@@ -40,7 +40,7 @@ def test_element_interchange_writes_parquet(tmp_path, monkeypatch):
 
     monkeypatch.setattr(element_module, "write_parquet_with_pool", _wrapper)
 
-    target = element_module.run_wepp_hillslope_element_interchange(workdir)
+    target = element_module.run_wepp_hillslope_element_interchange(workdir, start_year=2000)
     assert target.exists()
     assert calls
     assert all(p.name.lower().endswith(".element.dat") for p in calls[0]["files"])
@@ -72,3 +72,34 @@ def test_element_interchange_handles_missing_files(tmp_path):
     table = pq.read_table(target)
     assert table.schema == element_module.SCHEMA
     assert table.num_rows == 0
+
+
+def test_element_interchange_normalizes_overflow_dates(tmp_path):
+    src = PROJECT_OUTPUT
+    workdir = tmp_path / "output"
+    shutil.copytree(src, workdir)
+
+    template_path = workdir / "H1.element.dat"
+    lines = template_path.read_text().splitlines()
+    header = lines[:2]
+    template_tokens = element_module._split_fixed_width_line(lines[2])
+    template_tokens[1] = "30"  # Day
+    template_tokens[2] = "2"   # Month
+    template_tokens[3] = "5"   # Relative year
+    formatted = "".join(
+        f"{token:>{width}}"
+        for token, width in zip(template_tokens, element_module.ELEMENT_FIELD_WIDTHS)
+    )
+    new_path = workdir / "H901.element.dat"
+    new_path.write_text("\n".join(header + [formatted]) + "\n")
+
+    target = element_module.run_wepp_hillslope_element_interchange(workdir, start_year=2008)
+    table = pq.read_table(target)
+    df = table.to_pandas()
+    subset = df[df["wepp_id"] == 901]
+    assert not subset.empty
+    row = subset.iloc[0]
+    assert row["year"] == 2012
+    assert row["month"] == 2
+    assert row["day_of_month"] == 29
+    assert row["julian"] == 60

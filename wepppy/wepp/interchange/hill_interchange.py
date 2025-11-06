@@ -32,7 +32,7 @@ def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: i
 
     run_wepp_hillslope_pass_interchange(base)
     run_wepp_hillslope_ebe_interchange(base, start_year=start_year)
-    run_wepp_hillslope_element_interchange(base)
+    run_wepp_hillslope_element_interchange(base, start_year=start_year)
     run_wepp_hillslope_loss_interchange(base)
     run_wepp_hillslope_soil_interchange(base)
     run_wepp_hillslope_wat_interchange(base)

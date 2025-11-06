@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from calendar import monthrange
 from datetime import datetime
+from functools import partial
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -146,7 +148,44 @@ def _split_fixed_width_line(raw_line: str) -> List[str]:
     return tokens
 
 
-def _parse_element_file(path: Path) -> pa.Table:
+def _normalize_date_tokens(
+    raw_year: int,
+    raw_month: int,
+    raw_day: int,
+    *,
+    start_year: Optional[int] = None,
+) -> tuple[int, int, int, int, int]:
+    """Normalize WEPP element calendar tokens to valid Gregorian dates.
+
+    The revegetation binaries can emit month/day combinations that overflow the
+    civil calendar (for example 30 February when summarizing half-month periods)
+    and may also encode the simulation year as an offset from the configured
+    start year. This helper resolves the tokens to a valid date while preserving
+    ordering semantics.
+    """
+    year = raw_year
+    if start_year is not None and year < 1000:
+        year = start_year + year - 1
+
+    # Normalize months that fall outside 1-12 by rolling them into the year.
+    if raw_month < 1:
+        raw_month = 1
+    if raw_day < 1:
+        raw_day = 1
+    extra_years, month_index = divmod(raw_month - 1, 12)
+    year += extra_years
+    month = month_index + 1
+
+    max_day = monthrange(year, month)[1]
+    day = min(raw_day, max_day)
+
+    event_date = datetime(year, month, day)
+    julian = (event_date - datetime(year, 1, 1)).days + 1
+    water_year = int(determine_wateryear(event_date.year, julian))
+    return event_date.year, month, day, julian, water_year
+
+
+def _parse_element_file(path: Path, *, start_year: Optional[int] = None) -> pa.Table:
     match = ELEMENT_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized element filename pattern: {path}")
@@ -168,10 +207,14 @@ def _parse_element_file(path: Path) -> pa.Table:
         ofe = int(tokens[0])
         day_of_month = int(tokens[1])
         month = int(tokens[2])
-        year = int(tokens[3])
+        year_token = int(tokens[3])
 
-        julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
-        water_year = int(determine_wateryear(year, julian))
+        year, month, day_of_month, julian, water_year = _normalize_date_tokens(
+            year_token,
+            month,
+            day_of_month,
+            start_year=start_year,
+        )
 
         row: Dict[str, object] = {
             "wepp_id": wepp_id,
@@ -199,7 +242,11 @@ def _parse_element_file(path: Path) -> pa.Table:
     return pa.table(out, schema=SCHEMA)
 
 
-def run_wepp_hillslope_element_interchange(wepp_output_dir: Path | str) -> Path:
+def run_wepp_hillslope_element_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    start_year: Optional[int] = None,
+) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -209,5 +256,10 @@ def run_wepp_hillslope_element_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.element.parquet"
 
-    write_parquet_with_pool(element_files, _parse_element_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    if start_year is None:
+        parser = _parse_element_file
+    else:
+        parser = partial(_parse_element_file, start_year=start_year)
+
+    write_parquet_with_pool(element_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

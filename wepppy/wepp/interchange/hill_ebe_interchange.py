@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from functools import partial
 
 import re
@@ -19,7 +19,8 @@ from .versioning import schema_with_version
 
 EBE_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 UNIT_SKIP_TOKENS = {"---", "--", "----"}
-RAW_HEADER = [
+
+RAW_HEADER_STANDARD: List[str] = [
     "day",
     "mo",
     "year",
@@ -35,7 +36,7 @@ RAW_HEADER = [
     "Sed.Del",
     "ER",
 ]
-RAW_UNITS = [
+RAW_UNITS_STANDARD: List[str] = [
     "---",
     "--",
     "----",
@@ -51,7 +52,15 @@ RAW_UNITS = [
     "(kg/m)",
     "----",
 ]
-MEASUREMENT_COLUMNS = [
+RAW_HEADER_REVEG: List[str] = RAW_HEADER_STANDARD + ["Det-Len", "Dep-Len"]
+RAW_UNITS_REVEG: List[str] = RAW_UNITS_STANDARD + ["(m)", "(m)"]
+
+RAW_LAYOUTS: Dict[str, Tuple[List[str], List[str]]] = {
+    "standard": (RAW_HEADER_STANDARD, RAW_UNITS_STANDARD),
+    "reveg": (RAW_HEADER_REVEG, RAW_UNITS_REVEG),
+}
+
+MEASUREMENT_COLUMNS_STANDARD: List[str] = [
     "Precp (mm)",
     "Runoff (mm)",
     "IR-det (kg/m^2)",
@@ -64,6 +73,15 @@ MEASUREMENT_COLUMNS = [
     "Sed.Del (kg/m)",
     "ER",
 ]
+MEASUREMENT_COLUMNS_REVEG: List[str] = MEASUREMENT_COLUMNS_STANDARD + [
+    "Det-Len (m)",
+    "Dep-Len (m)",
+]
+
+MEASUREMENT_COLUMNS_BY_LAYOUT: Dict[str, List[str]] = {
+    "standard": MEASUREMENT_COLUMNS_STANDARD,
+    "reveg": MEASUREMENT_COLUMNS_REVEG,
+}
 
 COLUMN_ALIASES = {
     "Precp (mm)": "Precip",
@@ -76,6 +94,8 @@ COLUMN_ALIASES = {
     "Sed.Del (kg/m)": "Sed.Del",
     "Av-dep (kg/m^2)": "Av-dep",
     "Max-dep (kg/m^2)": "Max-dep",
+    "Det-Len (m)": "Det-Len",
+    "Dep-Len (m)": "Dep-Len",
 }
 
 SCHEMA = schema_with_version(
@@ -85,28 +105,48 @@ SCHEMA = schema_with_version(
             pa_field("year", pa.int16()),
             pa_field("month", pa.int8()),
             pa_field("day_of_month", pa.int8()),
-        pa_field("julian", pa.int16()),
-        pa_field("water_year", pa.int16()),
-        pa_field("Precip", pa.float64(), units="mm", description="Storm precipitation depth"),  # sedout.for:439
-        pa_field("Runoff", pa.float64(), units="mm", description="Runoff depth scaled by effective flow length"),  # sedout.for:433-438
-        pa_field("IR-det", pa.float64(), units="kg/m^2", description="Weighted interrill detachment over the hillslope"),  # sedout.for:420-429
-        pa_field("Av-det", pa.float64(), units="kg/m^2", description="Average soil detachment across detachment regions"),  # cseddet.inc
-        pa_field("Mx-det", pa.float64(), units="kg/m^2", description="Maximum soil detachment across detachment regions"),  # cseddet.inc
-        pa_field("Det-point", pa.float64(), units="m", description="Location of maximum soil detachment along hillslope"),  # cseddet.inc
-        pa_field("Av-dep", pa.float64(), units="kg/m^2", description="Average sediment deposition across deposition regions"),  # cseddet.inc
-        pa_field("Max-dep", pa.float64(), units="kg/m^2", description="Maximum sediment deposition across deposition regions"),  # cseddet.inc
-        pa_field("Dep-point", pa.float64(), units="m", description="Location of maximum sediment deposition along hillslope"),  # cseddet.inc
-        pa_field("Sed.Del", pa.float64(), units="kg/m", description="Storm sediment load per unit width at hillslope outlet"),  # cavloss.inc / sedout.for:439
-        pa_field("ER", pa.float64(), description="Specific surface enrichment ratio for event sediment"),  # cenrpa2.inc / sedout.for:439
-    ]
+            pa_field("julian", pa.int16()),
+            pa_field("water_year", pa.int16()),
+            pa_field("Precip", pa.float64(), units="mm", description="Storm precipitation depth"),  # sedout.for:439
+            pa_field("Runoff", pa.float64(), units="mm", description="Runoff depth scaled by effective flow length"),  # sedout.for:433-438
+            pa_field("IR-det", pa.float64(), units="kg/m^2", description="Weighted interrill detachment over the hillslope"),  # sedout.for:420-429
+            pa_field("Av-det", pa.float64(), units="kg/m^2", description="Average soil detachment across detachment regions"),  # cseddet.inc
+            pa_field("Mx-det", pa.float64(), units="kg/m^2", description="Maximum soil detachment across detachment regions"),  # cseddet.inc
+            pa_field("Det-point", pa.float64(), units="m", description="Location of maximum soil detachment along hillslope"),  # cseddet.inc
+            pa_field("Av-dep", pa.float64(), units="kg/m^2", description="Average sediment deposition across deposition regions"),  # cseddet.inc
+            pa_field("Max-dep", pa.float64(), units="kg/m^2", description="Maximum sediment deposition across deposition regions"),  # cseddet.inc
+            pa_field("Dep-point", pa.float64(), units="m", description="Location of maximum sediment deposition along hillslope"),  # cseddet.inc
+            pa_field("Sed.Del", pa.float64(), units="kg/m", description="Storm sediment load per unit width at hillslope outlet"),  # cavloss.inc / sedout.for:439
+            pa_field("ER", pa.float64(), description="Specific surface enrichment ratio for event sediment"),  # cenrpa2.inc / sedout.for:439
+            pa_field("Det-Len", pa.float64(), units="m", description="Effective detachment flow length"),  # sedout.for:433-438
+            pa_field("Dep-Len", pa.float64(), units="m", description="Effective deposition flow length"),  # sedout.for:433-438
+        ]
     )
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
+BASE_FIELD_NAMES: Tuple[str, ...] = (
+    "wepp_id",
+    "year",
+    "month",
+    "day_of_month",
+    "julian",
+    "water_year",
+)
+MEASUREMENT_FIELD_NAMES: List[str] = [
+    name for name in SCHEMA.names if name not in BASE_FIELD_NAMES
+]
 
-def _normalize_column_names(headers: List[str], units: List[str]) -> List[str]:
-    if headers != RAW_HEADER or units != RAW_UNITS:
+
+def _normalize_column_names(headers: List[str], units: List[str]) -> tuple[List[str], str]:
+    layout: str | None = None
+    for name, (expected_headers, expected_units) in RAW_LAYOUTS.items():
+        if headers == expected_headers and units == expected_units:
+            layout = name
+            break
+
+    if layout is None:
         raise ValueError(f"Unexpected EBE header layout: {headers} / {units}")
 
     out: List[str] = []
@@ -128,7 +168,7 @@ def _normalize_column_names(headers: List[str], units: List[str]) -> List[str]:
             deduped.append(f"{column}_{seen[column]}")
         else:
             deduped.append(column)
-    return deduped
+    return deduped, layout
 
 
 def _init_column_store() -> Dict[str, List]:
@@ -161,10 +201,13 @@ def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
     if not data_lines:
         return pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
-    column_names = _normalize_column_names(header_tokens, unit_tokens)
+    column_names, layout = _normalize_column_names(header_tokens, unit_tokens)
     measurement_columns = column_names[3:]
-    if measurement_columns != MEASUREMENT_COLUMNS:
-        raise ValueError(f"Unexpected EBE measurement columns: {measurement_columns}")
+    expected_measurements = MEASUREMENT_COLUMNS_BY_LAYOUT[layout]
+    if measurement_columns != expected_measurements:
+        raise ValueError(
+            f"Unexpected EBE measurement columns for layout '{layout}': {measurement_columns}"
+        )
     store = _init_column_store()
 
     for raw_line in data_lines:
@@ -195,6 +238,9 @@ def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
         for column_name, token in zip(measurement_columns, tokens[3:]):
             target_name = COLUMN_ALIASES.get(column_name, column_name)
             row[target_name] = _parse_float(token)
+
+        for field_name in MEASUREMENT_FIELD_NAMES:
+            row.setdefault(field_name, None)
 
         _append_row(store, row)
 

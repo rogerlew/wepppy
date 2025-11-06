@@ -59,19 +59,32 @@ class ReportQueryContext:
             refreshed = False
             for path in missing:
                 dataset = Path(self.run_directory, path)
-                if dataset.exists():
-                    try:
-                        update_catalog_entry(self.run_directory, path)
-                        refreshed = True
-                    except Exception:  # pragma: no cover - best effort catalog repair
-                        LOGGER.warning(
-                            "Failed to refresh catalog entry for %s under %s",
-                            path,
-                            self.run_directory,
-                            exc_info=True,
-                        )
+                if not dataset.exists():
+                    continue
+                try:
+                    update_catalog_entry(self.run_directory, path)
+                    refreshed = True
+                except Exception:  # pragma: no cover - best effort catalog repair
+                    LOGGER.warning(
+                        "Failed to refresh catalog entry for %s under %s",
+                        path,
+                        self.run_directory,
+                        exc_info=True,
+                    )
             if refreshed:
+                # force a fresh catalog read
                 self._context = None
+                try:
+                    activate_query_engine(self.run_directory, run_interchange=self.run_interchange)
+                except Exception:  # pragma: no cover - fallback to cached scan
+                    LOGGER.warning(
+                        "Full catalog refresh failed for %s (run_interchange=%s)",
+                        self.run_directory,
+                        self.run_interchange,
+                        exc_info=True,
+                    )
+                else:
+                    self._context = resolve_run_context(str(self.run_directory), auto_activate=False)
                 missing = [path for path in dataset_paths if not self.catalog.has(path)]
         if missing:
             formatted = ", ".join(sorted(missing))

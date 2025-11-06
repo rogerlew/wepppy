@@ -13,7 +13,14 @@ ebe_module = load_module("wepppy.wepp.interchange.hill_ebe_interchange", "wepppy
 cleanup_import_state()
 
 
-def test_ebe_interchange_writes_parquet(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    ("layout_name", "extra_measurements"),
+    [
+        ("standard", [[], []]),
+        ("reveg", [["65.0", "80.0"], ["61.0", "79.0"]]),
+    ],
+)
+def test_ebe_interchange_writes_parquet(layout_name, extra_measurements, tmp_path, monkeypatch):
     src = PROJECT_OUTPUT
     workdir = tmp_path / "output"
     shutil.copytree(src, workdir)
@@ -22,15 +29,21 @@ def test_ebe_interchange_writes_parquet(tmp_path, monkeypatch):
         if ebe_path.name != "H1.ebe.dat":
             ebe_path.unlink()
 
-    sample_rows = [
-        "  29   2     5  10.6     4.1   0.000   0.00   0.00    0.0    0.00    0.00    0.0     0.0  1.00",
-        "   1   3     5   0.0     0.0   0.000   0.00   0.00    0.0    0.00    0.00    0.0     0.0  1.00",
+    base_rows = [
+        ["29", "2", "5", "10.6", "4.1", "0.000", "0.00", "0.00", "0.0", "0.00", "0.00", "0.0", "0.0", "1.00"],
+        ["1", "3", "5", "0.0", "0.0", "0.000", "0.00", "0.00", "0.0", "0.00", "0.00", "0.0", "0.0", "1.00"],
     ]
+    sample_rows = [" ".join(row + extra) for row, extra in zip(base_rows, extra_measurements)]
+
+    header_tokens, unit_tokens = {
+        "standard": (ebe_module.RAW_HEADER_STANDARD, ebe_module.RAW_UNITS_STANDARD),
+        "reveg": (ebe_module.RAW_HEADER_REVEG, ebe_module.RAW_UNITS_REVEG),
+    }[layout_name]
 
     header = [
         " EVENT OUTPUT",
-        "day mo  year Precp  Runoff  IR-det Av-det Mx-det  Point  Av-dep Max-dep  Point Sed.Del    ER",
-        "--- --  ----  (mm)    (mm)  kg/m^2 kg/m^2 kg/m^2    (m)  kg/m^2  kg/m^2    (m)  (kg/m)  ----",
+        " ".join(header_tokens),
+        " ".join(unit_tokens),
     ]
 
     h1_path = workdir / "H1.ebe.dat"
@@ -65,6 +78,13 @@ def test_ebe_interchange_writes_parquet(tmp_path, monkeypatch):
     assert first["day_of_month"] == 29
     assert first["julian"] == 60
     assert first["water_year"] == 2012
+
+    if layout_name == "standard":
+        assert df["Det-Len"].isna().all()
+        assert df["Dep-Len"].isna().all()
+    else:
+        assert df["Det-Len"].tolist() == pytest.approx([65.0, 61.0])
+        assert df["Dep-Len"].tolist() == pytest.approx([80.0, 79.0])
 
 
 def test_ebe_interchange_handles_missing_files(tmp_path):
