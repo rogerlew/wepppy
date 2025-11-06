@@ -163,16 +163,58 @@ Queries are **stateless** and **ephemeral**:
 
 The query engine operates on **filesystem-backed datasets** within a WEPPcloud run directory:
 
-| Dataset Category | Path Pattern | Format | Example |
-|------------------|--------------|--------|---------|
-| Landuse | `landuse/*.parquet` | Parquet | `landuse/landuse.parquet` |
-| Soils | `soils/*.parquet` | Parquet | `soils/soils.parquet` |
-| Climate | `climate/*.parquet` | Parquet | `climate/daymet_1986-2023.parquet` |
-| WEPP Outputs | `wepp/output/interchange/*.parquet` | Parquet | `wepp/output/interchange/H.pass.parquet` |
-| Watershed Geometry | `dem/wbt/*.geojson` | GeoJSON | `dem/wbt/subcatchments.geojson` |
-| RAP Timeseries | `rap/*.parquet` | Parquet | `rap/rap_ts.parquet` |
+| Dataset Category | Path Pattern | Format | Description | Example |
+|------------------|--------------|--------|-------------|---------|
+| Landuse | `landuse/*.parquet` | Parquet | Hillslope landuse/management assignments | `landuse/landuse.parquet` |
+| Soils | `soils/*.parquet` | Parquet | Soil properties by hillslope | `soils/soils.parquet` |
+| Climate | `climate/*.parquet` | Parquet | Climate timeseries (Daymet, GridMET, PRISM) | `climate/daymet_1986-2023.parquet` |
+| WEPP Hillslope Outputs | `wepp/output/interchange/H.*.parquet` | Parquet | Hillslope-level WEPP model results | See below |
+| WEPP Loss Reports | `wepp/output/interchange/loss_pw0.*.parquet` | Parquet | Sediment/runoff loss summaries by hillslope, channel, watershed | See below |
+| WEPP Event Data | `wepp/output/interchange/pass_pw0.*.parquet` | Parquet | Event-level runoff/erosion details | See below |
+| WEPP Channel Outputs | `wepp/output/interchange/*chn*.parquet` | Parquet | Channel water balance and outputs | See below |
+| WEPP Return Periods | `wepp/output/interchange/return_period_*.parquet` | Parquet | Return period event analysis | See below |
+| Watershed Geometry | `dem/wbt/*.geojson` | GeoJSON | Subcatchments, channels, watershed boundaries | `dem/wbt/subcatchments.geojson` |
+| RAP Timeseries | `rap/*.parquet` | Parquet | Rangeland Analysis Platform remote sensing | `rap/rap_ts.parquet` |
 
-All datasets share a common keys (`TopazID`, `topaz_id`, `wepp_id`) for joining.
+#### WEPP Output Files
+
+**Hillslope-level outputs** (by simulation day, indexed by `topaz_id` or `wepp_id`):
+- `H.ebe.parquet` - Event-by-event hillslope results (daily when events occur)
+- `H.element.parquet` - OFE (Overland Flow Element) details by hillslope
+- `H.loss.parquet` - Hillslope sediment loss summary
+- `H.pass.parquet` - Daily hillslope pass data (runoff volume, sediment detachment, etc.)
+- `H.soil.parquet` - Soil loss by hillslope
+- `H.wat.parquet` - Water balance by hillslope
+
+**Loss reports** (annual/total summaries):
+- `loss_pw0.hill.parquet` - Hillslope loss summary
+- `loss_pw0.chn.parquet` - Channel loss summary
+- `loss_pw0.out.parquet` - Watershed outlet summary
+- `loss_pw0.class_data.parquet` - Loss by soil/landuse class
+- `loss_pw0.all_years.hill.parquet` - Multi-year hillslope losses
+- `loss_pw0.all_years.chn.parquet` - Multi-year channel losses
+- `loss_pw0.all_years.out.parquet` - Multi-year outlet summary
+- `loss_pw0.all_years.class_data.parquet` - Multi-year class data
+
+**Event-level data**:
+- `pass_pw0.events.parquet` - Individual runoff/erosion events
+- `pass_pw0.metadata.parquet` - Event metadata and statistics
+- `ebe_pw0.parquet` - Event-by-event detailed results
+
+**Channel outputs**:
+- `chan.out.parquet` - Channel output timeseries
+- `chanwb.parquet` - Channel water balance
+- `chnwb.parquet` - Alternative channel water balance format
+
+**Return period analysis**:
+- `return_period_events.parquet` - Events by return period
+- `return_period_event_ranks.parquet` - Event ranking for return period calculation
+
+**Water/sediment budgets**:
+- `totalwatsed3.parquet` - Total water and sediment budget
+- `soil_pw0.parquet` - Soil loss by OFE/hillslope
+
+All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linking hillslopes, soils, landuse, and WEPP results.
 
 ## MCP API Specification
 
