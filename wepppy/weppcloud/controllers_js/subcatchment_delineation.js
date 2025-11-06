@@ -1013,6 +1013,11 @@ var SubcatchmentDelineation = (function () {
                 disableRadio("sub_cmap_radio_dom_lc", false);
             }
             
+            // Enable Rangeland Cover layer after rangeland cover build
+            if (checklist.rangeland_cover) {
+                disableRadio("sub_cmap_radio_rangeland_cover", false);
+            }
+
             // Enable Dominant Soil after soil building
             if (checklist.soils) {
                 disableRadio("sub_cmap_radio_dom_soil", false);

@@ -1537,6 +1537,76 @@ class Watershed(NoDbBase):
 
         return self._deprecated_length_of(topaz_id)
 
+    def hillslope_width(self, topaz_id: Union[str, int]) -> float:
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_sub_width_lookup"):
+            sub_width_lookup: Dict[str, float] = self._sub_width_lookup  # type: ignore[has-type]
+            if topaz_id_str in sub_width_lookup:
+                return sub_width_lookup[topaz_id_str]
+
+        parquet_fn = _join(self.wat_dir, "hillslopes.parquet")
+        if _exists(parquet_fn):
+            import duckdb
+
+            with duckdb.connect() as con:
+                result = con.execute(
+                    f"SELECT topaz_id, width FROM read_parquet('{parquet_fn}')"
+                ).fetchall()
+            self._sub_width_lookup = {str(row[0]): float(row[1]) for row in result}  # type: ignore[misc]
+            if topaz_id_str in self._sub_width_lookup:  # type: ignore[attr-defined]
+                return self._sub_width_lookup[topaz_id_str]  # type: ignore[index]
+            return self._deprecated_width_of(topaz_id_str)
+
+        csv_fn = _join(self.wat_dir, "hillslopes.csv")
+        if _exists(csv_fn):
+            import duckdb
+
+            with duckdb.connect() as con:
+                result = con.execute(
+                    f"SELECT topaz_id, width FROM read_csv('{csv_fn}')"
+                ).fetchall()
+            self._sub_width_lookup = {str(row[0]): float(row[1]) for row in result}  # type: ignore[misc]
+            if topaz_id_str in self._sub_width_lookup:  # type: ignore[attr-defined]
+                return self._sub_width_lookup[topaz_id_str]  # type: ignore[index]
+            return self._deprecated_width_of(topaz_id_str)
+
+        return self._deprecated_width_of(topaz_id_str)
+
+    def channel_width(self, topaz_id: Union[str, int]) -> float:
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_chn_width_lookup"):
+            chn_width_lookup: Dict[str, float] = self._chn_width_lookup  # type: ignore[has-type]
+            if topaz_id_str in chn_width_lookup:
+                return chn_width_lookup[topaz_id_str]
+
+        parquet_fn = _join(self.wat_dir, "channels.parquet")
+        if _exists(parquet_fn):
+            import duckdb
+
+            with duckdb.connect() as con:
+                result = con.execute(
+                    f"SELECT topaz_id, width FROM read_parquet('{parquet_fn}')"
+                ).fetchall()
+            self._chn_width_lookup = {str(row[0]): float(row[1]) for row in result}  # type: ignore[misc]
+            if topaz_id_str in self._chn_width_lookup:  # type: ignore[attr-defined]
+                return self._chn_width_lookup[topaz_id_str]  # type: ignore[index]
+            return self._deprecated_width_of(topaz_id_str)
+
+        csv_fn = _join(self.wat_dir, "channels.csv")
+        if _exists(csv_fn):
+            import duckdb
+
+            with duckdb.connect() as con:
+                result = con.execute(
+                    f"SELECT topaz_id, width FROM read_csv('{csv_fn}')"
+                ).fetchall()
+            self._chn_width_lookup = {str(row[0]): float(row[1]) for row in result}  # type: ignore[misc]
+            if topaz_id_str in self._chn_width_lookup:  # type: ignore[attr-defined]
+                return self._chn_width_lookup[topaz_id_str]  # type: ignore[index]
+            return self._deprecated_width_of(topaz_id_str)
+
+        return self._deprecated_width_of(topaz_id_str)
+
     @deprecated
     def _deprecated_length_of(self, topaz_id: Union[str, int]) -> float:
         topaz_id_str = str(topaz_id)
@@ -1546,6 +1616,30 @@ class Watershed(NoDbBase):
             return self._chns_summary[topaz_id_str].length
         else:
             return self._subs_summary[topaz_id_str].length
+
+    @deprecated
+    def _deprecated_width_of(self, topaz_id: Union[str, int]) -> float:
+        topaz_id_str = str(topaz_id)
+        if topaz_id_str.endswith("4"):
+            if self._chns_summary is None:
+                raise ValueError("Channel summary data is None")
+            channel_summary = self._chns_summary[topaz_id_str]
+            if isinstance(channel_summary, dict):
+                return float(channel_summary["width"])
+            return float(channel_summary.width)
+
+        if self._subs_summary is None:
+            raise ValueError("Hillslope summary data is None")
+        hillslope_summary = self._subs_summary[topaz_id_str]
+        if isinstance(hillslope_summary, dict):
+            return float(hillslope_summary["width"])
+        return float(hillslope_summary.width)
+
+    def width_of(self, topaz_id: Union[str, int]) -> float:
+        topaz_id_str = str(topaz_id)
+        if topaz_id_str.endswith("4"):
+            return self.channel_width(topaz_id)
+        return self.hillslope_width(topaz_id)
 
     def hillslope_centroid_lnglat(self, topaz_id: Union[str, int]) -> Tuple[float, float]:
         if hasattr(self, "_sub_centroid_lookup"):

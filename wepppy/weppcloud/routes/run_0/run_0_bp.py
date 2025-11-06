@@ -51,7 +51,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#channel-delineation': TaskEnum.build_channels,
     '#set-outlet': TaskEnum.set_outlet,
     '#subcatchments-delineation': TaskEnum.build_subcatchments,
-    '#rangeland-cover': TaskEnum.fetch_rap_ts,  # Using RAP TS emoji as placeholder
+    '#rangeland-cover': TaskEnum.build_rangeland_cover,
     '#landuse': TaskEnum.build_landuse,
     '#climate': TaskEnum.build_climate,
     '#rap-ts': TaskEnum.fetch_rap_ts,

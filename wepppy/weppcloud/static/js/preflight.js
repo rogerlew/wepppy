@@ -191,6 +191,7 @@ function getSelectorForKey(key) {
         "channels": 'a[href="#channel-delineation"]',
         "outlet": 'a[href="#set-outlet"]',
         "subcatchments": 'a[href="#subcatchments-delineation"]',
+        "rangeland_cover": 'a[href="#rangeland-cover"]',
         "landuse": 'a[href="#landuse"]',
         "soils": 'a[href="#soils"]',
         "climate": 'a[href="#climate"]',

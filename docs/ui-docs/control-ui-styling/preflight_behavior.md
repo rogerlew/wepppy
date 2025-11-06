@@ -112,6 +112,7 @@ Controllers (e.g., subcatchment_delineation.js)
        '#map': TaskEnum.fetch_dem,
        '#disturbed-sbs': TaskEnum.init_sbs_map,
        '#channel-delineation': TaskEnum.build_channels,
+       '#rangeland-cover': TaskEnum.build_rangeland_cover,
        # ... etc
    }
    
@@ -135,6 +136,7 @@ Controllers (e.g., subcatchment_delineation.js)
        "sbs_map": 'a[href="#disturbed-sbs"]',
        "channels": 'a[href="#channel-delineation"]',
        "outlet": 'a[href="#set-outlet"]',
+       "rangeland_cover": 'a[href="#rangeland-cover"]',
        // ... etc
    };
    ```
@@ -165,6 +167,7 @@ def emoji(self) -> str:
         TaskEnum.build_channels: '🌊',
         TaskEnum.build_subcatchments: '🧩',
         TaskEnum.build_landuse: '🌲',
+    TaskEnum.build_rangeland_cover: '🦎',
         TaskEnum.build_soils: '🪱',
         TaskEnum.build_climate: '☁️',
         TaskEnum.fetch_rap_ts: '🗺️',

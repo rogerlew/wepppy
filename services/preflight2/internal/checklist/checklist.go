@@ -10,9 +10,9 @@ import (
 
 // Payload represents the structure delivered to WebSocket clients.
 type Payload struct {
-	Type         string            `json:"type"`
-	Checklist    map[string]bool   `json:"checklist"`
-	LockStatuses map[string]bool   `json:"lock_statuses"`
+	Type         string          `json:"type"`
+	Checklist    map[string]bool `json:"checklist"`
+	LockStatuses map[string]bool `json:"lock_statuses"`
 }
 
 // Evaluate translates raw Redis hash data into the preflight checklist and lock statuses.
@@ -20,19 +20,20 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 	debugDumpState("Evaluate", prep)
 
 	check := map[string]bool{
-		"sbs_map":      prep["attrs:has_sbs"] == "true",
-		"channels":     hasKey(prep, "timestamps:build_channels"),
-		"outlet":       false,
-		"subcatchments": false,
-		"landuse":      false,
-		"soils":        false,
-		"climate":      false,
-		"rap_ts":       false,
-		"wepp":         false,
-		"observed":     false,
-		"debris":       false,
-		"watar":        false,
-		"dss_export":   false,
+		"sbs_map":         prep["attrs:has_sbs"] == "true",
+		"channels":        hasKey(prep, "timestamps:build_channels"),
+		"outlet":          false,
+		"subcatchments":   false,
+		"landuse":         false,
+		"rangeland_cover": false,
+		"soils":           false,
+		"climate":         false,
+		"rap_ts":          false,
+		"wepp":            false,
+		"observed":        false,
+		"debris":          false,
+		"watar":           false,
+		"dss_export":      false,
 	}
 
 	buildChannels := prep["timestamps:build_channels"]
@@ -44,6 +45,10 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 	buildSoils := prep["timestamps:build_soils"]
 	check["soils"] = safeGT(buildSoils, prep["timestamps:abstract_watershed"]) &&
 		safeGT(buildSoils, prep["timestamps:build_landuse"])
+
+	buildRangeland := prep["timestamps:build_rangeland_cover"]
+	check["rangeland_cover"] = safeGT(buildRangeland, prep["timestamps:abstract_watershed"]) &&
+		safeGT(buildRangeland, prep["timestamps:build_landuse"])
 
 	check["climate"] = safeGT(prep["timestamps:build_climate"], prep["timestamps:abstract_watershed"])
 	check["rap_ts"] = safeGT(prep["timestamps:build_rap_ts"], prep["timestamps:build_climate"])
