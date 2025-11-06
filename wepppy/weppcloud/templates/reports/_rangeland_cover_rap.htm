@@ -1,29 +1,29 @@
 {% set report = rangeland_cover.rap_report %}
 {% if report is not none %}
 <h5>Rangeland Analysis Platform V2 {{ rangeland_cover.rap_year }} Statistics</h5>
- <table class="table">
-    <thead>
-      <tr>
-        <th>Component</th>
-        <th>Num pixels</th>
-        <th>Coverage (%)</th>
-        <th>Mean</th>
-        <th>Std. Dev.</th>
-        <th>Units</th>
-      </tr>
-    </thead>
-    <tbody>
+<table class="wc-table">
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Num pixels</th>
+      <th>Coverage (%)</th>
+      <th>Mean</th>
+      <th>Std. Dev.</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
     {% for ds in report %}
-      <tr>
-        <td>{{ ds }}</td>
-        <td>{{ report[ds].num_pixels }}</td>
-        <td>{{ unitizer(100.0 * report[ds].valid_pixels / report[ds].num_pixels, '%') | safe }}</td>
-        <td>{{ unitizer(report[ds].mean, report[ds].units) | safe }}</td>
-        <td>{{ unitizer(report[ds].std, report[ds].units) | safe }}</td>
-        <td>{{ unitizer_units(report[ds].units) | safe }}</td>
-      </tr>
+    <tr>
+      <td>{{ ds }}</td>
+      <td>{{ report[ds].num_pixels }}</td>
+      <td>{{ unitizer(100.0 * report[ds].valid_pixels / report[ds].num_pixels, '%') | safe }}</td>
+      <td>{{ unitizer(report[ds].mean, report[ds].units) | safe }}</td>
+      <td>{{ unitizer(report[ds].std, report[ds].units) | safe }}</td>
+      <td>{{ unitizer_units(report[ds].units) | safe }}</td>
+    </tr>
     {% endfor %}
-    </tbody>
- </table>
- <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='rap/rap_readme.txt') }}">RAP Attribution</a>
+  </tbody>
+</table>
+<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='rap/rap_readme.txt') }}">RAP Attribution</a>
 {% endif %}
