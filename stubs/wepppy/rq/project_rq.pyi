@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Mapping, Optional, Sequence
 
 _hostname: str
 REDIS_HOST: str
@@ -49,6 +49,12 @@ def build_subcatchments_rq(runid: str) -> None: ...
 def abstract_watershed_rq(runid: str) -> None: ...
 
 def build_subcatchments_and_abstract_watershed_rq(runid: str) -> None: ...
+
+def build_rangeland_cover_rq(
+    runid: str,
+    rap_year: Optional[int] = ...,
+    default_covers: Optional[Mapping[str, float]] = ...,
+) -> None: ...
 
 def build_landuse_rq(runid: str) -> None: ...
 

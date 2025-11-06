@@ -376,24 +376,50 @@ var RangelandCover = (function () {
                 defaults: state.defaults
             });
 
+            if (typeof rangeland.connect_status_stream === "function") {
+                rangeland.connect_status_stream(rangeland);
+            }
+
             http.postJson(url_for_run("tasks/build_rangeland_cover/"), {
                 rap_year: state.rapYear,
                 defaults: state.defaults
             }, { form: formElement }).then(function (result) {
                 var response = result && result.body ? result.body : null;
                 if (response && response.Success === true) {
-                    setStatusMessage(taskMsg + "... Success");
-                    rangeland.triggerEvent("RANGELAND_COVER_BUILD_TASK_COMPLETED", {
-                        mode: state.mode,
-                        defaults: state.defaults
-                    });
+                    var jobId = response.job_id || response.jobId || null;
+                    var submittedMessage = jobId ? taskMsg + "... Submitted (job " + jobId + ")" : taskMsg + "... Submitted";
+                    setStatusMessage(submittedMessage);
+                    if (typeof rangeland.append_status_message === "function" && jobId) {
+                        rangeland.append_status_message(rangeland, "build_rangeland_cover job submitted: " + jobId);
+                    }
+                    if (typeof rangeland.set_rq_job_id === "function") {
+                        rangeland.set_rq_job_id(rangeland, jobId);
+                    }
                 } else if (response) {
                     rangeland.pushResponseStacktrace(rangeland, response);
                     emit("rangeland:run:failed", { error: response, mode: state.mode });
+                    if (typeof rangeland.set_rq_job_id === "function") {
+                        rangeland.set_rq_job_id(rangeland, null);
+                    }
+                    if (typeof rangeland.disconnect_status_stream === "function") {
+                        rangeland.disconnect_status_stream(rangeland);
+                    }
+                    if (typeof rangeland.reset_status_spinner === "function") {
+                        rangeland.reset_status_spinner(rangeland);
+                    }
                 }
             }).catch(function (error) {
                 handleError(error, "Failed to build rangeland cover.");
                 emit("rangeland:run:failed", { error: error, mode: state.mode });
+                if (typeof rangeland.set_rq_job_id === "function") {
+                    rangeland.set_rq_job_id(rangeland, null);
+                }
+                if (typeof rangeland.disconnect_status_stream === "function") {
+                    rangeland.disconnect_status_stream(rangeland);
+                }
+                if (typeof rangeland.reset_status_spinner === "function") {
+                    rangeland.reset_status_spinner(rangeland);
+                }
             });
         };
 
@@ -479,6 +505,25 @@ var RangelandCover = (function () {
             var controllerContext = helper && typeof helper.getControllerContext === "function"
                 ? helper.getControllerContext(ctx, "rangelandCover")
                 : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "build_rangeland_cover_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_rangeland_cover_rq")) {
+                    var jobIdValue = jobIds.build_rangeland_cover_rq;
+                    if (jobIdValue !== undefined && jobIdValue !== null) {
+                        jobId = String(jobIdValue);
+                    }
+                }
+            }
+            if (typeof rangeland.set_rq_job_id === "function") {
+                rangeland.set_rq_job_id(rangeland, jobId);
+            }
 
             var mode = controllerContext.mode;
             if (mode === undefined && ctx.data && ctx.data.rangelandCover) {

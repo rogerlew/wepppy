@@ -2,8 +2,14 @@
 
 from .._common import *  # noqa: F401,F403
 
+import redis
+from rq import Queue
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.project_rq import TIMEOUT, build_rangeland_cover_rq
 
 from wepppy.weppcloud.utils.helpers import handle_with_exception_factory
 
@@ -108,6 +114,50 @@ def _coerce_cover_values(payload):
     return covers
 
 
+def _parse_rap_year(raw_value):
+    if raw_value in (None, ''):
+        return None
+    try:
+        return int(raw_value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError('Invalid RAP year supplied.') from exc
+
+
+def _coerce_build_defaults(payload):
+    defaults_payload = payload.get('defaults') if isinstance(payload.get('defaults'), dict) else None
+    if defaults_payload is None:
+        defaults_payload = {
+            'bunchgrass': payload.get('bunchgrass_cover'),
+            'forbs': payload.get('forbs_cover'),
+            'sodgrass': payload.get('sodgrass_cover'),
+            'shrub': payload.get('shrub_cover'),
+            'basal': payload.get('basal_cover'),
+            'rock': payload.get('rock_cover'),
+            'litter': payload.get('litter_cover'),
+            'cryptogams': payload.get('cryptogams_cover'),
+        }
+
+    try:
+        return {
+            'bunchgrass': float(defaults_payload.get('bunchgrass')),
+            'forbs': float(defaults_payload.get('forbs')),
+            'sodgrass': float(defaults_payload.get('sodgrass')),
+            'shrub': float(defaults_payload.get('shrub')),
+            'basal': float(defaults_payload.get('basal')),
+            'rock': float(defaults_payload.get('rock')),
+            'litter': float(defaults_payload.get('litter')),
+            'cryptogams': float(defaults_payload.get('cryptogams')),
+        }
+    except (TypeError, ValueError) as exc:
+        raise ValueError('Invalid default cover values supplied.') from exc
+
+
+def _parse_build_payload(payload):
+    rap_year = _parse_rap_year(payload.get('rap_year'))
+    defaults = _coerce_build_defaults(payload)
+    return rap_year, defaults
+
+
 rangeland_bp = Blueprint('rangeland', __name__)
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/tasks/modify_rangeland_cover/', methods=['POST'])
@@ -174,45 +224,32 @@ def report_rangeland_cover(runid, config):
 def task_build_rangeland_cover(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    rangeland_cover = RangelandCover.getInstance(wd)
 
     payload = parse_request_payload(request)
-
-    rap_year_raw = payload.get('rap_year')
-    if rap_year_raw in (None, ''):
-        rap_year = None
-    else:
-        try:
-            rap_year = int(rap_year_raw)
-        except (TypeError, ValueError):
-            return exception_factory('Building RangelandCover Failed', runid=runid)
-
-    defaults_payload = payload.get('defaults')
-    if not isinstance(defaults_payload, dict):
-        defaults_payload = {
-            'bunchgrass': payload.get('bunchgrass_cover'),
-            'forbs': payload.get('forbs_cover'),
-            'sodgrass': payload.get('sodgrass_cover'),
-            'shrub': payload.get('shrub_cover'),
-            'basal': payload.get('basal_cover'),
-            'rock': payload.get('rock_cover'),
-            'litter': payload.get('litter_cover'),
-            'cryptogams': payload.get('cryptogams_cover'),
-        }
+    try:
+        rap_year, default_covers = _parse_build_payload(payload)
+    except ValueError:
+        return exception_factory('Building RangelandCover Failed', runid=runid)
 
     try:
-        default_covers = dict(
-            bunchgrass=float(defaults_payload.get('bunchgrass')),
-            forbs=float(defaults_payload.get('forbs')),
-            sodgrass=float(defaults_payload.get('sodgrass')),
-            shrub=float(defaults_payload.get('shrub')),
-            basal=float(defaults_payload.get('basal')),
-            rock=float(defaults_payload.get('rock')),
-            litter=float(defaults_payload.get('litter')),
-            cryptogams=float(defaults_payload.get('cryptogams')),
-        )
-        rangeland_cover.build(rap_year=rap_year, default_covers=default_covers)
+        RangelandCover.getInstance(wd)
     except Exception:
         return exception_factory('Building RangelandCover Failed', runid=runid)
 
-    return success_factory()
+    try:
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.build_rangeland_cover)
+
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(
+                build_rangeland_cover_rq,
+                (runid, rap_year, default_covers),
+                timeout=TIMEOUT,
+            )
+        prep.set_rq_job_id('build_rangeland_cover_rq', job.id)
+    except Exception:
+        return exception_factory('Building RangelandCover Failed', runid=runid)
+
+    return jsonify({'Success': True, 'job_id': job.id})

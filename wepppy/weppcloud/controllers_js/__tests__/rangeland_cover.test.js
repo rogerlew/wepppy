@@ -145,8 +145,8 @@ describe("RangelandCover controller", () => {
             }
         };
 
-        httpRequestMock = jest.fn(() => Promise.resolve({ body: "<div>report</div>" }));
-        httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true } }));
+    httpRequestMock = jest.fn(() => Promise.resolve({ body: "<div>report</div>" }));
+    httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-123" } }));
 
         global.WCHttp = {
             request: httpRequestMock,
@@ -249,12 +249,11 @@ describe("RangelandCover controller", () => {
         expect(rapEvent.payload).toEqual({ year: 2025 });
     });
 
-    test("build success updates status, emits events, and refreshes report", async () => {
+    test("build queues job, defers completion to status trigger, and updates UI", async () => {
         eventLog.length = 0;
         const enableColorMap = global.SubcatchmentDelineation.getInstance().enableColorMap;
 
         rangeland.build();
-        await Promise.resolve();
         await Promise.resolve();
         await Promise.resolve();
 
@@ -266,20 +265,36 @@ describe("RangelandCover controller", () => {
             }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
+
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(rangeland);
+        expect(baseInstance.append_status_message).toHaveBeenCalledWith(rangeland, "build_rangeland_cover job submitted: job-123");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rangeland, "job-123");
+
+        const startedEvent = eventLog.find((item) => item.event === "rangeland:run:started");
+        expect(startedEvent).toBeDefined();
+
+        expect(httpRequestMock).not.toHaveBeenCalled();
+        expect(enableColorMap).not.toHaveBeenCalled();
+
+        expect(document.querySelector("#status").textContent).toContain("Submitted");
+
+        rangeland.triggerEvent("RANGELAND_COVER_BUILD_TASK_COMPLETED", {
+            mode: startedEvent.payload.mode,
+            defaults: startedEvent.payload.defaults
+        });
+        await Promise.resolve();
+        await Promise.resolve();
+
         expect(httpRequestMock).toHaveBeenCalledWith("report/rangeland_cover/", expect.objectContaining({
             method: "GET"
         }));
         expect(enableColorMap).toHaveBeenCalledWith("rangeland_cover");
 
-        const started = eventLog.find((item) => item.event === "rangeland:run:started");
-        const completed = eventLog.find((item) => item.event === "rangeland:run:completed");
-        const reportLoaded = eventLog.find((item) => item.event === "rangeland:report:loaded");
+        const completedEvent = eventLog.find((item) => item.event === "rangeland:run:completed");
+        const reportEvent = eventLog.find((item) => item.event === "rangeland:report:loaded");
 
-        expect(started).toBeDefined();
-        expect(completed).toBeDefined();
-        expect(reportLoaded).toBeDefined();
-
-        expect(document.querySelector("#status").textContent).toContain("Success");
+        expect(completedEvent).toBeDefined();
+        expect(reportEvent).toBeDefined();
     });
 
     test("build failure surfaces stack trace and emits failure event", async () => {
@@ -293,6 +308,16 @@ describe("RangelandCover controller", () => {
         const failedEvent = eventLog.find((item) => item.event === "rangeland:run:failed");
         expect(failedEvent).toBeDefined();
         expect(document.querySelector("#status").textContent).toContain("Failed to build rangeland cover.");
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(rangeland);
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rangeland, null);
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(rangeland);
+        expect(baseInstance.reset_status_spinner).toHaveBeenCalledWith(rangeland);
+    });
+
+    test("bootstrap restores queued job id", () => {
+        baseInstance.set_rq_job_id.mockClear();
+        rangeland.bootstrap({ jobIds: { build_rangeland_cover_rq: "job-555" } });
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rangeland, "job-555");
     });
 });
 

@@ -68,14 +68,55 @@ def rangeland_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr(cover_module, "RangelandCover", RangelandStub)
     monkeypatch.setattr(rangeland_module, "RangelandCover", RangelandStub)
 
+    queue_calls: list[dict[str, object]] = []
+
+    class FakeRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class FakeQueue:
+        def __init__(self, connection=None):
+            self.connection = connection
+
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None):
+            job_id = f"job-{len(queue_calls) + 1}"
+            job = SimpleNamespace(id=job_id)
+            queue_calls.append({
+                "func": func,
+                "args": args,
+                "kwargs": kwargs or {},
+                "timeout": timeout,
+                "job": job,
+            })
+            return job
+
+    prep_stub = SimpleNamespace(removed=[], job_ids={})
+
+    def remove_timestamp(key):
+        prep_stub.removed.append(key)
+
+    def set_rq_job_id(key, job_id):
+        prep_stub.job_ids[key] = job_id
+
+    prep_stub.remove_timestamp = remove_timestamp
+    prep_stub.set_rq_job_id = set_rq_job_id
+
+    monkeypatch.setattr(rangeland_module, "redis_connection_kwargs", lambda db: {})
+    monkeypatch.setattr(rangeland_module, "redis", SimpleNamespace(Redis=lambda **_: FakeRedis()))
+    monkeypatch.setattr(rangeland_module, "Queue", FakeQueue)
+    monkeypatch.setattr(rangeland_module.RedisPrep, "getInstance", lambda wd: prep_stub)
+
     with app.test_client() as client:
-        yield client, RangelandStub, str(run_dir)
+        yield client, RangelandStub, str(run_dir), queue_calls, prep_stub
 
     RangelandStub.reset_instances()
 
 
 def test_set_mode_parses_payload(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, _, _ = rangeland_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/set_rangeland_cover_mode/",
@@ -95,7 +136,7 @@ def test_set_mode_parses_payload(rangeland_client):
 
 
 def test_build_accepts_json_defaults(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, queue_calls, prep_stub = rangeland_client
 
     defaults = {
         "bunchgrass": "11.5",
@@ -116,11 +157,19 @@ def test_build_accepts_json_defaults(rangeland_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["Success"] is True
+    assert payload["job_id"] == "job-1"
 
     instance = RangelandStub.getInstance(run_dir)
-    assert instance.build_calls[-1] == {
-        "rap_year": 2021,
-        "defaults": {
+    assert instance.build_calls == []
+
+    assert len(queue_calls) == 1
+    call = queue_calls[-1]
+    assert call["func"] is rangeland_module.build_rangeland_cover_rq
+    assert call["timeout"] == rangeland_module.TIMEOUT
+    assert call["args"] == (
+        RUN_ID,
+        2021,
+        {
             "bunchgrass": 11.5,
             "forbs": 22.1,
             "sodgrass": 33.2,
@@ -130,11 +179,14 @@ def test_build_accepts_json_defaults(rangeland_client):
             "litter": 25.0,
             "cryptogams": 7.5,
         },
-    }
+    )
+
+    assert rangeland_module.TaskEnum.build_rangeland_cover in prep_stub.removed
+    assert prep_stub.job_ids["build_rangeland_cover_rq"] == "job-1"
 
 
 def test_build_supports_legacy_form_payload(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, queue_calls, prep_stub = rangeland_client
 
     form_payload = {
         "rap_year": "2019",
@@ -156,11 +208,18 @@ def test_build_supports_legacy_form_payload(rangeland_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["Success"] is True
+    assert payload["job_id"] == "job-1"
 
     instance = RangelandStub.getInstance(run_dir)
-    assert instance.build_calls[-1] == {
-        "rap_year": 2019,
-        "defaults": {
+    assert instance.build_calls == []
+
+    assert len(queue_calls) == 1
+    call = queue_calls[-1]
+    assert call["func"] is rangeland_module.build_rangeland_cover_rq
+    assert call["args"] == (
+        RUN_ID,
+        2019,
+        {
             "bunchgrass": 10.0,
             "forbs": 20.0,
             "sodgrass": 30.0,
@@ -170,11 +229,14 @@ def test_build_supports_legacy_form_payload(rangeland_client):
             "litter": 25.0,
             "cryptogams": 5.0,
         },
-    }
+    )
+
+    assert rangeland_module.TaskEnum.build_rangeland_cover in prep_stub.removed
+    assert prep_stub.job_ids["build_rangeland_cover_rq"] == "job-1"
 
 
 def test_modify_rangeland_cover_normalizes_payload(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, _, _ = rangeland_client
 
     payload = {
         "topaz_ids": ["101", " 102 ", "101"],
@@ -217,7 +279,7 @@ def test_modify_rangeland_cover_normalizes_payload(rangeland_client):
 
 
 def test_modify_rangeland_cover_validates_cover_range(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, _, _ = rangeland_client
 
     payload = {
         "topaz_ids": ["201"],
@@ -249,7 +311,7 @@ def test_modify_rangeland_cover_validates_cover_range(rangeland_client):
 
 
 def test_modify_rangeland_cover_requires_topaz_ids(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, _, _ = rangeland_client
 
     payload = {
         "topaz_ids": [],
@@ -281,7 +343,7 @@ def test_modify_rangeland_cover_requires_topaz_ids(rangeland_client):
 
 
 def test_current_cover_summary_normalizes_topaz_ids(rangeland_client):
-    client, RangelandStub, run_dir = rangeland_client
+    client, RangelandStub, run_dir, _, _ = rangeland_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/query/rangeland_cover/current_cover_summary/",

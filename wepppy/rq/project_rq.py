@@ -43,6 +43,7 @@ from wepppy.nodb.core import *
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.debris_flow import DebrisFlow
+from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
 from wepppy.nodb.mods.rap import RAP_TS
 
@@ -627,6 +628,33 @@ def build_subcatchments_and_abstract_watershed_rq(
             job.save()
         
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def build_rangeland_cover_rq(
+    runid: str,
+    rap_year: Optional[int] = None,
+    default_covers: Optional[Mapping[str, float]] = None,
+) -> None:
+    """Construct rangeland cover layers for the watershed asynchronously."""
+
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:rangeland_cover'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        rangeland_cover = RangelandCover.getInstance(wd)
+        rangeland_cover.build(rap_year=rap_year, default_covers=default_covers)
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   rangeland_cover RANGELAND_COVER_BUILD_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_rangeland_cover)
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
