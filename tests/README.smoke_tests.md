@@ -62,6 +62,14 @@ Until `wctl run-smoke` lands, you can export the env vars manually (below) to mi
   wctl run-npm smoke
   ```
 - Alternatively, run locally inside `static-src`: `npm run smoke`.
+- **For testing against dev/staging environments**, ensure `TEST_SUPPORT_ENABLED=true` is set in the backend environment and restart the service. Then:
+  ```bash
+  cd wepppy/weppcloud/static-src
+  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org \
+  SMOKE_CREATE_RUN=true \
+  SMOKE_RUN_CONFIG=dev_unit_1 \
+  npm run test:playwright -- --project=runs0
+  ```
 
 ### Environment Variables
 | Variable | Default | Description |
@@ -72,16 +80,13 @@ Until `wctl run-smoke` lands, you can export the env vars manually (below) to mi
 | `SMOKE_RUN_OVERRIDES` | _(unset)_ | JSON string of config overrides (e.g., `{ "general:dem_db": "ned1/2016" }`). |
 | `SMOKE_RUN_PATH` | _(unset)_ | Full runs0 URL to test (skips provisioning). |
 | `SMOKE_RUN_ROOT` | _(unset)_ | Optional root directory for provisioning (e.g., `/tmp/weppcloud_smoke`, `/dev/shm/weppcloud_smoke`). |
-| `SMOKE_BASE_URL` | `http://localhost:8080` | Backend origin. |
+| `SMOKE_BASE_URL` | `http://localhost:8080` | Backend origin. Use `http://localhost:8000` for direct Flask (no Caddy), or `http://localhost:8000/weppcloud` when the base includes the app prefix. |
 | `SMOKE_HEADLESS` | `true` | Set to `false` to watch executions. |
 | `SMOKE_KEEP_RUN` | `false` | Keeps the provisioned run after completion. |
 
 ### Current Coverage (Playwright)
-- Verifies core controllers render without console errors.
-- Auto-provisions runs (optional) via `/tests/api/create-run`.
-- Exercises map tabs (Layers, Drilldown, Modify Landuse) and confirms StatusStream context.
-- Toggles landuse modes and checks corresponding sections show/hide properly; ensures build button remains enabled.
-- If present, confirms treatments control exposes a StatusStream.
+- `page-load.spec.js`: provisions (or reuses) a run and verifies the runs0 page loads without console errors.
+- `controller-regression.spec.js`: currently drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and then injects an `exception_factory` payload to verify stacktrace rendering. Additional controllers will be layered in once their flows are stabilized.
 
 ### CI Considerations
 - The smoke suite is designed to give a quick health signal. As coverage grows (job submission, StatusStream assertions, additional flows) consider:
@@ -89,9 +94,9 @@ Until `wctl run-smoke` lands, you can export the env vars manually (below) to mi
   - Running headless Chromium by default; add Firefox/WebKit selectively.
   - Integrating with `wctl` or pipeline scripts so provisioning/cleanup happens automatically.
 
-### Cleanup
-- Auto-provisioned runs are deleted automatically unless `SMOKE_KEEP_RUN=true`.
-- Manual cleanup available via `DELETE /tests/api/run/<runid>`.
+### Cleanup / Provisioning
+- Both specs provision via `/tests/api/create-run` when `SMOKE_CREATE_RUN=true`; runs are deleted automatically unless `SMOKE_KEEP_RUN=true`.
+- Manual cleanup remains available via `DELETE /tests/api/run/<runid>`.
 
 ---
 

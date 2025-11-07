@@ -528,8 +528,11 @@ function controlBase() {
 
             if (!self.rq_job_id) {
                 self.hint.html("");
+                hideTarget(self.hint);
                 return;
             }
+
+            showTarget(self.hint);
 
             const linkHtml = `job_id: <a href="${jobDashboardUrl(self.rq_job_id)}" target="_blank">${escapeHtml(self.rq_job_id)}</a>`;
             self.hint.html(linkHtml);
