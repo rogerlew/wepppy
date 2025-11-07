@@ -67,27 +67,30 @@ Environment URLs can be overridden via:
 | `--base-url` | String | _(from env)_ | Override base URL (auto-selects `custom` env) |
 | `--config`, `-c` | String | `disturbed9002_wbt` | WEPPcloud config slug for provisioning |
 | `--run-path` | String | _(none)_ | Reuse existing run path (automatically disables provisioning) |
-| `--create-run / --no-create-run` | Flag | `True` | Auto-provision runs via `/tests/api/create-run` (ignored if `--run-path` set) |
+| `--create-run / --no-create-run` | Flag | `True` | Auto-provision runs via `/tests/api/create-run` (ignored when `--run-path` is set) |
 | `--keep-run` | Flag | `False` | Preserve provisioned run after tests complete |
 | `--run-root` | Path | _(none)_ | Optional root directory for run provisioning |
+| `--suite`, `-s` | Choice | `full` | Named suite preset (`full`, `smoke`, `controllers` → mapped to Playwright `--grep`). Explicit `--grep` overrides. |
 
 #### Playwright Execution
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `--project`, `-p` | String | `runs0` | Playwright project name from config |
-| `--workers`, `-w` | Int | `1` | Number of parallel workers |
-| `--headed` | Flag | `False` | Run in headed mode (visible browser) |
+| `--workers`, `-w` | Int | `1` | Number of parallel workers (force to `1` when `--headed` is used) |
+| `--headed` | Flag | `False` | Run in headed mode (visible browser); implies `--workers 1` |
 | `--grep`, `-g` | String | _(none)_ | Filter tests by pattern |
 | `--debug` | Flag | `False` | Run Playwright in debug mode |
 | `--ui` | Flag | `False` | Launch Playwright UI mode |
-| `--report` | Flag | `False` | Open HTML report after test run |
+| `--report` | Flag | `False` | Generate HTML report and open it via `npx playwright show-report` |
+| `--report-path` | Path | `playwright-report` | Directory passed to Playwright’s `--output` for HTML artifacts |
 
 #### Pass-through
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `--playwright-args` | String | _(none)_ | Additional Playwright CLI arguments (quoted strings preserved via shlex) |
+| `--playwright-args` | String | _(none)_ | Additional Playwright CLI arguments (quoted strings preserved via `shlex.split`) |
+| `--overrides` | Key=Value (repeatable) | _(none)_ | Converts to JSON and sets `SMOKE_RUN_OVERRIDES` (e.g., `--overrides general:dem_db=ned1/2016`) |
 
 ### Environment Variable Mapping
 
@@ -97,13 +100,12 @@ The command sets these environment variables before invoking `npm run test:playw
 |--------------|---------|-------------------------|
 | `--base-url` / `--env` | `SMOKE_BASE_URL` | `process.env.SMOKE_BASE_URL` |
 | `--create-run` (if no `--run-path`) | `SMOKE_CREATE_RUN` | `process.env.SMOKE_CREATE_RUN` |
-| `--run-path` | `SMOKE_RUN_PATH` | `process.env.SMOKE_RUN_PATH` |
-| _(auto: `--run-path` present)_ | `SMOKE_CREATE_RUN` | Set to `"false"` when `--run-path` provided |
+| `--run-path` | `SMOKE_RUN_PATH` | `process.env.SMOKE_RUN_PATH` (forces `SMOKE_CREATE_RUN=false`) |
 | `--config` | `SMOKE_RUN_CONFIG` | `process.env.SMOKE_RUN_CONFIG` |
 | `--keep-run` | `SMOKE_KEEP_RUN` | `process.env.SMOKE_KEEP_RUN` |
 | `--run-root` | `SMOKE_RUN_ROOT` | `process.env.SMOKE_RUN_ROOT` |
 | `--headed` | `SMOKE_HEADLESS` | `process.env.SMOKE_HEADLESS !== 'false'` |
-| _(computed)_ | `SMOKE_RUN_OVERRIDES` | `process.env.SMOKE_RUN_OVERRIDES` (JSON) |
+| `--overrides` | `SMOKE_RUN_OVERRIDES` | `process.env.SMOKE_RUN_OVERRIDES` (JSON) |
 
 ## Implementation Plan
 
@@ -134,20 +136,33 @@ from __future__ import annotations
 import json
 import shlex
 import subprocess
+import urllib.parse
+import urllib.request
 from pathlib import Path
-from typing import Literal, Optional
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 import typer
 
 from ..context import CLIContext
 
-EnvironmentPreset = Literal["local", "local-direct", "dev", "staging", "prod", "custom"]
+if TYPE_CHECKING:
+    EnvironmentPreset = Literal["local", "local-direct", "dev", "staging", "prod", "custom"]
+    SuitePreset = Literal["full", "smoke", "controllers"]
+else:
+    EnvironmentPreset = str
+    SuitePreset = str
 
 # Environment URL mappings
 _ENV_URLS = {
     "dev": "https://wc.bearhive.duckdns.org/weppcloud",
     "local": "http://localhost:8080",
     "local-direct": "http://localhost:8000/weppcloud",
+}
+
+SUITE_PATTERNS = {
+    "full": None,
+    "smoke": "page load",
+    "controllers": "controller regression",
 }
 
 
@@ -192,6 +207,48 @@ def _resolve_base_url(
         return override
     
     return _ENV_URLS.get(env, _ENV_URLS["dev"])
+
+
+def _ping_test_support(base_url: str) -> None:
+    """Fail fast if /tests/api/ping is unavailable."""
+    ping_url = urllib.parse.urljoin(
+        base_url if base_url.endswith("/") else f"{base_url}/",
+        "tests/api/ping",
+    )
+    try:
+        req = urllib.request.Request(ping_url, method="GET")
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status != 200:
+                typer.echo(
+                    f"[wctl2] Test support endpoint returned {response.status}. "
+                    f"Ensure TEST_SUPPORT_ENABLED=true in backend.",
+                    err=True,
+                )
+                raise typer.Exit(1)
+    except urllib.error.URLError as exc:
+        typer.echo(
+            f"[wctl2] Cannot reach {ping_url}: {exc.reason}. "
+            f"Is the backend running?",
+            err=True,
+        )
+        raise typer.Exit(1)
+    except Exception as exc:
+        typer.echo(f"[wctl2] Ping check failed: {exc}", err=True)
+        raise typer.Exit(1)
+
+
+def _build_overrides_json(overrides: List[str]) -> Optional[str]:
+    if not overrides:
+        return None
+
+    payload = {}
+    for item in overrides:
+        if "=" not in item:
+            typer.echo(f"[wctl2] Invalid override '{item}'. Use key=value syntax.", err=True)
+            raise typer.Exit(1)
+        key, value = item.split("=", 1)
+        payload[key] = value
+    return json.dumps(payload)
 
 
 def register(app: typer.Typer) -> None:
@@ -239,6 +296,12 @@ def register(app: typer.Typer) -> None:
             "--run-root",
             help="Optional root directory for provisioning.",
         ),
+        suite: SuitePreset = typer.Option(
+            "full",
+            "--suite",
+            "-s",
+            help="Suite preset: full (default), smoke, controllers.",
+        ),
         # Playwright Execution
         project: str = typer.Option(
             "runs0",
@@ -278,11 +341,21 @@ def register(app: typer.Typer) -> None:
             "--report",
             help="Open HTML report after run.",
         ),
+        report_path: str = typer.Option(
+            "playwright-report",
+            "--report-path",
+            help="Directory for Playwright HTML reports.",
+        ),
         # Pass-through
         playwright_args: Optional[str] = typer.Option(
             None,
             "--playwright-args",
             help="Additional Playwright CLI arguments.",
+        ),
+        overrides: List[str] = typer.Option(
+            [],
+            "--overrides",
+            help="Repeatable key=value overrides (converted to SMOKE_RUN_OVERRIDES JSON).",
         ),
     ) -> None:
         """
@@ -297,62 +370,75 @@ def register(app: typer.Typer) -> None:
         (SMOKE_CREATE_RUN=false) regardless of --create-run flag.
         """
         context = _context(ctx)
-        
-        # Resolve effective environment
+
+        # Resolve effective environment & verify test-support
         effective_env = "custom" if base_url else env
         resolved_url = _resolve_base_url(context, effective_env, base_url)
+        _ping_test_support(resolved_url)
+
+        # Determine active grep pattern (suite or explicit grep)
+        if suite not in SUITE_PATTERNS:
+            typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
+            raise typer.Exit(1)
         
+        suite_pattern = SUITE_PATTERNS[suite]
+        overrides_json = _build_overrides_json(overrides)
+
         # Build environment variables
         test_env = dict(context.environment)
         test_env["SMOKE_BASE_URL"] = resolved_url
         test_env["SMOKE_RUN_CONFIG"] = config
         test_env["SMOKE_HEADLESS"] = "false" if headed else "true"
         test_env["SMOKE_KEEP_RUN"] = "true" if keep_run else "false"
-        
-        # When run_path is provided, disable auto-provisioning
+
+        final_create_run = create_run and not run_path
+        test_env["SMOKE_CREATE_RUN"] = "true" if final_create_run else "false"
+
         if run_path:
             test_env["SMOKE_RUN_PATH"] = run_path
-            test_env["SMOKE_CREATE_RUN"] = "false"
-        else:
-            test_env["SMOKE_CREATE_RUN"] = "true" if create_run else "false"
-        
         if run_root:
             test_env["SMOKE_RUN_ROOT"] = run_root
-        
+        if overrides_json:
+            test_env["SMOKE_RUN_OVERRIDES"] = overrides_json
+
         # Build Playwright command
-        pw_args = ["--project", project, "--workers", str(workers)]
-        
-        if grep:
-            pw_args.extend(["--grep", grep])
+        effective_workers = 1 if headed else workers
+        pw_args = ["--project", project, "--workers", str(effective_workers)]
+
+        active_grep = grep or suite_pattern
+        if active_grep:
+            pw_args.extend(["--grep", active_grep])
         if debug:
             pw_args.append("--debug")
         if ui:
             pw_args.append("--ui")
         if report:
-            pw_args.extend(["--reporter", "html"])
-        
+            pw_args.extend(["--reporter", "html", "--output", report_path])
+
         if playwright_args:
-            # Use shlex.split() to properly handle quoted arguments
             pw_args.extend(shlex.split(playwright_args))
-        
+
         # Execute via npm
         static_src = context.project_dir / "wepppy" / "weppcloud" / "static-src"
         npm_cmd = ["npm", "run", "test:playwright", "--", *pw_args]
-        
+
         typer.echo(f"[wctl2] Running Playwright tests against {resolved_url}")
-        typer.echo(f"[wctl2] Config: {config}, Project: {project}, Workers: {workers}")
-        
+        typer.echo(f"[wctl2] Config: {config}, Project: {project}, Workers: {effective_workers}, Suite: {suite}")
+
         result = subprocess.run(
             npm_cmd,
             cwd=str(static_src),
             env=test_env,
         )
-        
+
         if report and result.returncode == 0:
-            # Open HTML report using npx playwright show-report
-            report_cmd = ["npx", "playwright", "show-report"]
-            subprocess.run(report_cmd, cwd=str(static_src), env=test_env)
-        
+            typer.echo(f"[wctl2] Opening report from {report_path}")
+            subprocess.run(
+                ["npx", "playwright", "show-report", report_path],
+                cwd=str(static_src),
+                env=test_env,
+            )
+
         raise typer.Exit(result.returncode)
 ```
 
@@ -384,6 +470,18 @@ wctl2 run-playwright --keep-run
 
 # Generate and open HTML report after successful run
 wctl2 run-playwright --report
+
+# Store report artifacts in a custom path
+wctl2 run-playwright --report --report-path /tmp/playwright-report
+
+# Run only controller regression suite
+wctl2 run-playwright --suite controllers
+
+# Suite with explicit grep override (grep wins)
+wctl2 run-playwright --suite smoke --grep "map tabs"
+
+# Apply config overrides
+wctl2 run-playwright --overrides general:dem_db=ned1/2016
 ```
 
 ### CI/CD Pipelines
@@ -393,7 +491,7 @@ wctl2 run-playwright --report
 wctl2 run-playwright --env staging --workers 4
 
 # Specific test subset for PR checks
-wctl2 run-playwright --grep "controller regression" --workers 2
+wctl2 run-playwright --suite smoke --workers 2
 
 # Production smoke test (pre-configured URL)
 wctl2 run-playwright --env prod --config dev_unit_1
@@ -425,7 +523,10 @@ Environment-specific URLs can be pre-configured in `docker/.env` or host `.env`:
 PLAYWRIGHT_DEV_URL=https://wc.bearhive.duckdns.org/weppcloud
 PLAYWRIGHT_STAGING_URL=https://staging.weppcloud.example.com/weppcloud
 PLAYWRIGHT_PROD_URL=https://weppcloud.example.com/weppcloud
+PLAYWRIGHT_DEV_PROJECT=runs0
 ```
+
+Setting `PLAYWRIGHT_<ENV>_PROJECT` is optional but allows each preset to default to a different Playwright project without passing `--project` explicitly.
 
 ### Playwright Config Integration
 
@@ -564,6 +665,9 @@ Options:
 
 ```python
 # tools/wctl2/tests/test_playwright.py
+import urllib.error
+from unittest.mock import MagicMock, patch
+
 def test_resolve_base_url_dev(mock_context):
     """Test default dev URL resolution."""
     url = _resolve_base_url(mock_context, "dev", None)
@@ -589,6 +693,32 @@ def test_playwright_args_quoting():
     args = '--grep "controller regression" --workers 2'
     parsed = shlex.split(args)
     assert parsed == ['--grep', 'controller regression', '--workers', '2']
+
+def test_ping_test_support_success():
+    """Test successful ping check."""
+    with patch('urllib.request.urlopen') as mock_urlopen:
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+        # Should not raise
+        _ping_test_support("https://test.example.com/weppcloud")
+
+def test_ping_test_support_failure():
+    """Test failed ping check exits with error."""
+    with patch('urllib.request.urlopen', side_effect=urllib.error.URLError("Connection refused")):
+        with pytest.raises(typer.Exit) as exc_info:
+            _ping_test_support("https://test.example.com/weppcloud")
+        assert exc_info.value.exit_code == 1
+
+def test_build_overrides_json():
+    """Test overrides parsing."""
+    overrides = ["general:dem_db=ned1/2016", "climate:source=daymet"]
+    result = _build_overrides_json(overrides)
+    parsed = json.loads(result)
+    assert parsed == {
+        "general:dem_db": "ned1/2016",
+        "climate:source": "daymet"
+    }
 ```
 
 ### Integration Tests
@@ -665,43 +795,14 @@ Benefits:
 
 ## Implementation Notes
 
-### Argument Quoting
-
-The `--playwright-args` option uses `shlex.split()` to properly handle shell quoting:
-
-```python
-# Handles quoted arguments correctly
-wctl2 run-playwright --playwright-args '--grep "controller regression"'
-wctl2 run-playwright --playwright-args "--grep 'landuse mode'"
-```
-
-Without `shlex.split()`, the simple `.split()` method would break on spaces inside quotes.
-
-### Run Path Auto-Disables Provisioning
-
-When `--run-path` is provided, the implementation automatically sets `SMOKE_CREATE_RUN=false` to prevent double-provisioning:
-
-```python
-if run_path:
-    test_env["SMOKE_RUN_PATH"] = run_path
-    test_env["SMOKE_CREATE_RUN"] = "false"  # Force disable provisioning
-else:
-    test_env["SMOKE_CREATE_RUN"] = "true" if create_run else "false"
-```
-
-This prevents the smoke harness from calling `/tests/api/create-run` when the user explicitly wants to reuse an existing run.
-
-### HTML Report Opening
-
-The `--report` flag uses `npx playwright show-report` instead of an npm script:
-
-```python
-if report and result.returncode == 0:
-    report_cmd = ["npx", "playwright", "show-report"]
-    subprocess.run(report_cmd, cwd=str(static_src), env=test_env)
-```
-
-Playwright's `show-report` command is a built-in CLI tool, not something defined in `package.json`.
+- **Suite presets**: `--suite controllers` maps to `--grep "controller regression"`. If the user also provides `--grep`, their explicit pattern takes precedence (suite pattern is ignored). New suites can be added by extending the `SUITE_PATTERNS` dict.
+- **Run-path overrides provisioning**: `--run-path` always forces `SMOKE_CREATE_RUN=false`; `--create-run` is ignored in that scenario to prevent double-provisioning.
+- **Ping validation**: `_ping_test_support()` hits `/tests/api/ping` before invoking Playwright so failures happen immediately with clear error messages differentiating network vs backend config issues.
+- **Headed mode**: When `--headed` is set we clamp `--workers` to `1`, matching Playwright's single-context limitation for visible browser windows.
+- **Overrides**: Multiple `--overrides key=value` flags build a JSON blob for `SMOKE_RUN_OVERRIDES`. Keys support `:` for nested config sections (e.g., `general:dem_db`).
+- **Argument quoting**: `--playwright-args` is parsed with `shlex.split()` so quoted grep patterns survive intact (e.g., `--playwright-args '--grep "some pattern"'`).
+- **Reports**: `--report` adds `--reporter html --output <path>` to the Playwright run and automatically calls `npx playwright show-report <path>` afterward, but only if the test run succeeded (exit code 0).
+- **Type hints**: `TYPE_CHECKING` guard around `Literal` types prevents runtime issues with Typer's option parsing while preserving type safety for mypy/pylance.
 
 ## Appendix: Related Documentation
 
