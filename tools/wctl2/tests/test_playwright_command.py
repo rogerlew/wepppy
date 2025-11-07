@@ -246,3 +246,35 @@ def test_ping_support_failure(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(typer.Exit):
         playwright_cmd._ping_test_support("http://localhost:9999/weppcloud")
+
+
+def test_report_path_without_report_opens_no_viewer(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    runner = CliRunner()
+    calls: List[List[str]] = []
+
+    def fake_ping(url: str) -> None:
+        return None
+
+    def fake_run(cmd, cwd=None, env=None):
+        calls.append(cmd)
+        return _DummyResult(returncode=0)
+
+    monkeypatch.setattr(playwright_cmd, "_ping_test_support", fake_ping)
+    monkeypatch.setattr(playwright_cmd.subprocess, "run", fake_run)
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-playwright",
+            "--report-path",
+            "telemetry/playwright-report",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 1
+    assert "--reporter" in calls[0]
+    idx = calls[0].index("--output")
+    assert calls[0][idx + 1] == "telemetry/playwright-report"

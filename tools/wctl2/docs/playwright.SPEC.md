@@ -83,7 +83,7 @@ Environment URLs can be overridden via:
 | `--debug` | Flag | `False` | Run Playwright in debug mode |
 | `--ui` | Flag | `False` | Launch Playwright UI mode |
 | `--report` | Flag | `False` | Generate HTML report and open it via `npx playwright show-report` after a successful run |
-| `--report-path` | Path | `playwright-report` | Directory passed to Playwright’s `--output` for HTML artifacts |
+| `--report-path` | Path | _(defaults to `playwright-report` when omitted)_ | Directory passed to Playwright’s `--output`; implies report generation without opening the viewer |
 
 #### Pass-through
 
@@ -801,7 +801,7 @@ Benefits:
 - **Headed mode**: When `--headed` is set we clamp `--workers` to `1`, matching Playwright's single-context limitation for visible browser windows.
 - **Overrides**: Multiple `--overrides key=value` flags build a JSON blob for `SMOKE_RUN_OVERRIDES`. Keys support `:` for nested config sections (e.g., `general:dem_db`).
 - **Argument quoting**: `--playwright-args` is parsed with `shlex.split()` so quoted grep patterns survive intact (e.g., `--playwright-args '--grep "some pattern"'`).
-- **Reports**: `--report` adds `--reporter html --output <path>` to the Playwright run and automatically calls `npx playwright show-report <path>` afterward, but only if the test run succeeded (exit code 0).
+- **Reports**: `--report` adds `--reporter html --output <path>` to the Playwright run and automatically calls `npx playwright show-report <path>` afterward (success only). Supplying `--report-path` without `--report` still attaches the HTML reporter but skips the viewer so CI can collect artifacts safely.
 - **Type hints**: `TYPE_CHECKING` guard around `Literal` types prevents runtime issues with Typer's option parsing while preserving type safety for mypy/pylance.
 
 ## Appendix: Related Documentation

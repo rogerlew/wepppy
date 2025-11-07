@@ -26,6 +26,7 @@ _ENV_URLS = {
 }
 
 DEFAULT_PROJECT = "runs0"
+DEFAULT_REPORT_PATH = "playwright-report"
 
 SUITE_PATTERNS: dict[str, Optional[str]] = {
     "full": None,
@@ -225,10 +226,10 @@ def register(app: typer.Typer) -> None:
             "--report",
             help="Generate HTML report and open it after a successful run.",
         ),
-        report_path: str = typer.Option(
-            "playwright-report",
+        report_path: Optional[str] = typer.Option(
+            None,
             "--report-path",
-            help="Destination directory for HTML reports.",
+            help="Destination directory for HTML reports (implies report generation without opening).",
         ),
         playwright_args: Optional[str] = typer.Option(
             None,
@@ -261,6 +262,8 @@ def register(app: typer.Typer) -> None:
         overrides_json = _build_overrides_json(overrides)
 
         project_value = _resolve_project(context, effective_env, project)
+        report_output_path = report_path or DEFAULT_REPORT_PATH
+        report_requested = report or report_path is not None
 
         env_vars = dict(context.environment)
         env_vars["SMOKE_BASE_URL"] = resolved_url
@@ -288,8 +291,8 @@ def register(app: typer.Typer) -> None:
             cli_args.append("--debug")
         if ui:
             cli_args.append("--ui")
-        if report:
-            cli_args.extend(["--reporter", "html", "--output", report_path])
+        if report_requested:
+            cli_args.extend(["--reporter", "html", "--output", report_output_path])
 
         if playwright_args:
             cli_args.extend(shlex.split(playwright_args))
@@ -309,9 +312,9 @@ def register(app: typer.Typer) -> None:
         )
 
         if report and result.returncode == 0:
-            typer.echo(f"[wctl2] Opening report from {report_path}")
+            typer.echo(f"[wctl2] Opening report from {report_output_path}")
             subprocess.run(
-                ["npx", "playwright", "show-report", report_path],
+                ["npx", "playwright", "show-report", report_output_path],
                 cwd=str(static_src),
                 env=env_vars,
             )
