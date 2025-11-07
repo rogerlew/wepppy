@@ -9,20 +9,6 @@
   </p>
 {% endset %}
 
-{% set summary_panel_override %}
-  <section class="wc-control__panel">
-    <h3 class="wc-control__panel-title">Summary</h3>
-    <dl class="wc-summary-list" id="path_ce_summary"></dl>
-  </section>
-{% endset %}
-
-{% set stacktrace_panel_override %}
-  <section class="wc-control__panel">
-    <h3 class="wc-control__panel-title">Details</h3>
-    <div id="path_ce_stacktrace" class="wc-control__stacktrace"></div>
-  </section>
-{% endset %}
-
 {% call ui.control_shell(
      form_id="path_ce_form",
      title="PATH Cost-Effective",
@@ -34,8 +20,14 @@
        "braille_id": "path_ce_braille",
        "height": "4rem"
      },
-     summary_panel_override=summary_panel_override,
-     stacktrace_panel_override=stacktrace_panel_override
+     summary_panel_options={
+       "body_html": '<dl class="wc-summary-list" id="path_ce_summary"></dl>'
+     },
+     stacktrace_panel_options={
+       "panel_id": "path_ce_stacktrace_panel",
+       "body_id": "path_ce_stacktrace",
+       "description": "Appears when an exception occurs."
+     }
    ) %}
 
   <fieldset class="wc-fieldset">

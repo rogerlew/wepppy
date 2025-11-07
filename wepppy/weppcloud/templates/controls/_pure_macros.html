@@ -19,7 +19,9 @@
       status_panel_override=None,
       status_panel_options=None,
       summary_panel_override=None,
-      stacktrace_panel_override=None
+      summary_panel_options=None,
+      stacktrace_panel_override=None,
+      stacktrace_panel_options=None
     ) -%}
 {% if collapsible %}
 <details class="wc-control wc-control--collapsible"{% if open %} open{% endif %}>
@@ -106,15 +108,29 @@
         footer=status_panel_footer
       )] %}
     {% endif %}
+    {% set summary_opts = summary_panel_options or {} %}
     {% if summary_panel_override is not none %}
       {% set panel_blocks = panel_blocks + [summary_panel_override|safe] %}
     {% else %}
-      {% set panel_blocks = panel_blocks + [legacy_summary_panel()] %}
+      {% set panel_blocks = panel_blocks + [legacy_summary_panel(
+        panel_id=summary_opts.get('panel_id'),
+        summary_id=summary_opts.get('summary_id', 'info'),
+        title=summary_opts.get('title', 'Summary'),
+        body_html=summary_opts.get('body_html')
+      )] %}
     {% endif %}
+    {% set stacktrace_opts = stacktrace_panel_options or {} %}
     {% if stacktrace_panel_override is not none %}
       {% set panel_blocks = panel_blocks + [stacktrace_panel_override|safe] %}
     {% else %}
-      {% set panel_blocks = panel_blocks + [legacy_stacktrace_panel()] %}
+      {% set panel_blocks = panel_blocks + [legacy_stacktrace_panel(
+        panel_id=stacktrace_opts.get('panel_id'),
+        title=stacktrace_opts.get('title', 'Details'),
+        description=stacktrace_opts.get('description'),
+        body_id=stacktrace_opts.get('body_id', 'stacktrace'),
+        collapsed=stacktrace_opts.get('collapsed', True),
+        empty_state=stacktrace_opts.get('empty_state', 'No stack trace recorded.')
+      )] %}
     {% endif %}
     {% set joined_panels = ''.join(panel_blocks) %}
     {% set has_panels = joined_panels|trim|length > 0 %}
@@ -298,18 +314,33 @@
 {% endcall %}
 {%- endmacro %}
 
-{% macro legacy_summary_panel() -%}
-<section class="wc-control__panel">
-  <h3 class="wc-control__panel-title">Summary</h3>
-  <div id="info" class="wc-control__panel-summary"></div>
+{% macro legacy_summary_panel(panel_id=None, summary_id="info", title="Summary", body_html=None) -%}
+<section class="wc-control__panel"{% if panel_id %} id="{{ panel_id }}"{% endif %}>
+  <h3 class="wc-control__panel-title">{{ title }}</h3>
+  {% if body_html %}
+    {{ body_html | safe }}
+  {% else %}
+  <div id="{{ summary_id }}" class="wc-control__panel-summary"></div>
+  {% endif %}
 </section>
 {%- endmacro %}
 
-{% macro legacy_stacktrace_panel() -%}
-<section class="wc-control__panel">
-  <h3 class="wc-control__panel-title">Details</h3>
-  <div id="stacktrace" class="wc-control__stacktrace"></div>
-</section>
+{% macro legacy_stacktrace_panel(
+      panel_id=None,
+      title="Details",
+      description=None,
+      body_id="stacktrace",
+      collapsed=True,
+      empty_state="No stack trace recorded."
+    ) -%}
+{{ stacktrace_panel(
+     id=panel_id,
+     summary=title,
+     description=description,
+     collapsed=collapsed,
+     body_id=body_id,
+     empty_state=empty_state
+   ) }}
 {%- endmacro %}
 
 {% macro fieldset(legend=None, description=None) -%}

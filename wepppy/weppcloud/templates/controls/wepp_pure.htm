@@ -1,20 +1,12 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
 
-{% set stacktrace_panel_override = ui.stacktrace_panel(
-     id="wepp_stacktrace_panel",
-     summary="Details",
-     collapsed=True,
-     body_id="stacktrace",
-     empty_state="No stack trace recorded."
-   ) %}
-
 {% call ui.control_shell(
      form_id="wepp_form",
      title="WEPP",
      collapsible=False,
      status_panel_options={"id": "wepp_status_panel", "height": "6rem"},
-     stacktrace_panel_override=stacktrace_panel_override
+     stacktrace_panel_options={"panel_id": "wepp_stacktrace_panel"}
    ) %}
 
   <p class="wc-text-muted">

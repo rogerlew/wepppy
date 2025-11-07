@@ -49,15 +49,8 @@
      collapsible=True,
      open=False,
      form_attrs={"data-treatments-form": true},
-      status_panel_options={"id": "treatments_status_panel", "height": "4rem"},
-     summary_panel_override=ui.legacy_summary_panel(),
-     stacktrace_panel_override=ui.stacktrace_panel(
-       id="treatments_stacktrace_panel",
-       summary="Details",
-       collapsed=True,
-       body_id="stacktrace",
-       empty_state="No stack trace recorded."
-     )
+     status_panel_options={"id": "treatments_status_panel", "height": "4rem"},
+     stacktrace_panel_options={"panel_id": "treatments_stacktrace_panel"}
    ) %}
 
   {{ ui.radio_group(

@@ -7,14 +7,10 @@
      title="Outlet",
      collapsible=False,
      status_panel_options={"id": "set_outlet_status_panel", "height": "3.25rem"},
-     stacktrace_panel_override=ui.stacktrace_panel(
-       id="set_outlet_stacktrace_panel",
-       summary="Details",
-       collapsed=True,
-       description="Exceptions and debug information streamed from the outlet worker.",
-       body_id="stacktrace",
-       empty_state="No stack trace recorded."
-     )
+     stacktrace_panel_options={
+       "panel_id": "set_outlet_stacktrace_panel",
+       "description": "Exceptions and debug information streamed from the outlet worker."
+     }
    ) %}
 
   <div class="hide-readonly wc-stack" data-outlet-root>

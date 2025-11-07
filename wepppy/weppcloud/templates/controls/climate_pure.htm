@@ -49,21 +49,13 @@
 ] %}
 {% set monthly_scale_factors = climate.precip_monthly_scale_factors if climate.precip_monthly_scale_factors else [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] %}
 
-{% set stacktrace_panel_override = ui.stacktrace_panel(
-     id="climate_stacktrace_panel",
-     summary="Details",
-     collapsed=True,
-     body_id="stacktrace",
-     empty_state="No stack trace recorded."
-   ) %}
-
 {% call ui.control_shell(
      form_id="climate_form",
      title="Climate Options",
      form_attrs={"data-controller": "climate"},
      collapsible=False,
      status_panel_options={"id": "climate_status_panel", "height": "6rem"},
-     stacktrace_panel_override=stacktrace_panel_override
+     stacktrace_panel_options={"panel_id": "climate_stacktrace_panel"}
    ) %}
 
   <script type="application/json" id="climate_catalog_data">{{ catalog | tojson }}</script>

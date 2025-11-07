@@ -16,14 +16,7 @@
      collapsible=False,
      description=description,
      status_panel_options={"id": "observed_status_panel", "height": "4rem"},
-     summary_panel_override=ui.legacy_summary_panel(),
-     stacktrace_panel_override=ui.stacktrace_panel(
-       id="observed_stacktrace_panel",
-       summary="Details",
-       collapsed=True,
-       body_id="stacktrace",
-       empty_state="No stack trace recorded."
-     )
+     stacktrace_panel_options={"panel_id": "observed_stacktrace_panel"}
    ) %}
 
   <section class="wc-observed">
