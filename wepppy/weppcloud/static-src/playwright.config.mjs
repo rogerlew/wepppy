@@ -18,5 +18,10 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
-  }
+  },
+  projects: [
+    {
+      name: 'runs0'
+    }
+  ]
 });

@@ -764,7 +764,7 @@ var Baer = (function () {
                     var controlLayers = map.ctrls._layers;
                     var layersToRemove = [];
                     for (var layerId in controlLayers) {
-                        if (controlLayers.hasOwnProperty(layerId)) {
+                        if (Object.prototype.hasOwnProperty.call(controlLayers, layerId)) {
                             var layerEntry = controlLayers[layerId];
                             if (layerEntry && layerEntry.name === "Burn Severity Map") {
                                 layersToRemove.push(layerEntry.layer);
