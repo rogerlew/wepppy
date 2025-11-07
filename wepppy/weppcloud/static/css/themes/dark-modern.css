@@ -1,0 +1,29 @@
+/* Generated from dark_modern.json on 2025-11-07T23:14:44.703492+00:00 */
+:root[data-theme="dark-modern"] {
+  --wc-color-accent: #0078D4;
+  --wc-color-accent-soft: rgba(0, 120, 212, 0.180);
+  --wc-color-attention: #616161;
+  --wc-color-attention-soft: rgba(97, 97, 97, 0.220);
+  --wc-color-border: #3C3C3C;
+  --wc-color-border-strong: #3C3C3C;
+  --wc-color-critical: #FFFFFF;
+  --wc-color-critical-soft: rgba(255, 255, 255, 0.200);
+  --wc-color-link: #4daafc;
+  --wc-color-link-hover: #4DAAFC;
+  --wc-color-on-primary: #FFFFFF;
+  --wc-color-page: #1F1F1F;
+  --wc-color-positive: #F1F1F133;
+  --wc-color-positive-soft: rgba(241, 241, 241, 0.180);
+  --wc-color-primary: #0078D4;
+  --wc-color-primary-dark: #0060AA;
+  --wc-color-surface: #1F1F1F;
+  --wc-color-surface-alt: #181818;
+  --wc-color-text: #CCCCCC;
+  --wc-color-text-muted: #6E7681;
+  --wc-shadow-md: none;
+  --wc-shadow-sm: none;
+}
+:root[data-theme="dark-modern"] .wc-card, :root[data-theme="dark-modern"] .wc-control, :root[data-theme="dark-modern"] .wc-panel {
+  border-color: transparent;
+  box-shadow: none;
+}

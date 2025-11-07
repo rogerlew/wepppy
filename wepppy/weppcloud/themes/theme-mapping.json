@@ -182,6 +182,19 @@
         "--wc-color-primary-dark": "#245C85",
         "--wc-color-on-primary": "#FCFCFC"
       }
+    },
+    "dark-modern": {
+      "label": "Dark Modern",
+      "source": "dark_modern.json",
+      "variant": "dark",
+      "description": "VS Code Dark Modern theme.",
+      "options": {
+        "flat_cards": true
+      },
+      "overrides": {
+        "--wc-shadow-sm": "none",
+        "--wc-shadow-md": "none"
+      }
     }
   },
   "variables": {

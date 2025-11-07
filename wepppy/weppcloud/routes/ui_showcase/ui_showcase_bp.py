@@ -11,6 +11,7 @@ ui_showcase_bp = Blueprint("ui_showcase", __name__, url_prefix="/ui/components")
 THEME_OPTIONS = [
     ("default", "Default (Light)"),
     ("onedark", "OneDark"),
+    ("dark-modern", "Dark Modern"),
     ("ayu-dark", "Ayu Dark"),
     ("ayu-mirage", "Ayu Mirage"),
     ("ayu-light", "Ayu Light"),
