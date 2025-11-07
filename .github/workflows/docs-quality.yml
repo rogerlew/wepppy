@@ -51,15 +51,25 @@ jobs:
           markdown-doc --version
           markdown-doc-bench --help >/dev/null
 
-      - name: Verify workspace wctl tooling
+      - name: Resolve wctl binary
         run: |
           set -euo pipefail
-          if [ ! -f "${WCTL_BIN}" ]; then
-            echo "wctl script missing from workspace: ${WCTL_BIN}" >&2
-            exit 127
+          if [ -f "${WCTL_BIN}" ]; then
+            echo "Using workspace wctl script: ${WCTL_BIN}"
+            WCTL_CMD="${WCTL_BIN}"
+          else
+            echo "Workspace wctl script missing at ${WCTL_BIN}; falling back to PATH lookup." >&2
+            if command -v wctl >/dev/null; then
+              WCTL_CMD="$(command -v wctl)"
+              echo "Resolved wctl from PATH: ${WCTL_CMD}"
+            else
+              echo "wctl binary not found in workspace or PATH." >&2
+              exit 127
+            fi
           fi
-          chmod +x "${WCTL_BIN}"
-          "${WCTL_BIN}" --help >/dev/null
+          chmod +x "${WCTL_CMD}" 2>/dev/null || true
+          "${WCTL_CMD}" --help >/dev/null
+          echo "WCTL_CMD=${WCTL_CMD}" >> "${GITHUB_ENV}"
 
       - name: Run markdown-doc lint (SARIF + JSON)
         run: |
@@ -76,10 +86,10 @@ jobs:
           )
 
           status=0
-          "${WCTL_BIN}" doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
+          "${WCTL_CMD}" doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
 
           # Also generate JSON for artifact (don't fail on this)
-          "${WCTL_BIN}" doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
+          "${WCTL_CMD}" doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
 
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
@@ -146,7 +156,7 @@ jobs:
       - name: Run markdown-doc benchmarks
         run: |
           set -euo pipefail
-          "${WCTL_BIN}" doc-bench --path docs --warmup 0 --iterations 1
+          "${WCTL_CMD}" doc-bench --path docs --warmup 0 --iterations 1
 
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
