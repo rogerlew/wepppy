@@ -65,10 +65,15 @@ Until `wctl run-smoke` lands, you can export the env vars manually (below) to mi
 - **For testing against dev/staging environments**, ensure `TEST_SUPPORT_ENABLED=true` is set in the backend environment and restart the service. Then:
   ```bash
   cd wepppy/weppcloud/static-src
-  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org \
-  SMOKE_CREATE_RUN=true \
-  SMOKE_RUN_CONFIG=dev_unit_1 \
+  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org/weppcloud \
+  SMOKE_RUN_CONFIG=disturbed9002_wbt \
   npm run test:playwright -- --project=runs0
+  ```
+  **Note:** The dev domain (wc.bearhive.duckdns.org) uses HTTPS with a `/weppcloud` prefix. The test suite handles this automatically via the `buildUrl()` helper. Example run with all tests passing (8 passed, 1 skipped):
+  ```bash
+  SMOKE_BASE_URL=https://wc.bearhive.duckdns.org/weppcloud \
+  SMOKE_RUN_CONFIG=disturbed9002_wbt \
+  npm run test:playwright -- --project=runs0 --workers=1
   ```
 
 ### Environment Variables
@@ -85,8 +90,10 @@ Until `wctl run-smoke` lands, you can export the env vars manually (below) to mi
 | `SMOKE_KEEP_RUN` | `false` | Keeps the provisioned run after completion. |
 
 ### Current Coverage (Playwright)
-- `page-load.spec.js`: provisions (or reuses) a run and verifies the runs0 page loads without console errors.
-- `controller-regression.spec.js`: currently drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and then injects an `exception_factory` payload to verify stacktrace rendering. Additional controllers will be layered in once their flows are stabilized.
+- `run-page-smoke.spec.js`: Provisions (or reuses) a run, verifies the runs0 page loads, checks for critical console errors (filters expected bootstrap warnings), validates map tabs, landuse mode toggling, and includes parameterized controller stacktrace tests for landuse, soils, climate, and rap_ts.
+- `controller-regression.spec.js`: Drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and then injects an `exception_factory` payload via page.evaluate() to verify stacktrace rendering.
+
+All tests use request interception to mock 500 errors instead of backend failure injection. Console error checks filter expected bootstrap failures for optional controllers (debris_flow, treatments) that may not exist in all configs.
 
 ### CI Considerations
 - The smoke suite is designed to give a quick health signal. As coverage grows (job submission, StatusStream assertions, additional flows) consider:

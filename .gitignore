@@ -29,6 +29,12 @@ wepppy/soils/ssurgo/tests/testsoils/
 .coverage
 coverage/
 
+# Playwright test artifacts
+wepppy/weppcloud/static-src/test-results/
+wepppy/weppcloud/static-src/playwright-report/
+wepppy/weppcloud/static-src/playwright/.cache/
+wepppy/weppcloud/static-src/.playwright/
+
 # External tools (managed separately)
 markdown-extract/
 actions-runner/
