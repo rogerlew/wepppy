@@ -7,10 +7,10 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: Profile Run - NEXRAD (PRISM) DebrisFlow
-- **Profile name**: baer-cropped-wbt-nexrad-prism-rap-wepp-debrisflow
-- **Description**: "Cameron Peak (baer.cropped.tif) WBT NEXRAD, RAP, WEPP, DebrisFlow"
-- **Run time**: next available 10-minute slot before existing workflows
+- **Title**: Profile Run - Europe-Disturbed
+- **Profile name**: eu-ebos-heuristic-multiple
+- **Description**: "Europe with eu-disturbed config and E-OBS multiple climates"
+- **Run time**: next available 20-minute slot before existing workflows
 
 Tasks:
 1. Create `.github/workflows/profile-run-[slug].yml` based on existing profile workflow patterns and the title (not the profile name)

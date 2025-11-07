@@ -3,6 +3,12 @@
 {% block form_id %}climate_form{% endblock %}
 {% block form_title %}Climate Options{% endblock %}
 {% block inputs %}
+{% set _spatial_help = {
+    0: ("Single climate", "Build one CLIGEN file for the entire watershed (fastest option)."),
+    1: ("Multiple climates", "Build per-hillslope climates using PRISM adjustments in the U.S. and E-OBS adjustments in Europe."),
+    2: ("Multiple climates (interpolated)", "Interpolate observed PRISM/GRIDMET grids for each hillslope (U.S. only, slower).")
+} %}
+{% set _selected_spatial_mode = climate.climate_spatialmode if climate.climate_spatialmode is not none else 0 %}
 
 {% if 'reveg' in climate.config_stem %}
 {% endif %}
@@ -32,10 +38,10 @@
         <h5>Spatial Mode</h5>
         <div class="form-group row">
             <div class="col-sm-6">
-                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }} data-climate-action="spatial-mode"> Single Climate
+                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }} data-climate-action="spatial-mode" data-spatial-help-title="{{ _spatial_help[0][0] }}" data-spatial-help-body="{{ _spatial_help[0][1] }}"> Single Climate
                     <a data-toggle="tooltip" data-placement="top" title="One per watershed."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }} data-climate-action="spatial-mode"> Multiple Climates
+                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }} data-climate-action="spatial-mode" data-spatial-help-title="{{ _spatial_help[1][0] }}" data-spatial-help-body="{{ _spatial_help[1][1] }}"> Multiple Climates
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
             </div>
@@ -213,24 +219,27 @@
         <div class="form-group row">
             <div class="col-sm-6">
                 <label class="radio">
-                    <input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }} data-climate-action="spatial-mode"> Single Climate
+                    <input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }} data-climate-action="spatial-mode" data-spatial-help-title="{{ _spatial_help[0][0] }}" data-spatial-help-body="{{ _spatial_help[0][1] }}"> Single Climate
                     <a data-toggle="tooltip" data-placement="top" 
                       title="One per watershed.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="1" class="disable-readonly" 
-                      id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }} data-climate-action="spatial-mode"> Multiple PRISM Revision
+                      id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }} data-climate-action="spatial-mode" data-spatial-help-title="{{ _spatial_help[1][0] }}" data-spatial-help-body="{{ _spatial_help[1][1] }}"> Multiple Climates
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="2" class="disable-readonly" 
-                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }} data-climate-action="spatial-mode"> Multiple Interpolated (Slow)
+                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }} data-climate-action="spatial-mode" data-spatial-help-title="{{ _spatial_help[2][0] }}" data-spatial-help-body="{{ _spatial_help[2][1] }}"> Multiple Interpolated (Slow)
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope, interpolates climate grid. Slow.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
             </div>
+        </div>
+        <div id="climate_spatialmode_help" class="wc-text-muted" style="margin-top:0; margin-bottom:1.5rem;">
+            <small><strong>{{ _spatial_help[_selected_spatial_mode][0] }}:</strong> {{ _spatial_help[_selected_spatial_mode][1] }}</small>
         </div>
     </div>
     <div id="input_years_container">

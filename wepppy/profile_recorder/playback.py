@@ -19,6 +19,10 @@ from wepppy.nodb.base import clear_locks
 from wepppy.nodb.core.ron import Ron
 
 
+class SandboxViolationError(RuntimeError):
+    """Raised when playback is about to touch the original run directory."""
+
+
 def _playback_run_root() -> Path:
     base = os.environ.get("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback")
     return Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", os.path.join(base, "runs")))
@@ -150,6 +154,7 @@ class PlaybackSession:
             endpoint = str(req.get("endpoint", ""))
             path = self._normalise_path(endpoint)
             effective_path = self._remap_run_path(path)
+            self._guard_sandbox_target(effective_path, request_id)
 
             if method == "GET" and "/rq/api/jobstatus/" in effective_path:
                 self.results.append((request_id, f"{effective_path}: skipped recorded jobstatus poll"))
@@ -386,6 +391,14 @@ class PlaybackSession:
     def _build_url(self, path: str) -> str:
         base = self.base_url.rstrip("/")
         normalized_path = path.lstrip("/")
+        parsed_base = urlparse(base)
+        base_path = parsed_base.path.lstrip("/")
+        if base_path:
+            shared_prefix = f"{base_path}/"
+            if normalized_path == base_path:
+                normalized_path = ""
+            elif normalized_path.startswith(shared_prefix):
+                normalized_path = normalized_path[len(shared_prefix) :]
         if normalized_path.startswith("query-engine/") or normalized_path == "query-engine":
             origin = urljoin(f"{base}/", "/")
             return urljoin(origin, normalized_path)
@@ -410,12 +423,39 @@ class PlaybackSession:
             self._wait_for_job(job_id, task=task_path)
 
     def _remap_run_path(self, path: str) -> str:
-        prefix = f"/runs/{self.original_run_id}/"
-        if path.startswith(prefix):
-            return path.replace(prefix, f"/runs/{self.playback_run_id}/", 1)
-        if path == f"/runs/{self.original_run_id}":
-            return f"/runs/{self.playback_run_id}"
+        if not self.original_run_id:
+            return path
+
+        parts = path.split("/")
+        for idx, part in enumerate(parts):
+            if part != "runs":
+                continue
+            candidate_idx = idx + 1
+            if candidate_idx >= len(parts):
+                continue
+            if parts[candidate_idx] != self.original_run_id:
+                continue
+            parts[candidate_idx] = self.playback_run_id
+            rebuilt = "/".join(parts)
+            if rebuilt.startswith("//"):
+                rebuilt = rebuilt[1:]
+            if rebuilt and not rebuilt.startswith("/"):
+                rebuilt = "/" + rebuilt
+            return rebuilt
         return path
+
+    def _guard_sandbox_target(self, path: str, request_id: str) -> None:
+        if not self.original_run_id:
+            return
+        marker = f"/runs/{self.original_run_id}"
+        if marker not in path:
+            return
+        message = (
+            f"{request_id} {path} still references source run '{self.original_run_id}'. "
+            "Playback refuses to touch the production run; re-promote the profile or inspect the capture."
+        )
+        self._log(message)
+        raise SandboxViolationError(message)
 
     def _build_form_request(
         self,

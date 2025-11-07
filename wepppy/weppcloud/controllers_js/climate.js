@@ -256,6 +256,7 @@ var Climate = (function () {
         climate.datasetRadios = dom.qsa("input[name=\"climate_dataset_choice\"]", formElement);
         climate.stationModeRadios = dom.qsa("input[name=\"climatestation_mode\"]", formElement);
         climate.spatialModeRadios = dom.qsa("input[name=\"climate_spatialmode\"]", formElement);
+        climate.spatialModeHelpEl = dom.qs("#climate_spatialmode_help", formElement) || document.getElementById("climate_spatialmode_help");
         climate.precipModeRadios = dom.qsa("input[name=\"precip_scaling_mode\"]", formElement);
         climate.buildModeRadios = dom.qsa("input[name=\"climate_build_mode\"]", formElement);
         climate.gridmetCheckbox = dom.qs("#checkbox_use_gridmet_wind_when_applicable");
@@ -278,10 +279,68 @@ var Climate = (function () {
         climate.datasetId = null;
         climate._previousStationMode = null;
         climate._delegates = [];
+        climate.spatialModeFieldEl = formElement
+            ? formElement.querySelector("#climate_spatialmode_controls .wc-field")
+            : document.querySelector("#climate_spatialmode_controls .wc-field");
 
         function handleError(error) {
             climate.pushResponseStacktrace(climate, toResponsePayload(http, error));
         }
+
+        climate.updateSpatialModeHelp = function (mode) {
+            if (!climate.spatialModeHelpEl) {
+                return;
+            }
+            var normalized = mode !== null && mode !== undefined ? String(mode) : null;
+            var radios = climate.spatialModeRadios || [];
+            var targetRadio = null;
+            for (var i = 0; i < radios.length; i += 1) {
+                var radio = radios[i];
+                if (!radio) {
+                    continue;
+                }
+                if (normalized !== null && String(radio.value) === normalized) {
+                    targetRadio = radio;
+                    break;
+                }
+            }
+            if (!targetRadio && radios.length > 0) {
+                targetRadio = radios[0];
+            }
+            if (!targetRadio) {
+                climate.spatialModeHelpEl.textContent = "";
+                climate.spatialModeHelpEl.style.display = "none";
+                return;
+            }
+            var title = targetRadio.getAttribute("data-spatial-help-title") || "";
+            var body = targetRadio.getAttribute("data-spatial-help-body") || "";
+            var small = document.createElement("small");
+            if (title) {
+                var strong = document.createElement("strong");
+                strong.textContent = title + ":";
+                small.appendChild(strong);
+                if (body) {
+                    small.appendChild(document.createTextNode(" " + body));
+                }
+            } else if (body) {
+                small.textContent = body;
+            }
+            climate.spatialModeHelpEl.textContent = "";
+            if (small.childNodes.length > 0) {
+                climate.spatialModeHelpEl.appendChild(small);
+                climate.spatialModeHelpEl.style.removeProperty("display");
+            } else {
+                climate.spatialModeHelpEl.style.display = "none";
+            }
+        };
+        climate.adjustSpatialModeFieldSpacing = function () {
+            if (climate.spatialModeFieldEl) {
+                climate.spatialModeFieldEl.style.marginBottom = "0";
+            }
+        };
+        climate.updateSpatialModeHelp(parseInteger(getRadioValue(climate.spatialModeRadios), 0));
+        climate.adjustSpatialModeFieldSpacing();
+        climate.updateSpatialModeHelp(parseInteger(getRadioValue(climate.spatialModeRadios), 0));
 
         climate.appendStatus = function (message, meta) {
             if (!message) {
@@ -714,6 +773,8 @@ var Climate = (function () {
             var opts = options || {};
             var parsedMode = parseInteger(mode, 0);
             setRadioValue(climate.spatialModeRadios, parsedMode);
+            climate.updateSpatialModeHelp(parsedMode);
+            climate.adjustSpatialModeFieldSpacing();
 
             if (opts.silent) {
                 return Promise.resolve(null);

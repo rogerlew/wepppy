@@ -187,27 +187,51 @@
     <div id="climate_monthlies" class="wc-card wc-card--muted"></div>
   </section>
 
-  {% set spatial_mode_options = [
+{% set spatial_mode_help = {
+  "0": ("Single climate", "Build one CLIGEN file for the entire watershed (fastest option)."),
+  "1": ("Multiple climates", "Build per-hillslope climates using PRISM adjustments in the U.S. and E-OBS adjustments in Europe."),
+  "2": ("Multiple climates (interpolated)", "Interpolate observed PRISM/GRIDMET grids for each hillslope (U.S. only, slower).")
+} %}
+
+{% set spatial_mode_options = [
     {
       "id": "climate_spatialmode0",
       "label": "Single climate",
       "value": "0",
       "selected": spatial_mode == 0,
-      "attrs": {"class": "disable-readonly", "data-spatial-value": "0", "data-climate-action": "spatial-mode"}
+      "attrs": {
+        "class": "disable-readonly",
+        "data-spatial-value": "0",
+        "data-climate-action": "spatial-mode",
+        "data-spatial-help-title": spatial_mode_help["0"][0],
+        "data-spatial-help-body": spatial_mode_help["0"][1]
+      }
     },
     {
       "id": "climate_spatialmode1",
-      "label": "Multiple climates (PRISM revision)",
+      "label": "Multiple climates",
       "value": "1",
       "selected": spatial_mode == 1,
-      "attrs": {"class": "disable-readonly", "data-spatial-value": "1", "data-climate-action": "spatial-mode"}
+      "attrs": {
+        "class": "disable-readonly",
+        "data-spatial-value": "1",
+        "data-climate-action": "spatial-mode",
+        "data-spatial-help-title": spatial_mode_help["1"][0],
+        "data-spatial-help-body": spatial_mode_help["1"][1]
+      }
     },
     {
       "id": "climate_spatialmode2",
       "label": "Multiple climates (Interpolated)",
       "value": "2",
       "selected": spatial_mode == 2,
-      "attrs": {"class": "disable-readonly", "data-spatial-value": "2", "data-climate-action": "spatial-mode"}
+      "attrs": {
+        "class": "disable-readonly",
+        "data-spatial-value": "2",
+        "data-climate-action": "spatial-mode",
+        "data-spatial-help-title": spatial_mode_help["2"][0],
+        "data-spatial-help-body": spatial_mode_help["2"][1]
+      }
     }
   ] %}
 
@@ -216,9 +240,12 @@
          "climate_spatialmode",
          label="Spatial mode",
          layout="horizontal",
-         options=spatial_mode_options,
-         help="Define how climates are distributed across hillslopes."
+         options=spatial_mode_options
        ) }}
+    {% set selected_key = spatial_mode|string %}
+    <div id="climate_spatialmode_help" class="wc-text-muted" style="margin-top:0; margin-bottom:1.5rem;">
+      <small><strong>{{ spatial_mode_help[selected_key][0] }}:</strong> {{ spatial_mode_help[selected_key][1] }}</small>
+    </div>
   </section>
 
   <section class="wc-stack" id="input_years_container" data-climate-section="stochastic_years">
