@@ -42,7 +42,6 @@ jobs:
           wctl run-playwright \
             --suite controllers \
             --workers 1 \
-            --report \
             --report-path "$PLAYWRIGHT_REPORT_PATH"
 
       - name: Upload Playwright controller report
