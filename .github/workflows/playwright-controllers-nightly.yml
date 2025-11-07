@@ -23,6 +23,21 @@ jobs:
         with:
           clean: false
 
+      - name: Ensure docker/.env exists
+        run: |
+          set -euo pipefail
+          if [ ! -f docker/.env ]; then
+            cat > docker/.env <<'EOF'
+UID=1000
+GID=993
+EXTERNAL_HOST=wc.bearhive.duckdns.org
+POSTGRES_PASSWORD=localdev
+SECRET_KEY=devsecret
+SECURITY_PASSWORD_SALT=devsalt
+TEST_SUPPORT_ENABLED=true
+EOF
+          fi
+
       - name: Verify wctl / wctl2 availability
         run: |
           set -euo pipefail
