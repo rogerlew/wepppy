@@ -28,6 +28,7 @@ jobs:
       security-events: write
     env:
       MARKDOWN_DOC_WORKSPACE: ${{ secrets.MARKDOWN_DOC_WORKSPACE }}
+      WCTL_BIN: ${{ format('{0}/wctl/wctl.sh', github.workspace) }}
     timeout-minutes: 20
 
     steps:
@@ -50,6 +51,16 @@ jobs:
           markdown-doc --version
           markdown-doc-bench --help >/dev/null
 
+      - name: Verify workspace wctl tooling
+        run: |
+          set -euo pipefail
+          if [ ! -f "${WCTL_BIN}" ]; then
+            echo "wctl script missing from workspace: ${WCTL_BIN}" >&2
+            exit 127
+          fi
+          chmod +x "${WCTL_BIN}"
+          "${WCTL_BIN}" --help >/dev/null
+
       - name: Run markdown-doc lint (SARIF + JSON)
         run: |
           set -euo pipefail
@@ -65,10 +76,10 @@ jobs:
           )
 
           status=0
-          wctl doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
+          "${WCTL_BIN}" doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
 
           # Also generate JSON for artifact (don't fail on this)
-          wctl doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
+          "${WCTL_BIN}" doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
 
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
@@ -135,7 +146,7 @@ jobs:
       - name: Run markdown-doc benchmarks
         run: |
           set -euo pipefail
-          wctl doc-bench --path docs --warmup 0 --iterations 1
+          "${WCTL_BIN}" doc-bench --path docs --warmup 0 --iterations 1
 
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
@@ -165,4 +176,3 @@ jobs:
           else
             echo "Redis data directory not present; nothing to remove."
           fi
-
