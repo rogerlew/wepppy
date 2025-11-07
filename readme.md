@@ -19,6 +19,7 @@
 
 | Badge | Profile Name | Description | Run Time (PT) |
 | ----- | ------------ | ----------- | ------------- |
+| [![Profile Run - SBS WBT MOFE](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-wbt-mofe.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-wbt-mofe.yml) | rattlesnake-wbt-fill-mofe-daymet-wepp-watar | Rattlesnake SBS with WBT (fill) Multiple OFEs, DAYMET, WEPP, WATAR (Anu) | 03:15 AM |
 | [![Profile Run - 10m MOFE](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-10m-mofe.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-10m-mofe.yml) | topaz-10m-mofe | Small Undisturbed US Watershed with TOPAZ Delineation and Multiple OFEs | 03:30 AM |
 | [![Profile Run - Europe-Disturbed](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-europe-disturbed.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-europe-disturbed.yml) | eu-ebos-heuristic-multiple | Europe with eu-disturbed config and E-OBS multiple climates | 03:40 AM |
 | [![Profile Run - NEXRAD (PRISM) DebrisFlow](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-nexrad-prism-debrisflow.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-nexrad-prism-debrisflow.yml) | baer-cropped-wbt-nexrad-prism-rap-wepp-debrisflow | Cameron Peak (baer.cropped.tif) WBT NEXRAD, RAP, WEPP, DebrisFlow | 04:00 AM |
