@@ -676,46 +676,49 @@ class Landuse(NoDbBase):
             burn_grass = disturbed.burn_grass
             sbs = disturbed.get_sbs()
 
-            sbs_lc_d = identify_mode_intersecting_raster_keys(
-                key_fn=watershed.subwta,
-                key2_fn=watershed.mofe_map,
-                parameter_fn=disturbed.disturbed_cropped
-            )
+            if sbs is not None:
+                self.logger.info('Applying burn severities to landuse by multiple OFE')
+
+                sbs_lc_d = identify_mode_intersecting_raster_keys(
+                    key_fn=watershed.subwta,
+                    key2_fn=watershed.mofe_map,
+                    parameter_fn=disturbed.disturbed_cropped
+                )
+                
+                for k, v in sbs_lc_d.items():
+                    for k2, v2 in v.items():
+                        sbs_lc_d[k][k2] = str(v2)
+                        
+                class_pixel_map = sbs.class_pixel_map
             
-            for k, v in sbs_lc_d.items():
-                for k2, v2 in v.items():
-                    sbs_lc_d[k][k2] = str(v2)
-                    
-            class_pixel_map = sbs.class_pixel_map
-           
-            meta = {}
-            for topaz_id, hill_sbs_d in sbs_lc_d.items():
-                if (int(topaz_id) - 4) % 10 == 0:
-                    continue
+                meta = {}
+                for topaz_id, hill_sbs_d in sbs_lc_d.items():
+                    if (int(topaz_id) - 4) % 10 == 0:
+                        continue
 
-                for mofe_id, val in hill_sbs_d.items():
-                    dom = domlc_d[topaz_id][mofe_id]
-                    man = man = get_management_summary(dom, self.mapping)
+                    for mofe_id, val in hill_sbs_d.items():
+                        dom = domlc_d[topaz_id][mofe_id]
+                        man = man = get_management_summary(dom, self.mapping)
 
-                    burn_class = class_pixel_map[val]
+                        burn_class = class_pixel_map[val]
 
-                    if burn_class in ['131', '132', '133']:
-                        if man.disturbed_class in ['forest', 'young forest']:
-                            domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
-                                                          '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
-                                                          '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
+                        if burn_class in ['131', '132', '133']:
+                            if man.disturbed_class in ['forest', 'young forest']:
+                                domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
+                                                            '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
+                                                            '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
 
-                        elif man.disturbed_class == 'shrub' and burn_shrubs:
-                            domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
-                                                          '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
-                                                          '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
-                            
-                        elif man.disturbed_class in ['tall grass'] and burn_grass:
-                            domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
-                                                          '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
-                                                          '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
+                            elif man.disturbed_class == 'shrub' and burn_shrubs:
+                                domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
+                                                            '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
+                                                            '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
+                                
+                            elif man.disturbed_class in ['tall grass'] and burn_grass:
+                                domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
+                                                            '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
+                                                            '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
 
-                    meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+                        meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
         
         self.logger.info(f'domlc_d = {domlc_d}')
 

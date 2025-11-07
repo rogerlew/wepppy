@@ -1414,7 +1414,7 @@ class Wepp(NoDbBase):
                              ManagementFile=man_fn,
                              ManagementDir=lc_dir,
                              Description=f"hill_{topaz_id} Multiple OFE",
-                             Color=(0,0,0))
+                             Color=(0, 0, 0, 255))
 
             man = man.build_multiple_year_man(years)
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
