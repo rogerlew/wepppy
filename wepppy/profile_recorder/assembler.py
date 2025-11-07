@@ -410,6 +410,10 @@ class ProfileAssembler:
 
     @staticmethod
     def _extract_config_slug(event: Dict[str, Any]) -> Optional[str]:
+        slug_from_meta = ProfileAssembler._normalise_config_slug(event.get("config"))
+        if slug_from_meta:
+            return slug_from_meta
+
         endpoint = event.get("endpoint")
         if not endpoint or not isinstance(endpoint, str):
             return None
@@ -419,9 +423,20 @@ class ProfileAssembler:
             return None
         try:
             idx = segments.index("runs")
-            return segments[idx + 2]
+            return ProfileAssembler._normalise_config_slug(segments[idx + 2])
         except (ValueError, IndexError):
             return None
+
+    @staticmethod
+    def _normalise_config_slug(raw_slug: Optional[str]) -> Optional[str]:
+        if not isinstance(raw_slug, str):
+            return None
+        slug = raw_slug.strip()
+        if not slug:
+            return None
+        if slug.endswith(".cfg"):
+            slug = slug[:-4]
+        return slug or None
 
     def _ensure_config_seed(
         self,

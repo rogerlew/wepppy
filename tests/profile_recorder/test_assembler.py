@@ -7,7 +7,14 @@ from typing import Any
 
 import pytest
 
-from wepppy.profile_recorder.assembler import ProfileAssembler
+from tests.profile_recorder.stubdeps import load_profile_module
+
+_ASSEMBLER_MODULE = load_profile_module(
+    "assembler.py",
+    "tests.profile_recorder.assembler_module",
+    package="wepppy.profile_recorder",
+)
+ProfileAssembler = getattr(_ASSEMBLER_MODULE, "ProfileAssembler")
 
 
 def _install_stub_module(monkeypatch: pytest.MonkeyPatch, name: str, **attrs: Any) -> None:
@@ -132,3 +139,48 @@ def test_capture_file_upload_writes_expected_seeds(monkeypatch: pytest.MonkeyPat
 
     omni_seed_dir = seed_root / "omni" / "_limbo"
     assert (omni_seed_dir / omni_seed.name).read_bytes() == omni_seed.read_bytes()
+
+
+@pytest.mark.unit
+def test_config_slug_prefers_event_metadata(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    data_repo_root = tmp_path / "data"
+    run_dir = tmp_path / "run"
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    config_slug = "disturbed9002-10-mofe"
+    config_file = run_dir / f"{config_slug}.cfg"
+    config_file.write_text("config=1")
+
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    defaults_path = config_dir / "_defaults.toml"
+    defaults_path.write_text("defaults")
+
+    monkeypatch.setattr(
+        "wepppy.profile_recorder.assembler.nodb_base.get_config_dir",
+        lambda: str(config_dir),
+    )
+    monkeypatch.setattr(
+        "wepppy.profile_recorder.assembler.nodb_base.get_default_config_path",
+        lambda: str(defaults_path),
+    )
+
+    assembler = ProfileAssembler(data_repo_root)
+    event = {
+        "endpoint": "https://wc.bearhive.duckdns.org/query-engine/runs/demo/query",
+        "stage": "response",
+        "config": config_slug,
+    }
+    assembler.handle_event("demo-run", "stream", event, run_dir)
+
+    active_path = (
+        data_repo_root
+        / "profiles"
+        / "_drafts"
+        / "demo-run"
+        / "stream"
+        / "seed"
+        / "config"
+        / "active_config.txt"
+    )
+    assert active_path.read_text() == config_slug
