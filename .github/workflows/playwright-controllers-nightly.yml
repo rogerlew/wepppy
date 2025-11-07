@@ -15,7 +15,9 @@ jobs:
       - homelab
     timeout-minutes: 40
     env:
-      PLAYWRIGHT_REPORT_PATH: telemetry/playwright-controller-report
+      # Use test-results/ to avoid conflicts with Playwright's internal report management
+      # See: docs/ui-docs/theme-metrics.spec.md section 8 for details on output directory conflicts
+      PLAYWRIGHT_REPORT_PATH: test-results/playwright-controller-report
 
     steps:
       - name: Checkout repository

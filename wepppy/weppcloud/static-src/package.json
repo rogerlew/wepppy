@@ -11,7 +11,8 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
     "check": "npm run lint && npm run test",
     "test:playwright": "playwright test --config=playwright.config.mjs",
-    "smoke": "playwright test --config=playwright.config.mjs"
+    "smoke": "playwright test --config=playwright.config.mjs",
+    "smoke:theme-metrics": "playwright test tests/smoke/theme-metrics.spec.js --config=playwright.config.mjs"
   },
   "dependencies": {
     "bootstrap": "4.5.3",

@@ -8,6 +8,22 @@ from wepppy.weppcloud.controllers_js import unitizer_map_builder
 ui_showcase_bp = Blueprint("ui_showcase", __name__, url_prefix="/ui/components")
 
 
+THEME_OPTIONS = [
+    ("default", "Default (Light)"),
+    ("onedark", "OneDark"),
+    ("ayu-dark", "Ayu Dark"),
+    ("ayu-mirage", "Ayu Mirage"),
+    ("ayu-light", "Ayu Light"),
+    ("ayu-dark-bordered", "Ayu Dark · Bordered"),
+    ("ayu-mirage-bordered", "Ayu Mirage · Bordered"),
+    ("ayu-light-bordered", "Ayu Light · Bordered"),
+    ("cursor-dark-anysphere", "Cursor Dark (Anysphere)"),
+    ("cursor-dark-midnight", "Cursor Dark (Midnight)"),
+    ("cursor-dark-high-contrast", "Cursor Dark (High Contrast)"),
+    ("cursor-light", "Cursor Light"),
+]
+
+
 def _build_unitizer_demo():
     map_data = unitizer_map_builder.build_unitizer_map_data()
     precisions = OrderedDict()
@@ -109,6 +125,190 @@ def component_gallery() -> str:
         pup_relpath=None,
     )
 
+    theme_lab_sub_cmap_options = [
+        {
+            "id": "sub_cmap_radio_default",
+            "label": "Default",
+            "value": "default",
+            "selected": True,
+            "attrs": {"data-subcatchment-role": "cmap-option"},
+        },
+        {
+            "id": "sub_cmap_radio_landuse_cover",
+            "label": "Vegetation Cover (%)",
+            "value": "landuse_cover",
+            "attrs": {"data-subcatchment-role": "cmap-option"},
+        },
+        {
+            "id": "sub_cmap_radio_dom_lc",
+            "label": "Dominant Landcover",
+            "value": "dom_lc",
+            "attrs": {"data-subcatchment-role": "cmap-option"},
+        },
+    ]
+
+    theme_contrast_targets = [
+        {
+            "id": "pure_button_primary",
+            "label": "Primary button text vs background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_primary_button",
+                    "background": "#theme_lab_primary_button",
+                }
+            ],
+        },
+        {
+            "id": "pure_button_secondary",
+            "label": "Secondary button text vs background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_secondary_button",
+                    "background": "#theme_lab_secondary_button",
+                }
+            ],
+        },
+        {
+            "id": "wc_field_help",
+            "label": "Helper copy vs input background",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "helper_vs_input",
+                    "foreground": "#theme_lab_textfield_help",
+                    "background": "#theme_lab_textfield",
+                }
+            ],
+        },
+        {
+            "id": "wc_field_hint_text",
+            "label": "Numeric hint vs input background",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "hint_vs_input",
+                    "foreground": "#theme_lab_numeric_help",
+                    "background": "#theme_lab_numeric",
+                }
+            ],
+        },
+        {
+            "id": "wc_text_muted",
+            "label": "Muted copy vs surface",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "muted_vs_surface",
+                    "foreground": "#theme_lab_muted_copy",
+                    "background": "#theme_lab_muted_surface",
+                }
+            ],
+        },
+        {
+            "id": "job_hint",
+            "label": "Job hint vs surface",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "hint_vs_surface",
+                    "foreground": "#theme_lab_job_hint",
+                    "background": "#theme_lab_muted_surface",
+                }
+            ],
+        },
+        {
+            "id": "wc_checkbox_checked",
+            "label": "Readonly toggle (checked)",
+            "threshold": 3.0,
+            "actions": [{"type": "set_checked", "target": "#theme_lab_checkbox", "value": True}],
+            "pairs": [
+                {
+                    "name": "checked_vs_surface",
+                    "foreground": "#theme_lab_checkbox",
+                    "background": "#theme_lab_checkbox_surface",
+                }
+            ],
+        },
+        {
+            "id": "wc_checkbox_unchecked",
+            "label": "Readonly toggle (unchecked)",
+            "threshold": 3.0,
+            "actions": [{"type": "set_checked", "target": "#theme_lab_checkbox", "value": False}],
+            "pairs": [
+                {
+                    "name": "unchecked_vs_surface",
+                    "foreground": "#theme_lab_checkbox",
+                    "background": "#theme_lab_checkbox_surface",
+                }
+            ],
+        },
+        {
+            "id": "sub_cmap_radio_default_checked",
+            "label": "Subcatchment radio (checked) vs background",
+            "threshold": 3.0,
+            "actions": [{"type": "click", "target": "#sub_cmap_radio_default"}],
+            "pairs": [
+                {
+                    "name": "checked_vs_background",
+                    "foreground": "#sub_cmap_radio_default",
+                    "background": "#theme_lab_subcmap_field",
+                }
+            ],
+        },
+        {
+            "id": "sub_cmap_radio_default_unchecked",
+            "label": "Subcatchment radio (unchecked) vs background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "unchecked_vs_background",
+                    "foreground": "#sub_cmap_radio_landuse_cover",
+                    "background": "#theme_lab_subcmap_field",
+                }
+            ],
+        },
+        {
+            "id": "sub_cmap_radio_checked_vs_unchecked",
+            "label": "Subcatchment radio checked vs unchecked token",
+            "threshold": 1.0,
+            "pairs": [
+                {
+                    "name": "checked_vs_unchecked",
+                    "foreground": "#sub_cmap_radio_default",
+                    "background": "#sub_cmap_radio_landuse_cover",
+                }
+            ],
+        },
+        {
+            "id": "leaflet_zoom_in",
+            "label": "Leaflet zoom-in button",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_zoom_in",
+                    "background": "#theme_lab_zoom_control",
+                }
+            ],
+        },
+        {
+            "id": "leaflet_zoom_out",
+            "label": "Leaflet zoom-out button",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_zoom_out",
+                    "background": "#theme_lab_zoom_control",
+                }
+            ],
+        },
+    ]
+
     class SampleUser:
         is_authenticated = True
 
@@ -130,4 +330,7 @@ def component_gallery() -> str:
         cls_units=cls_units,
         str_units=str_units,
         unitizer_map=map_data,
+        theme_options=THEME_OPTIONS,
+        theme_lab_sub_cmap_options=theme_lab_sub_cmap_options,
+        theme_contrast_targets=theme_contrast_targets,
     )

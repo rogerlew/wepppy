@@ -32,6 +32,7 @@ SUITE_PATTERNS: dict[str, Optional[str]] = {
     "full": None,
     "smoke": "page load",
     "controllers": "controller regression",
+    "theme-metrics": "theme contrast metrics",
 }
 
 
@@ -184,7 +185,7 @@ def register(app: typer.Typer) -> None:
             "full",
             "--suite",
             "-s",
-            help="Suite preset: full (default), smoke, controllers.",
+            help="Suite preset: full (default), smoke, controllers, theme-metrics.",
         ),
         project: Optional[str] = typer.Option(
             None,

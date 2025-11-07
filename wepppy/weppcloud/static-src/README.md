@@ -45,3 +45,19 @@
 ## Remaining CDN References
 - Some secondary pages still reference CDN Bootstrap/jQuery assets. Track TODOs via `rg "cdn.jsdelivr.net/npm/bootstrap"` and replace as we touch those templates.
 - Leaflet plugins that are not published on npm (e.g., custom glify layers) remain vendored under `static/js/`.
+
+## Playwright Test Artifacts
+
+**IMPORTANT:** When writing custom artifacts in Playwright tests, never use directories managed by Playwright reporters:
+
+- ❌ **`playwright-report/`** - Cleaned by HTML reporter on every run (configured in `playwright.config.mjs`)
+- ✅ **`test-results/<custom-subdir>/`** - Safe for custom artifacts (Playwright only manages test-specific subdirectories)
+
+Example from `theme-metrics.spec.js`:
+```javascript
+// Safe location - not cleaned by Playwright
+const DEFAULT_REPORT_DIR = path.join('test-results', 'theme-metrics');
+```
+
+If test artifacts mysteriously disappear despite successful `fs.writeFile()` calls, check if they're being written to a directory that Playwright cleans asynchronously after test completion.
+

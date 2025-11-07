@@ -16,7 +16,12 @@
     </p>
   </header>
 
-  <section class="wc-stack">
+  <nav class="wc-button-row wc-theme-demo-nav" aria-label="Showcase sections">
+    <a class="pure-button" href="#component-gallery">Component gallery</a>
+    <a class="pure-button pure-button-secondary" href="#theme-lab">Theme lab</a>
+  </nav>
+
+  <section id="component-gallery" class="wc-stack">
     <h2>Run Header Fields</h2>
     <p class="wc-text-muted">
       Header macros match the live run header; use them when a control needs inline editing for name/scenario.
@@ -289,6 +294,169 @@
     {% endcall %}
   </section>
 
+  <section id="theme-lab" class="wc-stack">
+    <header class="wc-stack">
+      <h2>Theme Lab</h2>
+      <p class="wc-text-muted">
+        Switch between production themes and inspect the components most likely to regress. The Playwright harness
+        reads the metadata on this page to record rendered contrast ratios for CI artifacts.
+      </p>
+    </header>
+    <div class="wc-theme-lab__picker wc-stack">
+      <div>
+        <label for="theme_lab_select" class="wc-field__label">Preview theme</label>
+        <select id="theme_lab_select"
+                class="wc-theme-switcher__select"
+                data-theme-select
+                aria-label="Theme Lab picker">
+          {% for value, label in theme_options %}
+            <option value="{{ value }}" {% if value == 'default' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <p class="wc-text-muted">
+        This inline selector mirrors the header switcher so designers and agents can stay focused on the specimen grid.
+      </p>
+    </div>
+    <div class="pure-g wc-theme-lab__grid">
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="pure-button-primary">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Primary action</h3>
+            <p class="wc-card__description">Default `.pure-button` used for WEPP, RQ, and analysis submissions.</p>
+          </header>
+          <div class="wc-card__body">
+            <button id="theme_lab_primary_button" type="button" class="pure-button">Run WEPP</button>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="pure-button-secondary">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Secondary action</h3>
+            <p class="wc-card__description">`.pure-button.pure-button-secondary` for cancel/reset flows.</p>
+          </header>
+          <div class="wc-card__body">
+            <button id="theme_lab_secondary_button" type="button" class="pure-button pure-button-secondary">
+              Cancel
+            </button>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-field-help">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Helper copy</h3>
+            <p class="wc-card__description">`.wc-field__help` vs the corresponding text input background.</p>
+          </header>
+          <div class="wc-card__body">
+            {{ ui.text_field(
+                 "theme_lab_textfield",
+                 "Watershed name",
+                 value="South Fork Fire",
+                 placeholder="Required field",
+                 help="Helper text should remain legible against the field background."
+               ) }}
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="field-input-hint">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Numeric hint text</h3>
+            <p class="wc-card__description">Tests hint text against `.wc-field__control` for numeric inputs.</p>
+          </header>
+          <div class="wc-card__body">
+            {{ ui.numeric_field(
+                 "theme_lab_numeric",
+                 "Rainfall (mm)",
+                 value="250",
+                 min="0",
+                 max="5000",
+                 precision="1",
+                 help="Enter a value between 0 and 5000 mm."
+               ) }}
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="sub_cmap_radio">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Subcatchment radio set</h3>
+            <p class="wc-card__description">Matches the Map control colormapping radios.</p>
+          </header>
+          <div class="wc-card__body" id="theme_lab_subcmap_field">
+            {{ ui.radio_group(
+                 "theme_lab_sub_cmap",
+                 label="Subcatchment colormapping",
+                 layout="vertical",
+                 options=theme_lab_sub_cmap_options
+               ) }}
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-text-muted">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Muted + job hint copy</h3>
+            <p class="wc-card__description">Ensures muted paragraphs and job hints preserve minimum contrast.</p>
+          </header>
+          <div class="wc-card__body wc-stack" id="theme_lab_muted_surface">
+            <p id="theme_lab_muted_copy" class="wc-text-muted">
+              Muted text communicates secondary context without overpowering the main content.
+            </p>
+            <p id="theme_lab_job_hint" class="wc-job-hint wc-field__help">
+              Job hint sample: <code>rq-landuse-1329</code>
+            </p>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-checkbox">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Readonly toggle</h3>
+            <p class="wc-card__description">Header checkbox styling (`.wc-run-header__toggle`) with checked + unchecked states.</p>
+          </header>
+          <div class="wc-card__body" id="theme_lab_checkbox_surface">
+            <label class="wc-run-header__toggle">
+              <input id="theme_lab_checkbox" type="checkbox" checked>
+              <span>Readonly</span>
+            </label>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="leaflet-zoom">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Leaflet zoom controls</h3>
+            <p class="wc-card__description">`.leaflet-control-zoom.leaflet-bar` buttons rendered without tiles.</p>
+          </header>
+          <div class="wc-card__body">
+            <div id="theme_lab_zoom_control"
+                 class="leaflet-control-zoom leaflet-bar"
+                 role="group"
+                 aria-label="Leaflet zoom controls">
+              <a id="theme_lab_zoom_in"
+                 class="leaflet-control-zoom-in"
+                 href="#"
+                 role="button"
+                 aria-label="Zoom in"
+                 title="Zoom in"
+                 onclick="return false;">+</a>
+              <a id="theme_lab_zoom_out"
+                 class="leaflet-control-zoom-out"
+                 href="#"
+                 role="button"
+                 aria-label="Zoom out"
+                 title="Zoom out"
+                 onclick="return false;">&minus;</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="wc-stack">
     <h2>Unitizer Modal</h2>
     <p class="wc-text-muted">
@@ -516,6 +684,9 @@
         },
       };
     })();
+  </script>
+  <script id="themeContrastTargets" type="application/json">
+    {{ theme_contrast_targets | tojson }}
   </script>
   <script>
     (function () {
