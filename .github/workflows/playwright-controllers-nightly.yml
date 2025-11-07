@@ -1,0 +1,68 @@
+name: Playwright Controllers Nightly
+
+on:
+  schedule:
+    # 02:15 AM Pacific Time ≈ 10:15 UTC
+    - cron: "15 10 * * *"
+  workflow_dispatch:
+
+jobs:
+  playwright-controllers:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 40
+    env:
+      PLAYWRIGHT_REPORT_PATH: telemetry/playwright-controller-report
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Verify wctl / wctl2 availability
+        run: |
+          set -euo pipefail
+          if ! command -v wctl >/dev/null; then
+            echo "wctl command not found on the runner." >&2
+            exit 127
+          fi
+          if ! python -m tools.wctl2 --help >/dev/null; then
+            echo "wctl2 module is unavailable." >&2
+            exit 127
+          fi
+
+      - name: Install npm dependencies
+        run: |
+          set -euo pipefail
+          wctl run-npm install
+
+      - name: Run Playwright controller suite
+        run: |
+          set -euo pipefail
+          python -m tools.wctl2 run-playwright \
+            --suite controllers \
+            --workers 1 \
+            --report \
+            --report-path "$PLAYWRIGHT_REPORT_PATH"
+
+      - name: Upload Playwright controller report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-controllers-report
+          path: wepppy/weppcloud/static-src/${{ env.PLAYWRIGHT_REPORT_PATH }}
+          if-no-files-found: warn
+
+      - name: Remove redis data directory
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi

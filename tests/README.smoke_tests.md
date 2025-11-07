@@ -117,6 +117,15 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 
 All tests use request interception to mock 500 errors instead of backend failure injection. Console error checks filter expected bootstrap failures for optional controllers (debris_flow, treatments) that may not exist in all configs.
 
+### Playwright Controller Regression Suite
+`controller-regression.spec.js` is now its own suite (`--suite controllers`) that exercises every controller listed in `static-src/tests/smoke/controller-cases.js`. Important details:
+
+- **Prerequisites:** Same as other smoke specs plus `TEST_SUPPORT_ENABLED=true`. The `/tests/api/create-run` endpoint automatically adds `playwright_load_all=true` to the runs0 URL so optional controllers (observed, debris_flow, etc.) render even when the config would normally hide them.
+- **RQ vs synchronous controllers:** Cases with `workflow: "rq_job"` run through `runRqJobWorkflow`, which stubs a successful `job_id` response followed by a failure response. Synchronous controllers (lacking the flag) simply intercept the HTTP request and inject a 500 payload.
+- **Controller metadata:** `controller-cases.js` defines per-controller selectors and optional hooks (`prepareAction` for form setup, `failureStatus` for non-500 responses, `expectJobHint` to skip hint assertions, `requireHintVisible` to ensure a job hint is actually shown). Keep helpers in that file lightweight; if more bespoke helpers accumulate, fold them into a small config module.
+- **Adding cases:** Provide `formSelector`, `actionSelector`, `stacktraceLocator`, and `hintLocator`. Set `workflow: "rq_job"` if the real controller enqueues an RQ task so the suite can validate both job-hint updates and failure stacktraces. Consider `requireHintVisible` whenever the UI should keep the job hint visible (for example, after switching modes).
+- **Execution:** `wctl2 run-playwright --suite controllers --workers 1` (or the equivalent `npm run test:playwright -- --grep "controller regression"`). The suite currently runs in ~25 seconds against dev, skipping controllers that are disabled for the target config.
+
 ### CI Considerations
 - The smoke suite is designed to give a quick health signal. As coverage grows (job submission, StatusStream assertions, additional flows) consider:
   - Splitting specs into targeted groups (`smoke`, `regression`).
