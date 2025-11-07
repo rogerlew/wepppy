@@ -106,18 +106,20 @@ test.describe('controller regression suite', () => {
 
       await page.route(controller.requestUrlPattern, async (route) => {
         intercepted = true;
-        await route.fulfill({
-          status: 500,
-          contentType: 'application/json',
-          body: JSON.stringify(body)
-        });
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify(body)
+      });
       });
 
       try {
         await page.locator(controller.actionSelector).click();
-        await expect(stacktraceLocator).toContainText(message, { timeout: 15000 });
+      await expect(stacktraceLocator).toContainText(message, { timeout: 15000 });
+      if (controller.expectJobHint !== false) {
         await expect(hintLocator).not.toHaveText(/^\s*$/);
-        expect(intercepted).toBeTruthy();
+      }
+      expect(intercepted).toBeTruthy();
       } finally {
         await page.unroute(controller.requestUrlPattern).catch(() => {});
       }
@@ -152,6 +154,10 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
     });
   });
 
+  if (typeof controller.prepareAction === 'function') {
+    await controller.prepareAction({ page, phase: 'success' });
+  }
+
   await expect(button).toBeEnabled();
   await button.click();
   
@@ -161,9 +167,10 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   await page.unroute(controller.requestUrlPattern).catch(() => {});
 
   // Test 2: Failure with stacktrace (verify stacktrace display and hint preservation)
+  const failureStatus = controller.failureStatus ?? 500;
   await page.route(controller.requestUrlPattern, async (route) => {
     await route.fulfill({
-      status: 500,
+      status: failureStatus,
       contentType: 'application/json',
       body: JSON.stringify({
         Success: false,
@@ -172,6 +179,10 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
       })
     });
   });
+
+  if (typeof controller.prepareAction === 'function') {
+    await controller.prepareAction({ page, phase: 'failure' });
+  }
 
   await button.click();
   

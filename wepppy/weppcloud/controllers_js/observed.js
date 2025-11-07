@@ -20,7 +20,7 @@ var Observed = (function () {
         stacktrace: "#stacktrace",
         rqJob: "#rq_job",
         textarea: "#observed_text",
-        hint: "#hint_run_wepp"
+        hint: "#hint_run_observed"
     };
 
     var ACTIONS = {
@@ -400,6 +400,11 @@ var Observed = (function () {
             var climateData = (ctx.data && ctx.data.climate) || {};
             var observedData = (ctx.data && ctx.data.observed) || {};
             var shouldShow = Boolean(climateData.hasObserved || observedData.hasResults || observedData.resultsAvailable);
+            var forceVisible = Boolean(ctx.flags && ctx.flags.playwrightLoadAll);
+
+            if (forceVisible) {
+                shouldShow = true;
+            }
 
             if (typeof controller.hideControl === "function") {
                 controller.hideControl();

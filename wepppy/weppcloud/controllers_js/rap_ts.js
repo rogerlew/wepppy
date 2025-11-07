@@ -380,12 +380,9 @@ var RAP_TS = (function () {
                 return;
             }
 
-            controller.info.html("");
-            controller.stacktrace.empty();
-            controller.hideStacktrace();
-            if (controller.hint && typeof controller.hint.text === "function") {
-                controller.hint.text("");
-            }
+        controller.info.html("");
+        controller.stacktrace.empty();
+        controller.hideStacktrace();
 
             var submission = forms.serializeForm(controller.form, { format: "json" }) || {};
             if (overridePayload && typeof overridePayload === "object") {

@@ -156,6 +156,7 @@ var Outlet = (function () {
         var stacktraceElement = dom.qs("#set_outlet_form #stacktrace");
         var rqJobElement = dom.qs("#set_outlet_form #rq_job");
         var hintElement = dom.qs("#hint_set_outlet_cursor");
+        var cursorHintElement = dom.qs("#set_outlet_cursor_hint");
         var entryInputElement = dom.qs("[data-outlet-entry-field]", formElement);
         var cursorButtonElement = dom.qs("[data-outlet-action='cursor-toggle']", formElement);
         var entryButtonElement = dom.qs("[data-outlet-action='entry-submit']", formElement);
@@ -168,6 +169,10 @@ var Outlet = (function () {
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
         var hintAdapter = createLegacyAdapter(hintElement);
+        var cursorHintAdapter = null;
+        if (cursorHintElement && cursorHintElement !== hintElement) {
+            cursorHintAdapter = createLegacyAdapter(cursorHintElement);
+        }
 
         outlet.form = formElement;
         outlet.info = infoAdapter;
@@ -176,7 +181,7 @@ var Outlet = (function () {
         outlet.rq_job = rqJobAdapter;
         outlet.command_btn_id = ["btn_set_outlet_cursor", "btn_set_outlet_entry"];
         outlet.hint = hintAdapter;
-        outlet.cursorHint = hintAdapter;
+        outlet.cursorHint = cursorHintAdapter || hintAdapter;
         outlet.cursorButton = cursorButtonElement;
         outlet.entryInput = entryInputElement;
         outlet.entryButton = entryButtonElement;
@@ -260,6 +265,28 @@ var Outlet = (function () {
             }
         }
 
+        function updateCursorHint(state) {
+            var message = state ? "Click on the map to define outlet." : "";
+            var adapter = cursorHintAdapter;
+
+            if (adapter && typeof adapter.text === "function") {
+                adapter.text(message);
+                if (adapter !== hintAdapter) {
+                    if (state && typeof adapter.show === "function") {
+                        adapter.show();
+                    }
+                    if (!state && typeof adapter.hide === "function") {
+                        adapter.hide();
+                    }
+                }
+                return;
+            }
+
+            if (hintElement) {
+                dom.setText(hintElement, message);
+            }
+        }
+
         function setCursorSelection(state) {
             var enabled = Boolean(state);
             outlet.cursorSelectionOn = enabled;
@@ -269,9 +296,7 @@ var Outlet = (function () {
                 cursorButtonElement.setAttribute("aria-pressed", enabled ? "true" : "false");
             }
 
-            if (hintElement) {
-                dom.setText(hintElement, enabled ? "Click on the map to define outlet." : "");
-            }
+            updateCursorHint(enabled);
 
             var containers = dom.qsa(".leaflet-container");
             containers.forEach(function (container) {

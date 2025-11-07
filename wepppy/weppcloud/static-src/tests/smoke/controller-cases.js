@@ -38,17 +38,26 @@ const controllerCases = [
   {
     name: "set_outlet",
     formSelector: "form#set_outlet_form",
-    actionSelector: "#btn_set_outlet_cursor",
+    actionSelector: "#btn_set_outlet_entry",
     requestUrlPattern: "**/rq/api/set_outlet",
     stacktraceLocator: "#set_outlet_stacktrace_panel [data-stacktrace-body]",
     hintLocator: "#hint_set_outlet_cursor",
-    workflow: "rq_job"
+    workflow: "rq_job",
+    prepareAction: async ({ page }) => {
+      const entryModeRadio = page.locator("#set_outlet_mode_entry");
+      if (await entryModeRadio.count()) {
+        await entryModeRadio.check({ force: true });
+      }
+      const entryField = page.locator("#input_set_outlet_entry");
+      await entryField.fill("-116.95, 46.73");
+    },
+    failureStatus: 200
   },
   {
     name: "rap_ts",
     formSelector: "form#rap_ts_form",
     actionSelector: "#btn_build_rap_ts",
-    requestUrlPattern: "**/rq/api/build_rap_ts",
+    requestUrlPattern: "**/rq/api/acquire_rap_ts",
     stacktraceLocator: "#rap_ts_stacktrace_panel [data-stacktrace-body]",
     hintLocator: "#hint_build_rap_ts",
     workflow: "rq_job"
@@ -66,10 +75,10 @@ const controllerCases = [
     name: "observed",
     formSelector: "form#observed_form",
     actionSelector: "#btn_run_observed",
-    requestUrlPattern: "**/rq/api/run_observed",
+    requestUrlPattern: /\/tasks\/run_model_fit\/?(?:\?.*)?$/,
     stacktraceLocator: "#observed_stacktrace_panel [data-stacktrace-body]",
-    hintLocator: "#hint_run_wepp",  // Note: observed reuses wepp's hint
-    workflow: "rq_job"
+    hintLocator: "#hint_run_observed",
+    expectJobHint: false
   },
   {
     name: "debris_flow",

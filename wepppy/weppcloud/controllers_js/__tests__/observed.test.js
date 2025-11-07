@@ -26,7 +26,7 @@ describe("Observed controller", () => {
 01/01/2020,12
 01/02/2020,15
 </textarea>
-                    <p id="hint_run_wepp"></p>
+                    <p id="hint_run_observed"></p>
                     <button id="btn_run_observed" type="button" data-action="observed-run">Run</button>
                 </form>
             </div>
