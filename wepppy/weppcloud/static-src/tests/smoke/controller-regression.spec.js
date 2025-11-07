@@ -91,8 +91,8 @@ test.describe('controller regression suite', () => {
         test.skip(true, `Stacktrace panel not present for ${controller.name}`);
       }
 
-      if (controller.workflow === 'landuse') {
-        await runLanduseWorkflow({
+      if (controller.workflow === 'rq_job') {
+        await runRqJobWorkflow({
           page,
           controller,
           hintLocator,
@@ -125,7 +125,20 @@ test.describe('controller regression suite', () => {
   });
 });
 
-async function runLanduseWorkflow({ page, controller, hintLocator, stacktraceLocator }) {
+/**
+ * Generic RQ job workflow for controllers that return job_id on success.
+ * 
+ * Tests two scenarios:
+ * 1. Successful request that returns a job_id - verifies hint is populated
+ * 2. Failed request that returns stacktrace - verifies stacktrace display and hint preservation
+ * 
+ * @param {Object} params
+ * @param {Page} params.page - Playwright page object
+ * @param {Object} params.controller - Controller configuration from controller-cases.js
+ * @param {Locator} params.hintLocator - Locator for the job hint element
+ * @param {Locator} params.stacktraceLocator - Locator for the stacktrace display element
+ */
+async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocator }) {
   const button = page.locator(controller.actionSelector);
 
   // Test 1: Successful build with job_id (verify hint is populated)

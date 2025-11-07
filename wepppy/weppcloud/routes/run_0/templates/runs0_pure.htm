@@ -5,13 +5,23 @@
 {#
   Preflight TOC Navigation:
   - Emojis sourced from TaskEnum.emoji() in wepppy/nodb/redis_prep.py
-  - Visibility controlled by preflight checklist via WebSocket
+  Visibility controlled by preflight checklist via WebSocket
   - See docs/ui-docs/control-ui-styling/preflight_behavior.md for architecture
 #}
 
-{% set hide_landuse_wepp = 'rhem' in ron.mods %}
+{% set hide_landuse_wepp = 'rhem' in ron.mods and not playwright_load_all %}
 
 {% set disabled_controllers = ['landuse', 'landuseModify', 'wepp'] if hide_landuse_wepp else [] %}
+
+{% set show_rangeland_cover = 'rangeland_cover' in ron.mods or playwright_load_all %}
+{% set show_rap_ts = 'rap_ts' in ron.mods or playwright_load_all %}
+{% set show_treatments = 'treatments' in ron.mods or playwright_load_all %}
+{% set show_ash = 'ash' in ron.mods or playwright_load_all %}
+{% set show_rhem = 'rhem' in ron.mods or playwright_load_all %}
+{% set show_omni = 'omni' in ron.mods or playwright_load_all %}
+{% set show_observed = observed is not none or playwright_load_all %}
+{% set show_debris_flow = ('debris_flow' in ron.mods or playwright_load_all) and (debris_flow is not none or playwright_load_all) and user.has_role('PowerUser') %}
+{% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
 
 {% block head_extras %}
 {{ super() }}
@@ -46,13 +56,13 @@
       <h4>Preflight and Navigation</h4>
       <ul class="wc-toc-list">
         <li><a href="#map" class="nav-link">Map &amp; Analysis</a></li>
-        {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
+        {% if show_disturbed_sbs %}
         <li><a href="#disturbed-sbs" class="nav-link">Soil Burn Severity</a></li>
         {% endif %}
         <li><a href="#channel-delineation" class="nav-link">Channel Delineation</a></li>
         <li><a href="#set-outlet" class="nav-link">Outlet</a></li>
         <li><a href="#subcatchments-delineation" class="nav-link">Subcatchments Delineation</a></li>
-        {% if 'rangeland_cover' in ron.mods %}
+        {% if show_rangeland_cover %}
         <li><a href="#rangeland-cover" class="nav-link">Rangeland Cover</a></li>
         {% endif %}
         {% if not hide_landuse_wepp %}
@@ -60,29 +70,29 @@
         {% endif %}
         <li><a href="#soils" class="nav-link">Soils</a></li>
         <li><a href="#climate" class="nav-link">Climate</a></li>
-        {% if 'rap_ts' in ron.mods %}
+        {% if show_rap_ts %}
         <li><a href="#rap-ts" class="nav-link">RAP Time Series</a></li>
         {% endif %}
-        {% if 'treatments' in ron.mods %}
+        {% if show_treatments %}
         <li><a href="#treatments" class="nav-link">Treatments</a></li>
         {% endif %}
         {% if not hide_landuse_wepp %}
         <li><a href="#wepp" class="nav-link">WEPP</a></li>
         {% endif %}
-        {% if 'ash' in ron.mods %}
+        {% if show_ash %}
         <li><a href="#ash" class="nav-link">Ash Transport</a></li>
         {% endif %}
-        {% if 'rhem' in ron.mods %}
+        {% if show_rhem %}
         <li><a href="#rhem" class="nav-link">RHEM</a></li>
         {% endif %}
-        {% if 'omni' in ron.mods %}
+        {% if show_omni %}
         <li><a href="#omni-scenarios" class="nav-link">Omni Scenarios</a></li>
         <li><a href="#omni-contrasts" class="nav-link">Omni Contrasts</a></li>
         {% endif %}
-        {% if observed is not none %}
+        {% if show_observed %}
         <li><a href="#observed" class="nav-link">Observed Data</a></li>
         {% endif %}
-        {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
+        {% if show_debris_flow %}
         <li><a href="#debris-flow" class="nav-link">Debris Flow</a></li>
         {% endif %}
         <li><a href="#dss-export" class="nav-link">DSS Export</a></li>
@@ -94,7 +104,7 @@
         {% include 'controls/map_pure.htm' %}
       </section>
 
-      {% if ('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods %}
+      {% if show_disturbed_sbs %}
       <section id="disturbed-sbs" class="wc-stack">
         {% include 'controls/disturbed_sbs_pure.htm' %}
       </section>
@@ -112,7 +122,7 @@
         {% include 'controls/subcatchments_pure.htm' %}
       </section>
 
-      {% if 'rangeland_cover' in ron.mods %}
+      {% if show_rangeland_cover %}
       <section id="rangeland-cover" class="wc-stack">
         {% include 'controls/rangeland_cover_pure.htm' %}
       </section>
@@ -132,13 +142,13 @@
         {% include 'controls/climate_pure.htm' %}
       </section>
 
-      {% if 'rap_ts' in ron.mods %}
+      {% if show_rap_ts %}
       <section id="rap-ts" class="wc-stack">
         {% include 'controls/rap_ts_pure.htm' %}
       </section>
       {% endif %}
 
-      {% if 'treatments' in ron.mods %}
+      {% if show_treatments %}
       <section id="treatments" class="wc-stack">
         {% include 'controls/treatments_pure.htm' %}
       </section>
@@ -150,19 +160,19 @@
       </section>
       {% endif %}
 
-      {% if 'ash' in ron.mods %}
+      {% if show_ash %}
       <section id="ash" class="wc-stack">
         {% include 'controls/ash_pure.htm' %}
       </section>
       {% endif %}
 
-      {% if 'rhem' in ron.mods %}
+      {% if show_rhem %}
       <section id="rhem" class="wc-stack">
         {% include 'controls/rhem_pure.htm' %}
       </section>
       {% endif %}
 
-      {% if 'omni' in ron.mods %}
+      {% if show_omni %}
       <section id="omni-scenarios" class="wc-stack">
         {% include 'controls/omni_scenarios_pure.htm' %}
       </section>
@@ -177,13 +187,13 @@
       </section>
       {% endif %}
 
-      {% if observed is not none %}
+      {% if show_observed %}
       <section id="observed" class="wc-stack">
         {% include 'controls/observed_pure.htm' %}
       </section>
       {% endif %}
 
-{% if 'debris_flow' in ron.mods and debris_flow is not none and user.has_role('PowerUser') %}
+{% if show_debris_flow %}
   <section id="debris-flow" class="wc-stack">
     {% include 'controls/debris_flow_pure.htm' %}
   </section>

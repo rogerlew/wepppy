@@ -59,12 +59,15 @@ def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
         raise BadRequest(str(exc)) from exc
 
     run_url = url_for_run("run_0.runs0", runid=runid, config=config)
+    url_params = []
     if overrides:
-        query = "&".join(
-            [f"{key}={value}" for key, value in overrides.items() if value is not None]
-        )
-        if query:
-            run_url = f"{run_url}?{query}"
+        url_params.extend([f"{key}={value}" for key, value in overrides.items() if value is not None])
+    
+    # Always add playwright_load_all for testing
+    url_params.append("playwright_load_all=true")
+    
+    if url_params:
+        run_url = f"{run_url}?{'&'.join(url_params)}"
 
     return {
         "runid": runid,

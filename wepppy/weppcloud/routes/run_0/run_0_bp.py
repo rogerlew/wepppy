@@ -210,9 +210,13 @@ def runs0(runid, config):
     Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
     db.session.commit()
 
+    # Playwright testing support: load all controls regardless of config/mods
+    playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
+
     return render_template('runs0_pure.htm',
                             user=current_user,
                             site_prefix=site_prefix,
+                            playwright_load_all=playwright_load_all,
                             topaz=topaz,
                             soils=soils,
                             ron=ron,
