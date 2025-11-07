@@ -31,14 +31,14 @@
          title="Create Archive",
          collapsible=False,
          form_attrs={'novalidate': True},
-         status_panel_override=ui.status_panel(
-           id="archive_status_panel",
-           title="Archive status",
-           variant="console",
-           description="Live updates for archive and restore jobs.",
-           log_id="archive_status_log",
-           initial="Waiting for activity..."
-         ),
+         status_panel_options={
+           "id": "archive_status_panel",
+           "title": "Archive status",
+           "variant": "console",
+           "log_id": "archive_status_log",
+           "description": "Live updates for archive and restore jobs.",
+           "initial": "Waiting for activity..."
+         },
          summary_panel_override='',
          stacktrace_panel_override=ui.stacktrace_panel(
            id="archive_stacktrace_panel",
@@ -70,7 +70,6 @@
          form_id="archive_list",
          title="Existing Archives",
          collapsible=False,
-         status_panel_override='',
          stacktrace_panel_override='',
          summary_panel_override=''
        ) %}

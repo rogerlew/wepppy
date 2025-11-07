@@ -17,6 +17,7 @@
       form_class=None,
       form_attrs=None,
       status_panel_override=None,
+      status_panel_options=None,
       summary_panel_override=None,
       stacktrace_panel_override=None
     ) -%}
@@ -74,10 +75,36 @@
     </header>
     {% endif %}
     {% set panel_blocks = [] %}
+    {% set status_opts = status_panel_options or {} %}
     {% if status_panel_override is not none %}
       {% set panel_blocks = panel_blocks + [status_panel_override|safe] %}
     {% else %}
-      {% set panel_blocks = panel_blocks + [legacy_status_panel()] %}
+      {% set status_panel_id = status_opts.get('id', form_id ~ '_status_panel') %}
+      {% set status_panel_job_id = status_opts.get('job_id', 'rq_job') %}
+      {% set status_panel_braille_id = status_opts.get('braille_id', 'braille') %}
+      {% set status_panel_log_id = status_opts.get('log_id', 'status') %}
+      {% set status_panel_height = status_opts.get('height') %}
+      {% set status_panel_variant = status_opts.get('variant', 'compact') %}
+      {% set status_panel_title = status_opts.get('title', 'Status') %}
+      {% set status_panel_meta = status_opts.get('meta') %}
+      {% set status_panel_description = status_opts.get('description') %}
+      {% set status_panel_actions = status_opts.get('actions') %}
+      {% set status_panel_footer = status_opts.get('footer') %}
+      {% set status_panel_initial = status_opts.get('initial') %}
+      {% set panel_blocks = panel_blocks + [legacy_status_panel(
+        panel_id=status_panel_id,
+        job_id=status_panel_job_id,
+        braille_id=status_panel_braille_id,
+        status_id=status_panel_log_id,
+        title=status_panel_title,
+        variant=status_panel_variant,
+        height=status_panel_height,
+        initial=status_panel_initial,
+        meta=status_panel_meta,
+        description=status_panel_description,
+        actions=status_panel_actions,
+        footer=status_panel_footer
+      )] %}
     {% endif %}
     {% if summary_panel_override is not none %}
       {% set panel_blocks = panel_blocks + [summary_panel_override|safe] %}
@@ -240,15 +267,35 @@
   {% endfor %}></{{ tag }}>
 {%- endmacro %}
 
-{% macro legacy_status_panel() -%}
-<section class="wc-control__panel">
-  <h3 class="wc-control__panel-title">Status</h3>
-  <div id="rq_job" class="wc-control__job"></div>
-  <div class="wc-control__status-text">
-    <small id="braille" class="wc-control__status-braille"></small>
-    <small id="status" class="wc-control__status-message"></small>
-  </div>
-</section>
+{% macro legacy_status_panel(
+      panel_id=None,
+      job_id="rq_job",
+      braille_id="braille",
+      status_id="status",
+      title="Status",
+      variant="compact",
+      height=None,
+      initial=None,
+      meta=None,
+      description=None,
+      actions=None,
+      footer=None
+    ) -%}
+{% call status_panel(
+     id=panel_id,
+     title=title,
+     variant=variant,
+     log_id=status_id,
+     initial=initial,
+     meta=meta,
+     description=description,
+     actions=actions,
+     footer=footer,
+     height=height
+   ) %}
+  <div id="{{ job_id }}" class="wc-status-panel__meta" aria-live="polite"></div>
+  <span id="{{ braille_id }}" class="wc-status-panel__meta" aria-hidden="true"></span>
+{% endcall %}
 {%- endmacro %}
 
 {% macro legacy_summary_panel() -%}

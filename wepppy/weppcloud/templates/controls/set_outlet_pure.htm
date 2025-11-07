@@ -2,27 +2,11 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
 
-{% set status_panel %}
-  {% call ui.status_panel(
-       id="set_outlet_status_panel",
-       title="Status",
-       variant="compact",
-       description="Live updates while the outlet job runs.",
-       log_id="status",
-       height="3.25rem"
-     ) %}
-    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
-    <div class="wc-status-panel__meta" aria-hidden="true">
-      <span id="braille"></span>
-    </div>
-  {% endcall %}
-{% endset %}
-
 {% call ui.control_shell(
      form_id="set_outlet_form",
      title="Outlet",
      collapsible=False,
-     status_panel_override=status_panel,
+     status_panel_options={"id": "set_outlet_status_panel", "height": "3.25rem"},
      stacktrace_panel_override=ui.stacktrace_panel(
        id="set_outlet_stacktrace_panel",
        summary="Details",

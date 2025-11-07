@@ -18,13 +18,13 @@
        collapsible=False,
        form_class="pure-form-aligned",
        form_attrs={'novalidate': True},
-       status_panel_override=ui.status_panel(
-         id="fork_status_panel",
-         title="Console",
-         variant="console",
-         meta='<div id="the_console" class="wc-status" data-state="attention">Waiting for submission...</div>',
-         log_id="fork_status_log"
-       ),
+       status_panel_options={
+         "id": "fork_status_panel",
+         "title": "Console",
+         "variant": "console",
+         "log_id": "fork_status_log",
+         "meta": '<div id="the_console" class="wc-status" data-state="attention">Waiting for submission...</div>'
+       },
        summary_panel_override='',
        stacktrace_panel_override=ui.stacktrace_panel(
          id="fork_stacktrace_panel",

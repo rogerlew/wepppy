@@ -48,6 +48,7 @@ See Also:
 
 # standard libraries
 import os
+import ast
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -84,6 +85,8 @@ from wepppy.nodb.duckdb_agents import (
 )
 
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
+
+DEFAULT_MAP_CENTER = [44.0, -116.0]
 
 __all__ = [
     'Map',
@@ -370,6 +373,38 @@ class Ron(NoDbBase):
 
     filename = 'ron.nodb'
 
+    @staticmethod
+    def _normalize_center(value: Any) -> List[float]:
+        """
+        Normalize map center definitions to [lat, lon] floats.
+        Handles lists, tuples, and legacy serialized strings.
+        """
+        center = value
+        if center is None or center == '':
+            return DEFAULT_MAP_CENTER.copy()
+
+        if isinstance(center, str):
+            center = center.strip()
+            if center == '':
+                return DEFAULT_MAP_CENTER.copy()
+            try:
+                center = ast.literal_eval(center)
+            except (ValueError, SyntaxError):
+                return DEFAULT_MAP_CENTER.copy()
+
+        if isinstance(center, tuple):
+            center = list(center)
+
+        if isinstance(center, list) and len(center) >= 2:
+            try:
+                lat = float(center[0])
+                lon = float(center[1])
+                return [lat, lon]
+            except (TypeError, ValueError):
+                return DEFAULT_MAP_CENTER.copy()
+
+        return DEFAULT_MAP_CENTER.copy()
+
     def __init__(
         self, 
         wd: str, 
@@ -395,7 +430,8 @@ class Ron(NoDbBase):
 
             # Map
             self._cellsize = self.config_get_float('general', 'cellsize')
-            self._center0 = self.config_get_raw('map', 'center0')
+            raw_center = self.config_get_raw('map', 'center0')
+            self._center0 = self._normalize_center(raw_center)
             self._zoom0 = self.config_get_int('map', 'zoom0')
 
             _boundary = self.config_get_path('map', 'boundary')
@@ -558,7 +594,10 @@ class Ron(NoDbBase):
     @property
     def center0(self) -> List[float]:
         if self.map is None:
-            return self._center0
+            normalized = self._normalize_center(getattr(self, '_center0', None))
+            if normalized != getattr(self, '_center0', None):
+                self._center0 = normalized
+            return normalized
         else:
             return self.map.center[::-1]
 

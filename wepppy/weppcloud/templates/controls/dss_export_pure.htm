@@ -28,25 +28,12 @@
   }
 ] %}
 
-{% set status_panel_override %}
-  {% call ui.status_panel(
-       id="dss_export_status_panel",
-       title="Status",
-       variant="compact",
-       log_id="status",
-       height="4rem"
-     ) %}
-    <div id="rq_job" class="wc-status-panel__meta" aria-live="polite"></div>
-    <span id="braille" class="wc-status-panel__meta" aria-hidden="true"></span>
-  {% endcall %}
-{% endset %}
-
 {% call ui.control_shell(
      form_id="dss_export_form",
      title="Partitioned DSS Export for HEC",
      collapsible=False,
      description=description,
-     status_panel_override=status_panel_override,
+     status_panel_options={"id": "dss_export_status_panel", "height": "4rem"},
      summary_panel_override=ui.legacy_summary_panel(),
      stacktrace_panel_override=ui.stacktrace_panel(
        id="dss_export_stacktrace_panel",
