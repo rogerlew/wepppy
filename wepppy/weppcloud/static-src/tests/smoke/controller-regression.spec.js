@@ -126,11 +126,12 @@ test.describe('controller regression suite', () => {
 });
 
 async function runLanduseWorkflow({ page, controller, hintLocator, stacktraceLocator }) {
-  const jobId = `pw-landuse-${Date.now()}`;
-  let intercepted = false;
+  const button = page.locator(controller.actionSelector);
 
+  // Test 1: Successful build with job_id (verify hint is populated)
+  const jobId = `pw-landuse-${Date.now()}`;
+  
   await page.route(controller.requestUrlPattern, async (route) => {
-    intercepted = true;
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -138,27 +139,36 @@ async function runLanduseWorkflow({ page, controller, hintLocator, stacktraceLoc
     });
   });
 
-  try {
-  await page.locator(controller.actionSelector).click();
-  await page.waitForTimeout(3000);
+  await expect(button).toBeEnabled();
+  await button.click();
+  
+  // Wait for job hint to show the job_id (proves response was processed and hint updated)
   await expect(hintLocator).toContainText(jobId, { timeout: 15000 });
-    expect(intercepted).toBeTruthy();
-  } finally {
-    await page.unroute(controller.requestUrlPattern).catch(() => {});
-  }
+  
+  await page.unroute(controller.requestUrlPattern).catch(() => {});
 
-  const failurePayload = buildFailurePayload(controller.name);
+  // Test 2: Failure with stacktrace (verify stacktrace display and hint preservation)
+  await page.route(controller.requestUrlPattern, async (route) => {
+    await route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        Success: false,
+        Error: 'Injected landuse failure',
+        StackTrace: ['Injected failure for landuse controller', 'Test stacktrace line 2']
+      })
+    });
+  });
 
-  await page.evaluate((payload) => {
-    const landuse = window.Landuse && typeof window.Landuse.getInstance === 'function'
-      ? window.Landuse.getInstance()
-      : null;
-    if (!landuse || typeof landuse.pushResponseStacktrace !== 'function') {
-      throw new Error('Landuse controller unavailable for stacktrace injection.');
-    }
-    landuse.pushResponseStacktrace(landuse, payload.body);
-  }, failurePayload);
-
-  await expect(stacktraceLocator).toContainText(failurePayload.message, { timeout: 15000 });
+  await button.click();
+  
+  // Verify stacktrace is displayed with both lines
+  await expect(stacktraceLocator).toContainText('Injected landuse failure', { timeout: 15000 });
+  await expect(stacktraceLocator).toContainText('Test stacktrace line 2', { timeout: 5000 });
+  
+  // Verify hint is still visible and contains the job_id from first request
   await expect(hintLocator).toContainText(jobId);
+  await expect(hintLocator).not.toHaveText(/^\s*$/);
+  
+  await page.unroute(controller.requestUrlPattern).catch(() => {});
 }
