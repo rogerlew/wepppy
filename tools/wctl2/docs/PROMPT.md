@@ -1,7 +1,7 @@
 # Prompt: Implement `wctl2`
 
 ## Anchor Documents
-- [`tools/wctl2/SPEC.md`](../wctl2/SPEC.md) — architecture, module plan, testing expectations
+- [`tools/wctl2/docs/SPEC.md`](tools/wctl2/docs/SPEC.md) — architecture, module plan, testing expectations
 - [`wctl/README.md`](../../wctl/README.md) — current CLI behaviour and user expectations
 - [`wctl/install.sh`](../../wctl/install.sh) — installer that generates the `wctl` shim
 

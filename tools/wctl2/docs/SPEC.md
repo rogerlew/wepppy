@@ -68,7 +68,7 @@
 - **CI integration**: Add workflow job executing new CLI to catch regressions.
 
 ## Documentation
-- `tools/wctl2/SPEC.md` (this document) – maintained for architectural reference.
+- `tools/wctl2/docs/SPEC.md` (this document) – maintained for architectural reference.
 - Update `wctl/README.md` with migration instructions once ready.
 - Document how to enable `WCTL_MAN_PATH` replacement if running with limited permissions during installation.
 

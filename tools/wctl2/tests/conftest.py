@@ -14,6 +14,7 @@ def temp_project(tmp_path: Path) -> Path:
         "GID=993\n"
         "PROFILE_PLAYBACK_URL=http://127.0.0.1:8070\n"
         "PROFILE_PLAYBACK_BASE_URL=http://weppcloud:8000/weppcloud\n"
+        "PLAYWRIGHT_DEV_PROJECT=runs0\n"
     )
     (docker_dir / "docker-compose.dev.yml").write_text("services: {}\n")
     return tmp_path

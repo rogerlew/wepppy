@@ -51,7 +51,28 @@ Each profile will eventually describe a set of actions (map, landuse, climate, W
 
 Until `wctl run-smoke` lands, you can export the env vars manually (below) to mimic the quick profile.
 
-## 3. Running the Smoke Suite (manual env)
+## 3. Running the Smoke Suite
+
+### `wctl2 run-playwright` (recommended)
+`wctl2 run-playwright` wraps all environment setup, ping validation, and Playwright CLI args:
+```bash
+# Default: dev environment, provisions disturbed9002_wbt, runs full suite
+wctl2 run-playwright
+
+# Local stack with existing run (skip provisioning)
+wctl2 run-playwright --env local --no-create-run --run-path http://localhost:8080/weppcloud/runs/<id>/<config>/
+
+# Controller-only checks with overrides and HTML report
+wctl2 run-playwright \
+  --env dev \
+  --suite controllers \
+  --workers 2 \
+  --overrides general:dem_db=ned1/2016 \
+  --report
+```
+Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_CONFIG`, etc.) and support advanced toggles like `--headed`, `--run-root`, and `--playwright-args`. See `tools/wctl2/docs/playwright.SPEC.md` for the full option table.
+
+### Manual env export (legacy)
 - From repository root:
   ```bash
   export TEST_SUPPORT_ENABLED=true
@@ -90,8 +111,9 @@ Until `wctl run-smoke` lands, you can export the env vars manually (below) to mi
 | `SMOKE_KEEP_RUN` | `false` | Keeps the provisioned run after completion. |
 
 ### Current Coverage (Playwright)
-- `run-page-smoke.spec.js`: Provisions (or reuses) a run, verifies the runs0 page loads, checks for critical console errors (filters expected bootstrap warnings), validates map tabs, landuse mode toggling, and includes parameterized controller stacktrace tests for landuse, soils, climate, and rap_ts.
-- `controller-regression.spec.js`: Drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and then injects an `exception_factory` payload via page.evaluate() to verify stacktrace rendering.
+- `page-load.spec.js`: Quick health check that provisions/reuses a run, loads the runs0 dashboard, verifies core controllers render, and fails fast on unexpected console errors.
+- `run-page-smoke.spec.js`: Extended coverage that drives map tabs, toggles landuse modes, exercises StatusStream wiring, and injects stacktraces for multiple controllers.
+- `controller-regression.spec.js`: Drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and injects failure payloads to ensure stacktraces render correctly.
 
 All tests use request interception to mock 500 errors instead of backend failure injection. Console error checks filter expected bootstrap failures for optional controllers (debris_flow, treatments) that may not exist in all configs.
 

@@ -112,4 +112,4 @@ All commands print the HTTP target and payload to stderr before streaming the se
 
 - Integrate the new CLI into CI pipelines (`wctl run-pytest`, `wctl docker compose config --quiet`, etc.).
 - Remove any downstream references to the legacy `profile_playback_cli.py` helpers; the Typer commands are the new canonical interface.
-- Keep an eye on `tools/wctl2/SPEC.md` for additional enhancements (command grouping, completion scripts, richer logging).
+- Keep an eye on `tools/wctl2/docs/SPEC.md` for additional enhancements (command grouping, completion scripts, richer logging).

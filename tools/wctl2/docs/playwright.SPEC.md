@@ -82,7 +82,7 @@ Environment URLs can be overridden via:
 | `--grep`, `-g` | String | _(none)_ | Filter tests by pattern |
 | `--debug` | Flag | `False` | Run Playwright in debug mode |
 | `--ui` | Flag | `False` | Launch Playwright UI mode |
-| `--report` | Flag | `False` | Generate HTML report and open it via `npx playwright show-report` |
+| `--report` | Flag | `False` | Generate HTML report and open it via `npx playwright show-report` after a successful run |
 | `--report-path` | Path | `playwright-report` | Directory passed to Playwright’s `--output` for HTML artifacts |
 
 #### Pass-through
@@ -806,7 +806,7 @@ Benefits:
 
 ## Appendix: Related Documentation
 
-- `tools/wctl2/SPEC.md` - Overall wctl2 architecture
+- `tools/wctl2/docs/SPEC.md` - Overall wctl2 architecture
 - `tests/README.smoke_tests.md` - Playwright test suite documentation
 - `wepppy/weppcloud/static-src/playwright.config.mjs` - Playwright configuration
 - `wctl/README.md` - wctl command reference
