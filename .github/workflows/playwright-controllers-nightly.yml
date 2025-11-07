@@ -23,30 +23,11 @@ jobs:
         with:
           clean: false
 
-      - name: Ensure docker/.env exists
-        run: |
-          set -euo pipefail
-          if [ ! -f docker/.env ]; then
-            cat > docker/.env <<'EOF'
-UID=1000
-GID=993
-EXTERNAL_HOST=wc.bearhive.duckdns.org
-POSTGRES_PASSWORD=localdev
-SECRET_KEY=devsecret
-SECURITY_PASSWORD_SALT=devsalt
-TEST_SUPPORT_ENABLED=true
-EOF
-          fi
-
       - name: Verify wctl / wctl2 availability
         run: |
           set -euo pipefail
           if ! command -v wctl >/dev/null; then
             echo "wctl command not found on the runner." >&2
-            exit 127
-          fi
-          if ! python -m tools.wctl2 --help >/dev/null; then
-            echo "wctl2 module is unavailable." >&2
             exit 127
           fi
 
@@ -58,7 +39,7 @@ EOF
       - name: Run Playwright controller suite
         run: |
           set -euo pipefail
-          python -m tools.wctl2 run-playwright \
+          wctl run-playwright \
             --suite controllers \
             --workers 1 \
             --report \
