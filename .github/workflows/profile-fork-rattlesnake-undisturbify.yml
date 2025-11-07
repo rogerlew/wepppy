@@ -17,7 +17,6 @@ jobs:
     env:
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-      WCTL_BIN: ${{ format('{0}/wctl/wctl.sh', github.workspace) }}
 
     steps:
       - name: Checkout repository
@@ -25,14 +24,13 @@ jobs:
         with:
           clean: false
 
-      - name: Verify workspace wctl tooling
+      - name: Verify wctl tooling
         run: |
           set -euo pipefail
-          if [ ! -x "${WCTL_BIN}" ]; then
-            echo "Workspace wctl script missing or not executable: ${WCTL_BIN}" >&2
+          if ! command -v wctl >/dev/null; then
+            echo "wctl command not found on the runner. Install wctl before rerunning this workflow." >&2
             exit 127
           fi
-          "${WCTL_BIN}" --help >/dev/null
 
       - name: Health check WEPPcloud service
         run: |
@@ -54,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p telemetry
-          "${WCTL_BIN}" run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify \
+          wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify \
             2>&1 | tee telemetry/rattlesnake-profile-fork.log
 
       - name: Upload profile playback log
