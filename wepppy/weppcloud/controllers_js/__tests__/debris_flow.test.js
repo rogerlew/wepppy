@@ -34,6 +34,9 @@ describe("DebrisFlow controller", () => {
             isHttpError: jest.fn(() => false)
         };
         global.WCHttp = httpMock;
+        global.WCForms = {
+            serializeForm: jest.fn(() => ({}))
+        };
 
         ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
             pushResponseStacktrace: jest.fn(),
@@ -55,6 +58,7 @@ describe("DebrisFlow controller", () => {
         delete global.WCHttp;
         delete global.controlBase;
         delete global.url_for_run;
+        delete global.WCForms;
         delete window.site_prefix;
         if (global.WCDom) {
             delete global.WCDom;
