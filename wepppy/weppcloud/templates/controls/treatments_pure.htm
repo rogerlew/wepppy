@@ -147,6 +147,10 @@
     </button>
   {% endcall %}
 
-  <p id="hint_build_treatments" class="wc-field__help" data-treatments-role="hint" aria-live="polite"></p>
+  {{ ui.job_hint(
+       "hint_build_treatments",
+       extra_class="wc-field__help",
+       attrs={"data-treatments-role": "hint"}
+     ) }}
 
 {% endcall %}

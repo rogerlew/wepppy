@@ -175,6 +175,7 @@ var Outlet = (function () {
         outlet.stacktrace = stacktraceAdapter;
         outlet.rq_job = rqJobAdapter;
         outlet.command_btn_id = ["btn_set_outlet_cursor", "btn_set_outlet_entry"];
+        outlet.hint = hintAdapter;
         outlet.cursorHint = hintAdapter;
         outlet.cursorButton = cursorButtonElement;
         outlet.entryInput = entryInputElement;

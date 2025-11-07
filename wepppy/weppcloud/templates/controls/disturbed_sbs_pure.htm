@@ -98,9 +98,9 @@
         </button>
       {% endif %}
     {% endcall %}
-    <p id="hint_upload_sbs" class="wc-field__help" aria-live="polite"></p>
+    {{ ui.job_hint("hint_upload_sbs", extra_class="wc-field__help") }}
     {% if 'disturbed' in ron.mods or 'baer' in ron.mods %}
-      <p id="hint_remove_sbs" class="wc-field__help" aria-live="polite"></p>
+      {{ ui.job_hint("hint_remove_sbs", extra_class="wc-field__help") }}
     {% endif %}
   </div>
 
@@ -117,7 +117,7 @@
         Use Uniform Low SBS
       </button>
     {% endcall %}
-    <p id="hint_low_sbs" class="wc-field__help" aria-live="polite"></p>
+    {{ ui.job_hint("hint_low_sbs", extra_class="wc-field__help") }}
 
     {% call button_row() %}
       <button
@@ -128,7 +128,7 @@
         Use Uniform Moderate SBS
       </button>
     {% endcall %}
-    <p id="hint_moderate_sbs" class="wc-field__help" aria-live="polite"></p>
+    {{ ui.job_hint("hint_moderate_sbs", extra_class="wc-field__help") }}
 
     {% call button_row() %}
       <button
@@ -139,7 +139,7 @@
         Use Uniform High SBS
       </button>
     {% endcall %}
-    <p id="hint_high_sbs" class="wc-field__help" aria-live="polite"></p>
+    {{ ui.job_hint("hint_high_sbs", extra_class="wc-field__help") }}
 
     {% call button_row() %}
       <button

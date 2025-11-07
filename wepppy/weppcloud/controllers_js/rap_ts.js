@@ -118,30 +118,51 @@ var RAP_TS = (function () {
     }
 
     function toResponsePayload(http, error) {
-        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
-            var detail = error.detail || error.message || "Request failed";
-            var body = error.body;
-            if (body && typeof body === "object") {
-                if (body.Error) {
-                    detail = body.Error;
-                }
-                if (Array.isArray(body.StackTrace)) {
-                    return {
-                        Success: false,
-                        Error: detail,
-                        StackTrace: body.StackTrace
-                    };
+        function coerceBody(raw) {
+            if (!raw) {
+                return null;
+            }
+            if (typeof raw === "string") {
+                try {
+                    return JSON.parse(raw);
+                } catch (err) {
+                    return raw;
                 }
             }
-            return {
-                Success: false,
-                Error: detail
-            };
+            return raw;
         }
-        return {
-            Success: false,
-            Error: (error && error.message) || "Request failed"
-        };
+
+        var body = coerceBody(error && error.body ? error.body : null);
+
+        if (body && typeof body === "object") {
+            var payload = body;
+            if (payload.Error === undefined) {
+                var fallback =
+                    payload.detail ||
+                    payload.message ||
+                    payload.error ||
+                    payload.errors;
+                if (fallback !== undefined && fallback !== null) {
+                    payload = Object.assign({}, payload, { Error: fallback });
+                }
+            }
+            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
+                return payload;
+            }
+        } else if (typeof body === "string" && body) {
+            return { Error: body };
+        }
+
+        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+            return error;
+        }
+
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error && (error.detail || error.message);
+            return { Error: detail || "Request failed" };
+        }
+
+        return { Error: (error && error.message) || "Request failed" };
     }
 
     function parseSchedule(dom) {

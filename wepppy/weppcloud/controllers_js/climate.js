@@ -108,10 +108,50 @@ var Climate = (function () {
     }
 
     function toResponsePayload(http, error) {
-        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
-            var detail = error.detail || error.body || error.message || "Request failed";
-            return { Error: detail };
+        function coerceBody(raw) {
+            if (!raw) {
+                return null;
+            }
+            if (typeof raw === "string") {
+                try {
+                    return JSON.parse(raw);
+                } catch (err) {
+                    return raw;
+                }
+            }
+            return raw;
         }
+
+        var body = coerceBody(error && error.body ? error.body : null);
+
+        if (body && typeof body === "object") {
+            var payload = body;
+            if (payload.Error === undefined) {
+                var fallback =
+                    payload.detail ||
+                    payload.message ||
+                    payload.error ||
+                    payload.errors;
+                if (fallback !== undefined && fallback !== null) {
+                    payload = Object.assign({}, payload, { Error: fallback });
+                }
+            }
+            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
+                return payload;
+            }
+        } else if (typeof body === "string" && body) {
+            return { Error: body };
+        }
+
+        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+            return error;
+        }
+
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error && (error.detail || error.message);
+            return { Error: detail || "Request failed" };
+        }
+
         return { Error: (error && error.message) || "Request failed" };
     }
 
@@ -252,6 +292,7 @@ var Climate = (function () {
         climate.cligenSection = dom.qs("#climate_cligen");
         climate.hintUpload = uploadHintAdapter;
         climate.hintBuild = buildHintAdapter;
+        climate.hint = buildHintAdapter;
 
         climate.datasetRadios = dom.qsa("input[name=\"climate_dataset_choice\"]", formElement);
         climate.stationModeRadios = dom.qsa("input[name=\"climatestation_mode\"]", formElement);

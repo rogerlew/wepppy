@@ -210,6 +210,36 @@
 </details>
 {%- endmacro %}
 
+{%- macro job_hint(
+      hint_id,
+      tag="p",
+      extra_class=None,
+      attrs=None,
+      aria_live="polite"
+    ) -%}
+{% set class_tokens = ['wc-job-hint', 'wc-text-muted'] %}
+{% if extra_class %}
+  {% for token in extra_class.split() %}
+    {% if token %}
+      {% set class_tokens = class_tokens + [token] %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% set attrs = attrs.copy() if attrs else {} %}
+<{{ tag }}
+  id="{{ hint_id }}"
+  class="{{ ' '.join(class_tokens) }}"
+  aria-live="{{ aria_live }}"
+  data-job-hint
+  {% for attr_key, attr_val in attrs.items() %}
+    {% if attr_val is true or attr_val is none or attr_val == '' %}
+      {{ attr_key }}
+    {% else %}
+      {{ attr_key }}="{{ attr_val }}"
+    {% endif %}
+  {% endfor %}></{{ tag }}>
+{%- endmacro %}
+
 {% macro legacy_status_panel() -%}
 <section class="wc-control__panel">
   <h3 class="wc-control__panel-title">Status</h3>
