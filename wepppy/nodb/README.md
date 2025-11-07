@@ -40,3 +40,18 @@ Instead of SQL queries, developers interact with rich Python objects that expose
 - **Trigger events** – `TriggerEvents` enum documents lifecycle hooks (e.g., `LANDUSE_BUILD_COMPLETE`) that mods and UI components listen for when orchestrating runs.
 
 When extending NoDb, prefer these utilities over bespoke implementations—custom locking or logging code frequently regresses cross-worker behavior. See the module docstring in `wepppy/nodb/base.py` for deeper context and example usage.
+
+## Path Placeholders in Configs
+
+NoDb configs reference large, location-specific datasets through placeholders that
+`config_get_path()` resolves at runtime:
+
+- `MODS_DIR` expands to `wepppy/nodb/mods`, keeping legacy bundles inside the repo.
+- `EXTENDED_MODS_DATA` points to heavy datasets that now live outside the repo. The
+  resolver honors the `EXTENDED_MODS_DATA` environment variable, falling back to the
+  default bind mounts (`/wc1/geodata/extended_mods_data`, `/geodata/extended_mods_data`)
+  or the legacy `mods/locations` folder when the external volumes are unavailable.
+
+Use the helper script `python wepppy/nodb/scripts/update_extended_mods_data.py --apply`
+whenever locations (Portland, Seattle, Lake Tahoe) need to be relinked to the external
+bundle; the script rewrites the `.cfg` files to use the placeholder consistently.

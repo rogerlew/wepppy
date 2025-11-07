@@ -20,6 +20,37 @@ from pathlib import Path
 
 MODS_DIR = os.path.dirname(__file__)
 
+
+def _normalize_path(value: str) -> str:
+    return os.path.abspath(os.path.expanduser(value))
+
+
+def _resolve_extended_mods_data() -> str:
+    """
+    Determine where heavy weight location bundles live.
+
+    Priority:
+    1. ``EXTENDED_MODS_DATA`` environment variable (always honored)
+    2. Default bind mounts such as ``/wc1/geodata/extended_mods_data`` or
+       ``/geodata/extended_mods_data`` when present
+    3. Legacy fallback under ``wepppy/nodb/mods/locations`` to preserve
+       backwards-compatible behavior when the external repo is absent.
+    """
+
+    env_override = os.environ.get('EXTENDED_MODS_DATA')
+    if env_override:
+        return _normalize_path(env_override)
+
+    for candidate in ('/wc1/geodata/extended_mods_data', '/geodata/extended_mods_data'):
+        if candidate and os.path.exists(candidate):
+            return _normalize_path(candidate)
+
+    legacy_fallback = os.path.join(MODS_DIR, 'locations')
+    return _normalize_path(legacy_fallback)
+
+
+EXTENDED_MODS_DATA = _resolve_extended_mods_data()
+
 try:
     from wepppy.nodb.base import _LEGACY_MODULE_REDIRECTS
 except Exception:  # pragma: no cover - fallback during partial imports
@@ -129,4 +160,4 @@ def __dir__():  # pragma: no cover - used for introspection
     return sorted(exported)
 
 
-__all__ = ['MODS_DIR']
+__all__ = ['MODS_DIR', 'EXTENDED_MODS_DATA']

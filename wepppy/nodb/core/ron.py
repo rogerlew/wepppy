@@ -541,8 +541,11 @@ class Ron(NoDbBase):
                     f.write(r.content)
                 baer.validate(_split(sbs_path)[-1], mode=0)
             else:
-                from wepppy.nodb.mods import MODS_DIR
-                sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
+                from wepppy.nodb.mods import MODS_DIR, EXTENDED_MODS_DATA
+                sbs_map = (
+                    sbs_map.replace('MODS_DIR', MODS_DIR)
+                    .replace('EXTENDED_MODS_DATA', EXTENDED_MODS_DATA)
+                )
 
                 # sbs_map = _join(_thisdir, sbs_map)
                 assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))

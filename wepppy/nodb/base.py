@@ -1317,11 +1317,12 @@ class NoDbBase(object):
             return default
 
     def config_get_path(self, section: str, option: str, default=None):
-        from .mods import MODS_DIR
+        from .mods import MODS_DIR, EXTENDED_MODS_DATA
         path = self.config_get_str(section, option, default)
         if path is None:
             return None
         path = path.replace('MODS_DIR', MODS_DIR)
+        path = path.replace('EXTENDED_MODS_DATA', EXTENDED_MODS_DATA)
         return path
 
     def config_get_raw(self, section: str, option: str, default=None):
