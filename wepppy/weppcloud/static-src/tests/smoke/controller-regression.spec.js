@@ -114,10 +114,13 @@ test.describe('controller regression suite', () => {
       });
 
       try {
-        await page.locator(controller.actionSelector).click();
+      await page.locator(controller.actionSelector).click();
       await expect(stacktraceLocator).toContainText(message, { timeout: 15000 });
       if (controller.expectJobHint !== false) {
         await expect(hintLocator).not.toHaveText(/^\s*$/);
+        if (controller.requireHintVisible) {
+          await expect(hintLocator).toBeVisible();
+        }
       }
       expect(intercepted).toBeTruthy();
       } finally {
@@ -163,6 +166,9 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   
   // Wait for job hint to show the job_id (proves response was processed and hint updated)
   await expect(hintLocator).toContainText(jobId, { timeout: 15000 });
+  if (controller.requireHintVisible) {
+    await expect(hintLocator).toBeVisible();
+  }
   
   await page.unroute(controller.requestUrlPattern).catch(() => {});
 
@@ -193,6 +199,9 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   // Verify hint is still visible and contains the job_id from first request
   await expect(hintLocator).toContainText(jobId);
   await expect(hintLocator).not.toHaveText(/^\s*$/);
+  if (controller.requireHintVisible) {
+    await expect(hintLocator).toBeVisible();
+  }
   
   await page.unroute(controller.requestUrlPattern).catch(() => {});
 }

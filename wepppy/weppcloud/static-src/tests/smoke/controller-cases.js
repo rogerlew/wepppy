@@ -1,3 +1,14 @@
+// NOTE: If more controllers need bespoke helpers, move these helpers into a small
+// config module so the main spec stays lean.
+const prepareSetOutletLonLat = async ({ page }) => {
+  const entryModeRadio = page.locator("#set_outlet_mode_entry");
+  if (await entryModeRadio.count()) {
+    await entryModeRadio.check({ force: true });
+  }
+  const entryField = page.locator("#input_set_outlet_entry");
+  await entryField.fill("-116.95, 46.73");
+};
+
 const controllerCases = [
   {
     name: "landuse",
@@ -43,15 +54,20 @@ const controllerCases = [
     stacktraceLocator: "#set_outlet_stacktrace_panel [data-stacktrace-body]",
     hintLocator: "#hint_set_outlet_cursor",
     workflow: "rq_job",
-    prepareAction: async ({ page }) => {
-      const entryModeRadio = page.locator("#set_outlet_mode_entry");
-      if (await entryModeRadio.count()) {
-        await entryModeRadio.check({ force: true });
-      }
-      const entryField = page.locator("#input_set_outlet_entry");
-      await entryField.fill("-116.95, 46.73");
-    },
+    prepareAction: prepareSetOutletLonLat,
     failureStatus: 200
+  },
+  {
+    name: "set_outlet_entry",
+    formSelector: "form#set_outlet_form",
+    actionSelector: "#btn_set_outlet_entry",
+    requestUrlPattern: "**/rq/api/set_outlet",
+    stacktraceLocator: "#set_outlet_stacktrace_panel [data-stacktrace-body]",
+    hintLocator: "#hint_set_outlet_cursor",
+    workflow: "rq_job",
+    prepareAction: prepareSetOutletLonLat,
+    failureStatus: 200,
+    requireHintVisible: true
   },
   {
     name: "rap_ts",

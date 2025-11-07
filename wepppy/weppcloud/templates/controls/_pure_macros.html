@@ -6,6 +6,9 @@
      TypeError at render time).
 #}
 
+{# Status/Summary/Stacktrace overrides exist but should be rare—only use when the
+   standard panels cannot express the special case. Excess overrides make the
+   macros pointless and harder to maintain. #}
 {% macro control_shell(
       form_id,
       title,

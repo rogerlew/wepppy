@@ -12,6 +12,7 @@
 | [![Stubtest](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/stubtest.yml) | Ensures Python type stubs stay in sync with runtime behavior via `stubtest`. |
 | [![CI Samurai Nightly](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/ci-samurai-nightly-ssh.yml) | Nightly self-hosted agent loop that applies fixes to tracked failures across the test suite. |
 | [![Pytest Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/pytest-coverage-nightly.yml) | 2 AM PT run executing `pytest --cov` and exporting XML coverage artifacts. |
+| [![Playwright Controllers Nightly](https://github.com/rogerlew/wepppy/actions/workflows/playwright-controllers-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/playwright-controllers-nightly.yml) | 2:15 AM PT `wctl2 run-playwright --suite controllers` regression sweep against the dev stack (job hints, stacktraces, controller health). |
 | [![NPM Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml) | 2:30 AM PT Jest run covering the `static-src` controllers with coverage reports. |
 
 
