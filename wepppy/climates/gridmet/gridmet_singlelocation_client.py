@@ -75,8 +75,11 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
     
     try:
         response_data = response.json()
-    except:
-        raise Exception(response.text)
+    except Exception as e:
+        raise Exception("Failed to parse JSON response from downscaledForecast server.\n"
+                        "URL: %s\nStatus: %s\nResponse: %s\nError: %s" % 
+                        (url, response.status_code, response.text[:500], str(e)))
+
 
     data = response_data['data'][0]
 

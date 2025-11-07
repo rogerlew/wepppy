@@ -54,8 +54,7 @@ _url_template = \
     '&lat={lat}'\
     '&lon={lng}'\
     '&positive-east-longitude=True'\
-    '&data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/'\
-    'agg_macav2metdata_{variable_name}_{model}_r1i1p1_{scenario}_CONUS_daily.nc'\
+    '&data-path=PATH_TO_DODS/agg_macav2metdata_{variable_name}_{model}_r1i1p1_{scenario}_CONUS_daily.nc'\
     '&variable={variable}'\
     '&variable-name={variable_name}'\
     '&start-date={start_date}'\
@@ -113,10 +112,17 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
     
     if r.status_code != 200:
         raise Exception("Encountered error retrieving "
-                        "from downscaledForecast server.\n%s" % url)
-        
+                        "from downscaledForecast server.\n%s\nResponse: %s" % (url, r.text))
+    
     # process returned data
-    data = r.json()['data'][0]
+    try:
+        response_data = r.json()
+    except Exception as e:
+        raise Exception("Failed to parse JSON response from downscaledForecast server.\n"
+                        "URL: %s\nStatus: %s\nResponse: %s\nError: %s" % 
+                        (url, r.status_code, r.text[:500], str(e)))
+    
+    data = response_data['data'][0]
     assert u'yyyy-mm-dd' in data
 
     df = pd.DataFrame()
