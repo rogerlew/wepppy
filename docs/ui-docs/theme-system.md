@@ -165,6 +165,12 @@ wepppy/weppcloud/
   - `--wc-focus-outline` must hold a 3:1 contrast with both focused control and surrounding surface.
 - When overrides cannot rescue a palette, ship an “Accessible” variant rather than diluting the base catalog.
 
+### Theme Lab & Metrics
+- `/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls) that the automation harness inspects. Keep this page in sync with macro updates so the rendered sample always matches production markup.
+- Run the contrast suite locally with `npm run smoke:theme-metrics` from `wepppy/weppcloud/static-src/` or through the CLI via `wctl2 run-playwright --suite theme-metrics --env local`. The harness simply hits the Theme Lab and does **not** require run provisioning, but the backend must be running so the page renders.
+- Results are written to `wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.{json,md}`. Attach the Markdown table to PRs when tweaking `theme-mapping.json` to prove contrast moved in the right direction.
+- Implementation details and expansion plan live in `docs/ui-docs/theme-metrics.spec.md`.
+
 ### Catalog Health
 | Metric | Target | Current | Notes |
 |--------|--------|---------|-------|
