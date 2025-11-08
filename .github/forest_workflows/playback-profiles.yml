@@ -1,0 +1,136 @@
+- workflow_slug: archive-us-small
+  title: US Small
+  playback_type: archive
+  profile_slug: us-small-wbt-daymet-rap-wepp
+  playback_options: []
+  schedule_pt: 05:05
+  artifact_name: us-small-profile-archive-log
+  artifact_path: telemetry/us-small-profile-archive.log
+  description: US Small
+- workflow_slug: fork-rattlesnake-undisturbify
+  title: Rattlesnake (Undisturbify)
+  playback_type: fork
+  profile_slug: rattlesnake-topaz-vanilla-wepp-watar
+  playback_options:
+  - --undisturbify
+  schedule_pt: 05:15
+  artifact_name: rattlesnake-profile-fork-log
+  artifact_path: telemetry/rattlesnake-profile-fork.log
+  description: Rattlesnake (Undisturbify)
+- workflow_slug: fork-us-small
+  title: US Small
+  playback_type: fork
+  profile_slug: us-small-wbt-daymet-rap-wepp
+  playback_options: []
+  schedule_pt: 04:55
+  artifact_name: us-small-profile-fork-log
+  artifact_path: telemetry/us-small-profile-fork.log
+  description: US Small
+- workflow_slug: run-10m-mofe
+  title: 10m MOFE
+  playback_type: run
+  profile_slug: topaz-10m-mofe
+  playback_options: []
+  schedule_pt: 03:30
+  artifact_name: ten-meter-mofe-profile-run-log
+  artifact_path: telemetry/ten-meter-mofe-profile-run.log
+  description: 10m MOFE
+- workflow_slug: run-earth-small
+  title: Earth Small
+  playback_type: run
+  profile_slug: earth-in-bc-ca-w-daymet
+  playback_options: []
+  schedule_pt: 05:25
+  artifact_name: earth-small-profile-run-log
+  artifact_path: telemetry/earth-small-profile-run.log
+  description: Earth Small
+- workflow_slug: run-europe-disturbed
+  title: Europe-Disturbed
+  playback_type: run
+  profile_slug: eu-ebos-heuristic-multiple
+  playback_options: []
+  schedule_pt: 03:40
+  artifact_name: europe-disturbed-profile-run-log
+  artifact_path: telemetry/europe-disturbed-profile-run.log
+  description: Europe-Disturbed
+- workflow_slug: run-nexrad-prism-debrisflow
+  title: NEXRAD (PRISM) DebrisFlow
+  playback_type: run
+  profile_slug: baer-cropped-wbt-nexrad-prism-rap-wepp-debrisflow
+  playback_options: []
+  schedule_pt: 04:00
+  artifact_name: nexrad-prism-debrisflow-profile-run-log
+  artifact_path: telemetry/nexrad-prism-debrisflow-profile-run.log
+  description: NEXRAD (PRISM) DebrisFlow
+- workflow_slug: run-portland-disturbed
+  title: Portland Disturbed
+  playback_type: run
+  profile_slug: small-daymet-portland
+  playback_options: []
+  schedule_pt: 03:10
+  artifact_name: portland-disturbed-profile-run-log
+  artifact_path: telemetry/portland-disturbed-profile-run.log
+  description: Portland Disturbed
+- workflow_slug: run-rattlesnake
+  title: Rattlesnake
+  playback_type: run
+  profile_slug: rattlesnake-topaz-vanilla-wepp-watar
+  playback_options: []
+  schedule_pt: 04:30
+  artifact_name: rattlesnake-profile-run-log
+  artifact_path: telemetry/rattlesnake-profile-run.log
+  description: Rattlesnake
+- workflow_slug: run-rhem
+  title: RHEM
+  playback_type: run
+  profile_slug: us-rap-rhem
+  playback_options: []
+  schedule_pt: 04:20
+  artifact_name: rhem-profile-run-log
+  artifact_path: telemetry/rhem-profile-run.log
+  description: RHEM
+- workflow_slug: run-sbs-noct
+  title: SBS NoCT
+  playback_type: run
+  profile_slug: eaton-noct-gridmet-wepp-2chaninp-watar-anu
+  playback_options: []
+  schedule_pt: 05:35
+  artifact_name: sbs-noct-profile-run-log
+  artifact_path: telemetry/sbs-noct-profile-run.log
+  description: SBS NoCT
+- workflow_slug: run-sbs-wbt-mofe
+  title: SBS WBT MOFE
+  playback_type: run
+  profile_slug: rattlesnake-wbt-fill-mofe-daymet-wepp-watar
+  playback_options: []
+  schedule_pt: 03:15
+  artifact_name: sbs-wbt-mofe-profile-run-log
+  artifact_path: telemetry/sbs-wbt-mofe-profile-run.log
+  description: SBS WBT MOFE
+- workflow_slug: run-seattle-simfire
+  title: Seattle Simfire
+  playback_type: run
+  profile_slug: seattle-simfire-future-cli
+  playback_options: []
+  schedule_pt: 03:00
+  artifact_name: seattle-simfire-profile-run-log
+  artifact_path: telemetry/seattle-simfire-profile-run.log
+  description: Seattle Simfire
+- workflow_slug: run-us-small
+  title: US Small
+  playback_type: run
+  profile_slug: us-small-wbt-daymet-rap-wepp
+  playback_options: []
+  schedule_pt: 04:45
+  artifact_name: us-small-profile-run-log
+  artifact_path: telemetry/us-small-profile-run.log
+  description: US Small
+- workflow_slug: run-wepp-reveg
+  title: WEPP Reveg
+  playback_type: run
+  profile_slug: us-reveg
+  playback_options: []
+  schedule_pt: 04:10
+  artifact_name: wepp-reveg-profile-run-log
+  artifact_path: telemetry/wepp-reveg-profile-run.log
+  description: WEPP Reveg
