@@ -1,0 +1,25 @@
+name: NPM Coverage Nightly
+on:
+  schedule:
+    - cron: 30 9 * * *
+  workflow_dispatch:
+jobs:
+  npm-coverage:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 60
+    steps:
+      - name: Run npm coverage suite
+        run: |
+          set -euo pipefail
+          scripts/run-npm-coverage.sh
+      - name: Upload npm coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-coverage
+          path: coverage/npm
+          if-no-files-found: warn
