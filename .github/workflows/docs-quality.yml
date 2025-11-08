@@ -37,16 +37,17 @@ jobs:
           clean: false # root-owned docker artifacts block git clean on self-hosted runner
 
       - name: Ensure docker/.env exists
+        shell: bash
         run: |
           set -euo pipefail
           if [ ! -f docker/.env ]; then
-            cat > docker/.env <<'EOF'
+            cat <<'ENVFILE' > docker/.env
 UID=1000
 GID=993
 POSTGRES_PASSWORD=localdev
 SECRET_KEY=localdev
 SECURITY_PASSWORD_SALT=localdev
-EOF
+ENVFILE
           fi
 
       - name: Install wctl shim
