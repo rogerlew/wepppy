@@ -1,0 +1,34 @@
+name: Playwright Controllers Nightly
+on:
+  schedule:
+  - cron: 15 10 * * *
+  workflow_dispatch: null
+jobs:
+  playwright-controllers:
+    runs-on:
+    - self-hosted
+    - Linux
+    - X64
+    - homelab
+    timeout-minutes: 40
+    env:
+      PLAYWRIGHT_REPORT_PATH: test-results/playwright-controller-report
+    steps:
+    - name: Install npm dependencies
+      run: |
+        set -euo pipefail
+        wctl run-npm install
+    - name: Run Playwright controller suite
+      run: |
+        set -euo pipefail
+        wctl run-playwright \
+          --suite controllers \
+          --workers 1 \
+          --report-path "$PLAYWRIGHT_REPORT_PATH"
+    - name: Upload Playwright controller report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-controllers-report
+        path: wepppy/weppcloud/static-src/${{ env.PLAYWRIGHT_REPORT_PATH }}
+        if-no-files-found: warn

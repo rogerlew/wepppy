@@ -1,0 +1,45 @@
+name: Profile Fork - Rattlesnake (Undisturbify)
+on:
+  schedule:
+  - cron: 15 12 * * *
+  workflow_dispatch: null
+jobs:
+  rattlesnake-profile:
+    runs-on:
+    - self-hosted
+    - Linux
+    - X64
+    - homelab
+    timeout-minutes: 120
+    env:
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+    - name: Health check WEPPcloud service
+      run: |
+        set -euo pipefail
+        deadline=$((SECONDS + 300))
+        while true; do
+          if curl -fsS https://wc.bearhive.duckdns.org/health >/dev/null; then
+            echo "WEPPcloud service is healthy."
+            break
+          fi
+          if [ "${SECONDS}" -ge "${deadline}" ]; then
+            echo "Timed out waiting for WEPPcloud service to become healthy." >&2
+            exit 1
+          fi
+          sleep 5
+        done
+    - name: Fork Rattlesnake profile (Undisturbify)
+      run: |
+        set -euo pipefail
+        mkdir -p telemetry
+        wctl run-fork-profile rattlesnake-topaz-vanilla-wepp-watar --undisturbify \
+          2>&1 | tee telemetry/rattlesnake-profile-fork.log
+    - name: Upload profile playback log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: rattlesnake-profile-fork-log
+        path: telemetry/rattlesnake-profile-fork.log
+        if-no-files-found: warn

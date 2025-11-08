@@ -1,0 +1,36 @@
+name: NPM Tests
+on:
+  pull_request:
+    paths:
+    - wepppy/weppcloud/static-src/**
+    - wepppy/weppcloud/controllers_js/**
+    - package.json
+    - package-lock.json
+    - .github/workflows/npm-tests.yml
+  push:
+    branches:
+    - master
+    paths:
+    - wepppy/weppcloud/static-src/**
+    - wepppy/weppcloud/controllers_js/**
+    - package.json
+    - package-lock.json
+    - .github/workflows/npm-tests.yml
+  workflow_dispatch: null
+jobs:
+  npm-tests:
+    runs-on:
+    - self-hosted
+    - Linux
+    - X64
+    - homelab
+    timeout-minutes: 20
+    steps:
+    - name: Install npm dependencies
+      run: |
+        set -euo pipefail
+        wctl run-npm install
+    - name: Run npm tests
+      run: |
+        set -euo pipefail
+        wctl run-npm test

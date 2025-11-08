@@ -1,0 +1,40 @@
+name: Stubtest
+on:
+  pull_request:
+    paths:
+    - wepppy/**/*.py
+    - wepppy/**/*.pyi
+    - stubs/**/*.pyi
+    - tools/sync_stubs.py
+    - .github/workflows/stubtest.yml
+  push:
+    branches:
+    - master
+    paths:
+    - wepppy/**/*.py
+    - wepppy/**/*.pyi
+    - stubs/**/*.pyi
+    - tools/sync_stubs.py
+    - .github/workflows/stubtest.yml
+  workflow_dispatch: null
+jobs:
+  stubtest:
+    runs-on:
+    - self-hosted
+    - Linux
+    - X64
+    - homelab
+    timeout-minutes: 20
+    steps:
+    - name: Run stubtest suite
+      run: |
+        set -euo pipefail
+        wctl run-stubtest
+    - name: Check pytest stubs completeness
+      run: |
+        set -euo pipefail
+        wctl check-test-stubs
+    - name: Check pytest isolation
+      run: |
+        set -euo pipefail
+        wctl check-test-isolation
