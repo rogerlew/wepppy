@@ -41,13 +41,13 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f docker/.env ]; then
-            cat <<'ENVFILE' > docker/.env
-            UID=1000
-            GID=993
-            POSTGRES_PASSWORD=localdev
-            SECRET_KEY=localdev
-            SECURITY_PASSWORD_SALT=localdev
-            ENVFILE
+            printf "%s\n" \
+              "UID=1000" \
+              "GID=993" \
+              "POSTGRES_PASSWORD=localdev" \
+              "SECRET_KEY=localdev" \
+              "SECURITY_PASSWORD_SALT=localdev" \
+              > docker/.env
           fi
       - name: Install wctl shim
         env:
