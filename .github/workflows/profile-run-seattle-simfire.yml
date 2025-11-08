@@ -1,0 +1,74 @@
+name: Profile Run - Seattle Simfire
+
+on:
+  schedule:
+    # 03:00 Pacific == 10:00 UTC during daylight saving; adjust if the target window changes.
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+
+jobs:
+  seattle-simfire-profile:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 120
+    env:
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Verify wctl tooling
+        run: |
+          set -euo pipefail
+          if ! command -v wctl >/dev/null; then
+            echo "wctl command not found on the runner. Install wctl before rerunning this workflow." >&2
+            exit 127
+          fi
+
+      - name: Health check WEPPcloud service
+        run: |
+          set -euo pipefail
+          deadline=$((SECONDS + 300))
+          while true; do
+            if curl -fsS https://wc.bearhive.duckdns.org/health >/dev/null; then
+              echo "WEPPcloud service is healthy."
+              break
+            fi
+            if [ "${SECONDS}" -ge "${deadline}" ]; then
+              echo "Timed out waiting for WEPPcloud service to become healthy." >&2
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Run Seattle Simfire profile
+        run: |
+          set -euo pipefail
+          mkdir -p telemetry
+          wctl run-test-profile seattle-simfire-future-cli 2>&1 | tee telemetry/seattle-simfire-profile-run.log
+
+      - name: Upload profile playback log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seattle-simfire-profile-run-log
+          path: telemetry/seattle-simfire-profile-run.log
+          if-no-files-found: warn
+
+      - name: Remove redis data directory
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
+            echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
+            sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
+          else
+            echo "Redis data directory not present; nothing to remove."
+          fi

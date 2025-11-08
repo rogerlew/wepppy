@@ -20,6 +20,7 @@
 
 | Badge / Run Time (PT) | Description / Profile Name |
 | --------------------- | -------------------------- |
+| [![Profile Run - Seattle Simfire](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-seattle-simfire.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-seattle-simfire.yml)<br>03:00 AM | Seattle Simfire with Future Climate (NMME)<br>`seattle-simfire-future-cli` |
 | [![Profile Run - Portland-Disturbed](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-portland-disturbed.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-portland-disturbed.yml)<br>03:10 AM | Small Portland with Daymet<br>`small-daymet-portland` |
 | [![Profile Run - SBS WBT MOFE](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-wbt-mofe.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-wbt-mofe.yml)<br>03:15 AM | Rattlesnake SBS with WBT (fill) Multiple OFEs, DAYMET, WEPP, WATAR (Anu)<br>`rattlesnake-wbt-fill-mofe-daymet-wepp-watar` |
 | [![Profile Run - 10m MOFE](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-10m-mofe.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-10m-mofe.yml)<br>03:30 AM | Small Undisturbed US Watershed with TOPAZ Delineation and Multiple OFEs<br>`topaz-10m-mofe` |
