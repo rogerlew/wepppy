@@ -9,9 +9,12 @@ if str(ROOT) not in sys.path:
 
 from types import SimpleNamespace
 
-from typer.testing import CliRunner
+from ._typer import CliRunner, TYPER_AVAILABLE
 
-from tools.wctl2.__main__ import app, run
+if TYPER_AVAILABLE:
+    from tools.wctl2.__main__ import app, run
+else:  # pragma: no cover - dependency missing
+    app = run = None  # type: ignore[assignment]
 
 
 class _StreamResponse:

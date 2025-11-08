@@ -4,9 +4,14 @@ import sys
 from typing import List, Sequence, Tuple
 
 import pytest
-from typer.testing import CliRunner
+from ._typer import CliRunner, TYPER_AVAILABLE
 
-from tools.wctl2.__main__ import app, run
+pytestmark = pytest.mark.skipif(not TYPER_AVAILABLE, reason="typer is required for wctl2 CLI smoke tests")
+
+if TYPER_AVAILABLE:
+    from tools.wctl2.__main__ import app, run
+else:  # pragma: no cover - dependency missing
+    app = run = None  # type: ignore[assignment]
 
 
 def test_run_npm_help(temp_project) -> None:

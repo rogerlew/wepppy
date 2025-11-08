@@ -5,12 +5,21 @@ from types import SimpleNamespace
 from typing import Any, Dict, List
 
 import pytest
-import typer
 import urllib.error
-from typer.testing import CliRunner
 
-from tools.wctl2.__main__ import app
-from tools.wctl2.commands import playwright as playwright_cmd
+from ._typer import CliRunner, TYPER_AVAILABLE, typer
+
+pytestmark = pytest.mark.skipif(
+    not TYPER_AVAILABLE,
+    reason="typer is required for wctl2 playwright command tests",
+)
+
+if TYPER_AVAILABLE:
+    from tools.wctl2.__main__ import app
+    from tools.wctl2.commands import playwright as playwright_cmd
+else:  # pragma: no cover - dependency missing
+    app = None  # type: ignore[assignment]
+    playwright_cmd = None  # type: ignore[assignment]
 
 
 class _DummyResult:

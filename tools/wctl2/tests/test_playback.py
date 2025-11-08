@@ -3,9 +3,14 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 import pytest
-from typer.testing import CliRunner
+from ._typer import CliRunner, TYPER_AVAILABLE
 
-from tools.wctl2.__main__ import app
+pytestmark = pytest.mark.skipif(not TYPER_AVAILABLE, reason="typer is required for wctl2 CLI playback tests")
+
+if TYPER_AVAILABLE:
+    from tools.wctl2.__main__ import app
+else:  # pragma: no cover - dependency missing
+    app = None  # type: ignore[assignment]
 
 
 class _StreamResponse:
