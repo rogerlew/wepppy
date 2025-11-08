@@ -66,6 +66,7 @@ from wepppy.nodb.core import *
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
+from .. import MODS_DIR, EXTENDED_MODS_DATA
 
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 
@@ -83,6 +84,16 @@ gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
+
+
+def _resolve_external_mods_path(path: Optional[str]) -> Optional[str]:
+    """Expand MODS_DIR/EXTENDED_MODS_DATA placeholders for fallback callers."""
+    if not path:
+        return path
+    return (
+        path.replace('MODS_DIR', MODS_DIR)
+        .replace('EXTENDED_MODS_DATA', EXTENDED_MODS_DATA)
+    )
 
 
 disturbed_class_aliases: Dict[str, str] = {
@@ -255,7 +266,7 @@ class Disturbed(NoDbBase):
         _lookup_path = self.config_get_path('disturbed', 'land_soil_lookup', None)
         if _lookup_path is None:
             _lookup_path = _join(_data_dir, 'disturbed_land_soil_lookup.csv')
-        return _lookup_path
+        return _resolve_external_mods_path(_lookup_path)
 
     def reset_land_soil_lookup(self) -> None:
         _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')

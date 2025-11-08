@@ -17,6 +17,29 @@ from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 
+
+def _resolve_extended_mods_data_root() -> str:
+    """Normalise EXTENDED_MODS_DATA for playback sandboxes."""
+    override = os.environ.get("EXTENDED_MODS_DATA")
+    if override:
+        return os.path.abspath(os.path.expanduser(override))
+
+    candidates = (
+        "/wc1/geodata/extended_mods_data",
+        "/geodata/extended_mods_data",
+    )
+    for candidate in candidates:
+        if os.path.isdir(candidate):
+            return candidate
+
+    repo_locations = Path(__file__).resolve().parents[2] / "wepppy" / "nodb" / "mods" / "locations"
+    return str(repo_locations)
+
+
+_EXTENDED_MODS_DATA_ROOT = _resolve_extended_mods_data_root()
+os.environ.setdefault("EXTENDED_MODS_DATA", _EXTENDED_MODS_DATA_ROOT)
+
+
 from wepppy.nodb.base import clear_locks
 from wepppy.nodb.core import Ron
 from wepppy.profile_recorder.playback import PlaybackSession

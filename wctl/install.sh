@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 WCTL_SCRIPT="${SCRIPT_DIR}/wctl.sh"
 SYMLINK_PATH="${WCTL_SYMLINK_PATH:-/usr/local/bin/wctl}"
+VENDOR_DIR="${PROJECT_DIR}/.wctl/vendor"
 
 usage() {
   cat <<'USAGE' >&2
@@ -43,6 +44,30 @@ case "${ENVIRONMENT}" in
     ;;
 esac
 
+mkdir -p "${VENDOR_DIR}"
+
+ensure_python_deps() {
+  python3 - "$VENDOR_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+vendor = Path(sys.argv[1])
+sys.path.insert(0, str(vendor))
+
+try:
+    import typer  # noqa: F401
+    import click  # noqa: F401
+except ImportError:
+    sys.exit(1)
+sys.exit(0)
+PY
+}
+
+if ! ensure_python_deps; then
+  echo "Installing local Typer/Click dependencies for wctl..."
+  python3 -m pip install --upgrade --target "${VENDOR_DIR}" "typer>=0.12,<0.13" "click>=8.1,<8.2" >/dev/null
+fi
+
 cat > "${WCTL_SCRIPT}" <<'EOF_SCRIPT'
 #!/bin/bash
 
@@ -65,13 +90,14 @@ SCRIPT_PATH="$(resolve_realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 COMPOSE_FILE_RELATIVE="__COMPOSE_FILE_RELATIVE__"
+VENDOR_DIR="__WCTL_VENDOR_DIR__"
 
 cd "${PROJECT_DIR}"
 
 if [[ -n "${PYTHONPATH:-}" ]]; then
-  export PYTHONPATH="${PROJECT_DIR}:${PROJECT_DIR}/tools:${PYTHONPATH}"
+  export PYTHONPATH="${PROJECT_DIR}:${PROJECT_DIR}/tools:${VENDOR_DIR}:${PYTHONPATH}"
 else
-  export PYTHONPATH="${PROJECT_DIR}:${PROJECT_DIR}/tools"
+  export PYTHONPATH="${PROJECT_DIR}:${PROJECT_DIR}/tools:${VENDOR_DIR}"
 fi
 
 export WCTL_COMPOSE_FILE="${COMPOSE_FILE_RELATIVE}"
@@ -79,14 +105,16 @@ export WCTL_COMPOSE_FILE="${COMPOSE_FILE_RELATIVE}"
 python3 -m wctl2 "$@"
 EOF_SCRIPT
 
-python3 - "${WCTL_SCRIPT}" "${COMPOSE_RELATIVE_PATH}" <<'PY'
+python3 - "${WCTL_SCRIPT}" "${COMPOSE_RELATIVE_PATH}" "${VENDOR_DIR}" <<'PY'
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
 compose_relative = sys.argv[2]
+vendor_dir = sys.argv[3]
 text = path.read_text()
 text = text.replace("__COMPOSE_FILE_RELATIVE__", compose_relative)
+text = text.replace("__WCTL_VENDOR_DIR__", vendor_dir)
 path.write_text(text)
 PY
 
