@@ -402,9 +402,9 @@ class TCROpts(object):
             return '\n'
 
 
-def prep_soil(args: Tuple[str, str, str, Optional[float], bool, float, bool, float]) -> Tuple[str, float]:
+def prep_soil(args: Tuple[str, str, str, Optional[float], Optional[Dict[str, Any]], float, bool, float]) -> Tuple[str, float]:
     t0 = time.time()
-    # str,    str,    str,    float,  bool,               float,       bool,       float
+    # str,    str,    str,    float,  dict|None,          float,       bool,       float
     topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
 
     soilu = WeppSoilUtil(src_fn)  # internally uses rosetta
@@ -1591,15 +1591,20 @@ class Wepp(NoDbBase):
             if kslast_map is not None:
                 lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
                 try:
-                    _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
-                    modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
+                    sampled_kslast = kslast_map.get_location_info(lng, lat, method='nearest')
                 except RDIOutOfBoundsException:
-                    _kslast = None
+                    sampled_kslast = None
 
-                if not isfloat(_kslast):
-                    _kslast = kslast if kslast is not None else None
-                elif _kslast <= 0.0:
-                    _kslast = kslast if kslast is not None else None
+                if isfloat(sampled_kslast) and float(sampled_kslast) > 0.0:
+                    _kslast = float(sampled_kslast)
+                    modify_kslast_pars = dict(
+                        map_fn=kslast_map_fn,
+                        lng=lng,
+                        lat=lat,
+                        map_value=_kslast,
+                    )
+                elif kslast is not None:
+                    _kslast = kslast
             elif kslast is not None:
                 _kslast = kslast
 

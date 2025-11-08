@@ -7,10 +7,10 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: Profile Run - SBS WBT MOFE
-- **Profile name**: rattlesnake-wbt-fill-mofe-daymet-wepp-watar
-- **Description**: "Rattlesnake SBS with WBT (fill) Multiple OFEs, DAYMET, WEPP, WATAR (Anu)"
-- **Run time**: next available 15-minute slot before existing workflows
+- **Title**: Profile Run - Portland-Disturbed
+- **Profile name**: small-daymet-portland
+- **Description**: "Small Portland with Daymet"
+- **Run time**: next available 10-minute slot before existing workflows
 
 Tasks:
 1. Create `.github/workflows/profile-run-[slug].yml` based on existing profile workflow patterns and the title (not the profile name)
