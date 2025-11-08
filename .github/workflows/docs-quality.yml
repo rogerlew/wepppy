@@ -65,10 +65,10 @@ jobs:
           )
 
           status=0
-          "wctl doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
+          "/usr/local/bin/wctl doc-lint "${TARGETS[@]}" --format sarif > docs-lint.sarif || status=$?
 
           # Also generate JSON for artifact (don't fail on this)
-          "wctl doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
+          "/usr/local/bin/wctl doc-lint "${TARGETS[@]}" --format json > docs-lint.json || true
 
           # Ensure SARIF exists (fallback placeholder when command fails before writing)
           if [ ! -s docs-lint.sarif ]; then
@@ -135,7 +135,7 @@ jobs:
       - name: Run markdown-doc benchmarks
         run: |
           set -euo pipefail
-          "wctl doc-bench --path docs --warmup 0 --iterations 1"
+          "/usr/local/bin/wctl doc-bench --path docs --warmup 0 --iterations 1"
 
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
