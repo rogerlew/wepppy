@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  RUNNER_DOCKER_ENV: /home/workdir/wepppy/docker/.env
+  RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
 
 jobs:
   pytest-coverage:
@@ -38,6 +38,7 @@ jobs:
               "SECURITY_PASSWORD_SALT=localdev" \
               > docker/.env
           fi
+          
       - name: Install wctl shim
         env:
           WCTL_SYMLINK_PATH: "${{ github.workspace }}/.wctl/bin/wctl"
