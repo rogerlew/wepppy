@@ -7,9 +7,9 @@ Use this template to add a new nightly profile test workflow and update the read
 ```
 Add a new profile run workflow with the following details:
 
-- **Title**: Profile Run - Portland-Disturbed
-- **Profile name**: small-daymet-portland
-- **Description**: "Small Portland with Daymet"
+- **Title**: Profile Run - Seattle Simfire
+- **Profile name**: seattle-simfire-future-cli
+- **Description**: "Seattle Simfire with Future Climate (NMME)"
 - **Run time**: next available 10-minute slot before existing workflows
 
 Tasks:
