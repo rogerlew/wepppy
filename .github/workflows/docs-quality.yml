@@ -36,6 +36,9 @@ jobs:
         with:
           clean: false # root-owned docker artifacts block git clean on self-hosted runner
 
+      - name: Install wctl shim
+        run: ./wctl/install.sh dev
+
       - name: Verify markdown-doc tooling
         run: |
           set -euo pipefail
