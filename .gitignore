@@ -26,6 +26,7 @@ out
 .mypy_cache/
 _legacy_weppcloud_controls/
 wepppy/soils/ssurgo/tests/testsoils/
+wepppy/wepp/management/tests/
 .coverage
 coverage/
 
