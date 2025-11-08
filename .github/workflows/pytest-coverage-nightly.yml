@@ -5,6 +5,9 @@ on:
     - cron: "0 9 * * *"
   workflow_dispatch:
 
+env:
+  RUNNER_DOCKER_ENV: /home/workdir/wepppy/docker/.env
+
 jobs:
   pytest-coverage:
     runs-on:
@@ -22,6 +25,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [ -n "${RUNNER_DOCKER_ENV:-}" ] && [ -f "${RUNNER_DOCKER_ENV}" ]; then
+            cp "${RUNNER_DOCKER_ENV}" docker/.env
+            exit 0
+          fi
           if [ ! -f docker/.env ]; then
             printf "%s\n" \
               "UID=1000" \
@@ -31,7 +38,6 @@ jobs:
               "SECURITY_PASSWORD_SALT=localdev" \
               > docker/.env
           fi
-
       - name: Install wctl shim
         env:
           WCTL_SYMLINK_PATH: "${{ github.workspace }}/.wctl/bin/wctl"
