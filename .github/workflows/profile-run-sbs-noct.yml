@@ -24,13 +24,11 @@ jobs:
         with:
           clean: false
 
-      - name: Verify wctl tooling
+      - name: Install wctl shim
         run: |
           set -euo pipefail
-          if ! command -v wctl >/dev/null; then
-            echo "wctl command not found on the runner. Install wctl before rerunning this workflow." >&2
-            exit 127
-          fi
+          chmod +x wctl/install.sh
+          ./wctl/install.sh dev
 
       - name: Health check WEPPcloud service
         run: |

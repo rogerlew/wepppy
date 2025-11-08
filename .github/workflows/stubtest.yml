@@ -34,13 +34,11 @@ jobs:
         with:
           clean: false # avoid git clean hitting root-owned artifacts on the runner
 
-      - name: Verify wctl tooling
+      - name: Install wctl shim
         run: |
           set -euo pipefail
-          if ! command -v wctl >/dev/null; then
-            echo "wctl command not found on the runner. Install wctl (see docs/work-packages/20251025_markdown_doc_toolkit/)." >&2
-            exit 127
-          fi
+          chmod +x wctl/install.sh
+          ./wctl/install.sh dev
 
       - name: Run stubtest suite
         run: |
