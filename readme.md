@@ -17,11 +17,10 @@
 
 
 ### Dev Server Nightly Profile Tests
-
 | Badge / Run Time (PT) | Description / Profile Name |
 | --------------------- | -------------------------- |
 | [![Profile Run - Seattle Simfire](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-seattle-simfire.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-seattle-simfire.yml)<br>03:00 AM | Seattle Simfire with Future Climate (NMME)<br>`seattle-simfire-future-cli` |
-| [![Profile Run - Portland-Disturbed](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-portland-disturbed.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-portland-disturbed.yml)<br>03:10 AM | Small Portland with Daymet<br>`small-daymet-portland` |
+| [![Profile Run - Portland Disturbed](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-portland-disturbed.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-portland-disturbed.yml)<br>03:10 AM | Small Portland with Daymet<br>`small-daymet-portland` |
 | [![Profile Run - SBS WBT MOFE](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-wbt-mofe.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-wbt-mofe.yml)<br>03:15 AM | Rattlesnake SBS with WBT (fill) Multiple OFEs, DAYMET, WEPP, WATAR (Anu)<br>`rattlesnake-wbt-fill-mofe-daymet-wepp-watar` |
 | [![Profile Run - 10m MOFE](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-10m-mofe.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-10m-mofe.yml)<br>03:30 AM | Small Undisturbed US Watershed with TOPAZ Delineation and Multiple OFEs<br>`topaz-10m-mofe` |
 | [![Profile Run - Europe-Disturbed](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-europe-disturbed.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-europe-disturbed.yml)<br>03:40 AM | Europe with eu-disturbed config and E-OBS multiple climates<br>`eu-ebos-heuristic-multiple` |
@@ -35,9 +34,6 @@
 | [![Profile Fork - Rattlesnake (Undisturbify)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-fork-rattlesnake-undisturbify.yml)<br>05:15 AM | Undisturbify fork test of Rattlesnake<br>`rattlesnake-topaz-vanilla-wepp-watar` |
 | [![Profile Run - Earth Small](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-earth-small.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-earth-small.yml)<br>05:25 AM | Earth OpenTopography API with ISRIC soil building, DAYMET in Canada, GHCN station DB<br>`earth-in-bc-ca-w-daymet` |
 | [![Profile Run - SBS NoCT](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-noct.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/profile-run-sbs-noct.yml)<br>05:35 AM | Eaton Fire (no CT), GRIDMET, WEPP, 2 channels of interest, WATAR (Anurag)<br>`eaton-noct-gridmet-wepp-2chaninp-watar-anu` |
-
-
-
 ## Overview
 
 wepppy is the core library powering **WEPPcloud**, automating Water Erosion Prediction Project (WEPP) simulations, wildfire response analytics, and watershed-scale geospatial preprocessing. The system glues together legacy FORTRAN 77 executables, modern Python services, and Rust-accelerated tooling to deliver repeatable, high-throughput erosion and hydrology simulations for fire teams, land managers, and research scientists.

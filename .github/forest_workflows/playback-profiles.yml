@@ -6,7 +6,7 @@
   schedule_pt: 05:05
   artifact_name: us-small-profile-archive-log
   artifact_path: telemetry/us-small-profile-archive.log
-  description: US Small
+  description: Archive test of the US Small Watershed
 - workflow_slug: fork-rattlesnake-undisturbify
   title: Rattlesnake (Undisturbify)
   playback_type: fork
@@ -16,7 +16,7 @@
   schedule_pt: 05:15
   artifact_name: rattlesnake-profile-fork-log
   artifact_path: telemetry/rattlesnake-profile-fork.log
-  description: Rattlesnake (Undisturbify)
+  description: Undisturbify fork test of Rattlesnake
 - workflow_slug: fork-us-small
   title: US Small
   playback_type: fork
@@ -25,7 +25,7 @@
   schedule_pt: 04:55
   artifact_name: us-small-profile-fork-log
   artifact_path: telemetry/us-small-profile-fork.log
-  description: US Small
+  description: Fork test of the US Small Watershed
 - workflow_slug: run-10m-mofe
   title: 10m MOFE
   playback_type: run
@@ -34,7 +34,8 @@
   schedule_pt: 03:30
   artifact_name: ten-meter-mofe-profile-run-log
   artifact_path: telemetry/ten-meter-mofe-profile-run.log
-  description: 10m MOFE
+  description: Small Undisturbed US Watershed with TOPAZ Delineation and Multiple
+    OFEs
 - workflow_slug: run-earth-small
   title: Earth Small
   playback_type: run
@@ -43,7 +44,8 @@
   schedule_pt: 05:25
   artifact_name: earth-small-profile-run-log
   artifact_path: telemetry/earth-small-profile-run.log
-  description: Earth Small
+  description: Earth OpenTopography API with ISRIC soil building, DAYMET in Canada,
+    GHCN station DB
 - workflow_slug: run-europe-disturbed
   title: Europe-Disturbed
   playback_type: run
@@ -52,7 +54,7 @@
   schedule_pt: 03:40
   artifact_name: europe-disturbed-profile-run-log
   artifact_path: telemetry/europe-disturbed-profile-run.log
-  description: Europe-Disturbed
+  description: Europe with eu-disturbed config and E-OBS multiple climates
 - workflow_slug: run-nexrad-prism-debrisflow
   title: NEXRAD (PRISM) DebrisFlow
   playback_type: run
@@ -61,7 +63,7 @@
   schedule_pt: 04:00
   artifact_name: nexrad-prism-debrisflow-profile-run-log
   artifact_path: telemetry/nexrad-prism-debrisflow-profile-run.log
-  description: NEXRAD (PRISM) DebrisFlow
+  description: Cameron Peak (baer.cropped.tif) WBT NEXRAD, RAP, WEPP, DebrisFlow
 - workflow_slug: run-portland-disturbed
   title: Portland Disturbed
   playback_type: run
@@ -70,7 +72,7 @@
   schedule_pt: 03:10
   artifact_name: portland-disturbed-profile-run-log
   artifact_path: telemetry/portland-disturbed-profile-run.log
-  description: Portland Disturbed
+  description: Small Portland with Daymet
 - workflow_slug: run-rattlesnake
   title: Rattlesnake
   playback_type: run
@@ -79,7 +81,8 @@
   schedule_pt: 04:30
   artifact_name: rattlesnake-profile-run-log
   artifact_path: telemetry/rattlesnake-profile-run.log
-  description: Rattlesnake
+  description: Playback test of Rattlesnake - TOPAZ, Vanilla Cligent, WEPP, WATAR
+    (Alex)
 - workflow_slug: run-rhem
   title: RHEM
   playback_type: run
@@ -88,7 +91,7 @@
   schedule_pt: 04:20
   artifact_name: rhem-profile-run-log
   artifact_path: telemetry/rhem-profile-run.log
-  description: RHEM
+  description: Small US RHEM run with rangeland-cover from RAP
 - workflow_slug: run-sbs-noct
   title: SBS NoCT
   playback_type: run
@@ -97,7 +100,7 @@
   schedule_pt: 05:35
   artifact_name: sbs-noct-profile-run-log
   artifact_path: telemetry/sbs-noct-profile-run.log
-  description: SBS NoCT
+  description: Eaton Fire (no CT), GRIDMET, WEPP, 2 channels of interest, WATAR (Anurag)
 - workflow_slug: run-sbs-wbt-mofe
   title: SBS WBT MOFE
   playback_type: run
@@ -106,7 +109,8 @@
   schedule_pt: 03:15
   artifact_name: sbs-wbt-mofe-profile-run-log
   artifact_path: telemetry/sbs-wbt-mofe-profile-run.log
-  description: SBS WBT MOFE
+  description: Rattlesnake SBS with WBT (fill) Multiple OFEs, DAYMET, WEPP, WATAR
+    (Anu)
 - workflow_slug: run-seattle-simfire
   title: Seattle Simfire
   playback_type: run
@@ -115,7 +119,7 @@
   schedule_pt: 03:00
   artifact_name: seattle-simfire-profile-run-log
   artifact_path: telemetry/seattle-simfire-profile-run.log
-  description: Seattle Simfire
+  description: Seattle Simfire with Future Climate (NMME)
 - workflow_slug: run-us-small
   title: US Small
   playback_type: run
@@ -124,7 +128,7 @@
   schedule_pt: 04:45
   artifact_name: us-small-profile-run-log
   artifact_path: telemetry/us-small-profile-run.log
-  description: US Small
+  description: Playback test of the US Small Watershed (WBT, Daymet RAP, WEPP)
 - workflow_slug: run-wepp-reveg
   title: WEPP Reveg
   playback_type: run
@@ -133,4 +137,4 @@
   schedule_pt: 04:10
   artifact_name: wepp-reveg-profile-run-log
   artifact_path: telemetry/wepp-reveg-profile-run.log
-  description: WEPP Reveg
+  description: Small US WEPP Reveg run with DAYMET climate

@@ -6,9 +6,12 @@ import argparse
 import copy
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import yaml
+import subprocess
+import tempfile
+import re
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -86,9 +89,9 @@ def _pt_to_utc_cron(pt_time: str, offset: int = 7) -> str:
     return f"{minute:02d} {utc_hour:02d} * * *"
 
 
-def _playback_specs() -> List[tuple[str, Dict[str, Any]]]:
+def _playback_specs() -> tuple[List[tuple[str, Dict[str, Any]]], List[Dict[str, Any]]]:
     if not PLAYBACK_FILE.exists():
-        return []
+        return [], []
     entries = load_yaml(PLAYBACK_FILE) or []
     specs: List[tuple[str, Dict[str, Any]]] = []
     for entry in entries:
@@ -167,7 +170,84 @@ def _playback_specs() -> List[tuple[str, Dict[str, Any]]]:
             "jobs": {job_name: job},
         }
         specs.append((f"profile-{workflow_slug}.yml", spec))
-    return specs
+    return specs, entries
+
+
+def _format_time_display(pt_time: str) -> str:
+    hour, minute = map(int, pt_time.split(":"))
+    suffix = "AM"
+    if hour >= 12:
+        suffix = "PM"
+    display_hour = hour % 12 or 12
+    return f"{display_hour:02d}:{minute:02d} {suffix}"
+
+
+def _generate_profile_table(entries: List[Dict[str, Any]]) -> str:
+    sorted_entries = sorted(entries, key=lambda e: e["schedule_pt"])
+    lines = [
+        "| Badge / Run Time (PT) | Description / Profile Name |",
+        "| --------------------- | -------------------------- |",
+    ]
+    for entry in sorted_entries:
+        workflow_slug = entry["workflow_slug"]
+        playback_type = entry["playback_type"]
+        title = entry["title"]
+        description = entry.get("description", title)
+        profile_slug = entry["profile_slug"]
+        display_time = _format_time_display(entry["schedule_pt"])
+        base_url = (
+            f"https://github.com/rogerlew/wepppy/actions/workflows/profile-{workflow_slug}.yml"
+        )
+        badge_title = f"Profile {playback_type.capitalize()} - {title}"
+        badge_cell = f"[![{badge_title}]({base_url}/badge.svg)]({base_url})<br>{display_time}"
+        desc_cell = f"{description}<br>`{profile_slug}`"
+        lines.append(f"| {badge_cell} | {desc_cell} |")
+    return "\n".join(lines) + "\n"
+
+
+def _extract_readme_section(text: str) -> str:
+    pattern = re.compile(
+        r"(### Dev Server Nightly Profile Tests\s*\n)(.*?)(\n## |\Z)",
+        re.S,
+    )
+    match = pattern.search(text)
+    if not match:
+        raise RuntimeError("Dev Server Nightly Profile Tests section not found in readme.md")
+    return match.group(2).strip()
+
+
+def _update_readme_table(entries: List[Dict[str, Any]], check: bool) -> bool:
+    table_text = _generate_profile_table(entries)
+    readme_path = REPO_ROOT / "readme.md"
+    readme_text = readme_path.read_text(encoding="utf-8")
+    current_section = _extract_readme_section(readme_text)
+    normalized_current = "\n".join(line.rstrip() for line in current_section.splitlines()).strip()
+    normalized_new = "\n".join(line.rstrip() for line in table_text.splitlines()).strip()
+    if normalized_current == normalized_new:
+        return True
+    if check:
+        print("Dev Server Nightly Profile Tests table is out of date.", file=sys.stderr)
+        return False
+    with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tmp:
+        tmp.write(table_text)
+        tmp_path = tmp.name
+    try:
+        subprocess.run(
+            [
+                "markdown-edit",
+                str(readme_path),
+                "replace",
+                "Dev Server Nightly Profile Tests",
+                "--with",
+                tmp_path,
+                "--keep-heading",
+                "--quiet",
+            ],
+            check=True,
+        )
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+    return True
 
 
 def main() -> int:
@@ -196,7 +276,8 @@ def main() -> int:
 
     dirty = False
     spec_entries = [(path.name, load_yaml(path)) for path in spec_files]
-    spec_entries.extend(_playback_specs())
+    playback_pairs, playback_entries = _playback_specs()
+    spec_entries.extend(playback_pairs)
 
     for file_name, spec in spec_entries:
         generated = build_workflow(spec, bootstrap)
@@ -209,6 +290,12 @@ def main() -> int:
             continue
         write_workflow(target_path, generated)
         print(f"Wrote {target_path}")
+
+    if "playback_entries" not in locals():
+        playback_entries = []
+    if playback_entries:
+        if not _update_readme_table(playback_entries, args.check):
+            dirty = True
 
     if args.check and dirty:
         return 1
