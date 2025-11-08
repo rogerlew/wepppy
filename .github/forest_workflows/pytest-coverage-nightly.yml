@@ -1,5 +1,5 @@
 name: Pytest Coverage Nightly
-true:
+on:
   schedule:
   - cron: 0 9 * * *
   workflow_dispatch: null
@@ -15,11 +15,9 @@ jobs:
     timeout-minutes: 120
     steps:
     - name: Run pytest coverage suite
-      run: 'set -euo pipefail
-
+      run: |
+        set -euo pipefail
         scripts/run-pytest-coverage.sh
-
-        '
     - name: Upload coverage artifacts
       if: always()
       uses: actions/upload-artifact@v4

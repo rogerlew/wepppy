@@ -77,6 +77,7 @@ def build_workflow(spec_path: Path, bootstrap: Dict[str, Any]) -> Dict[str, Any]
 
 def write_workflow(target: Path, data: Dict[str, Any]) -> None:
     content = GENERATED_BANNER + dump_yaml(data)
+    content = content.replace("\non:\n", "\n'on':\n", 1)
     target.write_text(content, encoding="utf-8")
 
 
