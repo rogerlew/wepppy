@@ -12,7 +12,7 @@ zoom_min=11
 
 [landuse]
 enable_landuse_change=true
-sbs_map  = "mods_dir/locations/seattle/simfire/sbs_pred_eagle_cedarriver_all.tif"
+sbs_map  = "mods_dir/locations/seattle/simfire/SBS_pred_Eagle_CedarRiver_all.tif"
 cover_defaults = "mods_dir/locations/seattle/lt_cover_defaults.csv"
 
 [soils]
