@@ -37,14 +37,9 @@ jobs:
           clean: false # root-owned docker artifacts block git clean on self-hosted runner
 
       - name: Install wctl shim
-        env:
-          WCTL_SYMLINK_PATH: "${{ github.workspace }}/.wctl/bin/wctl"
         run: |
-          set -euo pipefail
-          mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
           chmod +x wctl/install.sh
           ./wctl/install.sh dev
-          echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
 
       - name: Verify markdown-doc tooling
         run: |
