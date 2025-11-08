@@ -2762,29 +2762,54 @@ class Climate(NoDbBase):
 
             watershed = self.watershed_instance
             ws_lng, ws_lat = watershed.centroid
+            self.logger.info(f'    watershed centroid: ({ws_lng:.4f}, {ws_lat:.4f})')
 
             cli_dir = self.cli_dir
             start_year, end_year = self._future_start_year, self._future_end_year
 
             self._input_years = end_year - start_year + 1
+            self.logger.info(
+                f'    generating future climate for {start_year}-{end_year} '
+                f'({self._input_years} years total)'
+            )
 
             stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
             stationMeta = stationManager.get_station_fromid(climatestation)
+            station_desc = getattr(stationMeta, 'desc', '').strip()
+            try:
+                station_lon = float(getattr(stationMeta, 'longitude', float('nan')))
+                station_lat = float(getattr(stationMeta, 'latitude', float('nan')))
+                station_coords = f'({station_lon:.3f}, {station_lat:.3f})'
+            except (TypeError, ValueError):
+                raw_lon = getattr(stationMeta, 'longitude', '?')
+                raw_lat = getattr(stationMeta, 'latitude', '?')
+                station_coords = f'({raw_lon}, {raw_lat})'
+            self.logger.info(
+                f'    using CLIGEN station {climatestation} {station_coords} '
+                f'({station_desc}) from database {self.cligen_db}'
+            )
 
             par_fn = stationMeta.par
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             cli_fn = 'wepp.cli'
             prn_fn = 'ws.prn'
-            self.logger.info('  building {}... '.format(cli_fn))
+            self.logger.info(
+                f'    fetching CMIP5 RCP8.5 time series and building future CLI (prn={prn_fn}, cli={cli_fn})'
+            )
 
             build_future(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
+            self.logger.info('    CMIP5/CLIGEN processing complete')
 
             climate = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = climate.calc_monthlies()
             self.cli_fn = cli_fn
             self.par_fn = par_fn
+            monthlies_size = len(self.monthlies) if self.monthlies is not None else 0
+            self.logger.info(
+                f'    monthlies computed (entries={monthlies_size}); future climate assets ready'
+            )
 
     def _build_climate_single_storm_batch(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         """
