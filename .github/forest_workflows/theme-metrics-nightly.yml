@@ -1,0 +1,26 @@
+name: Theme Metrics Nightly
+on:
+  schedule:
+    # 02:20 AM Pacific ≈ 10:20 UTC during daylight saving
+    - cron: 20 10 * * *
+  workflow_dispatch: null
+jobs:
+  theme-metrics:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 40
+    steps:
+      - name: Run theme metrics Playwright suite
+        run: |
+          set -euo pipefail
+          wctl run-playwright --suite theme-metrics
+      - name: Upload theme contrast report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-contrast-report
+          path: wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md
+          if-no-files-found: warn
