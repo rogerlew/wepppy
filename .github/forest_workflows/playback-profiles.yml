@@ -55,6 +55,15 @@
   artifact_name: europe-disturbed-profile-run-log
   artifact_path: telemetry/europe-disturbed-profile-run.log
   description: Europe with eu-disturbed config and E-OBS multiple climates
+- workflow_slug: run-australia-disturbed
+  title: Australia-Disturbed
+  playback_type: run
+  profile_slug: au-disturbed
+  playback_options: []
+  schedule_pt: 03:50
+  artifact_name: australia-disturbed-profile-run-log
+  artifact_path: telemetry/australia-disturbed-profile-run.log
+  description: Australia with au-disturbed config and vanilla climate
 - workflow_slug: run-nexrad-prism-debrisflow
   title: NEXRAD (PRISM) DebrisFlow
   playback_type: run
