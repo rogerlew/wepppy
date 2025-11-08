@@ -18,6 +18,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Ensure docker/.env exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f docker/.env ]; then
+            printf "%s\n" \
+              "UID=1000" \
+              "GID=993" \
+              "POSTGRES_PASSWORD=localdev" \
+              "SECRET_KEY=localdev" \
+              "SECURITY_PASSWORD_SALT=localdev" \
+              > docker/.env
+          fi
+
+      - name: Install wctl shim
+        env:
+          WCTL_SYMLINK_PATH: "${{ github.workspace }}/.wctl/bin/wctl"
+        run: |
+          set -euo pipefail
+          mkdir -p "${GITHUB_WORKSPACE}/.wctl/bin"
+          chmod +x wctl/install.sh
+          ./wctl/install.sh dev
+          echo "${GITHUB_WORKSPACE}/.wctl/bin" >> "$GITHUB_PATH"
+
       - name: Run pytest coverage suite
         run: |
           set -euo pipefail
