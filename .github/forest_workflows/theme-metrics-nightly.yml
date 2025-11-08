@@ -24,3 +24,11 @@ jobs:
           name: theme-contrast-report
           path: wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md
           if-no-files-found: warn
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo '```text'
+            cat wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.md
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
