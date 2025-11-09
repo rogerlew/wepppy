@@ -10,6 +10,9 @@ echo "==> Preparing npm coverage workspace"
 rm -rf "${OUTPUT_DIR}"
 mkdir -p "${OUTPUT_DIR}"
 
+echo "==> Installing npm dependencies"
+wctl run-npm install
+
 echo "==> Running Jest tests with coverage"
 COVERAGE_DIRECTORY="${OUTPUT_DIR}" \
   wctl run-npm test -- --coverage --coverageDirectory="${OUTPUT_DIR}" --coverageReporters=text --coverageReporters=lcov
