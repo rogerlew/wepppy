@@ -1,3 +1,5 @@
+"""JWT encoding/decoding utilities for WEPPCloud service auth."""
+
 from __future__ import annotations
 
 import base64
@@ -41,6 +43,17 @@ class JWTServiceConfig:
 
 
 def _parse_algorithms(value: str | None) -> tuple[str, ...]:
+    """Parse and validate the configured signing algorithm list.
+
+    Args:
+        value: Comma-delimited algorithm string or None.
+
+    Returns:
+        Tuple of supported algorithm identifiers.
+
+    Raises:
+        JWTConfigurationError: If the value is empty or contains unsupported algorithms.
+    """
     if not value:
         return ("HS256",)
     algs: list[str] = []
@@ -58,6 +71,14 @@ def _parse_algorithms(value: str | None) -> tuple[str, ...]:
 
 @lru_cache(maxsize=1)
 def get_jwt_config() -> JWTServiceConfig:
+    """Load and cache JWT issuance settings from environment variables.
+
+    Returns:
+        Parsed `JWTServiceConfig` containing secrets and defaults.
+
+    Raises:
+        JWTConfigurationError: If the shared secret cannot be resolved.
+    """
     secret = os.getenv(f"{ENV_PREFIX}SECRET")
     if not secret:
         raise JWTConfigurationError("WEPP_AUTH_JWT_SECRET must be set to issue tokens")
@@ -81,10 +102,23 @@ def get_jwt_config() -> JWTServiceConfig:
 
 
 def _urlsafe_b64encode(data: bytes) -> str:
+    """Encode bytes using URL-safe base64 without padding."""
     return base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
 
 
 def _urlsafe_b64decode(segment: str, *, label: str) -> bytes:
+    """Decode a URL-safe base64 segment, raising descriptive errors.
+
+    Args:
+        segment: Encoded token segment.
+        label: Segment name to improve error messages.
+
+    Returns:
+        Decoded bytes for the requested segment.
+
+    Raises:
+        JWTDecodeError: If the data cannot be decoded.
+    """
     padding = "=" * (-len(segment) % 4)
     try:
         return base64.urlsafe_b64decode(segment + padding)
@@ -93,6 +127,19 @@ def _urlsafe_b64decode(segment: str, *, label: str) -> bytes:
 
 
 def encode_jwt(payload: Mapping[str, Any], secret: str, *, algorithm: str = "HS256") -> str:
+    """Create a signed JWT for the provided payload.
+
+    Args:
+        payload: Mapping of claims to encode.
+        secret: Shared secret used for HMAC signing.
+        algorithm: Name of the HMAC digest.
+
+    Returns:
+        Fully encoded JWT string.
+
+    Raises:
+        ValueError: If the requested algorithm is not supported.
+    """
     digest_factory = SUPPORTED_HS_ALGORITHMS.get(algorithm)
     if digest_factory is None:
         raise ValueError(f"Unsupported algorithm '{algorithm}'")
@@ -109,6 +156,7 @@ def encode_jwt(payload: Mapping[str, Any], secret: str, *, algorithm: str = "HS2
 
 
 def _decode_segments(token: str) -> tuple[Mapping[str, Any], Mapping[str, Any], bytes]:
+    """Split a JWT into decoded header, payload, and signature segments."""
     segments = token.split(".")
     if len(segments) != 3:
         raise JWTDecodeError("Invalid token format")
@@ -130,6 +178,22 @@ def _decode_segments(token: str) -> tuple[Mapping[str, Any], Mapping[str, Any], 
 
 
 def decode_jwt(token: str, *, secret: str, algorithms: Sequence[str], audience: Sequence[str] | None = None, issuer: str | None = None, leeway: int = 0) -> Mapping[str, Any]:
+    """Validate and decode a JWT using the provided verification context.
+
+    Args:
+        token: Encoded JWT to decode.
+        secret: Shared secret used to validate the signature.
+        algorithms: Allowed signing algorithms.
+        audience: Expected audience list.
+        issuer: Expected token issuer.
+        leeway: Seconds of tolerance for `exp`/`nbf`/`iat` validation.
+
+    Returns:
+        Mapping of validated claims.
+
+    Raises:
+        JWTDecodeError: If the token structure, signature, or claims are invalid.
+    """
     header, payload, signature = _decode_segments(token)
 
     algorithm = header.get("alg")
@@ -147,6 +211,17 @@ def decode_jwt(token: str, *, secret: str, algorithms: Sequence[str], audience: 
 
 
 def _validate_time_claims(payload: Mapping[str, Any], *, issuer: str | None, audience: Sequence[str] | None, leeway: int) -> None:
+    """Verify temporal, issuer, and audience constraints on a payload.
+
+    Args:
+        payload: Claims mapping to validate.
+        issuer: Expected issuer or None to skip issuer checks.
+        audience: Allowed audience values.
+        leeway: Number of seconds added to tolerate clock skew.
+
+    Raises:
+        JWTDecodeError: If any constraint is violated.
+    """
     now = time.time()
 
     exp = payload.get("exp")
@@ -191,6 +266,15 @@ def _validate_time_claims(payload: Mapping[str, Any], *, issuer: str | None, aud
 
 
 def _format_scope_claim(scopes: Sequence[str] | str | None, separator: str) -> str | None:
+    """Normalize scope inputs into a separator-delimited string.
+
+    Args:
+        scopes: Scope list or raw string from the caller.
+        separator: Character(s) used to join scopes.
+
+    Returns:
+        Normalized scope claim or `None` if no scopes are provided.
+    """
     if scopes is None:
         return None
     if isinstance(scopes, str):
@@ -215,9 +299,22 @@ def issue_token(
     extra_claims: Mapping[str, Any] | None = None,
     issued_at: int | None = None,
 ) -> dict[str, Any]:
-    """
-    Issue a signed JWT for downstream services.
-    Returns a dict with `token` and `claims`.
+    """Issue a signed JWT suitable for downstream services.
+
+    Args:
+        subject: Value assigned to the `sub` claim.
+        scopes: Optional scope list or string.
+        runs: Optional run identifiers baked into the token.
+        audience: Overrides for the `aud` claim.
+        expires_in: TTL in seconds (defaults to the configured value).
+        extra_claims: Additional claims to merge into the payload.
+        issued_at: Optional custom `iat` timestamp.
+
+    Returns:
+        Dict containing the encoded `token` plus the final `claims`.
+
+    Raises:
+        ValueError: If the TTL is non-positive.
     """
     config = get_jwt_config()
     algorithm = config.algorithms[0]
@@ -264,8 +361,14 @@ def issue_token(
 
 
 def decode_token(token: str, *, audience: Sequence[str] | str | None = None) -> Mapping[str, Any]:
-    """
-    Decode and validate a JWT using the configured secret and algorithms.
+    """Decode and validate a token using the global JWT configuration.
+
+    Args:
+        token: JWT string to verify.
+        audience: Optional audience override used during validation.
+
+    Returns:
+        Mapping of validated claims.
     """
     config = get_jwt_config()
     if audience is None:

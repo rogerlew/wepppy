@@ -1,3 +1,5 @@
+"""Return-period staging utilities for WEPP event datasets and derived reports."""
+
 from __future__ import annotations
 
 import json
@@ -61,6 +63,7 @@ MEASURE_LOOKUP: Dict[str, MeasureSpec] = {spec.measure_id: spec for spec in MEAS
 
 
 def _ensure_path(value: str | Path) -> Path:
+    """Expand and validate that a run directory exists."""
     path = Path(value).expanduser().resolve()
     if not path.exists():
         raise FileNotFoundError(path)
@@ -68,11 +71,13 @@ def _ensure_path(value: str | Path) -> Path:
 
 
 def _quote_identifier(identifier: str) -> str:
+    """Escape a DuckDB identifier so it can be referenced safely in SQL."""
     escaped = identifier.replace('"', '""')
     return f'"{escaped}"'
 
 
 def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[None, Dict[str, str]]:
+    """Return a parquet climate asset plus column mapping if one exists."""
     climate_dir = base / "climate"
     if not climate_dir.exists():
         return None, {}
@@ -97,6 +102,7 @@ def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[N
 
 
 def _build_topaz_filter(topaz_ids: Optional[Sequence[int]]) -> str:
+    """Generate a SQL WHERE clause limiting events to the given Topaz IDs."""
     if not topaz_ids:
         return ""
     values = sorted({int(v) for v in topaz_ids})
@@ -109,6 +115,7 @@ def _build_raw_event_query(
     climate_info: tuple[Path | None, Dict[str, str]],
     topaz_filter: str,
 ) -> str:
+    """Compose the DuckDB SQL used to stage event metrics prior to ranking."""
     climate_path, columns = climate_info
 
     if climate_path is None or not columns:
@@ -186,6 +193,7 @@ def _compute_event_counts(
     ebe_path: Path,
     topaz_filter: str,
 ) -> pd.DataFrame:
+    """Return per-topaz per-month event counts for downstream interpolation."""
     query = f"""
         SELECT
             e.element_id AS topaz_id,
@@ -201,6 +209,7 @@ def _compute_event_counts(
 
 
 def _build_measure_union(select_alias: str = "event_data") -> str:
+    """Return the SQL fragment that unpivots all measure columns for ranking."""
     statements: list[str] = []
     for spec in MEASURE_SPECS:
         statements.append(
@@ -217,6 +226,7 @@ def _build_measure_union(select_alias: str = "event_data") -> str:
 
 
 def _serialize_metadata(mapping: Mapping[str, Any]) -> Dict[bytes, bytes]:
+    """Encode a JSON-serializable mapping into Arrow schema metadata format."""
     payload: Dict[bytes, bytes] = {}
     for key, value in mapping.items():
         payload[key.encode("utf-8")] = json.dumps(value, separators=(",", ":")).encode("utf-8")
@@ -230,8 +240,16 @@ def refresh_return_period_events(
     max_rank: int = 128,
     buffer: int = 10,
 ) -> tuple[Path, Path]:
-    """
-    Regenerate staged return-period assets by querying the interchange Parquet datasets.
+    """Regenerate the staged parquet assets that power return-period reports.
+
+    Args:
+        wd: Run directory that owns the interchange parquet files.
+        topaz_ids: Optional subset of channel identifiers to rank.
+        max_rank: Maximum rank that should be guaranteed in the staged table.
+        buffer: Additional rows per measure retained beyond ``max_rank``.
+
+    Returns:
+        Tuple containing the paths to the staged ``events`` and ``ranks`` parquet files.
     """
 
     base = _ensure_path(wd)
@@ -411,6 +429,7 @@ def refresh_return_period_events(
 
 
 class ReturnPeriodDataset:
+    """Loader and façade for the staged return-period parquet datasets."""
     def __init__(
         self,
         wd: str | Path,
@@ -419,6 +438,14 @@ class ReturnPeriodDataset:
         max_rank: int = 128,
         buffer: int = 10,
     ) -> None:
+        """Load the staged parquet files and optionally regenerate them first.
+
+        Args:
+            wd: Run directory containing the staged parquet files.
+            auto_refresh: When ``True`` the staging pipeline is executed if either file is absent.
+            max_rank: Maximum desired rank for ``auto_refresh`` operations.
+            buffer: Additional rows retained beyond ``max_rank`` when auto-refreshing.
+        """
         base = _ensure_path(wd)
         context = resolve_run_context(str(base), auto_activate=False)
         self._root = context.base_dir
@@ -470,18 +497,22 @@ class ReturnPeriodDataset:
 
     @property
     def topaz_ids(self) -> list[int]:
+        """Return the sorted list of channel identifiers present in the staged events."""
         if "topaz_id" not in self._events.columns:
             return []
         ids = sorted(set(int(v) for v in self._events["topaz_id"].unique()))
         return ids
 
     def _events_for_topaz(self, topaz_id: int) -> pd.DataFrame:
+        """Return the subset of events scoped to ``topaz_id``."""
         return self._events[self._events["topaz_id"] == topaz_id].copy()
 
     def _ranks_for_topaz(self, topaz_id: int) -> pd.DataFrame:
+        """Return the subset of ranked measures scoped to ``topaz_id``."""
         return self._ranks[self._ranks["topaz_id"] == topaz_id].copy()
 
     def _counts_for_topaz(self, topaz_id: int) -> pd.DataFrame:
+        """Return the seasonal event-count dataframe for ``topaz_id``."""
         if self._event_counts.empty:
             return pd.DataFrame(columns=["year", "month", "event_count"])
         return self._event_counts[self._event_counts["topaz_id"] == topaz_id].copy()
@@ -496,6 +527,19 @@ class ReturnPeriodDataset:
         gringorten_correction: bool = False,
         topaz_id: Optional[int] = None,
     ) -> "ReturnPeriods":
+        """Generate a :class:`ReturnPeriods` instance for the requested parameters.
+
+        Args:
+            recurrence: Target recurrence intervals (years) to include in the report.
+            exclude_yr_indxs: Optional zero-based indexes of simulation years to remove.
+            exclude_months: Optional calendar months (1-12) to remove.
+            method: Either ``cta`` (default) or ``annual_maximum`` for the ranking strategy.
+            gringorten_correction: Whether to apply the Gringorten correction to the Weibull formula.
+            topaz_id: Optional channel identifier to target; defaults to the first available.
+
+        Returns:
+            Materialized :class:`ReturnPeriods` object carrying display-ready rows.
+        """
         if not recurrence:
             raise ValueError("recurrence intervals must be provided")
 
@@ -653,6 +697,7 @@ class ReturnPeriodDataset:
 
 
 def _format_event_row(row: pd.Series, spec: MeasureSpec) -> Dict[str, Any]:
+    """Convert a ranked event row into the structure the templates consume."""
     result: Dict[str, Any] = {
         "mo": int(row["mo"]),
         "da": int(row["da"]),
@@ -684,6 +729,8 @@ def _format_event_row(row: pd.Series, spec: MeasureSpec) -> Dict[str, Any]:
 
 
 class ReturnPeriods:
+    """Immutable-ish container for the final return-period table structures."""
+
     def __init__(self, *args, **kwargs):
         raise RuntimeError(
             "ReturnPeriods must be constructed using ReturnPeriodDataset.create_report; "
@@ -691,6 +738,7 @@ class ReturnPeriods:
         )
 
     def to_dict(self) -> Dict[str, Any]:
+        """Serialize the report for persistence or transfer."""
         return {
             "has_phosphorus": self.has_phosphorus,
             "header": self.header,
@@ -710,6 +758,7 @@ class ReturnPeriods:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "ReturnPeriods":
+        """Rehydrate an instance from :meth:`to_dict` output."""
         instance = cls.__new__(cls)
         instance.has_phosphorus = data.get("has_phosphorus", False)
         instance.header = list(data.get("header", []))
@@ -733,6 +782,7 @@ class ReturnPeriods:
         return instance
 
     def export_tsv_summary(self, summary_path: str | Path, extraneous: bool = False) -> None:
+        """Write a TSV summary to ``summary_path`` using the desired column set."""
         summary_path = Path(summary_path)
         if extraneous:
             self._export_tsv_summary_extraneous(summary_path)
@@ -740,6 +790,7 @@ class ReturnPeriods:
             self._export_tsv_summary_simple(summary_path)
 
     def _export_tsv_summary_simple(self, summary_path: Path) -> None:
+        """Write the condensed TSV layout consumed by most clients."""
         measures = [
             "Precipitation Depth",
             "Runoff",
@@ -777,6 +828,7 @@ class ReturnPeriods:
                 stream.write("\n")
 
     def _export_tsv_summary_extraneous(self, summary_path: Path) -> None:
+        """Write the verbose TSV layout that includes intermediate columns."""
         measures = [
             "Precipitation Depth",
             "Runoff",

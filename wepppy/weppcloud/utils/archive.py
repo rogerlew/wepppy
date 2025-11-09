@@ -1,13 +1,29 @@
-import subprocess
+"""Server-side helpers for archiving run directories."""
+
+from __future__ import annotations
+
 import os
 import shutil
+import subprocess
 
-## This archive module is different form the archive blueprint. the archive blueprint is for user download of results
-## This archive module is for server side archiving of old runs to save space to the archive directory (wc/archive)
+# This module differs from the archive blueprint, which handles user-facing downloads.
+# Here we focus on the background archiving and restoration flows that move run folders
+# between `/wc/runs` and the cold-storage `/wc/archive` hierarchy.
 
 
+def archive_run(runid: str, archive_dir: str = "/wc/archive", wd: str | None = None) -> None:
+    """Compress a run directory into the partitioned archive tree.
 
-def archive_run(runid, archive_dir='/wc/archive', wd=None):
+    Args:
+        runid: Run identifier to archive.
+        archive_dir: Root directory that stores archived runs.
+        wd: Optional absolute path to the run directory. When omitted the helper
+            resolves it via `helpers.get_wd`.
+
+    Raises:
+        Exception: If the archive could not be created or the source directory
+            cannot be removed after a successful archive.
+    """
     if wd is None:
         from wepppy.weppcloud.utils.helpers import get_wd
         wd = get_wd(runid)
@@ -45,7 +61,8 @@ def archive_run(runid, archive_dir='/wc/archive', wd=None):
                        f'Command output: stdout={stdout}, stderr={stderr}')
     
     
-def has_archive(runid, archive_dir='/wc/archive'):
+def has_archive(runid: str, archive_dir: str = "/wc/archive") -> bool:
+    """Return True if the archive tree already contains the run's tarball."""
     # Get the first two characters for the subdirectory (handle short runids)
     prefix = runid[:2] if len(runid) >= 2 else runid.ljust(2, '_')
     
@@ -55,7 +72,16 @@ def has_archive(runid, archive_dir='/wc/archive'):
     return os.path.exists(arc_fn)
 
 
-def restore_archive(arc_fn, wc_runs='/wc/runs/'):
+def restore_archive(arc_fn: str, wc_runs: str = '/wc/runs/') -> None:
+    """Inflate an archived run back into the active runs tree.
+
+    Args:
+        arc_fn: Absolute path to the `.tar.gz` archive that should be restored.
+        wc_runs: Root directory that stores live runs.
+
+    Raises:
+        Exception: If the archive cannot be found or decompressed.
+    """
     # Get the runid from the archive filename
     runid = os.path.split(arc_fn)[1].split('.')[0]
     

@@ -1,3 +1,5 @@
+"""Hillslope-scale summaries that blend loss_pw0.hill with landuse/soil metadata."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -45,12 +47,14 @@ class HillSummaryReport(ReportBase):
         self._dataframe = dataframe
         self.header = list(dataframe.columns)
 
-    def _prepare_context(self):
+    def _prepare_context(self) -> ReportQueryContext:
+        """Bootstrap and validate the report query context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
         context.ensure_datasets(self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
         return context
 
-    def _build_dataframe(self, context) -> pd.DataFrame:
+    def _build_dataframe(self, context: ReportQueryContext) -> pd.DataFrame:
+        """Run the DuckDB query and produce the fully formatted dataframe."""
         catalog = context.catalog
         include_soils = catalog.has(self._SOILS_DATASET)
 
@@ -220,11 +224,13 @@ class HillSummaryReport(ReportBase):
         return frame
 
     @staticmethod
-    def _is_loss_like(value) -> bool:
+    def _is_loss_like(value: Any) -> bool:
+        """Return ``True`` if ``value`` mimics the historic loss wrapper."""
         return hasattr(value, "fn") and hasattr(value, "hill_tbl")
 
     @staticmethod
-    def _infer_wd_from_loss(loss) -> Path:
+    def _infer_wd_from_loss(loss: Any) -> Path:
+        """Derive the run directory from a ``loss`` object."""
         fn_path = Path(loss.fn).expanduser()
         try:
             return fn_path.parents[2]
@@ -232,6 +238,7 @@ class HillSummaryReport(ReportBase):
             return fn_path.parent
 
     def _default_columns(self, include_soils: bool) -> List[str]:
+        """Return the default column ordering, optionally including soil fields."""
         base_columns = [
             "Wepp ID",
             "Topaz ID",
@@ -263,6 +270,7 @@ class HillSummaryReport(ReportBase):
         return base_columns
 
     def __iter__(self) -> Iterable[RowData]:
+        """Yield ``RowData`` wrappers for each formatted hillslope row."""
         for record in self._dataframe.to_dict(orient="records"):
             yield RowData(record)
 

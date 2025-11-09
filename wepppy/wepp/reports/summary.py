@@ -1,3 +1,5 @@
+"""Convenience imports bundling the three primary loss-based summary reports."""
+
 from __future__ import annotations
 
 from .loss_channel_report import ChannelSummaryReport

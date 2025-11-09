@@ -1,3 +1,5 @@
+"""Utility helpers for warming the query-engine context and caching report output."""
+
 from __future__ import annotations
 
 import json
@@ -39,21 +41,25 @@ class ReportQueryContext:
         if self.auto_activate:
             self.activate()
 
-    def activate(self):
+    def activate(self) -> Any:
+        """Populate (or refresh) the memoized query-engine context."""
         if self._context is None:
             activate_query_engine(self.run_directory, run_interchange=self.run_interchange)
             self._context = resolve_run_context(str(self.run_directory), auto_activate=False)
         return self._context
 
     @property
-    def context(self):
+    def context(self) -> Any:
+        """Return the lazily-loaded query-engine context."""
         return self.activate()
 
     @property
-    def catalog(self):
+    def catalog(self) -> Any:
+        """Shortcut to the query-engine catalog interface."""
         return self.context.catalog
 
     def ensure_datasets(self, *dataset_paths: str) -> None:
+        """Verify that each dataset path is cataloged and refresh the cache if needed."""
         missing = [path for path in dataset_paths if not self.catalog.has(path)]
         if missing:
             refreshed = False
@@ -90,14 +96,16 @@ class ReportQueryContext:
             formatted = ", ".join(sorted(missing))
             raise FileNotFoundError(f"Missing dataset(s) for report {formatted}")
 
-    def query(self, payload):
+    def query(self, payload: Any) -> Any:
+        """Run the provided query payload through the shared context."""
         return run_query(self.context, payload)
 
 
 class ReportCacheManager:
-    """Centralises cache path management and versioned parquet IO for reports."""
+    """Centralizes cache path management and versioned parquet IO for reports."""
 
     def __init__(self, run_directory: Path | str, *, namespace: str | None = None):
+        """Create a cache rooted in ``<run>/wepp/reports/cache[/namespace]``."""
         base = Path(run_directory).expanduser()
         if not base.exists():
             raise FileNotFoundError(base)
@@ -110,15 +118,18 @@ class ReportCacheManager:
 
     @property
     def root(self) -> Path:
+        """Return the resolved cache directory."""
         return self._root
 
     def _path_for(self, key: str) -> tuple[Path, Path]:
+        """Return the data and metadata paths for the provided cache key."""
         safe_key = key.replace("/", "_")
         data_path = self._root / f"{safe_key}.parquet"
         meta_path = self._root / f"{safe_key}.meta.json"
         return data_path, meta_path
 
     def read_parquet(self, key: str, *, version: str | None = None, **kwargs) -> pd.DataFrame | None:
+        """Read a cached dataframe if present and optionally version-matched."""
         data_path, meta_path = self._path_for(key)
         if not data_path.exists():
             return None
@@ -136,6 +147,7 @@ class ReportCacheManager:
         version: str | None = None,
         **kwargs,
     ) -> Path:
+        """Persist a dataframe alongside optional version metadata."""
         data_path, meta_path = self._path_for(key)
         data_path.parent.mkdir(parents=True, exist_ok=True)
         dataframe.to_parquet(data_path, **kwargs)
@@ -145,6 +157,7 @@ class ReportCacheManager:
         return data_path
 
     def invalidate(self, key: str) -> None:
+        """Remove the cached parquet + metadata files for ``key`` if they exist."""
         data_path, meta_path = self._path_for(key)
         for path in (data_path, meta_path):
             if path.exists():
@@ -152,6 +165,7 @@ class ReportCacheManager:
 
     @staticmethod
     def _read_metadata(path: Path) -> dict:
+        """Read cached metadata JSON or return an empty mapping on failure."""
         if not path.exists():
             return {}
         try:

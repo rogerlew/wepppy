@@ -1,8 +1,10 @@
+"""Hillslope-level water balance summaries sourced from H.wat interchange files."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
 from pathlib import Path
-from typing import Iterable, Mapping
+from typing import Iterable, Iterator, Mapping
 
 import pandas as pd
 import pyarrow.parquet as pq
@@ -88,10 +90,12 @@ class HillslopeWatbalReport(ReportBase):
         )
 
     def _validate_cache_columns(self, dataframe: pd.DataFrame) -> bool:
+        """Return ``True`` when the cached dataframe matches the expected schema."""
         expected = {"TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()}
         return expected.issubset(set(dataframe.columns))
 
     def _initialise_empty(self) -> None:
+        """Initialize placeholder dataframes when no source data exists."""
         self._per_hill_year = pd.DataFrame(columns=["TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()])
         self._per_hill_avg = self._per_hill_year.iloc[0:0]
         self._watershed_yearly = pd.DataFrame(columns=["WaterYear", *self._MEASURE_MAP.keys()])
@@ -102,6 +106,7 @@ class HillslopeWatbalReport(ReportBase):
         self.years = []
 
     def _build_summary(self) -> pd.DataFrame:
+        """Query the H.wat parquet and aggregate to both hill/year and watershed scales."""
         source_path = self.wd / self._SOURCE_REL_PATH
         if not source_path.exists():
             raise FileNotFoundError(source_path)
@@ -201,7 +206,8 @@ class HillslopeWatbalReport(ReportBase):
     def yearly_units(self) -> list[str | None]:
         return [None] + [parse_units(label) for label in self.header]
 
-    def avg_annual_iter(self):
+    def avg_annual_iter(self) -> Iterator[RowData]:
+        """Yield Topaz-level average metrics across the simulation period."""
         if self._per_hill_year.empty:
             return iter(())
 
@@ -215,7 +221,8 @@ class HillslopeWatbalReport(ReportBase):
                 record[label] = total / divisor
             yield RowData(record)
 
-    def yearly_iter(self):
+    def yearly_iter(self) -> Iterator[RowData]:
+        """Yield watershed-wide yearly totals."""
         if self._watershed_yearly.empty:
             return iter(())
 

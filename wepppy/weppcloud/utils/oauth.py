@@ -10,10 +10,18 @@ from typing import Any, Dict, Iterable, Optional, Tuple
 from urllib.parse import urlparse
 
 from authlib.integrations.flask_client import OAuth
-from flask import current_app
+from flask import Flask, current_app
 
 
-def _get_oauth_extension(app) -> OAuth:
+def _get_oauth_extension(app: Flask) -> OAuth:
+    """Return the Authlib OAuth extension, creating it if needed.
+
+    Args:
+        app: Flask application instance.
+
+    Returns:
+        Configured Authlib `OAuth` extension.
+    """
     oauth = app.extensions.get("authlib_oauth")
     if oauth is None:
         oauth = OAuth(app)
@@ -22,6 +30,14 @@ def _get_oauth_extension(app) -> OAuth:
 
 
 def _infer_api_base_url(provider_settings: Dict[str, Any]) -> Optional[str]:
+    """Infer an API base URL using provider metadata.
+
+    Args:
+        provider_settings: Provider configuration dictionary.
+
+    Returns:
+        String URL when it can be inferred, otherwise None.
+    """
     api_base_url = provider_settings.get("api_base_url")
     if api_base_url:
         return api_base_url
@@ -40,9 +56,18 @@ def ensure_oauth_client(
     provider: str,
     provider_settings: Dict[str, Any],
     *,
-    app=None,
+    app: Optional[Flask] = None,
 ):
-    """Create (or retrieve) an Authlib client for the given provider."""
+    """Create (or retrieve) an Authlib client for the given provider.
+
+    Args:
+        provider: Provider slug used throughout the app.
+        provider_settings: Dictionary loaded from configuration.
+        app: Optional Flask app; defaults to `current_app`.
+
+    Returns:
+        Authlib client instance or None when the provider is disabled.
+    """
     app = app or current_app
 
     client_id = provider_settings.get("client_id")
@@ -79,7 +104,11 @@ def ensure_oauth_client(
 
 
 def build_pkce_pair() -> Tuple[str, str]:
-    """Generate a PKCE verifier/challenge pair."""
+    """Generate a PKCE verifier/challenge pair.
+
+    Returns:
+        Tuple containing `(code_verifier, code_challenge)`.
+    """
     verifier_bytes = os.urandom(40)
     code_verifier = base64.urlsafe_b64encode(verifier_bytes).rstrip(b"=").decode("ascii")
     digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
@@ -88,11 +117,16 @@ def build_pkce_pair() -> Tuple[str, str]:
 
 
 def utc_now() -> datetime:
-    """Return a timezone-aware UTC timestamp."""
+    """Return a timezone-aware UTC timestamp.
+
+    Returns:
+        Current `datetime` in UTC.
+    """
     return datetime.now(timezone.utc)
 
 
 def _stringify_scopes(values: Iterable[Any]) -> str:
+    """Convert a scope iterable into a canonical space-delimited string."""
     return " ".join(
         scope.strip()
         for scope in (str(item) for item in values)
@@ -106,8 +140,12 @@ def normalize_token_scopes(
 ) -> str:
     """Normalize scopes returned from an OAuth token exchange.
 
-    Prefers scopes reported by the token payload and falls back to the
-    configured provider scope if the token omits them.
+    Args:
+        token: Token payload (if present) returned from Authlib.
+        provider_settings: Provider configuration dictionary.
+
+    Returns:
+        Space-delimited scope string (may be empty).
     """
     token_scopes = ""
     if token:
@@ -131,4 +169,5 @@ def normalize_token_scopes(
 
 
 def provider_enabled(provider_settings: Optional[Dict[str, Any]]) -> bool:
+    """Return True when the provider configuration is enabled."""
     return bool(provider_settings and provider_settings.get("enabled"))

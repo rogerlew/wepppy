@@ -1,6 +1,9 @@
+"""Channel-scale water-balance reporting backed by interchange parquet assets."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
+from collections.abc import Iterator
 from pathlib import Path
 
 import pandas as pd
@@ -38,6 +41,7 @@ class ChannelWatbalReport(ReportBase):
     _TRANSPIRATION_COLUMNS = ["Ep (mm)", "Es (mm)", "Er (mm)"]
 
     def __init__(self, wd: str | Path):
+        """Load the channel water-balance parquet and compute summary tables."""
         self.wd = Path(wd).expanduser()
         if not self.wd.exists():
             raise FileNotFoundError(self.wd)
@@ -141,25 +145,31 @@ class ChannelWatbalReport(ReportBase):
 
     @property
     def header(self) -> list[str]:
+        """Return the ordered set of watershed-level measure labels."""
         return list(self._MEASURE_MAP.keys())
 
     @property
     def avg_annual_header(self) -> list[str]:
+        """Include the Topaz identifier ahead of the per-channel measures."""
         return ["TopazID"] + list(self.header)
 
     @property
     def avg_annual_units(self) -> list[str | None]:
+        """Return the display units aligned with :pyattr:`avg_annual_header`."""
         return [None] + [parse_units(label) for label in self.header]
 
     @property
     def yearly_header(self) -> list[str]:
+        """Include the calendar year ahead of the watershed measures."""
         return ["Year"] + list(self.header)
 
     @property
     def yearly_units(self) -> list[str | None]:
+        """Return the display units aligned with :pyattr:`yearly_header`."""
         return [None] + [parse_units(label) for label in self.header]
 
-    def avg_annual_iter(self):
+    def avg_annual_iter(self) -> Iterator[RowData]:
+        """Yield per-channel average annual metrics as ``RowData`` objects."""
         for _, row in self._avg_dataframe.iterrows():
             record = OrderedDict()
             record["TopazID"] = int(row["TopazID"])
@@ -167,7 +177,8 @@ class ChannelWatbalReport(ReportBase):
                 record[label] = float(row.get(column, 0.0))
             yield RowData(record)
 
-    def yearly_iter(self):
+    def yearly_iter(self) -> Iterator[RowData]:
+        """Yield watershed-wide yearly metrics (weighted by channel area)."""
         for _, row in self._watershed_yearly.iterrows():
             record = OrderedDict()
             record["Year"] = int(row["Year"])

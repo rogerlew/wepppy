@@ -374,25 +374,25 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/wepp/management/utils/downgrade_to_98_4_format.py`
 - [x] `wepppy/wepp/management/utils/multi_ofe.py`
 - [x] `wepppy/wepp/management/utils/rotation_stack.py`
-- [ ] `wepppy/wepp/reports/__init__.py`
-- [ ] `wepppy/wepp/reports/average_annuals_by_landuse.py`
-- [ ] `wepppy/wepp/reports/channel_watbal.py`
-- [ ] `wepppy/wepp/reports/frq_flood.py`
-- [ ] `wepppy/wepp/reports/harness.py`
-- [ ] `wepppy/wepp/reports/helpers.py`
-- [ ] `wepppy/wepp/reports/hillslope_watbal.py`
-- [ ] `wepppy/wepp/reports/loss_channel_report.py`
-- [ ] `wepppy/wepp/reports/loss_hill_report.py`
-- [ ] `wepppy/wepp/reports/loss_outlet_report.py`
-- [ ] `wepppy/wepp/reports/report_base.py`
-- [ ] `wepppy/wepp/reports/return_periods.py`
-- [ ] `wepppy/wepp/reports/row_data.py`
-- [ ] `wepppy/wepp/reports/sediment_channel_distribution_report.py`
-- [ ] `wepppy/wepp/reports/sediment_characteristics.py`
-- [ ] `wepppy/wepp/reports/sediment_class_info_report.py`
-- [ ] `wepppy/wepp/reports/sediment_hillslope_distribution_report.py`
-- [ ] `wepppy/wepp/reports/summary.py`
-- [ ] `wepppy/wepp/reports/total_watbal.py`
+- [x] `wepppy/wepp/reports/__init__.py`
+- [x] `wepppy/wepp/reports/average_annuals_by_landuse.py`
+- [x] `wepppy/wepp/reports/channel_watbal.py`
+- [x] `wepppy/wepp/reports/frq_flood.py`
+- [x] `wepppy/wepp/reports/harness.py`
+- [x] `wepppy/wepp/reports/helpers.py`
+- [x] `wepppy/wepp/reports/hillslope_watbal.py`
+- [x] `wepppy/wepp/reports/loss_channel_report.py`
+- [x] `wepppy/wepp/reports/loss_hill_report.py`
+- [x] `wepppy/wepp/reports/loss_outlet_report.py`
+- [x] `wepppy/wepp/reports/report_base.py`
+- [x] `wepppy/wepp/reports/return_periods.py`
+- [x] `wepppy/wepp/reports/row_data.py`
+- [x] `wepppy/wepp/reports/sediment_channel_distribution_report.py`
+- [x] `wepppy/wepp/reports/sediment_characteristics.py`
+- [x] `wepppy/wepp/reports/sediment_class_info_report.py`
+- [x] `wepppy/wepp/reports/sediment_hillslope_distribution_report.py`
+- [x] `wepppy/wepp/reports/summary.py`
+- [x] `wepppy/wepp/reports/total_watbal.py`
 - [ ] `wepppy/wepp/soils/__init__.py`
 - [ ] `wepppy/wepp/soils/builder/__init__.py`
 - [ ] `wepppy/wepp/soils/horizon_mixin.py`

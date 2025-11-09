@@ -1,0 +1,9 @@
+from __future__ import annotations
+
+def archive_run(runid: str, archive_dir: str = ..., wd: str | None = ...) -> None: ...
+
+
+def has_archive(runid: str, archive_dir: str = ...) -> bool: ...
+
+
+def restore_archive(arc_fn: str, wc_runs: str = ...) -> None: ...

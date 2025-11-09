@@ -1,8 +1,10 @@
+"""Return-period style flood frequency reporting for outlet-scale events."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Iterator, Sequence
 
 import numpy as np
 import pandas as pd
@@ -82,6 +84,7 @@ class FrqFloodReport(ReportBase):
         self._rows = self._build_frequency_rows(annual_max, display_columns)
 
     def _initialise_empty(self) -> None:
+        """Reset derived attributes when no event data is available."""
         self.header = ["Recurrence", "Precipitation Depth (mm)", "Runoff Volume (m^3)", "Runoff (mm)"]
         self.units_d = {
             "Precipitation Depth": "mm",
@@ -100,6 +103,7 @@ class FrqFloodReport(ReportBase):
         self.num_events = 0
 
     def _load_event_dataframe(self) -> pd.DataFrame:
+        """Read the per-event interchange parquet into a tidy dataframe."""
         dataset_path = self.wd / self._EBE_DATASET
         if not dataset_path.exists():
             raise FileNotFoundError(dataset_path)
@@ -119,6 +123,7 @@ class FrqFloodReport(ReportBase):
         return frame
 
     def _load_watershed_area(self) -> float:
+        """Return the contributing watershed area in hectares if available."""
         dataset_path = self.wd / self._TOTALWATSED_DATASET
         if not dataset_path.exists():
             return 0.0
@@ -138,6 +143,7 @@ class FrqFloodReport(ReportBase):
         annual_max: pd.DataFrame,
         display_columns: Sequence[str],
     ) -> list[OrderedDict[str, float | str]]:
+        """Compute Weibull-based frequency rows for the configured recurrence intervals."""
         rows: list[OrderedDict[str, float | str]] = []
 
         if annual_max.empty:
@@ -175,11 +181,13 @@ class FrqFloodReport(ReportBase):
         return rows
 
     def _runoff_depth(self, runoff_volume_m3: float | None) -> float:
+        """Convert a runoff volume to depth (mm) using watershed area."""
         if not runoff_volume_m3 or self.wsarea <= 0:
             return 0.0
         return float(runoff_volume_m3) / (self.wsarea * 10000.0) * 1000.0
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[RowData]:
+        """Yield each recurrence interval row as ``RowData``."""
         for row in self._rows:
             yield RowData(row)
 

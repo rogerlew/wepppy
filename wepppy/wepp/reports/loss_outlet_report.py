@@ -1,3 +1,5 @@
+"""Outlet-scale summary that captures watershed delivery metrics per loss_pw0.out."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,6 +17,8 @@ __all__ = ["OutletSummaryReport", "OutletSummary"]
 
 @dataclass(slots=True)
 class OutletRow:
+    """Display row for the outlet summary table."""
+
     label: str
     value: Optional[float]
     units: Optional[str]
@@ -23,7 +27,7 @@ class OutletRow:
 
 
 class OutletSummaryReport:
-    """Summarise outlet delivery metrics using loss_pw0.out interchange assets."""
+    """Summarize outlet delivery metrics using loss_pw0.out interchange assets."""
 
     _DATASET_PATH = "wepp/output/interchange/loss_pw0.out.parquet"
 
@@ -31,7 +35,8 @@ class OutletSummaryReport:
         table = self._resolve_table(wd)
         self._rows = self._build_rows(table)
 
-    def _resolve_table(self, wd_or_loss) -> pd.DataFrame:
+    def _resolve_table(self, wd_or_loss: Any) -> pd.DataFrame:
+        """Load the outlet parquet either via loss context or query-engine."""
         if self._is_loss_like(wd_or_loss):
             loss = wd_or_loss
             self._wd = self._infer_wd_from_loss(loss)
@@ -44,12 +49,14 @@ class OutletSummaryReport:
         context = self._prepare_context()
         return self._load_table(context)
 
-    def _prepare_context(self):
+    def _prepare_context(self) -> ReportQueryContext:
+        """Ensure the outlet dataset is cataloged and return the context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
         context.ensure_datasets(self._DATASET_PATH)
         return context
 
-    def _load_table(self, context) -> pd.DataFrame:
+    def _load_table(self, context: ReportQueryContext) -> pd.DataFrame:
+        """Execute the query-engine payload and return a dataframe keyed by ``key``."""
         payload = QueryRequest(
             datasets=[{"path": self._DATASET_PATH, "alias": "out"}],
             columns=[
@@ -67,18 +74,21 @@ class OutletSummaryReport:
         return frame.set_index("key")
 
     @staticmethod
-    def _is_loss_like(value) -> bool:
+    def _is_loss_like(value: Any) -> bool:
+        """Return ``True`` if ``value`` matches the legacy loss object contract."""
         return hasattr(value, "out_tbl") and hasattr(value, "fn")
 
     @staticmethod
-    def _infer_wd_from_loss(loss) -> Path:
+    def _infer_wd_from_loss(loss: Any) -> Path:
+        """Resolve the run directory from the legacy loss object."""
         fn_path = Path(loss.fn).expanduser()
         try:
             return fn_path.parents[2]
         except IndexError:
             return fn_path.parent
 
-    def _table_from_loss(self, loss) -> pd.DataFrame:
+    def _table_from_loss(self, loss: Any) -> pd.DataFrame:
+        """Convert the ``loss.out_tbl`` payload to a dataframe keyed by ``key``."""
         records_attr = getattr(loss, "out_tbl")
         records = records_attr() if callable(records_attr) else records_attr
         frame = pd.DataFrame(records or [], columns=["key", "value", "units"])
@@ -93,6 +103,7 @@ class OutletSummaryReport:
         return frame.set_index("key")
 
     def _build_rows(self, table: pd.DataFrame) -> List[OutletRow]:
+        """Transform the outlet dataframe into display-friendly ``OutletRow`` objects."""
 
         def value_for(key: str) -> Optional[float]:
             return float(table.value.get(key)) if key in table.index else None
@@ -216,6 +227,7 @@ class OutletSummaryReport:
         return rows
 
     def rows(self, include_extraneous: bool = False) -> List[OutletRow]:
+        """Return the filtered or full set of outlet rows."""
         if include_extraneous:
             return list(self._rows)
 

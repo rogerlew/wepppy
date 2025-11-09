@@ -1,3 +1,5 @@
+"""Report wrapper for the particle-class metadata stored in loss_pw0.class_data."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
@@ -13,6 +15,7 @@ class SedimentClassInfoReport(ReportBase):
     """Channel sediment particle class information (loss_pw0.class_data)."""
 
     def __init__(self, class_table: pd.DataFrame):
+        """Persist the lookup table backing the report."""
         self._frame = class_table.copy()
         self.header = [
             "Class",
@@ -25,6 +28,7 @@ class SedimentClassInfoReport(ReportBase):
         ]
 
     def __iter__(self) -> Iterable[RowData]:
+        """Yield ``RowData`` wrappers for each class."""
         for _, row in self._frame.iterrows():
             data = OrderedDict()
             data["Class"] = int(row["class"])

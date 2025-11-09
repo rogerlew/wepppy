@@ -1,3 +1,5 @@
+"""Channel-scale summaries that combine loss_pw0.chn with channel metadata."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -35,12 +37,14 @@ class ChannelSummaryReport(ReportBase):
         self._dataframe = dataframe
         self.header = list(dataframe.columns)
 
-    def _prepare_context(self):
+    def _prepare_context(self) -> ReportQueryContext:
+        """Bootstrap and validate the report query context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
         context.ensure_datasets(self._LOSS_DATASET, self._CHANNEL_DATASET)
         return context
 
-    def _build_dataframe(self, context) -> pd.DataFrame:
+    def _build_dataframe(self, context: ReportQueryContext) -> pd.DataFrame:
+        """Run the DuckDB query and return a fully formatted dataframe."""
         payload = QueryRequest(
             datasets=[
                 {"path": self._LOSS_DATASET, "alias": "loss"},
@@ -185,17 +189,21 @@ class ChannelSummaryReport(ReportBase):
         return frame
 
     @staticmethod
-    def _is_loss_like(value) -> bool:
+    def _is_loss_like(value: Any) -> bool:
+        """Return ``True`` if ``value`` resembles the legacy ``loss`` object."""
         return hasattr(value, "fn") and hasattr(value, "chn_tbl")
 
     @staticmethod
-    def _infer_wd_from_loss(loss) -> Path:
+    def _infer_wd_from_loss(loss: Any) -> Path:
+        """Heuristically resolve the run directory from a ``loss`` object."""
         fn_path = Path(loss.fn).expanduser()
         try:
             return fn_path.parents[2]
         except IndexError:
             return fn_path.parent
+
     def _column_order(self, *, include_phosphorus: bool) -> List[str]:
+        """Return the desired column ordering for the final dataframe."""
         columns = [
             "Channel ID",
             "Wepp Channel ID",
@@ -229,6 +237,7 @@ class ChannelSummaryReport(ReportBase):
         return columns
 
     def __iter__(self) -> Iterable[RowData]:
+        """Yield ``RowData`` wrappers for every channel row."""
         for record in self._dataframe.to_dict(orient="records"):
             yield RowData(record)
 

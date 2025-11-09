@@ -1,3 +1,5 @@
+"""Co-ordinate sediment class lookups for both hillslope and channel contexts."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
@@ -65,6 +67,7 @@ class SedimentCharacteristics:
 
     @staticmethod
     def _coerce_run_directory(source: Union[str, Path, object]) -> Path:
+        """Normalize user-provided inputs into an absolute run directory path."""
         if isinstance(source, (str, Path)):
             path = Path(source).expanduser()
             if not path.exists():
@@ -76,7 +79,8 @@ class SedimentCharacteristics:
             return Path(source.fn).resolve().parents[2].expanduser()
         raise TypeError("SedimentCharacteristics expects a run directory path or a loss report instance")
 
-    def _prepare_context(self):
+    def _prepare_context(self) -> ReportQueryContext:
+        """Ensure required datasets exist and return a shared query context."""
         context = ReportQueryContext(self._wd, run_interchange=False)
         context.ensure_datasets(
             self._CLASS_DATASET,
@@ -87,7 +91,8 @@ class SedimentCharacteristics:
         )
         return context
 
-    def _load_class_dataframe(self, context) -> pd.DataFrame:
+    def _load_class_dataframe(self, context: ReportQueryContext) -> pd.DataFrame:
+        """Return the sediment class lookup table from ``loss_pw0.class_data``."""
         payload = QueryRequest(
             datasets=[{"path": self._CLASS_DATASET, "alias": "class"}],
             columns=[
@@ -108,7 +113,8 @@ class SedimentCharacteristics:
             raise ValueError("loss_pw0.class_data.parquet returned no records")
         return pd.DataFrame.from_records(records)
 
-    def _load_year_count(self, context) -> int:
+    def _load_year_count(self, context: ReportQueryContext) -> int:
+        """Return the number of simulation years represented in the pass file."""
         payload = QueryRequest(
             datasets=[{"path": self._HILL_ALL_YEARS_DATASET, "alias": "ay"}],
             columns=["COUNT(DISTINCT ay.year) AS year_count"],
@@ -117,7 +123,8 @@ class SedimentCharacteristics:
         years = int(result.records[0]["year_count"]) if result.records else 0
         return max(years, 1)
 
-    def _load_outlet_discharge(self, context) -> float:
+    def _load_outlet_discharge(self, context: ReportQueryContext) -> float:
+        """Return the annual average sediment discharge from the outlet dataset."""
         payload = QueryRequest(
             datasets=[{"path": self._OUTLET_DATASET, "alias": "out"}],
             columns=["out.key", "out.value"],
@@ -128,7 +135,8 @@ class SedimentCharacteristics:
             return 0.0
         return float(result.records[0]["value"] or 0.0)
 
-    def _lookup_outlet_value(self, context, key: str) -> float:
+    def _lookup_outlet_value(self, context: ReportQueryContext, key: str) -> float:
+        """Convenience helper for extracting arbitrary outlet metrics."""
         payload = QueryRequest(
             datasets=[{"path": self._OUTLET_DATASET, "alias": "out"}],
             columns=["out.value"],
@@ -138,6 +146,7 @@ class SedimentCharacteristics:
         return float(result.records[0]["value"] or 0.0) if result.records else 0.0
 
     def _build_channel_class_rows(self, class_table: pd.DataFrame, total_tonne: float) -> List[OrderedDict[str, float]]:
+        """Build per-class distributions expressed as tonnes per year."""
         rows: List[OrderedDict[str, float]] = []
         for _, row in class_table.iterrows():
             fraction = float(row["fraction"] or 0.0)
@@ -154,6 +163,7 @@ class SedimentCharacteristics:
         return rows
 
     def _build_particle_rows(self, class_table: pd.DataFrame, total_tonne: float, fractions: List[float]) -> List[OrderedDict[str, float]]:
+        """Aggregate class-level fractions into particle-type summaries."""
         fraction_series = pd.Series(fractions)
         particle_map = OrderedDict(
             {
@@ -177,7 +187,8 @@ class SedimentCharacteristics:
             )
         return rows
 
-    def _load_hillslope_class_masses(self, context) -> List[float]:
+    def _load_hillslope_class_masses(self, context: ReportQueryContext) -> List[float]:
+        """Return total sediment mass per class from the pass parquet."""
         payload = QueryRequest(
             datasets=[{"path": self._PASS_DATASET, "alias": "pass"}],
             columns=[
@@ -195,18 +206,21 @@ class SedimentCharacteristics:
         return [float(row[key] or 0.0) for key in ["mass_c1", "mass_c2", "mass_c3", "mass_c4", "mass_c5"]]
 
     def _compute_hill_total_delivery(self, class_masses: List[float], year_count: int) -> float:
+        """Compute the annualized sediment delivery (tonnes) for hillslopes."""
         total_kg = sum(class_masses)
         if total_kg <= 0.0:
             return 0.0
         return total_kg / max(year_count, 1) / 1000.0
 
     def _normalize_hill_class_fractions(self, class_masses: List[float]) -> List[float]:
+        """Convert hillslope class masses to fractions that sum to one."""
         total = sum(class_masses)
         if total <= 0.0:
             return [0.0] * len(class_masses)
         return [mass / total for mass in class_masses]
 
     def _build_hill_class_rows(self, fractions: List[float], total_tonne: float) -> List[OrderedDict[str, float]]:
+        """Materialize hillslope class fractions as report rows."""
         rows: List[OrderedDict[str, float]] = []
         for idx, fraction in enumerate(fractions, start=1):
             delivery = fraction * total_tonne

@@ -1,3 +1,5 @@
+"""High-level re-exports for report generators exposed throughout WEPPcloud."""
+
 from .average_annuals_by_landuse import AverageAnnualsByLanduseReport
 from .channel_watbal import ChannelWatbalReport
 from .frq_flood import FrqFloodReport

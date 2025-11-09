@@ -1,8 +1,10 @@
+"""Watershed-scale water balance reporting sourced from totalwatsed3 parquet."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
+from collections.abc import Callable, Iterable, Iterator
 from pathlib import Path
-from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -95,6 +97,7 @@ class TotalWatbalReport(ReportBase):
         self._pratios = self._build_ratio_row(measures_template)
 
     def _initialise_empty(self) -> None:
+        """Populate placeholder rows when the dataset is empty."""
         self.header = ["Water Year", *self._MEASURE_COLUMNS.keys()]
         self.data = []
         base = OrderedDict({"Water Year": "Mean"})
@@ -115,14 +118,16 @@ class TotalWatbalReport(ReportBase):
         self,
         label: str,
         measures: dict[str, list[float]],
-        reducer,
+        reducer: Callable[[Iterable[float]], float],
     ) -> OrderedDict[str, float | str]:
+        """Apply ``reducer`` to each measure list to create an aggregate row."""
         row = OrderedDict({"Water Year": label})
         for measure_label, values in measures.items():
             row[measure_label] = float(reducer(values)) if values else 0.0
         return row
 
     def _build_ratio_row(self, measures: dict[str, list[float]]) -> OrderedDict[str, float | str]:
+        """Compute precipitation-normalized ratios for select measures."""
         ratios = OrderedDict({"Water Year": "{X}/P"})
         precip_values = measures.get("Precipitation (mm)", [])
         precip_sum = float(sum(precip_values)) if precip_values else 0.0
@@ -140,20 +145,24 @@ class TotalWatbalReport(ReportBase):
 
         return ratios
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[RowData]:
+        """Yield per-year ``RowData`` rows."""
         for row in self.data:
             yield RowData(row)
 
     @property
     def means(self) -> RowData:
+        """Return the mean row as a ``RowData`` wrapper."""
         return RowData(self._means)
 
     @property
     def stdevs(self) -> RowData:
+        """Return the standard-deviation row as a ``RowData`` wrapper."""
         return RowData(self._stdevs)
 
     @property
     def pratios(self) -> RowData:
+        """Return the precipitation ratio row as a ``RowData`` wrapper."""
         return RowData(self._pratios)
 
 

@@ -1,39 +1,39 @@
+"""Shared helpers for Flask routes, run resolution, and error handling."""
+
+from __future__ import annotations
+
 from ast import literal_eval
-import traceback
-
-import logging
-import json
-import os
-import csv
+from datetime import datetime
+from functools import wraps
 import inspect
-
+import json
+import logging
+import os
+import socket
+import traceback
+from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
-from os.path import exists as _exists
-
-from pathlib import Path
-from functools import wraps
-
-from flask import current_app, g, jsonify, make_response, render_template, url_for
-from werkzeug.exceptions import HTTPException
-
-from datetime import datetime
-
-import socket
-
-from wepppy.all_your_base.all_your_base import isint
-_hostname = socket.gethostname()
+from typing import Any, Callable, Optional, ParamSpec, TypeVar
 
 import redis
+from flask import Request, Response, current_app, g, jsonify, make_response, url_for
+from werkzeug.exceptions import HTTPException
+
+from wepppy.all_your_base.all_your_base import isint
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
     redis_host,
 )
 
+_hostname = socket.gethostname()
+P = ParamSpec("P")
+ResponseValue = TypeVar("ResponseValue")
+
 logger = logging.getLogger(__name__)
 
-redis_wd_cache_client = None
+redis_wd_cache_client: Optional[redis.Redis] = None
 REDIS_HOST = redis_host()
 REDIS_WD_CACHE_DB = int(RedisDB.WD_CACHE)
 try:
@@ -53,14 +53,32 @@ _PLAYBACK_USE_CLONE = os.getenv("PROFILE_PLAYBACK_USE_CLONE", "false").lower() i
 
 
 def _playback_path(env_var: str, subdir: str) -> str:
+    """Resolve a playback directory from environment overrides.
+
+    Args:
+        env_var: Specific environment variable for the run context.
+        subdir: Default fallback sub-directory name.
+
+    Returns:
+        Absolute path to the playback asset directory.
+    """
     base = os.environ.get("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback")
     return os.environ.get(env_var, _join(base, subdir))
 
 
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
-    """
-    Gets the working directory path for a given run ID, using a Redis cache
-    to speed up lookups.
+    """Return the working directory path for a run, caching lookups in Redis.
+
+    Args:
+        runid: Run identifier to resolve.
+        prefer_active: When True, prefer the active Flask context (when available)
+            before hitting Redis or the filesystem.
+
+    Returns:
+        Absolute filesystem path for the requested run.
+
+    Raises:
+        ValueError: If the run identifier encodes an unknown group prefix.
     """
     global redis_wd_cache_client
 
@@ -142,14 +160,35 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     
 def get_batch_wd(batch_name: str) -> str:
+    """Return the run root for a batch job.
+
+    Args:
+        batch_name: Batch identifier from the request.
+
+    Returns:
+        Absolute path to the batch directory.
+    """
     return _join(get_batch_root_dir(), batch_name)
 
 
 def get_batch_base_wd(batch_name: str) -> str:
+    """Return the `_base` directory for a batch job.
+
+    Args:
+        batch_name: Batch identifier from the request.
+
+    Returns:
+        Absolute path to the batch's `_base` directory.
+    """
     return _join(get_batch_root_dir(), batch_name, '_base')
 
 
 def get_batch_root_dir() -> str:
+    """Resolve the base directory for batch runner execution.
+
+    Returns:
+        Filesystem root for batch jobs as configured in Flask.
+    """
     if current_app:
         root = current_app.config.get("BATCH_RUNNER_ROOT")
         if root:
@@ -158,6 +197,15 @@ def get_batch_root_dir() -> str:
 
 
 def get_batch_run_wd(batch_name: str, runid: str) -> str:
+    """Return the working directory for a run that belongs to a batch job.
+
+    Args:
+        batch_name: Parent batch identifier.
+        runid: Specific run identifier (or `_base`).
+
+    Returns:
+        Absolute path to the batch run's working directory.
+    """
     batch_wd = get_batch_wd(batch_name)
 
     if runid == '_base':
@@ -166,8 +214,20 @@ def get_batch_run_wd(batch_name: str, runid: str) -> str:
         return _join(batch_wd, 'runs', runid)
 
 
-def url_for_run(endpoint: str, **values) -> str:
-    """Generate a URL for run-scoped routes, including microservices."""
+def url_for_run(endpoint: str, **values: Any) -> str:
+    """Generate a URL for run-scoped routes, including microservices.
+
+    Args:
+        endpoint: Flask endpoint name or blueprint route.
+        **values: Parameters passed to `url_for`, plus optional helpers such as
+            `pup` and `subpath`.
+
+    Returns:
+        Fully qualified path rooted at the optional site prefix.
+
+    Raises:
+        ValueError: If required run identifiers are missing for specialized endpoints.
+    """
 
     site_prefix = current_app.config.get('SITE_PREFIX', '') if current_app else ''
 
@@ -218,20 +278,36 @@ def url_for_run(endpoint: str, **values) -> str:
     return _apply_site_prefix(url)
 
 
-def error_factory(msg='Error Handling Request'):
+def error_factory(msg: str = 'Error Handling Request') -> Response:
+    """Return a consistent JSON error payload for lightweight failures.
+
+    Args:
+        msg: Human-readable error message.
+
+    Returns:
+        Flask `Response` object with a JSON body.
+    """
     return jsonify({'Success': False,
                     'Error': msg})
 
 
-def _ensure_text(value):
-    """Return a safe text representation for logging/JSON payloads."""
+def _ensure_text(value: Any) -> str:
+    """Return a safe text representation for logging/JSON payloads.
+
+    Args:
+        value: Arbitrary value that needs to be logged.
+
+    Returns:
+        String representation that best describes the value.
+    """
     try:
         return str(value)
     except Exception:  # pragma: no cover - extremely defensive
         return repr(value)
 
 
-def _format_error_message(msg):
+def _format_error_message(msg: BaseException | str) -> str:
+    """Normalize exception objects or strings into a single-line message."""
     if isinstance(msg, BaseException):
         detail = _ensure_text(msg)
         if detail and detail != msg.__class__.__name__:
@@ -240,9 +316,21 @@ def _format_error_message(msg):
     return _ensure_text(msg)
 
 
-def exception_factory(msg='Error Handling Request',
-                      stacktrace=None,
-                      runid=None):
+def exception_factory(
+    msg: BaseException | str = 'Error Handling Request',
+    stacktrace: Optional[str] = None,
+    runid: Optional[str] = None,
+) -> Response:
+    """Log an exception and return the standard error payload.
+
+    Args:
+        msg: Exception or string describing the failure.
+        stacktrace: Optional pre-rendered stack trace.
+        runid: Optional run identifier to help locate context.
+
+    Returns:
+        Flask `Response` with the JSON error payload and HTTP 500 status.
+    """
     if stacktrace is None:
         stacktrace = traceback.format_exc()
 
@@ -278,7 +366,15 @@ def exception_factory(msg='Error Handling Request',
         return fallback
 
 
-def success_factory(kwds=None):
+def success_factory(kwds: Optional[dict[str, Any]] = None) -> Response:
+    """Return a success response optionally embedding content.
+
+    Args:
+        kwds: Optional dictionary attached under the `Content` key.
+
+    Returns:
+        Flask `Response` with a JSON body and success flag.
+    """
     if kwds is None:
         return jsonify({'Success': True})
     else:
@@ -286,7 +382,17 @@ def success_factory(kwds=None):
                         'Content': kwds})
 
 
-def authorize(runid, config, require_owner=False):
+def authorize(runid: str, config: str, require_owner: bool = False) -> None:
+    """Validate that the current user can access a run's resources.
+
+    Args:
+        runid: Run identifier to check.
+        config: Configuration slug used in the request.
+        require_owner: Reserved flag for future owner-only enforcement.
+
+    Raises:
+        werkzeug.exceptions.HTTPException: Propagated when Flask aborts.
+    """
     from flask_login import current_user
     from flask import abort
     from wepppy.nodb.core import Ron
@@ -317,24 +423,43 @@ def authorize(runid, config, require_owner=False):
     abort(403)
 
 
-def get_run_owners_lazy(runid):
+def get_run_owners_lazy(runid: str) -> Any:
+    """Import-on-demand helper for retrieving run owners.
+
+    Args:
+        runid: Target run identifier.
+
+    Returns:
+        Whatever `get_run_owners` returns (typically a collection of users).
+    """
     from wepppy.weppcloud.app import get_run_owners
     return get_run_owners(runid)
 
 
-def get_user_models():
+def get_user_models() -> tuple[Any, Any, Any]:
+    """Import the ORM models used for user/run metadata.
+
+    Returns:
+        Tuple of `(Run, User, user_datastore)` objects from the Flask app.
+    """
     from wepppy.weppcloud.app import Run, User, user_datastore
     return Run, User, user_datastore
 
-def authorize_and_handle_with_exception_factory(func):
+def authorize_and_handle_with_exception_factory(
+    func: Callable[..., ResponseValue],
+) -> Callable[..., Response | ResponseValue]:
+    """Decorate run-scoped routes with auth checks and exception handling.
+
+    Args:
+        func: Route callable that expects `runid` and `config` as the first two
+            positional arguments.
+
+    Returns:
+        Wrapped callable that enforces authorization and standard error payloads.
     """
-    A decorator for Flask routes that handles authorization and
-    exceptions for a given runid.
-    
-    Expects 'runid' and 'config' to be arguments in the decorated route.
-    """
+
     @wraps(func)
-    def wrapper(runid, config, *args, **kwargs):
+    def wrapper(runid: str, config: str, *args: Any, **kwargs: Any) -> Response | ResponseValue:
         try:
             # Authorize request before executing the route; aborts raise HTTPException.
             authorize(runid, config)
@@ -345,17 +470,26 @@ def authorize_and_handle_with_exception_factory(func):
         except HTTPException:
             # Preserve Flask/Werkzeug HTTP errors such as abort(403).
             raise
-        except Exception as e:
+        except Exception:
             # For unexpected errors, return the standard exception payload.
             return exception_factory(runid=runid)
             
     return wrapper
 
-def handle_with_exception_factory(func):
-    """Wrap a route/helper to send our standard error payload for unexpected failures."""
+def handle_with_exception_factory(
+    func: Callable[P, ResponseValue],
+) -> Callable[P, Response | ResponseValue]:
+    """Wrap a callable to return the standard error payload on failure.
+
+    Args:
+        func: Callable that may raise unexpected exceptions.
+
+    Returns:
+        Wrapped callable that downgrades errors into JSON responses.
+    """
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> Response | ResponseValue:
         # Prefer an explicit runid kwarg; otherwise inspect the signature to find one.
         runid = kwargs.get('runid')
         if runid is None:
@@ -379,7 +513,16 @@ def handle_with_exception_factory(func):
     return wrapper
 
 
-def parse_rec_intervals(request, years):
+def parse_rec_intervals(request: Request, years: int) -> list[int]:
+    """Parse recurrence intervals from query parameters.
+
+    Args:
+        request: Active Flask request containing `rec_intervals`.
+        years: Total simulation span used to determine default intervals.
+
+    Returns:
+        List of recurrence intervals sorted from largest to smallest.
+    """
     rec_intervals = request.args.get('rec_intervals', None)
     if rec_intervals is None:
         rec_intervals = [2, 5, 10, 20, 25]

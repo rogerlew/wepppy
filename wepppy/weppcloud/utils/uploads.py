@@ -1,3 +1,5 @@
+"""Utilities for validating and saving run-scoped uploads."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -25,6 +27,7 @@ _BUFFER_SIZE = 64 * 1024
 
 
 def _normalize_extensions(allowed_extensions: Sequence[str]) -> set[str]:
+    """Normalize a list of extensions into lowercase strings."""
     normalized: set[str] = set()
     for ext in allowed_extensions:
         if not ext:
@@ -39,6 +42,7 @@ def _prepare_filename(
     storage: FileStorage,
     filename_transform: Optional[Callable[[str], str]],
 ) -> str:
+    """Return a sanitized filename based on the upload payload."""
     raw_name = storage.filename or ""
     if raw_name.strip() == "":
         raise UploadError("no filename specified")
@@ -71,7 +75,26 @@ def save_run_file(
     post_save: Optional[Callable[[Path], None]] = None,
     max_bytes: Optional[int] = None,
 ) -> Path:
-    """Validate and persist a run-scoped file upload."""
+    """Validate and persist a run-scoped file upload.
+
+    Args:
+        runid: Run identifier the file belongs to.
+        config: Configuration slug (unused but common for context).
+        form_field: Form field that holds the `FileStorage`.
+        allowed_extensions: Acceptable file extensions (without dot).
+        dest_subdir: Relative destination under the run directory.
+        run_root: Optional override for the run root directory.
+        filename_transform: Callable that rewrites the sanitized filename.
+        overwrite: When False, reject uploads that would replace existing files.
+        post_save: Callback invoked with the saved path.
+        max_bytes: Optional file size limit.
+
+    Returns:
+        Path to the saved file.
+
+    Raises:
+        UploadError: If validation fails.
+    """
     if form_field not in request.files:
         raise UploadError("Could not find file")
 
@@ -127,6 +150,17 @@ def upload_success(
     status: int = 200,
     **extras: Any,
 ) -> Response:
+    """Return a success JSON payload for upload handlers.
+
+    Args:
+        message: Optional human-readable description.
+        content: Optional object to include under `Content`.
+        status: HTTP status code.
+        **extras: Additional keys merged into the JSON body.
+
+    Returns:
+        Flask `Response` instance.
+    """
     payload: dict[str, Any] = {"Success": True}
     if message is not None:
         payload["Message"] = message
@@ -139,6 +173,16 @@ def upload_success(
 
 
 def upload_failure(error: str, status: int = 400, **extras: Any) -> Response:
+    """Return a standardized failure JSON payload for uploads.
+
+    Args:
+        error: Human-readable message.
+        status: HTTP status code.
+        **extras: Extra JSON keys.
+
+    Returns:
+        Flask `Response` instance.
+    """
     payload: dict[str, Any] = {"Success": False, "Error": error}
     payload.update(extras)
     response = jsonify(payload)

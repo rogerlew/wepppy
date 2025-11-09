@@ -1,3 +1,5 @@
+"""Average annual landuse summaries backed by query-engine parquet joins."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -15,7 +17,7 @@ __all__ = ["AverageAnnualsByLanduseReport", "AverageAnnualsByLanduse"]
 
 
 class AverageAnnualsByLanduseReport(ReportBase):
-    """Summarise average annual hydrologic metrics per landuse using query-engine assets."""
+    """Summarize average annual hydrologic metrics per landuse using query-engine assets."""
 
     _CACHE_KEY = "average_annuals_by_landuse"
     _CACHE_VERSION = "1"
@@ -51,6 +53,7 @@ class AverageAnnualsByLanduseReport(ReportBase):
         self.header = dataframe.columns.tolist()
 
     def _build_dataframe(self) -> pd.DataFrame:
+        """Query DuckDB for the joined loss, hillslope, and landuse metrics."""
         context = ReportQueryContext(self.wd, run_interchange=False)
 
         context.ensure_datasets(self._LOSS_DATASET, self._HILLSLOPE_DATASET, self._LANDUSE_DATASET)
@@ -131,9 +134,11 @@ class AverageAnnualsByLanduseReport(ReportBase):
         return output
 
     def _empty_dataframe(self) -> pd.DataFrame:
+        """Return an empty dataframe shaped like the display schema."""
         return pd.DataFrame({column: [] for column in self._DISPLAY_COLUMNS}, columns=self._DISPLAY_COLUMNS)
 
     def __iter__(self) -> Iterable[RowData]:
+        """Yield ``RowData`` objects for each summarized landuse row."""
         for record in self._dataframe.to_dict(orient="records"):
             yield RowData(record)
 

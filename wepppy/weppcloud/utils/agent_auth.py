@@ -1,3 +1,5 @@
+"""JWT helpers for Codex/agent integrations."""
+
 from __future__ import annotations
 
 import os
@@ -13,11 +15,16 @@ AGENT_JWT_EXPIRES_KEY = "AGENT_JWT_EXPIRES"
 
 
 def init_agent_jwt(app: Flask) -> JWTManager:
-    """
-    Configure Flask-JWT-Extended for Wojak agent sessions.
+    """Configure Flask-JWT-Extended for Wojak agent sessions.
 
-    The secret defaults to AGENT_JWT_SECRET; when unset we fall back to the
-    Flask SECRET_KEY so the feature works in dev environments out of the box.
+    Args:
+        app: Flask application instance that hosts the JWT endpoints.
+
+    Returns:
+        Initialized `JWTManager` bound to the provided Flask app.
+
+    Raises:
+        RuntimeError: If neither `AGENT_JWT_SECRET` nor `SECRET_KEY` are configured.
     """
     secret = app.config.get(AGENT_JWT_SECRET_KEY)
     if not secret:
@@ -47,6 +54,14 @@ def init_agent_jwt(app: Flask) -> JWTManager:
 
 
 def _resolve_expiry(expires: Optional[timedelta]) -> timedelta:
+    """Resolve the token TTL from an explicit value or Flask config.
+
+    Args:
+        expires: Optional override supplied by the caller.
+
+    Returns:
+        The effective lifetime for a generated token.
+    """
     if expires is not None:
         return expires
 
@@ -77,11 +92,21 @@ def generate_agent_token(
     session_id: Optional[str] = None,
     expires: Optional[timedelta] = None,
 ) -> str:
-    """
-    Create a signed JWT for a Wojak agent session.
+    """Issue a run-scoped JWT for an interactive agent.
 
-    The token includes run/config scopes so downstream MCP tools can validate
-    access before touching the filesystem.
+    Args:
+        user_id: Primary identifier for the interactive session.
+        runid: WEPPCloud run folder identifier tied to the token.
+        config: Run configuration slug.
+        tier: Optional privilege tier included in the claims.
+        session_id: Optional tracking identifier for correlated requests.
+        expires: Optional explicit TTL; defaults to the Flask config.
+
+    Returns:
+        Encoded JWT containing the requested claims.
+
+    Raises:
+        ValueError: If any of the required identifiers are missing.
     """
     if not user_id:
         raise ValueError("user_id is required for agent tokens")
