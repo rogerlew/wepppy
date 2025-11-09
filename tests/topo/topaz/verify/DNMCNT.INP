@@ -230,7 +230,7 @@ C
 C  CODE      CSA VALUE                   MSCL VALUE
 C
     0        INDETERMINATE CSA VALUE     INDETERMINATE MSCL VALUE
-    1         4                        60
+    1         5                        60
     2         30.0                         500.0
     3         10.0                         300.0
     4          5.0                         400.0

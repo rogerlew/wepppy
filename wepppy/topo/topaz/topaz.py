@@ -37,8 +37,6 @@ from wepppy.topo.watershed_abstraction.support import (
     json_to_wgs, polygonize_netful, polygonize_bound, polygonize_subcatchments
 )
 
-os.environ["PYTHONUNBUFFERED"] = "1"
-
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)
