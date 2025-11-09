@@ -1,3 +1,7 @@
+"""Custom Redis Queue worker that adds per-run logging and cancellation hooks."""
+
+from __future__ import annotations
+
 import os
 from os.path import join as _join
 from os.path import split as _split
@@ -9,6 +13,7 @@ import logging
 
 import json
 import traceback
+from multiprocessing import Process
 
 import redis
 from wepppy.config.redis_settings import (
@@ -39,12 +44,15 @@ class JobCancelledException(Exception):
 
 
 class WepppyRqWorker(Worker):
+    """RQ worker that attaches run-scoped logs and supports SIGUSR1 cancellations."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Set the signal handler for SIGUSR1
         signal.signal(signal.SIGUSR1, self.handle_cancel_signal)
         
     def perform_job(self, job: 'Job', queue: 'Queue') -> bool:
+        """Override perform_job to capture PID/runid metadata and log to rq.log."""
         self.default_result_ttl = DEFAULT_RESULT_TTL
         runid = job.args[0]
         job.meta['pid'] = os.getpid()
@@ -73,21 +81,30 @@ class WepppyRqWorker(Worker):
             if file_handler:
                 self.log.removeHandler(file_handler)
                 
-    def handle_job_failure(self, job: 'Job', queue: 'Queue', started_job_registry=None, exc_string=''):
+    def handle_job_failure(
+        self,
+        job: Job,
+        queue: Queue,
+        started_job_registry: StartedJobRegistry | None = None,
+        exc_string: str = '',
+    ) -> None:
+        """Publish job failure events while preserving the superclass behavior."""
         super().handle_job_failure(job, queue, started_job_registry)
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'failed'}))
         print(f"Job {job.id} Failed")
 
-    def handle_job_success(self, job: 'Job', queue: 'Queue', started_job_registry: StartedJobRegistry):
+    def handle_job_success(self, job: Job, queue: Queue, started_job_registry: StartedJobRegistry) -> None:
+        """Publish job success events while preserving the superclass behavior."""
         super().handle_job_success(job, queue, started_job_registry)
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'success'}))
         print(f"Finished job {job.id}")
 
-    def handle_cancel_signal(self, signum, frame):
+    def handle_cancel_signal(self, signum: int, frame: object | None) -> None:
         """Handle SIGUSR1 by raising an exception to stop the job."""
         raise JobCancelledException("Job was cancelled")
         
-    def handle_exception(self, job: 'Job', *exc_info):
+    def handle_exception(self, job: Job, *exc_info) -> None:
+        """Publish exception details before delegating back to the superclass."""
         super().handle_exception(job, *exc_info)
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'exception'}))
         print(f"Job {job.id} Raised Exception")
@@ -96,7 +113,8 @@ class WepppyRqWorker(Worker):
         job.save()
 
 
-def start_worker():
+def start_worker() -> None:
+    """Start a worker that listens on the high/default/low queues."""
     from redis import Connection as RedisConnection
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     redis_conn = redis.Redis(**conn_kwargs)

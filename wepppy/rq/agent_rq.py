@@ -25,6 +25,7 @@ _rq_connection: redis.Redis = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 
 
 def _redis() -> redis.StrictRedis:
+    """Return a cached StrictRedis client for agent coordination channels."""
     global _redis_client
     if _redis_client is None:
         pool = redis.ConnectionPool(
@@ -39,10 +40,12 @@ def _redis() -> redis.StrictRedis:
 
 
 def _publish(channel: str, payload: Dict[str, Any]) -> None:
+    """Publish a JSON payload to the provided Redis pub/sub channel."""
     _redis().publish(channel, json.dumps(payload, separators=(",", ":")))
 
 
 def _store_env(session_id: str, payload: Dict[str, Any]) -> str:
+    """Persist agent session metadata in Redis and return the storage key."""
     env_key = ENV_KEY_TEMPLATE.format(session_id=session_id)
     _redis().setex(env_key, ENV_TTL_SECONDS, json.dumps(payload))
     return env_key
@@ -57,6 +60,7 @@ def _bootstrap_command(
     response_channel: str,
     env_key: str,
 ) -> str:
+    """Build the shell command used to bootstrap a Wojak CAO session."""
     exports = {
         "SESSION_ID": session_id,
         "RUNID": runid,
@@ -79,6 +83,7 @@ def _bootstrap_command(
 
 
 def _start_bootstrap(terminal_id: str, command: str) -> None:
+    """Send the bootstrap command to the CAO terminal."""
     response = requests.post(
         f"{CAO_BASE_URL}/terminals/{terminal_id}/input",
         params={"message": command},
@@ -96,8 +101,18 @@ def spawn_wojak_session(
     user_id: str,
     jwt_secret: str,
 ) -> Dict[str, Any]:
-    """
-    Spawn a CAO/Ash session for the Wojak agent and stash shared environment metadata.
+    """Spawn a CAO/Ash (Wojak) session and persist its runtime metadata.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+        config: Configuration stem for the run (ex. ``disturbed9002``).
+        session_id: CAO session identifier (mirrors UI socket ids).
+        jwt_token: Wojak JWT token used for downstream API calls.
+        user_id: Authenticated WEPPcloud user identifier.
+        jwt_secret: Signing secret so the bootstrapper can mint tokens.
+
+    Returns:
+        Dictionary describing the CAO terminal plus Redis channel names.
     """
 
     chat_channel = REDIS_CHAT_TEMPLATE.format(session_id=session_id)

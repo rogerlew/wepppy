@@ -1,3 +1,5 @@
+"""RQ helpers for rendering reports via the Dockerized weppcloudR service."""
+
 from __future__ import annotations
 
 import inspect
@@ -23,6 +25,7 @@ class WeppcloudRError(RuntimeError):
 
 
 def _ensure_docker_client() -> None:
+    """Ensure the Docker CLI is available before attempting to exec commands."""
     if shutil.which("docker") is None:
         raise WeppcloudRError(
             "Docker CLI not found in PATH. Install Docker or expose the CLI to the worker container."
@@ -30,6 +33,7 @@ def _ensure_docker_client() -> None:
 
 
 def _coerce_bool(value: object) -> bool:
+    """Coerce arbitrary truthy values into canonical booleans."""
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
@@ -38,6 +42,7 @@ def _coerce_bool(value: object) -> bool:
 
 
 def _write_command_logs(output_dir: Path, job_id: str, stdout: str, stderr: str) -> None:
+    """Persist stdout/stderr output from docker exec invocations."""
     try:
         (output_dir / f"render_deval_{job_id}.stdout").write_text(stdout, encoding="utf-8")
         (output_dir / f"render_deval_{job_id}.stderr").write_text(stderr, encoding="utf-8")
@@ -57,25 +62,21 @@ def render_deval_details_rq(
 ) -> str:
     """Render the DEVAL Details report inside the weppcloudR container.
 
-    Parameters
-    ----------
-    runid : str
-        Run identifier (first positional argument for the worker contract).
-    config : str
-        Configuration stem associated with the run.
-    active_root : str
-        Absolute path to the active run directory (config or pup root).
-    skip_cache : bool, optional
-        When True the cached report is ignored and a fresh render is forced.
-    container_name : str, optional
-        Override the docker container name (defaults to ``$WEPPCLOUDR_CONTAINER`` or ``weppcloudr``).
-    timeout : int, optional
-        Timeout in seconds for the docker exec command.
+    Args:
+        runid: Identifier used to locate the working directory.
+        config: Configuration stem associated with the run.
+        active_root: Absolute path to the active run directory.
+        skip_cache: When True, force a re-render even if the cache exists.
+        container_name: Optional Docker container override.
+        timeout: Optional timeout (seconds) for the `docker exec` command.
 
-    Returns
-    -------
-    str
-        The filesystem path to the rendered HTML document.
+    Returns:
+        Absolute path to the rendered HTML document.
+
+    Raises:
+        FileNotFoundError: If the active directory or rendered output is missing.
+        WeppcloudRError: When Docker is unavailable or the render command fails.
+        subprocess.TimeoutExpired: If the container command exceeds `timeout`.
     """
 
     job = get_current_job()

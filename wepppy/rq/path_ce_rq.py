@@ -1,3 +1,5 @@
+"""RQ task wrappers for PATH cost-effective optimization workflows."""
+
 from __future__ import annotations
 
 import inspect
@@ -15,8 +17,10 @@ TIMEOUT: int = 43_200
 
 
 def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
-    """
-    Run the PATH cost-effective optimization workflow for the given project.
+    """Run the PATH cost-effective optimization workflow for the given project.
+
+    Args:
+        runid: Identifier used to locate the working directory.
 
     Returns:
         Serialized solver payload including cost summaries and artifact paths.
