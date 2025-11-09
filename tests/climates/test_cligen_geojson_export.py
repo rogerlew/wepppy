@@ -18,7 +18,8 @@ def _has_sqlite_header(db_path: Path) -> bool:
         return False
 
 
-def collection_error(tmp_path: Path) -> None:
+@pytest.mark.integration
+def test_cligen_geojson_export(tmp_path: Path) -> None:
     db_path = Path(_cligen_module._db)
     if not _has_sqlite_header(db_path):
         pytest.skip("Cligen station database is unavailable (Git LFS asset not fetched).")

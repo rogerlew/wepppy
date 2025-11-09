@@ -494,10 +494,10 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/static-src/node_modules/flatted/python/flatted.py`
 - [ ] `wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py`
 - [ ] `wepppy/weppcloud/utils/__init__.py`
-- [ ] `wepppy/weppcloud/utils/agent_auth.py`
-- [ ] `wepppy/weppcloud/utils/archive.py`
-- [ ] `wepppy/weppcloud/utils/auth_tokens.py`
-- [ ] `wepppy/weppcloud/utils/helpers.py`
-- [ ] `wepppy/weppcloud/utils/oauth.py`
+- [x] `wepppy/weppcloud/utils/agent_auth.py`
+- [x] `wepppy/weppcloud/utils/archive.py`
+- [x] `wepppy/weppcloud/utils/auth_tokens.py`
+- [x] `wepppy/weppcloud/utils/helpers.py`
+- [x] `wepppy/weppcloud/utils/oauth.py`
 - [ ] `wepppy/weppcloud/utils/test/test_archive.py`
-- [ ] `wepppy/weppcloud/utils/uploads.py`
+- [x] `wepppy/weppcloud/utils/uploads.py`
