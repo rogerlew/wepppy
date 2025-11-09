@@ -16,19 +16,6 @@ from ._utils import _parse_float, _julian_to_calendar
 from .versioning import schema_with_version
 
 
-"""
-Example PASS file content:
-p1.cli                                             
-  100         1
-.23400E+05
-  5    0.20000E-05 0.10000E-04 0.34500E-04 0.54500E-03 0.20000E-03
-    0.00     0.00     0.00     0.00
-NO EVENT      2    25      0.65587E+01 0.00000E+00
-EVENT         3     8      0.10800E+05 0.11345E+00 0.63642E-01 0.27836E-02 0.65137E+02 0.00000E+00 0.00000E+00 0.00000E+00 0.00000E+00 0.10150E-01      0.31549E+01 0.00000E+00 0.34317E-02 0.33028E-02 0.13868E-01      0.24152E-01 0.36816E-02 0.70850E-01 0.68190E-01 0.28631E+00
-SUBEVENT      2   152      0.91566E-05 0.21426E+00 0.00000E+00 0.00000E+00 0.15037E+02 0.00000E+00
-"""
-
-
 EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
 SEDCLASS_COUNT = 5
 EVENT_FLOAT_COUNT = 12 + (2 * SEDCLASS_COUNT) + 2  # dur..tdep + sedcon + frcflw + gwbfv/gwdsv
@@ -78,6 +65,7 @@ SCHEMA = schema_with_version(
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
 def _event_tokens(lines: List[str], start_idx: int) -> tuple[List[str], int]:
+    """Collect numeric values for a multi-line EVENT record."""
     primary = lines[start_idx]
     numeric_tokens = primary[8:].split()
 
@@ -94,18 +82,22 @@ def _event_tokens(lines: List[str], start_idx: int) -> tuple[List[str], int]:
 
 
 def _subevent_tokens(line: str) -> List[str]:
+    """Return numeric tokens for a SUBEVENT line."""
     return line[8:].split()
 
 
 def _noevent_tokens(line: str) -> List[str]:
+    """Return numeric tokens for a NO EVENT line."""
     return line[8:].split()
 
 
 def _init_column_store() -> Dict[str, List]:
+    """Create an empty columnar store keyed by schema field."""
     return {name: [] for name in SCHEMA.names}
 
 
 def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
+    """Append a dictionary row to the in-memory columnar store."""
     for name in SCHEMA.names:
         store[name].append(row[name])
 
@@ -114,6 +106,7 @@ PASS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
 
 def _parse_pass_file(path: Path) -> pa.Table:
+    """Parse a single PASS file into a PyArrow table."""
     match = PASS_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized PASS filename pattern: {path}")
@@ -271,6 +264,7 @@ def _parse_pass_file(path: Path) -> pa.Table:
 
 
 def run_wepp_hillslope_pass_interchange(wepp_output_dir: Path | str) -> Path:
+    """Convert all `H*.pass.dat` files into a consolidated parquet dataset."""
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)

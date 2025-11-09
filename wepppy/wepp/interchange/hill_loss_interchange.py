@@ -52,15 +52,18 @@ SCHEMA = schema_with_version(
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
 def _init_column_store() -> Dict[str, List]:
+    """Create an empty columnar store keyed by schema column name."""
     return {name: [] for name in SCHEMA.names}
 
 
 def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
+    """Append a parsed record to the in-memory column store."""
     for name in SCHEMA.names:
         store[name].append(row[name])
 
 
 def _locate_class_table(lines: List[str]) -> Optional[int]:
+    """Return the index of the table header for sediment particle classes."""
     target_phrase = "sediment particle information leaving profile"
     start_idx: Optional[int] = None
     for idx, line in enumerate(lines):
@@ -70,6 +73,7 @@ def _locate_class_table(lines: List[str]) -> Optional[int]:
 
 
 def _parse_loss_file(path: Path) -> pa.Table:
+    """Parse a single `H*.loss.dat` file into a PyArrow table."""
     match = LOSS_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized LOSS filename pattern: {path}")
@@ -113,6 +117,7 @@ def _parse_loss_file(path: Path) -> pa.Table:
 
 
 def run_wepp_hillslope_loss_interchange(wepp_output_dir: Path | str) -> Path:
+    """Generate `H.loss.parquet` by parsing all hillslope loss outputs."""
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
