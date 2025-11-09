@@ -1,3 +1,5 @@
+"""Catalog activation helpers for WEPPcloud query engine assets."""
+
 from __future__ import annotations
 
 import json
@@ -5,7 +7,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Iterable, List
+from collections.abc import Iterable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,26 +32,19 @@ def activate_query_engine(
     wd: str | Path,
     *,
     run_interchange: bool = True,
-) -> Dict[str, object]:
-    """Scan a WEPPcloud working directory and build the query-engine catalog.
+) -> dict[str, object]:
+    """Scan a working directory and build the query-engine catalog.
 
-    Parameters
-    ----------
-    wd : str | Path
-        Working directory for a WEPPcloud run (parent of wepp/, landuse/, etc.).
-    run_interchange : bool, optional
-        When True, run the WEPP interchange exporters for any `wepp/output`
-        folder that does not already contain an `interchange` directory, by default True.
+    Args:
+        wd: Working directory for a WEPPcloud run (parent of `wepp/`, `landuse/`, etc.).
+        run_interchange: When True, generate missing WEPP interchange outputs.
 
-    Returns
-    -------
-    dict
-        The catalog dictionary persisted under `<wd>/_query_engine/catalog.json`.
+    Returns:
+        Catalog dictionary persisted under `<wd>/_query_engine/catalog.json`.
 
-    Raises
-    ------
-    FileNotFoundError
-        If the working directory does not exist.
+    Raises:
+        FileNotFoundError: If the supplied working directory does not exist.
+        PermissionError: If the working directory is flagged read-only.
     """
 
     base = Path(wd).expanduser().resolve()
@@ -81,7 +76,7 @@ def activate_query_engine(
 
     catalog_entries = _build_catalog(base)
 
-    catalog: Dict[str, object] = {
+    catalog: dict[str, object] = {
         "version": 1,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(base),
@@ -97,30 +92,20 @@ def activate_query_engine(
 def update_catalog_entry(
     wd: str | Path,
     asset_path: str,
-) -> Dict[str, object] | None:
-    """
-    Update the catalog entry for a single asset under the WEPP working directory.
+) -> dict[str, object] | None:
+    """Update the catalog entry for a single asset under the WEPP working directory.
 
-    Parameters
-    ----------
-    wd : str | Path
-        Working directory for a WEPPcloud run.
-    asset_path : str
-        Path to the asset relative to the working directory.
+    Args:
+        wd: Working directory for a WEPPcloud run.
+        asset_path: File path relative to the working directory (or absolute path).
 
-    Returns
-    -------
-    dict | None
-        The updated catalog entry, or None if the file no longer exists and was removed.
+    Returns:
+        The updated catalog entry or None if the file was removed.
 
-    Raises
-    ------
-    FileNotFoundError
-        If the working directory or catalog does not exist.
-    PermissionError
-        If the working directory is flagged as read-only.
-    ValueError
-        If the requested path is outside the working directory.
+    Raises:
+        FileNotFoundError: If the working directory or catalog does not exist.
+        PermissionError: If the working directory is flagged as read-only.
+        ValueError: If the requested path resides outside the working directory.
     """
 
     base = Path(wd).expanduser().resolve()
@@ -146,10 +131,10 @@ def update_catalog_entry(
         return activate_query_engine(base, run_interchange=False)
 
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-    files: List[Dict[str, object]] = catalog.get("files", [])
+    files: list[dict[str, object]] = catalog.get("files", [])
     files_by_path = {entry["path"]: entry for entry in files}
 
-    updated_entry: Dict[str, object] | None = None
+    updated_entry: dict[str, object] | None = None
     if target.exists():
         if target.is_dir():
             new_entries = _build_catalog_subset(base, target)
@@ -173,7 +158,12 @@ def update_catalog_entry(
 
 
 def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
-    """Generate WEPP interchange outputs when missing."""
+    """Generate WEPP interchange outputs when missing.
+
+    Args:
+        base: Working directory path.
+        start_year: Optional start year override for climate-aware runs.
+    """
     try:
         start_year = int(start_year)  # type: ignore
     except (TypeError, ValueError):
@@ -210,10 +200,17 @@ def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
             pass
 
 
-def _build_catalog(base: Path) -> List[Dict[str, object]]:
-    """Walk the directory tree and collect metadata for known asset types."""
+def _build_catalog(base: Path) -> list[dict[str, object]]:
+    """Walk the directory tree and collect metadata for known asset types.
 
-    entries: List[Dict[str, object]] = []
+    Args:
+        base: Working directory root.
+
+    Returns:
+        Sorted list of catalog entries keyed by path.
+    """
+
+    entries: list[dict[str, object]] = []
     base_len = len(str(base)) + 1
 
     for root, _, files in os.walk(base):
@@ -229,8 +226,17 @@ def _build_catalog(base: Path) -> List[Dict[str, object]]:
     return entries
 
 
-def _build_catalog_subset(base: Path, directory: Path) -> List[Dict[str, object]]:
-    entries: List[Dict[str, object]] = []
+def _build_catalog_subset(base: Path, directory: Path) -> list[dict[str, object]]:
+    """Build catalog entries limited to a specific directory subtree.
+
+    Args:
+        base: Run directory root.
+        directory: Directory tree that should be re-indexed.
+
+    Returns:
+        List of catalog entries contained inside the subtree.
+    """
+    entries: list[dict[str, object]] = []
     base_len = len(str(base)) + 1
 
     for root, _, files in os.walk(directory):
@@ -245,7 +251,15 @@ def _build_catalog_subset(base: Path, directory: Path) -> List[Dict[str, object]
     return entries
 
 
-def _read_parquet_schema(path: Path) -> Dict[str, object] | None:
+def _read_parquet_schema(path: Path) -> dict[str, object] | None:
+    """Read parquet schema metadata for inclusion in the catalog.
+
+    Args:
+        path: Path to the parquet file.
+
+    Returns:
+        Dictionary describing schema fields, or None if unavailable.
+    """
     try:
         import pyarrow.parquet as pq  # type: ignore
     except ImportError:  # pragma: no cover
@@ -271,7 +285,15 @@ def _read_parquet_schema(path: Path) -> Dict[str, object] | None:
     return {"fields": fields}
 
 
-def _read_geo_schema(path: Path) -> Dict[str, object] | None:
+def _read_geo_schema(path: Path) -> dict[str, object] | None:
+    """Attempt to read schema metadata for geojson-compatible files.
+
+    Args:
+        path: Path to the geospatial file.
+
+    Returns:
+        Dictionary describing schema fields, or None.
+    """
     try:
         import duckdb
     except ImportError:  # pragma: no cover
@@ -279,7 +301,17 @@ def _read_geo_schema(path: Path) -> Dict[str, object] | None:
         return None
 
 
-def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> Dict[str, object] | None:
+def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> dict[str, object] | None:
+    """Build a catalog entry for a single file path.
+
+    Args:
+        base: Base working directory.
+        path: File path being catalogued.
+        base_len: Optional cached length of the base path for slicing.
+
+    Returns:
+        Catalog entry dictionary or None when unsupported.
+    """
     suffix = path.suffix.lower()
     if suffix not in SUPPORTED_EXTENSIONS:
         return None
@@ -293,7 +325,7 @@ def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> Dict
         base_len = len(str(base)) + 1
 
     rel_path = str(path)[base_len:]
-    entry: Dict[str, object] = {
+    entry: dict[str, object] = {
         "path": rel_path.replace(os.sep, "/"),
         "extension": suffix,
         "size_bytes": stat.st_size,
@@ -309,5 +341,6 @@ def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> Dict
 
 
 def _raise_if_readonly(base: Path) -> None:
+    """Raise PermissionError when a WEPP run is marked read-only."""
     if (base / READONLY_SENTINEL).exists():
         raise PermissionError(f"Working directory '{base}' is flagged as read-only")

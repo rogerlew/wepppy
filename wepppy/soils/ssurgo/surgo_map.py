@@ -3,67 +3,67 @@
 #
 # Roger Lew (rogerlew@gmail.com)
 #
+from __future__ import annotations
+
+"""Raster helpers for SSURGO/STATSGO mapunit (mukey) rasters."""
+
+# Copyright (c) 2016-2018, University of Idaho
+# All rights reserved.
+#
+# Roger Lew (rogerlew@gmail.com)
+#
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-import os
-from os.path import join as _join
-from os.path import exists as _exists
-
 from collections import Counter
+from pathlib import Path
+from typing import Iterable, Optional, Tuple, Union
 
 import numpy as np
 
-from osgeo import osr
-from osgeo import gdal
-from osgeo.gdalconst import GDT_UInt32
+from wepppy.all_your_base.geo import read_raster
 
-from deprecated import deprecated
+__version__ = "v.0.1.0"
 
-from wepppy.all_your_base.geo import read_raster, raster_stacker
-
-__version__ = 'v.0.1.0'
-
-_thisdir = os.path.dirname(__file__)
-_ssurgo_cache_db = _join(_thisdir, ':memory:')  # 'ssurgo_cache.db')
-_statsco_cache_db = _join(_thisdir, 'statsco.db')
 
 class NoValidSoilsException(Exception):
-    """
-    No valid soils could be found within the catchment boundary
-    """
-    
-    __name__ = 'No Valid Soils Exception'
+    """Raised when no valid SSURGO soils can be found within the AOI."""
+
+    __name__ = "No Valid Soils Exception"
 
 
 class SurgoMap:
-    def __init__(self, fname):
-        assert _exists(fname)
-        self.fname = fname
+    """Small helper around a mukey raster used by `SurgoSoilCollection`."""
 
-        data, transform, proj = read_raster(fname, dtype=np.int32)
-        
+    def __init__(self, fname: Union[str, Path]) -> None:
+        fname = Path(fname)
+        if not fname.exists():
+            raise FileNotFoundError(fname)
+
+        data, transform, proj = read_raster(str(fname), dtype=np.int32)
+
         self.data = data
         self.transform = transform
         self.proj = proj
         self.mukeys = list(set(self.data.flatten()))
-        self.fname = fname
+        self.fname = str(fname)
 
-    def _get_dominant(self, indices=None, valid_mukeys=None):
-        """
-        Determines the dominant mukey for the given indices. If
-        indices is None then the entire maps is examined
-        """
+    def _get_dominant(
+        self,
+        indices: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+        valid_mukeys: Optional[Iterable[int]] = None,
+    ) -> Optional[int]:
+        """Return the dominant mukey globally or for the supplied pixel indices."""
 
         if indices is None:
-            x = self.data
-            
-        else:
-            x = self.data[indices]
-        
-        x = list(x.flatten())
+            subset = self.data
 
-        sorted_keys = Counter(x).most_common()[0]
+        else:
+            subset = self.data[indices]
+
+        flattened = list(subset.flatten())
+
+        sorted_keys = Counter(flattened).most_common()[0]
 
         if valid_mukeys is None:
             return sorted_keys[0]
@@ -71,6 +71,5 @@ class SurgoMap:
             for key in sorted_keys:
                 if key in valid_mukeys:
                     return key
-                
+
         return None
-        

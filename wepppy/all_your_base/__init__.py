@@ -11,4 +11,6 @@ from .hydro import __all__ as _hydro_all
 from .stats import *  # noqa: F401,F403
 from .stats import __all__ as _stats_all
 
-__all__ = list(_core_all) + list(_dateutils_all) + list(_hydro_all) + list(_stats_all)
+__all__: list[str] = (
+    list(_core_all) + list(_dateutils_all) + list(_hydro_all) + list(_stats_all)
+)

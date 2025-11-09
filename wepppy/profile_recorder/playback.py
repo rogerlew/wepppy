@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Profile playback tooling that replays recorder captures into WEPPcloud."""
+
 import argparse
 import json
 import logging
@@ -24,6 +26,7 @@ class SandboxViolationError(RuntimeError):
 
 
 def _playback_run_root() -> Path:
+    """Return the directory used to stage playback run directories."""
     base = os.environ.get("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback")
     return Path(os.environ.get("PROFILE_PLAYBACK_RUN_ROOT", os.path.join(base, "runs")))
 
@@ -36,6 +39,16 @@ class PlaybackSession:
 
     Only GET requests and JSON POST bodies are currently supported. Other payload
     types (form-data uploads) are surfaced in the report for manual follow-up.
+
+    Args:
+        profile_root: Path to a promoted recorder profile containing capture artifacts.
+        base_url: Target WEPPcloud base URL.
+        execute: When ``True`` send HTTP requests, otherwise log dry-run actions.
+        run_dir: Optional pre-provisioned run directory to reuse.
+        session: Optional preconfigured :class:`requests.Session`.
+        verbose: Enable detailed logging when ``True``.
+        logger: Optional logger that receives verbose messages.
+        playback_run_id: Override the generated run identifier used during replay.
     """
 
     def __init__(
@@ -50,6 +63,7 @@ class PlaybackSession:
         logger: Optional[logging.Logger] = None,
         playback_run_id: Optional[str] = None,
     ) -> None:
+        """Prime the session by indexing events and creating a sandboxed run."""
         self.profile_root = profile_root
         self.execute = execute
         self.base_url = base_url.rstrip("/")
@@ -93,6 +107,7 @@ class PlaybackSession:
         self.results: List[Tuple[str, str]] = []
 
     def _prepare_run_directory(self, profile_root: Path, run_id: str) -> Path:
+        """Create a clean run directory seeded with captured artifacts."""
         playback_root = _playback_run_root()
         playback_root.mkdir(parents=True, exist_ok=True)
         target = playback_root / run_id
@@ -104,6 +119,7 @@ class PlaybackSession:
 
     @staticmethod
     def _detect_run_id(events: Iterable[Event]) -> Optional[str]:
+        """Infer the source run identifier from the recorded request events."""
         for event in events:
             if event.get("stage") != "request":
                 continue
@@ -120,6 +136,7 @@ class PlaybackSession:
 
     @staticmethod
     def _load_events(path: Path) -> List[Event]:
+        """Read newline-delimited JSON capture events from disk."""
         events: List[Event] = []
         with path.open("r", encoding="utf-8") as handle:
             for line in handle:
@@ -131,6 +148,7 @@ class PlaybackSession:
 
     @staticmethod
     def _index_requests(events: Iterable[Event]) -> Dict[str, Event]:
+        """Build a lookup table from recorder request IDs to their metadata."""
         requests: Dict[str, Event] = {}
         for event in events:
             if event.get("stage") == "request" and "id" in event:
@@ -138,6 +156,7 @@ class PlaybackSession:
         return requests
 
     def run(self) -> None:
+        """Replay captured responses and optionally execute HTTP requests."""
         self._log("Beginning playback")
         for event in self.events:
             if event.get("stage") != "response":
@@ -234,6 +253,7 @@ class PlaybackSession:
 
     @staticmethod
     def _normalise_path(endpoint: str) -> str:
+        """Return a canonical path (leading slash, no scheme) for an endpoint."""
         if not endpoint:
             return ""
         parsed = urlparse(endpoint)
@@ -244,6 +264,7 @@ class PlaybackSession:
         return path
 
     def report(self) -> str:
+        """Return a formatted summary of the playback actions."""
         lines = ["Playback results:"]
         for request_id, status in self.results:
             lines.append(f"  - {request_id}: {status}")
@@ -261,6 +282,7 @@ class PlaybackSession:
         path: str,
         request_meta: Dict[str, Any],
     ) -> requests.Response:
+        """Send a single HTTP request and coordinate follow-up bookkeeping."""
         kwargs: Dict[str, object] = {"timeout": 60}
         files_stack = ExitStack()
         form_data: Dict[str, Any] = {}
@@ -331,6 +353,7 @@ class PlaybackSession:
         timeout: int = 300,
         interval: float = 2.0,
     ) -> requests.Response:
+        """Poll a task endpoint until a success status or timeout is reached."""
         end_time = time.time() + timeout
         last_response: Optional[requests.Response] = None
         last_status: Optional[int] = None
@@ -374,6 +397,7 @@ class PlaybackSession:
             time.sleep(interval)
 
     def _expected_status(self, event: Event) -> int:
+        """Return the HTTP status code the recorder reported for the response."""
         status = event.get("status")
         if isinstance(status, int):
             return status
@@ -382,6 +406,7 @@ class PlaybackSession:
         return 400
 
     def _extract_query_params(self, event: Event) -> List[Tuple[str, str]]:
+        """Parse query parameters from the recorded endpoint URL."""
         endpoint = str(event.get("endpoint") or "")
         parsed = urlparse(endpoint)
         if parsed.query:
@@ -389,6 +414,7 @@ class PlaybackSession:
         return []
 
     def _build_url(self, path: str) -> str:
+        """Construct a fully-qualified URL for the target WEPPcloud base."""
         base = self.base_url.rstrip("/")
         normalized_path = path.lstrip("/")
         parsed_base = urlparse(base)
@@ -405,17 +431,20 @@ class PlaybackSession:
         return urljoin(f"{base}/", normalized_path)
 
     def _should_wait_for_completion(self, method: str, path: str, expected_status: int) -> bool:
+        """Return True when playback should poll for completion after the request."""
         if method != "GET" or expected_status != 200:
             return False
         return any(path.endswith(suffix) for suffix in _WAIT_SUFFIXES)
 
     def _log(self, message: str) -> None:
+        """Emit playback log messages to the configured logger or stdout."""
         if self._logger is not None:
             self._logger.info(message)
         else:
             print(f"[playback] {message}")
 
     def _await_pending_jobs(self) -> None:
+        """Wait for every job enqueued by playback POST requests."""
         while self._pending_jobs:
             job_id, task_path = self._pending_jobs.popleft()
             if self.verbose:
@@ -423,6 +452,7 @@ class PlaybackSession:
             self._wait_for_job(job_id, task=task_path)
 
     def _remap_run_path(self, path: str) -> str:
+        """Replace source run identifiers with the playback sandbox run id."""
         if not self.original_run_id:
             return path
 
@@ -445,6 +475,7 @@ class PlaybackSession:
         return path
 
     def _guard_sandbox_target(self, path: str, request_id: str) -> None:
+        """Block requests that still reference the production run directory."""
         if not self.original_run_id:
             return
         marker = f"/runs/{self.original_run_id}"
@@ -462,6 +493,7 @@ class PlaybackSession:
         path: str,
         request_meta: Dict[str, Any],
     ) -> Tuple[Dict[str, Any], Dict[str, Tuple[Path, str]]]:
+        """Reconstruct form-data payloads using captured seed files when possible."""
         data: Dict[str, Any] = {}
         files: Dict[str, Tuple[Path, str]] = {}
         normalized = path.rstrip("/")
@@ -492,6 +524,7 @@ class PlaybackSession:
         self,
         data: Dict[str, Any],
     ) -> None:
+        """Populate soils form inputs from the run's Soils controller."""
         from wepppy.nodb.core.soils import Soils
 
         soils = Soils.getInstance(self.run_dir)
@@ -516,6 +549,7 @@ class PlaybackSession:
         data: Dict[str, Any],
         files: Dict[str, Tuple[Path, str]],
     ) -> None:
+        """Populate the landuse builder form and attach any captured uploads."""
         from wepppy.nodb.core.landuse import Landuse, LanduseMode
         from wepppy.nodb.mods.disturbed import Disturbed
 
@@ -560,6 +594,7 @@ class PlaybackSession:
         data: Dict[str, Any],
         files: Dict[str, Tuple[Path, str]],
     ) -> None:
+        """Populate SBS upload metadata and attach any available rasters."""
         upload_dir = self.seed_upload_root / "sbs"
         candidates = sorted(upload_dir.glob("input_upload_sbs*")) if upload_dir.exists() else []
         search_roots: List[Path] = []
@@ -582,6 +617,7 @@ class PlaybackSession:
         self,
         files: Dict[str, Tuple[Path, str]],
     ) -> None:
+        """Attach captured Revegetation cover transform CSV uploads."""
         upload_dir = self.seed_upload_root / "revegetation"
         candidates = sorted(upload_dir.glob("input_upload_cover_transform*")) if upload_dir.exists() else []
         if not candidates:
@@ -595,6 +631,7 @@ class PlaybackSession:
         self,
         files: Dict[str, Tuple[Path, str]],
     ) -> None:
+        """Attach CLI uploads, falling back to capture snapshots when needed."""
         upload_dir = self.seed_upload_root / "climate"
         candidates = sorted(upload_dir.glob("input_upload_cli*")) if upload_dir.exists() else []
         if not candidates:
@@ -609,6 +646,7 @@ class PlaybackSession:
         data: Dict[str, Any],
         files: Dict[str, Tuple[Path, str]],
     ) -> None:
+        """Populate Ash Transport form payloads and attach rasters."""
         from wepppy.nodb.mods.ash_transport import Ash
 
         ash = Ash.getInstance(str(self.run_dir))
@@ -670,6 +708,7 @@ class PlaybackSession:
         data: Dict[str, Any],
         files: Dict[str, Tuple[Path, str]],
     ) -> None:
+        """Populate Omni scenario definitions and attach SBS payloads."""
         from wepppy.nodb.mods.omni import Omni
 
         omni = Omni.getInstance(str(self.run_dir))
@@ -701,6 +740,7 @@ class PlaybackSession:
             data["scenarios"] = json.dumps(payload_defs)
 
     def _hydrate_seed_files(self, target: Path) -> None:
+        """Copy capture seed files (configs/uploads) into the sandbox run."""
         if not self.seed_root.exists():
             return
         config_seed = self.seed_root / "config"
@@ -729,6 +769,7 @@ class PlaybackSession:
                 self._log(f"Failed to initialize Ron with seed config {self.seed_config_stem}: {exc}")
 
     def _format_yearless_date(self, value: Any) -> Optional[str]:
+        """Render a month/day string as expected by form fields."""
         try:
             month = getattr(value, "month", None)
             day = getattr(value, "day", None)
@@ -742,6 +783,7 @@ class PlaybackSession:
             return None
 
     def _format_number(self, value: Any) -> str:
+        """Format numbers consistently so forms do not thrash state."""
         try:
             numeric = float(value)
         except Exception:
@@ -749,6 +791,7 @@ class PlaybackSession:
         return f"{numeric:.6g}"
 
     def _resolve_omni_sbs_seed(self, idx: int, original_path: Optional[str]) -> Optional[Path]:
+        """Resolve the capture file backing an Omni SBS scenario."""
         candidates: List[Path] = []
         seed_dir = self.seed_upload_root / "omni" / "_limbo"
         if seed_dir.exists():
@@ -779,6 +822,7 @@ class PlaybackSession:
         return None
 
     def _clear_playback_locks(self, *, stage: str) -> None:
+        """Clear lingering Redis locks for both the source and playback run ids."""
         identifiers = {self.playback_run_id}
         if self.original_run_id:
             identifiers.add(self.original_run_id)
@@ -797,6 +841,7 @@ class PlaybackSession:
             self._log(f"[locks:{stage}] No locks cleared")
 
     def _retag_run_group(self) -> None:
+        """Ensure sandbox nodb files use the temporary profile run-group."""
         group = "profile"
         group_name = "tmp"
         run_path = Path(self.run_dir)
@@ -822,6 +867,7 @@ class PlaybackSession:
                     self._log(f"Failed to write retagged run-group for {nodb_path}: {exc}")
 
     def _extract_job_id(self, response: requests.Response) -> Optional[str]:
+        """Parse job ids from JSON responses returned by POST requests."""
         content_type = response.headers.get("content-type", "")
         if "application/json" not in content_type.lower():
             return None
@@ -840,6 +886,7 @@ class PlaybackSession:
         return None
 
     def _fetch_job_info(self, job_id: str) -> Optional[dict]:
+        """Retrieve job metadata for logging and diagnostics."""
         info_url = self._build_url(f"/rq/api/jobinfo/{job_id}")
         try:
             response = self.session.get(info_url, timeout=60)
@@ -856,6 +903,7 @@ class PlaybackSession:
         return payload
 
     def _describe_job_failure(self, job_id: str, job_info: Optional[dict] = None) -> Optional[str]:
+        """Return a human-readable failure tree for the requested job."""
         if job_info is None:
             job_info = self._fetch_job_info(job_id)
 
@@ -896,6 +944,7 @@ class PlaybackSession:
         task: Optional[str],
         job_info: Optional[dict] = None,
     ) -> None:
+        """Emit elapsed-time diagnostics for finished or failed jobs."""
         if not self.verbose:
             return
 
@@ -939,6 +988,7 @@ class PlaybackSession:
         interval: float = 2.0,
         task: Optional[str] = None,
     ) -> None:
+        """Poll jobstatus until the queued job completes or fails."""
         status_url = self._build_url(f"/rq/api/jobstatus/{job_id}")
         end_time = time.time() + timeout
         last_status: Optional[str] = None
@@ -998,6 +1048,7 @@ class PlaybackSession:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    """CLI entry point used by ``python -m wepppy.profile_recorder.playback``."""
     parser = argparse.ArgumentParser(description="Replay recorder events against WEPPcloud.")
     parser.add_argument("profile", type=Path, help="Path to promoted profile root.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000", help="WEPPcloud base URL.")

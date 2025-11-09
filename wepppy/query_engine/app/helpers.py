@@ -1,3 +1,5 @@
+"""Utilities shared across Starlette entrypoints."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,8 +8,16 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 
 def resolve_run_path(runid_param: str) -> Path:
-    """
-    Resolve a run identifier or path to an absolute existing directory.
+    """Resolve a run identifier or path to an absolute existing directory.
+
+    Args:
+        runid_param: Run slug or filesystem path.
+
+    Returns:
+        Absolute Path to the detected run directory.
+
+    Raises:
+        FileNotFoundError: If the path cannot be resolved.
     """
 
     try:

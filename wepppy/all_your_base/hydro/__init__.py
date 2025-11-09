@@ -1,3 +1,7 @@
+"""Hydrology utilities exported for compatibility with legacy callers."""
+
+from __future__ import annotations
+
 from .hydro import determine_wateryear, vec_determine_wateryear
 from .objective_functions import (
     agreementindex,
@@ -21,7 +25,7 @@ from .objective_functions import (
     volume_error,
 )
 
-__all__ = [
+__all__: list[str] = [
     'determine_wateryear',
     'vec_determine_wateryear',
     'agreementindex',

@@ -1,11 +1,13 @@
-from typing import Tuple
-import json
+from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
+import json
+import math
 import os
 from os.path import exists as _exists
 from os.path import split as _split
 import shutil
-import math
+from typing import Any, Tuple
 from uuid import uuid4
 
 # noinspection PyPep8Naming
@@ -27,6 +29,7 @@ from .locationinfo import RasterDatasetInterpolator
 import rasterio
 import rasterio.warp
 from rasterio.warp import reproject, Resampling, calculate_default_transform
+from numpy.typing import NDArray
 
 from wepppy import f_esri as _f_esri
 
@@ -45,21 +48,68 @@ resample_methods = 'near bilinear cubic cubicspline lanczos ' \
                 'average mode max min med q1 q1'.split()
 resample_methods = tuple(resample_methods)
 
+PathType = str | os.PathLike[str]
+FloatArray = NDArray[np.floating[Any]]
+
+__all__ = [
+    "SCRATCH_DIR",
+    "wgs84_proj4",
+    "wgs84_wkt",
+    "resample_methods",
+    "has_f_esri",
+    "f_esri_gpkg_to_gdb",
+    "utm_raster_transform",
+    "validate_srs",
+    "utm_srid",
+    "centroid_px",
+    "crop_geojson",
+    "get_raster_extent",
+    "raster_stacker",
+    "warp2match",
+    "px_to_utm",
+    "px_to_lnglat",
+    "translate_tif_to_asc",
+    "translate_asc_to_tif",
+    "raster_extent",
+    "read_raster",
+    "wkt_2_proj4",
+    "read_tif",
+    "read_arc",
+    "write_arc",
+    "build_mask",
+    "get_utm_zone",
+    "haversine",
+    "determine_band_type",
+    "raster_stats",
+    "format_convert",
+    "crop_and_transform",
+    "rasterize_geometry_from_geojson",
+]
+
 
 # https://github.com/rogerlew/gdal-grande
 
-def has_f_esri():
+
+def has_f_esri() -> bool:
+    """Return ``True`` when the optional ESRI tooling is installed."""
+
     return _f_esri.has_f_esri()
 
 
-def f_esri_gpkg_to_gdb(gpkg_fn, gdb_fn):
-    """
-    Runs the docker command to convert a GeoPackage to a FileGDB.
-    """
+def f_esri_gpkg_to_gdb(gpkg_fn: PathType, gdb_fn: PathType) -> None:
+    """Convert a GeoPackage to FileGDB format using the ESRI helper."""
 
     _f_esri.c2c_gpkg_to_gdb(gpkg_fn, gdb_fn)
 
-def utm_raster_transform(wgs_extent, src_fn, dst_fn, cellsize, resample='bilinear'):
+
+def utm_raster_transform(
+    wgs_extent: Sequence[float],
+    src_fn: PathType,
+    dst_fn: PathType,
+    cellsize: float,
+    resample: str = 'bilinear',
+) -> None:
+    """Warp a raster into UTM space clipped to ``wgs_extent``."""
     west, south, east, north = wgs_extent
 
     assert src_fn is not None, 'Failed to download DEM'
@@ -101,16 +151,8 @@ def utm_raster_transform(wgs_extent, src_fn, dst_fn, cellsize, resample='bilinea
     # check to see if file was created
     assert os.path.exists(dst_fn), json.dumps(dict(cmd=cmd, output=output))
 
-def validate_srs(file_path):
-    """
-    Validates the SRS of a given file using gdalsrsinfo.
-
-    Parameters:
-        file_path (str): Path to the file to validate.
-
-    Returns:
-        bool: True if the SRS is valid, False otherwise.
-    """
+def validate_srs(file_path: PathType) -> bool:
+    """Validate the spatial reference recorded in ``file_path``."""
     cmd = ["gdalsrsinfo", "-v", file_path]
 
     try:
@@ -126,19 +168,23 @@ def validate_srs(file_path):
     return False
 
 
-def utm_srid(zone, northern) -> [str, None]:
+def utm_srid(zone: int, northern: bool) -> str:
+    """Return the EPSG SRID string for the provided UTM zone."""
+
     return f"326{zone:02d}" if northern else f"327{zone:02d}"
 
 
-def centroid_px(indx, indy) -> Tuple[int, int]:
-    """
-    given a sets of x and y indices calulates a central [x,y] index
-    """
-    return (int(round(float(np.mean(indx)))),
-            int(round(float(np.mean(indy)))))
+def centroid_px(indx: Sequence[float], indy: Sequence[float]) -> Tuple[int, int]:
+    """Return the rounded centroid pixel from the provided index arrays."""
+
+    return (
+        int(round(float(np.mean(indx)))),
+        int(round(float(np.mean(indy)))),
+    )
 
 
-def crop_geojson(fn, bbox):
+def crop_geojson(fn: PathType, bbox: Sequence[float]) -> dict[str, Any]:
+    """Filter ``fn`` down to features whose centroid falls within ``bbox``."""
     l, b, r, t = bbox
 
     assert l < r
@@ -158,7 +204,8 @@ def crop_geojson(fn, bbox):
     return js
 
 
-def get_raster_extent(match_fn, wgs=False):
+def get_raster_extent(match_fn: PathType, wgs: bool = False) -> Tuple[float, ...]:
+    """Return the extent of ``match_fn`` either in map units or WGS84."""
     rdi = RasterDatasetInterpolator(match_fn)
     proj4 = rdi.proj4
 
@@ -169,7 +216,12 @@ def get_raster_extent(match_fn, wgs=False):
     return extent
 
 
-def raster_stacker(src_fn, match_fn, dst_fn, resample='near'):
+def raster_stacker(
+    src_fn: PathType,
+    match_fn: PathType,
+    dst_fn: PathType,
+    resample: str = 'near',
+) -> None:
     """
     Warps a source raster to match the grid of another raster using rasterio.
 
@@ -241,7 +293,10 @@ def raster_stacker(src_fn, match_fn, dst_fn, resample='near'):
 
 
 @deprecated
-def warp2match(src_filename, match_filename, dst_filename):
+def warp2match(
+    src_filename: PathType, match_filename: PathType, dst_filename: PathType
+) -> None:
+    """Legacy GDAL-based wrapper that matches a raster to a reference grid."""
     # Source
     src = gdal.Open(src_filename, gdal.GA_ReadOnly)
     src_proj = src.GetProjection()
@@ -267,20 +322,29 @@ def warp2match(src_filename, match_filename, dst_filename):
     del dst  # Flush
 
 
-def px_to_utm(transform, x: int, y: int):
+def px_to_utm(transform: Sequence[float], x: int, y: int) -> Tuple[float, float]:
+    """Convert pixel indices into eastings/northings using ``transform``."""
     e = transform[0] + transform[1] * x
     n = transform[3] + transform[5] * y
     return e, n
 
 
-def px_to_lnglat(transform, x: int, y: int, utm_proj, wgs_proj):
+def px_to_lnglat(
+    transform: Sequence[float],
+    x: int,
+    y: int,
+    utm_proj: str,
+    wgs_proj: str,
+) -> Tuple[float, float]:
+    """Project pixel indices into lon/lat coordinates."""
     e, n = px_to_utm(transform, x, y)
 
     geo_transformer = GeoTransformer(src_proj4=utm_proj, dst_proj4=wgs_proj)
     return geo_transformer.transform(e, n)
 
 
-def translate_tif_to_asc(fn, fn2=None):
+def translate_tif_to_asc(fn: PathType, fn2: PathType | None = None) -> str:
+    """Convert a GeoTIFF into an ASCII grid using ``gdal_translate``."""
     assert fn.endswith(".tif")
     assert _exists(fn)
 
@@ -296,10 +360,11 @@ def translate_tif_to_asc(fn, fn2=None):
 
     assert _exists(fn2)
 
-    return fn2
+    return str(fn2)
 
 
-def translate_asc_to_tif(fn, fn2=None):
+def translate_asc_to_tif(fn: PathType, fn2: PathType | None = None) -> str:
+    """Convert an ASCII grid into a GeoTIFF."""
     assert fn.endswith(".asc")
     assert _exists(fn)
 
@@ -315,10 +380,11 @@ def translate_asc_to_tif(fn, fn2=None):
 
     assert _exists(fn2), fn2
 
-    return fn2
+    return str(fn2)
 
 
-def raster_extent(fn):
+def raster_extent(fn: PathType) -> list[float]:
+    """Return [minx, miny, maxx, maxy] for the raster stored at ``fn``."""
     assert _exists(fn)
     data = gdal.Open(fn)
     transform = data.GetGeoTransform()
@@ -330,26 +396,29 @@ def raster_extent(fn):
     return [minx, miny, maxx, maxy]
 
 
-def read_raster(fn, dtype=np.float64):
-    _fn = fn.lower()
+def read_raster(
+    fn: PathType, dtype: Any = np.float64
+) -> Tuple[FloatArray, Tuple[float, ...], str | None]:
+    """Dispatch to ``read_arc`` or ``read_tif`` based on the file suffix."""
+
+    _fn = str(fn).lower()
 
     if _fn.endswith('.asc') or _fn.endswith('arc'):
         return read_arc(fn, dtype)
-    else:
-        return read_tif(fn, dtype)
+    return read_tif(fn, dtype)
 
 
-def wkt_2_proj4(wkt):
+def wkt_2_proj4(wkt: str) -> str:
+    """Convert a WKT SRS string into a PROJ4 definition."""
     srs = osr.SpatialReference()
     srs.ImportFromWkt(wkt)
     return srs.ExportToProj4().strip()
 
 
-def read_tif(fn, dtype=np.float64, band=1):
-    """
-    use gdal to read an tif file and return the data and the
-    transform
-    """
+def read_tif(
+    fn: PathType, dtype: Any = np.float64, band: int = 1
+) -> Tuple[FloatArray, Tuple[float, ...], str | None]:
+    """Read a GeoTIFF and return the array, GDAL transform, and proj4 string."""
     assert _exists(fn), "Cannot open %s" % fn
 
     ds = rasterio.open(fn)
@@ -365,11 +434,10 @@ def read_tif(fn, dtype=np.float64, band=1):
     return data, transform, proj
 
 
-def read_arc(fn, dtype=np.float64):
-    """
-    use gdal to read an arc file and return the data and the
-    transform
-    """
+def read_arc(
+    fn: PathType, dtype: Any = np.float64
+) -> Tuple[FloatArray, Tuple[float, ...], str | None]:
+    """Read an Arc ASCII grid."""
     assert _exists(fn), "Cannot open %s" % fn
 
     ds = rasterio.open(fn)
@@ -392,7 +460,15 @@ def read_arc(fn, dtype=np.float64):
     return data, transform, proj
 
 
-def write_arc(data, fname, ll_x, ll_y, cellsize, no_data=0):
+def write_arc(
+    data: FloatArray | Sequence[Sequence[float]],
+    fname: PathType,
+    ll_x: float,
+    ll_y: float,
+    cellsize: float,
+    no_data: float = 0,
+) -> None:
+    """Persist a 2-D array to ASCII Arc/Info grid format."""
     # template for building
     arc_template = '''\
 ncols        {num_cols}
@@ -419,7 +495,10 @@ nodata_value {no_data}
                                      data=data_string))
 
 
-def build_mask(points, georef_fn):
+def build_mask(
+    points: Sequence[tuple[float, float]], georef_fn: PathType
+) -> FloatArray:
+    """Rasterize ``points`` against ``georef_fn`` and return a binary mask."""
 
     # This function is based loosely off of Frank's tests for
     # gdal.RasterizeLayer.
@@ -475,12 +554,8 @@ def build_mask(points, georef_fn):
     return -1 * (data / 255.0) + 1
 
 
-def get_utm_zone(srs):
-    """
-    extracts the utm_zone from an osr.SpatialReference object (srs)
-
-    returns the utm_zone as an int, returns None if utm_zone not found
-    """
+def get_utm_zone(srs: osr.SpatialReference | PathType) -> int | None:
+    """Extract the UTM zone from an ``osr.SpatialReference`` or raster path."""
     if not isinstance(srs, osr.SpatialReference):
         if _exists(srs):
             fn = srs
@@ -529,7 +604,10 @@ _AVG_EARTH_RADIUS = 6371  # in km
 _MILES_PER_KILOMETER = 0.621371
 
 
-def haversine(point1, point2, miles=False):
+def haversine(
+    point1: tuple[float, float], point2: tuple[float, float], miles: bool = False
+) -> float:
+    """Compute the Haversine distance in kilometers (or miles when requested)."""
     """ Calculate the great-circle distance between two points on the Earth surface.
     :input: two 2-tuples, containing the longitude and latitude of each point
     in decimal degrees.
@@ -578,7 +656,8 @@ class Extent(object):
                (a.ymin <= b.ymax and a.ymax >= b.ymin)
 
 
-def determine_band_type(vrt):
+def determine_band_type(vrt: PathType) -> str | None:
+    """Return the GDAL data type name for the first band in ``vrt``."""
     ds = gdal.Open(vrt)
     if ds is None:
         return None
@@ -601,7 +680,8 @@ _GDALDEM_MODES = tuple('hillshade slope aspect tri tpi roughnesshillshade '
                        'slope aspect tri tpi roughness'.split())
 
 
-def raster_stats(src):
+def raster_stats(src: PathType) -> dict[str, float]:
+    """Run ``gdalinfo`` statistics and parse the resulting aux XML."""
     cmd = 'gdalinfo %s -stats' % src
     p = Popen(cmd, shell=True, stdout=PIPE)
     output = p.stdout \
@@ -623,7 +703,8 @@ def raster_stats(src):
     return d
 
 
-def format_convert(src, _format):
+def format_convert(src: PathType, _format: str) -> str:
+    """Convert ``src`` into the requested GDAL output format."""
     dst = src[:-4] + _ext_d[_format]
     if _format == 'ENVI':
         stats = raster_stats(src)
@@ -645,7 +726,17 @@ def format_convert(src, _format):
     return dst
 
 
-def crop_and_transform(src, dst, bbox, layer='', cellsize=30, resample=None, fmt=None, gdaldem=None):
+def crop_and_transform(
+    src: PathType,
+    dst: PathType,
+    bbox: Sequence[float],
+    layer: str = '',
+    cellsize: float = 30,
+    resample: str | None = None,
+    fmt: str | None = None,
+    gdaldem: str | None = None,
+) -> None:
+    """Warp ``src`` into ``dst`` bounded by ``bbox`` and optionally post-process."""
     fn_uuid = str(uuid4().hex) + '.tif'
     dst1 = os.path.join(SCRATCH_DIR, fn_uuid)
 
@@ -752,7 +843,10 @@ def crop_and_transform(src, dst, bbox, layer='', cellsize=30, resample=None, fmt
     shutil.copyfile(dst_final, dst)
 
 
-def rasterize_geometry_from_geojson(dem_fn, geometry, dst_fn):
+def rasterize_geometry_from_geojson(
+    dem_fn: PathType, geometry: Any, dst_fn: PathType
+) -> None:
+    """Rasterize a GeoJSON geometry into the grid defined by ``dem_fn``."""
     import pyproj
     from rasterio.features import rasterize
     from shapely.ops import transform as shapely_transform

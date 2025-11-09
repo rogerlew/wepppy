@@ -1,3 +1,7 @@
+"""Thin client for the hosted CLIGEN web services."""
+
+from __future__ import annotations
+
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
@@ -9,6 +13,8 @@
 from os.path import join as _join
 
 import json
+from typing import Any
+
 import requests
 from posixpath import join as urljoin
 import time
@@ -18,16 +24,50 @@ from wepppy.all_your_base import isint, isfloat
 _cligen_url = "https://wepp.cloud/webservices/cligen/"
 
 
-def fetch_multiple_year(par, years,  lng=None, lat=None,
-                        p_mean=None, p_std=None, p_skew=None,
-                        p_wd=None, p_ww=None,
-                        tmax=None, tmin=None,
-                        dewpoint=None, solrad=None,
-                        returnjson=True, randseed=None,
-                        version='2015'):
-    """
-    https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=5&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
+def fetch_multiple_year(
+    par: int,
+    years: int,
+    lng: float | None = None,
+    lat: float | None = None,
+    p_mean: str | None = None,
+    p_std: str | None = None,
+    p_skew: str | None = None,
+    p_wd: str | None = None,
+    p_ww: str | None = None,
+    tmax: str | None = None,
+    tmin: str | None = None,
+    dewpoint: str | None = None,
+    solrad: str | None = None,
+    returnjson: bool = True,
+    randseed: int | None = None,
+    version: str = '2015',
+) -> dict[str, Any] | str:
+    """Request a multi-year CLIGEN run from the hosted service.
 
+    See https://wepp.cloud/webservices/cligen/multiple_year/<par>/ for parameter
+    semantics.
+
+    Args:
+        par: Station identifier.
+        years: Number of years to simulate remotely.
+        lng: Optional longitude override.
+        lat: Optional latitude override.
+        p_mean: Monthly precip source (`prism` or `daymet`).
+        p_std: Precip standard deviation source (`daymet`).
+        p_skew: Precip skew source (`daymet`).
+        p_wd: Wet→dry probability source (`daymet`).
+        p_ww: Wet→wet probability source (`daymet`).
+        tmax: Maximum temperature source (`prism`).
+        tmin: Minimum temperature source (`prism`).
+        dewpoint: Dew point source (`daymet`).
+        solrad: Solar radiation source (`daymet`).
+        returnjson: When True, decode the JSON payload; otherwise return text.
+        randseed: Optional CLIGEN random seed.
+        version: Station catalog version (`2015` or other server-supported tag).
+
+    Returns:
+        Parsed JSON dictionary or the raw `.cli` text depending on
+        ``returnjson``.
     """
 
     url = urljoin(_cligen_url, 'multiple_year', str(par))
@@ -111,13 +151,34 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
     return r.text
 
 
-def selected_single_storm(par,
-                          storm_date,
-                          design_storm_amount_inches,
-                          duration_of_storm_in_hours,
-                          time_to_peak_intensity_pct,
-                          max_intensity_inches_per_hour,
-                          cliver=5.3, returnjson=True, version='2015'):
+def selected_single_storm(
+    par: int,
+    storm_date: str,
+    design_storm_amount_inches: float,
+    duration_of_storm_in_hours: float,
+    time_to_peak_intensity_pct: float,
+    max_intensity_inches_per_hour: float,
+    cliver: float = 5.3,
+    returnjson: bool = True,
+    version: str = '2015',
+) -> dict[str, Any] | str:
+    """Request a single-storm design event from the hosted CLIGEN service.
+
+    Args:
+        par: Station identifier.
+        storm_date: Date string (MM-DD-YYYY or similar) describing the event.
+        design_storm_amount_inches: Total storm depth.
+        duration_of_storm_in_hours: Duration of the storm event.
+        time_to_peak_intensity_pct: Percent of duration until peak intensity.
+        max_intensity_inches_per_hour: Desired peak intensity.
+        cliver: CLIGEN binary version (5.2 or 5.3).
+        returnjson: When True, decode the JSON payload; otherwise return text.
+        version: Station catalog version.
+
+    Returns:
+        Parsed JSON dictionary or the raw `.cli` text depending on
+        ``returnjson``.
+    """
 
     url = urljoin(_cligen_url, 'selected_single_storm', str(par))
 
@@ -166,9 +227,29 @@ def selected_single_storm(par,
     return r.text
 
 
-def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=True, version='2015'):
-    """
-    https://wepp.cloud/webservices/cligen/observed_daymet/106152/?start_year=1980&end_year=2010&lng=-116&lat=47&returnjson=true
+def observed_daymet(
+    par: int,
+    start_year: int,
+    end_year: int,
+    lng: float | None = None,
+    lat: float | None = None,
+    returnjson: bool = True,
+    version: str = '2015',
+) -> dict[str, Any] | str:
+    """Fetch observed Daymet data for a station from the CLIGEN web service.
+
+    Args:
+        par: Station identifier.
+        start_year: First Daymet year (>= 1980).
+        end_year: Final Daymet year (<= last available).
+        lng: Optional longitude override used by the service.
+        lat: Optional latitude override used by the service.
+        returnjson: When True, decode the JSON payload; otherwise return text.
+        version: Station catalog version.
+
+    Returns:
+        Parsed JSON dictionary or the raw `.cli` text depending on
+        ``returnjson``.
     """
     url = urljoin(_cligen_url, "observed_daymet", str(par))
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Event assembler that builds profile drafts from recorder payloads."""
+
 import json
 import logging
 import shutil
@@ -31,15 +33,10 @@ TASK_RULES: Dict[str, Dict[str, Any]] = {
 
 
 class ProfileAssembler:
-    """
-    Streaming assembler stub.
-
-    Observes recorder events and mirrors them into the profile data repository.
-    The initial implementation simply appends events to a draft log so that no
-    information is lost before full assembly logic lands.
-    """
+    """Stream recorder events into a draft profile tree for later promotion."""
 
     def __init__(self, data_repo_root: Path) -> None:
+        """Initialize the assembler with the repository root."""
         self.data_repo_root = Path(data_repo_root)
 
     def handle_event(
@@ -51,6 +48,15 @@ class ProfileAssembler:
         *,
         file_hints: Optional[Dict[str, Path]] = None,
     ) -> None:
+        """Process a single recorder event and mirror assets to the draft capture.
+
+        Args:
+            run_id: Stable run identifier or ``"global"`` if missing.
+            capture_id: Recorder capture identifier if provided.
+            event: JSON-compatible event payload.
+            run_dir: Working directory on disk for the run; may be absent.
+            file_hints: Pre-resolved file candidates derived from the recorder event.
+        """
         try:
             run_key = sanitise_component(run_id or "global")
             capture_key = sanitise_component(capture_id or "stream")
@@ -106,6 +112,19 @@ class ProfileAssembler:
         *,
         slug: Optional[str] = None,
     ) -> Dict[str, str]:
+        """Copy the draft capture into a long-lived profile directory.
+
+        Args:
+            run_id: The run identifier originally associated with the draft.
+            capture_id: Recorder capture identifier, defaults to ``"stream"``.
+            slug: Optional human-friendly slug that overrides the default folder name.
+
+        Returns:
+            Paths describing the promoted profile tree.
+
+        Raises:
+            FileNotFoundError: If the draft directory does not exist.
+        """
         run_key = sanitise_component(run_id or "global")
         capture_key = sanitise_component(capture_id or "stream")
         draft_root = self.data_repo_root / "profiles" / "_drafts" / run_key / capture_key
@@ -133,6 +152,7 @@ class ProfileAssembler:
 
     @staticmethod
     def _snapshot_candidate(seed_root: Path, label: str, candidate: Path) -> None:
+        """Mirror a file or directory into the seed folder, noting missing paths."""
         safe_label = sanitise_component(label)
         target = seed_root / safe_label
 
@@ -151,6 +171,7 @@ class ProfileAssembler:
 
     @staticmethod
     def _normalise_endpoint(event: Dict[str, Any]) -> Optional[str]:
+        """Return a run-agnostic endpoint name for use in task rules."""
         endpoint = event.get("endpoint")
         if not endpoint or not isinstance(endpoint, str):
             return None
@@ -169,6 +190,7 @@ class ProfileAssembler:
         endpoint: str,
         rules: Dict[str, Any],
     ) -> None:
+        """Apply hard-coded expectations for well-known endpoints."""
         notes = []
 
         expected_files = rules.get("expected_files", [])
@@ -211,6 +233,7 @@ class ProfileAssembler:
         draft_root: Path,
         run_dir: Optional[Path],
     ) -> None:
+        """Copy any captured uploads under the seed/uploads namespace."""
         if run_dir is None:
             return
 
@@ -234,6 +257,7 @@ class ProfileAssembler:
             self._snapshot_omni_upload(seed_root, Path(run_dir))
 
     def _snapshot_landuse_upload(self, seed_root: Path, run_dir: Path) -> None:
+        """Capture landuse uploads and their metadata files."""
         try:
             from wepppy.nodb.core.landuse import Landuse
         except Exception as exc:
@@ -261,6 +285,7 @@ class ProfileAssembler:
                 self._copy_seed_file(lc_fn, canonical)
 
     def _snapshot_sbs_upload(self, seed_root: Path, run_dir: Path) -> None:
+        """Capture soil burn severity rasters from both Disturbed and Baer."""
         candidates: list[Path] = []
 
         try:
@@ -305,6 +330,7 @@ class ProfileAssembler:
             self._copy_seed_file(candidates[0], canonical)
 
     def _snapshot_cover_transform_upload(self, seed_root: Path, run_dir: Path) -> None:
+        """Capture Revegetation CSV uploads."""
         try:
             from wepppy.nodb.mods.revegetation import Revegetation
         except Exception as exc:
@@ -328,6 +354,7 @@ class ProfileAssembler:
                 self._copy_seed_file(path, canonical)
 
     def _snapshot_cli_upload(self, seed_root: Path, run_dir: Path) -> None:
+        """Capture CLI files referenced by the Climate controller."""
         try:
             from wepppy.nodb.core.climate import Climate
         except Exception as exc:
@@ -354,6 +381,7 @@ class ProfileAssembler:
             self._copy_seed_file(cli_path, canonical)
 
     def _snapshot_ash_upload(self, seed_root: Path, run_dir: Path) -> None:
+        """Capture inputs referenced by the ash transport mod."""
         try:
             from wepppy.nodb.mods.ash_transport import Ash
         except Exception as exc:
@@ -388,6 +416,7 @@ class ProfileAssembler:
                     self._copy_seed_file(type_path, canonical_type)
 
     def _snapshot_omni_upload(self, seed_root: Path, run_dir: Path) -> None:
+        """Copy Omni limbo files into the capture so playback can reuse them."""
         omni_seed = seed_root / "omni"
         omni_seed.mkdir(parents=True, exist_ok=True)
 
@@ -401,6 +430,7 @@ class ProfileAssembler:
 
     @staticmethod
     def _copy_seed_file(source: Path, target: Path) -> None:
+        """Copy a file into the seed directory, ignoring missing sources."""
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
             if source.exists():
@@ -410,6 +440,7 @@ class ProfileAssembler:
 
     @staticmethod
     def _extract_config_slug(event: Dict[str, Any]) -> Optional[str]:
+        """Infer the active configuration slug from the event payload."""
         slug_from_meta = ProfileAssembler._normalise_config_slug(event.get("config"))
         if slug_from_meta:
             return slug_from_meta
@@ -429,6 +460,7 @@ class ProfileAssembler:
 
     @staticmethod
     def _normalise_config_slug(raw_slug: Optional[str]) -> Optional[str]:
+        """Normalize candidate config names and strip ``.cfg`` suffixes."""
         if not isinstance(raw_slug, str):
             return None
         slug = raw_slug.strip()
@@ -444,6 +476,7 @@ class ProfileAssembler:
         config_slug: str,
         run_dir: Optional[Path],
     ) -> None:
+        """Ensure the capture contains a copy of the active and default configs."""
         config_dir = draft_root / "seed" / "config"
         config_dir.mkdir(parents=True, exist_ok=True)
 
@@ -492,6 +525,7 @@ class ProfileAssembler:
 
     @staticmethod
     def _evaluate_ron_expectation(ron: Any, attr: str, expectation: Dict[str, Any]) -> Optional[str]:
+        """Return a validation note if the Ron instance does not meet expectations."""
         if ron is None:
             return f"[ron] {attr} unavailable"
 

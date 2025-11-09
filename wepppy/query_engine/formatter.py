@@ -1,10 +1,13 @@
+"""Helpers to convert Arrow query results into JSON-safe payloads."""
+
 from __future__ import annotations
 
 import base64
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 import pyarrow as pa
 
@@ -13,14 +16,24 @@ from wepppy.query_engine.payload import TimeseriesReshapeSpec, TimeseriesSeriesS
 
 @dataclass(slots=True)
 class QueryResult:
-    records: List[Dict[str, Any]]
-    schema: Optional[List[Dict[str, Any]]] = None
+    """Structured response emitted by the query engine."""
+
+    records: list[dict[str, Any]]
+    schema: list[dict[str, Any]] | None = None
     row_count: int = 0
-    sql: Optional[str] = None
-    formatted: Optional[Dict[str, Any]] = None
+    sql: str | None = None
+    formatted: dict[str, Any] | None = None
 
 
 def _json_safe(value: Any) -> Any:
+    """Convert complex values (bytes, decimals, datetimes) into JSON-friendly data.
+
+    Args:
+        value: Arbitrary Python object.
+
+    Returns:
+        JSON serialisable representation of `value`.
+    """
     if isinstance(value, Mapping):
         return {key: _json_safe(item) for key, item in value.items()}
     if isinstance(value, (list, tuple, set)):
@@ -41,7 +54,15 @@ def _json_safe(value: Any) -> Any:
     return value
 
 
-def _field_metadata(field: pa.Field) -> Dict[str, str]:
+def _field_metadata(field: pa.Field) -> dict[str, str]:
+    """Return decoded metadata key/value pairs for a PyArrow field.
+
+    Args:
+        field: PyArrow field whose metadata should be inspected.
+
+    Returns:
+        Mapping of metadata keys to decoded string values.
+    """
     if not field.metadata:
         return {}
     meta = {}
@@ -53,17 +74,33 @@ def _field_metadata(field: pa.Field) -> Dict[str, str]:
     return meta
 
 
-def _schema_to_dict(schema: pa.Schema) -> List[Dict[str, Any]]:
-    entries: List[Dict[str, Any]] = []
+def _schema_to_dict(schema: pa.Schema) -> list[dict[str, Any]]:
+    """Convert a PyArrow schema into a serialisable list of field dicts.
+
+    Args:
+        schema: PyArrow schema returned by DuckDB.
+
+    Returns:
+        List of dictionaries summarising each field.
+    """
+    entries: list[dict[str, Any]] = []
     for field in schema:
-        entry: Dict[str, Any] = {"name": field.name, "type": str(field.type)}
+        entry: dict[str, Any] = {"name": field.name, "type": str(field.type)}
         entry.update(_field_metadata(field))
         entries.append(entry)
     return entries
 
 
-def _lookup_field_metadata(schema: pa.Schema) -> Dict[str, Dict[str, str]]:
-    lookup: Dict[str, Dict[str, str]] = {}
+def _lookup_field_metadata(schema: pa.Schema) -> dict[str, dict[str, str]]:
+    """Build a lookup of column name to metadata dict.
+
+    Args:
+        schema: PyArrow schema returned by DuckDB.
+
+    Returns:
+        Mapping of column name to metadata key/values.
+    """
+    lookup: dict[str, dict[str, str]] = {}
     for field in schema:
         metadata = _field_metadata(field)
         if metadata:
@@ -71,10 +108,25 @@ def _lookup_field_metadata(schema: pa.Schema) -> Dict[str, Dict[str, str]]:
     return lookup
 
 
-def _filtered_records_by_year(records: Sequence[Dict[str, Any]], *, year_column: Optional[str], excluded_years: set[Any]) -> List[Dict[str, Any]]:
+def _filtered_records_by_year(
+    records: Sequence[dict[str, Any]],
+    *,
+    year_column: str | None,
+    excluded_years: set[Any],
+) -> list[dict[str, Any]]:
+    """Remove rows that reference a year present in the excluded_years set.
+
+    Args:
+        records: Original record sequence.
+        year_column: Column containing the year marker.
+        excluded_years: Years that should be removed from the dataset.
+
+    Returns:
+        Filtered list of records.
+    """
     if not year_column or not excluded_years:
         return list(records)
-    filtered: List[Dict[str, Any]] = []
+    filtered: list[dict[str, Any]] = []
     for row in records:
         year_value = row.get(year_column)
         if year_value in excluded_years:
@@ -83,7 +135,22 @@ def _filtered_records_by_year(records: Sequence[Dict[str, Any]], *, year_column:
     return filtered
 
 
-def _excluded_years(records: Sequence[Dict[str, Any]], *, year_column: Optional[str], exclude_indexes: Sequence[int]) -> set[Any]:
+def _excluded_years(
+    records: Sequence[dict[str, Any]],
+    *,
+    year_column: str | None,
+    exclude_indexes: Sequence[int],
+) -> set[Any]:
+    """Identify which year values to omit based on index positions.
+
+    Args:
+        records: Record sequence that includes a year column.
+        year_column: Name of the year column.
+        exclude_indexes: Sorted indexes used to pick years to exclude.
+
+    Returns:
+        Set of years that should be filtered out.
+    """
     if year_column is None or not exclude_indexes:
         return set()
     years = sorted({row.get(year_column) for row in records if row.get(year_column) is not None})
@@ -98,7 +165,16 @@ def _excluded_years(records: Sequence[Dict[str, Any]], *, year_column: Optional[
     return excluded
 
 
-def _series_metadata(series: TimeseriesSeriesSpec, *, field_metadata: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
+def _series_metadata(series: TimeseriesSeriesSpec, *, field_metadata: dict[str, dict[str, str]]) -> dict[str, Any]:
+    """Combine explicit series metadata with schema-derived defaults.
+
+    Args:
+        series: Series descriptor from the reshape spec.
+        field_metadata: Metadata keyed by column name.
+
+    Returns:
+        Dictionary containing the resolved metadata for the output series.
+    """
     metadata = field_metadata.get(series.column, {})
     return {
         "units": series.units or metadata.get("units"),
@@ -107,22 +183,32 @@ def _series_metadata(series: TimeseriesSeriesSpec, *, field_metadata: Dict[str, 
 
 
 def _apply_timeseries_reshape(
-    records: List[Dict[str, Any]],
+    records: list[dict[str, Any]],
     schema: pa.Schema,
     spec: TimeseriesReshapeSpec,
-) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Aggregate tabular data into a structured timeseries response.
+
+    Args:
+        records: JSON-safe records emitted from Arrow.
+        schema: PyArrow schema used for metadata lookups.
+        spec: Timeseries reshape specification.
+
+    Returns:
+        Tuple containing filtered records and the formatted timeseries payload.
+    """
     field_meta_lookup = _lookup_field_metadata(schema)
     excluded_years = _excluded_years(records, year_column=spec.year_column, exclude_indexes=spec.exclude_year_indexes)
     filtered_records = _filtered_records_by_year(records, year_column=spec.year_column, excluded_years=excluded_years)
 
-    index_values: List[Any] = []
-    series_values: Dict[str, List[Any]] = {series.key: [] for series in spec.series}
+    index_values: list[Any] = []
+    series_values: dict[str, list[Any]] = {series.key: [] for series in spec.series}
     for row in filtered_records:
         index_values.append(row.get(spec.index_column))
         for series in spec.series:
             series_values[series.key].append(row.get(series.column))
 
-    series_output: List[Dict[str, Any]] = []
+    series_output: list[dict[str, Any]] = []
     for series in spec.series:
         meta = _series_metadata(series, field_metadata=field_meta_lookup)
         series_output.append(
@@ -166,16 +252,27 @@ def format_table(
     table: pa.Table,
     *,
     include_schema: bool = False,
-    sql: Optional[str] = None,
+    sql: str | None = None,
     reshape: TimeseriesReshapeSpec | None = None,
 ) -> QueryResult:
+    """Convert a PyArrow table into a JSON-oriented QueryResult.
+
+    Args:
+        table: DuckDB result table.
+        include_schema: When True, serialise schema metadata into the result.
+        sql: Optional SQL text to attach for debugging.
+        reshape: Optional reshape specification for timeseries payloads.
+
+    Returns:
+        QueryResult ready for JSON serialisation.
+    """
     pylist = table.to_pylist()
     records = [_json_safe(item) for item in pylist]
     schema = None
     if include_schema:
         schema = _schema_to_dict(table.schema)
 
-    formatted: Optional[Dict[str, Any]] = None
+    formatted: dict[str, Any] | None = None
     row_count = table.num_rows
 
     if reshape is not None:

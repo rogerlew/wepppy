@@ -1,21 +1,37 @@
+"""Resolve run metadata and catalogs for query-engine execution."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from wepppy.query_engine.catalog import DatasetCatalog, load_catalog
 
 
 @dataclass(slots=True)
 class RunContext:
+    """Activation metadata for a runid and optional scenario."""
+
     runid: str
     base_dir: Path
-    scenario: Optional[str]
+    scenario: str | None
     catalog: DatasetCatalog
 
 
-def resolve_run_context(runid: str, *, scenario: Optional[str] = None, auto_activate: bool = True) -> RunContext:
+def resolve_run_context(runid: str, *, scenario: str | None = None, auto_activate: bool = True) -> RunContext:
+    """Load the query-engine catalog for a run (and optional scenario).
+
+    Args:
+        runid: Path or slug to the WEPP run directory.
+        scenario: Optional scenario slug, relative to the run root.
+        auto_activate: When True, trigger `activate_query_engine` if needed.
+
+    Returns:
+        RunContext with resolved base directory and DatasetCatalog.
+
+    Raises:
+        FileNotFoundError: If the run directory or scenario path does not exist.
+    """
     base = Path(runid).expanduser()
     if not base.exists():
         raise FileNotFoundError(base)

@@ -11,9 +11,10 @@ python version of gdal's locationinfo with resampling:
     cubic, bicubic, near
 """
 
+from __future__ import annotations
+
 # standard library
 from math import ceil, floor
-
 # 3rd party modules
 from scipy import interpolate
 
@@ -22,8 +23,6 @@ import numpy as np
 from osgeo import gdal
 from osgeo import osr
 from osgeo.gdalconst import GA_ReadOnly
-
-# import numpy as np
 
 import utm
 
@@ -44,7 +43,9 @@ class RDIOutOfBoundsException(Exception):
 
 
 class RasterDatasetInterpolator:
-    def __init__(self, fname, proj=None):
+    """Utility that interpolates values from GDAL rasters in multiple CRSs."""
+
+    def __init__(self, fname: str, proj: str | None = None) -> None:
         self.lon_lat = False
         if fname.endswith('.nc'):
             import netCDF4
@@ -56,8 +57,9 @@ class RasterDatasetInterpolator:
                 self.lon_lat = True
 
         # open the image
-        self.ds = ds = gdal.Open(fname, GA_ReadOnly)
+        ds = gdal.Open(fname, GA_ReadOnly)
         assert ds is not None, fname
+        self.ds: gdal.Dataset = ds
 
         self.fname = fname
         self.nbands = nbands = ds.RasterCount
@@ -68,7 +70,7 @@ class RasterDatasetInterpolator:
         self.wkt_text = ds.GetProjection()
         self.srs = srs = osr.SpatialReference()
         srs.ImportFromWkt(self.wkt_text)
-        self.proj4 = srs.ExportToProj4()
+        self.proj4: str = srs.ExportToProj4()
 
         if proj is not None:
             self.proj4 = proj
@@ -80,13 +82,15 @@ class RasterDatasetInterpolator:
             self.left, self.upper = self.get_geo_coord(0, 0)
             self.right, self.lower = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
 
-        self.proj2wgs_transformer = proj2wgs_transformer = \
-            GeoTransformer(src_proj4=self.proj4, dst_proj4=wgs84_proj4)
+        self.proj2wgs_transformer = proj2wgs_transformer = GeoTransformer(
+            src_proj4=self.proj4, dst_proj4=wgs84_proj4
+        )
 
         lng0, lat0 = proj2wgs_transformer.transform(self.left, self.upper)
         _, _, self.utm_n, self.utm_h = utm.from_latlon(lat0, lng0)
         
-    def get_geo_coord(self, x, y):
+    def get_geo_coord(self, x: float, y: float) -> tuple[float, float]:
+        """Convert pixel coordinates into the dataset CRS."""
         assert self.transform is not None
 
         xorigin, xpxsize, xzero, yorigin, yzero, ypxsize = self.transform
@@ -98,14 +102,16 @@ class RasterDatasetInterpolator:
 
         return e, n
 
-    def get_px_coord_from_lnglat(self, lng, lat):
+    def get_px_coord_from_lnglat(self, lng: float, lat: float) -> tuple[int, int]:
+        """Project lon/lat coordinates into pixel indices."""
         proj2wgs_transformer = self.proj2wgs_transformer
 
         e, n = proj2wgs_transformer.reverse(lng, lat)
         px, py = self.get_px_coord(e, n)
         return int(px), int(py)
 
-    def get_px_coord(self, e, n):
+    def get_px_coord(self, e: float, n: float) -> tuple[float, float]:
+        """Return fractional pixel coordinates for projected points."""
         assert self.transform is not None
         
         xorigin, xpxsize, xzero, yorigin, yzero, ypxsize = self.transform
@@ -117,11 +123,13 @@ class RasterDatasetInterpolator:
 
         return x, y
 
-    def get_nodata_value(self, band):
+    def get_nodata_value(self, band: int) -> float | None:
+        """Return the NoData value registered for ``band`` (1-indexed)."""
+
         return self.band[band].GetNoDataValue()
 
     @property
-    def gt0_centroid(self):
+    def gt0_centroid(self) -> tuple[float, float]:
         data = self.band[0].ReadAsArray(0,0, self.ds.RasterXSize, self.ds.RasterYSize) 
         y = np.zeros(data.shape)
         y[data > 0] = 1
@@ -131,25 +139,28 @@ class RasterDatasetInterpolator:
         return lng, lat
 
     @property
-    def extent(self):
+    def extent(self) -> tuple[float, float, float, float]:
         proj2wgs_transformer = self.proj2wgs_transformer
         xmin, ymin = proj2wgs_transformer.transform(self.left, self.lower)
         xmax, ymax = proj2wgs_transformer.transform(self.right, self.upper)
         return xmin, ymin, xmax, ymax
 
     @property
-    def width(self):
+    def width(self) -> int:
         return self.ds.RasterXSize
 
     @property
-    def height(self):
+    def height(self) -> int:
         return self.ds.RasterYSize
 
-    def __contains__(self, en):
+    def __contains__(self, en: tuple[float, float]) -> bool:
         e, n = en
         return self.left < e < self.right and self.lower < n < self.upper
 
-    def get_location_info(self, lng, lat, method='cubic'):
+    def get_location_info(
+        self, lng: float, lat: float, method: str = 'cubic'
+    ) -> float | list[float | None]:
+        """Interpolate the raster stack at ``lng``/``lat``."""
         proj2wgs_transformer = self.proj2wgs_transformer
         e, n = proj2wgs_transformer.reverse(lng, lat)
 

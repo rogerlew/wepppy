@@ -1,11 +1,18 @@
-from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
-import json, shutil, socket
-import json
+"""Client helpers for the WMesque raster retrieval service."""
+
+from __future__ import annotations
+
 import base64
+import json
+import shutil
+import socket
+from collections.abc import Sequence
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
+
 from deprecated import deprecated
 
-def isfloat(x):
+def isfloat(x: object) -> bool:
     try:
         float(x)
     except:
@@ -17,7 +24,14 @@ WMESQUE_ENDPOINT = 'https://wepp.cloud/webservices/wmesque/'
 WMESQUE2_ENDPOINT = 'https://wepp.cloud/webservices/wmesque2/'
 
 @deprecated
-def _wmesque1_retrieve(dataset, extent, fname, cellsize, resample=None):
+def _wmesque1_retrieve(
+    dataset: str,
+    extent: Sequence[float],
+    fname: str,
+    cellsize: float,
+    resample: str | None = None,
+) -> int:
+    """Legacy endpoint that proxies the original WMesque CGI service."""
     global WMESQUE_ENDPOINT
 
     assert isfloat(cellsize)
@@ -53,21 +67,25 @@ def _wmesque1_retrieve(dataset, extent, fname, cellsize, resample=None):
 
     return 1
 
+
 def _b64url_to_bytes(s: str) -> bytes:
-    # add '=' padding for urlsafe b64
+    """Decode URL-safe base64 that may be missing padding."""
+
     pad = '=' * ((4 - len(s) % 4) % 4)
     return base64.urlsafe_b64decode(s + pad)
 
 
 def wmesque_retrieve(
-        dataset, 
-        extent, 
-        fname, 
-        cellsize, 
-        resample=None, 
-        v=1,
-        write_meta=True,
-        wmesque_endpoint=None):
+    dataset: str,
+    extent: Sequence[float],
+    fname: str,
+    cellsize: float,
+    resample: str | None = None,
+    v: int = 1,
+    write_meta: bool = True,
+    wmesque_endpoint: str | None = None,
+) -> int:
+    """Download a raster tile from WMesque and persist it at ``fname``."""
     v = int(v)
 
     if v == 1:

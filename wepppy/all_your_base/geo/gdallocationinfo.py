@@ -1,3 +1,5 @@
+"""Typed Python port of GDAL's ``gdallocationinfo`` raster query utility."""
+
 # !/usr/bin/env python3
 ###############################################################################
 #
@@ -12,6 +14,8 @@
 #
 # SPDX-License-Identifier: MIT
 ###############################################################################
+from __future__ import annotations
+
 import sys
 import textwrap
 from enum import Enum, auto
@@ -42,6 +46,15 @@ from osgeo_utils.auxiliary.util import (
     open_ds,
 )
 
+__all__ = [
+    "LocationInfoSRS",
+    "LocationInfoOutput",
+    "CoordinateTransformationOrSRS",
+    "gdallocationinfo",
+    "gdallocationinfo_util",
+    "val_at_coord",
+    "GDALLocationInfo",
+]
 
 class LocationInfoSRS(Enum):
     PixelLine = auto()
@@ -81,6 +94,33 @@ def gdallocationinfo(
     resample_alg=gdalconst.GRIORA_NearestNeighbour,
     quiet_mode: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Sample band values for the provided coordinates.
+
+    Parameters
+    ----------
+    filename_or_ds:
+        Path to a raster dataset or an already opened GDAL dataset handle.
+    x, y:
+        Pixel/line coordinates or coordinate pairs that can be promoted to
+        ``numpy`` arrays. Coordinate arrays must have matching lengths.
+    srs:
+        Optional spatial reference definition or coordinate transformation.
+        When omitted, ``LocationInfoSRS.PixelLine`` is assumed.
+    axis_order:
+        Axis-order hint passed to ``osr`` when building transformations.
+    band_nums:
+        Explicit band indices to sample. All bands are sampled by default.
+    resample_alg:
+        GDAL resampling algorithm to use when the lookup is not aligned.
+    quiet_mode:
+        When ``True`` suppresses extent warnings.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray, np.ndarray]
+        The potentially modified x/y coordinate arrays followed by a
+        ``(band, point)`` matrix of sampled values.
+    """
     ds = open_ds(filename_or_ds, open_options=open_options)
     filename = filename_or_ds if is_path_like(filename_or_ds) else ""
     if ds is None:
@@ -217,7 +257,7 @@ def gdallocationinfo_util(
     output_mode: Optional[LocationInfoOutput] = None,
     **kwargs,
 ):
-    
+    """High-level helper that mirrors the GDAL CLI behavior."""
     if output_mode is None:
         output_mode = LocationInfoOutput.Quiet
     if output_mode in [LocationInfoOutput.XML, LocationInfoOutput.LifOnly]:
@@ -286,9 +326,7 @@ def val_at_coord(
     print_xy: bool,
     print_values: bool,
 ):
-    """
-    val_at_coord is a simplified version of gdallocationinfo. It accepts a single point and has less options.
-    """
+    """Return band values for a single lon/lat pair."""
 
     ds = gdal.Open(filename, gdal.GA_ReadOnly)
     if ds is None:
@@ -331,6 +369,7 @@ def val_at_coord(
 
 
 class GDALLocationInfo(GDALScript):
+    """CLI entry point that emulates GDAL's ``gdallocationinfo`` tool."""
     def __init__(self):
         super().__init__()
         self.title = "Raster query tool"

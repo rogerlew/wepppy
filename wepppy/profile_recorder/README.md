@@ -394,6 +394,18 @@ tools/wctl2/commands/
   playback.py              # Typer CLI commands
 ```
 
+### Runtime Module Reference
+
+| Module | Key Classes / Functions | Responsibilities | Notes |
+|--------|-------------------------|------------------|-------|
+| `profile_recorder/profile_recorder.py` | `ProfileRecorder`, `get_profile_recorder()` | Flask extension that persists recorder events, enriches payloads with user metadata, and forwards successful responses (plus inferred file hints) to the assembler. | Docstrings outline audit log layout and extension wiring; stubs live in `profile_recorder.pyi`. Covered by `tests/profile_recorder/test_profile_recorder.py`. |
+| `profile_recorder/assembler.py` | `ProfileAssembler`, `TASK_RULES` | Streams events into `_drafts`, snapshots uploads/derived assets, enforces task-specific expectations, and promotes drafts into reusable profiles. | Event lifecycle, seed handling, and validation logging are described inline; stubs in `assembler.pyi`. Exercised by `tests/profile_recorder/test_assembler.py`. |
+| `profile_recorder/playback.py` | `PlaybackSession`, `SandboxViolationError`, `main()` | Replays promoted captures, hydrates sandboxed run directories, rebuilds form-data payloads, polls RQ jobs, and emits human-readable reports. | CLI docstrings describe every helper (form builders, polling, logging). Stubs in `playback.pyi`; tested via `tests/profile_recorder/test_playback_session.py`. |
+| `profile_recorder/config.py` | `RecorderConfig`, `resolve_recorder_config()` | Centralizes recorder settings (data roots, assembler toggle) and documents required Flask app config keys. | Protocol `_ConfiguredApp` keeps typing explicit; changes require stub update in `config.pyi`. |
+| `profile_recorder/utils.py` | `sanitise_component()` | Normalizes user-provided identifiers for file-system safe paths. | Shared by assembler & playback. Simple docstring backed by `utils.pyi`. |
+
+All runtime modules ship with colocated `.pyi` stubs. When adding new public methods, update the docstrings and stubs together, then run `wctl run-stubtest wepppy.profile_recorder.<module>` plus `wctl run-pytest tests/profile_recorder` (see [docs/prompt_templates/module_documentation_workflow.prompt.md](../../docs/prompt_templates/module_documentation_workflow.prompt.md) for details).
+
 ## Operational Notes
 
 ### Service Deployment

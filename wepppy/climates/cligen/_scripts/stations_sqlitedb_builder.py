@@ -1,3 +1,5 @@
+"""Rebuild the CLIGEN station SQLite catalogs from collections of `.par` files."""
+
 from os.path import exists as _exists
 from os.path import split as _split
 from os.path import join as _join
@@ -14,6 +16,7 @@ from pathlib import Path
 
 
 def isfloat(v):
+    """Return 1 when a value can be coerced to float, otherwise 0."""
     try:
         float(v)
         return 1
@@ -22,6 +25,7 @@ def isfloat(v):
 
 
 def _p(line):
+    """Normalize a `.par` line by stripping non-numeric tokens."""
     line = line.replace('TP5', '')
     line = line.replace('TP6', '')
     line = ''.join([v for v in line if v in ' -.0123456789'])
@@ -29,6 +33,7 @@ def _p(line):
 
 
 def get_state(par_path):
+    """Infer the station's state/region code from its `.par` filename."""
     state = Path(par_path).stem.upper()
     state = ''.join([c for c in state if not isfloat(c)])
     state = state.replace("_", "")
@@ -40,6 +45,7 @@ all_state_codes = None
 state_descriptions = None
 
 def readpar(par):
+    """Read a `.par` file and return the metadata tuple written to SQLite."""
     global all_state_codes, state_descriptions
     with open(par) as fid:
         desc = fid.readline().strip()
@@ -66,7 +72,8 @@ def readpar(par):
     return '"%s"' % state, '"%s"' % desc.replace('"', ''), '"%s"' % _split(par)[-1], latitude, longitude, years, type, elevation, tp5, tp6, str(annual_ppt)
 
 
-def get_state_name(state_code: set, state_code_wildcards: dict):
+def get_state_name(state_code: str, state_code_wildcards: dict):
+    """Return the human-friendly state/region name for a given code."""
     for state_code_wildcard, state_name in state_code_wildcards.items():
         if state_code.startswith(state_code_wildcard):
             return state_name
@@ -74,6 +81,7 @@ def get_state_name(state_code: set, state_code_wildcards: dict):
 
 
 def build_db(db_fn, par_dir, state_code_wildcards):
+    """Scan `.par` files and store their metadata in a SQLite database."""
     global all_state_codes, state_descriptions
     all_state_codes = set()
     state_descriptions = dict()

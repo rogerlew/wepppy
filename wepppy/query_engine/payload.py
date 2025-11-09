@@ -1,11 +1,26 @@
+"""Request parsing and normalisation utilities for the query engine."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 
-def _ensure_str_list(value: Iterable[Any], *, name: str) -> List[str]:
+def _ensure_str_list(value: Iterable[Any], *, name: str) -> list[str]:
+    """Convert an iterable into a list of strings with validation.
+
+    Args:
+        value: Source iterable that must only contain string-like values.
+        name: Human readable identifier for error messages.
+
+    Returns:
+        List of strings copied from the iterable.
+
+    Raises:
+        TypeError: If any element is not a string.
+    """
     items = []
     for item in value:
         if not isinstance(item, str):
@@ -15,6 +30,14 @@ def _ensure_str_list(value: Iterable[Any], *, name: str) -> List[str]:
 
 
 def _escape_alias_candidate(text: str) -> str:
+    """Convert a proposed alias into a DuckDB-safe identifier.
+
+    Args:
+        text: Raw alias proposal.
+
+    Returns:
+        Sanitised alias candidate suitable for deduplication.
+    """
     safe = []
     for char in text:
         if char.isalnum() or char == "_":
@@ -27,56 +50,81 @@ def _escape_alias_candidate(text: str) -> str:
 
 @dataclass(slots=True)
 class DatasetSpec:
+    """Normalised dataset entry describing a file and alias."""
+
     path: str
     alias: str
-    columns: Optional[List[str]] = None
+    columns: list[str] | None = None
 
 
 @dataclass(slots=True)
 class JoinSpec:
+    """Join definition linking datasets together."""
+
     left: str
     right: str
-    left_on: List[str]
-    right_on: List[str]
+    left_on: list[str]
+    right_on: list[str]
     join_type: str
 
 
 @dataclass(slots=True)
 class AggregationSpec:
+    """Aggregation definition included in the SELECT list."""
+
     sql: str
-    alias: Optional[str]
+    alias: str | None
 
 
 @dataclass(slots=True)
 class ComputedColumnSpec:
+    """Computed column definition appended to the SELECT list."""
+
     sql: str
     alias: str
 
 
 @dataclass(slots=True)
 class TimeseriesSeriesSpec:
+    """Metadata describing an output series during reshape."""
+
     column: str
     key: str
-    label: Optional[str]
-    group: Optional[str]
-    role: Optional[str]
-    color: Optional[str]
-    units: Optional[str]
-    description: Optional[str]
+    label: str | None
+    group: str | None
+    role: str | None
+    color: str | None
+    units: str | None
+    description: str | None
 
 
 @dataclass(slots=True)
 class TimeseriesReshapeSpec:
+    """Parameters for transforming tabular data into a timeseries payload."""
+
     index_column: str
     index_key: str
-    series: List[TimeseriesSeriesSpec]
-    year_column: Optional[str]
-    exclude_year_indexes: List[int]
+    series: list[TimeseriesSeriesSpec]
+    year_column: str | None
+    exclude_year_indexes: list[int]
     compact: bool
     include_records: bool
 
 
 def _normalise_computed_column(item: Any, *, used_aliases: set[str]) -> ComputedColumnSpec:
+    """Validate and normalise a computed column entry.
+
+    Args:
+        item: Raw dictionary representing the computed column request.
+        used_aliases: Aliases defined within the computed column list.
+
+    Returns:
+        ComputedColumnSpec describing the SQL expression.
+
+    Raises:
+        TypeError: If the entry is not an object.
+        ValueError: If required keys are missing or invalid.
+    """
     if not isinstance(item, dict):
         raise TypeError("computed_columns entries must be objects")
 
@@ -116,6 +164,18 @@ def _normalise_computed_column(item: Any, *, used_aliases: set[str]) -> Computed
 
 
 def _normalise_timeseries_series(entry: Any) -> TimeseriesSeriesSpec:
+    """Validate and normalise a reshape series entry.
+
+    Args:
+        entry: Raw dictionary describing a single series.
+
+    Returns:
+        TimeseriesSeriesSpec describing the series configuration.
+
+    Raises:
+        TypeError: When fields have incorrect types.
+        ValueError: When required keys are missing.
+    """
     if not isinstance(entry, dict):
         raise TypeError("reshape.series entries must be objects")
     column = entry.get("column")
@@ -166,6 +226,18 @@ def _normalise_timeseries_series(entry: Any) -> TimeseriesSeriesSpec:
 
 
 def _normalise_reshape(reshape: Any) -> TimeseriesReshapeSpec | None:
+    """Normalise the reshape payload when provided.
+
+    Args:
+        reshape: Raw reshape dictionary or None.
+
+    Returns:
+        TimeseriesReshapeSpec if provided, otherwise None.
+
+    Raises:
+        TypeError: If field types are invalid.
+        ValueError: If required sections are missing.
+    """
     if reshape is None:
         return None
     if not isinstance(reshape, dict):
@@ -200,7 +272,7 @@ def _normalise_reshape(reshape: Any) -> TimeseriesReshapeSpec | None:
         raise TypeError("reshape.year_column must be a string")
 
     exclude_indexes_value = reshape.get("exclude_year_indexes") or reshape.get("exclude_year_indices")
-    exclude_year_indexes: List[int] = []
+    exclude_year_indexes: list[int] = []
     if exclude_indexes_value is not None:
         if not isinstance(exclude_indexes_value, Sequence):
             raise TypeError("reshape.exclude_year_indexes must be a list of integers")
@@ -230,6 +302,20 @@ def _normalise_dataset(
     index: int,
     used_aliases: set[str],
 ) -> DatasetSpec:
+    """Normalise dataset entries into DatasetSpec objects.
+
+    Args:
+        dataset: Dataset definition string or dictionary.
+        index: Dataset index used for default aliasing.
+        used_aliases: Aliases that have already been assigned.
+
+    Returns:
+        DatasetSpec describing the dataset reference.
+
+    Raises:
+        TypeError: If dataset entries use unsupported types.
+        ValueError: If required keys are missing or invalid.
+    """
     if isinstance(dataset, str):
         path = dataset
         alias_candidate = Path(dataset).stem or f"dataset_{index}"
@@ -259,6 +345,15 @@ def _normalise_dataset(
 
 
 def _ensure_unique_alias(candidate: str, used_aliases: set[str]) -> str:
+    """Return a dataset alias that does not collide with previously used aliases.
+
+    Args:
+        candidate: Proposed alias string.
+        used_aliases: Aliases already in use.
+
+    Returns:
+        Unique alias string added to `used_aliases`.
+    """
     base = _escape_alias_candidate(candidate or "dataset")
     alias = base or "dataset"
     suffix = 1
@@ -270,6 +365,18 @@ def _ensure_unique_alias(candidate: str, used_aliases: set[str]) -> str:
 
 
 def _normalise_join(join: Any) -> JoinSpec:
+    """Normalise a join definition.
+
+    Args:
+        join: Raw dictionary describing the join.
+
+    Returns:
+        JoinSpec describing the join relationship.
+
+    Raises:
+        TypeError: For invalid input types.
+        ValueError: When required keys are missing or inconsistent.
+    """
     if not isinstance(join, dict):
         raise TypeError("joins entries must be objects")
 
@@ -318,6 +425,18 @@ def _normalise_join(join: Any) -> JoinSpec:
 
 
 def _normalise_aggregation(aggregation: Any) -> AggregationSpec:
+    """Normalise aggregation payloads.
+
+    Args:
+        aggregation: Raw aggregation entry (string or dict).
+
+    Returns:
+        AggregationSpec describing the aggregation expression.
+
+    Raises:
+        TypeError: If the entry type is unsupported.
+        ValueError: If the SQL expression cannot be derived.
+    """
     if isinstance(aggregation, str):
         sql = aggregation
         alias = None
@@ -347,23 +466,25 @@ def _normalise_aggregation(aggregation: Any) -> AggregationSpec:
 
 @dataclass(slots=True)
 class QueryRequest:
-    datasets: List[Any]
-    columns: Optional[List[str]] = None
-    limit: Optional[int] = None
+    """Validated representation of an incoming query payload."""
+
+    datasets: list[Any]
+    columns: list[str] | None = None
+    limit: int | None = None
     include_schema: bool = False
     include_sql: bool = False
-    joins: Optional[List[Dict[str, Any]]] = None
-    group_by: Optional[List[str]] = None
-    aggregations: Optional[List[Any]] = None
-    order_by: Optional[List[str]] = None
-    filters: Optional[List[Dict[str, Any]]] = None
-    computed_columns: Optional[List[Dict[str, Any]]] = None
-    reshape: Optional[Dict[str, Any]] = None
+    joins: list[dict[str, Any]] | None = None
+    group_by: list[str] | None = None
+    aggregations: list[Any] | None = None
+    order_by: list[str] | None = None
+    filters: list[dict[str, Any]] | None = None
+    computed_columns: list[dict[str, Any]] | None = None
+    reshape: dict[str, Any] | None = None
 
-    _dataset_specs: List[DatasetSpec] = field(init=False, repr=False)
-    _join_specs: List[JoinSpec] = field(init=False, repr=False)
-    _aggregation_specs: List[AggregationSpec] = field(init=False, repr=False)
-    _computed_columns_specs: List[ComputedColumnSpec] = field(init=False, repr=False)
+    _dataset_specs: list[DatasetSpec] = field(init=False, repr=False)
+    _join_specs: list[JoinSpec] = field(init=False, repr=False)
+    _aggregation_specs: list[AggregationSpec] = field(init=False, repr=False)
+    _computed_columns_specs: list[ComputedColumnSpec] = field(init=False, repr=False)
     _reshape_spec: TimeseriesReshapeSpec | None = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -418,7 +539,7 @@ class QueryRequest:
         if self.filters is not None:
             if not isinstance(self.filters, Sequence):
                 raise TypeError("filters must be a list of dicts")
-            normalised_filters: List[dict[str, object]] = []
+            normalised_filters: list[dict[str, object]] = []
             for filt in self.filters:
                 if not isinstance(filt, dict):
                     raise TypeError("filters entries must be objects")
@@ -457,28 +578,35 @@ class QueryRequest:
         self._reshape_spec = _normalise_reshape(self.reshape)
 
     @property
-    def dataset_specs(self) -> List[DatasetSpec]:
+    def dataset_specs(self) -> list[DatasetSpec]:
+        """Return the normalised dataset specs."""
         return list(self._dataset_specs)
 
     @property
-    def join_specs(self) -> List[JoinSpec]:
+    def join_specs(self) -> list[JoinSpec]:
+        """Return the normalised join specs."""
         return list(self._join_specs)
 
     @property
-    def aggregation_specs(self) -> List[AggregationSpec]:
+    def aggregation_specs(self) -> list[AggregationSpec]:
+        """Return the normalised aggregation specs."""
         return list(self._aggregation_specs)
 
     @property
-    def computed_column_specs(self) -> List[ComputedColumnSpec]:
+    def computed_column_specs(self) -> list[ComputedColumnSpec]:
+        """Return the normalised computed column specs."""
         return list(self._computed_columns_specs)
 
     @property
     def reshape_spec(self) -> TimeseriesReshapeSpec | None:
+        """Return the parsed reshape specification, if any."""
         return self._reshape_spec
 
 
 @dataclass
 class QueryPlan:
+    """Executable DuckDB plan derived from a QueryRequest."""
+
     sql: str
-    params: List[object]
+    params: list[object]
     requires_spatial: bool = False

@@ -1,3 +1,5 @@
+"""Starlette application exposing the query-engine web console and MCP routes."""
+
 from __future__ import annotations
 
 import os
@@ -45,6 +47,11 @@ MCP_OPENAPI_PATH = DOCS_ROOT / "mcp_openapi.yaml"
 
 
 def _render_mcp_openapi_yaml() -> str | None:
+    """Render the MCP OpenAPI spec with runtime host overrides.
+
+    Returns:
+        Serialized YAML string or None when rendering fails.
+    """
     try:
         raw_spec = MCP_OPENAPI_PATH.read_text(encoding="utf-8")
     except OSError as exc:
@@ -82,6 +89,15 @@ def _render_mcp_openapi_yaml() -> str | None:
 
 
 async def query_engine_http_exception_handler(request: StarletteRequest, exc: HTTPException) -> JSONResponse:
+    """Return structured JSON for HTTPException instances raised by Starlette.
+
+    Args:
+        request: Current Starlette request.
+        exc: Raised HTTPException.
+
+    Returns:
+        JSONResponse with error metadata and optional stacktrace.
+    """
     payload: dict[str, Any] = {
         "error": exc.detail if exc.detail else exc.__class__.__name__,
         "status_code": exc.status_code,
@@ -98,6 +114,15 @@ async def query_engine_http_exception_handler(request: StarletteRequest, exc: HT
 
 
 async def query_engine_exception_handler(request: StarletteRequest, exc: Exception) -> JSONResponse:
+    """Catch-all handler that logs and serialises uncaught exceptions.
+
+    Args:
+        request: Current Starlette request.
+        exc: Exception raised during processing.
+
+    Returns:
+        JSONResponse with stacktrace details.
+    """
     stacktrace_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
     stacktrace_text = "".join(stacktrace_lines)
     stacktrace_clean = stacktrace_text.strip("\n")
@@ -118,6 +143,14 @@ async def query_engine_exception_handler(request: StarletteRequest, exc: Excepti
 
 
 def _format_exception_message(exc: BaseException) -> str:
+    """Compose a concise exception message for JSON responses.
+
+    Args:
+        exc: Exception instance to summarise.
+
+    Returns:
+        Human-readable message combining exception type and detail.
+    """
     try:
         detail = str(exc)
     except Exception:
@@ -129,6 +162,12 @@ def _format_exception_message(exc: BaseException) -> str:
 
 
 def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
+    """Append stacktrace details to `<run>/exceptions.log` when possible.
+
+    Args:
+        stacktrace_text: Stacktrace text to append.
+        runid: Run identifier used to resolve the filesystem path.
+    """
     if not runid:
         return
 
@@ -148,12 +187,28 @@ def _log_exception_details(stacktrace_text: str, runid: str | None) -> None:
 
 
 async def homepage(request: StarletteRequest) -> Response:
+    """Serve a minimal landing page for manual testing.
+
+    Args:
+        request: Incoming Starlette request (unused).
+
+    Returns:
+        HTMLResponse with static instructions.
+    """
     return HTMLResponse(
         "<h1>WEPPcloud Query Engine</h1><p>See /query/runs/&lt;runid&gt; for details.</p>"
     )
 
 
 async def run_info(request: StarletteRequest) -> Response:
+    """Render a run summary page including catalog entry listings.
+
+    Args:
+        request: Current Starlette request with `runid` path parameter.
+
+    Returns:
+        TemplateResponse or JSON error when the run is missing.
+    """
     runid_param: str = request.path_params["runid"]
     try:
         run_path = resolve_run_path(runid_param)
@@ -186,6 +241,14 @@ async def run_info(request: StarletteRequest) -> Response:
 
 
 async def run_schema(request: StarletteRequest) -> Response:
+    """Return the activated catalog entries for a run as JSON.
+
+    Args:
+        request: Starlette request referencing the runid path parameter.
+
+    Returns:
+        JSONResponse containing catalog entries or an error payload.
+    """
     runid_param: str = request.path_params["runid"]
     try:
         run_path = resolve_run_path(runid_param)
@@ -206,6 +269,14 @@ async def run_schema(request: StarletteRequest) -> Response:
 
 
 async def make_query_endpoint(request: StarletteRequest) -> Response:
+    """Render the query console HTML page for a given run.
+
+    Args:
+        request: Starlette request containing the runid path parameter.
+
+    Returns:
+        TemplateResponse for the query console UI, or fallback text response.
+    """
     runid_param: str = request.path_params["runid"]
     try:
         run_path = resolve_run_path(runid_param)
@@ -279,6 +350,14 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
 
 
 async def run_query_endpoint(request: StarletteRequest) -> Response:
+    """Execute a query payload posted from the web console.
+
+    Args:
+        request: Starlette request containing the runid and JSON body.
+
+    Returns:
+        JSONResponse containing query results or error details.
+    """
     runid_param: str = request.path_params["runid"]
     try:
         run_path = resolve_run_path(runid_param)
@@ -376,6 +455,14 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
 
 
 async def activate_run(request: StarletteRequest) -> Response:
+    """Trigger activation via the HTTP console endpoints.
+
+    Args:
+        request: Starlette request containing the runid path parameter.
+
+    Returns:
+        JSONResponse describing activation status.
+    """
     runid_param: str = request.path_params["runid"]
 
     try:
@@ -396,6 +483,8 @@ async def activate_run(request: StarletteRequest) -> Response:
 
 
 class _HealthLogFilter(logging.Filter):
+    """Suppress /health log entries from access logs."""
+
     def filter(self, record):
         try:
             message = record.getMessage()
@@ -409,10 +498,26 @@ for _log_name in ('uvicorn.access', 'gunicorn.access'):
     logging.getLogger(_log_name).addFilter(_health_log_filter)
 
 def health(_: StarletteRequest):
+    """Return a plain-text OK response for container health checks.
+
+    Args:
+        _: Unused Starlette request.
+
+    Returns:
+        PlainTextResponse containing 'OK'.
+    """
     return PlainTextResponse('OK')
 
 
 async def mcp_openapi_spec(_: StarletteRequest) -> Response:
+    """Serve the MCP OpenAPI specification if available.
+
+    Args:
+        _: Unused Starlette request.
+
+    Returns:
+        Response containing YAML or a PlainTextResponse error.
+    """
     if not MCP_OPENAPI_PATH.is_file():
         LOGGER.warning("MCP OpenAPI spec not found at %s", MCP_OPENAPI_PATH)
         return PlainTextResponse("OpenAPI specification not found", status_code=404)
@@ -423,6 +528,11 @@ async def mcp_openapi_spec(_: StarletteRequest) -> Response:
 
 
 def create_app() -> Starlette:
+    """Create the full Starlette application (HTML + MCP mount if configured).
+
+    Returns:
+        Configured Starlette application instance.
+    """
     routes = [
         Route(
             '/health',

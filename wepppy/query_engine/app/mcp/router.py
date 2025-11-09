@@ -1,3 +1,5 @@
+"""Starlette router for the query-engine MCP API."""
+
 from __future__ import annotations
 
 import json
@@ -6,7 +8,8 @@ import os
 import time
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any
 from uuid import uuid4
 
 from starlette.applications import Starlette
@@ -38,6 +41,8 @@ DEFAULT_PROMPT_ROW_LIMIT = 25
 
 
 class QueryValidationException(Exception):
+    """Raised when a query payload fails validation before execution."""
+
     def __init__(self, status_code: int, code: str, detail: str, meta: Mapping[str, Any] | None = None) -> None:
         super().__init__(detail)
         self.status_code = status_code
@@ -47,12 +52,31 @@ class QueryValidationException(Exception):
 
 
 def _with_trace_id(meta: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Attach a random trace identifier to metadata payloads.
+
+    Args:
+        meta: Optional metadata dictionary.
+
+    Returns:
+        Dictionary containing the original metadata plus a `trace_id`.
+    """
     payload = dict(meta or {})
     payload.setdefault("trace_id", uuid4().hex)
     return payload
 
 
 def _error_response(status_code: int, code: str, detail: str, error_meta: Mapping[str, Any] | None = None) -> JSONResponse:
+    """Return a JSON API error response with a standard envelope.
+
+    Args:
+        status_code: HTTP status code to emit.
+        code: Short machine-readable error code.
+        detail: Human readable error detail.
+        error_meta: Optional metadata payload for context.
+
+    Returns:
+        JSONResponse following the JSON:API error shape.
+    """
     error_entry = {"code": code, "detail": detail}
     if error_meta:
         error_entry["meta"] = dict(error_meta)
@@ -60,12 +84,29 @@ def _error_response(status_code: int, code: str, detail: str, error_meta: Mappin
 
 
 def _normalise_leading_slash(path: str) -> str:
+    """Ensure paths include a leading slash.
+
+    Args:
+        path: Raw path fragment.
+
+    Returns:
+        Path guaranteed to start with `/`.
+    """
     if not path.startswith("/"):
         return "/" + path
     return path
 
 
 def _join_path(root_path: str, suffix: str) -> str:
+    """Join a root_path with a suffix while normalising slashes.
+
+    Args:
+        root_path: Base prefix (e.g., proxy root path).
+        suffix: Path fragment to append.
+
+    Returns:
+        Normalised combined path.
+    """
     if not root_path:
         return _normalise_leading_slash(suffix)
     base = root_path.rstrip("/")
@@ -73,11 +114,31 @@ def _join_path(root_path: str, suffix: str) -> str:
 
 
 def _absolute_url(request: Request, path: str) -> str:
+    """Build an absolute URL for the current request host.
+
+    Args:
+        request: Current Starlette request.
+        path: URL path to append.
+
+    Returns:
+        Fully-qualified URL string.
+    """
     base_url = str(request.base_url).rstrip("/")
     return f"{base_url}{path}"
 
 
 def _load_catalog_data(run_path: os.PathLike[str]) -> tuple[list[dict[str, Any]], str | None]:
+    """Load catalog JSON for a run path and return entries plus timestamp.
+
+    Args:
+        run_path: Filesystem path to the run directory.
+
+    Returns:
+        Tuple containing the list of catalog entries and the generated_at timestamp.
+
+    Raises:
+        FileNotFoundError: If the catalog file is missing.
+    """
     catalog_path = resolve_catalog_path(run_path)
     if not catalog_path.exists():
         raise FileNotFoundError(catalog_path)
@@ -89,6 +150,14 @@ def _load_catalog_data(run_path: os.PathLike[str]) -> tuple[list[dict[str, Any]]
 
 
 def _load_catalog_metadata(run_path: os.PathLike[str]) -> tuple[bool, str | None, int]:
+    """Return activation metadata for a run without loading the full catalog.
+
+    Args:
+        run_path: Filesystem path to the run directory.
+
+    Returns:
+        Tuple of (activated flag, generated_at timestamp, dataset count).
+    """
     try:
         entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError:
@@ -101,6 +170,11 @@ def _load_catalog_metadata(run_path: os.PathLike[str]) -> tuple[bool, str | None
 
 
 def _load_prompt_template() -> str:
+    """Read the LLM prompt template from disk, falling back to a built-in default.
+
+    Returns:
+        Template text with placeholder tokens.
+    """
     try:
         return PROMPT_TEMPLATE_PATH.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -114,6 +188,14 @@ def _load_prompt_template() -> str:
 
 
 def _build_schema_summary(raw_entries: Iterable[Mapping[str, Any]]) -> str:
+    """Build a concise bullet list summarising catalog schema coverage.
+
+    Args:
+        raw_entries: Catalog entries loaded from disk.
+
+    Returns:
+        Markdown-style bullet list describing available schemas.
+    """
     lines: list[str] = []
     for entry in raw_entries:
         path = entry.get("path") if isinstance(entry, Mapping) else None
@@ -133,6 +215,14 @@ def _build_schema_summary(raw_entries: Iterable[Mapping[str, Any]]) -> str:
 
 
 def _build_default_payload(raw_entries: Sequence[Mapping[str, Any]]) -> Mapping[str, Any]:
+    """Construct a starter query payload using the first catalog entry.
+
+    Args:
+        raw_entries: Catalog entries loaded from disk.
+
+    Returns:
+        Mapping representing a query payload example.
+    """
     datasets: list[dict[str, Any]] = []
     if raw_entries:
         first = raw_entries[0]
@@ -155,6 +245,15 @@ def _build_default_payload(raw_entries: Sequence[Mapping[str, Any]]) -> Mapping[
 
 
 def _render_prompt_template(template: str, placeholders: Mapping[str, Any]) -> str:
+    """Replace template placeholders with contextual values.
+
+    Args:
+        template: Template string containing `{{KEY}}` placeholders.
+        placeholders: Mapping of placeholder keys to replacement values.
+
+    Returns:
+        Rendered template string.
+    """
     rendered = template
     for key, value in placeholders.items():
         rendered = rendered.replace(f"{{{{{key}}}}}", str(value))
@@ -167,6 +266,19 @@ def _prepare_query_request(
     runid: str,
     run_path: os.PathLike[str],
 ) -> tuple[QueryRequest, Mapping[str, Any], list[dict[str, Any]], str | None]:
+    """Validate the inbound payload and build a QueryRequest instance.
+
+    Args:
+        payload: Raw JSON payload from the HTTP request.
+        runid: Run identifier string.
+        run_path: Filesystem path to the run directory.
+
+    Returns:
+        Tuple of (QueryRequest, normalized payload, raw catalog entries, generated_at).
+
+    Raises:
+        QueryValidationException: If the payload references missing datasets or is malformed.
+    """
     try:
         raw_entries, generated_at = _load_catalog_data(run_path)
     except FileNotFoundError as exc:
@@ -261,10 +373,26 @@ def _prepare_query_request(
 
 
 def resolve_catalog_path(run_path: os.PathLike[str]) -> Path:
+    """Return the expected catalog.json path beneath a run directory.
+
+    Args:
+        run_path: Base run directory path.
+
+    Returns:
+        Path object pointing at `_query_engine/catalog.json`.
+    """
     return Path(run_path) / "_query_engine" / "catalog.json"
 
 
 async def ping(request: Request) -> JSONResponse:
+    """Return a lightweight MCP service health payload.
+
+    Args:
+        request: Current Starlette request.
+
+    Returns:
+        JSONResponse with principal and service metadata.
+    """
     principal = get_principal(request)
     data: dict[str, Any] = {
         "type": "mcp_ping",
@@ -285,6 +413,21 @@ async def ping(request: Request) -> JSONResponse:
 
 
 def _parse_positive_int(value: str | None, *, field: str, default: int, minimum: int = 1, maximum: int | None = None) -> int:
+    """Parse a positive integer query parameter.
+
+    Args:
+        value: Raw string value from query params.
+        field: Field name used in error messages.
+        default: Default value when `value` is None.
+        minimum: Minimum allowed integer (inclusive).
+        maximum: Maximum allowed integer (inclusive).
+
+    Returns:
+        Parsed integer value.
+
+    Raises:
+        ValueError: If the value cannot be parsed or is out of bounds.
+    """
     if value is None:
         return default
     try:
@@ -299,6 +442,20 @@ def _parse_positive_int(value: str | None, *, field: str, default: int, minimum:
 
 
 def _parse_optional_positive_int(value: str | None, *, field: str, minimum: int = 1, maximum: int | None = None) -> int | None:
+    """Parse an optional positive integer, returning None when absent.
+
+    Args:
+        value: Raw string value.
+        field: Field name for error reporting.
+        minimum: Minimum allowed value.
+        maximum: Maximum allowed value.
+
+    Returns:
+        Parsed integer or None.
+
+    Raises:
+        ValueError: If the provided value is invalid.
+    """
     if value is None:
         return None
     parsed = _parse_positive_int(value, field=field, default=minimum, minimum=minimum, maximum=maximum)
@@ -306,6 +463,15 @@ def _parse_optional_positive_int(value: str | None, *, field: str, minimum: int 
 
 
 def _get_query_param(params: Mapping[str, Any], *names: str) -> str | None:
+    """Return the first present query parameter from the provided list of names.
+
+    Args:
+        params: Query parameter mapping.
+        *names: Candidate parameter names to inspect.
+
+    Returns:
+        The first matching value or None when absent.
+    """
     for name in names:
         value = params.get(name)
         if value is not None:
@@ -314,6 +480,19 @@ def _get_query_param(params: Mapping[str, Any], *names: str) -> str | None:
 
 
 def _parse_bool(value: str | None, *, field: str, default: bool) -> bool:
+    """Parse a truthy/falsy string into a boolean.
+
+    Args:
+        value: Optional query parameter string.
+        field: Field name for error reporting.
+        default: Boolean default when value is None.
+
+    Returns:
+        Parsed boolean value.
+
+    Raises:
+        ValueError: If the value cannot be interpreted as boolean.
+    """
     if value is None:
         return default
     value_lower = value.strip().lower()
@@ -325,6 +504,18 @@ def _parse_bool(value: str | None, *, field: str, default: bool) -> bool:
 
 
 def _resolve_run_entry(request: Request, runid: str) -> tuple[Path, dict[str, Any]]:
+    """Resolve run metadata and construct the JSON API envelope.
+
+    Args:
+        request: Starlette request providing URL context.
+        runid: Run identifier string.
+
+    Returns:
+        Tuple containing the run Path and the JSON:API resource object.
+
+    Raises:
+        FileNotFoundError: If the run cannot be resolved.
+    """
     try:
         run_path = resolve_run_path(runid)
     except FileNotFoundError:
@@ -364,12 +555,29 @@ def _resolve_run_entry(request: Request, runid: str) -> tuple[Path, dict[str, An
 
 
 def _principal_has_run(principal: MCPPrincipal, runid: str) -> bool:
+    """Return True if the authenticated token grants access to the run.
+
+    Args:
+        principal: Authenticated MCP principal.
+        runid: Run identifier being accessed.
+
+    Returns:
+        True when the runid is whitelisted in the token.
+    """
     if principal.run_ids is None:
         return False
     return runid in principal.run_ids
 
 
 def _is_excluded_dataset(path: str) -> bool:
+    """Return True when a dataset path should be hidden from clients.
+
+    Args:
+        path: Dataset path relative to the catalog root.
+
+    Returns:
+        True if the dataset should be filtered from responses.
+    """
     normalized = path.replace("\\", "/")
     normalized_lower = normalized.lower()
 
@@ -391,6 +599,14 @@ def _is_excluded_dataset(path: str) -> bool:
 
 
 def _filter_catalog_entries(entries: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Filter catalog entries to remove hidden or excluded datasets.
+
+    Args:
+        entries: Iterable of catalog entry dictionaries.
+
+    Returns:
+        Filtered list of entry dictionaries.
+    """
     filtered: list[dict[str, Any]] = []
     for entry in entries:
         if not isinstance(entry, dict):
@@ -406,6 +622,16 @@ def _filter_catalog_entries(entries: Iterable[dict[str, Any]]) -> list[dict[str,
 
 
 def _clone_entry(entry: dict[str, Any], *, include_fields: bool, field_limit: int | None) -> dict[str, Any]:
+    """Return a filtered copy of a catalog entry, optionally trimming schema fields.
+
+    Args:
+        entry: Catalog entry dictionary.
+        include_fields: Whether schema field metadata should be included.
+        field_limit: Optional limit on the number of schema fields.
+
+    Returns:
+        Shallow copy of the entry with schema adjusted as requested.
+    """
     clone = dict(entry)
     if not include_fields:
         clone.pop("schema", None)
@@ -432,6 +658,14 @@ def _clone_entry(entry: dict[str, Any], *, include_fields: bool, field_limit: in
 
 
 async def get_catalog(request: Request) -> JSONResponse:
+    """Return catalog entries for a run, enforcing scope and filters.
+
+    Args:
+        request: Starlette request containing runid path param.
+
+    Returns:
+        JSONResponse describing filtered catalog entries.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
@@ -505,6 +739,14 @@ async def get_catalog(request: Request) -> JSONResponse:
 
 
 async def get_run(request: Request) -> JSONResponse:
+    """Return run metadata including activation status and catalog stats.
+
+    Args:
+        request: Starlette request containing the runid path parameter.
+
+    Returns:
+        JSONResponse with run status and catalog metadata.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
@@ -529,6 +771,14 @@ async def get_run(request: Request) -> JSONResponse:
 
 
 async def validate_query(request: Request) -> JSONResponse:
+    """Validate a query payload without executing it.
+
+    Args:
+        request: Starlette request holding the runid and payload.
+
+    Returns:
+        JSONResponse summarising the normalized payload and catalog metadata.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
@@ -579,6 +829,14 @@ async def validate_query(request: Request) -> JSONResponse:
 
 
 async def execute_query(request: Request) -> JSONResponse:
+    """Execute a query payload after validating scope and catalog access.
+
+    Args:
+        request: Starlette request with the runid, payload, and query params.
+
+    Returns:
+        JSONResponse containing execution metadata and results.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
@@ -696,6 +954,14 @@ async def execute_query(request: Request) -> JSONResponse:
 
 
 async def activate_run_endpoint(request: Request) -> JSONResponse:
+    """Trigger catalog activation for a run via the MCP API.
+
+    Args:
+        request: Starlette request with the runid path parameter.
+
+    Returns:
+        JSONResponse describing activation status.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:activate")
 
@@ -737,6 +1003,14 @@ async def activate_run_endpoint(request: Request) -> JSONResponse:
 
 
 async def get_presets(request: Request) -> JSONResponse:
+    """Return the static query preset catalog.
+
+    Args:
+        request: Starlette request with runid parameter (used for scope).
+
+    Returns:
+        JSONResponse containing preset categories.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
@@ -768,6 +1042,14 @@ async def get_presets(request: Request) -> JSONResponse:
 
 
 async def get_prompt_template(request: Request) -> JSONResponse:
+    """Render the LLM prompt template with run-aware placeholders.
+
+    Args:
+        request: Starlette request referencing the runid.
+
+    Returns:
+        JSONResponse containing markdown template data.
+    """
     runid = request.path_params.get("runid") or ""
     principal = require_scope(request, "runs:read")
 
@@ -827,6 +1109,11 @@ async def get_prompt_template(request: Request) -> JSONResponse:
 
 
 def create_mcp_app() -> Starlette:
+    """Instantiate the Starlette app that powers the MCP API surface.
+
+    Returns:
+        Configured Starlette application with MCP routes and middleware.
+    """
     routes = [
         Route("/ping", ping, methods=["GET"], name="mcp_ping"),
         Route("/runs/{runid:str}", get_run, methods=["GET"], name="mcp_get_run"),

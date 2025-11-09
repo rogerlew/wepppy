@@ -1,45 +1,62 @@
-import os
+"""Network-heavy smoke test for the legacy WMesque raster service."""
+
+from __future__ import annotations
+
 import shutil
-from os.path import join as _join
-from os.path import exists as _exists
+from pathlib import Path
+from typing import Sequence
 
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from wepppy.all_your_base.geo import wmesque_retrieve, read_arc, read_tif
+from wepppy.all_your_base.geo import read_arc, read_tif, wmesque_retrieve
+
+TEST_DIR = Path("wmesque_data")
+DEFAULT_EXTENT = (-120.234375, 38.9505984033, -120.05859375, 39.0871695498)
 
 
-test_dir = 'wmesque_data'
+def run_smoke(extent: Sequence[float] | None = None, cellsize: float = 30.0) -> None:
+    """Download a handful of rasters and verify the Arc/GeoTIFF readers agree.
 
-if _exists(test_dir):
-    shutil.rmtree(test_dir)
+    Parameters
+    ----------
+    extent:
+        Optional bounding box (west, south, east, north) in WGS84 degrees.
+        The default matches the historical integration region used by WMesque.
+    cellsize:
+        Target raster resolution in meters.
+    """
 
-os.mkdir(test_dir)
+    bbox = tuple(extent or DEFAULT_EXTENT)
+    if len(bbox) != 4:
+        raise ValueError("extent must contain four floating point values")
 
-nlcd_tif = _join(test_dir, 'nlcd.tif')
-nlcd_asc = _join(test_dir, 'nlcd.asc')
-ned_asc = _join(test_dir, 'ned.asc')
+    if TEST_DIR.exists():
+        shutil.rmtree(TEST_DIR)
+    TEST_DIR.mkdir(parents=True, exist_ok=True)
+
+    nlcd_tif = TEST_DIR / "nlcd.tif"
+    nlcd_asc = TEST_DIR / "nlcd.asc"
+    ned_asc = TEST_DIR / "ned.asc"
+
+    wmesque_retrieve("nlcd/2011", bbox, str(nlcd_asc), cellsize)
+    wmesque_retrieve("nlcd/2011", bbox, str(nlcd_tif), cellsize)
+    wmesque_retrieve("ned1/2016", bbox, str(ned_asc), cellsize)
+
+    data, transform, proj = read_arc(str(nlcd_asc))
+    data_tif, transform_tif, proj_tif = read_tif(str(nlcd_tif), dtype=np.int32)
+    data_arc_int, transform_arc_int, proj_arc_int = read_arc(
+        str(nlcd_asc), dtype=np.int32
+    )
+
+    assert data.shape == data_tif.shape == data_arc_int.shape
+
+    assert all(v == v2 for v, v2 in zip(transform, transform_tif))
+    assert all(v == v2 for v, v2 in zip(transform, transform_arc_int))
+    assert proj == proj_tif == proj_arc_int
+
+    assert_array_equal(data, data_tif)
 
 
-extent = [-120.234375, 38.9505984033, -120.05859375, 39.0871695498]
-wmesque_retrieve('nlcd/2011', extent, nlcd_asc, 30.0)
-wmesque_retrieve('nlcd/2011', extent, nlcd_tif, 30.0)
-wmesque_retrieve('ned1/2016', extent, ned_asc, 30.0)
-
-data, transform, proj = read_arc(nlcd_asc)
-data2, transform2, proj2 = read_tif(nlcd_tif, dtype=np.int32)
-data3, transform3, proj3 = read_arc(nlcd_asc, dtype=np.int32)
-
-assert data.shape[0] == data2.shape[0], (data.shape, data2.shape)
-assert data.shape[1] == data2.shape[1], (data.shape, data2.shape)
-
-assert data.shape[0] == data3.shape[0], (data.shape, data3.shape)
-assert data.shape[1] == data3.shape[1], (data.shape, data3.shape)
-
-for v,v2 in zip(transform, transform2):
-    assert v == v2
-    
-for v,v2 in zip(transform, transform3):
-    assert v == v2
-    
-assert_array_equal(data, data2)
+if __name__ == "__main__":
+    run_smoke()

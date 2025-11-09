@@ -1,3 +1,5 @@
+"""Convenience imports for the CLIGEN climate-building toolkit."""
+
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #

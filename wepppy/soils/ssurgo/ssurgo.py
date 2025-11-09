@@ -6,7 +6,11 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from typing import List, Set, Union, Dict
+"""SSURGO/STATSGO soil ingestion and conversion helpers."""
+
+from __future__ import annotations
+
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import csv
 import os
 import requests
@@ -89,9 +93,7 @@ _metadata = {
 }
 
 class SsurgoRequestError(Exception):
-    """
-    Ssurgo request did not return 200 status code
-    """
+    """Raised when the NRCS SDM Tabular service returns a non-200 response."""
 
 
 # noinspection PyPep8Naming
@@ -145,16 +147,8 @@ def _extract_unique(xml):
     return table
 
 
-def query_mukeys_in_extent(extent: List[float]) -> Union[Set[int], None]:
-    """
-    Query ssurgo to determine the mukeys in the extent
-
-    :param extent:
-        xmin, ymin, xmax, ymax
-
-    :return:
-        list of mukeys
-    """
+def query_mukeys_in_extent(extent: Sequence[float]) -> Optional[Set[int]]:
+    """Return the mukeys that intersect the provided [xmin, ymin, xmax, ymax] extent."""
 
     assert len(extent) == 4
     assert extent[0] < extent[2]
@@ -193,7 +187,9 @@ def query_mukeys_in_extent(extent: List[float]) -> Union[Set[int], None]:
 
 
 class MajorComponent:
-    def __init__(self, component):
+    """Lightweight container for SSURGO ``component`` table rows."""
+
+    def __init__(self, component: Dict[str, Any]):
         self.muname = None
         self.albedodry_r = None
         for k, v in component.items():
@@ -202,6 +198,8 @@ class MajorComponent:
 
 # noinspection PyPep8Naming
 class Horizon(HorizonMixin):
+    """Wrap a single SSURGO ``chorizon`` record and derive WEPP-ready values."""
+
     def __init__(self, chkey, layer, defaults=None):
         self.chkey = chkey
 
@@ -456,6 +454,8 @@ TRANSIENT_FIELDS = ["_weppsoilutil"]
 
 
 class SoilSummary(object):
+    """Metadata describing a generated WEPP soil file derived from SSURGO data."""
+
     def __init__(self, **kwargs):
         self.mukey = None
         if "Mukey" in kwargs:
@@ -625,15 +625,17 @@ class SoilSummary(object):
 
 
 class WeppSoil:
+    """Construct and persist WEPP-formatted soils from SSURGO components."""
+
     def __init__(
         self,
-        ssurgo_c,
-        mukey,
-        initial_sat=0.75,
-        horizon_defaults=None,
-        res_lyr_ksat_threshold=2.0,
-        ksflag=True,
-    ):
+        ssurgo_c: "SurgoSoilCollection",
+        mukey: int,
+        initial_sat: float = 0.75,
+        horizon_defaults: Optional[Dict[str, Any]] = None,
+        res_lyr_ksat_threshold: float = 2.0,
+        ksflag: bool = True,
+    ) -> None:
 
         assert mukey in ssurgo_c.mukeys
 
@@ -686,12 +688,8 @@ POSSIBILITY OF SUCH DAMAGE."""
         else:
             return "%s (%s)" % (self.majorComponent.muname, self.horizons[0].texture)
 
-    def build(self):
-        """
-        Return the major component for a given mukey is the component
-        with the highest comppct_r value and a obtained cokey. If no
-        components have a usable cokey then None is returned.
-        """
+    def build(self) -> None:
+        """Populate major component + horizon state for the current mukey."""
         self.build_notes = []
 
         ssurgo_c = self.ssurgo_c
@@ -1580,11 +1578,8 @@ class SurgoSoilCollection(object):
         https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050900.pdf
     """
 
-    def __init__(self, mukeys, use_statsgo=False):
-        """
-        Builds a collection of soil components and layers from a list of mukeys.
-        SSurgo is queried when the collection is initialized.
-        """
+    def __init__(self, mukeys: Iterable[int], use_statsgo: bool = False) -> None:
+        """Preload the necessary SSURGO/STATSGO tables for the supplied mukeys."""
         mukeys = [v for v in mukeys if isint(v)]
         mukeys = [int(v) for v in mukeys]
         if use_statsgo:
@@ -1671,21 +1666,19 @@ class SurgoSoilCollection(object):
 
     def makeWeppSoils(
         self,
-        initial_sat=0.75,
-        verbose=False,
-        horizon_defaults=None,
-        ksflag=True,
-        logger=None,
-        max_workers=None
-    ):
-        """
-        Build WeppSoil objects concurrently per mukey and populate:
-            self.weppSoils, self.invalidSoils
+        initial_sat: float = 0.75,
+        verbose: bool = False,
+        horizon_defaults: Optional[Dict[str, Any]] = None,
+        ksflag: bool = True,
+        logger: Optional[logging.Logger] = None,
+        max_workers: Optional[int] = None,
+    ) -> None:
+        """Populate `self.weppSoils` / `self.invalidSoils` via concurrent builders.
 
         Notes:
-        - Work executes in separate processes; arguments and results must be picklable.
-        - Exceptions propagate to the caller; failed mukeys go to invalidSoils with value=None.
-        - Defaults to using the available CPU cores when max_workers is not provided.
+        - Work executes in separate processes; arguments/results must be picklable.
+        - Exceptions propagate to the caller; failed mukeys land in ``invalidSoils``.
+        - Defaults to the host CPU count when ``max_workers`` is not provided.
         """
 
         cpu_count = os.cpu_count() or 1
@@ -1773,13 +1766,14 @@ class SurgoSoilCollection(object):
 
     def writeWeppSoils(
         self,
-        wd="./",
-        overwrite=True,
-        write_logs=False,
-        db_build=False,
-        version="7778",
-        pickle=False,
+        wd: str = "./",
+        overwrite: bool = True,
+        write_logs: bool = False,
+        db_build: bool = False,
+        version: str = "7778",
+        pickle: bool = False,
     ) -> Dict[int, SoilSummary]:
+        """Persist every valid `WeppSoil` to disk and return a map of summaries."""
         assert self.weppSoils is not None
         soils = {}
         for weppSoil in self.weppSoils.values():
@@ -1793,7 +1787,10 @@ class SurgoSoilCollection(object):
 
         return soils
 
-    def logInvalidSoils(self, wd="./", overwrite=True, db_build=False):
+    def logInvalidSoils(
+        self, wd: str = "./", overwrite: bool = True, db_build: bool = False
+    ) -> None:
+        """Write WEPP soil build logs for invalid/failed mukeys."""
         assert self.invalidSoils is not None
         for weppSoil in self.invalidSoils.values():
             weppSoil.write_log(wd, overwrite, db_build=db_build)

@@ -1,16 +1,24 @@
 from __future__ import annotations
 
+"""Profile recorder entry points used by WEPPcloud Flask routes."""
+
 import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .assembler import ProfileAssembler
 from .config import RecorderConfig, resolve_recorder_config
 from .utils import sanitise_component
+
+if TYPE_CHECKING:
+    from flask import Flask
+
+EventPayload = Dict[str, Any]
+FileHintMap = Dict[str, Path]
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,16 +36,28 @@ class ProfileRecorder:
     """Persist recorder events to per-run audit logs and forward them to the assembler."""
 
     def __init__(self, *, config: RecorderConfig) -> None:
+        """Initialize the recorder and its assembler helper.
+
+        Args:
+            config: Runtime configuration that points to the data repository root.
+        """
         self.config = config
         self.assembler = ProfileAssembler(self.config.data_repo_root)
 
     def append_event(
         self,
-        event: Dict[str, Any],
+        event: EventPayload,
         *,
         user: Any = None,
         assembler_override: Optional[bool] = None,
     ) -> None:
+        """Write a recorder event and optionally dispatch it to the assembler.
+
+        Args:
+            event: Arbitrary JSON-like payload emitted by the recorder routes.
+            user: Optional Flask user object; metadata is copied when authenticated.
+            assembler_override: Force-enable/disable assembler handling when set.
+        """
         record = dict(event)
         record.setdefault("received_at", datetime.now(timezone.utc).isoformat())
 
@@ -73,6 +93,7 @@ class ProfileRecorder:
                 LOGGER.debug("Profile assembler failed for event %s: %s", run_id, exc)
 
     def _resolve_run_directory(self, run_id: Optional[str]) -> Optional[Path]:
+        """Return (and create if needed) the working directory for the given run."""
         if not run_id:
             return None
         try:
@@ -87,6 +108,7 @@ class ProfileRecorder:
         return candidate
 
     def _audit_log_path(self, run_dir: Optional[Path], run_id: Optional[str]) -> Path:
+        """Return the JSONL audit log path for the run or a global fallback."""
         if run_dir is not None:
             audit_dir = run_dir / "_logs"
         else:
@@ -97,13 +119,14 @@ class ProfileRecorder:
 
     def _extract_file_candidates(
         self,
-        event: Dict[str, Any],
+        event: EventPayload,
         run_dir: Optional[Path],
-    ) -> Dict[str, Path]:
+    ) -> FileHintMap:
+        """Inspect an event for run-relative file references."""
         if not run_dir:
             return {}
 
-        candidates: Dict[str, Path] = {}
+        candidates: FileHintMap = {}
         for key in KNOWN_FILE_KEYS:
             if key not in event:
                 continue
@@ -128,6 +151,7 @@ class ProfileRecorder:
         run_dir: Path,
         entry: Any,
     ) -> None:
+        """Record a file candidate when the payload looks like a path."""
         if not entry or not isinstance(entry, str):
             return
         candidate = Path(entry)
@@ -136,13 +160,14 @@ class ProfileRecorder:
         bucket[label] = candidate
 
     @staticmethod
-    def _append_jsonl(path: Path, record: Dict[str, Any]) -> None:
+    def _append_jsonl(path: Path, record: EventPayload) -> None:
+        """Append a serialized event to the JSONL audit log."""
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, separators=(",", ":")) + "\n")
 
 
-def get_profile_recorder(app) -> ProfileRecorder:
-    """Return (creating if needed) the ProfileRecorder bound to the Flask app."""
+def get_profile_recorder(app: Flask) -> ProfileRecorder:
+    """Return (creating if needed) the :class:`ProfileRecorder` bound to the Flask app."""
 
     extensions = getattr(app, "extensions", None)
     if extensions is None:

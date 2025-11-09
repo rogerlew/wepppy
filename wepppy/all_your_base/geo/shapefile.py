@@ -9,6 +9,16 @@ Compatible with Python versions 2.7-3.x
 
 __version__ = "2.0.0-dev"
 
+__all__ = [
+    "Shape",
+    "ShapeRecord",
+    "ShapefileException",
+    "Reader",
+    "Writer",
+    "geojson_to_shape",
+    "signed_area",
+]
+
 from struct import pack, unpack, calcsize, error, Struct
 import os
 import sys

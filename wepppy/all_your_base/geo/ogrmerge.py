@@ -1,3 +1,5 @@
+"""Vendored GDAL ``ogrmerge`` script wrapped for programmatic use."""
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
@@ -8,6 +10,11 @@
 # Author:   Even Rouault <even dot rouault at spatialys dot com>
 #
 ###############################################################################
+
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
+from typing import Any
 # Copyright (c) 2017, Even Rouault <even dot rouault at spatialys dot com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -36,6 +43,8 @@ import sys
 
 from osgeo import gdal
 from osgeo import ogr
+
+__all__ = ["Usage", "process"]
 
 ###############################################################
 # Usage()
@@ -190,8 +199,12 @@ class XMLWriter:
 # process()
 
 
-def process(argv, progress=None, progress_arg=None):
-
+def process(
+    argv: Sequence[str],
+    progress: Callable[[float], None] | None = None,
+    progress_arg: Any | None = None,
+):
+    """CLI-compatible entry point for ``ogrmerge``."""
     if len(argv) == 0:
         return Usage()
 

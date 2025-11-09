@@ -1,3 +1,5 @@
+"""Build and execute DuckDB SQL queries for WEPPcloud datasets."""
+
 from __future__ import annotations
 
 import re
@@ -14,10 +16,26 @@ _GEO_READ_EXTENSIONS = {".geojson", ".fgb", ".gpkg", ".shp"}
 
 
 def _escape_sql_literal(value: str) -> str:
+    """Escape single quotes within `value` for use inside SQL string literals.
+
+    Args:
+        value: String possibly containing single quotes.
+
+    Returns:
+        Escaped string safe for SQL literal contexts.
+    """
     return value.replace("'", "''")
 
 
 def _format_value(value: object) -> str:
+    """Format a Python value as a SQL literal.
+
+    Args:
+        value: Arbitrary Python value destined for SQL.
+
+    Returns:
+        SQL literal representation of `value`.
+    """
     if isinstance(value, bool):
         return "TRUE" if value else "FALSE"
     if isinstance(value, (int, float)):
@@ -26,6 +44,19 @@ def _format_value(value: object) -> str:
 
 
 def _coerce_filter_value(value: object, column_type: str | None, *, operator: str) -> object:
+    """Coerce an arbitrary filter value to match the declared Arrow/DuckDB type.
+
+    Args:
+        value: Filter value supplied by the request.
+        column_type: Arrow type string from the catalog schema.
+        operator: SQL operator string (e.g., '=', 'IN').
+
+    Returns:
+        Value converted into the appropriate Python type for DuckDB binding.
+
+    Raises:
+        ValueError: If the value cannot be coerced into the requested type.
+    """
     if column_type is None:
         return value
 
@@ -55,6 +86,15 @@ def _coerce_filter_value(value: object, column_type: str | None, *, operator: st
 
 
 def _dataset_source_sql(root: Path, spec: DatasetSpec) -> tuple[str, bool]:
+    """Return the DuckDB FROM clause component for a dataset and note spatial needs.
+
+    Args:
+        root: Root directory for catalog assets.
+        spec: Dataset spec referencing the asset.
+
+    Returns:
+        Tuple of the SQL fragment and whether spatial extension is required.
+    """
     dataset_path = root / Path(spec.path)
     source_path = dataset_path.as_posix()
     escaped = _escape_sql_literal(source_path)
@@ -74,7 +114,18 @@ _SIMPLE_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 def _qualify_join_column(alias: str, column: str) -> str:
-    """Return a qualified column suitable for a join condition."""
+    """Return an alias-qualified column reference suitable for join conditions.
+
+    Args:
+        alias: Dataset alias in scope.
+        column: Column name or expression.
+
+    Returns:
+        Column reference that is safe to embed within a JOIN condition.
+
+    Raises:
+        ValueError: If the column name is empty.
+    """
     column = column.strip()
     if not column:
         raise ValueError("Join column name cannot be empty")
@@ -99,6 +150,20 @@ def _build_join_clause(
     used_aliases: set[str],
     root: Path,
 ) -> tuple[str, str, bool]:
+    """Build the SQL fragment for a JOIN clause and record spatial requirements.
+
+    Args:
+        join_spec: Normalised join definition.
+        alias_to_spec: Mapping of alias to dataset spec.
+        used_aliases: Aliases already consumed in the FROM/JOIN clauses.
+        root: Catalog root directory.
+
+    Returns:
+        Tuple of SQL fragment, right-side alias, and spatial requirement flag.
+
+    Raises:
+        ValueError: If aliases are referenced before they exist or repeated.
+    """
     if join_spec.left not in used_aliases:
         raise ValueError(f"Join references alias '{join_spec.left}' before it appears in the FROM clause")
     if join_spec.right not in alias_to_spec:
@@ -120,6 +185,19 @@ def _build_join_clause(
 
 
 def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPlan:
+    """Translate a query payload into an executable DuckDB plan.
+
+    Args:
+        payload: Normalised request containing dataset, join, and filter specs.
+        catalog: Activated catalog describing available datasets and schemas.
+
+    Returns:
+        A QueryPlan containing SQL text, bound parameters, and spatial flag.
+
+    Raises:
+        FileNotFoundError: If any referenced dataset path is missing.
+        ValueError: If joins, filters, or dataset definitions are invalid.
+    """
     dataset_specs = payload.dataset_specs
     if not dataset_specs:
         raise ValueError("At least one dataset must be specified")
@@ -234,6 +312,15 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
 
 
 def run_query(run_context: RunContext, payload: QueryRequest) -> QueryResult:
+    """Execute a QueryRequest against DuckDB and format the results.
+
+    Args:
+        run_context: Resolved run metadata with catalog and working paths.
+        payload: Query request to execute.
+
+    Returns:
+        QueryResult with JSON-safe records, optional schema, and metadata.
+    """
     plan = build_query_plan(payload, run_context.catalog)
     executor = DuckDBExecutor(run_context.base_dir)
     table = executor.execute(plan.sql, plan.params, use_spatial=plan.requires_spatial)
