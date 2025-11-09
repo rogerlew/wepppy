@@ -1,0 +1,36 @@
+At line 3070 of file cligen.f (unit = 9, file = 'input.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+
+Error termination. Backtrace:
+#0  0x7299631702ba in ???
+#1  0x729963170db9 in ???
+#2  0x7299633e977d in ???
+#3  0x5f036feb9b92 in day_gen_
+#4  0x5f036feba7b7 in wxr_gen_
+#5  0x5f036fec302e in MAIN__
+#6  0x5f036feae29e in main
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.32300                         *
+  *                     Revised from VERSION 4.2                     *
+  *                          September 2024                          *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ id103771.par                                                                                                                                                                                                                                                    
+ input.prn                                                                                                                                                                                                                                                       

@@ -90,7 +90,7 @@
 - Detect scenarios where no prior year exists to merge into (e.g., first segment being 1-year followed by 2-year should succeed; two consecutive 2-year segments rely on the previous year produced after the first’s second year).
 
 ## Testing Strategy
-- Construct lightweight fixture management files checked into the repo (e.g., in `wepppy/wepp/management/tests/data/`).
+- Construct lightweight fixture management files checked into the repo (e.g., under `tests/wepp/management/`).
 - Unit tests should cover:
   - End-to-end mode unchanged (existing test updated to call `_build_end_to_end()` implicitly).
   - Stack-and-merge with sequences of 1-year rotations only (degenerates to standard append).

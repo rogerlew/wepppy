@@ -50,6 +50,22 @@ Most files mirror the module they cover. For example, `tests/weppcloud/routes/te
    wctl run-pytest tests --cov=wepppy   # coverage (HTML report in htmlcov/)
    ```
 
+## Opt-In Integration Toggles
+
+Certain long-running tests reach remote services and stay skipped unless you explicitly enable them. Each flag treats `1`, `true`, `yes`, or `on` (case-insensitive) as “enabled”.
+
+- `WMESQUE_INTEGRATION=1` – allows `tests/services/test_wmesque_retrieve.py` to hit the production WMesque raster service and compare ArcGrid vs GeoTIFF outputs. Expect multi-minute runs and real network traffic.
+- `SSURGO_INTEGRATION=1` – enables `tests/soils/test_ssurgo.py` to call the NRCS SDM endpoints and build WEPP soils from live SSURGO/STATSGO datasets. Requires the local SSURGO caches plus network access; plan for heavy IO.
+- `TOPAZ_INTEGRATION=1` – turns on `tests/topo/topaz/test_topaz_runner.py`, which runs GDAL-backed TOPAZ workflows against fixture DEMs. Needs the TOPAZ binaries on PATH and can take several minutes.
+
+Export the flag(s) before invoking pytest, e.g.:
+
+```bash
+WMESQUE_INTEGRATION=1 wctl run-pytest tests/services/test_wmesque_retrieve.py
+SSURGO_INTEGRATION=1 wctl run-pytest tests/soils/test_ssurgo.py
+TOPAZ_INTEGRATION=1 wctl run-pytest tests/topo/topaz/test_topaz_runner.py
+```
+
 ## Tips
 
 - The suite ships with a Redis stub (`tests/conftest.py`), so you never need a live Redis server for local runs.

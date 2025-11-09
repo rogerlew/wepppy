@@ -26,7 +26,6 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/all_your_base/stats/__init__.py`
 - [x] `wepppy/all_your_base/stats/stats.py`
 - [x] `wepppy/all_your_base/sys/__init__.py`
-- [x] `wepppy/all_your_base/tests/wmesque_retrieve_tests.py`
 - [ ] `wepppy/au/__init__.py`
 - [ ] `wepppy/au/climates/__init__.py`
 - [ ] `wepppy/au/climates/agdc/__init__.py`
@@ -46,11 +45,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/climates/cligen/_scripts/stations_sqlitedb_builder.py`
 - [ ] `wepppy/climates/cligen/cligen.py`
 - [ ] `wepppy/climates/cligen/stations/__init__.py`
-- [ ] `wepppy/climates/cligen/tests/conftest.py`
-- [ ] `wepppy/climates/cligen/tests/future_climate_builder.py`
-- [ ] `wepppy/climates/cligen/tests/geojson_export_test.py`
-- [ ] `wepppy/climates/cligen/tests/gridmet_maca_climate_builder.py`
-- [ ] `wepppy/climates/cligen/tests/prism_point_builder.py`
 - [ ] `wepppy/climates/cligen_client.py`
 - [ ] `wepppy/climates/climatena_ca/__init__.py`
 - [ ] `wepppy/climates/daymet/__init__.py`
@@ -74,8 +68,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/climates/snotel/__init__.py`
 - [ ] `wepppy/climates/snotel/process.py`
 - [ ] `wepppy/climates/snotel/sites/csv_to_geojson.py`
-- [ ] `wepppy/climates/tests/build_future_climate.py`
-- [ ] `wepppy/climates/tests/test.py`
 - [ ] `wepppy/climates/validation/24_us_stations/build_us_climates.py`
 - [ ] `wepppy/climates/validation/build_snotelf2.py`
 - [ ] `wepppy/config/__init__.py`
@@ -98,7 +90,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/eu/soils/eusoilhydrogrids/scripts/__init__.py`
 - [ ] `wepppy/eu/soils/eusoilhydrogrids/scripts/acquire.py`
 - [ ] `wepppy/eu/soils/soil_build.py`
-- [ ] `wepppy/eu/soils/tests/soil_build_test.py`
 - [ ] `wepppy/export/__init__.py`
 - [ ] `wepppy/export/arc_export.py`
 - [ ] `wepppy/export/ermit_input.py`
@@ -167,9 +158,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/mods/ash_transport/ashpost_documentation.py`
 - [ ] `wepppy/nodb/mods/ash_transport/ashpost_versioning.py`
 - [ ] `wepppy/nodb/mods/ash_transport/neris_ash_model.py`
-- [ ] `wepppy/nodb/mods/ash_transport/tests/annuals_test.py`
-- [ ] `wepppy/nodb/mods/ash_transport/tests/multi_year_runpost.py`
-- [ ] `wepppy/nodb/mods/ash_transport/tests/multi_year_test.py`
 - [ ] `wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py`
 - [ ] `wepppy/nodb/mods/baer/__init__.py`
 - [x] `wepppy/nodb/mods/baer/baer.py`
@@ -193,8 +181,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/mods/locations/lt/lt.py`
 - [ ] `wepppy/nodb/mods/locations/lt/scripts/batch_arc_export.py`
 - [ ] `wepppy/nodb/mods/locations/lt/selectors/__init__.py`
-- [ ] `wepppy/nodb/mods/locations/lt/tests/__init__.py`
-- [ ] `wepppy/nodb/mods/locations/lt/tests/test_lc.py`
 - [ ] `wepppy/nodb/mods/observed/__init__.py`
 - [ ] `wepppy/nodb/mods/observed/observed.py`
 - [ ] `wepppy/nodb/mods/omni/__init__.py`
@@ -242,8 +228,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/scripts/omni/_scripts/_run_omni.py`
 - [ ] `wepppy/nodb/scripts/update_extended_mods_data.py`
 - [x] `wepppy/nodb/status_messenger.py`
-- [ ] `wepppy/nodb/tests/abstract_subcatchments.py`
-- [ ] `wepppy/nodb/tests/prep_details_opt.py`
 - [x] `wepppy/nodb/unitizer.py`
 - [x] `wepppy/nodb/version.py`
 - [ ] `wepppy/profile_recorder/__init__.py`
@@ -294,7 +278,6 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/soils/ssurgo/statsgo_spatial.py`
 - [x] `wepppy/soils/ssurgo/surgo_map.py`
 - [ ] `wepppy/soils/ssurgo/tests/__init__.py`
-- [ ] `wepppy/soils/ssurgo/tests/test_ssurgo.py`
 - [ ] `wepppy/soils/ssurgo/tests/testsoils/__init__.py`
 - [ ] `wepppy/tools/migrations/migrate_ashpost_pickles.py`
 - [ ] `wepppy/tools/migrations/migrate_landuse_parquet.py`
@@ -306,8 +289,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/topo/peridot/flowpath.py`
 - [ ] `wepppy/topo/peridot/peridot_runner.py`
 - [ ] `wepppy/topo/topaz/__init__.py`
-- [ ] `wepppy/topo/topaz/tests/__init__.py`
-- [ ] `wepppy/topo/topaz/tests/topaz_tests.py`
 - [ ] `wepppy/topo/topaz/topaz.py`
 - [ ] `wepppy/topo/watershed_abstraction/__init__.py`
 - [x] `wepppy/topo/watershed_abstraction/slope_file.py`
@@ -366,10 +347,8 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/wepp/management/data/UnDisturbed/dump_to_json.py`
 - [x] `wepppy/wepp/management/managements.py`
 - [x] `wepppy/wepp/management/pmetpara.py`
-- [ ] `wepppy/wepp/management/tests/export_covers.py`
-- [ ] `wepppy/wepp/management/tests/test_multiple_ofe.py`
-- [ ] `wepppy/wepp/management/tests/test_rotation_stack.py`
-- [ ] `wepppy/wepp/management/tests/validate.py`
+- [ ] `wepppy/wepp/management/scripts/export_covers.py`
+- [ ] `wepppy/wepp/management/scripts/validate.py`
 - [ ] `wepppy/wepp/management/utils/__init__.py`
 - [x] `wepppy/wepp/management/utils/downgrade_to_98_4_format.py`
 - [x] `wepppy/wepp/management/utils/multi_ofe.py`

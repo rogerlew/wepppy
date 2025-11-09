@@ -15,6 +15,7 @@ def pytest_configure(config) -> None:
     config.addinivalue_line("markers", "routes: Flask/HTTP route tests")
     config.addinivalue_line("markers", "nodb: NoDb controller and locking tests")
     config.addinivalue_line("markers", "slow: Tests with timing dependencies (>2s)")
+    config.addinivalue_line("markers", "requires_network: Tests that reach external services")
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -22,6 +22,7 @@ import numpy as np
 import hashlib
 import inspect
 import logging
+import multiprocessing as mp
 from collections import defaultdict
 from datetime import datetime
 
@@ -34,9 +35,7 @@ import sqlite3
 
 from rosetta import Rosetta2, Rosetta3
 
-from concurrent.futures import wait, FIRST_COMPLETED
-
-from wepppy.nodb.base import createProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
 
 from wepppy.all_your_base import try_parse, try_parse_float, isfloat, isint
 
@@ -46,6 +45,42 @@ from wepppy.wepp.soils.utils import simple_texture, soil_texture
 __version__ = "v.0.1.0"
 
 ERIN_ADJUST_FCWP = True
+
+
+def _create_process_pool_executor(
+    max_workers: int,
+    logger: Optional[logging.Logger] = None,
+    prefer_spawn: bool = True,
+) -> ProcessPoolExecutor:
+    """Local copy of NoDb's ProcessPoolExecutor helper to avoid circular imports."""
+
+    if max_workers is None:
+        raise ValueError("max_workers is required")
+
+    log = logger or logging.getLogger(__name__)
+
+    if prefer_spawn:
+        ctx: Optional[mp.context.BaseContext] = None
+        try:
+            ctx = mp.get_context("spawn")
+        except (AttributeError, ValueError, RuntimeError):
+            ctx = None
+
+        if ctx is not None:
+            try:
+                return ProcessPoolExecutor(max_workers=max_workers, mp_context=ctx)
+            except (OSError, PermissionError) as exc:
+                log.warning(
+                    "Spawn start method unavailable for ProcessPoolExecutor (%s); using default context instead.",
+                    exc,
+                )
+            except Exception as exc:  # pragma: no cover - unexpected spawn errors
+                log.warning(
+                    "Spawn start method failed for ProcessPoolExecutor (%s); using default context instead.",
+                    exc,
+                )
+
+    return ProcessPoolExecutor(max_workers=max_workers)
 
 _thisdir = os.path.dirname(__file__)
 
@@ -1715,7 +1750,7 @@ class SurgoSoilCollection(object):
 
         # 2. Use ProcessPoolExecutor. Workers get the pre-loaded worker_view object.
         # No database access happens inside the pool.
-        with createProcessPoolExecutor(max_workers=max_workers, logger=logger, prefer_spawn=False) as pool:
+        with _create_process_pool_executor(max_workers=max_workers, logger=logger, prefer_spawn=False) as pool:
             futures = {
                 pool.submit(
                     _build_soil_for_process,
