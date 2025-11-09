@@ -13,6 +13,8 @@ concurrency_module = load_module("wepppy.wepp.interchange.concurrency", "wepppy/
 soil_module = load_module("wepppy.wepp.interchange.hill_soil_interchange", "wepppy/wepp/interchange/hill_soil_interchange.py")
 cleanup_import_state()
 
+PROFILE_DATA_ROOT = Path("/workdir/wepppy-test-engine-data/profiles")
+
 
 def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     src = PROJECT_OUTPUT
@@ -83,3 +85,32 @@ def test_soil_interchange_handles_missing_files(tmp_path):
     table = pq.read_table(target)
     assert table.schema == soil_module.SCHEMA
     assert table.num_rows == 0
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("profile", "soil_filename", "missing_columns"),
+    [
+        ("legacy-palouse", "H1.soil.dat", {"Saturation", "TSW"}),
+        ("us-small-wbt-daymet-rap-wepp", "H10.soil.dat", set()),
+    ],
+    ids=["legacy-layout", "modern-layout"],
+)
+def test_soil_interchange_supports_legacy_and_modern_layouts(tmp_path, profile, soil_filename, missing_columns):
+    source = PROFILE_DATA_ROOT / profile / "run/wepp/output" / soil_filename
+    if not source.exists():
+        pytest.skip(f"profile dataset missing: {source}")
+
+    tmp_source = tmp_path / soil_filename
+    tmp_source.write_bytes(source.read_bytes())
+
+    table = soil_module._parse_soil_file(tmp_source)
+    assert table.schema == soil_module.SCHEMA
+    assert table.num_rows > 0
+
+    for column in soil_module.MEASUREMENT_COLUMNS:
+        arr = table.column(column)
+        if column in missing_columns:
+            assert arr.null_count == table.num_rows
+        else:
+            assert arr.null_count < table.num_rows

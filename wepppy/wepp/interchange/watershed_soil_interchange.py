@@ -20,7 +20,7 @@ except ModuleNotFoundError:
     sys.modules[loader.name] = module
     loader.exec_module(module)
     pa_field = module.pa_field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -32,6 +32,41 @@ SOIL_FILENAME = "soil_pw0.txt"
 SOIL_PARQUET = "soil_pw0.parquet"
 CHUNK_SIZE = 250_000
 
+
+RAW_HEADER = [
+    "OFE",
+    "Day",
+    "Y",
+    "Poros",
+    "Keff",
+    "Suct",
+    "FC",
+    "WP",
+    "Rough",
+    "Ki",
+    "Kr",
+    "Tauc",
+    "Saturation",
+    "TSW",
+]
+
+LEGACY_HEADER = RAW_HEADER[:-2]
+
+MEASUREMENT_COLUMNS = [
+    "Poros",
+    "Keff",
+    "Suct",
+    "FC",
+    "WP",
+    "Rough",
+    "Ki",
+    "Kr",
+    "Tauc",
+    "Saturation",
+    "TSW",
+]
+
+LEGACY_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(LEGACY_HEADER) - 3]
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -100,6 +135,9 @@ def _write_soil_parquet(
     header_found = False
     data_start = 0
     row_counter = 0
+    header_tokens: Optional[List[str]] = None
+    measurement_columns = MEASUREMENT_COLUMNS
+    expected_tokens = len(RAW_HEADER)
 
     try:
         with source.open("r") as stream:
@@ -108,6 +146,14 @@ def _write_soil_parquet(
                 if not header_found:
                     if stripped.startswith("OFE"):
                         header_found = True
+                        header_tokens = stripped.split()
+                        if header_tokens == RAW_HEADER:
+                            measurement_columns = MEASUREMENT_COLUMNS
+                        elif header_tokens == LEGACY_HEADER:
+                            measurement_columns = LEGACY_MEASUREMENT_COLUMNS
+                        else:
+                            raise ValueError(f"Unexpected watershed soil header: {header_tokens}")
+                        expected_tokens = len(header_tokens)
                         data_start = idx + 2
                     continue
 
@@ -120,26 +166,16 @@ def _write_soil_parquet(
                 tokens = stripped.split()
                 if not tokens or not tokens[0].isdigit():
                     continue
-                if len(tokens) != 14:
+                if len(tokens) != expected_tokens:
                     raise ValueError(f"Unexpected token count in soil row: {raw_line}")
 
                 ofe = int(tokens[0])
                 julian = int(tokens[1])
                 year = int(tokens[2])
-                values = [float(tok) for tok in tokens[3:]]
-                (
-                    poros,
-                    keff,
-                    suct,
-                    fc,
-                    wp,
-                    rough,
-                    ki,
-                    kr,
-                    tauc,
-                    saturation,
-                    tsw,
-                ) = values
+                measurement_values = {
+                    column_name: float(token)
+                    for column_name, token in zip(measurement_columns, tokens[3:])
+                }
 
                 month, day_of_month = _julian_to_calendar(year, julian)
                 water_year = int(determine_wateryear(year, julian))
@@ -153,17 +189,8 @@ def _write_soil_parquet(
                 store["day_of_month"].append(day_of_month)
                 store["water_year"].append(water_year)
                 store["OFE"].append(ofe)
-                store["Poros"].append(poros)
-                store["Keff"].append(keff)
-                store["Suct"].append(suct)
-                store["FC"].append(fc)
-                store["WP"].append(wp)
-                store["Rough"].append(rough)
-                store["Ki"].append(ki)
-                store["Kr"].append(kr)
-                store["Tauc"].append(tauc)
-                store["Saturation"].append(saturation)
-                store["TSW"].append(tsw)
+                for column_name in MEASUREMENT_COLUMNS:
+                    store[column_name].append(measurement_values.get(column_name))
 
                 row_counter += 1
                 if row_counter % chunk_size == 0:

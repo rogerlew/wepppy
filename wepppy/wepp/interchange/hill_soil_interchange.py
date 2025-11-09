@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import re
 
@@ -34,6 +34,8 @@ RAW_HEADER = [
     "TSW",
 ]
 
+LEGACY_HEADER = RAW_HEADER[:-2]
+
 RAW_UNITS = [
     "",
     "",
@@ -51,6 +53,9 @@ RAW_UNITS = [
     "mm",
 ]
 
+COMPACT_UNITS = [token for token in RAW_UNITS if token]
+LEGACY_UNITS = COMPACT_UNITS[: len(LEGACY_HEADER) - 3]
+
 MEASUREMENT_COLUMNS = [
     "Poros",
     "Keff",
@@ -64,6 +69,8 @@ MEASUREMENT_COLUMNS = [
     "Saturation",
     "TSW",
 ]
+
+LEGACY_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(LEGACY_HEADER) - 3]
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -95,7 +102,7 @@ SCHEMA = schema_with_version(
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
 
-def _extract_layout(lines: List[str]) -> List[str]:
+def _extract_layout(lines: List[str]) -> Tuple[List[str], List[str], List[str]]:
     header_idx: Optional[int] = None
     unit_idx: Optional[int] = None
     header_tokens: Optional[List[str]] = None
@@ -118,10 +125,15 @@ def _extract_layout(lines: List[str]) -> List[str]:
     if header_idx is None or unit_idx is None or header_tokens is None or unit_tokens is None:
         raise ValueError("Unable to locate SOIL header layout")
 
-    if header_tokens != RAW_HEADER:
+    if header_tokens == RAW_HEADER:
+        expected_units = COMPACT_UNITS
+        measurement_columns = MEASUREMENT_COLUMNS
+    elif header_tokens == LEGACY_HEADER:
+        expected_units = LEGACY_UNITS
+        measurement_columns = LEGACY_MEASUREMENT_COLUMNS
+    else:
         raise ValueError(f"Unexpected SOIL header layout: {header_tokens}")
 
-    expected_units = [token for token in RAW_UNITS if token]
     if unit_tokens != expected_units:
         raise ValueError(f"Unexpected SOIL units: {unit_tokens}")
 
@@ -131,7 +143,7 @@ def _extract_layout(lines: List[str]) -> List[str]:
     while start_idx < len(lines) and set(lines[start_idx].strip()) == {"-"}:
         start_idx += 1
 
-    return lines[start_idx:]
+    return lines[start_idx:], header_tokens, measurement_columns
 
 
 def _init_column_store() -> Dict[str, List]:
@@ -150,17 +162,18 @@ def _parse_soil_file(path: Path) -> pa.Table:
     wepp_id = int(match.group("wepp_id"))
 
     lines = path.read_text().splitlines()
-    data_lines = _extract_layout(lines)
+    data_lines, header_tokens, measurement_columns = _extract_layout(lines)
     if not data_lines:
         return pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 
+    expected_columns = len(header_tokens)
     store = _init_column_store()
 
     for raw_line in data_lines:
         if not raw_line.strip():
             continue
         tokens = raw_line.split()
-        if len(tokens) != len(RAW_HEADER):
+        if len(tokens) != expected_columns:
             continue
 
         ofe = int(tokens[0])
@@ -184,8 +197,11 @@ def _parse_soil_file(path: Path) -> pa.Table:
             "OFE": ofe,
         }
 
-        for column_name, token in zip(MEASUREMENT_COLUMNS, tokens[3:]):
+        for column_name, token in zip(measurement_columns, tokens[3:]):
             row[column_name] = _parse_float(token)
+
+        for column_name in MEASUREMENT_COLUMNS:
+            row.setdefault(column_name, None)
 
         _append_row(store, row)
 
