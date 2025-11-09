@@ -13,7 +13,6 @@ from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.weppcloud.utils.helpers import (
     exception_factory,
     get_wd,
-    render_template,
     authorize
 )
 
