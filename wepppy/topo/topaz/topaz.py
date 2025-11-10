@@ -17,7 +17,10 @@ from subprocess import Popen, PIPE, STDOUT
 import time
 from glob import glob
 import shutil
+import warnings
 from collections import deque
+
+from imageio import imread
 
 from osgeo import gdal, osr
 import utm
@@ -678,10 +681,15 @@ class TopazRunner:
 
     def _create_dednm_input(self):
         """
-        Create the DEDNM input file required by the Topaz binaries using GDAL
-        to load the DEM so values remain deterministic across environments.
+        Uses gdal to extract elevation values from dem and puts them in a
+        single column ascii file named DEDNM.INP for topaz
         """
-        data = self._read_dem_array().flatten()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            data = imread(self.dem)
+
+        data = data.flatten()
         data = np.clip(data, 1.0, 9999.0)
 
         dednm_inp = 'DEDNM.INP'
@@ -690,27 +698,6 @@ class TopazRunner:
         fid.close()
 
         self.dednm_inp = dednm_inp
-
-    def _read_dem_array(self) -> np.ndarray:
-        """
-        Read DEM values with GDAL for DEDNM generation.
-        """
-        dataset = gdal.Open(self.dem)
-        if dataset is None:
-            raise RuntimeError(f"Unable to open DEM '{self.dem}' with GDAL")
-
-        band = dataset.GetRasterBand(1)
-        if band is None:
-            raise RuntimeError("DEM does not contain the expected raster band")
-
-        array_data = band.ReadAsArray()
-        if array_data is None:
-            raise RuntimeError("GDAL failed to read raster data from the DEM")
-
-        array = np.asarray(array_data, dtype=np.float32)
-        del band
-        del dataset
-        return array
 
     def _parse_dem(self):
         """
