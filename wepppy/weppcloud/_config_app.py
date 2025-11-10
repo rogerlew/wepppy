@@ -2,6 +2,8 @@
 import os
 import socket
 
+_TRUTHY = {'1', 'true', 'yes', 'on'}
+
 def config_app(app, logger=None):
     if logger is None:
         logger = app.logger
@@ -26,7 +28,7 @@ def config_app(app, logger=None):
     if flag_raw is None:
         app.config.setdefault('BATCH_RUNNER_ENABLED', True)
     else:
-        app.config['BATCH_RUNNER_ENABLED'] = flag_raw.strip().lower() in {'1', 'true', 'yes', 'on'}
+        app.config['BATCH_RUNNER_ENABLED'] = flag_raw.strip().lower() in _TRUTHY
 
     if 'BATCH_GEOJSON_MAX_MB' not in app.config:
         raw_limit = os.getenv('BATCH_GEOJSON_MAX_MB')
@@ -43,4 +45,29 @@ def config_app(app, logger=None):
     app.config.setdefault(
         'PROFILE_RECORDER_ASSEMBLER_ENABLED',
         app.config.get('PROFILE_RECORDER_ENABLED', True),
+    )
+
+    coverage_flag = os.getenv('ENABLE_PROFILE_COVERAGE')
+    if coverage_flag is None:
+        app.config.setdefault('PROFILE_COVERAGE_ENABLED', False)
+    else:
+        app.config['PROFILE_COVERAGE_ENABLED'] = coverage_flag.strip().lower() in _TRUTHY
+
+    app.config.setdefault(
+        'PROFILE_COVERAGE_DIR',
+        os.getenv('PROFILE_COVERAGE_DIR', '/workdir/wepppy-test-engine-data/coverage'),
+    )
+
+    coverage_config_path = os.getenv('PROFILE_COVERAGE_CONFIG')
+    if coverage_config_path:
+        app.config['PROFILE_COVERAGE_CONFIG'] = coverage_config_path
+    else:
+        app.config.setdefault(
+            'PROFILE_COVERAGE_CONFIG',
+            os.path.join(app.root_path, 'coverage.profile-playback.ini'),
+        )
+
+    app.config.setdefault(
+        'PROFILE_COVERAGE_CONTEXT_PREFIX',
+        os.getenv('PROFILE_COVERAGE_CONTEXT_PREFIX', 'profile'),
     )

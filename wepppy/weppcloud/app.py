@@ -50,12 +50,14 @@ from wepppy.weppcloud._blueprints_context import register_blueprints
 from wepppy.weppcloud._context_processors import register_context_processors
 from wepppy.weppcloud._config_app import config_app
 from wepppy.weppcloud._config_logging import config_logging
+from wepppy.weppcloud.middleware import init_profile_coverage
 
 config_logging(logging.INFO)
 
 app = Flask(__name__)
 config_app(app)
 init_agent_jwt(app)
+init_profile_coverage(app)
 
 # Flask 3 removed the legacy attribute that older extensions (Flask-Session)
 # still reference; reintroduce it for compatibility.
