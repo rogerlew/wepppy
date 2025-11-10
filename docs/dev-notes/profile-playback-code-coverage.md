@@ -6,14 +6,14 @@
 
 **Problem:** The 19 profile playback tests exercise different backend workflows, but there's no visibility into which Python modules, classes, or functions each profile actually uses.
 
-**Solution:** Flask middleware-based coverage tracing activated via HTTP headers during playback.
+**Solution:** Flask middleware-based coverage tracing activated via HTTP headers during playback, producing per-profile `coverage.py` data that we can post-process into a symbol-by-symbol map.
 
 **Key Mechanism:**
 1. Playback client adds `X-Profile-Trace: {profile_slug}` header to every HTTP request
-2. Flask middleware intercepts this header and starts `coverage.py` tracing
-3. All backend code executed during that request is traced
+2. Flask middleware intercepts this header and starts `coverage.py` tracing (line-level only; no per-call accounting needed)
+3. All backend Python code executed during that request is traced (Fortran/Rust binaries remain out-of-scope)
 4. Coverage data accumulates across the entire playback session into a `.coverage` file
-5. Post-playback: convert `.coverage` binary to JSON/HTML reports for analysis
+5. Post-playback: convert the `.coverage` binary to JSON/HTML reports and merge with a static symbol inventory
 
 **No Re-recording Required:** Existing profile captures work as-is; only the playback mechanism changes.
 
@@ -209,7 +209,7 @@ The playback client includes this header in every HTTP request during a profile 
 **Contents:** The `.coverage` file stores:
 - **Line-level execution data:** Which lines of which files were executed
 - **Branch coverage:** Which code branches were taken
-- **Execution context:** Metadata about when/how code was traced
+- **Execution context:** Metadata about when/how code was traced (we will use dynamic contexts to encode `{profile_slug}:{request_id}`)
 - **Cumulative data:** All requests from a playback session accumulate into one file
 
 **Why SQLite:** `coverage.py` uses SQLite for efficient incremental updates across a profile run with multiple HTTP requests.
@@ -220,11 +220,58 @@ The playback client includes this header in every HTTP request during a profile 
 3. **Playback completes:** File contains coverage from entire profile run
 4. **Post-processing:** Convert to JSON/HTML using `coverage.py` report generators
 
+### Multi-Process + Worker Handling
+
+`coverage.py` only writes to a single SQLite file per process. WEPPcloud uses multiple Flask workers, celery-style RQ workers, and subprocess-heavy tasks, so we need a deterministic way to merge per-process data without duplicating code changes everywhere.
+
+**Strategy:**
+
+1. **Parallel coverage mode:** Initialize coverage with `data_file=/.../{slug}.coverage`, `data_suffix=True`, `parallel=True`, and `context=f"profile:{slug}:{request_id}"`. The suffix prevents concurrent writers from trampling each other; `coverage combine` later merges them into the canonical `{slug}.coverage`.
+2. **Slug propagation:** The middleware stores the slug in `g.profile_trace_slug`. When a traced request enqueues an RQ job (or launches a subprocess that runs Python), a helper attaches the slug to job metadata/environment (for example `job.meta["profile_trace_slug"] = g.profile_trace_slug`). Centralized enqueue utilities (e.g., `wepppy.rq.project_rq.enqueue_wepp_job`) are the only code that needs to know about this; we do **not** have to touch every endpoint individually.
+3. **Worker bootstrap:** RQ workers call a shared initializer that checks for `PROFILE_TRACE_SLUG` (set from job meta before the task runs). If present, workers start coverage with the same `{slug}` data file + suffix, run the task, stop coverage, and flush data. This captures all downstream Python execution kicked off by the profile, even if it finishes after the HTTP response returns.
+4. **Combine step:** After the profile playback finishes, run `coverage combine /workdir/wepppy-test-engine-data/coverage/{slug}` to merge shards. The nightly pipeline can then emit JSON/HTML reports directly from the merged file.
+
+This keeps the instrumentation surface limited to: (a) the middleware, (b) the enqueue helpers that already wrap job dispatch, and (c) the RQ worker entry point. Regular Flask routes/controllers remain untouched.
+
+### Symbol Inventory + Line Hits
+
+The profile artifact needs to list every class/function even when no profile touches it. Coverage data alone cannot describe “everything defined” — it only records executed line numbers. We therefore need a lightweight static scan step:
+
+1. Walk the whitelisted directories (`wepppy/nodb`, `wepppy/wepp`, etc.) with `ast` to capture every class, method, and function definition plus start/end lines.
+2. Serialize that inventory to `coverage-symbols.json` (or a SQLite table) so nightly jobs can reuse it without re-parsing the tree.
+3. During report generation, intersect each symbol’s line span with the `executed_lines` pulled from the combined coverage JSON. If any line within the span appears in coverage output, mark the symbol as “covered_by = [slug]`.
+4. Produce matrices like `symbol -> [slug...]`, `slug -> [symbols...]`, and tree views showing uncovered regions.
+
+Because we only care about Python backend coverage, non-Python executables (Fortran, Rust, Whitebox) stay outside this inventory and we skip trying to trace them.
+
+### Coverage Config
+
+Create a dedicated `coverage.profile-playback.ini` alongside the Flask app:
+
+```ini
+[run]
+source = wepppy
+parallel = True
+dynamic_context = test_function
+omit =
+    wepppy/tests/*
+    wepppy/tools/*
+    wepppy/scripts/*
+    wepppy/wepp/migrations/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+```
+
+The middleware loads this config when `ENABLE_PROFILE_COVERAGE=1`, ensuring that nightly artifacts always ignore tests, CLI helpers, and migrations without depending on developer-specific `~/.coveragerc` files.
+
 ## Output Formats
 
 ### Profile Coverage Report (`{profile_slug}-coverage.json`)
 
-example output:
+example output (line hits only; no per-call accounting):
 
 ```json
 {
@@ -235,7 +282,6 @@ example output:
     "module_count": 42,
     "class_count": 156,
     "function_count": 1243,
-    "total_calls": 18392,
     "lines_covered": 4521,
     "lines_total": 8903,
     "coverage_percent": 50.8
@@ -251,26 +297,22 @@ example output:
     "wepppy.nodb.core.wepp.Wepp",
     "wepppy.climates.daymet.DaymetClient"
   ],
-  "functions": {
-    "wepppy.nodb.core.climate.Climate.build": {
-      "call_count": 1,
-      "locations": [
-        {
-          "file": "/workdir/wepppy/wepppy/nodb/core/climate.py",
-          "line": 487
-        }
-      ]
+  "symbols": [
+    {
+      "name": "wepppy.nodb.core.climate.Climate.build",
+      "file": "/workdir/wepppy/wepppy/nodb/core/climate.py",
+      "line_span": [430, 520],
+      "executed_lines": [487, 488],
+      "covered": true
     },
-    "wepppy.climates.daymet.DaymetClient.get_monthly_data": {
-      "call_count": 12,
-      "locations": [
-        {
-          "file": "/workdir/wepppy/wepppy/climates/daymet/client.py",
-          "line": 203
-        }
-      ]
+    {
+      "name": "wepppy.climates.daymet.DaymetClient.get_monthly_data",
+      "file": "/workdir/wepppy/wepppy/climates/daymet/client.py",
+      "line_span": [180, 240],
+      "executed_lines": [],
+      "covered": false
     }
-  }
+  ]
 }
 ```
 
