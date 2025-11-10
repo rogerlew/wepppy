@@ -8,14 +8,7 @@ from wepppy.all_your_base.dateutils import YearlessDate
 
 from .ash_type import AshType
 
-__all__ = [
-    "AshNoDbLockedException",
-    "AshModel",
-    "WhiteAshModel",
-    "BlackAshModel",
-    "WHITE_ASH_BD",
-    "BLACK_ASH_BD",
-]
+__all__: list[str]
 
 WHITE_ASH_BD: float
 BLACK_ASH_BD: float
