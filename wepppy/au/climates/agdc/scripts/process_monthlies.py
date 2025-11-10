@@ -1,4 +1,10 @@
-"""Aggregate AGDC NetCDF monthlies into GeoTIFF rasters and slim NetCDF files."""
+"""Aggregate AGDC NetCDF monthlies into GeoTIFF rasters and slim NetCDF files.
+
+The raw downloads contain decades of monthly values per file.  This script
+computes long-term monthly means for each measure, writes pared-down NetCDF
+files (one per calendar month), and exports companion GeoTIFF rasters that the
+rest of WEPPcloud can ingest quickly.
+"""
 
 from __future__ import annotations
 
@@ -22,6 +28,14 @@ def process_monthly_series(measures: Sequence[str] | None = None) -> None:
     Args:
         measures: Iterable of measure names (``rain``, ``tmax``, ``tmin``, ``rad``).
             Defaults to ``DEFAULT_MEASURES``.
+
+    Each measure is processed independently:
+
+    1. Load all NetCDF files under ``/geodata/au/agdc/monthly_series/<measure>``.
+    2. Mask sentinel values (≤ -999 or > 1e30) and accumulate monthly sums.
+    3. Divide by the pixel-wise observation count to obtain the climatology.
+    4. Write twelve NetCDF files (one per month) plus GeoTIFF rasters that share
+       the same naming convention.
     """
 
     selected = list(measures) if measures is not None else list(DEFAULT_MEASURES)

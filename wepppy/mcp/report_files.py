@@ -1,3 +1,5 @@
+"""Directory inspection helpers for the MCP run file tools."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,6 +12,7 @@ MAX_FILE_BYTES = 1_000_000  # 1 MB default cap for agent reads
 
 
 def _run_root(runid: str) -> Path:
+    """Resolve the working directory for a run, ensuring it exists."""
     path = Path(get_wd(runid))
     if not path.exists():
         raise FileNotFoundError(f"Run directory not found for {runid}")
@@ -17,6 +20,7 @@ def _run_root(runid: str) -> Path:
 
 
 def _sample_names(paths: Iterable[Path], limit: int = 5) -> list[str]:
+    """Return up to ``limit`` filenames from the supplied iterable."""
     names: list[str] = []
     for path in paths:
         names.append(path.name)
@@ -26,6 +30,7 @@ def _sample_names(paths: Iterable[Path], limit: int = 5) -> list[str]:
 
 
 def _describe_climate(root: Path) -> Dict[str, Any]:
+    """Summarize the climate folder contents, if present."""
     climate_dir = root / "climate"
     if not climate_dir.exists():
         return {}
@@ -42,6 +47,7 @@ def _describe_climate(root: Path) -> Dict[str, Any]:
 
 
 def _describe_wepp(root: Path) -> Dict[str, Any]:
+    """Summarize WEPP output artifacts."""
     wepp_output = root / "wepp" / "output"
     if not wepp_output.exists():
         return {}
@@ -57,6 +63,7 @@ def _describe_wepp(root: Path) -> Dict[str, Any]:
 
 
 def _describe_reports(root: Path) -> Dict[str, Any]:
+    """Summarize markdown report drafts stored in the run."""
     reports_dir = root / "reports"
     if not reports_dir.exists():
         return {}
@@ -69,6 +76,7 @@ def _describe_reports(root: Path) -> Dict[str, Any]:
 
 
 def _describe_watershed(root: Path) -> Dict[str, Any]:
+    """Summarize delineation outputs for the run."""
     watershed_dir = root / "watershed"
     if not watershed_dir.exists():
         return {}
@@ -81,6 +89,7 @@ def _describe_watershed(root: Path) -> Dict[str, Any]:
 
 
 def _describe_landuse(root: Path) -> Dict[str, Any]:
+    """Indicate whether the run includes burn metadata."""
     landuse_dir = root / "landuse"
     if not landuse_dir.exists():
         return {}
@@ -90,6 +99,7 @@ def _describe_landuse(root: Path) -> Dict[str, Any]:
 
 
 def _describe_soils(root: Path) -> Dict[str, Any]:
+    """Placeholder for future soil summaries (currently empty)."""
     soils_dir = root / "soils"
     if not soils_dir.exists():
         return {}
@@ -100,9 +110,7 @@ def _describe_soils(root: Path) -> Dict[str, Any]:
 def describe_run_contents(
     runid: str, category: Optional[str] = None, _jwt_claims: Mapping[str, Any] | None = None
 ) -> Dict[str, Any]:
-    """
-    Return lightweight metadata about a run directory.
-    """
+    """Return lightweight metadata about a run directory."""
 
     if _jwt_claims is None:
         raise PermissionError("Missing JWT claims for run validation")
@@ -146,6 +154,7 @@ def describe_run_contents(
 
 
 def _normalize_relative_path(path: str) -> Path:
+    """Strip leading separators to keep paths contained within the run."""
     sanitized = path.lstrip("/\\")
     return Path(sanitized)
 
@@ -154,9 +163,7 @@ def _normalize_relative_path(path: str) -> Path:
 def read_run_file(
     runid: str, path: str, *, encoding: str = "utf-8", _jwt_claims: Mapping[str, Any] | None = None
 ) -> str:
-    """
-    Read a small text file from the run directory.
-    """
+    """Read a small text file from the run directory."""
 
     if _jwt_claims is None:
         raise PermissionError("Missing JWT claims for run validation")

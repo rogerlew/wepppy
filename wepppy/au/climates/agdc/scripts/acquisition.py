@@ -1,4 +1,10 @@
-"""Fetch AGDC monthly NetCDF files into the local geodata cache."""
+"""Fetch AGDC monthly NetCDF files into the local geodata cache.
+
+The script mirrors the CSIRO THREDDS layout locally so downstream processing can
+run offline.  Each measure (``tmin``, ``tmax``, ``rain``, ``rad``) receives its
+own directory under ``/geodata/au/agdc/<measure>`` populated with the monthly
+NetCDF slices.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +27,11 @@ def download_agdc_monthlies(measures: Sequence[str] | None = None) -> None:
     Args:
         measures: Collection of measure names to download. Defaults to
             ``DEFAULT_MEASURES``.
+
+    The downloader is intentionally lightweight—it scrapes the THREDDS catalog
+    page for ``.nc`` links and streams each file directly to disk.  Re-running
+    the function is idempotent; existing files are skipped so operators can
+    resume interrupted transfers.
     """
 
     selected = list(measures) if measures is not None else list(DEFAULT_MEASURES)

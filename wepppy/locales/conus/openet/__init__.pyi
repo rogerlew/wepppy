@@ -1,5 +1,3 @@
-"""OpenET API helpers for CONUS evapotranspiration queries."""
-
 from __future__ import annotations
 
 from .openet_client import (

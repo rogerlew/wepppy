@@ -1,51 +1,67 @@
-from typing import Optional
+"""Legacy (NERIS) hillslope ash transport implementation."""
+
+from __future__ import annotations
+
 import math
-import enum
-import json
-
-from os.path import join as _join
-
 from copy import deepcopy
+import json
+import os
+from os.path import join as _join
+from typing import Optional
+
 import pandas as pd
 
 from wepppy.all_your_base.dateutils import YearlessDate
-from wepppy.all_your_base.stats import weibull_series, probability_of_occurrence
-
-from .wind_transport_thresholds import *
-
-_thisdir = os.path.dirname(__file__)
-_data_dir = _join(_thisdir, 'data')
+from wepppy.all_your_base.stats import probability_of_occurrence, weibull_series
 
 from .ash_type import AshType
+from .wind_transport_thresholds import (
+    lookup_wind_threshold_black_ash_proportion,
+    lookup_wind_threshold_white_ash_proportion,
+)
+
+_THISDIR = os.path.dirname(__file__)
+_DATA_DIR = _join(_THISDIR, "data")
+
+__all__ = [
+    "AshNoDbLockedException",
+    "AshModel",
+    "WhiteAshModel",
+    "BlackAshModel",
+    "WHITE_ASH_BD",
+    "BLACK_ASH_BD",
+]
+
 
 class AshNoDbLockedException(Exception):
-    pass
+    """Raised when a NoDb controller is mutated outside the lock."""
 
 
 WHITE_ASH_BD = 0.31
 BLACK_ASH_BD = 0.22
 
-class AshModel(object):
-    """
-    Base class for the hillslope ash models. This class is inherited by
-    the WhiteAshModel and BlackAshModel classes
-    """
-    def __init__(self,
-                 ash_type: AshType,
-                 proportion,
-                 decomposition_rate,
-                 bulk_density,
-                 density_at_fc,
-                 fraction_water_retention_capacity_at_sat,
-                 runoff_threshold,
-                 water_transport_rate,
-                 water_transport_rate_k,
-                 wind_threshold,
-                 porosity):
+
+class AshModel:
+    """Base class for the hillslope ash models used by NERIS."""
+
+    def __init__(
+        self,
+        ash_type: AshType,
+        proportion: float,
+        decomposition_rate: float,
+        bulk_density: float,
+        density_at_fc: float,
+        fraction_water_retention_capacity_at_sat: float,
+        runoff_threshold: float,
+        water_transport_rate: float,
+        water_transport_rate_k: float,
+        wind_threshold: float,
+        porosity: float,
+    ) -> None:
         self.ash_type = ash_type
         self.proportion = proportion
-        self.ini_ash_depth_mm = None
-        self.ini_ash_load_tonneha = None
+        self.ini_ash_depth_mm: Optional[float] = None
+        self.ini_ash_load_tonneha: Optional[float] = None
         self.decomposition_rate = decomposition_rate
         self.bulk_density = bulk_density
         self.density_at_fc = density_at_fc
@@ -57,28 +73,33 @@ class AshModel(object):
         self.porosity = porosity
 
     @property
-    def ini_material_available_mm(self):
+    def ini_material_available_mm(self) -> float:
         return self.proportion * self.ini_ash_depth_mm
 
     @property
-    def ini_material_available_tonneperha(self):
+    def ini_material_available_tonneperha(self) -> float:
         if self.ini_ash_load_tonneha is not None:
             return self.ini_ash_load_tonneha
         else:
             return 10.0 * self.ini_material_available_mm * self.bulk_density
 
     @property
-    def water_retention_capacity_at_sat(self):
+    def water_retention_capacity_at_sat(self) -> float:
         return self.fraction_water_retention_capacity_at_sat * self.ini_ash_depth_mm
 
-    def lookup_wind_threshold_proportion(self, w):
+    def lookup_wind_threshold_proportion(self, w: float) -> float:
         if w == 0.0:
             return 0.0
 
         if self.ash_type == AshType.BLACK:
-            return lookup_wind_threshold_black_ash_proportion(w)
+            result = lookup_wind_threshold_black_ash_proportion(w)
         elif self.ash_type == AshType.WHITE:
-            return lookup_wind_threshold_white_ash_proportion(w)
+            result = lookup_wind_threshold_white_ash_proportion(w)
+        else:
+            raise ValueError(f"Unsupported ash type {self.ash_type!r}")
+        if result is None:
+            raise ValueError(f"Wind threshold outside calibration range: {w}")
+        return result
 
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat_df: pd.DataFrame, out_dir, prefix,
                   recurrence=[100, 50, 25, 20, 10, 5, 2], 

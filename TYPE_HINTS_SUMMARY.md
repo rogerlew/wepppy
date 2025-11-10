@@ -27,11 +27,11 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/all_your_base/stats/stats.py`
 - [x] `wepppy/all_your_base/sys/__init__.py`
 - [ ] `wepppy/au/__init__.py`
-- [ ] `wepppy/au/climates/__init__.py`
-- [ ] `wepppy/au/climates/agdc/__init__.py`
-- [ ] `wepppy/au/climates/agdc/agdc.py`
-- [ ] `wepppy/au/climates/agdc/scripts/acquisition.py`
-- [ ] `wepppy/au/climates/agdc/scripts/process_monthlies.py`
+- [x] `wepppy/au/climates/__init__.py`
+- [x] `wepppy/au/climates/agdc/__init__.py`
+- [x] `wepppy/au/climates/agdc/agdc.py`
+- [x] `wepppy/au/climates/agdc/scripts/acquisition.py`
+- [x] `wepppy/au/climates/agdc/scripts/process_monthlies.py`
 - [ ] `wepppy/au/landuse_201011/__init__.py`
 - [ ] `wepppy/au/soils/__init__.py`
 - [ ] `wepppy/au/soils/asris_2001/__init__.py`
@@ -90,12 +90,12 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/eu/soils/eusoilhydrogrids/scripts/__init__.py`
 - [ ] `wepppy/eu/soils/eusoilhydrogrids/scripts/acquire.py`
 - [x] `wepppy/eu/soils/soil_build.py`
-- [ ] `wepppy/export/__init__.py`
-- [ ] `wepppy/export/arc_export.py`
-- [ ] `wepppy/export/ermit_input.py`
-- [ ] `wepppy/export/export.py`
-- [ ] `wepppy/export/gpkg_export.py`
-- [ ] `wepppy/export/prep_details.py`
+- [x] `wepppy/export/__init__.py`
+- [x] `wepppy/export/arc_export.py`
+- [x] `wepppy/export/ermit_input.py`
+- [x] `wepppy/export/export.py`
+- [x] `wepppy/export/gpkg_export.py`
+- [x] `wepppy/export/prep_details.py`
 - [ ] `wepppy/f_esri/__init__.py`
 - [ ] `wepppy/landcover/__init__.py`
 - [ ] `wepppy/landcover/emapr/__init__.py`
@@ -111,9 +111,9 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/locales/chile/__init__.py`
 - [ ] `wepppy/locales/chile/soils/__init__.py`
 - [ ] `wepppy/locales/chile/soils/from_carmen/_migrate.py`
-- [ ] `wepppy/locales/conus/__init__.py`
-- [ ] `wepppy/locales/conus/openet/__init__.py`
-- [ ] `wepppy/locales/conus/openet/openet_client.py`
+- [x] `wepppy/locales/conus/__init__.py`
+- [x] `wepppy/locales/conus/openet/__init__.py`
+- [x] `wepppy/locales/conus/openet/openet_client.py`
 - [ ] `wepppy/locales/earth/opentopography/__init__.py`
 - [ ] `wepppy/locales/earth/soils/__init__.py`
 - [ ] `wepppy/locales/earth/soils/isric/__init__.py`
@@ -148,17 +148,17 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/mods/ag_fields/__init__.py`
 - [x] `wepppy/nodb/mods/ag_fields/ag_fields.py`
 - [ ] `wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py`
-- [ ] `wepppy/nodb/mods/ash_transport/__init__.py`
+- [x] `wepppy/nodb/mods/ash_transport/__init__.py`
 - [ ] `wepppy/nodb/mods/ash_transport/_scripts/migrate_ash_model.py`
 - [x] `wepppy/nodb/mods/ash_transport/ash.py`
 - [x] `wepppy/nodb/mods/ash_transport/ash_multi_year_model.py`
 - [x] `wepppy/nodb/mods/ash_transport/ash_multi_year_model_alex.py`
-- [ ] `wepppy/nodb/mods/ash_transport/ash_type.py`
+- [x] `wepppy/nodb/mods/ash_transport/ash_type.py`
 - [x] `wepppy/nodb/mods/ash_transport/ashpost.py`
-- [ ] `wepppy/nodb/mods/ash_transport/ashpost_documentation.py`
-- [ ] `wepppy/nodb/mods/ash_transport/ashpost_versioning.py`
-- [ ] `wepppy/nodb/mods/ash_transport/neris_ash_model.py`
-- [ ] `wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py`
+- [x] `wepppy/nodb/mods/ash_transport/ashpost_documentation.py`
+- [x] `wepppy/nodb/mods/ash_transport/ashpost_versioning.py`
+- [x] `wepppy/nodb/mods/ash_transport/neris_ash_model.py`
+- [x] `wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py`
 - [ ] `wepppy/nodb/mods/baer/__init__.py`
 - [x] `wepppy/nodb/mods/baer/baer.py`
 - [x] `wepppy/nodb/mods/baer/sbs_map.py`
@@ -251,11 +251,11 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/query_engine/executor.py`
 - [x] `wepppy/query_engine/formatter.py`
 - [x] `wepppy/query_engine/payload.py`
-- [ ] `wepppy/rhem/__init__.py`
+- [x] `wepppy/rhem/__init__.py`
 - [ ] `wepppy/rhem/out/__init__.py`
 - [ ] `wepppy/rhem/out/full_output.py`
 - [ ] `wepppy/rhem/out/rhemtotalwatsed.py`
-- [ ] `wepppy/rhem/rhem.py`
+- [x] `wepppy/rhem/rhem.py`
 - [ ] `wepppy/rq/__init__.py`
 - [ ] `wepppy/rq/agent_rq.py`
 - [x] `wepppy/rq/batch_rq.py`

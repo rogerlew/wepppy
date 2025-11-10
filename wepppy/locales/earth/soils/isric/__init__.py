@@ -1,27 +1,38 @@
-from owslib.wms import WebMapService
+"""ISRIC SoilGrids retrieval and WEPP soil builder utilities."""
 
-import os
-from os.path import join as _join
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-import logging
+from __future__ import annotations
 
-from datetime import datetime
-
-from wepppy.all_your_base import isfloat
-from wepppy.all_your_base.geo import GeoTransformer
-from wepppy.all_your_base.geo import RasterDatasetInterpolator
-
-from wepppy.wepp.soils import  HorizonMixin
-from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import simple_texture
-from wepppy.wepp.soils.utils import WeppSoilUtil
-from wepppy.nodb.status_messenger import StatusMessenger
-
-from rosetta import Rosetta
-import hashlib
 import base64
+import hashlib
+import logging
+import os
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from datetime import datetime
+from os.path import join as _join
+from typing import Any, Dict, Tuple
 
 from osgeo import gdal
+from owslib.wms import WebMapService
+
+from wepppy.all_your_base import isfloat
+from wepppy.all_your_base.geo import GeoTransformer, RasterDatasetInterpolator
+from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.soils.ssurgo import SoilSummary
+from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils.utils import simple_texture
+
+BBox = Tuple[float, float, float, float]
+GridBBox = Tuple[float, float, float, float]
+GridSize = Tuple[float, float]
+
+__all__ = [
+    "ISRICSoilData",
+    "ISRICHorizon",
+    "adjust_to_grid",
+    "fetch_isric_soil_layers",
+    "fetch_isric_wrb",
+    "short_hash_id",
+]
 
 _logger = logging.getLogger(__name__)
 
@@ -60,9 +71,15 @@ wrb_rat = {
 
 soil_grid_proj4 = '+proj=igh +datum=WGS84 +no_defs +towgs84=0,0,0'
 
-def adjust_to_grid(bbox, grid_size=100):
-    """
-    Adjusts the given bounding box coordinates to align with a 100m grid.
+def adjust_to_grid(bbox: BBox, grid_size: int = 100) -> tuple[GridBBox, GridSize]:
+    """Snap a lat/lon bounding box to the ISRIC equal-area grid.
+
+    Args:
+        bbox: Geographic bounding box ``(west, south, east, north)``.
+        grid_size: Grid spacing in meters (default 100 m).
+
+    Returns:
+        Tuple of projected bounding box and raster size (cols, rows).
     """
     global soil_grid_proj4
 
@@ -125,9 +142,27 @@ isric_conversion_factors = {
     'wv0010': 10   # Water content at 10 kPa
 }
 
-def fetch_layer(wms_url, layer, crs, adj_bbox, size, format, soils_dir, status_channel=None):
-    """
-    Fetch a single ISRIC soil layer.
+def fetch_layer(
+    wms_url: str,
+    layer: str,
+    crs: str,
+    adj_bbox: GridBBox,
+    size: GridSize,
+    format: str,
+    soils_dir: str,
+    status_channel: str | None = None,
+) -> None:
+    """Fetch a single ISRIC soil layer via WMS request.
+
+    Args:
+        wms_url: MapServer URL.
+        layer: Layer identifier (e.g., ``bdod_0-5cm_Q0.5``).
+        crs: Projection string passed to the WMS service.
+        adj_bbox: Projected bounding box snapped to the SoilGrids grid.
+        size: Raster size (cols, rows) derived from ``grid_size``.
+        format: MIME format for the WMS response.
+        soils_dir: Output directory.
+        status_channel: Optional Redis pub/sub channel for logging.
     """
     if status_channel:
             StatusMessenger.publish(status_channel, f'    fetch_layer({layer}:{wms_url})')
@@ -141,9 +176,17 @@ def fetch_layer(wms_url, layer, crs, adj_bbox, size, format, soils_dir, status_c
     with open(os.path.join(soils_dir, filename), 'wb') as out:
         out.write(response.read())
 
-def fetch_isric_soil_layers(wgs_bbox, soils_dir='./', status_channel=None):
-    """
-    Fetches the ISRIC soil layers for the given bounding box in parallel.
+def fetch_isric_soil_layers(
+    wgs_bbox: BBox,
+    soils_dir: str = './',
+    status_channel: str | None = None,
+) -> None:
+    """Download all ISRIC soil layers for a bounding box in parallel.
+
+    Args:
+        wgs_bbox: Geographic bounding box (lon/lat degrees).
+        soils_dir: Target directory where GeoTIFFs are written.
+        status_channel: Optional Redis pub/sub channel for UI feedback.
     """
     if status_channel:
          StatusMessenger.publish(status_channel, f'  fetch_isric_soil_layers({wgs_bbox})')
@@ -187,9 +230,17 @@ def fetch_isric_soil_layers(wgs_bbox, soils_dir='./', status_channel=None):
                     raise
 
 
-def fetch_isric_wrb(wgs_bbox, soils_dir='./', status_channel=None):
-    """
-    Fetches the ISRIC soil layers for the given bounding box.
+def fetch_isric_wrb(
+    wgs_bbox: BBox,
+    soils_dir: str = './',
+    status_channel: str | None = None,
+) -> None:
+    """Download the WRB classification raster for the requested area.
+
+    Args:
+        wgs_bbox: Extent matching ``fetch_isric_soil_layers``.
+        soils_dir: Target directory for the GeoTIFF + RAT.
+        status_channel: Optional Redis pub/sub channel for UI feedback.
     """
     global isric_wrb_map
 
@@ -248,7 +299,9 @@ def fetch_isric_wrb(wgs_bbox, soils_dir='./', status_channel=None):
 
 
 class ISRICHorizon(HorizonMixin):
-    def __init__(self, depth, horizon_d):
+    """Concrete ``HorizonMixin`` implementation backed by ISRIC data."""
+
+    def __init__(self, depth: str, horizon_d: Dict[str, float]) -> None:
         self.rfg = horizon_d['cfvo']
         self.cec = horizon_d['cec']
         self.clay = horizon_d['clay']
@@ -277,21 +330,25 @@ _disclaimer = '''\
 # '''
 
 class ISRICSoilData:
-    def __init__(self, soils_dir='./'):
-        self.soils_dir = soils_dir
-        self.wgs_bbox = None
+    """High-level helper for fetching and building ISRIC-derived WEPP soils."""
 
-    def fetch(self, wgs_bbox, status_channel=None):
+    def __init__(self, soils_dir: str = './') -> None:
+        self.soils_dir = soils_dir
+        self.wgs_bbox: BBox | None = None
+
+    def fetch(self, wgs_bbox: BBox, status_channel: str | None = None) -> None:
+        """Download and cache all SoilGrids layers covering ``wgs_bbox``."""
         self.wgs_bbox = wgs_bbox
         fetch_isric_soil_layers(wgs_bbox, self.soils_dir, status_channel=status_channel)
 
-    def extract_soil_data(self, lng, lat):
+    def extract_soil_data(self, lng: float, lat: float) -> Dict[str, Dict[str, float]]:
+        """Interpolate SoilGrids properties for each depth at a coordinate."""
         global isric_measures, isric_depths, isric_conversion_factors
 
         if self.wgs_bbox is None:
             raise ValueError('No bounding box has been set. Please call the fetch method first.')
 
-        soil_data = {}
+        soil_data: Dict[str, Dict[str, float]] = {}
         for depth in isric_depths:
             soil_data[depth] = {}
             for measure in isric_measures:
@@ -299,24 +356,43 @@ class ISRICSoilData:
                 if not file_path:
                     raise ValueError(f'File {file_path} does not exist. Please call the fetch method first.')
 
-                # Create the interpolator
                 interpolator = RasterDatasetInterpolator(file_path)
                 value = interpolator.get_location_info(lng, lat, method='nearest')
                 soil_data[depth][measure] = value / isric_conversion_factors[measure]
 
         return soil_data
 
-    def get_wrb(self, lng, lat):
+    def get_wrb(self, lng: float, lat: float) -> str:
+        """Lookup the WRB most-probable classification for a coordinate."""
         file_path = _join(self.soils_dir, 'wrb_MostProbable.tif')
         interpolator = RasterDatasetInterpolator(file_path)
         value = interpolator.get_location_info(lng, lat, method='nearest')
         return wrb_rat[int(value)]
 
-    def build_soil(self, lng, lat, soil_fn=None, res_lyr_ksat_threshold=2.0, ksflag=0, ini_sat=0.75, meta=None):
-        """
-        ksflag
-           0 - do not use adjustments (conductivity will be held constant)
-           1 - use internal adjustments
+    def build_soil(
+        self,
+        lng: float,
+        lat: float,
+        soil_fn: str | None = None,
+        res_lyr_ksat_threshold: float = 2.0,
+        ksflag: int = 0,
+        ini_sat: float = 0.75,
+        meta: Dict[str, Any] | None = None,
+    ) -> tuple[str | None, SoilSummary | None, Dict[str, Any] | None]:
+        """Create a WEPP soil file using the fetched SoilGrids data.
+
+        Args:
+            lng: Longitude for the soil sample.
+            lat: Latitude for the soil sample.
+            soil_fn: Optional filename for the generated `.sol`.
+            res_lyr_ksat_threshold: Threshold (mm/hr) for restrictive layer logic.
+            ksflag: ``0`` to keep conductivity constant, ``1`` to enable WEPP
+                adjustments.
+            ini_sat: Initial saturation value to encode in the `.sol`.
+            meta: Optional metadata bubbled through to the return tuple.
+
+        Returns:
+            Tuple of ``(mukey, SoilSummary, meta)`` mirroring SSURGO builders.
         """
 
         assert int(ksflag) in [0, 1]
@@ -434,13 +510,15 @@ class ISRICSoilData:
                                   desc=wrb), meta
 
 
-def short_hash_id(input_string, length=8):
-    """
-    Generate a short hash ID from a given string.
+def short_hash_id(input_string: str, length: int = 8) -> str:
+    """Generate a short, deterministic hash identifier.
 
-    :param input_string: The input string to hash.
-    :param length: The desired length of the short hash. Default is 8 characters.
-    :return: A short hash ID of the specified length.
+    Args:
+        input_string: Arbitrary text to hash.
+        length: Desired character length for the returned token.
+
+    Returns:
+        Base64-derived token suitable for filenames or display.
     """
     # Hash the input string using SHA-256
     hash_bytes = hashlib.sha256(input_string.encode('utf-8')).digest()
@@ -454,7 +532,8 @@ def short_hash_id(input_string, length=8):
     return short_hash
 
 
-def _build_soil(lng, lat, soils_dir):
+def _build_soil(lng: float, lat: float, soils_dir: str) -> None:
+    """Ad-hoc helper for manual soil builds during local testing."""
     os.makedirs(soils_dir, exist_ok=True)
     soil = ISRICSoilData(soils_dir)
     soil.fetch((lng-0.1, lat-0.1, lng+0.1, lat+0.1))

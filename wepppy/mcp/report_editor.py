@@ -1,7 +1,9 @@
+"""Markdown report editing helpers exposed over the MCP tool interface."""
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping
 
 from wepppy.mcp.base import mcp_tool, validate_run_scope
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -18,6 +20,7 @@ else:
 
 
 def _ensure_bindings() -> None:
+    """Ensure the PyO3 bindings are importable before proceeding."""
     if mde is None or edit is None or _IMPORT_ERROR is not None:
         raise RuntimeError(
             "markdown_extract_py / markdown_edit_py bindings are not available. "
@@ -26,6 +29,7 @@ def _ensure_bindings() -> None:
 
 
 def _run_root(runid: str) -> Path:
+    """Resolve and validate the run working directory."""
     root = Path(get_wd(runid))
     if not root.exists():
         raise FileNotFoundError(f"Run directory not found for {runid}")
@@ -33,6 +37,7 @@ def _run_root(runid: str) -> Path:
 
 
 def _report_path(runid: str, report_id: str) -> Path:
+    """Return the path to a specific markdown draft, enforcing simple IDs."""
     if "/" in report_id or "\\" in report_id or ".." in report_id:
         raise ValueError("report_id must be a simple filename without path separators")
     path = _run_root(runid) / "reports" / f"{report_id}.md"
@@ -45,9 +50,7 @@ def _report_path(runid: str, report_id: str) -> Path:
 def list_report_sections(
     runid: str, report_id: str, _jwt_claims: Mapping[str, Any] | None = None
 ) -> List[Dict[str, Any]]:
-    """
-    Return high-level metadata for each markdown section.
-    """
+    """Return high-level metadata for each markdown section."""
 
     if _jwt_claims is None:
         raise PermissionError("Missing JWT claims for run validation")
@@ -75,9 +78,7 @@ def read_report_section(
     heading_pattern: str,
     _jwt_claims: Mapping[str, Any] | None = None,
 ) -> str:
-    """
-    Extract the first matching section body from a markdown report.
-    """
+    """Extract the first matching section body from a markdown report."""
 
     if _jwt_claims is None:
         raise PermissionError("Missing JWT claims for run validation")
@@ -103,9 +104,7 @@ def replace_report_section(
     keep_heading: bool = True,
     _jwt_claims: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    """
-    Replace the content of a markdown section using the PyO3 edit bindings.
-    """
+    """Replace the content of a markdown section using the edit bindings."""
 
     if _jwt_claims is None:
         raise PermissionError("Missing JWT claims for run validation")

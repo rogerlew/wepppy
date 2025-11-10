@@ -84,7 +84,12 @@ def gpkg_extract_objective_parameter(gpkg_fn: str, obj_param: str) -> Tuple[List
 
 
 def gpkg_export(wd: str) -> None:
-    """Build a GeoPackage (and optional FileGDB) for the run at ``wd``.
+    """Build a GeoPackage (and optional FileGDB mirror) for the run at ``wd``.
+
+    The export routine stitches hillslope/channel geometry, run metadata,
+    WEPP outputs, and optional management overlays into a single GeoPackage.
+    When the optional ESRI tooling is available, a FileGDB copy is produced so
+    ArcMap and Pro users can consume identical content without conversion.
 
     Args:
         wd: Working directory that contains the WEPP run artifacts.
@@ -303,11 +308,14 @@ def create_difference_map(
     """Generate a GeoJSON file highlighting metric deltas between scenarios.
 
     Args:
-        scenario1_gpkg_fn: Baseline GeoPackage path.
-        scenario2_gpkg_fn: Comparison GeoPackage path.
+        scenario1_gpkg_fn: Baseline GeoPackage path for the comparison.
+        scenario2_gpkg_fn: Comparison GeoPackage path with the same schema.
         difference_attributes: Metric names to compare (must exist in both).
-        output_geojson_fn: Destination path for the difference GeoJSON.
+        output_geojson_fn: Destination path that receives the GeoJSON diff.
         meta_attributes: Optional metadata keys carried over verbatim.
+
+    Raises:
+        AssertionError: If the GeoPackages disagree on CRS or feature count.
     """
     layer_name = "subcatchments"
     scenario1_gdf = gpd.read_file(scenario1_gpkg_fn, layer=layer_name)

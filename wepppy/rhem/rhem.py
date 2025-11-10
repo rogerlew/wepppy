@@ -1,12 +1,17 @@
-import io
-import os
+"""Thin helpers for running the Rangeland Hydrology and Erosion Model (RHEM)."""
+
+from __future__ import annotations
+
 import csv
-from os.path import join as _join
-from os.path import exists as _exists
+import io
+import math
+import os
+import subprocess
 from datetime import datetime
 from time import time
-import subprocess
-import math
+from typing import Dict, Sequence
+from os.path import exists as _exists
+from os.path import join as _join
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
@@ -14,8 +19,12 @@ _template_dir = _join(_thisdir, 'templates')
 _rhem = _join(_thisdir, "bin", "rhem_v23")
 
 
-def _template_loader(fn):
-    global _template_dir
+SoilTextureRow = Dict[str, str]
+SoilTextureTable = Dict[str, SoilTextureRow]
+
+
+def _template_loader(fn: str) -> str:
+    """Load a template file from the local ``templates`` directory."""
 
     with io.open(_join(_template_dir, fn), "r", encoding="utf-8") as fp:
         _template = fp.readlines()
@@ -27,17 +36,21 @@ def _template_loader(fn):
     return _template
 
 
-def _par_template_loader():
+def _par_template_loader() -> str:
+    """Return the parameter template used for ``*.par`` files."""
+
     return _template_loader("par.template")
 
 
-def read_soil_texture_table():
+def read_soil_texture_table() -> SoilTextureTable:
+    """Load the bundled soil texture look-up table used by RHEM."""
+
     fn = _join(_data_dir, 'soil_texture_table.csv')
     assert _exists(fn)
 
     fp = open(fn)
     csv_reader = csv.DictReader(fp)
-    d = {}
+    d: SoilTextureTable = {}
     for row in csv_reader:
         d[row['class_name'].lower()] = row
     fp.close()
@@ -48,22 +61,51 @@ def read_soil_texture_table():
 soil_texture_db = read_soil_texture_table()
 
 
-def make_parameter_file(scn_name,
-                        out_dir,
-                        soil_texture,
-                        moisture_content,
-                        bunchgrass_cover,
-                        forbs_cover,
-                        shrubs_cover,
-                        sodgrass_cover,
-                        rock_cover,
-                        basal_cover,
-                        litter_cover,
-                        cryptogams_cover,
-                        slope_length,
-                        slope_steepness,
-                        sl, sx, width,
-                        model_version):
+def make_parameter_file(
+    scn_name: str,
+    out_dir: str,
+    soil_texture: str,
+    moisture_content: float,
+    bunchgrass_cover: float,
+    forbs_cover: float,
+    shrubs_cover: float,
+    sodgrass_cover: float,
+    rock_cover: float,
+    basal_cover: float,
+    litter_cover: float,
+    cryptogams_cover: float,
+    slope_length: float,
+    slope_steepness: float,
+    sl: Sequence[float],
+    sx: Sequence[float],
+    width: float,
+    model_version: str,
+) -> str:
+    """Build a ``*.par`` input file for the provided hillslope scenario.
+
+    Args:
+        scn_name: Scenario identifier used to name artifacts.
+        out_dir: Directory where the ``*.par`` file will be written.
+        soil_texture: Soil texture key (matches ``soil_texture_table.csv``).
+        moisture_content: Antecedent moisture fraction.
+        bunchgrass_cover: Bunchgrass canopy cover percentage (0-100).
+        forbs_cover: Forbs canopy cover percentage (0-100).
+        shrubs_cover: Shrub canopy cover percentage (0-100).
+        sodgrass_cover: Sodgrass canopy cover percentage (0-100).
+        rock_cover: Rock ground cover percentage (0-100).
+        basal_cover: Basal ground cover percentage (0-100).
+        litter_cover: Litter ground cover percentage (0-100).
+        cryptogams_cover: Cryptogam ground cover percentage (0-100).
+        slope_length: Hillslope length in meters.
+        slope_steepness: Hillslope slope percent.
+        sl: Sequence of segment lengths used by the template.
+        sx: Sequence of segment slopes matching ``sl``.
+        width: Average hillslope width in meters.
+        model_version: Version string persisted alongside other metadata.
+
+    Returns:
+        Absolute path to the generated ``*.par`` file.
+    """
 
     # convert to percent values
     bunchgrass_cover = bunchgrass_cover/100
@@ -237,7 +279,14 @@ def make_parameter_file(scn_name,
     return fn
 
 
-def make_hillslope_run(run_fn, par_fn, stm_fn, out_summary, scn_name):
+def make_hillslope_run(
+    run_fn: str,
+    par_fn: str,
+    stm_fn: str,
+    out_summary: str,
+    scn_name: str,
+) -> None:
+    """Write an entry to the batch ``*.run`` file for RHEM CLI execution."""
     template = '{parameter_file}, {storm_file}, {output_summary}, "{scenario_name}",0,2,y,y,n,n,y'
 
     with open(run_fn, 'w') as fp:
@@ -245,7 +294,12 @@ def make_hillslope_run(run_fn, par_fn, stm_fn, out_summary, scn_name):
                                  output_summary=out_summary, scenario_name=scn_name))
 
 
-def run_hillslope(topaz_id, runs_dir):
+def run_hillslope(topaz_id: str, runs_dir: str) -> tuple[bool, str, float]:
+    """Execute the compiled RHEM binary for a single hillslope scenario.
+
+    Returns:
+        Tuple of (success flag, Topaz ID, runtime seconds).
+    """
     t0 = time()
     run_fn = _join(runs_dir, 'hill_{}.run'.format(topaz_id))
     cmd = [os.path.abspath(_rhem), '-b', run_fn]

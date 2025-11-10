@@ -1,3 +1,5 @@
+"""Download/aggregation helpers for the US Rangeland Analysis Platform."""
+
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
@@ -35,7 +37,10 @@ __all__ = [
 
 
 class RangelandAnalysisPlatform(object):
+    """Manages RAP GeoTIFF downloads clipped to a bounding box."""
+
     def __init__(self, wd='.', bbox=None, cellsize=30, version=DEFAULT_VERSION):
+        """Configure the working directory, target bounding box, and RAP version."""
         self.wd = wd
         if bbox is not None:
             bbox = [float(v) for v in  bbox]
@@ -54,6 +59,7 @@ class RangelandAnalysisPlatform(object):
             self.ds[year] = rap_fn
 
     def retrieve(self, years):
+        """Download/crop each year into the working directory via ``gdalwarp``."""
         cellsize = self.cellsize
         bbox = self.bbox
         version = self.version
@@ -108,12 +114,7 @@ class RangelandAnalysisPlatform(object):
         return retries
         
     def validate_raster(self, filename):
-        """
-        Validates if the raster file contains non-zero, non-masked data.
-        
-        :param filename: Path to the raster file.
-        :return: True if the raster contains valid data, False otherwise.
-        """
+        """Return True when ``filename`` exists and includes non-zero values."""
         try:
             dataset = gdal.Open(filename, gdal.GA_ReadOnly)
             if not dataset:
@@ -139,6 +140,7 @@ class RangelandAnalysisPlatform(object):
                 dataset = None
 
     def get_dataset_fn(self, year):
+        """Return the on-disk raster path for ``year`` (downloading if needed)."""
         year = str(year)
         if year not in self.ds:
             self.retrieve([year])
@@ -146,26 +148,36 @@ class RangelandAnalysisPlatform(object):
         return self.ds[year]
 
     def get_dataset(self, year):
+        """Return a ``RangelandAnalysisPlatformDataset`` for ``year``."""
         fn = self.get_dataset_fn(year)
         return RangelandAnalysisPlatformDataset(fn)
 
     def _attribution(self):
+        """Copy the required attribution README into ``wd`` if missing."""
         readme_txt = _join(self.wd, 'rap_readme.txt')
         if not _exists(readme_txt):
             os.copyfile(_join(_thisdir, 'rap_readme.txt', readme_txt))
 
 
 class RangelandAnalysisPlatformV2(RangelandAnalysisPlatform):
+    """RAP helper locked to the v2 dataset."""
+
     def __init__(self, wd='.', bbox=None, cellsize=30):
+        """Mirror base __init__ but force the dataset version to ``v2``."""
         super(RangelandAnalysisPlatformV2, self).__init__(wd=wd, bbox=bbox, cellsize=cellsize, version='v2')
 
 
 class RangelandAnalysisPlatformV3(RangelandAnalysisPlatform):
+    """RAP helper locked to the v3 dataset."""
+
     def __init__(self, wd='.', bbox=None, cellsize=30):
+        """Mirror base __init__ but force the dataset version to ``v3``."""
         super(RangelandAnalysisPlatformV3, self).__init__(wd=wd, bbox=bbox, cellsize=cellsize, version='v3')
 
 
 class RAP_Band(IntEnum):
+    """Enumerates the RAP band order for vegetation components and uncertainties."""
+
     ANNUAL_FORB_AND_GRASS = 1
     BARE_GROUND = 2
     LITTER = 3
@@ -181,14 +193,19 @@ class RAP_Band(IntEnum):
 
 
 class RangelandAnalysisPlatformDataset(object):
+    """Small helper that exposes masked rasters and stats for RAP tiles."""
+
     def __init__(self, fn):
+        """Open ``fn`` with rasterio for later band queries."""
         self.ds = rasterio.open(fn)
 
     @property
     def shape(self):
+        """Return the (rows, cols) of the dataset (mirrors band layout)."""
         return self.ds.read(RAP_Band.TREE).T.shape
 
     def get_band(self, band: RAP_Band):
+        """Return the requested vegetation band as a masked array."""
         try:
             data =  self.ds.read(band).T
         except IndexError:
@@ -196,6 +213,7 @@ class RangelandAnalysisPlatformDataset(object):
         return np.ma.masked_values(data, 65535)
 
     def spatial_stats(self, band: RAP_Band, bound_fn):
+        """Return summary stats for ``band`` within the polygon mask ``bound_fn``."""
         assert _exists(bound_fn)
         bounds, transform, proj = read_raster(bound_fn, dtype=np.int32)
         indices = np.where(bounds == 1)
@@ -227,5 +245,3 @@ if __name__ == "__main__":
     rap_ds = rap.get_dataset(2020)
     litter = rap_ds.get_band(RAP_Band.LITTER)
     print(litter)
-
-

@@ -1,3 +1,5 @@
+"""BC Soil Information Finder Tool (SIFT) soil extraction helpers."""
+
 import os
 from os.path import join as _join
 from os.path import split as _split
@@ -21,6 +23,7 @@ _gt = GeoTransformer(src_epsg=4326, dst_proj4=_proj4)
 
 
 def _float_try_parse(v):
+    """Best-effort float conversion that preserves ``None``/``null`` tokens."""
     try:
         v = float(v)
     except:
@@ -32,22 +35,26 @@ def _float_try_parse(v):
 
 
 def _ogrinfo_surveys(x, y):
+    """Return all soil survey records that intersect a single point."""
     cmd = ['ogrinfo', _datadir, 'BC_Soil_Surveys', '-ro', '-al', '-geom=NO', '-spat', x, y, x, y] 
     return _run_ogrinfo(cmd)
 
 
 def _ogrinfo_surveys_extent(xmin, ymin, xmax, ymax):
+    """Return soil survey records contained within the specified extent."""
     cmd = ['ogrinfo', _datadir, 'BC_Soil_Surveys', '-ro', '-al', '-geom=NO', 
            '-spat', xmin, ymin, xmax, ymax] 
     return _run_ogrinfo(cmd)
 
 
 def _ogrinfo_layers(soil_id):
+    """Return the BCSLF layer table for the given ``soil_id``."""
     cmd = ['ogrinfo', _datadir, '-sql', f"SELECT * FROM BCSLF_Soil_Layer_File WHERE SOIL_ID = '{soil_id}'", '-ro', '-al']
     return _run_ogrinfo(cmd)
 
 
 def _run_ogrinfo(cmd):
+    """Execute ``ogrinfo`` and coerce the stdout block into a dict."""
     p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
     res, _ = p.communicate()
     d = {}
@@ -73,7 +80,10 @@ def _run_ogrinfo(cmd):
 
 
 class SIFT(object):
+    """High-level accessors for querying BC SIFT soils and exporting WEPP files."""
+
     def query(self, lng, lat):
+        """Return soils intersecting the (lng, lat) point."""
         global _gt
         x, y = _gt.transform(lng, lat)
         x, y = str(x), str(y)
@@ -90,6 +100,7 @@ class SIFT(object):
         return d
 
     def query_extent(self, extent):
+        """Return soils that intersect the (xmin, ymin, xmax, ymax) extent."""
         global _gt
 
         xmin, ymin, xmax, ymax = extent
@@ -110,6 +121,7 @@ class SIFT(object):
         return d
 
     def _build_horizons(self, dkwargs):
+        """Instantiate ``SiftHorizon`` objects for each raw layer entry."""
         soil = SiftSoil()
         for k, kwargs in dkwargs.items():
             horizon = SiftHorizon({k.split()[0]: v for k,v in kwargs.items()})
@@ -141,14 +153,17 @@ class SIFT(object):
         return soil
 
     def build_wepp_soil(self, lng, lat, outdir='./'):
+        """Query a point location and emit WEPP ``.sol`` files under ``outdir``."""
         d = self.query(lng, lat)
         return self._build_wepp_soils(d, outdir=outdir)
 
     def build_wepp_soils(self, extent, outdir='./'):
+        """Query an extent and emit WEPP ``.sol`` files under ``outdir``."""
         d = self.query_extent(extent)
         return self._build_wepp_soils(d, outdir=outdir)
 
     def _build_wepp_soils(self, d, outdir):
+        """Write raw JSON/layer summaries and return coverage statistics."""
         mukey_cnt, valid_cnt, total_area, covered_area = 0, 0, 0, 0
         unique_soils = set()
 
@@ -182,6 +197,7 @@ class SIFT(object):
         return stats
 
 def _attr_validator(x):
+    """Translate SIFT sentinel ``-9`` to ``None`` for easier math."""
     if x == -9:
         return None
     else:
@@ -189,15 +205,19 @@ def _attr_validator(x):
 
 
 class SiftSoil(list):
+    """Container for horizon slices plus WEPP serialization helpers."""
+
     res_lyr_ksat_threshold = 2.0
     ksflag = 0
 
     @property
     def datver(self):
+        """Return the WEPP datver header value."""
         return 7778.0
 
     @property
     def valid(self):
+        """Return True when at least one mineral horizon passes validation."""
         for h in self:
             if h.valid:
                 return True
@@ -205,6 +225,7 @@ class SiftSoil(list):
 
     @property
     def soil_name(self):
+        """Return the representative soil name (first horizon)."""
         if len(self) == 0:
             return None
 
@@ -214,6 +235,7 @@ class SiftSoil(list):
 
     @property
     def is_water(self):
+        """Return True when the soil name implies an open-water mapunit."""
         if len(self) == 0:
             return False
 
@@ -222,6 +244,7 @@ class SiftSoil(list):
 
     @property
     def texid(self):
+        """Return the simplified texture ID for the dominant horizon."""
         if len(self) == 0:
             return None
 
@@ -229,6 +252,7 @@ class SiftSoil(list):
 
     @property
     def ki(self):
+        """Return the interrill erodibility for the dominant horizon."""
         if len(self) == 0:
             return None
 
@@ -236,6 +260,7 @@ class SiftSoil(list):
 
     @property
     def kr(self):
+        """Return the rill erodibility for the dominant horizon."""
         if len(self) == 0:
             return None
 
@@ -243,6 +268,7 @@ class SiftSoil(list):
 
     @property
     def shcrit(self):
+        """Return the critical shear for the dominant horizon."""
         if len(self) == 0:
             return None
 
@@ -250,9 +276,7 @@ class SiftSoil(list):
 
     @property
     def salb(self):
-        """
-        surface albedo
-        """
+        """Return the surface albedo calculated from the organic matter."""
         if len(self) == 0:
             return None
 
@@ -263,10 +287,12 @@ class SiftSoil(list):
 
     @property
     def nsl(self):
+        """Return the number of valid mineral horizons."""
         horizon_mask = [h.valid and not h.is_organic for h in self]
         return sum(horizon_mask)
 
     def __getitem__(self, index):
+        """Return the ``index``-th valid mineral horizon."""
         return [h for h in self if h.valid and not h.is_organic][index]
 
     summary_keys = ('SOILNAME',
@@ -290,6 +316,7 @@ class SiftSoil(list):
                     'KP1500')
 
     def summary(self):
+        """Return a prettytable summary of each horizon."""
         if self.nsl == 0:
             return '# (No Horizons)'
 
@@ -302,6 +329,7 @@ class SiftSoil(list):
         return '\n'.join([f'# {L}' for L in table.get_string().split('\n')])
     
     def _water(self):
+        """Return a canned `.sol` representation for open water polygons."""
         s = [f"{self.datver}",
               '#',
               '#            WEPPcloud (c) University of Idaho',
@@ -317,6 +345,7 @@ class SiftSoil(list):
         return '\n'.join(s)
 
     def __str__(self):
+        """Return WEPP ``.sol`` contents for the soil (or water fallback)."""
         if self.is_water:
             return self._water()
 
@@ -366,15 +395,20 @@ class SiftSoil(list):
 
 
 class SiftHorizon(HorizonMixin):
+    """Horizon adapter that converts raw SIFT layer rows into WEPP traits."""
+
     def __init__(self, kwargs):        
+        """Store the raw layer dictionary for later property access."""
         self._d = kwargs
 
     @property
     def clay(self):
+        """Return total clay percentage."""
         return _attr_validator(self._d['TCLAY'])
 
     @property
     def silt(self):
+        """Return total silt (or fallback to very fine sand when silt missing)."""
         silt = _attr_validator(self._d['TSILT'])
         vfs = _attr_validator(self._d['VFSAND'])
         if silt is None and vfs is None:
@@ -389,10 +423,12 @@ class SiftHorizon(HorizonMixin):
 
     @property
     def sand(self):
+        """Return total sand percentage."""
         return _attr_validator(self._d['TSAND'])
 
     @property
     def om(self):
+        """Return combined organic carbon + woody fraction percentage."""
         oc = _attr_validator(self._d['ORGCARB'])
         wood = _attr_validator(self._d['WOOD'])
         if oc is None and wood is None:
@@ -407,42 +443,52 @@ class SiftHorizon(HorizonMixin):
 
     @property
     def rfg(self):
+        """Return coarse fragment percentage."""
         return _attr_validator(self._d['COFRAG'])
 
     @property
     def bd(self):
+        """Return bulk density."""
         return _attr_validator(self._d['BD'])
 
     @property
     def ksat(self):
+        """Return saturated hydraulic conductivity."""
         return _attr_validator(self._d['KSAT'])
 
     @property
     def cec(self):
+        """Return cation exchange capacity."""
         return _attr_validator(self._d['CEC'])
 
     @property
     def hzn_master(self):
+        """Return the master horizon label."""
         return self._d['HZN_MAS']
 
     @property
     def is_organic(self):
+        """Return True when the horizon represents an organic layer."""
         return self.hzn_master in ('F', 'FH', 'H', 'L', 'LF', 'LFH', 'LH', 'O')
 
     @property
     def is_rock(self):
+        """Return True when the horizon is rock (R)."""
         return self.hzn_master == 'R'
 
     @property
     def is_water(self):
+        """Return True when the horizon is mapped as water."""
         return self.hzn_master == 'W'
 
     @property
     def soil_name(self):
+        """Return the soil series name payload."""
         return self._d['SOILNAME']
 
     @property
     def depth(self):
+        """Return the lower depth boundary in millimetres."""
         depth = _attr_validator(self._d['LDEPTH'])
         if isfloat(depth):
             depth *= 10.0
@@ -450,14 +496,17 @@ class SiftHorizon(HorizonMixin):
 
     @property
     def is_last(self):
+        """Return True when this is the final (deepest) mineral horizon."""
         return getattr(self, '_is_last', False)
 
     @is_last.setter
     def is_last(self, v: bool):
+        """Mark whether the horizon is the last mineral horizon."""
         self._is_last = v
 
     @property
     def solthk(self):
+        """Return the WEPP layer thickness (rounded for final layer)."""
         v = self.depth
         if self.is_last:
             if v < 200:
@@ -468,6 +517,7 @@ class SiftHorizon(HorizonMixin):
 
     @property
     def valid(self):
+        """Return True when all required physical properties are populated."""
         return self.clay is not None and \
                self.sand is not None and \
                self.vfs is not None and \
@@ -482,6 +532,7 @@ class SiftHorizon(HorizonMixin):
                getattr(self, 'shear', 0) > 0
 
     def __str__(self):
+        """Return the WEPP horizon line."""
         return f'  {self.solthk} {self.bd:.03f} {self.ksat:.03f} {self.anisotropy:.01f} ' \
                f'{self.field_cap:.03f} {self.wilt_pt:.03f} {self.sand:.01f} ' \
                f'{self.clay:.01f} {self.orgmat:.01f} {self.cec:.01f} {self.rfg:.01f}'

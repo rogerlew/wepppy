@@ -6,6 +6,8 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Routines for summarizing landcover rasters by subcatchment or MOFEs."""
+
 from os.path import exists as _exists
 from collections import Counter
 
@@ -20,7 +22,10 @@ from wepppy.all_your_base.geo import read_raster, raster_stacker
 
 
 class LandcoverMap:
+    """Wrapper that loads a categorical landcover raster and computes summaries."""
+
     def __init__(self, fname):
+        """Read the source raster into memory and cache its metadata."""
         assert _exists(fname)
         self.fname = fname
 
@@ -33,17 +38,25 @@ class LandcoverMap:
         self.fname = fname
 
     def _get_dominant(self, indices):
+        """Return the mode (most common class) for ``indices``."""
         x = self.data[indices]
         return int(Counter(x).most_common()[0][0])
         
     def _get_fractionals(self, indices):
+        """Return a histogram of class counts for ``indices``."""
         x = self.data[indices]
         return {str(k): v for k,v in Counter(x).most_common()}
         
     def calc_fractionals(self, subwta_fn):
-        """
-        calc fractionals based on the subcatchment
-        ids identified in the subwta_fn map
+        """Return per-subcatchment cover histograms derived from ``subwta_fn``.
+
+        Args:
+            subwta_fn: Path to the subcatchment ID raster (same shape as the
+                landcover grid).
+
+        Returns:
+            Dict keyed by subcatchment ID whose values are ``{class: count}``
+            mappings in descending frequency order.
         """
         assert _exists(subwta_fn)
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
@@ -65,9 +78,16 @@ class LandcoverMap:
             
     @deprecated("Use wepppyo3 instead")
     def build_lcgrid(self, subwta_fn, mofe_fn=None):
-        """
-        Generates a dominant lc map based on the subcatchment
-        ids identified in the subwta_fn map
+        """Return dominant landcover classes per subcatchment (and MOFE if given).
+
+        Args:
+            subwta_fn: Path to the watershed/subcatchment raster.
+            mofe_fn: Optional MOFE ID raster; when provided the output nests
+                classes per subcatchment/MOFE pair.
+
+        Returns:
+            Dict keyed by subcatchment ID mapping to either a dominant class or
+            a nested ``{mofe: class}`` structure.
         """
         assert _exists(subwta_fn)
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)

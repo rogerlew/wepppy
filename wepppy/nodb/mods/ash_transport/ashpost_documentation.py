@@ -1,3 +1,5 @@
+"""Generate Markdown documentation for AshPost parquet outputs."""
+
 from __future__ import annotations
 
 import math
@@ -24,7 +26,7 @@ ASH_POST_DOC_ORDER: List[Tuple[str, str]] = [
     ),
     (
         "watershed_annuals.parquet",
-        "Annual watershed totals summarising wind, water, and total ash transport along with residual ash.",
+        "Annual watershed totals summarizing wind, water, and total ash transport along with residual ash.",
     ),
     (
         "watershed_cumulatives.parquet",
@@ -36,18 +38,21 @@ MAX_SAMPLE_ROWS = 3
 
 
 def _format_units(field: pa.Field) -> str:
+    """Return the units metadata stored on a parquet field, if present."""
     if field.metadata and b"units" in field.metadata:
         return field.metadata[b"units"].decode()
     return ""
 
 
 def _format_description(field: pa.Field) -> str:
+    """Return the description metadata stored on a parquet field, if present."""
     if field.metadata and b"description" in field.metadata:
         return field.metadata[b"description"].decode()
     return ""
 
 
 def _schema_markdown(schema: pa.Schema) -> str:
+    """Render a parquet schema into a Markdown-friendly table."""
     lines = ["| Column | Type | Units | Description |", "| --- | --- | --- | --- |"]
     for field in schema:
         lines.append(
@@ -57,6 +62,7 @@ def _schema_markdown(schema: pa.Schema) -> str:
 
 
 def _table_preview_markdown(table: pa.Table) -> str:
+    """Produce a Markdown table previewing the leading rows."""
     if table.num_rows == 0:
         return "_No rows_\n"
 
@@ -102,6 +108,7 @@ def _table_preview_markdown(table: pa.Table) -> str:
 
 
 def _summarize_file(parquet_path: Path, description: str) -> str:
+    """Load a parquet file and produce a Markdown section summarizing it."""
     table = pq.read_table(parquet_path)
     schema = table.schema
     header = f"### `{parquet_path.name}`\n\n{description}\n\n"
@@ -111,6 +118,20 @@ def _summarize_file(parquet_path: Path, description: str) -> str:
 
 
 def generate_ashpost_documentation(ash_post_dir: Path | str, to_readme_md: bool = True) -> str:
+    """Create a Markdown README describing the AshPost output directory.
+
+    Args:
+        ash_post_dir: Directory containing the parquet artifacts written by
+            :class:`AshPost`.
+        to_readme_md: When ``True`` (default), also write ``README.md`` in the
+            provided directory.
+
+    Returns:
+        Markdown string describing every parquet file discovered.
+
+    Raises:
+        FileNotFoundError: If ``ash_post_dir`` does not exist.
+    """
     base = Path(ash_post_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -127,7 +148,7 @@ def generate_ashpost_documentation(ash_post_dir: Path | str, to_readme_md: bool 
 
     sections: List[str] = [
         "# Ash Transport Post-Processing\n",
-        "Derived parquet artifacts created by `AshPost` to summarise hillslope and watershed ash transport.\n",
+        "Derived parquet artifacts created by `AshPost` to summarize hillslope and watershed ash transport.\n",
         f"_AshPost Version: {version_text}_\n",
     ]
 

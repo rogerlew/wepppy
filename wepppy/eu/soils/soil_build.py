@@ -23,6 +23,11 @@ def _build_esdac_soil(kwargs: dict[str, Any]) -> tuple[str | int, str, Horizon, 
     Args:
         kwargs: Dictionary produced by :func:`build_esdac_soils` that carries
             the TopoAZ identifier, centroid, and build settings.
+
+    Returns:
+        Tuple of ``(topaz_id, soil_key, horizon, description)`` mirroring the
+        :meth:`ESDAC.build_wepp_soil` contract so the parent process can build
+        :class:`SoilSummary` instances without re-reading the .sol files.
     """
     topaz_id = kwargs["topaz_id"]
     lng = kwargs["lng"]

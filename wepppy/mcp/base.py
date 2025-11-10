@@ -1,3 +1,5 @@
+"""Authentication helpers for MCP tools exposed to automation agents."""
+
 from __future__ import annotations
 
 import os
@@ -15,6 +17,7 @@ CLAIMS_KWARG = "_jwt_claims"
 
 
 def _parse_algorithms(raw: str | None) -> Sequence[str]:
+    """Normalize the comma-delimited algorithms environment variable."""
     if not raw:
         return ("HS256",)
     algorithms = [item.strip().upper() for item in raw.split(",") if item.strip()]
@@ -24,6 +27,7 @@ def _parse_algorithms(raw: str | None) -> Sequence[str]:
 
 
 def _load_claims(expected_tier: str) -> Mapping[str, Any]:
+    """Decode and validate a JWT, raising ``PermissionError`` when invalid."""
     token = os.getenv(TOKEN_ENV_VAR)
     if not token:
         raise PermissionError("Agent token missing from environment")
@@ -49,9 +53,7 @@ def _load_claims(expected_tier: str) -> Mapping[str, Any]:
 
 
 def mcp_tool(*, tier: str = "wojak") -> Callable[[F], F]:
-    """
-    Decorator for MCP tools that validates the Wojak session token before execution.
-    """
+    """Decorator that enforces token validation for MCP-exposed functions."""
 
     def decorator(func: F) -> F:
         @wraps(func)
@@ -70,9 +72,7 @@ def mcp_tool(*, tier: str = "wojak") -> Callable[[F], F]:
 def validate_run_scope(
     runid: str, claims: Mapping[str, Any], *, config: str | None = None
 ) -> None:
-    """
-    Ensure the requested run/config matches the JWT scope.
-    """
+    """Ensure the requested run/config matches the JWT scope."""
 
     token_runid = claims.get("runid")
     if token_runid != runid:
@@ -86,8 +86,6 @@ def validate_run_scope(
 
 
 def validate_runid(runid: str, claims: Mapping[str, Any]) -> None:
-    """
-    Backwards-compatible helper that validates run scope only.
-    """
+    """Backwards-compatible helper that validates run scope only."""
 
     validate_run_scope(runid, claims)

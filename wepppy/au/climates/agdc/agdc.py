@@ -4,7 +4,13 @@
 # Roger Lew (rogerlew@gmail.com)
 #
 
-"""Thin adapter for running CLIGEN against the AGDC monthly dataset."""
+"""Thin adapter for running CLIGEN against the AGDC monthly dataset.
+
+The implementation intentionally keeps the WEPPcloud side as small as possible—
+all heavy lifting is handled by :func:`wepppy.climates.cligen.par_mod`.  This
+module simply wires up the AGDC-specific ``monthly_dataset`` and metadata so
+callers can request an Australian run without duplicating boilerplate.
+"""
 
 from __future__ import annotations
 
@@ -33,11 +39,15 @@ def agdc_mod(
         lng: Longitude used for localization.
         lat: Latitude used for localization.
         wd: Working directory where CLIGEN artifacts are stored.
-        nwds_method: Native wet/dry sequence handling strategy.
+        nwds_method: Native wet/dry sequence handling strategy to pass through
+            to CLIGEN.
         randseed: Optional deterministic seed for CLIGEN.
-        cliver: CLIGEN executable version tag.
-        suffix: Text appended to generated filenames.
-        logger: Optional logger for progress messages.
+        cliver: CLIGEN executable version tag; when omitted the default binary
+            is used.
+        suffix: Text appended to generated filenames so parallel requests do
+            not clobber one another.
+        logger: Optional logger for progress messages. When ``None`` the core
+            CLIGEN adapter will fall back to its module-level logger.
 
     Returns:
         Localized CLIGEN monthly statistics as produced by ``par_mod``.

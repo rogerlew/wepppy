@@ -233,6 +233,7 @@ class ESDAC:
     """High-level accessor for the ESDAC ESDB rasters and derived STU layers."""
 
     def __init__(self) -> None:
+        """Index the raster catalog and accompanying attribute tables."""
         # { attr, raster_file_path}
         catalog = glob(_join(_esdac_esdb_raster_dir, "*.tif"))
         self.catalog: dict[str, str] = {_attr_fmt(_split(fn)[-1][:-4]): fn for fn in catalog}

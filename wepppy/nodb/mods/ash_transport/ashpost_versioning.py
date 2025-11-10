@@ -1,3 +1,5 @@
+"""Version manifest helpers for AshPost parquet outputs."""
+
 from __future__ import annotations
 
 import json
@@ -18,10 +20,12 @@ ASHPOST_VERSION = Version(major=1, minor=0)
 
 
 def manifest_path(ash_post_dir: Path) -> Path:
+    """Return the canonical location of the AshPost manifest."""
     return ash_post_dir / MANIFEST_FILENAME
 
 
 def schema_with_version(schema: pa.Schema, *, version: Version = ASHPOST_VERSION) -> pa.Schema:
+    """Attach dataset metadata so parquet consumers can inspect versions."""
     metadata: MutableMapping[bytes, bytes] = dict(schema.metadata or {})
     metadata[b"dataset_name"] = b"ashpost"
     metadata[b"dataset_version"] = str(version).encode("utf-8")
@@ -31,6 +35,7 @@ def schema_with_version(schema: pa.Schema, *, version: Version = ASHPOST_VERSION
 
 
 def write_version_manifest(ash_post_dir: Path, *, version: Version = ASHPOST_VERSION) -> Path:
+    """Persist the AshPost manifest for the provided directory."""
     ash_post_dir.mkdir(parents=True, exist_ok=True)
     payload = version.to_dict()
     path = manifest_path(ash_post_dir)
@@ -40,6 +45,7 @@ def write_version_manifest(ash_post_dir: Path, *, version: Version = ASHPOST_VER
 
 
 def read_version_manifest(ash_post_dir: Path) -> Optional[Version]:
+    """Load the stored version manifest (if present)."""
     path = manifest_path(ash_post_dir)
     if not path.exists():
         return None
@@ -55,6 +61,7 @@ def read_version_manifest(ash_post_dir: Path) -> Optional[Version]:
 
 
 def needs_major_refresh(ash_post_dir: Path, *, version: Version = ASHPOST_VERSION) -> bool:
+    """Return ``True`` when existing outputs are incompatible with ``version``."""
     if not ash_post_dir.exists():
         return False
     try:
@@ -69,6 +76,7 @@ def needs_major_refresh(ash_post_dir: Path, *, version: Version = ASHPOST_VERSIO
 
 
 def remove_incompatible_outputs(ash_post_dir: Path, *, version: Version = ASHPOST_VERSION) -> bool:
+    """Delete AshPost outputs when the stored major version does not match."""
     if not needs_major_refresh(ash_post_dir, version=version):
         return False
     if ash_post_dir.exists():
@@ -79,4 +87,3 @@ def remove_incompatible_outputs(ash_post_dir: Path, *, version: Version = ASHPOS
         )
         shutil.rmtree(ash_post_dir, ignore_errors=True)
     return True
-

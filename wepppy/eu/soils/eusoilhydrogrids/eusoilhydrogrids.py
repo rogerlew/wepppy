@@ -15,6 +15,7 @@ class SoilHydroGrids:
     """Thin wrapper around the SoilHydroGrids GeoTIFF stack published by ESDAC."""
 
     def __init__(self) -> None:
+        """Ensure all standard depth/dataset tiles exist before sampling."""
         self.datasets: tuple[str, ...] = ("THS", "KS", "WP", "FC")
         self.depths: tuple[str, ...] = ("sl1", "sl2", "sl3", "sl4", "sl5", "sl6", "sl7")
         self.depth_offsets_mm: tuple[int, ...] = (0, 5, 15, 30, 60, 100, 200)

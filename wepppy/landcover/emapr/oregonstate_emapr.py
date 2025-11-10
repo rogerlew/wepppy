@@ -1,3 +1,5 @@
+"""Download utilities for the OSU eMapR biomass/canopy/vote datasets."""
+
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
@@ -31,6 +33,7 @@ OSUeMapR_Measures = (
 
 
 def _parse_meta(fn):
+    """Return (version, measure, statistic, year) extracted from ``fn``."""
     head, tail = _split(fn)
     tokens = tail.replace('_emapr_', '')\
                  .replace('oob_', 'oob-')\
@@ -44,7 +47,10 @@ def _parse_meta(fn):
 
 
 class OSUeMapR(object):
+    """Manages local eMapR datasets cropped to a bounding box."""
+
     def __init__(self, wd='.', bbox=None, cellsize=30, version=DEFAULT_VERSION):
+        """Initialize the downloader/cache with target directory and extent."""
         self.wd = wd
         if bbox is not None:
             bbox = [float(v) for v in bbox]
@@ -61,6 +67,7 @@ class OSUeMapR(object):
             self.ds[(measure, statistic, year)] = emapr_fn
 
     def retrieve(self, years, measures=None):
+        """Download/crop the requested ``years``/``measures`` into ``self.wd``."""
         if measures is None:
             measures = OSUeMapR_Measures
 
@@ -106,6 +113,7 @@ class OSUeMapR(object):
         self.lr_x, self.lr_y = lr_x, lr_y
 
     def get_dataset(self, measure, statistic, year):
+        """Return an ``OSUeMapR_Dataset`` representing the requested layer."""
         key = measure, statistic, year
         if key not in self.ds:
             self.retrieve([year], [(measure, statistic)])
@@ -113,13 +121,17 @@ class OSUeMapR(object):
         return OSUeMapR_Dataset(self.ds[key])
 
     def _attribution(self):
+        """Copy the attribution README into the working directory if missing."""
         readme_txt = _join(self.wd, 'emapr_readme.txt')
         if not _exists(readme_txt):
             os.copyfile(_join(_thisdir, 'emapr_readme.txt', readme_txt))
 
 
 class OSUeMapR_Dataset(object):
+    """Thin wrapper around an eMapR GeoTIFF stacked product."""
+
     def __init__(self, fn):
+        """Open ``fn`` with rasterio and parse its metadata tuple."""
         assert _exists(fn)
 
         self.version, self.measure, self.statistic, self.year = _parse_meta(fn)
@@ -127,9 +139,11 @@ class OSUeMapR_Dataset(object):
         
     @property
     def shape(self):
+        """Return the (rows, cols) shape of the raster."""
         return self.ds.read(1).T.shape
 
     def get_band(self):
+        """Return the first band as a masked array, or None if not available."""
         try:
             data =  self.ds.read(1).T
         except IndexError:
@@ -137,6 +151,7 @@ class OSUeMapR_Dataset(object):
         return np.ma.masked_values(data, 65535)
 
     def _get_median(self, indices):
+        """Return the masked-median for the pixel subset ``indices``."""
         data = self.get_band()
         if data is None:
             return
@@ -150,6 +165,7 @@ class OSUeMapR_Dataset(object):
         return retval
 
     def spatial_aggregation(self, subwta_fn):
+        """Aggregate median values per subcatchment ID stored in ``subwta_fn``."""
         assert _exists(subwta_fn)
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
         assert self.shape == subwta.shape
@@ -168,6 +184,7 @@ class OSUeMapR_Dataset(object):
         return domlc_d
 
     def spatial_stats(self, bound_fn):
+        """Return stats (count, mean, std) for pixels within ``bound_fn`` mask."""
         assert _exists(bound_fn)
         bounds, transform, proj = read_raster(bound_fn, dtype=np.int32)
         indices = np.where(bounds == 1)
@@ -198,4 +215,3 @@ if __name__ == "__main__":
     litter = rap_ds.get_band(RAP_Band.LITTER)
     print(litter)
      
-

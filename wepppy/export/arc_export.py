@@ -23,13 +23,14 @@ from wepppy.topo.watershed_abstraction.support import json_to_wgs
 
 @deprecated()
 def has_arc_export(wd: str) -> bool:
-    """Check whether the Arc export artifacts already exist for ``wd``.
+    """Check whether all legacy Arc export artifacts already exist for ``wd``.
 
     Args:
         wd: Working directory for a WEPP run.
 
     Returns:
-        True if the generated shapefiles and JSON already exist, False otherwise.
+        True when the expected GeoJSON, shapefile, and channel assets already
+        exist, which allows callers to skip expensive GDAL conversions.
     """
 
     ron = Ron.getInstance(wd)
@@ -49,11 +50,22 @@ def has_arc_export(wd: str) -> bool:
 
     
 def legacy_arc_export(wd: str, verbose: bool = False) -> None:
-    """Build the legacy Arc export package (GeoTIFF + shapefiles + KML).
+    """Build the historical Arc export bundle (GeoTIFF, shapefiles, KML).
+
+    The legacy workflow reads the TOPAZ ``*.JSON`` descriptors from the run
+    directory, enriches each feature with WEPP model results, and emits:
+
+    * GeoTIFF rasters converted from the original ``*.ARC`` grids
+    * GeoJSON/shapefile/KML triplets for subcatchments and channels
+    * Attribute tables with WEPP runoff, sediment, and nutrient metrics
 
     Args:
         wd: Working directory for the run that should be exported.
         verbose: When True, print every GDAL/OGR command used during export.
+
+    Raises:
+        subprocess.CalledProcessError: If any GDAL/OGR command fails.
+        AssertionError: When expected intermediate assets are missing.
     """
 
     ron = Ron.getInstance(wd)
@@ -375,9 +387,16 @@ def legacy_arc_export(wd: str, verbose: bool = False) -> None:
 def arc_export(wd: str, verbose: bool = False) -> None:
     """Export modern ArcMap deliverables rooted at ``wd``.
 
+    Compared to :func:`legacy_arc_export`, the modern variant assembles an
+    extended attribute set (RHEM, ash transport, etc.) while still rendering
+    shapefiles/KML/GeoJSON for both subcatchments and channels.
+
     Args:
         wd: Working directory for the run that should be exported.
         verbose: When True, print every GDAL/OGR command used during export.
+
+    Raises:
+        subprocess.CalledProcessError: Propagated when GDAL/OGR fails.
     """
 
     ron = Ron.getInstance(wd)
