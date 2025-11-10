@@ -38,6 +38,7 @@ All commands mirror the legacy behaviour, but now live under the Typer dispatche
 - `wctl restore-docker-data-permissions` – repairs ownership for `.docker-data/*` using the UID/GID from the active env file.
 - `wctl run-npm` – runs host-side npm/Yarn scripts with `--prefix wepppy/weppcloud/static-src` (plain npm commands like `install`, `test`, `lint`, etc.).
 - `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default).
+- `wctl run-python` – opens the project virtualenv's Python inside the container, defaulting to an interactive REPL when no script/args are supplied.
 - `wctl run-stubtest` – runs stubtest from the container (default target `wepppy.nodb.core`).
 - `wctl run-stubgen` – regenerates stubs (`python tools/sync_stubs.py`).
 - `wctl check-test-stubs` / `check-test-isolation` – launch the diagnostic scripts inside the container.

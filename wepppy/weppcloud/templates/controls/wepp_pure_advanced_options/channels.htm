@@ -11,15 +11,15 @@
      ) }}
 
   <h5 class="wc-heading wc-heading--xs">Constant CS parameters</h5>
-  {% set cs_options = [(wepp.channel_critical_shear, 'CS = ' ~ wepp.channel_critical_shear)] %}
+  {% set cs_ns = namespace(options=[(wepp.channel_critical_shear, 'CS = ' ~ wepp.channel_critical_shear)]) %}
   {% for opt in critical_shear_options %}
     {% set label = opt["particle_class"] ~ ' (' ~ opt["particle_diameter_range"] ~ ' mm) CS = ' ~ opt["cs"] %}
-    {% set cs_options = cs_options + [(opt["cs"], label)] %}
+    {% set cs_ns.options = cs_ns.options + [(opt["cs"], label)] %}
   {% endfor %}
   {{ ui.select_field(
        "channel_critical_shear",
        "Critical shear (N/m²) based on median channel bed particle size (mm)",
-       cs_options,
+       cs_ns.options,
        selected=wepp.channel_critical_shear,
        extra_control_class="disable-readonly"
      ) }}

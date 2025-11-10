@@ -294,16 +294,24 @@ class PlaybackSession:
         if method == "POST" and json_payload is not None:
             kwargs["json"] = json_payload
         elif method == "POST" and request_meta.get("bodyType") == "form-data":
+            requires_file = self._requires_file_upload(path)
+            body_supplied = False
             if form_data:
                 kwargs["data"] = form_data
+                body_supplied = True
             if files_info:
                 prepared_files: Dict[str, Tuple[str, Any, str]] = {}
                 for field, (file_path, mime) in files_info.items():
                     file_handle = files_stack.enter_context(open(file_path, "rb"))
                     prepared_files[field] = (os.path.basename(file_path), file_handle, mime)
                 kwargs["files"] = prepared_files
-            else:
+                body_supplied = True
+            elif requires_file:
                 self.results.append(("form-data", f"{path}: missing upload payload"))
+                files_stack.close()
+                raise requests.RequestException("missing form-data payload")
+            if not body_supplied:
+                self.results.append(("form-data", f"{path}: empty form-data payload"))
                 files_stack.close()
                 raise requests.RequestException("missing form-data payload")
         elif method == "POST" and form_data:
@@ -343,6 +351,14 @@ class PlaybackSession:
             return self._poll_for_completion(url, params, expected_status)
 
         return response
+
+    @staticmethod
+    def _requires_file_upload(path: str) -> bool:
+        """Return True when the endpoint represents a mandatory file upload."""
+        normalized = path.rstrip("/")
+        if "/tasks/upload_" in normalized:
+            return True
+        return False
 
     def _poll_for_completion(
         self,

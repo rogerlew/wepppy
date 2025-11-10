@@ -40,6 +40,26 @@ def register(app: typer.Typer) -> None:
         _exit_from_result(result)
 
     @app.command(
+        "run-python",
+        context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
+    )
+    def run_python(ctx: typer.Context) -> None:
+        context = _context(ctx)
+        args = list(ctx.args)
+        quoted = quote_args(args)
+        python_invocation = "/opt/venv/bin/python"
+        if quoted:
+            python_invocation = f"{python_invocation} {quoted}"
+        command = (
+            "cd /workdir/wepppy && "
+            "PYTHONPATH=/workdir/wepppy "
+            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+            f"{python_invocation}"
+        )
+        result = compose_exec(context, "weppcloud", command, check=False)
+        _exit_from_result(result)
+
+    @app.command(
         "run-stubtest",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
     )

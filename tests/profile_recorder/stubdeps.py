@@ -8,11 +8,26 @@ from typing import Any
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _STUBS_READY = False
+_ORIGINAL_MODULES: dict[str, ModuleType | None] = {}
+_PATCHED_ATTRIBUTES: list[tuple[Any, str, bool, Any]] = []
+
+
+def _remember_original_module(name: str) -> None:
+    if name not in _ORIGINAL_MODULES:
+        _ORIGINAL_MODULES[name] = sys.modules.get(name)
+
+
+def _setattr_with_restore(target: Any, attr_name: str, value: Any) -> None:
+    existed = hasattr(target, attr_name)
+    original_value = getattr(target, attr_name) if existed else None
+    _PATCHED_ATTRIBUTES.append((target, attr_name, existed, original_value))
+    setattr(target, attr_name, value)
 
 
 def _ensure_package_module(name: str) -> ModuleType:
     module = sys.modules.get(name)
     if module is None:
+        _remember_original_module(name)
         module = ModuleType(name)
         module.__path__ = []  # type: ignore[attr-defined]
         sys.modules[name] = module
@@ -21,6 +36,7 @@ def _ensure_package_module(name: str) -> ModuleType:
 
 def _install_stubs() -> None:
     if "flask" not in sys.modules:
+        _remember_original_module("flask")
         flask_stub = ModuleType("flask")
         flask_stub.current_app = SimpleNamespace(config={})
         flask_stub.g = SimpleNamespace()
@@ -35,6 +51,7 @@ def _install_stubs() -> None:
         sys.modules["flask"] = flask_stub
 
     if "werkzeug" not in sys.modules:
+        _remember_original_module("werkzeug")
         werkzeug_stub = ModuleType("werkzeug")
         exceptions_stub = ModuleType("werkzeug.exceptions")
 
@@ -44,9 +61,11 @@ def _install_stubs() -> None:
         exceptions_stub.HTTPException = _HTTPException
         werkzeug_stub.exceptions = exceptions_stub
         sys.modules["werkzeug"] = werkzeug_stub
+        _remember_original_module("werkzeug.exceptions")
         sys.modules["werkzeug.exceptions"] = exceptions_stub
 
     if "redis" not in sys.modules:
+        _remember_original_module("redis")
         redis_stub = ModuleType("redis")
 
         class _ConnectionError(Exception):
@@ -86,6 +105,7 @@ def _install_stubs() -> None:
         sys.modules["jsonpickle"] = jsonpickle_stub
 
     if "utm" not in sys.modules:
+        _remember_original_module("utm")
         utm_stub = ModuleType("utm")
 
         def _utm_from_latlon(*args: Any, **kwargs: Any) -> tuple[int, int, int, str]:
@@ -99,6 +119,7 @@ def _install_stubs() -> None:
         sys.modules["utm"] = utm_stub
 
     if "deprecated" not in sys.modules:
+        _remember_original_module("deprecated")
         deprecated_stub = ModuleType("deprecated")
 
         def _deprecated(_reason: Any | None = None, **_kwargs: Any):
@@ -111,6 +132,7 @@ def _install_stubs() -> None:
         sys.modules["deprecated"] = deprecated_stub
 
     if "wepppy.all_your_base.geo" not in sys.modules:
+        _remember_original_module("wepppy.all_your_base.geo")
         geo_stub = ModuleType("wepppy.all_your_base.geo")
 
         class _RasterDatasetInterpolator:
@@ -148,6 +170,7 @@ def _install_stubs() -> None:
         sys.modules["wepppy.all_your_base.geo"] = geo_stub
 
     if "wepppy.all_your_base.geo.webclients" not in sys.modules:
+        _remember_original_module("wepppy.all_your_base.geo.webclients")
         webclients_stub = ModuleType("wepppy.all_your_base.geo.webclients")
 
         def _webclient_stub(*args: Any, **kwargs: Any) -> dict[str, Any]:
@@ -159,13 +182,14 @@ def _install_stubs() -> None:
     import wepppy  # noqa: WPS433
 
     nodb_pkg = _ensure_package_module("wepppy.nodb")
-    setattr(wepppy, "nodb", nodb_pkg)
+    _setattr_with_restore(wepppy, "nodb", nodb_pkg)
     core_pkg = _ensure_package_module("wepppy.nodb.core")
     mods_pkg = _ensure_package_module("wepppy.nodb.mods")
     nodb_pkg.core = core_pkg  # type: ignore[attr-defined]
     nodb_pkg.mods = mods_pkg  # type: ignore[attr-defined]
 
     if "wepppy.nodb.base" not in sys.modules:
+        _remember_original_module("wepppy.nodb.base")
         nodb_base_stub = ModuleType("wepppy.nodb.base")
 
         def _clear_locks(*args: Any, **kwargs: Any) -> list[str]:
@@ -184,6 +208,7 @@ def _install_stubs() -> None:
         nodb_pkg.base = nodb_base_stub  # type: ignore[attr-defined]
 
     if "wepppy.nodb.core.ron" not in sys.modules:
+        _remember_original_module("wepppy.nodb.core.ron")
         ron_stub = ModuleType("wepppy.nodb.core.ron")
 
         class _Ron:
@@ -219,3 +244,29 @@ def load_profile_module(relative_path: str, module_name: str, *, package: str | 
     sys.modules[module_name] = module
     spec.loader.exec_module(module)  # type: ignore[attr-defined]
     return module
+
+
+def restore_profile_test_stubs() -> None:
+    global _STUBS_READY
+    if not _STUBS_READY:
+        return
+
+    for target, attr_name, existed, original_value in reversed(_PATCHED_ATTRIBUTES):
+        if existed:
+            setattr(target, attr_name, original_value)
+        else:
+            if hasattr(target, attr_name):
+                delattr(target, attr_name)
+    _PATCHED_ATTRIBUTES.clear()
+
+    for name, original in sorted(
+        _ORIGINAL_MODULES.items(),
+        key=lambda item: (item[0].count("."), len(item[0])),
+        reverse=True,
+    ):
+        if original is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = original
+    _ORIGINAL_MODULES.clear()
+    _STUBS_READY = False

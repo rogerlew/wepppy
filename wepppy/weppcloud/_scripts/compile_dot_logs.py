@@ -9,14 +9,15 @@ from os.path import exists as _exists
 from collections import Counter
 from datetime import datetime
 
-from wepppy.nodb import Ron
+from wepppy.nodb import Ron, Watershed
 
 fns = glob('/geodata/weppcloud_runs/.*')
 fns += glob('/geodata/wc1/runs/*/.*')
+fns += glob('/wc1/runs/*/.*')
 
 fp = open('/geodata/weppcloud_runs/access.csv', 'w')
 
-fp.write('runid,config,has_sbs,hillslopes,ash_hillslopes,year,user,ip,date\n')
+fp.write('runid,config,has_sbs,hillslopes,ash_hillslopes,centroid_longitude,centroid_latitude,year,user,ip,date\n')
 
 runs_counter = Counter()
 
@@ -54,11 +55,22 @@ for fn in fns:
         print(fn)
         continue
 
+    centroid_longitude, centroid_latitude = centroid = (None, None)
+    if slopes > 0:
+        try:
+            watershed = Watershed.getInstance(wd)
+            centroid = watershed.centroid
+            if centroid is not None:
+                centroid_longitude, centroid_latitude = centroid
+        except:
+            centroid_longitude, centroid_latitude = (None, None)
+
+
     first_access = datetime(3000, 1, 1)
     for line in lines:
         _date = line.split(',')[-1].strip()
         _date = datetime.strptime(_date, '%Y-%m-%d %H:%M:%S.%f')
-        fp.write('{},"{}",{},{},{},{},{}'.format(fn[1:], config, has_sbs, slopes, ash_slopes, _date.year, line))
+        fp.write('{},"{}",{},{},{},{},{},{},{}'.format(fn[1:], config, has_sbs, slopes, ash_slopes, centroid_longitude, centroid_latitude, _date.year, line))
         if _date < first_access:
             first_access = _date
 
@@ -120,3 +132,4 @@ grouped = df.groupby('runid', as_index=False).agg(
 grouped.to_csv(output_file, index=False)
 
 print(f"File with unique runids saved to {output_file}")
+

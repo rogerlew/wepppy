@@ -89,6 +89,9 @@
       {% set status_panel_braille_id = status_opts.get('braille_id', 'braille') %}
       {% set status_panel_log_id = status_opts.get('log_id', 'status') %}
       {% set status_panel_height = status_opts.get('height') %}
+      {% if status_panel_height is none %}
+        {% set status_panel_height = '4rem' %}
+      {% endif %}
       {% set status_panel_variant = status_opts.get('variant', 'compact') %}
       {% set status_panel_title = status_opts.get('title', 'Status') %}
       {% set status_panel_meta = status_opts.get('meta') %}
