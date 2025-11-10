@@ -59,7 +59,12 @@ common_cols =  ['area (ha)', 'topaz_id', 'year', 'mo', 'da', 'julian', 'days_fro
 
 out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
             'wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)',
-            'ash_depth (mm)', 'transportable_ash (tonne/ha)']
+            'ash_runoff (mm)', 'ash_depth (mm)', 'transportable_ash (tonne/ha)']
+
+VOLUME_COLUMNS_M3 = (
+    'ash_depth (m^3)',
+    'ash_runoff (m^3)',
+)
 
 ASH_POST_FILES: Dict[str, str] = {
     'hillslope_annuals': 'hillslope_annuals.parquet',
@@ -393,9 +398,10 @@ def calculate_watershed_statisics(
         'ash_transport (tonne)',
         'transportable_ash (tonne)',
     ]
+    volume_cols_annual = [col for col in VOLUME_COLUMNS_M3 if col in df_annuals.columns]
     _add_per_area_columns(df_annuals, tonne_cols)
-    if 'ash_depth (m^3)' in df_annuals.columns:
-        _add_per_area_columns(df_annuals, ['ash_depth (m^3)'])
+    if volume_cols_annual:
+        _add_per_area_columns(df_annuals, volume_cols_annual)
     annual_cols = [
         'year',
         'year0',
@@ -410,8 +416,11 @@ def calculate_watershed_statisics(
         'transportable_ash (tonne)',
         'transportable_ash (tonne/ha)',
     ]
-    if 'ash_depth (m^3)' in df_annuals.columns:
-        annual_cols.extend(['ash_depth (m^3)', 'ash_depth (mm)'])
+    for volume_col in volume_cols_annual:
+        annual_cols.extend([
+            volume_col,
+            volume_col.replace(' (m^3)', ' (mm)'),
+        ])
     df_annuals = df_annuals[[col for col in annual_cols if col in df_annuals.columns]]
     _write_parquet(df_annuals, _join(ash_post_dir, ASH_POST_FILES['watershed_annuals']))
 
@@ -421,9 +430,10 @@ def calculate_watershed_statisics(
     existing_density_cols = [col for col in df_daily.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
     if existing_density_cols:
         df_daily.drop(columns=existing_density_cols, inplace=True)
+    volume_cols_daily = [col for col in VOLUME_COLUMNS_M3 if col in df_daily.columns]
     _add_per_area_columns(df_daily, tonne_cols)
-    if 'ash_depth (m^3)' in df_daily.columns:
-        _add_per_area_columns(df_daily, ['ash_depth (m^3)'])
+    if volume_cols_daily:
+        _add_per_area_columns(df_daily, volume_cols_daily)
     daily_cols = [
         'year0',
         'year',
@@ -439,8 +449,11 @@ def calculate_watershed_statisics(
         'transportable_ash (tonne)',
         'transportable_ash (tonne/ha)',
     ]
-    if 'ash_depth (m^3)' in df_daily.columns:
-        daily_cols.extend(['ash_depth (m^3)', 'ash_depth (mm)'])
+    for volume_col in volume_cols_daily:
+        daily_cols.extend([
+            volume_col,
+            volume_col.replace(' (m^3)', ' (mm)'),
+        ])
     df_daily = df_daily[[col for col in daily_cols if col in df_daily.columns]]
     _write_parquet(df_daily, _join(ash_post_dir, ASH_POST_FILES['watershed_daily']))
 
@@ -455,9 +468,10 @@ def calculate_watershed_statisics(
     existing_density_cols = [col for col in grouped_df.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
     if existing_density_cols:
         grouped_df.drop(columns=existing_density_cols, inplace=True)
+    volume_cols_class = [col for col in VOLUME_COLUMNS_M3 if col in grouped_df.columns]
     _add_per_area_columns(grouped_df, tonne_cols)
-    if 'ash_depth (m^3)' in grouped_df.columns:
-        _add_per_area_columns(grouped_df, ['ash_depth (m^3)'])
+    if volume_cols_class:
+        _add_per_area_columns(grouped_df, volume_cols_class)
     class_cols = [
         'burn_class',
         'year0',
@@ -474,8 +488,11 @@ def calculate_watershed_statisics(
         'transportable_ash (tonne)',
         'transportable_ash (tonne/ha)',
     ]
-    if 'ash_depth (m^3)' in grouped_df.columns:
-        class_cols.extend(['ash_depth (m^3)', 'ash_depth (mm)'])
+    for volume_col in volume_cols_class:
+        class_cols.extend([
+            volume_col,
+            volume_col.replace(' (m^3)', ' (mm)'),
+        ])
     grouped_df = grouped_df[[col for col in class_cols if col in grouped_df.columns]]
     _write_parquet(grouped_df, _join(ash_post_dir, ASH_POST_FILES['watershed_daily_by_burn_class']))
 
