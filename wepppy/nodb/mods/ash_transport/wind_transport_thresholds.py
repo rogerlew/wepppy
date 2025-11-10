@@ -13,16 +13,16 @@ import numpy as np
 _THISDIR = os.path.dirname(__file__)
 _DATA_DIR = _join(_THISDIR, "data")
 
-with open(_join(_DATA_DIR, "wind_transport_thresholds.csv"), encoding="utf-8") as fp:
-    dict_reader = csv.DictReader(fp)
+with open(_join(_DATA_DIR, "wind_transport_thresholds.csv"), encoding="utf-8") as _fp:
+    _dict_reader = csv.DictReader(_fp)
 
     _wind_speeds: List[float] = []
     _white_w_pct: List[float] = []
     _black_w_pct: List[float] = []
-    for row in dict_reader:
-        _wind_speeds.append(float(row["U' (m/s)"]))
-        _white_w_pct.append(float(row["Transported cum. White (w,%)"]))
-        _black_w_pct.append(float(row["Remaining cum. Black (w,%)"]))
+    for _row in _dict_reader:
+        _wind_speeds.append(float(_row["U' (m/s)"]))
+        _white_w_pct.append(float(_row["Transported cum. White (w,%)"]))
+        _black_w_pct.append(float(_row["Remaining cum. Black (w,%)"]))
 
 _wind_speeds_arr: Final[np.ndarray] = np.array(_wind_speeds)
 

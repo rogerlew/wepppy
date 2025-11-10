@@ -8,6 +8,8 @@ from wepppy.all_your_base.dateutils import YearlessDate
 
 from .ash_type import AshType
 
+__all__: list[str]
+
 WHITE_ASH_BD: float
 BLACK_ASH_BD: float
 
@@ -29,6 +31,15 @@ class AshModel:
         porosity: float,
     ) -> None: ...
 
+    @property
+    def ini_material_available_mm(self) -> float: ...
+
+    @property
+    def ini_material_available_tonneperha(self) -> float: ...
+
+    @property
+    def water_retention_capacity_at_sat(self) -> float: ...
+
     def lookup_wind_threshold_proportion(self, w: float) -> float: ...
 
     def run_model(
@@ -48,8 +59,12 @@ class AshModel:
 
 
 class WhiteAshModel(AshModel):
+    __name__: str
+
     def __init__(self, bulk_density: float = ...) -> None: ...
 
 
 class BlackAshModel(AshModel):
+    __name__: str
+
     def __init__(self, bulk_density: float = ...) -> None: ...

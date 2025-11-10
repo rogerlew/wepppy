@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
-import pyarrow as pa
+import logging
 
 from wepppy.wepp.interchange.versioning import Version
 
+LOGGER: logging.Logger
 MANIFEST_FILENAME: str
 ASHPOST_VERSION: Version
 
 def manifest_path(ash_post_dir: Path) -> Path: ...
 
-def schema_with_version(schema: pa.Schema, *, version: Version = ...) -> pa.Schema: ...
+def schema_with_version(schema: Any, *, version: Version = ...) -> Any: ...
 
 def write_version_manifest(ash_post_dir: Path, *, version: Version = ...) -> Path: ...
 

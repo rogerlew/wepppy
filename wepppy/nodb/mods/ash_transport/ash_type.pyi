@@ -3,8 +3,8 @@ from __future__ import annotations
 import enum
 
 class AshType(enum.IntEnum):
-    BLACK: int
-    WHITE: int
+    BLACK = ...
+    WHITE = ...
 
     def __str__(self) -> str: ...
 
