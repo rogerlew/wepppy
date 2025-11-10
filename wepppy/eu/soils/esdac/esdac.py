@@ -1,9 +1,16 @@
-import json
-import string
-from os.path import split as _split
-from os.path import join as _join
+"""Builders that derive WEPP-ready soils from the ESDAC raster library."""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
 from datetime import datetime
 from glob import glob
+import json
+import string
+from typing import Final
+
+from os.path import join as _join
+from os.path import split as _split
 
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
@@ -11,26 +18,66 @@ from wepppy.wepp.soils import HorizonMixin
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 
 
-_esdac_esdb_raster_dir = '/geodata/eu/ESDAC_ESDB_rasters/' # 1km
-_esdac_derived_db_dir = '/geodata/eu/ESDAC_STU_EU_Layers/'
+_esdac_esdb_raster_dir: Final[str] = "/geodata/eu/ESDAC_ESDB_rasters/"  # 1km
+_esdac_derived_db_dir: Final[str] = "/geodata/eu/ESDAC_STU_EU_Layers/"
 
 
-_texture_defaults = {'clay loam': {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 0.5,
-                                   'field_cap': 0.001, 'wilt_pt': 0.001,
-                                   'sand': 25.0, 'clay': 30.0, 'orgmat': 5.0, 'cec': 25.0, 'rfg': 15.0},
-                     'silt loam': {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 1.5, 
-                                   'field_cap': 0.001, 'wilt_pt': 0.001,
-                                   'sand': 25.0, 'clay': 15.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 15.0},
-                     'loam':      {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 1.0, 
-                                   'field_cap': 0.001, 'wilt_pt': 0.001,
-                                   'sand': 45.0, 'clay': 20.0, 'orgmat': 5.0, 'cec': 20.0, 'rfg': 20.0},
-                     'sand loam': {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 2.0, 
-                                   'field_cap': 0.001, 'wilt_pt': 0.001,
-                                   'sand': 65.0, 'clay': 10.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 25.0},
-                     None: None}
+TextureDescriptor = dict[str, float]
+
+_texture_defaults: Final[dict[str | None, TextureDescriptor | None]] = {
+    "clay loam": {
+        "dbthridbar": 1.4,
+        "ksat": 28.0,
+        "shcrit": 0.5,
+        "field_cap": 0.001,
+        "wilt_pt": 0.001,
+        "sand": 25.0,
+        "clay": 30.0,
+        "orgmat": 5.0,
+        "cec": 25.0,
+        "rfg": 15.0,
+    },
+    "silt loam": {
+        "dbthridbar": 1.4,
+        "ksat": 28.0,
+        "shcrit": 1.5,
+        "field_cap": 0.001,
+        "wilt_pt": 0.001,
+        "sand": 25.0,
+        "clay": 15.0,
+        "orgmat": 5.0,
+        "cec": 15.0,
+        "rfg": 15.0,
+    },
+    "loam": {
+        "dbthridbar": 1.4,
+        "ksat": 28.0,
+        "shcrit": 1.0,
+        "field_cap": 0.001,
+        "wilt_pt": 0.001,
+        "sand": 45.0,
+        "clay": 20.0,
+        "orgmat": 5.0,
+        "cec": 20.0,
+        "rfg": 20.0,
+    },
+    "sand loam": {
+        "dbthridbar": 1.4,
+        "ksat": 28.0,
+        "shcrit": 2.0,
+        "field_cap": 0.001,
+        "wilt_pt": 0.001,
+        "sand": 65.0,
+        "clay": 10.0,
+        "orgmat": 5.0,
+        "cec": 15.0,
+        "rfg": 25.0,
+    },
+    None: None,
+}
 
 
-_tex_short_to_simple_texture = {
+_tex_short_to_simple_texture: Final[dict[str, str | None]] = {
     '0': None,
     '9': None,
     '1': 'sand loam',
@@ -41,7 +88,7 @@ _tex_short_to_simple_texture = {
 }
 
 
-_il_short_to_depth_mm = {
+_il_short_to_depth_mm: Final[dict[str, int | None]] = {
     '0':   None,
     '1':   1500,
     '2':   1150,
@@ -50,13 +97,13 @@ _il_short_to_depth_mm = {
 }
 
 
-_cec_to_cmol_per_kg = {
+_cec_to_cmol_per_kg: Final[dict[str, float]] = {
     'H': 50.0, 
     'M': 27.5, 
     'L': 10
 }
 
-_texdepchg_short_to_depth_mm = {
+_texdepchg_short_to_depth_mm: Final[dict[str, int | None]] = {
     '0': None,
     '1': 300,
     '2': 500,
@@ -67,7 +114,7 @@ _texdepchg_short_to_depth_mm = {
     '7': 900,
 }
 
-_octop_short_to_pct = {
+_octop_short_to_pct: Final[dict[str, float]] = {
     'H': 6.5,
     'M': 4.0,
     'L': 1.5,
@@ -92,9 +139,19 @@ _disclaimer = '''\
 
 
 class Horizon(HorizonMixin):
-    def __init__(self, clay: float=None, sand: float=None, silt: float=None, om: float=None,
-                 bd: float=None, gravel: float=None, _cec: str=None, depth: float=None):
+    """Container for the top/sub soil horizons derived from ESDAC rasters."""
 
+    def __init__(
+        self,
+        clay: float | None = None,
+        sand: float | None = None,
+        silt: float | None = None,
+        om: float | None = None,
+        bd: float | None = None,
+        gravel: float | None = None,
+        _cec: str | None = None,
+        depth: float | None = None,
+    ):
         self.clay = clay
         self.sand = sand
         self.silt = silt
@@ -110,41 +167,61 @@ class Horizon(HorizonMixin):
         self._rosettaPredict()
 
     @property
-    def vfs(self):
+    def vfs(self) -> float | None:
+        """Very fine sand fraction (mirrors silt for historical reasons)."""
         return self.silt
 
     @property
-    def cec(self):
+    def cec(self) -> float:
+        """Cation exchange capacity estimate from the categorical raster."""
+        if self._cec is None:
+            raise ValueError("CEC class is undefined for this horizon")
         return _cec_to_cmol_per_kg[self._cec]
 
     @property
-    def smr(self):
+    def smr(self) -> float | None:
+        """Rock fragment fraction."""
         return self.gravel
 
-    def as_dict(self):
-        return dict(clay=self.clay, sand=self.sand, silt=self.silt, om=self.om,
-                    bd=self.bd, gravel=self.gravel, cec=self.cec, 
-                    conductivity=self.conductivity, anisotrophy=self.anisotropy,
-                    interrill=self.interrill, rill=self.rill, shear=self.shear,
-                    ks=self.ks, wilting_point=self.wilting_point, 
-                    field_capacity=self.field_capacity)
+    def as_dict(self) -> dict[str, float | None]:
+        """Serialize the derived soil properties."""
+        return dict(
+            clay=self.clay,
+            sand=self.sand,
+            silt=self.silt,
+            om=self.om,
+            bd=self.bd,
+            gravel=self.gravel,
+            cec=self.cec,
+            conductivity=self.conductivity,
+            anisotrophy=self.anisotropy,
+            interrill=self.interrill,
+            rill=self.rill,
+            shear=self.shear,
+            ks=self.ks,
+            wilting_point=self.wilting_point,
+            field_capacity=self.field_capacity,
+        )
 
 
-def _attr_fmt(attr):
-    _attr = ''.join(c for c in attr.lower() if
-                   c in string.ascii_lowercase or c in string.digits)
+def _attr_fmt(attr: str) -> str:
+    """Normalize ESDAC attribute names so they can be used as dictionary keys."""
+    _attr = "".join(
+        c for c in attr.lower() if c in string.ascii_lowercase or c in string.digits
+    )
 
-    if 'lv' in _attr:
-        _attr = _attr.replace('lv', 'lev')
+    if "lv" in _attr:
+        _attr = _attr.replace("lv", "lev")
 
-    _replacements = {'txsrfdo': 'textsrfdom',
-                     'txsrfse': 'textsrfsec',
-                     'txsubdo': 'textsubdom',
-                     'txsubse': 'textsubsec',
-                     'txdepchg': 'textdepchg',
-                     'usedo': 'usedom',
-                     'erodi': 'erodibility'
-                     }
+    _replacements = {
+        "txsrfdo": "textsrfdom",
+        "txsrfse": "textsrfsec",
+        "txsubdo": "textsubdom",
+        "txsubse": "textsubsec",
+        "txdepchg": "textdepchg",
+        "usedo": "usedom",
+        "erodi": "erodibility",
+    }
 
     if _attr in _replacements:
         _attr = _replacements[_attr]
@@ -153,87 +230,113 @@ def _attr_fmt(attr):
 
 
 class ESDAC:
-    def __init__(self):
+    """High-level accessor for the ESDAC ESDB rasters and derived STU layers."""
+
+    def __init__(self) -> None:
         # { attr, raster_file_path}
-        catalog = glob(_join(_esdac_esdb_raster_dir, '*.tif'))
-        self.catalog = {_attr_fmt(_split(fn)[-1][:-4]): fn for fn in catalog}
+        catalog = glob(_join(_esdac_esdb_raster_dir, "*.tif"))
+        self.catalog: dict[str, str] = {_attr_fmt(_split(fn)[-1][:-4]): fn for fn in catalog}
 
         # { attr, raster_attribute table}
-        rats = {}
+        rats: dict[str, dict[str, str]] = {}
         for fn in catalog:
-            rats[_attr_fmt(_split(fn)[-1][:-4])] = self._rat_extract(fn[:-4] + '.json')
+            rats[_attr_fmt(_split(fn)[-1][:-4])] = self._rat_extract(fn[:-4] + ".json")
         self.rats = rats
 
         # { attr, raster_file_path}
-        derived_db_catalog = glob(_join(_esdac_derived_db_dir, '*.tif'))
-        self.derived_db_catalog = {_split(fn)[-1][:-4]: fn for fn in derived_db_catalog}
-
+        derived_db_catalog = glob(_join(_esdac_derived_db_dir, "*.tif"))
+        self.derived_db_catalog: dict[str, str] = {
+            _split(fn)[-1][:-4]: fn for fn in derived_db_catalog
+        }
 
     @staticmethod
-    def _rat_extract(fn):
-        with open(fn.replace('.tif', '.json')) as fp:
+    def _rat_extract(fn: str) -> dict[str, str]:
+        """Read the raster attribute table exported by ``gdalinfo -json``."""
+        with open(fn.replace(".tif", ".json")) as fp:
             info = json.load(fp)
 
-        rows = info['rat']['row']
+        rows = info["rat"]["row"]
 
-        d = {}
-        for r in rows:
-            r = r['f']
+        data: dict[str, str] = {}
+        for row in rows:
+            fields = row["f"]
 
-            if len(r) == 3:
-                d[str(r[0])] = str(r[2])
-            elif len(r) == 2:
-                d[str(r[0])] = str(r[0])
+            if len(fields) == 3:
+                data[str(fields[0])] = str(fields[2])
+            elif len(fields) == 2:
+                data[str(fields[0])] = str(fields[0])
             else:
-                raise Exception
+                raise ValueError(f"Unexpected RAT row: {row}")
 
-        return d
+        return data
 
-    def query(self, lng, lat, attrs):
+    def query(
+        self,
+        lng: float,
+        lat: float,
+        attrs: Sequence[str],
+    ) -> dict[str, tuple[str, str, str]]:
+        """Look up nominal ESDAC attributes for a given coordinate."""
         from .legends import get_legend
 
         catalog = self.catalog
         rats = self.rats
-        d = {}
+        data: dict[str, tuple[str, str, str]] = {}
 
         for attr in attrs:
             attr = _attr_fmt(attr)
-            assert attr in catalog, attr
+            if attr not in catalog:
+                raise KeyError(attr)
             rdi = RasterDatasetInterpolator(catalog[attr])
-            x = rdi.get_location_info(lng, lat, method='near')
+            x = rdi.get_location_info(lng, lat, method="near")
             px_val = str(int(x))
             short = rats[attr][px_val]
             legend = get_legend(attr)
-            try:
-                long = legend['table'][short]
-            except KeyError:
-                long = 'None'
+            long = legend["table"].get(short, "None")
 
-            d[attr] = px_val, short, long
+            data[attr] = (px_val, short, long)
 
-        return d
+        return data
 
-    def query_derived_db(self, lng, lat, attrs):
-
+    def query_derived_db(
+        self,
+        lng: float,
+        lat: float,
+        attrs: Sequence[str],
+    ) -> dict[str, float | None]:
+        """Sample the continuous STU rasters for the requested attributes."""
         catalog = self.derived_db_catalog
-        d = {}
+        data: dict[str, float | None] = {}
 
         for attr in attrs:
-            assert attr in catalog, (attr, catalog, _esdac_derived_db_dir)
+            if attr not in catalog:
+                raise KeyError(attr, catalog, _esdac_derived_db_dir)
             rdi = RasterDatasetInterpolator(catalog[attr])
-            x = rdi.get_location_info(lng, lat, method='near')
+            data[attr] = rdi.get_location_info(lng, lat, method="near")
 
-            d[attr] = x
+        return data
 
-        return d
+    def build_wepp_soil(
+        self,
+        lng: float,
+        lat: float,
+        soils_dir: str = "./",
+        res_lyr_ksat_threshold: float = 2.0,
+        ksflag: int = 0,
+    ) -> tuple[str, Horizon, str]:
+        """Build a WEPP soil file near ``(lng, lat)`` from ESDAC rasters.
 
-    def build_wepp_soil(self, lng, lat, soils_dir='./', res_lyr_ksat_threshold=2.0, ksflag=0):
-        """
-        Build wepp soil from ESDAC data
+        Args:
+            lng: Longitude in decimal degrees.
+            lat: Latitude in decimal degrees.
+            soils_dir: Directory that receives the generated ``.sol`` file.
+            res_lyr_ksat_threshold: Restrictive layer threshold (mm/hr).
+            ksflag: Controls WEPP's hydraulic conductivity smoothing behavior.
+                ``0`` disables adjustments while ``1`` enables them.
 
-        ksflag
-           0 - do not use adjustments (conductivity will be held constant)
-           1 - use internal adjustments
+        Returns:
+            A tuple containing the soil key, the top horizon metadata, and a
+            human-readable description string.
         """
         d_esdb = self.query(lng, lat, ('fao90lev1', 'usedom', 'textdepchg', 'il', 'cec_top', 'cec_sub', 'dgh', 'dimp', 'dr'))
         cec_top_class = d_esdb['cectop'][1]

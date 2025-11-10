@@ -8,6 +8,10 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+"""Flask endpoints that expose CLIGEN station search and file generation."""
+
+from __future__ import annotations
+
 import os
 
 from os.path import join as _join
@@ -22,7 +26,9 @@ from subprocess import (
 from datetime import datetime
 import warnings
 from copy import deepcopy
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, Request
+
+from typing import Any, Dict, Optional, Union
 
 from wepppy.all_your_base import isint
 
@@ -48,32 +54,26 @@ app = Flask(__name__)
 
 from deprecated import deprecated
 
-def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
+def safe_float_parse(value: object) -> Optional[float]:
+    """Return ``float(value)`` or ``None`` when parsing fails."""
 
-    # noinspection PyBroadException
     try:
-        return float(x)
+        return float(value)  # type: ignore[arg-type]
     except Exception:
         return None
 
 
 @app.route('/health')
-def health():
+def health() -> Response:
+    """Standard readiness endpoint."""
     return jsonify("OK")
 
 
 # noinspection PyPep8Naming
 @app.route('/findstation', methods=['GET', 'POST'])
 @app.route('/findstation/', methods=['GET', 'POST'])
-def findstation():
-    """
-    https://wepp.cloud/webservices/cligen/findstation/?lng=-117&lat=47
-    https://wepp.cloud/webservices/cligen/findstation/?lng=-117&lat=47&method=heuristic_search
-    https://wepp.cloud/webservices/cligen/findstation/?lng=-117&lat=47&method=closest
-    """
+def findstation() -> Response:
+    """Return the closest CLIGEN station metadata for a given location."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -117,10 +117,8 @@ def findstation():
 
 
 # noinspection PyPep8Naming
-def _fetch_par_contents(par, _request):
-    """
-    returns the contents of a par file
-    """
+def _fetch_par_contents(par: str, _request: Request) -> Union[str, Response]:
+    """Return the (optionally localized) contents of ``par``."""
     if _request.method == 'GET':
         d = _request.args
     else:  # POST
@@ -163,10 +161,8 @@ def _fetch_par_contents(par, _request):
 # noinspection PyPep8Naming
 @app.route('/fetchstationmeta/<par>', methods=['GET', 'POST'])
 @app.route('/fetchstationmeta/<par>/', methods=['GET', 'POST'])
-def fetchstationmeta(par):
-    """
-    https://wepp.cloud/webservices/cligen/fetchstationmeta/106152
-    """
+def fetchstationmeta(par: str) -> Response:
+    """Return station metadata (including monthlies) for ``par``."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -186,7 +182,7 @@ def fetchstationmeta(par):
 
 @app.route('/fetchpar/<par>', methods=['GET', 'POST'])
 @app.route('/fetchpar/<par>/', methods=['GET', 'POST'])
-def fetchpar(par):
+def fetchpar(par: str) -> Response:
     """
     https://wepp.cloud/webservices/cligen/fetchpar/106152
     https://wepp.cloud/webservices/cligen/fetchpar/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
@@ -205,7 +201,7 @@ def fetchpar(par):
 
 @app.route('/single_year/<par>', methods=['GET', 'POST'])
 @app.route('/single_year/<par>/', methods=['GET', 'POST'])
-def single_year_route(par):
+def single_year_route(par: str) -> Response:
     """
     https://wepp.cloud/webservices/cligen/single_year/106152/?years=1
     https://wepp.cloud/webservices/cligen/single_year/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
@@ -215,7 +211,7 @@ def single_year_route(par):
 
 @app.route('/multiple_year/<par>', methods=['GET', 'POST'])
 @app.route('/multiple_year/<par>/', methods=['GET', 'POST'])
-def multiple_year_route(par):
+def multiple_year_route(par: str) -> Response:
     """
     https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1
     https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
@@ -225,8 +221,8 @@ def multiple_year_route(par):
     return _multiple_year(par, request)
 
 
-def _multiple_year(par, _request, singleyearmode=False):
-
+def _multiple_year(par: str, _request: Request, singleyearmode: bool = False) -> Response:
+    """Build single/multi-year CLIGEN files and return either JSON or plain text."""
     if _request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -320,10 +316,14 @@ from scipy.optimize import fmin_slsqp, minimize
 import numpy as np
 
 
-def _make_single_storm_clinp(wd, cli_fn, par_fn, cliver, kwds):
-    """
-    makes an input file that is passed as stdin to cligen
-    """
+def _make_single_storm_clinp(
+    wd: str,
+    cli_fn: str,
+    par_fn: str,
+    cliver: str,
+    kwds: Dict[str, Any],
+) -> None:
+    """Write the ``clinp.txt`` instructions for a design-storm simulation."""
     clinp = _join(wd, "clinp.txt")
     fid = open(clinp, "w")
 
@@ -362,11 +362,12 @@ def _make_single_storm_clinp(wd, cli_fn, par_fn, cliver, kwds):
 
 @app.route('/selected_single_storm/<par>', methods=['GET', 'POST'])
 @app.route('/selected_single_storm/<par>/', methods=['GET', 'POST'])
-def single_storm(par):
+def single_storm(par: str) -> Response:
     """
-    https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=4.3
-    https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=5.3
-    https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=5.3&returnjson=True
+    Generate a CLIGEN file describing a synthetic single storm.
+
+    Examples:
+        https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=4.3
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -578,11 +579,8 @@ def observed_daymet(par):
 # noinspection PyPep8Naming
 @app.route('/future_rcp85/<par>', methods=['GET', 'POST'])
 @app.route('/future_rcp85/<par>/', methods=['GET', 'POST'])
-def future_rcp85(par):
-    """
-    https://wepp.cloud/webservices/cligen/future_rcp85/106152/?lng=-116&lat=46.5&start_year=2010&end_year=2020
-    https://wepp.cloud/webservices/cligen/future_rcp85/106152/?lng=-116&lat=46.5&start_year=2010&end_year=2020&returnjson=True
-    """
+def future_rcp85(par: str) -> Response:
+    """Build a CLIGEN file from downscaled RCP 8.5 time series."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 

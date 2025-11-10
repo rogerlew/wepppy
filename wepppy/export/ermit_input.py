@@ -1,3 +1,5 @@
+"""ERMiT batch file generation helpers for WEPPpy runs."""
+
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
@@ -6,30 +8,39 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from __future__ import annotations
+
+import csv
 import os
 import zipfile
-
+from collections import namedtuple
+from datetime import datetime
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
+from typing import Any, Sequence
 
-import csv
-from collections import namedtuple
-
-from datetime import datetime
-
-from osgeo import gdal
 import numpy as np
+from osgeo import gdal
 from scipy import stats
 
-import numpy as np
-
+from wepppy.climates.cligen import nullStation
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.ash_transport import Ash
-from wepppy.climates.cligen import nullStation
+
+HillslopeModel = tuple[Sequence[float], Sequence[float]]
 
 
-def calc_ERMiT_grads(hillslope_model):
+def calc_ERMiT_grads(hillslope_model: HillslopeModel) -> tuple[float, float, float]:
+    """Compute ERMiT top/middle/bottom gradients from a slope profile.
+
+    Args:
+        hillslope_model: Tuple containing cumulative distances (m) and
+            relative elevations for a hillslope profile.
+
+    Returns:
+        Tuple of percent gradients for the top 10 %, middle 80 %, and bottom 10 %.
+    """
     distances, relative_elevs = hillslope_model
 
     length = distances[-1]
@@ -49,7 +60,15 @@ def calc_ERMiT_grads(hillslope_model):
     return top, middle, bottom
 
 
-def calc_disturbed_grads(hillslope_model):
+def calc_disturbed_grads(hillslope_model: HillslopeModel) -> tuple[float, float, float, float]:
+    """Compute gradients for the disturbed batch export (upper/lower halves).
+
+    Args:
+        hillslope_model: Tuple containing cumulative distances and relative elevations.
+
+    Returns:
+        Tuple describing the upper/lower top and bottom gradients (percent).
+    """
     distances, relative_elevs = hillslope_model
 
     length = distances[-1]
@@ -73,7 +92,16 @@ def calc_disturbed_grads(hillslope_model):
     return upper_top, upper_bottom, lower_top, lower_bottom
 
 
-def readSlopeFile(fname):
+def readSlopeFile(fname: str) -> dict[str, float]:
+    """Parse a WEPP slope file and derive ERMiT slope characteristics.
+
+    Args:
+        fname: Path to the slope (`.slp`) file.
+
+    Returns:
+        Dictionary containing the slope length and gradient segments expressed
+        as percentages (matching ERMiT batch expectations).
+    """
 
     with open(fname) as fid:
         lines = fid.readlines()
@@ -162,18 +190,23 @@ def readSlopeFile(fname):
      If (headers(i) = "ROCK_PCT") Then ROCK_PCT = i ' - rock pct %
 """
 
-def fmt(x):
-    """
-    Format anything that should be numeric to one decimal place.
-    Safely handles None/''/already-formatted strings.
-    """
+def fmt(x: Any) -> Any:
+    """Format numeric values to one decimal place while preserving blanks."""
     try:
         return f'{float(x):.1f}'
     except (TypeError, ValueError):
         return x            # leave it untouched if it isn't numeric
         
 
-def create_ermit_input(wd):
+def create_ermit_input(wd: str) -> str:
+    """Generate ERMiT batch CSV/ZIP files for the specified working directory.
+
+    Args:
+        wd: Working directory containing the prepared WEPP run.
+
+    Returns:
+        Absolute path to the created ERMiT `.zip` archive.
+    """
 
     _log = [f'Creating ERMiT input for {wd}']
 
@@ -443,4 +476,3 @@ ROCK_PCT
 
 if __name__ == "__main__":
     create_ermit_input('/geodata/weppcloud_runs/054972e3-2d7d-4caf-833a-a73d400b0f39/')
-

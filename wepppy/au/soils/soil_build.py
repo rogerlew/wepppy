@@ -1,11 +1,15 @@
-import json
-import os
+"""Generate WEPP soil files from ASRIS products for Australian runs."""
+
+from __future__ import annotations
+
 import hashlib
+import json
 import math
 
 from datetime import datetime
 from os.path import join as _join
 from os.path import exists as _exists
+from typing import Dict, Sequence, Tuple
 
 from wepppy.all_your_base import isfloat
 from wepppy.soils.ssurgo import SoilSummary
@@ -39,11 +43,10 @@ _texture_defaults = {'clay loam': {'shcrit': 0.5, 'sand': 25.0, 'clay': 30.0, 'o
                      None: None}
 
 
-def _computeErodibility(clay, sand, vfs, om):
-    """
-    Computes erodibility estimates according to:
+def _computeErodibility(clay: float, sand: float, vfs: float, om: float) -> Dict[str, float]:
+    """Compute interrill, rill, and shear erodibility from texture inputs.
 
-    https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/usersum.pdf
+    Mirrors equations 6–11 from the official WEPP user summary (usersum.pdf).
     """
 
     # interrill, rill, shear
@@ -82,7 +85,26 @@ def _computeErodibility(clay, sand, vfs, om):
     return dict(interrill=interrill, rill=rill, shear=shear)
 
 
-def build_asris_soils(orders, soil_dir, status_channel=None):
+Order = Tuple[str | int, Tuple[float, float]]
+
+
+def build_asris_soils(
+    orders: Sequence[Order],
+    soil_dir: str,
+    status_channel: str | None = None,
+) -> Tuple[Dict[str, SoilSummary], Dict[str, str]]:
+    """Generate WEPP `.sol` files from ASRIS 2001 and grid datasets.
+
+    Args:
+        orders: Iterable of ``(topaz_id, (lng, lat))`` pairs to process.
+        soil_dir: Destination directory for the generated `.sol` files.
+        status_channel: Optional Redis pub/sub channel for progress messages.
+
+    Returns:
+        Tuple of ``(soils, domsoil_d)`` where ``soils`` maps hashes to
+        ``SoilSummary`` objects and ``domsoil_d`` associates Topaz IDs with hash
+        keys.
+    """
     lu = Lu10v5ua()
     asris_grid = ASRISgrid()
 

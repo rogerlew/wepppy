@@ -1,16 +1,21 @@
 # Copyright (c) 2016-2023, University of Idaho
 # All rights reserved.
 #
+"""Client utilities for retrieving Daymet time series for a single location."""
+
+from __future__ import annotations
+
 # Roger Lew (rogerlew@gmail.com)
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-import time
 import io
-from os.path import join as _join
-from concurrent.futures import wait, FIRST_COMPLETED
 import logging
+import time
+from concurrent.futures import FIRST_COMPLETED, wait
+from os.path import join as _join
+from typing import Mapping, MutableMapping, TypedDict
 
 import datetime
 import numpy as np
@@ -20,8 +25,6 @@ import requests
 from calendar import isleap
 
 from wepppy.all_your_base import isint
-
-from scipy.interpolate import RegularGridInterpolator
 
 import pyproj
 from pyproj import Proj
@@ -35,7 +38,45 @@ from wepppy.climates.cligen import df_to_prn
 from wepppy.nodb.base import createProcessPoolExecutor
 
 
-def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_years=True, gridmet_wind=False):
+class HillslopeLocation(TypedDict, total=False):
+    """Describes a WEPP hillslope centroid and pre-computed projections."""
+
+    latitude: float
+    longitude: float
+    easting: float
+    northing: float
+
+
+InterpolationSpec = Mapping[str, dict[str, float | str]]
+RawDaymetCube = Mapping[str, np.ndarray]
+
+
+def retrieve_historical_timeseries(
+    lon: float,
+    lat: float,
+    start_year: int,
+    end_year: int,
+    fill_leap_years: bool = True,
+    gridmet_wind: bool = False,
+) -> pd.DataFrame:
+    """Download Daymet data for a single coordinate from the ORNL API.
+
+    Args:
+        lon: Longitude in decimal degrees (WGS84).
+        lat: Latitude in decimal degrees (WGS84).
+        start_year: First year to request (inclusive).
+        end_year: Final year to request (inclusive).
+        fill_leap_years: Whether to duplicate Dec 31 in leap years so WEPP
+            receives 366 rows.
+        gridmet_wind: When ``True`` augment the result with GridMET wind data.
+
+    Returns:
+        DataFrame indexed by timestamp with Daymet columns and derived
+        ``tdew``/``srad`` features.
+
+    Raises:
+        Exception: If the Daymet API cannot be reached after multiple attempts.
+    """
     assert isint(start_year)
     assert isint(end_year)
 
@@ -142,27 +183,56 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
 
 
 
-def _retrieve_historical_timeseries_wrapper(lon, lat, start_year, end_year, fill_leap_years=True, gridmet_wind=False, attrs=None):
-    df = retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_years=fill_leap_years, gridmet_wind=gridmet_wind)
+def _retrieve_historical_timeseries_wrapper(
+    lon: float,
+    lat: float,
+    start_year: int,
+    end_year: int,
+    fill_leap_years: bool = True,
+    gridmet_wind: bool = False,
+    attrs: tuple[int, int] | None = None,
+) -> tuple[tuple[int, int] | None, pd.DataFrame]:
+    """Adapter that keeps track of pixel coordinates for executor futures."""
+
+    df = retrieve_historical_timeseries(
+        lon,
+        lat,
+        start_year,
+        end_year,
+        fill_leap_years=fill_leap_years,
+        gridmet_wind=gridmet_wind,
+    )
     return attrs, df
 
 
 
 def interpolate_daily_timeseries(
-    hillslope_locations,
-    start_year=2018,
-    end_year=2020,
-    output_dir='test',
-    output_type='prn parquet',
-    logger=None,
-    max_workers=12):
+    hillslope_locations: MutableMapping[str, HillslopeLocation],
+    start_year: int = 2018,
+    end_year: int = 2020,
+    output_dir: str = 'test',
+    output_type: str = 'prn parquet',
+    logger: logging.Logger | None = None,
+    max_workers: int = 12,
+) -> None:
+    """Interpolate Daymet single-pixel downloads onto WEPP hillslopes.
+
+    Args:
+        hillslope_locations: Mapping of Topaz IDs to lon/lat coordinates.
+        start_year: First year requested from Daymet.
+        end_year: Final year requested from Daymet.
+        output_dir: Destination for ``.prn`` and ``.parquet`` products.
+        output_type: Space-delimited list containing ``prn`` and/or ``parquet``.
+        logger: Optional logger used for progress reporting.
+        max_workers: Maximum size of the executor pools used for downloads.
+    """
 
     if max_workers < 1:
         max_workers = 1
     if max_workers > 20:
         max_workers = 20
 
-    debug = 1
+    debug = True
     gridmet_wind = False
 
     interpolation_spec = {
@@ -353,14 +423,28 @@ def interpolate_daily_timeseries(
                     logger.info(f'  interpolating topaz_id {topaz_id}... done.\n')
 
 
-def interpolate_daily_timeseries_for_location(topaz_id, loc, dates, 
-                                              eastings, northings, raw_data, interpolation_spec, output_dir, 
-                                              start_year, end_year, output_type='prn parquet'):
+def interpolate_daily_timeseries_for_location(
+    topaz_id: str,
+    loc: HillslopeLocation,
+    dates: pd.DatetimeIndex,
+    eastings: np.ndarray,
+    northings: np.ndarray,
+    raw_data: RawDaymetCube,
+    interpolation_spec: InterpolationSpec,
+    output_dir: str,
+    start_year: int,
+    end_year: int,
+    output_type: str = 'prn parquet',
+) -> str:
+    """Interpolate the Daymet cube for a single hillslope centroid.
+
+    Returns:
+        The Topaz ID once parquet/PRN artifacts have been written.
+    """
 
     df = pd.DataFrame(index=dates)
     hillslope_easting = loc['easting']
     hillslope_northing = loc['northing']
-    npts = len(dates)
 
     for measure, spec in interpolation_spec.items():
         

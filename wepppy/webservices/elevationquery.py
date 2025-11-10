@@ -1,30 +1,25 @@
-# Copyright (c) 2016-2018, University of Idaho
-# All rights reserved.
-#
-# Roger Lew (rogerlew@gmail.com)
-#
-# The project described was supported by NSF award number IIA-1301792
-# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
+"""Simple Flask endpoint for querying 1 arc-second NED elevation tiles."""
+
+from __future__ import annotations
 
 import math
+from typing import Optional
 
 from os.path import join as _join
 
 from subprocess import Popen, PIPE
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 
 from wepppy.all_your_base.geo import GeoTransformer, wgs84_proj4
 
 geodata_dir = '/geodata/'
 
 
-def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
+def safe_float_parse(value: object) -> Optional[float]:
+    """Return ``float(value)`` or ``None`` when parsing fails."""
     try:
-        return float(x)
-    except:
+        return float(value)  # type: ignore[arg-type]
+    except Exception:
         return None
 
 
@@ -35,7 +30,8 @@ def health():
     return jsonify("OK")
 
 @app.route('/', methods=['GET', 'POST'])
-def query_elevation():
+def query_elevation() -> Response:
+    """Return the NED elevation at the provided lat/long."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -96,4 +92,3 @@ def query_elevation():
 
 if __name__ == '__main__':
     app.run()
-

@@ -1,5 +1,11 @@
-from os.path import join as _join
+"""Load the ESDAC PTRDB/SGDPE legend tables into friendly dictionaries."""
+
+from __future__ import annotations
+
 import os
+from os.path import join as _join
+from typing import Final
+
 # https://esdac.jrc.ec.europa.eu/content/european-soil-database-v2-raster-library-1kmx1km
 # https://esdac.jrc.ec.europa.eu/content/sgdbe-attributes
 # https://esdac.jrc.ec.europa.eu/content/ptrdb-attributes
@@ -9,118 +15,101 @@ import os
 from ..esdac import _attr_fmt
 
 
-_thisdir = os.path.dirname(__file__)
+_thisdir: Final[str] = os.path.dirname(__file__)
 
-def _load_ptrdb_legends():
-    # read the file
-    with open(_join(_thisdir, 'ptrdb.dat'), 'r', encoding="utf-8") as fp:
+def _load_ptrdb_legends() -> dict[str, dict[str, object]]:
+    """Parse the PTRDB legend dump bundled alongside this module."""
+    with open(_join(_thisdir, "ptrdb.dat"), "r", encoding="utf-8") as fp:
         lines = fp.readlines()
 
-    # determine breaks based on the horizontal rules (e.g. -------)
     breaks = []
-    for i, L in enumerate(lines):
-        if L.strip().startswith('-'):
+    for i, line in enumerate(lines):
+        if line.strip().startswith("-"):
             breaks.append(i)
 
-    # iterate over the tables and parse
-    d = {}
+    data: dict[str, dict[str, object]] = {}
     i0 = 0
-    for i, iend in enumerate(breaks):
-        _lines = lines[i0:iend]
+    for _, iend in enumerate(breaks):
+        subset = lines[i0:iend]
 
-        # split the first line to get the attribute name and description
-        attr, desc = _lines[0].split('=')
+        attr, desc = subset[0].split("=")
         attr, desc = attr.strip(), desc.strip()
         attr = _attr_fmt(attr)
-        d[attr] = dict(description=desc, table={})
+        data[attr] = dict(description=desc, table={})
 
-        # iterate over remaining lines and pull out key value pairs
-        for L in _lines[1:]:
-            k, v = L.split('=')
-            k, v = k.strip(), v.strip()
-            d[attr]['table'][k] = v
+        for line in subset[1:]:
+            key, value = line.split("=")
+            key, value = key.strip(), value.strip()
+            data[attr]["table"][key] = value
 
         i0 = iend + 1
 
-    return d
+    return data
 
 
-def _load_sgdpe_legends():
-    # read the file
-    with open(_join(_thisdir, 'sgdpe.dat'), 'r', encoding="utf-8") as fp:
+def _load_sgdpe_legends() -> dict[str, dict[str, object]]:
+    """Parse the SGDPE legend dump bundled alongside this module."""
+    with open(_join(_thisdir, "sgdpe.dat"), "r", encoding="utf-8") as fp:
         lines = fp.readlines()
 
-    # determine breaks based on the horizontal rules (e.g. -------)
     breaks = []
-    for i, L in enumerate(lines):
-        if L.startswith('-') and len(L.strip()) > 70:
+    for i, line in enumerate(lines):
+        if line.startswith("-") and len(line.strip()) > 70:
             breaks.append(i)
 
-    # iterate over the tables and parse
-    d = {}
+    data: dict[str, dict[str, object]] = {}
     i0 = 0
     for i, iend in enumerate(breaks):
-
-        # catch empty tables
-        _lines = lines[i0:iend]
-        if len(_lines) == 0:
+        subset = lines[i0:iend]
+        if not subset:
             continue
 
-        # the attribute name is the first line
-        attr = _lines[0].strip()
-        attr = _attr_fmt(attr)
-        d[attr] = dict(description=None, table={})
+        attr = _attr_fmt(subset[0].strip())
+        data[attr] = dict(description=None, table={})
 
-        # the line after the attribute should be a horizontal rule
-        assert _lines[1].strip().startswith('-'), (attr, _lines[1])
+        assert subset[1].strip().startswith("-"), (attr, subset[1])
 
-        # There are carriage returns for some of the values, but some of the keys
-        # are ''. Here we remove the lines with carriage returns by assuming
-        # that '' is only used as a key if it is the first key-value pair in the table
-        # or the value is "No Information"
-        # The reformatted table is stored in tbl_lines
         tbl_lines = []
-        for i, L in enumerate(_lines[2:]):
-            if len(L[:4].strip()) == 0 and 'no information' not in L.lower() and i > 0:
-                tbl_lines[-1] = '%s %s' %(tbl_lines[-1].rstrip(),  L.lstrip())
+        for j, line in enumerate(subset[2:]):
+            if (
+                len(line[:4].strip()) == 0
+                and "no information" not in line.lower()
+                and j > 0
+            ):
+                tbl_lines[-1] = f"{tbl_lines[-1].rstrip()} {line.lstrip()}"
             else:
-                tbl_lines.append(L)
+                tbl_lines.append(line)
 
-        # now we can iterate over the key value pairs
-        for i, L in enumerate(tbl_lines):
-
-            # key is ''
-            if len(L[:4].strip()) == 0:
-                k = ''
-                v = L.strip()
+        for line in tbl_lines:
+            if len(line[:4].strip()) == 0:
+                key = ""
+                value = line.strip()
             else:
-                tokens = L.split()
-                k = tokens[0]
-                v = ' '.join(tokens[1:])
+                tokens = line.split()
+                key = tokens[0]
+                value = " ".join(tokens[1:])
 
-            d[attr]['table'][k] = v
+            data[attr]["table"][key] = value
 
         i0 = iend + 1
-        continue
 
-    return d
+    return data
 
 
 ptrdb = _load_ptrdb_legends()
 sgdpe = _load_sgdpe_legends()
 
 
-def get_legend(attr):
-    global ptrdb, sgdpe
-
+def get_legend(attr: str) -> dict[str, object]:
+    """Return the PTRDB/SGDPE legend dictionary for ``attr``."""
     _attr = _attr_fmt(attr)
 
-    for k in ptrdb:
-        if _attr == _attr_fmt(k):
-            return ptrdb[k]
+    for key, value in ptrdb.items():
+        if _attr == _attr_fmt(key):
+            return value
 
-    for k in sgdpe:
-        if _attr == _attr_fmt(k):
-            return sgdpe[k]
+    for key, value in sgdpe.items():
+        if _attr == _attr_fmt(key):
+            return value
 
     raise KeyError(attr)

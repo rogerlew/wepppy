@@ -1,24 +1,36 @@
+"""Legacy ArcGIS export helpers (shapefiles, KML, and GeoJSON)."""
+
+from __future__ import annotations
+
+import json
 import os
+import shutil
+import subprocess
+from glob import glob
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
-import shutil
-import json
-import subprocess
-from glob import glob
 
 from deprecated import deprecated
 
+from wepppy.all_your_base import isinf, isnan
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.rhem import RhemPost
-from wepppy.all_your_base import isnan, isinf
+from wepppy.topo.peridot.flowpath import PeridotChannel, PeridotFlowpath, PeridotHillslope
 from wepppy.topo.watershed_abstraction.support import json_to_wgs
 
-from wepppy.topo.peridot.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
 
 @deprecated()
-def has_arc_export(wd):
+def has_arc_export(wd: str) -> bool:
+    """Check whether the Arc export artifacts already exist for ``wd``.
+
+    Args:
+        wd: Working directory for a WEPP run.
+
+    Returns:
+        True if the generated shapefiles and JSON already exist, False otherwise.
+    """
 
     ron = Ron.getInstance(wd)
     name = ron.name
@@ -36,7 +48,13 @@ def has_arc_export(wd):
     return True
 
     
-def legacy_arc_export(wd, verbose=False):
+def legacy_arc_export(wd: str, verbose: bool = False) -> None:
+    """Build the legacy Arc export package (GeoTIFF + shapefiles + KML).
+
+    Args:
+        wd: Working directory for the run that should be exported.
+        verbose: When True, print every GDAL/OGR command used during export.
+    """
 
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
@@ -354,7 +372,13 @@ def legacy_arc_export(wd, verbose=False):
 
 
 @deprecated()
-def arc_export(wd, verbose=False):
+def arc_export(wd: str, verbose: bool = False) -> None:
+    """Export modern ArcMap deliverables rooted at ``wd``.
+
+    Args:
+        wd: Working directory for the run that should be exported.
+        verbose: When True, print every GDAL/OGR command used during export.
+    """
 
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)

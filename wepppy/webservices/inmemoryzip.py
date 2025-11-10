@@ -1,41 +1,39 @@
-# https://stackoverflow.com/a/2463818/2371135
+"""Utility to build ZIP archives entirely in memory."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Union
+import io
 import zipfile
-import StringIO
 
-class InMemoryZip(object):
-    def __init__(self):
-        # Create the in-memory file-like object
-        self.in_memory_zip = StringIO.StringIO()
 
-    def append(self, filename_in_zip, file_contents):
-        '''Appends a file with name filename_in_zip and contents of 
-        file_contents to the in-memory zip.'''
-        # Get a handle to the in-memory zip in append mode
-        zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
+class InMemoryZip:
+    """Minimal helper for composing ZIP files without touching disk."""
 
-        # Write the file to the in-memory zip
-        zf.writestr(filename_in_zip, file_contents)
+    def __init__(self) -> None:
+        self._buffer = io.BytesIO()
 
-        # Mark the files as having been created on Windows so that
-        # Unix permissions are not inferred as 0000
-        for zfile in zf.filelist:
-            zfile.create_system = 0        
-
+    def append(self, filename_in_zip: str, file_contents: Union[str, bytes]) -> InMemoryZip:
+        """Append ``file_contents`` to the archive under ``filename_in_zip``."""
+        with zipfile.ZipFile(self._buffer, "a", zipfile.ZIP_DEFLATED, False) as zf:
+            zf.writestr(filename_in_zip, file_contents)
+            for zfile in zf.filelist:
+                zfile.create_system = 0
         return self
 
-    def read(self):
-        '''Returns a string with the contents of the in-memory zip.'''
-        self.in_memory_zip.seek(0)
-        return self.in_memory_zip.read()
+    def read(self) -> bytes:
+        """Return the raw ZIP bytes."""
+        self._buffer.seek(0)
+        return self._buffer.read()
 
-    def writetofile(self, filename):
-        '''Writes the in-memory zip to a file.'''
-        f = file(filename, "w")
-        f.write(self.read())
-        f.close()
+    def writetofile(self, filename: Union[str, Path]) -> None:
+        """Persist the in-memory archive to ``filename``."""
+        path = Path(filename)
+        path.write_bytes(self.read())
+
 
 if __name__ == "__main__":
-    # Run a test
     imz = InMemoryZip()
     imz.append("test.txt", "Another test").append("test2.txt", "Still another")
     imz.writetofile("test.zip")

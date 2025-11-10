@@ -1,15 +1,20 @@
-import pandas as pd
-import numpy as np
+"""Utilities for interpolating Daymet rasters onto WEPP hillslope locations."""
+
+from __future__ import annotations
+
 from calendar import isleap
 from collections import defaultdict
-from concurrent.futures import wait, FIRST_COMPLETED
-import os
-from os.path import join as _join
-from os.path import exists as _exists
+from concurrent.futures import FIRST_COMPLETED, wait
 import logging
+import os
+from typing import DefaultDict, Literal, MutableMapping, TypedDict
 
-from metpy.calc import dewpoint
-from metpy.units import units
+import numpy as np
+import pandas as pd
+from pprint import pprint
+
+from os.path import exists as _exists
+from os.path import join as _join
 
 from osgeo import gdalconst
 
@@ -53,10 +58,45 @@ from wepppy.nodb.base import createProcessPoolExecutor
 
 _logger = logging.getLogger(__name__)
 
-from pprint import pprint
+
+class HillslopeLocation(TypedDict, total=False):
+    """Geospatial metadata tracked for a WEPP hillslope centroid."""
+
+    latitude: float
+    longitude: float
+    pixel_q: float
+    line_q: float
 
 
-def process_measure(year, measure, hillslope_locations, daymet_version='v4'):
+class ProcessedMeasure(TypedDict):
+    """Result for a single Daymet measure/year extraction."""
+
+    year: int
+    measure: str
+    data: pd.Series
+
+
+AggregatedData = DefaultDict[str, DefaultDict[str, dict[int, pd.Series]]]
+
+
+def process_measure(
+    year: int,
+    measure: str,
+    hillslope_locations: MutableMapping[str, HillslopeLocation],
+    daymet_version: Literal['v3', 'v4'] = 'v4',
+) -> dict[str, ProcessedMeasure]:
+    """Extract a single Daymet measure for every hillslope in one year.
+
+    Args:
+        year: Four-digit year included in the Daymet archive.
+        measure: Daymet variable name (for example ``prcp`` or ``tmax``).
+        hillslope_locations: Mapping of Topaz IDs to cached pixel indices.
+        daymet_version: Choose Daymet v3 or v4 file naming conventions.
+
+    Returns:
+        A mapping keyed by Topaz ID with the extracted ``pandas.Series`` and
+        metadata describing the year and measure.
+    """
 
     if daymet_version == 'v4':
         daymet_dir = '/geodata/daymet/v4'
@@ -81,20 +121,36 @@ def process_measure(year, measure, hillslope_locations, daymet_version='v4'):
     if isleap(year) and result.shape[0] == 365:
         result = np.vstack((result, result[-1, :]))
 
-    dfs = {}
+    dfs: dict[str, ProcessedMeasure] = {}
     for idx, topaz_id in enumerate(hillslope_locations):
         dfs[topaz_id] = dict(year=year, measure=measure, data=pd.Series(result[:, idx]))
     return dfs
     
 
 def interpolate_daily_timeseries(
-    hillslope_locations,
-    start_year=2018,
-    end_year=2020,
-    output_dir='test',
-    output_type='prn parquet',
-    status_channel=None,
-    max_workers=28):
+    hillslope_locations: MutableMapping[str, HillslopeLocation],
+    start_year: int = 2018,
+    end_year: int = 2020,
+    output_dir: str = 'test',
+    output_type: str = 'prn parquet',
+    status_channel: str | None = None,
+    max_workers: int = 28,
+) -> None:
+    """Download and interpolate Daymet data for a hillslope collection.
+
+    Args:
+        hillslope_locations: Topaz ID keyed dictionary with lat/lon values and
+            pixel indices computed by :func:`identify_pixel_coords`.
+        start_year: Inclusive year for the first record.
+        end_year: Inclusive year for the final record.
+        output_dir: Directory that receives generated ``.parquet``/``.prn`` files.
+        output_type: Space-delimited selection of ``prn`` and/or ``parquet``.
+        status_channel: Optional Redis channel for progress updates.
+        max_workers: Worker pool size for the raster extraction queue.
+
+    Raises:
+        Exception: Propagated when any worker future raises.
+    """
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -120,7 +176,7 @@ def interpolate_daily_timeseries(
                     StatusMessenger.publish(status_channel, f'  processing {measure} for {year}...')
                 futures.append(executor.submit(process_measure, year, measure, hillslope_locations))
 
-        aggregated = defaultdict(lambda: defaultdict(dict))
+        aggregated: AggregatedData = defaultdict(lambda: defaultdict(dict))
         pending = set(futures)
 
         while pending:
@@ -195,12 +251,27 @@ def interpolate_daily_timeseries(
                       'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
 
 
-def identify_pixel_coords(hillslope_locations, srs=4326, daymet_version='v4'):
+def identify_pixel_coords(
+    hillslope_locations: MutableMapping[str, HillslopeLocation],
+    srs: AnySRS | LocationInfoSRS | None = 4326,
+    daymet_version: Literal['v3', 'v4'] = 'v4',
+) -> MutableMapping[str, HillslopeLocation]:
+    """Populate pixel/line positions for the provided hillslopes.
+
+    Args:
+        hillslope_locations: Topaz ID keyed mapping with lon/lat values.
+        srs: Coordinate reference system describing the lon/lat coordinates.
+        daymet_version: Determines the raster directory that should be sampled.
+
+    Returns:
+        The same mapping with ``pixel_q`` and ``line_q`` offsets assigned.
+    """
+
     # copied this out of gdallocationinfo.py to avoid having to do this for every file.
-    
-    axis_order=0
-    ovr_idx=None
-    inline_xy_replacement=False
+
+    axis_order = 0
+    ovr_idx = None
+    inline_xy_replacement = False
 
     x = np.array([d['longitude'] for d in hillslope_locations.values()])
     y = np.array([d['latitude'] for d in hillslope_locations.values()])
@@ -306,5 +377,3 @@ if __name__ == "__main__":
     hillslope_locations = identify_pixel_coords(hillslope_locations)
 
     print(hillslope_locations)
-
-

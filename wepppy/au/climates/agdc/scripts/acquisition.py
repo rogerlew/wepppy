@@ -1,15 +1,31 @@
-from os.path import split as _split
-from os.path import join as _join
+"""Fetch AGDC monthly NetCDF files into the local geodata cache."""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
 from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
 import os
-import requests
-from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
+import requests
+from bs4 import BeautifulSoup
 
-if __name__ == "__main__":
-    measures = ['tmin', 'tmax', 'rain', 'rad']
-    for measure in measures:
+DEFAULT_MEASURES: tuple[str, ...] = ('tmin', 'tmax', 'rain', 'rad')
+
+
+def download_agdc_monthlies(measures: Sequence[str] | None = None) -> None:
+    """Download the AGDC NetCDF monthly stacks for each climate variable.
+
+    Args:
+        measures: Collection of measure names to download. Defaults to
+            ``DEFAULT_MEASURES``.
+    """
+
+    selected = list(measures) if measures is not None else list(DEFAULT_MEASURES)
+
+    for measure in selected:
         print(measure)
         url = 'http://rs-data1-mel.csiro.au/thredds/catalog/bawap/{}/month/catalog.html'.format(measure)
         file_server = 'http://rs-data1-mel.csiro.au/thredds/fileServer/'
@@ -36,3 +52,6 @@ if __name__ == "__main__":
                 with open(fname, 'wb') as fp:
                     fp.write(output.read())
 
+
+if __name__ == "__main__":
+    download_agdc_monthlies()

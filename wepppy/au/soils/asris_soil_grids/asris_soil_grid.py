@@ -1,26 +1,33 @@
-import json
-import os
-from os.path import split as _split
-from os.path import join as _join
-from os.path import exists as _exists
+"""Utilities for querying the ASRIS national soil grid rasters."""
 
+from __future__ import annotations
+
+import json
 from glob import glob
+from os.path import exists as _exists
+from os.path import isdir as _isdir
+from os.path import join as _join
+from os.path import split as _split
+from typing import Dict
+
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
+
+__all__ = ["ASRISgrid"]
 
 _asris_grid_raster_dir = '/geodata/au/asris/'
 
 
 class ASRISgrid:
-    def __init__(self):
-        # { attr, raster_file_path}
-        catalog = glob(_join(_asris_grid_raster_dir, '*'))
-        catalog = [path for path in catalog if os.path.isdir(path)]
-        catalog = {_split(path)[-1]:path for path in catalog}
-        self.catalog = catalog
+    """Expose soil attributes stored in the ASRIS raster catalog."""
 
-        # { attr, raster_attribute table}
-        rats = {}
-        for var, path in catalog.items():
+    def __init__(self) -> None:
+        catalog = glob(_join(_asris_grid_raster_dir, '*'))
+        catalog = [path for path in catalog if _isdir(path)]
+        catalog_dict = {_split(path)[-1]: path for path in catalog}
+        self.catalog: Dict[str, str] = catalog_dict
+
+        rats: Dict[str, Dict[int, float | int]] = {}
+        for var, path in catalog_dict.items():
             fn = _join(path + '.json')
 
             if not _exists(fn):
@@ -34,32 +41,41 @@ class ASRISgrid:
 
             rows = info['rat']['row']
 
-            d = {}
+            table: Dict[int, float | int] = {}
             for row in rows:
-                row = row['f']
-                d[row[0]] = row[-1]
+                fields = row['f']
+                table[fields[0]] = fields[-1]
 
-            rats[var] = d
-        self.rats = rats
+            rats[var] = table
+        self.rats: Dict[str, Dict[int, float | int]] = rats
 
-    def query(self, lng, lat):
+    def query(self, lng: float, lat: float) -> Dict[str, float | int]:
+        """Return ASRIS soil attributes for a coordinate.
 
+        Args:
+            lng: Longitude in decimal degrees.
+            lat: Latitude in decimal degrees.
+
+        Returns:
+            Dictionary keyed by raster short name with RAT values (when
+            available) or the raw pixel value.
+        """
         catalog = self.catalog
         rats = self.rats
-        d = {}
+        results: Dict[str, float | int] = {}
 
         for var in catalog:
             rdi = RasterDatasetInterpolator(_join(catalog[var], var))
             x = rdi.get_location_info(lng, lat, method='near')
             px_val = int(x)
             if var in rats:
-                value = rats[var][px_val]
+                value: float | int = rats[var][px_val]
             else:
                 value = px_val
 
-            d[var] = value
+            results[var] = value
 
-        return d
+        return results
 
 
 if __name__ == "__main__":

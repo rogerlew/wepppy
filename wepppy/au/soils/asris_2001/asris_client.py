@@ -1,17 +1,23 @@
-import requests
+"""ASRIS 2001 MapServer client with on-disk caching."""
+
+from __future__ import annotations
+
 import json
 import os
+from typing import Any, Dict
 
-from os.path import join as _join
 from os.path import exists as _exists
+from os.path import join as _join
+
+import requests
 
 from wepppy.all_your_base import isfloat
 
+__all__ = ["query_asris"]
+
 _thisdir = os.path.dirname(__file__)
 _cache_dir = _join(_thisdir, 'cache')
-
-if not _exists(_cache_dir):
-    _join(_thisdir, 'cache')
+os.makedirs(_cache_dir, exist_ok=True)
 
 _url = 'https://www.asris.csiro.au/arcgis/rest/services/ASRIS/ASRIS_2001/MapServer/' \
        'identify?geometry={{x:{lng},y:{lat}}}&geometryType=esriGeometryPoint&' \
@@ -51,17 +57,27 @@ _defaults = {
 }
 
 
-def query_asris(lng, lat):
-    global _url
+def query_asris(lng: float, lat: float) -> Dict[str, Dict[str, Any]]:
+    """Fetch ASRIS 2001 soil attributes for a location.
+
+    Args:
+        lng: Longitude in decimal degrees.
+        lat: Latitude in decimal degrees.
+
+    Returns:
+        Mapping of attribute name to metadata payload returned by ASRIS. Each
+        entry includes a numeric ``Value`` field scaled as required by WEPP.
+
+    Raises:
+        Exception: If the ASRIS service returns no data for the requested
+            coordinate.
+    """
 
     lng = round(lng, 2)
     lat = round(lat, 2)
 
-    if not _exists(_cache_dir):
-        os.mkdir(_cache_dir)
-
-    d = None
     fn = _join(_cache_dir, '{lng:0.2f},{lat:0.2f}.json'.format(lng=lng, lat=lat))
+    d = None
     if _exists(fn):
         with open(fn) as fp:
             d = json.load(fp)
@@ -94,4 +110,3 @@ if __name__ == "__main__":
     from pprint import pprint
     #query_asris(151.1436, -8.35522)
     pprint(query_asris(146, -38.472))
-

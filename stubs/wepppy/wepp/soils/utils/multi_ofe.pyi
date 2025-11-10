@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Iterable, List
 
+def read_soil_lines(fn: str) -> List[str]: ...
+
 class SoilMultipleOfeSynth:
     stack: List[str]
 

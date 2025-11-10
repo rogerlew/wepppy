@@ -410,6 +410,7 @@ class WeppSoilUtil(object):
         return new
 
     def __str__(self) -> str:
+        """Serialize the soil definition back into WEPP ``.sol`` text."""
         from rosetta import Rosetta3
         r3 = Rosetta3()
 
@@ -511,6 +512,7 @@ class WeppSoilUtil(object):
         
 
     def __repr__(self) -> str:
+        """Return a brief developer-friendly summary of the soil object."""
         from rosetta import Rosetta3
         r3 = Rosetta3()
 
@@ -616,6 +618,7 @@ class WeppSoilUtil(object):
         return '\n'.join(s) + '\n'
     
     def write(self, fn: str) -> None:
+        """Persist the current soil state to ``fn`` using WEPP file syntax."""
         s = self.__str__()
 
         with open(fn, 'w') as fp:
@@ -628,7 +631,20 @@ class WeppSoilUtil(object):
         h0_max_om: Optional[float] = None,
         hostname: str = '',
     ) -> 'WeppSoilUtil':
-        """Create a 7778-format soil tuned for disturbed (burn severity) scenarios."""
+        """Create a 7778-format soil tuned for disturbed (burn severity) scenarios.
+
+        Args:
+            replacements: Mapping of field names to either literal values or the
+                ``*<multiplier>`` replacement syntax accepted by
+                :func:`_replace_parameter`.
+            h0_min_depth: Minimum depth (mm) enforced on the first horizon.
+            h0_max_om: Optional cap on organic matter for the first horizon.
+            hostname: Host identifier recorded in the migration header.
+
+        Returns:
+            A migrated copy of ``self`` in 7778 format with the requested
+            replacements applied.
+        """
         if replacements is None:
             replacements = {}
 
@@ -715,25 +731,53 @@ class WeppSoilUtil(object):
 
         return new
 
-    def to9001(self, replacements: Optional[Dict[str, Any]], h0_min_depth: Optional[float] = None, h0_max_om: Optional[float] = None, hostname: str = '') -> 'WeppSoilUtil':
+    def to9001(
+        self,
+        replacements: Optional[Dict[str, Any]],
+        h0_min_depth: Optional[float] = None,
+        h0_max_om: Optional[float] = None,
+        hostname: str = '',
+    ) -> 'WeppSoilUtil':
+        """Return a copy migrated to the WEPP 9001 disturbed-soil format."""
         return self.to_over9000(replacements, 
                                 h0_min_depth=h0_min_depth, 
                                 h0_max_om=h0_max_om, hostname=hostname,
                                 version=9001)
 
-    def to9002(self, replacements: Optional[Dict[str, Any]], h0_min_depth: Optional[float] = None, h0_max_om: Optional[float] = None, hostname: str = '') -> 'WeppSoilUtil':
+    def to9002(
+        self,
+        replacements: Optional[Dict[str, Any]],
+        h0_min_depth: Optional[float] = None,
+        h0_max_om: Optional[float] = None,
+        hostname: str = '',
+    ) -> 'WeppSoilUtil':
+        """Return a copy migrated to the WEPP 9002 disturbed-soil format."""
         return self.to_over9000(replacements, 
                                 h0_min_depth=h0_min_depth, 
                                 h0_max_om=h0_max_om, hostname=hostname, 
                                 version=9002)
 
-    def to9003(self, replacements: Optional[Dict[str, Any]], h0_min_depth: Optional[float] = None, h0_max_om: Optional[float] = None, hostname: str = '') -> 'WeppSoilUtil':
+    def to9003(
+        self,
+        replacements: Optional[Dict[str, Any]],
+        h0_min_depth: Optional[float] = None,
+        h0_max_om: Optional[float] = None,
+        hostname: str = '',
+    ) -> 'WeppSoilUtil':
+        """Return a copy migrated to the WEPP 9003 disturbed-soil format."""
         return self.to_over9000(replacements, 
                                 h0_min_depth=h0_min_depth, 
                                 h0_max_om=h0_max_om, hostname=hostname, 
                                 version=9003)
 
-    def to9005(self, replacements: Optional[Dict[str, Any]], h0_min_depth: Optional[float] = None, h0_max_om: Optional[float] = None, hostname: str = '') -> 'WeppSoilUtil':
+    def to9005(
+        self,
+        replacements: Optional[Dict[str, Any]],
+        h0_min_depth: Optional[float] = None,
+        h0_max_om: Optional[float] = None,
+        hostname: str = '',
+    ) -> 'WeppSoilUtil':
+        """Return a copy migrated to the WEPP 9005 disturbed-soil format."""
         return self.to_over9000(replacements,
                                 h0_min_depth=h0_min_depth,
                                 h0_max_om=h0_max_om, hostname=hostname,
@@ -747,7 +791,19 @@ class WeppSoilUtil(object):
         hostname: str = '',
         version: int = 9002,
     ) -> 'WeppSoilUtil':
-        """Return a new migrated copy in the requested 900x WEPP soil format."""
+        """Return a new migrated copy in the requested 900x WEPP soil format.
+
+        Args:
+            replacements: Field overrides applied to each OFE and horizon.
+            h0_min_depth: Minimum allowed depth for the first horizon.
+            h0_max_om: Optional cap on the first horizon's organic matter.
+            hostname: Host identifier recorded for provenance.
+            version: Target WEPP 900x version number (9001, 9002, 9003, 9005).
+
+        Returns:
+            A migrated :class:`WeppSoilUtil` copy configured for the requested
+            WEPP version.
+        """
         if replacements is None:
             replacements = {}
 
@@ -851,11 +907,13 @@ class WeppSoilUtil(object):
         return new
 
     def _load_yaml(self, fn: str) -> None:
+        """Load a YAML representation of a soil into ``self.obj``."""
         with open(fn) as fp:
             yaml_txt = fp.read()
             self.obj = yaml.load(yaml_txt, Loader=Loader)
 
     def dump_yaml(self, dst: str) -> None:
+        """Write the current soil state to ``dst`` as YAML."""
         with open(dst, 'w') as fp:
             fp.write(
                 yaml.dump(
@@ -866,22 +924,26 @@ class WeppSoilUtil(object):
             )
 
     def _load_bson(self, fn: str) -> None:
+        """Load a BSON-encoded soil file into ``self.obj``."""
         import bson
         with open(fn, 'rb') as fp:
             bson_txt = fp.read()
             self.obj = bson.loads(bson_txt)
 
     def dump_bson(self, dst: str) -> None:
+        """Write the current soil state to ``dst`` using BSON encoding."""
         import bson
         with open(dst, 'wb') as fp:
             fp.write(bson.dumps(self.obj))
 
     @property
     def datver(self) -> float:
+        """Return the WEPP soil data version for the loaded file."""
         return self.obj['datver']
 
     @property
     def sand(self) -> float:
+        """Return the sand percentage of the first horizon, inferring if needed."""
         sand = self.obj['ofes'][0]['horizons'][0]['sand']
         if sand is None:
             s7778 = self.to7778()
@@ -891,6 +953,7 @@ class WeppSoilUtil(object):
 
     @property
     def clay(self) -> float:
+        """Return the clay percentage of the first horizon, inferring if needed."""
         try:
             clay = self.obj['ofes'][0]['horizons'][0]['clay']
         except KeyError:
@@ -904,11 +967,13 @@ class WeppSoilUtil(object):
         return clay
 
     @property
-    def avke(self):
+    def avke(self) -> Any:
+        """Return the average kinetic energy metric recorded for the soil."""
         return self.obj['ofes'][0].get('avke')
 
     @property
     def bd(self) -> Optional[float]:
+        """Return the first-horizon bulk density, estimating when absent."""
         bd = self.obj['ofes'][0]['horizons'][0]['bd']
         if bd is None:
             s7778 = self.to7778()
@@ -918,6 +983,7 @@ class WeppSoilUtil(object):
 
     @property
     def soil_depth(self) -> Optional[float]:
+        """Return the soil depth in millimeters for the final horizon."""
         horizons = self.obj['ofes'][0].get('horizons', [])
         if not horizons:
             return None
@@ -937,6 +1003,7 @@ class WeppSoilUtil(object):
 
     @property
     def rock(self) -> Optional[float]:
+        """Return the rock fragment percentage for the first horizon."""
         horizons = self.obj['ofes'][0].get('horizons', [])
         if not horizons:
             return None
@@ -956,11 +1023,13 @@ class WeppSoilUtil(object):
 
     @property
     def simple_texture(self) -> str:
+        """Return the simplified WEPP soil texture classification."""
         from wepppy.wepp.soils.utils import simple_texture
         return simple_texture(clay=self.clay, sand=self.sand)
 
     @property
     def simple_texture_enum(self) -> int:
+        """Return the simplified texture enum value used by WEPP."""
         from wepppy.wepp.soils.utils import simple_texture_enum
         return simple_texture_enum(clay=self.clay, sand=self.sand)
 

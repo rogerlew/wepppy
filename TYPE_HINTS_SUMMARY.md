@@ -47,10 +47,10 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/climates/cligen/stations/__init__.py`
 - [ ] `wepppy/climates/cligen_client.py`
 - [ ] `wepppy/climates/climatena_ca/__init__.py`
-- [ ] `wepppy/climates/daymet/__init__.py`
-- [ ] `wepppy/climates/daymet/daily_interpolation.py`
-- [ ] `wepppy/climates/daymet/daymet_singlelocation_client.py`
-- [ ] `wepppy/climates/daymet/fast_single_point.py`
+- [x] `wepppy/climates/daymet/__init__.py`
+- [x] `wepppy/climates/daymet/daily_interpolation.py`
+- [x] `wepppy/climates/daymet/daymet_singlelocation_client.py`
+- [x] `wepppy/climates/daymet/fast_single_point.py`
 - [ ] `wepppy/climates/daymet/scripts/__init__.py`
 - [ ] `wepppy/climates/daymet/scripts/build_vrt.py`
 - [ ] `wepppy/climates/daymet/scripts/daymet_timeseries_extraction.py`
@@ -78,18 +78,18 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/eu/climates/eobs/eobs.py`
 - [ ] `wepppy/eu/climates/eobs/scripts/__init__.py`
 - [ ] `wepppy/eu/climates/eobs/scripts/process.py`
-- [ ] `wepppy/eu/soils/__init__.py`
-- [ ] `wepppy/eu/soils/esdac/__init__.py`
-- [ ] `wepppy/eu/soils/esdac/esdac.py`
-- [ ] `wepppy/eu/soils/esdac/legends/__init__.py`
-- [ ] `wepppy/eu/soils/esdac/legends/legends.py`
+- [x] `wepppy/eu/soils/__init__.py`
+- [x] `wepppy/eu/soils/esdac/__init__.py`
+- [x] `wepppy/eu/soils/esdac/esdac.py`
+- [x] `wepppy/eu/soils/esdac/legends/__init__.py`
+- [x] `wepppy/eu/soils/esdac/legends/legends.py`
 - [ ] `wepppy/eu/soils/esdac/scripts/__init__.py`
 - [ ] `wepppy/eu/soils/esdac/scripts/make_tifs.py`
-- [ ] `wepppy/eu/soils/eusoilhydrogrids/__init__.py`
-- [ ] `wepppy/eu/soils/eusoilhydrogrids/eusoilhydrogrids.py`
+- [x] `wepppy/eu/soils/eusoilhydrogrids/__init__.py`
+- [x] `wepppy/eu/soils/eusoilhydrogrids/eusoilhydrogrids.py`
 - [ ] `wepppy/eu/soils/eusoilhydrogrids/scripts/__init__.py`
 - [ ] `wepppy/eu/soils/eusoilhydrogrids/scripts/acquire.py`
-- [ ] `wepppy/eu/soils/soil_build.py`
+- [x] `wepppy/eu/soils/soil_build.py`
 - [ ] `wepppy/export/__init__.py`
 - [ ] `wepppy/export/arc_export.py`
 - [ ] `wepppy/export/ermit_input.py`
@@ -302,18 +302,18 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/topo/wbt/wbt_topaz_emulator.py`
 - [ ] `wepppy/watershed_boundary_dataset/__init__.py`
 - [ ] `wepppy/watershed_boundary_dataset/usgs_wbd.py`
-- [ ] `wepppy/webservices/__init__.py`
-- [ ] `wepppy/webservices/benchmarks/benchmark_wmesque.py`
-- [ ] `wepppy/webservices/cligen.py`
-- [ ] `wepppy/webservices/dtale/__init__.py`
+- [x] `wepppy/webservices/__init__.py`
+- [x] `wepppy/webservices/benchmarks/benchmark_wmesque.py`
+- [x] `wepppy/webservices/cligen.py`
+- [x] `wepppy/webservices/dtale/__init__.py`
 - [x] `wepppy/webservices/dtale/dtale.py`
-- [ ] `wepppy/webservices/ecoregion_us.py`
-- [ ] `wepppy/webservices/elevationquery.py`
-- [ ] `wepppy/webservices/geeapi/__init__.py`
-- [ ] `wepppy/webservices/inmemoryzip.py`
+- [x] `wepppy/webservices/ecoregion_us.py`
+- [x] `wepppy/webservices/elevationquery.py`
+- [x] `wepppy/webservices/geeapi/__init__.py`
+- [x] `wepppy/webservices/inmemoryzip.py`
 - [x] `wepppy/webservices/metquery.py`
-- [ ] `wepppy/webservices/rq_dashboard.py`
-- [ ] `wepppy/webservices/wmesque.py`
+- [x] `wepppy/webservices/rq_dashboard.py`
+- [x] `wepppy/webservices/wmesque.py`
 - [x] `wepppy/webservices/wmesque2.py`
 - [ ] `wepppy/wepp/__init__.py`
 - [ ] `wepppy/wepp/_scripts/compare.py`

@@ -1,3 +1,5 @@
+"""Concurrency-oriented benchmark harness for the WMSesque service."""
+
 import concurrent.futures
 import time
 import os

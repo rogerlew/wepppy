@@ -33,6 +33,7 @@ The goal of documentation is to increase code understandability and maintainabil
    - If you add a new module, mirror its public API in a `.pyi` file alongside the `.py`.
    - When a package of related modules (mods, utilities, facades) achieves complete annotations, add `.pyi` coverage for each public entry point so optional consumers remain in sync.
    - After editing, run `python tools/sync_stubs.py` (or `wctl run-stubgen`) so the standalone `stubs/wepppy/` tree matches the source-of-truth `.pyi` files.
+   - python files in `tests`, `scripts`, and `_scripts` do not require stubs.
 
 4. **Validate with stubtest**
    - Execute stubtest from inside the container using the helper:

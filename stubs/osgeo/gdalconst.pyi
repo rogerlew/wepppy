@@ -1,0 +1,1 @@
+GRIORA_Cubic: int

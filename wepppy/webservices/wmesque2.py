@@ -87,20 +87,24 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def _b64url(obj: dict) -> str:
+    """Return a URL-safe base64 encoding for ``obj``."""
     b = json.dumps(obj, separators=(",", ":"), ensure_ascii=False).encode()
     return base64.urlsafe_b64encode(b).decode("ascii").rstrip("=")
 
 def from_b64url(s: str) -> dict:
+    """Decode a base64-url payload created by :func:`_b64url`."""
     s += "=" * ((4 - len(s) % 4) % 4)
     b = base64.urlsafe_b64decode(s)
     return json.loads(b.decode("utf-8"))
 
 def b64url_compact(obj: dict) -> str:
+    """Compress and encode ``obj`` for use inside metadata headers."""
     raw = json.dumps(obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     z = zlib.compress(raw, level=9)  # max compression
     return base64.urlsafe_b64encode(z).decode("ascii").rstrip("=")
 
 def from_b64url_compact(s: str) -> dict:
+    """Reverse :func:`b64url_compact` into the original dictionary."""
     s += "=" * ((4 - len(s) % 4) % 4)
     z = base64.urlsafe_b64decode(s)
     raw = zlib.decompress(z)

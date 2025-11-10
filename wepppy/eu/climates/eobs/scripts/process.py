@@ -1,17 +1,24 @@
+"""Convert raw E-OBS NetCDF rasters into monthly GeoTIFF summaries.
+
+This utility is intended for one-off preprocessing runs where the public E-OBS
+grids must be aggregated into monthly mean and standard deviation surfaces
+before WEPPpy consumes them. The script favors explicit, procedural logic so
+its geospatial steps remain easy to audit by hydrologists.
+"""
+
+from __future__ import annotations
+
 import os
-from os.path import join as _join
-from os.path import exists as _exists
-
+from collections.abc import Sequence
 from datetime import date, timedelta
-
-import numpy as np
-from numpy.ma import masked_values
-
-from scipy.stats import kurtosis
-
-from osgeo import gdal, osr
+from os.path import exists as _exists
+from os.path import join as _join
 
 import matplotlib.pyplot as plt
+import numpy as np
+from numpy.ma import masked_values
+from osgeo import gdal, osr
+from scipy.stats import kurtosis
 
 _eobs_dir = '/geodata/eu/E-OBS'
 
@@ -28,7 +35,24 @@ GEOGCS["WGS 84",
     AUTHORITY["EPSG","4326"]]'''
 
 
-def dump_tif(data, fname, wkt, transform, mask=None, nodata=None):
+def dump_tif(
+    data: np.ndarray | np.ma.MaskedArray,
+    fname: str,
+    wkt: str,
+    transform: Sequence[float],
+    mask: np.ndarray | None = None,
+    nodata: float | None = None,
+) -> None:
+    """Persist a NumPy grid as a single-band GeoTIFF.
+
+    Args:
+        data: Array containing the raster values to write.
+        fname: Absolute path to the destination GeoTIFF.
+        wkt: Spatial reference definition for the raster.
+        transform: GDAL affine transform describing pixel size/origin.
+        mask: Boolean mask (True marks cells to replace with ``nodata``).
+        nodata: Sentinel value that signals missing data to GIS software.
+    """
     if hasattr(data, "mask"):
         mask = data.mask
         assert nodata is not None

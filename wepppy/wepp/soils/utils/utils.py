@@ -56,7 +56,16 @@ class SoilReplacements:
 
 @deprecated
 def read_lc_file(fname: str) -> Dict[Tuple[str, str], MutableMapping[str, Optional[str]]]:
-    """Return land-cover parameters keyed by ``(LndcvrID, WEPP_Type)``."""
+    """Return land-cover parameters keyed by ``(LndcvrID, WEPP_Type)``.
+
+    Args:
+        fname: Path to a WEPP land-cover CSV file.
+
+    Returns:
+        A mapping whose keys are the ``(LndcvrID, WEPP_Type)`` tuple and whose
+        values contain the entire CSV row with ``"none*"`` entries normalized to
+        ``None``.
+    """
     result: Dict[Tuple[str, str], MutableMapping[str, Optional[str]]] = {}
 
     with open(fname, newline="") as csvfile:
@@ -89,7 +98,15 @@ def _replace_parameter(original: str, replacement: Optional[str]) -> str:
 
 
 def simple_texture(clay: float, sand: float) -> Optional[str]:
-    """Classify soil texture into coarse categories (loam, sand loam, etc.)."""
+    """Classify soil texture into coarse categories (loam, sand loam, etc.).
+
+    Args:
+        clay: Clay percentage (0-100).
+        sand: Sand percentage (0-100).
+
+    Returns:
+        A simplified text label or ``None`` when no coarse class matches.
+    """
     cs = clay + sand
     if (clay <= 27.0 and cs <= 50.0) or (clay > 27.0 and sand <= 20.0 and cs <= 50.0):
         return "silt loam"
@@ -113,7 +130,18 @@ def simple_texture(clay: float, sand: float) -> Optional[str]:
 
 
 def simple_texture_enum(clay: float, sand: float) -> int:
-    """Return the integer enum corresponding to :func:`simple_texture`."""
+    """Return the integer enum corresponding to :func:`simple_texture`.
+
+    Args:
+        clay: Clay percentage (0-100).
+        sand: Sand percentage (0-100).
+
+    Returns:
+        Integer identifier matching WEPP's coarse texture categories.
+
+    Raises:
+        ValueError: If :func:`simple_texture` cannot classify the inputs.
+    """
     mapping = {"clay loam": 1, "loam": 2, "sand loam": 3, "silt loam": 4}
     texture = simple_texture(clay, sand)
     if texture is None:
@@ -122,7 +150,7 @@ def simple_texture_enum(clay: float, sand: float) -> int:
 
 
 def _soil_texture(clay: float, sand: float) -> Optional[str]:
-    """Fine-grained USDA soil texture classification."""
+    """Return the detailed USDA soil texture classification."""
     assert sand + clay <= 100
     silt = 100.0 - sand - clay
 
@@ -167,7 +195,14 @@ def soil_texture(clay: float, sand: float) -> str:
 
 @deprecated
 def soil_specialization(src: str, dst: str, replacements: SoilReplacements, caller: str = "") -> None:
-    """Create a new soil file with selected parameters replaced."""
+    """Create a new soil file with selected parameters replaced.
+
+    Args:
+        src: Source soil file to read.
+        dst: Destination path for the modified soil.
+        replacements: Structured overrides applied to header/horizon fields.
+        caller: Optional provenance string stored in the header.
+    """
     with open(src) as f:
         lines = f.readlines()
 
@@ -215,7 +250,14 @@ def soil_specialization(src: str, dst: str, replacements: SoilReplacements, call
 
 
 def modify_kslast(src: str, dst: str, kslast: float, caller: str = "") -> None:
-    """Write a copy of ``src`` to ``dst`` using ``kslast`` for the restrictive layer."""
+    """Write a copy of ``src`` to ``dst`` using ``kslast`` for the restrictive layer.
+
+    Args:
+        src: Source soil file path.
+        dst: Destination soil file path.
+        kslast: Replacement restrictive layer conductivity value.
+        caller: Optional provenance string stored in the header.
+    """
     with open(src) as fp:
         lines = fp.readlines()
 
@@ -237,7 +279,15 @@ def modify_kslast(src: str, dst: str, kslast: float, caller: str = "") -> None:
 
 
 def soil_is_water(soil_fn: str) -> bool:
-    """Return True when ``soil_fn`` describes a water body rather than soil."""
+    """Return True when ``soil_fn`` describes a water body rather than soil.
+
+    Args:
+        soil_fn: Soil file path to inspect.
+
+    Returns:
+        True if ``soil_fn`` contains ``"water"`` (case insensitive), otherwise
+        False.
+    """
     with open(soil_fn) as fp2:
         contents = fp2.read()
     return "water" in contents.lower()

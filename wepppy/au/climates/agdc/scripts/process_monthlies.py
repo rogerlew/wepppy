@@ -1,20 +1,32 @@
-import sys
-import netCDF4
+"""Aggregate AGDC NetCDF monthlies into GeoTIFF rasters and slim NetCDF files."""
 
+from __future__ import annotations
+
+from collections.abc import Sequence
 import os
+from glob import glob
 from os.path import exists as _exists
 from os.path import join as _join
 import shutil
-from subprocess import Popen, PIPE
-from glob import glob
+from subprocess import PIPE, Popen
+
+import netCDF4
 import numpy as np
 
+DEFAULT_MEASURES: tuple[str, ...] = ('rain', 'tmax', 'tmin', 'rad')
 
-if __name__ == "__main__":
 
-    measures = ['rain', 'tmax', 'tmin', 'rad']
+def process_monthly_series(measures: Sequence[str] | None = None) -> None:
+    """Compute long-term monthly means for each AGDC measure and export GeoTIFFs.
 
-    for measure in measures:
+    Args:
+        measures: Iterable of measure names (``rain``, ``tmax``, ``tmin``, ``rad``).
+            Defaults to ``DEFAULT_MEASURES``.
+    """
+
+    selected = list(measures) if measures is not None else list(DEFAULT_MEASURES)
+
+    for measure in selected:
         print(measure)
 
         ncs = glob('/geodata/au/agdc/monthly_series/{}/*.nc'.format(measure))
@@ -79,3 +91,7 @@ if __name__ == "__main__":
             p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=dst_dir)
             p.wait()
             assert _exists(_join(dst_dir, '{:02}.tif'.format(i+1)))
+
+
+if __name__ == "__main__":
+    process_monthly_series()

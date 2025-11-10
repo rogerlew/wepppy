@@ -19,6 +19,8 @@ relies on GDAL, NCO, xarray, and NumPy; failures bubble up as JSON errors or
 plain-text messages to keep client debugging straightforward.
 """
 
+from __future__ import annotations
+
 import math
 import os
 from os.path import join as _join
@@ -32,6 +34,7 @@ from subprocess import Popen, PIPE
 from calendar import isleap
 
 import traceback
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import netCDF4
 
@@ -40,7 +43,7 @@ from osgeo import osr
 from multiprocessing import Pool
 
 from subprocess import Popen, PIPE
-from flask import Flask, jsonify, request, make_response, send_file, after_this_request
+from flask import Flask, Response, jsonify, request, make_response, send_file, after_this_request
 
 from wepppy.climates.daymet import daymet_proj4
 from wepppy.all_your_base.geo import wgs84_proj4
@@ -94,7 +97,7 @@ gdal.PushErrorHandler(gdal_error_handler)
 geodata_dir = '/geodata/'
 static_dir = None
 
-monthly_catalog = {
+monthly_catalog: Dict[str, Dict[str, str]] = {
     'daymet/prcp/mean' : {'Description': 'Precipitation averages calculated from daily Daymet (1980-2016)', 'Units': 'mm' },
     'daymet/prcp/std'  : {'Description': 'Precipitation standard deviations calculated from daily Daymet (1980-2016)', 'Units': 'mm' },
     'daymet/prcp/skew' : {'Description': 'Precipitation skewness calculated from daily Daymet (1980-2016)', 'Units': 'mm' },
@@ -119,7 +122,7 @@ monthly_catalog = {
     'au/agdc/monthlies/rain' : {'Description': 'Average daily precipitation', 'Units': 'mm' }
 }
 
-daily_catalog = {
+daily_catalog: Dict[str, Dict[str, str]] = {
     'daymet/prcp': {'Description': 'Precipitation daily values from Daymet', 'Units': 'mm'},
     'daymet/tmin': {'Description': 'Temperature Minimum daily values from Daymet', 'Units': 'C'},
     'daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'},
@@ -132,7 +135,7 @@ daily_catalog = {
 }
 
 
-def crop_nc(nc, bbox, dst):
+def crop_nc(nc: str, bbox: Tuple[float, float, float, float], dst: str) -> None:
     """Subset ``nc`` to ``bbox`` (WGS84) using ``ncks`` and write to ``dst``."""
 
     _wgs_2_lcc = GeoTransformer(src_proj4=wgs84_proj4,
@@ -174,7 +177,7 @@ def crop_nc(nc, bbox, dst):
     assert _exists(dst), ' '.join(cmd)
 
 
-def merge_nc(fn_list, dst):
+def merge_nc(fn_list: Iterable[str], dst: str) -> None:
     """Stack NetCDF files in ``fn_list`` into a single file stored at ``dst``."""
 
     cmd = ['ncecat'] + fn_list + ['-O', dst]
@@ -199,7 +202,7 @@ def safe_float_parse(x):
         return None
 
 
-def parse_bbox(bbox):
+def parse_bbox(bbox: str) -> Tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
     """Parse a ``left,bottom,right,top`` bounding box string into floats."""
 
     try:
@@ -220,7 +223,7 @@ app = Flask(__name__)
 
 
 @app.route('/health')
-def health():
+def health() -> Response:
     """Return a plain OK payload for health checks."""
 
     return jsonify("OK")
@@ -228,7 +231,7 @@ def health():
 
 @app.route('/daily/catalog')
 @app.route('/daily/catalog/')
-def query_daily_catalog():
+def query_daily_catalog() -> Response:
     """Return JSON metadata for the available Daymet daily datasets."""
 
     return jsonify(daily_catalog)
@@ -238,7 +241,7 @@ def query_daily_catalog():
 
 @app.route('/daily_singlepoint', methods=['GET', 'POST'])
 @app.route('/daily_singlepoint/', methods=['GET', 'POST'])
-def query_daily_singlepoint():
+def query_daily_singlepoint() -> Any:
     """Return a Daymet daily series interpolated to the provided location."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -289,7 +292,7 @@ def query_daily_singlepoint():
     return np.concatenate(all_ts)
 
 
-def daily_worker(args):
+def daily_worker(args: Tuple[int, str, Tuple[float, float, float, float]]) -> Tuple[str, str]:
     """Crop a single year's dataset and return status plus path or error."""
 
     yr, dataset, bbox = args
@@ -318,7 +321,7 @@ def daily_worker(args):
 
 @app.route('/daily', methods=['GET', 'POST'])
 @app.route('/daily/', methods=['GET', 'POST'])
-def query_daily():
+def query_daily() -> Response:
     """Return Daymet daily NetCDF subsets cropped to the requested bbox."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -360,7 +363,7 @@ def query_daily():
     if not (isint(start_year) and isint(end_year)):
         return jsonify({'Error': 'start_year and end_year must be integers'})
 
-    fn_list = []
+    fn_list: List[str] = []
     with Pool() as p:
         results = p.map(daily_worker, [(yr, dataset, bbox) for yr in range(start_year, end_year + 1)])
 
@@ -415,14 +418,14 @@ def query_daily():
 
 @app.route('/monthly/catalog')
 @app.route('/monthly/catalog/')
-def query_monthly_catalog():
+def query_monthly_catalog() -> Response:
     """Return JSON metadata for the available monthly climatology datasets."""
     return jsonify(monthly_catalog)
 
 
 @app.route('/monthly', methods=['GET', 'POST'])
 @app.route('/monthly/', methods=['GET', 'POST'])
-def query_monthly():
+def query_monthly() -> Response:
     """Return a monthly climatology NetCDF extracted for the requested location."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})

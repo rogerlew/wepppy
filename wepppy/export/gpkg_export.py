@@ -1,60 +1,55 @@
-import shutil
-from typing import List, Tuple
-import json
+"""GeoPackage exports and comparison helpers."""
 
+from __future__ import annotations
+
+import json
 import os
-from os.path import join as _join
-from os.path import split as _split
+import shutil
+from collections import namedtuple
 from os.path import exists as _exists
+from os.path import join as _join
+from typing import List, Tuple
 
 import geopandas as gpd
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from pandas.core.series import Series
-from collections import namedtuple
 
-from wepppy.nodb.core import Soils
 from wepppy import f_esri
-    
+from wepppy.nodb.core import Soils
 
-def esri_compatible_colnames(df):
-    # Create a dictionary to hold the mappings from original to new names
-    rename_dict = {col: col.replace(' ', '_')
-                           .replace('(', '')
-                           .replace(')', '')
-                           .replace('.', '') for col in df.columns}
 
-    # Rename the columns and return the modified dataframe
+def esri_compatible_colnames(df: pd.DataFrame) -> pd.DataFrame:
+    """Normalize column names so downstream ESRI tools do not choke on them.
+
+    Args:
+        df: DataFrame whose columns should be sanitized.
+
+    Returns:
+        A copy of ``df`` with spaces/punctuation stripped from column names.
+    """
+    rename_dict = {
+        col: col.replace(' ', '_').replace('(', '').replace(')', '').replace('.', '')
+        for col in df.columns
+    }
     return df.rename(columns=rename_dict)
 
 
 ObjectiveParameter = namedtuple('ObjectiveParameter', ['topaz_id', 'wepp_id', 'value'])
 
 def gpkg_extract_objective_parameter(gpkg_fn: str, obj_param: str) -> Tuple[List[ObjectiveParameter], float]:
-    """
-    Extracts the specified objective parameter from the specified GeoPackage file."
+    """Pull a ranked list (and total) for a single metric from a GeoPackage.
 
-    Parameters
-    ----------
-    gpkg_fn : str
-        The path to the GeoPackage file.
-    obj_param : str
-        The objective parameter to extract. Must be one of the following:
-        'Soil_Loss_kg', 'Runoff_mm', 'Runoff_Volume_m3', 'Subrunoff_mm', 'Subrunoff_Volume_m3', 'Total_Phosphorus_kg'.
+    Args:
+        gpkg_fn: Path to the GeoPackage produced by :func:`gpkg_export`.
+        obj_param: Column name to extract (see ERU metrics for valid options).
 
-    Returns
-    -------
-    List[ObjectiveParameter
-        A tuple containing a list of ObjectiveParameter named tuples
-    float
-        Total value of the parameter
+    Returns:
+        Tuple with a descending list of :class:`ObjectiveParameter` entries and
+        the domain-wide total for the metric.
 
-    Raises
-    ------
-    ValueError
-        If the specified objective parameter is invalid.
-
+    Raises:
+        ValueError: If the requested metric is not supported.
     """
 
     if obj_param not in ['Soil_Loss_kg', 'Runoff_mm', 'Runoff_Volume_m3', 
@@ -88,7 +83,12 @@ def gpkg_extract_objective_parameter(gpkg_fn: str, obj_param: str) -> Tuple[List
     return result_list, total_param
 
 
-def gpkg_export(wd: str):
+def gpkg_export(wd: str) -> None:
+    """Build a GeoPackage (and optional FileGDB) for the run at ``wd``.
+
+    Args:
+        wd: Working directory that contains the WEPP run artifacts.
+    """
     from wepppy.nodb.core import Watershed
     watershed = Watershed.getInstance(wd)
 
@@ -271,19 +271,44 @@ def gpkg_export(wd: str):
             _chown_and_rmtree(gdb_fn)
         f_esri.c2c_gpkg_to_gdb(gpkg_fn, gdb_fn)
         
-def _chown(dir_path):
+def _chown(dir_path: str) -> None:
+    """Recursively chown a directory so ArcGIS tooling can clean it up.
+
+    Args:
+        dir_path: Directory that should be re-owned by the web group user.
+    """
     assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
 
     cmd = f"sudo /bin/chown -R www-data:webgroup {dir_path}"
     os.system(cmd)
 
-def _chown_and_rmtree(dir_path):
+def _chown_and_rmtree(dir_path: str) -> None:
+    """Chown then remove a directory tree (used for stale GDB cleanup).
+
+    Args:
+        dir_path: Directory slated for deletion.
+    """
     assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
     _chown(dir_path)
     shutil.rmtree(dir_path)
 
 
-def create_difference_map(scenario1_gpkg_fn, scenario2_gpkg_fn, difference_attributes, output_geojson_fn,  meta_attributes=None):
+def create_difference_map(
+    scenario1_gpkg_fn: str,
+    scenario2_gpkg_fn: str,
+    difference_attributes: list[str],
+    output_geojson_fn: str,
+    meta_attributes: list[str] | None = None,
+) -> None:
+    """Generate a GeoJSON file highlighting metric deltas between scenarios.
+
+    Args:
+        scenario1_gpkg_fn: Baseline GeoPackage path.
+        scenario2_gpkg_fn: Comparison GeoPackage path.
+        difference_attributes: Metric names to compare (must exist in both).
+        output_geojson_fn: Destination path for the difference GeoJSON.
+        meta_attributes: Optional metadata keys carried over verbatim.
+    """
     layer_name = "subcatchments"
     scenario1_gdf = gpd.read_file(scenario1_gpkg_fn, layer=layer_name)
     scenario2_gdf = gpd.read_file(scenario2_gpkg_fn, layer=layer_name)

@@ -1,11 +1,24 @@
-from os.path import join as _join
-from os.path import exists as _exists
-import os
+"""CSV exports summarizing hillslope and channel preparation details."""
+
+from __future__ import annotations
+
 import csv
+import os
+from os.path import exists as _exists
+from os.path import join as _join
+
 from wepppy.nodb.core import Ron
 
 
-def export_hillslopes_prep_details(wd):
+def export_hillslopes_prep_details(wd: str) -> str:
+    """Write a CSV describing each hillslope prepared during model setup.
+
+    Args:
+        wd: Working directory for the WEPP run.
+
+    Returns:
+        Absolute path to the generated `hillslopes.csv`.
+    """
     ron = Ron.getInstance(wd)
     subcatchments_summary = ron.subs_summary()
     
@@ -117,7 +130,15 @@ def export_hillslopes_prep_details(wd):
     return fn
 
 
-def export_channels_prep_details(wd):
+def export_channels_prep_details(wd: str) -> str:
+    """Write a CSV describing each channel prepared during model setup.
+
+    Args:
+        wd: Working directory for the WEPP run.
+
+    Returns:
+        Absolute path to the generated `channels.csv`.
+    """
     ron = Ron.getInstance(wd)
     chns_summary = ron.chns_summary()
     fieldnames = ('topaz_id', 'wepp_id', 'chn_enum', 'chn_wepp_width', 'order', 'length', 'area', 'slope', 'aspect',

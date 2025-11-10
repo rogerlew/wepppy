@@ -1,16 +1,18 @@
-# Copyright (c) 2016-2018, University of Idaho
-# All rights reserved.
-#
-# Roger Lew (rogerlew@gmail.com)
-#
-# The project described was supported by NSF award number IIA-1301792
-# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
+"""Flask microservice that returns Level 1–3 U.S. EPA ecoregions.
 
-import math
+The endpoint accepts either GET or POST requests with longitude/latitude pairs
+plus an optional source spatial reference (``srs``). Coordinates can be in any
+Proj4-compatible projection; inputs are reprojected to WGS84 before the query.
+The service then intersects the point against the Level 3 shapefile stored
+under :data:`geodata_dir`.
+"""
+
+from __future__ import annotations
+
+from typing import Optional
 
 from os.path import join as _join
-from subprocess import Popen, PIPE
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 from osgeo import ogr
 
 from wepppy.all_your_base.geo import GeoTransformer, wgs84_proj4
@@ -18,20 +20,19 @@ from wepppy.all_your_base.geo import GeoTransformer, wgs84_proj4
 geodata_dir = '/geodata/'
 
 
-def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
+def safe_float_parse(value: object) -> Optional[float]:
+    """Return ``float(value)`` or ``None`` if conversion fails."""
     try:
-        return float(x)
-    except:
+        return float(value)  # type: ignore[arg-type]
+    except Exception:
         return None
 
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
-def query_ecoregion():
+def query_ecoregion() -> Response:
+    """Return the EPA ecoregion identifiers covering the requested point."""
 
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -102,4 +103,3 @@ def query_ecoregion():
 
 if __name__ == '__main__':
     app.run()
-

@@ -1,42 +1,32 @@
-# Copyright (c) 2016-2022, University of Idaho
-# All rights reserved.
-#
-# Roger Lew (rogerlew@gmail.com)
-#
-# The project described was supported by NSF award number IIA-1301792
-# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
+"""Google Earth Engine helper endpoint for Net Primary Productivity queries."""
 
-import math
+from __future__ import annotations
 
-from os.path import join as _join
+from typing import Any, Optional
 
-from subprocess import Popen, PIPE
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 
-from wepppy.all_your_base.geo import GeoTransformer, wgs84_proj4
-
-import ee
+try:  # pragma: no cover - optional dependency
+    import ee  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    ee = None  # type: ignore[assignment]
 
 geodata_dir = '/geodata/'
 
 
-def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
+def safe_float_parse(value: object) -> Optional[float]:
+    """Return ``float(value)`` or ``None`` when conversion fails."""
     try:
-        return float(x)
-    except:
+        return float(value)  # type: ignore[arg-type]
+    except Exception:
         return None
 
 
-def safe_int_parse(x):
-    """
-    Tries to parse {x} as a int. Returns None if it fails.
-    """
+def safe_int_parse(value: object) -> Optional[int]:
+    """Return ``int(value)`` or ``None`` on failure."""
     try:
-        return int(x)
-    except:
+        return int(value)  # type: ignore[arg-type]
+    except Exception:
         return None
 
         
@@ -44,9 +34,13 @@ app = Flask(__name__)
 
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def index() -> Response:
+    """Query NPP from the ``UMT/NTSG/v2/LANDSAT/NPP`` collection at a location."""
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
+
+    if ee is None:
+        return jsonify({'Error': 'google-earth-engine client not installed'})
 
     ee.Initialize()
             
@@ -78,4 +72,3 @@ def index():
 
 if __name__ == '__main__':
     app.run()
-

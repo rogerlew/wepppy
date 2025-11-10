@@ -23,6 +23,8 @@ single maps should be combined as a gdal virtual dataset (vrt). WMSesque
 looks for: {geodata_dir}/{dataset}/{year}/.vrt
 """
 
+from __future__ import annotations
+
 import subprocess
 import fnmatch
 import os
@@ -30,6 +32,7 @@ import shlex
 from uuid import uuid4
 
 from datetime import datetime
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import utm
 from flask import (
@@ -40,13 +43,15 @@ from flask import (
     make_response,
     send_file,
     after_this_request,
+    Response,
 )
 from osgeo import gdal
 import xml.etree.ElementTree as ET
 import base64, json, hashlib
 
 
-def _b64url(obj: dict) -> str:
+def _b64url(obj: Dict[str, object]) -> str:
+    """Serialize ``obj`` to JSON and return a URL-safe base64 payload."""
     b = json.dumps(obj, separators=(",", ":")).encode("utf-8")
     return base64.urlsafe_b64encode(b).decode("ascii").rstrip("=")
 
@@ -74,7 +79,8 @@ _catalog = os.path.join(_this_dir, "catalog")
 SCRATCH_DIR = "/dev/shm"
 
 
-def raster_stats(src):
+def raster_stats(src: str) -> Dict[str, float]:
+    """Return GDAL statistics for ``src`` after running ``gdalinfo -stats``."""
     cmd = "gdalinfo %s -stats" % src
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     output = p.stdout.read().decode("utf-8").replace("\n", "|")
@@ -93,7 +99,8 @@ def raster_stats(src):
     return d
 
 
-def format_convert(src, _format):
+def format_convert(src: str, _format: str) -> Optional[str]:
+    """Convert ``src`` GeoTIFF to requested ``_format``."""
     dst = src[:-4] + ext_d[_format]
     if _format == "ENVI":
         stats = raster_stats(src)
@@ -116,49 +123,41 @@ def format_convert(src, _format):
     return None
 
 
-def determine_band_type(vrt):
+def determine_band_type(vrt: str) -> Optional[str]:
+    """Inspect the first band of ``vrt`` and return its GDAL data type."""
     ds = gdal.Open(vrt)
-    if ds == None:
+    if ds is None:
         return None
 
     band = ds.GetRasterBand(1)
     return gdal.GetDataTypeName(band.DataType)
 
 
-def find_maps(geodata):
-    """
-    recursively searches for .vrt files from the
-    path speicified by {geodata_dir}
-    """
+def find_maps(geodata: str) -> List[str]:
+    """Return catalog entries rooted under the supplied geodata prefix."""
     maps = open(_catalog).readlines()
     maps = [fn.strip() for fn in maps if fn.startswith(geodata)]
-
     return maps
 
 
-def safe_float_parse(x):
-    """
-    Tries to parse {x} as a float. Returns None if it fails.
-    """
+def safe_float_parse(value: object) -> Optional[float]:
+    """Return ``float(value)`` or ``None`` on parsing failure."""
     try:
-        return float(x)
-    except:
+        return float(value)  # type: ignore[arg-type]
+    except Exception:
         return None
 
 
-def parse_bbox(bbox):
-    """
-    Tries to parse the bbox argument supplied by the request
-    in a fault tolerate manner
-    """
+def parse_bbox(bbox: str) -> Tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
+    """Parse a comma-separated bbox string into floats."""
     try:
         coords = bbox.split(",")
-    except:
+    except Exception:
         return (None, None, None, None)
 
     n = len(coords)
     if n < 4:
-        coords.extend([None for i in xrange(4 - n)])
+        coords.extend([None for _ in range(4 - n)])
     if n > 4:
         coords = coords[:4]
 
@@ -169,14 +168,13 @@ app = Flask(__name__)
 
 
 @app.route("/health")
-def health():
+def health() -> Response:
+    """Lightweight liveness probe."""
     return jsonify("OK")
 
 @app.route("/catalog")
-def catalog():
-    """
-    Return a list of available maps
-    """
+def catalog() -> Response:
+    """Return the contents of the catalog file."""
     maps = find_maps(geodata_dir)
     return jsonify(maps)
 
@@ -193,22 +191,16 @@ def catalog():
 @app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>")
 @app.route("/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>/")
 def api_dataset_year(
-    dataset, year, layer="", foo="", bar="", foo2="", bar2="", methods=["GET", "POST"]
-):
-    """
-    Constructs a file path for a given dataset and year, with optional additional parameters for layering.
-    The path dynamically adjusts to include layer, foo, bar, foo2, and bar2 directories if provided.
-
-    :param dataset: Name of the dataset.
-    :param year: Year of the dataset.
-    :param layer: Optional layer within the dataset.
-    :param foo: First optional subdirectory within layer.
-    :param bar: Second optional subdirectory within foo.
-    :param foo2: Third optional subdirectory within bar.
-    :param bar2: Fourth optional subdirectory within foo2.
-    :param methods: HTTP methods supported by the API endpoint.
-    :return: Path to the .vrt file constructed based on the provided parameters.
-    """
+    dataset: str,
+    year: str,
+    layer: str = "",
+    foo: str = "",
+    bar: str = "",
+    foo2: str = "",
+    bar2: str = "",
+    methods: Sequence[str] = ("GET", "POST"),
+) -> Response:
+    """Retrieve a dataset/year raster for the requested bounding box."""
     # Initialize the path with dataset and year
     path_parts = [geodata_dir, dataset, year]
 

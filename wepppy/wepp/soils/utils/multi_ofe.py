@@ -11,6 +11,7 @@ from os.path import split as _split
 
 
 def read_soil_lines(fn: str) -> List[str]:
+    """Return the raw lines from a WEPP soil file."""
     with open(fn) as fp:
         return fp.readlines()
 
@@ -29,17 +30,24 @@ class SoilMultipleOfeSynth(object):
 
     @property
     def description(self) -> str:
-        s = ["<wepppy.wepp.soils.utils.SoilMultipleOfe>", 
-             "Current Working Directory", os.getcwd(), "Stack:"] + self.stack
+        """Return a multi-line summary describing the composed soil file."""
+        s = [
+            "<wepppy.wepp.soils.utils.SoilMultipleOfe>",
+            "Current Working Directory",
+            os.getcwd(),
+            "Stack:",
+        ] + self.stack
         s = [f"# {L}" for L in s]
-        return '\n'.join(s)
+        return "\n".join(s)
 
     @property
     def num_ofes(self) -> int:
+        """Return the number of OFE soil inputs that have been staged."""
         return len(self.stack)
 
     @property
     def stack_of_fns(self) -> bool:
+        """Return True if every file referenced in ``stack`` exists."""
         return all(exists(fn) for fn in self.stack)
 
     def write(self, dst_fn: str, ksflag: int = 0) -> None:

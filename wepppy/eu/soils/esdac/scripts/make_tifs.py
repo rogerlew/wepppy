@@ -1,35 +1,33 @@
-"""
-run from ESDAC_soilsdb/esdac.jrc.ec.europa.eu/wyz_856/_02_rst/ESDB_1k_rasters_dom_val
-after extracting zips.
-"""
+"""Convert ESDAC STU rasters (``.rst``) into GeoTIFFs and JSON metadata."""
 
-import json
+from __future__ import annotations
+
 from glob import glob
-from os.path import join as _join
-from os.path import split as _split
-from os.path import exists as _exists
-import os
+import json
+from pathlib import Path
+from subprocess import check_output, run
 
-from osgeo import gdal
-
-from subprocess import Popen, check_output
-
-#wds = glob('*directory/*/w001001.adf')
-wds = glob('/geodata/eu/ESDAC_STU_EU_Layers/*.rst')
-
-for src in wds:
-    
-    dst = src[:-4] + '.tif'
-
-    cmd = ['gdal_translate', src, dst, '-a_srs', 'epsg:3035']
-    print(cmd)
-    p = Popen(cmd)
-    p.wait()
-
-    js = check_output('gdalinfo -json ' + src, shell=True)
-    info = json.loads(js.decode())
-    with open(src[:-4] + '.json', 'w') as fp:
-        json.dump(info, fp, indent=4, sort_keys=True, allow_nan=False)
+DEFAULT_RST_GLOB = "/geodata/eu/ESDAC_STU_EU_Layers/*.rst"
 
 
+def convert_rst_directory(
+    raster_glob: str = DEFAULT_RST_GLOB,
+) -> None:
+    """Iterate over ``.rst`` rasters and emit ``.tif`` + ``.json`` companions."""
+    for src in glob(raster_glob):
+        src_path = Path(src)
+        dst_path = src_path.with_suffix(".tif")
+        json_path = src_path.with_suffix(".json")
+
+        cmd = ["gdal_translate", str(src_path), str(dst_path), "-a_srs", "epsg:3035"]
+        print(" ".join(cmd))
+        run(cmd, check=True)
+
+        info = json.loads(check_output(["gdalinfo", "-json", str(src_path)], text=True))
+        with open(json_path, "w", encoding="utf-8") as fp:
+            json.dump(info, fp, indent=4, sort_keys=True, allow_nan=False)
+
+
+if __name__ == "__main__":
+    convert_rst_directory()
 
