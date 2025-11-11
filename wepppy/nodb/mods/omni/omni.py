@@ -1268,10 +1268,7 @@ class Omni(NoDbBase):
         self.logger.info('  run_omni_scenarios: compiling channel summaries')
         self.compile_channel_summaries()
         self.logger.info('  run_omni_scenarios: compiling scenario report')
-        try:
-            self.scenarios_report()
-        except Exception:
-            self.logger.exception('  run_omni_scenarios: failed to compile scenario report')
+        self.scenarios_report()
 
     def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
         from wepppy.nodb.core import Landuse, Soils, Wepp

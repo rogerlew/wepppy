@@ -262,6 +262,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
     )
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
+    
+    omni_has_ran_scenarios = bool(omni and omni.has_ran_scenarios)
 
     mod_visibility = {
         'rap_ts': show_rap_ts,
@@ -325,7 +327,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_debris_flow=show_debris_flow,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
-        mod_visibility=mod_visibility,
+        omni_has_ran_scenarios=omni_has_ran_scenarios,
+        mod_visibility=mod_visibility
     )
     return context
 

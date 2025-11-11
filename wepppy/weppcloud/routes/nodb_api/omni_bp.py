@@ -79,12 +79,12 @@ def query_omni_scenarios_report(runid, config):
                     key_desc = report_dict['key'][idx]
                     if key_desc == water_discharge_key:
                         scenario_data['water_discharge'] = {
-                            'value': report_dict['v'][idx],
+                            'value': report_dict['value'][idx],
                             'unit': report_dict['units'][idx]
                         }
                     elif key_desc == soil_loss_key:
                         scenario_data['soil_loss'] = {
-                            'value': report_dict['v'][idx],
+                            'value': report_dict['value'][idx],
                             'unit': report_dict['units'][idx]
                         }
 

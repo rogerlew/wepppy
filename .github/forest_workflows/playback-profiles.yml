@@ -172,3 +172,13 @@
   artifact_name: legacy-palouse-profile-run-log
   artifact_path: telemetry/legacy-palouse-profile-run.log
   description: Small Legacy Palouse run with stochastic PRISM climate
+
+- workflow_slug: rattlesnake-remove-rap-daymet-multi-interp-omni
+  title: Daymet Multi-Interp Omni
+  playback_type: run
+  profile_slug: rattlesnake-remove-rap-daymet-multi-interp-omni
+  playback_options: []
+  schedule_pt: 04:15
+  artifact_name: rattlesnake-remove-rap-daymet-multi-interp-omni-profile-run-log
+  artifact_path: telemetry/rattlesnake-remove-rap-daymet-multi-interp-omni-profile-run.log
+  description: Rattlesnake run with Daymet Multiple Interpolated Climates and Omni mulching scenarios

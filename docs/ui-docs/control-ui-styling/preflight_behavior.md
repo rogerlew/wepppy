@@ -102,6 +102,36 @@ Controllers (e.g., subcatchment_delineation.js)
 
 ---
 
+## Mods Selection Dropdown
+
+The Pure header exposes a **Mods** dropdown so operators can toggle optional controllers
+without reloading the page. Each checkbox wires through the project controller and
+re-renders the associated control panel alongside its TOC entry.
+
+### Backend pieces
+
+- `header/_run_header_fixed.htm` renders the checkbox list and tags each option with
+  `data-project-mod="<mod>"`.
+- `run_0/run_0_bp.py` maintains `MOD_UI_DEFINITIONS`, the `/view/mod/<mod>` route that
+  re-renders a control, and placeholder wrappers (`data-mod-section="<mod>"`) inside
+  `runs0_pure.htm`.
+- `project_bp.task_set_mod` updates `Ron.mods`, instantiates controllers, and preserves
+  existing `.nodb` snapshots by renaming them to `.bak` when modules are disabled.
+
+### Frontend pieces
+
+1. `project.js` listens for checkbox changes and posts to `tasks/set_mod`.
+2. Successful responses fetch `/view/mod/<mod>` and update both the nav entry
+   (`data-mod-nav`) and section placeholder (`data-mod-section`).
+3. `MOD_BOOTSTRAP_MAP` reinitialises controller JS (Omni remounts its event handlers,
+   Ash/Treatments rebuild their forms, etc.) so the new panel behaves as if the page was refreshed.
+
+When adding a new module, update the header list, append metadata in `MOD_UI_DEFINITIONS`,
+drop a `data-mod-section` wrapper in `runs0_pure.htm`, and optionally register a bootstrap
+handler so the controller self-initialises after dynamic inserts.
+
+---
+
 ## TOC Emoji Mapping
 
 ### How It Works

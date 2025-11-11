@@ -24,9 +24,11 @@
         {% set rangeland_has_covers = rangeland_cover.has_covers %}
     {% endif %}
 
-    {% set omni_has_ran_scenarios = False %}
-    {% if 'omni' in mods_list and omni %}
-        {% set omni_has_ran_scenarios = omni.has_ran_scenarios %}
+    {% if omni_has_ran_scenarios is not defined %}
+        {% set omni_has_ran_scenarios = False %}
+        {% if 'omni' in mods_list and omni %}
+            {% set omni_has_ran_scenarios = omni.has_ran_scenarios %}
+        {% endif %}
     {% endif %}
 
     {% set rhem_has_run = False %}
@@ -144,7 +146,8 @@
             "project": {"readonly": ron.readonly},
             "outlet": {},
             "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
-            "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform}
+            "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform},
+            "omni": {"hasRanScenarios": omni_has_ran_scenarios}
         },
         "ui": {
             "tocTaskEmojis": toc_task_emojis,
