@@ -980,6 +980,9 @@ class Landuse(NoDbBase):
 
             managements = getattr(self, 'managements', {})
 
+            if managements is None:
+                managements = {}
+
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             total_area = 0.0

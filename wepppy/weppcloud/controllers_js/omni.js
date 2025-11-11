@@ -9,10 +9,10 @@ var Omni = (function () {
     var MAX_SBS_FILE_BYTES = 100 * 1024 * 1024;
     var ALLOWED_SBS_FILE_EXTENSIONS = new Set(["tif", "tiff", "img"]);
     var SCENARIO_ORDER = [
+        "sbs_map",
         "uniform_low",
         "uniform_moderate",
         "uniform_high",
-        "sbs_map",
         "undisturbed",
         "prescribed_fire",
         "thinning",
@@ -952,6 +952,10 @@ var Omni = (function () {
                 instance = createInstance();
             }
             return instance;
+        },
+        remount: function remount() {
+            instance = null;
+            return this.getInstance();
         }
     };
 }());

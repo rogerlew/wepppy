@@ -72,33 +72,38 @@
         {% endif %}
         <li><a href="#soils" class="nav-link">Soils</a></li>
         <li><a href="#climate" class="nav-link">Climate</a></li>
-        {% if show_rap_ts %}
-        <li><a href="#rap-ts" class="nav-link">RAP Time Series</a></li>
-        {% endif %}
-        {% if show_treatments %}
-        <li><a href="#treatments" class="nav-link">Treatments</a></li>
-        {% endif %}
+        <li data-mod-nav="rap_ts" {% if not show_rap_ts %}hidden{% endif %}>
+          <a href="#rap-ts" class="nav-link">RAP Time Series</a>
+        </li>
+        <li data-mod-nav="treatments" {% if not show_treatments %}hidden{% endif %}>
+          <a href="#treatments" class="nav-link">Treatments</a>
+        </li>
         {% if not hide_landuse_wepp %}
         <li><a href="#wepp" class="nav-link">WEPP</a></li>
         {% endif %}
-        {% if show_ash %}
-        <li><a href="#ash" class="nav-link">Ash Transport</a></li>
-        {% endif %}
+        <li data-mod-nav="ash" {% if not show_ash %}hidden{% endif %}>
+          <a href="#ash" class="nav-link">Ash Transport</a>
+        </li>
         {% if show_rhem %}
         <li><a href="#rhem" class="nav-link">RHEM</a></li>
         {% endif %}
-        {% if show_omni %}
-        <li><a href="#omni-scenarios" class="nav-link">Omni Scenarios</a></li>
+        <li data-mod-nav="omni" {% if not show_omni %}hidden{% endif %}>
+          <a href="#omni-scenarios" class="nav-link">Omni Scenarios</a>
+        </li>
+        <li data-mod-nav="observed" {% if not show_observed %}hidden{% endif %}>
+          <a href="#observed" class="nav-link">Observed Data</a>
+        </li>
+        {% if user.has_role('PowerUser') %}
+        <li data-mod-nav="debris_flow" {% if not show_debris_flow %}hidden{% endif %}>
+          <a href="#debris-flow" class="nav-link">Debris Flow</a>
+        </li>
         {% endif %}
-        {% if show_observed %}
-        <li><a href="#observed" class="nav-link">Observed Data</a></li>
-        {% endif %}
-        {% if show_debris_flow %}
-        <li><a href="#debris-flow" class="nav-link">Debris Flow</a></li>
-        {% endif %}
-        {% if show_dss_export %}
-        <li><a href="#dss-export" class="nav-link">DSS Export</a></li>
-        {% endif %}
+        <li data-mod-nav="dss_export" {% if not show_dss_export %}hidden{% endif %}>
+          <a href="#dss-export" class="nav-link">DSS Export</a>
+        </li>
+        <li data-mod-nav="path_ce" {% if not show_path_ce %}hidden{% endif %}>
+          <a href="#path-cost-effective" class="nav-link">PATH Cost-Effective</a>
+        </li>
       </ul>
     </nav>
 
@@ -145,17 +150,21 @@
         {% include 'controls/climate_pure.htm' %}
       </section>
 
-      {% if show_rap_ts %}
-      <section id="rap-ts" class="wc-stack">
-        {% include 'controls/rap_ts_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="rap_ts" {% if not show_rap_ts %}hidden{% endif %}>
+        {% if show_rap_ts %}
+        <section id="rap-ts" class="wc-stack">
+          {% include 'controls/rap_ts_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
-      {% if show_treatments %}
-      <section id="treatments" class="wc-stack">
-        {% include 'controls/treatments_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="treatments" {% if not show_treatments %}hidden{% endif %}>
+        {% if show_treatments %}
+        <section id="treatments" class="wc-stack">
+          {% include 'controls/treatments_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
       {% if not hide_landuse_wepp %}
       <section id="wepp" class="wc-stack">
@@ -163,11 +172,13 @@
       </section>
       {% endif %}
 
-      {% if show_ash %}
-      <section id="ash" class="wc-stack">
-        {% include 'controls/ash_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="ash" {% if not show_ash %}hidden{% endif %}>
+        {% if show_ash %}
+        <section id="ash" class="wc-stack">
+          {% include 'controls/ash_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
       {% if show_rhem %}
       <section id="rhem" class="wc-stack">
@@ -175,35 +186,47 @@
       </section>
       {% endif %}
 
-      {% if show_omni %}
-      <section id="omni-scenarios" class="wc-stack">
-        {% include 'controls/omni_scenarios_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="omni" {% if not show_omni %}hidden{% endif %}>
+        {% if show_omni %}
+        <section id="omni-scenarios" class="wc-stack">
+          {% include 'controls/omni_scenarios_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
-      {% if 'path_ce' in ron.mods %}
-      <section id="path-cost-effective" class="wc-stack">
-        {% include 'controls/path_cost_effective_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="path_ce" {% if not show_path_ce %}hidden{% endif %}>
+        {% if show_path_ce %}
+        <section id="path-cost-effective" class="wc-stack">
+          {% include 'controls/path_cost_effective_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
-      {% if show_observed %}
-      <section id="observed" class="wc-stack">
-        {% include 'controls/observed_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="observed" {% if not show_observed %}hidden{% endif %}>
+        {% if show_observed %}
+        <section id="observed" class="wc-stack">
+          {% include 'controls/observed_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
-{% if show_debris_flow %}
-  <section id="debris-flow" class="wc-stack">
-    {% include 'controls/debris_flow_pure.htm' %}
-  </section>
+{% if user.has_role('PowerUser') %}
+  <div data-mod-section="debris_flow" {% if not show_debris_flow %}hidden{% endif %}>
+    {% if show_debris_flow %}
+    <section id="debris-flow" class="wc-stack">
+      {% include 'controls/debris_flow_pure.htm' %}
+    </section>
+    {% endif %}
+  </div>
 {% endif %}
 
-      {% if show_dss_export %}
-      <section id="dss-export" class="wc-stack">
-        {% include 'controls/dss_export_pure.htm' %}
-      </section>
-      {% endif %}
+      <div data-mod-section="dss_export" {% if not show_dss_export %}hidden{% endif %}>
+        {% if show_dss_export %}
+        <section id="dss-export" class="wc-stack">
+          {% include 'controls/dss_export_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
 
     </section>
   </div>

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from subprocess import PIPE, Popen
+import os
 import redis
 from rq import Queue
 from wepppy.config.redis_settings import (
@@ -46,6 +47,32 @@ MOD_DISABLE_GUARDS = {
 }
 
 
+def _mod_state_paths(wd: str, mod_name: str) -> tuple[str, str]:
+    nodb_path = os.path.join(wd, f'{mod_name}.nodb')
+    backup_path = os.path.join(wd, f'{mod_name}.bak')
+    return nodb_path, backup_path
+
+
+def _restore_mod_backup(wd: str, mod_name: str) -> bool:
+    nodb_path, backup_path = _mod_state_paths(wd, mod_name)
+    if not os.path.exists(backup_path):
+        return False
+    if os.path.exists(nodb_path):
+        os.remove(nodb_path)
+    os.replace(backup_path, nodb_path)
+    return True
+
+
+def _backup_mod_state(wd: str, mod_name: str) -> bool:
+    nodb_path, backup_path = _mod_state_paths(wd, mod_name)
+    if not os.path.exists(nodb_path):
+        return False
+    if os.path.exists(backup_path):
+        os.remove(backup_path)
+    os.replace(nodb_path, backup_path)
+    return True
+
+
 def _append_mod(ron: Ron, mod_name: str) -> bool:
     """Ensure ``mod_name`` is recorded on the project. Returns True when added."""
     current_mods = list(ron.mods or [])
@@ -69,6 +96,10 @@ def _instantiate_mod_if_available(wd: str, cfg_fn: str, mod_name: str) -> bool:
     cls = registry.get(mod_name)
     if cls is None:
         return False
+    
+    existing = cls.tryGetInstance(wd)
+    if existing is not None:
+        return True
     cls(wd, cfg_fn)
     return True
 
@@ -80,13 +111,15 @@ def _enable_mod_for_run(ron: Ron, wd: str, cfg_fn: str, mod_name: str) -> bool:
     for dependency in MOD_DEPENDENCIES.get(mod_name, []):
         dependency_added = _append_mod(ron, dependency)
         if dependency_added:
+            restored_dep = _restore_mod_backup(wd, dependency)
             _instantiate_mod_if_available(wd, cfg_fn, dependency)
 
+    restored = _restore_mod_backup(wd, mod_name)
     _instantiate_mod_if_available(wd, cfg_fn, mod_name)
     return changed
 
 
-def _disable_mod_for_run(ron: Ron, mod_name: str) -> bool:
+def _disable_mod_for_run(ron: Ron, wd: str, mod_name: str) -> bool:
     """Remove a mod when doing so will not violate dependency guards."""
     active_mods = set(ron.mods or [])
     blockers = [
@@ -101,6 +134,7 @@ def _disable_mod_for_run(ron: Ron, mod_name: str) -> bool:
     if mod_name not in active_mods:
         return False
 
+    _backup_mod_state(wd, mod_name)
     ron.remove_mod(mod_name)
     return True
 
@@ -118,7 +152,7 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     if enabled:
         changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
     else:
-        changed = _disable_mod_for_run(ron, mod_name)
+        changed = _disable_mod_for_run(ron, wd, mod_name)
 
     return {
         "mod": mod_name,

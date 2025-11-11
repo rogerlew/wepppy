@@ -676,8 +676,10 @@ class Omni(NoDbBase):
 
     @property
     def omni_dir(self) -> str:
-        global OMNI_REL_DIR
-        return _join(self.wd, OMNI_REL_DIR)
+        # `wd/omni` contains the aggregated .parquet outputs and _limbo
+        # `_pups/omni` contains the scenario clones and contrasts to make _pups generic to all projects
+        # AGENTS: don't mess with this structure without checking with roger
+        return _join(self.wd, 'omni')
     
     def get_objective_parameter_from_gpkg(self, objective_parameter: str, scenario: Optional[str] = None) -> Tuple[List[Any], float]:
         if scenario is None:
@@ -933,7 +935,7 @@ class Omni(NoDbBase):
             return pd.DataFrame(columns=['key', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
 
         for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names or [], self.contrasts or []), start=1):
-            parquet_files[contrast_name] = _join(self.wd, OMNI_REL_DIR, 'contrasts', str(contrast_id), 'wepp', 'output', 'loss_pw0.out.parquet')
+            parquet_files[contrast_name] = _join(self.wd, 'contrasts', str(contrast_id), 'wepp', 'output', 'loss_pw0.out.parquet')
 
         dfs = []
         for contrast_id, (contrast_name, path) in enumerate(parquet_files.items(), start=1):
@@ -985,7 +987,7 @@ class Omni(NoDbBase):
             return pd.DataFrame(columns=['key', 'v', 'units', 'contrast'])
 
         combined = pd.concat(dfs, ignore_index=True)
-        out_path = _join(self.wd, OMNI_REL_DIR, 'contrasts.out.parquet')
+        out_path = _join(self.omni_dir, 'contrasts.out.parquet')
         combined.to_parquet(out_path)
         self._refresh_catalog()
 
@@ -1263,6 +1265,13 @@ class Omni(NoDbBase):
 
         self.logger.info('  run_omni_scenarios: compiling hillslope summaries')
         self.compile_hillslope_summaries()
+        self.logger.info('  run_omni_scenarios: compiling channel summaries')
+        self.compile_channel_summaries()
+        self.logger.info('  run_omni_scenarios: compiling scenario report')
+        try:
+            self.scenarios_report()
+        except Exception:
+            self.logger.exception('  run_omni_scenarios: failed to compile scenario report')
 
     def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
         from wepppy.nodb.core import Landuse, Soils, Wepp
@@ -1518,7 +1527,8 @@ class Omni(NoDbBase):
         for scenario_def in self.scenarios:
             scenario = scenario_def.get('type')
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            if not _exists(_join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'loss_pw0.out.parquet')):
+            if not (_exists(_join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'loss_pw0.out.parquet')) or
+                    _exists(_join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'interchange', 'loss_pw0.out.parquet'))):
                 return False
 
         return True
@@ -1528,13 +1538,25 @@ class Omni(NoDbBase):
         compiles the loss_pw0.out.parquet across the scenarios
         """
         global OMNI_REL_DIR
-        parquet_files = {str(self.base_scenario): _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')}
+        _legacy_path = _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')
+        if _exists(_legacy_path):
+            parquet_files = {str(self.base_scenario): _legacy_path}
+        _interchange_path = _join(self.wd, 'wepp', 'output', 'interchange', 'loss_pw0.out.parquet')
+        if _exists(_interchange_path):
+            parquet_files = {str(self.base_scenario): _interchange_path}
 
         for scenario_def in self.scenarios:
             scenario = scenario_def.get('type')
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            parquet_files[_scenario_name] = _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'loss_pw0.out.parquet')
-
+            _legacy_path =  _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'loss_pw0.out.parquet')
+            if _exists(_legacy_path):
+                parquet_files[_scenario_name] = _legacy_path
+                continue
+            _interchange_path =  _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name, 'wepp', 'output', 'interchange', 'loss_pw0.out.parquet')
+            if _exists(_interchange_path):
+                parquet_files[_scenario_name] = _interchange_path
+                continue
+            
         dfs = []
         for scenario, path in parquet_files.items():
             if not os.path.isfile(path):
@@ -1548,7 +1570,7 @@ class Omni(NoDbBase):
             return pd.DataFrame(columns=['key', 'v', 'units', 'scenario'])
 
         combined = pd.concat(dfs, ignore_index=True)
-        out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.out.parquet')
+        out_path = _join(self.omni_dir, 'scenarios.out.parquet')
         combined.to_parquet(out_path)
         self._refresh_catalog()
 
@@ -1568,7 +1590,6 @@ class Omni(NoDbBase):
 
         dfs = []
         for scenario, wd in scenario_wds.items():
-            print(scenario, wd)
             loss = Wepp.getInstance(wd).report_loss()
             hill_rpt = HillSummaryReport(loss)
             df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
@@ -1576,7 +1597,6 @@ class Omni(NoDbBase):
             dfs.append(df)
 
         combined = pd.concat(dfs, ignore_index=True)
-        combined.info()
 
         # Data columns (total 20 columns):
         #  #   Column                                  Non-Null Count  Dtype  
@@ -1616,12 +1636,11 @@ class Omni(NoDbBase):
         # Calculate NTU in g/L (combined['Sediment Yield (t)'] * 1_000_000) / (combined['Runoff (m^3)'] * 1_000)
         combined['NTU (g/L)'] = (combined['Sediment Yield (t)'] * 1_000) / (combined['Runoff (m^3)'] + combined['Baseflow (m^3)'] )
 
-        out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.hillslope_summaries.parquet')
+        out_path = _join(self.omni_dir, 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
         self._refresh_catalog()
 
         return combined
-
 
     def compile_channel_summaries(self) -> pd.DataFrame:
         global OMNI_REL_DIR
@@ -1638,7 +1657,7 @@ class Omni(NoDbBase):
         dfs = []
         for scenario, wd in scenario_wds.items():
             loss = Wepp.getInstance(wd).report_loss()
-            channel_rpt = ChannelSummary(loss)
+            channel_rpt = ChannelSummaryReport(loss)
             df = channel_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
             df['scenario'] = scenario
             dfs.append(df)
@@ -1648,10 +1667,8 @@ class Omni(NoDbBase):
 
         combined = pd.concat(dfs, ignore_index=True)
 
-        # WeppID,TopazID,Landuse,Soil,Length (m),Hillslope Area (ha),Runoff (mm),Lateral Flow (mm),Baseflow (mm),Soil Loss (kg/ha),Sediment Deposition (kg/ha),Sediment Yield (kg/ha),scenario
 
-
-        out_path = _join(self.wd, OMNI_REL_DIR, 'scenarios.channel_summaries.parquet')
+        out_path = _join(self.omni_dir, 'scenarios.channel_summaries.parquet')
         combined.to_parquet(out_path)
         self._refresh_catalog()
 

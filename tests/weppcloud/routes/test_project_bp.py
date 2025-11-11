@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict
 
 import pytest
@@ -268,3 +269,45 @@ def test_set_mod_rejects_unknown_module(project_client):
     assert payload["Success"] is False
     assert "Unknown module" in payload["Error"]
     assert controller.mods == []
+
+
+def test_set_mod_disable_moves_nodb_to_backup(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["rap_ts"]
+    nodb_path = Path(run_dir) / "rap_ts.nodb"
+    nodb_path.write_text("state-data")
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    backup_path = Path(run_dir) / "rap_ts.bak"
+    assert not nodb_path.exists()
+    assert backup_path.exists()
+    assert backup_path.read_text() == "state-data"
+
+
+def test_set_mod_enable_restores_backup(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+    backup_path = Path(run_dir) / "rap_ts.bak"
+    backup_path.write_text("restored-state")
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    nodb_path = Path(run_dir) / "rap_ts.nodb"
+    assert nodb_path.exists()
+    assert nodb_path.read_text() == "restored-state"
+    assert not backup_path.exists()

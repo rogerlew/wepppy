@@ -2,6 +2,7 @@
 
 import wepppy
 import pathlib
+from collections import OrderedDict
 
 from datetime import datetime
 import awesome_codename
@@ -71,6 +72,58 @@ TOC_TASK_ANCHOR_TO_TASK = {
 
 TOC_TASK_EMOJI_MAP = {anchor: task.emoji() for anchor, task in TOC_TASK_ANCHOR_TO_TASK.items()}
 
+MOD_UI_DEFINITIONS = OrderedDict([
+    ('rap_ts', {
+        'label': 'RAP Time Series',
+        'section_id': 'rap-ts',
+        'section_class': 'wc-stack',
+        'template': 'controls/rap_ts_pure.htm',
+    }),
+    ('treatments', {
+        'label': 'Treatments',
+        'section_id': 'treatments',
+        'section_class': 'wc-stack',
+        'template': 'controls/treatments_pure.htm',
+    }),
+    ('ash', {
+        'label': 'Ash Transport',
+        'section_id': 'ash',
+        'section_class': 'wc-stack',
+        'template': 'controls/ash_pure.htm',
+    }),
+    ('omni', {
+        'label': 'Omni Scenarios',
+        'section_id': 'omni-scenarios',
+        'section_class': 'wc-stack',
+        'template': 'controls/omni_scenarios_pure.htm',
+    }),
+    ('observed', {
+        'label': 'Observed Data',
+        'section_id': 'observed',
+        'section_class': 'wc-stack',
+        'template': 'controls/observed_pure.htm',
+    }),
+    ('debris_flow', {
+        'label': 'Debris Flow',
+        'section_id': 'debris-flow',
+        'section_class': 'wc-stack',
+        'template': 'controls/debris_flow_pure.htm',
+        'requires_power_user': True,
+    }),
+    ('dss_export', {
+        'label': 'DSS Export',
+        'section_id': 'dss-export',
+        'section_class': 'wc-stack',
+        'template': 'controls/dss_export_pure.htm',
+    }),
+    ('path_ce', {
+        'label': 'PATH Cost-Effective',
+        'section_id': 'path-cost-effective',
+        'section_class': 'wc-stack',
+        'template': 'controls/path_cost_effective_pure.htm',
+    }),
+])
+
 @run_0_bp.route('/sw.js')
 def service_worker():
     from flask import make_response, send_from_directory
@@ -120,9 +173,8 @@ def _log_access(wd, current_user, ip):
         email = getattr(current_user, 'email', '<anonymous>')
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
 
-@run_0_bp.route('/runs/<string:runid>/<config>/')
-@authorize_and_handle_with_exception_factory
-def runs0(runid, config):
+
+def _build_runs0_context(runid, config, playwright_load_all):
     global VAPID_PUBLIC_KEY
     from wepppy.nodb.mods.revegetation import Revegetation
     from wepppy.wepp.soils import soilsdb
@@ -130,8 +182,6 @@ def runs0(runid, config):
     from wepp_runner.wepp_runner import linux_wepp_bin_opts
     from wepppy.wepp.management.managements import landuse_management_mapping_options
     from wepppy.weppcloud.app import db, Run
-
-    assert config is not None
 
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -143,7 +193,7 @@ def runs0(runid, config):
         target_args = {'runid': runid, 'config': ron.config_stem}
         if ctx.pup_relpath:
             target_args['pup'] = ctx.pup_relpath
-        return redirect(url_for_run('run_0.runs0', **target_args))
+        return {'redirect': url_for_run('run_0.runs0', **target_args)}
 
     if ctx.pup_root and not ron.readonly:
         try:
@@ -151,16 +201,6 @@ def runs0(runid, config):
         except Exception as exc:
             current_app.logger.warning('Failed to mark pup project as readonly: %s', exc)
 
-    # return jsonify({'wd': wd, 'base_wd': base_wd, 'runid': runid, 'config': config, 'pup_relpath': ctx.pup_relpath})
-    # https://wc.bearhive.duckdns.org/runs/considerable-imperative/disturbed9002/?pup=omni/scenarios/undisturbed
-    # {
-    # "base_wd": "/wc1/runs/co/considerable-imperative",
-    # "config": "disturbed9002",
-    # "pup_relpath": "omni/scenarios/undisturbed",
-    # "runid": "considerable-imperative",
-    # "wd": "/wc1/runs/co/considerable-imperative/_pups/omni/scenarios/undisturbed"
-    # }
-    
     landuse = Landuse.getInstance(wd)
     soils = Soils.getInstance(wd)
     climate = Climate.getInstance(wd)
@@ -186,7 +226,7 @@ def runs0(runid, config):
     treatments = Treatments.tryGetInstance(wd)
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
-    
+
     if redis_prep is not None:
         rq_job_ids = redis_prep.get_rq_job_ids()
     else:
@@ -210,52 +250,122 @@ def runs0(runid, config):
     Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
     db.session.commit()
 
-    # Playwright testing support: load all controls regardless of config/mods
-    playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
+    mods_list = ron.mods or []
+    show_rap_ts = 'rap_ts' in mods_list or playwright_load_all
+    show_treatments = 'treatments' in mods_list or playwright_load_all
+    show_ash = 'ash' in mods_list or playwright_load_all
+    show_omni = 'omni' in mods_list or playwright_load_all
+    show_observed = (observed is not None) or playwright_load_all
+    show_debris_flow = (
+        current_user.has_role('PowerUser') and
+        (debris_flow is not None or playwright_load_all)
+    )
+    show_dss_export = 'dss_export' in mods_list or playwright_load_all
+    show_path_ce = 'path_ce' in mods_list or playwright_load_all
 
-    return render_template('runs0_pure.htm',
-                            user=current_user,
-                            site_prefix=site_prefix,
-                            playwright_load_all=playwright_load_all,
-                            topaz=topaz,
-                            soils=soils,
-                            ron=ron,
-                            landuse=landuse,
-                            climate=climate,
-                            wepp=wepp,
-                            wepp_bin_options=wepp_bin_options,
-                            rhem=rhem,
-                            disturbed=disturbed,
-                            baer=baer,
-                            ash=ash,
-                            skid_trails=skid_trails,
-                            reveg=reveg,
-                            watershed=watershed,
-                            unitizer_nodb=unitizer,
-                            observed=observed,
-                            rangeland_cover=rangeland_cover,
-                            omni=omni,
-                            OmniScenario=OmniScenario,
-                            treatments=treatments,
-                            debris_flow=debris_flow,
-                            rq_job_ids=rq_job_ids,
-                            landuseoptions=landuseoptions,
-                            landcover_datasets=landuse.landcover_datasets,
-                            landuse_report_rows=landuse_report_context['report_rows'],
-                            landuse_dataset_options=landuse_report_context['dataset_options'],
-                            landuse_coverage_percentages=landuse_report_context['coverage_percentages'],
-                            landuse_management_mapping_options=landuse_management_mapping_options,
-                            soildboptions=soildboptions,
-                            critical_shear_options=critical_shear_options,
-                            reveg_cover_transform_options=reveg_cover_transform_options,
-                            climate_catalog=climate.catalog_datasets_payload(include_hidden=True),
-                            precisions=wepppy.nodb.unitizer.precisions,
-                            run_id=runid,
-                            runid=runid,
-                            config=config,
-                            toc_task_emojis=TOC_TASK_EMOJI_MAP,
-                            pup_relpath=ctx.pup_relpath,
-                            VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY)
+    mod_visibility = {
+        'rap_ts': show_rap_ts,
+        'treatments': show_treatments,
+        'ash': show_ash,
+        'omni': show_omni,
+        'observed': show_observed,
+        'debris_flow': show_debris_flow,
+        'dss_export': show_dss_export,
+        'path_ce': show_path_ce,
+    }
+
+    context = dict(
+        user=current_user,
+        site_prefix=site_prefix,
+        playwright_load_all=playwright_load_all,
+        topaz=topaz,
+        soils=soils,
+        ron=ron,
+        landuse=landuse,
+        climate=climate,
+        wepp=wepp,
+        wepp_bin_options=wepp_bin_options,
+        rhem=rhem,
+        disturbed=disturbed,
+        baer=baer,
+        ash=ash,
+        skid_trails=skid_trails,
+        reveg=reveg,
+        watershed=watershed,
+        unitizer_nodb=unitizer,
+        observed=observed,
+        rangeland_cover=rangeland_cover,
+        omni=omni,
+        OmniScenario=OmniScenario,
+        treatments=treatments,
+        debris_flow=debris_flow,
+        rq_job_ids=rq_job_ids,
+        landuseoptions=landuseoptions,
+        landcover_datasets=landuse.landcover_datasets,
+        landuse_report_rows=landuse_report_context['report_rows'],
+        landuse_dataset_options=landuse_report_context['dataset_options'],
+        landuse_coverage_percentages=landuse_report_context['coverage_percentages'],
+        landuse_management_mapping_options=landuse_management_mapping_options,
+        soildboptions=soildboptions,
+        critical_shear_options=critical_shear_options,
+        reveg_cover_transform_options=reveg_cover_transform_options,
+        climate_catalog=climate.catalog_datasets_payload(include_hidden=True),
+        precisions=wepppy.nodb.unitizer.precisions,
+        run_id=runid,
+        runid=runid,
+        config=config,
+        toc_task_emojis=TOC_TASK_EMOJI_MAP,
+        pup_relpath=ctx.pup_relpath,
+        VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY,
+        show_rap_ts=show_rap_ts,
+        show_treatments=show_treatments,
+        show_ash=show_ash,
+        show_omni=show_omni,
+        show_observed=show_observed,
+        show_debris_flow=show_debris_flow,
+        show_dss_export=show_dss_export,
+        show_path_ce=show_path_ce,
+        mod_visibility=mod_visibility,
+    )
+    return context
+
+@run_0_bp.route('/runs/<string:runid>/<config>/')
+@authorize_and_handle_with_exception_factory
+def runs0(runid, config):
+    assert config is not None
+    playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
+    context = _build_runs0_context(runid, config, playwright_load_all)
+    if 'redirect' in context:
+        return redirect(context['redirect'])
+    return render_template('runs0_pure.htm', **context)
+
+
+@run_0_bp.route('/runs/<string:runid>/<config>/view/mod/<string:mod_name>')
+@authorize_and_handle_with_exception_factory
+def view_mod_section(runid, config, mod_name):
+    mod_info = MOD_UI_DEFINITIONS.get(mod_name)
+    if not mod_info:
+        return error_factory('Unknown module')
+
+    context = _build_runs0_context(runid, config, playwright_load_all=False)
+    if 'redirect' in context:
+        return redirect(context['redirect'])
+
+    if not context['mod_visibility'].get(mod_name):
+        return error_factory('Module is not enabled for this run')
+
+    section_inner = render_template(mod_info['template'], **context)
+    section_html = render_template(
+        'run_0/mod_section_wrapper.htm',
+        section_id=mod_info['section_id'],
+        section_class=mod_info.get('section_class', 'wc-stack'),
+        section_html=section_inner,
+    )
+    return success_factory({
+        'mod': mod_name,
+        'section_id': mod_info['section_id'],
+        'html': section_html,
+    })
 
 @run_0_bp.route('/create', strict_slashes=False)
 @handle_with_exception_factory

@@ -319,6 +319,33 @@ var Project = (function () {
                 : []
         };
 
+        var MOD_BOOTSTRAP_MAP = {
+            rap_ts: function (ctx) {
+                bootstrapControllerSymbol(window.RAP_TS, ctx);
+            },
+            treatments: function (ctx) {
+                bootstrapControllerSymbol(window.Treatments, ctx);
+            },
+            ash: function (ctx) {
+                bootstrapControllerSymbol(window.Ash, ctx);
+            },
+            omni: function (ctx) {
+                bootstrapControllerSymbol(window.Omni, ctx, { forceRemount: true });
+            },
+            dss_export: function (ctx) {
+                bootstrapControllerSymbol(window.DssExport, ctx);
+            },
+            debris_flow: function (ctx) {
+                bootstrapControllerSymbol(window.DebrisFlow, ctx);
+            },
+            path_ce: function (ctx) {
+                bootstrapControllerSymbol(window.PathCE, ctx);
+            },
+            observed: function (ctx) {
+                bootstrapControllerSymbol(window.Observed, ctx);
+            }
+        };
+
         project.state = state;
         project._currentName = state.name;
         project._currentScenario = state.scenario;
@@ -327,6 +354,86 @@ var Project = (function () {
         project._notifyTimer = null;
         project._unitPreferenceInflight = null;
         project._pendingUnitPreference = null;
+
+        function getModNavElement(modName) {
+            return document.querySelector('[data-mod-nav="' + modName + '"]');
+        }
+
+        function getModSectionContainer(modName) {
+            return document.querySelector('[data-mod-section="' + modName + '"]');
+        }
+
+        function bootstrapControllerSymbol(symbol, context, options) {
+            if (!symbol) {
+                return;
+            }
+            var controller = null;
+            var forceRemount = options && options.forceRemount;
+            if (forceRemount && typeof symbol.remount === "function") {
+                controller = symbol.remount();
+            } else if (typeof symbol.getInstance === "function") {
+                controller = symbol.getInstance();
+            } else if (typeof symbol.remount === "function") {
+                controller = symbol.remount();
+            }
+            if (controller && typeof controller.bootstrap === "function") {
+                controller.bootstrap(context || window.runContext || {});
+            }
+        }
+
+        function toggleModNav(modName, enabled) {
+            var nav = getModNavElement(modName);
+            if (!nav) {
+                return;
+            }
+            if (enabled) {
+                nav.removeAttribute("hidden");
+            } else {
+                nav.setAttribute("hidden", "hidden");
+            }
+        }
+
+        function toggleModSection(modName, enabled, html) {
+            var container = getModSectionContainer(modName);
+            if (!container) {
+                return;
+            }
+            if (enabled) {
+                if (html !== undefined && html !== null) {
+                    container.innerHTML = html;
+                }
+                container.removeAttribute("hidden");
+            } else {
+                container.innerHTML = "";
+                container.setAttribute("hidden", "hidden");
+            }
+        }
+
+        function updateRunContextMods(modName, enabled) {
+            if (typeof window.runContext !== "object" || !window.runContext) {
+                return;
+            }
+            var ctx = window.runContext.mods || {};
+            var list = Array.isArray(ctx.list) ? ctx.list.slice() : [];
+            var index = list.indexOf(modName);
+            if (enabled && index === -1) {
+                list.push(modName);
+            } else if (!enabled && index !== -1) {
+                list.splice(index, 1);
+            }
+            ctx.list = list;
+            ctx.flags = ctx.flags || {};
+            ctx.flags[modName] = enabled;
+            window.runContext.mods = ctx;
+        }
+
+        function bootstrapModController(modName) {
+            var context = window.runContext || {};
+            var handler = MOD_BOOTSTRAP_MAP[modName];
+            if (typeof handler === "function") {
+                handler(context);
+            }
+        }
 
         project.notifyCommandBar = function (message, options) {
             options = options || {};
@@ -638,6 +745,16 @@ var Project = (function () {
         };
         project.setPublic = project.set_public;
 
+        project.load_mod_section = function (modName) {
+            var endpoint = "view/mod/" + encodeURIComponent(modName);
+            return http.getJson(url_for_run(endpoint)).then(function (response) {
+                if (response && response.Success === true) {
+                    return response.Content || response.content || response;
+                }
+                return Promise.reject(response || { Error: "Failed to load module section" });
+            });
+        };
+
         project.set_mod = function (modName, enabled, options) {
             options = options || {};
             var normalized = typeof modName === "string" ? modName.trim() : "";
@@ -655,25 +772,62 @@ var Project = (function () {
                 json: { mod: normalized, enabled: desiredState }
             }).then(function (result) {
                 var response = unpackResponse(result);
-                if (isSuccess(response)) {
-                    if (options.notify !== false) {
-                        var label = response.Content && response.Content.label ? response.Content.label : normalized;
-                        var verb = desiredState ? "enabled" : "disabled";
-                        project.notifyCommandBar(label + " " + verb + ". Reloading…");
+                if (!isSuccess(response)) {
+                    var message = response && (response.Error || response.Message || response.message);
+                    if (input) {
+                        input.disabled = false;
+                        input.checked = !desiredState;
                     }
-                    window.location.reload();
+                    if (response) {
+                        project.pushResponseStacktrace(project, response);
+                    }
+                    if (options.notify !== false) {
+                        if (message) {
+                            project.notifyCommandBar(message, { duration: null });
+                        } else {
+                            project.notifyCommandBar("Unable to update module.", { duration: null });
+                        }
+                    }
                     return response;
                 }
 
+                var label = response.Content && response.Content.label ? response.Content.label : normalized;
+
+                var applyUI = function (html) {
+                    toggleModNav(normalized, desiredState);
+                    toggleModSection(normalized, desiredState, html);
+                    updateRunContextMods(normalized, desiredState);
+                    if (options.notify !== false) {
+                        var verb = desiredState ? "enabled" : "disabled";
+                        project.notifyCommandBar(label + " " + verb + ".");
+                    }
+                };
+
+                if (desiredState) {
+                    return project.load_mod_section(normalized).then(function (payload) {
+                        var html = payload && payload.html ? payload.html : "";
+                        applyUI(html);
+                        bootstrapModController(normalized);
+                        if (input) {
+                            input.checked = true;
+                            input.disabled = false;
+                        }
+                        return response;
+                    }).catch(function (error) {
+                        if (input) {
+                            input.disabled = false;
+                            input.checked = false;
+                        }
+                        notifyError("Error rendering module section", error);
+                        project.notifyCommandBar("Module enabled but failed to render. Refresh to continue.", { duration: null });
+                        return response;
+                    });
+                }
+
+                applyUI();
                 if (input) {
+                    input.checked = false;
                     input.disabled = false;
-                    input.checked = !desiredState;
-                }
-                if (response) {
-                    project.pushResponseStacktrace(project, response);
-                }
-                if (options.notify !== false) {
-                    project.notifyCommandBar("Unable to update module.", { duration: null });
                 }
                 return response;
             }).catch(function (error) {

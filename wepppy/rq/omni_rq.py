@@ -73,6 +73,8 @@ def _update_dependency_state(
     run_state_entry: Dict[str, Any],
 ) -> None:
     """Persist dependency and run state metadata with retry semantics."""
+
+    from wepppy.nodb.base import NoDbAlreadyLockedError
     
     max_tries = 5
     for attempt in range(max_tries):
@@ -82,7 +84,7 @@ def _update_dependency_state(
                 omni.scenario_dependency_tree[scenario_name] = dependency_entry
                 omni.scenario_run_state.append(run_state_entry)
 
-        except OmniLockTimeout:
+        except NoDbAlreadyLockedError:
             if attempt + 1 == max_tries:
                 raise OmniLockTimeout('max retries exceeded')
             time.sleep(1.0)
@@ -418,6 +420,8 @@ def _compile_hillslope_summaries_rq(runid: str) -> None:
 
         omni = Omni.getInstance(wd)
         omni.compile_hillslope_summaries()
+        omni.compile_channel_summaries()
+        omni.scenarios_report()
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:

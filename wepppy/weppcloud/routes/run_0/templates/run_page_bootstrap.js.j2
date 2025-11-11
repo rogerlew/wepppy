@@ -160,6 +160,7 @@
     window.config = runConfig;
     window.readonly = {{ ron.readonly | tojson }};
     window.WEPP_channel_critical_shear = null;
+    window.runContext = runContext;
 
     function initUnitizers() {
         if (typeof initUnitConverters === "function") {
