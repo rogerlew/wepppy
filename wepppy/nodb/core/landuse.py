@@ -977,7 +977,8 @@ class Landuse(NoDbBase):
 
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
-            managements = {}
+
+            managements = getattr(self, 'managements', {})
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -987,6 +988,7 @@ class Landuse(NoDbBase):
                 area *= cell2 / 10000
 
                 if k not in managements:
+                    assert not k.endswith('-mulch_15') and not k.endswith('-mulch_30') and not k.endswith('-mulch_60'), k
                     man = get_management_summary(k, _map)
                     man.area = area
                     managements[k] = man

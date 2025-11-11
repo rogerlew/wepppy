@@ -282,7 +282,6 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
             with open(dst, 'r') as f:
                 d = json.load(f)
                 
-
             d['py/state']['wd'] = new_wd
             d['py/state']['_parent_wd'] = wd
 
