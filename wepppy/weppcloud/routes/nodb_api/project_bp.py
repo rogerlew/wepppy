@@ -14,7 +14,7 @@ from .._common import *  # noqa: F401,F403
 from sqlalchemy import func
 
 from wepppy.nodb.core import Ron
-from wepppy.nodb.base import clear_nodb_file_cache
+from wepppy.nodb.base import clear_nodb_file_cache, iter_nodb_mods_subclasses
 from wepppy.nodb.core import Watershed
 
 from wepppy.weppcloud.utils.helpers import (
@@ -25,6 +25,108 @@ from wepppy.weppcloud.utils.helpers import (
 
 
 project_bp = Blueprint('project', __name__)
+
+MOD_DISPLAY_NAMES = {
+    'rap_ts': 'RAP Time Series',
+    'ash': 'Ash Transport',
+    'treatments': 'Treatments',
+    'observed': 'Observed Data',
+    'debris_flow': 'Debris Flow',
+    'dss_export': 'DSS Export',
+    'omni': 'Omni',
+    'path_ce': 'Path CE',
+}
+
+MOD_DEPENDENCIES = {
+    'omni': ['treatments'],
+}
+
+MOD_DISABLE_GUARDS = {
+    'treatments': ['omni'],
+}
+
+
+def _append_mod(ron: Ron, mod_name: str) -> bool:
+    """Ensure ``mod_name`` is recorded on the project. Returns True when added."""
+    current_mods = list(ron.mods or [])
+    if mod_name in current_mods:
+        return False
+
+    with ron.locked():
+        mods = ron.mods
+        if mods is None:
+            ron._mods = [mod_name]
+        elif mod_name not in mods:
+            ron._mods.append(mod_name)
+            current_mods = ron._mods
+
+    return mod_name in (ron.mods or [])
+
+
+def _instantiate_mod_if_available(wd: str, cfg_fn: str, mod_name: str) -> bool:
+    """Instantiate the NoDb controller when a matching subclass exists."""
+    registry = {name: cls for name, cls in iter_nodb_mods_subclasses()}
+    cls = registry.get(mod_name)
+    if cls is None:
+        return False
+    cls(wd, cfg_fn)
+    return True
+
+
+def _enable_mod_for_run(ron: Ron, wd: str, cfg_fn: str, mod_name: str) -> bool:
+    """Add the mod (and dependencies) then materialize their controllers."""
+    changed = _append_mod(ron, mod_name)
+
+    for dependency in MOD_DEPENDENCIES.get(mod_name, []):
+        dependency_added = _append_mod(ron, dependency)
+        if dependency_added:
+            _instantiate_mod_if_available(wd, cfg_fn, dependency)
+
+    _instantiate_mod_if_available(wd, cfg_fn, mod_name)
+    return changed
+
+
+def _disable_mod_for_run(ron: Ron, mod_name: str) -> bool:
+    """Remove a mod when doing so will not violate dependency guards."""
+    active_mods = set(ron.mods or [])
+    blockers = [
+        blocker for blocker in MOD_DISABLE_GUARDS.get(mod_name, [])
+        if blocker in active_mods
+    ]
+    if blockers:
+        pretty = ", ".join(sorted(MOD_DISPLAY_NAMES.get(b, b) for b in blockers))
+        label = MOD_DISPLAY_NAMES.get(mod_name, mod_name)
+        raise ValueError(f"Disable {pretty} before removing {label}.")
+
+    if mod_name not in active_mods:
+        return False
+
+    ron.remove_mod(mod_name)
+    return True
+
+
+def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool) -> dict:
+    """Toggle a project mod and return the updated state payload."""
+    if mod_name not in MOD_DISPLAY_NAMES:
+        raise ValueError(f"Unknown module '{mod_name}'.")
+
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    ron = Ron.getInstance(wd)
+    cfg_fn = f"{config}.cfg"
+
+    if enabled:
+        changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
+    else:
+        changed = _disable_mod_for_run(ron, mod_name)
+
+    return {
+        "mod": mod_name,
+        "enabled": enabled,
+        "changed": bool(changed),
+        "mods": list(ron.mods or []),
+        "label": MOD_DISPLAY_NAMES.get(mod_name, mod_name),
+    }
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks')
@@ -371,3 +473,27 @@ def task_set_readonly(runid, config):
         return exception_factory('Error queuing readonly task', runid=runid)
 
     return success_factory({'readonly': desired_state, 'job_id': job.id})
+
+
+@project_bp.route('/runs/<string:runid>/<config>/tasks/set_mod', methods=['POST'])
+@project_bp.route('/runs/<string:runid>/<config>/tasks/set_mod/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
+def task_set_mod(runid, config):
+    payload = parse_request_payload(request, trim_strings=True, boolean_fields={'enabled'})
+    mod_name = payload.get('mod')
+    enabled = payload.get('enabled')
+
+    if mod_name in (None, ''):
+        return error_factory('mod is required')
+    if enabled is None or isinstance(enabled, str):
+        return error_factory('enabled must be boolean')
+
+    mod_key = str(mod_name).strip()
+    try:
+        state = set_project_mod_state(runid, config, mod_key, bool(enabled))
+    except ValueError as exc:
+        return error_factory(str(exc))
+    except Exception:
+        return exception_factory('Error updating module state', runid=runid)
+
+    return success_factory(state)

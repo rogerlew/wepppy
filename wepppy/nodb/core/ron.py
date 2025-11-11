@@ -989,6 +989,7 @@ class RonViewModel(object):
         self.readonly = _try_bool(ron.readonly)
         self.public = _try_bool(ron.public)
         self.pup_relpath = ron.pup_relpath
+        self.mods = [mod for mod in ron.mods]
 
     @classmethod
     def getInstanceFromRunID(cls, runid: str) -> 'RonViewModel':

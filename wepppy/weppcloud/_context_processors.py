@@ -113,13 +113,15 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
         from wepppy.nodb.core.ron import RonViewModel
         runid = None
         path_parts = request.path.split('/')
+
         try:
             _indx = path_parts.index('runs')
             runid = path_parts[_indx + 1]
             ron = RonViewModel.getInstanceFromRunID(runid)
-            return dict(current_ron=ron)
-        except:
-            return dict(current_ron=None)
+            mods = list(getattr(ron, 'mods', []) or [])
+            return dict(current_ron=ron, current_mods=mods)
+        except Exception:
+            return dict(current_ron=None, current_mods=[])
 
     @app.context_processor
     def security_processor():

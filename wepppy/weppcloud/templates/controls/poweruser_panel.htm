@@ -244,20 +244,6 @@
                 Disturbed Parameters Doc
               </a>
             {% endif %}
-            {% if 'omni' not in ron.mods %}
-              <button type="button"
-                      class="pure-button pure-button-secondary"
-                      data-project-action="migrate-omni">
-                Omni Migration
-              </button>
-            {% endif %}
-            {% if 'path_ce' not in ron.mods %}
-              <button type="button"
-                      class="pure-button pure-button-secondary"
-                      data-project-action="enable-path-ce">
-                Enable PATH Cost-Effective
-              </button>
-            {% endif %}
             {% if ron.profile_recorder_assembler_enabled and current_user.has_role('Admin') %}
               <button type="button"
                       class="pure-button pure-button-secondary"

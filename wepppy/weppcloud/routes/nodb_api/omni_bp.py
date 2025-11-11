@@ -6,6 +6,7 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.omni import Omni
 from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.core import Watershed
+from .project_bp import set_project_mod_state
 
 
 omni_bp = Blueprint('omni', __name__)
@@ -39,25 +40,11 @@ def get_scenario_run_state(runid, config):
 def omni_migration(runid, config):
     authorize(runid, config)
     try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        if 'omni' in ron._mods:
-            return error_factory('omni already in mods')
-        
-        with ron.locked():
-            ron._mods.append('omni')
-
-            if 'treatments' not in ron._mods:
-                ron._mods.append('treatments')
-                
-        cfg_fn = f'{config}.cfg'
-        Omni(wd, cfg_fn)
-
-        if not _exists(_join(wd, 'treatments.nodb')):
-            Treatments(wd, cfg_fn)
-
+        set_project_mod_state(runid, config, 'omni', True)
         return success_factory("Reload project to continue")
-    except:
+    except ValueError as exc:
+        return error_factory(str(exc))
+    except Exception:
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
 
 

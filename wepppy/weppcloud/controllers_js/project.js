@@ -12,6 +12,7 @@ var Project = (function () {
     var READONLY_SELECTOR = '[data-project-toggle="readonly"]';
     var PUBLIC_SELECTOR = '[data-project-toggle="public"]';
     var ACTION_SELECTOR = '[data-project-action]';
+    var MOD_SELECTOR = '[data-project-mod]';
     var GLOBAL_UNIT_SELECTOR = '[data-project-unitizer="global"]';
     var CATEGORY_UNIT_SELECTOR = '[data-project-unitizer="category"]';
 
@@ -307,11 +308,15 @@ var Project = (function () {
             project.events = emitter;
         }
 
+        var runContext = typeof window !== "undefined" ? window.runContext || {} : {};
         var state = {
             name: firstFieldValue(dom, NAME_SELECTOR, ""),
             scenario: firstFieldValue(dom, SCENARIO_SELECTOR, ""),
             readonly: readToggleState(dom, READONLY_SELECTOR, false),
-            public: readToggleState(dom, PUBLIC_SELECTOR, false)
+            public: readToggleState(dom, PUBLIC_SELECTOR, false),
+            mods: Array.isArray(runContext.mods && runContext.mods.list)
+                ? runContext.mods.list.slice()
+                : []
         };
 
         project.state = state;
@@ -633,6 +638,57 @@ var Project = (function () {
         };
         project.setPublic = project.set_public;
 
+        project.set_mod = function (modName, enabled, options) {
+            options = options || {};
+            var normalized = typeof modName === "string" ? modName.trim() : "";
+            if (!normalized) {
+                return Promise.resolve(null);
+            }
+            var desiredState = Boolean(enabled);
+            var input = options.input || null;
+            if (input) {
+                input.disabled = true;
+            }
+
+            return http.request(url_for_run("tasks/set_mod"), {
+                method: "POST",
+                json: { mod: normalized, enabled: desiredState }
+            }).then(function (result) {
+                var response = unpackResponse(result);
+                if (isSuccess(response)) {
+                    if (options.notify !== false) {
+                        var label = response.Content && response.Content.label ? response.Content.label : normalized;
+                        var verb = desiredState ? "enabled" : "disabled";
+                        project.notifyCommandBar(label + " " + verb + ". Reloading…");
+                    }
+                    window.location.reload();
+                    return response;
+                }
+
+                if (input) {
+                    input.disabled = false;
+                    input.checked = !desiredState;
+                }
+                if (response) {
+                    project.pushResponseStacktrace(project, response);
+                }
+                if (options.notify !== false) {
+                    project.notifyCommandBar("Unable to update module.", { duration: null });
+                }
+                return response;
+            }).catch(function (error) {
+                if (input) {
+                    input.disabled = false;
+                    input.checked = !desiredState;
+                }
+                notifyError("Error updating module state", error);
+                if (options.notify !== false) {
+                    project.notifyCommandBar("Error updating module.", { duration: null });
+                }
+                return null;
+            });
+        };
+
         project.clear_locks = function () {
             return http.request(url_for_run("tasks/clear_locks"), {
                 method: "GET",
@@ -648,39 +704,6 @@ var Project = (function () {
             }).catch(function (error) {
                 notifyError("Error clearing locks", error);
                 window.alert("Error clearing locks");
-                return null;
-            });
-        };
-
-        project.migrate_to_omni = function () {
-            return http.getJson(url_for_run("tasks/omni_migration")).then(function (response) {
-                if (response && response.Success === true) {
-                    window.alert("Project has been migrated to Omni. Page will now refresh.");
-                    window.location.reload();
-                } else {
-                    window.alert("Error migrating project to Omni");
-                }
-                return response;
-            }).catch(function (error) {
-                notifyError("Error migrating project to Omni", error);
-                window.alert("Error migrating project to Omni");
-                return null;
-            });
-        };
-
-        project.enable_path_cost_effective = function () {
-            return http.getJson(url_for_run("tasks/path_cost_effective_enable")).then(function (response) {
-                if (response && response.Success === true) {
-                    window.alert("PATH Cost-Effective module enabled. Page will now refresh.");
-                    window.location.reload();
-                } else {
-                    var message = response && (response.Message || (response.Content && response.Content.message));
-                    window.alert(message || "Error enabling PATH Cost-Effective module");
-                }
-                return response;
-            }).catch(function (error) {
-                notifyError("Error enabling PATH Cost-Effective module", error);
-                window.alert("Error enabling PATH Cost-Effective module");
                 return null;
             });
         };
@@ -907,6 +930,14 @@ var Project = (function () {
             project.set_public(target.checked);
         });
 
+        dom.delegate(document, "change", MOD_SELECTOR, function (event, target) {
+            var modName = target.getAttribute("data-project-mod");
+            if (!modName) {
+                return;
+            }
+            project.set_mod(modName, target.checked, { input: target });
+        });
+
         dom.delegate(document, "click", ACTION_SELECTOR, function (event, target) {
             var action = target.getAttribute("data-project-action");
             if (!action) {
@@ -915,10 +946,6 @@ var Project = (function () {
             event.preventDefault();
             if (action === "clear-locks") {
                 project.clear_locks();
-            } else if (action === "migrate-omni") {
-                project.migrate_to_omni();
-            } else if (action === "enable-path-ce") {
-                project.enable_path_cost_effective();
             } else if (action === "recorder-promote") {
                 project.promote_recorder_profile();
             }

@@ -9,18 +9,20 @@
   - See docs/ui-docs/control-ui-styling/preflight_behavior.md for architecture
 #}
 
-{% set hide_landuse_wepp = 'rhem' in ron.mods and not playwright_load_all %}
+{% set mods_list = ron.mods or [] %}
+{% set hide_landuse_wepp = 'rhem' in mods_list and not playwright_load_all %}
 
 {% set disabled_controllers = ['landuse', 'landuseModify', 'wepp'] if hide_landuse_wepp else [] %}
 
-{% set show_rangeland_cover = 'rangeland_cover' in ron.mods or playwright_load_all %}
-{% set show_rap_ts = 'rap_ts' in ron.mods or playwright_load_all %}
-{% set show_treatments = 'treatments' in ron.mods or playwright_load_all %}
-{% set show_ash = 'ash' in ron.mods or playwright_load_all %}
-{% set show_rhem = 'rhem' in ron.mods or playwright_load_all %}
-{% set show_omni = 'omni' in ron.mods or playwright_load_all %}
-{% set show_observed = observed is not none or playwright_load_all %}
-{% set show_debris_flow = ('debris_flow' in ron.mods or playwright_load_all) and (debris_flow is not none or playwright_load_all) and user.has_role('PowerUser') %}
+{% set show_rangeland_cover = 'rangeland_cover' in mods_list or playwright_load_all %}
+{% set show_rap_ts = 'rap_ts' in mods_list or playwright_load_all %}
+{% set show_treatments = 'treatments' in mods_list or playwright_load_all %}
+{% set show_ash = 'ash' in mods_list or playwright_load_all %}
+{% set show_rhem = 'rhem' in mods_list or playwright_load_all %}
+{% set show_omni = 'omni' in mods_list or playwright_load_all %}
+{% set show_observed = 'observed' in mods_list or playwright_load_all %}
+{% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and user.has_role('PowerUser') %}
+{% set show_dss_export = 'dss_export' in mods_list or playwright_load_all %}
 {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
 
 {% block head_extras %}
@@ -94,7 +96,9 @@
         {% if show_debris_flow %}
         <li><a href="#debris-flow" class="nav-link">Debris Flow</a></li>
         {% endif %}
+        {% if show_dss_export %}
         <li><a href="#dss-export" class="nav-link">DSS Export</a></li>
+        {% endif %}
       </ul>
     </nav>
 
@@ -195,9 +199,11 @@
   </section>
 {% endif %}
 
+      {% if show_dss_export %}
       <section id="dss-export" class="wc-stack">
         {% include 'controls/dss_export_pure.htm' %}
       </section>
+      {% endif %}
 
     </section>
   </div>

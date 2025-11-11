@@ -9,7 +9,7 @@ from flask import Flask
 
 import wepppy.weppcloud.routes.nodb_api.project_bp as project_module
 
-from tests.factories.singleton import singleton_factory
+from tests.factories.singleton import LockedMixin, singleton_factory
 
 RUN_ID = "test-run"
 CONFIG = "cfg"
@@ -44,6 +44,10 @@ def project_client(
 
     monkeypatch.setattr(project_module, "load_run_context", fake_load_run_context)
 
+    def remove_mod(self, mod_name: str) -> None:
+        if mod_name in self._mods:
+            self._mods.remove(mod_name)
+
     RonStub = singleton_factory(
         "RonStub",
         attrs={
@@ -53,9 +57,15 @@ def project_client(
             "readonly": False,
             "_mods": [],
         },
+        methods={
+            "remove_mod": remove_mod,
+            "mods": property(lambda self: self._mods),
+        },
+        mixins=(LockedMixin,),
     )
 
     monkeypatch.setattr(project_module, "Ron", RonStub)
+    monkeypatch.setattr(project_module, "iter_nodb_mods_subclasses", lambda: [])
 
     dispatched: Dict[str, Any] = {}
 
@@ -189,3 +199,72 @@ def test_set_readonly_enqueues_background_job(project_client):
     assert queue_call.func is project_rq.set_run_readonly_rq
     assert queue_call.args == (RUN_ID, True)
     assert queue_call.timeout == 42
+
+
+def test_set_mod_enables_simple_module(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    assert payload["Content"]["mod"] == "rap_ts"
+    assert payload["Content"]["enabled"] is True
+    assert "rap_ts" in controller.mods
+
+
+def test_set_mod_disables_module_when_no_guards(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["rap_ts"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is True
+    assert payload["Content"]["enabled"] is False
+    assert controller.mods == []
+
+
+def test_set_mod_blocks_dependency_violation(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["omni", "treatments"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "treatments", "enabled": False},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is False
+    assert "Disable Omni" in payload["Error"]
+    assert controller.mods == ["omni", "treatments"]
+
+
+def test_set_mod_rejects_unknown_module(project_client):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "unknown", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is False
+    assert "Unknown module" in payload["Error"]
+    assert controller.mods == []

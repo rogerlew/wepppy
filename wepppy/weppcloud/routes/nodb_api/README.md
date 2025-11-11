@@ -223,6 +223,7 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/tasks/setscenario[/]` | `POST` | Ron.scenario (set) | — |
 | `/runs/<string:runid>/<config>/tasks/set_public` | `POST` | Ron.public (set) | — |
 | `/runs/<string:runid>/<config>/tasks/set_readonly` | `POST` | — | Enqueues `set_run_readonly_rq`; payload coerced via `parse_request_payload(boolean_fields={...})` |
+| `/runs/<string:runid>/<config>/tasks/set_mod[/]` | `POST` | Ron.mods (set/remove), Ron.remove_mod | Toggles optional modules, enforces dependencies, and instantiates controllers when available |
 
 ### Rangeland Cover (`wepppy.weppcloud.routes.nodb_api.rangeland_bp`)
 - **NoDb singletons**: [RangelandCover](../../../nodb/mods/rangeland_cover.py), [Ron](../../../nodb/core/ron.py)
@@ -518,4 +519,3 @@ def test_with_mocked_helper(client):
 NoDb API design and implementation by the wepppy development team.
 
 License: BSD-3 Clause (see [../../../../license.txt](../../../../license.txt))
-

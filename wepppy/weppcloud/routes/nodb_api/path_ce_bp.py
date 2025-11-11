@@ -14,6 +14,7 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.path_ce import PathCostEffective
 from wepppy.rq.path_ce_rq import TIMEOUT, run_path_cost_effective_rq
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from .project_bp import set_project_mod_state
 
 path_ce_bp = Blueprint("path_ce", __name__)
 
@@ -86,24 +87,12 @@ def _build_config_payload(raw: Dict[str, Any]) -> Dict[str, Any]:
 def enable_path_cost_effective(runid: str, config: str):
     authorize(runid, config)
     try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-
-        existing_mods = ron.mods or []
-        if "path_ce" in existing_mods:
+        state = set_project_mod_state(runid, config, "path_ce", True)
+        if not state.get("changed", False):
             return error_factory("PATH cost-effective module already enabled")
-
-        with ron.locked():
-            mods = ron.mods
-            if mods is None:
-                ron._mods = ["path_ce"]
-            elif "path_ce" not in mods:
-                ron._mods.append("path_ce")
-
-        cfg_fn = f"{config}.cfg"
-        PathCostEffective(wd, cfg_fn)
-
         return success_factory("Reload project to access PATH cost-effective controls")
+    except ValueError as exc:
+        return error_factory(str(exc))
     except Exception:
         return exception_factory(
             "Error enabling PATH cost-effective module", runid=runid

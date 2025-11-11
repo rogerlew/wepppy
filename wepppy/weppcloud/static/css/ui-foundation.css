@@ -873,9 +873,15 @@ h5:first-child {
 }
 
 .wc-run-header__theme {
-  margin-left: auto;
   display: flex;
   align-items: center;
+}
+
+.wc-run-header__right {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-md);
 }
 
 .wc-run-header__fields {
@@ -930,7 +936,6 @@ h5:first-child {
 
 .wc-run-header__menu {
   position: relative;
-  margin-left: auto;
 }
 
 .wc-run-header__menu summary::-webkit-details-marker {

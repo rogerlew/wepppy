@@ -1,4 +1,15 @@
 {% from "controls/_pure_macros.html" import header_text_field %}
+{% set header_mod_options = [
+  ('rap_ts', 'RAP Time Series'),
+  ('ash', 'Ash Transport'),
+  ('treatments', 'Treatments'),
+  ('observed', 'Observed Data'),
+  ('debris_flow', 'Debris Flow'),
+  ('dss_export', 'DSS Export'),
+  ('omni', 'Omni'),
+  ('path_ce', 'Path CE')
+] %}
+{% set current_mods = current_ron_mods if current_ron_mods is defined else (current_ron.mods or []) %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
@@ -53,8 +64,25 @@
           </a>
           {% endif %}
         </div>
-        <div class="wc-run-header__theme">
-          {% include 'header/_theme_switcher.htm' %}
+        <div class="wc-run-header__right">
+          <div class="wc-run-header__theme">
+            {% include 'header/_theme_switcher.htm' %}
+          </div>
+          <details class="wc-run-header__menu wc-run-header__mods">
+            <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
+              Mods
+            </summary>
+            <div class="wc-run-header__menu-content">
+              {% for mod_name, mod_label in header_mod_options %}
+              <label class="wc-run-header__toggle">
+                <input type="checkbox"
+                       data-project-mod="{{ mod_name }}"
+                       {% if mod_name in current_mods %}checked{% endif %}>
+                <span>{{ mod_label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </details>
         </div>
         <details class="wc-run-header__menu">
           <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
