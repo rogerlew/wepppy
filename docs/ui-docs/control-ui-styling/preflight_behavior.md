@@ -99,6 +99,7 @@ Controllers (e.g., subcatchment_delineation.js)
 | `subcatchments` | Subcatchments delineated | `TaskEnum.build_subcatchments` |
 | `watar` | WATAR (ash transport) run | `TaskEnum.run_watar` |
 | `wepp` | WEPP model run | `TaskEnum.run_wepp_watershed` |
+| `omni_scenarios` | Omni scenario runner completed after the latest WEPP run | `TaskEnum.run_omni_scenarios` |
 
 ---
 

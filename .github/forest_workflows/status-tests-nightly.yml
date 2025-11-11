@@ -1,0 +1,31 @@
+name: Status Tests Nightly
+on:
+  schedule:
+    # 02:40 AM Pacific ≈ 10:40 UTC
+    - cron: 40 10 * * *
+  workflow_dispatch: null
+jobs:
+  status-tests:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 30
+    steps:
+      - name: Run status Go tests
+        run: |
+          set -euo pipefail
+          mkdir -p telemetry
+          LOG=telemetry/status-tests.log
+          {
+            echo "=== $(date -Iseconds) :: wctl run-status-tests ==="
+            wctl run-status-tests
+          } |& tee "${LOG}"
+      - name: Upload status test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-go-tests
+          path: telemetry/status-tests.log
+          if-no-files-found: warn

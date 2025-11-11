@@ -197,6 +197,7 @@ function getSelectorForKey(key) {
         "climate": 'a[href="#climate"]',
         "rap_ts": 'a[href="#rap-ts"]',
         "wepp": 'a[href="#wepp"]',
+        "omni_scenarios": 'a[href="#omni-scenarios"]',
         "observed": 'a[href="#observed"]',
         "debris": 'a[href="#debris-flow"]',
         "watar": 'a[href="#ash"]',

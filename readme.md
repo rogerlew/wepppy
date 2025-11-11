@@ -15,6 +15,8 @@
 | [![Playwright Controllers Nightly](https://github.com/rogerlew/wepppy/actions/workflows/playwright-controllers-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/playwright-controllers-nightly.yml) | 2:15 AM PT `wctl run-playwright --suite controllers` regression sweep against the dev stack (job hints, stacktraces, controller health). |
 | [![Theme Metrics Nightly](https://github.com/rogerlew/wepppy/actions/workflows/theme-metrics-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/theme-metrics-nightly.yml) | 2:20 AM PT `wctl run-playwright --suite theme-metrics` WCAG contrast metrics by theme |
 | [![NPM Coverage Nightly](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/npm-coverage-nightly.yml) | 2:30 AM PT Jest run covering the `static-src` controllers with coverage reports. |
+| [![Preflight Tests Nightly](https://github.com/rogerlew/wepppy/actions/workflows/preflight-tests-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/preflight-tests-nightly.yml) | 2:35 AM PT `wctl run-preflight-tests` validating the Go WebSocket checklist service. |
+| [![Status Tests Nightly](https://github.com/rogerlew/wepppy/actions/workflows/status-tests-nightly.yml/badge.svg)](https://github.com/rogerlew/wepppy/actions/workflows/status-tests-nightly.yml) | 2:40 AM PT `wctl run-status-tests` exercising the Go status streamer and miniredis harness. |
 
 
 ### Dev Server Nightly Profile Tests

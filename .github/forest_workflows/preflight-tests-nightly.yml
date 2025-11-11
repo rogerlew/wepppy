@@ -1,0 +1,31 @@
+name: Preflight Tests Nightly
+on:
+  schedule:
+    # 02:35 AM Pacific ≈ 10:35 UTC
+    - cron: 35 10 * * *
+  workflow_dispatch: null
+jobs:
+  preflight-tests:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 30
+    steps:
+      - name: Run preflight Go tests
+        run: |
+          set -euo pipefail
+          mkdir -p telemetry
+          LOG=telemetry/preflight-tests.log
+          {
+            echo "=== $(date -Iseconds) :: wctl run-preflight-tests ==="
+            wctl run-preflight-tests
+          } |& tee "${LOG}"
+      - name: Upload preflight test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-go-tests
+          path: telemetry/preflight-tests.log
+          if-no-files-found: warn
