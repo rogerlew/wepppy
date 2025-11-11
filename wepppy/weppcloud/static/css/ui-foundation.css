@@ -633,6 +633,51 @@ code * {
   gap: var(--wc-space-md);
 }
 
+/* Omni scenario layout */
+.scenario-item__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--wc-space-md);
+}
+
+.scenario-item__inputs {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--wc-space-md);
+}
+
+.scenario-item__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--wc-space-md);
+}
+
+.scenario-item__field,
+.scenario-item__controls .wc-field {
+  flex: 0 0 auto;
+}
+
+.scenario-item select.wc-field__control {
+  width: 260px;
+  max-width: 100%;
+}
+
+.scenario-item__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: var(--wc-space-lg);
+  align-self: stretch;
+}
+
+.scenario-item__actions .pure-button {
+  white-space: nowrap;
+}
+
 .wc-panel {
   background: var(--wc-color-surface);
   border: 1px solid var(--wc-color-border);
@@ -1066,6 +1111,9 @@ h5:first-child {
   display: flex;
   flex-direction: column;
   gap: var(--wc-space-lg);
+}
+
+.wc-control__surface {
   padding: var(--wc-space-xl);
 }
 

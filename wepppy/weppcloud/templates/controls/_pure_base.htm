@@ -14,51 +14,53 @@
     </div>
     <span class="wc-control__summary-icon" aria-hidden="true"></span>
   </summary>
-  <form id="{% block form_id %}{% endblock %}"
-        class="wc-control__form pure-form"
-        action="javascript:void(0);"
-        enctype="multipart/form-data">
-    {% if _form_description|trim or _form_toolbar|trim %}
-    <header class="wc-control__header">
-      {% if _form_description|trim %}
-      <div class="wc-control__description">
-        {{ _form_description|trim|safe }}
-      </div>
+  <div class="wc-control__surface">
+    <form id="{% block form_id %}{% endblock %}"
+          class="wc-control__form pure-form"
+          action="javascript:void(0);"
+          enctype="multipart/form-data">
+      {% if _form_description|trim or _form_toolbar|trim %}
+      <header class="wc-control__header">
+        {% if _form_description|trim %}
+        <div class="wc-control__description">
+          {{ _form_description|trim|safe }}
+        </div>
+        {% endif %}
+        {% if _form_toolbar|trim %}
+        <div class="wc-control__toolbar">
+          {{ _form_toolbar|trim|safe }}
+        </div>
+        {% endif %}
+      </header>
       {% endif %}
-      {% if _form_toolbar|trim %}
-      <div class="wc-control__toolbar">
-        {{ _form_toolbar|trim|safe }}
-      </div>
-      {% endif %}
-    </header>
-    {% endif %}
 
-    {% block control_body %}
-    <div class="wc-control__grid">
-      <section class="wc-control__inputs">
-        {% block control_inputs %}{% endblock %}
-      </section>
-      {% block control_panels %}
-      <section class="wc-control__panels">
-        <section class="wc-control__panel">
-          <h3 class="wc-control__panel-title">Status</h3>
-          <div id="rq_job" class="wc-control__job"></div>
-          <div class="wc-control__status-text">
-            <small id="braille" class="wc-control__status-braille"></small>
-            <small id="status" class="wc-control__status-message"></small>
-          </div>
+      {% block control_body %}
+      <div class="wc-control__grid">
+        <section class="wc-control__inputs">
+          {% block control_inputs %}{% endblock %}
         </section>
-        <section class="wc-control__panel">
-          <h3 class="wc-control__panel-title">Summary</h3>
-          <div id="info" class="wc-control__panel-summary"></div>
+        {% block control_panels %}
+        <section class="wc-control__panels">
+          <section class="wc-control__panel">
+            <h3 class="wc-control__panel-title">Status</h3>
+            <div id="rq_job" class="wc-control__job"></div>
+            <div class="wc-control__status-text">
+              <small id="braille" class="wc-control__status-braille"></small>
+              <small id="status" class="wc-control__status-message"></small>
+            </div>
+          </section>
+          <section class="wc-control__panel">
+            <h3 class="wc-control__panel-title">Summary</h3>
+            <div id="info" class="wc-control__panel-summary"></div>
+          </section>
+          <section class="wc-control__panel">
+            <h3 class="wc-control__panel-title">Details</h3>
+            <div id="stacktrace" class="wc-control__stacktrace"></div>
+          </section>
         </section>
-        <section class="wc-control__panel">
-          <h3 class="wc-control__panel-title">Details</h3>
-          <div id="stacktrace" class="wc-control__stacktrace"></div>
-        </section>
-      </section>
+        {% endblock %}
+      </div>
       {% endblock %}
-    </div>
-    {% endblock %}
-  </form>
+    </form>
+  </div>
 </details>

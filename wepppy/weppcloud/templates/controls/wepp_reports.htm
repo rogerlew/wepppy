@@ -1,51 +1,137 @@
 {% extends 'controls/_content_base.htm' %}
+{% import "controls/_pure_macros.html" as ui %}
 {% set page_id = "wepp-reports" %}
+
+{% set card_description %}
+  <p class="wc-text-muted">
+    Quick links to WEPP summaries, water-balance outputs, and supporting files for this run.
+    Each link respects the active run scope and opens in a new tab.
+  </p>
+{% endset %}
+
 {% block content %}
-  <div class="form-group row">
-      <h3>Run Reports</h3>
-  </div>
-  {% if climate.is_single_storm %}
-  <div>
-      <h4>WEPP Results</h4>
-      <div class="alert alert-info"><strong>Note:</strong>
-      A limited number of reports are available for single storms
-      </div>
-      <p><a href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config) }}" target="_blank">Watershed Loss Summary</a></p>
-      <p><a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/') }}" target="_blank">View WEPP Outputs Directory</a></p>
-      {% if not climate.ss_batch_storms %}
-          <p>&gt; <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/loss_pw0.txt') }}" target="_blank">Watershed Loss Summary</a></p>
-          <p>&gt; <a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/ebe_pw0.txt') }}" target="_blank">Watershed Event by Event Output</a></p>
+  <div class="wc-stack">
+    {% call ui.card_shell(
+         "Run Reports",
+         description=card_description | trim) %}
+      {% set is_single_storm = climate.is_single_storm %}
+      <section class="wc-stack">
+        <h4 class="wc-heading wc-heading--sm">WEPP Results</h4>
+        {% if is_single_storm %}
+          <div class="wc-alert wc-alert--info" role="status" aria-live="polite">
+            <p class="wc-alert__body">
+              <strong>Note:</strong>
+              A limited number of reports are available for single storms.
+            </p>
+          </div>
+          <div class="wc-stack">
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              Watershed Loss Summary
+            </a>
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/') }}"
+               target="_blank"
+               rel="noopener">
+              View WEPP Outputs Directory
+            </a>
+            {% if not climate.ss_batch_storms %}
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/loss_pw0.txt') }}"
+               target="_blank"
+               rel="noopener">
+              Watershed Loss Summary File
+            </a>
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='wepp/output/ebe_pw0.txt') }}"
+               target="_blank"
+               rel="noopener">
+              Watershed Event-by-Event Output
+            </a>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="wc-stack">
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              Watershed Loss Summary
+            </a>
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('wepp.report_wepp_return_periods', runid=runid, config=config, exclude_yr_indxs='0,1') }}"
+               target="_blank"
+               rel="noopener">
+              Return Periods Report
+            </a>
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('wepp.report_wepp_avg_annual_by_landuse', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              Summary by Landuse Report
+            </a>
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              Sediment Characteristics Report
+            </a>
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('weppcloud.deval_details', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              The Deval in the Details Report
+            </a>
+          </div>
+        {% endif %}
+      </section>
+
+      {% if not is_single_storm %}
+      <section class="wc-stack">
+        <h4 class="wc-heading wc-heading--sm">Water Balance Reports</h4>
+        <div class="wc-stack">
+          <a class="wc-link wc-link--file"
+             href="{{ url_for_run('wepp.report_wepp_avg_annual_watbal', runid=runid, config=config) }}"
+             target="_blank"
+             rel="noopener">
+            Average Annual Report
+          </a>
+          {% if user.has_role('PowerUser') %}
+          <a class="wc-link wc-link--file"
+             href="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config) }}"
+             target="_blank"
+             rel="noopener">
+            Yearly Report
+          </a>
+          {% endif %}
+          <a class="wc-link wc-link--file"
+             href="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config) }}"
+             target="_blank"
+             rel="noopener">
+            Daily Runoff / Lateral Flow / Baseflow Graph
+          </a>
+        </div>
+      </section>
       {% endif %}
-  </div>
-  {% else %}
-  <div>
-      <h4>WEPP Results</h4>
-      <p><a href="{{ url_for_run('wepp.report_wepp_loss', runid=runid, config=config) }}" target="_blank">Watershed Loss Summary</a></p>
-      <p><a href="{{ url_for_run('wepp.report_wepp_return_periods', runid=runid, config=config, exclude_yr_indxs='0,1') }}" target="_blank">Return Periods Report</a></p>
-      <!-- <p><a href="report/wepp/frq_flood/" target="_blank">Flooding Frequency Report</a></p> -->
-      <p><a href="{{ url_for_run('wepp.report_wepp_avg_annual_by_landuse', runid=runid, config=config) }}" target="_blank">Summary by Landuse Report</a></p>
-      <p><a href="{{ url_for_run('wepp.report_wepp_sediment_delivery', runid=runid, config=config) }}" target="_blank">Sediment Characteristics Report</a></p>
-      <p><a href="{{ url_for_run('weppcloud.deval_details', runid=runid, config=config) }}" target="_blank">The Deval in the Details Report</a></p>
-  </div>
-  <div>
-      <h4>Water Balance Reports</h4>
-      <p><a href="{{ url_for_run('wepp.report_wepp_avg_annual_watbal', runid=runid, config=config) }}" target="_blank">Average Annual Report</a></p>
-      {% if user.has_role('PowerUser') %}
-      <p><a href="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config) }}" target="_blank">Yearly Report</a></p>
+
+      {% set show_undisturbed = prep and prep.has_sbs and ('disturbed' in climate.mods) %}
+      {% if show_undisturbed %}
+      <section class="wc-stack">
+        <h4 class="wc-heading wc-heading--sm">Fork Project and Run Undisturbed</h4>
+        <p class="wc-text-muted">
+          Create a derived run with SBS removed, landuse and soils rebuilt, and WEPP executed in
+          undisturbed mode.
+        </p>
+        <a class="wc-link wc-link--file"
+           href="{{ url_for_run('fork.rq_fork_console', runid=runid, config=config, undisturbify='true') }}"
+           target="_blank"
+           rel="noopener nofollow">
+          Fork, rebuild, and run WEPP undisturbed
+        </a>
+      </section>
       {% endif %}
-      <p><a href="{{ url_for_run('wepp.plot_wepp_streamflow', runid=runid, config=config) }}" target="_blank">Daily Runoff/Lateral Flow/Baseflow Graph</a></p>
+    {% endcall %}
   </div>
-  {% endif %}
-  <hr/>
-  {% if prep.has_sbs %}
-    {% if 'disturbed' in climate.mods %}
-  <div class="form-group row">
-      <h3>Fork Project and Run Undisturbed</h3>
-  </div>
-  <div>
-      <p><a href="{{ url_for_run('fork.rq_fork_console', runid=runid, config=config, undisturbify='true') }}" target="_blank" rel="nofollow">Fork Project, Remove SBS, Rebuild Landuse and Soils, and Run WEPP Undisturbed.</a></p>
-  </div>
-    {% endif %}
-  {% endif %}
-  <hr/>
 {% endblock content %}

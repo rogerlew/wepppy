@@ -1,18 +1,34 @@
-<table class="table table-bordered">
+{% set first_scenario = scenarios|first if scenarios else None %}
+{% set water_units = first_scenario.water_discharge.unit if first_scenario and first_scenario.water_discharge.unit else 'm^3/yr' %}
+{% set soil_units = first_scenario.soil_loss.unit if first_scenario and first_scenario.soil_loss.unit else 'tonne/yr' %}
+
+<div class="wc-table-wrapper">
+  <table class="wc-table wc-table--dense">
     <thead>
-        <tr>
-            <th>Scenario</th>
-            <th>Avg. Ann. Water Discharge from Outlet (m³/yr)</th>
-            <th>Avg. Ann. Total Hillslope Soil Loss (tonne/yr)</th>
-        </tr>
+      <tr>
+        <th scope="col">Scenario</th>
+        <th scope="col" class="wc-text-right">
+          <div>Avg. Ann. Water Discharge from Outlet</div>
+          {{ unitizer_units(water_units) | safe }}
+        </th>
+        <th scope="col" class="wc-text-right">
+          <div>Avg. Ann. Total Hillslope Soil Loss</div>
+          {{ unitizer_units(soil_units) | safe }}
+        </th>
+      </tr>
     </thead>
     <tbody>
-        {% for scenario in scenarios %}
-        <tr>
-            <td>{{ scenario.name }}</td>
-            <td>{{ scenario.water_discharge.value|float|round(2) }}</td>
-            <td>{{ scenario.soil_loss.value|float|round(2) }}</td>
-        </tr>
-        {% endfor %}
+      {% for scenario in scenarios %}
+      <tr>
+        <th scope="row">{{ scenario.name }}</th>
+        <td class="wc-text-right">
+          {{ unitizer(scenario.water_discharge.value, scenario.water_discharge.unit or water_units) | safe }}
+        </td>
+        <td class="wc-text-right">
+          {{ unitizer(scenario.soil_loss.value, scenario.soil_loss.unit or soil_units) | safe }}
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+</div>

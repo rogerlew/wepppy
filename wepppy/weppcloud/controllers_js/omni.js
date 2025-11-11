@@ -622,23 +622,25 @@ var Omni = (function () {
             scenarioItem.dataset.index = String(scenarioCounter++);
             scenarioItem.dataset.omniScenarioItem = "true";
             scenarioItem.innerHTML = [
-                '<div class="wc-card__body wc-stack">',
-                '  <div class="wc-field">',
-                '    <label class="wc-field__label" for="omni_scenario_' + scenarioItem.dataset.index + '">Scenario</label>',
-                '    <select class="wc-field__control"',
-                '            id="omni_scenario_' + scenarioItem.dataset.index + '"',
-                '            name="scenario"',
-                '            data-omni-role="scenario-select">',
-                '      <option value="">Select scenario</option>',
-                '    </select>',
+                '<div class="wc-card__body scenario-item__body">',
+                '  <div class="scenario-item__inputs">',
+                '    <div class="wc-field scenario-item__field">',
+                '      <label class="wc-field__label" for="omni_scenario_' + scenarioItem.dataset.index + '">Scenario</label>',
+                '      <select class="wc-field__control"',
+                '              id="omni_scenario_' + scenarioItem.dataset.index + '"',
+                '              name="scenario"',
+                '              data-omni-role="scenario-select">',
+                '        <option value="">Select scenario</option>',
+                '      </select>',
+                '    </div>',
+                '    <div class="scenario-controls scenario-item__controls" data-omni-scenario-controls></div>',
                 '  </div>',
-                '  <div class="scenario-controls wc-stack" data-omni-scenario-controls></div>',
-                '</div>',
-                '<footer class="wc-card__footer">',
-                '  <button type="button" class="pure-button button-error disable-readonly" data-omni-action="remove-scenario">',
-                '    Remove',
-                '  </button>',
-                '</footer>'
+                '  <div class="scenario-item__actions">',
+                '    <button type="button" class="pure-button button-error disable-readonly" data-omni-action="remove-scenario">',
+                '      Remove',
+                '    </button>',
+                '  </div>',
+                '</div>'
             ].join("\n");
 
             scenarioContainer.appendChild(scenarioItem);

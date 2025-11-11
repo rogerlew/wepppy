@@ -1442,6 +1442,7 @@ class Omni(NoDbBase):
                 treatments.treatments_domlc_d = treatments_domlc_d
                 treatments.build_treatments()
 
+        landuse.build_managements()
         wepp = Wepp.getInstance(new_wd)
 
         # use the climate and slope from the parent project's wepp/run directory
