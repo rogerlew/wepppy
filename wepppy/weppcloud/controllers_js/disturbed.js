@@ -937,16 +937,14 @@ var Disturbed = (function () {
                 syncModeFromServer(controllerContext.mode, controllerContext.uniformSeverity, { emit: false });
             }
             
-            // Bootstrap baer controller if it exists and has initial SBS
-            if (flags.initialHasSbs) {
-                try {
-                    var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
-                    if (baer && typeof baer.bootstrap === "function") {
-                        baer.bootstrap(context);
-                    }
-                } catch (e) {
-                    console.warn("[Disturbed] Failed to bootstrap Baer controller", e);
+            // Always bootstrap the Baer controller so task events are wired even before SBS exists.
+            try {
+                var baer = typeof Baer !== "undefined" ? Baer.getInstance() : null;
+                if (baer && typeof baer.bootstrap === "function") {
+                    baer.bootstrap(context);
                 }
+            } catch (e) {
+                console.warn("[Disturbed] Failed to bootstrap Baer controller", e);
             }
             
             return disturbed;
