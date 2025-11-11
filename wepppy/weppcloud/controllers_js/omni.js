@@ -810,7 +810,8 @@ var Omni = (function () {
 
         omni.load_scenarios_from_backend = function () {
             clearStatus();
-            return http.getJson("api/omni/get_scenarios").then(function (data) {
+            var endpoint = url_for_run("api/omni/get_scenarios");
+            return http.getJson(endpoint).then(function (data) {
                 if (!Array.isArray(data)) {
                     throw new Error("Invalid scenario format");
                 }

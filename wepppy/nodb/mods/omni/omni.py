@@ -50,6 +50,7 @@ from wepppy.nodb.core import Climate, Soils, Watershed, Wepp
 from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_setter
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
+from wepppy.wepp.interchange import run_wepp_hillslope_interchange
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -1475,11 +1476,36 @@ class Omni(NoDbBase):
                                 sol_relpath=sol_relpath,
                                 max_workers=self.rq_job_pool_max_worker_per_scenario_task)
 
+        with self.timed(f'  {scenario_name}: run hillslope interchange'):
+                
+            def _normalize_start_year(value):
+                try:
+                    if value is None:
+                        return None
+                    if isinstance(value, str) and value.strip() == '':
+                        return None
+                    return int(value)
+                except (TypeError, ValueError):
+                    return None
+
+            start_year = None
+            climate = Climate.getInstance(new_wd)
+            for candidate in (
+                getattr(climate, "observed_start_year", None),
+                getattr(climate, "future_start_year", None),
+            ):
+                normalized = _normalize_start_year(candidate)
+                if normalized is not None:
+                    start_year = normalized
+                    break
+            run_wepp_hillslope_interchange(wepp.output_dir, start_year=start_year)
+
         with self.timed(f'  {scenario_name}: prep watershed'):
             wepp.prep_watershed()
 
         with self.timed(f'  {scenario_name}: run watershed'):
             wepp.run_watershed()
+            # run_wepp_watershed_interchange and generate_interchange_documentation is at end of wepp.run_watershed()
 
         return new_wd, scenario_name
 

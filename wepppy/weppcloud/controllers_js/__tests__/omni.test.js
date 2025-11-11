@@ -125,6 +125,7 @@ describe("Omni controller", () => {
 
         await omni.load_scenarios_from_backend();
 
+        expect(global.url_for_run).toHaveBeenCalledWith("api/omni/get_scenarios");
         expect(getJsonMock).toHaveBeenCalledWith("api/omni/get_scenarios");
 
         const select = document.querySelector("[data-omni-role='scenario-select']");
