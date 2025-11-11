@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test';
 import controllerCases from './controller-cases.js';
 
+/**
+ * @typedef {import('@playwright/test').Page} Page
+ * @typedef {import('@playwright/test').Locator} Locator
+ * @typedef {Object} ControllerCase
+ * @property {string} name
+ * @property {string} formSelector
+ * @property {string} actionSelector
+ * @property {string|RegExp} requestUrlPattern
+ * @property {string} stacktraceLocator
+ * @property {string} [hintLocator]
+ * @property {"rq_job"} [workflow]
+ * @property {(args: { page: Page, phase?: "success"|"failure" }) => Promise<void>|void} [prepareAction]
+ * @property {number} [failureStatus]
+ * @property {boolean} [requireHintVisible]
+ * @property {boolean} [expectJobHint]
+ * @property {string} [skipMessage]
+ */
+
 const baseURL = process.env.SMOKE_BASE_URL || 'http://localhost:8080';
 const shouldProvision = process.env.SMOKE_CREATE_RUN !== 'false';
 const keepRun = process.env.SMOKE_KEEP_RUN === 'true';
@@ -132,16 +150,17 @@ test.describe('controller regression suite', () => {
 
 /**
  * Generic RQ job workflow for controllers that return job_id on success.
- * 
+ *
  * Tests two scenarios:
  * 1. Successful request that returns a job_id - verifies hint is populated
  * 2. Failed request that returns stacktrace - verifies stacktrace display and hint preservation
- * 
+ *
  * @param {Object} params
  * @param {Page} params.page - Playwright page object
- * @param {Object} params.controller - Controller configuration from controller-cases.js
+ * @param {ControllerCase} params.controller - Controller configuration from controller-cases.js
  * @param {Locator} params.hintLocator - Locator for the job hint element
  * @param {Locator} params.stacktraceLocator - Locator for the stacktrace display element
+ * @returns {Promise<void>}
  */
 async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocator }) {
   const button = page.locator(controller.actionSelector);
@@ -149,12 +168,12 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   // Test 1: Successful build with job_id (verify hint is populated)
   const jobId = `pw-landuse-${Date.now()}`;
   
-  await page.route(controller.requestUrlPattern, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ Success: true, job_id: jobId })
-    });
+      await page.route(controller.requestUrlPattern, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ Success: true, job_id: jobId })
+        });
   });
 
   if (typeof controller.prepareAction === 'function') {

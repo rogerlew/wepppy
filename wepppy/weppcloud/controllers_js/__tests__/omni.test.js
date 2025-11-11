@@ -114,6 +114,8 @@ describe("Omni controller", () => {
             jobId: "job-321",
             scenarios: [{ type: "uniform_low" }]
         });
+        const hint = document.getElementById("hint_run_omni");
+        expect(hint.innerHTML).toContain("job-321");
     });
 
     test("load_scenarios_from_backend hydrates scenario controls", async () => {

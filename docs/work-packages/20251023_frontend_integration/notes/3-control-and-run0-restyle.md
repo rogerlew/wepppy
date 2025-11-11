@@ -5,7 +5,7 @@
 ### 1.1 Control templates
 - All controller views now extend the Pure macros (`controls/*_pure.htm`). Legacy `_base.htm` is retained only for historical reference and archived templates.【F:wepppy/weppcloud/templates/controls/map_pure.htm†L1-L5】
 - Individual controls (e.g., `landuse.htm`) embed large conditional blocks that pivot on locale flags and module toggles (such as `ron.locales` or `ron.mods`), leading to deeply nested `<option>` lists and duplicated markup for display modes and advanced inputs.【F:wepppy/weppcloud/templates/controls/landuse.htm†L1-L117】
-- Specialized panes like Omni and BatchRunner pull in extra partials under `controls/omni/` or separate blueprints, but they still rely on the `_base.htm` DOM contract for status, stacktrace, and summary rendering.
+- Specialized panes like Omni and BatchRunner rely on dedicated Pure templates (for example `controls/omni_scenarios_pure.htm` and `controls/omni_contrasts_pure.htm`) plus occasional blueprint helpers, but they still honour the shared `_base.htm` DOM contract for status, stacktrace, and summary rendering.
 
 ### 1.2 Run 0 page shell
 - `runs0_pure.htm` replaced the legacy `0.htm`, providing the Pure layout, table-of-contents, and shared command bar. The previous Bootstrap-era document is archived for reference only.【F:wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm†L1-L140】

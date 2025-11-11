@@ -9,6 +9,31 @@ const prepareSetOutletLonLat = async ({ page }) => {
   await entryField.fill("-116.95, 46.73");
 };
 
+const prepareOmniScenario = async ({ page }) => {
+  const addButton = page.locator("#add-omni-scenario");
+  await addButton.click();
+  const scenarioSelect = page.locator("[data-omni-role='scenario-select']").last();
+  await scenarioSelect.waitFor({ state: "visible" });
+  await scenarioSelect.selectOption({ value: "uniform_low" });
+};
+
+/**
+ * @typedef {Object} ControllerCase
+ * @property {string} name
+ * @property {string} formSelector
+ * @property {string} actionSelector
+ * @property {string|RegExp} requestUrlPattern
+ * @property {string} stacktraceLocator
+ * @property {string} [hintLocator]
+ * @property {"rq_job"} [workflow]
+ * @property {(args: { page: import("@playwright/test").Page, phase?: "success"|"failure" }) => Promise<void>|void} [prepareAction]
+ * @property {number} [failureStatus]
+ * @property {boolean} [requireHintVisible]
+ * @property {boolean} [expectJobHint]
+ * @property {string} [skipMessage]
+ */
+
+/** @type {ControllerCase[]} */
 const controllerCases = [
   {
     name: "landuse",
@@ -86,6 +111,17 @@ const controllerCases = [
     stacktraceLocator: "#wepp_stacktrace_panel [data-stacktrace-body]",
     hintLocator: "#hint_run_wepp",
     workflow: "rq_job"
+  },
+  {
+    name: "omni",
+    formSelector: "form#omni_form",
+    actionSelector: "#btn_run_omni",
+    requestUrlPattern: "**/rq/api/run_omni",
+    stacktraceLocator: "#omni_form [data-stacktrace-body]",
+    hintLocator: "#hint_run_omni",
+    workflow: "rq_job",
+    prepareAction: prepareOmniScenario,
+    requireHintVisible: true
   },
   {
     name: "observed",

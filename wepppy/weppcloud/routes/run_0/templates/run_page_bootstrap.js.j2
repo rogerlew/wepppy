@@ -169,7 +169,17 @@
     }
 
     function createBootstrapEntries(context) {
-        var modFlags = context.mods && context.mods.flags ? context.mods.flags : {};
+        var modFlags = context.mods && context.mods.flags ? Object.assign({}, context.mods.flags) : {};
+        if (context.flags && context.flags.playwrightLoadAll) {
+            modFlags.baer = true;
+            modFlags.disturbed = true;
+            modFlags.rangeland_cover = true;
+            modFlags.omni = true;
+            modFlags.rhem = true;
+            modFlags.ash = true;
+            modFlags.path_ce = true;
+            modFlags.debris_flow = true;
+        }
         var disabledControllers = new Set(
             (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
         );

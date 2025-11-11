@@ -478,6 +478,20 @@ var Omni = (function () {
         }
     }
 
+    function formatJobHint(jobId) {
+        if (!jobId) {
+            return "";
+        }
+        var host = "";
+        if (typeof window !== "undefined" && window.location && window.location.host) {
+            host = window.location.host;
+        }
+        var dashboardUrl = host
+            ? "https://" + host + "/weppcloud/rq/job-dashboard/" + encodeURIComponent(jobId)
+            : "/weppcloud/rq/job-dashboard/" + encodeURIComponent(jobId);
+        return 'job_id: <a href="' + dashboardUrl + '" target="_blank" rel="noopener noreferrer">' + jobId + "</a>";
+    }
+
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
@@ -717,9 +731,6 @@ var Omni = (function () {
             if (statusAdapter && typeof statusAdapter.html === "function") {
                 statusAdapter.html("");
             }
-            if (hintAdapter && typeof hintAdapter.text === "function") {
-                hintAdapter.text("");
-            }
             if (stacktraceAdapter && typeof stacktraceAdapter.html === "function") {
                 stacktraceAdapter.html("");
             }
@@ -767,8 +778,11 @@ var Omni = (function () {
                 if (body && body.Success === true) {
                     setStatus("run_omni_rq job submitted: " + body.job_id);
                     omni.set_rq_job_id(omni, body.job_id);
-                    if (hintAdapter && typeof hintAdapter.text === "function") {
-                        hintAdapter.text("");
+                    if (hintAdapter && typeof hintAdapter.html === "function") {
+                        hintAdapter.html(formatJobHint(body.job_id));
+                        if (typeof hintAdapter.show === "function") {
+                            hintAdapter.show();
+                        }
                     }
                     if (omniEvents && typeof omniEvents.emit === "function") {
                         omniEvents.emit("omni:run:completed", {
