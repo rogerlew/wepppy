@@ -70,7 +70,7 @@ Unit tests run via `wctl run-preflight-tests` (defaults to `go test ./...`). For
 
 - ✅ Reliable Go test harness covering configuration, Redis retry policies, and end-to-end WebSocket updates.
 - ☐ Documented load/chaos benchmarks with reproducible scripts.
-- ☐ CI job (or scheduled pipeline) invoking `wctl run-preflight-tests` with and without `-tags=integration`.
+- ✅ CI job (`preflight-tests-nightly`, 02:35 AM PT) invoking `wctl run-preflight-tests` with optional `-tags=integration` arguments.
 - ☐ README/AGENTS updates referencing chaos and load documentation once finalized.
 
 ## 5. Reference Commands

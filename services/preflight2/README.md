@@ -272,7 +272,7 @@ runaway calls during outages.
 
 - **Local builds**: `go build ./...` from `services/preflight2` compiles the binary. If Go tooling isn’t installed, `docker compose build preflight` performs the build inside a container and produces an updated `go.sum`.
 - **Formatting & linting**: Run `go fmt ./...` before committing. Optional linters (e.g., `golangci-lint run ./...`) are encouraged but not required yet.
-- **Testing**: Use the compose-managed Go builder. `wctl run-preflight-tests` runs `go test ./...`; append flags such as `-tags=integration ./internal/server` to exercise the miniredis/WebSocket harness. See `docs/testing-strategy-and-implementation-plan.md` for the full workflow.
+- **Testing**: Use the compose-managed Go builder. `wctl run-preflight-tests` runs `go test ./...`; append flags such as `-tags=integration ./internal/server` to exercise the miniredis/WebSocket harness. See `docs/testing-strategy-and-implementation-plan.md` for the full workflow. A nightly GitHub Action (`preflight-tests-nightly`, 02:35 AM PT) executes the same command on self-hosted runners to catch regressions automatically.
 - **Configuration management**: Prefer injecting `PREFLIGHT_*` vars via `.env` or Compose overrides rather than hardcoding defaults. Avoid committing secrets; Redis credentials should come from the environment or Docker secrets.
 - **Shared utilities**: If you need common code between `preflight2` and `status2`, consider creating `services/common` for shared logging/config helpers to avoid divergence.
 

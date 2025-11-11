@@ -70,7 +70,7 @@ All integration tests should run behind a `-tags=integration` build flag so they
 2. **Integration harness**: Create `internal/server/integration_test.go` guarded behind `integration` build tag. Reuse helper to spin up full server, start real WebSocket client using `websocket.Dial`, and manipulate Redis.
 3. **CI wiring**: Update project CI to run `go test ./...` on every change; add optional job for `-tags=integration` triggered via label or nightly schedule.
 
-**Status:** ✅ Unit tests cover configuration overrides and retry helpers (`internal/config/config_test.go`, `internal/server/server_test.go`). An integration harness backed by `miniredis` validates Redis→WebSocket forwarding (`internal/server/integration_test.go`, enabled with `-tags=integration`). The new `wctl run-status-tests` helper runs both suites, and accepts extra arguments to toggle integration coverage in CI.
+**Status:** ✅ Unit tests cover configuration overrides and retry helpers (`internal/config/config_test.go`, `internal/server/server_test.go`). An integration harness backed by `miniredis` validates Redis→WebSocket forwarding (`internal/server/integration_test.go`, enabled with `-tags=integration`). The new `wctl run-status-tests` helper runs both suites, and accepts extra arguments to toggle integration coverage in CI. Nightly execution is handled by the `status-tests-nightly` GitHub Action (02:40 AM PT) to ensure the Go builder runs on schedule.
 
 ### Phase 3 – Observability & Load Validation (Weeks 3–4)
 

@@ -242,6 +242,7 @@ Run the Go suite via:
 
 - `wctl run-status-tests` — executes `go test ./...` inside the compose-managed Go builder.
 - `wctl run-status-tests -tags=integration ./internal/server` — adds the Redis/WebSocket integration harness on demand.
+- Nightly coverage runs via the `status-tests-nightly` GitHub Action at 02:40 AM PT, ensuring both suites execute on self-hosted infrastructure.
 
 ## 13. Migration Notes
 
