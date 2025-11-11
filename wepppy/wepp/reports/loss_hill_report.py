@@ -232,8 +232,11 @@ class HillSummaryReport(ReportBase):
     def _infer_wd_from_loss(loss: Any) -> Path:
         """Derive the run directory from a ``loss`` object."""
         fn_path = Path(loss.fn).expanduser()
+        for parent in fn_path.parents:
+            if parent.name.casefold() == "wepp":
+                return parent.parent
         try:
-            return fn_path.parents[2]
+            return fn_path.parents[3]
         except IndexError:
             return fn_path.parent
 

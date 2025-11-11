@@ -1568,6 +1568,7 @@ class Omni(NoDbBase):
 
         dfs = []
         for scenario, wd in scenario_wds.items():
+            print(scenario, wd)
             loss = Wepp.getInstance(wd).report_loss()
             hill_rpt = HillSummaryReport(loss)
             df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
@@ -1575,21 +1576,42 @@ class Omni(NoDbBase):
             dfs.append(df)
 
         combined = pd.concat(dfs, ignore_index=True)
+        combined.info()
 
-        # WeppID,TopazID,Landuse,Soil,Length (m),Hillslope Area (ha),Runoff (mm),Lateral Flow (mm),Baseflow (mm),Soil Loss (kg/ha),Sediment Deposition (kg/ha),Sediment Yield (kg/ha),scenario
-
+        # Data columns (total 20 columns):
+        #  #   Column                                  Non-Null Count  Dtype  
+        # ---  ------                                  --------------  -----  
+        #  0   Wepp ID                                 2936 non-null   int64  
+        #  1   Topaz ID                                2936 non-null   int64  
+        #  2   Landuse Key                             2936 non-null   int64  
+        #  3   Landuse Description                     2936 non-null   object 
+        #  4   Soil Key                                2936 non-null   object 
+        #  5   Soil Description                        2936 non-null   object 
+        #  6   Length (m)                              2936 non-null   float64
+        #  7   Width (m)                               2936 non-null   float64
+        #  8   Slope                                   2936 non-null   float64
+        #  9   Landuse Area (ha)                       2936 non-null   float64
+        #  10  Runoff Depth (mm/yr)                    2936 non-null   float64
+        #  11  Lateral Flow Depth (mm/yr)              2936 non-null   float64
+        #  12  Baseflow Depth (mm/yr)                  2936 non-null   float64
+        #  13  Soil Loss (kg/yr)                       2936 non-null   float64
+        #  14  Soil Loss Density (kg/ha/yr)            2936 non-null   float64
+        #  15  Sediment Deposition (kg/yr)             2936 non-null   float64
+        #  16  Sediment Deposition Density (kg/ha/yr)  2936 non-null   float64
+        #  17  Sediment Yield (kg/yr)                  2936 non-null   float64
+        #  18  Sediment Yield Density (kg/ha/yr)       2936 non-null   float64
+        #  19  scenario                                2936 non-null   object 
+        # dtypes: float64(13), int64(3), object(4)
 
         # 1. Convert depths (mm) over area (ha) → volumes in m³:
-        #    1 mm over 1 ha = 0.001 m * 10 000 m² = 10 m³
-        combined['Runoff (m^3)']       = combined['Runoff (mm)']       * combined['Hillslope Area (ha)'] * 10
-        combined['Lateral Flow (m^3)'] = combined['Lateral Flow (mm)'] * combined['Hillslope Area (ha)'] * 10
-        combined['Baseflow (m^3)']     = combined['Baseflow (mm)']     * combined['Hillslope Area (ha)'] * 10
+        combined['Runoff (m^3)']       = combined['Runoff Depth (mm/yr)']       * combined['Landuse Area (ha)'] * 10
+        combined['Lateral Flow (m^3)'] = combined['Lateral Flow Depth (mm/yr)'] * combined['Landuse Area (ha)'] * 10
+        combined['Baseflow (m^3)']     = combined['Baseflow Depth (mm/yr)']     * combined['Landuse Area (ha)'] * 10
 
         # 2. Convert per‐area masses (kg/ha) over area (ha) → total mass in tonnes:
-        #    (kg/ha * ha) gives kg; divide by 1 000 → tonnes
-        combined['Soil Loss (t)']             = combined['Soil Loss (kg/ha)']             * combined['Hillslope Area (ha)'] / 1_000
-        combined['Sediment Deposition (t)']   = combined['Sediment Deposition (kg/ha)']   * combined['Hillslope Area (ha)'] / 1_000
-        combined['Sediment Yield (t)']        = combined['Sediment Yield (kg/ha)']        * combined['Hillslope Area (ha)'] / 1_000
+        combined['Soil Loss (t)']           = combined['Soil Loss Density (kg/ha/yr)']            * combined['Landuse Area (ha)'] / 1_000
+        combined['Sediment Deposition (t)'] = combined['Sediment Deposition Density (kg/ha/yr)']  * combined['Landuse Area (ha)'] / 1_000
+        combined['Sediment Yield (t)']      = combined['Sediment Yield Density (kg/ha/yr)']       * combined['Landuse Area (ha)'] / 1_000
 
         # Calculate NTU in g/L (combined['Sediment Yield (t)'] * 1_000_000) / (combined['Runoff (m^3)'] * 1_000)
         combined['NTU (g/L)'] = (combined['Sediment Yield (t)'] * 1_000) / (combined['Runoff (m^3)'] + combined['Baseflow (m^3)'] )

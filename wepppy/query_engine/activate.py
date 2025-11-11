@@ -106,6 +106,7 @@ def update_catalog_entry(
         FileNotFoundError: If the working directory or catalog does not exist.
         PermissionError: If the working directory is flagged as read-only.
         ValueError: If the requested path resides outside the working directory.
+            Child `_pups` scenarios may reference files under their parent run.
     """
 
     base = Path(wd).expanduser().resolve()
@@ -115,15 +116,22 @@ def update_catalog_entry(
     _raise_if_readonly(base)
 
     rel_path_obj = Path(asset_path)
-    if rel_path_obj.is_absolute():
-        target = rel_path_obj.resolve()
-    else:
-        target = (base / rel_path_obj).resolve()
+    catalog_entry_path: str | None = None
 
-    try:
-        rel_from_base = target.relative_to(base)
-    except ValueError as exc:
-        raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'") from exc
+    if rel_path_obj.is_absolute():
+        target = rel_path_obj
+        resolved_target = target.resolve()
+        if not _is_within_directory(base, resolved_target):
+            raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'")
+        rel_from_base = resolved_target.relative_to(base)
+        catalog_entry_path = str(rel_from_base).replace(os.sep, "/")
+    else:
+        normalized_parts = _normalize_relative_parts(rel_path_obj)
+        target = base.joinpath(*normalized_parts)
+        resolved_target = target.resolve()
+        if not _is_allowed_target(base, resolved_target):
+            raise ValueError(f"Path '{asset_path}' is outside working directory '{base}'")
+        catalog_entry_path = "/".join(normalized_parts)
 
     catalog_path = base / "_query_engine" / "catalog.json"
     if not catalog_path.exists():
@@ -142,13 +150,13 @@ def update_catalog_entry(
                 files_by_path[entry["path"]] = entry
             updated_entry = None
         else:
-            entry = _build_entry(base, target)
+            entry = _build_entry(base, target, catalog_path=catalog_entry_path)
             if entry is None:
                 raise ValueError(f"Unsupported asset type for '{target}'")
             files_by_path[entry["path"]] = entry
             updated_entry = entry
     else:
-        files_by_path.pop(str(rel_from_base).replace(os.sep, "/"), None)
+        files_by_path.pop(catalog_entry_path, None)
 
     catalog["files"] = sorted(files_by_path.values(), key=lambda item: item["path"])
     catalog["generated_at"] = datetime.now(timezone.utc).isoformat()
@@ -211,16 +219,11 @@ def _build_catalog(base: Path) -> list[dict[str, object]]:
     """
 
     entries: list[dict[str, object]] = []
-    base_len = len(str(base)) + 1
-
-    for root, _, files in os.walk(base):
-        root_path = Path(root)
-        for name in files:
-            path = root_path / name
-            entry = _build_entry(base, path, base_len=base_len)
-            if entry is None:
-                continue
-            entries.append(entry)
+    for path in _iter_catalog_files(base):
+        entry = _build_entry(base, path)
+        if entry is None:
+            continue
+        entries.append(entry)
 
     entries.sort(key=lambda item: item["path"])
     return entries
@@ -236,19 +239,11 @@ def _build_catalog_subset(base: Path, directory: Path) -> list[dict[str, object]
     Returns:
         List of catalog entries contained inside the subtree.
     """
-    entries: list[dict[str, object]] = []
-    base_len = len(str(base)) + 1
-
-    for root, _, files in os.walk(directory):
-        root_path = Path(root)
-        for name in files:
-            path = root_path / name
-            entry = _build_entry(base, path, base_len=base_len)
-            if entry is None:
-                continue
-            entries.append(entry)
-
-    return entries
+    return [
+        entry
+        for path in _iter_catalog_files(base, directory=directory)
+        if (entry := _build_entry(base, path)) is not None
+    ]
 
 
 def _read_parquet_schema(path: Path) -> dict[str, object] | None:
@@ -301,7 +296,13 @@ def _read_geo_schema(path: Path) -> dict[str, object] | None:
         return None
 
 
-def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> dict[str, object] | None:
+def _build_entry(
+    base: Path,
+    path: Path,
+    *,
+    base_len: int | None = None,
+    catalog_path: str | None = None,
+) -> dict[str, object] | None:
     """Build a catalog entry for a single file path.
 
     Args:
@@ -324,7 +325,14 @@ def _build_entry(base: Path, path: Path, *, base_len: int | None = None) -> dict
     if base_len is None:
         base_len = len(str(base)) + 1
 
-    rel_path = str(path)[base_len:]
+    if catalog_path is not None:
+        rel_path = catalog_path
+    else:
+        try:
+            rel_path = str(path.relative_to(base))
+        except ValueError:
+            rel_path = str(path)[base_len:]
+
     entry: dict[str, object] = {
         "path": rel_path.replace(os.sep, "/"),
         "extension": suffix,
@@ -344,3 +352,105 @@ def _raise_if_readonly(base: Path) -> None:
     """Raise PermissionError when a WEPP run is marked read-only."""
     if (base / READONLY_SENTINEL).exists():
         raise PermissionError(f"Working directory '{base}' is flagged as read-only")
+
+
+def _normalize_relative_parts(path: Path) -> tuple[str, ...]:
+    """Normalize a relative path and reject traversal attempts."""
+    parts: list[str] = []
+    for part in path.parts:
+        if part in ("", "."):
+            continue
+        if part == "..":
+            raise ValueError("Relative asset paths cannot escape the working directory")
+        parts.append(part)
+    if not parts:
+        raise ValueError("Asset path must reference a file or directory")
+    return tuple(parts)
+
+
+def _is_within_directory(base: Path, target: Path) -> bool:
+    """Return True when `target` resides under `base`."""
+    try:
+        target.relative_to(base)
+    except ValueError:
+        return False
+    return True
+
+
+def _find_parent_run_root(base: Path) -> Path | None:
+    """Best-effort inference of the run root for `_pups` child directories."""
+    parts = base.parts
+    try:
+        idx = parts.index("_pups")
+    except ValueError:
+        return None
+    if idx == 0:
+        return None
+    return Path(*parts[:idx])
+
+
+def _is_allowed_target(base: Path, target: Path) -> bool:
+    """Allow child run directories to reference parent-run assets."""
+    if _is_within_directory(base, target):
+        return True
+    parent_root = _find_parent_run_root(base)
+    if parent_root is None:
+        return False
+    return _is_within_directory(parent_root, target)
+
+
+def _iter_catalog_files(base: Path, *, directory: Path | None = None) -> Iterable[Path]:
+    """Yield files rooted at ``base`` (or ``directory``), following allowed symlinks."""
+    start = directory or base
+    stack: list[Path] = [start]
+    visited_paths: set[Path] = set()
+    visited_real_dirs: set[Path] = set()
+
+    while stack:
+        current = stack.pop()
+        try:
+            resolved_current = current.resolve()
+        except FileNotFoundError:
+            continue
+
+        if current in visited_paths:
+            continue
+        visited_paths.add(current)
+
+        if not _is_allowed_target(base, resolved_current):
+            continue
+
+        is_symlink_dir = current.is_symlink()
+        if not is_symlink_dir:
+            if resolved_current in visited_real_dirs:
+                continue
+            visited_real_dirs.add(resolved_current)
+
+        try:
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    entry_path = Path(entry.path)
+                    try:
+                        resolved_entry = entry_path.resolve()
+                    except FileNotFoundError:
+                        continue
+
+                    if entry.is_dir(follow_symlinks=False):
+                        stack.append(entry_path)
+                        continue
+
+                    if entry.is_symlink():
+                        if resolved_entry.is_dir():
+                            if not _is_allowed_target(base, resolved_entry):
+                                continue
+                            if resolved_entry in visited_real_dirs:
+                                continue
+                            stack.append(entry_path)
+                            continue
+                        if not resolved_entry.is_file():
+                            continue
+
+                    if resolved_entry.is_file() and _is_allowed_target(base, resolved_entry):
+                        yield entry_path
+        except (PermissionError, FileNotFoundError, NotADirectoryError):
+            continue

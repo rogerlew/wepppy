@@ -198,7 +198,10 @@ class ChannelSummaryReport(ReportBase):
         """Heuristically resolve the run directory from a ``loss`` object."""
         fn_path = Path(loss.fn).expanduser()
         try:
-            return fn_path.parents[2]
+            for parent in fn_path.parents:
+                if parent.name.casefold() == "wepp":
+                    return parent.parent
+            return fn_path.parents[3]
         except IndexError:
             return fn_path.parent
 

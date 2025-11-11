@@ -287,7 +287,7 @@ def test_hill_summary_accepts_loss_instance(monkeypatch, tmp_path):
 
     _ = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
-    loss_file = tmp_path / "wepp" / "output" / "loss_pw0.txt"
+    loss_file = tmp_path / "wepp" / "output" / "interchange" / "loss_pw0.hill.parquet"
     loss_file.parent.mkdir(parents=True, exist_ok=True)
     loss_file.touch()
 
@@ -338,7 +338,7 @@ def test_channel_summary_accepts_loss_instance(monkeypatch, tmp_path):
 
     _ = _configure_query_engine_stubs(monkeypatch, tmp_path, dataset_paths, records_map)
 
-    loss_file = tmp_path / "wepp" / "output" / "loss_pw0.txt"
+    loss_file = tmp_path / "wepp" / "output" / "interchange" / "loss_pw0.chn.parquet"
     loss_file.parent.mkdir(parents=True, exist_ok=True)
     loss_file.touch()
 
