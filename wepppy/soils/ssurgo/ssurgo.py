@@ -25,6 +25,7 @@ import logging
 import multiprocessing as mp
 from collections import defaultdict
 from datetime import datetime
+import time
 
 from xml.etree import ElementTree
 from math import exp
@@ -126,6 +127,68 @@ _metadata = {
     "publisher": "USDA National Resources Conservation Service (NRCS)",
     "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx",
 }
+
+_LOG = logging.getLogger(__name__)
+_SQLITE_BUSY_TIMEOUT_MS = 10_000
+_SQLITE_WAL_RETRY_ATTEMPTS = 5
+_SQLITE_WAL_RETRY_BASE_DELAY = 0.2
+
+
+def _configure_sqlite_connection(
+    conn: sqlite3.Connection,
+    *,
+    read_only: bool,
+    context: str,
+) -> None:
+    """Apply busy timeout and best-effort WAL mode."""
+    try:
+        conn.execute(f"PRAGMA busy_timeout={_SQLITE_BUSY_TIMEOUT_MS};")
+    except sqlite3.Error as exc:
+        _LOG.warning("%s: failed to set SQLite busy_timeout (%s)", context, exc)
+
+    if read_only:
+        return
+
+    _ensure_wal_mode(conn, context=context)
+
+
+def _ensure_wal_mode(conn: sqlite3.Connection, *, context: str) -> None:
+    """Switch the SQLite connection into WAL mode, retrying when locked."""
+    try:
+        row = conn.execute("PRAGMA journal_mode;").fetchone()
+        current_mode = (row[0] or "").lower() if row else ""
+    except sqlite3.Error as exc:
+        _LOG.warning("%s: unable to read SQLite journal_mode (%s)", context, exc)
+        return
+
+    if current_mode == "wal":
+        return
+
+    delay = _SQLITE_WAL_RETRY_BASE_DELAY
+    for attempt in range(1, _SQLITE_WAL_RETRY_ATTEMPTS + 1):
+        try:
+            conn.execute("PRAGMA journal_mode=WAL;")
+            return
+        except sqlite3.OperationalError as exc:
+            try:
+                row = conn.execute("PRAGMA journal_mode;").fetchone()
+                current_mode = (row[0] or "").lower() if row else current_mode
+                if current_mode == "wal":
+                    return
+            except sqlite3.Error:
+                pass
+
+            if attempt == _SQLITE_WAL_RETRY_ATTEMPTS:
+                _LOG.warning(
+                    "%s: unable to switch SQLite journal_mode to WAL after %s attempts (%s); continuing with %s mode.",
+                    context,
+                    attempt,
+                    exc,
+                    current_mode or "default",
+                )
+                return
+            time.sleep(delay)
+            delay = min(delay * 2, 2.0)
 
 class SsurgoRequestError(Exception):
     """Raised when the NRCS SDM Tabular service returns a non-200 response."""
@@ -1513,7 +1576,11 @@ class SurgoCollectionWorkerViewFactory:
         db_uri = f"file:{self._db_path}?mode=ro"
         conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
         conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL;")
+        _configure_sqlite_connection(
+            conn,
+            read_only=True,
+            context=f"{self.__class__.__name__}:{self._db_path}",
+        )
         return conn
 
     def build(self, mukeys: Set[int], source_data: str) -> _SurgoCollectionWorkerView:
@@ -1992,14 +2059,22 @@ class SurgoSoilCollection(object):
             return
 
         self.conn = sqlite3.connect(self._db_path, timeout=10.0)
-        self.conn.execute("PRAGMA journal_mode=WAL;")
+        _configure_sqlite_connection(
+            self.conn,
+            read_only=False,
+            context=f"{self.__class__.__name__}:{self._db_path}",
+        )
         self.cur = self.conn.cursor()
 
     def _connect_for_read(self):
         """Creates a new read connection (used by get_* methods)."""
         conn = sqlite3.connect(self._db_path, timeout=10.0)
         conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL;")
+        _configure_sqlite_connection(
+            conn,
+            read_only=True,
+            context=f"{self.__class__.__name__}-reader:{self._db_path}",
+        )
         return conn
 
 
