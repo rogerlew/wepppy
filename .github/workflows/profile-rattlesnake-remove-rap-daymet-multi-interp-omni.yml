@@ -2,7 +2,7 @@
 name: Profile Run - Daymet Multi-Interp Omni
 on:
   schedule:
-  - cron: 15 11 * * *
+  - cron: 17 10 * * *
   workflow_dispatch: null
 jobs:
   rattlesnake_remove_rap_daymet_multi_interp_omni:
