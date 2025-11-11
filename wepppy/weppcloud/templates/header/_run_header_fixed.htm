@@ -1,5 +1,5 @@
 {% from "controls/_pure_macros.html" import header_text_field %}
-<header class="wc-header wc-run-header">
+<header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
       <div class="wc-run-header__title-row">
@@ -248,4 +248,107 @@
   } else {
     ensureUnitizerModalHandlers();
   }
+
+  (function initRunHeaderHideaway() {
+    var header = document.querySelector('.wc-run-header--hideaway');
+    if (!header) {
+      return;
+    }
+
+    var lastScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
+    var HIDE_DELTA = 6;
+    var SHOW_DELTA = 4;
+    var SCROLL_THRESHOLD = header.offsetHeight || 72;
+    var ticking = false;
+    var toc = null;
+    function resolveToc() {
+      if (toc && toc.isConnected) {
+        return toc;
+      }
+      toc = document.getElementById('toc') || null;
+      return toc;
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', resolveToc, { once: true });
+    } else {
+      resolveToc();
+    }
+    var resizeScheduled = false;
+
+    function updateHeaderOffset() {
+      if (!header) {
+        return;
+      }
+      var height = header.getBoundingClientRect().height || 0;
+      document.documentElement.style.setProperty('--wc-run-header-offset', height + 'px');
+      SCROLL_THRESHOLD = height || 72;
+    }
+
+    updateHeaderOffset();
+
+    window.addEventListener('resize', function () {
+      if (resizeScheduled) {
+        return;
+      }
+      resizeScheduled = true;
+      var runner = function () {
+        resizeScheduled = false;
+        updateHeaderOffset();
+      };
+      if (typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(runner);
+      } else {
+        setTimeout(runner, 100);
+      }
+    });
+
+    function applyState(current) {
+      if (current <= 0) {
+        header.classList.remove('is-hidden');
+        header.classList.remove('is-elevated');
+        var tocElTop = resolveToc();
+        if (tocElTop) {
+          tocElTop.classList.remove('is-header-hidden');
+        }
+        lastScroll = 0;
+        return;
+      }
+
+      header.classList.add('is-elevated');
+
+      if (current > lastScroll && current - lastScroll > HIDE_DELTA && current > SCROLL_THRESHOLD) {
+        header.classList.add('is-hidden');
+        var tocHide = resolveToc();
+        if (tocHide) {
+          tocHide.classList.add('is-header-hidden');
+        }
+      } else if (lastScroll - current > SHOW_DELTA) {
+        header.classList.remove('is-hidden');
+        var tocShow = resolveToc();
+        if (tocShow) {
+          tocShow.classList.remove('is-header-hidden');
+        }
+      }
+
+      lastScroll = current;
+    }
+
+    function onScroll() {
+      var current = window.pageYOffset || document.documentElement.scrollTop || 0;
+      applyState(current);
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      if (typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(onScroll);
+      } else {
+        setTimeout(onScroll, 50);
+      }
+    }, { passive: true });
+  })();
 </script>

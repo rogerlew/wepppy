@@ -86,6 +86,7 @@
   --wc-button-disabled-text: var(--wc-color-text-muted);
   --wc-button-shadow: var(--wc-shadow-sm);
   --wc-button-shadow-hover: 0 8px 20px rgba(15, 23, 42, 0.16);
+  --wc-run-header-offset: 0px;
 }
 
 html {
@@ -819,6 +820,23 @@ h5:first-child {
   background: var(--wc-color-surface);
 }
 
+.wc-run-header--hideaway {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  transform: translateY(0);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  will-change: transform;
+}
+
+.wc-run-header--hideaway.is-hidden {
+  transform: translateY(-100%);
+}
+
+.wc-run-header--hideaway.is-elevated {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
 .wc-run-header__inner {
   display: flex;
   flex-direction: column;
@@ -1361,9 +1379,9 @@ h5:first-child {
 
 .wc-run-layout__toc {
   position: sticky;
-  top: calc(var(--wc-space-xl) * 2);
+  top: calc(var(--wc-run-header-offset, 0px) + var(--wc-space-lg));
   align-self: start;
-  max-height: calc(100vh - var(--wc-space-xl) * 3);
+  max-height: calc(100vh - var(--wc-space-xl));
   overflow-y: auto;
   padding: var(--wc-space-md) var(--wc-space-lg);
   background: var(--wc-color-surface);
@@ -1372,6 +1390,11 @@ h5:first-child {
   box-shadow: var(--wc-shadow-sm);
   width: 280px;
   min-width: 220px;
+  transition: top 160ms ease;
+}
+
+.wc-run-layout__toc.is-header-hidden {
+  top: var(--wc-space-lg);
 }
 
 /* ============================================================================
