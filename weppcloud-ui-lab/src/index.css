@@ -209,7 +209,13 @@
   inset-inline: 0;
   bottom: -1px;
   height: 320px;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.92) 65%, #02030a 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0) 0%,
+    rgba(15, 23, 42, 0.92) 60%,
+    rgba(2, 6, 23, 0.98) 90%,
+    #020617 100%
+  );
   z-index: 5;
   pointer-events: none;
 }

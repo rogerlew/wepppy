@@ -63,6 +63,10 @@ export function App() {
 
   const isAuthenticated = Boolean(appState.user?.is_authenticated)
   const heroHeadline = 'Watershed intelligence for response teams'
+  const mapEyebrow = 'Run atlas'
+  const mapTitle = 'Explore Active WEPPcloud Projects'
+  const mapSubtitle =
+    'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
   const mapSectionRef = useRef<HTMLDivElement | null>(null)
   const offsetCache = useRef(new Map<string, [number, number]>())
 
@@ -336,9 +340,14 @@ export function App() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto mb-6 max-w-5xl"
+          className="mx-auto mb-10 max-w-5xl"
         >
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="space-y-4 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
+            <p className="text-base text-slate-300">{mapSubtitle}</p>
+          </div>
+          <div className="mt-6 grid gap-6 sm:grid-cols-3">
             <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
             <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
             <MetricCard
