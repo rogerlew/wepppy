@@ -185,6 +185,33 @@ def _load_or_refresh_run_locations(force: bool = False) -> List[Dict[str, Any]]:
     return dataset
 
 
+def _build_landing_state() -> Dict[str, Any]:
+    user_info: Dict[str, Any] = {
+        'is_authenticated': bool(getattr(current_user, 'is_authenticated', False)),
+        'email': getattr(current_user, 'email', None),
+        'name': getattr(current_user, 'name', None),
+    }
+    return {'user': user_info}
+
+
+def _render_ui_lab_index_with_state(index_path: Path) -> Optional['flask.Response']:
+    try:
+        html = index_path.read_text(encoding='utf-8')
+    except OSError:
+        return None
+
+    state_json = json.dumps(_build_landing_state())
+    injection = f'<script>window.__WEPP_STATE__ = {state_json};</script>'
+    if '</head>' in html:
+        html = html.replace('</head>', f'{injection}</head>', 1)
+    else:
+        html = injection + html
+
+    response = make_response(html)
+    response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    return response
+
+
 @weppcloud_site_bp.route('/')
 def index():
     runs_counter = Counter()
@@ -217,7 +244,9 @@ def landing():
 
     vite_index = _resolve_landing_static_asset('index.html')
     if vite_index.exists():
-        return send_from_directory(vite_index.parent, vite_index.name)
+        rendered = _render_ui_lab_index_with_state(vite_index)
+        if rendered is not None:
+            return rendered
 
     return render_template('landing.htm', user=current_user)
 

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import DeckGL from '@deck.gl/react'
 import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import type { MapViewState, ViewStateChangeParameters } from '@deck.gl/core'
 import { Map as MapLibreMap } from 'react-map-gl/maplibre'
 import maplibregl from 'maplibre-gl'
 
+import { AuroraBackground } from '@/components/aurora-background'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_RUN_DATA_PATH = './run-locations.json'
@@ -20,9 +22,22 @@ type RunLocation = {
   has_sbs?: boolean
   hillslopes?: number | string | null
   ash_hillslopes?: number | string | null
-  user?: string | null
   access_count?: number | null
   last_accessed?: string | null
+}
+
+type AppState = {
+  user?: {
+    is_authenticated?: boolean
+    email?: string | null
+    name?: string | null
+  }
+}
+
+declare global {
+  interface Window {
+    __WEPP_STATE__?: AppState
+  }
 }
 
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -43,7 +58,12 @@ export function App() {
   const [error, setError] = useState<string | null>(null)
   const [panelOpen, setPanelOpen] = useState<boolean>(false)
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE)
+  const [appState] = useState<AppState>(() => (typeof window !== 'undefined' ? window.__WEPP_STATE__ ?? {} : {}))
+  const [mapActivated, setMapActivated] = useState<boolean>(false)
 
+  const isAuthenticated = Boolean(appState.user?.is_authenticated)
+  const heroHeadline = 'Watershed intelligence for response teams'
+  const mapSectionRef = useRef<HTMLDivElement | null>(null)
   const offsetCache = useRef(new Map<string, [number, number]>())
 
   useEffect(() => {
@@ -83,6 +103,28 @@ export function App() {
     return () => controller.abort()
   }, [])
 
+  useEffect(() => {
+    if (mapActivated) {
+      return undefined
+    }
+    const target = mapSectionRef.current
+    if (!target) {
+      return undefined
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setMapActivated(true)
+          }
+        })
+      },
+      { threshold: 0.35 },
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [mapActivated])
+
   const filteredData = useMemo(() => {
     if (yearFilter === 'all') {
       return data
@@ -117,7 +159,6 @@ export function App() {
     return {
       totalRuns: data.length,
       totalHillslopes,
-      lastAccessedFormatted: formatDate(lastAccessed),
       lastAccessedParts: formatDateParts(lastAccessed),
     }
   }, [data])
@@ -229,48 +270,97 @@ export function App() {
     return ''
   }, [error, isLoading])
 
+  const navItems = useMemo(
+    () => [
+      { label: 'Interface', href: '/weppcloud/' },
+      { label: 'Docs', href: '/weppcloud/docs/' },
+      { label: 'Research', href: 'https://wepp.cloud/research', external: true },
+      {
+        label: isAuthenticated ? 'Runs' : 'Login',
+        href: isAuthenticated ? '/weppcloud/runs/' : '/weppcloud/login/',
+      },
+    ],
+    [isAuthenticated],
+  )
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-6 py-10 sm:pt-8 sm:pb-0 lg:px-16">
-        <div className="absolute right-10 top-10 hidden h-64 w-64 rounded-full bg-sky-500/10 blur-[120px] lg:block" />
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-12">
-          <div className="space-y-6">
-            <p className="text-xs uppercase tracking-[0.3em] text-sky-300">Run atlas</p>
-            <div className="space-y-4">
-              <h2 className="text-3xl font-semibold leading-tight text-slate-50 sm:text-5xl lg:text-6xl">
-                Explore Active WEPPcloud Projects
-              </h2>
-              <p className="max-w-3xl text-base text-slate-300 sm:text-lg">
-                Every WEPPcloud run with a recorded centroid appears on this interactive map.
-                Highlight wildfire response studies, watershed planning campaigns, and the scale of
-                collaboration across the platform—without leaving the landing page.
+      <section id="hero" className="relative flex min-h-[100svh]">
+        <AuroraBackground className="flex-1 min-h-[100svh]">
+          <div className="relative mx-auto flex h-full max-w-5xl flex-col items-center justify-start gap-12 px-6 py-16 pt-[600px] text-center sm:py-24 lg:py-32">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="space-y-4"
+            >
+              <p className="text-xs uppercase tracking-[0.4em] text-sky-200">WEPPcloud</p>
+              <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+                <TypewriterText text={heroHeadline} speed={2} delay={200} />
+              </h1>
+              <p className="text-base text-slate-200 sm:text-lg">
+                Launch tools, explore documentation, or jump into the latest analytics. Scroll to
+                reveal live WEPPcloud runs rendered in real time.
               </p>
-            </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.15 }}
+              className="flex flex-wrap items-center justify-center gap-4"
+            >
+              {navItems.map((item, idx) => (
+                <motion.a
+                  key={item.label}
+                  className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold uppercase tracking-wide text-white transition hover:border-white/60"
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noreferrer' : undefined}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.15, delay: idx * 0.05 }}
+                >
+                  {item.label}
+                </motion.a>
+              ))}
+            </motion.div>
           </div>
+          <div className="hero-fade" />
+        </AuroraBackground>
+      </section>
 
-      <div className="grid gap-6 sm:grid-cols-3">
-        <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
-        <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
-        <MetricCard
-          label="Latest access"
-          value={
-            aggregateStats.lastAccessedParts
-              ? `${aggregateStats.lastAccessedParts.date}\n${aggregateStats.lastAccessedParts.time}`
-              : '--'
-          }
-          multiline
-        />
-      </div>
+      <section id="map" className="px-4 pb-16 pt-12 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto mb-6 max-w-5xl"
+        >
+          <div className="grid gap-6 sm:grid-cols-3">
+            <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
+            <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
+            <MetricCard
+              label="Latest access"
+              value={
+                aggregateStats.lastAccessedParts
+                  ? `${aggregateStats.lastAccessedParts.date}\n${aggregateStats.lastAccessedParts.time}`
+                  : '--'
+              }
+              multiline
+            />
+          </div>
+        </motion.div>
 
-          <p className="text-sm text-slate-400">{statusMessage}</p>
-        </div>
-      </div>
-
-      <section className="px-4 pb-16 pt-6 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-6xl space-y-6" />
-
-        <div className="mt-2 w-full">
-          <div className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40">
+        <div ref={mapSectionRef} className="mt-2 w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
+            className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40"
+          >
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
               <div className="map-legend">
                 <span className="legend-chip">
@@ -286,22 +376,28 @@ export function App() {
                   Filtered hillslopes: {filteredStats.hillslopes.toLocaleString()}
                 </span>
               </div>
-              <DeckGL
-                controller
-                initialViewState={INITIAL_VIEW_STATE}
-                layers={deckLayers}
-                viewState={viewState}
-                onViewStateChange={handleViewStateChange}
-                getTooltip={tooltipBuilder}
-                style={{ position: 'absolute', top: '0', right: '0', bottom: '0', left: '0' }}
-              >
-                <MapLibreMap
-                  reuseMaps
-                  mapLib={maplibregl}
-                  mapStyle={MAP_STYLE}
-                  attributionControl={false}
-                />
-              </DeckGL>
+              {mapActivated ? (
+                <DeckGL
+                  controller
+                  initialViewState={INITIAL_VIEW_STATE}
+                  layers={deckLayers}
+                  viewState={viewState}
+                  onViewStateChange={handleViewStateChange}
+                  getTooltip={tooltipBuilder}
+                  style={{ position: 'absolute', top: '0', right: '0', bottom: '0', left: '0' }}
+                >
+                  <MapLibreMap
+                    reuseMaps
+                    mapLib={maplibregl}
+                    mapStyle={MAP_STYLE}
+                    attributionControl={false}
+                  />
+                </DeckGL>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
+                  <p className="text-sm text-slate-400">Preparing map...</p>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -350,7 +446,7 @@ export function App() {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>
@@ -374,6 +470,48 @@ function MetricCard(props: {
         {typeof props.value === 'number' ? props.value.toLocaleString() : props.value ?? '--'}
       </p>
     </div>
+  )
+}
+
+type TypewriterTextProps = {
+  text: string
+  speed?: number
+  delay?: number
+}
+
+function TypewriterText({ text, speed = 40, delay = 200 }: TypewriterTextProps) {
+  const [displayed, setDisplayed] = useState<string>('')
+  const intervalRef = useRef<number | null>(null)
+  const timeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    let index = 0
+    timeoutRef.current = window.setTimeout(() => {
+      intervalRef.current = window.setInterval(() => {
+        index += 1
+        setDisplayed(text.slice(0, index))
+        if (index >= text.length && intervalRef.current) {
+          window.clearInterval(intervalRef.current)
+          intervalRef.current = null
+        }
+      }, speed)
+    }, delay)
+
+    return () => {
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current)
+      }
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [text, speed, delay])
+
+  return (
+    <span aria-label={text}>
+      {displayed}
+      <span className="typewriter-cursor">|</span>
+    </span>
   )
 }
 
