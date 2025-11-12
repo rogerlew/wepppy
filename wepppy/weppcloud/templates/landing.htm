@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WEPPcloud Projects</title>
+
+    <link href="https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js"></script>
+
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-dark: #030711;
+        --bg-panel: rgba(3, 7, 17, 0.86);
+        --accent: #7dd3fc;
+        --accent-strong: #38bdf8;
+        --text-primary: #e7f5ff;
+        --text-muted: #94a3b8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+      }
+
+      .landing-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .hero {
+        padding: 40px clamp(24px, 8vw, 80px);
+      }
+
+      .hero .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 12px;
+        color: var(--accent);
+        margin: 0 0 12px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 56px);
+      }
+
+      .hero p {
+        max-width: 720px;
+        line-height: 1.6;
+        color: var(--text-muted);
+      }
+
+      .hero-metrics {
+        display: flex;
+        gap: 32px;
+        margin: 32px 0 12px;
+        flex-wrap: wrap;
+      }
+
+      .metric {
+        min-width: 140px;
+      }
+
+      .metric-value {
+        display: block;
+        font-size: 36px;
+        font-weight: 600;
+      }
+
+      .metric-label {
+        color: var(--text-muted);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .status {
+        margin-top: 8px;
+        color: var(--text-muted);
+      }
+
+      .map-panel {
+        position: relative;
+        flex: 1;
+        min-height: 480px;
+      }
+
+      #map-canvas {
+        width: 100%;
+        height: calc(100vh - 280px);
+        min-height: 520px;
+      }
+
+      #control-panel {
+        position: absolute;
+        top: 84px;
+        right: 24px;
+        padding: 18px;
+        width: 280px;
+        background: var(--bg-panel);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 16px;
+        backdrop-filter: blur(8px);
+        font-size: 14px;
+        display: none;
+        z-index: 2;
+      }
+
+      #control-panel.is-open {
+        display: block;
+      }
+
+      .control-toggle {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        z-index: 3;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(2, 6, 23, 0.85);
+        color: var(--text-primary);
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+      }
+
+      .control-toggle .icon {
+        width: 18px;
+        height: 2px;
+        background: currentColor;
+        position: relative;
+        display: inline-block;
+      }
+
+      .control-toggle .icon::before,
+      .control-toggle .icon::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 18px;
+        height: 2px;
+        background: currentColor;
+      }
+
+      .control-toggle .icon::before {
+        top: -6px;
+      }
+
+      .control-toggle .icon::after {
+        top: 6px;
+      }
+
+      .control-toggle .label {
+        white-space: nowrap;
+      }
+
+      #control-panel h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .control {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+
+      .control label {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .control input[type="range"],
+      .control select {
+        width: 100%;
+        accent-color: var(--accent-strong);
+      }
+
+      .control-value {
+        font-size: 13px;
+        color: var(--text-primary);
+      }
+
+      .deck-tooltip {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 12px;
+        padding: 8px;
+        background: rgba(3, 7, 17, 0.88);
+        box-shadow: 0 10px 35px rgba(2, 6, 23, 0.45);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        border-radius: 8px;
+      }
+
+      @media (max-width: 900px) {
+        #control-panel {
+          position: fixed;
+          top: 70px;
+          right: 12px;
+          width: calc(100% - 24px);
+          max-width: 360px;
+        }
+
+        #map-canvas {
+          height: 60vh;
+          min-height: 420px;
+        }
+
+        .hero-metrics {
+          gap: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="landing-shell">
+      <header class="hero">
+        <p class="eyebrow">Run atlas</p>
+        <h1>Explore Active WEPPcloud Projects</h1>
+        <p>
+          Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight
+          recent wildfire response studies, watershed planning campaigns, and the scale of collaboration
+          across the platform.
+        </p>
+        <div class="hero-metrics">
+          <div class="metric">
+            <span id="run-count" class="metric-value">0</span>
+            <span class="metric-label">unique runs</span>
+          </div>
+          <div class="metric">
+            <span id="hillslope-count" class="metric-value">0</span>
+            <span class="metric-label">total hillslopes</span>
+          </div>
+          <div class="metric">
+            <span id="refresh-indicator" class="metric-value">--</span>
+            <span class="metric-label">latest access</span>
+          </div>
+        </div>
+        <p class="status" id="landing-status">Loading run data...</p>
+      </header>
+
+      <section class="map-panel">
+        <div id="map-canvas" role="region" aria-label="Map of WEPPcloud runs"></div>
+        <button
+          id="control-toggle"
+          class="control-toggle"
+          type="button"
+          aria-controls="control-panel"
+          aria-expanded="false"
+        >
+          <span class="icon" aria-hidden="true"></span>
+          <span class="label">Map controls</span>
+        </button>
+        <div id="control-panel" aria-label="Map display controls">
+          <h2>Display options</h2>
+          <div class="control">
+            <label for="year-filter">Year</label>
+            <select id="year-filter">
+              <option value="all">All years</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const RUN_DATA_URL = "{{ url_for('static', filename='runid-locations.json') }}";
+        const INITIAL_VIEW_STATE = {
+          longitude: -98.5795,
+          latitude: 39.8283,
+          zoom: 3.5,
+          maxZoom: 17,
+          pitch: 35,
+          bearing: 0,
+        };
+        const labelOffsetCache = new Map();
+        const state = {
+          data: [],
+          filtered: [],
+          labelSize: Math.min(10, Math.max(1, INITIAL_VIEW_STATE.zoom)),
+          pointScale: 1,
+          yearFilter: 'all',
+        };
+
+        const statusEl = document.getElementById('landing-status');
+        const runCountEl = document.getElementById('run-count');
+        const hillslopeEl = document.getElementById('hillslope-count');
+        const refreshEl = document.getElementById('refresh-indicator');
+        const controls = {
+          year: document.getElementById('year-filter'),
+        };
+
+        const { DeckGL, ScatterplotLayer, TextLayer } = deck;
+        const deckgl = new DeckGL({
+          container: 'map-canvas',
+          mapStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+          initialViewState: INITIAL_VIEW_STATE,
+          controller: true,
+          getTooltip: ({ object }) => buildTooltip(object),
+          onViewStateChange: ({ viewState }) => {
+            if (!viewState) {
+              return;
+            }
+            const derivedSize = deriveLabelSize(viewState.zoom);
+            if (Math.abs(derivedSize - state.labelSize) > 0.05) {
+              state.labelSize = derivedSize;
+              renderLayers();
+            }
+          },
+        });
+
+        const panelToggle = document.getElementById('control-toggle');
+        const panelToggleLabel = panelToggle.querySelector('.label');
+        const panel = document.getElementById('control-panel');
+
+        panelToggle.addEventListener('click', () => {
+          const isOpen = panel.classList.toggle('is-open');
+          panelToggle.setAttribute('aria-expanded', String(isOpen));
+          panelToggle.classList.toggle('is-open', isOpen);
+          if (panelToggleLabel) {
+            panelToggleLabel.textContent = isOpen ? 'Close controls' : 'Map controls';
+          }
+        });
+
+        controls.year.addEventListener('change', (event) => {
+          state.yearFilter = event.target.value;
+          renderLayers();
+        });
+
+        loadRunData();
+
+        async function loadRunData() {
+          try {
+            const response = await fetch(RUN_DATA_URL, { cache: 'no-store' });
+            if (!response.ok) {
+              throw new Error(`Request failed: ${response.status}`);
+            }
+            const payload = await response.json();
+            state.data = Array.isArray(payload) ? payload : [];
+            populateYearOptions(state.data);
+            renderLayers();
+            statusEl.textContent = 'Showing run centroids with recorded access history.';
+          } catch (error) {
+            console.error('Failed to load run locations', error);
+            statusEl.textContent = 'Unable to load run data right now.';
+          }
+        }
+
+        function populateYearOptions(dataset) {
+          const years = Array.from(new Set(dataset.map((entry) => entry.year).filter(Boolean)))
+            .map((year) => Number(year))
+            .filter((year) => !Number.isNaN(year))
+            .sort((a, b) => b - a);
+
+          controls.year.innerHTML = '<option value="all">All years</option>';
+          years.forEach((year) => {
+            const option = document.createElement('option');
+            option.value = String(year);
+            option.textContent = year;
+            controls.year.appendChild(option);
+          });
+        }
+
+        function applyFilters() {
+          if (!Array.isArray(state.data)) {
+            state.filtered = [];
+            return state.filtered;
+          }
+          const filtered = state.yearFilter === 'all'
+            ? state.data
+            : state.data.filter((entry) => String(entry.year || '') === state.yearFilter);
+          state.filtered = filtered;
+          return filtered;
+        }
+
+        function renderLayers() {
+          const dataset = applyFilters();
+          updateMetrics(dataset);
+
+          const scatterLayer = new ScatterplotLayer({
+            id: 'run-centroids',
+            data: dataset,
+            pickable: true,
+            radiusUnits: 'pixels',
+            radiusScale: 1,
+            radiusMinPixels: 4,
+            radiusMaxPixels: 60,
+            getPosition: (d) => d.coordinates,
+            getRadius: (d) => Math.max(6, (d.access_count || 1) * state.pointScale),
+            getFillColor: (d) => (d.has_sbs ? [124, 58, 237, 190] : [14, 165, 233, 190]),
+            getLineColor: [255, 255, 255, 180],
+            lineWidthMinPixels: 1,
+          });
+
+          const textLayer = new TextLayer({
+            id: 'run-labels',
+            data: dataset,
+            pickable: false,
+            getPosition: (d) => d.coordinates,
+            getText: (d) => (d.run_name || '').trim(),
+            getSize: state.labelSize,
+            getAngle: 0,
+            getColor: [236, 248, 255, 220],
+            getTextAnchor: 'start',
+            getAlignmentBaseline: 'bottom',
+            getPixelOffset: (d) => deriveLabelOffset(d),
+            maxWidth: 120,
+            sizeUnits: 'pixels',
+          });
+
+          deckgl.setProps({ layers: [scatterLayer, textLayer] });
+        }
+
+        function updateMetrics(dataset) {
+          const totalRuns = dataset.length;
+          const hillslopes = dataset.reduce((total, entry) => total + (Number(entry.hillslopes) || 0), 0);
+          const latest = dataset.length ? dataset[0] : null;
+
+          runCountEl.textContent = totalRuns.toLocaleString();
+          hillslopeEl.textContent = hillslopes.toLocaleString();
+          refreshEl.textContent = latest && latest.last_accessed
+            ? new Date(latest.last_accessed).toLocaleString()
+            : '--';
+
+          if (!totalRuns) {
+            statusEl.textContent = 'No georeferenced runs were found. Check again later.';
+          }
+        }
+
+        function buildTooltip(object) {
+          if (!object) {
+            return null;
+          }
+          const lines = [
+            object.run_name || 'Unnamed run',
+            object.runid || '--',
+            object.config ? `Config ${object.config}` : null,
+            object.user ? `User: ${object.user}` : null,
+            object.access_count ? `Accesses: ${object.access_count}` : null,
+            object.last_accessed ? `Last accessed: ${new Date(object.last_accessed).toLocaleString()}` : null,
+          ].filter(Boolean);
+          return lines.join('\\n');
+        }
+
+        function deriveLabelSize(zoom = 1) {
+          const clampedZoom = Math.max(1, Math.min(10, zoom || 1));
+          return clampedZoom;
+        }
+
+        function deriveLabelOffset(entry) {
+          if (!entry) {
+            return [6, 0];
+          }
+          const rawKey = entry.runid || (Array.isArray(entry.coordinates) ? entry.coordinates.join(':') : '');
+          const key = rawKey || 'fallback-run';
+          if (labelOffsetCache.has(key)) {
+            return labelOffsetCache.get(key);
+          }
+
+          const hash = hashString(key);
+          const angle = Math.abs(hash % 360) * (Math.PI / 180);
+          const magnitude = 4 + Math.abs(hash % 7); // 4px to 10px
+          const offset = [
+            Math.round(6 + Math.cos(angle) * magnitude),
+            Math.round(Math.sin(angle) * magnitude),
+          ];
+          labelOffsetCache.set(key, offset);
+          return offset;
+        }
+
+        function hashString(value) {
+          let hash = 0;
+          const input = value || '';
+          for (let i = 0; i < input.length; i += 1) {
+            hash = (hash << 5) - hash + input.charCodeAt(i);
+            hash |= 0; // Convert to 32-bit integer
+          }
+          return hash;
+        }
+      })();
+    </script>
+  </body>
+</html>
