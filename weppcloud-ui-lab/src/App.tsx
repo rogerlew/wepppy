@@ -932,6 +932,40 @@ const mapSubtitle =
           ))}
         </div>
       </section>
+
+      <section className="bg-[#030712] px-4 py-20 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl space-y-4 text-center"
+        >
+          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Team</p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Contributors</h2>
+          <p className="text-base text-slate-300">
+            WEPPcloud is the result of collaborative efforts from researchers, engineers, and
+            scientists across multiple institutions.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mx-auto mt-12 flex max-w-5xl flex-wrap items-center justify-center gap-3"
+        >
+          {CONTRIBUTORS.map((contributor) => (
+            <span
+              key={contributor}
+              className="rounded-full border border-white/10 bg-slate-800/60 px-4 py-2 text-sm text-slate-200"
+            >
+              {contributor}
+            </span>
+          ))}
+        </motion.div>
+      </section>
     </div>
   )
 }
