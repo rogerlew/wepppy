@@ -5,6 +5,7 @@ import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import type { MapViewState, ViewStateChangeParameters } from '@deck.gl/core'
 import { Map as MapLibreMap } from 'react-map-gl/maplibre'
 import maplibregl from 'maplibre-gl'
+import { Zap } from 'lucide-react'
 
 import { AuroraBackground } from '@/components/aurora-background'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,34 @@ const DEFAULT_RUN_DATA_PATH = './run-locations.json'
 const RUN_DATA_URL = import.meta.env.VITE_RUN_DATA_URL ?? DEFAULT_RUN_DATA_PATH
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json'
 const MAP_PIN_OFFSET = 800
+
+type HelpResource = {
+  title: string
+  description: string
+  href: string
+  icon: 'zap' | 'youtube' | 'github'
+}
+
+const HELP_RESOURCES: HelpResource[] = [
+  {
+    title: 'Quick Start',
+    description: 'Follow the walkthrough to configure a run end-to-end.',
+    href: 'https://doc.wepp.cloud/QuickStart.html',
+    icon: 'zap',
+  },
+  {
+    title: 'WEPPcloud YouTube',
+    description: 'Video tutorials, release notes, and demos.',
+    href: 'https://www.youtube.com/@fswepp4700',
+    icon: 'youtube',
+  },
+  {
+    title: 'wepppy on GitHub',
+    description: 'Source code, issues, and AI-friendly docs.',
+    href: 'https://github.com/rogerlew/wepppy',
+    icon: 'github',
+  },
+]
 
 type RunLocation = {
   runid: string
@@ -66,8 +95,8 @@ export function App() {
   const heroHeadline = 'Watershed intelligence for response teams'
   const mapEyebrow = 'Run atlas'
   const mapTitle = 'Explore Active WEPPcloud Projects'
-  const mapSubtitle =
-    'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
+const mapSubtitle =
+  'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
   const offsetCache = useRef(new Map<string, [number, number]>())
 
   useEffect(() => {
@@ -473,6 +502,48 @@ export function App() {
         </div>
       </div>
       </section>
+
+      <section className="bg-[#050714] px-4 py-20 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl space-y-4 text-center"
+        >
+          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Help</p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Help & Resources</h2>
+          <p className="text-base text-slate-300">
+            Jump straight into documentation, watch the latest walkthrough, or explore the open
+            source stack powering WEPPcloud.
+          </p>
+        </motion.div>
+
+        <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {HELP_RESOURCES.map((resource, index) => (
+            <motion.a
+              key={resource.title}
+              href={resource.href}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/60 p-6 text-left shadow-lg shadow-black/30 transition hover:-translate-y-1 hover:border-sky-400/60"
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+            >
+              <div className="mb-4 flex items-center gap-3 text-slate-100">
+                {renderHelpIcon(resource.icon)}
+                <span className="text-lg font-semibold">{resource.title}</span>
+              </div>
+              <p className="flex-grow text-sm text-slate-300">{resource.description}</p>
+              <span className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
+                Visit →
+              </span>
+            </motion.a>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }
@@ -501,6 +572,31 @@ type TypewriterTextProps = {
   text: string
   speed?: number
   delay?: number
+}
+
+function renderHelpIcon(icon: HelpResource['icon']) {
+  if (icon === 'zap') {
+    return <Zap className="h-6 w-6 text-sky-300" aria-hidden="true" />
+  }
+  if (icon === 'youtube') {
+    return (
+      <img
+        src="/weppcloud/static/images/youtube.png"
+        alt="YouTube"
+        className="h-6 w-6 rounded-md object-cover"
+      />
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6 text-slate-200" aria-hidden="true">
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 3.2C7.0275 3.2 3 7.2275 3 12.2C3 16.1825 5.57625 19.5463 9.15375 20.7388C9.60375 20.8175 9.7725 20.5475 9.7725 20.3113C9.7725 20.0975 9.76125 19.3888 9.76125 18.635C7.5 19.0513 6.915 18.0838 6.735 17.5775C6.63375 17.3188 6.195 16.52 5.8125 16.3063C5.4975 16.1375 5.0475 15.7213 5.80125 15.71C6.51 15.6988 7.01625 16.3625 7.185 16.6325C7.995 17.9938 9.28875 17.6113 9.80625 17.375C9.885 16.79 10.1213 16.3963 10.38 16.1713C8.3775 15.9463 6.285 15.17 6.285 11.7275C6.285 10.7488 6.63375 9.93875 7.2075 9.30875C7.1175 9.08375 6.8025 8.16125 7.2975 6.92375C7.2975 6.92375 8.05125 6.6875 9.7725 7.84625C10.4925 7.64375 11.2575 7.5425 12.0225 7.5425C12.7875 7.5425 13.5525 7.64375 14.2725 7.84625C15.9938 6.67625 16.7475 6.92375 16.7475 6.92375C17.2425 8.16125 16.9275 9.08375 16.8375 9.30875C17.4113 9.93875 17.76 10.7375 17.76 11.7275C17.76 15.1813 15.6563 15.9463 13.6538 16.1713C13.98 16.4525 14.2613 16.9925 14.2613 17.8363C14.2613 19.04 14.25 20.0075 14.25 20.3113C14.25 20.5475 14.4188 20.8288 14.8688 20.7388C18.4238 19.5463 21 16.1713 21 12.2C21 7.2275 16.9725 3.2 12 3.2Z"
+      />
+    </svg>
+  )
 }
 
 function TypewriterText({ text, speed = 40, delay = 200 }: TypewriterTextProps) {
