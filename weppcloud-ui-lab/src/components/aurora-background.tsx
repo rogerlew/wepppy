@@ -6,12 +6,16 @@ import { cn } from '@/lib/utils'
 type AuroraBackgroundProps = {
   className?: string
   children?: ReactNode
+  opacity?: number
 }
 
-export function AuroraBackground({ className, children }: AuroraBackgroundProps) {
+export function AuroraBackground({ className, children, opacity = 1 }: AuroraBackgroundProps) {
   return (
-    <div className={cn('relative flex flex-col overflow-hidden bg-slate-950', className)}>
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-80 mix-blend-screen">
+    <div className={cn('relative flex flex-col bg-slate-950', className)}>
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 z-0 h-screen mix-blend-screen"
+        style={{ opacity }}
+      >
         <motion.div
           initial={{ opacity: 0.4, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

@@ -19,10 +19,11 @@
    - Flask injects `window.__WEPP_STATE__` with `user.is_authenticated`, email, name.
    - React reads state on mount to toggle nav button text/link.
 
-## Animations
+## Animations & Interactions
 
 - Framer Motion handles hero copy/nav fade-in, metric block/map slide-up.
 - Typewriter effect animates hero headline (`speed=2`, `delay=200ms`).
+- Aurora overlay is fixed to the viewport (full-screen `fixed` layer) and fades out based on scroll progress (fully transparent after ~0.6 viewport height).
 - Map section only loads after observer triggers to keep first view light.
 
 ## Build/export

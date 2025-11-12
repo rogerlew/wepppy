@@ -60,6 +60,7 @@ export function App() {
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE)
   const [appState] = useState<AppState>(() => (typeof window !== 'undefined' ? window.__WEPP_STATE__ ?? {} : {}))
   const [mapActivated, setMapActivated] = useState<boolean>(false)
+  const [heroProgress, setHeroProgress] = useState<number>(0)
 
   const isAuthenticated = Boolean(appState.user?.is_authenticated)
   const heroHeadline = 'Watershed intelligence for response teams'
@@ -105,6 +106,22 @@ export function App() {
     loadRunLocations()
 
     return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    function handleScroll() {
+      const viewport = window.innerHeight || 1
+      const threshold = Math.max(viewport * 0.6, 1)
+      const progress = Math.min(Math.max(window.scrollY / threshold, 0), 1)
+      setHeroProgress(progress)
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -289,8 +306,8 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <section id="hero" className="relative flex min-h-[100svh]">
-        <AuroraBackground className="flex-1 min-h-[100svh]">
+      <section id="hero" className="relative flex min-h-[100svh] z-20">
+        <AuroraBackground className="flex-1 min-h-[100svh]" opacity={Math.max(0, 1 - heroProgress)}>
           <div className="relative mx-auto flex h-full max-w-5xl flex-col items-center justify-start gap-12 px-6 py-16 pt-[600px] text-center sm:py-24 lg:py-32">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -334,7 +351,8 @@ export function App() {
         </AuroraBackground>
       </section>
 
-      <section id="map" className="px-4 pb-16 pt-12 sm:px-6 lg:px-12">
+      <section id="map" className="relative z-30 px-4 pb-16 pt-12 sm:px-6 lg:px-12">
+        <div className="map-top-fade" aria-hidden="true" />
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -468,7 +486,7 @@ function MetricCard(props: {
   multiline?: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6">
+    <div className="rounded-2xl border border-white/20 bg-slate-900 p-6 shadow-lg shadow-black/30">
       <p className="text-xs uppercase tracking-widest text-slate-400">{props.label}</p>
       <p
         className={cn(
