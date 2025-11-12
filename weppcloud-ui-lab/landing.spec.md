@@ -65,39 +65,69 @@
    - **Heading:** `Affiliations and Collaborators`
    - **Subtitle:** `WEPPcloud is made possible through collaborative partnerships across research institutions, government agencies, and international funding programs.`
    - Logo grid (responsive, centered, max-width container):
-     - 3 columns on desktop, 2 on tablet, 1 on mobile
+     - 4 columns on desktop, 2 on tablet, 1 on mobile
      - Each logo card contains:
-       - Logo image with grayscale filter (`filter: grayscale(100%)`) that transitions to color on hover (`hover:filter-none`)
-       - Optional organization name/caption below logo (can be hidden on mobile)
-       - Optional link to organization website (logo wraps in anchor tag)
+       - Logo image with grayscale filter (no hover colorization)
+       - Organization caption below logo
+       - Link to organization website (logo wraps in anchor tag)
    - **Logo mappings:**
      - **University of Idaho:** 
-       - Image: `/weppcloud/static/images/ui-main-horizontal.jpg`
+       - Image: `/weppcloud/static/images/University_of_Idaho_logo.svg`
        - Caption: "Go Vandals! University of Idaho"
        - Link: `https://www.uidaho.edu/`
-     - **European Union Horizon 2020:**
-       - Image: **TODO: Add EU flag/Horizon 2020 logo** (e.g., `eu-horizon-2020-logo.png`)
-       - Caption: "WEPPcloud EU has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 101003890."
-       - Link: `https://cordis.europa.eu/project/id/101003890`
      - **Swansea University:**
        - Image: `/weppcloud/static/images/Swansea_University_logo.png`
-       - Caption: "Gweddw Crefft Heb Ei Dawn - Technical Skill is Bereft Without Culture. Swansea University"
+       - Caption: "Gweddw Crefft Heb Ei Dawn - Technical Skill is Bereft Without Culture"
        - Link: `https://www.swansea.ac.uk/`
      - **USDA Forest Service:**
-       - Image: `/weppcloud/static/images/usfslogo.png`
+       - Image: `/weppcloud/static/images/Logo_of_the_United_States_Forest_Service.svg`
        - Caption: "Caring for the land and serving people. Rocky Mountain Research Station"
        - Link: `https://www.fs.usda.gov/rmrs/`
      - **UI Research Computing & Data Services:**
        - Image: `/weppcloud/static/images/RCDS_Logo-horizontal.svg`
-       - Caption: "WEPPcloud is proudly hosted by the University of Idaho Research Computing + Data Services."
+       - Caption: "Proudly hosted by the University of Idaho Research Computing + Data Services"
        - Link: `https://www.uidaho.edu/research/computing`
    - **Styling notes:**
-     - Logos should have consistent height (e.g., `h-16` or `h-20`) with `object-contain` to maintain aspect ratio
-     - Apply Tailwind filters: `grayscale brightness-0 invert opacity-70` for dark theme integration
-     - On hover: `hover:grayscale-0 hover:brightness-100 hover:invert-0 hover:opacity-100`
-     - Smooth transition: `transition-all duration-300`
+     - Logos have consistent height (`h-20`) with `object-contain` to maintain aspect ratio
+     - Apply Tailwind filters: `grayscale invert opacity-60 contrast-125` for dark theme integration
+     - No hover colorization (logos stay filtered)
      - Cards have subtle border (`border-white/10`) and background (`bg-slate-900/40`)
-     - Generous padding around logos (`p-6` or `p-8`)
+     - Generous padding around logos (`p-8`)
+
+6. **Sponsors**
+   - Dark section (`bg-[#050714]` or similar darker than affiliations) with centered eyebrow, heading, and subtitle.
+   - **Eyebrow:** `Funding`
+   - **Heading:** `Sponsors`
+   - **Subtitle:** `WEPPcloud development is supported by grants from federal agencies, international research programs, and scientific funding bodies.`
+   - Logo grid (responsive, centered, max-width container):
+     - Same styling as Affiliations section
+     - 4 columns on desktop, 2 on tablet, 1 on mobile
+     - Each logo card contains:
+       - Logo image with same grayscale filter as affiliations
+       - Funding acknowledgment caption below logo
+       - Optional link to funding program website
+   - **Logo mappings:**
+     - **NSF Idaho EPSCoR:**
+       - Image: **MISSING** - Need NSF logo (e.g., `nsf-logo.svg` or `nsf-epscor-logo.png`)
+       - Caption: "This work was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award number IIA-1301792."
+       - Link: `https://www.nsf.gov/` or `https://www.idahoepscor.org/`
+     - **USDA NIFA:**
+       - Image: `/weppcloud/static/images/USDA_logo.png`
+       - Caption: "This work is supported by AFRI program [grant no. 2016-67020-25320/project accession no. 1009827] from the USDA National Institute of Food and Agriculture."
+       - Link: `https://www.nifa.usda.gov/`
+     - **UKRI / NERC:**
+       - Image: `/weppcloud/static/images/ukri-nerc-logo-600x160.png` (combined logo preferred) or `/weppcloud/static/images/UKRI-Logo_Horiz-RGB.png`
+       - Caption: "The Wildfire Ash Transport And Risk estimation tool (WATAR) was made possible with funding provided by UK NERC Grant NE/R011125/1 and European Commission (H2020 FirEUrisk project no. 101003890)."
+       - Link: `https://www.ukri.org/councils/nerc/`
+     - **NASA Western Water Applications Office:**
+       - Image: `/weppcloud/static/images/nasa_logo.svg`
+       - Caption: "The revegetation module in WEPPcloud was supported by NASA's Western Water Application Office (WWAO)."
+       - Link: `https://wwao.jpl.nasa.gov/`
+   - **Styling notes:**
+     - Same filter as Affiliations: `grayscale invert opacity-60 contrast-125`
+     - No hover effects (keep static)
+     - Cards match Affiliations styling for consistency
+     - Captions may be longer (funding acknowledgments) so ensure adequate spacing
 
 ### Runtime state
    - Flask injects `window.__WEPP_STATE__` with `user.is_authenticated`, email, name.
@@ -118,6 +148,6 @@
 
 ## TODO
 
-- **Add EU Horizon 2020 logo:** Download official EU flag or Horizon 2020 logo and place in `wepppy/weppcloud/static/images/` (e.g., `eu-horizon-2020-logo.png` or `eu-flag.svg`).
-  - Official EU emblem: https://ec.europa.eu/regional_policy/sources/images/emblem_horizontal_colour.jpg
-  - Or use EU flag SVG from official sources
+- **Add NSF logo:** Download official NSF logo and place in `wepppy/weppcloud/static/images/` (e.g., `nsf-logo.svg` or `nsf-logo.png`).
+  - Official NSF brand resources: https://www.nsf.gov/policies/nsf_logo.jsp
+  - Alternative: NSF Idaho EPSCoR specific logo if available
