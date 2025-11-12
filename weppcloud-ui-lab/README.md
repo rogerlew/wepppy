@@ -23,6 +23,7 @@ Components land in `src/components/ui/*` and rely on the shared utilities in `sr
 
 ## Building + exporting to Flask
 ```bash
+npm run build
 npm run export:landing
 ```
 Runs `npm run build`, then copies `dist/` into `wepppy/weppcloud/static/ui-lab/`.

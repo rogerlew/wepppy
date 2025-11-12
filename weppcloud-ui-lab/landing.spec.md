@@ -59,7 +59,47 @@
      - Email: brian.sheppard@usda.gov
      - Expertise: Hydrology, fire response modeling
 
-3. **Runtime state**
+5. **Affiliations and Collaborators**
+   - Dark section (`bg-[#020617]` or similar) with centered eyebrow, heading, and subtitle.
+   - **Eyebrow:** `Collaborators`
+   - **Heading:** `Affiliations and Collaborators`
+   - **Subtitle:** `WEPPcloud is made possible through collaborative partnerships across research institutions, government agencies, and international funding programs.`
+   - Logo grid (responsive, centered, max-width container):
+     - 3 columns on desktop, 2 on tablet, 1 on mobile
+     - Each logo card contains:
+       - Logo image with grayscale filter (`filter: grayscale(100%)`) that transitions to color on hover (`hover:filter-none`)
+       - Optional organization name/caption below logo (can be hidden on mobile)
+       - Optional link to organization website (logo wraps in anchor tag)
+   - **Logo mappings:**
+     - **University of Idaho:** 
+       - Image: `/weppcloud/static/images/ui-main-horizontal.jpg`
+       - Caption: "Go Vandals! University of Idaho"
+       - Link: `https://www.uidaho.edu/`
+     - **European Union Horizon 2020:**
+       - Image: **TODO: Add EU flag/Horizon 2020 logo** (e.g., `eu-horizon-2020-logo.png`)
+       - Caption: "WEPPcloud EU has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 101003890."
+       - Link: `https://cordis.europa.eu/project/id/101003890`
+     - **Swansea University:**
+       - Image: `/weppcloud/static/images/Swansea_University_logo.png`
+       - Caption: "Gweddw Crefft Heb Ei Dawn - Technical Skill is Bereft Without Culture. Swansea University"
+       - Link: `https://www.swansea.ac.uk/`
+     - **USDA Forest Service:**
+       - Image: `/weppcloud/static/images/usfslogo.png`
+       - Caption: "Caring for the land and serving people. Rocky Mountain Research Station"
+       - Link: `https://www.fs.usda.gov/rmrs/`
+     - **UI Research Computing & Data Services:**
+       - Image: `/weppcloud/static/images/RCDS_Logo-horizontal.svg`
+       - Caption: "WEPPcloud is proudly hosted by the University of Idaho Research Computing + Data Services."
+       - Link: `https://www.uidaho.edu/research/computing`
+   - **Styling notes:**
+     - Logos should have consistent height (e.g., `h-16` or `h-20`) with `object-contain` to maintain aspect ratio
+     - Apply Tailwind filters: `grayscale brightness-0 invert opacity-70` for dark theme integration
+     - On hover: `hover:grayscale-0 hover:brightness-100 hover:invert-0 hover:opacity-100`
+     - Smooth transition: `transition-all duration-300`
+     - Cards have subtle border (`border-white/10`) and background (`bg-slate-900/40`)
+     - Generous padding around logos (`p-6` or `p-8`)
+
+### Runtime state
    - Flask injects `window.__WEPP_STATE__` with `user.is_authenticated`, email, name.
    - React reads state on mount to toggle nav button text/link.
 
@@ -75,3 +115,9 @@
 
 - `npm run export:landing` builds Vite bundle and copies to `wepppy/weppcloud/static/ui-lab/`.
 - Flask `landing()` route injects `__WEPP_STATE__` before serving `index.html`.
+
+## TODO
+
+- **Add EU Horizon 2020 logo:** Download official EU flag or Horizon 2020 logo and place in `wepppy/weppcloud/static/images/` (e.g., `eu-horizon-2020-logo.png` or `eu-flag.svg`).
+  - Official EU emblem: https://ec.europa.eu/regional_policy/sources/images/emblem_horizontal_colour.jpg
+  - Or use EU flag SVG from official sources

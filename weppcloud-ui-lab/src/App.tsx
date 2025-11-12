@@ -5,7 +5,16 @@ import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import type { MapViewState, ViewStateChangeParameters } from '@deck.gl/core'
 import { Map as MapLibreMap } from 'react-map-gl/maplibre'
 import maplibregl from 'maplibre-gl'
-import { Zap } from 'lucide-react'
+import {
+  CloudRain,
+  FileText,
+  Flame,
+  Server,
+  Settings,
+  Sprout,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react'
 
 import { AuroraBackground } from '@/components/aurora-background'
 import { cn } from '@/lib/utils'
@@ -20,6 +29,67 @@ type HelpResource = {
   description: string
   href: string
   icon: 'zap' | 'youtube' | 'github'
+}
+
+const CONTACT_ICON_MAP = {
+  server: Server,
+  settings: Settings,
+  flame: Flame,
+  cloudRain: CloudRain,
+  sprout: Sprout,
+  fileText: FileText,
+} satisfies Record<string, LucideIcon>
+
+const CONTACT_ACCENTS = {
+  violet: {
+    border: 'border-violet-500/40',
+    glow: 'from-violet-500/20 via-violet-500/5 to-transparent',
+    icon: 'bg-violet-500/15 text-violet-100',
+    chip: 'bg-violet-500/10 text-violet-100',
+  },
+  sky: {
+    border: 'border-sky-500/40',
+    glow: 'from-sky-500/20 via-sky-500/5 to-transparent',
+    icon: 'bg-sky-500/15 text-sky-100',
+    chip: 'bg-sky-500/10 text-sky-100',
+  },
+  amber: {
+    border: 'border-amber-400/40',
+    glow: 'from-amber-400/25 via-amber-400/5 to-transparent',
+    icon: 'bg-amber-400/15 text-amber-100',
+    chip: 'bg-amber-400/10 text-amber-100',
+  },
+  emerald: {
+    border: 'border-emerald-400/40',
+    glow: 'from-emerald-400/20 via-emerald-400/5 to-transparent',
+    icon: 'bg-emerald-400/15 text-emerald-100',
+    chip: 'bg-emerald-400/10 text-emerald-100',
+  },
+  lime: {
+    border: 'border-lime-400/40',
+    glow: 'from-lime-400/20 via-lime-400/5 to-transparent',
+    icon: 'bg-lime-400/15 text-lime-100',
+    chip: 'bg-lime-400/10 text-lime-100',
+  },
+  cyan: {
+    border: 'border-cyan-400/40',
+    glow: 'from-cyan-400/20 via-cyan-400/5 to-transparent',
+    icon: 'bg-cyan-400/15 text-cyan-100',
+    chip: 'bg-cyan-400/10 text-cyan-100',
+  },
+} as const
+
+type ContactAccent = keyof typeof CONTACT_ACCENTS
+type ContactIcon = keyof typeof CONTACT_ICON_MAP
+
+type Contact = {
+  name: string
+  title: string
+  institution: string
+  email: string
+  expertise: string[]
+  icon: ContactIcon
+  accent: ContactAccent
 }
 
 const HELP_RESOURCES: HelpResource[] = [
@@ -40,6 +110,63 @@ const HELP_RESOURCES: HelpResource[] = [
     description: 'Source code, issues, and AI-friendly docs.',
     href: 'https://github.com/rogerlew/wepppy',
     icon: 'github',
+  },
+]
+
+const CONTACTS: Contact[] = [
+  {
+    name: 'Roger Lew',
+    title: 'WEPPcloud DevOps Architect, Associate Research Professor',
+    institution: 'University of Idaho',
+    email: 'rogerlew@uidaho.edu',
+    expertise: ['WEPPcloud', 'WEPP inputs & outputs', 'Data pipelines', 'Analytics'],
+    icon: 'server',
+    accent: 'violet',
+  },
+  {
+    name: 'Mariana Dobre',
+    title: 'Assistant Professor',
+    institution: 'University of Idaho',
+    email: 'mdobre@uidaho.edu',
+    expertise: ['Hydrology', 'Soil science', 'Calibration', 'Forests'],
+    icon: 'settings',
+    accent: 'sky',
+  },
+  {
+    name: 'Pete Robichaud',
+    title: 'Research Engineer',
+    institution: 'USDA Forest Service, Rocky Mountain Research Station',
+    email: 'peter.robichaud@usda.gov',
+    expertise: ['Forest response', 'WEPP', 'Post-fire erosion', 'Ash transport'],
+    icon: 'flame',
+    accent: 'amber',
+  },
+  {
+    name: 'Anurag Srivastava',
+    title: 'Research Scientist',
+    institution: 'University of Idaho',
+    email: 'srivanu@uidaho.edu',
+    expertise: ['WEPP model', 'Hydrology', 'Soil erosion', 'Climate datasets'],
+    icon: 'cloudRain',
+    accent: 'emerald',
+  },
+  {
+    name: 'Erin Brooks',
+    title: 'Professor',
+    institution: 'University of Idaho',
+    email: 'ebrooks@uidaho.edu',
+    expertise: ['Landscape hydrology', 'Precision agriculture', 'Nutrient cycling', 'Water quality'],
+    icon: 'sprout',
+    accent: 'lime',
+  },
+  {
+    name: 'Brian (Scott) Sheppard',
+    title: 'Research Hydrologist',
+    institution: 'USDA Forest Service, Rocky Mountain Research Station',
+    email: 'brian.sheppard@usda.gov',
+    expertise: ['Hydrology', 'Fire response modeling'],
+    icon: 'fileText',
+    accent: 'cyan',
   },
 ]
 
@@ -370,7 +497,7 @@ const mapSubtitle =
             transition={{ duration: 0.8, ease: 'easeOut' }}
             className="mx-auto max-w-5xl"
           >
-            <div className="space-y-4 text-center">
+            <div className="space-y-4 text-center pt-12">
               <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
               <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
               <p className="text-base text-slate-300">{mapSubtitle}</p>
@@ -541,7 +668,95 @@ const mapSubtitle =
             </motion.a>
           ))}
         </div>
-        <div aria-hidden="true" style={{ height: `${MAP_PIN_OFFSET}px` }} />
+      </section>
+
+      <section className="bg-[#030712] px-4 py-20 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl space-y-4 text-center"
+        >
+          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Team</p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Points of Contact</h2>
+          <p className="text-base text-slate-300">
+            Connect with the researchers, engineers, and hydrologists who shape WEPPcloud. Each
+            contact can help with specialized workflows, calibration strategies, and emergency
+            response planning.
+          </p>
+        </motion.div>
+
+        <div className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2">
+          {CONTACTS.map((contact, index) => {
+            const accent = CONTACT_ACCENTS[contact.accent]
+            const IconComponent = CONTACT_ICON_MAP[contact.icon]
+            return (
+              <motion.article
+                key={contact.email}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className={cn(
+                  'relative flex h-full flex-col overflow-hidden rounded-3xl border bg-slate-950/70 p-6 shadow-2xl shadow-black/40 transition hover:-translate-y-1 hover:shadow-black/60',
+                  accent.border,
+                )}
+              >
+                <div
+                  className={cn(
+                    'pointer-events-none absolute inset-0 bg-gradient-to-br opacity-70 blur-3xl',
+                    accent.glow,
+                  )}
+                  aria-hidden="true"
+                />
+                <div className="relative z-10 flex flex-col gap-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <div
+                      className={cn(
+                        'inline-flex h-14 w-14 items-center justify-center rounded-2xl text-lg',
+                        accent.icon,
+                      )}
+                    >
+                      <IconComponent className="h-7 w-7" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Contact</p>
+                      <h3 className="text-xl font-semibold text-white">{contact.name}</h3>
+                      <p className="text-sm text-slate-300">{contact.title}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-sm text-slate-300">
+                    <p className="font-medium text-slate-100">{contact.institution}</p>
+                    <a
+                      className="inline-flex items-center gap-2 text-sky-300 transition hover:text-sky-200"
+                      href={`mailto:${contact.email}`}
+                    >
+                      <span className="text-xs uppercase tracking-[0.3em] text-sky-200">Email</span>
+                      <span>{contact.email}</span>
+                    </a>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Expertise</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {contact.expertise.map((item) => (
+                        <span
+                          key={item}
+                          className={cn(
+                            'rounded-full px-3 py-1 text-xs font-medium',
+                            accent.chip,
+                          )}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.article>
+            )
+          })}
+        </div>
       </section>
     </div>
   )
