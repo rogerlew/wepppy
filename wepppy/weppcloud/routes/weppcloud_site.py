@@ -15,6 +15,7 @@ weppcloud_site_bp = Blueprint('weppcloud_site', __name__)
 _ACCESS_LOG_ENV_KEY = 'WEPP_ACCESS_LOG_PATH'
 _ACCESS_LOG_DEFAULT = '/geodata/weppcloud_runs/access.csv'
 _RUN_LOCATIONS_FILENAME = 'runid-locations.json'
+_LANDING_STATIC_DIRNAME = 'ui-lab'
 _BOOL_TRUE = {'1', 'true', 'yes', 'y', 'on'}
 
 
@@ -73,6 +74,14 @@ def _resolve_run_locations_path() -> Path:
     static_dir = Path(current_app.static_folder)
     static_dir.mkdir(parents=True, exist_ok=True)
     return static_dir / _RUN_LOCATIONS_FILENAME
+
+
+def _resolve_landing_static_root() -> Path:
+    return Path(current_app.static_folder) / _LANDING_STATIC_DIRNAME
+
+
+def _resolve_landing_static_asset(*parts: str) -> Path:
+    return _resolve_landing_static_root().joinpath(*parts)
 
 
 def _build_run_location_dataset(source_path: Path) -> List[Dict[str, Any]]:
@@ -201,7 +210,15 @@ def about():
 @weppcloud_site_bp.route('/landing/', strict_slashes=False)
 @handle_with_exception_factory
 def landing():
-    _load_or_refresh_run_locations(force=True)
+    try:
+        _load_or_refresh_run_locations(force=True)
+    except Exception:
+        current_app.logger.exception('Failed to refresh landing run locations')
+
+    vite_index = _resolve_landing_static_asset('index.html')
+    if vite_index.exists():
+        return send_from_directory(vite_index.parent, vite_index.name)
+
     return render_template('landing.htm', user=current_user)
 
 
@@ -210,3 +227,21 @@ def landing():
 def landing_run_locations():
     dataset = _load_or_refresh_run_locations()
     return jsonify(dataset)
+
+
+@weppcloud_site_bp.route('/landing/assets/<path:asset_path>', strict_slashes=False)
+@handle_with_exception_factory
+def landing_static_assets(asset_path: str):
+    assets_root = _resolve_landing_static_asset('assets')
+    if not assets_root.exists():
+        abort(404)
+    return send_from_directory(assets_root, asset_path)
+
+
+@weppcloud_site_bp.route('/landing/vite.svg', strict_slashes=False)
+@handle_with_exception_factory
+def landing_static_vite_icon():
+    icon_path = _resolve_landing_static_asset('vite.svg')
+    if not icon_path.exists():
+        abort(404)
+    return send_from_directory(icon_path.parent, icon_path.name)
