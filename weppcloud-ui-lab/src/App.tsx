@@ -59,7 +59,6 @@ export function App() {
   const [panelOpen, setPanelOpen] = useState<boolean>(false)
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE)
   const [appState] = useState<AppState>(() => (typeof window !== 'undefined' ? window.__WEPP_STATE__ ?? {} : {}))
-  const [mapActivated, setMapActivated] = useState<boolean>(false)
   const [heroProgress, setHeroProgress] = useState<number>(0)
 
   const isAuthenticated = Boolean(appState.user?.is_authenticated)
@@ -68,7 +67,6 @@ export function App() {
   const mapTitle = 'Explore Active WEPPcloud Projects'
   const mapSubtitle =
     'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
-  const mapSectionRef = useRef<HTMLDivElement | null>(null)
   const offsetCache = useRef(new Map<string, [number, number]>())
 
   useEffect(() => {
@@ -123,28 +121,6 @@ export function App() {
       window.removeEventListener('resize', handleScroll)
     }
   }, [])
-
-  useEffect(() => {
-    if (mapActivated) {
-      return undefined
-    }
-    const target = mapSectionRef.current
-    if (!target) {
-      return undefined
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setMapActivated(true)
-          }
-        })
-      },
-      { threshold: 0.35 },
-    )
-    observer.observe(target)
-    return () => observer.disconnect()
-  }, [mapActivated])
 
   const filteredData = useMemo(() => {
     if (yearFilter === 'all') {
@@ -380,7 +356,7 @@ export function App() {
           </div>
         </motion.div>
 
-        <div ref={mapSectionRef} className="mt-2 w-full">
+        <div className="mt-2 w-full">
           <motion.div
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -403,28 +379,37 @@ export function App() {
                   Filtered hillslopes: {filteredStats.hillslopes.toLocaleString()}
                 </span>
               </div>
-              {mapActivated ? (
-                <DeckGL
-                  controller
-                  initialViewState={INITIAL_VIEW_STATE}
-                  layers={deckLayers}
-                  viewState={viewState}
-                  onViewStateChange={handleViewStateChange}
-                  getTooltip={tooltipBuilder}
-                  style={{ position: 'absolute', top: '0', right: '0', bottom: '0', left: '0' }}
-                >
-                  <MapLibreMap
-                    reuseMaps
-                    mapLib={maplibregl}
-                    mapStyle={MAP_STYLE}
-                    attributionControl={false}
-                  />
-                </DeckGL>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
-                  <p className="text-sm text-slate-400">Preparing map...</p>
-                </div>
-              )}
+              <div
+                className="absolute inset-0"
+                onWheelCapture={(event) => {
+                  if (!event.ctrlKey) {
+                    event.stopPropagation()
+                  }
+                }}
+              >
+                {sortedData.length > 0 ? (
+                  <DeckGL
+                    controller
+                    initialViewState={INITIAL_VIEW_STATE}
+                    layers={deckLayers}
+                    viewState={viewState}
+                    onViewStateChange={handleViewStateChange}
+                    getTooltip={tooltipBuilder}
+                    style={{ position: 'absolute', top: '0', right: '0', bottom: '0', left: '0' }}
+                  >
+                    <MapLibreMap
+                      reuseMaps
+                      mapLib={maplibregl}
+                      mapStyle={MAP_STYLE}
+                      attributionControl={false}
+                    />
+                  </DeckGL>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
+                    <p className="text-sm text-slate-400">Preparing map...</p>
+                  </div>
+                )}
+              </div>
 
               <button
                 type="button"
@@ -445,6 +430,10 @@ export function App() {
               >
                 <h2 className="text-base font-semibold text-slate-100">Display options</h2>
                 <div className="mt-4 space-y-3">
+                  <p className="rounded-lg bg-slate-900/70 p-3 text-xs text-slate-300">
+                    Tip: Hold <span className="font-semibold text-slate-100">Ctrl</span> while
+                    scrolling to zoom the map.
+                  </p>
                   <label className="block text-xs uppercase tracking-wider text-slate-400">
                     Year
                     <select
