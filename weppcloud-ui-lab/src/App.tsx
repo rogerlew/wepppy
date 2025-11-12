@@ -238,6 +238,24 @@ const SPONSORS: Sponsor[] = [
   },
 ]
 
+const CONTRIBUTORS = [
+  'Marta Basso',
+  'Erin Brooks',
+  'Chinmay Deval',
+  'Mariana Dobre',
+  'Stefan Doerr',
+  'Helen Dow',
+  'William Elliot',
+  'Jim Frakenberger',
+  'Roger Lew',
+  'Mary E. Miller',
+  'Jonay Neris',
+  'Pete Robichaud',
+  'Cristina Santin',
+  'Brian (Scott) Sheppard',
+  'Anurag Srivastava',
+]
+
 type RunLocation = {
   runid: string
   run_name?: string
