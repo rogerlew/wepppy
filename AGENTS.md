@@ -247,6 +247,7 @@ Every module, service, and significant package should have a README.md that serv
 - Agents should assume a Linux host with Docker and Docker Compose available.
 - The `wctl` utility (Docker command wrapper) is installed on the host and should be used to manage containers, execute commands (e.g., `wctl exec weppcloud bash`), and run tests (`wctl run-pytest …`). This keeps workflows aligned with the team’s tooling.
 - The host filesystem mirrors the dev container layout under `/workdir/<repo>`, so relative paths such as `/workdir/wepppy/...` are safe to reference.
+- **Hostname note:** `forest.local` and `wc.bearhive.duckdns.org` resolve to the same machine (homelab dev box). Treat file paths like `/wc1/...` as shared between them.
 - The repository includes `docker/docker-compose.dev.yml`; expect it to exist and be the primary entry point for local orchestration.
 - **GitHub CLI (`gh`)** is available on the host and authenticated. Use it for creating issues, managing PRs, and querying repository metadata:
   ```bash

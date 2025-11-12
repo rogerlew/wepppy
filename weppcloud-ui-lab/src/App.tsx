@@ -360,45 +360,43 @@ const mapSubtitle =
       <section
         id="map"
         className="relative z-30 bg-[#020617] px-4 pb-16 pt-12 sm:px-6 lg:px-12"
-        style={{ minHeight: `calc(100vh + ${MAP_PIN_OFFSET}px)` }}
       >
         <div className="map-top-fade" aria-hidden="true" />
-        <div className="map-pin-wrapper" style={{ minHeight: `calc(100vh + ${MAP_PIN_OFFSET}px)` }}>
-          <div className="map-pin-container space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="mx-auto max-w-5xl"
-            >
-              <div className="space-y-4 text-center">
-                <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
-                <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
-                <p className="text-base text-slate-300">{mapSubtitle}</p>
-              </div>
-              <div className="mt-6 grid gap-6 sm:grid-cols-3">
-                <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
-                <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
-                <MetricCard
-                  label="Latest access"
-                  value={
-                    aggregateStats.lastAccessedParts
-                      ? `${aggregateStats.lastAccessedParts.date}\n${aggregateStats.lastAccessedParts.time}`
-                      : '--'
-                  }
-                  multiline
-                />
-              </div>
-            </motion.div>
+        <div className="map-pin-container space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="mx-auto max-w-5xl"
+          >
+            <div className="space-y-4 text-center">
+              <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
+              <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
+              <p className="text-base text-slate-300">{mapSubtitle}</p>
+            </div>
+            <div className="mt-6 grid gap-6 sm:grid-cols-3">
+              <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
+              <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
+              <MetricCard
+                label="Latest access"
+                value={
+                  aggregateStats.lastAccessedParts
+                    ? `${aggregateStats.lastAccessedParts.date}\n${aggregateStats.lastAccessedParts.time}`
+                    : '--'
+                }
+                multiline
+              />
+            </div>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
-              className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40"
-            >
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
+            className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40"
+          >
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
               <div className="map-legend">
                 <span className="legend-chip">
@@ -500,7 +498,7 @@ const mapSubtitle =
             </div>
           </motion.div>
         </div>
-      </div>
+        <div aria-hidden="true" style={{ height: `${MAP_PIN_OFFSET}px` }} />
       </section>
 
       <section className="bg-[#050714] px-4 py-20 sm:px-6 lg:px-12">
@@ -543,6 +541,7 @@ const mapSubtitle =
             </motion.a>
           ))}
         </div>
+        <div aria-hidden="true" style={{ height: `${MAP_PIN_OFFSET}px` }} />
       </section>
     </div>
   )

@@ -14,7 +14,10 @@ from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_except
 weppcloud_site_bp = Blueprint('weppcloud_site', __name__)
 
 _ACCESS_LOG_ENV_KEY = 'WEPP_ACCESS_LOG_PATH'
-_ACCESS_LOG_DEFAULT = '/geodata/weppcloud_runs/access.csv'
+_ACCESS_LOG_DEFAULTS = [
+    '/geodata/weppcloud_runs/access.csv',
+    '/wc1/geodata/weppcloud_runs/access.csv',
+]
 _RUN_LOCATIONS_FILENAME = 'runid-locations.json'
 _LANDING_STATIC_DIRNAME = 'ui-lab'
 _BOOL_TRUE = {'1', 'true', 'yes', 'y', 'on'}
@@ -67,8 +70,17 @@ def _derive_run_name(runid: str) -> str:
 def _resolve_access_log_path() -> Path:
     override = os.environ.get(_ACCESS_LOG_ENV_KEY)
     configured = current_app.config.get(_ACCESS_LOG_ENV_KEY)
-    resolved = override or configured or _ACCESS_LOG_DEFAULT
-    return Path(resolved)
+    if override:
+        return Path(override)
+    if configured:
+        return Path(configured)
+
+    for candidate in _ACCESS_LOG_DEFAULTS:
+        candidate_path = Path(candidate)
+        if candidate_path.exists():
+            return candidate_path
+    # Fall back to the first entry so downstream callers still receive a Path
+    return Path(_ACCESS_LOG_DEFAULTS[0])
 
 
 def _resolve_run_locations_path() -> Path:
