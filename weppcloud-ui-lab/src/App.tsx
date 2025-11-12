@@ -784,16 +784,60 @@ const mapSubtitle =
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
+                whileHover={{
+                  scale: 1.02,
+                }}
+                onMouseMove={(e) => {
+                  const card = e.currentTarget
+                  const rect = card.getBoundingClientRect()
+                  const x = e.clientX - rect.left
+                  const y = e.clientY - rect.top
+                  const centerX = rect.width / 2
+                  const centerY = rect.height / 2
+                  const rotateX = ((y - centerY) / centerY) * -10
+                  const rotateY = ((x - centerX) / centerX) * 10
+                  
+                  // Update card transform
+                  card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
+                  
+                  // Update highlight position
+                  const xPercent = (x / rect.width) * 100
+                  const yPercent = (y / rect.height) * 100
+                  const highlight = card.querySelector('.card-highlight') as HTMLElement
+                  if (highlight) {
+                    highlight.style.setProperty('--mouse-x', `${xPercent}%`)
+                    highlight.style.setProperty('--mouse-y', `${yPercent}%`)
+                    highlight.style.opacity = '1'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  const card = e.currentTarget
+                  card.style.transform = ''
+                  card.style.transition = 'transform 0.3s ease-out'
+                  
+                  const highlight = card.querySelector('.card-highlight') as HTMLElement
+                  if (highlight) {
+                    highlight.style.opacity = '0'
+                  }
+                }}
                 className={cn(
-                  'relative flex h-full flex-col overflow-hidden rounded-3xl border bg-slate-950/70 p-6 shadow-2xl shadow-black/40 transition hover:-translate-y-1 hover:shadow-black/60',
+                  'relative flex h-full flex-col overflow-hidden rounded-3xl border bg-slate-950/70 p-6 shadow-2xl shadow-black/40 hover:shadow-black/60',
                   accent.border,
                 )}
+                style={{ transformStyle: 'preserve-3d', transition: 'transform 0.3s ease-out' }}
               >
                 <div
                   className={cn(
                     'pointer-events-none absolute inset-0 bg-gradient-to-br opacity-70 blur-3xl',
                     accent.glow,
                   )}
+                  aria-hidden="true"
+                />
+                <div
+                  className="card-highlight pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200"
+                  style={{
+                    background: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.08) 0%, transparent 50%)',
+                  }}
                   aria-hidden="true"
                 />
                 <div className="relative z-10 flex flex-col gap-5">
