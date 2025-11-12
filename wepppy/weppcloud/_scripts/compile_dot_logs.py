@@ -11,6 +11,8 @@ from datetime import datetime
 
 from wepppy.nodb import Ron, Watershed
 
+# NOTE for AGENTS: DON"T TOUGH THIS FILE UNLESS REQUESTED
+
 fns = glob('/geodata/weppcloud_runs/.*')
 fns += glob('/geodata/wc1/runs/*/.*')
 fns += glob('/wc1/runs/*/.*')

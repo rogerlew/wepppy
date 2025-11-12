@@ -26,6 +26,39 @@
    - **wepppy GitHub:** Card linking to `https://github.com/rogerlew/wepppy` using the provided GitHub SVG icon.
    - Layout: three responsive cards (stacking on mobile) with short descriptions and CTA links.
 
+4. **Points of Contact**
+   - Grid of contact cards (2 columns, responsive) showcasing the WEPPcloud team.
+   - **Roger Lew** (Icon: `Server`)
+     - Title: WEPPcloud DevOps Architect, Associate Research Professor
+     - Institution: University of Idaho
+     - Email: rogerlew@uidaho.edu
+     - Expertise: WEPPcloud, WEPP input and outputs, data pipelines and analysis
+   - **Mariana Dobre** (Icon: `Settings`)
+     - Title: Assistant Professor
+     - Institution: University of Idaho
+     - Email: mdobre@uidaho.edu
+     - Expertise: Hydrology, Soil Science, Calibration, Forests
+   - **Pete Robichaud** (Icon: `Flame`)
+     - Title: Research Engineer
+     - Institution: USDA Forest Service, Rocky Mountain Research Station
+     - Email: peter.robichaud@usda.gov
+     - Expertise: Forest, WEPP, Post-fire erosion modeling, Ash Transport
+   - **Anurag Srivastava** (Icon: `CloudRain`)
+     - Title: Research Scientist
+     - Institution: University of Idaho
+     - Email: srivanu@uidaho.edu
+     - Expertise: WEPP model, Hydrology, Soil Erosion, Forest, Agriculture, Climate datasets and processing for WEPP
+   - **Erin Brooks** (Icon: `Sprout`)
+     - Title: Professor
+     - Institution: University of Idaho
+     - Email: ebrooks@uidaho.edu
+     - Expertise: Landscape hydrology, precision agriculture, nutrient cycling and transport, water quality, erosion
+   - **Brian (Scott) Sheppard** (Icon: `FileText`)
+     - Title: Research Hydrologist
+     - Institution: USDA Forest Service, Rocky Mountain Research Station
+     - Email: brian.sheppard@usda.gov
+     - Expertise: Hydrology, fire response modeling
+
 3. **Runtime state**
    - Flask injects `window.__WEPP_STATE__` with `user.is_authenticated`, email, name.
    - React reads state on mount to toggle nav button text/link.
