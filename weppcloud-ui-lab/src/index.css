@@ -119,3 +119,33 @@
   box-shadow: 0 18px 45px rgba(2, 6, 23, 0.45);
   color: #e2e8f0;
 }
+
+.map-legend {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #cbd5f5;
+  padding: 6px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+  background: rgba(3, 7, 18, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}

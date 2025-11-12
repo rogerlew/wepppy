@@ -237,9 +237,9 @@ export function App() {
           <div className="space-y-6">
             <p className="text-xs uppercase tracking-[0.3em] text-sky-300">Run atlas</p>
             <div className="space-y-4">
-              <h1 className="text-4xl font-semibold leading-tight text-slate-50 sm:text-5xl lg:text-6xl">
+              <h2 className="text-3xl font-semibold leading-tight text-slate-50 sm:text-5xl lg:text-6xl">
                 Explore Active WEPPcloud Projects
-              </h1>
+              </h2>
               <p className="max-w-3xl text-base text-slate-300 sm:text-lg">
                 Every WEPPcloud run with a recorded centroid appears on this interactive map.
                 Highlight wildfire response studies, watershed planning campaigns, and the scale of
@@ -267,26 +267,25 @@ export function App() {
       </div>
 
       <section className="px-4 pb-16 pt-6 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-6xl space-y-6">
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-800/80 px-3 py-1">
-              <span className="h-2 w-2 rounded-full bg-sky-400" />
-              Standard runs
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-800/80 px-3 py-1">
-              <span className="h-2 w-2 rounded-full bg-violet-500" />
-              Runs with SBS
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-800/80 px-3 py-1">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              Filtered hillslopes: {filteredStats.hillslopes.toLocaleString()}
-            </span>
-          </div>
-        </div>
+        <div className="mx-auto max-w-6xl space-y-6" />
 
-        <div className="mt-6 w-full">
+        <div className="mt-2 w-full">
           <div className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40">
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
+              <div className="map-legend">
+                <span className="legend-chip">
+                  <span className="legend-dot bg-sky-400" />
+                  Standard runs
+                </span>
+                <span className="legend-chip">
+                  <span className="legend-dot bg-violet-500" />
+                  Runs with SBS
+                </span>
+                <span className="legend-chip">
+                  <span className="legend-dot bg-emerald-400" />
+                  Filtered hillslopes: {filteredStats.hillslopes.toLocaleString()}
+                </span>
+              </div>
               <DeckGL
                 controller
                 initialViewState={INITIAL_VIEW_STATE}
@@ -326,7 +325,7 @@ export function App() {
                   <label className="block text-xs uppercase tracking-wider text-slate-400">
                     Year
                     <select
-                      className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2 text-sm text-slate-100"
+                      className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 shadow-none transition focus:border-sky-400 focus:outline-none"
                       value={yearFilter}
                       onChange={(event) => setYearFilter(event.target.value)}
                     >
