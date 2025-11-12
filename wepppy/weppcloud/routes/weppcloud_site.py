@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import json
+from flask import send_from_directory
 from flask_security import current_user
 
 from ._common import *  # noqa: F401,F403
@@ -119,7 +120,6 @@ def _build_run_location_dataset(source_path: Path) -> List[Dict[str, Any]]:
                 'has_sbs': _parse_bool(row.get('has_sbs')),
                 'hillslopes': _parse_int(row.get('hillslopes')),
                 'ash_hillslopes': _parse_int(row.get('ash_hillslopes')),
-                'user': row.get('user') or '',
             }
 
             if record is None:

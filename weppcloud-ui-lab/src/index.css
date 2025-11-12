@@ -1,3 +1,5 @@
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -63,6 +65,57 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-950 text-slate-100 antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
+  #root {
+    min-height: 100vh;
+  }
+}
+
+.control-toggle {
+  @apply absolute right-6 top-6 z-10 flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/80 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-slate-100 shadow-lg shadow-black/20 transition hover:border-sky-400/60;
+}
+
+.control-toggle .icon {
+  position: relative;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  display: inline-block;
+}
+
+.control-toggle .icon::before,
+.control-toggle .icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.control-toggle .icon::before {
+  top: -6px;
+}
+
+.control-toggle .icon::after {
+  top: 6px;
+}
+
+.control-panel {
+  backdrop-filter: blur(12px);
+}
+
+.deck-tooltip {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 12px;
+  padding: 8px;
+  background: rgba(3, 7, 18, 0.9);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 18px 45px rgba(2, 6, 23, 0.45);
+  color: #e2e8f0;
 }
