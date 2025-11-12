@@ -247,6 +247,7 @@ def run_wepp_api_client(
     class DummyTaskEnum:
         run_wepp_hillslopes = "run_wepp_hillslopes"
         run_wepp_watershed = "run_wepp_watershed"
+        run_omni_scenarios = "run_omni_scenarios"
 
     monkeypatch.setattr(wepp_rq_module, "TaskEnum", DummyTaskEnum)
 
@@ -322,7 +323,7 @@ def test_run_wepp_accepts_json_payload(run_wepp_api_client):
 
     env = ctx["env"]
     prep = env.redis_prep_class.getInstance(run_dir)
-    assert prep.removed == ["run_wepp_hillslopes", "run_wepp_watershed"]
+    assert prep.removed == ["run_wepp_hillslopes", "run_wepp_watershed", "run_omni_scenarios"]
     assert prep.job_history == [("run_wepp_rq", "job-123")]
 
     queue_call = env.recorder.queue_calls[0]
