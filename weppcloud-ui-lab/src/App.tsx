@@ -204,6 +204,40 @@ const AFFILIATIONS: Affiliation[] = [
   },
 ]
 
+type Sponsor = {
+  name: string
+  caption: string
+  logo: string
+  link: string
+}
+
+const SPONSORS: Sponsor[] = [
+  {
+    name: 'NSF Idaho EPSCoR',
+    caption: 'This work was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award number IIA-1301792.',
+    logo: '/weppcloud/static/images/Idaho_epscor_logo_no_white_background.png',
+    link: 'https://www.idahoepscor.org/',
+  },
+  {
+    name: 'USDA NIFA',
+    caption: 'This work is supported by AFRI program [grant no. 2016-67020-25320/project accession no. 1009827] from the USDA National Institute of Food and Agriculture.',
+    logo: '/weppcloud/static/images/USDA_logo.png',
+    link: 'https://www.nifa.usda.gov/',
+  },
+  {
+    name: 'UKRI NERC',
+    caption: 'The Wildfire Ash Transport And Risk estimation tool (WATAR) was made possible with funding provided by UK NERC Grant NE/R011125/1 and European Commission (H2020 FirEUrisk project no. 101003890).',
+    logo: '/weppcloud/static/images/ukri-nerc-logo-600x160.png',
+    link: 'https://www.ukri.org/councils/nerc/',
+  },
+  {
+    name: 'NASA WWAO',
+    caption: "The revegetation module in WEPPcloud was supported by NASA's Western Water Application Office (WWAO).",
+    logo: '/weppcloud/static/images/nasa_logo.svg',
+    link: 'https://wwao.jpl.nasa.gov/',
+  },
+]
+
 type RunLocation = {
   runid: string
   run_name?: string
@@ -834,6 +868,48 @@ const mapSubtitle =
               <p className="mt-4 text-center text-xs text-slate-400">
                 {affiliation.caption}
               </p>
+            </motion.a>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-[#050714] px-4 py-20 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl space-y-4 text-center"
+        >
+          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Funding</p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Sponsors</h2>
+          <p className="text-base text-slate-300">
+            WEPPcloud development is supported by grants from federal agencies, international
+            research programs, and scientific funding bodies.
+          </p>
+        </motion.div>
+
+        <div className="mx-auto mt-12 grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {SPONSORS.map((sponsor, index) => (
+            <motion.a
+              key={sponsor.name}
+              href={sponsor.link}
+              target="_blank"
+              rel="noreferrer"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-white/30"
+            >
+              <div className="flex h-20 w-full items-center justify-center">
+                <img
+                  src={sponsor.logo}
+                  alt={sponsor.name}
+                  className="max-h-20 w-auto object-contain grayscale invert opacity-60 contrast-125"
+                />
+              </div>
+              <p className="mt-4 text-center text-xs text-slate-400">{sponsor.caption}</p>
             </motion.a>
           ))}
         </div>

@@ -129,6 +129,54 @@
      - Cards match Affiliations styling for consistency
      - Captions may be longer (funding acknowledgments) so ensure adequate spacing
 
+7. **Contributors**
+   - Dark section (`bg-[#030712]` or similar) with centered eyebrow, heading, and subtitle.
+   - **Eyebrow:** `Team`
+   - **Heading:** `Contributors`
+   - **Subtitle:** `WEPPcloud is the result of collaborative efforts from researchers, engineers, and scientists across multiple institutions.`
+   - Simple badge/pill design (not cards):
+     - Responsive flex layout with wrapping (`flex-wrap`)
+     - Contributors displayed as rounded pills/badges
+     - Each badge contains just the contributor's name
+     - Badges should be compact and flow naturally
+     - Centered container with max-width
+   - **Contributors list (alphabetical by last name):**
+     - Marta Basso
+     - Erin Brooks
+     - Chinmay Deval
+     - Mariana Dobre
+     - Stefan Doerr
+     - Helen Dow
+     - William Elliot
+     - Jim Frakenberger
+     - Roger Lew
+     - Mary E. Miller
+     - Jonay Neris
+     - Pete Robichaud
+     - Cristina Santin
+     - Brian (Scott) Sheppard
+     - Anurag Srivastava
+   - **Implementation notes:**
+     - Use a simple JavaScript array of strings for easy maintenance:
+       ```typescript
+       const CONTRIBUTORS = [
+         'Marta Basso',
+         'Erin Brooks',
+         // ... etc
+       ]
+       ```
+     - No images, no links - just names in badges
+     - Adding new contributors should be as simple as adding a string to the array
+   - **Styling notes:**
+     - Badges: `rounded-full px-4 py-2 text-sm` 
+     - Background: `bg-slate-800/60` or similar subtle dark background
+     - Text: `text-slate-200`
+     - Border: optional subtle border `border border-white/10`
+     - Spacing: `gap-3` between badges
+     - Layout: `flex flex-wrap justify-center items-center`
+     - Container: `max-w-5xl mx-auto`
+     - Minimal animation: optional fade-in on viewport entry
+
 ### Runtime state
    - Flask injects `window.__WEPP_STATE__` with `user.is_authenticated`, email, name.
    - React reads state on mount to toggle nav button text/link.
