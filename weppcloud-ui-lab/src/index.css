@@ -120,6 +120,20 @@
   color: #e2e8f0;
 }
 
+.map-pin-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.map-pin-container {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 .map-legend {
   position: absolute;
   top: 20px;

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 const DEFAULT_RUN_DATA_PATH = './run-locations.json'
 const RUN_DATA_URL = import.meta.env.VITE_RUN_DATA_URL ?? DEFAULT_RUN_DATA_PATH
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json'
+const MAP_PIN_OFFSET = 800
 
 type RunLocation = {
   runid: string
@@ -327,43 +328,48 @@ export function App() {
         </AuroraBackground>
       </section>
 
-      <section id="map" className="relative z-30 bg-[#020617] px-4 pb-16 pt-12 sm:px-6 lg:px-12">
+      <section
+        id="map"
+        className="relative z-30 bg-[#020617] px-4 pb-16 pt-12 sm:px-6 lg:px-12"
+        style={{ minHeight: `calc(100vh + ${MAP_PIN_OFFSET}px)` }}
+      >
         <div className="map-top-fade" aria-hidden="true" />
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto mb-10 max-w-5xl"
-        >
-          <div className="space-y-4 text-center">
-            <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
-            <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
-            <p className="text-base text-slate-300">{mapSubtitle}</p>
-          </div>
-          <div className="mt-6 grid gap-6 sm:grid-cols-3">
-            <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
-            <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
-            <MetricCard
-              label="Latest access"
-              value={
-                aggregateStats.lastAccessedParts
-                  ? `${aggregateStats.lastAccessedParts.date}\n${aggregateStats.lastAccessedParts.time}`
-                  : '--'
-              }
-              multiline
-            />
-          </div>
-        </motion.div>
+        <div className="map-pin-wrapper" style={{ minHeight: `calc(100vh + ${MAP_PIN_OFFSET}px)` }}>
+          <div className="map-pin-container space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="mx-auto max-w-5xl"
+            >
+              <div className="space-y-4 text-center">
+                <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
+                <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
+                <p className="text-base text-slate-300">{mapSubtitle}</p>
+              </div>
+              <div className="mt-6 grid gap-6 sm:grid-cols-3">
+                <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
+                <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
+                <MetricCard
+                  label="Latest access"
+                  value={
+                    aggregateStats.lastAccessedParts
+                      ? `${aggregateStats.lastAccessedParts.date}\n${aggregateStats.lastAccessedParts.time}`
+                      : '--'
+                  }
+                  multiline
+                />
+              </div>
+            </motion.div>
 
-        <div className="mt-2 w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
-            className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40"
-          >
+            <motion.div
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
+              className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40"
+            >
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
               <div className="map-legend">
                 <span className="legend-chip">
@@ -411,6 +417,11 @@ export function App() {
                 )}
               </div>
 
+              <div className="absolute bottom-6 right-6 rounded-xl border border-white/10 bg-slate-950/80 px-4 py-2 text-xs text-slate-300">
+                Tip: Hold <span className="font-semibold text-white">Ctrl</span> while scrolling to
+                zoom the map.
+              </div>
+
               <button
                 type="button"
                 className="control-toggle"
@@ -430,10 +441,6 @@ export function App() {
               >
                 <h2 className="text-base font-semibold text-slate-100">Display options</h2>
                 <div className="mt-4 space-y-3">
-                  <p className="rounded-lg bg-slate-900/70 p-3 text-xs text-slate-300">
-                    Tip: Hold <span className="font-semibold text-slate-100">Ctrl</span> while
-                    scrolling to zoom the map.
-                  </p>
                   <label className="block text-xs uppercase tracking-wider text-slate-400">
                     Year
                     <select
@@ -464,6 +471,7 @@ export function App() {
             </div>
           </motion.div>
         </div>
+      </div>
       </section>
     </div>
   )
