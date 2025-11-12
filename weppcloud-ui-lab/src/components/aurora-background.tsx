@@ -11,9 +11,9 @@ type AuroraBackgroundProps = {
 
 export function AuroraBackground({ className, children, opacity = 1 }: AuroraBackgroundProps) {
   return (
-    <div className={cn('relative flex flex-col bg-slate-950', className)}>
+    <>
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 z-0 h-screen mix-blend-screen"
+        className="pointer-events-none fixed inset-0 z-[15] mix-blend-screen"
         style={{ opacity }}
       >
         <motion.div
@@ -28,7 +28,7 @@ export function AuroraBackground({ className, children, opacity = 1 }: AuroraBac
           <div className="aurora aurora-four" />
         </motion.div>
       </div>
-      <div className="relative z-10 flex h-full flex-col">{children}</div>
-    </div>
+      <div className={cn('relative z-10 flex flex-col bg-slate-950', className)}>{children}</div>
+    </>
   )
 }

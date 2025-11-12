@@ -306,7 +306,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <section id="hero" className="relative flex min-h-[100svh] z-20">
+      <section id="hero" className="flex min-h-[100svh] z-20">
         <AuroraBackground className="flex-1 min-h-[100svh]" opacity={Math.max(0, 1 - heroProgress)}>
           <div className="relative mx-auto flex h-full max-w-5xl flex-col items-center justify-start gap-12 px-6 py-16 pt-[600px] text-center sm:py-24 lg:py-32">
             <motion.div
@@ -351,7 +351,7 @@ export function App() {
         </AuroraBackground>
       </section>
 
-      <section id="map" className="relative z-30 px-4 pb-16 pt-12 sm:px-6 lg:px-12">
+      <section id="map" className="relative z-30 bg-[#020617] px-4 pb-16 pt-12 sm:px-6 lg:px-12">
         <div className="map-top-fade" aria-hidden="true" />
         <motion.div
           initial={{ opacity: 0, y: 50 }}
