@@ -13,6 +13,7 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 ## Specification
 - H.wat.parquet -> wat
 - H.pass.parquet -> pass
+- ash/H{wepp_id}_ash.parquet -> first-year ash transport metrics (optional)
 
 ## Schema for totalwatsed3, use `schema_utils.pa_field`
 
@@ -62,6 +63,22 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 | Aquifer losses | double | mm | Aquifer losses | reimplement running calc from totalwatsed.py provided below |
 | Reservoir Volume | double | mm | Reservoir Volume | reimplement running calc from totalwatsed.py provided below |
 | Streamflow | double | mm | Streamflow | Runoff + Lateral Flow + Baseflow |
+| wind_transport (tonne) | double | tonne | Ash transported by wind | Aggregated mass from first-year ash hillslope outputs |
+| wind_transport (tonne/ha) | double | tonne/ha | Ash transported by wind per unit area | wind_transport (tonne) / contributing area |
+| water_transport (tonne) | double | tonne | Ash transported by water | Aggregated mass from first-year ash hillslope outputs |
+| water_transport (tonne/ha) | double | tonne/ha | Ash transported by water per unit area | water_transport (tonne) / contributing area |
+| ash_transport (tonne) | double | tonne | Total ash transported (wind + water) | Aggregated mass from first-year ash hillslope outputs |
+| ash_transport (tonne/ha) | double | tonne/ha | Total ash transported (wind + water) per unit area | ash_transport (tonne) / contributing area |
+| transportable_ash (tonne) | double | tonne | Ash mass still available for transport | Aggregated transportable ash mass after daily updates |
+| transportable_ash (tonne/ha) | double | tonne/ha | Ash mass still available per unit area | transportable_ash (tonne) / contributing area |
+
+Ash metrics are harvested from the per-hillslope ash transport parquet files under
+``ash/H{wepp_id}_ash.parquet``. Each file is loaded with `read_hillslope_out_fn`,
+filtered to the first fire year (``year0 == year``), and converted from
+tonne-per-hectare to total tonnes using the watershed hillslope area. The
+aggregator respects the optional ``wepp_ids`` filter so channel-level exports
+receive localized totals, and it recomputes the per-area ratios after summing to
+match the watershed area represented in `totalwatsed3`.
 
 
 totalwatsed.py

@@ -49,6 +49,7 @@ from wepppy.nodb.mods.rap import RAP_TS
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.wepp.interchange import run_totalwatsed3
 from .wepp_rq import run_wepp_rq
 
 _hostname = socket.gethostname()
@@ -766,6 +767,12 @@ def run_ash_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         ash = Ash.getInstance(wd)
         ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm)
+
+        wepp = Wepp.getInstance(wd)
+        run_totalwatsed3(
+            wepp.wepp_interchange_dir,
+            baseflow_opts=wepp.baseflow_opts,
+        )
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   ash ASH_RUN_TASK_COMPLETED')

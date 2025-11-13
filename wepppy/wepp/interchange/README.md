@@ -145,7 +145,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | `loss_pw0.txt` | `run_wepp_watershed_loss_interchange` | `loss_pw0.hill.parquet`, `loss_pw0.chn.parquet`, `loss_pw0.out.parquet`, `loss_pw0.class_data.parquet` plus `all_years` variants | Annual and long-term sediment and pollutant summaries for hillslopes, channels, and outlet along with particle class fractions. |
 
 ### Derived and Export Products
-- `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None)` joins `H.pass.parquet` and `H.wat.parquet` with DuckDB to emit `totalwatsed3.parquet`, computing volumes, depths, and baseflow reservoirs using `BaseflowOpts`.
+- `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` joins `H.pass.parquet` and `H.wat.parquet` with DuckDB to emit `totalwatsed3.parquet`, computing volumes, depths, baseflow reservoirs, and (when available) first-year ash transport masses pulled from `ash/H{wepp_id}_ash.parquet`.
 - `totalwatsed_partitioned_dss_export()` iterates channel tops, filters hillslope WEPP ids via the watershed translator, and writes per-channel DSS time-series files plus derived discharges (`Q (m^3/s)`).
 - `chanout_dss_export()` converts `chan.out.parquet` peaks to DSS records (optionally tagging Topaz IDs) for hydrologic compatibility with HEC tools; `archive_dss_export_zip()` packages the exports.
 - `generate_interchange_documentation()` scans available Parquet tables, renders schema previews with sample rows, and stores a Markdown README alongside the data for consumers.
@@ -157,7 +157,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | `run_wepp_watershed_interchange(wepp_output_dir, start_year=None)` | Threaded watershed pipeline; fans out to individual writers and finalizes the manifest. |
 | `write_parquet_with_pool(files, parser, schema, target_path, **kwargs)` | Shared fan-out writer that parallelizes parsing, buffers results, and commits atomically (respects `WEPP_INTERCHANGE_FORCE_SERIAL`). |
 | `load_hill_wat_dataframe(wepp_output_dir, wepp_id, collapse='daily')` | Convenience accessor returning either daily aggregated or raw OFE-level WAT records via DuckDB. |
-| `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None)` | Produces watershed-wide daily hydrologic summaries and baseflow diagnostics from interchange tables. |
+| `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` | Produces watershed-wide daily hydrologic summaries, baseflow diagnostics, and ash transport mass totals from interchange + `ash` parquet files. |
 | `totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_channel=None)` | Writes one DSS file per channel using `run_totalwatsed3` output and optional status messaging. |
 | `chanout_dss_export(wd, status_channel=None)` | Converts channel peak data to DSS, honoring translator lookups for legacy consumers. |
 | `generate_interchange_documentation(interchange_dir, to_readme_md=True)` | Builds Markdown documentation (schema + previews) for the current interchange directory. |
@@ -344,6 +344,9 @@ total_path = run_totalwatsed3(
     baseflow_opts,
     wepp_ids=None  # None = all hillslopes
 )
+
+# Optional: include first-year ash transport masses if ash runs exist
+# total_path = run_totalwatsed3(interchange_dir, baseflow_opts, ash_dir=Path("/geodata/weppcloud_runs/abc123/CurCond/ash"))
 
 # Load result
 import pyarrow.parquet as pq

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence, TYPE_CHECKING, Any
+from typing import Iterable, Mapping, Sequence, TYPE_CHECKING, Any
 
+import logging
 import duckdb
 import numpy as np
 import pandas as pd
@@ -18,6 +19,8 @@ if TYPE_CHECKING:
 else:
     BaseflowOpts = Any  # type: ignore[assignment]
 
+LOGGER = logging.getLogger(__name__)
+
 DATE_COLUMNS = ("year", "sim_day_index", "julian", "month", "day_of_month", "water_year")
 PASS_METRIC_COLUMNS = (
     "runvol",
@@ -30,6 +33,18 @@ PASS_METRIC_COLUMNS = (
     "seddep_4",
     "seddep_5",
 )
+
+ASH_METRIC_BASES = (
+    "wind_transport",
+    "water_transport",
+    "ash_transport",
+    "transportable_ash",
+)
+
+ASH_TONNE_COLUMNS = tuple(f"{name} (tonne)" for name in ASH_METRIC_BASES)
+ASH_PER_HA_COLUMNS = tuple(f"{name} (tonne/ha)" for name in ASH_METRIC_BASES)
+ASH_METRIC_COLUMNS = ASH_TONNE_COLUMNS + ASH_PER_HA_COLUMNS
+ASH_JOIN_COLUMNS = ("year", "julian", "month", "day_of_month")
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -78,6 +93,14 @@ SCHEMA = schema_with_version(
             pa_field("Aquifer losses", pa.float64(), units="mm", description="Aquifer losses depth"),
             pa_field("Reservoir Volume", pa.float64(), units="mm", description="Groundwater storage depth"),
             pa_field("Streamflow", pa.float64(), units="mm", description="Streamflow depth"),
+            pa_field("wind_transport (tonne)", pa.float64(), units="tonne", description="Ash transported by wind (total mass)"),
+            pa_field("wind_transport (tonne/ha)", pa.float64(), units="tonne/ha", description="Ash transported by wind per unit area"),
+            pa_field("water_transport (tonne)", pa.float64(), units="tonne", description="Ash transported by water (total mass)"),
+            pa_field("water_transport (tonne/ha)", pa.float64(), units="tonne/ha", description="Ash transported by water per unit area"),
+            pa_field("ash_transport (tonne)", pa.float64(), units="tonne", description="Total ash transported (wind + water)"),
+            pa_field("ash_transport (tonne/ha)", pa.float64(), units="tonne/ha", description="Total ash transported per unit area"),
+            pa_field("transportable_ash (tonne)", pa.float64(), units="tonne", description="Ash mass still available for transport"),
+            pa_field("transportable_ash (tonne/ha)", pa.float64(), units="tonne/ha", description="Ash mass still available for transport per unit area"),
         ]
     )
 )
@@ -97,6 +120,206 @@ def _normalize_wepp_ids(wepp_ids: Sequence[int] | None) -> list[int] | None:
         return None
     normalized = sorted({int(wepp_id) for wepp_id in wepp_ids})
     return normalized
+
+
+def _resolve_run_root(interchange_dir: Path) -> Path | None:
+    try:
+        return interchange_dir.resolve().parents[2]
+    except (IndexError, RuntimeError):
+        return None
+
+
+def _resolve_ash_dir(interchange_dir: Path, override: Path | str | None) -> Path | None:
+    if override is not None:
+        return Path(override)
+    run_root = _resolve_run_root(interchange_dir)
+    if run_root is None:
+        return None
+    return run_root / "ash"
+
+
+def _available_wepp_ids(ash_dir: Path) -> list[int]:
+    if not ash_dir.exists():
+        return []
+    candidates: set[int] = set()
+    for path in ash_dir.glob("H*.parquet"):
+        stem = path.stem  # e.g., H12_ash
+        if not stem.startswith("H"):
+            continue
+        suffix = stem[1:]
+        if suffix.endswith("_ash"):
+            suffix = suffix[:-4]
+        if not suffix.isdigit():
+            continue
+        candidates.add(int(suffix))
+    return sorted(candidates)
+
+
+def _select_wepp_ids(ash_dir: Path, wepp_ids: list[int] | None) -> list[int]:
+    available = _available_wepp_ids(ash_dir)
+    if wepp_ids is None:
+        return available
+    requested = {int(value) for value in wepp_ids}
+    return [wepp_id for wepp_id in available if wepp_id in requested]
+
+
+def _build_area_lookup_from_watershed(run_root: Path | None, wepp_ids: Iterable[int]) -> dict[int, float]:
+    if run_root is None:
+        return {}
+    try:
+        from wepppy.nodb.core import Watershed
+    except ModuleNotFoundError:
+        LOGGER.debug("Ash merge skipped; Watershed controller unavailable")
+        return {}
+
+    try:
+        watershed = Watershed.getInstance(str(run_root))
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.debug("Ash merge skipped; unable to load Watershed at %s (%s)", run_root, exc)
+        return {}
+
+    translator = watershed.translator_factory()
+    lookup: dict[int, float] = {}
+    for wepp_id in wepp_ids:
+        try:
+            topaz_id = translator.top(wepp=int(wepp_id))
+        except Exception:  # pragma: no cover - translator failures
+            topaz_id = None
+        if topaz_id is None:
+            continue
+        try:
+            area_m2 = watershed.hillslope_area(topaz_id)
+        except Exception:  # pragma: no cover - hillslope lookup failures
+            continue
+        if area_m2 is None:
+            continue
+        area_ha = float(area_m2) / 10_000.0
+        if area_ha <= 0.0:
+            continue
+        lookup[int(wepp_id)] = area_ha
+    return lookup
+
+
+def _locate_hillslope_path(ash_dir: Path, wepp_id: int) -> Path | None:
+    candidates = [ash_dir / f"H{wepp_id}_ash.parquet", ash_dir / f"H{wepp_id}.parquet"]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def _import_read_hillslope_out_fn():
+    from wepppy.nodb.mods.ash_transport.ashpost import read_hillslope_out_fn
+
+    return read_hillslope_out_fn
+
+
+def _safe_mass_per_area(total: np.ndarray, area_ha: np.ndarray) -> np.ndarray:
+    result = np.zeros_like(total, dtype=np.float64)
+    np.divide(total, area_ha, out=result, where=area_ha > 0)
+    return result
+
+
+def _aggregate_ash_metrics(
+    interchange_dir: Path,
+    wepp_ids: list[int] | None,
+    ash_dir_override: Path | str | None,
+    ash_area_lookup: Mapping[int, float] | None,
+) -> pd.DataFrame | None:
+    ash_dir = _resolve_ash_dir(interchange_dir, ash_dir_override)
+    if ash_dir is None or not ash_dir.exists():
+        return None
+
+    candidate_wepp_ids = _select_wepp_ids(ash_dir, wepp_ids)
+    if not candidate_wepp_ids:
+        return None
+
+    area_lookup = {int(k): float(v) for k, v in (ash_area_lookup or {}).items()}
+    if not area_lookup:
+        run_root = _resolve_run_root(interchange_dir)
+        area_lookup = _build_area_lookup_from_watershed(run_root, candidate_wepp_ids)
+
+    if not area_lookup:
+        return None
+
+    read_hillslope_out_fn = _import_read_hillslope_out_fn()
+
+    frames: list[pd.DataFrame] = []
+    for wepp_id in candidate_wepp_ids:
+        area_ha = area_lookup.get(int(wepp_id))
+        if area_ha is None or area_ha <= 0.0:
+            LOGGER.debug("Ash merge skipping wepp_id=%s due to missing area", wepp_id)
+            continue
+        hillslope_path = _locate_hillslope_path(ash_dir, int(wepp_id))
+        if hillslope_path is None:
+            LOGGER.debug("Ash merge skipping wepp_id=%s; file not found", wepp_id)
+            continue
+        df = read_hillslope_out_fn(
+            str(hillslope_path),
+            meta_data={"area (ha)": area_ha},
+            meta_data_types={"area (ha)": "float64"},
+        )
+        if df.empty:
+            continue
+        if "year0" in df.columns:
+            df = df[df["year0"] == df["year"]]
+        elif "days_from_fire (days)" in df.columns:
+            df = df[df["days_from_fire (days)"] <= 365]
+        if df.empty:
+            continue
+        df = df.rename(columns={"mo": "month", "da": "day_of_month"})
+        if "month" not in df.columns or "day_of_month" not in df.columns:
+            try:
+                if {"year", "julian"}.issubset(df.columns):
+                    ordinal = (
+                        df["year"].to_numpy(dtype=np.int32, copy=False) * 1000
+                        + df["julian"].to_numpy(dtype=np.int32, copy=False)
+                    )
+                elif "date_int" in df.columns:
+                    ordinal = df["date_int"].to_numpy(dtype=np.int64, copy=False)
+                else:
+                    raise KeyError("missing year/julian for calendar resolution")
+                dates = pd.to_datetime(ordinal.astype(str), format="%Y%j", errors="coerce")
+                if dates.isna().any():
+                    raise ValueError("unable to parse ordinal dates")
+                if "month" not in df.columns:
+                    df["month"] = dates.month.astype(np.int16)
+                if "day_of_month" not in df.columns:
+                    df["day_of_month"] = dates.day.astype(np.int16)
+            except Exception as exc:  # pragma: no cover - defensive
+                LOGGER.debug("Ash merge skipped; unable to derive calendar fields for %s (%s)", hillslope_path, exc)
+                continue
+        subset_columns = [
+            "year",
+            "month",
+            "day_of_month",
+            "julian",
+            "area (ha)",
+            *ASH_TONNE_COLUMNS,
+        ]
+        missing = [col for col in subset_columns if col not in df.columns]
+        if missing:
+            LOGGER.debug("Ash merge skipping %s; missing columns %s", hillslope_path, missing)
+            continue
+        frames.append(df[subset_columns])
+
+    if not frames:
+        return None
+
+    combined = pd.concat(frames, ignore_index=True)
+    aggregations: dict[str, str] = {"area (ha)": "sum"}
+    aggregations.update({name: "sum" for name in ASH_TONNE_COLUMNS})
+    grouped = combined.groupby(list(ASH_JOIN_COLUMNS), as_index=False).agg(aggregations)
+    area = grouped["area (ha)"].to_numpy(dtype=np.float64, copy=False)
+    for base in ASH_METRIC_BASES:
+        total_col = f"{base} (tonne)"
+        per_ha_col = f"{base} (tonne/ha)"
+        grouped[per_ha_col] = _safe_mass_per_area(
+            grouped[total_col].to_numpy(dtype=np.float64, copy=False),
+            area,
+        )
+    grouped.drop(columns=["area (ha)"], inplace=True)
+    return grouped
 
 
 def _build_where_clause(wepp_ids: list[int] | None) -> str:
@@ -239,9 +462,24 @@ def _finalise_table(df: pd.DataFrame) -> pa.Table:
     return pa.Table.from_pandas(df, schema=SCHEMA, preserve_index=False)
 
 
-def run_totalwatsed3(interchange_dir: Path | str, baseflow_opts: BaseflowOpts, wepp_ids: Sequence[int] | None = None) -> Path:
-    """
-    Create totalwatsed3.parquet in ``interchange_dir`` by aggregating H.pass and H.wat parquet outputs.
+def run_totalwatsed3(
+    interchange_dir: Path | str,
+    baseflow_opts: BaseflowOpts,
+    wepp_ids: Sequence[int] | None = None,
+    *,
+    ash_dir: Path | str | None = None,
+    ash_area_lookup: Mapping[int, float] | None = None,
+) -> Path:
+    """Create ``totalwatsed3.parquet`` by fusing hydrology and ash transport outputs.
+
+    Args:
+        interchange_dir: Directory containing ``H.pass.parquet`` and ``H.wat.parquet``.
+        baseflow_opts: Baseflow configuration applied to aggregated percolation depths.
+        wepp_ids: Optional subset of hillslope WEPP identifiers to include.
+        ash_dir: Optional override pointing at the ``ash`` directory. Defaults to
+            ``<run>/ash`` derived from ``interchange_dir``.
+        ash_area_lookup: Optional mapping of ``wepp_id`` → ``area_ha``. Supplying this
+            skips Watershed lookups (useful for tests or bespoke batch jobs).
     """
     targets = _prepare_paths(interchange_dir)
     wepp_ids_normalized = _normalize_wepp_ids(wepp_ids)
@@ -261,6 +499,14 @@ def run_totalwatsed3(interchange_dir: Path | str, baseflow_opts: BaseflowOpts, w
         merged[list(PASS_METRIC_COLUMNS)] = 0.0
     else:
         merged[list(PASS_METRIC_COLUMNS)] = merged[list(PASS_METRIC_COLUMNS)].fillna(0.0)
+
+    ash_df = _aggregate_ash_metrics(Path(interchange_dir), wepp_ids_normalized, ash_dir, ash_area_lookup)
+    if ash_df is None:
+        for col in ASH_METRIC_COLUMNS:
+            merged[col] = 0.0
+    else:
+        merged = merged.merge(ash_df, on=list(ASH_JOIN_COLUMNS), how="left", validate="many_to_one")
+        merged[list(ASH_METRIC_COLUMNS)] = merged[list(ASH_METRIC_COLUMNS)].fillna(0.0)
 
     area = merged["Area"].to_numpy(dtype=np.float64, copy=False)
 

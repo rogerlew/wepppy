@@ -564,8 +564,10 @@ def read_hillslope_out_fn(
             else:
                 df[key] = pd.Series([value] * len(df)).astype(meta_data_types.get(key) if meta_data_types else None)
 
-    # Create a unique index from year and julian columns
-    df['date_int'] = df['year'] * 1000 + df['julian']
+    # Create a unique index from year and julian columns (avoid uint16 overflow)
+    year_ord = df['year'].astype(np.int32, copy=False)
+    julian_ord = df['julian'].astype(np.int32, copy=False)
+    df['date_int'] = year_ord * 1000 + julian_ord
     df.set_index('date_int', inplace=True)
 
     # Select columns to aggregate

@@ -114,8 +114,16 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 - `page-load.spec.js`: Quick health check that provisions/reuses a run, loads the runs0 dashboard, verifies core controllers render, and fails fast on unexpected console errors.
 - `run-page-smoke.spec.js`: Extended coverage that drives map tabs, toggles landuse modes, exercises StatusStream wiring, and injects stacktraces for multiple controllers.
 - `controller-regression.spec.js`: Drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and injects failure payloads to ensure stacktraces render correctly.
+- `mods-menu.spec.js`: Opens the header Mods dropdown, verifies each checkbox mirrors `Ron.mods`, ensures the TOC/preflight nav and controller placeholders stay synchronized, and toggles every mod off/on twice to confirm the project returns to its initial state.
 
 All tests use request interception to mock 500 errors instead of backend failure injection. Console error checks filter expected bootstrap failures for optional controllers (debris_flow, treatments) that may not exist in all configs.
+
+### Mods menu smoke
+`mods-menu.spec.js` catches regressions like “DSS Export checkbox checked but nav item missing.” Important notes:
+
+- **Run selection:** The spec defaults to `SMOKE_RUN_CONFIG=disturbed9002_wbt` and fails fast when `Ron.mods` lacks `disturbed`. When possible, reuse an existing disturbed profile (for example one of the seeds under `/workdir/wepppy-test-engine-data/profiles`) by pointing `SMOKE_RUN_PATH` at the playback URL.
+- **No `playwright_load_all`:** The suite strips the helper query parameter from `SMOKE_RUN_PATH` so nav visibility reflects real mod state. Do not re-add `playwright_load_all=true` when sharing URLs for this spec.
+- **What it validates:** Each checkbox state is compared against `window.runContext.mods`, the preflight/TOC entry (`data-mod-nav="<mod>"`), and the controller wrapper (`data-mod-section="<mod>"`). It then toggles every mod, verifies UI + state updates, and toggles again to ensure the project ends where it started.
 
 ### Playwright Controller Regression Suite
 `controller-regression.spec.js` is now its own suite (`--suite controllers`) that exercises every controller listed in `static-src/tests/smoke/controller-cases.js`. Important details:
