@@ -81,7 +81,8 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 
 	check["rhem"] = prep["timestamps:run_rhem"] != ""
 
-	check["dss_export"] = safeGT(prep["timestamps:dss_export"], runWepp)
+	latestTransport := maxTimestamp(prep, "timestamps:run_watar", "timestamps:run_wepp_watershed", "timestamps:run_wepp")
+	check["dss_export"] = safeGT(prep["timestamps:dss_export"], latestTransport)
 
 	locks := make(map[string]bool)
 	for k, v := range prep {

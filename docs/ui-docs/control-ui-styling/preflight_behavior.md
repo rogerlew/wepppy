@@ -503,6 +503,20 @@ document.addEventListener('preflight:update', function(event) {
 
 **Note:** Controls without direct TaskEnum mapping (e.g., `#map`, `#team`, `#treatments`) use placeholder emojis defined in `run_0_bp.py`.
 
+### DSS Export Dependency Rules
+
+`services/preflight2/internal/checklist/checklist.go` now guards the DSS export status with the latest hydrology/transport job timestamps:
+
+```go
+latestTransport := maxTimestamp(prep, "timestamps:run_watar", "timestamps:run_wepp_watershed", "timestamps:run_wepp")
+check["dss_export"] = safeGT(prep["timestamps:dss_export"], latestTransport)
+```
+
+**Practical implications**
+- Running DSS export flips only the `dss_export` checklist entry; it should never invalidate WEPP (`run_wepp_watershed`) or Ash Transport (`run_watar`).
+- Re-running WEPP or Ash creates newer timestamps, immediately invalidating the prior DSS export so the UI prompts operators to regenerate the archive.
+- Manual timestamp edits or scripting against `RedisPrep.timestamp(TaskEnum.dss_export)` must happen after the latest WEPP/WATAR runs, otherwise the checklist will remain false.
+
 ---
 
 ## Debugging
