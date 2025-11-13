@@ -2827,7 +2827,7 @@ h5:first-child {
 }
 
 .wc-map--invert-base .leaflet-pane.leaflet-tile-pane {
-  filter: invert(0.92) hue-rotate(180deg) saturate(0.8) contrast(0.95);
+  filter: hue-rotate(180deg) saturate(0.8) contrast(0.95) brightness(0.5);
 }
 
 .wc-map__resize-handle {
