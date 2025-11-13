@@ -106,6 +106,8 @@ def totalwatsed_partitioned_dss_export(
     dss_export_dir.mkdir(parents=True, exist_ok=True)
     TimeSeriesContainer_cls, HecDss_cls = _require_pydsstools()
 
+    sed_records: list[pd.DataFrame] = []
+
     for chn_id_str in translator.iter_chn_ids():
         channel_top_id = int(chn_id_str.split("_")[1])
 
@@ -132,6 +134,11 @@ def totalwatsed_partitioned_dss_export(
             df = apply_date_filters(df, start=start_date, end=end_date)
             if df.empty:
                 continue
+
+        if "sed_vol_conc" in df.columns:
+            sed_subset = df[["year", "month", "day_of_month", "sed_vol_conc"]].copy()
+            sed_subset["channel_top_id"] = channel_top_id
+            sed_records.append(sed_subset)
 
         # Derive discharge in m^3/s for compatibility with legacy export.
         area_series = df["Area"].astype(float, copy=False)
@@ -195,6 +202,12 @@ def totalwatsed_partitioned_dss_export(
                 fid.put_ts(tsc)
 
         assert dss_file.exists(), f"Failed to create DSS file: {dss_file}"
+
+    if sed_records:
+        sed_df = pd.concat(sed_records, ignore_index=True)
+        sed_df = sed_df[["year", "month", "day_of_month", "channel_top_id", "sed_vol_conc"]]
+        sed_csv_path = dss_export_dir / "sed_vol_conc_by_event_and_chn_id.csv"
+        sed_df.to_csv(sed_csv_path, index=False)
 
 
 def archive_dss_export_zip(wd: str | Path, status_channel: str | None = None) -> None:
