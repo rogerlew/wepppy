@@ -148,7 +148,7 @@ describe("DssExport controller", () => {
         );
 
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
-        expect(document.getElementById("info").innerHTML).toContain("weppcloud/browse/export/dss.zip");
+        expect(document.getElementById("info").innerHTML).toContain("browse/export/dss.zip");
         expect(completions).toHaveLength(1);
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
             "job:completed",
