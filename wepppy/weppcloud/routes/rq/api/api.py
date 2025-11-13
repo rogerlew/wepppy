@@ -2,13 +2,14 @@ import os
 import json
 import shutil
 
+
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 from subprocess import check_output
 
 import awesome_codename
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from flask_login import login_required
 import pandas as pd
@@ -19,7 +20,7 @@ from flask_security import current_user
 
 from werkzeug.utils import secure_filename
 
-from wepppy.weppcloud.utils.helpers import get_wd, success_factory, error_factory, exception_factory
+from wepppy.weppcloud.utils.helpers import get_wd, handle_with_exception_factory, success_factory, error_factory, exception_factory
 from wepppy.weppcloud.utils.uploads import save_run_file, UploadError
 
 import redis
@@ -89,6 +90,26 @@ def _redis_conn():
 TIMEOUT = 216_000
 SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 SBS_MAX_BYTES = 100 * 1024 * 1024
+
+
+def _safe_int(value: Any) -> int | None:
+    try:
+        candidate = int(str(value))
+    except (TypeError, ValueError):
+        return None
+    return candidate
+
+
+def _dedupe_positive_ints(values: Iterable[Any]) -> list[int]:
+    seen: set[int] = set()
+    cleaned: list[int] = []
+    for raw in values:
+        numeric = _safe_int(raw)
+        if numeric is None or numeric <= 0 or numeric in seen:
+            continue
+        seen.add(numeric)
+        cleaned.append(numeric)
+    return cleaned
 
 
 def _coerce_omni_scenario_list(payload: Dict[str, Any], raw_json: Any) -> list[Dict[str, Any]] | None:
@@ -853,6 +874,7 @@ def api_build_climate(runid, config):
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/post_dss_export_rq', methods=['POST'])
+@handle_with_exception_factory
 def api_post_dss_export_rq(runid, config):
 
     wd = get_wd(runid)
@@ -913,23 +935,22 @@ def api_post_dss_export_rq(runid, config):
         watershed = Watershed.getInstance(wd)
         dss_export_channel_ids = []
         for chn_id, chn_summary in watershed.chns_summary.items():
-            try:
-                order = int(chn_summary['order'])
-            except (TypeError, ValueError):
-                continue
+            order = int(chn_summary['order'])
+
             if order in dss_excluded_channel_orders:
                 continue
-            try:
-                dss_export_channel_ids.append(int(chn_id))
-            except (TypeError, ValueError):
-                continue
+            
+            dss_export_channel_ids.append(int(chn_id))
+
+    # this is source of truth for channel ids to export
+    dss_export_channel_ids = _dedupe_positive_ints(dss_export_channel_ids)
 
     with wepp.locked():
         if dss_export_mode is not None:
-            wepp.dss_export_mode = dss_export_mode
-        wepp.dss_excluded_channel_orders = dss_excluded_channel_orders
-        wepp.dss_export_channel_ids = dss_export_channel_ids
-    
+            wepp._dss_export_mode = dss_export_mode
+        wepp._dss_excluded_channel_orders = dss_excluded_channel_orders
+        wepp._dss_export_channel_ids = dss_export_channel_ids
+
     try:
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
@@ -1046,7 +1067,7 @@ def api_run_wepp(runid, config):
         wepp._arc_export_on_run_completion = arc_export_on_run_completion
         wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
         wepp._dss_export_on_run_completion = dss_export_on_run_completion
-        wepp._dss_export_exclude_orders = dss_export_exclude_orders
+        wepp._dss_excluded_channel_orders = dss_export_exclude_orders
 
     try:
         prep = RedisPrep.getInstance(wd)

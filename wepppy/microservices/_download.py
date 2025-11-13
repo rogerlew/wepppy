@@ -76,9 +76,11 @@ def _df_to_csv_bytes(df: pd.DataFrame) -> bytes:
 
 def _parquet_to_dataframe_with_units(path: str) -> pd.DataFrame:
     table = pq.read_table(path)
-    schema = table.schema
-    column_names = [_field_label_with_units(field) for field in schema]
     df = table.to_pandas()
+    schema = table.schema
+    # Only generate column names for actual DataFrame columns (not index columns)
+    column_names = [_field_label_with_units(field) for field in schema 
+                    if field.name not in df.index.names and field.name != '__index_level_0__']
     df.columns = column_names
     return df
 
