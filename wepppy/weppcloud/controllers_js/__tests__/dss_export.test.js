@@ -62,7 +62,8 @@ describe("DssExport controller", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } }))
+            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } })),
+            isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
         global.WCHttp = httpMock;
 
@@ -176,6 +177,7 @@ describe("DssExport controller", () => {
     test("request rejection routes through pushErrorStacktrace", async () => {
         const error = new Error("network");
         httpMock.postJson.mockRejectedValueOnce(error);
+        httpMock.isHttpError.mockReturnValue(false);
 
         dss.export();
         await Promise.resolve();
@@ -187,5 +189,20 @@ describe("DssExport controller", () => {
             expect.objectContaining({ task: "dss:export" })
         );
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    test("http errors with JSON bodies push response stacktrace", async () => {
+        const httpError = new Error("server boom");
+        httpError.name = "HttpError";
+        httpError.body = { Error: "Injected failure", StackTrace: ["trace line"] };
+        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.isHttpError.mockReturnValue(true);
+
+        dss.export();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(dss, httpError.body);
+        expect(baseInstance.pushErrorStacktrace).not.toHaveBeenCalledWith(dss, httpError);
     });
 });

@@ -231,3 +231,5 @@ def chanout_dss_export(wd: Path | str, status_channel: str | None = None) -> Non
             tsc.interval = -1
 
             fid.put_ts(tsc)
+
+    assert chan_dss.exists(), f"Failed to create DSS file: {chan_dss}"

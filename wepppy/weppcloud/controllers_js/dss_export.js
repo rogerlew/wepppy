@@ -233,6 +233,9 @@ var DssExport = (function () {
     }
 
     function buildDownloadUrl(path) {
+        if (typeof url_for_run === "function") {
+            return url_for_run(path);
+        }
         var prefix = typeof window.site_prefix === "string" ? window.site_prefix : "";
         var normalizedPrefix = prefix.replace(/\/+$/, "");
         var normalizedPath = (path || "").replace(/^\/+/, "");
@@ -431,9 +434,6 @@ var DssExport = (function () {
             controller.appendStatus(EXPORT_MESSAGE + "…");
             controller.stacktrace.text("");
             controller.hideStacktrace();
-            if (controller.hint && typeof controller.hint.text === "function") {
-                controller.hint.text("");
-            }
 
             var payload = controller.buildRequestPayload();
             controller.state.mode = payload.dss_export_mode || controller.state.mode || 1;
@@ -483,7 +483,33 @@ var DssExport = (function () {
                 });
                 controller.disconnect_status_stream(controller);
             }).catch(function (error) {
-                controller.pushErrorStacktrace(controller, error);
+                var handled = false;
+                if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+                    var payload = error && Object.prototype.hasOwnProperty.call(error, "body") ? error.body : null;
+                    if (typeof payload === "string" && payload.trim() !== "") {
+                        try {
+                            payload = JSON.parse(payload);
+                        } catch (err) {
+                            payload = {
+                                Error: error.statusText || "Request failed",
+                                StackTrace: [payload]
+                            };
+                        }
+                    }
+                    if (!payload && error && error.status) {
+                        payload = {
+                            Error: error.statusText || "Request failed",
+                            StackTrace: [error.message || ("HTTP " + error.status)]
+                        };
+                    }
+                    if (payload) {
+                        controller.pushResponseStacktrace(controller, payload);
+                        handled = true;
+                    }
+                }
+                if (!handled) {
+                    controller.pushErrorStacktrace(controller, error);
+                }
                 if (controller.events && typeof controller.events.emit === "function") {
                     controller.events.emit("dss:export:error", {
                         task: EXPORT_TASK,

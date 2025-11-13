@@ -164,7 +164,7 @@ def run_wepp_api_client(
             self._arc_export_on_run_completion = None
             self._legacy_arc_export_on_run_completion = None
             self._dss_export_on_run_completion = None
-            self._dss_export_exclude_orders: list[int] | None = None
+            self._dss_excluded_channel_orders: list[int] | None = None
 
         @classmethod
         def getInstance(cls, wd: str) -> "DummyWepp":
@@ -310,7 +310,7 @@ def test_run_wepp_accepts_json_payload(run_wepp_api_client):
     assert wepp_instance._arc_export_on_run_completion is False
     assert wepp_instance._legacy_arc_export_on_run_completion is True
     assert wepp_instance._dss_export_on_run_completion is True
-    assert wepp_instance._dss_export_exclude_orders == [1, 3]
+    assert wepp_instance._dss_excluded_channel_orders == [1, 3]
 
     soils = ctx["soils_cls"].getInstance(run_dir)
     assert soils.clip_soils is True

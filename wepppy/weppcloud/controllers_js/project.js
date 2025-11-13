@@ -355,8 +355,12 @@ var Project = (function () {
         project._unitPreferenceInflight = null;
         project._pendingUnitPreference = null;
 
-        function getModNavElement(modName) {
-            return document.querySelector('[data-mod-nav="' + modName + '"]');
+        function getModNavElements(modName) {
+            var nodes = document.querySelectorAll('[data-mod-nav="' + modName + '"]');
+            if (!nodes || nodes.length === 0) {
+                return [];
+            }
+            return Array.prototype.slice.call(nodes);
         }
 
         function getModSectionContainer(modName) {
@@ -382,14 +386,35 @@ var Project = (function () {
         }
 
         function toggleModNav(modName, enabled) {
-            var nav = getModNavElement(modName);
-            if (!nav) {
+            var navItems = getModNavElements(modName);
+            if (!navItems.length) {
                 return;
             }
-            if (enabled) {
-                nav.removeAttribute("hidden");
-            } else {
-                nav.setAttribute("hidden", "hidden");
+            navItems.forEach(function (nav) {
+                if (!nav) {
+                    return;
+                }
+                if (enabled) {
+                    nav.removeAttribute("hidden");
+                    nav.hidden = false;
+                    if (nav.style && nav.style.display === "none") {
+                        nav.style.removeProperty("display");
+                    }
+                } else {
+                    nav.setAttribute("hidden", "hidden");
+                    nav.hidden = true;
+                    if (nav.style) {
+                        nav.style.display = "none";
+                    }
+                }
+            });
+            var tocElement = document.getElementById("toc");
+            if (tocElement && typeof window.registerTocEmojiMetadata === "function" && window.tocTaskEmojis) {
+                try {
+                    window.registerTocEmojiMetadata(tocElement, window.tocTaskEmojis);
+                } catch (err) {
+                    console.warn("[Project] Failed to refresh TOC metadata", err);
+                }
             }
         }
 

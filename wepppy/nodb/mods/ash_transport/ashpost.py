@@ -24,6 +24,8 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, Mapping, MutableMapping, 
 
 # non-standard
 import numpy as np
+
+from wepppy.all_your_base.dateutils import YearlessDate
 import pandas as pd
 import dask.dataframe as dd
 import pyarrow as pa
@@ -283,6 +285,10 @@ def calculate_cumulative_transport(
 ) -> ReturnPeriods:
     """Aggregate cumulative transport metrics and compute return periods."""
 
+    # Early exit if no data
+    if df.empty:
+        return {}
+
     # group the filtered rows by year0 and aggregate the cum_ columns and weighted average of days_from_fire
     agg_d = {'days_from_fire (days)': 'first'}
 
@@ -303,6 +309,11 @@ def calculate_cumulative_transport(
 
     # calculate return intervals and probabilities for cumulative results
     num_fire_years = len(cum_df)
+    
+    # Guard against empty dataframe
+    if num_fire_years == 0:
+        return {}
+    
     cum_return_periods: ReturnPeriods = {}
     cols_to_extract = ['year0']
 
@@ -597,7 +608,10 @@ def read_hillslope_out_fn(
             df_agg[col.replace('mm', 'm^3')] = ( df_agg[col] * 0.001) *  (area_ha * 10000)
 
     if cumulative:
-        df_agg = df_agg[df_agg['transportable_ash (tonne/ha)'] == 0.0]
+        # Get the last day for each fire year (year0) instead of filtering by exact zero
+        # This is more robust than checking transportable_ash == 0.0 due to floating-point issues
+        df_agg = df_agg.sort_values(['year0', 'julian'])
+        df_agg = df_agg.groupby('year0').tail(1)
     return df_agg
 
 

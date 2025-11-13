@@ -140,6 +140,16 @@ const controllerCases = [
     stacktraceLocator: "#debris_flow_stacktrace_panel [data-stacktrace-body]",
     hintLocator: "#hint_run_debris_flow",
     workflow: "rq_job"
+  },
+  {
+    name: "dss_export",
+    formSelector: "form#dss_export_form",
+    actionSelector: "#btn_export_dss",
+    requestUrlPattern: "**/rq/api/post_dss_export_rq",
+    stacktraceLocator: "#dss_export_stacktrace_panel [data-stacktrace-body], form#dss_export_form #stacktrace",
+    hintLocator: "#hint_export_dss",
+    workflow: "rq_job",
+    requireHintVisible: true
   }
 ];
 

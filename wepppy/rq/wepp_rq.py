@@ -1,4 +1,6 @@
 from __future__ import annotations
+import json
+from typing import Any, Dict, Iterable, Optional
 
 """
 RQ task entry points for orchestrating WEPP model runs and post-processing steps.
@@ -7,6 +9,7 @@ The helpers enqueue work onto Redis-backed queues, orchestrate NoDb controller p
 and publish progress updates so the UI can reflect job status in real time.
 """
 
+import contextlib
 import inspect
 import os
 import shutil
@@ -17,6 +20,8 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from subprocess import call
+
+from datetime import datetime
 
 import redis
 from rq import Queue, get_current_job
@@ -82,6 +87,19 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+
+
+_DSS_CHANNELS_RELATIVE_PATH = ("export", "dss", "dss_channels.geojson")
+_FEATURE_TOPAZ_KEYS = ("TopazID", "topaz_id", "topazId", "topaz", "id", "ID")
+
+
+
+def _safe_int(value: Any) -> int | None:
+    try:
+        candidate = int(str(value))
+    except (TypeError, ValueError):
+        return None
+    return candidate
 
 
 def compress_fn(fn: str) -> None:
@@ -1005,6 +1023,141 @@ def _post_gpkg_export_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+
+def _cleanup_dss_export_dir(wd: str) -> None:
+    dss_export_dir = _join(wd, "export", "dss")
+    if _exists(dss_export_dir):
+        with contextlib.suppress(OSError):
+            shutil.rmtree(dss_export_dir, ignore_errors=False)
+            
+
+
+def _resolve_downstream_channel_ids(network: Any, seeds: Iterable[int]) -> set[int]:
+    resolved: set[int] = set()
+    for seed in seeds:
+        numeric = _safe_int(seed)
+        if numeric is None or numeric <= 0:
+            continue
+        resolved.add(numeric)
+    if not isinstance(network, dict):
+        return resolved
+
+    downstream_map: dict[int, set[int]] = {}
+    for downstream_raw, upstream_values in network.items():
+        downstream_id = _safe_int(downstream_raw)
+        if downstream_id is None or downstream_id <= 0:
+            continue
+        for upstream_raw in upstream_values or []:
+            upstream_id = _safe_int(upstream_raw)
+            if (
+                upstream_id is None
+                or upstream_id <= 0
+                or upstream_id == downstream_id
+            ):
+                continue
+            downstream_map.setdefault(upstream_id, set()).add(downstream_id)
+
+    stack = list(resolved)
+    while stack:
+        current = stack.pop()
+        for downstream_id in downstream_map.get(current, ()):
+            if downstream_id not in resolved:
+                resolved.add(downstream_id)
+                stack.append(downstream_id)
+
+    return resolved
+
+
+def _extract_channel_topaz_id(feature: Dict[str, Any]) -> int | None:
+    props = feature.get("properties")
+    if not isinstance(props, dict):
+        return None
+    for key in _FEATURE_TOPAZ_KEYS:
+        topaz_id = _safe_int(props.get(key))
+        if topaz_id is not None:
+            return topaz_id
+    return None
+
+
+def _write_dss_channel_geojson(wd: str, channel_ids: Optional[list[int]]) -> None:
+    dest_path = _join(wd, *_DSS_CHANNELS_RELATIVE_PATH)
+
+    if channel_ids is not None and not channel_ids:
+        with contextlib.suppress(OSError):
+            os.remove(dest_path)
+        return
+
+    try:
+        watershed = Watershed.getInstance(wd)
+    except Exception:
+        return
+
+    channels_geojson = getattr(watershed, "channels_shp", None)
+    if not channels_geojson or not _exists(channels_geojson):
+        return
+
+    try:
+        with open(channels_geojson, "r", encoding="utf-8") as source_fp:
+            source_geojson = json.load(source_fp)
+    except (OSError, json.JSONDecodeError):
+        return
+
+    try:
+        network = watershed.network
+    except Exception:
+        network = None
+
+    include_ids: set[int]
+    downstream_ids: Iterable[int]
+    if channel_ids is None:
+        include_ids = set()
+    else:
+        downstream_ids = _resolve_downstream_channel_ids(network, channel_ids)
+        include_ids = set(downstream_ids)
+
+    source_features = source_geojson.get("features", [])
+    filtered_features = []
+    for feature in source_features:
+        topaz_id = _extract_channel_topaz_id(feature)
+        if topaz_id is None:
+            continue
+        if channel_ids is None:
+            filtered_features.append(feature)
+            include_ids.add(topaz_id)
+        elif topaz_id in include_ids:
+            filtered_features.append(feature)
+
+    if not filtered_features:
+        with contextlib.suppress(OSError):
+            os.remove(dest_path)
+        return
+
+    output_geojson = dict(source_geojson)
+    output_geojson["features"] = filtered_features
+    metadata = output_geojson.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+    metadata.update(
+        {
+            "selected_topaz_ids": None if channel_ids is None else sorted(set(channel_ids)),
+            "downstream_topaz_ids": sorted(include_ids),
+            "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        }
+    )
+    output_geojson["metadata"] = metadata
+
+    dest_dir = os.path.dirname(dest_path)
+    os.makedirs(dest_dir, exist_ok=True)
+    tmp_path = dest_path + ".tmp"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as dest_fp:
+            json.dump(output_geojson, dest_fp)
+        os.replace(tmp_path, dest_path)
+    except OSError:
+        with contextlib.suppress(OSError):
+            os.remove(tmp_path)
+
+
 def post_dss_export_rq(runid: str) -> None:
     """Build DSS exports once hillslope interchange data is ready.
 
@@ -1026,24 +1179,28 @@ def post_dss_export_rq(runid: str) -> None:
         status_channel = f'{runid}:dss_export'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
+        export_channel_ids = wepp.dss_export_channel_ids
+        channel_filter: Optional[list[int]] = export_channel_ids if export_channel_ids else None
 
-
-        dss_export_dir = _join(wd, 'export/dss')
-
-        if _exists(dss_export_dir):
-            if status_channel is not None:
-                StatusMessenger.publish(status_channel, 'cleaning export/dss/\n')
-            shutil.rmtree(dss_export_dir)
-
+        StatusMessenger.publish(status_channel, 'cleaning up previous DSS export directory...')
+        _cleanup_dss_export_dir(wd)
         dss_export_zip = _join(wd, 'export/dss.zip')
         if _exists(dss_export_zip):
             if status_channel is not None:
                 StatusMessenger.publish(status_channel, 'removing export/dss.zip\n')
             os.remove(dss_export_zip)
                 
+        StatusMessenger.publish(status_channel, 'writing DSS channel geojson...')
+        _write_dss_channel_geojson(wd, channel_filter)
+
         time.sleep(1)
-        totalwatsed_partitioned_dss_export(wd, wepp.dss_export_channel_ids, status_channel=status_channel)
+        StatusMessenger.publish(status_channel, 'generating partitioned DSS export...')
+        totalwatsed_partitioned_dss_export(wd, channel_filter, status_channel=status_channel)
+        time.sleep(1)
+        StatusMessenger.publish(status_channel, 'generating channel outlet DSS export...')
         chanout_dss_export(wd, status_channel=status_channel)
+        time.sleep(1)
+        StatusMessenger.publish(status_channel, 'archiving DSS export zip...')
         archive_dss_export_zip(wd, status_channel=status_channel)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')

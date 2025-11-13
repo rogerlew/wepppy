@@ -156,6 +156,21 @@
     } | tojson }};
 
     var modsFlags = runContext.mods && runContext.mods.flags ? runContext.mods.flags : {};
+    if (runContext.flags && runContext.flags.playwrightLoadAll && modsFlags) {
+        [
+            "baer",
+            "disturbed",
+            "rangeland_cover",
+            "omni",
+            "rhem",
+            "ash",
+            "path_ce",
+            "debris_flow",
+            "dss_export"
+        ].forEach(function (modName) {
+            modsFlags[modName] = true;
+        });
+    }
 
     window.site_prefix = sitePrefix;
     window.runid = runId;

@@ -119,6 +119,12 @@ test.describe('run header mods menu', () => {
     await page.goto(targetRunPath, { waitUntil: 'networkidle' });
     await page.waitForFunction(() => Boolean(window.runContext && window.runContext.mods), null, { timeout: 15000 });
 
+    await page.waitForFunction(() => {
+      const flags = window.runContext?.mods?.flags;
+      if (!flags) return false;
+      return typeof flags.disturbed !== 'undefined';
+    }, null, { timeout: 5000 });
+
     const contextInfo = await page.evaluate(() => ({
       playwrightLoadAll: Boolean(window.runContext?.flags?.playwrightLoadAll),
       hasDisturbed: Boolean(window.runContext?.mods?.flags?.disturbed),

@@ -20,6 +20,7 @@ from flask_security import current_user
 
 from werkzeug.utils import secure_filename
 
+from wepppy.topo.peridot.flowpath import PeridotChannel
 from wepppy.weppcloud.utils.helpers import get_wd, handle_with_exception_factory, success_factory, error_factory, exception_factory
 from wepppy.weppcloud.utils.uploads import save_run_file, UploadError
 
@@ -935,7 +936,10 @@ def api_post_dss_export_rq(runid, config):
         watershed = Watershed.getInstance(wd)
         dss_export_channel_ids = []
         for chn_id, chn_summary in watershed.chns_summary.items():
-            order = int(chn_summary['order'])
+            if isinstance(chn_summary, PeridotChannel):
+                order = int(chn_summary.order)
+            else:
+                order = int(chn_summary['order'])
 
             if order in dss_excluded_channel_orders:
                 continue
@@ -953,9 +957,6 @@ def api_post_dss_export_rq(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
-        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
-        prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)

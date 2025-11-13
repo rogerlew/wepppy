@@ -184,6 +184,8 @@ def totalwatsed_partitioned_dss_export(
                 fid.deletePathname(tsc.pathname)
                 fid.put_ts(tsc)
 
+        assert dss_file.exists(), f"Failed to create DSS file: {dss_file}"
+
 
 def archive_dss_export_zip(wd: str | Path, status_channel: str | None = None) -> None:
     if status_channel is not None:
