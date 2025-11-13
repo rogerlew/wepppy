@@ -151,6 +151,8 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     assert data["wind_transport (tonne)"][0] == pytest.approx(1.0)
     assert data["wind_transport (tonne/ha)"][0] == pytest.approx(0.5)
     assert data["ash_transport (tonne)"][0] == pytest.approx(1.4)
+    assert "sed_vol_conc" in data
+    assert data["sed_vol_conc"][0] == pytest.approx(1.159943960651508e-4)
 
     # Missing ash directory should still produce rows with zeroed ash metrics.
     run_totalwatsed3(

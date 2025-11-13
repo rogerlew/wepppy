@@ -19,6 +19,7 @@ import requests
 
 from wepppy.nodb.base import clear_locks
 from wepppy.nodb.core.ron import Ron
+from wepppy.profile_recorder.expectations import ProfileExpectationError, evaluate_job_expectations
 
 
 class SandboxViolationError(RuntimeError):
@@ -65,6 +66,7 @@ class PlaybackSession:
     ) -> None:
         """Prime the session by indexing events and creating a sandboxed run."""
         self.profile_root = profile_root
+        self.profile_slug = profile_root.name
         self.execute = execute
         self.base_url = base_url.rstrip("/")
         self.capture_dir = profile_root / "capture"
@@ -466,6 +468,20 @@ class PlaybackSession:
             if self.verbose:
                 self._log(f"waiting for job {job_id} ({task_path}) to finish")
             self._wait_for_job(job_id, task=task_path)
+            self._run_job_expectations(task_path)
+
+    def _run_job_expectations(self, task_path: Optional[str]) -> None:
+        """Run profile-specific expectation checks for a completed task."""
+        if not task_path:
+            return
+        run_dir = Path(self.run_dir)
+        try:
+            satisfied = evaluate_job_expectations(self.profile_slug, run_dir, task_path)
+        except ProfileExpectationError as exc:
+            raise RuntimeError(str(exc)) from exc
+        if satisfied and self.verbose:
+            for description in satisfied:
+                self._log(f"expectation satisfied: {description}")
 
     def _remap_run_path(self, path: str) -> str:
         """Replace source run identifiers with the playback sandbox run id."""

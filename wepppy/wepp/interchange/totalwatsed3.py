@@ -22,16 +22,19 @@ else:
 LOGGER = logging.getLogger(__name__)
 
 DATE_COLUMNS = ("year", "sim_day_index", "julian", "month", "day_of_month", "water_year")
+_SEDIMENT_CLASS_COUNT = 5
+SEDIMENT_SPECIFIC_GRAVITY = (2.60, 2.65, 1.80, 1.60, 2.65)
+SEDIMENT_DENSITY_KG_M3 = tuple(value * 1000.0 for value in SEDIMENT_SPECIFIC_GRAVITY)
+SEDIMENT_MASS_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, _SEDIMENT_CLASS_COUNT + 1))
+SEDIMENT_VOLUME_COLUMN = "sed_vol_conc"
+
 PASS_METRIC_COLUMNS = (
     "runvol",
     "sbrunv",
     "tdet",
     "tdep",
-    "seddep_1",
-    "seddep_2",
-    "seddep_3",
-    "seddep_4",
-    "seddep_5",
+    *SEDIMENT_MASS_COLUMNS,
+    SEDIMENT_VOLUME_COLUMN,
 )
 
 ASH_METRIC_BASES = (
@@ -64,6 +67,12 @@ SCHEMA = schema_with_version(
             pa_field("seddep_3", pa.float64(), units="kg", description="Sediment Class 3 deposition"),
             pa_field("seddep_4", pa.float64(), units="kg", description="Sediment Class 4 deposition"),
             pa_field("seddep_5", pa.float64(), units="kg", description="Sediment Class 5 deposition"),
+            pa_field(
+                "sed_vol_conc",
+                pa.float64(),
+                units="m^3/m^3",
+                description="Total volumetric sediment concentration (solids volume divided by runoff volume)",
+            ),
             pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
             pa_field("P", pa.float64(), units="m^3", description="Precipitation volume"),
             pa_field("RM", pa.float64(), units="m^3", description="Rainfall+Irrigation+Snowmelt volume"),
@@ -220,6 +229,26 @@ def _safe_mass_per_area(total: np.ndarray, area_ha: np.ndarray) -> np.ndarray:
     return result
 
 
+def _compute_solids_volume(df: pd.DataFrame) -> np.ndarray:
+    if df.empty:
+        return np.zeros(0, dtype=np.float64)
+    volumes = np.zeros(df.shape[0], dtype=np.float64)
+    for column, density in zip(SEDIMENT_MASS_COLUMNS, SEDIMENT_DENSITY_KG_M3):
+        masses = df[column].to_numpy(dtype=np.float64, copy=False)
+        volumes += masses / density
+    return volumes
+
+
+def _compute_sediment_volumetric_concentration(df: pd.DataFrame) -> pd.Series:
+    if df.empty:
+        return pd.Series(dtype=np.float64, name=SEDIMENT_VOLUME_COLUMN)
+    solids_volume = _compute_solids_volume(df)
+    runvol = df["runvol"].to_numpy(dtype=np.float64, copy=False)
+    concentration = np.zeros_like(solids_volume, dtype=np.float64)
+    np.divide(solids_volume, runvol, out=concentration, where=runvol > 0.0)
+    return pd.Series(concentration, index=df.index, name=SEDIMENT_VOLUME_COLUMN)
+
+
 def _aggregate_ash_metrics(
     interchange_dir: Path,
     wepp_ids: list[int] | None,
@@ -364,7 +393,9 @@ def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_claus
         GROUP BY year, "{day_column}", julian, month, day_of_month, water_year
         ORDER BY year, julian, "{day_column}"
     """
-    return con.execute(query).df()
+    df = con.execute(query).df()
+    df[SEDIMENT_VOLUME_COLUMN] = _compute_sediment_volumetric_concentration(df)
+    return df
 
 
 def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause: str) -> pd.DataFrame:
