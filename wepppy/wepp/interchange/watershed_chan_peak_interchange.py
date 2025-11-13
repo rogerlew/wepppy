@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import errno
 import shutil
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
 
@@ -15,6 +15,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 from ._utils import _wait_for_path, _parse_float
 from .schema_utils import pa_field
 from .versioning import schema_with_version
+from .date_filters import apply_date_filters
 
 CHAN_PEAK_FILENAME = "chan.out"
 CHAN_PEAK_PARQUET = "chan.out.parquet"
@@ -164,7 +165,13 @@ def run_wepp_watershed_chan_peak_interchange(
     return target
 
 
-def chanout_dss_export(wd: Path | str, status_channel: str | None = None) -> None:
+def chanout_dss_export(
+    wd: Path | str,
+    status_channel: str | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
+) -> None:
     """
     Export channel-peak flow data to a DSS time-series file.
     """
@@ -204,6 +211,9 @@ def chanout_dss_export(wd: Path | str, status_channel: str | None = None) -> Non
     df["year"] = df["year"].astype(int)
     df["julian"] = df["julian"].astype(int)
     df["Time (s)"] = df["Time (s)"].fillna(0.0).astype(float)
+
+    if start_date is not None or end_date is not None:
+        df = apply_date_filters(df, start=start_date, end=end_date)
 
     base_dates = pd.to_datetime(df["year"].astype(str), format="%Y")
     base_dates = base_dates + pd.to_timedelta(df["julian"] - 1, unit="D")

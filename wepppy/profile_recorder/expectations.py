@@ -58,7 +58,7 @@ def _check_ash_remaining_ash(run_dir: Path, profile_slug: str, task_path: str) -
     """Ensure the ash parquet contains the expected remaining_ash value."""
     parquet_path = run_dir / "ash" / "H10_ash.parquet"
     _assert_file_exists(parquet_path)
-    value = _read_first_value(parquet_path, "remaining_ash")
+    value = _read_first_value(parquet_path, "remaining_ash (tonne/ha)")
     if value is None:
         raise ProfileExpectationError(f"{parquet_path} is empty; expected at least one row")
     numeric_value = float(value)

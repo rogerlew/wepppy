@@ -37,6 +37,7 @@ from wepppy.wepp.interchange import (
     run_wepp_watershed_interchange, 
     generate_interchange_documentation
 )
+from wepppy.wepp.interchange.dss_dates import parse_dss_date
 from wepppy.weppcloud.utils.helpers import get_wd
 
 try:
@@ -1181,6 +1182,8 @@ def post_dss_export_rq(runid: str) -> None:
         wepp = Wepp.getInstance(wd)
         export_channel_ids = wepp.dss_export_channel_ids
         channel_filter: Optional[list[int]] = export_channel_ids if export_channel_ids else None
+        start_date = parse_dss_date(wepp.dss_start_date)
+        end_date = parse_dss_date(wepp.dss_end_date)
 
         StatusMessenger.publish(status_channel, 'cleaning up previous DSS export directory...')
         _cleanup_dss_export_dir(wd)
@@ -1195,10 +1198,21 @@ def post_dss_export_rq(runid: str) -> None:
 
         time.sleep(1)
         StatusMessenger.publish(status_channel, 'generating partitioned DSS export...')
-        totalwatsed_partitioned_dss_export(wd, channel_filter, status_channel=status_channel)
+        totalwatsed_partitioned_dss_export(
+            wd,
+            channel_filter,
+            status_channel=status_channel,
+            start_date=start_date,
+            end_date=end_date,
+        )
         time.sleep(1)
         StatusMessenger.publish(status_channel, 'generating channel outlet DSS export...')
-        chanout_dss_export(wd, status_channel=status_channel)
+        chanout_dss_export(
+            wd,
+            status_channel=status_channel,
+            start_date=start_date,
+            end_date=end_date,
+        )
         time.sleep(1)
         StatusMessenger.publish(status_channel, 'archiving DSS export zip...')
         archive_dss_export_zip(wd, status_channel=status_channel)

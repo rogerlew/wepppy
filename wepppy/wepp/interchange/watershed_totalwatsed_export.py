@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import zipfile
+from datetime import date
 from glob import glob
 from pathlib import Path
 
@@ -20,6 +21,7 @@ else:
     _PYDSSTOOLS_IMPORT_ERROR = None
 
 from wepppy.wepp.interchange.totalwatsed3 import run_totalwatsed3
+from wepppy.wepp.interchange.date_filters import apply_date_filters
 
 __all__ = ["totalwatsed_partitioned_dss_export", "archive_dss_export_zip"]
 
@@ -63,6 +65,9 @@ def totalwatsed_partitioned_dss_export(
     wd: str | Path,
     export_channel_ids: list[int] | None = None,
     status_channel: str | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
 ) -> None:
     """
     Export per-channel `totalwatsed3` summaries to individual DSS files.
@@ -122,6 +127,11 @@ def totalwatsed_partitioned_dss_export(
         df = table.to_pandas()
         df.sort_values(["year", "julian", "sim_day_index"], kind="mergesort", inplace=True)
         df.reset_index(drop=True, inplace=True)
+
+        if start_date is not None or end_date is not None:
+            df = apply_date_filters(df, start=start_date, end=end_date)
+            if df.empty:
+                continue
 
         # Derive discharge in m^3/s for compatibility with legacy export.
         area_series = df["Area"].astype(float, copy=False)

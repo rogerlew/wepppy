@@ -5,6 +5,33 @@
 {% block inputs %}
 <div class="form-group row">
   <div class="col-sm-3">
+    <label for="dss_start_date">Start date (optional)</label>
+    <input
+      type="text"
+      class="form-control disable-readonly"
+      id="dss_start_date"
+      name="dss_start_date"
+      placeholder="MM/DD/YYYY"
+      value="{{ wepp.dss_start_date or '' }}"
+    />
+    <small class="form-text text-muted">Use simulation year for stochastic runs.</small>
+  </div>
+  <div class="col-sm-3">
+    <label for="dss_end_date">End date (optional)</label>
+    <input
+      type="text"
+      class="form-control disable-readonly"
+      id="dss_end_date"
+      name="dss_end_date"
+      placeholder="MM/DD/YYYY"
+      value="{{ wepp.dss_end_date or '' }}"
+    />
+    <small class="form-text text-muted">Defaults to the last simulation day.</small>
+  </div>
+</div>
+
+<div class="form-group row">
+  <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="dss_export_mode1"
         name="dss_export_mode" data-action="dss-export-mode" data-dss-export-mode="1"
         {% if wepp.dss_export_mode == 1 %} checked {% endif %}> Export Select Channels</label>

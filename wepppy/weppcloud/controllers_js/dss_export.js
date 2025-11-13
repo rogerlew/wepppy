@@ -163,6 +163,26 @@ var DssExport = (function () {
         return ids;
     }
 
+    function normalizeDateInput(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        var candidate = value;
+        if (Array.isArray(candidate)) {
+            candidate = candidate.find(function (entry) {
+                return entry !== undefined && entry !== null && entry !== "";
+            });
+        }
+        if (candidate === undefined || candidate === null) {
+            return null;
+        }
+        if (typeof candidate === "string") {
+            var trimmed = candidate.trim();
+            return trimmed === "" ? null : trimmed;
+        }
+        return String(candidate);
+    }
+
     function collectExcludeOrders(payload) {
         var orders = [];
         if (!payload) {
@@ -417,11 +437,15 @@ var DssExport = (function () {
             var currentMode = parseMode(payload.dss_export_mode, controller.state.mode || 1);
             var channelIds = parseChannelIds(payload.dss_export_channel_ids);
             var excludeOrders = collectExcludeOrders(payload);
+            var startDate = normalizeDateInput(payload.dss_start_date);
+            var endDate = normalizeDateInput(payload.dss_end_date);
 
             return {
                 dss_export_mode: currentMode,
                 dss_export_channel_ids: channelIds,
-                dss_export_exclude_orders: excludeOrders
+                dss_export_exclude_orders: excludeOrders,
+                dss_start_date: startDate,
+                dss_end_date: endDate
             };
         };
 

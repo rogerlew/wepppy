@@ -38,6 +38,25 @@
    ) %}
 
   <section class="wc-dss-export">
+    <div class="wc-stack-sm">
+      {{ ui.text_field(
+           "dss_start_date",
+           "Start date (optional)",
+           value=wepp.dss_start_date or "",
+           placeholder="MM/DD/YYYY",
+           extra_control_class="disable-readonly",
+           help="Use simulation year numbering for stochastic climates."
+         ) }}
+      {{ ui.text_field(
+           "dss_end_date",
+           "End date (optional)",
+           value=wepp.dss_end_date or "",
+           placeholder="MM/DD/YYYY",
+           extra_control_class="disable-readonly",
+           help="Defaults to the last available simulation day."
+         ) }}
+    </div>
+
     {{ ui.radio_group(
          "dss_export_mode",
          label="Export mode",

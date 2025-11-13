@@ -72,6 +72,7 @@ from wepppy.nodb.core import *
 from wepppy.all_your_base import isint, isfloat
 from wepppy.weppcloud.utils.archive import has_archive
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.wepp.interchange.dss_dates import format_dss_date, parse_dss_date
 
 from ..._common import roles_required, parse_request_payload
 
@@ -905,6 +906,14 @@ def api_post_dss_export_rq(runid, config):
                 result.append(parsed)
         return result
 
+    def _first_value(raw_value):
+        if isinstance(raw_value, (list, tuple, set)):
+            for candidate in raw_value:
+                if candidate not in (None, ""):
+                    return candidate
+            return None
+        return raw_value
+
     raw_mode = payload.get('dss_export_mode')
     try:
         dss_export_mode = int(raw_mode) if raw_mode not in (None, '') else None
@@ -949,11 +958,26 @@ def api_post_dss_export_rq(runid, config):
     # this is source of truth for channel ids to export
     dss_export_channel_ids = _dedupe_positive_ints(dss_export_channel_ids)
 
+    try:
+        start_date = parse_dss_date(_first_value(payload.get("dss_start_date")))
+    except ValueError:
+        return error_factory("Invalid DSS start date; use MM/DD/YYYY.")
+
+    try:
+        end_date = parse_dss_date(_first_value(payload.get("dss_end_date")))
+    except ValueError:
+        return error_factory("Invalid DSS end date; use MM/DD/YYYY.")
+
+    if start_date and end_date and start_date > end_date:
+        return error_factory("DSS start date must be on or before the end date.")
+
     with wepp.locked():
         if dss_export_mode is not None:
             wepp._dss_export_mode = dss_export_mode
         wepp._dss_excluded_channel_orders = dss_excluded_channel_orders
         wepp._dss_export_channel_ids = dss_export_channel_ids
+        wepp._dss_start_date = format_dss_date(start_date)
+        wepp._dss_end_date = format_dss_date(end_date)
 
     try:
         prep = RedisPrep.getInstance(wd)

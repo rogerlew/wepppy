@@ -65,6 +65,8 @@ def dss_export_app(
                 "_dss_export_mode": None,
                 "_dss_excluded_channel_orders": [],
                 "_dss_export_channel_ids": [],
+                "_dss_start_date": None,
+                "_dss_end_date": None,
                 "mode_updates": [],
                 "exclude_updates": [],
                 "channel_updates": [],
@@ -103,6 +105,8 @@ def test_post_dss_export_rq_accepts_json_payload(dss_export_app):
         "dss_export_mode": 1,
         "dss_export_channel_ids": [24, 54, 24],
         "dss_export_exclude_orders": [3],
+        "dss_start_date": "01/01/2000",
+        "dss_end_date": "12/31/2005",
     }
 
     runid = "demo"
@@ -128,6 +132,8 @@ def test_post_dss_export_rq_accepts_json_payload(dss_export_app):
     assert wepp_instance.dss_export_mode == 1
     assert wepp_instance.dss_export_channel_ids == [24, 54]
     assert wepp_instance.dss_excluded_channel_orders == [3]
+    assert wepp_instance._dss_start_date == "01/01/2000"
+    assert wepp_instance._dss_end_date == "12/31/2005"
 
     prep_instance = prep_cls.getInstance(str(base_path / runid))
     assert ("remove_timestamp", api_module.TaskEnum.run_wepp_hillslopes) in prep_instance.calls
@@ -149,6 +155,7 @@ def test_post_dss_export_rq_mode2_builds_channels(dss_export_app):
     payload = {
         "dss_export_mode": 2,
         "dss_export_exclude_orders": [2],
+        "dss_end_date": "03/01/3",
     }
 
     with app.test_request_context(
@@ -168,6 +175,8 @@ def test_post_dss_export_rq_mode2_builds_channels(dss_export_app):
     assert wepp_instance.dss_excluded_channel_orders == [2]
     # Order 2 excluded; others retained.
     assert sorted(wepp_instance.dss_export_channel_ids) == [101, 103]
+    assert wepp_instance._dss_start_date is None
+    assert wepp_instance._dss_end_date == "03/01/0003"
 
 
 def test_post_dss_export_rq_handles_form_payload(dss_export_app):
@@ -196,3 +205,52 @@ def test_post_dss_export_rq_handles_form_payload(dss_export_app):
     assert wepp_instance.dss_export_mode == 1
     assert wepp_instance.dss_export_channel_ids == [12, 34, 56]
     assert sorted(wepp_instance.dss_excluded_channel_orders) == [1, 3]
+
+
+def test_post_dss_export_rq_rejects_invalid_dates(dss_export_app):
+    app, recorder, _, _, _, api_module, _ = dss_export_app
+
+    payload = {
+        "dss_export_mode": 1,
+        "dss_start_date": "99/01/2000",
+    }
+
+    runid = "bad"
+    with app.test_request_context(
+        "/weppcloud/runs/bad/live/rq/api/post_dss_export_rq",
+        method="POST",
+        data=json.dumps(payload),
+        content_type="application/json",
+    ):
+        response = api_module.api_post_dss_export_rq(runid, "live")
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["Success"] is False
+    assert "Invalid DSS start date" in body["Error"]
+    assert recorder.queue_calls == []
+
+
+def test_post_dss_export_rq_requires_ordered_dates(dss_export_app):
+    app, recorder, _, _, _, api_module, _ = dss_export_app
+
+    payload = {
+        "dss_export_mode": 1,
+        "dss_start_date": "05/01/2001",
+        "dss_end_date": "04/01/2001",
+    }
+
+    runid = "unordered"
+    with app.test_request_context(
+        "/weppcloud/runs/unordered/live/rq/api/post_dss_export_rq",
+        method="POST",
+        data=json.dumps(payload),
+        content_type="application/json",
+    ):
+        response = api_module.api_post_dss_export_rq(runid, "live")
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["Success"] is False
+    assert "start date must be on or before the end date" in body["Error"]
+    assert recorder.queue_calls == []

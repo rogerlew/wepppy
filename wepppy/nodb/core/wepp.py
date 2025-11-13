@@ -66,7 +66,9 @@ Warning:
 
 # standard library
 import os
+from datetime import date
 from enum import IntEnum
+from pathlib import Path
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -174,6 +176,10 @@ from wepppy.wepp.soils.utils import simple_texture
 from wepppy.nodb.core.climate import ClimateMode
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
+from wepppy.wepp.interchange.dss_dates import (
+    format_dss_date,
+    parse_dss_date,
+)
 
 def _copyfile(src_fn: str, dst_fn: str) -> None:
     if _exists(dst_fn):
@@ -554,6 +560,101 @@ class Wepp(NoDbBase):
     @nodb_setter
     def dss_export_channel_ids(self, value: List[int]) -> None:
         self._dss_export_channel_ids = value
+
+    @property
+    def dss_start_date(self) -> Optional[str]:
+        stored = self._resolve_serialized_dss_date_attr("_dss_start_date")
+        if stored:
+            return stored
+        return self._default_dss_date("start")
+
+    @dss_start_date.setter
+    @nodb_setter
+    def dss_start_date(self, value: Optional[str]) -> None:
+        parsed = parse_dss_date(value)
+        self._dss_start_date = format_dss_date(parsed)
+
+    @property
+    def dss_end_date(self) -> Optional[str]:
+        stored = self._resolve_serialized_dss_date_attr("_dss_end_date")
+        if stored:
+            return stored
+        return self._default_dss_date("end")
+
+    @dss_end_date.setter
+    @nodb_setter
+    def dss_end_date(self, value: Optional[str]) -> None:
+        parsed = parse_dss_date(value)
+        self._dss_end_date = format_dss_date(parsed)
+
+    def _resolve_serialized_dss_date_attr(self, attr_name: str) -> Optional[str]:
+        raw_value = getattr(self, attr_name, None)
+        if not raw_value:
+            return None
+        try:
+            parsed = parse_dss_date(raw_value)
+        except ValueError:
+            return None
+        return format_dss_date(parsed)
+
+    def _default_dss_date(self, which: str) -> Optional[str]:
+        start, end = self._resolve_simulation_date_range()
+        target = start if which == "start" else end
+        return format_dss_date(target)
+
+    def _resolve_simulation_date_range(self) -> Tuple[Optional[date], Optional[date]]:
+        cached = getattr(self, "_dss_simulation_date_range", None)
+        if cached is not None:
+            return cached
+
+        events_path = Path(self.wepp_interchange_dir) / "pass_pw0.events.parquet"
+        default_range: Tuple[Optional[date], Optional[date]] = (None, None)
+
+        if events_path.exists():
+            try:
+                import pyarrow.parquet as pq
+            except ModuleNotFoundError:
+                pq = None
+
+            if pq is not None:
+                try:
+                    parquet_file = pq.ParquetFile(str(events_path))
+                except Exception:
+                    parquet_file = None
+
+                if (
+                    parquet_file is not None
+                    and parquet_file.num_row_groups > 0
+                    and parquet_file.metadata is not None
+                    and parquet_file.metadata.num_rows > 0
+                ):
+                    columns = ["year", "month", "day_of_month"]
+                    start_date = self._read_parquet_date_row(
+                        parquet_file.read_row_group(0, columns=columns), 0
+                    )
+                    end_date: Optional[date] = None
+                    for group_idx in range(parquet_file.num_row_groups - 1, -1, -1):
+                        table = parquet_file.read_row_group(group_idx, columns=columns)
+                        if table.num_rows == 0:
+                            continue
+                        end_date = self._read_parquet_date_row(table, table.num_rows - 1)
+                        if end_date is not None:
+                            break
+                    default_range = (start_date, end_date)
+
+        self._dss_simulation_date_range = default_range
+        return default_range
+
+    @staticmethod
+    def _read_parquet_date_row(table, index: int) -> Optional[date]:
+        try:
+            data = table.to_pydict()
+            year = int(data["year"][index])
+            month = int(data["month"][index])
+            day = int(data["day_of_month"][index])
+            return date(year, month, day)
+        except Exception:
+            return None
 
     @property
     def has_dss_zip(self) -> bool:
@@ -2432,7 +2533,11 @@ class Wepp(NoDbBase):
     @nodb_timed
     def _export_partitioned_totalwatsed2_dss(self):
         from wepppy.wepp.interchange import totalwatsed_partitioned_dss_export
-        totalwatsed_partitioned_dss_export(self.wd)
+        totalwatsed_partitioned_dss_export(
+            self.wd,
+            start_date=parse_dss_date(self.dss_start_date),
+            end_date=parse_dss_date(self.dss_end_date),
+        )
 
     def report_loss(self) -> Any:
         from wepppy.wepp.interchange.watershed_loss import Loss

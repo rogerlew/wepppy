@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -26,4 +27,10 @@ def run_wepp_watershed_chan_peak_interchange(
     start_year: Optional[int] = ...,
 ) -> Path: ...
 
-def chanout_dss_export(wd: Path | str, status_channel: Optional[str] = ...) -> None: ...
+def chanout_dss_export(
+    wd: Path | str,
+    status_channel: Optional[str] = ...,
+    *,
+    start_date: date | None = ...,
+    end_date: date | None = ...,
+) -> None: ...
