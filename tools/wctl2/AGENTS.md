@@ -43,6 +43,7 @@ Always cross-check requirements here before coding; the docs move along with the
 - Implementation lives in `commands/playwright.py`.
 - Specs, prompt, and acceptance report live under `docs/`.
 - Tests in `tests/test_playwright_command.py` cover overrides, env handling, and report behavior.
+- `--profile <slug>` clones the profile’s `run/` snapshot into the playback sandbox (`PROFILE_PLAYBACK_ROOT`, `PROFILE_PLAYBACK_BASE`, `PROFILE_PLAYBACK_RUN_ROOT`) and points Playwright at `/runs/profile;;tmp;;<uuid>/<config>/`. Handy for the Mods menu suite where we need Disturbed controllers pre-populated.
 
 ### Testing Checklist
 From repo root:

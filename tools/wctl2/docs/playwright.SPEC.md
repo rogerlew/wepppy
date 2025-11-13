@@ -500,6 +500,9 @@ wctl2 run-playwright --env prod --config dev_unit_1
 wctl2 run-playwright \
   --base-url https://pr-123.weppcloud-preview.dev/weppcloud \
   --config disturbed9002_wbt
+
+# Mods menu with recorded profile
+wctl2 run-playwright --suite mods-menu --profile legacy-palouse
 ```
 
 ### Performance Testing
@@ -545,33 +548,29 @@ export default defineConfig({
 
 No changes needed to existing Playwright configuration.
 
-## Future Enhancements
+## Profile Playback Provisioning
 
-### Profile-Based Testing
+Passing `--profile <slug>` clones the recorded run snapshot from
+`/workdir/wepppy-test-engine-data/profiles/<slug>/run` into the playback sandbox
+before Playwright executes. The command:
 
-Support for profile YAML files (similar to `run-test-profile`):
+1. Resolves the profile library via `PROFILE_PLAYBACK_ROOT` (default `/workdir/wepppy-test-engine-data/profiles`)
+   and the sandbox location via `PROFILE_PLAYBACK_BASE` / `PROFILE_PLAYBACK_RUN_ROOT`
+   (default `/workdir/wepppy-test-engine-data/playback/runs`).
+2. Copies the `run/` directory into a fresh `profile;;tmp;;<uuid>` sandbox and reads `active_config.txt`
+   to discover the config slug.
+3. Exports `SMOKE_RUN_PATH` so Playwright hits `/runs/profile;;tmp;;<uuid>/<config>/` on the target
+   WEPPcloud host (still controlled by `--env`/`--base-url`).
+4. Removes the sandbox directory afterwards unless `--keep-run` is set.
+
+Example:
 
 ```bash
-# Run profile-defined test suite
-wctl2 run-playwright --profile quick
-
-# Override profile settings
-wctl2 run-playwright --profile rattlesnake --env dev
+wctl2 run-playwright --suite mods-menu --profile legacy-palouse
 ```
 
-Profile example (`tests/smoke/profiles/quick.yml`):
-```yaml
-name: quick
-description: Small US watershed for fast health checks
-env:
-  SMOKE_RUN_CONFIG: dev_unit_1
-  SMOKE_RUN_OVERRIDES:
-    general:dem_db: ned1/2016
-playwright:
-  project: runs0
-  workers: 1
-  timeout: 120000
-```
+This clones the `legacy-palouse` capture locally, executes only the Mods menu suite,
+and validates that run header checkboxes stay in sync with TOC/preflight state.
 
 ### Test Suite Selection
 

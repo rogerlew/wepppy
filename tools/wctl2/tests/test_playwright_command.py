@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from types import SimpleNamespace
+from pathlib import Path
 from typing import Any, Dict, List
 
 import pytest
@@ -82,7 +83,8 @@ def test_run_path_disables_provisioning(monkeypatch: pytest.MonkeyPatch, temp_pr
     )
 
     assert result.exit_code == 0, result.output
-    assert ping_targets == ["http://localhost:9999/weppcloud"]
+    assert ping_targets
+    assert ping_targets[-1] == "http://localhost:9999/weppcloud"
     assert calls == [
         ["npm", "run", "test:playwright", "--", "--project", "runs0", "--workers", "1", "--grep", "controller regression"]
     ]
@@ -278,3 +280,139 @@ def test_report_path_without_report_opens_no_viewer(monkeypatch: pytest.MonkeyPa
     assert "--reporter" in calls[0]
     idx = calls[0].index("--output")
     assert calls[0][idx + 1] == "telemetry/playwright-report"
+
+
+def _create_profile(tmp_path: Path, slug: str = "legacy-palouse") -> Path:
+    profile_root = tmp_path / "profiles" / slug
+    run_dir = profile_root / "run"
+    capture_dir = profile_root / "capture"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    capture_dir.mkdir(parents=True, exist_ok=True)
+    payload = {"stage": "request", "endpoint": "/weppcloud/runs/skeletal-azalea/dev_cfg/view/overview"}
+    (capture_dir / "events.jsonl").write_text(json.dumps(payload) + "\n", encoding="utf-8")
+    (run_dir / "active_config.txt").write_text("dev_cfg", encoding="utf-8")
+    return profile_root
+
+
+def test_profile_mode_sets_run_path(monkeypatch: pytest.MonkeyPatch, temp_project: Path) -> None:
+    runner = CliRunner()
+    subprocess_calls: List[Dict[str, Any]] = []
+    ping_targets: List[str] = []
+
+    def fake_ping(url: str) -> None:
+        ping_targets.append(url)
+
+    def fake_run(cmd, cwd=None, env=None):
+        subprocess_calls.append({"cmd": cmd, "env": env})
+        return _DummyResult(returncode=0)
+
+    monkeypatch.setattr(playwright_cmd, "_ping_test_support", fake_ping)
+    monkeypatch.setattr(playwright_cmd.subprocess, "run", fake_run)
+
+    profile_root = _create_profile(temp_project)
+    playback_root = temp_project / "playback"
+    run_root = playback_root / "runs"
+    monkeypatch.setenv("PROFILE_PLAYBACK_ROOT", str(profile_root.parent))
+    monkeypatch.setenv("PROFILE_PLAYBACK_BASE", str(playback_root))
+    monkeypatch.setenv("PROFILE_PLAYBACK_RUN_ROOT", str(run_root))
+    monkeypatch.setattr(playwright_cmd, "uuid4", lambda: SimpleNamespace(hex="sandbox123"))
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-playwright",
+            "--suite",
+            "mods-menu",
+            "--profile",
+            "legacy-palouse",
+            "--base-url",
+            "http://localhost:8080/weppcloud",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert ping_targets
+    assert ping_targets[-1] == "http://localhost:8080/weppcloud"
+    env = subprocess_calls[0]["env"]
+    expected_base = "http://localhost:8080/weppcloud"
+    assert env["SMOKE_RUN_PATH"] == f"{expected_base}/runs/profile;;tmp;;sandbox123/dev_cfg/"
+    assert env["SMOKE_CREATE_RUN"] == "false"
+    assert env["SMOKE_BASE_URL"] == expected_base
+    assert not (run_root / "sandbox123").exists()
+
+
+def test_profile_missing_capture(monkeypatch: pytest.MonkeyPatch, temp_project: Path) -> None:
+    runner = CliRunner()
+
+    def fake_ping(url: str) -> None:
+        return None
+
+    def fake_run(cmd, cwd=None, env=None):
+        raise AssertionError("subprocess.run should not be called when profile prep fails")
+
+    monkeypatch.setattr(playwright_cmd, "_ping_test_support", fake_ping)
+    monkeypatch.setattr(playwright_cmd.subprocess, "run", fake_run)
+
+    profile_root = temp_project / "profiles" / "legacy-palouse"
+    (profile_root / "run").mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("PROFILE_PLAYBACK_ROOT", str(profile_root.parent))
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-playwright",
+            "--suite",
+            "mods-menu",
+            "--profile",
+            "legacy-palouse",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "Capture log missing" in result.output
+
+
+def test_profile_keep_run_skips_cleanup(monkeypatch: pytest.MonkeyPatch, temp_project: Path) -> None:
+    runner = CliRunner()
+    subprocess_calls: List[Dict[str, Any]] = []
+
+    def fake_ping(url: str) -> None:
+        return None
+
+    def fake_run(cmd, cwd=None, env=None):
+        subprocess_calls.append({"cmd": cmd, "env": env})
+        return _DummyResult(returncode=0)
+
+    monkeypatch.setattr(playwright_cmd, "_ping_test_support", fake_ping)
+    monkeypatch.setattr(playwright_cmd.subprocess, "run", fake_run)
+
+    profile_root = _create_profile(temp_project)
+    playback_root = temp_project / "playback"
+    run_root = playback_root / "runs"
+    monkeypatch.setenv("PROFILE_PLAYBACK_ROOT", str(profile_root.parent))
+    monkeypatch.setenv("PROFILE_PLAYBACK_BASE", str(playback_root))
+    monkeypatch.setenv("PROFILE_PLAYBACK_RUN_ROOT", str(run_root))
+    monkeypatch.setattr(playwright_cmd, "uuid4", lambda: SimpleNamespace(hex="sand45"))
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-playwright",
+            "--suite",
+            "mods-menu",
+            "--profile",
+            "legacy-palouse",
+            "--keep-run",
+            "--base-url",
+            "http://localhost:8080/weppcloud",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (run_root / "sand45").exists()

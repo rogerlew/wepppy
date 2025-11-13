@@ -121,9 +121,10 @@ All tests use request interception to mock 500 errors instead of backend failure
 ### Mods menu smoke
 `mods-menu.spec.js` catches regressions like “DSS Export checkbox checked but nav item missing.” Important notes:
 
-- **Run selection:** The spec defaults to `SMOKE_RUN_CONFIG=disturbed9002_wbt` and fails fast when `Ron.mods` lacks `disturbed`. When possible, reuse an existing disturbed profile (for example one of the seeds under `/workdir/wepppy-test-engine-data/profiles`) by pointing `SMOKE_RUN_PATH` at the playback URL.
+- **Run selection:** The spec defaults to `SMOKE_RUN_CONFIG=disturbed9002_wbt` and fails fast when `Ron.mods` lacks `disturbed`. When possible, clone an existing disturbed profile by using the built-in `--profile` flag (`wctl run-playwright --suite mods-menu --profile legacy-palouse`) which copies `/workdir/wepppy-test-engine-data/profiles/<slug>/run` into the playback sandbox and points Playwright at `/runs/profile;;tmp;;<uuid>/<config>/`.
 - **No `playwright_load_all`:** The suite strips the helper query parameter from `SMOKE_RUN_PATH` so nav visibility reflects real mod state. Do not re-add `playwright_load_all=true` when sharing URLs for this spec.
 - **What it validates:** Each checkbox state is compared against `window.runContext.mods`, the preflight/TOC entry (`data-mod-nav="<mod>"`), and the controller wrapper (`data-mod-section="<mod>"`). It then toggles every mod, verifies UI + state updates, and toggles again to ensure the project ends where it started.
+- **Automated provisioning:** Cloning honours the same environment variables as the playback helpers (`PROFILE_PLAYBACK_ROOT`, `PROFILE_PLAYBACK_BASE`, `PROFILE_PLAYBACK_RUN_ROOT`). CI can point these at `/workdir/wepppy-test-engine-data` so cloned runs share the same lifecycle as recorder/fork jobs.
 
 ### Playwright Controller Regression Suite
 `controller-regression.spec.js` is now its own suite (`--suite controllers`) that exercises every controller listed in `static-src/tests/smoke/controller-cases.js`. Important details:

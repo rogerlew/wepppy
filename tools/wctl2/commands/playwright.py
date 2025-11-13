@@ -6,15 +6,18 @@ import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
+import re
+import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Literal, Optional
+from uuid import uuid4
 
 import typer
 
 from ..context import CLIContext
-
 if TYPE_CHECKING:
     EnvironmentPreset = Literal["local", "local-direct", "dev", "staging", "prod", "custom"]
-    SuitePreset = Literal["full", "smoke", "controllers"]
+    SuitePreset = Literal["full", "smoke", "controllers", "mods-menu"]
 else:
     EnvironmentPreset = str
     SuitePreset = str
@@ -33,7 +36,10 @@ SUITE_PATTERNS: dict[str, Optional[str]] = {
     "smoke": "page load",
     "controllers": "controller regression",
     "theme-metrics": "theme contrast metrics",
+    "mods-menu": "run header mods menu",
 }
+
+RUN_ID_PATTERN = re.compile(r"/runs/([^/]+)/")
 
 
 def _context(ctx: typer.Context) -> CLIContext:
@@ -93,6 +99,87 @@ def _resolve_project(
     if override:
         return override
     return DEFAULT_PROJECT
+
+
+def _profile_root(context: CLIContext) -> Path:
+    candidate = context.env_value("PROFILE_PLAYBACK_ROOT") or context.environment.get("PROFILE_PLAYBACK_ROOT")
+    return Path(candidate or "/workdir/wepppy-test-engine-data/profiles")
+
+
+def _playback_run_root(context: CLIContext) -> Path:
+    base = context.env_value("PROFILE_PLAYBACK_BASE") or context.environment.get("PROFILE_PLAYBACK_BASE")
+    base_path = Path(base or "/workdir/wepppy-test-engine-data/playback")
+    override = context.env_value("PROFILE_PLAYBACK_RUN_ROOT") or context.environment.get("PROFILE_PLAYBACK_RUN_ROOT")
+    return Path(override) if override else base_path / "runs"
+
+
+def _read_active_config(run_dir: Path) -> str:
+    marker = run_dir / "active_config.txt"
+    if marker.exists():
+        value = marker.read_text(encoding="utf-8").strip()
+        if value:
+            return value
+    return "0"
+
+
+def _detect_profile_run_id(profile_root: Path) -> str:
+    events_path = profile_root / "capture" / "events.jsonl"
+    if not events_path.exists():
+        raise typer.Exit(f"[wctl2] Capture log missing: {events_path}")
+
+    with events_path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            endpoint = str(payload.get("endpoint") or payload.get("path") or "")
+            match = RUN_ID_PATTERN.search(endpoint)
+            if match:
+                return match.group(1)
+    raise typer.Exit(f"[wctl2] Unable to detect run id from {events_path}")
+
+
+def _clone_profile_run(context: CLIContext, profile: str) -> dict:
+    profile_root = _profile_root(context) / profile
+    if not profile_root.exists():
+        raise typer.Exit(f"[wctl2] Profile not found: {profile_root}")
+
+    source_run_dir = profile_root / "run"
+    if not source_run_dir.exists():
+        raise typer.Exit(f"[wctl2] Profile run snapshot missing: {source_run_dir}")
+
+    run_id = _detect_profile_run_id(profile_root)
+    sandbox_uuid = uuid4().hex
+    sandbox_run_id = f"profile;;tmp;;{sandbox_uuid}"
+
+    run_root = _playback_run_root(context)
+    run_root.mkdir(parents=True, exist_ok=True)
+    sandbox_dir = run_root / sandbox_uuid
+    shutil.rmtree(sandbox_dir, ignore_errors=True)
+    shutil.copytree(source_run_dir, sandbox_dir)
+
+    config_slug = _read_active_config(sandbox_dir)
+    return {
+        "run_id": sandbox_run_id,
+        "config": config_slug,
+        "run_dir": sandbox_dir,
+    }
+
+
+def _cleanup_cloned_run(run_dir: Path, keep_run: bool) -> None:
+    if keep_run:
+        typer.echo(f"[wctl2] Keeping cloned profile run at {run_dir}")
+        return
+    shutil.rmtree(run_dir, ignore_errors=True)
+
+
+def _build_run_path(base_url: str, run_id: str, config_slug: str) -> str:
+    base = base_url.rstrip("/")
+    return f"{base}/runs/{run_id}/{config_slug}/"
 
 
 def _ping_test_support(base_url: str) -> None:
@@ -185,7 +272,12 @@ def register(app: typer.Typer) -> None:
             "full",
             "--suite",
             "-s",
-            help="Suite preset: full (default), smoke, controllers, theme-metrics.",
+            help="Suite preset: full (default), smoke, controllers, theme-metrics, mods-menu.",
+        ),
+        profile: Optional[str] = typer.Option(
+            None,
+            "--profile",
+            help="Replay the specified profile via profile-playback before running tests.",
         ),
         project: Optional[str] = typer.Option(
             None,
@@ -259,8 +351,19 @@ def register(app: typer.Typer) -> None:
             typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
             raise typer.Exit(1)
 
+        if suite_value not in SUITE_PATTERNS:
+            typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
+            raise typer.Exit(1)
+
         suite_pattern = SUITE_PATTERNS[suite_value]
         overrides_json = _build_overrides_json(overrides)
+
+        resolved_url = _resolve_base_url(context, effective_env, base_url)
+        _ping_test_support(resolved_url)
+
+        profile_slug = profile.strip() if profile else None
+        if profile_slug and overrides_json:
+            typer.echo("[wctl2] Warning: --overrides ignored when using --profile.", err=True)
 
         project_value = _resolve_project(context, effective_env, project)
         report_output_path = report_path or DEFAULT_REPORT_PATH
@@ -302,15 +405,30 @@ def register(app: typer.Typer) -> None:
         npm_cmd = ["npm", "run", "test:playwright", "--", *cli_args]
 
         typer.echo(f"[wctl2] Running Playwright tests against {resolved_url}")
+
+        cloned_run: Optional[dict] = None
+        if profile_slug:
+            cloned_run = _clone_profile_run(context, profile_slug)
+            run_path = _build_run_path(resolved_url, cloned_run["run_id"], cloned_run["config"])
+            env_vars["SMOKE_RUN_PATH"] = run_path
+            env_vars["SMOKE_RUN_CONFIG"] = cloned_run["config"]
+            env_vars["SMOKE_CREATE_RUN"] = "false"
+            typer.echo(f"[wctl2] Using profile '{profile_slug}' run {cloned_run['run_id']} ({run_path})")
+
+        final_config = env_vars.get("SMOKE_RUN_CONFIG", config)
         typer.echo(
-            f"[wctl2] Config: {config}, Project: {project_value}, Workers: {effective_workers}, Suite: {suite_value}"
+            f"[wctl2] Config: {final_config}, Project: {project_value}, Workers: {effective_workers}, Suite: {suite_value}"
         )
 
-        result = subprocess.run(
-            npm_cmd,
-            cwd=str(static_src),
-            env=env_vars,
-        )
+        try:
+            result = subprocess.run(
+                npm_cmd,
+                cwd=str(static_src),
+                env=env_vars,
+            )
+        finally:
+            if cloned_run:
+                _cleanup_cloned_run(Path(cloned_run["run_dir"]), keep_run)
 
         if report and result.returncode == 0:
             typer.echo(f"[wctl2] Opening report from {report_output_path}")
