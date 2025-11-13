@@ -983,6 +983,9 @@ class Landuse(NoDbBase):
             if managements is None:
                 managements = {}
 
+            for k in managements:
+                managements[k].area = 0.0
+
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             total_area = 0.0
