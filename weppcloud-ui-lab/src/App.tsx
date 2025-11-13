@@ -9,6 +9,7 @@ import {
   CloudRain,
   FileText,
   Flame,
+  Globe,
   Server,
   Settings,
   Sprout,
@@ -202,6 +203,24 @@ const AFFILIATIONS: Affiliation[] = [
     logo: '/weppcloud/static/images/RCDS_Logo-horizontal.svg',
     link: 'https://www.uidaho.edu/research/computing',
   },
+  {
+    name: 'Rangeland Analysis Platform',
+    caption: 'Big data for big landscapes - combining satellite imagery with thousands of on-the-ground vegetation measurements',
+    logo: '/weppcloud/static/images/rapIconSmall.png',
+    link: 'https://rangelands.app/',
+  },
+  {
+    name: 'Michigan Technological University',
+    caption: 'Tomorrow needs Michigan Tech - R1 flagship technological research university',
+    logo: '/weppcloud/static/images/michigan-tech-logo-full-yellow.svg',
+    link: 'https://www.mtu.edu/',
+  },
+  {
+    name: 'Washington State University',
+    caption: 'World-class research university dedicated to solving problems and improving lives',
+    logo: '/weppcloud/static/images/Washington-State-University-Logo.png',
+    link: 'https://www.wsu.edu/',
+  },
 ]
 
 type Sponsor = {
@@ -239,13 +258,16 @@ const SPONSORS: Sponsor[] = [
 ]
 
 const CONTRIBUTORS = [
+  'Garrit Bass',
   'Marta Basso',
   'Erin Brooks',
+  'Subhankar Das',
   'Chinmay Deval',
   'Mariana Dobre',
   'Stefan Doerr',
   'Helen Dow',
   'William Elliot',
+  'Ames Fowler',
   'Jim Frakenberger',
   'Roger Lew',
   'Mary E. Miller',
@@ -254,6 +276,7 @@ const CONTRIBUTORS = [
   'Cristina Santin',
   'Brian (Scott) Sheppard',
   'Anurag Srivastava',
+  'Alex Watanabe'
 ]
 
 type RunLocation = {
@@ -512,11 +535,11 @@ const mapSubtitle =
 
   const navItems = useMemo(
     () => [
-      { label: 'Interface', href: '/weppcloud/' },
-      { label: 'Docs', href: '/weppcloud/docs/' },
-      { label: 'Research', href: 'https://wepp.cloud/research', external: true },
+      { label: 'Docs', href: 'https://doc.wepp.cloud' },
+      { label: 'Research', href: '/weppcloud/research', external: true },
+      { label: 'Interfaces', href: '/weppcloud/' },
       {
-        label: isAuthenticated ? 'Runs' : 'Login',
+        label: isAuthenticated ? 'My Runs' : 'Login',
         href: isAuthenticated ? '/weppcloud/runs/' : '/weppcloud/login/',
       },
     ],
@@ -536,7 +559,7 @@ const mapSubtitle =
             >
               <p className="text-xs uppercase tracking-[0.4em] text-sky-200">WEPPcloud</p>
               <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-                <TypewriterText text={heroHeadline} speed={2} delay={200} />
+                <TypewriterText text={heroHeadline} speed={1} delay={1000} />
               </h1>
               <p className="text-base text-slate-200 sm:text-lg">
                 Launch tools, explore documentation, or jump into the latest analytics. Scroll to
@@ -924,7 +947,12 @@ const mapSubtitle =
                 <img
                   src={affiliation.logo}
                   alt={affiliation.name}
-                  className="max-h-20 w-auto object-contain grayscale invert opacity-60 contrast-125"
+                  className={cn(
+                    "max-h-20 w-auto object-contain grayscale",
+                    affiliation.name === "Michigan Technological University"
+                      ? "brightness-[2] opacity-90 contrast-125"
+                      : "invert opacity-60 contrast-125"
+                  )}
                 />
               </div>
               <p className="mt-4 text-center text-xs text-slate-400">
@@ -1008,6 +1036,110 @@ const mapSubtitle =
               {contributor}
             </span>
           ))}
+        </motion.div>
+      </section>
+
+      <section className="bg-[#020617] px-4 py-20 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl space-y-4 text-center"
+        >
+          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Credits</p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+            Attributions and Data Sources
+          </h2>
+          <p className="text-base text-slate-300">
+            WEPPcloud leverages open data, research-quality datasets, and mapping services from
+            partners worldwide.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mx-auto mt-12 grid max-w-5xl gap-12 sm:grid-cols-2"
+        >
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Map Services</h3>
+            <p className="text-sm text-slate-300">
+              Map baselayers provided by{' '}
+              <a
+                href="https://www.google.com/maps"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-300 transition hover:text-sky-200"
+              >
+                Google
+              </a>{' '}
+              (Terrain, Satellite) and{' '}
+              <a
+                href="https://www.openstreetmap.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-300 transition hover:text-sky-200"
+              >
+                OpenStreetMap
+              </a>{' '}
+              contributors.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Regional Data Documentation</h3>
+            <div className="space-y-2">
+              {[
+                { region: 'United States', url: 'https://doc.wepp.cloud/us-data.html' },
+                { region: 'Europe', url: 'https://doc.wepp.cloud/eu-data.html' },
+                { region: 'Australia', url: 'https://doc.wepp.cloud/au-data.html' },
+                { region: 'Earth', url: 'https://doc.wepp.cloud/earth-data.html' },
+              ].map((item) => (
+                <div key={item.region} className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-sky-300 transition hover:text-sky-200"
+                  >
+                    {item.region}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      <section className="bg-[#030712] px-4 py-16 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl space-y-4"
+        >
+          <h2 className="text-center text-2xl font-semibold text-white sm:text-3xl">
+            Legal Disclaimer
+          </h2>
+          <div className="rounded-xl border border-white/10 bg-slate-900/40 p-6 sm:p-8">
+            <p className="text-sm leading-relaxed text-slate-300">
+              THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+              EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+              OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+              SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+              INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+              TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+              BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+              CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+              WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+              DAMAGE.
+            </p>
+          </div>
         </motion.div>
       </section>
     </div>

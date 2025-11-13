@@ -87,6 +87,18 @@
        - Image: `/weppcloud/static/images/RCDS_Logo-horizontal.svg`
        - Caption: "Proudly hosted by the University of Idaho Research Computing + Data Services"
        - Link: `https://www.uidaho.edu/research/computing`
+     - **Rangeland Analysis Platform:**
+       - Image: `/weppcloud/static/images/rapIconSmall.png`
+       - Caption: "Big data for big landscapes - combining satellite imagery with thousands of on-the-ground vegetation measurements"
+       - Link: `https://rangelands.app/`
+     - **Michigan Technological University:**
+       - Image: `/weppcloud/static/images/michigan-tech-logo-full-yellow.svg`
+       - Caption: "Tomorrow needs Michigan Tech - R1 flagship technological research university"
+       - Link: `https://www.mtu.edu/`
+     - **Washington State University:**
+       - Image: `/weppcloud/static/images/Washington-State-University-Logo.png`
+       - Caption: "World-class research university dedicated to solving problems and improving lives"
+       - Link: `https://www.wsu.edu/`
    - **Styling notes:**
      - Logos have consistent height (`h-20`) with `object-contain` to maintain aspect ratio
      - Apply Tailwind filters: `grayscale invert opacity-60 contrast-125` for dark theme integration
@@ -194,8 +206,42 @@
 - `npm run export:landing` builds Vite bundle and copies to `wepppy/weppcloud/static/ui-lab/`.
 - Flask `landing()` route injects `__WEPP_STATE__` before serving `index.html`.
 
-## TODO
+8. **Attributions and Data Sources**
+   - Final section at bottom of page with dark background (`bg-[#020617]` or similar).
+   - Two subsections side-by-side on desktop, stacked on mobile.
+   - **Eyebrow:** `Credits`
+   - **Heading:** `Attributions and Data Sources`
+   - **Subtitle:** `WEPPcloud leverages open data, research-quality datasets, and mapping services from partners worldwide.`
+   
+   **Subsection A: Attributions**
+   - **Subheading:** `Map Services`
+   - **Content:** Plain text attribution with inline links
+     - "Map baselayers provided by [Google](https://www.google.com/maps) (Terrain, Satellite) and [OpenStreetMap](https://www.openstreetmap.org/) contributors."
+   - **Styling notes:**
+     - Simple paragraph text with subtle styling
+     - Links styled consistently with rest of page (`text-sky-300 hover:text-sky-200`)
+     - Compact, not card-based
+   
+   **Subsection B: Data Sources**
+   - **Subheading:** `Regional Data Documentation`
+   - **Content:** List of links to regional data documentation pages
+     - **United States:** https://doc.wepp.cloud/us-data.html
+     - **Europe:** https://doc.wepp.cloud/eu-data.html
+     - **Australia:** https://doc.wepp.cloud/au-data.html
+     - **Earth:** https://doc.wepp.cloud/earth-data.html
+   - **Styling notes:**
+     - Simple list layout (not card-based)
+     - Each region name is a link to its data documentation page
+     - Links styled consistently (`text-sky-300 hover:text-sky-200`)
+     - Optionally use globe/map icons next to region names (e.g., Lucide `Globe`, `MapPin`)
+     - Vertical list or horizontal flex layout depending on space
+   
+   **Layout notes:**
+   - Desktop: two-column grid (Attributions left, Data Sources right)
+   - Mobile: stack vertically (Attributions on top, Data Sources below)
+   - Container: `max-w-5xl mx-auto`
+   - Padding: generous spacing (`py-20`)
+   - Text styling: `text-slate-300` for body, `text-white` for subheadings
+   - Keep design lightweight - this is informational, not promotional
 
-- **Add NSF logo:** Download official NSF logo and place in `wepppy/weppcloud/static/images/` (e.g., `nsf-logo.svg` or `nsf-logo.png`).
-  - Official NSF brand resources: https://www.nsf.gov/policies/nsf_logo.jsp
-  - Alternative: NSF Idaho EPSCoR specific logo if available
+````
