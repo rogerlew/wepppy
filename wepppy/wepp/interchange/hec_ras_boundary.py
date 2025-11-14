@@ -66,7 +66,8 @@ def build_boundary_condition_features(
     if proj is None:
         return []
 
-    metric = _load_metric_raster(watershed)
+    logger = getattr(watershed, "logger", None)
+    metric = _load_metric_raster(watershed, logger)
     if metric is None or metric.shape != subwta.shape:
         return []
 
@@ -79,6 +80,7 @@ def build_boundary_condition_features(
             stale.unlink()
 
     features: List[Dict[str, object]] = []
+
     for chn_id in sorted(set(channel_ids)):
         line = _build_boundary_line(
             chn_id,
@@ -88,7 +90,7 @@ def build_boundary_condition_features(
             transformer,
             translator,
             boundary_width_m,
-            getattr(watershed, "logger", None),
+            logger,
         )
         if line is None:
             continue
@@ -98,16 +100,21 @@ def build_boundary_condition_features(
     return features
 
 
-def _load_metric_raster(watershed: "Watershed") -> Optional[np.ndarray]:
+def _load_metric_raster(
+    watershed: "Watershed",
+    logger: Optional[logging.Logger],
+) -> Optional[np.ndarray]:
     metric_path = getattr(watershed, "relief", None)
-    if metric_path and os.path.exists(metric_path):
-        data, *_ = read_raster(metric_path, dtype=np.float64)
-        return data
-    discha_path = getattr(watershed, "discha", None)
-    if discha_path and os.path.exists(discha_path):
-        data, *_ = read_raster(discha_path, dtype=np.float64)
-        return data
-    return None
+    if not metric_path:
+        if logger is not None:
+            logger.error("Watershed relief raster missing; cannot build boundary lines")
+        return None
+    if not os.path.exists(metric_path):
+        if logger is not None:
+            logger.error("Relief raster does not exist at %s", metric_path)
+        return None
+    data, *_ = read_raster(metric_path, dtype=np.float64)
+    return data
 
 
 def _build_boundary_line(
@@ -126,24 +133,43 @@ def _build_boundary_line(
 
     cols, rows = np.where(mask)
     values = metric[cols, rows]
-    order = np.argsort(values)
-    if order.size == 0:
-        return None
-
-    lowest_idx = order[0]
-    reference_idx = _find_reference_index(order, cols, rows, lowest_idx)
-    if reference_idx is None:
+    ascending_order = np.argsort(values)
+    ordered_bottom_up = _ordered_unique_indices(ascending_order, cols, rows)
+    if len(ordered_bottom_up) < 2:
         if logger is not None:
-            logger.warning("Boundary generation skipped for chn_%s (insufficient pixels)", chn_topaz_id)
+            logger.warning(
+                "Boundary generation skipped for chn_%s (need >= 2 unique pixels)",
+                chn_topaz_id,
+            )
         return None
 
-    lowest_col, lowest_row = cols[lowest_idx], rows[lowest_idx]
-    ref_col, ref_row = cols[reference_idx], rows[reference_idx]
+    downgraded = False
 
-    lowest_xy = _cell_center(transform, lowest_col, lowest_row)
-    reference_xy = _cell_center(transform, ref_col, ref_row)
+    if len(ordered_bottom_up) >= 3:
+        second_idx = ordered_bottom_up[1]
+        third_idx = ordered_bottom_up[2]
+    else:
+        second_idx = ordered_bottom_up[0]
+        third_idx = ordered_bottom_up[1]
+        downgraded = True
 
-    endpoints_xy = _orthogonal_endpoints(lowest_xy, reference_xy, boundary_width_m)
+    center_idx = third_idx
+
+    if downgraded and logger is not None:
+        logger.warning(
+            "Boundary generation fallback for chn_%s (insufficient pixels for spec)",
+            chn_topaz_id,
+        )
+
+    second_col, second_row = cols[second_idx], rows[second_idx]
+    third_col, third_row = cols[third_idx], rows[third_idx]
+    center_col, center_row = cols[center_idx], rows[center_idx]
+
+    second_xy = _cell_center(transform, second_col, second_row)
+    third_xy = _cell_center(transform, third_col, third_row)
+    center_xy = _cell_center(transform, center_col, center_row)
+
+    endpoints_xy = _orthogonal_endpoints(center_xy, second_xy, third_xy, boundary_width_m)
     if endpoints_xy is None:
         if logger is not None:
             logger.warning("Boundary generation skipped for chn_%s (zero-length vector)", chn_topaz_id)
@@ -151,7 +177,7 @@ def _build_boundary_line(
 
     start_lon, start_lat = transformer.transform(*endpoints_xy[0])
     end_lon, end_lat = transformer.transform(*endpoints_xy[1])
-    center_lon, center_lat = transformer.transform(*lowest_xy)
+    center_lon, center_lat = transformer.transform(*center_xy)
     wepp_id = translator.wepp(top=chn_topaz_id)
 
     return BoundaryLine(
@@ -163,17 +189,20 @@ def _build_boundary_line(
     )
 
 
-def _find_reference_index(
+def _ordered_unique_indices(
     order: np.ndarray,
     cols: np.ndarray,
     rows: np.ndarray,
-    lowest_idx: int,
-) -> Optional[int]:
-    for idx in order[1:]:
-        if cols[idx] == cols[lowest_idx] and rows[idx] == rows[lowest_idx]:
+) -> List[int]:
+    seen: set[Tuple[int, int]] = set()
+    ordered: List[int] = []
+    for idx in order:
+        key = (int(cols[idx]), int(rows[idx]))
+        if key in seen:
             continue
-        return idx
-    return None
+        seen.add(key)
+        ordered.append(int(idx))
+    return ordered
 
 
 def _cell_center(transform: Sequence[float], col: int, row: int) -> Tuple[float, float]:
@@ -184,12 +213,13 @@ def _cell_center(transform: Sequence[float], col: int, row: int) -> Tuple[float,
 
 
 def _orthogonal_endpoints(
-    lowest_xy: Tuple[float, float],
-    reference_xy: Tuple[float, float],
+    center_xy: Tuple[float, float],
+    downstream_xy: Tuple[float, float],
+    upstream_xy: Tuple[float, float],
     width_m: float,
 ) -> Optional[Tuple[Tuple[float, float], Tuple[float, float]]]:
-    vx = lowest_xy[0] - reference_xy[0]
-    vy = lowest_xy[1] - reference_xy[1]
+    vx = upstream_xy[0] - downstream_xy[0]
+    vy = upstream_xy[1] - downstream_xy[1]
     norm = math.hypot(vx, vy)
     if norm == 0:
         return None
@@ -198,8 +228,8 @@ def _orthogonal_endpoints(
     nx = -vy / norm
     ny = vx / norm
     half = width_m / 2.0
-    start = (lowest_xy[0] - nx * half, lowest_xy[1] - ny * half)
-    end = (lowest_xy[0] + nx * half, lowest_xy[1] + ny * half)
+    start = (center_xy[0] - nx * half, center_xy[1] - ny * half)
+    end = (center_xy[0] + nx * half, center_xy[1] + ny * half)
     return start, end
 
 
