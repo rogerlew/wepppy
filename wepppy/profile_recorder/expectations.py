@@ -55,16 +55,25 @@ def evaluate_job_expectations(profile_slug: str, run_dir: Path, task_path: str) 
 
 
 def _check_ash_remaining_ash(run_dir: Path, profile_slug: str, task_path: str) -> None:
-    """Ensure the ash parquet contains the expected remaining_ash value."""
-    parquet_path = run_dir / "ash" / "H46_ash.parquet"
+    """Ensure the ash parquet contains the expected remaining_ash value for H46."""
+    _assert_remaining_ash_value(run_dir, "H46", 22.0)
+
+
+def _check_ash_remaining_ash_h10(run_dir: Path, profile_slug: str, task_path: str) -> None:
+    """Ensure the ash parquet contains the expected remaining_ash value for H10."""
+    _assert_remaining_ash_value(run_dir, "H10", 22.0)
+
+
+def _assert_remaining_ash_value(run_dir: Path, hillslope_id: str, expected_value: float) -> None:
+    parquet_path = run_dir / "ash" / f"{hillslope_id}_ash.parquet"
     _assert_file_exists(parquet_path)
     value = _read_first_value(parquet_path, "remaining_ash (tonne/ha)")
     if value is None:
         raise ProfileExpectationError(f"{parquet_path} is empty; expected at least one row")
     numeric_value = float(value)
-    if not math.isclose(numeric_value, 22.0, rel_tol=0.0, abs_tol=1e-6):
+    if not math.isclose(numeric_value, expected_value, rel_tol=0.0, abs_tol=1e-6):
         raise ProfileExpectationError(
-            f"{parquet_path} remaining_ash expected 22.0 but found {numeric_value}"
+            f"{parquet_path} remaining_ash expected {expected_value} but found {numeric_value}"
         )
 
 
@@ -111,8 +120,15 @@ _PROFILE_EXPECTATIONS: Dict[str, List[JobExpectation]] = {
         ),
         JobExpectation(
             endpoint_suffix="rq/api/post_dss_export_rq",
-            description="totalwatsed3 channel 144/204 DSS exports exist",
+            description="totalwatsed3 channel 104/124 DSS exports exist",
             check=_check_dss_exports_exist,
+        ),
+    ],
+    "double-ash-load": [
+        JobExpectation(
+            endpoint_suffix="rq/api/run_ash",
+            description="H10 remaining_ash equals 22.0 after run_ash",
+            check=_check_ash_remaining_ash_h10,
         ),
     ],
 }

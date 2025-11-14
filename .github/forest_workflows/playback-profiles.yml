@@ -193,7 +193,6 @@
   artifact_path: telemetry/single-storm-profile-run.log
   description: 0 Single Storm Climate
 
-
 - workflow_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
   title: SBS GRIDMET Interp DSS Export
   playback_type: run
@@ -203,3 +202,24 @@
   artifact_name: rattlesnake-gridmet-interp-watar10mm-dss_export-profile-run-log
   artifact_path: telemetry/rattlesnake-gridmet-interp-watar10mm-dss_export-profile-run.log
   description: Rattlesnake SBS with GRIDMET Interpolated Climate, WATAR 10mm depth, DSS Export
+
+- workflow_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
+  title: SBS GRIDMET Interp DSS Export
+  playback_type: run
+  profile_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
+  playback_options: []
+  schedule_pt: 05:45
+  artifact_name: rattlesnake-gridmet-interp-watar10mm-dss_export-profile-run-log
+  artifact_path: telemetry/rattlesnake-gridmet-interp-watar10mm-dss_export-profile-run.log
+  description: Rattlesnake SBS with GRIDMET Interpolated Climate, WATAR 10mm depth w/ verification, DSS Export
+
+- workflow_slug: double-ash-load
+  title: Double Ash Load
+  playback_type: run
+  profile_slug: double-ash-load
+  playback_options: []
+  schedule_pt: 05:50
+  artifact_name: double-ash-load-profile-run-log
+  artifact_path: telemetry/double-ash-load-profile-run.log
+  description: WATAR double ash load setting test
+
