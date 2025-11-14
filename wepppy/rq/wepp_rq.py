@@ -457,17 +457,17 @@ def run_wepp_rq(runid: str) -> Job:
                 jobs4_post.append(_job)
                 job.save()
 
-            job_post_watershed_interchange = q.enqueue_call(
-                _post_watershed_interchange_rq,
-                (runid,),
-                timeout=TIMEOUT,
-                depends_on=post_dependencies,
-            )
-            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
-            jobs4_post.append(job_post_watershed_interchange)
-            job.save()
-
             if not climate.is_single_storm:
+                job_post_watershed_interchange = q.enqueue_call(
+                    _post_watershed_interchange_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=post_dependencies,
+                )
+                job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
+                jobs4_post.append(job_post_watershed_interchange)
+                job.save()
+
                 _job = q.enqueue_call(
                     _analyze_return_periods_rq,
                     (runid,),

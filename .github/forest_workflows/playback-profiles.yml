@@ -182,3 +182,24 @@
   artifact_name: rattlesnake-remove-rap-daymet-multi-interp-omni-profile-run-log
   artifact_path: telemetry/rattlesnake-remove-rap-daymet-multi-interp-omni-profile-run.log
   description: Rattlesnake run with Daymet Multiple Interpolated Climates and Omni mulching scenarios
+
+- workflow_slug: single-storm
+  title: Single Storm
+  playback_type: run
+  profile_slug: single-storm
+  playback_options: []
+  schedule_pt: 05:40
+  artifact_name: single-storm-profile-run-log
+  artifact_path: telemetry/single-storm-profile-run.log
+  description: 0 Single Storm Climate
+
+
+- workflow_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
+  title: SBS GRIDMENT InterpDSS Export
+  playback_type: run
+  profile_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
+  playback_options: []
+  schedule_pt: 05:45
+  artifact_name: rattlesnake-gridmet-interp-watar10mm-dss_export-profile-run-log
+  artifact_path: telemetry/rattlesnake-gridmet-interp-watar10mm-dss_export-profile-run.log
+  description: Rattlesnake SBS with GRIDMET Interpolated Climate, WATAR 10mm depth, DSS Export
