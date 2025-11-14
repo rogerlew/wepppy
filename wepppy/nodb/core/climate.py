@@ -82,7 +82,6 @@ import requests
 
 from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 
-from wepppy.climates import cligen_client as cc
 from wepppy.climates.prism import prism_mod
 from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
@@ -95,6 +94,10 @@ from wepppy.climates.cligen import (
     ClimateFile, 
     Cligen,
     df_to_prn
+)
+from wepppy.climates.cligen.single_storm import (
+    SingleStormResult,
+    build_single_storm_cli,
 )
 from wepppy.all_your_base import isint, isfloat, NCPU
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
@@ -2828,12 +2831,14 @@ class Climate(NoDbBase):
 
             assert len(L) == 7, L
             mo, da, yr, prcp, duration, tp, ip = L
-            key ='ss_' + '_'.join(v.strip() for v in L)
-            specs[key] = dict(ss_storm_date=f'{mo} {da} {yr}',
-                              ss_design_storm_amount_inches=float(prcp),
-                              ss_duration_of_storm_in_hours=float(duration),
-                              ss_time_to_peak_intensity_pct=float(tp),
-                              ss_max_intensity_inches_per_hour=float(tp))
+            key = 'ss_' + '_'.join(v.strip() for v in L)
+            specs[key] = dict(
+                ss_storm_date=f'{mo} {da} {yr}',
+                ss_design_storm_amount_inches=float(prcp),
+                ss_duration_of_storm_in_hours=float(duration),
+                ss_time_to_peak_intensity_pct=float(tp),
+                ss_max_intensity_inches_per_hour=float(ip),
+            )
 
         with self.locked():
             self.set_attrs(attrs)
@@ -2841,32 +2846,41 @@ class Climate(NoDbBase):
             self.logger.info('  running _build_climate_single_storm... ')
 
             storms = []
+            result: Optional[SingleStormResult] = None
             for i, (key, spec) in enumerate(specs.items()):
 
-                result = cc.selected_single_storm(
+                result = build_single_storm_cli(
                     climatestation,
                     spec['ss_storm_date'],
                     spec['ss_design_storm_amount_inches'],
                     spec['ss_duration_of_storm_in_hours'],
                     spec['ss_time_to_peak_intensity_pct'],
                     spec['ss_max_intensity_inches_per_hour'],
-                    version=self.cligen_db
+                    output_dir=self.cli_dir,
+                    filename_prefix=key,
+                    version=self.cligen_db,
                 )
 
-                par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                    result,
-                    key,
-                    self.cli_dir
+                storms.append(
+                    dict(
+                        ss_batch_id=i + 1,
+                        ss_batch_key=key,
+                        spec=spec,
+                        par_fn=result.par_fn,
+                        cli_fn=result.cli_fn,
+                    )
                 )
-                storms.append(dict(ss_batch_id=i+1, ss_batch_key=key, spec=spec, par_fn=par_fn, cli_fn=cli_fn))
 
             if len(storms) > 20:
                 raise ValueError('Only 20 single storms can be ran in batch mode')
 
+            if result is None:
+                raise ValueError('Single storm batch specs were empty')
+
             self._ss_batch_storms = storms
-            self.monthlies = monthlies
-            self.par_fn = par_fn
-            self.cli_fn = cli_fn
+            self.monthlies = result.monthlies
+            self.par_fn = result.par_fn
+            self.cli_fn = result.cli_fn
 
     def _build_climate_single_storm(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         """
@@ -2878,25 +2892,21 @@ class Climate(NoDbBase):
             self.logger.info('  running _build_climate_single_storm... ')
             climatestation = self.climatestation
 
-            result = cc.selected_single_storm(
+            result = build_single_storm_cli(
                 climatestation,
                 self._ss_storm_date,
                 self._ss_design_storm_amount_inches,
                 self._ss_duration_of_storm_in_hours,
                 self._ss_time_to_peak_intensity_pct,
                 self._ss_max_intensity_inches_per_hour,
-                version=self.cligen_db
+                output_dir=self.cli_dir,
+                filename_prefix=climatestation,
+                version=self.cligen_db,
             )
 
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                result,
-                climatestation,
-                self.cli_dir
-            )
-
-            self.monthlies = monthlies
-            self.par_fn = par_fn
-            self.cli_fn = cli_fn
+            self.monthlies = result.monthlies
+            self.par_fn = result.par_fn
+            self.cli_fn = result.cli_fn
 
     def sub_summary(self, topaz_id: str) -> Optional[Dict[str, str]]:
         if not self.has_climate:

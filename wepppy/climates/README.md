@@ -28,7 +28,7 @@ The `wepppy.climates` package integrates diverse climate data sources into a uni
 
 | File | Purpose |
 |------|---------|
-| `cligen_client.py` | REST client for CLIGEN web service at `wepp.cloud/webservices/cligen/` |
+| `cligen/single_storm.py` | Direct single-storm CLIGEN builder (writes `.cli`/`.par` locally) |
 | `metquery_client.py` | Fetches PRISM monthly normals (precipitation, temperature) from `wepp.cloud/webservices/metquery/` |
 | `downscaled_nmme_client.py` | Experimental NMME climate projections client |
 | `noaa_precip_freqs_client.py` | NOAA precipitation frequency estimates (for storm generation) |
@@ -240,14 +240,12 @@ timeseries = retrieve_timeseries(
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CLIGEN_URL` | `https://wepp.cloud/webservices/cligen/` | Base URL for CLIGEN web service (override for local deployments) |
 | `SCRATCH_DIR` | `/dev/shm` | Temporary storage for NetCDF downloads (GridMET) |
 
 ### Climate Data Endpoints (Production)
 
 | Service | Endpoint | Purpose |
 |---------|----------|---------|
-| CLIGEN | `https://wepp.cloud/webservices/cligen/` | Stochastic weather generation |
 | MetQuery | `https://wepp.cloud/webservices/metquery/` | PRISM monthly normals |
 | Daymet | `https://daymet.ornl.gov/single-pixel/api/data` | Daymet single-pixel API |
 | GridMET | `http://www.climatologylab.org/gridmet.html` | GridMET THREDDS catalog |
@@ -465,12 +463,12 @@ def test_retrieve_timeseries_mock(responses):
 ```
 climates/
 ├── __init__.py                 # Empty (future: aggregate exports)
-├── cligen_client.py            # CLIGEN web service client
 ├── metquery_client.py          # PRISM monthly normals client
 ├── noaa_precip_freqs_client.py # NOAA precipitation frequencies
 ├── cligen/                     # CLIGEN package
 │   ├── __init__.py
 │   ├── cligen.py               # Core Cligen class
+│   ├── single_storm.py         # Direct single-storm builder
 │   ├── stations.db             # US stations SQLite
 │   ├── ghcn_daily/             # GHCN integration
 │   └── tests/

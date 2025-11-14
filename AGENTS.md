@@ -626,7 +626,7 @@ See `wepppy/weppcloud/controllers_js/README.md` for comprehensive controller arc
 
 ### Adding a New Climate Data Source
 1. Create module in `wepppy/climates/<source_name>/`
-2. Implement client class following existing patterns (e.g., `cligen_client.py`)
+2. Implement client class following existing patterns (e.g., `metquery_client.py` or `cligen/single_storm.py`)
 3. Add to `Climate` NoDb controller in `wepppy/nodb/core/climate.py`
 4. Update `__all__` exports
 5. Add tests in `tests/climates/`

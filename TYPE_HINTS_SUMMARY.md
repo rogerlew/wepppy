@@ -45,7 +45,7 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/climates/cligen/_scripts/stations_sqlitedb_builder.py`
 - [ ] `wepppy/climates/cligen/cligen.py`
 - [ ] `wepppy/climates/cligen/stations/__init__.py`
-- [ ] `wepppy/climates/cligen_client.py`
+- [ ] `wepppy/climates/cligen/single_storm.py`
 - [ ] `wepppy/climates/climatena_ca/__init__.py`
 - [x] `wepppy/climates/daymet/__init__.py`
 - [x] `wepppy/climates/daymet/daily_interpolation.py`
@@ -304,7 +304,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/watershed_boundary_dataset/usgs_wbd.py`
 - [x] `wepppy/webservices/__init__.py`
 - [x] `wepppy/webservices/benchmarks/benchmark_wmesque.py`
-- [x] `wepppy/webservices/cligen.py`
 - [x] `wepppy/webservices/dtale/__init__.py`
 - [x] `wepppy/webservices/dtale/dtale.py`
 - [x] `wepppy/webservices/ecoregion_us.py`

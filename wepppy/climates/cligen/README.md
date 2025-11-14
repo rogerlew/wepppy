@@ -19,7 +19,7 @@
 | `wepppy/climates/cligen/tests/future_climate_builder.py` | Script-like regression for building future climates from downscaled NMME RCP8.5 time series. |
 | `wepppy/climates/cligen/tests/gridmet_maca_climate_builder.py` | MACA/gridMET ingestion workflow (netCDF retrieval, DataFrame → `.prn`, CLIGEN invocation) with optional runtime dependency on the standalone `cligen` package. |
 | `wepppy/climates/cligen/tests/prism_point_builder.py` | Convenience utility that localizes a station to a 3×3 PRISM grid around an input point. |
-| `wepppy/climates/cligen/cligen_client.py` | REST client for the hosted `/webservices/cligen/*` endpoints (multi-year, single-storm, observed Daymet). |
+| `wepppy/climates/cligen/single_storm.py` | Direct CLI builder for the single-storm workflow (used by `Climate` NoDb controller). |
 
 ## Core APIs (cligen.py)
 - **Station / StationMeta**
@@ -39,27 +39,28 @@
 - **NullStation utility**
   - Provides a sentinel `StationMeta` when no catalog entry exists so calling code can still render UI elements without null checks.
 
-## Service Client (`cligen_client.py`)
-- Wraps the hosted `https://wepp.cloud/webservices/cligen/` endpoints via `requests`. The helpers validate inputs, normalize case, and raise with the server-side error body to make debugging easier.
-- `fetch_multiple_year()` takes a station ID plus data source hints (`p_mean`, `tmax`, `dewpoint`, etc.) and returns either JSON or the raw `.cli` payload.
-- `selected_single_storm()` submits design-storm parameters (date, depth, duration, time-to-peak, intensity).
-- `observed_daymet()` builds observed series bounded by [1980, last full Daymet year].
+## Single-Storm Builder (`single_storm.py`)
+- Replaces the legacy REST hop by invoking the bundled CLIGEN binaries directly.
+- `build_single_storm_cli()` writes `.par/.cli` files into a caller-provided directory, returning a `SingleStormResult` (paths + computed monthlies).
+- Input validation mirrors the legacy REST helper: storm dates accept `MM-DD-YYYY`, `MM/DD/YYYY`, or space-delimited tokens; peak intensity must be between 0–100%.
 
 ```python
-from wepppy.climates import cligen_client
+from pathlib import Path
+from wepppy.climates.cligen.single_storm import build_single_storm_cli
 
-data = cligen_client.fetch_multiple_year(
+result = build_single_storm_cli(
     par=106152,
-    years=30,
-    lat=46.4,
-    lng=-117.0,
-    p_mean="prism",
-    p_wd="daymet",
-    tmax="prism",
-    tmin="prism",
+    storm_date="6-10-2014",
+    design_storm_amount_inches=6.3,
+    duration_of_storm_in_hours=4.0,
+    time_to_peak_intensity_pct=40.0,
+    max_intensity_inches_per_hour=3.0,
+    output_dir=str(Path("/tmp/wepp_runs") / "cli"),
+    filename_prefix="design_storm",
+    version="2015",
 )
-with open("wepp.cli", "w") as handle:
-    handle.write(data["cli_text"])
+print(result.cli_path)  # /tmp/wepp_runs/cli/design_storm.cli
+print(result.monthlies)  # Calculated from the generated CLI (may be None on failure)
 ```
 
 ## Persistent Assets & Builder Script

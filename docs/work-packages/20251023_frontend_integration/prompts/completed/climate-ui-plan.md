@@ -49,7 +49,7 @@ This plan inventories the legacy climate control so we can translate it to the P
   - `Observed GridMET (11)` – `_build_climate_observed_gridmet` or `_…_multiple` orchestrate NetCDF downloads, interpolation, and per-hillslope PRN generation with heavy multiprocessing.
   - `DEP Nexrad (13)` – downloads breakpoint `.cli` files from Iowa State, clips to requested years, and optionally overwrites temperature/wind fields using PRISM/GridMET/Daymet timeseries.
   - `Future CMIP5 (3)` – fetches downscaled climate via `build_future` (RCP scenarios).
-  - `Single Storm` variants (4, 14) – call `cligen_client.selected_single_storm`, either once or batch-parsed from textarea rows.
+  - `Single Storm` variants (4, 14) – call `build_single_storm_cli` (local CLIGEN runner), either once or batch-parsed from textarea rows.
   - `E-OBS (8)` / `AGDC (10)` – delegate to `_build_climate_mod` with `eobs_mod` or `agdc_mod`. Presentation for AGDC is currently absent in the template.
   - `Observed/Future DB (6/7)` – expect `climate_*_selection` fields pointing at curated `.cli` directories (`observed_clis_wc`, `future_clis_wc`); the template only surfaces the radio, not the selector.
 - **Uploads** – `/tasks/upload_cli/` saves the file into `cli_dir` and calls `set_user_defined_cli()`, which sets `_orig_cli_fn`, computes monthlies, and (if necessary) flags `ClimateMode.UserDefinedSingleStorm`.
