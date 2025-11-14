@@ -195,7 +195,7 @@
 
 
 - workflow_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
-  title: SBS GRIDMENT InterpDSS Export
+  title: SBS GRIDMET Interp DSS Export
   playback_type: run
   profile_slug: rattlesnake-gridmet-interp-watar10mm-dss_export
   playback_options: []
