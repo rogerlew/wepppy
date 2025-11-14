@@ -83,6 +83,7 @@ from starlette.responses import (
 from starlette.routing import Route
 from wepppy.microservices._download import create_routes as create_download_routes
 from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
+from wepppy.microservices.dss_preview import build_preview as build_dss_preview
 
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.routes.usersum.usersum import _load_parameter_catalog
@@ -1316,6 +1317,19 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
     else:
         repr_mode = args.get('repr') is not None
+        wants_binary = (
+            repr_mode
+            or ('raw' in args)
+            or ('Raw' in headers)
+            or ('download' in args)
+            or ('Download' in headers)
+        )
+
+        if path_lower.endswith('.dss') and not wants_binary:
+            dss_response = await _maybe_render_dss_preview(path, runid, config)
+            if dss_response is not None:
+                return dss_response
+
         contents = None
 
         if repr_mode:
@@ -1441,6 +1455,51 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             contents=contents,
             contents_html=contents_html,
         )
+
+
+async def _maybe_render_dss_preview(path: str, runid: str, config: str):
+    download_href = '?download'
+    filename = basename(path)
+    try:
+        preview = await asyncio.to_thread(build_dss_preview, path)
+    except ModuleNotFoundError:
+        message = (
+            "Install pydsstools inside the WEPP environment to enable DSS previews "
+            "(pip install pydsstools)."
+        )
+        return render_template(
+            'browse/dss_file.htm',
+            runid=runid,
+            config=config,
+            filename=filename,
+            preview=None,
+            error_message=message,
+            download_href=download_href,
+        )
+    except FileNotFoundError:
+        raise
+    except Exception:
+        _logger.exception('Unable to summarize DSS file at %s', path)
+        message = "Unable to summarize this DSS file. Use Download to inspect it manually."
+        return render_template(
+            'browse/dss_file.htm',
+            runid=runid,
+            config=config,
+            filename=filename,
+            preview=None,
+            error_message=message,
+            download_href=download_href,
+        )
+
+    return render_template(
+        'browse/dss_file.htm',
+        runid=runid,
+        config=config,
+        filename=filename,
+        preview=preview,
+        error_message=None,
+        download_href=download_href,
+    )
 
 
 async def _handle_browse_request(request: StarletteRequest, runid: str, config: str, subpath: str):

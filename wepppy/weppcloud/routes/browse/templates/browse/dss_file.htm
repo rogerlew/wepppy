@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/page.svg?v=20250908"/>
+<title>{{ filename }} - {{ runid }}</title>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous">
+<script src="/weppcloud/static/js/sorttable.js"></script>
+<style>
+  .text-monospace { font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  .table-sm th, .table-sm td { vertical-align: top; }
+</style>
+</head>
+<body>
+<div class="container-fluid py-3">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+    <div class="mb-2 mb-md-0">
+      <h4 class="mb-1">{{ filename }}</h4>
+      {% if preview %}
+        <div class="text-muted small">{{ preview.file_size_label }} • Updated {{ preview.modified_label }}</div>
+        <div class="text-muted small">Records: {{ preview.record_count }}</div>
+      {% endif %}
+    </div>
+    <div>
+      <a href="{{ download_href }}" class="btn btn-primary btn-sm">Download File</a>
+    </div>
+  </div>
+
+  {% if error_message %}
+    <div class="alert alert-warning mt-3 mb-0">
+      {{ error_message }}
+    </div>
+  {% endif %}
+
+  {% if preview %}
+    <div class="row mt-3">
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-header">Overview</div>
+          <div class="card-body">
+            <dl class="row mb-0 small">
+              <dt class="col-sm-4">File Size</dt>
+              <dd class="col-sm-8">{{ preview.file_size_label }}</dd>
+              <dt class="col-sm-4">Modified</dt>
+              <dd class="col-sm-8">{{ preview.modified_label }}</dd>
+              <dt class="col-sm-4">Records</dt>
+              <dd class="col-sm-8">{{ preview.record_count }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-header">Record Types</div>
+          <div class="card-body small">
+            {% if preview.record_type_counts %}
+              <ul class="list-unstyled mb-0">
+                {% for label, count in preview.record_type_counts %}
+                  <li><strong>{{ label }}</strong>: {{ count }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted mb-0">No records found.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">Path Parts</div>
+      <div class="card-body small">
+        <div class="row">
+          {% for part, values in preview.unique_parts.items() %}
+            <div class="col-md-4 mb-2">
+              <div class="font-weight-bold">{{ part }}-Part</div>
+              {% if values %}
+                {% for value in values %}
+                  <span class="badge badge-light border mr-1 mb-1">{{ value }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-sm table-hover table-striped sortable">
+        <thead class="thead-light">
+          <tr>
+            <th>#</th>
+            <th>Parameter / Path</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Interval</th>
+            <th>Location</th>
+            <th>Type</th>
+            <th>Values</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in preview.rows %}
+            <tr>
+              <td>{{ row.index }}</td>
+              <td>
+                <div class="font-weight-bold">{{ row.c_part or '—' }}</div>
+                <div class="text-monospace small text-muted">{{ row.pathname }}</div>
+              </td>
+              <td>
+                {{ row.start_display or '—' }}
+                {% if row.start_raw and row.start_raw != row.start_display %}
+                  <div class="text-muted small">{{ row.start_raw }}</div>
+                {% endif %}
+              </td>
+              <td>{{ row.end_display or '—' }}</td>
+              <td>{{ row.e_part or '—' }}</td>
+              <td>{{ row.f_part or '—' }}</td>
+              <td>
+                {{ row.record_type }}
+                {% if row.data_type_code %}
+                  <div class="text-muted small">Code {{ row.data_type_code }}</div>
+                {% endif %}
+              </td>
+              <td>
+                {{ row.value_count or '—' }}
+                {% if row.logical_values and row.stored_values and row.logical_values != row.stored_values %}
+                  <div class="text-muted small">stored: {{ row.stored_values }}</div>
+                {% endif %}
+              </td>
+              <td>
+                {% if row.notes %}
+                  {% for note in row.notes %}
+                    <div>{{ note }}</div>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+</body>
+</html>
