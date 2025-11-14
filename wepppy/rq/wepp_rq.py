@@ -38,6 +38,7 @@ from wepppy.wepp.interchange import (
     generate_interchange_documentation
 )
 from wepppy.wepp.interchange.dss_dates import parse_dss_date
+from wepppy.wepp.interchange.hec_ras_boundary import build_boundary_condition_features
 from wepppy.weppcloud.utils.helpers import get_wd
 
 try:
@@ -92,6 +93,7 @@ TIMEOUT: int = 43_200
 
 _DSS_CHANNELS_RELATIVE_PATH = ("export", "dss", "dss_channels.geojson")
 _FEATURE_TOPAZ_KEYS = ("TopazID", "topaz_id", "topazId", "topaz", "id", "ID")
+_BOUNDARY_CONDITION_WIDTH_M = 100.0
 
 
 
@@ -1080,7 +1082,12 @@ def _extract_channel_topaz_id(feature: Dict[str, Any]) -> int | None:
     return None
 
 
-def _write_dss_channel_geojson(wd: str, channel_ids: Optional[list[int]]) -> None:
+def _write_dss_channel_geojson(
+    wd: str,
+    channel_ids: Optional[list[int]],
+    *,
+    boundary_width_m: float = _BOUNDARY_CONDITION_WIDTH_M,
+) -> None:
     dest_path = _join(wd, *_DSS_CHANNELS_RELATIVE_PATH)
 
     if channel_ids is not None and not channel_ids:
@@ -1118,6 +1125,7 @@ def _write_dss_channel_geojson(wd: str, channel_ids: Optional[list[int]]) -> Non
 
     source_features = source_geojson.get("features", [])
     filtered_features = []
+    selected_topaz_ids: set[int] = set()
     for feature in source_features:
         topaz_id = _extract_channel_topaz_id(feature)
         if topaz_id is None:
@@ -1125,16 +1133,26 @@ def _write_dss_channel_geojson(wd: str, channel_ids: Optional[list[int]]) -> Non
         if channel_ids is None:
             filtered_features.append(feature)
             include_ids.add(topaz_id)
+            selected_topaz_ids.add(topaz_id)
         elif topaz_id in include_ids:
             filtered_features.append(feature)
+            selected_topaz_ids.add(topaz_id)
 
     if not filtered_features:
         with contextlib.suppress(OSError):
             os.remove(dest_path)
         return
 
+    boundary_dir = _join(wd, "export", "dss", "boundaries")
+    boundary_features = build_boundary_condition_features(
+        watershed,
+        sorted(channel_ids),
+        boundary_dir,
+        boundary_width_m=boundary_width_m,
+    )
+
     output_geojson = dict(source_geojson)
-    output_geojson["features"] = filtered_features
+    output_geojson["features"] = filtered_features + boundary_features
     metadata = output_geojson.get("metadata")
     if not isinstance(metadata, dict):
         metadata = {}
@@ -1143,6 +1161,8 @@ def _write_dss_channel_geojson(wd: str, channel_ids: Optional[list[int]]) -> Non
             "selected_topaz_ids": None if channel_ids is None else sorted(set(channel_ids)),
             "downstream_topaz_ids": sorted(include_ids),
             "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "boundary_condition_width_m": boundary_width_m,
+            "boundary_feature_count": len(boundary_features),
         }
     )
     output_geojson["metadata"] = metadata
@@ -1193,7 +1213,7 @@ def post_dss_export_rq(runid: str) -> None:
                 StatusMessenger.publish(status_channel, 'removing export/dss.zip\n')
             os.remove(dss_export_zip)
                 
-        StatusMessenger.publish(status_channel, 'writing DSS channel geojson...')
+        StatusMessenger.publish(status_channel, 'writing DSS channel geojson + boundary GMLs...')
         _write_dss_channel_geojson(wd, channel_filter)
 
         time.sleep(1)
