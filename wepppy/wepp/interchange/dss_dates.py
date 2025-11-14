@@ -63,4 +63,6 @@ def format_dss_date(value: date | None) -> str | None:
 
     if value is None:
         return None
-    return value.strftime(DATE_DISPLAY_FORMAT)
+    # ``strftime`` may omit leading zeros for years prior to 1000 on some
+    # platforms; build the string manually to guarantee ``MM/DD/YYYY`` output.
+    return f"{value.month:02d}/{value.day:02d}/{value.year:04d}"
