@@ -246,6 +246,8 @@ Every module, service, and significant package should have a README.md that serv
 
 - Agents should assume a Linux host with Docker and Docker Compose available.
 - The `wctl` utility (Docker command wrapper) is installed on the host and should be used to manage containers, execute commands (e.g., `wctl exec weppcloud bash`), and run tests (`wctl run-pytest …`). This keeps workflows aligned with the team’s tooling.
+- The compose topology lives at `docker/docker-compose.dev.yml`. Treat it as the source of truth for which services must be running; bring everything up with `./wctl/wctl.sh up -d` and tear down with `./wctl/wctl.sh down`.
+- All Python work inside containers should target the baked virtual environment at `/opt/venv` (created in `docker/Dockerfile`). Activate it explicitly: `source /opt/venv/bin/activate && python …`. This venv already contains GDAL, pydsstools, duckdb, etc., so avoid `pip install` against the system interpreter.
 - The host filesystem mirrors the dev container layout under `/workdir/<repo>`, so relative paths such as `/workdir/wepppy/...` are safe to reference.
 - **Hostname note:** `forest.local` and `wc.bearhive.duckdns.org` resolve to the same machine (homelab dev box). Treat file paths like `/wc1/...` as shared between them.
 - The repository includes `docker/docker-compose.dev.yml`; expect it to exist and be the primary entry point for local orchestration.

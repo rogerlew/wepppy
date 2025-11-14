@@ -108,6 +108,9 @@ def totalwatsed_partitioned_dss_export(
 
     sed_records: list[pd.DataFrame] = []
 
+    start_bound = start_date
+    end_bound = end_date
+
     for chn_id_str in translator.iter_chn_ids():
         channel_top_id = int(chn_id_str.split("_")[1])
 
@@ -130,8 +133,8 @@ def totalwatsed_partitioned_dss_export(
         df.sort_values(["year", "julian", "sim_day_index"], kind="mergesort", inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        if start_date is not None or end_date is not None:
-            df = apply_date_filters(df, start=start_date, end=end_date)
+        if start_bound is not None or end_bound is not None:
+            df = apply_date_filters(df, start=start_bound, end=end_bound)
             if df.empty:
                 continue
 
@@ -170,7 +173,8 @@ def totalwatsed_partitioned_dss_export(
                 day=df["day_of_month"].astype(int, copy=False),
             )
         )
-        start_date = date_index.iloc[0]
+        series_start = date_index.iloc[0]
+        d_part = series_start.strftime("%d%b%Y").upper()
 
         dss_file = dss_export_dir / f"totalwatsed3_chan_{channel_top_id}.dss"
         with HecDss_cls.Open(str(dss_file)) as fid:
@@ -188,17 +192,18 @@ def totalwatsed_partitioned_dss_export(
                     .replace("_", "-")
                 )
 
-                pathname = f"/WEPP/TOTALWATSED3/{label.upper()}//1DAY/{channel_top_id}/"
+                pathname = f"/WEPP/TOTALWATSED3/{label.upper()}/{d_part}/1DAY/{channel_top_id}/"
                 tsc = TimeSeriesContainer_cls()
                 tsc.pathname = pathname
-                tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
+                tsc.startDateTime = series_start.strftime("%d%b%Y %H:%M:%S").upper()
                 tsc.interval = 1440
                 tsc.numberValues = len(series)
                 tsc.units = units.get(column, "")
                 tsc.type = "INST"
                 tsc.values = series
 
-                fid.deletePathname(tsc.pathname)
+                delete_pattern = f"/WEPP/TOTALWATSED3/{label.upper()}//1DAY/{channel_top_id}/"
+                fid.deletePathname(delete_pattern)
                 fid.put_ts(tsc)
 
         assert dss_file.exists(), f"Failed to create DSS file: {dss_file}"
