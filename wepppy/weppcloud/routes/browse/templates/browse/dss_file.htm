@@ -72,12 +72,17 @@
       </div>
     </div>
 
-    <div class="card mb-3">
-      <div class="card-header">Path Parts</div>
-      <div class="card-body small">
-        <div class="row">
-          {% for part, values in preview.unique_parts.items() %}
-            <div class="col-md-4 mb-2">
+<div class="card mb-3">
+  <div class="card-header">Path Parts</div>
+  <div class="card-body small">
+    <p class="text-muted">
+      HEC-DSS normalizes the pathname’s D-part to the first day of the year for regular series.
+      Use the <strong>Start</strong>, <strong>Values</strong>, and <strong>Notes</strong> columns below to see the true date range.
+      “stored: N” indicates how many timestamps actually exist in this record; the rest of the yearly block is DSS missing data.
+    </p>
+    <div class="row">
+      {% for part, values in preview.unique_parts.items() %}
+        <div class="col-md-4 mb-2">
               <div class="font-weight-bold">{{ part }}-Part</div>
               {% if values %}
                 {% for value in values %}

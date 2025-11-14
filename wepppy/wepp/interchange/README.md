@@ -33,6 +33,7 @@ This package **transforms WEPP text outputs into Apache Arrow/Parquet tables** w
 - **Hillslope interchange**: 6 parsers for PASS, EBE, Element, Loss, Soil, WAT reports (handles multi-line wrapping, fixed-width fields)
 - **Watershed interchange**: 7 parsers for watershed PASS, EBE, channel peak, channel water balance, soil, loss, and routing outputs
 - **Derived products**: `totalwatsed3` joins PASS + WAT with DuckDB for watershed-wide daily summaries; DSS export tooling for HEC integration
+- **Deep dive**: see [README.dss_export.md](README.dss_export.md) for the full DSS export + browse guide (totalwatsed channels and peak-flow records).
 - **Documentation generation**: Auto-generate Markdown schema previews with sample rows for human-readable interchange inspection
 - **Version management**: Semantic versioning with major/minor/patch compatibility checks and automatic cleanup of stale schemas
 

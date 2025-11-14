@@ -6,6 +6,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 
+import numpy as np
+
 from dateutil.relativedelta import relativedelta
 
 try:  # Optional dependency: only needed when inspecting DSS files
@@ -27,6 +29,8 @@ else:  # pragma: no cover - exercised via integration tests
     _PYDSSTOOLS_ERROR = None
 
 __all__ = ["build_preview"]
+
+_MISSING_THRESHOLD = -1e30
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,13 +144,19 @@ def build_preview(path: str) -> DssPreview:
             if start_dt is None and d_part:
                 notes.append("Unable to parse D-part date")
 
-            value_count = logical_values or stored_values
-            end_dt = _estimate_end(start_dt, e_part, value_count)
-            if end_dt is None and value_count and value_count > 1 and not _is_irregular_interval(e_part):
-                notes.append("Unable to estimate end date")
+            summary = None
+            try:
+                summary = _summarize_record(fid, pathname, runtime.hec_time)
+            except Exception:  # pragma: no cover - defensive
+                summary = None
 
+            actual_start = summary.start if summary else start_dt
             if _is_irregular_interval(e_part):
                 notes.append("Irregular interval")
+
+            end_dt = summary.end if summary else _estimate_end(start_dt, e_part, stored_values)
+            if end_dt is None and stored_values and stored_values > 1 and not _is_irregular_interval(e_part):
+                notes.append("Unable to estimate end date")
 
             row = _row_from_parts(
                 index=index,
@@ -157,13 +167,13 @@ def build_preview(path: str) -> DssPreview:
                 d_part=d_part,
                 e_part=e_part,
                 f_part=f_part,
-                start_dt=start_dt,
+                start_dt=actual_start,
                 end_dt=end_dt,
                 interval_label=e_part,
                 record_type=record_type,
                 data_type_code=data_type_code,
                 logical_values=logical_values,
-                stored_values=stored_values,
+                stored_values=summary.count if summary else stored_values,
                 notes=notes,
             )
             rows.append(row)
@@ -386,3 +396,69 @@ class _DssRuntime:
     dss_info: Any
     hec_time: Any
     set_message_level: Callable[[int, int], Any]
+
+
+@dataclass(frozen=True)
+class _RecordSummary:
+    start: datetime
+    end: datetime
+    count: int
+
+
+def _summarize_record(fid: Any, pathname: str, hec_time_cls: type | None) -> _RecordSummary | None:
+    try:
+        ts = fid.read_ts(pathname)
+    except Exception:
+        return None
+
+    values = getattr(ts, "values", None)
+    if values is None:
+        return None
+
+    arr = np.asarray(values, dtype=float)
+    valid_mask = arr > _MISSING_THRESHOLD
+    if not np.any(valid_mask):
+        return None
+
+    times = getattr(ts, "times", None)
+    if times:
+        converted = [_hectime_value_to_datetime(value, hec_time_cls) for value in times]
+        filtered = [dt for dt, flag in zip(converted, valid_mask) if dt is not None and flag]
+        if not filtered:
+            return None
+        return _RecordSummary(filtered[0], filtered[-1], len(filtered))
+
+    start_dt = _hectime_to_datetime(getattr(ts, "startDateTime", None), hec_time_cls)
+    interval_minutes = getattr(ts, "interval", 0) or 0
+    valid_indices = np.where(valid_mask)[0]
+    if valid_indices.size == 0 or start_dt is None or interval_minutes <= 0:
+        return None
+
+    first_idx = int(valid_indices[0])
+    last_idx = int(valid_indices[-1])
+    adjusted_start = start_dt + timedelta(minutes=interval_minutes * first_idx)
+    end_dt = adjusted_start + timedelta(minutes=interval_minutes * (last_idx - first_idx)) if last_idx >= first_idx else adjusted_start
+    count = int(valid_indices.size)
+    return _RecordSummary(adjusted_start, end_dt, count)
+
+
+def _hectime_to_datetime(text: str | None, hec_time_cls: type | None) -> datetime | None:
+    if not text or hec_time_cls is None:
+        return None
+    try:
+        hec_time = hec_time_cls(text)
+    except Exception:
+        return None
+    return getattr(hec_time, "python_datetime", None)
+
+
+def _hectime_value_to_datetime(value: int, hec_time_cls: type | None) -> datetime | None:
+    if hec_time_cls is None:
+        return None
+    getter = getattr(hec_time_cls, "getPyDateTimeFromValue", None)
+    if getter is None:
+        return None
+    try:
+        return getter(value)
+    except Exception:
+        return None

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `run_totalwatsed3()` | Aggregates hydrology + ash metrics into `totalwatsed3.parquet`. | `wepppy/wepp/interchange/totalwatsed3.py` |
 | `totalwatsed_partitioned_dss_export()` | Writes one DSS file per channel (`totalwatsed3_chan_<id>.dss`) using `totalwatsed3.parquet`. | `wepppy/wepp/interchange/watershed_totalwatsed_export.py` |
-| `chanout_dss_export()` | Converts `chan.out.parquet` peak flows into `peak_chan_<id>.dss`. | `wepppy/wepp/interchange/watershed_chan_peak_interchange.py` |
+| `chanout_dss_export()` | Converts `chan.out.parquet` peak flows into `peak_chan_<id>.dss` (irregular `IR-Year` series). | `wepppy/wepp/interchange/watershed_chan_peak_interchange.py` |
 | Browse DSS view | Provides a “pandas `.info()`”-style summary for any `*.dss`. | `wepppy/microservices/browse.py`, template `browse/dss_file.htm` |
 
 Exports run either from the UI (RQ job `post_dss_export_rq`) or from `Wepp._export_partitioned_totalwatsed2_dss()`. Date filtering uses the `dss_start_date` / `dss_end_date` fields stored in `wepp.nodb`.
@@ -88,6 +88,7 @@ Use this to confirm how many slots we stored and what DSS considers the true sta
 1. Reads `chan.out.parquet`, builds datetime stamps per channel, filters by the same bounds.
 2. Writes irregular DSS records (`E="IR-Year"`, `ts.times = [...]`, `ts.interval = -1`).
 3. Pathname `/WEPP/CHAN-OUT/PEAK-FLOW//IR-YEAR/<channel_id>/`.
+4. Because irregular records rely on explicit timestamps, `numberValues` equals the number of peak events in the filtered window even though the pathname D-part is still normalized to `01Jan<year>`.
 
 ### `archive_dss_export_zip(wd)`
 
@@ -106,7 +107,7 @@ Simple helper that zips everything under `export/dss/` into `dss.zip`. Called af
 - Summarizes unique A/B/C/D/E/F parts and record-type counts.
 - Returns a `DssPreview` dataclass that the template renders in `browse/dss_file.htm`.
 
-Because DSS normalizes the D-part, the preview relies on `startDateTime` rather than the literal `/01Jan2011/` string. When only three values are stored, the table shows `Values = 365 (stored: 3)`—the parentheses remind readers that most of the block is DSS missing data.
+Because DSS normalizes the D-part, the preview relies on `startDateTime` rather than the literal `/01Jan2011/` string. When only three values are stored, the table shows `Values = 365 (stored: 3)`—the parentheses remind readers that most of the block is DSS missing data. Irregular (`IR-Year`) peak-flow files are summarized from the explicit event timestamps, so the Start/End columns reflect the actual peaks stored.
 
 ## Field Guide / Troubleshooting
 
