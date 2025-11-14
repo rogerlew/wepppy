@@ -37,6 +37,7 @@ var DebrisFlow = (function () {
     function createLegacyAdapter(element) {
         if (!element) {
             return {
+                element: element,
                 length: 0,
                 show: function () {},
                 hide: function () {},
@@ -48,6 +49,7 @@ var DebrisFlow = (function () {
         }
 
         return {
+            element: element,
             length: 1,
             show: function () {
                 element.hidden = false;

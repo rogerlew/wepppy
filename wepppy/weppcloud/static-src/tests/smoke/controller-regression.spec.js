@@ -54,6 +54,15 @@ function buildFailurePayload(controllerName) {
   };
 }
 
+async function expectStacktracePanelOpen(page, controller) {
+  if (!controller.stacktracePanelLocator) {
+    return;
+  }
+  const panel = page.locator(controller.stacktracePanelLocator);
+  await expect(panel).toHaveCount(1);
+  await expect(panel).toHaveJSProperty('open', true);
+}
+
 test.describe('controller regression suite', () => {
   test.beforeAll(async ({ request }) => {
     if (targetRunPath || !shouldProvision) {
@@ -134,6 +143,7 @@ test.describe('controller regression suite', () => {
       try {
       await page.locator(controller.actionSelector).click();
       await expect(stacktraceLocator).toContainText(message, { timeout: 15000 });
+      await expectStacktracePanelOpen(page, controller);
       if (controller.expectJobHint !== false) {
         await expect(hintLocator).not.toHaveText(/^\s*$/);
         if (controller.requireHintVisible) {
@@ -183,10 +193,12 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   await expect(button).toBeEnabled();
   await button.click();
   
-  // Wait for job hint to show the job_id (proves response was processed and hint updated)
-  await expect(hintLocator).toContainText(jobId, { timeout: 15000 });
-  if (controller.requireHintVisible) {
-    await expect(hintLocator).toBeVisible();
+  if (controller.expectJobHint !== false) {
+    // Wait for job hint to show the job_id (proves response was processed and hint updated)
+    await expect(hintLocator).toContainText(jobId, { timeout: 15000 });
+    if (controller.requireHintVisible) {
+      await expect(hintLocator).toBeVisible();
+    }
   }
   
   await page.unroute(controller.requestUrlPattern).catch(() => {});
@@ -214,12 +226,17 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   // Verify stacktrace is displayed with both lines
   await expect(stacktraceLocator).toContainText('Injected landuse failure', { timeout: 15000 });
   await expect(stacktraceLocator).toContainText('Test stacktrace line 2', { timeout: 5000 });
+  await expectStacktracePanelOpen(page, controller);
   
-  // Verify hint is still visible and contains the job_id from first request
-  await expect(hintLocator).toContainText(jobId);
-  await expect(hintLocator).not.toHaveText(/^\s*$/);
-  if (controller.requireHintVisible) {
-    await expect(hintLocator).toBeVisible();
+  if (controller.expectJobHint !== false) {
+    // Verify hint is still visible and contains the job_id from first request
+    await expect(hintLocator).toContainText(jobId);
+    await expect(hintLocator).not.toHaveText(/^\s*$/);
+    if (controller.requireHintVisible) {
+      await expect(hintLocator).toBeVisible();
+    }
+  } else {
+    await expect(hintLocator).toBeAttached();
   }
   
   await page.unroute(controller.requestUrlPattern).catch(() => {});

@@ -68,6 +68,15 @@ function buildFailurePayload(controllerName) {
   };
 }
 
+async function expectStacktracePanelOpen(page, controller) {
+  if (!controller.stacktracePanelLocator) {
+    return;
+  }
+  const panel = page.locator(controller.stacktracePanelLocator);
+  await expect(panel).toHaveCount(1);
+  await expect(panel).toHaveJSProperty('open', true);
+}
+
 test.describe('runs0 smoke', () => {
   test.beforeAll(async ({ request }) => {
     if (!targetRunPath && shouldProvision) {
@@ -271,6 +280,7 @@ test.describe('runs0 smoke', () => {
       try {
         await page.locator(controller.actionSelector).click();
         await expect(stacktraceLocator).toContainText(errorMessage, { timeout: 15000 });
+        await expectStacktracePanelOpen(page, controller);
         // Hint may remain empty on error since no job was created
         await expect(hintLocator).toBeAttached();
         expect(intercepted).toBeTruthy();

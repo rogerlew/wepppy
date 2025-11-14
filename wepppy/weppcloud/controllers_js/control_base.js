@@ -62,6 +62,22 @@ function controlBase() {
         if (!target) {
             return null;
         }
+        if (typeof target === "object" && target !== null && target.element) {
+            const direct = target.element;
+            if (typeof window.Node !== "undefined" && direct instanceof window.Node) {
+                return direct;
+            }
+            if (typeof Element !== "undefined" && direct instanceof Element) {
+                return direct;
+            }
+            if (typeof direct === "string") {
+                try {
+                    return document.querySelector(direct);
+                } catch (err) {
+                    return null;
+                }
+            }
+        }
         if (typeof window.Node !== "undefined" && target instanceof window.Node) {
             return target;
         }
@@ -125,6 +141,41 @@ function controlBase() {
         }
         const text = value === undefined || value === null ? "" : String(value);
         element.textContent = text;
+    }
+
+    function findStacktracePanel(target) {
+        const element = unwrapElement(target);
+        if (!element) {
+            return null;
+        }
+        if (typeof element.closest === "function") {
+            const closest = element.closest("[data-stacktrace-panel]");
+            if (closest) {
+                return closest;
+            }
+        }
+        let current = element.parentElement;
+        while (current) {
+            if (current.hasAttribute && current.hasAttribute("data-stacktrace-panel")) {
+                return current;
+            }
+            current = current.parentElement;
+        }
+        return null;
+    }
+
+    function revealStacktracePanel(target) {
+        const panel = findStacktracePanel(target);
+        if (!panel) {
+            return;
+        }
+        if (typeof panel.open === "boolean") {
+            panel.open = true;
+        }
+        panel.hidden = false;
+        if (panel.style && panel.style.display === "none") {
+            panel.style.removeProperty("display");
+        }
     }
 
     function clearContent(target) {
@@ -344,6 +395,8 @@ function controlBase() {
                     '<pre><small class="text-muted">' + escapeHtml(String(response)) + "</small></pre>"
                 );
             }
+
+            revealStacktracePanel(self.stacktrace);
         },
 
         pushErrorStacktrace: function pushErrorStacktrace(self, error, textStatus, errorThrown) {
@@ -358,6 +411,8 @@ function controlBase() {
                     '<pre><small class="text-muted">' + escapeHtml(String(parts.detail)) + "</small></pre>"
                 );
             }
+
+            revealStacktracePanel(self.stacktrace);
         },
 
         should_disable_command_button: function should_disable_command_button(self) {
