@@ -19,6 +19,20 @@ describe("DssExport controller", () => {
                     <div id="stacktrace" style="display: none;"></div>
                     <div id="rq_job"></div>
                     <span id="braille"></span>
+                    <div class="wc-stack-sm">
+                        <input
+                            type="text"
+                            id="dss_start_date"
+                            name="dss_start_date"
+                            value="01/01/2001"
+                        >
+                        <input
+                            type="text"
+                            id="dss_end_date"
+                            name="dss_end_date"
+                            value="01/31/2001"
+                        >
+                    </div>
                     <div id="dss_export_mode1_controls">
                         <input
                             id="dss_export_mode1"
@@ -115,7 +129,13 @@ describe("DssExport controller", () => {
 
         expect(httpMock.postJson).toHaveBeenCalledWith(
             "rq/api/post_dss_export_rq",
-            { dss_export_mode: 1, dss_export_channel_ids: [12, 34], dss_export_exclude_orders: [] },
+            {
+                dss_export_mode: 1,
+                dss_export_channel_ids: [12, 34],
+                dss_export_exclude_orders: [],
+                dss_start_date: "01/01/2001",
+                dss_end_date: "01/31/2001"
+            },
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
