@@ -247,6 +247,45 @@ def test_playback_session_form_payloads(monkeypatch: pytest.MonkeyPatch, tmp_pat
 
 
 @pytest.mark.unit
+def test_playback_session_prefers_recorded_form_values(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    events = [
+        {"stage": "request", "id": "seed", "method": "GET", "endpoint_suffix": "status"},
+        {"stage": "response", "id": "seed", "status": 200, "ok": True, "endpoint_suffix": "status"},
+    ]
+    session, recording_session, call_log, info = _prepare_playback_session(tmp_path, monkeypatch, event_specs=events)
+
+    def execute_with_meta(meta: Dict[str, Any]) -> Dict[str, Any]:
+        original_path = f"/runs/{session.original_run_id}/{info['config_slug']}/rq/api/run_ash"
+        effective_path = session._remap_run_path(original_path)
+        url = session._build_url(effective_path)
+        form_data, files_info = session._build_form_request(effective_path, meta)
+        assert "ini_black_depth" in form_data and "ini_white_depth" in form_data
+        session._execute_request(
+            "POST",
+            url,
+            [],
+            None,
+            200,
+            effective_path,
+            meta,
+        )
+        session._pending_jobs.clear()
+        call_log.clear()
+        return recording_session.calls[-1][2]
+
+    overrides = {
+        "bodyType": "form-data",
+        "formValues": {
+            "ini_black_depth": "10",
+            "ini_white_depth": "11",
+        },
+    }
+    ash_kwargs = execute_with_meta(overrides)
+    assert ash_kwargs["data"]["ini_black_depth"] == "10"
+    assert ash_kwargs["data"]["ini_white_depth"] == "11"
+
+
+@pytest.mark.unit
 def test_playback_session_remaps_paths_with_prefix(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     events = [
         {"stage": "request", "id": "seed", "method": "GET", "endpoint_suffix": "status"},

@@ -68,6 +68,14 @@ describe("recorder interceptor", () => {
         global.config = "cfg-1";
         global.pup_relpath = "pup/test";
         global.FormData = MockFormData;
+        global.Blob = class MockBlob {};
+        global.File = class MockFile extends global.Blob {
+            constructor(name) {
+                super();
+                this.name = name || "file.bin";
+                this.size = (name || "").length;
+            }
+        };
         let perfTick = 0;
         global.performance = {
             now: jest.fn(() => {
@@ -99,6 +107,8 @@ describe("recorder interceptor", () => {
         delete global.config;
         delete global.pup_relpath;
         delete global.FormData;
+        delete global.File;
+        delete global.Blob;
         delete global.performance;
         delete global.window;
     });
@@ -192,8 +202,10 @@ describe("recorder interceptor", () => {
         setupInterceptor({ batchSize: 1 }, originalRequest);
 
         const form = new global.FormData();
-        form.append("file", "content");
+        form.append("file", new global.File("demo.bin"));
         form.append("meta", "value");
+        form.append("repeat", "first");
+        form.append("repeat", "second");
 
         await global.WCHttp.request("tasks/upload", {
             method: "post",
@@ -205,8 +217,13 @@ describe("recorder interceptor", () => {
         expect(requestEvent.requestMeta).toEqual(expect.objectContaining({
             hasBody: true,
             bodyType: "form-data",
-            formKeys: ["file", "meta"]
+            formKeys: ["file", "meta", "repeat"]
         }));
+        expect(requestEvent.requestMeta.formValues).toEqual({
+            meta: "value",
+            repeat: ["first", "second"]
+        });
+        expect(requestEvent.requestMeta.formValues).not.toHaveProperty("file");
     });
 
     it("summarises text payloads with preview and length", async () => {

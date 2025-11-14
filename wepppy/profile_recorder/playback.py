@@ -529,6 +529,7 @@ class PlaybackSession:
         data: Dict[str, Any] = {}
         files: Dict[str, Tuple[Path, str]] = {}
         normalized = path.rstrip("/")
+        recorded_values = self._extract_form_values(request_meta)
 
         try:
             if normalized.endswith("rq/api/build_landuse"):
@@ -549,6 +550,9 @@ class PlaybackSession:
                 self._populate_omni_form(data, files)
         except Exception as exc:
             self._log(f"Failed to build form-data payload for {path}: {exc}")
+
+        if recorded_values:
+            self._apply_recorded_form_values(data, recorded_values)
 
         return data, files
 
@@ -770,6 +774,33 @@ class PlaybackSession:
 
         if payload_defs:
             data["scenarios"] = json.dumps(payload_defs)
+
+    @staticmethod
+    def _extract_form_values(request_meta: Dict[str, Any]) -> Dict[str, Any]:
+        """Return recorded form-data values from request metadata."""
+        if not isinstance(request_meta, dict):
+            return {}
+        values = request_meta.get("formValues")
+        if isinstance(values, dict):
+            return dict(values)
+        return {}
+
+    def _apply_recorded_form_values(self, data: Dict[str, Any], recorded: Dict[str, Any]) -> None:
+        """Overlay recorded form values so playback matches the capture inputs."""
+        for key, value in recorded.items():
+            if isinstance(value, list):
+                data[key] = [self._coerce_form_value(item) for item in value]
+            else:
+                data[key] = self._coerce_form_value(value)
+
+    @staticmethod
+    def _coerce_form_value(value: Any) -> str:
+        """Convert recorded values to strings for form submission."""
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value
+        return str(value)
 
     def _hydrate_seed_files(self, target: Path) -> None:
         """Copy capture seed files (configs/uploads) into the sandbox run."""

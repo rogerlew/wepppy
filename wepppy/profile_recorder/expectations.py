@@ -56,7 +56,7 @@ def evaluate_job_expectations(profile_slug: str, run_dir: Path, task_path: str) 
 
 def _check_ash_remaining_ash(run_dir: Path, profile_slug: str, task_path: str) -> None:
     """Ensure the ash parquet contains the expected remaining_ash value."""
-    parquet_path = run_dir / "ash" / "H10_ash.parquet"
+    parquet_path = run_dir / "ash" / "H46_ash.parquet"
     _assert_file_exists(parquet_path)
     value = _read_first_value(parquet_path, "remaining_ash (tonne/ha)")
     if value is None:
@@ -71,8 +71,8 @@ def _check_ash_remaining_ash(run_dir: Path, profile_slug: str, task_path: str) -
 def _check_dss_exports_exist(run_dir: Path, profile_slug: str, task_path: str) -> None:
     """Ensure required DSS exports exist after the export job completes."""
     required = [
-        run_dir / "export" / "dss" / "totalwatsed3_chan_144.dss",
-        run_dir / "export" / "dss" / "totalwatsed3_chan_204.dss",
+        run_dir / "export" / "dss" / "totalwatsed3_chan_104.dss",
+        run_dir / "export" / "dss" / "totalwatsed3_chan_124.dss",
     ]
     missing = [path for path in required if not path.exists()]
     if missing:
@@ -82,11 +82,19 @@ def _check_dss_exports_exist(run_dir: Path, profile_slug: str, task_path: str) -
 
 def _read_first_value(parquet_path: Path, column: str):
     """Return the first column value from a parquet file using DuckDB."""
+    column_identifier = _quote_identifier(column)
+    query = f"SELECT {column_identifier} FROM read_parquet(?) LIMIT 1"
     with duckdb.connect(database=":memory:") as con:
-        row = con.execute(f"SELECT {column} FROM read_parquet(?) LIMIT 1", [str(parquet_path)]).fetchone()
+        row = con.execute(query, [str(parquet_path)]).fetchone()
     if not row:
         return None
     return row[0]
+
+
+def _quote_identifier(identifier: str) -> str:
+    """Return the DuckDB-escaped identifier for use in a SQL statement."""
+    escaped = identifier.replace('"', '""')
+    return f'"{escaped}"'
 
 
 def _assert_file_exists(path: Path) -> None:
@@ -98,7 +106,7 @@ _PROFILE_EXPECTATIONS: Dict[str, List[JobExpectation]] = {
     "rattlesnake-gridmet-interp-watar10mm-dss_export": [
         JobExpectation(
             endpoint_suffix="rq/api/run_ash",
-            description="H10 remaining_ash equals 22.0 after run_ash",
+            description="H46 remaining_ash equals 22.0 after run_ash",
             check=_check_ash_remaining_ash,
         ),
         JobExpectation(

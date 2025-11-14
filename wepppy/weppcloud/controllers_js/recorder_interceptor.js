@@ -229,6 +229,40 @@
         return "http_request";
     }
 
+    function isFileLike(value) {
+        if (!value || typeof value !== "object") {
+            return false;
+        }
+        if (typeof global.File === "function" && value instanceof global.File) {
+            return true;
+        }
+        if (typeof global.Blob === "function" && value instanceof global.Blob) {
+            return true;
+        }
+        var tag = Object.prototype.toString.call(value);
+        if (tag === "[object File]" || tag === "[object Blob]") {
+            return true;
+        }
+        if (typeof value.arrayBuffer === "function" || typeof value.stream === "function") {
+            return true;
+        }
+        return false;
+    }
+
+    function serialiseFormValue(value) {
+        if (value === undefined || value === null) {
+            return "";
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        try {
+            return String(value);
+        } catch (err) {
+            return "";
+        }
+    }
+
     function summariseBody(options, method) {
         var summary = {
             hasBody: false
@@ -257,16 +291,33 @@
         if (global.FormData && body instanceof global.FormData) {
             summary.bodyType = "form-data";
             var keys = [];
+            var values = {};
+            var hasValues = false;
             try {
                 body.forEach(function (value, key) {
                     if (keys.indexOf(key) === -1) {
                         keys.push(key);
+                    }
+                    if (!isFileLike(value)) {
+                        var nextValue = serialiseFormValue(value);
+                        if (Object.prototype.hasOwnProperty.call(values, key)) {
+                            if (!Array.isArray(values[key])) {
+                                values[key] = [values[key]];
+                            }
+                            values[key].push(nextValue);
+                        } else {
+                            values[key] = nextValue;
+                        }
+                        hasValues = true;
                     }
                 });
             } catch (err) {
                 /* noop */
             }
             summary.formKeys = keys;
+            if (hasValues) {
+                summary.formValues = values;
+            }
             return summary;
         }
         if (typeof body === "string") {

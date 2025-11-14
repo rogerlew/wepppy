@@ -421,11 +421,24 @@
         if (!modsFlags.dss_export) {
             setTimeout(function () {
                 try {
-                    var dssExport = typeof DssExport !== "undefined" ? DssExport.getInstance() : null;
-                    if (dssExport && typeof dssExport.hide === "function") {
-                        dssExport.hide();
-                        console.log("DssExport component hidden");
-                    }
+                    var hideElement = function (element) {
+                        if (!element) {
+                            return;
+                        }
+                        element.setAttribute("hidden", "hidden");
+                        element.hidden = true;
+                        if (element.style) {
+                            element.style.display = "none";
+                        }
+                    };
+
+                    hideElement(document.querySelector('[data-mod-section="dss_export"]'));
+
+                    var navItems = document.querySelectorAll('[data-mod-nav="dss_export"]');
+                    Array.prototype.forEach.call(navItems, hideElement);
+
+                    var tocAnchors = document.querySelectorAll('a[href="#partitioned-dss-export-for-hec"], a[href="#dss-export"]');
+                    Array.prototype.forEach.call(tocAnchors, hideElement);
                 } catch (err) {
                     console.warn("[Bootstrap] Failed to hide DSS export panel", err);
                 }
