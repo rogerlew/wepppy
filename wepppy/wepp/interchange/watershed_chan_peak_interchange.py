@@ -186,12 +186,17 @@ def chanout_dss_export(
 
     dss_dir = wd_path / "export" / "dss"
     dss_dir.mkdir(parents=True, exist_ok=True)
-    chan_dss = dss_dir / "chan.dss"
 
-    if chan_dss.exists():
+    if status_channel is not None:
+        StatusMessenger.publish(status_channel, "cleaning export/dss/peak_chan_*.dss\n")
+    for existing in dss_dir.glob("peak_chan_*.dss"):
+        existing.unlink()
+
+    legacy_chan_dss = dss_dir / "chan.dss"
+    if legacy_chan_dss.exists():
         if status_channel is not None:
-            StatusMessenger.publish(status_channel, "cleaning export/dss/chan.dss\n")
-        chan_dss.unlink()
+            StatusMessenger.publish(status_channel, "removing legacy export/dss/chan.dss\n")
+        legacy_chan_dss.unlink()
 
     if status_channel is not None:
         StatusMessenger.publish(status_channel, "chanout_dss_export()...\n")
@@ -199,18 +204,33 @@ def chanout_dss_export(
     parquet_path = run_wepp_watershed_chan_peak_interchange(wd_path / "wepp" / "output")
     df = pd.read_parquet(parquet_path)
 
-    id_column = "Chan_ID"
-    if translator is not None and hasattr(translator, "top"):
-        try:
-            df["TopazID"] = df["Elmt_ID"].apply(lambda wepp_id: translator.top(wepp=int(wepp_id)))
-            id_column = "TopazID"
-        except Exception:
-            if "TopazID" in df.columns:
-                df.drop(columns=["TopazID"], inplace=True)
-
     df["year"] = df["year"].astype(int)
     df["julian"] = df["julian"].astype(int)
+    df["Chan_ID"] = pd.to_numeric(df["Chan_ID"], errors="coerce")
     df["Time (s)"] = df["Time (s)"].fillna(0.0).astype(float)
+
+    df["channel_export_id"] = pd.to_numeric(df["Chan_ID"], errors="coerce")
+
+    if translator is not None and hasattr(translator, "top"):
+        def _safe_topaz(wepp_id: object) -> int | None:
+            try:
+                return translator.top(wepp=int(wepp_id))
+            except Exception:
+                return None
+
+        topaz_series = pd.to_numeric(df["Elmt_ID"].apply(_safe_topaz), errors="coerce")
+        valid_mask = topaz_series.notna()
+        if valid_mask.any():
+            df.loc[valid_mask, "channel_export_id"] = topaz_series.loc[valid_mask]
+
+    df = df[df["channel_export_id"].notna()].copy()
+    df["channel_export_id"] = df["channel_export_id"].round().astype(int)
+    channel_ids = sorted(set(int(value) for value in df["channel_export_id"].to_list()))
+
+    if not channel_ids:
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, "chanout_dss_export(): no channel IDs detected\n")
+        return
 
     if start_date is not None or end_date is not None:
         df = apply_date_filters(df, start=start_date, end=end_date)
@@ -219,8 +239,18 @@ def chanout_dss_export(
     base_dates = base_dates + pd.to_timedelta(df["julian"] - 1, unit="D")
     df["datetime"] = base_dates + pd.to_timedelta(df["Time (s)"], unit="s")
 
-    with HecDss.Open(str(chan_dss)) as fid:
-        for channel_id, group in df.groupby(id_column):
+    df.sort_values(["channel_export_id", "datetime"], kind="mergesort", inplace=True)
+    grouped = {int(key): group for key, group in df.groupby("channel_export_id")}
+
+    for channel_id in channel_ids:
+        channel_key = int(channel_id)
+        dss_path = dss_dir / f"peak_chan_{channel_key}.dss"
+        group = grouped.get(channel_key)
+
+        with HecDss.Open(str(dss_path)) as fid:
+            if group is None or group.empty:
+                continue
+
             values = group["Peak_Discharge (m^3/s)"].astype(float).to_list()
             times = group["datetime"].to_list()
 
@@ -230,9 +260,9 @@ def chanout_dss_export(
             # C: Parameter -> PEAK-FLOW
             # D: Time Window -> IR-YEAR (Irregular Yearly)
             # E: Interval -> Blank for irregular data
-            # F: Location -> Channel ID
+            # F: Location -> Channel ID (Topaz when available)
             tsc = TimeSeriesContainer()
-            tsc.pathname = f"/WEPP/CHAN-OUT/PEAK-FLOW//IR-YEAR/{channel_id}/"
+            tsc.pathname = f"/WEPP/CHAN-OUT/PEAK-FLOW//IR-YEAR/{channel_key}/"
             tsc.times = times
             tsc.values = values
             tsc.numberValues = len(values)
@@ -241,5 +271,3 @@ def chanout_dss_export(
             tsc.interval = -1
 
             fid.put_ts(tsc)
-
-    assert chan_dss.exists(), f"Failed to create DSS file: {chan_dss}"

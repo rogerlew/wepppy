@@ -2532,12 +2532,25 @@ class Wepp(NoDbBase):
 
     @nodb_timed
     def _export_partitioned_totalwatsed2_dss(self):
-        from wepppy.wepp.interchange import totalwatsed_partitioned_dss_export
+        from wepppy.wepp.interchange import (
+            totalwatsed_partitioned_dss_export,
+            chanout_dss_export,
+            archive_dss_export_zip,
+        )
+
+        start_date = parse_dss_date(self.dss_start_date)
+        end_date = parse_dss_date(self.dss_end_date)
         totalwatsed_partitioned_dss_export(
             self.wd,
-            start_date=parse_dss_date(self.dss_start_date),
-            end_date=parse_dss_date(self.dss_end_date),
+            start_date=start_date,
+            end_date=end_date,
         )
+        chanout_dss_export(
+            self.wd,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        archive_dss_export_zip(self.wd)
 
     def report_loss(self) -> Any:
         from wepppy.wepp.interchange.watershed_loss import Loss

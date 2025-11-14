@@ -147,7 +147,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 ### Derived and Export Products
 - `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` joins `H.pass.parquet` and `H.wat.parquet` with DuckDB to emit `totalwatsed3.parquet`, computing volumes, depths, baseflow reservoirs, and (when available) first-year ash transport masses pulled from `ash/H{wepp_id}_ash.parquet`.
 - `totalwatsed_partitioned_dss_export()` iterates channel tops, filters hillslope WEPP ids via the watershed translator, and writes per-channel DSS time-series files plus derived discharges (`Q (m^3/s)`).
-- `chanout_dss_export()` converts `chan.out.parquet` peaks to DSS records (optionally tagging Topaz IDs) for hydrologic compatibility with HEC tools; `archive_dss_export_zip()` packages the exports.
+- `chanout_dss_export()` converts `chan.out.parquet` peaks to per-channel DSS records named `peak_chan_{topaz_id}.dss` (optionally tagging Topaz IDs) for hydrologic compatibility with HEC tools; `archive_dss_export_zip()` packages the exports.
 - `generate_interchange_documentation()` scans available Parquet tables, renders schema previews with sample rows, and stores a Markdown README alongside the data for consumers.
 
 ## Key APIs
@@ -159,7 +159,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | `load_hill_wat_dataframe(wepp_output_dir, wepp_id, collapse='daily')` | Convenience accessor returning either daily aggregated or raw OFE-level WAT records via DuckDB. |
 | `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` | Produces watershed-wide daily hydrologic summaries, baseflow diagnostics, and ash transport mass totals from interchange + `ash` parquet files. |
 | `totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_channel=None)` | Writes one DSS file per channel using `run_totalwatsed3` output and optional status messaging. |
-| `chanout_dss_export(wd, status_channel=None)` | Converts channel peak data to DSS, honoring translator lookups for legacy consumers. |
+| `chanout_dss_export(wd, status_channel=None)` | Converts channel peak data to per-channel DSS files (`peak_chan_{topaz_id}.dss`), honoring translator lookups and falling back to WEPP IDs as needed. |
 | `generate_interchange_documentation(interchange_dir, to_readme_md=True)` | Builds Markdown documentation (schema + previews) for the current interchange directory. |
 
 ## Configuration
