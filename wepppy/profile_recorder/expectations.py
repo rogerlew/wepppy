@@ -71,8 +71,8 @@ def _check_ash_remaining_ash(run_dir: Path, profile_slug: str, task_path: str) -
 def _check_dss_exports_exist(run_dir: Path, profile_slug: str, task_path: str) -> None:
     """Ensure required DSS exports exist after the export job completes."""
     required = [
-        run_dir / "export" / "dss" / "totalwatsed3_chan_104.dss",
-        run_dir / "export" / "dss" / "totalwatsed3_chan_124.dss",
+        run_dir / "export" / "dss" / "totalwatsed3_chan_144.dss",
+        run_dir / "export" / "dss" / "totalwatsed3_chan_204.dss",
     ]
     missing = [path for path in required if not path.exists()]
     if missing:

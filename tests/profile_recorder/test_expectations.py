@@ -23,13 +23,19 @@ def _quote_identifier(identifier: str) -> str:
     return f'"{escaped}"'
 
 
+def _quote_literal(value: str) -> str:
+    escaped = value.replace("'", "''")
+    return f"'{escaped}'"
+
+
 def _write_single_value_parquet(path: Path, column: str, value: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with duckdb.connect(database=":memory:") as con:
         quoted_column = _quote_identifier(column)
         con.execute(f"CREATE TABLE data({quoted_column} DOUBLE)")
         con.execute(f"INSERT INTO data ({quoted_column}) VALUES (?)", [value])
-        con.execute("COPY data TO ? (FORMAT 'parquet')", [str(path)])
+        literal_path = _quote_literal(str(path))
+        con.execute(f"COPY data TO {literal_path} (FORMAT 'parquet')")
 
 
 @pytest.mark.unit
