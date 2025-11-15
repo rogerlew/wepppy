@@ -34,30 +34,6 @@ Primary consumers include incident hydrologists, Burned Area Emergency Response 
 - Successful runs call `update_catalog_entry(wd, "ash")`, registering artifacts with the Redis-backed query engine catalog so downstream consumers discover ash products automatically.
 - `RedisPrep.timestamp(TaskEnum.run_watar)` marks ash completion in Redis DB 2, driving control-panel status indicators and historical telemetry.
 
-## Installation / Setup
-
-- No extra installation is required beyond the standard WEPPcloud development stack. Ensure CLIGEN inputs, WEPP hillslope outputs, and burn severity rasters are present in the working directory.
-- Populate the `[ash]` section of the run configuration (`*.cfg`) with raster paths and model options before instantiating `Ash`.
-- Optional contaminant thresholds live under `[ash.contaminants.low|moderate|high]` and override baked-in defaults when provided.
-- When running outside Docker, confirm `wepppyo3` shared libraries are available so `identify_median_single_raster_key` can summarize rasters.
-
-## Quick Start / Examples
-
-```python
-from pathlib import Path
-from wepppy.nodb.mods.ash_transport import Ash, AshPost
-
-wd = Path("/path/to/workdir")
-
-# Upstream controllers (Watershed, Wepp, Climate, Landuse) must already be populated.
-ash = Ash.getInstance(wd, "project.cfg")
-ash.model = "alex"  # choose between "multi" (Srivastava2023) and "alex" (Watanabe2025)
-ash.run_ash(fire_date="8/4", ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0)
-
-# Post-processing can be rerun independently to regenerate parquet outputs and documentation.
-ash_post = AshPost.getInstance(wd)
-ash_post.run_post()
-```
 
 After execution, inspect `wd/ash` for per-hillslope parquet files and `wd/ash/post` for aggregated datasets, version manifests, and the generated documentation.
 

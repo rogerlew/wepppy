@@ -134,6 +134,7 @@ def write_hec_buffer_gml(
         return None
 
     mask = ndimage.binary_dilation(mask, structure=_build_disk_structure(SMOOTHING_RADIUS_PX))
+    mask = _fill_holes(mask)
     mask_uint8 = mask.astype(np.uint8) * 255
 
     dest_path = Path(dest_dir)
@@ -200,6 +201,13 @@ def _build_disk_structure(radius_px: int) -> np.ndarray:
     y, x = np.ogrid[-radius_px : radius_px + 1, -radius_px : radius_px + 1]
     mask = x**2 + y**2 <= radius_px**2
     return mask.astype(np.uint8)
+
+
+def _fill_holes(mask: np.ndarray) -> np.ndarray:
+    structure = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]], dtype=np.uint8)
+    neighbor_count = ndimage.convolve(mask.astype(np.uint8), structure, mode="constant", cval=0)
+    filled = np.logical_or(mask, neighbor_count == 4)
+    return filled
 
 
 def _apply_kernel(

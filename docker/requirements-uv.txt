@@ -200,6 +200,7 @@ requests==2.32.4
 requests-toolbelt==1.0.0
 rq==1.16.2
 rsa==4.9
+scikit-image==0.24.0
 scipy==1.13.1
 secretstorage==3.3.1
 send2trash==1.8.3
