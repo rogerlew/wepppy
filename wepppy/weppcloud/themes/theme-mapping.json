@@ -183,6 +183,23 @@
         "--wc-color-on-primary": "#FCFCFC"
       }
     },
+    "light-high-contrast": {
+      "label": "Light High Contrast",
+      "source": "light-high-contrast-theme.json",
+      "variant": "light",
+      "description": "High visibility theme tuned for WCAG AA+ controls.",
+      "options": {
+        "flat_cards": false
+      },
+      "overrides": {
+        "--wc-shadow-sm": "0 0 0 2px rgba(0, 31, 50, 0.18)",
+        "--wc-shadow-md": "0 0 0 3px rgba(0, 31, 50, 0.22)",
+        "--wc-font-size-base": "18px",
+        "--wc-font-size-sm": "17px",
+        "--wc-font-size-xs": "16px",
+        "--wc-line-height": "1.65"
+      }
+    },
     "dark-modern": {
       "label": "Dark Modern",
       "source": "dark_modern.json",
@@ -198,6 +215,38 @@
     }
   },
   "variables": {
+    "--wc-font-size-base": {
+      "description": "Base font size for body text.",
+      "tokens": [
+        {
+          "literal": "17px"
+        }
+      ]
+    },
+    "--wc-font-size-sm": {
+      "description": "Small text size used for helper copy and tables.",
+      "tokens": [
+        {
+          "literal": "1rem"
+        }
+      ]
+    },
+    "--wc-font-size-xs": {
+      "description": "Extra small text size used for badges and metadata.",
+      "tokens": [
+        {
+          "literal": "0.9rem"
+        }
+      ]
+    },
+    "--wc-line-height": {
+      "description": "Default line height multiplier for paragraph content.",
+      "tokens": [
+        {
+          "literal": "1.5"
+        }
+      ]
+    },
     "--wc-color-page": {
       "description": "Body background behind control shells and layout chrome.",
       "fallback": "#f6f8fa",

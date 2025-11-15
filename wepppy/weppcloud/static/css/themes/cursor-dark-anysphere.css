@@ -1,4 +1,4 @@
-/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-11-07T23:14:44.700046+00:00 */
+/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-11-15T00:46:23.512144+00:00 */
 :root[data-theme="cursor-dark-anysphere"] {
   --wc-color-accent: #30373a;
   --wc-color-accent-soft: rgba(48, 55, 58, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #141414;
   --wc-color-text: #D8DEE9;
   --wc-color-text-muted: #505050;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }

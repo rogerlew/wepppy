@@ -1,4 +1,4 @@
-/* Generated from OneDark.json on 2025-11-07T23:14:44.658274+00:00 */
+/* Generated from OneDark.json on 2025-11-15T00:46:23.459314+00:00 */
 :root[data-theme="onedark"] {
   --wc-color-accent: #528BFF;
   --wc-color-accent-soft: rgba(82, 139, 255, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #21252B;
   --wc-color-text: #ABB2BF;
   --wc-color-text-muted: #636D83;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 18px 48px rgba(0, 0, 0, 0.45);
   --wc-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.35);
 }

@@ -1,4 +1,4 @@
-/* Generated from ayu-dark-bordered.json on 2025-11-07T23:14:44.696510+00:00 */
+/* Generated from ayu-dark-bordered.json on 2025-11-15T00:46:23.508395+00:00 */
 :root[data-theme="ayu-dark-bordered"] {
   --wc-color-accent: #e6b450b3;
   --wc-color-accent-soft: rgba(230, 180, 80, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #0f131a;
   --wc-color-text: #bfbdb6;
   --wc-color-text-muted: #6c738099;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }

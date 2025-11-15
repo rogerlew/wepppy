@@ -1,4 +1,4 @@
-/* Generated from dark_modern.json on 2025-11-07T23:14:44.703492+00:00 */
+/* Generated from dark_modern.json on 2025-11-15T00:46:23.515686+00:00 */
 :root[data-theme="dark-modern"] {
   --wc-color-accent: #0078D4;
   --wc-color-accent-soft: rgba(0, 120, 212, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #181818;
   --wc-color-text: #CCCCCC;
   --wc-color-text-muted: #6E7681;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }

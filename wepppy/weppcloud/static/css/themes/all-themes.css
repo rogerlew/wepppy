@@ -1,4 +1,4 @@
-/* Generated from OneDark.json on 2025-11-07T23:14:44.658274+00:00 */
+/* Generated from OneDark.json on 2025-11-15T00:46:23.459314+00:00 */
 :root[data-theme="onedark"] {
   --wc-color-accent: #528BFF;
   --wc-color-accent-soft: rgba(82, 139, 255, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #21252B;
   --wc-color-text: #ABB2BF;
   --wc-color-text-muted: #636D83;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 18px 48px rgba(0, 0, 0, 0.45);
   --wc-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
@@ -28,7 +32,7 @@
   box-shadow: none;
 }
 
-/* Generated from ayu-dark.json on 2025-11-07T23:14:44.695671+00:00 */
+/* Generated from ayu-dark.json on 2025-11-15T00:46:23.507684+00:00 */
 :root[data-theme="ayu-dark"] {
   --wc-color-accent: #e6b450b3;
   --wc-color-accent-soft: rgba(230, 180, 80, 0.180);
@@ -50,6 +54,10 @@
   --wc-color-surface-alt: #0f131a;
   --wc-color-text: #bfbdb6;
   --wc-color-text-muted: #6c738099;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }
@@ -58,7 +66,7 @@
   box-shadow: none;
 }
 
-/* Generated from ayu-dark-bordered.json on 2025-11-07T23:14:44.696510+00:00 */
+/* Generated from ayu-dark-bordered.json on 2025-11-15T00:46:23.508395+00:00 */
 :root[data-theme="ayu-dark-bordered"] {
   --wc-color-accent: #e6b450b3;
   --wc-color-accent-soft: rgba(230, 180, 80, 0.180);
@@ -80,6 +88,10 @@
   --wc-color-surface-alt: #0f131a;
   --wc-color-text: #bfbdb6;
   --wc-color-text-muted: #6c738099;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
@@ -87,7 +99,7 @@
   box-shadow: none;
 }
 
-/* Generated from ayu-light.json on 2025-11-07T23:14:44.697183+00:00 */
+/* Generated from ayu-light.json on 2025-11-15T00:46:23.509062+00:00 */
 :root[data-theme="ayu-light"] {
   --wc-color-accent: #ffaa33b3;
   --wc-color-accent-soft: rgba(255, 170, 51, 0.180);
@@ -109,11 +121,15 @@
   --wc-color-surface-alt: #f3f4f5;
   --wc-color-text: #5c6166;
   --wc-color-text-muted: #8a919966;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
-/* Generated from ayu-light-bordered.json on 2025-11-07T23:14:44.697829+00:00 */
+/* Generated from ayu-light-bordered.json on 2025-11-15T00:46:23.509808+00:00 */
 :root[data-theme="ayu-light-bordered"] {
   --wc-color-accent: #ffaa33b3;
   --wc-color-accent-soft: rgba(255, 170, 51, 0.180);
@@ -135,6 +151,10 @@
   --wc-color-surface-alt: #f3f4f5;
   --wc-color-text: #5c6166;
   --wc-color-text-muted: #8a919966;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
@@ -142,7 +162,7 @@
   box-shadow: none;
 }
 
-/* Generated from ayu-mirage.json on 2025-11-07T23:14:44.698468+00:00 */
+/* Generated from ayu-mirage.json on 2025-11-15T00:46:23.510498+00:00 */
 :root[data-theme="ayu-mirage"] {
   --wc-color-accent: #ffcc66b3;
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
@@ -164,6 +184,10 @@
   --wc-color-surface-alt: #1c212b;
   --wc-color-text: #cccac2;
   --wc-color-text-muted: #8a919966;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }
@@ -172,7 +196,7 @@
   box-shadow: none;
 }
 
-/* Generated from ayu-mirage-bordered.json on 2025-11-07T23:14:44.699110+00:00 */
+/* Generated from ayu-mirage-bordered.json on 2025-11-15T00:46:23.511195+00:00 */
 :root[data-theme="ayu-mirage-bordered"] {
   --wc-color-accent: #ffcc66b3;
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
@@ -194,6 +218,10 @@
   --wc-color-surface-alt: #1c212b;
   --wc-color-text: #cccac2;
   --wc-color-text-muted: #8a919966;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
@@ -201,7 +229,7 @@
   box-shadow: none;
 }
 
-/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-11-07T23:14:44.700046+00:00 */
+/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-11-15T00:46:23.512144+00:00 */
 :root[data-theme="cursor-dark-anysphere"] {
   --wc-color-accent: #30373a;
   --wc-color-accent-soft: rgba(48, 55, 58, 0.180);
@@ -223,6 +251,10 @@
   --wc-color-surface-alt: #141414;
   --wc-color-text: #D8DEE9;
   --wc-color-text-muted: #505050;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }
@@ -231,7 +263,7 @@
   box-shadow: none;
 }
 
-/* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-11-07T23:14:44.700757+00:00 */
+/* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-11-15T00:46:23.512891+00:00 */
 :root[data-theme="cursor-dark-midnight"] {
   --wc-color-accent: #00000000;
   --wc-color-accent-soft: rgba(0, 0, 0, 0.180);
@@ -253,6 +285,10 @@
   --wc-color-surface-alt: #191c22;
   --wc-color-text: #7b88a1;
   --wc-color-text-muted: #4c566a;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }
@@ -261,7 +297,7 @@
   box-shadow: none;
 }
 
-/* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2025-11-07T23:14:44.701651+00:00 */
+/* Generated from Cursor-Dark-High-Contrast-color-theme.json on 2025-11-15T00:46:23.513735+00:00 */
 :root[data-theme="cursor-dark-high-contrast"] {
   --wc-color-accent: #88C0D0;
   --wc-color-accent-soft: rgba(136, 192, 208, 0.22);
@@ -283,6 +319,10 @@
   --wc-color-surface-alt: #0A0A0A;
   --wc-color-text: #D8DEE9;
   --wc-color-text-muted: #505050;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }
@@ -291,7 +331,7 @@
   box-shadow: none;
 }
 
-/* Generated from Cursor-Light-color-theme.json on 2025-11-07T23:14:44.702649+00:00 */
+/* Generated from Cursor-Light-color-theme.json on 2025-11-15T00:46:23.514588+00:00 */
 :root[data-theme="cursor-light"] {
   --wc-color-accent: #FCFCFC00;
   --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
@@ -313,6 +353,10 @@
   --wc-color-surface-alt: #F3F3F4;
   --wc-color-text: #15151DEB;
   --wc-color-text-muted: #0E0E2A47;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
@@ -320,7 +364,37 @@
   box-shadow: none;
 }
 
-/* Generated from dark_modern.json on 2025-11-07T23:14:44.703492+00:00 */
+/* Generated from light-high-contrast-theme.json on 2025-11-15T00:46:23.515167+00:00 */
+:root[data-theme="light-high-contrast"] {
+  --wc-color-accent: #0050A4;
+  --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
+  --wc-color-attention: #C25A00;
+  --wc-color-attention-soft: rgba(194, 90, 0, 0.220);
+  --wc-color-border: #0F3A5F;
+  --wc-color-border-strong: #0F3A5F;
+  --wc-color-critical: #B00020;
+  --wc-color-critical-soft: rgba(176, 0, 32, 0.200);
+  --wc-color-link: #0050A4;
+  --wc-color-link-hover: #002347;
+  --wc-color-on-primary: #FFFFFF;
+  --wc-color-page: #E4EDFF;
+  --wc-color-positive: #007944;
+  --wc-color-positive-soft: rgba(0, 121, 68, 0.180);
+  --wc-color-primary: #0050A4;
+  --wc-color-primary-dark: #004083;
+  --wc-color-surface: #FFFEFA;
+  --wc-color-surface-alt: #E2ECFF;
+  --wc-color-text: #051526;
+  --wc-color-text-muted: #004E89;
+  --wc-font-size-base: 18px;
+  --wc-font-size-sm: 17px;
+  --wc-font-size-xs: 16px;
+  --wc-line-height: 1.65;
+  --wc-shadow-md: 0 0 0 3px rgba(0, 31, 50, 0.22);
+  --wc-shadow-sm: 0 0 0 2px rgba(0, 31, 50, 0.18);
+}
+
+/* Generated from dark_modern.json on 2025-11-15T00:46:23.515686+00:00 */
 :root[data-theme="dark-modern"] {
   --wc-color-accent: #0078D4;
   --wc-color-accent-soft: rgba(0, 120, 212, 0.180);
@@ -342,6 +416,10 @@
   --wc-color-surface-alt: #181818;
   --wc-color-text: #CCCCCC;
   --wc-color-text-muted: #6E7681;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }

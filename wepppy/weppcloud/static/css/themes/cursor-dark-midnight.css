@@ -1,4 +1,4 @@
-/* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-11-07T23:14:44.700757+00:00 */
+/* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-11-15T00:46:23.512891+00:00 */
 :root[data-theme="cursor-dark-midnight"] {
   --wc-color-accent: #00000000;
   --wc-color-accent-soft: rgba(0, 0, 0, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #191c22;
   --wc-color-text: #7b88a1;
   --wc-color-text-muted: #4c566a;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: none;
   --wc-shadow-sm: none;
 }

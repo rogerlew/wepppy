@@ -1,4 +1,4 @@
-/* Generated from Cursor-Light-color-theme.json on 2025-11-07T23:14:44.702649+00:00 */
+/* Generated from Cursor-Light-color-theme.json on 2025-11-15T00:46:23.514588+00:00 */
 :root[data-theme="cursor-light"] {
   --wc-color-accent: #FCFCFC00;
   --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
@@ -20,6 +20,10 @@
   --wc-color-surface-alt: #F3F3F4;
   --wc-color-text: #15151DEB;
   --wc-color-text-muted: #0E0E2A47;
+  --wc-font-size-base: 17px;
+  --wc-font-size-sm: 1rem;
+  --wc-font-size-xs: 0.9rem;
+  --wc-line-height: 1.5;
   --wc-shadow-md: 0 6px 18px rgba(15, 23, 42, 0.12);
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
 }

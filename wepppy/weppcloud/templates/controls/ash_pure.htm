@@ -73,7 +73,10 @@
          value="%.3f"|format(ash.ini_black_ash_depth_mm),
          unit_label="mm",
          precision="0.1",
-         attrs={"data-disable-readonly": "true"}
+         attrs={"data-disable-readonly": "true"},
+         unit_category="xs-distance",
+         unit_name="mm",
+         extra_control_class="disable-readonly"
        ) }}
     {{ ui.numeric_field(
          "ini_white_depth",
@@ -81,7 +84,10 @@
          value="%.3f"|format(ash.ini_white_ash_depth_mm),
          unit_label="mm",
          precision="0.1",
-         attrs={"data-disable-readonly": "true"}
+         attrs={"data-disable-readonly": "true"},
+         unit_category="xs-distance",
+         unit_name="mm",
+         extra_control_class="disable-readonly"
        ) }}
   </div>
 
@@ -94,7 +100,10 @@
          value="%.3f"|format(ash.ini_black_ash_load),
          unit_label="kg/m^2",
          precision="0.1",
-         attrs={"data-disable-readonly": "true"}
+         attrs={"data-disable-readonly": "true"},
+         unit_category="sm-surface-density",
+         unit_name="kg/m^2",
+         extra_control_class="disable-readonly"
        ) }}
     {{ ui.numeric_field(
          "ini_white_load",
@@ -102,7 +111,10 @@
          value="%.3f"|format(ash.ini_white_ash_load),
          unit_label="kg/m^2",
          precision="0.1",
-         attrs={"data-disable-readonly": "true"}
+         attrs={"data-disable-readonly": "true"},
+         unit_category="sm-surface-density",
+         unit_name="kg/m^2",
+         extra_control_class="disable-readonly"
        ) }}
   </div>
 
@@ -140,7 +152,10 @@
        value="%.4f"|format(ash.field_black_ash_bulkdensity),
        unit_label="g/cm^3",
        precision="0.001",
-       attrs={"data-disable-readonly": "true"}
+       attrs={"data-disable-readonly": "true"},
+       unit_category="bulk-density",
+       unit_name="g/cm^3",
+       extra_control_class="disable-readonly"
      ) }}
 
   {{ ui.numeric_field(
@@ -149,7 +164,10 @@
        value="%.4f"|format(ash.field_white_ash_bulkdensity),
        unit_label="g/cm^3",
        precision="0.001",
-       attrs={"data-disable-readonly": "true"}
+       attrs={"data-disable-readonly": "true"},
+       unit_category="bulk-density",
+       unit_name="g/cm^3",
+       extra_control_class="disable-readonly"
      ) }}
 
   {% set selected_model = ash.model %}
@@ -206,32 +224,48 @@
       <div class="wc-stack">
         {{ ui.numeric_field(
              "white_ini_bulk_den",
-             "Initial bulk density (white ash, g/cm^3)",
+             "Initial bulk density (white ash)",
              value="%.6f"|format(white_pars.ini_bulk_den),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="g/cm^3",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="bulk-density",
+             unit_name="g/cm^3",
+             extra_control_class="disable-readonly"
            ) }}
         {{ ui.numeric_field(
              "black_ini_bulk_den",
-             "Initial bulk density (black ash, g/cm^3)",
+             "Initial bulk density (black ash)",
              value="%.6f"|format(black_pars.ini_bulk_den),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="g/cm^3",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="bulk-density",
+             unit_name="g/cm^3",
+             extra_control_class="disable-readonly"
            ) }}
 
         {{ ui.numeric_field(
              "white_fin_bulk_den",
-             "Final bulk density (white ash, g/cm^3)",
+             "Final bulk density (white ash)",
              value="%.6f"|format(white_pars.fin_bulk_den),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="g/cm^3",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="bulk-density",
+             unit_name="g/cm^3",
+             extra_control_class="disable-readonly"
            ) }}
         {{ ui.numeric_field(
              "black_fin_bulk_den",
-             "Final bulk density (black ash, g/cm^3)",
+             "Final bulk density (black ash)",
              value="%.6f"|format(black_pars.fin_bulk_den),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="g/cm^3",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="bulk-density",
+             unit_name="g/cm^3",
+             extra_control_class="disable-readonly"
            ) }}
 
         {{ ui.numeric_field(
@@ -251,17 +285,25 @@
 
         {{ ui.numeric_field(
              "white_par_den",
-             "Particle density (white ash, g/cm^3)",
+             "Particle density (white ash)",
              value="%.6f"|format(white_pars.par_den),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="g/cm^3",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="bulk-density",
+             unit_name="g/cm^3",
+             extra_control_class="disable-readonly"
            ) }}
         {{ ui.numeric_field(
              "black_par_den",
-             "Particle density (black ash, g/cm^3)",
+             "Particle density (black ash)",
              value="%.6f"|format(black_pars.par_den),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="g/cm^3",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="bulk-density",
+             unit_name="g/cm^3",
+             extra_control_class="disable-readonly"
            ) }}
 
         {{ ui.numeric_field(
@@ -283,48 +325,72 @@
              {% if using_alex %}style="display: none;"{% endif %}>
           {{ ui.numeric_field(
                "white_ini_erod",
-               "Initial erodibility (white ash, t/ha)",
-               value="%.6f"|format(ash.anu_white_ash_model_pars.ini_erod),
-               precision="0.0001",
-               attrs={"data-disable-readonly": "true"}
-             ) }}
+              "Initial erodibility (white ash)",
+              value="%.6f"|format(ash.anu_white_ash_model_pars.ini_erod),
+              precision="0.0001",
+              unit_label="t/ha",
+              attrs={"data-disable-readonly": "true"},
+              unit_category="surface-density",
+              unit_name="tonne/ha",
+              extra_control_class="disable-readonly"
+            ) }}
           {{ ui.numeric_field(
                "black_ini_erod",
-               "Initial erodibility (black ash, t/ha)",
-               value="%.6f"|format(ash.anu_black_ash_model_pars.ini_erod),
-               precision="0.0001",
-               attrs={"data-disable-readonly": "true"}
-             ) }}
+              "Initial erodibility (black ash)",
+              value="%.6f"|format(ash.anu_black_ash_model_pars.ini_erod),
+              precision="0.0001",
+              unit_label="t/ha",
+              attrs={"data-disable-readonly": "true"},
+              unit_category="surface-density",
+              unit_name="tonne/ha",
+              extra_control_class="disable-readonly"
+            ) }}
 
           {{ ui.numeric_field(
                "white_fin_erod",
-               "Final erodibility (white ash, t/ha)",
-               value="%.6f"|format(ash.anu_white_ash_model_pars.fin_erod),
-               precision="0.0001",
-               attrs={"data-disable-readonly": "true"}
-             ) }}
+              "Final erodibility (white ash)",
+              value="%.6f"|format(ash.anu_white_ash_model_pars.fin_erod),
+              precision="0.0001",
+              unit_label="t/ha",
+              attrs={"data-disable-readonly": "true"},
+              unit_category="surface-density",
+              unit_name="tonne/ha",
+              extra_control_class="disable-readonly"
+            ) }}
           {{ ui.numeric_field(
                "black_fin_erod",
-               "Final erodibility (black ash, t/ha)",
-               value="%.6f"|format(ash.anu_black_ash_model_pars.fin_erod),
-               precision="0.0001",
-               attrs={"data-disable-readonly": "true"}
-             ) }}
+              "Final erodibility (black ash)",
+              value="%.6f"|format(ash.anu_black_ash_model_pars.fin_erod),
+              precision="0.0001",
+              unit_label="t/ha",
+              attrs={"data-disable-readonly": "true"},
+              unit_category="surface-density",
+              unit_name="tonne/ha",
+              extra_control_class="disable-readonly"
+            ) }}
         </div>
 
         {{ ui.numeric_field(
              "white_roughness_limit",
-             "Roughness limit (white ash, mm)",
+             "Roughness limit (white ash)",
              value="%.6f"|format(white_pars.roughness_limit),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="mm",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="xs-distance",
+             unit_name="mm",
+             extra_control_class="disable-readonly"
            ) }}
         {{ ui.numeric_field(
              "black_roughness_limit",
-             "Roughness limit (black ash, mm)",
+             "Roughness limit (black ash)",
              value="%.6f"|format(black_pars.roughness_limit),
              precision="0.0001",
-             attrs={"data-disable-readonly": "true"}
+             unit_label="mm",
+             attrs={"data-disable-readonly": "true"},
+             unit_category="xs-distance",
+             unit_name="mm",
+             extra_control_class="disable-readonly"
            ) }}
 
         <div class="alex-only-param alex-dynamic-param"

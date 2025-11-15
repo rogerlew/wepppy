@@ -279,84 +279,103 @@
            "Storm date (month day year)",
            value=climate.ss_storm_date,
            help="Example: 4 15 01",
-           attrs={"class": "disable-readonly", "placeholder": "M D Y"}
+           attrs={"placeholder": "M D Y"},
+           extra_control_class="disable-readonly"
          ) }}
-      {{ ui.text_field(
-           "ss_design_storm_amount_inches",
-           "Design storm amount (inches)",
-           value=climate.ss_design_storm_amount_inches,
-           attrs={
-             "class": "disable-readonly",
-             "data-convert-target": "#ss_design_storm_amount_mm",
-             "data-convert-func": "in_to_mm",
-             "data-convert-decimals": "2"
-           }
-         ) }}
-      {{ ui.text_field(
+
+      {{ ui.numeric_field(
            "ss_duration_of_storm_in_hours",
-           "Storm duration (hours)",
+           "Storm duration",
            value=climate.ss_duration_of_storm_in_hours,
-           attrs={"class": "disable-readonly"}
+           unit_label="hours",
+           help="Enter the total storm duration (e.g., 6 for a six-hour storm).",
+           precision="0.1",
+           min="0",
+           attrs={"inputmode": "decimal"},
+           extra_control_class="disable-readonly",
+           max_width="320px"
          ) }}
-      {{ ui.text_field(
+
+      {{ ui.numeric_field(
            "ss_time_to_peak_intensity_pct",
-           "Time to peak intensity (%)",
+           "Time to peak intensity",
            value=climate.ss_time_to_peak_intensity_pct,
-           attrs={"class": "disable-readonly"}
+           unit_label="%",
+           help="Percent of the storm duration until peak intensity (0-100).",
+           precision="0.1",
+           min="0",
+           max="100",
+           attrs={"inputmode": "decimal"},
+           extra_control_class="disable-readonly",
+           max_width="320px"
          ) }}
     </div>
-    <div class="unitizer-wrapper">
-      <div class="unitizer units-m">
-        <div class="wc-field">
-          <label class="wc-field__label" for="ss_design_storm_amount_mm">Design storm amount (mm)</label>
-          <input
-            id="ss_design_storm_amount_mm"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ (climate.ss_design_storm_amount_inches * 25.4) | round(2) }}"
-            data-convert-target="#ss_design_storm_amount_inches"
-            data-convert-func="mm_to_in"
-            data-convert-decimals="2">
-        </div>
-        <div class="wc-field">
-          <label class="wc-field__label" for="ss_max_intensity_mm_per_hour">Maximum intensity (mm/hour)</label>
-          <input
-            id="ss_max_intensity_mm_per_hour"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ (climate.ss_max_intensity_inches_per_hour * 25.4) | round(2) }}"
-            data-convert-target="#ss_max_intensity_inches_per_hour"
-            data-convert-func="mm_to_in"
-            data-convert-decimals="2">
-        </div>
-      </div>
-      <div class="unitizer units-ft">
-        <div class="wc-field">
-          <label class="wc-field__label" for="ss_design_storm_amount_inches">Design storm amount (inches)</label>
-          <input
-            id="ss_design_storm_amount_inches"
-            name="ss_design_storm_amount_inches"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ climate.ss_design_storm_amount_inches }}"
-            data-convert-target="#ss_design_storm_amount_mm"
-            data-convert-func="in_to_mm"
-            data-convert-decimals="2">
-        </div>
-        <div class="wc-field">
-          <label class="wc-field__label" for="ss_max_intensity_inches_per_hour">Maximum intensity (inches/hour)</label>
-          <input
-            id="ss_max_intensity_inches_per_hour"
-            name="ss_max_intensity_inches_per_hour"
-            class="wc-field__control disable-readonly"
-            type="text"
-            value="{{ climate.ss_max_intensity_inches_per_hour }}"
-            data-convert-target="#ss_max_intensity_mm_per_hour"
-            data-convert-func="in_to_mm"
-            data-convert-decimals="2">
-        </div>
-      </div>
-    </div>
+
+    <p class="wc-text-muted">
+      Design storm depth and intensity respect your Unitizer preference—enter either SI or English values and we keep them synchronized.
+    </p>
+
+    {{ ui.unitized_numeric_group(
+         metric={
+           'unit_class': 'units-mm',
+           'fields': [
+             {
+               'id': 'ss_design_storm_amount_mm',
+               'label': 'Design storm amount',
+               'unit_label': 'mm',
+               'value': (climate.ss_design_storm_amount_inches * 25.4) | round(2),
+               'help': 'Metric entry automatically updates the English field.',
+               'precision': '0.01',
+               'attrs': {
+                 'data-convert-target': '#ss_design_storm_amount_inches',
+                 'data-convert-func': 'mm_to_in',
+                 'data-convert-decimals': '2'
+               },
+               'unit_category': 'xs-distance',
+               'unit_name': 'mm',
+               'extra_control_class': 'disable-readonly',
+               'max_width': '320px'
+             }
+           ]
+         },
+         imperial={
+           'unit_class': 'units-in',
+           'fields': [
+             {
+               'id': 'ss_design_storm_amount_inches',
+               'label': 'Design storm amount',
+               'unit_label': 'in',
+               'value': climate.ss_design_storm_amount_inches,
+               'help': 'English entry automatically updates the metric field.',
+               'precision': '0.01',
+               'attrs': {
+                 'data-convert-target': '#ss_design_storm_amount_mm',
+                 'data-convert-func': 'in_to_mm',
+                 'data-convert-decimals': '2'
+               },
+               'unit_category': 'xs-distance',
+               'unit_name': 'in',
+               'extra_control_class': 'disable-readonly',
+               'max_width': '320px'
+             }
+           ]
+         }
+    ) }}
+
+    {{ ui.numeric_field(
+         "ss_max_intensity_inches_per_hour",
+         "Maximum intensity",
+         value=climate.ss_max_intensity_inches_per_hour,
+         unit_label="in/hour",
+         help="Peak rainfall intensity for the single storm.",
+         precision="0.01",
+         min="0",
+         attrs={"class": "disable-readonly"},
+         unit_category="xs-distance-rate",
+         unit_name="in/hour",
+         extra_control_class="disable-readonly",
+         max_width="320px"
+       ) }}
   </section>
 
   <section class="wc-stack" id="climate_mode14_controls" data-climate-section="single_storm_batch">

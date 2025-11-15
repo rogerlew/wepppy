@@ -572,7 +572,7 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None, extra_control_class=None) -%}
+{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -594,7 +594,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
+<div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
@@ -616,7 +616,7 @@
 </div>
 {%- endmacro %}
 
-{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None) -%}
+{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -638,7 +638,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
+<div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <select class="{{ ' '.join(control_classes) }}"
           id="{{ field_id }}"
@@ -822,7 +822,7 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None) -%}
+{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -844,7 +844,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
+<div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
@@ -868,7 +868,7 @@
 </div>
 {%- endmacro %}
 
-{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None, grid_columns=None) -%}
+{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None, grid_columns=None, max_width='650px') -%}
 {% set options = options or [] %}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = name ~ "_help" %}
@@ -903,7 +903,7 @@
 {% if attrs.get('style') %}
   {% set _ = attrs.pop('style') %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
+<div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   {% if label %}
   <span class="wc-field__label" id="{{ label_id }}">{{ label }}</span>
   {% endif %}
@@ -957,7 +957,7 @@
 </div>
 {%- endmacro %}
 
-{% macro checkbox_field(field_id, label, checked=False, help=None, attrs=None, error=None) -%}
+{% macro checkbox_field(field_id, label, checked=False, help=None, attrs=None, error=None, max_width='650px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -975,7 +975,7 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}" style="max-width: 650px;">
+<div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   <label class="wc-choice wc-choice--checkbox">
     <input type="checkbox"
            id="{{ field_id }}"
@@ -999,7 +999,7 @@
 </div>
 {%- endmacro %}
 
-{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None, extra_control_class=None) -%}
+{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -1021,7 +1021,7 @@
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
-<div class="{{ ' '.join(field_classes) }}">
+<div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <textarea class="{{ ' '.join(control_classes) }}"
             id="{{ field_id }}"
@@ -1042,9 +1042,9 @@
 </div>
 {%- endmacro %}
 
-{% macro text_display(label=None, content='', variant=None, actions=None) -%}
+{% macro text_display(label=None, content='', variant=None, actions=None, max_width='650px') -%}
 {% set actions = actions or [] %}
-<div class="wc-field wc-field--display" style="max-width: 650px;">
+<div class="wc-field wc-field--display"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   {% if label %}
   <span class="wc-field__label">{{ label }}</span>
   {% endif %}

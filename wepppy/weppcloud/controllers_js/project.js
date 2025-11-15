@@ -15,8 +15,11 @@ var Project = (function () {
     var MOD_SELECTOR = '[data-project-mod]';
     var GLOBAL_UNIT_SELECTOR = '[data-project-unitizer="global"]';
     var CATEGORY_UNIT_SELECTOR = '[data-project-unitizer="category"]';
+    var RUN_HEADER_MENU_SELECTOR = ".wc-run-header__menu";
+    var RUN_HEADER_MENU_OPEN_SELECTOR = RUN_HEADER_MENU_SELECTOR + "[open]";
 
     var DEFAULT_DEBOUNCE_MS = 800;
+    var runHeaderMenuDismissBound = false;
 
     var EVENT_NAMES = [
         "project:name:updated",
@@ -60,6 +63,25 @@ var Project = (function () {
         }
 
         return { dom: dom, http: http, events: events };
+    }
+
+    function setupRunHeaderMenuDismiss(dom) {
+        if (runHeaderMenuDismissBound || typeof document === "undefined" || !document.addEventListener) {
+            return;
+        }
+        runHeaderMenuDismissBound = true;
+
+        document.addEventListener("click", function handleRunHeaderMenuDismiss(event) {
+            var openMenus = dom.qsa(RUN_HEADER_MENU_OPEN_SELECTOR) || [];
+            if (!openMenus.length) {
+                return;
+            }
+            openMenus.forEach(function (menu) {
+                if (menu && !menu.contains(event.target)) {
+                    menu.removeAttribute("open");
+                }
+            });
+        });
     }
 
     function firstFieldValue(dom, selector, fallback) {
@@ -294,6 +316,7 @@ var Project = (function () {
         var dom = helpers.dom;
         var http = helpers.http;
         var events = helpers.events;
+        setupRunHeaderMenuDismiss(dom);
 
         var project = controlBase();
         var emitter = null;

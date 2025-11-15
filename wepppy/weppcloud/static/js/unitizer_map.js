@@ -1162,6 +1162,41 @@
           "token": "ton_mi-sqr_yr"
         }
       ]
+    },
+    {
+      "conversions": [
+        {
+          "from": "g/cm^3",
+          "offset": 0.0,
+          "scale": 62.42796,
+          "to": "lb/ft^3"
+        },
+        {
+          "from": "lb/ft^3",
+          "offset": 0.0,
+          "scale": 0.0160185,
+          "to": "g/cm^3"
+        }
+      ],
+      "defaultIndex": 1,
+      "key": "bulk-density",
+      "label": "Bulk Density",
+      "units": [
+        {
+          "htmlLabel": "g/cm<sup>3</sup>",
+          "key": "g/cm^3",
+          "label": "g/cm^3",
+          "precision": 3,
+          "token": "g_cm-cube"
+        },
+        {
+          "htmlLabel": "lb/ft<sup>3</sup>",
+          "key": "lb/ft^3",
+          "label": "lb/ft^3",
+          "precision": 3,
+          "token": "lb_ft-cube"
+        }
+      ]
     }
   ],
   "generator": "unitizer_map_builder.py",
@@ -1176,6 +1211,7 @@
     "ft-cube_yr": "ft^3/yr",
     "g": "g",
     "g_L": "g/L",
+    "g_cm-cube": "g/cm^3",
     "ha": "ha",
     "ha-m_yr": "ha-m/yr",
     "in": "in",
@@ -1196,6 +1232,7 @@
     "lb_acre-_3": "lb/acre,3",
     "lb_acre_yr": "lb/acre/yr",
     "lb_acre_yr-_3": "lb/acre/yr,3",
+    "lb_ft-cube": "lb/ft^3",
     "lb_mi-sqr": "lb/mi^2",
     "lb_mi-sqr_yr": "lb/mi^2/yr",
     "lb_yr": "lb/yr",
@@ -1233,6 +1270,7 @@
     "ft^3/yr": "volume-annual",
     "g": "xs-weight",
     "g/L": "concentration",
+    "g/cm^3": "bulk-density",
     "ha": "area",
     "ha-m/yr": "area-xs-distance-annual",
     "in": "xs-distance",
@@ -1253,6 +1291,7 @@
     "lb/acre,3": "xs-surface-density",
     "lb/acre/yr": "sm-surface-density-annual",
     "lb/acre/yr,3": "xs-surface-density-annual",
+    "lb/ft^3": "bulk-density",
     "lb/mi^2": "sm-surface-density",
     "lb/mi^2/yr": "sm-surface-density-annual",
     "lb/yr": "sm-weight-annual",
