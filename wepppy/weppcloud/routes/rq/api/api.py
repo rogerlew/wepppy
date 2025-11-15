@@ -1096,6 +1096,9 @@ def api_run_wepp(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
+        # Clear cached run-specific states so dependent panels refresh next poll.
+        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
+        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
         prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
         with _redis_conn() as redis_conn:
