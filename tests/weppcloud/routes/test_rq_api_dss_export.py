@@ -136,8 +136,9 @@ def test_post_dss_export_rq_accepts_json_payload(dss_export_app):
     assert wepp_instance._dss_end_date == "12/31/2005"
 
     prep_instance = prep_cls.getInstance(str(base_path / runid))
-    assert ("remove_timestamp", api_module.TaskEnum.run_wepp_hillslopes) in prep_instance.calls
-    assert ("remove_timestamp", api_module.TaskEnum.run_wepp_watershed) in prep_instance.calls
+    # Manual DSS exports do not reset WEPP run timestamps.
+    assert ("remove_timestamp", api_module.TaskEnum.run_wepp_hillslopes) not in prep_instance.calls
+    assert ("remove_timestamp", api_module.TaskEnum.run_wepp_watershed) not in prep_instance.calls
     assert ("set_rq_job_id", "post_dss_export_rq", "job-001") in prep_instance.calls
 
 

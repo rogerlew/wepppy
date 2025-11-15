@@ -981,9 +981,7 @@ def api_post_dss_export_rq(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
-        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
-
+   
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(post_dss_export_rq, (runid,), timeout=TIMEOUT)
@@ -1098,8 +1096,6 @@ def api_run_wepp(runid, config):
 
     try:
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
-        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
         prep.remove_timestamp(TaskEnum.run_omni_scenarios)
 
         with _redis_conn() as redis_conn:
