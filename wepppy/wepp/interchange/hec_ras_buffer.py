@@ -14,10 +14,10 @@ from typing import Iterable, Mapping, MutableMapping, Optional, Sequence, TYPE_C
 import numpy as np
 from affine import Affine
 from scipy import ndimage
-from shapely.geometry import MultiPolygon, Polygon, shape as shapely_shape
+from skimage import measure
+from shapely.geometry import MultiPolygon, Polygon
 from shapely.ops import transform as shapely_transform, unary_union
 from rasterio.crs import CRS
-from rasterio.features import shapes
 import rasterio
 import pandas as pd
 
@@ -43,7 +43,7 @@ DEFAULT_WIDTH_RULES: Mapping[int | str, float] = {
     "default": 120.0,
 }
 MIN_MINOR_AXIS_RATIO = 0.4
-SMOOTHING_RADIUS_PX = 1
+SMOOTHING_RADIUS_PX = 3
 
 
 @dataclass(frozen=True)
@@ -319,16 +319,11 @@ def _mask_to_polygon(
 ) -> Optional[MultiPolygon | Polygon]:
     if proj is None:
         return None
-    center_transform = transform * Affine.translation(0.5, 0.5)
     bool_mask = mask_u8 > 0
-    geoms = [
-        shapely_shape(geom)
-        for geom, value in shapes(mask_u8, mask=bool_mask, transform=center_transform)
-        if int(value) > 0
-    ]
-    if not geoms:
+    contour_polys = _extract_contour_polygons(bool_mask, transform)
+    if not contour_polys:
         return None
-    merged = unary_union(geoms)
+    merged = unary_union(contour_polys)
     if merged.is_empty:
         return None
     transformer = GeoTransformer(src_proj4=proj, dst_epsg=WGS84_EPSG)
@@ -345,6 +340,37 @@ def _mask_to_polygon(
     if isinstance(converted, MultiPolygon):
         return converted
     return converted.buffer(0)
+
+
+def _extract_contour_polygons(mask: np.ndarray, transform: Affine) -> list[Polygon]:
+    if not np.any(mask):
+        return []
+    padded = np.pad(mask.astype(np.uint8), 1, mode="constant", constant_values=0)
+    contours = measure.find_contours(padded.astype(np.float32), 0.5)
+    geoms: list[Polygon] = []
+    for contour in contours:
+        if len(contour) < 3:
+            continue
+        # remove padding offset
+        rows = contour[:, 0] - 1.0
+        cols = contour[:, 1] - 1.0
+        coords = [_affine_point(transform, col, row) for row, col in zip(rows, cols)]
+        if not coords:
+            continue
+        if coords[0] != coords[-1]:
+            coords.append(coords[0])
+        poly = Polygon(coords)
+        if poly.is_empty or not poly.is_valid:
+            poly = poly.buffer(0)
+        if poly.is_empty:
+            continue
+        geoms.append(poly)
+    return geoms
+
+
+def _affine_point(transform: Affine, col: float, row: float) -> tuple[float, float]:
+    x, y = transform * (col, row)
+    return (float(x), float(y))
 
 
 def _write_polygon_gml(
