@@ -90,7 +90,13 @@ class HillSummaryReport(ReportBase):
         if include_soils:
             datasets.append({"path": self._SOILS_DATASET, "alias": "soil"})
             joins.append(
-                {"left": "hills", "right": "soil", "left_on": ["topaz_id"], "right_on": ["topaz_id"], "join_type": "left"}
+                {
+                    "left": "hills",
+                    "right": "soil",
+                    "left_on": ["topaz_id"],
+                    "right_on": ["topaz_id"],
+                    "join_type": "left",
+                }
             )
             columns.extend(
                 [

@@ -2279,7 +2279,7 @@ h5:first-child {
 }
 
 .wc-feature__metrics {
-  font-size: 0.875rem;
+  font-size: var(--wc-font-size-base);
   color: var(--wc-color-text-muted);
   padding-top: var(--wc-space-sm);
   border-top: 1px solid var(--wc-color-border);

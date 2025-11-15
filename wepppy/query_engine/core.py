@@ -85,7 +85,7 @@ def _coerce_filter_value(value: object, column_type: str | None, *, operator: st
         raise ValueError(f"Unable to coerce filter value '{value}' to type '{column_type}'") from exc
 
 
-def _dataset_source_sql(root: Path, spec: DatasetSpec) -> tuple[str, bool]:
+def _dataset_source_sql(root: Path, spec: DatasetSpec, catalog: DatasetCatalog) -> tuple[str, bool]:
     """Return the DuckDB FROM clause component for a dataset and note spatial needs.
 
     Args:
@@ -107,10 +107,72 @@ def _dataset_source_sql(root: Path, spec: DatasetSpec) -> tuple[str, bool]:
         reader = f"read_parquet('{escaped}')"
         requires_spatial = False
 
+    reader = _apply_identifier_aliases(reader, spec.path, catalog)
+
     return f"{reader} AS {spec.alias}", requires_spatial
 
 
 _SIMPLE_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _quote_identifier(identifier: str) -> str:
+    """Quote an identifier when required to preserve case."""
+    if _SIMPLE_IDENTIFIER_RE.match(identifier):
+        return identifier
+    escaped = identifier.replace('"', '""')
+    return f'"{escaped}"'
+
+
+def _apply_identifier_aliases(reader_sql: str, rel_path: str, catalog: DatasetCatalog) -> str:
+    """Ensure canonical identifier aliases (topaz/wepp) exist for each dataset."""
+    entry = catalog.get(rel_path)
+    schema = entry.schema if entry else None
+    fields = schema.get("fields") if isinstance(schema, dict) else None
+    column_names: set[str] = set()
+    if isinstance(fields, list):
+        for field in fields:
+            if isinstance(field, dict):
+                name = field.get("name")
+                if isinstance(name, str):
+                    column_names.add(name)
+
+    alias_exprs: list[str] = []
+    alias_exprs.extend(_build_alias_expressions(column_names, ("topaz_id", "TopazID"), "BIGINT"))
+    alias_exprs.extend(_build_alias_expressions(column_names, ("wepp_id", "WeppID"), "BIGINT"))
+
+    if not alias_exprs:
+        return reader_sql
+    computed = ", ".join(alias_exprs)
+    return f"(SELECT *, {computed} FROM {reader_sql})"
+
+
+def _build_alias_expressions(
+    column_names: set[str],
+    names: tuple[str, str],
+    cast_type: str,
+) -> list[str]:
+    """Create SELECT expressions that add/cast alias columns when necessary."""
+    alias_exprs: list[str] = []
+    available = [name for name in names if name in column_names]
+    if not available:
+        return alias_exprs
+
+    def _coalesce_expression(choices: list[str]) -> str:
+        quoted = [_quote_identifier(choice) for choice in choices]
+        if len(quoted) == 1:
+            return quoted[0]
+        return f"COALESCE({', '.join(quoted)})"
+
+    for alias_name in names:
+        if alias_name in column_names:
+            continue
+        sources = [name for name in available if name != alias_name]
+        if not sources:
+            continue
+        source_expr = _coalesce_expression(sources)
+        alias_exprs.append(f"CAST({source_expr} AS {cast_type}) AS {_quote_identifier(alias_name)}")
+
+    return alias_exprs
 
 
 def _qualify_join_column(alias: str, column: str) -> str:
@@ -149,6 +211,7 @@ def _build_join_clause(
     alias_to_spec: dict[str, DatasetSpec],
     used_aliases: set[str],
     root: Path,
+    catalog: DatasetCatalog,
 ) -> tuple[str, str, bool]:
     """Build the SQL fragment for a JOIN clause and record spatial requirements.
 
@@ -172,7 +235,7 @@ def _build_join_clause(
         raise ValueError(f"Join alias '{join_spec.right}' referenced multiple times in join list")
 
     right_spec = alias_to_spec[join_spec.right]
-    join_source, requires_spatial = _dataset_source_sql(root, right_spec)
+    join_source, requires_spatial = _dataset_source_sql(root, right_spec, catalog)
     used_aliases.add(join_spec.right)
 
     conditions = [
@@ -210,12 +273,14 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
         raise FileNotFoundError(missing_paths[0])
 
     base_spec = dataset_specs[0]
-    from_clause, requires_spatial = _dataset_source_sql(catalog_root, base_spec)
+    from_clause, requires_spatial = _dataset_source_sql(catalog_root, base_spec, catalog)
     used_aliases = {base_spec.alias}
 
     join_clauses: list[str] = []
     for join_spec in payload.join_specs:
-        clause, _, join_requires_spatial = _build_join_clause(join_spec, alias_to_spec, used_aliases, catalog_root)
+        clause, _, join_requires_spatial = _build_join_clause(
+            join_spec, alias_to_spec, used_aliases, catalog_root, catalog
+        )
         join_clauses.append(clause)
         requires_spatial = requires_spatial or join_requires_spatial
 
