@@ -2686,7 +2686,7 @@ h5:first-child {
 .wc-map-legend__header {
   font-weight: var(--wc-font-weight-semibold);
   margin-bottom: var(--wc-space-sm);
-  font-size: var(--wc-font-size-base);
+  font-size: calc(var(--wc-font-size-base) * 1.15);
 }
 
 .wc-map-legend__image {
@@ -3833,4 +3833,16 @@ body.wc-modal-open {
   margin: 0;
   font-size: 0.9rem;
   color: var(--wc-color-text-muted);
+}
+#baer-opacity-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-xs);
+  padding-top: var(--wc-space-lg);
+}
+
+#baer-opacity-controls p {
+  margin: 0;
+  font-weight: var(--wc-font-weight-semibold);
+  font-size: var(--wc-font-size-base);
 }

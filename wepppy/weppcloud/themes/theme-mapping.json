@@ -198,7 +198,10 @@
         "--wc-font-size-sm": "17px",
         "--wc-font-size-xs": "16px",
         "--wc-line-height": "1.65"
-      }
+      },
+      "extra_css": [
+        ":root[data-theme=\"light-high-contrast\"] .wc-control__panel-summary {\n  font-size: calc(var(--wc-font-size-base) * 1.15);\n}"
+      ]
     },
     "dark-modern": {
       "label": "Dark Modern",

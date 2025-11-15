@@ -1,4 +1,4 @@
-/* Generated from light-high-contrast-theme.json on 2025-11-15T00:46:23.515167+00:00 */
+/* Generated from light-high-contrast-theme.json on 2025-11-15T01:05:53.845558+00:00 */
 :root[data-theme="light-high-contrast"] {
   --wc-color-accent: #0050A4;
   --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
@@ -26,4 +26,7 @@
   --wc-line-height: 1.65;
   --wc-shadow-md: 0 0 0 3px rgba(0, 31, 50, 0.22);
   --wc-shadow-sm: 0 0 0 2px rgba(0, 31, 50, 0.18);
+}
+:root[data-theme="light-high-contrast"] .wc-control__panel-summary {
+  font-size: calc(var(--wc-font-size-base) * 1.15);
 }
