@@ -962,13 +962,14 @@ START: What does user want to build?
 
 | Token | Value | Use Case |
 |-------|-------|----------|
-| `--wc-space-xs` | 0.25rem (4px) | Tight spacing (icon-text gap) |
-| `--wc-space-sm` | 0.5rem (8px) | Button padding, form field gap |
-| `--wc-space-md` | 1rem (16px) | Section spacing (default) |
-| `--wc-space-lg` | 1.5rem (24px) | Major section dividers |
-| `--wc-space-xl` | 2rem (32px) | Control-to-control spacing |
+| `--wc-space-xs` | 0.25rem (~4px) | Tight spacing (icon-text gap) |
+| `--wc-space-sm` | 0.5rem (~9px) | Button padding, form field gap |
+| `--wc-space-md` | 0.75rem (~13px) | Section spacing (default) |
+| `--wc-space-lg` | 1rem (~17px) | Major section dividers |
+| `--wc-space-xl` | 1.5rem (~26px) | Control-to-control spacing |
+| `--wc-space-2xl` | 2rem (~34px) | Full-width gutters, run shell offsets |
 
-**Pattern:** Default = md (16px), tighter = sm (8px), sections = lg (24px), controls = xl (32px)
+**Pattern:** Default = md (~13px), tighter = sm (~9px), sections = lg (~17px), controls = xl (~26px).【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L58-L66】
 
 ### Form Type Selection
 
@@ -1454,8 +1455,9 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 
 ### Typography & spacing
 - Font stacks: sans-serif UI text uses `Source Sans 3` with system fallbacks; monospace uses `Source Code Pro` family.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L10-L147】
-- Base font size is 16px with heading sizes of 32/24/20/18/16/14 px for h1–h6, built into the stylesheet.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L72-L112】
-- Spacing tokens (`--wc-space-*`) define consistent padding/margins—use multiples instead of ad-hoc pixel values.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L41-L48】
+- Base font size is 17px, so the h1–h6 scale (2rem/1.5rem/1.25rem/1.125rem/1rem/0.875rem) renders at roughly 34/25.5/21.3/19.1/17/14.9 px as defined in the foundation stylesheet.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L579-L590】
+- `--wc-font-size-sm` (1rem) and `--wc-font-size-xs` (0.9rem) drive the legend/log typography utilities so “small” copy stays at full body size and “extra small” never dips below ~15px.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L20-L27】【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L888-L925】
+- Spacing tokens (`--wc-space-*`) define consistent padding/margins—use multiples instead of ad-hoc pixel values.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L58-L66】
 - Motion-sensitive defaults follow `prefers-reduced-motion` to disable transitions when requested, so interactive components remain comfortable for sensitive users.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L102-L111】
 
 ### Layout primitives

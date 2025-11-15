@@ -39,6 +39,7 @@ from wepppy.wepp.interchange import (
 )
 from wepppy.wepp.interchange.dss_dates import parse_dss_date
 from wepppy.wepp.interchange.hec_ras_boundary import build_boundary_condition_features
+from wepppy.wepp.interchange.hec_ras_buffer import write_hec_buffer_gml
 from wepppy.weppcloud.utils.helpers import get_wd
 
 try:
@@ -374,11 +375,17 @@ def run_wepp_rq(runid: str) -> Job:
             job2_totalwatsed2: Job | None = None
             job2_hillslope_interchange: Job | None = None
             job2_post_dss_export: Job | None = None
-            if not climate.is_single_storm:
-                job2_hillslope_interchange = q.enqueue_call(_build_hillslope_interchange_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
-                job.meta['jobs:2,func:_build_hillslope_interchange_rq'] = job2_hillslope_interchange.id
-                job.save()
 
+            job2_hillslope_interchange = q.enqueue_call(
+                _build_hillslope_interchange_rq,
+                (runid,),
+                timeout=TIMEOUT,
+                depends_on=jobs1_hillslopes,
+            )
+            job.meta['jobs:2,func:_build_hillslope_interchange_rq'] = job2_hillslope_interchange.id
+            job.save()
+
+            if not climate.is_single_storm:
                 job2_totalwatsed2 = q.enqueue_call(_build_totalwatsed3_rq, (runid,),  timeout=TIMEOUT, depends_on=job2_hillslope_interchange)
                 job.meta['jobs:2,func:_build_totalwatsed3_rq'] = job2_totalwatsed2.id
                 job.save()
@@ -445,7 +452,6 @@ def run_wepp_rq(runid: str) -> Job:
                 job.save()
 
             if not climate.is_single_storm:
-                
                 _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
                 job.meta['jobs:4,func:_run_hillslope_watbal_rq'] = _job.id
                 jobs4_post.append(_job)
@@ -457,17 +463,17 @@ def run_wepp_rq(runid: str) -> Job:
                 jobs4_post.append(_job)
                 job.save()
 
-            if not climate.is_single_storm:
-                job_post_watershed_interchange = q.enqueue_call(
-                    _post_watershed_interchange_rq,
-                    (runid,),
-                    timeout=TIMEOUT,
-                    depends_on=post_dependencies,
-                )
-                job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
-                jobs4_post.append(job_post_watershed_interchange)
-                job.save()
+            job_post_watershed_interchange = q.enqueue_call(
+                _post_watershed_interchange_rq,
+                (runid,),
+                timeout=TIMEOUT,
+                depends_on=post_dependencies,
+            )
+            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
+            jobs4_post.append(job_post_watershed_interchange)
+            job.save()
 
+            if not climate.is_single_storm:
                 _job = q.enqueue_call(
                     _analyze_return_periods_rq,
                     (runid,),
@@ -1144,12 +1150,23 @@ def _write_dss_channel_geojson(
         return
 
     boundary_dir = _join(wd, "export", "dss", "boundaries")
+    target_boundary_ids = sorted(include_ids) if include_ids else sorted(selected_topaz_ids)
+
     boundary_features = build_boundary_condition_features(
         watershed,
-        sorted(channel_ids),
+        target_boundary_ids,
         boundary_dir,
         boundary_width_m=boundary_width_m,
     )
+    buffer_info = None
+    if target_boundary_ids:
+        boundary_filter = set(channel_ids or []) or None
+        buffer_info = write_hec_buffer_gml(
+            watershed,
+            target_boundary_ids,
+            _join(wd, "export", "dss"),
+            boundary_channel_ids=boundary_filter,
+        )
 
     output_geojson = dict(source_geojson)
     output_geojson["features"] = filtered_features + boundary_features
@@ -1165,6 +1182,9 @@ def _write_dss_channel_geojson(
             "boundary_feature_count": len(boundary_features),
         }
     )
+    if buffer_info:
+        metadata["channel_buffer"] = buffer_info
+        metadata["floodplain_polygon"] = buffer_info.get("buffer_gml")
     output_geojson["metadata"] = metadata
 
     dest_dir = os.path.dirname(dest_path)

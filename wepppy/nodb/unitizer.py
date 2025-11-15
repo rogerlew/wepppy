@@ -168,6 +168,10 @@ converters: ConverterRegistry = {
         ('ton/acre/yr', 'ton/mi^2/yr'): lambda v: v * 640,
         ('ton/mi^2/yr', 'tonne/ha/yr'): lambda v: v * 0.00350265986,
         ('ton/mi^2/yr', 'ton/acre/yr'): lambda v: v * 0.0015625,
+    },
+    'bulk-density': {
+        ('g/cm^3', 'lb/ft^3'): lambda v: v * 62.42796,
+        ('lb/ft^3', 'g/cm^3'): lambda v: v * 0.0160185,
     }
 }
 
@@ -283,6 +287,10 @@ precisions: PrecisionRegistry = OrderedDict([
         ('tonne/ha/yr', 2),
         ('ton/acre/yr', 2),
         ('ton/mi^2/yr', 2)])
+     ),
+    ('bulk-density', OrderedDict([
+        ('g/cm^3', 3),
+        ('lb/ft^3', 3)])
      )
 ])
 
