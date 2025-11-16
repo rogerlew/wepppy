@@ -16,6 +16,8 @@ jobs:
       RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      ENABLE_PROFILE_COVERAGE: true
+      PROFILE_COVERAGE_EXPORT_DIR: /workdir/wepppy-test-engine-data/coverage
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4

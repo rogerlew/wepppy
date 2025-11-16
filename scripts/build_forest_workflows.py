@@ -127,6 +127,8 @@ def _playback_specs() -> tuple[List[tuple[str, Dict[str, Any]]], List[Dict[str, 
             "env": {
                 "ADMIN_EMAIL": "${{ secrets.ADMIN_EMAIL }}",
                 "ADMIN_PASSWORD": "${{ secrets.ADMIN_PASSWORD }}",
+                "ENABLE_PROFILE_COVERAGE": "true",
+                "PROFILE_COVERAGE_EXPORT_DIR": "/workdir/wepppy-test-engine-data/coverage",
             },
             "steps": [
                 {

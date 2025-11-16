@@ -47,15 +47,21 @@ class _JSONResponse:
 def test_run_test_profile_streams_output(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
     runner = CliRunner()
     calls: Dict[str, Any] = {}
+    token = "0123456789abcdef0123456789abcdef"
 
     def fake_post(url, json=None, headers=None, stream=None, timeout=None):
         calls["url"] = url
         calls["json"] = json
         calls["headers"] = headers
         calls["stream"] = stream
-        return _StreamResponse(lines=["line-1", "line-2"])
+        return _StreamResponse(lines=[f"line-1 token={token}", "line-2"])
+
+    def fake_get(url, headers=None, timeout=None):
+        calls["get_url"] = url
+        return _JSONResponse({"token": token, "status": "ok"})
 
     monkeypatch.setattr("tools.wctl2.commands.playback.requests.post", fake_post)
+    monkeypatch.setattr("tools.wctl2.commands.playback.requests.get", fake_get)
 
     result = runner.invoke(
         app,
@@ -81,12 +87,20 @@ def test_run_test_profile_with_trace(monkeypatch: pytest.MonkeyPatch, temp_proje
 
     runner = CliRunner()
     calls: Dict[str, Any] = {}
+    token = "fedcba9876543210fedcba9876543210"
 
     def fake_post(url, json=None, headers=None, stream=None, timeout=None):
         calls["json"] = json
-        return _StreamResponse(lines=["done"], status=200)
+        calls["url"] = url
+        calls["headers"] = headers
+        return _StreamResponse(lines=[f"done token={token}"], status=200)
+
+    def fake_get(url, headers=None, timeout=None):
+        calls["get_url"] = url
+        return _JSONResponse({"token": token, "status": "ok"})
 
     monkeypatch.setattr("tools.wctl2.commands.playback.requests.post", fake_post)
+    monkeypatch.setattr("tools.wctl2.commands.playback.requests.get", fake_get)
 
     result = runner.invoke(
         app,
