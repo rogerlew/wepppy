@@ -64,8 +64,7 @@ def activate_query_engine(
             from wepppy.nodb.core.climate import Climate  # local import to avoid heavy deps during import
 
             climate = Climate.getInstance(str(base))
-            if getattr(climate, "observed_start_year", '') != '':
-                start_year = climate.observed_start_year
+            start_year = climate.calendar_start_year
         except Exception:  # pragma: no cover - best effort
             LOGGER.debug(
                 "Unable to infer start_year from climate for %s; proceeding without override",

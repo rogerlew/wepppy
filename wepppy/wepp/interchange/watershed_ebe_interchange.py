@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Set
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+import logging
 
 from wepppy.all_your_base.hydro import determine_wateryear
 from ._utils import _wait_for_path, _parse_float
@@ -116,7 +117,12 @@ def _write_ebe_parquet(
                 else:
                     year = sim_year
 
-                julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+                try:
+                    julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+                except ValueError as e:
+                    logging.warning("Invalid date encountered: %s-%s-%s: %s", year, month, day_of_month, e)
+                    raise
+
                 store["year"].append(year)
                 store["simulation_year"].append(sim_year)
                 store["month"].append(month)

@@ -863,26 +863,8 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        def _normalize_start_year(value):
-            try:
-                if value is None:
-                    return None
-                if isinstance(value, str) and value.strip() == '':
-                    return None
-                return int(value)
-            except (TypeError, ValueError):
-                return None
-
-        start_year = None
         climate = Climate.getInstance(wd)
-        for candidate in (
-            getattr(climate, "observed_start_year", None),
-            getattr(climate, "future_start_year", None),
-        ):
-            normalized = _normalize_start_year(candidate)
-            if normalized is not None:
-                start_year = normalized
-                break
+        start_year = climate.calendar_start_year
         run_wepp_hillslope_interchange(_join(wd, 'wepp/output'), start_year=start_year)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
@@ -975,10 +957,8 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        start_year = None
         climate = Climate.getInstance(wd)
-        if getattr(climate, "observed_start_year", None) is not None:
-            start_year = climate.observed_start_year
+        start_year = climate.calendar_start_year
         run_wepp_watershed_interchange(_join(wd, 'wepp/output'), start_year=start_year)
         generate_interchange_documentation(_join(wd, 'wepp/output/interchange'))
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')

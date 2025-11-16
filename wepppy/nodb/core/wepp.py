@@ -2475,26 +2475,8 @@ class Wepp(NoDbBase):
         from wepppy.wepp.interchange.watershed_interchange import run_wepp_watershed_interchange
         from wepppy.wepp.interchange.interchange_documentation import generate_interchange_documentation
     
-        def _normalize_start_year(value):
-            try:
-                if value is None:
-                    return None
-                if isinstance(value, str) and value.strip() == '':
-                    return None
-                return int(value)
-            except (TypeError, ValueError):
-                return None
-
-        start_year = None
         climate = self.climate_instance.getInstance(self.wd)
-        for candidate in (
-            getattr(climate, "observed_start_year", None),
-            getattr(climate, "future_start_year", None),
-        ):
-            normalized = _normalize_start_year(candidate)
-            if normalized is not None:
-                start_year = normalized
-                break
+        start_year = climate.calendar_start_year
 
         run_wepp_watershed_interchange(self.output_dir, start_year=start_year)
         generate_interchange_documentation(self.wepp_interchange_dir)

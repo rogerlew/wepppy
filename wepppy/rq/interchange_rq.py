@@ -95,10 +95,8 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
             )
             return False
 
-        start_year: Optional[int] = None
         climate = Climate.getInstance(wd)
-        if getattr(climate, "observed_start_year", None) is not None:
-            start_year = climate.observed_start_year
+        start_year: Optional[int] = climate.calendar_start_year
 
         interchange_dir = run_wepp_hillslope_interchange(wepp_output_dir, start_year=start_year)
 

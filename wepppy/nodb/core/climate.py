@@ -1002,6 +1002,32 @@ class Climate(NoDbBase):
         return self._future_end_year
 
     @property
+    def calendar_start_year(self) -> Optional[int]:
+        """Return the calendar start year for WEPP date calculations.
+        
+        Checks both observed and future start years, normalizing empty strings
+        and invalid values to None. Prioritizes observed over future climate data.
+        
+        Returns:
+            Integer year if valid start year exists, None otherwise.
+        """
+        def _normalize(value):
+            try:
+                if value is None:
+                    return None
+                if isinstance(value, str) and value.strip() == '':
+                    return None
+                return int(value)
+            except (TypeError, ValueError):
+                return None
+        
+        for candidate in (self._observed_start_year, self._future_start_year):
+            normalized = _normalize(candidate)
+            if normalized is not None:
+                return normalized
+        return None
+
+    @property
     def ss_storm_date(self) -> str:
         return self._ss_storm_date
 
