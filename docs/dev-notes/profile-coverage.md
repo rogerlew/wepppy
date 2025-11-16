@@ -90,9 +90,11 @@ If playback dies early (502/500), check:
 
 - Coverage 7.11.3 is required; `coverage.py` is imported directly in weppcloud, rq-worker, and profile-playback. Import will fail fast if missing.
 - `X-Profile-Trace: <slug>` header activates tracing per request. Logs now show header detection, coverage start (slug/data_file/context), job tagging, and worker coverage startup to make debugging loss of the slug straightforward.
-- Default data root: `/workdir/wepppy-test-engine-data/coverage` (set via `PROFILE_COVERAGE_DIR` / `ENABLE_PROFILE_COVERAGE=1`).
+- Default data root: `/workdir/wepppy-test-engine-data/coverage` (set via `PROFILE_COVERAGE_DIR` / `ENABLE_PROFILE_COVERAGE=1`). `PROFILE_COVERAGE_EXPORT_DIR` should match this path for simplicity.
 - `--coverage-dir` simply mirrors the merged artifact into a path inside the playback container; it no longer affects where shards are written.
 - `coverage.profile-playback.ini` intentionally omits the `source` setting to avoid filtering out traced files; `relative_files=True` plus the omit list is sufficient for profile runs.
+- Batch collection helper: `python tools/run_profile_coverage_batch.py` now prefers the canonical list in `.github/forest_workflows/playback-profiles.yml` (profile_slug entries) before falling back to globbing under `PROFILE_PLAYBACK_ROOT`. Use `--profiles-file` to point elsewhere, or `--include/--exclude` to scope runs.
+- Batch helper retries flaky runs: `--retries` (default 3) will re-run a profile when the playback output shows errors (Playback error/failed job/traceback) or coverage combine fails.
 
 ## 4. Notes & troubleshooting
 
