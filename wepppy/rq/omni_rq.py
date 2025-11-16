@@ -20,6 +20,7 @@ from wepppy.config.redis_settings import (
 )
 
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.rq.exception_logging import with_exception_logging
 
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.mods.omni.omni import (
@@ -92,6 +93,7 @@ def _update_dependency_state(
             break
 
 
+@with_exception_logging
 def run_omni_scenario_rq(
     runid: str,
     scenario: Dict[str, Any],
@@ -166,6 +168,7 @@ def run_omni_scenario_rq(
         raise
 
 
+@with_exception_logging
 def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
     """Coordinate Omni scenario execution, optionally leveraging worker concurrency."""
     try:
@@ -409,6 +412,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
         raise
 
 
+@with_exception_logging
 def _compile_hillslope_summaries_rq(runid: str) -> None:
     """Compile Omni hillslope summaries after scenario execution."""
     try:
@@ -429,6 +433,7 @@ def _compile_hillslope_summaries_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _finalize_omni_scenarios_rq(runid: str) -> None:
     """Finalize Omni processing, stamping Redis prep state and notifying subscribers."""
     try:

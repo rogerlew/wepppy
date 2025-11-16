@@ -12,10 +12,12 @@ from wepppy.nodb.mods.path_ce import PathCostEffective
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.rq.exception_logging import with_exception_logging
 
 TIMEOUT: int = 43_200
 
 
+@with_exception_logging
 def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
     """Run the PATH cost-effective optimization workflow for the given project.
 

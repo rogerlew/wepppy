@@ -50,6 +50,7 @@ from wepppy.nodb.mods.rap import RAP_TS
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.wepp.interchange import run_totalwatsed3
+from wepppy.rq.exception_logging import with_exception_logging
 from .wepp_rq import run_wepp_rq
 
 _hostname = socket.gethostname()
@@ -66,6 +67,7 @@ TIMEOUT: int = 43_200
 DEFAULT_ZOOM: int = 12
 
 
+@with_exception_logging
 def test_run_rq(runid: str) -> tuple[str, ...]:
     """Execute the full preparation pipeline inline as a smoke-test.
 
@@ -236,6 +238,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
         raise
 
 
+@with_exception_logging
 def set_run_readonly_rq(runid: str, readonly: bool) -> None:
     """Toggle read-only state for a run and manage browse manifests.
 
@@ -323,6 +326,7 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
         raise
 
 
+@with_exception_logging
 def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
     """Persist an SBS map selection and timestamp the prep step.
 
@@ -351,6 +355,7 @@ def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
         raise
 
 
+@with_exception_logging
 def fetch_dem_rq(
     runid: str,
     extent: Sequence[float],
@@ -394,6 +399,7 @@ def fetch_dem_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+@with_exception_logging
 def build_channels_rq(
     runid: str,
     csa: float,
@@ -439,6 +445,7 @@ def build_channels_rq(
         raise
 
 
+@with_exception_logging
 def fetch_dem_and_build_channels_rq(
     runid: str,
     extent: Sequence[float],
@@ -496,6 +503,7 @@ def fetch_dem_and_build_channels_rq(
         raise
 
 
+@with_exception_logging
 def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
     """Persist the watershed outlet coordinates.
 
@@ -525,6 +533,7 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+@with_exception_logging
 def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) -> None:
     """Delineate subcatchments after channel extraction is complete.
 
@@ -566,6 +575,7 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
         raise
 
 
+@with_exception_logging
 def abstract_watershed_rq(runid: str) -> None:
     """Run the watershed abstraction step after subcatchments exist.
 
@@ -594,6 +604,7 @@ def abstract_watershed_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def build_subcatchments_and_abstract_watershed_rq(
     runid: str,
     updates: dict[str, Any] | None = None,
@@ -634,6 +645,7 @@ def build_subcatchments_and_abstract_watershed_rq(
         raise
 
 
+@with_exception_logging
 def build_rangeland_cover_rq(
     runid: str,
     rap_year: Optional[int] = None,
@@ -661,6 +673,7 @@ def build_rangeland_cover_rq(
         raise
 
 
+@with_exception_logging
 def build_landuse_rq(runid: str) -> None:
     """Construct landuse layers for the watershed.
 
@@ -688,6 +701,7 @@ def build_landuse_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def build_soils_rq(runid: str) -> None:
     """Build soil layers for the watershed.
 
@@ -715,6 +729,7 @@ def build_soils_rq(runid: str) -> None:
         raise
 
     
+@with_exception_logging
 def build_climate_rq(runid: str) -> None:
     """Generate climate inputs for the watershed.
 
@@ -742,6 +757,7 @@ def build_climate_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def run_ash_rq(
     runid: str,
     fire_date: str,
@@ -786,6 +802,7 @@ def run_ash_rq(
         raise
 
 
+@with_exception_logging
 def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> None:
     """Run the debris flow model for the current watershed configuration.
 
@@ -821,6 +838,7 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
         raise
 
 
+@with_exception_logging
 def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> None:
     """Execute the rangeland hydrology and erosion model (RHEM).
 
@@ -886,6 +904,7 @@ def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> N
 
 # Fork Functions
 
+@with_exception_logging
 def _finish_fork_rq(runid: str) -> None:
     """Emit fork completion messages once dependent jobs finish."""
     try:
@@ -912,6 +931,7 @@ def _clean_env_for_system_tools() -> dict[str, str]:
     return env
 
 
+@with_exception_logging
 def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
     """Fork an existing run directory and optionally rebuild assets.
 
@@ -1130,6 +1150,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
 
 # Archive Backend Functions
 # see docs/dev-notes/weppcloud-project-archiving.md for archive architecture
+@with_exception_logging
 def archive_rq(runid: str, comment: Optional[str] = None) -> None:
     """Create a zip archive of the run directory.
 
@@ -1219,6 +1240,7 @@ def archive_rq(runid: str, comment: Optional[str] = None) -> None:
                 pass
 
 
+@with_exception_logging
 def restore_archive_rq(runid: str, archive_name: str) -> None:
     """Restore a run directory from a previously generated archive.
 
@@ -1335,6 +1357,7 @@ def restore_archive_rq(runid: str, archive_name: str) -> None:
 
 # RAP_TS Functions
 
+@with_exception_logging
 def fetch_and_analyze_rap_ts_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None:
     """Download and analyze RAP time series rasters for the scenario.
 

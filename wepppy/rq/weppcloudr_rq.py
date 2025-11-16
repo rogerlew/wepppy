@@ -14,6 +14,7 @@ from typing import Optional
 from rq import get_current_job
 
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.exception_logging import with_exception_logging
 
 
 DEFAULT_CONTAINER_NAME = os.getenv("WEPPCLOUDR_CONTAINER", "weppcloudr")
@@ -51,6 +52,7 @@ def _write_command_logs(output_dir: Path, job_id: str, stdout: str, stderr: str)
         pass
 
 
+@with_exception_logging
 def render_deval_details_rq(
     runid: str,
     config: str,

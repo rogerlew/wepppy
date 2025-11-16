@@ -77,6 +77,7 @@ from wepppy.export.prep_details import (
     export_channels_prep_details,
     export_hillslopes_prep_details
 )
+from wepppy.rq.exception_logging import with_exception_logging
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -121,6 +122,7 @@ def compress_fn(fn: str) -> None:
 
 # turtles, turtles all the way down...
 
+@with_exception_logging
 def run_ss_batch_hillslope_rq(
     runid: str,
     wepp_id: int,
@@ -155,6 +157,7 @@ def run_ss_batch_hillslope_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}, ss_batch_id={ss_batch_id})')
         raise
 
+@with_exception_logging
 def run_hillslope_rq(runid: str, wepp_id: int, wepp_bin: str | None = None) -> tuple[bool, float]:
     """Execute a continuous hillslope WEPP run within an RQ worker.
 
@@ -183,6 +186,7 @@ def run_hillslope_rq(runid: str, wepp_id: int, wepp_bin: str | None = None) -> t
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
         raise
 
+@with_exception_logging
 def run_flowpath_rq(runid: str, flowpath: str, wepp_bin: str | None = None) -> tuple[bool, float]:
     """Run a flowpath WEPP simulation within an RQ worker.
 
@@ -211,6 +215,7 @@ def run_flowpath_rq(runid: str, flowpath: str, wepp_bin: str | None = None) -> t
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, flowpath={flowpath}, wepp_bin={wepp_bin})')
         raise
 
+@with_exception_logging
 def run_watershed_rq(runid: str, wepp_bin: str | None = None) -> tuple[bool, float]:
     """Run a watershed WEPP simulation within an RQ worker.
 
@@ -238,6 +243,7 @@ def run_watershed_rq(runid: str, wepp_bin: str | None = None) -> tuple[bool, flo
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, wepp_bin={wepp_bin})')
         raise
 
+@with_exception_logging
 def run_ss_batch_watershed_rq(
     runid: str,
     wepp_bin: str | None = None,
@@ -273,6 +279,7 @@ def run_ss_batch_watershed_rq(
 
 # the main turtle
 
+@with_exception_logging
 def run_wepp_rq(runid: str) -> Job:
     """Enqueue the full multi-stage WEPP workflow for a run directory.
 
@@ -528,6 +535,7 @@ def run_wepp_rq(runid: str) -> Job:
 
     return job6_finalfinal
 
+@with_exception_logging
 def _prep_multi_ofe_rq(runid: str) -> None:
     """Prepare multi-OFE slope inputs prior to hillslope execution.
 
@@ -553,6 +561,7 @@ def _prep_multi_ofe_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _prep_slopes_rq(runid: str) -> None:
     """Export slope files for each hillslope in preparation for WEPP runs.
 
@@ -578,6 +587,7 @@ def _prep_slopes_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _run_hillslopes_rq(runid: str) -> None:
     """Execute all queued hillslope WEPP runs for the scenario.
 
@@ -601,6 +611,7 @@ def _run_hillslopes_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _run_flowpaths_rq(runid: str) -> None:
     """Prepare inputs and execute flowpath WEPP runs for the scenario.
 
@@ -624,6 +635,7 @@ def _run_flowpaths_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _prep_managements_rq(runid: str) -> None:
     """Export management files required for upcoming hillslope runs.
 
@@ -649,6 +661,7 @@ def _prep_managements_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _prep_soils_rq(runid: str) -> None:
     """Export soil files required for upcoming hillslope runs.
 
@@ -674,6 +687,7 @@ def _prep_soils_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _prep_climates_rq(runid: str) -> None:
     """Copy climate artifacts into the run directory for hillslope prep.
 
@@ -699,6 +713,7 @@ def _prep_climates_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _prep_remaining_rq(runid: str) -> None:
     """Finalize hillslope preparation, including optional frost/baseflow assets.
 
@@ -762,6 +777,7 @@ def _prep_remaining_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _prep_watershed_rq(runid: str) -> None:
     """Generate watershed-scale WEPP inputs after hillslopes complete.
 
@@ -784,6 +800,7 @@ def _prep_watershed_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+@with_exception_logging
 def _post_run_cleanup_out_rq(runid: str) -> None:
     """Move WEPP .out files into output directories once runs finish.
 
@@ -823,6 +840,7 @@ def _post_run_cleanup_out_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _analyze_return_periods_rq(runid: str) -> None:
     """Generate return period summaries for the completed hillslope runs.
 
@@ -846,6 +864,7 @@ def _analyze_return_periods_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+@with_exception_logging
 def _build_hillslope_interchange_rq(runid: str) -> None:
     """Create hillslope interchange parquet artifacts for downstream tools.
 
@@ -869,6 +888,7 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+@with_exception_logging
 def _build_totalwatsed3_rq(runid: str) -> None:
     """Generate the aggregate watershed TotWatSed interchange dataset.
 
@@ -892,6 +912,7 @@ def _build_totalwatsed3_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _run_hillslope_watbal_rq(runid: str) -> None:
     """Compute water balance metrics once hillslope interchange data exists.
 
@@ -918,6 +939,7 @@ def _run_hillslope_watbal_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _post_prep_details_rq(runid: str) -> None:
     """Export prep detail CSVs/Parquets after runs complete.
 
@@ -940,6 +962,7 @@ def _post_prep_details_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+@with_exception_logging
 def _post_watershed_interchange_rq(runid: str) -> None:
     """Generate watershed interchange artifacts and documentation.
 
@@ -972,6 +995,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _post_legacy_arc_export_rq(runid: str) -> None:
     """Rebuild the legacy Arc-compatible export bundle when requested.
 
@@ -995,6 +1019,7 @@ def _post_legacy_arc_export_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _post_gpkg_export_rq(runid: str) -> None:
     """Rebuild the GeoPackage export bundle when requested.
 
@@ -1184,6 +1209,7 @@ def _write_dss_channel_geojson(
             os.remove(tmp_path)
 
 
+@with_exception_logging
 def post_dss_export_rq(runid: str) -> None:
     """Build DSS exports once hillslope interchange data is ready.
 
@@ -1258,6 +1284,7 @@ def post_dss_export_rq(runid: str) -> None:
 
 
 
+@with_exception_logging
 def _post_make_loss_grid_rq(runid: str) -> None:
     """Generate raster loss grids once watershed outputs are available.
 
@@ -1281,6 +1308,7 @@ def _post_make_loss_grid_rq(runid: str) -> None:
         raise
 
 
+@with_exception_logging
 def _log_complete_rq(runid: str) -> None:
     """Record final completion metadata and emit notifications for the run.
 

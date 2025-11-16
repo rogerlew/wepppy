@@ -18,6 +18,7 @@ from wepppy.config.redis_settings import (
 
 from wepppy.nodb.core import Landuse, LanduseMode, Ron, Soils, SoilsMode
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.exception_logging import with_exception_logging
 
 
 REDIS_HOST: str = redis_host()
@@ -26,6 +27,7 @@ RQ_DB: int = int(RedisDB.RQ)
 TIMEOUT: int = 43_200
 
 
+@with_exception_logging
 def land_and_soil_rq(
     runid: Optional[str],
     extent: Sequence[float],
