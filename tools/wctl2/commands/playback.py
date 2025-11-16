@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
-from typing import Optional
+from typing import NamedTuple, Optional
 
 import requests
 import typer
@@ -57,7 +58,32 @@ def _raise_for_status(response: requests.Response) -> None:
         raise typer.Exit(1) from exc
 
 
-def _stream_post(url: str, payload: dict, headers: dict) -> None:
+class PlaybackStreamOutcome(NamedTuple):
+    token: Optional[str]
+    saw_error: bool
+
+
+_TOKEN_RE = re.compile(r"token=([0-9a-fA-F]{32})")
+_ERROR_PATTERNS = ("playback error", "runtimeerror", "traceback", "status failed")
+
+
+def _update_outcome(outcome: PlaybackStreamOutcome, line: str) -> PlaybackStreamOutcome:
+    token_match = _TOKEN_RE.search(line)
+    token = outcome.token or (token_match.group(1) if token_match else None)
+    lowered = line.lower()
+    saw_error = outcome.saw_error or any(pattern in lowered for pattern in _ERROR_PATTERNS)
+    return PlaybackStreamOutcome(token=token, saw_error=saw_error)
+
+
+def _parse_lines(lines, outcome: PlaybackStreamOutcome) -> PlaybackStreamOutcome:
+    for line in lines:
+        outcome = _update_outcome(outcome, line)
+        typer.echo(line)
+    return outcome
+
+
+def _stream_post(url: str, payload: dict, headers: dict) -> PlaybackStreamOutcome:
+    outcome = PlaybackStreamOutcome(token=None, saw_error=False)
     try:
         with requests.post(url, json=payload, headers=headers, stream=True, timeout=None) as response:
             _raise_for_status(response)
@@ -65,7 +91,9 @@ def _stream_post(url: str, payload: dict, headers: dict) -> None:
             try:
                 for chunk in response.iter_lines():
                     if chunk:
-                        typer.echo(chunk.decode("utf-8"))
+                        line = chunk.decode("utf-8")
+                        outcome = _update_outcome(outcome, line)
+                        typer.echo(line)
                         received_any = True
             except requests.exceptions.ChunkedEncodingError as exc:
                 if not received_any:
@@ -74,7 +102,7 @@ def _stream_post(url: str, payload: dict, headers: dict) -> None:
                     f"[wctl] Streaming finished with chunked-encoding warning ({exc}); continuing without fallback.",
                     err=True,
                 )
-                return
+                return outcome
     except Exception as exc:
         # Handle chunked transfer encoding issues by falling back to non-streaming
         typer.echo(f"[wctl] Streaming failed ({exc.__class__.__name__}: {exc}), falling back to non-streaming...", err=True)
@@ -82,11 +110,11 @@ def _stream_post(url: str, payload: dict, headers: dict) -> None:
             response = requests.post(url, json=payload, headers=headers, stream=False, timeout=None)
             _raise_for_status(response)
             # Output the response text line by line to simulate streaming
-            for line in response.text.splitlines():
-                typer.echo(line)
+            outcome = _parse_lines(response.text.splitlines(), outcome)
         except Exception as fallback_exc:
             typer.echo(f"[wctl] Fallback also failed: {fallback_exc}", err=True)
             raise typer.Exit(1) from fallback_exc
+    return outcome
 
 
 def _post_json(url: str, payload: dict, headers: dict) -> None:
@@ -98,6 +126,24 @@ def _post_json(url: str, payload: dict, headers: dict) -> None:
         typer.echo(response.text)
     else:
         typer.echo(json.dumps(data, indent=2))
+
+
+def _fetch_result(service_url: str, token: str, headers: dict) -> Optional[dict]:
+    # Only forward cookies for result lookup; other headers (content-type, encoding)
+    # are unnecessary for GET.
+    result_headers = {}
+    if "Cookie" in headers:
+        result_headers["Cookie"] = headers["Cookie"]
+    url = f"{service_url.rstrip('/')}/run/result/{token}"
+    response = requests.get(url, headers=result_headers, timeout=60)
+    if response.status_code == 404:
+        return None
+    _raise_for_status(response)
+    try:
+        return response.json()
+    except ValueError:
+        typer.echo(f"[wctl] Unexpected non-JSON result for token {token}: {response.text}", err=True)
+        raise typer.Exit(1)
 
 
 def register(app: typer.Typer) -> None:
@@ -151,7 +197,22 @@ def register(app: typer.Typer) -> None:
         url = f"{resolved_service_url.rstrip('/')}/run/{profile}"
         typer.echo(f"[wctl] POST {url}", err=True)
         typer.echo(f"[wctl] payload: {json.dumps(payload)}", err=True)
-        _stream_post(url, payload, headers)
+        outcome = _stream_post(url, payload, headers)
+
+        if outcome.saw_error:
+            typer.echo("[wctl] playback stream reported errors; failing CI early.", err=True)
+            raise typer.Exit(1)
+
+        if not outcome.token:
+            typer.echo("[wctl] playback stream completed without exposing result token; marking as failure.", err=True)
+            raise typer.Exit(1)
+
+        result = _fetch_result(resolved_service_url, outcome.token, headers)
+        if result is None:
+            typer.echo(f"[wctl] no result found for token={outcome.token}; marking as failure.", err=True)
+            raise typer.Exit(1)
+
+        typer.echo(f"[wctl] playback completed successfully; token={outcome.token}", err=True)
         raise typer.Exit(0)
 
     @app.command("run-fork-profile")

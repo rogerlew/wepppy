@@ -42,8 +42,8 @@ def _run(cmd: List[str], cwd: Path | None = None, env: dict | None = None) -> No
     subprocess.run(cmd, check=True, cwd=cwd, env=env)
 
 
-def _run_wctl(cmd: List[str], cwd: Path, env: dict) -> subprocess.CompletedProcess:
-    """Run a wctl command, echo output, and return the completed process."""
+def _run_wctl(cmd: List[str], cwd: Path, env: dict, quiet: bool = False) -> subprocess.CompletedProcess:
+    """Run a wctl command, optionally suppressing output, and return the completed process."""
     proc = subprocess.run(
         cmd,
         cwd=cwd,
@@ -51,10 +51,11 @@ def _run_wctl(cmd: List[str], cwd: Path, env: dict) -> subprocess.CompletedProce
         text=True,
         capture_output=True,
     )
-    if proc.stdout:
-        sys.stdout.write(proc.stdout)
-    if proc.stderr:
-        sys.stderr.write(proc.stderr)
+    if not quiet or proc.returncode != 0:
+        if proc.stdout:
+            sys.stdout.write(proc.stdout)
+        if proc.stderr:
+            sys.stderr.write(proc.stderr)
     return proc
 
 
@@ -173,9 +174,15 @@ def _capture_profile(
     last_error: str | None = None
     for attempt in range(1, args.retries + 1):
         print(f"[attempt {attempt}/{args.retries}] {slug}")
-        proc = _run_wctl(cmd, cwd=args.repo_root, env=args.exec_env)
-        if proc.returncode != 0 or _has_playback_error(proc.stdout or "") or _has_playback_error(proc.stderr or ""):
-            last_error = proc.stdout + proc.stderr
+        proc = _run_wctl(cmd, cwd=args.repo_root, env=args.exec_env, quiet=True)
+        out = proc.stdout or ""
+        err = proc.stderr or ""
+        if proc.returncode != 0 or _has_playback_error(out) or _has_playback_error(err):
+            last_error = out + err
+            if out:
+                sys.stdout.write(out)
+            if err:
+                sys.stderr.write(err)
             if attempt < args.retries:
                 print(f"[retry] {slug} due to playback error/exit code")
                 continue
@@ -315,7 +322,8 @@ def _execute_batch(args: argparse.Namespace) -> None:
         print(f"No profiles found under {args.profiles_root}", file=sys.stderr)
         sys.exit(1)
 
-    for slug in profiles:
+    total = len(profiles)
+    for idx, slug in enumerate(profiles, start=1):
         if not _matches(slug, args.include, args.exclude):
             continue
         if not _has_capture(args.profiles_root, slug):
@@ -326,7 +334,7 @@ def _execute_batch(args: argparse.Namespace) -> None:
             print(f"[skip] {slug} (coverage artifact already exists)")
             continue
 
-        print(f"[run] {slug}")
+        print(f"[run {idx}/{total}] {slug}")
         if args.dry_run:
             continue
 
