@@ -19,7 +19,13 @@ except Exception:  # pragma: no cover - optional dependency
 LOGGER = logging.getLogger(__name__)
 
 
-def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
+def run_wepp_watershed_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    start_year: int | None = None,
+    run_soil_interchange: bool = True,
+    run_chnwb_interchange: bool = True,
+) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -39,10 +45,12 @@ def run_wepp_watershed_interchange(wepp_output_dir: Path | str, *, start_year: i
         (run_wepp_watershed_ebe_interchange, dict(start_year_kwargs)),
         (run_wepp_watershed_chanwb_interchange, dict(start_year_kwargs)),
         (run_wepp_watershed_chan_peak_interchange, dict(start_year_kwargs)),
-        (run_wepp_watershed_chnwb_interchange, dict(start_year_kwargs)),
-        (run_wepp_watershed_soil_interchange, {}),
-        (run_wepp_watershed_loss_interchange, {}),
     ]
+    if run_chnwb_interchange:
+        tasks.append((run_wepp_watershed_chnwb_interchange, dict(start_year_kwargs)))
+    if run_soil_interchange:
+        tasks.append((run_wepp_watershed_soil_interchange, {}))
+    tasks.append((run_wepp_watershed_loss_interchange, {}))
 
     with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
         futures = {executor.submit(func, base, **kwargs): func for func, kwargs in tasks}

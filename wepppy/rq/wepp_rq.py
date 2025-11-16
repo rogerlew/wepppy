@@ -511,10 +511,8 @@ def run_wepp_rq(runid: str) -> Job:
 
             # jobs:6
             job6_finalfinal: Job
-            if len(jobs5_post) > 0:
-                job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs5_post)
-            else:
-                job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs4_post)
+            final_dependencies = jobs4_post + jobs5_post
+            job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=final_dependencies)
                 
             job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
             job.save()
@@ -959,7 +957,14 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         climate = Climate.getInstance(wd)
         start_year = climate.calendar_start_year
-        run_wepp_watershed_interchange(_join(wd, 'wepp/output'), start_year=start_year)
+        run_soil_interchange = not climate.is_single_storm
+        run_chnwb_interchange = not climate.is_single_storm
+        run_wepp_watershed_interchange(
+            _join(wd, 'wepp/output'),
+            start_year=start_year,
+            run_soil_interchange=run_soil_interchange,
+            run_chnwb_interchange=run_chnwb_interchange,
+        )
         generate_interchange_documentation(_join(wd, 'wepp/output/interchange'))
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
