@@ -11,7 +11,7 @@ from datetime import datetime
 from os.path import join as _join
 from typing import Any, Dict, Tuple
 
-from osgeo import gdal
+from osgeo import gdal, osr
 from owslib.wms import WebMapService
 
 from wepppy.all_your_base import isfloat
@@ -164,6 +164,8 @@ def fetch_layer(
         soils_dir: Output directory.
         status_channel: Optional Redis pub/sub channel for logging.
     """
+    global soil_grid_proj4
+
     if status_channel:
             StatusMessenger.publish(status_channel, f'    fetch_layer({layer}:{wms_url})')
     wms = WebMapService(wms_url)
@@ -173,8 +175,24 @@ def fetch_layer(
                           size=size,
                           format=format)
     filename = f'{layer}.tif'
-    with open(os.path.join(soils_dir, filename), 'wb') as out:
+    file_path = os.path.join(soils_dir, filename)
+    with open(file_path, 'wb') as out:
         out.write(response.read())
+
+    # Workaround for ISRIC WMS bug: EPSG:152160 responses missing CRS metadata
+    # Check if projection is missing and inject Homolosine WKT if needed
+    if crs == 'EPSG:152160':
+        ds = gdal.Open(file_path, gdal.GA_ReadOnly)
+        wkt = ds.GetProjection()
+        ds = None
+
+        if len(wkt) == 0:
+            # Missing projection - inject the Homolosine WKT
+            ds = gdal.Open(file_path, gdal.GA_Update)
+            sr = osr.SpatialReference()
+            sr.ImportFromProj4(soil_grid_proj4)
+            ds.SetProjection(sr.ExportToWkt())
+            ds = None
 
 def fetch_isric_soil_layers(
     wgs_bbox: BBox,
@@ -242,7 +260,7 @@ def fetch_isric_wrb(
         soils_dir: Target directory for the GeoTIFF + RAT.
         status_channel: Optional Redis pub/sub channel for UI feedback.
     """
-    global isric_wrb_map
+    global isric_wrb_map, soil_grid_proj4
 
     if status_channel:
          StatusMessenger.publish(status_channel, f'    fetch_isric_wrb({wgs_bbox})')
@@ -263,19 +281,26 @@ def fetch_isric_wrb(
 
     # Save the response to a file
     filename = 'wrb_MostProbable.tif'
-    with open(_join(soils_dir, filename), 'wb') as out:
+    file_path = _join(soils_dir, filename)
+    with open(file_path, 'wb') as out:
         out.write(response.read())
 
-
     # Open the GeoTIFF in update mode
-    ds = gdal.Open(_join(soils_dir, filename), gdal.GA_Update)
+    ds = gdal.Open(file_path, gdal.GA_Update)
 
     if ds is None:
         print("Error opening the GeoTIFF file.")
     else:
+        # Workaround for ISRIC WMS bug: EPSG:152160 responses missing CRS metadata
+        # Check if projection is missing and inject Homolosine WKT if needed
+        wkt = ds.GetProjection()
+        if len(wkt) == 0 and crs == 'EPSG:152160':
+            sr = osr.SpatialReference()
+            sr.ImportFromProj4(soil_grid_proj4)
+            ds.SetProjection(sr.ExportToWkt())
+
         # Assuming the RAT is to be attached to the first band
         band = ds.GetRasterBand(1)
-
 
         # Create a new GDALRasterAttributeTable
         rat = gdal.RasterAttributeTable()
@@ -289,7 +314,6 @@ def fetch_isric_wrb(
             idx = rat.GetRowCount()
             rat.SetValueAsInt(idx, 0, value)  # Set value in 'VALUE' column
             rat.SetValueAsString(idx, 1, classification)  # Set soil classification in 'RSG' column
-
 
         # Attach the RAT to the band
         band.SetDefaultRAT(rat)

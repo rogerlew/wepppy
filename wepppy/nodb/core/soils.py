@@ -387,10 +387,12 @@ class Soils(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
         from wepppy.locales.earth.soils.isric import ISRICSoilData
 
-        if max_workers < 1:
-            max_workers = 1
-        if max_workers > 16:
-            max_workers = 16
+#        if max_workers < 1:
+#            max_workers = 1
+#        if max_workers > 8:
+#            max_workers = 8
+
+        max_workers = 1
 
         wd = self.wd
         watershed = self.watershed_instance
@@ -421,7 +423,7 @@ class Soils(NoDbBase):
             # Prepare arguments for multiprocessing
 
             # Execute in parallel
-            with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger, prefer_spawn=False) as executor:
+            with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger, prefer_spawn=True) as executor:
                 futures = []
                 for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                     futures.append(
