@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Optional
 
 import requests
@@ -35,6 +36,17 @@ def _default_base_url(context: CLIContext, override: Optional[str]) -> str:
     # Local HTTP base URL works only when callers supply their own cookie; playback's automated
     # login requires the public HTTPS host because WEPPcloud marks auth cookies as Secure.
     return "http://weppcloud:8000/weppcloud"
+
+def _resolve_coverage_config(context: CLIContext, override: Optional[str]) -> Optional[str]:
+    if override:
+        candidate = Path(override)
+        if not candidate.is_absolute():
+            candidate = (context.project_dir / candidate).resolve()
+        return str(candidate)
+    default = context.project_dir / "wepppy" / "weppcloud" / "coverage.profile-playback.ini"
+    if default.exists():
+        return str(default.resolve())
+    return None
 
 
 def _raise_for_status(response: requests.Response) -> None:
@@ -102,17 +114,35 @@ def register(app: typer.Typer) -> None:
             "--cookie-file",
             help="Read Cookie header from a file.",
         ),
+        trace_code: bool = typer.Option(False, "--trace-code", help="Enable profile coverage tracing."),
+        coverage_dir: Optional[str] = typer.Option(
+            None,
+            "--coverage-dir",
+            help="Directory inside the profile-playback container where combined coverage artifacts are written.",
+        ),
+        coverage_config: Optional[str] = typer.Option(
+            None,
+            "--coverage-config",
+            help="Override coverage.profile-playback.ini path (relative to the project root).",
+        ),
     ) -> None:
         context = _context(ctx)
         resolved_service_url = _default_service_url(context, service_url)
         resolved_base_url = _default_base_url(context, base_url)
         resolved_cookie = load_cookie(cookie, cookie_file)
+        resolved_coverage_config = _resolve_coverage_config(context, coverage_config) if trace_code else None
 
         payload = {"dry_run": dry_run, "verbose": True}
         if resolved_base_url:
             payload["base_url"] = resolved_base_url
         if resolved_cookie:
             payload["cookie"] = resolved_cookie
+        if trace_code:
+            payload["trace_code"] = True
+            if coverage_dir:
+                payload["coverage_dir"] = coverage_dir
+            if resolved_coverage_config:
+                payload["coverage_config"] = resolved_coverage_config
 
         headers = {"Content-Type": "application/json", "Accept-Encoding": "identity"}
         if resolved_cookie:

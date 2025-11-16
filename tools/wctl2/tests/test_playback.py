@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 import pytest
@@ -71,6 +72,39 @@ def test_run_test_profile_streams_output(monkeypatch: pytest.MonkeyPatch, temp_p
     assert calls["json"]["verbose"] is True
     assert calls["json"]["base_url"] == "http://weppcloud:8000/weppcloud"
     assert calls["headers"]["Content-Type"] == "application/json"
+
+
+def test_run_test_profile_with_trace(monkeypatch: pytest.MonkeyPatch, temp_project: Path) -> None:
+    coverage_file = temp_project / "wepppy" / "weppcloud" / "coverage.profile-playback.ini"
+    coverage_file.parent.mkdir(parents=True, exist_ok=True)
+    coverage_file.write_text("[run]\n")
+
+    runner = CliRunner()
+    calls: Dict[str, Any] = {}
+
+    def fake_post(url, json=None, headers=None, stream=None, timeout=None):
+        calls["json"] = json
+        return _StreamResponse(lines=["done"], status=200)
+
+    monkeypatch.setattr("tools.wctl2.commands.playback.requests.post", fake_post)
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-test-profile",
+            "backed-globule",
+            "--trace-code",
+            "--coverage-dir",
+            "/tmp/profile-coverage",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert calls["json"]["trace_code"] is True
+    assert calls["json"]["coverage_dir"] == "/tmp/profile-coverage"
+    assert calls["json"]["coverage_config"] == str(coverage_file.resolve())
 
 
 def test_run_archive_profile_prints_json(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:

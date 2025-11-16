@@ -43,6 +43,7 @@ from wepppy.nodb.core import Ron
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils.agent_auth import init_agent_jwt
 from wepppy.weppcloud.utils.oauth import utc_now
+from wepppy.weppcloud.profile_coverage import init_profile_coverage
 
 import logging
 from wepppy.weppcloud._jinja_filters import register_jinja_filters
@@ -56,6 +57,7 @@ config_logging(logging.INFO)
 app = Flask(__name__)
 config_app(app)
 init_agent_jwt(app)
+init_profile_coverage(app)
 
 # Flask 3 removed the legacy attribute that older extensions (Flask-Session)
 # still reference; reintroduce it for compatibility.

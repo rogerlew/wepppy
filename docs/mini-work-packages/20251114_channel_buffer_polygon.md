@@ -1,7 +1,7 @@
 # Mini Work Package: Channel Buffer Polygon Stamp for HEC-RAS Mesh Prep
 
-**Status:** Draft  
-**Last Updated:** 2025-11-14  
+**Status:** Completed  
+**Last Updated:** 2025-11-15  
 **Primary Areas:** `wepppy/rq/wepp_rq.py`, `wepppy/wepp/interchange/hec_ras_boundary.py`, `watershed/channels.parquet`, `Watershed.subwta`, `export/dss/*`
 
 ---
@@ -100,3 +100,25 @@ The mapping should be centralized (e.g., `HEC_RAS_ORDER_WIDTH = {1: 30.0, 2: 60.
 - **QA hooks:** no special preview artifacts today—the browse service will eventually gain generalized GML preview support if hydrologists need a richer visualization.
 
 Delivering this spec clears the path to implement the raster stamping helper and wire it into the DSS export flow without blocking on UI changes.
+
+## Outcome
+- `_write_hec_buffer_gml` now generates `export/dss/channel_buffer.gml` plus `export/dss/ras/channel_buffer_raster.tif` automatically during `_write_dss_channel_geojson`. Boundary channels stamp downstream-only while downstream traces fill the rest of the network.
+- The raster pipeline stamps dense elliptical kernels, performs a 3-pixel dilation, fills 4-neighbor holes, and then converts the mask to smooth polygons via `skimage.measure.find_contours`. This produces sub-pixel boundary curves without post-buffering artifacts.
+- Buffer metadata (selected IDs, downstream IDs, width rules, multiplier, raster cell size) is embedded in `dss_channels.geojson["metadata"]["channel_buffer"]` along with a `floodplain_polygon` pointer for UI download links.
+- The new contour step relies on `scikit-image==0.24.0`, now baked into the Docker image via `docker/requirements-uv.txt`.
+
+## Verification
+Ran the DSS export helper for the reference run to ensure the raster + GML emit correctly and look smooth in GIS previews:
+
+```bash
+./wctl/wctl.sh run-python <<'PY'
+from wepppy.rq.wepp_rq import _write_dss_channel_geojson
+_write_dss_channel_geojson('/wc1/runs/si/sizzling-hap', None)
+PY
+```
+
+This regenerated `export/dss/channel_buffer.gml` + `ras/channel_buffer_raster.tif` for `sizzling-hap`, confirming the contour-based workflow behaves in a real run directory.
+
+## Follow-ups
+- Surface the buffer download link and preview inside the WEPPcloud UI once the browse service can render arbitrary GML.
+- Monitor runtime on large basins; porting the stamping loop to Rust remains the primary option if DSS exports become noticeably slower. 

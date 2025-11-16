@@ -41,6 +41,7 @@ cligj==0.7.2
 cloudpickle==2.0.0
 comm==0.2.2
 contourpy==1.2.1
+coverage[toml]==7.11.3
 cryptography==44.0.2
 cycler==0.11.0
 cython==3.0.10

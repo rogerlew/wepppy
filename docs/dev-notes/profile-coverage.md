@@ -31,7 +31,7 @@ Leave the playback service (`profile-playback`) running as-is; it will inject th
 
 ## 2. Run a traced profile
 
-Execute the playback via `wctl` from the repository root. Always point `--coverage-dir` at a container-friendly path (for example `/tmp/profile-coverage`) so the FastAPI service can create the directory. Sample command for the `legacy-palouse` profile:
+Execute the playback via `wctl` from the repository root. **Default artifact path:** `/workdir/wepppy-test-engine-data/coverage/<slug>.coverage` (shared bind mount used by weppcloud + workers). `--coverage-dir` is optional and only needed when you want a second copy inside the playback container. Sample command for the `legacy-palouse` profile:
 
 ```bash
 cd /home/workdir/wepppy
@@ -46,7 +46,7 @@ Key expectations:
 
 - The playback stream shows normal HTTP activity followed by `Profile coverage saved to /tmp/profile-coverage/legacy-palouse.coverage`.
 - `/home/workdir/wepppy-test-engine-data/profiles/_runs/<token>.json` contains the run summary (run id, sandbox id, request log).
-- `/home/workdir/wepppy-test-engine-data/coverage` fills with `legacy-palouse.coverage.*` shards emitted by the Flask workers/RQ tasks.
+- `/home/workdir/wepppy-test-engine-data/coverage` fills with `legacy-palouse.coverage.*` shards emitted by the Flask workers/RQ tasks, and the merged `/home/workdir/wepppy-test-engine-data/coverage/legacy-palouse.coverage` file.
 
 If you need to run every profile back-to-back, the helper command does the globbing, header injection, and shard consolidation for you:
 
@@ -85,6 +85,13 @@ If playback dies early (502/500), check:
    ```
 
 3. (Optional) Remove the intermediate shards from the shared data volume once you have confirmed the `.coverage` file exists.
+
+## Current instrumentation notes (2025-11-15)
+
+- Coverage 7.11.3 is required; `coverage.py` is imported directly in weppcloud, rq-worker, and profile-playback. Import will fail fast if missing.
+- `X-Profile-Trace: <slug>` header activates tracing per request. Logs now show header detection, coverage start (slug/data_file/context), job tagging, and worker coverage startup to make debugging loss of the slug straightforward.
+- Default data root: `/workdir/wepppy-test-engine-data/coverage` (set via `PROFILE_COVERAGE_DIR` / `ENABLE_PROFILE_COVERAGE=1`).
+- `--coverage-dir` simply mirrors the merged artifact into a path inside the playback container; it no longer affects where shards are written.
 
 ## 4. Notes & troubleshooting
 

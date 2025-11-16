@@ -24,6 +24,7 @@ x-wepppy-service: &wepppy-service
     PROFILE_PLAYBACK_FORK_ROOT: ${PROFILE_PLAYBACK_FORK_ROOT:-/workdir/wepppy-test-engine-data/playback/fork}
     PROFILE_PLAYBACK_ARCHIVE_ROOT: ${PROFILE_PLAYBACK_ARCHIVE_ROOT:-/workdir/wepppy-test-engine-data/playback/archive}
     PROFILE_PLAYBACK_USE_CLONE: ${PROFILE_PLAYBACK_USE_CLONE:-true}
+    ENABLE_PROFILE_COVERAGE: ${ENABLE_PROFILE_COVERAGE:-false}
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:

@@ -86,6 +86,13 @@ def run_test(args: argparse.Namespace) -> int:
     if cookie:
         payload["cookie"] = cookie
 
+    if args.trace_code:
+        payload["trace_code"] = True
+        if args.coverage_dir:
+            payload["coverage_dir"] = args.coverage_dir
+        if args.coverage_config:
+            payload["coverage_config"] = args.coverage_config
+
     headers = {"Content-Type": "application/json"}
     if cookie:
         headers["Cookie"] = cookie
@@ -158,6 +165,9 @@ def build_parser() -> argparse.ArgumentParser:
     test.add_argument("--service-url", help="Override playback service URL.")
     test.add_argument("--cookie", help="Raw Cookie header forwarded to WEPPcloud.")
     test.add_argument("--cookie-file", help="Read Cookie header from a file.")
+    test.add_argument("--trace-code", action="store_true", help="Enable profile coverage tracing.")
+    test.add_argument("--coverage-dir", help="Directory for combined coverage artifacts inside the playback container.")
+    test.add_argument("--coverage-config", help="Override coverage.profile-playback.ini path.")
     test.set_defaults(func=run_test)
 
     fork = sub.add_parser("run-fork-profile", help="Trigger a fork job against the sandbox run.")

@@ -30,12 +30,31 @@ from rq.exceptions import NoSuchJobError
 
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.profile_coverage import load_settings_from_env
+from wepppy.profile_coverage.runtime import (
+    install_rq_hooks,
+    reset_profile_trace_slug,
+    set_profile_trace_slug,
+)
+try:
+    from coverage import Coverage
+    from coverage.exceptions import CoverageException
+except ImportError as exc:  # coverage is required for profile tracing
+    raise RuntimeError("coverage.py must be installed for profile coverage") from exc
+
+from uuid import uuid4
 
 
 REDIS_HOST = redis_host()
 RQ_DB = int(RedisDB.RQ)
 
 DEFAULT_RESULT_TTL = 604_800  # 1 week
+
+LOGGER = logging.getLogger(__name__)
+PROFILE_COVERAGE_SETTINGS = load_settings_from_env()
+if PROFILE_COVERAGE_SETTINGS.enabled and Coverage is not None:
+    PROFILE_COVERAGE_SETTINGS.ensure_data_root(LOGGER)
+    install_rq_hooks()
 
 
 class JobCancelledException(Exception):
@@ -50,6 +69,58 @@ class WepppyRqWorker(Worker):
         super().__init__(*args, **kwargs)
         # Set the signal handler for SIGUSR1
         signal.signal(signal.SIGUSR1, self.handle_cancel_signal)
+
+    def _start_job_coverage(self, job: Job):
+        if not PROFILE_COVERAGE_SETTINGS.enabled:
+            return None
+        slug = None
+        if isinstance(job.meta, dict):
+            slug = job.meta.get("profile_trace_slug")
+        if not slug:
+            LOGGER.info(
+                "Profile coverage: job %s has no profile_trace_slug meta; skipping coverage.",
+                job.id,
+            )
+            return None
+        token = uuid4().hex
+        ctx_token = set_profile_trace_slug(slug)
+        kwargs = PROFILE_COVERAGE_SETTINGS.coverage_kwargs(slug, token)
+        LOGGER.info(
+            "Profile coverage: starting for job %s slug=%s data_file=%s context=%s",
+            job.id,
+            slug,
+            kwargs.get("data_file"),
+            kwargs.get("context"),
+        )
+        try:
+            cov = Coverage(**kwargs)
+            try:
+                cov.load()
+            except CoverageException:
+                pass
+            cov.start()
+        except Exception as exc:  # pragma: no cover - defensive logging
+            reset_profile_trace_slug(ctx_token)
+            LOGGER.warning(
+                "Failed to start profile coverage for job %s (slug=%s): %s",
+                job.id,
+                slug,
+                exc,
+            )
+            return None
+        return cov, ctx_token, slug
+
+    def _stop_job_coverage(self, state) -> None:
+        coverage_state, ctx_token, slug = state
+        try:
+            coverage_state.stop()
+            coverage_state.save()
+        except CoverageException as exc:  # pragma: no cover - logging only
+            LOGGER.warning("Profile coverage save failed for slug %s: %s", slug, exc)
+        except Exception as exc:  # pragma: no cover - defensive logging
+            LOGGER.exception("Unexpected error while saving coverage for slug %s: %s", slug, exc)
+        finally:
+            reset_profile_trace_slug(ctx_token)
         
     def perform_job(self, job: 'Job', queue: 'Queue') -> bool:
         """Override perform_job to capture PID/runid metadata and log to rq.log."""
@@ -74,10 +145,13 @@ class WepppyRqWorker(Worker):
             except OSError:
                 file_handler = None
 
+        coverage_state = self._start_job_coverage(job)
         try:
             print(f"Starting job {job.id}")
             return super().perform_job(job, queue)
         finally:
+            if coverage_state:
+                self._stop_job_coverage(coverage_state)
             if file_handler:
                 self.log.removeHandler(file_handler)
                 

@@ -43,7 +43,12 @@ os.environ.setdefault("EXTENDED_MODS_DATA", _EXTENDED_MODS_DATA_ROOT)
 from wepppy.nodb.base import clear_locks
 from wepppy.nodb.core import Ron
 from wepppy.profile_recorder.playback import PlaybackSession
-
+from wepppy.profile_coverage import load_settings_from_env
+try:
+    from coverage import Coverage
+    from coverage.exceptions import CoverageException
+except ImportError as exc:  # coverage is required for profile tracing
+    raise RuntimeError("coverage.py must be installed for profile coverage") from exc
 
 PROFILE_ROOT = Path(os.environ.get("PROFILE_PLAYBACK_ROOT", "/workdir/wepppy-test-engine-data/profiles"))
 # NOTE: WEPPcloud authentication cookies are flagged Secure, so playback must target HTTPS;
@@ -51,6 +56,10 @@ PROFILE_ROOT = Path(os.environ.get("PROFILE_PLAYBACK_ROOT", "/workdir/wepppy-tes
 DEFAULT_BASE_URL = os.environ.get("PROFILE_PLAYBACK_BASE_URL", "https://wc.bearhive.duckdns.org/weppcloud")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+PROFILE_COVERAGE_SETTINGS = load_settings_from_env()
+DEFAULT_COVERAGE_EXPORT_DIR = Path(
+    os.environ.get("PROFILE_COVERAGE_EXPORT_DIR", "/tmp/profile-coverage")
+)
 
 
 def _sandbox_root(env_key: str, default_subdir: str) -> Path:
@@ -76,6 +85,15 @@ class ProfileRunRequest(BaseModel):
         description="Optional Cookie header forwarded with every request to WEPPcloud.",
     )
     verbose: bool = Field(False, description="Emit progress logs during replay.")
+    trace_code: bool = Field(False, description="Enable backend coverage tracing for the profile run.")
+    coverage_dir: Optional[str] = Field(
+        default=None,
+        description="Directory (inside the profile-playback container) where combined coverage artifacts are mirrored.",
+    )
+    coverage_config: Optional[str] = Field(
+        default=None,
+        description="Optional path to coverage.profile-playback.ini overriding the default config file.",
+    )
 
 
 class ProfileRunResult(BaseModel):
@@ -96,6 +114,10 @@ class ProfileRunResult(BaseModel):
     run_dir: str
     report: str
     requests: List[dict]
+    coverage_artifact: Optional[str] = Field(
+        default=None,
+        description="Path to the combined profile coverage artifact when tracing is enabled.",
+    )
 
 
 class ProfileForkRequest(BaseModel):
@@ -168,6 +190,75 @@ class ProfileArchiveResult(BaseModel):
 
 app = FastAPI(title="WEPPcloud Profile Playback", version="0.1.0")
 _RUNNER_LOGGER = logging.getLogger("profile_playback.runner")
+if PROFILE_COVERAGE_SETTINGS.enabled and Coverage is not None:
+    PROFILE_COVERAGE_SETTINGS.ensure_data_root(_RUNNER_LOGGER)
+
+
+def _resolve_config_path(override: Optional[str]) -> Optional[Path]:
+    if override:
+        candidate = Path(override)
+        if not candidate.is_absolute():
+            candidate = (Path(__file__).resolve().parents[2] / override).resolve()
+        candidate = candidate.expanduser()
+        return candidate if candidate.exists() else None
+    return PROFILE_COVERAGE_SETTINGS.config_path
+
+
+def _combine_profile_coverage(slug: str, config_override: Optional[str], logger: logging.Logger) -> Optional[Path]:
+    if not PROFILE_COVERAGE_SETTINGS.enabled:
+        logger.debug("Profile coverage disabled; skipping combine for %s", slug)
+        return None
+    data_root = PROFILE_COVERAGE_SETTINGS.data_root
+    shards = sorted(data_root.glob(f"{slug}.coverage.*"))
+    if not shards:
+        logger.warning("No coverage shards found for %s in %s", slug, data_root)
+        return None
+
+    target_file = data_root / f"{slug}.coverage"
+    try:
+        target_file.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+    config_path = _resolve_config_path(config_override)
+    kwargs = {"data_file": str(target_file)}
+    if config_path:
+        kwargs["config_file"] = str(config_path)
+
+    try:
+        coverage_runner = Coverage(**kwargs)
+        coverage_runner.combine([str(path) for path in shards])
+        coverage_runner.save()
+    except CoverageException as exc:
+        logger.error("Failed to combine coverage for %s: %s", slug, exc)
+        return None
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.exception("Unexpected coverage error for %s: %s", slug, exc)
+        return None
+
+    return target_file
+
+
+def _export_profile_coverage(slug: str, output_dir: Optional[str], config_override: Optional[str], logger: logging.Logger) -> Optional[Path]:
+    combined = _combine_profile_coverage(slug, config_override, logger)
+    if combined is None:
+        return None
+
+    destination_root = Path(output_dir).expanduser() if output_dir else DEFAULT_COVERAGE_EXPORT_DIR
+    try:
+        destination_root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        logger.error("Unable to create coverage export directory %s: %s", destination_root, exc)
+        return None
+
+    target = destination_root / combined.name
+    try:
+        shutil.copy2(combined, target)
+    except OSError as exc:
+        logger.error("Failed to copy coverage artifact for %s to %s: %s", slug, target, exc)
+        return None
+
+    return target
 
 
 def _color_output_enabled() -> bool:
@@ -734,6 +825,9 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
             _log_auth_success(profile, login_base_url)
             _mirror_cookies(session, login_base_url, playback_base_url)
 
+    if payload.trace_code:
+        session.headers["X-Profile-Trace"] = profile
+
     _RUNNER_LOGGER.info("Starting playback for %s (dry_run=%s)", profile, payload.dry_run)
 
     log_queue: Queue[str | None] = Queue()
@@ -748,6 +842,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
         handler.setFormatter(_PlaybackLogFormatter(colorize=_COLOR_OUTPUT))
         session_logger.addHandler(handler)
 
+        coverage_artifact: Optional[Path] = None
         try:
             playback = PlaybackSession(
                 profile_root=profile_root,
@@ -760,6 +855,20 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                 playback_run_id=sandbox_run_id,
             )
             playback.run()
+            if payload.trace_code:
+                coverage_artifact = _export_profile_coverage(
+                    profile,
+                    payload.coverage_dir,
+                    payload.coverage_config,
+                    session_logger,
+                )
+                if coverage_artifact:
+                    session_logger.info("Profile coverage saved to %s", coverage_artifact)
+                else:
+                    session_logger.warning(
+                        "Profile coverage requested for %s but no artifact was generated.",
+                        profile,
+                    )
             request_log = [{"id": request_id, "status": status} for request_id, status in playback.results]
             result = ProfileRunResult(
                 profile=profile,
@@ -771,6 +880,7 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
                 run_dir=str(playback.run_dir),
                 report=playback.report(),
                 requests=request_log,
+                coverage_artifact=str(coverage_artifact) if coverage_artifact else None,
             )
             result_path = _store_result(session_token, result)
             session_logger.info("result token=%s stored at %s", session_token, result_path)
@@ -868,4 +978,10 @@ def _extract_csrf_token(html: str) -> Optional[str]:
 if __name__ == "__main__":
     import uvicorn
 
+
     uvicorn.run("services.profile_playback.app:app", host="0.0.0.0", port=8070, reload=False)
+try:
+    from coverage import Coverage, CoverageException
+except ImportError:
+    Coverage = None  # type: ignore[assignment]
+    CoverageException = Exception  # type: ignore[assignment]
