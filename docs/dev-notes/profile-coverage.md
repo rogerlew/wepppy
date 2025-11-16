@@ -92,6 +92,7 @@ If playback dies early (502/500), check:
 - `X-Profile-Trace: <slug>` header activates tracing per request. Logs now show header detection, coverage start (slug/data_file/context), job tagging, and worker coverage startup to make debugging loss of the slug straightforward.
 - Default data root: `/workdir/wepppy-test-engine-data/coverage` (set via `PROFILE_COVERAGE_DIR` / `ENABLE_PROFILE_COVERAGE=1`).
 - `--coverage-dir` simply mirrors the merged artifact into a path inside the playback container; it no longer affects where shards are written.
+- `coverage.profile-playback.ini` intentionally omits the `source` setting to avoid filtering out traced files; `relative_files=True` plus the omit list is sufficient for profile runs.
 
 ## 4. Notes & troubleshooting
 
