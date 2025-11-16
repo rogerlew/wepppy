@@ -17,6 +17,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap, get_sbs_color_table
 from wepppy.all_your_base.geo import raster_stacker
+from wepppy.nodb.base import redis_lock_client
 
 
 # Use an existing test run directory for integration tests
@@ -32,6 +33,11 @@ def disturbed_instance():
     disturbed = Disturbed.getInstance(TEST_RUN_DIR)
     yield disturbed
     # Cleanup: Clear singleton but don't delete files
+    if redis_lock_client is not None:
+        try:
+            redis_lock_client.delete(disturbed._distributed_lock_key)  # type: ignore[attr-defined]
+        except Exception:
+            pass
     Disturbed._instances.clear()
 
 

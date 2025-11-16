@@ -1011,7 +1011,7 @@ class Climate(NoDbBase):
         Returns:
             Integer year if valid start year exists, None otherwise.
         """
-        def _normalize(value):
+        def _normalize(value: object) -> Optional[int]:
             try:
                 if value is None:
                     return None

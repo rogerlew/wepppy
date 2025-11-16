@@ -6,6 +6,9 @@ import json
 import logging
 import os
 import shutil
+import traceback
+from datetime import datetime
+from pathlib import Path
 
 from glob import glob
 from os.path import exists as _exists
@@ -14,7 +17,7 @@ from os.path import split as _split
 from typing import Any, Dict, Iterable, Optional, Set, Union
 
 from flask import (
-    Blueprint,
+    Blueprint as _FlaskBlueprint,
     abort,
     current_app,
     g,
@@ -43,6 +46,7 @@ from wepppy.weppcloud.utils.helpers import (
 
 __all__ = [
     'Blueprint',
+    'LoggedBlueprint',
     'abort',
     'authorize',
     'current_app',
@@ -87,6 +91,49 @@ __all__.extend([
 
 _TRUE_TOKENS: Set[str] = {'1', 'true', 'yes', 'on'}
 _FALSE_TOKENS: Set[str] = {'0', 'false', 'no', 'off'}
+
+
+def _maybe_log_exception(exc: Exception) -> None:
+    """Best-effort append of route exceptions to exceptions.log under the run folder."""
+    try:
+        view_args = getattr(request, "view_args", None) or {}
+        runid = view_args.get("runid") or view_args.get("run_id")
+        if not isinstance(runid, str):
+            return
+        wd = Path(get_wd(runid))
+        target = wd / "exceptions.log"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.utcnow().isoformat() + "Z"
+        endpoint = request.endpoint or "nodb_api"
+        stream = [
+            f"[{timestamp}] {endpoint}",
+            traceback.format_exc(),
+            "",
+        ]
+        with target.open("a", encoding="utf-8") as handle:
+            handle.write("\n".join(stream))
+    except Exception:
+        # Never interfere with Flask's exception propagation
+        return
+
+
+class LoggedBlueprint(_FlaskBlueprint):
+    """Blueprint that logs exceptions to the run workspace before propagation."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.register_error_handler(Exception, self._log_and_propagate)
+
+    @staticmethod
+    def _log_and_propagate(exc: Exception):
+        if not getattr(exc, "_logged_to_exceptions", False):
+            setattr(exc, "_logged_to_exceptions", True)
+            _maybe_log_exception(exc)
+        raise
+
+
+# Default export: use LoggedBlueprint for all route modules importing Blueprint
+Blueprint = LoggedBlueprint
 
 
 def _normalise_scalar(

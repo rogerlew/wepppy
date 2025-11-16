@@ -115,3 +115,15 @@ def _import_nodb_base() -> None:
         setattr(root_pkg, "profile_recorder", profile_pkg)
     except Exception:
         pass
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _ensure_wepppy_namespace() -> None:
+    """Ensure key subpackages are attached to the root wepppy module."""
+    root_pkg = importlib.import_module("wepppy")
+    for name in ("locales", "weppcloud", "rq"):
+        try:
+            submod = importlib.import_module(f"wepppy.{name}")
+            setattr(root_pkg, name, submod)
+        except Exception:
+            continue

@@ -9,7 +9,15 @@ if _CAO_SHIM_PATH.is_dir():
     __path__.append(str(_CAO_SHIM_PATH))
 
 
-_LAZY_SUBMODULES = {"rq", "climates", "mcp", "nodb", "profile_recorder"}
+_LAZY_SUBMODULES = {
+    "rq",
+    "climates",
+    "mcp",
+    "nodb",
+    "profile_recorder",
+    "locales",
+    "weppcloud",
+}
 
 
 def __getattr__(name):
