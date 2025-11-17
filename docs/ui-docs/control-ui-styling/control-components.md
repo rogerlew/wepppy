@@ -306,24 +306,24 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 ### Soil Burn Severity Control (`controls/disturbed_sbs_pure.htm`)
 - **Structure**: `ui.control_shell` keeps the SBS workflow inside a non-collapsible console. Mode selection uses `ui.radio_group`; upload view relies on `ui.file_upload` and `ui.text_display` for the current raster; uniform builders are rendered as `button_row()` actions with Pure buttons.
 - **JS contract**: Buttons expose `data-sbs-action` (`upload`, `remove`, `set-firedate`) and `data-sbs-uniform` for low/moderate/high presets. `baer.js` delegates events off the form and initialises visibility via `showHideControls` so both legacy and Pure markup stay in sync.
-- **Compatibility**: Legacy IDs (`#sbs_upload_form`, `#sbs_mode{0,1}_controls`, `hint_*`) are preserved to keep ControlBase logging and StatusStream wiring unchanged. The classic Bootstrap template remains at `controls/baer_upload.htm` for the legacy runs page until the toggle flips.
+- **Compatibility**: Legacy IDs (`#sbs_upload_form`, `#sbs_mode{0,1}_controls`, `hint_*`) are preserved to keep ControlBase logging and StatusStream wiring unchanged. The classic Bootstrap template (`controls/baer_upload.htm`) has been removed; Pure is the sole template.
 - **Status**: Implemented; TOC entry appears when `baer` or `disturbed` mods are active and `lt` is not present.
 
 ### Observed Data Control (`controls/observed_pure.htm`)
 - **Structure**: `ui.control_shell(collapsible=False)` with inline description of CSV requirements. Text entry uses `ui.textarea_field` (`id="observed_text"`) plus a `button_row()` housing `btn_run_observed`. Legacy summary/status IDs (`info`, `status`, `stacktrace`) remain via override hooks so `controlBase.attach_status_stream` continues to work.
 - **Status wiring**: Uses `ui.status_panel` (`observed_status_panel`) + `ui.stacktrace_panel`. `observed.js` now binds button clicks via delegated handler while still supporting the legacy `_base.htm` inline `onclick`.
 - **Hints & locks**: `run_observed_lock` image stays hidden by default and exposed through `preflight.js`. Hint label `hint_run_wepp` remains for compatibility.
-- **Status**: Implemented; legacy template retained for classic runs page. Future enhancement: optional CSV upload hook to share logic with the uploads helper.
+- **Status**: Implemented; Bootstrap legacy template removed. Future enhancement: optional CSV upload hook to share logic with the uploads helper.
 
 ### RAP Time Series Control (`controls/rap_ts_pure.htm`)
-- **Structure**: Minimal `ui.control_shell` with a short description paragraph and a single action button rendered via `button_row()`. The button retains `btn_build_rap_ts` so `rap_ts.js` can delegate clicks; the legacy template keeps its inline handler until the classic page is retired.
+- **Structure**: Minimal `ui.control_shell` with a short description paragraph and a single action button rendered via `button_row()`. The button retains `btn_build_rap_ts` so `rap_ts.js` can delegate clicks; the legacy template kept its inline handler until the classic page was retired.
 - **Status wiring**: `ui.status_panel` + `ui.stacktrace_panel` mirror other converted controls, allowing `controlBase.attach_status_stream` to surface queue updates. The hint (`hint_build_rap_ts`) remains below the button for log messaging, and the helper fabricates hidden placeholders when the legacy template renders.
-- **Status**: Implemented; bootstrap placeholder removed from `runs0_pure.htm`. Legacy `_base.htm` template persists for `0.htm` until Pure becomes default.
+- **Status**: Implemented; legacy Bootstrap template removed now that Pure is default.
 
 ### RHEM Control (`controls/rhem_pure.htm`)
 - **Structure**: Matches the RAP pattern with `ui.control_shell(collapsible=False)`, a short description, and a `button_row()` hosting the existing `btn_run_rhem` control. Hint text (`hint_run_rhem`) stays below the command bar for compatibility with legacy messaging.
 - **Status wiring**: Custom `status_panel`/`stacktrace_panel` overrides expose `#rq_job`, `#status`, and `#stacktrace` so `rhem.js` can stream updates. The controller attaches via `controlBase.attach_status_stream`, which creates fallback markup when the legacy `_base.htm` template renders.
-- **Status**: Implemented; legacy template remains on `0.htm` until the Pure layout becomes default.
+- **Status**: Implemented; legacy Bootstrap template removed now that the Pure layout is default.
 
 ### Debris Flow Control (`controls/debris_flow_pure.htm`)
 - **Structure**: `ui.control_shell(collapsible=False)` with a brief model disclaimer followed by a `button_row()` that retains `btn_run_debris_flow`. The PowerUser gate lives at the template include to mirror legacy behaviour.

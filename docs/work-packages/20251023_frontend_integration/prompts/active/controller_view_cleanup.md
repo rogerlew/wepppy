@@ -55,22 +55,22 @@
 ## Legacy / Orphan Templates (no runtime references)
 | Template(s) | Last hits | Recommendation |
 | --- | --- | --- |
-| `controls/ash.htm` | Docs only (`docs/ui-docs/ash-control-plan.md`) | Archive or delete after updating docs. |
-| `controls/baer_upload.htm` | Docs only | Superseded by `disturbed_sbs_pure.htm`; safe to archive. |
-| `controls/climate.htm` | Docs only | Pure climate control covers all use cases. |
+| `controls/ash.htm` | Removed (legacy) | Superseded by `ash_pure.htm`. |
+| `controls/baer_upload.htm` | Removed (legacy) | Superseded by `disturbed_sbs_pure.htm`. |
+| `controls/climate.htm` | Removed (legacy) | Pure climate control covers all use cases. |
 | `controls/debris_flow.htm` | Docs only | Replaced by `debris_flow_pure.htm`. |
-| `controls/dss_export.htm` | Docs only | Replaced by `dss_export_pure.htm`. |
-| `controls/export.htm` | Docs only | Functional overlap now lives under DSS export + reports. |
-| `controls/landuse_legacy.htm` | None | Remove with other `_base` legacy views. |
-| `controls/observed.htm` | Docs only | `observed_pure.htm` is the active view. |
+| `controls/dss_export.htm` | Removed (legacy) | Replaced by `dss_export_pure.htm`. |
+| `controls/export.htm` | Removed (legacy) | Functional overlap now lives under DSS export + reports. |
+| `controls/landuse_legacy.htm` | Removed (legacy) | Pure landuse control in use. |
+| `controls/observed.htm` | Removed (legacy) | `observed_pure.htm` is the active view. |
 | `controls/omni/omni_contrasts_definition.htm`, `controls/omni/omni_scenarios.htm` | Docs only | Legacy Bootstrap Omni views; archive alongside other `_base` templates. |
-| `controls/rangeland_cover.htm` | None | Legacy view, no runtime calls. |
-| `controls/rap_ts.htm` | None | Superseded by `rap_ts_pure.htm`. |
-| `controls/rhem.htm` | Docs only | Pure RHEM panel is the sole implementation. |
-| `controls/road_upload.htm` | None | No routes reference this control anymore. |
-| `controls/set_outlet_legacy.htm` | None | Obsoleted by `set_outlet_pure.htm`. |
-| `controls/soil_legacy.htm` | None | Pure soil control in use. |
-| `controls/team.htm` | None | Team management now relies exclusively on the Pure view. |
+| `controls/rangeland_cover.htm` | Removed (legacy) | Legacy view, no runtime calls. |
+| `controls/rap_ts.htm` | Removed (legacy) | Superseded by `rap_ts_pure.htm`. |
+| `controls/rhem.htm` | Removed (legacy) | Pure RHEM panel is the sole implementation. |
+| `controls/road_upload.htm` | Removed (legacy) | No routes reference this control anymore. |
+| `controls/set_outlet_legacy.htm` | Removed (legacy) | Obsoleted by `set_outlet_pure.htm`. |
+| `controls/soil_legacy.htm` | Removed (legacy) | Pure soil control in use. |
+| `controls/team.htm` | Removed (legacy) | Team management now relies exclusively on the Pure view. |
 | `controls/wepp.htm` | Removed (legacy) | Pure WEPP panel replaces it. |
 | `controls/wepp_advanced_options/*.htm` | Removed (legacy) | Superseded by `controls/wepp_pure_advanced_options/*.htm`. |
 
