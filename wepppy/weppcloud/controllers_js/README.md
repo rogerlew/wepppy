@@ -89,8 +89,8 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - The Project controller applies the same contract when readonly toggles queue `set_run_readonly_rq`; the worker now pushes human-readable updates to `<runid>:command`, which the command bar consumes directly to surface messages such as `manifest.db creation finished` without extra wiring.
 
 ## Views and DOM Contract
-- The HTML that controllers operate on lives under `wepppy/weppcloud/templates/controls/`. Each control has its own template (`wepp.htm`, `landuse.htm`, etc.) and they all extend the markup defined in `_base.htm`.
-- `_base.htm` defines the canonical form structure: `#status`, `#info`, `#rq_job`, `#stacktrace`, `#preflight_status`, and other fields that the JS expects. As long as new controls keep those IDs, `controlBase` can update the UI without per-controller duplication.
+- The HTML that controllers operate on lives under `wepppy/weppcloud/templates/controls/`. Each control has its own template (Pure variants such as `wepp_pure.htm`, `landuse_pure.htm`, etc.) and they extend the markup defined in `_pure_base.htm` (legacy `_base.htm` remains only for archived Bootstrap views).
+- `_pure_base.htm` defines the canonical form structure: `#status`, `#info`, `#rq_job`, `#stacktrace`, `#preflight_status`, and other fields that the JS expects. As long as new controls keep those IDs, `controlBase` can update the UI without per-controller duplication. Legacy `_base.htm` persists only for archived Bootstrap-era controls.
 - Higher-level pages (for example `templates/controls/poweruser_panel.htm`) compose multiple control templates, which in turn rely on the singleton controllers to bind behavior once the bundle loads.
 
 ## Build Script and Startup Integration

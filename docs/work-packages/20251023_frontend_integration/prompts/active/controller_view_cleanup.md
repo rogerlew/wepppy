@@ -71,15 +71,15 @@
 | `controls/set_outlet_legacy.htm` | None | Obsoleted by `set_outlet_pure.htm`. |
 | `controls/soil_legacy.htm` | None | Pure soil control in use. |
 | `controls/team.htm` | None | Team management now relies exclusively on the Pure view. |
-| `controls/wepp.htm` | Docs only | Pure WEPP panel replaces it; delete with `_advanced_options` set. |
-| `controls/wepp_advanced_options/*.htm` | Only included by `controls/wepp.htm` | Remove with the legacy WEPP template or stash for historical reference. |
+| `controls/wepp.htm` | Removed (legacy) | Pure WEPP panel replaces it. |
+| `controls/wepp_advanced_options/*.htm` | Removed (legacy) | Superseded by `controls/wepp_pure_advanced_options/*.htm`. |
 
 > All entries above were validated with `rg -l 'controls/<name>.htm'` and `rg -n '<name>.htm'`; only documentation files surfaced for these templates.
 
 ## Documentation Updates Needed
 - `docs/ui-docs/control-ui-styling/control-inventory.md` – drop references to legacy `_base` templates and confirm Pure coverage.
 - `docs/ui-docs/control-ui-styling/control-components.md` and related mod-specific plans – flag that Bootstrap templates have been retired or moved to archive storage.
-- `wepppy/weppcloud/controllers_js/README.md` – update narrative snippets that still cite `wepp.htm`, `rangeland_cover.htm`, etc., to prevent confusion for future agents.
+- `wepppy/weppcloud/controllers_js/README.md` – keep narrative snippets aligned with the Pure templates (`*_pure.htm`) now that legacy views (for example `wepp.htm`) are removed.
 
 ## Recommended Next Steps
 1. Move the orphaned `_base` templates (and their advanced-option includes) into an archival folder under `docs/work-packages/20251023_frontend_integration/legacy_controls/` or delete them outright after doc updates.

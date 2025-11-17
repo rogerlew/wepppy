@@ -233,7 +233,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
   - Numeric inputs (`ui.text_field`) for channel hydraulics, snow parameters, phosphorus concentrations, and soil clipping depths.
   - Select controls for channel critical shear / WEPP binary version / revegetation scenarios.
   - Inline script toggles the cover transform upload block when “User-Defined Transform” is chosen.
-- **Status**: Implemented (`controls/wepp_pure.htm`) with legacy markup preserved under `controls/wepp.htm` until the classic runs page is retired.
+- **Status**: Implemented (`controls/wepp_pure.htm`); legacy `controls/wepp.htm` was removed along with its advanced-option includes.
 
 ### 3.9 `text_display`
 - **Purpose**: Read-only block within a card (summaries, inline reports).

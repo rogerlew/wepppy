@@ -45,7 +45,7 @@ _Date: 2025-10-22 (updated audit aligned with current Pure migration status)_
 ## Modal & Supporting Partials
 - `_base.htm` / `_content_base.htm`: current layout shells providing `form`, status, summary, and stacktrace placeholders; target for replacement by `_pure_base.htm`.
 - `controls/unitizer_modal.htm` + `unitizer.htm`: modal and preference controls for unit conversion (`project.js` orchestrates preference changes).
-- `controls/wepp_advanced_options/*.htm`: advanced WEPP includes (baseflow, frost, clip soils, etc.) pulled into the WEPP panel via `{% include %}`; each needs macro-compatible wrappers.
+- `controls/wepp_pure_advanced_options/*.htm`: advanced WEPP includes (baseflow, frost, clip soils, etc.) pulled into the WEPP panel via `{% include %}`; legacy `controls/wepp_advanced_options` templates were removed.
 - `controls/map/rhem_hillslope_visualizations.htm`, `wepp_hillslope_visualizations.htm`: Leaflet overlay templates consumed by MapController.
 - `controls/edit_csv.htm`: generic CSV editor used by disturbed workflows.
 - `controls/poweruser_panel.htm`: global modal enabling push notifications and advanced resources; embeds extensive inline JS and CSS.
@@ -75,7 +75,7 @@ _Date: 2025-10-22 (updated audit aligned with current Pure migration status)_
 - **Road Upload wiring**: template exists but there is no dedicated JS controller and the expected `/tasks/upload_road/` endpoint is not surfaced in current blueprints—needs verification or removal from the migration scope.
 - **Inline scripting debt**: panels such as `ash.htm`, `poweruser_panel.htm`, and portions of `map.htm` embed large `<script>` blocks that must be factored into the macro/component plan.
 - **Locale branching**: Landuse, climate, and rangeland templates still branch on `ron.locales`/`ron.mods`; the future metadata contract should eliminate these ad-hoc checks.
-- **Advanced option includes**: WEPP advanced option partials and Omni fragments share markup patterns that will need macro equivalents to avoid duplicate Pure.css conversions.
+- **Advanced option includes**: WEPP advanced option partials (Pure variants under `controls/wepp_pure_advanced_options/`) and Omni fragments share markup patterns that will need macro equivalents to avoid duplicate Pure.css conversions.
 - **Read-only panels**: Export/Report views inherit `.controller-section` styling even though they render static content—confirm whether they migrate to `_pure_base.htm` or a leaner wrapper.
 
 ## Field Metadata Extracts
@@ -122,7 +122,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 | Field ID | Input Type | Label / Purpose | Options & Data Source | Backend Binding | Visibility / Notes |
 | --- | --- | --- | --- | --- | --- |
 | `btn_run_wepp` | button | Launch WEPP run | N/A | `POST /runs/<runid>/<config>/tasks/run_wepp/` → enqueues RQ job & logs via NoDb | Always visible unless `ron.mods` switches panel to RHEM; ControlBase handles status updates |
-| Advanced include stack (`controls/wepp_advanced_options/*.htm`) | multiple (text, number, checkbox, file) | Configure channel parameters, flowpaths, PMET, frost, snow, baseflow, phosphorus, clipping, executable paths | Values seeded from `Wepp` attributes and per-module config defaults | Parsed in `rq/api/build_wepp` (`Wepp.parse_inputs`) updating attributes such as `Wepp.dtchr_override`, `Wepp.channel_erodibility`, `Wepp.baseflow_opts`, etc. | Each include renders inside the collapse; future metadata work should enumerate all field IDs so macros can map labels/units without duplicating HTML |
+| Advanced include stack (`controls/wepp_pure_advanced_options/*.htm`) | multiple (text, number, checkbox, file) | Configure channel parameters, flowpaths, PMET, frost, snow, baseflow, phosphorus, clipping, executable paths | Values seeded from `Wepp` attributes and per-module config defaults | Parsed in `rq/api/build_wepp` (`Wepp.parse_inputs`) updating attributes such as `Wepp.dtchr_override`, `Wepp.channel_erodibility`, `Wepp.baseflow_opts`, etc. | Each include renders inside the collapse; future metadata work should enumerate all field IDs so macros can map labels/units without duplicating HTML |
 
 #### WEPP Advanced Options (partial summary)
 | Section / Partial | Key Fields | Backend Binding | Visibility & Notes |
