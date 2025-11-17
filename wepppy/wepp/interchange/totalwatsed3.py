@@ -37,15 +37,10 @@ PASS_METRIC_COLUMNS = (
     SEDIMENT_VOLUME_COLUMN,
 )
 
-ASH_METRIC_BASES = (
-    "wind_transport",
-    "water_transport",
-    "ash_transport",
-    "transportable_ash",
-)
-
-ASH_TONNE_COLUMNS = tuple(f"{name} (tonne)" for name in ASH_METRIC_BASES)
-ASH_PER_HA_COLUMNS = tuple(f"{name} (tonne/ha)" for name in ASH_METRIC_BASES)
+# Ash columns are unitless in names; units live in schema metadata
+ASH_METRIC_BASES = ("wind_transport", "water_transport", "ash_transport", "transportable_ash")
+ASH_TONNE_COLUMNS = ASH_METRIC_BASES
+ASH_PER_HA_COLUMNS = tuple(f"{name}_per_ha" for name in ASH_METRIC_BASES)
 ASH_METRIC_COLUMNS = ASH_TONNE_COLUMNS + ASH_PER_HA_COLUMNS
 ASH_JOIN_COLUMNS = ("year", "julian", "month", "day_of_month")
 
@@ -102,14 +97,14 @@ SCHEMA = schema_with_version(
             pa_field("Aquifer losses", pa.float64(), units="mm", description="Aquifer losses depth"),
             pa_field("Reservoir Volume", pa.float64(), units="mm", description="Groundwater storage depth"),
             pa_field("Streamflow", pa.float64(), units="mm", description="Streamflow depth"),
-            pa_field("wind_transport (tonne)", pa.float64(), units="tonne", description="Ash transported by wind (total mass)"),
-            pa_field("wind_transport (tonne/ha)", pa.float64(), units="tonne/ha", description="Ash transported by wind per unit area"),
-            pa_field("water_transport (tonne)", pa.float64(), units="tonne", description="Ash transported by water (total mass)"),
-            pa_field("water_transport (tonne/ha)", pa.float64(), units="tonne/ha", description="Ash transported by water per unit area"),
-            pa_field("ash_transport (tonne)", pa.float64(), units="tonne", description="Total ash transported (wind + water)"),
-            pa_field("ash_transport (tonne/ha)", pa.float64(), units="tonne/ha", description="Total ash transported per unit area"),
-            pa_field("transportable_ash (tonne)", pa.float64(), units="tonne", description="Ash mass still available for transport"),
-            pa_field("transportable_ash (tonne/ha)", pa.float64(), units="tonne/ha", description="Ash mass still available for transport per unit area"),
+            pa_field("wind_transport", pa.float64(), units="tonne", description="Ash transported by wind (total mass)"),
+            pa_field("wind_transport_per_ha", pa.float64(), units="tonne/ha", description="Ash transported by wind per unit area"),
+            pa_field("water_transport", pa.float64(), units="tonne", description="Ash transported by water (total mass)"),
+            pa_field("water_transport_per_ha", pa.float64(), units="tonne/ha", description="Ash transported by water per unit area"),
+            pa_field("ash_transport", pa.float64(), units="tonne", description="Total ash transported (wind + water)"),
+            pa_field("ash_transport_per_ha", pa.float64(), units="tonne/ha", description="Total ash transported per unit area"),
+            pa_field("transportable_ash", pa.float64(), units="tonne", description="Ash mass still available for transport"),
+            pa_field("transportable_ash_per_ha", pa.float64(), units="tonne/ha", description="Ash mass still available for transport per unit area"),
         ]
     )
 )
@@ -318,6 +313,17 @@ def _aggregate_ash_metrics(
             except Exception as exc:  # pragma: no cover - defensive
                 LOGGER.debug("Ash merge skipped; unable to derive calendar fields for %s (%s)", hillslope_path, exc)
                 continue
+        rename_map = {
+            "wind_transport (tonne)": "wind_transport",
+            "water_transport (tonne)": "water_transport",
+            "ash_transport (tonne)": "ash_transport",
+            "transportable_ash (tonne)": "transportable_ash",
+            "wind_transport (tonne/ha)": "wind_transport_per_ha",
+            "water_transport (tonne/ha)": "water_transport_per_ha",
+            "ash_transport (tonne/ha)": "ash_transport_per_ha",
+            "transportable_ash (tonne/ha)": "transportable_ash_per_ha",
+        }
+        df = df.rename(columns=rename_map)
         subset_columns = [
             "year",
             "month",
@@ -341,8 +347,8 @@ def _aggregate_ash_metrics(
     grouped = combined.groupby(list(ASH_JOIN_COLUMNS), as_index=False).agg(aggregations)
     area = grouped["area (ha)"].to_numpy(dtype=np.float64, copy=False)
     for base in ASH_METRIC_BASES:
-        total_col = f"{base} (tonne)"
-        per_ha_col = f"{base} (tonne/ha)"
+        total_col = base
+        per_ha_col = f"{base}_per_ha"
         grouped[per_ha_col] = _safe_mass_per_area(
             grouped[total_col].to_numpy(dtype=np.float64, copy=False),
             area,

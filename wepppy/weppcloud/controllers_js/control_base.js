@@ -359,6 +359,7 @@ function controlBase() {
         rq_job_status: null,
         job_status_poll_interval_ms: DEFAULT_POLL_INTERVAL_MS,
         _job_status_poll_timeout: null,
+        _job_status_stacktrace_timeout: null,
         _job_status_fetch_inflight: false,
         _job_status_error: null,
         statusStream: null,
@@ -415,6 +416,74 @@ function controlBase() {
             revealStacktracePanel(self.stacktrace);
         },
 
+        has_stacktrace_content: function has_stacktrace_content(self) {
+            const target = self && self.stacktrace ? self.stacktrace : null;
+            if (!target) {
+                return false;
+            }
+
+            const element = unwrapElement(target);
+            if (element) {
+                const text = (element.textContent || "").trim();
+                const html = (element.innerHTML || "").trim();
+                if (text || html) {
+                    return true;
+                }
+            }
+
+            if (typeof target.text === "function") {
+                const textValue = target.text();
+                if (textValue !== undefined && textValue !== null && String(textValue).trim()) {
+                    return true;
+                }
+            }
+
+            if (typeof target.html === "function") {
+                const htmlValue = target.html();
+                if (htmlValue !== undefined && htmlValue !== null && String(htmlValue).trim()) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        clear_stacktrace_backfill: function clear_stacktrace_backfill(self) {
+            if (self._job_status_stacktrace_timeout) {
+                clearTimeout(self._job_status_stacktrace_timeout);
+                self._job_status_stacktrace_timeout = null;
+            }
+        },
+
+        schedule_stacktrace_backfill: function schedule_stacktrace_backfill(self, errorParts) {
+            if (!self || !self.stacktrace) {
+                return;
+            }
+
+            self.clear_stacktrace_backfill(self);
+
+            const hasDetail = errorParts && (errorParts.detail !== undefined && errorParts.detail !== null);
+            const hasStatus = errorParts && (errorParts.statusCode || errorParts.statusText);
+            if (!hasDetail && !hasStatus) {
+                return;
+            }
+
+            self._job_status_stacktrace_timeout = setTimeout(function () {
+                self._job_status_stacktrace_timeout = null;
+
+                if (self.has_stacktrace_content(self)) {
+                    return;
+                }
+
+                self.pushErrorStacktrace(
+                    self,
+                    errorParts,
+                    errorParts ? errorParts.statusText : undefined,
+                    errorParts ? errorParts.detail : undefined
+                );
+            }, 5000);
+        },
+
         should_disable_command_button: function should_disable_command_button(self) {
             if (!self.rq_job_id) {
                 return false;
@@ -457,6 +526,7 @@ function controlBase() {
         },
 
         set_rq_job_id: function (self, job_id) {
+            self.clear_stacktrace_backfill(self);
             const normalizedJobId = normalizeJobId(job_id);
 
             if (normalizedJobId === self.rq_job_id) {
@@ -512,6 +582,7 @@ function controlBase() {
         },
 
         handle_job_status_response: function handle_job_status_response(self, data) {
+            self.clear_stacktrace_backfill(self);
             self._job_status_error = null;
             self.rq_job_status = data || {};
             self.render_job_status(self);
@@ -529,6 +600,7 @@ function controlBase() {
             const parts = deriveErrorParts(error);
             self._job_status_error = `${parts.statusCode} ${parts.statusText}`.trim();
             self.render_job_status(self);
+            self.schedule_stacktrace_backfill(self, parts);
 
             if (self.should_continue_polling(self)) {
                 self.schedule_job_status_poll(self);

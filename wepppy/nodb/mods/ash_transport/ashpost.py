@@ -23,6 +23,7 @@ import math
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Mapping, MutableMapping, Optional, Sequence
 
 # non-standard
+import duckdb
 import numpy as np
 
 from wepppy.all_your_base.dateutils import YearlessDate
@@ -216,6 +217,51 @@ def _write_parquet(df: pd.DataFrame, path: str) -> None:
     pq.write_table(table, path, compression='snappy')
 
 
+def _read_totalwatsed3_daily(wd: str) -> pd.DataFrame:
+    """Load daily hydrology + sediment from totalwatsed3 for ash adjustments."""
+    path = Path(wd) / "wepp" / "output" / "interchange" / "totalwatsed3.parquet"
+    if not path.exists():  # pragma: no cover - defensive
+        return pd.DataFrame()
+    schema = pq.read_schema(path)
+    cols = [
+        "year",
+        "julian",
+        "Streamflow",
+        "Runoff",
+        "Lateral Flow",
+        "Baseflow",
+        "Area",
+        "seddep_1",
+        "seddep_2",
+        "seddep_3",
+        "seddep_4",
+        "seddep_5",
+    ]
+    available_cols = [col for col in cols if col in schema.names]
+    if not available_cols:
+        return pd.DataFrame()
+    return pq.read_table(path, columns=available_cols).to_pandas()
+
+
+def _aggregate_runoff_by_wepp_ids(wat_path: Path, wepp_ids: list[int]) -> pd.DataFrame:
+    """Aggregate QOFE (runoff) volumes for selected hillslopes."""
+    if not wat_path.exists() or not wepp_ids:
+        return pd.DataFrame(columns=["year", "julian", "runoff_m3"])
+    id_list = ",".join(str(wid) for wid in sorted(set(wepp_ids)))
+    query = f"""
+        SELECT
+            year,
+            julian,
+            SUM(QOFE * 0.001 * Area) AS runoff_m3
+        FROM read_parquet('{wat_path.as_posix()}')
+        WHERE wepp_id IN ({id_list})
+        GROUP BY year, julian
+        ORDER BY year, julian
+    """
+    with duckdb.connect() as con:
+        return con.execute(query).df()
+
+
 def calculate_return_periods(
     df: pd.DataFrame,
     measure: str,
@@ -365,6 +411,11 @@ def calculate_watershed_statisics(
     ash_post_dir: str,
     recurrence: Sequence[int],
     burn_classes: Sequence[int] = (1, 2, 3),
+    *,
+    wd: str,
+    watershed,
+    translator,
+    ash,
     first_year_only: bool = False,
 ) -> tuple[ReturnPeriods, BurnClassReturnPeriods]:
     """Aggregate watershed transport metrics and compute return periods."""
@@ -445,6 +496,90 @@ def calculate_watershed_statisics(
     _add_per_area_columns(df_daily, tonne_cols)
     if volume_cols_daily:
         _add_per_area_columns(df_daily, volume_cols_daily)
+
+    hydrology_df = _read_totalwatsed3_daily(wd)
+    wat_path = Path(wd) / "wepp" / "output" / "interchange" / "H.wat.parquet"
+
+    ash_wepp_ids: list[int] = []
+    for topaz_id in watershed._subs_summary:
+        wepp_id = translator.wepp(top=topaz_id)
+        meta_entry = ash.meta.get(str(topaz_id), ash.meta.get(topaz_id, {}))
+        if meta_entry.get('ash_type') is None:
+            continue
+        ash_wepp_ids.append(int(wepp_id))
+
+    ash_wepp_runoff = _aggregate_runoff_by_wepp_ids(wat_path, ash_wepp_ids)
+    ash_wepp_runoff = ash_wepp_runoff.rename(columns={'runoff_m3': 'ash_wepp_runoff_m3'})
+
+    if not hydrology_df.empty:
+        hydrology_df['seddep_total_tonne'] = (
+            hydrology_df.get('seddep_1', 0)
+            + hydrology_df.get('seddep_2', 0)
+            + hydrology_df.get('seddep_3', 0)
+            + hydrology_df.get('seddep_4', 0)
+            + hydrology_df.get('seddep_5', 0)
+        ) / 1000.0
+        hydro_cols = [
+            'year',
+            'julian',
+            'Streamflow',
+            'Runoff',
+            'Lateral Flow',
+            'Baseflow',
+            'Area',
+            'seddep_total_tonne',
+        ]
+        hydrology_df = hydrology_df[hydro_cols].drop_duplicates(subset=['year', 'julian'])
+        df_daily = df_daily.merge(hydrology_df, on=['year', 'julian'], how='left')
+        df_daily = df_daily.merge(ash_wepp_runoff, on=['year', 'julian'], how='left')
+
+        area_total_m2 = df_daily.get('Area', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        area_total_ha = area_total_m2 / 10000.0
+        area_ash_ha = df_daily.get('area (ha)', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        area_ash_m2 = area_ash_ha * 10000.0
+
+        runoff_mm = df_daily.get('Runoff', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        runoff_total_m3 = runoff_mm * 0.001 * area_total_m2
+        ash_wepp_runoff_m3 = df_daily.get('ash_wepp_runoff_m3', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        runoff_nonash_m3 = np.clip(runoff_total_m3 - ash_wepp_runoff_m3, 0.0, None)
+
+        if 'ash_runoff (m^3)' in df_daily.columns:
+            ash_runoff_m3 = df_daily['ash_runoff (m^3)'].fillna(0.0).to_numpy(dtype=np.float64)
+        elif 'ash_runoff (mm)' in df_daily.columns:
+            ash_runoff_m3 = df_daily['ash_runoff (mm)'].fillna(0.0).to_numpy(dtype=np.float64) * 0.001 * area_ash_m2
+        else:
+            ash_runoff_m3 = np.zeros_like(runoff_total_m3, dtype=np.float64)
+
+        lat_flow_m3 = df_daily.get('Lateral Flow', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64) * 0.001 * area_total_m2
+        baseflow_m3 = df_daily.get('Baseflow', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64) * 0.001 * area_total_m2
+
+        corrected_runoff_m3 = runoff_nonash_m3 + ash_runoff_m3
+        corrected_streamflow_mm = np.zeros_like(corrected_runoff_m3, dtype=np.float64)
+        np.divide(
+            corrected_runoff_m3 + lat_flow_m3 + baseflow_m3,
+            area_total_m2,
+            out=corrected_streamflow_mm,
+            where=area_total_m2 > 0,
+        )
+        corrected_streamflow_mm *= 1000.0
+
+        streamflow_orig_mm = df_daily.get('Streamflow', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        df_daily['Streamflow_orig (mm)'] = streamflow_orig_mm
+        df_daily['Streamflow_ash_corr (mm)'] = corrected_streamflow_mm
+
+        ash_transport_total = df_daily.get('ash_transport (tonne)', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        seddep_total_tonne = df_daily.get('seddep_total_tonne', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
+        tot_solids_tonne = seddep_total_tonne + ash_transport_total
+        df_daily['tot_seddep+ash (tonne)'] = tot_solids_tonne
+        tot_solids_per_ha = np.zeros_like(tot_solids_tonne, dtype=np.float64)
+        np.divide(tot_solids_tonne, area_total_ha, out=tot_solids_per_ha, where=area_total_ha > 0)
+        df_daily['tot_seddep+ash (tonne/ha)'] = tot_solids_per_ha
+    else:
+        df_daily['Streamflow_orig (mm)'] = 0.0
+        df_daily['Streamflow_ash_corr (mm)'] = 0.0
+        df_daily['tot_seddep+ash (tonne)'] = 0.0
+        df_daily['tot_seddep+ash (tonne/ha)'] = 0.0
+
     daily_cols = [
         'year0',
         'year',
@@ -459,6 +594,10 @@ def calculate_watershed_statisics(
         'ash_transport (tonne/ha)',
         'transportable_ash (tonne)',
         'transportable_ash (tonne/ha)',
+        'Streamflow_orig (mm)',
+        'Streamflow_ash_corr (mm)',
+        'tot_seddep+ash (tonne)',
+        'tot_seddep+ash (tonne/ha)',
     ]
     for volume_col in volume_cols_daily:
         daily_cols.extend([
@@ -675,7 +814,16 @@ def watershed_daily_aggregated(
 
     calculate_hillslope_statistics(deepcopy(df), ash, ash_post_dir, first_year_only=True)
 
-    return_periods, burn_class_return_periods = calculate_watershed_statisics(deepcopy(df), ash_post_dir, recurrence, first_year_only=True)
+    return_periods, burn_class_return_periods = calculate_watershed_statisics(
+        deepcopy(df),
+        ash_post_dir,
+        recurrence,
+        wd=wd,
+        watershed=watershed,
+        translator=translator,
+        ash=ash,
+        first_year_only=True,
+    )
 
     del df
     del hill_data_frames

@@ -451,3 +451,29 @@ def create(config):
     ensure_readme_on_create(runid, config)
 
     return redirect(url_for_run('run_0.runs0', runid=runid, config=config))
+
+
+def _render_run_not_found_page() -> Response:
+    view_args = getattr(request, "view_args", {}) or {}
+    runid = view_args.get("runid") or request.args.get("runid") or ""
+    config = view_args.get("config") or request.args.get("config") or ""
+    context = {
+        "runid": runid,
+        "config": config,
+        "diff_runid": "",
+        "project_href": "",
+        "breadcrumbs_html": "",
+        "error_message": "This run either doesn't exist or you don't have access to it.",
+        "page_title": "Run Not Found",
+    }
+    return make_response(render_template("browse/not_found.htm", **context), 404)
+
+
+@run_0_bp.app_errorhandler(403)
+def _runs0_forbidden(error):  # pragma: no cover - flask error hook
+    return _render_run_not_found_page()
+
+
+@run_0_bp.app_errorhandler(404)
+def _runs0_not_found(error):  # pragma: no cover - flask error hook
+    return _render_run_not_found_page()
