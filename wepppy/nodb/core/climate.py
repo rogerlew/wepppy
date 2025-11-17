@@ -47,6 +47,7 @@ Note:
 
 # standard library
 import csv
+from pathlib import Path
 import os
 import inspect
 from os.path import join as _join
@@ -1406,6 +1407,41 @@ class Climate(NoDbBase):
         else:
             return self.cli_fn is not None
 
+    def _export_cli_parquet(self) -> Path | None:
+        """Persist the active CLI file to parquet with peak intensities for reports."""
+        cli_fn = self.cli_fn
+        if not cli_fn:
+            return None
+
+        cli_path = Path(self.cli_dir) / cli_fn
+        if not cli_path.exists():
+            return None
+
+        try:
+            cli_df = ClimateFile(str(cli_path)).as_dataframe(calc_peak_intensities=True)
+            export_df = cli_df.copy()
+            export_df["year"] = export_df.get("year")
+            export_df["month"] = export_df.get("mo")
+            export_df["day_of_month"] = export_df.get("da")
+
+            export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
+            export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
+            export_df["peak_intensity_30"] = export_df.get("30-min Peak Rainfall Intensity (mm/hour)")
+
+            export_df["storm_duration_hours"] = export_df.get("dur")
+            export_df["storm_duration"] = export_df.get("dur")
+
+            parquet_path = Path(self.cli_dir) / "wepp_cli.parquet"
+            export_df.to_parquet(parquet_path, index=False)
+            self.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
+            return parquet_path
+        except Exception:
+            self.logger.exception(
+                "Failed exporting CLI parquet with peak intensities",
+                extra={"cli_path": str(cli_path)},
+            )
+            return None
+
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
             raw_climate_mode = kwds.get('climate_mode')
@@ -1861,6 +1897,8 @@ class Climate(NoDbBase):
             self.logger.info('    running _scale_precip_monthlies with annual factors')
             self._scale_precip_monthlies(monthly_scale_factors, pyo3_cli_p_scale_annual_monthlies)
 
+        self._export_cli_parquet()
+
         try:
             self.logger.info('  timestamping build_climate task')
             prep = RedisPrep.getInstance(self.wd)
@@ -2007,9 +2045,6 @@ class Climate(NoDbBase):
             assert end_year >= start_year, (start_year, end_year)
             cli.clip(date(start_year, 1, 1), date(end_year, 12, 31))
             cli.write(_join(cli_dir, cli_fn))
-
-            url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}&intensity=10,30,60'
-            download_file(url, _join(cli_dir, f'{lng:.02f}x{lat:.02f}.intensities.csv'))
 
             self.logger.info('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))

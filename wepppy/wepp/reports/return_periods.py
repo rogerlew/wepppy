@@ -15,6 +15,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.all_your_base.stats import weibull_series
+from wepppy.climates.cligen import ClimateFile
 from wepppy.query_engine import activate_query_engine, resolve_run_context, update_catalog_entry
 LOGGER = logging.getLogger(__name__)
 
@@ -76,10 +77,59 @@ def _quote_identifier(identifier: str) -> str:
     return f'"{escaped}"'
 
 
+def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
+    """Materialize a climate parquet from an existing CLI when none are present."""
+    cli_dir = base / "wepp" / "runs"
+    if not cli_dir.exists():
+        return None, {}
+
+    for cli_candidate in sorted(cli_dir.glob("*.cli")):
+        try:
+            cli_df = ClimateFile(str(cli_candidate)).as_dataframe(calc_peak_intensities=True)
+        except Exception:  # pragma: no cover - defensive
+            continue
+
+        export_df = cli_df.copy()
+        export_df["year"] = export_df.get("year")
+        export_df["month"] = export_df.get("mo")
+        export_df["day_of_month"] = export_df.get("da")
+
+        export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
+        export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
+        export_df["peak_intensity_30"] = export_df.get("30-min Peak Rainfall Intensity (mm/hour)")
+        export_df["storm_duration_hours"] = export_df.get("dur")
+        export_df["storm_duration"] = export_df.get("dur")
+
+        climate_dir = base / "climate"
+        climate_dir.mkdir(parents=True, exist_ok=True)
+        parquet_path = climate_dir / "wepp_cli.parquet"
+        export_df.to_parquet(parquet_path, index=False)
+
+        LOGGER.info(
+            "Generated climate parquet from CLI for return-period staging",
+            extra={"cli": str(cli_candidate), "parquet": str(parquet_path)},
+        )
+
+        return parquet_path, {
+            "year": "year",
+            "month": "month",
+            "day": "day_of_month",
+            "intensity_10": "peak_intensity_10",
+            "intensity_15": "peak_intensity_15",
+            "intensity_30": "peak_intensity_30",
+            "duration": "storm_duration_hours",
+        }
+
+    return None, {}
+
+
 def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[None, Dict[str, str]]:
     """Return a parquet climate asset plus column mapping if one exists."""
     climate_dir = base / "climate"
     if not climate_dir.exists():
+        generated_path, generated_mapping = _generate_cli_parquet(base)
+        if generated_path:
+            return generated_path, generated_mapping
         return None, {}
 
     for candidate in sorted(climate_dir.rglob("*.parquet")):
@@ -97,6 +147,10 @@ def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[N
 
         if {"year", "month", "day"}.issubset(mapping):
             return candidate, mapping
+
+    generated_path, generated_mapping = _generate_cli_parquet(base)
+    if generated_path:
+        return generated_path, generated_mapping
 
     return None, {}
 

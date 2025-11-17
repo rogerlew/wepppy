@@ -421,6 +421,11 @@
         if (!modsFlags.dss_export) {
             setTimeout(function () {
                 try {
+                    var currentMods = window.runContext && window.runContext.mods && window.runContext.mods.flags;
+                    if (currentMods && currentMods.dss_export) {
+                        return; // User enabled DSS before the delayed hide runs.
+                    }
+
                     var hideElement = function (element) {
                         if (!element) {
                             return;
@@ -436,9 +441,6 @@
 
                     var navItems = document.querySelectorAll('[data-mod-nav="dss_export"]');
                     Array.prototype.forEach.call(navItems, hideElement);
-
-                    var tocAnchors = document.querySelectorAll('a[href="#partitioned-dss-export-for-hec"], a[href="#dss-export"]');
-                    Array.prototype.forEach.call(tocAnchors, hideElement);
                 } catch (err) {
                     console.warn("[Bootstrap] Failed to hide DSS export panel", err);
                 }

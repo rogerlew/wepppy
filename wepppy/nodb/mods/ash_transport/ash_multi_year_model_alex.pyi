@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Optional, Sequence, Tuple
 
 import pandas as pd
@@ -19,6 +20,7 @@ class AshNoDbLockedException(Exception):
 
 
 class AshModelAlex:
+    logger: logging.Logger
     ini_ash_depth_mm: Optional[float]
     ini_ash_load_tonneha: Optional[float]
     ini_bulk_den: Optional[float]

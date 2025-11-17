@@ -1,0 +1,157 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}Run Sync Dashboard{% endblock %}
+
+{% from "shared/console_macros.htm" import console_page, console_header, button_row %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% block body %}
+{% call console_page(data_controller="run-sync-dashboard") %}
+  {% call console_header(
+    title="Run Sync Dashboard",
+    subtitle="Import runs from remote WEPPcloud hosts, record provenance, and monitor status."
+  ) %}{% endcall %}
+
+  <div id="run_sync_config"
+       data-api-url="{{ url_for('run_sync_dashboard.api_run_sync') }}"
+       data-status-url="{{ url_for('run_sync_dashboard.run_sync_status') }}"
+       data-default-host="wepp.cloud"
+       data-default-root="{{ default_target_root }}"
+       data-status-channel="{{ status_channel_suffix }}"
+       hidden></div>
+
+  <div class="wc-stack">
+    {% call ui.control_shell(
+         form_id="run_sync_form",
+         title="Sync + register",
+         collapsible=False,
+         form_class="pure-form-aligned",
+         form_attrs={'novalidate': True},
+         status_panel_options={
+           "id": "run_sync_status_panel",
+           "title": "Sync status",
+           "variant": "console",
+           "log_id": "run_sync_status_log",
+           "description": "Live RQ events for the run sync job.",
+           "initial": "Waiting for submission…"
+         },
+         summary_panel_override='',
+         stacktrace_panel_override=''
+       ) %}
+      <fieldset>
+        {{ ui.text_field(
+             'source_host',
+             'Source host',
+             value='wepp.cloud',
+             attrs={'required': True}
+           ) }}
+        {{ ui.text_field(
+             'runid',
+             'Run ID',
+             attrs={'required': True, 'placeholder': 'my-run-id'}
+           ) }}
+        {{ ui.text_field(
+             'config',
+             'Config',
+             attrs={'required': True, 'placeholder': 'cfg'}
+           ) }}
+        {{ ui.text_field(
+             'target_root',
+             'Target root',
+             value=default_target_root,
+             help='Root folder where runs are stored (default keeps standard layout).'
+           ) }}
+        {{ ui.text_field(
+             'owner_email',
+             'Owner email',
+             help='Optional owner email captured in provenance and the migrations table.'
+           ) }}
+        {{ ui.text_field(
+             'auth_token',
+             'Auth token',
+             help='Required for push to wc.bearhive.duckdns.org when allow push is enabled.',
+             type='password'
+           ) }}
+        <div class="pure-control-group">
+          <label for="allow_push">Allow push</label>
+          <input id="allow_push" name="allow_push" type="checkbox" class="pure-checkbox">
+          <span class="wc-form__note">Required when syncing from wc.bearhive.duckdns.org / forest.local.</span>
+        </div>
+        <div class="pure-control-group">
+          <label for="overwrite">Overwrite existing</label>
+          <input id="overwrite" name="overwrite" type="checkbox" class="pure-checkbox">
+          <span class="wc-form__note">Replaces an existing run directory even if locked.</span>
+        </div>
+        {{ ui.text_field(
+             'expected_size',
+             'Expected size (bytes)',
+             help='Optional total size check across downloaded files.'
+           ) }}
+        {{ ui.text_field(
+             'expected_sha256',
+             'Expected SHA256',
+             help='Optional checksum of the downloaded run directory (computed deterministically).'
+           ) }}
+        {% call button_row(form_controls=True) %}
+          <button type="submit" class="pure-button pure-button-primary" id="run_sync_submit">Start sync</button>
+          <button type="button" class="pure-button pure-button-secondary" id="run_sync_refresh">Refresh status</button>
+        {% endcall %}
+      </fieldset>
+    {% endcall %}
+  </div>
+
+  <div class="wc-stack">
+    {% call ui.card_shell(
+         title="Run sync jobs",
+         description="Recent RQ jobs for sync + register (queued, running, failed, and finished).",
+         collapsible=False
+       ) %}
+      <div class="wc-table-wrapper">
+        <table class="wc-table" id="run_sync_jobs_table">
+          <thead>
+            <tr>
+              <th scope="col">Job ID</th>
+              <th scope="col">Run</th>
+              <th scope="col">Host</th>
+              <th scope="col">Status</th>
+              <th scope="col">RQ Status</th>
+              <th scope="col">Started</th>
+              <th scope="col">Ended</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    {% endcall %}
+  </div>
+
+  <div class="wc-stack">
+    {% call ui.card_shell(
+         title="Migrations table",
+         description="Latest provenance entries stored in the Flask migrations table.",
+         collapsible=False
+       ) %}
+      <div class="wc-table-wrapper">
+        <table class="wc-table" id="run_sync_migrations_table">
+          <thead>
+            <tr>
+              <th scope="col">Run</th>
+              <th scope="col">Host</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Status</th>
+              <th scope="col">Version</th>
+              <th scope="col">Pulled at</th>
+              <th scope="col">Path</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    {% endcall %}
+  </div>
+{% endcall %}
+{% endblock %}
+
+{% block script_extras %}
+<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+{% endblock %}

@@ -110,6 +110,8 @@ def run_ash_model(kwds: MutableMapping[str, Any]) -> str:
     prefix: str = kwds['prefix']
 
     del kwds['logger']
+    # Reuse the controller logger so model warnings land in ash.log
+    ash_model.logger = logger
     out_fn = ash_model.run_model(**kwds)
     logger.info(f'  finished ash model for {prefix}')
 

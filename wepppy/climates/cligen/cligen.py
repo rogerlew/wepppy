@@ -914,14 +914,6 @@ class ClimateFile(object):
             calc_peak_intensities: When True, compute 10/15/30/60 minute peak
                 intensities for each record and append them as extra columns.
         """
-        intensities_csv_fn = self.cli_fn[:-4] + '.intensities.csv'
-        if _exists(intensities_csv_fn):
-            intensities_df = pd.read_csv(intensities_csv_fn)
-            intensities_df.set_index('date', inplace=True)
-            intensities_dict = intensities_df.T.to_dict()
-        else:
-            intensities_dict = None
-
         breakpoint = self.breakpoint
         colnames = self.colnames
         data0line = self.data0line
@@ -970,17 +962,8 @@ class ClimateFile(object):
                     d['prcp'].append(0.0)
 
             if calc_peak_intensities:
-                if intensities_dict is not None:
-                    if date_str in intensities_dict:
-                        int_d = intensities_dict[date_str]
-                        intensities = [int_d['i10_mm'] * 6.0,
-                                       int_d['i30_mm'] * 2.0,
-                                       int_d['i60_mm']]
-                    else:
-                        intensities = [0, 0, 0]
-
-                elif self.breakpoint:
-                    intensities = [-1, -1, -1]
+                if self.breakpoint:
+                    intensities = [-1, -1, -1, -1]
                 else:
                     max_time = [10, 15, 30, 60]
                     intensities = cli2pat(prcp=d['prcp'][-1],

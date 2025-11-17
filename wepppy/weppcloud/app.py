@@ -163,6 +163,40 @@ class Run(db.Model):
                     readonly=ron.readonly)
 
 
+class RunMigration(db.Model):
+    """Provenance and migration tracking for imported runs."""
+
+    __tablename__ = "run_migrations"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    runid = db.Column(db.String(255), nullable=False)
+    config = db.Column(db.String(255), nullable=False)
+    local_path = db.Column(db.String(1024), nullable=False)
+    source_host = db.Column(db.String(255), nullable=True)
+    original_url = db.Column(db.String(1024), nullable=True)
+    pulled_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    owner_email = db.Column(db.String(255), nullable=True)
+    version_at_pull = db.Column(db.Integer(), nullable=True)
+    traits_detected = db.Column(db.JSON, nullable=True)
+    last_migration_version = db.Column(db.Integer(), nullable=True)
+    last_status = db.Column(db.String(64), nullable=True)
+    archive_before = db.Column(db.String(255), nullable=True)
+    archive_after = db.Column(db.String(255), nullable=True)
+    is_fixture = db.Column(db.Boolean(), default=False, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+        nullable=False,
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint("runid", "config", name="uq_run_migrations_runid_config"),
+        db.Index("ix_run_migrations_runid_config", "runid", "config"),
+    )
+
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)

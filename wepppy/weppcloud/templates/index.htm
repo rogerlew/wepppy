@@ -17,6 +17,11 @@
              rel="noopener">
             All Runs
           </a>
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for('run_sync_dashboard.run_sync_dashboard') }}"
+             rel="noopener">
+            Run Sync
+          </a>
         {% endif %}
         {% if current_user.has_role('Root') %}
           <a class="pure-button pure-button-secondary"

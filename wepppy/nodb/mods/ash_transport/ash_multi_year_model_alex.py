@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import math
 import os
 import warnings
@@ -24,6 +25,8 @@ _data_dir = _join(_thisdir, 'data')
 pd.options.mode.chained_assignment = None  # default='warn'
 
 from .ash_type import AshType
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "AshNoDbLockedException",
@@ -85,6 +88,7 @@ class AshModelAlex:
 
         assert fin_bulk_den >= ini_bulk_den, (fin_bulk_den, ini_bulk_den)
 
+        self.logger: logging.Logger = logging.getLogger(__name__)
         self.ash_type = ash_type
         self.ini_ash_depth_mm: Optional[float] = None
         self.ini_ash_load_tonneha: Optional[float] = None
@@ -396,6 +400,10 @@ class AshModelAlex:
 
                     water_transport_tonspha[i] = np.clip(transport_tonspha[i],
                                                          0, remaining_ash_tonspha[i-1])
+                    
+                    if ash_runoff_mm[i] > q[i]:
+                        self.logger.warning('ash_runoff_mm greater than q on day %d: %f > %f (%s, %d, %d)',
+                                            i, ash_runoff_mm[i], q[i], source_label, i, s_len)
 
             elif q[i] == 0:
                 if self.run_wind_transport:

@@ -758,16 +758,15 @@ class Watershed(NoDbBase):
         return self._outlet_top_id
 
     @property
-    def relief(self) -> Optional[float]:
+    def relief(self) -> Optional[str]:
         if self.delineation_backend_is_topaz:
-            return Topaz.getInstance(self.wd).relief
+            relief_path = _join(self.topaz_wd, "RELIEF.ARC")
         elif self.delineation_backend_is_wbt:
             relief_path = _join(self.wbt_wd, "relief.tif")
-            if _exists(relief_path):
-                return relief_path
+        else:
             return None
 
-        return None
+        return relief_path if _exists(relief_path) else None
 
     def translator_factory(self) -> WeppTopTranslator:
         if self._chns_summary is None:

@@ -98,6 +98,7 @@ from .readme_md import readme_bp
 from .usersum import usersum_bp
 from .batch_runner import batch_runner_bp
 from .user import user_bp
+from .run_sync_dashboard import run_sync_dashboard_bp
 from .locations import locations_bp
 from .weppcloudr import weppcloudr_bp
 from .rq.api.jobinfo import rq_jobinfo_bp
@@ -191,6 +192,7 @@ __all__ = [
     'treatments_bp',
     'unitizer_bp',
     'user_bp',
+    'run_sync_dashboard_bp',
     'watar_bp',
     'watershed_bp',
     'wepp_bp',

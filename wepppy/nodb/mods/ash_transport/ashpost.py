@@ -567,6 +567,22 @@ def calculate_watershed_statisics(
         df_daily['Streamflow_orig (mm)'] = streamflow_orig_mm
         df_daily['Streamflow_ash_corr (mm)'] = corrected_streamflow_mm
 
+        # verify and warn if corrected streamflow is greater than original streamflow on any day
+        exceed_mask = corrected_streamflow_mm > streamflow_orig_mm
+        if np.any(exceed_mask):
+            exceed_count = int(np.count_nonzero(exceed_mask))
+            max_overage_mm = float(np.max(corrected_streamflow_mm[exceed_mask] - streamflow_orig_mm[exceed_mask]))
+            sample = df_daily.loc[
+                exceed_mask, ['year', 'julian', 'Streamflow_orig (mm)', 'Streamflow_ash_corr (mm)']
+            ].head(5)
+            ash.logger.warning(
+                "AshPost: corrected streamflow exceeds original on %d day(s); max overage %.4f mm. Samples:\n%s",
+                exceed_count,
+                max_overage_mm,
+                sample.to_string(index=False),
+            )
+        
+
         ash_transport_total = df_daily.get('ash_transport (tonne)', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
         seddep_total_tonne = df_daily.get('seddep_total_tonne', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
         tot_solids_tonne = seddep_total_tonne + ash_transport_total

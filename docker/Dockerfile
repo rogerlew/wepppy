@@ -66,6 +66,7 @@ RUN apt-get update && \
         libbz2-dev \
         liblzma-dev \
         zlib1g-dev \
+        aria2 \
         rsync \
         ca-certificates && \
     git lfs install --system && \
