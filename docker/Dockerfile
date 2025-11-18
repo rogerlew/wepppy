@@ -67,9 +67,9 @@ RUN apt-get update && \
         liblzma-dev \
         zlib1g-dev \
         rsync \
+        aria2 \
         ca-certificates && \
     git lfs install --system
-RUN snap install aria2c
 
 RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker.tgz && \
     tar -xzf /tmp/docker.tgz -C /tmp && \
