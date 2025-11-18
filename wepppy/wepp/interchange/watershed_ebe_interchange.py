@@ -3,7 +3,6 @@ from __future__ import annotations
 import errno
 import re
 import shutil
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
@@ -12,7 +11,13 @@ import pyarrow.parquet as pq
 import logging
 
 from wepppy.all_your_base.hydro import determine_wateryear
-from ._utils import _wait_for_path, _parse_float
+from ._utils import (
+    _wait_for_path,
+    _parse_float,
+    _build_cli_calendar_lookup,
+    _calendar_day_to_julian,
+    CalendarLookup,
+)
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 
@@ -20,6 +25,7 @@ EBE_FILENAME = "ebe_pw0.txt"
 EBE_PARQUET = "ebe_pw0.parquet"
 CHUNK_SIZE = 250_000
 _HILLSLOPE_PATTERN = re.compile(r"^H(\d+)\.ebe\.dat$", re.IGNORECASE)
+LOGGER = logging.getLogger(__name__)
 
 
 MEASUREMENT_COLUMNS: List[str] = [
@@ -75,6 +81,7 @@ def _write_ebe_parquet(
     start_year: int | None = None,
     chunk_size: int = CHUNK_SIZE,
     legacy_element_id: int | None = None,
+    calendar_lookup: CalendarLookup | None = None,
 ) -> None:
     tmp_target = target.with_suffix(f"{target.suffix}.tmp")
     if tmp_target.exists():
@@ -117,11 +124,7 @@ def _write_ebe_parquet(
                 else:
                     year = sim_year
 
-                try:
-                    julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
-                except ValueError as e:
-                    logging.warning("Invalid date encountered: %s-%s-%s: %s", year, month, day_of_month, e)
-                    raise
+                julian = _calendar_day_to_julian(year, month, day_of_month, calendar_lookup=calendar_lookup)
 
                 store["year"].append(year)
                 store["simulation_year"].append(sim_year)
@@ -168,6 +171,38 @@ def _write_ebe_parquet(
                 shutil.move(str(tmp_target), str(target))
             else:
                 raise
+
+
+def _calendar_day_to_julian(
+    year: int,
+    month: int,
+    day_of_month: int,
+    *,
+    calendar_lookup: CalendarLookup | None = None,
+) -> int:
+    """Convert calendar day to julian day using CLI calendar when available."""
+    if calendar_lookup:
+        # Prefer the exact year, but if absent fall back to any available calendar;
+        # this keeps empirical (non-Gregorian) day counts intact.
+        lookup_year = calendar_lookup.get(int(year))
+        candidate_years = [lookup_year] if lookup_year is not None else list(calendar_lookup.values())
+        for days in candidate_years:
+            for idx, (m, d) in enumerate(days):
+                if int(m) == int(month) and int(d) == int(day_of_month):
+                    return idx + 1
+        raise ValueError(
+            f"Date {year}-{month}-{day_of_month} not found in CLI calendar lookup "
+            f"(years available: {sorted(calendar_lookup.keys())})"
+        )
+
+    # No lookup available; fall back to Gregorian so we fail fast on invalid dates.
+    try:
+        return (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid date {year}-{month}-{day_of_month} with no CLI calendar lookup; "
+            f"ensure climate/wepp_cli.parquet exists with year/month/day columns."
+        ) from exc
 
 
 def _collect_hillslope_wepp_ids(base: Path) -> Set[int]:
@@ -224,6 +259,13 @@ def run_wepp_watershed_ebe_interchange(
     ebe_path = base / EBE_FILENAME
     _wait_for_path(ebe_path)
 
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    if not calendar_lookup:
+        LOGGER.warning(
+            "No CLI calendar lookup available for %s; falling back to Gregorian day math.",
+            base,
+        )
+
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / EBE_PARQUET
@@ -233,5 +275,6 @@ def run_wepp_watershed_ebe_interchange(
         target,
         start_year=start_year,
         legacy_element_id=outlet_element_id,
+        calendar_lookup=calendar_lookup,
     )
     return target

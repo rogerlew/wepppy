@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 CHAN_FILENAME: str
 CHAN_PARQUET: str
@@ -17,6 +17,7 @@ def _write_chan_parquet(
     target: Path,
     *,
     start_year: Optional[int] = ...,
+    calendar_lookup: Dict[int, List[Tuple[int, int]]] | None = ...,
     chunk_size: int = ...,
 ) -> None: ...
 

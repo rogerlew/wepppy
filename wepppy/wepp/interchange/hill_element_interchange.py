@@ -246,12 +246,17 @@ def run_wepp_hillslope_element_interchange(
     wepp_output_dir: Path | str,
     *,
     start_year: Optional[int] = None,
+    expected_hillslopes: int | None = None,
 ) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
     element_files = sorted(base.glob("H*.element.dat"))
+    if expected_hillslopes is not None and len(element_files) != expected_hillslopes:
+        raise FileNotFoundError(
+            f"Expected {expected_hillslopes} hillslope element files but found {len(element_files)} in {base}"
+        )
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.element.parquet"

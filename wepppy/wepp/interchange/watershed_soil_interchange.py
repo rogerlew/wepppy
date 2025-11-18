@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import logging
 import errno
 import shutil
-from datetime import datetime, timedelta
 from pathlib import Path
 import gzip
 
@@ -26,11 +26,14 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
+from ._utils import _build_cli_calendar_lookup, _julian_to_calendar
 from .versioning import schema_with_version
 
 SOIL_FILENAME = "soil_pw0.txt"
 SOIL_PARQUET = "soil_pw0.parquet"
 CHUNK_SIZE = 250_000
+
+LOGGER = logging.getLogger(__name__)
 
 
 RAW_HEADER = [
@@ -96,11 +99,6 @@ SCHEMA = schema_with_version(
 )
 
 
-def _julian_to_calendar(year: int, julian: int) -> tuple[int, int]:
-    base = datetime(year, 1, 1) + timedelta(days=julian - 1)
-    return base.month, base.day
-
-
 def _init_column_store() -> Dict[str, List]:
     return {name: [] for name in SCHEMA.names}
 
@@ -119,6 +117,7 @@ def _write_soil_parquet(
     target: Path,
     *,
     chunk_size: int = CHUNK_SIZE,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
 ) -> None:
     tmp_target = target.with_suffix(f"{target.suffix}.tmp")
     if tmp_target.exists():
@@ -177,7 +176,7 @@ def _write_soil_parquet(
                     for column_name, token in zip(measurement_columns, tokens[3:])
                 }
 
-                month, day_of_month = _julian_to_calendar(year, julian)
+                month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
                 water_year = int(determine_wateryear(year, julian))
 
                 store["wepp_id"].append(ofe)
@@ -234,16 +233,17 @@ def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
 
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
     target = interchange_dir / SOIL_PARQUET
     if is_gzip:
         with gzip.open(soil_path, "rt") as stream:
             tmp_source = target.with_suffix(target.suffix + ".src")
             tmp_source.write_text(stream.read())
         try:
-            _write_soil_parquet(tmp_source, target)
+            _write_soil_parquet(tmp_source, target, calendar_lookup=calendar_lookup)
         finally:
             if tmp_source.exists():
                 tmp_source.unlink()
     else:
-        _write_soil_parquet(soil_path, target)
+        _write_soil_parquet(soil_path, target, calendar_lookup=calendar_lookup)
     return target

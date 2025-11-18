@@ -12,12 +12,16 @@ MEASUREMENT_COLUMNS: List[str]
 LEGACY_MEASUREMENT_COLUMNS: List[str]
 SCHEMA: Any
 
-def _julian_to_calendar(year: int, julian: int) -> Tuple[int, int]: ...
-
 def _init_column_store() -> Dict[str, List[object]]: ...
 
 def _flush_chunk(store: Dict[str, List[object]], writer: Any) -> None: ...
 
-def _write_soil_parquet(source: Path, target: Path, *, chunk_size: int = ...) -> None: ...
+def _write_soil_parquet(
+    source: Path,
+    target: Path,
+    *,
+    chunk_size: int = ...,
+    calendar_lookup: Dict[int, List[Tuple[int, int]]] | None = ...,
+) -> None: ...
 
 def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path: ...

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+import logging
+from functools import partial
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -12,7 +13,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
 from .schema_utils import pa_field
-from ._utils import _parse_float
+from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float
 from .versioning import schema_with_version
 
 SOIL_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
@@ -35,6 +36,8 @@ RAW_HEADER = [
 ]
 
 LEGACY_HEADER = RAW_HEADER[:-2]
+
+LOGGER = logging.getLogger(__name__)
 
 RAW_UNITS = [
     "",
@@ -155,7 +158,7 @@ def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
         store[name].append(row[name])
 
 
-def _parse_soil_file(path: Path) -> pa.Table:
+def _parse_soil_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
     match = SOIL_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized SOIL filename pattern: {path}")
@@ -180,9 +183,7 @@ def _parse_soil_file(path: Path) -> pa.Table:
         julian = int(tokens[1])
         year = int(tokens[2])
 
-        date = datetime(year, 1, 1) + timedelta(days=julian - 1)
-        month = date.month
-        day_of_month = date.day
+        month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
         water_year = int(determine_wateryear(year, julian))
 
         row: Dict[str, object] = {
@@ -208,15 +209,24 @@ def _parse_soil_file(path: Path) -> pa.Table:
     return pa.table(store, schema=SCHEMA)
 
 
-def run_wepp_hillslope_soil_interchange(wepp_output_dir: Path | str) -> Path:
+def run_wepp_hillslope_soil_interchange(
+    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
     soil_files = sorted(base.glob("H*.soil.dat"))
+    if expected_hillslopes is not None and len(soil_files) != expected_hillslopes:
+        raise FileNotFoundError(
+            f"Expected {expected_hillslopes} hillslope soil files but found {len(soil_files)} in {base}"
+        )
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.soil.parquet"
 
-    write_parquet_with_pool(soil_files, _parse_soil_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    parser = partial(_parse_soil_file, calendar_lookup=calendar_lookup)
+
+    write_parquet_with_pool(soil_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

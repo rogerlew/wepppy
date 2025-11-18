@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+import logging
+from functools import partial
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -15,7 +16,11 @@ import pyarrow.parquet as pq
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
-from ._utils import _parse_float, _julian_to_calendar
+from ._utils import (
+    _build_cli_calendar_lookup,
+    _julian_to_calendar,
+    _parse_float,
+)
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 
@@ -27,6 +32,8 @@ RAW_HEADER_SUBSTITUTIONS = (
     ("Water(mm)", "Water"),
     ("m^2", "(m^2)"),
 )
+
+LOGGER = logging.getLogger(__name__)
 
 WAT_COLUMN_NAMES = [
     "OFE",
@@ -239,7 +246,7 @@ def _extract_header(lines: List[str]) -> tuple[List[str], int]:
     return canonical_header, header_end + 2
 
 
-def _parse_wat_file(path: Path) -> pa.Table:
+def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
     match = WAT_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized WAT filename pattern: {path}")
@@ -260,7 +267,7 @@ def _parse_wat_file(path: Path) -> pa.Table:
 
         julian = int(tokens[column_positions["J"]])
         year = int(tokens[column_positions["Y"]])
-        month, day_of_month = _julian_to_calendar(year, julian)
+        month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
         sim_day_index = idx + 1
         wy = determine_wateryear(year, julian)
         ofe_id = int(tokens[column_positions["OFE"]])
@@ -286,18 +293,27 @@ def _parse_wat_file(path: Path) -> pa.Table:
     return pa.table(out, schema=SCHEMA)
 
 
-def run_wepp_hillslope_wat_interchange(wepp_output_dir: Path | str) -> Path:
+def run_wepp_hillslope_wat_interchange(
+    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
     wat_files = sorted(base.glob("H*.wat.dat"))
+    if expected_hillslopes is not None and len(wat_files) != expected_hillslopes:
+        raise FileNotFoundError(
+            f"Expected {expected_hillslopes} hillslope wat files but found {len(wat_files)} in {base}"
+        )
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.wat.parquet"
 
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    parser = partial(_parse_wat_file, calendar_lookup=calendar_lookup)
+
     write_parquet_with_pool(
-        wat_files, _parse_wat_file, SCHEMA, target_path, empty_table=EMPTY_TABLE
+        wat_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE
     )
     return target_path
 

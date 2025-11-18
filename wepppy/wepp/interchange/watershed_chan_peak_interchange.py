@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import errno
+import logging
 import shutil
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -12,7 +13,7 @@ import pandas as pd
 
 from wepppy.all_your_base.hydro import determine_wateryear
 
-from ._utils import _wait_for_path, _parse_float
+from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float, _wait_for_path
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 from .date_filters import apply_date_filters
@@ -20,6 +21,8 @@ from .date_filters import apply_date_filters
 CHAN_PEAK_FILENAME = "chan.out"
 CHAN_PEAK_PARQUET = "chan.out.parquet"
 CHUNK_SIZE = 500_000
+
+LOGGER = logging.getLogger(__name__)
 
 
 
@@ -64,6 +67,7 @@ def _write_chan_peak_parquet(
     target: Path,
     *,
     start_year: int | None = None,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
     chunk_size: int = CHUNK_SIZE,
 ) -> None:
     tmp_target = target.with_suffix(f"{target.suffix}.tmp")
@@ -107,12 +111,12 @@ def _write_chan_peak_parquet(
                 else:
                     year = sim_year
 
-                date_obj = datetime(year, 1, 1) + timedelta(days=julian - 1)
                 store["year"].append(year)
                 store["simulation_year"].append(sim_year)
                 store["julian"].append(julian)
-                store["month"].append(date_obj.month)
-                store["day_of_month"].append(date_obj.day)
+                month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
+                store["month"].append(month)
+                store["day_of_month"].append(day_of_month)
                 store["water_year"].append(int(determine_wateryear(year, julian)))
                 store["Elmt_ID"].append(elmt_id)
                 store["Chan_ID"].append(chan_id)
@@ -161,7 +165,8 @@ def run_wepp_watershed_chan_peak_interchange(
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHAN_PEAK_PARQUET
-    _write_chan_peak_parquet(source, target, start_year=start_year)
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    _write_chan_peak_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
     return target
 
 
@@ -203,6 +208,7 @@ def chanout_dss_export(
 
     parquet_path = run_wepp_watershed_chan_peak_interchange(wd_path / "wepp" / "output")
     df = pd.read_parquet(parquet_path)
+    calendar_lookup = _build_cli_calendar_lookup(wd_path / "wepp" / "output", log=LOGGER)
 
     df["year"] = df["year"].astype(int)
     df["julian"] = df["julian"].astype(int)
@@ -239,11 +245,17 @@ def chanout_dss_export(
         year = int(row["year"])
         julian = int(row["julian"])
         seconds = float(row["Time (s)"])
+        month_val = row.get("month")
+        day_val = row.get("day_of_month")
+        month = int(month_val) if pd.notna(month_val) else None
+        day = int(day_val) if pd.notna(day_val) else None
+        if month is None or day is None:
+            month, day = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
         try:
-            base = datetime(year, 1, 1) + timedelta(days=julian - 1)
+            base = datetime(year, month, day)
         except ValueError as exc:
             raise ValueError(
-                f"Invalid chan.out date components: year={year}, julian={julian}"
+                f"Invalid chan.out date components: year={year}, month={month}, day={day}, julian={julian}"
             ) from exc
         return base + timedelta(seconds=seconds)
 

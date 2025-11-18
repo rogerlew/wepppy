@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import gzip
+import logging
 import re
 import errno
 import shutil
-from datetime import datetime, timedelta
+from functools import partial
 from pathlib import Path
-import gzip
 from typing import Dict, Iterable, Iterator, List, Tuple
 
 try:
@@ -28,6 +29,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
+from ._utils import _build_cli_calendar_lookup, _compute_sim_day_index, _julian_to_calendar
 
 
 PASS_FILENAME = "pass_pw0.txt"
@@ -35,7 +37,10 @@ EVENTS_PARQUET = "pass_pw0.events.parquet"
 METADATA_PARQUET = "pass_pw0.metadata.parquet"
 EVENT_CHUNK_SIZE = 250_000
 
+LOGGER = logging.getLogger(__name__)
+
 _EVENT_LINE_RE = re.compile(r"(?P<label>[A-Z ]+?)\s+(?P<year>\d+)\s+(?P<day>\d+)")
+_FLOAT_TOKEN_RE = re.compile(r"[+-]?(?:\d+\.\d*|\d*\.\d+|\d+)(?:[Ee][+-]?\d+)?")
 
 
 def _parse_float(token: str) -> float:
@@ -47,12 +52,16 @@ def _parse_float(token: str) -> float:
     return float(stripped)
 
 
-def _julian_to_calendar(year: int, julian: int) -> Tuple[int, int]:
-    base = datetime(year, 1, 1) + timedelta(days=julian - 1)
-    return base.month, base.day
+def _tokenize_numeric_line(line: str) -> List[float]:
+    tokens = _FLOAT_TOKEN_RE.findall(line)
+    if not tokens:
+        return []
+    return [_parse_float(tok) for tok in tokens]
 
 
-def _parse_metadata(header_lines: List[str]) -> Tuple[Dict[str, object], pa.Table, int, List[int], int]:
+def _parse_metadata(
+    header_lines: List[str],
+) -> Tuple[Dict[str, object], pa.Table, int, List[int], int, List[str]]:
     version = None
     nhill = None
     max_years = None
@@ -156,7 +165,7 @@ def _parse_metadata(header_lines: List[str]) -> Tuple[Dict[str, object], pa.Tabl
         "npart": npart,
     }
 
-    return global_meta, metadata_table, npart, hillslope_ids, nhill
+    return global_meta, metadata_table, npart, hillslope_ids, nhill, climate_files
 
 
 class _ValueCollector:
@@ -181,7 +190,9 @@ class _ValueCollector:
             stripped = line.strip()
             if not stripped:
                 continue
-            self._buffer.extend(_parse_float(token) for token in stripped.split())
+            # pass files occasionally contain concatenated numbers without whitespace
+            # (e.g., "0.97059-100"); use regex tokenization to split them safely.
+            self._buffer.extend(_tokenize_numeric_line(stripped))
 
         return values
 
@@ -278,6 +289,7 @@ def _write_events_parquet(
     global_meta: Dict[str, object],
     target: Path,
     *,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
     chunk_size: int = EVENT_CHUNK_SIZE,
 ) -> None:
     base_columns, sed_columns, frc_columns = _build_event_columns(npart)
@@ -288,7 +300,7 @@ def _write_events_parquet(
     if tmp_target.exists():
         tmp_target.unlink()
 
-    sim_start_date = datetime(int(global_meta["begin_year"]), 1, 1)
+    start_year = int(global_meta["begin_year"])
 
     writer = pq.ParquetWriter(
         tmp_target,
@@ -309,14 +321,25 @@ def _write_events_parquet(
 
             match = _EVENT_LINE_RE.match(stripped)
             if not match:
+                numeric_tokens = _tokenize_numeric_line(stripped)
+                if numeric_tokens:
+                    # Some WEPP builds emit stray numeric lines between events; stash them
+                    # so the next read() can consume them instead of failing the parse.
+                    value_reader._buffer.extend(numeric_tokens)
+                    continue
                 raise ValueError(f"Unrecognized event header line: {raw_line}")
 
             label = match.group("label").strip()
             year = int(match.group("year"))
             julian = int(match.group("day"))
-            month, day_of_month = _julian_to_calendar(year, julian)
+            month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
             water_year = int(determine_wateryear(year, julian))
-            sim_day_index = (datetime(year, month, day_of_month) - sim_start_date).days + 1
+            sim_day_index = _compute_sim_day_index(
+                year,
+                julian,
+                start_year=start_year,
+                calendar_lookup=calendar_lookup,
+            )
             if sim_day_index < 1:
                 raise ValueError(
                     f"Computed simulation day index {sim_day_index} before simulation start for {year=}, {julian=}."
@@ -477,7 +500,7 @@ def _write_events_parquet(
                 raise
 
 
-def _parse_pass_file(stream) -> Tuple[Dict[str, object], pa.Table, int, List[int], int, Iterator[str]]:
+def _parse_pass_file(stream) -> Tuple[Dict[str, object], pa.Table, int, List[int], int, List[str], Iterator[str]]:
     stripped_lines = (line.rstrip("\n") for line in stream)
     header_lines: List[str] = []
     for line in stripped_lines:
@@ -487,8 +510,8 @@ def _parse_pass_file(stream) -> Tuple[Dict[str, object], pa.Table, int, List[int
     else:
         raise ValueError("Unable to locate beginning of hydrology section in pass file.")
 
-    global_meta, metadata_table, npart, hillslope_ids, nhill = _parse_metadata(header_lines)
-    return global_meta, metadata_table, npart, hillslope_ids, nhill, stripped_lines
+    global_meta, metadata_table, npart, hillslope_ids, nhill, climate_files = _parse_metadata(header_lines)
+    return global_meta, metadata_table, npart, hillslope_ids, nhill, climate_files, stripped_lines
 
 
 def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
@@ -519,7 +542,8 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
         stream = pass_path.open("r")
 
     with stream:
-        global_meta, metadata_table, npart, hillslope_ids, nhill, data_iter = _parse_pass_file(stream)
+        global_meta, metadata_table, npart, hillslope_ids, nhill, climate_files, data_iter = _parse_pass_file(stream)
+        calendar_lookup = _build_cli_calendar_lookup(base, climate_files=climate_files, log=LOGGER)
         _write_events_parquet(
             data_iter,
             hillslope_ids,
@@ -527,6 +551,7 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
             npart,
             global_meta,
             events_path,
+            calendar_lookup=calendar_lookup,
         )
 
     pq.write_table(metadata_table, metadata_path, compression="snappy", use_dictionary=True)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+import logging
+from functools import partial
 from pathlib import Path
 from typing import Dict, List
 
@@ -12,7 +13,12 @@ from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
 from .schema_utils import pa_field
-from ._utils import _parse_float, _julian_to_calendar
+from ._utils import (
+    _build_cli_calendar_lookup,
+    _compute_sim_day_index,
+    _julian_to_calendar,
+    _parse_float,
+)
 from .versioning import schema_with_version
 
 
@@ -21,6 +27,8 @@ SEDCLASS_COUNT = 5
 EVENT_FLOAT_COUNT = 12 + (2 * SEDCLASS_COUNT) + 2  # dur..tdep + sedcon + frcflw + gwbfv/gwdsv
 SUBEVENT_FLOAT_COUNT = 6  # sbrunf, sbrunv, drainq, drrunv, gwbfv, gwdsv
 NOEVENT_FLOAT_COUNT = 2  # gwbfv, gwdsv
+
+LOGGER = logging.getLogger(__name__)
 
 
 SCHEMA = schema_with_version(
@@ -105,7 +113,7 @@ def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
 PASS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
 
-def _parse_pass_file(path: Path) -> pa.Table:
+def _parse_pass_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
     """Parse a single PASS file into a PyArrow table."""
     match = PASS_FILE_RE.match(path.name)
     if not match:
@@ -125,8 +133,6 @@ def _parse_pass_file(path: Path) -> pa.Table:
         begin_year = int(header_tokens[-1])
     except ValueError as exc:
         raise ValueError(f"PASS header does not contain a valid start year in {path}") from exc
-
-    sim_start_date = datetime(begin_year, 1, 1)
 
     # skip header lines (climate setup, particle definitions)
     data_lines = lines[5:]
@@ -158,9 +164,14 @@ def _parse_pass_file(path: Path) -> pa.Table:
 
         year = int(tokens[0])
         julian = int(tokens[1])
-        month, day_of_month = _julian_to_calendar(year, julian)
+        month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
         wy = determine_wateryear(year, julian)
-        sim_day_index = (datetime(year, month, day_of_month) - sim_start_date).days + 1
+        sim_day_index = _compute_sim_day_index(
+            year,
+            julian,
+            start_year=begin_year,
+            calendar_lookup=calendar_lookup,
+        )
         if sim_day_index < 1:
             raise ValueError(
                 f"Computed negative simulation day index ({sim_day_index}) for {path} at year={year}, julian={julian}"
@@ -224,11 +235,11 @@ def _parse_pass_file(path: Path) -> pa.Table:
                     "sedcon_3": _parse_float(values[14]),
                     "sedcon_4": _parse_float(values[15]),
                     "sedcon_5": _parse_float(values[16]),
-                    "frcflw_1": _parse_float(values[17]),
-                    "frcflw_2": _parse_float(values[18]),
-                    "frcflw_3": _parse_float(values[19]),
-                    "frcflw_4": _parse_float(values[20]),
-                    "frcflw_5": _parse_float(values[21]),
+                    "clot": _parse_float(values[17]),
+                    "slot": _parse_float(values[18]),
+                    "saot": _parse_float(values[19]),
+                    "laot": _parse_float(values[20]),
+                    "sdot": _parse_float(values[21]),
                     "gwbfv": _parse_float(values[22]),
                     "gwdsv": _parse_float(values[23]),
                 }
@@ -263,16 +274,25 @@ def _parse_pass_file(path: Path) -> pa.Table:
     return pa.table(out, schema=SCHEMA)
 
 
-def run_wepp_hillslope_pass_interchange(wepp_output_dir: Path | str) -> Path:
+def run_wepp_hillslope_pass_interchange(
+    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+) -> Path:
     """Convert all `H*.pass.dat` files into a consolidated parquet dataset."""
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
     pass_files = sorted(base.glob("H*.pass.dat"))
+    if expected_hillslopes is not None and len(pass_files) != expected_hillslopes:
+        raise FileNotFoundError(
+            f"Expected {expected_hillslopes} hillslope pass files but found {len(pass_files)} in {base}"
+        )
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.pass.parquet"
 
-    write_parquet_with_pool(pass_files, _parse_pass_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    parser = partial(_parse_pass_file, calendar_lookup=calendar_lookup)
+
+    write_parquet_with_pool(pass_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

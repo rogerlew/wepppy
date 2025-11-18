@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import errno
 import shutil
-from datetime import datetime, timedelta
+import logging
 from pathlib import Path
 from typing import Dict, List
 
@@ -12,11 +12,13 @@ import pyarrow.parquet as pq
 from wepppy.all_your_base.hydro import determine_wateryear
 
 from .schema_utils import pa_field
-from ._utils import _wait_for_path, _parse_float
+from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float, _wait_for_path
 from .versioning import schema_with_version
 
 CHAN_FILENAME = "chanwb.out"
 CHAN_PARQUET = "chanwb.parquet"
+
+LOGGER = logging.getLogger(__name__)
 
 
 MEASUREMENT_COLUMNS: List[tuple[str, str, str]] = [
@@ -64,6 +66,7 @@ def _write_chan_parquet(
     target: Path,
     *,
     start_year: int | None = None,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
     chunk_size: int = 500_000,
 ) -> None:
     tmp_target = target.with_suffix(f"{target.suffix}.tmp")
@@ -106,12 +109,12 @@ def _write_chan_parquet(
                 else:
                     year = sim_year
 
-                date_obj = datetime(year, 1, 1) + timedelta(days=julian - 1)
                 store["year"].append(year)
                 store["simulation_year"].append(sim_year)
                 store["julian"].append(julian)
-                store["month"].append(date_obj.month)
-                store["day_of_month"].append(date_obj.day)
+                month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
+                store["month"].append(month)
+                store["day_of_month"].append(day_of_month)
                 store["water_year"].append(int(determine_wateryear(year, julian)))
                 store["Elmt_ID"].append(elmt_id)
                 store["Chan_ID"].append(chan_id)
@@ -162,5 +165,6 @@ def run_wepp_watershed_chanwb_interchange(
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHAN_PARQUET
-    _write_chan_parquet(source, target, start_year=start_year)
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    _write_chan_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
     return target

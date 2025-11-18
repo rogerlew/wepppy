@@ -116,13 +116,19 @@ def _parse_loss_file(path: Path) -> pa.Table:
     return pa.table(store, schema=SCHEMA)
 
 
-def run_wepp_hillslope_loss_interchange(wepp_output_dir: Path | str) -> Path:
+def run_wepp_hillslope_loss_interchange(
+    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+) -> Path:
     """Generate `H.loss.parquet` by parsing all hillslope loss outputs."""
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
     loss_files = sorted(base.glob("H*.loss.dat"))
+    if expected_hillslopes is not None and len(loss_files) != expected_hillslopes:
+        raise FileNotFoundError(
+            f"Expected {expected_hillslopes} hillslope loss files but found {len(loss_files)} in {base}"
+        )
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.loss.parquet"

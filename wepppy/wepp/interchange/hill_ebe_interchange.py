@@ -248,7 +248,12 @@ def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
     return table
 
 
-def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
+def run_wepp_hillslope_ebe_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    start_year: int | None = None,
+    expected_hillslopes: int | None = None,
+) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -259,6 +264,10 @@ def run_wepp_hillslope_ebe_interchange(wepp_output_dir: Path | str, *, start_yea
         start_year = None
 
     ebe_files = sorted(base.glob("H*.ebe.dat"))
+    if expected_hillslopes is not None and len(ebe_files) != expected_hillslopes:
+        raise FileNotFoundError(
+            f"Expected {expected_hillslopes} hillslope ebe files but found {len(ebe_files)} in {base}"
+        )
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.ebe.parquet"

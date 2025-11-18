@@ -178,11 +178,73 @@ def _build_topaz_filter(topaz_ids: Optional[Sequence[int]]) -> str:
     return f"WHERE e.element_id IN ({', '.join(str(v) for v in values)})"
 
 
+def _should_join_on_simulation_year(
+    connection: duckdb.DuckDBPyConnection,
+    ebe_path: Path,
+    climate_info: tuple[Path | None, Dict[str, str]],
+) -> bool:
+    """Return True when climate years align with simulation years instead of calendar years."""
+    climate_path, columns = climate_info
+    if climate_path is None or not columns or "year" not in columns:
+        return False
+
+    def _normalize(value: Any) -> Optional[float]:
+        try:
+            if value is None or (isinstance(value, float) and np.isnan(value)):
+                return None
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    def _overlaps(a_min: Optional[float], a_max: Optional[float], b_min: Optional[float], b_max: Optional[float]) -> bool:
+        if None in (a_min, a_max, b_min, b_max):
+            return False
+        return not (a_max < b_min or b_max < a_min)
+
+    try:
+        climate_min, climate_max = connection.execute(
+            f"""
+            SELECT
+                MIN({_quote_identifier(columns["year"])}),
+                MAX({_quote_identifier(columns["year"])})
+            FROM read_parquet('{climate_path.as_posix()}')
+            """
+        ).fetchone()
+        event_min_cal, event_max_cal, event_min_sim, event_max_sim = connection.execute(
+            f"""
+            SELECT
+                MIN(year),
+                MAX(year),
+                MIN(simulation_year),
+                MAX(simulation_year)
+            FROM read_parquet('{ebe_path.as_posix()}')
+            """
+        ).fetchone()
+    except Exception:  # pragma: no cover - defensive fallback
+        return False
+
+    climate_min_f = _normalize(climate_min)
+    climate_max_f = _normalize(climate_max)
+    cal_min_f = _normalize(event_min_cal)
+    cal_max_f = _normalize(event_max_cal)
+    sim_min_f = _normalize(event_min_sim)
+    sim_max_f = _normalize(event_max_sim)
+
+    # Prefer calendar-year joins when possible; fall back to simulation years when ranges do not overlap.
+    if _overlaps(cal_min_f, cal_max_f, climate_min_f, climate_max_f):
+        return False
+    if _overlaps(sim_min_f, sim_max_f, climate_min_f, climate_max_f):
+        return True
+    return False
+
+
 def _build_raw_event_query(
     ebe_path: Path,
     tot_path: Path,
     climate_info: tuple[Path | None, Dict[str, str]],
     topaz_filter: str,
+    *,
+    join_on_simulation_year: bool,
 ) -> str:
     """Compose the DuckDB SQL used to stage event metrics prior to ranking."""
     climate_path, columns = climate_info
@@ -206,9 +268,10 @@ def _build_raw_event_query(
             return f"{climate_alias}.{_quote_identifier(column)}"
 
         # Join on calendar year, not simulation year
+        join_year_expr = "e.simulation_year" if join_on_simulation_year else "e.year"
         climate_join = f"""
         LEFT JOIN read_parquet('{climate_path.as_posix()}') AS {climate_alias}
-          ON {climate_alias}.{year_col} = e.year
+          ON {climate_alias}.{year_col} = {join_year_expr}
          AND {climate_alias}.{month_col} = e.month
          AND {climate_alias}.{day_col} = e.day_of_month
         """
@@ -250,7 +313,7 @@ def _build_raw_event_query(
             {duration_expr} AS storm_duration_hours
         FROM read_parquet('{ebe_path.as_posix()}') AS e
         LEFT JOIN read_parquet('{tot_path.as_posix()}') AS tot
-          ON tot.year = e.year
+          ON tot.year = e.simulation_year
          AND tot.month = e.month
          AND tot.day_of_month = e.day_of_month
         {climate_join}
@@ -351,7 +414,14 @@ def refresh_return_period_events(
     with duckdb.connect() as con:
         con.execute("PRAGMA threads=4")
 
-        raw_event_query = _build_raw_event_query(ebe_path, tot_path, climate_info, topaz_filter)
+        join_on_sim_year = _should_join_on_simulation_year(con, ebe_path, climate_info)
+        raw_event_query = _build_raw_event_query(
+            ebe_path,
+            tot_path,
+            climate_info,
+            topaz_filter,
+            join_on_simulation_year=join_on_sim_year,
+        )
         con.execute(f"CREATE OR REPLACE TEMP TABLE raw_events AS {raw_event_query}")
 
         counts_df = _compute_event_counts(con, ebe_path, topaz_filter)
