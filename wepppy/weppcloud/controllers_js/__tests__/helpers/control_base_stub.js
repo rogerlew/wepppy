@@ -22,6 +22,7 @@ module.exports = function createControlBaseStub(overrides) {
         reset_status_spinner: jest.fn(),
         clear_status_messages: jest.fn(),
         append_status_message: jest.fn(),
+        reset_panel_state: jest.fn(),
         pushResponseStacktrace: jest.fn(),
         pushErrorStacktrace: jest.fn(),
         set_rq_job_id: jest.fn(),

@@ -144,7 +144,8 @@ describe("Climate controller", () => {
             }),
             connect_status_stream: jest.fn(),
             disconnect_status_stream: jest.fn(),
-            reset_status_spinner: jest.fn()
+            reset_status_spinner: jest.fn(),
+            reset_panel_state: jest.fn()
         };
 
         global.controlBase = jest.fn(() => controlBaseInstance);
