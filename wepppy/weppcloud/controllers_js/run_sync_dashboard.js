@@ -152,7 +152,10 @@
         }
 
         function bootstrap() {
-            var container = dom.ensureElement("[data-controller=\"run-sync-dashboard\"]");
+            var container = dom.qs("[data-controller=\"run-sync-dashboard\"]");
+            if (!container) {
+                return;
+            }
             if (container.__runSyncDashboardInit) {
                 return;
             }

@@ -146,9 +146,26 @@ var DebrisFlow = (function () {
         var http = helpers.http;
         var eventsApi = helpers.events;
 
+        var emitter = eventsApi.useEventMap(EVENT_NAMES, eventsApi.createEmitter());
+
+        var formElement = dom.qs("#debris_flow_form");
+        if (!formElement) {
+            var placeholder = controlBase();
+            placeholder.form = null;
+            placeholder.events = emitter;
+            placeholder.command_btn_id = "btn_run_debris_flow";
+            placeholder.run = function () {
+                return null;
+            };
+            placeholder.report = function () {};
+            placeholder.bootstrap = function () {
+                return placeholder;
+            };
+            return placeholder;
+        }
+
         var debris = controlBase();
 
-        var formElement = dom.ensureElement("#debris_flow_form", "Debris flow form not found.");
         var infoElement = dom.qs("#debris_flow_form #info");
         var statusElement = dom.qs("#debris_flow_form #status");
         var stacktraceElement = dom.qs("#debris_flow_form #stacktrace");
@@ -163,8 +180,6 @@ var DebrisFlow = (function () {
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
         var hintAdapter = createLegacyAdapter(hintElement);
-
-        var emitter = eventsApi.useEventMap(EVENT_NAMES, eventsApi.createEmitter());
 
         debris.form = formElement;
         debris.info = infoAdapter;

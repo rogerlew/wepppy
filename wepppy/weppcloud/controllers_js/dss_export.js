@@ -640,6 +640,20 @@ var DssExport = (function () {
                 ? helper.getControllerContext(ctx, "dssExport")
                 : {};
 
+            // Re-query mode panels if they weren't found during initial creation (dynamic loading)
+            if ((!controller.modePanels[1] || !controller.modePanels[1].element) && controller.form) {
+                var mode1El = dom.qs(SELECTORS.mode1, controller.form);
+                if (mode1El) {
+                    controller.modePanels[1] = createLegacyAdapter(mode1El);
+                }
+            }
+            if ((!controller.modePanels[2] || !controller.modePanels[2].element) && controller.form) {
+                var mode2El = dom.qs(SELECTORS.mode2, controller.form);
+                if (mode2El) {
+                    controller.modePanels[2] = createLegacyAdapter(mode2El);
+                }
+            }
+
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "post_dss_export_rq")
                 : null;

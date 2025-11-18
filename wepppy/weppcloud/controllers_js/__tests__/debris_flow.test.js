@@ -141,3 +141,63 @@ describe("DebrisFlow controller", () => {
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 });
+
+describe("DebrisFlow controller without DOM bindings", () => {
+    let baseInstance;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        document.body.innerHTML = "<div></div>";
+
+        await import("../dom.js");
+        await import("../events.js");
+
+        global.WCHttp = {
+            postJson: jest.fn(),
+            request: jest.fn(),
+            isHttpError: jest.fn(() => false)
+        };
+        global.WCForms = {
+            serializeForm: jest.fn(() => ({}))
+        };
+
+        ({ base: baseInstance } = createControlBaseStub({
+            pushResponseStacktrace: jest.fn(),
+            set_rq_job_id: jest.fn(),
+            triggerEvent: jest.fn(),
+            hideStacktrace: jest.fn(),
+            connect_status_stream: jest.fn(),
+            disconnect_status_stream: jest.fn()
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
+        global.url_for_run = jest.fn((path) => path);
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        delete window.DebrisFlow;
+        delete global.WCHttp;
+        delete global.controlBase;
+        delete global.url_for_run;
+        delete global.WCForms;
+        if (global.WCDom) {
+            delete global.WCDom;
+        }
+        if (global.WCEvents) {
+            delete global.WCEvents;
+        }
+        document.body.innerHTML = "";
+    });
+
+    test("returns a placeholder instance when the debris flow form is absent", async () => {
+        await import("../debris_flow.js");
+        const instance = window.DebrisFlow.getInstance();
+
+        expect(instance).not.toBeNull();
+        expect(instance.form).toBeNull();
+        expect(() => instance.bootstrap()).not.toThrow();
+        expect(instance.run()).toBeNull();
+        expect(baseInstance.connect_status_stream).not.toHaveBeenCalled();
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
+    });
+});
