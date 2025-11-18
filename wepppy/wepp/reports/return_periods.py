@@ -155,6 +155,12 @@ def _discover_climate_asset(base: Path) -> tuple[Path, Dict[str, str]] | tuple[N
                 mapping[key] = selected
 
         if {"year", "month", "day"}.issubset(mapping):
+            # Prefer a richer CLI-derived parquet when intensity/duration columns are missing.
+            needs_enrichment = not {"intensity_10", "intensity_15", "intensity_30", "duration"}.issubset(mapping)
+            if needs_enrichment:
+                generated_path, generated_mapping = _generate_cli_parquet(base)
+                if generated_path:
+                    return generated_path, generated_mapping
             return candidate, mapping
 
     generated_path, generated_mapping = _generate_cli_parquet(base)
@@ -199,6 +205,7 @@ def _build_raw_event_query(
                 return "CAST(NULL AS DOUBLE)"
             return f"{climate_alias}.{_quote_identifier(column)}"
 
+        # Join on calendar year, not simulation year
         climate_join = f"""
         LEFT JOIN read_parquet('{climate_path.as_posix()}') AS {climate_alias}
           ON {climate_alias}.{year_col} = e.year
