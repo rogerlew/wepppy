@@ -153,8 +153,8 @@ def _upsert_migration_row(
     original_url: str,
     owner_email: str | None,
     pulled_at: datetime,
-    version_at_pull: int | None,
     last_status: str | None,
+    version_at_pull: int | None,
 ) -> None:
     # Import inside the function to avoid circular imports during app bootstrap.
     from wepppy.weppcloud.app import RunMigration, app, db
@@ -169,8 +169,8 @@ def _upsert_migration_row(
         record.original_url = original_url
         record.owner_email = owner_email
         record.pulled_at = pulled_at
-        record.version_at_pull = version_at_pull
         record.last_status = last_status
+        record.version_at_pull = version_at_pull
         record.updated_at = utc_now()
         db.session.commit()
 
@@ -221,8 +221,8 @@ def run_sync_rq(
         original_url,
         owner_email,
         pulled_at,
-        None,
         "DOWNLOADING",
+        None,
     )
 
     spec_url = f"{original_url}/aria2c.spec"
@@ -255,8 +255,8 @@ def run_sync_rq(
             original_url,
             owner_email,
             pulled_at,
-            version_at_pull,
             "REGISTERED",
+            version_at_pull,
         )
         _publish_status(status_channel, job_id, "REGISTERED", str(run_root))
         _publish_status(status_channel, job_id, "COMPLETE", f"{func_name}({normalized_runid}, {normalized_config})")
@@ -279,13 +279,14 @@ def run_sync_rq(
             original_url,
             owner_email,
             pulled_at,
-            None,
             "EXCEPTION",
+            None,
         )
         raise
     finally:
-        if spec_file and spec_file.exists():
+        if spec_file and hasattr(spec_file, "exists") and hasattr(spec_file, "unlink"):
             try:
-                spec_file.unlink()
+                if spec_file.exists():
+                    spec_file.unlink()
             except OSError:
                 pass
