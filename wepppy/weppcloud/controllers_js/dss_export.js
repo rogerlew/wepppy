@@ -640,17 +640,37 @@ var DssExport = (function () {
                 ? helper.getControllerContext(ctx, "dssExport")
                 : {};
 
-            // Re-query mode panels if they weren't found during initial creation (dynamic loading)
+            // Re-query critical elements if they weren't found during initial creation (dynamic loading)
+            var needsReApply = false;
+            
+            if (!controller.form) {
+                controller.form = dom.qs(SELECTORS.form);
+            }
+            
             if ((!controller.modePanels[1] || !controller.modePanels[1].element) && controller.form) {
                 var mode1El = dom.qs(SELECTORS.mode1, controller.form);
                 if (mode1El) {
                     controller.modePanels[1] = createLegacyAdapter(mode1El);
+                    needsReApply = true;
                 }
             }
             if ((!controller.modePanels[2] || !controller.modePanels[2].element) && controller.form) {
                 var mode2El = dom.qs(SELECTORS.mode2, controller.form);
                 if (mode2El) {
                     controller.modePanels[2] = createLegacyAdapter(mode2El);
+                    needsReApply = true;
+                }
+            }
+            
+            // Re-apply initial mode if we just re-queried the panels
+            if (needsReApply && controller.form) {
+                var checkedModeEl = controller.form.querySelector("input[name='dss_export_mode']:checked");
+                var initialMode = parseMode(checkedModeEl ? checkedModeEl.value : null, controller.state.mode || 1);
+                controller.state.mode = initialMode;
+                try {
+                    applyMode(controller, initialMode, { emit: false, updateRadios: true, fallback: 1 });
+                } catch (err) {
+                    console.warn("[DssExport] Failed to apply mode during bootstrap:", err);
                 }
             }
 
