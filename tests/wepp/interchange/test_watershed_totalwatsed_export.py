@@ -32,12 +32,12 @@ def _build_dataframe():
     )
 
 
-def test_partitioned_dss_respects_date_range_per_channel(monkeypatch, tmp_path):
+def _run_export(monkeypatch, tmp_path, frames, **kwargs):
     wd = tmp_path / "run"
     (wd / "wepp" / "output" / "interchange").mkdir(parents=True)
     (wd / "export" / "dss").mkdir(parents=True)
 
-    translator_ids = ["chn_101", "chn_104"]
+    translator_ids = [f"chn_{channel_id}" for channel_id in frames]
 
     class DummyTranslator:
         def iter_chn_ids(self):
@@ -70,8 +70,6 @@ def test_partitioned_dss_respects_date_range_per_channel(monkeypatch, tmp_path):
     monkeypatch.setattr("wepppy.nodb.core.Watershed", DummyWatershed)
     monkeypatch.setattr("wepppy.nodb.core.Wepp", DummyWepp)
     monkeypatch.setattr("wepppy.nodb.core.wepp.BaseflowOpts", DummyBaseflowOpts)
-
-    frames = {channel_id: _build_dataframe() for channel_id in (101, 104)}
 
     def fake_run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None):
         channel_id = wepp_ids[0]
@@ -124,18 +122,52 @@ def test_partitioned_dss_respects_date_range_per_channel(monkeypatch, tmp_path):
 
     monkeypatch.setattr(mod, "_require_pydsstools", lambda: (RecordingTSC, RecordingHecDss))
 
-    mod.totalwatsed_partitioned_dss_export(
-        str(wd),
+    mod.totalwatsed_partitioned_dss_export(str(wd), **kwargs)
+    return RecordingHecDssFile.writes
+
+
+def test_partitioned_dss_respects_date_range_per_channel(monkeypatch, tmp_path):
+    frames = {channel_id: _build_dataframe() for channel_id in (101, 104)}
+
+    writes = _run_export(
+        monkeypatch,
+        tmp_path,
+        frames,
         start_date=date(2011, 2, 1),
         end_date=date(2011, 2, 3),
     )
 
     for chan_id in (101, 104):
         fname = f"totalwatsed3_chan_{chan_id}.dss"
-        records = RecordingHecDssFile.writes[fname]
+        records = writes[fname]
         assert records, f"Missing DSS writes for channel {chan_id}"
         runvol_record = next((rec for rec in records if "RUNVOL" in rec["pathname"]), None)
         assert runvol_record is not None
         assert runvol_record["start"] == "01FEB2011 00:00:00"
         assert runvol_record["count"] == 3
         assert "01FEB2011" in runvol_record["pathname"]
+
+
+def test_partitioned_dss_accepts_year_one_dates(monkeypatch, tmp_path):
+    frame = pd.DataFrame(
+        {
+            "year": [1, 1, 1],
+            "month": [1, 1, 1],
+            "day_of_month": [11, 12, 13],
+            "julian": [11, 12, 13],
+            "sim_day_index": [10, 11, 12],
+            "water_year": [1, 1, 1],
+            "Area": 1200.0,
+            "Streamflow": 1.0,
+            "runvol": 2.0,
+        }
+    )
+
+    writes = _run_export(monkeypatch, tmp_path, {101: frame})
+
+    records = writes["totalwatsed3_chan_101.dss"]
+    assert records, "DSS writes missing for year-one start date"
+    runvol_record = next((rec for rec in records if "RUNVOL" in rec["pathname"]), None)
+    assert runvol_record is not None
+    assert runvol_record["start"] == "11JAN0001 00:00:00"
+    assert "11JAN0001" in runvol_record["pathname"]

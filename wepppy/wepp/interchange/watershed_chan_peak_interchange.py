@@ -235,9 +235,19 @@ def chanout_dss_export(
     if start_date is not None or end_date is not None:
         df = apply_date_filters(df, start=start_date, end=end_date)
 
-    base_dates = pd.to_datetime(df["year"].astype(str), format="%Y")
-    base_dates = base_dates + pd.to_timedelta(df["julian"] - 1, unit="D")
-    df["datetime"] = base_dates + pd.to_timedelta(df["Time (s)"], unit="s")
+    def _build_timestamp(row: pd.Series) -> datetime:
+        year = int(row["year"])
+        julian = int(row["julian"])
+        seconds = float(row["Time (s)"])
+        try:
+            base = datetime(year, 1, 1) + timedelta(days=julian - 1)
+        except ValueError as exc:
+            raise ValueError(
+                f"Invalid chan.out date components: year={year}, julian={julian}"
+            ) from exc
+        return base + timedelta(seconds=seconds)
+
+    df["datetime"] = df.apply(_build_timestamp, axis=1)
 
     df.sort_values(["channel_export_id", "datetime"], kind="mergesort", inplace=True)
     grouped = {int(key): group for key, group in df.groupby("channel_export_id")}
