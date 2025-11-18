@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import zipfile
-from datetime import date
+from datetime import date, datetime
 from glob import glob
 from pathlib import Path
 
@@ -166,15 +166,18 @@ def totalwatsed_partitioned_dss_export(
             "Area",
         }
 
-        date_index = pd.to_datetime(
-            dict(
-                year=df["year"].astype(int, copy=False),
-                month=df["month"].astype(int, copy=False),
-                day=df["day_of_month"].astype(int, copy=False),
-            )
-        )
-        series_start = date_index.iloc[0]
-        d_part = series_start.strftime("%d%b%Y").upper()
+        start_year = int(df["year"].iloc[0])
+        start_month = int(df["month"].iloc[0])
+        start_day = int(df["day_of_month"].iloc[0])
+        try:
+            series_start = datetime(start_year, start_month, start_day)
+        except ValueError as exc:
+            raise ValueError(
+                f"Invalid start date components for DSS export: "
+                f"{start_year:04d}-{start_month:02d}-{start_day:02d}"
+            ) from exc
+        d_part = f"{series_start.strftime('%d%b')}{series_start.year:04d}".upper()
+        start_datetime_str = f"{d_part} {series_start.strftime('%H:%M:%S')}".upper()
 
         dss_file = dss_export_dir / f"totalwatsed3_chan_{channel_top_id}.dss"
         with HecDss_cls.Open(str(dss_file)) as fid:
@@ -195,7 +198,7 @@ def totalwatsed_partitioned_dss_export(
                 pathname = f"/WEPP/TOTALWATSED3/{label.upper()}/{d_part}/1DAY/{channel_top_id}/"
                 tsc = TimeSeriesContainer_cls()
                 tsc.pathname = pathname
-                tsc.startDateTime = series_start.strftime("%d%b%Y %H:%M:%S").upper()
+                tsc.startDateTime = start_datetime_str
                 tsc.interval = 1440
                 tsc.numberValues = len(series)
                 tsc.units = units.get(column, "")
