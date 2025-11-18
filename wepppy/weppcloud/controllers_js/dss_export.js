@@ -640,11 +640,18 @@ var DssExport = (function () {
                 ? helper.getControllerContext(ctx, "dssExport")
                 : {};
 
+            // DYNAMIC MOD LOADING SUPPORT (Nov 2025)
+            // When DSS Export is enabled via Mods checkbox, DOM elements don't exist during createInstance().
+            // This bootstrap logic re-queries elements and re-attaches event delegates to support dynamic loading.
+            // See docs/dev-notes/dynamic-mod-loading-patterns.md for full context.
+            
             // Re-query critical elements if they weren't found during initial creation (dynamic loading)
             var needsReApply = false;
+            var needsDelegates = false;
             
             if (!controller.form) {
                 controller.form = dom.qs(SELECTORS.form);
+                needsDelegates = true;
             }
             
             if ((!controller.modePanels[1] || !controller.modePanels[1].element) && controller.form) {
@@ -660,6 +667,29 @@ var DssExport = (function () {
                     controller.modePanels[2] = createLegacyAdapter(mode2El);
                     needsReApply = true;
                 }
+            }
+            
+            // Set up event delegates if form was just found (dynamic loading)
+            if (needsDelegates && controller.form) {
+                controller._delegates.push(dom.delegate(controller.form, "change", ACTIONS.modeToggle, function (event, target) {
+                    event.preventDefault();
+                    var datasetMode = target && target.getAttribute("data-dss-export-mode");
+                    var nextMode = parseMode(datasetMode || (target ? target.value : undefined), null);
+                    try {
+                        controller.setMode(nextMode);
+                    } catch (err) {
+                        console.error("[DssExport] Unable to set mode:", err);
+                    }
+                }));
+
+                controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.runExport, function (event) {
+                    event.preventDefault();
+                    controller.export();
+                }));
+
+                controller.form.addEventListener("DSS_EXPORT_TASK_COMPLETED", function (event) {
+                    controller.handleExportTaskCompleted(event && event.detail ? event.detail : null);
+                });
             }
             
             // Re-apply initial mode if we just re-queried the panels

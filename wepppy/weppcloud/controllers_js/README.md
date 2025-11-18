@@ -14,6 +14,34 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
   3. Remaining controllers alphabetically
 - Controllers can assume that `window.WCDom`, `window.WCEvents`, `window.WCForms`, and `window.WCHttp` exist before their module executes.
 
+## Dynamic Mod Loading
+**⚠️ Critical for new mod controllers:** When mods are dynamically enabled via the Mods dialog, the controller's singleton instance may be created *before* the DOM elements exist. This causes null references that persist even after the HTML is inserted.
+
+**Required patterns:**
+1. **Re-query elements in `bootstrap()`**: Check if critical elements are null and re-query them
+2. **Defensive element access**: Always verify elements exist before using them
+3. **Test dynamic loading**: Don't just test initial page load—test enabling the mod via checkbox
+
+**See:** [docs/dev-notes/dynamic-mod-loading-patterns.md](../../../docs/dev-notes/dynamic-mod-loading-patterns.md) for comprehensive guidance, examples, and architectural alternatives.
+
+**Quick template for new controllers:**
+```javascript
+controller.bootstrap = function bootstrap(context) {
+    // Re-query critical elements if they weren't found during createInstance()
+    if (!controller.form || !controller.form.element) {
+        var formElement = dom.qs(SELECTORS.form);
+        if (formElement) {
+            controller.form = formElement;
+            // Re-query child elements that depend on form
+            controller.button = dom.qs(SELECTORS.button, formElement);
+        }
+    }
+    
+    // Now proceed with bootstrap logic
+    // ...
+};
+```
+
 ## Vanilla Helper Modules
 - **`dom.js` (`window.WCDom`)** — Query helpers (`qs`, `qsa`, `ensureElement`), class/visibility utilities (`show`, `hide`, `toggle`, `toggleClass`), delegated event wiring (`delegate`), and light ARIA helpers. Each function accepts either selector strings or actual nodes and fails fast with descriptive errors when misused.
 - **`events.js` (`window.WCEvents`)** — Lightweight event emitter factory with `on/off/once/emit`, DOM bridge (`emitDom`), piping (`forward`), and `useEventMap` for opt-in event name validation during development.
