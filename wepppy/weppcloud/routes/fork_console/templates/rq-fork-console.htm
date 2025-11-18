@@ -20,6 +20,7 @@
 {% endblock %}
 
 {% block script_extras %}
+<script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='js/console_utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/status_stream.js') }}"></script>

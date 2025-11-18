@@ -4,12 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}WᴇᴘᴘCʟᴏᴜᴅ{% endblock %}</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon" />
-    <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/purecss/pure-min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/purecss/grids-responsive-min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-foundation.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes/all-themes.css') }}">
+    <link rel="shortcut icon" href="{{ static_url('favicon/favicon2.ico') }}" type="image/x-icon" />
+    <link rel="icon" href="{{ static_url('favicon/favicon2.ico') }}" type="image/x-icon" />
+    <link rel="stylesheet" href="{{ static_url('vendor/purecss/pure-min.css') }}">
+    <link rel="stylesheet" href="{{ static_url('vendor/purecss/grids-responsive-min.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/ui-foundation.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/themes/all-themes.css') }}">
     {% block head_extras %}{% endblock %}
   </head>
   <body class="wc-page">

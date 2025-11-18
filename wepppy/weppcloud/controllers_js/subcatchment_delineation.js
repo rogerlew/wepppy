@@ -377,21 +377,7 @@ var SubcatchmentDelineation = (function () {
         }
 
         function resetStatus(taskMsg) {
-            if (infoAdapter && typeof infoAdapter.text === "function") {
-                infoAdapter.text("");
-            } else {
-                safeText(infoElement, "");
-            }
-            if (statusAdapter && typeof statusAdapter.html === "function") {
-                statusAdapter.html(taskMsg + "...");
-            } else {
-                safeHtml(statusElement, taskMsg + "...");
-            }
-            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
-                stacktraceAdapter.text("");
-            } else {
-                safeText(stacktraceElement, "");
-            }
+            sub.reset_panel_state(sub, { taskMessage: taskMsg });
         }
 
         function requestJson(url, options) {

@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import logging
+import os
 from types import MethodType
 from datetime import datetime
 from glob import glob
@@ -40,12 +41,12 @@ from flask_migrate import Migrate
 from wtforms import StringField
 
 from wepppy.nodb.core import Ron
+from wepppy.weppcloud.utils.assets import resolve_asset_version
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils.agent_auth import init_agent_jwt
 from wepppy.weppcloud.utils.oauth import utc_now
 from wepppy.weppcloud.profile_coverage import init_profile_coverage
 
-import logging
 from wepppy.weppcloud._jinja_filters import register_jinja_filters
 from wepppy.weppcloud._blueprints_context import register_blueprints
 from wepppy.weppcloud._context_processors import register_context_processors
@@ -58,6 +59,9 @@ app = Flask(__name__)
 config_app(app)
 init_agent_jwt(app)
 init_profile_coverage(app)
+asset_version = resolve_asset_version()
+app.config.setdefault("ASSET_VERSION", asset_version)
+os.environ.setdefault("ASSET_VERSION", str(app.config["ASSET_VERSION"]))
 
 # Flask 3 removed the legacy attribute that older extensions (Flask-Session)
 # still reference; reintroduce it for compatibility.

@@ -49,14 +49,9 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
     target_root = tmp_path / "runs"
     result = run_sync.run_sync_rq(
         "demo-run",
-        "cfg",
         "wepp.cloud",
         "owner@example.com",
         str(target_root),
-        None,
-        False,
-        False,
-        None,
         None,
     )
 
@@ -75,6 +70,6 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
     assert any("DOWNLOADING" in message for _, message in published)
     assert any("REGISTERED" in message for _, message in published)
     assert result["local_path"] == str(run_root)
-    statuses = [args[8] for args, _ in upserts]
+    statuses = [args[7] for args, _ in upserts]
     assert "DOWNLOADING" in statuses
     assert "REGISTERED" in statuses

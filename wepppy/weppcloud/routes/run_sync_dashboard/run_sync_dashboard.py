@@ -138,39 +138,18 @@ def run_sync_dashboard():
 @roles_required('Admin')
 def api_run_sync():
     try:
-        payload = parse_request_payload(request, boolean_fields={'allow_push', 'overwrite'})
+        payload = parse_request_payload(request, boolean_fields=set())
     except Exception:
         return exception_factory('Invalid payload')
 
     runid = payload.get('runid')
-    config = payload.get('config')
-    if not runid or not config:
-        return error_factory('runid and config are required')
+    if not runid:
+        return error_factory('runid is required')
 
     source_host = payload.get('source_host') or 'wepp.cloud'
     target_root = payload.get('target_root') or DEFAULT_TARGET_ROOT
     owner_email = payload.get('owner_email') or None
-    auth_token = payload.get('auth_token') or None
-    allow_push = bool(payload.get('allow_push', False))
-    overwrite = bool(payload.get('overwrite', False))
-    expected_size_raw = payload.get('expected_size')
-    expected_sha256 = payload.get('expected_sha256') or None
-
-    expected_size = None
-    if expected_size_raw not in (None, ''):
-        try:
-            expected_size = int(expected_size_raw)
-        except (TypeError, ValueError):
-            return error_factory('expected_size must be an integer when provided')
-
-    normalized_host = source_host
-    if '://' in normalized_host:
-        normalized_host = normalized_host.split('://', 1)[1]
-    normalized_host = normalized_host.strip('/')
-    if normalized_host in {'wc.bearhive.duckdns.org', 'forest.local'} and not allow_push:
-        return error_factory('allow_push must be true when syncing from wc.bearhive.duckdns.org or forest.local')
-    if allow_push and normalized_host in {'wc.bearhive.duckdns.org', 'forest.local'} and not auth_token:
-        return error_factory('auth_token is required when allow_push is enabled for this host')
+    config = payload.get('config') or None
 
     try:
         with _redis_conn() as redis_conn:
@@ -179,15 +158,10 @@ def api_run_sync():
                 run_sync_rq,
                 (
                     runid,
-                    config,
                     source_host,
                     owner_email,
                     target_root,
-                    auth_token,
-                    allow_push,
-                    overwrite,
-                    expected_size,
-                    expected_sha256,
+                    config,
                 ),
                 timeout=RUN_SYNC_TIMEOUT,
             )
@@ -196,7 +170,7 @@ def api_run_sync():
 
     StatusMessenger.publish(
         f"{runid}:{STATUS_CHANNEL_SUFFIX}",
-        f"rq:{job.id} ENQUEUED run_sync_rq({runid}, {config})",
+        f"rq:{job.id} ENQUEUED run_sync_rq({runid})",
     )
 
     return jsonify({'Success': True, 'job_id': job.id})

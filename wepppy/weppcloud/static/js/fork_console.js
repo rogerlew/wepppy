@@ -25,7 +25,13 @@
 
     var origin = window.location.origin;
     var runId = dataset.runid || dataset.runId || "";
-    var initialUndisturbify = Boolean(dataset.undisturbify);
+    var undisturbifyRaw = dataset.undisturbify;
+    var initialUndisturbify = false;
+    if (typeof undisturbifyRaw === "string") {
+      initialUndisturbify = undisturbifyRaw.toLowerCase() === "true";
+    } else if (typeof undisturbifyRaw !== "undefined") {
+      initialUndisturbify = Boolean(undisturbifyRaw);
+    }
 
     var form = container.querySelector("#fork_form");
     var runIdInput = container.querySelector("#runid_input");

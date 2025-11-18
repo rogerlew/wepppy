@@ -10,7 +10,7 @@
   <div data-fork-console-config
        data-runid="{{ runid }}"
        data-config="{{ config }}"
-       data-undisturbify="{{ 'true' if undisturbify else 'false' }}"
+       data-undisturbify="{{ 'true' if undisturbify is sameas true else 'false' }}"
        hidden></div>
   {% call ui.control_shell(
        form_id="fork_form",
@@ -43,7 +43,7 @@
       {{ ui.checkbox_field(
            'undisturbify_checkbox',
            'Undisturbify output (optional)',
-           checked=undisturbify
+           checked=undisturbify is sameas true
          ) }}
       {% call button_row() %}
         <button type="submit" class="pure-button" id="submit_button">Fork project</button>

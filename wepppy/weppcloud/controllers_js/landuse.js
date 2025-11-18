@@ -244,18 +244,7 @@ var Landuse = (function () {
         };
 
         function resetStatus(taskMsg) {
-            if (infoAdapter && typeof infoAdapter.text === "function") {
-                infoAdapter.text("");
-            }
-            landuse.clear_status_messages(landuse);
-            if (taskMsg) {
-                landuse.append_status_message(landuse, taskMsg + "...");
-            }
-            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
-                stacktraceAdapter.text("");
-            } else if (stacktraceElement) {
-                stacktraceElement.textContent = "";
-            }
+            landuse.reset_panel_state(landuse, { taskMessage: taskMsg });
         }
 
         function handleError(error) {

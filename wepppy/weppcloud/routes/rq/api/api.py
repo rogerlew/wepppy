@@ -1524,6 +1524,8 @@ def api_fork(runid, config):
         
         if not _exists(wd):
             return exception_factory('Error forking project, run_id={runid} does not exist', runid=runid)
+
+        source_config = Ron.getInstance(wd).config_stem
         
         undisturbify_str = request.form.get("undisturbify", "false")
         undisturbify = undisturbify_str.lower() == "true"
@@ -1598,7 +1600,7 @@ def api_fork(runid, config):
         register_run = not new_runid.startswith('profile;;')
         if register_run and not current_user.is_anonymous:
             try:
-                user_datastore.create_run(new_runid, config, current_user)
+                user_datastore.create_run(new_runid, source_config, current_user)
             except Exception:
                 return exception_factory('Could not add run to user database')
 

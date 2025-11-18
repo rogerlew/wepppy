@@ -61,14 +61,8 @@
         });
     }
 
-    function normalizeRunLabel(runid, config) {
-        if (!runid && !config) {
-            return "";
-        }
-        if (!config) {
-            return runid || "";
-        }
-        return runid + " / " + config;
+    function normalizeRunLabel(runid) {
+        return runid || "";
     }
 
     function createController() {
@@ -113,7 +107,7 @@
             var rows = jobs.map(function (job) {
                 return createRow([
                     job.id || "",
-                    normalizeRunLabel(job.runid, job.config),
+                    normalizeRunLabel(job.runid),
                     job.source_host || "",
                     job.status || "",
                     job.job_status || "",
@@ -135,7 +129,7 @@
             }
             var rows = records.map(function (record) {
                 return createRow([
-                    normalizeRunLabel(record.runid, record.config),
+                    normalizeRunLabel(record.runid),
                     record.source_host || "",
                     record.owner_email || "",
                     record.last_status || "",
@@ -149,28 +143,12 @@
 
         function buildPayload(form, defaults) {
             var payload = forms.formToJSON(form);
-            var result = {
+            return {
                 source_host: payload.source_host || defaults.defaultHost,
                 runid: payload.runid ? String(payload.runid).trim() : "",
-                config: payload.config ? String(payload.config).trim() : "",
                 target_root: payload.target_root || defaults.defaultRoot,
-                owner_email: payload.owner_email || null,
-                auth_token: payload.auth_token || null,
-                allow_push: Boolean(payload.allow_push),
-                overwrite: Boolean(payload.overwrite),
-                expected_sha256: payload.expected_sha256 || null,
+                owner_email: payload.owner_email || null
             };
-            if (payload.expected_size !== undefined && payload.expected_size !== null && String(payload.expected_size).trim() !== "") {
-                result.expected_size = Number(payload.expected_size);
-            }
-
-            Object.keys(result).forEach(function (key) {
-                if (result[key] === "" || result[key] === null) {
-                    delete result[key];
-                }
-            });
-
-            return result;
         }
 
         function bootstrap() {
@@ -218,8 +196,8 @@
                     return;
                 }
                 var payload = buildPayload(form, defaults);
-                if (!payload.runid || !payload.config) {
-                    setStatusMessage("runid and config are required.");
+                if (!payload.runid) {
+                    setStatusMessage("runid is required.");
                     return;
                 }
                 setStatusMessage("Enqueueing run sync job...");

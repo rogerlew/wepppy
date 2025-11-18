@@ -178,6 +178,7 @@ var Wepp = (function () {
         wepp.rq_job = rqJobAdapter;
         wepp.hint = hintAdapter;
         wepp.command_btn_id = "btn_run_wepp";
+        wepp.resultsContainer = resultsContainer;
 
         wepp.statusPanelEl = dom.qs("#wepp_status_panel");
         wepp.stacktracePanelEl = dom.qs("#wepp_stacktrace_panel");
@@ -357,14 +358,11 @@ var Wepp = (function () {
         wepp.run = function () {
             var taskMsg = "Submitting wepp run";
 
-            if (infoAdapter && typeof infoAdapter.text === "function") {
-                infoAdapter.text("");
-            }
-            wepp.clear_status_messages(wepp);
-            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
-                stacktraceAdapter.text("");
-            }
-            wepp.appendStatus(taskMsg + "...");
+            wepp.reset_panel_state(wepp, {
+                taskMessage: taskMsg,
+                resultsTarget: resultsContainer,
+                hintTarget: hintAdapter
+            });
 
             wepp.connect_status_stream(wepp);
 

@@ -181,6 +181,9 @@ describe("Fork console smoke", () => {
         fetchMock.mockClear();
         statusStreamInstance.append.mockClear();
         global.StatusStream.attach.mockClear();
+
+        const undisturbifyCheckbox = document.getElementById("undisturbify_checkbox");
+        expect(undisturbifyCheckbox.checked).toBe(false);
     });
 
     afterEach(() => {

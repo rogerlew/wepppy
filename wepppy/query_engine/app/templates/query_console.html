@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Query Console – {{ run_name }}</title>
-    <link rel="stylesheet" href="/weppcloud/static/vendor/purecss/pure-min.css">
-    <link rel="stylesheet" href="/weppcloud/static/vendor/purecss/grids-responsive-min.css">
-    <link rel="stylesheet" href="/weppcloud/static/css/ui-foundation.css">
+    <link rel="stylesheet" href="/weppcloud/static/vendor/purecss/pure-min.css{% if asset_version %}?v={{ asset_version }}{% endif %}">
+    <link rel="stylesheet" href="/weppcloud/static/vendor/purecss/grids-responsive-min.css{% if asset_version %}?v={{ asset_version }}{% endif %}">
+    <link rel="stylesheet" href="/weppcloud/static/css/ui-foundation.css{% if asset_version %}?v={{ asset_version }}{% endif %}">
   </head>
   <body class="wc-page">
     {% from "shared/console_macros.htm" import console_page, console_header, button_row %}

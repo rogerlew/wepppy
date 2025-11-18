@@ -51,11 +51,6 @@
              attrs={'required': True, 'placeholder': 'my-run-id'}
            ) }}
         {{ ui.text_field(
-             'config',
-             'Config',
-             attrs={'required': True, 'placeholder': 'cfg'}
-           ) }}
-        {{ ui.text_field(
              'target_root',
              'Target root',
              value=default_target_root,
@@ -65,32 +60,6 @@
              'owner_email',
              'Owner email',
              help='Optional owner email captured in provenance and the migrations table.'
-           ) }}
-        {{ ui.text_field(
-             'auth_token',
-             'Auth token',
-             help='Required for push to wc.bearhive.duckdns.org when allow push is enabled.',
-             type='password'
-           ) }}
-        <div class="pure-control-group">
-          <label for="allow_push">Allow push</label>
-          <input id="allow_push" name="allow_push" type="checkbox" class="pure-checkbox">
-          <span class="wc-form__note">Required when syncing from wc.bearhive.duckdns.org / forest.local.</span>
-        </div>
-        <div class="pure-control-group">
-          <label for="overwrite">Overwrite existing</label>
-          <input id="overwrite" name="overwrite" type="checkbox" class="pure-checkbox">
-          <span class="wc-form__note">Replaces an existing run directory even if locked.</span>
-        </div>
-        {{ ui.text_field(
-             'expected_size',
-             'Expected size (bytes)',
-             help='Optional total size check across downloaded files.'
-           ) }}
-        {{ ui.text_field(
-             'expected_sha256',
-             'Expected SHA256',
-             help='Optional checksum of the downloaded run directory (computed deterministically).'
            ) }}
         {% call button_row(form_controls=True) %}
           <button type="submit" class="pure-button pure-button-primary" id="run_sync_submit">Start sync</button>

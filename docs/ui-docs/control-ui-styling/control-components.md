@@ -82,7 +82,7 @@ _Fixed console shell_
      )
    ) %}
   {{ ui.text_field('runid_input', 'Source run ID', value=runid, attrs={'readonly': 'readonly'}) }}
-  {{ ui.checkbox_field('undisturbify_checkbox', 'Undisturbify output (optional)', checked=undisturbify == 'true') }}
+  {{ ui.checkbox_field('undisturbify_checkbox', 'Undisturbify output (optional)', checked=undisturbify is sameas true) }}
   {% call button_row() %}
     <button type="submit" class="pure-button" id="submit_button">Fork project</button>
   {% endcall %}

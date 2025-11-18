@@ -1047,6 +1047,109 @@ function controlBase() {
             }
         },
 
+        reset_panel_state: function reset_panel_state(self, options) {
+            var opts = options || {};
+            var message = opts.message || opts.taskMessage || null;
+
+            var summaryTargets = [];
+            var stackTargets = [];
+            var hintTargets = [];
+            var resultsTargets = [];
+
+            function pushUnique(targets, target) {
+                if (!target) {
+                    return;
+                }
+                if (targets.indexOf(target) !== -1) {
+                    return;
+                }
+                targets.push(target);
+            }
+
+            function collectTargets(targets, candidate) {
+                if (!candidate) {
+                    return;
+                }
+                if (Array.isArray(candidate)) {
+                    candidate.forEach(function (item) {
+                        pushUnique(targets, item);
+                    });
+                    return;
+                }
+                pushUnique(targets, candidate);
+            }
+
+            collectTargets(summaryTargets, opts.summaryTarget);
+            collectTargets(summaryTargets, opts.summaryTargets);
+            collectTargets(summaryTargets, self.summary);
+            collectTargets(summaryTargets, self.summaryElement);
+            collectTargets(summaryTargets, self.info);
+            collectTargets(summaryTargets, self.infoElement);
+            if (self.form && opts.skipFormLookup !== true) {
+                try {
+                    var summaryEl = self.form.querySelector("#info");
+                    collectTargets(summaryTargets, summaryEl);
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+
+            collectTargets(stackTargets, opts.stacktraceTarget);
+            collectTargets(stackTargets, opts.stacktraceTargets);
+            collectTargets(stackTargets, self.stacktrace);
+            collectTargets(stackTargets, self.stacktraceElement);
+            collectTargets(stackTargets, self.stacktracePanelEl);
+
+            collectTargets(hintTargets, opts.hintTarget);
+            collectTargets(hintTargets, opts.hintTargets);
+            collectTargets(hintTargets, self.hint);
+
+            collectTargets(resultsTargets, opts.resultsTarget);
+            collectTargets(resultsTargets, opts.resultsTargets);
+            collectTargets(resultsTargets, self.results);
+            collectTargets(resultsTargets, self.resultsContainer);
+
+            try {
+                stackTargets.forEach(function (target) {
+                    clearContent(target);
+                });
+            } catch (err) {
+                /* ignore */
+            }
+
+            try {
+                summaryTargets.forEach(function (target) {
+                    clearContent(target);
+                });
+            } catch (err) {
+                /* ignore */
+            }
+
+            if (opts.clearStatus !== false && typeof self.clear_status_messages === "function") {
+                self.clear_status_messages(self);
+            }
+
+            try {
+                resultsTargets.forEach(function (target) {
+                    clearContent(target);
+                });
+            } catch (err) {
+                /* ignore */
+            }
+
+            try {
+                hintTargets.forEach(function (target) {
+                    setTextContent(target, "");
+                });
+            } catch (err) {
+                /* ignore */
+            }
+
+            if (message) {
+                self.append_status_message(self, opts.skipEllipsis ? message : message + "...");
+            }
+        },
+
         triggerEvent: function triggerEvent(eventName, payload) {
             if (!eventName) {
                 return;

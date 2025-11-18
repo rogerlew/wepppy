@@ -973,10 +973,7 @@ var Climate = (function () {
             climate.connect_status_stream(climate);
 
             var taskMsg = "Building climate";
-            infoAdapter.text("");
-            statusAdapter.html(taskMsg + "...");
-            stacktraceAdapter.text("");
-            climate.appendStatus(taskMsg + "...");
+            climate.reset_panel_state(climate, { taskMessage: taskMsg });
 
             var payload = forms.serializeForm(formElement, { format: "json" });
             climate.events.emit("climate:build:started", { payload: payload });

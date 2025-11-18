@@ -79,11 +79,20 @@ def _quote_identifier(identifier: str) -> str:
 
 def _generate_cli_parquet(base: Path) -> tuple[Path | None, Dict[str, str]]:
     """Materialize a climate parquet from an existing CLI when none are present."""
-    cli_dir = base / "wepp" / "runs"
-    if not cli_dir.exists():
+    cli_root = base / "wepp" / "runs"
+    if not cli_root.exists():
         return None, {}
 
-    for cli_candidate in sorted(cli_dir.glob("*.cli")):
+    # Prefer the watershed CLI (pw0.cli) when present, otherwise fall back to any .cli under wepp/runs.
+    candidates: list[Path] = []
+    preferred = cli_root / "pw0.cli"
+    if preferred.exists():
+        candidates.append(preferred)
+    candidates.extend(sorted(cli_root.glob("*.cli")))
+    if not candidates:
+        candidates.extend(sorted(cli_root.rglob("*.cli")))
+
+    for cli_candidate in candidates:
         try:
             cli_df = ClimateFile(str(cli_candidate)).as_dataframe(calc_peak_intensities=True)
         except Exception:  # pragma: no cover - defensive

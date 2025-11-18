@@ -30,6 +30,7 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 
 from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
+from wepppy.weppcloud.utils.assets import resolve_asset_version
 from .query_presets import QUERY_PRESETS
 from .helpers import resolve_run_path
 
@@ -44,6 +45,7 @@ TEMPLATES.env.loader = ChoiceLoader(loaders)
 LOGGER = logging.getLogger(__name__)
 DOCS_ROOT = Path(__file__).resolve().parent.parent / "docs"
 MCP_OPENAPI_PATH = DOCS_ROOT / "mcp_openapi.yaml"
+ASSET_VERSION = resolve_asset_version()
 
 
 def _render_mcp_openapi_yaml() -> str | None:
@@ -236,6 +238,7 @@ async def run_info(request: StarletteRequest) -> Response:
             "query_path": query_path,
             "entry_count": len(catalog_entries),
             "catalog_entries": catalog_entries,
+            "asset_version": ASSET_VERSION,
         },
     )
 
@@ -345,6 +348,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
             "query_presets": QUERY_PRESETS,
             "post_url": full_post_url,
             "post_url_display": post_display,
+            "asset_version": ASSET_VERSION,
         },
     )
 

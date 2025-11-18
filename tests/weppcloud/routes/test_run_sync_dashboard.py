@@ -49,10 +49,8 @@ def test_api_run_sync_enqueues_job(
             "/rq/api/run-sync",
             json={
                 "runid": "demo",
-                "config": "cfg",
                 "source_host": "wepp.cloud",
                 "owner_email": "owner@example.com",
-                "overwrite": True,
             },
         )
 
@@ -65,14 +63,9 @@ def test_api_run_sync_enqueues_job(
     assert queue_call.func is module.run_sync_rq
     assert queue_call.args == (
         "demo",
-        "cfg",
         "wepp.cloud",
         "owner@example.com",
         module.DEFAULT_TARGET_ROOT,
-        None,
-        False,
-        True,
-        None,
         None,
     )
     assert published[0][0] == f"demo:{module.STATUS_CHANNEL_SUFFIX}"

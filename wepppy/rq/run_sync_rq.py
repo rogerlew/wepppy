@@ -23,6 +23,7 @@ from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.weppcloud.utils.oauth import utc_now
 
 DEFAULT_TARGET_ROOT = "/wc1/runs"
+DEFAULT_CONFIG = "cfg"
 STATUS_CHANNEL_SUFFIX = "run_sync"
 STATUS_EVENTS = (
     "ENQUEUED",
@@ -177,25 +178,20 @@ def _upsert_migration_row(
 @with_exception_logging
 def run_sync_rq(
     runid: str,
-    config: str,
     source_host: str,
     owner_email: Optional[str] = None,
     target_root: str = DEFAULT_TARGET_ROOT,
-    auth_token: Optional[str] = None,
-    allow_push: bool = False,
-    overwrite: bool = False,
-    expected_size: Optional[int] = None,
-    expected_sha256: Optional[str] = None,
+    config: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Download a run from a remote WEPPcloud host and register provenance."""
     job = get_current_job()
     job_id = getattr(job, "id", "unknown")
     func_name = inspect.currentframe().f_code.co_name
     status_channel = _status_channel(runid)
-    _publish_status(status_channel, job_id, f"STARTED {func_name}({runid}, {config})")
+    _publish_status(status_channel, job_id, f"STARTED {func_name}({runid})")
 
     normalized_runid = _require_component_safe(runid, "runid")
-    normalized_config = _require_component_safe(config, "config")
+    normalized_config = _require_component_safe(config or DEFAULT_CONFIG, "config")
     normalized_host = _normalize_host(source_host)
 
     if job is not None:
@@ -204,27 +200,17 @@ def run_sync_rq(
         job.meta["source_host"] = normalized_host
         job.save()
 
-    if normalized_host in {"wc.bearhive.duckdns.org", "forest.local"}:
-        if not allow_push:
-            raise PermissionError("Cross-environment push is blocked without allow_push=true")
-        if not auth_token:
-            raise PermissionError("auth_token is required when allow_push is enabled for upstream sync")
-
     headers: dict[str, str] = {}
-    if auth_token:
-        headers["Authorization"] = f"Bearer {auth_token}"
 
     run_root = _resolve_run_root(target_root, normalized_runid, normalized_config)
     pulled_at = datetime.now(timezone.utc)
     original_url = f"https://{normalized_host}/weppcloud/runs/{normalized_runid}/{normalized_config}"
 
     if run_root.exists():
-        if not overwrite:
-            locked = [name for name, state in lock_statuses(normalized_runid).items() if name.endswith(".nodb") and state]
-            if locked:
-                raise RuntimeError(f"Run {normalized_runid} is locked ({', '.join(locked)}); enable overwrite to replace it")
-            raise RuntimeError(f"Run path already exists at {run_root}; enable overwrite to replace it")
-        shutil.rmtree(run_root)
+        locked = [name for name, state in lock_statuses(normalized_runid).items() if name.endswith(".nodb") and state]
+        if locked:
+            raise RuntimeError(f"Run {normalized_runid} is locked ({', '.join(locked)}); cannot overwrite")
+        raise RuntimeError(f"Run path already exists at {run_root}; refusing to overwrite")
 
     run_root.mkdir(parents=True, exist_ok=True)
     _upsert_migration_row(
@@ -246,7 +232,7 @@ def run_sync_rq(
         _publish_status(status_channel, job_id, "DOWNLOADING", spec_url)
 
         _run_aria2c(spec_file, run_root, headers)
-        _verify_download(run_root, expected_size=expected_size, expected_sha256=expected_sha256)
+        _verify_download(run_root)
         _publish_status(status_channel, job_id, "CHECKSUM_OK")
 
         version_at_pull = read_version(run_root)
@@ -259,10 +245,6 @@ def run_sync_rq(
             "owner_email": owner_email,
             "version_at_pull": version_at_pull,
         }
-        if expected_size is not None:
-            provenance["expected_size"] = expected_size
-        if expected_sha256:
-            provenance["expected_sha256"] = expected_sha256
         _write_provenance(run_root, provenance)
 
         _upsert_migration_row(

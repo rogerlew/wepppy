@@ -6,6 +6,8 @@ from datetime import datetime
 
 from typing import Optional, Type
 
+from flask import url_for
+
 from wepppy.nodb.core import Ron
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.weppcloud.utils.helpers import get_wd, url_for_run
@@ -73,6 +75,18 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
     @app.context_processor
     def inject_site_prefix():
         return dict(site_prefix=app.config.get('SITE_PREFIX', ''))
+
+    @app.context_processor
+    def versioned_static_processor():
+        version = app.config.get("ASSET_VERSION")
+
+        def static_url(filename: str):
+            params = {"filename": filename}
+            if version:
+                params["v"] = version
+            return url_for("static", **params)
+
+        return dict(asset_version=version, static_url=static_url)
         
     @app.context_processor
     def utility_processor():

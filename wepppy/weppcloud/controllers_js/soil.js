@@ -213,18 +213,7 @@ var Soil = (function () {
         };
 
         function resetStatus(taskMsg) {
-            if (infoAdapter && typeof infoAdapter.text === "function") {
-                infoAdapter.text("");
-            }
-            soil.clear_status_messages(soil);
-            if (taskMsg) {
-                soil.append_status_message(soil, taskMsg + "...");
-            }
-            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
-                stacktraceAdapter.text("");
-            } else if (stacktraceElement) {
-                stacktraceElement.textContent = "";
-            }
+            soil.reset_panel_state(soil, { taskMessage: taskMsg });
         }
 
         function handleError(error) {
