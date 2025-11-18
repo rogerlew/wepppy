@@ -451,9 +451,17 @@ var Project = (function () {
                     container.innerHTML = html;
                 }
                 container.removeAttribute("hidden");
+                container.hidden = false;
+                if (container.style) {
+                    container.style.removeProperty("display");
+                }
             } else {
                 container.innerHTML = "";
                 container.setAttribute("hidden", "hidden");
+                container.hidden = true;
+                if (container.style) {
+                    container.style.display = "none";
+                }
             }
         }
 
