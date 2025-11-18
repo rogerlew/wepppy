@@ -863,12 +863,17 @@ var Project = (function () {
                     return project.load_mod_section(normalized).then(function (payload) {
                         var html = payload && payload.html ? payload.html : "";
                         applyUI(html);
-                        bootstrapModController(normalized);
-                        if (input) {
-                            input.checked = true;
-                            input.disabled = false;
-                        }
-                        return response;
+                        // Allow DOM to settle before bootstrapping controller
+                        return new Promise(function (resolve) {
+                            setTimeout(function () {
+                                bootstrapModController(normalized);
+                                if (input) {
+                                    input.checked = true;
+                                    input.disabled = false;
+                                }
+                                resolve(response);
+                            }, 0);
+                        });
                     }).catch(function (error) {
                         if (input) {
                             input.disabled = false;
