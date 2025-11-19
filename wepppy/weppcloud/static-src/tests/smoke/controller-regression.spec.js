@@ -63,6 +63,30 @@ async function expectStacktracePanelOpen(page, controller) {
   await expect(panel).toHaveJSProperty('open', true);
 }
 
+async function ensureControlExpanded(page, formSelector) {
+  if (!formSelector) {
+    return;
+  }
+  const form = page.locator(formSelector).first();
+  if (!(await form.count())) {
+    return;
+  }
+  const parentDetails = form.locator('xpath=ancestor::details[1]');
+  if (!(await parentDetails.count())) {
+    return;
+  }
+  const isOpen = await parentDetails.evaluate((node) => node.hasAttribute('open'));
+  if (isOpen) {
+    return;
+  }
+  const summary = parentDetails.locator('summary').first();
+  if (!(await summary.count())) {
+    return;
+  }
+  await summary.click();
+  await expect(parentDetails).toHaveJSProperty('open', true);
+}
+
 test.describe('controller regression suite', () => {
   test.beforeAll(async ({ request }) => {
     if (targetRunPath || !shouldProvision) {
@@ -105,6 +129,8 @@ test.describe('controller regression suite', () => {
       if (!(await form.count())) {
         test.skip(true, controller.skipMessage || `${controller.name} control not enabled for this run`);
       }
+
+      await ensureControlExpanded(page, controller.formSelector);
 
       const hintLocator = controller.hintLocator
         ? page.locator(controller.hintLocator)

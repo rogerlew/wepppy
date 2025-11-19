@@ -281,11 +281,6 @@ var Treatments = (function () {
             } else if (statusElement) {
                 statusElement.innerHTML = message;
             }
-            if (hintAdapter && typeof hintAdapter.text === "function") {
-                hintAdapter.text(message);
-            } else if (hintElement) {
-                hintElement.textContent = message;
-            }
             if (treatmentsEvents) {
                 treatmentsEvents.emit("treatments:status:updated", {
                     message: message,
@@ -321,11 +316,6 @@ var Treatments = (function () {
             treatments.hideStacktrace();
             if (rqJobAdapter && typeof rqJobAdapter.text === "function") {
                 rqJobAdapter.text("");
-            }
-            if (hintAdapter && typeof hintAdapter.text === "function") {
-                hintAdapter.text("");
-            } else if (hintElement) {
-                hintElement.textContent = "";
             }
             if (taskMessage) {
                 emitStatus(taskMessage + "...");

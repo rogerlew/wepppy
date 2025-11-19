@@ -17,6 +17,21 @@ const prepareOmniScenario = async ({ page }) => {
   await scenarioSelect.selectOption({ value: "uniform_low" });
 };
 
+const prepareTreatments = async ({ page }) => {
+  await page.evaluate(() => {
+    const controller = window.Treatments && window.Treatments.getInstance
+      ? window.Treatments.getInstance()
+      : null;
+    if (!controller) {
+      throw new Error("Treatments controller unavailable");
+    }
+    if (controller.mode === 1 || controller.mode === 4) {
+      return null;
+    }
+    return controller.setMode(1, { skipRequest: true });
+  });
+};
+
 /**
  * @typedef {Object} ControllerCase
  * @property {string} name
@@ -185,6 +200,7 @@ const controllerCases = [
     stacktracePanelLocator: "#treatments_stacktrace_panel",
     hintLocator: "#hint_build_treatments",
     workflow: "rq_job",
+    prepareAction: prepareTreatments,
     skipMessage: "Treatments control not visible or not enabled for this configuration"
   },
   {
