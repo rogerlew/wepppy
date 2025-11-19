@@ -2,6 +2,66 @@
  * @jest-environment jsdom
  */
 
+const createControlBaseStub = require("./helpers/control_base_stub");
+
+const DEFAULT_DSS_HTML = `
+    <div class="controller-section" id="dss_section">
+        <form id="dss_export_form">
+            <div id="info"></div>
+            <div id="status"></div>
+            <div id="stacktrace" style="display: none;"></div>
+            <div id="rq_job"></div>
+            <span id="braille"></span>
+            <div class="wc-stack-sm">
+                <input
+                    type="text"
+                    id="dss_start_date"
+                    name="dss_start_date"
+                    value="01/01/2001"
+                >
+                <input
+                    type="text"
+                    id="dss_end_date"
+                    name="dss_end_date"
+                    value="01/31/2001"
+                >
+            </div>
+            <div id="dss_export_mode1_controls">
+                <input
+                    id="dss_export_mode1"
+                    type="radio"
+                    name="dss_export_mode"
+                    value="1"
+                    checked
+                    data-action="dss-export-mode"
+                    data-dss-export-mode="1"
+                >
+                <input type="text" id="dss_export_channel_ids" name="dss_export_channel_ids" value="12, 34">
+            </div>
+            <div id="dss_export_mode2_controls" style="display: none;">
+                <input
+                    id="dss_export_mode2"
+                    type="radio"
+                    name="dss_export_mode"
+                    value="2"
+                    data-action="dss-export-mode"
+                    data-dss-export-mode="2"
+                >
+                <input type="checkbox" id="dss_export_exclude_order_1" name="dss_export_exclude_order_1">
+                <input type="checkbox" id="dss_export_exclude_order_2" name="dss_export_exclude_order_2">
+                <input type="checkbox" id="dss_export_exclude_order_3" name="dss_export_exclude_order_3">
+                <input type="checkbox" id="dss_export_exclude_order_4" name="dss_export_exclude_order_4">
+                <input type="checkbox" id="dss_export_exclude_order_5" name="dss_export_exclude_order_5">
+            </div>
+            <button id="btn_export_dss" type="button" data-action="dss-export-run">Export</button>
+        </form>
+        <p id="hint_export_dss"></p>
+    </div>
+    <ul id="toc">
+        <li><a href="#dss-export">DSS Export</a></li>
+    </ul>
+`;
+
 describe("DssExport controller", () => {
     let httpMock;
     let baseInstance;
@@ -11,65 +71,7 @@ describe("DssExport controller", () => {
     beforeEach(async () => {
         jest.resetModules();
 
-        document.body.innerHTML = `
-            <div class="controller-section" id="dss_section">
-                <form id="dss_export_form">
-                    <div id="info"></div>
-                    <div id="status"></div>
-                    <div id="stacktrace" style="display: none;"></div>
-                    <div id="rq_job"></div>
-                    <span id="braille"></span>
-                    <div class="wc-stack-sm">
-                        <input
-                            type="text"
-                            id="dss_start_date"
-                            name="dss_start_date"
-                            value="01/01/2001"
-                        >
-                        <input
-                            type="text"
-                            id="dss_end_date"
-                            name="dss_end_date"
-                            value="01/31/2001"
-                        >
-                    </div>
-                    <div id="dss_export_mode1_controls">
-                        <input
-                            id="dss_export_mode1"
-                            type="radio"
-                            name="dss_export_mode"
-                            value="1"
-                            checked
-                            data-action="dss-export-mode"
-                            data-dss-export-mode="1"
-                        >
-                        <input type="text" id="dss_export_channel_ids" name="dss_export_channel_ids" value="12, 34">
-                    </div>
-                    <div id="dss_export_mode2_controls" style="display: none;">
-                        <input
-                            id="dss_export_mode2"
-                            type="radio"
-                            name="dss_export_mode"
-                            value="2"
-                            data-action="dss-export-mode"
-                            data-dss-export-mode="2"
-                        >
-                        <input type="checkbox" id="dss_export_exclude_order_1" name="dss_export_exclude_order_1">
-                        <input type="checkbox" id="dss_export_exclude_order_2" name="dss_export_exclude_order_2">
-                        <input type="checkbox" id="dss_export_exclude_order_3" name="dss_export_exclude_order_3">
-                        <input type="checkbox" id="dss_export_exclude_order_4" name="dss_export_exclude_order_4">
-                        <input type="checkbox" id="dss_export_exclude_order_5" name="dss_export_exclude_order_5">
-                    </div>
-                    <button id="btn_export_dss" type="button" data-action="dss-export-run">Export</button>
-                </form>
-                <p id="hint_export_dss"></p>
-            </div>
-            <ul id="toc">
-                <li><a href="#dss-export">DSS Export</a></li>
-            </ul>
-        `;
-
-        const createControlBaseStub = require("./helpers/control_base_stub");
+        document.body.innerHTML = DEFAULT_DSS_HTML;
 
         await import("../dom.js");
         await import("../forms.js");
@@ -155,7 +157,6 @@ describe("DssExport controller", () => {
         await Promise.resolve();
         await Promise.resolve();
     });
-
     test("mode toggle updates panels and emits events", () => {
         const modeEvents = [];
         dss.events.on("dss:mode:changed", (payload) => modeEvents.push(payload));
@@ -236,5 +237,78 @@ describe("DssExport controller", () => {
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(dss, httpError.body);
         expect(baseInstance.pushErrorStacktrace).not.toHaveBeenCalledWith(dss, httpError);
+    });
+});
+
+describe("DssExport controller (dynamic mods)", () => {
+    let httpMock;
+    let baseInstance;
+    let statusStreamMock;
+    let dss;
+
+    beforeEach(async () => {
+        jest.resetModules();
+
+        document.body.innerHTML = '<div id="mods-host"></div>';
+
+        await import("../dom.js");
+        await import("../forms.js");
+        await import("../events.js");
+
+        httpMock = {
+            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } })),
+            isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
+        };
+        global.WCHttp = httpMock;
+
+        ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
+            pushResponseStacktrace: jest.fn(),
+            pushErrorStacktrace: jest.fn(),
+            set_rq_job_id: jest.fn(),
+            triggerEvent: jest.fn(),
+            hideStacktrace: jest.fn()
+        }));
+        global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
+
+        window.site_prefix = "/weppcloud";
+        global.url_for_run = jest.fn((path) => path);
+
+        await import("../dss_export.js");
+        dss = window.DssExport.getInstance();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        delete window.DssExport;
+        delete global.WCHttp;
+        delete global.controlBase;
+        delete window.site_prefix;
+        delete global.url_for_run;
+        if (global.WCDom) {
+            delete global.WCDom;
+        }
+        if (global.WCForms) {
+            delete global.WCForms;
+        }
+        if (global.WCEvents) {
+            delete global.WCEvents;
+        }
+        document.body.innerHTML = "";
+    });
+
+    test("bootstrap attaches control after mods load and restores status feedback", async () => {
+        document.body.innerHTML = DEFAULT_DSS_HTML;
+
+        dss.bootstrap();
+        statusStreamMock.append.mockClear();
+
+        dss.export();
+
+        expect(baseInstance.clear_status_messages).toHaveBeenCalledWith(dss);
+        expect(statusStreamMock.append).toHaveBeenCalled();
+        expect(statusStreamMock.append.mock.calls[0][0]).toBe("Submitting DSS export request…");
+
+        await Promise.resolve();
+        await Promise.resolve();
     });
 });

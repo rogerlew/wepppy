@@ -390,13 +390,13 @@ var DssExport = (function () {
 
         controller.statusPanelEl = formElement ? dom.qs("#dss_export_status_panel") : null;
         controller.stacktracePanelEl = formElement ? dom.qs("#dss_export_stacktrace_panel") : null;
-        var spinnerElement = controller.statusPanelEl ? controller.statusPanelEl.querySelector("#braille") : null;
+        controller.statusSpinnerEl = controller.statusPanelEl ? controller.statusPanelEl.querySelector("#braille") : null;
 
         controller.attach_status_stream(controller, {
             element: controller.statusPanelEl,
             channel: DSS_CHANNEL,
             stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
-            spinner: spinnerElement
+            spinner: controller.statusSpinnerEl
         });
 
         controller.appendStatus = function (message, meta) {
@@ -426,6 +426,72 @@ var DssExport = (function () {
                 stacktraceElement.style.display = "none";
             }
         };
+
+        function rebindDomReferences() {
+            if (!controller.form) {
+                return;
+            }
+
+            formElement = controller.form;
+
+            var nextInfoElement = dom.qs(SELECTORS.info, formElement);
+            if (nextInfoElement !== infoElement) {
+                infoElement = nextInfoElement;
+                controller.info = createLegacyAdapter(infoElement);
+            }
+
+            var nextStatusElement = dom.qs(SELECTORS.status, formElement);
+            if (nextStatusElement !== statusElement) {
+                statusElement = nextStatusElement;
+                controller.status = createLegacyAdapter(statusElement);
+            }
+
+            var nextStacktraceElement = dom.qs(SELECTORS.stacktrace, formElement);
+            if (nextStacktraceElement !== stacktraceElement) {
+                stacktraceElement = nextStacktraceElement;
+                controller.stacktrace = createLegacyAdapter(stacktraceElement);
+            }
+
+            var nextRqJobElement = dom.qs(SELECTORS.rqJob, formElement);
+            if (nextRqJobElement !== rqJobElement) {
+                rqJobElement = nextRqJobElement;
+                controller.rq_job = createLegacyAdapter(rqJobElement);
+            }
+
+            var nextHintElement = dom.qs(SELECTORS.hint, formElement);
+            if (nextHintElement !== hintElement) {
+                hintElement = nextHintElement;
+                controller.hint = createLegacyAdapter(hintElement);
+            }
+
+            var nextStatusPanel = dom.qs("#dss_export_status_panel");
+            var nextStacktracePanel = dom.qs("#dss_export_stacktrace_panel");
+            var nextSpinnerElement = nextStatusPanel ? nextStatusPanel.querySelector("#braille") : null;
+            var shouldReattachStream = false;
+
+            if (nextStatusPanel !== controller.statusPanelEl) {
+                controller.statusPanelEl = nextStatusPanel;
+                shouldReattachStream = true;
+            }
+            if (nextStacktracePanel !== controller.stacktracePanelEl) {
+                controller.stacktracePanelEl = nextStacktracePanel;
+                shouldReattachStream = true;
+            }
+            if (nextSpinnerElement !== controller.statusSpinnerEl) {
+                controller.statusSpinnerEl = nextSpinnerElement;
+                shouldReattachStream = true;
+            }
+
+            if ((shouldReattachStream || (!controller.statusStream && controller.statusPanelEl)) && typeof controller.attach_status_stream === "function") {
+                controller.detach_status_stream(controller);
+                controller.attach_status_stream(controller, {
+                    element: controller.statusPanelEl,
+                    channel: DSS_CHANNEL,
+                    stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+                    spinner: controller.statusSpinnerEl
+                });
+            }
+        }
 
         controller.setMode = function (mode) {
             return applyMode(controller, mode, { emit: true, updateRadios: true });
@@ -655,19 +721,35 @@ var DssExport = (function () {
             var needsReApply = false;
             var needsDelegates = false;
             
-            if (!controller.form) {
+            if (!controller.form || !controller.form.isConnected) {
                 controller.form = dom.qs(SELECTORS.form);
-                needsDelegates = true;
+                needsDelegates = Boolean(controller.form);
             }
             
-            if ((!controller.modePanels[1] || !controller.modePanels[1].element) && controller.form) {
+            if (controller.form) {
+                formElement = controller.form;
+                if (!controller.container || !controller.container.isConnected) {
+                    controller.container = typeof controller.form.closest === "function"
+                        ? controller.form.closest(".controller-section") || controller.form
+                        : controller.form;
+                }
+                rebindDomReferences();
+            }
+            
+            var modePanelOneMissing = !controller.modePanels[1] ||
+                !controller.modePanels[1].element ||
+                (controller.modePanels[1].element && controller.modePanels[1].element.isConnected === false);
+            if (modePanelOneMissing && controller.form) {
                 var mode1El = dom.qs(SELECTORS.mode1, controller.form);
                 if (mode1El) {
                     controller.modePanels[1] = createLegacyAdapter(mode1El);
                     needsReApply = true;
                 }
             }
-            if ((!controller.modePanels[2] || !controller.modePanels[2].element) && controller.form) {
+            var modePanelTwoMissing = !controller.modePanels[2] ||
+                !controller.modePanels[2].element ||
+                (controller.modePanels[2].element && controller.modePanels[2].element.isConnected === false);
+            if (modePanelTwoMissing && controller.form) {
                 var mode2El = dom.qs(SELECTORS.mode2, controller.form);
                 if (mode2El) {
                     controller.modePanels[2] = createLegacyAdapter(mode2El);
