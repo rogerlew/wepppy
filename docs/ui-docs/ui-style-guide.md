@@ -3,7 +3,8 @@
 > **For AI Agents:** This document is agent training material, not human documentation.  
 > **Quick Start:** Scroll to [Pattern Catalog](#pattern-catalog) for copy-paste templates.  
 > **Deep Dive:** Scroll to [Design Philosophy](#design-philosophy) for rationale and technical details.  
-> **Theme System:** See [`theme-system.md`](theme-system.md) for VS Code theme integration and color customization.
+> **Theme System:** See [`theme-system.md`](theme-system.md) for VS Code theme integration and color customization.  
+> **Controller Contract:** See [`controller-contract.md`](controller-contract.md) for explicit requirements all controllers must follow.
 
 <!-- toc -->
 - [Pattern Catalog](#pattern-catalog)
@@ -1637,6 +1638,7 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 - Favor progressive enhancement: ensure modals, tooltips, and accordions render helpful content even when JavaScript is unavailable.
 - Keep interactions framework-agnostic. Lightweight Alpine.js sprinkles are acceptable, but they should operate on semantic HTML and classes defined here.
 - When introducing new JS-driven UI, pair it with CSS hooks inside `ui-foundation.css` (e.g., data attributes) so behavior and presentation remain decoupled.
+- **Controller contract:** All controllers must follow the explicit requirements in [`controller-contract.md`](controller-contract.md) including singleton pattern, bootstrap method, dynamic loading support, and testing coverage.
 
 ## Validation & automation
 - Use Stylelint with the shared config to block forbidden patterns such as `border-radius` values other than `var(--wc-radius-none)` and to require the `wc-` namespace for shared utilities.【F:.stylelintrc.json†L1-L21】

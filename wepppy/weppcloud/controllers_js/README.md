@@ -1,7 +1,8 @@
 # Controllers JS Architecture
 
 > **See also:** [AGENTS.md](../../../AGENTS.md) for Front-End Development section and controller bundling overview.  
-> Agent workflow specifics live in [controllers_js/AGENTS.md](./AGENTS.md).
+> Agent workflow specifics live in [controllers_js/AGENTS.md](./AGENTS.md).  
+> **Controller Contract:** See [docs/ui-docs/controller-contract.md](../../../docs/ui-docs/controller-contract.md) for explicit requirements all controllers must follow.
 
 This note explains how the controller JavaScript in `wepppy/weppcloud` is organized, how individual controller modules cooperate with the shared infrastructure, and what needs to happen when you extend the system.
 
@@ -22,7 +23,7 @@ This note explains how the controller JavaScript in `wepppy/weppcloud` is organi
 2. **Defensive element access**: Always verify elements exist before using them
 3. **Test dynamic loading**: Don't just test initial page load—test enabling the mod via checkbox
 
-**See:** [docs/dev-notes/dynamic-mod-loading-patterns.md](../../../docs/dev-notes/dynamic-mod-loading-patterns.md) for comprehensive guidance, examples, and architectural alternatives.
+**See:** [docs/ui-docs/controller-contract.md](../../../docs/ui-docs/controller-contract.md) for explicit contract requirements and [docs/dev-notes/dynamic-mod-loading-patterns.md](../../../docs/dev-notes/dynamic-mod-loading-patterns.md) for comprehensive patterns and alternatives.
 
 **Quick template for new controllers:**
 ```javascript
