@@ -189,6 +189,15 @@ def test_return_period_dataset_pipeline(tmp_path):
     )
     assert cached_report.return_periods["Runoff"]
 
+    # Calendar years should propagate through the report rows
+    earliest_calendar_year = int(dataset._events["calendar_year"].dropna().min())
+    assert report.y0 == earliest_calendar_year
+    precip_entries = report.return_periods.get("Precipitation Depth", {})
+    assert precip_entries, "expected precipitation entries for calendar-year assertion"
+    sample_entry = next(iter(precip_entries.values()))
+    assert sample_entry.get("calendar_year") is not None
+    assert sample_entry["calendar_year"] >= earliest_calendar_year
+
 
 def test_refresh_return_period_events_handles_pyarrow_table(monkeypatch, tmp_path):
     run_dir = _prepare_run_directory(tmp_path)

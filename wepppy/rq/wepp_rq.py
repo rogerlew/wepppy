@@ -107,6 +107,13 @@ def _safe_int(value: Any) -> int | None:
     return candidate
 
 
+def _safe_relpath(base: str, target: str | os.PathLike[str]) -> str:
+    try:
+        return os.path.relpath(str(target), base)
+    except (ValueError, TypeError):
+        return str(target)
+
+
 def compress_fn(fn: str) -> None:
     """Force gzip compression in place for the provided file path.
 
@@ -1168,6 +1175,11 @@ def _write_dss_channel_geojson(
         boundary_dir,
         boundary_width_m=boundary_width_m,
     )
+    boundary_shapefiles: list[str] = []
+    if boundary_features:
+        pattern = os.path.join(boundary_dir, "bc_*.shp")
+        for shp_path in sorted(glob(pattern)):
+            boundary_shapefiles.append(_safe_relpath(wd, shp_path))
     buffer_info = None
     if target_boundary_ids:
         boundary_filter = set(channel_ids or []) or None
@@ -1192,9 +1204,13 @@ def _write_dss_channel_geojson(
             "boundary_feature_count": len(boundary_features),
         }
     )
+    if boundary_shapefiles:
+        metadata["boundary_shapefiles"] = boundary_shapefiles
     if buffer_info:
         metadata["channel_buffer"] = buffer_info
         metadata["floodplain_polygon"] = buffer_info.get("buffer_gml")
+        if buffer_info.get("buffer_shapefile"):
+            metadata["floodplain_polygon_shp"] = buffer_info["buffer_shapefile"]
     output_geojson["metadata"] = metadata
 
     dest_dir = os.path.dirname(dest_path)

@@ -49,19 +49,49 @@ const LOCKABLE_FILES = Object.freeze({
 
 function initPreflight(runid) {
     var wsUrl = `wss://${window.location.host}/weppcloud-microservices/preflight/${runid}`;
+    var reconnectTimer = null;
+    var isConnecting = false;
 
-    function connectWebSocket() {
+    function scheduleReconnect(reason) {
+        if (reconnectTimer) {
+            return;
+        }
+        reconnectTimer = window.setTimeout(function() {
+            reconnectTimer = null;
+            connectWebSocket(reason || "timer");
+        }, 5000);
+    }
+
+    function connectWebSocket(reason) {
+        if (preflight_ws || isConnecting) {
+            return;
+        }
+        if (document.hidden) {
+            // wait until the page is visible to avoid browsers suspending the socket mid-handshake
+            return;
+        }
+
+        isConnecting = true;
         preflight_ws = new WebSocket(wsUrl);
 
         preflight_ws.onopen = function() {
+            isConnecting = false;
             $("#preflight_status").html("Connected");
-            preflight_ws.send(JSON.stringify({"type": "init"}));
+            try {
+                preflight_ws.send(JSON.stringify({ "type": "init" }));
+            } catch (err) {
+                console.warn("Preflight init send failed:", err);
+            }
+        };
+
+        preflight_ws.onerror = function(event) {
+            console.warn("Preflight websocket error", event);
         };
 
         preflight_ws.onmessage = function(event) {
             var payload = JSON.parse(event.data);
             if (payload.type === "ping") {
-                preflight_ws.send(JSON.stringify({"type": "pong"}));
+                preflight_ws.send(JSON.stringify({ "type": "pong" }));
             } else if (payload.type === "hangup") {
                 preflight_ws.close(1000, "server hangup");
                 preflight_ws = null;
@@ -72,11 +102,11 @@ function initPreflight(runid) {
                 lastPreflightChecklist = payload.checklist;
                 window.lastPreflightChecklist = payload.checklist;
                 controller_lock_statuses = payload.lock_statuses;
-
             }
         };
 
         preflight_ws.onclose = function(event) {
+            isConnecting = false;
             console.log(
                 "Preflight websocket closed",
                 "code:", event && event.code,
@@ -84,10 +114,8 @@ function initPreflight(runid) {
                 "wasClean:", event && event.wasClean
             );
             preflight_ws = null;
-            if (!document.hidden) { // Only reconnect if the page is visible
-                $("#preflight_status").html("Preflight Connection Closed");
-                setTimeout(connectWebSocket, 5000); // Try to reconnect every 5 seconds.
-            }
+            $("#preflight_status").html("Preflight Connection Closed");
+            scheduleReconnect("onclose");
         };
     }
 
@@ -95,13 +123,11 @@ function initPreflight(runid) {
 
     // Handling visibility change
     document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            if (preflight_ws) {
-                preflight_ws.close(1000, "document hidden");
-                preflight_ws = null;
+        if (!document.hidden) {
+            // Page became active again; reconnect if needed
+            if (!preflight_ws && !isConnecting) {
+                connectWebSocket("visibility");
             }
-        } else {
-            connectWebSocket(); // Reconnect WebSocket when page is visible
         }
     });
 }

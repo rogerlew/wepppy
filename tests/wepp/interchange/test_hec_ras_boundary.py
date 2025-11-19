@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import pytest
 
+from wepppy.all_your_base.geo import shapefile
 from wepppy.wepp.interchange import hec_ras_boundary as boundary
 
 
@@ -90,3 +91,20 @@ def test_build_boundary_condition_features_creates_geojson_and_gml(tmp_path, mon
     pos_text = root.find(".//gml:posList", ns).text
     assert pos_text is not None
     assert pos_text.strip() == "0.02500000 -0.07500000 0.02500000 0.02500000"
+
+    shp_path = dest_dir / "bc_1114.shp"
+    assert shp_path.exists()
+    prj_path = dest_dir / "bc_1114.prj"
+    assert prj_path.exists()
+    reader = shapefile.Reader(str(shp_path))
+    shape_records = reader.shapeRecords()
+    assert len(shape_records) == 1
+    record = shape_records[0].record
+    assert record[0] == 1114
+    assert record[1] == 1114
+    assert record[2] == pytest.approx(100.0)
+    assert record[3] == pytest.approx(0.025)
+    assert record[4] == pytest.approx(-0.025)
+    coords = shape_records[0].shape.points
+    assert coords == [(0.025, -0.075), (0.025, 0.025)]
+    reader.close()

@@ -24,15 +24,22 @@
         <td style="width: 30%">{{ unitizer_units(report.units_d[key]) | safe }}</td>
       </tr>
     {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
+      {% if rec_interval in report.return_periods[key] %}
+        {% set entry = report.return_periods[key][rec_interval] %}
+        {% set display_year = entry.get('calendar_year', entry.get('display_year')) %}
+        {% if display_year is none %}
+          {% set display_year = entry['year'] + report.y0 - 1 %}
+        {% endif %}
       <tr>
         <td style="width: 30%">{{ rec_interval }}</td>
-        <td style="width: 40%">{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
-                                  '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
-                                  '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
+        <td style="width: 40%">{{ '%02d' % (entry['mo'] | int) }}/{{
+                                  '%02d' % (entry['da'] | int) }}/{{
+                                  '%04d' % (display_year | int) }}</td>
         <td style="width: 30%">{{
-                unitizer(report.return_periods[key][rec_interval][key],
+                unitizer(entry[key],
                          report.units_d[key]) | safe }}</td>
       </tr>
+      {% endif %}
     {% endfor %}
     </tbody>
   </table>

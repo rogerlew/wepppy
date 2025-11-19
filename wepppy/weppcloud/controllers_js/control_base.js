@@ -4,6 +4,7 @@
  */
 function controlBase() {
     const TERMINAL_JOB_STATUSES = new Set(["finished", "failed", "stopped", "canceled", "not_found"]);
+    const SUCCESS_JOB_STATUSES = new Set(["finished"]);
     const DEFAULT_POLL_INTERVAL_MS = 800;
     const DEFAULT_SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
@@ -44,6 +45,40 @@ function controlBase() {
 
     function jobDashboardUrl(jobId) {
         return `https://${window.location.host}/weppcloud/rq/job-dashboard/${encodeURIComponent(jobId)}`;
+    }
+
+    function maybeDispatchCompletion(self, statusObj, source) {
+        if (!self || self._job_completion_dispatched) {
+            return;
+        }
+        const status = statusObj && statusObj.status ? String(statusObj.status) : null;
+        if (!status || !SUCCESS_JOB_STATUSES.has(status)) {
+            return;
+        }
+
+        self._job_completion_dispatched = true;
+
+        if (self.poll_completion_event) {
+            try {
+                self.triggerEvent(self.poll_completion_event, {
+                    source: source || "poll",
+                    status: statusObj,
+                    jobId: self.rq_job_id || null
+                });
+            } catch (err) {
+                console.warn("controlBase poll completion dispatch error:", err);
+            }
+        }
+
+        try {
+            self.triggerEvent("job:completed", {
+                jobId: self.rq_job_id || null,
+                status: statusObj,
+                source: source || "poll"
+            });
+        } catch (err) {
+            console.warn("controlBase job:completed dispatch error:", err);
+        }
     }
 
     function callAdapter(target, method, args) {
@@ -529,6 +564,8 @@ function controlBase() {
             self.clear_stacktrace_backfill(self);
             const normalizedJobId = normalizeJobId(job_id);
 
+            self._job_completion_dispatched = false;
+
             if (normalizedJobId === self.rq_job_id) {
                 if (!normalizedJobId) {
                     self.render_job_status(self);
@@ -592,6 +629,8 @@ function controlBase() {
             } else {
                 self.stop_job_status_polling(self);
             }
+
+            maybeDispatchCompletion(self, self.rq_job_status, "poll");
 
             self.update_command_button_state(self);
         },

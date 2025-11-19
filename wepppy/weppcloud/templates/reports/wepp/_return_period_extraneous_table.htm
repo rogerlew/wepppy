@@ -92,11 +92,17 @@
       <td> </td>
     </tr>
     {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
+      {% if rec_interval in report.return_periods[key] %}
+        {% set entry = report.return_periods[key][rec_interval] %}
+        {% set display_year = entry.get('calendar_year', entry.get('display_year')) %}
+        {% if display_year is none %}
+          {% set display_year = entry['year'] + report.y0 - 1 %}
+        {% endif %}
     <tr>
       <td>&quot;{{ rec_interval }}&quot;</td>
-      <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{
-        '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{
-        '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
+      <td>{{ '%02d' % (entry['mo'] | int) }}/{{
+        '%02d' % (entry['da'] | int) }}/{{
+        '%04d' % (display_year | int) }}</td>
       <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">
         {{ dash_if_zero(report.return_periods[key][rec_interval]['Precipitation Depth'], report.units_d['Precipitation Depth']) }}
       </td>
@@ -166,6 +172,7 @@
       {% endif %}
 
     </tr>
+      {% endif %}
     {% endfor %}
   </tbody>
 </table>

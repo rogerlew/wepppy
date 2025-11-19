@@ -183,10 +183,6 @@ func (c *connection) run(ctx context.Context) error {
 
 	defer c.sendHangup()
 
-	if err := c.pushUpdate(ctx); err != nil {
-		return err
-	}
-
 	group, ctx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		err := c.readLoop(ctx)
@@ -203,6 +199,9 @@ func (c *connection) run(ctx context.Context) error {
 		return err
 	})
 	group.Go(func() error {
+		if err := c.pushUpdate(ctx); err != nil {
+			return err
+		}
 		err := c.redisLoop(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {
 			c.logger.Info("redis loop exited", "error", err)
@@ -271,6 +270,7 @@ outer:
 			return ctx.Err()
 		}
 
+		c.logger.Info("redis subscribe dialing", "pattern", pattern, "attempt", attempt+1)
 		pubsub := c.srv.redis.PSubscribe(ctx, pattern)
 		c.srv.metrics.incrRedisReconnects()
 
@@ -316,6 +316,7 @@ outer:
 			}
 		}
 
+		c.logger.Info("redis subscribe established", "pattern", pattern)
 		attempt = 0
 		for {
 			msg, err := pubsub.ReceiveMessage(ctx)
@@ -371,6 +372,7 @@ func (c *connection) shouldAbort(attempt int) bool {
 }
 
 func (c *connection) pushUpdate(ctx context.Context) error {
+	c.logger.Info("push update start", "run_id", c.runID)
 	fetchCtx, cancel := context.WithTimeout(ctx, c.srv.cfg.RedisRequestTimeout)
 	defer cancel()
 
@@ -396,6 +398,7 @@ func (c *connection) pushUpdate(ctx context.Context) error {
 	c.logger.Info("preflight update", "run_id", c.runID, "checklist", payload.Checklist, "locks", payload.LockStatuses)
 	copyPayload := payload
 	c.last = &copyPayload
+	c.logger.Info("push update complete", "run_id", c.runID)
 	return nil
 }
 

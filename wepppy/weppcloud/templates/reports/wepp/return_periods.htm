@@ -35,8 +35,11 @@
 {% macro format_date(entry) -%}
   {%- set month = entry.mo | int -%}
   {%- set day = entry.da | int -%}
-  {%- set year = entry.year | int + report.y0 - 1 -%}
-  {{ "%02d/%02d/%04d"|format(month, day, year) }}
+  {%- set display_year = entry.get('calendar_year') if entry.get('calendar_year') is not none else entry.get('display_year') -%}
+  {% if display_year is none %}
+    {%- set display_year = entry.year | int + report.y0 - 1 -%}
+  {% endif %}
+  {{ "%02d/%02d/%04d"|format(month, day, display_year | int) }}
 {%- endmacro %}
 
 {% macro render_units(units) -%}

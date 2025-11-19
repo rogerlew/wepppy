@@ -525,6 +525,7 @@ class Wepp(NoDbBase):
             self._dss_export_channel_ids = [] # specifies which channels are exported
 
             self._dtchr_override = None
+            self._ichout_override = None
             self._chn_topaz_ids_of_interest = [24]
 
             self.run_flowpaths = False
@@ -824,6 +825,16 @@ class Wepp(NoDbBase):
                 if _dtchr_override < 60:
                     raise ValueError("dtchr_override must be at least 60")
                 self._dtchr_override = _dtchr_override
+
+            _ichout_override = kwds.get('ichout_override', None)
+            if _ichout_override is not None:
+                if _ichout_override == '':
+                    self._ichout_override = None
+                elif isint(_ichout_override):
+                    _ichout_value = int(_ichout_override)
+                    if _ichout_value not in (1, 3):
+                        raise ValueError("ichout_override must be 1 (peak only) or 3 (full timestep hydrograph)")
+                    self._ichout_override = _ichout_value
 
             _chn_topaz_ids_of_interest = kwds.get('chn_topaz_ids_of_interest', None)
             if _chn_topaz_ids_of_interest is not None:
@@ -2212,6 +2223,28 @@ class Wepp(NoDbBase):
         self._dtchr_override = value
 
     @property
+    def ichout_override(self) -> Optional[int]:
+        if hasattr(self, '_ichout_override'):
+            return self._ichout_override
+        return None
+
+    @ichout_override.setter
+    @nodb_setter
+    def ichout_override(self, value: int | str | None):
+        if isinstance(value, str):
+            value = value.strip()
+            if value == '':
+                value = None
+            elif value.isdigit():
+                value = int(value)
+        if value is None:
+            self._ichout_override = None
+            return
+        if value not in (1, 3):
+            raise ValueError(f"Expected ichout_override to be 1 or 3, got {value}")
+        self._ichout_override = value
+
+    @property
     def chn_topaz_ids_of_interest(self):
         if hasattr(self, '_chn_topaz_ids_of_interest'):
             if not self._chn_topaz_ids_of_interest:
@@ -2236,6 +2269,10 @@ class Wepp(NoDbBase):
         if climate.is_single_storm:  # and climate.is_breakpoint:
             ichout = 3
             dtchr = 60
+
+        if hasattr(self, '_ichout_override'):
+            if self._ichout_override in (1, 3):
+                ichout = self._ichout_override
 
         if hasattr(self, '_dtchr_override'):
             if isint(self._dtchr_override):
@@ -2577,7 +2614,14 @@ class Wepp(NoDbBase):
                 rep_mos = None if not rep_mos else tuple(sorted({int(x) for x in rep_mos}))
 
                 if req_yrs == rep_yrs and req_mos == rep_mos:
-                    return cached_report
+                    has_calendar_year = any(
+                        ("calendar_year" in row or "display_year" in row)
+                        for measure_rows in cached_report.return_periods.values()
+                        for row in measure_rows.values()
+                    )
+                    if has_calendar_year:
+                        return cached_report
+                    cached_report = None
 
         dataset = ReturnPeriodDataset(self.wd, auto_refresh=True)
         return_periods = dataset.create_report(

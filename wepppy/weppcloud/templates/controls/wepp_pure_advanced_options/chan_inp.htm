@@ -13,6 +13,20 @@
          "step": "1"
        }
      ) }}
+  {{ ui.select_field(
+       "ichout_override",
+       "Channel hydrograph output (ichout_override)",
+       options=[
+         ("", "Default (auto: peaks for continuous; timestep hydrograph for single-storm)"),
+         ("1", "Peaks only (ichout=1)"),
+         ("3", "Full timestep hydrograph (ichout=3)")
+       ],
+       selected=(wepp.ichout_override | string) if wepp.ichout_override is not none else "",
+       help="1 writes only peak time/discharge for the listed channels. 3 writes every routing timestep and produces large outputs—use only for short simulations spanning a few years.",
+       attrs={
+         "class": "disable-readonly"
+       }
+     ) }}
   {{ ui.text_field(
        "chn_topaz_ids_of_interest",
        "Channel TOPAZ IDs of interest (chn_topaz_ids_of_interest)",

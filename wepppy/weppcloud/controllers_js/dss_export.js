@@ -11,7 +11,7 @@ var DssExport = (function () {
     var FORM_ID = "dss_export_form";
     var DSS_CHANNEL = "dss_export";
     var EXPORT_TASK = "dss:export";
-    var EXPORT_MESSAGE = "Exporting to DSS";
+    var EXPORT_MESSAGE = "Submitting DSS export request";
 
     var SELECTORS = {
         form: "#" + FORM_ID,
@@ -456,6 +456,12 @@ var DssExport = (function () {
                 return;
             }
 
+            if (typeof controller.clear_status_messages === "function") {
+                controller.clear_status_messages(controller);
+            }
+            if (typeof controller.reset_status_spinner === "function") {
+                controller.reset_status_spinner(controller);
+            }
             controller.info.html("");
             controller.appendStatus(EXPORT_MESSAGE + "…");
             controller.stacktrace.text("");

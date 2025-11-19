@@ -21,6 +21,7 @@ from rasterio.crs import CRS
 import rasterio
 import pandas as pd
 
+from wepppy.all_your_base.geo import shapefile
 from wepppy.all_your_base.geo.geo import read_raster
 from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
 
@@ -33,8 +34,13 @@ WGS84_EPSG = 4326
 GML_NS = "http://www.opengis.net/gml"
 BC_NS = "https://weppcloud.org/hec-ras/boundary"
 BUFFER_GML_NAME = "channel_buffer.gml"
+BUFFER_SHP_BASENAME = "channel_buffer"
 BUFFER_RASTER_NAME = "channel_buffer_raster.tif"
 BUFFER_RASTER_DIRNAME = "ras"
+WGS84_PRJ = (
+    'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],'
+    'PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]]'
+)
 DEFAULT_WIDTH_RULES: Mapping[int | str, float] = {
     1: 30.0,
     2: 60.0,
@@ -142,24 +148,39 @@ def write_hec_buffer_gml(
     raster_dir.mkdir(parents=True, exist_ok=True)
     raster_path = raster_dir / BUFFER_RASTER_NAME
     gml_path = dest_path / BUFFER_GML_NAME
+    _remove_buffer_shapefile(dest_path)
 
     _write_mask_raster(mask_uint8, raster_path, affine, proj)
     polygon = _mask_to_polygon(mask_uint8, affine, proj)
     if polygon is None:
         return None
-    _write_polygon_gml(polygon, gml_path, {
-        "generatedAt": datetime.now(timezone.utc).isoformat(),
-        "widthMultiplier": f"{width_multiplier:.6f}",
-        "widthRulesMeters": ",".join(f"{k}:{v}" for k, v in width_rules.items()),
-    })
+    width_rules_text = ",".join(f"{k}:{v}" for k, v in width_rules.items())
+    _write_polygon_gml(
+        polygon,
+        gml_path,
+        {
+            "generatedAt": datetime.now(timezone.utc).isoformat(),
+            "widthMultiplier": f"{width_multiplier:.6f}",
+            "widthRulesMeters": width_rules_text,
+        },
+    )
+    shp_path = _write_polygon_shapefile(
+        polygon,
+        dest_path,
+        width_multiplier=width_multiplier,
+        width_rules_text=width_rules_text,
+        pixel_cellsize_m=cellsize,
+    )
 
     wd = getattr(watershed, "wd", None)
     rel_raster = _relpath_from(wd, raster_path)
     rel_gml = _relpath_from(wd, gml_path)
+    rel_shp = _relpath_from(wd, shp_path)
 
     return {
         "buffer_raster": rel_raster,
         "buffer_gml": rel_gml,
+        "buffer_shapefile": rel_shp,
         "width_multiplier": width_multiplier,
         "width_rules_m": dict(width_rules),
         "pixel_cellsize_m": cellsize,
@@ -406,6 +427,32 @@ def _write_polygon_gml(
     tree.write(gml_path, encoding="utf-8", xml_declaration=True)
 
 
+def _write_polygon_shapefile(
+    polygon: MultiPolygon | Polygon,
+    dest_dir: Path,
+    *,
+    width_multiplier: float,
+    width_rules_text: str,
+    pixel_cellsize_m: float,
+) -> Path:
+    base_path = dest_dir / BUFFER_SHP_BASENAME
+    writer = shapefile.Writer(
+        shapeType=shapefile.POLYGON,
+        encoding="utf-8",
+    )
+    writer.field("poly_id", "N", 10, 0)
+    writer.field("width_mult", "F", 12, 6)
+    writer.field("cellsize_m", "F", 12, 3)
+    writer.field("rules", "C", 254)
+    polygons = polygon.geoms if isinstance(polygon, MultiPolygon) else [polygon]
+    for idx, poly in enumerate(polygons, start=1):
+        writer.shape(poly.__geo_interface__)
+        writer.record(idx, width_multiplier, pixel_cellsize_m, width_rules_text[:254])
+    writer.save(str(base_path))
+    _write_buffer_prj(base_path.with_suffix(".prj"))
+    return base_path.with_suffix(".shp")
+
+
 def _format_pos_list(coords: Iterable[tuple[float, float]]) -> str:
     return " ".join(f"{x:.8f} {y:.8f}" for x, y in coords)
 
@@ -416,3 +463,14 @@ def _relpath_from(base_dir: Optional[str], target: Path) -> str:
     with contextlib.suppress(ValueError):
         return os.path.relpath(target, base_dir)
     return str(target)
+
+
+def _write_buffer_prj(prj_path: Path) -> None:
+    prj_path.write_text(WGS84_PRJ, encoding="utf-8")
+
+
+def _remove_buffer_shapefile(dest_dir: Path) -> None:
+    base = dest_dir / BUFFER_SHP_BASENAME
+    for ext in ("shp", "shx", "dbf", "prj", "cpg"):
+        with contextlib.suppress(OSError):
+            base.with_suffix(f".{ext}").unlink()

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import math
 import os
-import contextlib
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
+from wepppy.all_your_base.geo import shapefile
 from wepppy.all_your_base.geo.geo import read_raster
 from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
 
@@ -30,6 +31,10 @@ WGS84_EPSG = 4326
 GML_NS = "http://www.opengis.net/gml"
 BC_NS = "https://weppcloud.org/hec-ras/boundary"
 NAMESPACE_MAP = {"gml": GML_NS, "bc": BC_NS}
+WGS84_PRJ = (
+    'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],'
+    'PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]]'
+)
 
 
 @dataclass(frozen=True)
@@ -78,6 +83,7 @@ def build_boundary_condition_features(
     for stale in dest_dir_path.glob("bc_*.gml"):
         with contextlib.suppress(OSError):
             stale.unlink()
+    _remove_boundary_shapefiles(dest_dir_path)
 
     features: List[Dict[str, object]] = []
 
@@ -95,6 +101,7 @@ def build_boundary_condition_features(
         if line is None:
             continue
         _write_boundary_gml(line, dest_dir_path)
+        _write_boundary_shapefile(line, dest_dir_path, boundary_width_m)
         features.append(_boundary_line_feature(line, boundary_width_m))
 
     return features
@@ -284,3 +291,37 @@ def _format_pos_list(
     return " ".join(
         f"{coord:.8f}" for coord in (*start_lonlat, *end_lonlat)
     )
+
+
+def _write_boundary_shapefile(line: BoundaryLine, dest_dir: Path, width_m: float) -> None:
+    base = dest_dir / f"bc_{line.topaz_id}"
+    writer = shapefile.Writer(
+        shapeType=shapefile.POLYLINE,
+        encoding="utf-8",
+    )
+    writer.field("topaz_id", "N", 10, 0)
+    writer.field("wepp_id", "N", 10, 0)
+    writer.field("width_m", "F", 12, 3)
+    writer.field("center_lon", "F", 18, 8)
+    writer.field("center_lat", "F", 18, 8)
+    writer.line([[(line.start_lonlat[0], line.start_lonlat[1]), (line.end_lonlat[0], line.end_lonlat[1])]])
+    writer.record(line.topaz_id, line.wepp_id or -1, width_m, line.center_lonlat[0], line.center_lonlat[1])
+    writer.save(str(base))
+    _write_prj(base.with_suffix(".prj"))
+
+
+def _remove_boundary_shapefiles(dest_dir: Path) -> None:
+    patterns = ["bc_*", "boundary_conditions"]
+    for ext in ("shp", "shx", "dbf", "prj", "cpg"):
+        for pattern in patterns:
+            if "*" in pattern:
+                matches = dest_dir.glob(f"{pattern}.{ext}")
+            else:
+                matches = [dest_dir / f"{pattern}.{ext}"]
+            for stale in matches:
+                with contextlib.suppress(OSError):
+                    stale.unlink()
+
+
+def _write_prj(prj_path: Path) -> None:
+    prj_path.write_text(WGS84_PRJ, encoding="utf-8")

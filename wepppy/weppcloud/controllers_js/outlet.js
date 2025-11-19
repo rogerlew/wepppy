@@ -198,8 +198,11 @@ var Outlet = (function () {
             channel: "outlet",
             stacktrace: outlet.stacktracePanelEl ? { element: outlet.stacktracePanelEl } : null,
             spinner: spinnerElement,
-            logLimit: 200
+            logLimit: 200,
+            autoConnect: true
         });
+        outlet.poll_completion_event = "SET_OUTLET_TASK_COMPLETED";
+        outlet._completion_seen = false;
 
         outlet.popup = L.popup();
         outlet.cursorSelectionOn = false;
@@ -380,6 +383,7 @@ var Outlet = (function () {
             }
 
             setCursorSelection(false);
+            outlet._completion_seen = false;
 
             if (outlet.events && typeof outlet.events.emit === "function") {
                 outlet.events.emit("outlet:set:start", {
@@ -473,28 +477,31 @@ var Outlet = (function () {
         outlet.triggerEvent = function (eventName, payload) {
             var normalized = (eventName || "").toString().toUpperCase();
             if (normalized === "SET_OUTLET_TASK_COMPLETED") {
-                outlet.disconnect_status_stream(outlet);
-                if (outlet.popup && typeof outlet.popup.remove === "function") {
-                    try {
-                        outlet.popup.remove();
-                    } catch (err) {
-                        console.warn("Failed to remove outlet popup.", err);
+                if (!outlet._completion_seen) {
+                    outlet._completion_seen = true;
+                    outlet.disconnect_status_stream(outlet);
+                    if (outlet.popup && typeof outlet.popup.remove === "function") {
+                        try {
+                            outlet.popup.remove();
+                        } catch (err) {
+                            console.warn("Failed to remove outlet popup.", err);
+                        }
                     }
-                }
-                outlet.show();
-                if (outlet.events && typeof outlet.events.emit === "function") {
-                    outlet.events.emit("outlet:set:success", {
-                        jobId: outlet.rq_job_id || (lastSubmission && lastSubmission.jobId) || null,
-                        submission: lastSubmission,
+                    outlet.show();
+                    if (outlet.events && typeof outlet.events.emit === "function") {
+                        outlet.events.emit("outlet:set:success", {
+                            jobId: outlet.rq_job_id || (lastSubmission && lastSubmission.jobId) || null,
+                            submission: lastSubmission,
+                            payload: payload || {}
+                        });
+                    }
+                    baseTriggerEvent("job:completed", {
+                        jobId: outlet.rq_job_id || null,
+                        task: "outlet:set",
                         payload: payload || {}
                     });
+                    lastSubmission = null;
                 }
-                baseTriggerEvent("job:completed", {
-                    jobId: outlet.rq_job_id || null,
-                    task: "outlet:set",
-                    payload: payload || {}
-                });
-                lastSubmission = null;
             }
             return baseTriggerEvent(eventName, payload);
         };

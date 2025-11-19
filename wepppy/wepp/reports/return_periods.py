@@ -702,18 +702,38 @@ class ReturnPeriodDataset:
 
         exclude_months = tuple(sorted(set(int(m) for m in exclude_months))) if exclude_months else ()
 
+        year_column = "year"
+        if "calendar_year" in events.columns and not events["calendar_year"].isna().all():
+            year_column = "calendar_year"
+
+        events["display_year"] = events[year_column]
+        sim_to_display: dict[int, float] = {}
+        if "year" in events.columns:
+            sim_to_display = (
+                events[["year", "display_year"]]
+                .dropna(subset=["display_year"])
+                .drop_duplicates(subset=["year"])
+                .set_index("year")["display_year"]
+                .to_dict()
+            )
+
+        if not counts.empty:
+            counts["display_year"] = counts["year"].map(sim_to_display).fillna(counts["year"])
+        else:
+            counts["display_year"] = counts.get("year")
+
         if exclude_months:
             events = events[~events["mo"].isin(exclude_months)]
             ranks = ranks[ranks["event_id"].isin(events["event_id"])]
 
-        year_values = sorted(int(y) for y in events["year"].dropna().unique())
+        year_values = sorted(int(y) for y in events["display_year"].dropna().unique())
         if not year_values:
             raise ValueError("Unable to determine simulation years for events")
 
         exclude_yr_indxs = tuple(sorted(set(int(i) for i in exclude_yr_indxs))) if exclude_yr_indxs else ()
         excluded_years = {year_values[idx] for idx in exclude_yr_indxs if 0 <= idx < len(year_values)}
         if excluded_years:
-            events = events[~events["year"].isin(excluded_years)]
+            events = events[~events["display_year"].isin(excluded_years)]
             ranks = ranks[ranks["event_id"].isin(events["event_id"])]
 
         counts_filtered = counts.copy()
@@ -721,14 +741,14 @@ class ReturnPeriodDataset:
             if exclude_months:
                 counts_filtered = counts_filtered[~counts_filtered["month"].isin(exclude_months)]
             if excluded_years:
-                counts_filtered = counts_filtered[~counts_filtered["year"].isin(excluded_years)]
+                counts_filtered = counts_filtered[~counts_filtered["display_year"].isin(excluded_years)]
 
         if counts_filtered.empty:
             total_events = len(events)
-            years_count = len(set(events["year"]))
+            years_count = len(set(events["display_year"]))
         else:
             total_events = int(counts_filtered["event_count"].sum())
-            years_count = len(set(counts_filtered["year"]))
+            years_count = len(set(counts_filtered["display_year"]))
 
         years_count = max(years_count, 1)
         days_in_year = total_events / years_count if years_count > 0 else 0.0
@@ -764,8 +784,8 @@ class ReturnPeriodDataset:
 
             if method.lower() != "cta":
                 merged = (
-                    merged.sort_values(["year", "measure_value"], ascending=[True, False])
-                    .groupby("year", as_index=False, sort=False)
+                    merged.sort_values(["display_year", "measure_value"], ascending=[True, False])
+                    .groupby("display_year", as_index=False, sort=False)
                     .head(1)
                 )
                 merged = merged.sort_values(["measure_value", "event_id"], ascending=[False, True]).reset_index(drop=True)
@@ -783,7 +803,7 @@ class ReturnPeriodDataset:
                 if idx >= len(merged):
                     continue
                 row = merged.iloc[idx]
-                formatted = _format_event_row(row, spec)
+                formatted = _format_event_row(row, spec, base_year=year_values[0] if year_values else 0)
                 rows_for_measure[int(ret)] = formatted
 
             if rows_for_measure:
@@ -839,12 +859,32 @@ class ReturnPeriodDataset:
         return report
 
 
-def _format_event_row(row: pd.Series, spec: MeasureSpec) -> Dict[str, Any]:
+def _format_event_row(row: pd.Series, spec: MeasureSpec, *, base_year: int) -> Dict[str, Any]:
     """Convert a ranked event row into the structure the templates consume."""
+    display_year = row.get("display_year")
+    if pd.isna(display_year):
+        display_year = row.get("calendar_year")
+    if pd.isna(display_year):
+        year_value = row.get("year")
+        if pd.isna(year_value):
+            display_year = base_year
+        elif base_year:
+            display_year = int(year_value) + base_year - 1
+        else:
+            display_year = int(year_value)
+    display_year = int(display_year) if display_year is not None else int(base_year)
+
+    sim_year = row.get("year")
+    if pd.isna(sim_year):
+        sim_year = display_year
+    sim_year = int(sim_year)
+
     result: Dict[str, Any] = {
         "mo": int(row["mo"]),
         "da": int(row["da"]),
-        "year": int(row["year"]),
+        "year": sim_year,
+        "calendar_year": display_year,
+        "display_year": display_year,
         "TopazID": int(row["topaz_id"]),
         "Precipitation Depth": float(row.get("precip_mm", np.nan)),
         "Runoff": float(row.get("runoff_depth_mm", np.nan)) if not pd.isna(row.get("runoff_depth_mm")) else 0.0,
@@ -869,6 +909,31 @@ def _format_event_row(row: pd.Series, spec: MeasureSpec) -> Dict[str, Any]:
         result[spec.label] = float(target_value)
 
     return result
+
+
+def _resolve_display_year(row: Mapping[str, Any], base_year: int) -> int:
+    """Return the best-effort calendar year for a serialized return-period row."""
+
+    def _normalize(value: Any) -> Optional[int]:
+        try:
+            if value is None or (isinstance(value, float) and np.isnan(value)):
+                return None
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    for key in ("calendar_year", "display_year"):
+        normalized = _normalize(row.get(key))
+        if normalized is not None:
+            return normalized
+
+    normalized_year = _normalize(row.get("year"))
+    if normalized_year is None:
+        return int(base_year or 0)
+
+    if base_year:
+        return normalized_year + int(base_year) - 1
+    return normalized_year
 
 
 class ReturnPeriods:
@@ -965,7 +1030,8 @@ class ReturnPeriods:
                 stream.write(f"{key} ({unit})\n")
                 for rec_interval in sorted(self.return_periods[key], reverse=True):
                     row = self.return_periods[key][rec_interval]
-                    date = f"{int(row['mo']):02d}/{int(row['da']):02d}/{int(row['year'] + self.y0 - 1):04d}"
+                    display_year = _resolve_display_year(row, self.y0)
+                    date = f"{int(row['mo']):02d}/{int(row['da']):02d}/{display_year:04d}"
                     value = row.get(key, 0.0)
                     stream.write(f"{rec_interval}\t{date}\t{value:.2f}\n")
                 stream.write("\n")
@@ -1028,7 +1094,8 @@ class ReturnPeriods:
 
                 for rec_interval in sorted(self.return_periods[key], reverse=True):
                     row = self.return_periods[key][rec_interval]
-                    date = f"{int(row['mo']):02d}/{int(row['da']):02d}/{int(row['year'] + self.y0 - 1):04d}"
+                    display_year = _resolve_display_year(row, self.y0)
+                    date = f"{int(row['mo']):02d}/{int(row['da']):02d}/{display_year:04d}"
                     values = [
                         str(rec_interval),
                         date,

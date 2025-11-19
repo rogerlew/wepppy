@@ -144,6 +144,18 @@ describe("DssExport controller", () => {
         expect(startedEvents[0]).toEqual(expect.objectContaining({ task: "dss:export" }));
     });
 
+    test("export clears previous status and reports pending request", async () => {
+        dss.export();
+
+        expect(baseInstance.clear_status_messages).toHaveBeenCalledWith(dss);
+        expect(baseInstance.reset_status_spinner).toHaveBeenCalledWith(dss);
+        expect(statusStreamMock.append).toHaveBeenCalled();
+        expect(statusStreamMock.append.mock.calls[0][0]).toBe("Submitting DSS export request…");
+
+        await Promise.resolve();
+        await Promise.resolve();
+    });
+
     test("mode toggle updates panels and emits events", () => {
         const modeEvents = [];
         dss.events.on("dss:mode:changed", (payload) => modeEvents.push(payload));

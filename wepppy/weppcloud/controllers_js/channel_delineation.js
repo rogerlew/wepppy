@@ -210,8 +210,10 @@ var ChannelDelineation = (function () {
             form: formElement,
             channel: "channel_delineation",
             runId: window.runid || window.runId || null,
-            spinner: spinnerElement
+            spinner: spinnerElement,
+            autoConnect: true
         });
+        channel.poll_completion_event = "BUILD_CHANNELS_TASK_COMPLETED";
 
         channel.zoom_min = 12;
         channel.data = null;
@@ -219,6 +221,7 @@ var ChannelDelineation = (function () {
         channel.topIds = [];
         channel.glLayer = null;
         channel.labels = L.layerGroup();
+        channel._completion_seen = false;
 
         channel.style = function (feature) {
             var order = parseInt(feature && feature.properties ? feature.properties.Order : 0, 6);
@@ -433,15 +436,18 @@ var ChannelDelineation = (function () {
         channel.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "BUILD_CHANNELS_TASK_COMPLETED") {
-                channel.disconnect_status_stream(channel);
-                channel.show();
-                channel.report();
-                emit("channel:build:completed", payload || {});
-                baseTriggerEvent("job:completed", {
-                    jobId: channel.rq_job_id,
-                    task: "channel:build",
-                    payload: payload || {}
-                });
+                if (!channel._completion_seen) {
+                    channel._completion_seen = true;
+                    channel.disconnect_status_stream(channel);
+                    channel.show();
+                    channel.report();
+                    emit("channel:build:completed", payload || {});
+                    baseTriggerEvent("job:completed", {
+                        jobId: channel.rq_job_id,
+                        task: "channel:build",
+                        payload: payload || {}
+                    });
+                }
             } else if (normalized === "BUILD_CHANNELS_TASK_FAILED" || normalized === "BUILD_CHANNELS_TASK_ERROR") {
                 emit("channel:build:error", {
                     reason: "job_failure",
@@ -504,6 +510,7 @@ var ChannelDelineation = (function () {
             resetStatus(taskMsg);
 
             channel.remove();
+            channel._completion_seen = false;
             try {
                 Outlet.getInstance().remove();
             } catch (err) {

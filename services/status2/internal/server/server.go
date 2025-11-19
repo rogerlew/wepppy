@@ -227,6 +227,7 @@ outer:
 			return ctx.Err()
 		}
 
+		c.logger.Info("redis subscribe dialing", "channel", channel, "attempt", attempt+1)
 		pubsub := c.srv.redis.Subscribe(ctx, channel)
 		c.srv.metric.incrRedisReconnects()
 
@@ -275,6 +276,7 @@ outer:
 			}
 		}
 
+		c.logger.Info("redis subscribe established", "channel", channel)
 		attempt = 0
 		for {
 			messageCtx, cancel := c.redisRequestContext(ctx)
