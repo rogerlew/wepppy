@@ -213,6 +213,7 @@ var SubcatchmentDelineation = (function () {
         var infoElement = dom.qs("#build_subcatchments_form #info");
         var statusElement = dom.qs("#build_subcatchments_form #status");
         var stacktraceElement = dom.qs("#build_subcatchments_form #stacktrace");
+        var stacktracePanelElement = dom.qs("#subcatchments_stacktrace_panel");
         var rqJobElement = dom.qs("#build_subcatchments_form #rq_job");
         var hintElement = dom.qs("#hint_build_subcatchments");
         var spinnerElement = dom.qs("#build_subcatchments_form #braille");
@@ -227,6 +228,7 @@ var SubcatchmentDelineation = (function () {
         sub.info = infoAdapter;
         sub.status = statusAdapter;
         sub.stacktrace = stacktraceAdapter;
+        sub.stacktracePanelEl = stacktracePanelElement;
         sub.rq_job = rqJobAdapter;
         sub.hint = hintAdapter;
         sub.command_btn_id = "btn_build_subcatchments";
@@ -235,7 +237,8 @@ var SubcatchmentDelineation = (function () {
             form: formElement,
             channel: "subcatchment_delineation",
             runId: window.runid || window.runId || null,
-            spinner: spinnerElement
+            spinner: spinnerElement,
+            stacktrace: stacktracePanelElement ? { element: stacktracePanelElement } : null
         });
 
         sub.hideStacktrace = function () {

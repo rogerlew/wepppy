@@ -238,10 +238,12 @@
             }
             var panel = resolveElement(stacktraceConfig.element || stacktraceConfig.panel);
             if (!panel) {
+                console.warn("StatusStream: stacktrace panel element not found");
                 return null;
             }
             var body = stacktraceConfig.body ? resolveElement(stacktraceConfig.body) : panel.querySelector("[data-stacktrace-body]");
             if (!body) {
+                console.warn("StatusStream: stacktrace body element not found. Panel:", panel.id || "(no id)", "Expected selector: [data-stacktrace-body]");
                 return null;
             }
             return {

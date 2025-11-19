@@ -175,6 +175,28 @@ const controllerCases = [
     hintLocator: "#hint_run_ash",
     workflow: "rq_job",
     expectJobHint: false
+  },
+  {
+    name: "treatments",
+    formSelector: "form#treatments_form",
+    actionSelector: "#btn_build_treatments",
+    requestUrlPattern: "**/rq/api/build_treatments",
+    stacktraceLocator: "#treatments_stacktrace_panel [data-stacktrace-body]",
+    stacktracePanelLocator: "#treatments_stacktrace_panel",
+    hintLocator: "#hint_build_treatments",
+    workflow: "rq_job",
+    skipMessage: "Treatments control not visible or not enabled for this configuration"
+  },
+  {
+    name: "rhem",
+    formSelector: "form#rhem_form",
+    actionSelector: "#btn_run_rhem",
+    requestUrlPattern: "**/rq/api/run_rhem_rq",
+    stacktraceLocator: "#rhem_stacktrace_panel [data-stacktrace-body]",
+    stacktracePanelLocator: "#rhem_stacktrace_panel",
+    hintLocator: "#hint_run_rhem",
+    workflow: "rq_job",
+    expectJobHint: false
   }
 ];
 
