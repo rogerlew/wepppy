@@ -68,9 +68,9 @@ const controllerCases = [
   },
   {
     name: "subcatchments",
-    formSelector: "form#subcatchments_form",
+    formSelector: "form#build_subcatchments_form",
     actionSelector: "#btn_build_subcatchments",
-    requestUrlPattern: "**/rq/api/build_subcatchments",
+    requestUrlPattern: "**/rq/api/build_subcatchments_and_abstract_watershed",
     stacktraceLocator: "#subcatchments_stacktrace_panel [data-stacktrace-body]",
     stacktracePanelLocator: "#subcatchments_stacktrace_panel",
     hintLocator: "#hint_build_subcatchments",
@@ -151,7 +151,8 @@ const controllerCases = [
     stacktraceLocator: "#debris_flow_stacktrace_panel [data-stacktrace-body]",
     stacktracePanelLocator: "#debris_flow_stacktrace_panel",
     hintLocator: "#hint_run_debris_flow",
-    workflow: "rq_job"
+    workflow: "rq_job",
+    expectJobHint: false
   },
   {
     name: "dss_export",

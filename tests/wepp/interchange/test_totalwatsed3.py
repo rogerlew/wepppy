@@ -113,8 +113,8 @@ def _write_ash(path: Path) -> None:
             1 AS mo,
             1 AS da,
             0 AS "days_from_fire (days)",
-            CAST(0.5 AS DOUBLE) AS "wind_transport (tonne/ha)",
-            CAST(0.2 AS DOUBLE) AS "water_transport (tonne/ha)",
+            CAST(0.0 AS DOUBLE) AS "wind_transport (tonne/ha)",
+            CAST(0.7 AS DOUBLE) AS "water_transport (tonne/ha)",
             CAST(0.7 AS DOUBLE) AS "ash_transport (tonne/ha)",
             CAST(1.1 AS DOUBLE) AS "transportable_ash (tonne/ha)",
             CAST(0.0 AS DOUBLE) AS "ash_runoff (mm)",
@@ -147,10 +147,9 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     )
 
     data = _read_parquet_dict(output_path)
-    assert "ash_transport (tonne)" in data
-    assert data["wind_transport (tonne)"][0] == pytest.approx(1.0)
-    assert data["wind_transport (tonne/ha)"][0] == pytest.approx(0.5)
-    assert data["ash_transport (tonne)"][0] == pytest.approx(1.4)
+    assert "ash_transport" in data
+    assert data["wind_transport"][0] == pytest.approx(0.0)
+    assert data["ash_transport"][0] == pytest.approx(1.4)
     assert "sed_vol_conc" in data
     assert data["sed_vol_conc"][0] == pytest.approx(1.159943960651508e-4)
 

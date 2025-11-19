@@ -1050,6 +1050,7 @@ function controlBase() {
         reset_panel_state: function reset_panel_state(self, options) {
             var opts = options || {};
             var message = opts.message || opts.taskMessage || null;
+            var preserveJobHint = Boolean(self && self.rq_job_id && opts.clearJobHint !== true);
 
             var summaryTargets = [];
             var stackTargets = [];
@@ -1111,6 +1112,14 @@ function controlBase() {
 
             try {
                 stackTargets.forEach(function (target) {
+                    var resolved = resolveElement(target);
+                    if (resolved && resolved.hasAttribute && resolved.hasAttribute("data-stacktrace-panel")) {
+                        var body = resolved.querySelector("[data-stacktrace-body]");
+                        if (body) {
+                            clearContent(body);
+                            return;
+                        }
+                    }
                     clearContent(target);
                 });
             } catch (err) {
@@ -1139,6 +1148,9 @@ function controlBase() {
 
             try {
                 hintTargets.forEach(function (target) {
+                    if (preserveJobHint) {
+                        return;
+                    }
                     setTextContent(target, "");
                 });
             } catch (err) {

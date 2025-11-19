@@ -61,6 +61,6 @@ def test_write_events_parquet_absorbs_stray_numeric_lines(tmp_path) -> None:
 
     table = pq.read_table(out_path)
     assert table.num_rows == 2
-    assert list(table.column("event")) == ["EVENT", "NO EVENT"]
+    assert table.column("event").to_pylist() == ["EVENT", "NO EVENT"]
     assert table.column("gwbfv").to_pylist()[-1] == 0.5
     assert table.column("gwdsv").to_pylist()[-1] == 0.6

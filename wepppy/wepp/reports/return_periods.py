@@ -313,7 +313,10 @@ def _build_raw_event_query(
             {duration_expr} AS storm_duration_hours
         FROM read_parquet('{ebe_path.as_posix()}') AS e
         LEFT JOIN read_parquet('{tot_path.as_posix()}') AS tot
-          ON tot.year = e.simulation_year
+          ON (
+            tot.year = e.simulation_year
+            OR tot.year = e.year
+          )
          AND tot.month = e.month
          AND tot.day_of_month = e.day_of_month
         {climate_join}

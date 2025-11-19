@@ -4,7 +4,8 @@
 
 {% call ui.control_shell(
      form_id="build_subcatchments_form",
-     title="Subcatchments Delineation"
+     title="Subcatchments Delineation",
+     stacktrace_panel_options={"panel_id": "subcatchments_stacktrace_panel", "body_id": "stacktrace"}
    ) %}
 
   {% call ui.collapsible_card("Advanced options", expanded=False) %}

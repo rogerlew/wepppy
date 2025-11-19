@@ -721,7 +721,13 @@ def read_hillslope_out_fn(
     if cumulative:
         df = pd.read_parquet(out_fn)
     else:
-        df = pd.read_parquet(out_fn, columns=out_cols)
+        try:
+            schema = pq.read_schema(out_fn)
+            available_columns = [name for name in out_cols if name in schema.names]
+            df = pd.read_parquet(out_fn, columns=available_columns or None)
+        except pa.ArrowInvalid:
+            # Older outputs may omit the unit-suffixed columns; fall back to full read.
+            df = pd.read_parquet(out_fn)
 
     if meta_data is not None:
         for key, value in meta_data.items():

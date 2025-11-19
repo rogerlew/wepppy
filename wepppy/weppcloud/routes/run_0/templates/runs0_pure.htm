@@ -21,7 +21,8 @@
 {% set show_rhem = 'rhem' in mods_list or playwright_load_all %}
 {% set show_omni = 'omni' in mods_list or playwright_load_all %}
 {% set show_observed = 'observed' in mods_list or playwright_load_all %}
-{% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and user.has_role('PowerUser') %}
+{% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
+{% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow %}
 {% set show_dss_export = 'dss_export' in mods_list or playwright_load_all %}
 {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
 
@@ -93,7 +94,8 @@
         <li data-mod-nav="observed" {% if not show_observed %}hidden{% endif %}>
           <a href="#observed" class="nav-link">Observed Data</a>
         </li>
-        {% if user.has_role('PowerUser') %}
+        {% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
+        {% if allow_debris_flow %}
         <li data-mod-nav="debris_flow" {% if not show_debris_flow %}hidden{% endif %}>
           <a href="#debris-flow" class="nav-link">Debris Flow</a>
         </li>
@@ -210,7 +212,7 @@
         {% endif %}
       </div>
 
-{% if user.has_role('PowerUser') %}
+{% if allow_debris_flow %}
   <div data-mod-section="debris_flow" {% if not show_debris_flow %}hidden{% endif %}>
     {% if show_debris_flow %}
     <section id="debris-flow" class="wc-stack">

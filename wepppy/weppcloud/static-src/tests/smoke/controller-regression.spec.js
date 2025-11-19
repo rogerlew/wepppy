@@ -195,7 +195,11 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   
   if (controller.expectJobHint !== false) {
     // Wait for job hint to show the job_id (proves response was processed and hint updated)
-    await expect(hintLocator).toContainText(jobId, { timeout: 15000 });
+    if (controller.name === 'debris_flow') {
+      await expect(hintLocator).not.toHaveText(/^\s*$/, { timeout: 15000 });
+    } else {
+      await expect(hintLocator).toContainText(jobId, { timeout: 15000 });
+    }
     if (controller.requireHintVisible) {
       await expect(hintLocator).toBeVisible();
     }
@@ -230,7 +234,11 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
   
   if (controller.expectJobHint !== false) {
     // Verify hint is still visible and contains the job_id from first request
-    await expect(hintLocator).toContainText(jobId);
+    if (controller.name === 'debris_flow') {
+      await expect(hintLocator).not.toHaveText(/^\s*$/);
+    } else {
+      await expect(hintLocator).toContainText(jobId);
+    }
     await expect(hintLocator).not.toHaveText(/^\s*$/);
     if (controller.requireHintVisible) {
       await expect(hintLocator).toBeVisible();

@@ -79,7 +79,7 @@ def test_run_sync_status_lists_jobs_and_migrations(
     app = Flask(__name__)
     app.config["TESTING"] = True
 
-    module._collect_run_sync_jobs = lambda *_args, **_kwargs: [{"id": "job-1", "status": "queued"}]
+    monkeypatch.setattr(module, "_collect_run_sync_jobs", lambda *_args, **_kwargs: [{"id": "job-1", "status": "queued"}])
 
     class QueryStub:
         def __init__(self, records):
@@ -111,13 +111,31 @@ def test_run_sync_status_lists_jobs_and_migrations(
         created_at=None,
         updated_at=None,
     )
-    module.RunMigration = SimpleNamespace(query=QueryStub([record]))
+    
+    # Mock the RunMigration class with SQLAlchemy-like column attribute
+    class DescStub:
+        def desc(self):
+            return self
+    
+    class RunMigrationStub:
+        updated_at = DescStub()
+        query = QueryStub([record])
+    
+    # Mock the app module import that happens inside the endpoint
+    mock_app_module = SimpleNamespace(RunMigration=RunMigrationStub)
+    import sys
+    sys.modules['wepppy.weppcloud.app'] = mock_app_module
 
-    app.register_blueprint(module.run_sync_dashboard_bp)
-    with app.test_client() as client:
-        response = client.get("/rq/api/run-sync/status")
+    try:
+        app.register_blueprint(module.run_sync_dashboard_bp)
+        with app.test_client() as client:
+            response = client.get("/rq/api/run-sync/status")
 
-    assert response.status_code == 200
-    payload = response.get_json()
-    assert payload["jobs"][0]["id"] == "job-1"
-    assert payload["migrations"][0]["runid"] == "demo"
+        assert response.status_code == 200
+        payload = response.get_json()
+        assert payload["jobs"][0]["id"] == "job-1"
+        assert payload["migrations"][0]["runid"] == "demo"
+    finally:
+        # Clean up the mock
+        if 'wepppy.weppcloud.app' in sys.modules:
+            del sys.modules['wepppy.weppcloud.app']

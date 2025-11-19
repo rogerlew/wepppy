@@ -8,6 +8,7 @@ from datetime import datetime
 import awesome_codename
 
 from .._common import *  # noqa: F401,F403
+from flask import current_app
 
 import wepppy
 from wepppy.all_your_base import isint
@@ -256,10 +257,12 @@ def _build_runs0_context(runid, config, playwright_load_all):
     show_ash = 'ash' in mods_list or playwright_load_all
     show_omni = 'omni' in mods_list or playwright_load_all
     show_observed = (observed is not None) or playwright_load_all
-    show_debris_flow = (
-        current_user.has_role('PowerUser') and
-        (debris_flow is not None or playwright_load_all)
+    allow_debris_flow = (
+        current_user.has_role('PowerUser')
+        or current_app.config.get('TEST_SUPPORT_ENABLED')
+        or playwright_load_all
     )
+    show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
     
