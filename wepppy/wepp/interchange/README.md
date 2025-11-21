@@ -146,7 +146,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | `loss_pw0.txt` | `run_wepp_watershed_loss_interchange` | `loss_pw0.hill.parquet`, `loss_pw0.chn.parquet`, `loss_pw0.out.parquet`, `loss_pw0.class_data.parquet` plus `all_years` variants | Annual and long-term sediment and pollutant summaries for hillslopes, channels, and outlet along with particle class fractions. |
 
 ### Derived and Export Products
-- `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` joins `H.pass.parquet` and `H.wat.parquet` with DuckDB to emit `totalwatsed3.parquet`, computing volumes, depths, baseflow reservoirs, and (when available) first-year ash transport masses pulled from `ash/H{wepp_id}_ash.parquet`.
+- `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` joins `H.pass.parquet` and `H.wat.parquet` with DuckDB to emit `totalwatsed3.parquet`, computing volumes, depths, baseflow reservoirs, and (when available) ash transport mass totals (including per-type black/white splits) plus ash volumetric concentration and black-ash share.
 - `totalwatsed_partitioned_dss_export()` iterates channel tops, filters hillslope WEPP ids via the watershed translator, and writes per-channel DSS time-series files plus derived discharges (`Q (m^3/s)`).
 - `chanout_dss_export()` converts `chan.out.parquet` peaks to per-channel DSS records named `peak_chan_{topaz_id}.dss` (optionally tagging Topaz IDs) for hydrologic compatibility with HEC tools; `archive_dss_export_zip()` packages the exports.
 - `generate_interchange_documentation()` scans available Parquet tables, renders schema previews with sample rows, and stores a Markdown README alongside the data for consumers.

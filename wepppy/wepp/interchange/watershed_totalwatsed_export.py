@@ -20,7 +20,12 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed when pydsstool
 else:
     _PYDSSTOOLS_IMPORT_ERROR = None
 
-from wepppy.wepp.interchange.totalwatsed3 import run_totalwatsed3
+from wepppy.wepp.interchange.totalwatsed3 import (
+    ASH_BLACK_PCT_COLUMN,
+    ASH_VOLUME_COLUMN,
+    SED_ASH_VOLUME_COLUMN,
+    run_totalwatsed3,
+)
 from wepppy.wepp.interchange.date_filters import apply_date_filters
 
 __all__ = ["totalwatsed_partitioned_dss_export", "archive_dss_export_zip"]
@@ -138,10 +143,13 @@ def totalwatsed_partitioned_dss_export(
             if df.empty:
                 continue
 
-        if "sed_vol_conc" in df.columns:
-            sed_subset = df[["year", "month", "day_of_month", "sed_vol_conc"]].copy()
+        sed_metric_columns = ["sed_vol_conc", ASH_VOLUME_COLUMN, SED_ASH_VOLUME_COLUMN, ASH_BLACK_PCT_COLUMN]
+        available_sed_cols = [col for col in sed_metric_columns if col in df.columns]
+        if available_sed_cols:
+            sed_subset = df[["year", "month", "day_of_month", *available_sed_cols]].copy()
             sed_subset["channel_top_id"] = channel_top_id
-            sed_records.append(sed_subset)
+            ordered_cols = ["year", "month", "day_of_month", "channel_top_id", *available_sed_cols]
+            sed_records.append(sed_subset[ordered_cols])
 
         # Derive discharge in m^3/s for compatibility with legacy export.
         area_series = df["Area"].astype(float, copy=False)
@@ -213,7 +221,11 @@ def totalwatsed_partitioned_dss_export(
 
     if sed_records:
         sed_df = pd.concat(sed_records, ignore_index=True)
-        sed_df = sed_df[["year", "month", "day_of_month", "channel_top_id", "sed_vol_conc"]]
+        column_order = ["year", "month", "day_of_month", "channel_top_id"]
+        for col in ["sed_vol_conc", ASH_VOLUME_COLUMN, SED_ASH_VOLUME_COLUMN, ASH_BLACK_PCT_COLUMN]:
+            if col in sed_df.columns:
+                column_order.append(col)
+        sed_df = sed_df[column_order]
         sed_csv_path = dss_export_dir / "sed_vol_conc_by_event_and_chn_id.csv"
         sed_df.to_csv(sed_csv_path, index=False)
 

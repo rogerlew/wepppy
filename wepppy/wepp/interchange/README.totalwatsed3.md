@@ -6,7 +6,7 @@
 
 - Volumes (m³) from `H.wat` are summed, then converted back to depths (mm) via watershed area.
 - Sediment masses are derived from the pass file (`H.pass`) and converted to both kg (`seddep_*`) and a dimensionless volumetric concentration (`sed_vol_conc`).
-- Optional ash metrics are joined by date and scaled using either supplied area hints or the Watershed controller.
+- Optional ash metrics are joined by date and scaled using either supplied area hints or the Watershed controller (per-ash-type mass totals plus volumetric concentration/black fraction when bulk densities are known).
 
 The resulting table is written to `<run>/wepp/output/interchange/totalwatsed3.parquet` using the schema defined in `totalwatsed3.py`.
 
@@ -28,7 +28,10 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
 - `seddep_1`–`seddep_5`: total mass per sediment class (kg) computed as `Σ sedcon_i * runvol`.
 - `sed_vol_conc`: watershed-wide volumetric sediment concentration (m³ of solids per m³ of runoff).
 - `Area`, `P`, `RM`, `Q`, `Dp`, `latqcc`, … : volumetric sums from `H.wat`, later converted to depths (`Precipitation`, `Runoff`, etc.).
-- Ash transport columns (`wind_transport (tonne)`, `ash_transport (tonne/ha)`, …) when the ash directory is available.
+- Ash transport columns when the ash directory is available:
+  - Totals and per-area masses: `wind_transport`, `water_transport`, `ash_transport`, `transportable_ash` (+ `_per_ha`).
+  - Per-ash-type masses: `{wind,water,ash}_transport_{black,white}` (+ `_per_ha` via per-type area).
+  - Ash volumetrics: `ash_vol_conc` (ash solids volume / runoff), `sed+ash_vol_conc` (sediment + ash solids volume / runoff), `ash_black_pct_by_vol` (% of ash solids volume that is black ash).
 
 Nulls from missing PASS or ash rows are filled with zeros before the final Arrow table is materialised.
 
@@ -61,6 +64,7 @@ Specific gravity × 1 000 kg m⁻³ (density of water) yields the absolute
 2. Convert each class to solids volume: `V_i = seddep_i / ρ_i` where `ρ_i` is the density from the table above.
 3. Sum the solids volume: `V_total = Σ_i V_i`.
 4. Divide by total runoff: `sed_vol_conc = V_total / runvol_total` (guarded so zero runoff yields zero concentration).
+5. When ash is present, compute `ash_vol_conc` using per-hillslope ash masses and bulk densities from `Ash.meta` (defaulting to baked-in black/white values); `sed+ash_vol_conc` adds sediment solids; `ash_black_pct_by_vol` reports the black-ash share of ash solids volume.
 
 This mirrors the physics in WEPP: the numerator reconstructs the actual cubic meters of sediment solids mobilised that day, while the denominator is the water volume those solids travelled with. The resulting value is dimensionless (m³ m⁻³) and represents the watershed-average volumetric sediment concentration for that day. `totalwatsed3` stores it immediately after the `seddep_*` columns so future stakeholders can append per-class volumetric fractions alongside it.
 
