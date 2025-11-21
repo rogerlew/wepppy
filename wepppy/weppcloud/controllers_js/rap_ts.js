@@ -293,6 +293,117 @@ var RAP_TS = (function () {
                 lastSubmission: null
             }
         });
+        var delegateRoot = controller.form || null;
+
+        function detachDelegates() {
+            controller._delegates.forEach(function (unsubscribe) {
+                if (typeof unsubscribe === "function") {
+                    unsubscribe();
+                }
+            });
+            controller._delegates = [];
+            delegateRoot = null;
+        }
+
+        function attachDelegates(force) {
+            if (!controller.form) {
+                detachDelegates();
+                return;
+            }
+            if (!force && delegateRoot === controller.form && controller._delegates.length) {
+                return;
+            }
+            detachDelegates();
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.run, function (event) {
+                event.preventDefault();
+                controller.acquire();
+            }));
+            delegateRoot = controller.form;
+        }
+
+        function rebindDomReferences() {
+            var updated = { formChanged: false };
+
+            var nextForm = dom.qs(SELECTORS.form);
+            if (nextForm !== controller.form) {
+                controller.form = nextForm || null;
+                formElement = controller.form || null;
+                updated.formChanged = true;
+            }
+
+            if (controller.form) {
+                if (!controller.container || !controller.container.isConnected) {
+                    controller.container = typeof controller.form.closest === "function"
+                        ? controller.form.closest(".controller-section") || controller.form
+                        : controller.form;
+                }
+            } else {
+                controller.container = null;
+            }
+
+            function syncAdapter(selector, current, assign) {
+                var next = controller.form ? dom.qs(selector, controller.form) : null;
+                if (next !== current) {
+                    assign(next);
+                }
+            }
+
+            syncAdapter(SELECTORS.info, infoElement, function (next) {
+                infoElement = next;
+                controller.info = createLegacyAdapter(infoElement);
+            });
+            syncAdapter(SELECTORS.status, statusElement, function (next) {
+                statusElement = next;
+                controller.status = createLegacyAdapter(statusElement);
+            });
+            syncAdapter(SELECTORS.stacktrace, stacktraceElement, function (next) {
+                stacktraceElement = next;
+                controller.stacktrace = createLegacyAdapter(stacktraceElement);
+            });
+            syncAdapter(SELECTORS.rqJob, rqJobElement, function (next) {
+                rqJobElement = next;
+                controller.rq_job = createLegacyAdapter(rqJobElement);
+            });
+            syncAdapter(SELECTORS.hint, hintElement, function (next) {
+                hintElement = next;
+                controller.hint = createLegacyAdapter(hintElement);
+            });
+
+            var nextStatusPanel = dom.qs("#rap_ts_status_panel");
+            var nextStacktracePanel = dom.qs("#rap_ts_stacktrace_panel");
+            var nextSpinner = nextStatusPanel ? nextStatusPanel.querySelector("#braille") : null;
+            var shouldReattachStream = false;
+            if (nextStatusPanel !== controller.statusPanelEl) {
+                controller.statusPanelEl = nextStatusPanel;
+                shouldReattachStream = true;
+            }
+            if (nextStacktracePanel !== controller.stacktracePanelEl) {
+                controller.stacktracePanelEl = nextStacktracePanel;
+                shouldReattachStream = true;
+            }
+            if (nextSpinner !== controller.statusSpinnerEl) {
+                controller.statusSpinnerEl = nextSpinner;
+                shouldReattachStream = true;
+            }
+            if (shouldReattachStream && typeof controller.attach_status_stream === "function") {
+                controller.detach_status_stream(controller);
+                controller.attach_status_stream(controller, {
+                    element: controller.statusPanelEl,
+                    channel: WS_CHANNEL,
+                    runId: window.runid || window.runId || null,
+                    stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+                    spinner: controller.statusSpinnerEl,
+                    logLimit: 200,
+                    onTrigger: function (detail) {
+                        if (detail && detail.event) {
+                            controller.triggerEvent(detail.event, detail);
+                        }
+                    }
+                });
+            }
+
+            return updated;
+        }
 
         var baseTriggerEvent = controller.triggerEvent.bind(controller);
 
@@ -382,9 +493,9 @@ var RAP_TS = (function () {
                 return;
             }
 
-        controller.info.html("");
-        controller.stacktrace.empty();
-        controller.hideStacktrace();
+            controller.info.html("");
+            controller.stacktrace.empty();
+            controller.hideStacktrace();
 
             var submission = forms.serializeForm(controller.form, { format: "json" }) || {};
             if (overridePayload && typeof overridePayload === "object") {
@@ -467,12 +578,7 @@ var RAP_TS = (function () {
         };
 
         controller.dispose = function () {
-            controller._delegates.forEach(function (unsubscribe) {
-                if (typeof unsubscribe === "function") {
-                    unsubscribe();
-                }
-            });
-            controller._delegates = [];
+            detachDelegates();
             controller.disconnect_status_stream(controller);
         };
 
@@ -488,16 +594,36 @@ var RAP_TS = (function () {
             schedule: controller.state.schedule
         });
 
-        if (controller.form) {
-            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.run, function (event) {
-                event.preventDefault();
-                controller.acquire();
-            }));
-        }
+        attachDelegates();
+
+        controller._rebindDomReferences = rebindDomReferences;
+        controller._attachDelegates = attachDelegates;
+        controller._detachDelegates = detachDelegates;
 
         controller.bootstrap = function bootstrap(context) {
             var ctx = context || {};
             var helper = window.WCControllerBootstrap || null;
+            var rebindResult = controller._rebindDomReferences();
+            if (controller.form) {
+                controller._attachDelegates(Boolean(rebindResult && rebindResult.formChanged));
+            } else {
+                controller._detachDelegates();
+            }
+
+            var nextSchedule = parseSchedule(dom) || [];
+            var prevSchedule = controller.state && Array.isArray(controller.state.schedule)
+                ? controller.state.schedule
+                : [];
+            var prevSerialized = JSON.stringify(prevSchedule);
+            var nextSerialized = JSON.stringify(nextSchedule);
+            if (nextSerialized !== prevSerialized) {
+                controller.state.schedule = nextSchedule;
+                if (controller.events && typeof controller.events.emit === "function") {
+                    controller.events.emit("rap:schedule:loaded", { schedule: controller.state.schedule });
+                }
+                dispatchControlEvent("rap:schedule:loaded", { schedule: controller.state.schedule });
+            }
+
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "fetch_and_analyze_rap_ts_rq")
                 : null;
