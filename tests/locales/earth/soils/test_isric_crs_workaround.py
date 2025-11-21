@@ -11,13 +11,21 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from osgeo import gdal
 
-from wepppy.locales.earth.soils.isric import (
-    fetch_isric_wrb,
-    fetch_layer,
-    soil_grid_proj4,
-)
+pytestmark = []
+
+try:
+    from osgeo import gdal
+except ModuleNotFoundError:
+    gdal = None  # type: ignore[assignment]
+    pytestmark.append(pytest.mark.skip(reason="osgeo.gdal is required for CRS metadata tests"))
+    fetch_isric_wrb = fetch_layer = soil_grid_proj4 = None  # type: ignore[assignment]
+else:
+    from wepppy.locales.earth.soils.isric import (
+        fetch_isric_wrb,
+        fetch_layer,
+        soil_grid_proj4,
+    )
 
 
 @pytest.fixture

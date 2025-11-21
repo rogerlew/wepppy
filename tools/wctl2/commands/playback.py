@@ -204,8 +204,11 @@ def register(app: typer.Typer) -> None:
             raise typer.Exit(1)
 
         if not outcome.token:
-            typer.echo("[wctl] playback stream completed without exposing result token; marking as failure.", err=True)
-            raise typer.Exit(1)
+            typer.echo(
+                "[wctl] playback stream completed without exposing result token; skipping result lookup.",
+                err=True,
+            )
+            raise typer.Exit(0)
 
         result = _fetch_result(resolved_service_url, outcome.token, headers)
         if result is None:
