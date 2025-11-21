@@ -68,6 +68,10 @@ converters: ConverterRegistry = {
         ('km^2', 'm^2'): lambda v: v * 1000000.0,
         ('km^2', 'acre'): lambda v: v * 247.105,
     },
+    'currency-area': {
+        ('$/ha', '$/acre'): lambda v: v * 0.40468564224,
+        ('$/acre', '$/ha'): lambda v: v * 2.47105381467,
+    },
     'weight': {
         ('tonne', 'ton'): lambda v: v * 1.10231,
         ('ton', 'tonne'): lambda v: v * 25.4
@@ -205,6 +209,10 @@ precisions: PrecisionRegistry = OrderedDict([
         ('acre', 2),
         ('m^2', 2),
         ('km^2', 2)])
+     ),
+    ('currency-area', OrderedDict([
+        ('$/ha', 2),
+        ('$/acre', 2)])
      ),
     ('weight', OrderedDict([
         ('tonne', 2),
@@ -424,6 +432,7 @@ class Unitizer(NoDbBase):
 
         def cls_units(units):
             return str(units).replace('/', '_') \
+                .replace('$', 'usd') \
                 .replace('^2', '-sqr') \
                 .replace('^3', '-cube') \
                 .replace(',', '-_')

@@ -27,6 +27,13 @@ except Exception:  # pragma: no cover - optional dependency
 
 from wepppy.wepp.interchange.schema_utils import pa_field
 from wepppy.nodb.base import NoDbBase, nodb_setter
+from .presets import (
+    PATH_CE_BASELINE_SCENARIO,
+    PATH_CE_REFERENCE_SCENARIO,
+    PATH_CE_MULCH_PRESETS,
+    build_treatment_options,
+    default_mulch_costs,
+)
 
 from .data_loader import (
     PathCEDataError,
@@ -44,48 +51,31 @@ __all__ = ["PathCostEffective"]
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_TREATMENT_OPTIONS: List[Dict[str, Any]] = [
-    {
-        "label": "Mulch 0.5 tons/acre",
-        "scenario": "mulch_15_sbs_map",
-        "quantity": 0.5,
-        "unit_cost": 0.0,
-        "fixed_cost": 0.0,
-    },
-    {
-        "label": "Mulch 1.0 tons/acre",
-        "scenario": "mulch_30_sbs_map",
-        "quantity": 1.0,
-        "unit_cost": 0.0,
-        "fixed_cost": 0.0,
-    },
-    {
-        "label": "Mulch 2.0 tons/acre",
-        "scenario": "mulch_60_sbs_map",
-        "quantity": 2.0,
-        "unit_cost": 0.0,
-        "fixed_cost": 0.0,
-    },
-]
-
-DEFAULT_CONFIG: Dict[str, Any] = {
-    "post_fire_scenario": "sbs_map",
-    "undisturbed_scenario": "undisturbed",
-    "sdyd_threshold": 0.0,
-    "sddc_threshold": 0.0,
-    "slope_range": [None, None],
-    "severity_filter": None,
-    "treatment_options": DEFAULT_TREATMENT_OPTIONS,
-}
+def _default_config() -> Dict[str, Any]:
+    costs = default_mulch_costs()
+    return {
+        "post_fire_scenario": PATH_CE_BASELINE_SCENARIO,
+        "undisturbed_scenario": PATH_CE_REFERENCE_SCENARIO,
+        "sdyd_threshold": 0.0,
+        "sddc_threshold": 0.0,
+        "slope_range": [None, None],
+        "severity_filter": None,
+        "mulch_costs": dict(costs),
+        "treatment_options": build_treatment_options(costs),
+    }
 
 
 def _normalize_config(value: Mapping[str, Any]) -> Dict[str, Any]:
-    normalized = dict(DEFAULT_CONFIG)
+    normalized = _default_config()
     incoming = dict(value or {})
     normalized.update({k: v for k, v in incoming.items() if k in normalized})
 
+    mulch_costs = _normalize_mulch_costs(
+        incoming.get("mulch_costs"), incoming.get("treatment_options")
+    )
+    normalized["mulch_costs"] = mulch_costs
     normalized["treatment_options"] = _normalize_treatment_options(
-        incoming.get("treatment_options", normalized["treatment_options"])
+        build_treatment_options(mulch_costs)
     )
 
     return normalized
@@ -93,10 +83,8 @@ def _normalize_config(value: Mapping[str, Any]) -> Dict[str, Any]:
 
 def _normalize_treatment_options(options: Any) -> List[Dict[str, Any]]:
     normalized: List[Dict[str, Any]] = []
-    if not options:
-        options = DEFAULT_TREATMENT_OPTIONS
-
-    for option in options:
+    iterable = options or []
+    for option in iterable:
         if not isinstance(option, Mapping):
             continue
         label = str(option.get("label") or option.get("name") or "")
@@ -112,8 +100,30 @@ def _normalize_treatment_options(options: Any) -> List[Dict[str, Any]]:
                 "fixed_cost": float(option.get("fixed_cost", 0.0) or 0.0),
             }
         )
-    if not normalized:
-        normalized = DEFAULT_TREATMENT_OPTIONS
+    return normalized
+
+
+def _normalize_mulch_costs(costs: Any, fallback_options: Any = None) -> Dict[str, float]:
+    normalized = default_mulch_costs()
+    if isinstance(costs, Mapping):
+        for preset in PATH_CE_MULCH_PRESETS:
+            scenario = preset["key"]
+            if scenario not in costs:
+                continue
+            value = costs.get(scenario)
+            if value in (None, ""):
+                continue
+            try:
+                normalized[scenario] = float(value)
+            except (TypeError, ValueError):
+                normalized[scenario] = 0.0
+        return normalized
+
+    if fallback_options:
+        for option in _normalize_treatment_options(fallback_options):
+            scenario = option.get("scenario")
+            if scenario in normalized:
+                normalized[scenario] = float(option.get("unit_cost", 0.0) or 0.0)
     return normalized
 
 
@@ -206,6 +216,8 @@ class PathCostEffective(NoDbBase):
 
             if not hasattr(self, "_config"):
                 self._config = _normalize_config({})
+            else:
+                self._ensure_config_shape()
 
             if not hasattr(self, "_results"):
                 self._results: Dict[str, Any] = {}
@@ -238,7 +250,11 @@ class PathCostEffective(NoDbBase):
     @property
     def config(self) -> Dict[str, Any]:
         """Return a shallow copy of the current configuration payload."""
-        return dict(self._config)
+        self._ensure_config_shape()
+        current = dict(self._config)
+        current["mulch_costs"] = dict(current.get("mulch_costs", {}))
+        current["treatment_options"] = [dict(option) for option in current.get("treatment_options", [])]
+        return current
 
     @config.setter  # type: ignore[override]
     @nodb_setter
@@ -247,6 +263,20 @@ class PathCostEffective(NoDbBase):
         self._status = "configured"
         self._status_message = "Configuration updated."
         self._progress = 0.0
+
+    def _ensure_config_shape(self) -> None:
+        raw_value = getattr(self, "_config", None)
+        if isinstance(raw_value, Mapping):
+            return
+        fallback: Dict[str, Any] = {}
+        if isinstance(raw_value, list):
+            fallback["treatment_options"] = raw_value
+        elif raw_value is not None:
+            try:
+                fallback = dict(raw_value)  # type: ignore[arg-type]
+            except Exception:
+                fallback = {}
+        self._config = _normalize_config(fallback)
 
     # ------------------------------------------------------------------
     # Results & status management

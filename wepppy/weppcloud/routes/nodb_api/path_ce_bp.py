@@ -11,7 +11,9 @@ from rq import Queue
 from .._common import *  # noqa: F401,F403
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
+from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.path_ce import PathCostEffective
+from wepppy.nodb.mods.path_ce.presets import PATH_CE_MULCH_PRESETS, default_mulch_costs
 from wepppy.rq.path_ce_rq import TIMEOUT, run_path_cost_effective_rq
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 from .project_bp import set_project_mod_state
@@ -61,6 +63,18 @@ def _normalize_treatment_options(options: Any) -> List[Dict[str, Any]]:
     return normalized
 
 
+def _coerce_mulch_costs(raw_costs: Any) -> Dict[str, float]:
+    costs = default_mulch_costs()
+    if not isinstance(raw_costs, dict):
+        return costs
+    for preset in PATH_CE_MULCH_PRESETS:
+        scenario = preset["key"]
+        if scenario not in raw_costs:
+            continue
+        costs[scenario] = _coerce_float(raw_costs.get(scenario), default=0.0)
+    return costs
+
+
 def _build_config_payload(raw: Dict[str, Any]) -> Dict[str, Any]:
     payload = dict(raw)
     payload["sddc_threshold"] = _coerce_float(raw.get("sddc_threshold"))
@@ -75,6 +89,7 @@ def _build_config_payload(raw: Dict[str, Any]) -> Dict[str, Any]:
     payload.pop("slope_range_max", None)
 
     payload["severity_filter"] = _normalize_severity(raw.get("severity_filter"))
+    payload["mulch_costs"] = _coerce_mulch_costs(raw.get("mulch_costs"))
     payload["treatment_options"] = _normalize_treatment_options(raw.get("treatment_options"))
 
     return payload
@@ -182,6 +197,9 @@ def run_path_cost_effective(runid: str, config: str) -> Response:
         return error_factory("PATH Cost-Effective module is not enabled for this run.")
 
     _ensure_controller(wd, f"{config}.cfg")
+
+    if not Disturbed.getInstance(wd).has_sbs:
+        return error_factory("PATH Cost-Effective requires an SBS map. Upload or configure one in Disturbed before running.")
 
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
         queue = Queue(connection=redis_conn)

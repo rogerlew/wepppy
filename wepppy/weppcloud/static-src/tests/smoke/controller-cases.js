@@ -213,6 +213,17 @@ const controllerCases = [
     hintLocator: "#hint_run_rhem",
     workflow: "rq_job",
     expectJobHint: false
+  },
+  {
+    name: "path_ce",
+    formSelector: "form#path_ce_form",
+    actionSelector: "#path_ce_run",
+    requestUrlPattern: "**/tasks/path_cost_effective_run",
+    stacktraceLocator: "#path_ce_stacktrace_panel [data-stacktrace-body]",
+    stacktracePanelLocator: "#path_ce_stacktrace_panel",
+    hintLocator: "#path_ce_hint",
+    workflow: "rq_job",
+    skipMessage: "PATH Cost-Effective control not enabled for this run"
   }
 ];
 

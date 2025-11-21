@@ -41,6 +41,17 @@
 
 ## Open Questions
 - Should Omni re-run every time Path is invoked, or can we skip if `_pups/omni` already contains fresh parquets for these scenarios?
+
+rerun omni scenarios. omni will skip re-running scenarios that have been ran
+
 - Where is SBS map presence best validated (Disturbed controller vs. filesystem probe), and what constitutes “ready”?
+
+use has_sbs endpoint
+
 - Do we need to preserve existing custom Omni scenarios, or is it acceptable to overwrite with the fixed Path set for this workflow?
+
+keep existing add necessary scenarios for omni
+
 - Are per-hectare costs sufficient, or do we need optional fixed costs (mobilization) per mulch intensity?
+
+just per-hectare for now

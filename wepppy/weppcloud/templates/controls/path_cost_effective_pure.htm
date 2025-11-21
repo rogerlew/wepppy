@@ -29,6 +29,23 @@
      }
    ) %}
 
+  <style>
+    #path_ce_cost_table .path-ce-cost-field {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    #path_ce_cost_table .path-ce-cost-field input {
+      flex: 1;
+    }
+
+    #path_ce_cost_table .path-ce-cost-unit {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+
   <fieldset class="wc-fieldset">
     <legend class="wc-fieldset__legend">Thresholds</legend>
     <div class="wc-field wc-field--inline">
@@ -65,31 +82,114 @@
   </fieldset>
 
   <fieldset class="wc-fieldset">
-    <legend class="wc-fieldset__legend">Treatments</legend>
+    <legend class="wc-fieldset__legend">Scenario Package</legend>
     <div class="wc-field">
-      <table class="wc-table" id="path_ce_treatments_table" aria-describedby="path_ce_treatments_help">
+      <p class="wc-field__help">
+        PATH provisions a fixed Omni bundle before each run. The solver compares the post-fire SBS baseline,
+        three mulch intensities, and the undisturbed reference scenario.
+      </p>
+      <ul class="wc-list">
+        <li><strong>SBS Map (`sbs_map`)</strong>: current post-fire baseline.</li>
+        <li><strong>Mulch 0.5 tons/acre (`mulch_15_sbs_map`)</strong>: +15% ground cover.</li>
+        <li><strong>Mulch 1.0 tons/acre (`mulch_30_sbs_map`)</strong>: +30% ground cover.</li>
+        <li><strong>Mulch 2.0 tons/acre (`mulch_60_sbs_map`)</strong>: +60% ground cover.</li>
+        <li><strong>Undisturbed (`undisturbed`)</strong>: pre-fire reference run.</li>
+      </ul>
+    </div>
+  </fieldset>
+
+  <fieldset class="wc-fieldset">
+    <legend class="wc-fieldset__legend">Mulch Costs</legend>
+    <div class="wc-field">
+      <table class="wc-table" id="path_ce_cost_table" aria-describedby="path_ce_cost_help">
         <thead>
           <tr>
             <th scope="col">Label</th>
             <th scope="col">Scenario Key</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Unit Cost ($/ton)</th>
-            <th scope="col">Fixed Cost ($)</th>
-            <th scope="col" class="wc-table__actions">Actions</th>
+            <th scope="col">Cost</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          <tr>
+            <td>Mulch 0.5 tons/acre</td>
+            <td><code>mulch_15_sbs_map</code></td>
+            <td>
+              <div class="path-ce-cost-field" data-unitizer-category="currency-area">
+                <input
+                  type="number"
+                  class="pure-input-1"
+                  step="any"
+                  min="0"
+                  name="mulch_costs[mulch_15_sbs_map]"
+                  data-pathce-cost="mulch_15_sbs_map"
+                  data-unitizer-category="currency-area"
+                  data-unitizer-unit="$/ha"
+                  placeholder="0"
+                >
+                <span
+                  class="path-ce-cost-unit"
+                  data-unitizer-label
+                  data-unitizer-category="currency-area"
+                  data-unitizer-unit="$/ha"
+                >$/ha</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Mulch 1.0 tons/acre</td>
+            <td><code>mulch_30_sbs_map</code></td>
+            <td>
+              <div class="path-ce-cost-field" data-unitizer-category="currency-area">
+                <input
+                  type="number"
+                  class="pure-input-1"
+                  step="any"
+                  min="0"
+                  name="mulch_costs[mulch_30_sbs_map]"
+                  data-pathce-cost="mulch_30_sbs_map"
+                  data-unitizer-category="currency-area"
+                  data-unitizer-unit="$/ha"
+                  placeholder="0"
+                >
+                <span
+                  class="path-ce-cost-unit"
+                  data-unitizer-label
+                  data-unitizer-category="currency-area"
+                  data-unitizer-unit="$/ha"
+                >$/ha</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Mulch 2.0 tons/acre</td>
+            <td><code>mulch_60_sbs_map</code></td>
+            <td>
+              <div class="path-ce-cost-field" data-unitizer-category="currency-area">
+                <input
+                  type="number"
+                  class="pure-input-1"
+                  step="any"
+                  min="0"
+                  name="mulch_costs[mulch_60_sbs_map]"
+                  data-pathce-cost="mulch_60_sbs_map"
+                  data-unitizer-category="currency-area"
+                  data-unitizer-unit="$/ha"
+                  placeholder="0"
+                >
+                <span
+                  class="path-ce-cost-unit"
+                  data-unitizer-label
+                  data-unitizer-category="currency-area"
+                  data-unitizer-unit="$/ha"
+                >$/ha</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </table>
-      <p id="path_ce_treatments_help" class="wc-field__help">
-        Map UI-facing treatment labels to Omni scenario keys. Costs drive optimization; leave at 0 to ignore.
+      <p id="path_ce_cost_help" class="wc-field__help">
+        Enter treatment costs in USD per hectare (or acre if English units are selected). PATH multiplies by Omni hillslope areas to build the solver cost vector.
       </p>
-      <button
-        id="path_ce_add_treatment"
-        type="button"
-        class="pure-button pure-button-secondary"
-        data-pathce-action="add-treatment">
-        Add Treatment
-      </button>
     </div>
   </fieldset>
 
@@ -109,6 +209,6 @@
       Run PATH Cost-Effective
     </button>
   {% endcall %}
-  <p id="path_ce_hint" class="wc-field__help" aria-live="polite"></p>
+  {{ ui.job_hint("path_ce_hint", extra_class="wc-field__help") }}
 
 {% endcall %}
