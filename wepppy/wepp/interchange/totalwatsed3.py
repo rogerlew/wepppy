@@ -27,6 +27,9 @@ SEDIMENT_SPECIFIC_GRAVITY = (2.60, 2.65, 1.80, 1.60, 2.65)
 SEDIMENT_DENSITY_KG_M3 = tuple(value * 1000.0 for value in SEDIMENT_SPECIFIC_GRAVITY)
 SEDIMENT_MASS_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, _SEDIMENT_CLASS_COUNT + 1))
 SEDIMENT_VOLUME_COLUMN = "sed_vol_conc"
+ASH_VOLUME_COLUMN = "ash_vol_conc"
+SED_ASH_VOLUME_COLUMN = "sed+ash_vol_conc"
+ASH_BLACK_PCT_COLUMN = "ash_black_pct_by_vol"
 
 PASS_METRIC_COLUMNS = (
     "runvol",
@@ -38,10 +41,16 @@ PASS_METRIC_COLUMNS = (
 )
 
 # Ash columns are unitless in names; units live in schema metadata
+ASH_TYPES = ("black", "white")
 ASH_METRIC_BASES = ("wind_transport", "water_transport", "ash_transport", "transportable_ash")
+ASH_TYPED_BASES = ("wind_transport", "water_transport", "ash_transport")
 ASH_TONNE_COLUMNS = ASH_METRIC_BASES
 ASH_PER_HA_COLUMNS = tuple(f"{name}_per_ha" for name in ASH_METRIC_BASES)
-ASH_METRIC_COLUMNS = ASH_TONNE_COLUMNS + ASH_PER_HA_COLUMNS
+ASH_TYPED_TONNE_COLUMNS = tuple(f"{base}_{ash_type}" for ash_type in ASH_TYPES for base in ASH_TYPED_BASES)
+ASH_TYPED_PER_HA_COLUMNS = tuple(f"{name}_per_ha" for name in ASH_TYPED_TONNE_COLUMNS)
+ASH_METRIC_COLUMNS = ASH_TONNE_COLUMNS + ASH_PER_HA_COLUMNS + ASH_TYPED_TONNE_COLUMNS + ASH_TYPED_PER_HA_COLUMNS
+ASH_TYPE_AREA_COLUMNS = tuple(f"area_{ash_type}_ha" for ash_type in ASH_TYPES)
+ASH_VOLUME_HELPER_COLUMNS = ("ash_solids_volume", "ash_black_solids_volume", "ash_white_solids_volume")
 ASH_JOIN_COLUMNS = ("year", "julian", "month", "day_of_month")
 
 SCHEMA = schema_with_version(
@@ -99,12 +108,32 @@ SCHEMA = schema_with_version(
             pa_field("Streamflow", pa.float64(), units="mm", description="Streamflow depth"),
             pa_field("wind_transport", pa.float64(), units="tonne", description="Ash transported by wind (total mass)"),
             pa_field("wind_transport_per_ha", pa.float64(), units="tonne/ha", description="Ash transported by wind per unit area"),
+            pa_field("wind_transport_black", pa.float64(), units="tonne", description="Black ash transported by wind (total mass)"),
+            pa_field("wind_transport_black_per_ha", pa.float64(), units="tonne/ha", description="Black ash transported by wind per unit area over black ash hillslopes"),
+            pa_field("wind_transport_white", pa.float64(), units="tonne", description="White ash transported by wind (total mass)"),
+            pa_field("wind_transport_white_per_ha", pa.float64(), units="tonne/ha", description="White ash transported by wind per unit area over white ash hillslopes"),
             pa_field("water_transport", pa.float64(), units="tonne", description="Ash transported by water (total mass)"),
             pa_field("water_transport_per_ha", pa.float64(), units="tonne/ha", description="Ash transported by water per unit area"),
+            pa_field("water_transport_black", pa.float64(), units="tonne", description="Black ash transported by water (total mass)"),
+            pa_field("water_transport_black_per_ha", pa.float64(), units="tonne/ha", description="Black ash transported by water per unit area over black ash hillslopes"),
+            pa_field("water_transport_white", pa.float64(), units="tonne", description="White ash transported by water (total mass)"),
+            pa_field("water_transport_white_per_ha", pa.float64(), units="tonne/ha", description="White ash transported by water per unit area over white ash hillslopes"),
             pa_field("ash_transport", pa.float64(), units="tonne", description="Total ash transported (wind + water)"),
             pa_field("ash_transport_per_ha", pa.float64(), units="tonne/ha", description="Total ash transported per unit area"),
+            pa_field("ash_transport_black", pa.float64(), units="tonne", description="Black ash transported by wind + water (total mass)"),
+            pa_field("ash_transport_black_per_ha", pa.float64(), units="tonne/ha", description="Black ash transported per unit area over black ash hillslopes"),
+            pa_field("ash_transport_white", pa.float64(), units="tonne", description="White ash transported by wind + water (total mass)"),
+            pa_field("ash_transport_white_per_ha", pa.float64(), units="tonne/ha", description="White ash transported per unit area over white ash hillslopes"),
             pa_field("transportable_ash", pa.float64(), units="tonne", description="Ash mass still available for transport"),
             pa_field("transportable_ash_per_ha", pa.float64(), units="tonne/ha", description="Ash mass still available for transport per unit area"),
+            pa_field(ASH_VOLUME_COLUMN, pa.float64(), units="m^3/m^3", description="Ash volumetric concentration (solids volume divided by runoff volume)"),
+            pa_field(SED_ASH_VOLUME_COLUMN, pa.float64(), units="m^3/m^3", description="Sediment + ash volumetric concentration (total solids volume divided by runoff volume)"),
+            pa_field(
+                ASH_BLACK_PCT_COLUMN,
+                pa.float64(),
+                units="percent",
+                description="Fraction of ash solids volume that is black ash (percent of total ash volume)",
+            ),
         ]
     )
 )
@@ -140,6 +169,35 @@ def _resolve_ash_dir(interchange_dir: Path, override: Path | str | None) -> Path
     if run_root is None:
         return None
     return run_root / "ash"
+
+
+def _default_ash_bulk_densities() -> dict[str, float]:
+    try:
+        from wepppy.nodb.mods.ash_transport.ash_multi_year_model import BLACK_ASH_BD, WHITE_ASH_BD
+        return {"black": float(BLACK_ASH_BD) * 1000.0, "white": float(WHITE_ASH_BD) * 1000.0}
+    except ModuleNotFoundError:
+        # Fallback to baked-in defaults if ash module is unavailable
+        return {"black": 0.22 * 1000.0, "white": 0.31 * 1000.0}
+
+
+def _normalize_ash_type(value: Any) -> str | None:
+    try:
+        from wepppy.nodb.mods.ash_transport.ash_multi_year_model import AshType
+    except ModuleNotFoundError:
+        AshType = None  # type: ignore
+    if value is None:
+        return None
+    if isinstance(value, str):
+        lowered = value.lower()
+        if lowered in ASH_TYPES:
+            return lowered
+        return None
+    if AshType is not None:
+        if value == AshType.BLACK:
+            return "black"
+        if value == AshType.WHITE:
+            return "white"
+    return None
 
 
 def _available_wepp_ids(ash_dir: Path) -> list[int]:
@@ -204,6 +262,65 @@ def _build_area_lookup_from_watershed(run_root: Path | None, wepp_ids: Iterable[
     return lookup
 
 
+def _build_ash_type_and_density_lookup(run_root: Path | None, wepp_ids: Iterable[int]) -> tuple[dict[int, str], dict[int, float]]:
+    if run_root is None:
+        return {}, {}
+    try:
+        from wepppy.nodb.core import Watershed
+        from wepppy.nodb.mods.ash_transport import Ash
+    except ModuleNotFoundError:
+        LOGGER.debug("Ash type lookup skipped; controllers unavailable")
+        return {}, {}
+    try:
+        watershed = Watershed.getInstance(str(run_root))
+        translator = watershed.translator_factory()
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.debug("Ash type lookup skipped; unable to load Watershed at %s (%s)", run_root, exc)
+        return {}, {}
+    try:
+        ash = Ash.getInstance(str(run_root))
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.debug("Ash type lookup skipped; unable to load Ash at %s (%s)", run_root, exc)
+        return {}, {}
+    meta = ash.meta or {}
+    defaults = _default_ash_bulk_densities()
+    type_lookup: dict[int, str] = {}
+    density_lookup: dict[int, float] = {}
+    for wepp_id in wepp_ids:
+        try:
+            topaz_id = translator.top(wepp=int(wepp_id))
+        except Exception:
+            topaz_id = None
+        meta_entry = None
+        if topaz_id is not None:
+            meta_entry = meta.get(topaz_id) or meta.get(str(topaz_id))
+        if meta_entry is None:
+            meta_entry = meta.get(str(wepp_id)) or meta.get(wepp_id)
+        ash_type = _normalize_ash_type(meta_entry.get("ash_type") if isinstance(meta_entry, Mapping) else None)
+        if ash_type:
+            type_lookup[int(wepp_id)] = ash_type
+        density_val: float | None = None
+        if isinstance(meta_entry, Mapping):
+            if "ash_bulkdensity" in meta_entry:
+                try:
+                    density_val = float(meta_entry["ash_bulkdensity"])
+                except (TypeError, ValueError):
+                    density_val = None
+            elif "field_ash_bulkdensity" in meta_entry:
+                try:
+                    density_val = float(meta_entry["field_ash_bulkdensity"])
+                except (TypeError, ValueError):
+                    density_val = None
+        if density_val is None and ash_type is not None:
+            density_val = defaults.get(ash_type)
+        if density_val is None:
+            continue
+        density_kg_m3 = density_val * 1000.0
+        if density_kg_m3 > 0.0:
+            density_lookup[int(wepp_id)] = density_kg_m3
+    return type_lookup, density_lookup
+
+
 def _locate_hillslope_path(ash_dir: Path, wepp_id: int) -> Path | None:
     candidates = [ash_dir / f"H{wepp_id}_ash.parquet", ash_dir / f"H{wepp_id}.parquet"]
     for candidate in candidates:
@@ -221,6 +338,12 @@ def _import_read_hillslope_out_fn():
 def _safe_mass_per_area(total: np.ndarray, area_ha: np.ndarray) -> np.ndarray:
     result = np.zeros_like(total, dtype=np.float64)
     np.divide(total, area_ha, out=result, where=area_ha > 0)
+    return result
+
+
+def _safe_volume_concentration(solids_volume: np.ndarray, runvol: np.ndarray) -> np.ndarray:
+    result = np.zeros_like(runvol, dtype=np.float64)
+    np.divide(solids_volume, runvol, out=result, where=runvol > 0.0)
     return result
 
 
@@ -259,12 +382,14 @@ def _aggregate_ash_metrics(
         return None
 
     area_lookup = {int(k): float(v) for k, v in (ash_area_lookup or {}).items()}
+    run_root = _resolve_run_root(interchange_dir)
     if not area_lookup:
-        run_root = _resolve_run_root(interchange_dir)
         area_lookup = _build_area_lookup_from_watershed(run_root, candidate_wepp_ids)
 
     if not area_lookup:
         return None
+
+    ash_type_lookup, ash_density_lookup = _build_ash_type_and_density_lookup(run_root, candidate_wepp_ids)
 
     read_hillslope_out_fn = _import_read_hillslope_out_fn()
 
@@ -324,7 +449,7 @@ def _aggregate_ash_metrics(
             "transportable_ash (tonne/ha)": "transportable_ash_per_ha",
         }
         df = df.rename(columns=rename_map)
-        subset_columns = [
+        base_subset_columns = [
             "year",
             "month",
             "day_of_month",
@@ -332,10 +457,30 @@ def _aggregate_ash_metrics(
             "area (ha)",
             *ASH_TONNE_COLUMNS,
         ]
-        missing = [col for col in subset_columns if col not in df.columns]
+        missing = [col for col in base_subset_columns if col not in df.columns]
         if missing:
             LOGGER.debug("Ash merge skipping %s; missing columns %s", hillslope_path, missing)
             continue
+        ash_type = ash_type_lookup.get(int(wepp_id))
+        ash_density = ash_density_lookup.get(int(wepp_id))
+        ash_volume = np.zeros(df.shape[0], dtype=np.float64)
+        if ash_density is not None and ash_density > 0.0:
+            ash_volume = df["ash_transport"].to_numpy(dtype=np.float64, copy=False) * 1000.0 / float(ash_density)
+        df["ash_solids_volume"] = ash_volume
+        df["ash_black_solids_volume"] = ash_volume if ash_type == "black" else 0.0
+        df["ash_white_solids_volume"] = ash_volume if ash_type == "white" else 0.0
+        for ash_type_name in ASH_TYPES:
+            df[f"area_{ash_type_name}_ha"] = area_ha if ash_type == ash_type_name else 0.0
+        for base in ASH_TYPED_BASES:
+            for ash_type_name in ASH_TYPES:
+                col = f"{base}_{ash_type_name}"
+                df[col] = df[base] if ash_type == ash_type_name else 0.0
+        subset_columns = [
+            *base_subset_columns,
+            *ASH_TYPE_AREA_COLUMNS,
+            *ASH_TYPED_TONNE_COLUMNS,
+            *ASH_VOLUME_HELPER_COLUMNS,
+        ]
         frames.append(df[subset_columns])
 
     if not frames:
@@ -344,6 +489,9 @@ def _aggregate_ash_metrics(
     combined = pd.concat(frames, ignore_index=True)
     aggregations: dict[str, str] = {"area (ha)": "sum"}
     aggregations.update({name: "sum" for name in ASH_TONNE_COLUMNS})
+    aggregations.update({name: "sum" for name in ASH_TYPE_AREA_COLUMNS})
+    aggregations.update({name: "sum" for name in ASH_TYPED_TONNE_COLUMNS})
+    aggregations.update({name: "sum" for name in ASH_VOLUME_HELPER_COLUMNS})
     grouped = combined.groupby(list(ASH_JOIN_COLUMNS), as_index=False).agg(aggregations)
     area = grouped["area (ha)"].to_numpy(dtype=np.float64, copy=False)
     for base in ASH_METRIC_BASES:
@@ -353,7 +501,17 @@ def _aggregate_ash_metrics(
             grouped[total_col].to_numpy(dtype=np.float64, copy=False),
             area,
         )
-    grouped.drop(columns=["area (ha)"], inplace=True)
+    for ash_type_name in ASH_TYPES:
+        area_col = f"area_{ash_type_name}_ha"
+        area_by_type = grouped[area_col].to_numpy(dtype=np.float64, copy=False)
+        for base in ASH_TYPED_BASES:
+            total_col = f"{base}_{ash_type_name}"
+            per_ha_col = f"{total_col}_per_ha"
+            grouped[per_ha_col] = _safe_mass_per_area(
+                grouped[total_col].to_numpy(dtype=np.float64, copy=False),
+                area_by_type,
+            )
+    grouped.drop(columns=["area (ha)", *ASH_TYPE_AREA_COLUMNS], inplace=True)
     return grouped
 
 
@@ -541,9 +699,16 @@ def run_totalwatsed3(
     if ash_df is None:
         for col in ASH_METRIC_COLUMNS:
             merged[col] = 0.0
+        for col in ASH_VOLUME_HELPER_COLUMNS:
+            merged[col] = 0.0
     else:
         merged = merged.merge(ash_df, on=list(ASH_JOIN_COLUMNS), how="left", validate="many_to_one")
         merged[list(ASH_METRIC_COLUMNS)] = merged[list(ASH_METRIC_COLUMNS)].fillna(0.0)
+        for col in ASH_VOLUME_HELPER_COLUMNS:
+            if col in merged:
+                merged[col] = merged[col].fillna(0.0)
+            else:
+                merged[col] = 0.0
 
     area = merged["Area"].to_numpy(dtype=np.float64, copy=False)
 
@@ -577,6 +742,18 @@ def run_totalwatsed3(
     merged["Baseflow"] = baseflow
     merged["Aquifer losses"] = aquifer_losses
     merged["Streamflow"] = merged["Runoff"] + merged["Lateral Flow"] + merged["Baseflow"]
+
+    runvol_volume = merged["runvol"].to_numpy(dtype=np.float64, copy=False)
+    ash_solids_volume = merged["ash_solids_volume"].to_numpy(dtype=np.float64, copy=False)
+    ash_black_volume = merged["ash_black_solids_volume"].to_numpy(dtype=np.float64, copy=False)
+    merged[ASH_VOLUME_COLUMN] = _safe_volume_concentration(ash_solids_volume, runvol_volume)
+    ash_black_pct = np.zeros_like(ash_solids_volume, dtype=np.float64)
+    np.divide(ash_black_volume, ash_solids_volume, out=ash_black_pct, where=ash_solids_volume > 0.0)
+    ash_black_pct *= 100.0
+    merged[ASH_BLACK_PCT_COLUMN] = ash_black_pct
+    sed_solids_volume = merged[SEDIMENT_VOLUME_COLUMN].to_numpy(dtype=np.float64, copy=False) * runvol_volume
+    merged[SED_ASH_VOLUME_COLUMN] = _safe_volume_concentration(sed_solids_volume + ash_solids_volume, runvol_volume)
+    merged.drop(columns=list(ASH_VOLUME_HELPER_COLUMNS), inplace=True, errors="ignore")
 
     merged = merged.sort_values(["year", "julian", "sim_day_index"], kind="mergesort").reset_index(drop=True)
     table = _finalise_table(merged)

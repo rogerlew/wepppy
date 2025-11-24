@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass
+from importlib.machinery import ModuleSpec
 from pathlib import Path
 from textwrap import dedent
 from typing import Callable, Dict, Iterable, List, MutableMapping, Tuple
@@ -57,16 +58,19 @@ class LinearTransform:
 def _stub_wepppy_modules() -> None:
     """Install lightweight stubs so unitizer.py can execute in isolation."""
 
-    if "wepppy" in sys.modules:
-        return
+    if "wepppy" not in sys.modules:
+        root_pkg = types.ModuleType("wepppy")
+        root_pkg.__path__ = [str(ROOT / "wepppy")]
+        root_pkg.__spec__ = ModuleSpec("wepppy", loader=None, is_package=True)
+        root_pkg.__spec__.submodule_search_locations = list(root_pkg.__path__)
+        sys.modules["wepppy"] = root_pkg
 
-    root_pkg = types.ModuleType("wepppy")
-    root_pkg.__path__ = [str(ROOT / "wepppy")]
-    sys.modules["wepppy"] = root_pkg
-
-    nodb_pkg = types.ModuleType("wepppy.nodb")
-    nodb_pkg.__path__ = [str(ROOT / "wepppy" / "nodb")]
-    sys.modules["wepppy.nodb"] = nodb_pkg
+    if "wepppy.nodb" not in sys.modules:
+        nodb_pkg = types.ModuleType("wepppy.nodb")
+        nodb_pkg.__path__ = [str(ROOT / "wepppy" / "nodb")]
+        nodb_pkg.__spec__ = ModuleSpec("wepppy.nodb", loader=None, is_package=True)
+        nodb_pkg.__spec__.submodule_search_locations = list(nodb_pkg.__path__)
+        sys.modules["wepppy.nodb"] = nodb_pkg
 
     base_mod = types.ModuleType("wepppy.nodb.base")
 
@@ -124,6 +128,7 @@ def _cls_units(units: str) -> str:
     return (
         str(units)
         .replace("/", "_")
+        .replace("$", "usd")
         .replace("^2", "-sqr")
         .replace("^3", "-cube")
         .replace(",", "-_")

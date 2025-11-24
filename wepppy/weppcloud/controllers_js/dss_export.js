@@ -624,7 +624,7 @@ var DssExport = (function () {
 
         controller.report = function () {
             var href = buildDownloadUrl("browse/export/dss.zip");
-            controller.info.html("<a href='" + href + "' target='_blank'>Download DSS Export Results (.zip)</a>");
+            controller.info.html("<a class='wc-link wc-link--file' href='" + href + "' target='_blank'>Download DSS Export Results (.zip)</a>");
         };
 
         controller.handleExportTaskCompleted = function (detail) {

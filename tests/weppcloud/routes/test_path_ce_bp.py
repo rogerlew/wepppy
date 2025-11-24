@@ -75,6 +75,9 @@ def path_ce_client(
     RonStub = singleton_factory("RonStub", attrs={"mods": ["path_ce"]}, mixins=(LockedMixin,))
     monkeypatch.setattr(path_ce_module, "Ron", RonStub)
 
+    DisturbedStub = singleton_factory("DisturbedStub", attrs={"has_sbs": True}, mixins=(LockedMixin,))
+    monkeypatch.setattr(path_ce_module, "Disturbed", DisturbedStub)
+
     conn_factory = rq_environment.redis_conn_factory(label="redis-conn")
     monkeypatch.setattr(path_ce_module.redis, "Redis", lambda **kwargs: conn_factory())
 
@@ -82,15 +85,16 @@ def path_ce_client(
     monkeypatch.setattr(path_ce_module, "Queue", queue_class)
 
     with app.test_client() as client:
-        yield client, PathCEStub, RonStub, rq_environment, str(run_dir)
+        yield client, PathCEStub, RonStub, DisturbedStub, rq_environment, str(run_dir)
 
     PathCEStub.reset_instances()
     RonStub.reset_instances()
+    DisturbedStub.reset_instances()
     rq_environment.recorder.reset()
 
 
 def test_get_config_returns_controller_payload(path_ce_client):
-    client, PathCEStub, _, _, run_dir = path_ce_client
+    client, PathCEStub, *_unused, run_dir = path_ce_client
     controller = PathCEStub.getInstance(run_dir)
     controller.config = {"sddc_threshold": 12.0}
 
@@ -102,7 +106,7 @@ def test_get_config_returns_controller_payload(path_ce_client):
 
 
 def test_update_config_normalizes_payload(path_ce_client):
-    client, PathCEStub, _, _, run_dir = path_ce_client
+    client, PathCEStub, *_unused, run_dir = path_ce_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/api/path_ce/config",
@@ -112,15 +116,10 @@ def test_update_config_normalizes_payload(path_ce_client):
             "slope_min": "0.5",
             "slope_max": "8.25",
             "severity_filter": ["High", "Low", ""],
-            "treatment_options": [
-                {
-                    "label": "Mulch",
-                    "scenario": "sbs_map",
-                    "quantity": "3",
-                    "unit_cost": 120,
-                    "fixed_cost": "42"
-                }
-            ]
+            "mulch_costs": {
+                "mulch_15_sbs_map": "120",
+                "mulch_30_sbs_map": 175.25,
+            }
         },
     )
 
@@ -132,10 +131,12 @@ def test_update_config_normalizes_payload(path_ce_client):
     assert content["sdyd_threshold"] == 4.5
     assert content["slope_range"] == [0.5, 8.25]
     assert content["severity_filter"] == ["High", "Low"]
-    assert content["treatment_options"][0]["label"] == "Mulch"
+    assert content["mulch_costs"]["mulch_15_sbs_map"] == 120.0
+    assert content["mulch_costs"]["mulch_30_sbs_map"] == 175.25
 
     controller = PathCEStub.getInstance(run_dir)
     assert controller.config["slope_range"] == [0.5, 8.25]
+    assert controller.config["mulch_costs"]["mulch_30_sbs_map"] == 175.25
 
 
 def test_status_endpoint_handles_missing_instance(path_ce_client):
@@ -153,10 +154,11 @@ def test_status_endpoint_handles_missing_instance(path_ce_client):
 
 
 def test_run_enqueues_job(path_ce_client):
-    client, PathCEStub, RonStub, rq_environment, run_dir = path_ce_client
+    client, PathCEStub, RonStub, DisturbedStub, rq_environment, run_dir = path_ce_client
     PathCEStub.getInstance(run_dir)  # ensure controller exists
     ron = RonStub.getInstance(run_dir)
     ron.mods = ["path_ce"]
+    DisturbedStub.getInstance(run_dir).has_sbs = True
 
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/path_cost_effective_run")
 
@@ -168,3 +170,19 @@ def test_run_enqueues_job(path_ce_client):
     queue_call = rq_environment.recorder.queue_calls[0]
     assert queue_call.func is path_ce_module.run_path_cost_effective_rq
     assert queue_call.args == (RUN_ID,)
+
+
+def test_run_requires_sbs_map(path_ce_client):
+    client, PathCEStub, RonStub, DisturbedStub, *_rest = path_ce_client
+    run_dir = _rest[-1]
+    PathCEStub.getInstance(run_dir)
+    ron = RonStub.getInstance(run_dir)
+    ron.mods = ["path_ce"]
+    DisturbedStub.getInstance(run_dir).has_sbs = False
+
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/path_cost_effective_run")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Success"] is False
+    assert "SBS map" in payload["Error"]

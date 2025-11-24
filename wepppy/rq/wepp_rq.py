@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 from typing import Any, Dict, Iterable, Optional
+from pathlib import Path
 
 """
 RQ task entry points for orchestrating WEPP model runs and post-processing steps.
@@ -1055,6 +1056,23 @@ def _cleanup_dss_export_dir(wd: str) -> None:
     if _exists(dss_export_dir):
         with contextlib.suppress(OSError):
             shutil.rmtree(dss_export_dir, ignore_errors=False)
+
+
+def _copy_dss_readme(wd: str, status_channel: Optional[str] = None) -> None:
+    """Copy the DSS export README alongside generated artifacts."""
+    source = Path(__file__).resolve().parent.parent / "wepp" / "interchange" / "README.dss_export.md"
+    if not source.exists():
+        return
+    dest_dir = Path(wd) / "export" / "dss"
+    try:
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, dest_dir / "README.dss_export.md")
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, "copied DSS export README\n")
+    except OSError:
+        # Non-fatal; leave a breadcrumb if the status channel is available.
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, "warning: unable to write DSS README\n")
             
 
 
@@ -1281,6 +1299,8 @@ def post_dss_export_rq(runid: str) -> None:
             end_date=end_date,
         )
         time.sleep(1)
+        _copy_dss_readme(wd, status_channel=status_channel)
+        time.sleep(0.5)
         StatusMessenger.publish(status_channel, 'archiving DSS export zip...')
         archive_dss_export_zip(wd, status_channel=status_channel)
 

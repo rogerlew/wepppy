@@ -326,6 +326,41 @@
     {
       "conversions": [
         {
+          "from": "$/acre",
+          "offset": 0.0,
+          "scale": 2.47105381467,
+          "to": "$/ha"
+        },
+        {
+          "from": "$/ha",
+          "offset": 0.0,
+          "scale": 0.40468564224,
+          "to": "$/acre"
+        }
+      ],
+      "defaultIndex": 1,
+      "key": "currency-area",
+      "label": "Currency Area",
+      "units": [
+        {
+          "htmlLabel": "$/ha",
+          "key": "$/ha",
+          "label": "$/ha",
+          "precision": 2,
+          "token": "usd_ha"
+        },
+        {
+          "htmlLabel": "$/acre",
+          "key": "$/acre",
+          "label": "$/acre",
+          "precision": 2,
+          "token": "usd_acre"
+        }
+      ]
+    },
+    {
+      "conversions": [
+        {
           "from": "ton",
           "offset": 0.0,
           "scale": 25.4,
@@ -1257,9 +1292,13 @@
     "tonne_ha": "tonne/ha",
     "tonne_ha_yr": "tonne/ha/yr",
     "tonne_yr": "tonne/yr",
+    "usd_acre": "$/acre",
+    "usd_ha": "$/ha",
     "\u00b5g_L": "\u00b5g/L"
   },
   "unitToCategory": {
+    "$/acre": "currency-area",
+    "$/ha": "currency-area",
     "acre": "area",
     "acre-ft/yr": "area-xs-distance-annual",
     "degc": "temperature",

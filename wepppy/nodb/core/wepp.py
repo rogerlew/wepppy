@@ -533,7 +533,19 @@ class Wepp(NoDbBase):
 
             self.clean()
 
-        
+    @classmethod
+    def _post_instance_loaded(cls, instance: 'Wepp') -> 'Wepp':
+        instance = super()._post_instance_loaded(instance)
+
+        if not hasattr(instance, '_dss_excluded_channel_orders') or instance._dss_excluded_channel_orders is None:
+            instance._dss_excluded_channel_orders = instance.config_get_list(
+                'wepp',
+                'dss_excluded_channel_orders',
+                [1, 2],
+            )
+
+        return instance
+
     @property
     def dss_export_mode(self) -> int:
         return getattr(self, '_dss_export_mode', self.config_get_int('wepp', 'dss_export_mode', 2))
@@ -545,8 +557,10 @@ class Wepp(NoDbBase):
 
     @property
     def dss_excluded_channel_orders(self) -> list:
-        return getattr(self, '_dss_excluded_channel_orders', 
-                       self.config_get_list('wepp', 'dss_excluded_channel_orders'))
+        orders = getattr(self, '_dss_excluded_channel_orders', None)
+        if orders is None:
+            return self.config_get_list('wepp', 'dss_excluded_channel_orders', [1, 2])
+        return orders
 
     @dss_excluded_channel_orders.setter
     @nodb_setter

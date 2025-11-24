@@ -14,7 +14,7 @@ The Unitizer system provides dynamic unit conversion and preference management a
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ User Interface                                           │
+│ User Interface                                          │
 │ ├─ unitizer_modal.htm (Pure CSS modal)                  │
 │ │  ├─ Global SI/English radio buttons                   │
 │ │  └─ Per-category unit preference radios               │
@@ -116,6 +116,26 @@ document.addEventListener('unitizer:preferences-changed', function(event) {
   // Re-render custom UI
 });
 ```
+
+### 4. Currency per Area Inputs
+
+Mulch, seeding, and other treatment costs now use the `currency-area` category to
+toggle between `$/ha` and `$/acre` automatically. When building inputs:
+
+```html
+<input type="number"
+       name="mulch_costs[mulch_30_sbs_map]"
+       data-unitizer-category="currency-area"
+       data-unitizer-unit="$/ha"
+       data-pathce-cost="mulch_30_sbs_map">
+<span data-unitizer-label
+      data-unitizer-category="currency-area"
+      data-unitizer-unit="$/ha">$/ha</span>
+```
+
+Always record canonical values (in `$/ha`) via `data-unitizer-canonical-value`
+or by dispatching an `input` event after setting the field programmatically so
+the Unitizer client can keep the stored value in sync with the user-facing unit.
 
 ## Modal System Integration
 

@@ -13,6 +13,47 @@
 
 Exports run either from the UI (RQ job `post_dss_export_rq`) or from `Wepp._export_partitioned_totalwatsed2_dss()`. Date filtering uses the `dss_start_date` / `dss_end_date` fields stored in `wepp.nodb`.
 
+## Export Contents (produced by `post_dss_export_rq`)
+
+All artifacts land in `export/dss/` and are zipped to `export/dss.zip`:
+
+- `totalwatsed3_chan_<topaz_id>.dss` — regular daily DSS series for every metric in `totalwatsed3` (runoff, sediment, ash, etc.) per exported channel.
+- `peak_chan_<topaz_id>.dss` — irregular peak-flow DSS from `chan.out`.
+- `sed_vol_conc_by_event_and_chn_id.csv` — per-channel daily CSV including `sed_vol_conc`, `ash_vol_conc`, `sed+ash_vol_conc`, and `ash_black_pct_by_vol` when ash data exists.
+- `dss_channels.geojson` — filtered channel geometries plus boundary-condition features and metadata.
+- `boundaries/bc_<topaz_id>.gml` (+ `.shp` sidecars) — HEC-RAS boundary condition polygons; accompanies the GeoJSON.
+- `channel_buffer.gml` / `channel_buffer.shp` + `buffer_raster/*` (when buffer generation succeeds) — floodplain buffer derived from channel widths.
+- `README.dss_export.md` — this guide, copied into the export directory for downstream consumers.
+
+### How the volumetric/percent ash metrics are computed
+
+- **Inputs**:  
+  - `H.pass.parquet` (from `H*.pass.dat`): per-hillslope runoff volume (`runvol`) and sediment concentrations `sedcon_1`–`sedcon_5` (kg/m³).  
+  - `H.wat.parquet` (from `H*.wat.dat`): per-hillslope areas.  
+  - Ash parquet files (`ash/H{wepp_id}_ash.parquet`): per-day ash transport masses (tonne) plus `Ash.meta` (ash type black/white, bulk density). Defaults if meta is absent: black 0.22 g/cm³, white 0.31 g/cm³.
+
+- **`sed_vol_conc` (sediment volumetric concentration)**  
+  1) per hillslope/day: `seddep_i = sedcon_i * runvol` (kg).  
+  2) class volumes: `V_i = seddep_i / ρ_i`, with densities [2600, 2650, 1800, 1600, 2650] kg/m³ for classes 1–5.  
+  3) sum solids volume: `V_sed = Σ V_i`.  
+  4) aggregate `V_sed`, `runvol` across hillslopes.  
+  5) `sed_vol_conc = V_sed / runvol_total` (guarded against zero runoff).
+
+- **`ash_vol_conc` (ash volumetric concentration)**  
+  1) per hillslope/day ash mass = `ash_transport` (tonne).  
+  2) pick bulk density (kg/m³): `ash_bulkdensity` or `field_ash_bulkdensity` from `Ash.meta`, else default by ash type; convert g/cm³ → kg/m³.  
+  3) `V_ash = ash_transport_tonne * 1000 / density_kg_m3`.  
+  4) aggregate `V_ash`, `runvol` across hillslopes.  
+  5) `ash_vol_conc = V_ash / runvol_total` (guarded).
+
+- **`sed+ash_vol_conc` (combined solids volumetric concentration)**  
+  `(V_sed + V_ash) / runvol_total` using the same solids volumes as above.
+
+- **`ash_black_pct_by_vol` (black-ash share of ash solids)**  
+  1) per hillslope/day: if `Ash.meta` says “black”, `V_black = V_ash`, else 0.  
+  2) aggregate `V_black`, `V_ash` across hillslopes.  
+  3) `ash_black_pct_by_vol = (V_black / V_ash) * 100`, guarded so zero ash volume → 0.
+
 ## Working With `pydsstools`
 
 ### Dependencies
