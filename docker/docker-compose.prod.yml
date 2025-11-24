@@ -255,6 +255,11 @@ services:
       RQ_LOGGING_LEVEL: INFO
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
       REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+      WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+    volumes:
+      - /wc1:/wc1
+      - /geodata:/geodata
+      - /var/run/docker.sock:/var/run/docker.sock
     command:
       - rq
       - worker-pool

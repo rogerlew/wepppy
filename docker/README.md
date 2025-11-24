@@ -159,6 +159,9 @@ DTALE_INTERNAL_TOKEN=${DTALE_INTERNAL_TOKEN}
 # JWT secret for authentication
 WEPP_AUTH_JWT_SECRET=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
 
+# WeppcloudR container name (must match actual container name from docker compose)
+WEPPCLOUDR_CONTAINER=docker-weppcloudr-1
+
 # Optional: Override default ports if needed
 # WEPPCLOUD_PORT=8000
 # REDIS_PORT=6379
