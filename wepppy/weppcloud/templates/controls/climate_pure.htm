@@ -85,14 +85,14 @@
   {% set station_mode_options = [
     {
       "id": "climatestation_mode_auto",
-      "label": "Find Closest on Build",
+      "label": "Auto",
       "value": "-1",
       "selected": selected_station_mode == -1,
       "attrs": {"class": "disable-readonly", "data-mode-value": "-1", "data-climate-action": "station-mode"}
     },
     {
       "id": "climatestation_mode0",
-      "label": "Closest station",
+      "label": "Distance ranking",
       "value": "0",
       "selected": selected_station_mode == 0,
       "attrs": {"class": "disable-readonly", "data-mode-value": "0", "data-climate-action": "station-mode"}

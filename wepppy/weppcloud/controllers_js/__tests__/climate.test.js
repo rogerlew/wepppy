@@ -81,11 +81,11 @@ describe("Climate controller", () => {
 
                 <label class="wc-choice">
                     <input type="radio" name="climatestation_mode" value="-1" data-climate-action="station-mode" checked>
-                    <span>Find Closest on Build</span>
+                    <span>Auto</span>
                 </label>
                 <label class="wc-choice">
                     <input type="radio" name="climatestation_mode" value="0" data-climate-action="station-mode">
-                    <span>Closest</span>
+                    <span>Distance ranking</span>
                 </label>
                 <label class="wc-choice">
                     <input type="radio" name="climatestation_mode" value="1" data-climate-action="station-mode">
