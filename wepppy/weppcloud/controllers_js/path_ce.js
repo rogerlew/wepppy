@@ -23,10 +23,14 @@ var PathCE = (function () {
         run: function () { return endpoint("tasks/path_cost_effective_run"); }
     };
 
+    var TREATMENT_FIELDS = ["label", "scenario", "quantity", "unit_cost", "fixed_cost"];
     var EVENT_NAMES = [
         "pathce:config:loaded",
         "pathce:config:saved",
         "pathce:config:error",
+        "pathce:treatment:added",
+        "pathce:treatment:removed",
+        "pathce:treatment:updated",
         "pathce:status:update",
         "pathce:results:update",
         "pathce:run:started",
@@ -283,6 +287,107 @@ var PathCE = (function () {
         return costs;
     }
 
+    function createTreatmentRow(option) {
+        var doc = window.document;
+        var row = doc.createElement("tr");
+        TREATMENT_FIELDS.forEach(function (field) {
+            var cell = doc.createElement("td");
+            var input = doc.createElement("input");
+            input.setAttribute("data-pathce-field", field);
+            if (field === "label" || field === "scenario") {
+                input.type = "text";
+            } else {
+                input.type = "number";
+                input.step = "any";
+                input.min = "0";
+            }
+            var value = option && Object.prototype.hasOwnProperty.call(option, field) ? option[field] : "";
+            input.value = value === null || value === undefined ? "" : String(value);
+            cell.appendChild(input);
+            row.appendChild(cell);
+        });
+        var actionCell = doc.createElement("td");
+        var removeButton = doc.createElement("button");
+        removeButton.type = "button";
+        removeButton.setAttribute("data-pathce-action", "remove-treatment");
+        removeButton.textContent = "Remove";
+        actionCell.appendChild(removeButton);
+        row.appendChild(actionCell);
+        return row;
+    }
+
+    function renderTreatmentOptions(controller, options) {
+        var body = controller.treatmentsBody;
+        var list = Array.isArray(options) ? options : [];
+        if (!body) {
+            if (controller.state && controller.state.config) {
+                controller.state.config.treatment_options = list.slice();
+            }
+            return;
+        }
+        body.textContent = "";
+        list.forEach(function (option) {
+            body.appendChild(createTreatmentRow(option));
+        });
+    }
+
+    function appendTreatmentRow(controller, option) {
+        var body = controller.treatmentsBody;
+        if (!body) {
+            return null;
+        }
+        var row = createTreatmentRow(option || {});
+        body.appendChild(row);
+        emitEvent(controller, "pathce:treatment:added", { option: option || {}, row: row });
+        return row;
+    }
+
+    function removeTreatmentRow(controller, row) {
+        var body = controller.treatmentsBody;
+        if (!body || !row || !row.parentNode) {
+            return;
+        }
+        if (row.parentNode === body) {
+            body.removeChild(row);
+            emitEvent(controller, "pathce:treatment:removed", { row: row });
+        }
+    }
+
+    function harvestTreatmentOptions(controller) {
+        var body = controller.treatmentsBody;
+        if (!body) {
+            if (controller.state && controller.state.config && Array.isArray(controller.state.config.treatment_options)) {
+                return controller.state.config.treatment_options.slice();
+            }
+            return [];
+        }
+        var rows = body.querySelectorAll("tr");
+        var options = [];
+        Array.prototype.slice.call(rows).forEach(function (row) {
+            var getField = function (name) {
+                var input = row.querySelector('[data-pathce-field="' + name + '"]');
+                return input ? input.value : "";
+            };
+            var label = String(getField("label") || "").trim();
+            var scenario = String(getField("scenario") || "").trim();
+            if (!label && !scenario) {
+                return;
+            }
+            var quantity = toNumber(getField("quantity"));
+            var unitCost = toNumber(getField("unit_cost"));
+            var fixedCost = toNumber(getField("fixed_cost"));
+            options.push({
+                label: label,
+                scenario: scenario,
+                quantity: quantity === null ? 0 : quantity,
+                unit_cost: unitCost === null ? 0 : unitCost,
+                fixed_cost: fixedCost === null ? 0 : fixedCost
+            });
+        });
+        emitEvent(controller, "pathce:treatment:updated", { options: options });
+        return options;
+    }
+
     function applyMulchCosts(costInputs, costMap) {
         var list = Array.isArray(costInputs) ? costInputs : [];
         var formScope = null;
@@ -339,7 +444,8 @@ var PathCE = (function () {
             sdyd_threshold: sdyd === null ? 0 : sdyd,
             slope_range: [slopeMin, slopeMax],
             severity_filter: severity,
-            mulch_costs: readMulchCosts(controller.mulchCostInputs)
+            mulch_costs: readMulchCosts(controller.mulchCostInputs),
+            treatment_options: harvestTreatmentOptions(controller)
         };
     }
 
@@ -390,6 +496,7 @@ var PathCE = (function () {
         var stacktraceElement = dom.ensureElement("#path_ce_stacktrace", "PATH Cost-Effective stacktrace element missing.");
         var statusElement = dom.qs("#path_ce_form #status");
         var infoElement = dom.qs("#path_ce_form #info");
+        var treatmentsBody = dom.qs("#path_ce_treatments_table tbody") || dom.qs("#path_ce_treatments_table");
 
         var hintAdapter = createLegacyAdapter(hintElement);
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
@@ -412,6 +519,7 @@ var PathCE = (function () {
         controller.mulchCostInputs = Array.prototype.slice.call(
             formElement.querySelectorAll("[data-pathce-cost]")
         );
+        controller.treatmentsBody = treatmentsBody || null;
 
         var baseTriggerEvent = controller.triggerEvent.bind(controller);
         controller.triggerEvent = function (eventName, payload) {
@@ -426,6 +534,7 @@ var PathCE = (function () {
             var values = buildFormValues(state.config);
             applyFormValues(forms, formElement, values);
             applyMulchCosts(controller.mulchCostInputs, state.config.mulch_costs || {});
+            renderTreatmentOptions(controller, state.config.treatment_options || []);
             emitEvent(controller, "pathce:config:loaded", { config: state.config });
         }
 
@@ -543,6 +652,17 @@ var PathCE = (function () {
 
         dom.delegate(formElement, "click", "[data-pathce-action='save-config']", handleSave);
         dom.delegate(formElement, "click", "[data-pathce-action='run']", handleRun);
+        dom.delegate(formElement, "click", "[data-pathce-action='add-treatment']", function (event) {
+            event.preventDefault();
+            appendTreatmentRow(controller, {});
+        });
+        dom.delegate(formElement, "click", "[data-pathce-action='remove-treatment']", function (event) {
+            event.preventDefault();
+            var row = event && event.target && typeof event.target.closest === "function"
+                ? event.target.closest("tr")
+                : null;
+            removeTreatmentRow(controller, row);
+        });
 
         controller.fetchConfig = function () {
             setHint(controller, "Loading PATH Cost-Effective configuration…");
