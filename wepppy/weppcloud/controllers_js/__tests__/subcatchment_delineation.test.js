@@ -31,15 +31,67 @@ describe("Subcatchment Delineation controller", () => {
                    data-subcatchment-role="cmap-option">
             <input type="range"
                    id="wepp_sub_cmap_range_runoff"
+                   value="50"
                    data-subcatchment-role="scale-range"
                    data-subcatchment-scale="runoff">
+            <input type="range"
+                   id="wepp_sub_cmap_range_loss"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="loss">
+            <input type="range"
+                   id="ash_sub_cmap_range_load"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="ash_load">
+            <input type="range"
+                   id="ash_sub_cmap_range_transport"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="ash_transport">
+            <input type="range"
+                   id="wepp_sub_cmap_range_phosphorus"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="phosphorus">
+            <input type="range"
+                   id="rhem_sub_cmap_range_runoff"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="rhem_runoff">
+            <input type="range"
+                   id="rhem_sub_cmap_range_sed_yield"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="rhem_sed_yield">
+            <input type="range"
+                   id="rhem_sub_cmap_range_soil_loss"
+                   value="50"
+                   data-subcatchment-role="scale-range"
+                   data-subcatchment-scale="rhem_soil_loss">
+            <span id="wepp_sub_cmap_canvas_runoff_min"></span>
+            <span id="wepp_sub_cmap_canvas_runoff_max"></span>
+            <span id="wepp_sub_cmap_canvas_loss_min"></span>
+            <span id="wepp_sub_cmap_canvas_loss_max"></span>
+            <span id="ash_sub_cmap_canvas_load_min"></span>
+            <span id="ash_sub_cmap_canvas_load_max"></span>
+            <span id="ash_sub_cmap_canvas_transport_min"></span>
+            <span id="ash_sub_cmap_canvas_transport_max"></span>
+            <span id="wepp_sub_cmap_canvas_phosphorus_min"></span>
+            <span id="wepp_sub_cmap_canvas_phosphorus_max"></span>
+            <span id="rhem_sub_cmap_canvas_runoff_min"></span>
+            <span id="rhem_sub_cmap_canvas_runoff_max"></span>
+            <span id="rhem_sub_cmap_canvas_sed_yield_min"></span>
+            <span id="rhem_sub_cmap_canvas_sed_yield_max"></span>
+            <span id="rhem_sub_cmap_canvas_soil_loss_min"></span>
+            <span id="rhem_sub_cmap_canvas_soil_loss_max"></span>
         `;
 
         global.render_legend = jest.fn();
 
         await import("../utils.js");
         global.fromHex = jest.fn(() => ({ r: 1, g: 1, b: 1, a: 1 }));
-        global.linearToLog = jest.fn(() => 1);
+        global.linearToLog = jest.fn((value) => value);
         global.createColormap = jest.fn(() => ({ map: jest.fn(() => "#ffffff") }));
         global.updateRangeMaxLabel_mm = jest.fn();
         global.updateRangeMaxLabel_kgha = jest.fn();
@@ -139,7 +191,7 @@ describe("Subcatchment Delineation controller", () => {
         global.Wepp = { getInstance: jest.fn(() => ({ updatePhosphorus: jest.fn() })) };
         global.Project = { getInstance: jest.fn(() => ({ set_preferred_units: jest.fn() })) };
         global.UnitizerClient = { ready: jest.fn(() => Promise.resolve({
-            renderValue: jest.fn((value) => `${value}`),
+            renderValue: jest.fn((value, unit) => `${value} ${unit || ""}`.trim()),
             renderUnits: jest.fn(() => "kg/m^2"),
         })) };
         global.url_for_run = jest.fn((path) => path);
@@ -229,5 +281,30 @@ describe("Subcatchment Delineation controller", () => {
         expect(events).toHaveLength(1);
         expect(events[0].error).toEqual({ Error: "failure" });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
+    });
+
+    test("legend labels initialize and update on slider input", async () => {
+        subcatchment.bootstrap();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const runoffMin = document.getElementById("wepp_sub_cmap_canvas_runoff_min");
+        const runoffMax = document.getElementById("wepp_sub_cmap_canvas_runoff_max");
+        expect(runoffMin.textContent).not.toEqual("");
+        expect(runoffMax.textContent).not.toEqual("");
+
+        const runoffRange = document.getElementById("wepp_sub_cmap_range_runoff");
+        runoffRange.value = "80";
+        runoffRange.dispatchEvent(new Event("input", { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(runoffMax.textContent).toContain("mm");
+        expect(runoffMin.textContent).toContain("0");
+
+        const lossMin = document.getElementById("wepp_sub_cmap_canvas_loss_min");
+        const lossMax = document.getElementById("wepp_sub_cmap_canvas_loss_max");
+        expect(lossMin.textContent).not.toEqual("");
+        expect(lossMax.textContent).not.toEqual("");
     });
 });

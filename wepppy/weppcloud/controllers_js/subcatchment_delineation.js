@@ -342,6 +342,144 @@ var SubcatchmentDelineation = (function () {
 
         sub.state = state;
 
+        var DEFAULT_LINEAR_RANGE = 50;
+        var RANGE_LABEL_CONFIG = {
+            phosphorus: {
+                rangeKey: "phosphorus",
+                labelMinKey: "phosphorusMin",
+                labelMaxKey: "phosphorusMax",
+                unit: "kg/ha",
+                log: { min: 0.001, max: 10.0, maxLinear: 100 }
+            },
+            runoff: {
+                rangeKey: "runoff",
+                labelMinKey: "runoffMin",
+                labelMaxKey: "runoffMax",
+                unit: "mm",
+                log: { min: 0.1, max: 1000, maxLinear: 100 }
+            },
+            loss: {
+                rangeKey: "loss",
+                labelMinKey: "lossMin",
+                labelMaxKey: "lossMax",
+                unit: "kg/ha",
+                log: { min: 1, max: 10000, maxLinear: 100 }
+            },
+            ash_load: {
+                rangeKey: "ashLoad",
+                labelMinKey: "ashLoadMin",
+                labelMaxKey: "ashLoadMax",
+                unit: "tonne/ha",
+                log: { min: 0.001, max: 100, maxLinear: 100 }
+            },
+            ash_transport: {
+                rangeKey: "ashTransport",
+                labelMinKey: "ashTransportMin",
+                labelMaxKey: "ashTransportMax",
+                unit: "tonne/ha",
+                log: { min: 0.001, max: 20, maxLinear: 100 }
+            },
+            rhem_runoff: {
+                rangeKey: "rhemRunoff",
+                labelMinKey: "rhemRunoffMin",
+                labelMaxKey: "rhemRunoffMax",
+                unit: "mm",
+                log: { min: 0.1, max: 1000, maxLinear: 100 }
+            },
+            rhem_sed_yield: {
+                rangeKey: "rhemSedYield",
+                labelMinKey: "rhemSedYieldMin",
+                labelMaxKey: "rhemSedYieldMax",
+                unit: "mm",
+                log: { min: 1, max: 10000, maxLinear: 100 }
+            },
+            rhem_soil_loss: {
+                rangeKey: "rhemSoilLoss",
+                labelMinKey: "rhemSoilLossMin",
+                labelMaxKey: "rhemSoilLossMax",
+                unit: "kg/ha",
+                log: { min: 0.001, max: 10000, maxLinear: 100 }
+            }
+        };
+
+        function renderUnitLabel(value, unit, target, fallbackText) {
+            if (!target) {
+                return;
+            }
+            var fallback = fallbackText !== undefined
+                ? fallbackText
+                : (isFiniteNumber(value) ? (unit ? value + " " + unit : String(value)) : "");
+            var applyHtml = typeof applyLabelHtml === "function"
+                ? applyLabelHtml
+                : function (label, html) {
+                    if (label && "innerHTML" in label) {
+                        label.innerHTML = html;
+                    } else if (label && "textContent" in label) {
+                        label.textContent = html;
+                    }
+                };
+
+            if (!window.UnitizerClient || typeof window.UnitizerClient.ready !== "function") {
+                applyHtml(target, fallback);
+                return;
+            }
+
+            window.UnitizerClient.ready()
+                .then(function (client) {
+                    var html = client.renderValue(value, unit, { includeUnits: true });
+                    applyHtml(target, html);
+                })
+                .catch(function (error) {
+                    console.error("[Subcatchment] Failed to update unitized label", error);
+                    applyHtml(target, fallback);
+                });
+        }
+
+        function resolveRangeMax(mode) {
+            var cfg = RANGE_LABEL_CONFIG[mode];
+            if (!cfg) {
+                return null;
+            }
+            var rangeEl = state.rangeElements[cfg.rangeKey];
+            if (!rangeEl) {
+                return null;
+            }
+            var sliderValue = parseNumeric(rangeEl && rangeEl.value);
+            var linearValue = isFiniteNumber(sliderValue) ? sliderValue : DEFAULT_LINEAR_RANGE;
+            if (cfg.log) {
+                return linearToLog(linearValue, cfg.log.min, cfg.log.max, cfg.log.maxLinear);
+            }
+            return linearValue;
+        }
+
+        function updateLegendLabels(mode) {
+            var cfg = RANGE_LABEL_CONFIG[mode];
+            if (!cfg) {
+                return;
+            }
+            var maxValue = resolveRangeMax(mode);
+            if (!isFiniteNumber(maxValue)) {
+                return;
+            }
+            var minValue;
+            if (typeof cfg.minValue === "function") {
+                minValue = cfg.minValue(maxValue);
+            } else if (cfg.minValue !== undefined) {
+                minValue = cfg.minValue;
+            } else {
+                minValue = 0;
+            }
+
+            renderUnitLabel(minValue, cfg.unit, state.labelElements[cfg.labelMinKey]);
+            renderUnitLabel(maxValue, cfg.unit, state.labelElements[cfg.labelMaxKey]);
+        }
+
+        function primeLegendLabels() {
+            Object.keys(RANGE_LABEL_CONFIG).forEach(function (mode) {
+                updateLegendLabels(mode);
+            });
+        }
+
         function emit(eventName, payload) {
             if (subEvents && typeof subEvents.emit === "function") {
                 subEvents.emit(eventName, payload || {});
@@ -610,15 +748,10 @@ var SubcatchmentDelineation = (function () {
                         if (!Number.isFinite(v)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.phosphorus;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 0.001;
-                        var maxLog = 10.0;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.phosphorusMin, "0.000");
-                        updateRangeMaxLabel_kgha(r, state.labelElements.phosphorusMax);
+                        var r = resolveRangeMax("phosphorus");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.phosphorus.map(v / r);
                         return fromHex(hex, 0.9);
                     };
@@ -630,15 +763,10 @@ var SubcatchmentDelineation = (function () {
                         if (!record || Number.isNaN(v)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.runoff;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 0.1;
-                        var maxLog = 1000;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.runoffMin, "0.000");
-                        updateRangeMaxLabel_mm(r, state.labelElements.runoffMax);
+                        var r = resolveRangeMax("runoff");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.runoff.map(v / r);
                         return fromHex(hex, 0.9);
                     };
@@ -650,15 +778,10 @@ var SubcatchmentDelineation = (function () {
                         if (!record || Number.isNaN(v)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.loss;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 1;
-                        var maxLog = 10000;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.lossMin, "0.000");
-                        updateRangeMaxLabel_kgha(r, state.labelElements.lossMax);
+                        var r = resolveRangeMax("loss");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.loss.map(v / r);
                         return fromHex(hex, 0.9);
                     };
@@ -677,15 +800,10 @@ var SubcatchmentDelineation = (function () {
                         if (!Number.isFinite(v)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.ashLoad;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 0.001;
-                        var maxLog = 100;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.ashLoadMin, "0.000");
-                        updateRangeMaxLabel_tonneha(r, state.labelElements.ashLoadMax);
+                        var r = resolveRangeMax("ash_load");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.ashLoad.map(v / r);
                         return fromHex(hex, 0.9);
                     };
@@ -700,15 +818,10 @@ var SubcatchmentDelineation = (function () {
                         if (!Number.isFinite(value)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.ashTransport;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 0.001;
-                        var maxLog = 20;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.ashTransportMin, "0.000");
-                        updateRangeMaxLabel_tonneha(r, state.labelElements.ashTransportMax);
+                        var r = resolveRangeMax("ash_transport");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.ashTransport.map(value / r);
                         return fromHex(hex, 0.9);
                     };
@@ -723,15 +836,10 @@ var SubcatchmentDelineation = (function () {
                         if (!Number.isFinite(value)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.rhemRunoff;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 0.1;
-                        var maxLog = 1000;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.rhemRunoffMin, "0.000");
-                        updateRangeMaxLabel_mm(r, state.labelElements.rhemRunoffMax);
+                        var r = resolveRangeMax("rhem_runoff");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.rhemRunoff.map(value / r);
                         return fromHex(hex, 0.9);
                     };
@@ -746,15 +854,10 @@ var SubcatchmentDelineation = (function () {
                         if (!Number.isFinite(value)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.rhemSedYield;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 1;
-                        var maxLog = 10000;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.rhemSedYieldMin, "0.000");
-                        updateRangeMaxLabel_mm(r, state.labelElements.rhemSedYieldMax);
+                        var r = resolveRangeMax("rhem_sed_yield");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.rhemSedYield.map(value / r);
                         return fromHex(hex, 0.9);
                     };
@@ -769,15 +872,10 @@ var SubcatchmentDelineation = (function () {
                         if (!Number.isFinite(value)) {
                             return COLOR_DEFAULT;
                         }
-                        var range = state.rangeElements.rhemSoilLoss;
-                        var sliderValue = range ? parseFloat(range.value) : NaN;
-                        var linearValue = Number.isFinite(sliderValue) ? sliderValue : 50;
-                        var minLog = 0.001;
-                        var maxLog = 10000;
-                        var maxLinear = 100;
-                        var r = linearToLog(linearValue, minLog, maxLog, maxLinear);
-                        safeText(state.labelElements.rhemSoilLossMin, "0.000");
-                        updateRangeMaxLabel_kgha(r, state.labelElements.rhemSoilLossMax);
+                        var r = resolveRangeMax("rhem_soil_loss");
+                        if (!isFiniteNumber(r) || r <= 0) {
+                            return COLOR_DEFAULT;
+                        }
                         var hex = state.colorMappers.rhemSoilLoss.map(value / r);
                         return fromHex(hex, 0.9);
                     };
@@ -950,6 +1048,7 @@ var SubcatchmentDelineation = (function () {
             if (!mode) {
                 return;
             }
+            updateLegendLabels(mode);
             if (mode === "grd_loss") {
                 updateGriddedLoss();
                 return;
@@ -1136,6 +1235,7 @@ var SubcatchmentDelineation = (function () {
             renderLegendIfPresent("jet2", "rhem_sub_cmap_canvas_soil_loss");
             renderLegendIfPresent("jet2", "ash_sub_cmap_canvas_load");
             renderLegendIfPresent("jet2", "ash_sub_cmap_canvas_transport");
+            primeLegendLabels();
         };
 
         sub._refreshGlLayer = refreshGlLayer;
@@ -1339,6 +1439,7 @@ var SubcatchmentDelineation = (function () {
                 state.dataRunoff = data;
                 state.cmapMode = "runoff";
                 refreshGlLayer();
+                updateLegendLabels("runoff");
             }).catch(handleError);
         }
 
@@ -1347,6 +1448,7 @@ var SubcatchmentDelineation = (function () {
                 state.dataRunoff = state.dataRunoff || data;
                 state.cmapMode = "runoff";
                 refreshGlLayer();
+                updateLegendLabels("runoff");
             }).catch(handleError);
         }
 
@@ -1355,6 +1457,7 @@ var SubcatchmentDelineation = (function () {
                 state.dataRunoff = state.dataRunoff || data;
                 state.cmapMode = "runoff";
                 refreshGlLayer();
+                updateLegendLabels("runoff");
             }).catch(handleError);
         }
 
@@ -1363,6 +1466,7 @@ var SubcatchmentDelineation = (function () {
                 state.dataLoss = data;
                 state.cmapMode = "loss";
                 refreshGlLayer();
+                updateLegendLabels("loss");
             }).catch(handleError);
         }
 
@@ -1381,6 +1485,7 @@ var SubcatchmentDelineation = (function () {
                     state.dataPhosphorus = data;
                     state.cmapMode = "phosphorus";
                     refreshGlLayer();
+                    updateLegendLabels("phosphorus");
                 })
                 .catch(handleError);
         }
@@ -1392,6 +1497,7 @@ var SubcatchmentDelineation = (function () {
                     state.cmapMode = "ash_load";
                     state.ashMeasure = getAshTransportMeasure();
                     refreshGlLayer();
+                    updateLegendLabels("ash_load");
                 })
                 .catch(handleError);
         }
@@ -1402,6 +1508,7 @@ var SubcatchmentDelineation = (function () {
                     state.dataAshTransport = data;
                     state.cmapMode = "ash_transport";
                     refreshGlLayer();
+                    updateLegendLabels("ash_transport");
                 })
                 .catch(handleError);
         }
@@ -1415,6 +1522,7 @@ var SubcatchmentDelineation = (function () {
                     state.dataRhemRunoff = data;
                     state.cmapMode = "rhem_runoff";
                     refreshGlLayer();
+                    updateLegendLabels("rhem_runoff");
                 })
                 .catch(handleError);
         }
@@ -1425,6 +1533,7 @@ var SubcatchmentDelineation = (function () {
                     state.dataRhemSedYield = data;
                     state.cmapMode = "rhem_sed_yield";
                     refreshGlLayer();
+                    updateLegendLabels("rhem_sed_yield");
                 })
                 .catch(handleError);
         }
@@ -1435,6 +1544,7 @@ var SubcatchmentDelineation = (function () {
                     state.dataRhemSoilLoss = data;
                     state.cmapMode = "rhem_soil_loss";
                     refreshGlLayer();
+                    updateLegendLabels("rhem_soil_loss");
                 })
                 .catch(handleError);
         }

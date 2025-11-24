@@ -99,15 +99,55 @@ function unlockButton(buttonId, lockImageId) {
     lockImage.style.display = 'none';
 }
 
+// Normalize HTML/text writes across DOM elements, jQuery-style wrappers, and legacy adapters
+function applyLabelHtml(label, html) {
+    if (!label) {
+        return;
+    }
+    var textFallback = function () {
+        try {
+            if (label && "textContent" in label) {
+                label.textContent = String(html);
+            }
+        } catch (noop) {
+            // ignore
+        }
+    };
+
+    try {
+        var maybeHtml = label && label.html;
+        if (typeof maybeHtml === "function") {
+            maybeHtml.call(label, html);
+            return;
+        }
+        if ("innerHTML" in label) {
+            label.innerHTML = html;
+            return;
+        }
+        if ("textContent" in label) {
+            label.textContent = html;
+            return;
+        }
+        textFallback();
+    } catch (err) {
+        console.warn("applyLabelHtml: failed to write label content, falling back to textContent", err);
+        textFallback();
+    }
+}
+if (typeof globalThis !== "undefined") {
+    globalThis.applyLabelHtml = applyLabelHtml;
+}
+
 
 const updateRangeMaxLabel_mm = function (r, labelMax) {
     UnitizerClient.ready()
         .then(function (client) {
             var html = client.renderValue(r, 'mm', { includeUnits: true });
-            labelMax.html(html);
+            applyLabelHtml(labelMax, html);
         })
         .catch(function (error) {
             console.error("Failed to update unitizer label (mm)", error);
+            applyLabelHtml(labelMax, r + ' mm');
         });
 };
 
@@ -116,10 +156,11 @@ const updateRangeMaxLabel_kgha = function (r, labelMax) {
     UnitizerClient.ready()
         .then(function (client) {
             var html = client.renderValue(r, 'kg/ha', { includeUnits: true });
-            labelMax.html(html);
+            applyLabelHtml(labelMax, html);
         })
         .catch(function (error) {
             console.error("Failed to update unitizer label (kg/ha)", error);
+            applyLabelHtml(labelMax, r + ' kg/ha');
         });
 };
 
@@ -128,10 +169,11 @@ const updateRangeMaxLabel_tonneha = function (r, labelMax) {
     UnitizerClient.ready()
         .then(function (client) {
             var html = client.renderValue(r, 'tonne/ha', { includeUnits: true });
-            labelMax.html(html);
+            applyLabelHtml(labelMax, html);
         })
         .catch(function (error) {
             console.error("Failed to update unitizer label (tonne/ha)", error);
+            applyLabelHtml(labelMax, r + ' tonne/ha');
         });
 };
 
