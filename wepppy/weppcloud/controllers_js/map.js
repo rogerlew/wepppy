@@ -309,7 +309,8 @@ var MapController = (function () {
         map.centerInput = centerInput || null;
         map.tabset = createTabset(tabsetRoot);
 
-        var overlayRegistry = typeof Map === "function" ? new Map() : null;
+    var overlayRegistry = typeof Map === "function" ? new Map() : null;
+    var overlayNameRegistry = typeof Map === "function" ? new Map() : null;
         var elevationCooldownTimer = null;
         var mouseElevationHideTimer = null;
         var isFetchingElevation = false;
@@ -684,6 +685,72 @@ var MapController = (function () {
         map.ctrls = L.control.layers(map.baseMaps, map.overlayMaps);
         map.ctrls.addTo(map);
 
+        function clearOverlayName(layer) {
+            if (!overlayNameRegistry) {
+                return;
+            }
+            overlayNameRegistry.forEach(function (value, key) {
+                if (value === layer) {
+                    overlayNameRegistry.delete(key);
+                }
+            });
+        }
+
+        function registerOverlay(layer, name) {
+            if (!layer || !name || !map.ctrls || typeof map.ctrls.addOverlay !== "function") {
+                return;
+            }
+            var existing = overlayNameRegistry && overlayNameRegistry.get ? overlayNameRegistry.get(name) : null;
+            if (existing && existing !== layer) {
+                try {
+                    map.ctrls.removeLayer(existing);
+                } catch (err) {
+                    console.warn("[Map] Failed to remove existing overlay control entry", name, err);
+                }
+                try {
+                    map.removeLayer(existing);
+                } catch (err) {
+                    console.warn("[Map] Failed to remove existing overlay from map", name, err);
+                }
+                if (existing && typeof existing.remove === "function") {
+                    try {
+                        existing.remove();
+                    } catch (err) {
+                        // ignore
+                    }
+                }
+                if (overlayRegistry && overlayRegistry.delete) {
+                    overlayRegistry.delete(existing);
+                }
+                clearOverlayName(existing);
+            }
+            map.ctrls.addOverlay(layer, name);
+            if (overlayRegistry) {
+                overlayRegistry.set(layer, name);
+            }
+            if (overlayNameRegistry) {
+                overlayNameRegistry.set(name, layer);
+            }
+        }
+
+        function unregisterOverlay(layer) {
+            if (!layer || !map.ctrls || typeof map.ctrls.removeLayer !== "function") {
+                return;
+            }
+            try {
+                map.ctrls.removeLayer(layer);
+            } catch (err) {
+                console.warn("[Map] Failed to remove overlay from control", err);
+            }
+            if (overlayRegistry) {
+                overlayRegistry.delete(layer);
+            }
+            clearOverlayName(layer);
+        }
+
+        map.registerOverlay = registerOverlay;
+        map.unregisterOverlay = unregisterOverlay;
+
         window.document.addEventListener("wc-theme:change", function (event) {
             var theme = event && event.detail && event.detail.theme ? event.detail.theme : "default";
             syncMapTheme(theme);
@@ -692,6 +759,10 @@ var MapController = (function () {
         if (overlayRegistry) {
             overlayRegistry.set(map.usgs_gage, "USGS Gage Locations");
             overlayRegistry.set(map.snotel_locations, "SNOTEL Locations");
+        }
+        if (overlayNameRegistry) {
+            overlayNameRegistry.set("USGS Gage Locations", map.usgs_gage);
+            overlayNameRegistry.set("SNOTEL Locations", map.snotel_locations);
         }
 
         map.addGeoJsonOverlay = function (options) {
@@ -705,10 +776,7 @@ var MapController = (function () {
             var controller = createRemoteGeoJsonLayer(http, options);
             attachLayerRefresh(layerName, controller);
             controller.layer.addTo(map);
-            map.ctrls.addOverlay(controller.layer, layerName);
-            if (overlayRegistry) {
-                overlayRegistry.set(controller.layer, layerName);
-            }
+            registerOverlay(controller.layer, layerName);
             controller.refresh(url).catch(function (error) {
                 console.warn("[Map] Failed to load overlay", layerName, error);
             });
@@ -899,6 +967,12 @@ var MapController = (function () {
 
         map.on("overlayadd", function (event) {
             var name = event && event.name ? event.name : (overlayRegistry && overlayRegistry.get ? overlayRegistry.get(event.layer) : null);
+            if (overlayRegistry && name && event && event.layer) {
+                overlayRegistry.set(event.layer, name);
+            }
+            if (overlayNameRegistry && name && event && event.layer) {
+                overlayNameRegistry.set(name, event.layer);
+            }
             emit("map:layer:toggled", {
                 name: name,
                 layer: event.layer,
@@ -909,6 +983,12 @@ var MapController = (function () {
 
         map.on("overlayremove", function (event) {
             var name = event && event.name ? event.name : (overlayRegistry && overlayRegistry.get ? overlayRegistry.get(event.layer) : null);
+            if (overlayRegistry && event && event.layer) {
+                overlayRegistry.delete(event.layer);
+            }
+            if (overlayNameRegistry && event && event.layer) {
+                clearOverlayName(event.layer);
+            }
             emit("map:layer:toggled", {
                 name: name,
                 layer: event.layer,

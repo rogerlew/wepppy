@@ -86,6 +86,8 @@ describe("Channel Delineation controller", () => {
                 addOverlay: jest.fn(),
                 removeLayer: jest.fn(),
             },
+            registerOverlay: jest.fn(),
+            unregisterOverlay: jest.fn(),
             removeLayer: jest.fn(),
             getCenter: jest.fn(() => ({ lng: -117.52, lat: 46.88 })),
             getZoom: jest.fn(function () {
@@ -245,7 +247,7 @@ describe("Channel Delineation controller", () => {
             expect.objectContaining({ params: expect.any(Object) }),
         );
         expect(global.L.glify.layer).toHaveBeenCalled();
-        expect(mapStub.ctrls.addOverlay).toHaveBeenCalled();
+        expect(mapStub.registerOverlay).toHaveBeenCalled();
     });
 
     test("bootstrap assigns job id and triggers initial report", () => {

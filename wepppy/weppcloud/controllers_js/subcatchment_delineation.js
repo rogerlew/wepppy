@@ -683,7 +683,11 @@ var SubcatchmentDelineation = (function () {
                     console.warn("[Subcatchment] Failed to remove GL layer", err);
                 }
                 try {
-                    map.ctrls.removeLayer(state.glLayer);
+                    if (typeof map.unregisterOverlay === "function") {
+                        map.unregisterOverlay(state.glLayer);
+                    } else {
+                        map.ctrls.removeLayer(state.glLayer);
+                    }
                 } catch (err) {
                     console.warn("[Subcatchment] Failed to update layer control", err);
                 }
@@ -692,7 +696,11 @@ var SubcatchmentDelineation = (function () {
             }
             if (state.labels) {
                 try {
-                    map.ctrls.removeLayer(state.labels);
+                    if (typeof map.unregisterOverlay === "function") {
+                        map.unregisterOverlay(state.labels);
+                    } else {
+                        map.ctrls.removeLayer(state.labels);
+                    }
                 } catch (err) {
                     // ignore
                 }
@@ -897,7 +905,11 @@ var SubcatchmentDelineation = (function () {
                     console.warn("[Subcatchment] Failed to remove previous GL layer", err);
                 }
                 try {
-                    map.ctrls.removeLayer(state.glLayer);
+                    if (typeof map.unregisterOverlay === "function") {
+                        map.unregisterOverlay(state.glLayer);
+                    } else {
+                        map.ctrls.removeLayer(state.glLayer);
+                    }
                 } catch (err) {
                     console.warn("[Subcatchment] Failed to sync layer control", err);
                 }
@@ -923,7 +935,11 @@ var SubcatchmentDelineation = (function () {
             // Expose glLayer on sub instance for external access (e.g., flash-and-find)
             sub.glLayer = state.glLayer;
 
-            map.ctrls.addOverlay(state.glLayer, "Subcatchments");
+            if (typeof map.registerOverlay === "function") {
+                map.registerOverlay(state.glLayer, "Subcatchments");
+            } else {
+                map.ctrls.addOverlay(state.glLayer, "Subcatchments");
+            }
         }
 
         function updateGlLayerStyle() {
@@ -968,7 +984,11 @@ var SubcatchmentDelineation = (function () {
             }
             var map = MapController.getInstance();
             try {
-                map.ctrls.removeLayer(state.grid);
+                if (typeof map.unregisterOverlay === "function") {
+                    map.unregisterOverlay(state.grid);
+                } else {
+                    map.ctrls.removeLayer(state.grid);
+                }
             } catch (err) {
                 // ignore
             }
@@ -995,7 +1015,11 @@ var SubcatchmentDelineation = (function () {
                 arrowSize: 20
             }).addTo(map);
             updateGriddedLoss();
-            map.ctrls.addOverlay(state.grid, "Gridded Output");
+            if (typeof map.registerOverlay === "function") {
+                map.registerOverlay(state.grid, "Gridded Output");
+            } else {
+                map.ctrls.addOverlay(state.grid, "Gridded Output");
+            }
         }
 
         function updateGriddedLoss() {
@@ -1254,7 +1278,12 @@ var SubcatchmentDelineation = (function () {
                     state.data = geojson;
                     buildLabels();
                     refreshGlLayer();
-                    MapController.getInstance().ctrls.addOverlay(state.labels, "Subcatchment Labels");
+                    var ctrl = MapController.getInstance();
+                    if (ctrl && typeof ctrl.registerOverlay === "function") {
+                        ctrl.registerOverlay(state.labels, "Subcatchment Labels");
+                    } else if (ctrl && ctrl.ctrls && typeof ctrl.ctrls.addOverlay === "function") {
+                        ctrl.ctrls.addOverlay(state.labels, "Subcatchment Labels");
+                    }
                 })
                 .catch(handleError);
         }
@@ -1559,7 +1588,13 @@ var SubcatchmentDelineation = (function () {
             disposeGlLayer();
             removeGrid();
 
-            if (map && typeof map.ctrls === "object" && map.ctrls.removeLayer) {
+            if (map && typeof map.unregisterOverlay === "function") {
+                try {
+                    map.unregisterOverlay(state.labels);
+                } catch (err) {
+                    console.warn("[Subcatchment] Failed to remove labels", err);
+                }
+            } else if (map && typeof map.ctrls === "object" && map.ctrls.removeLayer) {
                 try {
                     map.ctrls.removeLayer(state.labels);
                 } catch (err) {

@@ -105,6 +105,8 @@ describe("Outlet controller", () => {
                 addOverlay: jest.fn(),
                 removeLayer: jest.fn()
             },
+            registerOverlay: jest.fn(),
+            unregisterOverlay: jest.fn(),
             removeLayer: jest.fn(),
             on: jest.fn()
         };
@@ -240,7 +242,7 @@ describe("Outlet controller", () => {
 
         expect(httpGetJsonMock).toHaveBeenCalledWith("query/outlet/", expect.objectContaining({ params: expect.any(Object) }));
         expect(httpRequestMock).toHaveBeenCalledWith("report/outlet/", expect.objectContaining({ params: expect.any(Object) }));
-        expect(mapInstance.ctrls.addOverlay).toHaveBeenCalled();
+        expect(mapInstance.registerOverlay).toHaveBeenCalled();
         expect(document.getElementById("info").innerHTML).toBe(reportResponse);
     });
 

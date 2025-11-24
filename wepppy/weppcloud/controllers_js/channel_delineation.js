@@ -479,13 +479,21 @@ var ChannelDelineation = (function () {
             var map = MapController.getInstance();
 
             if (channel.glLayer !== null) {
-                map.ctrls.removeLayer(channel.glLayer);
+                if (typeof map.unregisterOverlay === "function") {
+                    map.unregisterOverlay(channel.glLayer);
+                } else {
+                    map.ctrls.removeLayer(channel.glLayer);
+                }
                 map.removeLayer(channel.glLayer);
                 channel.glLayer = null;
             }
 
             if (channel.labels !== null) {
-                map.ctrls.removeLayer(channel.labels);
+                if (typeof map.unregisterOverlay === "function") {
+                    map.unregisterOverlay(channel.labels);
+                } else {
+                    map.ctrls.removeLayer(channel.labels);
+                }
                 map.removeLayer(channel.labels);
                 channel.labels = L.layerGroup();
             }
@@ -702,7 +710,11 @@ var ChannelDelineation = (function () {
                         }
                     }).addTo(map);
 
-                    map.ctrls.addOverlay(channel.glLayer, "Channels");
+                    if (typeof map.registerOverlay === "function") {
+                        map.registerOverlay(channel.glLayer, "Channels");
+                    } else {
+                        map.ctrls.addOverlay(channel.glLayer, "Channels");
+                    }
 
                     if (statusAdapter && typeof statusAdapter.text === "function") {
                         statusAdapter.text(taskMsg + " – done");
@@ -743,7 +755,11 @@ var ChannelDelineation = (function () {
                         }
                     }).addTo(map);
 
-                    map.ctrls.addOverlay(channel.glLayer, "Channels");
+                    if (typeof map.registerOverlay === "function") {
+                        map.registerOverlay(channel.glLayer, "Channels");
+                    } else {
+                        map.ctrls.addOverlay(channel.glLayer, "Channels");
+                    }
 
                     channel.labels = L.layerGroup();
                     var seen = new Set();
@@ -768,7 +784,11 @@ var ChannelDelineation = (function () {
                         channel.labels.addLayer(marker);
                     });
 
-                    map.ctrls.addOverlay(channel.labels, "Channel Labels");
+                    if (typeof map.registerOverlay === "function") {
+                        map.registerOverlay(channel.labels, "Channel Labels");
+                    } else {
+                        map.ctrls.addOverlay(channel.labels, "Channel Labels");
+                    }
 
                     if (statusAdapter && typeof statusAdapter.text === "function") {
                         statusAdapter.text("Displaying SUBWTA channels – done");

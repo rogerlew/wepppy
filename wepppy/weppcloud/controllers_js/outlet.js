@@ -519,7 +519,13 @@ var Outlet = (function () {
 
         outlet.remove = function () {
             var map = MapController.getInstance();
-            if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
+            if (map && typeof map.unregisterOverlay === "function") {
+                try {
+                    map.unregisterOverlay(outlet.outletMarker);
+                } catch (err) {
+                    console.warn("Failed to unregister outlet overlay.", err);
+                }
+            } else if (map && map.ctrls && typeof map.ctrls.removeLayer === "function") {
                 try {
                     map.ctrls.removeLayer(outlet.outletMarker);
                 } catch (err) {
@@ -562,7 +568,9 @@ var Outlet = (function () {
                     var lat = response.lat - offset;
                     var lng = response.lng + offset;
                     outlet.outletMarker.setLatLng([lat, lng]).addTo(map);
-                    if (map && map.ctrls && typeof map.ctrls.addOverlay === "function") {
+                    if (map && typeof map.registerOverlay === "function") {
+                        map.registerOverlay(outlet.outletMarker, "Outlet");
+                    } else if (map && map.ctrls && typeof map.ctrls.addOverlay === "function") {
                         map.ctrls.addOverlay(outlet.outletMarker, "Outlet");
                     }
                     setStatusMessage(taskMsg + "... Success");
