@@ -27,6 +27,7 @@ class PathCEStub(LockedMixin):
         self.status_message = "Waiting"
         self.progress = 0.0
         self.results: Dict[str, Any] = {}
+        self.persisted_config: Optional[Dict[str, Any]] = None
 
     @property
     def config(self) -> Dict[str, Any]:
@@ -43,6 +44,9 @@ class PathCEStub(LockedMixin):
             instance = cls(wd, "path_ce.cfg")
             cls._instances[wd] = instance
         return instance
+
+    def persist_config_snapshot(self) -> None:
+        self.persisted_config = dict(self._config)
 
     @classmethod
     def tryGetInstance(cls, wd: str) -> Optional["PathCEStub"]:
@@ -198,6 +202,7 @@ def test_run_persists_config_before_enqueue(path_ce_client):
     assert controller.config["sddc_threshold"] == 12.0
     assert controller.config["slope_range"] == [1.0, 9.0]
     assert controller.config["mulch_costs"]["mulch_15_sbs_map"] == 111.0
+    assert controller.persisted_config == controller.config
 
     queue_call = rq_environment.recorder.queue_calls[0]
     assert queue_call.func is path_ce_module.run_path_cost_effective_rq

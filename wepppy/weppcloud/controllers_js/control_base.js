@@ -349,6 +349,42 @@ function controlBase() {
         let statusText = "";
         let detail = errorThrown;
 
+        function normalizeDetail(value) {
+            if (value === undefined || value === null) {
+                return value;
+            }
+            if (typeof value === "string") {
+                return value;
+            }
+            if (Array.isArray(value)) {
+                return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+            }
+            if (typeof value === "object") {
+                const maybeError = value.Error || value.error || value.message || value.detail;
+                const maybeStack = value.StackTrace || value.stacktrace || value.stack;
+                const parts = [];
+                if (maybeError) {
+                    parts.push(String(maybeError));
+                }
+                if (maybeStack) {
+                    if (Array.isArray(maybeStack)) {
+                        parts.push(maybeStack.map(function (item) { return String(item); }).join("\n"));
+                    } else {
+                        parts.push(String(maybeStack));
+                    }
+                }
+                if (parts.length) {
+                    return parts.join("\n");
+                }
+                try {
+                    return JSON.stringify(value);
+                } catch (err) {
+                    return String(value);
+                }
+            }
+            return String(value);
+        }
+
         if (error) {
             if (typeof error.status === "number" && error.status > 0) {
                 statusCode = String(error.status);
@@ -357,15 +393,11 @@ function controlBase() {
                 statusText = error.statusText;
             }
             if (error.detail !== undefined) {
-                detail = error.detail;
+                detail = normalizeDetail(error.detail);
             } else if (typeof error.body === "string") {
                 detail = error.body;
             } else if (error.body && typeof error.body === "object") {
-                try {
-                    detail = JSON.stringify(error.body);
-                } catch (err) {
-                    detail = String(error.body);
-                }
+                detail = normalizeDetail(error.body);
             } else if (error.message && !detail) {
                 detail = error.message;
             }

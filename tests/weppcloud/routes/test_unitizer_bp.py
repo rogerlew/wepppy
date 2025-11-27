@@ -48,7 +48,7 @@ def unitizer_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
                 cls._instances[wd] = instance
             return instance
 
-        def set_preferences(self, kwds):
+        def set_preferences(self, kwds, strict: bool = True):  # noqa: ARG002 - parity with real impl
             self.preferences.update(kwds)
             return dict(self.preferences)
 

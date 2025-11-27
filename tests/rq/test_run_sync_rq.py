@@ -25,11 +25,17 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
     monkeypatch.setattr(run_sync, "lock_statuses", lambda runid: {})
 
     spec_file = tmp_path / "spec.aria2"
-    monkeypatch.setattr(
-        run_sync,
-        "_download_spec",
-        lambda url, headers: spec_file.write_text("url", encoding="utf-8") or spec_file,
-    )
+
+    def fake_download_spec(url: str, headers: dict[str, str] | None, target_dir: Path | None = None) -> Path:
+        if target_dir is not None:
+            target_dir.mkdir(parents=True, exist_ok=True)
+            spec_path = target_dir / ".aria2c.spec"
+            spec_path.write_text("url", encoding="utf-8")
+            return spec_path
+        spec_file.write_text("url", encoding="utf-8")
+        return spec_file
+
+    monkeypatch.setattr(run_sync, "_download_spec", fake_download_spec)
 
     def fake_aria2(input_file: Path, target_dir: Path, headers: dict[str, str] | None) -> None:
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -55,7 +61,8 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
         None,
     )
 
-    run_root = target_root / "demo-run" / "cfg"
+    # Runs are stored under {target_root}/{first_two_chars}/{runid}/
+    run_root = target_root / "de" / "demo-run"
     provenance_path = run_root / ".provenance.json"
     assert provenance_path.exists()
 

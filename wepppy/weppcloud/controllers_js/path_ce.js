@@ -784,7 +784,9 @@ var PathCE = (function () {
                 .catch(function (error) {
                     setMessage(controller, "Failed to enqueue PATH Cost-Effective run.", true);
                     controller.pushErrorStacktrace(controller, error);
-                    controller.set_rq_job_id(controller, null);
+                    // Preserve the last job_id hint so users can still inspect the previous attempt.
+                    controller.stop_job_status_polling(controller);
+                    controller.reset_status_spinner(controller);
                     state.lastEmittedStatus = "error";
                     emitEvent(controller, "pathce:run:error", { error: error });
                     controller.triggerEvent("job:error", { task: "pathce:run", error: error });
