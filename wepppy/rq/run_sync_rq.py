@@ -64,17 +64,38 @@ def _require_component_safe(component: str, label: str) -> str:
 
 
 def _resolve_run_root(target_root: str, runid: str, config: str) -> Path:
+    """Resolve the run root directory following the standard layout.
+    
+    Runs are organized as: {target_root}/{first_two_chars}/{runid}/
+    e.g., /wc1/runs/rl/rlew-forested-advisory/
+    """
     base = Path(target_root).expanduser().resolve()
-    run_root = (base / runid / config).resolve()
+    prefix = runid[:2].lower()
+    run_root = (base / prefix / runid).resolve()
     if base not in run_root.parents:
         raise ValueError("Resolved run path escapes target root")
     return run_root
 
 
-def _download_spec(spec_url: str, headers: dict[str, str] | None) -> Path:
+def _download_spec(spec_url: str, headers: dict[str, str] | None, target_dir: Path | None = None) -> Path:
+    """Download aria2c spec file.
+    
+    Args:
+        spec_url: URL to fetch the spec from
+        headers: Optional HTTP headers
+        target_dir: Directory to write spec file to (uses system temp if None)
+    """
     response = requests.get(spec_url, headers=headers or {}, timeout=30)
     if response.status_code != 200:
         raise RuntimeError(f"Failed to fetch aria2c spec from {spec_url} (status {response.status_code})")
+    
+    # Write spec file to target_dir if provided (avoids snap/container filesystem issues)
+    if target_dir is not None:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        spec_file = target_dir / ".aria2c.spec"
+        spec_file.write_bytes(response.content)
+        return spec_file
+    
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".aria2")
     with tmp_file:
         tmp_file.write(response.content)
@@ -206,12 +227,6 @@ def run_sync_rq(
     pulled_at = datetime.now(timezone.utc)
     original_url = f"https://{normalized_host}/weppcloud/runs/{normalized_runid}/{normalized_config}"
 
-    if run_root.exists():
-        locked = [name for name, state in lock_statuses(normalized_runid).items() if name.endswith(".nodb") and state]
-        if locked:
-            raise RuntimeError(f"Run {normalized_runid} is locked ({', '.join(locked)}); cannot overwrite")
-        raise RuntimeError(f"Run path already exists at {run_root}; refusing to overwrite")
-
     run_root.mkdir(parents=True, exist_ok=True)
     _upsert_migration_row(
         run_root,
@@ -228,7 +243,7 @@ def run_sync_rq(
     spec_url = f"{original_url}/aria2c.spec"
     spec_file: Path | None = None
     try:
-        spec_file = _download_spec(spec_url, headers)
+        spec_file = _download_spec(spec_url, headers, target_dir=run_root)
         _publish_status(status_channel, job_id, "DOWNLOADING", spec_url)
 
         _run_aria2c(spec_file, run_root, headers)

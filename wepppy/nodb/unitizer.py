@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
-from typing import Callable, Dict, Mapping, Optional, OrderedDict as OrderedDictType
+from typing import Callable, Dict, Mapping, Optional, OrderedDict as OrderedDictType, Set
 
 from wepppy.all_your_base import isfloat, isnan
 
@@ -366,12 +366,17 @@ class Unitizer(NoDbBase):
 
         return None
 
-    def set_preferences(self, kwds: Mapping[str, object]) -> Dict[str, str]:
+    def set_preferences(self, kwds: Mapping[str, object], *, strict: bool = True) -> Dict[str, str]:
         """Update unit preferences using key/value mappings.
 
         ``kwds`` may contain scalars or iterables of candidate values; the last
-        item wins, mirroring existing template semantics.
+        item wins, mirroring existing template semantics. Set ``strict`` to
+        ``False`` to ignore unknown categories/values (with a warning) so newer
+        front-ends do not break older back-ends.
         """
+
+        unknown_keys: Set[str] = set()
+        invalid_values: Set[str] = set()
 
         with self.locked():
             for key, raw_value in kwds.items():
@@ -388,12 +393,33 @@ class Unitizer(NoDbBase):
                 key_str = str(key)
                 value_str = str(value).replace('-/', ',')
 
-                if key_str not in precisions:
-                    raise KeyError(f'Unknown unitizer preference key: {key_str}')
-                if value_str not in precisions[key_str]:
-                    raise ValueError(f'Invalid unitizer preference value {value_str!r} for key {key_str!r}')
+                allowed_units = precisions.get(key_str)
+                if allowed_units is None:
+                    if strict:
+                        raise KeyError(f'Unknown unitizer preference key: {key_str}')
+                    unknown_keys.add(key_str)
+                    continue
+
+                if value_str not in allowed_units:
+                    if strict:
+                        raise ValueError(f'Invalid unitizer preference value {value_str!r} for key {key_str!r}')
+                    invalid_values.add(f'{key_str}={value_str}')
+                    continue
 
                 self._preferences[key_str] = value_str
+
+        logger = getattr(self, '_logger', None)
+        if logger is not None:
+            if unknown_keys:
+                logger.warning(
+                    'Ignoring unknown unitizer preference keys: %s',
+                    ', '.join(sorted(unknown_keys)),
+                )
+            if invalid_values:
+                logger.warning(
+                    'Ignoring invalid unitizer preference values: %s',
+                    ', '.join(sorted(invalid_values)),
+                )
 
         return self._preferences
 

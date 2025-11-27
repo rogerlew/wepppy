@@ -84,6 +84,7 @@
                 }
             }
             var logElement = container.querySelector("#run_sync_status_log");
+            var summaryElement = container.querySelector("#run_sync_summary");
             if (!runId || !channel || !logElement) {
                 return;
             }
@@ -92,6 +93,19 @@
                 logElement: logElement,
                 runId: runId,
                 channel: channel,
+                onAppend: function (detail) {
+                    // Detect COMPLETE message and show link in summary panel
+                    // Format: rq:<job_id> COMPLETE run_sync_rq(<runid>, <config>)
+                    var message = detail.message || "";
+                    var completeMatch = message.match(/COMPLETE run_sync_rq\(([^,]+),\s*([^)]+)\)/);
+                    if (completeMatch && summaryElement) {
+                        var syncedRunId = completeMatch[1].trim();
+                        var syncedConfig = completeMatch[2].trim();
+                        var runUrl = "/weppcloud/runs/" + encodeURIComponent(syncedRunId) + "/" + encodeURIComponent(syncedConfig) + "/";
+                        summaryElement.innerHTML = '<div style="padding: 0.5em 0;"><strong style="color: var(--wc-success-fg, #155724);">✓ Sync complete!</strong></div>' +
+                            '<a href="' + runUrl + '" class="pure-button pure-button-primary">Open run →</a>';
+                    }
+                }
             });
         }
 

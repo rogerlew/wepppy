@@ -46,7 +46,7 @@ from time import sleep
 # wepppy
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
-from wepppy.nodb.core import Climate, Soils, Watershed, Wepp
+from wepppy.nodb.core import Climate, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_setter
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
@@ -1575,7 +1575,6 @@ class Omni(NoDbBase):
     
     def compile_hillslope_summaries(self) -> pd.DataFrame:
         global OMNI_REL_DIR
-        from wepppy.nodb.core import Wepp
         from wepppy.wepp.reports import HillSummaryReport
 
         scenario_wds = {str(self.base_scenario): self.wd}
@@ -1585,13 +1584,28 @@ class Omni(NoDbBase):
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
             scenario_wds[_scenario_name] = _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
 
-        dfs = []
-        for scenario, wd in scenario_wds.items():
-            loss = Wepp.getInstance(wd).report_loss()
-            hill_rpt = HillSummaryReport(loss)
-            df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
-            df['scenario'] = scenario
-            dfs.append(df)
+        readonly_rons: List[Ron] = []
+        try:
+            # HillSummaryReport activates the query engine; temporarily allow writes.
+            for wd in scenario_wds.values():
+                ron = Ron.getInstance(wd)
+                if ron.readonly:
+                    ron.readonly = False
+                    readonly_rons.append(ron)
+
+            dfs = []
+            for scenario, wd in scenario_wds.items():
+                loss = Wepp.getInstance(wd).report_loss()
+                hill_rpt = HillSummaryReport(loss)
+                df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
+                df['scenario'] = scenario
+                dfs.append(df)
+        finally:
+            for ron in readonly_rons:
+                try:
+                    ron.readonly = True
+                except Exception as exc:  # pragma: no cover - best-effort restore
+                    self.logger.warning('Failed to restore readonly flag for %s: %s', ron.wd, exc)
 
         combined = pd.concat(dfs, ignore_index=True)
 
@@ -1641,7 +1655,6 @@ class Omni(NoDbBase):
 
     def compile_channel_summaries(self) -> pd.DataFrame:
         global OMNI_REL_DIR
-        from wepppy.nodb.core import Wepp
         from wepppy.wepp.reports import ChannelSummaryReport
 
         scenario_wds = {str(self.base_scenario): self.wd}
@@ -1651,13 +1664,28 @@ class Omni(NoDbBase):
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
             scenario_wds[_scenario_name] = _join(self.wd, OMNI_REL_DIR, 'scenarios', _scenario_name)
 
-        dfs = []
-        for scenario, wd in scenario_wds.items():
-            loss = Wepp.getInstance(wd).report_loss()
-            channel_rpt = ChannelSummaryReport(loss)
-            df = channel_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
-            df['scenario'] = scenario
-            dfs.append(df)
+        readonly_rons: List[Ron] = []
+        try:
+            # ChannelSummaryReport activates the query engine; temporarily allow writes.
+            for wd in scenario_wds.values():
+                ron = Ron.getInstance(wd)
+                if ron.readonly:
+                    ron.readonly = False
+                    readonly_rons.append(ron)
+
+            dfs = []
+            for scenario, wd in scenario_wds.items():
+                loss = Wepp.getInstance(wd).report_loss()
+                channel_rpt = ChannelSummaryReport(loss)
+                df = channel_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
+                df['scenario'] = scenario
+                dfs.append(df)
+        finally:
+            for ron in readonly_rons:
+                try:
+                    ron.readonly = True
+                except Exception as exc:  # pragma: no cover - best-effort restore
+                    self.logger.warning('Failed to restore readonly flag for %s: %s', ron.wd, exc)
 
         if not dfs:
             return pd.DataFrame()

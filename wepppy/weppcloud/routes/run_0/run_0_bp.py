@@ -68,6 +68,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#observed': TaskEnum.run_observed,
     '#debris-flow': TaskEnum.run_debris,
     '#dss-export': TaskEnum.dss_export,
+    '#path-cost-effective': TaskEnum.run_path_cost_effective,
     '#team': TaskEnum.project_init,  # Using project init emoji as placeholder
 }
 
@@ -180,7 +181,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     from wepppy.nodb.mods.revegetation import Revegetation
     from wepppy.wepp.soils import soilsdb
     from wepppy.wepp import management
-    from wepp_runner.wepp_runner import linux_wepp_bin_opts
+    from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
     from wepppy.wepp.management.managements import landuse_management_mapping_options
     from wepppy.weppcloud.app import db, Run
 
@@ -244,7 +245,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         ("20-yr_PartialRecovery.csv", "20-Year Partial Recovery"),
         ("user_cover_transform", "User-Defined Transform")
     ]
-    wepp_bin_options = [(opt, opt) for opt in linux_wepp_bin_opts]
+    wepp_bin_options = [(opt, opt) for opt in get_linux_wepp_bin_opts()]
 
     _log_access(base_wd, current_user, request.remote_addr)
     timestamp = datetime.now()

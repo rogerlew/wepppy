@@ -254,6 +254,21 @@ def url_for(endpoint: str, **values) -> str:
 templates_env.globals['url_for'] = url_for
 templates_env.globals['site_prefix'] = SITE_PREFIX
 
+# Mirror Flask's versioned static helper for templates that expect it.
+_ASSET_VERSION = os.getenv('ASSET_VERSION', '').strip()
+
+
+def static_url(filename: str) -> str:
+    path = url_for('static', filename=filename)
+    if _ASSET_VERSION:
+        delimiter = '&' if '?' in path else '?'
+        return f'{path}{delimiter}v={_ASSET_VERSION}'
+    return path
+
+
+templates_env.globals['static_url'] = static_url
+templates_env.globals['asset_version'] = _ASSET_VERSION
+
 
 def render_template(template_name, **context):
     context.setdefault('site_prefix', SITE_PREFIX)

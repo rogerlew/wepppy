@@ -1100,6 +1100,7 @@ def api_run_wepp(runid, config):
         prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
         prep.remove_timestamp(TaskEnum.run_wepp_watershed)
         prep.remove_timestamp(TaskEnum.run_omni_scenarios)
+        prep.remove_timestamp(TaskEnum.run_path_cost_effective)
 
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
