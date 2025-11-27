@@ -199,15 +199,15 @@ var PathCE = (function () {
         });
     }
 
-    function setHint(controller, message, isError) {
-        if (controller.hint && typeof controller.hint.text === "function") {
-            controller.hint.text(message || "");
+    function setMessage(controller, message, isError) {
+        if (controller.message && typeof controller.message.text === "function") {
+            controller.message.text(message || "");
         }
-        if (controller.hintElement) {
+        if (controller.messageElement) {
             if (isError) {
-                controller.hintElement.classList.add("wc-field__help--error");
+                controller.messageElement.classList.add("wc-field__help--error");
             } else {
-                controller.hintElement.classList.remove("wc-field__help--error");
+                controller.messageElement.classList.remove("wc-field__help--error");
             }
         }
     }
@@ -243,9 +243,17 @@ var PathCE = (function () {
         var doc = window.document;
         var data = results && typeof results === "object" ? results : {};
         if (Object.keys(data).length === 0) {
-            var empty = doc.createElement("dt");
-            empty.textContent = "No results yet.";
-            summaryElement.appendChild(empty);
+            var emptyItem = doc.createElement("div");
+            emptyItem.className = "wc-summary-pane__item";
+            var emptyTerm = doc.createElement("dt");
+            emptyTerm.className = "wc-summary-pane__term";
+            emptyTerm.textContent = "Summary";
+            var emptyDef = doc.createElement("dd");
+            emptyDef.className = "wc-summary-pane__definition";
+            emptyDef.textContent = "No results yet.";
+            emptyItem.appendChild(emptyTerm);
+            emptyItem.appendChild(emptyDef);
+            summaryElement.appendChild(emptyItem);
             return;
         }
         var rows = [
@@ -258,12 +266,17 @@ var PathCE = (function () {
         ];
         var fragment = doc.createDocumentFragment();
         rows.forEach(function (entry) {
+            var item = doc.createElement("div");
+            item.className = "wc-summary-pane__item";
             var dt = doc.createElement("dt");
+            dt.className = "wc-summary-pane__term";
             dt.textContent = entry[0];
             var dd = doc.createElement("dd");
+            dd.className = "wc-summary-pane__definition";
             dd.textContent = entry[1];
-            fragment.appendChild(dt);
-            fragment.appendChild(dd);
+            item.appendChild(dt);
+            item.appendChild(dd);
+            fragment.appendChild(item);
         });
         summaryElement.appendChild(fragment);
     }
@@ -480,7 +493,8 @@ var PathCE = (function () {
             resultsFetchInFlight: false,
             lastStatusValue: null,
             lastEmittedStatus: null,
-            lastJobId: null
+            lastJobId: null,
+            statusStartedAt: null
         };
         controller.state = state;
         controller.job_status_poll_interval_ms = 1200;
@@ -489,6 +503,7 @@ var PathCE = (function () {
         controller.events = emitter;
 
         var formElement = dom.ensureElement("#path_ce_form", "PATH Cost-Effective form not found.");
+        var messageElement = dom.ensureElement("#path_ce_message", "PATH Cost-Effective message element missing.");
         var hintElement = dom.ensureElement("#path_ce_hint", "PATH Cost-Effective hint element missing.");
         var summaryElement = dom.ensureElement("#path_ce_summary", "PATH Cost-Effective summary element missing.");
         var jobElement = dom.ensureElement("#path_ce_rq_job", "PATH Cost-Effective job element missing.");
@@ -504,8 +519,10 @@ var PathCE = (function () {
         var jobAdapter = createLegacyAdapter(jobElement);
         var brailleAdapter = createLegacyAdapter(brailleElement);
         var infoAdapter = createLegacyAdapter(infoElement);
+        var messageAdapter = createLegacyAdapter(messageElement);
 
         controller.form = formElement;
+        controller.message = messageAdapter;
         controller.hint = hintAdapter;
         controller.stacktrace = stacktraceAdapter;
         controller.status = statusAdapter;
@@ -514,6 +531,7 @@ var PathCE = (function () {
         controller.info = infoAdapter;
         controller.summaryElement = summaryElement;
         controller.hintElement = hintElement;
+        controller.messageElement = messageElement;
         controller.brailleElement = brailleElement;
         controller.command_btn_id = ["path_ce_run"];
         controller.mulchCostInputs = Array.prototype.slice.call(
@@ -559,10 +577,23 @@ var PathCE = (function () {
         function applyStatus(payload) {
             var data = payload || {};
             var statusName = typeof data.status === "string" ? data.status.toLowerCase() : "";
+            var previousStatus = state.lastStatusValue;
+            var recentRun = state.statusStartedAt && Date.now() - state.statusStartedAt < 3000;
+            if (state.lastJobId && previousStatus === "running" && recentRun) {
+                // Ignore stale responses immediately after a new run kicks off
+                if (statusName && statusName !== "running") {
+                    return;
+                }
+            }
+
             state.lastStatusValue = statusName || null;
 
+            if (state.lastStatusValue === "running") {
+                state.statusStartedAt = Date.now();
+            }
+
             updateStatusMessage(controller, data.status || "");
-            setHint(controller, data.status_message || "", statusName === "failed");
+            setMessage(controller, data.status_message || "", statusName === "failed");
             updateBraille(controller, data.progress);
 
             emitEvent(controller, "pathce:status:update", { status: data });
@@ -665,19 +696,19 @@ var PathCE = (function () {
         });
 
         controller.fetchConfig = function () {
-            setHint(controller, "Loading PATH Cost-Effective configuration…");
+            setMessage(controller, "Loading PATH Cost-Effective configuration…");
             return http.getJson(ENDPOINTS.config(), { params: { _: Date.now() } })
                 .then(function (response) {
                     var config = response && response.config ? response.config : {};
                     applyConfig(config);
-                    setHint(controller, "");
+                    setMessage(controller, "");
                     if (controller.stacktrace && typeof controller.stacktrace.empty === "function") {
                         controller.stacktrace.empty();
                     }
                     return config;
                 })
                 .catch(function (error) {
-                    setHint(controller, "Failed to load configuration.", true);
+                    setMessage(controller, "Failed to load configuration.", true);
                     controller.pushErrorStacktrace(controller, error);
                     emitEvent(controller, "pathce:config:error", { error: error });
                     throw error;
@@ -686,13 +717,13 @@ var PathCE = (function () {
 
         controller.saveConfig = function () {
             var payload = buildPayload(forms, controller);
-            setHint(controller, "Saving configuration…");
+            setMessage(controller, "Saving configuration…");
             return http.postJson(ENDPOINTS.config(), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
                     var nextConfig = response && response.config ? response.config : payload;
                     applyConfig(nextConfig);
-                    setHint(controller, "Configuration saved.");
+                    setMessage(controller, "Configuration saved.");
                     if (controller.stacktrace && typeof controller.stacktrace.empty === "function") {
                         controller.stacktrace.empty();
                     }
@@ -700,7 +731,7 @@ var PathCE = (function () {
                     return response;
                 })
                 .catch(function (error) {
-                    setHint(controller, "Failed to save configuration.", true);
+                    setMessage(controller, "Failed to save configuration.", true);
                     controller.pushErrorStacktrace(controller, error);
                     emitEvent(controller, "pathce:config:error", { error: error });
                     throw error;
@@ -708,9 +739,27 @@ var PathCE = (function () {
         };
 
         controller.run = function () {
-            setHint(controller, "Starting PATH Cost-Effective run…");
+            if (typeof controller.reset_panel_state === "function") {
+                controller.reset_panel_state(controller, {
+                    clearJobHint: false,
+                    clearStacktrace: true
+                });
+            }
+            setMessage(controller, "Starting PATH Cost-Effective run…");
+            if (controller.stacktrace && typeof controller.stacktrace.empty === "function") {
+                controller.stacktrace.empty();
+            }
+            if (controller.status && typeof controller.status.text === "function") {
+                controller.status.text("");
+            }
+            var statusLog = dom.qs("#path_ce_status_panel [data-status-log]");
+            if (statusLog) {
+                statusLog.textContent = "";
+            }
+            state.statusStartedAt = Date.now();
+            var payload = buildPayload(forms, controller);
             stopPolling();
-            return http.postJson(ENDPOINTS.run(), {}, { form: formElement })
+            return http.postJson(ENDPOINTS.run(), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
                     var jobId = response && (response.job_id || response.jobId);
@@ -727,13 +776,13 @@ var PathCE = (function () {
                     }
                     controller.triggerEvent("job:started", { task: "pathce:run", job_id: state.lastJobId, response: response });
                     emitEvent(controller, "pathce:run:started", { job_id: state.lastJobId, response: response });
-                    setHint(controller, "PATH Cost-Effective job submitted. Monitoring status…");
+                    setMessage(controller, "PATH Cost-Effective job submitted. Monitoring status…");
                     startPolling();
                     refreshResults();
                     return response;
                 })
                 .catch(function (error) {
-                    setHint(controller, "Failed to enqueue PATH Cost-Effective run.", true);
+                    setMessage(controller, "Failed to enqueue PATH Cost-Effective run.", true);
                     controller.pushErrorStacktrace(controller, error);
                     controller.set_rq_job_id(controller, null);
                     state.lastEmittedStatus = "error";
@@ -741,6 +790,38 @@ var PathCE = (function () {
                     controller.triggerEvent("job:error", { task: "pathce:run", error: error });
                     throw error;
                 });
+        };
+
+        controller.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "pathCe")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_path_ce")
+                : null;
+
+            if (!jobId && controllerContext && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_path_ce")) {
+                    var value = jobIds.run_path_ce;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            state.lastJobId = jobId || null;
+
+            if (typeof controller.set_rq_job_id === "function") {
+                controller.set_rq_job_id(controller, jobId || null);
+            }
         };
 
         controller.init = function () {

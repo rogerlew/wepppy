@@ -18,6 +18,7 @@ describe("PathCE controller", () => {
                 <div id="path_ce_rq_job"></div>
                 <span id="path_ce_braille"></span>
                 <dl id="path_ce_summary"></dl>
+                <p id="path_ce_message"></p>
                 <p id="path_ce_hint"></p>
                 <input id="path_ce_sddc_threshold" name="sddc_threshold" type="number">
                 <input id="path_ce_sdyd_threshold" name="sdyd_threshold" type="number">
@@ -226,7 +227,7 @@ describe("PathCE controller", () => {
             if (url === "api/path_ce/status") {
                 statusCalls += 1;
                 if (statusCalls === 1) {
-                    return Promise.resolve({ status: "idle", status_message: "", progress: 0 });
+                    return Promise.resolve({ status: "completed", status_message: "Stale", progress: 1 });
                 }
                 return Promise.resolve({ status: "completed", status_message: "Done", progress: 1 });
             }
@@ -240,11 +241,19 @@ describe("PathCE controller", () => {
             return Promise.resolve({ body: { Success: true, job_id: "job-42" } });
         });
 
+        const stacktrace = document.querySelector("#path_ce_stacktrace");
+        const status = document.querySelector("#status");
+        stacktrace.textContent = "Old stacktrace";
+        status.textContent = "Old status";
+
         const controller = getController();
         await Promise.resolve();
         await Promise.resolve();
 
-        await controller.run();
+        const runPromise = controller.run();
+        expect(stacktrace.textContent).toBe("");
+        expect(status.textContent).toBe("");
+        await runPromise;
         await Promise.resolve();
         await Promise.resolve();
 
@@ -258,6 +267,9 @@ describe("PathCE controller", () => {
             expect.objectContaining({ job_id: "job-42" })
         );
         expect(httpGetJson).toHaveBeenCalledWith("api/path_ce/status", expect.any(Object));
+        // Stale completed status should be ignored immediately after run
+        const statusLog = document.querySelector("#status");
+        expect(statusLog.textContent).toBe("");
     });
 
     test("fetchConfig failure records error hint and emits config error", async () => {
@@ -283,7 +295,18 @@ describe("PathCE controller", () => {
             "pathce:config:error",
             expect.objectContaining({ error: expect.any(Error) })
         );
-        const hint = document.querySelector("#path_ce_hint");
-        expect(hint.classList.contains("wc-field__help--error")).toBe(true);
+        const message = document.querySelector("#path_ce_message");
+        expect(message.classList.contains("wc-field__help--error")).toBe(true);
+    });
+
+    test("bootstrap rehydrates job id from context", async () => {
+        primeHttpMocks();
+        const controller = getController();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        controller.bootstrap({ jobIds: { run_path_ce: "ce-job-1" } });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "ce-job-1");
     });
 });

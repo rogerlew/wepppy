@@ -100,6 +100,7 @@ Controllers (e.g., subcatchment_delineation.js)
 | `watar` | WATAR (ash transport) run | `TaskEnum.run_watar` |
 | `wepp` | WEPP model run | `TaskEnum.run_wepp_watershed` |
 | `omni_scenarios` | Omni scenario runner completed after the latest WEPP run | `TaskEnum.run_omni_scenarios` |
+| `run_path_ce` | PATH Cost-Effective solver completed | `TaskEnum.run_path_cost_effective` |
 
 ---
 

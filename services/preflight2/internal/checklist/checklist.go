@@ -36,6 +36,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"debris":          false,
 		"watar":           false,
 		"dss_export":      false,
+		"run_path_ce":     false,
 	}
 
 	buildChannels := prep["timestamps:build_channels"]
@@ -78,6 +79,9 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_watar"], runWepp)
 
 	check["omni_scenarios"] = safeGT(prep["timestamps:run_omni_scenarios"], runWepp)
+
+	runPathCe := prep["timestamps:run_path_ce"]
+	check["run_path_ce"] = safeGT(runPathCe, runWepp)
 
 	check["rhem"] = prep["timestamps:run_rhem"] != ""
 

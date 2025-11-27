@@ -172,6 +172,38 @@ def test_run_enqueues_job(path_ce_client):
     assert queue_call.args == (RUN_ID,)
 
 
+def test_run_persists_config_before_enqueue(path_ce_client):
+    client, PathCEStub, RonStub, DisturbedStub, rq_environment, run_dir = path_ce_client
+    controller = PathCEStub.getInstance(run_dir)
+    ron = RonStub.getInstance(run_dir)
+    ron.mods = ["path_ce"]
+    DisturbedStub.getInstance(run_dir).has_sbs = True
+
+    payload = {
+        "sddc_threshold": "12",
+        "sdyd_threshold": "4.5",
+        "slope_min": "1",
+        "slope_max": "9",
+        "severity_filter": ["High"],
+        "mulch_costs": {"mulch_15_sbs_map": "111", "mulch_30_sbs_map": 222},
+    }
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/path_cost_effective_run",
+        json=payload,
+    )
+
+    assert response.status_code == 200
+    # Config should be persisted on controller prior to enqueue
+    assert controller.config["sddc_threshold"] == 12.0
+    assert controller.config["slope_range"] == [1.0, 9.0]
+    assert controller.config["mulch_costs"]["mulch_15_sbs_map"] == 111.0
+
+    queue_call = rq_environment.recorder.queue_calls[0]
+    assert queue_call.func is path_ce_module.run_path_cost_effective_rq
+    assert queue_call.args == (RUN_ID,)
+
+
 def test_run_requires_sbs_map(path_ce_client):
     client, PathCEStub, RonStub, DisturbedStub, *_rest = path_ce_client
     run_dir = _rest[-1]

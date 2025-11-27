@@ -7,8 +7,8 @@
 - **Template (`wepppy/weppcloud/templates/controls/path_cost_effective_pure.htm`)** renders generic threshold/filter fields plus a dynamic treatments table (scenario key, quantity, unit cost, fixed cost). Nothing enforces the mulch trio or $/ha.
 - **Routes (`wepppy/weppcloud/routes/nodb_api/path_ce_bp.py:83-194`)** only manage config/status/results and enqueue `run_path_cost_effective_rq`; they assume Omni artifacts already exist and do not validate SBS map/Omni readiness.
 - **RQ task (`wepppy/rq/path_ce_rq.py:20-58`)** immediately calls `PathCostEffective.run()`; no Omni orchestration or freshness check.
-- **NoDb/controller (`wepppy/nodb/mods/path_ce/path_cost_effective.py:47-117, 316-379`)** defaults to post-fire `sbs_map`, undisturbed baseline, and three mulch options with zero costs. It pulls Omni parquet outputs from `_pups/omni` and fails fast if scenarios are missing.
-- **Data loader (`wepppy/nodb/mods/path_ce/data_loader.py:64-129`)** expects `_pups/omni/scenarios.hillslope_summaries.parquet` and `contrasts.out.parquet` plus `watershed/hillslopes.parquet`; scenario names must match the configured treatment options.
+- **NoDb/controller (`wepppy/nodb/mods/path_ce/path_cost_effective.py:47-117, 316-379`)** defaults to post-fire `sbs_map`, undisturbed baseline, and three mulch options with zero costs. It pulls Omni parquet outputs from `omni/` and fails fast if scenarios are missing.
+- **Data loader (`wepppy/nodb/mods/path_ce/data_loader.py:64-129`)** expects `omni/scenarios.hillslope_summaries.parquet` and `omni/contrasts.out.parquet` plus `watershed/hillslopes.parquet`; scenario names must match the configured treatment options.
 - **Legacy prototype** (`wepppy/nodb/mods/path_ce_model.py`) is unused and diverges from the newer controller/solver path.
 
 ## Gaps vs Desired Flow

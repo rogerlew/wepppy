@@ -4,8 +4,8 @@
 Embed the existing PATH Cost-Effective optimization workflow inside the `PathCostEffective` NoDb controller so the model runs from within WEPPcloud using Omni scenario outputs and watershed parquet data.
 
 ## Required Inputs
-- **Omni scenario hillslope summaries**: `_pups/omni/scenarios.hillslope_summaries.parquet`
-- **Omni scenario outlet report**: `_pups/omni/contrasts.out.parquet`
+- **Omni scenario hillslope summaries**: `omni/scenarios.hillslope_summaries.parquet`
+- **Omni scenario outlet report**: `omni/contrasts.out.parquet`
 - **Watershed hillslopes parquet** (source of `slope_scalar`, geometry metadata): `watershed/hillslopes.parquet`
 - Optional future extensions: path-specific config stored under `<wd>/path/*.json`
 

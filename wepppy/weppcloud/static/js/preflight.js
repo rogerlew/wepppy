@@ -227,7 +227,8 @@ function getSelectorForKey(key) {
         "observed": 'a[href="#observed"]',
         "debris": 'a[href="#debris-flow"]',
         "watar": 'a[href="#ash"]',
-        "dss_export": 'a[href="#dss-export"]'
+        "dss_export": 'a[href="#dss-export"]',
+        "run_path_ce": 'a[href="#path-cost-effective"]'
     };
 
     return mapping[key];

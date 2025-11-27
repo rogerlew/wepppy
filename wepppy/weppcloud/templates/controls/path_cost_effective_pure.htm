@@ -15,17 +15,17 @@
      collapsible=False,
      description=description,
      status_panel_options={
-       "id": "path_ce_status_panel",
-       "job_id": "path_ce_rq_job",
-       "braille_id": "path_ce_braille"
+     "id": "path_ce_status_panel",
+     "job_id": "path_ce_rq_job",
+     "braille_id": "path_ce_braille"
      },
      summary_panel_options={
-       "body_html": '<dl class="wc-summary-list" id="path_ce_summary"></dl>'
+       "body_html": '<div class="wc-summary-pane"><dl class="wc-summary-pane__list" id="path_ce_summary"></dl></div>'
      },
      stacktrace_panel_options={
        "panel_id": "path_ce_stacktrace_panel",
        "body_id": "path_ce_stacktrace",
-       "description": "Appears when an exception occurs."
+       "description": "<p class='wc-field__help'>Appears when an exception occurs.</p><p id='path_ce_message' class='wc-field__help' aria-live='polite'></p>"
      }
    ) %}
 
@@ -194,13 +194,6 @@
   </fieldset>
 
   {% call button_row() %}
-    <button
-      id="path_ce_save"
-      type="button"
-      class="pure-button"
-      data-pathce-action="save-config">
-      Save Configuration
-    </button>
     <button
       id="path_ce_run"
       type="button"

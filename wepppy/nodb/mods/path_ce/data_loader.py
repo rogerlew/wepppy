@@ -14,8 +14,6 @@ from typing import Iterable, List, Mapping, MutableMapping, Optional, Sequence
 import numpy as np
 import pandas as pd
 
-from wepppy.nodb.mods.omni.omni import OMNI_REL_DIR
-
 DEFAULT_SEVERITY_MAP = {
     "High": {105, 119, 129},
     "Moderate": {118, 120, 130},
@@ -52,9 +50,27 @@ class PathCEDataError(RuntimeError):
     """Raised when required Omni or watershed artifacts are missing or malformed."""
 
 
+def _resolve_omni_dir(wd_path: Path) -> Path:
+    """Return the canonical Omni directory."""
+
+    omni_dir = wd_path / "omni"
+    if omni_dir.exists():
+        return omni_dir
+
+    raise PathCEDataError(
+        f"Omni outputs not found; expected directory at {omni_dir}"
+    )
+
+
 def _read_parquet(path: Path) -> pd.DataFrame:
+    return _read_parquet_optional(path, required=True)
+
+
+def _read_parquet_optional(path: Path, *, required: bool = False) -> Optional[pd.DataFrame]:
     if not path.exists():
-        raise PathCEDataError(f"Required parquet file missing: {path}")
+        if required:
+            raise PathCEDataError(f"Required parquet file missing: {path}")
+        return None
     try:
         return pd.read_parquet(path)
     except Exception as exc:  # pragma: no cover - pandas/pyarrow exceptions are diverse
@@ -96,10 +112,10 @@ def load_solver_inputs(
         raise PathCEDataError("At least one treatment option must be provided.")
 
     wd_path = Path(wd)
-    omni_dir = wd_path / OMNI_REL_DIR
+    omni_dir = _resolve_omni_dir(wd_path)
 
     hillslope_df = _read_parquet(omni_dir / "scenarios.hillslope_summaries.parquet")
-    outlet_df = _read_parquet(omni_dir / "contrasts.out.parquet")
+    outlet_df = _read_parquet_optional(omni_dir / "contrasts.out.parquet", required=False)
     watershed_df = _read_parquet(wd_path / "watershed" / "hillslopes.parquet")
 
     scenario_lookup = {option.label: option.scenario for option in treatment_options}
@@ -132,7 +148,7 @@ def load_solver_inputs(
 def _prepare_solver_dataframe(
     *,
     hillslope_df: pd.DataFrame,
-    outlet_df: pd.DataFrame,
+    outlet_df: Optional[pd.DataFrame],
     watershed_df: pd.DataFrame,
     post_fire_scenario: str,
     undisturbed_scenario: Optional[str],
@@ -181,6 +197,7 @@ def _prepare_solver_dataframe(
             outlet_df=outlet_df,
             treatment_label=option.label,
             scenario_key=option.scenario,
+            allow_missing=True,
         )
 
     severity_lookup = _invert_severity_map(severity_map)
@@ -236,14 +253,29 @@ def _group_by_scenario(hillslope_df: pd.DataFrame) -> MutableMapping[str, pd.Dat
 
 def _normalize_keys(df: pd.DataFrame) -> pd.DataFrame:
     normalized = df.copy()
-    normalized.rename(
-        columns={
-            "WeppID": "wepp_id",
-            "TopazID": "topaz_id",
-            "Landuse": "landuse",
-        },
-        inplace=True,
-    )
+    rename_candidates = {
+        "WeppID": "wepp_id",
+        "Wepp ID": "wepp_id",
+        "TopazID": "topaz_id",
+        "Topaz ID": "topaz_id",
+        "Landuse": "landuse",
+        "Landuse Key": "landuse",
+    }
+    rename_map = {source: target for source, target in rename_candidates.items() if source in normalized}
+    normalized.rename(columns=rename_map, inplace=True)
+
+    required = ("wepp_id", "topaz_id", "landuse")
+    missing = [col for col in required if col not in normalized]
+    if missing:
+        raise PathCEDataError(
+            f"Required columns {missing} missing from hillslope summaries; found columns: {list(normalized.columns)}"
+        )
+
+    if "Hillslope Area (ha)" not in normalized:
+        for candidate in ("Landuse Area (ha)", "Area (ha)"):
+            if candidate in normalized:
+                normalized["Hillslope Area (ha)"] = normalized[candidate]
+                break
     return normalized
 
 
@@ -276,16 +308,35 @@ def _attach_metrics(target: pd.DataFrame, source: pd.DataFrame, metric_suffix: s
 def _attach_outlet_metrics(
     *,
     target: pd.DataFrame,
-    outlet_df: pd.DataFrame,
+    outlet_df: Optional[pd.DataFrame],
     treatment_label: str,
     scenario_key: str,
+    allow_missing: bool = False,
 ) -> pd.DataFrame:
+    def _ensure_outlet_columns(df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+        if "Sddc post-fire" not in df:
+            df["Sddc post-fire"] = np.nan
+        sddc_col = f"Sddc post-treat {treatment_label}"
+        if sddc_col not in df:
+            df[sddc_col] = np.nan
+        return df
+
+    if outlet_df is None or outlet_df.empty:
+        if allow_missing:
+            return _ensure_outlet_columns(target)
+        raise PathCEDataError(
+            f"No outlet contrasts available for scenario '{scenario_key}'."
+        )
+
     matches = outlet_df[
         (outlet_df["key"] == SEDIMENT_DISCHARGE_KEY)
         & outlet_df["contrast"].astype(str).str.endswith(scenario_key)
     ].copy()
 
     if matches.empty:
+        if allow_missing:
+            return _ensure_outlet_columns(target)
         raise PathCEDataError(
             f"No outlet sediment discharge contrasts found for scenario '{scenario_key}'."
         )
@@ -322,6 +373,11 @@ def _compute_reductions(
     treatment_options: Sequence[TreatmentOption],
 ) -> pd.DataFrame:
     df = df.copy()
+    sddc_post_fire = pd.to_numeric(
+        df.get("Sddc post-fire", pd.Series(np.nan, index=df.index)),
+        errors="coerce",
+    )
+    df["Sddc post-fire"] = sddc_post_fire
 
     for option in treatment_options:
         label = option.label
@@ -330,7 +386,12 @@ def _compute_reductions(
         ntu_col = f"NTU post-treat {label}"
 
         df[f"Sdyd reduction {label}"] = df["Sdyd post-fire"] - df[sdyd_col]
-        df[f"Sddc reduction {label}"] = df["Sddc post-fire"] - df[sddc_col]
+        sddc_post_treat = pd.to_numeric(
+            df.get(sddc_col, pd.Series(np.nan, index=df.index)),
+            errors="coerce",
+        )
+        df[sddc_col] = sddc_post_treat
+        df[f"Sddc reduction {label}"] = sddc_post_fire - sddc_post_treat
         df[f"NTU reduction {label}"] = df["NTU post-fire"] - df[ntu_col]
 
     df["Burn severity"] = df["Burn severity"].fillna("Unknown")

@@ -20,7 +20,7 @@ def task_set_unit_preferences(runid, config):
             for key, value in payload.items()
             if value is not None
         }
-        res = unitizer.set_preferences(preferences)
+        res = unitizer.set_preferences(preferences, strict=False)
         return success_factory({'preferences': res})
     except Exception:
         return exception_factory('Error setting unit preferences', runid=runid)

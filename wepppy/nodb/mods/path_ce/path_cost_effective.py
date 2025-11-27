@@ -278,6 +278,12 @@ class PathCostEffective(NoDbBase):
                 fallback = {}
         self._config = _normalize_config(fallback)
 
+    def persist_config_snapshot(self) -> None:
+        """Force-save the current configuration without mutating status fields."""
+        with self.locked():
+            self._ensure_config_shape()
+            self._config = _normalize_config(self._config)
+
     # ------------------------------------------------------------------
     # Results & status management
     # ------------------------------------------------------------------

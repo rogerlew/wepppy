@@ -196,7 +196,12 @@ def run_path_cost_effective(runid: str, config: str) -> Response:
     if "path_ce" not in (ron.mods or []):
         return error_factory("PATH Cost-Effective module is not enabled for this run.")
 
-    _ensure_controller(wd, f"{config}.cfg")
+    controller = _ensure_controller(wd, f"{config}.cfg")
+    raw_payload = parse_request_payload(request)
+    if raw_payload:
+        payload = _build_config_payload(raw_payload)
+        controller.config = payload
+        controller.persist_config_snapshot()
 
     if not Disturbed.getInstance(wd).has_sbs:
         return error_factory("PATH Cost-Effective requires an SBS map. Upload or configure one in Disturbed before running.")
