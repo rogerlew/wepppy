@@ -34,3 +34,18 @@ Utilities for in-place standardization of legacy run assets. All scripts are exe
   - **Purpose:** re-runs AshPost when legacy `ash/post/*.pkl` artifacts are present, rebuilding parquet outputs and optionally removing the pickles.
   - **Metrics:** counts pickles, presence of raw ash parquet inputs, number of parquet outputs after migration, and runtime.
   - **Common flags:** `--root`, `--contains`, `--limit`, `--dry-run`, `--log-file`, `--verbose`, plus `--remove-pickles` to delete `.pkl` files after a successful run.
+
+- `migrate_interchange.py`
+  - **Purpose:** converts legacy WEPP text output files to Parquet format (interchange), enabling faster queries and modern analytics workflows.
+  - **Behavior:** idempotent—skips runs that already have interchange files unless `--force` is specified. Generates hillslope interchange, watershed interchange (if outputs exist), totalwatsed3, and documentation.
+  - **Common flags:** `run_dir` positional, `--force` to regenerate existing interchange.
+
+- `migrate_observed_nodb.py`
+  - **Purpose:** migrates legacy `observed.nodb` files from old module path (`wepppy.nodb.observed.Observed`) to the new path (`wepppy.nodb.mods.observed.observed.Observed`).
+  - **Behavior:** creates a `.bak` backup before modifying. Skips files already migrated or with unknown `py/object` types.
+  - **Common flags:** `run_dir` positional (path to run directory containing `observed.nodb`).
+
+- `migrate_run_paths.py`
+  - **Purpose:** migrates hardcoded paths in `.nodb` files from old server locations to new locations (e.g., `/geodata/wc1/` → `/wc1/`).
+  - **Behavior:** recursively walks JSON structures to replace path prefixes. Creates `.bak` backups. Optionally clears Redis cache for the run after migration.
+  - **Common flags:** `run_dir` positional, `--old-prefix` (default `/geodata/wc1`), `--new-prefix` (default `/wc1`), `--dry-run`, `--no-clear-cache`.

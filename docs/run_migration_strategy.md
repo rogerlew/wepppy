@@ -21,6 +21,9 @@
   - `migrate_landuse_parquet.py` — add/normalize `topaz_id`/`wepp_id` in landuse parquet.
   - `migrate_soils_parquet.py` — same for soils parquet.
   - `migrate_ashpost_pickles.py` — rebuild ash outputs from pickles.
+  - `migrate_interchange.py` — convert WEPP text outputs to Parquet interchange format.
+  - `migrate_observed_nodb.py` — migrate `observed.nodb` module paths from legacy to new location.
+  - `migrate_run_paths.py` — remap hardcoded paths in `.nodb` files (e.g., `/geodata/wc1/` → `/wc1/`).
 - RQ helper: `wepppy/rq/interchange_rq.py::run_interchange_migration` regenerates interchange outputs once prerequisites exist.
 - Archive/restore flow: `wepppy/rq/project_rq.py` + `wepppy/weppcloud/routes/archive_dashboard` is the rollback mechanism we should reuse for migrations.
 
