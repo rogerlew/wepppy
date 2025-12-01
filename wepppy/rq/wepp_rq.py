@@ -890,7 +890,15 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         climate = Climate.getInstance(wd)
         start_year = climate.calendar_start_year
-        run_wepp_hillslope_interchange(_join(wd, 'wepp/output'), start_year=start_year)
+        is_single_storm = climate.is_single_storm
+        # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat files
+        run_wepp_hillslope_interchange(
+            _join(wd, 'wepp/output'),
+            start_year=start_year,
+            run_loss_interchange=not is_single_storm,
+            run_soil_interchange=not is_single_storm,
+            run_wat_interchange=not is_single_storm,
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

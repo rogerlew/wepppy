@@ -30,6 +30,15 @@ _REQUIRED_WATERSHED_OUTPUTS: tuple[str, ...] = (
     "loss_pw0.txt",
 )
 
+# Single storm runs don't produce soil_pw0.txt or chnwb.txt
+_REQUIRED_WATERSHED_OUTPUTS_SINGLE_STORM: tuple[str, ...] = (
+    "pass_pw0.txt",
+    "chan.out",
+    "chanwb.out",
+    "ebe_pw0.txt",
+    "loss_pw0.txt",
+)
+
 
 def _with_gzip(path: Path) -> Path:
     """Return a path with a `.gz` suffix appended."""
@@ -86,7 +95,17 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
             )
             return False
 
-        missing = _missing_wepp_outputs(wepp_output_dir, _REQUIRED_WATERSHED_OUTPUTS)
+        climate = Climate.getInstance(wd)
+        is_single_storm = climate.is_single_storm
+        start_year: Optional[int] = climate.calendar_start_year
+
+        # Single storm runs don't produce soil_pw0.txt or chnwb.txt
+        required_outputs = (
+            _REQUIRED_WATERSHED_OUTPUTS_SINGLE_STORM
+            if is_single_storm
+            else _REQUIRED_WATERSHED_OUTPUTS
+        )
+        missing = _missing_wepp_outputs(wepp_output_dir, required_outputs)
 
         if not wepp_output_subpath and missing:
             StatusMessenger.publish(
@@ -95,13 +114,22 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
             )
             return False
 
-        climate = Climate.getInstance(wd)
-        start_year: Optional[int] = climate.calendar_start_year
-
-        interchange_dir = run_wepp_hillslope_interchange(wepp_output_dir, start_year=start_year)
+        # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat hillslope files
+        interchange_dir = run_wepp_hillslope_interchange(
+            wepp_output_dir,
+            start_year=start_year,
+            run_loss_interchange=not is_single_storm,
+            run_soil_interchange=not is_single_storm,
+            run_wat_interchange=not is_single_storm,
+        )
 
         if not missing:
-            run_wepp_watershed_interchange(wepp_output_dir, start_year=start_year)
+            run_wepp_watershed_interchange(
+                wepp_output_dir,
+                start_year=start_year,
+                run_soil_interchange=not is_single_storm,
+                run_chnwb_interchange=not is_single_storm,
+            )
 
         wepp = Wepp.getInstance(wd)
         run_totalwatsed3(interchange_dir, baseflow_opts=wepp.baseflow_opts)

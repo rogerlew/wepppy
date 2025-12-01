@@ -35,7 +35,7 @@
   {% endif %}
 {%- endmacro %}
 
-{% set outlet_rows = out_rpt.rows(include_extraneous=extraneous) %}
+{% set outlet_rows = out_rpt.rows(include_extraneous=extraneous) if out_rpt else [] %}
 {% set extraneous_value = 'true' if extraneous else 'false' %}
 {% set extraneous_toggle_value = 'false' if extraneous else 'true' %}
 
@@ -51,6 +51,16 @@
   </p>
 </header>
 
+{% if out_rpt is none and hill_rpt is none and chn_rpt is none %}
+<div class="wc-panel wc-panel--warning wc-stack">
+  <p class="wc-text-muted">
+    <strong>Reports not available:</strong> The loss summary reports could not be generated.
+    This may occur if the interchange files are missing or corrupted. Try re-running the WEPP model
+    or regenerating the interchange files.
+  </p>
+</div>
+{% else %}
+
 <div class="wc-inline">
   {% if extraneous %}
     <a class="pure-button pure-button-link"
@@ -65,6 +75,7 @@
   {% endif %}
 </div>
 
+{% if out_rpt %}
 <section class="wc-panel wc-stack">
   <header class="wc-stack">
     <h2 class="wc-heading__subtitle">Outlet summary</h2>
@@ -108,7 +119,9 @@
     </button>
   </div>
 </section>
+{% endif %}
 
+{% if hill_rpt %}
 <section class="wc-panel wc-stack">
   <header class="wc-stack">
     <h2 class="wc-heading__subtitle">Hillslope summary</h2>
@@ -152,7 +165,9 @@
     </button>
   </div>
 </section>
+{% endif %}
 
+{% if chn_rpt %}
 <section class="wc-panel wc-stack">
   <header class="wc-stack">
     <h2 class="wc-heading__subtitle">Channel summary</h2>
@@ -196,4 +211,6 @@
     </button>
   </div>
 </section>
+{% endif %}
+{% endif %}
 {% endblock %}

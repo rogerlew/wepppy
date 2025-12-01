@@ -46,6 +46,25 @@ def _publish_status(channel: str, job_id: str, label: str, detail: str | None = 
     StatusMessenger.publish(channel, message)
 
 
+def _publish_exception(channel: str, job_id: str, exc: Exception) -> None:
+    """Publish an exception with full traceback to the status channel."""
+    import traceback
+    
+    error_msg = str(exc)
+    tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+    tb_text = "".join(tb_lines)
+    
+    # Publish the exception info as a JSON payload for the dashboard
+    import json
+    payload = json.dumps({
+        "type": "EXCEPTION",
+        "job_id": job_id,
+        "Error": error_msg,
+        "StackTrace": tb_lines,
+    })
+    StatusMessenger.publish(channel, f"rq:{job_id} EXCEPTION_JSON {payload}")
+
+
 def _normalize_host(source_host: str) -> str:
     if not source_host:
         raise ValueError("source_host is required")
@@ -57,8 +76,10 @@ def _normalize_host(source_host: str) -> str:
 
 
 def _require_component_safe(component: str, label: str) -> str:
-    candidate = Path(component).name
-    if not candidate or candidate != component or candidate in {".", ".."}:
+    # Strip leading/trailing whitespace and slashes
+    cleaned = component.strip().strip("/") if component else ""
+    candidate = Path(cleaned).name if cleaned else ""
+    if not candidate or candidate != cleaned or candidate in {".", ".."}:
         raise ValueError(f"Invalid {label}: {component}")
     return candidate
 
@@ -208,12 +229,18 @@ def run_sync_rq(
     job = get_current_job()
     job_id = getattr(job, "id", "unknown")
     func_name = inspect.currentframe().f_code.co_name
-    status_channel = _status_channel(runid)
+    
+    # Use raw runid for status channel (before validation) so errors can be reported
+    status_channel = _status_channel(runid.rstrip("/") if runid else "unknown")
     _publish_status(status_channel, job_id, f"STARTED {func_name}({runid})")
 
-    normalized_runid = _require_component_safe(runid, "runid")
-    normalized_config = _require_component_safe(config or DEFAULT_CONFIG, "config")
-    normalized_host = _normalize_host(source_host)
+    try:
+        normalized_runid = _require_component_safe(runid, "runid")
+        normalized_config = _require_component_safe(config or DEFAULT_CONFIG, "config")
+        normalized_host = _normalize_host(source_host)
+    except Exception as e:
+        _publish_exception(status_channel, job_id, e)
+        raise
 
     if job is not None:
         job.meta["runid"] = normalized_runid
@@ -284,8 +311,8 @@ def run_sync_rq(
             "version_at_pull": version_at_pull,
             "pulled_at": pulled_at.isoformat(),
         }
-    except Exception:
-        _publish_status(status_channel, job_id, "EXCEPTION", f"{func_name}({normalized_runid}, {normalized_config})")
+    except Exception as e:
+        _publish_exception(status_channel, job_id, e)
         _upsert_migration_row(
             run_root,
             normalized_runid,

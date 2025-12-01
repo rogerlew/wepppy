@@ -506,13 +506,29 @@ def report_wepp_loss(runid, config):
 
     wd = get_wd(runid)
     is_singlestorm = Climate.getInstance(wd).is_single_storm
-    out_rpt = OutletSummaryReport(wd)
-    hill_rpt = HillSummaryReport(wd)
-    chn_rpt = ChannelSummaryReport(wd)
+    
+    # Try to instantiate reports - they may fail if interchange files are missing
+    try:
+        out_rpt = OutletSummaryReport(wd)
+    except Exception:
+        out_rpt = None
+        
+    try:
+        hill_rpt = HillSummaryReport(wd)
+    except Exception:
+        hill_rpt = None
+        
+    try:
+        chn_rpt = ChannelSummaryReport(wd)
+    except Exception:
+        chn_rpt = None
+    
     unitizer = Unitizer.getInstance(wd)
     ron = Ron.getInstance(wd)
 
     if _wants_csv():
+        if out_rpt is None:
+            abort(400, description="CSV export not available - reports not generated")
         table_key = (request.args.get('table') or 'outlet').lower()
         if table_key == 'outlet':
             df = _build_outlet_summary_dataframe(out_rpt, unitizer, include_extraneous=extraneous)
@@ -523,6 +539,8 @@ def report_wepp_loss(runid, config):
                 table=table_key,
             )
         elif table_key == 'hillslopes':
+            if hill_rpt is None:
+                abort(400, description="Hillslopes report not available")
             return _render_report_csv(
                 runid=runid,
                 report=hill_rpt,
@@ -531,6 +549,8 @@ def report_wepp_loss(runid, config):
                 table=table_key,
             )
         elif table_key == 'channels':
+            if chn_rpt is None:
+                abort(400, description="Channels report not available")
             return _render_report_csv(
                 runid=runid,
                 report=chn_rpt,

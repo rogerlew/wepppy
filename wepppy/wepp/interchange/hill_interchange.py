@@ -17,7 +17,33 @@ except Exception:  # pragma: no cover - optional dependency
 
 LOGGER = logging.getLogger(__name__)
 
-def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: int | None = None) -> Path:
+
+def run_wepp_hillslope_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    start_year: int | None = None,
+    run_loss_interchange: bool = True,
+    run_soil_interchange: bool = True,
+    run_wat_interchange: bool = True,
+) -> Path:
+    """Generate hillslope interchange parquet files.
+
+    Args:
+        wepp_output_dir: Path to WEPP output directory containing hillslope data files.
+        start_year: Optional start year for time-series outputs.
+        run_loss_interchange: When False, skip hillslope loss interchange.
+            Single storm runs don't produce .loss.dat files.
+        run_soil_interchange: When False, skip hillslope soil interchange.
+            Single storm runs don't produce .soil.dat files.
+        run_wat_interchange: When False, skip hillslope water balance interchange.
+            Single storm runs don't produce .wat.dat files.
+
+    Returns:
+        Path to the interchange directory.
+
+    Raises:
+        FileNotFoundError: If required output files are missing.
+    """
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -27,20 +53,25 @@ def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: i
     except (TypeError, ValueError):
         start_year = None
 
-
     interchange_dir = base / "interchange"
     remove_incompatible_interchange(interchange_dir)
 
     expected_hillslopes = _expected_hillslopes(base)
 
+    # Core outputs that exist for all run types
     results = {
         "pass": run_wepp_hillslope_pass_interchange(base, expected_hillslopes=expected_hillslopes),
         "ebe": run_wepp_hillslope_ebe_interchange(base, start_year=start_year, expected_hillslopes=expected_hillslopes),
         "element": run_wepp_hillslope_element_interchange(base, start_year=start_year, expected_hillslopes=expected_hillslopes),
-        "loss": run_wepp_hillslope_loss_interchange(base, expected_hillslopes=expected_hillslopes),
-        "soil": run_wepp_hillslope_soil_interchange(base, expected_hillslopes=expected_hillslopes),
-        "wat": run_wepp_hillslope_wat_interchange(base, expected_hillslopes=expected_hillslopes),
     }
+
+    # Optional outputs that may not exist for single storm runs
+    if run_loss_interchange:
+        results["loss"] = run_wepp_hillslope_loss_interchange(base, expected_hillslopes=expected_hillslopes)
+    if run_soil_interchange:
+        results["soil"] = run_wepp_hillslope_soil_interchange(base, expected_hillslopes=expected_hillslopes)
+    if run_wat_interchange:
+        results["wat"] = run_wepp_hillslope_wat_interchange(base, expected_hillslopes=expected_hillslopes)
 
     missing = [name for name, path in results.items() if path is None or not Path(path).exists()]
     if missing:

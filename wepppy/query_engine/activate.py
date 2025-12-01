@@ -60,18 +60,20 @@ def activate_query_engine(
 
     if run_interchange:
         start_year = None
+        is_single_storm = False
         try:
             from wepppy.nodb.core.climate import Climate  # local import to avoid heavy deps during import
 
             climate = Climate.getInstance(str(base))
             start_year = climate.calendar_start_year
+            is_single_storm = climate.is_single_storm
         except Exception:  # pragma: no cover - best effort
             LOGGER.debug(
                 "Unable to infer start_year from climate for %s; proceeding without override",
                 base,
                 exc_info=True,
             )
-        _ensure_interchange(base, start_year=start_year)
+        _ensure_interchange(base, start_year=start_year, is_single_storm=is_single_storm)
 
     catalog_entries = _build_catalog(base)
 
@@ -164,12 +166,13 @@ def update_catalog_entry(
     return updated_entry
 
 
-def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
+def _ensure_interchange(base: Path, *, start_year: int | None, is_single_storm: bool = False) -> None:
     """Generate WEPP interchange outputs when missing.
 
     Args:
         base: Working directory path.
         start_year: Optional start year override for climate-aware runs.
+        is_single_storm: Whether this is a single storm run (affects which outputs exist).
     """
     try:
         start_year = int(start_year)  # type: ignore
@@ -199,8 +202,20 @@ def _ensure_interchange(base: Path, *, start_year: int | None) -> None:
 
         LOGGER.info("Generating interchange outputs for %s", output_dir)
         try:
-            run_wepp_hillslope_interchange(output_dir, start_year=start_year)
-            run_wepp_watershed_interchange(output_dir, start_year=start_year)
+            # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat hillslope files
+            run_wepp_hillslope_interchange(
+                output_dir,
+                start_year=start_year,
+                run_loss_interchange=not is_single_storm,
+                run_soil_interchange=not is_single_storm,
+                run_wat_interchange=not is_single_storm,
+            )
+            run_wepp_watershed_interchange(
+                output_dir,
+                start_year=start_year,
+                run_soil_interchange=not is_single_storm,
+                run_chnwb_interchange=not is_single_storm,
+            )
             generate_interchange_documentation(interchange_dir)
         except Exception as exc:  # pragma: no cover - defensive logging
             LOGGER.warning("Failed to generate interchange products for %s", output_dir)

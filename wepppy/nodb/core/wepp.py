@@ -2528,8 +2528,14 @@ class Wepp(NoDbBase):
     
         climate = self.climate_instance.getInstance(self.wd)
         start_year = climate.calendar_start_year
+        is_single_storm = climate.is_single_storm
 
-        run_wepp_watershed_interchange(self.output_dir, start_year=start_year)
+        run_wepp_watershed_interchange(
+            self.output_dir,
+            start_year=start_year,
+            run_soil_interchange=not is_single_storm,
+            run_chnwb_interchange=not is_single_storm,
+        )
         generate_interchange_documentation(self.wepp_interchange_dir)
 
     def post_discord_wepp_run_complete(self):

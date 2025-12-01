@@ -80,20 +80,31 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
         wepp = Wepp.getInstance(str(run_path))
         start_year: Optional[int] = climate.calendar_start_year
         baseflow_opts = wepp.baseflow_opts
+        is_single_storm = climate.is_single_storm
     except Exception as e:
         print(f"❌ Failed to load run configuration: {e}")
         return
     
     # Check for required watershed outputs
-    required_watershed_outputs = [
-        "pass_pw0.txt",
-        "chan.out",
-        "chanwb.out",
-        "chnwb.txt",
-        "ebe_pw0.txt",
-        "soil_pw0.txt",
-        "loss_pw0.txt",
-    ]
+    # Single storm runs don't produce soil_pw0.txt or chnwb.txt
+    if is_single_storm:
+        required_watershed_outputs = [
+            "pass_pw0.txt",
+            "chan.out",
+            "chanwb.out",
+            "ebe_pw0.txt",
+            "loss_pw0.txt",
+        ]
+    else:
+        required_watershed_outputs = [
+            "pass_pw0.txt",
+            "chan.out",
+            "chanwb.out",
+            "chnwb.txt",
+            "ebe_pw0.txt",
+            "soil_pw0.txt",
+            "loss_pw0.txt",
+        ]
     
     missing = []
     for filename in required_watershed_outputs:
@@ -116,10 +127,17 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
         shutil.move(str(interchange_dir), str(backup_dir))
         print(f"📦 Backed up existing interchange to: {backup_dir}")
     
-    # Run hillslope interchange (always)
+    # Run hillslope interchange
+    # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat files
     try:
         print(f"🔄 Generating hillslope interchange...")
-        result_dir = run_wepp_hillslope_interchange(wepp_output_dir, start_year=start_year)
+        result_dir = run_wepp_hillslope_interchange(
+            wepp_output_dir,
+            start_year=start_year,
+            run_loss_interchange=not is_single_storm,
+            run_soil_interchange=not is_single_storm,
+            run_wat_interchange=not is_single_storm,
+        )
         print(f"✅ Hillslope interchange complete: {result_dir}")
         
         # List generated files
@@ -137,7 +155,12 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
     if has_watershed_outputs:
         try:
             print(f"🔄 Generating watershed interchange...")
-            run_wepp_watershed_interchange(wepp_output_dir, start_year=start_year)
+            run_wepp_watershed_interchange(
+                wepp_output_dir,
+                start_year=start_year,
+                run_soil_interchange=not is_single_storm,
+                run_chnwb_interchange=not is_single_storm,
+            )
             print(f"✅ Watershed interchange complete")
             
             # List watershed files

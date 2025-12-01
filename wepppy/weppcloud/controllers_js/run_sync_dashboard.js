@@ -65,6 +65,46 @@
         return runid || "";
     }
 
+    function escapeHtml(text) {
+        if (!text) return "";
+        var div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showStacktrace(container, errorPayload) {
+        var stacktraceEl = container.querySelector("#stacktrace");
+        if (!stacktraceEl) {
+            return;
+        }
+        stacktraceEl.innerHTML = "";
+        stacktraceEl.style.display = "block";
+        stacktraceEl.hidden = false;
+
+        if (errorPayload.Error) {
+            var heading = document.createElement("h6");
+            heading.textContent = errorPayload.Error;
+            stacktraceEl.appendChild(heading);
+        }
+
+        if (errorPayload.StackTrace) {
+            var lines = Array.isArray(errorPayload.StackTrace) ? errorPayload.StackTrace : [errorPayload.StackTrace];
+            var pre = document.createElement("pre");
+            var small = document.createElement("small");
+            small.className = "text-muted";
+            small.textContent = lines.join("");
+            pre.appendChild(small);
+            stacktraceEl.appendChild(pre);
+        }
+
+        // Make sure the stacktrace panel is visible
+        var panel = stacktraceEl.closest(".wc-card, .wc-panel, [class*=\"stacktrace\"]");
+        if (panel) {
+            panel.style.display = "block";
+            panel.hidden = false;
+        }
+    }
+
     function createController() {
         var helpers = ensureHelpers();
         var http = helpers.http;
@@ -94,9 +134,26 @@
                 runId: runId,
                 channel: channel,
                 onAppend: function (detail) {
+                    var message = detail.message || "";
+
+                    // Detect EXCEPTION_JSON message and display stacktrace
+                    var exceptionMatch = message.match(/EXCEPTION_JSON\s+(.+)$/);
+                    if (exceptionMatch) {
+                        try {
+                            var payload = JSON.parse(exceptionMatch[1]);
+                            showStacktrace(container, payload);
+                            if (summaryElement) {
+                                summaryElement.innerHTML = '<div style="padding: 0.5em 0;"><strong style="color: var(--wc-error-fg, #721c24);">✗ Sync failed</strong></div>' +
+                                    '<p>' + escapeHtml(payload.Error || 'Unknown error') + '</p>';
+                            }
+                        } catch (e) {
+                            // JSON parse failed, ignore
+                        }
+                        return;
+                    }
+
                     // Detect COMPLETE message and show link in summary panel
                     // Format: rq:<job_id> COMPLETE run_sync_rq(<runid>, <config>)
-                    var message = detail.message || "";
                     var completeMatch = message.match(/COMPLETE run_sync_rq\(([^,]+),\s*([^)]+)\)/);
                     if (completeMatch && summaryElement) {
                         var syncedRunId = completeMatch[1].trim();
