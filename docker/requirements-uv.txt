@@ -80,7 +80,7 @@ flask-jwt-extended==4.6.0
 flask-wtf==1.2.1
 flexcache==0.3
 flexparser==0.4
-fonttools==4.43.0
+fonttools==4.61.0
 folium==0.20.0
 fs==2.4.12
 fsspec==2022.1.0
