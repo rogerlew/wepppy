@@ -24,7 +24,10 @@
   - `migrate_interchange.py` — convert WEPP text outputs to Parquet interchange format.
   - `migrate_observed_nodb.py` — migrate `observed.nodb` module paths from legacy to new location.
   - `migrate_run_paths.py` — remap hardcoded paths in `.nodb` files (e.g., `/geodata/wc1/` → `/wc1/`).
-- RQ helper: `wepppy/rq/interchange_rq.py::run_interchange_migration` regenerates interchange outputs once prerequisites exist.
+- **Unified runner:** `wepppy/tools/migrations/runner.py` provides idempotent migrations for a single working directory via `run_all_migrations(wd)`.
+- **CLI tool:** `python -m wepppy.tools.migrations.run_migrations <wd>` runs all migrations with optional `--archive-before` and `--dry-run` flags.
+- **RQ task:** `wepppy/rq/migrations_rq.py::migrations_rq` runs migrations as a background job, optionally chained after sync.
+- **Run Sync Dashboard:** `/rq/run-sync` (admin-only) includes checkboxes for "Run migrations after sync" (default: checked) and "Archive before migrations" (default: unchecked).
 - Archive/restore flow: `wepppy/rq/project_rq.py` + `wepppy/weppcloud/routes/archive_dashboard` is the rollback mechanism we should reuse for migrations.
 
 ## Trait-based detection and upgrade plan

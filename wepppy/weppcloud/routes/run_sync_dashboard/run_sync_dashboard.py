@@ -14,12 +14,14 @@ from rq.registry import DeferredJobRegistry, FailedJobRegistry, FinishedJobRegis
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.migrations_rq import migrations_rq, STATUS_CHANNEL_SUFFIX as MIGRATIONS_CHANNEL_SUFFIX
 from wepppy.rq.run_sync_rq import DEFAULT_TARGET_ROOT, STATUS_CHANNEL_SUFFIX, run_sync_rq
 
 from .._common import *  # noqa: F401,F403
 from .._common import parse_request_payload
 
 RUN_SYNC_TIMEOUT = 86_400  # 24 hours
+MIGRATIONS_TIMEOUT = 7_200  # 2 hours
 
 run_sync_dashboard_bp = Blueprint('run_sync_dashboard', __name__, template_folder='templates')
 
@@ -130,6 +132,7 @@ def run_sync_dashboard():
         'rq-run-sync-dashboard.htm',
         default_target_root=DEFAULT_TARGET_ROOT,
         status_channel_suffix=STATUS_CHANNEL_SUFFIX,
+        migrations_channel_suffix=MIGRATIONS_CHANNEL_SUFFIX,
     )
 
 
@@ -138,7 +141,7 @@ def run_sync_dashboard():
 @roles_required('Admin')
 def api_run_sync():
     try:
-        payload = parse_request_payload(request, boolean_fields=set())
+        payload = parse_request_payload(request, boolean_fields={'run_migrations', 'archive_before'})
     except Exception:
         return exception_factory('Invalid payload')
 
@@ -150,11 +153,15 @@ def api_run_sync():
     target_root = payload.get('target_root') or DEFAULT_TARGET_ROOT
     owner_email = payload.get('owner_email') or None
     config = payload.get('config') or None
+    run_migrations = payload.get('run_migrations', True)
+    archive_before = payload.get('archive_before', False)
 
     try:
         with _redis_conn() as redis_conn:
             queue = Queue(connection=redis_conn)
-            job = queue.enqueue_call(
+            
+            # Enqueue sync job
+            sync_job = queue.enqueue_call(
                 run_sync_rq,
                 (
                     runid,
@@ -165,15 +172,34 @@ def api_run_sync():
                 ),
                 timeout=RUN_SYNC_TIMEOUT,
             )
+            
+            jobs_info = {'sync_job_id': sync_job.id}
+            
+            # Optionally chain migrations job
+            if run_migrations:
+                # Calculate expected working directory path
+                prefix = runid[:2].lower()
+                config_name = config or 'cfg'
+                wd = f"{target_root}/{prefix}/{runid}"
+                
+                migration_job = queue.enqueue_call(
+                    migrations_rq,
+                    (wd, runid),
+                    {'archive_before': archive_before},
+                    timeout=MIGRATIONS_TIMEOUT,
+                    depends_on=sync_job,
+                )
+                jobs_info['migration_job_id'] = migration_job.id
+                
     except Exception:
         return exception_factory('Failed to enqueue run sync job', runid=runid)
 
     StatusMessenger.publish(
         f"{runid}:{STATUS_CHANNEL_SUFFIX}",
-        f"rq:{job.id} ENQUEUED run_sync_rq({runid})",
+        f"rq:{sync_job.id} ENQUEUED run_sync_rq({runid})",
     )
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'Success': True, **jobs_info})
 
 
 @run_sync_dashboard_bp.route('/rq/api/run-sync/status', methods=['GET'])

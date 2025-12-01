@@ -161,7 +161,9 @@
                 source_host: payload.source_host || defaults.defaultHost,
                 runid: payload.runid ? String(payload.runid).trim() : "",
                 target_root: payload.target_root || defaults.defaultRoot,
-                owner_email: payload.owner_email || null
+                owner_email: payload.owner_email || null,
+                run_migrations: payload.run_migrations !== false,
+                archive_before: payload.archive_before === true
             };
         }
 

@@ -18,6 +18,7 @@
        data-default-host="wepp.cloud"
        data-default-root="{{ default_target_root }}"
        data-status-channel="{{ status_channel_suffix }}"
+       data-migrations-channel="{{ migrations_channel_suffix }}"
        hidden></div>
 
   <div class="wc-stack">
@@ -63,6 +64,18 @@
              'owner_email',
              'Owner email',
              help='Optional owner email captured in provenance and the migrations table.'
+           ) }}
+        {{ ui.checkbox_field(
+             'run_migrations',
+             'Run migrations after sync',
+             checked=True,
+             help='Apply all available migrations to normalize the run after download.'
+           ) }}
+        {{ ui.checkbox_field(
+             'archive_before',
+             'Archive before migrations',
+             checked=False,
+             help='Create a backup archive before running migrations (recommended for production runs).'
            ) }}
         {% call button_row(form_controls=True) %}
           <button type="submit" class="pure-button pure-button-primary" id="run_sync_submit">Start sync</button>
