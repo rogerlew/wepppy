@@ -93,7 +93,7 @@ _Fixed console shell_
 - Purpose: reusable log viewport for controls and console dashboards.
 - DOM contract: `<section class="wc-status-panel" data-status-panel data-variant="...">` containing `<div class="wc-status-panel__log" data-status-log role="log">`.
 - Key arguments: `id`, `variant` (defaults to `"compact"`; use `"console"` for tall dashboards), `meta`, `description`, `actions`, `footer`, `log_id`, `aria_live`, `initial`, `height`.
-- Height: omit unless you intentionally want a fixed viewport. Defaults clamp to 12–20rem; set ~`3.25rem` for a single line or a larger value for streaming consoles.
+- Height: omit unless you intentionally want a fixed viewport. Control shells default compact panels to ~`8rem`; console variants still clamp to 12–20rem. Override to a larger value for streaming consoles when needed.
 - Auto-scrolls to the bottom when the viewer is already near the end (< 12 px).
 - Accessibility: `role="log"` with `aria-live` (default `polite`) ensures screen readers announce new lines without stealing focus.
 
@@ -113,7 +113,7 @@ _Fixed console shell_
     element: document.getElementById('archive_status_panel'),
     channel: 'archive',
     runId: runid,
-    logLimit: 3000,
+    logLimit: 1000,
     stacktrace: { element: document.getElementById('archive_stacktrace_panel') },
     onTrigger(detail) {
       if (detail.event === 'ARCHIVE_COMPLETE') archiveFinished();

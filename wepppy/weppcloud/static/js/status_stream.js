@@ -14,7 +14,7 @@
 (function (global) {
     "use strict";
 
-    var DEFAULT_LOG_LIMIT = 3000;
+    var DEFAULT_LOG_LIMIT = 1000;
     var DEFAULT_RECONNECT_BASE_MS = 1500;
     var DEFAULT_RECONNECT_MAX_MS = 15000;
     var streams = new Map();
@@ -191,6 +191,10 @@
                     messages.push(line);
                 }
             });
+            if (messages.length > config.logLimit) {
+                messages.splice(0, messages.length - config.logLimit);
+                logElement.textContent = messages.join("\n") + "\n";
+            }
         }
 
         function dispatch(type, detail) {

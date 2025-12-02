@@ -37,8 +37,15 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
 
     monkeypatch.setattr(run_sync, "_download_spec", fake_download_spec)
 
-    def fake_aria2(input_file: Path, target_dir: Path, headers: dict[str, str] | None) -> None:
+    def fake_aria2(
+        input_file: Path,
+        target_dir: Path,
+        headers: dict[str, str] | None,
+        status_callback=None,
+    ) -> None:
         target_dir.mkdir(parents=True, exist_ok=True)
+        if status_callback:
+            status_callback("aria2-progress")
         (target_dir / "ron.nodb").write_text("nodb", encoding="utf-8")
 
     monkeypatch.setattr(run_sync, "_run_aria2c", fake_aria2)
@@ -75,6 +82,7 @@ def test_run_sync_rq_records_provenance(monkeypatch: pytest.MonkeyPatch, tmp_pat
 
     assert job.meta["runid"] == "demo-run"
     assert any("DOWNLOADING" in message for _, message in published)
+    assert any("aria2-progress" in message for _, message in published)
     assert any("REGISTERED" in message for _, message in published)
     assert result["local_path"] == str(run_root)
     statuses = [args[7] for args, _ in upserts]

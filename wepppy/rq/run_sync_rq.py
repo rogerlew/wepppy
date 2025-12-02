@@ -8,9 +8,10 @@ import json
 import shutil
 import subprocess
 import tempfile
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -123,7 +124,12 @@ def _download_spec(spec_url: str, headers: dict[str, str] | None, target_dir: Pa
         return Path(tmp_file.name)
 
 
-def _run_aria2c(input_file: Path, target_dir: Path, headers: dict[str, str] | None) -> None:
+def _run_aria2c(
+    input_file: Path,
+    target_dir: Path,
+    headers: dict[str, str] | None,
+    status_callback: Callable[[str], None] | None = None,
+) -> None:
     if shutil.which("aria2c") is None:
         raise RuntimeError("aria2c is required to sync runs but was not found on PATH")
 
@@ -145,9 +151,28 @@ def _run_aria2c(input_file: Path, target_dir: Path, headers: dict[str, str] | No
         for key, value in headers.items():
             cmd.extend(["--header", f"{key}: {value}"])
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"aria2c failed ({result.returncode}): {result.stderr or result.stdout}")
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+    output_tail: deque[str] = deque(maxlen=50)
+
+    assert process.stdout is not None
+    for line in process.stdout:
+        cleaned = line.rstrip()
+        if not cleaned:
+            continue
+        output_tail.append(cleaned)
+        if status_callback:
+            status_callback(cleaned)
+
+    process.wait()
+    if process.returncode != 0:
+        tail = "\n".join(output_tail)
+        raise RuntimeError(f"aria2c failed ({process.returncode}): {tail}")
 
 
 def _hash_directory(run_root: Path) -> str:
@@ -273,7 +298,10 @@ def run_sync_rq(
         spec_file = _download_spec(spec_url, headers, target_dir=run_root)
         _publish_status(status_channel, job_id, "DOWNLOADING", spec_url)
 
-        _run_aria2c(spec_file, run_root, headers)
+        def stream_aria2(line: str) -> None:
+            _publish_status(status_channel, job_id, "DOWNLOADING", line)
+
+        _run_aria2c(spec_file, run_root, headers, stream_aria2)
         _verify_download(run_root)
         _publish_status(status_channel, job_id, "CHECKSUM_OK")
 
