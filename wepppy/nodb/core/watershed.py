@@ -512,7 +512,13 @@ class Watershed(NoDbBase):
 
     @property
     def is_abstracted(self) -> bool:
-        return self._subs_summary is not None and self._chns_summary is not None
+        # Check legacy in-memory summaries first
+        if self._subs_summary is not None and self._chns_summary is not None:
+            return True
+        # Fall back to parquet files (post-migration state)
+        hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
+        channels_parquet = _join(self.wat_dir, "channels.parquet")
+        return _exists(hillslopes_parquet) and _exists(channels_parquet)
 
     @property
     def wepp_chn_type(self) -> str:
@@ -629,6 +635,17 @@ class Watershed(NoDbBase):
     @property
     def sub_n(self) -> int:
         if self._subs_summary is None:
+            # Try loading count from parquet if available
+            hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
+            if _exists(hillslopes_parquet):
+                import duckdb
+                try:
+                    con = duckdb.connect()
+                    result = con.execute(f"SELECT COUNT(*) FROM read_parquet('{hillslopes_parquet}')").fetchone()
+                    con.close()
+                    return result[0]
+                except Exception:
+                    pass
             return 0
 
         return len(self._subs_summary)
@@ -639,20 +656,23 @@ class Watershed(NoDbBase):
             return 0
 
         # use duckdb
-        if _exists(_join(self.wat_dir, "hillslopes.parquet")):
+        hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
+        if _exists(hillslopes_parquet):
             import duckdb
 
             try:
-                with duckdb.connect(_join(self.wat_dir, "hillslopes.parquet")) as con:
-                    sql = "SELECT COUNT(*) FROM hillslopes WHERE length > 300"
-                    result = con.execute(sql).fetchone()
-                    return result[0]
+                con = duckdb.connect()
+                sql = f"SELECT COUNT(*) FROM read_parquet('{hillslopes_parquet}') WHERE length > 300"
+                result = con.execute(sql).fetchone()
+                con.close()
+                return result[0]
             except duckdb.duckdb.IOException:
                 time.sleep(4)  # fix for slow NAS after abstraction
-                with duckdb.connect(_join(self.wat_dir, "hillslopes.parquet")) as con:
-                    sql = "SELECT COUNT(*) FROM hillslopes WHERE length > 300"
-                    result = con.execute(sql).fetchone()
-                    return result[0]
+                con = duckdb.connect()
+                sql = f"SELECT COUNT(*) FROM read_parquet('{hillslopes_parquet}') WHERE length > 300"
+                result = con.execute(sql).fetchone()
+                con.close()
+                return result[0]
 
         return sum(sub.length > 300 for sub in self._subs_summary.values())
 
@@ -687,6 +707,17 @@ class Watershed(NoDbBase):
     @property
     def chn_n(self) -> int:
         if self._chns_summary is None:
+            # Try loading count from parquet if available
+            channels_parquet = _join(self.wat_dir, "channels.parquet")
+            if _exists(channels_parquet):
+                import duckdb
+                try:
+                    con = duckdb.connect()
+                    result = con.execute(f"SELECT COUNT(*) FROM read_parquet('{channels_parquet}')").fetchone()
+                    con.close()
+                    return result[0]
+                except Exception:
+                    pass
             return 0
 
         return len(self._chns_summary)
@@ -769,15 +800,27 @@ class Watershed(NoDbBase):
         return relief_path if _exists(relief_path) else None
 
     def translator_factory(self) -> WeppTopTranslator:
-        if self._chns_summary is None:
-            raise Exception("No chn_ids available for translator")
-
-        if self._subs_summary is None:
-            raise Exception("No sub_ids available for translator")
-
-        return WeppTopTranslator(
-            map(int, self._subs_summary.keys()), map(int, self._chns_summary.keys())
-        )
+        # Try to get IDs from in-memory summaries first
+        if self._subs_summary is not None and self._chns_summary is not None:
+            return WeppTopTranslator(
+                map(int, self._subs_summary.keys()), map(int, self._chns_summary.keys())
+            )
+        
+        # Fall back to loading IDs from parquet files
+        hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
+        channels_parquet = _join(self.wat_dir, "channels.parquet")
+        
+        if _exists(hillslopes_parquet) and _exists(channels_parquet):
+            import duckdb
+            con = duckdb.connect()
+            sub_ids = con.execute(f"SELECT topaz_id FROM read_parquet('{hillslopes_parquet}')").fetchall()
+            chn_ids = con.execute(f"SELECT topaz_id FROM read_parquet('{channels_parquet}')").fetchall()
+            con.close()
+            return WeppTopTranslator(
+                (row[0] for row in sub_ids), (row[0] for row in chn_ids)
+            )
+        
+        raise Exception("No sub_ids/chn_ids available for translator (no summaries or parquet files)")
 
     #
     # build channels
@@ -1046,6 +1089,19 @@ class Watershed(NoDbBase):
 
         if sub_area is None and self._subs_summary is not None:
             sub_area = sum(summary.area for summary in self._subs_summary.values())
+        
+        # Fall back to parquet if in-memory summary not available
+        if sub_area is None:
+            hillslopes_parquet = _join(self.wat_dir, "hillslopes.parquet")
+            if _exists(hillslopes_parquet):
+                import duckdb
+                try:
+                    con = duckdb.connect()
+                    result = con.execute(f"SELECT SUM(area) FROM read_parquet('{hillslopes_parquet}')").fetchone()
+                    con.close()
+                    sub_area = result[0] if result[0] is not None else 0.0
+                except Exception:
+                    pass
 
         return sub_area if sub_area is not None else 0.0
 
@@ -1055,6 +1111,19 @@ class Watershed(NoDbBase):
 
         if chn_area is None and self._chns_summary is not None:
             chn_area = sum(summary.area for summary in self._chns_summary.values())
+        
+        # Fall back to parquet if in-memory summary not available
+        if chn_area is None:
+            channels_parquet = _join(self.wat_dir, "channels.parquet")
+            if _exists(channels_parquet):
+                import duckdb
+                try:
+                    con = duckdb.connect()
+                    result = con.execute(f"SELECT SUM(area) FROM read_parquet('{channels_parquet}')").fetchone()
+                    con.close()
+                    chn_area = result[0] if result[0] is not None else 0.0
+                except Exception:
+                    pass
 
         return chn_area if chn_area is not None else 0.0
 

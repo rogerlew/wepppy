@@ -64,6 +64,7 @@ def migrations_rq(
     *,
     archive_before: bool = False,
     migrations: Optional[List[str]] = None,
+    restore_readonly: bool = False,
 ) -> dict:
     """
     Run all applicable migrations on a working directory.
@@ -73,6 +74,7 @@ def migrations_rq(
         runid: Run identifier for status channel
         archive_before: If True, create archive backup before migrations
         migrations: Optional list of specific migrations to run (defaults to all)
+        restore_readonly: If True, restore readonly state after migrations complete
         
     Returns:
         Dictionary with migration results
@@ -98,6 +100,7 @@ def migrations_rq(
     publish_and_log("STARTED", f"{func_name}({runid})")
     file_logger.info(f"Working directory: {wd}")
     file_logger.info(f"Archive before: {archive_before}")
+    file_logger.info(f"Restore readonly: {restore_readonly}")
     file_logger.info(f"Specific migrations: {migrations or 'all'}")
     
     try:
@@ -136,11 +139,32 @@ def migrations_rq(
             publish_and_log("FAILED", f"Errors: {errors_str}")
             file_logger.error(f"Migrations failed. Errors: {result.errors}")
         
+        # Restore readonly state if requested
+        if restore_readonly:
+            try:
+                from wepppy.nodb.core.ron import Ron
+                ron = Ron.getInstance(wd)
+                ron.readonly = True
+                publish_and_log("READONLY_RESTORED", "Project readonly state restored")
+                file_logger.info("Readonly state restored")
+            except Exception as restore_err:
+                publish_and_log("READONLY_RESTORE_FAILED", str(restore_err))
+                file_logger.error(f"Failed to restore readonly state: {restore_err}", exc_info=True)
+        
         publish_and_log("TRIGGER", "migrations MIGRATION_COMPLETE")
         
         return result.to_dict()
         
     except Exception as e:
+        # Try to restore readonly even on exception
+        if restore_readonly:
+            try:
+                from wepppy.nodb.core.ron import Ron
+                ron = Ron.getInstance(wd)
+                ron.readonly = True
+                file_logger.info("Readonly state restored after exception")
+            except Exception:
+                pass
         publish_and_log("EXCEPTION", str(e))
         file_logger.error(f"Migration exception: {e}", exc_info=True)
         raise

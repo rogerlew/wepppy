@@ -339,12 +339,218 @@ def _build_runs0_context(runid, config, playwright_load_all):
 @run_0_bp.route('/runs/<string:runid>/<config>/')
 @authorize_and_handle_with_exception_factory
 def runs0(runid, config):
+    from wepppy.tools.migrations.runner import check_migrations_needed
+    
     assert config is not None
+    
+    # Check if migrations are needed (unless skip_migration_check is set)
+    skip_migration_check = request.args.get('skip_migration_check', '').lower() in ('true', '1', 'yes')
     playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
+    
+    if not skip_migration_check and not playwright_load_all:
+        wd = get_wd(runid)
+        if _exists(wd):
+            migration_status = check_migrations_needed(wd)
+            if migration_status.get("needs_migration"):
+                # Redirect to migration page
+                return redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
+    
     context = _build_runs0_context(runid, config, playwright_load_all)
     if 'redirect' in context:
         return redirect(context['redirect'])
     return render_template('runs0_pure.htm', **context)
+
+
+@run_0_bp.route('/runs/<string:runid>/<config>/migrate')
+@authorize_and_handle_with_exception_factory
+def migration_page(runid, config):
+    """Display migration status page for a run that needs migrations."""
+    from wepppy.tools.migrations.runner import check_migrations_needed
+    from wepppy.weppcloud.app import get_run_owners
+    
+    wd = get_wd(runid)
+    if not _exists(wd):
+        abort(404)
+    
+    ron = Ron.getInstance(wd)
+    migration_status = check_migrations_needed(wd)
+    
+    # Check if user can migrate (owner or admin)
+    is_owner = False
+    is_admin = False
+    try:
+        owners = get_run_owners(runid)
+        is_owner = current_user in owners if owners else True
+        is_admin = current_user.has_role('Admin') if hasattr(current_user, 'has_role') else False
+    except Exception:
+        is_owner = True  # Allow if we can't determine ownership
+    
+    can_migrate = is_owner or is_admin
+    is_readonly = ron.readonly
+    
+    context = {
+        'runid': runid,
+        'config': config,
+        'ron': ron,
+        'migration_status': migration_status,
+        'can_migrate': can_migrate,
+        'is_readonly': is_readonly,
+        'is_owner': is_owner,
+        'is_admin': is_admin,
+        'user': current_user,
+    }
+    return render_template('run_0/migration_page.htm', **context)
+
+
+@run_0_bp.route('/runs/<string:runid>/<config>/migrate/run', methods=['POST'])
+@authorize_and_handle_with_exception_factory
+def run_migrations(runid, config):
+    """Enqueue migration RQ job for the run."""
+    import redis
+    from rq import Queue
+    from rq.job import Job
+    
+    from wepppy.weppcloud.app import get_run_owners
+    from wepppy.nodb.base import lock_statuses
+    from wepppy.nodb.status_messenger import StatusMessenger
+    from wepppy.rq.migrations_rq import migrations_rq
+    from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+    
+    TIMEOUT = 216_000
+    
+    def _redis_conn():
+        return redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+    
+    wd = get_wd(runid)
+    if not _exists(wd):
+        return error_factory('Run not found')
+    
+    ron = Ron.getInstance(wd)
+    
+    # Check authorization
+    is_owner = False
+    is_admin = False
+    try:
+        owners = get_run_owners(runid)
+        is_owner = current_user in owners if owners else True
+        is_admin = current_user.has_role('Admin') if hasattr(current_user, 'has_role') else False
+    except Exception:
+        is_owner = True
+    
+    if not (is_owner or is_admin):
+        return error_factory('You must be the owner or an admin to migrate this project')
+    
+    # Check for active locks
+    locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
+    if locked:
+        return error_factory('Cannot migrate while files are locked: ' + ', '.join(locked))
+    
+    # Check if a migration job is already running
+    prep = RedisPrep.getInstance(wd)
+    existing_job_id = prep.get_rq_job_ids().get('migrations')
+    if existing_job_id:
+        try:
+            with _redis_conn() as redis_conn:
+                job = Job.fetch(existing_job_id, connection=redis_conn)
+                status = job.get_status(refresh=True)
+        except Exception:
+            status = None
+        
+        if status in ('queued', 'started', 'deferred'):
+            return error_factory('A migration job is already running for this project')
+    
+    # Get options from request
+    data = request.get_json() or {}
+    create_archive = data.get('create_archive', False)
+    
+    # Handle readonly state - remove temporarily for migration
+    was_readonly = ron.readonly
+    if was_readonly:
+        try:
+            ron.readonly = False
+        except Exception as e:
+            return error_factory(f'Failed to remove readonly state: {e}')
+    
+    try:
+        # Enqueue migration job
+        with _redis_conn() as redis_conn:
+            queue = Queue(connection=redis_conn)
+            job = queue.enqueue_call(
+                func=migrations_rq,
+                args=[wd, runid],
+                kwargs={
+                    'archive_before': create_archive,
+                    'restore_readonly': was_readonly,
+                },
+                timeout=TIMEOUT
+            )
+        
+        # Store job ID for tracking
+        prep.set_rq_job_id('migrations', job.id)
+        StatusMessenger.publish(f'{runid}:migrations', f'rq:{job.id} ENQUEUED migrations_rq({runid})')
+        
+        return success_factory({
+            'message': 'Migration job enqueued',
+            'job_id': job.id,
+            'was_readonly': was_readonly,
+        })
+        
+    except Exception as e:
+        # Restore readonly state on error
+        if was_readonly:
+            try:
+                ron.readonly = True
+            except Exception:
+                pass
+        return error_factory(f'Failed to enqueue migration job: {e}')
+
+
+@run_0_bp.route('/runs/<string:runid>/<config>/migrate/status/<string:job_id>')
+@authorize_and_handle_with_exception_factory
+def migration_status(runid, config, job_id):
+    """Get status of a migration job."""
+    import redis
+    from rq.job import Job
+    from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+    
+    def _redis_conn():
+        return redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+    
+    try:
+        with _redis_conn() as redis_conn:
+            job = Job.fetch(job_id, connection=redis_conn)
+            status = job.get_status(refresh=True)
+            
+            result_data = {
+                'status': status,
+                'status_message': '',
+                'progress': 0,
+                'log_messages': [],
+                'result': None,
+                'error': None,
+            }
+            
+            if status == 'queued':
+                result_data['status_message'] = 'Job is queued, waiting to start...'
+            elif status == 'started':
+                result_data['status_message'] = 'Migration in progress...'
+                result_data['progress'] = 50
+            elif status == 'finished':
+                result_data['status_message'] = 'Migration completed!'
+                result_data['progress'] = 100
+                result_data['result'] = job.result
+            elif status == 'failed':
+                result_data['status_message'] = 'Migration failed'
+                result_data['error'] = str(job.exc_info) if job.exc_info else 'Unknown error'
+            elif status == 'deferred':
+                result_data['status_message'] = 'Job deferred...'
+            else:
+                result_data['status_message'] = f'Status: {status}'
+            
+            return success_factory(result_data)
+            
+    except Exception as e:
+        return error_factory(f'Failed to get job status: {e}')
 
 
 @run_0_bp.route('/runs/<string:runid>/<config>/view/mod/<string:mod_name>')

@@ -136,13 +136,14 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 path = playback_candidate
 
     if path is None:
-        # Check the primary, non-prefixed location first
-        path = _join('/geodata/weppcloud_runs', runid)
+        # Primary location: /wc1/runs/<prefix>/<runid> (current)
+        # Legacy location: /geodata/weppcloud_runs/<runid> (deprecated)
+        prefix = runid[:2]
+        path = _join('/wc1/runs', prefix, runid)
 
-        # If not found, fall back to the prefixed, partitioned locations
+        # Fall back to legacy location if not found in primary
         if not _exists(path):
-            prefix = runid[:2]
-            path = _join('/wc1/runs', prefix, runid)
+            path = _join('/geodata/weppcloud_runs', runid)
             
     if context_override:
         path = context_override

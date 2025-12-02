@@ -18,6 +18,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import pickle
 import shutil
 import traceback
 from dataclasses import dataclass, field
@@ -28,16 +29,19 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 __all__ = [
     "MigrationResult",
     "run_all_migrations",
+    "check_migrations_needed",
     "migrate_observed_nodb",
     "migrate_run_paths",
     "migrate_interchange",
     "migrate_watersheds",
+    "migrate_watershed_nodb_slim",
     "migrate_wbt_geojson",
     "migrate_landuse_parquet",
     "migrate_soils_parquet",
     "refresh_query_catalog",
     "invalidate_redis_cache",
     "AVAILABLE_MIGRATIONS",
+    "MIGRATION_DESCRIPTIONS",
 ]
 
 
@@ -371,10 +375,34 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     if not parquet_files and not csv_files:
         return True, "No watershed data files (nothing to migrate)"
     
+    # Check if CSV files need conversion
+    needs_csv_conversion = bool(csv_files)
+    
+    # Check if parquet files need schema normalization
+    needs_normalization = False
+    if parquet_files and not needs_csv_conversion:
+        try:
+            import pyarrow.parquet as pq
+            for pf in parquet_files[:3]:  # Sample first few files
+                try:
+                    schema = pq.read_schema(pf)
+                    col_names = [f.name for f in schema]
+                    # Check for legacy uppercase ID columns
+                    if any(c in col_names for c in ['TOPAZ_ID', 'TopazID', 'Topaz_ID', 'WEPP_ID', 'WeppID', 'Wepp_ID']):
+                        needs_normalization = True
+                        break
+                except Exception:
+                    continue
+        except ImportError:
+            # Can't check without pyarrow, assume normalization needed
+            needs_normalization = True
+    
     if dry_run:
-        if csv_files and not parquet_files:
+        if needs_csv_conversion:
             return True, f"Would convert {len(csv_files)} CSV file(s) to Parquet"
-        return True, f"Would normalize {len(parquet_files)} watershed parquet file(s)"
+        if needs_normalization:
+            return True, f"Would normalize {len(parquet_files)} watershed parquet file(s)"
+        return True, "Watershed tables already normalized (nothing to migrate)"
     
     try:
         from wepppy.topo.peridot.peridot_runner import migrate_watershed_outputs
@@ -387,6 +415,117 @@ def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False
     if changed:
         return True, "Normalized watershed tables (CSV to Parquet conversion)"
     return True, "Watershed tables already normalized"
+
+
+def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
+    """
+    Remove legacy summary dictionaries from watershed.nodb and externalize structure.
+    
+    After parquet files exist (hillslopes.parquet, flowpaths.parquet, channels.parquet),
+    the _subs_summary, _fps_summary, and _chns_summary dictionaries are no longer needed
+    in watershed.nodb. Removing them reduces file size dramatically for large watersheds.
+    
+    Also migrates inline _structure data to structure.pkl file if not already externalized.
+    
+    Idempotent: safe to run multiple times.
+    
+    Args:
+        wd: Working directory path
+        dry_run: If True, report but don't modify
+        
+    Returns:
+        (applied, message) tuple
+    """
+    run_path = Path(wd)
+    watershed_nodb = run_path / "watershed.nodb"
+    watershed_dir = run_path / "watershed"
+    
+    if not watershed_nodb.exists():
+        return True, "No watershed.nodb (nothing to migrate)"
+    
+    # Check that required parquet files exist
+    required_parquets = ["hillslopes.parquet", "flowpaths.parquet", "channels.parquet"]
+    missing_parquets = [p for p in required_parquets if not (watershed_dir / p).exists()]
+    
+    if missing_parquets:
+        return True, f"Missing parquet files: {', '.join(missing_parquets)} (skipped)"
+    
+    # Load watershed.nodb
+    try:
+        with open(watershed_nodb, 'r') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        return False, f"Failed to read watershed.nodb: {e}"
+    
+    # The nodb format stores state under py/state for jsonpickle serialization
+    state = data.get("py/state", data)
+    
+    # Track what we're changing
+    changes = []
+    
+    # Check for legacy summary dictionaries
+    legacy_keys = ["_subs_summary", "_fps_summary", "_chns_summary"]
+    found_keys = [k for k in legacy_keys if k in state and state[k] is not None]
+    
+    # Check for inline _structure that needs to be externalized
+    structure_pkl_path = watershed_dir / "structure.pkl"
+    structure_data = state.get("_structure")
+    needs_structure_migration = (
+        structure_data is not None 
+        and not isinstance(structure_data, str)  # Not already a path
+        and not structure_pkl_path.exists()  # Pickle doesn't exist yet
+    )
+    
+    if not found_keys and not needs_structure_migration:
+        return True, "No legacy summaries or inline structure in watershed.nodb"
+    
+    # Calculate size savings
+    original_size = len(json.dumps(data))
+    
+    if dry_run:
+        msgs = []
+        if found_keys:
+            msgs.append(f"remove {len(found_keys)} legacy summary dict(s)")
+        if needs_structure_migration:
+            msgs.append("externalize _structure to structure.pkl")
+        return True, f"Would {' and '.join(msgs)}"
+    
+    # Remove the legacy dictionaries (set to None to preserve schema)
+    for key in found_keys:
+        state[key] = None
+        changes.append(f"removed {key}")
+    
+    # Externalize _structure to pickle file if needed
+    if needs_structure_migration:
+        try:
+            # The structure data from JSON needs to be decoded via jsonpickle
+            import jsonpickle
+            structure_json = json.dumps(structure_data)
+            structure_obj = jsonpickle.decode(structure_json)
+            
+            # Write to pickle file
+            with open(structure_pkl_path, 'wb') as f:
+                pickle.dump(structure_obj, f)
+            
+            # Update _structure to be the path string
+            state["_structure"] = str(structure_pkl_path)
+            changes.append("externalized _structure to structure.pkl")
+        except Exception as e:
+            # Non-fatal - structure migration can be skipped
+            changes.append(f"_structure migration skipped: {e}")
+    
+    # Write updated watershed.nodb
+    try:
+        with open(watershed_nodb, 'w') as f:
+            json.dump(data, f, indent=2)
+    except OSError as e:
+        return False, f"Failed to write watershed.nodb: {e}"
+    
+    # Calculate new size
+    new_size = len(json.dumps(data))
+    saved_mb = (original_size - new_size) / (1024 * 1024)
+    
+    return True, f"{', '.join(changes)}, saved {saved_mb:.1f} MB"
 
 
 def migrate_wbt_geojson(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
@@ -503,12 +642,12 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
     except Exception as e:
         return False, f"Failed to read parquet metadata: {e}"
     
-    # Check if migration needed (has uppercase or missing lowercase ids)
+    # Check if migration needed (has uppercase columns)
+    # Note: wepp_id is optional - not all landuse files have it
     needs_migration = (
         "TopazID" in field_names or
         "WeppID" in field_names or
-        "topaz_id" not in field_names or
-        "wepp_id" not in field_names
+        ("topaz_id" not in field_names and "TopazID" not in field_names)
     )
     
     if not needs_migration:
@@ -574,12 +713,12 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
     except Exception as e:
         return False, f"Failed to read parquet metadata: {e}"
     
-    # Check if migration needed
+    # Check if migration needed (has uppercase columns)
+    # Note: wepp_id is optional - not all soils files have it
     needs_migration = (
         "TopazID" in field_names or
         "WeppID" in field_names or
-        "topaz_id" not in field_names or
-        "wepp_id" not in field_names
+        ("topaz_id" not in field_names and "TopazID" not in field_names)
     )
     
     if not needs_migration:
@@ -713,6 +852,7 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
     ("observed_nodb", migrate_observed_nodb),
     ("run_paths", migrate_run_paths),
     ("watersheds", migrate_watersheds),
+    ("watershed_nodb_slim", migrate_watershed_nodb_slim),  # After watersheds ensures parquets exist
     ("wbt_geojson", migrate_wbt_geojson),
     ("landuse_parquet", migrate_landuse_parquet),
     ("soils_parquet", migrate_soils_parquet),
@@ -720,6 +860,92 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
     ("query_catalog", refresh_query_catalog),  # After interchange, before redis_cache
     ("redis_cache", invalidate_redis_cache),  # Always run last
 ]
+
+# Human-readable descriptions for each migration
+MIGRATION_DESCRIPTIONS: Dict[str, str] = {
+    "observed_nodb": "Update observed.nodb module path for new package structure",
+    "run_paths": "Fix hardcoded paths in .nodb files to match current location",
+    "watersheds": "Generate parquet files for watershed data (hillslopes, channels, flowpaths)",
+    "watershed_nodb_slim": "Slim watershed.nodb by externalizing structure data (reduces file size)",
+    "wbt_geojson": "Normalize GeoJSON identifiers for WhiteboxTools delineation",
+    "landuse_parquet": "Generate parquet files for landuse data",
+    "soils_parquet": "Generate parquet files for soils data",
+    "interchange": "Migrate WEPP interchange files to parquet format",
+    "query_catalog": "Refresh query engine catalog for parquet files",
+    "redis_cache": "Invalidate Redis cache for this run",
+}
+
+
+def check_migrations_needed(wd: str) -> Dict[str, Any]:
+    """
+    Check which migrations are needed for a working directory (dry run).
+    
+    Returns a dict with:
+        - needs_migration: bool - True if any migration would make changes
+        - migrations: list of dicts with name, description, would_apply, message
+    """
+    run_path = Path(wd)
+    result = {
+        "needs_migration": False,
+        "migrations": [],
+    }
+    
+    if not run_path.exists():
+        return result
+    
+    # Migrations that are always informational (always run but never block loading)
+    INFORMATIONAL_MIGRATIONS = {"redis_cache", "query_catalog", "interchange"}
+    
+    # Keywords that indicate no actual work needed
+    NO_WORK_KEYWORDS = [
+        "Already", 
+        "already", 
+        "No ", 
+        "No ", 
+        "nothing to migrate",
+        "no legacy", 
+        "skipped",
+        "not found",
+        "not available",
+    ]
+    
+    # Check each migration with dry_run=True
+    for name, migrate_fn in AVAILABLE_MIGRATIONS:
+        try:
+            applied, message = migrate_fn(wd, dry_run=True)
+            
+            # Informational migrations never require user action
+            if name in INFORMATIONAL_MIGRATIONS:
+                would_apply = False
+            else:
+                # Check if this migration indicates actual work is needed
+                would_apply = applied and "Would " in message
+                
+                # Also check for keywords indicating no work needed
+                for keyword in NO_WORK_KEYWORDS:
+                    if keyword in message:
+                        would_apply = False
+                        break
+            
+            if would_apply:
+                result["needs_migration"] = True
+            
+            result["migrations"].append({
+                "name": name,
+                "description": MIGRATION_DESCRIPTIONS.get(name, ""),
+                "would_apply": would_apply,
+                "message": message,
+            })
+        except Exception as e:
+            result["migrations"].append({
+                "name": name,
+                "description": MIGRATION_DESCRIPTIONS.get(name, ""),
+                "would_apply": False,
+                "message": f"Error checking: {e}",
+                "error": True,
+            })
+    
+    return result
 
 
 def run_all_migrations(

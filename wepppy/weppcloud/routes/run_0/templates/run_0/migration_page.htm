@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<title>{{ runid }} - Migration Required</title>
+<style>
+:root {
+  --wc-primary: #0078d4;
+  --wc-primary-hover: #106ebe;
+  --wc-success: #28a745;
+  --wc-warning: #ffc107;
+  --wc-danger: #dc3545;
+  --wc-info: #17a2b8;
+  --wc-text: #333;
+  --wc-text-muted: #6c757d;
+  --wc-bg: #f8f9fa;
+  --wc-border: #dee2e6;
+  --wc-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --wc-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--wc-font-sans);
+  line-height: 1.6;
+  color: var(--wc-text);
+  background: var(--wc-bg);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--wc-border);
+}
+
+.card-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.card-header .icon {
+  font-size: 1.75rem;
+}
+
+.runid {
+  font-family: var(--wc-font-mono);
+  background: var(--wc-bg);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-warning {
+  background: var(--wc-warning);
+  color: #212529;
+}
+
+.badge-info {
+  background: var(--wc-info);
+  color: #fff;
+}
+
+.badge-success {
+  background: var(--wc-success);
+  color: #fff;
+}
+
+.badge-danger {
+  background: var(--wc-danger);
+  color: #fff;
+}
+
+.migration-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.migration-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background: var(--wc-bg);
+}
+
+.migration-item.needs-migration {
+  background: #fff3cd;
+  border-left: 3px solid var(--wc-warning);
+}
+
+.migration-item.up-to-date {
+  background: #d4edda;
+  border-left: 3px solid var(--wc-success);
+}
+
+.migration-item .status-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.migration-item .details {
+  flex: 1;
+}
+
+.migration-item .name {
+  font-weight: 600;
+  font-family: var(--wc-font-mono);
+  font-size: 0.9rem;
+}
+
+.migration-item .description {
+  color: var(--wc-text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.migration-item .message {
+  font-size: 0.8rem;
+  color: var(--wc-text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+.options-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--wc-border);
+}
+
+.option-group {
+  margin-bottom: 1rem;
+}
+
+.option-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.option-group input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.option-description {
+  color: var(--wc-text-muted);
+  font-size: 0.85rem;
+  margin-left: 1.75rem;
+  margin-top: 0.25rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--wc-primary);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--wc-primary-hover);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: #fff;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--wc-border);
+  color: var(--wc-text);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--wc-bg);
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+}
+
+.alert-info {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.alert-success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden {
+  display: none !important;
+}
+
+.text-muted {
+  color: var(--wc-text-muted);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--wc-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--wc-primary);
+  transition: width 0.3s ease;
+}
+
+.log-output {
+  max-height: 200px;
+  overflow-y: auto;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: var(--wc-font-mono);
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.log-line {
+  padding: 0.1rem 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+code {
+  font-family: var(--wc-font-mono);
+  background: var(--wc-bg);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      {% if migration_status.needs_migration %}
+      <span class="icon">⚠️</span>
+      <div>
+        <h1>Migration Required</h1>
+      {% else %}
+      <span class="icon">✅</span>
+      <div>
+        <h1>Migration Status</h1>
+      {% endif %}
+        <span class="runid">{{ runid }}</span>
+        {% if is_readonly %}
+        <span class="badge badge-info">Read-Only</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if migration_status.needs_migration %}
+    <p>
+      This project requires data migrations to work with the current version of WEPPcloud. 
+      Migrations update internal data formats to improve performance and compatibility.
+    </p>
+    {% else %}
+    <p>
+      This project is up to date. All migrations have been applied.
+    </p>
+    {% endif %}
+
+    {% if not can_migrate %}
+    <div class="alert alert-warning">
+      <strong>Permission Required:</strong> Only the project owner or an administrator can run migrations on this project.
+      {% if is_readonly %}
+      The project is also read-only, which will be temporarily removed during migration.
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <h3 class="mb-1">Available Migrations</h3>
+    <ul class="migration-list">
+      {% for migration in migration_status.migrations %}
+      <li class="migration-item {% if migration.would_apply %}needs-migration{% else %}up-to-date{% endif %}">
+        <span class="status-icon">
+          {% if migration.would_apply %}🔄{% else %}✅{% endif %}
+        </span>
+        <div class="details">
+          <div class="name">{{ migration.name }}</div>
+          <div class="description">{{ migration.description }}</div>
+          <div class="message">{{ migration.message }}</div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if migration_status.needs_migration and can_migrate %}
+    <div class="options-section">
+      <h3 class="mb-1">Options</h3>
+      
+      <div class="option-group">
+        <label>
+          <input type="checkbox" id="create-archive" checked>
+          Create archive before migrating
+        </label>
+        <div class="option-description">
+          Saves a backup of the project that can be restored if needed. Recommended.
+        </div>
+      </div>
+
+      {% if is_readonly %}
+      <div class="alert alert-info mt-2">
+        <strong>Note:</strong> This project is read-only. The migration process will temporarily 
+        remove read-only protection, apply migrations, and then restore the read-only state.
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="run-migrations-btn" onclick="runMigrations()">
+        <span id="btn-text">Run Migrations</span>
+        <span id="btn-spinner" class="spinner hidden"></span>
+      </button>
+      <a href="{{ url_for('run_0.runs0', runid=runid, config=config, skip_migration_check='true') }}" 
+         class="btn btn-outline">
+        Load Without Migrating
+      </a>
+    </div>
+    {% elif migration_status.needs_migration and not can_migrate %}
+    <div class="actions">
+      <a href="{{ url_for('run_0.runs0', runid=runid, config=config, skip_migration_check='true') }}" 
+         class="btn btn-outline">
+        Load Without Migrating (Read-Only)
+      </a>
+    </div>
+    {% else %}
+    <div class="actions">
+      <a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}" 
+         class="btn btn-primary">
+        Continue to Project
+      </a>
+    </div>
+    {% endif %}
+
+    <div id="migration-result" class="hidden mt-2"></div>
+  </div>
+
+  <div class="card">
+    <h3 class="mb-1">What are migrations?</h3>
+    <p class="text-muted">
+      Migrations are automated updates that convert older data formats to newer, more efficient formats.
+      They improve load times, reduce file sizes, and ensure compatibility with the latest features.
+    </p>
+    <p class="text-muted">
+      All migrations are <strong>idempotent</strong>, meaning they can be safely run multiple times 
+      without causing problems. If a migration has already been applied, it will be skipped.
+    </p>
+  </div>
+</div>
+
+<script>
+const runid = '{{ runid }}';
+const config = '{{ config }}';
+let pollInterval = null;
+
+async function runMigrations() {
+  const btn = document.getElementById('run-migrations-btn');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+  const resultDiv = document.getElementById('migration-result');
+  const createArchive = document.getElementById('create-archive').checked;
+
+  // Disable button and show spinner
+  btn.disabled = true;
+  btnText.textContent = 'Queueing...';
+  btnSpinner.classList.remove('hidden');
+  resultDiv.classList.add('hidden');
+
+  try {
+    const response = await fetch('{{ url_for("run_0.run_migrations", runid=runid, config=config) }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        create_archive: createArchive
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.Success) {
+      const jobId = data.Content.job_id;
+      const wasReadonly = data.Content.was_readonly;
+      
+      resultDiv.className = 'alert alert-info mt-2';
+      resultDiv.innerHTML = `
+        <strong>⏳ Migration job queued</strong>
+        <p class="mb-1">Job ID: <code>${jobId}</code></p>
+        <p class="mb-1" id="status-text">Waiting for job to start...</p>
+        ${wasReadonly ? '<p class="text-muted">Readonly state will be restored after migration.</p>' : ''}
+        <div class="progress-bar mt-1">
+          <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div id="log-output" class="log-output mt-1"></div>
+      `;
+      resultDiv.classList.remove('hidden');
+      btnText.textContent = 'Running...';
+      
+      // Start polling for status
+      startStatusPolling(jobId);
+    } else {
+      throw new Error(data.Message || 'Failed to queue migration job');
+    }
+  } catch (error) {
+    resultDiv.className = 'alert alert-danger mt-2';
+    resultDiv.innerHTML = `<strong>❌ Failed to start migration:</strong> ${error.message}`;
+    resultDiv.classList.remove('hidden');
+    
+    // Re-enable button
+    btn.disabled = false;
+    btnText.textContent = 'Retry Migrations';
+    btnSpinner.classList.add('hidden');
+  }
+}
+
+function startStatusPolling(jobId) {
+  const statusText = document.getElementById('status-text');
+  const progressFill = document.getElementById('progress-fill');
+  const logOutput = document.getElementById('log-output');
+  let logMessages = [];
+  
+  pollInterval = setInterval(async () => {
+    try {
+      const response = await fetch(`/weppcloud/runs/${runid}/${config}/migrate/status/${jobId}`);
+      const data = await response.json();
+      
+      if (data.Success) {
+        const status = data.Content;
+        statusText.textContent = status.status_message || `Status: ${status.status}`;
+        
+        // Update progress bar
+        if (status.progress) {
+          progressFill.style.width = `${status.progress}%`;
+        }
+        
+        // Add new log messages
+        if (status.log_messages && status.log_messages.length > logMessages.length) {
+          const newMessages = status.log_messages.slice(logMessages.length);
+          logMessages = status.log_messages;
+          newMessages.forEach(msg => {
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.textContent = msg;
+            logOutput.appendChild(line);
+            logOutput.scrollTop = logOutput.scrollHeight;
+          });
+        }
+        
+        // Check if job is complete
+        if (status.status === 'finished') {
+          stopPolling();
+          onMigrationComplete(status.result);
+        } else if (status.status === 'failed') {
+          stopPolling();
+          onMigrationFailed(status.error || 'Unknown error');
+        }
+      }
+    } catch (error) {
+      console.error('Error polling status:', error);
+    }
+  }, 1000);
+}
+
+function stopPolling() {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+}
+
+function onMigrationComplete(result) {
+  const btn = document.getElementById('run-migrations-btn');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+  const resultDiv = document.getElementById('migration-result');
+  
+  btnSpinner.classList.add('hidden');
+  btnText.textContent = 'Complete!';
+  
+  const applied = result.applied || [];
+  const skipped = result.skipped || [];
+  
+  resultDiv.className = 'alert alert-success mt-2';
+  resultDiv.innerHTML = `
+    <strong>✅ Migrations completed successfully!</strong>
+    <p class="mb-1">Applied: ${applied.join(', ') || 'None'}</p>
+    <p class="mb-1">Skipped: ${skipped.join(', ') || 'None'}</p>
+    <p class="mt-2">
+      <a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}" class="btn btn-primary">
+        Continue to Project
+      </a>
+    </p>
+  `;
+}
+
+function onMigrationFailed(error) {
+  const btn = document.getElementById('run-migrations-btn');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+  const resultDiv = document.getElementById('migration-result');
+  
+  btnSpinner.classList.add('hidden');
+  btn.disabled = false;
+  btnText.textContent = 'Retry Migrations';
+  
+  resultDiv.className = 'alert alert-danger mt-2';
+  resultDiv.innerHTML = `<strong>❌ Migration failed:</strong> ${error}`;
+}
+
+// Clean up on page unload
+window.addEventListener('beforeunload', stopPolling);
+</script>
+
+</body>
+</html>

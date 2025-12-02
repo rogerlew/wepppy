@@ -763,10 +763,11 @@ class Soils(NoDbBase):
 
     @property
     def bd_d(self) -> Dict:
-        parquet_fn = _join(self.wd, 'soils.parquet')
+        """Returns dict of mukey -> bulk density."""
+        parquet_fn = _join(self.soils_dir, 'soils.parquet')
         if _exists(parquet_fn):
             with duckdb.connect() as con:
-                result = con.execute(parquet_fn=f"SELECT TopazID, bd FROM '{parquet_fn}'").fetchall()
+                result = con.execute(f"SELECT mukey, bd FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
 
         return self._deprecated_bd_d()
@@ -779,11 +780,12 @@ class Soils(NoDbBase):
         return d 
 
     @property
-    def clay_d(self):
-        parquet_fn = _join(self.wd, 'soils.parquet')
+    def clay_d(self) -> Dict:
+        """Returns dict of mukey -> clay percentage."""
+        parquet_fn = _join(self.soils_dir, 'soils.parquet')
         if _exists(parquet_fn):
             with duckdb.connect() as con:
-                result = con.execute(parquet_fn=f"SELECT TopazID, clay FROM '{parquet_fn}'").fetchall()
+                result = con.execute(f"SELECT mukey, clay FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
 
         return self._deprecated_clay_d()
@@ -796,11 +798,12 @@ class Soils(NoDbBase):
         return d 
 
     @property
-    def sand_d(self):
-        parquet_fn = _join(self.wd, 'soils.parquet')
+    def sand_d(self) -> Dict:
+        """Returns dict of mukey -> sand percentage."""
+        parquet_fn = _join(self.soils_dir, 'soils.parquet')
         if _exists(parquet_fn):
             with duckdb.connect() as con:
-                result = con.execute(parquet_fn=f"SELECT TopazID, sand FROM '{parquet_fn}'").fetchall()
+                result = con.execute(f"SELECT mukey, sand FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
             
         return self._deprecated_sand_d()
@@ -813,11 +816,12 @@ class Soils(NoDbBase):
         return d 
 
     @property
-    def ll_d(self):
-        parquet_fn = _join(self.wd, 'soils.parquet')
+    def ll_d(self) -> Dict:
+        """Returns dict of mukey -> liquid limit."""
+        parquet_fn = _join(self.soils_dir, 'soils.parquet')
         if _exists(parquet_fn):
             with duckdb.connect() as con:
-                result = con.execute(parquet_fn=f"SELECT TopazID, ll FROM '{parquet_fn}'").fetchall()
+                result = con.execute(f"SELECT mukey, ll FROM read_parquet('{parquet_fn}')").fetchall()
                 return {row[0]: row[1] for row in result}
     
         return self._deprecated_ll_d()
@@ -831,11 +835,10 @@ class Soils(NoDbBase):
 
     @property
     def clay_pct(self):
-
-        parquet_fn = _join(self.wd, 'soils.parquet')
+        parquet_fn = _join(self.soils_dir, 'soils.parquet')
         if _exists(parquet_fn):
             with duckdb.connect() as con:
-                result = con.execute(parquet_fn=f"SELECT TopazID, clay, area FROM '{parquet_fn}'").fetchall()
+                result = con.execute(f"SELECT topaz_id, clay, area FROM read_parquet('{parquet_fn}')").fetchall()
                 totalarea = sum([row[2] for row in result])
                 wsum = sum([row[1] * row[2] for row in result])
                 clay_pct = wsum / totalarea
@@ -845,16 +848,19 @@ class Soils(NoDbBase):
     
     @deprecated
     def _deprecated_clay_pct(self):
-        # if we are not using parquet, then we need to calculate the clay_pct
-        # from the soils dict
+        # This method should only be called for legacy runs without soils.parquet
         clay_d = self.clay_d
         domsoil_d = self.ssurgo_domsoil_d
 
-        assert domsoil_d is not None
+        if domsoil_d is None:
+            return 0.0
 
         totalarea = 0.0
         wsum = 0.0
         watershed = self.watershed_instance
+
+        if watershed._subs_summary is None:
+            return 0.0
 
         for topaz_id in watershed._subs_summary:
             mukey = domsoil_d[str(topaz_id)]
@@ -863,20 +869,40 @@ class Soils(NoDbBase):
             wsum += area * clay
             totalarea += area
 
-        clay_pct = wsum / totalarea
-
-        return clay_pct
+        return wsum / totalarea if totalarea > 0 else 0.0
 
     @property
     def liquid_limit(self):
+        # Try parquet first
+        parquet_fn = _join(self.soils_dir, 'soils.parquet')
+        if _exists(parquet_fn):
+            with duckdb.connect() as con:
+                result = con.execute(f"SELECT topaz_id, ll, area FROM read_parquet('{parquet_fn}') WHERE ll IS NOT NULL").fetchall()
+                if not result:
+                    return 0.0
+                totalarea = sum([row[2] for row in result])
+                wsum = sum([row[1] * row[2] for row in result])
+                return wsum / totalarea if totalarea > 0 else 0.0
+
+        # Fall back to deprecated method
+        return self._deprecated_liquid_limit()
+
+    @deprecated
+    def _deprecated_liquid_limit(self):
+        # This method should only be called for legacy runs without soils.parquet
         ll_d = self.ll_d
 
         domsoil_d = self.domsoil_d
-        assert domsoil_d is not None
+        if domsoil_d is None:
+            return 0.0
 
         totalarea = 0.0
         wsum = 0.0
         watershed = self.watershed_instance
+        
+        if watershed._subs_summary is None:
+            return 0.0
+            
         for topaz_id in watershed._subs_summary:
             mukey = domsoil_d[str(topaz_id)]
             ll = ll_d[str(mukey)]
@@ -887,9 +913,7 @@ class Soils(NoDbBase):
             wsum += area * ll
             totalarea += area
 
-        ll_pct = wsum / totalarea
-
-        return ll_pct
+        return wsum / totalarea if totalarea > 0 else 0.0
 
     def _build_ak(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
