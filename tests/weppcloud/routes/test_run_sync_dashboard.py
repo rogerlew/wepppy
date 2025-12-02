@@ -31,6 +31,8 @@ def test_api_run_sync_enqueues_job(
     app.config["TESTING"] = True
 
     env = rq_environment
+    # Ensure distinct job ids for sync + migration
+    env.recorder._job_id_iterator = iter(["job-run-sync", "job-run-migration"])  # type: ignore[attr-defined]
     monkeypatch.setattr(module, "_redis_conn", env.redis_conn_factory())
     monkeypatch.setattr(module, "Queue", env.queue_class(default_job_id="job-run-sync"))
     monkeypatch.setattr(module, "run_sync_rq", lambda *args, **kwargs: None)
@@ -57,17 +59,26 @@ def test_api_run_sync_enqueues_job(
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["Success"] is True
-    assert payload["job_id"] == "job-run-sync"
+    assert payload["sync_job_id"] == "job-run-sync"
+    assert payload["migration_job_id"] == "job-run-migration"
 
-    queue_call = env.recorder.queue_calls[0]
-    assert queue_call.func is module.run_sync_rq
-    assert queue_call.args == (
+    sync_call = env.recorder.queue_calls[0]
+    assert sync_call.func is module.run_sync_rq
+    assert sync_call.args == (
         "demo",
         "wepp.cloud",
         "owner@example.com",
         module.DEFAULT_TARGET_ROOT,
         None,
     )
+
+    migration_call = env.recorder.queue_calls[1]
+    assert migration_call.func is module.migrations_rq
+    assert migration_call.args == (f"{module.DEFAULT_TARGET_ROOT}/de/demo", "demo")
+    # migrations payload is passed via kwargs inside the enqueue options
+    assert migration_call.kwargs["kwargs"] == {"archive_before": False}
+    assert migration_call.kwargs["depends_on"] is env.recorder.queue_calls[0].job
+
     assert published[0][0] == f"demo:{module.STATUS_CHANNEL_SUFFIX}"
 
 

@@ -76,15 +76,18 @@ def make_queue(recorder: RQRecorder, *, default_job_id: str = "job-123"):
             self,
             func: Callable[..., Any],
             args: Tuple[Any, ...] = (),
+            kwargs: Optional[Dict[str, Any]] = None,
             timeout: Optional[int] = None,
-            **kwargs: Any,
+            **options: Any,
         ) -> JobStub:
             job_id = recorder.next_job_id(default_job_id)
             job = JobStub(job_id)
+            call_kwargs: Dict[str, Any] = dict(options)
+            # Mirror RQ: always carry the provided kwargs (can be None)
+            call_kwargs["kwargs"] = kwargs
             recorder.queue_calls.append(
-                QueueCall(func=func, args=args, kwargs=kwargs, timeout=timeout, job=job)
+                QueueCall(func=func, args=args, kwargs=call_kwargs, timeout=timeout, job=job)
             )
             return job
 
     return _Queue
-
