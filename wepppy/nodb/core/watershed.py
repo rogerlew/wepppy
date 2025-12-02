@@ -943,8 +943,13 @@ class Watershed(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(f'{self.class_name}.{func_name}()')
 
+        if self.readonly:
+            self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
+            return
+            
         with self.locked():
             self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
+
 
     @property
     def edge_hillslopes(self) -> List[int]:
