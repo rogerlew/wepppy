@@ -398,8 +398,9 @@ def migration_page(runid, config):
         'is_owner': is_owner,
         'is_admin': is_admin,
         'user': current_user,
+        'url_for_run': url_for_run,
     }
-    return render_template('run_0/migration_page.htm', **context)
+    return render_template('run_0/rq-migration-status.htm', **context)
 
 
 @run_0_bp.route('/runs/<string:runid>/<config>/migrate/run', methods=['POST'])

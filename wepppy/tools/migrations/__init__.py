@@ -23,6 +23,7 @@ from wepppy.tools.migrations.runner import (
     migrate_wbt_geojson,
     migrate_landuse_parquet,
     migrate_soils_parquet,
+    migrate_soils_nodb_meta,
     AVAILABLE_MIGRATIONS,
 )
 
@@ -36,5 +37,6 @@ __all__ = [
     "migrate_wbt_geojson",
     "migrate_landuse_parquet",
     "migrate_soils_parquet",
+    "migrate_soils_nodb_meta",
     "AVAILABLE_MIGRATIONS",
 ]

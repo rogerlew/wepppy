@@ -1,55 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
-<title>{{ runid }} - Migration Required</title>
+{% extends "base_pure.htm" %}
+
+{% block title %}Migration Status – {{ runid }}{% endblock %}
+
+{% from "shared/console_macros.htm" import console_page, console_header %}
+
+{% block head_extras %}
 <style>
-:root {
-  --wc-primary: #0078d4;
-  --wc-primary-hover: #106ebe;
-  --wc-success: #28a745;
-  --wc-warning: #ffc107;
-  --wc-danger: #dc3545;
-  --wc-info: #17a2b8;
-  --wc-text: #333;
-  --wc-text-muted: #6c757d;
-  --wc-bg: #f8f9fa;
-  --wc-border: #dee2e6;
-  --wc-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  --wc-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: var(--wc-font-sans);
-  line-height: 1.6;
-  color: var(--wc-text);
-  background: var(--wc-bg);
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.card {
-  background: #fff;
+.migration-card {
+  background: var(--wc-surface);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--wc-shadow-sm);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
-.card-header {
+.migration-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -58,19 +23,19 @@ body {
   border-bottom: 1px solid var(--wc-border);
 }
 
-.card-header h1 {
+.migration-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
-.card-header .icon {
-  font-size: 1.75rem;
+.migration-header .icon {
+  font-size: 1.5rem;
 }
 
-.runid {
+.runid-badge {
   font-family: var(--wc-font-mono);
-  background: var(--wc-bg);
+  background: var(--wc-bg-muted);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-size: 0.9rem;
@@ -83,25 +48,11 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-}
-
-.badge-warning {
-  background: var(--wc-warning);
-  color: #212529;
+  margin-left: 0.5rem;
 }
 
 .badge-info {
   background: var(--wc-info);
-  color: #fff;
-}
-
-.badge-success {
-  background: var(--wc-success);
-  color: #fff;
-}
-
-.badge-danger {
-  background: var(--wc-danger);
   color: #fff;
 }
 
@@ -118,16 +69,16 @@ body {
   padding: 0.75rem;
   border-radius: 4px;
   margin-bottom: 0.5rem;
-  background: var(--wc-bg);
+  background: var(--wc-bg-muted);
 }
 
 .migration-item.needs-migration {
-  background: #fff3cd;
+  background: var(--wc-warning-bg, #fff3cd);
   border-left: 3px solid var(--wc-warning);
 }
 
 .migration-item.up-to-date {
-  background: #d4edda;
+  background: var(--wc-success-bg, #d4edda);
   border-left: 3px solid var(--wc-success);
 }
 
@@ -195,53 +146,6 @@ body {
   flex-wrap: wrap;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.2s, opacity 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: var(--wc-primary);
-  color: #fff;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--wc-primary-hover);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: #fff;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #5a6268;
-}
-
-.btn-outline {
-  background: transparent;
-  border: 2px solid var(--wc-border);
-  color: var(--wc-text);
-}
-
-.btn-outline:hover:not(:disabled) {
-  background: var(--wc-bg);
-}
-
 .alert {
   padding: 1rem;
   border-radius: 4px;
@@ -249,34 +153,34 @@ body {
 }
 
 .alert-warning {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  color: #856404;
+  background: var(--wc-warning-bg, #fff3cd);
+  border: 1px solid var(--wc-warning);
+  color: var(--wc-warning-text, #856404);
 }
 
 .alert-info {
-  background: #d1ecf1;
-  border: 1px solid #bee5eb;
-  color: #0c5460;
+  background: var(--wc-info-bg, #d1ecf1);
+  border: 1px solid var(--wc-info);
+  color: var(--wc-info-text, #0c5460);
 }
 
 .alert-danger {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  background: var(--wc-error-bg, #f8d7da);
+  border: 1px solid var(--wc-error);
+  color: var(--wc-error-text, #721c24);
 }
 
 .alert-success {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  color: #155724;
+  background: var(--wc-success-bg, #d4edda);
+  border: 1px solid var(--wc-success);
+  color: var(--wc-success-text, #155724);
 }
 
 .spinner {
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border: 2px solid #fff;
+  border: 2px solid currentColor;
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 0.8s linear infinite;
@@ -288,10 +192,6 @@ body {
 
 .hidden {
   display: none !important;
-}
-
-.text-muted {
-  color: var(--wc-text-muted);
 }
 
 .progress-bar {
@@ -311,8 +211,8 @@ body {
 .log-output {
   max-height: 200px;
   overflow-y: auto;
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: var(--wc-bg-inset, #1e1e1e);
+  color: var(--wc-text-on-inset, #d4d4d4);
   font-family: var(--wc-font-mono);
   font-size: 0.8rem;
   padding: 0.5rem;
@@ -325,53 +225,45 @@ body {
   word-break: break-word;
 }
 
-code {
-  font-family: var(--wc-font-mono);
-  background: var(--wc-bg);
-  padding: 0.1rem 0.3rem;
-  border-radius: 3px;
-  font-size: 0.9em;
-}
-
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mb-1 { margin-bottom: 0.5rem; }
 .mb-2 { margin-bottom: 1rem; }
 </style>
-</head>
-<body>
+{% endblock %}
 
-<div class="container">
-  <div class="card">
-    <div class="card-header">
+{% block body %}
+{% call console_page(data_controller="migration-status") %}
+  {% set title_text = "Migration Required" if migration_status.needs_migration else "Migration Status" %}
+  {% call console_header(
+    run_link=url_for_run('run_0.runs0', runid=runid, config=config, skip_migration_check='true'),
+    run_label=runid,
+    title=title_text
+  ) %}
+    {% if migration_status.needs_migration %}
+    <p class="wc-text-muted">This project requires data migrations to work with the current version of WEPPcloud.</p>
+    {% else %}
+    <p class="wc-text-muted">This project is up to date. All migrations have been applied.</p>
+    {% endif %}
+  {% endcall %}
+
+  <div class="migration-card">
+    <div class="migration-header">
       {% if migration_status.needs_migration %}
       <span class="icon">⚠️</span>
-      <div>
-        <h1>Migration Required</h1>
       {% else %}
       <span class="icon">✅</span>
-      <div>
-        <h1>Migration Status</h1>
       {% endif %}
-        <span class="runid">{{ runid }}</span>
+      <div>
+        <h2>{{ title_text }}</h2>
+        <span class="runid-badge">{{ runid }}</span>
         {% if is_readonly %}
         <span class="badge badge-info">Read-Only</span>
         {% endif %}
       </div>
     </div>
 
-    {% if migration_status.needs_migration %}
-    <p>
-      This project requires data migrations to work with the current version of WEPPcloud. 
-      Migrations update internal data formats to improve performance and compatibility.
-    </p>
-    {% else %}
-    <p>
-      This project is up to date. All migrations have been applied.
-    </p>
-    {% endif %}
-
-    {% if not can_migrate %}
+    {% if not can_migrate and migration_status.needs_migration %}
     <div class="alert alert-warning">
       <strong>Permission Required:</strong> Only the project owner or an administrator can run migrations on this project.
       {% if is_readonly %}
@@ -419,26 +311,26 @@ code {
     </div>
 
     <div class="actions">
-      <button type="button" class="btn btn-primary" id="run-migrations-btn" onclick="runMigrations()">
+      <button type="button" class="pure-button pure-button-primary" id="run-migrations-btn" onclick="runMigrations()">
         <span id="btn-text">Run Migrations</span>
         <span id="btn-spinner" class="spinner hidden"></span>
       </button>
       <a href="{{ url_for('run_0.runs0', runid=runid, config=config, skip_migration_check='true') }}" 
-         class="btn btn-outline">
+         class="pure-button">
         Load Without Migrating
       </a>
     </div>
     {% elif migration_status.needs_migration and not can_migrate %}
     <div class="actions">
       <a href="{{ url_for('run_0.runs0', runid=runid, config=config, skip_migration_check='true') }}" 
-         class="btn btn-outline">
+         class="pure-button">
         Load Without Migrating (Read-Only)
       </a>
     </div>
     {% else %}
     <div class="actions">
       <a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}" 
-         class="btn btn-primary">
+         class="pure-button pure-button-primary">
         Continue to Project
       </a>
     </div>
@@ -447,19 +339,21 @@ code {
     <div id="migration-result" class="hidden mt-2"></div>
   </div>
 
-  <div class="card">
+  <div class="migration-card">
     <h3 class="mb-1">What are migrations?</h3>
-    <p class="text-muted">
+    <p class="wc-text-muted">
       Migrations are automated updates that convert older data formats to newer, more efficient formats.
       They improve load times, reduce file sizes, and ensure compatibility with the latest features.
     </p>
-    <p class="text-muted">
+    <p class="wc-text-muted">
       All migrations are <strong>idempotent</strong>, meaning they can be safely run multiple times 
       without causing problems. If a migration has already been applied, it will be skipped.
     </p>
   </div>
-</div>
+{% endcall %}
+{% endblock %}
 
+{% block script_extras %}
 <script>
 const runid = '{{ runid }}';
 const config = '{{ config }}';
@@ -500,7 +394,7 @@ async function runMigrations() {
         <strong>⏳ Migration job queued</strong>
         <p class="mb-1">Job ID: <code>${jobId}</code></p>
         <p class="mb-1" id="status-text">Waiting for job to start...</p>
-        ${wasReadonly ? '<p class="text-muted">Readonly state will be restored after migration.</p>' : ''}
+        ${wasReadonly ? '<p class="wc-text-muted">Readonly state will be restored after migration.</p>' : ''}
         <div class="progress-bar mt-1">
           <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
         </div>
@@ -599,7 +493,7 @@ function onMigrationComplete(result) {
     <p class="mb-1">Applied: ${applied.join(', ') || 'None'}</p>
     <p class="mb-1">Skipped: ${skipped.join(', ') || 'None'}</p>
     <p class="mt-2">
-      <a href="{{ url_for('run_0.runs0', runid=runid, config=config) }}" class="btn btn-primary">
+      <a href="{{ url_for('run_0.runs0', runid=runid, config=config, skip_migration_check='true') }}" class="pure-button pure-button-primary">
         Continue to Project
       </a>
     </p>
@@ -623,6 +517,4 @@ function onMigrationFailed(error) {
 // Clean up on page unload
 window.addEventListener('beforeunload', stopPolling);
 </script>
-
-</body>
-</html>
+{% endblock %}

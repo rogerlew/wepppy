@@ -7,6 +7,8 @@ import pytest
 pytest.importorskip("flask")
 from flask import Flask
 
+pytestmark = pytest.mark.unit
+
 import wepppy.weppcloud.routes.nodb_api.wepp_bp as wepp_module
 import wepppy.weppcloud.routes.rq.api.api as wepp_rq_module
 
@@ -336,3 +338,26 @@ def test_run_wepp_accepts_json_payload(run_wepp_api_client):
     assert queue_call.func is ctx["run_wepp_rq"]
     assert queue_call.args == (RUN_ID,)
     assert queue_call.timeout == wepp_rq_module.TIMEOUT
+
+
+def test_run_wepp_returns_json_error_on_unhandled_exception(run_wepp_api_client, monkeypatch):
+    client, ctx = run_wepp_api_client
+
+    def explode(self, payload: Dict[str, Any]) -> None:
+        raise RuntimeError("forced failure for testing")
+
+    monkeypatch.setattr(ctx["wepp_cls"], "parse_inputs", explode, raising=True)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/rq/api/run_wepp",
+        json={"clip_soils": False},
+    )
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["Success"] is False
+    assert "forced failure" in payload["Error"]
+    assert isinstance(payload.get("StackTrace"), list)
+
+    env = ctx["env"]
+    assert env.recorder.queue_calls == []

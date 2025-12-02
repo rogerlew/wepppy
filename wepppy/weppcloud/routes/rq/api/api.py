@@ -992,9 +992,7 @@ def api_post_dss_export_rq(runid, config):
     return jsonify({'Success': True, 'job_id': job.id})
 
 
-@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_wepp', methods=['POST'])
-def api_run_wepp(runid, config):
-
+def _handle_run_wepp(runid: str, config: str) -> Response:
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
@@ -1084,8 +1082,8 @@ def api_run_wepp(runid, config):
 
     try:
         wepp.parse_inputs(controller_payload)
-    except Exception:
-        return exception_factory('Error parsing wepp inputs', runid=runid)
+    except Exception as exc:
+        return exception_factory(exc, runid=runid)
 
     with wepp.locked():
         wepp._prep_details_on_run_completion = prep_details_on_run_completion
@@ -1110,6 +1108,14 @@ def api_run_wepp(runid, config):
         return exception_factory()
 
     return jsonify({'Success': True, 'job_id': job.id})
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_wepp', methods=['POST'])
+def api_run_wepp(runid, config):
+    try:
+        return _handle_run_wepp(runid, config)
+    except Exception as exc:
+        return exception_factory(exc, runid=runid)
 
 
 def _task_upload_ash_map(runid, config, file_input_id, *, required=True, overwrite=True):

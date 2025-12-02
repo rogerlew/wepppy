@@ -103,7 +103,12 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         try:
             cached_wd = redis_wd_cache_client.get(runid)
             if cached_wd:
-                return context_override or cached_wd
+                # Validate cached path still exists; invalidate if not
+                if _exists(cached_wd):
+                    return context_override or cached_wd
+                else:
+                    # Cached path no longer exists, delete stale entry
+                    redis_wd_cache_client.delete(runid)
         except redis.exceptions.ConnectionError as e:
             print(f"Warning: Redis connection error during GET. Falling back to filesystem. Error: {e}")
 
@@ -149,7 +154,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         path = context_override
 
     # 3. Store the determined path in the cache for future requests
-    if redis_wd_cache_client:
+    # Only cache if the path actually exists to avoid caching stale legacy paths
+    if redis_wd_cache_client and _exists(path):
         try:
             # Cache the result with a 72-hour (259200 seconds) expiration
             redis_wd_cache_client.set(runid, path, ex=72 * 3600)

@@ -38,6 +38,7 @@ __all__ = [
     "migrate_wbt_geojson",
     "migrate_landuse_parquet",
     "migrate_soils_parquet",
+    "migrate_soils_nodb_meta",
     "refresh_query_catalog",
     "invalidate_redis_cache",
     "AVAILABLE_MIGRATIONS",
@@ -254,8 +255,19 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
     interchange_dir = wepp_output_dir / "interchange"
     version_file = interchange_dir / "interchange_version.json"
     
-    if interchange_dir.exists() and version_file.exists() and not force:
+    # Check if the new-format loss files exist (loss_pw0.hill.parquet, loss_pw0.out.parquet)
+    # Old interchange may have H.loss.parquet but not the loss_pw0.* files
+    loss_hill_file = interchange_dir / "loss_pw0.hill.parquet"
+    loss_out_file = interchange_dir / "loss_pw0.out.parquet"
+    has_new_format = loss_hill_file.exists() and loss_out_file.exists()
+    
+    if interchange_dir.exists() and version_file.exists() and has_new_format and not force:
         return True, "Interchange already exists"
+    
+    if interchange_dir.exists() and not has_new_format:
+        if dry_run:
+            return False, "Interchange has old format (missing loss_pw0.* files), needs regeneration"
+        # Old format - will regenerate
     
     if dry_run:
         return True, "Would generate interchange files"
@@ -463,9 +475,19 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
     # Track what we're changing
     changes = []
     
-    # Check for legacy summary dictionaries
+    # Check for legacy summary dictionaries that contain actual summary objects
+    # After migration, these will be dicts like {str(id): None} which don't need migration
+    def needs_slimming(key: str) -> bool:
+        val = state.get(key)
+        if val is None:
+            return False
+        if not isinstance(val, dict):
+            return True  # Unexpected format, try to migrate
+        # Check if any values are non-None (actual summary objects)
+        return any(v is not None for v in val.values())
+    
     legacy_keys = ["_subs_summary", "_fps_summary", "_chns_summary"]
-    found_keys = [k for k in legacy_keys if k in state and state[k] is not None]
+    found_keys = [k for k in legacy_keys if needs_slimming(k)]
     
     # Check for inline _structure that needs to be externalized
     structure_pkl_path = watershed_dir / "structure.pkl"
@@ -485,15 +507,41 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
     if dry_run:
         msgs = []
         if found_keys:
-            msgs.append(f"remove {len(found_keys)} legacy summary dict(s)")
+            msgs.append(f"slim {len(found_keys)} legacy summary dict(s)")
         if needs_structure_migration:
             msgs.append("externalize _structure to structure.pkl")
         return True, f"Would {' and '.join(msgs)}"
     
-    # Remove the legacy dictionaries (set to None to preserve schema)
-    for key in found_keys:
-        state[key] = None
-        changes.append(f"removed {key}")
+    # Load topaz_ids from parquet files to create placeholder dicts
+    # This maintains backward compatibility with code that iterates over _subs_summary/_chns_summary
+    try:
+        import duckdb
+        con = duckdb.connect()
+        
+        hillslopes_parquet = str(watershed_dir / "hillslopes.parquet")
+        channels_parquet = str(watershed_dir / "channels.parquet")
+        
+        sub_ids = [row[0] for row in con.execute(
+            f"SELECT topaz_id FROM read_parquet('{hillslopes_parquet}')"
+        ).fetchall()]
+        chn_ids = [row[0] for row in con.execute(
+            f"SELECT topaz_id FROM read_parquet('{channels_parquet}')"
+        ).fetchall()]
+        con.close()
+    except Exception as e:
+        return False, f"Failed to read topaz_ids from parquet: {e}"
+    
+    # Replace legacy dictionaries with placeholder dicts containing just the IDs
+    # This maintains iteration compatibility while dropping the actual summary objects
+    if "_subs_summary" in found_keys:
+        state["_subs_summary"] = {str(topaz_id): None for topaz_id in sub_ids}
+        changes.append("slimmed _subs_summary")
+    if "_chns_summary" in found_keys:
+        state["_chns_summary"] = {str(topaz_id): None for topaz_id in chn_ids}
+        changes.append("slimmed _chns_summary")
+    if "_fps_summary" in found_keys:
+        state["_fps_summary"] = None  # flowpaths don't need iteration compatibility
+        changes.append("removed _fps_summary")
     
     # Externalize _structure to pickle file if needed
     if needs_structure_migration:
@@ -752,6 +800,83 @@ def migrate_soils_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         return False, f"Failed to normalize soils parquet: {e}"
 
 
+def migrate_soils_nodb_meta(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
+    """
+    Clear legacy _meta_fn attributes from SoilSummary objects in soils.nodb.
+    
+    The _meta_fn attributes point to legacy .json files containing pickled
+    WeppSoil objects with numpy scalars. These files cause deserialization
+    errors with newer numpy versions. When soils.parquet exists, these
+    legacy metadata files are not needed.
+    
+    Idempotent: safe to run multiple times.
+    
+    Args:
+        wd: Working directory path
+        dry_run: If True, report but don't modify
+        
+    Returns:
+        (applied, message) tuple
+    """
+    run_path = Path(wd)
+    soils_parquet = run_path / "soils" / "soils.parquet"
+    soils_nodb = run_path / "soils.nodb"
+    
+    # Only migrate if soils.parquet exists (new format is available)
+    if not soils_parquet.exists():
+        return True, "No soils.parquet (legacy meta files may still be needed)"
+    
+    if not soils_nodb.exists():
+        return True, "No soils.nodb file"
+    
+    try:
+        import jsonpickle
+    except ImportError:
+        return False, "jsonpickle not available"
+    
+    try:
+        with open(soils_nodb, 'r') as f:
+            content = f.read()
+        
+        # Check if any _meta_fn attributes with non-null values exist
+        # After migration, _meta_fn will be null, so we only need to migrate
+        # if there are actual file paths (strings containing .json)
+        import re
+        has_meta_fn_values = bool(re.search(r'"_meta_fn":\s*"[^"]+\.json"', content))
+        
+        if not has_meta_fn_values:
+            return True, "No legacy _meta_fn attributes found"
+        
+        if dry_run:
+            return True, "Would clear legacy _meta_fn attributes from soils.nodb"
+        
+        # Load the soils nodb object
+        # We need to handle legacy module paths
+        from wepppy.nodb.base import NoDbBase
+        NoDbBase._ensure_legacy_module_imports(content)
+        
+        soils_obj = jsonpickle.decode(content)
+        
+        # Clear _meta_fn from all SoilSummary objects
+        cleared_count = 0
+        if hasattr(soils_obj, 'soils') and soils_obj.soils:
+            for soil_summary in soils_obj.soils.values():
+                if hasattr(soil_summary, '_meta_fn') and soil_summary._meta_fn is not None:
+                    soil_summary._meta_fn = None
+                    cleared_count += 1
+        
+        if cleared_count == 0:
+            return True, "No _meta_fn attributes to clear"
+        
+        # Write back
+        with open(soils_nodb, 'w') as f:
+            f.write(jsonpickle.encode(soils_obj))
+        
+        return True, f"Cleared _meta_fn from {cleared_count} soil summaries"
+    except Exception as e:
+        return False, f"Failed to migrate soils.nodb meta: {e}"
+
+
 def invalidate_redis_cache(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
     """
     Invalidate Redis DB 13 cache for all .nodb files in the working directory.
@@ -856,6 +981,7 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
     ("wbt_geojson", migrate_wbt_geojson),
     ("landuse_parquet", migrate_landuse_parquet),
     ("soils_parquet", migrate_soils_parquet),
+    ("soils_nodb_meta", migrate_soils_nodb_meta),
     ("interchange", migrate_interchange),
     ("query_catalog", refresh_query_catalog),  # After interchange, before redis_cache
     ("redis_cache", invalidate_redis_cache),  # Always run last
@@ -870,6 +996,7 @@ MIGRATION_DESCRIPTIONS: Dict[str, str] = {
     "wbt_geojson": "Normalize GeoJSON identifiers for WhiteboxTools delineation",
     "landuse_parquet": "Generate parquet files for landuse data",
     "soils_parquet": "Generate parquet files for soils data",
+    "soils_nodb_meta": "Clear legacy _meta_fn attributes from soils.nodb (fixes numpy deserialization)",
     "interchange": "Migrate WEPP interchange files to parquet format",
     "query_catalog": "Refresh query engine catalog for parquet files",
     "redis_cache": "Invalidate Redis cache for this run",
@@ -914,12 +1041,15 @@ def check_migrations_needed(wd: str) -> Dict[str, Any]:
         try:
             applied, message = migrate_fn(wd, dry_run=True)
             
-            # Informational migrations never require user action
-            if name in INFORMATIONAL_MIGRATIONS:
+            # Informational migrations never require user action (unless they explicitly 
+            # return applied=False indicating work is needed)
+            if name in INFORMATIONAL_MIGRATIONS and applied:
                 would_apply = False
             else:
                 # Check if this migration indicates actual work is needed
-                would_apply = applied and "Would " in message
+                # applied=False means migration was NOT skipped (i.e., work needed)
+                # applied=True with "Would" means work would happen
+                would_apply = (not applied) or (applied and "Would " in message)
                 
                 # Also check for keywords indicating no work needed
                 for keyword in NO_WORK_KEYWORDS:
