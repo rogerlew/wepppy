@@ -173,7 +173,7 @@ def api_run_sync():
                 timeout=RUN_SYNC_TIMEOUT,
             )
             
-            jobs_info = {'sync_job_id': sync_job.id}
+            jobs_info = {'job_id': sync_job.id, 'sync_job_id': sync_job.id}
             
             # Optionally chain migrations job
             if run_migrations:
@@ -185,7 +185,7 @@ def api_run_sync():
                 migration_job = queue.enqueue_call(
                     migrations_rq,
                     (wd, runid),
-                    {'archive_before': archive_before},
+                    kwargs={'archive_before': archive_before},
                     timeout=MIGRATIONS_TIMEOUT,
                     depends_on=sync_job,
                 )
