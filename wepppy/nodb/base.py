@@ -724,6 +724,26 @@ class NoDbBase(object):
         return f'{self.runid}:{self.class_name}'
 
     def _init_logging(self):
+        """Initialize logging infrastructure for this NoDb controller.
+        
+        CRITICAL - Handler Reuse Pattern (fixes FD exhaustion):
+        ---------------------------------------------------------
+        Multiple controller types (Ron, Climate, Watershed, Soils, etc.) share the
+        same runid, and each calls _init_logging(). Without proper handler reuse,
+        each controller would open its own FileHandler → FD leak → "Too many open files".
+        
+        The solution is to store handler references on `runid_logger` (keyed by runid),
+        NOT on `self.logger` (keyed by class name). This way:
+        - First controller for a run creates handlers and stores them on runid_logger
+        - Subsequent controllers for the SAME run reuse handlers from runid_logger
+        - Different controller TYPES still share the same file handle
+        
+        The check `getattr(self.runid_logger, '_queue_handler', None)` must match
+        where we STORE the handlers (lines 791-797). If you check runid_logger but
+        store on self.logger, the reuse logic breaks and FDs leak.
+        
+        See also: _safe_stop_queue_listener() which closes _run_file_handler.
+        """
         # Close any existing file handlers on this instance to prevent FD leaks
         # This is needed when getInstance() re-initializes logging on a cached instance
         handler = getattr(self, '_run_file_handler', None)
@@ -739,6 +759,7 @@ class NoDbBase(object):
         self.logger = logging.getLogger(f'{self._logger_base_name}.{self.class_name}')  # project component logger
 
         # Check if queue handler exists on the runid_logger (shared across all controllers for this run)
+        # IMPORTANT: This check MUST use runid_logger, matching where handlers are stored (see lines 791-797)
         queue_handler = getattr(self.runid_logger, '_queue_handler', None)
 
         # Define a standard log format
@@ -790,7 +811,9 @@ class NoDbBase(object):
             self.runid_logger.setLevel(logging.ERROR)
             self.runid_logger.propagate = True  # allow propagation to root logger
 
-            # Attach handlers to runid_logger for reuse across controller types
+            # CRITICAL: Store handlers on runid_logger (NOT self.logger) for cross-controller reuse.
+            # The check above uses getattr(self.runid_logger, '_queue_handler', None) - these MUST match.
+            # If you store on self.logger but check runid_logger, every controller opens new FDs → leak.
             self.runid_logger._queue_handler = self._queue_handler
             self.runid_logger._log_queue = self._log_queue
             self.runid_logger._queue_listener = self._queue_listener
