@@ -58,6 +58,10 @@ if [ "${SKIP_BUILD}" = false ]; then
     echo ">>> Step 2: Building Docker images..."
     ./wctl/wctl.sh build --no-cache weppcloud rq-worker
     echo ""
+    
+    echo ">>> Step 2b: Pruning Docker build cache..."
+    docker builder prune -af
+    echo ""
 else
     echo ">>> Step 2: Skipping Docker build (--skip-build)"
     echo ""
