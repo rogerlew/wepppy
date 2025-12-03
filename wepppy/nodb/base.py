@@ -790,7 +790,15 @@ class NoDbBase(object):
             self.runid_logger.setLevel(logging.ERROR)
             self.runid_logger.propagate = True  # allow propagation to root logger
 
-            # Attach handlers to component logger for reuse
+            # Attach handlers to runid_logger for reuse across controller types
+            self.runid_logger._queue_handler = self._queue_handler
+            self.runid_logger._log_queue = self._log_queue
+            self.runid_logger._queue_listener = self._queue_listener
+            self.runid_logger._redis_handler = self._redis_handler
+            self.runid_logger._run_file_handler = self._run_file_handler
+            self.runid_logger._console_handler = self._console_handler
+
+            # Also attach to component logger for backward compatibility
             self.logger._log_queue = self._log_queue
             self.logger._queue_handler = self._queue_handler
             self.logger._queue_listener = self._queue_listener
@@ -798,13 +806,13 @@ class NoDbBase(object):
             self.logger._run_file_handler = self._run_file_handler
             self.logger._console_handler = self._console_handler
         else:
-            # Reuse existing handlers
-            self._queue_handler = self.logger.queue_handler
-            self._log_queue = self.logger._log_queue
-            self._queue_listener = self.logger._queue_listener
-            self._redis_handler = self.logger._redis_handler
-            self._run_file_handler = self.logger._run_file_handler
-            self._console_handler = self.logger._console_handler
+            # Reuse existing handlers from runid_logger
+            self._queue_handler = self.runid_logger._queue_handler
+            self._log_queue = self.runid_logger._log_queue
+            self._queue_listener = self.runid_logger._queue_listener
+            self._redis_handler = self.runid_logger._redis_handler
+            self._run_file_handler = self.runid_logger._run_file_handler
+            self._console_handler = self.runid_logger._console_handler
 
     def __getstate__(self) -> dict[str, Any]:
         """Remove non-serializable logger attributes before pickling."""
