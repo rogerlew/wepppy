@@ -5,6 +5,10 @@ from pathlib import Path
 import pytest
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line("markers", "unit: Fast, isolated unit tests")
+
+
 @pytest.fixture
 def temp_project(tmp_path: Path) -> Path:
     docker_dir = tmp_path / "docker"

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import grp
 import os
+import pwd
 import stat
 import subprocess
 from pathlib import Path
-from typing import Sequence
+from typing import Optional, Sequence, Tuple
 
 import typer
 
@@ -16,6 +18,30 @@ def _context(ctx: typer.Context) -> CLIContext:
     if not isinstance(context, CLIContext):
         raise RuntimeError("CLIContext is not initialised.")
     return context
+
+
+def _lookup_user_uid(username: str) -> Optional[str]:
+    try:
+        return str(pwd.getpwnam(username).pw_uid)
+    except KeyError:
+        return None
+
+
+def _lookup_group_gid(group: str) -> Optional[str]:
+    try:
+        return str(grp.getgrnam(group).gr_gid)
+    except KeyError:
+        return None
+
+
+def _resolve_runtime_uid_gid(context: CLIContext) -> Tuple[str, str]:
+    raw_uid = context.env_value("UID")
+    raw_gid = context.env_value("GID")
+
+    uid = (raw_uid or "").strip() or _lookup_user_uid("roger") or "1000"
+    gid = (raw_gid or "").strip() or _lookup_group_gid("docker") or "993"
+
+    return uid, gid
 
 
 def _run_host_command(context: CLIContext, command: Sequence[str]) -> int:
@@ -80,8 +106,7 @@ def register(app: typer.Typer) -> None:
             typer.echo(f"No .docker-data directory at {data_root}; nothing to do.")
             raise typer.Exit(0)
 
-        app_uid = context.env_value("UID") or "1000"
-        app_gid = context.env_value("GID") or "993"
+        app_uid, app_gid = _resolve_runtime_uid_gid(context)
 
         postgres = data_root / "postgres"
         if postgres.exists():
@@ -115,7 +140,9 @@ def register(app: typer.Typer) -> None:
 
         weppcloud = data_root / "weppcloud"
         if weppcloud.exists():
-            typer.echo(f"Fixing ownership for {weppcloud} (app runtime uid/gid).")
+            typer.echo(
+                f"Fixing ownership for {weppcloud} (uid:gid {app_uid}:{app_gid})."
+            )
             _chown_safe(weppcloud, f"{app_uid}:{app_gid}")
             _chmod_safe(
                 weppcloud,
