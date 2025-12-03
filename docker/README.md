@@ -2,7 +2,63 @@
 
 > **See also:** [AGENTS.md](../AGENTS.md) for Development Workflow, Docker Compose (Recommended), and Common Docker tasks sections.
 
-This guide walks through the local docker-compose stack (`docker/docker-compose.dev.yml`) that mirrors the WEPPcloud runtime. Use it as a map when onboarding new engineers or debugging environment issues.
+This guide covers both the development (`docker-compose.dev.yml`) and production (`docker-compose.prod.yml`) Docker Compose stacks for WEPPcloud.
+
+## Deployment Environments
+
+| Environment | Host | Domain | Compose File | Notes |
+|-------------|------|--------|--------------|-------|
+| **Test Production** | `forest1.local` | `wc-prod.bearhive.duckdns.org` | `docker-compose.prod.yml` | Primary test production server |
+| **Development** | `forest.local` | `wc.bearhive.duckdns.org` | `docker-compose.dev.yml` | Development with bind mounts |
+
+### Test Production (forest1.local)
+
+The test production server at `forest1.local` (accessible via `wc-prod.bearhive.duckdns.org`) should **always** use the production compose file:
+
+```bash
+cd /workdir/wepppy
+./scripts/deploy-production.sh
+# Or manually:
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
+```
+
+### Development (Local)
+
+For local development with live code reloading:
+
+```bash
+cd /workdir/wepppy
+docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
+```
+
+## Dev vs Prod Differences
+
+| Aspect | Dev (`docker-compose.dev.yml`) | Prod (`docker-compose.prod.yml`) |
+|--------|-------------------------------|----------------------------------|
+| **Redis storage** | Bind mount: `.docker-data/redis` | Named volume: `redis-data` |
+| **Postgres data** | Bind mount: `.docker-data/postgres` | Named volume: `postgres-data` |
+| **Postgres backups** | Bind mount: `.docker-data/postgres-backups` | Named volume: `postgres-backups` |
+| **Code** | Bind-mounted (live reload) | Baked into image |
+| **Container names** | `wepppy-*` prefix | `docker-*-1` (compose default) |
+
+### Production Backup Location
+
+On the production host, postgres backups are stored in the Docker named volume:
+```
+/var/lib/docker/volumes/docker_postgres-backups/_data/
+```
+
+To inspect backups (requires root):
+```bash
+sudo ls -la /var/lib/docker/volumes/docker_postgres-backups/_data/
+# Or via container:
+docker exec docker-postgres-backup-1 ls -la /backups/
+```
+
+Backups run daily with 7-day retention. To trigger a manual backup:
+```bash
+docker logs docker-postgres-backup-1  # Check recent backup status
+```
 
 ## Prerequisites
 - Docker Desktop or a recent Docker Engine.
@@ -18,13 +74,6 @@ EOF
 ```
 
 > To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
-
-Start or rebuild the stack with:
-
-```bash
-cd /workdir/wepppy
-docker compose --env-file docker/.env -f docker/docker-compose.dev.yml up --build
-```
 
 ## wctl (weppcloud control)
 Wrapper for running docker compose commands
@@ -46,8 +95,8 @@ wctl logs weppcloud
 | `query-engine` | FastAPI (Uvicorn) for analytical lookups | 8041 | Reload enabled for dev loop. |
 | `weppcloudr`   | R (Plumber) renderer for WEPPcloud reports | 8050 | Serves `/weppcloudr/*`; mounts R templates and run volumes; caches rendered HTML in run export dirs. |
 | `rq-worker`    | RQ worker pool servicing Redis queue DB 9 | — | Shares code volume; respects `UID`/`GID`. |
-| `redis`        | Redis 7.4 | 6379 | Persists under `../.docker-data/redis`. |
-| `postgres`     | PostgreSQL 16 | 5432 | Data dir at `../.docker-data/postgres`. |
+| `redis`        | Redis 7.4 | 6379 | Dev: `.docker-data/redis`, Prod: `redis-data` volume |
+| `postgres`     | PostgreSQL 16 | 5432 | Dev: `.docker-data/postgres`, Prod: `postgres-data` volume |
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |
 | Legacy profiles (`elevationquery`, `metquery`, `wmesque`, `wmesque2`) | Optional legacy web services | 8002, 8004, 8003, 8030 | Activated via `--profile legacy`. |
 | `webpush`      | Placeholder container for future WebPush service | — | No-op until implemented. |
@@ -142,8 +191,8 @@ cat > .env <<EOF
 UID=$(id -u)
 GID=$(id -g)
 
-# External host configuration
-EXTERNAL_HOST=wc.bearhive.duckdns.org
+# External host configuration (use wc-prod for test production)
+EXTERNAL_HOST=wc-prod.bearhive.duckdns.org
 EXTERNAL_HOST_DESCRIPTION="WEPPcloud Test Production Server"
 
 # Database credentials

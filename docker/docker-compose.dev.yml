@@ -445,20 +445,65 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h $${PGHOST} -U $${PGUSER} -d $${PGDATABASE}"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     command:
       - bash
       - -lc
       - |
         set -euo pipefail
         mkdir -p "$${BACKUP_DIR:-/backups}"
-        while true; do
+        
+        # Run initial backup on startup
+        run_backup() {
           ts=$$(date +"%Y%m%d-%H%M%S")
-          target="$${BACKUP_DIR:-/backups}/wepppy-$${ts}.dump"
-          echo "[ $$(date --iso-8601=seconds) ] writing $$target"
-          pg_dump -h "$${PGHOST}" -U "$${PGUSER}" -d "$${PGDATABASE}" -Fc -f "$$target"
-          echo "[ $$(date --iso-8601=seconds) ] purge older than $${BACKUP_KEEP_DAYS:-7} days"
-          find "$${BACKUP_DIR:-/backups}" -type f -mtime +$${BACKUP_KEEP_DAYS:-7} -delete
+          target="$${BACKUP_DIR:-/backups}/weppcloud-$${ts}.dump"
+          tmp_target="$${target}.tmp"
+          
+          echo "[ $$(date --iso-8601=seconds) ] Starting backup to $$target"
+          
+          # Dump to temp file first, then atomic rename
+          if pg_dump -h "$${PGHOST}" -U "$${PGUSER}" -d "$${PGDATABASE}" -Fc -f "$$tmp_target"; then
+            mv "$$tmp_target" "$$target"
+            
+            # Verify backup header
+            if head -c 5 "$$target" | grep -q "PGDMP"; then
+              size=$$(du -h "$$target" | cut -f1)
+              echo "[ $$(date --iso-8601=seconds) ] Backup complete: $$target ($$size)"
+            else
+              echo "[ $$(date --iso-8601=seconds) ] ERROR: Backup verification failed - invalid header"
+              rm -f "$$target"
+              return 1
+            fi
+          else
+            echo "[ $$(date --iso-8601=seconds) ] ERROR: pg_dump failed"
+            rm -f "$$tmp_target"
+            return 1
+          fi
+          
+          # Purge old backups
+          echo "[ $$(date --iso-8601=seconds) ] Purging backups older than $${BACKUP_KEEP_DAYS:-7} days"
+          find "$${BACKUP_DIR:-/backups}" -name "weppcloud-*.dump" -type f -mtime +$${BACKUP_KEEP_DAYS:-7} -delete
+          
+          # Also purge legacy named backups
+          find "$${BACKUP_DIR:-/backups}" -name "wepppy-*.dump" -type f -mtime +$${BACKUP_KEEP_DAYS:-7} -delete
+          
+          # List current backups
+          echo "[ $$(date --iso-8601=seconds) ] Current backups:"
+          ls -lh "$${BACKUP_DIR:-/backups}"/*.dump 2>/dev/null || echo "  (none)"
+        }
+        
+        # Initial backup
+        run_backup || echo "Initial backup failed, will retry on schedule"
+        
+        # Scheduled backups
+        while true; do
           sleep $${BACKUP_INTERVAL_SECONDS:-86400}
+          run_backup || echo "Scheduled backup failed"
         done
 
   rq-dashboard:
