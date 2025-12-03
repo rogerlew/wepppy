@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.10-slim AS base
+FROM python:3.12-slim AS base
 
 # Preinstall build toolchain and native libraries required by geospatial wheels.
 RUN apt-get update && \
@@ -88,14 +88,15 @@ RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write
     printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" && \
     printf '/workdir/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
     printf '/workdir/f-esri/\n' > "${SITE_PACKAGES}/f_esri.pth" && \
-    printf '/workdir/wepppyo3/release/linux/py310-wepppy310-env/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
+    printf '/workdir/wepppyo3/release/linux/py312/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
     
 # Vendor Rosetta directly from GitHub into site-packages, including LFS assets.
-RUN git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
+RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" && \
+    git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
     cd /tmp/rosetta && \
     git lfs pull && \
     rm -rf .git && \
-    mv /tmp/rosetta /opt/venv/lib/python3.10/site-packages/rosetta
+    mv /tmp/rosetta "${SITE_PACKAGES}/rosetta"
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
