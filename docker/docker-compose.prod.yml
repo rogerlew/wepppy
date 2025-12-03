@@ -52,6 +52,10 @@ x-wepppy-service: &wepppy-service
 services:
   weppcloud:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
     environment:
       <<: *wepppy-env
       CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers.js
@@ -83,6 +87,10 @@ services:
 
   browse:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
     environment:
       <<: *wepppy-env
       REDIS_URL: ${BROWSE_REDIS_URL:-redis://redis:6379/0}
@@ -102,6 +110,10 @@ services:
 
   dtale:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     environment:
       <<: *wepppy-env
       DTALE_BASE_URL: http://dtale:9010
@@ -119,6 +131,10 @@ services:
 
   profile-playback:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - uvicorn
       - services.profile_playback.app:app
@@ -142,6 +158,10 @@ services:
 
   elevationquery:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -158,6 +178,10 @@ services:
 
   metquery:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -172,6 +196,10 @@ services:
 
   wmesque:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -186,6 +214,10 @@ services:
 
   wmesque2:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -202,6 +234,10 @@ services:
 
   query-engine:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     environment:
       <<: *wepppy-env
       EXTERNAL_HOST: ${EXTERNAL_HOST}
@@ -249,6 +285,10 @@ services:
 
   rq-worker:
     <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
     environment:
       <<: *wepppy-env
       LOGLEVEL: INFO

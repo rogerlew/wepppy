@@ -140,6 +140,10 @@ services:
   profile-playback:
     <<: *wepppy-service
     container_name: profile-playback
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - uvicorn
       - services.profile_playback.app:app
@@ -184,6 +188,10 @@ services:
   dtale:
     <<: *wepppy-service
     container_name: wepppy-dtale
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -205,6 +213,10 @@ services:
   elevationquery:
     <<: *wepppy-service
     container_name: wepppy-elevationquery
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -222,6 +234,10 @@ services:
   metquery:
     <<: *wepppy-service
     container_name: wepppy-metquery
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -237,6 +253,10 @@ services:
   wmesque:
     <<: *wepppy-service
     container_name: wepppy-wmesque
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -252,6 +272,10 @@ services:
   wmesque2:
     <<: *wepppy-service
     container_name: wepppy-wmesque2
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     command:
       - gunicorn
       - --workers
@@ -269,6 +293,10 @@ services:
   query-engine:
     <<: *wepppy-service
     container_name: wepppy-query-engine
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     environment:
       <<: *wepppy-env
       EXTERNAL_HOST: ${EXTERNAL_HOST}

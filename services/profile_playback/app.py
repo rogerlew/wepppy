@@ -40,7 +40,7 @@ _EXTENDED_MODS_DATA_ROOT = _resolve_extended_mods_data_root()
 os.environ.setdefault("EXTENDED_MODS_DATA", _EXTENDED_MODS_DATA_ROOT)
 
 
-from wepppy.nodb.base import clear_locks
+from wepppy.nodb.base import clear_locks, NoDbBase
 from wepppy.nodb.core import Ron
 from wepppy.profile_recorder.playback import PlaybackSession
 from wepppy.profile_coverage import load_settings_from_env
@@ -887,6 +887,14 @@ async def run_profile(profile: str, payload: ProfileRunRequest) -> StreamingResp
         except Exception:  # pragma: no cover - defensive logging
             session_logger.exception("Playback error token=%s", session_token)
         finally:
+            # Clean up NoDb instances to release file descriptors
+            if sandbox_run_dir is not None:
+                try:
+                    cleaned = NoDbBase.cleanup_run_instances(str(sandbox_run_dir))
+                    if cleaned > 0:
+                        session_logger.debug("Cleaned up %d NoDb instances for %s", cleaned, sandbox_run_dir)
+                except Exception as cleanup_exc:
+                    session_logger.warning("Error cleaning up NoDb instances: %s", cleanup_exc)
             log_queue.put(None)
             session_logger.removeHandler(handler)
             handler.close()

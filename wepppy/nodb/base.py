@@ -839,7 +839,7 @@ class NoDbBase(object):
             self.logger.log(level, f"{task_name}... done. ({duration:.2f}s)")
 
     def _safe_stop_queue_listener(self) -> None:
-        """Safely stop the queue listener, handling potential thread cleanup issues."""
+        """Safely stop the queue listener and close file handlers to prevent FD leaks."""
         # if you change method you MUST verify that `wctl run-pytest` exits cleanly without hanging
         try:
             if hasattr(self, '_queue_listener') and self._queue_listener is not None:
@@ -859,6 +859,16 @@ class NoDbBase(object):
                 
                 # Clear the reference
                 self._queue_listener = None
+
+            # Close file handlers to prevent FD leaks
+            for handler_attr in ('_run_file_handler', '_exception_file_handler'):
+                handler = getattr(self, handler_attr, None)
+                if handler is not None:
+                    try:
+                        handler.close()
+                    except:
+                        pass
+                    setattr(self, handler_attr, None)
                 
         except (AttributeError, TypeError, KeyboardInterrupt, Exception):
             # Silently ignore cleanup errors during process shutdown
@@ -1026,6 +1036,54 @@ class NoDbBase(object):
                     pass
             # Clear the instances dict
             cls._instances.clear()
+
+    @classmethod
+    def cleanup_run_instances(cls, wd: str) -> int:
+        """
+        Clean up all NoDb instances associated with a specific working directory.
+        
+        This closes file handlers and removes cached instances for a run, freeing
+        file descriptors. Useful for long-running services like profile-playback
+        that create many transient runs.
+        
+        Args:
+            wd: Working directory path to clean up
+            
+        Returns:
+            Number of instances cleaned up
+        """
+        from wepppy.nodb.core import __all__ as core_all
+        from wepppy.nodb.mods import __all__ as mods_all
+        import importlib
+        
+        abs_wd = os.path.abspath(wd)
+        cleaned = 0
+        
+        # Collect all NoDbBase subclasses from core and mods
+        nodb_classes: list[type['NoDbBase']] = [cls]
+        
+        for module_path in ('wepppy.nodb.core', 'wepppy.nodb.mods'):
+            try:
+                module = importlib.import_module(module_path)
+                for name in getattr(module, '__all__', []):
+                    obj = getattr(module, name, None)
+                    if isinstance(obj, type) and issubclass(obj, NoDbBase) and obj is not NoDbBase:
+                        nodb_classes.append(obj)
+            except ImportError:
+                pass
+        
+        # Clean up instances from each class
+        for nodb_cls in nodb_classes:
+            with nodb_cls._instances_lock:
+                if abs_wd in nodb_cls._instances:
+                    instance = nodb_cls._instances.pop(abs_wd)
+                    try:
+                        instance._safe_stop_queue_listener()
+                        cleaned += 1
+                    except:
+                        pass
+        
+        return cleaned
     
     @classmethod
     def tryGetInstance(
