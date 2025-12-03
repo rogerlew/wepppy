@@ -1,7 +1,7 @@
 """Tests for NoDb file handler cleanup to prevent file descriptor leaks.
 
 These tests validate that:
-1. _safe_stop_queue_listener properly closes file handlers
+1. _safe_stop_queue_listener properly closes the run file handler
 2. cleanup_all_instances closes file handlers for all cached instances
 3. cleanup_run_instances closes file handlers for a specific run
 4. File descriptors are properly released after cleanup
@@ -132,32 +132,6 @@ class TestSafeStopQueueListener:
         # Verify attribute was cleared
         assert controller._run_file_handler is None
 
-    def test_closes_exception_file_handler(
-        self,
-        run_dir: Path,
-        redis_env: SimpleNamespace,
-    ) -> None:
-        """Validates that _safe_stop_queue_listener closes _exception_file_handler."""
-        controller = FileHandlerTrackingController(str(run_dir))
-
-        # Verify file handler was created
-        assert hasattr(controller, "_exception_file_handler")
-        assert controller._exception_file_handler is not None
-        
-        exception_file_handler = controller._exception_file_handler
-        # Get the underlying stream before it's closed
-        stream = exception_file_handler.stream
-        assert stream is not None
-        assert not stream.closed
-
-        # Call cleanup
-        controller._safe_stop_queue_listener()
-
-        # Verify the stream was closed
-        assert stream.closed
-        # Verify attribute was cleared
-        assert controller._exception_file_handler is None
-
     def test_stops_queue_listener(
         self,
         run_dir: Path,
@@ -195,7 +169,6 @@ class TestSafeStopQueueListener:
 
         # All handlers should be None
         assert controller._run_file_handler is None
-        assert controller._exception_file_handler is None
         assert controller._queue_listener is None
 
     def test_handles_missing_attributes(
@@ -206,9 +179,8 @@ class TestSafeStopQueueListener:
         """Validates cleanup handles instances with missing handler attributes."""
         controller = FileHandlerTrackingController(str(run_dir))
 
-        # Remove attributes to simulate edge case
+        # Remove attribute to simulate edge case
         del controller._run_file_handler
-        del controller._exception_file_handler
 
         # Should not raise
         controller._safe_stop_queue_listener()
@@ -238,18 +210,14 @@ class TestCleanupAllInstances:
 
         # Get references to streams before cleanup
         stream1_run = controller1._run_file_handler.stream
-        stream1_exc = controller1._exception_file_handler.stream
         stream2_run = controller2._run_file_handler.stream
-        stream2_exc = controller2._exception_file_handler.stream
 
         # Cleanup all instances
         FileHandlerTrackingController.cleanup_all_instances()
 
         # Verify all streams were closed
         assert stream1_run.closed
-        assert stream1_exc.closed
         assert stream2_run.closed
-        assert stream2_exc.closed
 
         # Verify instances dict was cleared
         assert len(FileHandlerTrackingController._instances) == 0
@@ -386,27 +354,19 @@ class TestFileDescriptorCleanup:
         """Validates file descriptors are released after _safe_stop_queue_listener."""
         controller = FileHandlerTrackingController(str(run_dir))
 
-        # Get the file descriptor numbers before cleanup
+        # Get the file descriptor number before cleanup
         run_handler = controller._run_file_handler
-        exc_handler = controller._exception_file_handler
-
         run_fd = run_handler.stream.fileno()
-        exc_fd = exc_handler.stream.fileno()
 
-        # Both should be valid file descriptors
+        # Should be valid file descriptor
         assert run_fd >= 0
-        assert exc_fd >= 0
 
         # Cleanup
         controller._safe_stop_queue_listener()
 
-        # After cleanup, trying to use the old FDs should fail
-        # (they should be closed)
+        # After cleanup, trying to use the old FD should fail (it should be closed)
         with pytest.raises(OSError):
             os.fstat(run_fd)
-
-        with pytest.raises(OSError):
-            os.fstat(exc_fd)
 
     def test_multiple_controllers_cleanup_releases_all_fds(
         self,
@@ -418,7 +378,7 @@ class TestFileDescriptorCleanup:
         controllers = []
         fds = []
 
-        # Create 5 controllers (10 file handlers = 10 FDs)
+        # Create 5 controllers (5 run file handlers = 5 FDs)
         for i in range(5):
             run = tmp_path / f"run_{i}"
             run.mkdir()
@@ -429,7 +389,6 @@ class TestFileDescriptorCleanup:
             FileHandlerTrackingController._instances[str(run)] = controller
 
             fds.append(controller._run_file_handler.stream.fileno())
-            fds.append(controller._exception_file_handler.stream.fileno())
 
         # All FDs should be valid
         for fd in fds:

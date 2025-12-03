@@ -724,11 +724,21 @@ class NoDbBase(object):
         return f'{self.runid}:{self.class_name}'
 
     def _init_logging(self):
+        # Close any existing file handlers on this instance to prevent FD leaks
+        # This is needed when getInstance() re-initializes logging on a cached instance
+        handler = getattr(self, '_run_file_handler', None)
+        if handler is not None:
+            try:
+                handler.close()
+            except:
+                pass
+            self._run_file_handler = None
+        
         # Initialize loggers
         self.runid_logger = logging.getLogger(f'wepppy.run.{self.runid}')  # project logger
         self.logger = logging.getLogger(f'{self._logger_base_name}.{self.class_name}')  # project component logger
 
-        # Check if queue handler exists
+        # Check if queue handler exists on the runid_logger (shared across all controllers for this run)
         queue_handler = getattr(self.runid_logger, '_queue_handler', None)
 
         # Define a standard log format
@@ -767,13 +777,6 @@ class NoDbBase(object):
             self._console_handler.setLevel(logging.ERROR)
             self._console_handler.setFormatter(formatter)
 
-            # RunID exceptions handler
-            exceptions_path = _join(self.wd, 'exceptions.log')  # absolute path to exceptions log
-            self._exception_file_handler = FileHandler(exceptions_path)
-            self._exception_file_handler.setLevel(try_redis_get_log_level(self.runid, logging.ERROR))
-            self._exception_file_handler.setFormatter(formatter)
-            Path(exceptions_path).touch(exist_ok=True)
-
             # Initialize queue listener with all handlers
             self._queue_listener = QueueListener(
                 self._log_queue,
@@ -786,7 +789,6 @@ class NoDbBase(object):
 
             self.runid_logger.setLevel(logging.ERROR)
             self.runid_logger.propagate = True  # allow propagation to root logger
-            self.runid_logger.addHandler(self._exception_file_handler)
 
             # Attach handlers to component logger for reuse
             self.logger._log_queue = self._log_queue
@@ -794,7 +796,6 @@ class NoDbBase(object):
             self.logger._queue_listener = self._queue_listener
             self.logger._redis_handler = self._redis_handler
             self.logger._run_file_handler = self._run_file_handler
-            self.logger._exception_file_handler = self._exception_file_handler
             self.logger._console_handler = self._console_handler
         else:
             # Reuse existing handlers
@@ -803,7 +804,6 @@ class NoDbBase(object):
             self._queue_listener = self.logger._queue_listener
             self._redis_handler = self.logger._redis_handler
             self._run_file_handler = self.logger._run_file_handler
-            self._exception_file_handler = self.logger._exception_file_handler
             self._console_handler = self.logger._console_handler
 
     def __getstate__(self) -> dict[str, Any]:
@@ -818,7 +818,6 @@ class NoDbBase(object):
             '_queue_listener',
             '_redis_handler',
             '_run_file_handler',
-            '_exception_file_handler',
             '_console_handler',
         ):
             state.pop(attr, None)
@@ -860,15 +859,14 @@ class NoDbBase(object):
                 # Clear the reference
                 self._queue_listener = None
 
-            # Close file handlers to prevent FD leaks
-            for handler_attr in ('_run_file_handler', '_exception_file_handler'):
-                handler = getattr(self, handler_attr, None)
-                if handler is not None:
-                    try:
-                        handler.close()
-                    except:
-                        pass
-                    setattr(self, handler_attr, None)
+            # Close file handler to prevent FD leaks
+            handler = getattr(self, '_run_file_handler', None)
+            if handler is not None:
+                try:
+                    handler.close()
+                except:
+                    pass
+                self._run_file_handler = None
                 
         except (AttributeError, TypeError, KeyboardInterrupt, Exception):
             # Silently ignore cleanup errors during process shutdown
