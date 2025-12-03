@@ -7,7 +7,7 @@ RUN npm ci --legacy-peer-deps
 COPY wepppy/weppcloud/static-src/ ./
 RUN npm run build
 
-FROM python:3.10-slim AS base
+FROM python:3.12-slim AS base
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
 
@@ -97,12 +97,13 @@ RUN /opt/venv/bin/python -c "import duckdb; \
                con.close()"
 
 # Vendor Rosetta directly from GitHub into site-packages, including LFS assets.
-RUN git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
+RUN SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') && \
+    git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
     pushd /tmp/rosetta >/dev/null && \
     git lfs pull && \
     popd >/dev/null && \
     rm -rf /tmp/rosetta/.git && \
-    mv /tmp/rosetta /opt/venv/lib/python3.10/site-packages/rosetta
+    mv /tmp/rosetta "${SITE_PACKAGES}/rosetta"
 
 # Prepare filesystem layout that historically lived at /workdir.
 RUN mkdir -p /workdir /opt/vendor /var/log/wepppy /var/lib/wepppy && \
@@ -146,7 +147,7 @@ RUN set -euxo pipefail; \
 RUN set -euxo pipefail; \
     SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
     mkdir -p "${SITE_PACKAGES}/wepppyo3"; \
-    cp -a /opt/vendor/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/. "${SITE_PACKAGES}/wepppyo3/"
+    cp -a /opt/vendor/wepppyo3/release/linux/py312/wepppyo3/. "${SITE_PACKAGES}/wepppyo3/"
 
 # Generate equivalent .pth injections inside the virtual environment.
 RUN set -euxo pipefail; \
@@ -157,7 +158,7 @@ RUN set -euxo pipefail; \
     printf "/workdir/weppcloud2/\n" > "${SITE_PACKAGES}/weppcloud2.pth"; \
     printf "/workdir/weppcloud-wbt/WBT/\n" > "${SITE_PACKAGES}/wbt.pth"; \
     printf "/workdir/f-esri/\n" > "${SITE_PACKAGES}/f_esri.pth"; \
-    printf "/workdir/wepppyo3/release/linux/py310-wepppy310-env/\n" > "${SITE_PACKAGES}/wepppyo3.pth"
+    printf "/workdir/wepppyo3/release/linux/py312/\n" > "${SITE_PACKAGES}/wepppyo3.pth"
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
