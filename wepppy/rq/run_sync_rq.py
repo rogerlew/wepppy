@@ -107,7 +107,7 @@ def _download_spec(spec_url: str, headers: dict[str, str] | None, target_dir: Pa
         headers: Optional HTTP headers
         target_dir: Directory to write spec file to (uses system temp if None)
     """
-    response = requests.get(spec_url, headers=headers or {}, timeout=30)
+    response = requests.get(spec_url, headers=headers or {}, timeout=120)
     if response.status_code != 200:
         raise RuntimeError(f"Failed to fetch aria2c spec from {spec_url} (status {response.status_code})")
     

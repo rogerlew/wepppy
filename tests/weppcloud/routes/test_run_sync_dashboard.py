@@ -150,3 +150,16 @@ def test_run_sync_status_lists_jobs_and_migrations(
         # Clean up the mock
         if 'wepppy.weppcloud.app' in sys.modules:
             del sys.modules['wepppy.weppcloud.app']
+
+
+def test_resolve_job_skips_missing_jobs(run_sync_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = run_sync_module
+
+    def fake_fetch(job_id, connection=None):  # type: ignore[unused-argument]
+        raise module.NoSuchJobError("missing")
+
+    monkeypatch.setattr(module, "Job", SimpleNamespace(fetch=fake_fetch))
+
+    result = module._resolve_job(SimpleNamespace(), "missing-job", "queued")
+
+    assert result is None
