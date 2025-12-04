@@ -84,9 +84,19 @@ def _resolve_access_log_path() -> Path:
 
 
 def _resolve_run_locations_path() -> Path:
-    static_dir = Path(current_app.static_folder)
-    static_dir.mkdir(parents=True, exist_ok=True)
-    return static_dir / _RUN_LOCATIONS_FILENAME
+    """Return a writable path for the run-locations cache file.
+    
+    Uses the same directory as the access log (typically /geodata/weppcloud_runs/)
+    since that location is writable in production. Falls back to /tmp if the 
+    access log directory doesn't exist.
+    """
+    access_log_dir = _resolve_access_log_path().parent
+    if access_log_dir.exists():
+        return access_log_dir / _RUN_LOCATIONS_FILENAME
+    # Fallback to /tmp for environments where geodata isn't mounted
+    fallback = Path('/tmp')
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback / _RUN_LOCATIONS_FILENAME
 
 
 def _resolve_landing_static_root() -> Path:
