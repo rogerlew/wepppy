@@ -72,7 +72,7 @@ def _resolve_job(redis_conn: redis.Redis, job_id: str, status_label: str) -> Dic
     try:
         job = Job.fetch(job_id, connection=redis_conn)
     except NoSuchJobError:
-        return {"id": job_id, "status": "missing"}
+        return None
 
     if not _job_is_run_sync(job):
         return None
