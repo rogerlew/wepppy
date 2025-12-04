@@ -213,6 +213,22 @@ function controlBase() {
         }
     }
 
+    function clearStacktrace(target) {
+        const element = unwrapElement(target);
+        if (!element) {
+            return;
+        }
+        clearContent(element);
+        hideTarget(element);
+        const panel = findStacktracePanel(element);
+        if (panel && panel !== element) {
+            if (typeof panel.open === "boolean") {
+                panel.open = false;
+            }
+            hideTarget(panel);
+        }
+    }
+
     function clearContent(target) {
         if (callAdapter(target, "empty")) {
             return;
@@ -429,6 +445,8 @@ function controlBase() {
         _job_status_stacktrace_timeout: null,
         _job_status_fetch_inflight: false,
         _job_status_error: null,
+        _job_status_error_parts: null,
+        _job_status_stacktrace_from_poll: false,
         statusStream: null,
         _statusStreamHandle: null,
 
@@ -542,6 +560,8 @@ function controlBase() {
                     return;
                 }
 
+                self._job_status_stacktrace_from_poll = true;
+                self._job_status_error_parts = errorParts || null;
                 self.pushErrorStacktrace(
                     self,
                     errorParts,
@@ -597,6 +617,8 @@ function controlBase() {
             const normalizedJobId = normalizeJobId(job_id);
 
             self._job_completion_dispatched = false;
+            self._job_status_stacktrace_from_poll = false;
+            self._job_status_error_parts = null;
 
             if (normalizedJobId === self.rq_job_id) {
                 if (!normalizedJobId) {
@@ -652,6 +674,11 @@ function controlBase() {
 
         handle_job_status_response: function handle_job_status_response(self, data) {
             self.clear_stacktrace_backfill(self);
+            if (self._job_status_stacktrace_from_poll) {
+                clearStacktrace(self.stacktrace);
+                self._job_status_stacktrace_from_poll = false;
+                self._job_status_error_parts = null;
+            }
             self._job_status_error = null;
             self.rq_job_status = data || {};
             self.render_job_status(self);
@@ -670,6 +697,7 @@ function controlBase() {
         handle_job_status_error: function handle_job_status_error(self, error) {
             const parts = deriveErrorParts(error);
             self._job_status_error = `${parts.statusCode} ${parts.statusText}`.trim();
+            self._job_status_error_parts = parts;
             self.render_job_status(self);
             self.schedule_stacktrace_backfill(self, parts);
 
