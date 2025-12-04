@@ -224,4 +224,34 @@ describe("Fork console smoke", () => {
             runId: "demo-run",
         }));
     });
+
+    test("failed fork surfaces stacktrace", async () => {
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq/api/fork") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        Success: false,
+                        Error: "Error forking project",
+                        StackTrace: ["trace line 1", "trace line 2"],
+                    }),
+                });
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+
+        const consoleBlock = document.getElementById("the_console");
+        expect(consoleBlock.dataset.state).toBe("critical");
+        expect(consoleBlock.textContent).toContain("Error forking project");
+
+        const stacktraceBody = document.querySelector("#fork_stacktrace_panel [data-stacktrace-body]");
+        expect(stacktraceBody.textContent).toContain("trace line 1");
+        expect(stacktraceBody.textContent).toContain("trace line 2");
+
+        expect(document.getElementById("submit_button").disabled).toBe(false);
+        expect(document.getElementById("submit_button").hidden).toBe(false);
+    });
 });

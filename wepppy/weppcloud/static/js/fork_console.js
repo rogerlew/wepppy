@@ -42,6 +42,7 @@
     var statusPanel = container.querySelector("#fork_status_panel");
     var statusLog = container.querySelector("#fork_status_log");
     var stacktracePanel = container.querySelector("#fork_stacktrace_panel");
+    var stacktraceBody = stacktracePanel ? stacktracePanel.querySelector("[data-stacktrace-body]") : null;
 
     var statusStream = null;
     var pendingStatusMessages = [];
@@ -84,6 +85,13 @@
       }
       if (statusLog) {
         statusLog.textContent = "";
+      }
+      if (stacktracePanel && stacktraceBody) {
+        stacktraceBody.textContent = "";
+        stacktracePanel.hidden = true;
+        if (typeof stacktracePanel.open !== "undefined") {
+          stacktracePanel.open = false;
+        }
       }
     }
 
@@ -167,6 +175,18 @@
       flushPendingStatus();
     }
 
+    function showStacktrace(lines) {
+      if (!stacktracePanel || !stacktraceBody) {
+        return;
+      }
+      stacktracePanel.hidden = false;
+      if (typeof stacktracePanel.open !== "undefined") {
+        stacktracePanel.open = true;
+      }
+      var text = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
+      stacktraceBody.textContent = text;
+    }
+
     function forkProject(event) {
       event.preventDefault();
       if (!form) {
@@ -207,7 +227,20 @@
         })
         .then(function (body) {
           if (!body.Success) {
-            throw new Error(body.Error || "Fork submission failed");
+            var errMsg = body.Error || "Fork submission failed";
+            if (consoleBlock) {
+              consoleBlock.dataset.state = "critical";
+              consoleBlock.textContent = "Error: " + errMsg;
+            }
+            appendStatus("Error submitting fork job: " + errMsg);
+            if (body.StackTrace) {
+              showStacktrace(body.StackTrace);
+            }
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.hidden = false;
+            }
+            return;
           }
           newRunId = body.new_runid || "";
           jobId = body.job_id || "";
@@ -242,6 +275,9 @@
             consoleBlock.textContent = "Error: " + (err.message || err);
           }
           appendStatus("Error submitting fork job: " + (err.message || err));
+          if (err && err.stack) {
+            showStacktrace(err.stack.split("\n"));
+          }
           if (submitButton) {
             submitButton.disabled = false;
             submitButton.hidden = false;

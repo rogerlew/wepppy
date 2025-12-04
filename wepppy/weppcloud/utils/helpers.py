@@ -143,19 +143,22 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     if path is None:
         # Primary location: /wc1/runs/<prefix>/<runid> (current)
         prefix = runid[:2]
-        path = _join('/wc1/runs', prefix, runid)
+        primary_path = _join('/wc1/runs', prefix, runid)
+        legacy_path = _join('/geodata/weppcloud_runs', runid)
 
-        # Fall back to legacy location if not found in primary and it exists
-        if not _exists(path):
-            legacy_path = _join('/geodata/weppcloud_runs', runid)
-            if _exists(legacy_path):
-                path = legacy_path
+        if _exists(primary_path):
+            path = primary_path
+        elif _exists(legacy_path):
+            path = legacy_path
+        else:
+            # Prefer primary even if it does not exist yet (for new runs)
+            path = primary_path
 
     if context_override:
         path = context_override
 
     # 3. Store the determined path in the cache for future requests
-    # Only cache if the path actually exists to avoid caching stale legacy paths
+    # Only cache if the path actually exists to avoid caching stale paths
     if redis_wd_cache_client and _exists(path):
         try:
             # Cache the result with a 72-hour (259200 seconds) expiration
@@ -165,6 +168,12 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
             print(f"Warning: Redis connection error during SET. Error: {e}")
 
     return path
+
+
+def get_primary_wd(runid: str) -> str:
+    """Return the canonical /wc1/runs path for the given runid."""
+    prefix = runid[:2]
+    return _join('/wc1/runs', prefix, runid)
 
     
 def get_batch_wd(batch_name: str) -> str:
