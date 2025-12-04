@@ -29,6 +29,12 @@
        value=wepp.channel_erodibility,
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
+  {{ ui.text_field(
+       "minimum_channel_width_m",
+       "Minimum channel width (m)",
+       value=wepp.minimum_channel_width_m,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
 
   <h5 class="wc-heading wc-heading--xs">Manning Roughness Coefficient</h5>
   <p class="wc-text-muted">

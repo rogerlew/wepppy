@@ -36,7 +36,7 @@ from wepppy.config.redis_settings import (
     redis_host,
 )
 
-from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 
 from wepppy.nodb.base import clear_locks, clear_nodb_file_cache
 from wepppy.nodb.core import *
@@ -100,7 +100,7 @@ def test_run_rq(runid: str) -> tuple[str, ...]:
         base_wd = get_wd(runid)
 
         new_runid = f'{runid}-latest'
-        runid_wd = get_wd(new_runid)
+        runid_wd = get_primary_wd(new_runid)
 
         StatusMessenger.publish(status_channel, f'base_wd: {base_wd}')
         init_required = False
@@ -973,7 +973,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
         StatusMessenger.publish(status_channel, f"Found rsync at: {rsync_path}")
 
         wd = get_wd(runid)
-        new_wd = get_wd(new_runid)
+        new_wd = get_primary_wd(new_runid)
 
         run_left = wd if wd.endswith('/') else f'{wd}/'
         run_right = new_wd if new_wd.endswith('/') else f'{new_wd}/'

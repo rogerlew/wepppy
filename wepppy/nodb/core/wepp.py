@@ -810,6 +810,10 @@ class Wepp(NoDbBase):
             if isfloat(_channel_manning_roughness_coefficient_veg):
                 self._channel_manning_roughness_coefficient_veg = float(_channel_manning_roughness_coefficient_veg)
 
+            _minimum_channel_width_m = kwds.get('minimum_channel_width_m', None)
+            if isfloat(_minimum_channel_width_m):
+                self._minimum_channel_width_m = float(_minimum_channel_width_m)
+
             _pmet_kcb = kwds.get('pmet_kcb', None)
             if isfloat(_pmet_kcb):
                 self._pmet_kcb = float(_pmet_kcb)
@@ -2124,7 +2128,22 @@ class Wepp(NoDbBase):
         with open(_join(runs_dir, 'pw0.str'), 'w') as fp:
             fp.write('\n'.join(s) + '\n')
 
+
+    @property
+    def minimum_channel_width_m(self) -> float:
+        if hasattr(self, '_minimum_channel_width_m'):
+            return self._minimum_channel_width_m
+        return 0.305  # 1 foot
+
+    @minimum_channel_width_m.setter
+    @nodb_setter
+    def minimum_channel_width_m(self, value: float):
+        if value <= 0.0:
+            raise ValueError(f"Expected minimum_channel_width_m to be positive, got {value}")
+        self._minimum_channel_width_m = value
+
     def _prep_channel_slopes(self):
+        minimum_channel_width_m = self.minimum_channel_width_m
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
 
@@ -2137,7 +2156,7 @@ class Wepp(NoDbBase):
             lines = f.readlines()
             version = lines[0].strip()
 
-            if version.startswith('2023'):
+            if float(version) >= 2023.0:
                 with open(_join(runs_dir, 'pw0.slp'), 'w') as f:
                     f.write('99.1\n')
                     n_chns = int(lines[1].strip())
@@ -2152,8 +2171,8 @@ class Wepp(NoDbBase):
                             aspect += 360.0
 
                         width = float(width)
-                        if width < 0.305:
-                            width = 0.305
+                        if width < minimum_channel_width_m:
+                            width = minimum_channel_width_m
 
                         f.write(f'{aspect} {width}\n')
                         f.write(lines[i + 1])
