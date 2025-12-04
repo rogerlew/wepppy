@@ -89,6 +89,10 @@
             More
           </summary>
           <div class="wc-run-header__menu-content">
+            <a class="pure-button"
+               href="{{ url_for_run('browse.browse_tree', runid=current_ron.runid, config=current_ron.config_stem, subpath='') }}">
+              Browse
+            </a>
             <button type="button"
                     class="pure-button"
                     data-toggle="modal"

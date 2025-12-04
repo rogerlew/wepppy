@@ -52,6 +52,10 @@
         <details class="wc-run-header__menu">
           <summary class="wc-run-header__menu-button pure-button pure-button-secondary">More</summary>
           <div class="wc-run-header__menu-content">
+            <a class="pure-button"
+               href="{{ url_for_run('browse.browse_tree', runid=current_ron.runid, config=current_ron.config_stem, subpath='') }}">
+              Browse
+            </a>
             <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
             <button type="button" class="pure-button" data-command="open-unitizer">Unitizer</button>
             <label class="wc-run-header__toggle">
