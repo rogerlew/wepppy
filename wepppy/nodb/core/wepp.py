@@ -2154,9 +2154,9 @@ class Wepp(NoDbBase):
 
         with open(src_fn) as f:
             lines = f.readlines()
-            version = lines[0].strip()
+            version = float(lines[0].strip())
 
-            if float(version) >= 2023.0:
+            if version >= 2025.0:
                 with open(_join(runs_dir, 'pw0.slp'), 'w') as f:
                     f.write('99.1\n')
                     n_chns = int(lines[1].strip())
@@ -2179,6 +2179,12 @@ class Wepp(NoDbBase):
                         f.write(lines[i + 2])
 
                         i += 3
+            elif version >= 2023.0:
+                # this version produces suspiciously small channel widths
+                raise ValueError(
+                    f'Unsupported channel slope file version {version} in {src_fn}. '
+                    'Please update the PERIDOT TO compatible version.'
+                )
             else:
                 dst_fn = _join(runs_dir, 'pw0.slp')
                 _copyfile(src_fn, dst_fn)
