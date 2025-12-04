@@ -682,6 +682,7 @@ function controlBase() {
             self._job_status_error = null;
             self.rq_job_status = data || {};
             self.render_job_status(self);
+            self.manage_status_stream(self, self.rq_job_status && self.rq_job_status.status);
 
             if (self.should_continue_polling(self, self.rq_job_status && self.rq_job_status.status)) {
                 self.schedule_job_status_poll(self);
