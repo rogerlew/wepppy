@@ -543,6 +543,164 @@ def run_wepp_rq(runid: str) -> Job:
 
     return job6_finalfinal
 
+
+@with_exception_logging
+def run_wepp_watershed_rq(runid: str) -> Job:
+    """Enqueue the WEPP watershedworkflow for a run directory.
+
+    The orchestrator performs initial synchronous setup (locking checks,
+    controller priming), then enqueues the staged RQ tasks that prepare
+    inputs, execute WEPP, and fan out the post-processing jobs. Each stage
+    updates Redis-backed status channels so the UI can visualize progress.
+
+    Args:
+        runid: Identifier used to locate the working directory.
+
+    Returns:
+        The final RQ job that logs completion once all dependencies finish.
+
+    Raises:
+        Exception: If the run is currently locked or any prep step fails.
+    """
+    try:
+        job = get_current_job()
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        wd = get_wd(runid)
+        wepp = Wepp.getInstance(wd)
+
+        if wepp.islocked():
+            raise Exception(f'{runid} is locked')
+
+        # send feedback to user
+        wepp.logger.info('Running Wepp Watershed\n')
+
+        # quick prep operations that require locking
+        wepp._check_and_set_baseflow_map()
+        wepp._check_and_set_phosphorus_map()
+
+        watershed = Watershed.getInstance(wd)
+        climate = Climate.getInstance(wd)
+        runs_dir = os.path.abspath(wepp.runs_dir)
+        wepp_bin = wepp.wepp_bin
+
+        wepp.logger.info('    wepp_bin:{}'.format(wepp_bin))
+
+        # everything below here is asynchronous, performed by workers
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue(connection=redis_conn)
+
+            #
+            # Prep Watershed
+            job2_watershed_prep = q.enqueue_call(_prep_watershed_rq, (runid,), timeout=TIMEOUT)
+            job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
+
+            #
+            # Run Watershed
+            wepp.logger.info(f'Running Watershed wepp_bin:{wepp_bin}... ')
+
+            # jobs:3
+            jobs3_watersheds: list[Job] = []
+            if climate.climate_mode == ClimateMode.SingleStormBatch:
+
+                for d in climate.ss_batch_storms:
+                    ss_batch_key = d['ss_batch_key']
+                    ss_batch_id = d['ss_batch_id']
+
+                    _job = q.enqueue_call(
+                            func=run_ss_batch_watershed_rq,
+                            args=[runid],
+                            kwargs=dict(wepp_bin=wepp_bin, ss_batch_id=ss_batch_id),
+                            timeout=TIMEOUT,
+                            depends_on=job2_watershed_prep)
+                    job.meta[f'jobs:3,func:run_ss_batch_watershed_rq,ss_batch_id:{ss_batch_id}'] = _job.id
+                    jobs3_watersheds.append(_job)
+                    job.save()
+
+            else:
+                _job = q.enqueue_call(
+                        func=run_watershed_rq,
+                        args=[runid],
+                        kwargs=dict(wepp_bin=wepp_bin),
+                        timeout=TIMEOUT,
+                        depends_on=job2_watershed_prep)
+                job.meta[f'jobs:3,func:run_watershed_rq'] = _job.id
+                jobs3_watersheds.append(_job)
+                job.save()
+
+            post_dependencies = jobs3_watersheds or [job2_watershed_prep]
+
+            # jobs:4
+            jobs4_post: list[Job] = []
+
+            _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+            job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = _job.id
+            jobs4_post.append(_job)
+            job.save()
+
+            if wepp.prep_details_on_run_completion:
+                _job = q.enqueue_call(_post_prep_details_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                job.meta['jobs:4,func:_post_prep_details_rq'] = _job.id
+                jobs4_post.append(_job)
+                job.save()
+
+            if not wepp.multi_ofe:
+                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                job.meta['jobs:4,func:_post_make_loss_grid_rq'] = _job.id
+                jobs4_post.append(_job)
+                job.save()
+
+            job_post_watershed_interchange = q.enqueue_call(
+                _post_watershed_interchange_rq,
+                (runid,),
+                timeout=TIMEOUT,
+                depends_on=post_dependencies,
+            )
+            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
+            jobs4_post.append(job_post_watershed_interchange)
+            job.save()
+
+            if not climate.is_single_storm:
+                _job = q.enqueue_call(
+                    _analyze_return_periods_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=job_post_watershed_interchange,
+                )
+                job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
+                jobs4_post.append(_job)
+                job.save()
+
+            jobs5_post: list[Job] = []
+            if wepp.legacy_arc_export_on_run_completion:
+                _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=TIMEOUT, depends_on=jobs4_post)
+                job.meta['jobs:5,func:_post_legacy_arc_export_rq'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+
+            # jobs:6
+            job6_finalfinal: Job
+            final_dependencies = jobs4_post + jobs5_post
+            job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=final_dependencies)
+                
+            job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
+            job.save()
+         
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job6_finalfinal.id}',
+        )
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+    return job6_finalfinal
+
+
 @with_exception_logging
 def _prep_multi_ofe_rq(runid: str) -> None:
     """Prepare multi-OFE slope inputs prior to hillslope execution.

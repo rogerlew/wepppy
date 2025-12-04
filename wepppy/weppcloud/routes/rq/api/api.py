@@ -21,7 +21,14 @@ from flask_security import current_user
 from werkzeug.utils import secure_filename
 
 from wepppy.topo.peridot.flowpath import PeridotChannel
-from wepppy.weppcloud.utils.helpers import get_wd, handle_with_exception_factory, success_factory, error_factory, exception_factory
+from wepppy.weppcloud.utils.helpers import (
+    get_wd,
+    get_primary_wd,
+    handle_with_exception_factory,
+    success_factory,
+    error_factory,
+    exception_factory,
+)
 from wepppy.weppcloud.utils.uploads import save_run_file, UploadError
 
 import redis
@@ -59,7 +66,7 @@ from wepppy.rq.project_rq import (
     archive_rq,
     restore_archive_rq
 )
-from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
+from wepppy.rq.wepp_rq import run_wepp_rq, run_wepp_watershed_rq, post_dss_export_rq
 from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.rq.land_and_soil_rq import land_and_soil_rq
 from wepppy.rq.batch_rq import run_batch_rq
@@ -1038,6 +1045,7 @@ def _handle_run_wepp(runid: str, config: str) -> Response:
             return None
 
     soils = Soils.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
 
     clip_soils = bool(pop_scalar(controller_payload, 'clip_soils', False))
     soils.clip_soils = clip_soils
@@ -1114,6 +1122,124 @@ def _handle_run_wepp(runid: str, config: str) -> Response:
 def api_run_wepp(runid, config):
     try:
         return _handle_run_wepp(runid, config)
+    except Exception as exc:
+        return exception_factory(exc, runid=runid)
+
+
+def _handle_run_wepp_watershed(runid, config):
+    
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+
+    controller_payload = parse_request_payload(
+        request,
+        boolean_fields={'clip_hillslopes', 'prep_details_on_run_completion', 'arc_export_on_run_completion',
+                        'legacy_arc_export_on_run_completion', 'dss_export_on_run_completion'}
+    )
+
+    def pop_scalar(mapping, key, default=None):
+        value = mapping.pop(key, default)
+        if isinstance(value, list):
+            for item in value:
+                if item in (None, ''):
+                    continue
+                return item
+            return default
+        return value
+
+    def parse_int(value):
+        if value in (None, "", False):
+            return None
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    def parse_float(value):
+        if value in (None, "", False):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    soils = Soils.getInstance(wd)
+
+    clip_soils = bool(pop_scalar(controller_payload, 'clip_soils', False))
+    soils.clip_soils = clip_soils
+
+    clip_soils_depth = parse_int(pop_scalar(controller_payload, 'clip_soils_depth'))
+    if clip_soils_depth is not None:
+        soils.clip_soils_depth = clip_soils_depth
+
+    watershed = Watershed.getInstance(wd)
+
+    clip_hillslopes = bool(pop_scalar(controller_payload, 'clip_hillslopes', False))
+    watershed.clip_hillslopes = clip_hillslopes
+
+    clip_hillslope_length = parse_int(pop_scalar(controller_payload, 'clip_hillslope_length'))
+
+    if clip_hillslope_length is not None:
+        watershed.clip_hillslope_length = clip_hillslope_length
+
+    initial_sat = parse_float(pop_scalar(controller_payload, 'initial_sat'))
+
+    if initial_sat is not None:
+        soils.initial_sat = initial_sat
+
+    reveg_scenario = pop_scalar(controller_payload, 'reveg_scenario', None)
+    if isinstance(reveg_scenario, str):
+        reveg_scenario = reveg_scenario.strip()
+
+    if reveg_scenario is not None:
+        from wepppy.nodb.mods.revegetation import Revegetation
+        reveg = Revegetation.getInstance(wd)
+        reveg.load_cover_transform(reveg_scenario)
+
+    prep_details_on_run_completion = bool(pop_scalar(controller_payload, 'prep_details_on_run_completion', False))
+    arc_export_on_run_completion = bool(pop_scalar(controller_payload, 'arc_export_on_run_completion', False))
+    legacy_arc_export_on_run_completion = bool(pop_scalar(controller_payload, 'legacy_arc_export_on_run_completion', False))
+    dss_export_on_run_completion = bool(pop_scalar(controller_payload, 'dss_export_on_run_completion', False))
+
+    dss_export_exclude_orders = []
+    for i in range(1, 6):
+        if bool(pop_scalar(controller_payload, f'dss_export_exclude_order_{i}', False)):
+            dss_export_exclude_orders.append(i)
+
+    try:
+        wepp.parse_inputs(controller_payload)
+    except Exception as exc:
+        return exception_factory(exc, runid=runid)
+
+    with wepp.locked():
+        wepp._prep_details_on_run_completion = prep_details_on_run_completion
+        wepp._arc_export_on_run_completion = arc_export_on_run_completion
+        wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
+        wepp._dss_export_on_run_completion = dss_export_on_run_completion
+        wepp._dss_excluded_channel_orders = dss_export_exclude_orders
+
+    try:
+        prep = RedisPrep.getInstance(wd)
+        # Clear cached run-specific states so dependent panels refresh next poll.
+        prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
+        prep.remove_timestamp(TaskEnum.run_wepp_watershed)
+        prep.remove_timestamp(TaskEnum.run_omni_scenarios)
+        prep.remove_timestamp(TaskEnum.run_path_cost_effective)
+
+        with _redis_conn() as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(run_wepp_watershed_rq, (runid,), timeout=TIMEOUT)
+            prep.set_rq_job_id('run_wepp_watershed_rq', job.id)
+    except Exception:
+        return exception_factory()
+
+    return jsonify({'Success': True, 'job_id': job.id})
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_wepp_watershed', methods=['POST'])
+def api_run_wepp_watershed(runid, config):
+    try:
+        return _handle_run_wepp_watershed(runid, config)
     except Exception as exc:
         return exception_factory(exc, runid=runid)
 
@@ -1582,7 +1708,7 @@ def api_fork(runid, config):
                 elif request.remote_addr == '127.0.0.1':
                     new_runid = 'devvm-' + new_runid
 
-            new_wd = get_wd(new_runid, prefer_active=False)
+            new_wd = get_primary_wd(new_runid)
 
             if requested_runid:
                 dir_created = True

@@ -460,6 +460,48 @@ var Wepp = (function () {
                 });
         };
 
+        wepp.runWatershed = function () {
+            var taskMsg = "Submitting WEPP watershed run";
+
+            wepp.reset_panel_state(wepp, {
+                taskMessage: taskMsg,
+                resultsTarget: resultsContainer,
+                hintTarget: hintAdapter
+            });
+
+            wepp.connect_status_stream(wepp);
+
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+
+            if (weppEvents && typeof weppEvents.emit === "function") {
+                weppEvents.emit("wepp:run_watershed:started", { payload: payload });
+            }
+
+            http.postJson(url_for_run("rq/api/run_wepp_watershed"), payload, { form: formElement })
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.Success === true) {
+                        var message = "run_wepp_watershed_rq job submitted: " + response.job_id;
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html(message);
+                        }
+                        wepp.appendStatus(message, { job_id: response.job_id });
+                        wepp.set_rq_job_id(wepp, response.job_id);
+                        if (weppEvents && typeof weppEvents.emit === "function") {
+                            weppEvents.emit("wepp:run_watershed:queued", { jobId: response.job_id, payload: payload });
+                        }
+                    } else if (response) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                    }
+                })
+                .catch(function (error) {
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run_watershed:error", toResponsePayload(http, error));
+                    }
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
         function ensureDelegates() {
             if (wepp._delegates && wepp._delegates.length) {
                 return;
@@ -470,6 +512,13 @@ var Wepp = (function () {
                     event.preventDefault();
                 }
                 wepp.run();
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-watershed"]', function (event) {
+                if (event && typeof event.preventDefault === "function") {
+                    event.preventDefault();
+                }
+                wepp.runWatershed();
             }));
 
             wepp._delegates.push(dom.delegate(formElement, "change", "[data-wepp-routine]", function () {

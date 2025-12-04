@@ -76,8 +76,16 @@
       <img id="run_wepp_lock" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Lock" style="display:none;">
       Run WEPP
     </button>
+    <button
+      id="btn_run_wepp_watershed"
+      type="button"
+      class="pure-button pure-button-primary disable-readonly"
+      data-wepp-action="run-watershed">
+      Run WEPP Watershed
+    </button>
   {% endcall %}
   {{ ui.job_hint("hint_run_wepp") }}
+  <p class="wc-text-muted" id="hint_run_wepp_watershed">Run WEPP Watershed requires a prior full WEPP run; hillslope outputs must already exist.</p>
 
 {% endcall %}
 
