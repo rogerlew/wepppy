@@ -424,6 +424,12 @@ var ChannelDelineation = (function () {
         function updateExtentInputVisibility(mode) {
             updateManualExtentVisibility(mode);
             updateMapObjectVisibility(mode);
+            if (mode === 2) {
+                setBuildButtonEnabled(true, "");
+                channel.update_command_button_state(channel);
+            } else if (typeof channel.onMapChange === "function") {
+                channel.onMapChange();
+            }
         }
 
         function updateBreachDistanceVisibility(selection) {
@@ -552,6 +558,11 @@ var ChannelDelineation = (function () {
             }
             updateExtentInputVisibility(mode);
             emit("channel:extent:mode", { mode: mode });
+            try {
+                channel.onMapChange();
+            } catch (err) {
+                // Map may not be ready yet; safe to ignore.
+            }
         }));
 
         delegates.push(dom.delegate(formElement, "change", "[data-channel-role=\"wbt-fill\"]", function () {
@@ -683,6 +694,18 @@ var ChannelDelineation = (function () {
                 return Promise.reject(err);
             }
 
+            if (payload.set_extent_mode === 2 && payload.map_object && payload.map_center && payload.map_center.length === 2) {
+                try {
+                    var map = MapController.getInstance();
+                    if (map && typeof map.flyTo === "function") {
+                        var flyZoom = payload.map_zoom || map.getZoom();
+                        map.flyTo([payload.map_center[1], payload.map_center[0]], flyZoom);
+                    }
+                } catch (err) {
+                    // Flying to map object center is best effort; continue even if it fails.
+                }
+            }
+
             emit("channel:build:started", {
                 payload: payload
             });
@@ -758,14 +781,19 @@ var ChannelDelineation = (function () {
                     mapBoundsInput.value = extent.join(",");
                 }
 
-                var zoomOk = zoom >= channel.zoom_min;
-                var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
-                var enabled = zoomOk || powerOverride;
-
-                if (!enabled) {
-                    setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
-                } else {
+                var extentMode = getExtentMode();
+                if (extentMode === 2) {
                     setBuildButtonEnabled(true, "");
+                } else {
+                    var zoomOk = zoom >= channel.zoom_min;
+                    var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
+                    var enabled = zoomOk || powerOverride;
+
+                    if (!enabled) {
+                        setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
+                    } else {
+                        setBuildButtonEnabled(true, "");
+                    }
                 }
 
                 channel.update_command_button_state(channel);

@@ -98,6 +98,7 @@ describe("Channel Delineation controller", () => {
             getZoom: jest.fn(function () {
                 return this._zoom;
             }),
+            flyTo: jest.fn(),
             getBounds: jest.fn(() => ({
                 getSouthWest: () => ({ lat: 46.5, lng: -118.0 }),
                 getNorthEast: () => ({ lat: 47.0, lng: -117.0 }),
@@ -247,6 +248,23 @@ describe("Channel Delineation controller", () => {
         expect(jsonPayload.map_bounds_text).toBe(mapObject.extent.join(", "));
     });
 
+    test("build flies map to map object center when Set Map Object is selected", async () => {
+        document.getElementById("set_extent_mode_map").checked = false;
+        document.getElementById("set_extent_mode_manual").checked = false;
+        document.getElementById("set_extent_mode_map_object").checked = true;
+
+        const mapObject = {
+            extent: [-76.8, 39.9, -76.3, 40.2],
+            center: [-76.55, 40.05],
+            zoom: 11
+        };
+        document.getElementById("map_object").value = JSON.stringify(mapObject);
+
+        await channel.build();
+
+        expect(mapStub.flyTo).toHaveBeenCalledWith([mapObject.center[1], mapObject.center[0]], mapObject.zoom);
+    });
+
     test("build rejects when manual extent is invalid", async () => {
         document.getElementById("set_extent_mode_manual").checked = true;
         document.getElementById("set_extent_mode_map").checked = false;
@@ -276,6 +294,18 @@ describe("Channel Delineation controller", () => {
         expect(document.getElementById("hint_build_channels_en").textContent).toContain("zoom must be");
         expect(events).toHaveLength(1);
         expect(events[0].zoom).toBe(10);
+    });
+
+    test("onMapChange keeps build button enabled in Set Map Object mode regardless of zoom", () => {
+        mapStub._zoom = 8;
+        document.getElementById("set_extent_mode_map").checked = false;
+        document.getElementById("set_extent_mode_map_object").checked = true;
+
+        channel.onMapChange();
+
+        const button = document.getElementById("btn_build_channels_en");
+        expect(button.disabled).toBe(false);
+        expect(button.dataset.mapDisabled).toBe("false");
     });
 
     test("show loads WebGL layer when delineation pass is 1", async () => {
