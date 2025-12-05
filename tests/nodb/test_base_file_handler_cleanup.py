@@ -96,9 +96,9 @@ def redis_env(monkeypatch: pytest.MonkeyPatch) -> SimpleNamespace:
 
 
 @pytest.fixture
-def run_dir(tmp_path: Path) -> Path:
-    """Create a temporary run directory."""
-    run = tmp_path / "test_run"
+def run_dir(tmp_path: Path, request: pytest.FixtureRequest) -> Path:
+    """Create a temporary run directory scoped to the test name to avoid logger reuse."""
+    run = tmp_path / request.node.name
     run.mkdir()
     return run
 
@@ -193,11 +193,12 @@ class TestCleanupAllInstances:
         self,
         tmp_path: Path,
         redis_env: SimpleNamespace,
+        request: pytest.FixtureRequest,
     ) -> None:
         """Validates cleanup_all_instances closes handlers for all cached instances."""
         # Create multiple run directories and instances
-        run1 = tmp_path / "run1"
-        run2 = tmp_path / "run2"
+        run1 = tmp_path / f"{request.node.name}_run1"
+        run2 = tmp_path / f"{request.node.name}_run2"
         run1.mkdir()
         run2.mkdir()
 
@@ -245,10 +246,11 @@ class TestCleanupRunInstances:
         self,
         tmp_path: Path,
         redis_env: SimpleNamespace,
+        request: pytest.FixtureRequest,
     ) -> None:
         """Validates cleanup_run_instances only cleans up the specified run."""
-        run1 = tmp_path / "run1"
-        run2 = tmp_path / "run2"
+        run1 = tmp_path / f"{request.node.name}_run1"
+        run2 = tmp_path / f"{request.node.name}_run2"
         run1.mkdir()
         run2.mkdir()
 
@@ -372,6 +374,7 @@ class TestFileDescriptorCleanup:
         self,
         tmp_path: Path,
         redis_env: SimpleNamespace,
+        request: pytest.FixtureRequest,
     ) -> None:
         """Validates FDs are released when cleaning up multiple controllers."""
         runs = []
@@ -380,7 +383,7 @@ class TestFileDescriptorCleanup:
 
         # Create 5 controllers (5 run file handlers = 5 FDs)
         for i in range(5):
-            run = tmp_path / f"run_{i}"
+            run = tmp_path / f"{request.node.name}_run_{i}"
             run.mkdir()
             runs.append(run)
 

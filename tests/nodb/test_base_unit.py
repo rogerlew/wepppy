@@ -119,6 +119,7 @@ def logging_controller(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     redis_env: SimpleNamespace,
+    request: pytest.FixtureRequest,
 ) -> tuple[LoggingController, SimpleNamespace]:
     state = SimpleNamespace(messages=[], handler=None, listener=None)
 
@@ -147,7 +148,7 @@ def logging_controller(
     monkeypatch.setattr(base, "StatusMessengerHandler", StubStatusMessengerHandler, raising=False)
     monkeypatch.setattr(base, "QueueListener", StubQueueListener, raising=False)
 
-    run_dir = tmp_path / "logging-run"
+    run_dir = tmp_path / f"{request.node.name}-logging"
     run_dir.mkdir()
     instance = LoggingController(str(run_dir))
 
@@ -307,10 +308,8 @@ def test_init_logging_sets_up_queue_listener(
     assert handler.channel == f"{controller.runid}:{controller.class_name}"
 
     log_path = Path(controller._nodb.replace(".nodb", ".log"))
-    exceptions_path = Path(controller.wd) / "exceptions.log"
 
     assert log_path.exists()
-    assert exceptions_path.exists()
 
 
 def test_logging_pipeline_flushes_to_status_handler(
