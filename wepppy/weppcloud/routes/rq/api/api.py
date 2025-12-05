@@ -311,16 +311,16 @@ def _parse_map_change(payload: Dict[str, Any]):
     wbt_blc_dist_raw = payload.get('wbt_blc_dist')
     set_extent_mode_raw = payload.get('set_extent_mode', 0)
     map_bounds_text_raw = payload.get('map_bounds_text', '')
-
-    if center_raw is None or zoom_raw is None or bounds_raw is None or mcl_raw is None or csa_raw is None:
-        error = error_factory('Expecting center, zoom, bounds, mcl, and csa')
-        return error, None
+    map_object_raw = payload.get('map_object')
 
     def _as_float_sequence(value: Any, expected_len: int, label: str) -> list[float]:
-        if isinstance(value, (list, tuple)):
-            parts = list(value)
-        elif isinstance(value, str):
-            parts = [part.strip() for part in value.split(',') if part.strip()]
+        candidate = value
+        if isinstance(value, dict) and "py/tuple" in value:
+            candidate = value.get("py/tuple")
+        if isinstance(candidate, (list, tuple)):
+            parts = list(candidate)
+        elif isinstance(candidate, str):
+            parts = [part.strip() for part in candidate.split(',') if part.strip()]
         else:
             raise ValueError(f'Invalid {label} payload.')
         if len(parts) != expected_len:
@@ -352,19 +352,32 @@ def _parse_map_change(payload: Dict[str, Any]):
             raise ValueError(f'Could not parse {label}.') from exc
 
     try:
-        center = _as_float_sequence(center_raw, 2, 'center')
-        extent = _as_float_sequence(bounds_raw, 4, 'bounds')
-        zoom = _as_float(zoom_raw, 'zoom')
+        set_extent_mode = _as_int(set_extent_mode_raw, 'set_extent_mode')
+        if set_extent_mode not in (0, 1, 2):
+            raise ValueError('set_extent_mode must be 0, 1, or 2.')
+
+        map_object = None
+        if set_extent_mode == 2:
+            if map_object_raw in (None, ''):
+                raise ValueError('map_object is required when set_extent_mode is 2.')
+            map_object = Map.from_payload(map_object_raw)
+            center = _as_float_sequence(map_object.center, 2, 'center')
+            extent = _as_float_sequence(map_object.extent, 4, 'bounds')
+            zoom = _as_float(map_object.zoom, 'zoom')
+        else:
+            if center_raw is None or zoom_raw is None or bounds_raw is None or mcl_raw is None or csa_raw is None:
+                error = error_factory('Expecting center, zoom, bounds, mcl, and csa')
+                return error, None
+            center = _as_float_sequence(center_raw, 2, 'center')
+            extent = _as_float_sequence(bounds_raw, 4, 'bounds')
+            zoom = _as_float(zoom_raw, 'zoom')
+
         mcl = _as_float(mcl_raw, 'mcl')
         csa = _as_float(csa_raw, 'csa')
 
         l, b, r, t = extent
         if not (l < r and b < t):
             raise ValueError('Invalid bounds ordering.')
-
-        set_extent_mode = _as_int(set_extent_mode_raw, 'set_extent_mode')
-        if set_extent_mode not in (0, 1):
-            raise ValueError('set_extent_mode must be 0 or 1.')
 
         if isinstance(wbt_fill_or_breach_raw, (list, tuple)):
             wbt_fill_or_breach = next((str(item) for item in wbt_fill_or_breach_raw if item not in (None, '')), None)
@@ -385,12 +398,14 @@ def _parse_map_change(payload: Dict[str, Any]):
             map_bounds_text = str(map_bounds_text_candidates[0]) if map_bounds_text_candidates else ''
         else:
             map_bounds_text = str(map_bounds_text_raw or '')
+        if set_extent_mode == 2 and map_bounds_text == '':
+            map_bounds_text = ', '.join([str(v) for v in extent])
 
     except ValueError as exc:
         error = exception_factory(str(exc))
         return error, None
 
-    return None, [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text]
+    return None, [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text, map_object]
 
 
 @rq_api_bp.route('/rq/api/landuse_and_soils', methods=['POST'])
@@ -447,7 +462,7 @@ def fetch_dem_and_build_channels(runid, config):
         (extent, center, zoom,
           mcl, csa, 
           wbt_fill_or_breach, wbt_blc_dist, 
-          set_extent_mode, map_bounds_text) = args
+          set_extent_mode, map_bounds_text, map_object) = args
         wd = get_wd(runid)
 
         watershed = Watershed.getInstance(wd)
@@ -462,6 +477,10 @@ def fetch_dem_and_build_channels(runid, config):
                         watershed._wbt_fill_or_breach = wbt_fill_or_breach
                     if wbt_blc_dist is not None:
                         watershed._wbt_blc_dist = wbt_blc_dist
+
+            if map_object is not None:
+                ron = Ron.getInstance(wd)
+                ron.set_map_object(map_object)
     
             return success_factory('Set watershed inputs for batch processing')
 
@@ -471,7 +490,11 @@ def fetch_dem_and_build_channels(runid, config):
         
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(fetch_dem_and_build_channels_rq, (runid, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text), timeout=TIMEOUT)
+            job = q.enqueue_call(
+                fetch_dem_and_build_channels_rq,
+                (runid, extent, center, zoom, csa, mcl, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text, map_object),
+                timeout=TIMEOUT
+            )
             prep.set_rq_job_id('fetch_dem_and_build_channels_rq', job.id)
     except Exception as e:
         if isinstance(e, MinimumChannelLengthTooShortError):

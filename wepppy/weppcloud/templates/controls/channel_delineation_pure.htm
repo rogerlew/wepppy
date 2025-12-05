@@ -31,6 +31,13 @@
              "value": "1",
              "selected": watershed.set_extent_mode == 1,
              "attrs": {"class": "disable-readonly", "data-channel-role": "extent-mode"}
+           },
+           {
+             "id": "set_extent_mode_map_object",
+             "label": "Set Map Object",
+             "value": "2",
+             "selected": watershed.set_extent_mode == 2,
+             "attrs": {"class": "disable-readonly", "data-channel-role": "extent-mode"}
            }
          ]
        ) }}
@@ -43,6 +50,22 @@
            placeholder="-122.52, 44.16, -122.41, 44.23",
            attrs={"aria-label": "south, west, north, east"},
            extra_control_class="disable-readonly"
+      ) }}
+    </div>
+
+    <div id="map_object_group" style="display: none;">
+      <p class="wc-field__help">
+        Paste the <code>_map</code> JSON from the source run's <code>ron.nodb</code> to reuse the exact grid (extent, center, zoom, UTM, dimensions) used for delineation.
+      </p>
+      {{ ui.textarea_field(
+           "map_object",
+           "Map object JSON",
+           value="",
+           rows=10,
+           placeholder='{"py/object": "wepppy.nodb.ron.Map", "extent": [...], "center": [...], "zoom": 11, "cellsize": 30}',
+           attrs={"aria-label": "Serialized Map object JSON", "style": "font-family: var(--wc-font-mono, monospace);"},
+           extra_control_class="disable-readonly",
+           max_width="100%"
       ) }}
     </div>
   </div>

@@ -1,6 +1,6 @@
 from .climate import Climate, ClimateMode, ClimateSpatialMode, NoClimateStationSelectedError, ClimateModeIsUndefinedError
 from .landuse import Landuse, LanduseMode
-from .ron import Ron
+from .ron import Map, Ron
 from .soils import Soils, SoilsMode
 from .topaz import Topaz, WatershedBoundaryTouchesEdgeError, MinimumChannelLengthTooShortError
 from .watershed import Watershed, WatershedNotAbstractedError
@@ -14,6 +14,7 @@ __all__ = [
     'ClimateModeIsUndefinedError',
     'Landuse', 
     'LanduseMode',
+    'Map',
     'Ron', 
     'Soils', 
     'SoilsMode',

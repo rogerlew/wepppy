@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 _hostname: str
 REDIS_HOST: str
@@ -19,6 +19,7 @@ def fetch_dem_rq(
     extent: Sequence[float],
     center: Optional[Sequence[float]],
     zoom: Optional[int],
+    map_object: Any | None = ...,
 ) -> None: ...
 
 def build_channels_rq(
@@ -40,6 +41,7 @@ def fetch_dem_and_build_channels_rq(
     wbt_blc_dist: Optional[int],
     set_extent_mode: int,
     map_bounds_text: str,
+    map_object: Any | None = ...,
 ) -> None: ...
 
 def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None: ...

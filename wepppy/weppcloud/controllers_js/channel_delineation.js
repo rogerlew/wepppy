@@ -150,6 +150,104 @@ var ChannelDelineation = (function () {
         return numbers.length ? numbers : null;
     }
 
+    function unwrapPyTuple(value) {
+        if (value && typeof value === "object" && !Array.isArray(value) && Object.prototype.hasOwnProperty.call(value, "py/tuple")) {
+            return value["py/tuple"];
+        }
+        return value;
+    }
+
+    function normalizeUtmTuple(value) {
+        var tuple = unwrapPyTuple(value);
+        if (tuple === null || tuple === undefined || tuple === "") {
+            return null;
+        }
+        if (!Array.isArray(tuple) || tuple.length !== 4) {
+            throw new Error("UTM tuple must include 4 values (ul_x, ul_y, zone, letter).");
+        }
+        var zoneLetter = String(tuple[3]).trim();
+        var east = toFloat(tuple[0]);
+        var north = toFloat(tuple[1]);
+        var zone = toInteger(tuple[2]);
+        if (east === null || north === null || zone === null || !zoneLetter) {
+            throw new Error("UTM tuple is missing required values.");
+        }
+        return [east, north, zone, zoneLetter];
+    }
+
+    function normalizeMapObject(rawValue) {
+        if (rawValue === null || rawValue === undefined || rawValue === "") {
+            throw new Error("Map object JSON is required when using Set Map Object.");
+        }
+
+        var parsed = rawValue;
+        if (typeof rawValue === "string") {
+            try {
+                parsed = JSON.parse(rawValue);
+            } catch (err) {
+                throw new Error("Map object must be valid JSON.");
+            }
+        }
+
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+            throw new Error("Map object must be a JSON object.");
+        }
+
+        var extent = parseNumericList(unwrapPyTuple(parsed.extent), 4);
+        var center = parseNumericList(unwrapPyTuple(parsed.center), 2);
+        var zoom = toInteger(parsed.zoom);
+        var cellsize = toFloat(parsed.cellsize);
+
+        if (!extent || extent.length !== 4) {
+            throw new Error("Map object must include an extent array with four numeric values.");
+        }
+        if (!center || center.length !== 2) {
+            throw new Error("Map object must include a center array with two numeric values.");
+        }
+        if (zoom === null) {
+            throw new Error("Map object must include a numeric zoom.");
+        }
+        if (cellsize !== null && cellsize <= 0) {
+            throw new Error("Map object cellsize must be positive when provided.");
+        }
+
+        var mapPayload = {
+            "py/object": parsed["py/object"] || "wepppy.nodb.ron.Map",
+            extent: extent,
+            center: center,
+            zoom: zoom
+        };
+        if (cellsize !== null) {
+            mapPayload.cellsize = cellsize;
+        }
+
+        var utm = normalizeUtmTuple(parsed.utm);
+        if (utm) {
+            mapPayload.utm = utm;
+        }
+
+        var ulx = toFloat(parsed._ul_x);
+        var uly = toFloat(parsed._ul_y);
+        var lrx = toFloat(parsed._lr_x);
+        var lry = toFloat(parsed._lr_y);
+        var numCols = toInteger(parsed._num_cols);
+        var numRows = toInteger(parsed._num_rows);
+
+        if (ulx !== null) { mapPayload._ul_x = ulx; }
+        if (uly !== null) { mapPayload._ul_y = uly; }
+        if (lrx !== null) { mapPayload._lr_x = lrx; }
+        if (lry !== null) { mapPayload._lr_y = lry; }
+        if (numCols !== null) { mapPayload._num_cols = numCols; }
+        if (numRows !== null) { mapPayload._num_rows = numRows; }
+
+        return {
+            payload: mapPayload,
+            extent: extent,
+            center: center,
+            zoom: zoom
+        };
+    }
+
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
@@ -183,6 +281,8 @@ var ChannelDelineation = (function () {
         var spinnerElement = dom.qs("#build_channels_form #braille");
         var manualExtentGroup = dom.qs("#map_bounds_text_group");
         var manualExtentInput = dom.qs("#map_bounds_text");
+        var mapObjectGroup = dom.qs("#map_object_group");
+        var mapObjectInput = dom.qs("#map_object");
         var mapBoundsInput = dom.qs("#map_bounds");
         var mapCenterInput = dom.qs("#map_center");
         var mapZoomInput = dom.qs("#map_zoom");
@@ -310,6 +410,22 @@ var ChannelDelineation = (function () {
             }
         }
 
+        function updateMapObjectVisibility(mode) {
+            if (!mapObjectGroup) {
+                return;
+            }
+            if (mode === 2) {
+                dom.show(mapObjectGroup);
+            } else {
+                dom.hide(mapObjectGroup);
+            }
+        }
+
+        function updateExtentInputVisibility(mode) {
+            updateManualExtentVisibility(mode);
+            updateMapObjectVisibility(mode);
+        }
+
         function updateBreachDistanceVisibility(selection) {
             if (!wbtBreachContainer) {
                 return;
@@ -359,19 +475,48 @@ var ChannelDelineation = (function () {
         }
 
         function buildPayload() {
-            prepareExtentFields();
-
             var raw = forms.serializeForm(formElement, { format: "object" });
-            var center = parseNumericList(raw.map_center, 2);
-            var bounds = parseNumericList(raw.map_bounds, 4);
-            var zoom = toFloat(raw.map_zoom);
+            var setExtentMode = toInteger(raw.set_extent_mode);
+            if (setExtentMode === null) {
+                setExtentMode = 0;
+            }
+            var mapObject = null;
+            var center = null;
+            var bounds = null;
+            var zoom = null;
             var distance = toFloat(raw.map_distance);
             var mcl = coalesceNumeric(raw, ["mcl", "input_mcl"]);
             var csa = coalesceNumeric(raw, ["csa", "input_csa"]);
-            var setExtentMode = toInteger(raw.set_extent_mode);
             var wbtFill = raw.wbt_fill_or_breach || null;
             var wbtBreachDistance = toInteger(raw.wbt_blc_dist);
             var mapBoundsText = raw.map_bounds_text || "";
+
+            if (setExtentMode === 2) {
+                mapObject = normalizeMapObject(raw.map_object);
+                center = mapObject.center;
+                bounds = mapObject.extent;
+                zoom = mapObject.zoom;
+
+                if (bounds) {
+                    mapBoundsText = bounds.join(", ");
+                }
+                if (mapCenterInput) {
+                    mapCenterInput.value = center.join(",");
+                }
+                if (mapBoundsInput) {
+                    mapBoundsInput.value = bounds.join(",");
+                }
+                if (mapZoomInput) {
+                    mapZoomInput.value = zoom;
+                }
+            } else {
+                if (setExtentMode === 1) {
+                    prepareExtentFields();
+                }
+                center = parseNumericList(raw.map_center, 2);
+                bounds = parseNumericList(raw.map_bounds, 4);
+                zoom = toFloat(raw.map_zoom);
+            }
 
             if (!center || center.length !== 2) {
                 throw new Error("Map center is not available yet. Move the map to establish bounds.");
@@ -381,9 +526,6 @@ var ChannelDelineation = (function () {
             }
             if (mcl === null || csa === null) {
                 throw new Error("Minimum channel length and critical source area must be numeric.");
-            }
-            if (setExtentMode === null) {
-                setExtentMode = 0;
             }
 
             return {
@@ -396,7 +538,8 @@ var ChannelDelineation = (function () {
                 wbt_fill_or_breach: wbtFill,
                 wbt_blc_dist: wbtBreachDistance,
                 set_extent_mode: setExtentMode,
-                map_bounds_text: mapBoundsText
+                map_bounds_text: mapBoundsText,
+                map_object: mapObject ? mapObject.payload : null
             };
         }
 
@@ -407,7 +550,7 @@ var ChannelDelineation = (function () {
             if (Number.isNaN(mode)) {
                 mode = 0;
             }
-            updateManualExtentVisibility(mode);
+            updateExtentInputVisibility(mode);
             emit("channel:extent:mode", { mode: mode });
         }));
 
@@ -421,7 +564,7 @@ var ChannelDelineation = (function () {
         }));
 
         function initializeUI() {
-            updateManualExtentVisibility(getExtentMode());
+            updateExtentInputVisibility(getExtentMode());
             if (wbtFillSelect) {
                 updateBreachDistanceVisibility(wbtFillSelect.value);
             }

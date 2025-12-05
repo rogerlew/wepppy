@@ -49,6 +49,7 @@ See Also:
 # standard libraries
 import os
 import ast
+import json
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -132,6 +133,104 @@ class Map(object):
 
         self._num_cols: int = int(round((lr_x - ul_x) / cellsize))
         self._num_rows: int = int(round((ul_y - lr_y) / cellsize))
+
+    @classmethod
+    def from_payload(
+        cls,
+        payload: Any,
+        default_cellsize: Optional[float] = None,
+    ) -> "Map":
+        """Hydrate a Map instance from a JSON/dict payload."""
+
+        def _unwrap_py_tuple(value: Any) -> Any:
+            if isinstance(value, dict) and "py/tuple" in value:
+                return value.get("py/tuple")
+            return value
+
+        def _coerce_sequence(value: Any, label: str, expected_len: int) -> List[float]:
+            seq = _unwrap_py_tuple(value)
+            if not isinstance(seq, (list, tuple)):
+                raise ValueError(f"{label} must be a list or tuple.")
+            if len(seq) != expected_len:
+                raise ValueError(f"{label} must contain {expected_len} values.")
+            result: List[float] = []
+            for part in seq:
+                try:
+                    result.append(float(part))
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(f"Could not parse numeric values for {label}.") from exc
+            return result
+
+        def _coerce_int(value: Any, label: str) -> int:
+            try:
+                return int(float(value))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Could not parse integer value for {label}.") from exc
+
+        def _coerce_float(value: Any, label: str, *, allow_none: bool = False) -> Optional[float]:
+            if value is None and allow_none:
+                return None
+            try:
+                return float(value)
+            except (TypeError, ValueError) as exc:
+                if allow_none:
+                    return None
+                raise ValueError(f"Could not parse numeric value for {label}.") from exc
+
+        def _apply_optional_fields(map_obj: "Map", data: Dict[str, Any]) -> None:
+            utm_raw = _unwrap_py_tuple(data.get("utm"))
+            if utm_raw is not None:
+                if not isinstance(utm_raw, (list, tuple)) or len(utm_raw) != 4:
+                    raise ValueError("utm must be a 4-element tuple of (ul_x, ul_y, zone, letter).")
+                try:
+                    map_obj.utm = (  # type: ignore[attr-defined]
+                        float(utm_raw[0]),
+                        float(utm_raw[1]),
+                        int(float(utm_raw[2])),
+                        str(utm_raw[3]),
+                    )
+                except (TypeError, ValueError) as exc:
+                    raise ValueError("Invalid utm tuple values.") from exc
+
+            for key in ("_ul_x", "_ul_y", "_lr_x", "_lr_y"):
+                val = _coerce_float(data.get(key), key, allow_none=True)
+                if val is not None:
+                    setattr(map_obj, key, float(val))
+            for key in ("_num_cols", "_num_rows"):
+                val = _coerce_int(data.get(key), key) if data.get(key) not in (None, "") else None
+                if val is not None:
+                    setattr(map_obj, key, int(val))
+
+        if payload is None:
+            raise ValueError("Map payload is required.")
+
+        data: Any = payload
+        if isinstance(payload, str):
+            try:
+                data = json.loads(payload)
+            except json.JSONDecodeError as exc:
+                raise ValueError("Map payload must be valid JSON.") from exc
+
+        if isinstance(data, cls):
+            payload_dict = data.__dict__
+        elif isinstance(data, dict):
+            payload_dict = data
+        else:
+            raise ValueError("Map payload must be a JSON object.")
+
+        extent = _coerce_sequence(payload_dict.get("extent"), "extent", 4)
+        center = _coerce_sequence(payload_dict.get("center"), "center", 2)
+        zoom = _coerce_int(payload_dict.get("zoom"), "zoom")
+        cellsize_raw = payload_dict.get("cellsize")
+        if cellsize_raw in (None, ""):
+            cellsize_raw = default_cellsize if default_cellsize is not None else 30.0
+        cellsize = _coerce_float(cellsize_raw, "cellsize")
+        if cellsize is None or cellsize <= 0:
+            raise ValueError("cellsize must be positive.")
+
+        map_obj = cls(extent, center, zoom, cellsize)
+        _apply_optional_fields(map_obj, payload_dict)
+        return map_obj
 
     @property
     def utm_zone(self) -> int:
@@ -643,6 +742,20 @@ class Ron(NoDbBase):
 
         with self.locked():
             self._map = Map(extent, center, zoom, self.cellsize)
+            lng, lat = self.map.center
+            self._w3w = None
+
+    def set_map_object(self, map_object: Any) -> None:
+        func_name = inspect.currentframe().f_code.co_name
+        self.logger.info(f'{self.class_name}.{func_name}(map_object=provided)')
+
+        map_instance = map_object if isinstance(map_object, Map) else Map.from_payload(
+            map_object,
+            default_cellsize=self.cellsize,
+        )
+
+        with self.locked():
+            self._map = map_instance
             lng, lat = self.map.center
             self._w3w = None
 

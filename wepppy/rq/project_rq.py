@@ -361,6 +361,7 @@ def fetch_dem_rq(
     extent: Sequence[float],
     center: Optional[Sequence[float]],
     zoom: Optional[int],
+    map_object: Any | None = None,
 ) -> None:
     """Fetch a DEM for the current map extent.
 
@@ -369,6 +370,7 @@ def fetch_dem_rq(
         extent: Bounding box `[minx, miny, maxx, maxy]` in projected coords.
         center: Optional map center override; derived from extent when omitted.
         zoom: Optional zoom level; falls back to `DEFAULT_ZOOM` when missing.
+        map_object: Optional hydrated Map object to reuse exact map geometry.
 
     Raises:
         Exception: Propagates size validation and DEM acquisition failures.
@@ -379,15 +381,20 @@ def fetch_dem_rq(
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        
-        if center is None:
-            center = [(extent[0]+extent[2])/2, (extent[1]+extent[3])/2]
-        
-        if zoom is None:
-            zoom = DEFAULT_ZOOM
-            
+
         ron = Ron.getInstance(wd)
-        ron.set_map(extent, center, zoom)
+        if map_object is not None:
+            ron.set_map_object(map_object)
+            extent = ron.map.extent  # type: ignore[assignment]
+            center = ron.map.center  # type: ignore[assignment]
+            zoom = ron.map.zoom      # type: ignore[assignment]
+        else:
+            if center is None:
+                center = [(extent[0]+extent[2])/2, (extent[1]+extent[3])/2]
+            
+            if zoom is None:
+                zoom = DEFAULT_ZOOM
+            ron.set_map(extent, center, zoom)
 
         if ron.map.num_cols > ron.max_map_dimension_px or ron.map.num_rows > ron.max_map_dimension_px:
             raise Exception(f'Map size too large: {ron.map.num_cols}x{ron.map.num_rows}. Maximum is {ron.max_map_dimension_px}x{ron.max_map_dimension_px}.')
@@ -457,6 +464,7 @@ def fetch_dem_and_build_channels_rq(
     wbt_blc_dist: Optional[int],
     set_extent_mode: int,
     map_bounds_text: str,
+    map_object: Any | None = None,
 ) -> None:
     """Chain DEM acquisition and channel building via dependent RQ jobs.
 
@@ -471,6 +479,7 @@ def fetch_dem_and_build_channels_rq(
         wbt_blc_dist: Optional breaching distance for Whitebox runs.
         set_extent_mode: Serialized extent mode persisted on the watershed.
         map_bounds_text: User-facing bounds description stored with the run.
+        map_object: Optional hydrated Map object to preserve exact map geometry.
 
     Raises:
         Exception: Propagates errors from job enqueueing or delineation.
@@ -489,7 +498,7 @@ def fetch_dem_and_build_channels_rq(
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
             
-            ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom))
+            ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom, map_object))
             job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
             job.save()
 

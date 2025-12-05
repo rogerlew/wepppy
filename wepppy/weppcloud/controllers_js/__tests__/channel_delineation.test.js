@@ -32,12 +32,17 @@ describe("Channel Delineation controller", () => {
                     <input id="map_bounds_text" name="map_bounds_text" type="text" value="-118.0,46.5,-117.0,47.0">
                 </div>
 
+                <div id="map_object_group" style="display: none;">
+                    <textarea id="map_object" name="map_object" rows="8"></textarea>
+                </div>
+
                 <div id="wbt_blc_dist_container" style="display: none;">
                     <input id="wbt_blc_dist" name="wbt_blc_dist" type="text" value="400">
                 </div>
 
                 <input type="radio" id="set_extent_mode_map" name="set_extent_mode" value="0" data-channel-role="extent-mode" checked>
                 <input type="radio" id="set_extent_mode_manual" name="set_extent_mode" value="1" data-channel-role="extent-mode">
+                <input type="radio" id="set_extent_mode_map_object" name="set_extent_mode" value="2" data-channel-role="extent-mode">
 
                 <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" data-channel-role="wbt-fill">
                     <option value="fill">Fill</option>
@@ -194,11 +199,52 @@ describe("Channel Delineation controller", () => {
         expect(jsonPayload.mcl).toBe(60);
         expect(jsonPayload.csa).toBe(5);
         expect(jsonPayload.set_extent_mode).toBe(0);
+        expect(jsonPayload.map_object).toBeNull();
 
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, "job-99");
         expect(events).toHaveLength(1);
         expect(events[0].payload.payload.map_center).toEqual([-117.52, 46.88]);
+    });
+
+    test("build sends map object payload when Set Map Object is selected", async () => {
+        document.getElementById("set_extent_mode_map").checked = false;
+        document.getElementById("set_extent_mode_manual").checked = false;
+        document.getElementById("set_extent_mode_map_object").checked = true;
+
+        const mapObject = {
+            "py/object": "wepppy.nodb.ron.Map",
+            extent: [-76.8, 39.9, -76.3, 40.2],
+            center: [-76.55, 40.05],
+            zoom: 11,
+            cellsize: 30,
+            utm: { "py/tuple": [344441.4, 4458876.1, 18, "T"] },
+            _ul_x: 344441.4,
+            _ul_y: 4458876.1,
+            _lr_x: 380706.6,
+            _lr_y: 4421419.0,
+            _num_cols: 1209,
+            _num_rows: 1249
+        };
+        document.getElementById("map_object").value = JSON.stringify(mapObject);
+
+        const result = await channel.build();
+        expect(result).toMatchObject({ Success: true, job_id: "job-99" });
+
+        const jsonPayload = requestMock.mock.calls[0][1].json;
+        expect(jsonPayload.set_extent_mode).toBe(2);
+        expect(jsonPayload.map_object).toMatchObject({
+            "py/object": "wepppy.nodb.ron.Map",
+            extent: mapObject.extent,
+            center: mapObject.center,
+            zoom: mapObject.zoom,
+            _num_cols: 1209,
+            _num_rows: 1249
+        });
+        expect(jsonPayload.map_center).toEqual(mapObject.center);
+        expect(jsonPayload.map_bounds).toEqual(mapObject.extent);
+        expect(jsonPayload.map_zoom).toBe(mapObject.zoom);
+        expect(jsonPayload.map_bounds_text).toBe(mapObject.extent.join(", "));
     });
 
     test("build rejects when manual extent is invalid", async () => {

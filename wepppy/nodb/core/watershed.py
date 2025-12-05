@@ -283,7 +283,7 @@ class Watershed(NoDbBase):
     @nodb_setter
     def set_extent_mode(self, value: int) -> None:
         _value = int(value)
-        assert _value in [0, 1], f"Invalid set_extent_mode value: {_value}"
+        assert _value in [0, 1, 2], f"Invalid set_extent_mode value: {_value}"
         self._set_extent_mode = _value
 
     @property
