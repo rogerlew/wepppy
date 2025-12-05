@@ -232,6 +232,26 @@ class Map(object):
         _apply_optional_fields(map_obj, payload_dict)
         return map_obj
 
+    def to_payload(self) -> Dict[str, Any]:
+        """Serialize the map to a json-friendly payload matching ron.nodb structure."""
+        payload: Dict[str, Any] = {
+            "py/object": f"{self.__module__}.{type(self).__name__}",
+            "extent": [float(v) for v in self.extent],
+            "center": [float(v) for v in self.center],
+            "zoom": int(self.zoom),
+            "cellsize": float(self.cellsize),
+        }
+        utm_tuple = getattr(self, "utm", None)
+        if utm_tuple is not None:
+            payload["utm"] = {"py/tuple": [float(utm_tuple[0]), float(utm_tuple[1]), int(utm_tuple[2]), str(utm_tuple[3])]}
+        for key in ("_ul_x", "_ul_y", "_lr_x", "_lr_y"):
+            if hasattr(self, key):
+                payload[key] = float(getattr(self, key))
+        for key in ("_num_cols", "_num_rows"):
+            if hasattr(self, key):
+                payload[key] = int(getattr(self, key))
+        return payload
+
     @property
     def utm_zone(self) -> int:
         return self.utm[2]

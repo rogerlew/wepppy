@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from datetime import datetime
 import awesome_codename
+import json
 
 from .._common import *  # noqa: F401,F403
 from flask import current_app
@@ -189,6 +190,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
     wd = str(ctx.active_root)
     base_wd = str(ctx.run_root)
     ron = Ron.getInstance(wd)
+    map_object_payload = ron.map.to_payload() if ron.map is not None else None
+    map_object_json = json.dumps(map_object_payload, indent=2) if map_object_payload else ""
 
     # check config from url matches config from Ron
     if config != ron.config_stem:
@@ -320,6 +323,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         run_id=runid,
         runid=runid,
         config=config,
+        map_object_payload=map_object_payload,
+        map_object_json=map_object_json,
         toc_task_emojis=TOC_TASK_EMOJI_MAP,
         pup_relpath=ctx.pup_relpath,
         VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY,

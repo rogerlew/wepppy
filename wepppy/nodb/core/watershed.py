@@ -133,7 +133,7 @@ __all__ = [
 ]
 class DelineationBackend(IntEnum):
     TOPAZ = 1
-    TauDEM = 2
+    TauDEM = 2  # Deprecated
     WBT = 3
 
 

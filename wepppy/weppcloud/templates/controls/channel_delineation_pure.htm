@@ -60,7 +60,7 @@
       {{ ui.textarea_field(
            "map_object",
            "Map object JSON",
-           value="",
+           value=map_object_json | default(''),
            rows=10,
            placeholder='{"py/object": "wepppy.nodb.ron.Map", "extent": [...], "center": [...], "zoom": 11, "cellsize": 30}',
            attrs={"aria-label": "Serialized Map object JSON", "style": "font-family: var(--wc-font-mono, monospace);"},
