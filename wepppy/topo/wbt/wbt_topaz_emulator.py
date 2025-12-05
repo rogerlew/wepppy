@@ -1162,7 +1162,12 @@ class WhiteboxToolsTopazEmulator:
     @build_step("flow_vector_slope")
     def _create_flow_vector_slope(self, logger=None):
         """
-        Create a flow vector slope raster from the flow vector file using WBT.
+        Create a flow vector slope raster using the D8 flow direction.
+        
+        Uses the fvslope tool which calculates slope in the direction of flow,
+        matching TOPAZ's FVSLOP algorithm. This produces lower, more physically
+        appropriate slopes at channel locations compared to the standard slope
+        tool which calculates maximum terrain gradient.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
@@ -1171,7 +1176,7 @@ class WhiteboxToolsTopazEmulator:
 
         remove_if_exists(fvslop_fn)
 
-        self.wbt.slope(dem=self.dem, output=fvslop_fn, units='ratio')
+        self.wbt.fvslope(dem=self.relief, d8_pntr=self.flovec, output=fvslop_fn, units='ratio')
 
         if not _exists(fvslop_fn):
             raise Exception(f"Flow vector slope file was not created: {fvslop_fn}")
