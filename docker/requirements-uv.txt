@@ -239,7 +239,7 @@ typing-extensions==4.12.0
 tzdata==2025.1
 ufolib2==0.13.1
 uvicorn==0.30.6
-urllib3==2.5.0
+urllib3==2.6.0
 utm==0.8.1
 versioneer==0.29
 vine==5.1.0
