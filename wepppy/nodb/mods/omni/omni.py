@@ -73,6 +73,26 @@ CoverValues = Dict[str, float]
 RhemRunResult = Tuple[bool, str, float]
 ScenarioDef = Dict[str, Any]
 ScenarioDependency = Dict[str, Dict[str, Any]]
+
+
+def _update_nodb_wd(d: Dict[str, Any], new_wd: str, parent_wd: Optional[str] = None) -> None:
+    """Update wd (and optionally _parent_wd) in nodb JSON, handling both formats.
+    
+    Old jsonpickle format stores properties at top level.
+    New format (with __getstate__) wraps properties in py/state.
+    """
+    if 'py/state' in d:
+        # New format: properties nested in py/state
+        d['py/state']['wd'] = new_wd
+        if parent_wd is not None:
+            d['py/state']['_parent_wd'] = parent_wd
+    else:
+        # Old format: properties at top level
+        d['wd'] = new_wd
+        if parent_wd is not None:
+            d['_parent_wd'] = parent_wd
+
+
 ContrastMapping = Dict[int | str, str]
 ContrastDependency = Dict[str, Dict[str, Optional[str]]]
 
@@ -211,8 +231,7 @@ def _run_contrast(
         with open(dst, 'r') as f:
             d = json.load(f)
         
-        d['py/state']['wd'] = new_wd
-        d['py/state']['_parent_wd'] = wd
+        _update_nodb_wd(d, new_wd, parent_wd=wd)
 
         with open(dst, 'w') as fp:
             json.dump(d, fp)
@@ -282,8 +301,7 @@ def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
             with open(dst, 'r') as f:
                 d = json.load(f)
                 
-            d['py/state']['wd'] = new_wd
-            d['py/state']['_parent_wd'] = wd
+            _update_nodb_wd(d, new_wd, parent_wd=wd)
 
             with open(dst, 'w') as fp:
                 json.dump(d, fp)
@@ -368,7 +386,7 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
         with open(dst, 'r') as f:
             d = json.load(f)
             
-        d['py/state']['wd'] = new_wd
+        _update_nodb_wd(d, new_wd)
 
         with open(dst, 'w') as fp:
             json.dump(d, fp)

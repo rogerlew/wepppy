@@ -39,6 +39,7 @@ __all__ = [
     "migrate_landuse_parquet",
     "migrate_soils_parquet",
     "migrate_soils_nodb_meta",
+    "migrate_nodb_jsonpickle_format",
     "refresh_query_catalog",
     "invalidate_redis_cache",
     "AVAILABLE_MIGRATIONS",
@@ -877,6 +878,94 @@ def migrate_soils_nodb_meta(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         return False, f"Failed to migrate soils.nodb meta: {e}"
 
 
+def migrate_nodb_jsonpickle_format(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
+    """
+    Migrate .nodb files from old flat jsonpickle format to new py/state format.
+    
+    Old jsonpickle format (pre-__getstate__) stores properties at top level:
+        {"py/object": "...", "wd": "/path", "data": {...}}
+    
+    New format (with __getstate__/__setstate__) wraps properties in py/state:
+        {"py/object": "...", "py/state": {"wd": "/path", "data": {...}}}
+    
+    The new format is required for proper serialization of NoDb objects that
+    implement __getstate__ to exclude non-serializable logger attributes.
+    
+    Idempotent: safe to run multiple times - already-migrated files are skipped.
+    
+    Args:
+        wd: Working directory path
+        dry_run: If True, report but don't modify
+        
+    Returns:
+        (applied, message) tuple
+    """
+    run_path = Path(wd)
+    nodb_files = sorted(run_path.glob("*.nodb"))
+    
+    if not nodb_files:
+        return True, "No .nodb files found"
+    
+    migrated_count = 0
+    skipped_count = 0
+    error_files = []
+    
+    for nodb_file in nodb_files:
+        try:
+            with open(nodb_file, 'r') as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            error_files.append((nodb_file.name, f"JSON parse error: {e}"))
+            continue
+        
+        # Check if already in new format (has py/state)
+        if 'py/state' in data:
+            skipped_count += 1
+            continue
+        
+        # Check if this is a valid nodb file (has py/object)
+        if 'py/object' not in data:
+            skipped_count += 1
+            continue
+        
+        if dry_run:
+            migrated_count += 1
+            continue
+        
+        # Extract all properties except py/object and py/ prefixed keys
+        py_object = data.pop('py/object')
+        state = {}
+        keys_to_move = [k for k in data.keys() if not k.startswith('py/')]
+        for key in keys_to_move:
+            state[key] = data.pop(key)
+        
+        # Reconstruct in new format
+        new_data = {'py/object': py_object, 'py/state': state}
+        # Preserve any other py/ prefixed keys (like py/reduce, py/id, etc.)
+        for key, value in data.items():
+            if key.startswith('py/'):
+                new_data[key] = value
+        
+        with open(nodb_file, 'w') as f:
+            json.dump(new_data, f, indent=2)
+        
+        migrated_count += 1
+    
+    if error_files:
+        error_summary = ", ".join(f"{name}: {err}" for name, err in error_files[:3])
+        if len(error_files) > 3:
+            error_summary += f" (+{len(error_files) - 3} more)"
+        return False, f"Errors in {len(error_files)} files: {error_summary}"
+    
+    if migrated_count == 0:
+        return True, f"All {skipped_count} files already in new format"
+    
+    if dry_run:
+        return True, f"Would migrate {migrated_count} files (skipped {skipped_count} already migrated)"
+    
+    return True, f"Migrated {migrated_count} files to py/state format (skipped {skipped_count})"
+
+
 def invalidate_redis_cache(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
     """
     Invalidate Redis DB 13 cache for all .nodb files in the working directory.
@@ -976,6 +1065,7 @@ def refresh_query_catalog(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
 AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
     ("observed_nodb", migrate_observed_nodb),
     ("run_paths", migrate_run_paths),
+    ("nodb_jsonpickle_format", migrate_nodb_jsonpickle_format),  # After run_paths, before other nodb operations
     ("watersheds", migrate_watersheds),
     ("watershed_nodb_slim", migrate_watershed_nodb_slim),  # After watersheds ensures parquets exist
     ("wbt_geojson", migrate_wbt_geojson),
@@ -991,6 +1081,7 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
 MIGRATION_DESCRIPTIONS: Dict[str, str] = {
     "observed_nodb": "Update observed.nodb module path for new package structure",
     "run_paths": "Fix hardcoded paths in .nodb files to match current location",
+    "nodb_jsonpickle_format": "Convert old flat jsonpickle format to new py/state format",
     "watersheds": "Generate parquet files for watershed data (hillslopes, channels, flowpaths)",
     "watershed_nodb_slim": "Slim watershed.nodb by externalizing structure data (reduces file size)",
     "wbt_geojson": "Normalize GeoJSON identifiers for WhiteboxTools delineation",

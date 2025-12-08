@@ -205,7 +205,11 @@ class BatchRunner(NoDbBase):
             for nodb_fn in glob(_join(runid_wd, '*.nodb')):
                 with open(nodb_fn, 'r') as fp:
                     state = json.load(fp)
-                state.setdefault('py/state', {})['wd'] = runid_wd
+                # Handle both old (flat) and new (py/state) jsonpickle formats
+                if 'py/state' in state:
+                    state['py/state']['wd'] = runid_wd
+                else:
+                    state['wd'] = runid_wd
                 with open(nodb_fn, 'w') as fp:
                     json.dump(state, fp)
                     fp.flush()
