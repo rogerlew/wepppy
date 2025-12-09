@@ -62,6 +62,7 @@ import inspect
 import utm
 import requests
 
+from wepppy.nodb.version import read_version
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
@@ -1123,6 +1124,7 @@ class RonViewModel(object):
         self.public = _try_bool(ron.public)
         self.pup_relpath = ron.pup_relpath
         self.mods = [mod for mod in ron.mods]
+        self.nodb_version = read_version(ron.wd)
 
     @classmethod
     def getInstanceFromRunID(cls, runid: str) -> 'RonViewModel':

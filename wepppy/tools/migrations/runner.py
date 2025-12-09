@@ -26,6 +26,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from wepppy.nodb.version import CURRENT_VERSION, read_version
+
 __all__ = [
     "MigrationResult",
     "run_all_migrations",
@@ -1079,6 +1081,7 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
 
 # Human-readable descriptions for each migration
 MIGRATION_DESCRIPTIONS: Dict[str, str] = {
+    "nodb_version": "Update NoDb schema version marker",
     "observed_nodb": "Update observed.nodb module path for new package structure",
     "run_paths": "Fix hardcoded paths in .nodb files to match current location",
     "nodb_jsonpickle_format": "Convert old flat jsonpickle format to new py/state format",
@@ -1110,6 +1113,33 @@ def check_migrations_needed(wd: str) -> Dict[str, Any]:
     
     if not run_path.exists():
         return result
+
+    nodb_version = read_version(run_path)
+    version_outdated = nodb_version < CURRENT_VERSION
+
+    result.update(
+        {
+            "nodb_version": nodb_version,
+            "current_version": CURRENT_VERSION,
+            "version_outdated": version_outdated,
+        }
+    )
+
+    version_message = (
+        f"NoDb schema version {nodb_version} is below current {CURRENT_VERSION}"
+        if version_outdated
+        else f"NoDb schema version {nodb_version} is current"
+    )
+    result["migrations"].append(
+        {
+            "name": "nodb_version",
+            "description": MIGRATION_DESCRIPTIONS.get("nodb_version", ""),
+            "would_apply": version_outdated,
+            "message": version_message,
+        }
+    )
+    if version_outdated:
+        result["needs_migration"] = True
     
     # Migrations that are always informational (always run but never block loading)
     INFORMATIONAL_MIGRATIONS = {"redis_cache", "query_catalog", "interchange"}

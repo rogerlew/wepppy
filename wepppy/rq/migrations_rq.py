@@ -11,6 +11,7 @@ from typing import List, Optional
 from rq import get_current_job
 
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.nodb.version import CURRENT_VERSION, write_version
 from wepppy.rq.exception_logging import with_exception_logging
 
 STATUS_CHANNEL_SUFFIX = "migrations"
@@ -129,7 +130,17 @@ def migrations_rq(
             migrations=migrations,
             on_progress=progress_callback,
         )
-        
+
+        if result.success:
+            try:
+                write_version(wd, CURRENT_VERSION)
+                publish_and_log("VERSION_UPDATED", f"NoDb version set to {CURRENT_VERSION}")
+                file_logger.info("Updated NoDb version marker to current")
+            except Exception as version_err:
+                result.success = False
+                result.errors["version"] = str(version_err)
+                file_logger.error(f"Failed to update NoDb version: {version_err}", exc_info=True)
+
         if result.success:
             applied_str = ", ".join(result.applied) if result.applied else "none"
             publish_and_log("COMPLETED", f"Applied: {applied_str}")

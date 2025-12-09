@@ -866,6 +866,19 @@ h5:first-child {
   text-decoration: underline;
 }
 
+.wc-run-header__version {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-2xs);
+  padding: var(--wc-space-2xs) var(--wc-space-sm);
+  border-radius: var(--wc-radius-pill);
+  background: var(--wc-color-surface-alt);
+  color: var(--wc-color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .wc-run-header__content {
   display: flex;
   flex-wrap: wrap;

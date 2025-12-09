@@ -14,6 +14,7 @@ from flask import current_app
 import wepppy
 from wepppy.all_your_base import isint
 from wepppy.nodb.base import get_configs
+from wepppy.nodb.version import CURRENT_VERSION, read_version
 from wepppy.nodb.core import * 
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.mods.observed import Observed
@@ -344,8 +345,6 @@ def _build_runs0_context(runid, config, playwright_load_all):
 @run_0_bp.route('/runs/<string:runid>/<config>/')
 @authorize_and_handle_with_exception_factory
 def runs0(runid, config):
-    from wepppy.tools.migrations.runner import check_migrations_needed
-    
     assert config is not None
     
     # Check if migrations are needed (unless skip_migration_check is set)
@@ -355,8 +354,8 @@ def runs0(runid, config):
     if not skip_migration_check and not playwright_load_all:
         wd = get_wd(runid)
         if _exists(wd):
-            migration_status = check_migrations_needed(wd)
-            if migration_status.get("needs_migration"):
+            nodb_version = read_version(wd)
+            if nodb_version < CURRENT_VERSION:
                 # Redirect to migration page
                 return redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
     
@@ -376,6 +375,10 @@ def migration_page(runid, config):
     wd = get_wd(runid)
     if not _exists(wd):
         abort(404)
+    
+    nodb_version = read_version(wd)
+    if nodb_version >= CURRENT_VERSION:
+        return redirect(url_for_run('run_0.runs0', runid=runid, config=config))
     
     ron = Ron.getInstance(wd)
     migration_status = check_migrations_needed(wd)

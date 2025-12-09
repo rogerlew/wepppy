@@ -18,6 +18,9 @@
         <a class="wc-run-header__descriptor" href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}">
           {{ current_ron.runid }} {{ current_ron.config_stem }}
         </a>
+        <span class="wc-run-header__version">
+          NoDb v{{ current_ron.nodb_version|default('?', false) }}
+        </span>
       </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">
