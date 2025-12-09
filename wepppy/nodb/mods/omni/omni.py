@@ -1007,7 +1007,7 @@ class Omni(NoDbBase):
         combined = pd.concat(dfs, ignore_index=True)
         out_path = _join(self.omni_dir, 'contrasts.out.parquet')
         combined.to_parquet(out_path)
-        self._refresh_catalog()
+        self._refresh_catalog(os.path.relpath(out_path, self.wd))
 
         return combined
     
@@ -1587,7 +1587,7 @@ class Omni(NoDbBase):
         combined = pd.concat(dfs, ignore_index=True)
         out_path = _join(self.omni_dir, 'scenarios.out.parquet')
         combined.to_parquet(out_path)
-        self._refresh_catalog()
+        self._refresh_catalog(os.path.relpath(out_path, self.wd))
 
         return combined
     
@@ -1667,7 +1667,7 @@ class Omni(NoDbBase):
 
         out_path = _join(self.omni_dir, 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
-        self._refresh_catalog()
+        self._refresh_catalog(os.path.relpath(out_path, self.wd))
 
         return combined
 
@@ -1713,7 +1713,7 @@ class Omni(NoDbBase):
 
         out_path = _join(self.omni_dir, 'scenarios.channel_summaries.parquet')
         combined.to_parquet(out_path)
-        self._refresh_catalog()
+        self._refresh_catalog(os.path.relpath(out_path, self.wd))
 
         return combined
 
