@@ -8,9 +8,6 @@ var BatchRunner = (function () {
 
     var instance;
 
-    var RUN_DIRECTIVE_STATUS_CLASSES = ["text-danger", "text-success", "text-muted", "text-warning"];
-    var RUN_BATCH_MESSAGE_CLASSES = ["text-danger", "text-success", "text-muted", "text-warning", "text-info"];
-
     var EVENT_NAMES = [
         "batch:upload:started",
         "batch:upload:completed",
@@ -39,6 +36,30 @@ var BatchRunner = (function () {
         "success",
         "error"
     ]);
+
+    var STATUS_STATE_MAP = {
+        success: "success",
+        ok: "success",
+        completed: "success",
+        complete: "success",
+        finished: "success",
+        error: "critical",
+        failed: "critical",
+        failure: "critical",
+        stopped: "critical",
+        canceled: "critical",
+        cancelled: "critical",
+        not_found: "warning",
+        started: "info",
+        warning: "warning",
+        attention: "warning",
+        queued: "warning",
+        pending: "warning",
+        info: "info",
+        running: "info",
+        active: "info",
+        default: ""
+    };
 
     var SELECTORS = {
         form: "#batch_runner_form",
@@ -160,6 +181,28 @@ var BatchRunner = (function () {
         return timestamp || "—";
     }
 
+    function applyDataState(target, state) {
+        if (!target) {
+            return;
+        }
+        if (state) {
+            target.setAttribute("data-state", state);
+        } else {
+            target.removeAttribute("data-state");
+        }
+    }
+
+    function resolveStatusState(status) {
+        if (!status) {
+            return STATUS_STATE_MAP.default;
+        }
+        var key = String(status).toLowerCase();
+        if (Object.prototype.hasOwnProperty.call(STATUS_STATE_MAP, key)) {
+            return STATUS_STATE_MAP[key];
+        }
+        return STATUS_STATE_MAP.default;
+    }
+
     function buildValidationMessage(summary) {
         if (!summary || typeof summary !== "object") {
             return [];
@@ -210,7 +253,7 @@ var BatchRunner = (function () {
 
         controller._delegates = [];
         controller._runDirectivesSaving = false;
-        controller._runDirectivesStatus = { message: "", css: "" };
+        controller._runDirectivesStatus = { message: "", state: "" };
 
         controller.jobInfo = {
             pollIntervalMs: 3000,
@@ -427,6 +470,9 @@ var BatchRunner = (function () {
             controller.resourceSamplesBody = controller.resourceCard.querySelector(DATA_ROLES.resourceSamplesBody);
             controller.runDirectiveList = controller.container.querySelector(DATA_ROLES.runDirectiveList);
             controller.runDirectiveStatus = controller.container.querySelector(DATA_ROLES.runDirectiveStatus);
+            if (controller.runDirectiveList && controller.runDirectiveList.classList) {
+                controller.runDirectiveList.classList.add("wc-stack");
+            }
 
             if (controller.templateCard) {
                 controller.templateInput = controller.templateCard.querySelector(DATA_ROLES.templateInput);
@@ -616,7 +662,7 @@ var BatchRunner = (function () {
                             idx +
                             "</td><td><code>" +
                             featureId +
-                            '</code></td><td><pre class="mb-0">' +
+                            '</code></td><td><pre class="wc-pre">' +
                             props +
                             "</pre></td></tr>"
                         );
@@ -641,6 +687,7 @@ var BatchRunner = (function () {
 
             if (!validation) {
                 setText(controller.templateStatus, "");
+                applyDataState(controller.templateStatus, "");
                 deps.dom.hide(controller.validationSummary);
                 deps.dom.hide(controller.validationIssues);
                 deps.dom.hide(controller.validationPreview);
@@ -652,10 +699,16 @@ var BatchRunner = (function () {
             var issues = validation.errors || [];
             var preview = validation.preview || [];
 
+            if ((status === "unknown" || status === undefined || status === null) && summary.is_valid === true) {
+                status = "ok";
+                validation.status = "ok";
+            }
+
             setText(
                 controller.templateStatus,
                 status === "ok" ? "Template is valid." : "Template requires attention."
             );
+            applyDataState(controller.templateStatus, status === "ok" ? "success" : "warning");
 
             if (controller.validationSummary && controller.validationSummaryList) {
                 var items = buildValidationMessage(summary).map(function (item) {
@@ -693,7 +746,7 @@ var BatchRunner = (function () {
                                     : "—"
                             );
                             var featureId = escapeHtml(entry.feature_id || entry.featureId || "—");
-                            var runid = escapeHtml(entry.runid || entry.runId || "—");
+                            var runid = escapeHtml(entry.runid || entry.runId || entry.run_id || "—");
                             var error = escapeHtml(entry.error || "");
                             return (
                                 "<tr><td>" +
@@ -726,8 +779,8 @@ var BatchRunner = (function () {
 
             if (!Array.isArray(directives) || directives.length === 0) {
                 controller.runDirectiveList.innerHTML =
-                    '<div class="text-muted small">No batch tasks configured.</div>';
-                setRunDirectivesStatus("No batch tasks configured.", "text-muted");
+                    '<div class="wc-text-muted">No batch tasks configured.</div>';
+                setRunDirectivesStatus("No batch tasks configured.", "info");
                 return;
             }
 
@@ -742,8 +795,8 @@ var BatchRunner = (function () {
                     var checked = directive.enabled ? " checked" : "";
                     var disabled = !controller.state.enabled || controller._runDirectivesSaving ? " disabled" : "";
                     return (
-                        '<div class="custom-control custom-checkbox mb-1">' +
-                        '<input type="checkbox" class="custom-control-input" id="' +
+                        '<label class="wc-choice wc-choice--checkbox">' +
+                        '<input type="checkbox" id="' +
                         controlId +
                         '" data-run-directive="' +
                         escapeHtml(slug) +
@@ -751,12 +804,10 @@ var BatchRunner = (function () {
                         checked +
                         disabled +
                         ">" +
-                        '<label class="custom-control-label" for="' +
-                        controlId +
-                        '">' +
+                        '<span class="wc-choice__body"><span class="wc-choice__label">' +
                         escapeHtml(label) +
-                        "</label>" +
-                        "</div>"
+                        "</span></span>" +
+                        "</label>"
                     );
                 })
                 .join("");
@@ -767,7 +818,7 @@ var BatchRunner = (function () {
             if (controller._runDirectivesStatus && controller._runDirectivesStatus.message) {
                 applyStoredRunDirectiveStatus();
             } else if (!controller.state.enabled) {
-                setRunDirectivesStatus("Batch runner is disabled; tasks cannot be edited.", "text-muted");
+                setRunDirectivesStatus("Batch runner is disabled; tasks cannot be edited.", "warning");
             }
         }
 
@@ -792,7 +843,7 @@ var BatchRunner = (function () {
 
             if (jobLocked) {
                 controller.runBatchButton.disabled = true;
-                setRunBatchMessage("Batch run in progress…", "text-muted");
+                setRunBatchMessage("Batch run in progress…", "info");
                 return;
             }
 
@@ -808,24 +859,25 @@ var BatchRunner = (function () {
 
             var allowRun = enabled && Boolean(resource) && templateIsValid;
             var message = "";
-            var cssClass = "text-muted";
+            var state = "info";
 
             if (!enabled) {
                 message = "Batch runner is disabled.";
-                cssClass = "text-warning";
+                state = "warning";
             } else if (!resource) {
                 message = "Upload a watershed GeoJSON before running.";
             } else if (!templateIsValid) {
                 message = "Validate and resolve template issues before running.";
-                cssClass = "text-warning";
+                state = "warning";
             } else {
                 message = "Ready to run batch.";
+                state = "success";
             }
 
             controller.runBatchButton.disabled = !allowRun;
 
             if (!preserveMessage || !allowRun) {
-                setRunBatchMessage(message, cssClass);
+                setRunBatchMessage(message, state);
             }
         }
 
@@ -845,7 +897,7 @@ var BatchRunner = (function () {
             syncRunDirectiveDisabledState();
         }
 
-        function setRunBatchBusy(busy, message, cssClass) {
+        function setRunBatchBusy(busy, message, state) {
             if (controller.runBatchButton && busy) {
                 controller.runBatchButton.disabled = true;
             }
@@ -857,27 +909,22 @@ var BatchRunner = (function () {
                 }
             }
             if (message != null) {
-                setRunBatchMessage(message, cssClass || "text-muted");
+                setRunBatchMessage(message, state || "info");
             }
             if (!busy) {
                 renderRunControls({ preserveMessage: true });
             }
         }
 
-        function setRunDirectivesStatus(message, cssClass) {
+        function setRunDirectivesStatus(message, state) {
             controller._runDirectivesStatus = {
                 message: message || "",
-                css: cssClass || ""
+                state: state || ""
             };
             if (!controller.runDirectiveStatus) {
                 return;
             }
-            RUN_DIRECTIVE_STATUS_CLASSES.forEach(function (cls) {
-                controller.runDirectiveStatus.classList.remove(cls);
-            });
-            if (cssClass) {
-                controller.runDirectiveStatus.classList.add(cssClass);
-            }
+            applyDataState(controller.runDirectiveStatus, state);
             setText(controller.runDirectiveStatus, message || "");
         }
 
@@ -886,25 +933,15 @@ var BatchRunner = (function () {
                 return;
             }
             var status = controller._runDirectivesStatus || {};
-            RUN_DIRECTIVE_STATUS_CLASSES.forEach(function (cls) {
-                controller.runDirectiveStatus.classList.remove(cls);
-            });
-            if (status.css) {
-                controller.runDirectiveStatus.classList.add(status.css);
-            }
+            applyDataState(controller.runDirectiveStatus, status.state);
             setText(controller.runDirectiveStatus, status.message || "");
         }
 
-        function setRunBatchMessage(message, cssClass) {
+        function setRunBatchMessage(message, state) {
             if (!controller.runBatchHint) {
                 return;
             }
-            RUN_BATCH_MESSAGE_CLASSES.forEach(function (cls) {
-                controller.runBatchHint.classList.remove(cls);
-            });
-            if (cssClass) {
-                controller.runBatchHint.classList.add(cssClass);
-            }
+            applyDataState(controller.runBatchHint, state);
             setText(controller.runBatchHint, message || "");
         }
 
@@ -913,7 +950,7 @@ var BatchRunner = (function () {
                 controller.uploadButton.disabled = busy || !controller.state.enabled;
             }
             if (message != null) {
-                setUploadStatus(message, busy ? "text-muted" : "");
+                setUploadStatus(message, busy ? "info" : "");
             }
         }
 
@@ -923,19 +960,15 @@ var BatchRunner = (function () {
             }
             if (message != null) {
                 setText(controller.templateStatus, message);
+                applyDataState(controller.templateStatus, busy ? "info" : "");
             }
         }
 
-        function setUploadStatus(message, cssClass) {
+        function setUploadStatus(message, state) {
             if (!controller.uploadStatus) {
                 return;
             }
-            RUN_BATCH_MESSAGE_CLASSES.concat(["text-info"]).forEach(function (cls) {
-                controller.uploadStatus.classList.remove(cls);
-            });
-            if (cssClass) {
-                controller.uploadStatus.classList.add(cssClass);
-            }
+            applyDataState(controller.uploadStatus, state);
             setText(controller.uploadStatus, message || "");
         }
 
@@ -960,7 +993,7 @@ var BatchRunner = (function () {
                 return;
             }
             setRunDirectivesBusy(true);
-            setRunDirectivesStatus("Saving batch task selection…", "text-muted");
+            setRunDirectivesStatus("Saving batch task selection…", "info");
 
             controller.http
                 .postJson(apiUrl("run-directives"), { run_directives: values })
@@ -981,7 +1014,7 @@ var BatchRunner = (function () {
                         controller.state.snapshot = snapshot;
                     }
 
-                    setRunDirectivesStatus("Batch tasks updated.", "text-success");
+                    setRunDirectivesStatus("Batch tasks updated.", "success");
                     controller.emitter.emit("batch:run-directives:updated", {
                         success: true,
                         batchName: controller.state.batchName,
@@ -993,7 +1026,7 @@ var BatchRunner = (function () {
                 .catch(function (error) {
                     var message =
                         error && error.message ? error.message : "Failed to update batch tasks.";
-                    setRunDirectivesStatus(message, "text-danger");
+                    setRunDirectivesStatus(message, "critical");
                     controller.emitter.emit("batch:run-directives:update-failed", {
                         error: message,
                         batchName: controller.state.batchName
@@ -1033,7 +1066,7 @@ var BatchRunner = (function () {
             }
 
             if (!payload) {
-                infoPanel.innerHTML = '<span class="text-muted">Job information unavailable.</span>';
+                infoPanel.innerHTML = '<div class="wc-text-muted">Job information unavailable.</div>';
                 return;
             }
 
@@ -1042,7 +1075,7 @@ var BatchRunner = (function () {
             var jobInfos = Array.isArray(normalized.jobs) ? normalized.jobs : [];
 
             if (!jobInfos.length) {
-                infoPanel.innerHTML = '<span class="text-muted">Job information unavailable.</span>';
+                infoPanel.innerHTML = '<div class="wc-text-muted">Job information unavailable.</div>';
                 return;
             }
 
@@ -1080,30 +1113,33 @@ var BatchRunner = (function () {
                 );
             });
 
-            var parts = [];
+            var parts = ['<div class="wc-stack">'];
 
             if (jobInfos.length === 1) {
                 var rootInfo = jobInfos[0] || {};
                 parts.push(
-                    "<div><strong>Batch status:</strong> " +
+                    '<div class="wc-status-chip"' +
+                        (resolveStatusState(rootInfo.status) ? ' data-state="' + resolveStatusState(rootInfo.status) + '"' : "") +
+                        ">Batch status: " +
                         escapeHtml(rootInfo.status || "unknown") +
                         "</div>"
                 );
                 if (rootInfo.id) {
                     parts.push(
-                        '<div class="small text-muted">Job ID: <code>' +
-                            escapeHtml(rootInfo.id) +
-                            "</code></div>"
+                        '<div class="wc-text-muted">Job ID: <code>' + escapeHtml(rootInfo.id) + "</code></div>"
                     );
                 }
             } else {
-                parts.push("<div><strong>Tracked jobs:</strong></div>");
+                parts.push("<div class=\"wc-text-muted\">Tracked jobs:</div>");
                 var maxJobsToShow = 6;
                 var jobBadges = jobInfos.slice(0, maxJobsToShow).map(function (info) {
                     var safeStatus = escapeHtml((info && info.status) || "unknown");
                     var safeId = escapeHtml((info && info.id) || "—");
+                    var state = resolveStatusState(info && info.status);
                     return (
-                        '<span class="badge badge-light text-dark border mr-1 mb-1">' +
+                        '<span class="wc-status-chip"' +
+                        (state ? ' data-state="' + state + '"' : "") +
+                        ">" +
                         safeStatus +
                         " · <code>" +
                         safeId +
@@ -1111,9 +1147,9 @@ var BatchRunner = (function () {
                     );
                 });
                 if (jobInfos.length > maxJobsToShow) {
-                    jobBadges.push('<span class="text-muted">…</span>');
+                    jobBadges.push('<span class="wc-text-muted">…</span>');
                 }
-                parts.push('<div class="mt-1">' + jobBadges.join(" ") + "</div>");
+                parts.push('<div>' + jobBadges.join(" ") + "</div>");
             }
 
             var allNotFound = jobInfos.every(function (info) {
@@ -1122,30 +1158,32 @@ var BatchRunner = (function () {
 
             if (allNotFound) {
                 parts.push(
-                    '<div class="small text-muted">Requested job IDs were not found in the queue.</div>'
+                    '<div class="wc-text-muted">Requested job IDs were not found in the queue.</div>'
                 );
+                parts.push("</div>");
                 infoPanel.innerHTML = parts.join("");
                 return;
             }
 
             if (totalWatersheds > 0) {
                 parts.push(
-                    '<div class="small text-muted">Watersheds: ' +
+                    '<div class="wc-text-muted">Watersheds: ' +
                         completedWatersheds +
                         "/" +
                         totalWatersheds +
                         " finished</div>"
                 );
             } else {
-                parts.push(
-                    '<div class="small text-muted">Watershed tasks have not started yet.</div>'
-                );
+                parts.push('<div class="wc-text-muted">Watershed tasks have not started yet.</div>');
             }
 
             if (activeWatersheds.length) {
                 var activeList = activeWatersheds.slice(0, 6).map(function (node) {
+                    var state = resolveStatusState(node.status || "running");
                     return (
-                        '<span class="badge badge-info text-dark mr-1 mb-1">' +
+                        '<span class="wc-status-chip"' +
+                        (state ? ' data-state="' + state + '"' : "") +
+                        ">" +
                         escapeHtml(node.runid) +
                         " · " +
                         escapeHtml(node.status || "pending") +
@@ -1153,10 +1191,10 @@ var BatchRunner = (function () {
                     );
                 });
                 if (activeWatersheds.length > activeList.length) {
-                    activeList.push('<span class="text-muted">…</span>');
+                    activeList.push('<span class="wc-text-muted">…</span>');
                 }
                 parts.push(
-                    '<div class="mt-2"><strong>Active</strong><div>' +
+                    '<div class="wc-stack"><strong>Active</strong><div>' +
                         activeList.join(" ") +
                         "</div></div>"
                 );
@@ -1165,21 +1203,22 @@ var BatchRunner = (function () {
             if (failedWatersheds.length) {
                 var failedList = failedWatersheds.slice(0, 6).map(function (node) {
                     return (
-                        '<span class="badge badge-danger text-light mr-1 mb-1">' +
+                        '<span class="wc-status-chip" data-state="critical">' +
                         escapeHtml(node.runid) +
                         "</span>"
                     );
                 });
                 if (failedWatersheds.length > failedList.length) {
-                    failedList.push('<span class="text-muted">…</span>');
+                    failedList.push('<span class="wc-text-muted">…</span>');
                 }
                 parts.push(
-                    '<div class="mt-2"><strong class="text-danger">Failures</strong><div>' +
+                    '<div class="wc-stack"><strong>Failures</strong><div>' +
                         failedList.join(" ") +
                         "</div></div>"
                 );
             }
 
+            parts.push("</div>");
             infoPanel.innerHTML = parts.join("");
         }
 
@@ -1411,7 +1450,7 @@ var BatchRunner = (function () {
                 controller.jobInfo.refreshPending = false;
                 if (!controller.jobInfo.lastPayload) {
                     controller.infoPanel.innerHTML =
-                        '<span class="text-muted">No batch job submitted yet.</span>';
+                        '<div class="wc-text-muted">No batch job submitted yet.</div>';
                 }
                 return;
             }
@@ -1452,7 +1491,7 @@ var BatchRunner = (function () {
                     console.warn("Unable to refresh batch job info:", error);
                     if (controller.infoPanel) {
                         controller.infoPanel.innerHTML =
-                            '<span class="text-muted">Unable to refresh batch job details.</span>';
+                            '<div class="wc-text-muted">Unable to refresh batch job details.</div>';
                     }
                 })
                 .finally(function () {
@@ -1508,12 +1547,14 @@ var BatchRunner = (function () {
 
         function renderMetaRow(label, value) {
             return (
-                '<dt class="col-sm-4">' +
+                '<div class="wc-summary-pane__item">' +
+                '<dt class="wc-summary-pane__term">' +
                 escapeHtml(label) +
                 "</dt>" +
-                '<dd class="col-sm-8">' +
+                '<dd class="wc-summary-pane__definition">' +
                 escapeHtml(value) +
-                "</dd>"
+                "</dd>" +
+                "</div>"
             );
         }
 
@@ -1533,7 +1574,7 @@ var BatchRunner = (function () {
             }
             var fileInput = controller.uploadInput;
             if (!fileInput || !fileInput.files || !fileInput.files.length) {
-                setUploadStatus("Choose a GeoJSON file before uploading.", "text-warning");
+                setUploadStatus("Choose a GeoJSON file before uploading.", "warning");
                 return;
             }
 
@@ -1615,7 +1656,7 @@ var BatchRunner = (function () {
                         controller.state.snapshot = snapshot;
                     }
 
-                    setUploadStatus(payload.message || "Upload complete.", "text-success");
+                    setUploadStatus(payload.message || "Upload complete.", "success");
                     if (fileInput) {
                         fileInput.value = "";
                     }
@@ -1631,7 +1672,7 @@ var BatchRunner = (function () {
                 })
                 .catch(function (error) {
                     var message = error && error.message ? error.message : "Upload failed.";
-                    setUploadStatus(message, "text-danger");
+                    setUploadStatus(message, "critical");
                     controller.emitter.emit("batch:upload:failed", {
                         error: message,
                         batchName: controller.state.batchName
@@ -1652,6 +1693,7 @@ var BatchRunner = (function () {
             var template = (controller.templateInput && controller.templateInput.value || "").trim();
             if (!template) {
                 setText(controller.templateStatus, "Enter a template before validating.");
+                applyDataState(controller.templateStatus, "warning");
                 return;
             }
 
@@ -1694,6 +1736,7 @@ var BatchRunner = (function () {
                     var message =
                         error && error.message ? error.message : "Template validation failed.";
                     setText(controller.templateStatus, message);
+                    applyDataState(controller.templateStatus, "critical");
                     controller.emitter.emit("batch:template:validate-failed", {
                         error: message,
                         batchName: controller.state.batchName
@@ -1706,7 +1749,7 @@ var BatchRunner = (function () {
 
         function runBatch() {
             if (!controller.state.enabled) {
-                setRunBatchMessage("Batch runner is disabled.", "text-warning");
+                setRunBatchMessage("Batch runner is disabled.", "warning");
                 return;
             }
 
@@ -1737,13 +1780,13 @@ var BatchRunner = (function () {
             controller.jobInfo.completedIds.clear();
             controller.jobInfo.lastPayload = null;
 
-            setRunBatchBusy(true, "Submitting batch run…", "text-muted");
+            setRunBatchBusy(true, "Submitting batch run…", "info");
 
             controller.connect_status_stream(controller);
 
             if (controller.infoPanel) {
                 controller.infoPanel.innerHTML =
-                    '<span class="text-muted">Submitting batch job…</span>';
+                    '<div class="wc-status-chip" data-state="info">Submitting batch job…</div>';
             }
 
             controller.http
@@ -1762,7 +1805,7 @@ var BatchRunner = (function () {
                     }
 
                     var successMessage = payload.message || "Batch run submitted.";
-                    setRunBatchMessage(successMessage, "text-success");
+                    setRunBatchMessage(successMessage, "success");
 
                     controller.emitter.emit("batch:run:started", {
                         batchName: controller.state.batchName,
@@ -1776,10 +1819,12 @@ var BatchRunner = (function () {
                 .catch(function (error) {
                     var message =
                         error && error.message ? error.message : "Failed to submit batch run.";
-                    setRunBatchMessage(message, "text-danger");
+                    setRunBatchMessage(message, "critical");
                     if (controller.infoPanel) {
                         controller.infoPanel.innerHTML =
-                            '<span class="text-danger">' + escapeHtml(message) + "</span>";
+                            '<div class="wc-status-chip" data-state="critical">' +
+                            escapeHtml(message) +
+                            "</div>";
                     }
                     controller.disconnect_status_stream(controller);
                     controller.emitter.emit("batch:run:failed", {
@@ -1822,7 +1867,7 @@ var BatchRunner = (function () {
                         refreshJobInfo({ force: true });
                     } else if (ctrl.infoPanel) {
                         ctrl.infoPanel.innerHTML =
-                            '<span class="text-muted">No batch job submitted yet.</span>';
+                            '<div class="wc-text-muted">No batch job submitted yet.</div>';
                     }
                 }
             };

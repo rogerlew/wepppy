@@ -17,6 +17,7 @@ from copy import deepcopy
 import shutil
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar
 
+from wepppy.all_your_base.geo import raster_stacker
 from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir, get_wd
 
@@ -259,6 +260,7 @@ class BatchRunner(NoDbBase):
             map_center = ((bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0)
             ron.set_map(bbox, center=map_center, zoom=11)
             ron.fetch_dem()
+            self._maybe_init_sbs_map(ron, prep, logger)
 
         if self.is_task_enabled(TaskEnum.build_channels) and prep[str(TaskEnum.build_channels)] is None:
             logger.info(f'building channels')
@@ -351,6 +353,99 @@ class BatchRunner(NoDbBase):
     # ------------------------------------------------------------------
     # properties
     # ------------------------------------------------------------------
+    def _maybe_init_sbs_map(self, ron: Ron, prep: RedisPrep, logger: logging.Logger) -> None:
+        """
+        If a configured SBS map exists, crop it to the DEM grid for this batch run
+        and re-validate the mod so we avoid carrying the full raster in every run.
+        """
+        sbs_map = ron.config_get_path('landuse', 'sbs_map')
+        if not sbs_map:
+            logger.info('No sbs_map configured; skipping SBS initialization')
+            return
+
+        mods = ron.mods or []
+        mod_instance = None
+        mod_label = None
+
+        if 'disturbed' in mods:
+            from wepppy.nodb.mods.disturbed import Disturbed
+            mod_instance = Disturbed.getInstance(ron.wd)
+            mod_label = 'disturbed'
+        elif 'baer' in mods:
+            from wepppy.nodb.mods.baer import Baer
+            mod_instance = Baer.getInstance(ron.wd)
+            mod_label = 'baer'
+        else:
+            logger.warning('sbs_map configured but no baer/disturbed mod enabled; skipping SBS initialization')
+            return
+
+        os.makedirs(mod_instance.baer_dir, exist_ok=True)
+        sbs_basename = _split(sbs_map)[1]
+        dest_path = _join(mod_instance.baer_dir, sbs_basename)
+
+        tmp_download: Optional[str] = None
+        source_path = sbs_map
+        if sbs_map.startswith('http'):
+            import requests
+
+            tmp_dir = _join(mod_instance.baer_dir, '_tmp')
+            os.makedirs(tmp_dir, exist_ok=True)
+            tmp_download = _join(tmp_dir, sbs_basename)
+            logger.info(f'Downloading SBS map from URL for cropping: {sbs_map}')
+
+            with requests.get(sbs_map, stream=True, timeout=120) as resp:
+                resp.raise_for_status()
+                with open(tmp_download, 'wb') as fh:
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        if chunk:
+                            fh.write(chunk)
+            source_path = tmp_download
+        elif not _exists(source_path):
+            raise FileNotFoundError(f"sbs_map path does not exist: {source_path}")
+
+        source_equals_dest = os.path.abspath(source_path) == os.path.abspath(dest_path)
+        crop_target = dest_path if not source_equals_dest else dest_path + '.cropped'
+
+        if _exists(dest_path) and not source_equals_dest:
+            try:
+                os.remove(dest_path)
+            except OSError as exc:
+                logger.warning(f'Unable to remove existing SBS map before cropping ({dest_path}): {exc}')
+
+        logger.info(f'Cropping SBS map to DEM grid: {source_path} -> {crop_target}')
+        raster_stacker(source_path, ron.dem_fn, crop_target, resample='near')
+
+        if source_equals_dest:
+            os.replace(crop_target, dest_path)
+
+        if tmp_download and _exists(tmp_download):
+            try:
+                os.remove(tmp_download)
+            except OSError:
+                pass
+
+        if mod_label == 'disturbed':
+            breaks = getattr(mod_instance, '_breaks', None)
+            nodata_vals = getattr(mod_instance, '_nodata_vals', None)
+            color_map = getattr(mod_instance, '_color_map', None)
+            mode = getattr(mod_instance, '_sbs_mode', None)
+            uniform_severity = getattr(mod_instance, '_uniform_severity', None)
+            mod_instance.validate(
+                sbs_basename,
+                breaks=breaks,
+                nodata_vals=nodata_vals,
+                color_map=color_map,
+                mode=mode,
+                uniform_severity=uniform_severity,
+            )
+        else:
+            mode = getattr(mod_instance, '_sbs_mode', None)
+            uniform_severity = getattr(mod_instance, '_uniform_severity', None)
+            mod_instance.validate(sbs_basename, mode=mode, uniform_severity=uniform_severity)
+
+        prep.timestamp(TaskEnum.init_sbs_map)
+        prep.has_sbs = True
+
     @property
     def base_wd(self) -> str:
         return os.path.join(self.wd, "_base")

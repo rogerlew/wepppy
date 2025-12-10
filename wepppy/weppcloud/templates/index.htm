@@ -22,6 +22,11 @@
              rel="noopener">
             Run Sync
           </a>
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for('batch_runner.create_batch_project') }}"
+             rel="noopener">
+            Create Batch Run
+          </a>
         {% endif %}
         {% if current_user.has_role('Root') %}
           <a class="pure-button pure-button-secondary"

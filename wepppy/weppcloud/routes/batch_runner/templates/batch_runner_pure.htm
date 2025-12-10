@@ -1,0 +1,272 @@
+{# Doc: controllers_js/README.md — Batch Runner Controller Reference (Pure UI variant) #}
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set base_runid = batch_base_runid if batch_base_runid is defined else ('batch;;' ~ batch_name ~ ';;_base') %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Upload watershed GeoJSON, validate run-id templates, and launch batch orchestration. Status streams through the panels on the right.
+  </p>
+{% endset %}
+
+<style>
+  .batch-runner-samples .wc-pre {
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 4rem;
+  }
+  .batch-runner-directives-list {
+    gap: var(--wc-space-xs);
+  }
+  .batch-runner-directives-list .wc-choice {
+    margin: 0;
+  }
+  #batch-runner-root {
+    gap: var(--wc-space-md);
+  }
+  #batch-runner-root > .wc-panel {
+    margin: 0;
+  }
+  #batch_runner_run_container .wc-button-row {
+    align-items: flex-start;
+    gap: var(--wc-space-xs);
+    flex-direction: column;
+    margin-bottom: 0;
+  }
+  #batch_runner_run_container {
+    align-content: start;
+    min-height: auto;
+  }
+  .batch-runner-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--wc-font-size-sm);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    padding: var(--wc-space-2xs) var(--wc-space-sm);
+    margin-top: var(--wc-space-xs);
+    height: auto;
+    max-height: 32px;
+    overflow: hidden;
+  }
+  .batch-runner-run-row {
+    display: inline-flex;
+    gap: var(--wc-space-xs);
+    align-items: center;
+    width: auto;
+    justify-self: start;
+    align-self: start;
+    max-width: fit-content;
+    margin-bottom: 0;
+  }
+</style>
+
+{% call ui.control_shell(
+     form_id="batch_runner_form",
+     title="Manage Batch Run",
+     collapsible=False,
+     description=description,
+     status_panel_options={
+       "id": "batch_runner_status_panel",
+       "job_id": "rq_job",
+       "braille_id": "braille",
+       "log_id": "status",
+       "height": "10rem",
+       "variant": "compact"
+     },
+     summary_panel_options={
+       "summary_id": "info",
+       "title": "Summary"
+     },
+     stacktrace_panel_options={
+       "panel_id": "batch_runner_stacktrace_panel",
+       "body_id": "stacktrace",
+       "description": "<p class='wc-field__help'>Appears when an exception occurs.</p>"
+     }
+   ) %}
+<div id="batch-runner-root" class="wc-stack">
+  <section class="wc-panel wc-stack" id="batch-runner-base-card">
+    <div class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle">Base Project</h3>
+        <p class="wc-text-muted">Open the shared <code>_base</code> project to edit defaults applied to every batch run.</p>
+        <div class="wc-text-muted">Run ID: <code>{{ base_runid }}</code></div>
+      </div>
+      <a class="pure-button pure-button-primary"
+         href="{{ url_for('run_0.runs0', runid=base_runid, config=base_config) }}">
+        Configure Base Project
+      </a>
+    </div>
+  </section>
+
+  {% if not feature_enabled %}
+  <div class="wc-status-chip" data-state="warning" role="status">
+    Batch Runner is currently disabled. State is shown read-only for verification purposes.
+  </div>
+  {% endif %}
+
+  {% set upload_attrs = {'data-role': 'geojson-input'} %}
+  {% if not feature_enabled %}
+    {% set _ = upload_attrs.update({'disabled': 'disabled'}) %}
+  {% endif %}
+
+  <section class="wc-panel wc-stack" id="batch-runner-resource-card">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle">Resource Intake</h3>
+        <p class="wc-text-muted">Upload the watershed GeoJSON driving batch expansion. Maximum size {{ geojson_limit_mb }}&nbsp;MB.</p>
+      </div>
+    </header>
+
+    <div class="wc-stack" data-role="upload-form">
+      {{ ui.file_upload(
+        'geojson_file',
+        'GeoJSON file',
+        accept='.geojson,.json',
+        help='Choose a FeatureCollection to enable template validation.',
+        attrs=upload_attrs,
+        max_width='100%'
+      ) }}
+      <div class="wc-button-row">
+        <button type="button"
+                class="pure-button pure-button-primary"
+                data-role="upload-button"
+                data-action="batch-upload"
+                {% if not feature_enabled %}disabled{% endif %}>
+          Upload GeoJSON
+        </button>
+      </div>
+      <div class="wc-status-chip" data-role="upload-status" data-state="info"></div>
+    </div>
+
+    <div class="wc-status-chip" data-state="info" data-role="resource-empty">
+      No GeoJSON resource uploaded yet. Upload a FeatureCollection to enable template validation.
+    </div>
+
+    <div class="wc-stack" data-role="resource-details" hidden>
+      <h4 class="wc-heading__subtitle">Current Resource</h4>
+      <div class="wc-summary-pane">
+        <dl class="wc-summary-pane__list" data-role="resource-meta"></dl>
+      </div>
+    </div>
+
+    <div class="wc-stack" data-role="resource-schema" hidden>
+      <h4 class="wc-heading__subtitle">Properties</h4>
+      <div class="wc-table-wrapper">
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Type</th>
+            </tr>
+          </thead>
+          <tbody data-role="resource-schema-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="wc-stack batch-runner-samples" data-role="resource-samples" hidden>
+      <h4 class="wc-heading__subtitle">Sample Features</h4>
+      <div class="wc-table-wrapper">
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th scope="col">Index</th>
+              <th scope="col">Feature ID</th>
+              <th scope="col">Properties</th>
+            </tr>
+          </thead>
+          <tbody data-role="resource-samples-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="wc-panel wc-stack" id="batch-runner-template-card">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle">Run ID Template</h3>
+        <p class="wc-text-muted">
+          Expressions inside braces are evaluated with <code>properties</code>, <code>feature</code>, <code>index</code> (0-based),
+          <code>one_based_index</code>, and helper functions like <code>slug()</code>, <code>lower()</code>, <code>upper()</code>, and <code>zfill()</code>.
+        </p>
+      </div>
+    </header>
+    <div class="wc-stack">
+      <div class="wc-field">
+        <label class="wc-field__label" for="batch-runner-template-input">Template</label>
+        <textarea class="wc-field__control"
+                  id="batch-runner-template-input"
+                  rows="3"
+                  data-role="template-input"
+                  placeholder="e.g. {slug(properties['HucName'])}-{zfill(one_based_index, 3)}"
+                  {% if not feature_enabled %}disabled{% endif %}></textarea>
+        <p class="wc-field__help">Validate to preview run IDs and catch duplicate or missing values before orchestration.</p>
+      </div>
+      <div class="wc-button-row">
+        <button class="pure-button" type="button" data-role="validate-button"
+                data-action="batch-validate"
+                {% if not feature_enabled %}disabled{% endif %}>Validate Template</button>
+      </div>
+      <div class="wc-status-chip batch-runner-status" data-role="template-status" data-state="info" aria-live="polite"></div>
+
+      <div class="wc-stack" data-role="validation-summary" hidden>
+        <h4 class="wc-heading__subtitle">Validation Summary</h4>
+        <ul class="wc-list" data-role="validation-summary-list"></ul>
+      </div>
+
+      <div class="wc-stack" data-role="validation-issues" hidden>
+        <h4 class="wc-heading__subtitle">Issues</h4>
+        <div class="wc-status-chip" data-state="warning" data-role="validation-issues-list"></div>
+      </div>
+
+      <div class="wc-stack" data-role="validation-preview" hidden>
+        <h4 class="wc-heading__subtitle">Preview</h4>
+        <div class="wc-table-wrapper">
+          <table class="wc-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Feature ID</th>
+                <th scope="col">Run ID</th>
+                <th scope="col">Error</th>
+              </tr>
+            </thead>
+            <tbody data-role="preview-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wc-panel wc-stack" id="batch_runner_directives_container">
+    <div class="wc-panel__header">
+      <div class="wc-stack">
+        <div class="wc-field__label">Batch Tasks</div>
+        <p class="wc-text-muted">Toggle tasks to include in this batch run.</p>
+      </div>
+    </div>
+    <div class="wc-stack batch-runner-directives-list" data-role="run-directive-list"></div>
+    <div class="wc-status-chip" data-role="run-directive-status" data-state="info"></div>
+  </section>
+
+  <section class="wc-panel wc-stack hide-readonly" id="batch_runner_run_container">
+    <div class="wc-button-row batch-runner-run-row">
+      <button
+        id="btn_run_batch"
+        class="pure-button pure-button-primary"
+        type="button"
+        data-action="batch-run">
+        <img id="run_batch_lock" style="display:none;"
+             src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}"
+             alt="Batch is locked" />
+        Run Batch
+      </button>
+    </div>
+    <div id="hint_run_batch" class="wc-status-chip batch-runner-status" role="status" aria-live="polite"></div>
+  </section>
+</div>
+{% endcall %}

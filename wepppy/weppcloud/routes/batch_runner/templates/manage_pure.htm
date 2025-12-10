@@ -1,0 +1,26 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}Batch Runner – Manage Batch{% endblock %}
+
+{% block head_extras %}
+<script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
+{% endblock %}
+
+{% from "shared/console_macros.htm" import console_page, console_header %}
+
+{% block body %}
+{% call console_page(include_command_bar=True, classes="wc-console") %}
+  {% call console_header(
+    run_link=url_for('run_0.runs0', runid=batch_base_runid, config=base_config),
+    run_label=batch_base_runid,
+    title="Batch Runner",
+    subtitle="Upload resources, validate run IDs, and orchestrate batch tasks."
+  ) %}{% endcall %}
+
+  {% include 'batch_runner_pure.htm' %}
+{% endcall %}
+{% endblock %}
+
+{% block script_extras %}
+{% include 'manage_page_bootstrap.js.j2' %}
+{% endblock %}

@@ -198,7 +198,6 @@ def create_batch_project():
 
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/", methods=["GET"])
-@roles_required("Admin")
 @handle_with_exception_factory
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
@@ -231,7 +230,7 @@ def view_batch(batch_name: str):
 
     context.setdefault("site_prefix", current_app.config.get("SITE_PREFIX", ""))
 
-    return render_template("manage.htm", **context)
+    return render_template("manage_pure.htm", **context)
 
 
 @batch_runner_bp.route('/batch/_/<string:batch_name>/run-directives', methods=['POST'])
