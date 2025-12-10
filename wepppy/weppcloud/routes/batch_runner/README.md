@@ -16,6 +16,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - `_create_batch_project()` resolves the batch root (`get_batch_root_dir()`), creates `<batch_name>/`, and instantiates `BatchRunner`, which immediately bootstraps `_base/` using the selected config.
 - `/batch/_/<batch_name>/` resolves `BatchRunner.getInstanceFromBatchName()`, reaches into the `_base/` directory, and hydrates the same NoDb singletons that the run-0 blueprint exposes (Ron, Landuse, Soils, Watershed, Omni, etc.). The manage view renders `manage_pure.htm` which includes `batch_runner_pure.htm`.
 - `/upload-geojson` accepts GeoJSON/JSON uploads, persists them into `<batch_name>/resources/`, instantiates a `WatershedCollection`, and lets `BatchRunner` record the analysis metadata.
+- `/upload-sbs-map` (Admin) accepts a soil burn severity raster, validates it with `sbs_map_sanity_check`, stores it once under `<batch_name>/resources/`, and records metadata on the `BatchRunner` so each per-watershed run can crop it after DEM fetch.
 - `/validate-template` replays the stored `WatershedCollection`, runs template evaluation, and persists the results on the `BatchRunner` instance before returning a JSON payload to the UI.
 
 ### `BatchRunner` (NoDb)
@@ -23,6 +24,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - On initialization it records the chosen base config and prepares three directories: `_base/` (canonical project scaffold), `runs/` (future per-watershed clones), and `resources/` (uploads).
 - `_init_base_project()` wipes and recreates `_base/`, then instantiates `Ron` with `run_group='batch'` and `group_name=<batch_name>`, which in turn cascades to the rest of the NoDb singletons when they initialize.
 - Tracks two primary blobs of state today: `_geojson_state` (analysis metadata for the registered watershed collection) and `_runid_template_state` (last validation result). Both are guarded by the standard NoDb locking helpers via `nodb_setter`.
+- Tracks optional `_sbs_map` + metadata when uploaded through the new UI; `_maybe_init_sbs_map` prefers this batch-level file over per-config `landuse.sbs_map`, crops it with `raster_stacker`, and re-validates Disturbed/Baer mods per run.
 - Exposes helpers for rehydrating a `WatershedCollection` and for persisting template validation output so the UI can refresh without re-reading the upload.
 
 ### `WatershedCollection`

@@ -110,8 +110,13 @@
 
   {% set upload_attrs = {'data-role': 'geojson-input'} %}
   {% if not feature_enabled %}
-    {% set _ = upload_attrs.update({'disabled': 'disabled'}) %}
-  {% endif %}
+  {% set _ = upload_attrs.update({'disabled': 'disabled'}) %}
+{% endif %}
+
+{% set sbs_upload_attrs = {'data-role': 'sbs-input'} %}
+{% if not feature_enabled %}
+  {% set _ = sbs_upload_attrs.update({'disabled': 'disabled'}) %}
+{% endif %}
 
   <section class="wc-panel wc-stack" id="batch-runner-resource-card">
     <header class="wc-panel__header">
@@ -181,6 +186,47 @@
           </thead>
           <tbody data-role="resource-samples-body"></tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="wc-panel wc-stack" id="batch-runner-sbs-card">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle">SBS Map (optional)</h3>
+        <p class="wc-text-muted">Upload a soil burn severity raster to reuse across all batch runs. It will be cropped to each DEM automatically.</p>
+      </div>
+    </header>
+
+    <div class="wc-stack" data-role="sbs-upload-form">
+      {{ ui.file_upload(
+        'sbs_map',
+        'SBS Map',
+        accept='.tif,.tiff,.img,.vrt',
+        help='GeoTIFF/IMG/VRT up to several GB. Stored once per batch and cropped per run.',
+        attrs=sbs_upload_attrs,
+        max_width='100%'
+      ) }}
+      <div class="wc-button-row">
+        <button type="button"
+                class="pure-button pure-button-primary"
+                data-role="sbs-upload-button"
+                data-action="batch-upload-sbs"
+                {% if not feature_enabled %}disabled{% endif %}>
+          Upload SBS Map
+        </button>
+      </div>
+      <div class="wc-status-chip" data-role="sbs-upload-status" data-state="info"></div>
+    </div>
+
+    <div class="wc-status-chip" data-state="info" data-role="sbs-empty">
+      No SBS map uploaded yet. Upload one to apply the same raster to every batch run.
+    </div>
+
+    <div class="wc-stack" data-role="sbs-details" hidden>
+      <h4 class="wc-heading__subtitle">Current SBS Map</h4>
+      <div class="wc-summary-pane">
+        <dl class="wc-summary-pane__list" data-role="sbs-meta"></dl>
       </div>
     </div>
   </section>

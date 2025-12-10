@@ -35,6 +35,7 @@ _BLUEPRINT_ATTRS = [
     "fork_bp",
     "observed_bp",
     "omni_bp",
+    "gl_dashboard_bp",
     "pivottable_bp",
     "project_bp",
     "jsoncrack_bp",

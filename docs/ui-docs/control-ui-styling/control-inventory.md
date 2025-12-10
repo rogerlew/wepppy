@@ -257,7 +257,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 ### Batch Runner Console (catalogued, out of main scope)
 | Section | Template | Key Inputs / Actions | Backend Binding | Notes |
 | --- | --- | --- | --- | --- |
-| Resource Intake | `routes/batch_runner/templates/batch_runner.htm` | `geojson_file` upload, validation status nodes | `BatchRunner.uploadGeojson()` (custom API) | Uses bespoke card layout/JS; likely separate migration effort |
+| Resource Intake | `routes/batch_runner/templates/batch_runner_pure.htm` | `geojson_file` upload, validation status nodes | `BatchRunner.uploadGeojson()` (custom API) | Pure UI variant; legacy Bootstrap template removed |
 | Run ID Template | same | `template-input` textarea, validate button, preview tables | `BatchRunner.validateTemplate()` -> batch API | Heavy client logic; treat as standalone console |
 | Batch Tasks | same | Task toggles, run button (`btn_run_batch`) | `BatchRunner.runBatch()` -> `/rq/api/run-batch` | Layout currently uses Bootstrap cards; document for future redesign |
 

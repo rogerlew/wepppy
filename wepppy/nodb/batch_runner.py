@@ -80,6 +80,8 @@ class BatchRunner(NoDbBase):
             self._geojson_state = None
             self._runid_template_state = None
             self._base_wd = os.path.join(self.wd, "_base")
+            self._sbs_map: Optional[str] = None
+            self._sbs_map_metadata: Optional[Dict[str, Any]] = None
             self._run_directives = {task: True for task in self.DEFAULT_TASKS}
             self._run_directives[TaskEnum.if_exists_rmtree] = False
 
@@ -358,10 +360,12 @@ class BatchRunner(NoDbBase):
         If a configured SBS map exists, crop it to the DEM grid for this batch run
         and re-validate the mod so we avoid carrying the full raster in every run.
         """
-        sbs_map = ron.config_get_path('landuse', 'sbs_map')
+        sbs_map = self._resolve_sbs_map_path(self.sbs_map) if self.sbs_map else ron.config_get_path('landuse', 'sbs_map')
         if not sbs_map:
             logger.info('No sbs_map configured; skipping SBS initialization')
             return
+
+        logger.info(f'Initializing SBS map from {"batch override" if self.sbs_map else "config"}: {sbs_map}')
 
         mods = ron.mods or []
         mod_instance = None
@@ -445,6 +449,33 @@ class BatchRunner(NoDbBase):
 
         prep.timestamp(TaskEnum.init_sbs_map)
         prep.has_sbs = True
+
+    def _resolve_sbs_map_path(self, path: Optional[str]) -> Optional[str]:
+        if path is None:
+            return None
+        if os.path.isabs(path):
+            return path
+        return os.path.join(self.wd, path)
+
+    @property
+    def sbs_map(self) -> Optional[str]:
+        return getattr(self, '_sbs_map', None)
+
+    @sbs_map.setter
+    @nodb_setter
+    def sbs_map(self, value: Optional[str]) -> None:
+        self._sbs_map = value
+
+    @property
+    def sbs_map_metadata(self) -> Optional[Dict[str, Any]]:
+        if getattr(self, '_sbs_map_metadata', None) is None:
+            return None
+        return deepcopy(self._sbs_map_metadata)
+
+    @sbs_map_metadata.setter
+    @nodb_setter
+    def sbs_map_metadata(self, value: Optional[Dict[str, Any]]) -> None:
+        self._sbs_map_metadata = deepcopy(value) if value is not None else None
 
     @property
     def base_wd(self) -> str:
@@ -581,6 +612,10 @@ class BatchRunner(NoDbBase):
         if self._geojson_state:
             snapshot["resources"][self.RESOURCE_WATERSHED] = deepcopy(self._geojson_state)
 
+        sbs_state = self.sbs_resource_state()
+        if sbs_state:
+            snapshot["resources"]["sbs_map"] = sbs_state
+
         if self._runid_template_state:
             snapshot["metadata"]["template_validation"] = deepcopy(self._runid_template_state)
             snapshot["runid_template"] = self._runid_template_state.get("template")
@@ -593,6 +628,26 @@ class BatchRunner(NoDbBase):
             })
 
         return snapshot
+
+    def sbs_resource_state(self) -> Optional[Dict[str, Any]]:
+        sbs_map = self._resolve_sbs_map_path(self.sbs_map)
+        if not sbs_map:
+            return None
+
+        resource: Dict[str, Any] = deepcopy(self.sbs_map_metadata) or {}
+        resource.setdefault("filename", _split(sbs_map)[1])
+        try:
+            resource.setdefault("relative_path", os.path.relpath(sbs_map, self.wd))
+        except ValueError:
+            resource.setdefault("relative_path", sbs_map)
+
+        try:
+            resource["size_bytes"] = os.path.getsize(sbs_map)
+            resource["missing"] = False
+        except OSError:
+            resource["missing"] = True
+
+        return resource
 
     def generate_runstate_cli_report(self) -> Dict[str, Any]:
         from wcwidth import wcswidth

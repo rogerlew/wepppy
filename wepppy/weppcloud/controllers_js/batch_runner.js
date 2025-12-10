@@ -20,6 +20,9 @@ var BatchRunner = (function () {
         "batch:run:started",
         "batch:run:completed",
         "batch:run:failed",
+        "batch:sbs-upload:started",
+        "batch:sbs-upload:completed",
+        "batch:sbs-upload:failed",
         "job:started",
         "job:completed",
         "job:error"
@@ -69,6 +72,7 @@ var BatchRunner = (function () {
         rqJob: "#batch_runner_form #rq_job",
         container: "#batch-runner-root",
         resourceCard: "#batch-runner-resource-card",
+        sbsCard: "#batch-runner-sbs-card",
         templateCard: "#batch-runner-template-card",
         runBatchButton: "#btn_run_batch",
         runBatchHint: "#hint_run_batch",
@@ -87,6 +91,13 @@ var BatchRunner = (function () {
         resourceSchemaBody: '[data-role="resource-schema-body"]',
         resourceSamples: '[data-role="resource-samples"]',
         resourceSamplesBody: '[data-role="resource-samples-body"]',
+        sbsUploadForm: '[data-role="sbs-upload-form"]',
+        sbsInput: '[data-role="sbs-input"]',
+        sbsUploadButton: '[data-role="sbs-upload-button"]',
+        sbsUploadStatus: '[data-role="sbs-upload-status"]',
+        sbsEmpty: '[data-role="sbs-empty"]',
+        sbsDetails: '[data-role="sbs-details"]',
+        sbsMeta: '[data-role="sbs-meta"]',
         runDirectiveList: '[data-role="run-directive-list"]',
         runDirectiveStatus: '[data-role="run-directive-status"]',
         templateInput: '[data-role="template-input"]',
@@ -102,6 +113,7 @@ var BatchRunner = (function () {
 
     var ACTIONS = {
         upload: '[data-action="batch-upload"]',
+        uploadSbs: '[data-action="batch-upload-sbs"]',
         validate: '[data-action="batch-validate"]',
         run: '[data-action="batch-run"]'
     };
@@ -292,6 +304,14 @@ var BatchRunner = (function () {
         controller.resourceSchemaBody = null;
         controller.resourceSamples = null;
         controller.resourceSamplesBody = null;
+        controller.sbsCard = null;
+        controller.sbsUploadForm = null;
+        controller.sbsUploadInput = null;
+        controller.sbsUploadButton = null;
+        controller.sbsUploadStatus = null;
+        controller.sbsEmpty = null;
+        controller.sbsDetails = null;
+        controller.sbsMeta = null;
         controller.runDirectiveList = null;
         controller.runDirectiveStatus = null;
 
@@ -331,9 +351,12 @@ var BatchRunner = (function () {
         controller._setRunDirectivesStatus = setRunDirectivesStatus;
         controller._renderRunDirectives = renderRunDirectives;
         controller._applyResourceVisibility = applyResourceVisibility;
+        controller._setSbsUploadStatus = setSbsUploadStatus;
+        controller._setSbsUploadBusy = setSbsUploadBusy;
 
         controller._handleRunDirectiveToggle = handleRunDirectiveToggle;
         controller._handleUpload = handleUpload;
+        controller._handleSbsUpload = handleSbsUpload;
         controller._handleValidate = handleValidate;
 
         controller._setRunDirectivesBusy = setRunDirectivesBusy;
@@ -468,6 +491,16 @@ var BatchRunner = (function () {
             controller.resourceSchemaBody = controller.resourceCard.querySelector(DATA_ROLES.resourceSchemaBody);
             controller.resourceSamples = controller.resourceCard.querySelector(DATA_ROLES.resourceSamples);
             controller.resourceSamplesBody = controller.resourceCard.querySelector(DATA_ROLES.resourceSamplesBody);
+            controller.sbsCard = deps.dom.qs(SELECTORS.sbsCard);
+            if (controller.sbsCard) {
+                controller.sbsUploadForm = controller.sbsCard.querySelector(DATA_ROLES.sbsUploadForm);
+                controller.sbsUploadInput = controller.sbsCard.querySelector(DATA_ROLES.sbsInput);
+                controller.sbsUploadButton = controller.sbsCard.querySelector(DATA_ROLES.sbsUploadButton);
+                controller.sbsUploadStatus = controller.sbsCard.querySelector(DATA_ROLES.sbsUploadStatus);
+                controller.sbsEmpty = controller.sbsCard.querySelector(DATA_ROLES.sbsEmpty);
+                controller.sbsDetails = controller.sbsCard.querySelector(DATA_ROLES.sbsDetails);
+                controller.sbsMeta = controller.sbsCard.querySelector(DATA_ROLES.sbsMeta);
+            }
             controller.runDirectiveList = controller.container.querySelector(DATA_ROLES.runDirectiveList);
             controller.runDirectiveStatus = controller.container.querySelector(DATA_ROLES.runDirectiveStatus);
             if (controller.runDirectiveList && controller.runDirectiveList.classList) {
@@ -507,6 +540,26 @@ var BatchRunner = (function () {
                 deps.dom.delegate(controller.resourceCard || controller.container, "click", ACTIONS.upload, function (event) {
                     event.preventDefault();
                     handleUpload();
+                })
+            );
+
+            if (
+                controller.sbsUploadForm &&
+                controller.sbsUploadForm.tagName &&
+                controller.sbsUploadForm.tagName.toLowerCase() === "form"
+            ) {
+                delegates.push(
+                    deps.dom.delegate(controller.sbsUploadForm, "submit", function (event) {
+                        event.preventDefault();
+                        handleSbsUpload();
+                    })
+                );
+            }
+
+            delegates.push(
+                deps.dom.delegate(controller.sbsCard || controller.container, "click", ACTIONS.uploadSbs, function (event) {
+                    event.preventDefault();
+                    handleSbsUpload();
                 })
             );
 
@@ -576,6 +629,7 @@ var BatchRunner = (function () {
 
         function render() {
             renderResource();
+            renderSbsResource();
             renderValidation();
             renderRunDirectives();
             renderRunControls();
@@ -670,6 +724,55 @@ var BatchRunner = (function () {
                     .join("");
             } else {
                 deps.dom.hide(controller.resourceSamples);
+            }
+        }
+
+        function renderSbsResource() {
+            if (!controller.sbsCard) {
+                return;
+            }
+            var snapshot = controller.state.snapshot || {};
+            var resources = snapshot.resources || {};
+            var resource = resources.sbs_map;
+            if (!controller.sbsEmpty || !controller.sbsDetails) {
+                return;
+            }
+
+            if (!resource) {
+                deps.dom.show(controller.sbsEmpty);
+                deps.dom.hide(controller.sbsDetails);
+                return;
+            }
+
+            deps.dom.hide(controller.sbsEmpty);
+            deps.dom.show(controller.sbsDetails);
+
+            var metaRows = [];
+            metaRows.push(renderMetaRow("Filename", resource.filename || resource.original_filename || "—"));
+            if (resource.uploaded_by) {
+                metaRows.push(renderMetaRow("Uploaded by", resource.uploaded_by));
+            }
+            if (resource.uploaded_at) {
+                metaRows.push(renderMetaRow("Uploaded at", formatTimestamp(resource.uploaded_at)));
+            }
+            if (resource.size_bytes != null) {
+                metaRows.push(renderMetaRow("Size", formatBytes(resource.size_bytes)));
+            }
+            if (resource.relative_path) {
+                metaRows.push(renderMetaRow("Path", resource.relative_path));
+            }
+            if (resource.sanity_message) {
+                metaRows.push(renderMetaRow("Validation", resource.sanity_message));
+            }
+            if (resource.replaced) {
+                metaRows.push(renderMetaRow("Replaced existing file", resource.replaced ? "Yes" : "No"));
+            }
+            if (resource.missing) {
+                metaRows.push(renderMetaRow("Status", "File missing on disk"));
+            }
+
+            if (controller.sbsMeta) {
+                controller.sbsMeta.innerHTML = metaRows.join("");
             }
         }
 
@@ -970,6 +1073,26 @@ var BatchRunner = (function () {
             }
             applyDataState(controller.uploadStatus, state);
             setText(controller.uploadStatus, message || "");
+        }
+
+        function setSbsUploadBusy(busy, message) {
+            if (controller.sbsUploadButton) {
+                controller.sbsUploadButton.disabled = busy || !controller.state.enabled;
+            }
+            if (controller.sbsUploadInput) {
+                controller.sbsUploadInput.disabled = busy || !controller.state.enabled;
+            }
+            if (message != null) {
+                setSbsUploadStatus(message, busy ? "info" : "");
+            }
+        }
+
+        function setSbsUploadStatus(message, state) {
+            if (!controller.sbsUploadStatus) {
+                return;
+            }
+            applyDataState(controller.sbsUploadStatus, state);
+            setText(controller.sbsUploadStatus, message || "");
         }
 
         function collectRunDirectiveValues() {
@@ -1680,6 +1803,77 @@ var BatchRunner = (function () {
                 })
                 .finally(function () {
                     setUploadBusy(false);
+                });
+        }
+
+        function handleSbsUpload(event) {
+            if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+            }
+            if (!controller.state.enabled) {
+                return;
+            }
+            var fileInput = controller.sbsUploadInput;
+            if (!fileInput || !fileInput.files || !fileInput.files.length) {
+                setSbsUploadStatus("Choose an SBS map before uploading.", "warning");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("sbs_map", fileInput.files[0]);
+
+            setSbsUploadBusy(true, "Uploading SBS map…");
+            controller.emitter.emit("batch:sbs-upload:started", {
+                batchName: controller.state.batchName,
+                filename: fileInput.files[0].name,
+                size: fileInput.files[0].size
+            });
+
+            controller.http
+                .request(apiUrl("upload-sbs-map"), {
+                    method: "POST",
+                    body: formData
+                })
+                .then(function (response) {
+                    var payload = response.body || {};
+                    if (!payload.success) {
+                        var errorMsg = payload.error || payload.message || "Upload failed.";
+                        throw new Error(errorMsg);
+                    }
+
+                    if (payload.snapshot) {
+                        controller.state.snapshot = payload.snapshot || {};
+                    } else {
+                        var snapshot = controller.state.snapshot || {};
+                        snapshot.resources = snapshot.resources || {};
+                        if (payload.resource) {
+                            snapshot.resources.sbs_map = payload.resource;
+                        }
+                        controller.state.snapshot = snapshot;
+                    }
+
+                    setSbsUploadStatus(payload.message || "Upload complete.", "success");
+                    if (fileInput) {
+                        fileInput.value = "";
+                    }
+                    renderSbsResource();
+
+                    controller.emitter.emit("batch:sbs-upload:completed", {
+                        success: true,
+                        batchName: controller.state.batchName,
+                        snapshot: controller.state.snapshot
+                    });
+                })
+                .catch(function (error) {
+                    var message = error && error.message ? error.message : "Upload failed.";
+                    setSbsUploadStatus(message, "critical");
+                    controller.emitter.emit("batch:sbs-upload:failed", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                })
+                .finally(function () {
+                    setSbsUploadBusy(false);
                 });
         }
 
