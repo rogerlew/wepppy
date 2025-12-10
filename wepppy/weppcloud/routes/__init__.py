@@ -90,6 +90,7 @@ from .export import export_bp
 from .fork_console import fork_bp
 from .diff import diff_bp
 from .geodata import geodata_bp
+from .gl_dashboard import gl_dashboard_bp
 from .huc_fire import huc_fire_bp
 from .map import map_bp
 from .pivottable import pivottable_bp
@@ -125,6 +126,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     diff_bp,
     disturbed_bp,
     export_bp,
+    gl_dashboard_bp,
     geodata_bp,
     huc_fire_bp,
     jsoncrack_bp,
@@ -172,6 +174,7 @@ __all__ = [
     'export_bp',
     'fork_bp',
     'diff_bp',
+    'gl_dashboard_bp',
     'geodata_bp',
     'huc_fire_bp',
     'landuse_bp',

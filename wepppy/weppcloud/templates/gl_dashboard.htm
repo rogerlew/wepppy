@@ -1,0 +1,233 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}GL Dashboard — {{ runid }}{% endblock %}
+
+{% block site_header %}{% endblock %}
+{% block header_tools %}{% endblock %}
+
+{% block head_extras %}
+<style>
+  :root {
+    color-scheme: dark;
+  }
+  .gl-layer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.35rem;
+    color: #c1cbe3;
+  }
+  .gl-layer-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .gl-layer-item input {
+    accent-color: #3f6ac7;
+  }
+  html, body {
+    background: #070c14;
+    color: #e5ecf7;
+  }
+  .wc-page__body {
+    padding: 0;
+  }
+  .gl-shell {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1080px) {
+    .gl-shell {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+  }
+  .gl-sidebar {
+    background: #0d1523;
+    border: 1px solid #1f2c44;
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  }
+  .gl-sidebar h3 {
+    margin: 0;
+    color: #c7d7ff;
+    letter-spacing: 0.02em;
+  }
+  .gl-sidebar p {
+    margin: 0;
+    color: #8fa0c2;
+  }
+  .gl-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: #c1cbe3;
+    line-height: 1.6;
+  }
+  .gl-main {
+    background: #0b101b;
+    border: 1px solid #1f2c44;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  }
+  .gl-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #1f2c44;
+    background: #0f1727;
+  }
+  .gl-topbar__meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    color: #9fb4dc;
+    font-size: 0.95rem;
+  }
+  .gl-topbar__meta strong {
+    color: #e5ecf7;
+  }
+  .gl-topbar__meta a.gl-run-link,
+  .gl-topbar__meta a.gl-run-link:visited {
+    color: #f7fbff !important;
+    text-decoration-line: underline !important;
+  }
+  .gl-topbar__meta a.gl-run-link:hover {
+    color: #cde2ff !important;
+  }
+  .gl-topbar__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .gl-btn {
+    background: #142035;
+    border: 1px solid #263b5f;
+    color: #e5ecf7;
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .gl-btn[data-variant="primary"] {
+    background: #1d3b70;
+    border-color: #3f6ac7;
+  }
+  .gl-viewport {
+    position: relative;
+    flex: 1;
+    min-height: 420px;
+    border-bottom: 1px solid #1f2c44;
+  }
+  .gl-viewport #gl-dashboard-map {
+    position: absolute;
+    inset: 0;
+  }
+  #gl-dashboard-map canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+  .gl-table {
+    background: #0f1727;
+    border-top: 1px solid #1f2c44;
+    padding: 0.5rem 1rem;
+    max-height: 260px;
+    overflow: hidden;
+    transition: max-height 180ms ease;
+  }
+  .gl-table.is-collapsed {
+    max-height: 48px;
+  }
+  .gl-table__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .gl-table__content {
+    margin-top: 0.5rem;
+    color: #8fa0c2;
+  }
+</style>
+{% endblock %}
+
+{% block body_container %}
+<div class="gl-shell">
+  <aside class="gl-sidebar">
+    <div>
+      <h3>Layers</h3>
+      <p>Wire this to scenarios + catalog; toggles should drive map + charts.</p>
+    </div>
+    <ul class="gl-layer-list" id="gl-layer-list"></ul>
+    <p id="gl-layer-empty" style="color:#8fa0c2;margin:0;">No raster layers detected yet.</p>
+  </aside>
+
+  <section class="gl-main">
+    <div class="gl-topbar">
+      <div class="gl-topbar__meta">
+        <span>Run <strong><a class="gl-run-link" href="{{ site_prefix }}/runs/{{ runid }}/{{ config }}/">{{ runid }}</a></strong></span>
+        <span>Config <strong>{{ config }}</strong></span>
+      </div>
+      <div class="gl-topbar__actions">
+        <button class="gl-btn" type="button" onclick="location.href='{{ site_prefix }}/runs/{{ runid }}/{{ config }}/browse/';">Browse</button>
+      </div>
+    </div>
+
+    <div class="gl-viewport">
+      <div id="gl-dashboard-map" role="presentation"></div>
+    </div>
+
+    <div class="gl-table is-collapsed" id="gl-table">
+      <div class="gl-table__header">
+        <h4 style="margin:0;color:#c7d7ff;">Table</h4>
+        <button class="gl-btn" data-table-toggle type="button">Toggle table</button>
+      </div>
+      <div class="gl-table__content">
+        Tabular data from the query engine will stream here. Wiring pending.
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block script_extras %}
+  <script>
+    window.GL_DASHBOARD_CONTEXT = {{ {
+      "runid": runid,
+      "config": config,
+      "sitePrefix": site_prefix,
+      "tileUrl": tile_url
+    } | tojson }};
+  </script>
+  <script src="{{ static_url('js/geotiff.js') }}"></script>
+  <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+  <script src="{{ static_url('js/gl-dashboard.js') }}"></script>
+  <script>
+    (function () {
+      const toggle = document.querySelector('[data-table-toggle]');
+      const table = document.getElementById('gl-table');
+      if (toggle && table) {
+        toggle.addEventListener('click', () => {
+          table.classList.toggle('is-collapsed');
+        });
+      }
+    })();
+  </script>
+{% endblock %}
