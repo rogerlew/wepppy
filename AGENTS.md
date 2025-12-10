@@ -251,6 +251,11 @@ Every module, service, and significant package should have a README.md that serv
 - All Python work inside containers should target the baked virtual environment at `/opt/venv` (created in `docker/Dockerfile`). Activate it explicitly: `source /opt/venv/bin/activate && python …`. This venv already contains GDAL, pydsstools, duckdb, etc., so avoid `pip install` against the system interpreter.
 - The host filesystem mirrors the dev container layout under `/workdir/<repo>`, so relative paths such as `/workdir/wepppy/...` are safe to reference.
 - **Hostname note:** `forest.local` and `wc.bearhive.duckdns.org` resolve to the same machine (homelab dev box). Treat file paths like `/wc1/...` as shared between them.
+- **Runs directory locations:**
+  - **Canonical:** `/wc1/runs/` — All new runs are created here. This is the authoritative location.
+  - **Legacy:** `/geodata/weppcloud_runs/` or `/wc1/geodata/weppcloud_runs/` — Historical location, no longer used for new runs. May contain old archived runs.
+  - When searching for runs or debugging, **always check `/wc1/runs/` first**.
+  - Run directories are organized as `/wc1/runs/<prefix>/<runid>/` where `<prefix>` is the first two characters of the runid.
 - The repository includes `docker/docker-compose.dev.yml`; expect it to exist and be the primary entry point for local orchestration.
 - **GitHub CLI (`gh`)** is available on the host and authenticated. Use it for creating issues, managing PRs, and querying repository metadata:
   ```bash
