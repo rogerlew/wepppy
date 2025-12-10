@@ -1,8 +1,8 @@
-# WEPPcloud Batch Runner (PoC Snapshot)
+# WEPPcloud Batch Runner (Pure UI Snapshot)
 
 > **See also:** [AGENTS.md](../../../../AGENTS.md) for Working with NoDb Controllers and RQ Background Tasks sections.
 
-The batch runner feature now lives as a proof-of-concept that stitches together existing NoDb primitives with a thin blueprint and controller shell. The goal is to stand up the end-to-end shape of the workflow before hardening it, with an emphasis on reusing the `_base` project controls and keeping the mental model familiar to power users.
+The batch runner feature now lives as a proof-of-concept that stitches together existing NoDb primitives with a thin blueprint and controller shell. The goal is to stand up the end-to-end shape of the workflow before hardening it, with an emphasis on reusing the `_base` project controls and keeping the mental model familiar to power users. The UI now uses the Pure templates (`manage_pure.htm`, `batch_runner_pure.htm`); the legacy Bootstrap pages were removed.
 
 ## Intent
 - Give admins a sandbox for preparing a canonical `_base` project and cloning it across many watersheds.
@@ -14,7 +14,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 ### `batch_runner_bp`
 - `/batch/create/` is gated by `roles_required("Admin")` and the `BATCH_RUNNER_ENABLED` flag. It collects a batch name and base config, then calls `_create_batch_project()`.
 - `_create_batch_project()` resolves the batch root (`get_batch_root_dir()`), creates `<batch_name>/`, and instantiates `BatchRunner`, which immediately bootstraps `_base/` using the selected config.
-- `/batch/_/<batch_name>/` resolves `BatchRunner.getInstanceFromBatchName()`, reaches into the `_base/` directory, and hydrates the same NoDb singletons that the run-0 blueprint exposes (Ron, Landuse, Soils, Watershed, Omni, etc.). The template currently reuses `weppcloud/templates/controls/_base.htm`, but the control-specific context was lost in the recent refactor and must be reintroduced.
+- `/batch/_/<batch_name>/` resolves `BatchRunner.getInstanceFromBatchName()`, reaches into the `_base/` directory, and hydrates the same NoDb singletons that the run-0 blueprint exposes (Ron, Landuse, Soils, Watershed, Omni, etc.). The manage view renders `manage_pure.htm` which includes `batch_runner_pure.htm`.
 - `/upload-geojson` accepts GeoJSON/JSON uploads, persists them into `<batch_name>/resources/`, instantiates a `WatershedCollection`, and lets `BatchRunner` record the analysis metadata.
 - `/validate-template` replays the stored `WatershedCollection`, runs template evaluation, and persists the results on the `BatchRunner` instance before returning a JSON payload to the UI.
 
@@ -41,7 +41,6 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 4. **Template Preview** – Template validation rebuilds the `WatershedCollection`, generates prospective run IDs, records the summary (`_runid_template_state`), and returns duplicates/errors for UI display.
 
 ## Current Constraints & Gaps
-- Batch-runner-specific context is absent from `manage.htm` after migrating to `_base.htm`; controls cannot yet surface the new state.
 - Controllers remain in a prototype shape—the bootstrap payload still mirrors run-0 and does not emit batch-aware data structures.
 - RQ orchestration, `_base` cloning into per-run directories, and job submission are intentionally deferred.
 - No durability beyond the persisted GeoJSON metadata and template snapshot; retries and resuming work are not wired up yet.

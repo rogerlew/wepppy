@@ -198,6 +198,7 @@ def create_batch_project():
 
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/", methods=["GET"])
+@roles_required("Admin")
 @handle_with_exception_factory
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
