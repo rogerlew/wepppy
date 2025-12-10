@@ -1,0 +1,7 @@
+[Unit]
+Description=WEPPcloud Memory Watchdog
+
+[Service]
+Type=oneshot
+ExecStart=/workdir/wepppy/scripts/memory-watchdog.sh
+User=root
