@@ -9,9 +9,12 @@
        checked=watershed.clip_hillslopes,
        attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "hillslope_clip_length",
-       "Hillslope clip length (m)",
+       "Hillslope clip length",
        value=watershed.clip_hillslope_length | round | int,
+       unit_label="m",
+       unit_category="sm-distance",
+       unit_name="m",
        attrs={"class": "disable-readonly", "inputmode": "numeric"}
      ) }}

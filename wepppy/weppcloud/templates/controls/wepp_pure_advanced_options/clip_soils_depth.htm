@@ -9,16 +9,20 @@
        checked=soils.clip_soils,
        attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "clip_soils_depth",
-       "Soil clip depth (mm)",
+       "Soil clip depth",
        value=soils.clip_soils_depth | round | int,
+       unit_label="mm",
+       unit_category="xs-distance",
+       unit_name="mm",
        attrs={"class": "disable-readonly", "inputmode": "numeric"}
      ) }}
   <h5 class="wc-heading wc-heading--xs">Initial Soil Saturation</h5>
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "initial_sat",
-       "Initial soil saturation (fraction)",
+       "Initial soil saturation",
        value=soils.initial_sat,
+       unit_label="fraction",
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
