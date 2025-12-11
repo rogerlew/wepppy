@@ -23,16 +23,20 @@
        selected=wepp.channel_critical_shear,
        extra_control_class="disable-readonly"
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "channel_erodibility",
-       "Channel erodibility (s/m; default 1e-6)",
+       "Channel erodibility (default 1e-6)",
        value=wepp.channel_erodibility,
+       unit_label="s/m",
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "minimum_channel_width_m",
-       "Minimum channel width (m)",
+       "Minimum channel width",
        value=wepp.minimum_channel_width_m,
+       unit_label="m",
+       unit_category="sm-distance",
+       unit_name="m",
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
 
@@ -62,16 +66,22 @@
     <a href="https://github.com/rogerlew/wepppy/raw/master/wepppy/wepp/soils/resources/ChannelCriticalShear_Vs_ChannelSlope.xlsx" target="_blank" rel="noopener noreferrer">channel critical shear spreadsheet</a>
     to derive values.
   </p>
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "tcr_opts_taumin",
-       "Minimum channel critical shear limit (taumin, N/m²)",
+       "Minimum channel critical shear limit (taumin)",
        value=wepp.tcr_opts.taumin,
+       unit_label="N/m²",
+       unit_category="shear-stress",
+       unit_name="N/m^2",
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "tcr_opts_taumax",
-       "Maximum channel critical shear limit (taumax, N/m²)",
+       "Maximum channel critical shear limit (taumax)",
        value=wepp.tcr_opts.taumax,
+       unit_label="N/m²",
+       unit_category="shear-stress",
+       unit_name="N/m^2",
        attrs={"class": "disable-readonly", "inputmode": "decimal"}
      ) }}
   {{ ui.text_field(

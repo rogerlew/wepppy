@@ -1267,10 +1267,46 @@
           "token": "lb_ft-cube"
         }
       ]
+    },
+    {
+      "conversions": [
+        {
+          "from": "N/m^2",
+          "offset": 0.0,
+          "scale": 0.0208854,
+          "to": "lb/ft^2"
+        },
+        {
+          "from": "lb/ft^2",
+          "offset": 0.0,
+          "scale": 47.8803,
+          "to": "N/m^2"
+        }
+      ],
+      "defaultIndex": 1,
+      "key": "shear-stress",
+      "label": "Shear Stress",
+      "units": [
+        {
+          "htmlLabel": "N/m<sup>2</sup>",
+          "key": "N/m^2",
+          "label": "N/m^2",
+          "precision": 1,
+          "token": "N_m-sqr"
+        },
+        {
+          "htmlLabel": "lb/ft<sup>2</sup>",
+          "key": "lb/ft^2",
+          "label": "lb/ft^2",
+          "precision": 2,
+          "token": "lb_ft-sqr"
+        }
+      ]
     }
   ],
   "generator": "unitizer_map_builder.py",
   "tokenToUnit": {
+    "N_m-sqr": "N/m^2",
     "acre": "acre",
     "acre-ft_yr": "acre-ft/yr",
     "degc": "degc",
@@ -1304,6 +1340,7 @@
     "lb_acre_yr": "lb/acre/yr",
     "lb_acre_yr-_3": "lb/acre/yr,3",
     "lb_ft-cube": "lb/ft^3",
+    "lb_ft-sqr": "lb/ft^2",
     "lb_mi-sqr": "lb/mi^2",
     "lb_mi-sqr_yr": "lb/mi^2/yr",
     "lb_yr": "lb/yr",
@@ -1335,6 +1372,7 @@
   "unitToCategory": {
     "$/acre": "currency-area",
     "$/ha": "currency-area",
+    "N/m^2": "shear-stress",
     "acre": "area",
     "acre-ft/yr": "area-xs-distance-annual",
     "degc": "temperature",
@@ -1367,6 +1405,7 @@
     "lb/acre,3": "xs-surface-density",
     "lb/acre/yr": "sm-surface-density-annual",
     "lb/acre/yr,3": "xs-surface-density-annual",
+    "lb/ft^2": "shear-stress",
     "lb/ft^3": "snow-density",
     "lb/mi^2": "sm-surface-density",
     "lb/mi^2/yr": "sm-surface-density-annual",
