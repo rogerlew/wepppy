@@ -61,6 +61,46 @@
         color: var(--text-muted);
       }
 
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+
+      .hero-actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bg-dark);
+        background: var(--accent);
+        border: 1px solid transparent;
+        transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .hero-actions a:hover {
+        background: var(--accent-strong);
+        transform: translateY(-1px);
+      }
+
+      .hero-actions a.secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border-color: rgba(148, 163, 184, 0.4);
+      }
+
+      .hero-actions a.secondary:hover {
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-primary);
+        transform: none;
+      }
+
       .hero-metrics {
         display: flex;
         gap: 32px;
@@ -255,6 +295,10 @@
           </div>
         </div>
         <p class="status" id="landing-status">Loading run data...</p>
+        <div class="hero-actions">
+          <a href="{{ url_for('weppcloud_site.interfaces') }}">Browse interfaces</a>
+          <a class="secondary" href="{{ url_for('weppcloud_site.about') }}">About WEPPcloud</a>
+        </div>
       </header>
 
       <section class="map-panel">

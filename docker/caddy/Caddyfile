@@ -135,7 +135,10 @@ http://:8080 {
     }
 
     @root path /
-    redir @root /weppcloud
+    redir @root /weppcloud/
+
+    @weppcloud_no_slash path /weppcloud
+    redir @weppcloud_no_slash /weppcloud/
 
     handle_path /weppcloud* {
         reverse_proxy weppcloud:8000 {

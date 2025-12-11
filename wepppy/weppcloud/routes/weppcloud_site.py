@@ -234,31 +234,11 @@ def _render_ui_lab_index_with_state(index_path: Path) -> Optional['flask.Respons
     return response
 
 
-@weppcloud_site_bp.route('/')
-def index():
-    runs_counter = Counter()
-    try:
-        if _exists('/geodata/weppcloud_runs/runs_counter.json'):
-            with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
-                runs_counter = Counter(json.load(fp))
-    except:
-        pass
-
-    try:
-        return render_template('index.htm', user=current_user, runs_counter=runs_counter)
-    except Exception:
-        return exception_factory()
+def _landing_assets_dir() -> Path:
+    return _resolve_landing_static_asset('assets')
 
 
-@weppcloud_site_bp.route('/about/', strict_slashes=False)
-@handle_with_exception_factory
-def about():
-    return render_template('about.htm', user=current_user)
-
-
-@weppcloud_site_bp.route('/landing/', strict_slashes=False)
-@handle_with_exception_factory
-def landing():
+def _render_landing_page() -> 'flask.Response':
     try:
         _load_or_refresh_run_locations(force=True)
     except Exception:
@@ -273,20 +253,86 @@ def landing():
     return render_template('landing.htm', user=current_user)
 
 
+@weppcloud_site_bp.route('/')
+@handle_with_exception_factory
+def index():
+    return _render_landing_page()
+
+
+@weppcloud_site_bp.route('/interfaces/', strict_slashes=False)
+def interfaces():
+    runs_counter = Counter()
+    try:
+        if _exists('/geodata/weppcloud_runs/runs_counter.json'):
+            with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
+                runs_counter = Counter(json.load(fp))
+    except:
+        pass
+
+    try:
+        return render_template('interfaces.htm', user=current_user, runs_counter=runs_counter)
+    except Exception:
+        return exception_factory()
+
+
+@weppcloud_site_bp.route('/about/', strict_slashes=False)
+@handle_with_exception_factory
+def about():
+    return render_template('about.htm', user=current_user)
+
+
+def _landing_run_locations_response() -> 'flask.Response':
+    dataset = _load_or_refresh_run_locations()
+    return jsonify(dataset)
+
+
+@weppcloud_site_bp.route('/landing/', strict_slashes=False)
+@handle_with_exception_factory
+def landing():
+    return _render_landing_page()
+
+
 @weppcloud_site_bp.route('/landing/run-locations.json', strict_slashes=False)
 @handle_with_exception_factory
 def landing_run_locations():
-    dataset = _load_or_refresh_run_locations()
-    return jsonify(dataset)
+    return _landing_run_locations_response()
+
+
+@weppcloud_site_bp.route('/run-locations.json', strict_slashes=False)
+@handle_with_exception_factory
+def landing_run_locations_root():
+    return _landing_run_locations_response()
+
+
+def _get_mimetype_for_asset(asset_path: str) -> Optional[str]:
+    """Return explicit MIME type for assets that Safari may reject otherwise."""
+    if asset_path.endswith('.js'):
+        return 'application/javascript'
+    if asset_path.endswith('.mjs'):
+        return 'application/javascript'
+    if asset_path.endswith('.css'):
+        return 'text/css'
+    if asset_path.endswith('.json'):
+        return 'application/json'
+    return None
 
 
 @weppcloud_site_bp.route('/landing/assets/<path:asset_path>', strict_slashes=False)
 @handle_with_exception_factory
 def landing_static_assets(asset_path: str):
-    assets_root = _resolve_landing_static_asset('assets')
+    assets_root = _landing_assets_dir()
     if not assets_root.exists():
         abort(404)
+    mimetype = _get_mimetype_for_asset(asset_path)
+    if mimetype:
+        return send_from_directory(assets_root, asset_path, mimetype=mimetype)
     return send_from_directory(assets_root, asset_path)
+
+
+@weppcloud_site_bp.route('/assets/<path:asset_path>', strict_slashes=False)
+@handle_with_exception_factory
+def landing_static_assets_root(asset_path: str):
+    return landing_static_assets(asset_path)
 
 
 @weppcloud_site_bp.route('/landing/vite.svg', strict_slashes=False)
@@ -296,3 +342,9 @@ def landing_static_vite_icon():
     if not icon_path.exists():
         abort(404)
     return send_from_directory(icon_path.parent, icon_path.name)
+
+
+@weppcloud_site_bp.route('/vite.svg', strict_slashes=False)
+@handle_with_exception_factory
+def landing_static_vite_icon_root():
+    return landing_static_vite_icon()

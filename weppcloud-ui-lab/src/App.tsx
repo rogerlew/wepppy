@@ -537,7 +537,7 @@ const mapSubtitle =
     () => [
       { label: 'Docs', href: 'https://doc.wepp.cloud' },
       { label: 'Research', href: '/weppcloud/research', external: true },
-      { label: 'Interfaces', href: '/weppcloud/' },
+      { label: 'Interfaces', href: '/weppcloud/interfaces/' },
       {
         label: isAuthenticated ? 'My Runs' : 'Login',
         href: isAuthenticated ? '/weppcloud/runs/' : '/weppcloud/login/',
