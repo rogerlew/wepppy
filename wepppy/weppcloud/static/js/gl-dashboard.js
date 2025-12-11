@@ -24,6 +24,22 @@
     bearing: 0,
   };
 
+  const controllerOptions = {
+    dragPan: true,
+    dragRotate: false,
+    scrollZoom: true,
+    touchZoom: true,
+    touchRotate: false,
+    doubleClickZoom: true,
+    keyboard: true,
+  };
+  let currentViewState = initialViewState;
+
+  function setViewState(viewState) {
+    currentViewState = viewState;
+    deckgl.setProps({ viewState: currentViewState });
+  }
+
   const baseLayer = new deck.TileLayer({
     id: 'gl-dashboard-base-tiles',
     data: tileTemplate,
@@ -94,6 +110,101 @@
   const detectedLayers = [];
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
+  let geoTiffLoader = null;
+  const NLCD_COLORMAP = {
+    11: '#5475A8', // Open water
+    12: '#ffffff', // Perennial ice/snow
+    21: '#e6d6d6', // Developed, open space
+    22: '#ccb1b1', // Developed, low intensity
+    23: '#ff0000', // Developed, medium intensity
+    24: '#b50000', // Developed, high intensity
+    31: '#d2cdc0', // Barren land
+    41: '#85c77e', // Deciduous forest
+    42: '#38814e', // Evergreen forest
+    43: '#d4e7b0', // Mixed forest
+    51: '#af963c', // Dwarf scrub
+    52: '#dcca8f', // Shrub/scrub
+    71: '#fde9aa', // Grassland/herbaceous
+    72: '#d1d182', // Sedge/herbaceous
+    73: '#a3cc51', // Lichens
+    74: '#82ba9e', // Moss
+    81: '#fbf65d', // Pasture/hay
+    82: '#ca9146', // Cultivated crops
+    90: '#c8e6f8', // Woody wetlands
+    95: '#64b3d5', // Emergent herbaceous wetlands
+  };
+  const HEX_RGB_RE = /^#?([0-9a-f]{6})$/i;
+  const soilColorCache = new Map();
+
+  function hslToHex(h, s, l) {
+    const sat = s / 100;
+    const light = l / 100;
+    const a = sat * Math.min(light, 1 - light);
+    const f = (n) => {
+      const k = (n + h / 30) % 12;
+      const color = light - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color)
+        .toString(16)
+        .padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  function soilColorForValue(value) {
+    if (!Number.isFinite(value)) return null;
+    if (soilColorCache.has(value)) {
+      return soilColorCache.get(value);
+    }
+    const v = Math.abs(Math.trunc(value));
+    const hue = ((v * 2654435761) >>> 0) % 360; // Knuth hash for spread
+    const sat = 50 + (((v * 1013904223) >>> 0) % 30); // 50-79
+    const light = 45 + (((v * 1664525) >>> 0) % 20); // 45-64
+    const hex = hslToHex(hue, sat, light);
+    soilColorCache.set(value, hex);
+    return hex;
+  }
+
+  function resolveGeoTiffGlobal() {
+    if (typeof GeoTIFF !== 'undefined' && GeoTIFF && typeof GeoTIFF.fromArrayBuffer === 'function') {
+      return GeoTIFF;
+    }
+    if (typeof geotiff !== 'undefined') {
+      if (geotiff.GeoTIFF && typeof geotiff.GeoTIFF.fromArrayBuffer === 'function') {
+        return geotiff.GeoTIFF;
+      }
+      if (geotiff.default && typeof geotiff.default.fromArrayBuffer === 'function') {
+        return geotiff.default;
+      }
+    }
+    return null;
+  }
+
+  async function ensureGeoTiff() {
+    const existing = resolveGeoTiffGlobal();
+    if (existing) {
+      return existing;
+    }
+    if (!geoTiffLoader) {
+      geoTiffLoader = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = ctx.geoTiffUrl || 'https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js';
+        script.async = true;
+        script.onload = () => {
+          const GT = resolveGeoTiffGlobal();
+          if (GT) {
+            resolve(GT);
+          } else {
+            reject(new Error('GeoTIFF global missing after script load'));
+          }
+        };
+        script.onerror = () => {
+          reject(new Error('GeoTIFF script failed to load'));
+        };
+        document.head.appendChild(script);
+      });
+    }
+    return geoTiffLoader;
+  }
 
   async function detectSbsLayer() {
     const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/baer_wgs_map`;
@@ -198,6 +309,26 @@
   }
 
   function computeBoundsFromGdal(info) {
+    const wgs84 = info && info.wgs84Extent && info.wgs84Extent.coordinates;
+    if (Array.isArray(wgs84) && wgs84.length && Array.isArray(wgs84[0])) {
+      const ring = wgs84[0];
+      let west = Infinity;
+      let south = Infinity;
+      let east = -Infinity;
+      let north = -Infinity;
+      for (const pt of ring) {
+        if (!Array.isArray(pt) || pt.length < 2) continue;
+        const [lon, lat] = pt;
+        if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
+        if (lon < west) west = lon;
+        if (lon > east) east = lon;
+        if (lat < south) south = lat;
+        if (lat > north) north = lat;
+      }
+      if ([west, south, east, north].every((v) => Number.isFinite(v))) {
+        return [west, south, east, north];
+      }
+    }
     const cc = info && info.cornerCoordinates;
     if (!cc) return null;
     const ll = cc.lowerLeft || cc.lowerleft || cc.LowerLeft;
@@ -218,14 +349,14 @@
     const cy = (south + north) / 2;
     const span = Math.max(east - west, north - south);
     const zoom = Math.max(2, Math.min(14, Math.log2(360 / (span || 0.001)) - 1));
-    deckgl.setProps({
-      viewState: {
-        longitude: cx,
-        latitude: cy,
-        zoom,
-        bearing: 0,
-        pitch: 0,
-      },
+    setViewState({
+      longitude: cx,
+      latitude: cy,
+      zoom,
+      bearing: 0,
+      pitch: 0,
+      minZoom: currentViewState.minZoom,
+      maxZoom: currentViewState.maxZoom,
     });
   }
 
@@ -236,22 +367,74 @@
     return resp.json();
   }
 
-  async function fetchRasterCanvas(path) {
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/download/${path}`;
-    const resp = await fetch(url);
-    if (!resp.ok) {
-      throw new Error(`Raster fetch failed: ${resp.status}`);
+  function colorize(values, width, height, colorMap) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx2d = canvas.getContext('2d');
+    const imgData = ctx2d.createImageData(width, height);
+    const mapEntries =
+      colorMap &&
+      typeof colorMap !== 'function' &&
+      Object.entries(colorMap).reduce((acc, [k, hex]) => {
+        const v = Number(k);
+        if (!Number.isFinite(v)) return acc;
+        const parsed = HEX_RGB_RE.exec(hex || '');
+        if (!parsed) return acc;
+        const intVal = parseInt(parsed[1], 16);
+        acc[v] = [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255];
+        return acc;
+      }, {});
+    const fnCache = new Map();
+
+    if (mapEntries && Object.keys(mapEntries).length) {
+      for (let i = 0, j = 0; i < values.length; i++, j += 4) {
+        const v = values[i];
+        const rgb = mapEntries[v];
+        if (rgb) {
+          imgData.data[j] = rgb[0];
+          imgData.data[j + 1] = rgb[1];
+          imgData.data[j + 2] = rgb[2];
+          imgData.data[j + 3] = 230;
+        } else {
+          imgData.data[j + 3] = 0; // transparent for unknown codes
+        }
+      }
+      ctx2d.putImageData(imgData, 0, 0);
+      return canvas;
     }
-    if (typeof GeoTIFF === 'undefined' || typeof GeoTIFF.fromArrayBuffer !== 'function') {
-      throw new Error('GeoTIFF library not available');
+
+    if (typeof colorMap === 'function') {
+      for (let i = 0, j = 0; i < values.length; i++, j += 4) {
+        const v = values[i];
+        if (!Number.isFinite(v)) {
+          imgData.data[j + 3] = 0;
+          continue;
+        }
+        let rgb = fnCache.get(v);
+        if (!rgb) {
+          const hex = colorMap(v);
+          const parsed = HEX_RGB_RE.exec(hex || '');
+          if (parsed) {
+            const intVal = parseInt(parsed[1], 16);
+            rgb = [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255];
+            fnCache.set(v, rgb);
+          }
+        }
+        if (rgb) {
+          imgData.data[j] = rgb[0];
+          imgData.data[j + 1] = rgb[1];
+          imgData.data[j + 2] = rgb[2];
+          imgData.data[j + 3] = 230;
+        } else {
+          imgData.data[j + 3] = 0;
+        }
+      }
+      ctx2d.putImageData(imgData, 0, 0);
+      return canvas;
     }
-    const array = await resp.arrayBuffer();
-    const tiff = await GeoTIFF.fromArrayBuffer(array);
-    const image = await tiff.getImage();
-    const width = image.getWidth();
-    const height = image.getHeight();
-    const data = await image.readRasters({ interleave: true, samples: [0] });
-    const values = data;
+
+    // Fallback grayscale
     let min = Infinity;
     let max = -Infinity;
     for (let i = 0; i < values.length; i++) {
@@ -265,11 +448,6 @@
       min = 0;
       max = 255;
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx2d = canvas.getContext('2d');
-    const imgData = ctx2d.createImageData(width, height);
     const scale = 255 / (max - min || 1);
     for (let i = 0, j = 0; i < values.length; i++, j += 4) {
       const v = values[i];
@@ -283,6 +461,23 @@
     return canvas;
   }
 
+  async function fetchRasterCanvas(path, colorMap) {
+    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/download/${path}`;
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      throw new Error(`Raster fetch failed: ${resp.status}`);
+    }
+    const GT = await ensureGeoTiff();
+    const array = await resp.arrayBuffer();
+    const tiff = await GT.fromArrayBuffer(array);
+    const image = await tiff.getImage();
+    const width = image.getWidth();
+    const height = image.getHeight();
+    const data = await image.readRasters({ interleave: true, samples: [0] });
+    const values = data;
+    return colorize(values, width, height, colorMap);
+  }
+
   async function detectLayers() {
     await detectSbsLayer();
     for (const def of layerDefs) {
@@ -293,20 +488,14 @@
           if (!info) continue;
           const bounds = computeBoundsFromGdal(info);
           if (!bounds) continue;
-          const canvas = await fetchRasterCanvas(path);
-          const layer = new deck.BitmapLayer({
-            id: `raster-${def.key}-${path}`,
-            image: canvas,
-            bounds,
-            pickable: false,
-            opacity: 0.8,
-          });
+          const colorMap = def.key === 'landuse' ? NLCD_COLORMAP : def.key === 'soils' ? soilColorForValue : null;
+          const canvas = await fetchRasterCanvas(path, colorMap);
           found = {
             key: def.key,
             label: def.label,
             path,
             bounds,
-            bitmapLayer: layer,
+            canvas,
             visible: true,
           };
           break;
@@ -328,8 +517,15 @@
 
   const deckgl = new deck.Deck({
     parent: target,
-    controller: true,
+    controller: controllerOptions,
     initialViewState,
+    onViewStateChange: ({ viewState }) => {
+      setViewState({
+        ...viewState,
+        minZoom: initialViewState.minZoom,
+        maxZoom: initialViewState.maxZoom,
+      });
+    },
     layers: [baseLayer],
     getTooltip: (info) => {
       if (info && info.tile) {

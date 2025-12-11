@@ -213,10 +213,11 @@
       "runid": runid,
       "config": config,
       "sitePrefix": site_prefix,
-      "tileUrl": tile_url
+      "tileUrl": tile_url,
+      "geoTiffUrl": "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"
     } | tojson }};
   </script>
-  <script src="{{ static_url('js/geotiff.js') }}"></script>
+  <script src="https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"></script>
   <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
   <script src="{{ static_url('js/gl-dashboard.js') }}"></script>
   <script>
