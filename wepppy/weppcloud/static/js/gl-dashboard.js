@@ -116,10 +116,14 @@
   const soilsLayers = [];
   const hillslopesLayers = [];
   const weppLayers = [];
+  const rapLayers = [];
   let landuseSummary = null;
   let soilsSummary = null;
   let hillslopesSummary = null;
   let weppSummary = null;
+  let rapSummary = null;
+  let rapMetadata = null;
+  let rapSelectedYear = null;
   let subcatchmentsGeoJson = null;
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
@@ -302,6 +306,11 @@
       const el = document.getElementById(`layer-WEPP-${l.key}`);
       if (el) el.checked = false;
     });
+    rapLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-RAP-${l.key}`);
+      if (el) el.checked = false;
+    });
   }
 
   function updateLayerList() {
@@ -320,6 +329,9 @@
     }
     if (weppLayers.length) {
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
+    }
+    if (rapLayers.length) {
+      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, hasYearPicker: true });
     }
     if (detectedLayers.length) {
       rasterSections.push({ title: 'Rasters', items: detectedLayers, isSubcatchment: false });
@@ -354,6 +366,34 @@
       summary.textContent = section.title;
       details.appendChild(summary);
 
+      // Add year picker for RAP section
+      if (section.hasYearPicker && rapMetadata && rapMetadata.years && rapMetadata.years.length) {
+        const yearPickerDiv = document.createElement('div');
+        yearPickerDiv.className = 'gl-year-picker';
+        yearPickerDiv.style.cssText = 'padding: 0.5rem; display: flex; align-items: center; gap: 0.5rem;';
+        const yearLabel = document.createElement('label');
+        yearLabel.textContent = 'Year:';
+        yearLabel.style.fontWeight = '500';
+        const yearSelect = document.createElement('select');
+        yearSelect.id = 'rap-year-select';
+        yearSelect.style.cssText = 'flex: 1; padding: 0.25rem;';
+        rapMetadata.years.forEach((year) => {
+          const opt = document.createElement('option');
+          opt.value = year;
+          opt.textContent = year;
+          if (year === rapSelectedYear) opt.selected = true;
+          yearSelect.appendChild(opt);
+        });
+        yearSelect.addEventListener('change', async () => {
+          rapSelectedYear = parseInt(yearSelect.value, 10);
+          await refreshRapData();
+          applyLayers();
+        });
+        yearPickerDiv.appendChild(yearLabel);
+        yearPickerDiv.appendChild(yearSelect);
+        details.appendChild(yearPickerDiv);
+      }
+
       const itemList = document.createElement('ul');
       itemList.className = 'gl-layer-items';
 
@@ -368,12 +408,35 @@
         }
         input.checked = layer.visible;
         input.id = `layer-${section.title}-${layer.key}`;
-        input.addEventListener('change', () => {
+        input.addEventListener('change', async () => {
           if (section.isSubcatchment) {
             // Radio behavior: deselect all, then select this one
             deselectAllSubcatchmentOverlays();
             layer.visible = true;
             input.checked = true;
+            // For RAP layers, refresh data for the selected band via query-engine
+            if (layer.bandId && rapSelectedYear) {
+              try {
+                const dataPayload = {
+                  datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+                  columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
+                  filters: [
+                    { column: 'rap.year', op: '=', value: rapSelectedYear },
+                    { column: 'rap.band', op: '=', value: layer.bandId },
+                  ],
+                };
+                const dataResult = await postQueryEngine(dataPayload);
+                if (dataResult && dataResult.records) {
+                  rapSummary = {};
+                  for (const row of dataResult.records) {
+                    rapSummary[String(row.topaz_id)] = row.value;
+                  }
+                }
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('gl-dashboard: failed to load RAP band data', err);
+              }
+            }
           } else {
             layer.visible = input.checked;
           }
@@ -424,8 +487,9 @@
     const soilsDeckLayers = buildSoilsLayers();
     const hillslopesDeckLayers = buildHillslopesLayers();
     const weppDeckLayers = buildWeppLayers();
+    const rapDeckLayers = buildRapLayers();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...activeRasterLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...rapDeckLayers, ...activeRasterLayers],
     });
   }
 
@@ -743,6 +807,95 @@
       }
     }
     return null;
+  }
+
+  // RAP band labels for display
+  const RAP_BAND_LABELS = {
+    annual_forb_grass: 'Annual Forb & Grass',
+    bare_ground: 'Bare Ground',
+    litter: 'Litter',
+    perennial_forb_grass: 'Perennial Forb & Grass',
+    shrub: 'Shrub',
+    tree: 'Tree',
+  };
+
+  function rapFillColor(row) {
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+    // RAP values are percentages 0-100
+    const normalized = Math.min(1, Math.max(0, value / 100));
+    return viridisColor(normalized);
+  }
+
+  function rapValue(row) {
+    if (row == null) return null;
+    const v = Number(row);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildRapLayers() {
+    const activeLayers = rapLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && rapSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `rap-${overlay.key}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? rapSummary[String(topaz)] : null;
+            return rapFillColor(row);
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function pickActiveRapLayer() {
+    for (let i = rapLayers.length - 1; i >= 0; i--) {
+      const layer = rapLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
+  async function refreshRapData() {
+    const activeLayer = pickActiveRapLayer();
+    if (!activeLayer || !rapSelectedYear) return;
+    try {
+      const dataPayload = {
+        datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+        columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
+        filters: [
+          { column: 'rap.year', op: '=', value: rapSelectedYear },
+          { column: 'rap.band', op: '=', value: activeLayer.bandId },
+        ],
+      };
+      const dataResult = await postQueryEngine(dataPayload);
+      if (dataResult && dataResult.records) {
+        rapSummary = {};
+        for (const row of dataResult.records) {
+          rapSummary[String(row.topaz_id)] = row.value;
+        }
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to refresh RAP data', err);
+    }
   }
 
   function buildLanduseLayers() {
@@ -1186,6 +1339,119 @@
     }
   }
 
+  /**
+   * Post a JSON payload to the query-engine and return the parsed response.
+   * @param {Object} payload - Query engine request body
+   * @returns {Promise<Object|null>} Parsed JSON response or null on failure
+   */
+  async function postQueryEngine(payload) {
+    const origin = window.location.origin || `${window.location.protocol}//${window.location.host}`;
+    const targetUrl = `${origin}/query-engine/runs/${ctx.runid}/query`;
+    const resp = await fetch(targetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  }
+
+  async function detectRapOverlays() {
+    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    try {
+      // Query for available years
+      const yearsPayload = {
+        datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+        columns: ['DISTINCT rap.year AS year'],
+        order_by: ['year'],
+      };
+      const yearsResult = await postQueryEngine(yearsPayload);
+      if (!yearsResult || !yearsResult.records || !yearsResult.records.length) return;
+
+      // Query for available bands
+      const bandsPayload = {
+        datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+        columns: ['DISTINCT rap.band AS band'],
+        order_by: ['band'],
+      };
+      const bandsResult = await postQueryEngine(bandsPayload);
+      if (!bandsResult || !bandsResult.records || !bandsResult.records.length) return;
+
+      const years = yearsResult.records.map((r) => r.year);
+      const bands = bandsResult.records.map((r) => r.band);
+
+      // Build rapMetadata from query results
+      const RAP_BAND_ID_TO_KEY = {
+        1: 'annual_forb_grass',
+        2: 'bare_ground',
+        3: 'litter',
+        4: 'perennial_forb_grass',
+        5: 'shrub',
+        6: 'tree',
+      };
+      rapMetadata = {
+        available: true,
+        years,
+        bands: bands.map((id) => ({ id, label: RAP_BAND_ID_TO_KEY[id] || `band_${id}` })),
+      };
+
+      // Set default year to most recent
+      if (years.length) {
+        rapSelectedYear = years[years.length - 1];
+      }
+
+      // Ensure subcatchments are loaded
+      if (!subcatchmentsGeoJson) {
+        const geoResp = await fetch(geoUrl);
+        if (geoResp.ok) {
+          subcatchmentsGeoJson = await geoResp.json();
+        }
+      }
+      if (!subcatchmentsGeoJson) return;
+
+      // Build layer definitions for each band
+      const basePath = 'rap/rap_ts.parquet';
+      rapLayers.length = 0;
+      for (const band of rapMetadata.bands) {
+        const label = RAP_BAND_LABELS[band.label] || band.label;
+        rapLayers.push({
+          key: `rap-${band.label}`,
+          label: `${label} (%)`,
+          path: basePath,
+          bandId: band.id,
+          bandKey: band.label,
+          visible: false,
+        });
+      }
+
+      // Load initial data for the first band via query-engine
+      if (rapLayers.length && rapSelectedYear) {
+        const firstBand = rapLayers[0];
+        const dataPayload = {
+          datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+          columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
+          filters: [
+            { column: 'rap.year', op: '=', value: rapSelectedYear },
+            { column: 'rap.band', op: '=', value: firstBand.bandId },
+          ],
+        };
+        const dataResult = await postQueryEngine(dataPayload);
+        if (dataResult && dataResult.records) {
+          rapSummary = {};
+          for (const row of dataResult.records) {
+            rapSummary[String(row.topaz_id)] = row.value;
+          }
+        }
+      }
+
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load RAP overlays', err);
+    }
+  }
+
   const deckgl = new deck.Deck({
     parent: target,
     controller: controllerOptions,
@@ -1276,6 +1542,18 @@
           return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
+      const rapOverlay = pickActiveRapLayer();
+      if (info.object && rapOverlay && rapSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? rapSummary[String(topaz)] : null;
+        const val = rapValue(row);
+        if (val !== null) {
+          const bandLabel = RAP_BAND_LABELS[rapOverlay.bandKey] || rapOverlay.bandKey;
+          const label = `${bandLabel}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
+          return `Layer: ${rapOverlay.path}\nYear: ${rapSelectedYear}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
       const rasterLayer = pickActiveRaster();
       if (info.coordinate && rasterLayer) {
         const val = sampleRaster(rasterLayer, info.coordinate);
@@ -1298,7 +1576,7 @@
   // Expose for debugging.
   window.glDashboardDeck = deckgl;
 
-  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays()]).catch((err) => {
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectRapOverlays()]).catch((err) => {
     // eslint-disable-next-line no-console
     console.error('gl-dashboard: layer detection failed', err);
   });

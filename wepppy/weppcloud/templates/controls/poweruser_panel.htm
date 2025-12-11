@@ -216,6 +216,12 @@
         <section class="pu-modal__column" aria-labelledby="puActionsColumn">
           <h3 class="pu-modal__section-title" id="puActionsColumn">Actions</h3>
           <div class="pu-action-list">
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              GL Dashboard
+            </a>
             <button type="button"
                     class="pure-button pure-button-secondary"
                     data-project-action="clear-locks">
