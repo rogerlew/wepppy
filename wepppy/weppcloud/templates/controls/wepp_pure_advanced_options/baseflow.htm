@@ -4,27 +4,35 @@
     Baseflow is not implemented for single-storm climates.
     <a href="https://github.com/rogerlew/wepppy/issues/312" target="_blank" rel="noopener noreferrer">Discussion</a>
   </p>
-  {{ ui.text_field(
-       "gwstorage",
-       "Initial groundwater storage (mm)",
+  {{ ui.numeric_field(
+       "baseflow_opts_gwstorage",
+       "Initial groundwater storage",
        value=wepp.baseflow_opts.gwstorage,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="mm",
+       unit_category="xs-distance",
+       unit_name="mm",
+       attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
-       "bfcoeff",
-       "Baseflow coefficient (per day)",
+  {{ ui.numeric_field(
+       "baseflow_opts_bfcoeff",
+       "Baseflow coefficient",
        value=wepp.baseflow_opts.bfcoeff,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="per day",
+       attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
-       "dscoeff",
-       "Deep seepage coefficient (per day)",
+  {{ ui.numeric_field(
+       "baseflow_opts_dscoeff",
+       "Deep seepage coefficient",
        value=wepp.baseflow_opts.dscoeff,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="per day",
+       attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
-       "bfthreshold",
-       "Watershed groundwater baseflow threshold area (ha)",
+  {{ ui.numeric_field(
+       "baseflow_opts_bfthreshold",
+       "Watershed groundwater baseflow threshold area",
        value=wepp.baseflow_opts.bfthreshold,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="ha",
+       unit_category="area",
+       unit_name="ha",
+       attrs={"class": "disable-readonly"}
      ) }}
