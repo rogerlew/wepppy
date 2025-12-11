@@ -1015,6 +1015,75 @@ def query_topaz_wepp_map(runid, config):
     return jsonify(d)
 
 
+@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/hillslopes')
+@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/hillslopes/')
+@authorize_and_handle_with_exception_factory
+def query_wepp_loss_hillslopes(runid, config):
+    """Return WEPP loss hillslope summary keyed by topaz_id for GL dashboard overlays.
+    
+    Queries wepp/output/interchange/loss_pw0.hill.parquet via query-engine,
+    joins with watershed/hillslopes.parquet to get topaz_id mapping,
+    and returns a dict keyed by topaz_id for easy client-side lookup.
+    """
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+    
+    loss_parquet = _join(wd, 'wepp/output/interchange/loss_pw0.hill.parquet')
+    if not _exists(loss_parquet):
+        return error_factory('loss_pw0.hill.parquet is not available; please run the WEPP interchange workflow first.')
+    
+    # Fast path: try to resolve context without activation if catalog exists
+    try:
+        run_context = resolve_run_context(wd, auto_activate=False)
+    except FileNotFoundError:
+        # Catalog doesn't exist - activate it (slow)
+        try:
+            activate_query_engine(wd, run_interchange=False)
+            run_context = resolve_run_context(wd, auto_activate=False)
+        except FileNotFoundError:
+            return error_factory('Unable to resolve query engine catalog for this run')
+        except Exception:
+            return exception_factory('Error activating query engine', runid=runid)
+    except Exception:
+        return exception_factory('Error resolving query engine context', runid=runid)
+    
+    # Query loss data joined with hillslopes to get topaz_id mapping
+    payload = {
+        'datasets': [
+            {'path': 'wepp/output/interchange/loss_pw0.hill.parquet', 'alias': 'loss'},
+            {'path': 'watershed/hillslopes.parquet', 'alias': 'hill'},
+        ],
+        'joins': [
+            {'left': 'loss', 'right': 'hill', 'on': 'wepp_id', 'type': 'inner'}
+        ],
+        'columns': [
+            'hill.topaz_id',
+            'loss.wepp_id',
+            'loss."Subrunoff Volume" AS subrunoff_volume',
+            'loss."Baseflow Volume" AS baseflow_volume',
+            'loss."Soil Loss" AS soil_loss',
+            'loss."Sediment Deposition" AS sediment_deposition',
+            'loss."Sediment Yield" AS sediment_yield',
+        ],
+    }
+    
+    try:
+        query = QueryRequest(**payload)
+        result = run_query(run_context, query)
+    except Exception:
+        return exception_factory('Error running WEPP loss query', runid=runid)
+    
+    # Convert records list to dict keyed by topaz_id
+    summary = {}
+    if result.records:
+        for rec in result.records:
+            topaz_id = rec.get('topaz_id')
+            if topaz_id is not None:
+                summary[str(topaz_id)] = rec
+    
+    return jsonify(summary)
+
+
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>/')
 @authorize_and_handle_with_exception_factory

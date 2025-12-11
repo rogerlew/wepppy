@@ -66,6 +66,21 @@
     display: grid;
     gap: 0.25rem;
   }
+  .gl-layer-group-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7fa0;
+    padding: 0.5rem 0 0.25rem 0;
+    margin-top: 0.5rem;
+    border-top: 1px solid #1f2c44;
+  }
+  .gl-layer-group-header:first-child {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+  }
   html, body {
     background: #070c14;
     color: #e5ecf7;
@@ -212,7 +227,7 @@
 <div class="gl-shell">
   <aside class="gl-sidebar">
     <div>
-      <h3>Rasters</h3>
+      <h3>Layers</h3>
     </div>
     <ul class="gl-layer-list" id="gl-layer-list"></ul>
     <p id="gl-layer-empty" style="color:#8fa0c2;margin:0;">No raster layers detected yet.</p>
@@ -253,7 +268,10 @@
       "config": config,
       "sitePrefix": site_prefix,
       "tileUrl": tile_url,
-      "geoTiffUrl": "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"
+      "geoTiffUrl": "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js",
+      "mapExtent": map_extent,
+      "mapCenter": map_center,
+      "mapZoom": map_zoom
     } | tojson }};
   </script>
   <script src="https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"></script>

@@ -14,10 +14,14 @@
   const tileTemplate =
     ctx.tileUrl || 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
+  // Use map extent/center/zoom from ron.nodb if available
+  const mapCenter = ctx.mapCenter; // [longitude, latitude]
+  const mapZoom = ctx.mapZoom;
+
   const initialViewState = {
-    longitude: ctx.longitude || -114.5,
-    latitude: ctx.latitude || 43.8,
-    zoom: ctx.zoom || 5,
+    longitude: mapCenter && mapCenter[0] != null ? mapCenter[0] : (ctx.longitude || -114.5),
+    latitude: mapCenter && mapCenter[1] != null ? mapCenter[1] : (ctx.latitude || 43.8),
+    zoom: mapZoom != null ? mapZoom : (ctx.zoom || 5),
     minZoom: 2,
     maxZoom: 17,
     pitch: 0,
@@ -110,8 +114,12 @@
   const detectedLayers = [];
   const landuseLayers = [];
   const soilsLayers = [];
+  const hillslopesLayers = [];
+  const weppLayers = [];
   let landuseSummary = null;
   let soilsSummary = null;
+  let hillslopesSummary = null;
+  let weppSummary = null;
   let subcatchmentsGeoJson = null;
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
@@ -272,7 +280,7 @@
     }
   }
 
-  // Helper to deselect all subcatchment overlays across landuse and soils
+  // Helper to deselect all subcatchment overlays across landuse, soils, and hillslopes
   function deselectAllSubcatchmentOverlays() {
     landuseLayers.forEach((l) => {
       l.visible = false;
@@ -282,6 +290,16 @@
     soilsLayers.forEach((l) => {
       l.visible = false;
       const el = document.getElementById(`layer-Soils-${l.key}`);
+      if (el) el.checked = false;
+    });
+    hillslopesLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-Watershed-${l.key}`);
+      if (el) el.checked = false;
+    });
+    weppLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-WEPP-${l.key}`);
       if (el) el.checked = false;
     });
   }
@@ -296,6 +314,12 @@
     }
     if (soilsLayers.length) {
       subcatchmentSections.push({ title: 'Soils', items: soilsLayers, isSubcatchment: true });
+    }
+    if (hillslopesLayers.length) {
+      subcatchmentSections.push({ title: 'Watershed', items: hillslopesLayers, isSubcatchment: true });
+    }
+    if (weppLayers.length) {
+      subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
     }
     if (detectedLayers.length) {
       rasterSections.push({ title: 'Rasters', items: detectedLayers, isSubcatchment: false });
@@ -398,8 +422,10 @@
       .filter(Boolean);
     const landuseDeckLayers = buildLanduseLayers();
     const soilsDeckLayers = buildSoilsLayers();
+    const hillslopesDeckLayers = buildHillslopesLayers();
+    const weppDeckLayers = buildWeppLayers();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...activeRasterLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...activeRasterLayers],
     });
   }
 
@@ -557,6 +583,168 @@
     return activeLayers;
   }
 
+  // Hillslopes value ranges for normalization (approximate)
+  const HILLSLOPES_RANGES = {
+    slope_scalar: { min: 0, max: 1 },     // 0-100% slope as decimal
+    length: { min: 0, max: 1000 },         // meters
+    aspect: { min: 0, max: 360 },          // degrees
+  };
+
+  function hillslopesFillColor(mode, row) {
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+
+    // For aspect, use a circular colormap (HSL hue)
+    if (mode === 'aspect') {
+      // Convert aspect degrees to hue (0-360)
+      const hue = value % 360;
+      // Simple HSL to RGB conversion for hue wheel
+      const h = hue / 60;
+      const c = 200; // chroma
+      const x = c * (1 - Math.abs((h % 2) - 1));
+      let r, g, b;
+      if (h < 1) { r = c; g = x; b = 0; }
+      else if (h < 2) { r = x; g = c; b = 0; }
+      else if (h < 3) { r = 0; g = c; b = x; }
+      else if (h < 4) { r = 0; g = x; b = c; }
+      else if (h < 5) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+      return [Math.round(r + 55), Math.round(g + 55), Math.round(b + 55), 200];
+    }
+
+    // For slope and length, use viridis scale
+    const range = HILLSLOPES_RANGES[mode] || { min: 0, max: 1 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    return viridisColor(normalized);
+  }
+
+  function hillslopesValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildHillslopesLayers() {
+    const activeLayers = hillslopesLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && hillslopesSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `hillslopes-${overlay.key}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? hillslopesSummary[String(topaz)] : null;
+            return hillslopesFillColor(overlay.mode, row);
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function pickActiveHillslopesLayer() {
+    for (let i = hillslopesLayers.length - 1; i >= 0; i--) {
+      const layer = hillslopesLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
+  // WEPP loss ranges computed dynamically from weppSummary data
+  let weppRanges = {};
+
+  function computeWeppRanges() {
+    if (!weppSummary) return;
+    const modes = ['subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
+    weppRanges = {};
+    for (const mode of modes) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (const key of Object.keys(weppSummary)) {
+        const row = weppSummary[key];
+        const v = Number(row[mode]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      // Handle edge cases
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(max)) max = 1;
+      if (max <= min) max = min + 1;
+      weppRanges[mode] = { min, max };
+    }
+  }
+
+  function weppFillColor(mode, row) {
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+
+    const range = weppRanges[mode] || { min: 0, max: 100 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    return viridisColor(normalized);
+  }
+
+  function weppValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildWeppLayers() {
+    const activeLayers = weppLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && weppSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `wepp-${overlay.key}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? weppSummary[String(topaz)] : null;
+            return weppFillColor(overlay.mode, row);
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function pickActiveWeppLayer() {
+    for (let i = weppLayers.length - 1; i >= 0; i--) {
+      const layer = weppLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
   function buildLanduseLayers() {
     const activeLayers = landuseLayers
       .filter((l) => l.visible && subcatchmentsGeoJson && landuseSummary)
@@ -676,13 +864,19 @@
     return null;
   }
 
-  function zoomToBounds(bounds) {
+  function zoomToBounds(bounds, explicitZoom) {
     if (!bounds || bounds.length !== 4) return;
     const [west, south, east, north] = bounds;
     const cx = (west + east) / 2;
     const cy = (south + north) / 2;
-    const span = Math.max(east - west, north - south);
-    const zoom = Math.max(2, Math.min(14, Math.log2(360 / (span || 0.001)) - 1));
+    // Use explicit zoom if provided, otherwise calculate from bounds span
+    let zoom;
+    if (explicitZoom != null && Number.isFinite(explicitZoom)) {
+      zoom = explicitZoom;
+    } else {
+      const span = Math.max(east - west, north - south);
+      zoom = Math.max(2, Math.min(16, Math.log2(360 / (span || 0.001)) - 1));
+    }
     setViewState({
       longitude: cx,
       latitude: cy,
@@ -872,8 +1066,12 @@
       );
       updateLayerList();
       applyLayers();
-      // Zoom to project extent from subcatchments GeoJSON
-      if (subcatchmentsGeoJson && subcatchmentsGeoJson.features && subcatchmentsGeoJson.features.length) {
+      // Zoom to project extent from ron.map if available, otherwise compute from subcatchments GeoJSON
+      const ronExtent = ctx.mapExtent;
+      const ronZoom = ctx.mapZoom;
+      if (ronExtent && ronExtent.length === 4 && ronExtent.every(Number.isFinite)) {
+        zoomToBounds(ronExtent, ronZoom);
+      } else if (subcatchmentsGeoJson && subcatchmentsGeoJson.features && subcatchmentsGeoJson.features.length) {
         let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity;
         for (const feat of subcatchmentsGeoJson.features) {
           const geom = feat.geometry;
@@ -930,6 +1128,64 @@
     }
   }
 
+  async function detectHillslopesOverlays() {
+    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/watershed/subcatchments`;
+    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    try {
+      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
+      if (!subResp.ok || !geoResp.ok) return;
+      hillslopesSummary = await subResp.json();
+      // subcatchmentsGeoJson may already be loaded by detectLanduseOverlays or detectSoilsOverlays
+      if (!subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = await geoResp.json();
+      }
+      if (!hillslopesSummary || !subcatchmentsGeoJson) return;
+      const basePath = 'watershed/hillslopes.parquet';
+      hillslopesLayers.length = 0;
+      hillslopesLayers.push(
+        { key: 'hillslope-slope', label: 'Slope (rise/run)', path: basePath, mode: 'slope_scalar', visible: false },
+        { key: 'hillslope-length', label: 'Hillslope length (m)', path: basePath, mode: 'length', visible: false },
+        { key: 'hillslope-aspect', label: 'Aspect (degrees)', path: basePath, mode: 'aspect', visible: false },
+      );
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load hillslopes overlays', err);
+    }
+  }
+
+  async function detectWeppOverlays() {
+    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/wepp/loss/hillslopes`;
+    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    try {
+      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
+      if (!subResp.ok || !geoResp.ok) return;
+      weppSummary = await subResp.json();
+      // subcatchmentsGeoJson may already be loaded by other detect functions
+      if (!subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = await geoResp.json();
+      }
+      if (!weppSummary || !subcatchmentsGeoJson) return;
+      // Compute dynamic ranges from the loaded data
+      computeWeppRanges();
+      const basePath = 'wepp/output/interchange/loss_pw0.hill.parquet';
+      weppLayers.length = 0;
+      weppLayers.push(
+        { key: 'wepp-subrunoff', label: 'Subrunoff Volume (mm)', path: basePath, mode: 'subrunoff_volume', visible: false },
+        { key: 'wepp-baseflow', label: 'Baseflow Volume (mm)', path: basePath, mode: 'baseflow_volume', visible: false },
+        { key: 'wepp-soil-loss', label: 'Soil Loss (tonnes/ha)', path: basePath, mode: 'soil_loss', visible: false },
+        { key: 'wepp-sed-dep', label: 'Sediment Deposition (tonnes/ha)', path: basePath, mode: 'sediment_deposition', visible: false },
+        { key: 'wepp-sed-yield', label: 'Sediment Yield (tonnes/ha)', path: basePath, mode: 'sediment_yield', visible: false },
+      );
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load WEPP overlays', err);
+    }
+  }
+
   const deckgl = new deck.Deck({
     parent: target,
     controller: controllerOptions,
@@ -976,6 +1232,50 @@
           return `Layer: ${soilOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
+      const hillslopesOverlay = pickActiveHillslopesLayer();
+      if (info.object && hillslopesOverlay && hillslopesSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? hillslopesSummary[String(topaz)] : null;
+        const val = hillslopesValue(hillslopesOverlay.mode, row);
+        if (val !== null) {
+          let label;
+          if (hillslopesOverlay.mode === 'slope_scalar') {
+            label = `Slope: ${typeof val === 'number' ? (val * 100).toFixed(1) : val}%`;
+          } else if (hillslopesOverlay.mode === 'length') {
+            label = `Length: ${typeof val === 'number' ? val.toFixed(1) : val} m`;
+          } else if (hillslopesOverlay.mode === 'aspect') {
+            label = `Aspect: ${typeof val === 'number' ? val.toFixed(0) : val}°`;
+          } else {
+            label = `${hillslopesOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+          }
+          return `Layer: ${hillslopesOverlay.path}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
+      const weppOverlay = pickActiveWeppLayer();
+      if (info.object && weppOverlay && weppSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? weppSummary[String(topaz)] : null;
+        const val = weppValue(weppOverlay.mode, row);
+        if (val !== null) {
+          let label;
+          if (weppOverlay.mode === 'subrunoff_volume') {
+            label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
+          } else if (weppOverlay.mode === 'baseflow_volume') {
+            label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
+          } else if (weppOverlay.mode === 'soil_loss') {
+            label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
+          } else if (weppOverlay.mode === 'sediment_deposition') {
+            label = `Sed. Deposition: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
+          } else if (weppOverlay.mode === 'sediment_yield') {
+            label = `Sed. Yield: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
+          } else {
+            label = `${weppOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+          }
+          return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
       const rasterLayer = pickActiveRaster();
       if (info.coordinate && rasterLayer) {
         const val = sampleRaster(rasterLayer, info.coordinate);
@@ -998,7 +1298,7 @@
   // Expose for debugging.
   window.glDashboardDeck = deckgl;
 
-  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays()]).catch((err) => {
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays()]).catch((err) => {
     // eslint-disable-next-line no-console
     console.error('gl-dashboard: layer detection failed', err);
   });
