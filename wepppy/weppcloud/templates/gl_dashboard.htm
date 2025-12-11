@@ -26,6 +26,46 @@
   .gl-layer-item input {
     accent-color: #3f6ac7;
   }
+  .gl-layer-details {
+    margin: 0;
+    border-bottom: 1px solid #1f2c44;
+    padding-bottom: 0.5rem;
+  }
+  .gl-layer-details:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .gl-layer-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #9fb4dc;
+    padding: 0.35rem 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .gl-layer-details summary::-webkit-details-marker {
+    display: none;
+  }
+  .gl-layer-details summary::before {
+    content: '▶';
+    font-size: 0.65em;
+    transition: transform 150ms ease;
+  }
+  .gl-layer-details[open] summary::before {
+    transform: rotate(90deg);
+  }
+  .gl-layer-details summary:hover {
+    color: #c7d7ff;
+  }
+  .gl-layer-items {
+    list-style: none;
+    padding: 0 0 0 1rem;
+    margin: 0.25rem 0 0 0;
+    display: grid;
+    gap: 0.25rem;
+  }
   html, body {
     background: #070c14;
     color: #e5ecf7;

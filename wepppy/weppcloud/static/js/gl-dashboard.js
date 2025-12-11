@@ -109,7 +109,9 @@
 
   const detectedLayers = [];
   const landuseLayers = [];
+  const soilsLayers = [];
   let landuseSummary = null;
+  let soilsSummary = null;
   let subcatchmentsGeoJson = null;
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
@@ -270,17 +272,36 @@
     }
   }
 
+  // Helper to deselect all subcatchment overlays across landuse and soils
+  function deselectAllSubcatchmentOverlays() {
+    landuseLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-Landuse-${l.key}`);
+      if (el) el.checked = false;
+    });
+    soilsLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-Soils-${l.key}`);
+      if (el) el.checked = false;
+    });
+  }
+
   function updateLayerList() {
     if (!layerListEl) return;
     layerListEl.innerHTML = '';
-    const sections = [];
+    const subcatchmentSections = [];
+    const rasterSections = [];
     if (landuseLayers.length) {
-      sections.push({ title: 'Landuse', items: landuseLayers });
+      subcatchmentSections.push({ title: 'Landuse', items: landuseLayers, isSubcatchment: true });
+    }
+    if (soilsLayers.length) {
+      subcatchmentSections.push({ title: 'Soils', items: soilsLayers, isSubcatchment: true });
     }
     if (detectedLayers.length) {
-      sections.push({ title: 'Rasters', items: detectedLayers });
+      rasterSections.push({ title: 'Rasters', items: detectedLayers, isSubcatchment: false });
     }
-    if (!sections.length) {
+    const allSections = [...subcatchmentSections, ...rasterSections];
+    if (!allSections.length) {
       if (layerEmptyEl) {
         layerEmptyEl.hidden = false;
       }
@@ -289,28 +310,46 @@
     if (layerEmptyEl) {
       layerEmptyEl.hidden = true;
     }
-    sections.forEach((section) => {
-      const heading = document.createElement('li');
-      heading.className = 'gl-layer-group';
-      heading.textContent = section.title;
-      layerListEl.appendChild(heading);
+    // Add subcatchment section header if we have any
+    if (subcatchmentSections.length) {
+      const groupHeader = document.createElement('li');
+      groupHeader.className = 'gl-layer-group-header';
+      groupHeader.textContent = 'Subcatchment Overlays';
+      layerListEl.appendChild(groupHeader);
+    }
+    allSections.forEach((section, idx) => {
+      // Create collapsible details element
+      const details = document.createElement('details');
+      details.className = 'gl-layer-details';
+      // Open the first section by default, or sections with visible items
+      const hasVisibleItem = section.items.some((l) => l.visible);
+      details.open = idx === 0 || hasVisibleItem;
+
+      const summary = document.createElement('summary');
+      summary.className = 'gl-layer-group';
+      summary.textContent = section.title;
+      details.appendChild(summary);
+
+      const itemList = document.createElement('ul');
+      itemList.className = 'gl-layer-items';
+
       section.items.forEach((layer) => {
         const li = document.createElement('li');
         li.className = 'gl-layer-item';
         const input = document.createElement('input');
-        input.type = 'checkbox';
+        // Use radio for subcatchment overlays (landuse/soils), checkbox for rasters
+        input.type = section.isSubcatchment ? 'radio' : 'checkbox';
+        if (section.isSubcatchment) {
+          input.name = 'subcatchment-overlay';
+        }
         input.checked = layer.visible;
         input.id = `layer-${section.title}-${layer.key}`;
         input.addEventListener('change', () => {
-          if (section.title === 'Landuse' && input.checked) {
-            // Enforce single-selection for landuse overlays
-            section.items.forEach((other) => {
-              other.visible = other.key === layer.key;
-              const otherInput = document.getElementById(`layer-${section.title}-${other.key}`);
-              if (otherInput && otherInput !== input) {
-                otherInput.checked = other.visible;
-              }
-            });
+          if (section.isSubcatchment) {
+            // Radio behavior: deselect all, then select this one
+            deselectAllSubcatchmentOverlays();
+            layer.visible = true;
+            input.checked = true;
           } else {
             layer.visible = input.checked;
           }
@@ -323,8 +362,11 @@
         label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
         li.appendChild(input);
         li.appendChild(label);
-        layerListEl.appendChild(li);
+        itemList.appendChild(li);
       });
+
+      details.appendChild(itemList);
+      layerListEl.appendChild(details);
     });
   }
 
@@ -355,8 +397,9 @@
       })
       .filter(Boolean);
     const landuseDeckLayers = buildLanduseLayers();
+    const soilsDeckLayers = buildSoilsLayers();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...activeRasterLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...activeRasterLayers],
     });
   }
 
@@ -450,6 +493,68 @@
     }
     const v = Number(row[mode]);
     return Number.isFinite(v) ? v : null;
+  }
+
+  function soilsFillColor(mode, row) {
+    if (!row) return [120, 120, 120, 120];
+    if (mode === 'dominant') {
+      const rgba = hexToRgbaArray(row.color, 220);
+      return rgba || [120, 120, 120, 180];
+    }
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) {
+      return [120, 120, 120, 120];
+    }
+    // Normalize value ranges for viridis color scale
+    let normalized = 0;
+    if (mode === 'clay' || mode === 'sand' || mode === 'rock') {
+      // These are percentages 0-100
+      normalized = Math.min(1, Math.max(0, value / 100));
+    } else if (mode === 'bd') {
+      // Bulk density typically 0.5-2.0 g/cm3
+      normalized = Math.min(1, Math.max(0, (value - 0.5) / 1.5));
+    } else {
+      normalized = Math.min(1, Math.max(0, value));
+    }
+    return viridisColor(normalized);
+  }
+
+  function soilsValue(mode, row) {
+    if (!row) return null;
+    if (mode === 'dominant') {
+      return row.desc || row.simple_texture || row.mukey || 'soil';
+    }
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildSoilsLayers() {
+    const activeLayers = soilsLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && soilsSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `soils-${overlay.key}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? soilsSummary[String(topaz)] : null;
+            return soilsFillColor(overlay.mode, row);
+          },
+        });
+      });
+    return activeLayers;
   }
 
   function buildLanduseLayers() {
@@ -554,6 +659,16 @@
   function pickActiveLanduseLayer() {
     for (let i = landuseLayers.length - 1; i >= 0; i--) {
       const layer = landuseLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
+  function pickActiveSoilsLayer() {
+    for (let i = soilsLayers.length - 1; i >= 0; i--) {
+      const layer = soilsLayers[i];
       if (layer.visible) {
         return layer;
       }
@@ -786,6 +901,35 @@
     }
   }
 
+  async function detectSoilsOverlays() {
+    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/soils/subcatchments`;
+    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    try {
+      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
+      if (!subResp.ok || !geoResp.ok) return;
+      soilsSummary = await subResp.json();
+      // subcatchmentsGeoJson may already be loaded by detectLanduseOverlays
+      if (!subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = await geoResp.json();
+      }
+      if (!soilsSummary || !subcatchmentsGeoJson) return;
+      const basePath = 'soils/soils.parquet';
+      soilsLayers.length = 0;
+      soilsLayers.push(
+        { key: 'soil-dominant', label: 'Dominant soil (color)', path: basePath, mode: 'dominant', visible: false },
+        { key: 'soil-clay', label: 'Clay content (%)', path: basePath, mode: 'clay', visible: false },
+        { key: 'soil-sand', label: 'Sand content (%)', path: basePath, mode: 'sand', visible: false },
+        { key: 'soil-bd', label: 'Bulk density (g/cm³)', path: basePath, mode: 'bd', visible: false },
+        { key: 'soil-rock', label: 'Rock content (%)', path: basePath, mode: 'rock', visible: false },
+      );
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load soils overlays', err);
+    }
+  }
+
   const deckgl = new deck.Deck({
     parent: target,
     controller: controllerOptions,
@@ -814,6 +958,24 @@
           return `Layer: ${luOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
+      const soilOverlay = pickActiveSoilsLayer();
+      if (info.object && soilOverlay && soilsSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? soilsSummary[String(topaz)] : null;
+        const val = soilsValue(soilOverlay.mode, row);
+        if (val !== null) {
+          let label;
+          if (soilOverlay.mode === 'dominant') {
+            label = `Soil: ${val}`;
+          } else if (soilOverlay.mode === 'bd') {
+            label = `Bulk density: ${typeof val === 'number' ? val.toFixed(2) : val} g/cm³`;
+          } else {
+            label = `${soilOverlay.mode}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
+          }
+          return `Layer: ${soilOverlay.path}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
       const rasterLayer = pickActiveRaster();
       if (info.coordinate && rasterLayer) {
         const val = sampleRaster(rasterLayer, info.coordinate);
@@ -836,7 +998,7 @@
   // Expose for debugging.
   window.glDashboardDeck = deckgl;
 
-  Promise.all([detectLayers(), detectLanduseOverlays()]).catch((err) => {
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays()]).catch((err) => {
     // eslint-disable-next-line no-console
     console.error('gl-dashboard: layer detection failed', err);
   });
