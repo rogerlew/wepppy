@@ -306,7 +306,7 @@ http.get("resources/subcatchments.json")
 - `/batch/` routes (cross-run operations)
 - `/api/` global endpoints (user prefs, system status)
 - `/auth/` authentication routes
-- Root routes (`/`, `/index`, `/about`)
+- Root routes (`/`, `/index`)
 
 ### Bulk Fix Pattern
 

@@ -275,12 +275,6 @@ def interfaces():
         return exception_factory()
 
 
-@weppcloud_site_bp.route('/about/', strict_slashes=False)
-@handle_with_exception_factory
-def about():
-    return render_template('about.htm', user=current_user)
-
-
 def _landing_run_locations_response() -> 'flask.Response':
     dataset = _load_or_refresh_run_locations()
     return jsonify(dataset)
