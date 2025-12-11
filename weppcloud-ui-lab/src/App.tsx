@@ -536,7 +536,7 @@ const mapSubtitle =
   const navItems = useMemo(
     () => [
       { label: 'Docs', href: 'https://doc.wepp.cloud' },
-      { label: 'Research', href: '/weppcloud/research', external: true },
+      { label: 'Research', href: 'https://forest.moscowfsl.wsu.edu/library/', external: true },
       { label: 'Interfaces', href: '/weppcloud/interfaces/' },
       {
         label: isAuthenticated ? 'My Runs' : 'Login',
@@ -591,6 +591,27 @@ const mapSubtitle =
           </div>
           <div className="hero-fade" />
         </AuroraBackground>
+      </section>
+
+      <section
+        id="about"
+        className="relative z-30 bg-[#020617] px-4 py-16 sm:px-6 lg:px-12"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl text-center"
+        >
+          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">About</p>
+          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">What is WEPPcloud?</h2>
+          <p className="mt-6 text-lg leading-relaxed text-slate-300">
+            WEPPcloud is an online interface for running WEPP (Water Erosion Prediction Project) Model. WEPP is a
+            physically based erosion model built to replace the Universal Soil Loss Equation (USLE) model. The interface
+            simplifies the acquisition and preparation of topography, soil, management, and climate inputs for WEPP.
+          </p>
+        </motion.div>
       </section>
 
       <section
