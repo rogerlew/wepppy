@@ -231,12 +231,29 @@
       if (!Array.isArray(bounds) || bounds.length !== 4 || bounds.some((v) => !Number.isFinite(v))) {
         return;
       }
+      // Fetch the PNG so we can sample pixel values on hover.
+      const imgResp = await fetch(imgurl);
+      if (!imgResp.ok) {
+        throw new Error(`SBS image fetch failed: ${imgResp.status}`);
+      }
+      const blob = await imgResp.blob();
+      const bitmap = await createImageBitmap(blob);
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx2d = canvas.getContext('2d');
+      ctx2d.drawImage(bitmap, 0, 0);
+      const imgData = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
       detectedLayers.push({
         key: 'sbs',
         label: 'SBS Map',
         path: 'query/baer_wgs_map',
         bounds,
-        imageUrl: imgurl,
+        canvas,
+        width: canvas.width,
+        height: canvas.height,
+        values: imgData.data,
+        sampleMode: 'rgba',
         visible: true,
       });
     } catch (err) {
@@ -270,7 +287,7 @@
       });
       const label = document.createElement('label');
       label.setAttribute('for', input.id);
-      label.textContent = layer.label;
+      label.innerHTML = `<span class="gl-layer-name">${layer.label}</span><br><span class="gl-layer-path">${layer.path}</span>`;
       li.appendChild(input);
       li.appendChild(label);
       layerListEl.appendChild(li);
@@ -342,6 +359,42 @@
     return [west, south, east, north];
   }
 
+  function sampleRaster(layer, lonLat) {
+    if (!layer || !layer.values || !layer.width || !layer.height || !layer.bounds) return null;
+    const [lon, lat] = lonLat || [];
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+    const [west, south, east, north] = layer.bounds;
+    if (lon < west || lon > east || lat < south || lat > north) {
+      return null;
+    }
+    const x = ((lon - west) / (east - west)) * layer.width;
+    const y = ((north - lat) / (north - south)) * layer.height;
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    if (xi < 0 || xi >= layer.width || yi < 0 || yi >= layer.height) return null;
+    if (layer.sampleMode === 'rgba') {
+      const base = (yi * layer.width + xi) * 4;
+      const r = layer.values[base];
+      const g = layer.values[base + 1];
+      const b = layer.values[base + 2];
+      const a = layer.values[base + 3];
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+    const idx = yi * layer.width + xi;
+    const v = layer.values[idx];
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function pickActiveRaster() {
+    for (let i = detectedLayers.length - 1; i >= 0; i--) {
+      const layer = detectedLayers[i];
+      if (layer.visible && layer.values) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
   function zoomToBounds(bounds) {
     if (!bounds || bounds.length !== 4) return;
     const [west, south, east, north] = bounds;
@@ -401,7 +454,7 @@
         }
       }
       ctx2d.putImageData(imgData, 0, 0);
-      return canvas;
+      return { canvas, values, width, height, sampleMode: 'scalar' };
     }
 
     if (typeof colorMap === 'function') {
@@ -431,7 +484,7 @@
         }
       }
       ctx2d.putImageData(imgData, 0, 0);
-      return canvas;
+      return { canvas, values, width, height, sampleMode: 'scalar' };
     }
 
     // Fallback grayscale
@@ -458,7 +511,7 @@
       imgData.data[j + 3] = 200;
     }
     ctx2d.putImageData(imgData, 0, 0);
-    return canvas;
+    return { canvas, values, width, height, sampleMode: 'scalar' };
   }
 
   async function fetchRasterCanvas(path, colorMap) {
@@ -489,13 +542,17 @@
           const bounds = computeBoundsFromGdal(info);
           if (!bounds) continue;
           const colorMap = def.key === 'landuse' ? NLCD_COLORMAP : def.key === 'soils' ? soilColorForValue : null;
-          const canvas = await fetchRasterCanvas(path, colorMap);
+          const raster = await fetchRasterCanvas(path, colorMap);
           found = {
             key: def.key,
             label: def.label,
             path,
             bounds,
-            canvas,
+            canvas: raster.canvas,
+            width: raster.width,
+            height: raster.height,
+            values: raster.values,
+            sampleMode: raster.sampleMode,
             visible: true,
           };
           break;
@@ -528,7 +585,15 @@
     },
     layers: [baseLayer],
     getTooltip: (info) => {
-      if (info && info.tile) {
+      if (!info) return null;
+      const rasterLayer = pickActiveRaster();
+      if (info.coordinate && rasterLayer) {
+        const val = sampleRaster(rasterLayer, info.coordinate);
+        if (val !== null) {
+          return `Layer: ${rasterLayer.path}\nValue: ${val}`;
+        }
+      }
+      if (info.tile) {
         return `Tile z${info.tile.z}`;
       }
       return null;
