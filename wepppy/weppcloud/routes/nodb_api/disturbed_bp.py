@@ -13,12 +13,12 @@ from .._common import (
     exception_factory,
     jsonify,
     load_run_context,
+    parse_request_payload,
     render_template,
     request,
     secure_filename,
     send_file,
     success_factory,
-    parse_request_payload,
     _join,
 )
 from wepppy.nodb.core import Ron
@@ -84,12 +84,23 @@ def task_modify_disturbed(runid: str, config: str) -> Response:
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    data = parse_request_payload(request, trim_strings=False)
-    rows = data.get('rows')
-    if isinstance(rows, dict):
-        data['rows'] = [rows]
+
+    # The frontend sends a raw JSON array of rows (list of lists).
+    # Try to parse it directly first, falling back to dict payload format.
+    raw_json = request.get_json(silent=True, force=True)
+    if isinstance(raw_json, list):
+        # Direct array payload from jspreadsheet getData()
+        rows = raw_json
+    elif isinstance(raw_json, dict):
+        # Dict payload with 'rows' key
+        rows = raw_json.get('rows', [])
+        if isinstance(rows, dict):
+            rows = [rows]
+    else:
+        rows = []
+
     lookup_fn = Disturbed.getInstance(wd).lookup_fn
-    write_disturbed_land_soil_lookup(lookup_fn, data)
+    write_disturbed_land_soil_lookup(lookup_fn, rows)
     return success_factory()
 
 

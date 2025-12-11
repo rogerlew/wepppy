@@ -55,7 +55,7 @@ document.getElementById('save').onclick = function () {
     $.post({
                 url: "tasks/modify_disturbed",
                 data: JSON.stringify(data), 
-                contentType: "application/text",
+                contentType: "application/json",
                 dataType: "json",
                 success: function success(response) {
                     alert('Save Successful');

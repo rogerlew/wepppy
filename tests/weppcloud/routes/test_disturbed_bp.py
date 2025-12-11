@@ -206,7 +206,8 @@ def test_task_modify_disturbed_writes_lookup(disturbed_client):
     assert response.get_json()["Success"] is True
     lookup_path, data = dispatched["write_lookup"]
     assert lookup_path == DisturbedStub.getInstance(run_dir).lookup_fn
-    assert data == payload
+    # The endpoint now extracts rows from the payload dict
+    assert data == payload["rows"]
 
 
 def test_query_baer_wgs_map_returns_metadata(disturbed_client):
