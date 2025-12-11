@@ -2265,9 +2265,10 @@ h5:first-child {
 
 .wc-feature__media img {
   width: 100%;
+  max-width: 200px;
   height: auto;
   display: block;
-  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-md);
 }
 
 .wc-feature__body {
