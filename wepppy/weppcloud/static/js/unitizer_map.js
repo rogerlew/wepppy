@@ -1232,6 +1232,41 @@
           "token": "lb_ft-cube"
         }
       ]
+    },
+    {
+      "conversions": [
+        {
+          "from": "kg/m^3",
+          "offset": 0.0,
+          "scale": 0.062428,
+          "to": "lb/ft^3"
+        },
+        {
+          "from": "lb/ft^3",
+          "offset": 0.0,
+          "scale": 16.0185,
+          "to": "kg/m^3"
+        }
+      ],
+      "defaultIndex": 1,
+      "key": "snow-density",
+      "label": "Snow Density",
+      "units": [
+        {
+          "htmlLabel": "kg/m<sup>3</sup>",
+          "key": "kg/m^3",
+          "label": "kg/m^3",
+          "precision": 1,
+          "token": "kg_m-cube"
+        },
+        {
+          "htmlLabel": "lb/ft<sup>3</sup>",
+          "key": "lb/ft^3",
+          "label": "lb/ft^3",
+          "precision": 2,
+          "token": "lb_ft-cube"
+        }
+      ]
     }
   ],
   "generator": "unitizer_map_builder.py",
@@ -1257,6 +1292,7 @@
     "kg_ha-_3": "kg/ha,3",
     "kg_ha_yr": "kg/ha/yr",
     "kg_ha_yr-_3": "kg/ha/yr,3",
+    "kg_m-cube": "kg/m^3",
     "kg_m-sqr": "kg/m^2",
     "kg_m-sqr_yr": "kg/m^2/yr",
     "kg_yr": "kg/yr",
@@ -1322,6 +1358,7 @@
     "kg/ha/yr,3": "xs-surface-density-annual",
     "kg/m^2": "sm-surface-density",
     "kg/m^2/yr": "sm-surface-density-annual",
+    "kg/m^3": "snow-density",
     "kg/yr": "sm-weight-annual",
     "km": "distance",
     "km^2": "area",
@@ -1330,7 +1367,7 @@
     "lb/acre,3": "xs-surface-density",
     "lb/acre/yr": "sm-surface-density-annual",
     "lb/acre/yr,3": "xs-surface-density-annual",
-    "lb/ft^3": "bulk-density",
+    "lb/ft^3": "snow-density",
     "lb/mi^2": "sm-surface-density",
     "lb/mi^2/yr": "sm-surface-density-annual",
     "lb/yr": "sm-weight-annual",

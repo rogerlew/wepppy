@@ -7,21 +7,33 @@
        checked=wepp.run_snow,
        attrs={"class": "disable-readonly", "data-wepp-routine": "snow"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "snow_opts_rst",
-       "Rain/snow threshold temperature (°C)",
+       "Rain/snow threshold temperature",
        value=wepp.snow_opts.rst,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="°C",
+       unit_category="temperature",
+       unit_name="degc",
+       precision=0.1,
+       attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "snow_opts_newsnw",
-       "Density of new snow (g/cm³)",
+       "Density of new snow",
        value=wepp.snow_opts.newsnw,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="kg/m³",
+       unit_category="snow-density",
+       unit_name="kg/m^3",
+       precision=1,
+       attrs={"class": "disable-readonly"}
      ) }}
-  {{ ui.text_field(
+  {{ ui.numeric_field(
        "snow_opts_ssd",
-       "Snow settling density (g/cm³)",
+       "Snow settling density",
        value=wepp.snow_opts.ssd,
-       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+       unit_label="kg/m³",
+       unit_category="snow-density",
+       unit_name="kg/m^3",
+       precision=1,
+       attrs={"class": "disable-readonly"}
      ) }}

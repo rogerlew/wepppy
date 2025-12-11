@@ -2572,13 +2572,21 @@ h5:first-child {
   margin: 0;
 }
 
+#sbs_mode1_controls {
+  gap: var(--wc-space-xs);
+}
+
 #sbs_mode1_controls .wc-button-row {
-  margin-bottom: var(--wc-space-md);
+  margin-bottom: 0;
 }
 
 #sbs_mode1_controls .wc-button-row .pure-button {
-  min-width: 240px;
+  width: 220px;
   justify-content: center;
+}
+
+#sbs_mode1_controls .wc-job-hint:empty {
+  display: none;
 }
 
 .wc-baer-classify {
