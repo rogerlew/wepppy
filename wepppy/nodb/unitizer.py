@@ -176,6 +176,10 @@ converters: ConverterRegistry = {
     'bulk-density': {
         ('g/cm^3', 'lb/ft^3'): lambda v: v * 62.42796,
         ('lb/ft^3', 'g/cm^3'): lambda v: v * 0.0160185,
+    },
+    'snow-density': {
+        ('kg/m^3', 'lb/ft^3'): lambda v: v * 0.062428,
+        ('lb/ft^3', 'kg/m^3'): lambda v: v * 16.0185,
     }
 }
 
@@ -299,6 +303,10 @@ precisions: PrecisionRegistry = OrderedDict([
     ('bulk-density', OrderedDict([
         ('g/cm^3', 3),
         ('lb/ft^3', 3)])
+     ),
+    ('snow-density', OrderedDict([
+        ('kg/m^3', 1),
+        ('lb/ft^3', 2)])
      )
 ])
 
