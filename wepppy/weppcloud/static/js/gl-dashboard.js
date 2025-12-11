@@ -108,6 +108,9 @@
   ];
 
   const detectedLayers = [];
+  const landuseLayers = [];
+  let landuseSummary = null;
+  let subcatchmentsGeoJson = null;
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
   let geoTiffLoader = null;
@@ -135,6 +138,11 @@
   };
   const HEX_RGB_RE = /^#?([0-9a-f]{6})$/i;
   const soilColorCache = new Map();
+  const viridisScale =
+    typeof createColormap === 'function'
+      ? createColormap({ colormap: 'viridis', nshades: 256, format: 'rgba' })
+      : null;
+  const RGBA_RE = /^rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*(?:,\s*([0-9.]+)\s*)?\)$/i;
 
   function hslToHex(h, s, l) {
     const sat = s / 100;
@@ -254,7 +262,7 @@
         height: canvas.height,
         values: imgData.data,
         sampleMode: 'rgba',
-        visible: true,
+        visible: false,
       });
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -265,7 +273,14 @@
   function updateLayerList() {
     if (!layerListEl) return;
     layerListEl.innerHTML = '';
-    if (!detectedLayers.length) {
+    const sections = [];
+    if (landuseLayers.length) {
+      sections.push({ title: 'Landuse', items: landuseLayers });
+    }
+    if (detectedLayers.length) {
+      sections.push({ title: 'Rasters', items: detectedLayers });
+    }
+    if (!sections.length) {
       if (layerEmptyEl) {
         layerEmptyEl.hidden = false;
       }
@@ -274,23 +289,42 @@
     if (layerEmptyEl) {
       layerEmptyEl.hidden = true;
     }
-    detectedLayers.forEach((layer) => {
-      const li = document.createElement('li');
-      li.className = 'gl-layer-item';
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.checked = layer.visible;
-      input.id = `layer-${layer.key}`;
-      input.addEventListener('change', () => {
-        layer.visible = input.checked;
-        applyLayers();
+    sections.forEach((section) => {
+      const heading = document.createElement('li');
+      heading.className = 'gl-layer-group';
+      heading.textContent = section.title;
+      layerListEl.appendChild(heading);
+      section.items.forEach((layer) => {
+        const li = document.createElement('li');
+        li.className = 'gl-layer-item';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = layer.visible;
+        input.id = `layer-${section.title}-${layer.key}`;
+        input.addEventListener('change', () => {
+          if (section.title === 'Landuse' && input.checked) {
+            // Enforce single-selection for landuse overlays
+            section.items.forEach((other) => {
+              other.visible = other.key === layer.key;
+              const otherInput = document.getElementById(`layer-${section.title}-${other.key}`);
+              if (otherInput && otherInput !== input) {
+                otherInput.checked = other.visible;
+              }
+            });
+          } else {
+            layer.visible = input.checked;
+          }
+          applyLayers();
+        });
+        const label = document.createElement('label');
+        label.setAttribute('for', input.id);
+        const name = layer.label || layer.key;
+        const path = layer.path || '';
+        label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+        li.appendChild(input);
+        li.appendChild(label);
+        layerListEl.appendChild(li);
       });
-      const label = document.createElement('label');
-      label.setAttribute('for', input.id);
-      label.innerHTML = `<span class="gl-layer-name">${layer.label}</span><br><span class="gl-layer-path">${layer.path}</span>`;
-      li.appendChild(input);
-      li.appendChild(label);
-      layerListEl.appendChild(li);
     });
   }
 
@@ -320,9 +354,131 @@
         return null;
       })
       .filter(Boolean);
+    const landuseDeckLayers = buildLanduseLayers();
     deckgl.setProps({
-      layers: [baseLayer, ...activeRasterLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...activeRasterLayers],
     });
+  }
+
+  function hexToRgbaArray(hex, alpha = 230) {
+    const parsed = HEX_RGB_RE.exec(hex || '');
+    if (!parsed) return null;
+    const intVal = parseInt(parsed[1], 16);
+    return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, alpha];
+  }
+
+  function rgbaStringToArray(str, alphaOverride) {
+    const match = RGBA_RE.exec(str || '');
+    if (!match) return null;
+    const r = Number(match[1]);
+    const g = Number(match[2]);
+    const b = Number(match[3]);
+    const aRaw = match[4];
+    if (![r, g, b].every(Number.isFinite)) return null;
+    const a = Number.isFinite(Number(aRaw)) ? Number(aRaw) * 255 : 255;
+    const finalA = Number.isFinite(alphaOverride) ? alphaOverride : a;
+    return [Math.round(r), Math.round(g), Math.round(b), Math.round(finalA)];
+  }
+
+  function normalizeColorEntry(entry, alpha = 230) {
+    if (!entry) return null;
+    if (Array.isArray(entry)) {
+      if (entry.length === 4 && entry.every((v) => Number.isFinite(Number(v)))) {
+        const r = Number(entry[0]);
+        const g = Number(entry[1]);
+        const b = Number(entry[2]);
+        let a = Number(entry[3]);
+        // colormap library returns alpha in 0-1 range; convert to 0-255
+        if (a <= 1) {
+          a = a * 255;
+        }
+        // Use the passed alpha override if the original alpha was fully opaque
+        if (a >= 254) {
+          a = alpha;
+        }
+        return [r, g, b, Math.round(a)];
+      }
+    } else if (typeof entry === 'string') {
+      const hex = hexToRgbaArray(entry, alpha);
+      if (hex) return hex;
+      const rgba = rgbaStringToArray(entry, alpha);
+      if (rgba) return rgba;
+    }
+    return null;
+  }
+
+  function viridisColor(val) {
+    const v = Math.min(1, Math.max(0, Number(val)));
+    if (viridisScale && typeof viridisScale.map === 'function') {
+      const mapped = viridisScale.map(v);
+      const rgba = normalizeColorEntry(mapped, 230);
+      if (rgba) return rgba;
+    }
+    if (viridisScale && Array.isArray(viridisScale) && viridisScale.length) {
+      const idx = Math.min(viridisScale.length - 1, Math.floor(v * (viridisScale.length - 1)));
+      const color = viridisScale[idx];
+      const rgba = normalizeColorEntry(color, 230);
+      if (rgba) return rgba;
+    }
+    const start = [68, 1, 84];
+    const end = [253, 231, 37];
+    return [
+      Math.round(start[0] + (end[0] - start[0]) * v),
+      Math.round(start[1] + (end[1] - start[1]) * v),
+      Math.round(start[2] + (end[2] - start[2]) * v),
+      230,
+    ];
+  }
+
+  function landuseFillColor(mode, row) {
+    if (!row) return [120, 120, 120, 120];
+    if (mode === 'dominant') {
+      const rgba = hexToRgbaArray(row.color, 220);
+      return rgba || [120, 120, 120, 180];
+    }
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) {
+      return [120, 120, 120, 120];
+    }
+    return viridisColor(Math.min(1, Math.max(0, value)));
+  }
+
+  function landuseValue(mode, row) {
+    if (!row) return null;
+    if (mode === 'dominant') {
+      return row.desc || row.key || row._map || 'landuse';
+    }
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildLanduseLayers() {
+    const activeLayers = landuseLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && landuseSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `landuse-${overlay.key}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? landuseSummary[String(topaz)] : null;
+            return landuseFillColor(overlay.mode, row);
+          },
+        });
+      });
+    return activeLayers;
   }
 
   function computeBoundsFromGdal(info) {
@@ -389,6 +545,16 @@
     for (let i = detectedLayers.length - 1; i >= 0; i--) {
       const layer = detectedLayers[i];
       if (layer.visible && layer.values) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
+  function pickActiveLanduseLayer() {
+    for (let i = landuseLayers.length - 1; i >= 0; i--) {
+      const layer = landuseLayers[i];
+      if (layer.visible) {
         return layer;
       }
     }
@@ -553,7 +719,7 @@
             height: raster.height,
             values: raster.values,
             sampleMode: raster.sampleMode,
-            visible: true,
+            visible: false,
           };
           break;
         } catch (err) {
@@ -572,6 +738,54 @@
     }
   }
 
+  async function detectLanduseOverlays() {
+    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/landuse/subcatchments`;
+    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    try {
+      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
+      if (!subResp.ok || !geoResp.ok) return;
+      landuseSummary = await subResp.json();
+      subcatchmentsGeoJson = await geoResp.json();
+      if (!landuseSummary || !subcatchmentsGeoJson) return;
+      const basePath = 'landuse/landuse.parquet';
+      landuseLayers.length = 0;
+      landuseLayers.push(
+        { key: 'lu-dominant', label: 'Dominant landuse', path: basePath, mode: 'dominant', visible: true },
+        { key: 'lu-cancov', label: 'Canopy cover (cancov)', path: basePath, mode: 'cancov', visible: false },
+        { key: 'lu-inrcov', label: 'Interrill cover (inrcov)', path: basePath, mode: 'inrcov', visible: false },
+        { key: 'lu-rilcov', label: 'Rill cover (rilcov)', path: basePath, mode: 'rilcov', visible: false },
+      );
+      updateLayerList();
+      applyLayers();
+      // Zoom to project extent from subcatchments GeoJSON
+      if (subcatchmentsGeoJson && subcatchmentsGeoJson.features && subcatchmentsGeoJson.features.length) {
+        let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity;
+        for (const feat of subcatchmentsGeoJson.features) {
+          const geom = feat.geometry;
+          if (!geom || !geom.coordinates) continue;
+          const coords = geom.type === 'Polygon' ? geom.coordinates[0] : 
+                         geom.type === 'MultiPolygon' ? geom.coordinates.flat(2) : [];
+          for (const pt of coords) {
+            if (!Array.isArray(pt) || pt.length < 2) continue;
+            const [lon, lat] = pt;
+            if (Number.isFinite(lon) && Number.isFinite(lat)) {
+              if (lon < west) west = lon;
+              if (lon > east) east = lon;
+              if (lat < south) south = lat;
+              if (lat > north) north = lat;
+            }
+          }
+        }
+        if ([west, south, east, north].every(Number.isFinite)) {
+          zoomToBounds([west, south, east, north]);
+        }
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load landuse overlays', err);
+    }
+  }
+
   const deckgl = new deck.Deck({
     parent: target,
     controller: controllerOptions,
@@ -586,6 +800,20 @@
     layers: [baseLayer],
     getTooltip: (info) => {
       if (!info) return null;
+      const luOverlay = pickActiveLanduseLayer();
+      if (info.object && luOverlay && landuseSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? landuseSummary[String(topaz)] : null;
+        const val = landuseValue(luOverlay.mode, row);
+        if (val !== null) {
+          const label =
+            luOverlay.mode === 'dominant'
+              ? `Landuse: ${val}`
+              : `${luOverlay.mode}: ${typeof val === 'number' ? val.toFixed(3) : val}`;
+          return `Layer: ${luOverlay.path}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
       const rasterLayer = pickActiveRaster();
       if (info.coordinate && rasterLayer) {
         const val = sampleRaster(rasterLayer, info.coordinate);
@@ -608,7 +836,7 @@
   // Expose for debugging.
   window.glDashboardDeck = deckgl;
 
-  detectLayers().catch((err) => {
+  Promise.all([detectLayers(), detectLanduseOverlays()]).catch((err) => {
     // eslint-disable-next-line no-console
     console.error('gl-dashboard: layer detection failed', err);
   });
