@@ -115,7 +115,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 1: WEPPcloud-(Un)Disturbed
 
-**Current file**: `interfaces/disturbed.png` (200×200px)
+**Files**: `interfaces/disturbed.svg`, `interfaces/disturbed.png` (400×400px) ✓ Generated
 **Purpose**: Primary US interface for pre/post-fire erosion modeling with WATAR
 
 ```
@@ -136,7 +136,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 2: WEPPcloud-Revegetation
 
-**Current file**: `interfaces/revegetation.webp` (1024×1024px)
+**Files**: `interfaces/revegetation.svg`, `interfaces/revegetation.png` (400×400px) ✓ Generated
 **Purpose**: Post-fire recovery modeling with RAP vegetation data
 
 ```
@@ -158,28 +158,28 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 3: WEPPcloud-EU (Europe)
 
-**Current file**: `interfaces/europe.png` (512×512px)
+**Files**: `interfaces/europe.svg`, `interfaces/europe.png` (400×400px) ✓ Generated
 **Purpose**: European interface using ESDAC data
 
 ```
 A minimalist flat illustration logo for European watershed erosion modeling.
 Style: modern flat design with subtle gradients, clean geometric shapes.
 Color palette: ocean blue (#0369a1) and forest green (#166534) with gold (#fbbf24) accents.
-The composition shows a stylized European landscape with rolling Mediterranean hills,
-subtle outline of Europe as a landmass silhouette. Topographic contour lines and 
-water flow channels. Small EU stars motif subtly integrated.
-Olive trees or vineyards on terraced slopes. Erosion runoff into a river or coast.
+The composition shows a stylized Mediterranean landscape with rolling terraced hills.
+Topographic contour lines and water flow channels cutting through the terrain.
+Olive trees or vineyards on terraced slopes with visible erosion runoff into a river or coast.
+Small EU stars motif subtly integrated in the sky or as abstract accent.
 Background: transparent or soft slate (#1e293b).
-No text, no labels, professional icon style, suitable for web UI at 400x400 pixels.
+No text, no labels, no country outline, no map shape, no landmass silhouette, professional icon style, suitable for web UI at 400x400 pixels.
 ```
 
-**Keywords**: Europe, Mediterranean, terraces, olive trees, EU stars, coastal
+**Keywords**: Europe, Mediterranean, terraces, olive trees, EU stars, coastal, vineyards
 
 ---
 
 ### Prompt 4: WEPPcloud-AU (Australia)
 
-**Current file**: `interfaces/australia200.png` (200×200px)
+**Files**: `interfaces/australia.svg`, `interfaces/australia.png` (400×400px) ✓ Generated
 **Purpose**: Australian interface using ASRIS data
 
 ```
@@ -200,7 +200,7 @@ No text, no labels, no country outline, no map shape, professional icon style, s
 
 ### Prompt 5: WEPPcloud-RHEM (Rangeland)
 
-**Current file**: `interfaces/rhem.png` (150×44px) — undersized text logo
+**Files**: `interfaces/rhem.svg`, `interfaces/rhem.png` (400×400px) ✓ Generated
 **Purpose**: Rangeland Hydrology and Erosion Model
 
 ```
@@ -221,7 +221,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 6: Lake Tahoe Site-Specific
 
-**Current file**: `interfaces/lt.jpg` (150×150px)
+**Files**: `interfaces/lake-tahoe.svg`, `interfaces/lake-tahoe.png` (400×400px) ✓ Generated
 **Purpose**: Lake Tahoe region-specific modeling
 
 ```
@@ -242,7 +242,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 7: Hazard SEES / FireEarth
 
-**Current file**: `interfaces/widlfire_credit_NOAA_DanBorsum.jpg` (200×200px)
+**Files**: `interfaces/fireearth.svg`, `interfaces/fireearth.png` (400×400px) ✓ Generated
 **Purpose**: Municipal watershed wildfire hazard modeling
 
 ```
@@ -263,7 +263,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 8: Legacy WEPPcloud (Baseline)
 
-**Current file**: `interfaces/0.jpg` (200×200px)
+**Files**: `interfaces/legacy-weppcloud.svg`, `interfaces/legacy-weppcloud.png` (400×400px) ✓ Generated
 **Purpose**: Original WEPP interface (deprecated but still available)
 
 ```
@@ -285,7 +285,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 9: Agricultural Fields
 
-**Current file**: None (new interface)
+**Files**: `interfaces/agricultural.svg`, `interfaces/agricultural.png` (400×400px) ✓ Generated
 **Purpose**: Agricultural field-scale erosion modeling
 
 ```
@@ -307,7 +307,7 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ### Prompt 10: WEPPcloud-PEP / BAER
 
-**Current file**: `interfaces/baer.jpg` (530×530px)
+**Files**: `interfaces/baer-pep.svg`, `interfaces/baer-pep.png` (400×400px) ✓ Generated
 **Purpose**: Post-fire erosion prediction (legacy BAER support)
 
 ```
@@ -332,25 +332,26 @@ No text, no labels, professional icon style, suitable for web UI at 400x400 pixe
 
 ```
 interfaces/
-├── disturbed.svg         # Primary SVG
-├── disturbed.png         # 400x400 PNG export
-├── disturbed-32.png      # 32x32 navigation icon
-├── revegetation.svg
-├── revegetation.png
-├── europe.svg
-├── europe.png
-├── australia.svg
-├── australia.png
-├── rhem.svg
-├── rhem.png
-├── lake-tahoe.svg
-├── lake-tahoe.png
-├── fireearth.svg
-├── fireearth.png
-├── legacy-weppcloud.svg
-├── legacy-weppcloud.png
-├── baer-pep.svg
-└── baer-pep.png
+├── disturbed.svg         # Primary SVG ✓
+├── disturbed.png         # 400x400 PNG export ✓
+├── revegetation.svg      # ✓
+├── revegetation.png      # ✓
+├── europe.svg            # ✓
+├── europe.png            # ✓
+├── australia.svg         # ✓
+├── australia.png         # ✓
+├── rhem.svg              # ✓
+├── rhem.png              # ✓
+├── lake-tahoe.svg        # ✓
+├── lake-tahoe.png        # ✓
+├── fireearth.svg         # ✓
+├── fireearth.png         # ✓
+├── legacy-weppcloud.svg  # ✓
+├── legacy-weppcloud.png  # ✓
+├── agricultural.svg      # ✓
+├── agricultural.png      # ✓
+├── baer-pep.svg          # ✓
+└── baer-pep.png          # ✓
 ```
 
 ### Generation Workflow
@@ -425,6 +426,7 @@ Before deploying new logos:
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-11 | GitHub Copilot | Initial document creation |
+| 2025-12-11 | Roger Lew | Generated all 10 interface logos using ChatGPT 5.1, vectorized with vtracer |
 
 ---
 
