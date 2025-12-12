@@ -971,6 +971,44 @@
     return container;
   }
 
+  // Aspect legend using swatches for cardinal directions (HSL hue wheel)
+  function renderAspectLegend() {
+    // Cardinal/intercardinal directions with degrees (0=N, 90=E, 180=S, 270=W)
+    const directions = [
+      { label: 'N (0°)', degrees: 0 },
+      { label: 'NE (45°)', degrees: 45 },
+      { label: 'E (90°)', degrees: 90 },
+      { label: 'SE (135°)', degrees: 135 },
+      { label: 'S (180°)', degrees: 180 },
+      { label: 'SW (225°)', degrees: 225 },
+      { label: 'W (270°)', degrees: 270 },
+      { label: 'NW (315°)', degrees: 315 },
+    ];
+    
+    // Convert aspect degrees to RGB using same logic as hillslopesFillColor
+    function aspectToRgb(degrees) {
+      const hue = degrees % 360;
+      const h = hue / 60;
+      const c = 200; // chroma
+      const x = c * (1 - Math.abs((h % 2) - 1));
+      let r, g, b;
+      if (h < 1) { r = c; g = x; b = 0; }
+      else if (h < 2) { r = x; g = c; b = 0; }
+      else if (h < 3) { r = 0; g = c; b = x; }
+      else if (h < 4) { r = 0; g = x; b = c; }
+      else if (h < 5) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+      return `rgb(${Math.round(r + 55)}, ${Math.round(g + 55)}, ${Math.round(b + 55)})`;
+    }
+    
+    const items = directions.map(d => ({
+      label: d.label,
+      color: aspectToRgb(d.degrees)
+    }));
+    
+    return renderCategoricalLegend(items);
+  }
+
   function renderLegendForLayer(layer) {
     const section = document.createElement('div');
     section.className = 'gl-legend-section';
@@ -1086,9 +1124,9 @@
       unit = 'm';
     }
     else if (mode === 'aspect' && hillslopesSummary) {
-      minVal = 0;
-      maxVal = 360;  // HILLSLOPES_RANGES.aspect
-      unit = '°';
+      // Aspect uses a circular hue colormap - render as swatches
+      section.appendChild(renderAspectLegend());
+      return section;
     }
     // WEPP layers - these use dynamic data ranges, which is correct
     else if (weppRanges && weppRanges[mode]) {
