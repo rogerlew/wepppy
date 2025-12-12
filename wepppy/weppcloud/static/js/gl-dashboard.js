@@ -11,8 +11,59 @@
     return;
   }
 
-  const tileTemplate =
+  const defaultTileTemplate =
     ctx.tileUrl || 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  // Basemap definitions - Google endpoints match wepppy/weppcloud/controllers_js/map.js
+  const GOOGLE_SUBDOMAINS = ['mt0', 'mt1', 'mt2', 'mt3'];
+  let subdomainIndex = 0;
+  function nextGoogleSubdomain() {
+    const sub = GOOGLE_SUBDOMAINS[subdomainIndex % GOOGLE_SUBDOMAINS.length];
+    subdomainIndex++;
+    return sub;
+  }
+
+  const BASEMAP_DEFS = {
+    osm: {
+      label: 'OpenStreetMap',
+      template: 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      getUrl: function (x, y, z) {
+        return this.template
+          .replace('{x}', String(x))
+          .replace('{y}', String(y))
+          .replace('{z}', String(z));
+      }
+    },
+    googleTerrain: {
+      label: 'Google Terrain',
+      template: 'https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+      getUrl: function (x, y, z) {
+        const sub = nextGoogleSubdomain();
+        return this.template
+          .replace('{s}', sub)
+          .replace('{x}', String(x))
+          .replace('{y}', String(y))
+          .replace('{z}', String(z));
+      }
+    },
+    googleSatellite: {
+      label: 'Google Satellite',
+      template: 'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+      getUrl: function (x, y, z) {
+        const sub = nextGoogleSubdomain();
+        return this.template
+          .replace('{s}', sub)
+          .replace('{x}', String(x))
+          .replace('{y}', String(y))
+          .replace('{z}', String(z));
+      }
+    }
+  };
+
+  let currentBasemapKey = ctx.basemap || 'googleTerrain';
+  if (!BASEMAP_DEFS[currentBasemapKey]) {
+    currentBasemapKey = 'googleTerrain';
+  }
 
   // Use map extent/center/zoom from ron.nodb if available
   const mapCenter = ctx.mapCenter; // [longitude, latitude]
@@ -44,57 +95,89 @@
     deckgl.setProps({ viewState: currentViewState });
   }
 
-  const baseLayer = new deck.TileLayer({
-    id: 'gl-dashboard-base-tiles',
-    data: tileTemplate,
-    minZoom: 0,
-    maxZoom: 19,
-    tileSize: 256,
-    maxRequests: 8,
-    getTileData: async ({ index, signal }) => {
-      const { x, y, z } = index || {};
-      if (![x, y, z].every(Number.isFinite)) {
-        throw new Error(`Tile coords missing: x=${x} y=${y} z=${z}`);
-      }
-      const url = tileTemplate
-        .replace('{x}', String(x))
-        .replace('{y}', String(y))
-        .replace('{z}', String(z));
-      const response = await fetch(url, { signal, mode: 'cors' });
-      if (!response.ok) {
-        throw new Error(`Tile fetch failed ${response.status}: ${url}`);
-      }
-      const blob = await response.blob();
-      return await createImageBitmap(blob);
-    },
-    onTileError: (err) => {
-      // eslint-disable-next-line no-console
-      console.error('gl-dashboard tile error', err);
-    },
-    renderSubLayers: (props) => {
-      const tile = props.tile;
-      const data = props.data;
+  function createBaseLayer(basemapKey) {
+    const basemapDef = BASEMAP_DEFS[basemapKey] || BASEMAP_DEFS.googleTerrain;
+    return new deck.TileLayer({
+      id: 'gl-dashboard-base-tiles',
+      data: basemapDef.template,
+      minZoom: 0,
+      maxZoom: 19,
+      tileSize: 256,
+      maxRequests: 8,
+      getTileData: async ({ index, signal }) => {
+        const { x, y, z } = index || {};
+        if (![x, y, z].every(Number.isFinite)) {
+          throw new Error(`Tile coords missing: x=${x} y=${y} z=${z}`);
+        }
+        const url = basemapDef.getUrl(x, y, z);
+        const response = await fetch(url, { signal, mode: 'cors' });
+        if (!response.ok) {
+          throw new Error(`Tile fetch failed ${response.status}: ${url}`);
+        }
+        const blob = await response.blob();
+        return await createImageBitmap(blob);
+      },
+      onTileError: (err) => {
+        // eslint-disable-next-line no-console
+        console.error('gl-dashboard tile error', err);
+      },
+      renderSubLayers: (props) => {
+        const tile = props.tile;
+        const data = props.data;
 
-      if (!tile || !data || !tile.bbox) {
-        return null;
-      }
+        if (!tile || !data || !tile.bbox) {
+          return null;
+        }
 
-      const { west, south, east, north } = tile.bbox;
-      const bounds = [west, south, east, north];
-      if (bounds.some((v) => !Number.isFinite(v))) {
-        return null;
-      }
+        const { west, south, east, north } = tile.bbox;
+        const bounds = [west, south, east, north];
+        if (bounds.some((v) => !Number.isFinite(v))) {
+          return null;
+        }
 
-      return new deck.BitmapLayer(props, {
-        id: `${props.id}-${tile.id}`,
-        data: null,
-        image: data,
-        bounds,
-        pickable: false,
-        opacity: 0.95,
-      });
-    },
-  });
+        return new deck.BitmapLayer(props, {
+          id: `${props.id}-${tile.id}`,
+          data: null,
+          image: data,
+          bounds,
+          pickable: false,
+          opacity: 0.95,
+        });
+      },
+    });
+  }
+
+  let baseLayer = createBaseLayer(currentBasemapKey);
+
+  function setBasemap(basemapKey) {
+    if (!BASEMAP_DEFS[basemapKey]) {
+      console.warn('gl-dashboard: unknown basemap key', basemapKey);
+      return;
+    }
+    currentBasemapKey = basemapKey;
+    baseLayer = createBaseLayer(basemapKey);
+    applyLayers();
+    // Update selector UI if present
+    const selector = document.getElementById('gl-basemap-select');
+    if (selector && selector.value !== basemapKey) {
+      selector.value = basemapKey;
+    }
+  }
+
+  function toggleSubcatchmentLabels(visible) {
+    subcatchmentLabelsVisible = !!visible;
+    applyLayers();
+    // Update checkbox UI if present
+    const checkbox = document.getElementById('gl-subcatchment-labels-toggle');
+    if (checkbox && checkbox.checked !== subcatchmentLabelsVisible) {
+      checkbox.checked = subcatchmentLabelsVisible;
+    }
+  }
+
+  // Expose basemap API for external use
+  window.glDashboardSetBasemap = setBasemap;
+  window.glDashboardBasemaps = BASEMAP_DEFS;
+  window.glDashboardToggleLabels = toggleSubcatchmentLabels;
 
   const layerDefs = [
     {
@@ -125,6 +208,7 @@
   let rapMetadata = null;
   let rapSelectedYear = null;
   let subcatchmentsGeoJson = null;
+  let subcatchmentLabelsVisible = false;
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
   let geoTiffLoader = null;
@@ -502,6 +586,64 @@
     });
   }
 
+  function buildSubcatchmentLabelsLayer() {
+    if (!subcatchmentLabelsVisible || !subcatchmentsGeoJson) {
+      return [];
+    }
+    // Compute centroids for label placement, ensuring unique labels per topaz_id
+    const labelData = [];
+    const seenIds = new Set();
+    const features = subcatchmentsGeoJson.features || [];
+    features.forEach((feature) => {
+      const props = feature.properties || {};
+      const topazId = props.TopazID || props.topaz_id || props.topaz || props.id;
+      if (topazId == null) return;
+      // Skip if we've already added a label for this topaz_id
+      const idKey = String(topazId);
+      if (seenIds.has(idKey)) return;
+      seenIds.add(idKey);
+      // Compute centroid from geometry
+      const geom = feature.geometry;
+      if (!geom) return;
+      let coords = [];
+      if (geom.type === 'Polygon' && geom.coordinates && geom.coordinates[0]) {
+        coords = geom.coordinates[0];
+      } else if (geom.type === 'MultiPolygon' && geom.coordinates && geom.coordinates[0] && geom.coordinates[0][0]) {
+        coords = geom.coordinates[0][0];
+      }
+      if (!coords.length) return;
+      let sumX = 0, sumY = 0;
+      coords.forEach((pt) => {
+        sumX += pt[0];
+        sumY += pt[1];
+      });
+      const centroid = [sumX / coords.length, sumY / coords.length];
+      labelData.push({
+        position: centroid,
+        text: idKey,
+      });
+    });
+    return [
+      new deck.TextLayer({
+        id: 'subcatchment-labels',
+        data: labelData,
+        getPosition: (d) => d.position,
+        getText: (d) => d.text,
+        getSize: 14,
+        getColor: [255, 255, 255, 255],
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontWeight: 'bold',
+        outlineColor: [0, 0, 0, 200],
+        outlineWidth: 2,
+        billboard: false,
+        sizeUnits: 'pixels',
+        pickable: false,
+      }),
+    ];
+  }
+
   function applyLayers() {
     const activeRasterLayers = detectedLayers
       .filter((layer) => layer.visible)
@@ -533,8 +675,9 @@
     const hillslopesDeckLayers = buildHillslopesLayers();
     const weppDeckLayers = buildWeppLayers();
     const rapDeckLayers = buildRapLayers();
+    const labelLayers = buildSubcatchmentLabelsLayer();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...rapDeckLayers, ...activeRasterLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
     });
   }
 

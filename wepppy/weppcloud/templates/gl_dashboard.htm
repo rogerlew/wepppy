@@ -288,6 +288,21 @@
 <div class="gl-shell">
   <aside class="gl-sidebar">
     <div>
+      <h3>Basemap</h3>
+      <select id="gl-basemap-select" class="gl-custom-select__trigger" style="margin-top:0.5rem;">
+        <option value="googleTerrain">Google Terrain</option>
+        <option value="googleSatellite">Google Satellite</option>
+        <option value="osm">OpenStreetMap</option>
+      </select>
+    </div>
+    <div style="margin-top:0.75rem;">
+      <h3>Overlays</h3>
+      <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+        <input type="checkbox" id="gl-subcatchment-labels-toggle" />
+        <span>Subcatchment Labels</span>
+      </label>
+    </div>
+    <div style="margin-top:0.75rem;">
       <h3>Layers</h3>
     </div>
     <ul class="gl-layer-list" id="gl-layer-list"></ul>
@@ -346,6 +361,24 @@
       if (toggle && table) {
         toggle.addEventListener('click', () => {
           table.classList.toggle('is-collapsed');
+        });
+      }
+
+      // Basemap selector initialization
+      const basemapSelect = document.getElementById('gl-basemap-select');
+      if (basemapSelect && typeof window.glDashboardSetBasemap === 'function') {
+        // Set initial value to match the default in gl-dashboard.js
+        basemapSelect.value = 'googleTerrain';
+        basemapSelect.addEventListener('change', (e) => {
+          window.glDashboardSetBasemap(e.target.value);
+        });
+      }
+
+      // Subcatchment labels toggle
+      const labelsToggle = document.getElementById('gl-subcatchment-labels-toggle');
+      if (labelsToggle && typeof window.glDashboardToggleLabels === 'function') {
+        labelsToggle.addEventListener('change', (e) => {
+          window.glDashboardToggleLabels(e.target.checked);
         });
       }
     })();
