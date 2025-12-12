@@ -207,11 +207,138 @@
   let rapSummary = null;
   let rapMetadata = null;
   let rapSelectedYear = null;
+  let rapCumulativeMode = false; // true = show sum of selected bands
   let subcatchmentsGeoJson = null;
   let subcatchmentLabelsVisible = false;
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
   let geoTiffLoader = null;
+
+  // ============================================================================
+  // Year Slider Controller (generic, reusable for RAP and other features)
+  // ============================================================================
+  const yearSlider = {
+    el: document.getElementById('gl-year-slider'),
+    input: document.getElementById('gl-year-slider-input'),
+    valueEl: document.getElementById('gl-year-slider-value'),
+    minEl: document.getElementById('gl-year-slider-min'),
+    maxEl: document.getElementById('gl-year-slider-max'),
+    _listeners: [],
+    _visible: false,
+    _minYear: 1,
+    _maxYear: 100,
+    _currentYear: 1,
+    _hasObserved: false,
+    _initialized: false,
+
+    init(config) {
+      if (!this.el || !this.input) return;
+      if (this._initialized) return; // Only init once
+      this._initialized = true;
+      
+      this._minYear = config.startYear || 1;
+      this._maxYear = config.endYear || 100;
+      this._hasObserved = config.hasObserved || false;
+      this._currentYear = this._maxYear; // Default to most recent year
+
+      this.input.min = String(this._minYear);
+      this.input.max = String(this._maxYear);
+      this.input.value = String(this._currentYear);
+
+      if (this.minEl) this.minEl.textContent = String(this._minYear);
+      if (this.maxEl) this.maxEl.textContent = String(this._maxYear);
+      this._updateDisplay();
+
+      // Attach input listener
+      this.input.addEventListener('input', () => {
+        this._currentYear = parseInt(this.input.value, 10);
+        this._updateDisplay();
+        this._emit('change', this._currentYear);
+      });
+    },
+
+    _updateDisplay() {
+      if (this.valueEl) {
+        this.valueEl.textContent = String(this._currentYear);
+      }
+    },
+
+    show() {
+      if (this.el && !this._visible) {
+        this.el.classList.add('is-visible');
+        this._visible = true;
+      }
+    },
+
+    hide() {
+      if (this.el && this._visible) {
+        this.el.classList.remove('is-visible');
+        this._visible = false;
+      }
+    },
+
+    setRange(minYear, maxYear, currentYear) {
+      // Initialize if not already done
+      if (!this._initialized && this.el && this.input) {
+        this.init({ startYear: minYear, endYear: maxYear });
+      }
+      this._minYear = minYear;
+      this._maxYear = maxYear;
+      if (this.input) {
+        this.input.min = String(minYear);
+        this.input.max = String(maxYear);
+      }
+      if (this.minEl) this.minEl.textContent = String(minYear);
+      if (this.maxEl) this.maxEl.textContent = String(maxYear);
+      if (currentYear != null) {
+        this._currentYear = currentYear;
+        if (this.input) this.input.value = String(currentYear);
+      }
+      this._updateDisplay();
+    },
+
+    getValue() {
+      return this._currentYear;
+    },
+
+    setValue(year) {
+      this._currentYear = year;
+      if (this.input) this.input.value = String(year);
+      this._updateDisplay();
+    },
+
+    on(event, callback) {
+      this._listeners.push({ event, callback });
+    },
+
+    off(event, callback) {
+      this._listeners = this._listeners.filter(
+        (l) => !(l.event === event && l.callback === callback)
+      );
+    },
+
+    _emit(event, data) {
+      for (const listener of this._listeners) {
+        if (listener.event === event) {
+          listener.callback(data);
+        }
+      }
+    },
+  };
+
+  // Initialize year slider from climate context
+  const climateCtx = ctx.climate;
+  if (climateCtx && climateCtx.startYear != null && climateCtx.endYear != null) {
+    yearSlider.init({
+      startYear: climateCtx.startYear,
+      endYear: climateCtx.endYear,
+      hasObserved: climateCtx.hasObserved,
+    });
+  }
+
+  // Expose for external use
+  window.glDashboardYearSlider = yearSlider;
+
   const NLCD_COLORMAP = {
     11: '#5475A8', // Open water
     12: '#ffffff', // Perennial ice/snow
@@ -417,6 +544,12 @@
       const el = document.getElementById(`layer-RAP-${l.key}`);
       if (el) el.checked = false;
     });
+    // Reset RAP cumulative mode
+    rapCumulativeMode = false;
+    const cumulativeEl = document.getElementById('layer-RAP-cumulative');
+    if (cumulativeEl) cumulativeEl.checked = false;
+    // Hide year slider when no RAP layers active
+    yearSlider.hide();
   }
 
   function updateLayerList() {
@@ -437,7 +570,8 @@
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
     }
     if (rapLayers.length) {
-      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, hasYearPicker: true });
+      // RAP uses special rendering with cumulative mode + checkboxes
+      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true });
     }
     if (detectedLayers.length) {
       rasterSections.push({ title: 'Rasters', items: detectedLayers, isSubcatchment: false });
@@ -465,84 +599,18 @@
       details.className = 'gl-layer-details';
       // Open the first section by default, or sections with visible items
       const hasVisibleItem = section.items.some((l) => l.visible);
-      details.open = idx === 0 || hasVisibleItem;
+      details.open = idx === 0 || hasVisibleItem || (section.isRap && rapCumulativeMode);
 
       const summary = document.createElement('summary');
       summary.className = 'gl-layer-group';
       summary.textContent = section.title;
       details.appendChild(summary);
 
-      // Add year picker for RAP section (custom dropdown for dark theme)
-      if (section.hasYearPicker && rapMetadata && rapMetadata.years && rapMetadata.years.length) {
-        const yearPickerDiv = document.createElement('div');
-        yearPickerDiv.className = 'gl-year-picker';
-        yearPickerDiv.style.cssText = 'padding: 0.5rem; display: flex; align-items: center; gap: 0.5rem;';
-        const yearLabel = document.createElement('label');
-        yearLabel.textContent = 'Year:';
-        yearLabel.style.fontWeight = '500';
-
-        // Custom dropdown container
-        const dropdownContainer = document.createElement('div');
-        dropdownContainer.className = 'gl-custom-select';
-        dropdownContainer.style.cssText = 'flex: 1; position: relative;';
-
-        const selectedDisplay = document.createElement('button');
-        selectedDisplay.type = 'button';
-        selectedDisplay.className = 'gl-custom-select__trigger';
-        selectedDisplay.textContent = rapSelectedYear;
-        selectedDisplay.setAttribute('aria-haspopup', 'listbox');
-        selectedDisplay.setAttribute('aria-expanded', 'false');
-
-        const optionsList = document.createElement('ul');
-        optionsList.className = 'gl-custom-select__options';
-        optionsList.setAttribute('role', 'listbox');
-        optionsList.style.display = 'none';
-
-        rapMetadata.years.forEach((year) => {
-          const li = document.createElement('li');
-          li.className = 'gl-custom-select__option';
-          li.setAttribute('role', 'option');
-          li.setAttribute('data-value', year);
-          li.textContent = year;
-          if (year === rapSelectedYear) {
-            li.classList.add('is-selected');
-            li.setAttribute('aria-selected', 'true');
-          }
-          li.addEventListener('click', async () => {
-            rapSelectedYear = year;
-            selectedDisplay.textContent = year;
-            optionsList.querySelectorAll('.gl-custom-select__option').forEach((o) => {
-              o.classList.remove('is-selected');
-              o.setAttribute('aria-selected', 'false');
-            });
-            li.classList.add('is-selected');
-            li.setAttribute('aria-selected', 'true');
-            optionsList.style.display = 'none';
-            selectedDisplay.setAttribute('aria-expanded', 'false');
-            await refreshRapData();
-            applyLayers();
-          });
-          optionsList.appendChild(li);
-        });
-
-        selectedDisplay.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const isOpen = optionsList.style.display !== 'none';
-          optionsList.style.display = isOpen ? 'none' : 'block';
-          selectedDisplay.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-          optionsList.style.display = 'none';
-          selectedDisplay.setAttribute('aria-expanded', 'false');
-        });
-
-        dropdownContainer.appendChild(selectedDisplay);
-        dropdownContainer.appendChild(optionsList);
-        yearPickerDiv.appendChild(yearLabel);
-        yearPickerDiv.appendChild(dropdownContainer);
-        details.appendChild(yearPickerDiv);
+      // Special handling for RAP section
+      if (section.isRap) {
+        renderRapSection(details, section);
+        layerListEl.appendChild(details);
+        return;
       }
 
       const itemList = document.createElement('ul');
@@ -565,29 +633,6 @@
             deselectAllSubcatchmentOverlays();
             layer.visible = true;
             input.checked = true;
-            // For RAP layers, refresh data for the selected band via query-engine
-            if (layer.bandId && rapSelectedYear) {
-              try {
-                const dataPayload = {
-                  datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
-                  columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
-                  filters: [
-                    { column: 'rap.year', op: '=', value: rapSelectedYear },
-                    { column: 'rap.band', op: '=', value: layer.bandId },
-                  ],
-                };
-                const dataResult = await postQueryEngine(dataPayload);
-                if (dataResult && dataResult.records) {
-                  rapSummary = {};
-                  for (const row of dataResult.records) {
-                    rapSummary[String(row.topaz_id)] = row.value;
-                  }
-                }
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                console.warn('gl-dashboard: failed to load RAP band data', err);
-              }
-            }
           } else {
             layer.visible = input.checked;
           }
@@ -606,6 +651,138 @@
       details.appendChild(itemList);
       layerListEl.appendChild(details);
     });
+  }
+
+  /**
+   * Render the RAP section with cumulative cover radio + band checkboxes.
+   */
+  function renderRapSection(details, section) {
+    const itemList = document.createElement('ul');
+    itemList.className = 'gl-layer-items';
+
+    // Cumulative Cover radio option
+    const cumulativeLi = document.createElement('li');
+    cumulativeLi.className = 'gl-layer-item';
+    const cumulativeInput = document.createElement('input');
+    cumulativeInput.type = 'radio';
+    cumulativeInput.name = 'subcatchment-overlay';
+    cumulativeInput.checked = rapCumulativeMode;
+    cumulativeInput.id = 'layer-RAP-cumulative';
+    cumulativeInput.addEventListener('change', async () => {
+      if (cumulativeInput.checked) {
+        deselectAllSubcatchmentOverlays();
+        rapCumulativeMode = true;
+        // Re-check the cumulative radio since deselectAll cleared it
+        cumulativeInput.checked = true;
+        // Show year slider
+        yearSlider.show();
+        await refreshRapData();
+        applyLayers();
+      }
+    });
+    const cumulativeLabel = document.createElement('label');
+    cumulativeLabel.setAttribute('for', 'layer-RAP-cumulative');
+    cumulativeLabel.innerHTML = '<span class="gl-layer-name">Cumulative Cover</span><br><span class="gl-layer-path">Sum of selected bands (0-100%)</span>';
+    cumulativeLi.appendChild(cumulativeInput);
+    cumulativeLi.appendChild(cumulativeLabel);
+    itemList.appendChild(cumulativeLi);
+
+    // Band checkboxes (indented under cumulative)
+    const bandContainer = document.createElement('li');
+    bandContainer.style.cssText = 'padding-left: 1.5rem; margin-top: 0.25rem;';
+    const bandList = document.createElement('ul');
+    bandList.className = 'gl-layer-items';
+    bandList.style.cssText = 'gap: 0.15rem;';
+
+    section.items.forEach((layer) => {
+      const li = document.createElement('li');
+      li.className = 'gl-layer-item';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = layer.selected !== false; // Default to selected unless explicitly false
+      input.id = `layer-RAP-band-${layer.key}`;
+      input.addEventListener('change', async () => {
+        layer.selected = input.checked;
+        if (rapCumulativeMode) {
+          await refreshRapData();
+          applyLayers();
+        }
+      });
+      const label = document.createElement('label');
+      label.setAttribute('for', input.id);
+      const name = layer.label || layer.key;
+      label.innerHTML = `<span class="gl-layer-name" style="font-size:0.85rem;">${name}</span>`;
+      li.appendChild(input);
+      li.appendChild(label);
+      bandList.appendChild(li);
+    });
+
+    bandContainer.appendChild(bandList);
+    itemList.appendChild(bandContainer);
+
+    // Individual band radio options (for viewing single bands)
+    const separatorLi = document.createElement('li');
+    separatorLi.style.cssText = 'border-top: 1px solid #1f2c44; margin: 0.5rem 0; padding: 0;';
+    itemList.appendChild(separatorLi);
+
+    const individualHeader = document.createElement('li');
+    individualHeader.style.cssText = 'font-size: 0.75rem; color: #6b7fa0; padding: 0.25rem 0;';
+    individualHeader.textContent = 'Or view single band:';
+    itemList.appendChild(individualHeader);
+
+    section.items.forEach((layer) => {
+      const li = document.createElement('li');
+      li.className = 'gl-layer-item';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'subcatchment-overlay';
+      input.checked = layer.visible && !rapCumulativeMode;
+      input.id = `layer-RAP-${layer.key}`;
+      input.addEventListener('change', async () => {
+        if (input.checked) {
+          deselectAllSubcatchmentOverlays();
+          rapCumulativeMode = false;
+          layer.visible = true;
+          input.checked = true;
+          // Show year slider
+          yearSlider.show();
+          // Load data for the selected band
+          if (layer.bandId && rapSelectedYear) {
+            try {
+              const dataPayload = {
+                datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+                columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
+                filters: [
+                  { column: 'rap.year', op: '=', value: rapSelectedYear },
+                  { column: 'rap.band', op: '=', value: layer.bandId },
+                ],
+              };
+              const dataResult = await postQueryEngine(dataPayload);
+              if (dataResult && dataResult.records) {
+                rapSummary = {};
+                for (const row of dataResult.records) {
+                  rapSummary[String(row.topaz_id)] = row.value;
+                }
+              }
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.warn('gl-dashboard: failed to load RAP band data', err);
+            }
+          }
+          applyLayers();
+        }
+      });
+      const label = document.createElement('label');
+      label.setAttribute('for', input.id);
+      const name = layer.label || layer.key;
+      const path = layer.path || '';
+      label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+      li.appendChild(input);
+      li.appendChild(label);
+      itemList.appendChild(li);
+    });
+
+    details.appendChild(itemList);
   }
 
   function buildSubcatchmentLabelsLayer() {
@@ -778,11 +955,22 @@
         break;
       }
     }
-    // RAP
-    for (const layer of rapLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'RAP' });
-        break;
+    // RAP - handle cumulative mode
+    if (rapCumulativeMode) {
+      const selectedBands = rapLayers.filter((l) => l.selected !== false);
+      const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
+      active.push({
+        key: 'rap-cumulative',
+        label: `Cumulative Cover (${bandNames})`,
+        category: 'RAP',
+        isCumulative: true,
+      });
+    } else {
+      for (const layer of rapLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'RAP' });
+          break;
+        }
       }
     }
     // Raster layers (SBS, etc.)
@@ -1132,6 +1320,12 @@
     else if (weppRanges && weppRanges[mode]) {
       minVal = weppRanges[mode].min;
       maxVal = weppRanges[mode].max;
+    }
+    // RAP cumulative mode - use 0-100% (clamped at colormap level)
+    else if (layer.isCumulative) {
+      minVal = 0;
+      maxVal = 100;
+      unit = '%';
     }
     // RAP layers - use 0-100% (rapFillColor normalizes by /100)
     else if (layer.bandKey && rapSummary) {
@@ -1520,11 +1714,14 @@
   }
 
   function buildRapLayers() {
-    const activeLayers = rapLayers
-      .filter((l) => l.visible && subcatchmentsGeoJson && rapSummary)
-      .map((overlay) => {
-        return new deck.GeoJsonLayer({
-          id: `rap-${overlay.key}`,
+    // In cumulative mode, render a single layer from the cumulative summary
+    if (rapCumulativeMode && subcatchmentsGeoJson && rapSummary) {
+      // Create a unique ID based on selected bands and year to force re-render
+      const selectedBandKeys = rapLayers.filter((l) => l.selected !== false).map((l) => l.bandKey).join('-');
+      const layerId = `rap-cumulative-${rapSelectedYear}-${selectedBandKeys}`;
+      return [
+        new deck.GeoJsonLayer({
+          id: layerId,
           data: subcatchmentsGeoJson,
           pickable: true,
           stroked: false,
@@ -1543,6 +1740,40 @@
             const row = topaz != null ? rapSummary[String(topaz)] : null;
             return rapFillColor(row);
           },
+          updateTriggers: {
+            getFillColor: [rapSelectedYear, selectedBandKeys],
+          },
+        }),
+      ];
+    }
+
+    // Single band mode
+    const activeLayers = rapLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && rapSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `rap-${overlay.key}-${rapSelectedYear}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? rapSummary[String(topaz)] : null;
+            return rapFillColor(row);
+          },
+          updateTriggers: {
+            getFillColor: [rapSelectedYear],
+          },
         });
       });
     return activeLayers;
@@ -1559,8 +1790,50 @@
   }
 
   async function refreshRapData() {
+    if (!rapSelectedYear) return;
+
+    // In cumulative mode, load all selected bands and sum them
+    if (rapCumulativeMode) {
+      const selectedBands = rapLayers.filter((l) => l.selected !== false);
+      if (!selectedBands.length) {
+        rapSummary = {};
+        return;
+      }
+
+      try {
+        // Query all selected bands at once using IN filter
+        const bandIds = selectedBands.map((l) => l.bandId);
+        const dataPayload = {
+          datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+          columns: ['rap.topaz_id AS topaz_id', 'rap.band AS band', 'rap.value AS value'],
+          filters: [
+            { column: 'rap.year', op: '=', value: rapSelectedYear },
+            { column: 'rap.band', op: 'IN', value: bandIds },
+          ],
+        };
+        const dataResult = await postQueryEngine(dataPayload);
+        if (dataResult && dataResult.records) {
+          // Sum values by topaz_id
+          const sumByTopaz = {};
+          for (const row of dataResult.records) {
+            const tid = String(row.topaz_id);
+            if (!sumByTopaz[tid]) {
+              sumByTopaz[tid] = 0;
+            }
+            sumByTopaz[tid] += row.value || 0;
+          }
+          rapSummary = sumByTopaz;
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('gl-dashboard: failed to refresh RAP cumulative data', err);
+      }
+      return;
+    }
+
+    // Single band mode
     const activeLayer = pickActiveRapLayer();
-    if (!activeLayer || !rapSelectedYear) return;
+    if (!activeLayer) return;
     try {
       const dataPayload = {
         datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
@@ -1582,6 +1855,16 @@
       console.warn('gl-dashboard: failed to refresh RAP data', err);
     }
   }
+
+  // Wire year slider to RAP data refresh
+  yearSlider.on('change', async (year) => {
+    rapSelectedYear = year;
+    const hasActiveRap = rapCumulativeMode || rapLayers.some((l) => l.visible);
+    if (hasActiveRap) {
+      await refreshRapData();
+      applyLayers();
+    }
+  });
 
   function buildLanduseLayers() {
     const activeLayers = landuseLayers
@@ -2096,6 +2379,8 @@
       if (!subcatchmentsGeoJson) return;
 
       // Build layer definitions for each band
+      // Default selected: tree and shrub
+      const DEFAULT_SELECTED_BANDS = ['tree', 'shrub'];
       const basePath = 'rap/rap_ts.parquet';
       rapLayers.length = 0;
       for (const band of rapMetadata.bands) {
@@ -2107,7 +2392,15 @@
           bandId: band.id,
           bandKey: band.label,
           visible: false,
+          selected: DEFAULT_SELECTED_BANDS.includes(band.label), // For cumulative mode checkboxes
         });
+      }
+
+      // Sync year slider with RAP years if available
+      if (years.length) {
+        const minYear = years[0];
+        const maxYear = years[years.length - 1];
+        yearSlider.setRange(minYear, maxYear, rapSelectedYear);
       }
 
       // Load initial data for the first band via query-engine
@@ -2230,16 +2523,24 @@
           return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
-      const rapOverlay = pickActiveRapLayer();
-      if (info.object && rapOverlay && rapSummary) {
+      // RAP tooltip - handle both cumulative and single band modes
+      if (info.object && rapSummary && (rapCumulativeMode || pickActiveRapLayer())) {
         const props = info.object && info.object.properties;
         const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
         const row = topaz != null ? rapSummary[String(topaz)] : null;
         const val = rapValue(row);
         if (val !== null) {
-          const bandLabel = RAP_BAND_LABELS[rapOverlay.bandKey] || rapOverlay.bandKey;
-          const label = `${bandLabel}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-          return `Layer: ${rapOverlay.path}\nYear: ${rapSelectedYear}\nTopazID: ${topaz}\n${label}`;
+          if (rapCumulativeMode) {
+            const selectedBands = rapLayers.filter((l) => l.selected !== false);
+            const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
+            const label = `Cumulative (${bandNames}): ${typeof val === 'number' ? val.toFixed(1) : val}%`;
+            return `Layer: Cumulative Cover\nYear: ${rapSelectedYear}\nTopazID: ${topaz}\n${label}`;
+          } else {
+            const rapOverlay = pickActiveRapLayer();
+            const bandLabel = RAP_BAND_LABELS[rapOverlay.bandKey] || rapOverlay.bandKey;
+            const label = `${bandLabel}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
+            return `Layer: ${rapOverlay.path}\nYear: ${rapSelectedYear}\nTopazID: ${topaz}\n${label}`;
+          }
         }
       }
       const rasterLayer = pickActiveRaster();

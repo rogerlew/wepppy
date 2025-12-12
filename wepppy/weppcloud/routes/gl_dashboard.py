@@ -5,7 +5,7 @@ from __future__ import annotations
 from flask import current_app
 
 from ._common import *  # noqa: F401,F403
-from wepppy.nodb.core import Ron
+from wepppy.nodb.core import Ron, Climate
 
 
 gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
@@ -36,6 +36,38 @@ def gl_dashboard(runid: str, config: str):
     except Exception:
         pass
 
+    # Get climate context for year slider
+    climate_context = None
+    try:
+        climate = Climate.getInstance(wd)
+        has_observed = climate.has_observed
+        if has_observed:
+            # Observed climate: use calendar years
+            start_year = climate.observed_start_year
+            end_year = climate.observed_end_year
+            # Normalize to int if valid
+            if isinstance(start_year, str) and start_year.strip() == '':
+                start_year = None
+            if isinstance(end_year, str) and end_year.strip() == '':
+                end_year = None
+            if start_year is not None:
+                start_year = int(start_year)
+            if end_year is not None:
+                end_year = int(end_year)
+        else:
+            # CLIGEN/stochastic: years start at 1
+            input_years = climate.input_years
+            start_year = 1
+            end_year = input_years if input_years else 100
+        
+        climate_context = {
+            'hasObserved': bool(has_observed),
+            'startYear': start_year,
+            'endYear': end_year,
+        }
+    except Exception:
+        pass
+
     return render_template(
         "gl_dashboard.htm",
         runid=runid,
@@ -45,4 +77,5 @@ def gl_dashboard(runid: str, config: str):
         map_extent=map_extent,
         map_center=map_center,
         map_zoom=map_zoom,
+        climate_context=climate_context,
     )

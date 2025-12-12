@@ -420,6 +420,88 @@
     text-align: center;
     margin-top: 0.1rem;
   }
+  /* Year slider - fixed at bottom of map */
+  .gl-year-slider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(13, 21, 35, 0.95);
+    border-top: 1px solid #1f2c44;
+    padding: 0.5rem 1rem;
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1000;
+  }
+  .gl-year-slider.is-visible {
+    display: flex;
+  }
+  .gl-year-slider__label {
+    font-size: 0.85rem;
+    color: #9fb4dc;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .gl-year-slider__track {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .gl-year-slider__input {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: #1f2c44;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  .gl-year-slider__input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #3f6ac7;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #c7d7ff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  .gl-year-slider__input::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #3f6ac7;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #c7d7ff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  .gl-year-slider__input:hover::-webkit-slider-thumb {
+    background: #5a85e0;
+  }
+  .gl-year-slider__input:hover::-moz-range-thumb {
+    background: #5a85e0;
+  }
+  .gl-year-slider__value {
+    min-width: 4em;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e5ecf7;
+    background: #142035;
+    border: 1px solid #263b5f;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+  }
+  .gl-year-slider__range {
+    font-size: 0.75rem;
+    color: #6b7fa0;
+    white-space: nowrap;
+  }
 </style>
 {% endblock %}
 
@@ -471,6 +553,16 @@
           <p class="gl-legend-empty" id="gl-legend-empty">No layers visible</p>
         </div>
       </div>
+      <!-- Year slider - fixed at bottom of map -->
+      <div class="gl-year-slider" id="gl-year-slider">
+        <span class="gl-year-slider__label">Year:</span>
+        <div class="gl-year-slider__track">
+          <span class="gl-year-slider__range" id="gl-year-slider-min"></span>
+          <input type="range" class="gl-year-slider__input" id="gl-year-slider-input" min="1" max="100" value="1" />
+          <span class="gl-year-slider__range" id="gl-year-slider-max"></span>
+        </div>
+        <span class="gl-year-slider__value" id="gl-year-slider-value"></span>
+      </div>
     </div>
 
     <div class="gl-table is-collapsed" id="gl-table">
@@ -496,7 +588,8 @@
       "geoTiffUrl": "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js",
       "mapExtent": map_extent,
       "mapCenter": map_center,
-      "mapZoom": map_zoom
+      "mapZoom": map_zoom,
+      "climate": climate_context
     } | tojson }};
   </script>
   <script src="https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"></script>
