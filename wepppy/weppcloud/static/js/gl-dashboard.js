@@ -65,14 +65,26 @@
     currentBasemapKey = 'googleTerrain';
   }
 
-  // Use map extent/center/zoom from ron.nodb if available
+  // Use map extent/center from ron.nodb if available
+  // Note: We intentionally ignore ctx.mapZoom - it reflects the user's last
+  // interactive zoom which may be zoomed into a small area. For the dashboard
+  // we always want to show the full watershed extent.
   const mapCenter = ctx.mapCenter; // [longitude, latitude]
-  const mapZoom = ctx.mapZoom;
+  const mapExtent = ctx.mapExtent; // [west, south, east, north]
+
+  // Calculate initial zoom from extent to show full watershed
+  let initialZoom = ctx.zoom || 5;
+  if (mapExtent && mapExtent.length === 4 && mapExtent.every(Number.isFinite)) {
+    const [west, south, east, north] = mapExtent;
+    const span = Math.max(east - west, north - south);
+    // Zoom to fit watershed with some padding
+    initialZoom = Math.max(2, Math.min(16, Math.log2(360 / (span || 0.001)) + 0.5));
+  }
 
   const initialViewState = {
     longitude: mapCenter && mapCenter[0] != null ? mapCenter[0] : (ctx.longitude || -114.5),
     latitude: mapCenter && mapCenter[1] != null ? mapCenter[1] : (ctx.latitude || 43.8),
-    zoom: mapZoom != null ? mapZoom : (ctx.zoom || 5),
+    zoom: initialZoom,
     minZoom: 2,
     maxZoom: 17,
     pitch: 0,
@@ -1343,6 +1355,7 @@
     slope_scalar: 'rise/run',
     length: 'm',
     aspect: '°',
+    runoff_volume: 'mm',
     subrunoff_volume: 'mm',
     baseflow_volume: 'mm',
     soil_loss: 't/ha',
@@ -2049,7 +2062,7 @@
 
   function computeWeppRanges() {
     if (!weppSummary) return;
-    const modes = ['subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
+    const modes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
     weppRanges = {};
     for (const mode of modes) {
       let min = Infinity;
@@ -2564,19 +2577,56 @@
   function zoomToBounds(bounds, explicitZoom) {
     if (!bounds || bounds.length !== 4) return;
     const [west, south, east, north] = bounds;
-    const cx = (west + east) / 2;
-    const cy = (south + north) / 2;
-    // Use explicit zoom if provided, otherwise calculate from bounds span
-    let zoom;
+
+    // Use deck.gl's WebMercatorViewport.fitBounds for accurate zoom calculation
+    // This properly accounts for:
+    // 1. Viewport dimensions (container width/height)
+    // 2. Mercator projection distortion at different latitudes
+    // 3. Bounds aspect ratio vs viewport aspect ratio
+    const containerWidth = target.clientWidth || 800;
+    const containerHeight = target.clientHeight || 600;
+
+    let longitude, latitude, zoom;
+
     if (explicitZoom != null && Number.isFinite(explicitZoom)) {
+      // Use explicit zoom if provided, just center on bounds
+      longitude = (west + east) / 2;
+      latitude = (south + north) / 2;
       zoom = explicitZoom;
+    } else if (deck.WebMercatorViewport) {
+      // Use fitBounds for accurate zoom calculation
+      // Target ~70% viewport coverage: 15% padding on each side
+      const paddingFraction = 0.15;
+      const paddingPixels = Math.min(containerWidth, containerHeight) * paddingFraction;
+
+      const viewport = new deck.WebMercatorViewport({
+        width: containerWidth,
+        height: containerHeight
+      });
+
+      const fittedViewport = viewport.fitBounds(
+        [[west, south], [east, north]],
+        { padding: paddingPixels }
+      );
+
+      longitude = fittedViewport.longitude;
+      latitude = fittedViewport.latitude;
+      // Reduce zoom slightly to ensure watershed edges are fully visible
+      zoom = fittedViewport.zoom - 0.5;
     } else {
+      // Fallback if WebMercatorViewport is not available
+      longitude = (west + east) / 2;
+      latitude = (south + north) / 2;
       const span = Math.max(east - west, north - south);
       zoom = Math.max(2, Math.min(16, Math.log2(360 / (span || 0.001)) - 1));
     }
+
+    // Clamp zoom to valid range
+    zoom = Math.max(currentViewState.minZoom, Math.min(currentViewState.maxZoom, zoom));
+
     setViewState({
-      longitude: cx,
-      latitude: cy,
+      longitude,
+      latitude,
       zoom,
       bearing: 0,
       pitch: 0,
@@ -2739,9 +2789,7 @@
     }
     updateLayerList();
     applyLayers();
-    if (detectedLayers.length) {
-      zoomToBounds(detectedLayers[0].bounds);
-    }
+    // Don't zoom here - let detectLanduseOverlays handle it with subcatchments bounds
   }
 
   async function detectLanduseOverlays() {
@@ -2763,33 +2811,7 @@
       );
       updateLayerList();
       applyLayers();
-      // Zoom to project extent from ron.map if available, otherwise compute from subcatchments GeoJSON
-      const ronExtent = ctx.mapExtent;
-      const ronZoom = ctx.mapZoom;
-      if (ronExtent && ronExtent.length === 4 && ronExtent.every(Number.isFinite)) {
-        zoomToBounds(ronExtent, ronZoom);
-      } else if (subcatchmentsGeoJson && subcatchmentsGeoJson.features && subcatchmentsGeoJson.features.length) {
-        let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity;
-        for (const feat of subcatchmentsGeoJson.features) {
-          const geom = feat.geometry;
-          if (!geom || !geom.coordinates) continue;
-          const coords = geom.type === 'Polygon' ? geom.coordinates[0] : 
-                         geom.type === 'MultiPolygon' ? geom.coordinates.flat(2) : [];
-          for (const pt of coords) {
-            if (!Array.isArray(pt) || pt.length < 2) continue;
-            const [lon, lat] = pt;
-            if (Number.isFinite(lon) && Number.isFinite(lat)) {
-              if (lon < west) west = lon;
-              if (lon > east) east = lon;
-              if (lat < south) south = lat;
-              if (lat > north) north = lat;
-            }
-          }
-        }
-        if ([west, south, east, north].every(Number.isFinite)) {
-          zoomToBounds([west, south, east, north]);
-        }
-      }
+      // Zoom handled by zoomToSubcatchmentBounds after all detection completes
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load landuse overlays', err);
@@ -2870,6 +2892,7 @@
       const basePath = 'wepp/output/interchange/loss_pw0.hill.parquet';
       weppLayers.length = 0;
       weppLayers.push(
+        { key: 'wepp-runoff', label: 'Runoff Volume (mm)', path: basePath, mode: 'runoff_volume', visible: false },
         { key: 'wepp-subrunoff', label: 'Subrunoff Volume (mm)', path: basePath, mode: 'subrunoff_volume', visible: false },
         { key: 'wepp-baseflow', label: 'Baseflow Volume (mm)', path: basePath, mode: 'baseflow_volume', visible: false },
         { key: 'wepp-soil-loss', label: 'Soil Loss (tonnes/ha)', path: basePath, mode: 'soil_loss', visible: false },
@@ -3095,7 +3118,9 @@
         const val = weppValue(weppOverlay.mode, row);
         if (val !== null) {
           let label;
-          if (weppOverlay.mode === 'subrunoff_volume') {
+          if (weppOverlay.mode === 'runoff_volume') {
+            label = `Runoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
+          } else if (weppOverlay.mode === 'subrunoff_volume') {
             label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
           } else if (weppOverlay.mode === 'baseflow_volume') {
             label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
@@ -3164,8 +3189,9 @@
     applyLayers();
   };
 
-  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectRapOverlays()]).catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error('gl-dashboard: layer detection failed', err);
-  });
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectRapOverlays()])
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('gl-dashboard: layer detection failed', err);
+    });
 })();

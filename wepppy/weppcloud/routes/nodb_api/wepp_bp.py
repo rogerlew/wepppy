@@ -1059,6 +1059,7 @@ def query_wepp_loss_hillslopes(runid, config):
         'columns': [
             'hill.topaz_id',
             'loss.wepp_id',
+            'loss."Runoff Volume" AS runoff_volume',
             'loss."Subrunoff Volume" AS subrunoff_volume',
             'loss."Baseflow Volume" AS baseflow_volume',
             'loss."Soil Loss" AS soil_loss',

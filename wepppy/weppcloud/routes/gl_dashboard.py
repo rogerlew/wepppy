@@ -16,7 +16,8 @@ gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
 )
 def gl_dashboard(runid: str, config: str):
     authorize(runid, config)
-    wd = load_run_context(runid, config)
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
 
     site_prefix = current_app.config.get("SITE_PREFIX", "/weppcloud")
     tile_url = current_app.config.get(
