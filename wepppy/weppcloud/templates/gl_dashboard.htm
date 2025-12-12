@@ -380,11 +380,30 @@
     flex-direction: column;
     gap: 0.25rem;
   }
-  .gl-legend-continuous__bar {
+  .gl-legend-continuous__bar-wrapper {
     height: 12px;
     border-radius: 3px;
-    background: linear-gradient(to right, #440154, #482878, #3e4a89, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b5de2b, #fde725);
     border: 1px solid rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    position: relative;
+  }
+  .gl-legend-continuous__bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to right, 
+      #440154 0%, 
+      #482878 11%, 
+      #3e4a89 22%, 
+      #31688e 33%, 
+      #26828e 44%, 
+      #1f9e89 55%, 
+      #35b779 66%, 
+      #6ece58 77%, 
+      #b5de2b 88%, 
+      #fde725 100%);
   }
   .gl-legend-continuous__labels {
     display: flex;

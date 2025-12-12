@@ -944,9 +944,12 @@
     const container = document.createElement('div');
     container.className = 'gl-legend-continuous';
     
+    const barWrapper = document.createElement('div');
+    barWrapper.className = 'gl-legend-continuous__bar-wrapper';
     const bar = document.createElement('div');
     bar.className = 'gl-legend-continuous__bar';
-    container.appendChild(bar);
+    barWrapper.appendChild(bar);
+    container.appendChild(barWrapper);
     
     const labels = document.createElement('div');
     labels.className = 'gl-legend-continuous__labels';
@@ -1049,51 +1052,54 @@
     let maxVal = 100;
     let unit = LAYER_UNITS[mode] || '';
     
-    // Landuse cover layers (0-1 range, display as %)
+    // Landuse cover layers (0-1 range in data, colormap uses value directly)
     if (['cancov', 'inrcov', 'rilcov'].includes(mode)) {
-      const range = computeRangeFromSummary(landuseSummary, mode);
-      minVal = range.min * 100;
-      maxVal = range.max * 100;
+      minVal = 0;
+      maxVal = 100;
       unit = '%';
     }
-    // Soils continuous
-    else if (['clay', 'sand', 'rock', 'bd'].includes(mode) && soilsSummary) {
-      const range = computeRangeFromSummary(soilsSummary, mode);
-      minVal = range.min;
-      maxVal = range.max;
+    // Soils continuous - use colormap normalization ranges, not data ranges
+    else if (['clay', 'sand', 'rock'].includes(mode) && soilsSummary) {
+      minVal = 0;
+      maxVal = 100;
+      unit = '%';
     }
-    // Hillslopes/Watershed continuous
-    else if (['slope_scalar', 'length', 'aspect'].includes(mode) && hillslopesSummary) {
-      const range = computeRangeFromSummary(hillslopesSummary, mode);
-      minVal = range.min;
-      maxVal = range.max;
-      if (mode === 'slope_scalar') {
-        // Convert to percentage for display
-        minVal = range.min * 100;
-        maxVal = range.max * 100;
-        unit = '%';
-      }
+    else if (mode === 'bd' && soilsSummary) {
+      minVal = 0.5;
+      maxVal = 2.0;
+      unit = 'g/cm³';
     }
-    // WEPP layers
+    else if (mode === 'soil_depth' && soilsSummary) {
+      minVal = 0;
+      maxVal = 2000;
+      unit = 'mm';
+    }
+    // Hillslopes/Watershed continuous - use HILLSLOPES_RANGES constants
+    else if (mode === 'slope_scalar' && hillslopesSummary) {
+      minVal = 0;
+      maxVal = 100;  // HILLSLOPES_RANGES.slope_scalar is 0-1, display as %
+      unit = '%';
+    }
+    else if (mode === 'length' && hillslopesSummary) {
+      minVal = 0;
+      maxVal = 1000;  // HILLSLOPES_RANGES.length
+      unit = 'm';
+    }
+    else if (mode === 'aspect' && hillslopesSummary) {
+      minVal = 0;
+      maxVal = 360;  // HILLSLOPES_RANGES.aspect
+      unit = '°';
+    }
+    // WEPP layers - these use dynamic data ranges, which is correct
     else if (weppRanges && weppRanges[mode]) {
       minVal = weppRanges[mode].min;
       maxVal = weppRanges[mode].max;
     }
-    // RAP layers
+    // RAP layers - use 0-100% (rapFillColor normalizes by /100)
     else if (layer.bandKey && rapSummary) {
-      let min = Infinity, max = -Infinity;
-      for (const key of Object.keys(rapSummary)) {
-        const v = Number(rapSummary[key]);
-        if (Number.isFinite(v)) {
-          if (v < min) min = v;
-          if (v > max) max = v;
-        }
-      }
-      if (Number.isFinite(min) && Number.isFinite(max)) {
-        minVal = min;
-        maxVal = max;
-      }
-      unit = RAP_UNITS[layer.bandKey] || '%';
+      minVal = 0;
+      maxVal = 100;
+      unit = '%';
     }
     
     section.appendChild(renderContinuousLegend(minVal, maxVal, unit));
@@ -1241,6 +1247,9 @@
     } else if (mode === 'bd') {
       // Bulk density typically 0.5-2.0 g/cm3
       normalized = Math.min(1, Math.max(0, (value - 0.5) / 1.5));
+    } else if (mode === 'soil_depth') {
+      // Soil depth typically 0-2000 mm
+      normalized = Math.min(1, Math.max(0, value / 2000));
     } else {
       normalized = Math.min(1, Math.max(0, value));
     }
@@ -1910,6 +1919,7 @@
         { key: 'soil-sand', label: 'Sand content (%)', path: basePath, mode: 'sand', visible: false },
         { key: 'soil-bd', label: 'Bulk density (g/cm³)', path: basePath, mode: 'bd', visible: false },
         { key: 'soil-rock', label: 'Rock content (%)', path: basePath, mode: 'rock', visible: false },
+        { key: 'soil-depth', label: 'Soil depth (mm)', path: basePath, mode: 'soil_depth', visible: false },
       );
       updateLayerList();
       applyLayers();
@@ -2130,6 +2140,8 @@
             label = `Soil: ${val}`;
           } else if (soilOverlay.mode === 'bd') {
             label = `Bulk density: ${typeof val === 'number' ? val.toFixed(2) : val} g/cm³`;
+          } else if (soilOverlay.mode === 'soil_depth') {
+            label = `Soil depth: ${typeof val === 'number' ? val.toFixed(0) : val} mm`;
           } else {
             label = `${soilOverlay.mode}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
           }
