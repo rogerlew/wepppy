@@ -2480,6 +2480,10 @@ class Wepp(NoDbBase):
         wd = self.wd
         climate = self.climate_instance
         wepp_bin = self.wepp_bin
+
+        if 'wepp_50k' in wepp_bin:
+            wepp_bin = 'wepp_dcc52a6'
+
         self.logger.info(f'Running Watershed wepp_bin:{self.wepp_bin}')
         self.logger.info(f'    climate_mode:{climate.climate_mode.name}')
         self.logger.info(f'    output_dir:{self.output_dir}')
@@ -2501,7 +2505,7 @@ class Wepp(NoDbBase):
 
         else:
             with self.timed('  Running watershed run'):
-                assert run_watershed(runs_dir, wepp_bin=self.wepp_bin, status_channel=self._status_channel)
+                assert run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=self._status_channel)
 
                 self.logger.info('    moving .out files...')
                 for fn in glob(_join(self.runs_dir, '*.out')):
