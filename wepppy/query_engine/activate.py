@@ -32,12 +32,14 @@ def activate_query_engine(
     wd: str | Path,
     *,
     run_interchange: bool = True,
+    force_refresh: bool = False,
 ) -> dict[str, object]:
     """Scan a working directory and build the query-engine catalog.
 
     Args:
         wd: Working directory for a WEPPcloud run (parent of `wepp/`, `landuse/`, etc.).
         run_interchange: When True, generate missing WEPP interchange outputs.
+        force_refresh: When True, rebuild the catalog even if one already exists.
 
     Returns:
         Catalog dictionary persisted under `<wd>/_query_engine/catalog.json`.
@@ -54,6 +56,16 @@ def activate_query_engine(
     _raise_if_readonly(base)
 
     query_engine_dir = base / "_query_engine"
+    catalog_path = query_engine_dir / "catalog.json"
+
+    if not force_refresh and catalog_path.exists():
+        try:
+            cache_dir = query_engine_dir / "cache"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            return json.loads(catalog_path.read_text(encoding="utf-8"))
+        except Exception:  # pragma: no cover - fall back to full rebuild
+            LOGGER.warning("Existing catalog unreadable for %s; rebuilding", base, exc_info=True)
+
     query_engine_dir.mkdir(exist_ok=True)
     cache_dir = query_engine_dir / "cache"
     cache_dir.mkdir(exist_ok=True)

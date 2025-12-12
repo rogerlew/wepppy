@@ -78,6 +78,7 @@ from wepppy.export.prep_details import (
     export_channels_prep_details,
     export_hillslopes_prep_details
 )
+from wepppy.query_engine.activate import activate_query_engine
 from wepppy.rq.exception_logging import with_exception_logging
 
 try:
@@ -1163,6 +1164,8 @@ def _post_watershed_interchange_rq(runid: str) -> None:
             run_chnwb_interchange=run_chnwb_interchange,
         )
         generate_interchange_documentation(_join(wd, 'wepp/output/interchange'))
+        activate_query_engine(wd, run_interchange=False, force_refresh=True)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} ACTIVATED query_engine({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

@@ -572,7 +572,7 @@ def test_activate_run_endpoint(monkeypatch, tmp_path):
     monkeypatch.setattr(
         router,
         "activate_query_engine",
-        lambda path: {"generated_at": "2024-05-07T16:33:22Z", "files": ["datasets/one.parquet"]},
+        lambda path, *, force_refresh=False: {"generated_at": "2024-05-07T16:33:22Z", "files": ["datasets/one.parquet"]},
     )
 
     client = TestClient(app)

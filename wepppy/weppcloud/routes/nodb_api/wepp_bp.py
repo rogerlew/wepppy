@@ -20,7 +20,7 @@ from wepppy.wepp.reports.report_base import ReportBase
 from wepppy.wepp.reports.row_data import parse_name, parse_units
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
 import json
-from wepppy.query_engine import activate_query_engine, resolve_run_context, run_query
+from wepppy.query_engine import resolve_run_context, run_query
 from wepppy.query_engine.payload import QueryRequest
 from flask import Response, abort
 
@@ -706,8 +706,7 @@ def plot_wepp_streamflow(runid, config):
         return error_factory('totalwatsed3.parquet is not available; please run the WEPP interchange workflow first.')
 
     try:
-        activate_query_engine(wd, run_interchange=False)
-        run_context = resolve_run_context(wd, auto_activate=False)
+        run_context = resolve_run_context(wd, auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return error_factory('Unable to resolve query engine catalog for this run')
     except Exception:
@@ -1032,18 +1031,10 @@ def query_wepp_loss_hillslopes(runid, config):
     if not _exists(loss_parquet):
         return error_factory('loss_pw0.hill.parquet is not available; please run the WEPP interchange workflow first.')
     
-    # Fast path: try to resolve context without activation if catalog exists
     try:
-        run_context = resolve_run_context(wd, auto_activate=False)
+        run_context = resolve_run_context(wd, auto_activate=True, run_interchange=False)
     except FileNotFoundError:
-        # Catalog doesn't exist - activate it (slow)
-        try:
-            activate_query_engine(wd, run_interchange=False)
-            run_context = resolve_run_context(wd, auto_activate=False)
-        except FileNotFoundError:
-            return error_factory('Unable to resolve query engine catalog for this run')
-        except Exception:
-            return exception_factory('Error activating query engine', runid=runid)
+        return error_factory('Unable to resolve query engine catalog for this run')
     except Exception:
         return exception_factory('Error resolving query engine context', runid=runid)
     

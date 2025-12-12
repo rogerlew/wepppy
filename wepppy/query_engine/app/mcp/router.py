@@ -896,7 +896,7 @@ async def execute_query(request: Request) -> JSONResponse:
         return JSONResponse({"data": data, "meta": meta})
 
     try:
-        context = resolve_run_context(str(run_path), auto_activate=False)
+        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - defensive logging
@@ -974,7 +974,7 @@ async def activate_run_endpoint(request: Request) -> JSONResponse:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
 
     try:
-        catalog = activate_query_engine(run_path)
+        catalog = activate_query_engine(run_path, force_refresh=True)
     except FileNotFoundError:
         return _error_response(404, "not_found", f"Run '{runid}' not found")
     except Exception as exc:  # pragma: no cover - defensive logging

@@ -97,12 +97,13 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
 
     run_directives_state = []
     directives_map = batch_runner.run_directives
-    for task in BatchRunner.DEFAULT_TASKS:
+    tasks = getattr(batch_runner, "DEFAULT_TASKS", BatchRunner.DEFAULT_TASKS)
+    for task in tasks:
         label = task.label()
         run_directives_state.append({
             "slug": task.value,
             "label": label,
-            "enabled": directives_map[task]
+            "enabled": directives_map.get(task, True)
         })
     snapshot["run_directives"] = run_directives_state
 
@@ -110,7 +111,8 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
     if geojson_state:
         snapshot.setdefault("resources", {})["watershed_geojson"] = _serialize_geojson_state(geojson_state)
 
-    sbs_resource = batch_runner.sbs_resource_state()
+    sbs_state_getter = getattr(batch_runner, "sbs_resource_state", None)
+    sbs_resource = sbs_state_getter() if callable(sbs_state_getter) else None
     if sbs_resource:
         snapshot.setdefault("resources", {})["sbs_map"] = sbs_resource
 

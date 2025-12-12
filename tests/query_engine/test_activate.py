@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 import pyarrow as pa
@@ -113,3 +114,25 @@ def test_activate_query_engine_includes_base_assets_with_pups_symlinks(tmp_path:
     catalog = activate_query_engine(run_dir, run_interchange=False)
     paths = {entry["path"] for entry in catalog["files"]}
     assert dataset_rel.as_posix() in paths
+
+
+def test_activate_query_engine_reuses_existing_catalog(tmp_path: Path) -> None:
+    table = pa.table({"id": [1], "value": ["a"]})
+    rel = "data/sample.parquet"
+    file_path = tmp_path / rel
+    _write_parquet(file_path, table)
+
+    catalog_path = tmp_path / "_query_engine" / "catalog.json"
+
+    activate_query_engine(tmp_path, run_interchange=False)
+    initial_mtime = catalog_path.stat().st_mtime
+
+    # Should short-circuit and reuse the existing catalog
+    catalog = activate_query_engine(tmp_path, run_interchange=False)
+
+    assert catalog_path.stat().st_mtime == initial_mtime
+    assert any(entry["path"] == rel for entry in catalog["files"])
+
+    time.sleep(1)
+    activate_query_engine(tmp_path, run_interchange=False, force_refresh=True)
+    assert catalog_path.stat().st_mtime > initial_mtime

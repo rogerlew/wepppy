@@ -13,7 +13,7 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 - Provide a predictable activation pipeline so legacy runs can opt into the query experience.
 
 ## Core Modules (`wepppy/query_engine`)
-- `activate_query_engine(wd, run_interchange=True)`: walk a run directory, emit `<wd>/_query_engine/catalog.json`, cache derived artifacts, and optionally run WEPP interchange/documentation when missing. The start year is inferred from `Climate` when present.
+- `activate_query_engine(wd, run_interchange=True, force_refresh=False)`: walk a run directory, emit `<wd>/_query_engine/catalog.json`, cache derived artifacts, and optionally run WEPP interchange/documentation when missing. When a catalog already exists and `force_refresh` is false, the existing JSON is returned without rescanning the filesystem.
 - `resolve_run_context(runid, scenario=None)`: resolve filesystem paths, auto-activate if necessary, and hydrate a `RunContext` (base directory + catalog handle).
 - `run_query(run_context, QueryRequest)`: build and execute a DuckDB plan, returning a `QueryResult(records, schema, row_count)`.
 - Support utilities:

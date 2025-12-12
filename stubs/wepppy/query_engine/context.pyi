@@ -10,4 +10,11 @@ class RunContext:
     scenario: str | None
     catalog: DatasetCatalog
 
-def resolve_run_context(runid: str, *, scenario: str | None = ..., auto_activate: bool = ...) -> RunContext: ...
+def resolve_run_context(
+    runid: str,
+    *,
+    scenario: str | None = ...,
+    auto_activate: bool = ...,
+    run_interchange: bool = ...,
+    force_refresh: bool = ...,
+) -> RunContext: ...

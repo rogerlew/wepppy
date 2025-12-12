@@ -218,8 +218,7 @@ async def run_info(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        activate_query_engine(run_path, run_interchange=False)
-        context = resolve_run_context(str(run_path), auto_activate=False)
+        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -259,8 +258,7 @@ async def run_schema(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        activate_query_engine(run_path, run_interchange=False)
-        context = resolve_run_context(str(run_path), auto_activate=False)
+        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -291,7 +289,7 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
     sample_dataset = "landuse/landuse.parquet"
 
     try:
-        context = resolve_run_context(str(run_path), auto_activate=False)
+        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
         catalog_entries = context.catalog.entries()
         if catalog_entries:
             # Use first parquet file, skip JSON/other metadata files
@@ -374,11 +372,7 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         return JSONResponse({"error": "Invalid JSON payload"}, status_code=400)
 
     try:
-        # Only activate if catalog doesn't exist - avoids expensive directory walks on every query
-        catalog_path = run_path / "_query_engine" / "catalog.json"
-        if not catalog_path.exists():
-            activate_query_engine(run_path, run_interchange=False)
-        context = resolve_run_context(str(run_path), auto_activate=False)
+        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
@@ -478,7 +472,7 @@ async def activate_run(request: StarletteRequest) -> Response:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 
     try:
-        catalog = activate_query_engine(run_path)
+        catalog = activate_query_engine(run_path, force_refresh=True)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
     except Exception as exc:

@@ -41,7 +41,13 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
             raise FileNotFoundError(runid_param)
         return run_dir
 
-    def fake_resolve_context(runid_path: str, *, auto_activate: bool = True):
+    def fake_resolve_context(
+        runid_path: str,
+        *,
+        auto_activate: bool = True,
+        run_interchange: bool = True,
+        force_refresh: bool = False,
+    ):
         return SimpleNamespace(
             runid=runid_path,
             base_dir=run_dir,
@@ -49,7 +55,7 @@ def test_query_endpoint_accepts_trailing_slash(monkeypatch, tmp_path):
             catalog=dummy_catalog,
         )
 
-    def fake_activate_query_engine(path, *, run_interchange: bool = True):
+    def fake_activate_query_engine(path, *, run_interchange: bool = True, force_refresh: bool = False):
         return {}
 
     def fake_run_query(context, payload):

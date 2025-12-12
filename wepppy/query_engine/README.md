@@ -135,7 +135,7 @@ Before querying, a run must be **activated** to generate the `catalog.json` file
 5. **Serialization**: Write `_query_engine/catalog.json` with paths, schemas, sizes, and timestamps
 6. **Duration**: Typically 5-30 seconds depending on run size
 
-Once activated, the catalog is cached until the next activation or until files are modified.
+Once activated, the catalog is cached until the next activation or until files are modified. Repeated calls to `activate_query_engine` reuse the existing `catalog.json` unless `force_refresh=True` is provided (useful after interchange jobs finish).
 
 ### Query Execution Model
 

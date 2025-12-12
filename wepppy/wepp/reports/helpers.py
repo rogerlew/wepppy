@@ -44,8 +44,11 @@ class ReportQueryContext:
     def activate(self) -> Any:
         """Populate (or refresh) the memoized query-engine context."""
         if self._context is None:
-            activate_query_engine(self.run_directory, run_interchange=self.run_interchange)
-            self._context = resolve_run_context(str(self.run_directory), auto_activate=False)
+            self._context = resolve_run_context(
+                str(self.run_directory),
+                auto_activate=True,
+                run_interchange=self.run_interchange,
+            )
         return self._context
 
     @property

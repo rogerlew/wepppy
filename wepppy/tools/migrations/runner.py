@@ -1056,7 +1056,7 @@ def refresh_query_catalog(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]
         return True, "Query engine not available (catalog refresh skipped)"
     
     try:
-        activate_query_engine(str(run_path), run_interchange=False)
+        activate_query_engine(str(run_path), run_interchange=False, force_refresh=True)
         return True, f"Refreshed query catalog ({len(parquet_files)} interchange files)"
     except Exception as e:
         # Non-fatal - catalog will be refreshed on first query
