@@ -211,11 +211,15 @@
   const soilsLayers = [];
   const hillslopesLayers = [];
   const weppLayers = [];
+  const weppEventLayers = [];
   const rapLayers = [];
   let landuseSummary = null;
   let soilsSummary = null;
   let hillslopesSummary = null;
   let weppSummary = null;
+  let weppEventSummary = null;
+  let weppEventMetadata = null; // { available, startDate, endDate }
+  let weppEventSelectedDate = null; // "YYYY-MM-DD" string
   let rapSummary = null;
   let rapMetadata = null;
   let rapSelectedYear = null;
@@ -973,6 +977,11 @@
       const el = document.getElementById(`layer-WEPP-${l.key}`);
       if (el) el.checked = false;
     });
+    weppEventLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-WEPP-Event-${l.key}`);
+      if (el) el.checked = false;
+    });
     rapLayers.forEach((l) => {
       l.visible = false;
       const el = document.getElementById(`layer-RAP-${l.key}`);
@@ -1002,6 +1011,10 @@
     }
     if (weppLayers.length) {
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
+    }
+    if (weppEventLayers.length) {
+      // WEPP Event uses special rendering with date input + radio options
+      subcatchmentSections.push({ title: 'WEPP Event', items: weppEventLayers, isSubcatchment: true, isWeppEvent: true });
     }
     if (rapLayers.length) {
       // RAP uses special rendering with cumulative mode + checkboxes
@@ -1043,6 +1056,13 @@
       // Special handling for RAP section
       if (section.isRap) {
         renderRapSection(details, section);
+        layerListEl.appendChild(details);
+        return;
+      }
+
+      // Special handling for WEPP Event section
+      if (section.isWeppEvent) {
+        renderWeppEventSection(details, section);
         layerListEl.appendChild(details);
         return;
       }
@@ -1234,6 +1254,85 @@
     details.appendChild(itemList);
   }
 
+  /**
+   * Render the WEPP Event section with date input + metric radio options.
+   */
+  function renderWeppEventSection(details, section) {
+    const itemList = document.createElement('ul');
+    itemList.className = 'gl-layer-items';
+
+    // Date input row
+    const dateLi = document.createElement('li');
+    dateLi.className = 'gl-layer-item';
+    dateLi.style.cssText = 'flex-direction: column; align-items: flex-start; gap: 0.25rem;';
+    const dateLabel = document.createElement('label');
+    dateLabel.textContent = 'Event Date:';
+    dateLabel.style.cssText = 'font-size: 0.85rem; color: #8fa0c2;';
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.id = 'gl-wepp-event-date';
+    dateInput.style.cssText = 'width: 100%; padding: 0.25rem; background: #1f2c44; border: 1px solid #3f5070; border-radius: 4px; color: #d0d7e8; font-size: 0.85rem;';
+    if (weppEventSelectedDate) {
+      dateInput.value = weppEventSelectedDate;
+    }
+    if (weppEventMetadata && weppEventMetadata.startDate) {
+      dateInput.min = weppEventMetadata.startDate;
+    }
+    if (weppEventMetadata && weppEventMetadata.endDate) {
+      dateInput.max = weppEventMetadata.endDate;
+    }
+    dateInput.addEventListener('change', async () => {
+      weppEventSelectedDate = dateInput.value;
+      // Reload data for the currently active WEPP Event layer
+      const activeLayer = pickActiveWeppEventLayer();
+      if (activeLayer && weppEventSelectedDate) {
+        await refreshWeppEventData();
+        applyLayers();
+      }
+    });
+    dateLi.appendChild(dateLabel);
+    dateLi.appendChild(dateInput);
+    itemList.appendChild(dateLi);
+
+    // Separator
+    const separatorLi = document.createElement('li');
+    separatorLi.style.cssText = 'border-top: 1px solid #1f2c44; margin: 0.5rem 0; padding: 0;';
+    itemList.appendChild(separatorLi);
+
+    // Radio options for each metric
+    section.items.forEach((layer) => {
+      const li = document.createElement('li');
+      li.className = 'gl-layer-item';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'subcatchment-overlay';
+      input.checked = layer.visible;
+      input.id = `layer-WEPP-Event-${layer.key}`;
+      input.addEventListener('change', async () => {
+        if (input.checked) {
+          deselectAllSubcatchmentOverlays();
+          layer.visible = true;
+          input.checked = true;
+          // Load data if we have a date selected
+          if (weppEventSelectedDate) {
+            await refreshWeppEventData();
+          }
+          applyLayers();
+        }
+      });
+      const label = document.createElement('label');
+      label.setAttribute('for', input.id);
+      const name = layer.label || layer.key;
+      const path = layer.path || '';
+      label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+      li.appendChild(input);
+      li.appendChild(label);
+      itemList.appendChild(li);
+    });
+
+    details.appendChild(itemList);
+  }
+
   function buildSubcatchmentLabelsLayer() {
     if (!subcatchmentLabelsVisible || !subcatchmentsGeoJson) {
       return [];
@@ -1322,10 +1421,11 @@
     const soilsDeckLayers = buildSoilsLayers();
     const hillslopesDeckLayers = buildHillslopesLayers();
     const weppDeckLayers = buildWeppLayers();
+    const weppEventDeckLayers = buildWeppEventLayers();
     const rapDeckLayers = buildRapLayers();
     const labelLayers = buildSubcatchmentLabelsLayer();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
     });
     // Update legends panel after layer changes
     updateLegendsPanel();
@@ -1361,6 +1461,12 @@
     soil_loss: 't/ha',
     sediment_deposition: 't/ha',
     sediment_yield: 't/ha',
+    // WEPP Event metrics
+    event_P: 'mm',
+    event_Q: 'mm',
+    event_ET: 'mm',
+    event_peakro: 'm³/s',
+    event_tdet: 'kg',
   };
 
   // RAP band units
@@ -1402,6 +1508,13 @@
     for (const layer of weppLayers) {
       if (layer.visible) {
         active.push({ ...layer, category: 'WEPP' });
+        break;
+      }
+    }
+    // WEPP Event
+    for (const layer of weppEventLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'WEPP Event' });
         break;
       }
     }
@@ -1771,6 +1884,12 @@
       minVal = weppRanges[mode].min;
       maxVal = weppRanges[mode].max;
     }
+    // WEPP Event layers - use dynamic weppEventRanges
+    else if (weppEventRanges && weppEventRanges[mode]) {
+      minVal = weppEventRanges[mode].min;
+      maxVal = weppEventRanges[mode].max;
+      unit = LAYER_UNITS[mode] || '';
+    }
     // RAP cumulative mode - use 0-100% (clamped at colormap level)
     else if (layer.isCumulative) {
       minVal = 0;
@@ -2136,6 +2255,178 @@
       }
     }
     return null;
+  }
+
+  // WEPP Event ranges computed dynamically from weppEventSummary data
+  let weppEventRanges = {};
+
+  function computeWeppEventRanges() {
+    if (!weppEventSummary) return;
+    const modes = ['event_P', 'event_Q', 'event_ET', 'event_peakro', 'event_tdet'];
+    weppEventRanges = {};
+    for (const mode of modes) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (const key of Object.keys(weppEventSummary)) {
+        const row = weppEventSummary[key];
+        const v = Number(row[mode]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      // Handle edge cases
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(max)) max = 1;
+      if (max <= min) max = min + 0.001;
+      weppEventRanges[mode] = { min, max };
+    }
+  }
+
+  function weppEventFillColor(mode, row) {
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+
+    const range = weppEventRanges[mode] || { min: 0, max: 100 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    return viridisColor(normalized);
+  }
+
+  function weppEventValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildWeppEventLayers() {
+    const activeLayers = weppEventLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && weppEventSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `wepp-event-${overlay.key}-${weppEventSelectedDate}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? weppEventSummary[String(topaz)] : null;
+            return weppEventFillColor(overlay.mode, row);
+          },
+          updateTriggers: {
+            getFillColor: [weppEventSelectedDate],
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function pickActiveWeppEventLayer() {
+    for (let i = weppEventLayers.length - 1; i >= 0; i--) {
+      const layer = weppEventLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
+  async function refreshWeppEventData() {
+    if (!weppEventSelectedDate) return;
+    const activeLayer = pickActiveWeppEventLayer();
+    if (!activeLayer) return;
+
+    // Parse the date to get year, month, day
+    const [year, month, day] = weppEventSelectedDate.split('-').map(Number);
+    if (!year || !month || !day) return;
+
+    try {
+      // Reset cached summary so stale values are not reused on failure
+      weppEventSummary = {};
+      weppEventRanges = {};
+
+      // Determine which parquet file and column to query based on the mode
+      const mode = activeLayer.mode;
+      const columns = ['hill.topaz_id AS topaz_id'];
+      let filters;
+
+      if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
+        // H.wat.parquet - aggregate OFEs by hillslope (topaz_id) via hillslopes mapping
+        const parquetPath = 'wepp/output/interchange/H.wat.parquet';
+        const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
+        const valueExpression =
+          mode === 'event_ET'
+            ? '(SUM(wat.Ep) + SUM(wat.Es) + SUM(wat.Er))'
+            : `SUM(wat.${watColumn})`;
+        filters = [
+          { column: 'wat.year', op: '=', value: year },
+          { column: 'wat.month', op: '=', value: month },
+          { column: 'wat.day_of_month', op: '=', value: day },
+        ];
+        const dataPayload = {
+          datasets: [
+            { path: parquetPath, alias: 'wat' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          ],
+          joins: [{ left: 'wat', right: 'hill', on: 'wepp_id', type: 'inner' }],
+          columns,
+          aggregations: [{ sql: valueExpression, alias: 'value' }],
+          filters,
+          group_by: ['hill.topaz_id'],
+        };
+        const dataResult = await postQueryEngine(dataPayload);
+        if (dataResult && dataResult.records) {
+          weppEventSummary = {};
+          for (const row of dataResult.records) {
+            weppEventSummary[String(row.topaz_id)] = { [mode]: row.value };
+          }
+          computeWeppEventRanges();
+        }
+      } else if (mode === 'event_peakro' || mode === 'event_tdet') {
+        // H.pass.parquet
+        const parquetPath = 'wepp/output/interchange/H.pass.parquet';
+        const passColumn = mode === 'event_peakro' ? 'peakro' : 'tdet';
+        const valueExpression =
+          mode === 'event_peakro' ? `MAX(pass.${passColumn})` : `SUM(pass.${passColumn})`;
+        filters = [
+          { column: 'pass.year', op: '=', value: year },
+          { column: 'pass.month', op: '=', value: month },
+          { column: 'pass.day_of_month', op: '=', value: day },
+        ];
+        const dataPayload = {
+          datasets: [
+            { path: parquetPath, alias: 'pass' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          ],
+          joins: [{ left: 'pass', right: 'hill', on: 'wepp_id', type: 'inner' }],
+          columns,
+          aggregations: [{ sql: valueExpression, alias: 'value' }],
+          filters,
+          group_by: ['hill.topaz_id'],
+        };
+        const dataResult = await postQueryEngine(dataPayload);
+        if (dataResult && dataResult.records) {
+          weppEventSummary = {};
+          for (const row of dataResult.records) {
+            weppEventSummary[String(row.topaz_id)] = { [mode]: row.value };
+          }
+          computeWeppEventRanges();
+        }
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to refresh WEPP Event data', err);
+    }
   }
 
   // RAP band labels for display
@@ -2907,6 +3198,59 @@
     }
   }
 
+  async function detectWeppEventOverlays() {
+    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    try {
+      // Use climate context for date range (already available, avoids slow parquet query)
+      const climateCtx = ctx.climate;
+      if (!climateCtx || !climateCtx.startYear || !climateCtx.endYear) {
+        // eslint-disable-next-line no-console
+        console.warn('gl-dashboard: no climate context available for WEPP Event');
+        return;
+      }
+
+      const minYear = climateCtx.startYear;
+      const maxYear = climateCtx.endYear;
+
+      // Set up metadata with date range (using Jan 1 of min year to Dec 31 of max year)
+      weppEventMetadata = {
+        available: true,
+        startDate: `${minYear}-01-01`,
+        endDate: `${maxYear}-12-31`,
+      };
+
+      // Default to first day of simulation
+      if (!weppEventSelectedDate) {
+        weppEventSelectedDate = weppEventMetadata.startDate;
+      }
+
+      // Ensure subcatchments are loaded
+      if (!subcatchmentsGeoJson) {
+        const geoResp = await fetch(geoUrl);
+        if (geoResp.ok) {
+          subcatchmentsGeoJson = await geoResp.json();
+        }
+      }
+      if (!subcatchmentsGeoJson) return;
+
+      // Build layer definitions for WEPP Event metrics
+      weppEventLayers.length = 0;
+      weppEventLayers.push(
+        { key: 'wepp-event-P', label: 'Precipitation (P)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_P', visible: false },
+        { key: 'wepp-event-Q', label: 'Runoff (Q)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_Q', visible: false },
+        { key: 'wepp-event-ET', label: 'Total ET (Ep+Es+Er)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_ET', visible: false },
+        { key: 'wepp-event-peakro', label: 'Peak Runoff Rate', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_peakro', visible: false },
+        { key: 'wepp-event-tdet', label: 'Total Detachment', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_tdet', visible: false },
+      );
+
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load WEPP Event overlays', err);
+    }
+  }
+
   /**
    * Post a JSON payload to the query-engine and return the parsed response.
    * @param {Object} payload - Query engine request body
@@ -3136,6 +3480,31 @@
           return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
+      // WEPP Event tooltip
+      const weppEventOverlay = pickActiveWeppEventLayer();
+      if (info.object && weppEventOverlay && weppEventSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? weppEventSummary[String(topaz)] : null;
+        const val = weppEventValue(weppEventOverlay.mode, row);
+        if (val !== null) {
+          let label;
+          if (weppEventOverlay.mode === 'event_P') {
+            label = `Precipitation: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
+          } else if (weppEventOverlay.mode === 'event_Q') {
+            label = `Runoff: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
+          } else if (weppEventOverlay.mode === 'event_ET') {
+            label = `Total ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
+          } else if (weppEventOverlay.mode === 'event_peakro') {
+            label = `Peak Runoff Rate: ${typeof val === 'number' ? val.toFixed(4) : val} m\u00b3/s`;
+          } else if (weppEventOverlay.mode === 'event_tdet') {
+            label = `Total Detachment: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
+          } else {
+            label = `${weppEventOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+          }
+          return `Layer: ${weppEventOverlay.path}\nDate: ${weppEventSelectedDate}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
       // RAP tooltip - handle both cumulative and single band modes
       if (info.object && rapSummary && (rapCumulativeMode || pickActiveRapLayer())) {
         const props = info.object && info.object.properties;
@@ -3189,7 +3558,7 @@
     applyLayers();
   };
 
-  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectRapOverlays()])
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectWeppEventOverlays(), detectRapOverlays()])
     .catch((err) => {
       // eslint-disable-next-line no-console
       console.error('gl-dashboard: layer detection failed', err);

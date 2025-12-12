@@ -316,10 +316,6 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
     if join_clauses:
         sql_parts.extend(join_clauses)
 
-    if group_by and payload.aggregation_specs:
-        group_by_sql = ", ".join(group_by)
-        sql_parts.append(f"GROUP BY {group_by_sql}")
-
     if payload.filters:
         filter_clauses = []
         for filt in payload.filters:
@@ -364,6 +360,10 @@ def build_query_plan(payload: QueryRequest, catalog: DatasetCatalog) -> QueryPla
             filter_clauses.append(f"{column} {operator} {formatted_value}")
 
         sql_parts.append("WHERE " + " AND ".join(filter_clauses))
+
+    if group_by and payload.aggregation_specs:
+        group_by_sql = ", ".join(group_by)
+        sql_parts.append(f"GROUP BY {group_by_sql}")
 
     if payload.order_by:
         order_by_sql = ", ".join(payload.order_by)

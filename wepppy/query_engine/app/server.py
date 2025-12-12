@@ -374,7 +374,10 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
         return JSONResponse({"error": "Invalid JSON payload"}, status_code=400)
 
     try:
-        activate_query_engine(run_path, run_interchange=False)
+        # Only activate if catalog doesn't exist - avoids expensive directory walks on every query
+        catalog_path = run_path / "_query_engine" / "catalog.json"
+        if not catalog_path.exists():
+            activate_query_engine(run_path, run_interchange=False)
         context = resolve_run_context(str(run_path), auto_activate=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
