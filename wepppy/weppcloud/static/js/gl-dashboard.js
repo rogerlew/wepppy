@@ -835,6 +835,46 @@
     }));
   }
 
+  function getUsedSoilClasses(layer) {
+    // Extract unique soil codes from the SSURGO raster values array
+    // and try to match them with soilsSummary for labels
+    const codes = new Set();
+    if (!layer || !layer.values) return [];
+    const values = layer.values;
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i];
+      if (Number.isFinite(v) && v > 0) {
+        codes.add(v);
+      }
+    }
+    if (codes.size === 0) return [];
+    
+    // Build a map from mukey integer prefix to soil info from soilsSummary
+    const mukeyToInfo = new Map();
+    if (soilsSummary) {
+      for (const topazId of Object.keys(soilsSummary)) {
+        const row = soilsSummary[topazId];
+        if (!row || !row.mukey) continue;
+        // mukey format: "762983-loam-forest" - extract the numeric prefix
+        const mukeyParts = String(row.mukey).split('-');
+        const mukeyNum = parseInt(mukeyParts[0], 10);
+        if (Number.isFinite(mukeyNum) && !mukeyToInfo.has(mukeyNum)) {
+          mukeyToInfo.set(mukeyNum, {
+            desc: row.simple_texture || row.desc || `Soil ${mukeyNum}`,
+            mukey: row.mukey,
+          });
+        }
+      }
+    }
+    
+    // Sort numerically and return as legend items
+    return Array.from(codes).sort((a, b) => a - b).map(code => {
+      const color = soilColorForValue(code);
+      const label = String(code);
+      return { color, label };
+    });
+  }
+
   function getUsedLanduseClasses() {
     // Extract unique landuse classes from landuseSummary with their color and description
     const classMap = new Map(); // key -> { color, desc }
@@ -849,6 +889,25 @@
       const color = row.color;
       const desc = row.desc || `Class ${key}`;
       classMap.set(key, { color, desc });
+    }
+    return classMap;
+  }
+
+  function getUsedSoilsClasses() {
+    // Extract unique soil classes from soilsSummary with their color and description
+    // Deduplicate by mukey (e.g., "762991-silt loam-forest")
+    const classMap = new Map(); // mukey -> { color, desc }
+    if (!soilsSummary) return classMap;
+    for (const topazId of Object.keys(soilsSummary)) {
+      const row = soilsSummary[topazId];
+      if (!row) continue;
+      const mukey = row.mukey;
+      if (mukey == null) continue;
+      if (classMap.has(mukey)) continue;
+      // Extract color and description
+      const color = row.color;
+      const desc = row.desc || mukey;
+      classMap.set(mukey, { color, desc });
     }
     return classMap;
   }
@@ -936,13 +995,18 @@
       return section;
     }
     
-    // Categorical: dominant soil (uses hashed colors)
+    // Categorical: dominant soil
     if (mode === 'dominant' && layer.category === 'Soils') {
-      // Soil dominant is hashed per soil code - show note instead of full legend
-      const note = document.createElement('p');
-      note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
-      note.textContent = 'Colors vary by soil type';
-      section.appendChild(note);
+      const classMap = getUsedSoilsClasses();
+      const items = [];
+      for (const [mukey, info] of classMap.entries()) {
+        // Color is a hex string from API (e.g., "#d11141")
+        const colorCss = info.color || '#888888';
+        items.push({ color: colorCss, label: info.desc || mukey });
+      }
+      if (items.length) {
+        section.appendChild(renderCategoricalLegend(items));
+      }
       return section;
     }
     
@@ -955,6 +1019,20 @@
         const note = document.createElement('p');
         note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
         note.textContent = 'NLCD land cover classes';
+        section.appendChild(note);
+      }
+      return section;
+    }
+    
+    // SSURGO raster (soils/ssurgo.tif)
+    if (layer.key === 'soils' && layer.category === 'Raster') {
+      const soilItems = getUsedSoilClasses(layer);
+      if (soilItems.length) {
+        section.appendChild(renderCategoricalLegend(soilItems));
+      } else {
+        const note = document.createElement('p');
+        note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
+        note.textContent = 'SSURGO soil types';
         section.appendChild(note);
       }
       return section;
