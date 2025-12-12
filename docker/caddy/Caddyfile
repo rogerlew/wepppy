@@ -80,6 +80,12 @@ http://:8080 {
         file_server
     }
 
+    handle /favicon.ico {
+        root * /srv/weppcloud/static
+        rewrite * /favicon.ico
+        file_server
+    }
+
     handle_path /browse* {
         reverse_proxy browse:9009 {
             transport http {

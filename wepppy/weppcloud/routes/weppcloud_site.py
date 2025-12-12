@@ -238,13 +238,19 @@ def _landing_assets_dir() -> Path:
     return _resolve_landing_static_asset('assets')
 
 
-def _render_landing_page() -> 'flask.Response':
+def _render_landing_page(variant: str = 'light') -> 'flask.Response':
+    """Render landing page.
+    
+    Args:
+        variant: 'light' for flat governmental style, 'dark' for aurora/glassmorphism style
+    """
     try:
         _load_or_refresh_run_locations(force=True)
     except Exception:
         current_app.logger.exception('Failed to refresh landing run locations')
 
-    vite_index = _resolve_landing_static_asset('index.html')
+    index_file = 'index-light.html' if variant == 'light' else 'index.html'
+    vite_index = _resolve_landing_static_asset(index_file)
     if vite_index.exists():
         rendered = _render_ui_lab_index_with_state(vite_index)
         if rendered is not None:
@@ -256,7 +262,7 @@ def _render_landing_page() -> 'flask.Response':
 @weppcloud_site_bp.route('/')
 @handle_with_exception_factory
 def index():
-    return _render_landing_page()
+    return _render_landing_page('light')
 
 
 @weppcloud_site_bp.route('/interfaces/', strict_slashes=False)
@@ -283,7 +289,21 @@ def _landing_run_locations_response() -> 'flask.Response':
 @weppcloud_site_bp.route('/landing/', strict_slashes=False)
 @handle_with_exception_factory
 def landing():
-    return _render_landing_page()
+    return _render_landing_page('light')
+
+
+@weppcloud_site_bp.route('/landing/light/', strict_slashes=False)
+@handle_with_exception_factory
+def landing_light():
+    """Render the light-themed (governmental aesthetic) landing page variant."""
+    return _render_landing_page('light')
+
+
+@weppcloud_site_bp.route('/landing/dark/', strict_slashes=False)
+@handle_with_exception_factory
+def landing_dark():
+    """Render the dark-themed (aurora/glassmorphism) landing page variant."""
+    return _render_landing_page('dark')
 
 
 @weppcloud_site_bp.route('/landing/run-locations.json', strict_slashes=False)

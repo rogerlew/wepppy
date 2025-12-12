@@ -17,13 +17,11 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-import { AuroraBackground } from '@/components/aurora-background'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_RUN_DATA_PATH = './run-locations.json'
 const RUN_DATA_URL = import.meta.env.VITE_RUN_DATA_URL ?? DEFAULT_RUN_DATA_PATH
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json'
-const MAP_PIN_OFFSET = 800
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json'
 
 type HelpResource = {
   title: string
@@ -43,40 +41,40 @@ const CONTACT_ICON_MAP = {
 
 const CONTACT_ACCENTS = {
   violet: {
-    border: 'border-violet-500/40',
-    glow: 'from-violet-500/20 via-violet-500/5 to-transparent',
-    icon: 'bg-violet-500/15 text-violet-100',
-    chip: 'bg-violet-500/10 text-violet-100',
+    border: 'border-violet-600/30',
+    glow: 'from-violet-100/40 via-violet-50/20 to-transparent',
+    icon: 'bg-violet-100 text-violet-700',
+    chip: 'bg-violet-50 text-violet-700 border border-violet-200',
   },
   sky: {
-    border: 'border-sky-500/40',
-    glow: 'from-sky-500/20 via-sky-500/5 to-transparent',
-    icon: 'bg-sky-500/15 text-sky-100',
-    chip: 'bg-sky-500/10 text-sky-100',
+    border: 'border-sky-600/30',
+    glow: 'from-sky-100/40 via-sky-50/20 to-transparent',
+    icon: 'bg-sky-100 text-sky-700',
+    chip: 'bg-sky-50 text-sky-700 border border-sky-200',
   },
   amber: {
-    border: 'border-amber-400/40',
-    glow: 'from-amber-400/25 via-amber-400/5 to-transparent',
-    icon: 'bg-amber-400/15 text-amber-100',
-    chip: 'bg-amber-400/10 text-amber-100',
+    border: 'border-amber-500/30',
+    glow: 'from-amber-100/40 via-amber-50/20 to-transparent',
+    icon: 'bg-amber-100 text-amber-700',
+    chip: 'bg-amber-50 text-amber-700 border border-amber-200',
   },
   emerald: {
-    border: 'border-emerald-400/40',
-    glow: 'from-emerald-400/20 via-emerald-400/5 to-transparent',
-    icon: 'bg-emerald-400/15 text-emerald-100',
-    chip: 'bg-emerald-400/10 text-emerald-100',
+    border: 'border-emerald-500/30',
+    glow: 'from-emerald-100/40 via-emerald-50/20 to-transparent',
+    icon: 'bg-emerald-100 text-emerald-700',
+    chip: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
   },
   lime: {
-    border: 'border-lime-400/40',
-    glow: 'from-lime-400/20 via-lime-400/5 to-transparent',
-    icon: 'bg-lime-400/15 text-lime-100',
-    chip: 'bg-lime-400/10 text-lime-100',
+    border: 'border-lime-500/30',
+    glow: 'from-lime-100/40 via-lime-50/20 to-transparent',
+    icon: 'bg-lime-100 text-lime-700',
+    chip: 'bg-lime-50 text-lime-700 border border-lime-200',
   },
   cyan: {
-    border: 'border-cyan-400/40',
-    glow: 'from-cyan-400/20 via-cyan-400/5 to-transparent',
-    icon: 'bg-cyan-400/15 text-cyan-100',
-    chip: 'bg-cyan-400/10 text-cyan-100',
+    border: 'border-cyan-500/30',
+    glow: 'from-cyan-100/40 via-cyan-50/20 to-transparent',
+    icon: 'bg-cyan-100 text-cyan-700',
+    chip: 'bg-cyan-50 text-cyan-700 border border-cyan-200',
   },
 } as const
 
@@ -317,7 +315,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const POINT_SCALE = 1
 
-export function App() {
+export function AppLight() {
   const [data, setData] = useState<RunLocation[]>([])
   const [yearFilter, setYearFilter] = useState<string>('all')
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -325,14 +323,13 @@ export function App() {
   const [panelOpen, setPanelOpen] = useState<boolean>(false)
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE)
   const [appState] = useState<AppState>(() => (typeof window !== 'undefined' ? window.__WEPP_STATE__ ?? {} : {}))
-  const [heroProgress, setHeroProgress] = useState<number>(0)
 
   const isAuthenticated = Boolean(appState.user?.is_authenticated)
-  const heroHeadline = 'Watershed intelligence for response teams'
+  const heroHeadline = 'Turning landscape data into watershed intelligence for planning and management'
   const mapEyebrow = 'Run atlas'
   const mapTitle = 'Explore Active WEPPcloud Projects'
-const mapSubtitle =
-  'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
+  const mapSubtitle =
+    'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
   const offsetCache = useRef(new Map<string, [number, number]>())
 
   useEffect(() => {
@@ -370,22 +367,6 @@ const mapSubtitle =
     loadRunLocations()
 
     return () => controller.abort()
-  }, [])
-
-  useEffect(() => {
-    function handleScroll() {
-      const viewport = window.innerHeight || 1
-      const threshold = Math.max(viewport * 0.6, 1)
-      const progress = Math.min(Math.max(window.scrollY / threshold, 0), 1)
-      setHeroProgress(progress)
-    }
-    handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll)
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
-    }
   }, [])
 
   const filteredData = useMemo(() => {
@@ -485,8 +466,8 @@ const mapSubtitle =
       radiusMaxPixels: 60,
       getPosition: (d) => d.coordinates,
       getRadius: (d) => Math.max(6, (d.access_count ?? 1) * POINT_SCALE),
-      getFillColor: (d) => (d.has_sbs ? [124, 58, 237, 190] : [14, 165, 233, 190]),
-      getLineColor: [255, 255, 255, 180],
+      getFillColor: (d) => (d.has_sbs ? [109, 40, 217, 200] : [2, 132, 199, 200]),
+      getLineColor: [255, 255, 255, 220],
       lineWidthMinPixels: 1,
     })
 
@@ -498,7 +479,7 @@ const mapSubtitle =
       getText: (d) => (d.run_name || '').trim(),
       getSize: labelSize,
       getAngle: 0,
-      getColor: [236, 248, 255, 220],
+      getColor: [30, 41, 59, 220],
       getTextAnchor: 'start',
       getAlignmentBaseline: 'bottom',
       getPixelOffset: (d) => getLabelOffset(d),
@@ -547,66 +528,59 @@ const mapSubtitle =
   )
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <section id="hero" className="flex min-h-[100svh] z-20">
-        <AuroraBackground className="flex-1 min-h-[100svh]" opacity={Math.max(0, 1 - heroProgress)}>
-          <div className="relative mx-auto flex h-full max-w-5xl flex-col items-center justify-start gap-12 px-6 py-16 pt-[600px] text-center sm:py-24 lg:py-32">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="space-y-4"
-            >
-              <p className="text-xs uppercase tracking-[0.4em] text-sky-200">WEPPcloud</p>
-              <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
-                <TypewriterText text={heroHeadline} speed={1} delay={1000} />
-              </h1>
-              <p className="text-base text-slate-200 sm:text-lg">
-                Launch tools, explore documentation, or jump into the latest analytics. Scroll to
-                reveal live WEPPcloud runs rendered in real time.
-              </p>
-            </motion.div>
+    <div className="light-theme min-h-screen bg-gray-50 text-slate-800">
+      {/* Hero Section - Clean government style */}
+      <section id="hero" className="relative bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <div>
+              <h1 className="text-2xl font-semibold text-slate-800">WEPPcloud</h1>
+              <p className="text-sm text-slate-500">Water Erosion Prediction Project</p>
+            </div>
+            
+            <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 max-w-2xl leading-tight">
+              {heroHeadline}
+            </h2>
+            
+            <p className="text-base text-slate-600 max-w-2xl leading-relaxed">
+              WEPPcloud is an online interface for running WEPP (Water Erosion Prediction Project) Model. 
+              Access tools, explore documentation, or review the latest watershed analytics.
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.15 }}
-              className="flex flex-wrap items-center justify-center gap-4"
-            >
-              {navItems.map((item, idx) => (
-                <motion.a
+            <div className="flex flex-wrap gap-3 pt-2">
+              {navItems.map((item) => (
+                <a
                   key={item.label}
-                  className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold uppercase tracking-wide text-white transition hover:border-white/60"
+                  className="inline-flex items-center px-5 py-2.5 text-sm font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-colors"
                   href={item.href}
                   target={item.external ? '_blank' : undefined}
                   rel={item.external ? 'noreferrer' : undefined}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.15, delay: idx * 0.05 }}
                 >
                   {item.label}
-                </motion.a>
+                </a>
               ))}
-            </motion.div>
-          </div>
-          <div className="hero-fade" />
-        </AuroraBackground>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
-      <section
-        id="about"
-        className="relative z-30 bg-[#020617] px-4 py-16 sm:px-6 lg:px-12"
-      >
+      {/* About Section */}
+      <section id="about" className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">About</p>
-          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">What is WEPPcloud?</h2>
-          <p className="mt-6 text-lg leading-relaxed text-slate-300">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">About</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-4">What is WEPPcloud?</h3>
+          <p className="text-base leading-relaxed text-slate-600">
             WEPPcloud is an online interface for running WEPP (Water Erosion Prediction Project) Model. WEPP is a
             physically based erosion model built to replace the Universal Soil Loss Equation (USLE) model. The interface
             simplifies the acquisition and preparation of topography, soil, management, and climate inputs for WEPP.
@@ -614,28 +588,24 @@ const mapSubtitle =
         </motion.div>
       </section>
 
-      <section
-        id="map"
-        className="relative z-30 bg-[#020617] px-4 pb-16 pt-12 sm:px-6 lg:px-12"
-      >
-        <div className="map-top-fade" aria-hidden="true" />
-        <div className="map-pin-container space-y-8">
+      {/* Map Section */}
+      <section id="map" className="bg-gray-100 px-4 py-12 sm:px-6 lg:px-12">
+        <div className="mx-auto max-w-6xl space-y-8">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="mx-auto max-w-5xl"
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            <div className="space-y-4 text-center pt-12">
-              <p className="text-xs uppercase tracking-[0.4em] text-sky-200">{mapEyebrow}</p>
-              <h2 className="text-3xl font-semibold text-white sm:text-4xl">{mapTitle}</h2>
-              <p className="text-base text-slate-300">{mapSubtitle}</p>
-            </div>
-            <div className="mt-6 grid gap-6 sm:grid-cols-3">
-              <MetricCard label="Unique runs" value={aggregateStats.totalRuns} />
-              <MetricCard label="Total hillslopes" value={aggregateStats.totalHillslopes} />
-              <MetricCard
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">{mapEyebrow}</h2>
+            <h3 className="text-2xl font-semibold text-slate-900 mb-2">{mapTitle}</h3>
+            <p className="text-base text-slate-600 max-w-3xl">{mapSubtitle}</p>
+            
+            {/* Stats grid */}
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <MetricCardLight label="Unique runs" value={aggregateStats.totalRuns} />
+              <MetricCardLight label="Total hillslopes" value={aggregateStats.totalHillslopes} />
+              <MetricCardLight
                 label="Latest access"
                 value={
                   aggregateStats.lastAccessedParts
@@ -648,27 +618,29 @@ const mapSubtitle =
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
-            className="relative min-h-[520px] border border-white/10 bg-slate-950/80 shadow-2xl shadow-black/40"
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+            className="relative border border-gray-300 bg-white shadow-sm"
           >
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
-              <div className="map-legend">
-                <span className="legend-chip">
-                  <span className="legend-dot bg-sky-400" />
+              {/* Legend */}
+              <div className="light-legend">
+                <span className="light-legend-chip">
+                  <span className="light-legend-dot bg-sky-600" />
                   Standard runs
                 </span>
-                <span className="legend-chip">
-                  <span className="legend-dot bg-violet-500" />
+                <span className="light-legend-chip">
+                  <span className="light-legend-dot bg-violet-600" />
                   Runs with SBS
                 </span>
-                <span className="legend-chip">
-                  <span className="legend-dot bg-emerald-400" />
+                <span className="light-legend-chip">
+                  <span className="light-legend-dot bg-emerald-600" />
                   Filtered hillslopes: {filteredStats.hillslopes.toLocaleString()}
                 </span>
               </div>
+
               <div
                 className="absolute inset-0"
                 onWheelCapture={(event) => {
@@ -695,104 +667,98 @@ const mapSubtitle =
                     />
                   </DeckGL>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
-                    <p className="text-sm text-slate-400">Preparing map...</p>
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <p className="text-sm text-slate-500">Preparing map...</p>
                   </div>
                 )}
               </div>
 
-              <div className="absolute bottom-6 right-6 rounded-xl border border-white/10 bg-slate-950/80 px-4 py-2 text-xs text-slate-300">
-                Tip: Hold <span className="font-semibold text-white">Ctrl</span> while scrolling to
-                zoom the map.
+              <div className="absolute bottom-4 right-4 border border-gray-300 bg-white px-3 py-2 text-xs text-slate-600">
+                Tip: Hold <span className="font-semibold text-slate-800">Ctrl</span> while scrolling to zoom the map.
               </div>
 
               <button
                 type="button"
-                className="control-toggle"
+                className="light-control-toggle"
                 aria-expanded={panelOpen}
                 onClick={() => setPanelOpen((open) => !open)}
               >
-                <span className="icon" aria-hidden="true" />
-                <span className="label">{panelOpen ? 'Close controls' : 'Map controls'}</span>
+                <span className="light-toggle-icon" aria-hidden="true" />
+                <span>{panelOpen ? 'Close' : 'Filters'}</span>
               </button>
 
               <aside
                 className={cn(
-                  'control-panel',
-                  'absolute right-6 top-24 w-72 rounded-2xl border border-slate-800/80 bg-slate-950/95 p-6 text-sm transition-all',
+                  'absolute right-4 top-16 w-64 border border-gray-300 bg-white p-4 text-sm shadow-lg transition-all',
                   panelOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
                 )}
               >
-                <h2 className="text-base font-semibold text-slate-100">Display options</h2>
-                <div className="mt-4 space-y-3">
-                  <label className="block text-xs uppercase tracking-wider text-slate-400">
-                    Year
-                    <select
-                      className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 shadow-none transition focus:border-sky-400 focus:outline-none"
-                      value={yearFilter}
-                      onChange={(event) => setYearFilter(event.target.value)}
-                    >
-                      <option value="all">All years</option>
-                      {yearOptions.map((year) => (
-                        <option key={year} value={String(year)}>
-                          {year}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <p className="text-xs text-slate-400">
-                    Zoom to reveal run labels. Marker size scales with access count and is fixed at
-                    1x for consistency.
-                  </p>
-                </div>
+                <h4 className="text-sm font-semibold text-slate-800 mb-3">Display options</h4>
+                <label className="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">
+                  Year
+                </label>
+                <select
+                  className="w-full border border-gray-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-500 focus:outline-none"
+                  value={yearFilter}
+                  onChange={(event) => setYearFilter(event.target.value)}
+                >
+                  <option value="all">All years</option>
+                  {yearOptions.map((year) => (
+                    <option key={year} value={String(year)}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs text-slate-500">
+                  Zoom to reveal run labels.
+                </p>
               </aside>
 
               {statusMessage && (
-                <div className="absolute bottom-6 left-6 rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-xs text-slate-300">
+                <div className="absolute bottom-4 left-4 border border-gray-300 bg-white px-3 py-2 text-xs text-slate-600">
                   {statusMessage}
                 </div>
               )}
             </div>
           </motion.div>
         </div>
-        <div aria-hidden="true" style={{ height: `${MAP_PIN_OFFSET}px` }} />
       </section>
 
-      <section className="bg-[#050714] px-4 py-20 sm:px-6 lg:px-12">
+      {/* Help & Resources */}
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4 text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl mb-8"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Help</p>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Help & Resources</h2>
-          <p className="text-base text-slate-300">
-            Jump straight into documentation, watch the latest walkthrough, or explore the open
-            source stack powering WEPPcloud.
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Help</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">Help & Resources</h3>
+          <p className="text-base text-slate-600">
+            Documentation, tutorials, and source code for WEPPcloud.
           </p>
         </motion.div>
 
-        <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto max-w-4xl grid gap-4 sm:grid-cols-3">
           {HELP_RESOURCES.map((resource, index) => (
             <motion.a
               key={resource.title}
               href={resource.href}
               target="_blank"
               rel="noreferrer"
-              className="flex h-full flex-col rounded-2xl border border-white/10 bg-slate-900/60 p-6 text-left shadow-lg shadow-black/30 transition hover:-translate-y-1 hover:border-sky-400/60"
-              initial={{ opacity: 0, y: 25 }}
+              className="flex flex-col p-5 border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-colors"
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <div className="mb-4 flex items-center gap-3 text-slate-100">
-                {renderHelpIcon(resource.icon)}
-                <span className="text-lg font-semibold">{resource.title}</span>
+              <div className="mb-3 flex items-center gap-2 text-slate-700">
+                {renderHelpIconLight(resource.icon)}
+                <span className="font-semibold">{resource.title}</span>
               </div>
-              <p className="flex-grow text-sm text-slate-300">{resource.description}</p>
-              <span className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
+              <p className="flex-grow text-sm text-slate-600">{resource.description}</p>
+              <span className="mt-4 text-xs font-medium text-slate-500 uppercase tracking-wide">
                 Visit →
               </span>
             </motion.a>
@@ -800,132 +766,63 @@ const mapSubtitle =
         </div>
       </section>
 
-      <section className="bg-[#030712] px-4 py-20 sm:px-6 lg:px-12">
+      {/* Points of Contact */}
+      <section className="bg-gray-50 px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4 text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl mb-8"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Team</p>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Points of Contact</h2>
-          <p className="text-base text-slate-300">
-            Connect with the researchers, engineers, and hydrologists who shape WEPPcloud. Each
-            contact can help with specialized workflows, calibration strategies, and emergency
-            response planning.
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Team</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">Points of Contact</h3>
+          <p className="text-base text-slate-600">
+            Connect with the researchers, engineers, and hydrologists who shape WEPPcloud.
           </p>
         </motion.div>
 
-        <div className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2">
+        <div className="mx-auto max-w-5xl grid gap-4 md:grid-cols-2">
           {CONTACTS.map((contact, index) => {
             const accent = CONTACT_ACCENTS[contact.accent]
             const IconComponent = CONTACT_ICON_MAP[contact.icon]
             return (
               <motion.article
                 key={contact.email}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                whileHover={{
-                  scale: 1.02,
-                }}
-                onMouseMove={(e) => {
-                  const card = e.currentTarget
-                  const rect = card.getBoundingClientRect()
-                  const x = e.clientX - rect.left
-                  const y = e.clientY - rect.top
-                  const centerX = rect.width / 2
-                  const centerY = rect.height / 2
-                  const rotateX = ((y - centerY) / centerY) * -10
-                  const rotateY = ((x - centerX) / centerX) * 10
-                  
-                  // Update card transform
-                  card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
-                  
-                  // Update highlight position
-                  const xPercent = (x / rect.width) * 100
-                  const yPercent = (y / rect.height) * 100
-                  const highlight = card.querySelector('.card-highlight') as HTMLElement
-                  if (highlight) {
-                    highlight.style.setProperty('--mouse-x', `${xPercent}%`)
-                    highlight.style.setProperty('--mouse-y', `${yPercent}%`)
-                    highlight.style.opacity = '1'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  const card = e.currentTarget
-                  card.style.transform = ''
-                  card.style.transition = 'transform 0.3s ease-out'
-                  
-                  const highlight = card.querySelector('.card-highlight') as HTMLElement
-                  if (highlight) {
-                    highlight.style.opacity = '0'
-                  }
-                }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
                 className={cn(
-                  'relative flex h-full flex-col overflow-hidden rounded-3xl border bg-slate-950/70 p-6 shadow-2xl shadow-black/40 hover:shadow-black/60',
+                  'flex flex-col p-5 border bg-white',
                   accent.border,
                 )}
-                style={{ transformStyle: 'preserve-3d', transition: 'transform 0.3s ease-out' }}
               >
-                <div
-                  className={cn(
-                    'pointer-events-none absolute inset-0 bg-gradient-to-br opacity-70 blur-3xl',
-                    accent.glow,
-                  )}
-                  aria-hidden="true"
-                />
-                <div
-                  className="card-highlight pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200"
-                  style={{
-                    background: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.08) 0%, transparent 50%)',
-                  }}
-                  aria-hidden="true"
-                />
-                <div className="relative z-10 flex flex-col gap-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div
-                      className={cn(
-                        'inline-flex h-14 w-14 items-center justify-center rounded-2xl text-lg',
-                        accent.icon,
-                      )}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={cn('flex h-10 w-10 items-center justify-center rounded', accent.icon)}>
+                    <IconComponent className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-900">{contact.name}</p>
+                    <p className="text-sm text-slate-600">{contact.title}</p>
+                    <p className="text-sm text-slate-500">{contact.institution}</p>
+                  </div>
+                </div>
+                <a
+                  className="text-sm text-sky-700 hover:text-sky-800 mb-3"
+                  href={`mailto:${contact.email}`}
+                >
+                  {contact.email}
+                </a>
+                <div className="flex flex-wrap gap-1.5">
+                  {contact.expertise.map((item) => (
+                    <span
+                      key={item}
+                      className={cn('px-2 py-0.5 text-xs', accent.chip)}
                     >
-                      <IconComponent className="h-7 w-7" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Contact</p>
-                      <h3 className="text-xl font-semibold text-white">{contact.name}</h3>
-                      <p className="text-sm text-slate-300">{contact.title}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-1 text-sm text-slate-300">
-                    <p className="font-medium text-slate-100">{contact.institution}</p>
-                    <a
-                      className="inline-flex items-center gap-2 text-sky-300 transition hover:text-sky-200"
-                      href={`mailto:${contact.email}`}
-                    >
-                      <span className="text-xs uppercase tracking-[0.3em] text-sky-200">Email</span>
-                      <span>{contact.email}</span>
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Expertise</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {contact.expertise.map((item) => (
-                        <span
-                          key={item}
-                          className={cn(
-                            'rounded-full px-3 py-1 text-xs font-medium',
-                            accent.chip,
-                          )}
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                      {item}
+                    </span>
+                  ))}
                 </div>
               </motion.article>
             )
@@ -933,126 +830,117 @@ const mapSubtitle =
         </div>
       </section>
 
-      <section className="bg-[#020617] px-4 py-20 sm:px-6 lg:px-12">
+      {/* Affiliations */}
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4 text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl mb-8"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Collaborators</p>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-            Affiliations and Collaborators
-          </h2>
-          <p className="text-base text-slate-300">
-            WEPPcloud is made possible through collaborative partnerships across research
-            institutions, government agencies, and international funding programs.
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Collaborators</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">Affiliations and Collaborators</h3>
+          <p className="text-base text-slate-600">
+            WEPPcloud is made possible through collaborative partnerships across research institutions, government agencies, and international funding programs.
           </p>
         </motion.div>
 
-        <div className="mx-auto mt-12 grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto max-w-5xl grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {AFFILIATIONS.map((affiliation, index) => (
             <motion.a
               key={affiliation.name}
               href={affiliation.link}
               target="_blank"
               rel="noreferrer"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-white/30"
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              className="flex flex-col items-center p-6 border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
             >
-              <div className="flex h-20 w-full items-center justify-center">
+              <div className="flex h-16 w-full items-center justify-center mb-3">
                 <img
                   src={affiliation.logo}
                   alt={affiliation.name}
-                  className={cn(
-                    "max-h-20 w-auto object-contain grayscale",
-                    affiliation.name === "Michigan Technological University"
-                      ? "brightness-[2] opacity-90 contrast-125"
-                      : "invert opacity-60 contrast-125"
-                  )}
+                  className="max-h-16 w-auto object-contain"
                 />
               </div>
-              <p className="mt-4 text-center text-xs text-slate-400">
-                {affiliation.caption}
-              </p>
+              <p className="text-center text-xs text-slate-500">{affiliation.caption}</p>
             </motion.a>
           ))}
         </div>
       </section>
 
-      <section className="bg-[#050714] px-4 py-20 sm:px-6 lg:px-12">
+      {/* Sponsors */}
+      <section className="bg-gray-50 px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4 text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl mb-8"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Funding</p>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Sponsors</h2>
-          <p className="text-base text-slate-300">
-            WEPPcloud development is supported by grants from federal agencies, international
-            research programs, and scientific funding bodies.
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Funding</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">Sponsors</h3>
+          <p className="text-base text-slate-600">
+            WEPPcloud development is supported by grants from federal agencies, international research programs, and scientific funding bodies.
           </p>
         </motion.div>
 
-        <div className="mx-auto mt-12 grid max-w-6xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto max-w-5xl grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {SPONSORS.map((sponsor, index) => (
             <motion.a
               key={sponsor.name}
               href={sponsor.link}
               target="_blank"
               rel="noreferrer"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-white/30"
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              className="flex flex-col items-center p-6 border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
             >
-              <div className="flex h-20 w-full items-center justify-center">
+              <div className="flex h-16 w-full items-center justify-center mb-3">
                 <img
                   src={sponsor.logo}
                   alt={sponsor.name}
-                  className="max-h-20 w-auto object-contain grayscale invert opacity-60 contrast-125"
+                  className="max-h-16 w-auto object-contain"
                 />
               </div>
-              <p className="mt-4 text-center text-xs text-slate-400">{sponsor.caption}</p>
+              <p className="text-center text-xs text-slate-500">{sponsor.caption}</p>
             </motion.a>
           ))}
         </div>
       </section>
 
-      <section className="bg-[#030712] px-4 py-20 sm:px-6 lg:px-12">
+      {/* Contributors */}
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4 text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl mb-8"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Team</p>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Contributors</h2>
-          <p className="text-base text-slate-300">
-            WEPPcloud is the result of collaborative efforts from researchers, engineers, and
-            scientists across multiple institutions.
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Team</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">Contributors</h3>
+          <p className="text-base text-slate-600">
+            WEPPcloud is the result of collaborative efforts from researchers, engineers, and scientists across multiple institutions.
           </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mx-auto mt-12 flex max-w-5xl flex-wrap items-center justify-center gap-3"
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl flex flex-wrap items-center justify-center gap-2"
         >
           {CONTRIBUTORS.map((contributor) => (
             <span
               key={contributor}
-              className="rounded-full border border-white/10 bg-slate-800/60 px-4 py-2 text-sm text-slate-200"
+              className="px-3 py-1.5 text-sm border border-gray-200 bg-gray-50 text-slate-700"
             >
               {contributor}
             </span>
@@ -1060,59 +948,47 @@ const mapSubtitle =
         </motion.div>
       </section>
 
-      <section className="bg-[#020617] px-4 py-20 sm:px-6 lg:px-12">
+      {/* Data Sources */}
+      <section className="bg-gray-50 px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4 text-center"
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl mb-8"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-sky-200">Credits</p>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-            Attributions and Data Sources
-          </h2>
-          <p className="text-base text-slate-300">
-            WEPPcloud leverages open data, research-quality datasets, and mapping services from
-            partners worldwide.
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Credits</h2>
+          <h3 className="text-2xl font-semibold text-slate-900 mb-2">Attributions and Data Sources</h3>
+          <p className="text-base text-slate-600">
+            WEPPcloud leverages open data, research-quality datasets, and mapping services from partners worldwide.
           </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mx-auto mt-12 grid max-w-5xl gap-12 sm:grid-cols-2"
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl grid gap-8 sm:grid-cols-2"
         >
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Map Services</h3>
-            <p className="text-sm text-slate-300">
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-2">Map Services</h4>
+            <p className="text-sm text-slate-600">
               Map baselayers provided by{' '}
-              <a
-                href="https://www.google.com/maps"
-                target="_blank"
-                rel="noreferrer"
-                className="text-sky-300 transition hover:text-sky-200"
-              >
+              <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" className="text-sky-700 hover:text-sky-800">
                 Google
               </a>{' '}
               (Terrain, Satellite) and{' '}
-              <a
-                href="https://www.openstreetmap.org/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-sky-300 transition hover:text-sky-200"
-              >
+              <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer" className="text-sky-700 hover:text-sky-800">
                 OpenStreetMap
               </a>{' '}
               contributors.
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Regional Data Documentation</h3>
-            <div className="space-y-2">
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-2">Regional Data Documentation</h4>
+            <div className="space-y-1">
               {[
                 { region: 'United States', url: 'https://doc.wepp.cloud/us-data.html' },
                 { region: 'Europe', url: 'https://doc.wepp.cloud/eu-data.html' },
@@ -1121,12 +997,7 @@ const mapSubtitle =
               ].map((item) => (
                 <div key={item.region} className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm text-sky-300 transition hover:text-sky-200"
-                  >
+                  <a href={item.url} target="_blank" rel="noreferrer" className="text-sm text-sky-700 hover:text-sky-800">
                     {item.region}
                   </a>
                 </div>
@@ -1136,19 +1007,18 @@ const mapSubtitle =
         </motion.div>
       </section>
 
-      <section className="bg-[#030712] px-4 py-16 sm:px-6 lg:px-12">
+      {/* Legal Disclaimer */}
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl space-y-4"
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="mx-auto max-w-4xl"
         >
-          <h2 className="text-center text-2xl font-semibold text-white sm:text-3xl">
-            Legal Disclaimer
-          </h2>
-          <div className="rounded-xl border border-white/10 bg-slate-900/40 p-6 sm:p-8">
-            <p className="text-sm leading-relaxed text-slate-300">
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">Legal Disclaimer</h2>
+          <div className="p-6 border border-gray-200 bg-gray-50">
+            <p className="text-sm leading-relaxed text-slate-600">
               THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
               EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
               OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
@@ -1163,22 +1033,29 @@ const mapSubtitle =
           </div>
         </motion.div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-700 text-white px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-4xl text-center text-sm">
+          <p>© {new Date().getFullYear()} University of Idaho • USDA Forest Service</p>
+        </div>
+      </footer>
     </div>
   )
 }
 
-function MetricCard(props: {
+function MetricCardLight(props: {
   label: string
   value: number | string | null | undefined
   multiline?: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-white/20 bg-slate-900 p-6 shadow-lg shadow-black/30">
-      <p className="text-xs uppercase tracking-widest text-slate-400">{props.label}</p>
+    <div className="p-4 border border-gray-200 bg-white">
+      <p className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">{props.label}</p>
       <p
         className={cn(
-          'mt-3 text-3xl font-semibold text-white whitespace-pre-line',
-          props.multiline && 'leading-tight text-2xl',
+          'text-2xl font-semibold text-slate-900 whitespace-pre-line',
+          props.multiline && 'leading-tight text-xl',
         )}
       >
         {typeof props.value === 'number' ? props.value.toLocaleString() : props.value ?? '--'}
@@ -1187,27 +1064,21 @@ function MetricCard(props: {
   )
 }
 
-type TypewriterTextProps = {
-  text: string
-  speed?: number
-  delay?: number
-}
-
-function renderHelpIcon(icon: HelpResource['icon']) {
+function renderHelpIconLight(icon: HelpResource['icon']) {
   if (icon === 'zap') {
-    return <Zap className="h-6 w-6 text-sky-300" aria-hidden="true" />
+    return <Zap className="h-5 w-5 text-slate-600" aria-hidden="true" />
   }
   if (icon === 'youtube') {
     return (
       <img
         src="/weppcloud/static/images/youtube.png"
         alt="YouTube"
-        className="h-6 w-6 rounded-md object-cover"
+        className="h-5 w-5 rounded object-cover"
       />
     )
   }
   return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 text-slate-200" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-5 w-5 text-slate-600" aria-hidden="true">
       <path
         fill="currentColor"
         fillRule="evenodd"
@@ -1215,42 +1086,6 @@ function renderHelpIcon(icon: HelpResource['icon']) {
         d="M12 3.2C7.0275 3.2 3 7.2275 3 12.2C3 16.1825 5.57625 19.5463 9.15375 20.7388C9.60375 20.8175 9.7725 20.5475 9.7725 20.3113C9.7725 20.0975 9.76125 19.3888 9.76125 18.635C7.5 19.0513 6.915 18.0838 6.735 17.5775C6.63375 17.3188 6.195 16.52 5.8125 16.3063C5.4975 16.1375 5.0475 15.7213 5.80125 15.71C6.51 15.6988 7.01625 16.3625 7.185 16.6325C7.995 17.9938 9.28875 17.6113 9.80625 17.375C9.885 16.79 10.1213 16.3963 10.38 16.1713C8.3775 15.9463 6.285 15.17 6.285 11.7275C6.285 10.7488 6.63375 9.93875 7.2075 9.30875C7.1175 9.08375 6.8025 8.16125 7.2975 6.92375C7.2975 6.92375 8.05125 6.6875 9.7725 7.84625C10.4925 7.64375 11.2575 7.5425 12.0225 7.5425C12.7875 7.5425 13.5525 7.64375 14.2725 7.84625C15.9938 6.67625 16.7475 6.92375 16.7475 6.92375C17.2425 8.16125 16.9275 9.08375 16.8375 9.30875C17.4113 9.93875 17.76 10.7375 17.76 11.7275C17.76 15.1813 15.6563 15.9463 13.6538 16.1713C13.98 16.4525 14.2613 16.9925 14.2613 17.8363C14.2613 19.04 14.25 20.0075 14.25 20.3113C14.25 20.5475 14.4188 20.8288 14.8688 20.7388C18.4238 19.5463 21 16.1713 21 12.2C21 7.2275 16.9725 3.2 12 3.2Z"
       />
     </svg>
-  )
-}
-
-function TypewriterText({ text, speed = 40, delay = 200 }: TypewriterTextProps) {
-  const [displayed, setDisplayed] = useState<string>('')
-  const intervalRef = useRef<number | null>(null)
-  const timeoutRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    let index = 0
-    timeoutRef.current = window.setTimeout(() => {
-      intervalRef.current = window.setInterval(() => {
-        index += 1
-        setDisplayed(text.slice(0, index))
-        if (index >= text.length && intervalRef.current) {
-          window.clearInterval(intervalRef.current)
-          intervalRef.current = null
-        }
-      }, speed)
-    }, delay)
-
-    return () => {
-      if (intervalRef.current) {
-        window.clearInterval(intervalRef.current)
-      }
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [text, speed, delay])
-
-  return (
-    <span aria-label={text}>
-      {displayed}
-      <span className="typewriter-cursor">|</span>
-    </span>
   )
 }
 
@@ -1313,4 +1148,4 @@ function resolveDataUrl(path: string): string {
   return new URL(target, window.location.href).toString()
 }
 
-export default App
+export default AppLight

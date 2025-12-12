@@ -1030,6 +1030,38 @@ class Omni(NoDbBase):
 
         return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
 
+    def _interchange_class_data_path_for_scenario(self, scenario_name: Optional[Any]) -> str:
+        global OMNI_REL_DIR
+        scenario_key = self._normalize_scenario_key(scenario_name)
+
+        base_path = _join(self.wd, 'wepp', 'output', 'interchange', 'loss_pw0.all_years.class_data.parquet')
+        scenario_path = _join(self.wd, OMNI_REL_DIR, 'scenarios', scenario_key, 'wepp', 'output', 'interchange', 'loss_pw0.all_years.class_data.parquet')
+
+        if scenario_key == str(self.base_scenario) and not _exists(scenario_path):
+            return base_path
+
+        return scenario_path if _exists(scenario_path) else (base_path if scenario_key == str(self.base_scenario) else scenario_path)
+
+    def _year_set_for_scenario(self, scenario_name: Optional[Any]) -> Optional[Set[int]]:
+        path = self._interchange_class_data_path_for_scenario(scenario_name)
+        if not os.path.isfile(path):
+            return None
+
+        try:
+            df = pd.read_parquet(path, columns=['year'])
+        except Exception as exc:
+            self.logger.debug('Failed to read years for scenario %s from %s: %s', scenario_name, path, exc)
+            return None
+
+        if 'year' not in df:
+            return None
+
+        try:
+            return set(int(y) for y in df['year'].dropna().unique().tolist())
+        except Exception as exc:
+            self.logger.debug('Failed to normalize years for scenario %s from %s: %s', scenario_name, path, exc)
+            return None
+
     def _scenario_signature(self, scenario_def: ScenarioDef) -> str:
         sanitized: Dict[str, Any] = {}
         for key, value in scenario_def.items():
@@ -1135,6 +1167,7 @@ class Omni(NoDbBase):
 
         active_scenarios = set()
         processed_scenarios = set()
+        base_scenario_key = str(self.base_scenario)
 
         def dependency_info(scenario_enum: OmniScenario, scenario_def: ScenarioDef):
             scenario_name = _scenario_name_from_scenario_definition(scenario_def)
@@ -1143,13 +1176,20 @@ class Omni(NoDbBase):
             dependency_path = self._loss_pw0_path_for_scenario(dependency_target)
             dependency_hash = _hash_file_sha1(dependency_path)
             signature = self._scenario_signature(scenario_def)
+            base_years = self._year_set_for_scenario(base_scenario_key)
+            scenario_years = self._year_set_for_scenario(scenario_name)
+            years_match = (
+                base_years is not None and
+                scenario_years is not None and
+                scenario_years == base_years
+            )
             prev_entry = dependency_tree.get(scenario_name)
             up_to_date = (
                 prev_entry is not None and
                 prev_entry.get('dependency_sha1') == dependency_hash and
                 prev_entry.get('signature') == signature
             )
-            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date
+            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
 
         # pass 1 scenarios: dependent on base_scenario
         for scenario_def in self.scenarios:
@@ -1162,13 +1202,13 @@ class Omni(NoDbBase):
                 # defer thinning/prescribed fire until after dependent scenarios build
                 continue
 
-            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date = \
+            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match = \
                 dependency_info(scenario_enum, scenario_def)
             processed_scenarios.add(scenario_name)
 
             target_key = self._normalize_scenario_key(dependency_target)
 
-            if up_to_date:
+            if up_to_date and years_match:
                 self.logger.info(f'  run_omni_scenarios: {scenario_name} dependency unchanged, skipping')
                 ts = time.time()
                 dependency_tree[scenario_name] = {
@@ -1191,7 +1231,12 @@ class Omni(NoDbBase):
                 self.scenario_run_state = run_states
                 continue
 
-            self.logger.info(f'  run_omni_scenarios: {scenario_name}')
+            run_reason = 'dependency_changed'
+            if up_to_date and not years_match:
+                run_reason = 'year_set_mismatch'
+                self.logger.info(f'  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning')
+            else:
+                self.logger.info(f'  run_omni_scenarios: {scenario_name}')
             omni_dir, scenario_name = self.run_omni_scenario(scenario_def)
             self._post_omni_run(omni_dir, scenario_name)
 
@@ -1208,7 +1253,7 @@ class Omni(NoDbBase):
             run_states.append({
                 'scenario': scenario_name,
                 'status': 'executed',
-                'reason': 'dependency_changed',
+                'reason': run_reason,
                 'dependency_target': target_key,
                 'dependency_path': dependency_path,
                 'dependency_sha1': updated_hash,
@@ -1223,12 +1268,12 @@ class Omni(NoDbBase):
             if scenario_name in processed_scenarios:
                 continue
 
-            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date = dependency_info(scenario_enum, scenario_def)
+            scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match = dependency_info(scenario_enum, scenario_def)
             processed_scenarios.add(scenario_name)
 
             target_key = self._normalize_scenario_key(dependency_target)
 
-            if up_to_date:
+            if up_to_date and years_match:
                 self.logger.info(f'  run_omni_scenarios: {scenario_name} dependency unchanged, skipping')
                 ts = time.time()
                 dependency_tree[scenario_name] = {
@@ -1251,7 +1296,12 @@ class Omni(NoDbBase):
                 self.scenario_run_state = run_states
                 continue
 
-            self.logger.info(f'  run_omni_scenarios: {scenario_name}')
+            run_reason = 'dependency_changed'
+            if up_to_date and not years_match:
+                run_reason = 'year_set_mismatch'
+                self.logger.info(f'  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning')
+            else:
+                self.logger.info(f'  run_omni_scenarios: {scenario_name}')
             omni_dir, scenario_name = self.run_omni_scenario(scenario_def)
             self._post_omni_run(omni_dir, scenario_name)
             
@@ -1268,7 +1318,7 @@ class Omni(NoDbBase):
             run_states.append({
                 'scenario': scenario_name,
                 'status': 'executed',
-                'reason': 'dependency_changed',
+                'reason': run_reason,
                 'dependency_target': target_key,
                 'dependency_path': dependency_path,
                 'dependency_sha1': updated_hash,

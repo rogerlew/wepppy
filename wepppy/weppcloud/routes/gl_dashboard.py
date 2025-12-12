@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from flask import current_app
 
 from ._common import *  # noqa: F401,F403
@@ -9,6 +10,33 @@ from wepppy.nodb.core import Ron, Climate
 
 
 gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
+
+
+def _get_omni_scenarios(wd: str):
+    """Get list of omni scenarios if the project has the omni mod.
+    
+    Returns a list of scenario dicts with 'name' and 'path' keys, or None if not omni-enabled.
+    """
+    omni_nodb_path = os.path.join(wd, 'omni.nodb')
+    if not os.path.exists(omni_nodb_path):
+        return None
+    
+    scenarios_dir = os.path.join(wd, '_pups', 'omni', 'scenarios')
+    if not os.path.isdir(scenarios_dir):
+        return None
+    
+    scenarios = []
+    for name in sorted(os.listdir(scenarios_dir)):
+        scenario_path = os.path.join(scenarios_dir, name)
+        if os.path.isdir(scenario_path):
+            # Check for valid scenario by presence of wepp.nodb
+            if os.path.exists(os.path.join(scenario_path, 'wepp.nodb')):
+                scenarios.append({
+                    'name': name,
+                    'path': f'_pups/omni/scenarios/{name}'
+                })
+    
+    return scenarios if scenarios else None
 
 
 @gl_dashboard_bp.route(
@@ -23,6 +51,9 @@ def gl_dashboard(runid: str, config: str):
     tile_url = current_app.config.get(
         "GL_DASHBOARD_BASE_TILE_URL", "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
     )
+    
+    # Check for omni scenarios
+    omni_scenarios = _get_omni_scenarios(wd)
 
     # Get map extent/center/zoom from Ron if available
     map_extent = None
@@ -79,4 +110,5 @@ def gl_dashboard(runid: str, config: str):
         map_center=map_center,
         map_zoom=map_zoom,
         climate_context=climate_context,
+        omni_scenarios=omni_scenarios,
     )

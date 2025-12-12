@@ -156,6 +156,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 
 ## Troubleshooting
 - **Static assets 404** — ensure the Caddy container is up and the repo is mounted. The file server path is `/srv/weppcloud/static`; missing files there won’t be proxied to Flask.
+- **Browse service returns “Run '' either doesn’t exist” on `/browse/` URLs** — this means Caddy routed the request to the Flask app instead of the browse microservice (you’ll see `Server: gunicorn` in the response). Verify in `docker/caddy/Caddyfile` that the browse/dtale/download/gdalinfo matchers stay **above** the catch-all `handle_path /weppcloud*` block; re-ordering those blocks causes this symptom.
 - **Permission denied when writing to bind-mounted directories** — double-check `UID`/`GID` in `docker/.env` and recreate containers. Existing files created with old ids may need a `chown`.
 - **`I have no name!` shell prompt** — indicates the uid lacks an `/etc/passwd` entry. Adjust the Dockerfile if cosmetic prompts matter.
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
