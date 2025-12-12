@@ -210,6 +210,7 @@
   let rapCumulativeMode = false; // true = show sum of selected bands
   let subcatchmentsGeoJson = null;
   let subcatchmentLabelsVisible = false;
+  let graphHighlightedTopazId = null; // Subcatchment highlighted from graph hover
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
   let geoTiffLoader = null;
@@ -239,7 +240,10 @@
       this._minYear = config.startYear || 1;
       this._maxYear = config.endYear || 100;
       this._hasObserved = config.hasObserved || false;
-      this._currentYear = this._maxYear; // Default to most recent year
+      this._currentYear = this._minYear; // Default to first year
+      this._playing = false;
+      this._intervalId = null;
+      this._playBtn = document.getElementById('gl-year-slider-play');
 
       this.input.min = String(this._minYear);
       this.input.max = String(this._maxYear);
@@ -255,6 +259,11 @@
         this._updateDisplay();
         this._emit('change', this._currentYear);
       });
+
+      // Play/pause button
+      if (this._playBtn) {
+        this._playBtn.addEventListener('click', () => this.toggle());
+      }
     },
 
     _updateDisplay() {
@@ -324,6 +333,50 @@
         }
       }
     },
+
+    play() {
+      if (this._playing) return;
+      this._playing = true;
+      this._updatePlayButton();
+      
+      // Start animation interval (1 year every 3 seconds)
+      this._intervalId = setInterval(() => {
+        let nextYear = this._currentYear + 1;
+        // Loop back to start when reaching end
+        if (nextYear > this._maxYear) {
+          nextYear = this._minYear;
+        }
+        this._currentYear = nextYear;
+        if (this.input) this.input.value = String(nextYear);
+        this._updateDisplay();
+        this._emit('change', this._currentYear);
+      }, 3000);
+    },
+
+    pause() {
+      if (!this._playing) return;
+      this._playing = false;
+      if (this._intervalId) {
+        clearInterval(this._intervalId);
+        this._intervalId = null;
+      }
+      this._updatePlayButton();
+    },
+
+    toggle() {
+      if (this._playing) {
+        this.pause();
+      } else {
+        this.play();
+      }
+    },
+
+    _updatePlayButton() {
+      if (this._playBtn) {
+        this._playBtn.textContent = this._playing ? '⏸' : '▶';
+        this._playBtn.title = this._playing ? 'Pause' : 'Play';
+      }
+    },
   };
 
   // Initialize year slider from climate context
@@ -338,6 +391,375 @@
 
   // Expose for external use
   window.glDashboardYearSlider = yearSlider;
+
+  // ============================================================================
+  // Timeseries Graph Controller (for RAP and other timeseries data)
+  // ============================================================================
+  const timeseriesGraph = {
+    canvas: null,
+    ctx2d: null,
+    container: document.getElementById('gl-graph-container'),
+    emptyEl: document.getElementById('gl-graph-empty'),
+    tooltipEl: document.getElementById('gl-graph-tooltip'),
+    _visible: false,
+    _data: null, // { years: [], series: { topazId: { values: [], color: [r,g,b] } } }
+    _highlightedId: null,
+    _hoveredId: null, // from canvas hover
+    _padding: { top: 20, right: 20, bottom: 35, left: 50 },
+    _lineWidth: 1.5,
+    _highlightWidth: 3,
+
+    init() {
+      this.canvas = document.getElementById('gl-graph-canvas');
+      if (this.canvas) {
+        this.ctx2d = this.canvas.getContext('2d');
+        this.canvas.addEventListener('mousemove', (e) => this._onCanvasHover(e));
+        this.canvas.addEventListener('mouseleave', () => this._onCanvasLeave());
+        // Handle resize
+        window.addEventListener('resize', () => {
+          if (this._visible && this._data) {
+            this._resizeCanvas();
+            this.render();
+          }
+        });
+      }
+    },
+
+    show() {
+      if (this.container) {
+        this.container.style.display = 'block';
+      }
+      if (this.emptyEl) {
+        this.emptyEl.style.display = 'none';
+      }
+      this._visible = true;
+      this._resizeCanvas();
+    },
+
+    hide() {
+      if (this.container) {
+        this.container.style.display = 'none';
+      }
+      if (this.emptyEl) {
+        this.emptyEl.style.display = 'block';
+      }
+      this._visible = false;
+      this._data = null;
+    },
+
+    _resizeCanvas() {
+      if (!this.canvas || !this.container) return;
+      const rect = this.container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.max(rect.width, 400);
+      const height = 200;
+      this.canvas.width = width * dpr;
+      this.canvas.height = height * dpr;
+      this.canvas.style.width = width + 'px';
+      this.canvas.style.height = height + 'px';
+      if (this.ctx2d) {
+        this.ctx2d.scale(dpr, dpr);
+      }
+    },
+
+    /**
+     * Set timeseries data and render.
+     * @param {Object} data - { years: [2016, 2017, ...], series: { '101': { values: [v1, v2, ...], color: [r,g,b,a] }, ... }, yLabel: 'Cover %', xLabel: 'Year' }
+     */
+    setData(data) {
+      this._data = data;
+      if (data && Object.keys(data.series || {}).length > 0) {
+        this.show();
+        this.render();
+      } else {
+        this.hide();
+      }
+    },
+
+    /**
+     * Highlight a specific subcatchment line (from map hover).
+     */
+    highlightSubcatchment(topazId) {
+      if (this._highlightedId !== topazId) {
+        this._highlightedId = topazId;
+        if (this._visible && this._data) {
+          this.render();
+        }
+      }
+    },
+
+    clearHighlight() {
+      if (this._highlightedId !== null) {
+        this._highlightedId = null;
+        if (this._visible && this._data) {
+          this.render();
+        }
+      }
+    },
+
+    render() {
+      if (!this.ctx2d || !this._data || !this._data.years || !this._data.series) return;
+      const ctx = this.ctx2d;
+      const dpr = window.devicePixelRatio || 1;
+      const width = this.canvas.width / dpr;
+      const height = this.canvas.height / dpr;
+      const pad = this._padding;
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+
+      const years = this._data.years;
+      const series = this._data.series;
+      const seriesIds = Object.keys(series);
+      if (years.length === 0 || seriesIds.length === 0) return;
+
+      // Compute scales
+      const xMin = Math.min(...years);
+      const xMax = Math.max(...years);
+      const xRange = xMax - xMin || 1;
+      const xScale = (yr) => pad.left + ((yr - xMin) / xRange) * plotWidth;
+
+      // Find y range
+      let yMin = Infinity, yMax = -Infinity;
+      for (const id of seriesIds) {
+        for (const v of series[id].values) {
+          if (v != null && isFinite(v)) {
+            if (v < yMin) yMin = v;
+            if (v > yMax) yMax = v;
+          }
+        }
+      }
+      if (!isFinite(yMin)) yMin = 0;
+      if (!isFinite(yMax)) yMax = 100;
+      // Add padding to y range
+      const yPad = (yMax - yMin) * 0.1 || 5;
+      yMin = Math.max(0, yMin - yPad);
+      yMax = yMax + yPad;
+      const yRange = yMax - yMin || 1;
+      const yScale = (v) => pad.top + plotHeight - ((v - yMin) / yRange) * plotHeight;
+
+      // Store scales for hit testing
+      this._xScale = xScale;
+      this._yScale = yScale;
+      this._plotBounds = { left: pad.left, right: width - pad.right, top: pad.top, bottom: height - pad.bottom };
+      this._yMin = yMin;
+      this._yMax = yMax;
+
+      // Draw axes
+      ctx.strokeStyle = '#3f5070';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, pad.top);
+      ctx.lineTo(pad.left, height - pad.bottom);
+      ctx.lineTo(width - pad.right, height - pad.bottom);
+      ctx.stroke();
+
+      // Draw X axis ticks and labels
+      ctx.fillStyle = '#8fa0c2';
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      const xTicks = this._computeTicks(xMin, xMax, 6, true);
+      for (const tick of xTicks) {
+        const x = xScale(tick);
+        ctx.beginPath();
+        ctx.moveTo(x, height - pad.bottom);
+        ctx.lineTo(x, height - pad.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(String(tick), x, height - pad.bottom + 6);
+      }
+
+      // Draw Y axis ticks and labels
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      const yTicks = this._computeTicks(yMin, yMax, 5, false);
+      for (const tick of yTicks) {
+        const y = yScale(tick);
+        ctx.beginPath();
+        ctx.moveTo(pad.left - 4, y);
+        ctx.lineTo(pad.left, y);
+        ctx.stroke();
+        ctx.fillText(tick.toFixed(0), pad.left - 6, y);
+        // Draw grid line
+        ctx.strokeStyle = '#1f2c44';
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.strokeStyle = '#3f5070';
+      }
+
+      // Draw X axis label
+      if (this._data.xLabel) {
+        ctx.fillStyle = '#6b7fa0';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(this._data.xLabel, pad.left + plotWidth / 2, height - 12);
+      }
+
+      // Draw Y axis label
+      if (this._data.yLabel) {
+        ctx.save();
+        ctx.translate(12, pad.top + plotHeight / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = '#6b7fa0';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(this._data.yLabel, 0, 0);
+        ctx.restore();
+      }
+
+      // Draw lines - non-highlighted first
+      const highlightId = this._highlightedId || this._hoveredId;
+      for (const id of seriesIds) {
+        if (id === String(highlightId)) continue;
+        this._drawLine(ctx, years, series[id], xScale, yScale, false);
+      }
+
+      // Draw highlighted line last (on top)
+      if (highlightId && series[String(highlightId)]) {
+        this._drawLine(ctx, years, series[String(highlightId)], xScale, yScale, true);
+      }
+
+      // Draw current year indicator if yearSlider is active
+      if (rapSelectedYear && rapSelectedYear >= xMin && rapSelectedYear <= xMax) {
+        const x = xScale(rapSelectedYear);
+        ctx.strokeStyle = '#ffcc00';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x, pad.top);
+        ctx.lineTo(x, height - pad.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    },
+
+    _drawLine(ctx, years, seriesData, xScale, yScale, highlighted) {
+      const values = seriesData.values;
+      const color = seriesData.color || [100, 150, 200, 180];
+      ctx.strokeStyle = highlighted
+        ? `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1)`
+        : `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.5)`;
+      ctx.lineWidth = highlighted ? this._highlightWidth : this._lineWidth;
+      ctx.beginPath();
+      let started = false;
+      for (let i = 0; i < years.length; i++) {
+        const v = values[i];
+        if (v == null || !isFinite(v)) continue;
+        const x = xScale(years[i]);
+        const y = yScale(v);
+        if (!started) {
+          ctx.moveTo(x, y);
+          started = true;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    },
+
+    _computeTicks(min, max, count, integers) {
+      const range = max - min;
+      if (range === 0) return [min];
+      const step = range / (count - 1);
+      const ticks = [];
+      for (let i = 0; i < count; i++) {
+        let tick = min + step * i;
+        if (integers) tick = Math.round(tick);
+        ticks.push(tick);
+      }
+      return [...new Set(ticks)]; // Remove duplicates
+    },
+
+    _onCanvasHover(e) {
+      if (!this._data || !this._xScale || !this._plotBounds) return;
+      const rect = this.canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const bounds = this._plotBounds;
+
+      if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) {
+        this._onCanvasLeave();
+        return;
+      }
+
+      // Find closest line
+      const years = this._data.years;
+      const series = this._data.series;
+      const seriesIds = Object.keys(series);
+      let closestId = null;
+      let closestDist = Infinity;
+      let closestValue = null;
+      let closestYear = null;
+
+      for (const id of seriesIds) {
+        const values = series[id].values;
+        for (let i = 0; i < years.length; i++) {
+          const v = values[i];
+          if (v == null || !isFinite(v)) continue;
+          const px = this._xScale(years[i]);
+          const py = this._yScale(v);
+          const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+          if (dist < closestDist && dist < 20) {
+            closestDist = dist;
+            closestId = id;
+            closestValue = v;
+            closestYear = years[i];
+          }
+        }
+      }
+
+      if (closestId !== this._hoveredId) {
+        this._hoveredId = closestId;
+        this.render();
+      }
+
+      // Show tooltip
+      if (closestId && this.tooltipEl) {
+        this.tooltipEl.style.display = 'block';
+        this.tooltipEl.style.left = (x + 10) + 'px';
+        this.tooltipEl.style.top = (y - 10) + 'px';
+        this.tooltipEl.textContent = `Hillslope ${closestId}: ${closestValue.toFixed(1)}% (${closestYear})`;
+      }
+
+      // Emit event for map to highlight
+      if (typeof window.glDashboardHighlightSubcatchment === 'function') {
+        window.glDashboardHighlightSubcatchment(closestId ? parseInt(closestId, 10) : null);
+      }
+    },
+
+    _onCanvasLeave() {
+      this._hoveredId = null;
+      if (this.tooltipEl) {
+        this.tooltipEl.style.display = 'none';
+      }
+      if (this._visible && this._data) {
+        this.render();
+      }
+      // Clear map highlight
+      if (typeof window.glDashboardHighlightSubcatchment === 'function') {
+        window.glDashboardHighlightSubcatchment(null);
+      }
+    },
+  };
+
+  // Initialize graph controller
+  timeseriesGraph.init();
+
+  // Expose for external use
+  window.glDashboardTimeseriesGraph = timeseriesGraph;
+
+  // Callback when graph panel is toggled
+  window.glDashboardGraphToggled = async function (visible) {
+    if (visible && (rapCumulativeMode || rapLayers.some((l) => l.visible))) {
+      await loadRapTimeseriesData();
+    }
+  };
 
   const NLCD_COLORMAP = {
     11: '#5475A8', // Open water
@@ -678,6 +1100,11 @@
         yearSlider.show();
         await refreshRapData();
         applyLayers();
+        // Load graph data if graph is visible
+        const graphEl = document.getElementById('gl-graph');
+        if (graphEl && !graphEl.classList.contains('is-collapsed')) {
+          await loadRapTimeseriesData();
+        }
       }
     });
     const cumulativeLabel = document.createElement('label');
@@ -706,6 +1133,11 @@
         if (rapCumulativeMode) {
           await refreshRapData();
           applyLayers();
+          // Reload graph data if graph is visible
+          const graphEl = document.getElementById('gl-graph');
+          if (graphEl && !graphEl.classList.contains('is-collapsed')) {
+            await loadRapTimeseriesData();
+          }
         }
       });
       const label = document.createElement('label');
@@ -770,6 +1202,11 @@
             }
           }
           applyLayers();
+          // Load graph data if graph is visible
+          const graphEl = document.getElementById('gl-graph');
+          if (graphEl && !graphEl.classList.contains('is-collapsed')) {
+            await loadRapTimeseriesData();
+          }
         }
       });
       const label = document.createElement('label');
@@ -1724,7 +2161,7 @@
           id: layerId,
           data: subcatchmentsGeoJson,
           pickable: true,
-          stroked: false,
+          stroked: true,
           filled: true,
           opacity: 0.8,
           getFillColor: (f) => {
@@ -1740,8 +2177,27 @@
             const row = topaz != null ? rapSummary[String(topaz)] : null;
             return rapFillColor(row);
           },
+          getLineColor: (f) => {
+            const props = f && f.properties;
+            const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+            if (graphHighlightedTopazId && String(topaz) === String(graphHighlightedTopazId)) {
+              return [255, 200, 0, 255]; // Bright yellow highlight
+            }
+            return [0, 0, 0, 0]; // Transparent by default
+          },
+          getLineWidth: (f) => {
+            const props = f && f.properties;
+            const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+            if (graphHighlightedTopazId && String(topaz) === String(graphHighlightedTopazId)) {
+              return 3;
+            }
+            return 0;
+          },
+          lineWidthUnits: 'pixels',
           updateTriggers: {
             getFillColor: [rapSelectedYear, selectedBandKeys],
+            getLineColor: [graphHighlightedTopazId],
+            getLineWidth: [graphHighlightedTopazId],
           },
         }),
       ];
@@ -1755,7 +2211,7 @@
           id: `rap-${overlay.key}-${rapSelectedYear}`,
           data: subcatchmentsGeoJson,
           pickable: true,
-          stroked: false,
+          stroked: true,
           filled: true,
           opacity: 0.8,
           getFillColor: (f) => {
@@ -1771,8 +2227,27 @@
             const row = topaz != null ? rapSummary[String(topaz)] : null;
             return rapFillColor(row);
           },
+          getLineColor: (f) => {
+            const props = f && f.properties;
+            const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+            if (graphHighlightedTopazId && String(topaz) === String(graphHighlightedTopazId)) {
+              return [255, 200, 0, 255]; // Bright yellow highlight
+            }
+            return [0, 0, 0, 0]; // Transparent by default
+          },
+          getLineWidth: (f) => {
+            const props = f && f.properties;
+            const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+            if (graphHighlightedTopazId && String(topaz) === String(graphHighlightedTopazId)) {
+              return 3;
+            }
+            return 0;
+          },
+          lineWidthUnits: 'pixels',
           updateTriggers: {
             getFillColor: [rapSelectedYear],
+            getLineColor: [graphHighlightedTopazId],
+            getLineWidth: [graphHighlightedTopazId],
           },
         });
       });
@@ -1856,6 +2331,103 @@
     }
   }
 
+  /**
+   * Load full RAP timeseries data for the graph panel.
+   * Queries all years for selected bands and builds series data for each hillslope.
+   */
+  async function loadRapTimeseriesData() {
+    if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
+      timeseriesGraph.hide();
+      return;
+    }
+
+    const selectedBands = rapCumulativeMode
+      ? rapLayers.filter((l) => l.selected !== false)
+      : [pickActiveRapLayer()].filter(Boolean);
+
+    if (!selectedBands.length) {
+      timeseriesGraph.hide();
+      return;
+    }
+
+    try {
+      const bandIds = selectedBands.map((l) => l.bandId);
+      // Query all years for selected bands
+      const dataPayload = {
+        datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+        columns: ['rap.topaz_id AS topaz_id', 'rap.year AS year', 'rap.band AS band', 'rap.value AS value'],
+        filters: [{ column: 'rap.band', op: 'IN', value: bandIds }],
+        order_by: ['year'],
+      };
+      const dataResult = await postQueryEngine(dataPayload);
+      if (!dataResult || !dataResult.records || dataResult.records.length === 0) {
+        timeseriesGraph.hide();
+        return;
+      }
+
+      // Build series data structure
+      // { years: [2016, 2017, ...], series: { topazId: { values: [...], color: [r,g,b,a] } } }
+      const yearSet = new Set();
+      const rawData = {}; // { topazId: { year: sumValue } }
+
+      for (const row of dataResult.records) {
+        const tid = String(row.topaz_id);
+        const year = row.year;
+        const value = row.value || 0;
+        yearSet.add(year);
+
+        if (!rawData[tid]) {
+          rawData[tid] = {};
+        }
+        // Sum values if cumulative mode (multiple bands per year)
+        rawData[tid][year] = (rawData[tid][year] || 0) + value;
+      }
+
+      const years = Array.from(yearSet).sort((a, b) => a - b);
+      const series = {};
+
+      // Compute min/max for color mapping
+      let minVal = Infinity, maxVal = -Infinity;
+      for (const tid of Object.keys(rawData)) {
+        for (const yr of years) {
+          const v = rawData[tid][yr];
+          if (v != null && isFinite(v)) {
+            if (v < minVal) minVal = v;
+            if (v > maxVal) maxVal = v;
+          }
+        }
+      }
+      if (!isFinite(minVal)) minVal = 0;
+      if (!isFinite(maxVal)) maxVal = 100;
+      const valRange = maxVal - minVal || 1;
+
+      // Build series with colors matching the map's colormap
+      for (const tid of Object.keys(rawData)) {
+        const values = years.map((yr) => rawData[tid][yr] ?? null);
+        // Use the latest value for color assignment (or average)
+        const latestVal = values.filter((v) => v != null).pop() || 0;
+        const normalized = Math.min(1, Math.max(0, (latestVal - minVal) / valRange));
+        const color = viridisColor(normalized);
+        series[tid] = { values, color };
+      }
+
+      const bandLabel = rapCumulativeMode
+        ? 'Cumulative (' + selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join('+') + ')'
+        : RAP_BAND_LABELS[selectedBands[0].bandKey] || selectedBands[0].bandKey;
+
+      timeseriesGraph.setData({
+        years,
+        series,
+        xLabel: 'Year',
+        yLabel: bandLabel + ' %',
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load RAP timeseries', err);
+      timeseriesGraph.hide();
+    }
+  }
+
   // Wire year slider to RAP data refresh
   yearSlider.on('change', async (year) => {
     rapSelectedYear = year;
@@ -1863,6 +2435,10 @@
     if (hasActiveRap) {
       await refreshRapData();
       applyLayers();
+      // Re-render graph to update year indicator line
+      if (timeseriesGraph._visible) {
+        timeseriesGraph.render();
+      }
     }
   });
 
@@ -2442,6 +3018,18 @@
         maxZoom: initialViewState.maxZoom,
       });
     },
+    onHover: (info) => {
+      // Highlight corresponding line in graph when hovering over subcatchment
+      if (info && info.object && info.object.properties) {
+        const props = info.object.properties;
+        const topaz = props.TopazID || props.topaz_id || props.topaz || props.id;
+        if (topaz != null) {
+          timeseriesGraph.highlightSubcatchment(String(topaz));
+          return;
+        }
+      }
+      timeseriesGraph.clearHighlight();
+    },
     layers: [baseLayer],
     getTooltip: (info) => {
       if (!info) return null;
@@ -2564,6 +3152,17 @@
 
   // Expose for debugging.
   window.glDashboardDeck = deckgl;
+
+  /**
+   * Highlight a subcatchment on the map (called from graph hover).
+   * Uses deck.gl updateTriggers mechanism via layer highlighting.
+   */
+  window.glDashboardHighlightSubcatchment = function (topazId) {
+    if (topazId === graphHighlightedTopazId) return;
+    graphHighlightedTopazId = topazId;
+    // Re-render layers to apply highlight
+    applyLayers();
+  };
 
   Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectRapOverlays()]).catch((err) => {
     // eslint-disable-next-line no-console

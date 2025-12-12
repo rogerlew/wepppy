@@ -263,26 +263,53 @@
     height: 100% !important;
     display: block;
   }
-  .gl-table {
+  .gl-graph {
     background: #0f1727;
     border-top: 1px solid #1f2c44;
     padding: 0.5rem 1rem;
-    max-height: 260px;
+    max-height: 280px;
     overflow: hidden;
     transition: max-height 180ms ease;
   }
-  .gl-table.is-collapsed {
+  .gl-graph.is-collapsed {
     max-height: 48px;
   }
-  .gl-table__header {
+  .gl-graph__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
   }
-  .gl-table__content {
+  .gl-graph__content {
     margin-top: 0.5rem;
     color: #8fa0c2;
+    position: relative;
+  }
+  .gl-graph__empty {
+    font-size: 0.9rem;
+    color: #6b7fa0;
+    padding: 1rem 0;
+  }
+  .gl-graph__container {
+    position: relative;
+  }
+  #gl-graph-canvas {
+    width: 100%;
+    height: 200px;
+    display: block;
+  }
+  .gl-graph__tooltip {
+    position: absolute;
+    background: rgba(13, 21, 35, 0.95);
+    border: 1px solid #3f6ac7;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+    color: #e5ecf7;
+    pointer-events: none;
+    display: none;
+    z-index: 10;
+    white-space: nowrap;
   }
   /* Legends panel - floating on top of map */
   .gl-legends-panel {
@@ -502,6 +529,28 @@
     color: #6b7fa0;
     white-space: nowrap;
   }
+  .gl-year-slider__play {
+    background: #1f2c44;
+    border: 1px solid #3f6ac7;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    color: #c7d7ff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .gl-year-slider__play:hover {
+    background: #263b5f;
+    border-color: #5a85e0;
+  }
+  .gl-year-slider__play:active {
+    background: #3f6ac7;
+  }
 </style>
 {% endblock %}
 
@@ -555,6 +604,7 @@
       </div>
       <!-- Year slider - fixed at bottom of map -->
       <div class="gl-year-slider" id="gl-year-slider">
+        <button class="gl-year-slider__play" id="gl-year-slider-play" type="button" title="Play">▶</button>
         <span class="gl-year-slider__label">Year:</span>
         <div class="gl-year-slider__track">
           <span class="gl-year-slider__range" id="gl-year-slider-min"></span>
@@ -565,13 +615,17 @@
       </div>
     </div>
 
-    <div class="gl-table is-collapsed" id="gl-table">
-      <div class="gl-table__header">
-        <h4 style="margin:0;color:#c7d7ff;">Table</h4>
-        <button class="gl-btn" data-table-toggle type="button">Toggle table</button>
+    <div class="gl-graph is-collapsed" id="gl-graph">
+      <div class="gl-graph__header">
+        <h4 style="margin:0;color:#c7d7ff;">Graph</h4>
+        <button class="gl-btn" data-graph-toggle type="button">Toggle Graph</button>
       </div>
-      <div class="gl-table__content">
-        Tabular data from the query engine will stream here. Wiring pending.
+      <div class="gl-graph__content">
+        <div class="gl-graph__empty" id="gl-graph-empty">Select a timeseries layer (e.g., RAP) to view trends</div>
+        <div class="gl-graph__container" id="gl-graph-container" style="display:none;">
+          <canvas id="gl-graph-canvas" width="800" height="200"></canvas>
+          <div class="gl-graph__tooltip" id="gl-graph-tooltip"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -598,11 +652,15 @@
   <script src="{{ static_url('js/gl-dashboard.js') }}"></script>
   <script>
     (function () {
-      const toggle = document.querySelector('[data-table-toggle]');
-      const table = document.getElementById('gl-table');
-      if (toggle && table) {
+      const toggle = document.querySelector('[data-graph-toggle]');
+      const graph = document.getElementById('gl-graph');
+      if (toggle && graph) {
         toggle.addEventListener('click', () => {
-          table.classList.toggle('is-collapsed');
+          graph.classList.toggle('is-collapsed');
+          // Notify gl-dashboard that graph visibility changed
+          if (typeof window.glDashboardGraphToggled === 'function') {
+            window.glDashboardGraphToggled(!graph.classList.contains('is-collapsed'));
+          }
         });
       }
 
