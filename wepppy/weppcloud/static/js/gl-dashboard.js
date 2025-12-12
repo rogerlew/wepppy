@@ -234,6 +234,28 @@
     90: '#c8e6f8', // Woody wetlands
     95: '#64b3d5', // Emergent herbaceous wetlands
   };
+  const NLCD_LABELS = {
+    11: 'Open Water',
+    12: 'Perennial Ice/Snow',
+    21: 'Developed, Open Space',
+    22: 'Developed, Low Intensity',
+    23: 'Developed, Medium Intensity',
+    24: 'Developed, High Intensity',
+    31: 'Barren Land',
+    41: 'Deciduous Forest',
+    42: 'Evergreen Forest',
+    43: 'Mixed Forest',
+    51: 'Dwarf Scrub',
+    52: 'Shrub/Scrub',
+    71: 'Grassland/Herbaceous',
+    72: 'Sedge/Herbaceous',
+    73: 'Lichens',
+    74: 'Moss',
+    81: 'Pasture/Hay',
+    82: 'Cultivated Crops',
+    90: 'Woody Wetlands',
+    95: 'Emergent Herbaceous Wetlands',
+  };
   const HEX_RGB_RE = /^#?([0-9a-f]{6})$/i;
   const soilColorCache = new Map();
   const viridisScale =
@@ -679,7 +701,357 @@
     deckgl.setProps({
       layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
     });
+    // Update legends panel after layer changes
+    updateLegendsPanel();
   }
+
+  // ============================================================================
+  // Legends Panel Rendering
+  // ============================================================================
+
+  // SBS burn class colors and labels (matches baer.py / disturbed.py)
+  const SBS_CLASSES = [
+    { color: '#00734A', label: 'Unburned' },
+    { color: '#4DE600', label: 'Low' },
+    { color: '#FFFF00', label: 'Moderate' },
+    { color: '#FF0000', label: 'High' },
+  ];
+
+  // Units for continuous layers
+  const LAYER_UNITS = {
+    cancov: '%',
+    inrcov: '%',
+    rilcov: '%',
+    clay: '%',
+    sand: '%',
+    rock: '%',
+    bd: 'g/cm³',
+    slope_scalar: 'rise/run',
+    length: 'm',
+    aspect: '°',
+    subrunoff_volume: 'mm',
+    baseflow_volume: 'mm',
+    soil_loss: 't/ha',
+    sediment_deposition: 't/ha',
+    sediment_yield: 't/ha',
+  };
+
+  // RAP band units
+  const RAP_UNITS = {
+    afgc: '%',
+    pfgc: '%',
+    tree: '%',
+    shr: '%',
+    bgr: '%',
+    ltr: '%',
+  };
+
+  function getActiveLayerForLegend() {
+    // Find the first visible layer from each category
+    const active = [];
+    
+    // Landuse
+    for (const layer of landuseLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'Landuse' });
+        break;
+      }
+    }
+    // Soils
+    for (const layer of soilsLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'Soils' });
+        break;
+      }
+    }
+    // Hillslopes/Watershed
+    for (const layer of hillslopesLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'Watershed' });
+        break;
+      }
+    }
+    // WEPP
+    for (const layer of weppLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'WEPP' });
+        break;
+      }
+    }
+    // RAP
+    for (const layer of rapLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'RAP' });
+        break;
+      }
+    }
+    // Raster layers (SBS, etc.)
+    for (const layer of detectedLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'Raster' });
+      }
+    }
+    return active;
+  }
+
+  function computeRangeFromSummary(summary, mode) {
+    if (!summary) return { min: 0, max: 100 };
+    let min = Infinity;
+    let max = -Infinity;
+    for (const key of Object.keys(summary)) {
+      const row = summary[key];
+      const v = Number(row[mode]);
+      if (Number.isFinite(v)) {
+        if (v < min) min = v;
+        if (v > max) max = v;
+      }
+    }
+    if (!Number.isFinite(min)) min = 0;
+    if (!Number.isFinite(max)) max = 100;
+    if (max <= min) max = min + 1;
+    return { min, max };
+  }
+
+  function formatLegendValue(value, decimals = 1) {
+    if (!Number.isFinite(value)) return '—';
+    return value.toFixed(decimals);
+  }
+
+  function getUsedNlcdClasses(layer) {
+    // Extract unique NLCD classes from the raster values array
+    const classes = new Set();
+    if (!layer || !layer.values) return [];
+    const values = layer.values;
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i];
+      if (Number.isFinite(v) && v > 0 && NLCD_COLORMAP[v]) {
+        classes.add(v);
+      }
+    }
+    // Sort numerically and return as legend items
+    return Array.from(classes).sort((a, b) => a - b).map(code => ({
+      color: NLCD_COLORMAP[code],
+      label: NLCD_LABELS[code] || `Class ${code}`,
+    }));
+  }
+
+  function getUsedLanduseClasses() {
+    // Extract unique landuse classes from landuseSummary with their color and description
+    const classMap = new Map(); // key -> { color, desc }
+    if (!landuseSummary) return classMap;
+    for (const topazId of Object.keys(landuseSummary)) {
+      const row = landuseSummary[topazId];
+      if (!row) continue;
+      const key = row.key ?? row._map;
+      if (key == null) continue;
+      if (classMap.has(key)) continue;
+      // Extract color and description
+      const color = row.color;
+      const desc = row.desc || `Class ${key}`;
+      classMap.set(key, { color, desc });
+    }
+    return classMap;
+  }
+
+  function rgbaArrayToCss(colorArr, alphaOverride) {
+    if (!Array.isArray(colorArr) || colorArr.length < 3) return null;
+    const r = Number(colorArr[0]);
+    const g = Number(colorArr[1]);
+    const b = Number(colorArr[2]);
+    const a = alphaOverride != null ? alphaOverride : (colorArr[3] != null ? Number(colorArr[3]) / 255 : 1);
+    if (![r, g, b].every(Number.isFinite)) return null;
+    return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${a.toFixed(2)})`;
+  }
+
+  function renderCategoricalLegend(items) {
+    const container = document.createElement('div');
+    container.className = 'gl-legend-categorical';
+    for (const item of items) {
+      const row = document.createElement('div');
+      row.className = 'gl-legend-categorical__item';
+      const swatch = document.createElement('span');
+      swatch.className = 'gl-legend-categorical__swatch';
+      swatch.style.backgroundColor = item.color;
+      const label = document.createElement('span');
+      label.textContent = item.label;
+      row.appendChild(swatch);
+      row.appendChild(label);
+      container.appendChild(row);
+    }
+    return container;
+  }
+
+  function renderContinuousLegend(minVal, maxVal, unit) {
+    const container = document.createElement('div');
+    container.className = 'gl-legend-continuous';
+    
+    const bar = document.createElement('div');
+    bar.className = 'gl-legend-continuous__bar';
+    container.appendChild(bar);
+    
+    const labels = document.createElement('div');
+    labels.className = 'gl-legend-continuous__labels';
+    const minLabel = document.createElement('span');
+    minLabel.textContent = formatLegendValue(minVal);
+    const maxLabel = document.createElement('span');
+    maxLabel.textContent = formatLegendValue(maxVal);
+    labels.appendChild(minLabel);
+    labels.appendChild(maxLabel);
+    container.appendChild(labels);
+    
+    if (unit) {
+      const unitEl = document.createElement('div');
+      unitEl.className = 'gl-legend-continuous__unit';
+      unitEl.textContent = unit;
+      container.appendChild(unitEl);
+    }
+    
+    return container;
+  }
+
+  function renderLegendForLayer(layer) {
+    const section = document.createElement('div');
+    section.className = 'gl-legend-section';
+    
+    const title = document.createElement('h5');
+    title.className = 'gl-legend-section__title';
+    title.textContent = layer.label || layer.key;
+    section.appendChild(title);
+
+    // Determine legend type based on layer mode
+    const mode = layer.mode || '';
+    
+    // Categorical: dominant landuse
+    if (mode === 'dominant' && layer.category === 'Landuse') {
+      const classMap = getUsedLanduseClasses();
+      const items = [];
+      for (const [key, info] of classMap.entries()) {
+        // Color is a hex string from API (e.g., "#1c6330")
+        const colorCss = info.color || '#888888';
+        items.push({ color: colorCss, label: info.desc || `Class ${key}` });
+      }
+      if (items.length) {
+        section.appendChild(renderCategoricalLegend(items));
+      }
+      return section;
+    }
+    
+    // Categorical: dominant soil (uses hashed colors)
+    if (mode === 'dominant' && layer.category === 'Soils') {
+      // Soil dominant is hashed per soil code - show note instead of full legend
+      const note = document.createElement('p');
+      note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
+      note.textContent = 'Colors vary by soil type';
+      section.appendChild(note);
+      return section;
+    }
+    
+    // NLCD raster (landuse/nlcd.tif)
+    if (layer.key === 'landuse' && layer.category === 'Raster') {
+      const nlcdItems = getUsedNlcdClasses(layer);
+      if (nlcdItems.length) {
+        section.appendChild(renderCategoricalLegend(nlcdItems));
+      } else {
+        const note = document.createElement('p');
+        note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
+        note.textContent = 'NLCD land cover classes';
+        section.appendChild(note);
+      }
+      return section;
+    }
+    
+    // SBS raster
+    if (layer.key === 'sbs') {
+      section.appendChild(renderCategoricalLegend(SBS_CLASSES));
+      return section;
+    }
+    
+    // Continuous layers
+    let minVal = 0;
+    let maxVal = 100;
+    let unit = LAYER_UNITS[mode] || '';
+    
+    // Landuse cover layers (0-1 range, display as %)
+    if (['cancov', 'inrcov', 'rilcov'].includes(mode)) {
+      const range = computeRangeFromSummary(landuseSummary, mode);
+      minVal = range.min * 100;
+      maxVal = range.max * 100;
+      unit = '%';
+    }
+    // Soils continuous
+    else if (['clay', 'sand', 'rock', 'bd'].includes(mode) && soilsSummary) {
+      const range = computeRangeFromSummary(soilsSummary, mode);
+      minVal = range.min;
+      maxVal = range.max;
+    }
+    // Hillslopes/Watershed continuous
+    else if (['slope_scalar', 'length', 'aspect'].includes(mode) && hillslopesSummary) {
+      const range = computeRangeFromSummary(hillslopesSummary, mode);
+      minVal = range.min;
+      maxVal = range.max;
+      if (mode === 'slope_scalar') {
+        // Convert to percentage for display
+        minVal = range.min * 100;
+        maxVal = range.max * 100;
+        unit = '%';
+      }
+    }
+    // WEPP layers
+    else if (weppRanges && weppRanges[mode]) {
+      minVal = weppRanges[mode].min;
+      maxVal = weppRanges[mode].max;
+    }
+    // RAP layers
+    else if (layer.bandKey && rapSummary) {
+      let min = Infinity, max = -Infinity;
+      for (const key of Object.keys(rapSummary)) {
+        const v = Number(rapSummary[key]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      if (Number.isFinite(min) && Number.isFinite(max)) {
+        minVal = min;
+        maxVal = max;
+      }
+      unit = RAP_UNITS[layer.bandKey] || '%';
+    }
+    
+    section.appendChild(renderContinuousLegend(minVal, maxVal, unit));
+    return section;
+  }
+
+  function updateLegendsPanel() {
+    const contentEl = document.getElementById('gl-legends-content');
+    const emptyEl = document.getElementById('gl-legend-empty');
+    if (!contentEl) return;
+
+    const activeLayers = getActiveLayerForLegend();
+    
+    // Clear existing content except empty message
+    const children = Array.from(contentEl.children);
+    for (const child of children) {
+      if (child.id !== 'gl-legend-empty') {
+        child.remove();
+      }
+    }
+    
+    if (!activeLayers.length) {
+      if (emptyEl) emptyEl.style.display = '';
+      return;
+    }
+    
+    if (emptyEl) emptyEl.style.display = 'none';
+    
+    for (const layer of activeLayers) {
+      const legendSection = renderLegendForLayer(layer);
+      contentEl.appendChild(legendSection);
+    }
+  }
+
+  // Expose for external use
+  window.glDashboardUpdateLegends = updateLegendsPanel;
 
   function hexToRgbaArray(hex, alpha = 230) {
     const parsed = HEX_RGB_RE.exec(hex || '');

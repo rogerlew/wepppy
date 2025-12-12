@@ -55,3 +55,8 @@ keep existing add necessary scenarios for omni
 - Are per-hectare costs sufficient, or do we need optional fixed costs (mobilization) per mulch intensity?
 
 just per-hectare for now
+
+
+## Characteristics Layer
+
+shapefile with charactersitics that could be used for masking treatments, PATH, etc. 

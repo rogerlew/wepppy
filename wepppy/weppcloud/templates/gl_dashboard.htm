@@ -281,6 +281,123 @@
     margin-top: 0.5rem;
     color: #8fa0c2;
   }
+  /* Legends panel - floating on top of map */
+  .gl-legends-panel {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(13, 21, 35, 0.92);
+    border: 1px solid #1f2c44;
+    border-radius: 8px;
+    padding: 0;
+    min-width: 180px;
+    max-width: 280px;
+    max-height: 70vh;
+    overflow: hidden;
+    z-index: 1000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    transition: max-height 200ms ease, opacity 150ms ease;
+  }
+  .gl-legends-panel.is-collapsed {
+    max-height: 36px;
+  }
+  .gl-legends-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #1f2c44;
+    cursor: pointer;
+    user-select: none;
+  }
+  .gl-legends-panel__header:hover {
+    background: rgba(31, 44, 68, 0.5);
+  }
+  .gl-legends-panel__title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c7d7ff;
+  }
+  .gl-legends-panel__toggle {
+    font-size: 0.7em;
+    color: #6b7fa0;
+    transition: transform 200ms ease;
+  }
+  .gl-legends-panel.is-collapsed .gl-legends-panel__toggle {
+    transform: rotate(-90deg);
+  }
+  .gl-legends-panel__content {
+    padding: 0.5rem 0.75rem;
+    overflow-y: auto;
+    max-height: calc(70vh - 40px);
+  }
+  .gl-legends-panel.is-collapsed .gl-legends-panel__content {
+    display: none;
+  }
+  .gl-legend-empty {
+    color: #6b7fa0;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+  .gl-legend-section {
+    margin-bottom: 0.75rem;
+  }
+  .gl-legend-section:last-child {
+    margin-bottom: 0;
+  }
+  .gl-legend-section__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #9fb4dc;
+    margin: 0 0 0.35rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  /* Categorical legend (NLCD, soil types, SBS) */
+  .gl-legend-categorical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .gl-legend-categorical__item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: #c1cbe3;
+  }
+  .gl-legend-categorical__swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  /* Continuous legend (viridis gradient) */
+  .gl-legend-continuous {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .gl-legend-continuous__bar {
+    height: 12px;
+    border-radius: 3px;
+    background: linear-gradient(to right, #440154, #482878, #3e4a89, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b5de2b, #fde725);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .gl-legend-continuous__labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #8fa0c2;
+  }
+  .gl-legend-continuous__unit {
+    font-size: 0.7rem;
+    color: #6b7fa0;
+    text-align: center;
+    margin-top: 0.1rem;
+  }
 </style>
 {% endblock %}
 
@@ -322,6 +439,16 @@
 
     <div class="gl-viewport">
       <div id="gl-dashboard-map" role="presentation"></div>
+      <!-- Floating legends panel -->
+      <div class="gl-legends-panel" id="gl-legends-panel">
+        <div class="gl-legends-panel__header" id="gl-legends-toggle">
+          <h4 class="gl-legends-panel__title">Legend</h4>
+          <span class="gl-legends-panel__toggle">▼</span>
+        </div>
+        <div class="gl-legends-panel__content" id="gl-legends-content">
+          <p class="gl-legend-empty" id="gl-legend-empty">No layers visible</p>
+        </div>
+      </div>
     </div>
 
     <div class="gl-table is-collapsed" id="gl-table">
@@ -379,6 +506,15 @@
       if (labelsToggle && typeof window.glDashboardToggleLabels === 'function') {
         labelsToggle.addEventListener('change', (e) => {
           window.glDashboardToggleLabels(e.target.checked);
+        });
+      }
+
+      // Legends panel toggle
+      const legendsToggle = document.getElementById('gl-legends-toggle');
+      const legendsPanel = document.getElementById('gl-legends-panel');
+      if (legendsToggle && legendsPanel) {
+        legendsToggle.addEventListener('click', () => {
+          legendsPanel.classList.toggle('is-collapsed');
         });
       }
     })();
