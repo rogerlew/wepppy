@@ -2501,7 +2501,7 @@ class Wepp(NoDbBase):
 
         else:
             with self.timed('  Running watershed run'):
-                assert run_watershed(runs_dir, wepp_bin='wepp_50k_2', status_channel=self._status_channel)
+                assert run_watershed(runs_dir, wepp_bin=self.wepp_bin, status_channel=self._status_channel)
 
                 self.logger.info('    moving .out files...')
                 for fn in glob(_join(self.runs_dir, '*.out')):
