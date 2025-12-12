@@ -11,6 +11,27 @@
     return;
   }
 
+  // ============================================================================
+  // Omni Scenario and Comparison Mode State
+  // ============================================================================
+  let currentScenarioPath = ''; // Empty string = base scenario
+  let comparisonMode = false;
+  let baseSummaryCache = {}; // Cache for base scenario data when in comparison mode
+  let comparisonDiffRanges = {}; // Cache for computed difference ranges per measure
+  
+  // Measures that support comparison (difference) mapping
+  const COMPARISON_MEASURES = [
+    'cancov', 'inrcov', 'rilcov',  // Landuse covers
+    'runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield',  // WEPP
+    'event_P', 'event_Q', 'event_ET', 'event_peakro', 'event_tdet'  // WEPP Event
+  ];
+  
+  // Create rdbu (red-blue diverging) colormap for comparison mode
+  const rdbuScale =
+    typeof createColormap === 'function'
+      ? createColormap({ colormap: 'rdbu', nshades: 256, format: 'rgba' })
+      : null;
+
   const defaultTileTemplate =
     ctx.tileUrl || 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
@@ -190,6 +211,334 @@
   window.glDashboardSetBasemap = setBasemap;
   window.glDashboardBasemaps = BASEMAP_DEFS;
   window.glDashboardToggleLabels = toggleSubcatchmentLabels;
+
+  // ============================================================================
+  // Scenario and Comparison Mode Functions
+  // ============================================================================
+  
+  /**
+   * Build a URL path that respects the current scenario selection.
+   * Uses the ?pup= query parameter to specify the scenario path.
+   * @param {string} relativePath - Path relative to the run root (e.g., 'landuse/landuse.parquet')
+   * @returns {string} Full URL path with scenario query parameter if applicable
+   */
+  function buildScenarioUrl(relativePath) {
+    const baseUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${relativePath}`;
+    if (currentScenarioPath) {
+      // Convert full scenario path (e.g., '_pups/omni/scenarios/mulch_15') 
+      // to pup parameter (e.g., 'omni/scenarios/mulch_15')
+      const pupPath = currentScenarioPath.replace(/^_pups\//, '');
+      return `${baseUrl}?pup=${encodeURIComponent(pupPath)}`;
+    }
+    // Base scenario
+    return baseUrl;
+  }
+  
+  /**
+   * Build a URL path for the base scenario (used in comparison mode).
+   * @param {string} relativePath - Path relative to the run root
+   * @returns {string} Full URL path to base scenario
+   */
+  function buildBaseUrl(relativePath) {
+    return `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${relativePath}`;
+  }
+
+  /**
+   * Set the active scenario and reload data.
+   * @param {string} scenarioPath - Path to scenario (e.g., '_pups/omni/scenarios/mulch_15') or empty for base
+   */
+  async function setScenario(scenarioPath) {
+    if (scenarioPath === currentScenarioPath) return;
+    
+    currentScenarioPath = scenarioPath || '';
+    
+    // Clear cached data
+    landuseSummary = null;
+    soilsSummary = null;
+    weppSummary = null;
+    weppEventSummary = null;
+    
+    // Reload data for current layers
+    await Promise.all([
+      detectLanduseOverlays(),
+      detectSoilsOverlays(),
+      detectWeppOverlays(),
+    ]);
+    
+    // If comparison mode is on, we need the base data too
+    if (comparisonMode && currentScenarioPath) {
+      await loadBaseScenarioData();
+    }
+    
+    applyLayers();
+  }
+  
+  /**
+   * Enable or disable comparison mode.
+   * In comparison mode, shows (Base - Scenario) difference maps for supported measures.
+   * @param {boolean} enabled - Whether comparison mode is enabled
+   */
+  async function setComparisonMode(enabled) {
+    comparisonMode = !!enabled;
+    
+    // If enabling comparison mode and we have a scenario selected, load base data
+    if (comparisonMode && currentScenarioPath) {
+      await loadBaseScenarioData();
+    }
+    
+    applyLayers();
+    updateLayerList(); // Update layer list to show comparison indicators
+    updateLegendsPanel(); // Update legends to show diverging scale
+  }
+  
+  /**
+   * Load base scenario data for comparison mode.
+   */
+  async function loadBaseScenarioData() {
+    baseSummaryCache = {};
+    comparisonDiffRanges = {};
+    
+    try {
+      // Load base landuse data
+      const landuseUrl = buildBaseUrl('query/landuse/subcatchments');
+      const landuseResp = await fetch(landuseUrl);
+      if (landuseResp.ok) {
+        baseSummaryCache.landuse = await landuseResp.json();
+      }
+      
+      // Load base WEPP data
+      const weppUrl = buildBaseUrl('query/wepp/loss/hillslopes');
+      const weppResp = await fetch(weppUrl);
+      if (weppResp.ok) {
+        baseSummaryCache.wepp = await weppResp.json();
+      }
+      
+      // Compute difference ranges for proper colormap scaling
+      computeComparisonDiffRanges();
+      
+      // Note: WEPP Event data is loaded per-date, so we'll load base event data
+      // on demand when a comparison is requested for a specific date
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load base scenario data for comparison', err);
+    }
+  }
+  
+  /**
+   * Compute difference ranges for comparison mode colormap scaling.
+   * For each comparable measure, finds robust min/max difference using percentiles.
+   * Uses 5th/95th percentiles to avoid outlier domination while keeping 0 at midpoint.
+   */
+  function computeComparisonDiffRanges() {
+    comparisonDiffRanges = {};
+    
+    /**
+     * Compute robust range using percentiles.
+     * @param {number[]} diffs - Array of difference values
+     * @returns {{min: number, max: number}} Range object
+     */
+    function computeRobustRange(diffs) {
+      if (!diffs.length) return null;
+      diffs.sort((a, b) => a - b);
+      
+      // Use 5th and 95th percentiles to avoid outlier domination
+      const p5Idx = Math.floor(diffs.length * 0.05);
+      const p95Idx = Math.floor(diffs.length * 0.95);
+      const p5 = diffs[p5Idx];
+      const p95 = diffs[p95Idx];
+      
+      // Make range symmetric around 0 for proper diverging colormap
+      // Take the larger absolute value to ensure full color range is used
+      const maxAbs = Math.max(Math.abs(p5), Math.abs(p95));
+      
+      return { min: -maxAbs, max: maxAbs, p5, p95 };
+    }
+    
+    // Compute landuse cover difference ranges
+    if (landuseSummary && baseSummaryCache.landuse) {
+      const coverModes = ['cancov', 'inrcov', 'rilcov'];
+      for (const mode of coverModes) {
+        const diffs = [];
+        for (const topazId of Object.keys(landuseSummary)) {
+          const scenarioRow = landuseSummary[topazId];
+          const baseRow = baseSummaryCache.landuse[topazId];
+          if (!scenarioRow || !baseRow) continue;
+          const scenarioValue = Number(scenarioRow[mode]);
+          const baseValue = Number(baseRow[mode]);
+          if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
+          diffs.push(baseValue - scenarioValue);
+        }
+        const range = computeRobustRange(diffs);
+        if (range) {
+          comparisonDiffRanges[mode] = range;
+        }
+      }
+    }
+    
+    // Compute WEPP measure difference ranges
+    if (weppSummary && baseSummaryCache.wepp) {
+      const weppModes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
+      for (const mode of weppModes) {
+        const diffs = [];
+        for (const topazId of Object.keys(weppSummary)) {
+          const scenarioRow = weppSummary[topazId];
+          const baseRow = baseSummaryCache.wepp[topazId];
+          if (!scenarioRow || !baseRow) continue;
+          const scenarioValue = Number(scenarioRow[mode]);
+          const baseValue = Number(baseRow[mode]);
+          if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
+          diffs.push(baseValue - scenarioValue);
+        }
+        const range = computeRobustRange(diffs);
+        if (range) {
+          comparisonDiffRanges[mode] = range;
+        }
+      }
+    }
+    
+    console.log('gl-dashboard: computed comparison diff ranges', comparisonDiffRanges);
+  }
+  
+  /**
+   * Compute WEPP Event difference ranges for the current date.
+   * Uses percentile-based scaling for robustness.
+   */
+  function computeWeppEventDiffRanges() {
+    if (!weppEventSummary || !baseSummaryCache.weppEvent) return;
+    
+    function computeRobustRange(diffs) {
+      if (!diffs.length) return null;
+      diffs.sort((a, b) => a - b);
+      const p5Idx = Math.floor(diffs.length * 0.05);
+      const p95Idx = Math.floor(diffs.length * 0.95);
+      const p5 = diffs[p5Idx];
+      const p95 = diffs[p95Idx];
+      const maxAbs = Math.max(Math.abs(p5), Math.abs(p95));
+      return { min: -maxAbs, max: maxAbs, p5, p95 };
+    }
+    
+    const eventModes = ['event_P', 'event_Q', 'event_ET', 'event_peakro', 'event_tdet'];
+    for (const mode of eventModes) {
+      const diffs = [];
+      for (const topazId of Object.keys(weppEventSummary)) {
+        const scenarioRow = weppEventSummary[topazId];
+        const baseRow = baseSummaryCache.weppEvent[topazId];
+        if (!scenarioRow || !baseRow) continue;
+        const scenarioValue = Number(scenarioRow[mode]);
+        const baseValue = Number(baseRow[mode]);
+        if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
+        diffs.push(baseValue - scenarioValue);
+      }
+      const range = computeRobustRange(diffs);
+      if (range) {
+        comparisonDiffRanges[mode] = range;
+      }
+    }
+  }
+
+  // Load base scenario WEPP Event data for current date
+  async function loadBaseWeppEventData() {
+    if (!weppEventSelectedDate || !comparisonMode) return;
+    
+    const [year, month, day] = weppEventSelectedDate.split('-').map(Number);
+    if (!year || !month || !day) return;
+    
+    const activeLayer = pickActiveWeppEventLayer();
+    if (!activeLayer) return;
+    
+    try {
+      const mode = activeLayer.mode;
+      const columns = ['hill.topaz_id AS topaz_id'];
+      let filters;
+      let baseQueryResult = {};
+      
+      // Use base URL for query engine (no scenario path)
+      const origin = window.location.origin || `${window.location.protocol}//${window.location.host}`;
+      const baseQueryUrl = `${origin}/query-engine/runs/${ctx.runid}/query`;
+
+      if (mode === 'event_P' || mode === 'event_Q' || mode === 'event_ET') {
+        const parquetPath = 'wepp/output/interchange/H.wat.parquet';
+        const watColumn = mode === 'event_P' ? 'P' : mode === 'event_Q' ? 'Q' : null;
+        const valueExpression =
+          mode === 'event_ET'
+            ? '(SUM(wat.Ep) + SUM(wat.Es) + SUM(wat.Er))'
+            : `SUM(wat.${watColumn})`;
+        filters = [
+          { column: 'wat.year', op: '=', value: year },
+          { column: 'wat.month', op: '=', value: month },
+          { column: 'wat.day_of_month', op: '=', value: day },
+        ];
+        const dataPayload = {
+          datasets: [
+            { path: parquetPath, alias: 'wat' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          ],
+          joins: [{ left: 'wat', right: 'hill', on: 'wepp_id', type: 'inner' }],
+          columns,
+          aggregations: [{ sql: valueExpression, alias: 'value' }],
+          filters,
+          group_by: ['hill.topaz_id'],
+        };
+        const resp = await fetch(baseQueryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(dataPayload),
+        });
+        if (resp.ok) {
+          const dataResult = await resp.json();
+          if (dataResult && dataResult.records) {
+            for (const row of dataResult.records) {
+              baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
+            }
+          }
+        }
+      } else if (mode === 'event_peakro' || mode === 'event_tdet') {
+        const parquetPath = 'wepp/output/interchange/H.pass.parquet';
+        const passColumn = mode === 'event_peakro' ? 'peakro' : 'tdet';
+        const valueExpression =
+          mode === 'event_peakro' ? `MAX(pass.${passColumn})` : `SUM(pass.${passColumn})`;
+        filters = [
+          { column: 'pass.year', op: '=', value: year },
+          { column: 'pass.month', op: '=', value: month },
+          { column: 'pass.day_of_month', op: '=', value: day },
+        ];
+        const dataPayload = {
+          datasets: [
+            { path: parquetPath, alias: 'pass' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          ],
+          joins: [{ left: 'pass', right: 'hill', on: 'wepp_id', type: 'inner' }],
+          columns,
+          aggregations: [{ sql: valueExpression, alias: 'value' }],
+          filters,
+          group_by: ['hill.topaz_id'],
+        };
+        const resp = await fetch(baseQueryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(dataPayload),
+        });
+        if (resp.ok) {
+          const dataResult = await resp.json();
+          if (dataResult && dataResult.records) {
+            for (const row of dataResult.records) {
+              baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
+            }
+          }
+        }
+      }
+      
+      baseSummaryCache.weppEvent = baseQueryResult;
+      
+      // Compute WEPP Event difference ranges for colormap scaling
+      computeWeppEventDiffRanges();
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load base WEPP Event data for comparison', err);
+    }
+  }
+  
+  // Expose scenario API for external use
+  window.glDashboardSetScenario = setScenario;
+  window.glDashboardSetComparisonMode = setComparisonMode;
 
   const layerDefs = [
     {
@@ -1722,6 +2071,85 @@
     return container;
   }
 
+  // Diverging legend for comparison mode (blue-white-red)
+  // mode parameter allows looking up the computed difference range
+  function renderDivergingLegend(unit, label, mode) {
+    const container = document.createElement('div');
+    container.className = 'gl-legend-continuous gl-legend-diverging';
+    
+    const barWrapper = document.createElement('div');
+    barWrapper.className = 'gl-legend-continuous__bar-wrapper';
+    const bar = document.createElement('div');
+    bar.className = 'gl-legend-continuous__bar gl-legend-diverging__bar';
+    // Blue (#2166AC) -> White -> Red (#B2182B) gradient
+    bar.style.background = 'linear-gradient(to right, #2166AC, #F7F7F7 50%, #B2182B)';
+    barWrapper.appendChild(bar);
+    container.appendChild(barWrapper);
+    
+    // Get the computed difference range for this mode
+    const range = mode ? comparisonDiffRanges[mode] : null;
+    const hasRange = range && Number.isFinite(range.min) && Number.isFinite(range.max);
+    
+    /**
+     * Format a numeric value for legend display.
+     * Uses appropriate precision based on magnitude.
+     */
+    function formatLegendValue(val) {
+      const absVal = Math.abs(val);
+      if (absVal >= 10000) return val.toFixed(0);
+      if (absVal >= 100) return val.toFixed(1);
+      if (absVal >= 1) return val.toFixed(2);
+      return val.toFixed(3);
+    }
+    
+    const labels = document.createElement('div');
+    labels.className = 'gl-legend-continuous__labels';
+    labels.style.justifyContent = 'space-between';
+    
+    const leftLabel = document.createElement('span');
+    if (hasRange) {
+      // Show min value (negative = scenario higher)
+      leftLabel.textContent = formatLegendValue(range.min);
+    } else {
+      leftLabel.textContent = 'Scenario > Base';
+    }
+    leftLabel.style.color = '#2166AC';
+    
+    const centerLabel = document.createElement('span');
+    centerLabel.textContent = '0';
+    centerLabel.style.color = 'var(--gl-text-secondary, #8fa0c2)';
+    
+    const rightLabel = document.createElement('span');
+    if (hasRange) {
+      // Show max value (positive = base higher)
+      rightLabel.textContent = '+' + formatLegendValue(range.max);
+    } else {
+      rightLabel.textContent = 'Base > Scenario';
+    }
+    rightLabel.style.color = '#B2182B';
+    
+    labels.appendChild(leftLabel);
+    labels.appendChild(centerLabel);
+    labels.appendChild(rightLabel);
+    container.appendChild(labels);
+    
+    if (unit) {
+      const unitEl = document.createElement('div');
+      unitEl.className = 'gl-legend-continuous__unit';
+      unitEl.textContent = `Difference (${unit})`;
+      container.appendChild(unitEl);
+    }
+    
+    if (label) {
+      const labelEl = document.createElement('div');
+      labelEl.style.cssText = 'font-size:0.7rem;color:var(--gl-text-secondary, #8fa0c2);margin-top:4px;text-align:center;';
+      labelEl.textContent = label;
+      container.appendChild(labelEl);
+    }
+    
+    return container;
+  }
+
   // Aspect legend using swatches for cardinal directions (HSL hue wheel)
   function renderAspectLegend() {
     // Cardinal/intercardinal directions with degrees (0=N, 90=E, 180=S, 270=W)
@@ -1771,6 +2199,15 @@
 
     // Determine legend type based on layer mode
     const mode = layer.mode || '';
+    
+    // Check if this is comparison mode for a comparison-enabled measure
+    const isComparisonMeasure = COMPARISON_MEASURES.includes(mode);
+    if (comparisonMode && isComparisonMeasure && currentScenarioPath) {
+      // Render diverging legend for comparison mode
+      const unit = LAYER_UNITS[mode] || '';
+      section.appendChild(renderDivergingLegend(unit, 'Base − Scenario', mode));
+      return section;
+    }
     
     // Categorical: dominant landuse
     if (mode === 'dominant' && layer.category === 'Landuse') {
@@ -2008,6 +2445,93 @@
     ];
   }
 
+  /**
+   * Diverging color function for comparison mode using rdbu colormap.
+   * Maps normalized difference values (-1 to 1) to blue-white-red colors.
+   * Negative = blue (scenario < base), Zero = white, Positive = red (scenario > base)
+   * @param {number} normalizedDiff - Difference normalized to -1 to 1 range
+   * @returns {Array} RGBA color array
+   */
+  function divergingColor(normalizedDiff) {
+    // Map -1 to 1 range to 0 to 1 for colormap lookup
+    // rdbu is red-white-blue, but we want blue (negative/scenario lower) to red (positive/scenario higher)
+    // So we invert: low values (scenario < base) = blue, high values (scenario > base) = red
+    const v = Math.min(1, Math.max(0, (normalizedDiff + 1) / 2));
+    
+    if (rdbuScale && typeof rdbuScale.map === 'function') {
+      const mapped = rdbuScale.map(v);
+      const rgba = normalizeColorEntry(mapped, 230);
+      if (rgba) return rgba;
+    }
+    if (rdbuScale && Array.isArray(rdbuScale) && rdbuScale.length) {
+      const idx = Math.min(rdbuScale.length - 1, Math.floor(v * (rdbuScale.length - 1)));
+      const color = rdbuScale[idx];
+      const rgba = normalizeColorEntry(color, 230);
+      if (rgba) return rgba;
+    }
+    
+    // Fallback: simple blue-white-red gradient
+    if (normalizedDiff < 0) {
+      // Blue to white for negative values
+      const t = normalizedDiff + 1; // 0 to 1
+      return [
+        Math.round(33 + (255 - 33) * t),
+        Math.round(102 + (255 - 102) * t),
+        Math.round(172 + (255 - 172) * t),
+        230
+      ];
+    } else {
+      // White to red for positive values
+      const t = normalizedDiff; // 0 to 1
+      return [
+        255,
+        Math.round(255 - (255 - 102) * t),
+        Math.round(255 - (255 - 94) * t),
+        230
+      ];
+    }
+  }
+
+  /**
+   * Get comparison fill color for landuse layer.
+   * Uses computed difference ranges for proper diverging colormap scaling.
+   * @param {string} mode - The landuse metric (cancov, inrcov, rilcov)
+   * @param {Object} scenarioRow - Row from scenario landuse summary
+   * @param {Object} baseRow - Row from base landuse summary
+   * @returns {Array} RGBA color array
+   */
+  function landuseComparisonFillColor(mode, scenarioRow, baseRow) {
+    if (!scenarioRow || !baseRow) return [120, 120, 120, 120];
+    
+    const scenarioValue = Number(scenarioRow[mode]);
+    const baseValue = Number(baseRow[mode]);
+    
+    if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) {
+      return [120, 120, 120, 120];
+    }
+    
+    // Compute difference: Base - Scenario
+    // Positive = base is higher (scenario reduced cover)
+    // Negative = scenario is higher (scenario increased cover)
+    const diff = baseValue - scenarioValue;
+    
+    // Normalize using computed difference range for this measure
+    // This ensures 0 maps to 0.5 (neutral), with proper scaling for actual data range
+    const range = comparisonDiffRanges[mode];
+    let normalizedDiff;
+    if (range && (range.min !== range.max)) {
+      // Scale to -1 to 1 with 0 at the midpoint
+      const maxAbs = Math.max(Math.abs(range.min), Math.abs(range.max));
+      normalizedDiff = maxAbs > 0 ? diff / maxAbs : 0;
+    } else {
+      // Fallback: treat cover diff directly as -1 to 1
+      normalizedDiff = diff;
+    }
+    normalizedDiff = Math.max(-1, Math.min(1, normalizedDiff));
+    
+    return divergingColor(normalizedDiff);
+  }
+
   function landuseFillColor(mode, row) {
     if (!row) return [120, 120, 120, 120];
     if (mode === 'dominant') {
@@ -2212,6 +2736,48 @@
     return viridisColor(normalized);
   }
 
+  /**
+   * Get comparison fill color for WEPP layer.
+   * Uses computed difference ranges for proper diverging colormap scaling.
+   * @param {string} mode - The WEPP metric
+   * @param {Object} scenarioRow - Row from scenario WEPP summary
+   * @param {Object} baseRow - Row from base WEPP summary  
+   * @returns {Array} RGBA color array
+   */
+  function weppComparisonFillColor(mode, scenarioRow, baseRow) {
+    if (!scenarioRow || !baseRow) return [128, 128, 128, 200];
+    
+    const scenarioValue = Number(scenarioRow[mode]);
+    const baseValue = Number(baseRow[mode]);
+    
+    if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) {
+      return [128, 128, 128, 200];
+    }
+    
+    // Compute difference: Base - Scenario
+    // Positive = base is higher (scenario reduced runoff/erosion - improvement)
+    // Negative = scenario is higher (scenario increased runoff/erosion - worse)
+    const diff = baseValue - scenarioValue;
+    
+    // Normalize using computed difference range for this measure
+    // This ensures 0 maps to 0.5 (neutral), with proper scaling for actual data range
+    const range = comparisonDiffRanges[mode];
+    let normalizedDiff;
+    if (range && (range.min !== range.max)) {
+      // Scale to -1 to 1 with 0 at the midpoint
+      const maxAbs = Math.max(Math.abs(range.min), Math.abs(range.max));
+      normalizedDiff = maxAbs > 0 ? diff / maxAbs : 0;
+    } else {
+      // Fallback: use WEPP ranges
+      const fallbackRange = weppRanges[mode] || { min: 0, max: 100 };
+      const maxDiff = fallbackRange.max - fallbackRange.min;
+      normalizedDiff = maxDiff > 0 ? diff / maxDiff : 0;
+    }
+    normalizedDiff = Math.max(-1, Math.min(1, normalizedDiff));
+    
+    return divergingColor(normalizedDiff);
+  }
+
   function weppValue(mode, row) {
     if (!row) return null;
     const v = Number(row[mode]);
@@ -2222,8 +2788,14 @@
     const activeLayers = weppLayers
       .filter((l) => l.visible && subcatchmentsGeoJson && weppSummary)
       .map((overlay) => {
+        // Check if comparison mode is active and this is a comparable measure
+        const useComparison = comparisonMode && 
+                             currentScenarioPath && 
+                             COMPARISON_MEASURES.includes(overlay.mode) &&
+                             baseSummaryCache.wepp;
+        
         return new deck.GeoJsonLayer({
-          id: `wepp-${overlay.key}`,
+          id: `wepp-${overlay.key}${useComparison ? '-diff' : ''}`,
           data: subcatchmentsGeoJson,
           pickable: true,
           stroked: false,
@@ -2240,7 +2812,15 @@
                 props.WeppID ||
                 props.wepp_id);
             const row = topaz != null ? weppSummary[String(topaz)] : null;
+            
+            if (useComparison) {
+              const baseRow = topaz != null ? baseSummaryCache.wepp[String(topaz)] : null;
+              return weppComparisonFillColor(overlay.mode, row, baseRow);
+            }
             return weppFillColor(overlay.mode, row);
+          },
+          updateTriggers: {
+            getFillColor: [comparisonMode, currentScenarioPath, comparisonDiffRanges[overlay.mode]],
           },
         });
       });
@@ -2283,6 +2863,44 @@
     }
   }
 
+  /**
+   * Get comparison fill color for WEPP Event layer.
+   * @param {string} mode - The WEPP Event metric
+   * @param {Object} scenarioRow - Row from scenario WEPP Event summary
+   * @param {Object} baseRow - Row from base WEPP Event summary  
+   * @returns {Array} RGBA color array
+   */
+  function weppEventComparisonFillColor(mode, scenarioRow, baseRow) {
+    if (!scenarioRow || !baseRow) return [128, 128, 128, 200];
+    
+    const scenarioValue = Number(scenarioRow[mode]);
+    const baseValue = Number(baseRow[mode]);
+    
+    if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) {
+      return [128, 128, 128, 200];
+    }
+    
+    const diff = baseValue - scenarioValue;
+    
+    // Normalize using computed difference range for this measure
+    // This ensures 0 maps to 0.5 (neutral), with proper scaling for actual data range
+    const range = comparisonDiffRanges[mode];
+    let normalizedDiff;
+    if (range && (range.min !== range.max)) {
+      // Scale to -1 to 1 with 0 at the midpoint
+      const maxAbs = Math.max(Math.abs(range.min), Math.abs(range.max));
+      normalizedDiff = maxAbs > 0 ? diff / maxAbs : 0;
+    } else {
+      // Fallback: use WEPP Event ranges
+      const fallbackRange = weppEventRanges[mode] || { min: 0, max: 100 };
+      const maxDiff = fallbackRange.max - fallbackRange.min;
+      normalizedDiff = maxDiff > 0 ? diff / maxDiff : 0;
+    }
+    normalizedDiff = Math.max(-1, Math.min(1, normalizedDiff));
+    
+    return divergingColor(normalizedDiff);
+  }
+
   function weppEventFillColor(mode, row) {
     if (!row) return [128, 128, 128, 200];
     const value = Number(row[mode]);
@@ -2303,8 +2921,12 @@
     const activeLayers = weppEventLayers
       .filter((l) => l.visible && subcatchmentsGeoJson && weppEventSummary)
       .map((overlay) => {
+        // Check if this is a comparison-capable measure
+        const isComparisonMeasure = COMPARISON_MEASURES.includes(overlay.mode);
+        const useComparison = comparisonMode && isComparisonMeasure && baseSummaryCache.weppEvent;
+
         return new deck.GeoJsonLayer({
-          id: `wepp-event-${overlay.key}-${weppEventSelectedDate}`,
+          id: `wepp-event-${overlay.key}-${weppEventSelectedDate}${comparisonMode ? '-cmp' : ''}`,
           data: subcatchmentsGeoJson,
           pickable: true,
           stroked: false,
@@ -2321,10 +2943,14 @@
                 props.WeppID ||
                 props.wepp_id);
             const row = topaz != null ? weppEventSummary[String(topaz)] : null;
+            if (useComparison) {
+              const baseRow = topaz != null ? baseSummaryCache.weppEvent[String(topaz)] : null;
+              return weppEventComparisonFillColor(overlay.mode, baseRow, row);
+            }
             return weppEventFillColor(overlay.mode, row);
           },
           updateTriggers: {
-            getFillColor: [weppEventSelectedDate],
+            getFillColor: [weppEventSelectedDate, comparisonMode, baseSummaryCache.weppEvent, comparisonDiffRanges[overlay.mode]],
           },
         });
       });
@@ -2422,6 +3048,11 @@
           }
           computeWeppEventRanges();
         }
+      }
+      
+      // Load base scenario data for comparison mode
+      if (comparisonMode && currentScenarioPath) {
+        await loadBaseWeppEventData();
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -2750,8 +3381,14 @@
     const activeLayers = landuseLayers
       .filter((l) => l.visible && subcatchmentsGeoJson && landuseSummary)
       .map((overlay) => {
+        // Check if comparison mode is active and this is a comparable measure
+        const useComparison = comparisonMode && 
+                             currentScenarioPath && 
+                             COMPARISON_MEASURES.includes(overlay.mode) &&
+                             baseSummaryCache.landuse;
+        
         return new deck.GeoJsonLayer({
-          id: `landuse-${overlay.key}`,
+          id: `landuse-${overlay.key}${useComparison ? '-diff' : ''}`,
           data: subcatchmentsGeoJson,
           pickable: true,
           stroked: false,
@@ -2768,7 +3405,15 @@
                 props.WeppID ||
                 props.wepp_id);
             const row = topaz != null ? landuseSummary[String(topaz)] : null;
+            
+            if (useComparison) {
+              const baseRow = topaz != null ? baseSummaryCache.landuse[String(topaz)] : null;
+              return landuseComparisonFillColor(overlay.mode, row, baseRow);
+            }
             return landuseFillColor(overlay.mode, row);
+          },
+          updateTriggers: {
+            getFillColor: [comparisonMode, currentScenarioPath, comparisonDiffRanges[overlay.mode]],
           },
         });
       });
@@ -3084,8 +3729,9 @@
   }
 
   async function detectLanduseOverlays() {
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/landuse/subcatchments`;
-    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    const url = buildScenarioUrl(`query/landuse/subcatchments`);
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
       const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
       if (!subResp.ok || !geoResp.ok) return;
@@ -3110,8 +3756,9 @@
   }
 
   async function detectSoilsOverlays() {
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/soils/subcatchments`;
-    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    const url = buildScenarioUrl(`query/soils/subcatchments`);
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
       const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
       if (!subResp.ok || !geoResp.ok) return;
@@ -3140,8 +3787,9 @@
   }
 
   async function detectHillslopesOverlays() {
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/watershed/subcatchments`;
-    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    const url = buildScenarioUrl(`query/watershed/subcatchments`);
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
       const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
       if (!subResp.ok || !geoResp.ok) return;
@@ -3167,8 +3815,9 @@
   }
 
   async function detectWeppOverlays() {
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/wepp/loss/hillslopes`;
-    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    const url = buildScenarioUrl(`query/wepp/loss/hillslopes`);
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
       const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
       if (!subResp.ok || !geoResp.ok) return;
@@ -3199,7 +3848,8 @@
   }
 
   async function detectWeppEventOverlays() {
-    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
       // Use climate context for date range (already available, avoids slow parquet query)
       const climateCtx = ctx.climate;
@@ -3258,7 +3908,14 @@
    */
   async function postQueryEngine(payload) {
     const origin = window.location.origin || `${window.location.protocol}//${window.location.host}`;
-    const targetUrl = `${origin}/query-engine/runs/${ctx.runid}/query`;
+    // Build scenario-aware query URL
+    // For scenarios, the path is the full scenario directory path (e.g., _pups/omni/scenarios/mulch_15)
+    let queryPath = `runs/${ctx.runid}`;
+    if (currentScenarioPath) {
+      // currentScenarioPath is already the full path like '_pups/omni/scenarios/mulch_15'
+      queryPath += `/${currentScenarioPath}`;
+    }
+    const targetUrl = `${origin}/query-engine/${queryPath}/query`;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -3269,7 +3926,8 @@
   }
 
   async function detectRapOverlays() {
-    const geoUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/resources/subcatchments.json`;
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
       // Query for available years
       const yearsPayload = {

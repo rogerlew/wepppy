@@ -425,7 +425,9 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     except Exception:
         return
 
-    wd = get_wd(runid)
+    # Always use base run path for authorization checks, not scenario paths.
+    # Scenarios inherit their parent run's access permissions.
+    wd = get_wd(runid, prefer_active=False)
     owners = get_run_owners(runid)
 
     if not owners:

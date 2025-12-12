@@ -447,6 +447,15 @@
     text-align: center;
     margin-top: 0.1rem;
   }
+  /* Diverging legend styles for comparison mode */
+  .gl-legend-diverging__bar {
+    background: linear-gradient(to right, #2166AC, #F7F7F7 50%, #B2182B) !important;
+  }
+  .gl-legend-diverging .gl-legend-continuous__labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+  }
   /* Year slider - fixed at bottom of map */
   .gl-year-slider {
     position: absolute;
@@ -551,6 +560,40 @@
   .gl-year-slider__play:active {
     background: #3f6ac7;
   }
+  /* Scenario selector */
+  .gl-scenario-selector {
+    margin-top: 0.75rem;
+  }
+  .gl-scenario-selector select {
+    width: 100%;
+    background: #142035;
+    border: 1px solid #263b5f;
+    color: #e5ecf7;
+    border-radius: 6px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .gl-scenario-selector select:hover {
+    border-color: #3f6ac7;
+  }
+  .gl-scenario-selector select:focus {
+    outline: none;
+    border-color: #3f6ac7;
+    box-shadow: 0 0 0 2px rgba(63, 106, 199, 0.25);
+  }
+  /* Comparison overlay indicator */
+  .gl-comparison-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #2563eb 0%, #dc2626 100%);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
 </style>
 {% endblock %}
 
@@ -565,12 +608,29 @@
         <option value="osm">OpenStreetMap</option>
       </select>
     </div>
+    {% if omni_scenarios %}
+    <div class="gl-scenario-selector">
+      <h3>Scenario</h3>
+      <select id="gl-scenario-select" style="margin-top:0.5rem;">
+        <option value="" selected>Base Scenario</option>
+        {% for scenario in omni_scenarios %}
+        <option value="{{ scenario.path }}">{{ scenario.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
     <div style="margin-top:0.75rem;">
       <h3>Overlays</h3>
       <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
         <input type="checkbox" id="gl-subcatchment-labels-toggle" />
         <span>Subcatchment Labels</span>
       </label>
+      {% if omni_scenarios %}
+      <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.35rem;">
+        <input type="checkbox" id="gl-comparison-toggle" />
+        <span>Compare to Base Scenario</span>
+      </label>
+      {% endif %}
     </div>
     <div style="margin-top:0.75rem;">
       <h3>Layers</h3>
@@ -583,7 +643,8 @@
     <div class="gl-topbar">
       <div class="gl-topbar__meta">
         <span>Run <strong><a class="gl-run-link" href="{{ site_prefix }}/runs/{{ runid }}/{{ config }}/">{{ runid }}</a></strong></span>
-        <span>Config <strong>{{ config }}</strong></span>
+        <span id="gl-scenario-display">{% if omni_scenarios %}Scenario <strong>Base</strong>{% else %}Config <strong>{{ config }}</strong>{% endif %}</span>
+        <span id="gl-comparison-indicator" style="display:none;"><span class="gl-comparison-badge">Difference Map</span></span>
       </div>
       <div class="gl-topbar__actions">
         <button class="gl-btn" type="button" onclick="location.href='{{ site_prefix }}/runs/{{ runid }}/{{ config }}/browse/';">Browse</button>
@@ -643,7 +704,8 @@
       "mapExtent": map_extent,
       "mapCenter": map_center,
       "mapZoom": map_zoom,
-      "climate": climate_context
+      "climate": climate_context,
+      "omniScenarios": omni_scenarios
     } | tojson }};
   </script>
   <script src="https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"></script>
@@ -688,6 +750,32 @@
       if (legendsToggle && legendsPanel) {
         legendsToggle.addEventListener('click', () => {
           legendsPanel.classList.toggle('is-collapsed');
+        });
+      }
+
+      // Scenario selector
+      const scenarioSelect = document.getElementById('gl-scenario-select');
+      const scenarioDisplay = document.getElementById('gl-scenario-display');
+      if (scenarioSelect && typeof window.glDashboardSetScenario === 'function') {
+        scenarioSelect.addEventListener('change', (e) => {
+          const scenarioPath = e.target.value;
+          const scenarioName = scenarioPath ? e.target.options[e.target.selectedIndex].text : 'Base';
+          window.glDashboardSetScenario(scenarioPath);
+          if (scenarioDisplay) {
+            scenarioDisplay.innerHTML = 'Scenario <strong>' + scenarioName + '</strong>';
+          }
+        });
+      }
+
+      // Comparison toggle
+      const comparisonToggle = document.getElementById('gl-comparison-toggle');
+      const comparisonIndicator = document.getElementById('gl-comparison-indicator');
+      if (comparisonToggle && typeof window.glDashboardSetComparisonMode === 'function') {
+        comparisonToggle.addEventListener('change', (e) => {
+          window.glDashboardSetComparisonMode(e.target.checked);
+          if (comparisonIndicator) {
+            comparisonIndicator.style.display = e.target.checked ? 'inline' : 'none';
+          }
         });
       }
     })();
