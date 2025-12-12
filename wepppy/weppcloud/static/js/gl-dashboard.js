@@ -366,7 +366,7 @@
       summary.textContent = section.title;
       details.appendChild(summary);
 
-      // Add year picker for RAP section
+      // Add year picker for RAP section (custom dropdown for dark theme)
       if (section.hasYearPicker && rapMetadata && rapMetadata.years && rapMetadata.years.length) {
         const yearPickerDiv = document.createElement('div');
         yearPickerDiv.className = 'gl-year-picker';
@@ -374,23 +374,68 @@
         const yearLabel = document.createElement('label');
         yearLabel.textContent = 'Year:';
         yearLabel.style.fontWeight = '500';
-        const yearSelect = document.createElement('select');
-        yearSelect.id = 'rap-year-select';
-        yearSelect.style.cssText = 'flex: 1; padding: 0.25rem;';
+
+        // Custom dropdown container
+        const dropdownContainer = document.createElement('div');
+        dropdownContainer.className = 'gl-custom-select';
+        dropdownContainer.style.cssText = 'flex: 1; position: relative;';
+
+        const selectedDisplay = document.createElement('button');
+        selectedDisplay.type = 'button';
+        selectedDisplay.className = 'gl-custom-select__trigger';
+        selectedDisplay.textContent = rapSelectedYear;
+        selectedDisplay.setAttribute('aria-haspopup', 'listbox');
+        selectedDisplay.setAttribute('aria-expanded', 'false');
+
+        const optionsList = document.createElement('ul');
+        optionsList.className = 'gl-custom-select__options';
+        optionsList.setAttribute('role', 'listbox');
+        optionsList.style.display = 'none';
+
         rapMetadata.years.forEach((year) => {
-          const opt = document.createElement('option');
-          opt.value = year;
-          opt.textContent = year;
-          if (year === rapSelectedYear) opt.selected = true;
-          yearSelect.appendChild(opt);
+          const li = document.createElement('li');
+          li.className = 'gl-custom-select__option';
+          li.setAttribute('role', 'option');
+          li.setAttribute('data-value', year);
+          li.textContent = year;
+          if (year === rapSelectedYear) {
+            li.classList.add('is-selected');
+            li.setAttribute('aria-selected', 'true');
+          }
+          li.addEventListener('click', async () => {
+            rapSelectedYear = year;
+            selectedDisplay.textContent = year;
+            optionsList.querySelectorAll('.gl-custom-select__option').forEach((o) => {
+              o.classList.remove('is-selected');
+              o.setAttribute('aria-selected', 'false');
+            });
+            li.classList.add('is-selected');
+            li.setAttribute('aria-selected', 'true');
+            optionsList.style.display = 'none';
+            selectedDisplay.setAttribute('aria-expanded', 'false');
+            await refreshRapData();
+            applyLayers();
+          });
+          optionsList.appendChild(li);
         });
-        yearSelect.addEventListener('change', async () => {
-          rapSelectedYear = parseInt(yearSelect.value, 10);
-          await refreshRapData();
-          applyLayers();
+
+        selectedDisplay.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = optionsList.style.display !== 'none';
+          optionsList.style.display = isOpen ? 'none' : 'block';
+          selectedDisplay.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
         });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+          optionsList.style.display = 'none';
+          selectedDisplay.setAttribute('aria-expanded', 'false');
+        });
+
+        dropdownContainer.appendChild(selectedDisplay);
+        dropdownContainer.appendChild(optionsList);
         yearPickerDiv.appendChild(yearLabel);
-        yearPickerDiv.appendChild(yearSelect);
+        yearPickerDiv.appendChild(dropdownContainer);
         details.appendChild(yearPickerDiv);
       }
 

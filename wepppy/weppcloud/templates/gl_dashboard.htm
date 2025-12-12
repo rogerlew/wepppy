@@ -66,6 +66,67 @@
     display: grid;
     gap: 0.25rem;
   }
+  /* Custom dropdown for dark theme */
+  .gl-custom-select {
+    position: relative;
+  }
+  .gl-custom-select__trigger {
+    width: 100%;
+    background: #142035;
+    border: 1px solid #263b5f;
+    color: #e5ecf7;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gl-custom-select__trigger::after {
+    content: '▼';
+    font-size: 0.6em;
+    margin-left: 0.5rem;
+    opacity: 0.7;
+  }
+  .gl-custom-select__trigger:hover {
+    border-color: #3f6ac7;
+  }
+  .gl-custom-select__trigger:focus {
+    outline: none;
+    border-color: #3f6ac7;
+    box-shadow: 0 0 0 2px rgba(63, 106, 199, 0.25);
+  }
+  .gl-custom-select__options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #142035;
+    border: 1px solid #3f6ac7;
+    border-radius: 6px;
+    margin-top: 4px;
+    padding: 0;
+    list-style: none;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+  .gl-custom-select__option {
+    padding: 0.4rem 0.5rem;
+    cursor: pointer;
+    color: #c1cbe3;
+  }
+  .gl-custom-select__option:hover {
+    background: #1d3b70;
+    color: #fff;
+  }
+  .gl-custom-select__option.is-selected {
+    background: #263b5f;
+    color: #fff;
+  }
   .gl-layer-group-header {
     font-size: 0.75rem;
     font-weight: 600;
