@@ -678,6 +678,12 @@
         <option value="{{ scenario.path }}">{{ scenario.name }}</option>
         {% endfor %}
       </select>
+      {% if omni_scenarios %}
+      <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.35rem;">
+        <input type="checkbox" id="gl-comparison-toggle" />
+        <span>Compare to Base Scenario</span>
+      </label>
+      {% endif %}
     </div>
     {% endif %}
     <div style="margin-top:0.75rem;">
@@ -686,12 +692,6 @@
         <input type="checkbox" id="gl-subcatchment-labels-toggle" />
         <span>Subcatchment Labels</span>
       </label>
-      {% if omni_scenarios %}
-      <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.35rem;">
-        <input type="checkbox" id="gl-comparison-toggle" />
-        <span>Compare to Base Scenario</span>
-      </label>
-      {% endif %}
     </div>
     <div style="margin-top:0.75rem;">
       <h3>Layers</h3>
