@@ -357,12 +357,8 @@
         baseSummaryCache.landuse = await landuseResp.json();
       }
       
-      // Load base WEPP data
-      const weppUrl = buildBaseUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
-      const weppResp = await fetch(weppUrl);
-      if (weppResp.ok) {
-        baseSummaryCache.wepp = await weppResp.json();
-      }
+      // Load base WEPP data through query-engine
+      baseSummaryCache.wepp = await fetchWeppSummary(weppStatistic, { base: true });
       
       // Compute difference ranges for proper colormap scaling
       computeComparisonDiffRanges();
@@ -2953,9 +2949,78 @@
     return null;
   }
 
+  const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
+  const WEPP_LOSS_PATH = 'wepp/output/interchange/loss_pw0.hill.parquet';
+
   // WEPP loss ranges computed dynamically from weppSummary data
   let weppRanges = {};
   let weppYearlyRanges = {};
+
+  function buildWeppAggregations(statistic) {
+    const stat = (statistic || 'mean').toLowerCase();
+    const measureMap = {
+      runoff_volume: '"Runoff Volume"',
+      subrunoff_volume: '"Subrunoff Volume"',
+      baseflow_volume: '"Baseflow Volume"',
+      soil_loss: '"Soil Loss"',
+      sediment_deposition: '"Sediment Deposition"',
+      sediment_yield: '"Sediment Yield"',
+    };
+
+    function statExpression(column) {
+      if (stat === 'p90') return `quantile(loss.${column}, 0.9)`;
+      if (stat === 'sd') return `stddev_samp(loss.${column})`;
+      if (stat === 'cv') {
+        return `CASE WHEN avg(loss.${column}) = 0 THEN NULL ELSE stddev_samp(loss.${column}) / avg(loss.${column}) * 100 END`;
+      }
+      return `avg(loss.${column})`;
+    }
+
+    return Object.entries(measureMap).map(([alias, column]) => ({
+      sql: statExpression(column),
+      alias,
+    }));
+  }
+
+  async function fetchWeppSummary(statistic, { base = false } = {}) {
+    const aggregations = buildWeppAggregations(statistic);
+    const columns = ['hill.topaz_id AS topaz_id', 'hill.wepp_id AS wepp_id'];
+    const joins = [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }];
+    const datasetPaths = [WEPP_YEARLY_PATH, WEPP_LOSS_PATH];
+
+    async function runWithDataset(path) {
+      const payload = {
+        datasets: [
+          { path, alias: 'loss' },
+          { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+        ],
+        joins,
+        columns,
+        group_by: ['hill.topaz_id', 'hill.wepp_id'],
+        aggregations,
+      };
+      const result = base ? await postBaseQueryEngine(payload) : await postQueryEngine(payload);
+      if (result && result.records) {
+        const summary = {};
+        for (const row of result.records) {
+          const topazId = row.topaz_id;
+          if (topazId != null) {
+            summary[String(topazId)] = row;
+          }
+        }
+        return summary;
+      }
+      return null;
+    }
+
+    for (const path of datasetPaths) {
+      const summary = await runWithDataset(path);
+      if (summary !== null) {
+        return summary;
+      }
+    }
+    return null;
+  }
 
   async function refreshWeppStatisticData() {
     // If no WEPP overlays are active, just keep the stat selection for later.
@@ -2965,18 +3030,14 @@
     }
 
     try {
-      const url = buildScenarioUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
-      const resp = await fetch(url);
-      if (!resp.ok) return;
-      const data = await resp.json();
-      weppSummary = data;
-      computeWeppRanges();
+      weppSummary = await fetchWeppSummary(weppStatistic);
+      if (weppSummary) {
+        computeWeppRanges();
+      }
 
       if (comparisonMode && currentScenarioPath) {
-        const baseUrl = buildBaseUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
-        const baseResp = await fetch(baseUrl);
-        if (baseResp.ok) {
-          baseSummaryCache.wepp = await baseResp.json();
+        baseSummaryCache.wepp = await fetchWeppSummary(weppStatistic, { base: true });
+        if (baseSummaryCache.wepp) {
           computeComparisonDiffRanges();
         }
       }
@@ -3129,8 +3190,6 @@
     }
     return null;
   }
-
-  const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
 
   function computeWeppYearlyRanges() {
     if (!weppYearlySummary) return;
@@ -4513,21 +4572,21 @@
   }
 
   async function detectWeppOverlays() {
-    const url = buildScenarioUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
     // Geometry is shared across scenarios - always use base URL
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-      if (!subResp.ok || !geoResp.ok) return;
-      weppSummary = await subResp.json();
-      // subcatchmentsGeoJson may already be loaded by other detect functions
-      if (!subcatchmentsGeoJson) {
-        subcatchmentsGeoJson = await geoResp.json();
+      const geoPromise = subcatchmentsGeoJson
+        ? Promise.resolve(subcatchmentsGeoJson)
+        : fetch(geoUrl).then((resp) => (resp.ok ? resp.json() : null));
+      const [weppData, geoJson] = await Promise.all([fetchWeppSummary(weppStatistic), geoPromise]);
+      weppSummary = weppData;
+      if (!subcatchmentsGeoJson && geoJson) {
+        subcatchmentsGeoJson = geoJson;
       }
       if (!weppSummary || !subcatchmentsGeoJson) return;
       // Compute dynamic ranges from the loaded data
       computeWeppRanges();
-      const basePath = 'wepp/output/interchange/loss_pw0.hill.parquet';
+      const basePath = WEPP_LOSS_PATH;
       weppLayers.length = 0;
       weppLayers.push(
         { key: 'wepp-runoff', label: 'Runoff Volume (mm)', path: basePath, mode: 'runoff_volume', visible: false },

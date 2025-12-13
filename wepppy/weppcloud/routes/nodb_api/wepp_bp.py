@@ -20,8 +20,6 @@ from wepppy.wepp.reports.report_base import ReportBase
 from wepppy.wepp.reports.row_data import parse_name, parse_units
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
 import json
-from wepppy.query_engine import resolve_run_context, run_query
-from wepppy.query_engine.payload import QueryRequest
 from flask import Response, abort
 
 wepp_bp = Blueprint('wepp', __name__)
@@ -1014,95 +1012,6 @@ def query_topaz_wepp_map(runid, config):
     return jsonify(d)
 
 
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/hillslopes')
-@wepp_bp.route('/runs/<string:runid>/<config>/query/wepp/loss/hillslopes/')
-@authorize_and_handle_with_exception_factory
-def query_wepp_loss_hillslopes(runid, config):
-    """Return WEPP loss hillslope summary keyed by topaz_id for GL dashboard overlays.
-    
-    Queries wepp/output/interchange/loss_pw0.hill.parquet via query-engine,
-    joins with watershed/hillslopes.parquet to get topaz_id mapping,
-    and returns a dict keyed by topaz_id for easy client-side lookup.
-    """
-    ctx = load_run_context(runid, config)
-    wd = str(ctx.active_root)
-    stat = request.args.get('stat', 'mean').lower()
-    valid_stats = {'mean', 'p90', 'sd', 'cv'}
-    if stat not in valid_stats:
-        stat = 'mean'
-
-    # Prefer the all_years parquet when present so statistics can be computed across years
-    yearly_parquet = _join(wd, 'wepp/output/interchange/loss_pw0.all_years.hill.parquet')
-    loss_parquet = yearly_parquet if _exists(yearly_parquet) else _join(wd, 'wepp/output/interchange/loss_pw0.hill.parquet')
-    if not _exists(loss_parquet):
-        return error_factory('WEPP loss parquet is not available; please run the WEPP interchange workflow first.')
-    
-    try:
-        run_context = resolve_run_context(wd, auto_activate=True, run_interchange=False)
-    except FileNotFoundError:
-        return error_factory('Unable to resolve query engine catalog for this run')
-    except Exception:
-        return exception_factory('Error resolving query engine context', runid=runid)
-    
-    # Map friendly names to parquet columns
-    measure_map = {
-        'runoff_volume': '"Runoff Volume"',
-        'subrunoff_volume': '"Subrunoff Volume"',
-        'baseflow_volume': '"Baseflow Volume"',
-        'soil_loss': '"Soil Loss"',
-        'sediment_deposition': '"Sediment Deposition"',
-        'sediment_yield': '"Sediment Yield"',
-    }
-
-    def stat_expression(column: str) -> str:
-        if stat == 'mean':
-            return f'avg(loss.{column})'
-        if stat == 'p90':
-            return f'quantile(loss.{column}, 0.9)'
-        if stat == 'sd':
-            return f'stddev_samp(loss.{column})'
-        if stat == 'cv':
-            return f'CASE WHEN avg(loss.{column}) = 0 THEN NULL ELSE stddev_samp(loss.{column}) / avg(loss.{column}) * 100 END'
-        return f'avg(loss.{column})'
-
-    columns = [
-        'hill.topaz_id',
-        'hill.wepp_id',
-    ]
-    aggregations = [
-        {'expression': stat_expression(col), 'alias': alias}
-        for alias, col in measure_map.items()
-    ]
-
-    # Query loss data joined with hillslopes to get topaz_id mapping
-    payload = {
-        'datasets': [
-            {'path': 'wepp/output/interchange/loss_pw0.all_years.hill.parquet' if _exists(yearly_parquet) else 'wepp/output/interchange/loss_pw0.hill.parquet', 'alias': 'loss'},
-            {'path': 'watershed/hillslopes.parquet', 'alias': 'hill'},
-        ],
-        'joins': [
-            {'left': 'loss', 'right': 'hill', 'on': 'wepp_id', 'type': 'inner'}
-        ],
-        'columns': columns,
-        'group_by': ['hill.topaz_id', 'hill.wepp_id'],
-        'aggregations': aggregations,
-    }
-    
-    try:
-        query = QueryRequest(**payload)
-        result = run_query(run_context, query)
-    except Exception:
-        return exception_factory('Error running WEPP loss query', runid=runid)
-    
-    # Convert records list to dict keyed by topaz_id
-    summary = {}
-    if result.records:
-        for rec in result.records:
-            topaz_id = rec.get('topaz_id')
-            if topaz_id is not None:
-                summary[str(topaz_id)] = rec
-    
-    return jsonify(summary)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>')
