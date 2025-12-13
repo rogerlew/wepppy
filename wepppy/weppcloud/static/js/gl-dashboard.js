@@ -276,6 +276,13 @@
     landuseSummary = null;
     soilsSummary = null;
     weppSummary = null;
+    weppYearlySummary = null;
+    weppYearlyMetadata = null;
+    weppYearlyRanges = {};
+    weppYearlyDiffRanges = {};
+    weppYearlyCache = {};
+    baseWeppYearlyCache = {};
+    weppYearlySelectedYear = null;
     weppEventSummary = null;
     
     // Reload data for current layers
@@ -283,14 +290,31 @@
       detectLanduseOverlays(),
       detectSoilsOverlays(),
       detectWeppOverlays(),
+      detectWeppYearlyOverlays(),
     ]);
     
     // If comparison mode is on, we need the base data too
     if (comparisonMode && currentScenarioPath) {
       await loadBaseScenarioData();
+      if (weppYearlySelectedYear != null) {
+        await loadBaseWeppYearlyData(weppYearlySelectedYear);
+        computeWeppYearlyDiffRanges(weppYearlySelectedYear);
+      }
     }
     
     applyLayers();
+
+    const graphEl = document.getElementById('gl-graph');
+    const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
+    if (graphVisible) {
+      if (rapCumulativeMode || rapLayers.some((l) => l.visible)) {
+        await loadRapTimeseriesData();
+      }
+      const activeWeppYearly = pickActiveWeppYearlyLayer();
+      if (activeWeppYearly) {
+        await loadWeppYearlyTimeseriesData();
+      }
+    }
   }
   
   /**
@@ -300,10 +324,17 @@
    */
   async function setComparisonMode(enabled) {
     comparisonMode = !!enabled;
+    if (!comparisonMode) {
+      weppYearlyDiffRanges = {};
+    }
     
     // If enabling comparison mode and we have a scenario selected, load base data
     if (comparisonMode && currentScenarioPath) {
       await loadBaseScenarioData();
+      if (weppYearlySelectedYear != null) {
+        await loadBaseWeppYearlyData(weppYearlySelectedYear);
+        computeWeppYearlyDiffRanges(weppYearlySelectedYear);
+      }
     }
     
     applyLayers();
@@ -580,12 +611,19 @@
   const soilsLayers = [];
   const hillslopesLayers = [];
   const weppLayers = [];
+  const weppYearlyLayers = [];
   const weppEventLayers = [];
   const rapLayers = [];
   let landuseSummary = null;
   let soilsSummary = null;
   let hillslopesSummary = null;
   let weppSummary = null;
+  let weppYearlyMetadata = null; // { years: [], minYear, maxYear }
+  let weppYearlySelectedYear = null;
+  let weppYearlySummary = null;
+  let weppYearlyDiffRanges = {};
+  let weppYearlyCache = {};
+  let baseWeppYearlyCache = {};
   let weppEventSummary = null;
   let weppEventMetadata = null; // { available, startDate, endDate }
   let weppEventSelectedDate = null; // "YYYY-MM-DD" string
@@ -790,7 +828,10 @@
     _data: null, // { years: [], series: { topazId: { values: [], color: [r,g,b] } } }
     _highlightedId: null,
     _hoveredId: null, // from canvas hover
-    _padding: { top: 20, right: 20, bottom: 35, left: 50 },
+    _currentYear: null,
+    _source: null,
+    _tooltipFormatter: null,
+    _padding: { top: 20, right: 20, bottom: 35, left: 70 },
     _lineWidth: 1.5,
     _highlightWidth: 3,
 
@@ -830,6 +871,9 @@
       }
       this._visible = false;
       this._data = null;
+      this._currentYear = null;
+      this._source = null;
+      this._tooltipFormatter = null;
     },
 
     _resizeCanvas() {
@@ -849,15 +893,25 @@
 
     /**
      * Set timeseries data and render.
-     * @param {Object} data - { years: [2016, 2017, ...], series: { '101': { values: [v1, v2, ...], color: [r,g,b,a] }, ... }, yLabel: 'Cover %', xLabel: 'Year' }
+     * @param {Object} data - { years: [2016, 2017, ...], series: { '101': { values: [v1, v2, ...], color: [r,g,b,a] }, ... }, yLabel: 'Cover %', xLabel: 'Year', currentYear?: number, source?: string, tooltipFormatter?: fn }
      */
     setData(data) {
       this._data = data;
+      this._currentYear = data && data.currentYear != null ? data.currentYear : null;
+      this._source = data && data.source ? data.source : null;
+      this._tooltipFormatter = data && typeof data.tooltipFormatter === 'function' ? data.tooltipFormatter : null;
       if (data && Object.keys(data.series || {}).length > 0) {
         this.show();
         this.render();
       } else {
         this.hide();
+      }
+    },
+
+    setCurrentYear(year) {
+      this._currentYear = year;
+      if (this._visible && this._data) {
+        this.render();
       }
     },
 
@@ -1011,8 +1065,8 @@
       }
 
       // Draw current year indicator if yearSlider is active
-      if (rapSelectedYear && rapSelectedYear >= xMin && rapSelectedYear <= xMax) {
-        const x = xScale(rapSelectedYear);
+      if (this._currentYear && this._currentYear >= xMin && this._currentYear <= xMax) {
+        const x = xScale(this._currentYear);
         ctx.strokeStyle = '#ffcc00';
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 4]);
@@ -1109,7 +1163,11 @@
         this.tooltipEl.style.display = 'block';
         this.tooltipEl.style.left = (x + 10) + 'px';
         this.tooltipEl.style.top = (y - 10) + 'px';
-        this.tooltipEl.textContent = `Hillslope ${closestId}: ${closestValue.toFixed(1)}% (${closestYear})`;
+        if (this._tooltipFormatter) {
+          this.tooltipEl.textContent = this._tooltipFormatter(closestId, closestValue, closestYear);
+        } else {
+          this.tooltipEl.textContent = `Hillslope ${closestId}: ${closestValue.toFixed(1)}% (${closestYear})`;
+        }
       }
 
       // Emit event for map to highlight
@@ -1141,8 +1199,13 @@
 
   // Callback when graph panel is toggled
   window.glDashboardGraphToggled = async function (visible) {
-    if (visible && (rapCumulativeMode || rapLayers.some((l) => l.visible))) {
+    if (!visible) return;
+    if (rapCumulativeMode || rapLayers.some((l) => l.visible)) {
       await loadRapTimeseriesData();
+    }
+    const activeWeppYearly = pickActiveWeppYearlyLayer();
+    if (activeWeppYearly) {
+      await loadWeppYearlyTimeseriesData();
     }
   };
 
@@ -1346,6 +1409,11 @@
       const el = document.getElementById(`layer-WEPP-${l.key}`);
       if (el) el.checked = false;
     });
+    weppYearlyLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-WEPP-Yearly-${l.key}`);
+      if (el) el.checked = false;
+    });
     weppEventLayers.forEach((l) => {
       l.visible = false;
       const el = document.getElementById(`layer-WEPP-Event-${l.key}`);
@@ -1364,6 +1432,21 @@
     yearSlider.hide();
   }
 
+  async function activateWeppYearlyLayer() {
+    if (!weppYearlyMetadata || !weppYearlyMetadata.years || !weppYearlyMetadata.years.length) {
+      yearSlider.hide();
+      return;
+    }
+    const minYear = weppYearlyMetadata.minYear;
+    const maxYear = weppYearlyMetadata.maxYear;
+    if (weppYearlySelectedYear == null || weppYearlySelectedYear < minYear || weppYearlySelectedYear > maxYear) {
+      weppYearlySelectedYear = maxYear;
+    }
+    yearSlider.setRange(minYear, maxYear, weppYearlySelectedYear);
+    yearSlider.show();
+    await refreshWeppYearlyData();
+  }
+
   function updateLayerList() {
     if (!layerListEl) return;
     layerListEl.innerHTML = '';
@@ -1380,6 +1463,9 @@
     }
     if (weppLayers.length) {
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
+    }
+    if (weppYearlyLayers.length) {
+      subcatchmentSections.push({ title: 'WEPP Yearly', idPrefix: 'WEPP-Yearly', items: weppYearlyLayers, isSubcatchment: true, isWeppYearly: true });
     }
     if (weppEventLayers.length) {
       // WEPP Event uses special rendering with date input + radio options
@@ -1449,17 +1535,29 @@
           input.name = 'subcatchment-overlay';
         }
         input.checked = layer.visible;
-        input.id = `layer-${section.title}-${layer.key}`;
+        const idPrefix = section.idPrefix || section.title;
+        input.id = `layer-${idPrefix}-${layer.key}`;
         input.addEventListener('change', async () => {
           if (section.isSubcatchment) {
             // Radio behavior: deselect all, then select this one
             deselectAllSubcatchmentOverlays();
             layer.visible = true;
             input.checked = true;
+            if (section.isWeppYearly) {
+              await activateWeppYearlyLayer();
+            }
           } else {
             layer.visible = input.checked;
           }
           applyLayers();
+          const graphEl = document.getElementById('gl-graph');
+          const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
+          if (graphVisible && section.isWeppYearly && layer.visible) {
+            await loadWeppYearlyTimeseriesData();
+          } else if (graphVisible && !section.isSubcatchment && (rapCumulativeMode || rapLayers.some((l) => l.visible))) {
+            // Keep RAP graph in sync when switching out of subcatchment overlays
+            await loadRapTimeseriesData();
+          }
         });
         const label = document.createElement('label');
         label.setAttribute('for', input.id);
@@ -1497,6 +1595,14 @@
         rapCumulativeMode = true;
         // Re-check the cumulative radio since deselectAll cleared it
         cumulativeInput.checked = true;
+        if (rapMetadata && rapMetadata.years && rapMetadata.years.length) {
+          const minYear = rapMetadata.years[0];
+          const maxYear = rapMetadata.years[rapMetadata.years.length - 1];
+          if (!rapSelectedYear || rapSelectedYear < minYear || rapSelectedYear > maxYear) {
+            rapSelectedYear = maxYear;
+          }
+          yearSlider.setRange(minYear, maxYear, rapSelectedYear);
+        }
         // Show year slider
         yearSlider.show();
         await refreshRapData();
@@ -1577,6 +1683,14 @@
           rapCumulativeMode = false;
           layer.visible = true;
           input.checked = true;
+          if (rapMetadata && rapMetadata.years && rapMetadata.years.length) {
+            const minYear = rapMetadata.years[0];
+            const maxYear = rapMetadata.years[rapMetadata.years.length - 1];
+            if (!rapSelectedYear || rapSelectedYear < minYear || rapSelectedYear > maxYear) {
+              rapSelectedYear = maxYear;
+            }
+            yearSlider.setRange(minYear, maxYear, rapSelectedYear);
+          }
           // Show year slider
           yearSlider.show();
           // Load data for the selected band
@@ -1790,11 +1904,12 @@
     const soilsDeckLayers = buildSoilsLayers();
     const hillslopesDeckLayers = buildHillslopesLayers();
     const weppDeckLayers = buildWeppLayers();
+    const weppYearlyDeckLayers = buildWeppYearlyLayers();
     const weppEventDeckLayers = buildWeppEventLayers();
     const rapDeckLayers = buildRapLayers();
     const labelLayers = buildSubcatchmentLabelsLayer();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...weppYearlyDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
     });
     // Update legends panel after layer changes
     updateLegendsPanel();
@@ -1877,6 +1992,13 @@
     for (const layer of weppLayers) {
       if (layer.visible) {
         active.push({ ...layer, category: 'WEPP' });
+        break;
+      }
+    }
+    // WEPP Yearly
+    for (const layer of weppYearlyLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'WEPP Yearly' });
         break;
       }
     }
@@ -2100,7 +2222,7 @@
 
   // Diverging legend for comparison mode (blue-white-red)
   // mode parameter allows looking up the computed difference range
-  function renderDivergingLegend(unit, label, mode) {
+  function renderDivergingLegend(unit, label, mode, rangeOverride) {
     const container = document.createElement('div');
     container.className = 'gl-legend-continuous gl-legend-diverging';
     
@@ -2114,7 +2236,7 @@
     container.appendChild(barWrapper);
     
     // Get the computed difference range for this mode
-    const range = mode ? comparisonDiffRanges[mode] : null;
+    const range = rangeOverride || (mode ? comparisonDiffRanges[mode] : null);
     const hasRange = range && Number.isFinite(range.min) && Number.isFinite(range.max);
     
     /**
@@ -2229,10 +2351,12 @@
     
     // Check if this is comparison mode for a comparison-enabled measure
     const isComparisonMeasure = COMPARISON_MEASURES.includes(mode);
+    const diffRangeOverride = layer.category === 'WEPP Yearly' ? weppYearlyDiffRanges[mode] : null;
+    const divergingMode = diffRangeOverride ? mode : (layer.category === 'WEPP Yearly' ? null : mode);
     if (comparisonMode && isComparisonMeasure && currentScenarioPath) {
       // Render diverging legend for comparison mode
       const unit = LAYER_UNITS[mode] || '';
-      section.appendChild(renderDivergingLegend(unit, 'Base − Scenario', mode));
+      section.appendChild(renderDivergingLegend(unit, 'Base − Scenario', divergingMode, diffRangeOverride));
       return section;
     }
     
@@ -2347,6 +2471,10 @@
     else if (weppRanges && weppRanges[mode]) {
       minVal = weppRanges[mode].min;
       maxVal = weppRanges[mode].max;
+    }
+    else if (weppYearlyRanges && weppYearlyRanges[mode]) {
+      minVal = weppYearlyRanges[mode].min;
+      maxVal = weppYearlyRanges[mode].max;
     }
     // WEPP Event layers - use dynamic weppEventRanges
     else if (weppEventRanges && weppEventRanges[mode]) {
@@ -2802,6 +2930,7 @@
 
   // WEPP loss ranges computed dynamically from weppSummary data
   let weppRanges = {};
+  let weppYearlyRanges = {};
 
   function computeWeppRanges() {
     if (!weppSummary) return;
@@ -2942,6 +3071,279 @@
       }
     }
     return null;
+  }
+
+  const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
+
+  function computeWeppYearlyRanges() {
+    if (!weppYearlySummary) return;
+    const modes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
+    weppYearlyRanges = {};
+    for (const mode of modes) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (const key of Object.keys(weppYearlySummary)) {
+        const row = weppYearlySummary[key];
+        const v = Number(row[mode]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(max)) max = 1;
+      if (max <= min) max = min + 1;
+      weppYearlyRanges[mode] = { min, max };
+    }
+  }
+
+  function weppYearlyFillColor(mode, row) {
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+
+    const range = weppYearlyRanges[mode] || { min: 0, max: 100 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+
+    if (WATER_MEASURES.includes(mode)) {
+      return winterColor(normalized);
+    } else if (SOIL_MEASURES.includes(mode)) {
+      return jet2Color(normalized);
+    }
+    return viridisColor(normalized);
+  }
+
+  function weppYearlyComparisonFillColor(mode, scenarioRow, baseRow) {
+    if (!scenarioRow || !baseRow) return [128, 128, 128, 200];
+    const scenarioValue = Number(scenarioRow[mode]);
+    const baseValue = Number(baseRow[mode]);
+    if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) {
+      return [128, 128, 128, 200];
+    }
+    const diff = baseValue - scenarioValue;
+    const range = weppYearlyDiffRanges[mode];
+    let normalizedDiff;
+    if (range && range.min !== range.max) {
+      const maxAbs = Math.max(Math.abs(range.min), Math.abs(range.max));
+      normalizedDiff = maxAbs > 0 ? diff / maxAbs : 0;
+    } else {
+      const fallbackRange = weppYearlyRanges[mode] || { min: 0, max: 100 };
+      const maxDiff = fallbackRange.max - fallbackRange.min;
+      normalizedDiff = maxDiff > 0 ? diff / maxDiff : 0;
+    }
+    normalizedDiff = Math.max(-1, Math.min(1, normalizedDiff));
+    return divergingColor(normalizedDiff);
+  }
+
+  function weppYearlyValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildWeppYearlyLayers() {
+    const activeLayers = weppYearlyLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && weppYearlySummary)
+      .map((overlay) => {
+        const baseSummary = baseWeppYearlyCache[weppYearlySelectedYear];
+        const useComparison =
+          comparisonMode &&
+          currentScenarioPath &&
+          COMPARISON_MEASURES.includes(overlay.mode) &&
+          baseSummary;
+
+        return new deck.GeoJsonLayer({
+          id: `wepp-yearly-${overlay.key}-${weppYearlySelectedYear}${useComparison ? '-diff' : ''}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: true,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? weppYearlySummary[String(topaz)] : null;
+            if (useComparison) {
+              const baseRow = topaz != null ? baseSummary[String(topaz)] : null;
+              return weppYearlyComparisonFillColor(overlay.mode, row, baseRow);
+            }
+            return weppYearlyFillColor(overlay.mode, row);
+          },
+          getLineColor: (f) => {
+            const props = f && f.properties;
+            const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+            if (graphHighlightedTopazId && String(topaz) === String(graphHighlightedTopazId)) {
+              return [255, 200, 0, 255];
+            }
+            return [0, 0, 0, 0];
+          },
+          getLineWidth: (f) => {
+            const props = f && f.properties;
+            const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+            if (graphHighlightedTopazId && String(topaz) === String(graphHighlightedTopazId)) {
+              return 3;
+            }
+            return 0;
+          },
+          lineWidthUnits: 'pixels',
+          updateTriggers: {
+            getFillColor: [weppYearlySelectedYear, comparisonMode, currentScenarioPath, weppYearlyDiffRanges[overlay.mode]],
+            getLineColor: [graphHighlightedTopazId],
+            getLineWidth: [graphHighlightedTopazId],
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function pickActiveWeppYearlyLayer() {
+    for (let i = weppYearlyLayers.length - 1; i >= 0; i--) {
+      const layer = weppYearlyLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
+  function computeWeppYearlyDiffRanges(year) {
+    weppYearlyDiffRanges = {};
+    if (!weppYearlySummary || !baseWeppYearlyCache[year]) return;
+    const baseSummary = baseWeppYearlyCache[year];
+    const modes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
+
+    function computeRobustRange(diffs) {
+      if (!diffs.length) return null;
+      diffs.sort((a, b) => a - b);
+      const p5Idx = Math.floor(diffs.length * 0.05);
+      const p95Idx = Math.floor(diffs.length * 0.95);
+      const p5 = diffs[p5Idx];
+      const p95 = diffs[p95Idx];
+      const maxAbs = Math.max(Math.abs(p5), Math.abs(p95));
+      return { min: -maxAbs, max: maxAbs, p5, p95 };
+    }
+
+    for (const mode of modes) {
+      const diffs = [];
+      for (const topazId of Object.keys(weppYearlySummary)) {
+        const scenarioRow = weppYearlySummary[topazId];
+        const baseRow = baseSummary[topazId];
+        if (!scenarioRow || !baseRow) continue;
+        const scenarioValue = Number(scenarioRow[mode]);
+        const baseValue = Number(baseRow[mode]);
+        if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
+        diffs.push(baseValue - scenarioValue);
+      }
+      const range = computeRobustRange(diffs);
+      if (range) {
+        weppYearlyDiffRanges[mode] = range;
+      }
+    }
+  }
+
+  async function loadBaseWeppYearlyData(year) {
+    if (!Number.isFinite(year)) return null;
+    if (baseWeppYearlyCache[year]) {
+      return baseWeppYearlyCache[year];
+    }
+    const columns = [
+      'hill.topaz_id AS topaz_id',
+      'loss."Runoff Volume" AS runoff_volume',
+      'loss."Subrunoff Volume" AS subrunoff_volume',
+      'loss."Baseflow Volume" AS baseflow_volume',
+      'loss."Soil Loss" AS soil_loss',
+      'loss."Sediment Deposition" AS sediment_deposition',
+      'loss."Sediment Yield" AS sediment_yield',
+    ];
+    const payload = {
+      datasets: [
+        { path: WEPP_YEARLY_PATH, alias: 'loss' },
+        { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+      ],
+      joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
+      columns,
+      filters: [{ column: 'loss.year', op: '=', value: year }],
+    };
+    try {
+      const result = await postBaseQueryEngine(payload);
+      if (result && result.records) {
+        const summary = {};
+        for (const row of result.records) {
+          const topazId = row.topaz_id;
+          if (topazId != null) {
+            summary[String(topazId)] = row;
+          }
+        }
+        baseWeppYearlyCache[year] = summary;
+        return summary;
+      }
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load base WEPP yearly data', err);
+    }
+    return null;
+  }
+
+  async function refreshWeppYearlyData() {
+    const year = weppYearlySelectedYear;
+    if (!Number.isFinite(year)) return;
+
+    if (weppYearlyCache[year]) {
+      weppYearlySummary = weppYearlyCache[year];
+    } else {
+      weppYearlySummary = null;
+      const columns = [
+        'hill.topaz_id AS topaz_id',
+        'loss."Runoff Volume" AS runoff_volume',
+        'loss."Subrunoff Volume" AS subrunoff_volume',
+        'loss."Baseflow Volume" AS baseflow_volume',
+        'loss."Soil Loss" AS soil_loss',
+        'loss."Sediment Deposition" AS sediment_deposition',
+        'loss."Sediment Yield" AS sediment_yield',
+      ];
+      const payload = {
+        datasets: [
+          { path: WEPP_YEARLY_PATH, alias: 'loss' },
+          { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+        ],
+        joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
+        columns,
+        filters: [{ column: 'loss.year', op: '=', value: year }],
+      };
+      try {
+        const result = await postQueryEngine(payload);
+        if (result && result.records) {
+          weppYearlySummary = {};
+          for (const row of result.records) {
+            const topazId = row.topaz_id;
+            if (topazId != null) {
+              weppYearlySummary[String(topazId)] = row;
+            }
+          }
+          weppYearlyCache[year] = weppYearlySummary;
+        }
+      } catch (err) {
+        console.warn('gl-dashboard: failed to refresh WEPP yearly data', err);
+        weppYearlySummary = null;
+      }
+    }
+
+    if (weppYearlySummary) {
+      computeWeppYearlyRanges();
+    }
+
+    if (comparisonMode && currentScenarioPath) {
+      await loadBaseWeppYearlyData(year);
+      computeWeppYearlyDiffRanges(year);
+    } else {
+      weppYearlyDiffRanges = {};
+    }
   }
 
   // WEPP Event ranges computed dynamically from weppEventSummary data
@@ -3469,6 +3871,12 @@
         series,
         xLabel: 'Year',
         yLabel: bandLabel + ' %',
+        currentYear: rapSelectedYear,
+        source: 'rap',
+        tooltipFormatter: (id, value, yr) => {
+          const numeric = Number.isFinite(value) ? value.toFixed(1) : value;
+          return `Hillslope ${id}: ${numeric}% (${yr}) — ${bandLabel}`;
+        },
       });
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -3477,17 +3885,136 @@
     }
   }
 
+  const WEPP_YEARLY_COLUMN_MAP = {
+    runoff_volume: '"Runoff Volume"',
+    subrunoff_volume: '"Subrunoff Volume"',
+    baseflow_volume: '"Baseflow Volume"',
+    soil_loss: '"Soil Loss"',
+    sediment_deposition: '"Sediment Deposition"',
+    sediment_yield: '"Sediment Yield"',
+  };
+
+  function weppYearlyGraphColor(normalized, mode) {
+    if (WATER_MEASURES.includes(mode)) {
+      return winterColor(normalized);
+    }
+    if (SOIL_MEASURES.includes(mode)) {
+      return jet2Color(normalized);
+    }
+    return viridisColor(normalized);
+  }
+
+  async function loadWeppYearlyTimeseriesData() {
+    const overlay = pickActiveWeppYearlyLayer();
+    if (!overlay || !weppYearlyMetadata || !weppYearlyMetadata.years || !weppYearlyMetadata.years.length) {
+      timeseriesGraph.hide();
+      return;
+    }
+
+    try {
+      const valueColumn = WEPP_YEARLY_COLUMN_MAP[overlay.mode] || overlay.mode;
+      const dataPayload = {
+        datasets: [
+          { path: WEPP_YEARLY_PATH, alias: 'loss' },
+          { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+        ],
+        joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
+        columns: ['hill.topaz_id AS topaz_id', 'loss.year AS year', `loss.${valueColumn} AS value`],
+        order_by: ['year'],
+      };
+      const dataResult = await postQueryEngine(dataPayload);
+      if (!dataResult || !dataResult.records || dataResult.records.length === 0) {
+        timeseriesGraph.hide();
+        return;
+      }
+
+      const yearSet = new Set();
+      const rawData = {};
+      for (const row of dataResult.records) {
+        const tid = String(row.topaz_id);
+        const year = row.year;
+        const value = row.value;
+        if (!Number.isFinite(value)) continue;
+        yearSet.add(year);
+        if (!rawData[tid]) rawData[tid] = {};
+        rawData[tid][year] = value;
+      }
+
+      const years = Array.from(yearSet).sort((a, b) => a - b);
+      if (!years.length) {
+        timeseriesGraph.hide();
+        return;
+      }
+
+      let minVal = Infinity;
+      let maxVal = -Infinity;
+      for (const tid of Object.keys(rawData)) {
+        for (const yr of years) {
+          const v = rawData[tid][yr];
+          if (v != null && isFinite(v)) {
+            if (v < minVal) minVal = v;
+            if (v > maxVal) maxVal = v;
+          }
+        }
+      }
+      if (!isFinite(minVal)) minVal = 0;
+      if (!isFinite(maxVal)) maxVal = 1;
+      const range = maxVal - minVal || 1;
+
+      const series = {};
+      for (const tid of Object.keys(rawData)) {
+        const values = years.map((yr) => (rawData[tid][yr] != null ? rawData[tid][yr] : null));
+        const latestVal = values.filter((v) => v != null).pop() || 0;
+        const normalized = Math.min(1, Math.max(0, (latestVal - minVal) / range));
+        const color = weppYearlyGraphColor(normalized, overlay.mode);
+        series[tid] = { values, color };
+      }
+
+      const tooltipFormatter = (id, value, yr) => {
+        const label = overlay.label || overlay.mode;
+        const numeric = Number.isFinite(value) ? value.toFixed(2) : value;
+        return `Hillslope ${id}: ${numeric} (${yr}) — ${label}`;
+      };
+
+      timeseriesGraph.setData({
+        years,
+        series,
+        xLabel: 'Year',
+        yLabel: overlay.label || overlay.mode,
+        currentYear: weppYearlySelectedYear,
+        source: 'wepp_yearly',
+        tooltipFormatter,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load WEPP yearly timeseries', err);
+      timeseriesGraph.hide();
+    }
+  }
+
   // Wire year slider to RAP data refresh
   yearSlider.on('change', async (year) => {
-    rapSelectedYear = year;
+    let needsApply = false;
     const hasActiveRap = rapCumulativeMode || rapLayers.some((l) => l.visible);
     if (hasActiveRap) {
+      rapSelectedYear = year;
       await refreshRapData();
-      applyLayers();
-      // Re-render graph to update year indicator line
-      if (timeseriesGraph._visible) {
-        timeseriesGraph.render();
+      needsApply = true;
+      if (timeseriesGraph._source === 'rap') {
+        timeseriesGraph.setCurrentYear(rapSelectedYear);
       }
+    }
+    const activeWeppYearly = pickActiveWeppYearlyLayer();
+    if (activeWeppYearly) {
+      weppYearlySelectedYear = year;
+      await refreshWeppYearlyData();
+      needsApply = true;
+      if (timeseriesGraph._source === 'wepp_yearly') {
+        timeseriesGraph.setCurrentYear(weppYearlySelectedYear);
+      }
+    }
+    if (needsApply) {
+      applyLayers();
     }
   });
 
@@ -3961,6 +4488,86 @@
     }
   }
 
+  async function detectWeppYearlyOverlays() {
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
+    weppYearlyLayers.length = 0;
+    weppYearlySummary = null;
+    weppYearlyMetadata = null;
+    try {
+      const yearsPayload = {
+        datasets: [{ path: WEPP_YEARLY_PATH, alias: 'loss' }],
+        columns: ['DISTINCT loss.year AS year'],
+        order_by: ['year'],
+      };
+      const yearsResult = await postQueryEngine(yearsPayload);
+      if (!yearsResult || !yearsResult.records || !yearsResult.records.length) {
+        if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
+          yearSlider.hide();
+        }
+        updateLayerList();
+        return;
+      }
+
+      const years = yearsResult.records
+        .map((r) => Number(r.year))
+        .filter((y) => Number.isFinite(y))
+        .sort((a, b) => a - b);
+      if (!years.length) {
+        if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
+          yearSlider.hide();
+        }
+        updateLayerList();
+        return;
+      }
+
+      if (!subcatchmentsGeoJson) {
+        const geoResp = await fetch(geoUrl);
+        if (geoResp.ok) {
+          subcatchmentsGeoJson = await geoResp.json();
+        }
+      }
+      if (!subcatchmentsGeoJson) {
+        if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
+          yearSlider.hide();
+        }
+        updateLayerList();
+        return;
+      }
+
+      weppYearlyMetadata = {
+        years,
+        minYear: years[0],
+        maxYear: years[years.length - 1],
+      };
+      if (weppYearlySelectedYear == null || weppYearlySelectedYear < weppYearlyMetadata.minYear || weppYearlySelectedYear > weppYearlyMetadata.maxYear) {
+        weppYearlySelectedYear = weppYearlyMetadata.maxYear;
+      }
+
+      weppYearlyLayers.length = 0;
+      weppYearlyLayers.push(
+        { key: 'wepp-yearly-runoff', label: 'Runoff Volume (mm)', path: WEPP_YEARLY_PATH, mode: 'runoff_volume', visible: false },
+        { key: 'wepp-yearly-subrunoff', label: 'Subrunoff Volume (mm)', path: WEPP_YEARLY_PATH, mode: 'subrunoff_volume', visible: false },
+        { key: 'wepp-yearly-baseflow', label: 'Baseflow Volume (mm)', path: WEPP_YEARLY_PATH, mode: 'baseflow_volume', visible: false },
+        { key: 'wepp-yearly-soil-loss', label: 'Soil Loss (tonnes/ha)', path: WEPP_YEARLY_PATH, mode: 'soil_loss', visible: false },
+        { key: 'wepp-yearly-sed-dep', label: 'Sediment Deposition (tonnes/ha)', path: WEPP_YEARLY_PATH, mode: 'sediment_deposition', visible: false },
+        { key: 'wepp-yearly-sed-yield', label: 'Sediment Yield (tonnes/ha)', path: WEPP_YEARLY_PATH, mode: 'sediment_yield', visible: false },
+      );
+
+      await refreshWeppYearlyData();
+      if (comparisonMode && currentScenarioPath) {
+        await loadBaseWeppYearlyData(weppYearlySelectedYear);
+        computeWeppYearlyDiffRanges(weppYearlySelectedYear);
+      }
+
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load WEPP yearly overlays', err);
+    }
+  }
+
   async function detectWeppEventOverlays() {
     // Geometry is shared across scenarios - always use base URL
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
@@ -4030,6 +4637,18 @@
       queryPath += `/${currentScenarioPath}`;
     }
     const targetUrl = `${origin}/query-engine/${queryPath}/query`;
+    const resp = await fetch(targetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  }
+
+  async function postBaseQueryEngine(payload) {
+    const origin = window.location.origin || `${window.location.protocol}//${window.location.host}`;
+    const targetUrl = `${origin}/query-engine/runs/${ctx.runid}/query`;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -4252,6 +4871,33 @@
           return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
+      const weppYearlyOverlay = pickActiveWeppYearlyLayer();
+      if (info.object && weppYearlyOverlay && weppYearlySummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? weppYearlySummary[String(topaz)] : null;
+        const val = weppYearlyValue(weppYearlyOverlay.mode, row);
+        if (val !== null) {
+          let label;
+          if (weppYearlyOverlay.mode === 'runoff_volume') {
+            label = `Runoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
+          } else if (weppYearlyOverlay.mode === 'subrunoff_volume') {
+            label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
+          } else if (weppYearlyOverlay.mode === 'baseflow_volume') {
+            label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
+          } else if (weppYearlyOverlay.mode === 'soil_loss') {
+            label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
+          } else if (weppYearlyOverlay.mode === 'sediment_deposition') {
+            label = `Sed. Deposition: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
+          } else if (weppYearlyOverlay.mode === 'sediment_yield') {
+            label = `Sed. Yield: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
+          } else {
+            label = `${weppYearlyOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+          }
+          const yearLine = weppYearlySelectedYear != null ? `Year: ${weppYearlySelectedYear}\n` : '';
+          return `Layer: ${weppYearlyOverlay.path}\n${yearLine}TopazID: ${topaz}\n${label}`;
+        }
+      }
       // WEPP Event tooltip
       const weppEventOverlay = pickActiveWeppEventLayer();
       if (info.object && weppEventOverlay && weppEventSummary) {
@@ -4330,7 +4976,7 @@
     applyLayers();
   };
 
-  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectWeppEventOverlays(), detectRapOverlays()])
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectWeppYearlyOverlays(), detectWeppEventOverlays(), detectRapOverlays()])
     .catch((err) => {
       // eslint-disable-next-line no-console
       console.error('gl-dashboard: layer detection failed', err);
