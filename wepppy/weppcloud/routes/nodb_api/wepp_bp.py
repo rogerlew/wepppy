@@ -1026,10 +1026,16 @@ def query_wepp_loss_hillslopes(runid, config):
     """
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    
-    loss_parquet = _join(wd, 'wepp/output/interchange/loss_pw0.hill.parquet')
+    stat = request.args.get('stat', 'mean').lower()
+    valid_stats = {'mean', 'p90', 'sd', 'cv'}
+    if stat not in valid_stats:
+        stat = 'mean'
+
+    # Prefer the all_years parquet when present so statistics can be computed across years
+    yearly_parquet = _join(wd, 'wepp/output/interchange/loss_pw0.all_years.hill.parquet')
+    loss_parquet = yearly_parquet if _exists(yearly_parquet) else _join(wd, 'wepp/output/interchange/loss_pw0.hill.parquet')
     if not _exists(loss_parquet):
-        return error_factory('loss_pw0.hill.parquet is not available; please run the WEPP interchange workflow first.')
+        return error_factory('WEPP loss parquet is not available; please run the WEPP interchange workflow first.')
     
     try:
         run_context = resolve_run_context(wd, auto_activate=True, run_interchange=False)
@@ -1038,25 +1044,48 @@ def query_wepp_loss_hillslopes(runid, config):
     except Exception:
         return exception_factory('Error resolving query engine context', runid=runid)
     
+    # Map friendly names to parquet columns
+    measure_map = {
+        'runoff_volume': '"Runoff Volume"',
+        'subrunoff_volume': '"Subrunoff Volume"',
+        'baseflow_volume': '"Baseflow Volume"',
+        'soil_loss': '"Soil Loss"',
+        'sediment_deposition': '"Sediment Deposition"',
+        'sediment_yield': '"Sediment Yield"',
+    }
+
+    def stat_expression(column: str) -> str:
+        if stat == 'mean':
+            return f'avg(loss.{column})'
+        if stat == 'p90':
+            return f'quantile(loss.{column}, 0.9)'
+        if stat == 'sd':
+            return f'stddev_samp(loss.{column})'
+        if stat == 'cv':
+            return f'CASE WHEN avg(loss.{column}) = 0 THEN NULL ELSE stddev_samp(loss.{column}) / avg(loss.{column}) * 100 END'
+        return f'avg(loss.{column})'
+
+    columns = [
+        'hill.topaz_id',
+        'hill.wepp_id',
+    ]
+    aggregations = [
+        {'expression': stat_expression(col), 'alias': alias}
+        for alias, col in measure_map.items()
+    ]
+
     # Query loss data joined with hillslopes to get topaz_id mapping
     payload = {
         'datasets': [
-            {'path': 'wepp/output/interchange/loss_pw0.hill.parquet', 'alias': 'loss'},
+            {'path': 'wepp/output/interchange/loss_pw0.all_years.hill.parquet' if _exists(yearly_parquet) else 'wepp/output/interchange/loss_pw0.hill.parquet', 'alias': 'loss'},
             {'path': 'watershed/hillslopes.parquet', 'alias': 'hill'},
         ],
         'joins': [
             {'left': 'loss', 'right': 'hill', 'on': 'wepp_id', 'type': 'inner'}
         ],
-        'columns': [
-            'hill.topaz_id',
-            'loss.wepp_id',
-            'loss."Runoff Volume" AS runoff_volume',
-            'loss."Subrunoff Volume" AS subrunoff_volume',
-            'loss."Baseflow Volume" AS baseflow_volume',
-            'loss."Soil Loss" AS soil_loss',
-            'loss."Sediment Deposition" AS sediment_deposition',
-            'loss."Sediment Yield" AS sediment_yield',
-        ],
+        'columns': columns,
+        'group_by': ['hill.topaz_id', 'hill.wepp_id'],
+        'aggregations': aggregations,
     }
     
     try:

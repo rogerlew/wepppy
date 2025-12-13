@@ -706,6 +706,33 @@ code * {
   flex-wrap: wrap;
 }
 
+.gl-wepp-stat {
+  margin: var(--wc-space-sm) 0 var(--wc-space-md);
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+  border: 1px solid var(--wc-color-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--wc-color-surface) 90%, transparent);
+}
+
+.gl-wepp-stat__label {
+  font-weight: 600;
+  color: var(--wc-color-text);
+  margin-bottom: var(--wc-space-2xs);
+}
+
+.gl-wepp-stat__options {
+  display: grid;
+  gap: var(--wc-space-2xs);
+}
+
+.gl-wepp-stat__options label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--wc-space-2xs);
+  align-items: center;
+  color: var(--wc-color-text);
+}
+
 .wc-panel {
   background: var(--wc-color-surface);
   border: 1px solid var(--wc-color-border);

@@ -358,7 +358,7 @@
       }
       
       // Load base WEPP data
-      const weppUrl = buildBaseUrl('query/wepp/loss/hillslopes');
+      const weppUrl = buildBaseUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
       const weppResp = await fetch(weppUrl);
       if (weppResp.ok) {
         baseSummaryCache.wepp = await weppResp.json();
@@ -618,6 +618,7 @@
   let soilsSummary = null;
   let hillslopesSummary = null;
   let weppSummary = null;
+  let weppStatistic = 'mean'; // mean | p90 | sd | cv
   let weppYearlyMetadata = null; // { years: [], minYear, maxYear }
   let weppYearlySelectedYear = null;
   let weppYearlySummary = null;
@@ -1520,6 +1521,30 @@
         renderWeppEventSection(details, section);
         layerListEl.appendChild(details);
         return;
+      }
+
+      if (section.title === 'WEPP') {
+        const statWrapper = document.createElement('div');
+        statWrapper.className = 'gl-wepp-stat';
+        statWrapper.innerHTML = `
+          <div class="gl-wepp-stat__label">Statistic</div>
+          <div class="gl-wepp-stat__options">
+            <label><input type="radio" name="wepp-stat" value="mean" ${weppStatistic === 'mean' ? 'checked' : ''}> Mean (Annual Average)</label>
+            <label><input type="radio" name="wepp-stat" value="p90" ${weppStatistic === 'p90' ? 'checked' : ''}> 90th Percentile (Risk)</label>
+            <label><input type="radio" name="wepp-stat" value="sd" ${weppStatistic === 'sd' ? 'checked' : ''}> Std. Deviation (Variability)</label>
+            <label><input type="radio" name="wepp-stat" value="cv" ${weppStatistic === 'cv' ? 'checked' : ''}> CV % (Instability)</label>
+          </div>
+        `;
+        const statInputs = statWrapper.querySelectorAll('input[name="wepp-stat"]');
+        statInputs.forEach((inputEl) => {
+          inputEl.addEventListener('change', async (event) => {
+            const nextStat = event.target.value;
+            if (nextStat === weppStatistic) return;
+            weppStatistic = nextStat;
+            await refreshWeppStatisticData();
+          });
+        });
+        details.appendChild(statWrapper);
       }
 
       const itemList = document.createElement('ul');
@@ -2932,6 +2957,38 @@
   let weppRanges = {};
   let weppYearlyRanges = {};
 
+  async function refreshWeppStatisticData() {
+    // If no WEPP overlays are active, just keep the stat selection for later.
+    const hasActiveWepp = weppLayers.some((l) => l.visible);
+    if (!hasActiveWepp) {
+      return;
+    }
+
+    try {
+      const url = buildScenarioUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
+      const resp = await fetch(url);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      weppSummary = data;
+      computeWeppRanges();
+
+      if (comparisonMode && currentScenarioPath) {
+        const baseUrl = buildBaseUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
+        const baseResp = await fetch(baseUrl);
+        if (baseResp.ok) {
+          baseSummaryCache.wepp = await baseResp.json();
+          computeComparisonDiffRanges();
+        }
+      }
+
+      applyLayers();
+      updateLegendsPanel();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to refresh WEPP data for statistic', err);
+    }
+  }
+
   function computeWeppRanges() {
     if (!weppSummary) return;
     const modes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
@@ -3056,7 +3113,7 @@
             return weppFillColor(overlay.mode, row);
           },
           updateTriggers: {
-            getFillColor: [comparisonMode, currentScenarioPath, comparisonDiffRanges[overlay.mode]],
+            getFillColor: [comparisonMode, currentScenarioPath, comparisonDiffRanges[overlay.mode], weppStatistic],
           },
         });
       });
@@ -4456,7 +4513,7 @@
   }
 
   async function detectWeppOverlays() {
-    const url = buildScenarioUrl(`query/wepp/loss/hillslopes`);
+    const url = buildScenarioUrl(`query/wepp/loss/hillslopes?stat=${weppStatistic}`);
     // Geometry is shared across scenarios - always use base URL
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
