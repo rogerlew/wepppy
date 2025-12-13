@@ -255,7 +255,7 @@ Every module, service, and significant package should have a README.md that serv
   - **Canonical:** `/wc1/runs/` — All new runs are created here. This is the authoritative location.
   - **Legacy:** `/geodata/weppcloud_runs/` or `/wc1/geodata/weppcloud_runs/` — Historical location, no longer used for new runs. May contain old archived runs.
   - When searching for runs or debugging, **always check `/wc1/runs/` first**.
-  - Run directories are organized as `/wc1/runs/<prefix>/<runid>/` where `<prefix>` is the first two characters of the runid.
+  - Run directories are organized as `/wc1/runs/<prefix>/<runid>/` where `<prefix>` is the first two characters of the runid. The `config` is not part of the path.
 - The repository includes `docker/docker-compose.dev.yml`; expect it to exist and be the primary entry point for local orchestration.
 - **GitHub CLI (`gh`)** is available on the host and authenticated. Use it for creating issues, managing PRs, and querying repository metadata:
   ```bash
