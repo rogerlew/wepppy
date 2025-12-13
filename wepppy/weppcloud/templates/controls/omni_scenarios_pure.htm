@@ -23,15 +23,24 @@
     <div class="wc-card">
       <div class="wc-card__body wc-stack">
         <div id="scenario-container" class="wc-stack"></div>
-        <div>
-        <button id="add-omni-scenario"
-                type="button"
-                class="pure-button pure-button-secondary disable-readonly"
-                data-omni-action="add-scenario">
-            Add scenario
-        </button>
+        <div class="omni-scenario-actions">
+          <div class="omni-scenario-actions__buttons">
+            <button id="add-omni-scenario"
+                    type="button"
+                    class="pure-button pure-button-secondary disable-readonly"
+                    data-omni-action="add-scenario">
+              Add scenario
+            </button>
+            <button id="delete-omni-scenarios"
+                    type="button"
+                    class="pure-button button-error disable-readonly"
+                    data-omni-action="delete-selected"
+                    disabled>
+              Delete selected scenarios
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
     </div>
     <p class="wc-text-muted">
       Mulching and thinning scenarios depend on their base scenario outputs. Place base scenarios ahead of
@@ -48,5 +57,30 @@
     </button>
   {% endcall %}
   {{ ui.job_hint("hint_run_omni", extra_class="wc-field__help") }}
+
+  <div class="wc-modal" id="omni-delete-modal" data-modal hidden>
+    <div class="wc-modal__overlay" data-modal-dismiss></div>
+    <div class="wc-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="omniDeleteModalTitle">
+      <header class="wc-modal__header">
+        <h2 class="wc-modal__title" id="omniDeleteModalTitle">Delete scenarios</h2>
+        <button type="button"
+                class="wc-modal__close"
+                data-modal-dismiss
+                aria-label="Close delete scenarios dialog">
+          &times;
+        </button>
+      </header>
+      <div class="wc-modal__body">
+        <p class="wc-text-muted">The following scenarios and their results will be removed:</p>
+        <ul class="wc-list" data-omni-role="delete-list"></ul>
+      </div>
+      <footer class="wc-modal__footer">
+        <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Cancel</button>
+        <button type="button" class="pure-button button-error" data-omni-action="confirm-delete">
+          Delete scenarios
+        </button>
+      </footer>
+    </div>
+  </div>
 
 {% endcall %}

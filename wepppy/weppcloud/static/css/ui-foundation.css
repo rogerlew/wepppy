@@ -681,6 +681,31 @@ code * {
   white-space: nowrap;
 }
 
+.scenario-item__selector {
+  display: flex;
+  align-items: flex-start;
+  padding-top: var(--wc-space-md);
+}
+
+.scenario-item__selector input[type="checkbox"] {
+  margin: 0;
+  transform: translateY(2px);
+}
+
+.omni-scenario-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wc-space-sm);
+  justify-content: flex-start;
+}
+
+.omni-scenario-actions__buttons {
+  display: flex;
+  gap: var(--wc-space-sm);
+  flex-wrap: wrap;
+}
+
 .wc-panel {
   background: var(--wc-color-surface);
   border: 1px solid var(--wc-color-border);

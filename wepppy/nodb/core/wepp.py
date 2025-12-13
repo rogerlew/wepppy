@@ -519,7 +519,7 @@ class Wepp(NoDbBase):
             self._prep_details_on_run_completion = self.config_get_bool('wepp', 'prep_details_on_run_completion', False)
             self._arc_export_on_run_completion = self.config_get_bool('wepp', 'arc_export_on_run_completion', True)
             self._legacy_arc_export_on_run_completion = self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False)
-            self._dss_export_mode = self.config_get_int('wepp', 'dss_export_mode', 2)  # view model property
+            self._dss_export_mode = self.config_get_int('wepp', 'dss_export_mode', 1)  # view model property
             self._dss_export_on_run_completion = self.config_get_bool('wepp', 'dss_export_on_run_completion', False)  # view model property
             self._dss_excluded_channel_orders = self.config_get_list('wepp', 'dss_excluded_channel_orders', [1, 2])  # view model property
             self._dss_export_channel_ids = [] # specifies which channels are exported
@@ -548,7 +548,7 @@ class Wepp(NoDbBase):
 
     @property
     def dss_export_mode(self) -> int:
-        return getattr(self, '_dss_export_mode', self.config_get_int('wepp', 'dss_export_mode', 2))
+        return getattr(self, '_dss_export_mode', self.config_get_int('wepp', 'dss_export_mode', 1))
     
     @dss_export_mode.setter
     @nodb_setter

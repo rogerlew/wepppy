@@ -465,6 +465,60 @@ var Omni = (function () {
         return definition;
     }
 
+    function scenarioNameFromDefinition(definition) {
+        if (!definition || !definition.type) {
+            return null;
+        }
+        var type = String(definition.type);
+        var normalizedType = type.toLowerCase();
+        var typeAlias = {
+            "1": "uniform_low",
+            "2": "uniform_moderate",
+            "3": "uniform_high",
+            "4": "thinning",
+            "5": "mulch",
+            "8": "sbs_map",
+            "9": "undisturbed",
+            "10": "prescribed_fire"
+        };
+        if (typeAlias[normalizedType]) {
+            normalizedType = typeAlias[normalizedType];
+        }
+
+        if (normalizedType === "thinning") {
+            var canopy = String(definition.canopy_cover || "").replace(/%/g, "");
+            var ground = String(definition.ground_cover || "").replace(/%/g, "");
+            if (!canopy || !ground) {
+                return null;
+            }
+            return normalizedType + "_" + canopy + "_" + ground;
+        }
+
+        if (normalizedType === "mulch") {
+            var increase = String(definition.ground_cover_increase || "").replace(/%/g, "");
+            var base = String(definition.base_scenario || "").trim();
+            if (!increase || !base) {
+                return null;
+            }
+            return normalizedType + "_" + increase + "_" + base;
+        }
+
+        if (normalizedType === "sbs_map") {
+            var rawPath = String(definition.sbs_file_path || definition.sbs_map || definition.sbs_file || "");
+            var fileName = rawPath.split(/[/\\\\]/).pop() || "";
+            if (!fileName) {
+                return normalizedType;
+            }
+            try {
+                return normalizedType + "_" + btoa(fileName).replace(/=+$/g, "");
+            } catch (err) {
+                return normalizedType;
+            }
+        }
+
+        return normalizedType;
+    }
+
     function validateSbsFile(file) {
         if (!file) {
             return;
@@ -503,6 +557,11 @@ var Omni = (function () {
         var omni = controlBase();
         var omniEvents = null;
         var scenarioCounter = 0;
+        var deleteButton = null;
+        var deleteModal = null;
+        var deleteModalList = null;
+        var deleteModalConfirm = null;
+        var pendingDeleteSelections = [];
 
         if (events && typeof events.createEmitter === "function") {
             var baseEmitter = events.createEmitter();
@@ -524,6 +583,10 @@ var Omni = (function () {
         var rqJobElement = dom.qs("#omni_form #rq_job");
         var spinnerElement = dom.qs("#omni_form #braille");
         var hintElement = dom.qs("#hint_run_omni");
+        deleteButton = dom.qs("#omni_form [data-omni-action='delete-selected']");
+        deleteModal = dom.qs("#omni-delete-modal");
+        deleteModalList = deleteModal ? deleteModal.querySelector("[data-omni-role='delete-list']") : null;
+        deleteModalConfirm = deleteModal ? deleteModal.querySelector("[data-omni-action='confirm-delete']") : null;
         var scenarioContainer = dom.ensureElement("#scenario-container", "Omni scenario container not found.");
 
         var infoAdapter = createLegacyAdapter(infoElement);
@@ -569,10 +632,158 @@ var Omni = (function () {
                 return;
             }
             var definition = readScenarioDefinition(scenarioItem);
+            syncScenarioSelectionState(scenarioItem, definition);
+            updateDeleteButtonState();
             omniEvents.emit("omni:scenario:updated", {
                 scenario: definition,
                 element: scenarioItem
             });
+        }
+
+        function syncScenarioSelectionState(scenarioItem, definition) {
+            if (!scenarioItem) {
+                return;
+            }
+            var checkbox = scenarioItem.querySelector("[data-omni-role='scenario-select-toggle']");
+            var scenarioName = scenarioNameFromDefinition(definition || readScenarioDefinition(scenarioItem));
+            scenarioItem.dataset.omniScenarioName = scenarioName || "";
+            if (!checkbox) {
+                return;
+            }
+            var enabled = Boolean(scenarioName);
+            checkbox.disabled = !enabled;
+            if (!enabled) {
+                checkbox.checked = false;
+            }
+        }
+
+        function collectSelectedScenarios() {
+            var items = scenarioContainer.querySelectorAll("[data-omni-scenario-item='true']");
+            var selections = [];
+            items.forEach(function (item) {
+                var checkbox = item.querySelector("[data-omni-role='scenario-select-toggle']");
+                if (!checkbox || checkbox.disabled || !checkbox.checked) {
+                    return;
+                }
+                var definition = readScenarioDefinition(item);
+                var scenarioName = scenarioNameFromDefinition(definition);
+                if (scenarioName) {
+                    selections.push({
+                        item: item,
+                        name: scenarioName,
+                        definition: definition
+                    });
+                }
+            });
+            return selections;
+        }
+
+        function updateDeleteButtonState() {
+            if (!deleteButton) {
+                return;
+            }
+            var selections = collectSelectedScenarios();
+            deleteButton.disabled = selections.length === 0;
+        }
+
+        function openDeleteModal() {
+            var selections = collectSelectedScenarios();
+            if (selections.length === 0) {
+                setStatus("Select at least one scenario to delete.");
+                return;
+            }
+            if (!deleteModal || !deleteModalList) {
+                setStatus("Delete dialog unavailable.");
+                return;
+            }
+            deleteModalList.innerHTML = "";
+            selections.forEach(function (selection) {
+                var li = deleteModal.ownerDocument.createElement("li");
+                li.textContent = selection.name || "Scenario";
+                deleteModalList.appendChild(li);
+            });
+            pendingDeleteSelections = selections;
+            openModal(deleteModal);
+        }
+
+        function pruneDeletedScenarios(removedNames) {
+            if (!removedNames || removedNames.length === 0) {
+                return;
+            }
+            var removedSet = new Set(removedNames.map(function (name) {
+                return String(name);
+            }));
+            var items = scenarioContainer.querySelectorAll("[data-omni-scenario-item='true']");
+            items.forEach(function (item) {
+                var scenarioName = item.dataset.omniScenarioName;
+                if (scenarioName && removedSet.has(scenarioName)) {
+                    item.remove();
+                    if (omniEvents && typeof omniEvents.emit === "function") {
+                        omniEvents.emit("omni:scenario:removed", {
+                            scenario: scenarioName,
+                            element: item
+                        });
+                    }
+                }
+            });
+        }
+
+        function confirmDeleteSelected() {
+            if (!pendingDeleteSelections.length) {
+                closeModal(deleteModal);
+                return;
+            }
+            var names = pendingDeleteSelections
+                .map(function (entry) { return entry.name; })
+                .filter(Boolean);
+            if (!names.length) {
+                closeModal(deleteModal);
+                return;
+            }
+
+            setStatus("Deleting selected scenarios...");
+            if (deleteModalConfirm) {
+                deleteModalConfirm.disabled = true;
+            }
+
+            http.postJson(url_for_run("api/omni/delete_scenarios"), { scenario_names: names }, { form: formElement })
+                .then(function (response) {
+                    var body = response && response.body ? response.body : {};
+                    var content = body && body.Content ? body.Content : {};
+                    var removed = Array.isArray(content.removed) ? content.removed : [];
+                    var missing = Array.isArray(content.missing) ? content.missing : [];
+
+                    if (removed.length) {
+                        pruneDeletedScenarios(removed);
+                    }
+
+                    refreshScenarioOptions();
+                    updateDeleteButtonState();
+
+                    var parts = [];
+                    if (removed.length) {
+                        parts.push("Removed " + removed.length + " scenario(s).");
+                    }
+                    if (missing.length) {
+                        parts.push("Missing: " + missing.join(", "));
+                    }
+                    setStatus(parts.join(" ") || "No scenarios deleted.");
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    omni.pushResponseStacktrace(omni, payload);
+                    setStatus(payload && payload.Error ? payload.Error : "Failed to delete scenarios.");
+                    if (omniEvents && typeof omniEvents.emit === "function") {
+                        omniEvents.emit("omni:run:error", { error: error });
+                    }
+                })
+                .finally(function () {
+                    pendingDeleteSelections = [];
+                    if (deleteModalConfirm) {
+                        deleteModalConfirm.disabled = false;
+                    }
+                    closeModal(deleteModal);
+                });
         }
 
         function refreshScenarioOptions() {
@@ -615,6 +826,8 @@ var Omni = (function () {
                 );
                 controlsHost.appendChild(controlField);
             });
+
+            syncScenarioSelectionState(scenarioItem, values || readScenarioDefinition(scenarioItem));
         }
 
         function addScenario(prefill, options) {
@@ -626,6 +839,12 @@ var Omni = (function () {
             scenarioItem.innerHTML = [
                 '<div class="wc-card__body scenario-item__body">',
                 '  <div class="scenario-item__inputs">',
+                '    <label class="scenario-item__selector" aria-label="Select scenario for deletion">',
+                '      <input type="checkbox"',
+                '             class="disable-readonly"',
+                '             data-omni-role="scenario-select-toggle"',
+                '             title="Select scenario for deletion" />',
+                '    </label>',
                 '    <div class="wc-field scenario-item__field">',
                 '      <label class="wc-field__label" for="omni_scenario_' + scenarioItem.dataset.index + '">Scenario</label>',
                 '      <select class="wc-field__control"',
@@ -654,6 +873,8 @@ var Omni = (function () {
                 select.value = prefill.type;
             }
             updateScenarioControls(scenarioItem, prefill || null);
+            syncScenarioSelectionState(scenarioItem, prefill || readScenarioDefinition(scenarioItem));
+            updateDeleteButtonState();
 
             if (!opts.deferRefresh) {
                 refreshScenarioOptions();
@@ -677,6 +898,7 @@ var Omni = (function () {
 
             scenarioItem.remove();
             refreshScenarioOptions();
+            updateDeleteButtonState();
 
             if (omniEvents && typeof omniEvents.emit === "function") {
                 omniEvents.emit("omni:scenario:removed", { element: scenarioItem });
@@ -745,6 +967,55 @@ var Omni = (function () {
                 statusAdapter.html(message || "");
             }
         }
+
+        function openModal(modal) {
+            if (!modal) {
+                return;
+            }
+            var manager = typeof window !== "undefined" ? window.ModalManager : null;
+            if (manager && typeof manager.open === "function") {
+                manager.open(modal);
+                return;
+            }
+            modal.removeAttribute("hidden");
+            modal.style.display = "flex";
+            modal.classList.add("is-visible");
+            if (typeof document !== "undefined") {
+                document.body.classList.add("wc-modal-open");
+            }
+        }
+
+        function closeModal(modal) {
+            if (!modal) {
+                return;
+            }
+            var manager = typeof window !== "undefined" ? window.ModalManager : null;
+            if (manager && typeof manager.close === "function") {
+                manager.close(modal);
+                return;
+            }
+            modal.classList.remove("is-visible");
+            modal.setAttribute("hidden", "hidden");
+            modal.style.display = "";
+            if (typeof document !== "undefined") {
+                document.body.classList.remove("wc-modal-open");
+            }
+        }
+
+        function bindModalDismiss(modal) {
+            if (!modal) {
+                return;
+            }
+            var dismissers = modal.querySelectorAll("[data-modal-dismiss]");
+            dismissers.forEach(function (btn) {
+                btn.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    closeModal(modal);
+                });
+            });
+        }
+
+        bindModalDismiss(deleteModal);
 
         omni.serializeScenarios = serializeScenarios;
 
@@ -830,9 +1101,11 @@ var Omni = (function () {
                         select.value = scenario.type;
                     }
                     updateScenarioControls(item, scenario);
+                    syncScenarioSelectionState(item, scenario);
                 });
 
                 refreshScenarioOptions();
+                updateDeleteButtonState();
 
                 if (omniEvents && typeof omniEvents.emit === "function") {
                     omniEvents.emit("omni:scenarios:loaded", { scenarios: data });
@@ -868,6 +1141,11 @@ var Omni = (function () {
             addScenario();
         });
 
+        dom.delegate(formElement, "click", "[data-omni-action='delete-selected']", function (event) {
+            event.preventDefault();
+            openDeleteModal();
+        });
+
         dom.delegate(formElement, "click", "[data-omni-action='remove-scenario']", function (event) {
             event.preventDefault();
             removeScenario(event.target);
@@ -883,16 +1161,31 @@ var Omni = (function () {
             updateScenarioControls(item);
             refreshScenarioOptions();
             emitScenarioUpdate(item);
+            syncScenarioSelectionState(item);
+            updateDeleteButtonState();
         });
 
         dom.delegate(scenarioContainer, "change", "[data-omni-field]", function (event, matched) {
             var item = matched.closest("[data-omni-scenario-item='true']");
             emitScenarioUpdate(item);
+            syncScenarioSelectionState(item);
+            updateDeleteButtonState();
+        });
+
+        dom.delegate(scenarioContainer, "change", "[data-omni-role='scenario-select-toggle']", function () {
+            updateDeleteButtonState();
         });
 
         document.addEventListener("disturbed:has_sbs_changed", function () {
             refreshScenarioOptions();
         });
+
+        if (deleteModalConfirm) {
+            deleteModalConfirm.addEventListener("click", function (event) {
+                event.preventDefault();
+                confirmDeleteSelected();
+            });
+        }
 
         var bootstrapState = {
             scenariosLoaded: false,

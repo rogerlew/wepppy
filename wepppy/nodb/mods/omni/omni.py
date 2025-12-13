@@ -624,6 +624,72 @@ class Omni(NoDbBase):
                         'type': scenario_type
                     })
 
+    def delete_scenarios(self, scenario_names: Iterable[str]) -> Dict[str, List[str]]:
+        """
+        Remove scenarios by name, deleting their clones and pruning cached summaries.
+        """
+        names = [str(name) for name in scenario_names if str(name).strip()]
+        # Preserve order and deduplicate
+        target_names: List[str] = list(dict.fromkeys(names))
+        if not target_names:
+            return {'removed': [], 'missing': []}
+
+        removed: List[str] = []
+        missing: List[str] = []
+
+        existing_defs = list(self.scenarios)
+        kept_defs: List[Dict[str, Any]] = []
+        existing_names: Set[str] = set()
+
+        for scenario_def in existing_defs:
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            existing_names.add(scenario_name)
+            if scenario_name in target_names:
+                removed.append(scenario_name)
+            else:
+                kept_defs.append(scenario_def)
+
+        missing.extend([name for name in target_names if name not in existing_names])
+        self.scenarios = kept_defs
+
+        kept_names = {_scenario_name_from_scenario_definition(defn) for defn in kept_defs}
+
+        dependency_tree = dict(self.scenario_dependency_tree)
+        for key in list(dependency_tree.keys()):
+            if key not in kept_names:
+                dependency_tree.pop(key, None)
+        self.scenario_dependency_tree = dependency_tree
+
+        run_state = [
+            state for state in (self.scenario_run_state or [])
+            if state.get('scenario') in kept_names
+        ]
+        self.scenario_run_state = run_state
+
+        for name in target_names:
+            scenario_dir = _join(self.wd, OMNI_REL_DIR, 'scenarios', name)
+            if _exists(scenario_dir):
+                try:
+                    shutil.rmtree(scenario_dir)
+                    pup_relpath = os.path.relpath(scenario_dir, self.wd)
+                    _clear_nodb_cache_and_locks(self.runid, pup_relpath)
+                except Exception as exc:
+                    self.logger.debug('Failed to remove scenario directory %s: %s', scenario_dir, exc)
+                if name not in removed:
+                    removed.append(name)
+            elif name not in removed:
+                missing.append(name)
+
+        aggregated = _join(self.omni_dir, 'scenarios.out.parquet')
+        if _exists(aggregated):
+            try:
+                os.remove(aggregated)
+            except Exception as exc:
+                self.logger.debug('Failed to remove aggregated scenario summary %s: %s', aggregated, exc)
+
+        self._refresh_catalog(OMNI_REL_DIR)
+        return {'removed': removed, 'missing': missing}
+
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         """
         this is called from the web backend to set the parameters in the nodb

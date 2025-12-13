@@ -36,6 +36,25 @@ def get_scenario_run_state(runid, config):
         return exception_factory('Error Getting Scenario Run State', runid=runid)
 
 
+@omni_bp.route('/runs/<string:runid>/<config>/api/omni/delete_scenarios', methods=['POST'])
+def delete_scenarios(runid, config):
+    authorize(runid, config)
+    try:
+        wd = get_wd(runid)
+        payload = parse_request_payload(request)
+        scenario_names = payload.get('scenario_names') or payload.get('scenarios') or []
+        if isinstance(scenario_names, str):
+            scenario_names = [scenario_names]
+        if not isinstance(scenario_names, (list, tuple)):
+            scenario_names = []
+
+        omni = Omni.getInstance(wd)
+        result = omni.delete_scenarios(scenario_names)
+        return success_factory(result)
+    except Exception:
+        return exception_factory('Error deleting scenarios', runid=runid)
+
+
 @omni_bp.route('/runs/<string:runid>/<config>/tasks/omni_migration')
 def omni_migration(runid, config):
     authorize(runid, config)

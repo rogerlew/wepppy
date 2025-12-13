@@ -25,6 +25,9 @@ describe("Omni controller", () => {
                     <button id="add-omni-scenario"
                             type="button"
                             data-omni-action="add-scenario">Add scenario</button>
+                    <button id="delete-omni-scenarios"
+                            type="button"
+                            data-omni-action="delete-selected">Delete selected scenarios</button>
                     <div id="scenario-container"></div>
                 </div>
                 <button id="btn_run_omni"
@@ -32,6 +35,13 @@ describe("Omni controller", () => {
                         data-omni-action="run-scenarios">Run</button>
             </form>
             <p id="hint_run_omni"></p>
+            <div id="omni-delete-modal" data-modal hidden>
+                <div data-modal-dismiss></div>
+                <div>
+                    <ul data-omni-role="delete-list"></ul>
+                    <button data-omni-action="confirm-delete">Confirm</button>
+                </div>
+            </div>
         `;
 
         await import("../dom.js");
@@ -153,5 +163,35 @@ describe("Omni controller", () => {
 
         const statusElement = document.getElementById("status");
         expect(statusElement.textContent).toContain("SBS maps must be");
+    });
+
+    test("delete selected scenarios posts delete request and prunes DOM", async () => {
+        addScenarioAndSelect("uniform_low");
+        const selectToggle = document.querySelector("[data-omni-role='scenario-select-toggle']");
+        selectToggle.checked = true;
+        selectToggle.dispatchEvent(new window.Event("change", { bubbles: true }));
+
+        requestMock.mockResolvedValueOnce({
+            body: { Success: true, Content: { removed: ["uniform_low"], missing: [] } }
+        });
+
+        const deleteButton = document.querySelector("[data-omni-action='delete-selected']");
+        deleteButton.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+
+        const confirmButton = document.querySelector("[data-omni-action='confirm-delete']");
+        confirmButton.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+
+        await requestMock.mock.results[0].value;
+
+        expect(requestMock).toHaveBeenCalledWith(
+            "api/omni/delete_scenarios",
+            expect.objectContaining({
+                method: "POST",
+                json: { scenario_names: ["uniform_low"] }
+            })
+        );
+
+        const remaining = document.querySelectorAll("[data-omni-scenario-item='true']");
+        expect(remaining.length).toBe(0);
     });
 });

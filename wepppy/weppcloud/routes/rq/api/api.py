@@ -1107,9 +1107,16 @@ def _handle_run_wepp(runid: str, config: str) -> Response:
     dss_export_on_run_completion = bool(pop_scalar(controller_payload, 'dss_export_on_run_completion', False))
 
     dss_export_exclude_orders = []
+    exclude_orders_supplied = False
     for i in range(1, 6):
-        if bool(pop_scalar(controller_payload, f'dss_export_exclude_order_{i}', False)):
+        key = f'dss_export_exclude_order_{i}'
+        if key not in controller_payload:
+            continue
+        exclude_orders_supplied = True
+        if bool(pop_scalar(controller_payload, key, False)):
             dss_export_exclude_orders.append(i)
+    if not exclude_orders_supplied:
+        dss_export_exclude_orders = wepp.dss_excluded_channel_orders
 
     try:
         wepp.parse_inputs(controller_payload)
@@ -1225,9 +1232,16 @@ def _handle_run_wepp_watershed(runid, config):
     dss_export_on_run_completion = bool(pop_scalar(controller_payload, 'dss_export_on_run_completion', False))
 
     dss_export_exclude_orders = []
+    exclude_orders_supplied = False
     for i in range(1, 6):
-        if bool(pop_scalar(controller_payload, f'dss_export_exclude_order_{i}', False)):
+        key = f'dss_export_exclude_order_{i}'
+        if key not in controller_payload:
+            continue
+        exclude_orders_supplied = True
+        if bool(pop_scalar(controller_payload, key, False)):
             dss_export_exclude_orders.append(i)
+    if not exclude_orders_supplied:
+        dss_export_exclude_orders = wepp.dss_excluded_channel_orders
 
     try:
         wepp.parse_inputs(controller_payload)
