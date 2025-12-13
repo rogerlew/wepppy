@@ -54,6 +54,7 @@
 
   const defaultTileTemplate =
     ctx.tileUrl || 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  let subcatchmentsVisible = true;
 
   // Basemap definitions - Google endpoints match wepppy/weppcloud/controllers_js/map.js
   const GOOGLE_SUBDOMAINS = ['mt0', 'mt1', 'mt2', 'mt3'];
@@ -227,10 +228,34 @@
     }
   }
 
+  function toggleSubcatchments(visible) {
+    const desired = !!visible;
+    subcatchmentsVisible = desired;
+    // Subcatchment overlays are GeoJson layers; toggling off hides all subcatchment-based layers.
+    applyLayers();
+    const checkbox = document.getElementById('gl-subcatchments-toggle');
+    if (checkbox && checkbox.checked !== desired) {
+      checkbox.checked = desired;
+    }
+  }
+
   // Expose basemap API for external use
   window.glDashboardSetBasemap = setBasemap;
   window.glDashboardBasemaps = BASEMAP_DEFS;
   window.glDashboardToggleLabels = toggleSubcatchmentLabels;
+  window.glDashboardToggleSubcatchments = toggleSubcatchments;
+
+  // Wire UI toggles
+  const labelsToggle = document.getElementById('gl-subcatchment-labels-toggle');
+  if (labelsToggle) {
+    labelsToggle.addEventListener('change', (e) => toggleSubcatchmentLabels(e.target.checked));
+  }
+  const subcatchmentsToggle = document.getElementById('gl-subcatchments-toggle');
+  if (subcatchmentsToggle) {
+    subcatchmentsToggle.addEventListener('change', (e) => toggleSubcatchments(e.target.checked));
+    // Ensure initial state matches flag
+    subcatchmentsToggle.checked = subcatchmentsVisible;
+  }
 
   // ============================================================================
   // Scenario and Comparison Mode Functions
@@ -1858,15 +1883,15 @@
         return null;
       })
       .filter(Boolean);
-    const landuseDeckLayers = buildLanduseLayers();
-    const soilsDeckLayers = buildSoilsLayers();
-    const hillslopesDeckLayers = buildHillslopesLayers();
-    const watarDeckLayers = buildWatarLayers();
-    const weppDeckLayers = buildWeppLayers();
-    const weppYearlyDeckLayers = buildWeppYearlyLayers();
-    const weppEventDeckLayers = buildWeppEventLayers();
-    const rapDeckLayers = buildRapLayers();
-    const labelLayers = buildSubcatchmentLabelsLayer();
+    const landuseDeckLayers = subcatchmentsVisible ? buildLanduseLayers() : [];
+    const soilsDeckLayers = subcatchmentsVisible ? buildSoilsLayers() : [];
+    const hillslopesDeckLayers = subcatchmentsVisible ? buildHillslopesLayers() : [];
+    const watarDeckLayers = subcatchmentsVisible ? buildWatarLayers() : [];
+    const weppDeckLayers = subcatchmentsVisible ? buildWeppLayers() : [];
+    const weppYearlyDeckLayers = subcatchmentsVisible ? buildWeppYearlyLayers() : [];
+    const weppEventDeckLayers = subcatchmentsVisible ? buildWeppEventLayers() : [];
+    const rapDeckLayers = subcatchmentsVisible ? buildRapLayers() : [];
+    const labelLayers = subcatchmentLabelsVisible && subcatchmentsVisible ? buildSubcatchmentLabelsLayer() : [];
     deckgl.setProps({
       layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...watarDeckLayers, ...weppDeckLayers, ...weppYearlyDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
     });
@@ -1929,69 +1954,71 @@
     // Find the first visible layer from each category
     const active = [];
     
-    // Landuse
-    for (const layer of landuseLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'Landuse' });
-        break;
-      }
-    }
-    // Soils
-    for (const layer of soilsLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'Soils' });
-        break;
-      }
-    }
-    // Hillslopes/Watershed
-    for (const layer of hillslopesLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'Watershed' });
-        break;
-      }
-    }
-    // WATAR
-    for (const layer of watarLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'WATAR' });
-        break;
-      }
-    }
-    // WEPP
-    for (const layer of weppLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'WEPP' });
-        break;
-      }
-    }
-    // WEPP Yearly
-    for (const layer of weppYearlyLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'WEPP Yearly' });
-        break;
-      }
-    }
-    // WEPP Event
-    for (const layer of weppEventLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'WEPP Event' });
-        break;
-      }
-    }
-    // RAP - handle cumulative mode
-    if (rapCumulativeMode) {
-      const selectedBands = rapLayers.filter((l) => l.selected !== false);
-      const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
-      active.push({
-        key: 'rap-cumulative',
-        label: `Cumulative Cover (${bandNames})`,
-        category: 'RAP',
-        isCumulative: true,
-      });
-    } else {
-      for (const layer of rapLayers) {
+    if (subcatchmentsVisible) {
+      // Landuse
+      for (const layer of landuseLayers) {
         if (layer.visible) {
-          active.push({ ...layer, category: 'RAP' });
+          active.push({ ...layer, category: 'Landuse' });
+          break;
+        }
+      }
+      // Soils
+      for (const layer of soilsLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'Soils' });
+          break;
+        }
+      }
+      // Hillslopes/Watershed
+      for (const layer of hillslopesLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'Watershed' });
+          break;
+        }
+      }
+      // RAP - handle cumulative mode
+      if (rapCumulativeMode) {
+        const selectedBands = rapLayers.filter((l) => l.selected !== false);
+        const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
+        active.push({
+          key: 'rap-cumulative',
+          label: `Cumulative Cover (${bandNames})`,
+          category: 'RAP',
+          isCumulative: true,
+        });
+      } else {
+        for (const layer of rapLayers) {
+          if (layer.visible) {
+            active.push({ ...layer, category: 'RAP' });
+            break;
+          }
+        }
+      }
+      // WEPP
+      for (const layer of weppLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'WEPP' });
+          break;
+        }
+      }
+      // WEPP Yearly
+      for (const layer of weppYearlyLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'WEPP Yearly' });
+          break;
+        }
+      }
+      // WEPP Event
+      for (const layer of weppEventLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'WEPP Event' });
+          break;
+        }
+      }
+      // WATAR
+      for (const layer of watarLayers) {
+        if (layer.visible) {
+          active.push({ ...layer, category: 'WATAR' });
           break;
         }
       }
