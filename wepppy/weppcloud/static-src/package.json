@@ -35,5 +35,8 @@
     "prettier": "^3.3.3",
     "rimraf": "5.0.5",
     "@playwright/test": "^1.48.2"
+  },
+  "overrides": {
+    "glob": "11.1.0"
   }
 }
