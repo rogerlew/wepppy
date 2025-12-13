@@ -1480,18 +1480,23 @@
     if (!layerListEl) return;
     layerListEl.innerHTML = '';
     const subcatchmentSections = [];
-    const rasterSections = [];
-    if (landuseLayers.length) {
-      subcatchmentSections.push({ title: 'Landuse', items: landuseLayers, isSubcatchment: true });
+    // Rasters: append specific rasters to Landuse/Soils groups
+    const landuseRasters = detectedLayers
+      .filter((l) => l.key === 'landuse' || l.key === 'sbs')
+      .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
+    const soilsRasters = detectedLayers
+      .filter((l) => l.key === 'soils')
+      .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
+
+    if (landuseLayers.length || landuseRasters.length) {
+      subcatchmentSections.push({ title: 'Landuse', items: [...landuseLayers, ...landuseRasters], isSubcatchment: true });
     }
-    if (soilsLayers.length) {
-      subcatchmentSections.push({ title: 'Soils', items: soilsLayers, isSubcatchment: true });
+    if (soilsLayers.length || soilsRasters.length) {
+      subcatchmentSections.push({ title: 'Soils', items: [...soilsLayers, ...soilsRasters], isSubcatchment: true });
     }
-    if (hillslopesLayers.length) {
-      subcatchmentSections.push({ title: 'Watershed', items: hillslopesLayers, isSubcatchment: true });
-    }
-    if (watarLayers.length) {
-      subcatchmentSections.push({ title: 'WATAR', items: watarLayers, isSubcatchment: true });
+    if (rapLayers.length) {
+      // RAP uses special rendering with cumulative mode + checkboxes
+      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true });
     }
     if (weppLayers.length) {
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
@@ -1503,14 +1508,10 @@
       // WEPP Event uses special rendering with date input + radio options
       subcatchmentSections.push({ title: 'WEPP Event', items: weppEventLayers, isSubcatchment: true, isWeppEvent: true });
     }
-    if (rapLayers.length) {
-      // RAP uses special rendering with cumulative mode + checkboxes
-      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true });
+    if (watarLayers.length) {
+      subcatchmentSections.push({ title: 'WATAR', items: watarLayers, isSubcatchment: true });
     }
-    if (detectedLayers.length) {
-      rasterSections.push({ title: 'Rasters', items: detectedLayers, isSubcatchment: false });
-    }
-    const allSections = [...subcatchmentSections, ...rasterSections];
+    const allSections = [...subcatchmentSections];
     if (!allSections.length) {
       if (layerEmptyEl) {
         layerEmptyEl.hidden = false;
@@ -1586,15 +1587,16 @@
         li.className = 'gl-layer-item';
         const input = document.createElement('input');
         // Use radio for subcatchment overlays (landuse/soils), checkbox for rasters
-        input.type = section.isSubcatchment ? 'radio' : 'checkbox';
-        if (section.isSubcatchment) {
+        const isRaster = layer.isRaster === true;
+        input.type = section.isSubcatchment && !isRaster ? 'radio' : 'checkbox';
+        if (section.isSubcatchment && !isRaster) {
           input.name = 'subcatchment-overlay';
         }
         input.checked = layer.visible;
         const idPrefix = section.idPrefix || section.title;
         input.id = `layer-${idPrefix}-${layer.key}`;
         input.addEventListener('change', async () => {
-          if (section.isSubcatchment) {
+          if (section.isSubcatchment && !isRaster) {
             // Radio behavior: deselect all, then select this one
             deselectAllSubcatchmentOverlays();
             layer.visible = true;
@@ -1603,6 +1605,9 @@
               await activateWeppYearlyLayer();
             }
           } else {
+            const target = layer.rasterRef || layer;
+            target.visible = input.checked;
+            // Keep copied flags in sync so UI reflects state
             layer.visible = input.checked;
           }
           applyLayers();
