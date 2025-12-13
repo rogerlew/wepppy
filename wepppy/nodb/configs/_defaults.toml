@@ -64,6 +64,7 @@ pmet_rawp=0.8
 prep_details_on_run_completion=false
 arc_export_on_run_completion=true
 legacy_arc_export_on_run_completion=false
+dss_export_mode=1
 dss_excluded_channel_orders=[1,2]
 bin=wepp_dcc52a6
 
@@ -78,4 +79,3 @@ nch=1.0
 
 [ash]
 run_wind_transport=false
-
