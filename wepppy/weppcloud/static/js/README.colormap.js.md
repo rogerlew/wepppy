@@ -273,6 +273,72 @@ Each control point needs:
 
 Both modules define similar colorscale names and can be used together—colormap.js for choropleth features and Plotty for legend canvases and raster overlays.
 
+## GL Dashboard: Omni Scenario Comparison Mode
+
+The GL Dashboard (`gl-dashboard.js`) supports comparing WEPP model outputs between base scenarios and Omni treatment scenarios using diverging colormaps.
+
+### Comparison Mode Features
+
+When **Compare to Base Scenario** is enabled:
+- Displays difference maps: `Base − Scenario`
+- Uses **rdbu** (red-blue diverging) colormap:
+  - **Blue**: Scenario reduced the metric (improvement for erosion/runoff)
+  - **White/Gray**: No significant change
+  - **Red**: Scenario increased the metric
+- Applies percentile-based scaling (5th/95th) to avoid outlier domination
+
+### Colormap Assignments by Measure Category
+
+| Category | Measures | Normal Colormap | Comparison Colormap |
+|----------|----------|-----------------|---------------------|
+| **Water** | Runoff Volume, Subrunoff Volume, Baseflow Volume, Peak Runoff Rate, Precipitation (P), ET | `winter` (blue→green) | `rdbu` (diverging) |
+| **Soil** | Soil Loss, Sediment Deposition, Sediment Yield, Total Detachment | `jet2` (cyan→yellow→red) | `rdbu` (diverging) |
+| **Cover** | Canopy Cover, Interrill Cover, Rill Cover | `viridis` | `rdbu` (diverging) |
+| **Categorical** | Dominant Landuse, Dominant Soil | Category colors | N/A |
+
+### Implementation Details
+
+```javascript
+// Create colormaps for each measure type
+const winterScale = createColormap({ colormap: 'winter', nshades: 256, format: 'rgba' });
+const jet2Scale = createColormap({ colormap: 'jet2', nshades: 256, format: 'rgba' });
+const rdbuScale = createColormap({ colormap: 'rdbu', nshades: 256, format: 'rgba' });
+
+// Water measures use winter colormap
+const WATER_MEASURES = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 
+                        'event_P', 'event_Q', 'event_ET', 'event_peakro'];
+                        
+// Soil measures use jet2 colormap  
+const SOIL_MEASURES = ['soil_loss', 'sediment_deposition', 'sediment_yield', 'event_tdet'];
+```
+
+### Percentile-Based Scaling
+
+To handle extreme outliers in hydrological data, comparison mode uses robust percentile scaling:
+
+```javascript
+function computeRobustRange(diffs) {
+  diffs.sort((a, b) => a - b);
+  const p5Idx = Math.floor(diffs.length * 0.05);
+  const p95Idx = Math.floor(diffs.length * 0.95);
+  const p5 = diffs[p5Idx];
+  const p95 = diffs[p95Idx];
+  // Symmetric range around 0 for diverging colormap
+  const maxAbs = Math.max(Math.abs(p5), Math.abs(p95));
+  return { min: -maxAbs, max: maxAbs };
+}
+```
+
+This ensures that the colormap spans a meaningful data range rather than being washed out by outliers (e.g., a single hillslope with extreme erosion values).
+
+### Scenario Data Loading
+
+Scenario data is loaded via the `?pup=` query parameter:
+- Base scenario: `/runs/{runid}/{config}/query/landuse_summary`
+- Omni scenario: `/runs/{runid}/{config}/query/landuse_summary?pup=omni/scenarios/{name}`
+
+The dashboard caches base scenario data when entering comparison mode to enable real-time difference calculations.
+
 ## Credits
 
 Original implementation by Ben Postlethwaite (January 2013), MIT License.

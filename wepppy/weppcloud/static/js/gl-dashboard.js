@@ -26,10 +26,30 @@
     'event_P', 'event_Q', 'event_ET', 'event_peakro', 'event_tdet'  // WEPP Event
   ];
   
-  // Create rdbu (red-blue diverging) colormap for comparison mode
+  // Water-related measures use winter (blue→green) colormap
+  const WATER_MEASURES = [
+    'runoff_volume', 'subrunoff_volume', 'baseflow_volume',  // WEPP
+    'event_P', 'event_Q', 'event_ET', 'event_peakro'  // WEPP Event
+  ];
+  
+  // Soil-related measures use jet2 (cyan→yellow→red) colormap
+  const SOIL_MEASURES = [
+    'soil_loss', 'sediment_deposition', 'sediment_yield',  // WEPP
+    'event_tdet'  // WEPP Event
+  ];
+  
+  // Create colormaps for different measure types
   const rdbuScale =
     typeof createColormap === 'function'
       ? createColormap({ colormap: 'rdbu', nshades: 256, format: 'rgba' })
+      : null;
+  const winterScale =
+    typeof createColormap === 'function'
+      ? createColormap({ colormap: 'winter', nshades: 256, format: 'rgba' })
+      : null;
+  const jet2Scale =
+    typeof createColormap === 'function'
+      ? createColormap({ colormap: 'jet2', nshades: 256, format: 'rgba' })
       : null;
 
   const defaultTileTemplate =
@@ -2040,14 +2060,21 @@
     return container;
   }
 
-  function renderContinuousLegend(minVal, maxVal, unit) {
+  function renderContinuousLegend(minVal, maxVal, unit, colormap) {
     const container = document.createElement('div');
     container.className = 'gl-legend-continuous';
     
     const barWrapper = document.createElement('div');
     barWrapper.className = 'gl-legend-continuous__bar-wrapper';
     const bar = document.createElement('div');
-    bar.className = 'gl-legend-continuous__bar';
+    // Apply appropriate colormap class
+    let barClass = 'gl-legend-continuous__bar';
+    if (colormap === 'winter') {
+      barClass += ' gl-legend-continuous__bar--winter';
+    } else if (colormap === 'jet2') {
+      barClass += ' gl-legend-continuous__bar--jet2';
+    }
+    bar.className = barClass;
     barWrapper.appendChild(bar);
     container.appendChild(barWrapper);
     
@@ -2340,7 +2367,15 @@
       unit = '%';
     }
     
-    section.appendChild(renderContinuousLegend(minVal, maxVal, unit));
+    // Determine colormap based on measure type
+    let colormap = 'viridis';  // default
+    if (WATER_MEASURES.includes(mode)) {
+      colormap = 'winter';
+    } else if (SOIL_MEASURES.includes(mode)) {
+      colormap = 'jet2';
+    }
+    
+    section.appendChild(renderContinuousLegend(minVal, maxVal, unit, colormap));
     return section;
   }
 
@@ -2443,6 +2478,71 @@
       Math.round(start[2] + (end[2] - start[2]) * v),
       230,
     ];
+  }
+
+  /**
+   * Winter colormap for water-related measures (blue→green).
+   * @param {number} val - Normalized value 0-1
+   * @returns {Array} RGBA color array
+   */
+  function winterColor(val) {
+    const v = Math.min(1, Math.max(0, Number(val)));
+    if (winterScale && typeof winterScale.map === 'function') {
+      const mapped = winterScale.map(v);
+      const rgba = normalizeColorEntry(mapped, 230);
+      if (rgba) return rgba;
+    }
+    if (winterScale && Array.isArray(winterScale) && winterScale.length) {
+      const idx = Math.min(winterScale.length - 1, Math.floor(v * (winterScale.length - 1)));
+      const color = winterScale[idx];
+      const rgba = normalizeColorEntry(color, 230);
+      if (rgba) return rgba;
+    }
+    // Fallback: blue (0, 0, 255) to green (0, 255, 128)
+    return [
+      0,
+      Math.round(v * 255),
+      Math.round(255 - v * 127),
+      230,
+    ];
+  }
+
+  /**
+   * Jet2 colormap for soil-related measures (cyan→yellow→red).
+   * @param {number} val - Normalized value 0-1
+   * @returns {Array} RGBA color array
+   */
+  function jet2Color(val) {
+    const v = Math.min(1, Math.max(0, Number(val)));
+    if (jet2Scale && typeof jet2Scale.map === 'function') {
+      const mapped = jet2Scale.map(v);
+      const rgba = normalizeColorEntry(mapped, 230);
+      if (rgba) return rgba;
+    }
+    if (jet2Scale && Array.isArray(jet2Scale) && jet2Scale.length) {
+      const idx = Math.min(jet2Scale.length - 1, Math.floor(v * (jet2Scale.length - 1)));
+      const color = jet2Scale[idx];
+      const rgba = normalizeColorEntry(color, 230);
+      if (rgba) return rgba;
+    }
+    // Fallback: cyan (0, 255, 255) → yellow (255, 255, 0) → red (255, 0, 0)
+    if (v < 0.5) {
+      const t = v * 2;
+      return [
+        Math.round(255 * t),
+        255,
+        Math.round(255 * (1 - t)),
+        230,
+      ];
+    } else {
+      const t = (v - 0.5) * 2;
+      return [
+        255,
+        Math.round(255 * (1 - t)),
+        0,
+        230,
+      ];
+    }
   }
 
   /**
@@ -2733,6 +2833,13 @@
 
     const range = weppRanges[mode] || { min: 0, max: 100 };
     const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    
+    // Use winter colormap for water-related measures, jet2 for soil-related measures
+    if (WATER_MEASURES.includes(mode)) {
+      return winterColor(normalized);
+    } else if (SOIL_MEASURES.includes(mode)) {
+      return jet2Color(normalized);
+    }
     return viridisColor(normalized);
   }
 
@@ -2908,6 +3015,13 @@
 
     const range = weppEventRanges[mode] || { min: 0, max: 100 };
     const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    
+    // Use winter colormap for water-related measures, jet2 for soil-related measures
+    if (WATER_MEASURES.includes(mode)) {
+      return winterColor(normalized);
+    } else if (SOIL_MEASURES.includes(mode)) {
+      return jet2Color(normalized);
+    }
     return viridisColor(normalized);
   }
 

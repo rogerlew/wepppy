@@ -114,24 +114,6 @@ http://:8080 {
         }
     }
 
-    @elevationquery path_regexp elevationquery ^/weppcloud/runs/[^/]+/[^/]+/elevationquery/?$
-    handle @elevationquery {
-        reverse_proxy elevationquery:8002 {
-            transport http {
-                read_timeout 3m
-            }
-        }
-    }
-
-    @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
-    handle @browse_proxy {
-        reverse_proxy browse:9009 {
-            transport http {
-                read_timeout 3m
-            }
-        }
-    }
-
     handle /rq-dashboard* {
         reverse_proxy rq-dashboard:9181 {
             header_up X-Forwarded-Prefix /rq-dashboard
@@ -146,11 +128,34 @@ http://:8080 {
     @weppcloud_no_slash path /weppcloud
     redir @weppcloud_no_slash /weppcloud/
 
-    handle_path /weppcloud* {
-        reverse_proxy weppcloud:8000 {
-            header_up X-Forwarded-Prefix /weppcloud
-            header_up X-Forwarded-Proto {scheme}
-            header_up Host {host}
+    # Use route to enforce evaluation order - regex matchers must come before /weppcloud* glob
+    route /weppcloud/* {
+        @elevationquery path_regexp elevationquery ^/weppcloud/runs/[^/]+/[^/]+/elevationquery/?$
+        handle @elevationquery {
+            reverse_proxy elevationquery:8002 {
+                transport http {
+                    read_timeout 3m
+                }
+            }
+        }
+
+        @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
+        handle @browse_proxy {
+            reverse_proxy browse:9009 {
+                transport http {
+                    read_timeout 3m
+                }
+            }
+        }
+
+        # Fallback to Flask weppcloud app
+        handle {
+            uri strip_prefix /weppcloud
+            reverse_proxy weppcloud:8000 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up Host {host}
+            }
         }
     }
 }

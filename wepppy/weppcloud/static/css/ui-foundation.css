@@ -2265,7 +2265,6 @@ h5:first-child {
 
 .wc-feature__media img {
   width: 100%;
-  max-width: 200px;
   height: auto;
   display: block;
   border-radius: var(--wc-radius-md);
@@ -2327,7 +2326,7 @@ h5:first-child {
 
 @media (min-width: 48em) {
   .wc-feature {
-    grid-template-columns: 16rem 1fr;
+    grid-template-columns: 20rem 1fr;
   }
 
   .wc-banner__links {
