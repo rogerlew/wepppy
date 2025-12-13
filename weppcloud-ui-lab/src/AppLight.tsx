@@ -528,7 +528,7 @@ export function AppLight() {
   )
 
   return (
-    <div className="light-theme min-h-screen bg-gray-50 text-slate-800">
+    <div className="light-theme min-h-screen bg-white text-slate-800">
       {/* Hero Section - Clean government style */}
       <section id="hero" className="relative bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
@@ -589,7 +589,7 @@ export function AppLight() {
       </section>
 
       {/* Map Section */}
-      <section id="map" className="bg-gray-100 px-4 py-12 sm:px-6 lg:px-12">
+      <section id="map" className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <div className="mx-auto max-w-6xl space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -767,7 +767,7 @@ export function AppLight() {
       </section>
 
       {/* Points of Contact */}
-      <section className="bg-gray-50 px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -784,7 +784,6 @@ export function AppLight() {
 
         <div className="mx-auto max-w-5xl grid gap-4 md:grid-cols-2">
           {CONTACTS.map((contact, index) => {
-            const accent = CONTACT_ACCENTS[contact.accent]
             const IconComponent = CONTACT_ICON_MAP[contact.icon]
             return (
               <motion.article
@@ -793,13 +792,10 @@ export function AppLight() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className={cn(
-                  'flex flex-col p-5 border bg-white',
-                  accent.border,
-                )}
+                className="flex flex-col p-5 border border-gray-200 bg-white"
               >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className={cn('flex h-10 w-10 items-center justify-center rounded', accent.icon)}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-slate-600">
                     <IconComponent className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div className="flex-1">
@@ -809,7 +805,7 @@ export function AppLight() {
                   </div>
                 </div>
                 <a
-                  className="text-sm text-sky-700 hover:text-sky-800 mb-3"
+                  className="text-sm text-slate-700 hover:text-slate-900 mb-3"
                   href={`mailto:${contact.email}`}
                 >
                   {contact.email}
@@ -818,7 +814,7 @@ export function AppLight() {
                   {contact.expertise.map((item) => (
                     <span
                       key={item}
-                      className={cn('px-2 py-0.5 text-xs', accent.chip)}
+                      className="px-2 py-0.5 text-xs bg-gray-50 text-slate-600 border border-gray-200"
                     >
                       {item}
                     </span>
@@ -873,7 +869,7 @@ export function AppLight() {
       </section>
 
       {/* Sponsors */}
-      <section className="bg-gray-50 px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -949,7 +945,7 @@ export function AppLight() {
       </section>
 
       {/* Data Sources */}
-      <section className="bg-gray-50 px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-12 border-b border-gray-200">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1035,8 +1031,8 @@ export function AppLight() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-700 text-white px-4 py-6 sm:px-6">
-        <div className="mx-auto max-w-4xl text-center text-sm">
+      <footer className="bg-white border-t border-gray-200 px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-4xl text-center text-sm text-slate-600">
           <p>© {new Date().getFullYear()} University of Idaho • USDA Forest Service</p>
         </div>
       </footer>
