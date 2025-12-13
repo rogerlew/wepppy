@@ -348,6 +348,8 @@ class Treatments(NoDbBase):
             new_man_summary.man_fn = new_man_fn
             new_man_summary.disturbed_class = f'{disturbed_class}-{treatment}'
             new_man_summary.desc += f'{man_summary.desc} - {treatment}'
+            new_man_summary.inrcov = new_inrcov
+            new_man_summary.rilcov = new_rilcov
 
             new_dom = f'{landuse_instance.domlc_d[topaz_id]}-{treatment}'
             landuse_instance.domlc_d[topaz_id] = new_dom
