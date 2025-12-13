@@ -2,21 +2,36 @@
 
 {% block title %}GL Dashboard — {{ runid }}{% endblock %}
 
-{% block site_header %}{% endblock %}
-{% block header_tools %}{% endblock %}
+{% block site_header %}
+<header class="wc-header gl-header">
+  <div class="wc-header__inner">
+    <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
+    <div class="wc-header__tools">
+      {% include 'header/_theme_switcher.htm' %}
+    </div>
+  </div>
+</header>
+{% endblock %}
 
 {% block head_extras %}
+<script>
+  /* Apply stored theme immediately to prevent FOUC */
+  (function() {
+    try {
+      var theme = localStorage.getItem('wc-theme');
+      if (theme) document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+  })();
+</script>
 <style>
-  :root {
-    color-scheme: dark;
-  }
+  /* GL Dashboard Layout - uses theme system CSS variables */
   .gl-layer-list {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
     gap: 0.35rem;
-    color: #c1cbe3;
+    color: var(--wc-color-text);
   }
   .gl-layer-item {
     display: flex;
@@ -24,11 +39,11 @@
     gap: 0.5rem;
   }
   .gl-layer-item input {
-    accent-color: #3f6ac7;
+    accent-color: var(--wc-color-primary);
   }
   .gl-layer-details {
     margin: 0;
-    border-bottom: 1px solid #1f2c44;
+    border-bottom: 1px solid var(--wc-color-border);
     padding-bottom: 0.5rem;
   }
   .gl-layer-details:last-child {
@@ -38,7 +53,7 @@
   .gl-layer-details summary {
     cursor: pointer;
     font-weight: 600;
-    color: #9fb4dc;
+    color: var(--wc-color-text);
     padding: 0.35rem 0;
     list-style: none;
     display: flex;
@@ -57,7 +72,7 @@
     transform: rotate(90deg);
   }
   .gl-layer-details summary:hover {
-    color: #c7d7ff;
+    color: var(--wc-color-link-hover);
   }
   .gl-layer-items {
     list-style: none;
@@ -66,15 +81,15 @@
     display: grid;
     gap: 0.25rem;
   }
-  /* Custom dropdown for dark theme */
+  /* Custom dropdown using theme variables */
   .gl-custom-select {
     position: relative;
   }
   .gl-custom-select__trigger {
     width: 100%;
-    background: #142035;
-    border: 1px solid #263b5f;
-    color: #e5ecf7;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
+    color: var(--wc-color-text);
     border-radius: 6px;
     padding: 0.35rem 0.5rem;
     font-size: 0.9rem;
@@ -91,12 +106,12 @@
     opacity: 0.7;
   }
   .gl-custom-select__trigger:hover {
-    border-color: #3f6ac7;
+    border-color: var(--wc-color-primary);
   }
   .gl-custom-select__trigger:focus {
     outline: none;
-    border-color: #3f6ac7;
-    box-shadow: 0 0 0 2px rgba(63, 106, 199, 0.25);
+    border-color: var(--wc-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--wc-color-primary) 25%, transparent);
   }
   .gl-custom-select__options {
     position: absolute;
@@ -105,37 +120,37 @@
     right: 0;
     max-height: 200px;
     overflow-y: auto;
-    background: #142035;
-    border: 1px solid #3f6ac7;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-primary);
     border-radius: 6px;
     margin-top: 4px;
     padding: 0;
     list-style: none;
     z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--wc-shadow-md);
   }
   .gl-custom-select__option {
     padding: 0.4rem 0.5rem;
     cursor: pointer;
-    color: #c1cbe3;
+    color: var(--wc-color-text);
   }
   .gl-custom-select__option:hover {
-    background: #1d3b70;
-    color: #fff;
+    background: var(--wc-color-accent-soft);
+    color: var(--wc-color-text);
   }
   .gl-custom-select__option.is-selected {
-    background: #263b5f;
-    color: #fff;
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-text);
   }
   .gl-layer-group-header {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #6b7fa0;
+    color: var(--wc-color-text-muted);
     padding: 0.5rem 0 0.25rem 0;
     margin-top: 0.5rem;
-    border-top: 1px solid #1f2c44;
+    border-top: 1px solid var(--wc-color-border);
   }
   .gl-layer-group-header:first-child {
     margin-top: 0;
@@ -143,14 +158,26 @@
     padding-top: 0;
   }
   html, body {
-    background: #070c14;
-    color: #e5ecf7;
+    background: var(--wc-color-page);
+    color: var(--wc-color-text);
   }
   .wc-page__body {
     padding: 0;
   }
+  .gl-header {
+    background: var(--wc-color-surface);
+    border-bottom: 1px solid var(--wc-color-border);
+    padding: 0.5rem 1rem;
+  }
+  .gl-header .wc-header__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: none;
+    padding: 0;
+  }
   .gl-shell {
-    height: 100vh;
+    height: calc(100vh - 52px); /* Account for header */
     width: 100vw;
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -167,90 +194,98 @@
     }
   }
   .gl-sidebar {
-    background: #0d1523;
-    border: 1px solid #1f2c44;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
     border-radius: 12px;
     padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--wc-shadow-md);
     overflow-y: auto;
     min-height: 0;
   }
   .gl-sidebar h3 {
     margin: 0;
-    color: #c7d7ff;
+    color: var(--wc-color-text);
     letter-spacing: 0.02em;
   }
   .gl-sidebar p {
     margin: 0;
-    color: #8fa0c2;
+    color: var(--wc-color-text-muted);
   }
   .gl-sidebar ul {
     list-style: none;
     padding: 0;
     margin: 0;
-    color: #c1cbe3;
+    color: var(--wc-color-text);
     line-height: 1.6;
   }
   .gl-main {
-    background: #0b101b;
-    border: 1px solid #1f2c44;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--wc-shadow-md);
   }
   .gl-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #1f2c44;
-    background: #0f1727;
+    border-bottom: 1px solid var(--wc-color-border);
+    background: var(--wc-color-surface-alt);
   }
   .gl-topbar__meta {
     display: flex;
     gap: 1rem;
     align-items: center;
-    color: #9fb4dc;
+    color: var(--wc-color-text-muted);
     font-size: 0.95rem;
   }
   .gl-topbar__meta strong {
-    color: #e5ecf7;
+    color: var(--wc-color-text);
   }
   .gl-topbar__meta a.gl-run-link,
   .gl-topbar__meta a.gl-run-link:visited {
-    color: #f7fbff !important;
+    color: var(--wc-color-link) !important;
     text-decoration-line: underline !important;
   }
   .gl-topbar__meta a.gl-run-link:hover {
-    color: #cde2ff !important;
+    color: var(--wc-color-link-hover) !important;
   }
   .gl-topbar__actions {
     display: flex;
     gap: 0.5rem;
   }
   .gl-btn {
-    background: #142035;
-    border: 1px solid #263b5f;
-    color: #e5ecf7;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
+    color: var(--wc-color-text);
     border-radius: 8px;
     padding: 0.35rem 0.65rem;
     font-size: 0.9rem;
     cursor: pointer;
   }
+  .gl-btn:hover {
+    background: var(--wc-color-surface-alt);
+    border-color: var(--wc-color-border-strong);
+  }
   .gl-btn[data-variant="primary"] {
-    background: #1d3b70;
-    border-color: #3f6ac7;
+    background: var(--wc-color-primary);
+    border-color: var(--wc-color-primary);
+    color: var(--wc-color-on-primary);
+  }
+  .gl-btn[data-variant="primary"]:hover {
+    background: var(--wc-color-primary-dark);
   }
   .gl-viewport {
     position: relative;
     flex: 1;
     min-height: 420px;
-    border-bottom: 1px solid #1f2c44;
+    border-bottom: 1px solid var(--wc-color-border);
   }
   .gl-viewport #gl-dashboard-map {
     position: absolute;
@@ -264,8 +299,8 @@
     display: block;
   }
   .gl-graph {
-    background: #0f1727;
-    border-top: 1px solid #1f2c44;
+    background: var(--wc-color-surface-alt);
+    border-top: 1px solid var(--wc-color-border);
     padding: 0.5rem 1rem;
     max-height: 280px;
     overflow: hidden;
@@ -280,14 +315,17 @@
     justify-content: space-between;
     gap: 0.5rem;
   }
+  .gl-graph__header h4 {
+    color: var(--wc-color-text);
+  }
   .gl-graph__content {
     margin-top: 0.5rem;
-    color: #8fa0c2;
+    color: var(--wc-color-text-muted);
     position: relative;
   }
   .gl-graph__empty {
     font-size: 0.9rem;
-    color: #6b7fa0;
+    color: var(--wc-color-text-muted);
     padding: 1rem 0;
   }
   .gl-graph__container {
@@ -300,24 +338,25 @@
   }
   .gl-graph__tooltip {
     position: absolute;
-    background: rgba(13, 21, 35, 0.95);
-    border: 1px solid #3f6ac7;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-primary);
     border-radius: 4px;
     padding: 0.35rem 0.5rem;
     font-size: 0.8rem;
-    color: #e5ecf7;
+    color: var(--wc-color-text);
     pointer-events: none;
     display: none;
     z-index: 10;
     white-space: nowrap;
+    box-shadow: var(--wc-shadow-sm);
   }
   /* Legends panel - floating on top of map */
   .gl-legends-panel {
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
-    background: rgba(13, 21, 35, 0.92);
-    border: 1px solid #1f2c44;
+    background: color-mix(in srgb, var(--wc-color-surface) 92%, transparent);
+    border: 1px solid var(--wc-color-border);
     border-radius: 8px;
     padding: 0;
     min-width: 180px;
@@ -325,8 +364,9 @@
     max-height: 70vh;
     overflow: hidden;
     z-index: 1000;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--wc-shadow-md);
     transition: max-height 200ms ease, opacity 150ms ease;
+    backdrop-filter: blur(8px);
   }
   .gl-legends-panel.is-collapsed {
     max-height: 36px;
@@ -336,22 +376,22 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid #1f2c44;
+    border-bottom: 1px solid var(--wc-color-border);
     cursor: pointer;
     user-select: none;
   }
   .gl-legends-panel__header:hover {
-    background: rgba(31, 44, 68, 0.5);
+    background: var(--wc-color-accent-soft);
   }
   .gl-legends-panel__title {
     margin: 0;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #c7d7ff;
+    color: var(--wc-color-text);
   }
   .gl-legends-panel__toggle {
     font-size: 0.7em;
-    color: #6b7fa0;
+    color: var(--wc-color-text-muted);
     transition: transform 200ms ease;
   }
   .gl-legends-panel.is-collapsed .gl-legends-panel__toggle {
@@ -366,7 +406,7 @@
     display: none;
   }
   .gl-legend-empty {
-    color: #6b7fa0;
+    color: var(--wc-color-text-muted);
     font-size: 0.8rem;
     font-style: italic;
   }
@@ -379,7 +419,7 @@
   .gl-legend-section__title {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #9fb4dc;
+    color: var(--wc-color-text-muted);
     margin: 0 0 0.35rem 0;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -395,14 +435,14 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.75rem;
-    color: #c1cbe3;
+    color: var(--wc-color-text);
   }
   .gl-legend-categorical__swatch {
     width: 14px;
     height: 14px;
     border-radius: 2px;
     flex-shrink: 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--wc-color-border);
   }
   /* Continuous legend (viridis gradient) */
   .gl-legend-continuous {
@@ -413,7 +453,7 @@
   .gl-legend-continuous__bar-wrapper {
     height: 12px;
     border-radius: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--wc-color-border);
     overflow: hidden;
     position: relative;
   }
@@ -459,11 +499,11 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.7rem;
-    color: #8fa0c2;
+    color: var(--wc-color-text-muted);
   }
   .gl-legend-continuous__unit {
     font-size: 0.7rem;
-    color: #6b7fa0;
+    color: var(--wc-color-text-muted);
     text-align: center;
     margin-top: 0.1rem;
   }
@@ -482,20 +522,21 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(13, 21, 35, 0.95);
-    border-top: 1px solid #1f2c44;
+    background: color-mix(in srgb, var(--wc-color-surface) 95%, transparent);
+    border-top: 1px solid var(--wc-color-border);
     padding: 0.5rem 1rem;
     display: none;
     align-items: center;
     gap: 1rem;
     z-index: 1000;
+    backdrop-filter: blur(8px);
   }
   .gl-year-slider.is-visible {
     display: flex;
   }
   .gl-year-slider__label {
     font-size: 0.85rem;
-    color: #9fb4dc;
+    color: var(--wc-color-text-muted);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -511,7 +552,7 @@
     -webkit-appearance: none;
     appearance: none;
     height: 6px;
-    background: #1f2c44;
+    background: var(--wc-color-border);
     border-radius: 3px;
     outline: none;
     cursor: pointer;
@@ -521,50 +562,50 @@
     appearance: none;
     width: 18px;
     height: 18px;
-    background: #3f6ac7;
+    background: var(--wc-color-primary);
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid #c7d7ff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--wc-color-text);
+    box-shadow: var(--wc-shadow-sm);
   }
   .gl-year-slider__input::-moz-range-thumb {
     width: 18px;
     height: 18px;
-    background: #3f6ac7;
+    background: var(--wc-color-primary);
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid #c7d7ff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--wc-color-text);
+    box-shadow: var(--wc-shadow-sm);
   }
   .gl-year-slider__input:hover::-webkit-slider-thumb {
-    background: #5a85e0;
+    background: var(--wc-color-primary-dark);
   }
   .gl-year-slider__input:hover::-moz-range-thumb {
-    background: #5a85e0;
+    background: var(--wc-color-primary-dark);
   }
   .gl-year-slider__value {
     min-width: 4em;
     text-align: center;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #e5ecf7;
-    background: #142035;
-    border: 1px solid #263b5f;
+    color: var(--wc-color-text);
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
   }
   .gl-year-slider__range {
     font-size: 0.75rem;
-    color: #6b7fa0;
+    color: var(--wc-color-text-muted);
     white-space: nowrap;
   }
   .gl-year-slider__play {
-    background: #1f2c44;
-    border: 1px solid #3f6ac7;
+    background: var(--wc-color-surface-alt);
+    border: 1px solid var(--wc-color-primary);
     border-radius: 50%;
     width: 32px;
     height: 32px;
-    color: #c7d7ff;
+    color: var(--wc-color-text);
     font-size: 0.9rem;
     cursor: pointer;
     display: flex;
@@ -574,11 +615,11 @@
     flex-shrink: 0;
   }
   .gl-year-slider__play:hover {
-    background: #263b5f;
-    border-color: #5a85e0;
+    background: var(--wc-color-border);
+    border-color: var(--wc-color-primary-dark);
   }
   .gl-year-slider__play:active {
-    background: #3f6ac7;
+    background: var(--wc-color-primary);
   }
   /* Scenario selector */
   .gl-scenario-selector {
@@ -586,27 +627,27 @@
   }
   .gl-scenario-selector select {
     width: 100%;
-    background: #142035;
-    border: 1px solid #263b5f;
-    color: #e5ecf7;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
+    color: var(--wc-color-text);
     border-radius: 6px;
     padding: 0.4rem 0.5rem;
     font-size: 0.9rem;
     cursor: pointer;
   }
   .gl-scenario-selector select:hover {
-    border-color: #3f6ac7;
+    border-color: var(--wc-color-primary);
   }
   .gl-scenario-selector select:focus {
     outline: none;
-    border-color: #3f6ac7;
-    box-shadow: 0 0 0 2px rgba(63, 106, 199, 0.25);
+    border-color: var(--wc-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--wc-color-primary) 25%, transparent);
   }
   /* Comparison overlay indicator */
   .gl-comparison-badge {
     display: inline-block;
-    background: linear-gradient(90deg, #2563eb 0%, #dc2626 100%);
-    color: #fff;
+    background: linear-gradient(90deg, var(--wc-color-info) 0%, var(--wc-color-error) 100%);
+    color: var(--wc-color-text);
     font-size: 0.7rem;
     font-weight: 600;
     padding: 0.15rem 0.4rem;
@@ -656,7 +697,7 @@
       <h3>Layers</h3>
     </div>
     <ul class="gl-layer-list" id="gl-layer-list"></ul>
-    <p id="gl-layer-empty" style="color:#8fa0c2;margin:0;">No raster layers detected yet.</p>
+    <p id="gl-layer-empty" style="color:var(--wc-color-text-muted);margin:0;">No raster layers detected yet.</p>
   </aside>
 
   <section class="gl-main">
@@ -698,7 +739,7 @@
 
     <div class="gl-graph is-collapsed" id="gl-graph">
       <div class="gl-graph__header">
-        <h4 style="margin:0;color:#c7d7ff;">Graph</h4>
+        <h4 style="margin:0;color:var(--wc-color-text);">Graph</h4>
         <button class="gl-btn" data-graph-toggle type="button">Toggle Graph</button>
       </div>
       <div class="gl-graph__content">
@@ -714,6 +755,56 @@
 {% endblock %}
 
 {% block script_extras %}
+  <script>
+    /* Theme Switcher Controller */
+    (function () {
+      var STORAGE_KEY = "wc-theme";
+      var SELECTOR = "[data-theme-select]";
+      var root = document.documentElement;
+
+      function applyTheme(theme) {
+        if (!theme || theme === "default") {
+          root.removeAttribute("data-theme");
+        } else {
+          root.setAttribute("data-theme", theme);
+        }
+      }
+
+      function storeTheme(theme) {
+        try {
+          if (!theme || theme === "default") {
+            localStorage.removeItem(STORAGE_KEY);
+          } else {
+            localStorage.setItem(STORAGE_KEY, theme);
+          }
+        } catch (e) {}
+      }
+
+      function syncSelects(theme) {
+        var value = theme && theme !== "" ? theme : "default";
+        document.querySelectorAll(SELECTOR).forEach(function (select) {
+          if (select.value !== value) select.value = value;
+        });
+      }
+
+      function handleChange(event) {
+        var select = event.target;
+        if (!select || !select.matches(SELECTOR)) return;
+        var theme = select.value;
+        applyTheme(theme);
+        storeTheme(theme);
+        syncSelects(theme);
+      }
+
+      // Initialize
+      var stored = null;
+      try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+      var initial = stored || root.getAttribute("data-theme") || "default";
+      applyTheme(initial);
+      syncSelects(initial);
+      document.addEventListener("change", handleChange, { passive: true });
+    })();
+  </script>
   <script>
     window.GL_DASHBOARD_CONTEXT = {{ {
       "runid": runid,
