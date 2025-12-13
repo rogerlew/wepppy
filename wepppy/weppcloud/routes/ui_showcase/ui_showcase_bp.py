@@ -21,7 +21,6 @@ THEME_OPTIONS = [
     ("cursor-dark-anysphere", "Cursor Dark (Anysphere)"),
     ("cursor-dark-midnight", "Cursor Dark (Midnight)"),
     ("cursor-dark-high-contrast", "Cursor Dark (High Contrast)"),
-    ("cursor-light", "Cursor Light"),
 ]
 
 

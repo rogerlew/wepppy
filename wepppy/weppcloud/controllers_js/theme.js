@@ -58,6 +58,23 @@
         });
     }
 
+    function listAvailableThemes(selects) {
+        var values = ["default"];
+        if (!selects || !selects.length) {
+            return values;
+        }
+        selects.forEach(function (select) {
+            var options = select && select.options ? select.options : [];
+            for (var i = 0; i < options.length; i += 1) {
+                var value = options[i].value || "default";
+                if (values.indexOf(value) === -1) {
+                    values.push(value);
+                }
+            }
+        });
+        return values;
+    }
+
     function handleChange(event) {
         var select = event.target;
         if (!select || select.matches(SELECTOR) === false) {
@@ -79,8 +96,13 @@
             return;
         }
 
+        var availableThemes = listAvailableThemes(selects);
         var stored = getStoredTheme();
         var initial = stored || root.getAttribute("data-theme") || "default";
+        if (availableThemes.indexOf(initial) === -1) {
+            initial = "default";
+            storeTheme(initial);
+        }
         applyTheme(initial);
         syncSelects(initial);
         emitThemeChange(initial);

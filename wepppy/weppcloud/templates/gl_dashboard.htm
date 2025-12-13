@@ -787,6 +787,18 @@
         });
       }
 
+      function listAvailableThemes() {
+        var values = ["default"];
+        document.querySelectorAll(SELECTOR).forEach(function (select) {
+          var options = select && select.options ? select.options : [];
+          for (var i = 0; i < options.length; i += 1) {
+            var value = options[i].value || "default";
+            if (values.indexOf(value) === -1) values.push(value);
+          }
+        });
+        return values;
+      }
+
       function handleChange(event) {
         var select = event.target;
         if (!select || !select.matches(SELECTOR)) return;
@@ -800,6 +812,11 @@
       var stored = null;
       try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
       var initial = stored || root.getAttribute("data-theme") || "default";
+      var available = listAvailableThemes();
+      if (available.indexOf(initial) === -1) {
+        initial = "default";
+        storeTheme(initial);
+      }
       applyTheme(initial);
       syncSelects(initial);
       document.addEventListener("change", handleChange, { passive: true });

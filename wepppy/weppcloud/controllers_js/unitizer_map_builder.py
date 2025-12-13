@@ -14,6 +14,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 from importlib.machinery import ModuleSpec
+from contextlib import contextmanager
 from pathlib import Path
 from textwrap import dedent
 from typing import Callable, Dict, Iterable, List, MutableMapping, Tuple
@@ -55,71 +56,98 @@ class LinearTransform:
         return LinearTransform(scale=inv_scale, offset=-self.offset * inv_scale)
 
 
-def _stub_wepppy_modules() -> None:
-    """Install lightweight stubs so unitizer.py can execute in isolation."""
+@contextmanager
+def _stub_wepppy_modules():
+    """Temporarily install lightweight stubs so unitizer.py can load in isolation."""
 
-    if "wepppy" not in sys.modules:
-        root_pkg = types.ModuleType("wepppy")
-        root_pkg.__path__ = [str(ROOT / "wepppy")]
-        root_pkg.__spec__ = ModuleSpec("wepppy", loader=None, is_package=True)
-        root_pkg.__spec__.submodule_search_locations = list(root_pkg.__path__)
-        sys.modules["wepppy"] = root_pkg
+    originals: Dict[str, object] = {}
+    _missing = object()
 
-    if "wepppy.nodb" not in sys.modules:
-        nodb_pkg = types.ModuleType("wepppy.nodb")
-        nodb_pkg.__path__ = [str(ROOT / "wepppy" / "nodb")]
-        nodb_pkg.__spec__ = ModuleSpec("wepppy.nodb", loader=None, is_package=True)
-        nodb_pkg.__spec__.submodule_search_locations = list(nodb_pkg.__path__)
-        sys.modules["wepppy.nodb"] = nodb_pkg
+    def _remember(name: str) -> None:
+        if name not in originals:
+            originals[name] = sys.modules.get(name, _missing)
 
-    base_mod = types.ModuleType("wepppy.nodb.base")
+    try:
+        if "wepppy" not in sys.modules:
+            _remember("wepppy")
+            root_pkg = types.ModuleType("wepppy")
+            root_pkg.__path__ = [str(ROOT / "wepppy")]
+            root_pkg.__spec__ = ModuleSpec("wepppy", loader=None, is_package=True)
+            root_pkg.__spec__.submodule_search_locations = list(root_pkg.__path__)
+            sys.modules["wepppy"] = root_pkg
 
-    class _DummyNoDbBase:
-        def __init__(self, *args, **kwargs) -> None:  # pragma: no cover - trivial
-            pass
+        if "wepppy.nodb" not in sys.modules:
+            _remember("wepppy.nodb")
+            nodb_pkg = types.ModuleType("wepppy.nodb")
+            nodb_pkg.__path__ = [str(ROOT / "wepppy" / "nodb")]
+            nodb_pkg.__spec__ = ModuleSpec("wepppy.nodb", loader=None, is_package=True)
+            nodb_pkg.__spec__.submodule_search_locations = list(nodb_pkg.__path__)
+            sys.modules["wepppy.nodb"] = nodb_pkg
 
-    base_mod.NoDbBase = _DummyNoDbBase
-    sys.modules["wepppy.nodb.base"] = base_mod
+        if "wepppy.nodb.base" not in sys.modules:
+            _remember("wepppy.nodb.base")
+            base_mod = types.ModuleType("wepppy.nodb.base")
 
-    helpers_mod = types.ModuleType("wepppy.all_your_base")
+            class _DummyNoDbBase:
+                def __init__(self, *args, **kwargs) -> None:  # pragma: no cover - trivial
+                    pass
 
-    def _isint(value: object) -> bool:
-        try:
-            return float(int(value)) == float(value)
-        except Exception:
-            return False
+            base_mod.NoDbBase = _DummyNoDbBase
+            sys.modules["wepppy.nodb.base"] = base_mod
 
-    def _isfloat(value: object) -> bool:
-        try:
-            float(value)
-            return True
-        except Exception:
-            return False
+        if "wepppy.all_your_base" not in sys.modules:
+            _remember("wepppy.all_your_base")
+            helpers_mod = types.ModuleType("wepppy.all_your_base")
 
-    def _isnan(value: object) -> bool:
-        try:
-            return float(value) != float(value)
-        except Exception:
-            return False
+            def _isint(value: object) -> bool:
+                try:
+                    return float(int(value)) == float(value)
+                except Exception:
+                    return False
 
-    helpers_mod.isint = _isint  # type: ignore[attr-defined]
-    helpers_mod.isfloat = _isfloat  # type: ignore[attr-defined]
-    helpers_mod.isnan = _isnan  # type: ignore[attr-defined]
-    sys.modules["wepppy.all_your_base"] = helpers_mod
+            def _isfloat(value: object) -> bool:
+                try:
+                    float(value)
+                    return True
+                except Exception:
+                    return False
+
+            def _isnan(value: object) -> bool:
+                try:
+                    return float(value) != float(value)
+                except Exception:
+                    return False
+
+            helpers_mod.isint = _isint  # type: ignore[attr-defined]
+            helpers_mod.isfloat = _isfloat  # type: ignore[attr-defined]
+            helpers_mod.isnan = _isnan  # type: ignore[attr-defined]
+            sys.modules["wepppy.all_your_base"] = helpers_mod
+
+        yield
+    finally:
+        for name, original in originals.items():
+            if original is _missing:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = original
 
 
 def load_unitizer_module():
     """Load ``wepppy.nodb.unitizer`` with minimal dependency scaffolding."""
 
-    _stub_wepppy_modules()
-    spec = importlib.util.spec_from_file_location(
-        "wepppy.nodb.unitizer", str(UNITIZER_PATH)
-    )
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load spec for {UNITIZER_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["wepppy.nodb.unitizer"] = module
-    spec.loader.exec_module(module)
+    existing = sys.modules.get("wepppy.nodb.unitizer")
+    if existing is not None:
+        return existing
+
+    with _stub_wepppy_modules():
+        spec = importlib.util.spec_from_file_location(
+            "wepppy.nodb.unitizer", str(UNITIZER_PATH)
+        )
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"Unable to load spec for {UNITIZER_PATH}")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["wepppy.nodb.unitizer"] = module
+        spec.loader.exec_module(module)
     return module
 
 
