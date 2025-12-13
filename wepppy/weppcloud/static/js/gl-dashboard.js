@@ -606,6 +606,7 @@
   const landuseLayers = [];
   const soilsLayers = [];
   const hillslopesLayers = [];
+  const watarLayers = [];
   const weppLayers = [];
   const weppYearlyLayers = [];
   const weppEventLayers = [];
@@ -613,6 +614,7 @@
   let landuseSummary = null;
   let soilsSummary = null;
   let hillslopesSummary = null;
+  let watarSummary = null;
   let weppSummary = null;
   let weppStatistic = 'mean'; // mean | p90 | sd | cv
   let weppYearlyMetadata = null; // { years: [], minYear, maxYear }
@@ -1406,6 +1408,11 @@
       const el = document.getElementById(`layer-WEPP-${l.key}`);
       if (el) el.checked = false;
     });
+    watarLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-WATAR-${l.key}`);
+      if (el) el.checked = false;
+    });
     weppYearlyLayers.forEach((l) => {
       l.visible = false;
       const el = document.getElementById(`layer-WEPP-Yearly-${l.key}`);
@@ -1457,6 +1464,9 @@
     }
     if (hillslopesLayers.length) {
       subcatchmentSections.push({ title: 'Watershed', items: hillslopesLayers, isSubcatchment: true });
+    }
+    if (watarLayers.length) {
+      subcatchmentSections.push({ title: 'WATAR', items: watarLayers, isSubcatchment: true });
     }
     if (weppLayers.length) {
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
@@ -1851,13 +1861,14 @@
     const landuseDeckLayers = buildLanduseLayers();
     const soilsDeckLayers = buildSoilsLayers();
     const hillslopesDeckLayers = buildHillslopesLayers();
+    const watarDeckLayers = buildWatarLayers();
     const weppDeckLayers = buildWeppLayers();
     const weppYearlyDeckLayers = buildWeppYearlyLayers();
     const weppEventDeckLayers = buildWeppEventLayers();
     const rapDeckLayers = buildRapLayers();
     const labelLayers = buildSubcatchmentLabelsLayer();
     deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...weppDeckLayers, ...weppYearlyDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
+      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...watarDeckLayers, ...weppDeckLayers, ...weppYearlyDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
     });
     // Update legends panel after layer changes
     updateLegendsPanel();
@@ -1893,6 +1904,9 @@
     soil_loss: 't/ha',
     sediment_deposition: 't/ha',
     sediment_yield: 't/ha',
+    wind_transport: 't/ha',
+    water_transport: 't/ha',
+    ash_transport: 't/ha',
     // WEPP Event metrics
     event_P: 'mm',
     event_Q: 'mm',
@@ -1933,6 +1947,13 @@
     for (const layer of hillslopesLayers) {
       if (layer.visible) {
         active.push({ ...layer, category: 'Watershed' });
+        break;
+      }
+    }
+    // WATAR
+    for (const layer of watarLayers) {
+      if (layer.visible) {
+        active.push({ ...layer, category: 'WATAR' });
         break;
       }
     }
@@ -2415,6 +2436,11 @@
       section.appendChild(renderAspectLegend());
       return section;
     }
+    // WATAR layers - dynamic ranges
+    else if (watarRanges && watarRanges[mode]) {
+      minVal = watarRanges[mode].min;
+      maxVal = watarRanges[mode].max;
+    }
     // WEPP layers - these use dynamic data ranges, which is correct
     else if (weppRanges && weppRanges[mode]) {
       minVal = weppRanges[mode].min;
@@ -2448,6 +2474,8 @@
     if (WATER_MEASURES.includes(mode)) {
       colormap = 'winter';
     } else if (SOIL_MEASURES.includes(mode)) {
+      colormap = 'jet2';
+    } else if (layer.category === 'WATAR') {
       colormap = 'jet2';
     }
     
@@ -2876,10 +2904,89 @@
     return null;
   }
 
+  // WATAR (ash transport) overlays
+  function computeWatarRanges() {
+    if (!watarSummary) return;
+    const modes = ['wind_transport', 'water_transport', 'ash_transport'];
+    watarRanges = {};
+    for (const mode of modes) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (const key of Object.keys(watarSummary)) {
+        const row = watarSummary[key];
+        const v = Number(row[mode]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(max)) max = 1;
+      if (max <= min) max = min + 1;
+      watarRanges[mode] = { min, max };
+    }
+  }
+
+  function watarFillColor(mode, row) {
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+    const range = watarRanges[mode] || { min: 0, max: 1 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    return jet2Color(normalized);
+  }
+
+  function watarValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function buildWatarLayers() {
+    const activeLayers = watarLayers
+      .filter((l) => l.visible && subcatchmentsGeoJson && watarSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `watar-${overlay.key}`,
+          data: subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? watarSummary[String(topaz)] : null;
+            return watarFillColor(overlay.mode, row);
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function pickActiveWatarLayer() {
+    for (let i = watarLayers.length - 1; i >= 0; i--) {
+      const layer = watarLayers[i];
+      if (layer.visible) {
+        return layer;
+      }
+    }
+    return null;
+  }
+
   const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
   const WEPP_LOSS_PATH = 'wepp/output/interchange/loss_pw0.hill.parquet';
+  const WATAR_PATH = 'ash/post/hillslope_annuals.parquet';
 
   // WEPP loss ranges computed dynamically from weppSummary data
+  let watarRanges = {};
   let weppRanges = {};
   let weppYearlyRanges = {};
 
@@ -4498,6 +4605,54 @@
     }
   }
 
+  async function detectWatarOverlays() {
+    // Geometry is shared across scenarios - always use base URL
+    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
+    try {
+      const payload = {
+        datasets: [{ path: WATAR_PATH, alias: 'wtr' }],
+        columns: [
+          'wtr.topaz_id AS topaz_id',
+          'wtr."wind_transport (tonne/ha)" AS wind_transport',
+          'wtr."water_transport (tonne/ha)" AS water_transport',
+          'wtr."ash_transport (tonne/ha)" AS ash_transport',
+        ],
+      };
+      const result = await postQueryEngine(payload);
+      if (!result || !result.records || !result.records.length) return;
+
+      watarSummary = {};
+      for (const row of result.records) {
+        const topazId = row.topaz_id;
+        if (topazId != null) {
+          watarSummary[String(topazId)] = row;
+        }
+      }
+      computeWatarRanges();
+
+      if (!subcatchmentsGeoJson) {
+        const geoResp = await fetch(geoUrl);
+        if (geoResp.ok) {
+          subcatchmentsGeoJson = await geoResp.json();
+        }
+      }
+      if (!subcatchmentsGeoJson) return;
+
+      watarLayers.length = 0;
+      watarLayers.push(
+        { key: 'watar-wind', label: 'Wind Transport (tonne/ha)', path: WATAR_PATH, mode: 'wind_transport', visible: false },
+        { key: 'watar-water', label: 'Water Transport (tonne/ha)', path: WATAR_PATH, mode: 'water_transport', visible: false },
+        { key: 'watar-ash', label: 'Ash Transport (tonne/ha)', path: WATAR_PATH, mode: 'ash_transport', visible: false },
+      );
+
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load WATAR overlays', err);
+    }
+  }
+
   async function detectWeppOverlays() {
     // Geometry is shared across scenarios - always use base URL
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
@@ -4888,6 +5043,17 @@
           return `Layer: ${hillslopesOverlay.path}\nTopazID: ${topaz}\n${label}`;
         }
       }
+      const watarOverlay = pickActiveWatarLayer();
+      if (info.object && watarOverlay && watarSummary) {
+        const props = info.object && info.object.properties;
+        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+        const row = topaz != null ? watarSummary[String(topaz)] : null;
+        const val = watarValue(watarOverlay.mode, row);
+        if (val !== null) {
+          const label = `${watarOverlay.label}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+          return `Layer: ${watarOverlay.path}\nTopazID: ${topaz}\n${label}`;
+        }
+      }
       const weppOverlay = pickActiveWeppLayer();
       if (info.object && weppOverlay && weppSummary) {
         const props = info.object && info.object.properties;
@@ -5019,7 +5185,7 @@
     applyLayers();
   };
 
-  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWeppOverlays(), detectWeppYearlyOverlays(), detectWeppEventOverlays(), detectRapOverlays()])
+  Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWatarOverlays(), detectWeppOverlays(), detectWeppYearlyOverlays(), detectWeppEventOverlays(), detectRapOverlays()])
     .catch((err) => {
       // eslint-disable-next-line no-console
       console.error('gl-dashboard: layer detection failed', err);
