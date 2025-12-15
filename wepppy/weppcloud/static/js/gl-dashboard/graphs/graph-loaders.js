@@ -29,7 +29,6 @@ export function createGraphLoaders(deps) {
   const {
     graphScenarios,
     postQueryEngine,
-    postBaseQueryEngine,
     postQueryEngineForScenario,
     viridisColor,
     winterColor,
