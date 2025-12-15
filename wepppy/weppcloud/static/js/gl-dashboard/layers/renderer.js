@@ -1,5 +1,7 @@
 // Sidebar layer list and legend rendering for gl-dashboard.
 
+import { resolveColormapName } from '../colors.js';
+
 export function createLayerRenderer({
   getState,
   setValue,
@@ -765,14 +767,7 @@ export function createLayerRenderer({
       unit = '%';
     }
 
-    let colormap = 'viridis';
-    if (WATER_MEASURES.includes(mode)) {
-      colormap = 'winter';
-    } else if (SOIL_MEASURES.includes(mode)) {
-      colormap = 'jet2';
-    } else if (layer.category === 'WATAR') {
-      colormap = 'jet2';
-    }
+    const colormap = resolveColormapName(mode, layer.category, { WATER_MEASURES, SOIL_MEASURES });
 
     section.appendChild(renderContinuousLegend(minVal, maxVal, unit, colormap));
     return section;

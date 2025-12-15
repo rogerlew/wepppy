@@ -1,5 +1,7 @@
 // Layer builders, color/value helpers, and tooltip/legend utilities for gl-dashboard.
 
+import { normalizeModeValue, resolveColormapName } from '../colors.js';
+
 function pickActive(arr) {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (arr[i].visible) {
@@ -17,6 +19,14 @@ export function createLayerUtils({
 }) {
   const { viridisColor, winterColor, jet2Color, rdbuScale } = colorScales;
   const { WATER_MEASURES, SOIL_MEASURES, NLCD_COLORMAP, NLCD_LABELS, RAP_BAND_LABELS } = constants;
+
+  function colorFromPalette(name, normalized) {
+    if (name === 'winter') return winterColor(normalized);
+    if (name === 'jet2') return jet2Color(normalized);
+    if (name === 'viridis') return viridisColor(normalized);
+    // Fallback to viridis to avoid silent gray fills if a palette is added without support.
+    return viridisColor(normalized);
+  }
 
   function landuseValue(mode, row) {
     if (!row) return null;
@@ -38,9 +48,10 @@ export function createLayerUtils({
       return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, 220];
     }
     const v = Number(row[mode]);
-    if (!Number.isFinite(v)) return [128, 128, 128, 200];
-    const normalized = Math.min(1, Math.max(0, v / 100));
-    return mode === 'cancov' ? winterColor(normalized) : jet2Color(normalized);
+    const normalized = normalizeModeValue(mode, v);
+    if (!Number.isFinite(normalized)) return [128, 128, 128, 200];
+    const palette = resolveColormapName(mode, 'Landuse', { WATER_MEASURES, SOIL_MEASURES });
+    return colorFromPalette(palette, normalized);
   }
 
   function landuseComparisonFillColor(mode, scenarioRow, baseRow) {
@@ -52,7 +63,8 @@ export function createLayerUtils({
       return [128, 128, 128, 200];
     }
     const diff = baseValue - scenarioValue;
-    const range = state.comparisonDiffRanges[mode] || { min: -50, max: 50 };
+    const usePercentScale = Math.abs(baseValue) > 1 || Math.abs(scenarioValue) > 1;
+    const range = state.comparisonDiffRanges[mode] || { min: usePercentScale ? -50 : -1, max: usePercentScale ? 50 : 1 };
     const normalized = Math.min(1, Math.max(0, (diff - range.min) / (range.max - range.min || 1)));
     return rdbuScale(normalized);
   }
@@ -122,17 +134,10 @@ export function createLayerUtils({
       return [r, g, b, 200];
     }
     const v = Number(row[mode]);
-    if (!Number.isFinite(v)) return [128, 128, 128, 200];
-    let normalized = 0.5;
-    if (['clay', 'sand', 'rock'].includes(mode)) {
-      normalized = Math.min(1, Math.max(0, v / 100));
-    } else if (mode === 'bd') {
-      normalized = Math.min(1, Math.max(0, (v - 0.8) / 1.4));
-    } else if (mode === 'soil_depth') {
-      const depth = Math.min(v, 2000);
-      normalized = Math.min(1, Math.max(0, depth / 2000));
-    }
-    return jet2Color(normalized);
+    const normalized = normalizeModeValue(mode, v);
+    if (!Number.isFinite(normalized)) return [128, 128, 128, 200];
+    const palette = resolveColormapName(mode, 'Soils', { WATER_MEASURES, SOIL_MEASURES });
+    return colorFromPalette(palette, normalized);
   }
 
   function hillslopesFillColor(mode, row) {
@@ -227,7 +232,8 @@ export function createLayerUtils({
     if (!Number.isFinite(value)) return [128, 128, 128, 200];
     const range = state.weppEventRanges[mode] || { min: 0, max: 1 };
     const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
-    return jet2Color(normalized);
+    const palette = resolveColormapName(mode, 'WEPP Event', { WATER_MEASURES, SOIL_MEASURES });
+    return colorFromPalette(palette, normalized);
   }
 
   function rapFillColor(row) {
