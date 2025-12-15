@@ -22,14 +22,20 @@
   let queryEngineModule;
   let graphLoadersModule;
   let detectorModule;
+  let layerUtilsModule;
+  let mapControllerModule;
+  let layerRendererModule;
   try {
-    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule, detectorModule] = await Promise.all([
+    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule] = await Promise.all([
       import(`${moduleBase}config.js`),
       import(`${moduleBase}state.js`),
       import(`${moduleBase}graphs/timeseries-graph.js`),
       import(`${moduleBase}data/query-engine.js`),
       import(`${moduleBase}graphs/graph-loaders.js`),
       import(`${moduleBase}layers/detector.js`),
+      import(`${moduleBase}map/layers.js`),
+      import(`${moduleBase}map/controller.js`),
+      import(`${moduleBase}layers/renderer.js`),
     ]);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -49,6 +55,9 @@
     createColorScales,
   } = config;
   const { getState, setValue, initState } = stateModule;
+  const { createLayerUtils } = layerUtilsModule;
+  const { createMapController } = mapControllerModule;
+  const { createLayerRenderer } = layerRendererModule;
   const { createTimeseriesGraph } = graphModule;
   const state = getState();
   const queryEngine = queryEngineModule.createQueryEngine(ctx);
@@ -172,8 +181,8 @@
 
   function setViewState(viewState) {
     setValue('currentViewState', viewState);
-    if (deckgl) {
-      deckgl.setProps({ viewState });
+    if (mapController) {
+      mapController.setViewState(viewState);
     }
   }
 
@@ -229,6 +238,7 @@
     });
   }
 
+  let mapController;
   let baseLayer = createBaseLayer(currentBasemapKey);
 
   function setBasemap(basemapKey) {
@@ -758,6 +768,8 @@
   const layerEmptyEl = document.getElementById('gl-layer-empty');
   const graphListEl = document.getElementById('gl-graph-list');
   const graphEmptyEl = document.getElementById('gl-graph-empty');
+  const legendContentEl = document.getElementById('gl-legends-content');
+  const legendEmptyEl = document.getElementById('gl-legend-empty');
   const glMainEl = document.querySelector('.gl-main');
   const graphPanelEl = document.getElementById('gl-graph');
 
@@ -1193,166 +1205,6 @@
     await refreshWeppYearlyData();
   }
 
-  function updateLayerList() {
-    if (!layerListEl) return;
-    layerListEl.innerHTML = '';
-    const subcatchmentSections = [];
-    // Rasters: append specific rasters to Landuse/Soils groups
-    const landuseRasters = detectedLayers
-      .filter((l) => l.key === 'landuse' || l.key === 'sbs')
-      .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
-    const soilsRasters = detectedLayers
-      .filter((l) => l.key === 'soils')
-      .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
-
-    if (landuseLayers.length || landuseRasters.length) {
-      subcatchmentSections.push({ title: 'Landuse', items: [...landuseLayers, ...landuseRasters], isSubcatchment: true });
-    }
-    if (soilsLayers.length || soilsRasters.length) {
-      subcatchmentSections.push({ title: 'Soils', items: [...soilsLayers, ...soilsRasters], isSubcatchment: true });
-    }
-    if (rapLayers.length) {
-      // RAP uses special rendering with cumulative mode + checkboxes
-      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true });
-    }
-    if (weppLayers.length) {
-      subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
-    }
-    if (weppYearlyLayers.length) {
-      subcatchmentSections.push({ title: 'WEPP Yearly', idPrefix: 'WEPP-Yearly', items: weppYearlyLayers, isSubcatchment: true, isWeppYearly: true });
-    }
-    if (weppEventLayers.length) {
-      // WEPP Event uses special rendering with date input + radio options
-      subcatchmentSections.push({ title: 'WEPP Event', items: weppEventLayers, isSubcatchment: true, isWeppEvent: true });
-    }
-    if (watarLayers.length) {
-      subcatchmentSections.push({ title: 'WATAR', items: watarLayers, isSubcatchment: true });
-    }
-    const allSections = [...subcatchmentSections];
-    if (!allSections.length) {
-      if (layerEmptyEl) {
-        layerEmptyEl.hidden = false;
-      }
-      return;
-    }
-    if (layerEmptyEl) {
-      layerEmptyEl.hidden = true;
-    }
-    // Add subcatchment section header if we have any
-    if (subcatchmentSections.length) {
-      const groupHeader = document.createElement('li');
-      groupHeader.className = 'gl-layer-group-header';
-      groupHeader.textContent = 'Subcatchment Overlays';
-      layerListEl.appendChild(groupHeader);
-    }
-    allSections.forEach((section, idx) => {
-      // Create collapsible details element
-      const details = document.createElement('details');
-      details.className = 'gl-layer-details';
-      // Open the first section by default, or sections with visible items
-      const hasVisibleItem = section.items.some((l) => l.visible);
-      details.open = idx === 0 || hasVisibleItem || (section.isRap && rapCumulativeMode);
-
-      const summary = document.createElement('summary');
-      summary.className = 'gl-layer-group';
-      summary.textContent = section.title;
-      details.appendChild(summary);
-
-      // Special handling for RAP section
-      if (section.isRap) {
-        renderRapSection(details, section);
-        layerListEl.appendChild(details);
-        return;
-      }
-
-      // Special handling for WEPP Event section
-      if (section.isWeppEvent) {
-        renderWeppEventSection(details, section);
-        layerListEl.appendChild(details);
-        return;
-      }
-
-      if (section.title === 'WEPP') {
-        const statWrapper = document.createElement('div');
-        statWrapper.className = 'gl-wepp-stat';
-        statWrapper.innerHTML = `
-          <div class="gl-wepp-stat__label">Statistic</div>
-          <div class="gl-wepp-stat__options">
-            <label><input type="radio" name="wepp-stat" value="mean" ${weppStatistic === 'mean' ? 'checked' : ''}> Mean (Annual Average)</label>
-            <label><input type="radio" name="wepp-stat" value="p90" ${weppStatistic === 'p90' ? 'checked' : ''}> 90th Percentile (Risk)</label>
-            <label><input type="radio" name="wepp-stat" value="sd" ${weppStatistic === 'sd' ? 'checked' : ''}> Std. Deviation (Variability)</label>
-            <label><input type="radio" name="wepp-stat" value="cv" ${weppStatistic === 'cv' ? 'checked' : ''}> CV % (Instability)</label>
-          </div>
-        `;
-        const statInputs = statWrapper.querySelectorAll('input[name="wepp-stat"]');
-        statInputs.forEach((inputEl) => {
-          inputEl.addEventListener('change', async (event) => {
-            const nextStat = event.target.value;
-            if (nextStat === weppStatistic) return;
-            weppStatistic = nextStat;
-            await refreshWeppStatisticData();
-          });
-        });
-        details.appendChild(statWrapper);
-      }
-
-      const itemList = document.createElement('ul');
-      itemList.className = 'gl-layer-items';
-
-      section.items.forEach((layer) => {
-        const li = document.createElement('li');
-        li.className = 'gl-layer-item';
-        const input = document.createElement('input');
-        // Use radio for subcatchment overlays (landuse/soils), checkbox for rasters
-        const isRaster = layer.isRaster === true;
-        input.type = section.isSubcatchment && !isRaster ? 'radio' : 'checkbox';
-        if (section.isSubcatchment && !isRaster) {
-          input.name = 'subcatchment-overlay';
-        }
-        input.checked = layer.visible;
-        const idPrefix = section.idPrefix || section.title;
-        input.id = `layer-${idPrefix}-${layer.key}`;
-        input.addEventListener('change', async () => {
-          if (section.isSubcatchment && !isRaster) {
-            // Radio behavior: deselect all, then select this one
-            deselectAllSubcatchmentOverlays();
-            layer.visible = true;
-            input.checked = true;
-            if (section.isWeppYearly) {
-              await activateWeppYearlyLayer();
-            }
-          } else {
-            const target = layer.rasterRef || layer;
-            target.visible = input.checked;
-            // Keep copied flags in sync so UI reflects state
-            layer.visible = input.checked;
-          }
-          setGraphFocus(false);
-          applyLayers();
-          const graphEl = document.getElementById('gl-graph');
-          const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
-          if (graphVisible && section.isWeppYearly && layer.visible) {
-            await loadWeppYearlyTimeseriesData();
-          } else if (graphVisible && !section.isSubcatchment && (rapCumulativeMode || rapLayers.some((l) => l.visible))) {
-            // Keep RAP graph in sync when switching out of subcatchment overlays
-            await loadRapTimeseriesData();
-          }
-        });
-        const label = document.createElement('label');
-        label.setAttribute('for', input.id);
-        const name = layer.label || layer.key;
-        const path = layer.path || '';
-        label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
-        li.appendChild(input);
-        li.appendChild(label);
-        itemList.appendChild(li);
-      });
-
-      details.appendChild(itemList);
-      layerListEl.appendChild(details);
-    });
-  }
-
   function updateGraphList() {
     if (!graphListEl) return;
     graphListEl.innerHTML = '';
@@ -1405,173 +1257,6 @@
   /**
    * Render the RAP section with cumulative cover radio + band checkboxes.
    */
-  function renderRapSection(details, section) {
-    const itemList = document.createElement('ul');
-    itemList.className = 'gl-layer-items';
-
-    // Cumulative Cover radio option
-    const cumulativeLi = document.createElement('li');
-    cumulativeLi.className = 'gl-layer-item';
-    const cumulativeInput = document.createElement('input');
-    cumulativeInput.type = 'radio';
-    cumulativeInput.name = 'subcatchment-overlay';
-    cumulativeInput.checked = rapCumulativeMode;
-    cumulativeInput.id = 'layer-RAP-cumulative';
-    cumulativeInput.addEventListener('change', async () => {
-      if (cumulativeInput.checked) {
-        deselectAllSubcatchmentOverlays();
-        rapCumulativeMode = true;
-        // Re-check the cumulative radio since deselectAll cleared it
-        cumulativeInput.checked = true;
-        setGraphFocus(false);
-        setGraphCollapsed(false);
-        if (rapMetadata && rapMetadata.years && rapMetadata.years.length) {
-          const minYear = rapMetadata.years[0];
-          const maxYear = rapMetadata.years[rapMetadata.years.length - 1];
-          if (!rapSelectedYear || rapSelectedYear < minYear || rapSelectedYear > maxYear) {
-            rapSelectedYear = maxYear;
-          }
-          yearSlider.setRange(minYear, maxYear, rapSelectedYear);
-        }
-        // Show year slider
-        yearSlider.show();
-        await refreshRapData();
-        applyLayers();
-        // Load graph data if graph is visible
-        const graphEl = document.getElementById('gl-graph');
-        if (graphEl && !graphEl.classList.contains('is-collapsed')) {
-          await loadRapTimeseriesData();
-        }
-      }
-    });
-    const cumulativeLabel = document.createElement('label');
-    cumulativeLabel.setAttribute('for', 'layer-RAP-cumulative');
-    cumulativeLabel.innerHTML = '<span class="gl-layer-name">Cumulative Cover</span><br><span class="gl-layer-path">Sum of selected bands (0-100%)</span>';
-    cumulativeLi.appendChild(cumulativeInput);
-    cumulativeLi.appendChild(cumulativeLabel);
-    itemList.appendChild(cumulativeLi);
-
-    // Band checkboxes (indented under cumulative)
-    const bandContainer = document.createElement('li');
-    bandContainer.style.cssText = 'padding-left: 1.5rem; margin-top: 0.25rem;';
-    const bandList = document.createElement('ul');
-    bandList.className = 'gl-layer-items';
-    bandList.style.cssText = 'gap: 0.15rem;';
-
-    section.items.forEach((layer) => {
-      const li = document.createElement('li');
-      li.className = 'gl-layer-item';
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.checked = layer.selected !== false; // Default to selected unless explicitly false
-      input.id = `layer-RAP-band-${layer.key}`;
-      input.addEventListener('change', async () => {
-        layer.selected = input.checked;
-        if (rapCumulativeMode) {
-          await refreshRapData();
-          applyLayers();
-          // Reload graph data if graph is visible
-          const graphEl = document.getElementById('gl-graph');
-          if (graphEl && !graphEl.classList.contains('is-collapsed')) {
-            await loadRapTimeseriesData();
-          }
-        }
-      });
-      const label = document.createElement('label');
-      label.setAttribute('for', input.id);
-      const name = layer.label || layer.key;
-      label.innerHTML = `<span class="gl-layer-name" style="font-size:0.85rem;">${name}</span>`;
-      li.appendChild(input);
-      li.appendChild(label);
-      bandList.appendChild(li);
-    });
-
-    bandContainer.appendChild(bandList);
-    itemList.appendChild(bandContainer);
-
-    details.appendChild(itemList);
-  }
-
-  /**
-   * Render the WEPP Event section with date input + metric radio options.
-   */
-  function renderWeppEventSection(details, section) {
-    const itemList = document.createElement('ul');
-    itemList.className = 'gl-layer-items';
-
-    // Date input row
-    const dateLi = document.createElement('li');
-    dateLi.className = 'gl-layer-item';
-    dateLi.style.cssText = 'flex-direction: column; align-items: flex-start; gap: 0.25rem;';
-    const dateLabel = document.createElement('label');
-    dateLabel.textContent = 'Event Date:';
-    dateLabel.style.cssText = 'font-size: 0.85rem; color: #8fa0c2;';
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateInput.id = 'gl-wepp-event-date';
-    dateInput.style.cssText = 'width: 100%; padding: 0.25rem; background: #1f2c44; border: 1px solid #3f5070; border-radius: 4px; color: #d0d7e8; font-size: 0.85rem;';
-    if (weppEventSelectedDate) {
-      dateInput.value = weppEventSelectedDate;
-    }
-    if (weppEventMetadata && weppEventMetadata.startDate) {
-      dateInput.min = weppEventMetadata.startDate;
-    }
-    if (weppEventMetadata && weppEventMetadata.endDate) {
-      dateInput.max = weppEventMetadata.endDate;
-    }
-    dateInput.addEventListener('change', async () => {
-      weppEventSelectedDate = dateInput.value;
-      // Reload data for the currently active WEPP Event layer
-      const activeLayer = pickActiveWeppEventLayer();
-      if (activeLayer && weppEventSelectedDate) {
-        await refreshWeppEventData();
-        applyLayers();
-      }
-    });
-    dateLi.appendChild(dateLabel);
-    dateLi.appendChild(dateInput);
-    itemList.appendChild(dateLi);
-
-    // Separator
-    const separatorLi = document.createElement('li');
-    separatorLi.style.cssText = 'border-top: 1px solid #1f2c44; margin: 0.5rem 0; padding: 0;';
-    itemList.appendChild(separatorLi);
-
-    // Radio options for each metric
-    section.items.forEach((layer) => {
-      const li = document.createElement('li');
-      li.className = 'gl-layer-item';
-      const input = document.createElement('input');
-      input.type = 'radio';
-      input.name = 'subcatchment-overlay';
-      input.checked = layer.visible;
-      input.id = `layer-WEPP-Event-${layer.key}`;
-      input.addEventListener('change', async () => {
-        if (input.checked) {
-          deselectAllSubcatchmentOverlays();
-          layer.visible = true;
-          input.checked = true;
-          setGraphFocus(false);
-          // Load data if we have a date selected
-          if (weppEventSelectedDate) {
-            await refreshWeppEventData();
-          }
-          applyLayers();
-        }
-      });
-      const label = document.createElement('label');
-      label.setAttribute('for', input.id);
-      const name = layer.label || layer.key;
-      const path = layer.path || '';
-      label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
-      li.appendChild(input);
-      li.appendChild(label);
-      itemList.appendChild(li);
-    });
-
-    details.appendChild(itemList);
-  }
-
   function buildSubcatchmentLabelsLayer() {
     if (!subcatchmentLabelsVisible || !subcatchmentsGeoJson) {
       return [];
@@ -1631,688 +1316,12 @@
   }
 
   function applyLayers() {
-    const activeRasterLayers = detectedLayers
-      .filter((layer) => layer.visible)
-      .map((layer) => {
-        if (layer.imageUrl) {
-          const cacheBusted = `${layer.imageUrl}${layer.imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-          return new deck.BitmapLayer({
-            id: `raster-${layer.key}`,
-            image: cacheBusted,
-            bounds: layer.bounds,
-            pickable: false,
-            opacity: 0.8,
-          });
-        }
-        if (layer.canvas) {
-          return new deck.BitmapLayer({
-            id: `raster-${layer.key}`,
-            image: layer.canvas,
-            bounds: layer.bounds,
-            pickable: false,
-            opacity: 0.8,
-          });
-        }
-        return null;
-      })
-      .filter(Boolean);
-    const landuseDeckLayers = subcatchmentsVisible ? buildLanduseLayers() : [];
-    const soilsDeckLayers = subcatchmentsVisible ? buildSoilsLayers() : [];
-    const hillslopesDeckLayers = subcatchmentsVisible ? buildHillslopesLayers() : [];
-    const watarDeckLayers = subcatchmentsVisible ? buildWatarLayers() : [];
-    const weppDeckLayers = subcatchmentsVisible ? buildWeppLayers() : [];
-    const weppYearlyDeckLayers = subcatchmentsVisible ? buildWeppYearlyLayers() : [];
-    const weppEventDeckLayers = subcatchmentsVisible ? buildWeppEventLayers() : [];
-    const rapDeckLayers = subcatchmentsVisible ? buildRapLayers() : [];
-    const labelLayers = subcatchmentLabelsVisible && subcatchmentsVisible ? buildSubcatchmentLabelsLayer() : [];
-    deckgl.setProps({
-      layers: [baseLayer, ...landuseDeckLayers, ...soilsDeckLayers, ...hillslopesDeckLayers, ...watarDeckLayers, ...weppDeckLayers, ...weppYearlyDeckLayers, ...weppEventDeckLayers, ...rapDeckLayers, ...activeRasterLayers, ...labelLayers],
-    });
-    // Update legends panel after layer changes
+    const stack = layerUtils.buildLayerStack(baseLayer);
+    if (mapController) {
+      mapController.applyLayers(stack);
+    }
     updateLegendsPanel();
   }
-
-  // ============================================================================
-  // Legends Panel Rendering
-  // ============================================================================
-
-  // SBS burn class colors and labels (matches baer.py / disturbed.py)
-  const SBS_CLASSES = [
-    { color: '#00734A', label: 'Unburned' },
-    { color: '#4DE600', label: 'Low' },
-    { color: '#FFFF00', label: 'Moderate' },
-    { color: '#FF0000', label: 'High' },
-  ];
-
-  // Units for continuous layers
-  const LAYER_UNITS = {
-    cancov: '%',
-    inrcov: '%',
-    rilcov: '%',
-    clay: '%',
-    sand: '%',
-    rock: '%',
-    bd: 'g/cm³',
-    slope_scalar: 'rise/run',
-    length: 'm',
-    aspect: '°',
-    runoff_volume: 'mm',
-    subrunoff_volume: 'mm',
-    baseflow_volume: 'mm',
-    soil_loss: 't/ha',
-    sediment_deposition: 't/ha',
-    sediment_yield: 't/ha',
-    wind_transport: 't/ha',
-    water_transport: 't/ha',
-    ash_transport: 't/ha',
-    // WEPP Event metrics
-    event_P: 'mm',
-    event_Q: 'mm',
-    event_ET: 'mm',
-    event_peakro: 'm³/s',
-    event_tdet: 'kg',
-  };
-
-  // RAP band units
-  const RAP_UNITS = {
-    afgc: '%',
-    pfgc: '%',
-    tree: '%',
-    shr: '%',
-    bgr: '%',
-    ltr: '%',
-  };
-
-  function getActiveLayerForLegend() {
-    // Find the first visible layer from each category
-    const active = [];
-    
-    if (subcatchmentsVisible) {
-      // Landuse
-      for (const layer of landuseLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'Landuse' });
-          break;
-        }
-      }
-      // Soils
-      for (const layer of soilsLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'Soils' });
-          break;
-        }
-      }
-      // Hillslopes/Watershed
-      for (const layer of hillslopesLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'Watershed' });
-          break;
-        }
-      }
-      // RAP - handle cumulative mode
-      if (rapCumulativeMode) {
-        const selectedBands = rapLayers.filter((l) => l.selected !== false);
-        const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
-        active.push({
-          key: 'rap-cumulative',
-          label: `Cumulative Cover (${bandNames})`,
-          category: 'RAP',
-          isCumulative: true,
-        });
-      } else {
-        for (const layer of rapLayers) {
-          if (layer.visible) {
-            active.push({ ...layer, category: 'RAP' });
-            break;
-          }
-        }
-      }
-      // WEPP
-      for (const layer of weppLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'WEPP' });
-          break;
-        }
-      }
-      // WEPP Yearly
-      for (const layer of weppYearlyLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'WEPP Yearly' });
-          break;
-        }
-      }
-      // WEPP Event
-      for (const layer of weppEventLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'WEPP Event' });
-          break;
-        }
-      }
-      // WATAR
-      for (const layer of watarLayers) {
-        if (layer.visible) {
-          active.push({ ...layer, category: 'WATAR' });
-          break;
-        }
-      }
-    }
-    // Raster layers (SBS, etc.)
-    for (const layer of detectedLayers) {
-      if (layer.visible) {
-        active.push({ ...layer, category: 'Raster' });
-      }
-    }
-    return active;
-  }
-
-  function computeRangeFromSummary(summary, mode) {
-    if (!summary) return { min: 0, max: 100 };
-    let min = Infinity;
-    let max = -Infinity;
-    for (const key of Object.keys(summary)) {
-      const row = summary[key];
-      const v = Number(row[mode]);
-      if (Number.isFinite(v)) {
-        if (v < min) min = v;
-        if (v > max) max = v;
-      }
-    }
-    if (!Number.isFinite(min)) min = 0;
-    if (!Number.isFinite(max)) max = 100;
-    if (max <= min) max = min + 1;
-    return { min, max };
-  }
-
-  function formatLegendValue(value, decimals = 1) {
-    if (!Number.isFinite(value)) return '—';
-    return value.toFixed(decimals);
-  }
-
-  function getUsedNlcdClasses(layer) {
-    // Extract unique NLCD classes from the raster values array
-    const classes = new Set();
-    if (!layer || !layer.values) return [];
-    const values = layer.values;
-    for (let i = 0; i < values.length; i++) {
-      const v = values[i];
-      if (Number.isFinite(v) && v > 0 && NLCD_COLORMAP[v]) {
-        classes.add(v);
-      }
-    }
-    // Sort numerically and return as legend items
-    return Array.from(classes).sort((a, b) => a - b).map(code => ({
-      color: NLCD_COLORMAP[code],
-      label: NLCD_LABELS[code] || `Class ${code}`,
-    }));
-  }
-
-  function getUsedSoilClasses(layer) {
-    // Extract unique soil codes from the SSURGO raster values array
-    // and try to match them with soilsSummary for labels
-    const codes = new Set();
-    if (!layer || !layer.values) return [];
-    const values = layer.values;
-    for (let i = 0; i < values.length; i++) {
-      const v = values[i];
-      if (Number.isFinite(v) && v > 0) {
-        codes.add(v);
-      }
-    }
-    if (codes.size === 0) return [];
-    
-    // Build a map from mukey integer prefix to soil info from soilsSummary
-    const mukeyToInfo = new Map();
-    if (soilsSummary) {
-      for (const topazId of Object.keys(soilsSummary)) {
-        const row = soilsSummary[topazId];
-        if (!row || !row.mukey) continue;
-        // mukey format: "762983-loam-forest" - extract the numeric prefix
-        const mukeyParts = String(row.mukey).split('-');
-        const mukeyNum = parseInt(mukeyParts[0], 10);
-        if (Number.isFinite(mukeyNum) && !mukeyToInfo.has(mukeyNum)) {
-          mukeyToInfo.set(mukeyNum, {
-            desc: row.simple_texture || row.desc || `Soil ${mukeyNum}`,
-            mukey: row.mukey,
-          });
-        }
-      }
-    }
-    
-    // Sort numerically and return as legend items
-    return Array.from(codes).sort((a, b) => a - b).map(code => {
-      const color = soilColorForValue(code);
-      const label = String(code);
-      return { color, label };
-    });
-  }
-
-  function getUsedLanduseClasses() {
-    // Extract unique landuse classes from landuseSummary with their color and description
-    const classMap = new Map(); // key -> { color, desc }
-    if (!landuseSummary) return classMap;
-    for (const topazId of Object.keys(landuseSummary)) {
-      const row = landuseSummary[topazId];
-      if (!row) continue;
-      const key = row.key ?? row._map;
-      if (key == null) continue;
-      if (classMap.has(key)) continue;
-      // Extract color and description
-      const color = row.color;
-      const desc = row.desc || `Class ${key}`;
-      classMap.set(key, { color, desc });
-    }
-    return classMap;
-  }
-
-  function getUsedSoilsClasses() {
-    // Extract unique soil classes from soilsSummary with their color and description
-    // Deduplicate by mukey (e.g., "762991-silt loam-forest")
-    const classMap = new Map(); // mukey -> { color, desc }
-    if (!soilsSummary) return classMap;
-    for (const topazId of Object.keys(soilsSummary)) {
-      const row = soilsSummary[topazId];
-      if (!row) continue;
-      const mukey = row.mukey;
-      if (mukey == null) continue;
-      if (classMap.has(mukey)) continue;
-      // Extract color and description
-      const color = row.color;
-      const desc = row.desc || mukey;
-      classMap.set(mukey, { color, desc });
-    }
-    return classMap;
-  }
-
-  function rgbaArrayToCss(colorArr, alphaOverride) {
-    if (!Array.isArray(colorArr) || colorArr.length < 3) return null;
-    const r = Number(colorArr[0]);
-    const g = Number(colorArr[1]);
-    const b = Number(colorArr[2]);
-    const a = alphaOverride != null ? alphaOverride : (colorArr[3] != null ? Number(colorArr[3]) / 255 : 1);
-    if (![r, g, b].every(Number.isFinite)) return null;
-    return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${a.toFixed(2)})`;
-  }
-
-  function renderCategoricalLegend(items) {
-    const container = document.createElement('div');
-    container.className = 'gl-legend-categorical';
-    for (const item of items) {
-      const row = document.createElement('div');
-      row.className = 'gl-legend-categorical__item';
-      const swatch = document.createElement('span');
-      swatch.className = 'gl-legend-categorical__swatch';
-      swatch.style.backgroundColor = item.color;
-      const label = document.createElement('span');
-      label.textContent = item.label;
-      row.appendChild(swatch);
-      row.appendChild(label);
-      container.appendChild(row);
-    }
-    return container;
-  }
-
-  function renderContinuousLegend(minVal, maxVal, unit, colormap) {
-    const container = document.createElement('div');
-    container.className = 'gl-legend-continuous';
-    
-    const barWrapper = document.createElement('div');
-    barWrapper.className = 'gl-legend-continuous__bar-wrapper';
-    const bar = document.createElement('div');
-    // Apply appropriate colormap class
-    let barClass = 'gl-legend-continuous__bar';
-    if (colormap === 'winter') {
-      barClass += ' gl-legend-continuous__bar--winter';
-    } else if (colormap === 'jet2') {
-      barClass += ' gl-legend-continuous__bar--jet2';
-    }
-    bar.className = barClass;
-    barWrapper.appendChild(bar);
-    container.appendChild(barWrapper);
-    
-    const labels = document.createElement('div');
-    labels.className = 'gl-legend-continuous__labels';
-    const minLabel = document.createElement('span');
-    minLabel.textContent = formatLegendValue(minVal);
-    const maxLabel = document.createElement('span');
-    maxLabel.textContent = formatLegendValue(maxVal);
-    labels.appendChild(minLabel);
-    labels.appendChild(maxLabel);
-    container.appendChild(labels);
-    
-    if (unit) {
-      const unitEl = document.createElement('div');
-      unitEl.className = 'gl-legend-continuous__unit';
-      unitEl.textContent = unit;
-      container.appendChild(unitEl);
-    }
-    
-    return container;
-  }
-
-  // Diverging legend for comparison mode (blue-white-red)
-  // mode parameter allows looking up the computed difference range
-  function renderDivergingLegend(unit, label, mode, rangeOverride) {
-    const container = document.createElement('div');
-    container.className = 'gl-legend-continuous gl-legend-diverging';
-    
-    const barWrapper = document.createElement('div');
-    barWrapper.className = 'gl-legend-continuous__bar-wrapper';
-    const bar = document.createElement('div');
-    bar.className = 'gl-legend-continuous__bar gl-legend-diverging__bar';
-    // Blue (#2166AC) -> White -> Red (#B2182B) gradient
-    bar.style.background = 'linear-gradient(to right, #2166AC, #F7F7F7 50%, #B2182B)';
-    barWrapper.appendChild(bar);
-    container.appendChild(barWrapper);
-    
-    // Get the computed difference range for this mode
-    const range = rangeOverride || (mode ? comparisonDiffRanges[mode] : null);
-    const hasRange = range && Number.isFinite(range.min) && Number.isFinite(range.max);
-    
-    /**
-     * Format a numeric value for legend display.
-     * Uses appropriate precision based on magnitude.
-     */
-    function formatLegendValue(val) {
-      const absVal = Math.abs(val);
-      if (absVal >= 10000) return val.toFixed(0);
-      if (absVal >= 100) return val.toFixed(1);
-      if (absVal >= 1) return val.toFixed(2);
-      return val.toFixed(3);
-    }
-    
-    const labels = document.createElement('div');
-    labels.className = 'gl-legend-continuous__labels';
-    labels.style.justifyContent = 'space-between';
-    
-    const leftLabel = document.createElement('span');
-    if (hasRange) {
-      // Show min value (negative = scenario higher)
-      leftLabel.textContent = formatLegendValue(range.min);
-    } else {
-      leftLabel.textContent = 'Scenario > Base';
-    }
-    leftLabel.style.color = '#2166AC';
-    
-    const centerLabel = document.createElement('span');
-    centerLabel.textContent = '0';
-    centerLabel.style.color = 'var(--gl-text-secondary, #8fa0c2)';
-    
-    const rightLabel = document.createElement('span');
-    if (hasRange) {
-      // Show max value (positive = base higher)
-      rightLabel.textContent = '+' + formatLegendValue(range.max);
-    } else {
-      rightLabel.textContent = 'Base > Scenario';
-    }
-    rightLabel.style.color = '#B2182B';
-    
-    labels.appendChild(leftLabel);
-    labels.appendChild(centerLabel);
-    labels.appendChild(rightLabel);
-    container.appendChild(labels);
-    
-    if (unit) {
-      const unitEl = document.createElement('div');
-      unitEl.className = 'gl-legend-continuous__unit';
-      unitEl.textContent = `Difference (${unit})`;
-      container.appendChild(unitEl);
-    }
-    
-    if (label) {
-      const labelEl = document.createElement('div');
-      labelEl.style.cssText = 'font-size:0.7rem;color:var(--gl-text-secondary, #8fa0c2);margin-top:4px;text-align:center;';
-      labelEl.textContent = label;
-      container.appendChild(labelEl);
-    }
-    
-    return container;
-  }
-
-  // Aspect legend using swatches for cardinal directions (HSL hue wheel)
-  function renderAspectLegend() {
-    // Cardinal/intercardinal directions with degrees (0=N, 90=E, 180=S, 270=W)
-    const directions = [
-      { label: 'N (0°)', degrees: 0 },
-      { label: 'NE (45°)', degrees: 45 },
-      { label: 'E (90°)', degrees: 90 },
-      { label: 'SE (135°)', degrees: 135 },
-      { label: 'S (180°)', degrees: 180 },
-      { label: 'SW (225°)', degrees: 225 },
-      { label: 'W (270°)', degrees: 270 },
-      { label: 'NW (315°)', degrees: 315 },
-    ];
-    
-    // Convert aspect degrees to RGB using same logic as hillslopesFillColor
-    function aspectToRgb(degrees) {
-      const hue = degrees % 360;
-      const h = hue / 60;
-      const c = 200; // chroma
-      const x = c * (1 - Math.abs((h % 2) - 1));
-      let r, g, b;
-      if (h < 1) { r = c; g = x; b = 0; }
-      else if (h < 2) { r = x; g = c; b = 0; }
-      else if (h < 3) { r = 0; g = c; b = x; }
-      else if (h < 4) { r = 0; g = x; b = c; }
-      else if (h < 5) { r = x; g = 0; b = c; }
-      else { r = c; g = 0; b = x; }
-      return `rgb(${Math.round(r + 55)}, ${Math.round(g + 55)}, ${Math.round(b + 55)})`;
-    }
-    
-    const items = directions.map(d => ({
-      label: d.label,
-      color: aspectToRgb(d.degrees)
-    }));
-    
-    return renderCategoricalLegend(items);
-  }
-
-  function renderLegendForLayer(layer) {
-    const section = document.createElement('div');
-    section.className = 'gl-legend-section';
-    
-    const title = document.createElement('h5');
-    title.className = 'gl-legend-section__title';
-    title.textContent = layer.label || layer.key;
-    section.appendChild(title);
-
-    // Determine legend type based on layer mode
-    const mode = layer.mode || '';
-    
-    // Check if this is comparison mode for a comparison-enabled measure
-    const isComparisonMeasure = COMPARISON_MEASURES.includes(mode);
-    const diffRangeOverride = layer.category === 'WEPP Yearly' ? weppYearlyDiffRanges[mode] : null;
-    const divergingMode = diffRangeOverride ? mode : (layer.category === 'WEPP Yearly' ? null : mode);
-    if (comparisonMode && isComparisonMeasure && currentScenarioPath) {
-      // Render diverging legend for comparison mode
-      const unit = LAYER_UNITS[mode] || '';
-      section.appendChild(renderDivergingLegend(unit, 'Base − Scenario', divergingMode, diffRangeOverride));
-      return section;
-    }
-    
-    // Categorical: dominant landuse
-    if (mode === 'dominant' && layer.category === 'Landuse') {
-      const classMap = getUsedLanduseClasses();
-      const items = [];
-      for (const [key, info] of classMap.entries()) {
-        // Color is a hex string from API (e.g., "#1c6330")
-        const colorCss = info.color || '#888888';
-        items.push({ color: colorCss, label: info.desc || `Class ${key}` });
-      }
-      if (items.length) {
-        section.appendChild(renderCategoricalLegend(items));
-      }
-      return section;
-    }
-    
-    // Categorical: dominant soil
-    if (mode === 'dominant' && layer.category === 'Soils') {
-      const classMap = getUsedSoilsClasses();
-      const items = [];
-      for (const [mukey, info] of classMap.entries()) {
-        // Color is a hex string from API (e.g., "#d11141")
-        const colorCss = info.color || '#888888';
-        items.push({ color: colorCss, label: info.desc || mukey });
-      }
-      if (items.length) {
-        section.appendChild(renderCategoricalLegend(items));
-      }
-      return section;
-    }
-    
-    // NLCD raster (landuse/nlcd.tif)
-    if (layer.key === 'landuse' && layer.category === 'Raster') {
-      const nlcdItems = getUsedNlcdClasses(layer);
-      if (nlcdItems.length) {
-        section.appendChild(renderCategoricalLegend(nlcdItems));
-      } else {
-        const note = document.createElement('p');
-        note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
-        note.textContent = 'NLCD land cover classes';
-        section.appendChild(note);
-      }
-      return section;
-    }
-    
-    // SSURGO raster (soils/ssurgo.tif)
-    if (layer.key === 'soils' && layer.category === 'Raster') {
-      const soilItems = getUsedSoilClasses(layer);
-      if (soilItems.length) {
-        section.appendChild(renderCategoricalLegend(soilItems));
-      } else {
-        const note = document.createElement('p');
-        note.style.cssText = 'font-size:0.75rem;color:#8fa0c2;margin:0;';
-        note.textContent = 'SSURGO soil types';
-        section.appendChild(note);
-      }
-      return section;
-    }
-    
-    // SBS raster
-    if (layer.key === 'sbs') {
-      section.appendChild(renderCategoricalLegend(SBS_CLASSES));
-      return section;
-    }
-    
-    // Continuous layers
-    let minVal = 0;
-    let maxVal = 100;
-    let unit = LAYER_UNITS[mode] || '';
-    
-    // Landuse cover layers (0-1 range in data, colormap uses value directly)
-    if (['cancov', 'inrcov', 'rilcov'].includes(mode)) {
-      minVal = 0;
-      maxVal = 100;
-      unit = '%';
-    }
-    // Soils continuous - use colormap normalization ranges, not data ranges
-    else if (['clay', 'sand', 'rock'].includes(mode) && soilsSummary) {
-      minVal = 0;
-      maxVal = 100;
-      unit = '%';
-    }
-    else if (mode === 'bd' && soilsSummary) {
-      minVal = 0.5;
-      maxVal = 2.0;
-      unit = 'g/cm³';
-    }
-    else if (mode === 'soil_depth' && soilsSummary) {
-      minVal = 0;
-      maxVal = 2000;
-      unit = 'mm';
-    }
-    // Hillslopes/Watershed continuous - use HILLSLOPES_RANGES constants
-    else if (mode === 'slope_scalar' && hillslopesSummary) {
-      minVal = 0;
-      maxVal = 100;  // HILLSLOPES_RANGES.slope_scalar is 0-1, display as %
-      unit = '%';
-    }
-    else if (mode === 'length' && hillslopesSummary) {
-      minVal = 0;
-      maxVal = 1000;  // HILLSLOPES_RANGES.length
-      unit = 'm';
-    }
-    else if (mode === 'aspect' && hillslopesSummary) {
-      // Aspect uses a circular hue colormap - render as swatches
-      section.appendChild(renderAspectLegend());
-      return section;
-    }
-    // WATAR layers - dynamic ranges
-    else if (watarRanges && watarRanges[mode]) {
-      minVal = watarRanges[mode].min;
-      maxVal = watarRanges[mode].max;
-    }
-    // WEPP layers - these use dynamic data ranges, which is correct
-    else if (weppRanges && weppRanges[mode]) {
-      minVal = weppRanges[mode].min;
-      maxVal = weppRanges[mode].max;
-    }
-    else if (weppYearlyRanges && weppYearlyRanges[mode]) {
-      minVal = weppYearlyRanges[mode].min;
-      maxVal = weppYearlyRanges[mode].max;
-    }
-    // WEPP Event layers - use dynamic weppEventRanges
-    else if (weppEventRanges && weppEventRanges[mode]) {
-      minVal = weppEventRanges[mode].min;
-      maxVal = weppEventRanges[mode].max;
-      unit = LAYER_UNITS[mode] || '';
-    }
-    // RAP cumulative mode - use 0-100% (clamped at colormap level)
-    else if (layer.isCumulative) {
-      minVal = 0;
-      maxVal = 100;
-      unit = '%';
-    }
-    // RAP layers - use 0-100% (rapFillColor normalizes by /100)
-    else if (layer.bandKey && rapSummary) {
-      minVal = 0;
-      maxVal = 100;
-      unit = '%';
-    }
-    
-    // Determine colormap based on measure type
-    let colormap = 'viridis';  // default
-    if (WATER_MEASURES.includes(mode)) {
-      colormap = 'winter';
-    } else if (SOIL_MEASURES.includes(mode)) {
-      colormap = 'jet2';
-    } else if (layer.category === 'WATAR') {
-      colormap = 'jet2';
-    }
-    
-    section.appendChild(renderContinuousLegend(minVal, maxVal, unit, colormap));
-    return section;
-  }
-
-  function updateLegendsPanel() {
-    const contentEl = document.getElementById('gl-legends-content');
-    const emptyEl = document.getElementById('gl-legend-empty');
-    if (!contentEl) return;
-
-    const activeLayers = getActiveLayerForLegend();
-    
-    // Clear existing content except empty message
-    const children = Array.from(contentEl.children);
-    for (const child of children) {
-      if (child.id !== 'gl-legend-empty') {
-        child.remove();
-      }
-    }
-    
-    if (!activeLayers.length) {
-      if (emptyEl) emptyEl.style.display = '';
-      return;
-    }
-    
-    if (emptyEl) emptyEl.style.display = 'none';
-    
-    for (const layer of activeLayers) {
-      const legendSection = renderLegendForLayer(layer);
-      contentEl.appendChild(legendSection);
-    }
-  }
-
-  // Expose for external use
-  window.glDashboardUpdateLegends = updateLegendsPanel;
 
   function hexToRgbaArray(hex, alpha = 230) {
     const parsed = HEX_RGB_RE.exec(hex || '');
@@ -2495,6 +1504,76 @@
       ];
     }
   }
+
+  // Normalize 0-1 diverging input to [-1, 1] for the rdbu gradient.
+  function rdbuColor(normalized) {
+    const clamped = Math.min(1, Math.max(0, Number(normalized)));
+    return divergingColor(clamped * 2 - 1);
+  }
+
+  // RAP band labels for display
+  const RAP_BAND_LABELS = {
+    annual_forb_grass: 'Annual Forb & Grass',
+    bare_ground: 'Bare Ground',
+    litter: 'Litter',
+    perennial_forb_grass: 'Perennial Forb & Grass',
+    shrub: 'Shrub',
+    tree: 'Tree',
+  };
+
+  const layerUtils = createLayerUtils({
+    deck,
+    getState,
+    colorScales: {
+      viridisColor,
+      winterColor,
+      jet2Color,
+      rdbuScale: rdbuColor,
+    },
+    constants: {
+      WATER_MEASURES,
+      SOIL_MEASURES,
+      NLCD_COLORMAP,
+      NLCD_LABELS,
+      RAP_BAND_LABELS,
+      COMPARISON_MEASURES,
+    },
+  });
+
+  const layerRenderer = createLayerRenderer({
+    getState,
+    setValue,
+    layerUtils,
+    domRefs: {
+      layerListEl,
+      layerEmptyEl,
+      legendsContentEl: legendContentEl,
+      legendEmptyEl,
+    },
+    yearSlider,
+    deselectAllSubcatchmentOverlays,
+    activateWeppYearlyLayer,
+    refreshWeppStatisticData,
+    refreshRapData,
+    refreshWeppEventData,
+    loadRapTimeseriesData,
+    loadWeppYearlyTimeseriesData,
+    applyLayers,
+    setGraphFocus,
+    setGraphCollapsed,
+    pickActiveWeppEventLayer,
+    soilColorForValue,
+    constants: {
+      COMPARISON_MEASURES,
+      WATER_MEASURES,
+      SOIL_MEASURES,
+      RAP_BAND_LABELS,
+      NLCD_COLORMAP,
+      NLCD_LABELS,
+    },
+  });
+  const { updateLayerList, updateLegendsPanel } = layerRenderer;
+  window.glDashboardUpdateLegends = updateLegendsPanel;
 
   /**
    * Get comparison fill color for landuse layer.
@@ -3502,16 +2581,6 @@
       console.warn('gl-dashboard: failed to refresh WEPP Event data', err);
     }
   }
-
-  // RAP band labels for display
-  const RAP_BAND_LABELS = {
-    annual_forb_grass: 'Annual Forb & Grass',
-    bare_ground: 'Bare Ground',
-    litter: 'Litter',
-    perennial_forb_grass: 'Perennial Forb & Grass',
-    shrub: 'Shrub',
-    tree: 'Tree',
-  };
 
   function rapFillColor(row) {
     if (!row) return [128, 128, 128, 200];
@@ -4664,10 +3733,12 @@
     }
   }
 
-  const deckgl = new deck.Deck({
-    parent: target,
-    controller: controllerOptions,
+  mapController = createMapController({
+    deck,
+    target,
+    controllerOptions,
     initialViewState,
+    layers: [baseLayer],
     onViewStateChange: ({ viewState }) => {
       setViewState({
         ...viewState,
@@ -4676,7 +3747,6 @@
       });
     },
     onHover: (info) => {
-      // Highlight corresponding line in graph when hovering over subcatchment
       if (info && info.object && info.object.properties) {
         const props = info.object.properties;
         const topaz = props.TopazID || props.topaz_id || props.topaz || props.id;
@@ -4687,190 +3757,14 @@
       }
       timeseriesGraph.clearHighlight();
     },
-    layers: [baseLayer],
-    getTooltip: (info) => {
-      if (!info) return null;
-      const luOverlay = pickActiveLanduseLayer();
-      if (info.object && luOverlay && landuseSummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? landuseSummary[String(topaz)] : null;
-        const val = landuseValue(luOverlay.mode, row);
-        if (val !== null) {
-          const label =
-            luOverlay.mode === 'dominant'
-              ? `Landuse: ${val}`
-              : `${luOverlay.mode}: ${typeof val === 'number' ? val.toFixed(3) : val}`;
-          return `Layer: ${luOverlay.path}\nTopazID: ${topaz}\n${label}`;
-        }
-      }
-      const soilOverlay = pickActiveSoilsLayer();
-      if (info.object && soilOverlay && soilsSummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? soilsSummary[String(topaz)] : null;
-        const val = soilsValue(soilOverlay.mode, row);
-        if (val !== null) {
-          let label;
-          if (soilOverlay.mode === 'dominant') {
-            label = `Soil: ${val}`;
-          } else if (soilOverlay.mode === 'bd') {
-            label = `Bulk density: ${typeof val === 'number' ? val.toFixed(2) : val} g/cm³`;
-          } else if (soilOverlay.mode === 'soil_depth') {
-            label = `Soil depth: ${typeof val === 'number' ? val.toFixed(0) : val} mm`;
-          } else {
-            label = `${soilOverlay.mode}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-          }
-          return `Layer: ${soilOverlay.path}\nTopazID: ${topaz}\n${label}`;
-        }
-      }
-      const hillslopesOverlay = pickActiveHillslopesLayer();
-      if (info.object && hillslopesOverlay && hillslopesSummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? hillslopesSummary[String(topaz)] : null;
-        const val = hillslopesValue(hillslopesOverlay.mode, row);
-        if (val !== null) {
-          let label;
-          if (hillslopesOverlay.mode === 'slope_scalar') {
-            label = `Slope: ${typeof val === 'number' ? (val * 100).toFixed(1) : val}%`;
-          } else if (hillslopesOverlay.mode === 'length') {
-            label = `Length: ${typeof val === 'number' ? val.toFixed(1) : val} m`;
-          } else if (hillslopesOverlay.mode === 'aspect') {
-            label = `Aspect: ${typeof val === 'number' ? val.toFixed(0) : val}°`;
-          } else {
-            label = `${hillslopesOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-          }
-          return `Layer: ${hillslopesOverlay.path}\nTopazID: ${topaz}\n${label}`;
-        }
-      }
-      const watarOverlay = pickActiveWatarLayer();
-      if (info.object && watarOverlay && watarSummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? watarSummary[String(topaz)] : null;
-        const val = watarValue(watarOverlay.mode, row);
-        if (val !== null) {
-          const label = `${watarOverlay.label}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-          return `Layer: ${watarOverlay.path}\nTopazID: ${topaz}\n${label}`;
-        }
-      }
-      const weppOverlay = pickActiveWeppLayer();
-      if (info.object && weppOverlay && weppSummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? weppSummary[String(topaz)] : null;
-        const val = weppValue(weppOverlay.mode, row);
-        if (val !== null) {
-          let label;
-          if (weppOverlay.mode === 'runoff_volume') {
-            label = `Runoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-          } else if (weppOverlay.mode === 'subrunoff_volume') {
-            label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-          } else if (weppOverlay.mode === 'baseflow_volume') {
-            label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-          } else if (weppOverlay.mode === 'soil_loss') {
-            label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-          } else if (weppOverlay.mode === 'sediment_deposition') {
-            label = `Sed. Deposition: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-          } else if (weppOverlay.mode === 'sediment_yield') {
-            label = `Sed. Yield: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-          } else {
-            label = `${weppOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-          }
-          return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
-        }
-      }
-      const weppYearlyOverlay = pickActiveWeppYearlyLayer();
-      if (info.object && weppYearlyOverlay && weppYearlySummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? weppYearlySummary[String(topaz)] : null;
-        const val = weppYearlyValue(weppYearlyOverlay.mode, row);
-        if (val !== null) {
-          let label;
-          if (weppYearlyOverlay.mode === 'runoff_volume') {
-            label = `Runoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-          } else if (weppYearlyOverlay.mode === 'subrunoff_volume') {
-            label = `Subrunoff: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-          } else if (weppYearlyOverlay.mode === 'baseflow_volume') {
-            label = `Baseflow: ${typeof val === 'number' ? val.toFixed(1) : val} mm`;
-          } else if (weppYearlyOverlay.mode === 'soil_loss') {
-            label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-          } else if (weppYearlyOverlay.mode === 'sediment_deposition') {
-            label = `Sed. Deposition: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-          } else if (weppYearlyOverlay.mode === 'sediment_yield') {
-            label = `Sed. Yield: ${typeof val === 'number' ? val.toFixed(2) : val} tonnes/ha`;
-          } else {
-            label = `${weppYearlyOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-          }
-          const yearLine = weppYearlySelectedYear != null ? `Year: ${weppYearlySelectedYear}\n` : '';
-          return `Layer: ${weppYearlyOverlay.path}\n${yearLine}TopazID: ${topaz}\n${label}`;
-        }
-      }
-      // WEPP Event tooltip
-      const weppEventOverlay = pickActiveWeppEventLayer();
-      if (info.object && weppEventOverlay && weppEventSummary) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? weppEventSummary[String(topaz)] : null;
-        const val = weppEventValue(weppEventOverlay.mode, row);
-        if (val !== null) {
-          let label;
-          if (weppEventOverlay.mode === 'event_P') {
-            label = `Precipitation: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-          } else if (weppEventOverlay.mode === 'event_Q') {
-            label = `Runoff: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-          } else if (weppEventOverlay.mode === 'event_ET') {
-            label = `Total ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-          } else if (weppEventOverlay.mode === 'event_peakro') {
-            label = `Peak Runoff Rate: ${typeof val === 'number' ? val.toFixed(4) : val} m\u00b3/s`;
-          } else if (weppEventOverlay.mode === 'event_tdet') {
-            label = `Total Detachment: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
-          } else {
-            label = `${weppEventOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
-          }
-          return `Layer: ${weppEventOverlay.path}\nDate: ${weppEventSelectedDate}\nTopazID: ${topaz}\n${label}`;
-        }
-      }
-      // RAP tooltip - handle both cumulative and single band modes
-      if (info.object && rapSummary && (rapCumulativeMode || pickActiveRapLayer())) {
-        const props = info.object && info.object.properties;
-        const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
-        const row = topaz != null ? rapSummary[String(topaz)] : null;
-        const val = rapValue(row);
-        if (val !== null) {
-          if (rapCumulativeMode) {
-            const selectedBands = rapLayers.filter((l) => l.selected !== false);
-            const bandNames = selectedBands.map((l) => RAP_BAND_LABELS[l.bandKey] || l.bandKey).join(' + ');
-            const label = `Cumulative (${bandNames}): ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-            return `Layer: Cumulative Cover\nYear: ${rapSelectedYear}\nTopazID: ${topaz}\n${label}`;
-          } else {
-            const rapOverlay = pickActiveRapLayer();
-            const bandLabel = RAP_BAND_LABELS[rapOverlay.bandKey] || rapOverlay.bandKey;
-            const label = `${bandLabel}: ${typeof val === 'number' ? val.toFixed(1) : val}%`;
-            return `Layer: ${rapOverlay.path}\nYear: ${rapSelectedYear}\nTopazID: ${topaz}\n${label}`;
-          }
-        }
-      }
-      const rasterLayer = pickActiveRaster();
-      if (info.coordinate && rasterLayer) {
-        const val = sampleRaster(rasterLayer, info.coordinate);
-        if (val !== null) {
-          return `Layer: ${rasterLayer.path}\nValue: ${val}`;
-        }
-      }
-      if (info.tile) {
-        return `Tile z${info.tile.z}`;
-      }
-      return null;
-    },
+    getTooltip: (info) => layerUtils.formatTooltip(info),
     onError: (error) => {
       // Keep the stub resilient; surface issues in console.
       // eslint-disable-next-line no-console
       console.error('gl-dashboard render error', error);
     },
   });
+  const { deckgl } = mapController;
 
   // Expose for debugging.
   window.glDashboardDeck = deckgl;
