@@ -1,4 +1,7 @@
-// Layer builders, color/value helpers, and tooltip/legend utilities for gl-dashboard.
+/**
+ * Deck layer builders, color/value helpers, and tooltip/legend utilities for gl-dashboard.
+ * Pure functions: no DOM access. Consumers supply deck and state accessors.
+ */
 
 import { normalizeModeValue, resolveColormapName } from '../colors.js';
 

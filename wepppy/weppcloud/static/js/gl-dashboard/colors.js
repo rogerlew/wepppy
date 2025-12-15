@@ -1,4 +1,7 @@
-// Shared colormap + normalization helpers for gl-dashboard overlays.
+/**
+ * Shared colormap + normalization helpers for gl-dashboard overlays.
+ * Pure helpers: no DOM/deck access.
+ */
 
 const MODE_COLORMAP = {
   // Landuse cover (fractions or percentages)

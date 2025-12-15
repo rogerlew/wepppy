@@ -1,5 +1,7 @@
-// Shared mutable state for gl-dashboard. Keeps all runtime state in one place
-// and provides a simple subscription mechanism for interested consumers.
+/**
+ * Shared mutable state for gl-dashboard. Single source of truth plus subscriptions.
+ * Pure state container: no DOM/deck usage.
+ */
 
 const state = {
   currentScenarioPath: '',

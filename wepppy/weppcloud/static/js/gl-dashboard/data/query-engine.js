@@ -1,5 +1,9 @@
 import { getValue } from '../state.js';
 
+/**
+ * Query Engine HTTP helpers. No DOM/deck usage; relies on window.location and ctx.
+ * Returns POST wrappers scoped to the current run (and optional scenario).
+ */
 function getOrigin() {
   return window.location.origin || `${window.location.protocol}//${window.location.host}`;
 }

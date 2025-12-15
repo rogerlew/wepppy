@@ -1,4 +1,8 @@
-// Deck.gl controller wrapper for gl-dashboard.
+/**
+ * Deck.gl controller wrapper for gl-dashboard.
+ * Owns the Deck instance; accepts callbacks for hover/tooltips/errors/view state.
+ * No business logic; no sidebar/DOM manipulation beyond the target element.
+ */
 
 export function createMapController({
   deck,

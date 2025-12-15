@@ -1,3 +1,7 @@
+/**
+ * Graph data loaders for Omni/RAP/WEPP charts.
+ * No DOM/deck usage; consumes Query Engine helpers and returns datasets for the graph renderer.
+ */
 import { WATER_MEASURES, SOIL_MEASURES } from '../config.js';
 import { getState } from '../state.js';
 

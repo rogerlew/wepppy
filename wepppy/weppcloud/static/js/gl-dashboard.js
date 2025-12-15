@@ -1,3 +1,7 @@
+/**
+ * gl-dashboard entrypoint/orchestrator. Wires modules, binds DOM events, and exposes globals.
+ * Keep business logic in submodules (config/state/colors/data/graphs/layers/map).
+ */
 (async function () {
   const ctx = window.GL_DASHBOARD_CONTEXT || {};
   const target = document.getElementById('gl-dashboard-map');
@@ -54,7 +58,7 @@
     createBasemapDefs,
     createColorScales,
   } = config;
-  const { getState, setValue, initState } = stateModule;
+  const { getState, setValue, setState, initState } = stateModule;
   const { createLayerUtils } = layerUtilsModule;
   const { createMapController } = mapControllerModule;
   const { createLayerRenderer } = layerRendererModule;
@@ -71,9 +75,9 @@
   var lastGraphContextKey = null; // eslint-disable-line no-var
 
   function isRapActive(stateObj) {
-    if (!stateObj.rapSummary) return false;
+    // RAP should only drive graph controls when a RAP overlay is actually in play
     if (stateObj.rapCumulativeMode) return true;
-    return (stateObj.rapLayers || []).some((l) => l && l.selected !== false);
+    return (stateObj.rapLayers || []).some((l) => l && l.visible);
   }
 
   function isWeppYearlyActive(stateObj) {
@@ -366,6 +370,16 @@
     baseWeppYearlyCache = {};
     weppYearlySelectedYear = null;
     weppEventSummary = null;
+    setState({
+      weppYearlySummary: null,
+      weppYearlyMetadata: null,
+      weppYearlyRanges: {},
+      weppYearlyDiffRanges: {},
+      weppYearlyCache: {},
+      baseWeppYearlyCache: {},
+      weppYearlySelectedYear: null,
+      weppYearlyLayers: [],
+    });
     
     // Reload data for current layers
     await Promise.all([
@@ -1334,6 +1348,7 @@
     if (weppYearlySelectedYear == null || weppYearlySelectedYear < minYear || weppYearlySelectedYear > maxYear) {
       weppYearlySelectedYear = maxYear;
     }
+    setValue('weppYearlySelectedYear', weppYearlySelectedYear);
     yearSlider.setRange(minYear, maxYear, weppYearlySelectedYear);
     yearSlider.show();
     await refreshWeppYearlyData();
@@ -2423,6 +2438,7 @@
           }
         }
         baseWeppYearlyCache[year] = summary;
+        setState({ baseWeppYearlyCache: { ...baseWeppYearlyCache } });
         return summary;
       }
     } catch (err) {
@@ -2485,6 +2501,18 @@
     } else {
       weppYearlyDiffRanges = {};
     }
+
+    setState({
+      weppYearlySummary: weppYearlySummary || null,
+      weppYearlyRanges: { ...weppYearlyRanges },
+      weppYearlyDiffRanges: { ...weppYearlyDiffRanges },
+      baseWeppYearlyCache: { ...baseWeppYearlyCache },
+      weppYearlySelectedYear,
+    });
+
+    // Re-sync graph controls now that WEPP Yearly data is available so the graph panel
+    // opens in split mode instead of staying minimized after the initial toggle.
+    syncGraphModeForContext();
   }
 
   // WEPP Event ranges computed dynamically from weppEventSummary data
@@ -2971,6 +2999,7 @@
     const activeWeppYearly = pickActiveWeppYearlyLayer();
     if (activeWeppYearly) {
       weppYearlySelectedYear = year;
+      setValue('weppYearlySelectedYear', weppYearlySelectedYear);
       await refreshWeppYearlyData();
       needsApply = true;
       if (timeseriesGraph._source === 'wepp_yearly') {
@@ -3402,6 +3431,12 @@
         if (result && Array.isArray(result.weppYearlyLayers)) {
           weppYearlyLayers = result.weppYearlyLayers;
         }
+        setState({
+          weppYearlyLayers: [...weppYearlyLayers],
+          weppYearlyMetadata: null,
+          weppYearlySelectedYear: null,
+          weppYearlySummary: null,
+        });
         if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
           yearSlider.hide();
         }
@@ -3413,6 +3448,13 @@
       weppYearlySelectedYear = result.weppYearlySelectedYear;
       subcatchmentsGeoJson = result.subcatchmentsGeoJson || subcatchmentsGeoJson;
       weppYearlyLayers = result.weppYearlyLayers || [];
+      setState({
+        weppYearlyMetadata,
+        weppYearlySelectedYear,
+        weppYearlyLayers: [...weppYearlyLayers],
+        weppYearlySummary,
+        subcatchmentsGeoJson,
+      });
 
       yearSlider.setRange(weppYearlyMetadata.minYear, weppYearlyMetadata.maxYear, weppYearlySelectedYear);
       yearSlider.show();

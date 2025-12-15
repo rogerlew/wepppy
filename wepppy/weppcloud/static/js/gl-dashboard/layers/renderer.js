@@ -1,4 +1,7 @@
-// Sidebar layer list and legend rendering for gl-dashboard.
+/**
+ * Sidebar layer list and legend rendering for gl-dashboard.
+ * DOM-only: receives callbacks/state setters to trigger data/deck updates.
+ */
 
 import { resolveColormapName } from '../colors.js';
 

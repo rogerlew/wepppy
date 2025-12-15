@@ -1,5 +1,7 @@
-// Configuration and static constants for the gl-dashboard bundle.
-// Keep this module free of DOM access so it can be imported in workers or tests.
+/**
+ * Configuration and static constants for gl-dashboard.
+ * Pure exports: no DOM/deck usage. Safe to import in workers or tests.
+ */
 
 export const COMPARISON_MEASURES = [
   'cancov',

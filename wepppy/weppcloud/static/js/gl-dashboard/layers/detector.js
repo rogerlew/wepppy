@@ -1,4 +1,8 @@
-// Detection helpers for gl-dashboard overlays. Pure data routines only; no DOM access.
+/**
+ * Detection helpers for gl-dashboard overlays.
+ * Pure data routines: fetch summaries/metadata and return overlay descriptors.
+ * No DOM/deck access; suitable for tests/workers.
+ */
 
 async function detectSbsLayer({ ctx, loadSbsImage }) {
   const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/baer_wgs_map`;
