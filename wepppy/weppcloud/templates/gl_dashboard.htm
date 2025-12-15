@@ -655,6 +655,22 @@
     margin-left: 0.5rem;
     vertical-align: middle;
   }
+  .gl-main.graph-focus .gl-viewport {
+    display: none;
+  }
+  .gl-main.graph-focus .gl-graph {
+    max-height: none;
+    flex: 1;
+  }
+  .gl-main.graph-focus .gl-graph__content {
+    height: 100%;
+  }
+  .gl-main.graph-focus #gl-graph-container {
+    height: 80vh;
+  }
+  .gl-main.graph-focus #gl-graph-canvas {
+    height: 100%;
+  }
 </style>
 {% endblock %}
 
@@ -702,6 +718,10 @@
     </div>
     <ul class="gl-layer-list" id="gl-layer-list"></ul>
     <p id="gl-layer-empty" style="color:var(--wc-color-text-muted);margin:0;">No raster layers detected yet.</p>
+    <div style="margin-top:0.75rem;">
+      <h3>Graphs</h3>
+    </div>
+    <ul class="gl-layer-list" id="gl-graph-list"></ul>
   </aside>
 
   <section class="gl-main">
@@ -747,9 +767,9 @@
         <button class="gl-btn" data-graph-toggle type="button">Toggle Graph</button>
       </div>
       <div class="gl-graph__content">
-        <div class="gl-graph__empty" id="gl-graph-empty">Select a timeseries layer (e.g., RAP) to view trends</div>
+        <div class="gl-graph__empty" id="gl-graph-empty"></div>
         <div class="gl-graph__container" id="gl-graph-container" style="display:none;">
-          <canvas id="gl-graph-canvas" width="800" height="200"></canvas>
+          <canvas id="gl-graph-canvas" width="800" height="520"></canvas>
           <div class="gl-graph__tooltip" id="gl-graph-tooltip"></div>
         </div>
       </div>
@@ -850,10 +870,8 @@
       const graph = document.getElementById('gl-graph');
       if (toggle && graph) {
         toggle.addEventListener('click', () => {
-          graph.classList.toggle('is-collapsed');
-          // Notify gl-dashboard that graph visibility changed
-          if (typeof window.glDashboardGraphToggled === 'function') {
-            window.glDashboardGraphToggled(!graph.classList.contains('is-collapsed'));
+          if (typeof window.glDashboardToggleGraphPanel === 'function') {
+            window.glDashboardToggleGraphPanel();
           }
         });
       }

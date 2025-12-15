@@ -612,6 +612,42 @@
   window.glDashboardSetScenario = setScenario;
   window.glDashboardSetComparisonMode = setComparisonMode;
 
+  function setGraphFocus(enabled) {
+    graphFocus = !!enabled;
+    if (glMainEl) {
+      if (graphFocus) {
+        glMainEl.classList.add('graph-focus');
+      } else {
+        glMainEl.classList.remove('graph-focus');
+      }
+    }
+  }
+
+  function ensureGraphExpanded() {
+    if (graphPanelEl) {
+      graphPanelEl.classList.remove('is-collapsed');
+    }
+  }
+
+  function setGraphCollapsed(collapsed) {
+    if (!graphPanelEl) return;
+    graphPanelEl.classList.toggle('is-collapsed', collapsed);
+    if (typeof window.glDashboardGraphToggled === 'function') {
+      window.glDashboardGraphToggled(!graphPanelEl.classList.contains('is-collapsed'));
+    }
+    if (collapsed) {
+      setGraphFocus(false);
+    }
+  }
+
+  function toggleGraphPanel() {
+    if (!graphPanelEl) return;
+    const collapsing = !graphPanelEl.classList.contains('is-collapsed');
+    setGraphCollapsed(collapsing);
+  }
+
+  window.glDashboardToggleGraphPanel = toggleGraphPanel;
+
   const layerDefs = [
     {
       key: 'landuse',
@@ -636,6 +672,30 @@
   const weppYearlyLayers = [];
   const weppEventLayers = [];
   const rapLayers = [];
+  const graphDefs = [
+    {
+      key: 'omni',
+      title: 'Omni Scenarios',
+      items: [
+        { key: 'omni-soil-loss-hill', label: 'Soil Loss (hillslopes, tonne/ha)', type: 'boxplot' },
+        { key: 'omni-soil-loss-chn', label: 'Soil Loss (channels, tonne)', type: 'boxplot' },
+        { key: 'omni-runoff-hill', label: 'Runoff (hillslopes, mm)', type: 'boxplot' },
+        { key: 'omni-outlet-sediment', label: 'Sediment discharge (tonne/ha)', type: 'bars' },
+        { key: 'omni-outlet-stream', label: 'Stream discharge (mm)', type: 'bars' },
+      ],
+    },
+  ];
+  const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
+  const graphScenarios = [{ name: 'Base', path: '' }].concat(
+    omniScenarios.map((s) => ({ name: s.name || s.path || 'Scenario', path: s.path || '' }))
+  );
+  let graphFocus = false;
+  let activeGraphKey = null;
+  const hillLossCache = {};
+  const channelLossCache = {};
+  const outletAllYearsCache = {};
+  const hillslopeAreaCache = {};
+  const graphDataCache = {};
   let landuseSummary = null;
   let soilsSummary = null;
   let hillslopesSummary = null;
@@ -660,6 +720,10 @@
   let graphHighlightedTopazId = null; // Subcatchment highlighted from graph hover
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
+  const graphListEl = document.getElementById('gl-graph-list');
+  const graphEmptyEl = document.getElementById('gl-graph-empty');
+  const glMainEl = document.querySelector('.gl-main');
+  const graphPanelEl = document.getElementById('gl-graph');
   let geoTiffLoader = null;
 
   // ============================================================================
@@ -847,6 +911,7 @@
     ctx2d: null,
     container: document.getElementById('gl-graph-container'),
     emptyEl: document.getElementById('gl-graph-empty'),
+    _emptyDefault: '',
     tooltipEl: document.getElementById('gl-graph-tooltip'),
     _visible: false,
     _data: null, // { years: [], series: { topazId: { values: [], color: [r,g,b] } } }
@@ -855,12 +920,15 @@
     _currentYear: null,
     _source: null,
     _tooltipFormatter: null,
-    _padding: { top: 20, right: 20, bottom: 35, left: 70 },
+    _padding: { top: 32, right: 160, bottom: 220, left: 100 },
     _lineWidth: 1.5,
     _highlightWidth: 3,
 
     init() {
       this.canvas = document.getElementById('gl-graph-canvas');
+      if (this.emptyEl) {
+        this.emptyEl.textContent = '';
+      }
       if (this.canvas) {
         this.ctx2d = this.canvas.getContext('2d');
         this.canvas.addEventListener('mousemove', (e) => this._onCanvasHover(e));
@@ -881,6 +949,7 @@
       }
       if (this.emptyEl) {
         this.emptyEl.style.display = 'none';
+        this.emptyEl.textContent = '';
       }
       this._visible = true;
       this._resizeCanvas();
@@ -891,6 +960,7 @@
         this.container.style.display = 'none';
       }
       if (this.emptyEl) {
+        this.emptyEl.textContent = this._emptyDefault;
         this.emptyEl.style.display = 'block';
       }
       this._visible = false;
@@ -905,7 +975,7 @@
       const rect = this.container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       const width = Math.max(rect.width, 400);
-      const height = 200;
+      const height = graphFocus ? Math.max(rect.height * 0.8 || 0, 320) : 200;
       this.canvas.width = width * dpr;
       this.canvas.height = height * dpr;
       this.canvas.style.width = width + 'px';
@@ -915,16 +985,16 @@
       }
     },
 
-    /**
-     * Set timeseries data and render.
-     * @param {Object} data - { years: [2016, 2017, ...], series: { '101': { values: [v1, v2, ...], color: [r,g,b,a] }, ... }, yLabel: 'Cover %', xLabel: 'Year', currentYear?: number, source?: string, tooltipFormatter?: fn }
-     */
     setData(data) {
       this._data = data;
+      const headerEl = document.querySelector('#gl-graph h4');
+      if (headerEl) {
+        headerEl.textContent = data && data.title ? data.title : 'Graph';
+      }
       this._currentYear = data && data.currentYear != null ? data.currentYear : null;
       this._source = data && data.source ? data.source : null;
       this._tooltipFormatter = data && typeof data.tooltipFormatter === 'function' ? data.tooltipFormatter : null;
-      if (data && Object.keys(data.series || {}).length > 0) {
+      if (this._hasData(data)) {
         this.show();
         this.render();
       } else {
@@ -961,16 +1031,40 @@
     },
 
     render() {
+      if (!this.ctx2d || !this._data) return;
+      const type = this._data.type || 'line';
+      if (type === 'boxplot') {
+        return this._renderBoxplot();
+      }
+      if (type === 'bars') {
+        return this._renderBars();
+      }
+      return this._renderLine();
+    },
+
+    _hasData(data) {
+      if (!data) return false;
+      const type = data.type || 'line';
+      if (type === 'boxplot') {
+        return Array.isArray(data.series) && data.series.some((s) => s && s.stats);
+      }
+      if (type === 'bars') {
+        return Array.isArray(data.series) && data.series.length && Array.isArray(data.categories) && data.categories.length;
+      }
+      return data.years && data.series && Object.keys(data.series).length > 0;
+    },
+
+    _renderLine() {
       if (!this.ctx2d || !this._data || !this._data.years || !this._data.series) return;
+      const theme = this._getTheme();
       const ctx = this.ctx2d;
       const dpr = window.devicePixelRatio || 1;
       const width = this.canvas.width / dpr;
       const height = this.canvas.height / dpr;
-      const pad = this._padding;
+      const pad = { ...this._padding, bottom: Math.max(this._padding.bottom, 100) };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
 
-      // Clear canvas
       ctx.clearRect(0, 0, width, height);
 
       const years = this._data.years;
@@ -978,13 +1072,11 @@
       const seriesIds = Object.keys(series);
       if (years.length === 0 || seriesIds.length === 0) return;
 
-      // Compute scales
       const xMin = Math.min(...years);
       const xMax = Math.max(...years);
       const xRange = xMax - xMin || 1;
       const xScale = (yr) => pad.left + ((yr - xMin) / xRange) * plotWidth;
 
-      // Find y range
       let yMin = Infinity, yMax = -Infinity;
       for (const id of seriesIds) {
         for (const v of series[id].values) {
@@ -996,22 +1088,19 @@
       }
       if (!isFinite(yMin)) yMin = 0;
       if (!isFinite(yMax)) yMax = 100;
-      // Add padding to y range
       const yPad = (yMax - yMin) * 0.1 || 5;
       yMin = Math.max(0, yMin - yPad);
       yMax = yMax + yPad;
       const yRange = yMax - yMin || 1;
       const yScale = (v) => pad.top + plotHeight - ((v - yMin) / yRange) * plotHeight;
 
-      // Store scales for hit testing
       this._xScale = xScale;
       this._yScale = yScale;
       this._plotBounds = { left: pad.left, right: width - pad.right, top: pad.top, bottom: height - pad.bottom };
       this._yMin = yMin;
       this._yMax = yMax;
 
-      // Draw axes
-      ctx.strokeStyle = '#3f5070';
+      ctx.strokeStyle = theme.axis;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(pad.left, pad.top);
@@ -1019,9 +1108,8 @@
       ctx.lineTo(width - pad.right, height - pad.bottom);
       ctx.stroke();
 
-      // Draw X axis ticks and labels
-      ctx.fillStyle = '#8fa0c2';
-      ctx.font = '11px sans-serif';
+      ctx.fillStyle = theme.muted;
+      ctx.font = '13px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       const xTicks = this._computeTicks(xMin, xMax, 6, true);
@@ -1034,7 +1122,6 @@
         ctx.fillText(String(tick), x, height - pad.bottom + 6);
       }
 
-      // Draw Y axis ticks and labels
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       const yTicks = this._computeTicks(yMin, yMax, 5, false);
@@ -1045,50 +1132,44 @@
         ctx.lineTo(pad.left, y);
         ctx.stroke();
         ctx.fillText(tick.toFixed(0), pad.left - 6, y);
-        // Draw grid line
-        ctx.strokeStyle = '#1f2c44';
+        ctx.strokeStyle = theme.grid;
         ctx.beginPath();
         ctx.moveTo(pad.left, y);
         ctx.lineTo(width - pad.right, y);
         ctx.stroke();
-        ctx.strokeStyle = '#3f5070';
+        ctx.strokeStyle = theme.axis;
       }
 
-      // Draw X axis label
       if (this._data.xLabel) {
-        ctx.fillStyle = '#6b7fa0';
-        ctx.font = '12px sans-serif';
+        ctx.fillStyle = theme.muted;
+        ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(this._data.xLabel, pad.left + plotWidth / 2, height - 12);
       }
 
-      // Draw Y axis label
       if (this._data.yLabel) {
         ctx.save();
         ctx.translate(12, pad.top + plotHeight / 2);
         ctx.rotate(-Math.PI / 2);
-        ctx.fillStyle = '#6b7fa0';
-        ctx.font = '12px sans-serif';
+        ctx.fillStyle = theme.muted;
+        ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(this._data.yLabel, 0, 0);
         ctx.restore();
       }
 
-      // Draw lines - non-highlighted first
       const highlightId = this._highlightedId || this._hoveredId;
       for (const id of seriesIds) {
         if (id === String(highlightId)) continue;
         this._drawLine(ctx, years, series[id], xScale, yScale, false);
       }
 
-      // Draw highlighted line last (on top)
       if (highlightId && series[String(highlightId)]) {
         this._drawLine(ctx, years, series[String(highlightId)], xScale, yScale, true);
       }
 
-      // Draw current year indicator if yearSlider is active
       if (this._currentYear && this._currentYear >= xMin && this._currentYear <= xMax) {
         const x = xScale(this._currentYear);
         ctx.strokeStyle = '#ffcc00';
@@ -1099,6 +1180,272 @@
         ctx.lineTo(x, height - pad.bottom);
         ctx.stroke();
         ctx.setLineDash([]);
+      }
+
+      // Legend
+      const legendItems = seriesIds.map((id) => {
+        const s = series[id] || {};
+        return {
+          label: s.label || id,
+          color: s.color || [100, 150, 200, 180],
+          id,
+        };
+      });
+      if (legendItems.length) {
+        const legendX = width - pad.right + 10;
+        let legendY = pad.top;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = '13px sans-serif';
+        legendItems.forEach((item) => {
+          const color = item.color;
+          ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`;
+          ctx.fillRect(legendX, legendY, 14, 14);
+          ctx.fillStyle = theme.text;
+          ctx.fillText(item.label, legendX + 18, legendY + 7);
+          legendY += 18;
+        });
+      }
+    },
+
+    _renderBoxplot() {
+      if (!this.ctx2d || !this._data || !Array.isArray(this._data.series)) return;
+      const series = this._data.series.filter((s) => s && s.stats);
+      if (!series.length) return;
+      const theme = this._getTheme();
+      const ctx = this.ctx2d;
+      const dpr = window.devicePixelRatio || 1;
+      const width = this.canvas.width / dpr;
+      const height = this.canvas.height / dpr;
+      const pad = { ...this._padding, bottom: Math.max(this._padding.bottom, 240) };
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom;
+
+      ctx.clearRect(0, 0, width, height);
+
+      let yMin = Infinity;
+      let yMax = -Infinity;
+      for (const s of series) {
+        const stats = s.stats;
+        yMin = Math.min(yMin, stats.min);
+        yMax = Math.max(yMax, stats.max);
+      }
+      if (!isFinite(yMin)) yMin = 0;
+      if (!isFinite(yMax)) yMax = 1;
+      const yPad = (yMax - yMin) * 0.1 || 5;
+      yMin = yMin - yPad;
+      yMax = yMax + yPad;
+      const yRange = yMax - yMin || 1;
+      const yScale = (v) => pad.top + plotHeight - ((v - yMin) / yRange) * plotHeight;
+
+      ctx.strokeStyle = theme.axis;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, pad.top);
+      ctx.lineTo(pad.left, height - pad.bottom);
+      ctx.lineTo(width - pad.right, height - pad.bottom);
+      ctx.stroke();
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = theme.muted;
+      ctx.font = '15px sans-serif';
+      const yTicks = this._computeTicks(yMin, yMax, 5, false);
+      for (const tick of yTicks) {
+        const y = yScale(tick);
+        ctx.beginPath();
+        ctx.moveTo(pad.left - 4, y);
+        ctx.lineTo(pad.left, y);
+        ctx.stroke();
+        ctx.fillText(tick.toFixed(1), pad.left - 6, y);
+        ctx.strokeStyle = theme.grid;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.strokeStyle = theme.axis;
+      }
+
+      if (this._data.yLabel) {
+        ctx.save();
+        ctx.translate(12, pad.top + plotHeight / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = theme.muted;
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(this._data.yLabel, 0, 0);
+        ctx.restore();
+      }
+
+      const boxWidth = Math.max(20, Math.min(60, plotWidth / Math.max(series.length * 1.5, 1)));
+      const gap = (plotWidth - boxWidth * series.length) / (series.length + 1);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = theme.text;
+      ctx.font = '16px sans-serif';
+
+      series.forEach((s, idx) => {
+        const xCenter = pad.left + gap * (idx + 1) + boxWidth * idx + boxWidth / 2;
+        const { min, q1, median, q3, max } = s.stats;
+        const color = s.color || [99, 179, 237];
+        const rgba = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.85)`;
+
+        const yMinPos = yScale(min);
+        const yMaxPos = yScale(max);
+        const yQ1 = yScale(q1);
+        const yQ3 = yScale(q3);
+        const yMedian = yScale(median);
+
+        ctx.strokeStyle = rgba;
+        ctx.fillStyle = rgba;
+        ctx.lineWidth = 1.5;
+
+        // Whiskers
+        ctx.beginPath();
+        ctx.moveTo(xCenter, yMaxPos);
+        ctx.lineTo(xCenter, yQ3);
+        ctx.moveTo(xCenter, yQ1);
+        ctx.lineTo(xCenter, yMinPos);
+        ctx.stroke();
+
+        // Caps
+        ctx.beginPath();
+        ctx.moveTo(xCenter - boxWidth * 0.3, yMaxPos);
+        ctx.lineTo(xCenter + boxWidth * 0.3, yMaxPos);
+        ctx.moveTo(xCenter - boxWidth * 0.3, yMinPos);
+        ctx.lineTo(xCenter + boxWidth * 0.3, yMinPos);
+        ctx.stroke();
+
+        // Box
+        ctx.fillRect(xCenter - boxWidth / 2, yQ3, boxWidth, yQ1 - yQ3);
+        ctx.strokeRect(xCenter - boxWidth / 2, yQ3, boxWidth, yQ1 - yQ3);
+
+        // Median line
+        ctx.strokeStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(xCenter - boxWidth / 2, yMedian);
+        ctx.lineTo(xCenter + boxWidth / 2, yMedian);
+        ctx.stroke();
+
+        // Label
+        ctx.save();
+        ctx.translate(xCenter, height - pad.bottom + 26);
+        ctx.rotate(-Math.PI / 4);
+        ctx.fillStyle = theme.text;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(s.label || `S${idx + 1}`, 0, 0);
+        ctx.restore();
+      });
+    },
+
+  _renderBars() {
+    if (!this.ctx2d || !this._data || !Array.isArray(this._data.categories) || !Array.isArray(this._data.series)) return;
+    const categories = this._data.categories;
+    const series = this._data.series;
+    if (!categories.length || !series.length) return;
+
+    const theme = this._getTheme();
+    const ctx = this.ctx2d;
+      const dpr = window.devicePixelRatio || 1;
+      const width = this.canvas.width / dpr;
+      const height = this.canvas.height / dpr;
+      const pad = this._padding;
+      const plotWidth = width - pad.left - pad.right - 80; // reserve space for legend
+      const plotHeight = height - pad.top - pad.bottom;
+
+      ctx.clearRect(0, 0, width, height);
+
+      let yMax = 0;
+      for (const s of series) {
+        for (const v of s.values) {
+          if (v != null && isFinite(v)) {
+            if (v > yMax) yMax = v;
+          }
+        }
+      }
+      yMax = yMax || 1;
+      const yPad = yMax * 0.1;
+      const yScale = (v) => pad.top + plotHeight - ((v) / (yMax + yPad)) * plotHeight;
+
+      ctx.strokeStyle = theme.axis;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, pad.top);
+      ctx.lineTo(pad.left, height - pad.bottom);
+      ctx.lineTo(pad.left + plotWidth, height - pad.bottom);
+      ctx.stroke();
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = theme.muted;
+      ctx.font = '13px sans-serif';
+      const yTicks = this._computeTicks(0, yMax, 5, false);
+      for (const tick of yTicks) {
+        const y = yScale(tick);
+        ctx.beginPath();
+        ctx.moveTo(pad.left - 4, y);
+        ctx.lineTo(pad.left, y);
+        ctx.stroke();
+        ctx.fillText(tick.toFixed(1), pad.left - 6, y);
+        ctx.strokeStyle = theme.grid;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(pad.left + plotWidth, y);
+        ctx.stroke();
+        ctx.strokeStyle = theme.axis;
+      }
+
+      const groupWidth = plotWidth / Math.max(categories.length, 1);
+      const barWidth = Math.max(6, Math.min(24, groupWidth / Math.max(series.length, 1) - 4));
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = theme.text;
+      ctx.font = '13px sans-serif';
+
+      categories.forEach((cat, idx) => {
+        const groupStart = pad.left + groupWidth * idx + groupWidth * 0.1;
+        series.forEach((s, sIdx) => {
+          const val = s.values[idx];
+          if (val == null || !isFinite(val)) return;
+          const color = s.color || [99, 179, 237];
+          const x = groupStart + sIdx * (barWidth + 4);
+          const y = yScale(val);
+          const h = (height - pad.bottom) - y;
+          ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.8)`;
+          ctx.fillRect(x, y, barWidth, h);
+        });
+        ctx.fillStyle = theme.text;
+        ctx.fillText(String(cat), groupStart + (barWidth + 4) * series.length / 2, height - pad.bottom + 6);
+      });
+
+      // Legend
+      const legendX = pad.left + plotWidth + 10;
+      let legendY = pad.top;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = '13px sans-serif';
+      series.forEach((s) => {
+        const color = s.color || [99, 179, 237];
+        ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`;
+        ctx.fillRect(legendX, legendY, 14, 14);
+        ctx.fillStyle = theme.text;
+        ctx.fillText(s.label || 'Series', legendX + 18, legendY + 7);
+        legendY += 18;
+      });
+
+      if (this._data.yLabel) {
+        ctx.save();
+        ctx.translate(12, pad.top + plotHeight / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = theme.muted;
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(this._data.yLabel, 0, 0);
+        ctx.restore();
       }
     },
 
@@ -1139,8 +1486,19 @@
       return [...new Set(ticks)]; // Remove duplicates
     },
 
+    _getTheme() {
+      const root = getComputedStyle(document.documentElement);
+      const text = root.getPropertyValue('--wc-color-text').trim() || '#e5e7eb';
+      const muted = root.getPropertyValue('--wc-color-text-muted').trim() || '#94a3b8';
+      const axis = root.getPropertyValue('--wc-color-border').trim() || '#334155';
+      const grid = root.getPropertyValue('--wc-color-border-muted').trim() || 'rgba(148, 163, 184, 0.35)';
+      const highlight = root.getPropertyValue('--wc-color-accent').trim() || '#ffcc00';
+      return { text, muted, axis, grid, highlight };
+    },
+
     _onCanvasHover(e) {
-      if (!this._data || !this._xScale || !this._plotBounds) return;
+      if (!this._data || (this._data.type && this._data.type !== 'line')) return;
+      if (!this._xScale || !this._plotBounds) return;
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -1223,7 +1581,14 @@
 
   // Callback when graph panel is toggled
   window.glDashboardGraphToggled = async function (visible) {
-    if (!visible) return;
+    if (!visible) {
+      setGraphFocus(false);
+      return;
+    }
+    if (activeGraphKey && graphFocus) {
+      await activateGraphItem(activeGraphKey, { keepFocus: graphFocus });
+      return;
+    }
     if (rapCumulativeMode || rapLayers.some((l) => l.visible)) {
       await loadRapTimeseriesData();
     }
@@ -1284,6 +1649,16 @@
       ? createColormap({ colormap: 'viridis', nshades: 256, format: 'rgba' })
       : null;
   const RGBA_RE = /^rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*(?:,\s*([0-9.]+)\s*)?\)$/i;
+  const GRAPH_COLORS = [
+    [99, 179, 237],
+    [139, 92, 246],
+    [16, 185, 129],
+    [244, 114, 182],
+    [251, 146, 60],
+    [94, 234, 212],
+    [248, 113, 113],
+    [125, 211, 252],
+  ];
 
   function hslToHex(h, s, l) {
     const sat = s / 100;
@@ -1610,6 +1985,7 @@
             // Keep copied flags in sync so UI reflects state
             layer.visible = input.checked;
           }
+          setGraphFocus(false);
           applyLayers();
           const graphEl = document.getElementById('gl-graph');
           const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
@@ -1635,6 +2011,55 @@
     });
   }
 
+  function updateGraphList() {
+    if (!graphListEl) return;
+    graphListEl.innerHTML = '';
+    let rendered = 0;
+    graphDefs.forEach((group, idx) => {
+      const details = document.createElement('details');
+      details.className = 'gl-layer-details';
+      const hasActive = group.items.some((i) => i.key === activeGraphKey);
+      details.open = idx === 0 || hasActive;
+
+      const summary = document.createElement('summary');
+      summary.className = 'gl-layer-group';
+      summary.textContent = group.title || 'Graphs';
+      details.appendChild(summary);
+
+      const itemList = document.createElement('ul');
+      itemList.className = 'gl-layer-items';
+
+      group.items.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'gl-layer-item';
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'graph-selection';
+        input.id = `graph-${item.key}`;
+        input.checked = activeGraphKey === item.key;
+        input.addEventListener('change', async () => {
+          if (input.checked) {
+            await activateGraphItem(item.key);
+          }
+        });
+        const label = document.createElement('label');
+        label.setAttribute('for', input.id);
+        label.innerHTML = `<span class="gl-layer-name">${item.label}</span>`;
+        li.appendChild(input);
+        li.appendChild(label);
+        itemList.appendChild(li);
+        rendered += 1;
+      });
+
+      details.appendChild(itemList);
+      graphListEl.appendChild(details);
+    });
+
+    if (graphEmptyEl) {
+      graphEmptyEl.hidden = rendered > 0;
+    }
+  }
+
   /**
    * Render the RAP section with cumulative cover radio + band checkboxes.
    */
@@ -1656,6 +2081,8 @@
         rapCumulativeMode = true;
         // Re-check the cumulative radio since deselectAll cleared it
         cumulativeInput.checked = true;
+        setGraphFocus(false);
+        setGraphCollapsed(false);
         if (rapMetadata && rapMetadata.years && rapMetadata.years.length) {
           const minYear = rapMetadata.years[0];
           const maxYear = rapMetadata.years[rapMetadata.years.length - 1];
@@ -1720,7 +2147,81 @@
     bandContainer.appendChild(bandList);
     itemList.appendChild(bandContainer);
 
-    
+    // Individual band radio options (for viewing single bands)
+    const separatorLi = document.createElement('li');
+    separatorLi.style.cssText = 'border-top: 1px solid #1f2c44; margin: 0.5rem 0; padding: 0;';
+    itemList.appendChild(separatorLi);
+
+    const individualHeader = document.createElement('li');
+    individualHeader.style.cssText = 'font-size: 0.75rem; color: #6b7fa0; padding: 0.25rem 0;';
+    individualHeader.textContent = 'Or view single band:';
+    itemList.appendChild(individualHeader);
+
+    section.items.forEach((layer) => {
+      const li = document.createElement('li');
+      li.className = 'gl-layer-item';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'subcatchment-overlay';
+      input.checked = layer.visible && !rapCumulativeMode;
+      input.id = `layer-RAP-${layer.key}`;
+      input.addEventListener('change', async () => {
+        if (input.checked) {
+          deselectAllSubcatchmentOverlays();
+          rapCumulativeMode = false;
+          layer.visible = true;
+          input.checked = true;
+          setGraphFocus(false);
+          setGraphCollapsed(false);
+          if (rapMetadata && rapMetadata.years && rapMetadata.years.length) {
+            const minYear = rapMetadata.years[0];
+            const maxYear = rapMetadata.years[rapMetadata.years.length - 1];
+            if (!rapSelectedYear || rapSelectedYear < minYear || rapSelectedYear > maxYear) {
+              rapSelectedYear = maxYear;
+            }
+            yearSlider.setRange(minYear, maxYear, rapSelectedYear);
+          }
+          // Show year slider
+          yearSlider.show();
+          // Load data for the selected band
+          if (layer.bandId && rapSelectedYear) {
+            try {
+              const dataPayload = {
+                datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
+                columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
+                filters: [
+                  { column: 'rap.year', op: '=', value: rapSelectedYear },
+                  { column: 'rap.band', op: '=', value: layer.bandId },
+                ],
+              };
+              const dataResult = await postQueryEngine(dataPayload);
+              if (dataResult && dataResult.records) {
+                rapSummary = {};
+                for (const row of dataResult.records) {
+                  rapSummary[String(row.topaz_id)] = row.value;
+                }
+              }
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.warn('gl-dashboard: failed to load RAP band data', err);
+            }
+          }
+          applyLayers();
+          // Reload graph data if graph is visible
+          const graphEl = document.getElementById('gl-graph');
+          if (graphEl && !graphEl.classList.contains('is-collapsed')) {
+            await loadRapTimeseriesData();
+          }
+        }
+      });
+      const label = document.createElement('label');
+      label.setAttribute('for', input.id);
+      const name = layer.label || layer.key;
+      label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${layer.path || ''}</span>`;
+      li.appendChild(input);
+      li.appendChild(label);
+      itemList.appendChild(li);
+    });
 
     details.appendChild(itemList);
   }
@@ -1784,6 +2285,7 @@
           deselectAllSubcatchmentOverlays();
           layer.visible = true;
           input.checked = true;
+          setGraphFocus(false);
           // Load data if we have a date selected
           if (weppEventSelectedDate) {
             await refreshWeppEventData();
@@ -4888,6 +5390,379 @@
     return resp.json();
   }
 
+  async function postQueryEngineForScenario(payload, scenarioPath) {
+    const origin = window.location.origin || `${window.location.protocol}//${window.location.host}`;
+    let queryPath = `runs/${ctx.runid}`;
+    if (scenarioPath) {
+      queryPath += `/${scenarioPath}`;
+    }
+    const targetUrl = `${origin}/query-engine/${queryPath}/query`;
+    const resp = await fetch(targetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  }
+
+  function scenarioColor(idx) {
+    const c = GRAPH_COLORS[idx % GRAPH_COLORS.length];
+    return [c[0], c[1], c[2], 255];
+  }
+
+  function quantile(values, q) {
+    if (!values.length) return null;
+    const sorted = [...values].sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const lower = Math.floor(pos);
+    const upper = Math.ceil(pos);
+    if (lower === upper) return sorted[lower];
+    const weight = pos - lower;
+    return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+  }
+
+  function computeBoxStats(values) {
+    const clean = (values || []).filter((v) => Number.isFinite(v));
+    if (!clean.length) return null;
+    const min = Math.min(...clean);
+    const max = Math.max(...clean);
+    const q1 = quantile(clean, 0.25);
+    const median = quantile(clean, 0.5);
+    const q3 = quantile(clean, 0.75);
+    return { min, q1, median, q3, max };
+  }
+
+  async function loadHillLossScenario(scenarioPath) {
+    const key = scenarioPath || '';
+    if (hillLossCache[key]) return hillLossCache[key];
+    const payload = {
+      datasets: [
+        { path: 'wepp/output/interchange/loss_pw0.hill.parquet', alias: 'loss' },
+        { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+      ],
+      joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
+      columns: [
+        'loss."Hillslope Area" AS area_ha',
+        'loss."Soil Loss" AS soil_loss_kg',
+        'loss."Runoff Volume" AS runoff_volume_m3',
+        'hill.topaz_id AS topaz_id',
+      ],
+    };
+    try {
+      const result = await postQueryEngineForScenario(payload, scenarioPath);
+      const rows = [];
+      if (result && result.records) {
+        for (const row of result.records) {
+          rows.push({
+            area_ha: Number(row.area_ha),
+            soil_loss_kg: Number(row.soil_loss_kg),
+            runoff_volume_m3: Number(row.runoff_volume_m3),
+          });
+        }
+      }
+      hillLossCache[key] = rows;
+      const totalArea = rows.reduce((acc, r) => acc + (Number.isFinite(r.area_ha) ? r.area_ha : 0), 0);
+      hillslopeAreaCache[key] = totalArea;
+      return rows;
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load hillslope loss data', err);
+      hillLossCache[key] = [];
+      return [];
+    }
+  }
+
+  async function loadChannelLossScenario(scenarioPath) {
+    const key = scenarioPath || '';
+    if (channelLossCache[key]) return channelLossCache[key];
+    const payload = {
+      datasets: [{ path: 'wepp/output/interchange/loss_pw0.chn.parquet', alias: 'chn' }],
+      columns: [
+        'chn."Soil Loss" AS soil_loss_kg',
+        'chn.chn_enum AS chn_id',
+      ],
+    };
+    try {
+      const result = await postQueryEngineForScenario(payload, scenarioPath);
+      const rows = [];
+      if (result && result.records) {
+        for (const row of result.records) {
+          rows.push({
+            soil_loss_kg: Number(row.soil_loss_kg),
+            chn_id: row.chn_id,
+          });
+        }
+      }
+      channelLossCache[key] = rows;
+      return rows;
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load channel loss data', err);
+      channelLossCache[key] = [];
+      return [];
+    }
+  }
+
+  async function loadOutletScenario(scenarioPath) {
+    const key = scenarioPath || '';
+    if (outletAllYearsCache[key]) return outletAllYearsCache[key];
+    const payload = {
+      datasets: [{ path: 'wepp/output/interchange/loss_pw0.all_years.out.parquet', alias: 'out' }],
+      columns: ['out.year AS year', 'out.key AS key', 'out.value AS value'],
+      order_by: ['year'],
+    };
+    try {
+      const result = await postQueryEngineForScenario(payload, scenarioPath);
+      const map = {};
+      if (result && result.records) {
+        for (const row of result.records) {
+          const year = Number(row.year);
+          const keyName = String(row.key || '');
+          const val = Number(row.value);
+          if (!map[keyName]) {
+            map[keyName] = {};
+          }
+          if (Number.isFinite(year)) {
+            map[keyName][year] = val;
+          }
+        }
+      }
+      outletAllYearsCache[key] = map;
+      return map;
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load outlet data', err);
+      outletAllYearsCache[key] = {};
+      return {};
+    }
+  }
+
+  async function getTotalAreaHa(scenarioPath) {
+    const key = scenarioPath || '';
+    if (hillslopeAreaCache[key] != null) return hillslopeAreaCache[key];
+    await loadHillLossScenario(scenarioPath);
+    return hillslopeAreaCache[key] || 0;
+  }
+
+  function selectOutletKey(outletMap, candidates) {
+    const keys = Object.keys(outletMap || {});
+    if (!keys.length) return null;
+    for (const cand of candidates) {
+      const exact = keys.find((k) => k.toLowerCase() === cand.toLowerCase());
+      if (exact) return exact;
+    }
+    for (const cand of candidates) {
+      const match = keys.find((k) => k.toLowerCase().includes(cand.toLowerCase()));
+      if (match) return match;
+    }
+    return null;
+  }
+
+  async function buildHillSoilLossBoxplot() {
+    const series = [];
+    for (let i = 0; i < graphScenarios.length; i++) {
+      const scenario = graphScenarios[i];
+      const rows = await loadHillLossScenario(scenario.path);
+      const perArea = rows
+        .map((r) => {
+          const areaHa = Number(r.area_ha);
+          const soilKg = Number(r.soil_loss_kg);
+          if (!Number.isFinite(areaHa) || areaHa <= 0 || !Number.isFinite(soilKg)) return null;
+          return soilKg / (areaHa * 1000); // tonne/ha
+        })
+        .filter((v) => Number.isFinite(v));
+      const stats = computeBoxStats(perArea);
+      if (stats) {
+        series.push({ label: scenario.name, stats, color: scenarioColor(i) });
+      }
+    }
+    return {
+      type: 'boxplot',
+      title: 'Soil Loss (hillslopes)',
+      yLabel: 'tonne/ha',
+      series,
+    };
+  }
+
+  async function buildHillRunoffBoxplot() {
+    const series = [];
+    for (let i = 0; i < graphScenarios.length; i++) {
+      const scenario = graphScenarios[i];
+      const rows = await loadHillLossScenario(scenario.path);
+      const perArea = rows
+        .map((r) => {
+          const areaHa = Number(r.area_ha);
+          const runoffM3 = Number(r.runoff_volume_m3);
+          if (!Number.isFinite(areaHa) || areaHa <= 0 || !Number.isFinite(runoffM3)) return null;
+          return (runoffM3 * 1000) / (areaHa * 10000); // mm over area
+        })
+        .filter((v) => Number.isFinite(v));
+      const stats = computeBoxStats(perArea);
+      if (stats) {
+        series.push({ label: scenario.name, stats, color: scenarioColor(i) });
+      }
+    }
+    return {
+      type: 'boxplot',
+      title: 'Runoff (hillslopes)',
+      yLabel: 'mm',
+      series,
+    };
+  }
+
+  async function buildChannelSoilLossBoxplot() {
+    const series = [];
+    for (let i = 0; i < graphScenarios.length; i++) {
+      const scenario = graphScenarios[i];
+      const rows = await loadChannelLossScenario(scenario.path);
+      const tonnes = rows
+        .map((r) => {
+          const soilKg = Number(r.soil_loss_kg);
+          return Number.isFinite(soilKg) ? soilKg / 1000 : null;
+        })
+        .filter((v) => Number.isFinite(v));
+      const stats = computeBoxStats(tonnes);
+      if (stats) {
+        series.push({ label: scenario.name, stats, color: scenarioColor(i) });
+      }
+    }
+    return {
+      type: 'boxplot',
+      title: 'Soil Loss (channels)',
+      yLabel: 'tonne',
+      series,
+    };
+  }
+
+  async function buildOutletSedimentBars() {
+    const yearsSet = new Set();
+    const scenarioData = [];
+    for (let i = 0; i < graphScenarios.length; i++) {
+      const scenario = graphScenarios[i];
+      const outletMap = await loadOutletScenario(scenario.path);
+      const keyName = selectOutletKey(outletMap, ['total sediment discharge from outlet', 'sediment discharge from outlet', 'sediment discharge']);
+      const areaHa = await getTotalAreaHa(scenario.path);
+      scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i) });
+      if (keyName && outletMap[keyName]) {
+        for (const yr of Object.keys(outletMap[keyName])) {
+          const yNum = Number(yr);
+          if (Number.isFinite(yNum)) yearsSet.add(yNum);
+        }
+      }
+    }
+    const years = Array.from(yearsSet).sort((a, b) => a - b);
+    const series = [];
+    for (const data of scenarioData) {
+      if (!data.keyName || !years.length) continue;
+      const values = years.map((yr) => {
+        const raw = data.outletMap[data.keyName] ? Number(data.outletMap[data.keyName][yr]) : null;
+        if (!Number.isFinite(raw) || !data.areaHa) return null;
+        return raw / data.areaHa; // tonne/ha
+      });
+      series.push({ label: data.scenario.name, values, color: data.color });
+    }
+    const lineSeries = {};
+    series.forEach((s) => {
+      lineSeries[s.label] = { values: s.values, color: s.color };
+    });
+    return {
+      type: 'line',
+      title: 'Sediment discharge (outlet)',
+      years,
+      series: lineSeries,
+      xLabel: 'Year',
+      yLabel: 'tonne/ha',
+    };
+  }
+
+  async function buildOutletStreamBars() {
+    const yearsSet = new Set();
+    const scenarioData = [];
+    for (let i = 0; i < graphScenarios.length; i++) {
+      const scenario = graphScenarios[i];
+      const outletMap = await loadOutletScenario(scenario.path);
+      const keyName = selectOutletKey(outletMap, ['water discharge from outlet', 'stream discharge']);
+      const areaHa = await getTotalAreaHa(scenario.path);
+      scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i) });
+      if (keyName && outletMap[keyName]) {
+        for (const yr of Object.keys(outletMap[keyName])) {
+          const yNum = Number(yr);
+          if (Number.isFinite(yNum)) yearsSet.add(yNum);
+        }
+      }
+    }
+    const years = Array.from(yearsSet).sort((a, b) => a - b);
+    const series = [];
+    for (const data of scenarioData) {
+      if (!data.keyName || !years.length) continue;
+      const values = years.map((yr) => {
+        const raw = data.outletMap[data.keyName] ? Number(data.outletMap[data.keyName][yr]) : null;
+        if (!Number.isFinite(raw) || !data.areaHa) return null;
+        // raw assumed m^3, convert to mm over watershed area
+        return (raw * 1000) / (data.areaHa * 10000);
+      });
+      series.push({ label: data.scenario.name, values, color: data.color });
+    }
+    const lineSeries = {};
+    series.forEach((s) => {
+      lineSeries[s.label] = { values: s.values, color: s.color };
+    });
+    return {
+      type: 'line',
+      title: 'Stream discharge (outlet)',
+      years,
+      series: lineSeries,
+      xLabel: 'Year',
+      yLabel: 'mm',
+    };
+  }
+
+  const GRAPH_LOADERS = {
+    'omni-soil-loss-hill': buildHillSoilLossBoxplot,
+    'omni-soil-loss-chn': buildChannelSoilLossBoxplot,
+    'omni-runoff-hill': buildHillRunoffBoxplot,
+    'omni-outlet-sediment': buildOutletSedimentBars,
+    'omni-outlet-stream': buildOutletStreamBars,
+  };
+
+  async function loadGraphDataset(key, { force } = {}) {
+    if (!force && graphDataCache[key]) {
+      return graphDataCache[key];
+    }
+    const loader = GRAPH_LOADERS[key];
+    if (!loader) return null;
+    const data = await loader();
+    graphDataCache[key] = data;
+    return data;
+  }
+
+  async function activateGraphItem(key, options = {}) {
+    activeGraphKey = key;
+    const keepFocus = options.keepFocus || false;
+    ensureGraphExpanded();
+    if (!keepFocus) {
+      setGraphFocus(true);
+    }
+    try {
+      const data = await loadGraphDataset(key, { force: options.force });
+      if (data) {
+        timeseriesGraph.setData(data);
+        if (graphEmptyEl) graphEmptyEl.style.display = 'none';
+      } else {
+        timeseriesGraph.hide();
+        if (graphEmptyEl) {
+          graphEmptyEl.textContent = 'No data available for this graph.';
+          graphEmptyEl.style.display = '';
+        }
+      }
+    } catch (err) {
+      console.warn('gl-dashboard: failed to activate graph', err);
+      timeseriesGraph.hide();
+      if (graphEmptyEl) {
+        graphEmptyEl.textContent = 'Unable to load graph data.';
+        graphEmptyEl.style.display = '';
+      }
+    }
+  }
+
   async function detectRapOverlays() {
     // Geometry is shared across scenarios - always use base URL
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
@@ -5216,6 +6091,8 @@
     // Re-render layers to apply highlight
     applyLayers();
   };
+
+  updateGraphList();
 
   Promise.all([detectLayers(), detectLanduseOverlays(), detectSoilsOverlays(), detectHillslopesOverlays(), detectWatarOverlays(), detectWeppOverlays(), detectWeppYearlyOverlays(), detectWeppEventOverlays(), detectRapOverlays()])
     .catch((err) => {
