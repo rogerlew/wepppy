@@ -788,21 +788,26 @@
     setGraphMode(collapsing ? 'minimized' : 'split', { source: 'user' });
   }
 
+  function currentGraphSource() {
+    try {
+      const g = window.glDashboardTimeseriesGraph;
+      return g && g._source ? g._source : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
   function updateGraphModeButtons(mode) {
     if (!graphModeButtons || !graphModeButtons.length) return;
+    const omniFocused = currentGraphSource() === 'omni' && getState().graphFocus;
+
     graphModeButtons.forEach((btn) => {
       const isActive = btn.dataset.graphMode === mode;
       btn.classList.toggle('is-active', isActive);
       btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    });
-  }
-
-  function setGraphControlsEnabled(enabled) {
-    graphControlsEnabled = !!enabled;
-    if (!graphModeButtons || !graphModeButtons.length) return;
-    graphModeButtons.forEach((btn) => {
       const isMin = btn.dataset.graphMode === 'minimized';
-      const disable = !graphControlsEnabled && !isMin;
+      const isSplit = btn.dataset.graphMode === 'split';
+      const disable = (!graphControlsEnabled && !isMin) || (omniFocused && isSplit);
       if (disable) {
         btn.classList.add('is-disabled');
         btn.setAttribute('aria-disabled', 'true');
@@ -813,6 +818,11 @@
         btn.disabled = false;
       }
     });
+  }
+
+  function setGraphControlsEnabled(enabled) {
+    graphControlsEnabled = !!enabled;
+    updateGraphModeButtons(getState().graphMode || 'split');
   }
 
   function setGraphMode(mode, options = {}) {
@@ -827,18 +837,22 @@
       updateGraphModeButtons(targetMode);
       return;
     }
-    setValue('graphMode', targetMode);
-    if (targetMode === 'minimized') {
+    const st = getState();
+    const graphCapable = isRapActive(st) || isWeppYearlyActive(st) || !!st.activeGraphKey;
+    const effectiveMode = !graphCapable && source !== 'user' ? 'minimized' : targetMode;
+
+    setValue('graphMode', effectiveMode);
+    if (effectiveMode === 'minimized') {
       setGraphCollapsed(true);
       setGraphFocus(false, { skipModeSync: true, force: true });
-    } else if (targetMode === 'split') {
+    } else if (effectiveMode === 'split') {
       setGraphCollapsed(false, { focusOnExpand: false });
       setGraphFocus(false, { skipModeSync: true, force: true });
-    } else if (targetMode === 'full') {
+    } else if (effectiveMode === 'full') {
       setGraphCollapsed(false, { focusOnExpand: true });
       setGraphFocus(true, { skipModeSync: true, force: true });
     }
-    updateGraphModeButtons(targetMode);
+    updateGraphModeButtons(effectiveMode);
   }
 
   window.glDashboardToggleGraphPanel = toggleGraphPanel;
@@ -1082,10 +1096,25 @@
     lastGraphContextKey = contextKey;
 
     if (!graphCapable) {
+      graphModeUserOverride = null;
+      const tg = window.glDashboardTimeseriesGraph;
+      if (tg && typeof tg.hide === 'function') {
+        tg.hide();
+      }
+      if (st.activeGraphKey) {
+        setValue('activeGraphKey', null);
+      }
+      setGraphFocus(false, { force: true, skipModeSync: true });
       setGraphControlsEnabled(false);
       setGraphMode('minimized', { source: 'auto' });
       yearSlider.hide();
       return;
+    }
+
+    // If a non-graph context (e.g., map-only) left the user in a minimized override,
+    // clear it when a graph-capable RAP/WEPP Yearly context becomes active so we auto-open split.
+    if (graphModeUserOverride === 'minimized' && (rapActive || yearlyActive)) {
+      graphModeUserOverride = null;
     }
 
     setGraphControlsEnabled(true);
@@ -1336,6 +1365,10 @@
     if (cumulativeEl) cumulativeEl.checked = false;
     // Hide year slider when no RAP layers active
     yearSlider.hide();
+    // Clear active graph context when switching to map-only overlays
+    setValue('activeGraphKey', null);
+    setGraphFocus(false, { force: true, skipModeSync: true });
+    graphModeUserOverride = null;
   }
 
   async function activateWeppYearlyLayer() {
