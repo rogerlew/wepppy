@@ -13,6 +13,7 @@ const state = {
   currentViewState: null,
 
   graphFocus: false,
+  graphMode: 'minimized',
   activeGraphKey: null,
   graphDataCache: {},
   hillLossCache: {},

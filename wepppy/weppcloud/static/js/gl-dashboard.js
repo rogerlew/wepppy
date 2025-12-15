@@ -62,6 +62,24 @@
   const state = getState();
   const queryEngine = queryEngineModule.createQueryEngine(ctx);
   let graphLoaders;
+  let glMainEl;
+  let graphPanelEl;
+  let graphModeButtons;
+  let graphModeUserOverride = null;
+  let graphControlsEnabled = true;
+  // Use var to avoid TDZ issues if syncGraphModeForContext fires early during init.
+  var lastGraphContextKey = null; // eslint-disable-line no-var
+
+  function isRapActive(stateObj) {
+    if (!stateObj.rapSummary) return false;
+    if (stateObj.rapCumulativeMode) return true;
+    return (stateObj.rapLayers || []).some((l) => l && l.selected !== false);
+  }
+
+  function isWeppYearlyActive(stateObj) {
+    if (!stateObj.weppYearlySummary) return false;
+    return (stateObj.weppYearlyLayers || []).some((l) => l && l.visible);
+  }
 
   const { rdbuScale, winterScale, jet2Scale } = createColorScales(
     typeof createColormap === 'function' ? createColormap : null
@@ -135,6 +153,7 @@
     'currentBasemapKey',
     'currentViewState',
     'graphFocus',
+    'graphMode',
     'activeGraphKey',
     'hillLossCache',
     'channelLossCache',
@@ -698,8 +717,14 @@
     });
   }
 
-  function setGraphFocus(enabled) {
+  function setGraphFocus(enabled, options = {}) {
+    const { skipModeSync = false, force = false } = options;
     const focus = !!enabled;
+    const currentMode = getState().graphMode || 'split';
+    if (!focus && graphModeUserOverride === 'full' && !force) {
+      // Preserve user-selected full mode unless explicitly forced to drop.
+      return;
+    }
     setValue('graphFocus', focus);
     if (glMainEl) {
       if (focus) {
@@ -707,6 +732,12 @@
       } else {
         glMainEl.classList.remove('graph-focus');
       }
+    }
+    if (!skipModeSync) {
+      const collapsed = graphPanelEl ? graphPanelEl.classList.contains('is-collapsed') : false;
+      const mode = collapsed ? 'minimized' : focus ? 'full' : 'split';
+      setValue('graphMode', mode);
+      updateGraphModeButtons(mode);
     }
   }
 
@@ -716,16 +747,17 @@
     }
   }
 
-  function setGraphCollapsed(collapsed) {
+  function setGraphCollapsed(collapsed, options = {}) {
+    const { focusOnExpand = true } = options;
     if (!graphPanelEl) return;
     graphPanelEl.classList.toggle('is-collapsed', collapsed);
     if (typeof window.glDashboardGraphToggled === 'function') {
       window.glDashboardGraphToggled(!graphPanelEl.classList.contains('is-collapsed'));
     }
     if (collapsed) {
-      setGraphFocus(false);
+      setGraphFocus(false, { force: true });
     } else {
-      setGraphFocus(true);
+      setGraphFocus(focusOnExpand);
       // Refresh layout after expanding
       if (timeseriesGraph && typeof timeseriesGraph._resizeCanvas === 'function') {
         timeseriesGraph._resizeCanvas();
@@ -739,10 +771,64 @@
   function toggleGraphPanel() {
     if (!graphPanelEl) return;
     const collapsing = !graphPanelEl.classList.contains('is-collapsed');
-    setGraphCollapsed(collapsing);
+    setGraphMode(collapsing ? 'minimized' : 'split', { source: 'user' });
+  }
+
+  function updateGraphModeButtons(mode) {
+    if (!graphModeButtons || !graphModeButtons.length) return;
+    graphModeButtons.forEach((btn) => {
+      const isActive = btn.dataset.graphMode === mode;
+      btn.classList.toggle('is-active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function setGraphControlsEnabled(enabled) {
+    graphControlsEnabled = !!enabled;
+    if (!graphModeButtons || !graphModeButtons.length) return;
+    graphModeButtons.forEach((btn) => {
+      const isMin = btn.dataset.graphMode === 'minimized';
+      const disable = !graphControlsEnabled && !isMin;
+      if (disable) {
+        btn.classList.add('is-disabled');
+        btn.setAttribute('aria-disabled', 'true');
+        btn.disabled = true;
+      } else {
+        btn.classList.remove('is-disabled');
+        btn.removeAttribute('aria-disabled');
+        btn.disabled = false;
+      }
+    });
+  }
+
+  function setGraphMode(mode, options = {}) {
+    const { source = 'auto' } = options;
+    const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
+    if (source === 'user') {
+      graphModeUserOverride = validated;
+    }
+    const targetMode = source === 'user' ? validated : graphModeUserOverride || validated;
+    const currentMode = getState().graphMode || 'split';
+    if (targetMode === currentMode && source !== 'user') {
+      updateGraphModeButtons(targetMode);
+      return;
+    }
+    setValue('graphMode', targetMode);
+    if (targetMode === 'minimized') {
+      setGraphCollapsed(true);
+      setGraphFocus(false, { skipModeSync: true, force: true });
+    } else if (targetMode === 'split') {
+      setGraphCollapsed(false, { focusOnExpand: false });
+      setGraphFocus(false, { skipModeSync: true, force: true });
+    } else if (targetMode === 'full') {
+      setGraphCollapsed(false, { focusOnExpand: true });
+      setGraphFocus(true, { skipModeSync: true, force: true });
+    }
+    updateGraphModeButtons(targetMode);
   }
 
   window.glDashboardToggleGraphPanel = toggleGraphPanel;
+  window.glDashboardSetGraphMode = setGraphMode;
 
   const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
   const graphScenarios = [{ name: 'Base', path: '' }].concat(
@@ -770,8 +856,23 @@
   const graphEmptyEl = document.getElementById('gl-graph-empty');
   const legendContentEl = document.getElementById('gl-legends-content');
   const legendEmptyEl = document.getElementById('gl-legend-empty');
-  const glMainEl = document.querySelector('.gl-main');
-  const graphPanelEl = document.getElementById('gl-graph');
+  glMainEl = document.querySelector('.gl-main');
+  graphPanelEl = document.getElementById('gl-graph');
+  graphModeButtons = document.querySelectorAll('[data-graph-mode]');
+
+  if (graphModeButtons && graphModeButtons.length) {
+    graphModeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => setGraphMode(btn.dataset.graphMode, { source: 'user' }));
+    });
+  }
+
+  const initialGraphMode = graphPanelEl && graphPanelEl.classList.contains('is-collapsed')
+    ? 'minimized'
+    : getState().graphFocus
+      ? 'full'
+      : 'split';
+  setGraphMode(getState().graphMode || initialGraphMode, { source: 'auto' });
+  setGraphControlsEnabled(true);
 
   // ============================================================================
   // Year Slider Controller (generic, reusable for RAP and other features)
@@ -949,10 +1050,42 @@
 
   // Expose for external use
   window.glDashboardYearSlider = yearSlider;
+  // Initial graph control sync after year slider is available
+  syncGraphModeForContext();
 
   // ============================================================================
   // Timeseries Graph Controller (for RAP and other timeseries data)
   // ============================================================================
+  function syncGraphModeForContext() {
+    const st = getState();
+    const rapActive = isRapActive(st);
+    const yearlyActive = isWeppYearlyActive(st);
+    const graphCapable = rapActive || yearlyActive || !!st.activeGraphKey;
+    const contextKey = `${graphCapable ? 1 : 0}-${rapActive ? 1 : 0}-${yearlyActive ? 1 : 0}-${graphModeUserOverride || ''}-${st.activeGraphKey || ''}`;
+    if (contextKey === lastGraphContextKey) {
+      return;
+    }
+    lastGraphContextKey = contextKey;
+
+    if (!graphCapable) {
+      setGraphControlsEnabled(false);
+      setGraphMode('minimized', { source: 'auto' });
+      yearSlider.hide();
+      return;
+    }
+
+    setGraphControlsEnabled(true);
+    const targetMode = graphModeUserOverride || 'split';
+    setGraphMode(targetMode, { source: graphModeUserOverride ? 'user' : 'auto' });
+
+    // Year slider visible only for RAP or WEPP Yearly contexts
+    if (rapActive || yearlyActive) {
+      yearSlider.show();
+    } else {
+      yearSlider.hide();
+    }
+  }
+
   async function handleGraphPanelToggle(visible) {
     if (!visible) {
       setGraphFocus(false);
@@ -982,6 +1115,7 @@
   });
 
   timeseriesGraph.init();
+  syncGraphModeForContext();
 
   window.glDashboardTimeseriesGraph = timeseriesGraph;
   window.glDashboardGraphToggled = handleGraphPanelToggle;
@@ -1320,6 +1454,7 @@
     if (mapController) {
       mapController.applyLayers(stack);
     }
+    syncGraphModeForContext();
     updateLegendsPanel();
   }
 
@@ -2789,6 +2924,7 @@
       return;
     }
     timeseriesGraph.setData(data);
+    syncGraphModeForContext();
   }
 
   const WEPP_YEARLY_COLUMN_MAP = {
@@ -2817,6 +2953,7 @@
       return;
     }
     timeseriesGraph.setData(data);
+    syncGraphModeForContext();
   }
 
   // Wire year slider to RAP data refresh
@@ -3683,6 +3820,7 @@
           graphEmptyEl.style.display = '';
         }
       }
+      syncGraphModeForContext();
     } catch (err) {
       console.warn('gl-dashboard: failed to activate graph', err);
       timeseriesGraph.hide();

@@ -318,6 +318,24 @@
     justify-content: space-between;
     gap: 0.5rem;
   }
+  .gl-graph__controls {
+    display: inline-flex;
+    gap: 0.25rem;
+  }
+  .gl-graph__controls .gl-btn {
+    padding: 0.35rem 0.5rem;
+    line-height: 1.1;
+    min-width: 2.25rem;
+  }
+  .gl-graph__controls .gl-btn.is-active {
+    background: var(--wc-color-primary);
+    color: var(--wc-color-on-primary);
+    border-color: var(--wc-color-primary);
+  }
+  .gl-graph__controls .gl-btn.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
   .gl-graph__header h4 {
     color: var(--wc-color-text);
   }
@@ -770,7 +788,11 @@
     <div class="gl-graph is-collapsed" id="gl-graph">
       <div class="gl-graph__header">
         <h4 style="margin:0;color:var(--wc-color-text);">Graph</h4>
-        <button class="gl-btn" data-graph-toggle type="button">Toggle Graph</button>
+        <div class="gl-graph__controls" role="group" aria-label="Graph layout">
+          <button class="gl-btn is-active" data-graph-mode="minimized" type="button" title="Minimize graph panel" aria-label="Minimize graph panel">─</button>
+          <button class="gl-btn" data-graph-mode="split" type="button" title="Split view" aria-label="Split view">⊟</button>
+          <button class="gl-btn" data-graph-mode="full" type="button" title="Full graph" aria-label="Full graph">□</button>
+        </div>
       </div>
       <div class="gl-graph__content">
         <div class="gl-graph__empty" id="gl-graph-empty"></div>
@@ -872,16 +894,6 @@
   <script src="{{ static_url('js/gl-dashboard.js') }}"></script>
   <script>
     (function () {
-      const toggle = document.querySelector('[data-graph-toggle]');
-      const graph = document.getElementById('gl-graph');
-      if (toggle && graph) {
-        toggle.addEventListener('click', () => {
-          if (typeof window.glDashboardToggleGraphPanel === 'function') {
-            window.glDashboardToggleGraphPanel();
-          }
-        });
-      }
-
       // Basemap selector initialization
       const basemapSelect = document.getElementById('gl-basemap-select');
       if (basemapSelect && typeof window.glDashboardSetBasemap === 'function') {
