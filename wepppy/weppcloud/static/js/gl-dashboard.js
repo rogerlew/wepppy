@@ -21,13 +21,15 @@
   let graphModule;
   let queryEngineModule;
   let graphLoadersModule;
+  let detectorModule;
   try {
-    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule] = await Promise.all([
+    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule, detectorModule] = await Promise.all([
       import(`${moduleBase}config.js`),
       import(`${moduleBase}state.js`),
       import(`${moduleBase}graphs/timeseries-graph.js`),
       import(`${moduleBase}data/query-engine.js`),
       import(`${moduleBase}graphs/graph-loaders.js`),
+      import(`${moduleBase}layers/detector.js`),
     ]);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -60,6 +62,17 @@
   const BASEMAP_DEFS = basemapDefs;
   const layerDefs = BASE_LAYER_DEFS;
   const graphDefs = GRAPH_DEFS;
+  const {
+    detectRasterLayers: detectRasterLayersData,
+    detectLanduseOverlays: detectLanduseData,
+    detectSoilsOverlays: detectSoilsData,
+    detectHillslopesOverlays: detectHillslopesData,
+    detectWatarOverlays: detectWatarData,
+    detectWeppOverlays: detectWeppData,
+    detectWeppYearlyOverlays: detectWeppYearlyData,
+    detectWeppEventOverlays: detectWeppEventData,
+    detectRapOverlays: detectRapData,
+  } = detectorModule || {};
 
   const mapCenter = ctx.mapCenter; // [longitude, latitude]
   const mapExtent = ctx.mapExtent; // [west, south, east, north]
@@ -1093,60 +1106,26 @@
     return geoTiffLoader;
   }
 
-  async function detectSbsLayer() {
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/baer_wgs_map`;
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        return;
-      }
-      const payload = await resp.json();
-      if (!payload || payload.Success !== true || !payload.Content) {
-        return;
-      }
-      let bounds = payload.Content.bounds;
-      const imgurl = payload.Content.imgurl;
-      if (!bounds || !imgurl) {
-        return;
-      }
-      // Normalize bounds: API returns [[lat1, lon1], [lat2, lon2]]
-      if (Array.isArray(bounds) && bounds.length === 2 && Array.isArray(bounds[0]) && Array.isArray(bounds[1])) {
-        const [lat1, lon1] = bounds[0];
-        const [lat2, lon2] = bounds[1];
-        bounds = [lon1, lat1, lon2, lat2];
-      }
-      if (!Array.isArray(bounds) || bounds.length !== 4 || bounds.some((v) => !Number.isFinite(v))) {
-        return;
-      }
-      // Fetch the PNG so we can sample pixel values on hover.
-      const imgResp = await fetch(imgurl);
-      if (!imgResp.ok) {
-        throw new Error(`SBS image fetch failed: ${imgResp.status}`);
-      }
-      const blob = await imgResp.blob();
-      const bitmap = await createImageBitmap(blob);
-      const canvas = document.createElement('canvas');
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const ctx2d = canvas.getContext('2d');
-      ctx2d.drawImage(bitmap, 0, 0);
-      const imgData = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
-      detectedLayers.push({
-        key: 'sbs',
-        label: 'SBS Map',
-        path: 'query/baer_wgs_map',
-        bounds,
-        canvas,
-        width: canvas.width,
-        height: canvas.height,
-        values: imgData.data,
-        sampleMode: 'rgba',
-        visible: false,
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn('gl-dashboard: failed to load SBS map', err);
+  async function loadSbsImage(imgurl) {
+    const imgResp = await fetch(imgurl);
+    if (!imgResp.ok) {
+      throw new Error(`SBS image fetch failed: ${imgResp.status}`);
     }
+    const blob = await imgResp.blob();
+    const bitmap = await createImageBitmap(blob);
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx2d = canvas.getContext('2d');
+    ctx2d.drawImage(bitmap, 0, 0);
+    const imgData = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
+    return {
+      canvas,
+      width: canvas.width,
+      height: canvas.height,
+      values: imgData.data,
+      sampleMode: 'rgba',
+    };
   }
 
   // Helper to deselect all subcatchment overlays across landuse, soils, and hillslopes
@@ -2725,29 +2704,6 @@
     return null;
   }
 
-  // WATAR (ash transport) overlays
-  function computeWatarRanges() {
-    if (!watarSummary) return;
-    const modes = ['wind_transport', 'water_transport', 'ash_transport'];
-    watarRanges = {};
-    for (const mode of modes) {
-      let min = Infinity;
-      let max = -Infinity;
-      for (const key of Object.keys(watarSummary)) {
-        const row = watarSummary[key];
-        const v = Number(row[mode]);
-        if (Number.isFinite(v)) {
-          if (v < min) min = v;
-          if (v > max) max = v;
-        }
-      }
-      if (!Number.isFinite(min)) min = 0;
-      if (!Number.isFinite(max)) max = 1;
-      if (max <= min) max = min + 1;
-      watarRanges[mode] = { min, max };
-    }
-  }
-
   function watarFillColor(mode, row) {
     if (!row) return [128, 128, 128, 200];
     const value = Number(row[mode]);
@@ -3863,40 +3819,6 @@
     return activeLayers;
   }
 
-  function computeBoundsFromGdal(info) {
-    const wgs84 = info && info.wgs84Extent && info.wgs84Extent.coordinates;
-    if (Array.isArray(wgs84) && wgs84.length && Array.isArray(wgs84[0])) {
-      const ring = wgs84[0];
-      let west = Infinity;
-      let south = Infinity;
-      let east = -Infinity;
-      let north = -Infinity;
-      for (const pt of ring) {
-        if (!Array.isArray(pt) || pt.length < 2) continue;
-        const [lon, lat] = pt;
-        if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
-        if (lon < west) west = lon;
-        if (lon > east) east = lon;
-        if (lat < south) south = lat;
-        if (lat > north) north = lat;
-      }
-      if ([west, south, east, north].every((v) => Number.isFinite(v))) {
-        return [west, south, east, north];
-      }
-    }
-    const cc = info && info.cornerCoordinates;
-    if (!cc) return null;
-    const ll = cc.lowerLeft || cc.lowerleft || cc.LowerLeft;
-    const ur = cc.upperRight || cc.upperright || cc.UpperRight;
-    if (!ll || !ur) return null;
-    const west = Math.min(ll[0], ur[0]);
-    const east = Math.max(ll[0], ur[0]);
-    const south = Math.min(ll[1], ur[1]);
-    const north = Math.max(ll[1], ur[1]);
-    if (![west, south, east, north].every(Number.isFinite)) return null;
-    return [west, south, east, north];
-  }
-
   function sampleRaster(layer, lonLat) {
     if (!layer || !layer.values || !layer.width || !layer.height || !layer.bounds) return null;
     const [lon, lat] = lonLat || [];
@@ -4133,62 +4055,36 @@
   }
 
   async function detectLayers() {
-    await detectSbsLayer();
-    for (const def of layerDefs) {
-      let found = null;
-      for (const path of def.paths) {
-        try {
-          const info = await fetchGdalInfo(path);
-          if (!info) continue;
-          const bounds = computeBoundsFromGdal(info);
-          if (!bounds) continue;
-          const colorMap = def.key === 'landuse' ? NLCD_COLORMAP : def.key === 'soils' ? soilColorForValue : null;
-          const raster = await fetchRasterCanvas(path, colorMap);
-          found = {
-            key: def.key,
-            label: def.label,
-            path,
-            bounds,
-            canvas: raster.canvas,
-            width: raster.width,
-            height: raster.height,
-            values: raster.values,
-            sampleMode: raster.sampleMode,
-            visible: false,
-          };
-          break;
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.warn(`gl-dashboard: failed to load ${def.label} at ${path}`, err);
-        }
+    try {
+      const result = await detectRasterLayersData({
+        ctx,
+        layerDefs,
+        loadRaster: fetchRasterCanvas,
+        loadSbsImage,
+        fetchGdalInfo,
+        nlcdColormap: NLCD_COLORMAP,
+        soilColorForValue,
+      });
+      if (!result || !Array.isArray(result.detectedLayers)) {
+        return;
       }
-      if (found) {
-        detectedLayers.push(found);
-      }
+      detectedLayers = result.detectedLayers;
+      updateLayerList();
+      applyLayers();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to detect raster layers', err);
     }
-    updateLayerList();
-    applyLayers();
     // Don't zoom here - let detectLanduseOverlays handle it with subcatchments bounds
   }
 
   async function detectLanduseOverlays() {
-    const url = buildScenarioUrl(`query/landuse/subcatchments`);
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-      if (!subResp.ok || !geoResp.ok) return;
-      landuseSummary = await subResp.json();
-      subcatchmentsGeoJson = await geoResp.json();
-      if (!landuseSummary || !subcatchmentsGeoJson) return;
-      const basePath = 'landuse/landuse.parquet';
-      landuseLayers.length = 0;
-      landuseLayers.push(
-        { key: 'lu-dominant', label: 'Dominant landuse', path: basePath, mode: 'dominant', visible: true },
-        { key: 'lu-cancov', label: 'Canopy cover (cancov)', path: basePath, mode: 'cancov', visible: false },
-        { key: 'lu-inrcov', label: 'Interrill cover (inrcov)', path: basePath, mode: 'inrcov', visible: false },
-        { key: 'lu-rilcov', label: 'Rill cover (rilcov)', path: basePath, mode: 'rilcov', visible: false },
-      );
+      const result = await detectLanduseData({ buildScenarioUrl, buildBaseUrl });
+      if (!result) return;
+      landuseSummary = result.landuseSummary;
+      subcatchmentsGeoJson = result.subcatchmentsGeoJson || subcatchmentsGeoJson;
+      landuseLayers = result.landuseLayers || [];
       updateLayerList();
       applyLayers();
       // Zoom handled by zoomToSubcatchmentBounds after all detection completes
@@ -4199,28 +4095,12 @@
   }
 
   async function detectSoilsOverlays() {
-    const url = buildScenarioUrl(`query/soils/subcatchments`);
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-      if (!subResp.ok || !geoResp.ok) return;
-      soilsSummary = await subResp.json();
-      // subcatchmentsGeoJson may already be loaded by detectLanduseOverlays
-      if (!subcatchmentsGeoJson) {
-        subcatchmentsGeoJson = await geoResp.json();
-      }
-      if (!soilsSummary || !subcatchmentsGeoJson) return;
-      const basePath = 'soils/soils.parquet';
-      soilsLayers.length = 0;
-      soilsLayers.push(
-        { key: 'soil-dominant', label: 'Dominant soil (color)', path: basePath, mode: 'dominant', visible: false },
-        { key: 'soil-clay', label: 'Clay content (%)', path: basePath, mode: 'clay', visible: false },
-        { key: 'soil-sand', label: 'Sand content (%)', path: basePath, mode: 'sand', visible: false },
-        { key: 'soil-bd', label: 'Bulk density (g/cm³)', path: basePath, mode: 'bd', visible: false },
-        { key: 'soil-rock', label: 'Rock content (%)', path: basePath, mode: 'rock', visible: false },
-        { key: 'soil-depth', label: 'Soil depth (mm)', path: basePath, mode: 'soil_depth', visible: false },
-      );
+      const result = await detectSoilsData({ buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson });
+      if (!result) return;
+      soilsSummary = result.soilsSummary;
+      subcatchmentsGeoJson = result.subcatchmentsGeoJson || subcatchmentsGeoJson;
+      soilsLayers = result.soilsLayers || [];
       updateLayerList();
       applyLayers();
     } catch (err) {
@@ -4230,25 +4110,12 @@
   }
 
   async function detectHillslopesOverlays() {
-    const url = buildScenarioUrl(`query/watershed/subcatchments`);
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-      if (!subResp.ok || !geoResp.ok) return;
-      hillslopesSummary = await subResp.json();
-      // subcatchmentsGeoJson may already be loaded by detectLanduseOverlays or detectSoilsOverlays
-      if (!subcatchmentsGeoJson) {
-        subcatchmentsGeoJson = await geoResp.json();
-      }
-      if (!hillslopesSummary || !subcatchmentsGeoJson) return;
-      const basePath = 'watershed/hillslopes.parquet';
-      hillslopesLayers.length = 0;
-      hillslopesLayers.push(
-        { key: 'hillslope-slope', label: 'Slope (rise/run)', path: basePath, mode: 'slope_scalar', visible: false },
-        { key: 'hillslope-length', label: 'Hillslope length (m)', path: basePath, mode: 'length', visible: false },
-        { key: 'hillslope-aspect', label: 'Aspect (degrees)', path: basePath, mode: 'aspect', visible: false },
-      );
+      const result = await detectHillslopesData({ buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson });
+      if (!result) return;
+      hillslopesSummary = result.hillslopesSummary;
+      subcatchmentsGeoJson = result.subcatchmentsGeoJson || subcatchmentsGeoJson;
+      hillslopesLayers = result.hillslopesLayers || [];
       updateLayerList();
       applyLayers();
     } catch (err) {
@@ -4258,47 +4125,27 @@
   }
 
   async function detectWatarOverlays() {
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      const payload = {
-        datasets: [{ path: WATAR_PATH, alias: 'wtr' }],
-        columns: [
-          'wtr.topaz_id AS topaz_id',
-          'wtr."wind_transport (tonne/ha)" AS wind_transport',
-          'wtr."water_transport (tonne/ha)" AS water_transport',
-          'wtr."ash_transport (tonne/ha)" AS ash_transport',
-        ],
-      };
-      const result = await postQueryEngine(payload);
-      if (!result || !result.records || !result.records.length) return;
+      const result = await detectWatarData({
+        buildBaseUrl,
+        postQueryEngine,
+        watarPath: WATAR_PATH,
+        subcatchmentsGeoJson,
+      });
+      if (!result || !result.watarSummary) return;
 
-      watarSummary = {};
-      for (const row of result.records) {
-        const topazId = row.topaz_id;
-        if (topazId != null) {
-          watarSummary[String(topazId)] = row;
-        }
+      watarSummary = result.watarSummary;
+      if (result.watarRanges) {
+        watarRanges = result.watarRanges;
       }
-      computeWatarRanges();
-
-      if (!subcatchmentsGeoJson) {
-        const geoResp = await fetch(geoUrl);
-        if (geoResp.ok) {
-          subcatchmentsGeoJson = await geoResp.json();
-        }
+      if (result.subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = result.subcatchmentsGeoJson;
       }
-      if (!subcatchmentsGeoJson) return;
-
-      watarLayers.length = 0;
-      watarLayers.push(
-        { key: 'watar-wind', label: 'Wind Transport (tonne/ha)', path: WATAR_PATH, mode: 'wind_transport', visible: false },
-        { key: 'watar-water', label: 'Water Transport (tonne/ha)', path: WATAR_PATH, mode: 'water_transport', visible: false },
-        { key: 'watar-ash', label: 'Ash Transport (tonne/ha)', path: WATAR_PATH, mode: 'ash_transport', visible: false },
-      );
-
-      updateLayerList();
-      applyLayers();
+      if (result.watarLayers) {
+        watarLayers = result.watarLayers;
+        updateLayerList();
+        applyLayers();
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load WATAR overlays', err);
@@ -4306,32 +4153,27 @@
   }
 
   async function detectWeppOverlays() {
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      const geoPromise = subcatchmentsGeoJson
-        ? Promise.resolve(subcatchmentsGeoJson)
-        : fetch(geoUrl).then((resp) => (resp.ok ? resp.json() : null));
-      const [weppData, geoJson] = await Promise.all([fetchWeppSummary(weppStatistic), geoPromise]);
-      weppSummary = weppData;
-      if (!subcatchmentsGeoJson && geoJson) {
-        subcatchmentsGeoJson = geoJson;
+      const result = await detectWeppData({
+        buildBaseUrl,
+        fetchWeppSummary,
+        weppStatistic,
+        weppLossPath: WEPP_LOSS_PATH,
+        subcatchmentsGeoJson,
+      });
+      if (!result || !result.weppSummary) return;
+      weppSummary = result.weppSummary;
+      if (result.weppRanges) {
+        weppRanges = result.weppRanges;
       }
-      if (!weppSummary || !subcatchmentsGeoJson) return;
-      // Compute dynamic ranges from the loaded data
-      computeWeppRanges();
-      const basePath = WEPP_LOSS_PATH;
-      weppLayers.length = 0;
-      weppLayers.push(
-        { key: 'wepp-runoff', label: 'Runoff Volume (mm)', path: basePath, mode: 'runoff_volume', visible: false },
-        { key: 'wepp-subrunoff', label: 'Subrunoff Volume (mm)', path: basePath, mode: 'subrunoff_volume', visible: false },
-        { key: 'wepp-baseflow', label: 'Baseflow Volume (mm)', path: basePath, mode: 'baseflow_volume', visible: false },
-        { key: 'wepp-soil-loss', label: 'Soil Loss (tonnes/ha)', path: basePath, mode: 'soil_loss', visible: false },
-        { key: 'wepp-sed-dep', label: 'Sediment Deposition (tonnes/ha)', path: basePath, mode: 'sediment_deposition', visible: false },
-        { key: 'wepp-sed-yield', label: 'Sediment Yield (tonnes/ha)', path: basePath, mode: 'sediment_yield', visible: false },
-      );
-      updateLayerList();
-      applyLayers();
+      if (result.subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = result.subcatchmentsGeoJson;
+      }
+      if (result.weppLayers) {
+        weppLayers = result.weppLayers;
+        updateLayerList();
+        applyLayers();
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load WEPP overlays', err);
@@ -4339,19 +4181,21 @@
   }
 
   async function detectWeppYearlyOverlays() {
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
-    weppYearlyLayers.length = 0;
+    weppYearlyLayers = [];
     weppYearlySummary = null;
     weppYearlyMetadata = null;
     try {
-      const yearsPayload = {
-        datasets: [{ path: WEPP_YEARLY_PATH, alias: 'loss' }],
-        columns: ['DISTINCT loss.year AS year'],
-        order_by: ['year'],
-      };
-      const yearsResult = await postQueryEngine(yearsPayload);
-      if (!yearsResult || !yearsResult.records || !yearsResult.records.length) {
+      const result = await detectWeppYearlyData({
+        buildBaseUrl,
+        postQueryEngine,
+        weppYearlyPath: WEPP_YEARLY_PATH,
+        currentSelectedYear: weppYearlySelectedYear,
+        subcatchmentsGeoJson,
+      });
+      if (!result || !result.weppYearlyMetadata) {
+        if (result && Array.isArray(result.weppYearlyLayers)) {
+          weppYearlyLayers = result.weppYearlyLayers;
+        }
         if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
           yearSlider.hide();
         }
@@ -4359,57 +4203,15 @@
         return;
       }
 
-      const years = yearsResult.records
-        .map((r) => Number(r.year))
-        .filter((y) => Number.isFinite(y))
-        .sort((a, b) => a - b);
-      if (!years.length) {
-        if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
-          yearSlider.hide();
-        }
-        updateLayerList();
-        return;
-      }
+      weppYearlyMetadata = result.weppYearlyMetadata;
+      weppYearlySelectedYear = result.weppYearlySelectedYear;
+      subcatchmentsGeoJson = result.subcatchmentsGeoJson || subcatchmentsGeoJson;
+      weppYearlyLayers = result.weppYearlyLayers || [];
 
-      if (!subcatchmentsGeoJson) {
-        const geoResp = await fetch(geoUrl);
-        if (geoResp.ok) {
-          subcatchmentsGeoJson = await geoResp.json();
-        }
-      }
-      if (!subcatchmentsGeoJson) {
-        if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
-          yearSlider.hide();
-        }
-        updateLayerList();
-        return;
-      }
-
-      weppYearlyMetadata = {
-        years,
-        minYear: years[0],
-        maxYear: years[years.length - 1],
-      };
-      if (weppYearlySelectedYear == null || weppYearlySelectedYear < weppYearlyMetadata.minYear || weppYearlySelectedYear > weppYearlyMetadata.maxYear) {
-        weppYearlySelectedYear = weppYearlyMetadata.maxYear;
-      }
-
-      weppYearlyLayers.length = 0;
-      weppYearlyLayers.push(
-        { key: 'wepp-yearly-runoff', label: 'Runoff Volume (mm)', path: WEPP_YEARLY_PATH, mode: 'runoff_volume', visible: false },
-        { key: 'wepp-yearly-subrunoff', label: 'Subrunoff Volume (mm)', path: WEPP_YEARLY_PATH, mode: 'subrunoff_volume', visible: false },
-        { key: 'wepp-yearly-baseflow', label: 'Baseflow Volume (mm)', path: WEPP_YEARLY_PATH, mode: 'baseflow_volume', visible: false },
-        { key: 'wepp-yearly-soil-loss', label: 'Soil Loss (tonnes/ha)', path: WEPP_YEARLY_PATH, mode: 'soil_loss', visible: false },
-        { key: 'wepp-yearly-sed-dep', label: 'Sediment Deposition (tonnes/ha)', path: WEPP_YEARLY_PATH, mode: 'sediment_deposition', visible: false },
-        { key: 'wepp-yearly-sed-yield', label: 'Sediment Yield (tonnes/ha)', path: WEPP_YEARLY_PATH, mode: 'sediment_yield', visible: false },
-      );
+      yearSlider.setRange(weppYearlyMetadata.minYear, weppYearlyMetadata.maxYear, weppYearlySelectedYear);
+      yearSlider.show();
 
       await refreshWeppYearlyData();
-      if (comparisonMode && currentScenarioPath) {
-        await loadBaseWeppYearlyData(weppYearlySelectedYear);
-        computeWeppYearlyDiffRanges(weppYearlySelectedYear);
-      }
-
       updateLayerList();
       applyLayers();
     } catch (err) {
@@ -4419,50 +4221,27 @@
   }
 
   async function detectWeppEventOverlays() {
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      // Use climate context for date range (already available, avoids slow parquet query)
-      const climateCtx = ctx.climate;
-      if (!climateCtx || !climateCtx.startYear || !climateCtx.endYear) {
-        // eslint-disable-next-line no-console
-        console.warn('gl-dashboard: no climate context available for WEPP Event');
-        return;
+      const result = await detectWeppEventData({
+        buildBaseUrl,
+        climateCtx: ctx.climate,
+        currentSelectedDate: weppEventSelectedDate,
+        subcatchmentsGeoJson,
+      });
+      if (!result) return;
+
+      if (result.subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = result.subcatchmentsGeoJson;
       }
-
-      const minYear = climateCtx.startYear;
-      const maxYear = climateCtx.endYear;
-
-      // Set up metadata with date range (using Jan 1 of min year to Dec 31 of max year)
-      weppEventMetadata = {
-        available: true,
-        startDate: `${minYear}-01-01`,
-        endDate: `${maxYear}-12-31`,
-      };
-
-      // Default to first day of simulation
-      if (!weppEventSelectedDate) {
-        weppEventSelectedDate = weppEventMetadata.startDate;
+      if (result.weppEventLayers) {
+        weppEventLayers = result.weppEventLayers;
       }
-
-      // Ensure subcatchments are loaded
-      if (!subcatchmentsGeoJson) {
-        const geoResp = await fetch(geoUrl);
-        if (geoResp.ok) {
-          subcatchmentsGeoJson = await geoResp.json();
-        }
+      if (result.weppEventMetadata) {
+        weppEventMetadata = result.weppEventMetadata;
       }
-      if (!subcatchmentsGeoJson) return;
-
-      // Build layer definitions for WEPP Event metrics
-      weppEventLayers.length = 0;
-      weppEventLayers.push(
-        { key: 'wepp-event-P', label: 'Precipitation (P)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_P', visible: false },
-        { key: 'wepp-event-Q', label: 'Runoff (Q)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_Q', visible: false },
-        { key: 'wepp-event-ET', label: 'Total ET (Ep+Es+Er)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_ET', visible: false },
-        { key: 'wepp-event-peakro', label: 'Peak Runoff Rate', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_peakro', visible: false },
-        { key: 'wepp-event-tdet', label: 'Total Detachment', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_tdet', visible: false },
-      );
+      if (result.weppEventSelectedDate) {
+        weppEventSelectedDate = result.weppEventSelectedDate;
+      }
 
       updateLayerList();
       applyLayers();
@@ -4846,102 +4625,35 @@
   }
 
   async function detectRapOverlays() {
-    // Geometry is shared across scenarios - always use base URL
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     try {
-      // Query for available years
-      const yearsPayload = {
-        datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
-        columns: ['DISTINCT rap.year AS year'],
-        order_by: ['year'],
-      };
-      const yearsResult = await postQueryEngine(yearsPayload);
-      if (!yearsResult || !yearsResult.records || !yearsResult.records.length) return;
+      const result = await detectRapData({
+        buildBaseUrl,
+        postQueryEngine,
+        rapBandLabels: RAP_BAND_LABELS,
+        subcatchmentsGeoJson,
+        currentSelectedYear: rapSelectedYear,
+      });
+      if (!result) return;
 
-      // Query for available bands
-      const bandsPayload = {
-        datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
-        columns: ['DISTINCT rap.band AS band'],
-        order_by: ['band'],
-      };
-      const bandsResult = await postQueryEngine(bandsPayload);
-      if (!bandsResult || !bandsResult.records || !bandsResult.records.length) return;
-
-      const years = yearsResult.records.map((r) => r.year);
-      const bands = bandsResult.records.map((r) => r.band);
-
-      // Build rapMetadata from query results
-      const RAP_BAND_ID_TO_KEY = {
-        1: 'annual_forb_grass',
-        2: 'bare_ground',
-        3: 'litter',
-        4: 'perennial_forb_grass',
-        5: 'shrub',
-        6: 'tree',
-      };
-      rapMetadata = {
-        available: true,
-        years,
-        bands: bands.map((id) => ({ id, label: RAP_BAND_ID_TO_KEY[id] || `band_${id}` })),
-      };
-
-      // Set default year to most recent
-      if (years.length) {
-        rapSelectedYear = years[years.length - 1];
+      if (result.subcatchmentsGeoJson) {
+        subcatchmentsGeoJson = result.subcatchmentsGeoJson;
       }
-
-      // Ensure subcatchments are loaded
-      if (!subcatchmentsGeoJson) {
-        const geoResp = await fetch(geoUrl);
-        if (geoResp.ok) {
-          subcatchmentsGeoJson = await geoResp.json();
-        }
+      if (result.rapMetadata) {
+        rapMetadata = result.rapMetadata;
       }
-      if (!subcatchmentsGeoJson) return;
-
-      // Build layer definitions for each band
-      // Default selected: tree and shrub
-      const DEFAULT_SELECTED_BANDS = ['tree', 'shrub'];
-      const basePath = 'rap/rap_ts.parquet';
-      rapLayers.length = 0;
-      for (const band of rapMetadata.bands) {
-        const label = RAP_BAND_LABELS[band.label] || band.label;
-        rapLayers.push({
-          key: `rap-${band.label}`,
-          label: `${label} (%)`,
-          path: basePath,
-          bandId: band.id,
-          bandKey: band.label,
-          visible: false,
-          selected: DEFAULT_SELECTED_BANDS.includes(band.label), // For cumulative mode checkboxes
-        });
+      if (result.rapSelectedYear != null) {
+        rapSelectedYear = result.rapSelectedYear;
       }
-
-      // Sync year slider with RAP years if available
-      if (years.length) {
-        const minYear = years[0];
-        const maxYear = years[years.length - 1];
+      if (result.rapLayers) {
+        rapLayers = result.rapLayers;
+      }
+      if (rapMetadata && rapMetadata.years && rapMetadata.years.length) {
+        const minYear = rapMetadata.years[0];
+        const maxYear = rapMetadata.years[rapMetadata.years.length - 1];
         yearSlider.setRange(minYear, maxYear, rapSelectedYear);
       }
-
-      // Load initial data for the first band via query-engine
-      if (rapLayers.length && rapSelectedYear) {
-        const firstBand = rapLayers[0];
-        const dataPayload = {
-          datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
-          columns: ['rap.topaz_id AS topaz_id', 'rap.value AS value'],
-          filters: [
-            { column: 'rap.year', op: '=', value: rapSelectedYear },
-            { column: 'rap.band', op: '=', value: firstBand.bandId },
-          ],
-        };
-        const dataResult = await postQueryEngine(dataPayload);
-        if (dataResult && dataResult.records) {
-          rapSummary = {};
-          for (const row of dataResult.records) {
-            rapSummary[String(row.topaz_id)] = row.value;
-          }
-        }
+      if (result.rapSummary) {
+        rapSummary = result.rapSummary;
       }
 
       updateLayerList();
