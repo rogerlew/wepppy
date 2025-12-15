@@ -637,6 +637,15 @@
     }
     if (collapsed) {
       setGraphFocus(false);
+    } else {
+      setGraphFocus(true);
+      // Refresh layout after expanding
+      if (timeseriesGraph && typeof timeseriesGraph._resizeCanvas === 'function') {
+        timeseriesGraph._resizeCanvas();
+        if (timeseriesGraph._data) {
+          timeseriesGraph.render();
+        }
+      }
     }
   }
 
@@ -920,7 +929,7 @@
     _currentYear: null,
     _source: null,
     _tooltipFormatter: null,
-    _padding: { top: 32, right: 160, bottom: 220, left: 100 },
+    _padding: { top: 32, right: 160, bottom: 80, left: 100 },
     _lineWidth: 1.5,
     _highlightWidth: 3,
 
@@ -981,6 +990,7 @@
       this.canvas.style.width = width + 'px';
       this.canvas.style.height = height + 'px';
       if (this.ctx2d) {
+        this.ctx2d.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx2d.scale(dpr, dpr);
       }
     },
@@ -995,6 +1005,14 @@
       this._source = data && data.source ? data.source : null;
       this._tooltipFormatter = data && typeof data.tooltipFormatter === 'function' ? data.tooltipFormatter : null;
       if (this._hasData(data)) {
+        if (graphPanelEl && graphPanelEl.classList.contains('is-collapsed')) {
+          graphPanelEl.classList.remove('is-collapsed');
+          if (typeof window.glDashboardGraphToggled === 'function') {
+            window.glDashboardGraphToggled(true);
+          }
+        }
+        // Full-pane focus only for omni graphs; keep split view for RAP/WEPP yearly.
+        setGraphFocus(data.source === 'omni');
         this.show();
         this.render();
       } else {
@@ -1061,7 +1079,7 @@
       const dpr = window.devicePixelRatio || 1;
       const width = this.canvas.width / dpr;
       const height = this.canvas.height / dpr;
-      const pad = { ...this._padding, bottom: Math.max(this._padding.bottom, 100) };
+      const pad = { ...this._padding, bottom: Math.max(this._padding.bottom, 60) };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
 
@@ -1182,29 +1200,31 @@
         ctx.setLineDash([]);
       }
 
-      // Legend
-      const legendItems = seriesIds.map((id) => {
-        const s = series[id] || {};
-        return {
-          label: s.label || id,
-          color: s.color || [100, 150, 200, 180],
-          id,
-        };
-      });
-      if (legendItems.length) {
-        const legendX = width - pad.right + 10;
-        let legendY = pad.top;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.font = '13px sans-serif';
-        legendItems.forEach((item) => {
-          const color = item.color;
-          ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`;
-          ctx.fillRect(legendX, legendY, 14, 14);
-          ctx.fillStyle = theme.text;
-          ctx.fillText(item.label, legendX + 18, legendY + 7);
-          legendY += 18;
+      // Legend: only for omni scenario graphs (flagged via source)
+      if (this._data && this._data.source === 'omni') {
+        const legendItems = seriesIds.map((id) => {
+          const s = series[id] || {};
+          return {
+            label: s.label || id,
+            color: s.color || [100, 150, 200, 180],
+            id,
+          };
         });
+        if (legendItems.length) {
+          const legendX = width - pad.right + 10;
+          let legendY = pad.top;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.font = '13px sans-serif';
+          legendItems.forEach((item) => {
+            const color = item.color;
+            ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.9)`;
+            ctx.fillRect(legendX, legendY, 14, 14);
+            ctx.fillStyle = theme.text;
+            ctx.fillText(item.label, legendX + 18, legendY + 7);
+            legendY += 18;
+          });
+        }
       }
     },
 
@@ -1217,7 +1237,7 @@
       const dpr = window.devicePixelRatio || 1;
       const width = this.canvas.width / dpr;
       const height = this.canvas.height / dpr;
-      const pad = { ...this._padding, bottom: Math.max(this._padding.bottom, 240) };
+      const pad = { ...this._padding, bottom: Math.max(this._padding.bottom, 200) };
       const plotWidth = width - pad.left - pad.right;
       const plotHeight = height - pad.top - pad.bottom;
 
@@ -5578,6 +5598,7 @@
       type: 'boxplot',
       title: 'Soil Loss (hillslopes)',
       yLabel: 'tonne/ha',
+      source: 'omni',
       series,
     };
   }
@@ -5604,6 +5625,7 @@
       type: 'boxplot',
       title: 'Runoff (hillslopes)',
       yLabel: 'mm',
+      source: 'omni',
       series,
     };
   }
@@ -5628,6 +5650,7 @@
       type: 'boxplot',
       title: 'Soil Loss (channels)',
       yLabel: 'tonne',
+      source: 'omni',
       series,
     };
   }
@@ -5670,6 +5693,7 @@
       series: lineSeries,
       xLabel: 'Year',
       yLabel: 'tonne/ha',
+      source: 'omni',
     };
   }
 
@@ -5712,6 +5736,7 @@
       series: lineSeries,
       xLabel: 'Year',
       yLabel: 'mm',
+      source: 'omni',
     };
   }
 
@@ -5738,12 +5763,13 @@
     activeGraphKey = key;
     const keepFocus = options.keepFocus || false;
     ensureGraphExpanded();
-    if (!keepFocus) {
-      setGraphFocus(true);
-    }
     try {
       const data = await loadGraphDataset(key, { force: options.force });
       if (data) {
+        // Respect caller override; otherwise only focus full-pane for omni graphs.
+        if (!keepFocus) {
+          setGraphFocus(data.source === 'omni');
+        }
         timeseriesGraph.setData(data);
         if (graphEmptyEl) graphEmptyEl.style.display = 'none';
       } else {
