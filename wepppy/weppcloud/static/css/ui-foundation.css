@@ -23,7 +23,7 @@
   --wc-font-size-base: 17px;
   --wc-font-size-sm: 1rem;
   --wc-font-size-xs: 0.9rem;
-  --wc-line-height: 1.5;
+  --wc-line-height: 1.0;
 
   /* Light theme color palette (grayscale inspired) */
   --wc-color-page: #f6f8fa;
@@ -633,48 +633,47 @@ code * {
 /* Layout utilities */
 .wc-stack {
   display: grid;
-  gap: var(--wc-space-md);
+  gap: var(--wc-space-sm);
 }
 
 /* Omni scenario layout */
 .scenario-item__body {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: var(--wc-space-md);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: var(--wc-space-sm);
 }
 
 .scenario-item__inputs {
-  display: flex;
-  flex: 1 1 auto;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--wc-space-md);
+  display: grid;
+  grid-template-columns: auto repeat(3, minmax(220px, 1fr));
+  align-items: start;
+  gap: var(--wc-space-sm);
 }
 
 .scenario-item__controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--wc-space-md);
+  display: contents;
 }
 
 .scenario-item__field,
 .scenario-item__controls .wc-field {
   flex: 0 0 auto;
+  width: 100%;
+  max-width: none;
 }
 
 .scenario-item select.wc-field__control {
-  width: 260px;
+  width: 100%;
   max-width: 100%;
 }
 
 .scenario-item__actions {
-  margin-left: auto;
   display: flex;
   align-items: flex-end;
-  margin-bottom: var(--wc-space-lg);
+  justify-content: flex-end;
+  margin-bottom: var(--wc-space-sm);
   align-self: stretch;
+  justify-self: end;
 }
 
 .scenario-item__actions .pure-button {
@@ -683,7 +682,7 @@ code * {
 
 .scenario-item__selector {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding-top: var(--wc-space-md);
 }
 
@@ -1545,7 +1544,13 @@ h5:first-child {
   display: flex;
   flex-direction: column;
   gap: var(--wc-space-sm);
-  margin-bottom: var(--wc-space-lg);
+  margin-bottom: var(--wc-space-xs);
+  max-width: 750px;
+  width: 100%;
+}
+
+.wc-field--number-inline {
+  gap: var(--wc-space-xs);
 }
 
 .wc-field__label {
@@ -1589,14 +1594,30 @@ h5:first-child {
   padding-left: var(--wc-space-sm);
 }
 
+.wc-field__inline-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) auto auto;
+  align-items: center;
+  gap: var(--wc-space-md);
+}
+
+@media (max-width: 768px) {
+  .wc-field__inline-row {
+    grid-template-columns: 1fr auto;
+  }
+}
+
 .wc-field__input-row {
   display: flex;
   align-items: center;
   gap: var(--wc-space-sm);
+  justify-content: flex-start;
 }
 
 .wc-field__control--number {
-  flex: 1 1 0;
+  width: 120px;
+  min-width: 100px;
+  flex: 0 0 auto;
 }
 
 .wc-field__unit {
@@ -1613,6 +1634,16 @@ h5:first-child {
   white-space: nowrap;
 }
 
+.wc-field__unit--spacer {
+  visibility: hidden;
+}
+
+.wc-field--text-inline .wc-field__control--text {
+  width: 240px;
+  min-width: 240px;
+  flex: 0 0 auto;
+}
+
 .wc-field__meta {
   margin: 0;
   font-size: 0.875rem;
@@ -1625,7 +1656,7 @@ h5:first-child {
 
 .wc-choice-group {
   display: grid;
-  gap: var(--wc-space-sm);
+  gap: var(--wc-space-xs);
 }
 
 .wc-choice-group--horizontal {
@@ -1635,6 +1666,8 @@ h5:first-child {
 
 .wc-choice-group--grid {
   grid-auto-flow: row;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  column-gap: var(--wc-space-sm);
 }
 
 .wc-choice-group--wrap {
@@ -2396,8 +2429,7 @@ h5:first-child {
 .wc-choice {
   display: flex;
   align-items: flex-start;
-  gap: var(--wc-space-sm);
-  padding: var(--wc-space-2xs) 0;
+  gap: var(--wc-space-xs);
   font-weight: 600;
 }
 
@@ -3098,6 +3130,19 @@ h5:first-child {
   align-items: center;
   justify-content: center;
   border-radius: var(--wc-radius-pill);
+  background: var(--wc-color-surface);
+  color: var(--wc-color-text);
+  border: 1px solid var(--wc-color-border);
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  box-shadow: none;
+}
+
+.wc-landuse-report__toggle:hover,
+.wc-landuse-report__toggle:focus-visible {
+  background: var(--wc-color-surface-alt);
+  border-color: var(--wc-color-border-strong);
+  color: var(--wc-color-text);
 }
 
 .wc-landuse-report__select {

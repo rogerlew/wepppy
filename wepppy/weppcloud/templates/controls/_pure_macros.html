@@ -572,7 +572,7 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
+{% macro text_field(field_id, label, value='', help=None, type='text', placeholder=None, attrs=None, error=None, extra_control_class=None, max_width=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -586,27 +586,32 @@
 {% if error %}
   {% set describedby = describedby + [error_id] %}
 {% endif %}
-{% set field_classes = ['wc-field'] %}
+{% set field_classes = ['wc-field', 'wc-field--text-inline'] %}
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
-{% set control_classes = ['wc-field__control'] %}
+{% set control_classes = ['wc-field__control', 'wc-field__control--text'] %}
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
 <div class="{{ ' '.join(field_classes) }}"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
-  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
-  <input class="{{ ' '.join(control_classes) }}"
-         id="{{ field_id }}"
-         name="{{ field_id }}"
-         type="{{ type }}"
-         value="{{ value }}"
-         {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
-         {% if error %}aria-invalid="true"{% endif %}
-         {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
-         {% for attr_key, attr_val in attrs.items() %}
-           {{ attr_key }}="{{ attr_val }}"
-         {% endfor %}>
+  <div class="wc-field__inline-row">
+    <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+    <div class="wc-field__input-row">
+      <input class="{{ ' '.join(control_classes) }}"
+             id="{{ field_id }}"
+             name="{{ field_id }}"
+             type="{{ type }}"
+             value="{{ value }}"
+             {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+             {% if error %}aria-invalid="true"{% endif %}
+             {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+             {% for attr_key, attr_val in attrs.items() %}
+               {{ attr_key }}="{{ attr_val }}"
+             {% endfor %}>
+      <span class="wc-field__unit wc-field__unit--spacer" aria-hidden="true"></span>
+    </div>
+  </div>
   {% if help %}
   <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
   {% endif %}
@@ -616,7 +621,7 @@
 </div>
 {%- endmacro %}
 
-{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
+{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None, max_width='750px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -680,7 +685,7 @@
 </label>
 {%- endmacro %}
 
-{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None, unit_category=None, unit_name=None, extra_control_class=None, field_extra_class=None, max_width='650px') -%}
+{% macro numeric_field(field_id, label, value='', unit_label=None, help=None, precision=None, min=None, max=None, required=False, nullable=False, attrs=None, error=None, unit_category=None, unit_name=None, extra_control_class=None, field_extra_class=None, max_width='750px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -719,34 +724,36 @@
 <div class="{{ ' '.join(field_classes) }}"
      style="max-width: {{ max_width }};"
      {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}>
-  <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
-  <div class="wc-field__input-row">
-    <input class="{{ ' '.join(control_classes) }}"
-           id="{{ field_id }}"
-           name="{{ field_id }}"
-           type="number"
-            value="{{ value }}"
-           {% if precision is not none %}step="{{ precision }}"{% endif %}
-           {% if precision is not none %}data-precision="{{ precision }}"{% endif %}
-           {% if min is not none %}min="{{ min }}"{% endif %}
-           {% if max is not none %}max="{{ max }}"{% endif %}
-           {% if required %}required{% endif %}
-           {% if nullable %}data-nullable="true"{% endif %}
-           {% if error %}aria-invalid="true"{% endif %}
-           {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
-           {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}
-           {% if unit_name %}data-unitizer-unit="{{ unit_name }}"{% endif %}
-           {% for attr_key, attr_val in attrs.items() %}
-             {{ attr_key }}="{{ attr_val }}"
-           {% endfor %}>
-    {% if unit_label %}
-    <span class="wc-field__unit"
-          data-unitizer-label
-          {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}
-          {% if unit_name %}data-unitizer-unit="{{ unit_name }}"{% endif %}>
-      {{ unit_label }}
-    </span>
-    {% endif %}
+  <div class="wc-field__inline-row">
+    <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
+    <div class="wc-field__input-row">
+      <input class="{{ ' '.join(control_classes) }}"
+             id="{{ field_id }}"
+             name="{{ field_id }}"
+             type="number"
+              value="{{ value }}"
+             {% if precision is not none %}step="{{ precision }}"{% endif %}
+             {% if precision is not none %}data-precision="{{ precision }}"{% endif %}
+             {% if min is not none %}min="{{ min }}"{% endif %}
+             {% if max is not none %}max="{{ max }}"{% endif %}
+             {% if required %}required{% endif %}
+             {% if nullable %}data-nullable="true"{% endif %}
+             {% if error %}aria-invalid="true"{% endif %}
+             {% if describedby %}aria-describedby="{{ ' '.join(describedby) }}"{% endif %}
+             {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}
+             {% if unit_name %}data-unitizer-unit="{{ unit_name }}"{% endif %}
+             {% for attr_key, attr_val in attrs.items() %}
+               {{ attr_key }}="{{ attr_val }}"
+             {% endfor %}>
+      {% if unit_label %}
+      <span class="wc-field__unit"
+            data-unitizer-label
+            {% if unit_category %}data-unitizer-category="{{ unit_category }}"{% endif %}
+            {% if unit_name %}data-unitizer-unit="{{ unit_name }}"{% endif %}>
+        {{ unit_label }}
+      </span>
+      {% endif %}
+    </div>
   </div>
   {% if help %}
   <p id="{{ help_id }}" class="wc-field__help">{{ help }}</p>
@@ -822,7 +829,7 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
+{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None, max_width='750px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -868,7 +875,7 @@
 </div>
 {%- endmacro %}
 
-{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None, grid_columns=None, max_width='650px') -%}
+{% macro radio_group(name, label=None, layout='vertical', options=None, help=None, mode_help=None, attrs=None, error=None, grid_columns=None, max_width='750px') -%}
 {% set options = options or [] %}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = name ~ "_help" %}
@@ -957,7 +964,7 @@
 </div>
 {%- endmacro %}
 
-{% macro checkbox_field(field_id, label, checked=False, help=None, attrs=None, error=None, max_width='650px') -%}
+{% macro checkbox_field(field_id, label, checked=False, help=None, attrs=None, error=None, max_width='750px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -999,7 +1006,7 @@
 </div>
 {%- endmacro %}
 
-{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None, extra_control_class=None, max_width='650px') -%}
+{% macro textarea_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None, extra_control_class=None, max_width='750px') -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -1042,7 +1049,7 @@
 </div>
 {%- endmacro %}
 
-{% macro text_display(label=None, content='', variant=None, actions=None, max_width='650px') -%}
+{% macro text_display(label=None, content='', variant=None, actions=None, max_width='750px') -%}
 {% set actions = actions or [] %}
 <div class="wc-field wc-field--display"{% if max_width %} style="max-width: {{ max_width }};"{% endif %}>
   {% if label %}

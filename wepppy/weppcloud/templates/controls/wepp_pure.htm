@@ -67,26 +67,30 @@
     </div>
   {% endcall %}
 
-  {% call button_row() %}
-    <button
-      id="btn_run_wepp"
-      type="button"
-      class="pure-button pure-button-primary disable-readonly"
-      data-wepp-action="run">
-      <img id="run_wepp_lock" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Lock" style="display:none;">
-      Run WEPP
-    </button>
-    <button
-      id="btn_run_wepp_watershed"
-      type="button"
-      class="pure-button pure-button-primary disable-readonly"
-      data-wepp-action="run-watershed">
-      Run WEPP Watershed
-    </button>
-  {% endcall %}
+  <div class="wc-stack">
+    {% call button_row() %}
+      <button
+        id="btn_run_wepp"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly"
+        data-wepp-action="run">
+        <img id="run_wepp_lock" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Lock" style="display:none;">
+        Run WEPP Hillslopes and Channels
+      </button>
+    {% endcall %}
+    {% call button_row() %}
+      <button
+        id="btn_run_wepp_watershed"
+        type="button"
+        class="pure-button pure-button-secondary disable-readonly"
+        data-wepp-action="run-watershed">
+        Run WEPP Channels
+      </button>
+    {% endcall %}
+  </div>
+  <p class="wc-text-muted" id="hint_run_wepp_watershed">Run WEPP Channels requires a prior full WEPP run; hillslope outputs must already exist.</p>
   {{ ui.job_hint("hint_run_wepp") }}
-  <p class="wc-text-muted" id="hint_run_wepp_watershed">Run WEPP Watershed requires a prior full WEPP run; hillslope outputs must already exist.</p>
-
+  
 {% endcall %}
 
 <div id="wepp-results" class="wc-stack"></div>

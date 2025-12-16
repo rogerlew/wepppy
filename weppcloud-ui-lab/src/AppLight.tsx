@@ -516,9 +516,9 @@ export function AppLight() {
 
   const navItems = useMemo(
     () => [
+      { label: 'Interfaces', href: '/weppcloud/interfaces/', primary: true },
       { label: 'Docs', href: 'https://doc.wepp.cloud' },
       { label: 'Research', href: 'https://forest.moscowfsl.wsu.edu/library/', external: true },
-      { label: 'Interfaces', href: '/weppcloud/interfaces/' },
       {
         label: isAuthenticated ? 'My Runs' : 'Login',
         href: isAuthenticated ? '/weppcloud/runs/' : '/weppcloud/login/',
@@ -556,7 +556,11 @@ export function AppLight() {
               {navItems.map((item) => (
                 <a
                   key={item.label}
-                  className="inline-flex items-center px-5 py-2.5 text-sm font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-colors"
+                  className={
+                    item.primary
+                      ? "inline-flex items-center px-5 py-2.5 text-sm font-medium border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 transition-colors shadow-sm"
+                      : "inline-flex items-center px-5 py-2.5 text-sm font-medium border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-colors"
+                  }
                   href={item.href}
                   target={item.external ? '_blank' : undefined}
                   rel={item.external ? 'noreferrer' : undefined}

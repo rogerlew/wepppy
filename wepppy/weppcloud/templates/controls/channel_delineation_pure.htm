@@ -84,15 +84,14 @@
                  'help': 'Recommended to use default value.',
                  'extra_control_class': 'disable-readonly',
                  'attrs': {
-                   'data-convert-target': '#input_mcl_en',
-                   'data-convert-func': 'm_to_ft',
-                   'data-convert-decimals': '2'
-                 },
-                 'max_width': '300px',
-                 'precision': '0.01'
-               }
-             ]
-           },
+                 'data-convert-target': '#input_mcl_en',
+                 'data-convert-func': 'm_to_ft',
+                 'data-convert-decimals': '2'
+               },
+               'precision': '0.01'
+             }
+           ]
+         },
            imperial={
              'unit_class': 'units-ft',
              'fields': [
@@ -104,11 +103,10 @@
                  'help': 'Recommended to use default value.',
                  'extra_control_class': 'disable-readonly',
                  'attrs': {
-                   'data-convert-target': '#input_mcl',
-                   'data-convert-func': 'ft_to_m',
-                   'data-convert-decimals': '2'
-                 },
-                 'max_width': '300px',
+                 'data-convert-target': '#input_mcl',
+                 'data-convert-func': 'ft_to_m',
+                 'data-convert-decimals': '2'
+               },
                  'precision': '0.01'
                }
              ]
@@ -126,11 +124,10 @@
                  'help': 'The minimum drainage area below which a permanent channel forms.',
                  'extra_control_class': 'disable-readonly',
                  'attrs': {
-                   'data-convert-target': '#input_csa_en',
-                   'data-convert-func': 'ha_to_ac',
-                   'data-convert-decimals': '2'
-                 },
-                 'max_width': '300px',
+                 'data-convert-target': '#input_csa_en',
+                 'data-convert-func': 'ha_to_ac',
+                 'data-convert-decimals': '2'
+               },
                  'precision': '0.01'
                }
              ]
@@ -146,11 +143,10 @@
                  'help': 'The minimum drainage area below which a permanent channel forms.',
                  'extra_control_class': 'disable-readonly',
                  'attrs': {
-                   'data-convert-target': '#input_csa',
-                   'data-convert-func': 'ac_to_ha',
-                   'data-convert-decimals': '2'
-                 },
-                 'max_width': '300px',
+                 'data-convert-target': '#input_csa',
+                 'data-convert-func': 'ac_to_ha',
+                 'data-convert-decimals': '2'
+               },
                  'precision': '0.01'
                }
              ]
@@ -165,12 +161,11 @@
              'fields': [
                {
                  'id': 'input_csa',
-                 'label': 'Critical source area',
-                 'unit_label': 'ha',
-                 'value': watershed.pkcsa,
-                'help': 'The minimum drainage area below which a permanent channel forms.',
+                'label': 'Critical source area',
+                'unit_label': 'ha',
+                'value': watershed.pkcsa,
+               'help': 'The minimum drainage area below which a permanent channel forms.',
                  'extra_control_class': 'disable-readonly',
-                 'max_width': '300px',
                  'precision': '0.01'
                }
              ]
@@ -180,12 +175,11 @@
              'fields': [
                {
                  'id': 'input_csa_en',
-                 'label': 'Critical source area',
-                 'unit_label': 'acre',
-                 'value': watershed.pkcsa,
-                'help': 'The minimum drainage area below which a permanent channel forms.',
+                'label': 'Critical source area',
+                'unit_label': 'acre',
+                'value': watershed.pkcsa,
+               'help': 'The minimum drainage area below which a permanent channel forms.',
                  'extra_control_class': 'disable-readonly',
-                 'max_width': '300px',
                  'precision': '0.01'
                }
              ]
@@ -218,7 +212,6 @@
            unit_label='m',
            help='Recommended to use default value.',
            extra_control_class='disable-readonly',
-           max_width='300px',
            precision='0.01'
       ) }}
     </div>
