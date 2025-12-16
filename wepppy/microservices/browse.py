@@ -528,7 +528,7 @@ def create_manifest(wd: str) -> str:
     return manifest_path
 
 
-def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str, page: int, page_size: int):
+def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str, page: int, page_size: int, sort_by: str, sort_order: str):
     manifest_path = _manifest_path(root_wd)
     if not os.path.exists(manifest_path):
         return None
@@ -562,6 +562,18 @@ def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str
             where_clause += ' AND name GLOB ?'
             params.append(filter_pattern)
 
+        sort_column = {
+            'date': 'mtime_ns',
+            'size': 'size_bytes',
+            'name': 'name',
+        }.get(sort_by, 'name')
+        direction = 'ASC' if sort_order == 'asc' else 'DESC'
+        if sort_column == 'name':
+            primary_sort = f'{sort_column} COLLATE NOCASE {direction}'
+        else:
+            primary_sort = f'{sort_column} {direction}'
+        order_clause = f'ORDER BY sort_rank DESC, {primary_sort}, name COLLATE NOCASE ASC'
+
         total_items = conn.execute(
             f'SELECT COUNT(*) AS total FROM entries WHERE {where_clause}',
             params,
@@ -573,7 +585,7 @@ def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str
                        child_count, symlink_target, sort_rank
                 FROM entries
                 WHERE {where_clause}
-                ORDER BY sort_rank DESC, name
+                {order_clause}
                 LIMIT ? OFFSET ?''',
             params + [page_size, offset],
         ).fetchall()
@@ -686,6 +698,23 @@ def _validate_filter_pattern(pattern):
         return True
     safe_pattern = r'^[a-zA-Z0-9_*?[\]\-\.]+$'
     return bool(re.match(safe_pattern, pattern))
+
+
+_SORT_FIELDS = {'name', 'date', 'size'}
+_SORT_ORDERS = {'asc', 'desc'}
+
+
+def _normalize_sort_params(args) -> tuple[str, str]:
+    sort_by = (args.get('sort', '') or '').lower()
+    if sort_by not in _SORT_FIELDS:
+        sort_by = 'name'
+
+    sort_order = (args.get('order', '') or '').lower()
+    if sort_order not in _SORT_ORDERS:
+        # Defaults: name ascending; date/size default to descending (newest/largest first)
+        sort_order = 'desc' if sort_by in ('date', 'size') else 'asc'
+
+    return sort_by, sort_order
 
 
 def _ensure_markup(value):
@@ -934,17 +963,32 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
         return await browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
 
 
-async def get_entries(directory, filter_pattern, start, end, page_size):
+async def get_entries(directory, filter_pattern, start, end, page_size, sort_by: str = 'name', sort_order: str = 'asc'):
     """Retrieve paginated directory entries using ls -l with ISO time style."""
+
+    sort_flag = '--sort=name'
+    reverse_flag = ''
+    if sort_by == 'date':
+        sort_flag = '--sort=time'
+        reverse_flag = '-r' if sort_order == 'asc' else ''
+    elif sort_by == 'size':
+        sort_flag = '--sort=size'
+        reverse_flag = '-r' if sort_order == 'asc' else ''
+    else:
+        reverse_flag = '-r' if sort_order == 'desc' else ''
+
+    sort_parts = f"{sort_flag}"
+    if reverse_flag:
+        sort_parts = f"{sort_parts} {reverse_flag}"
 
     if filter_pattern:
         cmd = (
-            f"ls -l --time-style=long-iso --group-directories-first {filter_pattern} "
+            f"ls -l --time-style=long-iso --group-directories-first {sort_parts} {filter_pattern} "
             f"| sed '/^total /d' | sed -n '{start},{end}p'"
         )
     else:
         cmd = (
-            f"ls -l --time-style=long-iso --group-directories-first "
+            f"ls -l --time-style=long-iso --group-directories-first {sort_parts} "
             f"| sed '/^total /d' | sed -n '{start},{end}p'"
         )
 
@@ -1052,7 +1096,7 @@ async def get_total_items(directory, filter_pattern=''):
         return 0
 
 
-async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
+async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='', sort_by: str = 'name', sort_order: str = 'asc'):
     """List directory contents with pagination and optional filtering."""
 
     manifest_result = await asyncio.to_thread(
@@ -1062,6 +1106,8 @@ async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filt
         filter_pattern,
         page,
         page_size,
+        sort_by,
+        sort_order,
     )
     if manifest_result is not None:
         entries, total_items = manifest_result
@@ -1071,7 +1117,7 @@ async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filt
     end = page * page_size
 
     entries_task = asyncio.create_task(
-        get_entries(directory, filter_pattern, start, end, page_size)
+        get_entries(directory, filter_pattern, start, end, page_size, sort_by, sort_order)
     )
     total_task = asyncio.create_task(
         get_total_items(directory, filter_pattern)
@@ -1094,25 +1140,59 @@ def get_pad(x):
     return x * ' '
 
 
-async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
+async def html_dir_list(_dir, runid, wd, request_path, diff_wd, base_query, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='', sort_by: str = 'name', sort_order: str = 'asc'):
     _padding = ' '
     s = []
     
-    page_entries, total_items, using_manifest = await get_page_entries(wd, _dir, page, page_size, filter_pattern)
-    
-    # Adjust column width based on current page entries
-    n = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
-    
+    base_query = base_query or {}
+    page_entries, total_items, using_manifest = await get_page_entries(wd, _dir, page, page_size, filter_pattern, sort_by, sort_order)
+
+    original_request_path = request_path
     # strip wildcard from request path if it has a wild card as last item
     if filter_pattern:
         request_path = request_path.rsplit('/', 1)[0]
-    
+
+    query_suffix = f"?{urlencode(base_query)}" if base_query else ''
+
+    def _default_order_for_field(field: str) -> str:
+        if field == 'name':
+            return 'asc'
+        return 'desc'
+
+    def _build_sort_link(field: str, label: str, width: int) -> str:
+        is_active = sort_by == field
+        indicator = f' [{sort_order}]' if is_active else ''
+        display = f'{label}{indicator}'
+        pad = get_pad(max(1, width - len(display)))
+        next_order = 'desc' if is_active and sort_order == 'asc' else 'asc'
+        if not is_active:
+            next_order = _default_order_for_field(field)
+        query_params = {**{k: v for k, v in base_query.items() if k not in ('sort', 'order')},
+                        'sort': field, 'order': next_order}
+        href = original_request_path
+        if query_params:
+            href = f"{href}?{urlencode(query_params)}"
+        return f'<a href="{href}">{display}</a>{pad}'
+
+    name_col_width = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
+    date_col_width = max(len(_format_mtime_ns(0)), 16)
+    size_col_width = 12
+
+    header_line = (
+        f"{_padding}  "
+        f"{_build_sort_link('name', 'Name', name_col_width)}"
+        f"{_build_sort_link('date', 'Modified', date_col_width)}"
+        f"{_build_sort_link('size', 'Size', size_col_width)}"
+        "Actions\n"
+    )
+    s.append(header_line)
+
     # Generate HTML for the current page
     for i, entry in enumerate(page_entries):
         _file = entry[0]
         is_dir = entry[1]
         path = _join(_dir, _file)
-        ts_pad = get_pad(n - len(_file))
+        ts_pad = get_pad(name_col_width - len(_file))
         last_modified_time = entry[2]
         _tree_char = '├└'[i == len(page_entries) - 1]
         
@@ -1122,7 +1202,10 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
             sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
-            s.append(_padding + f'{_tree_char} <a href="{file_link}/{diff_arg}"><b>{_file}{ts_pad}</b></a>{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n')
+            dir_href = f"{file_link}/"
+            if query_suffix:
+                dir_href = f"{dir_href}{query_suffix}"
+            s.append(_padding + f'{_tree_char} <a href="{dir_href}"><b>{_file}{ts_pad}</b></a>{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n')
         else:
             file_link = _join(request_path, _file)
             is_symlink = entry[4]
@@ -1169,7 +1252,9 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff
             if diff_wd and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
                 diff_path = _join(diff_wd, os.path.relpath(path, wd))
                 if _exists(diff_path):
-                    diff_url = _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
+                    diff_url = _join(request_path, _file).replace('/browse/', '/diff/')
+                    if query_suffix:
+                        diff_url = f"{diff_url}{query_suffix}"
                     diff_link = f'  <a href="{diff_url}">diff</a>'
             s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}{ts_pad}</a>{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{dtale_link}{diff_link}{sym_target}\n')
         
@@ -1189,11 +1274,20 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     if '?' in diff_runid:
         diff_runid = diff_runid.split('?')[0]
 
+    sort_by, sort_order = _normalize_sort_params(args)
+
     diff_wd = None
-    diff_arg = ''
+    base_query: dict[str, str] = {}
     if diff_runid:
         diff_wd = get_wd(diff_runid)
-        diff_arg = f'?diff={diff_runid}'
+        base_query['diff'] = diff_runid
+
+    include_sort_params = ('sort' in args) or ('order' in args) or sort_by != 'name' or sort_order != 'asc'
+    if include_sort_params:
+        base_query['sort'] = sort_by
+        base_query['order'] = sort_order
+
+    query_suffix = f'?{urlencode(base_query)}' if base_query else ''
     
     if not _exists(path):
         return jsonify({'Success': False, 'Error': 'path does not exist'})
@@ -1206,7 +1300,8 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     if os.path.isdir(path):
         # build breadcrumb links and clickable separators that expose absolute paths
         root_url = _prefix_path(f'/runs/{runid}/{config}/browse/')
-        breadcrumb_items = [(f'<a href="{root_url}{diff_arg}"><b>{runid}</b></a>', os.path.abspath(wd))]
+        root_href = f'{root_url}{query_suffix}'
+        breadcrumb_items = [(f'<a href="{root_href}"><b>{runid}</b></a>', os.path.abspath(wd))]
 
         if rel_path != '.':
             parts = rel_path.split('/')
@@ -1220,7 +1315,8 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
                     breadcrumb_html = f'<b>{part}</b>'
                 else:
                     part_url = _prefix_path(f'/runs/{runid}/{config}/browse/{_rel_path}/')
-                    breadcrumb_html = f'<a href="{part_url}{diff_arg}"><b>{part}</b></a>'
+                    part_href = f'{part_url}{query_suffix}'
+                    breadcrumb_html = f'<a href="{part_href}"><b>{part}</b></a>'
                 breadcrumb_items.append((breadcrumb_html, abs_part_path))
 
         breadcrumb_segments: list[str] = []
@@ -1249,8 +1345,8 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         
         # Generate directory listing and get total items
         listing_html, total_items, using_manifest = await html_dir_list(
-            path, runid, wd, request.path, diff_runid, diff_wd, diff_arg,
-            page=page, page_size=MAX_FILE_LIMIT, filter_pattern=filter_pattern
+            path, runid, wd, request.path, diff_wd, base_query,
+            page=page, page_size=MAX_FILE_LIMIT, filter_pattern=filter_pattern, sort_by=sort_by, sort_order=sort_order
         )
         
         # Calculate total pages and validate page number
