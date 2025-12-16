@@ -3,6 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathInput = document.getElementById('pathInput');
     if (!pathInput) return;
 
+    function deriveBaseDirPath(pathname) {
+        if (pathname.endsWith('/')) {
+            return pathname;
+        }
+        const lastSlash = pathname.lastIndexOf('/');
+        const lastSegment = pathname.slice(lastSlash + 1);
+        const hasWildcard = /[*?\[\]]/.test(lastSegment);
+        if (hasWildcard) {
+            // Strip the existing wildcard filter so a new search replaces it.
+            return pathname.slice(0, lastSlash + 1);
+        }
+        return pathname + '/';
+    }
+
     function handleNavigation(event) {
         if (event.key !== 'Enter') return;
         event.preventDefault();
@@ -18,10 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const baseUrl = `/weppcloud/runs/{{ runid }}/{{ config }}/browse`;
             newUrl = baseUrl + path;
         } else {
-            const baseHref =
-                currentUrl.origin +
-                currentUrl.pathname +
-                (currentUrl.pathname.endsWith('/') ? '' : '/');
+            const baseHref = currentUrl.origin + deriveBaseDirPath(currentUrl.pathname);
 
             const resolvedUrl = new URL(path, baseHref);
             newUrl = resolvedUrl.pathname;
