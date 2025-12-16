@@ -1,4 +1,5 @@
 {% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
 
   {{ ui.select_field(
        "wepp_bin",
@@ -17,3 +18,14 @@
       </p>
     </div>
   {% endif %}
+
+  {% call button_row() %}
+    <button
+      id="btn_run_wepp_watershed"
+      type="button"
+      class="pure-button pure-button-secondary disable-readonly"
+      data-wepp-action="run-watershed">
+      Run WEPP Watershed
+    </button>
+  {% endcall %}
+  <p class="wc-text-muted" id="hint_run_wepp_watershed">Run WEPP Channels requires a prior full WEPP run; hillslope outputs must already exist.</p>
