@@ -38,6 +38,7 @@
  {% set monthly_nwds = climate.monthlies.nwds %}
  {% set monthly_tmax = climate.monthlies.tmaxs %}
  {% set monthly_tmin = climate.monthlies.tmins %}
+ {# monthly_ppts here are already cumulative monthly totals; do not re-scale by wet days #}
  {% set annual_precip = monthly_ppts | sum %}
  {% set average_tmax = mean(monthly_tmax) %}
  {% set average_tmin = mean(monthly_tmin) %}

@@ -4,10 +4,19 @@
 {% set monthly_nwds = station.monthlies.nwds %}
 {% set monthly_tmax = station.monthlies.tmaxs %}
 {% set monthly_tmin = station.monthlies.tmins %}
-{% set annual_precip = monthly_ppts | sum %}
+{% set precip = namespace(totals=[], annual=0) %}
+{# MEAN P values in .par files are per storm day; scale by NWDS to get monthly totals #}
+{% for i in range(monthly_ppts | length) %}
+  {% set total = monthly_ppts[i] * monthly_nwds[i] %}
+  {% set precip.totals = precip.totals + [total] %}
+  {% set precip.annual = precip.annual + total %}
+{% endfor %}
+{% set monthly_precip_totals = precip.totals %}
+{% set annual_precip = precip.annual %}
 {% set average_tmax = mean(monthly_tmax) %}
 {% set average_tmin = mean(monthly_tmin) %}
 
+<h3 class="wc-heading wc-heading--sm">Monthly summary</h3>
 <h5>{{ title }}</h5>
 
 <div class="wc-stack">
@@ -57,7 +66,7 @@
       <tbody>
         <tr>
           <th scope="row">Mean precip</th>
-          {% for value in monthly_ppts %}
+          {% for value in monthly_precip_totals %}
           <td class="wc-text-right">{{ unitizer(value, 'in') | safe }}</td>
           {% endfor %}
           <td>{{ unitizer_units('in') | safe }}</td>
