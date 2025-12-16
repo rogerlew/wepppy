@@ -12,6 +12,7 @@
 {% set current_mods = current_ron_mods if current_ron_mods is defined else (current_ron.mods or []) %}
 {% set last_modified_dt = get_last_modified(current_ron.runid) if current_ron is defined else None %}
 {% set last_modified_display = last_modified_dt.strftime('%Y-%m-%d %H:%M:%S') ~ ' UTC' if last_modified_dt else None %}
+{% set last_modified_epoch = last_modified_dt.timestamp()|int if last_modified_dt else None %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
@@ -24,8 +25,19 @@
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
         {% if last_modified_display %}
-        <span class="wc-run-header__meta" title="Last modified (UTC)">
+        <span class="wc-run-header__meta js-run-last-modified"
+              data-run-last-modified="{{ last_modified_epoch }}"
+              data-run-last-modified-display="{{ last_modified_display }}"
+              title="Last modified (UTC)">
           Last Modified: {{ last_modified_display }}
+        </span>
+        {% else %}
+        <span class="wc-run-header__meta js-run-last-modified"
+              data-run-last-modified=""
+              data-run-last-modified-display=""
+              hidden
+              title="Last modified (UTC)">
+          Last Modified: —
         </span>
         {% endif %}
       </div>
