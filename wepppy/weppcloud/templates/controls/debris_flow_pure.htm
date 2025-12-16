@@ -16,7 +16,7 @@
 {% call ui.control_shell(
      form_id="debris_flow_form",
      title="Debris Flow Analysis",
-     collapsible=False,
+     collapsible=True,
      description=description,
      form_attrs={"data-debris-has-results": "true" if debris_flow.volume is not none else "false"},
      status_panel_options={"id": "debris_flow_status_panel"},

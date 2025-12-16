@@ -28,6 +28,51 @@ function controlBase() {
             .replace(/'/g, "&#39;");
     }
 
+    function formatUtcTimestamp(value) {
+        if (value === null || value === undefined) {
+            return null;
+        }
+
+        const raw = String(value).trim();
+        if (!raw) {
+            return null;
+        }
+
+        const match = raw.match(
+            /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?/
+        );
+
+        if (!match) {
+            return `${raw} UTC`;
+        }
+
+        const [, y, m, d, hh, mm, ss, fraction] = match;
+        let milliseconds = 0;
+        if (fraction) {
+            const fractionValue = parseFloat(`0.${fraction}`);
+            if (!Number.isNaN(fractionValue)) {
+                milliseconds = Math.round(fractionValue * 1000);
+            }
+        }
+
+        const baseMs = Date.UTC(
+            parseInt(y, 10),
+            parseInt(m, 10) - 1,
+            parseInt(d, 10),
+            parseInt(hh, 10),
+            parseInt(mm, 10),
+            parseInt(ss, 10),
+            milliseconds
+        );
+
+        const roundedMs = Math.round(baseMs / 1000) * 1000;
+        const date = new Date(roundedMs);
+
+        const pad = (num) => String(num).padStart(2, "0");
+        const formatted = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+        return `${formatted} UTC`;
+    }
+
     function normalizeJobId(jobId) {
         if (jobId === undefined || jobId === null) {
             return null;
@@ -727,17 +772,19 @@ function controlBase() {
 
             const timeline = [];
 
-            if (statusObj.started_at) {
-                timeline.push(`<span class="mr-3">Started: ${escapeHtml(statusObj.started_at)}</span>`);
+            const startedAt = formatUtcTimestamp(statusObj.started_at);
+            if (startedAt) {
+                timeline.push(`<span class="mr-3">Started: ${escapeHtml(startedAt)}</span>`);
             }
 
-            if (statusObj.ended_at) {
-                timeline.push(`<span class="mr-3">Ended: ${escapeHtml(statusObj.ended_at)}</span>`);
+            const endedAt = formatUtcTimestamp(statusObj.ended_at);
+            if (endedAt) {
+                timeline.push(`<span class="mr-3">Ended: ${escapeHtml(endedAt)}</span>`);
             }
 
             if (timeline.length) {
                 parts.push(
-                    `<div class="small text-muted d-flex flex-wrap align-items-baseline">${timeline.join("")}</div>`
+                    `<div class="small text-muted d-flex flex-wrap align-items-baseline">${timeline.join(" ")}</div>`
                 );
             }
 

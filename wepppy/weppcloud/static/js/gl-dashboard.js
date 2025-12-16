@@ -1134,16 +1134,19 @@
       setGraphFocus(false);
       return;
     }
-    if (activeGraphKey && graphFocus) {
-      await activateGraphItem(activeGraphKey, { keepFocus: graphFocus });
+    const hasRapGraph = rapCumulativeMode || rapLayers.some((l) => l.visible);
+    const activeWeppYearly = pickActiveWeppYearlyLayer();
+
+    if (hasRapGraph) {
+      await loadRapTimeseriesData();
       return;
     }
-    if (rapCumulativeMode || rapLayers.some((l) => l.visible)) {
-      await loadRapTimeseriesData();
-    }
-    const activeWeppYearly = pickActiveWeppYearlyLayer();
     if (activeWeppYearly) {
       await loadWeppYearlyTimeseriesData();
+      return;
+    }
+    if (activeGraphKey && graphFocus) {
+      await activateGraphItem(activeGraphKey, { keepFocus: graphFocus });
     }
   }
 
@@ -1361,16 +1364,24 @@
     });
     // Reset RAP cumulative mode
     rapCumulativeMode = false;
+    setValue('rapCumulativeMode', false);
     const cumulativeEl = document.getElementById('layer-RAP-cumulative');
     if (cumulativeEl) cumulativeEl.checked = false;
     // Hide year slider when no RAP layers active
     yearSlider.hide();
     // Clear active graph context when switching to map-only overlays
+    activeGraphKey = null;
     setValue('activeGraphKey', null);
     setGraphFocus(false, { force: true, skipModeSync: true });
     graphModeUserOverride = null;
     setGraphCollapsed(true, { focusOnExpand: false });
+    setValue('graphMode', 'minimized');
+    const st = getState();
+    if (st) {
+      st.graphMode = 'minimized';
+    }
     setGraphMode('minimized', { source: 'auto' });
+    syncGraphModeForContext();
   }
 
   async function activateWeppYearlyLayer() {
@@ -2987,6 +2998,8 @@
       return;
     }
     timeseriesGraph.setData(data);
+    activeGraphKey = null;
+    setValue('activeGraphKey', null);
     syncGraphModeForContext();
   }
 
@@ -3877,6 +3890,9 @@
   }
 
   async function activateGraphItem(key, options = {}) {
+    if (rapCumulativeMode) {
+      return;
+    }
     activeGraphKey = key;
     const keepFocus = options.keepFocus || false;
     ensureGraphExpanded();

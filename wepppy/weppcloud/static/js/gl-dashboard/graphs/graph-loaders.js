@@ -462,6 +462,7 @@ export function createGraphLoaders(deps) {
         yLabel: bandLabel + ' %',
         currentYear: state.rapSelectedYear,
         source: 'rap',
+        title: bandLabel || 'RAP Timeseries',
         tooltipFormatter: (id, value, yr) => {
           const numeric = Number.isFinite(value) ? value.toFixed(1) : value;
           return `Hillslope ${id}: ${numeric}% (${yr}) — ${bandLabel}`;

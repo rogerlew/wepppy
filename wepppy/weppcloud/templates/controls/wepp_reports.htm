@@ -13,6 +13,7 @@
   <div class="wc-stack">
     {% call ui.card_shell(
          "Run Reports",
+         collapsible=True,
          description=card_description | trim) %}
       {% set is_single_storm = climate.is_single_storm %}
       <section class="wc-stack">

@@ -768,12 +768,14 @@
 {% set metric_fields = metric.get('fields', []) if metric else [] %}
 {% set imperial_fields = imperial.get('fields', []) if imperial else [] %}
 {% if metric_fields or imperial_fields %}
+{% set default_max_width = '750px' %}
 <div class="unitizer-wrapper{% if wrapper_extra_class %} {{ wrapper_extra_class }}{% endif %}">
   {% if metric_fields %}
   <div class="unitizer {{ metric.get('unit_class', 'units-m') }}">
     <div class="wc-stack">
       {% for field in metric_fields %}
         {% set attrs = field.get('attrs') or {} %}
+        {% set max_width = field.get('max_width', metric.get('max_width', default_max_width)) %}
         {{ numeric_field(
              field.get('id'),
              field.get('label'),
@@ -791,7 +793,7 @@
              unit_name=field.get('unit_name'),
              extra_control_class=field.get('extra_control_class'),
              field_extra_class=field.get('field_extra_class'),
-             max_width=field.get('max_width', '650px')
+             max_width=max_width
         ) }}
       {% endfor %}
     </div>
@@ -802,6 +804,7 @@
     <div class="wc-stack">
       {% for field in imperial_fields %}
         {% set attrs = field.get('attrs') or {} %}
+        {% set max_width = field.get('max_width', imperial.get('max_width', default_max_width)) %}
         {{ numeric_field(
              field.get('id'),
              field.get('label'),
@@ -819,7 +822,7 @@
              unit_name=field.get('unit_name'),
              extra_control_class=field.get('extra_control_class'),
              field_extra_class=field.get('field_extra_class'),
-             max_width=field.get('max_width', '650px')
+             max_width=max_width
         ) }}
       {% endfor %}
     </div>

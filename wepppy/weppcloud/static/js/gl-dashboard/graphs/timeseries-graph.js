@@ -116,6 +116,10 @@ export function createTimeseriesGraph(options = {}) {
     },
 
     setData(data) {
+      const state = getState();
+      if (state && state.rapCumulativeMode && data && data.source === 'omni') {
+        return;
+      }
       this._data = data;
       const headerEl = document.querySelector('#gl-graph h4');
       if (headerEl) {

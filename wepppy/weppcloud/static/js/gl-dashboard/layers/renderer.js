@@ -94,6 +94,7 @@ export function createLayerRenderer({
     cumulativeInput.addEventListener('change', async () => {
       if (!cumulativeInput.checked) return;
       deselectAllSubcatchmentOverlays();
+      window.rapCumulativeMode = true;
       setValue('rapCumulativeMode', true);
       // Re-check the cumulative radio since deselectAll cleared it
       cumulativeInput.checked = true;
@@ -390,19 +391,33 @@ export function createLayerRenderer({
             layer.visible = input.checked;
           }
           setGraphFocus(false);
-          applyLayers();
-          const graphEl = document.getElementById('gl-graph');
-          const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
-          if (graphVisible && section.isWeppYearly && layer.visible) {
-            await loadWeppYearlyTimeseriesData();
-          } else if (graphVisible && !section.isSubcatchment && (getState().rapCumulativeMode || getState().rapLayers.some((l) => l.visible))) {
-            await loadRapTimeseriesData();
+        applyLayers();
+        const graphEl = document.getElementById('gl-graph');
+        // Collapse the graph when switching to non-timeseries overlays.
+        if (section.isSubcatchment && !section.isRap && !section.isWeppYearly) {
+          if (graphEl) {
+            graphEl.classList.add('is-collapsed');
           }
-        });
-        const label = document.createElement('label');
-        label.setAttribute('for', input.id);
-        const name = layer.label || layer.key;
-        const path = layer.path || '';
+          if (window.glDashboardSetGraphMode) {
+            window.glDashboardSetGraphMode('minimized', { source: 'auto' });
+          }
+          setTimeout(() => {
+            if (window.glDashboardSetGraphMode) {
+              window.glDashboardSetGraphMode('minimized', { source: 'user' });
+            }
+          }, 0);
+        }
+        const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
+        if (graphVisible && section.isWeppYearly && layer.visible) {
+          await loadWeppYearlyTimeseriesData();
+        } else if (graphVisible && !section.isSubcatchment && (getState().rapCumulativeMode || getState().rapLayers.some((l) => l.visible))) {
+          await loadRapTimeseriesData();
+        }
+      });
+      const label = document.createElement('label');
+      label.setAttribute('for', input.id);
+      const name = layer.label || layer.key;
+      const path = layer.path || '';
         label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
         li.appendChild(input);
         li.appendChild(label);

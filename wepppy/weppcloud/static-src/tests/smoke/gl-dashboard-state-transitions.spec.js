@@ -17,8 +17,16 @@ async function openDashboard(page) {
 
 async function expandSection(page, title) {
   const summary = page.locator('summary.gl-layer-group', { hasText: title });
-    await expect(summary).toBeVisible({ timeout: 15000 });
-    await summary.click();
+  await expect(summary).toBeVisible({ timeout: 15000 });
+  // Avoid toggling an already-open <details>; explicitly open it.
+  await summary.evaluate((el) => {
+    const details = el.closest('details');
+    if (details && !details.open) {
+      details.open = true;
+    }
+  });
+  // Scroll into view to prevent off-viewport click failures on nested inputs.
+  await summary.scrollIntoViewIfNeeded();
 }
 
 function graphPanel(page) {

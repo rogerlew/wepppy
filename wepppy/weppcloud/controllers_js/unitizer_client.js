@@ -394,7 +394,13 @@
             }
 
             updateCanonicalValue(meta.element, meta);
-            var retry = Number(meta.element.dataset.unitizerCanonicalValue);
+            var canonical = meta.element.dataset.unitizerCanonicalValue;
+
+            if (canonical === undefined || canonical === null || canonical === "") {
+                return null;
+            }
+
+            var retry = Number(canonical);
             return Number.isFinite(retry) ? retry : null;
         }
 
