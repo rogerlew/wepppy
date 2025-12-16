@@ -319,9 +319,9 @@ export async function detectWeppOverlays({
       { key: 'wepp-runoff', label: 'Runoff (mm)', path: weppLossPath, mode: 'runoff_volume', visible: false },
       { key: 'wepp-subrunoff', label: 'Subrunoff (mm)', path: weppLossPath, mode: 'subrunoff_volume', visible: false },
       { key: 'wepp-baseflow', label: 'Baseflow (mm)', path: weppLossPath, mode: 'baseflow_volume', visible: false },
-      { key: 'wepp-soil-loss', label: 'Soil Loss (tonnes/ha)', path: weppLossPath, mode: 'soil_loss', visible: false },
-      { key: 'wepp-sed-dep', label: 'Sediment Deposition (tonnes/ha)', path: weppLossPath, mode: 'sediment_deposition', visible: false },
-      { key: 'wepp-sed-yield', label: 'Sediment Yield (tonnes/ha)', path: weppLossPath, mode: 'sediment_yield', visible: false },
+      { key: 'wepp-soil-loss', label: 'Soil Loss (t/ha)', path: weppLossPath, mode: 'soil_loss', visible: false },
+      { key: 'wepp-sed-dep', label: 'Sediment Deposition (t/ha)', path: weppLossPath, mode: 'sediment_deposition', visible: false },
+      { key: 'wepp-sed-yield', label: 'Sediment Yield (t/ha)', path: weppLossPath, mode: 'sediment_yield', visible: false },
     ];
 
     return { weppSummary, weppRanges, weppLayers, subcatchmentsGeoJson: resolvedGeo };

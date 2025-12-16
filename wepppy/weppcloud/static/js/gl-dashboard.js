@@ -2046,17 +2046,18 @@
     const stat = (statistic || 'mean').toLowerCase();
     
     // Map of measures with their conversion formulas
-    // For water volumes: convert m³ to mm depth using hillslope area
-    // Formula: depth_mm = (volume_m3 / area_ha) / 10
-    // For sediment: convert kg to tonnes/ha using hillslope area
-    // Formula: tonnes_per_ha = (kg / 1000) / area_ha
+    // Note: hill.area is in m² (square meters)
+    // For water volumes: convert m³ to mm depth
+    // Formula: depth_mm = (volume_m³ / area_m²) * 1000
+    // For sediment: convert kg to tonnes/ha
+    // Formula: tonnes_per_ha = (kg / area_m²) * 10000 / 1000 = (kg / area_m²) * 10
     const measureMap = {
-      runoff_volume: { column: '"Runoff Volume"', formula: 'loss.{col} / hill.area / 10', label: 'mm' },
-      subrunoff_volume: { column: '"Subrunoff Volume"', formula: 'loss.{col} / hill.area / 10', label: 'mm' },
-      baseflow_volume: { column: '"Baseflow Volume"', formula: 'loss.{col} / hill.area / 10', label: 'mm' },
-      soil_loss: { column: '"Soil Loss"', formula: 'loss.{col} / 1000 / hill.area', label: 'tonnes/ha' },
-      sediment_deposition: { column: '"Sediment Deposition"', formula: 'loss.{col} / 1000 / hill.area', label: 'tonnes/ha' },
-      sediment_yield: { column: '"Sediment Yield"', formula: 'loss.{col} / 1000 / hill.area', label: 'tonnes/ha' },
+      runoff_volume: { column: '"Runoff Volume"', formula: 'loss.{col} / hill.area * 1000', label: 'mm' },
+      subrunoff_volume: { column: '"Subrunoff Volume"', formula: 'loss.{col} / hill.area * 1000', label: 'mm' },
+      baseflow_volume: { column: '"Baseflow Volume"', formula: 'loss.{col} / hill.area * 1000', label: 'mm' },
+      soil_loss: { column: '"Soil Loss"', formula: 'loss.{col} / hill.area * 10', label: 't/ha' },
+      sediment_deposition: { column: '"Sediment Deposition"', formula: 'loss.{col} / hill.area * 10', label: 't/ha' },
+      sediment_yield: { column: '"Sediment Yield"', formula: 'loss.{col} / hill.area * 10', label: 't/ha' },
     };
 
     function statExpression(measure) {

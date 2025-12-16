@@ -354,7 +354,9 @@ export function createLayerRenderer({
         statInputs.forEach((inputEl) => {
           inputEl.addEventListener('change', async (event) => {
             const nextStat = event.target.value;
-            if (nextStat === weppStatistic) return;
+            // Read current state value, don't use captured weppStatistic from closure
+            const currentStat = getState().weppStatistic;
+            if (nextStat === currentStat) return;
             setValue('weppStatistic', nextStat);
             await refreshWeppStatisticData();
           });

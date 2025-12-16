@@ -504,7 +504,7 @@ export function createGraphLoaders(deps) {
           { path: 'watershed/hillslopes.parquet', alias: 'hill' },
         ],
         joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
-        columns: ['hill.topaz_id AS topaz_id', 'loss.year AS year', `loss.${valueColumn} AS value`],
+        columns: ['hill.topaz_id AS topaz_id', 'loss.year AS year', `loss.${valueColumn} AS value`, 'hill.area AS area'],
         order_by: ['year'],
       };
       const dataResult = await postQueryEngine(dataPayload);
@@ -517,8 +517,18 @@ export function createGraphLoaders(deps) {
       for (const row of dataResult.records) {
         const tid = String(row.topaz_id);
         const year = row.year;
-        const value = row.value;
-        if (!Number.isFinite(value)) continue;
+        let value = row.value;
+        const area = row.area;
+        if (!Number.isFinite(value) || !Number.isFinite(area) || area <= 0) continue;
+        
+        // Convert units: water measures to mm, soil measures to t/ha
+        // Area is in m², raw water values are in m³, raw soil values are in kg
+        if (WATER_MEASURES.includes(overlay.mode)) {
+          value = (value / area) * 1000; // m³/m² * 1000 = mm
+        } else if (SOIL_MEASURES.includes(overlay.mode)) {
+          value = (value / area) * 10; // kg/m² * 10 = t/ha
+        }
+        
         yearSet.add(year);
         if (!rawData[tid]) rawData[tid] = {};
         rawData[tid][year] = value;

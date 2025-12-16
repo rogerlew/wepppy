@@ -51,7 +51,7 @@ export function createTimeseriesGraph(options = {}) {
     _source: null,
     _tooltipFormatter: null,
     _padding: { ...padding },
-    _lineWidth: 1.5,
+    _lineWidth: 1,
     _highlightWidth: 3,
 
     init() {
@@ -297,7 +297,7 @@ export function createTimeseriesGraph(options = {}) {
         ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(this._data.xLabel, pad.left + plotWidth / 2, height - 12);
+        ctx.fillText(this._data.xLabel, pad.left + plotWidth / 2, height - 22);
       }
 
       if (this._data.yLabel) {
@@ -611,7 +611,7 @@ export function createTimeseriesGraph(options = {}) {
       const color = seriesData.color || [100, 150, 200, 180];
       ctx.strokeStyle = highlighted
         ? `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1)`
-        : `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.5)`;
+        : `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.15)`;
       ctx.lineWidth = highlighted ? this._highlightWidth : this._lineWidth;
       ctx.beginPath();
       let started = false;
