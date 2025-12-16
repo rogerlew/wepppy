@@ -163,21 +163,19 @@
      stacktrace_panel_override=''
    ) %}
   <div class="wc-map-controls">
-    <div class="wc-map-controls__input">
-      {{ ui.text_field(
-           "input_centerloc",
-           "Center or ID search",
-           placeholder="Lon, Lat, [Zoom] | TopazID | WeppID",
-           attrs={"autocomplete": "off", "inputmode": "text"},
-           help="Enter coordinates (lon, lat, optional zoom) or a Topaz/Wepp ID."
-         ) }}
-    </div>
-    <div class="wc-map-controls__actions">
-      {% call button_row() %}
-        <button type="button"
-                class="pure-button pure-button-primary"
-                id="btn_setloc"
-                data-map-action="go">Go</button>
+    <div class="wc-map-controls__row wc-map-controls__row--inputs">
+      <label class="wc-map-controls__label" for="input_centerloc">Center or ID search</label>
+      <div class="wc-map-controls__input">
+        <input class="wc-map-controls__input-field wc-field__control wc-field__control--text"
+               id="input_centerloc"
+               name="input_centerloc"
+               type="text"
+               placeholder="Lon, Lat, [Zoom] | TopazID | WeppID"
+               autocomplete="off"
+               inputmode="text"
+               aria-describedby="input_centerloc_hint">
+      </div>
+      <div class="wc-map-controls__actions">
         <button type="button"
                 class="pure-button pure-button-secondary"
                 id="btn_find_topaz_id"
@@ -186,7 +184,16 @@
                 class="pure-button pure-button-secondary"
                 id="btn_find_wepp_id"
                 data-map-action="find-wepp">Find WEPP ID</button>
-      {% endcall %}
+      </div>
+      <div class="wc-map-controls__go">
+        <button type="button"
+                class="pure-button pure-button-primary"
+                id="btn_setloc"
+                data-map-action="go">Go</button>
+      </div>
+    </div>
+    <div class="wc-map-controls__row wc-map-controls__row--hint">
+      <p id="input_centerloc_hint" class="wc-map-controls__hint">Enter coordinates (lon, lat, optional zoom) or a Topaz/Wepp ID.</p>
     </div>
   </div>
 
