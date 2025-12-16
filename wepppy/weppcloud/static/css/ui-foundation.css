@@ -23,7 +23,7 @@
   --wc-font-size-base: 17px;
   --wc-font-size-sm: 1rem;
   --wc-font-size-xs: 0.9rem;
-  --wc-line-height: 1.0;
+  --wc-line-height: 1.25;
 
   /* Light theme color palette (grayscale inspired) */
   --wc-color-page: #f6f8fa;
@@ -768,10 +768,6 @@ code * {
   line-height: 1.4;
 }
 
-.wc-heading:first-child {
-  margin-top: 0;
-}
-
 .wc-heading--sm {
   font-size: 1.1rem;
 }
@@ -791,7 +787,7 @@ h5:first-child {
 .wc-text-muted {
   color: var(--wc-color-text-muted);
   margin-top: var(--wc-space-sm);
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .wc-text-muted:first-child {
@@ -1583,7 +1579,7 @@ h5:first-child {
 .wc-field__help {
   margin: 0;
   color: var(--wc-color-text-muted);
-  font-size: var(--wc-font-size-sm);
+  font-size: 1rem;
 }
 
 .wc-field__message {
@@ -3675,6 +3671,7 @@ body.wc-modal-open {
   padding: var(--wc-space-md);
   margin-bottom: var(--wc-space-lg);
   max-width: 650px;
+  font-size: 1rem;
 }
 
 .wc-summary-pane__list {
@@ -3700,13 +3697,13 @@ body.wc-modal-open {
 .wc-summary-pane__term {
   font-weight: 600;
   color: var(--wc-color-text);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .wc-summary-pane__definition {
   color: var(--wc-color-text);
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .wc-summary-pane__link {
@@ -3720,6 +3717,7 @@ body.wc-modal-open {
   transition: all 0.15s ease;
   display: inline-block;
   margin-top: var(--wc-space-xs);
+  font-size: 1rem;
 }
 
 .wc-summary-pane__link:hover,
@@ -3739,6 +3737,7 @@ body.wc-modal-open {
   font-style: italic;
   color: var(--wc-color-text-muted);
   margin-bottom: var(--wc-space-xs);
+  font-size: 1rem;
 }
 
 .wc-summary-pane__actions {
