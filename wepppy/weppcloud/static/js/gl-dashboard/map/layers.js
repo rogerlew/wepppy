@@ -41,6 +41,15 @@ export function createLayerUtils({
   function landuseFillColor(mode, row) {
     if (!row) return [128, 128, 128, 200];
     if (mode === 'dominant') {
+      // First check if the row has a color field (for custom landuses like Disturbed)
+      if (row.color) {
+        const hex = row.color.replace('#', '');
+        const intVal = Number.parseInt(hex, 16);
+        if (Number.isFinite(intVal)) {
+          return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, 220];
+        }
+      }
+      // Fall back to NLCD colormap for standard land cover codes
       const key = row.key ?? row._map;
       if (key == null) return [128, 128, 128, 200];
       const parsed = Number.parseInt(key, 10);

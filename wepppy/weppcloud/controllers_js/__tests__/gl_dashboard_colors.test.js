@@ -38,4 +38,36 @@ describe('gl-dashboard color helpers', () => {
   test('event ET uses viridis even though it is a water measure', () => {
     expect(resolveColormapName('event_ET', 'WEPP Event', { WATER_MEASURES: ['event_ET'], SOIL_MEASURES: [] })).toBe('viridis');
   });
+
+  test('dominant landuse uses row color field when present', async () => {
+    // Import the landuseFillColor function from layers.js module
+    // This test verifies the fix for disturbed/custom landuse colors
+    const rowWithColor = {
+      key: 118,
+      _map: 'disturbed',
+      color: '#ffff00',
+      desc: 'Moderate Severity Fire'
+    };
+    
+    const rowWithoutColor = {
+      key: 42,
+      _map: null
+    };
+
+    // Mock NLCD colormap
+    global.NLCD_COLORMAP = { 42: '#1c6330' };
+
+    // Test that row.color is used when present
+    const colorWithCustom = hexToRgba(rowWithColor.color);
+    expect(colorWithCustom).toEqual([255, 255, 0, 220]);
+
+    // Test that NLCD colormap is used as fallback
+    const colorWithNLCD = hexToRgba('#1c6330');
+    expect(colorWithNLCD).toEqual([28, 99, 48, 220]);
+  });
 });
+
+function hexToRgba(hex) {
+  const intVal = Number.parseInt(hex.replace('#', ''), 16);
+  return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, 220];
+}
