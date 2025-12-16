@@ -2,7 +2,7 @@ from os.path import exists as _exists
 from os.path import join as _join
 from glob import glob
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from typing import Optional, Type
 
@@ -60,7 +60,11 @@ def _get_last_modified(runid):
         if statbuf.st_mtime > last:
             last = statbuf.st_mtime
 
-    return datetime.fromtimestamp(last)
+    if last == 0:
+        return None
+
+    rounded_ts = round(last)
+    return datetime.fromtimestamp(rounded_ts, tz=timezone.utc)
 
 def _get_all_users():
     if UserModel is None:

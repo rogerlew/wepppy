@@ -10,6 +10,8 @@
   ('path_ce', 'Path CE')
 ] %}
 {% set current_mods = current_ron_mods if current_ron_mods is defined else (current_ron.mods or []) %}
+{% set last_modified_dt = get_last_modified(current_ron.runid) if current_ron is defined else None %}
+{% set last_modified_display = last_modified_dt.strftime('%Y-%m-%d %H:%M:%S') ~ ' UTC' if last_modified_dt else None %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
@@ -21,6 +23,11 @@
         <span class="wc-run-header__version">
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
+        {% if last_modified_display %}
+        <span class="wc-run-header__meta" title="Last modified (UTC)">
+          Last Modified: {{ last_modified_display }}
+        </span>
+        {% endif %}
       </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">

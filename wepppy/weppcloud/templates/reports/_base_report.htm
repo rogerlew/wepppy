@@ -7,6 +7,8 @@
 
 {% block site_header %}
 {% if current_ron %}
+{% set last_modified_dt = get_last_modified(current_ron.runid) %}
+{% set last_modified_display = last_modified_dt.strftime('%Y-%m-%d %H:%M:%S') ~ ' UTC' if last_modified_dt else None %}
 <header class="wc-header wc-run-header">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
@@ -18,6 +20,11 @@
         <span class="wc-run-header__version">
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
+        {% if last_modified_display %}
+        <span class="wc-run-header__meta" title="Last modified (UTC)">
+          Last Modified: {{ last_modified_display }}
+        </span>
+        {% endif %}
       </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">

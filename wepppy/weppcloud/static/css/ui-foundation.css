@@ -930,6 +930,16 @@ h5:first-child {
   letter-spacing: 0.02em;
 }
 
+.wc-run-header__meta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--wc-space-2xs);
+  font-size: 0.95rem;
+  color: var(--wc-color-text-muted);
+  white-space: nowrap;
+}
+
 .wc-run-header__content {
   display: flex;
   flex-wrap: wrap;
@@ -1138,6 +1148,11 @@ h5:first-child {
   .wc-run-header__right {
     justify-content: flex-start;
     margin-left: 0;
+  }
+
+  .wc-run-header__meta {
+    margin-left: 0;
+    white-space: normal;
   }
 }
 
