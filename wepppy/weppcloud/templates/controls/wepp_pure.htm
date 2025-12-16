@@ -56,7 +56,7 @@
       {% call ui.card("Export Configuration", attrs={"id": "wepp_export_configuration"}) %}
       {% include "controls/wepp_pure_advanced_options/prep_details.htm" %}
       {% endcall %}
-      {% call ui.card("WEPP Version", attrs={"id": "wepp_binary_selection"}) %}
+      {% call ui.card("WEPP Exec", attrs={"id": "wepp_binary_selection"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
       {% endcall %}
       {% if reveg %}
@@ -75,20 +75,10 @@
         class="pure-button pure-button-primary disable-readonly"
         data-wepp-action="run">
         <img id="run_wepp_lock" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Lock" style="display:none;">
-        Run WEPP Hillslopes and Channels
-      </button>
-    {% endcall %}
-    {% call button_row() %}
-      <button
-        id="btn_run_wepp_watershed"
-        type="button"
-        class="pure-button pure-button-secondary disable-readonly"
-        data-wepp-action="run-watershed">
-        Run WEPP Channels
+        Run WEPP
       </button>
     {% endcall %}
   </div>
-  <p class="wc-text-muted" id="hint_run_wepp_watershed">Run WEPP Channels requires a prior full WEPP run; hillslope outputs must already exist.</p>
   {{ ui.job_hint("hint_run_wepp") }}
   
 {% endcall %}
