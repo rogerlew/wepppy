@@ -42,3 +42,5 @@ wepppy/weppcloud/static-src/.playwright/
 markdown-extract/
 actions-runner/
 telemetry/
+
+wepppy/weppcloud/static-src/.playwright-browsers

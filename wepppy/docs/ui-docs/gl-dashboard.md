@@ -380,18 +380,37 @@ gl-dashboard.js (main)
 - **Canvas:** `#gl-graph-canvas` (520px height, devicePixelRatio scaling)
 - **Tooltip:** `#gl-graph-tooltip` (positioned absolute on hover)
 
-**State Machine:**
+**State Transitions:**
 ```
-[No Graph Data]
-  ↓ (layer activated)
-[Minimized] ← user clicks minimize
-  ↓ (user clicks split)
-[Split] ← user clicks split
-      ↓ (user clicks full OR Omni graph activated)
-  [Full] ← graph focus enabled (map viewport hidden)
-  ↓ (user clicks minimize)
-[Minimized]
+Map-only overlays (Landuse/Soils/WEPP/WEPP Event/WATAR)
+  ↓ auto
+Graph minimized (controls disabled; slider hidden)
+  ↓ RAP cumulative or any visible RAP overlay OR any visible WEPP Yearly overlay
+Graph split (controls enabled; slider visible)
+  ↓ Omni graph activated OR user clicks full
+Graph full (focus; map hidden; split button disabled while Omni focused)
+  ↓ user minimizes
+Graph minimized
+  ↓ switch back to map-only overlays
+Graph minimized (controls disabled; slider hidden)
 ```
+
+### Graph Panel Modes
+
+#### Minimized
+**State:** `graphMode = 'minimized'`, `graphFocus = false`  
+**UI:** Panel height 48px, content hidden, only header visible  
+**Trigger:** User clicks minimize, or no graph-capable layers active (map-only overlays)
+
+#### Split
+**State:** `graphMode = 'split'`, `graphFocus = false`  
+**UI:** Panel height ~640px, map stacked above graph  
+**Trigger:** User clicks split, or RAP cumulative/visible RAP overlay, or WEPP Yearly overlay becomes active
+
+#### Full
+**State:** `graphMode = 'full'`, `graphFocus = true`  
+**UI:** Graph focus hides the map viewport (graph stretches vertically)  
+**Trigger:** User clicks full, or Omni graph is activated (split button disabled while Omni focused)
 
 #### Year Slider
 **Element:** `#gl-year-slider`  

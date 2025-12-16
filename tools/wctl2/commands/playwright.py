@@ -17,7 +17,7 @@ import typer
 from ..context import CLIContext
 if TYPE_CHECKING:
     EnvironmentPreset = Literal["local", "local-direct", "dev", "staging", "prod", "custom"]
-    SuitePreset = Literal["full", "smoke", "controllers", "mods-menu"]
+    SuitePreset = Literal["full", "smoke", "controllers", "mods-menu", "gl-dashboard-state-transitions"]
 else:
     EnvironmentPreset = str
     SuitePreset = str
@@ -37,6 +37,7 @@ SUITE_PATTERNS: dict[str, Optional[str]] = {
     "controllers": "controller regression",
     "theme-metrics": "theme contrast metrics",
     "mods-menu": "run header mods menu",
+    "gl-dashboard-state-transitions": "gl-dashboard state transitions",
 }
 
 RUN_ID_PATTERN = re.compile(r"/runs/([^/]+)/")

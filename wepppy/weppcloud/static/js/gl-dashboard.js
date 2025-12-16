@@ -1369,6 +1369,8 @@
     setValue('activeGraphKey', null);
     setGraphFocus(false, { force: true, skipModeSync: true });
     graphModeUserOverride = null;
+    setGraphCollapsed(true, { focusOnExpand: false });
+    setGraphMode('minimized', { source: 'auto' });
   }
 
   async function activateWeppYearlyLayer() {

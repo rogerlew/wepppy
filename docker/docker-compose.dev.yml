@@ -74,6 +74,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    environment:
+      <<: *wepppy-env
+      PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/weppcloud/static-src/.playwright-browsers
+      PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS: "1"
 
   status:
     build:
