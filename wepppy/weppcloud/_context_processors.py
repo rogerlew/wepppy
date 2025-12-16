@@ -51,19 +51,44 @@ def _get_run_owner(runid):
 
 
 def _get_last_modified(runid):
-    wd = get_wd(runid)
-    nodbs = glob(_join(wd, '*.nodb'))
+    try:
+        from wepppy.nodb.base import redis_lock_client
+    except Exception:
+        redis_lock_client = None  # type: ignore
 
-    last = 0
-    for fn in nodbs:
-        statbuf = os.stat(fn)
-        if statbuf.st_mtime > last:
-            last = statbuf.st_mtime
+    last_ts = 0
 
-    if last == 0:
+    if redis_lock_client is not None:
+        try:
+            data = redis_lock_client.hgetall(runid) or {}
+            raw_last = data.get('last_modified')
+            if raw_last:
+                last_ts = max(last_ts, int(round(float(raw_last))))
+            for key, raw in data.items():
+                if not key.startswith('timestamps:'):
+                    continue
+                try:
+                    ts_val = int(round(float(raw)))
+                    if ts_val > last_ts:
+                        last_ts = ts_val
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+    if last_ts == 0:
+        wd = get_wd(runid)
+        nodbs = glob(_join(wd, '*.nodb'))
+
+        for fn in nodbs:
+            statbuf = os.stat(fn)
+            if statbuf.st_mtime > last_ts:
+                last_ts = statbuf.st_mtime
+
+    if last_ts == 0:
         return None
 
-    rounded_ts = round(last)
+    rounded_ts = round(last_ts)
     return datetime.fromtimestamp(rounded_ts, tz=timezone.utc)
 
 def _get_all_users():

@@ -1215,6 +1215,13 @@ class NoDbBase(object):
             update_last_modified(self.runid)
         except Exception:
             pass
+        try:
+            if redis_lock_client is not None:
+                ts = self._nodb_mtime if self._nodb_mtime is not None else time()
+                rounded_ts = int(round(ts))
+                redis_lock_client.hset(self.runid, "last_modified", str(rounded_ts))
+        except Exception:
+            pass
 
     @classmethod
     def _get_nodb_path(cls, wd: str) -> str:

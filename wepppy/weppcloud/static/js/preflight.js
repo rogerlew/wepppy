@@ -15,6 +15,7 @@
 var preflight_ws;
 let lastPreflightChecklist = null;
 let controller_lock_statuses = null;
+let lastModifiedMeta = null;
 window.lastPreflightChecklist = lastPreflightChecklist;
 
 // Map .nodb files to the UI elements we surface lock icons for.
@@ -46,6 +47,70 @@ const LOCKABLE_FILES = Object.freeze({
     "debris_flow.nodb": { lockImageId: "run_debris_flow_lock", puLockImageId: "pu_debris_flow_lock" },
     "omni.nodb": { lockImageId: null, puLockImageId: "pu_omni_lock" }
 });
+
+function normalizeLastModified(raw) {
+    if (raw === undefined || raw === null || raw === "") {
+        return null;
+    }
+    var num = Number(raw);
+    if (!Number.isFinite(num)) {
+        return null;
+    }
+    var rounded = Math.round(num);
+    var date = new Date(rounded * 1000);
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+    var iso = date.toISOString().replace("T", " ").replace(/\.\d+Z$/, "");
+    return {
+        epoch: rounded,
+        display: iso + " UTC"
+    };
+}
+
+function renderLastModified(raw) {
+    var normalized = normalizeLastModified(raw);
+    if (!normalized) {
+        return lastModifiedMeta;
+    }
+
+    lastModifiedMeta = normalized;
+
+    if (typeof window !== "undefined") {
+        window.lastRunLastModified = normalized.epoch;
+    }
+
+    if (typeof document !== "undefined") {
+        var targets = document.querySelectorAll('[data-run-last-modified]');
+        targets.forEach(function(target) {
+            target.removeAttribute("hidden");
+            target.textContent = "Last Modified: " + normalized.display;
+            target.setAttribute("data-run-last-modified", String(normalized.epoch));
+            target.setAttribute("data-run-last-modified-display", normalized.display);
+        });
+    }
+
+    return normalized;
+}
+
+function dispatchPreflightEvent(checklist, lockStatuses, lastModified) {
+    if (typeof document === "undefined" || typeof CustomEvent === "undefined") {
+        return;
+    }
+
+    var detail = {
+        checklist: checklist || {},
+        lockStatuses: lockStatuses || {},
+        lock_statuses: lockStatuses || {},
+        lastModified: lastModified ? lastModified.epoch : null,
+        lastModifiedDisplay: lastModified ? lastModified.display : null,
+        last_modified: lastModified ? lastModified.epoch : null
+    };
+    var merged = Object.assign({}, detail.checklist, detail);
+    document.dispatchEvent(new CustomEvent("preflight:update", {
+        detail: merged
+    }));
+}
 
 function initPreflight(runid) {
     var wsUrl = `wss://${window.location.host}/weppcloud-microservices/preflight/${runid}`;
@@ -96,12 +161,14 @@ function initPreflight(runid) {
                 preflight_ws.close(1000, "server hangup");
                 preflight_ws = null;
             } else if (payload.type === "preflight") {
+                var normalizedLastModified = renderLastModified(payload.last_modified);
                 updateUI(payload.checklist);
                 updateLocks(payload.lock_statuses);
 
                 lastPreflightChecklist = payload.checklist;
                 window.lastPreflightChecklist = payload.checklist;
                 controller_lock_statuses = payload.lock_statuses;
+                dispatchPreflightEvent(payload.checklist, payload.lock_statuses, normalizedLastModified);
             }
         };
 
@@ -165,6 +232,7 @@ function updateLocks(lockStatuses) {
 
 
 function updateUI(checklist) {
+    checklist = checklist || {};
     var readonly = typeof window.readonly !== 'undefined' ? window.readonly : false;
     
     for (var key in checklist) {
@@ -181,12 +249,6 @@ function updateUI(checklist) {
 
     var selector = getSelectorForKey("sbs_map");
     if (!selector) {
-        // Dispatch preflight update event for controllers to react
-        if (typeof document !== 'undefined' && typeof CustomEvent !== 'undefined') {
-            document.dispatchEvent(new CustomEvent('preflight:update', { 
-                detail: checklist 
-            }));
-        }
         return;
     }
 
@@ -200,13 +262,6 @@ function updateUI(checklist) {
         } else {
             $(selector).addClass('unburned').removeClass('burned');
         }
-    }
-    
-    // Dispatch preflight update event for controllers to react
-    if (typeof document !== 'undefined' && typeof CustomEvent !== 'undefined') {
-        document.dispatchEvent(new CustomEvent('preflight:update', { 
-            detail: checklist 
-        }));
     }
 }
 

@@ -5,6 +5,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -13,6 +14,7 @@ type Payload struct {
 	Type         string          `json:"type"`
 	Checklist    map[string]bool `json:"checklist"`
 	LockStatuses map[string]bool `json:"lock_statuses"`
+	LastModified *int64          `json:"last_modified,omitempty"`
 }
 
 // Evaluate translates raw Redis hash data into the preflight checklist and lock statuses.
@@ -99,6 +101,34 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 	return check, locks
 }
 
+// ExtractLastModified returns the last modified timestamp (seconds since epoch) if present.
+// Falls back to the newest timestamps:* value when explicit metadata is missing.
+func ExtractLastModified(prep map[string]string) *int64 {
+	if ts, ok := parseInt(prep["last_modified"]); ok {
+		return &ts
+	}
+
+	var latest int64
+	found := false
+	for key, raw := range prep {
+		if !strings.HasPrefix(key, "timestamps:") {
+			continue
+		}
+		if ts, ok := parseInt(raw); ok {
+			if !found || ts > latest {
+				latest = ts
+				found = true
+			}
+		}
+	}
+
+	if !found {
+		return nil
+	}
+
+	return &latest
+}
+
 func hasKey(prep map[string]string, key string) bool {
 	_, ok := prep[key]
 	return ok
@@ -158,7 +188,18 @@ func Equal(a, b Payload) bool {
 		return false
 	}
 	return reflect.DeepEqual(a.Checklist, b.Checklist) &&
-		reflect.DeepEqual(a.LockStatuses, b.LockStatuses)
+		reflect.DeepEqual(a.LockStatuses, b.LockStatuses) &&
+		equalsIntPtr(a.LastModified, b.LastModified)
+}
+
+func equalsIntPtr(a, b *int64) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
 }
 
 var (

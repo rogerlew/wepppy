@@ -382,10 +382,12 @@ func (c *connection) pushUpdate(ctx context.Context) error {
 	}
 
 	check, locks := checklist.Evaluate(prep)
+	lastModified := checklist.ExtractLastModified(prep)
 	payload := checklist.Payload{
 		Type:         "preflight",
 		Checklist:    check,
 		LockStatuses: locks,
+		LastModified: lastModified,
 	}
 
 	if c.last != nil && checklist.Equal(*c.last, payload) {
