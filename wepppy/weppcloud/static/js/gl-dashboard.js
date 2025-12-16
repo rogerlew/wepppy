@@ -3492,7 +3492,6 @@
       });
 
       yearSlider.setRange(weppYearlyMetadata.minYear, weppYearlyMetadata.maxYear, weppYearlySelectedYear);
-      yearSlider.show();
 
       await refreshWeppYearlyData();
       updateLayerList();
