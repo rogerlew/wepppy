@@ -2044,35 +2044,43 @@
 
   function buildWeppAggregations(statistic) {
     const stat = (statistic || 'mean').toLowerCase();
+    
+    // Map of measures with their conversion formulas
+    // For water volumes: convert m³ to mm depth using hillslope area
+    // Formula: depth_mm = (volume_m3 / area_ha) / 10
+    // For sediment: convert kg to tonnes/ha using hillslope area
+    // Formula: tonnes_per_ha = (kg / 1000) / area_ha
     const measureMap = {
-      runoff_volume: '"Runoff Volume"',
-      subrunoff_volume: '"Subrunoff Volume"',
-      baseflow_volume: '"Baseflow Volume"',
-      soil_loss: '"Soil Loss"',
-      sediment_deposition: '"Sediment Deposition"',
-      sediment_yield: '"Sediment Yield"',
+      runoff_volume: { column: '"Runoff Volume"', formula: 'loss.{col} / hill.area / 10', label: 'mm' },
+      subrunoff_volume: { column: '"Subrunoff Volume"', formula: 'loss.{col} / hill.area / 10', label: 'mm' },
+      baseflow_volume: { column: '"Baseflow Volume"', formula: 'loss.{col} / hill.area / 10', label: 'mm' },
+      soil_loss: { column: '"Soil Loss"', formula: 'loss.{col} / 1000 / hill.area', label: 'tonnes/ha' },
+      sediment_deposition: { column: '"Sediment Deposition"', formula: 'loss.{col} / 1000 / hill.area', label: 'tonnes/ha' },
+      sediment_yield: { column: '"Sediment Yield"', formula: 'loss.{col} / 1000 / hill.area', label: 'tonnes/ha' },
     };
 
-    function statExpression(column) {
-      if (stat === 'p90') return `quantile(loss.${column}, 0.9)`;
-      if (stat === 'sd') return `stddev_samp(loss.${column})`;
+    function statExpression(measure) {
+      const expr = measure.formula.replace('{col}', measure.column);
+      if (stat === 'p90') return `quantile(${expr}, 0.9)`;
+      if (stat === 'sd') return `stddev_samp(${expr})`;
       if (stat === 'cv') {
-        return `CASE WHEN avg(loss.${column}) = 0 THEN NULL ELSE stddev_samp(loss.${column}) / avg(loss.${column}) * 100 END`;
+        return `CASE WHEN avg(${expr}) = 0 THEN NULL ELSE stddev_samp(${expr}) / avg(${expr}) * 100 END`;
       }
-      return `avg(loss.${column})`;
+      return `avg(${expr})`;
     }
 
-    return Object.entries(measureMap).map(([alias, column]) => ({
-      sql: statExpression(column),
+    return Object.entries(measureMap).map(([alias, measure]) => ({
+      sql: statExpression(measure),
       alias,
     }));
   }
 
   async function fetchWeppSummary(statistic, { base = false } = {}) {
     const aggregations = buildWeppAggregations(statistic);
-    const columns = ['hill.topaz_id AS topaz_id', 'hill.wepp_id AS wepp_id'];
+    const columns = ['hill.topaz_id AS topaz_id', 'hill.wepp_id AS wepp_id', 'hill.area AS area'];
     const joins = [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }];
-    const datasetPaths = [WEPP_YEARLY_PATH, WEPP_LOSS_PATH];
+    // Use all_years data to compute statistics per-hillslope across all years
+    const datasetPaths = [WEPP_YEARLY_PATH];
 
     async function runWithDataset(path) {
       const payload = {
@@ -2082,7 +2090,7 @@
         ],
         joins,
         columns,
-        group_by: ['hill.topaz_id', 'hill.wepp_id'],
+        group_by: ['hill.topaz_id', 'hill.wepp_id', 'hill.area'],
         aggregations,
       };
       const result = base ? await postBaseQueryEngine(payload) : await postQueryEngine(payload);
@@ -2139,7 +2147,7 @@
   function computeWeppRanges() {
     if (!weppSummary) return;
     const modes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
-    weppRanges = {};
+    const ranges = {};
     for (const mode of modes) {
       let min = Infinity;
       let max = -Infinity;
@@ -2155,8 +2163,10 @@
       if (!Number.isFinite(min)) min = 0;
       if (!Number.isFinite(max)) max = 1;
       if (max <= min) max = min + 1;
-      weppRanges[mode] = { min, max };
+      ranges[mode] = { min, max };
     }
+    // Use setValue to ensure state change is detected
+    setValue('weppRanges', ranges);
   }
 
   function weppFillColor(mode, row) {
@@ -3447,7 +3457,8 @@
       if (!result || !result.weppSummary) return;
       weppSummary = result.weppSummary;
       if (result.weppRanges) {
-        weppRanges = result.weppRanges;
+        // Use setValue to ensure state change is detected
+        setValue('weppRanges', result.weppRanges);
       }
       if (result.subcatchmentsGeoJson) {
         subcatchmentsGeoJson = result.subcatchmentsGeoJson;

@@ -735,6 +735,11 @@ export function createLayerRenderer({
     let maxVal = 100;
     let unit = LAYER_UNITS[mode] || '';
 
+    // CV statistic always shows percentage
+    if (state.weppStatistic === 'cv') {
+      unit = '%';
+    }
+
     if (['cancov', 'inrcov', 'rilcov'].includes(mode)) {
       minVal = 0;
       maxVal = 100;
