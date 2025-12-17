@@ -270,6 +270,7 @@
       return;
     }
     currentBasemapKey = basemapKey;
+    setValue('currentBasemapKey', basemapKey);
     baseLayer = createBaseLayer(basemapKey);
     applyLayers();
     // Update selector UI if present
@@ -307,6 +308,14 @@
   window.glDashboardToggleSubcatchments = toggleSubcatchments;
 
   // Wire UI toggles
+  const basemapSelect = document.getElementById('gl-basemap-select');
+  if (basemapSelect) {
+    const initialBasemap = BASEMAP_DEFS[currentBasemapKey] ? currentBasemapKey : 'googleTerrain';
+    basemapSelect.value = initialBasemap;
+    basemapSelect.addEventListener('change', (e) => {
+      setBasemap(e.target.value);
+    });
+  }
   const labelsToggle = document.getElementById('gl-subcatchment-labels-toggle');
   if (labelsToggle) {
     labelsToggle.addEventListener('change', (e) => toggleSubcatchmentLabels(e.target.checked));

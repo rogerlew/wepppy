@@ -38,6 +38,24 @@ async function expectCollapsed(page) {
 }
 
 test.describe('gl-dashboard state transitions', () => {
+  test('Basemap selector updates state and deck layer', async ({ page }) => {
+    await openDashboard(page);
+    const basemapSelect = page.locator('#gl-basemap-select');
+    await basemapSelect.selectOption('osm');
+    await expect(basemapSelect).toHaveValue('osm');
+    const state = await page.evaluate(async () => {
+      const mod = await import(`${window.GL_DASHBOARD_CONTEXT.sitePrefix || ''}/static/js/gl-dashboard/state.js`);
+      const deck = window.glDashboardDeck;
+      const baseLayer = deck && deck.props && Array.isArray(deck.props.layers) ? deck.props.layers[0] : null;
+      return {
+        basemap: mod.getState().currentBasemapKey,
+        baseLayerData: baseLayer && baseLayer.props ? baseLayer.props.data : null,
+      };
+    });
+    expect(state.basemap).toBe('osm');
+    expect(state.baseLayerData || '').toContain('openstreetmap');
+  });
+
   test('RAP → Landuse collapses graph', async ({ page }) => {
     await openDashboard(page);
     await expandSection(page, 'RAP');
