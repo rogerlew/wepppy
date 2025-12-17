@@ -19,6 +19,8 @@ export function createLayerRenderer({
   loadRapTimeseriesData,
   loadWeppYearlyTimeseriesData,
   applyLayers,
+  syncGraphLayout,
+  clearGraphModeOverride,
   setGraphFocus,
   setGraphCollapsed,
   pickActiveWeppEventLayer,
@@ -379,47 +381,47 @@ export function createLayerRenderer({
         input.checked = layer.visible;
         const idPrefix = section.idPrefix || section.title;
         input.id = `layer-${idPrefix}-${layer.key}`;
+        const selectSubcatchmentLayer = async () => {
+          deselectAllSubcatchmentOverlays();
+          layer.visible = true;
+          input.checked = true;
+          if (section.isWeppYearly) {
+            await activateWeppYearlyLayer();
+          }
+        };
         input.addEventListener('change', async () => {
           if (section.isSubcatchment && !isRaster) {
-            deselectAllSubcatchmentOverlays();
-            layer.visible = true;
-            input.checked = true;
-            if (section.isWeppYearly) {
-              await activateWeppYearlyLayer();
-            }
+            await selectSubcatchmentLayer();
           } else {
             const target = layer.rasterRef || layer;
             target.visible = input.checked;
             layer.visible = input.checked;
           }
-          setGraphFocus(false);
-        applyLayers();
-        const graphEl = document.getElementById('gl-graph');
-        // Collapse the graph when switching to non-timeseries overlays.
-        if (section.isSubcatchment && !section.isRap && !section.isWeppYearly) {
-          if (graphEl) {
-            graphEl.classList.add('is-collapsed');
+          applyLayers();
+          if (section.isSubcatchment && !section.isRap && !section.isWeppYearly) {
+            clearGraphModeOverride && clearGraphModeOverride();
+            setValue('activeGraphKey', null);
+            setGraphFocus(false, { force: true, skipModeSync: true });
+            setGraphCollapsed(true, { focusOnExpand: false });
+            syncGraphLayout && syncGraphLayout();
+            return;
           }
-          if (window.glDashboardSetGraphMode) {
-            window.glDashboardSetGraphMode('minimized', { source: 'auto' });
+          const graphEl = document.getElementById('gl-graph');
+          const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
+          if (graphVisible && section.isWeppYearly && layer.visible) {
+            await loadWeppYearlyTimeseriesData();
+          } else if (
+            graphVisible &&
+            !section.isSubcatchment &&
+            (getState().rapCumulativeMode || getState().rapLayers.some((l) => l.visible))
+          ) {
+            await loadRapTimeseriesData();
           }
-          setTimeout(() => {
-            if (window.glDashboardSetGraphMode) {
-              window.glDashboardSetGraphMode('minimized', { source: 'user' });
-            }
-          }, 0);
-        }
-        const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
-        if (graphVisible && section.isWeppYearly && layer.visible) {
-          await loadWeppYearlyTimeseriesData();
-        } else if (graphVisible && !section.isSubcatchment && (getState().rapCumulativeMode || getState().rapLayers.some((l) => l.visible))) {
-          await loadRapTimeseriesData();
-        }
-      });
-      const label = document.createElement('label');
-      label.setAttribute('for', input.id);
-      const name = layer.label || layer.key;
-      const path = layer.path || '';
+        });
+        const label = document.createElement('label');
+        label.setAttribute('for', input.id);
+        const name = layer.label || layer.key;
+        const path = layer.path || '';
         label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
         li.appendChild(input);
         li.appendChild(label);

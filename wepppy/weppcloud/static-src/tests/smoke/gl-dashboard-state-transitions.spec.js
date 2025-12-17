@@ -46,6 +46,13 @@ async function expectCollapsed(page) {
   await expect(graphPanel(page)).toHaveClass(/is-collapsed/, { timeout: 10000 });
 }
 
+async function requireSection(page, title) {
+  const summary = page.locator('summary.gl-layer-group', { hasText: title });
+  if ((await summary.count()) === 0) {
+    test.skip(`${title} section not present in this run`);
+  }
+}
+
 test.describe('gl-dashboard state transitions', () => {
   test('Basemap selector updates state and deck layer', async ({ page }) => {
     await openDashboard(page);
@@ -67,6 +74,7 @@ test.describe('gl-dashboard state transitions', () => {
 
   test('RAP → Landuse collapses graph', async ({ page }) => {
     await openDashboard(page);
+    await requireSection(page, 'RAP');
     await expandSection(page, 'RAP');
     const rapCumulative = page.getByLabel('Cumulative Cover');
     await rapCumulative.scrollIntoViewIfNeeded();
@@ -90,6 +98,7 @@ test.describe('gl-dashboard state transitions', () => {
     await omniChn.scrollIntoViewIfNeeded();
     await omniChn.click({ force: true });
     await page.getByRole('button', { name: 'Full graph' }).click();
+    await requireSection(page, 'RAP');
     await expandSection(page, 'RAP');
     const rapCumulative = page.getByLabel('Cumulative Cover');
     await rapCumulative.scrollIntoViewIfNeeded();
@@ -114,6 +123,7 @@ test.describe('gl-dashboard state transitions', () => {
     const omniChn = page.getByLabel('Soil Loss (channels, tonne)');
     await omniChn.scrollIntoViewIfNeeded();
     await omniChn.click({ force: true });
+    await requireSection(page, 'RAP');
     await expandSection(page, 'RAP');
     const rapCumulative = page.getByLabel('Cumulative Cover');
     await rapCumulative.scrollIntoViewIfNeeded();
@@ -246,6 +256,7 @@ test.describe('gl-dashboard state transitions', () => {
 
   test('WEPP yearly slider anchors above graph in split mode', async ({ page }) => {
     await openDashboard(page);
+    await requireSection(page, 'WEPP Yearly');
     await expandSection(page, 'WEPP Yearly');
     const weppRadio = page.locator('input[id^="layer-WEPP-Yearly-"]').first();
     await expect(weppRadio).toBeVisible({ timeout: 15000 });
@@ -338,6 +349,7 @@ test.describe('gl-dashboard state transitions', () => {
 
   test('RAP slider uses top slot and updates selected year', async ({ page }) => {
     await openDashboard(page);
+    await requireSection(page, 'RAP');
     await expandSection(page, 'RAP');
     const rapCumulative = page.getByLabel('Cumulative Cover');
     await rapCumulative.scrollIntoViewIfNeeded();
@@ -389,5 +401,41 @@ test.describe('gl-dashboard state transitions', () => {
     await ensureGraphMode(page, 'minimized');
     await expectCollapsed(page);
     await expect(page.locator('#gl-year-slider')).not.toHaveClass(/is-visible/, { timeout: 10000 });
+  });
+
+  test('Non-graph overlays hide the year slider (Landuse/Soils/WEPP/WATAR)', async ({ page }) => {
+    await openDashboard(page);
+    // Show the slider via a graph-capable context.
+    await requireSection(page, 'RAP');
+    await expandSection(page, 'RAP');
+    const rapCumulative = page.getByLabel('Cumulative Cover');
+    await rapCumulative.scrollIntoViewIfNeeded();
+    await rapCumulative.click({ force: true });
+    const slider = page.locator('#gl-year-slider');
+    await expect(slider).toHaveClass(/is-visible/, { timeout: 10000 });
+
+    const overlays = [
+      { locator: page.locator('summary.gl-layer-group', { hasText: 'Landuse' }), selector: 'input[id^="layer-Landuse-"]' },
+      { locator: page.locator('summary.gl-layer-group', { hasText: 'Soils' }), selector: 'input[id^="layer-Soils-"]' },
+      { locator: page.locator('summary.gl-layer-group', { hasText: /^WEPP$/ }), selector: 'input[id^="layer-WEPP-"]' },
+      { locator: page.locator('summary.gl-layer-group', { hasText: 'WATAR' }), selector: 'input[id^="layer-WATAR-"]' },
+    ];
+
+    for (const { locator, selector } of overlays) {
+      const summary = locator.first();
+      await expect(summary).toBeVisible({ timeout: 15000 });
+      await summary.evaluate((el) => {
+        const details = el.closest('details');
+        if (details && !details.open) details.open = true;
+      });
+      await summary.scrollIntoViewIfNeeded();
+
+      const input = page.locator(selector).first();
+      if (await input.count()) {
+        await input.scrollIntoViewIfNeeded();
+        await input.click({ force: true });
+        await expect(slider).not.toHaveClass(/is-visible/, { timeout: 8000 });
+      }
+    }
   });
 });

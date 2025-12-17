@@ -74,8 +74,14 @@
   let graphModeUserOverride = null;
   let graphControlsEnabled = true;
   let activeGraphLoad = null; // { key, promise }
-  // Use var to avoid TDZ issues if syncGraphModeForContext fires early during init.
+  let yearSlider;
+  let timeseriesGraph;
+  // Use var to avoid TDZ issues if syncGraphLayout fires early during init.
   var lastGraphContextKey = null; // eslint-disable-line no-var
+
+  function clearGraphModeOverride() {
+    graphModeUserOverride = null;
+  }
 
   function isRapActive(stateObj) {
     // RAP should only drive graph controls when a RAP overlay is actually in play
@@ -86,6 +92,63 @@
   function isWeppYearlyActive(stateObj) {
     if (!stateObj.weppYearlySummary) return false;
     return (stateObj.weppYearlyLayers || []).some((l) => l && l.visible);
+  }
+
+  const GRAPH_CONTEXT_DEFS = {
+    climate_yearly: { mode: 'full', slider: 'bottom', focus: true },
+    wepp_yearly: { mode: 'split', slider: 'top', focus: false },
+    rap: { mode: 'split', slider: 'top', focus: false },
+    cumulative: { mode: 'full', slider: 'inherit', focus: true },
+    omni: { mode: 'full', slider: 'inherit', focus: true },
+    default: { mode: 'split', slider: 'hide', focus: false },
+  };
+
+  function positionYearSlider(position) {
+    const container = document.getElementById('gl-graph-container');
+    if (!yearSlider || !yearSlider.el) {
+      if (position === 'hide' && container) {
+        container.classList.remove('has-bottom-slider');
+      }
+      return;
+    }
+    if (position === 'inherit') {
+      return;
+    }
+    if (position === 'top') {
+      yearSlider.show('layer');
+      return;
+    }
+    if (position === 'bottom') {
+      yearSlider.show('climate');
+      return;
+    }
+    yearSlider.hide();
+  }
+
+  function resolveGraphContext(stateObj = getState()) {
+    const st = stateObj || getState();
+    const activeKey = st.activeGraphKey;
+    const source = currentGraphSource();
+    const rapActive = isRapActive(st);
+    const yearlyActive = isWeppYearlyActive(st);
+
+    if (activeKey === 'climate-yearly') return { key: 'climate_yearly', graphCapable: true };
+    if (activeKey === 'cumulative-contribution') return { key: 'cumulative', graphCapable: true };
+    if (activeKey && activeKey.startsWith('omni')) return { key: 'omni', graphCapable: true };
+    if (!activeKey) {
+      if (rapActive) return { key: 'rap', graphCapable: true };
+      if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
+      return { key: 'default', graphCapable: false };
+    }
+
+    if (source === 'climate_yearly') return { key: 'climate_yearly', graphCapable: true };
+    if (source === 'rap' && rapActive) return { key: 'rap', graphCapable: true };
+    if (source === 'wepp_yearly' && yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
+    if (source === 'omni') return { key: 'omni', graphCapable: true };
+
+    if (rapActive) return { key: 'rap', graphCapable: true };
+    if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
+    return { key: 'default', graphCapable: false };
   }
 
   const { rdbuScale, winterScale, jet2Scale } = createColorScales(
@@ -788,6 +851,10 @@
       window.glDashboardGraphToggled(!graphPanelEl.classList.contains('is-collapsed'));
     }
     if (collapsed) {
+      setValue('graphFocus', false);
+      if (glMainEl) {
+        glMainEl.classList.remove('graph-focus');
+      }
       setGraphFocus(false, { force: true });
     } else {
       setGraphFocus(focusOnExpand);
@@ -844,21 +911,10 @@
     updateGraphModeButtons(getState().graphMode || 'split');
   }
 
-  function setGraphMode(mode, options = {}) {
-    const { source = 'auto' } = options;
+  function applyGraphMode(mode, { source = 'auto', graphCapable = true, focusOverride } = {}) {
     const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
-    if (source === 'user') {
-      graphModeUserOverride = validated;
-    }
-    const targetMode = source === 'user' ? validated : graphModeUserOverride || validated;
+    const effectiveMode = graphCapable ? validated : 'minimized';
     const currentMode = getState().graphMode || 'split';
-    if (targetMode === currentMode && source !== 'user') {
-      updateGraphModeButtons(targetMode);
-      return;
-    }
-    const st = getState();
-    const graphCapable = isRapActive(st) || isWeppYearlyActive(st) || !!st.activeGraphKey;
-    const effectiveMode = !graphCapable && source !== 'user' ? 'minimized' : targetMode;
 
     setValue('graphMode', effectiveMode);
     if (effectiveMode === 'minimized') {
@@ -871,7 +927,24 @@
       setGraphCollapsed(false, { focusOnExpand: true });
       setGraphFocus(true, { skipModeSync: true, force: true });
     }
+    if (focusOverride !== undefined) {
+      setGraphFocus(!!focusOverride, { skipModeSync: true, force: true });
+    }
     updateGraphModeButtons(effectiveMode);
+    return effectiveMode;
+  }
+
+  function setGraphMode(mode, options = {}) {
+    const { source = 'auto' } = options;
+    const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
+    if (source === 'user') {
+      graphModeUserOverride = validated;
+    } else if (source === 'auto') {
+      clearGraphModeOverride();
+    }
+    return syncGraphLayout({
+      userOverride: source === 'user' ? validated : undefined,
+    });
   }
 
   window.glDashboardToggleGraphPanel = toggleGraphPanel;
@@ -926,7 +999,6 @@
       ? 'full'
       : 'split';
   setGraphMode(getState().graphMode || initialGraphMode, { source: 'auto' });
-  setGraphControlsEnabled(true);
 
   function getCumulativeGraphOptions() {
     const measureOpt =
@@ -946,6 +1018,20 @@
       ? Number(climateStartMonthSelect ? climateStartMonthSelect.value : getState().climateStartMonth || 10)
       : 1;
     return { waterYear: !!waterYear, startMonth };
+  }
+
+  function activateClimateGraph(graphOptions) {
+    clearGraphModeOverride();
+    activeGraphKey = 'climate-yearly';
+    setValue('activeGraphKey', 'climate-yearly');
+    // Reflect selection in the radio list
+    const radio = document.getElementById('graph-climate-yearly');
+    if (radio && !radio.checked) {
+      radio.checked = true;
+    }
+    lastGraphContextKey = null;
+    syncGraphLayout();
+    return activateGraphItem('climate-yearly', { force: true, graphOptions, keepFocus: true });
   }
 
   function handleCumulativeMeasureChange(nextValue) {
@@ -975,19 +1061,15 @@
       climateStartMonthSelect.disabled = !waterYear;
       climateStartMonthSelect.value = String(nextStart);
     }
-    if (activeGraphKey === 'climate-yearly') {
-      const options = getClimateGraphOptions();
-      activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
-    }
+    const options = getClimateGraphOptions();
+    activateClimateGraph(options);
   }
 
   function handleClimateStartMonthChange(val) {
     const month = Math.min(12, Math.max(1, Number(val) || 10));
     setValue('climateStartMonth', month);
-    if (activeGraphKey === 'climate-yearly') {
-      const options = getClimateGraphOptions();
-      activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
-    }
+    const options = getClimateGraphOptions();
+    activateClimateGraph(options);
   }
 
   function handleCumulativeScenarioToggle(path, checked) {
@@ -1089,6 +1171,11 @@
     calendarInput.value = 'calendar';
     calendarInput.checked = !getState().climateWaterYear;
     calendarInput.addEventListener('change', () => handleClimateModeChange('calendar'));
+    calendarInput.addEventListener('click', () => {
+      if (calendarInput.checked) {
+        handleClimateModeChange('calendar');
+      }
+    });
     const calendarSpan = document.createElement('span');
     calendarSpan.textContent = 'Calendar Year';
     modeCalendar.appendChild(calendarInput);
@@ -1100,6 +1187,11 @@
     waterInput.value = 'water';
     waterInput.checked = !!getState().climateWaterYear;
     waterInput.addEventListener('change', () => handleClimateModeChange('water'));
+    waterInput.addEventListener('click', () => {
+      if (waterInput.checked) {
+        handleClimateModeChange('water');
+      }
+    });
     const waterSpan = document.createElement('span');
     waterSpan.textContent = 'Water Year';
     modeWater.appendChild(waterInput);
@@ -1138,7 +1230,7 @@
   // ============================================================================
   // Year Slider Controller (generic, reusable for RAP and other features)
   // ============================================================================
-  const yearSlider = {
+  yearSlider = {
     el: document.getElementById('gl-year-slider'),
     input: document.getElementById('gl-year-slider-input'),
     valueEl: document.getElementById('gl-year-slider-value'),
@@ -1335,27 +1427,32 @@
   // Expose for external use
   window.glDashboardYearSlider = yearSlider;
   // Initial graph control sync after year slider is available
-  syncGraphModeForContext();
+  syncGraphLayout();
 
   // ============================================================================
   // Timeseries Graph Controller (for RAP and other timeseries data)
   // ============================================================================
-  function syncGraphModeForContext() {
+  function syncGraphLayout(options = {}) {
+    const { userOverride } = options;
+    if (userOverride !== undefined) {
+      graphModeUserOverride = userOverride;
+    }
     const st = getState();
-    const rapActive = isRapActive(st);
-    const yearlyActive = isWeppYearlyActive(st);
-    const climateActive =
-      st.activeGraphKey === 'climate-yearly' ||
-      (window.glDashboardTimeseriesGraph && window.glDashboardTimeseriesGraph._source === 'climate_yearly');
-    const omniActive =
-      (st.activeGraphKey && (st.activeGraphKey === 'cumulative-contribution' || st.activeGraphKey.startsWith('omni'))) ||
-      (window.glDashboardTimeseriesGraph && window.glDashboardTimeseriesGraph._source === 'omni');
-    const graphCapable = rapActive || yearlyActive || climateActive || !!st.activeGraphKey;
-    const contextKey = `${graphCapable ? 1 : 0}-${rapActive ? 1 : 0}-${yearlyActive ? 1 : 0}-${climateActive ? 1 : 0}-${omniActive ? 1 : 0}-${graphModeUserOverride || ''}-${st.activeGraphKey || ''}`;
-    lastGraphContextKey = contextKey;
+    const context = resolveGraphContext(st);
+    const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS.default;
+    const override = graphModeUserOverride;
+    const graphCapable = context.graphCapable;
+    const sliderPlacement = graphCapable ? def.slider : 'hide';
+    const mode = graphCapable ? (override || def.mode) : 'minimized';
+    const focus = override ? mode === 'full' : def.focus || mode === 'full';
+    const sliderReady = !!(yearSlider && yearSlider.el);
+    const layoutKey = `${context.key}|${mode}|${focus ? '1' : '0'}|${sliderPlacement}|${override || ''}|${graphCapable ? 1 : 0}|${sliderReady ? 'ready' : 'pending'}`;
+    if (layoutKey === lastGraphContextKey) {
+      return;
+    }
+    lastGraphContextKey = layoutKey;
 
     if (!graphCapable) {
-      graphModeUserOverride = null;
       const tg = window.glDashboardTimeseriesGraph;
       if (tg && typeof tg.hide === 'function') {
         tg.hide();
@@ -1363,44 +1460,34 @@
       if (st.activeGraphKey) {
         setValue('activeGraphKey', null);
       }
-      setGraphFocus(false, { force: true, skipModeSync: true });
-      setGraphControlsEnabled(false);
-      setGraphMode('minimized', { source: 'auto' });
-      yearSlider.hide();
-      return;
-    }
-
-    // If a non-graph context (e.g., map-only) left the user in a minimized override,
-    // clear it when a graph-capable RAP/WEPP/Climate context becomes active so we auto-open full view.
-    if (graphModeUserOverride === 'minimized' && (rapActive || yearlyActive || climateActive)) {
-      graphModeUserOverride = null;
-    }
-
-    setGraphControlsEnabled(true);
-    const defaultMode = (() => {
-      if (graphModeUserOverride) return graphModeUserOverride;
-      if (omniActive) return 'full';
-      if (climateActive) return 'full';
-      if (rapActive || yearlyActive) return 'split';
-      if (st.activeGraphKey) return 'full';
-      return 'split';
-    })();
-    const targetMode = graphModeUserOverride || defaultMode;
-    setGraphMode(targetMode, { source: graphModeUserOverride ? 'user' : 'auto' });
-
-    // Year slider visible for RAP, WEPP Yearly, and Climate Yearly contexts
-    if (rapActive || yearlyActive || climateActive) {
-      // Climate Yearly: slider at bottom of graph; RAP/WEPP Yearly: slider above graph
-      const sliderContext = climateActive ? 'climate' : 'layer';
-      yearSlider.show(sliderContext);
-      // If climate is selected but the graph data isn't showing climate yet, force refresh
-      if (climateActive && activeGraphKey === 'climate-yearly' && (!window.glDashboardTimeseriesGraph || window.glDashboardTimeseriesGraph._source !== 'climate_yearly')) {
-        const options = getClimateGraphOptions();
-        activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
+      setValue('graphFocus', false);
+      if (glMainEl) {
+        glMainEl.classList.remove('graph-focus');
       }
-    } else {
-      yearSlider.hide();
+      setGraphFocus(false, { skipModeSync: true, force: true });
     }
+
+    setGraphControlsEnabled(graphCapable);
+    applyGraphMode(mode, {
+      source: override ? 'user' : 'auto',
+      graphCapable,
+      focusOverride: focus,
+    });
+
+    if (
+      context.key === 'climate_yearly' &&
+      activeGraphKey === 'climate-yearly' &&
+      (!window.glDashboardTimeseriesGraph || window.glDashboardTimeseriesGraph._source !== 'climate_yearly')
+    ) {
+      const graphOptions = getClimateGraphOptions();
+      activateGraphItem('climate-yearly', { force: true, graphOptions, keepFocus: true });
+    }
+
+    positionYearSlider(sliderPlacement);
+  }
+
+  function syncGraphModeForContext(options) {
+    return syncGraphLayout(options);
   }
 
   async function handleGraphPanelToggle(visible) {
@@ -1443,7 +1530,7 @@
     }
   }
 
-  const timeseriesGraph = createTimeseriesGraph({
+  timeseriesGraph = createTimeseriesGraph({
     container: document.getElementById('gl-graph-container'),
     emptyEl: document.getElementById('gl-graph-empty'),
     tooltipEl: document.getElementById('gl-graph-tooltip'),
@@ -1454,7 +1541,7 @@
   });
 
   timeseriesGraph.init();
-  syncGraphModeForContext();
+  syncGraphLayout();
 
   window.glDashboardTimeseriesGraph = timeseriesGraph;
   window.glDashboardGraphToggled = handleGraphPanelToggle;
@@ -1630,6 +1717,17 @@
       const el = document.getElementById(`layer-Watershed-${l.key}`);
       if (el) el.checked = false;
     });
+    rapLayers.forEach((l) => {
+      l.visible = false;
+      const el = document.getElementById(`layer-RAP-${l.key}`);
+      if (el) el.checked = false;
+    });
+    rapCumulativeMode = false;
+    setValue('rapCumulativeMode', false);
+    const rapCumEl = document.getElementById('layer-RAP-cumulative');
+    if (rapCumEl) {
+      rapCumEl.checked = false;
+    }
     weppLayers.forEach((l) => {
       l.visible = false;
       const el = document.getElementById(`layer-WEPP-${l.key}`);
@@ -1660,26 +1758,20 @@
     setValue('rapCumulativeMode', false);
     const cumulativeEl = document.getElementById('layer-RAP-cumulative');
     if (cumulativeEl) cumulativeEl.checked = false;
-    // Hide year slider when no RAP layers active
-    yearSlider.hide();
     // Clear active graph context when switching to map-only overlays
     activeGraphKey = null;
     setValue('activeGraphKey', null);
     setGraphFocus(false, { force: true, skipModeSync: true });
-    graphModeUserOverride = null;
-    setGraphCollapsed(true, { focusOnExpand: false });
-    setValue('graphMode', 'minimized');
-    const st = getState();
-    if (st) {
-      st.graphMode = 'minimized';
-    }
-    setGraphMode('minimized', { source: 'auto' });
-    syncGraphModeForContext();
+    clearGraphModeOverride();
+    lastGraphContextKey = null;
+    applyGraphMode('minimized', { graphCapable: false });
+    positionYearSlider('hide');
+    syncGraphLayout();
   }
 
   async function activateWeppYearlyLayer() {
     if (!weppYearlyMetadata || !weppYearlyMetadata.years || !weppYearlyMetadata.years.length) {
-      yearSlider.hide();
+      syncGraphLayout();
       return;
     }
     const minYear = weppYearlyMetadata.minYear;
@@ -1689,7 +1781,6 @@
     }
     setValue('weppYearlySelectedYear', weppYearlySelectedYear);
     yearSlider.setRange(minYear, maxYear, weppYearlySelectedYear);
-    yearSlider.show('layer');
     await refreshWeppYearlyData();
   }
 
@@ -1721,8 +1812,11 @@
           input.checked = activeGraphKey === item.key;
           input.addEventListener('change', async () => {
             if (input.checked) {
+              clearGraphModeOverride();
+              lastGraphContextKey = null;
               activeGraphKey = item.key;
               setValue('activeGraphKey', item.key);
+              syncGraphLayout();
               let graphOptions;
               if (item.key === 'cumulative-contribution') {
                 graphOptions = getCumulativeGraphOptions();
@@ -1856,7 +1950,7 @@
     if (mapController) {
       mapController.applyLayers(stack);
     }
-    syncGraphModeForContext();
+    syncGraphLayout();
     updateLegendsPanel();
   }
 
@@ -2096,6 +2190,8 @@
     loadRapTimeseriesData,
     loadWeppYearlyTimeseriesData,
     applyLayers,
+    syncGraphLayout,
+    clearGraphModeOverride,
     setGraphFocus,
     setGraphCollapsed,
     pickActiveWeppEventLayer,
@@ -2910,7 +3006,7 @@
 
     // Re-sync graph controls now that WEPP Yearly data is available so the graph panel
     // opens in split mode instead of staying minimized after the initial toggle.
-    syncGraphModeForContext();
+    syncGraphLayout();
   }
 
   // WEPP Event ranges computed dynamically from weppEventSummary data
@@ -3347,10 +3443,11 @@
     const data = await ensureGraphLoaders().buildRapTimeseriesData();
     if (!data) {
       timeseriesGraph.hide();
+      syncGraphLayout();
       return;
     }
     timeseriesGraph.setData(data);
-    syncGraphModeForContext();
+    syncGraphLayout();
   }
 
   const WEPP_YEARLY_COLUMN_MAP = {
@@ -3376,10 +3473,11 @@
     const data = await ensureGraphLoaders().buildWeppYearlyTimeseriesData();
     if (!data) {
       timeseriesGraph.hide();
+      syncGraphLayout();
       return;
     }
     timeseriesGraph.setData(data);
-    syncGraphModeForContext();
+    syncGraphLayout();
   }
 
   // Wire year slider to RAP data refresh
@@ -3413,6 +3511,8 @@
     }
     if (needsApply) {
       applyLayers();
+    } else {
+      syncGraphLayout();
     }
   });
 
@@ -3843,10 +3943,8 @@
           weppYearlySelectedYear: null,
           weppYearlySummary: null,
         });
-        if (!rapCumulativeMode && !rapLayers.some((l) => l.visible)) {
-          yearSlider.hide();
-        }
         updateLayerList();
+        syncGraphLayout();
         return;
       }
 
@@ -4260,7 +4358,13 @@
     ensureGraphExpanded();
     const loadPromise = (async () => {
       const data = await loadGraphDataset(key, { force: options.force, options: graphOptions });
+      const stateNow = getState();
+      const stale = stateNow.activeGraphKey !== key;
       if (data) {
+        if (stale) {
+          syncGraphLayout();
+          return;
+        }
         // Respect caller override; otherwise only focus full-pane for omni graphs.
         if (!keepFocus) {
           setGraphFocus(data.source === 'omni' || data.source === 'climate_yearly');
@@ -4274,8 +4378,6 @@
             data.selectedYear != null && Number.isFinite(data.selectedYear) ? data.selectedYear : maxYear;
           setValue('climateYearlySelectedYear', selYear);
           yearSlider.setRange(minYear, maxYear, selYear);
-          yearSlider.show('climate');
-          setGraphMode('full', { source: 'auto' });
         }
       } else {
         timeseriesGraph.hide();
@@ -4284,7 +4386,7 @@
           graphEmptyEl.style.display = '';
         }
       }
-      syncGraphModeForContext();
+      syncGraphLayout();
     })();
     activeGraphLoad = { key, promise: loadPromise };
     try {

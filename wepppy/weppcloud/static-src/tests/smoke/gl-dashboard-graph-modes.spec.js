@@ -22,6 +22,13 @@ async function expandSection(page, title) {
   await summary.scrollIntoViewIfNeeded();
 }
 
+async function requireSection(page, title) {
+  const summary = page.locator('summary.gl-layer-group', { hasText: title });
+  if ((await summary.count()) === 0) {
+    test.skip(`${title} section not present in this run`);
+  }
+}
+
 async function getState(page) {
   return page.evaluate(async () => {
     const mod = await import(`${window.GL_DASHBOARD_CONTEXT.sitePrefix || ''}/static/js/gl-dashboard/state.js`);
@@ -60,6 +67,7 @@ async function getGeometry(page) {
 test.describe('gl-dashboard graph modes and slider placement', () => {
   test('WEPP Yearly loads split mode with top slider', async ({ page }) => {
     await openDashboard(page);
+    await requireSection(page, 'WEPP Yearly');
     await expandSection(page, 'WEPP Yearly');
     const weppRadio = page.locator('input[id^="layer-WEPP-Yearly-"]').first();
     await expect(weppRadio).toBeVisible({ timeout: 15000 });
@@ -75,6 +83,43 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     expect(geom.hasBottom).toBe(false);
     expect(geom.slider && geom.container).not.toBeNull();
     expect(geom.slider.top).toBeLessThan(geom.container.top);
+  });
+
+  test('Landuse overlay → Climate Yearly forces full mode with bottom slider', async ({ page }) => {
+    await openDashboard(page);
+    await expandSection(page, 'Landuse');
+    const landuseDominant = page.getByLabel('Dominant landuse');
+    await landuseDominant.scrollIntoViewIfNeeded();
+    await landuseDominant.click({ force: true });
+
+    await expandSection(page, 'Climate Yearly');
+    await page.locator('#graph-climate-yearly').click({ force: true });
+
+    await expect.poll(async () => getGraphSource(page)).toBe('climate_yearly');
+    await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('climate-yearly');
+    await expect.poll(async () => getActiveMode(page)).toBe('full');
+    await expect(page.locator('.gl-main')).toHaveClass(/graph-focus/);
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeTruthy();
+    expect(geom.parentId).toBe('gl-graph-container');
+    expect(geom.hasBottom).toBe(true);
+  });
+
+  test('Climate mode radios activate Climate Yearly graph when not already active', async ({ page }) => {
+    await openDashboard(page);
+    // Ensure we start from a non-climate context
+    await expandSection(page, 'Landuse');
+    await page.getByLabel('Dominant landuse').click({ force: true });
+
+    await expandSection(page, 'Climate Yearly');
+    const waterYear = page.getByLabel('Water Year');
+    await waterYear.click({ force: true });
+
+    await expect.poll(async () => getGraphSource(page)).toBe('climate_yearly');
+    await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('climate-yearly');
+    await expect.poll(async () => getActiveMode(page)).toBe('full');
+    await expect(page.locator('.gl-main')).toHaveClass(/graph-focus/);
   });
 
   test('Climate Yearly forces full mode with bottom slider', async ({ page }) => {
@@ -127,8 +172,7 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     await page.getByLabel('Cumulative contribution curve').click({ force: true });
 
     await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('cumulative-contribution');
-    const source = await getGraphSource(page);
-    expect(source).toBeTruthy();
+    await expect.poll(async () => getGraphSource(page)).toBeTruthy();
 
     const visibleCount = await page.locator('#gl-year-slider.is-visible').count();
     expect(visibleCount).toBe(0);

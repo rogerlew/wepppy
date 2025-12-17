@@ -121,6 +121,8 @@ export function createTimeseriesGraph(options = {}) {
         return;
       }
       this._data = data;
+      const panelCollapsed = panelEl && panelEl.classList.contains('is-collapsed');
+      const allowExpand = !state || state.graphMode !== 'minimized';
       const headerEl = document.querySelector('#gl-graph h4');
       if (headerEl) {
         headerEl.textContent = data && data.title ? data.title : 'Graph';
@@ -130,17 +132,16 @@ export function createTimeseriesGraph(options = {}) {
       this._tooltipFormatter =
         data && typeof data.tooltipFormatter === 'function' ? data.tooltipFormatter : null;
       if (this._hasData(data)) {
-        if (panelEl && panelEl.classList.contains('is-collapsed')) {
-          panelEl.classList.remove('is-collapsed');
-          notifyPanelToggle(true);
-        }
-        if (typeof setGraphFocus === 'function') {
-          setGraphFocus(data.source === 'omni');
+        if (allowExpand && !panelCollapsed) {
+          this.show();
+          this.render();
         } else {
-          setValue('graphFocus', data.source === 'omni');
+          this._visible = false;
+          if (this.emptyEl) {
+            this.emptyEl.textContent = '';
+            this.emptyEl.style.display = 'none';
+          }
         }
-        this.show();
-        this.render();
       } else {
         this.hide();
       }
