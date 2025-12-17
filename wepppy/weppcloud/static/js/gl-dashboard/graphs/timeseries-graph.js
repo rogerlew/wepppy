@@ -51,8 +51,8 @@ export function createTimeseriesGraph(options = {}) {
     _source: null,
     _tooltipFormatter: null,
     _padding: { ...padding },
-    _lineWidth: 1,
-    _highlightWidth: 3,
+    _lineWidth: 2,
+    _highlightWidth: 3.5,
 
     init() {
       this.canvas = document.getElementById('gl-graph-canvas');
@@ -611,7 +611,7 @@ export function createTimeseriesGraph(options = {}) {
       const color = seriesData.color || [100, 150, 200, 180];
       ctx.strokeStyle = highlighted
         ? `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1)`
-        : `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.15)`;
+        : `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.6)`;
       ctx.lineWidth = highlighted ? this._highlightWidth : this._lineWidth;
       ctx.beginPath();
       let started = false;

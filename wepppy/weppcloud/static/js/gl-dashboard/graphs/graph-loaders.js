@@ -25,6 +25,15 @@ const WEPP_YEARLY_COLUMN_MAP = {
   sediment_yield: '"Sediment Yield"',
 };
 
+const CUMULATIVE_MEASURE_MAP = {
+  runoff_volume: { column: 'runoff_volume_m3', label: 'Runoff (m³)', unit: 'm³', soil: false },
+  subrunoff_volume: { column: 'subrunoff_volume_m3', label: 'Lateral Flow (m³)', unit: 'm³', soil: false },
+  baseflow_volume: { column: 'baseflow_volume_m3', label: 'Baseflow (m³)', unit: 'm³', soil: false },
+  soil_loss: { column: 'soil_loss_kg', label: 'Soil Loss (t)', unit: 't', soil: true },
+  sediment_deposition: { column: 'sediment_deposition_kg', label: 'Sed Deposition (t)', unit: 't', soil: true },
+  sediment_yield: { column: 'sediment_yield_kg', label: 'Sed Yield (t)', unit: 't', soil: true },
+};
+
 export function createGraphLoaders(deps) {
   const {
     graphScenarios,
@@ -78,6 +87,10 @@ export function createGraphLoaders(deps) {
         'loss."Hillslope Area" AS area_ha',
         'loss."Soil Loss" AS soil_loss_kg',
         'loss."Runoff Volume" AS runoff_volume_m3',
+        'loss."Subrunoff Volume" AS subrunoff_volume_m3',
+        'loss."Baseflow Volume" AS baseflow_volume_m3',
+        'loss."Sediment Deposition" AS sediment_deposition_kg',
+        'loss."Sediment Yield" AS sediment_yield_kg',
         'hill.topaz_id AS topaz_id',
       ],
     };
@@ -90,6 +103,10 @@ export function createGraphLoaders(deps) {
             area_ha: Number(row.area_ha),
             soil_loss_kg: Number(row.soil_loss_kg),
             runoff_volume_m3: Number(row.runoff_volume_m3),
+            subrunoff_volume_m3: Number(row.subrunoff_volume_m3),
+            baseflow_volume_m3: Number(row.baseflow_volume_m3),
+            sediment_deposition_kg: Number(row.sediment_deposition_kg),
+            sediment_yield_kg: Number(row.sediment_yield_kg),
           });
         }
       }
@@ -178,6 +195,99 @@ export function createGraphLoaders(deps) {
     return state.hillslopeAreaCache[key] || 0;
   }
 
+  function normalizeCumulativeValue(raw, measureKey) {
+    const def = CUMULATIVE_MEASURE_MAP[measureKey];
+    if (!def) return null;
+    const val = Number(raw);
+    if (!Number.isFinite(val)) return null;
+    if (def.soil) {
+      return val / 1000; // kg → tonne
+    }
+    return val;
+  }
+
+  function clampPercent(val) {
+    if (!Number.isFinite(val)) return 0;
+    const pct = Math.max(0, Math.min(100, val));
+    return Math.round(pct * 1e6) / 1e6;
+  }
+
+  function buildPercentAxis(step = 0.5) {
+    const axis = [];
+    const clampedStep = step > 0 ? step : 0.5;
+    for (let p = 0; p <= 100 + 1e-9; p += clampedStep) {
+      axis.push(clampPercent(Math.min(p, 100)));
+    }
+    if (axis[axis.length - 1] !== 100) {
+      axis.push(100);
+    }
+    return axis;
+  }
+
+  function alignSeriesToAxis(percents, values, axis) {
+    if (!percents.length || percents.length !== values.length) return [];
+    const aligned = [];
+    const n = percents.length;
+    for (const pct of axis) {
+      if (pct <= percents[0]) {
+        aligned.push(values[0]);
+        continue;
+      }
+      if (pct >= percents[n - 1]) {
+        aligned.push(values[n - 1]);
+        continue;
+      }
+      let idx = 0;
+      while (idx < n - 1 && percents[idx + 1] < pct) {
+        idx += 1;
+      }
+      const p0 = percents[idx];
+      const p1 = percents[idx + 1];
+      const v0 = values[idx];
+      const v1 = values[idx + 1];
+      const span = p1 - p0 || 1;
+      const t = Math.max(0, Math.min(1, (pct - p0) / span));
+      aligned.push(v0 + t * (v1 - v0));
+    }
+    return aligned;
+  }
+
+  function computeCumulativeSeries(rows, measureKey) {
+    const def = CUMULATIVE_MEASURE_MAP[measureKey];
+    if (!def) return null;
+    const valid = [];
+    let totalArea = 0;
+    for (const row of rows) {
+      const areaHa = Number(row.area_ha);
+      const rawVal = normalizeCumulativeValue(row[def.column], measureKey);
+      if (!Number.isFinite(areaHa) || areaHa <= 0 || !Number.isFinite(rawVal)) continue;
+      valid.push({
+        areaHa,
+        value: rawVal,
+        perArea: rawVal / areaHa,
+      });
+      totalArea += areaHa;
+    }
+    if (!valid.length || totalArea <= 0) return null;
+    valid.sort((a, b) => b.perArea - a.perArea);
+
+    let cumulativeArea = 0;
+    let cumulativeValue = 0;
+    const percents = [0];
+    const values = [0];
+    for (const entry of valid) {
+      cumulativeArea += entry.areaHa;
+      cumulativeValue += entry.value;
+      percents.push(clampPercent((cumulativeArea / totalArea) * 100));
+      values.push(cumulativeValue);
+    }
+    if (percents[percents.length - 1] < 100) {
+      percents.push(100);
+      values.push(cumulativeValue);
+    }
+    return { percents, values };
+  }
+
   function selectOutletKey(outletMap, candidates) {
     const keys = Object.keys(outletMap || {});
     if (!keys.length) return null;
@@ -190,6 +300,71 @@ export function createGraphLoaders(deps) {
       if (match) return match;
     }
     return null;
+  }
+
+  async function buildCumulativeContributionGraph(options = {}) {
+    const measureKey = CUMULATIVE_MEASURE_MAP[options.measureKey] ? options.measureKey : 'runoff_volume';
+    const measureDef = CUMULATIVE_MEASURE_MAP[measureKey];
+    const selectedScenarioPaths = Array.isArray(options.scenarioPaths) ? options.scenarioPaths : [];
+    const scenarioSet = new Set(['']);
+    selectedScenarioPaths.forEach((p) => {
+      if (p != null) scenarioSet.add(p);
+    });
+    const scenarios = graphScenarios.filter((s) => scenarioSet.has(s.path || ''));
+    if (!scenarios.length) {
+      scenarios.push({ name: 'Base', path: '' });
+    }
+
+    const percentAxis = buildPercentAxis(0.5);
+    const seriesEntries = [];
+
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i];
+      const rows = await loadHillLossScenario(scenario.path);
+      const cumulative = computeCumulativeSeries(rows, measureKey);
+      if (!cumulative) continue;
+      seriesEntries.push({
+        id: scenario.path || 'base',
+        label: scenario.name || (scenario.path ? scenario.path : 'Base'),
+        percents: cumulative.percents,
+        values: cumulative.values,
+        color: scenarioColor(i),
+      });
+    }
+
+    if (!seriesEntries.length) {
+      return null;
+    }
+
+    const series = {};
+    seriesEntries.forEach((entry) => {
+      series[entry.id] = {
+        label: entry.label,
+        values: alignSeriesToAxis(entry.percents, entry.values, percentAxis),
+        color: entry.color,
+      };
+    });
+
+    const tooltipFormatter = (id, value, pct) => {
+      const item = series[id];
+      const label = (item && item.label) || id || 'Scenario';
+      const numericVal = Number.isFinite(value)
+        ? value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+        : value;
+      const pctVal = Number.isFinite(pct) ? pct.toFixed(1) : pct;
+      return `${label}: ${numericVal} ${measureDef.unit} @ ${pctVal}% area`;
+    };
+
+    return {
+      type: 'line',
+      title: `Cumulative Contribution — ${measureDef.label}`,
+      years: percentAxis,
+      series,
+      xLabel: 'Percent of Total Hillslope Area',
+      yLabel: measureDef.label,
+      source: 'omni',
+      tooltipFormatter,
+    };
   }
 
   async function buildHillSoilLossBoxplot() {
@@ -360,6 +535,7 @@ export function createGraphLoaders(deps) {
   }
 
   const graphLoadersMap = {
+    'cumulative-contribution': buildCumulativeContributionGraph,
     'omni-soil-loss-hill': buildHillSoilLossBoxplot,
     'omni-soil-loss-chn': buildChannelSoilLossBoxplot,
     'omni-runoff-hill': buildHillRunoffBoxplot,
@@ -367,14 +543,26 @@ export function createGraphLoaders(deps) {
     'omni-outlet-stream': buildOutletStreamBars,
   };
 
-  async function loadGraphDataset(key, { force } = {}) {
-    if (!force && state.graphDataCache[key]) {
-      return state.graphDataCache[key];
+  function graphCacheKey(key, options) {
+    if (key === 'cumulative-contribution') {
+      const measureKey = options && options.measureKey ? options.measureKey : state.cumulativeMeasure || 'runoff_volume';
+      const scenarioKeys = options && Array.isArray(options.scenarioPaths)
+        ? options.scenarioPaths.slice().sort().join('|')
+        : (state.cumulativeScenarioSelections || []).slice().sort().join('|');
+      return `${key}:${measureKey}:${scenarioKeys}`;
+    }
+    return key;
+  }
+
+  async function loadGraphDataset(key, { force, options } = {}) {
+    const cacheKey = graphCacheKey(key, options);
+    if (!force && state.graphDataCache[cacheKey]) {
+      return state.graphDataCache[cacheKey];
     }
     const loader = graphLoadersMap[key];
     if (!loader) return null;
-    const data = await loader();
-    state.graphDataCache[key] = data;
+    const data = await loader(options || {});
+    state.graphDataCache[cacheKey] = data;
     return data;
   }
 

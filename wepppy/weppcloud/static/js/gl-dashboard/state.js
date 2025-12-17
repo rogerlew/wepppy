@@ -18,6 +18,8 @@ const state = {
   graphMode: 'minimized',
   activeGraphKey: null,
   graphDataCache: {},
+  cumulativeMeasure: 'runoff_volume',
+  cumulativeScenarioSelections: [],
   hillLossCache: {},
   channelLossCache: {},
   outletAllYearsCache: {},

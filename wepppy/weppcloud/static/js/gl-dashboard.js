@@ -55,6 +55,7 @@
     DEFAULT_CONTROLLER_OPTIONS,
     BASE_LAYER_DEFS,
     GRAPH_DEFS,
+    CUMULATIVE_MEASURE_OPTIONS,
     createBasemapDefs,
     createColorScales,
   } = config;
@@ -164,6 +165,8 @@
     'outletAllYearsCache',
     'hillslopeAreaCache',
     'graphDataCache',
+    'cumulativeMeasure',
+    'cumulativeScenarioSelections',
     'landuseSummary',
     'soilsSummary',
     'hillslopesSummary',
@@ -891,6 +894,10 @@
   const layerEmptyEl = document.getElementById('gl-layer-empty');
   const graphListEl = document.getElementById('gl-graph-list');
   const graphEmptyEl = document.getElementById('gl-graph-empty');
+  let cumulativeControlsEl = null;
+  let cumulativeMeasureSelect = null;
+  let cumulativeScenarioContainer = null;
+  let cumulativeScenariosEl = null;
   const legendContentEl = document.getElementById('gl-legends-content');
   const legendEmptyEl = document.getElementById('gl-legend-empty');
   glMainEl = document.querySelector('.gl-main');
@@ -910,6 +917,100 @@
       : 'split';
   setGraphMode(getState().graphMode || initialGraphMode, { source: 'auto' });
   setGraphControlsEnabled(true);
+
+  function getCumulativeGraphOptions() {
+    const measureOpt =
+      CUMULATIVE_MEASURE_OPTIONS.find((opt) => opt.key === cumulativeMeasure) ||
+      CUMULATIVE_MEASURE_OPTIONS[0];
+    const measureKey = measureOpt ? measureOpt.key : 'runoff_volume';
+    if (cumulativeMeasure !== measureKey) {
+      setValue('cumulativeMeasure', measureKey);
+    }
+    const selected = Array.isArray(cumulativeScenarioSelections) ? cumulativeScenarioSelections : [];
+    return { measureKey, scenarioPaths: selected };
+  }
+
+  function handleCumulativeMeasureChange(nextValue) {
+    setValue('cumulativeMeasure', nextValue);
+    if (activeGraphKey === 'cumulative-contribution') {
+      const options = getCumulativeGraphOptions();
+      activateGraphItem('cumulative-contribution', {
+        force: true,
+        keepFocus: true,
+        graphOptions: options,
+      });
+    }
+  }
+
+  function handleCumulativeScenarioToggle(path, checked) {
+    const current = Array.isArray(cumulativeScenarioSelections) ? cumulativeScenarioSelections.slice() : [];
+    const nextSet = new Set(current);
+    if (checked) {
+      nextSet.add(path);
+    } else {
+      nextSet.delete(path);
+    }
+    const next = Array.from(nextSet);
+    setValue('cumulativeScenarioSelections', next);
+    if (activeGraphKey === 'cumulative-contribution') {
+      const options = getCumulativeGraphOptions();
+      activateGraphItem('cumulative-contribution', {
+        force: true,
+        keepFocus: true,
+        graphOptions: options,
+      });
+    }
+  }
+
+  function renderCumulativeMeasureSelector() {
+    if (!cumulativeMeasureSelect) return;
+    cumulativeMeasureSelect.innerHTML = '';
+    CUMULATIVE_MEASURE_OPTIONS.forEach((opt) => {
+      const optionEl = document.createElement('option');
+      optionEl.value = opt.key;
+      optionEl.textContent = opt.label;
+      cumulativeMeasureSelect.appendChild(optionEl);
+    });
+    const measureOpt =
+      CUMULATIVE_MEASURE_OPTIONS.find((opt) => opt.key === cumulativeMeasure) ||
+      CUMULATIVE_MEASURE_OPTIONS[0];
+    if (measureOpt) {
+      cumulativeMeasureSelect.value = measureOpt.key;
+      if (cumulativeMeasure !== measureOpt.key) {
+        setValue('cumulativeMeasure', measureOpt.key);
+      }
+    }
+    cumulativeMeasureSelect.addEventListener('change', (e) => handleCumulativeMeasureChange(e.target.value));
+  }
+
+  function renderCumulativeScenarioSelector() {
+    if (!cumulativeScenariosEl || !cumulativeScenarioContainer) return;
+    if (!omniScenarios.length) {
+      cumulativeScenarioContainer.style.display = 'none';
+      return;
+    }
+    cumulativeScenarioContainer.style.display = '';
+    cumulativeScenariosEl.innerHTML = '';
+    const selectedSet = new Set(Array.isArray(cumulativeScenarioSelections) ? cumulativeScenarioSelections : []);
+    omniScenarios.forEach((scenario, idx) => {
+      const id = `gl-cumulative-scenario-${idx}`;
+      const wrapper = document.createElement('label');
+      wrapper.className = 'gl-layer-item';
+      wrapper.style.display = 'flex';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '0.5rem';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.id = id;
+      input.checked = selectedSet.has(scenario.path);
+      input.addEventListener('change', (e) => handleCumulativeScenarioToggle(scenario.path, e.target.checked));
+      const span = document.createElement('span');
+      span.textContent = scenario.name || scenario.path || `Scenario ${idx + 1}`;
+      wrapper.appendChild(input);
+      wrapper.appendChild(span);
+      cumulativeScenariosEl.appendChild(wrapper);
+    });
+  }
 
   // ============================================================================
   // Year Slider Controller (generic, reusable for RAP and other features)
@@ -1155,7 +1256,8 @@
       return;
     }
     if (activeGraphKey && graphFocus) {
-      await activateGraphItem(activeGraphKey, { keepFocus: graphFocus });
+      const graphOptions = activeGraphKey === 'cumulative-contribution' ? getCumulativeGraphOptions() : undefined;
+      await activateGraphItem(activeGraphKey, { keepFocus: graphFocus, graphOptions });
     }
   }
 
@@ -1437,7 +1539,8 @@
         input.checked = activeGraphKey === item.key;
         input.addEventListener('change', async () => {
           if (input.checked) {
-            await activateGraphItem(item.key);
+            const graphOptions = item.key === 'cumulative-contribution' ? getCumulativeGraphOptions() : undefined;
+            await activateGraphItem(item.key, { graphOptions });
           }
         });
         const label = document.createElement('label');
@@ -1450,6 +1553,39 @@
       });
 
       details.appendChild(itemList);
+
+      if (group.key === 'cumulative') {
+        const toolbar = document.createElement('div');
+        toolbar.className = 'gl-graph__toolbar';
+        const measureField = document.createElement('div');
+        measureField.className = 'gl-graph__field';
+        const measureLabel = document.createElement('label');
+        measureLabel.setAttribute('for', 'gl-cumulative-measure');
+        measureLabel.textContent = 'Measure';
+        cumulativeMeasureSelect = document.createElement('select');
+        cumulativeMeasureSelect.id = 'gl-cumulative-measure';
+        measureField.appendChild(measureLabel);
+        measureField.appendChild(cumulativeMeasureSelect);
+
+        const scenarioField = document.createElement('div');
+        scenarioField.className = 'gl-graph__field';
+        const scenarioLabel = document.createElement('span');
+        scenarioLabel.textContent = 'Select Scenarios';
+        cumulativeScenarioContainer = scenarioField;
+        cumulativeScenariosEl = document.createElement('div');
+        cumulativeScenariosEl.className = 'gl-graph__scenario-list';
+        scenarioField.appendChild(scenarioLabel);
+        scenarioField.appendChild(cumulativeScenariosEl);
+
+        toolbar.appendChild(measureField);
+        toolbar.appendChild(scenarioField);
+        cumulativeControlsEl = toolbar;
+
+        details.appendChild(toolbar);
+        renderCumulativeMeasureSelector();
+        renderCumulativeScenarioSelector();
+      }
+
       graphListEl.appendChild(details);
     });
 
@@ -3906,8 +4042,8 @@
     'omni-outlet-stream': buildOutletStreamBars,
   };
 
-  async function loadGraphDataset(key, { force } = {}) {
-    return ensureGraphLoaders().loadGraphDataset(key, { force });
+  async function loadGraphDataset(key, { force, options } = {}) {
+    return ensureGraphLoaders().loadGraphDataset(key, { force, options });
   }
 
   async function activateGraphItem(key, options = {}) {
@@ -3916,9 +4052,10 @@
     }
     activeGraphKey = key;
     const keepFocus = options.keepFocus || false;
+    const graphOptions = options.graphOptions;
     ensureGraphExpanded();
     try {
-      const data = await loadGraphDataset(key, { force: options.force });
+      const data = await loadGraphDataset(key, { force: options.force, options: graphOptions });
       if (data) {
         // Respect caller override; otherwise only focus full-pane for omni graphs.
         if (!keepFocus) {

@@ -39,6 +39,15 @@ export const SOIL_MEASURES = [
 
 export const DEFAULT_GRAPH_PADDING = { top: 32, right: 160, bottom: 80, left: 100 };
 
+export const CUMULATIVE_MEASURE_OPTIONS = [
+  { key: 'runoff_volume', label: 'Runoff (m³)' },
+  { key: 'subrunoff_volume', label: 'Lateral Flow (m³)' },
+  { key: 'baseflow_volume', label: 'Baseflow (m³)' },
+  { key: 'soil_loss', label: 'Soil Loss (t)' },
+  { key: 'sediment_deposition', label: 'Sed Deposition (t)' },
+  { key: 'sediment_yield', label: 'Sed Yield (t)' },
+];
+
 export const DEFAULT_CONTROLLER_OPTIONS = {
   dragPan: true,
   dragRotate: false,
@@ -73,6 +82,11 @@ export const LAYER_REGISTRY = {
 };
 
 export const GRAPH_DEFS = [
+  {
+    key: 'cumulative',
+    title: 'Cumulative Contribution',
+    items: [{ key: 'cumulative-contribution', label: 'Cumulative contribution curve', type: 'line' }],
+  },
   {
     key: 'omni',
     title: 'Omni Scenarios',

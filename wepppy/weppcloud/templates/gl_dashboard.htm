@@ -344,6 +344,42 @@
     color: var(--wc-color-text-muted);
     position: relative;
   }
+  .gl-graph__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--wc-color-surface);
+    border: 1px solid var(--wc-color-border);
+    border-radius: 6px;
+    margin: 0.5rem 0 0.5rem;
+  }
+  .gl-graph__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .gl-graph__field label,
+  .gl-graph__field span {
+    font-size: 0.85rem;
+    color: var(--wc-color-text-muted);
+  }
+  .gl-graph__field select {
+    min-width: 200px;
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-text);
+    border: 1px solid var(--wc-color-border);
+    border-radius: 6px;
+    padding: 0.4rem 0.5rem;
+  }
+  .gl-graph__scenario-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+  }
+  .gl-graph__scenario-list .gl-layer-item {
+    margin: 0;
+  }
   .gl-graph.is-collapsed .gl-graph__content {
     display: none;
   }

@@ -248,9 +248,12 @@ gl-dashboard.js (main)
 
   **Query Pattern (Omni Graphs):**
   1. For each scenario, query the interchange parquet files (`wepp/output/interchange/loss_pw0.hill.parquet`, `loss_pw0.chn.parquet`, `loss_pw0.all_years.out.parquet`).
-  2. Compute statistics (min, q1, median, q3, max) per scenario for the boxplots; outlet bars come from `loss_pw0.all_years.out.parquet`.
-  3. Join with hillslope area for normalization (tonne → tonne/ha) using `watershed/hillslopes.parquet`.
-  4. Return boxplot series keyed by scenario and outlet bar series keyed by year.
+  2. Join with hillslope area (in m²) from `watershed/hillslopes.parquet` for unit conversions.
+  3. Apply unit conversions:
+     - Water measures (runoff, subrunoff, baseflow): `(m³ / area_m²) * 1000 = mm` (depth)
+     - Soil measures (soil_loss, sediment_deposition, sediment_yield): `(kg / area_m²) * 10 = t/ha` (mass per area)
+  4. Compute statistics (min, q1, median, q3, max) per scenario for boxplots; outlet bars come from `loss_pw0.all_years.out.parquet`.
+  5. Return boxplot series keyed by scenario and outlet bar series keyed by year.
 
 #### `data/query-engine.js`
 **Purpose:** Abstracts Query Engine HTTP calls  
@@ -321,10 +324,39 @@ gl-dashboard.js (main)
   </details>
   <details class="gl-layer-details">
     <summary>WEPP Yearly</summary>
+    <div class="gl-wepp-stat">
+      <div class="gl-wepp-stat__label">Statistic</div>
+      <div class="gl-wepp-stat__options">
+        <label><input type="radio" name="wepp-stat" value="mean" checked> Mean (Annual Average)</label>
+        <label><input type="radio" name="wepp-stat" value="p90"> 90th Percentile (Risk)</label>
+        <label><input type="radio" name="wepp-stat" value="sd"> Std. Deviation (Variability)</label>
+        <label><input type="radio" name="wepp-stat" value="cv"> CV % (Instability)</label>
+      </div>
+    </div>
     <ul class="gl-layer-items">
       <li class="gl-layer-item">
         <input type="checkbox" id="layer-WEPP-Yearly-runoff" />
         <label for="layer-WEPP-Yearly-runoff">Runoff (mm)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="checkbox" id="layer-WEPP-Yearly-subrunoff" />
+        <label for="layer-WEPP-Yearly-subrunoff">Lateral Flow (mm)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="checkbox" id="layer-WEPP-Yearly-baseflow" />
+        <label for="layer-WEPP-Yearly-baseflow">Baseflow (mm)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="checkbox" id="layer-WEPP-Yearly-soil_loss" />
+        <label for="layer-WEPP-Yearly-soil_loss">Soil Loss (t/ha)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="checkbox" id="layer-WEPP-Yearly-sediment_deposition" />
+        <label for="layer-WEPP-Yearly-sediment_deposition">Sediment Deposition (t/ha)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="checkbox" id="layer-WEPP-Yearly-sediment_yield" />
+        <label for="layer-WEPP-Yearly-sediment_yield">Sediment Yield (t/ha)</label>
       </li>
     </ul>
   </details>
@@ -440,7 +472,7 @@ Graph minimized (controls disabled; slider hidden)
 **Legend Format:**
 ```html
 <div class="gl-legend-item" style="display: none;">
-  <h5>Runoff (mm)</h5>
+  <h5>Runoff (mm)</h5>  <!-- Units shown: mm for water, t/ha for soil, % for cover -->
   <div class="gl-legend-gradient">
     <div class="gl-legend-stops">
       <span style="background: rgb(68,1,84)"></span>
@@ -453,6 +485,11 @@ Graph minimized (controls disabled; slider hidden)
   </div>
 </div>
 ```
+
+**Unit Display:**
+- Water measures: `mm` (runoff_volume, subrunoff_volume, baseflow_volume)
+- Soil measures: `t/ha` (soil_loss, sediment_deposition, sediment_yield)
+- CV statistic: `%` (coefficient of variation, dimensionless percentage)
 
 **Update Trigger:** `updateLegendsPanel()` called after `applyLayers()`  
 **Display Logic:**
@@ -598,12 +635,20 @@ function applyColormap(rasterData, colorMap) {
 **Rendering:** deck.gl GeoJsonLayer with subcatchments geometry + attribute join  
 **Examples:** Landuse dom, Soils mukey, WEPP runoff, RAP AFG, WATAR ash_loading
 
+**WEPP Output Units:**
+- **Raw data** in parquet files: Water volumes in m³, soil mass in kg
+- **Display units** after conversion: Water depth in mm, soil mass in t/ha
+- **Conversion formulas:**
+  - Water: `(value_m³ / hillslope_area_m²) * 1000 = mm`
+  - Soil: `(value_kg / hillslope_area_m²) * 10 = t/ha`
+- Hillslope areas are retrieved from `watershed/hillslopes.parquet` and joined on `wepp_id`
+
 **Data Structure:**
 ```javascript
-// Summary from Query Engine
+// Summary from Query Engine (after conversion)
 {
-  "123": { runoff_volume: 45.2, soil_loss: 2.1 },
-  "456": { runoff_volume: 32.8, soil_loss: 1.5 }
+  "123": { runoff_volume: 45.2, soil_loss: 2.1 },  // mm, t/ha
+  "456": { runoff_volume: 32.8, soil_loss: 1.5 }   // mm, t/ha
 }
 
 // GeoJSON features
@@ -788,6 +833,39 @@ function deselectAllSubcatchmentOverlays() {
 - Y-axis: Value (auto-scaled)
 - Bars: Vertical bars with fill color, hover highlight
 - Hover: Show value with 2 decimal precision
+
+#### Cumulative Contribution (Omni)
+**Use Case:** Rank hillslopes by per-area contribution for a selected measure and plot cumulative contribution by percent of total hillslope area.  
+**Data Sources:** `wepp/output/interchange/loss_pw0.hill.parquet` + `watershed/hillslopes.parquet` (per scenario).  
+**Measures:** Runoff (m³), Lateral Flow (m³), Baseflow (m³), Soil Loss (t), Sed Deposition (t), Sed Yield (t).  
+**Controls (sidebar → Graphs → Cumulative Contribution detail):**
+- **Measure** dropdown (`CUMULATIVE_MEASURE_OPTIONS`) to choose the variable.
+- **Select Scenarios** checkboxes (all Omni scenarios plus implicit Base); Base is always included even if unchecked/unchecked logic defaults to selected set.
+**Computation:**
+- For each scenario independently, compute per-area derivative = measure / area_ha, sort descending, cumulative sum by area and value.
+- Values converted to tonne for soil measures; water values stay in m³.
+- Percent-of-area axis uses a fixed 0.5% step (0 → 100) and each scenario is linearly interpolated onto that axis (prevents jagged traces when scenarios have different hillslope counts).
+**Data Format:**
+```javascript
+{
+  type: 'line',
+  title: 'Cumulative Contribution — Soil Loss (t)',
+  years: [0, 0.5, ..., 100], // percent of total hillslope area
+  series: {
+    base: { label: 'Base', values: [...], color: [r,g,b,a] },
+    'omni/path': { label: 'mulch_15', values: [...], color: [r,g,b,a] }
+  },
+  xLabel: 'Percent of Total Hillslope Area',
+  yLabel: 'Soil Loss (t)',
+  source: 'omni',
+  tooltipFormatter: (id, value, pct) => `${label}: ${value} t @ ${pct}% area`
+}
+```
+**Rendering:**
+- X-axis: Percent of total hillslope area.
+- Y-axis: Cumulative measure.
+- Lines: One per scenario; Base always shown. Legend uses scenario names.
+- Hover: Shows scenario, cumulative value, and percent-of-area for the nearest point.
 
 ### Graph Panel Modes
 
