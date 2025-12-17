@@ -29,8 +29,9 @@
   let layerUtilsModule;
   let mapControllerModule;
   let layerRendererModule;
+  let scenarioModule;
   try {
-    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule] = await Promise.all([
+    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule, scenarioModule] = await Promise.all([
       import(`${moduleBase}config.js`),
       import(`${moduleBase}state.js`),
       import(`${moduleBase}graphs/timeseries-graph.js`),
@@ -40,6 +41,7 @@
       import(`${moduleBase}map/layers.js`),
       import(`${moduleBase}map/controller.js`),
       import(`${moduleBase}layers/renderer.js`),
+      import(`${moduleBase}scenario/manager.js`),
     ]);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -65,6 +67,7 @@
   const { createMapController } = mapControllerModule;
   const { createLayerRenderer } = layerRendererModule;
   const { createTimeseriesGraph } = graphModule;
+  const { createScenarioManager } = scenarioModule;
   const state = getState();
   const queryEngine = queryEngineModule.createQueryEngine(ctx);
   let graphLoaders;
@@ -401,83 +404,18 @@
   // ============================================================================
   // Scenario and Comparison Mode Functions
   // ============================================================================
-  
-  /**
-   * Build a URL path that respects the current scenario selection.
-   * Uses the ?pup= query parameter to specify the scenario path.
-   * @param {string} relativePath - Path relative to the run root (e.g., 'landuse/landuse.parquet')
-   * @returns {string} Full URL path with scenario query parameter if applicable
-   */
-  function buildScenarioUrl(relativePath) {
-    const baseUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${relativePath}`;
-    if (currentScenarioPath) {
-      // Convert full scenario path (e.g., '_pups/omni/scenarios/mulch_15') 
-      // to pup parameter (e.g., 'omni/scenarios/mulch_15')
-      const pupPath = currentScenarioPath.replace(/^_pups\//, '');
-      return `${baseUrl}?pup=${encodeURIComponent(pupPath)}`;
+  async function handleScenarioChange({ scenarioPath, phase } = {}) {
+    const targetScenario = scenarioPath != null ? scenarioPath : getState().currentScenarioPath;
+    const activeScenario = getState().currentScenarioPath;
+    if (targetScenario != null && targetScenario !== activeScenario) {
+      return;
     }
-    // Base scenario
-    return baseUrl;
-  }
-  
-  /**
-   * Build a URL path for the base scenario (used in comparison mode).
-   * @param {string} relativePath - Path relative to the run root
-   * @returns {string} Full URL path to base scenario
-   */
-  function buildBaseUrl(relativePath) {
-    return `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${relativePath}`;
-  }
 
-  /**
-   * Set the active scenario and reload data.
-   * @param {string} scenarioPath - Path to scenario (e.g., '_pups/omni/scenarios/mulch_15') or empty for base
-   */
-  async function setScenario(scenarioPath) {
-    if (scenarioPath === currentScenarioPath) return;
-    
-    currentScenarioPath = scenarioPath || '';
-    
-    // Clear cached data
-    landuseSummary = null;
-    soilsSummary = null;
-    weppSummary = null;
-    weppYearlySummary = null;
-    weppYearlyMetadata = null;
-    weppYearlyRanges = {};
-    weppYearlyDiffRanges = {};
-    weppYearlyCache = {};
-    baseWeppYearlyCache = {};
-    weppYearlySelectedYear = null;
-    weppEventSummary = null;
-    setState({
-      weppYearlySummary: null,
-      weppYearlyMetadata: null,
-      weppYearlyRanges: {},
-      weppYearlyDiffRanges: {},
-      weppYearlyCache: {},
-      baseWeppYearlyCache: {},
-      weppYearlySelectedYear: null,
-      weppYearlyLayers: [],
-    });
-    
-    // Reload data for current layers
-    await Promise.all([
-      detectLanduseOverlays(),
-      detectSoilsOverlays(),
-      detectWeppOverlays(),
-      detectWeppYearlyOverlays(),
-    ]);
-    
-    // If comparison mode is on, we need the base data too
-    if (comparisonMode && currentScenarioPath) {
-      await loadBaseScenarioData();
-      if (weppYearlySelectedYear != null) {
-        await loadBaseWeppYearlyData(weppYearlySelectedYear);
-        computeWeppYearlyDiffRanges(weppYearlySelectedYear);
-      }
+    if (phase === 'before_base') {
+      await Promise.all([detectLanduseOverlays(), detectSoilsOverlays(), detectWeppOverlays(), detectWeppYearlyOverlays()]);
+      return;
     }
-    
+
     applyLayers();
 
     const graphEl = document.getElementById('gl-graph');
@@ -492,135 +430,93 @@
       }
     }
   }
-  
-  /**
-   * Enable or disable comparison mode.
-   * In comparison mode, shows (Base - Scenario) difference maps for supported measures.
-   * @param {boolean} enabled - Whether comparison mode is enabled
-   */
-  async function setComparisonMode(enabled) {
-    comparisonMode = !!enabled;
-    if (!comparisonMode) {
-      weppYearlyDiffRanges = {};
-    }
-    
-    // If enabling comparison mode and we have a scenario selected, load base data
-    if (comparisonMode && currentScenarioPath) {
-      await loadBaseScenarioData();
-      if (weppYearlySelectedYear != null) {
-        await loadBaseWeppYearlyData(weppYearlySelectedYear);
-        computeWeppYearlyDiffRanges(weppYearlySelectedYear);
-      }
-    }
-    
+
+  function handleComparisonChange() {
     applyLayers();
-    updateLayerList(); // Update layer list to show comparison indicators
-    updateLegendsPanel(); // Update legends to show diverging scale
+    updateLayerList();
+    updateLegendsPanel();
   }
-  
-  /**
-   * Load base scenario data for comparison mode.
-   */
-  async function loadBaseScenarioData() {
-    baseSummaryCache = {};
-    comparisonDiffRanges = {};
-    
-    try {
-      // Load base landuse data
-      const landuseUrl = buildBaseUrl('query/landuse/subcatchments');
-      const landuseResp = await fetch(landuseUrl);
-      if (landuseResp.ok) {
-        baseSummaryCache.landuse = await landuseResp.json();
-      }
-      
-      // Load base WEPP data through query-engine
-      baseSummaryCache.wepp = await fetchWeppSummary(weppStatistic, { base: true });
-      
-      // Compute difference ranges for proper colormap scaling
-      computeComparisonDiffRanges();
-      
-      // Note: WEPP Event data is loaded per-date, so we'll load base event data
-      // on demand when a comparison is requested for a specific date
-    } catch (err) {
-      console.warn('gl-dashboard: failed to load base scenario data for comparison', err);
+
+  const weppDataManager = {
+    loadBaseWeppYearlyData,
+    computeWeppYearlyDiffRanges,
+    loadBaseWeppEventData,
+    computeWeppEventDiffRanges,
+  };
+
+  const scenarioManager = createScenarioManager({
+    ctx,
+    getState,
+    setValue,
+    setState,
+    postQueryEngine,
+    postBaseQueryEngine,
+    fetchWeppSummary,
+    weppDataManager,
+    onScenarioChange: handleScenarioChange,
+    onComparisonChange: handleComparisonChange,
+  });
+
+  const {
+    buildScenarioUrl,
+    buildBaseUrl,
+    setScenario,
+    setComparisonMode,
+    computeComparisonDiffRanges,
+  } = scenarioManager;
+
+  // Expose scenario API for external use
+  window.glDashboardSetScenario = setScenario;
+  window.glDashboardSetComparisonMode = setComparisonMode;
+
+  async function initializeScenarioFromSelect() {
+    const scenarioSelect = document.getElementById('gl-scenario-select');
+    if (!scenarioSelect || !scenarioSelect.value) return false;
+
+    const scenarioPath = scenarioSelect.value;
+    const scenarioName =
+      (scenarioSelect.options && scenarioSelect.options[scenarioSelect.selectedIndex] && scenarioSelect.options[scenarioSelect.selectedIndex].text) || 'Base';
+    const scenarioDisplay = document.getElementById('gl-scenario-display');
+    if (scenarioDisplay) {
+      scenarioDisplay.innerHTML = `Scenario <strong>${scenarioName}</strong>`;
     }
+    await setScenario(scenarioPath);
+    return true;
   }
-  
-  /**
-   * Compute difference ranges for comparison mode colormap scaling.
-   * For each comparable measure, finds robust min/max difference using percentiles.
-   * Uses 5th/95th percentiles to avoid outlier domination while keeping 0 at midpoint.
-   */
-  function computeComparisonDiffRanges() {
-    comparisonDiffRanges = {};
-    
-    /**
-     * Compute robust range using percentiles.
-     * @param {number[]} diffs - Array of difference values
-     * @returns {{min: number, max: number}} Range object
-     */
-    function computeRobustRange(diffs) {
-      if (!diffs.length) return null;
-      diffs.sort((a, b) => a - b);
-      
-      // Use 5th and 95th percentiles to avoid outlier domination
-      const p5Idx = Math.floor(diffs.length * 0.05);
-      const p95Idx = Math.floor(diffs.length * 0.95);
-      const p5 = diffs[p5Idx];
-      const p95 = diffs[p95Idx];
-      
-      // Make range symmetric around 0 for proper diverging colormap
-      // Take the larger absolute value to ensure full color range is used
-      const maxAbs = Math.max(Math.abs(p5), Math.abs(p95));
-      
-      return { min: -maxAbs, max: maxAbs, p5, p95 };
-    }
-    
-    // Compute landuse cover difference ranges
-    if (landuseSummary && baseSummaryCache.landuse) {
-      const coverModes = ['cancov', 'inrcov', 'rilcov'];
-      for (const mode of coverModes) {
-        const diffs = [];
-        for (const topazId of Object.keys(landuseSummary)) {
-          const scenarioRow = landuseSummary[topazId];
-          const baseRow = baseSummaryCache.landuse[topazId];
-          if (!scenarioRow || !baseRow) continue;
-          const scenarioValue = Number(scenarioRow[mode]);
-          const baseValue = Number(baseRow[mode]);
-          if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
-          diffs.push(baseValue - scenarioValue);
-        }
-        const range = computeRobustRange(diffs);
-        if (range) {
-          comparisonDiffRanges[mode] = range;
-        }
+
+  function bindScenarioSelector() {
+    const scenarioSelect = document.getElementById('gl-scenario-select');
+    const scenarioDisplay = document.getElementById('gl-scenario-display');
+    if (!scenarioSelect || scenarioSelect.dataset.glScenarioBound === 'true') return;
+    scenarioSelect.dataset.glScenarioBound = 'true';
+    scenarioSelect.addEventListener('change', (e) => {
+      const scenarioPath = e.target.value;
+      const scenarioName =
+        (e.target.options && e.target.options[e.target.selectedIndex] && e.target.options[e.target.selectedIndex].text) || 'Base';
+      setScenario(scenarioPath);
+      if (scenarioDisplay) {
+        scenarioDisplay.innerHTML = `Scenario <strong>${scenarioName}</strong>`;
       }
-    }
-    
-    // Compute WEPP measure difference ranges
-    if (weppSummary && baseSummaryCache.wepp) {
-      const weppModes = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
-      for (const mode of weppModes) {
-        const diffs = [];
-        for (const topazId of Object.keys(weppSummary)) {
-          const scenarioRow = weppSummary[topazId];
-          const baseRow = baseSummaryCache.wepp[topazId];
-          if (!scenarioRow || !baseRow) continue;
-          const scenarioValue = Number(scenarioRow[mode]);
-          const baseValue = Number(baseRow[mode]);
-          if (!Number.isFinite(scenarioValue) || !Number.isFinite(baseValue)) continue;
-          diffs.push(baseValue - scenarioValue);
-        }
-        const range = computeRobustRange(diffs);
-        if (range) {
-          comparisonDiffRanges[mode] = range;
-        }
-      }
-    }
-    
-    console.log('gl-dashboard: computed comparison diff ranges', comparisonDiffRanges);
+    });
   }
-  
+
+  function bindComparisonToggle() {
+    const comparisonToggle = document.getElementById('gl-comparison-toggle');
+    const comparisonIndicator = document.getElementById('gl-comparison-indicator');
+    if (!comparisonToggle || comparisonToggle.dataset.glComparisonBound === 'true') return;
+    comparisonToggle.dataset.glComparisonBound = 'true';
+    const syncIndicator = (checked) => {
+      if (comparisonIndicator) {
+        comparisonIndicator.style.display = checked ? 'inline' : 'none';
+      }
+    };
+    syncIndicator(comparisonToggle.checked);
+    comparisonToggle.addEventListener('change', (e) => {
+      setComparisonMode(e.target.checked);
+      syncIndicator(e.target.checked);
+    });
+  }
+
   /**
    * Compute WEPP Event difference ranges for the current date.
    * Uses percentile-based scaling for robustness.
@@ -757,58 +653,6 @@
     } catch (err) {
       console.warn('gl-dashboard: failed to load base WEPP Event data for comparison', err);
     }
-  }
-  
-  // Expose scenario API for external use
-  window.glDashboardSetScenario = setScenario;
-  window.glDashboardSetComparisonMode = setComparisonMode;
-
-  async function initializeScenarioFromSelect() {
-    const scenarioSelect = document.getElementById('gl-scenario-select');
-    if (!scenarioSelect || !scenarioSelect.value) return false;
-
-    const scenarioPath = scenarioSelect.value;
-    const scenarioName =
-      (scenarioSelect.options && scenarioSelect.options[scenarioSelect.selectedIndex] && scenarioSelect.options[scenarioSelect.selectedIndex].text) || 'Base';
-    const scenarioDisplay = document.getElementById('gl-scenario-display');
-    if (scenarioDisplay) {
-      scenarioDisplay.innerHTML = `Scenario <strong>${scenarioName}</strong>`;
-    }
-    await setScenario(scenarioPath);
-    return true;
-  }
-
-  function bindScenarioSelector() {
-    const scenarioSelect = document.getElementById('gl-scenario-select');
-    const scenarioDisplay = document.getElementById('gl-scenario-display');
-    if (!scenarioSelect || scenarioSelect.dataset.glScenarioBound === 'true') return;
-    scenarioSelect.dataset.glScenarioBound = 'true';
-    scenarioSelect.addEventListener('change', (e) => {
-      const scenarioPath = e.target.value;
-      const scenarioName =
-        (e.target.options && e.target.options[e.target.selectedIndex] && e.target.options[e.target.selectedIndex].text) || 'Base';
-      setScenario(scenarioPath);
-      if (scenarioDisplay) {
-        scenarioDisplay.innerHTML = `Scenario <strong>${scenarioName}</strong>`;
-      }
-    });
-  }
-
-  function bindComparisonToggle() {
-    const comparisonToggle = document.getElementById('gl-comparison-toggle');
-    const comparisonIndicator = document.getElementById('gl-comparison-indicator');
-    if (!comparisonToggle || comparisonToggle.dataset.glComparisonBound === 'true') return;
-    comparisonToggle.dataset.glComparisonBound = 'true';
-    const syncIndicator = (checked) => {
-      if (comparisonIndicator) {
-        comparisonIndicator.style.display = checked ? 'inline' : 'none';
-      }
-    };
-    syncIndicator(comparisonToggle.checked);
-    comparisonToggle.addEventListener('change', (e) => {
-      setComparisonMode(e.target.checked);
-      syncIndicator(e.target.checked);
-    });
   }
 
   function setGraphFocus(enabled, options = {}) {
