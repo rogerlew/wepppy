@@ -1161,7 +1161,8 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_wd, base_query, page
 
     def _build_sort_link(field: str, label: str, width: int) -> str:
         is_active = sort_by == field
-        indicator = f' [{sort_order}]' if is_active else ''
+        direction_symbol = '↑' if sort_order == 'asc' else '↓'
+        indicator = f' [{direction_symbol}]' if is_active else ''
         display = f'{label}{indicator}'
         pad = get_pad(max(1, width - len(display)))
         next_order = 'desc' if is_active and sort_order == 'asc' else 'asc'
@@ -1172,21 +1173,20 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_wd, base_query, page
         href = original_request_path
         if query_params:
             href = f"{href}?{urlencode(query_params)}"
-        return f'<a href="{href}">{display}</a>{pad}'
+        return f'<a href="{href}" class="browse-sort-link">{display}{pad}</a>'
 
     name_col_width = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
     date_col_width = max(len(_format_mtime_ns(0)), 16)
     size_col_width = 12
 
     header_line = (
-        f"{_padding}  "
+        f'<span class="browse-header">{_padding}  '
         f"{_build_sort_link('name', 'Name', name_col_width)}"
         f"{_build_sort_link('date', 'Modified', date_col_width)}"
         f"{_build_sort_link('size', 'Size', size_col_width)}"
-        "Actions\n"
+        "Actions</span>\n"
     )
     s.append(header_line)
-
     # Generate HTML for the current page
     for i, entry in enumerate(page_entries):
         _file = entry[0]
