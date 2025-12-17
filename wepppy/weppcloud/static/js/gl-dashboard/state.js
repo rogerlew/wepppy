@@ -60,6 +60,10 @@ const state = {
   rapSelectedYear: null,
   rapCumulativeMode: false,
 
+  climateYearlySelectedYear: null,
+  climateWaterYear: true,
+  climateStartMonth: 10,
+
   subcatchmentsGeoJson: null,
   graphHighlightedTopazId: null,
 

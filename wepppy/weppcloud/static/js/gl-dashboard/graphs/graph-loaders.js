@@ -34,6 +34,8 @@ const CUMULATIVE_MEASURE_MAP = {
   sediment_yield: { column: 'sediment_yield_kg', label: 'Sed Yield (t)', unit: 't', soil: true },
 };
 
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 export function createGraphLoaders(deps) {
   const {
     graphScenarios,
@@ -206,6 +208,23 @@ export function createGraphLoaders(deps) {
     return val;
   }
 
+  function climatePrecipColor(idx) {
+    const base = [236, 72, 153];
+    const fade = 0.4 + 0.6 * ((idx % 6) / 5);
+    return [Math.round(base[0] * fade), Math.round(base[1] * fade), Math.round(base[2] * fade), 255];
+  }
+
+  function climateTempColors(idx) {
+    const fade = 0.45 + 0.55 * ((idx % 6) / 5);
+    const tmin = [59, 130, 246];
+    const tmax = [239, 68, 68];
+    const scale = (c) => Math.round(c * fade);
+    return {
+      tmin: [scale(tmin[0]), scale(tmin[1]), scale(tmin[2]), 255],
+      tmax: [scale(tmax[0]), scale(tmax[1]), scale(tmax[2]), 255],
+    };
+  }
+
   function clampPercent(val) {
     if (!Number.isFinite(val)) return 0;
     const pct = Math.max(0, Math.min(100, val));
@@ -365,6 +384,125 @@ export function createGraphLoaders(deps) {
       source: 'omni',
       tooltipFormatter,
     };
+  }
+
+  async function buildClimateYearlyGraph(options = {}) {
+    const waterYear = options.waterYear !== undefined ? options.waterYear : state.climateWaterYear;
+    const startMonthRaw = options.startMonth || state.climateStartMonth || 10;
+    const startMonth = waterYear ? Math.min(12, Math.max(1, startMonthRaw)) : 1;
+    const monthLabels = [];
+    for (let i = 0; i < 12; i++) {
+      const idx = (startMonth - 1 + i) % 12;
+      monthLabels.push(MONTH_LABELS[idx]);
+    }
+
+    const payload = {
+      datasets: [{ path: 'climate/wepp_cli.parquet', alias: 'cli' }],
+      columns: [
+        'cli.year AS year',
+        'COALESCE(cli.month, cli.mo) AS month',
+        'cli.prcp AS prcp',
+        'cli.tmin AS tmin',
+        'cli.tmax AS tmax',
+      ],
+      order_by: ['year', 'month'],
+    };
+
+    try {
+      const result = await postQueryEngine(payload);
+      if (!result || !Array.isArray(result.records) || !result.records.length) {
+        return null;
+      }
+
+      const byYear = {};
+      for (const row of result.records) {
+        const year = Number(row.year);
+        const month = Number(row.month);
+        if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) continue;
+        const targetYear = waterYear
+          ? month >= startMonth
+            ? year + 1
+            : year
+          : year;
+        const monthIdx = waterYear ? (month - startMonth + 12) % 12 : month - 1;
+        const prcp = Number(row.prcp);
+        const tmin = Number(row.tmin);
+        const tmax = Number(row.tmax);
+        if (!byYear[targetYear]) {
+          byYear[targetYear] = {
+            precip: Array(12).fill(0),
+            tminSum: Array(12).fill(0),
+            tmaxSum: Array(12).fill(0),
+            counts: Array(12).fill(0),
+          };
+        }
+        if (Number.isFinite(prcp)) {
+          byYear[targetYear].precip[monthIdx] += prcp;
+        }
+        if (Number.isFinite(tmin)) {
+          byYear[targetYear].tminSum[monthIdx] += tmin;
+        }
+        if (Number.isFinite(tmax)) {
+          byYear[targetYear].tmaxSum[monthIdx] += tmax;
+        }
+        byYear[targetYear].counts[monthIdx] += 1;
+      }
+
+      const years = Object.keys(byYear)
+        .map((y) => Number(y))
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (!years.length) return null;
+
+      const precipSeries = {};
+      const tempSeries = {};
+      years.forEach((yr, idx) => {
+        const data = byYear[yr];
+        const monthly = [];
+        for (let i = 0; i < 12; i++) {
+          monthly.push(data.precip[i] || 0);
+        }
+        const counts = data.counts;
+        const tminAvg = data.tminSum.map((sum, i) => {
+          const c = counts[i];
+          return c > 0 ? sum / c : null;
+        });
+        const tmaxAvg = data.tmaxSum.map((sum, i) => {
+          const c = counts[i];
+          return c > 0 ? sum / c : null;
+        });
+        precipSeries[yr] = { values: monthly, color: climatePrecipColor(idx) };
+        const tempColors = climateTempColors(idx);
+        tempSeries[yr] = { tmin: tminAvg, tmax: tmaxAvg, colors: tempColors };
+      });
+
+      const selectedYear =
+        state.climateYearlySelectedYear && years.includes(state.climateYearlySelectedYear)
+          ? state.climateYearlySelectedYear
+          : years[years.length - 1];
+      state.climateYearlySelectedYear = selectedYear;
+
+      return {
+        type: 'climate-yearly',
+        title: 'Climate Yearly',
+        months: MONTH_LABELS,
+        months: monthLabels,
+        years,
+        precipSeries,
+        tempSeries,
+        selectedYear,
+        xLabel: 'Month',
+        yLabel: 'Climate',
+        source: 'climate_yearly',
+        currentYear: selectedYear,
+        waterYear,
+        startMonth,
+      };
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('gl-dashboard: failed to load climate yearly data', err);
+      return null;
+    }
   }
 
   async function buildHillSoilLossBoxplot() {
@@ -535,6 +673,7 @@ export function createGraphLoaders(deps) {
   }
 
   const graphLoadersMap = {
+    'climate-yearly': buildClimateYearlyGraph,
     'cumulative-contribution': buildCumulativeContributionGraph,
     'omni-soil-loss-hill': buildHillSoilLossBoxplot,
     'omni-soil-loss-chn': buildChannelSoilLossBoxplot,
@@ -550,6 +689,11 @@ export function createGraphLoaders(deps) {
         ? options.scenarioPaths.slice().sort().join('|')
         : (state.cumulativeScenarioSelections || []).slice().sort().join('|');
       return `${key}:${measureKey}:${scenarioKeys}`;
+    }
+    if (key === 'climate-yearly') {
+      const water = options && options.waterYear !== undefined ? options.waterYear : state.climateWaterYear;
+      const start = options && options.startMonth ? options.startMonth : state.climateStartMonth || 10;
+      return `${key}:${water ? 'wy' : 'cy'}:${start}`;
     }
     return key;
   }

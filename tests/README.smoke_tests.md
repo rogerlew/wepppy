@@ -69,7 +69,14 @@ wctl2 run-playwright \
   --workers 2 \
   --overrides general:dem_db=ned1/2016 \
   --report
+
+# GL dashboard regressions (uses run path to auto-derive GL_DASHBOARD_URL)
+wctl2 run-playwright \
+  --suite gl-dashboard-state-transitions \
+  --run-path https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/ \
+  --workers 1
 ```
+`--run-path` now auto-appends `/gl-dashboard` for that suite; you can also pass `--gl-dashboard-url` or `--gl-dashboard-path` directly. The wrapper defaults `PLAYWRIGHT_BROWSERS_PATH` to `./.playwright-browsers` (override via `--browsers-path` when sharing a cache).
 Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_CONFIG`, etc.) and support advanced toggles like `--headed`, `--run-root`, and `--playwright-args`. See `tools/wctl2/docs/playwright.SPEC.md` for the full option table.
 
 ### Manual env export (legacy)
@@ -115,6 +122,9 @@ Flags map directly to the smoke harness env vars (`SMOKE_BASE_URL`, `SMOKE_RUN_C
 - `run-page-smoke.spec.js`: Extended coverage that drives map tabs, toggles landuse modes, exercises StatusStream wiring, and injects stacktraces for multiple controllers.
 - `controller-regression.spec.js`: Drives the Landuse workflow end-to-end—simulates a successful job submission (job hint/link updates) and injects failure payloads to ensure stacktraces render correctly.
 - `mods-menu.spec.js`: Opens the header Mods dropdown, verifies each checkbox mirrors `Ron.mods`, ensures the TOC/preflight nav and controller placeholders stay synchronized, and toggles every mod off/on twice to confirm the project returns to its initial state.
+- `gl-dashboard-state-transitions.spec.js`: Basemap changes, RAP/WEPP/Climate graph toggles, cumulative contribution workflow, year-slider visibility rules, and RAP year updates.
+- `gl-dashboard-graph-modes.spec.js`: Graph mode/slider placement (WEPP split vs. Climate full), cumulative contribution stability, year-slider playback, graph-focus map hiding, and legend rendering (comparison diverging legend assertion skips when no scenario supports it).
+- `theme-metrics.spec.js`: Theme contrast/metrics sampling for WC theme system.
 
 All tests use request interception to mock 500 errors instead of backend failure injection. Console error checks filter expected bootstrap failures for optional controllers (debris_flow, treatments) that may not exist in all configs.
 

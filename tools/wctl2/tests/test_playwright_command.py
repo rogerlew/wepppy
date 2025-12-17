@@ -92,6 +92,49 @@ def test_run_path_disables_provisioning(monkeypatch: pytest.MonkeyPatch, temp_pr
     assert captured_env["SMOKE_CREATE_RUN"] == "false"
     assert captured_env["SMOKE_HEADLESS"] == "false"
     assert captured_env["SMOKE_BASE_URL"] == "http://localhost:9999/weppcloud"
+    assert captured_env["GL_DASHBOARD_URL"] == "http://localhost:9999/weppcloud/runs/demo/gl-dashboard"
+    assert captured_env["PLAYWRIGHT_BROWSERS_PATH"] == "./.playwright-browsers"
+
+
+def test_gl_dashboard_url_and_browsers_path(monkeypatch: pytest.MonkeyPatch, temp_project: Path) -> None:
+    runner = CliRunner()
+    captured_env: Dict[str, str] = {}
+    calls: List[List[str]] = []
+
+    def fake_ping(url: str) -> None:
+        return None
+
+    def fake_run(cmd, cwd=None, env=None):
+        calls.append(cmd)
+        captured_env.update(env or {})
+        return _DummyResult(returncode=0)
+
+    monkeypatch.setattr(playwright_cmd, "_ping_test_support", fake_ping)
+    monkeypatch.setattr(playwright_cmd.subprocess, "run", fake_run)
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "run-playwright",
+            "--base-url",
+            "http://localhost:8080/weppcloud",
+            "--gl-dashboard-url",
+            "http://example.test/weppcloud/runs/demo/gl-dashboard",
+            "--browsers-path",
+            "/tmp/pw-browsers",
+            "--no-create-run",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert calls
+    assert captured_env["GL_DASHBOARD_URL"] == "http://example.test/weppcloud/runs/demo/gl-dashboard"
+    assert captured_env["PLAYWRIGHT_BROWSERS_PATH"] == "/tmp/pw-browsers"
+    assert captured_env["SMOKE_CREATE_RUN"] == "false"
+    assert captured_env["SMOKE_BASE_URL"] == "http://localhost:8080/weppcloud"
+    assert "GL_DASHBOARD_PATH" not in captured_env
 
 
 def test_report_triggers_show_report_on_success(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
@@ -340,6 +383,8 @@ def test_profile_mode_sets_run_path(monkeypatch: pytest.MonkeyPatch, temp_projec
     assert env["SMOKE_RUN_PATH"] == f"{expected_base}/runs/profile;;tmp;;sandbox123/dev_cfg/"
     assert env["SMOKE_CREATE_RUN"] == "false"
     assert env["SMOKE_BASE_URL"] == expected_base
+    assert env["GL_DASHBOARD_URL"] == f"{expected_base}/runs/profile;;tmp;;sandbox123/dev_cfg/gl-dashboard"
+    assert env["PLAYWRIGHT_BROWSERS_PATH"] == "./.playwright-browsers"
     assert not (run_root / "sandbox123").exists()
 
 

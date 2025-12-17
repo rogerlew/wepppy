@@ -442,26 +442,37 @@ Graph minimized (controls disabled; slider hidden)
 #### Full
 **State:** `graphMode = 'full'`, `graphFocus = true`  
 **UI:** Graph focus hides the map viewport (graph stretches vertically)  
-**Trigger:** User clicks full, or Omni graph is activated (split button disabled while Omni focused)
+**Trigger:** User clicks full, or any of the following are active:
+- Omni graphs (`omni-*` sources) or Cumulative Contribution → always force full by default
+- Climate Yearly graph → full by default
+- Explicit user override via layout buttons
 
 #### Year Slider
-**Element:** `#gl-year-slider`  
-**Visibility:** `.is-visible` class added when RAP or WEPP Yearly layers active  
+**Element:** `#gl-year-slider` (single instance reused across contexts)  
+**Placement & Visibility (context-aware):**
+- **Climate Yearly** → slider is moved **inside** `#gl-graph-container`, pinned to the **bottom**; container gets `.has-bottom-slider` to add padding. Graph defaults to **full** pane.
+- **RAP / WEPP Yearly** → slider stays in the dedicated slot **above** the graph pane (`#gl-graph-year-slider`) at 100% width; never overlaps the graph header. Graph defaults to **split** view.
+- Hidden when no RAP/WEPP/Climate Yearly graph context is active.
+
 **Controls:**
 - Input: `#gl-year-slider-input` (range slider)
-- Min/Max Labels: `#gl-year-slider-min`, `#gl-year-slider-max`
-- Current Value: `#gl-year-slider-value`
-- Play Button: `#gl-year-slider-play` (▶ / ⏸)
+- Min/Max: `#gl-year-slider-min` / `#gl-year-slider-max`
+- Current: `#gl-year-slider-value`
+- Play: `#gl-year-slider-play` (▶ / ⏸)
 
 **Behavior:**
-- On input change → emit 'change' event → refresh layer data for selected year
-- Play mode: Advance 1 year every 3 seconds, loop back to start
-- Initialized from `ctx.climate.startYear` / `endYear`
-- Range reconfigured when RAP/WEPP Yearly metadata loads
+- On input change → emit `change` → refresh active RAP/WEPP Yearly layers and update the graph year.
+- Play mode: advance 1 year every 3 seconds; loops to min when exceeding max.
+- Range sourced from context metadata:
+  - Climate: `ctx.climate.startYear` / `endYear`
+  - RAP: `rapMetadata.years`
+  - WEPP Yearly: `weppYearlyMetadata.minYear` / `maxYear`
+- Graph mode re-syncs on context changes; in-flight graph loads are de-duped per key to prevent reload loops.
 
 **Integration:**
-- RAP: `rapSelectedYear` updates → fetches cumulative or band-specific summary
-- WEPP Yearly: `weppYearlySelectedYear` updates → queries parquet with year filter
+- RAP: updates `rapSelectedYear`, refreshes overlays, and updates graph year when source is `rap`.
+- WEPP Yearly: updates `weppYearlySelectedYear`, refreshes overlays, and updates graph year when source is `wepp_yearly`.
+- Climate Yearly: updates `climateYearlySelectedYear`, refreshes the climate graph, keeps full-pane focus.
 
 #### Legends Panel
 **Element:** `#gl-legends-panel`  
@@ -866,6 +877,40 @@ function deselectAllSubcatchmentOverlays() {
 - Y-axis: Cumulative measure.
 - Lines: One per scenario; Base always shown. Legend uses scenario names.
 - Hover: Shows scenario, cumulative value, and percent-of-area for the nearest point.
+
+#### Climate Yearly (precip + temp)
+**Purpose:** Visualize yearly climate by month with support for calendar year or water year start. Two stacked subplots share the month axis.  
+**Data Source:** `climate/wepp_cli.parquet` (queried via `query-engine`; supports base and scenario paths). Required columns: `year`, `month` (or `mo`), `prcp`, `tmin`, `tmax`.  
+**Controls (Graphs → Climate Yearly detail):**
+- Year mode toggle: `Calendar Year` or `Water Year` (default).  
+- `Water Year start month` select (default October, disabled when Calendar Year is selected).  
+- Year slider fixed in the graph pane; highlights the selected year.
+**Computation:**
+- Water Year: months are rotated to start at the selected month; months ≥ start month are assigned to `year+1` to group a WY. Calendar Year forces start month to January.  
+- Monthly precip: sum per month (no cumulative).  
+- Monthly temp: average Tmin/Tmax per month.  
+- Per-year series are color-coded (precip: magenta tones; Tmin: blue; Tmax: red). Highlighted year uses thicker strokes/opacity (shared with year slider).
+**Data Format:**
+```javascript
+{
+  type: 'climate-yearly',
+  months: ['Oct', 'Nov', ..., 'Sep'], // rotated when WY
+  years: [2000, 2001, ...],
+  precipSeries: { 2000: { values: [mm...], color }, ... },
+  tempSeries: { 2000: { tmin: [...], tmax: [...], colors: { tmin, tmax } }, ... },
+  selectedYear: 2023,
+  currentYear: 2023,
+  waterYear: true,
+  startMonth: 10,
+  source: 'climate_yearly'
+}
+```
+**Rendering:**
+- Top subplot: monthly precip lines for all years; Y auto-scales to max monthly total.  
+- Bottom subplot: monthly Tmin/Tmax lines for all years; Y auto-scales to min/max across both Tmin/Tmax.  
+- Month labels use 3-char abbreviations; rotated for Water Year.  
+- Legend shows highlighted year + Tmin/Tmax keys; year slider hover updates the highlight.  
+- Hover tooltip returns nearest month/year with `P`, `Tmin`, `Tmax` values.
 
 ### Graph Panel Modes
 

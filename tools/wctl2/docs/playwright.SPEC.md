@@ -92,6 +92,14 @@ Environment URLs can be overridden via:
 | `--playwright-args` | String | _(none)_ | Additional Playwright CLI arguments (quoted strings preserved via `shlex.split`) |
 | `--overrides` | Key=Value (repeatable) | _(none)_ | Converts to JSON and sets `SMOKE_RUN_OVERRIDES` (e.g., `--overrides general:dem_db=ned1/2016`) |
 
+#### GL dashboard helpers
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--gl-dashboard-url` | String | Derived from `--run-path` when present | Full GL dashboard URL passed to the suite (highest priority) |
+| `--gl-dashboard-path` | String | _(none)_ | Path appended to `SMOKE_BASE_URL` when URL is not set (for example `/runs/<id>/<config>/gl-dashboard`) |
+| `--browsers-path` | Path | `./.playwright-browsers` | Sets `PLAYWRIGHT_BROWSERS_PATH` before invoking Playwright |
+
 ### Environment Variable Mapping
 
 The command sets these environment variables before invoking `npm run test:playwright`:
@@ -106,6 +114,9 @@ The command sets these environment variables before invoking `npm run test:playw
 | `--run-root` | `SMOKE_RUN_ROOT` | `process.env.SMOKE_RUN_ROOT` |
 | `--headed` | `SMOKE_HEADLESS` | `process.env.SMOKE_HEADLESS !== 'false'` |
 | `--overrides` | `SMOKE_RUN_OVERRIDES` | `process.env.SMOKE_RUN_OVERRIDES` (JSON) |
+| `--gl-dashboard-url` / derived `--run-path` | `GL_DASHBOARD_URL` | `process.env.GL_DASHBOARD_URL` (preferred by gl-dashboard tests) |
+| `--gl-dashboard-path` | `GL_DASHBOARD_PATH` | `process.env.GL_DASHBOARD_PATH` (used with `SMOKE_BASE_URL` fallback) |
+| `--browsers-path` | `PLAYWRIGHT_BROWSERS_PATH` | `process.env.PLAYWRIGHT_BROWSERS_PATH` |
 
 ## Implementation Plan
 

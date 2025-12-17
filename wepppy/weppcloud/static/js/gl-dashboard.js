@@ -56,6 +56,7 @@
     BASE_LAYER_DEFS,
     GRAPH_DEFS,
     CUMULATIVE_MEASURE_OPTIONS,
+    MONTH_LABELS,
     createBasemapDefs,
     createColorScales,
   } = config;
@@ -72,6 +73,7 @@
   let graphModeButtons;
   let graphModeUserOverride = null;
   let graphControlsEnabled = true;
+  let activeGraphLoad = null; // { key, promise }
   // Use var to avoid TDZ issues if syncGraphModeForContext fires early during init.
   var lastGraphContextKey = null; // eslint-disable-line no-var
 
@@ -188,6 +190,9 @@
     'rapMetadata',
     'rapSelectedYear',
     'rapCumulativeMode',
+    'climateYearlySelectedYear',
+    'climateWaterYear',
+    'climateStartMonth',
     'subcatchmentsGeoJson',
     'subcatchmentLabelsVisible',
     'graphHighlightedTopazId',
@@ -776,8 +781,10 @@
   function setGraphCollapsed(collapsed, options = {}) {
     const { focusOnExpand = true } = options;
     if (!graphPanelEl) return;
+    const wasCollapsed = graphPanelEl.classList.contains('is-collapsed');
     graphPanelEl.classList.toggle('is-collapsed', collapsed);
-    if (typeof window.glDashboardGraphToggled === 'function') {
+    const changed = wasCollapsed !== collapsed;
+    if (changed && typeof window.glDashboardGraphToggled === 'function') {
       window.glDashboardGraphToggled(!graphPanelEl.classList.contains('is-collapsed'));
     }
     if (collapsed) {
@@ -898,6 +905,9 @@
   let cumulativeMeasureSelect = null;
   let cumulativeScenarioContainer = null;
   let cumulativeScenariosEl = null;
+  let climateControlsEl = null;
+  let climateModeRadios = null;
+  let climateStartMonthSelect = null;
   const legendContentEl = document.getElementById('gl-legends-content');
   const legendEmptyEl = document.getElementById('gl-legend-empty');
   glMainEl = document.querySelector('.gl-main');
@@ -930,6 +940,14 @@
     return { measureKey, scenarioPaths: selected };
   }
 
+  function getClimateGraphOptions() {
+    const waterYear = climateModeRadios ? climateModeRadios.querySelector('input[value="water"]')?.checked : getState().climateWaterYear;
+    const startMonth = waterYear
+      ? Number(climateStartMonthSelect ? climateStartMonthSelect.value : getState().climateStartMonth || 10)
+      : 1;
+    return { waterYear: !!waterYear, startMonth };
+  }
+
   function handleCumulativeMeasureChange(nextValue) {
     setValue('cumulativeMeasure', nextValue);
     if (activeGraphKey === 'cumulative-contribution') {
@@ -939,6 +957,36 @@
         keepFocus: true,
         graphOptions: options,
       });
+    }
+  }
+
+  function handleClimateModeChange(mode) {
+    const waterYear = mode === 'water';
+    const currentState = getState();
+    let nextStart = currentState.climateStartMonth || 10;
+    if (!waterYear) {
+      nextStart = 1;
+    } else if (!nextStart || nextStart === 1) {
+      nextStart = 10;
+    }
+    setValue('climateWaterYear', waterYear);
+    setValue('climateStartMonth', nextStart);
+    if (climateStartMonthSelect) {
+      climateStartMonthSelect.disabled = !waterYear;
+      climateStartMonthSelect.value = String(nextStart);
+    }
+    if (activeGraphKey === 'climate-yearly') {
+      const options = getClimateGraphOptions();
+      activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
+    }
+  }
+
+  function handleClimateStartMonthChange(val) {
+    const month = Math.min(12, Math.max(1, Number(val) || 10));
+    setValue('climateStartMonth', month);
+    if (activeGraphKey === 'climate-yearly') {
+      const options = getClimateGraphOptions();
+      activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
     }
   }
 
@@ -1012,6 +1060,81 @@
     });
   }
 
+  function renderClimateControls() {
+    if (!climateControlsEl) return;
+    climateControlsEl.innerHTML = '';
+    const monthLabelsSafe = Array.isArray(MONTH_LABELS) && MONTH_LABELS.length === 12
+      ? MONTH_LABELS
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const wrapper = document.createElement('div');
+    wrapper.className = 'gl-graph__options gl-wepp-stat__options';
+
+    const modeLabel = document.createElement('div');
+    modeLabel.textContent = 'Year Mode';
+    modeLabel.style.fontSize = '0.9rem';
+    modeLabel.style.color = 'var(--wc-color-text-muted)';
+    wrapper.appendChild(modeLabel);
+
+    const modeContainer = document.createElement('div');
+    modeContainer.style.display = 'flex';
+    modeContainer.style.gap = '0.75rem';
+    const modeCalendar = document.createElement('label');
+    modeCalendar.style.display = 'flex';
+    modeCalendar.style.alignItems = 'center';
+    modeCalendar.style.gap = '0.35rem';
+    const modeWater = modeCalendar.cloneNode(true);
+    const calendarInput = document.createElement('input');
+    calendarInput.type = 'radio';
+    calendarInput.name = 'climate-year-mode';
+    calendarInput.value = 'calendar';
+    calendarInput.checked = !getState().climateWaterYear;
+    calendarInput.addEventListener('change', () => handleClimateModeChange('calendar'));
+    const calendarSpan = document.createElement('span');
+    calendarSpan.textContent = 'Calendar Year';
+    modeCalendar.appendChild(calendarInput);
+    modeCalendar.appendChild(calendarSpan);
+
+    const waterInput = document.createElement('input');
+    waterInput.type = 'radio';
+    waterInput.name = 'climate-year-mode';
+    waterInput.value = 'water';
+    waterInput.checked = !!getState().climateWaterYear;
+    waterInput.addEventListener('change', () => handleClimateModeChange('water'));
+    const waterSpan = document.createElement('span');
+    waterSpan.textContent = 'Water Year';
+    modeWater.appendChild(waterInput);
+    modeWater.appendChild(waterSpan);
+
+    modeContainer.appendChild(modeCalendar);
+    modeContainer.appendChild(modeWater);
+    wrapper.appendChild(modeContainer);
+    climateModeRadios = modeContainer;
+
+    const startField = document.createElement('div');
+    startField.className = 'gl-graph__field';
+    const startLabel = document.createElement('label');
+    startLabel.textContent = 'Water Year start month';
+    startLabel.style.fontSize = '0.9rem';
+    startLabel.style.color = 'var(--wc-color-text-muted)';
+    climateStartMonthSelect = document.createElement('select');
+    for (let i = 1; i <= 12; i++) {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = monthLabelsSafe[i - 1] || `Month ${i}`;
+      climateStartMonthSelect.appendChild(opt);
+    }
+    const startVal = getState().climateStartMonth || 10;
+    climateStartMonthSelect.value = String(startVal);
+    climateStartMonthSelect.disabled = !getState().climateWaterYear;
+    climateStartMonthSelect.addEventListener('change', (e) => handleClimateStartMonthChange(e.target.value));
+
+    startField.appendChild(startLabel);
+    startField.appendChild(climateStartMonthSelect);
+    wrapper.appendChild(startField);
+
+    climateControlsEl.appendChild(wrapper);
+  }
+
   // ============================================================================
   // Year Slider Controller (generic, reusable for RAP and other features)
   // ============================================================================
@@ -1069,17 +1192,40 @@
       }
     },
 
-    show() {
-      if (this.el && !this._visible) {
-        this.el.classList.add('is-visible');
-        this._visible = true;
+    /**
+     * Show the year slider in the appropriate location based on context
+     * @param {string} context - 'climate' for Climate Yearly (bottom of graph), 
+     *                          'layer' for RAP/WEPP Yearly (above graph)
+     */
+    show(context = 'layer') {
+      if (!this.el) return;
+      const resolvedContext = context || 'layer';
+      this._context = resolvedContext;
+
+      const container = document.getElementById('gl-graph-container');
+      const slot = document.getElementById('gl-graph-year-slider');
+      const target = resolvedContext === 'climate' ? (container || slot) : (slot || container);
+
+      if (target && this.el.parentElement !== target) {
+        target.appendChild(this.el);
       }
+
+      if (container) {
+        container.classList.toggle('has-bottom-slider', resolvedContext === 'climate');
+      }
+
+      this.el.classList.add('is-visible');
+      this._visible = true;
     },
 
     hide() {
       if (this.el && this._visible) {
         this.el.classList.remove('is-visible');
         this._visible = false;
+      }
+      const container = document.getElementById('gl-graph-container');
+      if (container) {
+        container.classList.remove('has-bottom-slider');
       }
     },
 
@@ -1198,11 +1344,14 @@
     const st = getState();
     const rapActive = isRapActive(st);
     const yearlyActive = isWeppYearlyActive(st);
-    const graphCapable = rapActive || yearlyActive || !!st.activeGraphKey;
-    const contextKey = `${graphCapable ? 1 : 0}-${rapActive ? 1 : 0}-${yearlyActive ? 1 : 0}-${graphModeUserOverride || ''}-${st.activeGraphKey || ''}`;
-    if (contextKey === lastGraphContextKey) {
-      return;
-    }
+    const climateActive =
+      st.activeGraphKey === 'climate-yearly' ||
+      (window.glDashboardTimeseriesGraph && window.glDashboardTimeseriesGraph._source === 'climate_yearly');
+    const omniActive =
+      (st.activeGraphKey && (st.activeGraphKey === 'cumulative-contribution' || st.activeGraphKey.startsWith('omni'))) ||
+      (window.glDashboardTimeseriesGraph && window.glDashboardTimeseriesGraph._source === 'omni');
+    const graphCapable = rapActive || yearlyActive || climateActive || !!st.activeGraphKey;
+    const contextKey = `${graphCapable ? 1 : 0}-${rapActive ? 1 : 0}-${yearlyActive ? 1 : 0}-${climateActive ? 1 : 0}-${omniActive ? 1 : 0}-${graphModeUserOverride || ''}-${st.activeGraphKey || ''}`;
     lastGraphContextKey = contextKey;
 
     if (!graphCapable) {
@@ -1222,18 +1371,33 @@
     }
 
     // If a non-graph context (e.g., map-only) left the user in a minimized override,
-    // clear it when a graph-capable RAP/WEPP Yearly context becomes active so we auto-open split.
-    if (graphModeUserOverride === 'minimized' && (rapActive || yearlyActive)) {
+    // clear it when a graph-capable RAP/WEPP/Climate context becomes active so we auto-open full view.
+    if (graphModeUserOverride === 'minimized' && (rapActive || yearlyActive || climateActive)) {
       graphModeUserOverride = null;
     }
 
     setGraphControlsEnabled(true);
-    const targetMode = graphModeUserOverride || 'split';
+    const defaultMode = (() => {
+      if (graphModeUserOverride) return graphModeUserOverride;
+      if (omniActive) return 'full';
+      if (climateActive) return 'full';
+      if (rapActive || yearlyActive) return 'split';
+      if (st.activeGraphKey) return 'full';
+      return 'split';
+    })();
+    const targetMode = graphModeUserOverride || defaultMode;
     setGraphMode(targetMode, { source: graphModeUserOverride ? 'user' : 'auto' });
 
-    // Year slider visible only for RAP or WEPP Yearly contexts
-    if (rapActive || yearlyActive) {
-      yearSlider.show();
+    // Year slider visible for RAP, WEPP Yearly, and Climate Yearly contexts
+    if (rapActive || yearlyActive || climateActive) {
+      // Climate Yearly: slider at bottom of graph; RAP/WEPP Yearly: slider above graph
+      const sliderContext = climateActive ? 'climate' : 'layer';
+      yearSlider.show(sliderContext);
+      // If climate is selected but the graph data isn't showing climate yet, force refresh
+      if (climateActive && activeGraphKey === 'climate-yearly' && (!window.glDashboardTimeseriesGraph || window.glDashboardTimeseriesGraph._source !== 'climate_yearly')) {
+        const options = getClimateGraphOptions();
+        activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
+      }
     } else {
       yearSlider.hide();
     }
@@ -1242,6 +1406,24 @@
   async function handleGraphPanelToggle(visible) {
     if (!visible) {
       setGraphFocus(false);
+      return;
+    }
+    if (activeGraphLoad && activeGraphLoad.key === activeGraphKey) {
+      await activeGraphLoad.promise.catch(() => {});
+      return;
+    }
+    if (activeGraphKey) {
+      const graphOptions =
+        activeGraphKey === 'cumulative-contribution'
+          ? getCumulativeGraphOptions()
+          : activeGraphKey === 'climate-yearly'
+            ? getClimateGraphOptions()
+            : undefined;
+      await activateGraphItem(activeGraphKey, {
+        keepFocus: graphFocus,
+        graphOptions,
+        force: activeGraphKey === 'climate-yearly',
+      });
       return;
     }
     const hasRapGraph = rapCumulativeMode || rapLayers.some((l) => l.visible);
@@ -1507,7 +1689,7 @@
     }
     setValue('weppYearlySelectedYear', weppYearlySelectedYear);
     yearSlider.setRange(minYear, maxYear, weppYearlySelectedYear);
-    yearSlider.show();
+    yearSlider.show('layer');
     await refreshWeppYearlyData();
   }
 
@@ -1515,11 +1697,11 @@
     if (!graphListEl) return;
     graphListEl.innerHTML = '';
     let rendered = 0;
-    graphDefs.forEach((group, idx) => {
-      const details = document.createElement('details');
-      details.className = 'gl-layer-details';
-      const hasActive = group.items.some((i) => i.key === activeGraphKey);
-      details.open = idx === 0 || hasActive;
+      graphDefs.forEach((group, idx) => {
+        const details = document.createElement('details');
+        details.className = 'gl-layer-details';
+        const hasActive = group.items.some((i) => i.key === activeGraphKey);
+        details.open = idx === 0 || hasActive;
 
       const summary = document.createElement('summary');
       summary.className = 'gl-layer-group';
@@ -1529,23 +1711,30 @@
       const itemList = document.createElement('ul');
       itemList.className = 'gl-layer-items';
 
-      group.items.forEach((item) => {
-        const li = document.createElement('li');
-        li.className = 'gl-layer-item';
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.name = 'graph-selection';
-        input.id = `graph-${item.key}`;
-        input.checked = activeGraphKey === item.key;
-        input.addEventListener('change', async () => {
-          if (input.checked) {
-            const graphOptions = item.key === 'cumulative-contribution' ? getCumulativeGraphOptions() : undefined;
-            await activateGraphItem(item.key, { graphOptions });
-          }
-        });
-        const label = document.createElement('label');
-        label.setAttribute('for', input.id);
-        label.innerHTML = `<span class="gl-layer-name">${item.label}</span>`;
+        group.items.forEach((item) => {
+          const li = document.createElement('li');
+          li.className = 'gl-layer-item';
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = 'graph-selection';
+          input.id = `graph-${item.key}`;
+          input.checked = activeGraphKey === item.key;
+          input.addEventListener('change', async () => {
+            if (input.checked) {
+              activeGraphKey = item.key;
+              setValue('activeGraphKey', item.key);
+              let graphOptions;
+              if (item.key === 'cumulative-contribution') {
+                graphOptions = getCumulativeGraphOptions();
+              } else if (item.key === 'climate-yearly') {
+                graphOptions = getClimateGraphOptions();
+              }
+              await activateGraphItem(item.key, { graphOptions, force: item.key === 'climate-yearly', keepFocus: item.key === 'climate-yearly' });
+            }
+          });
+          const label = document.createElement('label');
+          label.setAttribute('for', input.id);
+          label.innerHTML = `<span class="gl-layer-name">${item.label}</span>`;
         li.appendChild(input);
         li.appendChild(label);
         itemList.appendChild(li);
@@ -1584,6 +1773,13 @@
         details.appendChild(toolbar);
         renderCumulativeMeasureSelector();
         renderCumulativeScenarioSelector();
+      }
+      if (group.key === 'climate') {
+        const optionsPanel = document.createElement('div');
+        optionsPanel.className = 'gl-graph__toolbar';
+        climateControlsEl = optionsPanel;
+        renderClimateControls();
+        details.appendChild(optionsPanel);
       }
 
       graphListEl.appendChild(details);
@@ -3154,8 +3350,6 @@
       return;
     }
     timeseriesGraph.setData(data);
-    activeGraphKey = null;
-    setValue('activeGraphKey', null);
     syncGraphModeForContext();
   }
 
@@ -3208,6 +3402,13 @@
       needsApply = true;
       if (timeseriesGraph._source === 'wepp_yearly') {
         timeseriesGraph.setCurrentYear(weppYearlySelectedYear);
+      }
+    }
+    const activeClimate = activeGraphKey === 'climate-yearly' || timeseriesGraph._source === 'climate_yearly';
+    if (activeClimate) {
+      setValue('climateYearlySelectedYear', year);
+      if (timeseriesGraph._source === 'climate_yearly') {
+        timeseriesGraph.setCurrentYear(year);
       }
     }
     if (needsApply) {
@@ -4050,19 +4251,32 @@
     if (rapCumulativeMode) {
       return;
     }
+    if (activeGraphLoad && activeGraphLoad.key === key && !options.force) {
+      return activeGraphLoad.promise;
+    }
     activeGraphKey = key;
     const keepFocus = options.keepFocus || false;
     const graphOptions = options.graphOptions;
     ensureGraphExpanded();
-    try {
+    const loadPromise = (async () => {
       const data = await loadGraphDataset(key, { force: options.force, options: graphOptions });
       if (data) {
         // Respect caller override; otherwise only focus full-pane for omni graphs.
         if (!keepFocus) {
-          setGraphFocus(data.source === 'omni');
+          setGraphFocus(data.source === 'omni' || data.source === 'climate_yearly');
         }
         timeseriesGraph.setData(data);
         if (graphEmptyEl) graphEmptyEl.style.display = 'none';
+        if (data.source === 'climate_yearly' && Array.isArray(data.years) && data.years.length) {
+          const minYear = Math.min(...data.years);
+          const maxYear = Math.max(...data.years);
+          const selYear =
+            data.selectedYear != null && Number.isFinite(data.selectedYear) ? data.selectedYear : maxYear;
+          setValue('climateYearlySelectedYear', selYear);
+          yearSlider.setRange(minYear, maxYear, selYear);
+          yearSlider.show('climate');
+          setGraphMode('full', { source: 'auto' });
+        }
       } else {
         timeseriesGraph.hide();
         if (graphEmptyEl) {
@@ -4071,12 +4285,20 @@
         }
       }
       syncGraphModeForContext();
+    })();
+    activeGraphLoad = { key, promise: loadPromise };
+    try {
+      await loadPromise;
     } catch (err) {
       console.warn('gl-dashboard: failed to activate graph', err);
       timeseriesGraph.hide();
       if (graphEmptyEl) {
         graphEmptyEl.textContent = 'Unable to load graph data.';
         graphEmptyEl.style.display = '';
+      }
+    } finally {
+      if (activeGraphLoad && activeGraphLoad.promise === loadPromise) {
+        activeGraphLoad = null;
       }
     }
   }

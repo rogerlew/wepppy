@@ -391,10 +391,57 @@
   .gl-graph__container {
     position: relative;
   }
+  .gl-graph__container.has-bottom-slider {
+    padding-bottom: 4.25rem;
+  }
   #gl-graph-canvas {
     width: 100%;
     height: 520px;
     display: block;
+  }
+  /* Year slider slot - sits above graph pane for RAP/WEPP Yearly */
+  .gl-graph__year-slider {
+    display: none;
+    position: relative;
+    width: 100%;
+    margin: 0 0 0.5rem;
+    padding: 0 0.25rem 0.5rem;
+  }
+  .gl-graph__year-slider:has(.is-visible) {
+    display: block;
+  }
+  /* When year slider is inside graph panel slot, reset absolute positioning */
+  .gl-graph__year-slider .gl-year-slider {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    box-sizing: border-box;
+    background: color-mix(in srgb, var(--wc-color-surface) 95%, transparent);
+    border: 1px solid var(--wc-color-border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(8px);
+    box-shadow: var(--wc-shadow-sm);
+  }
+  .gl-graph__year-slider .gl-year-slider.is-visible {
+    display: flex;
+  }
+  /* Climate Yearly context: year slider at bottom of container */
+  .gl-graph__container .gl-year-slider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--wc-color-border);
+    border-bottom: none;
+    background: color-mix(in srgb, var(--wc-color-surface) 95%, transparent);
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+  .gl-graph__container .gl-year-slider.is-visible {
+    display: flex;
   }
   .gl-graph__tooltip {
     position: absolute;
@@ -796,9 +843,9 @@
       </div>
     </div>
 
-    <div class="gl-viewport">
-      <div id="gl-dashboard-map" role="presentation"></div>
-      <!-- Floating legends panel -->
+  <div class="gl-viewport">
+    <div id="gl-dashboard-map" role="presentation"></div>
+    <!-- Floating legends panel -->
       <div class="gl-legends-panel" id="gl-legends-panel">
         <div class="gl-legends-panel__header" id="gl-legends-toggle">
           <h4 class="gl-legends-panel__title">Legend</h4>
@@ -821,6 +868,7 @@
       </div>
     </div>
 
+    <div class="gl-graph__year-slider" id="gl-graph-year-slider"></div>
     <div class="gl-graph is-collapsed" id="gl-graph">
       <div class="gl-graph__header">
         <h4 style="margin:0;color:var(--wc-color-text);">Graph</h4>

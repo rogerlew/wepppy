@@ -37,6 +37,8 @@ export const SOIL_MEASURES = [
   'event_tdet',
 ];
 
+export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 export const DEFAULT_GRAPH_PADDING = { top: 32, right: 160, bottom: 80, left: 100 };
 
 export const CUMULATIVE_MEASURE_OPTIONS = [
@@ -82,6 +84,11 @@ export const LAYER_REGISTRY = {
 };
 
 export const GRAPH_DEFS = [
+  {
+    key: 'climate',
+    title: 'Climate Yearly',
+    items: [{ key: 'climate-yearly', label: 'Climate Yearly (precip + temp)', type: 'line' }],
+  },
   {
     key: 'cumulative',
     title: 'Cumulative Contribution',

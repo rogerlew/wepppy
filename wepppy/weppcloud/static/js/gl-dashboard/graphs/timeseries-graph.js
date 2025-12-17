@@ -174,6 +174,9 @@ export function createTimeseriesGraph(options = {}) {
     render() {
       if (!this.ctx2d || !this._data) return;
       const type = this._data.type || 'line';
+      if (type === 'climate-yearly') {
+        return this._renderClimateYearly();
+      }
       if (type === 'boxplot') {
         return this._renderBoxplot();
       }
@@ -186,6 +189,9 @@ export function createTimeseriesGraph(options = {}) {
     _hasData(data) {
       if (!data) return false;
       const type = data.type || 'line';
+      if (type === 'climate-yearly') {
+        return data.months && data.months.length && data.years && Object.keys(data.precipSeries || {}).length;
+      }
       if (type === 'boxplot') {
         return Array.isArray(data.series) && data.series.some((s) => s && s.stats);
       }
@@ -606,6 +612,254 @@ export function createTimeseriesGraph(options = {}) {
       }
     },
 
+    _renderClimateYearly() {
+      if (!this.ctx2d || !this._data || !Array.isArray(this._data.months)) return;
+      const months = this._data.months;
+      const precipSeries = this._data.precipSeries || {};
+      const tempSeries = this._data.tempSeries || {};
+      const years = this._data.years || [];
+      if (!months.length || !years.length) return;
+      const theme = this._getTheme();
+      const ctx = this.ctx2d;
+      const dpr = window.devicePixelRatio || 1;
+      const width = this.canvas.width / dpr;
+      const height = this.canvas.height / dpr;
+      const pad = { ...this._padding, right: Math.max(this._padding.right, 160) };
+      const plotWidth = width - pad.left - pad.right;
+      const plotHeight = height - pad.top - pad.bottom - 24;
+      const gap = 48;
+      const precipHeight = plotHeight * 0.55;
+      const tempHeight = plotHeight - precipHeight - gap;
+      const precipBounds = {
+        left: pad.left,
+        right: width - pad.right,
+        top: pad.top,
+        bottom: pad.top + precipHeight,
+      };
+      const tempBounds = {
+        left: pad.left,
+        right: width - pad.right,
+        top: pad.top + precipHeight + gap,
+        bottom: pad.top + precipHeight + gap + tempHeight,
+      };
+
+      ctx.clearRect(0, 0, width, height);
+      const xScale = (idx) => {
+        if (months.length === 1) return pad.left + plotWidth / 2;
+        return pad.left + (idx / (months.length - 1)) * plotWidth;
+      };
+
+      // Precip axes
+      let precipMax = 0;
+      Object.keys(precipSeries).forEach((yr) => {
+        const vals = precipSeries[yr].values || [];
+        vals.forEach((v) => {
+          if (v != null && isFinite(v) && v > precipMax) precipMax = v;
+        });
+      });
+      const precipTicks = this._computeTicks(0, precipMax || 1, 5, false);
+      const yScalePrecip = (v) => {
+        const maxVal = precipTicks[precipTicks.length - 1] || 1;
+        return (
+          precipBounds.bottom - ((v || 0) / (maxVal || 1)) * (precipBounds.bottom - precipBounds.top)
+        );
+      };
+
+      ctx.strokeStyle = theme.axis;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(precipBounds.left, precipBounds.top);
+      ctx.lineTo(precipBounds.left, precipBounds.bottom);
+      ctx.lineTo(precipBounds.right, precipBounds.bottom);
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = theme.muted;
+      ctx.font = '12px sans-serif';
+      months.forEach((m, idx) => {
+        const x = xScale(idx);
+        ctx.beginPath();
+        ctx.moveTo(x, precipBounds.bottom);
+        ctx.lineTo(x, precipBounds.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(m, x, precipBounds.bottom + 6);
+      });
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.font = '12px sans-serif';
+      precipTicks.forEach((tick) => {
+        const y = yScalePrecip(tick);
+        ctx.beginPath();
+        ctx.moveTo(precipBounds.left - 4, y);
+        ctx.lineTo(precipBounds.left, y);
+        ctx.stroke();
+        ctx.fillText(tick.toFixed(0), precipBounds.left - 6, y);
+        ctx.strokeStyle = theme.grid;
+        ctx.beginPath();
+        ctx.moveTo(precipBounds.left, y);
+        ctx.lineTo(precipBounds.right, y);
+        ctx.stroke();
+        ctx.strokeStyle = theme.axis;
+      });
+
+      // Temperature panel
+      let tempMin = Infinity;
+      let tempMax = -Infinity;
+      Object.keys(tempSeries).forEach((yr) => {
+        const entry = tempSeries[yr];
+        (entry.tmin || []).forEach((v) => {
+          if (v != null && isFinite(v)) tempMin = Math.min(tempMin, v);
+        });
+        (entry.tmax || []).forEach((v) => {
+          if (v != null && isFinite(v)) tempMax = Math.max(tempMax, v);
+        });
+      });
+      if (!isFinite(tempMin)) tempMin = 0;
+      if (!isFinite(tempMax)) tempMax = 1;
+      const tempTicks = this._computeTicks(tempMin, tempMax, 5, false);
+      const yScaleTemp = (v) => {
+        const minVal = tempTicks[0];
+        const maxVal = tempTicks[tempTicks.length - 1] || minVal + 1;
+        const span = maxVal - minVal || 1;
+        return (
+          tempBounds.bottom - ((v - minVal) / span) * (tempBounds.bottom - tempBounds.top)
+        );
+      };
+
+      ctx.strokeStyle = theme.axis;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(tempBounds.left, tempBounds.top);
+      ctx.lineTo(tempBounds.left, tempBounds.bottom);
+      ctx.lineTo(tempBounds.right, tempBounds.bottom);
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = theme.muted;
+      ctx.font = '12px sans-serif';
+      months.forEach((m, idx) => {
+        const x = xScale(idx);
+        ctx.beginPath();
+        ctx.moveTo(x, tempBounds.bottom);
+        ctx.lineTo(x, tempBounds.bottom + 4);
+        ctx.stroke();
+        ctx.fillText(m, x, tempBounds.bottom + 6);
+      });
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.font = '12px sans-serif';
+      tempTicks.forEach((tick) => {
+        const y = yScaleTemp(tick);
+        ctx.beginPath();
+        ctx.moveTo(tempBounds.left - 4, y);
+        ctx.lineTo(tempBounds.left, y);
+        ctx.stroke();
+        ctx.fillText(tick.toFixed(1), tempBounds.left - 6, y);
+        ctx.strokeStyle = theme.grid;
+        ctx.beginPath();
+        ctx.moveTo(tempBounds.left, y);
+        ctx.lineTo(tempBounds.right, y);
+        ctx.stroke();
+        ctx.strokeStyle = theme.axis;
+      });
+
+      const selectedYear = this._currentYear || this._data.selectedYear || years[years.length - 1];
+      const highlightWidth = this._highlightWidth;
+      const baseWidth = this._lineWidth;
+      const drawClimateLine = (vals, color, highlighted, bounds) => {
+        ctx.strokeStyle = highlighted
+          ? `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1)`
+          : `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.35)`;
+        ctx.lineWidth = highlighted ? highlightWidth : baseWidth;
+        ctx.beginPath();
+        let started = false;
+        vals.forEach((v, idx) => {
+          if (v == null || !isFinite(v)) return;
+          const x = xScale(idx);
+          const y = bounds === 'precip' ? yScalePrecip(v) : yScaleTemp(v);
+          if (!started) {
+            ctx.moveTo(x, y);
+            started = true;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.stroke();
+      };
+
+      Object.keys(precipSeries).forEach((yr) => {
+        const entry = precipSeries[yr];
+        if (!entry || !Array.isArray(entry.values)) return;
+        const highlighted = Number(yr) === Number(selectedYear);
+        drawClimateLine(entry.values, entry.color || [236, 72, 153, 255], highlighted, 'precip');
+      });
+
+      ctx.fillStyle = theme.muted;
+      ctx.font = '13px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('Monthly Precip (mm)', pad.left, precipBounds.top - 8);
+
+      Object.keys(tempSeries).forEach((yr) => {
+        const entry = tempSeries[yr];
+        if (!entry) return;
+        const highlighted = Number(yr) === Number(selectedYear);
+        if (Array.isArray(entry.tmin)) {
+          drawClimateLine(entry.tmin, (entry.colors && entry.colors.tmin) || [59, 130, 246, 255], highlighted, 'temp');
+        }
+        if (Array.isArray(entry.tmax)) {
+          drawClimateLine(entry.tmax, (entry.colors && entry.colors.tmax) || [239, 68, 68, 255], highlighted, 'temp');
+        }
+      });
+
+      ctx.fillStyle = theme.muted;
+      ctx.font = '13px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('Temperature (°C)', pad.left, tempBounds.top - 8);
+
+      // Legend for selected year
+      const legendX = width - pad.right + 10;
+      let legendY = pad.top;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = '12px sans-serif';
+      ctx.fillStyle = theme.text;
+      ctx.fillText('Highlighted Year', legendX, legendY);
+      legendY += 16;
+      const selColorPrecip = precipSeries[selectedYear] ? precipSeries[selectedYear].color : [236, 72, 153, 255];
+      ctx.fillStyle = `rgba(${selColorPrecip[0]}, ${selColorPrecip[1]}, ${selColorPrecip[2]}, 0.9)`;
+      ctx.fillRect(legendX, legendY, 14, 4);
+      ctx.fillStyle = theme.text;
+      ctx.fillText(String(selectedYear || ''), legendX + 20, legendY + 2);
+      legendY += 16;
+      ctx.fillStyle = `rgba(59, 130, 246, 0.9)`;
+      ctx.fillRect(legendX, legendY, 14, 4);
+      ctx.fillStyle = theme.text;
+      ctx.fillText('Tmin', legendX + 20, legendY + 2);
+      legendY += 16;
+      ctx.fillStyle = `rgba(239, 68, 68, 0.9)`;
+      ctx.fillRect(legendX, legendY, 14, 4);
+      ctx.fillStyle = theme.text;
+      ctx.fillText('Tmax', legendX + 20, legendY + 2);
+
+      this._climateContext = {
+        months,
+        years,
+        precipSeries,
+        tempSeries,
+        xScale,
+        yScalePrecip,
+        yScaleTemp,
+        precipBounds,
+        tempBounds,
+      };
+    },
+
     _drawLine(ctx, years, seriesData, xScale, yScale, highlighted) {
       const values = seriesData.values;
       const color = seriesData.color || [100, 150, 200, 180];
@@ -655,11 +909,97 @@ export function createTimeseriesGraph(options = {}) {
     },
 
     _onCanvasHover(e) {
-      if (!this._data || (this._data.type && this._data.type !== 'line')) return;
-      if (!this._xScale || !this._plotBounds) return;
+      if (!this._data) return;
+      const type = this._data.type || 'line';
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+
+      if (type === 'climate-yearly') {
+        const ctx = this._climateContext;
+        if (!ctx || !ctx.xScale) return;
+        const boundsLeft = Math.min(ctx.precipBounds.left, ctx.tempBounds.left);
+        const boundsRight = Math.max(ctx.precipBounds.right, ctx.tempBounds.right);
+        const boundsTop = Math.min(ctx.precipBounds.top, ctx.tempBounds.top);
+        const boundsBottom = Math.max(ctx.precipBounds.bottom, ctx.tempBounds.bottom);
+        if (x < boundsLeft || x > boundsRight || y < boundsTop || y > boundsBottom) {
+          this._onCanvasLeave();
+          return;
+        }
+        let best = null;
+        ctx.months.forEach((_, idx) => {
+          const px = ctx.xScale(idx);
+          ctx.years.forEach((yr) => {
+            const precipVal =
+              ctx.precipSeries[yr] && Array.isArray(ctx.precipSeries[yr].values)
+                ? ctx.precipSeries[yr].values[idx]
+                : null;
+            if (precipVal != null && isFinite(precipVal)) {
+              const py = ctx.yScalePrecip(precipVal);
+              const dist = Math.hypot(px - x, py - y);
+              if (!best || dist < best.dist) {
+                best = { dist, yr, idx, anchorX: px, anchorY: py };
+              }
+            }
+            const tminVal =
+              ctx.tempSeries[yr] && Array.isArray(ctx.tempSeries[yr].tmin)
+                ? ctx.tempSeries[yr].tmin[idx]
+                : null;
+            if (tminVal != null && isFinite(tminVal)) {
+              const ty = ctx.yScaleTemp(tminVal);
+              const dist = Math.hypot(px - x, ty - y);
+              if (!best || dist < best.dist) {
+                best = { dist, yr, idx, anchorX: px, anchorY: ty };
+              }
+            }
+            const tmaxVal =
+              ctx.tempSeries[yr] && Array.isArray(ctx.tempSeries[yr].tmax)
+                ? ctx.tempSeries[yr].tmax[idx]
+                : null;
+            if (tmaxVal != null && isFinite(tmaxVal)) {
+              const ty = ctx.yScaleTemp(tmaxVal);
+              const dist = Math.hypot(px - x, ty - y);
+              if (!best || dist < best.dist) {
+                best = { dist, yr, idx, anchorX: px, anchorY: ty };
+              }
+            }
+          });
+        });
+
+        if (!best || best.dist > 24) {
+          this._onCanvasLeave();
+          return;
+        }
+        const year = best.yr;
+        const monthLabel = ctx.months[best.idx] || '';
+        const precipVal =
+          ctx.precipSeries[year] && Array.isArray(ctx.precipSeries[year].values)
+            ? ctx.precipSeries[year].values[best.idx]
+            : null;
+        const tminVal =
+          ctx.tempSeries[year] && Array.isArray(ctx.tempSeries[year].tmin)
+            ? ctx.tempSeries[year].tmin[best.idx]
+            : null;
+        const tmaxVal =
+          ctx.tempSeries[year] && Array.isArray(ctx.tempSeries[year].tmax)
+            ? ctx.tempSeries[year].tmax[best.idx]
+            : null;
+
+        if (this.tooltipEl) {
+          this.tooltipEl.style.display = 'block';
+          this.tooltipEl.style.left = `${best.anchorX + 12}px`;
+          this.tooltipEl.style.top = `${best.anchorY - 10}px`;
+          const parts = [`${monthLabel} ${year}`];
+          if (precipVal != null && isFinite(precipVal)) parts.push(`P: ${precipVal.toFixed(1)} mm`);
+          if (tminVal != null && isFinite(tminVal)) parts.push(`Tmin: ${tminVal.toFixed(1)}°C`);
+          if (tmaxVal != null && isFinite(tmaxVal)) parts.push(`Tmax: ${tmaxVal.toFixed(1)}°C`);
+          this.tooltipEl.textContent = parts.join(' | ');
+        }
+        return;
+      }
+
+      if (type && type !== 'line') return;
+      if (!this._xScale || !this._plotBounds) return;
       const bounds = this._plotBounds;
 
       if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) {

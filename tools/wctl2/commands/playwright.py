@@ -30,6 +30,7 @@ _ENV_URLS = {
 
 DEFAULT_PROJECT = "runs0"
 DEFAULT_REPORT_PATH = "playwright-report"
+DEFAULT_BROWSERS_PATH = "./.playwright-browsers"
 
 SUITE_PATTERNS: dict[str, Optional[str]] = {
     "full": None,
@@ -181,6 +182,49 @@ def _cleanup_cloned_run(run_dir: Path, keep_run: bool) -> None:
 def _build_run_path(base_url: str, run_id: str, config_slug: str) -> str:
     base = base_url.rstrip("/")
     return f"{base}/runs/{run_id}/{config_slug}/"
+
+
+def _append_path(url: str, suffix: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    base_path = parsed.path or ""
+    normalized = suffix.lstrip("/")
+
+    if base_path.rstrip("/").endswith(normalized):
+        final_path = base_path if base_path.endswith("/") else f"{base_path}/"
+    else:
+        prefix = base_path if base_path.endswith("/") else f"{base_path}/"
+        final_path = f"{prefix}{normalized}"
+
+    return urllib.parse.urlunparse(parsed._replace(path=final_path))
+
+
+def _resolve_gl_dashboard_targets(
+    base_url: str,
+    run_path: Optional[str],
+    explicit_url: Optional[str],
+    explicit_path: Optional[str],
+) -> tuple[Optional[str], Optional[str]]:
+    """
+    Determine GL dashboard URL/path for the Playwright suite.
+
+    Priority:
+    1) explicit_url
+    2) run_path + /gl-dashboard
+    3) explicit_path appended to base_url
+    """
+
+    path_value = explicit_path.strip() if explicit_path else None
+    url_value = explicit_url.strip() if explicit_url else None
+
+    candidate_run_path = run_path.strip() if run_path else None
+
+    if not url_value and candidate_run_path:
+        url_value = _append_path(candidate_run_path, "gl-dashboard")
+
+    if not url_value and path_value:
+        url_value = _append_path(base_url, path_value)
+
+    return url_value, path_value
 
 
 def _ping_test_support(base_url: str) -> None:
@@ -335,6 +379,21 @@ def register(app: typer.Typer) -> None:
             "--overrides",
             help="Repeatable key=value overrides converted to SMOKE_RUN_OVERRIDES JSON.",
         ),
+        gl_dashboard_url: Optional[str] = typer.Option(
+            None,
+            "--gl-dashboard-url",
+            help="Full GL dashboard URL (overrides derived run path).",
+        ),
+        gl_dashboard_path: Optional[str] = typer.Option(
+            None,
+            "--gl-dashboard-path",
+            help="Path to GL dashboard appended to SMOKE_BASE_URL when URL is not set (e.g., /runs/<id>/<config>/gl-dashboard).",
+        ),
+        browsers_path: Optional[str] = typer.Option(
+            None,
+            "--browsers-path",
+            help="PLAYWRIGHT_BROWSERS_PATH override (defaults to ./.playwright-browsers under static-src).",
+        ),
     ) -> None:
         """
         Run Playwright smoke tests against WEPPcloud environments.
@@ -352,15 +411,8 @@ def register(app: typer.Typer) -> None:
             typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
             raise typer.Exit(1)
 
-        if suite_value not in SUITE_PATTERNS:
-            typer.echo(f"[wctl2] Unknown suite preset '{suite}'.", err=True)
-            raise typer.Exit(1)
-
         suite_pattern = SUITE_PATTERNS[suite_value]
         overrides_json = _build_overrides_json(overrides)
-
-        resolved_url = _resolve_base_url(context, effective_env, base_url)
-        _ping_test_support(resolved_url)
 
         profile_slug = profile.strip() if profile else None
         if profile_slug and overrides_json:
@@ -370,7 +422,12 @@ def register(app: typer.Typer) -> None:
         report_output_path = report_path or DEFAULT_REPORT_PATH
         report_requested = report or report_path is not None
 
+        current_run_path = run_path
         env_vars = dict(context.environment)
+        if browsers_path:
+            env_vars["PLAYWRIGHT_BROWSERS_PATH"] = browsers_path
+        else:
+            env_vars.setdefault("PLAYWRIGHT_BROWSERS_PATH", DEFAULT_BROWSERS_PATH)
         env_vars["SMOKE_BASE_URL"] = resolved_url
         env_vars["SMOKE_RUN_CONFIG"] = config
         env_vars["SMOKE_HEADLESS"] = "false" if headed else "true"
@@ -385,6 +442,8 @@ def register(app: typer.Typer) -> None:
             env_vars["SMOKE_RUN_ROOT"] = run_root
         if overrides_json:
             env_vars["SMOKE_RUN_OVERRIDES"] = overrides_json
+        if gl_dashboard_path:
+            env_vars["GL_DASHBOARD_PATH"] = gl_dashboard_path
 
         effective_workers = 1 if headed else workers
         cli_args: List[str] = ["--project", project_value, "--workers", str(effective_workers)]
@@ -412,9 +471,23 @@ def register(app: typer.Typer) -> None:
             cloned_run = _clone_profile_run(context, profile_slug)
             run_path = _build_run_path(resolved_url, cloned_run["run_id"], cloned_run["config"])
             env_vars["SMOKE_RUN_PATH"] = run_path
+            current_run_path = run_path
             env_vars["SMOKE_RUN_CONFIG"] = cloned_run["config"]
             env_vars["SMOKE_CREATE_RUN"] = "false"
             typer.echo(f"[wctl2] Using profile '{profile_slug}' run {cloned_run['run_id']} ({run_path})")
+
+        current_run_path = current_run_path or env_vars.get("SMOKE_RUN_PATH")
+        gl_url_env, gl_path_env = _resolve_gl_dashboard_targets(
+            resolved_url,
+            current_run_path,
+            gl_dashboard_url,
+            gl_dashboard_path or env_vars.get("GL_DASHBOARD_PATH"),
+        )
+        if gl_path_env and "GL_DASHBOARD_PATH" not in env_vars:
+            env_vars["GL_DASHBOARD_PATH"] = gl_path_env
+        if gl_url_env:
+            env_vars["GL_DASHBOARD_URL"] = gl_url_env
+            typer.echo(f"[wctl2] GL dashboard target: {gl_url_env}")
 
         final_config = env_vars.get("SMOKE_RUN_CONFIG", config)
         typer.echo(
