@@ -114,4 +114,28 @@ test.describe('gl-dashboard state transitions', () => {
     await expect(graphHeader).toContainText('Cumulative');
     await expect(graphPanel(page)).not.toHaveClass(/is-collapsed/);
   });
+
+  test('Cumulative contribution: select Soil Loss and add scenario', async ({ page }) => {
+    await openDashboard(page);
+    const cumulativeSummary = page.locator('summary.gl-layer-group', { hasText: 'Cumulative Contribution' });
+    await cumulativeSummary.evaluate((el) => {
+      const details = el.closest('details');
+      if (details && !details.open) details.open = true;
+    });
+    await page.getByLabel('Cumulative contribution curve').click({ force: true });
+    const measureSelect = page.locator('#gl-cumulative-measure');
+    await measureSelect.selectOption({ value: 'soil_loss' });
+    const firstScenario = page.locator('[id^="gl-cumulative-scenario-"]').first();
+    if (await firstScenario.count()) {
+      await firstScenario.check({ force: true });
+    }
+    const graphHeader = page.locator('#gl-graph h4');
+    await expect(graphHeader).toContainText('Cumulative Contribution');
+    const graphData = await page.evaluate(() => {
+      const g = window.glDashboardTimeseriesGraph;
+      return g && g._data ? { hasData: !!g._data.series, source: g._data.source } : null;
+    });
+    expect(graphData).not.toBeNull();
+    expect(graphData.hasData).toBeTruthy();
+  });
 });
