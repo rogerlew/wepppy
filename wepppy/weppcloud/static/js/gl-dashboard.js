@@ -23,6 +23,7 @@
   let config;
   let stateModule;
   let graphModule;
+  let graphModeModule;
   let queryEngineModule;
   let graphLoadersModule;
   let detectorModule;
@@ -31,10 +32,11 @@
   let layerRendererModule;
   let scenarioModule;
   try {
-    [config, stateModule, graphModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule, scenarioModule] = await Promise.all([
+    [config, stateModule, graphModule, graphModeModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule, scenarioModule] = await Promise.all([
       import(`${moduleBase}config.js`),
       import(`${moduleBase}state.js`),
       import(`${moduleBase}graphs/timeseries-graph.js`),
+      import(`${moduleBase}ui/graph-mode.js`),
       import(`${moduleBase}data/query-engine.js`),
       import(`${moduleBase}graphs/graph-loaders.js`),
       import(`${moduleBase}layers/detector.js`),
@@ -67,92 +69,31 @@
   const { createMapController } = mapControllerModule;
   const { createLayerRenderer } = layerRendererModule;
   const { createTimeseriesGraph } = graphModule;
+  const { createGraphModeController } = graphModeModule;
   const { createScenarioManager } = scenarioModule;
+  let layerUtils;
+  let pendingApplyLayers = false;
   const state = getState();
   const queryEngine = queryEngineModule.createQueryEngine(ctx);
   let graphLoaders;
   let glMainEl;
   let graphPanelEl;
   let graphModeButtons;
-  let graphModeUserOverride = null;
-  let graphControlsEnabled = true;
+  let graphModeController;
+  let clearGraphModeOverride;
+  let setGraphFocus;
+  let setGraphCollapsed;
+  let toggleGraphPanel;
+  let setGraphMode;
+  let syncGraphLayout;
+  let ensureGraphExpanded;
+  let graphModeChangeInProgress = false;
+  let suppressApplyLayersOnModeChange = false;
+  let updateLayerList;
+  let updateLegendsPanel;
   let activeGraphLoad = null; // { key, promise }
   let yearSlider;
   let timeseriesGraph;
-  // Use var to avoid TDZ issues if syncGraphLayout fires early during init.
-  var lastGraphContextKey = null; // eslint-disable-line no-var
-
-  function clearGraphModeOverride() {
-    graphModeUserOverride = null;
-  }
-
-  function isRapActive(stateObj) {
-    // RAP should only drive graph controls when a RAP overlay is actually in play
-    if (stateObj.rapCumulativeMode) return true;
-    return (stateObj.rapLayers || []).some((l) => l && l.visible);
-  }
-
-  function isWeppYearlyActive(stateObj) {
-    if (!stateObj.weppYearlySummary) return false;
-    return (stateObj.weppYearlyLayers || []).some((l) => l && l.visible);
-  }
-
-  const GRAPH_CONTEXT_DEFS = {
-    climate_yearly: { mode: 'full', slider: 'bottom', focus: true },
-    wepp_yearly: { mode: 'split', slider: 'top', focus: false },
-    rap: { mode: 'split', slider: 'top', focus: false },
-    cumulative: { mode: 'full', slider: 'inherit', focus: true },
-    omni: { mode: 'full', slider: 'inherit', focus: true },
-    default: { mode: 'split', slider: 'hide', focus: false },
-  };
-
-  function positionYearSlider(position) {
-    const container = document.getElementById('gl-graph-container');
-    if (!yearSlider || !yearSlider.el) {
-      if (position === 'hide' && container) {
-        container.classList.remove('has-bottom-slider');
-      }
-      return;
-    }
-    if (position === 'inherit') {
-      return;
-    }
-    if (position === 'top') {
-      yearSlider.show('layer');
-      return;
-    }
-    if (position === 'bottom') {
-      yearSlider.show('climate');
-      return;
-    }
-    yearSlider.hide();
-  }
-
-  function resolveGraphContext(stateObj = getState()) {
-    const st = stateObj || getState();
-    const activeKey = st.activeGraphKey;
-    const source = currentGraphSource();
-    const rapActive = isRapActive(st);
-    const yearlyActive = isWeppYearlyActive(st);
-
-    if (activeKey === 'climate-yearly') return { key: 'climate_yearly', graphCapable: true };
-    if (activeKey === 'cumulative-contribution') return { key: 'cumulative', graphCapable: true };
-    if (activeKey && activeKey.startsWith('omni')) return { key: 'omni', graphCapable: true };
-    if (!activeKey) {
-      if (rapActive) return { key: 'rap', graphCapable: true };
-      if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-      return { key: 'default', graphCapable: false };
-    }
-
-    if (source === 'climate_yearly') return { key: 'climate_yearly', graphCapable: true };
-    if (source === 'rap' && rapActive) return { key: 'rap', graphCapable: true };
-    if (source === 'wepp_yearly' && yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-    if (source === 'omni') return { key: 'omni', graphCapable: true };
-
-    if (rapActive) return { key: 'rap', graphCapable: true };
-    if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-    return { key: 'default', graphCapable: false };
-  }
 
   const { rdbuScale, winterScale, jet2Scale } = createColorScales(
     typeof createColormap === 'function' ? createColormap : null
@@ -434,7 +375,11 @@
   function handleComparisonChange() {
     applyLayers();
     updateLayerList();
-    updateLegendsPanel();
+    if (typeof updateLegendsPanel === 'function') {
+      updateLegendsPanel();
+    } else {
+      pendingApplyLayers = true;
+    }
   }
 
   const weppDataManager = {
@@ -655,145 +600,6 @@
     }
   }
 
-  function setGraphFocus(enabled, options = {}) {
-    const { skipModeSync = false, force = false } = options;
-    const focus = !!enabled;
-    const currentMode = getState().graphMode || 'split';
-    if (!focus && graphModeUserOverride === 'full' && !force) {
-      // Preserve user-selected full mode unless explicitly forced to drop.
-      return;
-    }
-    setValue('graphFocus', focus);
-    if (glMainEl) {
-      if (focus) {
-        glMainEl.classList.add('graph-focus');
-      } else {
-        glMainEl.classList.remove('graph-focus');
-      }
-    }
-    if (!skipModeSync) {
-      const collapsed = graphPanelEl ? graphPanelEl.classList.contains('is-collapsed') : false;
-      const mode = collapsed ? 'minimized' : focus ? 'full' : 'split';
-      setValue('graphMode', mode);
-      updateGraphModeButtons(mode);
-    }
-  }
-
-  function ensureGraphExpanded() {
-    if (graphPanelEl) {
-      graphPanelEl.classList.remove('is-collapsed');
-    }
-  }
-
-  function setGraphCollapsed(collapsed, options = {}) {
-    const { focusOnExpand = true } = options;
-    if (!graphPanelEl) return;
-    const wasCollapsed = graphPanelEl.classList.contains('is-collapsed');
-    graphPanelEl.classList.toggle('is-collapsed', collapsed);
-    const changed = wasCollapsed !== collapsed;
-    if (changed && typeof window.glDashboardGraphToggled === 'function') {
-      window.glDashboardGraphToggled(!graphPanelEl.classList.contains('is-collapsed'));
-    }
-    if (collapsed) {
-      setValue('graphFocus', false);
-      if (glMainEl) {
-        glMainEl.classList.remove('graph-focus');
-      }
-      setGraphFocus(false, { force: true });
-    } else {
-      setGraphFocus(focusOnExpand);
-      // Refresh layout after expanding
-      if (timeseriesGraph && typeof timeseriesGraph._resizeCanvas === 'function') {
-        timeseriesGraph._resizeCanvas();
-        if (timeseriesGraph._data) {
-          timeseriesGraph.render();
-        }
-      }
-    }
-  }
-
-  function toggleGraphPanel() {
-    if (!graphPanelEl) return;
-    const collapsing = !graphPanelEl.classList.contains('is-collapsed');
-    setGraphMode(collapsing ? 'minimized' : 'split', { source: 'user' });
-  }
-
-  function currentGraphSource() {
-    try {
-      const g = window.glDashboardTimeseriesGraph;
-      return g && g._source ? g._source : null;
-    } catch (err) {
-      return null;
-    }
-  }
-
-  function updateGraphModeButtons(mode) {
-    if (!graphModeButtons || !graphModeButtons.length) return;
-    const omniFocused = currentGraphSource() === 'omni' && getState().graphFocus;
-
-    graphModeButtons.forEach((btn) => {
-      const isActive = btn.dataset.graphMode === mode;
-      btn.classList.toggle('is-active', isActive);
-      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-      const isMin = btn.dataset.graphMode === 'minimized';
-      const isSplit = btn.dataset.graphMode === 'split';
-      const disable = (!graphControlsEnabled && !isMin) || (omniFocused && isSplit);
-      if (disable) {
-        btn.classList.add('is-disabled');
-        btn.setAttribute('aria-disabled', 'true');
-        btn.disabled = true;
-      } else {
-        btn.classList.remove('is-disabled');
-        btn.removeAttribute('aria-disabled');
-        btn.disabled = false;
-      }
-    });
-  }
-
-  function setGraphControlsEnabled(enabled) {
-    graphControlsEnabled = !!enabled;
-    updateGraphModeButtons(getState().graphMode || 'split');
-  }
-
-  function applyGraphMode(mode, { source = 'auto', graphCapable = true, focusOverride } = {}) {
-    const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
-    const effectiveMode = graphCapable ? validated : 'minimized';
-    const currentMode = getState().graphMode || 'split';
-
-    setValue('graphMode', effectiveMode);
-    if (effectiveMode === 'minimized') {
-      setGraphCollapsed(true);
-      setGraphFocus(false, { skipModeSync: true, force: true });
-    } else if (effectiveMode === 'split') {
-      setGraphCollapsed(false, { focusOnExpand: false });
-      setGraphFocus(false, { skipModeSync: true, force: true });
-    } else if (effectiveMode === 'full') {
-      setGraphCollapsed(false, { focusOnExpand: true });
-      setGraphFocus(true, { skipModeSync: true, force: true });
-    }
-    if (focusOverride !== undefined) {
-      setGraphFocus(!!focusOverride, { skipModeSync: true, force: true });
-    }
-    updateGraphModeButtons(effectiveMode);
-    return effectiveMode;
-  }
-
-  function setGraphMode(mode, options = {}) {
-    const { source = 'auto' } = options;
-    const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
-    if (source === 'user') {
-      graphModeUserOverride = validated;
-    } else if (source === 'auto') {
-      clearGraphModeOverride();
-    }
-    return syncGraphLayout({
-      userOverride: source === 'user' ? validated : undefined,
-    });
-  }
-
-  window.glDashboardToggleGraphPanel = toggleGraphPanel;
-  window.glDashboardSetGraphMode = setGraphMode;
-
   const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
   const graphScenarios = [{ name: 'Base', path: '' }].concat(
     omniScenarios.map((s) => ({ name: s.name || s.path || 'Scenario', path: s.path || '' }))
@@ -831,19 +637,6 @@
   graphPanelEl = document.getElementById('gl-graph');
   graphModeButtons = document.querySelectorAll('[data-graph-mode]');
 
-  if (graphModeButtons && graphModeButtons.length) {
-    graphModeButtons.forEach((btn) => {
-      btn.addEventListener('click', () => setGraphMode(btn.dataset.graphMode, { source: 'user' }));
-    });
-  }
-
-  const initialGraphMode = graphPanelEl && graphPanelEl.classList.contains('is-collapsed')
-    ? 'minimized'
-    : getState().graphFocus
-      ? 'full'
-      : 'split';
-  setGraphMode(getState().graphMode || initialGraphMode, { source: 'auto' });
-
   function getCumulativeGraphOptions() {
     const measureOpt =
       CUMULATIVE_MEASURE_OPTIONS.find((opt) => opt.key === cumulativeMeasure) ||
@@ -873,8 +666,7 @@
     if (radio && !radio.checked) {
       radio.checked = true;
     }
-    lastGraphContextKey = null;
-    syncGraphLayout();
+    syncGraphLayout({ resetContext: true });
     return activateGraphItem('climate-yearly', { force: true, graphOptions, keepFocus: true });
   }
 
@@ -1270,69 +1062,59 @@
 
   // Expose for external use
   window.glDashboardYearSlider = yearSlider;
-  // Initial graph control sync after year slider is available
-  syncGraphLayout();
 
-  // ============================================================================
-  // Timeseries Graph Controller (for RAP and other timeseries data)
-  // ============================================================================
-  function syncGraphLayout(options = {}) {
-    const { userOverride } = options;
-    if (userOverride !== undefined) {
-      graphModeUserOverride = userOverride;
+  const handleGraphModeChange = (payload = {}) => {
+    if (graphModeChangeInProgress) return;
+    graphModeChangeInProgress = true;
+    try {
+      if (!suppressApplyLayersOnModeChange) {
+        applyLayers();
+      }
+      if (payload.contextKey === 'climate_yearly' && getState().activeGraphKey === 'climate-yearly') {
+        const graphInstance = timeseriesGraph || window.glDashboardTimeseriesGraph;
+        if (!graphInstance || graphInstance._source !== 'climate_yearly') {
+          const graphOptions = getClimateGraphOptions();
+          activateGraphItem('climate-yearly', { force: true, graphOptions, keepFocus: true });
+        }
+      }
+    } finally {
+      graphModeChangeInProgress = false;
     }
-    const st = getState();
-    const context = resolveGraphContext(st);
-    const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS.default;
-    const override = graphModeUserOverride;
-    const graphCapable = context.graphCapable;
-    const sliderPlacement = graphCapable ? def.slider : 'hide';
-    const mode = graphCapable ? (override || def.mode) : 'minimized';
-    const focus = override ? mode === 'full' : def.focus || mode === 'full';
-    const sliderReady = !!(yearSlider && yearSlider.el);
-    const layoutKey = `${context.key}|${mode}|${focus ? '1' : '0'}|${sliderPlacement}|${override || ''}|${graphCapable ? 1 : 0}|${sliderReady ? 'ready' : 'pending'}`;
-    if (layoutKey === lastGraphContextKey) {
-      return;
-    }
-    lastGraphContextKey = layoutKey;
+  };
 
-    if (!graphCapable) {
-      const tg = window.glDashboardTimeseriesGraph;
-      if (tg && typeof tg.hide === 'function') {
-        tg.hide();
-      }
-      if (st.activeGraphKey) {
-        setValue('activeGraphKey', null);
-      }
-      setValue('graphFocus', false);
-      if (glMainEl) {
-        glMainEl.classList.remove('graph-focus');
-      }
-      setGraphFocus(false, { skipModeSync: true, force: true });
-    }
+  graphModeController = createGraphModeController({
+    getState,
+    setValue,
+    domRefs: { glMainEl, graphPanelEl, graphModeButtons },
+    yearSlider,
+    timeseriesGraph: () => timeseriesGraph,
+    onModeChange: handleGraphModeChange,
+  });
+  ({
+    clearGraphModeOverride,
+    setGraphFocus,
+    setGraphCollapsed,
+    toggleGraphPanel,
+    setGraphMode,
+    syncGraphLayout,
+    ensureGraphExpanded,
+  } = graphModeController);
 
-    setGraphControlsEnabled(graphCapable);
-    applyGraphMode(mode, {
-      source: override ? 'user' : 'auto',
-      graphCapable,
-      focusOverride: focus,
+  if (graphModeButtons && graphModeButtons.length) {
+    graphModeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => setGraphMode(btn.dataset.graphMode, { source: 'user' }));
     });
-
-    if (
-      context.key === 'climate_yearly' &&
-      activeGraphKey === 'climate-yearly' &&
-      (!window.glDashboardTimeseriesGraph || window.glDashboardTimeseriesGraph._source !== 'climate_yearly')
-    ) {
-      const graphOptions = getClimateGraphOptions();
-      activateGraphItem('climate-yearly', { force: true, graphOptions, keepFocus: true });
-    }
-
-    positionYearSlider(sliderPlacement);
   }
 
-  function syncGraphModeForContext(options) {
-    return syncGraphLayout(options);
-  }
+  const initialGraphMode = graphPanelEl && graphPanelEl.classList.contains('is-collapsed')
+    ? 'minimized'
+    : getState().graphFocus
+      ? 'full'
+      : 'split';
+  setGraphMode(getState().graphMode || initialGraphMode, { source: 'auto', resetContext: true });
+
+  window.glDashboardToggleGraphPanel = toggleGraphPanel;
+  window.glDashboardSetGraphMode = setGraphMode;
 
   async function handleGraphPanelToggle(visible) {
     if (!visible) {
@@ -1607,10 +1389,7 @@
     setValue('activeGraphKey', null);
     setGraphFocus(false, { force: true, skipModeSync: true });
     clearGraphModeOverride();
-    lastGraphContextKey = null;
-    applyGraphMode('minimized', { graphCapable: false });
-    positionYearSlider('hide');
-    syncGraphLayout();
+    syncGraphLayout({ resetContext: true });
   }
 
   async function activateWeppYearlyLayer() {
@@ -1657,10 +1436,9 @@
           input.addEventListener('change', async () => {
             if (input.checked) {
               clearGraphModeOverride();
-              lastGraphContextKey = null;
               activeGraphKey = item.key;
               setValue('activeGraphKey', item.key);
-              syncGraphLayout();
+              syncGraphLayout({ resetContext: true });
               let graphOptions;
               if (item.key === 'cumulative-contribution') {
                 graphOptions = getCumulativeGraphOptions();
@@ -1790,11 +1568,20 @@
   }
 
   function applyLayers() {
+    if (!layerUtils) {
+      pendingApplyLayers = true;
+      return;
+    }
     const stack = layerUtils.buildLayerStack(baseLayer);
     if (mapController) {
       mapController.applyLayers(stack);
     }
-    syncGraphLayout();
+    suppressApplyLayersOnModeChange = true;
+    try {
+      syncGraphLayout();
+    } finally {
+      suppressApplyLayersOnModeChange = false;
+    }
     updateLegendsPanel();
   }
 
@@ -1996,7 +1783,7 @@
     tree: 'Tree',
   };
 
-  const layerUtils = createLayerUtils({
+  layerUtils = createLayerUtils({
     deck,
     getState,
     colorScales: {
@@ -2049,7 +1836,11 @@
       NLCD_LABELS,
     },
   });
-  const { updateLayerList, updateLegendsPanel } = layerRenderer;
+  ({ updateLayerList, updateLegendsPanel } = layerRenderer);
+  if (pendingApplyLayers) {
+    pendingApplyLayers = false;
+    applyLayers();
+  }
   window.glDashboardUpdateLegends = updateLegendsPanel;
 
   /**

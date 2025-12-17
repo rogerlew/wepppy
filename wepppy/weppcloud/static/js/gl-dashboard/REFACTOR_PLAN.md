@@ -62,12 +62,10 @@ GL_DASHBOARD_URL="..." npm run smoke -- tests/smoke/gl-dashboard-state-transitio
 
 ### Remaining in gl-dashboard.js (to extract)
 
-1. **Scenario & Comparison Logic** (~400 lines) - URL building, scenario switching, diff ranges
-2. **Graph Mode Orchestration** (~250 lines) - Mode state machine, focus/collapse
-3. **Year Slider Controller** (~200 lines) - Generic slider with play/pause
-4. **Color Scale Functions** (~300 lines) - Colormap implementations still in main file
-5. **WEPP/Layer Data Functions** (~600 lines) - Refresh handlers, range computation
-6. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
+1. **Year Slider Controller** (~200 lines) - Generic slider with play/pause
+2. **Color Scale Functions** (~300 lines) - Colormap implementations still in main file
+3. **WEPP/Layer Data Functions** (~600 lines) - Refresh handlers, range computation
+4. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
 
 ---
 
@@ -90,7 +88,8 @@ npm run smoke -- tests/smoke/gl-dashboard-*.spec.js 2>&1 | tee baseline-results.
 ---
 
 ### Phase 1: Scenario & Comparison Module
-**Risk:** Low | **Lines:** ~400 | **Duration:** 2-3 hours
+**Risk:** Low | **Lines:** ~400 | **Duration:** 2-3 hours  
+**Status:** Complete – logic extracted to `gl-dashboard/scenario/manager.js` with injected deps; Playwright smoke passed.
 
 **Extract to:** `gl-dashboard/scenario/manager.js`
 
@@ -143,7 +142,8 @@ export function createScenarioManager({
 ---
 
 ### Phase 2: Graph Mode Controller
-**Risk:** Medium | **Lines:** ~250 | **Duration:** 2-3 hours
+**Risk:** Medium | **Lines:** ~250 | **Duration:** 2-3 hours  
+**Status:** Complete – controller lives in `gl-dashboard/ui/graph-mode.js`; graph mode wiring updated; smoke passed.
 
 **Extract to:** `gl-dashboard/ui/graph-mode.js`
 
