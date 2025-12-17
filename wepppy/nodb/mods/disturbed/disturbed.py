@@ -72,6 +72,8 @@ from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 
 __all__ = [
     'disturbed_class_aliases',
+    'TREATMENT_SUFFIXES',
+    'lookup_disturbed_class',
     'read_disturbed_land_soil_lookup',
     'migrate_land_soil_lookup',
     'write_disturbed_land_soil_lookup',
@@ -102,6 +104,34 @@ disturbed_class_aliases: Dict[str, str] = {
     'forest moderate sev fire': 'moderate sev fire',
     'forest low sev fire': 'low sev fire',
 }
+
+# Treatment suffixes that should be stripped when looking up base disturbed class
+TREATMENT_SUFFIXES = ('-mulch_15', '-mulch_30', '-mulch_60', '-thinning', '-prescribed_fire')
+
+
+def lookup_disturbed_class(disturbed_class: Optional[str]) -> Optional[str]:
+    """
+    Extract the base disturbed class from a treatment-modified class.
+    
+    Treatment scenarios append suffixes like '-mulch_15' to the base disturbed class.
+    For soil parameter lookups, we need the base class (e.g., 'forest moderate sev fire')
+    because the soil erodibility is determined by fire severity, not treatment type.
+    
+    Examples:
+        'forest moderate sev fire-mulch_15' -> 'forest moderate sev fire'
+        'shrub high sev fire-mulch_30' -> 'shrub high sev fire'
+        'forest high sev fire' -> 'forest high sev fire'
+        None -> None
+    """
+    if disturbed_class is None:
+        return None
+    
+    for suffix in TREATMENT_SUFFIXES:
+        if disturbed_class.endswith(suffix):
+            return disturbed_class[:-len(suffix)]
+    
+    return disturbed_class
+
 
 def read_disturbed_land_soil_lookup(fname: str) -> Dict[Tuple[str, str], Dict[str, Any]]:
     d = {}
@@ -1238,7 +1268,11 @@ class Disturbed(NoDbBase):
 
             texid = simple_texture(clay=clay, sand=sand)
 
-            key = (texid, man.disturbed_class)
+            # Use base disturbed class for lookup (strip treatment suffixes like -mulch_15)
+            # Treatment-modified classes (e.g., 'forest moderate sev fire-mulch_15') won't have
+            # entries in _land_soil_replacements_d, but we still need fire-adjusted erodibility
+            lookup_class = lookup_disturbed_class(man.disturbed_class)
+            key = (texid, lookup_class)
             if key not in _land_soil_replacements_d:
                 # this is different from mofe.
                 # for mofe we have to migrate to 9002...
