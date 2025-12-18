@@ -191,7 +191,7 @@ def _ensure_wal_mode(conn: sqlite3.Connection, *, context: str) -> None:
             delay = min(delay * 2, 2.0)
 
 class SsurgoRequestError(Exception):
-    """Raised when the NRCS SDM Tabular service returns a non-200 response."""
+    """Raised when the NRCS SDM Tabular service fails or is unreachable."""
 
 
 # noinspection PyPep8Naming
@@ -199,7 +199,27 @@ def _makeSOAPrequest(query):
     global _ssurgo_url, _query_template
     headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
     body = _query_template.format(query=query)
-    r = requests.post(_ssurgo_url, data=body, headers=headers, timeout=30)
+
+    try:
+        r = requests.post(_ssurgo_url, data=body, headers=headers, timeout=30)
+    except requests.exceptions.ConnectTimeout as exc:
+        message = (
+            "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) is currently "
+            "unavailable. Try again later."
+        )
+        _LOG.error(message)
+        raise SsurgoRequestError(message) from exc
+    except requests.exceptions.Timeout as exc:
+        message = (
+            "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) did not respond "
+            "before the timeout. Try again later."
+        )
+        _LOG.error(message)
+        raise SsurgoRequestError(message) from exc
+    except requests.exceptions.RequestException as exc:
+        message = f"Failed to query NRCS SDM Data Access service: {exc}"
+        _LOG.error(message)
+        raise SsurgoRequestError(message) from exc
 
     if r.status_code != 200:
         raise SsurgoRequestError((r.content, query))
