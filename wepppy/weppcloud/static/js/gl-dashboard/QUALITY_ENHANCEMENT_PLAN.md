@@ -27,9 +27,9 @@
 - [x] Add lightweight logging for unexpected detector failures (network/parse) to ease debugging without changing UX.
 
 ## Phase 5: Visual/Behavioral Coverage
-- [ ] Expand Playwright smoke to assert layer controls populate after async detection (no “No raster layers” when rasters exist).
-- [ ] Add Playwright check for comparison diverging legend when comparison mode/data is available.
-- [ ] Add Playwright check for slider placement per context (climate/outlet bottom; RAP/WEPP Yearly top; cumulative/omni hidden).
+- [x] Expand Playwright smoke to assert layer controls populate after async detection (no “No raster layers” when rasters exist).
+- [x] Add Playwright check for comparison diverging legend when comparison mode/data is available.
+- [x] Add Playwright check for slider placement per context (climate/outlet bottom; RAP/WEPP Yearly top; cumulative/omni hidden).
 
 ## Phase 6: Maintenance & Cleanup
 - [ ] Sweep for dead code/unused imports in `gl-dashboard.js` and modules; remove.

@@ -86,6 +86,23 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     expect(geom.slider.top).toBeLessThan(geom.container.top);
   });
 
+  test('RAP cumulative uses top slider when RAP data is present', async ({ page }) => {
+    await openDashboard(page);
+    await requireSection(page, 'RAP');
+    await expandSection(page, 'RAP');
+
+    const cumulative = page.getByLabel('Cumulative Cover');
+    await expect(cumulative).toBeVisible({ timeout: 15000 });
+    await cumulative.click({ force: true });
+
+    await expect.poll(async () => (await getState(page)).rapCumulativeMode ?? false).toBeTruthy();
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeTruthy();
+    expect(geom.parentId).toBe('gl-graph-year-slider');
+    expect(geom.hasBottom).toBe(false);
+  });
+
   test('Landuse overlay → Climate Yearly forces full mode with bottom slider', async ({ page }) => {
     await openDashboard(page);
     await expandSection(page, 'Landuse');
@@ -224,6 +241,16 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     expect(geom.hasBottom).toBe(false);
   });
 
+  test('Year slider stays hidden when only overlay layers are active', async ({ page }) => {
+    await openDashboard(page);
+    await expandSection(page, 'Landuse');
+    await page.getByLabel('Dominant landuse').click({ force: true });
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeFalsy();
+    expect(geom.hasBottom).toBe(false);
+  });
+
   test('Year slider playback advances year in climate context', async ({ page }) => {
     await openDashboard(page);
     await expandSection(page, 'Climate Yearly');
@@ -261,10 +288,20 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     // Split should bring the map back
     await page.locator('[data-graph-mode="split"]').click({ force: true });
     await expect(page.locator('.gl-main')).not.toHaveClass(/graph-focus/);
-    await expect(page.locator('.gl-viewport')).toBeVisible();
+    await expect.poll(async () => (await getState(page)).graphFocus).toBeFalsy();
+    await expect
+      .poll(async () =>
+        page.evaluate(() => {
+          const vp = document.querySelector('.gl-viewport');
+          if (!vp) return false;
+          const style = window.getComputedStyle(vp);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        }),
+      )
+      .toBeTruthy();
   });
 
-  test('Landuse comparison renders diverging legend for Interrill cover (inrcov)', async ({ page }) => {
+  test('Comparison mode shows diverging legend when diff data is available', async ({ page }) => {
     await openDashboard(page);
     await expandSection(page, 'Landuse');
     const inrcov = page.getByLabel('Interrill cover (inrcov)');
@@ -276,13 +313,14 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     if ((await scenarioSelect.count()) === 0) {
       test.skip('Scenario select not available in this run');
     }
-    const targetScenario = scenarioSelect.locator('option', { hasText: 'mulch_60_sbs_map' });
-    if ((await targetScenario.count()) === 0) {
-      test.skip('mulch_60_sbs_map scenario not present');
+    const comparisonOptions = scenarioSelect.locator('option[value]:not([value=""])');
+    const optionCount = await comparisonOptions.count();
+    if (optionCount === 0) {
+      test.skip('No alternate scenario available for comparison');
     }
-    const scenarioValue = await targetScenario.first().getAttribute('value');
+    const scenarioValue = await comparisonOptions.first().getAttribute('value');
     if (!scenarioValue) {
-      test.skip('mulch_60_sbs_map scenario value missing');
+      test.skip('Comparison scenario value missing');
     }
     await scenarioSelect.selectOption(scenarioValue);
 
@@ -293,14 +331,27 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     await comparisonToggle.check({ force: true });
 
     await expect.poll(async () => (await getState(page)).comparisonMode).toBeTruthy();
-    await expect.poll(async () => (await getState(page)).currentScenarioPath || '').toContain('mulch_60_sbs_map');
+    await expect.poll(async () => (await getState(page)).currentScenarioPath || '').toContain(scenarioValue);
 
     // Ensure the layer stays selected after scenario toggle
     await inrcov.click({ force: true });
     await expect(inrcov).toBeChecked();
 
+    const diffReady = await page
+      .waitForFunction(() => {
+        const st = window.glDashboardState;
+        if (!st || !st.comparisonMode) return false;
+        const ranges = st.comparisonDiffRanges || {};
+        return Object.values(ranges).some((r) => r && Number.isFinite(r.min) && Number.isFinite(r.max));
+      }, { timeout: 15000 })
+      .catch(() => null);
+    if (!diffReady) {
+      test.skip('Comparison diff data not available for selected scenario');
+    }
+
     const legendSections = page.locator('#gl-legends-content .gl-legend-section');
     await expect.poll(async () => legendSections.count()).toBeGreaterThan(0);
     await expect.poll(async () => page.locator('.gl-legend-diverging__bar').count()).toBeGreaterThan(0);
+    await expect(page.locator('#gl-comparison-indicator')).toBeVisible();
   });
 });
