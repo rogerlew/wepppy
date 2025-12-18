@@ -584,7 +584,6 @@ export function createGraphLoaders(deps) {
       return {
         type: 'climate-yearly',
         title: 'Climate Yearly',
-        months: MONTH_LABELS,
         months: monthLabels,
         years,
         precipSeries,
@@ -598,7 +597,6 @@ export function createGraphLoaders(deps) {
         startMonth,
       };
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load climate yearly data', err);
       return null;
     }
@@ -905,7 +903,6 @@ export function createGraphLoaders(deps) {
         },
       };
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load RAP timeseries', err);
       return null;
     }
@@ -1015,7 +1012,6 @@ export function createGraphLoaders(deps) {
         tooltipFormatter,
       };
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load WEPP yearly timeseries', err);
       return null;
     }

@@ -17,7 +17,6 @@ import { YEAR_SLIDER_CONTEXTS } from '../config.js';
  * @typedef {Object} YearSliderInitConfig
  * @property {number} [startYear]
  * @property {number} [endYear]
- * @property {boolean} [hasObserved]
  */
 
 /**
@@ -59,11 +58,9 @@ export function createYearSlider({
   let minYear = 1;
   let maxYear = 100;
   let currentYear = 1;
-  let hasObserved = false;
   let initialized = false;
   let playing = false;
   let intervalId = null;
-  let context = YEAR_SLIDER_CONTEXTS.LAYER;
   let playButton = playBtn || null;
   const VALID_CONTEXTS = Object.values(YEAR_SLIDER_CONTEXTS);
 
@@ -97,7 +94,6 @@ export function createYearSlider({
 
     minYear = config.startYear || 1;
     maxYear = config.endYear || 100;
-    hasObserved = config.hasObserved || false;
     currentYear = minYear;
     playing = false;
     intervalId = null;
@@ -125,7 +121,6 @@ export function createYearSlider({
   const show = (ctx = YEAR_SLIDER_CONTEXTS.LAYER) => {
     if (!el) return;
     const resolvedContext = normalizeContext(ctx);
-    context = resolvedContext;
 
     const container = document.getElementById('gl-graph-container');
     const slot = document.getElementById('gl-graph-year-slider');

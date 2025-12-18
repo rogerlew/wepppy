@@ -83,7 +83,6 @@
       import(`${moduleBase}data/rap-data.js`),
     ]);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('gl-dashboard: failed to load modules', err);
     target.innerHTML = '<div style="padding:1rem;color:#e11d48;">Module load failed.</div>';
     return;
@@ -126,14 +125,9 @@
       rdbuColor: colorsModule.rdbuColor,
     };
   const {
-    viridisScale,
-    winterScale,
-    jet2Scale,
-    rdbuScale,
     viridisColor = colorsModule.viridisColor,
     winterColor = colorsModule.winterColor,
     jet2Color = colorsModule.jet2Color,
-    divergingColor = colorsModule.divergingColor,
     rdbuColor = colorsModule.rdbuColor,
   } = colorScales;
 
@@ -221,14 +215,12 @@
   let updateLegendsPanel = () => {};
   let timeseriesGraph;
   let graphModeController;
-  let pendingApplyLayers = false;
   let suppressApplyLayersOnModeChange = false;
   let handleGraphPanelToggle = () => {};
   let loadRapTimeseriesData = async () => {};
   let loadWeppYearlyTimeseriesData = async () => {};
   let activateGraphItem = async () => {};
   let getClimateGraphOptions = () => ({});
-  let getCumulativeGraphOptions = () => ({});
 
   const layerListEl = document.getElementById('gl-layer-list');
   const layerEmptyEl = document.getElementById('gl-layer-empty');
@@ -329,7 +321,6 @@
     computeWeppRanges: computeWeppRangesCore,
     computeWeppYearlyRanges: computeWeppYearlyRangesCore,
     computeWeppYearlyDiffRanges: computeWeppYearlyDiffRangesCore,
-    loadBaseWeppYearlyData: loadBaseWeppYearlyDataCore,
     refreshWeppYearlyData: refreshWeppYearlyDataCore,
     computeWeppEventRanges: computeWeppEventRangesCore,
     computeWeppEventDiffRanges: computeWeppEventDiffRangesCore,
@@ -341,7 +332,7 @@
     throw new Error('gl-dashboard: rap data module failed to load');
   }
 
-  const { refreshRapData, pickActiveRapLayer } = createRapDataManager({
+  const { refreshRapData } = createRapDataManager({
     getState,
     setValue,
     postQueryEngine,
@@ -476,7 +467,6 @@
     },
     getTooltip: (info) => layerUtils.formatTooltip(info),
     onError: (error) => {
-      // eslint-disable-next-line no-console
       console.error('gl-dashboard render error', error);
     },
   });
@@ -484,10 +474,7 @@
   window.glDashboardDeck = deckgl;
 
   function applyLayers() {
-    if (!layerUtils || !mapController) {
-      pendingApplyLayers = true;
-      return;
-    }
+    if (!layerUtils || !mapController) return;
     const stack = layerUtils.buildLayerStack(basemapController.getBaseLayer());
     mapController.applyLayers(stack);
     suppressApplyLayersOnModeChange = true;
@@ -535,15 +522,10 @@
   });
 
   const {
-    detectRasterLayers,
     detectLanduseOverlays,
     detectSoilsOverlays,
-    detectHillslopesOverlays,
-    detectWatarOverlays,
     detectWeppOverlays,
     detectWeppYearlyOverlays,
-    detectWeppEventOverlays,
-    detectRapOverlays,
     detectLayers,
   } = detectionController;
 
@@ -602,7 +584,6 @@
     toggleGraphPanel,
     setGraphMode,
     syncGraphLayout,
-    ensureGraphExpanded,
   } = graphModeController;
 
   const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
@@ -619,36 +600,35 @@
   }
 
   const graphController = createGraphController({
-        graphDefs: GRAPH_DEFS,
+    graphDefs: GRAPH_DEFS,
+    graphScenarios,
+    graphLoadersFactory: () =>
+      graphLoadersModule.createGraphLoaders({
         graphScenarios,
-        graphLoadersFactory: () =>
-          graphLoadersModule.createGraphLoaders({
-            graphScenarios,
-            postQueryEngine: queryEngine.postQueryEngine,
-            postBaseQueryEngine: queryEngine.postBaseQueryEngine,
-            postQueryEngineForScenario: queryEngine.postQueryEngineForScenario,
-            viridisColor,
-            winterColor,
-            jet2Color,
-            RAP_BAND_LABELS,
-          }),
-        yearSlider,
-        getState,
-        setValue,
-        graphModeController,
-        timeseriesGraph: () => timeseriesGraph,
-        graphPanelEl,
-        graphModeButtons,
-        graphEmptyEl,
-        graphListEl,
-        cumulativeMeasureOptions: CUMULATIVE_MEASURE_OPTIONS,
-        monthLabels: MONTH_LABELS,
-      });
+        postQueryEngine,
+        postBaseQueryEngine,
+        postQueryEngineForScenario,
+        viridisColor,
+        winterColor,
+        jet2Color,
+        RAP_BAND_LABELS,
+      }),
+    yearSlider,
+    getState,
+    setValue,
+    graphModeController,
+    timeseriesGraph: () => timeseriesGraph,
+    graphPanelEl,
+    graphModeButtons,
+    graphEmptyEl,
+    graphListEl,
+    cumulativeMeasureOptions: CUMULATIVE_MEASURE_OPTIONS,
+    monthLabels: MONTH_LABELS,
+  });
 
   const {
     renderGraphList,
     getClimateGraphOptions: graphGetClimateGraphOptions,
-    getCumulativeGraphOptions: graphGetCumulativeGraphOptions,
     loadRapTimeseriesData: graphLoadRapTimeseriesData,
     loadWeppYearlyTimeseriesData: graphLoadWeppYearlyTimeseriesData,
     activateGraphItem: graphActivateGraphItem,
@@ -657,7 +637,6 @@
   } = graphController;
 
   getClimateGraphOptions = graphGetClimateGraphOptions;
-  getCumulativeGraphOptions = graphGetCumulativeGraphOptions;
   loadRapTimeseriesData = graphLoadRapTimeseriesData;
   loadWeppYearlyTimeseriesData = graphLoadWeppYearlyTimeseriesData;
   activateGraphItem = graphActivateGraphItem;
@@ -866,7 +845,6 @@
         }
         await Promise.all(detectionTasks);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.warn('gl-dashboard: layer detection failed', err);
       }
     })();

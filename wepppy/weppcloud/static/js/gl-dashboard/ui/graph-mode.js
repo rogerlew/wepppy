@@ -193,7 +193,7 @@ export function createGraphModeController({
     try {
       const graph = getGraph() || window.glDashboardTimeseriesGraph;
       return graph && graph._source ? graph._source : null;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -221,11 +221,6 @@ export function createGraphModeController({
         btn.disabled = false;
       }
     });
-  }
-
-  function setGraphControlsEnabled(enabled) {
-    graphControlsEnabled = !!enabled;
-    updateGraphModeButtons(getState().graphMode || GRAPH_MODES.SPLIT);
   }
 
   function setGraphFocus(enabled, options = {}) {

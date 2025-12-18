@@ -32,6 +32,6 @@
 - [x] Add Playwright check for slider placement per context (climate/outlet bottom; RAP/WEPP Yearly top; cumulative/omni hidden).
 
 ## Phase 6: Maintenance & Cleanup
-- [ ] Sweep for dead code/unused imports in `gl-dashboard.js` and modules; remove.
-- [ ] Ensure `ctx.sitePrefix` usage is consistent across new code paths (audit any hardcoded URLs).
-- [ ] Keep README/AGENTS/UI docs in sync when modules change (add to PR checklist).
+- [x] Sweep for dead code/unused imports in `gl-dashboard.js` and modules; remove.
+- [x] Ensure `ctx.sitePrefix` usage is consistent across new code paths (audit any hardcoded URLs).
+- [x] Keep README/AGENTS/UI docs in sync when modules change (add to PR checklist).

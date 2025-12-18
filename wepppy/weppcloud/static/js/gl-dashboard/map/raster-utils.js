@@ -23,7 +23,6 @@ function logRaster(kind, message, context) {
   if (context !== undefined) {
     parts.push(context);
   }
-  // eslint-disable-next-line no-console
   console[kind](...parts);
 }
 

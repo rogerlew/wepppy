@@ -38,7 +38,6 @@ export function createLayerRenderer({
     COMPARISON_MEASURES,
     WATER_MEASURES,
     SOIL_MEASURES,
-    RAP_BAND_LABELS,
     NLCD_COLORMAP,
     NLCD_LABELS,
   } = constants || {};
@@ -279,12 +278,16 @@ export function createLayerRenderer({
     const soilsRasters = detectedLayers
       .filter((l) => l.key === 'soils')
       .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
+    const hillslopesItems = hillslopesLayers || [];
 
     if (landuseLayers.length || landuseRasters.length) {
       subcatchmentSections.push({ title: 'Landuse', items: [...landuseLayers, ...landuseRasters], isSubcatchment: true, stateKey: 'landuseLayers' });
     }
     if (soilsLayers.length || soilsRasters.length) {
       subcatchmentSections.push({ title: 'Soils', items: [...soilsLayers, ...soilsRasters], isSubcatchment: true, stateKey: 'soilsLayers' });
+    }
+    if (hillslopesItems.length) {
+      subcatchmentSections.push({ title: 'Hillslopes', items: hillslopesItems, isSubcatchment: true, stateKey: 'hillslopesLayers' });
     }
     if (rapLayers.length) {
       subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true, stateKey: 'rapLayers' });

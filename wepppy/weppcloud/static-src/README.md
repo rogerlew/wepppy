@@ -14,6 +14,7 @@
   - `SMOKE_KEEP_RUN=true` keeps the provisioned run after the suite completes.
   - `SMOKE_BASE_URL` and `SMOKE_HEADLESS=false` adjust backend origin and browser mode.
 - GL dashboard smoke specs skip RAP or comparison assertions automatically when the target run lacks those datasets; expect occasional `skipped` results rather than failures.
+- Some runs legitimately lack RAP or comparison data; skips in those specs are expected and not treated as failures.
 - `npm run smoke:theme-metrics` runs the Theme Lab contrast harness. It only needs the UI showcase route (`/ui/components/#theme-lab`) online, so no run provisioning is required. Reports land in `test-results/theme-metrics/` as both JSON and Markdown (consumed by CI and reviewers). You can drive the same run through `wctl2 run-playwright --suite theme-metrics --env local`.
 - Docker builds copy the production bundle into `wepppy/weppcloud/static/vendor/` so images ship with everything baked in. The app entrypoint mirrors the bundle to `/srv/weppcloud/static` when `STATIC_ASSET_SYNC_DIR` is set (Compose prod does this for Caddy).
 
