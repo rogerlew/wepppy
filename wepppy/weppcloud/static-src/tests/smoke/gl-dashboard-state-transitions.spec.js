@@ -18,6 +18,7 @@ async function openDashboard(page) {
 async function expandSection(page, title) {
   const summary = page.locator('summary.gl-layer-group', { hasText: title });
   await expect(summary).toBeVisible({ timeout: 15000 });
+  await summary.scrollIntoViewIfNeeded();
   // Avoid toggling an already-open <details>; explicitly open it.
   await summary.evaluate((el) => {
     const details = el.closest('details');
@@ -53,8 +54,12 @@ async function requireSection(page, title) {
 
 async function clickLanduseDominant(page) {
   await expandSection(page, 'Landuse');
-  const landuseDominant = page.getByLabel('Dominant landuse').first();
-  await expect(landuseDominant).toBeVisible({ timeout: 15000 });
+  await expect
+    .poll(async () => page.locator('input[id^="layer-Landuse-lu-dominant"]').count())
+    .toBeGreaterThan(0);
+  const landuseDominant = page.locator('input[id^="layer-Landuse-lu-dominant"]').first();
+  await landuseDominant.waitFor({ state: 'visible', timeout: 15000 });
+  await landuseDominant.scrollIntoViewIfNeeded();
   await landuseDominant.click({ force: true });
 }
 

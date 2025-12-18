@@ -110,8 +110,8 @@ Post-QE plan, the GL Dashboard has improved from 7.5/10 to **8.5/10**.
 ### Score Breakdown
 
 ```
-Architecture & Design     █████████░  9/10
-Code Organization         █████████░  9/10
+Architecture & Design    █████████░  9/10
+Code Organization        █████████░  9/10
 Documentation            █████████░  9/10
 Type Safety (JSDoc)      ███████░░░  7/10
 Testability              ████████░░  8/10

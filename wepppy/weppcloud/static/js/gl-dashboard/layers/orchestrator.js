@@ -49,10 +49,18 @@ export function createDetectionController({
   async function detectLanduseOverlays() {
     const result = await detectorModule.detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
+      const prevVisible = (getState().landuseLayers || []).find((l) => l && l.visible);
+      const nextLanduseLayers = Array.isArray(result.landuseLayers) ? [...result.landuseLayers] : [];
+      if (prevVisible && nextLanduseLayers.some((l) => l && l.key === prevVisible.key)) {
+        for (const layer of nextLanduseLayers) {
+          layer.visible = layer.key === prevVisible.key;
+        }
+      }
       setState({
         landuseSummary: result.landuseSummary,
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
-        landuseLayers: result.landuseLayers,
+        subcatchmentsGeoJson: subcatchments,
+        landuseLayers: nextLanduseLayers,
       });
       if (getState().comparisonMode) {
         computeComparisonDiffRanges();
@@ -69,9 +77,10 @@ export function createDetectionController({
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       setState({
         soilsSummary: result.soilsSummary,
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
+        subcatchmentsGeoJson: subcatchments,
         soilsLayers: result.soilsLayers,
       });
       updateLayerList();
@@ -86,9 +95,10 @@ export function createDetectionController({
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       setState({
         hillslopesSummary: result.hillslopesSummary,
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
+        subcatchmentsGeoJson: subcatchments,
         hillslopesLayers: result.hillslopesLayers,
       });
       updateLayerList();
@@ -104,10 +114,11 @@ export function createDetectionController({
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       setState({
         watarSummary: result.watarSummary,
         watarRanges: result.watarRanges || {},
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
+        subcatchmentsGeoJson: subcatchments,
         watarLayers: result.watarLayers,
       });
       updateLayerList();
@@ -124,10 +135,11 @@ export function createDetectionController({
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       setState({
         weppSummary: result.weppSummary,
         weppRanges: result.weppRanges || {},
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
+        subcatchmentsGeoJson: subcatchments,
         weppLayers: result.weppLayers,
       });
       if (getState().comparisonMode) {
@@ -147,11 +159,12 @@ export function createDetectionController({
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
     });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       setState({
         weppYearlyLayers: result.weppYearlyLayers,
         weppYearlyMetadata: result.weppYearlyMetadata,
         weppYearlySelectedYear: result.weppYearlySelectedYear,
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
+        subcatchmentsGeoJson: subcatchments,
       });
       if (result.weppYearlyMetadata && result.weppYearlyMetadata.years && result.weppYearlyMetadata.years.length) {
         yearSlider.setRange(result.weppYearlyMetadata.minYear, result.weppYearlyMetadata.maxYear, result.weppYearlySelectedYear);
@@ -189,12 +202,13 @@ export function createDetectionController({
       currentSelectedYear: getState().rapSelectedYear,
     });
     if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       setState({
         rapLayers: result.rapLayers || [],
         rapMetadata: result.rapMetadata || null,
         rapSelectedYear: result.rapSelectedYear || null,
         rapSummary: result.rapSummary || null,
-        subcatchmentsGeoJson: result.subcatchmentsGeoJson || getState().subcatchmentsGeoJson,
+        subcatchmentsGeoJson: subcatchments,
       });
       if (result.rapMetadata && result.rapMetadata.years && result.rapMetadata.years.length) {
         const minYear = result.rapMetadata.years[0];

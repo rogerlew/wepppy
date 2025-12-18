@@ -181,19 +181,13 @@ export function createScenarioManager({
     if (nextScenario === currentState.currentScenarioPath) return;
 
     setValue('currentScenarioPath', nextScenario);
+    // Keep existing subcatchment geometry and overlays visible during scenario transitions.
+    // New summaries/metadata will replace these once detection finishes, avoiding map flicker.
     setState({
-      landuseSummary: null,
-      soilsSummary: null,
-      weppSummary: null,
-      weppYearlySummary: null,
-      weppYearlyMetadata: null,
       weppYearlyRanges: {},
       weppYearlyDiffRanges: {},
       weppYearlyCache: {},
       baseWeppYearlyCache: {},
-      weppYearlySelectedYear: null,
-      weppEventSummary: null,
-      weppYearlyLayers: [],
     });
 
     if (typeof onScenarioChange === 'function') {

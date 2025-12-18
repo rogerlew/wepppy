@@ -223,4 +223,44 @@ test.describe('gl-dashboard layer detection and wiring', () => {
       return ids.some((id) => typeof id === 'string' && id.includes('wepp-event'));
     }).toBeTruthy();
   });
+
+  test('Landuse selection persists after scenario change', async ({ page }) => {
+    await openDashboard(page);
+    await expandSection(page, 'Landuse');
+
+    const inrcov = page.getByLabel('Interrill cover (inrcov)');
+    await expect(inrcov).toBeVisible({ timeout: 15000 });
+    await inrcov.click({ force: true });
+    await expect(inrcov).toBeChecked();
+
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('landuse-lu-inrcov');
+
+    const scenarioSelect = page.locator('#gl-scenario-select');
+    if ((await scenarioSelect.count()) === 0) {
+      test.skip('Scenario selector not available in this run');
+    }
+    const scenarioOptions = scenarioSelect.locator('option[value]:not([value=""])');
+    const optionCount = await scenarioOptions.count();
+    if (optionCount === 0) {
+      test.skip('No alternate scenarios available');
+    }
+    const scenarioValue = await scenarioOptions.first().getAttribute('value');
+    if (!scenarioValue) {
+      test.skip('Scenario option missing value');
+    }
+
+    await scenarioSelect.selectOption(scenarioValue);
+    await expect.poll(async () =>
+      page.evaluate((val) => window.glDashboardState?.currentScenarioPath === val, scenarioValue),
+    ).toBeTruthy();
+
+    await expect.poll(async () =>
+      page.evaluate(() => {
+        const layers = window.glDashboardState?.landuseLayers || [];
+        return layers.some((l) => l && l.key === 'lu-inrcov' && l.visible);
+      }),
+    ).toBeTruthy();
+
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('landuse-lu-inrcov');
+  });
 });

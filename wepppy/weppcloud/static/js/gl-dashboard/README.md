@@ -29,6 +29,8 @@
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
 - Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.
 - Detection failures for expected absences stay console-only; do not surface UI banners/toasts for missing rasters.
+- Scenario selector only affects map overlays (landuse/soils/WEPP layers); graphs use their own scenario list and loaders.
+- Omni scenarios use the same watershed delineation as base (subcatchments/channels/topaz + WEPP IDs); scenario switches reuse existing geometry instead of redrawing hillslopes.
 
 ## Module Contracts (injection signatures)
 - `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`
