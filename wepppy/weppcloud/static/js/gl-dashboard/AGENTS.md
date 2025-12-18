@@ -2,9 +2,9 @@
 
 Developer quick-reference for the GL Dashboard modules. Full contracts and conventions live in `README.md` here, and the user-facing spec is at `wepppy/docs/ui-docs/gl-dashboard.md`.
 
-## Active Refactoring Initiative
+## Status
 
-**See [`REFACTOR_PLAN.md`](./REFACTOR_PLAN.md)** for the multi-phase plan to split `gl-dashboard.js` (4,513 lines) into cohesive submodules.
+Refactor complete; main file is thin wiring. See [`REFACTOR_PLAN.md`](./REFACTOR_PLAN.md) for history, and `README.md` here for current module contracts.
 
 ### Test URLs for Regression Validation
 - **Primary:** `https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard`
@@ -15,22 +15,35 @@ Developer quick-reference for the GL Dashboard modules. Full contracts and conve
 cd wepppy/weppcloud/static-src
 GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard" \
   npm run smoke -- tests/smoke/gl-dashboard-*.spec.js
+GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessive-compulsive/disturbed9002_wbt/gl-dashboard" \
+  npm run smoke -- tests/smoke/gl-dashboard-*.spec.js
 ```
 
 ## Core Conventions
 
 - Read `README.md` for module boundaries (DOM vs. deck vs. data) and critical conventions.
-- Keep `syncGraphModeForContext()` idempotent (context-key guard) to avoid recursion/memory spikes.
-- Hoist init-time variables with `var` if referenced before declaration to avoid TDZ during startup.
-- Guard DOM refs in helpers like `setGraphCollapsed` so tests or partial renders don't throw.
-- Year slider: initialize with climate context, bind listeners, then call `syncGraphModeForContext()`.
-- Graph controls should only stay enabled when RAP cumulative is on, a RAP overlay is visible, WEPP Yearly is active, or a graph radio is selected.
+- Apply `ctx.sitePrefix` to all fetches (browse, gdalinfo, query-engine).
+- Keep graph layout idempotent: `syncGraphLayout()` must short-circuit on unchanged context key.
+- Year slider placement: climate/outlet → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline.
+- Guard DOM refs (slider, graph panel, buttons) so partial renders/tests don’t throw.
+- Graph controls enabled only when RAP cumulative, a RAP/WEPP Yearly overlay is active, or a graph radio is selected.
+
+## Page Load Pipeline
+
+1. **Bootstrap** – `initGlDashboard()` fetches run metadata, builds `ctx`, and calls `initMap()`.
+2. **Layer detection** – `detectRasterLayers()` + `detectLanduseOverlays()` probe browse/gdalinfo endpoints to populate available layers.
+3. **State hydration** – URL hash parsed; default state merged; `setValue()` seeds reactive store.
+4. **Map render** – Deck.gl viewport created; base raster + vector overlays applied via `applyLayers()`.
+5. **UI wiring** – Sidebar controls, year slider, graph panel bound to state subscribers.
+6. **Ready** – First paint complete; user interactions trigger `setValue()` → subscriber cascade.
 
 ## Troubleshooting
 
-- **Graph pane loops/stays open:** Check the context guard in `syncGraphLayout()` and RAP/WEPP visibility checks.
-- **Slider missing:** Confirm metadata loaded via `rapMetadata` or `weppYearlyMetadata`.
+- **Rasters/layers missing:** Confirm `BASE_LAYER_DEFS` paths resolve via `ctx.sitePrefix`; check `detectRasterLayers`/`detectLanduseOverlays` await paths.
+- **Graph pane loops/stays open:** Verify `syncGraphLayout()` context guard and RAP/WEPP visibility checks.
+- **Slider missing:** Confirm `rapMetadata`/`weppYearlyMetadata` are loaded; ensure slider placement rules run.
 - **Legends/tooltips wrong:** Consume legend payloads from `map/layers` instead of recomputing.
+- **Comparison colors wrong:** Ensure `weppDataManager` is injected into scenario manager; diff ranges set before apply.
 
 ## Quick Checks
 
@@ -42,6 +55,7 @@ node --check wepppy/weppcloud/static/js/gl-dashboard.js
 cd wepppy/weppcloud/static-src
 npm run smoke -- tests/smoke/gl-dashboard-state-transitions.spec.js
 npm run smoke -- tests/smoke/gl-dashboard-graph-modes.spec.js
+npm run smoke -- tests/smoke/gl-dashboard-layers.spec.js
 ```
 
 ## Refactoring Guidelines

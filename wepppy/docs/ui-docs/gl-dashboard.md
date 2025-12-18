@@ -2,7 +2,7 @@
 > WebGL-accelerated geospatial dashboard for WEPPcloud runs using deck.gl, providing interactive maps, timeseries graphs, and multi-scenario comparison
 
 **Version:** 1.0  
-**Last Updated:** 2025-12-15  
+**Last Updated:** 2026-02-XX  
 **Status:** Production
 
 ## Table of Contents
@@ -47,53 +47,63 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 - **Query Engine:** DuckDB-powered backend for parquet/GeoJSON queries
 - **Color Scales:** colormap library (viridis, rdbu, winter, jet2) + custom NLCD/soil palettes
 
-### File Structure
+### File Structure (modularized)
 ```
 wepppy/weppcloud/static/js/gl-dashboard/
-├── config.js                    # Constants, layer defs, graph defs, color scales
-├── state.js                     # Centralized state management
-├── colors.js                    # Color utilities and palettes
+├── config.js                    # Constants, layer/graph defs, colormaps
+├── state.js                     # Centralized state + subscriptions
+├── colors.js                    # Colormap + normalization helpers
+├── scenario/manager.js          # Scenario/comparison switching + diff ranges
 ├── data/
-│   └── query-engine.js          # Query Engine fetch helpers
+│   ├── query-engine.js          # Query Engine fetch helpers (sitePrefix-aware)
+│   └── wepp-data.js             # WEPP stat/yearly/event fetch + base/comparison
+├── ui/
+│   ├── graph-mode.js            # Graph mode/layout controller + slider placement
+│   └── year-slider.js           # Timeline control (show/hide/playback)
 ├── graphs/
 │   ├── timeseries-graph.js      # Canvas-based graph renderer
 │   └── graph-loaders.js         # Data loaders for Omni/RAP/WEPP graphs
 ├── layers/
-│   ├── detector.js              # Layer detection (raster, vector, overlays)
-│   └── renderer.js              # Layer rendering logic
-└── map/
-    ├── controller.js            # deck.gl wrapper
-    └── layers.js                # Layer stack builder, utils
-
-wepppy/weppcloud/static/js/
-└── gl-dashboard.js              # Main orchestration script (3939 lines)
+│   ├── detector.js              # Overlay detection (raster, vector, overlays)
+│   ├── orchestrator.js          # Detection sequencing + state wiring
+│   └── renderer.js              # Sidebar/legend DOM rendering
+├── map/
+│   ├── controller.js            # deck.gl wrapper
+│   ├── layers.js                # Layer stack builder, tooltips, legends
+│   └── raster-utils.js          # GeoTIFF/SBS loaders, gdalinfo fetch
+└── gl-dashboard.js              # Thin orchestrator (imports, DI, DOM binding)
 
 wepppy/weppcloud/templates/
 └── gl_dashboard.htm             # Jinja template with CSS and HTML structure
 ```
 
-### Module Dependencies
+### Module Dependencies (high level)
 ```
 gl-dashboard.js (main)
   ├── config.js
   ├── state.js
-  ├── graphs/timeseries-graph.js
+  ├── scenario/manager.js
   ├── data/query-engine.js
+  ├── data/wepp-data.js
+  ├── ui/graph-mode.js
+  ├── ui/year-slider.js
+  ├── graphs/timeseries-graph.js
   ├── graphs/graph-loaders.js
   ├── layers/detector.js
+  ├── layers/orchestrator.js
+  ├── layers/renderer.js
   ├── map/layers.js
   ├── map/controller.js
-  └── layers/renderer.js
+  └── map/raster-utils.js
 ```
 
 **Initialization Flow:**
 1. Load context from `window.GL_DASHBOARD_CONTEXT` (injected by Flask template)
-2. Import all modules via dynamic `import()` calls
+2. Dynamic `import()` of modules; instantiate controllers with dependency injection (state getters/setters, fetch helpers, render callbacks)
 3. Initialize deck.gl controller with basemap tile layer
-4. Detect available layers (raster GeoTIFFs, parquet datasets)
-5. Render layer checkboxes and graph radios in sidebar
-6. Bind UI event listeners (basemap selector, scenario selector, layer toggles, graph mode buttons)
-7. Apply initial layer stack (subcatchments visible by default)
+4. Kick off detection (raster gdalinfo + parquet summaries) asynchronously; render placeholder layer controls immediately, then populate once detection resolves (non-blocking page load)
+5. Bind UI event listeners (basemap selector, scenario/comparison, layer toggles, graph mode buttons, year slider)
+6. Apply initial layer stack (subcatchments visible by default); graph layout sync is idempotent
 
 ## Component Map
 
@@ -1177,140 +1187,17 @@ yearSlider.input.addEventListener('input', (e) => {
 
 ## Testing Strategy
 
-### Unit Tests
-**Target:** Individual modules (state.js, config.js, detector.js)  
-**Framework:** Jest or Vitest  
-**Coverage:**
-- State updates trigger correct notifications
-- Color scale functions return valid RGBA arrays
-- Layer detection parses gdalinfo correctly
-- Query Engine payload construction
-
-**Example:**
-```javascript
-// state.test.js
-import { setState, getValue, subscribe } from '../state.js';
-
-test('setState triggers subscriber with changed keys', () => {
-  let notifiedKeys = [];
-  subscribe((state, keys) => { notifiedKeys = keys; }, ['rapSelectedYear']);
-  
-  setState({ rapSelectedYear: 2023 });
-  expect(notifiedKeys).toEqual(['rapSelectedYear']);
-  expect(getValue('rapSelectedYear')).toBe(2023);
-});
-```
-
-### Integration Tests
-**Target:** Full dashboard with mocked deck.gl and Query Engine  
-**Framework:** Playwright with custom fixtures  
-**Coverage:**
-- Layer toggle updates map (verify deck.gl layer count)
-- Year slider updates graph cursor
-- Scenario selector refetches overlays
-- Comparison mode applies rdbu colormap
-
-**Fixture Strategy:**
-```javascript
-// fixtures/deck-mock.js
-export const mockDeck = {
-  Deck: class MockDeck {
-    constructor(props) {
-      this.props = props;
-      this.layers = props.layers || [];
-    }
-    setProps(props) {
-      if (props.layers) this.layers = props.layers;
-    }
-  },
-  GeoJsonLayer: class MockGeoJsonLayer {
-    constructor(props) { this.props = props; }
-  },
-  TileLayer: class MockTileLayer {
-    constructor(props) { this.props = props; }
-  }
-};
-
-// Test usage
-beforeEach(() => {
-  global.deck = mockDeck;
-});
-
-test('applyLayers adds GeoJsonLayer to stack', () => {
-  const controller = createMapController({ ... });
-  const layers = [new deck.GeoJsonLayer({ id: 'test' })];
-  controller.applyLayers(layers);
-  expect(controller.deckgl.layers).toHaveLength(1);
-});
-```
-
-### Visual Regression Tests
-**Target:** Screenshot comparison for UI consistency  
-**Tools:** Playwright `page.screenshot()` + pixelmatch  
-**Coverage:**
-- Basemap rendering (each basemap type)
-- Legend panel layout (discrete vs. continuous)
-- Graph rendering (line, boxplot, bars)
-- Comparison mode colormap
-
-**Example:**
-```javascript
-test('RAP layer shows correct legend', async ({ page }) => {
-  await page.goto('/runs/test/dev_unit_1/gl-dashboard');
-  await page.click('#layer-RAP-AFG');
-  await page.waitForTimeout(1000);
-  
-  const legendPanel = await page.$('#gl-legends-panel');
-  const screenshot = await legendPanel.screenshot();
-  expect(screenshot).toMatchSnapshot('rap-afg-legend.png');
-});
-```
-
-### Smoke Tests (Playwright)
-**Purpose:** Verify dashboard loads and basic interactions work in production-like environment  
-**Script:** `/workdir/wepppy/tests/gl-dashboard-exploration.spec.mjs`  
-**Checks:**
-- Page loads without console errors
-- Map container renders
-- Layer list populates
-- Layer toggle updates legends
-- Graph panel expands/collapses
-- Year slider appears when RAP activated
-- Omni graph renders boxplot
-
-**Environment Variables:**
-- `BASE_URL`: Dashboard base URL (e.g., `http://localhost:8080`)
-- `RUNID`: Test run ID
-- `CONFIG`: Configuration slug (e.g., `dev_unit_1`)
-
-**Run Command:**
-```bash
-export BASE_URL=http://localhost:8080
-export RUNID=test-run-id
-export CONFIG=dev_unit_1
-npx playwright test tests/gl-dashboard-exploration.spec.mjs --headed
-```
-
-### Test Data Fixtures
-**Location:** `tests/gl-dashboard/fixtures/`  
-**Contents:**
-- `subcatchments.geojson`: Minimal GeoJSON with 3 subcatchments
-- `rap-summary.json`: RAP query result for 2000-2023
-- `wepp-yearly-summary.json`: WEPP yearly query result
-- `omni-soil-loss.json`: Omni boxplot data
-- `gdalinfo-nlcd.json`: Mocked gdalinfo response
-
-**Usage:**
-```javascript
-import subcatchments from './fixtures/subcatchments.geojson';
-import rapSummary from './fixtures/rap-summary.json';
-
-test('buildRapLayer with fixture data', () => {
-  const layer = buildRapLayer(rapSummary, 'AFG', viridisScale, { min: 0, max: 50 });
-  expect(layer.id).toBe('rap-AFG');
-  expect(layer.props.data).toEqual(subcatchments);
-});
-```
+- Smoke (Playwright): run from `wepppy/weppcloud/static-src`
+  - `gl-dashboard-state-transitions.spec.js`
+  - `gl-dashboard-graph-modes.spec.js`
+  - `gl-dashboard-layers.spec.js`
+  - `gl-dashboard-cumulative.spec.js`
+  - URLs:
+    - `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js`
+    - `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessive-compulsive/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js`
+- Unit/Integration: mock deck.gl and Query Engine; validate state updates, detector URL construction (sitePrefix-aware), color scales, graph layout idempotence, slider placement rules.
+- Visual checks: comparison mode shows diverging legend when base/diff ranges available; slider placement matches context (climate/outlet bottom; RAP/WEPP Yearly top; cumulative/omni hidden).
+- Fixtures: `tests/gl-dashboard/fixtures/` holds gdalinfo/parquet/GeoJSON stubs and canned Query Engine responses for local tests.
 
 ## Known Issues and Workarounds
 

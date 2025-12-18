@@ -62,7 +62,7 @@ GL_DASHBOARD_URL="..." npm run smoke -- tests/smoke/gl-dashboard-state-transitio
 
 ### Remaining in gl-dashboard.js (to extract)
 
-1. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
+None – orchestrator is now thin wiring; init/graph/layout fixes landed. Keep monitoring for regressions.
 
 ---
 
@@ -339,19 +339,10 @@ export function createWeppDataManager({
 ---
 
 ### Phase 6: Initialization Cleanup
-**Risk:** Low | **Lines:** ~300 | **Duration:** 1-2 hours
+**Risk:** Low | **Lines:** ~300 | **Duration:** 1-2 hours  
+**Status:** Complete – orchestrator reduced to wiring; graph-mode slider placement clarified; cumulative labels/colors fixed; layer panel resilience improved; smoke green on both runs.
 
-**Objective:** Reduce orchestrator to pure wiring
-
-After phases 1-5, `gl-dashboard.js` should contain only:
-- Dynamic module imports
-- Module instantiation with dependency injection
-- DOM element lookups
-- Event listener wiring
-- `initializeDashboard()` call
-- Global hook exposure (`window.glDashboard*`)
-
-**Target size:** ~500-800 lines (down from 4,513)
+**Outcome:** `gl-dashboard.js` is primarily imports, dependency injection, DOM lookups, event binding, initializeDashboard, and global hooks. Target size met (~500-800 lines).
 
 ---
 

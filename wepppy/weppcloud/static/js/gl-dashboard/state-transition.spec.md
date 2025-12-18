@@ -1,5 +1,5 @@
 # GL Dashboard State Transitions Spec
-> Data-driven graph/slider layout state to prevent regressions from fragile imperative code.
+> Data-driven graph/slider layout state to prevent regressions from fragile imperative code. Status: implemented; covered by `gl-dashboard-graph-modes.spec.js` and `gl-dashboard-state-transitions.spec.js`.
 
 ## Goals
 - Single source of truth for graph modes, slider placement, and focus per context.
