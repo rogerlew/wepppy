@@ -31,11 +31,7 @@ export const GRAPH_SLIDER_PLACEMENTS = Object.freeze({
 });
 
 /**
- * @typedef {'climate_yearly' | 'wepp_yearly' | 'rap' | 'cumulative' | 'omni' | 'default'} GraphContextKey
- */
-
-/**
- * @enum {GraphContextKey}
+ * @enum {'climate_yearly' | 'wepp_yearly' | 'rap' | 'cumulative' | 'omni' | 'default'}
  */
 export const GRAPH_CONTEXT_KEYS = Object.freeze({
   CLIMATE_YEARLY: 'climate_yearly',
@@ -45,6 +41,22 @@ export const GRAPH_CONTEXT_KEYS = Object.freeze({
   OMNI: 'omni',
   DEFAULT: 'default',
 });
+
+/**
+ * @typedef {typeof GRAPH_CONTEXT_KEYS[keyof typeof GRAPH_CONTEXT_KEYS]} GraphContextKey
+ */
+
+/**
+ * @enum {'layer' | 'climate'}
+ */
+export const YEAR_SLIDER_CONTEXTS = Object.freeze({
+  LAYER: 'layer',
+  CLIMATE: 'climate',
+});
+
+/**
+ * @typedef {typeof YEAR_SLIDER_CONTEXTS[keyof typeof YEAR_SLIDER_CONTEXTS]} YearSliderContext
+ */
 
 export const COMPARISON_MEASURES = [
   'cancov',

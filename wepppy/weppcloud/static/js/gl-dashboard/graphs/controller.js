@@ -1,4 +1,4 @@
-import { GRAPH_CONTEXT_KEYS } from '../config.js';
+import { GRAPH_CONTEXT_KEYS, GRAPH_MODES } from '../config.js';
 
 /**
  * Graph list, activation, and timeseries wiring for gl-dashboard.
@@ -33,6 +33,8 @@ export function createGraphController({
     ensureGraphExpanded,
   } = graphModeController;
   const { OMNI, CLIMATE_YEARLY } = GRAPH_CONTEXT_KEYS;
+  const VALID_GRAPH_MODES = Object.values(GRAPH_MODES);
+  const normalizeGraphMode = (value) => (VALID_GRAPH_MODES.includes(value) ? value : null);
 
   function ensureGraphLoaders() {
     if (!graphLoaders) {
@@ -445,7 +447,10 @@ export function createGraphController({
   function bindModeButtons() {
     if (graphModeButtons && graphModeButtons.length) {
       graphModeButtons.forEach((btn) => {
-        btn.addEventListener('click', () => setGraphMode(btn.dataset.graphMode, { source: 'user' }));
+        btn.addEventListener('click', () => {
+          const nextMode = normalizeGraphMode(btn.dataset.graphMode) || GRAPH_MODES.SPLIT;
+          setGraphMode(nextMode, { source: 'user' });
+        });
       });
     }
   }

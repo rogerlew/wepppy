@@ -25,8 +25,6 @@ async function expandSection(page, title) {
       details.open = true;
     }
   });
-  // Scroll into view to prevent off-viewport click failures on nested inputs.
-  await summary.scrollIntoViewIfNeeded();
 }
 
 function graphPanel(page) {
@@ -51,6 +49,13 @@ async function requireSection(page, title) {
   if ((await summary.count()) === 0) {
     test.skip(`${title} section not present in this run`);
   }
+}
+
+async function clickLanduseDominant(page) {
+  await expandSection(page, 'Landuse');
+  const landuseDominant = page.getByLabel('Dominant landuse').first();
+  await expect(landuseDominant).toBeVisible({ timeout: 15000 });
+  await landuseDominant.click({ force: true });
 }
 
 test.describe('gl-dashboard state transitions', () => {
@@ -79,10 +84,7 @@ test.describe('gl-dashboard state transitions', () => {
     const rapCumulative = page.getByLabel('Cumulative Cover');
     await rapCumulative.scrollIntoViewIfNeeded();
     await rapCumulative.click({ force: true });
-    await expandSection(page, 'Landuse');
-    const landuseDominant = page.getByLabel('Dominant landuse');
-    await landuseDominant.scrollIntoViewIfNeeded();
-    await landuseDominant.click({ force: true });
+    await clickLanduseDominant(page);
     await page.waitForTimeout(1000);
     await expectCollapsed(page);
   });
@@ -103,10 +105,7 @@ test.describe('gl-dashboard state transitions', () => {
     const rapCumulative = page.getByLabel('Cumulative Cover');
     await rapCumulative.scrollIntoViewIfNeeded();
     await rapCumulative.click({ force: true });
-    await expandSection(page, 'Landuse');
-    const landuseDominant = page.getByLabel('Dominant landuse');
-    await landuseDominant.scrollIntoViewIfNeeded();
-    await landuseDominant.click({ force: true });
+    await clickLanduseDominant(page);
     await page.waitForTimeout(1000);
     await expectCollapsed(page);
   });

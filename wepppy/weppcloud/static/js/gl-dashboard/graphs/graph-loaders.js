@@ -934,10 +934,10 @@ export function createGraphLoaders(deps) {
 
     try {
       const valueColumn = WEPP_YEARLY_COLUMN_MAP[overlay.mode] || overlay.mode;
-      const dataPayload = {
+        const dataPayload = {
         datasets: [
           { path: 'wepp/output/interchange/loss_pw0.all_years.hill.parquet', alias: 'loss' },
-          { path: 'watershed/chillslopes.parquet', alias: 'hill' },
+          { path: 'watershed/hillslopes.parquet', alias: 'hill' },
         ],
         joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
         columns: ['hill.topaz_id AS topaz_id', 'loss.year AS year', `loss.${valueColumn} AS value`, 'hill.area AS area'],

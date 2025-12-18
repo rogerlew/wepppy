@@ -1,4 +1,9 @@
-import { GRAPH_CONTEXT_KEYS, GRAPH_MODES, GRAPH_SLIDER_PLACEMENTS } from '../config.js';
+import {
+  GRAPH_CONTEXT_KEYS,
+  GRAPH_MODES,
+  GRAPH_SLIDER_PLACEMENTS,
+  YEAR_SLIDER_CONTEXTS,
+} from '../config.js';
 
 /**
  * @typedef {Object} GraphModeDomRefs
@@ -46,7 +51,7 @@ import { GRAPH_CONTEXT_KEYS, GRAPH_MODES, GRAPH_SLIDER_PLACEMENTS } from '../con
 /**
  * @typedef {Object} YearSliderController
  * @property {HTMLElement | null} el
- * @property {(ctx?: 'layer' | 'climate') => void} show
+ * @property {(ctx?: import('../config.js').YearSliderContext) => void} show
  * @property {() => void} hide
  */
 
@@ -97,6 +102,7 @@ export function createGraphModeController({
   const graphModeButtons = domRefs?.graphModeButtons || null;
   const getGraph = typeof timeseriesGraph === 'function' ? timeseriesGraph : () => timeseriesGraph;
   const VALID_GRAPH_MODES = Object.values(GRAPH_MODES);
+  const normalizeGraphMode = (value) => (VALID_GRAPH_MODES.includes(value) ? value : null);
 
   let graphModeUserOverride = null;
   let graphControlsEnabled = true;
@@ -173,11 +179,11 @@ export function createGraphModeController({
       return;
     }
     if (position === GRAPH_SLIDER_PLACEMENTS.TOP) {
-      slider.show('layer');
+      slider.show(YEAR_SLIDER_CONTEXTS.LAYER);
       return;
     }
     if (position === GRAPH_SLIDER_PLACEMENTS.BOTTOM) {
-      slider.show('climate');
+      slider.show(YEAR_SLIDER_CONTEXTS.CLIMATE);
       return;
     }
     slider.hide();
@@ -198,12 +204,13 @@ export function createGraphModeController({
     const omniFocused = currentGraphSource() === GRAPH_CONTEXT_KEYS.OMNI && (getState().graphFocus || false);
 
     buttons.forEach((btn) => {
-      const isActive = btn.dataset.graphMode === mode;
+      const btnMode = normalizeGraphMode(btn.dataset.graphMode);
+      const isActive = btnMode === mode;
       btn.classList.toggle('is-active', isActive);
       btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-      const isMin = btn.dataset.graphMode === GRAPH_MODES.MINIMIZED;
-      const isSplit = btn.dataset.graphMode === GRAPH_MODES.SPLIT;
-      const disable = (!graphControlsEnabled && !isMin) || (omniFocused && isSplit);
+      const isMin = btnMode === GRAPH_MODES.MINIMIZED;
+      const isSplit = btnMode === GRAPH_MODES.SPLIT;
+      const disable = (!btnMode || (!graphControlsEnabled && !isMin)) || (omniFocused && isSplit);
       if (disable) {
         btn.classList.add('is-disabled');
         btn.setAttribute('aria-disabled', 'true');

@@ -1,3 +1,8 @@
+import { YEAR_SLIDER_CONTEXTS } from '../config.js';
+
+/**
+ * @typedef {import('../config.js').YearSliderContext} YearSliderContext
+ */
 /**
  * @typedef {Object} YearSliderElements
  * @property {HTMLElement | null} el
@@ -13,10 +18,6 @@
  * @property {number} [startYear]
  * @property {number} [endYear]
  * @property {boolean} [hasObserved]
- */
-
-/**
- * @typedef {'layer' | 'climate'} YearSliderContext
  */
 
 /**
@@ -62,8 +63,11 @@ export function createYearSlider({
   let initialized = false;
   let playing = false;
   let intervalId = null;
-  let context = 'layer';
+  let context = YEAR_SLIDER_CONTEXTS.LAYER;
   let playButton = playBtn || null;
+  const VALID_CONTEXTS = Object.values(YEAR_SLIDER_CONTEXTS);
+
+  const normalizeContext = (ctx) => (VALID_CONTEXTS.includes(ctx) ? ctx : YEAR_SLIDER_CONTEXTS.LAYER);
 
   const updateDisplay = () => {
     if (valueEl) {
@@ -118,21 +122,22 @@ export function createYearSlider({
     }
   };
 
-  const show = (ctx = 'layer') => {
+  const show = (ctx = YEAR_SLIDER_CONTEXTS.LAYER) => {
     if (!el) return;
-    const resolvedContext = ctx || 'layer';
+    const resolvedContext = normalizeContext(ctx);
     context = resolvedContext;
 
     const container = document.getElementById('gl-graph-container');
     const slot = document.getElementById('gl-graph-year-slider');
-    const target = resolvedContext === 'climate' ? (container || slot) : (slot || container);
+    const target =
+      resolvedContext === YEAR_SLIDER_CONTEXTS.CLIMATE ? (container || slot) : (slot || container);
 
     if (target && el.parentElement !== target) {
       target.appendChild(el);
     }
 
     if (container) {
-      container.classList.toggle('has-bottom-slider', resolvedContext === 'climate');
+      container.classList.toggle('has-bottom-slider', resolvedContext === YEAR_SLIDER_CONTEXTS.CLIMATE);
     }
 
     el.classList.add('is-visible');
