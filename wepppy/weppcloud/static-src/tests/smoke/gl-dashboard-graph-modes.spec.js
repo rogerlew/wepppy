@@ -8,7 +8,8 @@ const targetUrl =
     : 'https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard');
 
 async function openDashboard(page) {
-  await page.goto(targetUrl, { waitUntil: 'networkidle' });
+  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle', { timeout: 45000 }).catch(() => {});
   await expect(page.locator('#gl-dashboard-map')).toBeVisible();
 }
 
@@ -116,6 +117,7 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     const waterYear = page.getByLabel('Water Year');
     await waterYear.click({ force: true });
 
+    await expect(page.locator('#graph-climate-yearly')).toBeChecked();
     await expect.poll(async () => getGraphSource(page)).toBe('climate_yearly');
     await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('climate-yearly');
     await expect.poll(async () => getActiveMode(page)).toBe('full');
@@ -158,12 +160,8 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     await expect.poll(async () => getActiveMode(page)).toBe('full');
 
     const geom = await getGeometry(page);
-    if (geom.visible) {
-      // If another yearly context kept it alive, it should remain in the correct slot.
-      expect(['gl-graph-container', 'gl-graph-year-slider']).toContain(geom.parentId);
-    } else {
-      expect(geom.visible).toBeFalsy();
-    }
+    expect(geom.visible).toBeFalsy();
+    expect(geom.hasBottom).toBe(false);
   });
 
   test('Slider visibility off in Cumulative when no yearly context remains', async ({ page }) => {
@@ -176,6 +174,54 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
 
     const visibleCount = await page.locator('#gl-year-slider.is-visible').count();
     expect(visibleCount).toBe(0);
+  });
+
+  test('Sediment discharge graph shows bottom year slider', async ({ page }) => {
+    await openDashboard(page);
+    await requireSection(page, 'Omni Scenarios');
+    await expandSection(page, 'Omni Scenarios');
+    await page.locator('#graph-omni-outlet-sediment').click({ force: true });
+
+    await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('omni-outlet-sediment');
+    await expect.poll(async () => getGraphSource(page)).toBe('omni');
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeTruthy();
+    expect(geom.parentId).toBe('gl-graph-container');
+    expect(geom.hasBottom).toBe(true);
+  });
+
+  test('Stream discharge graph shows bottom year slider', async ({ page }) => {
+    await openDashboard(page);
+    await requireSection(page, 'Omni Scenarios');
+    await expandSection(page, 'Omni Scenarios');
+    await page.locator('#graph-omni-outlet-stream').click({ force: true });
+
+    await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('omni-outlet-stream');
+    await expect.poll(async () => getGraphSource(page)).toBe('omni');
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeTruthy();
+    expect(geom.parentId).toBe('gl-graph-container');
+    expect(geom.hasBottom).toBe(true);
+  });
+
+  test('Year slider hides after switching from Climate Yearly to Soil Loss hillslopes', async ({ page }) => {
+    await openDashboard(page);
+    await expandSection(page, 'Climate Yearly');
+    await page.locator('#graph-climate-yearly').click({ force: true });
+    await expect.poll(async () => getGraphSource(page)).toBe('climate_yearly');
+
+    await requireSection(page, 'Omni Scenarios');
+    await expandSection(page, 'Omni Scenarios');
+    await page.locator('#graph-omni-soil-loss-hill').click({ force: true });
+
+    await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('omni-soil-loss-hill');
+    await expect.poll(async () => getGraphSource(page)).toBe('omni');
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeFalsy();
+    expect(geom.hasBottom).toBe(false);
   });
 
   test('Year slider playback advances year in climate context', async ({ page }) => {

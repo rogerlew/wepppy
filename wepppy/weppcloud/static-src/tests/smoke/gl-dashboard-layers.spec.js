@@ -8,7 +8,8 @@ const targetUrl =
     : 'https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard');
 
 async function openDashboard(page) {
-  await page.goto(targetUrl, { waitUntil: 'networkidle' });
+  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+  await page.waitForLoadState('networkidle', { timeout: 45000 }).catch(() => {});
   await expect(page.locator('#gl-dashboard-map')).toBeVisible();
 }
 
@@ -44,6 +45,15 @@ async function getDetectedLayer(page, key) {
       size: layer.canvas ? { w: layer.canvas.width, h: layer.canvas.height } : null,
     };
   }, key);
+}
+
+async function waitForSubcatchments(page) {
+  await expect.poll(async () =>
+    page.evaluate(() => {
+      const st = window.glDashboardState;
+      return !!(st && st.subcatchmentsGeoJson && st.subcatchmentsGeoJson.features && st.subcatchmentsGeoJson.features.length);
+    }),
+  ).toBeTruthy();
 }
 
 test.describe('gl-dashboard layer detection and wiring', () => {
@@ -84,6 +94,12 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     expect(landuse.bounds[1]).toBeGreaterThan(-90);
     expect(landuse.bounds[1]).toBeLessThan(90);
     expect(landuse.hasCanvas || landuse.size).toBeTruthy();
+    const legendSection = page
+      .locator('#gl-legends-content .gl-legend-section')
+      .filter({ hasText: 'Landuse (nlcd.tif)' })
+      .first();
+    await expect(legendSection).toBeVisible({ timeout: 10000 });
+    await expect(legendSection).toContainText(/NLCD/i);
   });
 
   test('raster: soils ssurgo.tif toggles bitmap layer', async ({ page }) => {
@@ -102,5 +118,23 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     expect(soils.bounds[1]).toBeGreaterThan(-90);
     expect(soils.bounds[1]).toBeLessThan(90);
     expect(soils.hasCanvas || soils.size).toBeTruthy();
+    const legendSection = page
+      .locator('#gl-legends-content .gl-legend-section')
+      .filter({ hasText: 'Soils (ssurgo.tif)' })
+      .first();
+    await expect(legendSection).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Subcatchment Labels toggle shows/hides label layer', async ({ page }) => {
+    await openDashboard(page);
+    await waitForSubcatchments(page);
+    const labelsToggle = page.locator('#gl-subcatchment-labels-toggle');
+    await expect(labelsToggle).toBeVisible({ timeout: 15000 });
+
+    await labelsToggle.check({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('subcatchment-labels');
+
+    await labelsToggle.uncheck({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('subcatchment-labels');
   });
 });

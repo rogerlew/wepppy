@@ -34,9 +34,19 @@ export function createGraphModeController({
     climate_yearly: { mode: 'full', slider: 'bottom', focus: true },
     wepp_yearly: { mode: 'split', slider: 'top', focus: false },
     rap: { mode: 'split', slider: 'top', focus: false },
-    cumulative: { mode: 'full', slider: 'inherit', focus: true },
-    omni: { mode: 'full', slider: 'inherit', focus: true },
+    cumulative: { mode: 'full', slider: 'hide', focus: true },
+    omni: { mode: 'full', slider: 'hide', focus: true },
     default: { mode: 'split', slider: 'hide', focus: false },
+  };
+
+  const GRAPH_SLIDER_OVERRIDES = {
+    'climate-yearly': 'bottom',
+    'cumulative-contribution': 'hide',
+    'omni-outlet-sediment': 'bottom',
+    'omni-outlet-stream': 'bottom',
+    'omni-soil-loss-hill': 'hide',
+    'omni-soil-loss-chn': 'hide',
+    'omni-runoff-hill': 'hide',
   };
 
   function positionYearSlider(position) {
@@ -189,20 +199,29 @@ export function createGraphModeController({
     const source = currentGraphSource();
     const rapActive = isRapActive(st);
     const yearlyActive = isWeppYearlyActive(st);
+    const sliderOverride = activeKey ? GRAPH_SLIDER_OVERRIDES[activeKey] : null;
 
-    if (activeKey === 'climate-yearly') return { key: 'climate_yearly', graphCapable: true };
-    if (activeKey === 'cumulative-contribution') return { key: 'cumulative', graphCapable: true };
-    if (activeKey && activeKey.startsWith('omni')) return { key: 'omni', graphCapable: true };
+    if (activeKey === 'climate-yearly') {
+      return { key: 'climate_yearly', graphCapable: true, slider: sliderOverride || 'bottom' };
+    }
+    if (activeKey === 'cumulative-contribution') {
+      return { key: 'cumulative', graphCapable: true, slider: sliderOverride || 'hide' };
+    }
+    if (activeKey && activeKey.startsWith('omni')) {
+      return { key: 'omni', graphCapable: true, slider: sliderOverride || 'hide' };
+    }
     if (!activeKey) {
       if (rapActive) return { key: 'rap', graphCapable: true };
       if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
       return { key: 'default', graphCapable: false };
     }
 
-    if (source === 'climate_yearly') return { key: 'climate_yearly', graphCapable: true };
+    if (source === 'climate_yearly') {
+      return { key: 'climate_yearly', graphCapable: true, slider: sliderOverride || 'bottom' };
+    }
     if (source === 'rap' && rapActive) return { key: 'rap', graphCapable: true };
     if (source === 'wepp_yearly' && yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-    if (source === 'omni') return { key: 'omni', graphCapable: true };
+    if (source === 'omni') return { key: 'omni', graphCapable: true, slider: sliderOverride || 'hide' };
 
     if (rapActive) return { key: 'rap', graphCapable: true };
     if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
@@ -222,7 +241,7 @@ export function createGraphModeController({
     const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS.default;
     const override = graphModeUserOverride;
     const graphCapable = context.graphCapable;
-    const sliderPlacement = graphCapable ? def.slider : 'hide';
+    const sliderPlacement = graphCapable ? (context.slider || def.slider) : 'hide';
     const mode = graphCapable ? (override || def.mode) : 'minimized';
     const focus = override ? mode === 'full' : def.focus || mode === 'full';
     const sliderReady = !!(yearSlider && yearSlider.el);

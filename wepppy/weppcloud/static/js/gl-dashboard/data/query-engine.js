@@ -40,18 +40,26 @@ export function createQueryEngine(ctx) {
   }
 
   async function postQueryEngineForScenario(payload, scenarioPath) {
-    let queryPath = `runs/${ctx.runid}`;
-    if (ctx.config) {
-      queryPath += `/${ctx.config}`;
+    const slug = scenarioPath
+      ? scenarioPath.replace(/\/$/, '').split('/').pop()
+      : '';
+    const runPrefix = ctx.runid && ctx.runid.length >= 2 ? ctx.runid.slice(0, 2) : null;
+    const scenarioDir =
+      slug && runPrefix ? `/wc1/runs/${runPrefix}/${ctx.runid}/_pups/omni/scenarios/${slug}` : null;
+
+    let targetUrl;
+    if (scenarioDir) {
+      targetUrl = `/query-engine/runs/${encodeURIComponent(scenarioDir)}/query`;
+    } else {
+      const basePath = ctx.config ? `runs/${ctx.runid}/${ctx.config}` : `runs/${ctx.runid}`;
+      targetUrl = `/query-engine/${basePath}/query`;
     }
-    if (scenarioPath) {
-      queryPath += `/${scenarioPath}`;
-    }
-    const targetUrl = `/query-engine/${queryPath}/query`;
+
+    const body = JSON.stringify(payload);
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload),
+      body,
     });
     if (!resp.ok) return null;
     return resp.json();

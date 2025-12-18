@@ -165,10 +165,17 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     const width = image.getWidth();
     const height = image.getHeight();
     const raster = await image.readRasters({ interleave: true, samples: [0] });
-    const values = raster[0] ? raster : new Float32Array(raster.length);
+    const values = ArrayBuffer.isView(raster) ? raster : raster[0];
     const canvas = colorize(values, width, height, colorMap);
     const bounds = image.getBoundingBox();
-    return { canvas, bounds };
+    return {
+      canvas,
+      bounds,
+      values,
+      width,
+      height,
+      sampleMode: colorMap ? 'palette' : 'scalar',
+    };
   }
 
   return { loadRaster, loadSbsImage, fetchGdalInfo };

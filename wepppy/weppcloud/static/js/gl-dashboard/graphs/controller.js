@@ -52,6 +52,14 @@ export function createGraphController({
     return { measureKey, scenarioPaths: selected };
   }
 
+  function ensureClimateGraphSelected() {
+    setValue('activeGraphKey', 'climate-yearly');
+    const radio = document.getElementById('graph-climate-yearly');
+    if (radio && !radio.checked) {
+      radio.checked = true;
+    }
+  }
+
   function getClimateGraphOptions() {
     const waterYear = getState().climateWaterYear;
     const startMonth = waterYear ? getState().climateStartMonth || 10 : 1;
@@ -319,6 +327,7 @@ export function createGraphController({
     }
     setValue('climateWaterYear', waterYear);
     setValue('climateStartMonth', nextStart);
+    ensureClimateGraphSelected();
     const select = document.getElementById('gl-climate-start-month');
     if (select) {
       select.disabled = !waterYear;
@@ -331,6 +340,7 @@ export function createGraphController({
   function handleClimateStartMonthChange(val) {
     const month = Math.min(12, Math.max(1, Number(val) || 10));
     setValue('climateStartMonth', month);
+    ensureClimateGraphSelected();
     const options = getClimateGraphOptions();
     activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
   }
