@@ -50,6 +50,61 @@ export const CUMULATIVE_MEASURE_OPTIONS = [
   { key: 'sediment_yield', label: 'Sed Yield (t)' },
 ];
 
+export const NLCD_COLORMAP = {
+  11: '#5475A8',
+  12: '#ffffff',
+  21: '#e6d6d6',
+  22: '#ccb1b1',
+  23: '#ff0000',
+  24: '#b50000',
+  31: '#d2cdc0',
+  41: '#85c77e',
+  42: '#38814e',
+  43: '#d4e7b0',
+  51: '#af963c',
+  52: '#dcca8f',
+  71: '#fde9aa',
+  72: '#d1d182',
+  73: '#a3cc51',
+  74: '#82ba9e',
+  81: '#fbf65d',
+  82: '#ca9146',
+  90: '#c8e6f8',
+  95: '#64b3d5',
+};
+
+export const NLCD_LABELS = {
+  11: 'Open Water',
+  12: 'Perennial Ice/Snow',
+  21: 'Developed, Open Space',
+  22: 'Developed, Low Intensity',
+  23: 'Developed, Medium Intensity',
+  24: 'Developed, High Intensity',
+  31: 'Barren Land',
+  41: 'Deciduous Forest',
+  42: 'Evergreen Forest',
+  43: 'Mixed Forest',
+  51: 'Dwarf Scrub',
+  52: 'Shrub/Scrub',
+  71: 'Grassland/Herbaceous',
+  72: 'Sedge/Herbaceous',
+  73: 'Lichens',
+  74: 'Moss',
+  81: 'Pasture/Hay',
+  82: 'Cultivated Crops',
+  90: 'Woody Wetlands',
+  95: 'Emergent Herbaceous Wetlands',
+};
+
+export const RAP_BAND_LABELS = {
+  annual_forb_grass: 'Annual Forb & Grass',
+  bare_ground: 'Bare Ground',
+  litter: 'Litter',
+  perennial_forb_grass: 'Perennial Forb & Grass',
+  shrub: 'Shrub',
+  tree: 'Tree',
+};
+
 export const DEFAULT_CONTROLLER_OPTIONS = {
   dragPan: true,
   dragRotate: false,

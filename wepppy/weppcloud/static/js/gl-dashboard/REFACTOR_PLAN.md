@@ -62,8 +62,7 @@ GL_DASHBOARD_URL="..." npm run smoke -- tests/smoke/gl-dashboard-state-transitio
 
 ### Remaining in gl-dashboard.js (to extract)
 
-1. **WEPP/Layer Data Functions** (~600 lines) - Refresh handlers, range computation
-2. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
+1. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
 
 ---
 
@@ -280,7 +279,8 @@ export {
 ---
 
 ### Phase 5: WEPP Data Handlers
-**Risk:** Medium | **Lines:** ~600 | **Duration:** 3-4 hours
+**Risk:** Medium | **Lines:** ~600 | **Duration:** 3-4 hours  
+**Status:** Complete – `gl-dashboard/data/wepp-data.js` created; gl-dashboard wired to manager; state-backed ranges; scenario/comparison hooks intact; Playwright smoke passed on both test runs.
 
 **Extract to:** `gl-dashboard/data/wepp-data.js`
 
@@ -332,6 +332,9 @@ export function createWeppDataManager({
 - WEPP statistic dropdown changes (mean, p90, cv)
 - WEPP Yearly slider changes
 - WEPP Event date picker changes
+- Playwright smoke (both URLs):  
+  - Primary: `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js` (21 passed, 1 skipped)  
+  - Secondary: `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessive-compulsive/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js` (16 passed, 6 skipped)
 
 ---
 

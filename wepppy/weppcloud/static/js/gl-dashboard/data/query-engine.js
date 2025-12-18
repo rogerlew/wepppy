@@ -1,23 +1,23 @@
 import { getValue } from '../state.js';
 
 /**
- * Query Engine HTTP helpers. No DOM/deck usage; relies on window.location and ctx.
+ * Query Engine HTTP helpers. No DOM/deck usage; relies on ctx for run context.
  * Returns POST wrappers scoped to the current run (and optional scenario).
+ * 
+ * Query Engine runs as a separate service at /query-engine/ (no sitePrefix).
+ * URL format: /query-engine/runs/{runid}/{config}/query
  */
-function getOrigin() {
-  return window.location.origin || `${window.location.protocol}//${window.location.host}`;
-}
-
 export function createQueryEngine(ctx) {
-  const origin = getOrigin();
-
   async function postQueryEngine(payload) {
     let queryPath = `runs/${ctx.runid}`;
+    if (ctx.config) {
+      queryPath += `/${ctx.config}`;
+    }
     const scenarioPath = getValue('currentScenarioPath');
     if (scenarioPath) {
       queryPath += `/${scenarioPath}`;
     }
-    const targetUrl = `${origin}/query-engine/${queryPath}/query`;
+    const targetUrl = `/query-engine/${queryPath}/query`;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -28,7 +28,8 @@ export function createQueryEngine(ctx) {
   }
 
   async function postBaseQueryEngine(payload) {
-    const targetUrl = `${origin}/query-engine/runs/${ctx.runid}/query`;
+    const basePath = ctx.config ? `runs/${ctx.runid}/${ctx.config}` : `runs/${ctx.runid}`;
+    const targetUrl = `/query-engine/${basePath}/query`;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -40,10 +41,13 @@ export function createQueryEngine(ctx) {
 
   async function postQueryEngineForScenario(payload, scenarioPath) {
     let queryPath = `runs/${ctx.runid}`;
+    if (ctx.config) {
+      queryPath += `/${ctx.config}`;
+    }
     if (scenarioPath) {
       queryPath += `/${scenarioPath}`;
     }
-    const targetUrl = `${origin}/query-engine/${queryPath}/query`;
+    const targetUrl = `/query-engine/${queryPath}/query`;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
