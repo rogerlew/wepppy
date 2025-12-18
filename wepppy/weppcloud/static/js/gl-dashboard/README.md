@@ -23,7 +23,7 @@
 
 ## Critical Conventions
 - All fetches honor `ctx.sitePrefix` (browse/gdalinfo/query-engine) to avoid missing-run errors.
-- `syncGraphLayout()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
+- `syncGraphModeForContext()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
 - Year slider placement: climate/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
