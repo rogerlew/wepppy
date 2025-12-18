@@ -30,6 +30,7 @@
 - Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.
 - Detection failures for expected absences stay console-only; do not surface UI banners/toasts for missing rasters.
 - Scenario selector only affects map overlays (landuse/soils/WEPP layers); graphs use their own scenario list and loaders.
+- Base scenario labels: default to “Undisturbed”; switch to “Burned” when an SBS map is detected. UI (scenario display/select + base graph series) reflects this label.
 - Omni scenarios use the same watershed delineation as base (subcatchments/channels/topaz + WEPP IDs); scenario switches reuse existing geometry instead of redrawing hillslopes.
 
 ## Module Contracts (injection signatures)

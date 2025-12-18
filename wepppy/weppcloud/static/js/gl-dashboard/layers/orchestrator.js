@@ -28,6 +28,7 @@ export function createDetectionController({
   computeComparisonDiffRanges,
   baseLayerDefs,
   rapBandLabels,
+  onBaseScenarioDetected,
 }) {
   async function detectRasterLayers() {
     const result = await detectorModule.detectRasterLayers({
@@ -41,6 +42,9 @@ export function createDetectionController({
     });
     if (result && result.detectedLayers) {
       setValue('detectedLayers', result.detectedLayers);
+      if (typeof onBaseScenarioDetected === 'function' && result.detectedLayers.some((l) => l && l.key === 'sbs')) {
+        onBaseScenarioDetected('Burned');
+      }
       updateLayerList();
       applyLayers();
     }

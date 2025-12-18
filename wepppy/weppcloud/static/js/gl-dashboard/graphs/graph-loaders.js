@@ -80,7 +80,9 @@ export function createGraphLoaders(deps) {
   } = GRAPH_CONTEXT_KEYS;
 
   function scenarioColor(idx) {
-    const c = GRAPH_COLORS[idx % GRAPH_COLORS.length];
+    // Use Math.abs to handle negative indices (e.g., when prepending base scenario)
+    const safeIdx = Math.abs(idx) % GRAPH_COLORS.length;
+    const c = GRAPH_COLORS[safeIdx];
     return [c[0], c[1], c[2], 255];
   }
 
@@ -127,9 +129,11 @@ export function createGraphLoaders(deps) {
    */
   function scenarioPath(scenario) {
     if (!scenario) return '';
-    // Explicit path takes precedence
+    // Explicit empty path indicates base scenario
+    if (scenario.path === '') return '';
+    // Explicit non-empty path takes precedence
     if (scenario.path) return scenario.path;
-    // Base scenario
+    // Legacy: name-based base scenario detection
     if (!scenario.name || scenario.name === 'Base' || scenario.name === 'base') return '';
     // Construct path from scenario name
     return `_pups/omni/scenarios/${scenario.name}`;
@@ -141,6 +145,14 @@ export function createGraphLoaders(deps) {
   function scenarioKey(scenario) {
     const path = scenarioPath(scenario);
     return path || 'base';
+  }
+
+  function scenarioDisplayName(scenario) {
+    const path = scenarioPath(scenario);
+    if (!path) {
+      return getState().baseScenarioLabel || 'Base';
+    }
+    return scenario?.name || scenario?.path || 'Scenario';
   }
 
   async function loadHillLossScenario(scenPath) {
@@ -188,7 +200,12 @@ export function createGraphLoaders(deps) {
         const totalSoilLoss = rows.reduce((sum, r) => sum + (r.soil_loss_kg || 0), 0);
         console.debug('gl-dashboard: loaded', { scenPath, rows: rows.length, totalSoilLoss });
       }
-      state.hillLossCache[cacheKey] = rows;
+      if (rows.length || cacheKey !== 'base' || !state.hillLossCache[cacheKey]) {
+        state.hillLossCache[cacheKey] = rows;
+      }
+      if (!rows.length && cacheKey === 'base' && Array.isArray(state.hillLossCache[cacheKey]) && state.hillLossCache[cacheKey].length) {
+        return state.hillLossCache[cacheKey];
+      }
       const totalArea = rows.reduce(
         (acc, r) => acc + (Number.isFinite(r.area_ha) ? r.area_ha : 0),
         0
@@ -223,7 +240,12 @@ export function createGraphLoaders(deps) {
           });
         }
       }
-      state.channelLossCache[cacheKey] = rows;
+      if (rows.length || cacheKey !== 'base' || !state.channelLossCache[cacheKey]) {
+        state.channelLossCache[cacheKey] = rows;
+      }
+      if (!rows.length && cacheKey === 'base' && Array.isArray(state.channelLossCache[cacheKey]) && state.channelLossCache[cacheKey].length) {
+        return state.channelLossCache[cacheKey];
+      }
       return rows;
     } catch (err) {
       console.warn('gl-dashboard: failed to load channel loss data', err);
@@ -254,7 +276,12 @@ export function createGraphLoaders(deps) {
           }
         }
       }
-      state.outletAllYearsCache[cacheKey] = map;
+      if (Object.keys(map).length || cacheKey !== 'base' || !state.outletAllYearsCache[cacheKey]) {
+        state.outletAllYearsCache[cacheKey] = map;
+      }
+      if (!Object.keys(map).length && cacheKey === 'base' && state.outletAllYearsCache[cacheKey]) {
+        return state.outletAllYearsCache[cacheKey];
+      }
       return map;
     } catch (err) {
       console.warn('gl-dashboard: failed to load outlet data', err);
@@ -411,6 +438,11 @@ export function createGraphLoaders(deps) {
     selectedScenarioPaths.forEach((p) => {
       if (p != null && p !== '' && p !== 'base') scenarioSet.add(p);
     });
+
+    // Ensure base is always included when rendering
+    if (!scenarioSet.has('base')) {
+      scenarioSet.add('base');
+    }
     
     // Filter and process scenarios
     const scenarios = [];
@@ -425,7 +457,11 @@ export function createGraphLoaders(deps) {
     }
     
     if (!scenarios.length) {
-      scenarios.push({ scenario: { name: 'Base', path: '' }, originalIndex: 0, key: 'base', path: '' });
+      scenarios.push({ scenario: { name: scenarioDisplayName({}), path: '' }, originalIndex: 0, key: 'base', path: '' });
+    } else if (!scenarios.some((s) => s.key === 'base')) {
+      // Prepend base so it stays visible even when other scenarios are selected
+      // Use originalIndex: 0 to ensure base uses the first color in the palette
+      scenarios.unshift({ scenario: { name: scenarioDisplayName({}), path: '' }, originalIndex: 0, key: 'base', path: '' });
     }
 
     const percentAxis = buildPercentAxis(0.5);
@@ -443,7 +479,7 @@ export function createGraphLoaders(deps) {
       console.debug('gl-dashboard: scenario cumulative', { name: scenario.name, finalValue, points: cumulative.values.length });
       seriesEntries.push({
         id: key,
-        label: scenario.name || 'Base',
+        label: scenarioDisplayName(scenario),
         percents: cumulative.percents,
         values: cumulative.values,
         color: scenarioColor(originalIndex),
@@ -604,8 +640,10 @@ export function createGraphLoaders(deps) {
 
   async function buildHillSoilLossBoxplot() {
     const series = [];
-    for (let i = 0; i < graphScenarios.length; i++) {
-      const scenario = graphScenarios[i];
+    // Always include base first for clarity
+    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i];
       const path = scenarioPath(scenario);
       const rows = await loadHillLossScenario(path);
       const perArea = rows
@@ -618,7 +656,7 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(perArea);
       if (stats) {
-        series.push({ label: scenario.name || 'Base', stats, color: scenarioColor(i) });
+        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i) });
       }
     }
     return {
@@ -632,8 +670,9 @@ export function createGraphLoaders(deps) {
 
   async function buildHillRunoffBoxplot() {
     const series = [];
-    for (let i = 0; i < graphScenarios.length; i++) {
-      const scenario = graphScenarios[i];
+    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i];
       const path = scenarioPath(scenario);
       const rows = await loadHillLossScenario(path);
       const perArea = rows
@@ -646,7 +685,7 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(perArea);
       if (stats) {
-        series.push({ label: scenario.name || 'Base', stats, color: scenarioColor(i) });
+        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i) });
       }
     }
     return {
@@ -660,8 +699,9 @@ export function createGraphLoaders(deps) {
 
   async function buildChannelSoilLossBoxplot() {
     const series = [];
-    for (let i = 0; i < graphScenarios.length; i++) {
-      const scenario = graphScenarios[i];
+    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i];
       const path = scenarioPath(scenario);
       const rows = await loadChannelLossScenario(path);
       const tonnes = rows
@@ -672,7 +712,7 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(tonnes);
       if (stats) {
-        series.push({ label: scenario.name || 'Base', stats, color: scenarioColor(i) });
+        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i) });
       }
     }
     return {
@@ -687,8 +727,9 @@ export function createGraphLoaders(deps) {
   async function buildOutletSedimentBars() {
     const yearsSet = new Set();
     const scenarioData = [];
-    for (let i = 0; i < graphScenarios.length; i++) {
-      const scenario = graphScenarios[i];
+    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i];
       const path = scenarioPath(scenario);
       const outletMap = await loadOutletScenario(path);
       const keyName = selectOutletKey(outletMap, [
@@ -714,7 +755,7 @@ export function createGraphLoaders(deps) {
         if (!Number.isFinite(raw) || !data.areaHa) return null;
         return raw / data.areaHa;
       });
-      series.push({ label: data.scenario.name, values, color: data.color });
+      series.push({ label: scenarioDisplayName(data.scenario), values, color: data.color });
     }
     const lineSeries = {};
     series.forEach((s) => {
@@ -734,8 +775,9 @@ export function createGraphLoaders(deps) {
   async function buildOutletStreamBars() {
     const yearsSet = new Set();
     const scenarioData = [];
-    for (let i = 0; i < graphScenarios.length; i++) {
-      const scenario = graphScenarios[i];
+    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i];
       const path = scenarioPath(scenario);
       const outletMap = await loadOutletScenario(path);
       const keyName = selectOutletKey(outletMap, ['water discharge from outlet', 'stream discharge']);
@@ -757,7 +799,7 @@ export function createGraphLoaders(deps) {
         if (!Number.isFinite(raw) || !data.areaHa) return null;
         return (raw * 1000) / (data.areaHa * 10000);
       });
-      series.push({ label: data.scenario.name, values, color: data.color });
+      series.push({ label: scenarioDisplayName(data.scenario), values, color: data.color });
     }
     const lineSeries = {};
     series.forEach((s) => {

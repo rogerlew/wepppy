@@ -490,44 +490,15 @@
     basemapController.setApplyLayers(applyLayers);
   }
 
-  if (typeof createDetectionController !== 'function') {
-    throw new Error('gl-dashboard: detection controller module failed to load');
-  }
-
-  const detectionController = createDetectionController({
-    ctx,
-    detectorModule,
-    getState,
-    setState,
-    setValue,
-    buildScenarioUrl,
-    buildBaseUrl,
-    fetchWeppSummary,
-    weppLossPath: WEPP_LOSS_PATH,
-    weppYearlyPath: WEPP_YEARLY_PATH,
-    watarPath: WATAR_PATH,
-    postQueryEngine,
-    yearSlider,
-    climateCtx,
-    applyLayers: () => applyLayers(),
-    updateLayerList: () => updateLayerList(),
-    nlcdColormap: NLCD_COLORMAP,
-    soilColorForValue: colorsModule.soilColorForValue,
-    loadRaster,
-    loadSbsImage,
-    fetchGdalInfo,
-    computeComparisonDiffRanges,
-    baseLayerDefs: BASE_LAYER_DEFS,
-    rapBandLabels: RAP_BAND_LABELS,
-  });
-
-  const {
-    detectLanduseOverlays,
-    detectSoilsOverlays,
-    detectWeppOverlays,
-    detectWeppYearlyOverlays,
-    detectLayers,
-  } = detectionController;
+  const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
+  let baseScenarioLabel = getState().baseScenarioLabel || 'Undisturbed';
+  const graphScenarios = [{ name: baseScenarioLabel, path: '' }].concat(
+    omniScenarios.map((s, idx) => {
+      const name = s.name || `scenario-${idx + 1}`;
+      const path = s.path || `_pups/omni/scenarios/${name}`;
+      return { name, path };
+    }),
+  );
 
   function handleComparisonChange() {
     applyLayers();
@@ -586,15 +557,6 @@
     syncGraphLayout,
   } = graphModeController;
 
-  const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
-  const graphScenarios = [{ name: 'Base', path: '' }].concat(
-    omniScenarios.map((s, idx) => {
-      const name = s.name || `scenario-${idx + 1}`;
-      const path = s.path || `_pups/omni/scenarios/${name}`;
-      return { name, path };
-    }),
-  );
-
   if (typeof createGraphController !== 'function') {
     throw new Error('gl-dashboard: graph controller module failed to load');
   }
@@ -641,6 +603,72 @@
   loadWeppYearlyTimeseriesData = graphLoadWeppYearlyTimeseriesData;
   activateGraphItem = graphActivateGraphItem;
   handleGraphPanelToggle = graphHandleGraphPanelToggle;
+
+  if (typeof createDetectionController !== 'function') {
+    throw new Error('gl-dashboard: detection controller module failed to load');
+  }
+
+  const detectionController = createDetectionController({
+    ctx,
+    detectorModule,
+    getState,
+    setState,
+    setValue,
+    buildScenarioUrl,
+    buildBaseUrl,
+    fetchWeppSummary,
+    weppLossPath: WEPP_LOSS_PATH,
+    weppYearlyPath: WEPP_YEARLY_PATH,
+    watarPath: WATAR_PATH,
+    postQueryEngine,
+    yearSlider,
+    climateCtx,
+    applyLayers: () => applyLayers(),
+    updateLayerList: () => updateLayerList(),
+    nlcdColormap: NLCD_COLORMAP,
+    soilColorForValue: colorsModule.soilColorForValue,
+    loadRaster,
+    loadSbsImage,
+    fetchGdalInfo,
+    computeComparisonDiffRanges,
+    baseLayerDefs: BASE_LAYER_DEFS,
+    rapBandLabels: RAP_BAND_LABELS,
+    onBaseScenarioDetected: (label) => setBaseScenarioLabel(label),
+  });
+
+  const {
+    detectLanduseOverlays,
+    detectSoilsOverlays,
+    detectWeppOverlays,
+    detectWeppYearlyOverlays,
+    detectLayers,
+  } = detectionController;
+
+  function setBaseScenarioLabel(label = 'Undisturbed') {
+    const normalized = label || 'Undisturbed';
+    if (normalized === baseScenarioLabel) return;
+    baseScenarioLabel = normalized;
+    setValue('baseScenarioLabel', normalized);
+
+    const scenarioSelect = document.getElementById('gl-scenario-select');
+    if (scenarioSelect) {
+      const baseOption = scenarioSelect.querySelector('option[value=""]');
+      if (baseOption) {
+        baseOption.textContent = `${normalized} (Base)`;
+      }
+      if (!getState().currentScenarioPath) {
+        const scenarioDisplay = document.getElementById('gl-scenario-display');
+        if (scenarioDisplay) {
+          scenarioDisplay.innerHTML = `Scenario <strong>${normalized}</strong>`;
+        }
+      }
+    }
+
+    if (graphScenarios.length) {
+      graphScenarios[0].name = normalized;
+      renderGraphList();
+    }
+  }
 
   bindModeButtons();
 
@@ -782,7 +810,9 @@
     scenarioSelect.addEventListener('change', (e) => {
       const scenarioPath = e.target.value;
       const scenarioName =
-        (e.target.options && e.target.options[e.target.selectedIndex] && e.target.options[e.target.selectedIndex].text) || 'Base';
+        scenarioPath && e.target.options && e.target.options[e.target.selectedIndex]
+          ? e.target.options[e.target.selectedIndex].text
+          : baseScenarioLabel;
       setScenario(scenarioPath);
       if (scenarioDisplay) {
         scenarioDisplay.innerHTML = `Scenario <strong>${scenarioName}</strong>`;
@@ -813,7 +843,9 @@
 
     const scenarioPath = scenarioSelect.value;
     const scenarioName =
-      (scenarioSelect.options && scenarioSelect.options[scenarioSelect.selectedIndex] && scenarioSelect.options[scenarioSelect.selectedIndex].text) || 'Base';
+      scenarioPath && scenarioSelect.options && scenarioSelect.options[scenarioSelect.selectedIndex]
+        ? scenarioSelect.options[scenarioSelect.selectedIndex].text
+        : baseScenarioLabel;
     const scenarioDisplay = document.getElementById('gl-scenario-display');
     if (scenarioDisplay) {
       scenarioDisplay.innerHTML = `Scenario <strong>${scenarioName}</strong>`;
@@ -826,6 +858,7 @@
     // Synchronous UI setup - runs immediately
     bindScenarioSelector();
     bindComparisonToggle();
+    setBaseScenarioLabel(baseScenarioLabel);
     basemapController.bindBasemapControls();
     renderGraphList();
     applyLayers(); // Render map immediately with base layers

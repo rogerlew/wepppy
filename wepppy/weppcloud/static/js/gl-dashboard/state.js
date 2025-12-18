@@ -10,6 +10,7 @@ const state = {
   comparisonMode: false,
   baseSummaryCache: {},
   comparisonDiffRanges: {},
+  baseScenarioLabel: 'Undisturbed',
 
   subcatchmentsVisible: true,
   subcatchmentLabelsVisible: false,
