@@ -28,6 +28,13 @@
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
 
+## Module Contracts (injection signatures)
+- `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`
+- `createGraphModeController({ getState, setValue, domRefs, yearSlider, timeseriesGraph, onModeChange })`
+- `createYearSlider({ el, input, valueEl, minEl, maxEl, playBtn })`
+- `createWeppDataManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, pickActiveWeppEventLayer, WEPP_YEARLY_PATH, WEPP_LOSS_PATH })`
+- `colors.js` exports: `normalizeModeValue`, `resolveColormapName`, `hslToHex`, `soilColorForValue`, `hexToRgbaArray`, `rgbaStringToArray`, `normalizeColorEntry`, `createColorScales`, `viridisColor`, `winterColor`, `jet2Color`, `divergingColor`, `rdbuColor`
+
 ## Common Pitfalls
 - Forgetting `await` on detector/data calls leaves overlays empty with no error.
 - Bypassing state setters (direct mutation) skips subscribers and legends/apply updates.

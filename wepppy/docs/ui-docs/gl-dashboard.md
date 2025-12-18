@@ -82,6 +82,8 @@ wepppy/weppcloud/templates/
 gl-dashboard.js (main)
   ├── config.js
   ├── state.js
+  ├── colors.js
+  ├── colors.js                  # Added: colormap utilities
   ├── scenario/manager.js
   ├── data/query-engine.js
   ├── data/wepp-data.js
@@ -103,7 +105,7 @@ gl-dashboard.js (main)
 3. Initialize deck.gl controller with basemap tile layer
 4. Kick off detection (raster gdalinfo + parquet summaries) asynchronously; render placeholder layer controls immediately, then populate once detection resolves (non-blocking page load)
 5. Bind UI event listeners (basemap selector, scenario/comparison, layer toggles, graph mode buttons, year slider)
-6. Apply initial layer stack (subcatchments visible by default); graph layout sync is idempotent
+6. Apply initial layer stack (subcatchments visible by default); graph layout sync via `syncGraphModeForContext()` is idempotent
 
 ## Component Map
 
@@ -460,8 +462,9 @@ Graph minimized (controls disabled; slider hidden)
 #### Year Slider
 **Element:** `#gl-year-slider` (single instance reused across contexts)  
 **Placement & Visibility (context-aware):**
-- **Climate Yearly** → slider is moved **inside** `#gl-graph-container`, pinned to the **bottom**; container gets `.has-bottom-slider` to add padding. Graph defaults to **full** pane.
+- **Climate Yearly / Outlet graphs** → slider is moved **inside** `#gl-graph-container`, pinned to the **bottom**; container gets `.has-bottom-slider` to add padding. Graph defaults to **full** pane.
 - **RAP / WEPP Yearly** → slider stays in the dedicated slot **above** the graph pane (`#gl-graph-year-slider`) at 100% width; never overlaps the graph header. Graph defaults to **split** view.
+- **Cumulative / Omni graphs** → slider is **hidden** (no timeline dimension).
 - Hidden when no RAP/WEPP/Climate Yearly graph context is active.
 
 **Controls:**
@@ -975,395 +978,29 @@ function syncGraphModeForContext() {
 }
 ```
 
-**Key Points:**
-- **Idempotency:** Context key prevents redundant mode changes (avoids recursive toggles)
-- **User Override:** `graphModeUserOverride` preserves manual mode selection
-- **Auto Mode:** When context changes (layer activation), mode resets unless user override set
-
-### Graph Data Caching
-
-**Purpose:** Avoid redundant Query Engine calls  
-**Cache Keys:**
-- `graphDataCache[graphKey]`: Full graph dataset (Omni graphs)
-- `hillLossCache[scenarioPath]`: Hill loss parquet for scenario
-- `channelLossCache[scenarioPath]`: Channel loss parquet for scenario
-- `outletAllYearsCache[scenarioPath]`: Outlet discharge timeseries
-
-**Invalidation:**
-- Scenario change → clear all caches
-- Force reload → `loadGraphDataset(key, { force: true })`
-
-## State Management
-
-### State Updates
-**Pattern:** Always use `setValue(key, value)` or `setState(updates)` to trigger change notifications  
-**Subscribers:** Interested components can subscribe via `subscribe(callback, keys)`
-
-**Example:**
-```javascript
-// Update single value
-setValue('rapSelectedYear', 2023);
-
-// Batch update
-setState({
-  rapSelectedYear: 2023,
-  rapCumulativeMode: false
-});
-
-// Subscribe to changes
-subscribe((state, changedKeys) => {
-  if (changedKeys.includes('rapSelectedYear')) {
-    console.log('Year changed to', state.rapSelectedYear);
-  }
-}, ['rapSelectedYear']);
-```
-
-### Property Binding
-**Pattern:** Expose state keys as global window properties for external access
-
-```javascript
-bindStateKeys([
-  'currentScenarioPath',
-  'comparisonMode',
-  'rapSelectedYear',
-  'weppYearlySelectedYear',
-  // ...
-]);
-
-// Now accessible globally
-window.rapSelectedYear = 2022; // Triggers setValue internally
-console.log(window.rapSelectedYear); // Reads from state
-```
-
-### State Persistence
-**Not Implemented:** State is ephemeral (resets on page reload)  
-**Future Enhancement:** Save state to localStorage or URL query params for session continuity
-
-## Interaction Patterns
-
-### Layer Toggle Pattern
-1. User clicks checkbox `#layer-Landuse-dom`
-2. Event handler fires:
-   ```javascript
-   layerCheckbox.addEventListener('change', async (e) => {
-     const layerKey = e.target.dataset.layerKey;
-     const category = e.target.dataset.category;
-     const layer = landuseLayers.find(l => l.key === layerKey);
-     
-     if (e.target.checked) {
-       // Deselect other layers in category
-       deselectAllSubcatchmentOverlays();
-       layer.visible = true;
-       
-       // Load summary if not cached
-       if (!landuseSummary) {
-         await detectLanduseOverlays({ ... });
-       }
-     } else {
-       layer.visible = false;
-     }
-     
-     applyLayers();
-     syncGraphModeForContext();
-   });
-   ```
-
-### RAP Cumulative Mode Pattern
-**Behavior:** Radio button toggles between cumulative cover and individual bands
-
-1. User clicks "Cumulative Cover" radio
-2. Handler sets `rapCumulativeMode = true`, deselects all band checkboxes
-3. Fetch cumulative summary (sum of AFG, PFG, BGR)
-4. Apply layer with cumulative colormap
-5. Year slider remains visible (cumulative data varies by year)
-
-**Mutual Exclusivity:**
-- Cumulative mode: Single overlay showing sum of all bands
-- Band mode: Multiple band overlays can be visible simultaneously (AFG + PFG + BGR)
-
-### Year Slider Pattern
-**Continuous Update:**
-1. User drags slider → input event fires continuously
-2. Debounce or throttle update to avoid excessive re-renders
-3. Update `rapSelectedYear` or `weppYearlySelectedYear`
-4. Query new data for selected year
-5. Rebuild layer with new summary
-6. Update graph cursor if timeseries visible
-
-**Play Mode:**
-1. User clicks play button
-2. Start interval timer (3-second delay)
-3. Increment year, loop back to min year when reaching max
-4. Emit 'change' event for each step
-5. User can pause or manually adjust slider to interrupt
-
-### Graph Hover Pattern
-1. Mouse moves over canvas → `_onCanvasHover(e)` fires
-2. Calculate mouse position in data coordinates
-3. Find nearest line or box to cursor
-4. Highlight that series (increase line width, draw highlight box)
-5. Show tooltip with subcatchment ID and value
-6. If hovering over subcatchment in graph → call `onHighlightSubcatchment(topazId)`
-7. Map layer highlights corresponding feature (bold stroke)
-
-### Scenario Comparison Pattern
-1. User selects scenario from dropdown
-2. User enables comparison toggle
-3. Dashboard loads base scenario summaries (if not cached)
-4. Compute difference: Δ = Base - Scenario
-5. Calculate percentile-based ranges (p5, p95) for scaling
-6. Apply rdbu colormap (red = negative Δ, blue = positive Δ)
-7. Legend shows "Δ Soil Loss" with -maxAbs / +maxAbs labels
-
-## Performance Considerations
-
-### Memory Management
-
-#### Large Payload Handling
-**Issue:** RAP timeseries (24 years × 8 bands × 500 subcatchments) can exceed 96 MB  
-**Solution:**
-- Load summary on-demand (only when layer activated)
-- Clear cache when switching scenarios
-- Use binary parquet format instead of JSON
-
-#### GeoTIFF Loading
-**Issue:** Large rasters (4096×4096 RGBA) consume 64 MB per layer  
-**Solution:**
-- Load rasters only when checkbox toggled
-- Release raster data after rendering to canvas (keep only canvas reference)
-- Limit number of simultaneous raster layers (max 2-3)
-
-#### Graph Rendering
-**Issue:** Rendering 500+ lines at 60 FPS causes frame drops  
-**Solution:**
-- Aggregate subcatchments by region (hillslope → watershed)
-- Draw only visible lines (clip to viewport)
-- Use canvas compositing (layered rendering)
-- Throttle hover updates (requestAnimationFrame)
-
-### Render Optimization
-
-#### Layer Update Triggers
-**Pattern:** Explicit `updateTriggers` in deck.gl layers to control re-renders
-
-```javascript
-new deck.GeoJsonLayer({
-  id: 'wepp-runoff',
-  data: subcatchmentsGeoJson,
-  getFillColor: (f) => colorForValue(f.properties.TopazID),
-  updateTriggers: {
-    getFillColor: [weppSummary, weppStatistic, weppRanges.runoff_volume]
-  }
-});
-```
-
-**Avoid:** Passing unstable references (inline functions, new objects) in updateTriggers
-
-#### Debouncing Year Slider
-**Pattern:** Throttle year slider updates to max 10 Hz (100ms interval)
-
-```javascript
-let sliderTimeout = null;
-yearSlider.input.addEventListener('input', (e) => {
-  clearTimeout(sliderTimeout);
-  sliderTimeout = setTimeout(() => {
-    const year = parseInt(e.target.value, 10);
-    setValue('rapSelectedYear', year);
-    refreshRapData();
-  }, 100);
-});
-```
-
-### Known Bottlenecks
-
-1. **Query Engine Latency:** 200-500ms per query (network + DuckDB execution)
-   - Mitigation: Pre-fetch summaries on page load, cache aggressively
-   
-2. **Canvas Redraw:** 50-100ms for complex graphs (500+ lines)
-   - Mitigation: Use offscreen canvas, render in chunks, skip frames if behind
-
-3. **Layer Stack Rebuild:** 30-50ms when toggling layers (GeoJSON layer construction)
-   - Mitigation: Reuse layer instances where possible, only update data prop
-
-## Testing Strategy
-
-- Smoke (Playwright): run from `wepppy/weppcloud/static-src`
-  - `gl-dashboard-state-transitions.spec.js`
-  - `gl-dashboard-graph-modes.spec.js`
-  - `gl-dashboard-layers.spec.js`
-  - `gl-dashboard-cumulative.spec.js`
-  - URLs:
-    - `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js`
-    - `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessive-compulsive/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js`
-- Unit/Integration: mock deck.gl and Query Engine; validate state updates, detector URL construction (sitePrefix-aware), color scales, graph layout idempotence, slider placement rules.
-- Visual checks: comparison mode shows diverging legend when base/diff ranges available; slider placement matches context (climate/outlet bottom; RAP/WEPP Yearly top; cumulative/omni hidden).
-- Fixtures: `tests/gl-dashboard/fixtures/` holds gdalinfo/parquet/GeoJSON stubs and canned Query Engine responses for local tests.
-
-## Known Issues and Workarounds
-
-### Issue 1: TDZ (Temporal Dead Zone) in Graph Mode Sync
-**Symptom:** `ReferenceError: Cannot access 'lastGraphContextKey' before initialization`  
-**Cause:** `syncGraphModeForContext()` called during module init before `lastGraphContextKey` declared with `let`  
-**Workaround:** Use `var lastGraphContextKey = null;` to hoist declaration  
-**Location:** `gl-dashboard.js:73`
-
-**Code:**
-```javascript
-// Use var to avoid TDZ issues if syncGraphModeForContext fires early during init.
-var lastGraphContextKey = null; // eslint-disable-line no-var
-```
-
-### Issue 2: Recursive Graph Toggle Loop
-**Symptom:** Clicking graph mode button triggers infinite `setGraphMode()` calls  
-**Cause:** `setGraphMode()` calls `setGraphFocus()` which calls `syncGraphModeForContext()` which calls `setGraphMode()` again  
-**Workaround:** Idempotency check in `syncGraphModeForContext()` prevents recursion  
-**Location:** `gl-dashboard.js:1059-1065`
-
-**Code:**
-```javascript
-function syncGraphModeForContext() {
-  const contextKey = `${graphCapable}-${rapActive}-${yearlyActive}-${graphModeUserOverride}-${activeGraphKey}`;
-  if (contextKey === lastGraphContextKey) {
-    return; // No-op if context unchanged
-  }
-  lastGraphContextKey = contextKey;
-  // ... proceed with mode change
-}
-```
-
-### Issue 3: Year Slider Visibility Flicker
-**Symptom:** Slider appears/disappears rapidly when toggling RAP layers  
-**Cause:** Multiple async `refreshRapData()` calls in flight, each calling `syncGraphModeForContext()`  
-**Workaround:** Guard slider visibility changes with flag to prevent redundant show/hide  
-**Location:** `gl-dashboard.js:1080-1086`
-
-**Code:**
-```javascript
-// Year slider visible only for RAP or WEPP Yearly contexts
-if (rapActive || yearlyActive) {
-  if (!yearSlider._visible) yearSlider.show(); // Guard prevents flicker
-} else {
-  if (yearSlider._visible) yearSlider.hide();
-}
-```
-
-### Issue 4: Graph Panel Re-Enter After Minimize
-**Symptom:** Graph panel re-expands when clicking any layer after minimizing  
-**Cause:** `syncGraphModeForContext()` resets mode to 'split' if `graphCapable` and no user override  
-**Workaround:** Track `graphModeUserOverride` to preserve user-selected minimize  
-**Location:** `gl-dashboard.js:804-830`
-
-**Code:**
-```javascript
-function setGraphMode(mode, options = {}) {
-  const { source = 'auto' } = options;
-  if (source === 'user') {
-    graphModeUserOverride = mode; // Preserve user selection
-  }
-  const targetMode = graphModeUserOverride || mode;
-  setValue('graphMode', targetMode);
-  // ...
-}
-```
-
-### Issue 5: Omni Graph Activation Toggles Twice
-**Symptom:** Clicking Omni graph radio triggers two render cycles  
-**Cause:** `activateGraphItem()` calls `setGraphFocus(true)`, which triggers mode change, which calls `handleGraphPanelToggle()`, which calls `activateGraphItem()` again  
-**Workaround:** Pass `keepFocus` option to skip redundant focus change  
-**Location:** `gl-dashboard.js:3803-3828`
-
-**Code:**
-```javascript
-async function activateGraphItem(key, options = {}) {
-  const keepFocus = options.keepFocus || false;
-  ensureGraphExpanded();
-  const data = await loadGraphDataset(key, { force: options.force });
-  if (!keepFocus) {
-    setGraphFocus(data.source === 'omni'); // Only set focus if not preserved
-  }
-  timeseriesGraph.setData(data);
-  syncGraphModeForContext();
-}
-```
-
-### Issue 6: Large Payload Timeout
-**Symptom:** RAP timeseries fetch times out after 30 seconds  
-**Cause:** Query Engine processes 500+ subcatchments × 24 years × 8 bands (96k rows)  
-**Workaround:** Increase fetch timeout, or paginate query with year range filters  
-**Location:** `data/query-engine.js:18-28`
-
-**Mitigation:**
-```javascript
-const resp = await fetch(targetUrl, {
-  method: 'POST',
-  headers: { ... },
-  body: JSON.stringify(payload),
-  signal: AbortSignal.timeout(60000) // Increase to 60s
-});
-```
-
-### Issue 7: Subcatchment Label Duplication
-**Symptom:** Multiple labels appear for same subcatchment (MultiPolygon features)  
-**Cause:** GeoJSON has multiple features per topaz_id (split geometries)  
-**Workaround:** Track seen IDs in `buildSubcatchmentLabelsLayer()` and skip duplicates  
-**Location:** `gl-dashboard.js:2163-2180`
-
-**Code:**
-```javascript
-function buildSubcatchmentLabelsLayer() {
-  const seenIds = new Set();
-  const labelData = [];
-  features.forEach((feature) => {
-    const topazId = feature.properties.TopazID;
-    const idKey = String(topazId);
-    if (seenIds.has(idKey)) return; // Skip duplicates
-    seenIds.add(idKey);
-    // ... compute centroid and add label
-  });
-  return new deck.TextLayer({ data: labelData });
-}
-```
-
-## Future Enhancements
-
-### Planned Features
-1. **URL State Persistence:** Encode layer selections, year, scenario in query params
-2. **Export Tools:** Download current view as PNG/PDF, export graph data as CSV
-3. **Animation Recording:** Capture year slider playback as video
-4. **Custom Basemap Upload:** Allow users to add custom tile layers
-5. **3D Terrain Overlay:** Use deck.gl TerrainLayer for elevation visualization
-6. **Real-time Updates:** WebSocket connection for live model runs
-
-### Performance Optimizations
-1. **Web Worker Offloading:** Move colormap computation to worker thread
-2. **Progressive Loading:** Render low-res version first, then upgrade
-3. **Virtualized Layer List:** Render only visible layers in long category lists
-4. **IndexedDB Caching:** Persist summaries in browser for offline access
-
-### Accessibility Improvements
-1. **Keyboard Navigation:** Arrow keys to navigate layer list, tab to graph controls
-2. **Screen Reader Support:** ARIA labels for all interactive elements
-3. **High Contrast Mode:** Respect `prefers-contrast` media query
-4. **Legend Text Alternatives:** Provide tabular legend data for screen readers
-
----
-
 ## Appendix A: Key File Paths
 
 | Component | Path |
 |-----------|------|
-| Main script | `wepppy/weppcloud/static/js/gl-dashboard.js` |
+| Main orchestrator | `wepppy/weppcloud/static/js/gl-dashboard/gl-dashboard.js` |
 | State management | `wepppy/weppcloud/static/js/gl-dashboard/state.js` |
 | Configuration | `wepppy/weppcloud/static/js/gl-dashboard/config.js` |
+| Color utilities | `wepppy/weppcloud/static/js/gl-dashboard/colors.js` |
 | Layer detection | `wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js` |
+| Layer orchestration | `wepppy/weppcloud/static/js/gl-dashboard/layers/orchestrator.js` |
 | Layer rendering | `wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js` |
 | Map controller | `wepppy/weppcloud/static/js/gl-dashboard/map/controller.js` |
 | Layer utilities | `wepppy/weppcloud/static/js/gl-dashboard/map/layers.js` |
+| Raster utilities | `wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js` |
 | Timeseries graph | `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js` |
 | Graph loaders | `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` |
 | Query Engine | `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js` |
+| WEPP data manager | `wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js` |
+| Graph mode controller | `wepppy/weppcloud/static/js/gl-dashboard/ui/graph-mode.js` |
+| Year slider | `wepppy/weppcloud/static/js/gl-dashboard/ui/year-slider.js` |
+| Scenario manager | `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js` |
 | Template | `wepppy/weppcloud/templates/gl_dashboard.htm` |
-| Smoke tests | `tests/gl-dashboard-exploration.spec.mjs` |
+| Smoke tests | `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-*.spec.js` |
 
 ## Appendix B: Selector Reference
 

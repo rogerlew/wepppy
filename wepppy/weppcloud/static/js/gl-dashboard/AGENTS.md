@@ -19,15 +19,6 @@ GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessi
   npm run smoke -- tests/smoke/gl-dashboard-*.spec.js
 ```
 
-## Core Conventions
-
-- Read `README.md` for module boundaries (DOM vs. deck vs. data) and critical conventions.
-- Apply `ctx.sitePrefix` to all fetches (browse, gdalinfo, query-engine).
-- Keep graph layout idempotent: `syncGraphLayout()` must short-circuit on unchanged context key.
-- Year slider placement: climate/outlet → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline.
-- Guard DOM refs (slider, graph panel, buttons) so partial renders/tests don’t throw.
-- Graph controls enabled only when RAP cumulative, a RAP/WEPP Yearly overlay is active, or a graph radio is selected.
-
 ## Page Load Pipeline
 
 1. **Bootstrap** – `initGlDashboard()` fetches run metadata, builds `ctx`, and calls `initMap()`.
@@ -37,13 +28,23 @@ GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessi
 5. **UI wiring** – Sidebar controls, year slider, graph panel bound to state subscribers.
 6. **Ready** – First paint complete; user interactions trigger `setValue()` → subscriber cascade.
 
+## Core Conventions
+
+- Read `README.md` for module boundaries (DOM vs. deck vs. data) and critical conventions.
+- Apply `ctx.sitePrefix` to all fetches (browse, gdalinfo, query-engine).
+- Keep graph layout idempotent: `syncGraphModeForContext()` must short-circuit on unchanged context key.
+- Year slider placement: climate/outlet → bottom; RAP/WEPP Yearly → top (`#gl-graph-year-slider`); cumulative/omni → hidden; hide when no timeline.
+- Guard DOM refs (slider, graph panel, buttons) so partial renders/tests don't throw.
+- Graph controls enabled only when RAP cumulative, a RAP/WEPP Yearly overlay is active, or a graph radio is selected.
+
 ## Troubleshooting
 
 - **Rasters/layers missing:** Confirm `BASE_LAYER_DEFS` paths resolve via `ctx.sitePrefix`; check `detectRasterLayers`/`detectLanduseOverlays` await paths.
-- **Graph pane loops/stays open:** Verify `syncGraphLayout()` context guard and RAP/WEPP visibility checks.
-- **Slider missing:** Confirm `rapMetadata`/`weppYearlyMetadata` are loaded; ensure slider placement rules run.
-- **Legends/tooltips wrong:** Consume legend payloads from `map/layers` instead of recomputing.
-- **Comparison colors wrong:** Ensure `weppDataManager` is injected into scenario manager; diff ranges set before apply.
+- **Graph pane loops/stays open:** Verify `syncGraphModeForContext()` context guard in `ui/graph-mode.js` and RAP/WEPP visibility checks.
+- **Slider missing:** Confirm `rapMetadata`/`weppYearlyMetadata` are loaded; ensure slider placement rules run in `ui/year-slider.js`.
+- **Legends/tooltips wrong:** Consume legend payloads from `map/layers.js` instead of recomputing; check `buildLegendForLayer()`.
+- **Comparison colors wrong:** Ensure `weppDataManager` is injected into scenario manager; diff ranges set before `applyLayers()`.
+- **Page load stalls:** Layer controls render before detection finishes by design; detection is async. If the sidebar stays empty, check detector fetches (sitePrefix) and orchestrator awaits.
 
 ## Quick Checks
 
