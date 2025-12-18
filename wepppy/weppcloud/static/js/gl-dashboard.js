@@ -24,6 +24,8 @@
   let stateModule;
   let graphModule;
   let graphModeModule;
+  let colorsModule;
+  let yearSliderModule;
   let queryEngineModule;
   let graphLoadersModule;
   let detectorModule;
@@ -32,11 +34,13 @@
   let layerRendererModule;
   let scenarioModule;
   try {
-    [config, stateModule, graphModule, graphModeModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule, scenarioModule] = await Promise.all([
+    [config, colorsModule, stateModule, graphModule, graphModeModule, yearSliderModule, queryEngineModule, graphLoadersModule, detectorModule, layerUtilsModule, mapControllerModule, layerRendererModule, scenarioModule] = await Promise.all([
       import(`${moduleBase}config.js`),
+      import(`${moduleBase}colors.js`),
       import(`${moduleBase}state.js`),
       import(`${moduleBase}graphs/timeseries-graph.js`),
       import(`${moduleBase}ui/graph-mode.js`),
+      import(`${moduleBase}ui/year-slider.js`),
       import(`${moduleBase}data/query-engine.js`),
       import(`${moduleBase}graphs/graph-loaders.js`),
       import(`${moduleBase}layers/detector.js`),
@@ -62,14 +66,19 @@
     CUMULATIVE_MEASURE_OPTIONS,
     MONTH_LABELS,
     createBasemapDefs,
-    createColorScales,
   } = config;
+  const {
+    soilColorForValue,
+    hexToRgbaArray,
+  } = colorsModule;
+  const colorsCreateColorScales = colorsModule.createColorScales;
   const { getState, setValue, setState, initState } = stateModule;
   const { createLayerUtils } = layerUtilsModule;
   const { createMapController } = mapControllerModule;
   const { createLayerRenderer } = layerRendererModule;
   const { createTimeseriesGraph } = graphModule;
   const { createGraphModeController } = graphModeModule;
+  const { createYearSlider } = yearSliderModule;
   const { createScenarioManager } = scenarioModule;
   let layerUtils;
   let pendingApplyLayers = false;
@@ -95,9 +104,32 @@
   let yearSlider;
   let timeseriesGraph;
 
-  const { rdbuScale, winterScale, jet2Scale } = createColorScales(
-    typeof createColormap === 'function' ? createColormap : null
-  );
+  const colorScaleFactory =
+    (typeof colorsCreateColorScales === 'function' && colorsCreateColorScales) ||
+    (typeof config.createColorScales === 'function' && config.createColorScales);
+  const colorScales =
+    colorScaleFactory?.(typeof createColormap === 'function' ? createColormap : null) || {
+      viridisScale: null,
+      winterScale: null,
+      jet2Scale: null,
+      rdbuScale: null,
+      viridisColor: colorsModule.viridisColor,
+      winterColor: colorsModule.winterColor,
+      jet2Color: colorsModule.jet2Color,
+      divergingColor: colorsModule.divergingColor,
+      rdbuColor: colorsModule.rdbuColor,
+    };
+  const {
+    viridisScale,
+    winterScale,
+    jet2Scale,
+    rdbuScale,
+    viridisColor = colorsModule.viridisColor,
+    winterColor = colorsModule.winterColor,
+    jet2Color = colorsModule.jet2Color,
+    divergingColor = colorsModule.divergingColor,
+    rdbuColor = colorsModule.rdbuColor,
+  } = colorScales;
 
   const { basemapDefs } = createBasemapDefs();
   const BASEMAP_DEFS = basemapDefs;
@@ -863,192 +895,14 @@
     climateControlsEl.appendChild(wrapper);
   }
 
-  // ============================================================================
-  // Year Slider Controller (generic, reusable for RAP and other features)
-  // ============================================================================
-  yearSlider = {
+  yearSlider = createYearSlider({
     el: document.getElementById('gl-year-slider'),
     input: document.getElementById('gl-year-slider-input'),
     valueEl: document.getElementById('gl-year-slider-value'),
     minEl: document.getElementById('gl-year-slider-min'),
     maxEl: document.getElementById('gl-year-slider-max'),
-    _listeners: [],
-    _visible: false,
-    _minYear: 1,
-    _maxYear: 100,
-    _currentYear: 1,
-    _hasObserved: false,
-    _initialized: false,
-
-    init(config) {
-      if (!this.el || !this.input) return;
-      if (this._initialized) return; // Only init once
-      this._initialized = true;
-      
-      this._minYear = config.startYear || 1;
-      this._maxYear = config.endYear || 100;
-      this._hasObserved = config.hasObserved || false;
-      this._currentYear = this._minYear; // Default to first year
-      this._playing = false;
-      this._intervalId = null;
-      this._playBtn = document.getElementById('gl-year-slider-play');
-
-      this.input.min = String(this._minYear);
-      this.input.max = String(this._maxYear);
-      this.input.value = String(this._currentYear);
-
-      if (this.minEl) this.minEl.textContent = String(this._minYear);
-      if (this.maxEl) this.maxEl.textContent = String(this._maxYear);
-      this._updateDisplay();
-
-      // Attach input listener
-      this.input.addEventListener('input', () => {
-        this._currentYear = parseInt(this.input.value, 10);
-        this._updateDisplay();
-        this._emit('change', this._currentYear);
-      });
-
-      // Play/pause button
-      if (this._playBtn) {
-        this._playBtn.addEventListener('click', () => this.toggle());
-      }
-    },
-
-    _updateDisplay() {
-      if (this.valueEl) {
-        this.valueEl.textContent = String(this._currentYear);
-      }
-    },
-
-    /**
-     * Show the year slider in the appropriate location based on context
-     * @param {string} context - 'climate' for Climate Yearly (bottom of graph), 
-     *                          'layer' for RAP/WEPP Yearly (above graph)
-     */
-    show(context = 'layer') {
-      if (!this.el) return;
-      const resolvedContext = context || 'layer';
-      this._context = resolvedContext;
-
-      const container = document.getElementById('gl-graph-container');
-      const slot = document.getElementById('gl-graph-year-slider');
-      const target = resolvedContext === 'climate' ? (container || slot) : (slot || container);
-
-      if (target && this.el.parentElement !== target) {
-        target.appendChild(this.el);
-      }
-
-      if (container) {
-        container.classList.toggle('has-bottom-slider', resolvedContext === 'climate');
-      }
-
-      this.el.classList.add('is-visible');
-      this._visible = true;
-    },
-
-    hide() {
-      if (this.el && this._visible) {
-        this.el.classList.remove('is-visible');
-        this._visible = false;
-      }
-      const container = document.getElementById('gl-graph-container');
-      if (container) {
-        container.classList.remove('has-bottom-slider');
-      }
-    },
-
-    setRange(minYear, maxYear, currentYear) {
-      // Initialize if not already done
-      if (!this._initialized && this.el && this.input) {
-        this.init({ startYear: minYear, endYear: maxYear });
-      }
-      this._minYear = minYear;
-      this._maxYear = maxYear;
-      if (this.input) {
-        this.input.min = String(minYear);
-        this.input.max = String(maxYear);
-      }
-      if (this.minEl) this.minEl.textContent = String(minYear);
-      if (this.maxEl) this.maxEl.textContent = String(maxYear);
-      if (currentYear != null) {
-        this._currentYear = currentYear;
-        if (this.input) this.input.value = String(currentYear);
-      }
-      this._updateDisplay();
-    },
-
-    getValue() {
-      return this._currentYear;
-    },
-
-    setValue(year) {
-      this._currentYear = year;
-      if (this.input) this.input.value = String(year);
-      this._updateDisplay();
-    },
-
-    on(event, callback) {
-      this._listeners.push({ event, callback });
-    },
-
-    off(event, callback) {
-      this._listeners = this._listeners.filter(
-        (l) => !(l.event === event && l.callback === callback)
-      );
-    },
-
-    _emit(event, data) {
-      for (const listener of this._listeners) {
-        if (listener.event === event) {
-          listener.callback(data);
-        }
-      }
-    },
-
-    play() {
-      if (this._playing) return;
-      this._playing = true;
-      this._updatePlayButton();
-      
-      // Start animation interval (1 year every 3 seconds)
-      this._intervalId = setInterval(() => {
-        let nextYear = this._currentYear + 1;
-        // Loop back to start when reaching end
-        if (nextYear > this._maxYear) {
-          nextYear = this._minYear;
-        }
-        this._currentYear = nextYear;
-        if (this.input) this.input.value = String(nextYear);
-        this._updateDisplay();
-        this._emit('change', this._currentYear);
-      }, 3000);
-    },
-
-    pause() {
-      if (!this._playing) return;
-      this._playing = false;
-      if (this._intervalId) {
-        clearInterval(this._intervalId);
-        this._intervalId = null;
-      }
-      this._updatePlayButton();
-    },
-
-    toggle() {
-      if (this._playing) {
-        this.pause();
-      } else {
-        this.play();
-      }
-    },
-
-    _updatePlayButton() {
-      if (this._playBtn) {
-        this._playBtn.textContent = this._playing ? '⏸' : '▶';
-        this._playBtn.title = this._playing ? 'Pause' : 'Play';
-      }
-    },
-  };
+    playBtn: document.getElementById('gl-year-slider-play'),
+  });
 
   // Initialize year slider from climate context
   const climateCtx = ctx.climate;
@@ -1216,13 +1070,6 @@
     90: 'Woody Wetlands',
     95: 'Emergent Herbaceous Wetlands',
   };
-  const HEX_RGB_RE = /^#?([0-9a-f]{6})$/i;
-  const soilColorCache = new Map();
-  const viridisScale =
-    typeof createColormap === 'function'
-      ? createColormap({ colormap: 'viridis', nshades: 256, format: 'rgba' })
-      : null;
-  const RGBA_RE = /^rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*(?:,\s*([0-9.]+)\s*)?\)$/i;
   const GRAPH_COLORS = [
     [99, 179, 237],
     [139, 92, 246],
@@ -1233,34 +1080,6 @@
     [248, 113, 113],
     [125, 211, 252],
   ];
-
-  function hslToHex(h, s, l) {
-    const sat = s / 100;
-    const light = l / 100;
-    const a = sat * Math.min(light, 1 - light);
-    const f = (n) => {
-      const k = (n + h / 30) % 12;
-      const color = light - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-      return Math.round(255 * color)
-        .toString(16)
-        .padStart(2, '0');
-    };
-    return `#${f(0)}${f(8)}${f(4)}`;
-  }
-
-  function soilColorForValue(value) {
-    if (!Number.isFinite(value)) return null;
-    if (soilColorCache.has(value)) {
-      return soilColorCache.get(value);
-    }
-    const v = Math.abs(Math.trunc(value));
-    const hue = ((v * 2654435761) >>> 0) % 360; // Knuth hash for spread
-    const sat = 50 + (((v * 1013904223) >>> 0) % 30); // 50-79
-    const light = 45 + (((v * 1664525) >>> 0) % 20); // 45-64
-    const hex = hslToHex(hue, sat, light);
-    soilColorCache.set(value, hex);
-    return hex;
-  }
 
   function resolveGeoTiffGlobal() {
     if (typeof GeoTIFF !== 'undefined' && GeoTIFF && typeof GeoTIFF.fromArrayBuffer === 'function') {
@@ -1585,193 +1404,6 @@
     updateLegendsPanel();
   }
 
-  function hexToRgbaArray(hex, alpha = 230) {
-    const parsed = HEX_RGB_RE.exec(hex || '');
-    if (!parsed) return null;
-    const intVal = parseInt(parsed[1], 16);
-    return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, alpha];
-  }
-
-  function rgbaStringToArray(str, alphaOverride) {
-    const match = RGBA_RE.exec(str || '');
-    if (!match) return null;
-    const r = Number(match[1]);
-    const g = Number(match[2]);
-    const b = Number(match[3]);
-    const aRaw = match[4];
-    if (![r, g, b].every(Number.isFinite)) return null;
-    const a = Number.isFinite(Number(aRaw)) ? Number(aRaw) * 255 : 255;
-    const finalA = Number.isFinite(alphaOverride) ? alphaOverride : a;
-    return [Math.round(r), Math.round(g), Math.round(b), Math.round(finalA)];
-  }
-
-  function normalizeColorEntry(entry, alpha = 230) {
-    if (!entry) return null;
-    if (Array.isArray(entry)) {
-      if (entry.length === 4 && entry.every((v) => Number.isFinite(Number(v)))) {
-        const r = Number(entry[0]);
-        const g = Number(entry[1]);
-        const b = Number(entry[2]);
-        let a = Number(entry[3]);
-        // colormap library returns alpha in 0-1 range; convert to 0-255
-        if (a <= 1) {
-          a = a * 255;
-        }
-        // Use the passed alpha override if the original alpha was fully opaque
-        if (a >= 254) {
-          a = alpha;
-        }
-        return [r, g, b, Math.round(a)];
-      }
-    } else if (typeof entry === 'string') {
-      const hex = hexToRgbaArray(entry, alpha);
-      if (hex) return hex;
-      const rgba = rgbaStringToArray(entry, alpha);
-      if (rgba) return rgba;
-    }
-    return null;
-  }
-
-  function viridisColor(val) {
-    const v = Math.min(1, Math.max(0, Number(val)));
-    if (viridisScale && typeof viridisScale.map === 'function') {
-      const mapped = viridisScale.map(v);
-      const rgba = normalizeColorEntry(mapped, 230);
-      if (rgba) return rgba;
-    }
-    if (viridisScale && Array.isArray(viridisScale) && viridisScale.length) {
-      const idx = Math.min(viridisScale.length - 1, Math.floor(v * (viridisScale.length - 1)));
-      const color = viridisScale[idx];
-      const rgba = normalizeColorEntry(color, 230);
-      if (rgba) return rgba;
-    }
-    const start = [68, 1, 84];
-    const end = [253, 231, 37];
-    return [
-      Math.round(start[0] + (end[0] - start[0]) * v),
-      Math.round(start[1] + (end[1] - start[1]) * v),
-      Math.round(start[2] + (end[2] - start[2]) * v),
-      230,
-    ];
-  }
-
-  /**
-   * Winter colormap for water-related measures (blue→green).
-   * @param {number} val - Normalized value 0-1
-   * @returns {Array} RGBA color array
-   */
-  function winterColor(val) {
-    const v = Math.min(1, Math.max(0, Number(val)));
-    if (winterScale && typeof winterScale.map === 'function') {
-      const mapped = winterScale.map(v);
-      const rgba = normalizeColorEntry(mapped, 230);
-      if (rgba) return rgba;
-    }
-    if (winterScale && Array.isArray(winterScale) && winterScale.length) {
-      const idx = Math.min(winterScale.length - 1, Math.floor(v * (winterScale.length - 1)));
-      const color = winterScale[idx];
-      const rgba = normalizeColorEntry(color, 230);
-      if (rgba) return rgba;
-    }
-    // Fallback: blue (0, 0, 255) to green (0, 255, 128)
-    return [
-      0,
-      Math.round(v * 255),
-      Math.round(255 - v * 127),
-      230,
-    ];
-  }
-
-  /**
-   * Jet2 colormap for soil-related measures (cyan→yellow→red).
-   * @param {number} val - Normalized value 0-1
-   * @returns {Array} RGBA color array
-   */
-  function jet2Color(val) {
-    const v = Math.min(1, Math.max(0, Number(val)));
-    if (jet2Scale && typeof jet2Scale.map === 'function') {
-      const mapped = jet2Scale.map(v);
-      const rgba = normalizeColorEntry(mapped, 230);
-      if (rgba) return rgba;
-    }
-    if (jet2Scale && Array.isArray(jet2Scale) && jet2Scale.length) {
-      const idx = Math.min(jet2Scale.length - 1, Math.floor(v * (jet2Scale.length - 1)));
-      const color = jet2Scale[idx];
-      const rgba = normalizeColorEntry(color, 230);
-      if (rgba) return rgba;
-    }
-    // Fallback: cyan (0, 255, 255) → yellow (255, 255, 0) → red (255, 0, 0)
-    if (v < 0.5) {
-      const t = v * 2;
-      return [
-        Math.round(255 * t),
-        255,
-        Math.round(255 * (1 - t)),
-        230,
-      ];
-    } else {
-      const t = (v - 0.5) * 2;
-      return [
-        255,
-        Math.round(255 * (1 - t)),
-        0,
-        230,
-      ];
-    }
-  }
-
-  /**
-   * Diverging color function for comparison mode using rdbu colormap.
-   * Maps normalized difference values (-1 to 1) to blue-white-red colors.
-   * Negative = blue (scenario < base), Zero = white, Positive = red (scenario > base)
-   * @param {number} normalizedDiff - Difference normalized to -1 to 1 range
-   * @returns {Array} RGBA color array
-   */
-  function divergingColor(normalizedDiff) {
-    // Map -1 to 1 range to 0 to 1 for colormap lookup
-    // rdbu is red-white-blue, but we want blue (negative/scenario lower) to red (positive/scenario higher)
-    // So we invert: low values (scenario < base) = blue, high values (scenario > base) = red
-    const v = Math.min(1, Math.max(0, (normalizedDiff + 1) / 2));
-    
-    if (rdbuScale && typeof rdbuScale.map === 'function') {
-      const mapped = rdbuScale.map(v);
-      const rgba = normalizeColorEntry(mapped, 230);
-      if (rgba) return rgba;
-    }
-    if (rdbuScale && Array.isArray(rdbuScale) && rdbuScale.length) {
-      const idx = Math.min(rdbuScale.length - 1, Math.floor(v * (rdbuScale.length - 1)));
-      const color = rdbuScale[idx];
-      const rgba = normalizeColorEntry(color, 230);
-      if (rgba) return rgba;
-    }
-    
-    // Fallback: simple blue-white-red gradient
-    if (normalizedDiff < 0) {
-      // Blue to white for negative values
-      const t = normalizedDiff + 1; // 0 to 1
-      return [
-        Math.round(33 + (255 - 33) * t),
-        Math.round(102 + (255 - 102) * t),
-        Math.round(172 + (255 - 172) * t),
-        230
-      ];
-    } else {
-      // White to red for positive values
-      const t = normalizedDiff; // 0 to 1
-      return [
-        255,
-        Math.round(255 - (255 - 102) * t),
-        Math.round(255 - (255 - 94) * t),
-        230
-      ];
-    }
-  }
-
-  // Normalize 0-1 diverging input to [-1, 1] for the rdbu gradient.
-  function rdbuColor(normalized) {
-    const clamped = Math.min(1, Math.max(0, Number(normalized)));
-    return divergingColor(clamped * 2 - 1);
-  }
 
   // RAP band labels for display
   const RAP_BAND_LABELS = {

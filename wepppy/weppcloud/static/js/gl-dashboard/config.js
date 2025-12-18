@@ -120,6 +120,7 @@ export function createColorScales(colormapFn) {
   };
 
   return {
+    viridisScale: makeScale('viridis'),
     rdbuScale: makeScale('rdbu'),
     winterScale: makeScale('winter'),
     jet2Scale: makeScale('jet2'),

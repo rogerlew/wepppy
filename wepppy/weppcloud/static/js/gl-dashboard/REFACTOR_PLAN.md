@@ -62,10 +62,8 @@ GL_DASHBOARD_URL="..." npm run smoke -- tests/smoke/gl-dashboard-state-transitio
 
 ### Remaining in gl-dashboard.js (to extract)
 
-1. **Year Slider Controller** (~200 lines) - Generic slider with play/pause
-2. **Color Scale Functions** (~300 lines) - Colormap implementations still in main file
-3. **WEPP/Layer Data Functions** (~600 lines) - Refresh handlers, range computation
-4. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
+1. **WEPP/Layer Data Functions** (~600 lines) - Refresh handlers, range computation
+2. **Init & Wiring** (~300 lines) - Detection orchestration, global hooks
 
 ---
 
@@ -198,7 +196,8 @@ export function createGraphModeController({
 ---
 
 ### Phase 3: Year Slider Controller
-**Risk:** Low | **Lines:** ~200 | **Duration:** 1-2 hours
+**Risk:** Low | **Lines:** ~200 | **Duration:** 1-2 hours  
+**Status:** Complete – controller extracted to `gl-dashboard/ui/year-slider.js`; graph-mode integration intact; smoke verified.
 
 **Extract to:** `gl-dashboard/ui/year-slider.js`
 
@@ -238,7 +237,8 @@ export function createYearSlider({
 ---
 
 ### Phase 4: Color Scale Consolidation
-**Risk:** Low | **Lines:** ~300 | **Duration:** 1-2 hours
+**Risk:** Low | **Lines:** ~300 | **Duration:** 1-2 hours  
+**Status:** Complete – colormap helpers consolidated into `gl-dashboard/colors.js`; imports updated; smoke verified.
 
 **Expand:** `gl-dashboard/colors.js`
 
