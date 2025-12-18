@@ -17,14 +17,14 @@
 - [X] Add JSDoc enums/typedefs for graph mode, slider placement, and context keys.
 
 ## Phase 3: Unit/Integration Tests
-- [ ] Add fast unit tests for `colors.js` (colormap outputs, normalization).
-- [ ] Add unit tests for detector URL construction (sitePrefix-aware) and range computations in wepp-data.
-- [ ] Add unit tests for state subscriptions (setState/setValue change notifications).
-- [ ] Ensure tests live alongside modules or under `static-src/tests` with clear fixture usage.
+- [x] Add fast unit tests for `colors.js` (colormap outputs, normalization).
+- [x] Add unit tests for detector URL construction (sitePrefix-aware) and range computations in wepp-data.
+- [x] Add unit tests for state subscriptions (setState/setValue change notifications).
+- [x] Ensure tests live alongside modules or under `static-src/tests` with clear fixture usage.
 
 ## Phase 4: Error Handling & UX Feedback
-- [ ] Add lightweight error surfaces for detector failures (set state flags; optionally surface a non-blocking banner/legend note).
-- [ ] Guard async detection with user-visible fallback for missing rasters/overlays (e.g., “No rasters detected—check run data”).
+- [x] Keep detection logging to console for expected missing resources; avoid noisy UI banners for normal absences.
+- [x] Add lightweight logging for unexpected detector failures (network/parse) to ease debugging without changing UX.
 
 ## Phase 5: Visual/Behavioral Coverage
 - [ ] Expand Playwright smoke to assert layer controls populate after async detection (no “No raster layers” when rasters exist).

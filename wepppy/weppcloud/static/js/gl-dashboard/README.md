@@ -28,6 +28,7 @@
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
 - Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.
+- Detection failures for expected absences stay console-only; do not surface UI banners/toasts for missing rasters.
 
 ## Module Contracts (injection signatures)
 - `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`

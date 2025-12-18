@@ -4,20 +4,35 @@
  * No DOM/deck access; suitable for tests/workers.
  */
 
+function logDetection(kind, message, context) {
+  const parts = [`gl-dashboard detection: ${message}`];
+  if (context !== undefined) {
+    parts.push(context);
+  }
+  // eslint-disable-next-line no-console
+  console[kind](...parts);
+}
+
+const logDetectionInfo = (message, context) => logDetection('info', message, context);
+const logDetectionWarn = (message, context) => logDetection('warn', message, context);
+
 async function detectSbsLayer({ ctx, loadSbsImage }) {
   const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/baer_wgs_map`;
   const resp = await fetch(url);
   if (!resp.ok) {
+    logDetectionInfo('SBS map not available', { url, status: resp.status });
     return null;
   }
   const payload = await resp.json();
   if (!payload || payload.Success !== true || !payload.Content) {
+    logDetectionInfo('SBS response missing content', { url });
     return null;
   }
 
   let { bounds } = payload.Content;
   const imgurl = payload.Content.imgurl;
   if (!bounds || !imgurl) {
+    logDetectionInfo('SBS payload missing bounds/image', { url, hasBounds: Boolean(bounds), hasImg: Boolean(imgurl) });
     return null;
   }
 
@@ -28,11 +43,13 @@ async function detectSbsLayer({ ctx, loadSbsImage }) {
     bounds = [lon1, lat1, lon2, lat2];
   }
   if (!Array.isArray(bounds) || bounds.length !== 4 || bounds.some((v) => !Number.isFinite(v))) {
+    logDetectionInfo('SBS bounds invalid', { url, bounds });
     return null;
   }
 
   const raster = await loadSbsImage(imgurl);
   if (!raster) {
+    logDetectionInfo('SBS image failed to load', { imgurl });
     return null;
   }
 
@@ -89,6 +106,7 @@ async function ensureSubcatchments(buildBaseUrl, subcatchmentsGeoJson) {
   if (geoResp.ok) {
     return geoResp.json();
   }
+   logDetectionInfo('Subcatchments GeoJSON missing', { geoUrl, status: geoResp.status });
   return subcatchmentsGeoJson;
 }
 
@@ -133,8 +151,7 @@ export async function detectRasterLayers({
       }
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load SBS map', err);
+    logDetectionWarn('failed to load SBS map', err);
   }
 
   for (const def of layerDefs) {
@@ -158,8 +175,7 @@ export async function detectRasterLayers({
         };
         break;
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.warn(`gl-dashboard: failed to load ${def.label} at ${path}`, err);
+        logDetectionWarn(`failed to load ${def.label} at ${path}`, err);
       }
     }
     if (found) {
@@ -175,11 +191,20 @@ export async function detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl }) 
     const url = buildScenarioUrl(`query/landuse/subcatchments`);
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-    if (!subResp.ok || !geoResp.ok) return null;
+    if (!subResp.ok || !geoResp.ok) {
+      logDetectionInfo('Landuse overlays missing', { subStatus: subResp.status, geoStatus: geoResp.status });
+      return null;
+    }
 
     const landuseSummary = await subResp.json();
     const subcatchmentsGeoJson = await geoResp.json();
-    if (!landuseSummary || !subcatchmentsGeoJson) return null;
+    if (!landuseSummary || !subcatchmentsGeoJson) {
+      logDetectionInfo('Landuse overlays unavailable (empty payload)', {
+        hasSummary: Boolean(landuseSummary),
+        hasGeoJson: Boolean(subcatchmentsGeoJson),
+      });
+      return null;
+    }
 
     const basePath = 'landuse/landuse.parquet';
     const landuseLayers = [
@@ -191,8 +216,7 @@ export async function detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl }) 
 
     return { landuseSummary, subcatchmentsGeoJson, landuseLayers };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load landuse overlays', err);
+    logDetectionWarn('failed to load landuse overlays', err);
     return null;
   }
 }
@@ -202,11 +226,20 @@ export async function detectSoilsOverlays({ buildScenarioUrl, buildBaseUrl, subc
     const url = buildScenarioUrl(`query/soils/subcatchments`);
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-    if (!subResp.ok || !geoResp.ok) return null;
+    if (!subResp.ok || !geoResp.ok) {
+      logDetectionInfo('Soils overlays missing', { subStatus: subResp.status, geoStatus: geoResp.status });
+      return null;
+    }
 
     const soilsSummary = await subResp.json();
     const geoJson = subcatchmentsGeoJson || (await geoResp.json());
-    if (!soilsSummary || !geoJson) return null;
+    if (!soilsSummary || !geoJson) {
+      logDetectionInfo('Soils overlays unavailable (empty payload)', {
+        hasSummary: Boolean(soilsSummary),
+        hasGeoJson: Boolean(geoJson),
+      });
+      return null;
+    }
 
     const basePath = 'soils/soils.parquet';
     const soilsLayers = [
@@ -220,8 +253,7 @@ export async function detectSoilsOverlays({ buildScenarioUrl, buildBaseUrl, subc
 
     return { soilsSummary, subcatchmentsGeoJson: geoJson, soilsLayers };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load soils overlays', err);
+    logDetectionWarn('failed to load soils overlays', err);
     return null;
   }
 }
@@ -231,11 +263,20 @@ export async function detectHillslopesOverlays({ buildScenarioUrl, buildBaseUrl,
     const url = buildScenarioUrl(`query/watershed/subcatchments`);
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-    if (!subResp.ok || !geoResp.ok) return null;
+    if (!subResp.ok || !geoResp.ok) {
+      logDetectionInfo('Hillslopes overlays missing', { subStatus: subResp.status, geoStatus: geoResp.status });
+      return null;
+    }
 
     const hillslopesSummary = await subResp.json();
     const geoJson = subcatchmentsGeoJson || (await geoResp.json());
-    if (!hillslopesSummary || !geoJson) return null;
+    if (!hillslopesSummary || !geoJson) {
+      logDetectionInfo('Hillslopes overlays unavailable (empty payload)', {
+        hasSummary: Boolean(hillslopesSummary),
+        hasGeoJson: Boolean(geoJson),
+      });
+      return null;
+    }
 
     const basePath = 'watershed/hillslopes.parquet';
     const hillslopesLayers = [
@@ -246,8 +287,7 @@ export async function detectHillslopesOverlays({ buildScenarioUrl, buildBaseUrl,
 
     return { hillslopesSummary, subcatchmentsGeoJson: geoJson, hillslopesLayers };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load hillslopes overlays', err);
+    logDetectionWarn('failed to load hillslopes overlays', err);
     return null;
   }
 }
@@ -264,7 +304,10 @@ export async function detectWatarOverlays({ buildBaseUrl, postQueryEngine, watar
       ],
     };
     const result = await postQueryEngine(payload);
-    if (!result || !result.records || !result.records.length) return null;
+    if (!result || !result.records || !result.records.length) {
+      logDetectionInfo('WATAR overlays missing or empty', { path: watarPath });
+      return null;
+    }
 
     const watarSummary = {};
     for (const row of result.records) {
@@ -285,8 +328,7 @@ export async function detectWatarOverlays({ buildBaseUrl, postQueryEngine, watar
 
     return { watarSummary, watarRanges, watarLayers, subcatchmentsGeoJson: geoJson };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load WATAR overlays', err);
+    logDetectionWarn('failed to load WATAR overlays', err);
     return null;
   }
 }
@@ -305,7 +347,13 @@ export async function detectWeppOverlays({
 
     const [weppSummary, geoJson] = await Promise.all([fetchWeppSummary(weppStatistic), geoPromise]);
     const resolvedGeo = subcatchmentsGeoJson || geoJson;
-    if (!weppSummary || !resolvedGeo) return null;
+    if (!weppSummary || !resolvedGeo) {
+      logDetectionInfo('WEPP overlays missing summary or geometry', {
+        hasSummary: Boolean(weppSummary),
+        hasGeoJson: Boolean(resolvedGeo),
+      });
+      return null;
+    }
 
     const weppRanges = computeRanges(weppSummary, [
       'runoff_volume',
@@ -327,8 +375,7 @@ export async function detectWeppOverlays({
 
     return { weppSummary, weppRanges, weppLayers, subcatchmentsGeoJson: resolvedGeo };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load WEPP overlays', err);
+    logDetectionWarn('failed to load WEPP overlays', err);
     return null;
   }
 }
@@ -348,6 +395,7 @@ export async function detectWeppYearlyOverlays({
     };
     const yearsResult = await postQueryEngine(yearsPayload);
     if (!yearsResult || !yearsResult.records || !yearsResult.records.length) {
+      logDetectionInfo('WEPP yearly overlays missing year list', { path: weppYearlyPath });
       return { weppYearlyLayers: [], weppYearlyMetadata: null, weppYearlySelectedYear: null, subcatchmentsGeoJson };
     }
 
@@ -361,6 +409,7 @@ export async function detectWeppYearlyOverlays({
 
     const geoJson = await ensureSubcatchments(buildBaseUrl, subcatchmentsGeoJson);
     if (!geoJson) {
+      logDetectionInfo('WEPP yearly overlays missing subcatchments', { path: weppYearlyPath });
       return { weppYearlyLayers: [], weppYearlyMetadata: null, weppYearlySelectedYear: null, subcatchmentsGeoJson };
     }
 
@@ -390,8 +439,7 @@ export async function detectWeppYearlyOverlays({
       subcatchmentsGeoJson: geoJson,
     };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load WEPP yearly overlays', err);
+    logDetectionWarn('failed to load WEPP yearly overlays', err);
     return null;
   }
 }
@@ -404,8 +452,9 @@ export async function detectWeppEventOverlays({
 }) {
   try {
     if (!climateCtx || !climateCtx.startYear || !climateCtx.endYear) {
-      // eslint-disable-next-line no-console
-      console.warn('gl-dashboard: no climate context available for WEPP Event');
+      logDetectionInfo('WEPP Event overlays unavailable: missing climate context', {
+        hasClimateCtx: Boolean(climateCtx),
+      });
       return null;
     }
 
@@ -431,8 +480,7 @@ export async function detectWeppEventOverlays({
 
     return { weppEventLayers, weppEventMetadata: metadata, weppEventSelectedDate: selectedDate, subcatchmentsGeoJson: geoJson };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load WEPP Event overlays', err);
+    logDetectionWarn('failed to load WEPP Event overlays', err);
     return null;
   }
 }
@@ -451,7 +499,10 @@ export async function detectRapOverlays({
       order_by: ['year'],
     };
     const yearsResult = await postQueryEngine(yearsPayload);
-    if (!yearsResult || !yearsResult.records || !yearsResult.records.length) return null;
+    if (!yearsResult || !yearsResult.records || !yearsResult.records.length) {
+      logDetectionInfo('RAP overlays missing year list');
+      return null;
+    }
 
     const bandsPayload = {
       datasets: [{ path: 'rap/rap_ts.parquet', alias: 'rap' }],
@@ -459,7 +510,10 @@ export async function detectRapOverlays({
       order_by: ['band'],
     };
     const bandsResult = await postQueryEngine(bandsPayload);
-    if (!bandsResult || !bandsResult.records || !bandsResult.records.length) return null;
+    if (!bandsResult || !bandsResult.records || !bandsResult.records.length) {
+      logDetectionInfo('RAP overlays missing band list');
+      return null;
+    }
 
     const years = yearsResult.records.map((r) => r.year);
     const bands = bandsResult.records.map((r) => r.band);
@@ -523,13 +577,14 @@ export async function detectRapOverlays({
         for (const row of dataResult.records) {
           rapSummary[String(row.topaz_id)] = row.value;
         }
+      } else {
+        logDetectionInfo('RAP overlays missing data for selected year', { year: rapSelectedYear });
       }
     }
 
     return { rapLayers, rapMetadata, rapSelectedYear, rapSummary, subcatchmentsGeoJson: geoJson };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn('gl-dashboard: failed to load RAP overlays', err);
+    logDetectionWarn('failed to load RAP overlays', err);
     return null;
   }
 }

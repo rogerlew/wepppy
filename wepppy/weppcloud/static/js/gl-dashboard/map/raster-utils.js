@@ -18,6 +18,15 @@
  * @property {(path: string) => Promise<Object|null>} fetchGdalInfo Fetch GDAL info JSON for a raster path.
  */
 
+function logRaster(kind, message, context) {
+  const parts = [`gl-dashboard raster-utils: ${message}`];
+  if (context !== undefined) {
+    parts.push(context);
+  }
+  // eslint-disable-next-line no-console
+  console[kind](...parts);
+}
+
 function resolveGeoTiffGlobal() {
   if (typeof GeoTIFF !== 'undefined' && GeoTIFF && typeof GeoTIFF.fromArrayBuffer === 'function') {
     return GeoTIFF;
@@ -66,7 +75,7 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
   async function loadSbsImage(imgurl) {
     const imgResp = await fetch(imgurl);
     if (!imgResp.ok) {
-      throw new Error(`SBS image fetch failed: ${imgResp.status}`);
+      throw new Error(`SBS image fetch failed ${imgResp.status}: ${imgurl}`);
     }
     const blob = await imgResp.blob();
     const bitmap = await createImageBitmap(blob);
@@ -87,9 +96,17 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
 
   async function fetchGdalInfo(path) {
     const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/gdalinfo/${path}`;
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    return resp.json();
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        logRaster('info', 'gdalinfo missing', { path, status: resp.status });
+        return null;
+      }
+      return resp.json();
+    } catch (err) {
+      logRaster('warn', 'gdalinfo fetch failed', { path, url, err });
+      return null;
+    }
   }
 
   function normalizeColorEntry(entry, alpha = 230) {
