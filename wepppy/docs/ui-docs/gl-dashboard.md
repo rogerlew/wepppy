@@ -978,6 +978,13 @@ function syncGraphModeForContext() {
 }
 ```
 
+## Testing Strategy
+
+- **Playwright smoke tests:** Live in `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-*.spec.js`; run with `GL_DASHBOARD_URL="https://.../gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js` (or combine `SMOKE_BASE_URL` + `GL_DASHBOARD_PATH`).
+- **Fixtures:** No dedicated fixture directory; specs exercise live WEPPcloud runs with inline helpers/mocks.
+- **Exploration script:** `tests/gl-dashboard-exploration.spec.mjs` is available for manual walkthroughs and doc captures.
+- **Sanity check:** `node --check wepppy/weppcloud/static/js/gl-dashboard.js`.
+
 ## Appendix A: Key File Paths
 
 | Component | Path |

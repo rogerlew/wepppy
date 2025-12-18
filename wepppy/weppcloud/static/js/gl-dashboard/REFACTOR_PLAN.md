@@ -499,11 +499,11 @@ Refactor complete. All six phases landed successfully with Playwright smoke test
 | `gl-dashboard.md` | ✅ Slider placement rules clarified (DOM slot vs. container) |
 | `AGENTS.md` | ✅ Correctly references `#gl-graph-year-slider` for RAP/WEPP Yearly |
 
-#### 5. Test Fixture Path Verification Needed
+#### 5. Test Fixture Path Verification ✅ Resolved
 
 | Document | Issue |
 |----------|-------|
-| `gl-dashboard.md` Testing Strategy | References `tests/gl-dashboard/fixtures/` — path existence unverified; low priority |
+| `gl-dashboard.md` Testing Strategy | ✅ Smoke tests live in `wepppy/weppcloud/static-src/tests/smoke/`; no dedicated fixtures directory (inline helpers against live runs). |
 
 #### 6. README.md Module Contracts ✅ Resolved
 
@@ -563,3 +563,50 @@ The refactor achieved its goals: `gl-dashboard.js` is now a thin orchestrator (~
 **Refactor Status:** ✅ Complete  
 **Documentation Status:** ✅ Complete  
 **Test Status:** ✅ Green
+
+---
+
+### Post Refactor Quality Assessment: 7.5/10
+
+#### Strengths
+
+| Category | Score | Notes |
+|----------|-------|-------|
+| **Modular Architecture** | 8/10 | Clean separation: state, colors, data, UI, layers, map, scenario. Each module has focused responsibility. |
+| **Documentation** | 8/10 | AGENTS.md, README.md, REFACTOR_PLAN.md, and gl-dashboard.md provide comprehensive coverage. Troubleshooting guides are practical. |
+| **Dependency Injection** | 8/10 | Callbacks over imports pattern enables testability. Module contracts are explicit. |
+| **State Management** | 7/10 | Centralized reactive store with `setValue()`/`setState()`. Subscription model is clean. |
+| **Idempotency Guards** | 8/10 | `syncGraphModeForContext()` context-key guard prevents infinite loops—a critical invariant well-documented. |
+| **Test Coverage** | 7/10 | Playwright smoke tests cover major flows. Both test URLs documented with pass counts. |
+
+#### Weaknesses
+
+| Category | Score | Notes |
+|----------|-------|-------|
+| **JSDoc Coverage** | 5/10 | Modules lack inline documentation. IDE hover help is minimal. |
+| **Error Handling** | 6/10 | DOM guards (`if (!el) return;`) are good, but fetch error paths could be more robust. |
+| **Type Safety** | 4/10 | No TypeScript or JSDoc types. Large injection signatures are stringly-typed. |
+| **Unit Test Isolation** | 5/10 | Heavy reliance on Playwright smoke tests; few isolated unit tests for individual modules. |
+| **Magic Strings** | 6/10 | Graph contexts, slider positions, mode names scattered as string literals. Could use enums/constants. |
+
+#### Score Breakdown
+
+```
+Architecture & Design    ████████░░  8/10
+Code Organization        ████████░░  8/10
+Documentation            ████████░░  8/10
+Testability              ███████░░░  7/10
+Type Safety              ████░░░░░░  4/10
+Error Handling           ██████░░░░  6/10
+Inline Documentation     █████░░░░░  5/10
+─────────────────────────────────────────
+Overall Maintainability  ███████▌░░  7.5/10
+```
+
+#### Path to 9/10
+
+1. **Add TypeScript or JSDoc types** — Module injection signatures would benefit from explicit typing
+2. **Extract constants** — `'climate'`, `'layer'`, `'split'`, `'full'` → named exports in `config.js`
+3. **Add unit tests** — Test `colors.js` functions, state transitions, and range computations in isolation
+4. **JSDoc all exports** — Even brief `@param`/`@returns` annotations improve discoverability
+5. **Error boundaries** — Wrap async detection in try/catch with user-visible fallback states
