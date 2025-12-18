@@ -83,6 +83,14 @@ Omni maintains two bookkeeping structures in `omni.nodb`:
 
 Contrast execution follows the same hashing approach via `contrast_dependency_tree`.
 
+## Scenario Run Slugs and Routing
+
+- **Filesystem layout:** `_pups/omni/scenarios/<name>` under the parent run root.
+- **Run slug for web/UI:** `omni;;<parent_runid>;;<scenario_name>` (for example `omni;;walk-in-obsessive-compulsive;;undisturbed`).
+- **Canonical URLs:** `/weppcloud/runs/omni;;<parent_runid>;;<scenario>/<config>/...` — no `?pup=` query parameters are used. All controllers and templates should rely on `url_for_run` (JS) or Flask `url_for` with the provided `runid/config` to keep grouped slugs intact.
+- **Browse/Reports:** The header Browse/README/FORK/ARCHIVE links and GL dashboard now honor grouped slugs; avoid hardcoding base runids when deep-linking Omni scenarios.
+- **Legacy pup query:** Disabled for Omni; grouped slugs replace `?pup=...` access.
+
 ## Scenario Types and Parameters
 
 ### OmniScenario Enum
