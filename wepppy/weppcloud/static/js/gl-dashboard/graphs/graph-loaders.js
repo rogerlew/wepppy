@@ -40,6 +40,12 @@ const GRAPH_COLORS = [
   [125, 211, 252],
 ];
 
+// Named scenario colors for base scenario types
+const NAMED_SCENARIO_COLORS = {
+  burned: [239, 68, 68],      // Red (Tailwind red-500)
+  undisturbed: [34, 197, 94], // Green (Tailwind green-500)
+};
+
 const WEPP_YEARLY_COLUMN_MAP = {
   runoff_volume: '"Runoff Volume"',
   subrunoff_volume: '"Subrunoff Volume"',
@@ -79,7 +85,15 @@ export function createGraphLoaders(deps) {
     WEPP_YEARLY,
   } = GRAPH_CONTEXT_KEYS;
 
-  function scenarioColor(idx) {
+  function scenarioColor(idx, scenarioName = null) {
+    // Check for named scenario colors first (case-insensitive)
+    if (scenarioName) {
+      const lowerName = scenarioName.toLowerCase();
+      if (NAMED_SCENARIO_COLORS[lowerName]) {
+        const c = NAMED_SCENARIO_COLORS[lowerName];
+        return [c[0], c[1], c[2], 255];
+      }
+    }
     // Use Math.abs to handle negative indices (e.g., when prepending base scenario)
     const safeIdx = Math.abs(idx) % GRAPH_COLORS.length;
     const c = GRAPH_COLORS[safeIdx];
@@ -482,7 +496,7 @@ export function createGraphLoaders(deps) {
         label: scenarioDisplayName(scenario),
         percents: cumulative.percents,
         values: cumulative.values,
-        color: scenarioColor(originalIndex),
+        color: scenarioColor(originalIndex, scenario.name),
       });
     }
 
@@ -656,7 +670,7 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(perArea);
       if (stats) {
-        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i) });
+        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i, scenario.name) });
       }
     }
     return {
@@ -685,7 +699,7 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(perArea);
       if (stats) {
-        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i) });
+        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i, scenario.name) });
       }
     }
     return {
@@ -712,7 +726,7 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(tonnes);
       if (stats) {
-        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i) });
+        series.push({ label: scenarioDisplayName(scenario), stats, color: scenarioColor(i, scenario.name) });
       }
     }
     return {
@@ -738,7 +752,7 @@ export function createGraphLoaders(deps) {
         'sediment discharge',
       ]);
       const areaHa = await getTotalAreaHa(path);
-      scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i) });
+      scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i, scenario.name) });
       if (keyName && outletMap[keyName]) {
         for (const yr of Object.keys(outletMap[keyName])) {
           const yNum = Number(yr);
@@ -782,7 +796,7 @@ export function createGraphLoaders(deps) {
       const outletMap = await loadOutletScenario(path);
       const keyName = selectOutletKey(outletMap, ['water discharge from outlet', 'stream discharge']);
       const areaHa = await getTotalAreaHa(path);
-      scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i) });
+      scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i, scenario.name) });
       if (keyName && outletMap[keyName]) {
         for (const yr of Object.keys(outletMap[keyName])) {
           const yNum = Number(yr);
