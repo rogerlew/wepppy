@@ -369,7 +369,8 @@
   window.glDashboardSetScenario = setScenario;
   window.glDashboardSetComparisonMode = setComparisonMode;
 
-  function deselectAllSubcatchmentOverlays() {
+  function deselectAllSubcatchmentOverlays(options = {}) {
+    const { skipApply = false, skipUpdate = false } = options;
     const keys = [
       'landuseLayers',
       'soilsLayers',
@@ -391,8 +392,12 @@
     clearGraphModeOverride();
     setGraphFocus(false, { force: true, skipModeSync: true });
     syncGraphLayout({ resetContext: true });
-    applyLayers();
-    updateLayerList();
+    if (!skipApply) {
+      applyLayers();
+    }
+    if (!skipUpdate) {
+      updateLayerList();
+    }
   }
 
   async function refreshWeppStatisticData() {
@@ -515,8 +520,8 @@
     postQueryEngine,
     yearSlider,
     climateCtx,
-    applyLayers,
-    updateLayerList,
+    applyLayers: () => applyLayers(),
+    updateLayerList: () => updateLayerList(),
     nlcdColormap: NLCD_COLORMAP,
     soilColorForValue: colorsModule.soilColorForValue,
     loadRaster,
@@ -747,6 +752,9 @@
     setValue('weppYearlySelectedYear', selected);
     yearSlider.setRange(minYear, maxYear, selected);
     await refreshWeppYearlyData();
+    setValue('activeGraphKey', 'wepp-yearly');
+    await loadWeppYearlyTimeseriesData();
+    syncGraphLayout();
   }
 
   yearSlider.on('change', async (year) => {

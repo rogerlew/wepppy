@@ -73,6 +73,24 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     return resp.json();
   }
 
+  function normalizeColorEntry(entry, alpha = 230) {
+    if (!entry) return null;
+    if (Array.isArray(entry)) {
+      const [r, g, b, a] = entry;
+      if ([r, g, b].every((v) => Number.isFinite(v))) {
+        const finalA = Number.isFinite(a) ? a : alpha;
+        return [r, g, b, finalA];
+      }
+    } else if (typeof entry === 'string') {
+      const match = /^#?([0-9a-f]{6})$/i.exec(entry.trim());
+      if (match) {
+        const intVal = parseInt(match[1], 16);
+        return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, alpha];
+      }
+    }
+    return null;
+  }
+
   function colorize(values, width, height, colorMap) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -108,12 +126,21 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
         const v = values[i];
         let color = [180, 180, 180, 230];
         if (Number.isFinite(v)) {
-          let fn = fnCache.get(colorMap);
-          if (!fn) {
-            fn = typeof colorMap === 'function' ? colorMap : colorFn;
-            fnCache.set(colorMap, fn);
+          if (typeof colorMap === 'function') {
+            const mapped = colorMap(v);
+            const rgba = normalizeColorEntry(mapped, 230);
+            if (rgba) {
+              color = rgba;
+            }
+          } else {
+            let fn = fnCache.get(colorMap);
+            if (!fn) {
+              fn = colorMap ? colorMap : colorFn;
+              fnCache.set(colorMap, fn);
+            }
+            const mapped = typeof fn === 'function' ? fn((v - 1) / 255) : null;
+            color = mapped || color;
           }
-          color = fn((v - 1) / 255) || color;
         }
         imgData.data[j] = color[0];
         imgData.data[j + 1] = color[1];

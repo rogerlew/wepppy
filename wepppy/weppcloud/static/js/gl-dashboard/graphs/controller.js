@@ -257,6 +257,7 @@ export function createGraphController({
     calendarInput.value = 'calendar';
     calendarInput.checked = !getState().climateWaterYear;
     calendarInput.addEventListener('change', () => handleClimateModeChange('calendar'));
+    calendarInput.addEventListener('click', () => handleClimateModeChange('calendar'));
     const calendarSpan = document.createElement('span');
     calendarSpan.textContent = 'Calendar Year';
     calendarLabel.appendChild(calendarInput);
@@ -272,6 +273,7 @@ export function createGraphController({
     waterInput.value = 'water';
     waterInput.checked = !!getState().climateWaterYear;
     waterInput.addEventListener('change', () => handleClimateModeChange('water'));
+    waterInput.addEventListener('click', () => handleClimateModeChange('water'));
     const waterSpan = document.createElement('span');
     waterSpan.textContent = 'Water Year';
     waterLabel.appendChild(waterInput);

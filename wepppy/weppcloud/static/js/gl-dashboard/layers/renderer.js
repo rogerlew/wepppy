@@ -275,16 +275,16 @@ export function createLayerRenderer({
       .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
 
     if (landuseLayers.length || landuseRasters.length) {
-      subcatchmentSections.push({ title: 'Landuse', items: [...landuseLayers, ...landuseRasters], isSubcatchment: true });
+      subcatchmentSections.push({ title: 'Landuse', items: [...landuseLayers, ...landuseRasters], isSubcatchment: true, stateKey: 'landuseLayers' });
     }
     if (soilsLayers.length || soilsRasters.length) {
-      subcatchmentSections.push({ title: 'Soils', items: [...soilsLayers, ...soilsRasters], isSubcatchment: true });
+      subcatchmentSections.push({ title: 'Soils', items: [...soilsLayers, ...soilsRasters], isSubcatchment: true, stateKey: 'soilsLayers' });
     }
     if (rapLayers.length) {
-      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true });
+      subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true, stateKey: 'rapLayers' });
     }
     if (weppLayers.length) {
-      subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true });
+      subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true, stateKey: 'weppLayers' });
     }
     if (weppYearlyLayers.length) {
       subcatchmentSections.push({
@@ -293,13 +293,14 @@ export function createLayerRenderer({
         items: weppYearlyLayers,
         isSubcatchment: true,
         isWeppYearly: true,
+        stateKey: 'weppYearlyLayers',
       });
     }
     if (weppEventLayers.length) {
-      subcatchmentSections.push({ title: 'WEPP Event', items: weppEventLayers, isSubcatchment: true, isWeppEvent: true });
+      subcatchmentSections.push({ title: 'WEPP Event', items: weppEventLayers, isSubcatchment: true, isWeppEvent: true, stateKey: 'weppEventLayers' });
     }
     if (watarLayers.length) {
-      subcatchmentSections.push({ title: 'WATAR', items: watarLayers, isSubcatchment: true });
+      subcatchmentSections.push({ title: 'WATAR', items: watarLayers, isSubcatchment: true, stateKey: 'watarLayers' });
     }
     const allSections = [...subcatchmentSections];
     if (!allSections.length) {
@@ -381,9 +382,18 @@ export function createLayerRenderer({
         input.checked = layer.visible;
         const idPrefix = section.idPrefix || section.title;
         input.id = `layer-${idPrefix}-${layer.key}`;
+        const stateKey = section.stateKey;
         const selectSubcatchmentLayer = async () => {
-          deselectAllSubcatchmentOverlays();
-          layer.visible = true;
+          deselectAllSubcatchmentOverlays({ skipApply: true, skipUpdate: true });
+          if (stateKey) {
+            const overlays = (getState()[stateKey] || []).map((overlay) => ({
+              ...overlay,
+              visible: overlay.key === layer.key,
+            }));
+            setValue(stateKey, overlays);
+          } else {
+            layer.visible = true;
+          }
           input.checked = true;
           if (section.isWeppYearly) {
             await activateWeppYearlyLayer();
@@ -398,6 +408,8 @@ export function createLayerRenderer({
             layer.visible = input.checked;
           }
           applyLayers();
+          syncGraphLayout && syncGraphLayout();
+          updateLayerList();
           if (section.isSubcatchment && !section.isRap && !section.isWeppYearly) {
             clearGraphModeOverride && clearGraphModeOverride();
             setValue('activeGraphKey', null);
@@ -408,7 +420,7 @@ export function createLayerRenderer({
           }
           const graphEl = document.getElementById('gl-graph');
           const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
-          if (graphVisible && section.isWeppYearly && layer.visible) {
+          if (section.isWeppYearly && layer.visible) {
             await loadWeppYearlyTimeseriesData();
           } else if (
             graphVisible &&

@@ -46,10 +46,10 @@ async function detectSbsLayer({ ctx, loadSbsImage }) {
   };
 }
 
-function computeBoundsFromGdal(info) {
+export function computeBoundsFromGdal(info) {
   const wgs84 = info && info.wgs84Extent && info.wgs84Extent.coordinates;
-  if (Array.isArray(wgs84) && wgs84.length && Array.isArray(wgs84[0])) {
-    const ring = wgs84[0];
+  if (Array.isArray(wgs84) && wgs84.length) {
+    const ring = Array.isArray(wgs84[0]) && Array.isArray(wgs84[0][0]) ? wgs84[0] : wgs84;
     let west = Infinity;
     let south = Infinity;
     let east = -Infinity;
@@ -143,16 +143,17 @@ export async function detectRasterLayers({
       try {
         const info = await fetchGdalInfo(path);
         if (!info) continue;
-        const bounds = computeBoundsFromGdal(info);
-        if (!bounds) continue;
+        const wgs84Bounds = computeBoundsFromGdal(info);
         const colorMap = def.key === 'landuse' ? nlcdColormap : def.key === 'soils' ? soilColorForValue : null;
         const raster = await loadRaster(path, colorMap);
+        const bounds = wgs84Bounds || raster.bounds;
+        if (!bounds) continue;
         found = {
           key: def.key,
           label: def.label,
           path,
-          bounds,
           ...raster,
+          bounds,
           visible: false,
         };
         break;
