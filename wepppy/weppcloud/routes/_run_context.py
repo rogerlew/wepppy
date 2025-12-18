@@ -77,7 +77,8 @@ def load_run_context(
     if not run_root.is_dir():
         abort(404, description=f"Run '{runid}' not found")
 
-    pup_relpath = request.args.get("pup")
+    # For grouped run slugs (e.g., omni;;<runid>;;<scenario>), ignore any pup query.
+    pup_relpath = None if ";;" in runid else request.args.get("pup")
     pup_root: Optional[Path] = None
     active_root = run_root
 

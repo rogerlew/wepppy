@@ -278,29 +278,32 @@ Keep this document updated when the bundling flow or controller contract changes
 - **Transport**: uploads stream `FormData` to `/batch/_/<name>/upload-geojson`; template checks post JSON to `/batch/_/<name>/validate-template`; directive toggles post JSON to `/batch/_/<name>/run-directives`; batch submissions post JSON to `/batch/_/<name>/rq/api/run-batch`. Flask routes now consume payloads via `parse_request_payload`, and `BatchRunner.update_run_directives` coerces stringy truths (`"true"`, `"false"`, `"on"`, `"off"`) to native booleans so NoDb state stays clean. Job telemetry requests hit `/weppcloud/rq/api/jobinfo` with the tracked job IDs managed by the controller.
 - **Testing**: Jest coverage in `controllers_js/__tests__/batch_runner.test.js` exercises upload/validate flows, directive persistence, run submission, event emission, and job-info polling. Backend expectations live in `tests/weppcloud/test_batch_runner_endpoints.py` (upload, validation, directives) and `tests/weppcloud/routes/test_rq_api_batch_runner.py` (queue wiring and error handling). Run `wctl run-npm test -- batch_runner`, rebuild the bundle (`python wepppy/weppcloud/controllers_js/build_controllers_js.py`), and execute `wctl run-pytest tests/weppcloud/test_batch_runner_endpoints.py tests/weppcloud/routes/test_rq_api_batch_runner.py` before handing off changes.
 
-## Run-Scoped URL Construction
+## Run-Scoped URL Construction (slug-first, no `pup=` injection)
 
-All API endpoints that operate within a run context **MUST** use `url_for_run()` from `utils.js`:
+All API endpoints that operate within a run context **MUST** use `url_for_run()` from `utils.js`.
+
+Key behaviors:
+- Derives run slug + config from the current URL path (preferred) or window globals.
+- Builds `/runs/<runid>/<config>/...` using that slug (supports grouped slugs like `omni;;…;;…`).
+- Does **not** append `?pup=` or any pup query params.
 
 ```javascript
-// ✅ Correct - run-scoped endpoints
+// ✅ Correct - run-scoped endpoints (slug-resolved)
 http.postJson(url_for_run("rq/api/build_climate"), payload, { form: formElement })
 http.request(url_for_run("tasks/set_landuse_db"), { method: "POST", body: params })
 http.get(url_for_run("query/delineation_pass"))
 http.get(url_for_run("resources/subcatchments.json"))
 
-// ❌ Wrong - missing run context
+// ❌ Wrong - missing run context or manual pup params
 http.postJson("rq/api/build_climate", payload)
-http.get("resources/subcatchments.json")
+http.get("resources/subcatchments.json?pup=_pups/omni/scenarios/foo")
 ```
 
-**Why:** Flask routes expect `/runs/<runid>/<config>/...` structure. The helper reads `window.runId` and `window.config` to build proper paths.
-
 **Scope:** Applies to ALL endpoints under:
-- `rq/api/*` - Background job triggers (build_climate, run_wepp, build_landuse, etc.)
-- `tasks/*` - Task endpoints (set_*, acquire_*, modify_*, etc.)
-- `query/*` - Status/data queries (delineation_pass, outlet, wepp/phosphorus_opts, etc.)
-- `resources/*` - GeoJSON, legends, static data (subcatchments.json, netful.json, legends/sbs/, etc.)
+- `rq/api/*` — Background job triggers (build_climate, run_wepp, build_landuse, etc.)
+- `tasks/*` — Task endpoints (set_*, acquire_*, modify_*, etc.)
+- `query/*` — Status/data queries (delineation_pass, outlet, wepp/phosphorus_opts, etc.)
+- `resources/*` — GeoJSON, legends, static data (subcatchments.json, netful.json, legends/sbs/, etc.)
 
 **Exceptions:** Endpoints that are NOT run-scoped:
 - `/batch/` routes (cross-run operations)
@@ -327,12 +330,6 @@ path.write_text(new_content)
 
 **Verification:**
 ```bash
-# Check for unwrapped endpoints
+# Check for unwrapped endpoints (should be empty)
 grep -rh '"rq/api/\|"tasks/\|"query/\|"resources/' wepppy/weppcloud/controllers_js/*.js | grep -v url_for_run
-
-# After fixing, restart container to rebuild controllers.js
-wctl restart weppcloud
-
-# Verify rebuild
-docker logs weppcloud | grep "Building controllers"
 ```

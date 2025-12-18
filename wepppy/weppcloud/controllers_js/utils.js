@@ -13,14 +13,41 @@ function url_for_run(url) {
         sitePrefix = window.site_prefix.replace(/\/+$/, "");
     }
 
+    function resolveRunContextFromLocation() {
+        var path = window.location && window.location.pathname ? window.location.pathname : "";
+        var prefix = sitePrefix;
+        if (prefix && prefix !== "/" && prefix.charAt(0) !== "/") {
+            prefix = "/" + prefix;
+        }
+        if (prefix && path.indexOf(prefix) === 0) {
+            path = path.slice(prefix.length);
+        }
+
+        var parts = path.split("/").filter(function (segment) {
+            return segment.length > 0;
+        });
+        var runsIndex = parts.indexOf("runs");
+        if (runsIndex === -1 || parts.length <= runsIndex + 2) {
+            return null;
+        }
+        return {
+            runId: decodeURIComponent(parts[runsIndex + 1]),
+            config: decodeURIComponent(parts[runsIndex + 2])
+        };
+    }
+
     var normalizedUrl = url || "";
     if (normalizedUrl.charAt(0) === "/") {
         normalizedUrl = normalizedUrl.substring(1);
     }
 
+    var resolved = resolveRunContextFromLocation();
+    var activeRunId = resolved && resolved.runId ? resolved.runId : (typeof window.runId === "string" ? window.runId : "");
+    var activeConfig = resolved && resolved.config ? resolved.config : (typeof window.config === "string" ? window.config : "");
+
     var runScopedPath = normalizedUrl;
-    if (typeof window.runId === "string" && window.runId && typeof window.config === "string" && window.config) {
-        runScopedPath = "runs/" + encodeURIComponent(window.runId) + "/" + encodeURIComponent(window.config) + "/";
+    if (activeRunId && activeConfig) {
+        runScopedPath = "runs/" + encodeURIComponent(activeRunId) + "/" + encodeURIComponent(activeConfig) + "/";
         if (normalizedUrl) {
             runScopedPath += normalizedUrl;
         }
@@ -30,13 +57,7 @@ function url_for_run(url) {
         runScopedPath = "/" + runScopedPath;
     }
 
-    var fullUrl = sitePrefix + runScopedPath;
-
-    if (typeof pup_relpath === 'string' && pup_relpath && fullUrl.indexOf('pup=') === -1) {
-        fullUrl += (fullUrl.indexOf('?') === -1 ? '?' : '&') + 'pup=' + encodeURIComponent(pup_relpath);
-    }
-
-    return fullUrl;
+    return sitePrefix + runScopedPath;
 }
 
 function pass() {

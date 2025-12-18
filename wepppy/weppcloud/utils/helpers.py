@@ -131,6 +131,16 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         elif _group == 'profile' and _name == 'archive':
             playback_root = _playback_path("PROFILE_PLAYBACK_ARCHIVE_ROOT", "archive")
             path = _join(playback_root, _runid)
+        elif _group == 'omni':
+            # Omni scenarios live under the parent run's _pups directory.
+            base_root = get_primary_wd(_name)
+            scenario_path = _join(base_root, '_pups', 'omni', 'scenarios', _runid)
+            if not _exists(scenario_path):
+                legacy_base_root = _join('/geodata/weppcloud_runs', _name)
+                legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'scenarios', _runid)
+                if _exists(legacy_candidate):
+                    scenario_path = legacy_candidate
+            path = scenario_path
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:
