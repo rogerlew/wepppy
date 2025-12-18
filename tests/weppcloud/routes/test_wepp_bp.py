@@ -167,6 +167,7 @@ def run_wepp_api_client(
             self._legacy_arc_export_on_run_completion = None
             self._dss_export_on_run_completion = None
             self._dss_excluded_channel_orders: list[int] | None = None
+            self._dss_export_channel_ids: list[int] | None = None
 
         @classmethod
         def getInstance(cls, wd: str) -> "DummyWepp":
@@ -178,6 +179,18 @@ def run_wepp_api_client(
 
         def parse_inputs(self, payload: Dict[str, Any]) -> None:
             self.parse_inputs_payload = payload
+
+        @property
+        def dss_excluded_channel_orders(self) -> list[int]:
+            if self._dss_excluded_channel_orders is None:
+                return []
+            return self._dss_excluded_channel_orders
+
+        @property
+        def dss_export_channel_ids(self) -> list[int]:
+            if self._dss_export_channel_ids is None:
+                return []
+            return self._dss_export_channel_ids
 
         def locked(self):
             return DummyLock(self)
