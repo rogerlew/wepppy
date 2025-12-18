@@ -44,3 +44,4 @@ actions-runner/
 telemetry/
 
 wepppy/weppcloud/static-src/.playwright-browsers
+.playwright-mcp
