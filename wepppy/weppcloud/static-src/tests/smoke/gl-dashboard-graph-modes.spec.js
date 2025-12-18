@@ -264,36 +264,43 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     await expect(page.locator('.gl-viewport')).toBeVisible();
   });
 
-  test('Legends render for WEPP Yearly and show diverging scale in comparison mode', async ({ page }) => {
+  test('Landuse comparison renders diverging legend for Interrill cover (inrcov)', async ({ page }) => {
     await openDashboard(page);
-    await expandSection(page, 'WEPP Yearly');
-    const weppRadio = page.locator('input[id^="layer-WEPP-Yearly-"]').first();
-    await expect(weppRadio).toBeVisible({ timeout: 15000 });
-    await weppRadio.check({ force: true });
-    await expect.poll(async () => getGraphSource(page)).toBe('wepp_yearly');
+    await expandSection(page, 'Landuse');
+    const inrcov = page.getByLabel('Interrill cover (inrcov)');
+    await expect(inrcov).toBeVisible({ timeout: 15000 });
+    await inrcov.click({ force: true });
+    await expect(inrcov).toBeChecked();
 
-    // Legends populated
+    const scenarioSelect = page.locator('#gl-scenario-select');
+    if ((await scenarioSelect.count()) === 0) {
+      test.skip('Scenario select not available in this run');
+    }
+    const targetScenario = scenarioSelect.locator('option', { hasText: 'mulch_60_sbs_map' });
+    if ((await targetScenario.count()) === 0) {
+      test.skip('mulch_60_sbs_map scenario not present');
+    }
+    const scenarioValue = await targetScenario.first().getAttribute('value');
+    if (!scenarioValue) {
+      test.skip('mulch_60_sbs_map scenario value missing');
+    }
+    await scenarioSelect.selectOption(scenarioValue);
+
+    const comparisonToggle = page.locator('#gl-comparison-toggle');
+    if ((await comparisonToggle.count()) === 0) {
+      test.skip('Comparison toggle not available');
+    }
+    await comparisonToggle.check({ force: true });
+
+    await expect.poll(async () => (await getState(page)).comparisonMode).toBeTruthy();
+    await expect.poll(async () => (await getState(page)).currentScenarioPath || '').toContain('mulch_60_sbs_map');
+
+    // Ensure the layer stays selected after scenario toggle
+    await inrcov.click({ force: true });
+    await expect(inrcov).toBeChecked();
+
     const legendSections = page.locator('#gl-legends-content .gl-legend-section');
     await expect.poll(async () => legendSections.count()).toBeGreaterThan(0);
-
-    // Enable scenario + comparison to trigger diverging legend
-    const scenarioSelect = page.locator('#gl-scenario-select');
-    const optionCount = await scenarioSelect.locator('option').count();
-    if (optionCount > 1) {
-      const firstScenario = await scenarioSelect.locator('option').nth(1).getAttribute('value');
-      if (firstScenario) {
-        await scenarioSelect.selectOption(firstScenario);
-        await page.locator('#gl-comparison-toggle').check({ force: true });
-        const scenarioPath = (await getState(page)).currentScenarioPath;
-        if (scenarioPath) {
-          await page.waitForTimeout(500);
-          const divergingCount = await page.locator('.gl-legend-diverging__bar').count();
-          if (divergingCount === 0) {
-            test.skip('No diverging legend rendered for comparison scenario in this run');
-          }
-          expect(divergingCount).toBeGreaterThan(0);
-        }
-      }
-    }
+    await expect.poll(async () => page.locator('.gl-legend-diverging__bar').count()).toBeGreaterThan(0);
   });
 });
