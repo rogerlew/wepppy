@@ -1,3 +1,5 @@
+import { GRAPH_MODES } from './config.js';
+
 /**
  * Shared mutable state for gl-dashboard. Single source of truth plus subscriptions.
  * Pure state container: no DOM/deck usage.
@@ -15,7 +17,7 @@ const state = {
   currentViewState: null,
 
   graphFocus: false,
-  graphMode: 'minimized',
+  graphMode: GRAPH_MODES.MINIMIZED,
   activeGraphKey: null,
   graphDataCache: {},
   cumulativeMeasure: 'runoff_volume',

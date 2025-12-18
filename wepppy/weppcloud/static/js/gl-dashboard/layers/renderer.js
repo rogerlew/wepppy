@@ -95,7 +95,7 @@ export function createLayerRenderer({
     cumulativeInput.id = 'layer-RAP-cumulative';
     cumulativeInput.addEventListener('change', async () => {
       if (!cumulativeInput.checked) return;
-      deselectAllSubcatchmentOverlays();
+      deselectAllSubcatchmentOverlays({ skipUpdate: true });
       window.rapCumulativeMode = true;
       setValue('rapCumulativeMode', true);
       // Re-check the cumulative radio since deselectAll cleared it
@@ -121,6 +121,7 @@ export function createLayerRenderer({
       if (graphEl && !graphEl.classList.contains('is-collapsed')) {
         await loadRapTimeseriesData();
       }
+      updateLayerList();
     });
     const cumulativeLabel = document.createElement('label');
     cumulativeLabel.setAttribute('for', 'layer-RAP-cumulative');
@@ -225,14 +226,19 @@ export function createLayerRenderer({
       input.id = `layer-WEPP-Event-${layer.key}`;
       input.addEventListener('change', async () => {
         if (!input.checked) return;
-        deselectAllSubcatchmentOverlays();
-        layer.visible = true;
+        deselectAllSubcatchmentOverlays({ skipUpdate: true });
+        const nextLayers = (getState().weppEventLayers || []).map((overlay) => ({
+          ...overlay,
+          visible: overlay.key === layer.key,
+        }));
+        setValue('weppEventLayers', nextLayers);
         input.checked = true;
         setGraphFocus(false);
         if (getState().weppEventSelectedDate) {
           await refreshWeppEventData();
         }
         applyLayers();
+        updateLayerList();
       });
       const label = document.createElement('label');
       label.setAttribute('for', input.id);

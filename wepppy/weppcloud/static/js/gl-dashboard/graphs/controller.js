@@ -1,3 +1,5 @@
+import { GRAPH_CONTEXT_KEYS } from '../config.js';
+
 /**
  * Graph list, activation, and timeseries wiring for gl-dashboard.
  * Pure DOM/graph coordination; data loading is delegated to graphLoadersFactory.
@@ -30,6 +32,7 @@ export function createGraphController({
     syncGraphLayout,
     ensureGraphExpanded,
   } = graphModeController;
+  const { OMNI, CLIMATE_YEARLY } = GRAPH_CONTEXT_KEYS;
 
   function ensureGraphLoaders() {
     if (!graphLoaders) {
@@ -109,10 +112,10 @@ export function createGraphController({
           return;
         }
         if (!keepFocus) {
-          setGraphFocus(data.source === 'omni' || data.source === 'climate_yearly');
+          setGraphFocus(data.source === OMNI || data.source === CLIMATE_YEARLY);
         }
         getGraph()?.setData(data);
-        if (data.source === 'climate_yearly' && Array.isArray(data.years) && data.years.length) {
+        if (data.source === CLIMATE_YEARLY && Array.isArray(data.years) && data.years.length) {
           const minYear = Math.min(...data.years);
           const maxYear = Math.max(...data.years);
           const selYear =
@@ -214,6 +217,7 @@ export function createGraphController({
     scenarioList.className = 'gl-graph__scenario-list';
     const selectedSet = new Set(getState().cumulativeScenarioSelections || []);
     graphScenarios.slice(1).forEach((scenario, idx) => {
+      const scenarioKey = scenario.path || `_pups/omni/scenarios/${scenario.name || `scenario-${idx}`}`;
       const id = `gl-cumulative-scenario-${idx}`;
       const wrapper = document.createElement('label');
       wrapper.className = 'gl-layer-item';
@@ -223,8 +227,9 @@ export function createGraphController({
       const input = document.createElement('input');
       input.type = 'checkbox';
       input.id = id;
-      input.checked = selectedSet.has(scenario.path);
-      input.addEventListener('change', (e) => handleCumulativeScenarioToggle(scenario.path, e.target.checked));
+      input.value = scenarioKey;
+      input.checked = selectedSet.has(scenarioKey);
+      input.addEventListener('change', (e) => handleCumulativeScenarioToggle(scenarioKey, e.target.checked));
       const span = document.createElement('span');
       span.textContent = scenario.name || scenario.path || `Scenario ${idx + 1}`;
       wrapper.appendChild(input);

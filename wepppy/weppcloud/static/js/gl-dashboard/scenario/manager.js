@@ -1,3 +1,56 @@
+/**
+ * @typedef {Object} ScenarioContext
+ * @property {string} sitePrefix
+ * @property {string} runid
+ * @property {string} config
+ */
+
+/**
+ * @callback GetState
+ * @returns {Record<string, any>}
+ */
+
+/**
+ * @callback SetValue
+ * @param {string} key
+ * @param {any} value
+ */
+
+/**
+ * @callback SetState
+ * @param {Record<string, any>} partialState
+ */
+
+/**
+ * @typedef {Object} WeppDataManager
+ * @property {(year: number) => Promise<void>} [loadBaseWeppYearlyData]
+ * @property {(year: number) => void} [computeWeppYearlyDiffRanges]
+ */
+
+/**
+ * @typedef {(payload: { scenarioPath: string, phase: 'before_base' | 'after_base' }) => Promise<void> | void} ScenarioChangeHandler
+ */
+
+/**
+ * @typedef {(payload: { enabled: boolean }) => Promise<void> | void} ComparisonChangeHandler
+ */
+
+/**
+ * @typedef {Object} ScenarioManager
+ * @property {(relativePath: string) => string} buildScenarioUrl
+ * @property {(relativePath: string) => string} buildBaseUrl
+ * @property {(scenarioPath: string) => Promise<void>} setScenario
+ * @property {(enabled: boolean) => Promise<void>} setComparisonMode
+ * @property {() => Promise<void>} loadBaseScenarioData
+ * @property {(baseSummaryOverride?: Record<string, any>) => Record<string, any>} computeComparisonDiffRanges
+ */
+
+/**
+ * Scenario and comparison controller for GL Dashboard; handles base scenario URLs,
+ * base data hydration, and diff range computation.
+ * @param {{ ctx: ScenarioContext, getState: GetState, setValue: SetValue, setState: SetState, postQueryEngine?: Function, postBaseQueryEngine?: Function, fetchWeppSummary: Function, weppDataManager?: WeppDataManager, onScenarioChange?: ScenarioChangeHandler, onComparisonChange?: ComparisonChangeHandler }} params
+ * @returns {ScenarioManager}
+ */
 export function createScenarioManager({
   ctx,
   getState,

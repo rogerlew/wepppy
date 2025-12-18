@@ -3,6 +3,49 @@
  * Pure exports: no DOM/deck usage. Safe to import in workers or tests.
  */
 
+/**
+ * @typedef {'minimized' | 'split' | 'full'} GraphMode
+ */
+
+/**
+ * @enum {GraphMode}
+ */
+export const GRAPH_MODES = Object.freeze({
+  MINIMIZED: 'minimized',
+  SPLIT: 'split',
+  FULL: 'full',
+});
+
+/**
+ * @typedef {'top' | 'bottom' | 'hide' | 'inherit'} GraphSliderPlacement
+ */
+
+/**
+ * @enum {GraphSliderPlacement}
+ */
+export const GRAPH_SLIDER_PLACEMENTS = Object.freeze({
+  TOP: 'top',
+  BOTTOM: 'bottom',
+  HIDE: 'hide',
+  INHERIT: 'inherit',
+});
+
+/**
+ * @typedef {'climate_yearly' | 'wepp_yearly' | 'rap' | 'cumulative' | 'omni' | 'default'} GraphContextKey
+ */
+
+/**
+ * @enum {GraphContextKey}
+ */
+export const GRAPH_CONTEXT_KEYS = Object.freeze({
+  CLIMATE_YEARLY: 'climate_yearly',
+  WEPP_YEARLY: 'wepp_yearly',
+  RAP: 'rap',
+  CUMULATIVE: 'cumulative',
+  OMNI: 'omni',
+  DEFAULT: 'default',
+});
+
 export const COMPARISON_MEASURES = [
   'cancov',
   'inrcov',

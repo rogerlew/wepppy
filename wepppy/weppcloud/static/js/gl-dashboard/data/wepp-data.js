@@ -1,3 +1,35 @@
+/**
+ * @typedef {Object} WeppDataManagerDeps
+ * @property {{ sitePrefix: string, runid: string, config: string }} ctx Run-scoped identifiers used when hitting base Query Engine paths.
+ * @property {() => any} getState Read the reactive dashboard state object.
+ * @property {(key: string, value: any, options?: { silent?: boolean }) => void} setValue Write a single state key with notifications.
+ * @property {(updates: Record<string, any>, options?: { silent?: boolean }) => void} setState Merge state updates with optional silent flag.
+ * @property {(payload: Object) => Promise<{ records?: Object[] } | null>} postQueryEngine Query Engine POST for the active scenario.
+ * @property {(payload: Object) => Promise<{ records?: Object[] } | null>} postBaseQueryEngine Query Engine POST for the base scenario (comparison).
+ * @property {() => { mode: string } | null} pickActiveWeppEventLayer Resolve the currently selected WEPP event layer descriptor.
+ * @property {string} WEPP_YEARLY_PATH Parquet path for yearly WEPP outputs (interchange/H.parquet alias).
+ * @property {string} WEPP_LOSS_PATH Parquet path for soil loss outputs (reserved for future queries).
+ */
+
+/**
+ * @typedef {Object} WeppDataManager
+ * @property {(statistic: string, options?: { base?: boolean }) => Promise<Object|null>} fetchWeppSummary Fetch WEPP summary aggregated by topaz_id for a statistic.
+ * @property {() => Promise<boolean>} refreshWeppStatisticData Refresh active WEPP summary and ranges for the current statistic.
+ * @property {(summaryOverride?: Object|null) => Object|null} computeWeppRanges Compute min/max for WEPP summary modes.
+ * @property {(summaryOverride?: Object|null) => Object|null} computeWeppYearlyRanges Compute min/max for yearly WEPP summaries.
+ * @property {(year: number) => Object} computeWeppYearlyDiffRanges Compute yearly diff ranges against base cache for a year.
+ * @property {(year: number) => Promise<Object|null>} loadBaseWeppYearlyData Load and cache base WEPP yearly summary for a year.
+ * @property {() => Promise<boolean>} refreshWeppYearlyData Refresh scenario/base yearly summaries and diff ranges.
+ * @property {(summaryOverride?: Object|null) => Object|null} computeWeppEventRanges Compute min/max for WEPP event summaries.
+ * @property {() => Object|null} computeWeppEventDiffRanges Compute event diff ranges against base cache.
+ * @property {() => Promise<Object|null>} loadBaseWeppEventData Load base WEPP event data for the selected date/layer.
+ * @property {() => Promise<boolean>} refreshWeppEventData Refresh scenario event data (and base when in comparison).
+ */
+
+/**
+ * @param {WeppDataManagerDeps} params
+ * @returns {WeppDataManager}
+ */
 export function createWeppDataManager({
   ctx,
   getState,

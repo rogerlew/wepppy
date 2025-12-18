@@ -1,8 +1,32 @@
 /**
  * Graph data loaders for Omni/RAP/WEPP charts.
  * No DOM/deck usage; consumes Query Engine helpers and returns datasets for the graph renderer.
+ *
+ * SCENARIO QUERY ARCHITECTURE (REGRESSION GUARD)
+ * ==============================================
+ * Scenario data is queried via the `scenario` body parameter, NOT URL path manipulation.
+ *
+ * ✅ CORRECT: Use postQueryEngineForScenario() which adds { scenario: "name" } to request body
+ * ❌ WRONG: Appending _pups/omni/scenarios/... to the URL (server will reject with 400)
+ *
+ * The query-engine's resolve_run_context() accepts a `scenario` parameter that:
+ * 1. Resolves the scenario subdirectory: {run_path}/_pups/omni/scenarios/{scenario}/
+ * 2. Overlays scenario-specific parquet files over base run data
+ * 3. Returns a context with the scenario's catalog
+ *
+ * The JavaScript helper chain:
+ * 1. scenarioPath(scenario) → builds path string like "_pups/omni/scenarios/mulch_30"
+ * 2. postQueryEngineForScenario(path, payload) → extracts scenario name, adds to body
+ * 3. Server extracts scenario from body, passes to resolve_run_context()
+ *
+ * If scenario queries return identical data for all scenarios, check:
+ * 1. postQueryEngineForScenario() is extracting scenario name correctly
+ * 2. Server is extracting and passing scenario parameter to resolve_run_context()
+ * 3. The scenario subdirectory exists and contains the expected parquet files
+ *
+ * See: wepppy/query_engine/README.md "Querying Omni Scenarios"
  */
-import { WATER_MEASURES, SOIL_MEASURES } from '../config.js';
+import { GRAPH_CONTEXT_KEYS, SOIL_MEASURES, WATER_MEASURES } from '../config.js';
 import { getState } from '../state.js';
 
 const GRAPH_COLORS = [
@@ -48,6 +72,12 @@ export function createGraphLoaders(deps) {
   } = deps;
 
   const state = getState();
+  const {
+    OMNI,
+    CLIMATE_YEARLY,
+    RAP,
+    WEPP_YEARLY,
+  } = GRAPH_CONTEXT_KEYS;
 
   function scenarioColor(idx) {
     const c = GRAPH_COLORS[idx % GRAPH_COLORS.length];
@@ -76,9 +106,49 @@ export function createGraphLoaders(deps) {
     return { min, q1, median, q3, max };
   }
 
-  async function loadHillLossScenario(scenarioPath) {
-    const key = scenarioPath || '';
-    if (state.hillLossCache[key]) return state.hillLossCache[key];
+  /**
+   * Get the filesystem path for querying scenario data.
+   *
+   * IMPORTANT: This path is NOT appended to the URL. It is passed to
+   * postQueryEngineForScenario() which extracts the scenario name and
+   * adds it to the request body as { scenario: "name" }.
+   *
+   * The server's resolve_run_context() uses this to find:
+   *   {run_root}/_pups/omni/scenarios/{name}/
+   *
+   * @param {Object|null} scenario - Scenario object with name or path property
+   * @returns {string} Path string like "_pups/omni/scenarios/mulch_30" or empty for base
+   *
+   * Examples:
+   *   scenarioPath(null) → ''
+   *   scenarioPath({ name: 'Base' }) → ''
+   *   scenarioPath({ name: 'mulch_30_sbs_map' }) → '_pups/omni/scenarios/mulch_30_sbs_map'
+   *   scenarioPath({ path: 'custom/path' }) → 'custom/path'
+   */
+  function scenarioPath(scenario) {
+    if (!scenario) return '';
+    // Explicit path takes precedence
+    if (scenario.path) return scenario.path;
+    // Base scenario
+    if (!scenario.name || scenario.name === 'Base' || scenario.name === 'base') return '';
+    // Construct path from scenario name
+    return `_pups/omni/scenarios/${scenario.name}`;
+  }
+
+  /**
+   * Get unique cache key for scenario.
+   */
+  function scenarioKey(scenario) {
+    const path = scenarioPath(scenario);
+    return path || 'base';
+  }
+
+  async function loadHillLossScenario(scenPath) {
+    const cacheKey = scenPath || 'base';
+    if (state.hillLossCache[cacheKey]) {
+      console.debug('gl-dashboard: cache hit for', cacheKey);
+      return state.hillLossCache[cacheKey];
+    }
     const payload = {
       datasets: [
         { path: 'wepp/output/interchange/loss_pw0.hill.parquet', alias: 'loss' },
@@ -97,7 +167,8 @@ export function createGraphLoaders(deps) {
       ],
     };
     try {
-      const result = await postQueryEngineForScenario(payload, scenarioPath);
+      console.debug('gl-dashboard: querying scenario', { scenPath, cacheKey });
+      const result = await postQueryEngineForScenario(payload, scenPath);
       const rows = [];
       if (result && result.records) {
         for (const row of result.records) {
@@ -112,24 +183,28 @@ export function createGraphLoaders(deps) {
           });
         }
       }
-      state.hillLossCache[key] = rows;
+      // Debug: log summary of loaded data
+      if (rows.length) {
+        const totalSoilLoss = rows.reduce((sum, r) => sum + (r.soil_loss_kg || 0), 0);
+        console.debug('gl-dashboard: loaded', { scenPath, rows: rows.length, totalSoilLoss });
+      }
+      state.hillLossCache[cacheKey] = rows;
       const totalArea = rows.reduce(
         (acc, r) => acc + (Number.isFinite(r.area_ha) ? r.area_ha : 0),
         0
       );
-      state.hillslopeAreaCache[key] = totalArea;
+      state.hillslopeAreaCache[cacheKey] = totalArea;
       return rows;
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn('gl-dashboard: failed to load hillslope loss data', err);
-      state.hillLossCache[key] = [];
+      console.warn('gl-dashboard: failed to load hillslope loss data', { scenPath, err });
+      state.hillLossCache[cacheKey] = [];
       return [];
     }
   }
 
-  async function loadChannelLossScenario(scenarioPath) {
-    const key = scenarioPath || '';
-    if (state.channelLossCache[key]) return state.channelLossCache[key];
+  async function loadChannelLossScenario(scenPath) {
+    const cacheKey = scenPath || 'base';
+    if (state.channelLossCache[cacheKey]) return state.channelLossCache[cacheKey];
     const payload = {
       datasets: [
         { path: 'wepp/output/interchange/loss_pw0.chn.parquet', alias: 'loss' },
@@ -139,7 +214,7 @@ export function createGraphLoaders(deps) {
       columns: ['loss."Soil Loss" AS soil_loss_kg', 'chn.topaz_id AS topaz_id'],
     };
     try {
-      const result = await postQueryEngineForScenario(payload, scenarioPath);
+      const result = await postQueryEngineForScenario(payload, scenPath);
       const rows = [];
       if (result && result.records) {
         for (const row of result.records) {
@@ -148,26 +223,25 @@ export function createGraphLoaders(deps) {
           });
         }
       }
-      state.channelLossCache[key] = rows;
+      state.channelLossCache[cacheKey] = rows;
       return rows;
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load channel loss data', err);
-      state.channelLossCache[key] = [];
+      state.channelLossCache[cacheKey] = [];
       return [];
     }
   }
 
-  async function loadOutletScenario(scenarioPath) {
-    const key = scenarioPath || '';
-    if (state.outletAllYearsCache[key]) return state.outletAllYearsCache[key];
+  async function loadOutletScenario(scenPath) {
+    const cacheKey = scenPath || 'base';
+    if (state.outletAllYearsCache[cacheKey]) return state.outletAllYearsCache[cacheKey];
     const payload = {
       datasets: [{ path: 'wepp/output/interchange/loss_pw0.all_years.out.parquet', alias: 'out' }],
       columns: ['out.key AS key', 'out.year AS year', 'out.value AS value'],
       order_by: ['year'],
     };
     try {
-      const result = await postQueryEngineForScenario(payload, scenarioPath);
+      const result = await postQueryEngineForScenario(payload, scenPath);
       const map = {};
       if (result && result.records) {
         for (const row of result.records) {
@@ -180,21 +254,20 @@ export function createGraphLoaders(deps) {
           }
         }
       }
-      state.outletAllYearsCache[key] = map;
+      state.outletAllYearsCache[cacheKey] = map;
       return map;
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.warn('gl-dashboard: failed to load outlet data', err);
-      state.outletAllYearsCache[key] = {};
+      state.outletAllYearsCache[cacheKey] = {};
       return {};
     }
   }
 
-  async function getTotalAreaHa(scenarioPath) {
-    const key = scenarioPath || '';
-    if (state.hillslopeAreaCache[key] != null) return state.hillslopeAreaCache[key];
-    await loadHillLossScenario(scenarioPath);
-    return state.hillslopeAreaCache[key] || 0;
+  async function getTotalAreaHa(scenPath) {
+    const cacheKey = scenPath || 'base';
+    if (state.hillslopeAreaCache[cacheKey] != null) return state.hillslopeAreaCache[cacheKey];
+    await loadHillLossScenario(scenPath);
+    return state.hillslopeAreaCache[cacheKey] || 0;
   }
 
   function normalizeCumulativeValue(raw, measureKey) {
@@ -325,29 +398,55 @@ export function createGraphLoaders(deps) {
     const measureKey = CUMULATIVE_MEASURE_MAP[options.measureKey] ? options.measureKey : 'runoff_volume';
     const measureDef = CUMULATIVE_MEASURE_MAP[measureKey];
     const selectedScenarioPaths = Array.isArray(options.scenarioPaths) ? options.scenarioPaths : [];
-    const scenarioSet = new Set(['']);
-    selectedScenarioPaths.forEach((p) => {
-      if (p != null) scenarioSet.add(p);
+    
+    console.debug('gl-dashboard: buildCumulativeContributionGraph input', {
+      measureKey,
+      selectedScenarioPaths,
+      graphScenariosCount: graphScenarios.length,
+      graphScenarios: graphScenarios.map((s) => ({ name: s.name, path: s.path })),
     });
-    const scenarios = graphScenarios.filter((s) => scenarioSet.has(s.path || ''));
+    
+    // Build set of selected scenario keys
+    const scenarioSet = new Set(['base']); // Always include base
+    selectedScenarioPaths.forEach((p) => {
+      if (p != null && p !== '' && p !== 'base') scenarioSet.add(p);
+    });
+    
+    // Filter and process scenarios
+    const scenarios = [];
+    for (let i = 0; i < graphScenarios.length; i++) {
+      const s = graphScenarios[i];
+      const key = scenarioKey(s);
+      const path = scenarioPath(s);
+      console.debug('gl-dashboard: checking scenario', { i, name: s.name, key, path, inSet: scenarioSet.has(key) });
+      if (scenarioSet.has(key)) {
+        scenarios.push({ scenario: s, originalIndex: i, key, path });
+      }
+    }
+    
     if (!scenarios.length) {
-      scenarios.push({ name: 'Base', path: '' });
+      scenarios.push({ scenario: { name: 'Base', path: '' }, originalIndex: 0, key: 'base', path: '' });
     }
 
     const percentAxis = buildPercentAxis(0.5);
     const seriesEntries = [];
 
-    for (let i = 0; i < scenarios.length; i++) {
-      const scenario = scenarios[i];
-      const rows = await loadHillLossScenario(scenario.path);
+    for (const { scenario, originalIndex, key, path } of scenarios) {
+      console.debug('gl-dashboard: loading scenario data', { name: scenario.name, key, path });
+      const rows = await loadHillLossScenario(path);
       const cumulative = computeCumulativeSeries(rows, measureKey);
-      if (!cumulative) continue;
+      if (!cumulative) {
+        console.debug('gl-dashboard: no cumulative data', { name: scenario.name });
+        continue;
+      }
+      const finalValue = cumulative.values[cumulative.values.length - 1];
+      console.debug('gl-dashboard: scenario cumulative', { name: scenario.name, finalValue, points: cumulative.values.length });
       seriesEntries.push({
-        id: scenario.path || 'base',
-        label: scenario.name || (scenario.path ? scenario.path : 'Base'),
+        id: key,
+        label: scenario.name || 'Base',
         percents: cumulative.percents,
         values: cumulative.values,
-        color: scenarioColor(i),
+        color: scenarioColor(originalIndex),
       });
     }
 
@@ -381,7 +480,7 @@ export function createGraphLoaders(deps) {
       series,
       xLabel: 'Percent of Total Hillslope Area',
       yLabel: measureDef.label,
-      source: 'omni',
+      source: OMNI,
       tooltipFormatter,
     };
   }
@@ -493,7 +592,7 @@ export function createGraphLoaders(deps) {
         selectedYear,
         xLabel: 'Month',
         yLabel: 'Climate',
-        source: 'climate_yearly',
+        source: CLIMATE_YEARLY,
         currentYear: selectedYear,
         waterYear,
         startMonth,
@@ -509,7 +608,8 @@ export function createGraphLoaders(deps) {
     const series = [];
     for (let i = 0; i < graphScenarios.length; i++) {
       const scenario = graphScenarios[i];
-      const rows = await loadHillLossScenario(scenario.path);
+      const path = scenarioPath(scenario);
+      const rows = await loadHillLossScenario(path);
       const perArea = rows
         .map((r) => {
           const areaHa = Number(r.area_ha);
@@ -520,14 +620,14 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(perArea);
       if (stats) {
-        series.push({ label: scenario.name, stats, color: scenarioColor(i) });
+        series.push({ label: scenario.name || 'Base', stats, color: scenarioColor(i) });
       }
     }
     return {
       type: 'boxplot',
       title: 'Soil Loss (hillslopes)',
       yLabel: 'tonne/ha',
-      source: 'omni',
+      source: OMNI,
       series,
     };
   }
@@ -536,7 +636,8 @@ export function createGraphLoaders(deps) {
     const series = [];
     for (let i = 0; i < graphScenarios.length; i++) {
       const scenario = graphScenarios[i];
-      const rows = await loadHillLossScenario(scenario.path);
+      const path = scenarioPath(scenario);
+      const rows = await loadHillLossScenario(path);
       const perArea = rows
         .map((r) => {
           const areaHa = Number(r.area_ha);
@@ -547,14 +648,14 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(perArea);
       if (stats) {
-        series.push({ label: scenario.name, stats, color: scenarioColor(i) });
+        series.push({ label: scenario.name || 'Base', stats, color: scenarioColor(i) });
       }
     }
     return {
       type: 'boxplot',
       title: 'Runoff (hillslopes)',
       yLabel: 'mm',
-      source: 'omni',
+      source: OMNI,
       series,
     };
   }
@@ -563,7 +664,8 @@ export function createGraphLoaders(deps) {
     const series = [];
     for (let i = 0; i < graphScenarios.length; i++) {
       const scenario = graphScenarios[i];
-      const rows = await loadChannelLossScenario(scenario.path);
+      const path = scenarioPath(scenario);
+      const rows = await loadChannelLossScenario(path);
       const tonnes = rows
         .map((r) => {
           const soilKg = Number(r.soil_loss_kg);
@@ -572,14 +674,14 @@ export function createGraphLoaders(deps) {
         .filter((v) => Number.isFinite(v));
       const stats = computeBoxStats(tonnes);
       if (stats) {
-        series.push({ label: scenario.name, stats, color: scenarioColor(i) });
+        series.push({ label: scenario.name || 'Base', stats, color: scenarioColor(i) });
       }
     }
     return {
       type: 'boxplot',
       title: 'Soil Loss (channels)',
       yLabel: 'tonne',
-      source: 'omni',
+      source: OMNI,
       series,
     };
   }
@@ -589,13 +691,14 @@ export function createGraphLoaders(deps) {
     const scenarioData = [];
     for (let i = 0; i < graphScenarios.length; i++) {
       const scenario = graphScenarios[i];
-      const outletMap = await loadOutletScenario(scenario.path);
+      const path = scenarioPath(scenario);
+      const outletMap = await loadOutletScenario(path);
       const keyName = selectOutletKey(outletMap, [
         'total sediment discharge from outlet',
         'sediment discharge from outlet',
         'sediment discharge',
       ]);
-      const areaHa = await getTotalAreaHa(scenario.path);
+      const areaHa = await getTotalAreaHa(path);
       scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i) });
       if (keyName && outletMap[keyName]) {
         for (const yr of Object.keys(outletMap[keyName])) {
@@ -626,7 +729,7 @@ export function createGraphLoaders(deps) {
       series: lineSeries,
       xLabel: 'Year',
       yLabel: 'tonne/ha',
-      source: 'omni',
+      source: OMNI,
     };
   }
 
@@ -635,9 +738,10 @@ export function createGraphLoaders(deps) {
     const scenarioData = [];
     for (let i = 0; i < graphScenarios.length; i++) {
       const scenario = graphScenarios[i];
-      const outletMap = await loadOutletScenario(scenario.path);
+      const path = scenarioPath(scenario);
+      const outletMap = await loadOutletScenario(path);
       const keyName = selectOutletKey(outletMap, ['water discharge from outlet', 'stream discharge']);
-      const areaHa = await getTotalAreaHa(scenario.path);
+      const areaHa = await getTotalAreaHa(path);
       scenarioData.push({ scenario, outletMap, keyName, areaHa, color: scenarioColor(i) });
       if (keyName && outletMap[keyName]) {
         for (const yr of Object.keys(outletMap[keyName])) {
@@ -668,7 +772,7 @@ export function createGraphLoaders(deps) {
       series: lineSeries,
       xLabel: 'Year',
       yLabel: 'mm',
-      source: 'omni',
+      source: OMNI,
     };
   }
 
@@ -789,12 +893,12 @@ export function createGraphLoaders(deps) {
 
       return {
         years,
-        series,
-        xLabel: 'Year',
-        yLabel: bandLabel + ' %',
-        currentYear: state.rapSelectedYear,
-        source: 'rap',
-        title: bandLabel || 'RAP Timeseries',
+      series,
+      xLabel: 'Year',
+      yLabel: bandLabel + ' %',
+      currentYear: state.rapSelectedYear,
+      source: RAP,
+      title: bandLabel || 'RAP Timeseries',
         tooltipFormatter: (id, value, yr) => {
           const numeric = Number.isFinite(value) ? value.toFixed(1) : value;
           return `Hillslope ${id}: ${numeric}% (${yr}) — ${bandLabel}`;
@@ -833,7 +937,7 @@ export function createGraphLoaders(deps) {
       const dataPayload = {
         datasets: [
           { path: 'wepp/output/interchange/loss_pw0.all_years.hill.parquet', alias: 'loss' },
-          { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          { path: 'watershed/chillslopes.parquet', alias: 'hill' },
         ],
         joins: [{ left: 'loss', right: 'hill', on: 'wepp_id', type: 'inner' }],
         columns: ['hill.topaz_id AS topaz_id', 'loss.year AS year', `loss.${valueColumn} AS value`, 'hill.area AS area'],
@@ -907,7 +1011,7 @@ export function createGraphLoaders(deps) {
         xLabel: 'Year',
         yLabel: overlay.label || overlay.mode,
         currentYear: state.weppYearlySelectedYear,
-        source: 'wepp_yearly',
+        source: WEPP_YEARLY,
         tooltipFormatter,
       };
     } catch (err) {

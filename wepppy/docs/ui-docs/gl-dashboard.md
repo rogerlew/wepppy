@@ -268,7 +268,9 @@ gl-dashboard.js (main)
   5. Return boxplot series keyed by scenario and outlet bar series keyed by year.
 
 #### `data/query-engine.js`
-**Purpose:** Abstracts Query Engine HTTP calls  
+**Purpose:**
+**Note:** Query Engine endpoints are served at the root (`/query-engine/...`) and are not prefixed by `sitePrefix`.
+ Abstracts Query Engine HTTP calls  
 **Exports:** `createQueryEngine(ctx)`  
 **Methods:**
 - `postQueryEngine(payload)`: POST to `/query-engine/runs/{runid}/{scenario}/query`

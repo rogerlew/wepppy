@@ -27,6 +27,7 @@
 - Year slider placement: climate/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
+- Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.
 
 ## Module Contracts (injection signatures)
 - `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`
@@ -60,3 +61,59 @@
   - `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/minus-farce/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js`
   - `GL_DASHBOARD_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/walk-in-obsessive-compulsive/disturbed9002_wbt/gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js`
 - Targeted checks: graph-modes (layout/slider), layers (subcatchment labels toggle, rasters detected), diverging legend in comparison runs.
+## Querying Omni Scenario Data
+
+**CRITICAL**: Scenario data is queried via the `scenario` body parameter, NOT URL path manipulation.
+
+### Architecture
+
+The query flow for scenarios:
+
+1. **Frontend**: `scenarioPath(scenario)` builds a path like `_pups/omni/scenarios/mulch_30`
+2. **HTTP Helper**: `postQueryEngineForScenario(path, payload)` extracts the scenario name from the path and adds `{ scenario: "mulch_30" }` to the request body
+3. **Server**: Extracts `scenario` from body and passes to `resolve_run_context()`
+4. **Query Engine**: Resolves `{run_root}/_pups/omni/scenarios/mulch_30/` and overlays scenario parquet files
+
+### Correct Usage
+
+```javascript
+// In graph-loaders.js - use scenarioPath() + postQueryEngineForScenario()
+const path = scenarioPath(scenario);  // "_pups/omni/scenarios/mulch_30"
+const result = await postQueryEngineForScenario(path, payload);
+```
+
+### Common Mistakes (AVOID)
+
+```javascript
+// ❌ WRONG: Appending scenario path to URL - server will reject with 400
+const url = `${baseUrl}/_pups/omni/scenarios/mulch_30/query`;
+await fetch(url, { body: JSON.stringify(payload) });
+
+// ❌ WRONG: Using postQueryEngine with modified URL
+await postQueryEngine(payload, `${prefix}/_pups/omni/scenarios/mulch_30`);
+```
+
+### Debugging Identical Scenario Data
+
+If boxplots/cumulative graphs show identical values for all scenarios:
+
+1. **Check browser DevTools Network tab**: Verify requests include `"scenario": "name"` in the body
+2. **Verify server log**: Confirm `scenario=name` is logged in resolve_run_context calls
+3. **Test directly with curl**:
+   ```bash
+   # Base (no scenario)
+   curl -X POST /query-engine/runs/RUNID/CONFIG/query \
+     -d '{"datasets": ["wepp/output/interchange/loss_pw0.hill.parquet"]}'
+
+   # Scenario (should return different data)
+   curl -X POST /query-engine/runs/RUNID/CONFIG/query \
+     -d '{"scenario": "mulch_30_sbs_map", "datasets": ["wepp/output/interchange/loss_pw0.hill.parquet"]}'
+   ```
+4. **Verify scenario directory exists**: `ls -la {run_path}/_pups/omni/scenarios/mulch_30_sbs_map/`
+
+### Related Files
+
+- `data/query-engine.js` - HTTP helpers including `postQueryEngineForScenario()`
+- `graphs/graph-loaders.js` - `scenarioPath()` and scenario data loading
+- `wepppy/query_engine/README.md` - Server-side scenario query documentation
+- `wepppy/query_engine/app/server.py` - Server endpoint implementation

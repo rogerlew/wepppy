@@ -277,8 +277,27 @@ async def make_query_endpoint(request: StarletteRequest) -> Response:
 
     Returns:
         TemplateResponse for the query console UI, or fallback text response.
+
+    Note:
+        Scenario queries should use the POST endpoint with a ``scenario``
+        body parameter, NOT URL path manipulation.
     """
     runid_param: str = request.path_params["runid"]
+
+    # Reject garbage paths that embed scenario/subpaths in the URL
+    # Check for /_pups/ or /_outputs/ anywhere in path, or at end of path
+    if (
+        "/_pups/" in runid_param
+        or "/_outputs/" in runid_param
+        or runid_param.endswith("/_pups")
+        or runid_param.endswith("/_outputs")
+    ):
+        return PlainTextResponse(
+            "Invalid URL: scenario paths should not be in the URL. "
+            "Use the 'scenario' body parameter in POST requests instead.",
+            status_code=400,
+        )
+
     try:
         run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
@@ -359,8 +378,39 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
 
     Returns:
         JSONResponse containing query results or error details.
+
+    Note:
+        Scenario queries should use the ``scenario`` body parameter, NOT
+        URL path manipulation. If you need scenario data, post::
+
+            {"scenario": "mulch_30_sbs_map", "dataset_specs": [...]}
+
+        Do NOT append ``_pups/omni/scenarios/...`` to the URL - this will
+        result in a 400 error.
     """
     runid_param: str = request.path_params["runid"]
+
+    # Reject garbage paths that embed scenario/subpaths in the URL
+    # Users must use the body "scenario" parameter instead
+    # Check for /_pups/ or /_outputs/ anywhere in path, or at end of path
+    if (
+        "/_pups/" in runid_param
+        or "/_outputs/" in runid_param
+        or runid_param.endswith("/_pups")
+        or runid_param.endswith("/_outputs")
+    ):
+        return JSONResponse(
+            {
+                "error": (
+                    "Invalid URL: scenario paths should not be in the URL. "
+                    "Use the 'scenario' body parameter instead. "
+                    "Example: POST {\"scenario\": \"mulch_30_sbs_map\", \"dataset_specs\": [...]}"
+                ),
+                "hint": "Remove '_pups/omni/scenarios/...' from URL and add 'scenario' to request body",
+            },
+            status_code=400,
+        )
+
     try:
         run_path = resolve_run_path(runid_param)
     except FileNotFoundError:
@@ -371,8 +421,11 @@ async def run_query_endpoint(request: StarletteRequest) -> Response:
     except json.JSONDecodeError:
         return JSONResponse({"error": "Invalid JSON payload"}, status_code=400)
 
+    # Extract optional scenario from request body
+    scenario = body.pop("scenario", None)
+
     try:
-        context = resolve_run_context(str(run_path), auto_activate=True, run_interchange=False)
+        context = resolve_run_context(str(run_path), scenario=scenario, auto_activate=True, run_interchange=False)
     except FileNotFoundError:
         return JSONResponse({"error": f"Run '{runid_param}' not found"}, status_code=404)
 

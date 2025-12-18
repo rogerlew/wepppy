@@ -3,6 +3,21 @@
  * Handles GeoTIFF loading, SBS images, and GDAL info fetches.
  */
 
+/**
+ * @typedef {Object} RasterUtilsDeps
+ * @property {{ sitePrefix: string, runid: string, config: string, geoTiffUrl?: string }} ctx Run-scoped identifiers and optional GeoTIFF CDN override.
+ * @property {() => { geoTiffLoader?: Promise<any> | null }} getState Read reactive state to reuse the GeoTIFF loader promise.
+ * @property {(key: string, value: any) => void} setValue Write a single state key (geoTiffLoader cache).
+ * @property {(v: number) => number[] | null} colorFn Fallback colormap function returning RGBA-ish array.
+ */
+
+/**
+ * @typedef {Object} RasterUtils
+ * @property {(path: string, colorMap?: Object | ((value: number) => number[] | string | null)) => Promise<{ canvas: HTMLCanvasElement, bounds: number[], values: any, width: number, height: number, sampleMode: string }>} loadRaster Fetch and render a GeoTIFF to canvas with optional colormap.
+ * @property {(imgurl: string) => Promise<{ canvas: HTMLCanvasElement, width: number, height: number, values: Uint8ClampedArray, sampleMode: 'rgba' }>} loadSbsImage Load an SBS PNG/JPEG into a canvas and extract RGBA values.
+ * @property {(path: string) => Promise<Object|null>} fetchGdalInfo Fetch GDAL info JSON for a raster path.
+ */
+
 function resolveGeoTiffGlobal() {
   if (typeof GeoTIFF !== 'undefined' && GeoTIFF && typeof GeoTIFF.fromArrayBuffer === 'function') {
     return GeoTIFF;
@@ -18,6 +33,10 @@ function resolveGeoTiffGlobal() {
   return null;
 }
 
+/**
+ * @param {RasterUtilsDeps} params
+ * @returns {RasterUtils}
+ */
 export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
   async function ensureGeoTiff() {
     const existing = resolveGeoTiffGlobal();

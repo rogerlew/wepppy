@@ -1,4 +1,4 @@
-import { DEFAULT_GRAPH_PADDING } from '../config.js';
+import { DEFAULT_GRAPH_PADDING, GRAPH_MODES } from '../config.js';
 import { getState, setValue } from '../state.js';
 
 /**
@@ -122,7 +122,7 @@ export function createTimeseriesGraph(options = {}) {
       }
       this._data = data;
       const panelCollapsed = panelEl && panelEl.classList.contains('is-collapsed');
-      const allowExpand = !state || state.graphMode !== 'minimized';
+      const allowExpand = !state || state.graphMode !== GRAPH_MODES.MINIMIZED;
       const headerEl = document.querySelector('#gl-graph h4');
       if (headerEl) {
         headerEl.textContent = data && data.title ? data.title : 'Graph';

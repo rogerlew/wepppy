@@ -1,3 +1,89 @@
+import { GRAPH_CONTEXT_KEYS, GRAPH_MODES, GRAPH_SLIDER_PLACEMENTS } from '../config.js';
+
+/**
+ * @typedef {Object} GraphModeDomRefs
+ * @property {HTMLElement | null} [glMainEl]
+ * @property {HTMLElement | null} [graphPanelEl]
+ * @property {NodeListOf<HTMLElement> | HTMLElement[] | null} [graphModeButtons]
+ */
+
+/**
+ * @typedef {import('../config.js').GraphMode} GraphMode
+ */
+
+/**
+ * @typedef {import('../config.js').GraphContextKey} GraphContextKey
+ */
+
+/**
+ * @typedef {import('../config.js').GraphSliderPlacement} GraphSliderPlacement
+ */
+
+/**
+ * @typedef {Object} GraphContext
+ * @property {GraphContextKey} key
+ * @property {boolean} graphCapable
+ * @property {GraphSliderPlacement} [slider]
+ */
+
+/**
+ * @typedef {Object} GraphModeChangePayload
+ * @property {GraphMode} mode
+ * @property {GraphContextKey} contextKey
+ * @property {boolean} graphCapable
+ * @property {boolean} focus
+ */
+
+/**
+ * @typedef {Object} TimeseriesGraph
+ * @property {string} [_source]
+ * @property {unknown} [_data]
+ * @property {() => void} [render]
+ * @property {() => void} [_resizeCanvas]
+ * @property {() => void} [hide]
+ */
+
+/**
+ * @typedef {Object} YearSliderController
+ * @property {HTMLElement | null} el
+ * @property {(ctx?: 'layer' | 'climate') => void} show
+ * @property {() => void} hide
+ */
+
+/**
+ * @callback GetState
+ * @returns {Record<string, any>}
+ */
+
+/**
+ * @callback SetValue
+ * @param {string} key
+ * @param {any} value
+ */
+
+/**
+ * @callback GraphModeChangeHandler
+ * @param {GraphModeChangePayload} payload
+ */
+
+/**
+ * @typedef {Object} GraphModeController
+ * @property {() => void} clearGraphModeOverride
+ * @property {(enabled: boolean, options?: { skipModeSync?: boolean, force?: boolean }) => void} setGraphFocus
+ * @property {(collapsed: boolean, options?: { focusOnExpand?: boolean }) => void} setGraphCollapsed
+ * @property {() => void} toggleGraphPanel
+ * @property {(mode: GraphMode, options?: { source?: 'auto' | 'user', resetContext?: boolean }) => GraphMode | undefined} setGraphMode
+ * @property {(options?: { userOverride?: GraphMode, resetContext?: boolean }) => GraphMode | undefined} syncGraphLayout
+ * @property {(stateObj?: Record<string, any>) => GraphContext} resolveGraphContext
+ * @property {(mode: GraphMode) => void} updateGraphModeButtons
+ * @property {() => void} ensureGraphExpanded
+ */
+
+/**
+ * Graph mode/layout controller: handles slider placement, panel collapse, and focus.
+ * @param {{ getState: GetState, setValue: SetValue, domRefs?: GraphModeDomRefs, yearSlider?: YearSliderController | null, timeseriesGraph?: TimeseriesGraph | (() => TimeseriesGraph | null), onModeChange?: GraphModeChangeHandler }} params
+ * @returns {GraphModeController}
+ */
 export function createGraphModeController({
   getState,
   setValue,
@@ -10,6 +96,7 @@ export function createGraphModeController({
   const graphPanelEl = domRefs?.graphPanelEl || null;
   const graphModeButtons = domRefs?.graphModeButtons || null;
   const getGraph = typeof timeseriesGraph === 'function' ? timeseriesGraph : () => timeseriesGraph;
+  const VALID_GRAPH_MODES = Object.values(GRAPH_MODES);
 
   let graphModeUserOverride = null;
   let graphControlsEnabled = true;
@@ -31,41 +118,65 @@ export function createGraphModeController({
   }
 
   const GRAPH_CONTEXT_DEFS = {
-    climate_yearly: { mode: 'full', slider: 'bottom', focus: true },
-    wepp_yearly: { mode: 'split', slider: 'top', focus: false },
-    rap: { mode: 'split', slider: 'top', focus: false },
-    cumulative: { mode: 'full', slider: 'hide', focus: true },
-    omni: { mode: 'full', slider: 'hide', focus: true },
-    default: { mode: 'split', slider: 'hide', focus: false },
+    [GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY]: {
+      mode: GRAPH_MODES.FULL,
+      slider: GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+      focus: true,
+    },
+    [GRAPH_CONTEXT_KEYS.WEPP_YEARLY]: {
+      mode: GRAPH_MODES.SPLIT,
+      slider: GRAPH_SLIDER_PLACEMENTS.TOP,
+      focus: false,
+    },
+    [GRAPH_CONTEXT_KEYS.RAP]: {
+      mode: GRAPH_MODES.SPLIT,
+      slider: GRAPH_SLIDER_PLACEMENTS.TOP,
+      focus: false,
+    },
+    [GRAPH_CONTEXT_KEYS.CUMULATIVE]: {
+      mode: GRAPH_MODES.FULL,
+      slider: GRAPH_SLIDER_PLACEMENTS.HIDE,
+      focus: true,
+    },
+    [GRAPH_CONTEXT_KEYS.OMNI]: {
+      mode: GRAPH_MODES.FULL,
+      slider: GRAPH_SLIDER_PLACEMENTS.HIDE,
+      focus: true,
+    },
+    [GRAPH_CONTEXT_KEYS.DEFAULT]: {
+      mode: GRAPH_MODES.SPLIT,
+      slider: GRAPH_SLIDER_PLACEMENTS.HIDE,
+      focus: false,
+    },
   };
 
   const GRAPH_SLIDER_OVERRIDES = {
-    'climate-yearly': 'bottom',
-    'cumulative-contribution': 'hide',
-    'omni-outlet-sediment': 'bottom',
-    'omni-outlet-stream': 'bottom',
-    'omni-soil-loss-hill': 'hide',
-    'omni-soil-loss-chn': 'hide',
-    'omni-runoff-hill': 'hide',
+    'climate-yearly': GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+    'cumulative-contribution': GRAPH_SLIDER_PLACEMENTS.HIDE,
+    'omni-outlet-sediment': GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+    'omni-outlet-stream': GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+    'omni-soil-loss-hill': GRAPH_SLIDER_PLACEMENTS.HIDE,
+    'omni-soil-loss-chn': GRAPH_SLIDER_PLACEMENTS.HIDE,
+    'omni-runoff-hill': GRAPH_SLIDER_PLACEMENTS.HIDE,
   };
 
   function positionYearSlider(position) {
     const container = document.getElementById('gl-graph-container');
     const slider = yearSlider;
     if (!slider || !slider.el) {
-      if (position === 'hide' && container) {
+      if (position === GRAPH_SLIDER_PLACEMENTS.HIDE && container) {
         container.classList.remove('has-bottom-slider');
       }
       return;
     }
-    if (position === 'inherit') {
+    if (position === GRAPH_SLIDER_PLACEMENTS.INHERIT) {
       return;
     }
-    if (position === 'top') {
+    if (position === GRAPH_SLIDER_PLACEMENTS.TOP) {
       slider.show('layer');
       return;
     }
-    if (position === 'bottom') {
+    if (position === GRAPH_SLIDER_PLACEMENTS.BOTTOM) {
       slider.show('climate');
       return;
     }
@@ -84,14 +195,14 @@ export function createGraphModeController({
   function updateGraphModeButtons(mode) {
     const buttons = graphModeButtons && typeof graphModeButtons.length === 'number' ? Array.from(graphModeButtons) : [];
     if (!buttons.length) return;
-    const omniFocused = currentGraphSource() === 'omni' && (getState().graphFocus || false);
+    const omniFocused = currentGraphSource() === GRAPH_CONTEXT_KEYS.OMNI && (getState().graphFocus || false);
 
     buttons.forEach((btn) => {
       const isActive = btn.dataset.graphMode === mode;
       btn.classList.toggle('is-active', isActive);
       btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-      const isMin = btn.dataset.graphMode === 'minimized';
-      const isSplit = btn.dataset.graphMode === 'split';
+      const isMin = btn.dataset.graphMode === GRAPH_MODES.MINIMIZED;
+      const isSplit = btn.dataset.graphMode === GRAPH_MODES.SPLIT;
       const disable = (!graphControlsEnabled && !isMin) || (omniFocused && isSplit);
       if (disable) {
         btn.classList.add('is-disabled');
@@ -107,13 +218,13 @@ export function createGraphModeController({
 
   function setGraphControlsEnabled(enabled) {
     graphControlsEnabled = !!enabled;
-    updateGraphModeButtons(getState().graphMode || 'split');
+    updateGraphModeButtons(getState().graphMode || GRAPH_MODES.SPLIT);
   }
 
   function setGraphFocus(enabled, options = {}) {
     const { skipModeSync = false, force = false } = options;
     const focus = !!enabled;
-    if (!focus && graphModeUserOverride === 'full' && !force) {
+    if (!focus && graphModeUserOverride === GRAPH_MODES.FULL && !force) {
       return;
     }
     setValue('graphFocus', focus);
@@ -126,7 +237,7 @@ export function createGraphModeController({
     }
     if (!skipModeSync) {
       const collapsed = graphPanelEl ? graphPanelEl.classList.contains('is-collapsed') : false;
-      const mode = collapsed ? 'minimized' : focus ? 'full' : 'split';
+      const mode = collapsed ? GRAPH_MODES.MINIMIZED : focus ? GRAPH_MODES.FULL : GRAPH_MODES.SPLIT;
       setValue('graphMode', mode);
       updateGraphModeButtons(mode);
     }
@@ -168,21 +279,21 @@ export function createGraphModeController({
   function toggleGraphPanel() {
     if (!graphPanelEl) return;
     const collapsing = !graphPanelEl.classList.contains('is-collapsed');
-    setGraphMode(collapsing ? 'minimized' : 'split', { source: 'user' });
+    setGraphMode(collapsing ? GRAPH_MODES.MINIMIZED : GRAPH_MODES.SPLIT, { source: 'user' });
   }
 
   function applyGraphMode(mode, { graphCapable = true, focusOverride } = {}) {
-    const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
-    const effectiveMode = graphCapable ? validated : 'minimized';
+    const validated = VALID_GRAPH_MODES.includes(mode) ? mode : GRAPH_MODES.SPLIT;
+    const effectiveMode = graphCapable ? validated : GRAPH_MODES.MINIMIZED;
 
     setValue('graphMode', effectiveMode);
-    if (effectiveMode === 'minimized') {
+    if (effectiveMode === GRAPH_MODES.MINIMIZED) {
       setGraphCollapsed(true);
       setGraphFocus(false, { skipModeSync: true, force: true });
-    } else if (effectiveMode === 'split') {
+    } else if (effectiveMode === GRAPH_MODES.SPLIT) {
       setGraphCollapsed(false, { focusOnExpand: false });
       setGraphFocus(false, { skipModeSync: true, force: true });
-    } else if (effectiveMode === 'full') {
+    } else if (effectiveMode === GRAPH_MODES.FULL) {
       setGraphCollapsed(false, { focusOnExpand: true });
       setGraphFocus(true, { skipModeSync: true, force: true });
     }
@@ -202,30 +313,54 @@ export function createGraphModeController({
     const sliderOverride = activeKey ? GRAPH_SLIDER_OVERRIDES[activeKey] : null;
 
     if (activeKey === 'climate-yearly') {
-      return { key: 'climate_yearly', graphCapable: true, slider: sliderOverride || 'bottom' };
+      return {
+        key: GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY,
+        graphCapable: true,
+        slider: sliderOverride || GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+      };
     }
     if (activeKey === 'cumulative-contribution') {
-      return { key: 'cumulative', graphCapable: true, slider: sliderOverride || 'hide' };
+      return {
+        key: GRAPH_CONTEXT_KEYS.CUMULATIVE,
+        graphCapable: true,
+        slider: sliderOverride || GRAPH_SLIDER_PLACEMENTS.HIDE,
+      };
     }
     if (activeKey && activeKey.startsWith('omni')) {
-      return { key: 'omni', graphCapable: true, slider: sliderOverride || 'hide' };
+      return {
+        key: GRAPH_CONTEXT_KEYS.OMNI,
+        graphCapable: true,
+        slider: sliderOverride || GRAPH_SLIDER_PLACEMENTS.HIDE,
+      };
     }
     if (!activeKey) {
-      if (rapActive) return { key: 'rap', graphCapable: true };
-      if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-      return { key: 'default', graphCapable: false };
+      if (rapActive) return { key: GRAPH_CONTEXT_KEYS.RAP, graphCapable: true };
+      if (yearlyActive) return { key: GRAPH_CONTEXT_KEYS.WEPP_YEARLY, graphCapable: true };
+      return { key: GRAPH_CONTEXT_KEYS.DEFAULT, graphCapable: false };
     }
 
-    if (source === 'climate_yearly') {
-      return { key: 'climate_yearly', graphCapable: true, slider: sliderOverride || 'bottom' };
+    if (source === GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY) {
+      return {
+        key: GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY,
+        graphCapable: true,
+        slider: sliderOverride || GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+      };
     }
-    if (source === 'rap' && rapActive) return { key: 'rap', graphCapable: true };
-    if (source === 'wepp_yearly' && yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-    if (source === 'omni') return { key: 'omni', graphCapable: true, slider: sliderOverride || 'hide' };
+    if (source === GRAPH_CONTEXT_KEYS.RAP && rapActive) return { key: GRAPH_CONTEXT_KEYS.RAP, graphCapable: true };
+    if (source === GRAPH_CONTEXT_KEYS.WEPP_YEARLY && yearlyActive) {
+      return { key: GRAPH_CONTEXT_KEYS.WEPP_YEARLY, graphCapable: true };
+    }
+    if (source === GRAPH_CONTEXT_KEYS.OMNI) {
+      return {
+        key: GRAPH_CONTEXT_KEYS.OMNI,
+        graphCapable: true,
+        slider: sliderOverride || GRAPH_SLIDER_PLACEMENTS.HIDE,
+      };
+    }
 
-    if (rapActive) return { key: 'rap', graphCapable: true };
-    if (yearlyActive) return { key: 'wepp_yearly', graphCapable: true };
-    return { key: 'default', graphCapable: false };
+    if (rapActive) return { key: GRAPH_CONTEXT_KEYS.RAP, graphCapable: true };
+    if (yearlyActive) return { key: GRAPH_CONTEXT_KEYS.WEPP_YEARLY, graphCapable: true };
+    return { key: GRAPH_CONTEXT_KEYS.DEFAULT, graphCapable: false };
   }
 
   function syncGraphLayout(options = {}) {
@@ -238,12 +373,12 @@ export function createGraphModeController({
     }
     const st = getState();
     const context = resolveGraphContext(st);
-    const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS.default;
+    const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS[GRAPH_CONTEXT_KEYS.DEFAULT];
     const override = graphModeUserOverride;
     const graphCapable = context.graphCapable;
-    const sliderPlacement = graphCapable ? (context.slider || def.slider) : 'hide';
-    const mode = graphCapable ? (override || def.mode) : 'minimized';
-    const focus = override ? mode === 'full' : def.focus || mode === 'full';
+    const sliderPlacement = graphCapable ? (context.slider || def.slider) : GRAPH_SLIDER_PLACEMENTS.HIDE;
+    const mode = graphCapable ? (override || def.mode) : GRAPH_MODES.MINIMIZED;
+    const focus = override ? mode === GRAPH_MODES.FULL : def.focus || mode === GRAPH_MODES.FULL;
     const sliderReady = !!(yearSlider && yearSlider.el);
     const layoutKey = `${context.key}|${mode}|${focus ? '1' : '0'}|${sliderPlacement}|${override || ''}|${graphCapable ? 1 : 0}|${sliderReady ? 'ready' : 'pending'}`;
     if (layoutKey === lastGraphContextKey) {
@@ -287,7 +422,7 @@ export function createGraphModeController({
 
   function setGraphMode(mode, options = {}) {
     const { source = 'auto', resetContext = false } = options;
-    const validated = ['minimized', 'split', 'full'].includes(mode) ? mode : 'split';
+    const validated = VALID_GRAPH_MODES.includes(mode) ? mode : GRAPH_MODES.SPLIT;
     if (source === 'user') {
       graphModeUserOverride = validated;
     } else if (source === 'auto') {

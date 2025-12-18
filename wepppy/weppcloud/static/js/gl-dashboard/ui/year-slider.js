@@ -1,3 +1,50 @@
+/**
+ * @typedef {Object} YearSliderElements
+ * @property {HTMLElement | null} el
+ * @property {HTMLInputElement | null} input
+ * @property {HTMLElement | null} valueEl
+ * @property {HTMLElement | null} minEl
+ * @property {HTMLElement | null} maxEl
+ * @property {HTMLElement | null} playBtn
+ */
+
+/**
+ * @typedef {Object} YearSliderInitConfig
+ * @property {number} [startYear]
+ * @property {number} [endYear]
+ * @property {boolean} [hasObserved]
+ */
+
+/**
+ * @typedef {'layer' | 'climate'} YearSliderContext
+ */
+
+/**
+ * @typedef {Object} YearSliderController
+ * @property {HTMLElement | null} el
+ * @property {HTMLInputElement | null} input
+ * @property {HTMLElement | null} valueEl
+ * @property {HTMLElement | null} minEl
+ * @property {HTMLElement | null} maxEl
+ * @property {HTMLElement | null} playBtn
+ * @property {(config?: YearSliderInitConfig) => void} init
+ * @property {(ctx?: YearSliderContext) => void} show
+ * @property {() => void} hide
+ * @property {(min: number, max: number, current?: number) => void} setRange
+ * @property {() => number} getValue
+ * @property {(year: number) => void} setValue
+ * @property {(event: 'change', callback: (year: number) => void) => void} on
+ * @property {(event: 'change', callback: (year: number) => void) => void} off
+ * @property {() => void} play
+ * @property {() => void} pause
+ * @property {() => void} toggle
+ */
+
+/**
+ * Year slider controller used by graph-mode to place and control the year picker.
+ * @param {YearSliderElements} params
+ * @returns {YearSliderController}
+ */
 export function createYearSlider({
   el,
   input,

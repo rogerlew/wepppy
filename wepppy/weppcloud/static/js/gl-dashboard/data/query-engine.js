@@ -6,30 +6,38 @@ import { getValue } from '../state.js';
  * 
  * Query Engine runs as a separate service at /query-engine/ (no sitePrefix).
  * URL format: /query-engine/runs/{runid}/{config}/query
+ * Scenario is passed in the request body as "scenario" parameter.
  */
 export function createQueryEngine(ctx) {
-  async function postQueryEngine(payload) {
+  function getBaseUrl() {
     let queryPath = `runs/${ctx.runid}`;
     if (ctx.config) {
       queryPath += `/${ctx.config}`;
     }
+    return `/query-engine/${queryPath}/query`;
+  }
+
+  async function postQueryEngine(payload) {
+    const targetUrl = getBaseUrl();
     const scenarioPath = getValue('currentScenarioPath');
+    // Extract scenario name from path like "_pups/omni/scenarios/scenario_name"
+    let scenario = null;
     if (scenarioPath) {
-      queryPath += `/${scenarioPath}`;
+      const match = scenarioPath.match(/_pups\/omni\/scenarios\/([^/]+)/);
+      scenario = match ? match[1] : null;
     }
-    const targetUrl = `/query-engine/${queryPath}/query`;
+    const body = scenario ? { ...payload, scenario } : payload;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
     if (!resp.ok) return null;
     return resp.json();
   }
 
   async function postBaseQueryEngine(payload) {
-    const basePath = ctx.config ? `runs/${ctx.runid}/${ctx.config}` : `runs/${ctx.runid}`;
-    const targetUrl = `/query-engine/${basePath}/query`;
+    const targetUrl = getBaseUrl();
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -40,19 +48,18 @@ export function createQueryEngine(ctx) {
   }
 
   async function postQueryEngineForScenario(payload, scenarioPath) {
-    // For scenario-specific queries, mimic main path + scenario
-    let queryPath = `runs/${ctx.runid}`;
-    if (ctx.config) {
-      queryPath += `/${ctx.config}`;
-    }
+    const targetUrl = getBaseUrl();
+    // Extract scenario name from path like "_pups/omni/scenarios/scenario_name"
+    let scenario = null;
     if (scenarioPath) {
-      queryPath += `/${scenarioPath}`;
+      const match = scenarioPath.match(/_pups\/omni\/scenarios\/([^/]+)/);
+      scenario = match ? match[1] : null;
     }
-    const targetUrl = `/query-engine/${queryPath}/query`;
+    const body = scenario ? { ...payload, scenario } : payload;
     const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
     if (!resp.ok) return null;
     return resp.json();

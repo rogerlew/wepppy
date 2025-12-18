@@ -56,6 +56,13 @@ async function waitForSubcatchments(page) {
   ).toBeTruthy();
 }
 
+async function isDetailsOpen(page, title) {
+  return page.locator('summary.gl-layer-group', { hasText: title }).evaluate((el) => {
+    const details = el.closest('details');
+    return details ? details.open : false;
+  });
+}
+
 test.describe('gl-dashboard layer detection and wiring', () => {
   test('layer controls render and toggling updates the deck stack', async ({ page }) => {
     await openDashboard(page);
@@ -136,5 +143,68 @@ test.describe('gl-dashboard layer detection and wiring', () => {
 
     await labelsToggle.uncheck({ force: true });
     await expect.poll(async () => getDeckLayerIds(page)).not.toContain('subcatchment-labels');
+  });
+
+  test('RAP cumulative stays selected and panel remains open', async ({ page }) => {
+    await openDashboard(page);
+    const rapSummary = page.locator('summary.gl-layer-group', { hasText: 'RAP' });
+    if ((await rapSummary.count()) === 0) {
+      test.skip('RAP section not present in this run');
+    }
+    await expandSection(page, 'RAP');
+
+    const cumulative = page.getByLabel('Cumulative Cover');
+    await expect(cumulative).toBeVisible({ timeout: 15000 });
+    await cumulative.click({ force: true });
+
+    await expect(cumulative).toBeChecked({ timeout: 10000 });
+    await expect.poll(async () => isDetailsOpen(page, 'RAP')).toBeTruthy();
+    await expect.poll(async () =>
+      page.evaluate(() => window.glDashboardState?.rapCumulativeMode ?? false),
+    ).toBeTruthy();
+    await expect.poll(async () => {
+      const ids = await getDeckLayerIds(page);
+      return ids.some((id) => typeof id === 'string' && id.includes('rap-cumulative'));
+    }).toBeTruthy();
+  });
+
+  test('WEPP Event selection keeps panel open and renders layer', async ({ page }) => {
+    await openDashboard(page);
+    const weppEventSummary = page.locator('summary.gl-layer-group', { hasText: 'WEPP Event' });
+    if ((await weppEventSummary.count()) === 0) {
+      test.skip('WEPP Event section not present in this run');
+    }
+    await expandSection(page, 'WEPP Event');
+
+    const dateInput = page.locator('#gl-wepp-event-date');
+    await expect(dateInput).toBeVisible({ timeout: 15000 });
+    const meta = await page.evaluate(() => {
+      const m = window.glDashboardState?.weppEventMetadata;
+      return m ? { start: m.startDate, end: m.endDate } : null;
+    });
+    if (!meta || (!meta.start && !meta.end)) {
+      test.skip('WEPP Event metadata missing start/end date');
+    }
+    const dateToUse = meta.end || meta.start;
+    await dateInput.evaluate((el, val) => {
+      el.value = val;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }, dateToUse);
+
+    const details = weppEventSummary.locator('xpath=..');
+    const firstRadio = details.locator('input[type="radio"]').first();
+    await expect(firstRadio).toBeVisible({ timeout: 15000 });
+    await firstRadio.click({ force: true });
+
+    await expect(firstRadio).toBeChecked({ timeout: 10000 });
+    await expect.poll(async () => isDetailsOpen(page, 'WEPP Event')).toBeTruthy();
+    await expect.poll(async () =>
+      page.evaluate(() => (window.glDashboardState?.weppEventLayers || []).some((l) => l.visible)),
+    ).toBeTruthy();
+    await expect.poll(async () => {
+      const ids = await getDeckLayerIds(page);
+      return ids.some((id) => typeof id === 'string' && id.includes('wepp-event'));
+    }).toBeTruthy();
   });
 });

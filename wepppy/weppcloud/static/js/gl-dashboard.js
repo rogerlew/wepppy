@@ -93,6 +93,8 @@
     COMPARISON_MEASURES,
     WATER_MEASURES,
     SOIL_MEASURES,
+    GRAPH_CONTEXT_KEYS,
+    GRAPH_MODES,
     DEFAULT_CONTROLLER_OPTIONS,
     BASE_LAYER_DEFS,
     GRAPH_DEFS,
@@ -556,7 +558,7 @@
     suppressApplyLayersOnModeChange = true;
     try {
       applyLayers();
-      if (payload.contextKey === 'climate_yearly' && getState().activeGraphKey === 'climate-yearly') {
+      if (payload.contextKey === GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY && getState().activeGraphKey === 'climate-yearly') {
         const graphOptions = getClimateGraphOptions();
         activateGraphItem('climate-yearly', { force: true, graphOptions, keepFocus: true });
       }
@@ -605,7 +607,11 @@
 
   const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
   const graphScenarios = [{ name: 'Base', path: '' }].concat(
-    omniScenarios.map((s) => ({ name: s.name || s.path || 'Scenario', path: s.path || '' })),
+    omniScenarios.map((s, idx) => {
+      const name = s.name || `scenario-${idx + 1}`;
+      const path = s.path || `_pups/omni/scenarios/${name}`;
+      return { name, path };
+    }),
   );
 
   if (typeof createGraphController !== 'function') {
@@ -697,10 +703,10 @@
   window.glDashboardUpdateLegends = updateLegendsPanel;
 
   const initialGraphMode = graphPanelEl && graphPanelEl.classList.contains('is-collapsed')
-    ? 'minimized'
+    ? GRAPH_MODES.MINIMIZED
     : getState().graphFocus
-      ? 'full'
-      : 'split';
+      ? GRAPH_MODES.FULL
+      : GRAPH_MODES.SPLIT;
   setGraphMode(getState().graphMode || initialGraphMode, { source: 'auto', resetContext: true });
 
   window.glDashboardToggleGraphPanel = toggleGraphPanel;
@@ -764,7 +770,7 @@
       setValue('rapSelectedYear', year);
       await refreshRapData();
       needsApply = true;
-      if (timeseriesGraph._source === 'rap') {
+      if (timeseriesGraph._source === GRAPH_CONTEXT_KEYS.RAP) {
         timeseriesGraph.setCurrentYear(year);
       }
     }
@@ -773,14 +779,14 @@
       setValue('weppYearlySelectedYear', year);
       await refreshWeppYearlyData();
       needsApply = true;
-      if (timeseriesGraph._source === 'wepp_yearly') {
+      if (timeseriesGraph._source === GRAPH_CONTEXT_KEYS.WEPP_YEARLY) {
         timeseriesGraph.setCurrentYear(year);
       }
     }
-    const activeClimate = getState().activeGraphKey === 'climate-yearly' || timeseriesGraph._source === 'climate_yearly';
+    const activeClimate = getState().activeGraphKey === 'climate-yearly' || timeseriesGraph._source === GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY;
     if (activeClimate) {
       setValue('climateYearlySelectedYear', year);
-      if (timeseriesGraph._source === 'climate_yearly') {
+      if (timeseriesGraph._source === GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY) {
         timeseriesGraph.setCurrentYear(year);
       }
     }
