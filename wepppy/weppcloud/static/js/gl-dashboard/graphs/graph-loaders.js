@@ -679,6 +679,7 @@ export function createGraphLoaders(deps) {
       yLabel: 'tonne/ha',
       source: OMNI,
       series,
+      defaultLogScale: true,
     };
   }
 
@@ -708,6 +709,7 @@ export function createGraphLoaders(deps) {
       yLabel: 'mm',
       source: OMNI,
       series,
+      defaultLogScale: false,
     };
   }
 
@@ -735,6 +737,7 @@ export function createGraphLoaders(deps) {
       yLabel: 'tonne',
       source: OMNI,
       series,
+      defaultLogScale: true,
     };
   }
 

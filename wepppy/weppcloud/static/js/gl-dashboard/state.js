@@ -67,6 +67,9 @@ const state = {
   climateWaterYear: true,
   climateStartMonth: 10,
 
+  // Per-graph log scale preferences for boxplots (keyed by graph key)
+  boxplotLogScale: {},
+
   subcatchmentsGeoJson: null,
   graphHighlightedTopazId: null,
 

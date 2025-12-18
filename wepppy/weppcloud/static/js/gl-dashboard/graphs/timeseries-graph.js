@@ -53,6 +53,7 @@ export function createTimeseriesGraph(options = {}) {
     _padding: { ...padding },
     _lineWidth: 2,
     _highlightWidth: 3.5,
+    _scaleToggleEl: null,
 
     init() {
       this.canvas = document.getElementById('gl-graph-canvas');
@@ -92,6 +93,11 @@ export function createTimeseriesGraph(options = {}) {
         this.emptyEl.textContent = this._emptyDefault;
         this.emptyEl.style.display = 'block';
       }
+      // Remove scale toggle when hiding
+      if (this._scaleToggleEl) {
+        this._scaleToggleEl.remove();
+        this._scaleToggleEl = null;
+      }
       this._visible = false;
       this._data = null;
       this._currentYear = null;
@@ -115,6 +121,88 @@ export function createTimeseriesGraph(options = {}) {
       }
     },
 
+    _getLogScaleForGraph(graphKey, defaultLogScale) {
+      const state = getState();
+      const prefs = state.boxplotLogScale || {};
+      if (graphKey in prefs) {
+        return prefs[graphKey];
+      }
+      return !!defaultLogScale;
+    },
+
+    _setLogScaleForGraph(graphKey, useLog) {
+      const state = getState();
+      const prefs = { ...(state.boxplotLogScale || {}) };
+      prefs[graphKey] = useLog;
+      setValue('boxplotLogScale', prefs);
+    },
+
+    _updateScaleToggle(data) {
+      // Remove existing scale toggle if present
+      if (this._scaleToggleEl) {
+        this._scaleToggleEl.remove();
+        this._scaleToggleEl = null;
+      }
+      
+      // Only show for boxplot graphs
+      if (!data || data.type !== 'boxplot') {
+        return;
+      }
+      
+      // Query DOM after removing old toggle to get fresh references
+      const headerEl = document.querySelector('#gl-graph .gl-graph__header');
+      const controlsEl = headerEl ? headerEl.querySelector('.gl-graph__controls') : null;
+      
+      if (!controlsEl) {
+        return;
+      }
+      
+      const graphKey = getState().activeGraphKey;
+      const useLog = this._getLogScaleForGraph(graphKey, data.defaultLogScale);
+      
+      // Create toggle container
+      const toggleEl = document.createElement('div');
+      toggleEl.className = 'gl-graph__controls';
+      toggleEl.style.marginRight = '0.75rem';
+      toggleEl.setAttribute('role', 'group');
+      toggleEl.setAttribute('aria-label', 'Y-axis scale');
+      
+      const linearBtn = document.createElement('button');
+      linearBtn.className = 'gl-btn' + (!useLog ? ' is-active' : '');
+      linearBtn.type = 'button';
+      linearBtn.title = 'Linear scale';
+      linearBtn.setAttribute('aria-label', 'Linear scale');
+      linearBtn.textContent = 'Lin';
+      linearBtn.addEventListener('click', () => {
+        if (useLog) {
+          this._setLogScaleForGraph(graphKey, false);
+          this._updateScaleToggle(this._data);
+          this.render();
+        }
+      });
+      
+      const logBtn = document.createElement('button');
+      logBtn.className = 'gl-btn' + (useLog ? ' is-active' : '');
+      logBtn.type = 'button';
+      logBtn.title = 'Logarithmic scale';
+      logBtn.setAttribute('aria-label', 'Logarithmic scale');
+      logBtn.textContent = 'Log';
+      logBtn.addEventListener('click', () => {
+        if (!useLog) {
+          this._setLogScaleForGraph(graphKey, true);
+          this._updateScaleToggle(this._data);
+          this.render();
+        }
+      });
+      
+      toggleEl.appendChild(linearBtn);
+      toggleEl.appendChild(logBtn);
+      
+      // Insert before the layout controls
+      controlsEl.parentNode.insertBefore(toggleEl, controlsEl);
+      this._scaleToggleEl = toggleEl;
+    },
+
     setData(data) {
       const state = getState();
       if (state && state.rapCumulativeMode && data && data.source === 'omni') {
@@ -131,6 +219,10 @@ export function createTimeseriesGraph(options = {}) {
       this._source = data && data.source ? data.source : null;
       this._tooltipFormatter =
         data && typeof data.tooltipFormatter === 'function' ? data.tooltipFormatter : null;
+      
+      // Update scale toggle for boxplot graphs
+      this._updateScaleToggle(data);
+      
       if (this._hasData(data)) {
         if (allowExpand && !panelCollapsed) {
           this.show();
@@ -368,6 +460,39 @@ export function createTimeseriesGraph(options = {}) {
       }
     },
 
+    _computeLogTicks(min, max, count) {
+      // Generate nice log-scale ticks
+      const logMin = min > 0 ? Math.log10(min) : -2;
+      const logMax = Math.log10(max);
+      const ticks = [];
+      const startPow = Math.floor(logMin);
+      const endPow = Math.ceil(logMax);
+      
+      // Add major ticks at powers of 10
+      for (let p = startPow; p <= endPow; p++) {
+        const val = Math.pow(10, p);
+        if (val >= min && val <= max) {
+          ticks.push(val);
+        }
+      }
+      
+      // If we have too few ticks, add intermediate values
+      if (ticks.length < 3) {
+        const intermediates = [2, 5];
+        for (let p = startPow; p <= endPow; p++) {
+          for (const mult of intermediates) {
+            const val = mult * Math.pow(10, p);
+            if (val >= min && val <= max && !ticks.includes(val)) {
+              ticks.push(val);
+            }
+          }
+        }
+      }
+      
+      ticks.sort((a, b) => a - b);
+      return ticks.slice(0, count + 2);
+    },
+
     _renderBoxplot() {
       if (!this.ctx2d || !this._data || !Array.isArray(this._data.series)) return;
       const series = this._data.series.filter((s) => s && s.stats);
@@ -383,6 +508,10 @@ export function createTimeseriesGraph(options = {}) {
 
       ctx.clearRect(0, 0, width, height);
 
+      // Determine if using log scale
+      const graphKey = getState().activeGraphKey;
+      const useLog = this._getLogScaleForGraph(graphKey, this._data.defaultLogScale);
+
       let yMin = Infinity;
       let yMax = -Infinity;
       for (const s of series) {
@@ -392,11 +521,33 @@ export function createTimeseriesGraph(options = {}) {
       }
       if (!isFinite(yMin)) yMin = 0;
       if (!isFinite(yMax)) yMax = 1;
-      const yPad = (yMax - yMin) * 0.1 || 5;
-      yMin = yMin - yPad;
-      yMax = yMax + yPad;
-      const yRange = yMax - yMin || 1;
-      const yScale = (v) => pad.top + plotHeight - ((v - yMin) / yRange) * plotHeight;
+      
+      // For log scale, ensure positive minimum
+      let yScale;
+      let yTicks;
+      if (useLog) {
+        // Clamp minimum to a small positive value for log scale
+        const logFloor = yMax > 0 ? yMax * 0.001 : 0.001;
+        yMin = Math.max(yMin, logFloor);
+        if (yMin >= yMax) {
+          yMax = yMin * 100;
+        }
+        const logMin = Math.log10(yMin);
+        const logMax = Math.log10(yMax);
+        const logRange = logMax - logMin || 1;
+        yScale = (v) => {
+          const clampedV = Math.max(v, logFloor);
+          return pad.top + plotHeight - ((Math.log10(clampedV) - logMin) / logRange) * plotHeight;
+        };
+        yTicks = this._computeLogTicks(yMin, yMax, 5);
+      } else {
+        const yPad = (yMax - yMin) * 0.1 || 5;
+        yMin = yMin - yPad;
+        yMax = yMax + yPad;
+        const yRange = yMax - yMin || 1;
+        yScale = (v) => pad.top + plotHeight - ((v - yMin) / yRange) * plotHeight;
+        yTicks = this._computeTicks(yMin, yMax, 5, false);
+      }
 
       ctx.strokeStyle = theme.axis;
       ctx.lineWidth = 1;
@@ -410,14 +561,24 @@ export function createTimeseriesGraph(options = {}) {
       ctx.textBaseline = 'middle';
       ctx.fillStyle = theme.muted;
       ctx.font = '15px sans-serif';
-      const yTicks = this._computeTicks(yMin, yMax, 5, false);
       for (const tick of yTicks) {
         const y = yScale(tick);
         ctx.beginPath();
         ctx.moveTo(pad.left - 4, y);
         ctx.lineTo(pad.left, y);
         ctx.stroke();
-        ctx.fillText(tick.toFixed(1), pad.left - 6, y);
+        // Format tick label based on scale and magnitude
+        let tickLabel;
+        if (useLog) {
+          if (tick >= 1) {
+            tickLabel = tick >= 10 ? tick.toFixed(0) : tick.toFixed(1);
+          } else {
+            tickLabel = tick.toPrecision(2);
+          }
+        } else {
+          tickLabel = tick.toFixed(1);
+        }
+        ctx.fillText(tickLabel, pad.left - 6, y);
         ctx.strokeStyle = theme.grid;
         ctx.beginPath();
         ctx.moveTo(pad.left, y);
@@ -434,7 +595,8 @@ export function createTimeseriesGraph(options = {}) {
         ctx.font = '16px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(this._data.yLabel, 0, 0);
+        const scaleLabel = useLog ? ' (log)' : '';
+        ctx.fillText(this._data.yLabel + scaleLabel, 0, 0);
         ctx.restore();
       }
 
