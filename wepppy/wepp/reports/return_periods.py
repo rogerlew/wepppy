@@ -17,6 +17,7 @@ import pyarrow.parquet as pq
 from wepppy.all_your_base.stats import weibull_series
 from wepppy.climates.cligen import ClimateFile
 from wepppy.query_engine import activate_query_engine, resolve_run_context, update_catalog_entry
+from wepppy.query_engine.activate import READONLY_SENTINEL
 LOGGER = logging.getLogger(__name__)
 
 EVENTS_REL_PATH = Path("wepp/output/interchange/return_period_events.parquet")
@@ -596,8 +597,16 @@ class ReturnPeriodDataset:
         self._events_path = self._root / EVENTS_REL_PATH
         self._ranks_path = self._root / RANKS_REL_PATH
 
-        if auto_refresh and (not self._events_path.exists() or not self._ranks_path.exists()):
+        readonly = (self._root / READONLY_SENTINEL).exists()
+        missing_assets = (not self._events_path.exists() or not self._ranks_path.exists())
+
+        if auto_refresh and not readonly and missing_assets:
             refresh_return_period_events(base, max_rank=max_rank, buffer=buffer)
+        elif readonly and missing_assets:
+            raise PermissionError(
+                f"Return-period assets missing for readonly run '{self._root}'. "
+                "Disable readonly to regenerate staged parquet files."
+            )
 
         self._events_table = pq.read_table(self._events_path)
         self._ranks_table = pq.read_table(self._ranks_path)

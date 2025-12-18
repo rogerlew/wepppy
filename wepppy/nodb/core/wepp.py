@@ -2637,6 +2637,8 @@ class Wepp(NoDbBase):
 
         return_periods_fn = None
         cached_report: ReturnPeriods | None = None
+        rep_yrs = None
+        rep_mos = None
         if meoization:
             req_yrs = None if not exclude_yr_indxs else tuple(sorted({int(x) for x in exclude_yr_indxs}))
             req_mos = None if not exclude_months else tuple(sorted({int(x) for x in exclude_months}))
@@ -2662,17 +2664,18 @@ class Wepp(NoDbBase):
                 rep_yrs = None if not rep_yrs else tuple(sorted({int(x) for x in rep_yrs}))
                 rep_mos = None if not rep_mos else tuple(sorted({int(x) for x in rep_mos}))
 
-                if req_yrs == rep_yrs and req_mos == rep_mos:
-                    has_calendar_year = any(
-                        ("calendar_year" in row or "display_year" in row)
-                        for measure_rows in cached_report.return_periods.values()
-                        for row in measure_rows.values()
-                    )
-                    if has_calendar_year:
-                        return cached_report
-                    cached_report = None
+            if cached_report and req_yrs == rep_yrs and req_mos == rep_mos:
+                has_calendar_year = any(
+                    ("calendar_year" in row or "display_year" in row)
+                    for measure_rows in cached_report.return_periods.values()
+                    for row in measure_rows.values()
+                )
+                if has_calendar_year:
+                    return cached_report
+                cached_report = None
 
-        dataset = ReturnPeriodDataset(self.wd, auto_refresh=True)
+        readonly = _exists(_join(self.wd, 'READONLY'))
+        dataset = ReturnPeriodDataset(self.wd, auto_refresh=not readonly)
         return_periods = dataset.create_report(
             rec_intervals,
             exclude_yr_indxs=exclude_yr_indxs,

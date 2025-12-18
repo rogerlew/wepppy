@@ -42,6 +42,9 @@
         {% endif %}
       </div>
       <div class="wc-run-header__content">
+        {% set view_args = request.view_args if request and request.view_args else {} %}
+        {% set view_runid = view_args.get('runid', current_ron.runid) %}
+        {% set view_config = view_args.get('config', current_ron.config_stem) %}
         <div class="wc-run-header__fields">
           {{ header_text_field(
             "input_name",
@@ -66,20 +69,20 @@
         </div>
         <div class="wc-run-header__actions">
           <a class="pure-button pure-button-secondary"
-             href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             href="{{ url_for_run('readme.readme_editor', runid=view_runid, config=view_config) }}"
              target="_blank"
              rel="noopener">
             README
           </a>
           {% if not pup_relpath %}
           <a class="pure-button pure-button-secondary"
-             href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             href="{{ url_for_run('fork.rq_fork_console', runid=view_runid, config=view_config) }}"
              target="_blank"
              rel="noopener">
             FORK
           </a>
           <a class="pure-button pure-button-secondary"
-             href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             href="{{ url_for_run('archive.rq_archive_dashboard', runid=view_runid, config=view_config) }}"
              target="_blank"
              rel="noopener">
             ARCHIVE
@@ -112,7 +115,7 @@
           </summary>
           <div class="wc-run-header__menu-content">
             <a class="pure-button"
-               href="{{ url_for_run('browse.browse_tree', runid=current_ron.runid, config=current_ron.config_stem, subpath='') }}">
+               href="{{ url_for_run('browse.browse_tree', runid=view_runid, config=view_config, subpath='') }}">
               Browse
             </a>
             <button type="button"

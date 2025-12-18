@@ -19,6 +19,9 @@ from wepppy.wepp.reports import TotalWatbalReport
 from wepppy.wepp.reports.report_base import ReportBase
 from wepppy.wepp.reports.row_data import parse_name, parse_units
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
+from wepppy.query_engine import resolve_run_context
+from wepppy.query_engine.payload import QueryRequest
+from wepppy.query_engine import run_query
 import json
 from flask import Response, abort
 

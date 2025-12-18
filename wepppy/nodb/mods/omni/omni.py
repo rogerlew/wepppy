@@ -51,6 +51,7 @@ from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
 from wepppy.wepp.interchange import run_wepp_hillslope_interchange
+from wepppy.wepp.reports import refresh_return_period_events
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -1168,6 +1169,10 @@ class Omni(NoDbBase):
     def _post_omni_run(self, omni_wd: str, scenario_name: str):
         from wepppy.nodb.core import Ron
         ron = Ron.getInstance(omni_wd)
+        try:
+            refresh_return_period_events(omni_wd)
+        except Exception:
+            ron.logger.warning("omni: failed to refresh return-period assets", exc_info=True)
         with ron.locked():
             ron._mods = [mod for mod in ron._mods if mod != 'omni']
             ron._name = scenario_name
