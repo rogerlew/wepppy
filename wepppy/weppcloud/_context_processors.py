@@ -190,6 +190,10 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
         )
 
     @app.context_processor
+    def auth_feature_flags_processor():
+        return dict(enable_local_login=app.config.get("ENABLE_LOCAL_LOGIN", True))
+
+    @app.context_processor
     def csrf_token_processor():
         try:
             from flask_wtf.csrf import generate_csrf
