@@ -238,6 +238,40 @@
     const rainMeltSeries = meteoSeries.find(series => series.role === "rain_melt") || meteoSeries[0];
     const precipSeries = meteoSeries.find(series => series.role === "precip") || (meteoSeries.length > 1 ? meteoSeries[1] : meteoSeries[0]);
 
+    const FLOW_STACK_ORDER = ["baseflow", "lateral_flow", "runoff"];
+
+    function normalizeFlowKey(value) {
+      return (value || "")
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
+    }
+
+    function flowStackPriority(series) {
+      const candidates = [series.id, series.label];
+      for (const candidate of candidates) {
+        const key = normalizeFlowKey(candidate);
+        const idx = FLOW_STACK_ORDER.indexOf(key);
+        if (idx >= 0) {
+          return idx;
+        }
+      }
+      return FLOW_STACK_ORDER.length;
+    }
+
+    const flowSeriesOrdered = flowSeries
+      .map((series, idx) => ({ series, idx }))
+      .sort((a, b) => {
+        const aPriority = flowStackPriority(a.series);
+        const bPriority = flowStackPriority(b.series);
+        if (aPriority === bPriority) {
+          return a.idx - b.idx;
+        }
+        return aPriority - bPriority;
+      })
+      .map(entry => entry.series);
+
     const flowColors = {};
     flowSeries.forEach(series => {
       const fallback = FLOW_COLOR_DEFAULTS[series.id] || FLOW_COLOR_DEFAULTS[series.label] || "#1e90ff";
@@ -407,7 +441,7 @@
       const yHyeto = d3.scaleLinear().range([0, height]);
       const yHyetoC = d3.scaleLinear().range([0, height2]);
 
-      const flows = flowSeries.map(series => ({
+      const flows = flowSeriesOrdered.map(series => ({
         id: series.id,
         label: series.label || series.id,
         values: rows.map(row => ({
@@ -419,6 +453,19 @@
       }));
       flowUnitLabel = flows[0]?.units || flowUnitLabel;
       const flowUnit = flowUnitLabel;
+
+      const flowStackKeys = flows.map(series => series.id);
+      const stack = d3.stack()
+        .keys(flowStackKeys)
+        .value((row, key) => {
+          const value = row[key];
+          return value == null || Number.isNaN(value) ? 0 : value;
+        });
+      const stackedFlows = stack(rows);
+      const stackedFlowSeries = flows.map((series, idx) => ({
+        ...series,
+        stack: stackedFlows[idx] || [],
+      }));
 
       let precip = [];
       let rainMelt = [];
@@ -432,7 +479,8 @@
 
       x.domain(d3.extent(rows, row => row.date));
       xC.domain(x.domain());
-      y.domain([0, d3.max(flows, series => d3.max(series.values, d => d.value)) || 1]);
+      const flowStackMax = d3.max(stackedFlows, layer => d3.max(layer, d => d[1])) || 1;
+      y.domain([0, flowStackMax]);
       yC.domain(y.domain());
 
       const yTick = d => `${d} ${flowUnitLabel}`;
@@ -510,15 +558,15 @@
       const flowsG = focus.append("g")
         .attr("class", "flows")
         .attr("clip-path", `url(#${clipId})`);
-      flows.forEach(series => {
+      stackedFlowSeries.forEach(series => {
         const area = d3.area()
           .curve(d3.curveBasis)
-          .x(d => x(d.date))
-          .y0(height)
-          .y1(d => y(d.value));
+          .x(d => x(d.data.date))
+          .y0(d => y(d[0]))
+          .y1(d => y(d[1]));
 
         flowsG.append("path")
-          .datum(series.values)
+          .datum(series.stack)
           .attr("class", `area-${series.id.replace(/\s+/g, '-')}`)
           .attr("fill", series.color)
           .attr("fill-opacity", 0.35)
@@ -661,19 +709,19 @@
         .attr("class", "context-flows")
         .attr("clip-path", `url(#${contextClipId})`);
 
-      flows.forEach(series => {
+      stackedFlowSeries.forEach(series => {
         const visible = series.values.some(d => d.value > 0);
         if (!visible) {
           return;
         }
         const area = d3.area()
           .curve(d3.curveBasis)
-          .x(d => xC(d.date))
-          .y0(height2)
-          .y1(d => yC(d.value));
+          .x(d => xC(d.data.date))
+          .y0(d => yC(d[0]))
+          .y1(d => yC(d[1]));
 
         barsGC.append("path")
-          .datum(series.values)
+          .datum(series.stack)
           .attr("class", `area-${series.id.replace(/\s+/g, '-')}`)
           .attr("fill", series.color)
           .attr("fill-opacity", 0.2)
@@ -715,7 +763,7 @@
         .style("text-anchor", "middle")
         .text("Date");
 
-      const legendData = flowSeries.map(series => ({
+      const legendData = flowSeriesOrdered.map(series => ({
         id: series.id,
         label: `${series.label || series.id} (${series.units || flowUnit})`,
         colors: [flowColors[series.id] || "#1e90ff"],
@@ -747,14 +795,14 @@
         });
       };
       redrawAreas = () => {
-        flows.forEach(series => {
+        stackedFlowSeries.forEach(series => {
           const area = d3.area()
             .curve(d3.curveBasis)
-            .x(d => x(d.date))
-            .y0(height)
-            .y1(d => y(d.value));
+            .x(d => x(d.data.date))
+            .y0(d => y(d[0]))
+            .y1(d => y(d[1]));
           focus.select(`.area-${series.id.replace(/\s+/g, '-')}`)
-            .attr("d", area(series.values));
+            .attr("d", area(series.stack));
         });
       };
     }
