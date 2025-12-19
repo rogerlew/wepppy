@@ -11,9 +11,11 @@ from os.path import exists as _exists
 from os.path import join as _join
 
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 import io
 import math
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import pandas as pd
@@ -90,27 +92,20 @@ class Observed(NoDbBase):
 
         with self.locked():
             with io.StringIO(textdata) as fp:
-                df = pd.read_csv(fp)
+                df = pd.read_csv(
+                    fp,
+                    parse_dates=['Date'],
+                    date_format='%m/%d/%Y',
+                    engine='pyarrow',
+                )
 
             assert 'Date' in df
 
-            yrs, mos, das, juls = [], [], [], []
-            for d in df['Date']:
-                mo, da, yr = d.split('/')
-                mo = int(mo)
-                da = int(da)
-                yr = int(yr)
-                jul = (datetime(yr, mo, da) - datetime(yr, 1, 1)).days
-
-                yrs.append(yr)
-                mos.append(mo)
-                das.append(da)
-                juls.append(jul)
-
-            df['Year'] = yrs
-            df['Month'] = mos
-            df['Day'] = das
-            df['Julian'] = juls
+            date_series = df['Date']
+            df['Year'] = date_series.dt.year.astype(np.int16, copy=False)
+            df['Month'] = date_series.dt.month.astype(np.int8, copy=False)
+            df['Day'] = date_series.dt.day.astype(np.int8, copy=False)
+            df['Julian'] = (date_series.dt.dayofyear - 1).astype(np.int16, copy=False)
 
             df.to_csv(self.observed_fn)
             
@@ -125,17 +120,47 @@ class Observed(NoDbBase):
     def calc_model_fit(self):
         assert self.has_observed
 
+        total_start = perf_counter()
         observed_df = pd.read_csv(self.observed_fn)
 
+        start = perf_counter()
         hillslope_sim, wsarea_m2 = self._load_hillslope_simulation()
+        hillslope_load_time = perf_counter() - start
+        first_year = hillslope_sim['Year'].min() if not hillslope_sim.empty else None
         results = {}
-        results['Hillslopes'] = self.run_measures(observed_df, hillslope_sim, 'Hillslopes')
 
-        channel_sim = self._load_channel_simulation(wsarea_m2, hillslope_sim['Year'].min() if not hillslope_sim.empty else None)
-        results['Channels'] = self.run_measures(observed_df, channel_sim, 'Channels')
+        def _run_hillslopes():
+            start = perf_counter()
+            hillslope_results = self.run_measures(observed_df, hillslope_sim, 'Hillslopes')
+            return hillslope_results, perf_counter() - start
 
+        def _run_channels():
+            start = perf_counter()
+            channel_sim = self._load_channel_simulation(wsarea_m2, first_year)
+            channel_load_time = perf_counter() - start
+            start = perf_counter()
+            channel_results = self.run_measures(observed_df, channel_sim, 'Channels')
+            channel_fit_time = perf_counter() - start
+            return channel_results, channel_load_time, channel_fit_time
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            hillslope_future = executor.submit(_run_hillslopes)
+            channel_future = executor.submit(_run_channels)
+            results['Hillslopes'], hillslope_fit_time = hillslope_future.result()
+            results['Channels'], channel_load_time, channel_fit_time = channel_future.result()
+
+        total_time = perf_counter() - total_start
         with self.locked():
             self.results = results
+            self.logger.info(
+                "Observed calc_model_fit timings: hillslope_load=%.3fs hillslope_stats=%.3fs "
+                "channel_load=%.3fs channel_stats=%.3fs total=%.3fs",
+                hillslope_load_time,
+                hillslope_fit_time,
+                channel_load_time,
+                channel_fit_time,
+                total_time,
+            )
             
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -216,20 +241,28 @@ class Observed(NoDbBase):
 
     def _load_hillslope_simulation(self):
         output_dir = Path(self.output_dir)
-        interchange = _interchange_module()
-        interchange.run_wepp_hillslope_pass_interchange(output_dir)
-        interchange.run_wepp_hillslope_wat_interchange(output_dir)
-
         interchange_dir = output_dir / 'interchange'
-
+        tot_path = interchange_dir / 'totalwatsed3.parquet'
         wepp = self.wepp_instance
-        baseflow_opts = getattr(wepp, 'baseflow_opts', None)
-        if baseflow_opts is None:
-            baseflow_opts = BaseflowOpts()
+        if tot_path.exists():
+            table = pq.read_table(tot_path)
+            sim = table.to_pandas()
+        else:
+            interchange = _interchange_module()
+            pass_path = interchange_dir / 'H.pass.parquet'
+            wat_path = interchange_dir / 'H.wat.parquet'
+            if not pass_path.exists():
+                interchange.run_wepp_hillslope_pass_interchange(output_dir)
+            if not wat_path.exists():
+                interchange.run_wepp_hillslope_wat_interchange(output_dir)
 
-        tot_path = interchange.run_totalwatsed3(interchange_dir, baseflow_opts)
-        table = pq.read_table(tot_path)
-        sim = table.to_pandas()
+            baseflow_opts = getattr(wepp, 'baseflow_opts', None)
+            if baseflow_opts is None:
+                baseflow_opts = BaseflowOpts()
+
+            tot_path = interchange.run_totalwatsed3(interchange_dir, baseflow_opts)
+            table = pq.read_table(tot_path)
+            sim = table.to_pandas()
 
         if sim.empty:
             empty_columns = [
@@ -362,7 +395,8 @@ class Observed(NoDbBase):
         if first_year is not None and 'Year' in ebe_df:
             mask = ebe_df['Year'] < 1000
             if mask.any() and 'simulation_year' in ebe_df:
-                ebe_df.loc[mask, 'Year'] = ebe_df.loc[mask, 'simulation_year'].astype(int) + first_year - 1
+                ebe_df['Year'] = ebe_df['Year'].astype(np.int32, copy=False)
+                ebe_df.loc[mask, 'Year'] = ebe_df.loc[mask, 'simulation_year'].astype(np.int32) + first_year - 1
 
         for col in ('Year', 'Month', 'Day', 'Julian', 'Water Year'):
             if col in ebe_df:
