@@ -40,7 +40,7 @@ x-wepppy-service: &wepppy-service
     <<: *wepppy-env
   volumes:
     - /wc1:/wc1
-    - /geodata:/geodata
+    - /wc1/geodata:/geodata
   depends_on:
     redis:
       condition: service_started
@@ -62,7 +62,7 @@ services:
       STATIC_ASSET_SYNC_DIR: /srv/weppcloud/static
     volumes:
       - /wc1:/wc1
-      - /geodata:/geodata
+      - /wc1/geodata:/geodata
       - ../wepppy/weppcloud/static:/srv/weppcloud/static
     command:
       - gunicorn
@@ -150,7 +150,7 @@ services:
       PROFILE_PLAYBACK_ROOT: ${PROFILE_PLAYBACK_ROOT:-/workdir/wepppy-test-engine-data/profiles}
     volumes:
       - /wc1:/wc1
-      - /geodata:/geodata
+      - /wc1/geodata:/geodata
       - ${PROFILE_PLAYBACK_DATA_DIR:-/workdir/wepppy-test-engine-data}:/workdir/wepppy-test-engine-data
     expose:
       - "8070"
@@ -267,7 +267,7 @@ services:
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
       DEVAL_TEMPLATE: /srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd
     volumes:
-      - /geodata:/geodata
+      - /wc1/geodata:/geodata
       - /wc1:/wc1
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
@@ -300,7 +300,7 @@ services:
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
     volumes:
       - /wc1:/wc1
-      - /geodata:/geodata
+      - /wc1/geodata:/geodata
       - /var/run/docker.sock:/var/run/docker.sock
     command:
       - rq
