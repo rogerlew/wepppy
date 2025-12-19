@@ -55,22 +55,8 @@ def report_observed(runid, config):
     ron = Ron.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/wepp/observed.htm', runid=runid, config=config,
-                           results=observed.results,
-                           stat_names=observed.stat_names,
-                           ron=ron,
-                           unitizer_nodb=unitizer,
-                           precisions=UNITIZER_PRECISIONS,
-                           user=current_user)
-
-
-@observed_bp.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
-@observed_bp.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
-@authorize_and_handle_with_exception_factory
-def plot_observed(runid, config, selected):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    unitizer = Unitizer.getInstance(wd)
+    results = observed.results
+    stat_names = observed.stat_names if results else []
 
     graph_series = glob(_join(ron.observed_dir, '*.csv'))
     graph_series = [_split(fn)[-1].replace('.csv', '') for fn in graph_series]
@@ -78,8 +64,13 @@ def plot_observed(runid, config, selected):
         graph_series.remove('observed')
     graph_series = sorted(graph_series)
 
+    selected = request.args.get('selected')
     if selected not in graph_series:
-        selected = graph_series[0] if graph_series else None
+        default_graph = 'Hillslopes-Streamflow_(mm)-Daily'
+        if default_graph in graph_series:
+            selected = default_graph
+        else:
+            selected = graph_series[0] if graph_series else None
 
     parseDate_fmt = "%Y-%m-%d"
     if selected:
@@ -114,7 +105,9 @@ def plot_observed(runid, config, selected):
             file=f"{selected}.csv",
         )
 
-    return render_template('reports/wepp/observed_comparison_graph.htm', runid=runid, config=config,
+    return render_template('reports/wepp/observed.htm', runid=runid, config=config,
+                           results=results,
+                           stat_names=stat_names,
                            graph_series=graph_series,
                            selected=selected,
                            parseDate_fmt=parseDate_fmt,
