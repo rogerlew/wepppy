@@ -26,6 +26,9 @@ var MapController = (function () {
     ];
 
     var DEFAULT_ELEVATION_COOLDOWN_MS = 400;
+    var SENSOR_LAYER_MIN_ZOOM = 9;
+    var USGS_LAYER_NAME = "USGS Gage Locations";
+    var SNOTEL_LAYER_NAME = "SNOTEL Locations";
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -582,13 +585,13 @@ var MapController = (function () {
         }
 
         var usgsLayerController = createRemoteGeoJsonLayer(http, {
-            layerName: "USGS Gage Locations",
+            layerName: USGS_LAYER_NAME,
             onEachFeature: bindDescription,
             pointToLayer: createCircleLayerOptions("#ff7800")
         });
 
         var snotelLayerController = createRemoteGeoJsonLayer(http, {
-            layerName: "SNOTEL Locations",
+            layerName: SNOTEL_LAYER_NAME,
             onEachFeature: bindDescription,
             pointToLayer: createCircleLayerOptions("#000078")
         });
@@ -621,8 +624,8 @@ var MapController = (function () {
             return controller;
         }
 
-        attachLayerRefresh("USGS Gage Locations", usgsLayerController);
-        attachLayerRefresh("SNOTEL Locations", snotelLayerController);
+        attachLayerRefresh(USGS_LAYER_NAME, usgsLayerController);
+        attachLayerRefresh(SNOTEL_LAYER_NAME, snotelLayerController);
 
         map.usgs_gage = usgsLayerController.layer;
         map.snotel_locations = snotelLayerController.layer;
@@ -765,12 +768,67 @@ var MapController = (function () {
         });
 
         if (overlayRegistry) {
-            overlayRegistry.set(map.usgs_gage, "USGS Gage Locations");
-            overlayRegistry.set(map.snotel_locations, "SNOTEL Locations");
+            overlayRegistry.set(map.usgs_gage, USGS_LAYER_NAME);
+            overlayRegistry.set(map.snotel_locations, SNOTEL_LAYER_NAME);
         }
         if (overlayNameRegistry) {
-            overlayNameRegistry.set("USGS Gage Locations", map.usgs_gage);
-            overlayNameRegistry.set("SNOTEL Locations", map.snotel_locations);
+            overlayNameRegistry.set(USGS_LAYER_NAME, map.usgs_gage);
+            overlayNameRegistry.set(SNOTEL_LAYER_NAME, map.snotel_locations);
+        }
+
+        function relabelOverlay(layer, newName) {
+            if (!layer || !map.ctrls || typeof map.ctrls.removeLayer !== "function" || typeof map.ctrls.addOverlay !== "function") {
+                return;
+            }
+            var currentName = overlayRegistry && overlayRegistry.get ? overlayRegistry.get(layer) : null;
+            if (currentName === newName) {
+                return;
+            }
+            try {
+                map.ctrls.removeLayer(layer);
+            } catch (err) {
+                console.warn("[Map] Failed to remove overlay from control during relabel", err);
+            }
+            if (overlayRegistry && overlayRegistry.delete) {
+                overlayRegistry.delete(layer);
+            }
+            if (overlayNameRegistry && overlayNameRegistry.delete && currentName) {
+                overlayNameRegistry.delete(currentName);
+            }
+            try {
+                map.ctrls.addOverlay(layer, newName);
+            } catch (err) {
+                console.warn("[Map] Failed to add overlay to control during relabel", err);
+                return;
+            }
+            if (overlayRegistry) {
+                overlayRegistry.set(layer, newName);
+            }
+            if (overlayNameRegistry) {
+                overlayNameRegistry.set(newName, layer);
+            }
+        }
+
+        function updateSnotelOverlayLabel() {
+            if (!map.snotel_locations) {
+                return;
+            }
+            var zoom = map.getZoom();
+            var label = zoom >= SENSOR_LAYER_MIN_ZOOM
+                ? SNOTEL_LAYER_NAME
+                : SNOTEL_LAYER_NAME + " (zoom >= " + SENSOR_LAYER_MIN_ZOOM + ")";
+            relabelOverlay(map.snotel_locations, label);
+        }
+
+        function updateUSGSOverlayLabel() {
+            if (!map.usgs_gage) {
+                return;
+            }
+            var zoom = map.getZoom();
+            var label = zoom >= SENSOR_LAYER_MIN_ZOOM
+                ? USGS_LAYER_NAME
+                : USGS_LAYER_NAME + " (zoom >= " + SENSOR_LAYER_MIN_ZOOM + ")";
+            relabelOverlay(map.usgs_gage, label);
         }
 
         map.addGeoJsonOverlay = function (options) {
@@ -793,6 +851,8 @@ var MapController = (function () {
 
         function handleViewportChange() {
             map.onMapChange();
+            updateSnotelOverlayLabel();
+            updateUSGSOverlayLabel();
             if (typeof ChannelDelineation !== "undefined" && ChannelDelineation !== null) {
                 try {
                     ChannelDelineation.getInstance().onMapChange();
@@ -812,6 +872,8 @@ var MapController = (function () {
         map.on("move", handleViewportChange);
         map.on("zoomend", handleViewportSettled);
         map.on("moveend", handleViewportSettled);
+        updateSnotelOverlayLabel();
+        updateUSGSOverlayLabel();
 
         map.onMapChange = function () {
             updateMapStatus();
@@ -947,8 +1009,17 @@ var MapController = (function () {
             map.findById(window.WEPP_FIND_AND_FLASH.ID_TYPE.WEPP);
         };
 
+        function requireMinZoom(minZoom, label) {
+            var zoom = map.getZoom();
+            if (zoom < minZoom) {
+                console.info("[Map] " + label + " requires zoom " + minZoom + "+ (current " + zoom + ").");
+                return false;
+            }
+            return true;
+        }
+
         map.loadUSGSGageLocations = function () {
-            if (map.getZoom() < 9) {
+            if (!requireMinZoom(SENSOR_LAYER_MIN_ZOOM, "USGS Gage Locations")) {
                 return;
             }
             if (!map.hasLayer(map.usgs_gage) || typeof map.usgs_gage.refresh !== "function") {
@@ -961,7 +1032,7 @@ var MapController = (function () {
         };
 
         map.loadSnotelLocations = function () {
-            if (map.getZoom() < 9) {
+            if (!requireMinZoom(SENSOR_LAYER_MIN_ZOOM, "SNOTEL Locations")) {
                 return;
             }
             if (!map.hasLayer(map.snotel_locations) || typeof map.snotel_locations.refresh !== "function") {
