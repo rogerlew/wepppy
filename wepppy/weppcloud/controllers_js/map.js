@@ -497,10 +497,18 @@ var MapController = (function () {
                 var cursorLat = coordRound(latlng.lat);
 
                 if (!response || typeof response.Elevation !== "number" || !isFinite(response.Elevation)) {
-                    var message = response && response.Error ? response.Error : "Elevation unavailable";
-                    showMouseElevation("| Elevation: " + message + " | Cursor: " + cursorLng + ", " + cursorLat);
+                    var errorText = response && response.Error;
+                    var suppressElevationMessage = typeof errorText === "string" && errorText.toLowerCase().indexOf("dem not found under run directory") !== -1;
+
+                    if (!suppressElevationMessage) {
+                        var message = errorText || "Elevation unavailable";
+                        showMouseElevation("| Elevation: " + message + " | Cursor: " + cursorLng + ", " + cursorLat);
+                    } else {
+                        hideMouseElevation(0);
+                    }
+
                     emit("map:elevation:error", {
-                        message: message,
+                        message: errorText || "Elevation unavailable",
                         lat: latlng.lat,
                         lng: latlng.lng
                     });
