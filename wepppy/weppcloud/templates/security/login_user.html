@@ -8,6 +8,7 @@
 {% block auth_subheading %}<p>Enter your WEPPcloud credentials to access tools and projects.</p>{% endblock %}
 
 {% block content %}
+  {% set local_login_enabled = enable_local_login|default(true) %}
   {% if enabled_oauth_providers %}
     <div class="wc-oauth-container">
       <p class="wc-oauth-intro">Sign in with a connected account:</p>
@@ -56,38 +57,42 @@
             <span class="wc-oauth-label">Continue with {{ provider_name }}</span>
           </a>
         {% endfor %}
-        <div class="wc-auth-separator wc-auth-separator--inline" aria-hidden="true">or use your password below</div>
+        {% if local_login_enabled %}
+          <div class="wc-auth-separator wc-auth-separator--inline" aria-hidden="true">or use your password below</div>
+        {% endif %}
       </div>
     </div>
   {% endif %}
 
-  <form action="{{ url_for_security('login') }}{{ prop_next() }}" method="post" name="login_user_form" class="pure-form pure-form-aligned wc-auth-form" novalidate>
-    <fieldset>
-      {{ login_user_form.hidden_tag() }}
-      {{ render_form_errors(login_user_form) }}
+  {% if local_login_enabled %}
+    <form action="{{ url_for_security('login') }}{{ prop_next() }}" method="post" name="login_user_form" class="pure-form pure-form-aligned wc-auth-form" novalidate>
+      <fieldset>
+        {{ login_user_form.hidden_tag() }}
+        {{ render_form_errors(login_user_form) }}
 
-      {% if login_user_form.email and "email" in identity_attributes %}
-        {{ render_aligned_field(login_user_form.email, label_text='Email', input_class='pure-input-1', placeholder='you@example.com', autocomplete='username') }}
-      {% endif %}
-
-      {% if login_user_form.username and "username" in identity_attributes %}
         {% if login_user_form.email and "email" in identity_attributes %}
-          <div class="wc-auth-separator" aria-hidden="true">or</div>
+          {{ render_aligned_field(login_user_form.email, label_text='Email', input_class='pure-input-1', placeholder='you@example.com', autocomplete='username') }}
         {% endif %}
-        {{ render_aligned_field(login_user_form.username, label_text='Username', input_class='pure-input-1', autocomplete='username') }}
-      {% endif %}
 
-      {{ render_aligned_password(login_user_form.password, toggle_id='wc-password-toggle', input_class='pure-input-1', autocomplete='current-password') }}
+        {% if login_user_form.username and "username" in identity_attributes %}
+          {% if login_user_form.email and "email" in identity_attributes %}
+            <div class="wc-auth-separator" aria-hidden="true">or</div>
+          {% endif %}
+          {{ render_aligned_field(login_user_form.username, label_text='Username', input_class='pure-input-1', autocomplete='username') }}
+        {% endif %}
 
-      {% if login_user_form.remember %}
-        {{ render_aligned_checkbox(login_user_form.remember, 'Remember me on this device') }}
-      {% endif %}
+        {{ render_aligned_password(login_user_form.password, toggle_id='wc-password-toggle', input_class='pure-input-1', autocomplete='current-password') }}
 
-      <div class="pure-controls">
-        {{ login_user_form.submit(class_='pure-button pure-button-primary') }}
-      </div>
-    </fieldset>
-  </form>
+        {% if login_user_form.remember %}
+          {{ render_aligned_checkbox(login_user_form.remember, 'Remember me on this device') }}
+        {% endif %}
+
+        <div class="pure-controls">
+          {{ login_user_form.submit(class_='pure-button pure-button-primary') }}
+        </div>
+      </fieldset>
+    </form>
+  {% endif %}
 {% endblock %}
 
 {% block auth_footer %}

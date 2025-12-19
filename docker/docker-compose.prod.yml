@@ -28,6 +28,7 @@ x-wepppy-env: &wepppy-env
   PROFILE_PLAYBACK_FORK_ROOT: ${PROFILE_PLAYBACK_FORK_ROOT:-/workdir/wepppy-test-engine-data/playback/fork}
   PROFILE_PLAYBACK_ARCHIVE_ROOT: ${PROFILE_PLAYBACK_ARCHIVE_ROOT:-/workdir/wepppy-test-engine-data/playback/archive}
   PROFILE_PLAYBACK_USE_CLONE: ${PROFILE_PLAYBACK_USE_CLONE:-true}
+  ENABLE_LOCAL_LOGIN: ${ENABLE_LOCAL_LOGIN:-true}
 
 x-wepppy-service: &wepppy-service
   <<: *wepppy-image

@@ -36,6 +36,20 @@ def _get_env_any(names: List[str], default: Optional[str] = None) -> Optional[st
     return default
 
 
+def _get_env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+
+    normalized = raw.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+
+    return default
+
+
 def _normalize_site_prefix(site_prefix: str) -> str:
     if not site_prefix:
         return ""
@@ -197,6 +211,7 @@ def config_app(app: Any):
     app.config["APPLICATION_ROOT"] = site_prefix
     app.config["DEBUG"] = True
     app.config["SITE_PREFIX"] = site_prefix
+    app.config["ENABLE_LOCAL_LOGIN"] = _get_env_bool("ENABLE_LOCAL_LOGIN", True)
 
     test_support_enabled = os.getenv("TEST_SUPPORT_ENABLED", "false").strip().lower()
     app.config["TEST_SUPPORT_ENABLED"] = test_support_enabled in {"1", "true", "yes"}
