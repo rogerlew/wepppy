@@ -24,6 +24,8 @@
       "selected": dataset.catalog_id == ns.selected,
       "description": dataset.description,
       "disabled": (not dataset.ui_exposed) and (dataset.catalog_id != ns.selected),
+      "group": dataset.group or 'Other',
+      "group_hint": dataset.group_hint or '',
       "attrs": {
         "class": "disable-readonly",
         "data-climate-action": "dataset",
@@ -64,21 +66,72 @@
   <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}" data-climate-field="mode">
 
   <section class="wc-stack" id="climate_dataset_section" data-climate-element="dataset">
-    {{ ui.radio_group(
-         "climate_dataset_choice",
-         label="Climate dataset",
-         layout="vertical",
-         options=ns.options,
-         help="Choose the climate dataset to configure for this run.",
-         attrs={"data-climate-dataset-group": "true"}
-       ) }}
-
-    <div id="climate_dataset_message" class="wc-alert wc-alert--info" role="status" aria-live="polite">
-      {% if selected_dataset %}
-        <p class="wc-alert__body">{{ selected_dataset.help_text or selected_dataset.description }}</p>
-      {% else %}
-        <p class="wc-alert__body">Select a dataset to view configuration guidance.</p>
+    {# Build grouped options structure #}
+    {% set groups_order = ['Stochastic', 'Observed', 'Future', 'Single Event', 'User-Defined'] %}
+    {% set grouped = namespace(data={}) %}
+    {% for opt in ns.options %}
+      {% set grp = opt.get('group', 'Other') %}
+      {% if grp not in grouped.data %}
+        {% set _ = grouped.data.update({grp: {'hint': opt.get('group_hint', ''), 'options': []}}) %}
       {% endif %}
+      {% set _ = grouped.data[grp]['options'].append(opt) %}
+    {% endfor %}
+
+    <div class="wc-field" style="max-width: 750px;">
+      <div class="wc-choice-group wc-choice-group--vertical wc-choice-group--grouped"
+           role="radiogroup"
+           aria-label="Climate dataset"
+           data-climate-dataset-group="true">
+        {% for group_name in groups_order %}
+          {% if group_name in grouped.data %}
+            {% set group_info = grouped.data[group_name] %}
+            {# Check if selected dataset is in this group #}
+            {% set group_has_selection = false %}
+            {% for option in group_info.options %}
+              {% if option.selected %}
+                {% set group_has_selection = true %}
+              {% endif %}
+            {% endfor %}
+            <div class="wc-choice-group__section" data-climate-group="{{ group_name }}">
+              <h4 class="wc-choice-group__heading">{{ group_name }}</h4>
+              {% if group_info.hint %}
+              <p class="wc-choice-group__hint">{{ group_info.hint }}</p>
+              {% endif %}
+              {% for option in group_info.options %}
+              {% set option_attrs = option.get('attrs', {}).copy() if option.get('attrs') else {} %}
+              {% set option_id = option.get('id', 'climate_dataset_' ~ loop.index) %}
+              <label class="wc-choice{% if option.disabled %} is-disabled{% endif %}">
+                <input type="radio"
+                       id="{{ option_id }}"
+                       name="climate_dataset_choice"
+                       value="{{ option.value }}"
+                       {% if option.selected %}checked{% endif %}
+                       {% if option.disabled %}disabled aria-disabled="true"{% endif %}
+                       data-choice-value="{{ option.value }}"
+                       data-climate-group="{{ group_name }}"
+                       {% for attr_key, attr_val in option_attrs.items() %}
+                         {{ attr_key }}="{{ attr_val }}"
+                       {% endfor %}>
+                <span class="wc-choice__body">
+                  <span class="wc-choice__label">{{ option.label }}</span>
+                  {% if option.description %}
+                  <span class="wc-choice__description">{{ option.description|safe }}</span>
+                  {% endif %}
+                </span>
+              </label>
+              {% endfor %}
+              <div class="wc-dataset-hint" data-climate-group-message="{{ group_name }}" role="status" aria-live="polite"{% if not group_has_selection %} hidden{% endif %}>
+                {% for option in group_info.options %}
+                  {% if option.selected %}
+                    {% set ds = climate.datasetMap[option.value] if climate.datasetMap else None %}
+                    <p class="wc-dataset-hint__text">{{ selected_dataset.help_text or selected_dataset.description if selected_dataset else '' }}</p>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
     </div>
   </section>
 

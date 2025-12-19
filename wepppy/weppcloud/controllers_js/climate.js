@@ -285,7 +285,7 @@ var Climate = (function () {
         climate.statusSpinnerEl = climate.statusPanelEl ? climate.statusPanelEl.querySelector("#braille") : null;
         climate.statusStream = null;
 
-        climate.datasetMessage = dom.qs("#climate_dataset_message");
+        climate.datasetMessages = dom.qsa("[data-climate-group-message]");
         climate.stationSelect = dom.qs("#climate_station_selection");
         climate.monthliesContainer = dom.qs("#climate_monthlies");
         climate.catalogHiddenInput = dom.qs("#climate_catalog_id");
@@ -533,19 +533,27 @@ var Climate = (function () {
         };
 
         climate.updateDatasetMessage = function (dataset) {
-            if (!climate.datasetMessage) {
+            if (!climate.datasetMessages || climate.datasetMessages.length === 0) {
                 return;
             }
-            climate.datasetMessage.innerHTML = "";
+            var targetGroup = dataset && dataset.group ? dataset.group : null;
             var messages = formatDatasetMessage(dataset);
-            if (!messages.length) {
-                return;
-            }
-            messages.forEach(function (line, index) {
-                var paragraph = document.createElement("p");
-                paragraph.className = index === 0 ? "wc-alert__body" : "wc-alert__meta";
-                paragraph.textContent = line;
-                climate.datasetMessage.appendChild(paragraph);
+
+            climate.datasetMessages.forEach(function (msgEl) {
+                var groupName = msgEl.getAttribute("data-climate-group-message");
+                if (groupName === targetGroup && messages.length > 0) {
+                    msgEl.innerHTML = "";
+                    messages.forEach(function (line, index) {
+                        var paragraph = document.createElement("p");
+                        paragraph.className = index === 0 ? "wc-dataset-hint__text" : "wc-dataset-hint__meta";
+                        paragraph.textContent = line;
+                        msgEl.appendChild(paragraph);
+                    });
+                    msgEl.hidden = false;
+                } else {
+                    msgEl.innerHTML = "";
+                    msgEl.hidden = true;
+                }
             });
         };
 

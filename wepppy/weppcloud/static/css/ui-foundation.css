@@ -1693,6 +1693,61 @@ h5:first-child {
   min-width: 8rem;
 }
 
+/* Grouped choice sections (e.g., Climate dataset categories) */
+.wc-choice-group--grouped {
+  gap: var(--wc-space-lg);
+}
+
+.wc-choice-group__section {
+  display: grid;
+  gap: var(--wc-space-xs);
+}
+
+.wc-choice-group__heading {
+  margin: 0 0 var(--wc-space-2xs) 0;
+  font-size: var(--wc-font-sm);
+  font-weight: 600;
+  color: var(--wc-color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--wc-color-border);
+  padding-bottom: var(--wc-space-2xs);
+}
+
+.wc-choice-group__hint {
+  margin: 0 0 var(--wc-space-xs) 0;
+  font-size: var(--wc-font-xs);
+  color: var(--wc-color-text-muted);
+  font-style: italic;
+}
+
+/* Dataset hint message (shown for selected option in group) */
+.wc-dataset-hint {
+  margin-top: var(--wc-space-xs);
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+  background: var(--wc-color-surface-alt, rgba(var(--wc-color-accent-rgb, 59, 130, 246), 0.08));
+  border-left: 3px solid var(--wc-color-accent, #3b82f6);
+  border-radius: var(--wc-radius-sm);
+}
+
+.wc-dataset-hint__text {
+  margin: 0;
+  font-size: var(--wc-font-xs);
+  color: var(--wc-color-text);
+  line-height: 1.4;
+}
+
+.wc-dataset-hint__meta {
+  margin: var(--wc-space-2xs) 0 0 0;
+  font-size: var(--wc-font-xs);
+  color: var(--wc-color-text-muted);
+  line-height: 1.4;
+}
+
+.wc-dataset-hint[hidden] {
+  display: none;
+}
+
 /* =============================================================================
    README Editor
    ========================================================================== */
