@@ -5,7 +5,7 @@
 ## Overview
 - Parses observed CSV text (`Date` + measures) into a normalized `observed.csv` with year/month/day/julian fields.
 - Loads WEPP interchange outputs to compute daily/yearly model-fit statistics for hillslopes and channels.
-- Persists results in `observed.nodb`, writes comparison CSVs under `<run>/observed/`, and exposes report/plot routes.
+- Persists results in `observed.nodb`, writes comparison CSVs under `<run>/observed/`, and exposes report + CSV routes.
 
 ## Data Flow
 1. `parse_textdata(textdata)` reads CSV, parses dates, and writes `<run>/observed/observed.csv`.
@@ -20,20 +20,27 @@
 - `observed.log` (timing logs, status stream).
 - `observed.nodb` (results payload).
 
+## Observed Report + Graph (Specification)
+- Route: `/runs/<runid>/<config>/report/observed/` with optional `?selected=<series>`.
+- Default graph selection: `Hillslopes-Streamflow_(mm)-Daily` when available, otherwise the first CSV in `<run>/observed/`.
+- Report content order: summary tables first, graph second.
+- Graph data source: `GET /runs/<runid>/<config>/resources/observed/<file>` (client-side CSV fetch).
+- Graph CSV format: `date,Modeled,Observed` (date is `YYYY-MM-DD` for Daily, `YYYY` for Yearly).
+- Graph behavior: two line series (Simulated/Observed), main plot + brush context, no precipitation bars.
+- Error handling: if no comparison files exist, the report shows a message and skips the chart.
+
 ## UI Wiring
 - Control template: `wepppy/weppcloud/templates/controls/observed_pure.htm`.
 - Controller: `wepppy/weppcloud/controllers_js/observed.js`.
   - On page load, the summary pane shows “View Model Fit Results” when `observed.hasResults` is true.
   - Status stream uses channel `observed` (`controlBase.attach_status_stream`).
-- Report: `/runs/<runid>/<config>/report/observed/` (Pure report template).
-- Plot: `/runs/<runid>/<config>/plot/observed/<selected>/` (legacy D3 v3 graph).
+- Report: `wepppy/weppcloud/templates/reports/wepp/observed.htm` (tables + graph).
 
 ## Endpoints
 | Route | Method | Purpose |
 | --- | --- | --- |
 | `/runs/<runid>/<config>/tasks/run_model_fit` | POST | Parse CSV + run model fit (sync) |
 | `/runs/<runid>/<config>/report/observed/` | GET | Render observed summary report |
-| `/runs/<runid>/<config>/plot/observed/<selected>/` | GET | Render comparison graph |
 | `/runs/<runid>/<config>/resources/observed/<file>` | GET | Download CSV artifacts |
 
 ## Profiling Notes (Dec 2025)
@@ -55,6 +62,12 @@ wctl run-pytest tests/nodb/mods/test_observed_processing.py
 wctl run-pytest tests/weppcloud/routes/test_observed_bp.py
 wctl run-npm test -- observed
 ```
+
+## Development Guidance
+- Report payload assembly lives in `wepppy/weppcloud/routes/nodb_api/observed_bp.py` and should stay lightweight; chart data is fetched client-side.
+- Graph rendering lives in `wepppy/weppcloud/templates/reports/wepp/observed.htm` and uses the local `static/js/d3.js` bundle.
+- If you add new measures, ensure `Observed._write_measure` outputs `Modeled` + `Observed` columns with `date` so the graph can render without backend changes.
+- The `selected` query param should always map to a CSV in `<run>/observed/`; guard against missing files and fall back to the first available series.
 
 ## Implementation Notes
 - `parse_textdata` uses pandas with the `pyarrow` CSV engine and in-reader date parsing.
