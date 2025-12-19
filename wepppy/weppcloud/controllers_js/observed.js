@@ -414,6 +414,9 @@ var Observed = (function () {
             if (shouldShow && typeof controller.showControl === "function") {
                 controller.showControl();
             }
+            if (observedData.hasResults && typeof controller.report === "function") {
+                controller.report();
+            }
             return controller;
         };
 

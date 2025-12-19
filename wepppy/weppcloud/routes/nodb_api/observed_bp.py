@@ -2,9 +2,11 @@
 
 from .._common import *  # noqa: F401,F403
 
-from wepppy.nodb.core import Ron, Wepp
+from wepppy.nodb.core import Ron
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.nodb.mods.observed import Observed
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 
 
 observed_bp = Blueprint('observed', __name__)
@@ -46,6 +48,7 @@ def submit_task_run_model_fit(runid, config):
 
 @observed_bp.route('/runs/<string:runid>/<config>/report/observed')
 @observed_bp.route('/runs/<string:runid>/<config>/report/observed/')
+@authorize_and_handle_with_exception_factory
 def report_observed(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
@@ -57,35 +60,71 @@ def report_observed(runid, config):
                            stat_names=observed.stat_names,
                            ron=ron,
                            unitizer_nodb=unitizer,
+                           precisions=UNITIZER_PRECISIONS,
                            user=current_user)
 
 
 @observed_bp.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
 @observed_bp.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
+@authorize_and_handle_with_exception_factory
 def plot_observed(runid, config, selected):
-
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
 
-    graph_series = glob(_join(wepp.observed_dir, '*.csv'))
+    graph_series = glob(_join(ron.observed_dir, '*.csv'))
     graph_series = [_split(fn)[-1].replace('.csv', '') for fn in graph_series]
-    graph_series.remove('observed')
+    if 'observed' in graph_series:
+        graph_series.remove('observed')
+    graph_series = sorted(graph_series)
 
-    assert selected in graph_series
+    if selected not in graph_series:
+        selected = graph_series[0] if graph_series else None
 
-    if 'Daily' in selected:
-        parseDate_fmt = "%m/%d/%Y"
-    else:
-        parseDate_fmt = "%Y"
+    parseDate_fmt = "%Y-%m-%d"
+    if selected:
+        if 'Daily' in selected:
+            parseDate_fmt = "%Y-%m-%d"
+        elif 'Yearly' in selected:
+            parseDate_fmt = "%Y"
+
+    selected_scope = ""
+    selected_period = ""
+    selected_label = ""
+    if selected:
+        parts = selected.split('-')
+        if parts:
+            selected_scope = parts[0]
+        if len(parts) > 1:
+            selected_period = parts[-1]
+        if len(parts) > 2:
+            measure_part = "-".join(parts[1:-1])
+        elif len(parts) > 1:
+            measure_part = parts[1]
+        else:
+            measure_part = selected
+        selected_label = measure_part.replace('_', ' ')
+
+    data_url = None
+    if selected:
+        data_url = url_for_run(
+            'observed.resources_observed_data',
+            runid=runid,
+            config=config,
+            file=f"{selected}.csv",
+        )
 
     return render_template('reports/wepp/observed_comparison_graph.htm', runid=runid, config=config,
-                           graph_series=sorted(graph_series),
+                           graph_series=graph_series,
                            selected=selected,
                            parseDate_fmt=parseDate_fmt,
+                           selected_scope=selected_scope,
+                           selected_period=selected_period,
+                           selected_label=selected_label,
+                           data_url=data_url,
                            ron=ron,
                            unitizer_nodb=unitizer,
+                           precisions=UNITIZER_PRECISIONS,
                            user=current_user)
 
 
