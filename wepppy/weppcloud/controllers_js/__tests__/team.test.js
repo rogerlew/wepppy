@@ -93,6 +93,7 @@ describe("Team controller", () => {
     test("initializes and loads collaborator list", async () => {
         const handler = jest.fn();
         team.events.on("team:list:loaded", handler);
+        team.bootstrap({ user: { isAuthenticated: true } });
 
         await flushPromises();
 

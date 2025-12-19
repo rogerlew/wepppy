@@ -31,7 +31,9 @@ var MapController = (function () {
     var SNOTEL_LAYER_NAME = "SNOTEL Locations";
     var NHD_LAYER_NAME = "NHD Flowlines";
     var NHD_LAYER_MIN_ZOOM = 11;
-    var NHD_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
+    var NHD_LAYER_HR_MIN_ZOOM = 14;
+    var NHD_SMALL_SCALE_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
+    var NHD_HR_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/query";
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -222,11 +224,12 @@ var MapController = (function () {
         return String(input);
     }
 
-    function buildNhdFlowlinesUrl(bbox) {
+    function buildNhdFlowlinesUrl(bbox, zoom) {
         if (!bbox) {
             return null;
         }
-        return NHD_QUERY_URL
+        var queryUrl = zoom >= NHD_LAYER_HR_MIN_ZOOM ? NHD_HR_QUERY_URL : NHD_SMALL_SCALE_QUERY_URL;
+        return queryUrl
             + "?where=1%3D1"
             + "&outFields=OBJECTID"
             + "&geometry=" + encodeURIComponent(bbox)
@@ -854,14 +857,19 @@ var MapController = (function () {
             relabelOverlay(map.snotel_locations, label);
         }
 
+        function resolveNhdLabel(zoom) {
+            return zoom >= NHD_LAYER_HR_MIN_ZOOM ? "NHDPlus HR Flowlines" : NHD_LAYER_NAME;
+        }
+
         function updateNhdOverlayLabel() {
             if (!map.nhd_flowlines) {
                 return;
             }
             var zoom = map.getZoom();
+            var baseLabel = resolveNhdLabel(zoom);
             var label = zoom >= NHD_LAYER_MIN_ZOOM
-                ? NHD_LAYER_NAME
-                : NHD_LAYER_NAME + " (zoom >= " + NHD_LAYER_MIN_ZOOM + ")";
+                ? baseLabel
+                : baseLabel + " (zoom >= " + NHD_LAYER_MIN_ZOOM + ")";
             relabelOverlay(map.nhd_flowlines, label);
         }
 
@@ -1100,7 +1108,7 @@ var MapController = (function () {
                 return;
             }
             var bbox = map.getBounds().toBBoxString();
-            var url = buildNhdFlowlinesUrl(bbox);
+            var url = buildNhdFlowlinesUrl(bbox, map.getZoom());
             if (!url) {
                 return;
             }

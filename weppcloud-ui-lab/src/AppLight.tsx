@@ -325,7 +325,7 @@ export function AppLight() {
   const [appState] = useState<AppState>(() => (typeof window !== 'undefined' ? window.__WEPP_STATE__ ?? {} : {}))
 
   const isAuthenticated = Boolean(appState.user?.is_authenticated)
-  const heroHeadline = 'Turning landscape data into watershed intelligence for planning and management'
+  const heroHeadline = 'Data-driven watershed hydrology and erosion modeling to support decision-making.'
   const mapEyebrow = 'Run atlas'
   const mapTitle = 'Explore Active WEPPcloud Projects'
   const mapSubtitle =
@@ -997,16 +997,16 @@ export function AppLight() {
             <p className="text-sm text-slate-600 mt-2">
               Hydrography flowlines:{' '}
               <a
-                href="https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/"
+                href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/"
                 target="_blank"
                 rel="noreferrer"
                 className="text-sky-700 hover:text-sky-800"
               >
-                U.S. Geological Survey National Hydrography Dataset (NHD), Flowline - Small Scale
+                U.S. Geological Survey NHDPlus HR NetworkNHDFlowline
               </a>{' '}
               (
               <a
-                href="http://nhdgeo.usgs.gov/metadata/nhd_high.htm"
+                href="https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/metadata"
                 target="_blank"
                 rel="noreferrer"
                 className="text-sky-700 hover:text-sky-800"

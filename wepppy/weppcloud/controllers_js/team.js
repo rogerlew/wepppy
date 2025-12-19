@@ -346,6 +346,12 @@ var Team = (function () {
 
         function refreshMembers(options) {
             var opts = options || {};
+            if (team.isAuthenticated === false) {
+                if (!opts.silentStatus) {
+                    team.appendStatus("Sign in to view collaborators.");
+                }
+                return Promise.resolve("");
+            }
             emitter.emit("team:list:loading");
             return http.request(url_for_run("report/users/"), {
                 method: "GET",
@@ -572,7 +578,6 @@ var Team = (function () {
         };
 
         attachStatusChannel();
-        refreshMembers({ silentStatus: true });
 
         var bootstrapState = {
             listenersBound: false,
@@ -583,6 +588,7 @@ var Team = (function () {
             var ctx = context || {};
             var user = ctx.user || {};
             var form = team.form;
+            team.isAuthenticated = Boolean(user.isAuthenticated);
 
             if (form && !bootstrapState.listenersBound && typeof form.addEventListener === "function") {
                 form.addEventListener("TEAM_ADDUSER_TASK_COMPLETED", function () {
