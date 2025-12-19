@@ -29,6 +29,9 @@ var MapController = (function () {
     var SENSOR_LAYER_MIN_ZOOM = 9;
     var USGS_LAYER_NAME = "USGS Gage Locations";
     var SNOTEL_LAYER_NAME = "SNOTEL Locations";
+    var NHD_LAYER_NAME = "NHD Flowlines";
+    var NHD_LAYER_MIN_ZOOM = 11;
+    var NHD_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -217,6 +220,22 @@ var MapController = (function () {
             return input.length ? normalizeUrlPayload(input[0]) : null;
         }
         return String(input);
+    }
+
+    function buildNhdFlowlinesUrl(bbox) {
+        if (!bbox) {
+            return null;
+        }
+        return NHD_QUERY_URL
+            + "?where=1%3D1"
+            + "&outFields=OBJECTID"
+            + "&geometry=" + encodeURIComponent(bbox)
+            + "&geometryType=esriGeometryEnvelope"
+            + "&inSR=4326&outSR=4326"
+            + "&spatialRel=esriSpatialRelIntersects"
+            + "&returnGeometry=true"
+            + "&resultRecordCount=2000"
+            + "&f=geojson";
     }
 
     function createRemoteGeoJsonLayer(http, options) {
@@ -596,6 +615,15 @@ var MapController = (function () {
             pointToLayer: createCircleLayerOptions("#000078")
         });
 
+        var nhdLayerController = createRemoteGeoJsonLayer(http, {
+            layerName: NHD_LAYER_NAME,
+            style: {
+                color: "#7b2cbf",
+                weight: 1.5,
+                opacity: 0.7
+            }
+        });
+
         function attachLayerRefresh(layerName, controller) {
             var baseRefresh = controller.refresh;
             var layer = controller.layer;
@@ -626,9 +654,11 @@ var MapController = (function () {
 
         attachLayerRefresh(USGS_LAYER_NAME, usgsLayerController);
         attachLayerRefresh(SNOTEL_LAYER_NAME, snotelLayerController);
+        attachLayerRefresh(NHD_LAYER_NAME, nhdLayerController);
 
         map.usgs_gage = usgsLayerController.layer;
         map.snotel_locations = snotelLayerController.layer;
+        map.nhd_flowlines = nhdLayerController.layer;
 
         map.googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
             maxZoom: 20,
@@ -686,11 +716,13 @@ var MapController = (function () {
 
         map.overlayMaps = {
             "USGS Gage Locations": map.usgs_gage,
-            "SNOTEL Locations": map.snotel_locations
+            "SNOTEL Locations": map.snotel_locations,
+            "NHD Flowlines": map.nhd_flowlines
         };
 
         // Default to Terrain base layer instead of Satellite
         map.googleTerrain.addTo(map);
+        map.nhd_flowlines.addTo(map);
         syncMapTheme(getCurrentTheme());
 
         map.ctrls = L.control.layers(map.baseMaps, map.overlayMaps);
@@ -770,10 +802,12 @@ var MapController = (function () {
         if (overlayRegistry) {
             overlayRegistry.set(map.usgs_gage, USGS_LAYER_NAME);
             overlayRegistry.set(map.snotel_locations, SNOTEL_LAYER_NAME);
+            overlayRegistry.set(map.nhd_flowlines, NHD_LAYER_NAME);
         }
         if (overlayNameRegistry) {
             overlayNameRegistry.set(USGS_LAYER_NAME, map.usgs_gage);
             overlayNameRegistry.set(SNOTEL_LAYER_NAME, map.snotel_locations);
+            overlayNameRegistry.set(NHD_LAYER_NAME, map.nhd_flowlines);
         }
 
         function relabelOverlay(layer, newName) {
@@ -820,6 +854,17 @@ var MapController = (function () {
             relabelOverlay(map.snotel_locations, label);
         }
 
+        function updateNhdOverlayLabel() {
+            if (!map.nhd_flowlines) {
+                return;
+            }
+            var zoom = map.getZoom();
+            var label = zoom >= NHD_LAYER_MIN_ZOOM
+                ? NHD_LAYER_NAME
+                : NHD_LAYER_NAME + " (zoom >= " + NHD_LAYER_MIN_ZOOM + ")";
+            relabelOverlay(map.nhd_flowlines, label);
+        }
+
         function updateUSGSOverlayLabel() {
             if (!map.usgs_gage) {
                 return;
@@ -853,6 +898,7 @@ var MapController = (function () {
             map.onMapChange();
             updateSnotelOverlayLabel();
             updateUSGSOverlayLabel();
+            updateNhdOverlayLabel();
             if (typeof ChannelDelineation !== "undefined" && ChannelDelineation !== null) {
                 try {
                     ChannelDelineation.getInstance().onMapChange();
@@ -866,6 +912,7 @@ var MapController = (function () {
             emit("map:center:changed", buildViewportPayload());
             map.loadUSGSGageLocations();
             map.loadSnotelLocations();
+            map.loadNhdFlowlines();
         }
 
         map.on("zoom", handleViewportChange);
@@ -874,6 +921,7 @@ var MapController = (function () {
         map.on("moveend", handleViewportSettled);
         updateSnotelOverlayLabel();
         updateUSGSOverlayLabel();
+        updateNhdOverlayLabel();
 
         map.onMapChange = function () {
             updateMapStatus();
@@ -1044,6 +1092,23 @@ var MapController = (function () {
             });
         };
 
+        map.loadNhdFlowlines = function () {
+            if (!requireMinZoom(NHD_LAYER_MIN_ZOOM, NHD_LAYER_NAME)) {
+                return;
+            }
+            if (!map.hasLayer(map.nhd_flowlines) || typeof map.nhd_flowlines.refresh !== "function") {
+                return;
+            }
+            var bbox = map.getBounds().toBBoxString();
+            var url = buildNhdFlowlinesUrl(bbox);
+            if (!url) {
+                return;
+            }
+            map.nhd_flowlines.refresh(url).catch(function (error) {
+                console.warn("[Map] Failed to refresh NHD flowlines", error);
+            });
+        };
+
         map.on("overlayadd", function (event) {
             var name = event && event.name ? event.name : (overlayRegistry && overlayRegistry.get ? overlayRegistry.get(event.layer) : null);
             if (overlayRegistry && name && event && event.layer) {
@@ -1058,6 +1123,9 @@ var MapController = (function () {
                 visible: true,
                 type: "overlay"
             });
+            if (event && event.layer === map.nhd_flowlines) {
+                map.loadNhdFlowlines();
+            }
         });
 
         map.on("overlayremove", function (event) {

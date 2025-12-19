@@ -97,4 +97,20 @@ describe("WCHttp helpers", () => {
         const bodyParams = new URLSearchParams(options.body);
         expect(bodyParams.get("foo")).toBe("bar");
     });
+
+    test("request parses +json content types", async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: {
+                get: () => "application/geo+json;charset=UTF-8"
+            },
+            text: () => Promise.resolve(JSON.stringify({ type: "FeatureCollection", features: [] }))
+        });
+
+        const result = await window.WCHttp.request("/resources/nhd", { method: "GET" });
+
+        expect(result.body).toEqual({ type: "FeatureCollection", features: [] });
+    });
 });

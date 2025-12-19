@@ -974,15 +974,46 @@ export function AppLight() {
           <div>
             <h4 className="font-semibold text-slate-800 mb-2">Map Services</h4>
             <p className="text-sm text-slate-600">
-              Map baselayers provided by{' '}
-              <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" className="text-sky-700 hover:text-sky-800">
-                Google
-              </a>{' '}
-              (Terrain, Satellite) and{' '}
-              <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer" className="text-sky-700 hover:text-sky-800">
+              Basemap tiles ©{' '}
+              <a
+                href="https://www.openstreetmap.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-700 hover:text-sky-800"
+              >
                 OpenStreetMap
               </a>{' '}
-              contributors.
+              contributors, ©{' '}
+              <a
+                href="https://carto.com/attributions"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-700 hover:text-sky-800"
+              >
+                CARTO
+              </a>
+              .
+            </p>
+            <p className="text-sm text-slate-600 mt-2">
+              Hydrography flowlines:{' '}
+              <a
+                href="https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-700 hover:text-sky-800"
+              >
+                U.S. Geological Survey National Hydrography Dataset (NHD), Flowline - Small Scale
+              </a>{' '}
+              (
+              <a
+                href="http://nhdgeo.usgs.gov/metadata/nhd_high.htm"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-700 hover:text-sky-800"
+              >
+                metadata
+              </a>
+              ).
             </p>
           </div>
 

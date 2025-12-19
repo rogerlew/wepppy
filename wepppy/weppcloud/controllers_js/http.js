@@ -207,6 +207,13 @@
         };
     }
 
+    function isJsonContentType(contentType) {
+        if (!contentType) {
+            return false;
+        }
+        return contentType.indexOf("application/json") !== -1 || contentType.indexOf("+json") !== -1;
+    }
+
     function parseBody(response) {
         var contentType = response.headers && response.headers.get ? response.headers.get("content-type") || "" : "";
         if (!contentType) {
@@ -214,7 +221,7 @@
                 return text ? text : null;
             });
         }
-        if (contentType.indexOf("application/json") !== -1) {
+        if (isJsonContentType(contentType)) {
             return response.text().then(function (text) {
                 if (!text) {
                     return null;
