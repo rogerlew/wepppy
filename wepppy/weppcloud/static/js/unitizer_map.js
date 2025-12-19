@@ -1236,16 +1236,16 @@
     {
       "conversions": [
         {
-          "from": "kg/m^3",
+          "from": "g/cm^3",
           "offset": 0.0,
-          "scale": 0.062428,
+          "scale": 62.42796,
           "to": "lb/ft^3"
         },
         {
           "from": "lb/ft^3",
           "offset": 0.0,
-          "scale": 16.0185,
-          "to": "kg/m^3"
+          "scale": 0.0160185,
+          "to": "g/cm^3"
         }
       ],
       "defaultIndex": 1,
@@ -1253,17 +1253,17 @@
       "label": "Snow Density",
       "units": [
         {
-          "htmlLabel": "kg/m<sup>3</sup>",
-          "key": "kg/m^3",
-          "label": "kg/m^3",
-          "precision": 1,
-          "token": "kg_m-cube"
+          "htmlLabel": "g/cm<sup>3</sup>",
+          "key": "g/cm^3",
+          "label": "g/cm^3",
+          "precision": 0,
+          "token": "g_cm-cube"
         },
         {
           "htmlLabel": "lb/ft<sup>3</sup>",
           "key": "lb/ft^3",
           "label": "lb/ft^3",
-          "precision": 2,
+          "precision": 0,
           "token": "lb_ft-cube"
         }
       ]
@@ -1328,7 +1328,6 @@
     "kg_ha-_3": "kg/ha,3",
     "kg_ha_yr": "kg/ha/yr",
     "kg_ha_yr-_3": "kg/ha/yr,3",
-    "kg_m-cube": "kg/m^3",
     "kg_m-sqr": "kg/m^2",
     "kg_m-sqr_yr": "kg/m^2/yr",
     "kg_yr": "kg/yr",
@@ -1383,7 +1382,7 @@
     "ft^3/yr": "volume-annual",
     "g": "xs-weight",
     "g/L": "concentration",
-    "g/cm^3": "bulk-density",
+    "g/cm^3": "snow-density",
     "ha": "area",
     "ha-m/yr": "area-xs-distance-annual",
     "in": "xs-distance",
@@ -1396,7 +1395,6 @@
     "kg/ha/yr,3": "xs-surface-density-annual",
     "kg/m^2": "sm-surface-density",
     "kg/m^2/yr": "sm-surface-density-annual",
-    "kg/m^3": "snow-density",
     "kg/yr": "sm-weight-annual",
     "km": "distance",
     "km^2": "area",

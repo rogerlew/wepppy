@@ -208,14 +208,14 @@ class SnowOpts(object):
         else:
             self.rst = rst
 
-        # density of new snow
+        # density of new snow (g/cm³)
 
         if newsnw is None:
             self.newsnw = 100.0
         else:
             self.newsnw = newsnw
 
-        # snow settling density
+        # snow settling density (g/cm³)
         if ssd is None:
             self.ssd = 250.0
         else:

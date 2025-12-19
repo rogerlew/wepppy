@@ -178,8 +178,8 @@ converters: ConverterRegistry = {
         ('lb/ft^3', 'g/cm^3'): lambda v: v * 0.0160185,
     },
     'snow-density': {
-        ('kg/m^3', 'lb/ft^3'): lambda v: v * 0.062428,
-        ('lb/ft^3', 'kg/m^3'): lambda v: v * 16.0185,
+        ('g/cm^3', 'lb/ft^3'): lambda v: v * 62.42796,
+        ('lb/ft^3', 'g/cm^3'): lambda v: v * 0.0160185,
     },
     'shear-stress': {
         ('N/m^2', 'lb/ft^2'): lambda v: v * 0.0208854,
@@ -309,8 +309,8 @@ precisions: PrecisionRegistry = OrderedDict([
         ('lb/ft^3', 3)])
      ),
     ('snow-density', OrderedDict([
-        ('kg/m^3', 1),
-        ('lb/ft^3', 2)])
+        ('g/cm^3', 0),
+        ('lb/ft^3', 0)])
      ),
     ('shear-stress', OrderedDict([
         ('N/m^2', 1),
