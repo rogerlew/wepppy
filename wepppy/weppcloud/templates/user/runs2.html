@@ -9,10 +9,11 @@
 {% macro sortable_header(label, field) -%}
   {% set current_sort = sort | default('last_modified', true) %}
   {% set current_direction = direction | default('desc', true) %}
+  {% set sort_endpoint = runs_sort_endpoint | default('user.runs', true) %}
   {% set is_active = (current_sort == field) %}
   {% set asc_active = is_active and current_direction == 'asc' %}
   {% set desc_active = is_active and current_direction == 'desc' %}
-  {% set per_page_value = per_page | default(100, true) %}
+  {% set per_page_value = per_page | default(25, true) %}
   {% if asc_active %}
     {% set indicator = '▲' %}
     {% set aria_sort = 'ascending' %}
@@ -38,7 +39,7 @@
       data-sort-direction="{{ current_direction if is_active else 'none' }}"
       aria-sort="{{ aria_sort }}">
     <a class="wc-server-sort"
-       href="{{ url_for('user.runs', page=1, sort=field, direction=next_direction, per_page=per_page_value) }}"
+       href="{{ url_for(sort_endpoint, page=1, sort=field, direction=next_direction, per_page=per_page_value) }}"
        aria-label="Sort {{ label }} {{ next_direction_label }}"
        data-next-direction="{{ next_direction }}">
       <span class="wc-server-sort__label">{{ label }}</span>
@@ -46,6 +47,7 @@
     </a>
   </th>
 {%- endmacro %}
+{% set column_count = 8 + (1 if show_owner else 0) %}
 <section class="wc-stack wc-table-page">
   <header class="wc-stack">
     <div class="wc-console-header">
@@ -106,70 +108,14 @@
               <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
             </tr>
           </thead>
-          <tbody>
-            {% for meta in user_runs %}
-            <tr id="{{ meta.runid }}"
-                data-search="{{ (meta.name | default('', true) ~ ' ' ~ meta.scenario | default('', true) ~ ' ' ~ meta.runid | default('', true)) | lower }}">
-              {% if show_owner %}<td>{{ meta.owner }}</td>{% endif %}
-              <td>{{ meta.name }}</td>
-              <td>{{ meta.scenario }}</td>
-              <td>{{ meta.runid }}</td>
-              <td>{{ meta.config }}</td>
-              <td>
-                <a class="pure-button pure-button-secondary" href="{{ site_prefix }}/runs/{{ meta.runid }}/{{ meta.config }}/" target="_blank" rel="noopener">Open</a>
-              </td>
-              <td>{% if meta.date_created %}{{ meta.date_created }}{% else %}&mdash;{% endif %}</td>
-              <td>{% if meta.last_modified %}{{ meta.last_modified }}{% else %}&mdash;{% endif %}</td>
-              <td>
-                <input type="checkbox" value="{{ meta.runid }}" {% if meta.readonly %}disabled{% endif %} aria-label="Select {{ meta.runid }}">
-              </td>
+          <tbody id="runs_table_body">
+            <tr id="runs_empty_row" data-empty-row="true">
+              <td colspan="{{ column_count }}" class="wc-text-muted">Loading runs...</td>
             </tr>
-          {% else %}
-          <tr data-empty-row="true">
-            <td colspan="10" class="wc-text-muted">No runs found.</td>
-          </tr>
-          {% endfor %}
           </tbody>
         </table>
       </div>
-
-      {% if pagination %}
-        {% set per_page_value = per_page | default(100, true) %}
-        {% set sort_value = sort | default('last_modified', true) %}
-        {% set direction_value = direction | default('desc', true) %}
-        <nav aria-label="Runs pagination" class="wc-pagination-nav">
-          {% if pagination.has_prev %}
-            <a class="wc-pagination__link"
-               href="{{ url_for('user.runs', page=pagination.prev_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
-               aria-label="Previous page">
-              &laquo;
-            </a>
-          {% else %}
-            <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&laquo;</span>
-          {% endif %}
-
-          {% for p in range(max(1, pagination.page - 2), min(pagination.pages, pagination.page + 2) + 1) %}
-            {% if p == pagination.page %}
-              <span class="wc-pagination__link wc-pagination__link--current" aria-current="page">{{ p }}</span>
-            {% else %}
-              <a class="wc-pagination__link"
-                 href="{{ url_for('user.runs', page=p, sort=sort_value, direction=direction_value, per_page=per_page_value) }}">
-                {{ p }}
-              </a>
-            {% endif %}
-          {% endfor %}
-
-          {% if pagination.has_next %}
-            <a class="wc-pagination__link"
-               href="{{ url_for('user.runs', page=pagination.next_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
-               aria-label="Next page">
-              &raquo;
-            </a>
-          {% else %}
-            <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&raquo;</span>
-          {% endif %}
-        </nav>
-      {% endif %}
+      <nav id="runs-pagination" aria-label="Runs pagination" class="wc-pagination wc-pagination-nav" hidden></nav>
     </div>
 
     <div id="runs-map-view" role="tabpanel" aria-labelledby="runs-tab-map" hidden>
@@ -187,6 +133,9 @@
   const sitePrefix = {{ site_prefix | default('', true) | tojson }};
   const deleteButton = document.getElementById('delete_runs_button');
   const runsTable = document.getElementById('runs_table');
+  const runsTableBody = document.getElementById('runs_table_body');
+  const runsEmptyRow = document.getElementById('runs_empty_row');
+  const runsPagination = document.getElementById('runs-pagination');
   const runsTableView = document.getElementById('runs-table-view');
   const runsMapView = document.getElementById('runs-map-view');
   const runsTabTable = document.getElementById('runs-tab-table');
@@ -196,63 +145,326 @@
   const runsSearchInput = document.getElementById('runs_search_input');
   const runsSearchClear = document.getElementById('runs_search_clear');
   const runsSearchGo = document.getElementById('runs_search_go');
+  const showOwner = {{ show_owner | tojson }};
+  const runsSortParam = {{ sort | default('last_modified', true) | tojson }};
+  const runsDirectionParam = {{ direction | default('desc', true) | tojson }};
+  const runsPerPageDefault = {{ per_page | default(25, true) | tojson }};
   {% if show_owner %}
+  const runsCatalogUrl = {{ url_for('user.runs_catalog', scope='all') | tojson }};
   const runsMapDataUrl = {{ url_for('user.runs_map_data', scope='all') | tojson }};
   {% else %}
+  const runsCatalogUrl = {{ url_for('user.runs_catalog') | tojson }};
   const runsMapDataUrl = {{ url_for('user.runs_map_data') | tojson }};
   {% endif %}
+  let runsCatalog = [];
+  let runsFiltered = [];
+  let runsCatalogLoaded = false;
+  let currentPage = 1;
+  let perPage = runsPerPageDefault;
+  let searchQuery = '';
   let runsMapInitialized = false;
   let runsMapDeck = null;
+
+  const initialParams = new URLSearchParams(window.location.search);
+  const pageParam = parseInt(initialParams.get('page'), 10);
+  if (Number.isFinite(pageParam) && pageParam > 0) {
+    currentPage = pageParam;
+  }
+  const perPageParam = parseInt(initialParams.get('per_page'), 10);
+  if (Number.isFinite(perPageParam) && perPageParam > 0) {
+    perPage = perPageParam;
+  }
+  const queryParam = (initialParams.get('q') || '').trim();
+  if (queryParam) {
+    searchQuery = queryParam;
+    if (runsSearchInput) {
+      runsSearchInput.value = searchQuery;
+    }
+  }
+
+  function buildRunsCatalogUrl() {
+    const params = new URLSearchParams();
+    if (runsSortParam) {
+      params.set('sort', runsSortParam);
+    }
+    if (runsDirectionParam) {
+      params.set('direction', runsDirectionParam);
+    }
+    const query = params.toString();
+    return query ? `${runsCatalogUrl}?${query}` : runsCatalogUrl;
+  }
+
+  function updateRunsUrl() {
+    const params = new URLSearchParams();
+    params.set('page', String(currentPage));
+    params.set('per_page', String(perPage));
+    if (runsSortParam) {
+      params.set('sort', runsSortParam);
+    }
+    if (runsDirectionParam) {
+      params.set('direction', runsDirectionParam);
+    }
+    if (searchQuery) {
+      params.set('q', searchQuery);
+    }
+    const query = params.toString();
+    const nextUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+    window.history.replaceState(null, '', nextUrl);
+  }
+
+  function buildSearchIndex(run) {
+    return [run.name, run.scenario, run.runid].filter(Boolean).join(' ').toLowerCase();
+  }
+
+  function setRunsEmptyMessage(message) {
+    if (!runsEmptyRow) {
+      return;
+    }
+    const cell = runsEmptyRow.querySelector('td');
+    if (cell) {
+      cell.textContent = message;
+    }
+    runsEmptyRow.hidden = false;
+  }
+
+  function clearRunRows() {
+    if (!runsTableBody) {
+      return;
+    }
+    runsTableBody.querySelectorAll('tr[data-run-row="true"]').forEach((row) => row.remove());
+  }
+
+  function formatOptionalValue(value) {
+    if (value === null || value === undefined || value === '') {
+      return '—';
+    }
+    return String(value);
+  }
+
+  function buildRunRow(run) {
+    const row = document.createElement('tr');
+    row.dataset.runRow = 'true';
+    if (run.runid) {
+      row.id = run.runid;
+    }
+    row.dataset.search = run.searchIndex || '';
+
+    function appendCell(text) {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      row.appendChild(cell);
+    }
+
+    if (showOwner) {
+      appendCell(formatOptionalValue(run.owner || ''));
+    }
+    appendCell(formatOptionalValue(run.name || ''));
+    appendCell(formatOptionalValue(run.scenario || ''));
+    appendCell(formatOptionalValue(run.runid || ''));
+    appendCell(formatOptionalValue(run.config || ''));
+
+    const linkCell = document.createElement('td');
+    const link = document.createElement('a');
+    link.className = 'pure-button pure-button-secondary';
+    link.href = `${sitePrefix}/runs/${run.runid}/${run.config}/`;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Open';
+    linkCell.appendChild(link);
+    row.appendChild(linkCell);
+
+    appendCell(formatOptionalValue(run.date_created));
+    appendCell(formatOptionalValue(run.last_modified));
+
+    const selectCell = document.createElement('td');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = run.runid || '';
+    checkbox.disabled = !!run.readonly;
+    checkbox.setAttribute('aria-label', `Select ${run.runid || ''}`);
+    checkbox.addEventListener('change', updateDeleteState);
+    selectCell.appendChild(checkbox);
+    row.appendChild(selectCell);
+
+    return row;
+  }
+
+  function getTotalPages() {
+    if (!perPage || perPage <= 0) {
+      return 1;
+    }
+    return Math.ceil(runsFiltered.length / perPage) || 1;
+  }
+
+  function renderRunsTable() {
+    if (!runsTableBody) {
+      return;
+    }
+    clearRunRows();
+
+    if (!runsCatalogLoaded) {
+      setRunsEmptyMessage('Loading runs...');
+      return;
+    }
+
+    const totalPages = getTotalPages();
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+    const start = (currentPage - 1) * perPage;
+    const end = start + perPage;
+    const pageRuns = perPage > 0 ? runsFiltered.slice(start, end) : runsFiltered;
+
+    if (!pageRuns.length) {
+      const message = searchQuery ? 'No matching runs found.' : 'No runs found.';
+      setRunsEmptyMessage(message);
+      return;
+    }
+
+    if (runsEmptyRow) {
+      runsEmptyRow.hidden = true;
+    }
+
+    const fragment = document.createDocumentFragment();
+    pageRuns.forEach((run) => {
+      fragment.appendChild(buildRunRow(run));
+    });
+    runsTableBody.insertBefore(fragment, runsEmptyRow);
+    updateDeleteState();
+  }
+
+  function buildPaginationControl(label, page, ariaLabel) {
+    if (!page) {
+      const span = document.createElement('span');
+      span.className = 'wc-pagination__link';
+      span.setAttribute('aria-disabled', 'true');
+      span.textContent = label;
+      return span;
+    }
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'wc-pagination__link';
+    button.textContent = label;
+    if (ariaLabel) {
+      button.setAttribute('aria-label', ariaLabel);
+    }
+    button.addEventListener('click', () => setRunsPage(page));
+    return button;
+  }
+
+  function renderPagination() {
+    if (!runsPagination) {
+      return;
+    }
+    if (!runsCatalogLoaded) {
+      runsPagination.innerHTML = '';
+      runsPagination.hidden = true;
+      return;
+    }
+    const totalPages = getTotalPages();
+    if (totalPages <= 1) {
+      runsPagination.innerHTML = '';
+      runsPagination.hidden = true;
+      return;
+    }
+    runsPagination.hidden = false;
+    runsPagination.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    fragment.appendChild(buildPaginationControl('«', currentPage > 1 ? currentPage - 1 : null, 'Previous page'));
+
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+    for (let page = start; page <= end; page += 1) {
+      if (page === currentPage) {
+        const span = document.createElement('span');
+        span.className = 'wc-pagination__link wc-pagination__link--current';
+        span.setAttribute('aria-current', 'page');
+        span.textContent = String(page);
+        fragment.appendChild(span);
+      } else {
+        fragment.appendChild(buildPaginationControl(String(page), page));
+      }
+    }
+
+    fragment.appendChild(buildPaginationControl('»', currentPage < totalPages ? currentPage + 1 : null, 'Next page'));
+
+    runsPagination.appendChild(fragment);
+  }
+
+  function setRunsPage(page) {
+    currentPage = page;
+    renderRunsTable();
+    renderPagination();
+    updateRunsUrl();
+  }
 
   async function deleteRun(runid) {
     const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, { method: 'POST' });
     if (response.ok) {
-      const row = document.getElementById(runid);
-      if (row) {
-        row.remove();
-      }
+      runsCatalog = runsCatalog.filter((run) => run.runid !== runid);
+      applyRunsFilter({ resetPage: false });
     } else {
       console.error('Failed to delete run', runid);
     }
   }
 
   function updateDeleteState() {
+    if (!runsTable || !deleteButton) {
+      return;
+    }
     const checked = runsTable.querySelectorAll('input[type="checkbox"]:checked');
     deleteButton.disabled = checked.length === 0;
   }
 
-  function applyRunsFilter() {
-    if (!runsTable || !runsSearchInput) {
-      return;
+  function applyRunsFilter(options = {}) {
+    const query = runsSearchInput ? runsSearchInput.value.trim() : '';
+    const normalized = query.toLowerCase();
+    const queryChanged = query !== searchQuery;
+    if (queryChanged || options.resetPage) {
+      currentPage = 1;
     }
-    const query = runsSearchInput.value.trim().toLowerCase();
-    let matches = 0;
-    const rows = runsTable.querySelectorAll('tbody tr');
-    rows.forEach((row) => {
-      if (row.dataset.emptyRow === 'true') {
-        return;
-      }
-      const haystack = row.dataset.search || '';
-      const isMatch = !query || haystack.includes(query);
-      row.style.display = isMatch ? '' : 'none';
-      if (isMatch) {
-        matches += 1;
-      }
-    });
+    searchQuery = query;
+    runsFiltered = normalized
+      ? runsCatalog.filter((run) => (run.searchIndex || '').includes(normalized))
+      : runsCatalog.slice();
     if (runsSearchClear) {
       runsSearchClear.disabled = query.length === 0;
     }
-    const emptyRow = runsTable.querySelector('tbody tr[data-empty-row="true"]');
-    if (emptyRow) {
-      if (!query && matches === 0) {
-        emptyRow.style.display = '';
-        return;
+    renderRunsTable();
+    renderPagination();
+    updateRunsUrl();
+  }
+
+  async function loadRunsCatalog() {
+    if (!runsCatalogUrl) {
+      return;
+    }
+    setRunsEmptyMessage('Loading runs...');
+    try {
+      const response = await fetch(buildRunsCatalogUrl());
+      if (!response.ok) {
+        throw new Error(`Runs fetch failed ${response.status}`);
       }
-      emptyRow.style.display = matches ? 'none' : '';
+      const payload = await response.json();
+      runsCatalog = (payload.runs || []).map((run) => ({
+        ...run,
+        searchIndex: buildSearchIndex(run),
+      }));
+      runsCatalogLoaded = true;
+      applyRunsFilter({ resetPage: false });
+    } catch (error) {
+      console.error(error);
+      runsCatalogLoaded = true;
+      setRunsEmptyMessage('Unable to load runs.');
+      renderPagination();
     }
   }
 
   function deleteRuns() {
+    if (!runsTable) {
+      return;
+    }
     const checks = Array.from(runsTable.querySelectorAll('input[type="checkbox"]:checked'));
     if (!checks.length) {
       return;
@@ -548,36 +760,24 @@
     });
   }
 
-  if (!runsTable) {
-    console.warn('Runs table not found; skipping selection logic.');
-    if (deleteButton) {
-      deleteButton.disabled = true;
-    }
-  } else {
-    runsTable.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-      checkbox.addEventListener('change', updateDeleteState);
-    });
-    updateDeleteState();
-  }
-
   if (runsSearchInput) {
-    runsSearchInput.addEventListener('input', applyRunsFilter);
+    runsSearchInput.addEventListener('input', () => applyRunsFilter({ resetPage: true }));
     runsSearchInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        applyRunsFilter();
+        applyRunsFilter({ resetPage: true });
       }
     });
   }
   if (runsSearchGo) {
-    runsSearchGo.addEventListener('click', applyRunsFilter);
+    runsSearchGo.addEventListener('click', () => applyRunsFilter({ resetPage: true }));
   }
   if (runsSearchClear) {
     runsSearchClear.addEventListener('click', () => {
       if (runsSearchInput) {
         runsSearchInput.value = '';
       }
-      applyRunsFilter();
+      applyRunsFilter({ resetPage: true });
     });
   }
 
@@ -587,6 +787,17 @@
   if (runsTabMap) {
     runsTabMap.addEventListener('click', () => setRunsView('map'));
   }
+
+  if (!runsTable) {
+    console.warn('Runs table not found; skipping selection logic.');
+    if (deleteButton) {
+      deleteButton.disabled = true;
+    }
+  } else {
+    updateDeleteState();
+  }
+
+  loadRunsCatalog();
 </script>
 {% endblock %}
 

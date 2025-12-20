@@ -264,45 +264,45 @@ def runs():
     try:
         from wepppy.weppcloud.app import runs_users, Run
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 100, type=int)
+        per_page = request.args.get('per_page', 25, type=int)
         if per_page <= 0:
-            per_page = 100
+            per_page = 25
 
         sort_param = _normalize_sort_param(request.args.get('sort'))
         direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
         is_desc = direction_param == 'desc'
 
-        base_query = (
-            Run.query
-            .join(runs_users)
-            .filter(runs_users.c.user_id == current_user.id)
-            .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
-        )
-
-        pagination = None
-        metas = []
-
-        if sort_param in DB_SORT_FIELDS:
-            column = getattr(Run, sort_param)
-            query = base_query.order_by(None)
-
-            if sort_param in {'last_modified', 'date_created'}:
-                order_expr = column.desc().nullslast() if is_desc else column.asc().nullslast()
-            else:
-                order_expr = column.desc() if is_desc else column.asc()
-
-            secondary_expr = Run.id.desc() if is_desc else Run.id.asc()
-            query = query.order_by(order_expr, secondary_expr)
-            pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-            metas = _collect_metas_for_runs(pagination.items)
-        else:
-            runs_all = base_query.all()
-            metas_all = _collect_metas_for_runs(runs_all)
-            metas_all = _sort_metas(metas_all, sort_param, is_desc)
-            metas, pagination = _slice_for_page(metas_all, page, per_page)
-
         format_param = (request.args.get('format') or request.args.get('fomat') or '').lower()
         if format_param == 'json':
+            base_query = (
+                Run.query
+                .join(runs_users)
+                .filter(runs_users.c.user_id == current_user.id)
+                .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
+            )
+
+            pagination = None
+            metas = []
+
+            if sort_param in DB_SORT_FIELDS:
+                column = getattr(Run, sort_param)
+                query = base_query.order_by(None)
+
+                if sort_param in {'last_modified', 'date_created'}:
+                    order_expr = column.desc().nullslast() if is_desc else column.asc().nullslast()
+                else:
+                    order_expr = column.desc() if is_desc else column.asc()
+
+                secondary_expr = Run.id.desc() if is_desc else Run.id.asc()
+                query = query.order_by(order_expr, secondary_expr)
+                pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+                metas = _collect_metas_for_runs(pagination.items)
+            else:
+                runs_all = base_query.all()
+                metas_all = _collect_metas_for_runs(runs_all)
+                metas_all = _sort_metas(metas_all, sort_param, is_desc)
+                metas, pagination = _slice_for_page(metas_all, page, per_page)
+
             return jsonify(
                 metas=metas,
                 pagination=_pagination_payload(pagination),
@@ -314,8 +314,8 @@ def runs():
         return render_template(
             "user/runs2.html",
             user=current_user,
-            user_runs=metas,
-            pagination=pagination,
+            user_runs=[],
+            pagination=None,
             show_owner=False,
             sort=sort_param,
             direction=direction_param,
@@ -324,6 +324,37 @@ def runs():
     except:
         return exception_factory()
 
+
+@user_bp.route("/runs/catalog", strict_slashes=False)
+@login_required
+def runs_catalog():
+    try:
+        from wepppy.weppcloud.app import runs_users, Run
+        sort_param = _normalize_sort_param(request.args.get('sort'))
+        direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
+        is_desc = direction_param == 'desc'
+
+        scope = (request.args.get('scope') or '').lower()
+        if scope == 'all' and (current_user.has_role('Admin') or current_user.has_role('Root')):
+            runs_all = Run.query.all()
+        else:
+            runs_all = (
+                Run.query
+                .join(runs_users)
+                .filter(runs_users.c.user_id == current_user.id)
+                .all()
+            )
+
+        metas = _collect_metas_for_runs(runs_all)
+        metas = _sort_metas(metas, sort_param, is_desc)
+        return jsonify(
+            runs=metas,
+            sort=sort_param,
+            direction=direction_param,
+            total=len(metas),
+        )
+    except:
+        return exception_factory()
 
 @user_bp.route("/runs/map-data", strict_slashes=False)
 @login_required
