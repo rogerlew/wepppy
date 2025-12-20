@@ -45,6 +45,7 @@ The `wepppy.climates` package integrates diverse climate data sources into a uni
   - `cligen.py` - Core CLIGEN wrapper (`Cligen` class, `par_mod()` for PRISM adjustments)
   - `stations.db` - SQLite database of ~15,000 US CLIGEN stations
   - `ghcn_daily/` - GHCN (Global Historical Climatology Network) daily data integration
+- **Reference**: CLIGEN station statistics (`.par`) format: [cligenparms.md](../weppcloud/routes/usersum/input-file-specifications/cligenparms.md)
 - **Usage Pattern**: Find nearest station → optionally revise with PRISM/Daymet → generate stochastic climate
 - **Strengths**: Fast, enables Monte Carlo analysis, creates climate scenarios for unmonitored locations
 - **Limitations**: Synthetic (not suitable for validating against streamflow), assumes stationarity

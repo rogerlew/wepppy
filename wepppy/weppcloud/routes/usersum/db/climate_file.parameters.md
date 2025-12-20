@@ -1,5 +1,6 @@
 # CLIGEN Climate File Parameters
 Derived from `wepppy/weppcloud/routes/usersum/input-file-specifications/climate-file.spec.md`.
+See also: [CLIGEN station statistics input file format](../input-file-specifications/cligenparms.md) for `.par` station metadata.
 Line numbers reference the CLIGEN climate file format; the heading supplies the default `usersum <parameter>` description.
 
 ## Header

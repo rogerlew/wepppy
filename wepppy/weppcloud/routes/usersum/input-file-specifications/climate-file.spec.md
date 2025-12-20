@@ -1,5 +1,7 @@
 # Climate Input File Specification
 
+_See also: [CLIGEN station statistics input file format](cligenparms.md)._
+
 - Line 1:
 
   CLIGEN version number - real (datver)
