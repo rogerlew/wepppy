@@ -245,6 +245,11 @@ describe("Subcatchment Delineation controller", () => {
     });
 
     test("build posts JSON payload and records job id", async () => {
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
         subcatchment.build();
         await Promise.resolve();
         await Promise.resolve();
@@ -256,6 +261,7 @@ describe("Subcatchment Delineation controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(subcatchment, "job-77");
+        expect(pollCompletionValues).toEqual(["WATERSHED_ABSTRACTION_TASK_COMPLETED"]);
     });
 
     test("registers delegated handlers for map controls", () => {
@@ -281,6 +287,22 @@ describe("Subcatchment Delineation controller", () => {
         expect(events).toHaveLength(1);
         expect(events[0].error).toEqual({ Error: "failure" });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
+    });
+
+    test("final completion trigger is idempotent", () => {
+        const weppInstance = { updatePhosphorus: jest.fn() };
+        global.Wepp.getInstance = jest.fn(() => weppInstance);
+
+        jest.spyOn(subcatchment, "report").mockImplementation(jest.fn());
+        jest.spyOn(subcatchment, "enableColorMap").mockImplementation(jest.fn());
+
+        subcatchment.triggerEvent("WATERSHED_ABSTRACTION_TASK_COMPLETED", {});
+        subcatchment.triggerEvent("WATERSHED_ABSTRACTION_TASK_COMPLETED", {});
+
+        expect(subcatchment.report).toHaveBeenCalledTimes(1);
+        expect(subcatchment.enableColorMap).toHaveBeenCalledTimes(1);
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(weppInstance.updatePhosphorus).toHaveBeenCalledTimes(1);
     });
 
     test("legend labels initialize and update on slider input", async () => {

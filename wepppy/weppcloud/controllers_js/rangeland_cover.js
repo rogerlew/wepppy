@@ -288,6 +288,13 @@ var RangelandCover = (function () {
             spinner: spinnerElement
         });
 
+        function resetCompletionSeen() {
+            rangeland._completion_seen = false;
+        }
+
+        rangeland.poll_completion_event = "RANGELAND_COVER_BUILD_TASK_COMPLETED";
+        resetCompletionSeen();
+
         function emit(eventName, payload) {
             if (!rangelandEvents || typeof rangelandEvents.emit !== "function") {
                 return;
@@ -413,6 +420,7 @@ var RangelandCover = (function () {
             var taskMsg = "Building rangeland cover";
 
             resetStatus(taskMsg);
+            resetCompletionSeen();
             emit("rangeland:run:started", {
                 mode: state.mode,
                 defaults: state.defaults
@@ -435,6 +443,7 @@ var RangelandCover = (function () {
                         rangeland.append_status_message(rangeland, "build_rangeland_cover job submitted: " + jobId);
                     }
                     if (typeof rangeland.set_rq_job_id === "function") {
+                        rangeland.poll_completion_event = "RANGELAND_COVER_BUILD_TASK_COMPLETED";
                         rangeland.set_rq_job_id(rangeland, jobId);
                     }
                 } else if (response) {
@@ -487,6 +496,10 @@ var RangelandCover = (function () {
         rangeland.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "RANGELAND_COVER_BUILD_TASK_COMPLETED") {
+                if (rangeland._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                rangeland._completion_seen = true;
                 rangeland.disconnect_status_stream(rangeland);
                 try {
                     SubcatchmentDelineation.getInstance().enableColorMap("rangeland_cover");
@@ -497,7 +510,7 @@ var RangelandCover = (function () {
                 emit("rangeland:run:completed", payload || {});
             }
 
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         function ensureDelegates() {

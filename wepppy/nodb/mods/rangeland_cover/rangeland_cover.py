@@ -259,6 +259,10 @@ class RangelandCover(NoDbBase):
         if default_covers is not None:
             self.set_default_covers(default_covers)
 
+        if self.covers is not None:
+            with self.locked():
+                self.covers = None
+
         mode = self.mode
         if mode == RangelandCoverMode.Gridded:
             self._build_gridded_usgs_shrubland()

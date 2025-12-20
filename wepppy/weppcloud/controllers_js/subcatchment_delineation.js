@@ -241,6 +241,16 @@ var SubcatchmentDelineation = (function () {
             stacktrace: stacktracePanelElement ? { element: stacktracePanelElement } : null
         });
 
+        function resetCompletionSeen() {
+            sub._completion_seen = {
+                BUILD_SUBCATCHMENTS_TASK_COMPLETED: false,
+                WATERSHED_ABSTRACTION_TASK_COMPLETED: false
+            };
+        }
+
+        sub.poll_completion_event = "WATERSHED_ABSTRACTION_TASK_COMPLETED";
+        resetCompletionSeen();
+
         sub.hideStacktrace = function () {
             if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
                 stacktraceAdapter.hide();
@@ -490,6 +500,12 @@ var SubcatchmentDelineation = (function () {
         sub.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "BUILD_SUBCATCHMENTS_TASK_COMPLETED") {
+                if (sub._completion_seen && sub._completion_seen[normalized]) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                if (sub._completion_seen) {
+                    sub._completion_seen[normalized] = true;
+                }
                 sub.show();
                 try {
                     ChannelDelineation.getInstance().show();
@@ -498,6 +514,12 @@ var SubcatchmentDelineation = (function () {
                 }
                 emit("subcatchment:build:completed", payload || {});
             } else if (normalized === "WATERSHED_ABSTRACTION_TASK_COMPLETED") {
+                if (sub._completion_seen && sub._completion_seen[normalized]) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                if (sub._completion_seen) {
+                    sub._completion_seen[normalized] = true;
+                }
                 sub.report();
                 sub.disconnect_status_stream(sub);
                 sub.enableColorMap("slp_asp");
@@ -508,7 +530,7 @@ var SubcatchmentDelineation = (function () {
                 }
             }
 
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         function handleError(error) {
@@ -1583,6 +1605,7 @@ var SubcatchmentDelineation = (function () {
             var taskMsg = "Building Subcatchments";
 
             resetStatus(taskMsg);
+            resetCompletionSeen();
             sub.connect_status_stream(sub);
 
             disposeGlLayer();
@@ -1615,6 +1638,7 @@ var SubcatchmentDelineation = (function () {
                         } else {
                             safeHtml(statusElement, "build_subcatchments_and_abstract_watershed_rq job submitted: " + response.job_id);
                         }
+                        sub.poll_completion_event = "WATERSHED_ABSTRACTION_TASK_COMPLETED";
                         sub.set_rq_job_id(sub, response.job_id);
                     } else if (response) {
                         sub.pushResponseStacktrace(sub, response);

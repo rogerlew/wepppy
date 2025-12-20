@@ -252,6 +252,10 @@ describe("RangelandCover controller", () => {
     test("build queues job, defers completion to status trigger, and updates UI", async () => {
         eventLog.length = 0;
         const enableColorMap = global.SubcatchmentDelineation.getInstance().enableColorMap;
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
 
         rangeland.build();
         await Promise.resolve();
@@ -269,6 +273,7 @@ describe("RangelandCover controller", () => {
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(rangeland);
         expect(baseInstance.append_status_message).toHaveBeenCalledWith(rangeland, "build_rangeland_cover job submitted: job-123");
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rangeland, "job-123");
+        expect(pollCompletionValues).toEqual(["RANGELAND_COVER_BUILD_TASK_COMPLETED"]);
 
         const startedEvent = eventLog.find((item) => item.event === "rangeland:run:started");
         expect(startedEvent).toBeDefined();
@@ -295,6 +300,19 @@ describe("RangelandCover controller", () => {
 
         expect(completedEvent).toBeDefined();
         expect(reportEvent).toBeDefined();
+    });
+
+    test("completion trigger is idempotent", () => {
+        const enableColorMap = global.SubcatchmentDelineation.getInstance().enableColorMap;
+
+        jest.spyOn(rangeland, "report").mockImplementation(jest.fn());
+
+        rangeland.triggerEvent("RANGELAND_COVER_BUILD_TASK_COMPLETED", {});
+        rangeland.triggerEvent("RANGELAND_COVER_BUILD_TASK_COMPLETED", {});
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(enableColorMap).toHaveBeenCalledTimes(1);
+        expect(rangeland.report).toHaveBeenCalledTimes(1);
     });
 
     test("build failure surfaces stack trace and emits failure event", async () => {

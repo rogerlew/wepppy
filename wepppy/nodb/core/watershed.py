@@ -957,6 +957,10 @@ class Watershed(NoDbBase):
 
         assert not self.islocked()
 
+        if _exists(self.subwta):
+            self.logger.info(f' Removing subcatchment: {self.subwta}')
+            os.remove(self.subwta)
+
         if self.delineation_backend_is_topaz:
             self.logger.info(f' delineation_backend_is_topaz')
             Topaz.getInstance(self.wd).build_subcatchments()
