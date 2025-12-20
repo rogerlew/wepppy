@@ -4,7 +4,6 @@
 
 {% block header_nav %}
 <nav class="wc-nav" aria-label="Primary">
-  <a class="wc-nav__link" href="{{ url_for('weppcloud_site.index') }}">Home</a>
   {% if current_user.is_authenticated %}
     <a class="wc-nav__link" href="{{ url_for('user.runs') }}">Runs</a>
     <a class="wc-nav__link" href="{{ url_for('user.profile') }}">Profile</a>
