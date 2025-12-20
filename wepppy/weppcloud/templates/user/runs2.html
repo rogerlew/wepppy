@@ -50,94 +50,136 @@
   <header class="wc-stack">
     <div class="wc-console-header">
       <div class="wc-console-header__primary">
-        <h1 class="wc-heading__title">Runs</h1>
+        <div class="wc-stack">
+          <h1 class="wc-heading__title">Runs</h1>
+          <div class="wc-tabs__nav" role="tablist" aria-label="Runs view">
+            <button class="wc-tabs__tab is-active" id="runs-tab-table" type="button" role="tab" aria-selected="true" aria-controls="runs-table-view">
+              Table
+            </button>
+            <button class="wc-tabs__tab" id="runs-tab-map" type="button" role="tab" aria-selected="false" aria-controls="runs-map-view">
+              Map
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
 
   <section class="wc-panel wc-stack">
-    <div class="wc-toolbar wc-toolbar--end">
-      <button type="button" class="pure-button pure-button-secondary" id="delete_runs_button" onclick="deleteRuns()" disabled>Delete selected</button>
-    </div>
+    <div id="runs-table-view" role="tabpanel" aria-labelledby="runs-tab-table">
+      <div class="wc-map-controls">
+        <div class="wc-map-controls__row wc-map-controls__row--inputs">
+          <label class="wc-map-controls__label" for="runs_search_input">Search runs</label>
+          <div class="wc-map-controls__input">
+            <input class="wc-map-controls__input-field wc-field__control wc-field__control--text"
+                   id="runs_search_input"
+                   name="runs_search_input"
+                   type="text"
+                   placeholder="Name | Scenario | Run ID"
+                   autocomplete="off"
+                   inputmode="text">
+          </div>
+          <div class="wc-map-controls__actions">
+            <button type="button" class="pure-button pure-button-secondary" id="runs_search_clear" disabled>Clear</button>
+          </div>
+          <div class="wc-map-controls__go">
+            <button type="button" class="pure-button pure-button-primary" id="runs_search_go">Search</button>
+          </div>
+        </div>
+      </div>
+      <div class="wc-toolbar wc-toolbar--end">
+        <button type="button" class="pure-button pure-button-secondary" id="delete_runs_button" onclick="deleteRuns()" disabled>Delete selected</button>
+      </div>
 
-    <div class="wc-table-wrapper">
-      <table class="wc-table wc-table--dense" id="runs_table">
-        <thead>
-          <tr>
-            {% if show_owner %}<th scope="col">Owner</th>{% endif %}
-            {{ sortable_header('Project name', 'name') }}
-            {{ sortable_header('Scenario', 'scenario') }}
-            {{ sortable_header('Run ID', 'runid') }}
-            {{ sortable_header('Config', 'config') }}
-            <th scope="col">Link</th>
-            {{ sortable_header('Creation date', 'date_created') }}
-            {{ sortable_header('Last modified', 'last_modified') }}
-            <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for meta in user_runs %}
-          <tr id="{{ meta.runid }}">
-            {% if show_owner %}<td>{{ meta.owner }}</td>{% endif %}
-            <td>{{ meta.name }}</td>
-            <td>{{ meta.scenario }}</td>
-            <td>{{ meta.runid }}</td>
-            <td>{{ meta.config }}</td>
-            <td>
-              <a class="pure-button pure-button-secondary" href="{{ site_prefix }}/runs/{{ meta.runid }}/{{ meta.config }}/" target="_blank" rel="noopener">Open</a>
-            </td>
-            <td>{% if meta.date_created %}{{ meta.date_created }}{% else %}&mdash;{% endif %}</td>
-            <td>{% if meta.last_modified %}{{ meta.last_modified }}{% else %}&mdash;{% endif %}</td>
-            <td>
-              <input type="checkbox" value="{{ meta.runid }}" {% if meta.readonly %}disabled{% endif %} aria-label="Select {{ meta.runid }}">
-            </td>
-          </tr>
+      <div class="wc-table-wrapper">
+        <table class="wc-table wc-table--dense" id="runs_table">
+          <thead>
+            <tr>
+              {% if show_owner %}<th scope="col">Owner</th>{% endif %}
+              {{ sortable_header('Project name', 'name') }}
+              {{ sortable_header('Scenario', 'scenario') }}
+              {{ sortable_header('Run ID', 'runid') }}
+              {{ sortable_header('Config', 'config') }}
+              <th scope="col">Link</th>
+              {{ sortable_header('Creation date', 'date_created') }}
+              {{ sortable_header('Last modified', 'last_modified') }}
+              <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for meta in user_runs %}
+            <tr id="{{ meta.runid }}"
+                data-search="{{ (meta.name | default('', true) ~ ' ' ~ meta.scenario | default('', true) ~ ' ' ~ meta.runid | default('', true)) | lower }}">
+              {% if show_owner %}<td>{{ meta.owner }}</td>{% endif %}
+              <td>{{ meta.name }}</td>
+              <td>{{ meta.scenario }}</td>
+              <td>{{ meta.runid }}</td>
+              <td>{{ meta.config }}</td>
+              <td>
+                <a class="pure-button pure-button-secondary" href="{{ site_prefix }}/runs/{{ meta.runid }}/{{ meta.config }}/" target="_blank" rel="noopener">Open</a>
+              </td>
+              <td>{% if meta.date_created %}{{ meta.date_created }}{% else %}&mdash;{% endif %}</td>
+              <td>{% if meta.last_modified %}{{ meta.last_modified }}{% else %}&mdash;{% endif %}</td>
+              <td>
+                <input type="checkbox" value="{{ meta.runid }}" {% if meta.readonly %}disabled{% endif %} aria-label="Select {{ meta.runid }}">
+              </td>
+            </tr>
           {% else %}
-          <tr>
+          <tr data-empty-row="true">
             <td colspan="10" class="wc-text-muted">No runs found.</td>
           </tr>
           {% endfor %}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
+
+      {% if pagination %}
+        {% set per_page_value = per_page | default(100, true) %}
+        {% set sort_value = sort | default('last_modified', true) %}
+        {% set direction_value = direction | default('desc', true) %}
+        <nav aria-label="Runs pagination" class="wc-pagination-nav">
+          {% if pagination.has_prev %}
+            <a class="wc-pagination__link"
+               href="{{ url_for('user.runs', page=pagination.prev_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
+               aria-label="Previous page">
+              &laquo;
+            </a>
+          {% else %}
+            <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&laquo;</span>
+          {% endif %}
+
+          {% for p in range(max(1, pagination.page - 2), min(pagination.pages, pagination.page + 2) + 1) %}
+            {% if p == pagination.page %}
+              <span class="wc-pagination__link wc-pagination__link--current" aria-current="page">{{ p }}</span>
+            {% else %}
+              <a class="wc-pagination__link"
+                 href="{{ url_for('user.runs', page=p, sort=sort_value, direction=direction_value, per_page=per_page_value) }}">
+                {{ p }}
+              </a>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+            <a class="wc-pagination__link"
+               href="{{ url_for('user.runs', page=pagination.next_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
+               aria-label="Next page">
+              &raquo;
+            </a>
+          {% else %}
+            <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&raquo;</span>
+          {% endif %}
+        </nav>
+      {% endif %}
     </div>
 
-    {% if pagination %}
-      {% set per_page_value = per_page | default(100, true) %}
-      {% set sort_value = sort | default('last_modified', true) %}
-      {% set direction_value = direction | default('desc', true) %}
-      <nav aria-label="Runs pagination" class="wc-pagination-nav">
-        {% if pagination.has_prev %}
-          <a class="wc-pagination__link"
-             href="{{ url_for('user.runs', page=pagination.prev_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
-             aria-label="Previous page">
-            &laquo;
-          </a>
-        {% else %}
-          <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&laquo;</span>
-        {% endif %}
-
-        {% for p in range(max(1, pagination.page - 2), min(pagination.pages, pagination.page + 2) + 1) %}
-          {% if p == pagination.page %}
-            <span class="wc-pagination__link wc-pagination__link--current" aria-current="page">{{ p }}</span>
-          {% else %}
-            <a class="wc-pagination__link"
-               href="{{ url_for('user.runs', page=p, sort=sort_value, direction=direction_value, per_page=per_page_value) }}">
-              {{ p }}
-            </a>
-          {% endif %}
-        {% endfor %}
-
-        {% if pagination.has_next %}
-          <a class="wc-pagination__link"
-             href="{{ url_for('user.runs', page=pagination.next_num, sort=sort_value, direction=direction_value, per_page=per_page_value) }}"
-             aria-label="Next page">
-            &raquo;
-          </a>
-        {% else %}
-          <span class="wc-pagination__link" aria-hidden="true" aria-disabled="true">&raquo;</span>
-        {% endif %}
-      </nav>
-    {% endif %}
+    <div id="runs-map-view" role="tabpanel" aria-labelledby="runs-tab-map" hidden>
+      <div class="wc-map" style="aspect-ratio: 16 / 9; min-height: 420px;">
+        <div id="runs-map-canvas" class="wc-map__canvas" role="application" aria-label="Runs map viewport"></div>
+      </div>
+      <div id="runs-map-status" class="wc-text-muted" aria-live="polite" style="margin-top: var(--wc-space-sm);">
+        Switch to Map to load run locations.
+      </div>
+    </div>
   </section>
 </section>
 
@@ -145,6 +187,22 @@
   const sitePrefix = {{ site_prefix | default('', true) | tojson }};
   const deleteButton = document.getElementById('delete_runs_button');
   const runsTable = document.getElementById('runs_table');
+  const runsTableView = document.getElementById('runs-table-view');
+  const runsMapView = document.getElementById('runs-map-view');
+  const runsTabTable = document.getElementById('runs-tab-table');
+  const runsTabMap = document.getElementById('runs-tab-map');
+  const runsMapStatus = document.getElementById('runs-map-status');
+  const runsMapCanvas = document.getElementById('runs-map-canvas');
+  const runsSearchInput = document.getElementById('runs_search_input');
+  const runsSearchClear = document.getElementById('runs_search_clear');
+  const runsSearchGo = document.getElementById('runs_search_go');
+  {% if show_owner %}
+  const runsMapDataUrl = {{ url_for('user.runs_map_data', scope='all') | tojson }};
+  {% else %}
+  const runsMapDataUrl = {{ url_for('user.runs_map_data') | tojson }};
+  {% endif %}
+  let runsMapInitialized = false;
+  let runsMapDeck = null;
 
   async function deleteRun(runid) {
     const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, { method: 'POST' });
@@ -163,6 +221,37 @@
     deleteButton.disabled = checked.length === 0;
   }
 
+  function applyRunsFilter() {
+    if (!runsTable || !runsSearchInput) {
+      return;
+    }
+    const query = runsSearchInput.value.trim().toLowerCase();
+    let matches = 0;
+    const rows = runsTable.querySelectorAll('tbody tr');
+    rows.forEach((row) => {
+      if (row.dataset.emptyRow === 'true') {
+        return;
+      }
+      const haystack = row.dataset.search || '';
+      const isMatch = !query || haystack.includes(query);
+      row.style.display = isMatch ? '' : 'none';
+      if (isMatch) {
+        matches += 1;
+      }
+    });
+    if (runsSearchClear) {
+      runsSearchClear.disabled = query.length === 0;
+    }
+    const emptyRow = runsTable.querySelector('tbody tr[data-empty-row="true"]');
+    if (emptyRow) {
+      if (!query && matches === 0) {
+        emptyRow.style.display = '';
+        return;
+      }
+      emptyRow.style.display = matches ? 'none' : '';
+    }
+  }
+
   function deleteRuns() {
     const checks = Array.from(runsTable.querySelectorAll('input[type="checkbox"]:checked'));
     if (!checks.length) {
@@ -176,6 +265,289 @@
     runids.forEach(deleteRun);
   }
 
+  function setRunsView(view) {
+    const isMap = view === 'map';
+    if (runsTableView) {
+      runsTableView.hidden = isMap;
+    }
+    if (runsMapView) {
+      runsMapView.hidden = !isMap;
+    }
+    if (runsTabTable) {
+      runsTabTable.classList.toggle('is-active', !isMap);
+      runsTabTable.setAttribute('aria-selected', (!isMap).toString());
+    }
+    if (runsTabMap) {
+      runsTabMap.classList.toggle('is-active', isMap);
+      runsTabMap.setAttribute('aria-selected', isMap.toString());
+    }
+    if (isMap) {
+      initRunsMap();
+    }
+  }
+
+  function formatRunLabel(run) {
+    const runid = run.runid || '';
+    const details = [];
+    if (run.name) {
+      details.push(run.name);
+    }
+    if (run.scenario) {
+      details.push(run.scenario);
+    }
+    if (!details.length) {
+      return runid;
+    }
+    return `${runid}\n${details.join(' | ')}`;
+  }
+
+  function buildViewState(runs) {
+    const fallback = {
+      longitude: -114.5,
+      latitude: 43.8,
+      zoom: 4,
+      minZoom: 2,
+      maxZoom: 17,
+      pitch: 0,
+      bearing: 0,
+    };
+    if (!runs.length) {
+      return fallback;
+    }
+    let minLon = null;
+    let maxLon = null;
+    let minLat = null;
+    let maxLat = null;
+    runs.forEach((run) => {
+      const center = run.map_center;
+      if (!center || center.length < 2) {
+        return;
+      }
+      const lon = center[0];
+      const lat = center[1];
+      if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
+        return;
+      }
+      minLon = minLon === null ? lon : Math.min(minLon, lon);
+      maxLon = maxLon === null ? lon : Math.max(maxLon, lon);
+      minLat = minLat === null ? lat : Math.min(minLat, lat);
+      maxLat = maxLat === null ? lat : Math.max(maxLat, lat);
+    });
+    if (minLon === null || maxLon === null || minLat === null || maxLat === null) {
+      return fallback;
+    }
+    const span = Math.max(maxLon - minLon, maxLat - minLat);
+    const zoom = span ? Math.max(2, Math.min(16, Math.log2(360 / span) + 0.5)) : 12;
+    return {
+      longitude: (minLon + maxLon) / 2,
+      latitude: (minLat + maxLat) / 2,
+      zoom,
+      minZoom: 2,
+      maxZoom: 17,
+      pitch: 0,
+      bearing: 0,
+    };
+  }
+
+  function updateMapStatus(message) {
+    if (runsMapStatus) {
+      runsMapStatus.textContent = message;
+    }
+  }
+
+  function createTerrainLayer(deckApi) {
+    const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
+    let subdomainIndex = 0;
+    const template = 'https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}';
+
+    return new deckApi.TileLayer({
+      id: 'runs-base-tiles',
+      data: template,
+      minZoom: 0,
+      maxZoom: 19,
+      tileSize: 256,
+      maxRequests: 8,
+      getTileData: async ({ index, signal }) => {
+        const { x, y, z } = index || {};
+        if (![x, y, z].every(Number.isFinite)) {
+          throw new Error(`Tile coords missing: x=${x} y=${y} z=${z}`);
+        }
+        const sub = subdomains[subdomainIndex % subdomains.length];
+        subdomainIndex += 1;
+        const url = template
+          .replace('{s}', sub)
+          .replace('{x}', String(x))
+          .replace('{y}', String(y))
+          .replace('{z}', String(z));
+        const response = await fetch(url, { signal, mode: 'cors' });
+        if (!response.ok) {
+          throw new Error(`Tile fetch failed ${response.status}: ${url}`);
+        }
+        const blob = await response.blob();
+        return await createImageBitmap(blob);
+      },
+      onTileError: (err) => {
+        console.error('runs map tile error', err);
+      },
+      renderSubLayers: (props) => {
+        const tile = props.tile;
+        const data = props.data;
+        if (!tile || !data || !tile.bbox) {
+          return null;
+        }
+        const { west, south, east, north } = tile.bbox;
+        const bounds = [west, south, east, north];
+        if (bounds.some((v) => !Number.isFinite(v))) {
+          return null;
+        }
+        return new deckApi.BitmapLayer(props, {
+          id: `${props.id}-${tile.id}`,
+          data: null,
+          image: data,
+          bounds,
+          pickable: false,
+          opacity: 0.95,
+        });
+      },
+    });
+  }
+
+  function waitForDeck() {
+    if (window.deck && window.deck.Deck) {
+      return Promise.resolve(window.deck);
+    }
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        attempts += 1;
+        if (window.deck && window.deck.Deck) {
+          clearInterval(timer);
+          resolve(window.deck);
+          return;
+        }
+        if (attempts > 20) {
+          clearInterval(timer);
+          reject(new Error('deck.gl failed to load.'));
+        }
+      }, 250);
+    });
+  }
+
+  async function initRunsMap() {
+    if (runsMapInitialized) {
+      return;
+    }
+    runsMapInitialized = true;
+    if (!runsMapCanvas) {
+      updateMapStatus('Runs map container not found.');
+      return;
+    }
+    updateMapStatus('Loading map data...');
+    let deckApi;
+    try {
+      deckApi = await waitForDeck();
+    } catch (error) {
+      console.error(error);
+      updateMapStatus('Map failed to load. deck.gl is unavailable.');
+      return;
+    }
+    let payload;
+    try {
+      const response = await fetch(runsMapDataUrl);
+      if (!response.ok) {
+        throw new Error(`Map data fetch failed ${response.status}`);
+      }
+      payload = await response.json();
+    } catch (error) {
+      console.error(error);
+      updateMapStatus('Unable to load run locations.');
+      return;
+    }
+    const runs = (payload.runs || [])
+      .filter((run) => Array.isArray(run.map_center) && run.map_center.length >= 2)
+      .map((run) => ({
+        ...run,
+        label: formatRunLabel(run),
+        url: `${sitePrefix}/runs/${run.runid}/${run.config}/`,
+      }));
+
+    if (!runs.length) {
+      updateMapStatus('No runs with map centers are available yet.');
+    } else {
+      updateMapStatus(`${runs.length} run${runs.length === 1 ? '' : 's'} mapped.`);
+    }
+
+    const viewState = buildViewState(runs);
+    const baseLayer = createTerrainLayer(deckApi);
+    const pointsLayer = new deckApi.ScatterplotLayer({
+      id: 'runs-points',
+      data: runs,
+      pickable: true,
+      radiusUnits: 'pixels',
+      getPosition: (d) => d.map_center,
+      getRadius: 6,
+      getFillColor: [31, 111, 235, 200],
+      getLineColor: [255, 255, 255, 200],
+      lineWidthUnits: 'pixels',
+      getLineWidth: 1,
+    });
+    const labelsLayer = new deckApi.TextLayer({
+      id: 'runs-labels',
+      data: runs,
+      pickable: true,
+      getPosition: (d) => d.map_center,
+      getText: (d) => d.label,
+      getSize: 14,
+      sizeUnits: 'pixels',
+      getColor: [31, 111, 235, 235],
+      fontFamily: '"Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+      getPixelOffset: [12, 0],
+      getTextAnchor: 'start',
+      getAlignmentBaseline: 'center',
+      background: true,
+      getBackgroundColor: [255, 255, 255, 230],
+      backgroundPadding: [6, 4],
+    });
+
+    runsMapDeck = new deckApi.Deck({
+      parent: runsMapCanvas,
+      views: new deckApi.MapView({ repeat: false }),
+      initialViewState: viewState,
+      controller: {
+        dragRotate: false,
+        touchRotate: false,
+      },
+      layers: [baseLayer, pointsLayer, labelsLayer],
+      getCursor: ({ isDragging, isHovering }) => {
+        if (isDragging) {
+          return 'grabbing';
+        }
+        if (isHovering) {
+          return 'pointer';
+        }
+        return 'grab';
+      },
+      getTooltip: ({ object }) => {
+        if (!object) {
+          return null;
+        }
+        const details = [object.runid];
+        if (object.name) {
+          details.push(object.name);
+        }
+        if (object.scenario) {
+          details.push(object.scenario);
+        }
+        return details.filter(Boolean).join(' | ');
+      },
+      onClick: ({ object }) => {
+        if (object && object.url) {
+          window.open(object.url, '_blank', 'noopener');
+        }
+      },
+    });
+  }
+
   if (!runsTable) {
     console.warn('Runs table not found; skipping selection logic.');
     if (deleteButton) {
@@ -187,10 +559,39 @@
     });
     updateDeleteState();
   }
+
+  if (runsSearchInput) {
+    runsSearchInput.addEventListener('input', applyRunsFilter);
+    runsSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        applyRunsFilter();
+      }
+    });
+  }
+  if (runsSearchGo) {
+    runsSearchGo.addEventListener('click', applyRunsFilter);
+  }
+  if (runsSearchClear) {
+    runsSearchClear.addEventListener('click', () => {
+      if (runsSearchInput) {
+        runsSearchInput.value = '';
+      }
+      applyRunsFilter();
+    });
+  }
+
+  if (runsTabTable) {
+    runsTabTable.addEventListener('click', () => setRunsView('table'));
+  }
+  if (runsTabMap) {
+    runsTabMap.addEventListener('click', () => setRunsView('map'));
+  }
 </script>
 {% endblock %}
 
 {% block script_extras %}
   {{ super() }}
+  <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
   <script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
 {% endblock %}

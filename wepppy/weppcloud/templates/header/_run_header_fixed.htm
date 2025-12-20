@@ -115,56 +115,68 @@
               </a>
             </div>
           </details>
+          <details class="wc-run-header__menu">
+            <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
+              More
+            </summary>
+            <div class="wc-run-header__menu-content">
+              <a class="pure-button"
+                 href="{{ url_for_run('browse.browse_tree', runid=view_runid, config=view_config, subpath='') }}">
+                Browse
+              </a>
+              <button type="button"
+                      class="pure-button"
+                      data-toggle="modal"
+                      data-modal-open="puModal">
+                PowerUser
+              </button>
+              <button type="button"
+                      class="pure-button"
+                      data-modal-open="unitizerModal">
+                Change Units
+              </button>
+              <button type="button"
+                      class="pure-button"
+                      data-modal-open="teamModal">
+                Manage Team
+              </button>
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_readonly"
+                       type="checkbox"
+                       data-project-toggle="readonly"
+                       {% if current_ron.readonly %}checked{% endif %}>
+                <span>Readonly</span>
+              </label>
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_public"
+                       type="checkbox"
+                       data-project-toggle="public"
+                       {% if current_ron.public %}checked{% endif %}>
+                <span>Public</span>
+              </label>
+              {% if user.has_role('Admin') %}
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem) }}"
+                 target="_blank"
+                 rel="noopener">
+                Access log
+              </a>
+              {% endif %}
+              {% if user.is_authenticated %}
+              <hr aria-hidden="true">
+              <a class="pure-button pure-button-secondary" href="{{ url_for('user.profile') }}">
+                Profile
+              </a>
+              <a class="pure-button pure-button-secondary" href="{{ url_for('user.runs') }}">
+                Runs
+              </a>
+              <a class="pure-button pure-button-secondary" href="{{ url_for('security.logout') }}">
+                Logout
+              </a>
+              {% endif %}
+            </div>
+          </details>
         </div>
-        <details class="wc-run-header__menu">
-          <summary class="wc-run-header__menu-button pure-button pure-button-secondary">
-            More
-          </summary>
-          <div class="wc-run-header__menu-content">
-            <a class="pure-button"
-               href="{{ url_for_run('browse.browse_tree', runid=view_runid, config=view_config, subpath='') }}">
-              Browse
-            </a>
-            <button type="button"
-                    class="pure-button"
-                    data-toggle="modal"
-                    data-modal-open="puModal">
-              PowerUser
-            </button>
-            <button type="button"
-                    class="pure-button"
-                    data-modal-open="unitizerModal">
-              Change Units
-            </button>
-            <button type="button"
-                    class="pure-button"
-                    data-modal-open="teamModal">
-              Manage Team
-            </button>
-            <label class="wc-run-header__toggle">
-              <input id="checkbox_readonly"
-                     type="checkbox"
-                     data-project-toggle="readonly"
-                     {% if current_ron.readonly %}checked{% endif %}>
-              <span>Readonly</span>
-            </label>
-            <label class="wc-run-header__toggle">
-              <input id="checkbox_public"
-                     type="checkbox"
-                     data-project-toggle="public"
-                     {% if current_ron.public %}checked{% endif %}>
-              <span>Public</span>
-            </label>
-            {% if user.has_role('Admin') %}
-            <a class="pure-button pure-button-secondary"
-               href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem) }}"
-               target="_blank"
-               rel="noopener">
-              Access log
-            </a>
-            {% endif %}
-          </div>
-        </details>
       </div>
     </div>
   </div>

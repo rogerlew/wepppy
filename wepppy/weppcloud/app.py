@@ -163,7 +163,6 @@ class Run(db.Model):
                     config=self.config,
                     name=ron.name,
                     scenario=ron.scenario,
-                    w3w=ron.w3w,
                     readonly=ron.readonly)
 
 

@@ -1311,6 +1311,9 @@ var Climate = (function () {
 
     if (typeof document !== "undefined") {
         var bootstrapClimate = function () {
+            if (!document.getElementById("climate_form")) {
+                return;
+            }
             try {
                 Climate.getInstance();
             } catch (err) {

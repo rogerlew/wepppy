@@ -195,11 +195,67 @@ def _build_meta(wd, attrs: dict):
 
         meta = dict(name=ron.name,
                     scenario=ron.scenario,
-                    w3w=ron.w3w,
                     readonly=ron.readonly)
         meta.update(attrs)
 
         return meta
+
+
+def _build_map_meta(wd, attrs: dict):
+        try:
+            ron = Ron.getInstance(wd)
+        except:
+            return None
+
+        map_center = None
+        map_zoom = None
+        if ron.map is not None:
+            map_center = ron.map.center
+            map_zoom = ron.map.zoom
+
+        meta = dict(
+            runid=attrs.get("runid"),
+            config=attrs.get("config"),
+            name=ron.name,
+            scenario=ron.scenario,
+            readonly=ron.readonly,
+            map_center=map_center,
+            map_zoom=map_zoom,
+        )
+        return meta
+
+
+def _collect_map_metas_for_runs(runs) -> List[dict]:
+    """Build map metadata payloads for the provided runs in parallel."""
+    if not runs:
+        return []
+
+    metas: List[Optional[dict]] = [None] * len(runs)
+    max_workers = max(min(10, len(runs)), 1)
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(
+                _build_map_meta,
+                run.wd,
+                {
+                    "runid": run.runid,
+                    "config": run.config,
+                },
+            ): idx
+            for idx, run in enumerate(runs)
+        }
+
+        try:
+            for future in as_completed(futures):
+                idx = futures[future]
+                meta = future.result()
+                metas[idx] = meta
+        except Exception:
+            for future in futures:
+                future.cancel()
+            raise
+
+    return [meta for meta in metas if meta]
 
 
 @user_bp.route("/runs", strict_slashes=False)
@@ -265,5 +321,31 @@ def runs():
             direction=direction_param,
             per_page=per_page,
         )
+    except:
+        return exception_factory()
+
+
+@user_bp.route("/runs/map-data", strict_slashes=False)
+@login_required
+def runs_map_data():
+    try:
+        from wepppy.weppcloud.app import runs_users, Run
+        scope = (request.args.get('scope') or '').lower()
+        if scope == 'all' and (current_user.has_role('Admin') or current_user.has_role('Root')):
+            runs_all = (
+                Run.query
+                .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
+                .all()
+            )
+        else:
+            runs_all = (
+                Run.query
+                .join(runs_users)
+                .filter(runs_users.c.user_id == current_user.id)
+                .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
+                .all()
+            )
+        metas = _collect_map_metas_for_runs(runs_all)
+        return jsonify(runs=metas)
     except:
         return exception_factory()
