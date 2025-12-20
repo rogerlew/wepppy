@@ -1,5 +1,7 @@
 # UI Scaling Strategy
 
+> **Status (Issue #472):** Reviewed and deemed unnecessary after token cleanup; the reported scaling issue was caused by site-specific browser zoom. This document is archived for future reference.
+
 **Purpose**  
 Define a deterministic, accessible, and hardware-agnostic UI scaling strategy suitable for desktop-first web applications. This document is intended to be both human-readable and agent-actionable, enabling automated or semi-automated implementation without reliance on browser- or OS-specific heuristics.
 
@@ -133,3 +135,12 @@ Expected scale values (rounded) for quick checks and tests:
    - Run through a small set of layouts (usersum markdown, pure pages, run header)
      and confirm no overflow regressions.
    - Update this document with the final formula and any tested edge cases.
+
+---
+
+## 7. Status
+
+Scaling was reviewed after token cleanup and determined to be unnecessary at this time.
+Current behavior is acceptable; the reported issue was traced to user-applied, site-specific
+browser zoom. This strategy remains archived for future reference if display-density
+requirements change.
