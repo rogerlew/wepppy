@@ -1484,11 +1484,49 @@ var MapController = (function () {
                     console.warn("Map GL: failed to refresh SBS map", error);
                 });
             },
+            hillQuery: function (queryUrl) {
+                if (!queryUrl) {
+                    return;
+                }
+                if (map.isDrilldownSuppressed && map.isDrilldownSuppressed()) {
+                    return;
+                }
+                if (map.tabset && typeof map.tabset.activate === "function") {
+                    map.tabset.activate("drilldown", true);
+                }
+                emit("map:drilldown:requested", { url: queryUrl });
+                http.request(queryUrl, {
+                    method: "GET",
+                    headers: { Accept: "text/html,application/xhtml+xml" }
+                }).then(function (result) {
+                    var html = typeof result.body === "string" ? result.body : "";
+                    if (map.drilldown && typeof map.drilldown.html === "function") {
+                        map.drilldown.html(html);
+                    } else if (drilldownElement) {
+                        drilldownElement.innerHTML = html;
+                    }
+                    try {
+                        if (window.Project && typeof window.Project.getInstance === "function") {
+                            window.Project.getInstance().set_preferred_units();
+                        }
+                    } catch (err) {
+                        console.warn("Map GL: failed to set preferred units", err);
+                    }
+                    emit("map:drilldown:loaded", { url: queryUrl });
+                }).catch(function (error) {
+                    console.error("Map GL: drilldown request failed", error);
+                    emit("map:drilldown:error", { url: queryUrl, error: error });
+                });
+            },
             subQuery: function () {
                 warnNotImplemented("subQuery");
             },
-            chnQuery: function () {
-                warnNotImplemented("chnQuery");
+            chnQuery: function (topazId) {
+                if (topazId === undefined || topazId === null) {
+                    return;
+                }
+                var queryUrl = window.url_for_run("report/chn_summary/" + topazId + "/");
+                map.hillQuery(queryUrl);
             },
             findByTopazId: function () {
                 warnNotImplemented("findByTopazId");

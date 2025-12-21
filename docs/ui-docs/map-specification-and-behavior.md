@@ -353,14 +353,22 @@ Assumptions:
 - Scope: channel pass 2, labels via TextLayer/IconLayer, click -> `chnQuery`.
 - Tests: Playwright click channel -> drilldown panel update.
 
-### Phase 8b: subcatchments GL parity (controller + UX)
-- Scope: bring `subcatchments_gl.js` to functional parity with `subcatchment_delineation.js` (build action, status/polling, report loading, legend updates, preflight gating) while reconciling Leaflet vs. GL differences.
-- Notes: assumes Phase 8 delivered the GL subcatchment layers/colormap; this pass focuses on controller wiring and UI parity.
-- Tests: Jest for build/report/poll failure; Playwright build subcatchments -> report + legend update.
+### Phase 8 handoff summary
+- Pass 2: `query/delineation_pass/` routes to SUBWTA channels via `resources/channels.json`, with pickable GeoJsonLayer, fill enabled, and palette opacity ~0.6.
+- Labels: `Channel Labels` TextLayer renders unique TopazID labels with SDF outline styling (blue text + white stroke), registered in the overlay control and hidden by default.
+- Hover labels: when labels are hidden, hovering a channel shows an offset TopazID label; hover labels are suppressed when the labels overlay is visible.
+- Legend: channel order legend is injected into `#sub_legend` when pass 2 renders.
+- Drilldown: `map_gl.js` now implements `hillQuery` + `chnQuery` to load `report/chn_summary/<topazId>/` into the drilldown panel.
+- Tests: Jest covers pass 2 overlay + click drilldown, label styling, hover label behavior, and overlay toggle cleanup; Playwright stubs pass 2 data and confirms labels + drilldown panel update. `wctl run-npm test -- channel_gl.test.js` clean.
 
 ### Phase 9: subcatchments + gridded loss
 - Scope: GeoJsonLayer subcatchments, color map modes, labels, gridded loss raster.
 - Tests: Jest for color mapping; Playwright toggle subcatchment layers + legend range.
+
+### Phase 9b: subcatchments GL parity (controller + UX)
+- Scope: bring `subcatchments_gl.js` to functional parity with `subcatchment_delineation.js` (build action, status/polling, report loading, legend updates, preflight gating) while reconciling Leaflet vs. GL differences.
+- Notes: assumes Phase 9 delivered the GL subcatchment layers/colormap; this pass focuses on controller wiring and UI parity.
+- Tests: Jest for build/report/poll failure; Playwright build subcatchments -> report + legend update.
 
 ### Phase 10: WEPP find and flash
 - Scope: deck picking + highlight, reuse search input workflows.
@@ -381,6 +389,7 @@ Assumptions:
 ## Test and verification gates (per phase)
 - Unit (Jest): new controller tests under `controllers_js/__tests__`.
 - UI (Playwright): extend `static-src/tests/smoke` with map_pure_gl cases.
+- Note: hover interactions are flaky in Playwright; prefer Jest for hover-specific checks.
 - E2E run: create run via `/tests/api/create-run`, step through outlet -> channel -> subcatchments -> landuse -> soils -> wepp.
 - Keep old Leaflet path running in CI as regression baseline until parity is proven.
 

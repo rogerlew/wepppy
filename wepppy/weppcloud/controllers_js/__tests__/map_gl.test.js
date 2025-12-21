@@ -403,6 +403,26 @@ describe("Map GL controller", () => {
         }));
     });
 
+    test("chnQuery loads drilldown HTML and emits events", async () => {
+        const mapInstance = global.MapController.getInstance();
+
+        global.WCHttp.request.mockResolvedValueOnce({ body: "<div>Channel Summary</div>" });
+
+        emittedEvents = [];
+        mapInstance.chnQuery("123");
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(global.WCHttp.request).toHaveBeenCalledWith(
+            "/runs/test-run/cfg/report/chn_summary/123/",
+            expect.objectContaining({ method: "GET" }),
+        );
+        const drilldown = document.getElementById("drilldown");
+        expect(drilldown.innerHTML).toContain("Channel Summary");
+        expect(emittedEvents.some((evt) => evt.name === "map:drilldown:requested")).toBe(true);
+        expect(emittedEvents.some((evt) => evt.name === "map:drilldown:loaded")).toBe(true);
+    });
+
     test("mousemove triggers elevation request once per cooldown", async () => {
         global.MapController.getInstance();
 

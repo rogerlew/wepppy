@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * ChannelDelineation (Deck.gl parity + pass 1)
+ * ChannelDelineation (Deck.gl parity + pass 1/2)
  * ----------------------------------------------------------------------------
  */
 var ChannelDelineation = (function () {
@@ -19,8 +19,21 @@ var ChannelDelineation = (function () {
 
     var CHANNEL_LAYER_NAME = "Channels";
     var CHANNEL_LAYER_ID = "wc-channels-netful";
+    var CHANNEL_PASS2_LAYER_ID = "wc-channels-subwta";
+    var CHANNEL_LABEL_LAYER_NAME = "Channel Labels";
+    var CHANNEL_LABEL_LAYER_ID = "wc-channel-labels";
+    var CHANNEL_HOVER_LABEL_LAYER_ID = "wc-channel-hover-label";
     var NETFUL_ENDPOINT = "resources/netful.json";
+    var CHANNELS_ENDPOINT = "resources/channels.json";
     var CHANNEL_OPACITY = 0.9;
+    var CHANNEL_PASS1_FILL_OPACITY = 0.9;
+    var CHANNEL_PASS2_OPACITY = 0.6;
+    var CHANNEL_PASS2_FILL_OPACITY = 0.9;
+    var CHANNEL_LABEL_COLOR = [26, 115, 232, 255];
+    var CHANNEL_LABEL_OUTLINE_COLOR = [255, 255, 255, 255];
+    var CHANNEL_LABEL_OUTLINE_WIDTH = 3;
+    var CHANNEL_LABEL_FONT_SIZE = 14;
+    var CHANNEL_HOVER_OFFSET_PX = [14, -18];
     var DEFAULT_ORDER = 4;
     var MAX_ORDER = 7;
     var EMPTY_GEOJSON = { type: "FeatureCollection", features: [] };
@@ -29,6 +42,24 @@ var ChannelDelineation = (function () {
         "#2500F4", "#6600cc", "#50006b", "#6b006b"
     ].map(function (color) {
         return hexToRgba(color, CHANNEL_OPACITY);
+    });
+    var CHANNEL_PASS1_FILL_PALETTE = [
+        "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
+        "#2500F4", "#6600cc", "#50006b", "#6b006b"
+    ].map(function (color) {
+        return hexToRgba(color, CHANNEL_PASS1_FILL_OPACITY);
+    });
+    var CHANNEL_PASS2_PALETTE = [
+        "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
+        "#2500F4", "#6600cc", "#50006b", "#6b006b"
+    ].map(function (color) {
+        return hexToRgba(color, CHANNEL_PASS2_OPACITY);
+    });
+    var CHANNEL_PASS2_FILL_PALETTE = [
+        "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
+        "#2500F4", "#6600cc", "#50006b", "#6b006b"
+    ].map(function (color) {
+        return hexToRgba(color, CHANNEL_PASS2_FILL_OPACITY);
     });
 
     function ensureHelpers() {
@@ -329,12 +360,27 @@ var ChannelDelineation = (function () {
         return Math.max(0, Math.min(MAX_ORDER, value));
     }
 
-    function getLineColor(feature) {
+    function getLineColorPass1(feature) {
         var order = resolveOrder(feature);
         return CHANNEL_PALETTE[order] || CHANNEL_PALETTE[DEFAULT_ORDER];
     }
 
-    function attachRebuild(layer, channel) {
+    function getLineColorPass2(feature) {
+        var order = resolveOrder(feature);
+        return CHANNEL_PASS2_PALETTE[order] || CHANNEL_PASS2_PALETTE[DEFAULT_ORDER];
+    }
+
+    function getFillColorPass1(feature) {
+        var order = resolveOrder(feature);
+        return CHANNEL_PASS1_FILL_PALETTE[order] || CHANNEL_PASS1_FILL_PALETTE[DEFAULT_ORDER];
+    }
+
+    function getFillColorPass2(feature) {
+        var order = resolveOrder(feature);
+        return CHANNEL_PASS2_FILL_PALETTE[order] || CHANNEL_PASS2_FILL_PALETTE[DEFAULT_ORDER];
+    }
+
+    function attachChannelRebuild(layer, channel, options) {
         if (!layer) {
             return;
         }
@@ -343,40 +389,328 @@ var ChannelDelineation = (function () {
                 return layer;
             }
             var deckApi = ensureDeck();
-            var nextLayer = buildLayer(deckApi, channel.glData);
-            attachRebuild(nextLayer, channel);
+            var nextLayer = buildChannelLayer(deckApi, channel.glData, options || {});
+            attachChannelRebuild(nextLayer, channel, options || {});
             channel.glLayer = nextLayer;
             return nextLayer;
         };
     }
 
-    function buildLayer(deckApi, data) {
+    function attachLabelRebuild(layer, channel) {
+        if (!layer) {
+            return;
+        }
+        layer.__wcRebuild = function () {
+            if (!channel || !channel.labelData) {
+                return layer;
+            }
+            var deckApi = ensureDeck();
+            var nextLayer = buildLabelLayer(deckApi, channel.labelData);
+            if (!nextLayer) {
+                return layer;
+            }
+            attachLabelRebuild(nextLayer, channel);
+            channel.labelLayer = nextLayer;
+            return nextLayer;
+        };
+    }
+
+    function buildChannelLayer(deckApi, data, options) {
+        var opts = options || {};
         return new deckApi.GeoJsonLayer({
-            id: CHANNEL_LAYER_ID,
+            id: opts.layerId || CHANNEL_LAYER_ID,
             data: data || EMPTY_GEOJSON,
-            pickable: false,
+            pickable: Boolean(opts.pickable),
             stroked: true,
-            filled: false,
+            filled: Boolean(opts.filled),
             lineWidthUnits: "pixels",
             lineWidthMinPixels: 1,
             getLineWidth: function () { return 1.5; },
-            getLineColor: getLineColor
+            getLineColor: opts.getLineColor || getLineColorPass1,
+            getFillColor: opts.getFillColor || null,
+            onHover: typeof opts.onHover === "function" ? opts.onHover : null,
+            onClick: typeof opts.onClick === "function" ? opts.onClick : null
         });
     }
 
-    function removeLayer(channel, map) {
-        if (!channel.glLayer) {
+    function resolveLabelPosition(feature) {
+        var geometry = feature && feature.geometry ? feature.geometry : null;
+        if (!geometry) {
+            return null;
+        }
+        if (typeof window.polylabel === "function" && (geometry.type === "Polygon" || geometry.type === "MultiPolygon")) {
+            try {
+                var polyCoords = geometry.type === "Polygon" ? geometry.coordinates : geometry.coordinates[0];
+                var center = window.polylabel(polyCoords, 1.0);
+                if (Array.isArray(center) && center.length >= 2) {
+                    return [center[0], center[1]];
+                }
+            } catch (err) {
+                // fall back to first coordinate
+            }
+        }
+
+        var coords = null;
+        if (geometry.type === "Point") {
+            coords = geometry.coordinates;
+        } else if (geometry.type === "MultiPoint") {
+            coords = geometry.coordinates && geometry.coordinates[0];
+        } else if (geometry.type === "LineString") {
+            coords = geometry.coordinates && geometry.coordinates[0];
+        } else if (geometry.type === "MultiLineString") {
+            coords = geometry.coordinates && geometry.coordinates[0] && geometry.coordinates[0][0];
+        } else if (geometry.type === "Polygon") {
+            coords = geometry.coordinates && geometry.coordinates[0] && geometry.coordinates[0][0];
+        } else if (geometry.type === "MultiPolygon") {
+            coords = geometry.coordinates && geometry.coordinates[0] && geometry.coordinates[0][0] && geometry.coordinates[0][0][0];
+        }
+
+        if (!coords || coords.length < 2) {
+            return null;
+        }
+        return [coords[0], coords[1]];
+    }
+
+    function buildLabelData(features) {
+        var labels = [];
+        var seen = typeof Set === "function" ? new Set() : null;
+        (features || []).forEach(function (feature) {
+            var topId = feature && feature.properties ? feature.properties.TopazID : null;
+            if (topId === null || topId === undefined) {
+                return;
+            }
+            var key = String(topId);
+            if (seen) {
+                if (seen.has(key)) {
+                    return;
+                }
+                seen.add(key);
+            } else {
+                for (var i = 0; i < labels.length; i += 1) {
+                    if (labels[i].text === key) {
+                        return;
+                    }
+                }
+            }
+            var position = resolveLabelPosition(feature);
+            if (!position) {
+                return;
+            }
+            labels.push({
+                text: key,
+                position: position
+            });
+        });
+        return labels;
+    }
+
+    function resolveHoverLabelPosition(info, map) {
+        if (!info || !map || !map._deck) {
+            return null;
+        }
+        var x = Number(info.x);
+        var y = Number(info.y);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) {
+            return null;
+        }
+        var offsetX = x + CHANNEL_HOVER_OFFSET_PX[0];
+        var offsetY = y + CHANNEL_HOVER_OFFSET_PX[1];
+        var deckInstance = map._deck;
+        if (typeof deckInstance.getViewports === "function") {
+            var viewports = deckInstance.getViewports();
+            var viewport = viewports && viewports.length ? viewports[0] : null;
+            if (viewport && typeof viewport.unproject === "function") {
+                var coords = viewport.unproject([offsetX, offsetY]);
+                if (coords && coords.length >= 2) {
+                    return [coords[0], coords[1]];
+                }
+            }
+        }
+        return null;
+    }
+
+    function buildHoverLabelData(feature, positionOverride) {
+        if (!feature || !feature.properties) {
+            return null;
+        }
+        var topId = feature.properties.TopazID;
+        if (topId === null || topId === undefined) {
+            return null;
+        }
+        var position = positionOverride || resolveLabelPosition(feature);
+        if (!position) {
+            return null;
+        }
+        return [{
+            text: String(topId),
+            position: position
+        }];
+    }
+
+    function buildLabelLayer(deckApi, labelData) {
+        if (!deckApi || typeof deckApi.TextLayer !== "function") {
+            return null;
+        }
+        return new deckApi.TextLayer({
+            id: CHANNEL_LABEL_LAYER_ID,
+            data: labelData || [],
+            pickable: false,
+            getPosition: function (d) { return d.position; },
+            getText: function (d) { return d.text; },
+            getSize: function () { return CHANNEL_LABEL_FONT_SIZE; },
+            sizeUnits: "pixels",
+            getColor: function () { return CHANNEL_LABEL_COLOR; },
+            outlineColor: CHANNEL_LABEL_OUTLINE_COLOR,
+            outlineWidth: CHANNEL_LABEL_OUTLINE_WIDTH,
+            fontSettings: { sdf: true }
+        });
+    }
+
+    function buildHoverLabelLayer(deckApi, labelData) {
+        if (!deckApi || typeof deckApi.TextLayer !== "function") {
+            return null;
+        }
+        return new deckApi.TextLayer({
+            id: CHANNEL_HOVER_LABEL_LAYER_ID,
+            data: labelData || [],
+            pickable: false,
+            getPosition: function (d) { return d.position; },
+            getText: function (d) { return d.text; },
+            getSize: function () { return CHANNEL_LABEL_FONT_SIZE; },
+            sizeUnits: "pixels",
+            getColor: function () { return CHANNEL_LABEL_COLOR; },
+            outlineColor: CHANNEL_LABEL_OUTLINE_COLOR,
+            outlineWidth: CHANNEL_LABEL_OUTLINE_WIDTH,
+            fontSettings: { sdf: true }
+        });
+    }
+
+    function clearHoverLabel(channel, map) {
+        if (!channel) {
             return;
         }
-        if (typeof map.unregisterOverlay === "function") {
-            map.unregisterOverlay(channel.glLayer);
-        } else if (map.ctrls && typeof map.ctrls.removeLayer === "function") {
-            map.ctrls.removeLayer(channel.glLayer);
+        if (!channel.hoverLabelLayer) {
+            channel.hoverLabelKey = null;
+            return;
         }
-        if (typeof map.removeLayer === "function") {
-            map.removeLayer(channel.glLayer);
+        if (map && typeof map.removeLayer === "function") {
+            map.removeLayer(channel.hoverLabelLayer, { skipOverlay: true });
         }
-        channel.glLayer = null;
+        channel.hoverLabelLayer = null;
+        channel.hoverLabelKey = null;
+    }
+
+    function updateHoverLabel(channel, map, deckApi, info) {
+        if (!channel || !map || !deckApi) {
+            return;
+        }
+        if (channel.labelLayer && typeof map.hasLayer === "function" && map.hasLayer(channel.labelLayer)) {
+            clearHoverLabel(channel, map);
+            return;
+        }
+        var feature = info && info.object ? info.object : null;
+        if (!feature) {
+            clearHoverLabel(channel, map);
+            return;
+        }
+        var topId = feature && feature.properties ? feature.properties.TopazID : null;
+        if (topId === null || topId === undefined) {
+            clearHoverLabel(channel, map);
+            return;
+        }
+        var key = String(topId);
+        if (channel.hoverLabelKey === key && channel.hoverLabelLayer) {
+            return;
+        }
+        var position = resolveHoverLabelPosition(info, map);
+        var data = buildHoverLabelData(feature, position);
+        if (!data || !data.length) {
+            clearHoverLabel(channel, map);
+            return;
+        }
+        var nextLayer = buildHoverLabelLayer(deckApi, data);
+        if (!nextLayer) {
+            return;
+        }
+        if (channel.hoverLabelLayer && typeof map.removeLayer === "function") {
+            map.removeLayer(channel.hoverLabelLayer, { skipOverlay: true });
+        }
+        channel.hoverLabelLayer = nextLayer;
+        channel.hoverLabelKey = key;
+        if (typeof map.addLayer === "function") {
+            map.addLayer(nextLayer, { skipRefresh: true });
+        }
+    }
+
+    function buildChannelLegendHtml() {
+        var items = [
+            "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
+            "#2500F4", "#6600cc", "#50006b", "#6b006b"
+        ];
+        var html = '<div class="wc-map-legend__header">Channel Order</div>';
+        for (var i = 0; i < items.length; i += 1) {
+            html += '<div class="wc-legend-item">'
+                + '<span class="wc-legend-item__swatch" style="--legend-color: ' + items[i] + ';"></span>'
+                + '<span class="wc-legend-item__label">Order ' + i + "</span>"
+                + "</div>";
+        }
+        return html;
+    }
+
+    function setChannelLegend(html) {
+        try {
+            var map = MapController.getInstance();
+            if (!map || !map.sub_legend) {
+                return;
+            }
+            var target = map.sub_legend;
+            if (typeof target.html === "function") {
+                target.html(html || "");
+                return;
+            }
+            if (typeof target === "string") {
+                var el = document.querySelector(target);
+                if (el) {
+                    el.innerHTML = html || "";
+                }
+                return;
+            }
+            if (target && target instanceof Element) {
+                target.innerHTML = html || "";
+                return;
+            }
+            if (target && target[0] && target[0] instanceof Element) {
+                target[0].innerHTML = html || "";
+            }
+        } catch (err) {
+            console.warn("[Channel GL] Failed to update legend", err);
+        }
+    }
+
+    function removeLayer(channel, map) {
+        clearHoverLabel(channel, map);
+        if (channel.glLayer) {
+            if (typeof map.unregisterOverlay === "function") {
+                map.unregisterOverlay(channel.glLayer);
+            } else if (map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                map.ctrls.removeLayer(channel.glLayer);
+            }
+            if (typeof map.removeLayer === "function") {
+                map.removeLayer(channel.glLayer);
+            }
+            channel.glLayer = null;
+        }
+        if (channel.labelLayer) {
+            if (typeof map.unregisterOverlay === "function") {
+                map.unregisterOverlay(channel.labelLayer);
+            } else if (map.ctrls && typeof map.ctrls.removeLayer === "function") {
+                map.ctrls.removeLayer(channel.labelLayer);
+            }
+            if (typeof map.removeLayer === "function") {
+                map.removeLayer(channel.labelLayer);
+            }
+            channel.labelLayer = null;
+        }
     }
 
     function buildNetfulUrl() {
@@ -384,6 +718,13 @@ var ChannelDelineation = (function () {
             throw new Error("ChannelDelineation GL requires url_for_run.");
         }
         return window.url_for_run(NETFUL_ENDPOINT);
+    }
+
+    function buildChannelsUrl() {
+        if (typeof window.url_for_run !== "function") {
+            throw new Error("ChannelDelineation GL requires url_for_run.");
+        }
+        return window.url_for_run(CHANNELS_ENDPOINT);
     }
 
     function createInstance() {
@@ -449,6 +790,10 @@ var ChannelDelineation = (function () {
         channel.zoom_min = 12;
         channel.glLayer = null;
         channel.glData = null;
+        channel.labelLayer = null;
+        channel.labelData = null;
+        channel.hoverLabelLayer = null;
+        channel.hoverLabelKey = null;
         channel._completion_seen = false;
 
         var bootstrapState = {
@@ -817,6 +1162,17 @@ var ChannelDelineation = (function () {
                 map.events.on("map:ready", function () {
                     channel.onMapChange();
                 });
+                map.events.on("map:layer:toggled", function (payload) {
+                    if (!payload || !payload.name) {
+                        return;
+                    }
+                    if (payload.name === CHANNEL_LABEL_LAYER_NAME && payload.visible) {
+                        clearHoverLabel(channel, map);
+                    }
+                    if (payload.name === CHANNEL_LAYER_NAME && !payload.visible) {
+                        clearHoverLabel(channel, map);
+                    }
+                });
             }
             mapEventsBound = true;
         }
@@ -928,7 +1284,7 @@ var ChannelDelineation = (function () {
                 });
         };
 
-        channel.show = function () {
+        channel.show_1 = function () {
             var map = ensureMap();
             var deckApi = ensureDeck();
             var url = buildNetfulUrl();
@@ -942,12 +1298,26 @@ var ChannelDelineation = (function () {
             }
 
             removeLayer(channel, map);
+            setChannelLegend("");
 
             return http.getJson(url, { params: { _: Date.now() } })
                 .then(function (data) {
                     channel.glData = data || EMPTY_GEOJSON;
-                    channel.glLayer = buildLayer(deckApi, channel.glData);
-                    attachRebuild(channel.glLayer, channel);
+                    channel.labelData = null;
+                    channel.glLayer = buildChannelLayer(deckApi, channel.glData, {
+                        layerId: CHANNEL_LAYER_ID,
+                        getLineColor: getLineColorPass1,
+                        getFillColor: getFillColorPass1,
+                        pickable: false,
+                        filled: true
+                    });
+                    attachChannelRebuild(channel.glLayer, channel, {
+                        layerId: CHANNEL_LAYER_ID,
+                        getLineColor: getLineColorPass1,
+                        getFillColor: getFillColorPass1,
+                        pickable: false,
+                        filled: true
+                    });
                     if (typeof map.registerOverlay === "function") {
                         map.registerOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
                     } else if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
@@ -967,6 +1337,135 @@ var ChannelDelineation = (function () {
                     showErrorStatus("Unable to load channel map.");
                     emit("channel:build:error", { reason: "load", error: error });
                     throw error;
+                });
+        };
+
+        channel.show_2 = function () {
+            var map = ensureMap();
+            var deckApi = ensureDeck();
+            var url = buildChannelsUrl();
+            var taskMsg = "Displaying SUBWTA channels";
+
+            if (!bootstrapState.reported) {
+                resetStatus(taskMsg);
+            }
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text(taskMsg + "...");
+            }
+
+            removeLayer(channel, map);
+            setChannelLegend("");
+
+            return http.getJson(url, { params: { _: Date.now() } })
+                .then(function (data) {
+                    var features = data && data.features ? data.features : [];
+                    var onHoverHandler = function (info) {
+                        updateHoverLabel(channel, map, deckApi, info);
+                    };
+                    var onClickHandler = function (info) {
+                        var feature = info && info.object ? info.object : null;
+                        var topId = feature && feature.properties ? feature.properties.TopazID : null;
+                        if (!topId) {
+                            return;
+                        }
+                        if (map && typeof map.chnQuery === "function") {
+                            map.chnQuery(topId);
+                        }
+                    };
+                    channel.glData = data || EMPTY_GEOJSON;
+                    channel.glLayer = buildChannelLayer(deckApi, channel.glData, {
+                        layerId: CHANNEL_PASS2_LAYER_ID,
+                        getLineColor: getLineColorPass2,
+                        getFillColor: getFillColorPass2,
+                        pickable: true,
+                        filled: true,
+                        onHover: onHoverHandler,
+                        onClick: onClickHandler
+                    });
+                    attachChannelRebuild(channel.glLayer, channel, {
+                        layerId: CHANNEL_PASS2_LAYER_ID,
+                        getLineColor: getLineColorPass2,
+                        getFillColor: getFillColorPass2,
+                        pickable: true,
+                        filled: true,
+                        onHover: onHoverHandler,
+                        onClick: onClickHandler
+                    });
+
+                    channel.labelData = buildLabelData(features);
+                    channel.labelLayer = buildLabelLayer(deckApi, channel.labelData);
+                    if (channel.labelLayer) {
+                        attachLabelRebuild(channel.labelLayer, channel);
+                    }
+
+                    if (typeof map.registerOverlay === "function") {
+                        map.registerOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
+                    } else if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
+                        map.ctrls.addOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
+                    }
+                    if (typeof map.addLayer === "function") {
+                        map.addLayer(channel.glLayer);
+                    }
+
+                    if (channel.labelLayer) {
+                        if (typeof map.registerOverlay === "function") {
+                            map.registerOverlay(channel.labelLayer, CHANNEL_LABEL_LAYER_NAME);
+                        } else if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
+                            map.ctrls.addOverlay(channel.labelLayer, CHANNEL_LABEL_LAYER_NAME);
+                        }
+                    }
+
+                    if (statusAdapter && typeof statusAdapter.text === "function") {
+                        statusAdapter.text(taskMsg + " - done");
+                    }
+                    setChannelLegend(buildChannelLegendHtml());
+                    emit("channel:layers:loaded", { mode: 2, layer: channel.glLayer });
+                    return channel.glLayer;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    showErrorStatus("Unable to load channel map.");
+                    emit("channel:build:error", { reason: "load", error: error });
+                    throw error;
+                });
+        };
+
+        channel.show = function () {
+            var taskMsg = "Identifying topaz_pass";
+            if (!bootstrapState.reported) {
+                resetStatus(taskMsg);
+            }
+
+            return http.request(window.url_for_run("query/delineation_pass/"), { params: { _: Date.now() } })
+                .then(function (result) {
+                    var response = result && Object.prototype.hasOwnProperty.call(result, "body") ? result.body : result;
+                    var pass = parseInt(response, 10);
+                    if ([0, 1, 2].indexOf(pass) === -1) {
+                        channel.pushResponseStacktrace(channel, { Error: "Error Determining Delineation Pass" });
+                        showErrorStatus("Error determining delineation pass.");
+                        setChannelLegend("");
+                        return null;
+                    }
+                    if (pass === 0) {
+                        channel.pushResponseStacktrace(channel, { Error: "Channels not delineated" });
+                        showErrorStatus("Channels have not been delineated yet.");
+                        setChannelLegend("");
+                        return null;
+                    }
+
+                    if (pass === 1) {
+                        return channel.show_1();
+                    }
+                    return channel.show_2();
+                })
+                .then(function (layer) {
+                    if (layer && statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(taskMsg + "... Success");
+                    }
+                    return layer;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
                 });
         };
 

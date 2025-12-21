@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 const fallbackUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/rlew-appreciated-tremolite/disturbed9002/';
 const emptyFallbackUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/unpaved-neophyte/disturbed9002/';
-const outletProjectUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/air-cooled-broadening/disturbed9002/';
 
 function buildUrl(path, baseUrl) {
   if (!path) {
@@ -146,64 +145,6 @@ async function waitForMapTransition(page) {
   }, { timeout: 10000 }).toBeFalsy();
 }
 
-async function flyToLocation(page, coords) {
-  await page.evaluate((target) => {
-    const map = window.MapController && typeof window.MapController.getInstance === 'function'
-      ? window.MapController.getInstance()
-      : null;
-    if (map && typeof map.flyTo === 'function') {
-      const zoom = typeof map.getZoom === 'function' ? map.getZoom() : undefined;
-      map.flyTo([target.lat, target.lng], zoom);
-    }
-  }, coords);
-  await waitForMapTransition(page);
-}
-
-async function resolveMapClickPoint(page, coords) {
-  return page.evaluate((target) => {
-    const map = window.MapController && typeof window.MapController.getInstance === 'function'
-      ? window.MapController.getInstance()
-      : null;
-    const deck = map && map._deck ? map._deck : null;
-    const canvas = document.getElementById('mapid');
-    if (!deck || typeof deck.project !== 'function' || !canvas) {
-      return null;
-    }
-    const rect = canvas.getBoundingClientRect();
-    const projected = deck.project([target.lng, target.lat]);
-    if (!projected || projected.length < 2) {
-      return null;
-    }
-    return {
-      x: rect.left + projected[0],
-      y: rect.top + projected[1],
-    };
-  }, coords);
-}
-
-async function clickMapAtLngLat(page, coords) {
-  const point = await resolveMapClickPoint(page, coords);
-  if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) {
-    await page.mouse.click(point.x, point.y);
-    return true;
-  }
-  const box = await page.locator('#mapid').boundingBox();
-  if (box) {
-    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-    return true;
-  }
-  return page.evaluate((target) => {
-    const map = window.MapController && typeof window.MapController.getInstance === 'function'
-      ? window.MapController.getInstance()
-      : null;
-    const deck = map && map._deck ? map._deck : null;
-    if (!deck || !deck.props || typeof deck.props.onClick !== 'function') {
-      return false;
-    }
-    deck.props.onClick({ coordinate: [target.lng, target.lat] });
-    return true;
-  }, coords);
-}
 
 async function openOverlayPanel(page) {
   const layerToggle = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__toggle');
@@ -618,6 +559,87 @@ test.describe('map gl smoke', () => {
     await expect(page.locator('label:has-text("Channels")')).toHaveCount(1);
 
     expect(consoleErrors).toEqual([]);
+  });
+
+  test('channel pass 2 renders labels and drilldown', async ({ page }) => {
+    await openRun(page);
+
+    const stubbed = await page.evaluate(() => {
+      const http = window.WCHttp;
+      if (!http || typeof http.request !== 'function' || typeof http.getJson !== 'function') {
+        return false;
+      }
+      if (!http._channelPass2OriginalRequest) {
+        http._channelPass2OriginalRequest = http.request.bind(http);
+      }
+      if (!http._channelPass2OriginalGetJson) {
+        http._channelPass2OriginalGetJson = http.getJson.bind(http);
+      }
+      const originalRequest = http._channelPass2OriginalRequest;
+      const originalGetJson = http._channelPass2OriginalGetJson;
+      http.request = (url, options) => {
+        const target = String(url || '');
+        if (target.includes('query/delineation_pass')) {
+          return Promise.resolve({ body: '2' });
+        }
+        if (target.includes('report/chn_summary/')) {
+          return Promise.resolve({ body: '<div id="chn-summary">Channel Summary</div>' });
+        }
+        return originalRequest(url, options);
+      };
+      http.getJson = (url, options) => {
+        const target = String(url || '');
+        if (target.includes('resources/channels.json')) {
+          return Promise.resolve({
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: { Order: 2, TopazID: 123 },
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: [[
+                    [-120.1, 45.1],
+                    [-120.2, 45.1],
+                    [-120.2, 45.2],
+                    [-120.1, 45.2],
+                    [-120.1, 45.1],
+                  ]],
+                },
+              },
+            ],
+          });
+        }
+        return originalGetJson(url, options);
+      };
+      return true;
+    });
+    expect(stubbed).toBe(true);
+
+    await page.evaluate(async () => {
+      const channel = window.ChannelDelineation && typeof window.ChannelDelineation.getInstance === 'function'
+        ? window.ChannelDelineation.getInstance()
+        : null;
+      if (channel && typeof channel.show === 'function') {
+        await channel.show();
+      }
+      if (channel && channel.glLayer && channel.glLayer.props && typeof channel.glLayer.props.onClick === 'function') {
+        const data = channel.glLayer.props.data;
+        const feature = data && data.features ? data.features[0] : null;
+        if (feature) {
+          channel.glLayer.props.onClick({ object: feature });
+        }
+      }
+    });
+
+    await expect.poll(async () => {
+      return (await page.locator('#drilldown').textContent()) || '';
+    }, { timeout: 10000 }).toContain('Channel Summary');
+
+    const { layerToggle } = await openOverlayPanel(page);
+    await expect(page.locator('label:has-text("Channels")')).toHaveCount(1);
+    await expect(page.locator('label:has-text("Channel Labels")')).toHaveCount(1);
+    await layerToggle.click();
   });
 
   test('build channels submits job and renders report', async ({ page }) => {

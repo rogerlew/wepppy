@@ -11,6 +11,7 @@ describe("ChannelDelineation GL controller", () => {
     let baseInstance;
     let mapStub;
     let outletRemoveMock;
+    let mapEventHandlers;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -90,7 +91,7 @@ describe("ChannelDelineation GL controller", () => {
 
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
-        requestMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-99" } }));
+        requestMock = jest.fn(() => Promise.resolve({ body: {} }));
         getJsonMock = jest.fn(() => Promise.resolve({ type: "FeatureCollection", features: [] }));
 
         global.WCHttp = {
@@ -101,6 +102,7 @@ describe("ChannelDelineation GL controller", () => {
 
         global.url_for_run = jest.fn((path) => `/runs/test/cfg/${path}`);
 
+        mapEventHandlers = {};
         mapStub = {
             _zoom: 13,
             addLayer: jest.fn(),
@@ -112,7 +114,12 @@ describe("ChannelDelineation GL controller", () => {
                 removeLayer: jest.fn(),
             },
             on: jest.fn(),
-            events: { on: jest.fn() },
+            events: {
+                on: jest.fn((eventName, handler) => {
+                    mapEventHandlers[eventName] = handler;
+                }),
+            },
+            hasLayer: jest.fn(() => false),
             getCenter: jest.fn(() => ({ lng: -117.52, lat: 46.88 })),
             getZoom: jest.fn(function () {
                 return this._zoom;
@@ -123,6 +130,12 @@ describe("ChannelDelineation GL controller", () => {
             })),
             distance: jest.fn(() => 1500),
             flyTo: jest.fn(),
+            chnQuery: jest.fn(),
+        };
+        mapStub._deck = {
+            getViewports: jest.fn(() => [{
+                unproject: jest.fn(() => [-120.25, 45.15]),
+            }]),
         };
         global.MapController = {
             getInstance: jest.fn(() => mapStub),
@@ -158,8 +171,13 @@ describe("ChannelDelineation GL controller", () => {
             this.props = props || {};
             this.id = props ? props.id : undefined;
         }
+        function TextLayer(props) {
+            this.props = props || {};
+            this.id = props ? props.id : undefined;
+        }
         global.deck = {
             GeoJsonLayer: GeoJsonLayer,
+            TextLayer: TextLayer,
         };
 
         await import("../channel_gl.js");
@@ -190,6 +208,7 @@ describe("ChannelDelineation GL controller", () => {
     test("show registers overlay and emits channel:layers:loaded", async () => {
         const channel = window.ChannelDelineation.getInstance();
 
+        requestMock.mockResolvedValueOnce({ body: "1" });
         getJsonMock.mockResolvedValueOnce({
             type: "FeatureCollection",
             features: [],
@@ -215,7 +234,7 @@ describe("ChannelDelineation GL controller", () => {
             features: [{ type: "Feature", properties: { Order: 2 } }],
         });
 
-        await channel.show();
+        await channel.show_1();
 
         const color = channel.glLayer.props.getLineColor({ properties: { Order: 2 } });
         expect(color).toEqual([71, 158, 255, 230]);
@@ -229,7 +248,7 @@ describe("ChannelDelineation GL controller", () => {
             features: [{ type: "Feature", properties: { Order: 1 } }],
         });
 
-        await channel.show();
+        await channel.show_1();
 
         const firstLayer = channel.glLayer;
         expect(typeof firstLayer.__wcRebuild).toBe("function");
@@ -244,6 +263,7 @@ describe("ChannelDelineation GL controller", () => {
     test("build posts payload and records job id", async () => {
         const channel = window.ChannelDelineation.getInstance();
 
+        requestMock.mockResolvedValueOnce({ body: { Success: true, job_id: "job-99" } });
         const result = await channel.build();
 
         expect(result).toMatchObject({ Success: true, job_id: "job-99" });
@@ -319,5 +339,181 @@ describe("ChannelDelineation GL controller", () => {
         expect(buildButton.disabled).toBe(false);
         expect(mapCenterInput.value).toBe("-117.52,46.88");
         expect(mapZoomInput.value).toBe("13");
+    });
+
+    test("show pass 2 registers labels and clicks drilldown", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({ body: "2" });
+        getJsonMock.mockResolvedValueOnce({
+            type: "FeatureCollection",
+            features: [
+                {
+                    type: "Feature",
+                    properties: { Order: 2, TopazID: 123 },
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: [[
+                            [-120.1, 45.1],
+                            [-120.2, 45.1],
+                            [-120.2, 45.2],
+                            [-120.1, 45.2],
+                            [-120.1, 45.1],
+                        ]],
+                    },
+                },
+            ],
+        });
+
+        await channel.show();
+
+        expect(getJsonMock).toHaveBeenCalledWith(
+            "/runs/test/cfg/resources/channels.json",
+            expect.objectContaining({ params: expect.any(Object) }),
+        );
+        expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Channels");
+        expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Channel Labels");
+        expect(channel.labelLayer).toBeTruthy();
+        expect(channel.glLayer.props.filled).toBe(true);
+        const fillColor = channel.glLayer.props.getFillColor({ properties: { Order: 2 } });
+        expect(fillColor).toEqual([71, 158, 255, 230]);
+        const clickHandler = channel.glLayer.props.onClick;
+        expect(typeof clickHandler).toBe("function");
+        clickHandler({ object: { properties: { TopazID: 123 } } });
+        expect(mapStub.chnQuery).toHaveBeenCalledWith(123);
+    });
+
+    test("pass 2 labels use sdf outline styling", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({ body: "2" });
+        getJsonMock.mockResolvedValueOnce({
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: { Order: 2, TopazID: 123 },
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [[
+                        [-120.1, 45.1],
+                        [-120.2, 45.1],
+                        [-120.2, 45.2],
+                        [-120.1, 45.2],
+                        [-120.1, 45.1],
+                    ]],
+                },
+            }],
+        });
+
+        await channel.show();
+
+        expect(channel.labelLayer.props.fontSettings).toEqual({ sdf: true });
+        expect(channel.labelLayer.props.outlineWidth).toBe(3);
+        expect(channel.labelLayer.props.getSize()).toBe(14);
+    });
+
+    test("hover labels render when channel labels are hidden", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({ body: "2" });
+        getJsonMock.mockResolvedValueOnce({
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: { Order: 2, TopazID: 321 },
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [[
+                        [-120.1, 45.1],
+                        [-120.2, 45.1],
+                        [-120.2, 45.2],
+                        [-120.1, 45.2],
+                        [-120.1, 45.1],
+                    ]],
+                },
+            }],
+        });
+
+        await channel.show();
+
+        mapStub.addLayer.mockClear();
+        mapStub.hasLayer.mockImplementation((layer) => layer === channel.glLayer);
+
+        const hoverHandler = channel.glLayer.props.onHover;
+        hoverHandler({ object: { properties: { TopazID: 321 } }, x: 100, y: 80 });
+
+        expect(channel.hoverLabelLayer).toBeTruthy();
+        expect(mapStub.addLayer).toHaveBeenCalledWith(channel.hoverLabelLayer, { skipRefresh: true });
+    });
+
+    test("hover labels are suppressed when the labels overlay is visible", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({ body: "2" });
+        getJsonMock.mockResolvedValueOnce({
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: { Order: 2, TopazID: 555 },
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [[
+                        [-120.1, 45.1],
+                        [-120.2, 45.1],
+                        [-120.2, 45.2],
+                        [-120.1, 45.2],
+                        [-120.1, 45.1],
+                    ]],
+                },
+            }],
+        });
+
+        await channel.show();
+
+        mapStub.addLayer.mockClear();
+        mapStub.hasLayer.mockImplementation((layer) => layer === channel.labelLayer);
+
+        const hoverHandler = channel.glLayer.props.onHover;
+        hoverHandler({ object: { properties: { TopazID: 555 } }, x: 120, y: 60 });
+
+        expect(channel.hoverLabelLayer).toBeNull();
+        expect(mapStub.addLayer).not.toHaveBeenCalled();
+    });
+
+    test("hover labels clear on overlay toggle", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({ body: "2" });
+        getJsonMock.mockResolvedValueOnce({
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: { Order: 2, TopazID: 777 },
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [[
+                        [-120.1, 45.1],
+                        [-120.2, 45.1],
+                        [-120.2, 45.2],
+                        [-120.1, 45.2],
+                        [-120.1, 45.1],
+                    ]],
+                },
+            }],
+        });
+
+        await channel.show();
+
+        mapStub.hasLayer.mockImplementation((layer) => layer === channel.glLayer);
+        const hoverHandler = channel.glLayer.props.onHover;
+        hoverHandler({ object: { properties: { TopazID: 777 } }, x: 140, y: 40 });
+
+        expect(channel.hoverLabelLayer).toBeTruthy();
+
+        mapStub.removeLayer.mockClear();
+        mapEventHandlers["map:layer:toggled"]({ name: "Channel Labels", visible: true });
+
+        expect(channel.hoverLabelLayer).toBeNull();
+        expect(mapStub.removeLayer).toHaveBeenCalledWith(expect.any(Object), { skipOverlay: true });
     });
 });
