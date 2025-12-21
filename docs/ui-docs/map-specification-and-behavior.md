@@ -219,6 +219,13 @@ Phase 0: scaffolding + feature flag
 - Create `_gl` controller equivalents with stubs and no Leaflet dependencies (ex: `subcatchments_gl.js`, `channel_gl.js`, `outlet_gl.js`, `landuse_modify_gl.js`, `rangeland_cover_modify_gl.js`). These should export the same global names/methods and emit the same events, even if internals are no-ops initially.
 - Tests: Jest smoke for `MapController.getInstance()` + `map:ready` emission; Playwright load of map_pure_gl page.
 
+### Phase 0 handoff summary
+- Feature flag: `use_deck_gl_map` gates `controls/map_pure_gl.htm` vs. `controls/map_pure.htm`, plus `controllers-gl.js` vs. `controllers.js` in `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm`.
+- Leaflet-only assets are gated behind the flag (`leaflet.js`, `leaflet-ajax.js`, `leaflet-geotiff.js`, `glify-browser.js`, `leaflet-glify-layer.js`, and `flash-and-find-by-id.js`).
+- GL bundle: `build_controllers_js.py` emits `static/js/controllers-gl.js` from helpers + `*_gl.js` stubs and keeps `controllers.js` Leaflet-only.
+- GL controllers: `map_gl.js` defines the MapController surface and events, plus stub controllers for subcatchments/channels/outlet/landuse-modify/rangeland-cover-modify.
+- Tests: `controllers_js/__tests__/map_gl.test.js` (Jest) and `static-src/tests/smoke/map-gl.spec.js` (Playwright).
+
 Phase 1: base layers + view state + status
 - Scope: basemap tiles (Terrain/Satellite), view state sync, `#mapstatus` updates, map resize handle.
 - Tests: Jest for view state updates and `map:center:changed`; Playwright for basemap toggle + resize handle.
@@ -280,6 +287,24 @@ Phase 13: WEPP results visualization
 - UI (Playwright): extend `static-src/tests/smoke` with map_pure_gl cases.
 - E2E run: create run via `/tests/api/create-run`, step through outlet -> channel -> subcatchments -> landuse -> soils -> wepp.
 - Keep old Leaflet path running in CI as regression baseline until parity is proven.
+
+## Testing quickstart (Phase 0)
+Run the GL controller Jest smoke:
+```bash
+wctl run-npm test -- map_gl.test.js
+```
+
+Run the Playwright GL smoke with the configured test project:
+```bash
+MAP_GL_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/rlew-appreciated-tremolite/disturbed9002/" \
+  wctl run-npm smoke -- --project=runs0 map-gl.spec.js
+```
+
+## Ops note: restart weppcloud on bearhive
+```bash
+wctl restart weppcloud
+```
+TLS termination runs through pfSense and HAProxy in front of Caddy. Wait ~5 seconds after restart before hitting `https://wc.bearhive.duckdns.org/` to avoid transient HAProxy 502s.
 
 ## Additional concerns and risk reducers
 - Compatibility: provide a `MapController` adapter that preserves event names and method signatures; avoid touching legacy controllers until deck equivalents exist.

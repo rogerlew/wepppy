@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import importlib.util
 import sys
-from typing import Final, List
+from typing import Final, List, Set
 
 MODULE_DIR: Final[Path] = Path(__file__).resolve().parent
 ROOT: Final[Path] = MODULE_DIR.parent
@@ -34,6 +34,7 @@ write_unitizer_module = _builder_module.write_unitizer_module
 
 TEMPLATES_DIR: Final[Path] = MODULE_DIR / "templates"
 OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers.js"
+GL_OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers-gl.js"
 STATUS_STREAM_SOURCE: Final[Path] = MODULE_DIR / "status_stream.js"
 STATUS_STREAM_OUTPUT: Final[Path] = ROOT / "static" / "js" / "status_stream.js"
 PRIORITY_MODULES: Final[List[str]] = [
@@ -50,6 +51,16 @@ PRIORITY_MODULES: Final[List[str]] = [
     "bootstrap.js",
     "project.js",
 ]
+GL_PRIORITY_MODULES: Final[List[str]] = list(PRIORITY_MODULES)
+GL_EXCLUDED_MODULES: Final[Set[str]] = {
+    "map.js",
+    "subcatchment_delineation.js",
+    "channel_delineation.js",
+    "outlet.js",
+    "landuse_modify.js",
+    "rangeland_cover_modify.js",
+    "baer.js",
+}
 
 
 def _collect_controller_modules() -> List[str]:
@@ -59,7 +70,9 @@ def _collect_controller_modules() -> List[str]:
     Priority modules are emitted first to preserve dependencies (utilities,
     control base, project). Remaining modules are appended alphabetically.
     """
-    module_names = sorted(path.name for path in MODULE_DIR.glob("*.js"))
+    module_names = sorted(
+        path.name for path in MODULE_DIR.glob("*.js") if not path.name.endswith("_gl.js")
+    )
 
     ordered: List[str] = []
     for name in PRIORITY_MODULES:
@@ -71,7 +84,31 @@ def _collect_controller_modules() -> List[str]:
     return ordered
 
 
-def render_controllers() -> str:
+def _collect_gl_controller_modules() -> List[str]:
+    """
+    Discover GL controller source modules and return an ordered list.
+
+    GL bundles include helper modules, non-Leaflet controllers, plus *_gl.js stubs.
+    """
+    module_names = sorted(
+        path.name
+        for path in MODULE_DIR.glob("*.js")
+        if not path.name.endswith("_gl.js")
+        and path.name not in GL_EXCLUDED_MODULES
+    )
+
+    ordered: List[str] = []
+    for name in GL_PRIORITY_MODULES:
+        if name in module_names:
+            ordered.append(name)
+            module_names.remove(name)
+
+    ordered.extend(module_names)
+    ordered.extend(sorted(path.name for path in MODULE_DIR.glob("*_gl.js")))
+    return ordered
+
+
+def render_controllers(modules: List[str], *, bundle_name: str) -> str:
     search_paths = [str(TEMPLATES_DIR), str(MODULE_DIR)]
     env = Environment(
         loader=FileSystemLoader(search_paths),
@@ -81,8 +118,11 @@ def render_controllers() -> str:
     )
     template = env.get_template("controllers.js.j2")
     build_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    modules = _collect_controller_modules()
-    return template.render(build_date=build_date, modules=modules)
+    return template.render(
+        build_date=build_date,
+        modules=modules,
+        bundle_name=bundle_name,
+    )
 
 
 def write_output(contents: str, *, output_path: Path = OUTPUT_PATH) -> None:
@@ -114,6 +154,12 @@ def main() -> None:
         help="Override output path (defaults to static/js/controllers.js)",
     )
     parser.add_argument(
+        "--gl-output",
+        type=Path,
+        default=GL_OUTPUT_PATH,
+        help="Override output path (defaults to static/js/controllers-gl.js)",
+    )
+    parser.add_argument(
         "--unitizer-output",
         type=Path,
         default=DEFAULT_UNITIZER_OUTPUT,
@@ -133,8 +179,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    contents = render_controllers()
+    contents = render_controllers(
+        _collect_controller_modules(),
+        bundle_name="controllers.js",
+    )
     write_output(contents, output_path=args.output)
+    gl_contents = render_controllers(
+        _collect_gl_controller_modules(),
+        bundle_name="controllers-gl.js",
+    )
+    write_output(gl_contents, output_path=args.gl_output)
     status_stream_bundle = render_status_stream_bundle()
     write_output(status_stream_bundle, output_path=args.status_stream_output)
     write_unitizer_module(output_path=args.unitizer_output)
