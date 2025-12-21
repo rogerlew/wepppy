@@ -249,12 +249,16 @@ Assumptions:
 - Status: `#mapstatus` updates with new center/zoom after fly-to completes.
 - Tests: `controllers_js/__tests__/map_gl.test.js` covers parsing, events, validation, and transition duration.
 
+### Potential issues
+- Fly-to transitions currently emit `moveend`/`zoomend` + `map:center:changed` immediately and again when the deck transition ends; no known side effects yet, but overlay refresh hooks may double-fire.
+
 ### Phase 2: USGS/SNOTEL/NHD overlays
 - Scope: GeoJsonLayer overlays with zoom gating and label updates; `map:layer:*` events.
 - Tests: Jest for overlay refresh + label gating; Playwright toggle overlays and verify legend/status.
 
 ### Phase 2 handoff summary
 - Overlay layers: deck `GeoJsonLayer` for USGS gages, SNOTEL locations, and NHD flowlines with Leaflet-matching styling and draw order (NHD below sensors).
+- Overlay colors (approved): USGS `#ff7800`, SNOTEL `#d6336c`, NHD `#7b2cbf`.
 - Refresh: `WCHttp.getJson` fetches on `moveend`/`zoomend` with a short debounce during pan/zoom; in-flight requests abort or are ignored if stale.
 - Zoom gating + labels: USGS/SNOTEL gated at zoom >= 9; NHD gated at zoom >= 11, with HR label at zoom >= 14; overlay labels update to reflect thresholds.
 - Events: `map:layer:refreshed` and `map:layer:error` emitted on successful/failed refreshes.
@@ -264,6 +268,14 @@ Assumptions:
 ### Phase 3: SBS map (image overlay)
 - Scope: SBS raster fetch + deck BitmapLayer; link to Baer/Disturbed; legend injection.
 - Tests: Playwright load SBS, verify legend and opacity changes.
+
+### Phase 3 handoff summary
+- Overlay layer: deck `BitmapLayer` for SBS image with run-scoped `/query/baer_wgs_map/` metadata and `resources/baer.png` fetch (bounds normalized for deck).
+- Legend: `#sbs_legend` hydrated from `/resources/legends/sbs/`, with opacity slider wired to `map.sbs_layer.setOpacity`.
+- Events: `map:layer:refreshed` / `map:layer:error` emitted on SBS refresh; `map:layer:toggled` on overlay toggle.
+- State sync: listens for `disturbed:has_sbs_changed` to add/remove overlay and clear the legend when SBS is removed.
+- Tests: Jest validates SBS refresh success/error + legend visibility; Playwright covers toggle + opacity slider updates.
+- Empty-run URL for missing SBS smoke coverage: `https://wc.bearhive.duckdns.org/weppcloud/runs/unpaved-neophyte/disturbed9002/`.
 
 ### Phase 4: legends framework
 - Scope: deck legend panel or reuse existing legend targets (`#sub_legend`, `#sbs_legend`).

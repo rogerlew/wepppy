@@ -12,6 +12,7 @@ describe("Map GL controller", () => {
 
         global.runid = "test-run";
         global.config = "cfg";
+        global.url_for_run = jest.fn((path) => `/runs/${global.runid}/${global.config}/${path}`);
 
         document.body.innerHTML = `
             <form id="setloc_form">
@@ -69,6 +70,11 @@ describe("Map GL controller", () => {
             isHttpError: jest.fn(() => false),
         };
 
+        global.createImageBitmap = jest.fn(() => Promise.resolve({}));
+        if (global.window) {
+            global.window.createImageBitmap = global.createImageBitmap;
+        }
+
         function Deck(props) {
             this.props = props || {};
             this.setProps = jest.fn((next) => {
@@ -119,6 +125,11 @@ describe("Map GL controller", () => {
         delete global.coordRound;
         delete global.runid;
         delete global.config;
+        delete global.url_for_run;
+        delete global.createImageBitmap;
+        if (global.window) {
+            delete global.window.createImageBitmap;
+        }
         emittedEvents = [];
     });
 
@@ -155,7 +166,7 @@ describe("Map GL controller", () => {
         global.MapController.getInstance();
 
         const overlayInputs = Array.from(document.querySelectorAll('input[name="wc-map-overlay"]'));
-        expect(overlayInputs.length).toBeGreaterThanOrEqual(3);
+        expect(overlayInputs.length).toBeGreaterThanOrEqual(4);
 
         const labels = overlayInputs.map((input) => {
             const text = input.parentElement.querySelector(".wc-map-layer-control__text");
@@ -165,6 +176,7 @@ describe("Map GL controller", () => {
         expect(labels.some((label) => label.includes("USGS Gage Locations"))).toBe(true);
         expect(labels.some((label) => label.includes("SNOTEL Locations"))).toBe(true);
         expect(labels.some((label) => label.includes("NHD"))).toBe(true);
+        expect(labels.some((label) => label.includes("Burn Severity Map"))).toBe(true);
 
         const usgsLabel = labels.find((label) => label.includes("USGS Gage Locations"));
         expect(usgsLabel).toContain("zoom >= 9");
@@ -174,6 +186,60 @@ describe("Map GL controller", () => {
         const nhdIndex = labels.findIndex((label) => label.includes("NHD"));
         expect(usgsIndex).toBeLessThan(snotelIndex);
         expect(snotelIndex).toBeLessThan(nhdIndex);
+    });
+
+    test("loadSbsMap emits map:layer:refreshed and shows legend", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
+
+        global.WCHttp.getJson.mockResolvedValueOnce({
+            Success: true,
+            Content: {
+                bounds: [[40.0, -120.0], [41.0, -119.0]],
+                imgurl: "resources/baer.png",
+            },
+        });
+        global.WCHttp.request.mockImplementation((url) => {
+            if (String(url).includes("legends/sbs")) {
+                return Promise.resolve({ body: "<div>Legend</div>" });
+            }
+            return Promise.resolve({ body: new Blob([""], { type: "image/png" }) });
+        });
+
+        emittedEvents = [];
+        await mapInstance.loadSbsMap();
+
+        const refreshed = emittedEvents.find(
+            (evt) => evt.name === "map:layer:refreshed" && evt.payload.name === "Burn Severity Map"
+        );
+        expect(refreshed).toBeTruthy();
+        const legend = document.getElementById("sbs_legend");
+        expect(legend.hidden).toBe(false);
+        expect(legend.innerHTML).toContain("Legend");
+    });
+
+    test("loadSbsMap emits map:layer:error and clears legend on failure", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
+
+        const legend = document.getElementById("sbs_legend");
+        legend.innerHTML = "<div>Existing</div>";
+        legend.hidden = false;
+
+        global.WCHttp.getJson.mockResolvedValueOnce({
+            Success: false,
+            Error: "No SBS map has been specified",
+        });
+
+        emittedEvents = [];
+        await mapInstance.loadSbsMap();
+
+        const errorEvent = emittedEvents.find(
+            (evt) => evt.name === "map:layer:error" && evt.payload.name === "Burn Severity Map"
+        );
+        expect(errorEvent).toBeTruthy();
+        expect(legend.hidden).toBe(true);
+        expect(legend.innerHTML).toBe("");
     });
 
     test("loadUSGSGageLocations gated by zoom and emits refreshed", async () => {

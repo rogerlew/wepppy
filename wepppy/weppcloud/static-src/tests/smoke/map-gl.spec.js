@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const fallbackUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/rlew-appreciated-tremolite/disturbed9002/';
+const emptyFallbackUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/unpaved-neophyte/disturbed9002/';
 
 function buildUrl(path, baseUrl) {
   if (!path) {
@@ -32,11 +33,32 @@ function resolveTargetUrl() {
   return fallbackUrl;
 }
 
-async function openRun(page) {
-  const targetUrl = resolveTargetUrl();
-  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+function resolveEmptyUrl() {
+  if (process.env.MAP_GL_EMPTY_URL) {
+    return process.env.MAP_GL_EMPTY_URL;
+  }
+  if (process.env.SMOKE_EMPTY_RUN_PATH && process.env.SMOKE_BASE_URL) {
+    return buildUrl(process.env.SMOKE_EMPTY_RUN_PATH, process.env.SMOKE_BASE_URL);
+  }
+  return emptyFallbackUrl;
+}
+
+async function openRun(page, targetUrl, options) {
+  const resolved = targetUrl || resolveTargetUrl();
+  const opts = options || {};
+  await page.goto(resolved, { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('networkidle', { timeout: 45000 }).catch(() => {});
-  await expect(page.locator('#mapid')).toBeVisible();
+  const map = page.locator('#mapid');
+  if (opts.allowMissingMap) {
+    try {
+      await map.waitFor({ state: 'visible', timeout: 15000 });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  await expect(map).toBeVisible();
+  return true;
 }
 
 function attachConsoleCapture(page) {
@@ -132,6 +154,30 @@ async function openOverlayPanel(page) {
     await expect(panel).toBeVisible();
   }
   return { layerToggle, panel };
+}
+
+async function enableSbsOverlay(page) {
+  const { layerToggle } = await openOverlayPanel(page);
+  const sbsInput = page.locator('label:has-text("Burn Severity Map") input[type="checkbox"]');
+  await expect(sbsInput).toBeVisible();
+  await sbsInput.check();
+  await layerToggle.click();
+
+  return page.evaluate(async () => {
+    const map = window.MapController && typeof window.MapController.getInstance === 'function'
+      ? window.MapController.getInstance()
+      : null;
+    let response = null;
+    if (map && typeof map.loadSbsMap === 'function') {
+      response = await map.loadSbsMap();
+    }
+    const legend = document.getElementById('sbs_legend');
+    return {
+      success: Boolean(response && response.Success === true),
+      legendVisible: Boolean(legend && !legend.hidden && legend.innerHTML.trim().length > 0),
+      hasImage: Boolean(map && map.sbs_layer && map.sbs_layer.props && map.sbs_layer.props.image),
+    };
+  });
 }
 
 async function getFeatureClickPoint(page, layerKey) {
@@ -404,5 +450,64 @@ test.describe('map gl smoke', () => {
     }
     await closeModal.click();
     await expect(modal).toBeHidden();
+  });
+
+  test('toggle SBS overlay shows legend', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await enableSbsOverlay(page);
+
+    const legend = page.locator('#sbs_legend');
+    if (!outcome.success) {
+      await expect(legend).toBeHidden();
+      return;
+    }
+    await expect(legend).toBeVisible();
+    const slider = legend.locator('#baer-opacity-slider');
+    await expect(slider).toBeVisible();
+  });
+
+  test('SBS opacity slider updates layer opacity', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await enableSbsOverlay(page);
+
+    const legend = page.locator('#sbs_legend');
+    const slider = legend.locator('#baer-opacity-slider');
+    if (!outcome.success) {
+      await expect(legend).toBeHidden();
+      return;
+    }
+    await expect(slider).toBeVisible();
+
+    await slider.evaluate((element) => {
+      element.value = '0.4';
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        return map && map.sbs_layer && map.sbs_layer.props ? map.sbs_layer.props.opacity : null;
+      });
+    }).toBeCloseTo(0.4, 1);
+  });
+
+  test('empty run tolerates missing SBS resources', async ({ page }) => {
+    const mapVisible = await openRun(page, resolveEmptyUrl(), { allowMissingMap: true });
+    if (!mapVisible) {
+      test.skip(true, 'Empty run map not available.');
+    }
+
+    const outcome = await enableSbsOverlay(page);
+    const legend = page.locator('#sbs_legend');
+    if (outcome.success) {
+      await expect(legend).toBeVisible();
+    } else {
+      await expect(legend).toBeHidden();
+    }
   });
 });

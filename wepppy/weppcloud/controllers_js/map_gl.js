@@ -21,7 +21,8 @@ var MapController = (function () {
         "map:drilldown:error",
         "map:layer:toggled",
         "map:layer:refreshed",
-        "map:layer:error"
+        "map:layer:error",
+        "baer:map:opacity"
     ];
 
     var DEFAULT_VIEW = { lat: 44.0, lng: -116.0, zoom: 6 };
@@ -34,6 +35,12 @@ var MapController = (function () {
     var NHD_LAYER_HR_MIN_ZOOM = 14;
     var NHD_SMALL_SCALE_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
     var NHD_HR_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/query";
+    var SBS_LAYER_NAME = "Burn Severity Map";
+    var SBS_QUERY_ENDPOINT = "query/baer_wgs_map/";
+    var SBS_LEGEND_ENDPOINT = "resources/legends/sbs/";
+    var SBS_DEFAULT_OPACITY = 0.7;
+    var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
+    var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -296,6 +303,37 @@ var MapController = (function () {
         return [r, g, b, a];
     }
 
+    function isAbsoluteUrl(url) {
+        return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(String(url || ""));
+    }
+
+    function clampOpacity(value) {
+        var parsed = parseFloat(value);
+        if (!Number.isFinite(parsed)) {
+            return SBS_DEFAULT_OPACITY;
+        }
+        return Math.max(0, Math.min(1, parsed));
+    }
+
+    function normalizeSbsBounds(bounds) {
+        if (!Array.isArray(bounds) || bounds.length < 2) {
+            return null;
+        }
+        var sw = bounds[0];
+        var ne = bounds[1];
+        if (!Array.isArray(sw) || !Array.isArray(ne) || sw.length < 2 || ne.length < 2) {
+            return null;
+        }
+        var south = Number(sw[0]);
+        var west = Number(sw[1]);
+        var north = Number(ne[0]);
+        var east = Number(ne[1]);
+        if (![south, west, north, east].every(Number.isFinite)) {
+            return null;
+        }
+        return [west, south, east, north];
+    }
+
     function normalizeCenter(center) {
         if (Array.isArray(center) && center.length >= 2) {
             var lat = Number(center[0]);
@@ -367,6 +405,12 @@ var MapController = (function () {
             }
         }
 
+        function ensureBitmapLayer() {
+            if (!deckApi || typeof deckApi.BitmapLayer !== "function") {
+                throw new Error("Map GL controller requires deck.gl BitmapLayer (window.deck.BitmapLayer).");
+            }
+        }
+
         var state = {
             center: { lat: DEFAULT_VIEW.lat, lng: DEFAULT_VIEW.lng },
             zoom: DEFAULT_VIEW.zoom,
@@ -414,11 +458,29 @@ var MapController = (function () {
         var baseLayer = null;
         var baseLayerKey = basemapDefs.googleTerrain.key;
         var layerControl = null;
+        var sbsLayerController = null;
 
         function emit(eventName, payload) {
             if (mapEvents && typeof mapEvents.emit === "function") {
                 mapEvents.emit(eventName, payload || {});
             }
+        }
+
+        function resolveRunScopedUrl(path) {
+            if (!path) {
+                return null;
+            }
+            var raw = String(path);
+            if (isAbsoluteUrl(raw)) {
+                return raw;
+            }
+            if (raw.indexOf("/runs/") !== -1 || raw.indexOf("runs/") === 0) {
+                return raw;
+            }
+            if (typeof url_for_run !== "function") {
+                throw new Error("Map GL controller requires url_for_run helper for run-scoped URLs.");
+            }
+            return url_for_run(raw);
         }
 
         function warnNotImplemented(action) {
@@ -870,12 +932,18 @@ var MapController = (function () {
         if (name.indexOf("NHD") !== -1) {
             return 2;
         }
+        if (name.indexOf(SBS_LAYER_NAME) !== -1) {
+            return 3;
+        }
         return 99;
     }
 
     function overlayRenderIndex(name) {
         if (!name) {
             return 99;
+        }
+        if (name.indexOf(SBS_LAYER_NAME) !== -1) {
+            return -1;
         }
         if (name.indexOf("NHD") !== -1) {
             return 0;
@@ -1119,10 +1187,13 @@ var MapController = (function () {
                 syncOverlayLayerControlSelection();
                 return layer;
             },
-            removeLayer: function (layer) {
+            removeLayer: function (layer, options) {
                 if (layerRegistry && layer) {
                     layerRegistry.delete(layer);
                     applyLayers();
+                }
+                if (!(options && options.skipOverlay)) {
+                    handleOverlayRemoved(layer);
                 }
                 syncOverlayLayerControlSelection();
                 return null;
@@ -1211,6 +1282,28 @@ var MapController = (function () {
                     console.warn("Map GL: failed to refresh NHD flowlines", error);
                 });
             },
+            loadSbsMap: function () {
+                if (!map.sbs_layer || !map.hasLayer(map.sbs_layer) || typeof map.sbs_layer.refresh !== "function") {
+                    return null;
+                }
+                var url = resolveRunScopedUrl(SBS_QUERY_ENDPOINT);
+                if (!url) {
+                    return null;
+                }
+                return map.sbs_layer.refresh(url).then(function (data) {
+                    if (data === undefined) {
+                        return data;
+                    }
+                    return loadSbsLegend().catch(function (error) {
+                        console.warn("Map GL: failed to update SBS legend", error);
+                    }).then(function () {
+                        return data;
+                    });
+                }).catch(function (error) {
+                    clearSbsLegend();
+                    console.warn("Map GL: failed to refresh SBS map", error);
+                });
+            },
             subQuery: function () {
                 warnNotImplemented("subQuery");
             },
@@ -1273,6 +1366,11 @@ var MapController = (function () {
                     state.readyEmitted = true;
                 }
 
+                var flags = context && context.flags ? context.flags : null;
+                if (flags && flags.initialHasSbs === true && map.sbs_layer && !map.hasLayer(map.sbs_layer)) {
+                    map.addLayer(map.sbs_layer);
+                }
+
                 updateMapStatus();
             }
         };
@@ -1285,6 +1383,126 @@ var MapController = (function () {
             props.id = layerId;
             props.data = data || EMPTY_GEOJSON;
             return new deckApi.GeoJsonLayer(props);
+        }
+
+        function buildBitmapLayer(layerId, image, bounds, opacity) {
+            ensureBitmapLayer();
+            var hasData = Boolean(image && bounds);
+            return new deckApi.BitmapLayer({
+                id: layerId,
+                image: image || null,
+                bounds: bounds || [0, 0, 0, 0],
+                opacity: Number.isFinite(opacity) ? opacity : SBS_DEFAULT_OPACITY,
+                pickable: false,
+                visible: hasData
+            });
+        }
+
+        function loadImageFromBlob(blob) {
+            if (!blob) {
+                return Promise.reject(new Error("SBS image payload missing."));
+            }
+            if (typeof window.Blob === "function" && !(blob instanceof window.Blob)) {
+                return Promise.reject(new Error("SBS image response was not a Blob."));
+            }
+            if (typeof window.createImageBitmap === "function") {
+                return window.createImageBitmap(blob);
+            }
+            if (typeof window.Image !== "function") {
+                return Promise.reject(new Error("SBS image loader unavailable."));
+            }
+            return new Promise(function (resolve, reject) {
+                var urlBuilder = window.URL || window.webkitURL;
+                if (!urlBuilder || typeof urlBuilder.createObjectURL !== "function") {
+                    reject(new Error("SBS image loader unavailable."));
+                    return;
+                }
+                var objectUrl = urlBuilder.createObjectURL(blob);
+                var image = new window.Image();
+                image.onload = function () {
+                    urlBuilder.revokeObjectURL(objectUrl);
+                    resolve(image);
+                };
+                image.onerror = function () {
+                    urlBuilder.revokeObjectURL(objectUrl);
+                    reject(new Error("Failed to decode SBS image."));
+                };
+                image.src = objectUrl;
+            });
+        }
+
+        function fetchSbsImage(url, signal) {
+            return http.request(url, { method: "GET", signal: signal }).then(function (result) {
+                return loadImageFromBlob(result.body);
+            });
+        }
+
+        function loadSbsLegend() {
+            if (!sbsLegendElement) {
+                return Promise.resolve(null);
+            }
+            var legendUrl = resolveRunScopedUrl(SBS_LEGEND_ENDPOINT);
+            if (!legendUrl) {
+                return Promise.resolve(null);
+            }
+            return http.request(legendUrl, { method: "GET" }).then(function (result) {
+                var content = result.body;
+                sbsLegendElement.innerHTML = content === null || content === undefined ? "" : String(content);
+                attachSbsOpacitySlider(sbsLegendElement);
+                dom.show(sbsLegendElement);
+                return content;
+            }).catch(function (error) {
+                console.warn("Map GL: failed to load SBS legend", error);
+                throw error;
+            });
+        }
+
+        function clearSbsLegend() {
+            if (!sbsLegendElement) {
+                return;
+            }
+            sbsLegendElement.innerHTML = "";
+            dom.hide(sbsLegendElement);
+        }
+
+        function attachSbsOpacitySlider(legendElement) {
+            if (!legendElement || !sbsLayerController) {
+                return;
+            }
+            var existing = legendElement.querySelector("#" + LEGEND_OPACITY_CONTAINER_ID);
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
+
+            var container = document.createElement("div");
+            container.id = LEGEND_OPACITY_CONTAINER_ID;
+
+            var label = document.createElement("p");
+            label.textContent = "SBS Map Opacity";
+
+            var slider = document.createElement("input");
+            slider.type = "range";
+            slider.id = LEGEND_OPACITY_INPUT_ID;
+            slider.min = "0";
+            slider.max = "1";
+            slider.step = "0.1";
+            slider.value = String(sbsLayerController.getOpacity());
+
+            function updateOpacity(event) {
+                if (!sbsLayerController) {
+                    return;
+                }
+                var next = clampOpacity(event.target.value);
+                sbsLayerController.setOpacity(next);
+                emit("baer:map:opacity", { opacity: next });
+            }
+
+            slider.addEventListener("input", updateOpacity);
+            slider.addEventListener("change", updateOpacity);
+
+            container.appendChild(label);
+            container.appendChild(slider);
+            legendElement.appendChild(container);
         }
 
         function createRemoteGeoJsonLayer(options) {
@@ -1373,6 +1591,150 @@ var MapController = (function () {
             }
 
             currentLayer.refresh = refresh;
+
+            return controller;
+        }
+
+        function createSbsLayerController(options) {
+            options = options || {};
+            var layerName = options.layerName || SBS_LAYER_NAME;
+            var layerId = options.layerId || toOverlayId(layerName);
+            var activeAbort = null;
+            var activeImageAbort = null;
+            var requestToken = 0;
+            var currentOpacity = clampOpacity(options.opacity);
+            var currentBounds = null;
+            var currentImage = null;
+            var currentLayer = buildBitmapLayer(layerId, null, null, currentOpacity);
+            currentLayer.options = { opacity: currentOpacity };
+            var controller = {
+                layer: currentLayer,
+                refresh: refresh,
+                setOpacity: setOpacity,
+                getOpacity: getOpacity
+            };
+
+            function replaceLayer(nextLayer) {
+                var label = overlayRegistry && overlayRegistry.get(currentLayer)
+                    ? overlayRegistry.get(currentLayer)
+                    : layerName;
+                var wasVisible = map.hasLayer(currentLayer);
+                if (overlayRegistry) {
+                    overlayRegistry.delete(currentLayer);
+                }
+                if (overlayNameRegistry && label) {
+                    overlayNameRegistry.delete(label);
+                }
+                if (map.overlayMaps && label) {
+                    delete map.overlayMaps[label];
+                }
+                if (wasVisible) {
+                    map.removeLayer(currentLayer, { skipOverlay: true });
+                }
+                currentLayer = nextLayer;
+                controller.layer = currentLayer;
+                currentLayer.refresh = controller.refresh;
+                currentLayer.setOpacity = controller.setOpacity;
+                currentLayer.options = { opacity: currentOpacity };
+                if (options.mapKey) {
+                    map[options.mapKey] = currentLayer;
+                }
+                if (label) {
+                    if (overlayRegistry) {
+                        overlayRegistry.set(currentLayer, label);
+                    }
+                    if (overlayNameRegistry) {
+                        overlayNameRegistry.set(label, currentLayer);
+                    }
+                    if (map.overlayMaps) {
+                        map.overlayMaps[label] = currentLayer;
+                    }
+                }
+                if (wasVisible) {
+                    map.addLayer(currentLayer, { skipRefresh: true });
+                }
+                renderOverlayLayerControl();
+            }
+
+            function getOpacity() {
+                return currentOpacity;
+            }
+
+            function setOpacity(next) {
+                currentOpacity = clampOpacity(next);
+                var nextLayer = buildBitmapLayer(layerId, currentImage, currentBounds, currentOpacity);
+                replaceLayer(nextLayer);
+            }
+
+            function refresh(urlInput) {
+                var rawUrl = normalizeUrlPayload(urlInput || options.url || SBS_QUERY_ENDPOINT);
+                if (!rawUrl) {
+                    return Promise.resolve();
+                }
+                var url = resolveRunScopedUrl(rawUrl);
+                if (!url) {
+                    return Promise.resolve();
+                }
+                if (activeAbort && typeof activeAbort.abort === "function") {
+                    activeAbort.abort();
+                }
+                if (activeImageAbort && typeof activeImageAbort.abort === "function") {
+                    activeImageAbort.abort();
+                }
+                var abortController = typeof AbortController === "function" ? new AbortController() : null;
+                activeAbort = abortController;
+                requestToken += 1;
+                var token = requestToken;
+
+                return http.getJson(url, {
+                    signal: abortController ? abortController.signal : undefined
+                }).then(function (data) {
+                    if (token !== requestToken) {
+                        return data;
+                    }
+                    activeAbort = null;
+                    if (!data || data.Success !== true || !data.Content) {
+                        var message = data && data.Error ? data.Error : "No SBS map has been specified.";
+                        var error = new Error(message);
+                        error.payload = data;
+                        throw error;
+                    }
+                    var content = data.Content || {};
+                    var bounds = normalizeSbsBounds(content.bounds);
+                    var imgPath = normalizeUrlPayload(content.imgurl);
+                    if (!bounds || !imgPath) {
+                        throw new Error("SBS map metadata missing bounds or image URL.");
+                    }
+                    var imgUrl = isAbsoluteUrl(imgPath) ? imgPath : resolveRunScopedUrl(imgPath);
+                    if (!imgUrl) {
+                        throw new Error("SBS map image URL unavailable.");
+                    }
+                    imgUrl = imgUrl + (imgUrl.indexOf("?") === -1 ? "?v=" : "&v=") + Date.now();
+                    var imageAbort = typeof AbortController === "function" ? new AbortController() : null;
+                    activeImageAbort = imageAbort;
+                    return fetchSbsImage(imgUrl, imageAbort ? imageAbort.signal : undefined).then(function (image) {
+                        if (token !== requestToken) {
+                            return data;
+                        }
+                        activeImageAbort = null;
+                        currentBounds = bounds;
+                        currentImage = image;
+                        var nextLayer = buildBitmapLayer(layerId, image, bounds, currentOpacity);
+                        replaceLayer(nextLayer);
+                        return data;
+                    });
+                }).catch(function (error) {
+                    activeAbort = null;
+                    activeImageAbort = null;
+                    if (http.isHttpError && http.isHttpError(error) && error.cause && error.cause.name === "AbortError") {
+                        return;
+                    }
+                    throw error;
+                });
+            }
+
+            currentLayer.refresh = refresh;
+            currentLayer.setOpacity = setOpacity;
 
             return controller;
         }
@@ -1504,6 +1866,14 @@ var MapController = (function () {
                 map.loadSnotelLocations();
             } else if (layer === map.nhd_flowlines) {
                 map.loadNhdFlowlines();
+            } else if (layer === map.sbs_layer) {
+                map.loadSbsMap();
+            }
+        }
+
+        function handleOverlayRemoved(layer) {
+            if (layer === map.sbs_layer) {
+                clearSbsLegend();
             }
         }
 
@@ -1816,22 +2186,33 @@ var MapController = (function () {
             },
             mapKey: "nhd_flowlines"
         });
+        sbsLayerController = createSbsLayerController({
+            layerName: SBS_LAYER_NAME,
+            mapKey: "sbs_layer",
+            opacity: SBS_DEFAULT_OPACITY
+        });
 
         attachLayerRefresh(USGS_LAYER_NAME, usgsLayerController);
         attachLayerRefresh(SNOTEL_LAYER_NAME, snotelLayerController);
         attachLayerRefresh(NHD_LAYER_NAME, nhdLayerController);
+        attachLayerRefresh(SBS_LAYER_NAME, sbsLayerController);
 
         map.usgs_gage = usgsLayerController.layer;
         map.snotel_locations = snotelLayerController.layer;
         map.nhd_flowlines = nhdLayerController.layer;
+        map.sbs_layer = sbsLayerController.layer;
 
         map.overlayMaps[USGS_LAYER_NAME] = map.usgs_gage;
         map.overlayMaps[SNOTEL_LAYER_NAME] = map.snotel_locations;
         map.overlayMaps[NHD_LAYER_NAME] = map.nhd_flowlines;
+        map.overlayMaps[SBS_LAYER_NAME] = map.sbs_layer;
 
         map.registerOverlay(map.usgs_gage, USGS_LAYER_NAME);
         map.registerOverlay(map.snotel_locations, SNOTEL_LAYER_NAME);
         map.registerOverlay(map.nhd_flowlines, NHD_LAYER_NAME);
+        map.registerOverlay(map.sbs_layer, SBS_LAYER_NAME);
+
+        clearSbsLegend();
 
         map.addLayer(map.nhd_flowlines);
         updateUSGSOverlayLabel();
@@ -1842,6 +2223,24 @@ var MapController = (function () {
         map.on("zoom", handleViewportChange);
         map.on("moveend", handleViewportSettled);
         map.on("zoomend", handleViewportSettled);
+
+        if (typeof document !== "undefined" && document.addEventListener) {
+            document.addEventListener("disturbed:has_sbs_changed", function (event) {
+                var detail = event && event.detail ? event.detail : {};
+                var hasSbs = detail.hasSbs === true;
+                if (hasSbs) {
+                    if (map.sbs_layer && !map.hasLayer(map.sbs_layer)) {
+                        map.addLayer(map.sbs_layer);
+                        return;
+                    }
+                    map.loadSbsMap();
+                } else if (map.sbs_layer && map.hasLayer(map.sbs_layer)) {
+                    map.removeLayer(map.sbs_layer);
+                } else {
+                    clearSbsLegend();
+                }
+            });
+        }
 
         map.setBaseLayer = function (key) {
             var def = resolveBasemap(key);
