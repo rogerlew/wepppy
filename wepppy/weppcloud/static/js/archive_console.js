@@ -224,8 +224,22 @@
       fetchArchives();
     }
 
+    function archiveFailed() {
+      currentJobId = null;
+      if (archiveButton) {
+        archiveButton.disabled = false;
+      }
+      setRestoreButtonsDisabled(false);
+      setDeleteButtonsDisabled(false);
+      appendStatus("Archive job failed.");
+      fetchArchives();
+    }
+
     function restoreFinished() {
       currentJobId = null;
+      if (archiveButton) {
+        archiveButton.disabled = false;
+      }
       setRestoreButtonsDisabled(false);
       setDeleteButtonsDisabled(false);
       fetchArchives();
@@ -240,6 +254,17 @@
       }
     }
 
+    function restoreFailed() {
+      currentJobId = null;
+      if (archiveButton) {
+        archiveButton.disabled = false;
+      }
+      setRestoreButtonsDisabled(false);
+      setDeleteButtonsDisabled(false);
+      fetchArchives();
+      appendStatus("Restore job failed.");
+    }
+
     function handleTrigger(detail) {
       if (!detail || !detail.event) {
         return;
@@ -247,8 +272,12 @@
       var eventName = String(detail.event).toUpperCase();
       if (eventName === "ARCHIVE_COMPLETE") {
         archiveFinished();
+      } else if (eventName === "ARCHIVE_FAILED") {
+        archiveFailed();
       } else if (eventName === "RESTORE_COMPLETE") {
         restoreFinished();
+      } else if (eventName === "RESTORE_FAILED") {
+        restoreFailed();
       }
     }
 

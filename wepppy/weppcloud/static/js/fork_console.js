@@ -43,11 +43,14 @@
     var statusLog = container.querySelector("#fork_status_log");
     var stacktracePanel = container.querySelector("#fork_stacktrace_panel");
     var stacktraceBody = stacktracePanel ? stacktracePanel.querySelector("[data-stacktrace-body]") : null;
+    var rqJob = container.querySelector("#rq_job");
 
     var statusStream = null;
     var pendingStatusMessages = [];
     var jobId = "";
     var newRunId = "";
+    var poller = null;
+    var completionState = { completed: false, failed: false };
 
     function appendStatus(message) {
       if (message === undefined || message === null) {
@@ -68,9 +71,31 @@
       }
     }
 
+    function resetCompletionState() {
+      completionState.completed = false;
+      completionState.failed = false;
+    }
+
+    function resetJobStatus() {
+      if (poller) {
+        poller.set_rq_job_id(poller, null);
+        return;
+      }
+      if (rqJob) {
+        rqJob.textContent = "";
+      }
+    }
+
     function flushPendingStatus() {
       if (!statusStream || pendingStatusMessages.length === 0) {
         return;
+      }
+      if (statusStream.logElement && statusStream.logElement.textContent) {
+        var expected = pendingStatusMessages.join("\n") + "\n";
+        if (statusStream.logElement.textContent === expected) {
+          pendingStatusMessages.length = 0;
+          return;
+        }
       }
       pendingStatusMessages.splice(0).forEach(function (msg) {
         statusStream.append(msg);
@@ -79,10 +104,15 @@
 
     function resetStatusLog() {
       pendingStatusMessages.length = 0;
+      resetCompletionState();
       if (statusStream) {
         statusStream.disconnect();
         statusStream = null;
       }
+      if (poller) {
+        poller.statusStream = null;
+      }
+      resetJobStatus();
       if (statusLog) {
         statusLog.textContent = "";
       }
@@ -140,16 +170,58 @@
       appendStatus("Fork job failed.");
     }
 
-    function handleTrigger(detail) {
-      if (!detail || !detail.event) {
+    function markCompleted(detail) {
+      if (completionState.completed) {
         return;
       }
-      var eventName = String(detail.event).toUpperCase();
-      if (eventName === "FORK_COMPLETE") {
-        handleForkComplete();
-      } else if (eventName === "FORK_FAILED") {
-        handleForkFailed();
+      completionState.completed = true;
+      completionState.failed = false;
+      handleForkComplete(detail);
+    }
+
+    function markFailed(detail) {
+      if (completionState.failed) {
+        return;
       }
+      completionState.failed = true;
+      completionState.completed = false;
+      handleForkFailed(detail);
+    }
+
+    function handleTrigger(eventOrDetail, payload) {
+      var eventName = null;
+      var detail = null;
+      if (typeof eventOrDetail === "string") {
+        eventName = eventOrDetail;
+        detail = payload || {};
+      } else if (eventOrDetail && eventOrDetail.event) {
+        eventName = eventOrDetail.event;
+        detail = eventOrDetail;
+      }
+      if (!eventName) {
+        return;
+      }
+      var normalized = String(eventName).toUpperCase();
+      if (normalized === "FORK_COMPLETE" || normalized === "JOB:COMPLETED") {
+        markCompleted(detail);
+      } else if (normalized === "FORK_FAILED" || normalized === "JOB:ERROR") {
+        markFailed(detail);
+      }
+    }
+
+    function initPoller() {
+      if (typeof controlBase !== "function") {
+        console.warn("controlBase is unavailable; fork polling disabled.");
+        return;
+      }
+      poller = controlBase();
+      poller.form = form;
+      poller.rq_job = rqJob;
+      poller.stacktrace = stacktraceBody;
+      poller.poll_completion_event = "FORK_COMPLETE";
+      poller.triggerEvent = function (eventName, detail) {
+        handleTrigger(eventName, detail);
+      };
     }
 
     function connectStatusStreamForRun(currentRunId) {
@@ -172,6 +244,9 @@
         stacktrace: stacktrace,
         onTrigger: handleTrigger
       });
+      if (poller) {
+        poller.statusStream = statusStream;
+      }
       flushPendingStatus();
     }
 
@@ -268,6 +343,9 @@
           }
 
           connectStatusStreamForRun(runId);
+          if (poller) {
+            poller.set_rq_job_id(poller, jobId);
+          }
         })
         .catch(function (err) {
           if (consoleBlock) {
@@ -334,6 +412,7 @@
       });
     }
 
+    initPoller();
     connectStatusStreamForRun(runId);
     flushPendingStatus();
   }

@@ -75,7 +75,9 @@ controller.triggerEvent = function (eventName, payload) {
   - Channel: `archive`
   - Trigger events:
     - `ARCHIVE_COMPLETE` -> `archiveFinished()` (enable buttons, clear comment, refresh list).
+    - `ARCHIVE_FAILED` -> `archiveFailed()` (enable buttons, refresh list, append status).
     - `RESTORE_COMPLETE` -> `restoreFinished()` (enable buttons, refresh list, show load link).
+    - `RESTORE_FAILED` -> `restoreFailed()` (enable buttons, refresh list, append status).
 
 ## Run Controls (runs0_pure.htm)
 ### Channel Delineation

@@ -926,6 +926,7 @@ def _finish_fork_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
         raise
 
 
@@ -1155,6 +1156,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
         raise
 
 # Archive Backend Functions
@@ -1228,6 +1230,7 @@ def archive_rq(runid: str, comment: Optional[str] = None) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   archive ARCHIVE_COMPLETE')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   archive ARCHIVE_FAILED')
         raise
     finally:
         if archive_path_tmp and os.path.exists(archive_path_tmp):
@@ -1350,6 +1353,7 @@ def restore_archive_rq(runid: str, archive_name: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   archive RESTORE_COMPLETE')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   archive RESTORE_FAILED')
         raise
     finally:
         if prep is None:
