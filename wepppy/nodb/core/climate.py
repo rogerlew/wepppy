@@ -1671,6 +1671,12 @@ class Climate(NoDbBase):
         self.logger.info('  assert not self.islocked()')
         assert not self.islocked()
 
+        with self.locked():
+            self.cli_fn = None
+            self.par_fn = None
+            self.sub_cli_fns = None
+            self.sub_par_fns = None
+
         wd = self.wd
         watershed = self.watershed_instance
         if not watershed.is_abstracted:
@@ -1693,12 +1699,6 @@ class Climate(NoDbBase):
         if not _exists(cli_dir):
             self.logger.info('  cli_dir does not exist, creating')
             os.mkdir(cli_dir)
-
-        with self.locked():
-            self.cli_fn = None
-            self.par_fn = None
-            self.sub_cli_fns = None
-            self.sub_par_fns = None
 
         climate_mode = self.climate_mode
         self.logger.info(f'  climate_mode: {climate_mode}')

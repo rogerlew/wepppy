@@ -288,6 +288,7 @@ var RAP_TS = (function () {
             statusSpinnerEl: statusSpinnerElement,
             command_btn_id: "btn_build_rap_ts",
             _delegates: [],
+            _completion_seen: false,
             state: {
                 schedule: [],
                 lastSubmission: null
@@ -393,12 +394,7 @@ var RAP_TS = (function () {
                     runId: window.runid || window.runId || null,
                     stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
                     spinner: controller.statusSpinnerEl,
-                    logLimit: 200,
-                    onTrigger: function (detail) {
-                        if (detail && detail.event) {
-                            controller.triggerEvent(detail.event, detail);
-                        }
-                    }
+                    logLimit: 200
                 });
             }
 
@@ -406,6 +402,10 @@ var RAP_TS = (function () {
         }
 
         var baseTriggerEvent = controller.triggerEvent.bind(controller);
+
+        function resetCompletionSeen() {
+            controller._completion_seen = false;
+        }
 
         function dispatchControlEvent(eventName, payload) {
             baseTriggerEvent(eventName, payload);
@@ -431,12 +431,7 @@ var RAP_TS = (function () {
             runId: window.runid || window.runId || null,
             stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
             spinner: controller.statusSpinnerEl,
-            logLimit: 200,
-            onTrigger: function (detail) {
-                if (detail && detail.event) {
-                    controller.triggerEvent(detail.event, detail);
-                }
-            }
+            logLimit: 200
         });
 
         controller.hideStacktrace = function () {
@@ -483,9 +478,13 @@ var RAP_TS = (function () {
         controller.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "RAP_TS_TASK_COMPLETED") {
+                if (controller._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                controller._completion_seen = true;
                 controller.handleRunCompletion(payload || null);
             }
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         controller.acquire = function (overridePayload) {
@@ -493,6 +492,7 @@ var RAP_TS = (function () {
                 return;
             }
 
+            resetCompletionSeen();
             controller.info.html("");
             controller.stacktrace.empty();
             controller.hideStacktrace();
@@ -558,6 +558,7 @@ var RAP_TS = (function () {
                         message += ": " + jobId;
                     }
                     controller.setStatusMessage(message, { status: "queued", jobId: jobId });
+                    controller.poll_completion_event = "RAP_TS_TASK_COMPLETED";
                     controller.set_rq_job_id(controller, jobId);
                     if (controller.events && typeof controller.events.emit === "function") {
                         controller.events.emit("rap:timeseries:status", {
@@ -638,6 +639,10 @@ var RAP_TS = (function () {
                         jobId = String(value);
                     }
                 }
+            }
+            if (jobId) {
+                resetCompletionSeen();
+                controller.poll_completion_event = "RAP_TS_TASK_COMPLETED";
             }
             if (typeof controller.set_rq_job_id === "function") {
                 controller.set_rq_job_id(controller, jobId);

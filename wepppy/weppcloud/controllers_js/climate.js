@@ -330,6 +330,12 @@ var Climate = (function () {
             climate.pushResponseStacktrace(climate, toResponsePayload(http, error));
         }
 
+        function resetCompletionSeen() {
+            climate._completion_seen = false;
+        }
+
+        resetCompletionSeen();
+
         climate.updateSpatialModeHelp = function (mode) {
             if (!climate.spatialModeHelpEl) {
                 return;
@@ -978,6 +984,7 @@ var Climate = (function () {
             if (!climate._statusStreamHandle) {
                 climate.attachStatusStream({ autoConnect: false });
             }
+            resetCompletionSeen();
             climate.connect_status_stream(climate);
 
             var taskMsg = "Building climate";
@@ -993,6 +1000,7 @@ var Climate = (function () {
                         var message = "build_climate job submitted: " + body.job_id;
                         statusAdapter.html(message);
                         climate.appendStatus(message);
+                        climate.poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED";
                         climate.set_rq_job_id(climate, body.job_id);
                         climate.events.emit("climate:build:completed", { jobId: body.job_id, payload: payload });
                         return;
@@ -1019,6 +1027,7 @@ var Climate = (function () {
                 var body = response.body || {};
                 if (body.Success === true) {
                     climate.appendStatus("User-defined climate uploaded successfully.");
+                    resetCompletionSeen();
                     climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED", body);
                     climate.events.emit("climate:upload:completed", body);
                     return;
@@ -1122,9 +1131,13 @@ var Climate = (function () {
             } else if (normalized === "CLIMATE_SETSTATION_TASK_COMPLETED") {
                 climate.viewStationMonthlies();
             } else if (normalized === "CLIMATE_BUILD_TASK_COMPLETED" || normalized === "CLIMATE_BUILD_COMPLETE") {
+                if (climate._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                climate._completion_seen = true;
                 climate.report();
             }
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         if (typeof dom.delegate === "function") {
@@ -1246,6 +1259,9 @@ var Climate = (function () {
             }
 
             if (typeof climate.set_rq_job_id === "function") {
+                if (jobId) {
+                    climate.poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED";
+                }
                 climate.set_rq_job_id(climate, jobId);
             }
 

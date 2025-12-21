@@ -297,6 +297,10 @@ describe("Climate controller", () => {
         const completed = jest.fn();
         climate.events.on("climate:build:started", started);
         climate.events.on("climate:build:completed", completed);
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
 
         const buildButton = document.querySelector('[data-climate-action="build"]');
         buildButton.dispatchEvent(new Event("click", { bubbles: true }));
@@ -310,8 +314,18 @@ describe("Climate controller", () => {
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(controlBaseInstance, "job-123");
+        expect(pollCompletionValues).toEqual(["CLIMATE_BUILD_TASK_COMPLETED"]);
         expect(started).toHaveBeenCalled();
         expect(completed).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-123" }));
+    });
+
+    test("build completion is idempotent", () => {
+        jest.spyOn(climate, "report").mockImplementation(() => {});
+
+        climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED");
+        climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED");
+
+        expect(climate.report).toHaveBeenCalledTimes(1);
     });
 
     test("upload posts FormData and emits completion event", async () => {
@@ -387,6 +401,10 @@ describe("Climate controller", () => {
         const refreshSpy = jest.spyOn(climate, "refreshStationSelection").mockImplementation(() => {});
         const monthliesSpy = jest.spyOn(climate, "viewStationMonthlies").mockImplementation(() => {});
         climate.report = jest.fn();
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
 
         climate.bootstrap({
             jobIds: { build_climate_rq: "climate-job" },
@@ -394,6 +412,7 @@ describe("Climate controller", () => {
         });
 
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, "climate-job");
+        expect(pollCompletionValues).toEqual(["CLIMATE_BUILD_TASK_COMPLETED"]);
         expect(precipSpy).toHaveBeenCalledWith("model");
         expect(refreshSpy).toHaveBeenCalled();
         expect(monthliesSpy).toHaveBeenCalled();

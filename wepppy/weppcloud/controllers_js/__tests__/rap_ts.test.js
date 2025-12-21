@@ -83,6 +83,7 @@ describe("RAP_TS controller", () => {
         if (global.WCEvents) {
             delete global.WCEvents;
         }
+        delete window.WCControllerBootstrap;
         delete global.url_for_run;
         document.body.innerHTML = "";
     });
@@ -95,9 +96,32 @@ describe("RAP_TS controller", () => {
         expect(events).toContainEqual(["2024"]);
     });
 
+    test("bootstrap wires poll completion event before set_rq_job_id", () => {
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn(() => "job-456")
+        };
+        let pollCompletionEvent = null;
+        controller._completion_seen = true;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
+
+        controller.bootstrap({});
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-456");
+        expect(pollCompletionEvent).toBe("RAP_TS_TASK_COMPLETED");
+        expect(controller._completion_seen).toBe(false);
+    });
+
     test("acquire queues job and updates status", async () => {
         const statuses = [];
         controller.events.on("rap:timeseries:status", (payload) => statuses.push(payload.status));
+        let pollCompletionEvent = null;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
 
         const button = document.querySelector("[data-rap-action='run']");
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -111,6 +135,7 @@ describe("RAP_TS controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.objectContaining({}), "job-123");
+        expect(pollCompletionEvent).toBe("RAP_TS_TASK_COMPLETED");
 
         const statusNode = document.getElementById("status");
         expect(statusNode.innerHTML).toContain("fetch_and_analyze_rap_ts_rq job submitted");
@@ -139,11 +164,22 @@ describe("RAP_TS controller", () => {
             Success: false,
             Error: "Service unavailable"
         });
-  expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(errors).toHaveLength(1);
         expect(errors[0]).toEqual({
             Success: false,
             Error: "Service unavailable"
         });
+    });
+
+    test("completion trigger is idempotent", () => {
+        const completions = [];
+        controller.events.on("rap:timeseries:run:completed", (payload) => completions.push(payload));
+
+        controller.triggerEvent("RAP_TS_TASK_COMPLETED", { source: "status" });
+        controller.triggerEvent("RAP_TS_TASK_COMPLETED", { source: "status" });
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(completions).toHaveLength(1);
     });
 });
