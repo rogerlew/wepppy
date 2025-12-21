@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * ChannelDelineation (Deck.gl pass 1)
+ * ChannelDelineation (Deck.gl parity + pass 1)
  * ----------------------------------------------------------------------------
  */
 var ChannelDelineation = (function () {
@@ -31,20 +31,35 @@ var ChannelDelineation = (function () {
         return hexToRgba(color, CHANNEL_OPACITY);
     });
 
-    function ensureEvents() {
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
         var events = window.WCEvents;
+
+        if (!dom || typeof dom.ensureElement !== "function" || typeof dom.qs !== "function" ||
+            typeof dom.qsa !== "function" || typeof dom.delegate !== "function" ||
+            typeof dom.show !== "function" || typeof dom.hide !== "function") {
+            throw new Error("ChannelDelineation GL requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("ChannelDelineation GL requires WCForms helpers.");
+        }
+        if (!http || typeof http.request !== "function" || typeof http.getJson !== "function") {
+            throw new Error("ChannelDelineation GL requires WCHttp helpers.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("ChannelDelineation GL requires WCEvents helpers.");
         }
-        return events;
+
+        return { dom: dom, forms: forms, http: http, events: events };
     }
 
-    function ensureHttp() {
-        var http = window.WCHttp;
-        if (!http || typeof http.getJson !== "function") {
-            throw new Error("ChannelDelineation GL requires WCHttp.getJson.");
+    function ensureControlBase() {
+        if (typeof window.controlBase !== "function") {
+            throw new Error("ChannelDelineation GL requires controlBase.");
         }
-        return http;
+        return window.controlBase;
     }
 
     function ensureMap() {
@@ -63,6 +78,227 @@ var ChannelDelineation = (function () {
             throw new Error("ChannelDelineation GL requires deck.gl GeoJsonLayer.");
         }
         return deckApi;
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                element: element,
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            element: element,
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                element.style.display = "none";
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toFloat(value) {
+        if (value === null || value === undefined || value === "") {
+            return null;
+        }
+        if (Array.isArray(value)) {
+            return toFloat(value[0]);
+        }
+        var parsed = Number(value);
+        if (!Number.isFinite(parsed)) {
+            return null;
+        }
+        return parsed;
+    }
+
+    function toInteger(value) {
+        var parsed = toFloat(value);
+        if (parsed === null) {
+            return null;
+        }
+        return Math.trunc(parsed);
+    }
+
+    function coalesceNumeric(raw, keys) {
+        if (!raw) {
+            return null;
+        }
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            if (!Object.prototype.hasOwnProperty.call(raw, key)) {
+                continue;
+            }
+            var value = toFloat(raw[key]);
+            if (value !== null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    function parseNumericList(value, expectedLength) {
+        if (value === null || value === undefined) {
+            return null;
+        }
+        var parts = [];
+        if (Array.isArray(value)) {
+            parts = value;
+        } else if (typeof value === "string") {
+            parts = value.split(",").map(function (part) {
+                return part.trim();
+            });
+        } else {
+            parts = [value];
+        }
+        var numbers = parts
+            .map(function (part) {
+                return toFloat(part);
+            })
+            .filter(function (part) {
+                return part !== null && !Number.isNaN(part);
+            });
+        if (expectedLength && numbers.length !== expectedLength) {
+            return null;
+        }
+        return numbers.length ? numbers : null;
+    }
+
+    function unwrapPyTuple(value) {
+        if (value && typeof value === "object" && !Array.isArray(value) && Object.prototype.hasOwnProperty.call(value, "py/tuple")) {
+            return value["py/tuple"];
+        }
+        return value;
+    }
+
+    function normalizeUtmTuple(value) {
+        var tuple = unwrapPyTuple(value);
+        if (tuple === null || tuple === undefined || tuple === "") {
+            return null;
+        }
+        if (!Array.isArray(tuple) || tuple.length !== 4) {
+            throw new Error("UTM tuple must include 4 values (ul_x, ul_y, zone, letter).");
+        }
+        var zoneLetter = String(tuple[3]).trim();
+        var east = toFloat(tuple[0]);
+        var north = toFloat(tuple[1]);
+        var zone = toInteger(tuple[2]);
+        if (east === null || north === null || zone === null || !zoneLetter) {
+            throw new Error("UTM tuple is missing required values.");
+        }
+        return [east, north, zone, zoneLetter];
+    }
+
+    function normalizeMapObject(rawValue) {
+        if (rawValue === null || rawValue === undefined || rawValue === "") {
+            throw new Error("Map object JSON is required when using Set Map Object.");
+        }
+
+        var parsed = rawValue;
+        if (typeof rawValue === "string") {
+            try {
+                parsed = JSON.parse(rawValue);
+            } catch (err) {
+                throw new Error("Map object must be valid JSON.");
+            }
+        }
+
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+            throw new Error("Map object must be a JSON object.");
+        }
+
+        var extent = parseNumericList(unwrapPyTuple(parsed.extent), 4);
+        var center = parseNumericList(unwrapPyTuple(parsed.center), 2);
+        var zoom = toInteger(parsed.zoom);
+        var cellsize = toFloat(parsed.cellsize);
+
+        if (!extent || extent.length !== 4) {
+            throw new Error("Map object must include an extent array with four numeric values.");
+        }
+        if (!center || center.length !== 2) {
+            throw new Error("Map object must include a center array with two numeric values.");
+        }
+        if (zoom === null) {
+            throw new Error("Map object must include a numeric zoom.");
+        }
+        if (cellsize !== null && cellsize <= 0) {
+            throw new Error("Map object cellsize must be positive when provided.");
+        }
+
+        var mapPayload = {
+            "py/object": parsed["py/object"] || "wepppy.nodb.ron.Map",
+            extent: extent,
+            center: center,
+            zoom: zoom
+        };
+        if (cellsize !== null) {
+            mapPayload.cellsize = cellsize;
+        }
+
+        var utm = normalizeUtmTuple(parsed.utm);
+        if (utm) {
+            mapPayload.utm = utm;
+        }
+
+        var ulx = toFloat(parsed._ul_x);
+        var uly = toFloat(parsed._ul_y);
+        var lrx = toFloat(parsed._lr_x);
+        var lry = toFloat(parsed._lr_y);
+        var numCols = toInteger(parsed._num_cols);
+        var numRows = toInteger(parsed._num_rows);
+
+        if (ulx !== null) { mapPayload._ul_x = ulx; }
+        if (uly !== null) { mapPayload._ul_y = uly; }
+        if (lrx !== null) { mapPayload._lr_x = lrx; }
+        if (lry !== null) { mapPayload._lr_y = lry; }
+        if (numCols !== null) { mapPayload._num_cols = numCols; }
+        if (numRows !== null) { mapPayload._num_rows = numRows; }
+
+        return {
+            payload: mapPayload,
+            extent: extent,
+            center: center,
+            zoom: zoom
+        };
     }
 
     function hexToRgba(hex, alpha) {
@@ -115,7 +351,7 @@ var ChannelDelineation = (function () {
     }
 
     function buildLayer(deckApi, data) {
-        var layer = new deckApi.GeoJsonLayer({
+        return new deckApi.GeoJsonLayer({
             id: CHANNEL_LAYER_ID,
             data: data || EMPTY_GEOJSON,
             pickable: false,
@@ -126,7 +362,6 @@ var ChannelDelineation = (function () {
             getLineWidth: function () { return 1.5; },
             getLineColor: getLineColor
         });
-        return layer;
     }
 
     function removeLayer(channel, map) {
@@ -152,80 +387,658 @@ var ChannelDelineation = (function () {
     }
 
     function createInstance() {
-        var events = ensureEvents();
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var events = helpers.events;
+        var baseFactory = ensureControlBase();
+
+        var channel = baseFactory();
+
         var emitterBase = events.createEmitter();
-        var emitter = typeof events.useEventMap === "function"
+        var channelEvents = typeof events.useEventMap === "function"
             ? events.useEventMap(EVENT_NAMES, emitterBase)
             : emitterBase;
+
+        channel.events = channelEvents;
+
+        var formElement = dom.ensureElement("#build_channels_form", "Channel delineation form not found.");
+        var infoElement = dom.qs("#build_channels_form #info");
+        var statusElement = dom.qs("#build_channels_form #status");
+        var stacktraceElement = dom.qs("#build_channels_form #stacktrace");
+        var rqJobElement = dom.qs("#build_channels_form #rq_job");
+        var hintElement = dom.qs("#hint_build_channels_en");
+        var spinnerElement = dom.qs("#build_channels_form #braille");
+        var manualExtentGroup = dom.qs("#map_bounds_text_group");
+        var manualExtentInput = dom.qs("#map_bounds_text");
+        var mapObjectGroup = dom.qs("#map_object_group");
+        var mapObjectInput = dom.qs("#map_object");
+        var mapBoundsInput = dom.qs("#map_bounds");
+        var mapCenterInput = dom.qs("#map_center");
+        var mapZoomInput = dom.qs("#map_zoom");
+        var mapDistanceInput = dom.qs("#map_distance");
+        var wbtFillSelect = dom.qs("#input_wbt_fill_or_breach");
+        var wbtBreachContainer = dom.qs("#wbt_blc_dist_container");
+        var wbtBreachInput = dom.qs("#wbt_blc_dist");
+        var buildButton = document.getElementById("btn_build_channels_en");
+
+        var infoAdapter = createLegacyAdapter(infoElement);
+        var statusAdapter = createLegacyAdapter(statusElement);
+        var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
+        var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var hintAdapter = createLegacyAdapter(hintElement);
+
+        channel.form = formElement;
+        channel.info = infoAdapter;
+        channel.status = statusAdapter;
+        channel.stacktrace = stacktraceAdapter;
+        channel.rq_job = rqJobAdapter;
+        channel.hint = hintAdapter;
+        channel.command_btn_id = "btn_build_channels_en";
+        channel.statusSpinnerEl = spinnerElement;
+        channel.attach_status_stream(channel, {
+            form: formElement,
+            channel: "channel_delineation",
+            runId: window.runid || window.runId || null,
+            spinner: spinnerElement,
+            autoConnect: true
+        });
+        channel.poll_completion_event = "BUILD_CHANNELS_TASK_COMPLETED";
+
+        channel.zoom_min = 12;
+        channel.glLayer = null;
+        channel.glData = null;
+        channel._completion_seen = false;
+
         var bootstrapState = {
-            shown: false
+            reported: false,
+            shownWithoutSubcatchments: false
         };
 
-        var channel = {
-            events: emitter,
-            glLayer: null,
-            glData: null,
-            bootstrap: function bootstrap(context) {
-                var ctx = context || {};
-                var helper = window.WCControllerBootstrap || null;
-                var controllerContext = helper && typeof helper.getControllerContext === "function"
-                    ? helper.getControllerContext(ctx, "channel")
-                    : {};
-                var watershed = (ctx.data && ctx.data.watershed) || {};
-                var hasChannels = Boolean(watershed.hasChannels);
-
-                if (controllerContext.zoomMin !== undefined && controllerContext.zoomMin !== null) {
-                    channel.zoom_min = controllerContext.zoomMin;
-                }
-                if (typeof channel.onMapChange === "function") {
-                    channel.onMapChange();
-                }
-                if (hasChannels && !bootstrapState.shown) {
-                    bootstrapState.shown = true;
-                    return channel.show();
-                }
-
-                return null;
-            },
-            onMapChange: function () {
-                return null;
-            },
-            show: function () {
-                var http = ensureHttp();
-                var map = ensureMap();
-                var deckApi = ensureDeck();
-                var url = buildNetfulUrl();
-
-                removeLayer(channel, map);
-
-                return http.getJson(url, { params: { _: Date.now() } })
-                    .then(function (data) {
-                        channel.glData = data || EMPTY_GEOJSON;
-                        channel.glLayer = buildLayer(deckApi, channel.glData);
-                        attachRebuild(channel.glLayer, channel);
-                        if (typeof map.registerOverlay === "function") {
-                            map.registerOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
-                        } else if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
-                            map.ctrls.addOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
-                        }
-                        if (typeof map.addLayer === "function") {
-                            map.addLayer(channel.glLayer);
-                        }
-                        if (channel.events && typeof channel.events.emit === "function") {
-                            channel.events.emit("channel:layers:loaded", { mode: 1, layer: channel.glLayer });
-                        }
-                        return channel.glLayer;
-                    })
-                    .catch(function (error) {
-                        if (channel.events && typeof channel.events.emit === "function") {
-                            channel.events.emit("channel:build:error", { mode: 1, error: error });
-                        }
-                        throw error;
-                    });
-            },
-            refreshLayers: function () {
-                return channel.show();
+        function emit(eventName, payload) {
+            if (channelEvents && typeof channelEvents.emit === "function") {
+                channelEvents.emit(eventName, payload || {});
             }
+        }
+
+        function setHint(message) {
+            if (hintAdapter && typeof hintAdapter.text === "function") {
+                hintAdapter.text(message || "");
+            }
+        }
+
+        function resetStatus(message) {
+            if (infoAdapter && typeof infoAdapter.text === "function") {
+                infoAdapter.text("");
+            }
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(message + "...");
+            }
+            if (stacktraceAdapter && typeof stacktraceAdapter.empty === "function") {
+                stacktraceAdapter.empty();
+            }
+            channel.hideStacktrace();
+        }
+
+        function showErrorStatus(message) {
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html('<span class="text-danger">' + message + "</span>");
+            }
+        }
+
+        function getExtentMode() {
+            var radios = dom.qsa('[data-channel-role="extent-mode"]', formElement);
+            for (var i = 0; i < radios.length; i += 1) {
+                if (radios[i].checked) {
+                    var parsed = parseInt(radios[i].value, 10);
+                    return Number.isNaN(parsed) ? 0 : parsed;
+                }
+            }
+            return 0;
+        }
+
+        function updateManualExtentVisibility(mode) {
+            if (!manualExtentGroup) {
+                return;
+            }
+            if (mode === 1) {
+                dom.show(manualExtentGroup);
+            } else {
+                dom.hide(manualExtentGroup);
+            }
+        }
+
+        function updateMapObjectVisibility(mode) {
+            if (!mapObjectGroup) {
+                return;
+            }
+            if (mode === 2) {
+                dom.show(mapObjectGroup);
+            } else {
+                dom.hide(mapObjectGroup);
+            }
+        }
+
+        function updateExtentInputVisibility(mode) {
+            updateManualExtentVisibility(mode);
+            updateMapObjectVisibility(mode);
+            if (mode === 2) {
+                setBuildButtonEnabled(true, "");
+                channel.update_command_button_state(channel);
+            } else if (typeof channel.onMapChange === "function") {
+                channel.onMapChange();
+            }
+        }
+
+        function updateBreachDistanceVisibility(selection) {
+            if (!wbtBreachContainer) {
+                return;
+            }
+            if (selection === "breach_least_cost") {
+                dom.show(wbtBreachContainer);
+            } else {
+                dom.hide(wbtBreachContainer);
+            }
+        }
+
+        function setBuildButtonEnabled(enabled, reason) {
+            if (!buildButton) {
+                return;
+            }
+            buildButton.dataset.mapDisabled = enabled ? "false" : "true";
+            if (buildButton.dataset.jobDisabled === "true") {
+                buildButton.disabled = true;
+            } else {
+                buildButton.disabled = !enabled;
+            }
+            setHint(enabled ? "" : reason);
+        }
+
+        var baseShouldDisable = channel.should_disable_command_button.bind(channel);
+        channel.should_disable_command_button = function (self) {
+            if (baseShouldDisable(self)) {
+                return true;
+            }
+            if (buildButton && buildButton.dataset.mapDisabled === "true") {
+                return true;
+            }
+            return false;
+        };
+
+        function prepareExtentFields() {
+            if (getExtentMode() !== 1) {
+                return;
+            }
+            if (!manualExtentInput || !mapBoundsInput) {
+                return;
+            }
+            if (typeof window.parseBboxText !== "function") {
+                throw new Error("parseBboxText helper is required for manual extents.");
+            }
+            var raw = manualExtentInput.value || "";
+            var bbox = window.parseBboxText(raw);
+            manualExtentInput.value = bbox.join(", ");
+            mapBoundsInput.value = bbox.join(",");
+        }
+
+        function buildPayload() {
+            var raw = forms.serializeForm(formElement, { format: "object" });
+            var setExtentMode = toInteger(raw.set_extent_mode);
+            if (setExtentMode === null) {
+                setExtentMode = 0;
+            }
+            var mapObject = null;
+            var center = null;
+            var bounds = null;
+            var zoom = null;
+            var distance = toFloat(raw.map_distance);
+            var mcl = coalesceNumeric(raw, ["mcl", "input_mcl"]);
+            var csa = coalesceNumeric(raw, ["csa", "input_csa"]);
+            var wbtFill = raw.wbt_fill_or_breach || null;
+            var wbtBreachDistance = toInteger(raw.wbt_blc_dist);
+            var mapBoundsText = raw.map_bounds_text || "";
+
+            if (setExtentMode === 2) {
+                mapObject = normalizeMapObject(raw.map_object);
+                center = mapObject.center;
+                bounds = mapObject.extent;
+                zoom = mapObject.zoom;
+
+                if (bounds) {
+                    mapBoundsText = bounds.join(", ");
+                }
+                if (mapCenterInput) {
+                    mapCenterInput.value = center.join(",");
+                }
+                if (mapBoundsInput) {
+                    mapBoundsInput.value = bounds.join(",");
+                }
+                if (mapZoomInput) {
+                    mapZoomInput.value = zoom;
+                }
+            } else {
+                if (setExtentMode === 1) {
+                    prepareExtentFields();
+                }
+                center = parseNumericList(raw.map_center, 2);
+                bounds = parseNumericList(raw.map_bounds, 4);
+                zoom = toFloat(raw.map_zoom);
+            }
+
+            if (!center || center.length !== 2) {
+                throw new Error("Map center is not available yet. Move the map to establish bounds.");
+            }
+            if (!bounds || bounds.length !== 4) {
+                throw new Error("Map extent is missing. Navigate the map or specify a manual extent.");
+            }
+            if (mcl === null || csa === null) {
+                throw new Error("Minimum channel length and critical source area must be numeric.");
+            }
+
+            return {
+                map_center: center,
+                map_zoom: zoom,
+                map_bounds: bounds,
+                map_distance: distance,
+                mcl: mcl,
+                csa: csa,
+                wbt_fill_or_breach: wbtFill,
+                wbt_blc_dist: wbtBreachDistance,
+                set_extent_mode: setExtentMode,
+                map_bounds_text: mapBoundsText,
+                map_object: mapObject ? mapObject.payload : null
+            };
+        }
+
+        var delegates = [];
+
+        delegates.push(dom.delegate(formElement, "change", "[data-channel-role=\"extent-mode\"]", function () {
+            var mode = parseInt(this.value, 10);
+            if (Number.isNaN(mode)) {
+                mode = 0;
+            }
+            updateExtentInputVisibility(mode);
+            emit("channel:extent:mode", { mode: mode });
+            try {
+                channel.onMapChange();
+            } catch (err) {
+                // Map may not be ready yet; safe to ignore.
+            }
+        }));
+
+        delegates.push(dom.delegate(formElement, "change", "[data-channel-role=\"wbt-fill\"]", function () {
+            updateBreachDistanceVisibility(this.value);
+        }));
+
+        delegates.push(dom.delegate(formElement, "click", "[data-channel-action=\"build\"]", function (event) {
+            event.preventDefault();
+            channel.build();
+        }));
+
+        function initializeUI() {
+            updateExtentInputVisibility(getExtentMode());
+            if (wbtFillSelect) {
+                updateBreachDistanceVisibility(wbtFillSelect.value);
+            }
+            if (buildButton) {
+                buildButton.dataset.mapDisabled = "false";
+            }
+        }
+
+        initializeUI();
+
+        var baseTriggerEvent = channel.triggerEvent.bind(channel);
+        channel.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "BUILD_CHANNELS_TASK_COMPLETED") {
+                if (!channel._completion_seen) {
+                    channel._completion_seen = true;
+                    channel.disconnect_status_stream(channel);
+                    channel.show();
+                    channel.report();
+                    emit("channel:build:completed", payload || {});
+                    baseTriggerEvent("job:completed", {
+                        jobId: channel.rq_job_id,
+                        task: "channel:build",
+                        payload: payload || {}
+                    });
+                }
+            } else if (normalized === "BUILD_CHANNELS_TASK_FAILED" || normalized === "BUILD_CHANNELS_TASK_ERROR") {
+                emit("channel:build:error", {
+                    reason: "job_failure",
+                    payload: payload || {}
+                });
+                baseTriggerEvent("job:error", {
+                    jobId: channel.rq_job_id,
+                    task: "channel:build",
+                    payload: payload || {}
+                });
+            }
+
+            baseTriggerEvent(eventName, payload);
+        };
+
+        channel.hideStacktrace = function () {
+            if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
+                stacktraceAdapter.hide();
+                return;
+            }
+            if (!stacktraceElement) {
+                return;
+            }
+            stacktraceElement.hidden = true;
+            stacktraceElement.style.display = "none";
+        };
+
+        channel.remove = function () {
+            var map;
+            try {
+                map = ensureMap();
+            } catch (err) {
+                return;
+            }
+            removeLayer(channel, map);
+        };
+
+        channel.onMapChange = function () {
+            var map;
+            try {
+                map = ensureMap();
+            } catch (error) {
+                return;
+            }
+            try {
+                var center = map.getCenter();
+                var zoom = map.getZoom();
+                var bounds = map.getBounds();
+                var sw = bounds.getSouthWest();
+                var ne = bounds.getNorthEast();
+                var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
+                var distance = map.distance(ne, sw);
+
+                if (mapCenterInput) {
+                    mapCenterInput.value = [center.lng, center.lat].join(",");
+                }
+                if (mapZoomInput) {
+                    mapZoomInput.value = zoom;
+                }
+                if (mapDistanceInput) {
+                    mapDistanceInput.value = distance;
+                }
+                if (mapBoundsInput) {
+                    mapBoundsInput.value = extent.join(",");
+                }
+
+                var extentMode = getExtentMode();
+                if (extentMode === 2) {
+                    setBuildButtonEnabled(true, "");
+                } else {
+                    var zoomOk = zoom >= channel.zoom_min;
+                    var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
+                    var enabled = zoomOk || powerOverride;
+
+                    if (!enabled) {
+                        setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
+                    } else {
+                        setBuildButtonEnabled(true, "");
+                    }
+                }
+
+                channel.update_command_button_state(channel);
+
+                emit("channel:map:updated", {
+                    center: [center.lng, center.lat],
+                    zoom: zoom,
+                    distance: distance,
+                    extent: extent
+                });
+            } catch (error) {
+                // Map not initialized yet - this is normal during bootstrap.
+            }
+        };
+
+        var mapEventsBound = false;
+        function bindMapEvents() {
+            if (mapEventsBound) {
+                return;
+            }
+            var map;
+            try {
+                map = ensureMap();
+            } catch (err) {
+                return;
+            }
+            if (map && typeof map.on === "function") {
+                map.on("move", channel.onMapChange);
+                map.on("zoom", channel.onMapChange);
+            }
+            if (map && map.events && typeof map.events.on === "function") {
+                map.events.on("map:ready", function () {
+                    channel.onMapChange();
+                });
+            }
+            mapEventsBound = true;
+        }
+
+        bindMapEvents();
+
+        channel.has_dem = function (onSuccessCallback) {
+            return http.getJson(window.url_for_run("query/has_dem/"), { params: { _: Date.now() } })
+                .then(function (response) {
+                    if (typeof onSuccessCallback === "function") {
+                        onSuccessCallback(response);
+                    }
+                    return response;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    throw error;
+                });
+        };
+
+        channel.build = function () {
+            var taskMsg = "Delineating channels";
+            resetStatus(taskMsg);
+
+            channel.remove();
+            channel._completion_seen = false;
+            try {
+                if (window.Outlet && typeof window.Outlet.getInstance === "function") {
+                    window.Outlet.getInstance().remove();
+                }
+            } catch (err) {
+                console.warn("Failed to remove outlet before channel build", err);
+            }
+
+            channel.connect_status_stream(channel);
+
+            var payload;
+            try {
+                payload = buildPayload();
+            } catch (err) {
+                showErrorStatus(err.message);
+                emit("channel:build:error", { reason: "validation", error: err });
+                channel.triggerEvent("job:error", {
+                    reason: "validation",
+                    message: err.message
+                });
+                return Promise.reject(err);
+            }
+
+            if (payload.set_extent_mode === 2 && payload.map_center && payload.map_center.length === 2) {
+                try {
+                    var map = ensureMap();
+                    if (map && typeof map.flyTo === "function") {
+                        var flyZoom = payload.map_zoom || map.getZoom();
+                        map.flyTo([payload.map_center[1], payload.map_center[0]], flyZoom);
+                    }
+                } catch (err) {
+                    // Best-effort.
+                }
+            }
+
+            emit("channel:build:started", {
+                payload: payload
+            });
+
+            return http.request(window.url_for_run("rq/api/fetch_dem_and_build_channels"), {
+                method: "POST",
+                json: payload,
+                form: formElement
+            })
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (data.Success === true && data.job_id) {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html("fetch_dem_and_build_channels_rq job submitted: " + data.job_id);
+                        }
+                        channel.set_rq_job_id(channel, data.job_id);
+                        channel.triggerEvent("job:started", {
+                            jobId: data.job_id,
+                            task: "channel:build",
+                            payload: payload
+                        });
+                        return data;
+                    }
+                    channel.pushResponseStacktrace(channel, data);
+                    showErrorStatus("Failed to submit channel delineation job.");
+                    emit("channel:build:error", {
+                        reason: "server",
+                        response: data
+                    });
+                    channel.triggerEvent("job:error", {
+                        reason: "server",
+                        response: data
+                    });
+                    return data;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    showErrorStatus("Unable to enqueue channel delineation job.");
+                    emit("channel:build:error", {
+                        reason: "http",
+                        error: error
+                    });
+                    channel.triggerEvent("job:error", {
+                        reason: "http",
+                        error: error
+                    });
+                    throw error;
+                });
+        };
+
+        channel.show = function () {
+            var map = ensureMap();
+            var deckApi = ensureDeck();
+            var url = buildNetfulUrl();
+            var taskMsg = "Displaying Channel Map (WebGL)";
+
+            if (!bootstrapState.reported) {
+                resetStatus(taskMsg);
+            }
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text(taskMsg + "...");
+            }
+
+            removeLayer(channel, map);
+
+            return http.getJson(url, { params: { _: Date.now() } })
+                .then(function (data) {
+                    channel.glData = data || EMPTY_GEOJSON;
+                    channel.glLayer = buildLayer(deckApi, channel.glData);
+                    attachRebuild(channel.glLayer, channel);
+                    if (typeof map.registerOverlay === "function") {
+                        map.registerOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
+                    } else if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
+                        map.ctrls.addOverlay(channel.glLayer, CHANNEL_LAYER_NAME);
+                    }
+                    if (typeof map.addLayer === "function") {
+                        map.addLayer(channel.glLayer);
+                    }
+                    if (statusAdapter && typeof statusAdapter.text === "function") {
+                        statusAdapter.text(taskMsg + " - done");
+                    }
+                    emit("channel:layers:loaded", { mode: 1, layer: channel.glLayer });
+                    return channel.glLayer;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    showErrorStatus("Unable to load channel map.");
+                    emit("channel:build:error", { reason: "load", error: error });
+                    throw error;
+                });
+        };
+
+        channel.refreshLayers = function () {
+            return channel.show();
+        };
+
+        channel.report = function () {
+            return http.request(window.url_for_run("report/channel"), {
+                headers: { Accept: "text/html, */*;q=0.8" }
+            })
+                .then(function (result) {
+                    if (infoAdapter && typeof infoAdapter.html === "function") {
+                        infoAdapter.html(result.body || "");
+                    }
+                    bootstrapState.reported = true;
+                    emit("channel:report:loaded", {});
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                });
+        };
+
+        channel.bootstrap = function bootstrap(context) {
+            bindMapEvents();
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var controllerContext = helper && typeof helper.getControllerContext === "function"
+                ? helper.getControllerContext(ctx, "channel")
+                : {};
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "fetch_dem_and_build_channels_rq")
+                : null;
+            if (!jobId && controllerContext.jobId) {
+                jobId = controllerContext.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "fetch_dem_and_build_channels_rq")) {
+                    var value = jobIds.fetch_dem_and_build_channels_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (typeof channel.set_rq_job_id === "function") {
+                channel.set_rq_job_id(channel, jobId);
+            }
+
+            if (controllerContext.zoomMin !== undefined && controllerContext.zoomMin !== null) {
+                channel.zoom_min = controllerContext.zoomMin;
+            }
+
+            if (typeof channel.onMapChange === "function") {
+                channel.onMapChange();
+            }
+
+            var watershed = (ctx.data && ctx.data.watershed) || {};
+            var hasChannels = Boolean(watershed.hasChannels);
+            if (hasChannels && !bootstrapState.reported && typeof channel.report === "function") {
+                channel.report();
+                bootstrapState.reported = true;
+            }
+
+            if (hasChannels && !bootstrapState.shownWithoutSubcatchments && typeof channel.show === "function") {
+                channel.show();
+                bootstrapState.shownWithoutSubcatchments = true;
+            }
+
+            return channel;
         };
 
         return channel;

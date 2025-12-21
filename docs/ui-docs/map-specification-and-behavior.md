@@ -310,12 +310,53 @@ Assumptions:
 - Tests: Jest in `map_gl.test.js` asserts single request per cooldown and abort/hide on mouseout.
 
 ### Phase 7: outlet selection
-- Scope: map click for outlet, marker rendering, cursor mode toggle.
-- Tests: Playwright set outlet via cursor; E2E run flow through outlet step.
+- Scope: deck `onClick` dispatches `{ latlng }` to map click handlers; outlet cursor mode submits `rq/api/set_outlet`, shows temp feedback, and renders the final outlet marker from `query/outlet/`.
+- Tests: Jest covers GL outlet selection; Playwright covers cursor click + overlay cleanup.
+
+### Phase 7 handoff summary
+- Click wiring: Map GL uses deck `onClick` to emit `{ latlng }` click events so `Outlet.setClickHandler` works like Leaflet.
+- Temp feedback: blue circle (fill 0.5, stroke 2) plus "Setting outlet..." dialog anchored via deck layers; cleaned on success or error.
+- Outlet marker: GeoJsonLayer with overlay label "Outlet", registered in the overlay control; temp layers removed when the marker renders.
+- Tests: Jest `outlet_gl.test.js` covers cursor submit, temp layer creation, and completion cleanup; Playwright keeps a stubbed cursor click flow with temp overlay and outlet marker assertions.
+- Test run: https://wc.bearhive.duckdns.org/weppcloud/runs/air-cooled-broadening/disturbed9002/
+
+### Phase 7 final handoff
+- Delivered: GL map click dispatch, outlet cursor selection, temp feedback layers, and outlet marker overlay parity with Leaflet.
+- Controller parity: `outlet_gl.js` now mirrors the Leaflet controller lifecycle (status stream, job polling events, report load).
+- Overlay stability: Outlet layer rebuild hook avoids WebGL errors when toggling the overlay on/off.
+- Tests: Jest outlet coverage + Playwright stubbed outlet smoke remain; removed brittle public-run smoke to avoid external state flakiness.
+
+### Phase 7b: channels GL parity (controller + UX)
+- Scope: bring `channel_gl.js` to functional parity with `channel_delineation.js` (build action, status/polling, report loading, map hooks) while reconciling Leaflet vs. GL interface differences.
+- Notes: this is controller parity only; channel layer pass 2 and labels remain in Phase 8.
+- Tests: Jest for build/report flow + polling failure; Playwright build channels -> report load.
+
+### Phase 7b handoff summary
+- Controller parity: `channel_gl.js` now wires the build form, status/stacktrace panels, status stream, job id handling, and report loading while keeping the netful overlay.
+- Build flow: `rq/api/fetch_dem_and_build_channels` submission sets the job id, uses an idempotent completion guard, and triggers report + netful reload on completion.
+- Bootstrap: job id recovery checks `fetch_dem_and_build_channels_rq`, applies `zoomMin`, and loads report + netful when channels already exist.
+- Map integration: `onMapChange` binds to map move/zoom + `map:ready`, updates map input fields, and gates the build button by zoom min.
+- Tests: Jest `controllers_js/__tests__/channel_gl.test.js` covers build payload, completion idempotence, failure job:error, and map gating; Playwright `static-src/tests/smoke/map-gl.spec.js` adds a build flow with report and layer assertions.
+
+### Phase 7c: outlet GL parity (controller + UX)
+- Scope: bring `outlet_gl.js` to functional parity with `outlet.js` (cursor mode, status/polling, report loading, marker rendering) while reconciling Leaflet vs. GL interface differences.
+- Notes: this is controller parity for the outlet UI; outlet map feedback layers can stay as Phase 7 delivered.
+- Tests: Jest for submit/complete/poll failure; Playwright cursor click -> temporary feedback -> outlet marker + report.
+
+### Phase 7c handoff summary
+- Controller parity: `outlet_gl.js` wires DOM hooks, status/stacktrace panels, status stream, job id handling, and controlBase lifecycle events (`job:started`, `job:completed`, `job:error`).
+- Cursor flow: cursor toggle uses map click events, posts `rq/api/set_outlet`, and cleans up temporary feedback layers on success or error.
+- Display: `query/outlet/` renders the outlet marker overlay and `report/outlet/` hydrates the info panel; emits `outlet:display:refresh` after successful render.
+- Tests: Jest `controllers_js/__tests__/outlet_gl.test.js` covers cursor submit, completion idempotence, and report refresh; Playwright smoke asserts temp feedback and final marker/report.
 
 ### Phase 8: channel layer pass 2 + labels + drilldown
 - Scope: channel pass 2, labels via TextLayer/IconLayer, click -> `chnQuery`.
 - Tests: Playwright click channel -> drilldown panel update.
+
+### Phase 8b: subcatchments GL parity (controller + UX)
+- Scope: bring `subcatchments_gl.js` to functional parity with `subcatchment_delineation.js` (build action, status/polling, report loading, legend updates, preflight gating) while reconciling Leaflet vs. GL differences.
+- Notes: assumes Phase 8 delivered the GL subcatchment layers/colormap; this pass focuses on controller wiring and UI parity.
+- Tests: Jest for build/report/poll failure; Playwright build subcatchments -> report + legend update.
 
 ### Phase 9: subcatchments + gridded loss
 - Scope: GeoJsonLayer subcatchments, color map modes, labels, gridded loss raster.

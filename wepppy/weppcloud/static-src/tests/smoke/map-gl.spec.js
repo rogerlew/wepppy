@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const fallbackUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/rlew-appreciated-tremolite/disturbed9002/';
 const emptyFallbackUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/unpaved-neophyte/disturbed9002/';
+const outletProjectUrl = 'https://wc.bearhive.duckdns.org/weppcloud/runs/air-cooled-broadening/disturbed9002/';
 
 function buildUrl(path, baseUrl) {
   if (!path) {
@@ -143,6 +144,65 @@ async function waitForMapTransition(page) {
       return viewState ? viewState.transitionDuration : null;
     });
   }, { timeout: 10000 }).toBeFalsy();
+}
+
+async function flyToLocation(page, coords) {
+  await page.evaluate((target) => {
+    const map = window.MapController && typeof window.MapController.getInstance === 'function'
+      ? window.MapController.getInstance()
+      : null;
+    if (map && typeof map.flyTo === 'function') {
+      const zoom = typeof map.getZoom === 'function' ? map.getZoom() : undefined;
+      map.flyTo([target.lat, target.lng], zoom);
+    }
+  }, coords);
+  await waitForMapTransition(page);
+}
+
+async function resolveMapClickPoint(page, coords) {
+  return page.evaluate((target) => {
+    const map = window.MapController && typeof window.MapController.getInstance === 'function'
+      ? window.MapController.getInstance()
+      : null;
+    const deck = map && map._deck ? map._deck : null;
+    const canvas = document.getElementById('mapid');
+    if (!deck || typeof deck.project !== 'function' || !canvas) {
+      return null;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const projected = deck.project([target.lng, target.lat]);
+    if (!projected || projected.length < 2) {
+      return null;
+    }
+    return {
+      x: rect.left + projected[0],
+      y: rect.top + projected[1],
+    };
+  }, coords);
+}
+
+async function clickMapAtLngLat(page, coords) {
+  const point = await resolveMapClickPoint(page, coords);
+  if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) {
+    await page.mouse.click(point.x, point.y);
+    return true;
+  }
+  const box = await page.locator('#mapid').boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    return true;
+  }
+  return page.evaluate((target) => {
+    const map = window.MapController && typeof window.MapController.getInstance === 'function'
+      ? window.MapController.getInstance()
+      : null;
+    const deck = map && map._deck ? map._deck : null;
+    if (!deck || !deck.props || typeof deck.props.onClick !== 'function') {
+      return false;
+    }
+    deck.props.onClick({ coordinate: [target.lng, target.lat] });
+    return true;
+  }, coords);
 }
 
 async function openOverlayPanel(page) {
@@ -558,6 +618,185 @@ test.describe('map gl smoke', () => {
     await expect(page.locator('label:has-text("Channels")')).toHaveCount(1);
 
     expect(consoleErrors).toEqual([]);
+  });
+
+  test('build channels submits job and renders report', async ({ page }) => {
+    const consoleErrors = attachConsoleCapture(page);
+
+    await openRun(page);
+
+    const stubbed = await page.evaluate(() => {
+      const http = window.WCHttp;
+      if (!http || typeof http.request !== 'function' || typeof http.getJson !== 'function') {
+        return false;
+      }
+      if (!http._channelBuildOriginalRequest) {
+        http._channelBuildOriginalRequest = http.request.bind(http);
+      }
+      if (!http._channelBuildOriginalGetJson) {
+        http._channelBuildOriginalGetJson = http.getJson.bind(http);
+      }
+      http.request = (url, options) => {
+        const target = String(url || '');
+        if (target.includes('rq/api/fetch_dem_and_build_channels')) {
+          return Promise.resolve({ body: { Success: true, job_id: 'job-channel-1' } });
+        }
+        if (target.includes('report/channel')) {
+          return Promise.resolve({ body: '<div id="channel-report">Report</div>' });
+        }
+        return http._channelBuildOriginalRequest(url, options);
+      };
+      http.getJson = (url, options) => {
+        const target = String(url || '');
+        if (target.includes('resources/netful.json')) {
+          return Promise.resolve({
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: { Order: 2 },
+                geometry: { type: 'LineString', coordinates: [[-120.1, 48.1], [-120.2, 48.2]] },
+              },
+            ],
+          });
+        }
+        return http._channelBuildOriginalGetJson(url, options);
+      };
+      return true;
+    });
+    expect(stubbed).toBe(true);
+
+    await page.evaluate(() => {
+      window.ispoweruser = true;
+      const channel = window.ChannelDelineation && typeof window.ChannelDelineation.getInstance === 'function'
+        ? window.ChannelDelineation.getInstance()
+        : null;
+      if (channel && typeof channel.onMapChange === 'function') {
+        channel.onMapChange();
+      }
+    });
+
+    await page.locator('#btn_build_channels_en').click();
+
+    await expect(page.locator('#build_channels_form #status')).toContainText(
+      'fetch_dem_and_build_channels_rq job submitted',
+      { timeout: 20000 },
+    );
+
+    await page.evaluate(() => {
+      const channel = window.ChannelDelineation && typeof window.ChannelDelineation.getInstance === 'function'
+        ? window.ChannelDelineation.getInstance()
+        : null;
+      if (channel && typeof channel.triggerEvent === 'function') {
+        channel.triggerEvent('BUILD_CHANNELS_TASK_COMPLETED', { status: 'finished' });
+      }
+    });
+
+    await expect(page.locator('#build_channels_form #info')).toContainText('Report', { timeout: 20000 });
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        return layers.some((layer) => layer && layer.id === 'wc-channels-netful');
+      });
+    }).toBe(true);
+
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('outlet cursor click renders temp overlay and outlet marker', async ({ page }) => {
+    await openRun(page);
+
+    const stubbed = await page.evaluate(() => {
+      const http = window.WCHttp;
+      if (!http || typeof http.request !== 'function' || typeof http.getJson !== 'function') {
+        return false;
+      }
+      if (!http._outletGlOriginalRequest) {
+        http._outletGlOriginalRequest = http.request.bind(http);
+      }
+      if (!http._outletGlOriginalGetJson) {
+        http._outletGlOriginalGetJson = http.getJson.bind(http);
+      }
+      http.request = (url, options) => {
+        const target = String(url || '');
+        if (target.includes('rq/api/set_outlet')) {
+          return Promise.resolve({ body: { Success: true, job_id: 'job-1' } });
+        }
+        if (target.includes('report/outlet')) {
+          return Promise.resolve({ body: '<div>Report</div>' });
+        }
+        return http._outletGlOriginalRequest(url, options);
+      };
+      http.getJson = (url, options) => {
+        const target = String(url || '');
+        if (target.includes('query/outlet')) {
+          return Promise.resolve({ lat: 45.15, lng: -120.35 });
+        }
+        return http._outletGlOriginalGetJson(url, options);
+      };
+      return true;
+    });
+    expect(stubbed).toBe(true);
+
+    await page.evaluate(() => {
+      const outlet = window.Outlet && typeof window.Outlet.getInstance === 'function'
+        ? window.Outlet.getInstance()
+        : null;
+      if (outlet && typeof outlet.setCursorSelection === 'function') {
+        outlet.setCursorSelection(true);
+      }
+    });
+
+    await page.locator('#mapid').click({ position: { x: 200, y: 200 } });
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        return layers.some((layer) => layer && layer.id === 'wc-outlet-temp-marker');
+      });
+    }).toBe(true);
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        return layers.some((layer) => layer && layer.id === 'wc-outlet-temp-dialog');
+      });
+    }).toBe(true);
+
+    await page.evaluate(() => {
+      const outlet = window.Outlet && typeof window.Outlet.getInstance === 'function'
+        ? window.Outlet.getInstance()
+        : null;
+      if (outlet && typeof outlet.triggerEvent === 'function') {
+        outlet.triggerEvent('SET_OUTLET_TASK_COMPLETED', {});
+      }
+    });
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        const hasTemp = layers.some((layer) => layer && (
+          layer.id === 'wc-outlet-temp-marker' || layer.id === 'wc-outlet-temp-dialog'
+        ));
+        const hasOutlet = layers.some((layer) => layer && layer.id === 'wc-outlet-marker');
+        return { hasTemp, hasOutlet };
+      });
+    }).toEqual({ hasTemp: false, hasOutlet: true });
+
+    await expect(page.locator('label:has-text("Outlet")')).toHaveCount(1);
   });
 
   test('toggle SBS overlay shows legend', async ({ page }) => {

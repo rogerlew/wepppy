@@ -752,6 +752,24 @@ var MapController = (function () {
             });
         }
 
+        function fireClickHandlers(latlng, info) {
+            if (!latlng || !mapHandlers.click) {
+                return;
+            }
+            mapHandlers.click.forEach(function (handler) {
+                try {
+                    handler({
+                        target: map,
+                        latlng: latlng,
+                        info: info || null,
+                        originalEvent: info && info.srcEvent ? info.srcEvent : null
+                    });
+                } catch (err) {
+                    console.warn("Map GL handler failed for click", err);
+                }
+            });
+        }
+
         function notifyViewChange(isFinal) {
             updateMapStatus();
             fireMapHandlers("move");
@@ -2517,6 +2535,17 @@ var MapController = (function () {
             widgets: widgets,
             onHover: function (info) {
                 handleDeckHover(info);
+            },
+            onClick: function (info) {
+                if (!info || !info.coordinate || info.coordinate.length < 2) {
+                    return;
+                }
+                var lng = Number(info.coordinate[0]);
+                var lat = Number(info.coordinate[1]);
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                    return;
+                }
+                fireClickHandlers({ lat: lat, lng: lng }, info);
             },
             onViewStateChange: function (params) {
                 var viewState = params && params.viewState ? params.viewState : null;
