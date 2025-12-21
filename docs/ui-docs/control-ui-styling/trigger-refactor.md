@@ -198,7 +198,7 @@ controller.triggerEvent = function (eventName, payload) {
   - No StatusStream channel.
 
 ## Known Duplicate-Trigger Paths (StatusStream)
-- `wepppy/weppcloud/controllers_js/wepp.js`, `wepppy/weppcloud/controllers_js/rhem.js`, `wepppy/weppcloud/controllers_js/team.js`
+- `wepppy/weppcloud/controllers_js/rhem.js`, `wepppy/weppcloud/controllers_js/team.js`
   - Each passes `onTrigger` that re-calls `triggerEvent`, even though `controlBase.attach_status_stream()` already does this.
   - StatusStream triggers can fire completion handlers twice unless downstream code guards against duplicates.
 
@@ -209,9 +209,9 @@ controller.triggerEvent = function (eventName, payload) {
 - [x] Soils (`wepppy/weppcloud/controllers_js/soil.js`): `_completion_seen` guard; `poll_completion_event = "SOILS_BUILD_TASK_COMPLETED"`; report idempotent.
 - [x] Climate (`wepppy/weppcloud/controllers_js/climate.js`): report idempotent; `poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED"` for build jobs only; keep StatusStream triggers for station/spatial tasks.
 - [x] RAP time series (`wepppy/weppcloud/controllers_js/rap_ts.js`): remove duplicate `onTrigger` re-calling `triggerEvent`; add `_completion_seen` guard; set `poll_completion_event = "RAP_TS_TASK_COMPLETED"`.
-- [ ] Treatments (`wepppy/weppcloud/controllers_js/treatments.js`): add `_completion_seen` guard (or per-event); set `poll_completion_event` to the final completion event used for build jobs.
-- [ ] WEPP (`wepppy/weppcloud/controllers_js/wepp.js`): remove duplicate `onTrigger` re-calling `triggerEvent`; add `_completion_seen` guard; set `poll_completion_event = "WEPP_RUN_TASK_COMPLETED"`.
-- [ ] Ash (`wepppy/weppcloud/controllers_js/ash.js`): add `_completion_seen` guard; set `poll_completion_event = "ASH_RUN_TASK_COMPLETED"`.
+- [x] Treatments (`wepppy/weppcloud/controllers_js/treatments.js`): add `_completion_seen` guard (or per-event); set `poll_completion_event` to the final completion event used for build jobs.
+- [x] WEPP (`wepppy/weppcloud/controllers_js/wepp.js`): remove duplicate `onTrigger` re-calling `triggerEvent`; add `_completion_seen` guard; set `poll_completion_event = "WEPP_RUN_TASK_COMPLETED"`.
+- [x] Ash (`wepppy/weppcloud/controllers_js/ash.js`): add `_completion_seen` guard; set `poll_completion_event = "ASH_RUN_TASK_COMPLETED"`.
 - [ ] RHEM (`wepppy/weppcloud/controllers_js/rhem.js`): remove duplicate `onTrigger` re-calling `triggerEvent`; add `_completion_seen` guard; set `poll_completion_event = "RHEM_RUN_TASK_COMPLETED"`.
 - [ ] Omni (`wepppy/weppcloud/controllers_js/omni.js`): add `_completion_seen` guard; set `poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED"`.
 - [ ] Debris flow (`wepppy/weppcloud/controllers_js/debris_flow.js`): add `_completion_seen` guard; set `poll_completion_event = "DEBRIS_FLOW_RUN_TASK_COMPLETED"`; ensure CustomEvent handler stays idempotent.

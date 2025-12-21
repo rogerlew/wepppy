@@ -284,6 +284,7 @@ var Ash = (function () {
         ash.hint = hintAdapter;
         ash.events = emitter;
         ash.statusSpinnerEl = spinnerElement;
+        ash._completion_seen = false;
 
         ash.attach_status_stream(ash, {
             form: formElement,
@@ -340,6 +341,10 @@ var Ash = (function () {
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
             }
+        }
+
+        function resetCompletionSeen() {
+            ash._completion_seen = false;
         }
 
         function handleError(error, context) {
@@ -586,6 +591,7 @@ var Ash = (function () {
 
         ash.run = function () {
             var taskMsg = "Running ash model";
+            resetCompletionSeen();
             resetStatus(taskMsg);
 
             if (!ash.validateBeforeRun()) {
@@ -619,6 +625,7 @@ var Ash = (function () {
                 var payload = response.body || {};
                 if (payload.Success === true) {
                     statusAdapter.html("run_ash job submitted: " + payload.job_id);
+                    ash.poll_completion_event = "ASH_RUN_TASK_COMPLETED";
                     ash.set_rq_job_id(ash, payload.job_id);
                     ash.rq_job_id = payload.job_id;
                     emitter.emit("ash:run:started", {
@@ -690,7 +697,12 @@ var Ash = (function () {
 
         var baseTriggerEvent = ash.triggerEvent.bind(ash);
         ash.triggerEvent = function (eventName, payload) {
-            if (eventName === "ASH_RUN_TASK_COMPLETED") {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "ASH_RUN_TASK_COMPLETED") {
+                if (ash._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                ash._completion_seen = true;
                 ash.disconnect_status_stream(ash);
                 ash.report();
                 emitter.emit("ash:run:completed", {
@@ -698,7 +710,7 @@ var Ash = (function () {
                     payload: payload || null
                 });
             }
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         dom.delegate(formElement, "change", 'input[name="ash_depth_mode"]', function (event, matched) {
@@ -771,6 +783,10 @@ var Ash = (function () {
                 }
             }
 
+            if (jobId) {
+                resetCompletionSeen();
+                ash.poll_completion_event = "ASH_RUN_TASK_COMPLETED";
+            }
             if (typeof ash.set_rq_job_id === "function") {
                 ash.set_rq_job_id(ash, jobId);
             }

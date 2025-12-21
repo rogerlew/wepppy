@@ -209,18 +209,23 @@ var Wepp = (function () {
             runId: window.runid || window.runId || null,
             stacktrace: wepp.stacktracePanelEl ? { element: wepp.stacktracePanelEl } : null,
             spinner: wepp.statusSpinnerEl,
-            logLimit: 400,
-            onTrigger: function (detail) {
-                if (detail && detail.event) {
-                    wepp.triggerEvent(detail.event, detail);
-                }
-            }
+            logLimit: 400
         });
+
+        wepp._completion_seen = false;
+
+        function resetCompletionSeen() {
+            wepp._completion_seen = false;
+        }
 
         var baseTriggerEvent = wepp.triggerEvent.bind(wepp);
         wepp.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "WEPP_RUN_TASK_COMPLETED") {
+                if (wepp._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                wepp._completion_seen = true;
                 wepp.disconnect_status_stream(wepp);
                 wepp.report();
                 try {
@@ -233,7 +238,7 @@ var Wepp = (function () {
                 }
             }
 
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         wepp.hideStacktrace = function () {
@@ -364,6 +369,7 @@ var Wepp = (function () {
                 hintTarget: hintAdapter
             });
 
+            resetCompletionSeen();
             wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
@@ -381,6 +387,7 @@ var Wepp = (function () {
                             statusAdapter.html(message);
                         }
                         wepp.appendStatus(message, { job_id: response.job_id });
+                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
                         wepp.set_rq_job_id(wepp, response.job_id);
                         if (weppEvents && typeof weppEvents.emit === "function") {
                             weppEvents.emit("wepp:run:queued", { jobId: response.job_id, payload: payload });
@@ -469,6 +476,7 @@ var Wepp = (function () {
                 hintTarget: hintAdapter
             });
 
+            resetCompletionSeen();
             wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
@@ -486,6 +494,7 @@ var Wepp = (function () {
                             statusAdapter.html(message);
                         }
                         wepp.appendStatus(message, { job_id: response.job_id });
+                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
                         wepp.set_rq_job_id(wepp, response.job_id);
                         if (weppEvents && typeof weppEvents.emit === "function") {
                             weppEvents.emit("wepp:run_watershed:queued", { jobId: response.job_id, payload: payload });
@@ -567,9 +576,19 @@ var Wepp = (function () {
                         jobId = String(value);
                     }
                 }
+                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_watershed_rq")) {
+                    var watershedValue = jobIds.run_wepp_watershed_rq;
+                    if (watershedValue !== undefined && watershedValue !== null) {
+                        jobId = String(watershedValue);
+                    }
+                }
             }
 
             if (typeof wepp.set_rq_job_id === "function") {
+                if (jobId) {
+                    wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+                    resetCompletionSeen();
+                }
                 wepp.set_rq_job_id(wepp, jobId);
             }
 

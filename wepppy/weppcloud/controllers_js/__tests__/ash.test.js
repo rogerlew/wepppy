@@ -163,6 +163,7 @@ describe("Ash controller", () => {
         delete global.controlBase;
         delete global.Project;
         delete global.url_for_run;
+        delete window.WCControllerBootstrap;
 
         if (global.WCDom) {
             delete global.WCDom;
@@ -227,6 +228,11 @@ describe("Ash controller", () => {
     test("run submits FormData and emits started event", async () => {
         const runStarted = jest.fn();
         ash.events.on("ash:run:started", runStarted);
+        let pollCompletionEvent = null;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
 
         ash.run();
         await Promise.resolve();
@@ -251,6 +257,7 @@ describe("Ash controller", () => {
             payload: expect.objectContaining({ ash_model: "multi" })
         });
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(ash, "ash-job");
+        expect(pollCompletionEvent).toBe("ASH_RUN_TASK_COMPLETED");
     });
 
     test("run failures push stacktrace and emit completed", async () => {
@@ -284,19 +291,39 @@ describe("Ash controller", () => {
         expect(document.getElementById("hint_run_ash").textContent).toContain(".txt");
     });
 
-    test("websocket completion triggers report and event emission", () => {
+    test("completion trigger is idempotent", () => {
         const completed = jest.fn();
         ash.events.on("ash:run:completed", completed);
         ash.rq_job_id = "finished-job";
         ash.report = jest.fn();
 
         ash.triggerEvent("ASH_RUN_TASK_COMPLETED");
+        ash.triggerEvent("ASH_RUN_TASK_COMPLETED");
 
-        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
-        expect(ash.report).toHaveBeenCalled();
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(ash.report).toHaveBeenCalledTimes(1);
         expect(completed).toHaveBeenCalledWith({
             jobId: "finished-job",
             payload: null
         });
+        expect(completed).toHaveBeenCalledTimes(1);
+    });
+
+    test("bootstrap wires poll completion before set_rq_job_id", () => {
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn(() => "ash-job-2")
+        };
+        let pollCompletionEvent = null;
+        ash._completion_seen = true;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
+
+        ash.bootstrap({});
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(ash, "ash-job-2");
+        expect(pollCompletionEvent).toBe("ASH_RUN_TASK_COMPLETED");
+        expect(ash._completion_seen).toBe(false);
     });
 });

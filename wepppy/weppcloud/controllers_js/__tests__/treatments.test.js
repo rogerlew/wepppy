@@ -122,7 +122,7 @@ describe("Treatments controller", () => {
         document.body.innerHTML = "";
     });
 
-    test("initialises helpers, captures option list, and emits scenario event", () => {
+    test("initializes helpers, captures option list, and emits scenario event", () => {
         expect(global.controlBase).toHaveBeenCalledTimes(1);
         expect(treatments.mode).toBe(1);
 
@@ -182,6 +182,11 @@ describe("Treatments controller", () => {
 
     test("build submits form data, wires job lifecycle, and updates status", async () => {
         emittedEvents.length = 0;
+        let pollCompletionEvent = null;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
 
         treatments.build();
         await flushPromises();
@@ -192,6 +197,7 @@ describe("Treatments controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(treatments, "job-123");
+        expect(pollCompletionEvent).toBe("TREATMENTS_BUILD_TASK_COMPLETED");
         expect(statusStreamMock.append).toHaveBeenCalledWith(
             expect.stringContaining("build_treatments job submitted"),
             expect.any(Object)
@@ -201,6 +207,17 @@ describe("Treatments controller", () => {
         const submitted = emittedEvents.find((entry) => entry.event === "treatments:run:submitted");
         expect(started).toBeTruthy();
         expect(submitted).toBeTruthy();
+    });
+
+    test("completion trigger is idempotent", () => {
+        emittedEvents.length = 0;
+
+        treatments.triggerEvent("TREATMENTS_BUILD_TASK_COMPLETED", { source: "poll" });
+        treatments.triggerEvent("TREATMENTS_BUILD_TASK_COMPLETED", { source: "poll" });
+
+        const completionEvents = emittedEvents.filter((entry) => entry.event === "treatments:job:completed");
+        expect(completionEvents).toHaveLength(1);
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
     });
 
     test("build failure records stacktrace and emits error event", async () => {

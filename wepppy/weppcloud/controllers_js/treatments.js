@@ -226,6 +226,7 @@ var Treatments = (function () {
         treatments.command_btn_id = "btn_build_treatments";
         treatments.hint = hintAdapter;
         treatments.rq_job = rqJobAdapter;
+        treatments._completion_seen = false;
 
         var spinnerElement = statusPanelEl ? statusPanelEl.querySelector("#braille") : null;
         treatments.statusSpinnerEl = spinnerElement;
@@ -322,6 +323,10 @@ var Treatments = (function () {
             }
         }
 
+        function resetCompletionSeen() {
+            treatments._completion_seen = false;
+        }
+
         function handleModeError(error, normalized, selectionValue) {
             var payload = toResponsePayload(http, error);
             treatments.pushResponseStacktrace(treatments, payload);
@@ -408,6 +413,7 @@ var Treatments = (function () {
 
         treatments.build = function () {
             var taskMessage = "Building treatments";
+            resetCompletionSeen();
             resetBeforeRun(taskMessage);
 
             if (treatmentsEvents) {
@@ -430,6 +436,7 @@ var Treatments = (function () {
                 if (response && response.Success === true) {
                     var message = "build_treatments job submitted: " + response.job_id;
                     emitStatus(message);
+                    treatments.poll_completion_event = "TREATMENTS_BUILD_TASK_COMPLETED";
                     treatments.set_rq_job_id(treatments, response.job_id);
                     if (treatmentsEvents) {
                         treatmentsEvents.emit("treatments:run:submitted", {
@@ -512,20 +519,29 @@ var Treatments = (function () {
         treatments.triggerEvent = function (eventName, detail) {
             if (eventName) {
                 var normalized = String(eventName).toUpperCase();
+                var isCompleted = normalized.indexOf("COMPLETED") >= 0 ||
+                    normalized.indexOf("FINISHED") >= 0 ||
+                    normalized.indexOf("SUCCESS") >= 0;
+                if (isCompleted) {
+                    if (treatments._completion_seen) {
+                        return baseTriggerEvent(eventName, detail);
+                    }
+                    treatments._completion_seen = true;
+                    if (treatmentsEvents) {
+                        treatmentsEvents.emit("treatments:job:completed", detail || {});
+                    }
+                    treatments.disconnect_status_stream(treatments);
+                }
                 if (treatmentsEvents) {
                     if (normalized.indexOf("STARTED") >= 0 || normalized.indexOf("QUEUED") >= 0) {
                         treatmentsEvents.emit("treatments:job:started", detail || {});
-                    }
-                    if (normalized.indexOf("COMPLETED") >= 0 || normalized.indexOf("FINISHED") >= 0 || normalized.indexOf("SUCCESS") >= 0) {
-                        treatmentsEvents.emit("treatments:job:completed", detail || {});
-                        treatments.disconnect_status_stream(treatments);
                     }
                     if (normalized.indexOf("FAILED") >= 0 || normalized.indexOf("ERROR") >= 0) {
                         treatmentsEvents.emit("treatments:job:failed", detail || {});
                     }
                 }
             }
-            baseTriggerEvent(eventName, detail);
+            return baseTriggerEvent(eventName, detail);
         };
 
         function setupStatusStream() {

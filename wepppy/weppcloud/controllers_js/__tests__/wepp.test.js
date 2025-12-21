@@ -129,6 +129,11 @@ describe("Wepp controller", () => {
     });
 
     test("run submits JSON payload and sets job id", async () => {
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
         const runButton = document.querySelector('[data-wepp-action="run"]');
         runButton.dispatchEvent(new Event("click", { bubbles: true }));
 
@@ -141,6 +146,27 @@ describe("Wepp controller", () => {
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-1");
+        expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
+    });
+
+    test("runWatershed submits JSON payload and sets job id", async () => {
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
+        wepp.runWatershed();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "rq/api/run_wepp_watershed",
+            expect.objectContaining({ clip_soils: true, initial_sat: "0.3" }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-1");
+        expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
     });
 
     test("run emits lifecycle events", async () => {
@@ -160,6 +186,20 @@ describe("Wepp controller", () => {
 
         wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED");
         expect(completed).toHaveBeenCalled();
+    });
+
+    test("completion trigger is idempotent", () => {
+        const observedInstance = { onWeppRunCompleted: jest.fn() };
+        global.Observed.getInstance.mockReturnValue(observedInstance);
+
+        jest.spyOn(wepp, "report").mockImplementation(() => {});
+
+        wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED");
+        wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED");
+
+        expect(controlBaseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(wepp.report).toHaveBeenCalledTimes(1);
+        expect(observedInstance.onWeppRunCompleted).toHaveBeenCalledTimes(1);
     });
 
     test("set_run_wepp_routine posts JSON payload via delegate", async () => {
