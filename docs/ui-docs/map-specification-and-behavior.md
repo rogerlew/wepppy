@@ -216,6 +216,7 @@ Assumptions:
 
 Phase 0: scaffolding + feature flag
 - Deliverables: `map_pure_gl.htm`, `map_gl.js` skeleton, feature flag routing, deck.gl script loading.
+- Create `_gl` controller equivalents with stubs and no Leaflet dependencies (ex: `subcatchments_gl.js`, `channel_gl.js`, `outlet_gl.js`, `landuse_modify_gl.js`, `rangeland_cover_modify_gl.js`). These should export the same global names/methods and emit the same events, even if internals are no-ops initially.
 - Tests: Jest smoke for `MapController.getInstance()` + `map:ready` emission; Playwright load of map_pure_gl page.
 
 Phase 1: base layers + view state + status
@@ -282,8 +283,8 @@ Phase 13: WEPP results visualization
 
 ## Additional concerns and risk reducers
 - Compatibility: provide a `MapController` adapter that preserves event names and method signatures; avoid touching legacy controllers until deck equivalents exist.
-- Adapter responsibilities: implement the "Map API surface expected by other controllers" in this doc (map methods, `ctrls.addOverlay/removeLayer`, `map.drilldown`/`sub_legend`/`sbs_legend`/`mouseelev` adapters) and keep `MapController.events` emission identical so existing subscriptions do not break.
-- Legacy controller strategy: when deck.gl is active, either swap in `_gl` controller equivalents or no-op the Leaflet-only controllers; avoid partial refactors that leave a mixed Leaflet/deck state.
+- Adapter responsibilities: implement the "Map API surface expected by other controllers" in this doc (map methods, `ctrls.addOverlay/removeLayer`, `map.drilldown`/`sub_legend`/`sbs_legend`/`mouseelev` adapters) and keep `MapController.events` emission identical so existing subscriptions do not break. Keep the `window.WeppMap` alias in GL mode.
+- Legacy controller strategy: when deck.gl is active, swap to `_gl` controller equivalents (even if stubs). Avoid partial refactors that leave a mixed Leaflet/deck state. Stubs should be intentionally safe: emit events, guard UI, and log a clear warning for unimplemented behaviors so tests can proceed without Leaflet.
 - Overlay control UI: Leaflet control must be replaced with a deterministic, tested UI (consider reusing gl-dashboard layer list patterns).
 - Selection tools: implement a deck-based box select layer; do not rely on Leaflet-specific `boxZoom` or `.leaflet-container` class.
 - Performance: large GeoJSON (subcatchments/channels) needs batching or simplified geometry; validate on large runs early.
