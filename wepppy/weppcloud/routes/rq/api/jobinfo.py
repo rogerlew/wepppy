@@ -112,6 +112,7 @@ def _extract_job_ids_from_request():
 
 @rq_jobinfo_bp.route('/rq/api/jobstatus/<string:job_id>')
 def jobstatus_route(job_id):
+    # NOTE: Read-only polling endpoint; consider implementing fastapi microservice and rate limiting if worker pressure grows.
     try:
         job_status = get_wepppy_rq_job_status(job_id)
         return jsonify(job_status)
