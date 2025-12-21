@@ -41,6 +41,8 @@ var MapController = (function () {
     var SBS_DEFAULT_OPACITY = 0.7;
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
+    var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
+    var MOUSE_ELEVATION_HIDE_DELAY_MS = 2000;
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -459,6 +461,10 @@ var MapController = (function () {
         var baseLayerKey = basemapDefs.googleTerrain.key;
         var layerControl = null;
         var sbsLayerController = null;
+        var elevationCooldownTimer = null;
+        var mouseElevationHideTimer = null;
+        var isFetchingElevation = false;
+        var lastElevationAbort = null;
 
         function emit(eventName, payload) {
             if (mapEvents && typeof mapEvents.emit === "function") {
@@ -507,6 +513,137 @@ var MapController = (function () {
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
             dom.setText(mapStatusElement, "Center: " + lng + ", " + lat + " | Zoom: " + zoom + " ( Map Width:" + width + "px )");
+        }
+
+        function showMouseElevation(text) {
+            if (!mouseElevationElement) {
+                return;
+            }
+            if (mouseElevationHideTimer) {
+                clearTimeout(mouseElevationHideTimer);
+                mouseElevationHideTimer = null;
+            }
+            dom.setText(mouseElevationElement, text);
+            dom.show(mouseElevationElement);
+        }
+
+        function hideMouseElevation(delayMs) {
+            if (!mouseElevationElement) {
+                return;
+            }
+            if (mouseElevationHideTimer) {
+                clearTimeout(mouseElevationHideTimer);
+            }
+            mouseElevationHideTimer = window.setTimeout(function () {
+                dom.hide(mouseElevationElement);
+            }, typeof delayMs === "number" ? delayMs : 0);
+        }
+
+        function scheduleElevationCooldown() {
+            if (elevationCooldownTimer) {
+                clearTimeout(elevationCooldownTimer);
+            }
+            elevationCooldownTimer = window.setTimeout(function () {
+                isFetchingElevation = false;
+            }, DEFAULT_ELEVATION_COOLDOWN_MS);
+            map.fetchTimer = elevationCooldownTimer;
+        }
+
+        function resolveElevationEndpoint() {
+            if (typeof url_for_run === "function") {
+                try {
+                    return url_for_run("elevationquery/");
+                } catch (error) {
+                    // Fallback to manual path construction below.
+                }
+            }
+            var encodedRunId = (typeof runid !== "undefined" && runid !== null) ? encodeURIComponent(runid) : null;
+            var encodedConfig = (typeof config !== "undefined" && config !== null) ? encodeURIComponent(config) : null;
+            if (encodedRunId && encodedConfig) {
+                return "/runs/" + encodedRunId + "/" + encodedConfig + "/elevationquery/";
+            }
+            return null;
+        }
+
+        function handleDeckHover(info) {
+            if (!info || !info.coordinate || info.coordinate.length < 2) {
+                return;
+            }
+            var lng = Number(info.coordinate[0]);
+            var lat = Number(info.coordinate[1]);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                return;
+            }
+            if (!isFetchingElevation) {
+                fetchElevation({ lat: lat, lng: lng });
+            }
+        }
+
+        function fetchElevation(latlng) {
+            var endpoint = resolveElevationEndpoint();
+            if (!endpoint) {
+                return Promise.resolve();
+            }
+            if (isFetchingElevation) {
+                return Promise.resolve();
+            }
+            isFetchingElevation = true;
+
+            if (lastElevationAbort && typeof lastElevationAbort.abort === "function") {
+                lastElevationAbort.abort();
+            }
+            var abortController = typeof AbortController === "function" ? new AbortController() : null;
+            lastElevationAbort = abortController;
+
+            emit("map:elevation:requested", { lat: latlng.lat, lng: latlng.lng });
+
+            return http.postJson(endpoint, { lat: latlng.lat, lng: latlng.lng }, {
+                signal: abortController ? abortController.signal : undefined
+            }).then(function (result) {
+                var response = result ? result.body : null;
+                var cursorLng = coordRound(latlng.lng);
+                var cursorLat = coordRound(latlng.lat);
+
+                if (!response || typeof response.Elevation !== "number" || !isFinite(response.Elevation)) {
+                    var errorText = response && response.Error;
+                    var suppressElevationMessage = typeof errorText === "string"
+                        && errorText.toLowerCase().indexOf("dem not found under run directory") !== -1;
+
+                    if (!suppressElevationMessage) {
+                        var message = errorText || "Elevation unavailable";
+                        showMouseElevation("| Elevation: " + message + " | Cursor: " + cursorLng + ", " + cursorLat);
+                    } else {
+                        hideMouseElevation(0);
+                    }
+
+                    emit("map:elevation:error", {
+                        message: errorText || "Elevation unavailable",
+                        lat: latlng.lat,
+                        lng: latlng.lng
+                    });
+                    return;
+                }
+
+                var elev = response.Elevation.toFixed(1);
+                showMouseElevation("| Elevation: " + elev + " m | Cursor: " + cursorLng + ", " + cursorLat);
+                emit("map:elevation:loaded", {
+                    elevation: response.Elevation,
+                    lat: latlng.lat,
+                    lng: latlng.lng
+                });
+            }).catch(function (error) {
+                if (http.isHttpError && http.isHttpError(error) && error.cause && error.cause.name === "AbortError") {
+                    return;
+                }
+                console.warn("[Map GL] Elevation request failed", error);
+                emit("map:elevation:error", {
+                    error: error,
+                    lat: latlng.lat,
+                    lng: latlng.lng
+                });
+            }).then(function () {
+                scheduleElevationCooldown();
+            });
         }
 
         function buildBounds() {
@@ -919,11 +1056,11 @@ var MapController = (function () {
             });
         }
 
-    function overlaySortIndex(name) {
-        if (!name) {
-            return 99;
-        }
-        if (name.indexOf(USGS_LAYER_NAME) !== -1) {
+        function overlaySortIndex(name) {
+            if (!name) {
+                return 99;
+            }
+            if (name.indexOf(USGS_LAYER_NAME) !== -1) {
             return 0;
         }
         if (name.indexOf(SNOTEL_LAYER_NAME) !== -1) {
@@ -938,11 +1075,11 @@ var MapController = (function () {
         return 99;
     }
 
-    function overlayRenderIndex(name) {
-        if (!name) {
-            return 99;
-        }
-        if (name.indexOf(SBS_LAYER_NAME) !== -1) {
+        function overlayRenderIndex(name) {
+            if (!name) {
+                return 99;
+            }
+            if (name.indexOf(SBS_LAYER_NAME) !== -1) {
             return -1;
         }
         if (name.indexOf("NHD") !== -1) {
@@ -954,8 +1091,29 @@ var MapController = (function () {
         if (name.indexOf(SNOTEL_LAYER_NAME) !== -1) {
             return 2;
         }
-        return 99;
-    }
+            return 99;
+        }
+
+        function rebuildOverlayLayer(name, layer) {
+            if (!layer || typeof layer.__wcRebuild !== "function") {
+                return layer;
+            }
+            var nextLayer = layer.__wcRebuild();
+            if (!nextLayer || nextLayer === layer) {
+                return layer;
+            }
+            if (overlayRegistry) {
+                overlayRegistry.delete(layer);
+                overlayRegistry.set(nextLayer, name);
+            }
+            if (overlayNameRegistry) {
+                overlayNameRegistry.set(name, nextLayer);
+            }
+            if (map.overlayMaps) {
+                map.overlayMaps[name] = nextLayer;
+            }
+            return nextLayer;
+        }
 
         function renderOverlayLayerControl() {
             var control = ensureLayerControl();
@@ -997,14 +1155,18 @@ var MapController = (function () {
                 input.id = inputId;
                 input.checked = map.hasLayer(layer);
                 input.addEventListener("change", function () {
+                    var activeLayer = overlayNameRegistry && overlayNameRegistry.get(name)
+                        ? overlayNameRegistry.get(name)
+                        : layer;
                     if (input.checked) {
-                        map.addLayer(layer);
+                        activeLayer = rebuildOverlayLayer(name, activeLayer);
+                        map.addLayer(activeLayer);
                     } else {
-                        map.removeLayer(layer);
+                        map.removeLayer(activeLayer);
                     }
                     emit("map:layer:toggled", {
                         name: name,
-                        layer: layer,
+                        layer: activeLayer,
                         visible: input.checked,
                         type: "overlay"
                     });
@@ -1343,6 +1505,12 @@ var MapController = (function () {
             },
             onMapChange: function () {
                 updateMapStatus();
+            },
+            fetchElevation: function (ev) {
+                if (!ev || !ev.latlng) {
+                    return;
+                }
+                fetchElevation(ev.latlng);
             },
             bootstrap: function (context) {
                 var mapContext = context && context.map ? context.map : context || {};
@@ -2307,6 +2475,21 @@ var MapController = (function () {
             });
         }
 
+        if (mapCanvasElement && typeof mapCanvasElement.addEventListener === "function") {
+            mapCanvasElement.addEventListener("mouseleave", function (event) {
+                var related = event ? event.relatedTarget : null;
+                if (related && mapCanvasElement.contains && mapCanvasElement.contains(related)) {
+                    return;
+                }
+                hideMouseElevation(MOUSE_ELEVATION_HIDE_DELAY_MS);
+                if (lastElevationAbort && typeof lastElevationAbort.abort === "function") {
+                    lastElevationAbort.abort();
+                }
+                lastElevationAbort = null;
+                isFetchingElevation = false;
+            });
+        }
+
         var initialViewState = normalizeViewState({
             longitude: state.center.lng,
             latitude: state.center.lat,
@@ -2332,6 +2515,9 @@ var MapController = (function () {
             height: size.height || undefined,
             layers: baseLayer ? [baseLayer] : [],
             widgets: widgets,
+            onHover: function (info) {
+                handleDeckHover(info);
+            },
             onViewStateChange: function (params) {
                 var viewState = params && params.viewState ? params.viewState : null;
                 if (!viewState) {

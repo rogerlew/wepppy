@@ -452,6 +452,114 @@ test.describe('map gl smoke', () => {
     await expect(modal).toBeHidden();
   });
 
+  test('channels overlay toggles without console errors', async ({ page }) => {
+    const consoleErrors = attachConsoleCapture(page);
+
+    await openRun(page);
+
+    const stubbed = await page.evaluate(() => {
+      const http = window.WCHttp;
+      if (!http || typeof http.getJson !== 'function') {
+        return false;
+      }
+      if (!http._channelGlOriginalGetJson) {
+        http._channelGlOriginalGetJson = http.getJson.bind(http);
+      }
+      const original = http._channelGlOriginalGetJson;
+      http.getJson = (url, options) => {
+        if (String(url).includes('resources/netful.json')) {
+          return Promise.resolve({
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: { Order: 2 },
+                geometry: { type: 'LineString', coordinates: [[-120.1, 48.1], [-120.2, 48.2]] },
+              },
+              {
+                type: 'Feature',
+                properties: { Order: 4 },
+                geometry: { type: 'LineString', coordinates: [[-120.3, 48.3], [-120.4, 48.4]] },
+              },
+            ],
+          });
+        }
+        return original(url, options);
+      };
+      return true;
+    });
+    expect(stubbed).toBe(true);
+
+    await page.evaluate(async () => {
+      const channel = window.ChannelDelineation && typeof window.ChannelDelineation.getInstance === 'function'
+        ? window.ChannelDelineation.getInstance()
+        : null;
+      if (channel && typeof channel.show === 'function') {
+        await channel.show();
+      }
+    });
+
+    const channelColor = await page.evaluate(() => {
+      const channel = window.ChannelDelineation && typeof window.ChannelDelineation.getInstance === 'function'
+        ? window.ChannelDelineation.getInstance()
+        : null;
+      const layer = channel ? channel.glLayer : null;
+      return layer && layer.props && typeof layer.props.getLineColor === 'function'
+        ? layer.props.getLineColor({ properties: { Order: 2 } })
+        : null;
+    });
+    expect(channelColor).toEqual([71, 158, 255, 230]);
+
+    const { layerToggle } = await openOverlayPanel(page);
+    const channelsInput = page.locator('label:has-text("Channels") input[type="checkbox"]');
+    await expect(channelsInput).toBeVisible();
+    await channelsInput.check();
+    await layerToggle.click();
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        return layers.some((layer) => layer && layer.id === 'wc-channels-netful');
+      });
+    }).toBe(true);
+
+    await openOverlayPanel(page);
+    await channelsInput.uncheck();
+    await layerToggle.click();
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        return layers.some((layer) => layer && layer.id === 'wc-channels-netful');
+      });
+    }).toBe(false);
+
+    await openOverlayPanel(page);
+    await channelsInput.check();
+    await layerToggle.click();
+
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+        return layers.some((layer) => layer && layer.id === 'wc-channels-netful');
+      });
+    }).toBe(true);
+
+    await openOverlayPanel(page);
+    await expect(page.locator('label:has-text("Channels")')).toHaveCount(1);
+
+    expect(consoleErrors).toEqual([]);
+  });
+
   test('toggle SBS overlay shows legend', async ({ page }) => {
     await openRun(page);
 

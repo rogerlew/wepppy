@@ -42,6 +42,8 @@ describe("Map GL controller", () => {
         mapElement.getBoundingClientRect = () => ({
             width: 640,
             height: 480,
+            left: 0,
+            top: 0,
         });
 
         global.coordRound = jest.fn((value) => Math.round(value * 1000) / 1000);
@@ -80,6 +82,7 @@ describe("Map GL controller", () => {
             this.setProps = jest.fn((next) => {
                 this.props = Object.assign({}, this.props, next);
             });
+            this.unproject = jest.fn(() => [-120.5, 45.25]);
             deckInstance = this;
         }
         function MapView() {}
@@ -398,5 +401,47 @@ describe("Map GL controller", () => {
             width: 640,
             height: 480,
         }));
+    });
+
+    test("mousemove triggers elevation request once per cooldown", async () => {
+        global.MapController.getInstance();
+
+        global.WCHttp.postJson.mockResolvedValueOnce({ body: { Elevation: 123.4 } });
+
+        deckInstance.props.onHover({ coordinate: [-120.5, 45.25] });
+        deckInstance.props.onHover({ coordinate: [-120.6, 45.35] });
+
+        expect(global.WCHttp.postJson).toHaveBeenCalledTimes(1);
+        expect(emittedEvents.some((evt) => evt.name === "map:elevation:requested")).toBe(true);
+
+        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 250));
+
+        global.WCHttp.postJson.mockResolvedValueOnce({ body: { Elevation: 130.0 } });
+        deckInstance.props.onHover({ coordinate: [-120.7, 45.45] });
+
+        expect(global.WCHttp.postJson).toHaveBeenCalledTimes(2);
+    });
+
+    test("mouseleave hides elevation and aborts pending request", () => {
+        jest.useFakeTimers();
+        const abortSpy = jest.fn();
+        const originalAbortController = global.AbortController;
+        global.AbortController = jest.fn(() => ({ signal: {}, abort: abortSpy }));
+
+        global.WCHttp.postJson.mockReturnValue(new Promise(() => {}));
+
+        global.MapController.getInstance();
+        deckInstance.props.onHover({ coordinate: [-120.5, 45.25] });
+        mapElement.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+
+        expect(abortSpy).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(2000);
+        const mouseElev = document.getElementById("mouseelev");
+        expect(mouseElev.hidden).toBe(true);
+
+        global.AbortController = originalAbortController;
+        jest.useRealTimers();
     });
 });

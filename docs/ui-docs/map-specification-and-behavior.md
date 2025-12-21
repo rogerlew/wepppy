@@ -281,13 +281,33 @@ Assumptions:
 - Scope: reuse existing legend targets (`#sub_legend`, `#sbs_legend`) and lock in show/hide behavior.
 - Tests: Jest covers SBS legend show/hide + opacity slider; Playwright covers SBS legend toggle, slider, and empty-run resilience.
 
+### Phase 4 handoff summary
+- Legend targets: SBS and subcatchment legends stay on `#sbs_legend` / `#sub_legend`, with show/hide controlled by overlay state.
+- SBS legend: loads from `/resources/legends/sbs/`, injects the opacity slider, and clears content when SBS is removed or refresh fails.
+- Events: `baer:map:opacity` emitted on slider changes; SBS refresh emits `map:layer:refreshed`/`map:layer:error`.
+- Tests: Jest covers SBS legend show/hide + opacity slider updates; Playwright covers toggle visibility, slider updates, and empty-run behavior.
+
 ### Phase 5: channel layer pass 1 (netful)
-- Scope: GeoJsonLayer for channels pass 1; overlay control entry.
-- Tests: Playwright show channels after delineation; verify overlay toggles.
+- Scope: GL ChannelDelineation loads `resources/netful.json` as a deck GeoJsonLayer (lines only), uses the Order palette, and registers the overlay as "Channels."
+- Events: `channel:layers:loaded` on success; `channel:build:error` on failure.
+- Tests: Jest `channel_gl.test.js` covers overlay registration and palette mapping; Playwright can add channel toggle coverage after delineation.
+
+### Phase 5 handoff summary
+- Overlay: GL ChannelDelineation builds `wc-channels-netful` from `resources/netful.json`, registers it as "Channels", and auto-loads on bootstrap when `data.watershed.hasChannels` is true.
+- Styling: Order-based palette (same as Leaflet) with line-only rendering; rebuild hook returns a fresh deck layer on re-enable to avoid WebGL buffer errors.
+- Events: `channel:layers:loaded` emitted on successful load; `channel:build:error` emitted on fetch errors.
+- Tests: Jest validates overlay registration, palette mapping, and rebuild hook; Playwright smoke stubs netful data and verifies toggle on/off without console errors.
 
 ### Phase 6: elevation hover
-- Scope: mouse move -> elevation query; `#mouseelev` updates; cooldown/abort behavior.
-- Tests: Jest for debounce + error handling; Playwright hover check (mock response).
+- Scope: GL hover -> elevation query (`/elevationquery/`), `#mouseelev` updates, cooldown + abort behavior on mouseleave.
+- Events: `map:elevation:requested`, `map:elevation:loaded`, `map:elevation:error`.
+- Tests: Jest covers hover cooldown and mouseout abort; Playwright hover check (mock response) optional.
+
+### Phase 6 handoff summary
+- Behavior: GL map uses deck `onHover` for elevation queries plus `mouseleave` on the map container, posts to `/elevationquery/`, and updates `#mouseelev` with elevation + cursor coords.
+- Throttle: cooldown uses 200ms; `mouseleave` hides the elevation after 2s and aborts in-flight requests.
+- Events: `map:elevation:requested` emitted before the request; `map:elevation:loaded`/`map:elevation:error` emitted on completion.
+- Tests: Jest in `map_gl.test.js` asserts single request per cooldown and abort/hide on mouseout.
 
 ### Phase 7: outlet selection
 - Scope: map click for outlet, marker rendering, cursor mode toggle.
