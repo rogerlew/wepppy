@@ -3099,6 +3099,99 @@ h5:first-child {
   opacity: 0.7;
 }
 
+.wc-map-layer-control {
+  position: absolute;
+  top: var(--wc-space-sm);
+  right: var(--wc-space-sm);
+  z-index: 1003;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--wc-space-xs);
+  pointer-events: auto;
+}
+
+.wc-map-layer-control__toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--wc-radius-sm);
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-surface);
+  box-shadow: var(--wc-shadow-sm);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wc-color-text);
+}
+
+.wc-map-layer-control__toggle:hover,
+.wc-map-layer-control__toggle:focus-visible {
+  background: var(--wc-color-surface-alt);
+  border-color: var(--wc-color-border-strong);
+}
+
+.wc-map-layer-control__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--wc-color-accent-soft);
+}
+
+.wc-map-layer-control__icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.wc-map-layer-control__panel {
+  min-width: 190px;
+  background: var(--wc-color-surface);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  box-shadow: var(--wc-shadow-sm);
+  padding: var(--wc-space-sm);
+  display: grid;
+  gap: var(--wc-space-sm);
+}
+
+.wc-map-layer-control__section {
+  display: grid;
+  gap: var(--wc-space-xs);
+}
+
+.wc-map-layer-control__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--wc-color-text);
+}
+
+.wc-map-layer-control__list {
+  display: grid;
+  gap: var(--wc-space-xs);
+}
+
+.wc-map-layer-control__item {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-xs);
+  font-size: 0.85rem;
+  color: var(--wc-color-text);
+  cursor: pointer;
+}
+
+.wc-map-layer-control__item input {
+  margin: 0;
+}
+
+.wc-map-layer-control__item input:focus-visible {
+  outline: 2px solid var(--wc-color-accent-soft);
+  outline-offset: 2px;
+}
+
+.wc-map-layer-control__panel[hidden] {
+  display: none;
+}
+
 .wc-map-layout__inspector {
   display: grid;
   gap: var(--wc-space-md);

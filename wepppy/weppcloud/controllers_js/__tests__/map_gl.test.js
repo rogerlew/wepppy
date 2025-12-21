@@ -4,6 +4,8 @@
 
 describe("Map GL controller", () => {
     let emittedEvents;
+    let deckInstance;
+    let mapElement;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -35,6 +37,14 @@ describe("Map GL controller", () => {
             <div id="mapid"></div>
         `;
 
+        mapElement = document.getElementById("mapid");
+        mapElement.getBoundingClientRect = () => ({
+            width: 640,
+            height: 480,
+        });
+
+        global.coordRound = jest.fn((value) => Math.round(value * 1000) / 1000);
+
         await import("../dom.js");
 
         emittedEvents = [];
@@ -59,7 +69,37 @@ describe("Map GL controller", () => {
             isHttpError: jest.fn(() => false),
         };
 
-        global.deck = { Deck: function Deck() {} };
+        function Deck(props) {
+            this.props = props || {};
+            this.setProps = jest.fn((next) => {
+                this.props = Object.assign({}, this.props, next);
+            });
+            deckInstance = this;
+        }
+        function MapView() {}
+        function TileLayer(props) {
+            this.props = props || {};
+        }
+        function BitmapLayer(props) {
+            this.props = props || {};
+        }
+        function WebMercatorViewport(opts) {
+            this.opts = opts || {};
+            this.getBounds = () => [
+                (this.opts.longitude || 0) - 1,
+                (this.opts.latitude || 0) - 1,
+                (this.opts.longitude || 0) + 1,
+                (this.opts.latitude || 0) + 1,
+            ];
+        }
+
+        global.deck = {
+            Deck: Deck,
+            MapView: MapView,
+            TileLayer: TileLayer,
+            BitmapLayer: BitmapLayer,
+            WebMercatorViewport: WebMercatorViewport,
+        };
 
         await import("../map_gl.js");
     });
@@ -70,6 +110,7 @@ describe("Map GL controller", () => {
         delete global.WCHttp;
         delete global.MapController;
         delete global.WeppMap;
+        delete global.coordRound;
         delete global.runid;
         delete global.config;
         emittedEvents = [];
@@ -85,5 +126,33 @@ describe("Map GL controller", () => {
 
         expect(emittedEvents.some((evt) => evt.name === "map:ready")).toBe(true);
         expect(global.WeppMap).toBe(global.MapController);
+        expect(mapInstance._deck).toBe(deckInstance);
+        expect(Array.isArray(deckInstance.props.layers)).toBe(true);
+        expect(deckInstance.props.layers.length).toBeGreaterThan(0);
+        expect(document.querySelector('[data-map-layer-control="true"]')).not.toBeNull();
+        expect(document.querySelectorAll('input[name="wc-map-basemap"]').length).toBeGreaterThan(0);
+    });
+
+    test("setView updates map status and emits center change", () => {
+        const mapInstance = global.MapController.getInstance();
+
+        mapInstance.setView([46.8, -117.5], 10);
+
+        const status = document.getElementById("mapstatus");
+        expect(status.textContent).toContain("Center:");
+        expect(status.textContent).toContain("46.8");
+        expect(status.textContent).toContain("-117.5");
+        expect(emittedEvents.some((evt) => evt.name === "map:center:changed")).toBe(true);
+    });
+
+    test("invalidateSize resizes deck", () => {
+        const mapInstance = global.MapController.getInstance();
+
+        mapInstance.invalidateSize();
+
+        expect(deckInstance.setProps).toHaveBeenCalledWith(expect.objectContaining({
+            width: 640,
+            height: 480,
+        }));
     });
 });

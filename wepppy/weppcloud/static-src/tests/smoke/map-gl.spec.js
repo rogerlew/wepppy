@@ -59,6 +59,23 @@ function attachConsoleCapture(page) {
   return consoleErrors;
 }
 
+function parseZoom(statusText) {
+  if (!statusText) {
+    return null;
+  }
+  const match = statusText.match(/Zoom:\s*([0-9.]+)/i);
+  if (!match) {
+    return null;
+  }
+  const value = Number(match[1]);
+  return Number.isFinite(value) ? value : null;
+}
+
+async function getZoom(page) {
+  const text = await page.locator('#mapstatus').textContent();
+  return parseZoom(text || '');
+}
+
 test.describe('map gl smoke', () => {
   test('run loads without console errors and map canvas is visible', async ({ page }) => {
     const consoleErrors = attachConsoleCapture(page);
@@ -71,6 +88,36 @@ test.describe('map gl smoke', () => {
     expect(box).not.toBeNull();
     expect(box.width).toBeGreaterThan(0);
     expect(box.height).toBeGreaterThan(0);
+    await expect(page.locator('#mapid canvas')).toHaveCount(1);
+    await expect(page.locator('#mapstatus')).toContainText('Center');
+
+    const initialZoom = await getZoom(page);
+    expect(initialZoom).not.toBeNull();
+
+    await page.locator('#mapid').click({ position: { x: 20, y: 20 } });
+    await page.keyboard.press('Shift+Equal');
+    await expect.poll(async () => getZoom(page)).toBeGreaterThan(initialZoom);
+
+    const zoomAfterIn = await getZoom(page);
+    await page.keyboard.press('Minus');
+    await expect.poll(async () => getZoom(page)).toBeLessThan(zoomAfterIn);
+
+    const layerToggle = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__toggle');
+    await expect(layerToggle).toBeVisible();
+    await layerToggle.click();
+    const satelliteInput = page.locator('label:has-text("Satellite") input[type="radio"]');
+    await expect(satelliteInput).toBeVisible();
+    await satelliteInput.check();
+    await expect(satelliteInput).toBeChecked();
+    await expect.poll(async () => {
+      return page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layers = map && map._deck && map._deck.props ? map._deck.props.layers : null;
+        return layers && layers.length ? layers[0].id : null;
+      });
+    }).toContain('googleSatellite');
 
     expect(consoleErrors).toEqual([]);
   });

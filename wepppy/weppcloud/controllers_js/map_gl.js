@@ -249,7 +249,7 @@ var MapController = (function () {
         return null;
     }
 
-    function buildBounds(center, zoom) {
+    function buildBoundsFallback(center, zoom) {
         var lat = center.lat;
         var lng = center.lng;
         var zoomValue = Number.isFinite(zoom) ? zoom : DEFAULT_VIEW.zoom;
@@ -288,6 +288,7 @@ var MapController = (function () {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
         var events = helpers.events;
+        var deckApi = window.deck;
         var coordRound = (typeof window.coordRound === "function")
             ? window.coordRound
             : function (value) { return Math.round(value * 1000) / 1000; };
@@ -305,6 +306,21 @@ var MapController = (function () {
             ? events.useEventMap(EVENT_NAMES, emitterBase)
             : emitterBase;
 
+        var basemapDefs = {
+            googleTerrain: {
+                key: "googleTerrain",
+                label: "Terrain",
+                template: "https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}",
+                subdomains: ["mt0", "mt1", "mt2", "mt3"]
+            },
+            googleSatellite: {
+                key: "googleSatellite",
+                label: "Satellite",
+                template: "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+                subdomains: ["mt0", "mt1", "mt2", "mt3"]
+            }
+        };
+
         var formElement = dom.qs("#setloc_form");
         var centerInput = dom.qs("#input_centerloc", formElement);
         var mapCanvasElement = dom.qs("#mapid");
@@ -317,9 +333,15 @@ var MapController = (function () {
 
         var overlayRegistry = typeof Map === "function" ? new Map() : null;
         var overlayNameRegistry = typeof Map === "function" ? new Map() : null;
+        var layerRegistry = typeof Set === "function" ? new Set() : null;
         var drilldownSuppressionTokens = typeof Set === "function" ? new Set() : null;
         var panes = {};
         var mapHandlers = {};
+        var deckgl = null;
+        var isApplyingViewState = false;
+        var baseLayer = null;
+        var baseLayerKey = basemapDefs.googleTerrain.key;
+        var layerControl = null;
 
         function emit(eventName, payload) {
             if (mapEvents && typeof mapEvents.emit === "function") {
@@ -329,6 +351,16 @@ var MapController = (function () {
 
         function warnNotImplemented(action) {
             console.warn("Map GL stub: " + action + " not implemented.");
+        }
+
+        function getCanvasSize() {
+            if (!mapCanvasElement) {
+                return { width: 0, height: 0 };
+            }
+            var rect = mapCanvasElement.getBoundingClientRect();
+            var width = Math.round(rect.width || mapCanvasElement.offsetWidth || mapCanvasElement.clientWidth || 0);
+            var height = Math.round(rect.height || mapCanvasElement.offsetHeight || mapCanvasElement.clientHeight || 0);
+            return { width: width, height: height };
         }
 
         function updateMapStatus() {
@@ -343,9 +375,39 @@ var MapController = (function () {
             dom.setText(mapStatusElement, "Center: " + lng + ", " + lat + " | Zoom: " + zoom + " ( Map Width:" + width + "px )");
         }
 
+        function buildBounds() {
+            var center = state.center;
+            var zoom = state.zoom;
+            if (deckApi && typeof deckApi.WebMercatorViewport === "function") {
+                var size = getCanvasSize();
+                if (size.width > 0 && size.height > 0) {
+                    var viewport = new deckApi.WebMercatorViewport({
+                        width: size.width,
+                        height: size.height,
+                        longitude: center.lng,
+                        latitude: center.lat,
+                        zoom: zoom,
+                        pitch: 0,
+                        bearing: 0
+                    });
+                    var bounds = viewport.getBounds();
+                    if (bounds && bounds.length === 4) {
+                        return {
+                            getSouthWest: function () { return { lat: bounds[1], lng: bounds[0] }; },
+                            getNorthEast: function () { return { lat: bounds[3], lng: bounds[2] }; },
+                            toBBoxString: function () {
+                                return [bounds[0], bounds[1], bounds[2], bounds[3]].join(",");
+                            }
+                        };
+                    }
+                }
+            }
+            return buildBoundsFallback(center, zoom);
+        }
+
         function buildViewportPayload() {
             var center = state.center;
-            var bounds = buildBounds(center, state.zoom);
+            var bounds = buildBounds();
             return {
                 center: { lat: center.lat, lng: center.lng },
                 zoom: state.zoom,
@@ -372,6 +434,389 @@ var MapController = (function () {
             return drilldownSuppressionTokens ? drilldownSuppressionTokens.size > 0 : false;
         }
 
+        function normalizeViewState(viewState) {
+            if (!viewState || typeof viewState !== "object") {
+                return null;
+            }
+            var longitude = Number(viewState.longitude);
+            var latitude = Number(viewState.latitude);
+            var zoom = Number.isFinite(viewState.zoom) ? Number(viewState.zoom) : state.zoom;
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+                return null;
+            }
+            var bearing = Number.isFinite(viewState.bearing) ? Number(viewState.bearing) : 0;
+            var pitch = Number.isFinite(viewState.pitch) ? Number(viewState.pitch) : 0;
+            return {
+                longitude: longitude,
+                latitude: latitude,
+                zoom: zoom,
+                bearing: bearing,
+                pitch: pitch
+            };
+        }
+
+        function toViewState(center, zoom) {
+            return normalizeViewState({
+                longitude: center.lng,
+                latitude: center.lat,
+                zoom: Number.isFinite(zoom) ? zoom : state.zoom
+            });
+        }
+
+        function updateStateFromViewState(viewState) {
+            state.center = { lat: viewState.latitude, lng: viewState.longitude };
+            state.zoom = viewState.zoom;
+        }
+
+        function fireMapHandlers(eventName) {
+            if (!eventName || !mapHandlers[eventName]) {
+                return;
+            }
+            mapHandlers[eventName].forEach(function (handler) {
+                try {
+                    handler({ target: map });
+                } catch (err) {
+                    console.warn("Map GL handler failed for " + eventName, err);
+                }
+            });
+        }
+
+        function notifyViewChange(isFinal) {
+            updateMapStatus();
+            fireMapHandlers("move");
+            fireMapHandlers("zoom");
+            if (isFinal) {
+                fireMapHandlers("moveend");
+                fireMapHandlers("zoomend");
+                emit("map:center:changed", buildViewportPayload());
+            }
+        }
+
+        function applyViewState(nextViewState, options) {
+            var normalized = normalizeViewState(nextViewState);
+            if (!normalized) {
+                return;
+            }
+            updateStateFromViewState(normalized);
+            if (deckgl && !(options && options.skipDeck)) {
+                var size = getCanvasSize();
+                if (!isApplyingViewState) {
+                    isApplyingViewState = true;
+                    deckgl.setProps({
+                        viewState: normalized,
+                        width: size.width || undefined,
+                        height: size.height || undefined
+                    });
+                    isApplyingViewState = false;
+                }
+            }
+            notifyViewChange(Boolean(options && options.final));
+        }
+
+        function resolveBasemap(key) {
+            if (!key) {
+                return basemapDefs.googleTerrain;
+            }
+            if (basemapDefs[key]) {
+                return basemapDefs[key];
+            }
+            var lower = String(key).toLowerCase();
+            if (lower.indexOf("sat") !== -1) {
+                return basemapDefs.googleSatellite;
+            }
+            if (lower.indexOf("terrain") !== -1) {
+                return basemapDefs.googleTerrain;
+            }
+            return basemapDefs.googleTerrain;
+        }
+
+        function buildBasemapUrl(def, x, y, z) {
+            var template = def.template;
+            var subdomains = def.subdomains || [];
+            var subdomain = subdomains.length
+                ? subdomains[(x + y + z) % subdomains.length]
+                : "";
+            return template
+                .replace("{s}", subdomain)
+                .replace("{x}", x)
+                .replace("{y}", y)
+                .replace("{z}", z);
+        }
+
+        function createBaseLayer(definition) {
+            var def = definition || basemapDefs.googleTerrain;
+            if (!deckApi || typeof deckApi.TileLayer !== "function" || typeof deckApi.BitmapLayer !== "function") {
+                warnNotImplemented("TileLayer/BitmapLayer unavailable");
+                return null;
+            }
+            return new deckApi.TileLayer({
+                id: "map-gl-base-" + def.key,
+                data: def.template,
+                minZoom: 0,
+                maxZoom: 19,
+                tileSize: 256,
+                maxRequests: 8,
+                getTileData: async function (params) {
+                    var index = params && params.index ? params.index : {};
+                    var x = index.x;
+                    var y = index.y;
+                    var z = index.z;
+                    if (![x, y, z].every(Number.isFinite)) {
+                        throw new Error("Tile coords missing: x=" + x + " y=" + y + " z=" + z);
+                    }
+                    var url = buildBasemapUrl(def, x, y, z);
+                    var response = await fetch(url, { signal: params.signal, mode: "cors" });
+                    if (!response.ok) {
+                        throw new Error("Tile fetch failed " + response.status + ": " + url);
+                    }
+                    var blob = await response.blob();
+                    return await createImageBitmap(blob);
+                },
+                onTileError: function (error) {
+                    console.warn("Map GL tile error", error);
+                },
+                renderSubLayers: function (props) {
+                    var tile = props.tile;
+                    if (!tile || !props.data || !tile.bbox) {
+                        return null;
+                    }
+                    var west = tile.bbox.west;
+                    var south = tile.bbox.south;
+                    var east = tile.bbox.east;
+                    var north = tile.bbox.north;
+                    return new deckApi.BitmapLayer(props, {
+                        id: props.id + "-" + tile.id,
+                        data: null,
+                        image: props.data,
+                        bounds: [west, south, east, north],
+                        pickable: false,
+                        opacity: 1.0
+                    });
+                }
+            });
+        }
+
+        function applyLayers() {
+            if (!deckgl) {
+                return;
+            }
+            var nextLayers = [];
+            if (baseLayer) {
+                nextLayers.push(baseLayer);
+            }
+            if (layerRegistry) {
+                layerRegistry.forEach(function (layer) {
+                    nextLayers.push(layer);
+                });
+            }
+            deckgl.setProps({ layers: nextLayers });
+        }
+
+        function ensureLayerControl() {
+            if (layerControl || !mapCanvasElement || typeof document === "undefined") {
+                return layerControl;
+            }
+            var host = mapCanvasElement.closest ? mapCanvasElement.closest(".wc-map") : null;
+            if (!host) {
+                host = mapCanvasElement.parentElement;
+            }
+            if (!host) {
+                return null;
+            }
+
+            var root = document.createElement("div");
+            root.className = "wc-map-layer-control";
+            root.setAttribute("data-map-layer-control", "true");
+
+            var toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "wc-map-layer-control__toggle";
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.setAttribute("aria-label", "Layers");
+            toggle.setAttribute("title", "Layers");
+            toggle.innerHTML = '<svg class="wc-map-layer-control__icon" aria-hidden="true" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg" width="26" height="26"><path fill="#b9b9b9" d="m.032 17.056 13-8 13 8-13 8z"/><path fill="#737373" d="m.032 17.056-.032.93 13 8 13-8 .032-.93-13 8z"/><path fill="#cdcdcd" d="m0 13.076 13-8 13 8-13 8z"/><path fill="#737373" d="M0 13.076v.91l13 8 13-8v-.91l-13 8z"/><path fill="#e9e9e9" fill-opacity=".585" stroke="#797979" stroke-width=".1" d="m0 8.986 13-8 13 8-13 8-13-8"/><path fill="#737373" d="M0 8.986v1l13 8 13-8v-1l-13 8z"/></svg><span class="wc-sr-only">Layers</span>';
+
+            var panel = document.createElement("div");
+            panel.className = "wc-map-layer-control__panel";
+            panel.hidden = true;
+
+            var baseSection = document.createElement("div");
+            baseSection.className = "wc-map-layer-control__section";
+            var baseTitle = document.createElement("div");
+            baseTitle.className = "wc-map-layer-control__title";
+            baseTitle.textContent = "Base Layers";
+            var baseList = document.createElement("div");
+            baseList.className = "wc-map-layer-control__list";
+            baseSection.appendChild(baseTitle);
+            baseSection.appendChild(baseList);
+
+            var overlaySection = document.createElement("div");
+            overlaySection.className = "wc-map-layer-control__section";
+            var overlayTitle = document.createElement("div");
+            overlayTitle.className = "wc-map-layer-control__title";
+            overlayTitle.textContent = "Overlays";
+            var overlayList = document.createElement("div");
+            overlayList.className = "wc-map-layer-control__list";
+            overlaySection.appendChild(overlayTitle);
+            overlaySection.appendChild(overlayList);
+
+            panel.appendChild(baseSection);
+            panel.appendChild(overlaySection);
+            root.appendChild(toggle);
+            root.appendChild(panel);
+            host.appendChild(root);
+
+            function setExpanded(expanded) {
+                if (!layerControl) {
+                    return;
+                }
+                layerControl.toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+                layerControl.root.classList.toggle("is-expanded", expanded);
+                layerControl.panel.hidden = !expanded;
+            }
+
+            toggle.addEventListener("click", function () {
+                var expanded = toggle.getAttribute("aria-expanded") === "true";
+                setExpanded(!expanded);
+            });
+
+            root.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    setExpanded(false);
+                }
+            });
+
+            layerControl = {
+                root: root,
+                toggle: toggle,
+                panel: panel,
+                baseSection: baseSection,
+                baseList: baseList,
+                overlaySection: overlaySection,
+                overlayList: overlayList,
+                overlayInputs: typeof Map === "function" ? new Map() : null
+            };
+
+            return layerControl;
+        }
+
+        function renderBaseLayerControl() {
+            var control = ensureLayerControl();
+            if (!control) {
+                return;
+            }
+            var baseMaps = map.baseMaps || {};
+            var names = Object.keys(baseMaps);
+            control.baseList.textContent = "";
+            if (!names.length) {
+                control.baseSection.hidden = true;
+                return;
+            }
+            control.baseSection.hidden = false;
+            names.forEach(function (name, index) {
+                var def = baseMaps[name];
+                var key = def && def.key ? def.key : name;
+                var label = def && def.label ? def.label : name;
+                var inputId = "wc-map-basemap-" + index;
+                var wrapper = document.createElement("label");
+                wrapper.className = "wc-map-layer-control__item";
+                var input = document.createElement("input");
+                input.type = "radio";
+                input.name = "wc-map-basemap";
+                input.value = key;
+                input.id = inputId;
+                input.checked = key === baseLayerKey;
+                input.addEventListener("change", function () {
+                    if (input.checked) {
+                        map.setBaseLayer(key);
+                    }
+                });
+                var text = document.createElement("span");
+                text.className = "wc-map-layer-control__text";
+                text.textContent = label;
+                wrapper.appendChild(input);
+                wrapper.appendChild(text);
+                control.baseList.appendChild(wrapper);
+            });
+        }
+
+        function syncBaseLayerControlSelection() {
+            if (!layerControl) {
+                return;
+            }
+            var inputs = layerControl.baseList.querySelectorAll('input[type="radio"][name="wc-map-basemap"]');
+            Array.prototype.forEach.call(inputs, function (input) {
+                input.checked = input.value === baseLayerKey;
+            });
+        }
+
+        function renderOverlayLayerControl() {
+            var control = ensureLayerControl();
+            if (!control || !overlayNameRegistry) {
+                return;
+            }
+            control.overlayList.textContent = "";
+            if (control.overlayInputs && typeof control.overlayInputs.clear === "function") {
+                control.overlayInputs.clear();
+            }
+            var entries = Array.from(overlayNameRegistry.entries());
+            if (!entries.length) {
+                control.overlaySection.hidden = true;
+                return;
+            }
+            control.overlaySection.hidden = false;
+            entries.forEach(function (entry, index) {
+                var name = entry[0];
+                var layer = entry[1];
+                var inputId = "wc-map-overlay-" + index;
+                var wrapper = document.createElement("label");
+                wrapper.className = "wc-map-layer-control__item";
+                var input = document.createElement("input");
+                input.type = "checkbox";
+                input.name = "wc-map-overlay";
+                input.value = name;
+                input.id = inputId;
+                input.checked = map.hasLayer(layer);
+                input.addEventListener("change", function () {
+                    if (input.checked) {
+                        map.addLayer(layer);
+                    } else {
+                        map.removeLayer(layer);
+                    }
+                    emit("map:layer:toggled", {
+                        name: name,
+                        layer: layer,
+                        visible: input.checked,
+                        type: "overlay"
+                    });
+                });
+                var text = document.createElement("span");
+                text.className = "wc-map-layer-control__text";
+                text.textContent = name;
+                wrapper.appendChild(input);
+                wrapper.appendChild(text);
+                control.overlayList.appendChild(wrapper);
+                if (control.overlayInputs && typeof control.overlayInputs.set === "function") {
+                    control.overlayInputs.set(name, input);
+                }
+            });
+        }
+
+        function syncOverlayLayerControlSelection() {
+            if (!layerControl || !overlayNameRegistry || !layerControl.overlayInputs) {
+                return;
+            }
+            layerControl.overlayInputs.forEach(function (input, name) {
+                var layer = overlayNameRegistry.get(name);
+                if (!layer) {
+                    input.disabled = true;
+                    return;
+                }
+                input.disabled = false;
+                input.checked = map.hasLayer(layer);
+            });
+        }
+
         var map = {
             events: mapEvents,
             drilldown: createLegacyAdapter(drilldownElement),
@@ -385,8 +830,21 @@ var MapController = (function () {
                     if (!layer || !name || !overlayRegistry || !overlayNameRegistry) {
                         return;
                     }
+                    var existing = overlayNameRegistry.get(name);
+                    if (existing && existing !== layer) {
+                        map.removeLayer(existing);
+                        overlayRegistry.delete(existing);
+                        overlayNameRegistry.delete(name);
+                        if (map.overlayMaps) {
+                            delete map.overlayMaps[name];
+                        }
+                    }
                     overlayRegistry.set(layer, name);
                     overlayNameRegistry.set(name, layer);
+                    if (map.overlayMaps) {
+                        map.overlayMaps[name] = layer;
+                    }
+                    renderOverlayLayerControl();
                 },
                 removeLayer: function (layer) {
                     if (!layer || !overlayRegistry || !overlayNameRegistry) {
@@ -396,7 +854,11 @@ var MapController = (function () {
                     if (name) {
                         overlayRegistry.delete(layer);
                         overlayNameRegistry.delete(name);
+                        if (map.overlayMaps) {
+                            delete map.overlayMaps[name];
+                        }
                     }
+                    renderOverlayLayerControl();
                 }
             },
             boxZoom: {
@@ -436,20 +898,18 @@ var MapController = (function () {
                 return state.zoom;
             },
             getBounds: function () {
-                return buildBounds(state.center, state.zoom);
+                return buildBounds();
             },
             distance: function (a, b) {
                 return calculateDistanceMeters(a, b);
             },
             setView: function (center, zoom) {
                 var normalized = normalizeCenter(center);
-                if (normalized) {
-                    state.center = normalized;
+                if (!normalized) {
+                    return;
                 }
-                if (Number.isFinite(zoom)) {
-                    state.zoom = zoom;
-                }
-                map.onMapChange();
+                var nextViewState = toViewState(normalized, Number.isFinite(zoom) ? zoom : state.zoom);
+                applyViewState(nextViewState, { final: true });
             },
             flyTo: function (center, zoom) {
                 map.setView(center, zoom);
@@ -469,10 +929,40 @@ var MapController = (function () {
                 };
                 map.setView([center.lat, center.lng], state.zoom);
             },
-            invalidateSize: function () { return null; },
-            addLayer: function () { return null; },
-            removeLayer: function () { return null; },
-            hasLayer: function () { return false; },
+            invalidateSize: function () {
+                if (!deckgl) {
+                    return null;
+                }
+                var size = getCanvasSize();
+                deckgl.setProps({
+                    width: size.width || undefined,
+                    height: size.height || undefined
+                });
+                updateMapStatus();
+                return null;
+            },
+            addLayer: function (layer) {
+                if (layerRegistry && layer) {
+                    layerRegistry.add(layer);
+                    applyLayers();
+                }
+                syncOverlayLayerControlSelection();
+                return layer;
+            },
+            removeLayer: function (layer) {
+                if (layerRegistry && layer) {
+                    layerRegistry.delete(layer);
+                    applyLayers();
+                }
+                syncOverlayLayerControlSelection();
+                return null;
+            },
+            hasLayer: function (layer) {
+                if (!layerRegistry || !layer) {
+                    return false;
+                }
+                return layerRegistry.has(layer);
+            },
             registerOverlay: function (layer, name) {
                 map.ctrls.addOverlay(layer, name);
                 return layer;
@@ -523,7 +1013,6 @@ var MapController = (function () {
             },
             onMapChange: function () {
                 updateMapStatus();
-                emit("map:center:changed", buildViewportPayload());
             },
             bootstrap: function (context) {
                 var mapContext = context && context.map ? context.map : context || {};
@@ -550,6 +1039,27 @@ var MapController = (function () {
                 updateMapStatus();
             }
         };
+
+        map.baseMaps = {
+            Terrain: basemapDefs.googleTerrain,
+            Satellite: basemapDefs.googleSatellite
+        };
+        map.overlayMaps = {};
+        map.setBaseLayer = function (key) {
+            var def = resolveBasemap(key);
+            baseLayerKey = def.key;
+            baseLayer = createBaseLayer(def);
+            applyLayers();
+            syncBaseLayerControlSelection();
+            emit("map:layer:toggled", {
+                name: def.label,
+                layer: baseLayer,
+                visible: true,
+                type: "base"
+            });
+        };
+        renderBaseLayerControl();
+        renderOverlayLayerControl();
 
         if (centerInput && typeof centerInput.addEventListener === "function") {
             centerInput.addEventListener("keydown", function (event) {
@@ -599,6 +1109,49 @@ var MapController = (function () {
                 }
             });
         }
+
+        var initialViewState = normalizeViewState({
+            longitude: state.center.lng,
+            latitude: state.center.lat,
+            zoom: state.zoom
+        });
+
+        var size = getCanvasSize();
+        baseLayer = createBaseLayer(resolveBasemap(baseLayerKey));
+        var widgets = [];
+        if (deckApi && typeof deckApi.ZoomWidget === "function") {
+            widgets.push(new deckApi.ZoomWidget({
+                placement: "top-left",
+                orientation: "vertical",
+                transitionDuration: 200
+            }));
+        }
+        deckgl = new deckApi.Deck({
+            parent: mapCanvasElement,
+            controller: true,
+            views: deckApi.MapView ? [new deckApi.MapView({ repeat: true })] : undefined,
+            initialViewState: initialViewState,
+            width: size.width || undefined,
+            height: size.height || undefined,
+            layers: baseLayer ? [baseLayer] : [],
+            widgets: widgets,
+            onViewStateChange: function (params) {
+                var viewState = params && params.viewState ? params.viewState : null;
+                if (!viewState) {
+                    return;
+                }
+                if (isApplyingViewState) {
+                    return;
+                }
+                var interaction = params && params.interactionState ? params.interactionState : null;
+                var isFinal = !interaction || (!interaction.isDragging && !interaction.isZooming && !interaction.isPanning && !interaction.inTransition);
+                applyViewState(viewState, { final: isFinal });
+            },
+            onError: function (error) {
+                console.warn("Map GL deck error", error);
+            }
+        });
+        map._deck = deckgl;
 
         updateMapStatus();
         return map;

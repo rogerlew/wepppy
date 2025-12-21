@@ -214,7 +214,7 @@ Assumptions:
 - `map_pure_gl.htm` is opt-in behind a feature flag, query param, or config gate.
 - Leaflet map remains default until deck.gl reaches parity.
 
-Phase 0: scaffolding + feature flag
+### Phase 0: scaffolding + feature flag
 - Deliverables: `map_pure_gl.htm`, `map_gl.js` skeleton, feature flag routing, deck.gl script loading.
 - Create `_gl` controller equivalents with stubs and no Leaflet dependencies (ex: `subcatchments_gl.js`, `channel_gl.js`, `outlet_gl.js`, `landuse_modify_gl.js`, `rangeland_cover_modify_gl.js`). These should export the same global names/methods and emit the same events, even if internals are no-ops initially.
 - Tests: Jest smoke for `MapController.getInstance()` + `map:ready` emission; Playwright load of map_pure_gl page.
@@ -226,59 +226,67 @@ Phase 0: scaffolding + feature flag
 - GL controllers: `map_gl.js` defines the MapController surface and events, plus stub controllers for subcatchments/channels/outlet/landuse-modify/rangeland-cover-modify.
 - Tests: `controllers_js/__tests__/map_gl.test.js` (Jest) and `static-src/tests/smoke/map-gl.spec.js` (Playwright).
 
-Phase 1: base layers + view state + status
+### Phase 1: base layers + view state + status
 - Scope: basemap tiles (Terrain/Satellite), view state sync, `#mapstatus` updates, map resize handle.
 - Tests: Jest for view state updates and `map:center:changed`; Playwright for basemap toggle + resize handle.
 
-Phase 1a: fly-to location + optional zoom
+### Phase 1 handoff summary
+- Basemap tiles: deck `TileLayer` + `BitmapLayer` with Google Terrain (default) and Satellite in `wepppy/weppcloud/controllers_js/map_gl.js`.
+- View state: `setView`/`flyTo`/`getCenter`/`getZoom`/`getBounds` implemented with deck `onViewStateChange` feedback and guard to avoid recursion.
+- Status + resize: `#mapstatus` updates on view changes; `invalidateSize()` remeasures and calls `deck.setProps`.
+- Widgets: `ZoomWidget` enabled via UMD bundle load and wired into `widgets` on the deck instance.
+- Layer control: Leaflet-style base/overlay UI rendered inside `.wc-map` (custom control), using the Leaflet layers SVG icon.
+- Tests: Playwright `static-src/tests/smoke/map-gl.spec.js` now covers mapstatus text, zoom +/- keys, and base-layer switching; Jest covers layer-control presence.
+
+### Phase 1a: fly-to location + optional zoom
 - Scope: parse `#input_centerloc` values (`lon, lat, [zoom]`), `go` button and Enter key handling, `map:center:requested` event, `flyTo` behavior.
 - Tests: Jest for parsing + `flyTo` call; Playwright for input entry and map center update.
 
-Phase 2: USGS/SNOTEL/NHD overlays
+### Phase 2: USGS/SNOTEL/NHD overlays
 - Scope: GeoJsonLayer overlays with zoom gating and label updates; `map:layer:*` events.
 - Tests: Jest for overlay refresh + label gating; Playwright toggle overlays and verify legend/status.
 
-Phase 3: SBS map (image overlay)
+### Phase 3: SBS map (image overlay)
 - Scope: SBS raster fetch + deck BitmapLayer; link to Baer/Disturbed; legend injection.
 - Tests: Playwright load SBS, verify legend and opacity changes.
 
-Phase 4: legends framework
+### Phase 4: legends framework
 - Scope: deck legend panel or reuse existing legend targets (`#sub_legend`, `#sbs_legend`).
 - Tests: Jest for legend updates; Playwright for legend visibility and content.
 
-Phase 5: channel layer pass 1 (netful)
+### Phase 5: channel layer pass 1 (netful)
 - Scope: GeoJsonLayer for channels pass 1; overlay control entry.
 - Tests: Playwright show channels after delineation; verify overlay toggles.
 
-Phase 6: elevation hover
+### Phase 6: elevation hover
 - Scope: mouse move -> elevation query; `#mouseelev` updates; cooldown/abort behavior.
 - Tests: Jest for debounce + error handling; Playwright hover check (mock response).
 
-Phase 7: outlet selection
+### Phase 7: outlet selection
 - Scope: map click for outlet, marker rendering, cursor mode toggle.
 - Tests: Playwright set outlet via cursor; E2E run flow through outlet step.
 
-Phase 8: channel layer pass 2 + labels + drilldown
+### Phase 8: channel layer pass 2 + labels + drilldown
 - Scope: channel pass 2, labels via TextLayer/IconLayer, click -> `chnQuery`.
 - Tests: Playwright click channel -> drilldown panel update.
 
-Phase 9: subcatchments + gridded loss
+### Phase 9: subcatchments + gridded loss
 - Scope: GeoJsonLayer subcatchments, color map modes, labels, gridded loss raster.
 - Tests: Jest for color mapping; Playwright toggle subcatchment layers + legend range.
 
-Phase 10: WEPP find and flash
+### Phase 10: WEPP find and flash
 - Scope: deck picking + highlight, reuse search input workflows.
 - Tests: Playwright find Topaz/WEPP ID -> flash + drilldown.
 
-Phase 11: landuse + soils overlays
+### Phase 11: landuse + soils overlays
 - Scope: landuse/soils colormaps and legend updates.
 - Tests: Playwright toggle landuse/soils modes and validate legends.
 
-Phase 12: landuse modify + rangeland cover modify
+### Phase 12: landuse modify + rangeland cover modify
 - Scope: selection mode with box select, outline overlay, modify forms.
 - Tests: Playwright selection + submit; E2E run covering modify steps.
 
-Phase 13: WEPP results visualization
+### Phase 13: WEPP results visualization
 - Scope: results modes (runoff, loss, phosphorus, ash) + scale controls.
 - Tests: Playwright switch results modes; E2E run through WEPP build + map visuals.
 
@@ -299,6 +307,33 @@ Run the Playwright GL smoke with the configured test project:
 MAP_GL_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/rlew-appreciated-tremolite/disturbed9002/" \
   wctl run-npm smoke -- --project=runs0 map-gl.spec.js
 ```
+
+## Developer onboarding: custom map layer control (GL)
+Purpose: replace Leaflet `L.control.layers` with a deterministic, deck-compatible UI.
+
+Core files:
+- `wepppy/weppcloud/controllers_js/map_gl.js` (control creation + behavior).
+- `wepppy/weppcloud/static/css/ui-foundation.css` (styling).
+
+How it works:
+- `ensureLayerControl()` builds the control DOM inside `.wc-map` with a toggle button (Leaflet layers SVG) and a panel containing Base Layers and Overlays sections.
+- Base layers use radio inputs from `map.baseMaps` and call `map.setBaseLayer(key)` on change.
+- Overlays use checkbox inputs from `map.overlayMaps` / `overlayNameRegistry` and call `map.addLayer()` / `map.removeLayer()` on change.
+- `map.ctrls.addOverlay()` / `map.ctrls.removeLayer()` refresh the overlay list and keep `map.overlayMaps` in sync.
+- `map.addLayer()` / `map.removeLayer()` update deck layers and sync checkbox state.
+
+Adding a new overlay:
+1. Create the deck layer in the relevant controller.
+2. Register it with `map.registerOverlay(layer, "Overlay Label")` (or `map.ctrls.addOverlay(layer, name)`).
+3. The overlay appears in the control and toggles on/off by calling `map.addLayer` / `map.removeLayer`.
+
+Changing base layers:
+- Update `basemapDefs` in `map_gl.js` and the `map.baseMaps` entries (use a stable `key`).
+- The radio list is regenerated in `renderBaseLayerControl()`. Selection updates `baseLayerKey` and re-applies layers.
+
+Testing:
+- Jest: `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` asserts control render and base radio inputs.
+- Playwright: `wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js` asserts Satellite selection updates the deck base layer id.
 
 ## Ops note: restart weppcloud on bearhive
 ```bash

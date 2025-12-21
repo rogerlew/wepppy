@@ -32,6 +32,12 @@
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
 {% if use_deck_gl_map %}
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+<script>
+  window._deckCore = window.deck;
+</script>
+<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"
+        onload="window.deck = Object.assign({}, window._deckCore || {}, window.deck || {}); delete window._deckCore;"></script>
+<link rel="stylesheet" href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css">
 <script src="{{ url_for('static', filename='js/controllers-gl.js') }}"></script>
 {% else %}
 <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
