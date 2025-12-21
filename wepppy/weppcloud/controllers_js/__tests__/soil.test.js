@@ -116,6 +116,27 @@ describe("Soil controller", () => {
         expect(pollCompletionValues).toEqual(["SOILS_BUILD_TASK_COMPLETED"]);
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        global.WCHttp.getJson.mockResolvedValueOnce({ exc_info: "trace line" });
+        soil.rq_job_id = "job-123";
+
+        soil.handle_job_status_response(soil, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            soil,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("setMode posts JSON payload with parsed integers", async () => {
         document.getElementById("soil_single_selection").value = "303";
         document.getElementById("soil_single_dbselection").value = "DB1";

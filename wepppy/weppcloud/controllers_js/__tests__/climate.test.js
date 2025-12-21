@@ -127,9 +127,8 @@ describe("Climate controller", () => {
             </form>
         `;
 
-        const streamStub = { append: jest.fn(), connect: jest.fn(), disconnect: jest.fn() };
-
-        controlBaseInstance = {
+        const createControlBaseStub = require("./helpers/control_base_stub");
+        ({ base: controlBaseInstance } = createControlBaseStub({
             triggerEvent: jest.fn(),
             pushResponseStacktrace: jest.fn(),
             pushErrorStacktrace: jest.fn(),
@@ -137,20 +136,13 @@ describe("Climate controller", () => {
             stop_job_status_polling: jest.fn(),
             render_job_status: jest.fn(),
             update_command_button_state: jest.fn(),
-            attach_status_stream: jest.fn((self, options) => {
-                controlBaseInstance.statusStream = streamStub;
-                return streamStub;
-            }),
-            detach_status_stream: jest.fn(() => {
-                controlBaseInstance.statusStream = null;
-            }),
             connect_status_stream: jest.fn(),
             disconnect_status_stream: jest.fn(),
             reset_status_spinner: jest.fn(),
             reset_panel_state: jest.fn()
-        };
+        }));
 
-        global.controlBase = jest.fn(() => controlBaseInstance);
+        global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
         postJsonMock = jest.fn((url) => {
             if (url === "rq/api/build_climate") {
@@ -313,7 +305,7 @@ describe("Climate controller", () => {
             expect.objectContaining({ climate_catalog_id: "dataset_a" }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
-        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(controlBaseInstance, "job-123");
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, "job-123");
         expect(pollCompletionValues).toEqual(["CLIMATE_BUILD_TASK_COMPLETED"]);
         expect(started).toHaveBeenCalled();
         expect(completed).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-123" }));
@@ -326,6 +318,27 @@ describe("Climate controller", () => {
         climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED");
 
         expect(climate.report).toHaveBeenCalledTimes(1);
+    });
+
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        global.WCHttp.getJson.mockResolvedValueOnce({ exc_info: "trace line" });
+        climate.rq_job_id = "job-123";
+
+        climate.handle_job_status_response(climate, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            climate,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = controlBaseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
     });
 
     test("upload posts FormData and emits completion event", async () => {

@@ -37,6 +37,7 @@ describe("RAP_TS controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-123" } })),
+            request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.isHttpError))
         };
         global.WCHttp = httpMock;
@@ -142,6 +143,26 @@ describe("RAP_TS controller", () => {
         expect(statusNode.innerHTML).toContain("job-123");
 
         expect(statuses).toEqual(["started", "queued"]);
+    });
+
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        httpMock.request.mockResolvedValueOnce({ body: { exc_info: "trace line" } });
+        controller.rq_job_id = "job-123";
+
+        controller.handle_job_status_response(controller, { status: "failed" });
+        await flushPromises();
+
+        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            controller,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
     });
 
     test("acquire surfaces HTTP errors and disconnects websocket", async () => {

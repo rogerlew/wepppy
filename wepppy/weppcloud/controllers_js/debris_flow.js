@@ -192,7 +192,6 @@ var DebrisFlow = (function () {
         debris.stacktracePanelEl = stacktracePanelElement || null;
         debris.statusSpinnerEl = spinnerElement || null;
         debris._completion_seen = false;
-        debris._poll_failure_seen = false;
         debris.attach_status_stream(debris, {
             element: statusPanelElement,
             form: formElement,
@@ -221,7 +220,6 @@ var DebrisFlow = (function () {
 
         function resetCompletionSeen() {
             debris._completion_seen = false;
-            debris._poll_failure_seen = false;
         }
 
         function handleError(error) {
@@ -311,80 +309,6 @@ var DebrisFlow = (function () {
             debris.report();
         }
 
-        function extractJobInfoStacktrace(payload) {
-            if (!payload) {
-                return null;
-            }
-            if (payload.exc_info) {
-                return payload.exc_info;
-            }
-            if (payload.description) {
-                return payload.description;
-            }
-            var children = payload.children || {};
-            var orders = Object.keys(children);
-            for (var i = 0; i < orders.length; i += 1) {
-                var list = children[orders[i]] || [];
-                for (var j = 0; j < list.length; j += 1) {
-                    var childStack = extractJobInfoStacktrace(list[j]);
-                    if (childStack) {
-                        return childStack;
-                    }
-                }
-            }
-            try {
-                return JSON.stringify(payload, null, 2);
-            } catch (err) {
-                return String(payload);
-            }
-        }
-
-        function handlePollFailure(statusObj) {
-            if (debris._poll_failure_seen) {
-                return;
-            }
-            var status = statusObj && statusObj.status ? String(statusObj.status).toLowerCase() : "";
-            if (status !== "failed" && status !== "stopped" && status !== "canceled") {
-                return;
-            }
-            debris._poll_failure_seen = true;
-
-            var jobId = debris.rq_job_id || (statusObj && statusObj.id) || null;
-            var errorPayload = { Error: "Debris flow job " + status + "." };
-
-            if (!jobId || !http || typeof http.request !== "function") {
-                debris.pushResponseStacktrace(debris, errorPayload);
-                emitter.emit("debris:run:error", { error: errorPayload, status: status });
-                debris.triggerEvent("job:error", { task: "debris:run", error: errorPayload, status: status });
-                return;
-            }
-
-            http.request("/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId))
-                .then(function (result) {
-                    var payload = result && result.body ? result.body : result;
-                    if (typeof payload === "string") {
-                        try {
-                            payload = JSON.parse(payload);
-                        } catch (err) {
-                            payload = { exc_info: payload };
-                        }
-                    }
-                    var stacktrace = extractJobInfoStacktrace(payload);
-                    if (stacktrace) {
-                        errorPayload.StackTrace = String(stacktrace).split("\n");
-                    }
-                    debris.pushResponseStacktrace(debris, errorPayload);
-                    emitter.emit("debris:run:error", { error: errorPayload, status: status });
-                    debris.triggerEvent("job:error", { task: "debris:run", error: errorPayload, status: status });
-                })
-                .catch(function (error) {
-                    var fallback = toResponsePayload(http, error);
-                    debris.pushResponseStacktrace(debris, fallback);
-                    emitter.emit("debris:run:error", { error: fallback, status: status });
-                    debris.triggerEvent("job:error", { task: "debris:run", error: fallback, status: status });
-                });
-        }
-
         var baseTriggerEvent = debris.triggerEvent.bind(debris);
         debris.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
@@ -392,14 +316,6 @@ var DebrisFlow = (function () {
                 handleCompletion();
             }
             return baseTriggerEvent(eventName, payload);
-        };
-
-        var baseHandleJobStatusResponse = debris.handle_job_status_response;
-        debris.handle_job_status_response = function (self, data) {
-            if (typeof baseHandleJobStatusResponse === "function") {
-                baseHandleJobStatusResponse(self, data);
-            }
-            handlePollFailure((self && self.rq_job_status) || data || null);
         };
 
         formElement.addEventListener("DEBRIS_FLOW_RUN_TASK_COMPLETED", function () {

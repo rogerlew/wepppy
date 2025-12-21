@@ -309,6 +309,27 @@ describe("Ash controller", () => {
         expect(completed).toHaveBeenCalledTimes(1);
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        requestMock.mockResolvedValueOnce({ body: { exc_info: "trace line" } });
+        ash.rq_job_id = "job-123";
+
+        ash.handle_job_status_response(ash, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(requestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            ash,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("bootstrap wires poll completion before set_rq_job_id", () => {
         window.WCControllerBootstrap = {
             resolveJobId: jest.fn(() => "ash-job-2")

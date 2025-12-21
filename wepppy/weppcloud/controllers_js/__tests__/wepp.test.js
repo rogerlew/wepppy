@@ -202,6 +202,27 @@ describe("Wepp controller", () => {
         expect(observedInstance.onWeppRunCompleted).toHaveBeenCalledTimes(1);
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        getJsonMock.mockResolvedValueOnce({ exc_info: "trace line" });
+        wepp.rq_job_id = "job-123";
+
+        wepp.handle_job_status_response(wepp, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(getJsonMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            wepp,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = controlBaseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("set_run_wepp_routine posts JSON payload via delegate", async () => {
         var toggle = document.querySelector('[data-wepp-routine="pmet"]');
         toggle.checked = true;

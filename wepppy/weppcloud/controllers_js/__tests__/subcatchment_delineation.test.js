@@ -289,6 +289,27 @@ describe("Subcatchment Delineation controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        httpRequestMock.mockResolvedValueOnce({ body: { exc_info: "trace line" } });
+        subcatchment.rq_job_id = "job-123";
+
+        subcatchment.handle_job_status_response(subcatchment, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpRequestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            subcatchment,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("final completion trigger is idempotent", () => {
         const weppInstance = { updatePhosphorus: jest.fn() };
         global.Wepp.getInstance = jest.fn(() => weppInstance);

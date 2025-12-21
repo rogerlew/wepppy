@@ -127,10 +127,9 @@ describe("DebrisFlow controller", () => {
                 StackTrace: expect.any(Array)
             })
         );
-        expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
-            "job:error",
-            expect.objectContaining({ task: "debris:run", status: "failed" })
-        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
     });
 
     test("handles unsuccessful payload by pushing stacktrace and emitting error", async () => {

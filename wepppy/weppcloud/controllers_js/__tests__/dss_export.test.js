@@ -79,6 +79,7 @@ describe("DssExport controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } })),
+            request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
         global.WCHttp = httpMock;
@@ -195,6 +196,36 @@ describe("DssExport controller", () => {
         );
     });
 
+    test("poll failure prefers child stacktrace over description", async () => {
+        httpMock.request.mockResolvedValueOnce({
+            body: {
+                description: "root description",
+                children: {
+                    "0": [
+                        { exc_info: "child trace line" }
+                    ]
+                }
+            }
+        });
+        dss.rq_job_id = "job-123";
+
+        dss.handle_job_status_response(dss, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            dss,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.arrayContaining(["child trace line"])
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("completion trigger is idempotent", () => {
         const completions = [];
         dss.events.on("dss:export:completed", (payload) => completions.push(payload));
@@ -294,6 +325,7 @@ describe("DssExport controller (dynamic mods)", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } })),
+            request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
         global.WCHttp = httpMock;

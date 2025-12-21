@@ -315,6 +315,27 @@ describe("RangelandCover controller", () => {
         expect(rangeland.report).toHaveBeenCalledTimes(1);
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        httpRequestMock.mockResolvedValueOnce({ body: { exc_info: "trace line" } });
+        rangeland.rq_job_id = "job-123";
+
+        rangeland.handle_job_status_response(rangeland, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpRequestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            rangeland,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("build failure surfaces stack trace and emits failure event", async () => {
         httpPostJsonMock.mockImplementationOnce(() => Promise.reject(new Error("boom")));
         eventLog.length = 0;

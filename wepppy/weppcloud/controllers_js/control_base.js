@@ -5,6 +5,7 @@
 function controlBase() {
     const TERMINAL_JOB_STATUSES = new Set(["finished", "failed", "stopped", "canceled", "not_found"]);
     const SUCCESS_JOB_STATUSES = new Set(["finished"]);
+    const FAILURE_JOB_STATUSES = new Set(["failed", "stopped", "canceled", "not_found"]);
     const DEFAULT_POLL_INTERVAL_MS = 800;
     const DEFAULT_SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
@@ -92,6 +93,56 @@ function controlBase() {
         return `https://${window.location.host}/weppcloud/rq/job-dashboard/${encodeURIComponent(jobId)}`;
     }
 
+    function splitStacktrace(value) {
+        if (value === undefined || value === null) {
+            return [];
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); });
+        }
+        if (typeof value === "string") {
+            return value.split(/\r?\n/);
+        }
+        return [String(value)];
+    }
+
+    function extractJobInfoStacktrace(payload) {
+        if (!payload) {
+            return null;
+        }
+        if (payload.exc_info) {
+            return payload.exc_info;
+        }
+        if (payload.children && typeof payload.children === "object") {
+            const orders = Object.keys(payload.children);
+            for (let i = 0; i < orders.length; i += 1) {
+                const entries = payload.children[orders[i]] || [];
+                for (let j = 0; j < entries.length; j += 1) {
+                    const candidate = extractJobInfoStacktrace(entries[j]);
+                    if (candidate) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+        if (payload.description) {
+            return payload.description;
+        }
+        return null;
+    }
+
+    function normalizeJobInfoPayload(result) {
+        let payload = result && Object.prototype.hasOwnProperty.call(result, "body") ? result.body : result;
+        if (typeof payload === "string") {
+            try {
+                payload = JSON.parse(payload);
+            } catch (err) {
+                return { exc_info: payload };
+            }
+        }
+        return payload;
+    }
+
     function maybeDispatchCompletion(self, statusObj, source) {
         if (!self || self._job_completion_dispatched) {
             return;
@@ -124,6 +175,67 @@ function controlBase() {
         } catch (err) {
             console.warn("controlBase job:completed dispatch error:", err);
         }
+    }
+
+    function maybeDispatchFailure(self, statusObj, source) {
+        if (!self || self._job_failure_dispatched) {
+            return;
+        }
+        const status = statusObj && statusObj.status ? String(statusObj.status).toLowerCase() : null;
+        if (!status || !FAILURE_JOB_STATUSES.has(status)) {
+            return;
+        }
+
+        self._job_failure_dispatched = true;
+
+        const jobId = self.rq_job_id || (statusObj && statusObj.id) || null;
+        const errorPayload = { Error: `Job ${status}.` };
+
+        function emitFailure() {
+            try {
+                self.triggerEvent("job:error", {
+                    jobId: jobId,
+                    status: status,
+                    source: source || "poll"
+                });
+            } catch (err) {
+                console.warn("controlBase job:error dispatch error:", err);
+            }
+        }
+
+        if (!jobId) {
+            self.pushResponseStacktrace(self, errorPayload);
+            emitFailure();
+            return;
+        }
+
+        let http;
+        try {
+            http = ensureHttp();
+        } catch (err) {
+            self.pushResponseStacktrace(self, errorPayload);
+            emitFailure();
+            return;
+        }
+
+        const jobInfoUrl = `/weppcloud/rq/api/jobinfo/${encodeURIComponent(jobId)}`;
+        const fetchJobInfo = typeof http.getJson === "function"
+            ? http.getJson(jobInfoUrl)
+            : http.request(jobInfoUrl).then(normalizeJobInfoPayload);
+
+        Promise.resolve(fetchJobInfo)
+            .then(function (payload) {
+                const stacktrace = extractJobInfoStacktrace(payload);
+                if (stacktrace) {
+                    errorPayload.StackTrace = splitStacktrace(stacktrace);
+                }
+                self.pushResponseStacktrace(self, errorPayload);
+                emitFailure();
+            })
+            .catch(function (error) {
+                self.pushErrorStacktrace(self, error, status, errorPayload.Error);
+                emitFailure();
+            });
     }
 
     function callAdapter(target, method, args) {
@@ -492,6 +604,7 @@ function controlBase() {
         _job_status_error: null,
         _job_status_error_parts: null,
         _job_status_stacktrace_from_poll: false,
+        _job_failure_dispatched: false,
         statusStream: null,
         _statusStreamHandle: null,
 
@@ -662,6 +775,7 @@ function controlBase() {
             const normalizedJobId = normalizeJobId(job_id);
 
             self._job_completion_dispatched = false;
+            self._job_failure_dispatched = false;
             self._job_status_stacktrace_from_poll = false;
             self._job_status_error_parts = null;
 
@@ -736,6 +850,7 @@ function controlBase() {
             }
 
             maybeDispatchCompletion(self, self.rq_job_status, "poll");
+            maybeDispatchFailure(self, self.rq_job_status, "poll");
 
             self.update_command_button_state(self);
         },

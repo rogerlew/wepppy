@@ -1,6 +1,8 @@
 /* eslint-env node */
 
 module.exports = function createControlBaseStub(overrides) {
+    require("../../control_base.js");
+    const realBase = global.controlBase ? global.controlBase() : {};
     const statusStreamMock = {
         append: jest.fn(),
         connect: jest.fn(),
@@ -8,7 +10,7 @@ module.exports = function createControlBaseStub(overrides) {
         clear: jest.fn()
     };
 
-    const base = Object.assign({
+    const base = Object.assign({}, realBase, {
         statusStream: null,
         attach_status_stream: jest.fn(function (self) {
             if (self) {
@@ -29,6 +31,7 @@ module.exports = function createControlBaseStub(overrides) {
         render_job_status: jest.fn(),
         update_command_button_state: jest.fn(),
         stop_job_status_polling: jest.fn(),
+        schedule_job_status_poll: jest.fn(),
         fetch_job_status: jest.fn(),
         manage_status_stream: jest.fn(),
         should_disable_command_button: jest.fn(() => false),

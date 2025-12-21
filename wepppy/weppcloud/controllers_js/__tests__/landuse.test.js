@@ -183,6 +183,27 @@ describe("Landuse controller", () => {
         );
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        global.WCHttp.getJson.mockResolvedValueOnce({ exc_info: "trace line" });
+        landuse.rq_job_id = "job-123";
+
+        landuse.handle_job_status_response(landuse, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            landuse,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("modify_mapping posts payload and refreshes report", async () => {
         jest.spyOn(landuse, "report").mockImplementation(() => {});
 

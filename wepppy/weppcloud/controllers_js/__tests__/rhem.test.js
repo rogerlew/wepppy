@@ -162,6 +162,26 @@ describe("Rhem controller", () => {
         expect(completions).toHaveLength(1);
     });
 
+    test("poll failure pushes stacktrace and emits job error", async () => {
+        httpMock.request.mockResolvedValueOnce({ body: { exc_info: "trace line" } });
+        rhem.rq_job_id = "job-123";
+
+        rhem.handle_job_status_response(rhem, { status: "failed" });
+        await flushPromises();
+
+        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            rhem,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
+        const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
+        expect(jobErrorCalls).toHaveLength(1);
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+    });
+
     test("bootstrap wires poll completion before job id", () => {
         const pollCompletionValues = [];
         baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
