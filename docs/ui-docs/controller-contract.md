@@ -36,7 +36,7 @@
   - `poll_completion_event` + `job:completed` once on `finished` (guarded by `_job_completion_dispatched`).
   - `job:error` once on `failed`/`stopped`/`canceled`/`not_found` (guarded by `_job_failure_dispatched`), after fetching `/rq/api/jobinfo/<job_id>` to push stacktraces (child `exc_info` preferred).
 - Custom `onTrigger` handlers must **not** call `triggerEvent` again; `attach_status_stream` already does this. Use guarded handlers for CustomEvents to avoid recursion.
-- **See also:** [trigger-refactor.md](control-ui-styling/trigger-refactor.md) for the per-controller trigger inventory and completion event names.
+- **See also:** [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md) for the per-controller trigger inventory and completion event names.
 
 ### Requests
 - Use `WCHttp` and `url_for_run()` for every in-run endpoint (`rq/api/*`, `tasks/*`, `query/*`, `resources/*`). Never hardcode `/weppcloud/...` or bare paths.

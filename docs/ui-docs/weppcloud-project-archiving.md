@@ -1,7 +1,7 @@
 # WEPPcloud Project Archiving Details
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for RQ Background Tasks and Adding an RQ Background Task sections.  
-> **Related:** [weppcloud-project-forking.md](weppcloud-project-forking.md), [controller-contract.md](controller-contract.md), [trigger-refactor.md](control-ui-styling/trigger-refactor.md)
+> **Related:** [weppcloud-project-forking.md](weppcloud-project-forking.md), [controller-contract.md](controller-contract.md), [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md)
 
 ## Introduction
 The archiving system lets project owners capture point-in-time snapshots of a WEPPcloud run and later restore them. Archives are stored as zip bundles within each run's working directory, under an `archives/` subfolder. The front end provides a dedicated dashboard so users can trigger archiving, monitor progress over websockets, and restore previous snapshots without leaving the run.

@@ -1,4 +1,5 @@
 # Status-Based Completion Trigger Inventory
+Status: Completed 2025-12-20. Archived for reference.
 Scope: status-based completion triggers tied to the fork console, archive dashboard, and run controls surfaced by `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm`.
 
 ## Shared Trigger Mechanics
@@ -14,6 +15,7 @@ Scope: status-based completion triggers tied to the fork console, archive dashbo
 - controlBase job-status polling (`wepppy/weppcloud/controllers_js/control_base.js`)
   - `set_rq_job_id()` polls `/weppcloud/rq/api/jobstatus/<jobid>` and tracks terminal statuses.
   - On `finished`, `maybeDispatchCompletion()` fires `poll_completion_event` + `job:completed` once (`_job_completion_dispatched`).
+  - On `failed/stopped/canceled/not_found`, `maybeDispatchFailure()` emits `job:error` and pulls `/weppcloud/rq/api/jobinfo/<jobid>` for stacktrace context.
   - Only controllers with `poll_completion_event` set can complete via polling.
 
 ## Correct Completion Pattern (StatusStream + Poll)
@@ -69,6 +71,7 @@ controller.triggerEvent = function (eventName, payload) {
   - Trigger events:
     - `FORK_COMPLETE` -> `handleForkComplete()` (toggle buttons, success message/link, append status).
     - `FORK_FAILED` -> `handleForkFailed()` (toggle buttons, error message, append status).
+  - Polling fallback: `controlBase` tracks job status and emits `job:completed`/`job:error` to the same handlers (idempotent guard).
 
 ## Archive Dashboard
 - `wepppy/weppcloud/static/js/archive_console.js`
@@ -78,6 +81,7 @@ controller.triggerEvent = function (eventName, payload) {
     - `ARCHIVE_FAILED` -> `archiveFailed()` (enable buttons, refresh list, append status).
     - `RESTORE_COMPLETE` -> `restoreFinished()` (enable buttons, refresh list, show load link).
     - `RESTORE_FAILED` -> `restoreFailed()` (enable buttons, refresh list, append status).
+  - Polling fallback: `controlBase` tracks job status and emits `job:completed`/`job:error` to the same handlers (idempotent guard).
 
 ## Run Controls (runs0_pure.htm)
 ### Channel Delineation
@@ -204,7 +208,7 @@ controller.triggerEvent = function (eventName, payload) {
   - Each passes `onTrigger` that re-calls `triggerEvent`, even though `controlBase.attach_status_stream()` already does this.
   - StatusStream triggers can fire completion handlers twice unless downstream code guards against duplicates.
 
-## Run Controls Update Checklist (do these before fork/archive)
+## Run Controls Update Checklist (completed 2025-12-20)
 - [x] Subcatchment delineation (`wepppy/weppcloud/controllers_js/subcatchment_delineation.js`): per-event completion guards; `poll_completion_event = WATERSHED_ABSTRACTION_TASK_COMPLETED`; keep StatusStream for intermediate `BUILD_SUBCATCHMENTS_TASK_COMPLETED`; invalidate `subwta` on rebuild.
 - [x] Rangeland cover (`wepppy/weppcloud/controllers_js/rangeland_cover.js`): `_completion_seen` guard; `poll_completion_event = "RANGELAND_COVER_BUILD_TASK_COMPLETED"`; report idempotent; invalidate covers on rebuild.
 - [x] Landuse (`wepppy/weppcloud/controllers_js/landuse.js`): `_completion_seen` guard; `poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED"`; report idempotent.
@@ -218,11 +222,14 @@ controller.triggerEvent = function (eventName, payload) {
 - [x] Omni (`wepppy/weppcloud/controllers_js/omni.js`): add `_completion_seen` guard; set `poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED"`.
 - [x] Debris flow (`wepppy/weppcloud/controllers_js/debris_flow.js`): add `_completion_seen` guard; set `poll_completion_event = "DEBRIS_FLOW_RUN_TASK_COMPLETED"`; ensure CustomEvent handler stays idempotent.
 - [x] DSS export (`wepppy/weppcloud/controllers_js/dss_export.js`): add `_completion_seen` guard; set `poll_completion_event = "DSS_EXPORT_TASK_COMPLETED"`; ensure report loads once.
+- [x] Fork console (`wepppy/weppcloud/static/js/fork_console.js`): hybrid StatusStream + polling; idempotent completion.
+- [x] Archive dashboard (`wepppy/weppcloud/static/js/archive_console.js`): hybrid StatusStream + polling; idempotent completion.
 
 ### Already compliant / no changes expected
 - Channel delineation (`wepppy/weppcloud/controllers_js/channel_delineation.js`), Outlet (`wepppy/weppcloud/controllers_js/outlet.js`) already follow the hybrid pattern with `_completion_seen` + polling.
 - Observed (`wepppy/weppcloud/controllers_js/observed.js`), Disturbed/BAER (`wepppy/weppcloud/controllers_js/disturbed.js`, `wepppy/weppcloud/controllers_js/baer.js`), PATH CE (`wepppy/weppcloud/controllers_js/path_ce.js`) do not need polling updates.
 
-## Deferred (after run controls)
-- [ ] Fork console (`wepppy/weppcloud/static/js/fork_console.js`)
-- [ ] Archive dashboard (`wepppy/weppcloud/static/js/archive_console.js`)
+## Closeout Notes (2025-12-20)
+- Hybrid StatusStream + polling completion is now standard for run controls, fork console, and archive dashboard.
+- Polling failure handling is centralized in `controlBase` (`job:error` + jobinfo stacktrace).
+- Remaining duplicate-trigger risk: `wepppy/weppcloud/controllers_js/team.js` still re-calls `triggerEvent` in its custom `onTrigger`.

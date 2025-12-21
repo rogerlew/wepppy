@@ -44,6 +44,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/god-tier-prompting-strategy.md](docs/god-tier-prompting-strategy.md)
 - [docs/mini-work-packages/README.md](docs/mini-work-packages/README.md)
 - [docs/mini-work-packages/completed/nodb_mods_doc_typing.md](docs/mini-work-packages/completed/nodb_mods_doc_typing.md)
+- [docs/mini-work-packages/completed/trigger-refactor.md](docs/mini-work-packages/completed/trigger-refactor.md)
 - [docs/oauth_spec.md](docs/oauth_spec.md)
 - [docs/prompt_templates/AGENTS.md](docs/prompt_templates/AGENTS.md)
 - [docs/prompt_templates/agents_authoring_template.md](docs/prompt_templates/agents_authoring_template.md)
@@ -911,6 +912,43 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
   - [Status Table](#status-table)
   - [Action Log](#action-log)
   - [Next Steps](#next-steps)
+
+---
+
+## docs/mini-work-packages/completed/trigger-refactor.md
+
+- [Status-Based Completion Trigger Inventory](#status-based-completion-trigger-inventory)
+  - [Shared Trigger Mechanics](#shared-trigger-mechanics)
+  - [Correct Completion Pattern (StatusStream + Poll)](#correct-completion-pattern-statusstream-poll)
+    - [Single-job RQ controllers](#single-job-rq-controllers)
+    - [Multi-stage RQ controllers](#multi-stage-rq-controllers)
+    - [Non-RQ / synchronous controllers](#non-rq-synchronous-controllers)
+    - [Avoid double-triggering](#avoid-double-triggering)
+  - [Fork Console](#fork-console)
+  - [Archive Dashboard](#archive-dashboard)
+  - [Run Controls (runs0_pure.htm)](#run-controls-runs0purehtm)
+    - [Channel Delineation](#channel-delineation)
+    - [Outlet](#outlet)
+    - [Subcatchment Delineation](#subcatchment-delineation)
+    - [Rangeland Cover](#rangeland-cover)
+    - [Landuse](#landuse)
+    - [Soils](#soils)
+    - [Climate](#climate)
+    - [RAP Time Series](#rap-time-series)
+    - [Treatments](#treatments)
+    - [WEPP](#wepp)
+    - [Ash](#ash)
+    - [RHEM](#rhem)
+    - [Omni Scenarios](#omni-scenarios)
+    - [Debris Flow](#debris-flow)
+    - [DSS Export](#dss-export)
+    - [Observed Data](#observed-data)
+    - [Disturbed / SBS (BAER)](#disturbed-sbs-baer)
+    - [PATH Cost-Effective](#path-cost-effective)
+  - [Known Duplicate-Trigger Paths (StatusStream)](#known-duplicate-trigger-paths-statusstream)
+  - [Run Controls Update Checklist (completed 2025-12-20)](#run-controls-update-checklist-completed-2025-12-20)
+    - [Already compliant / no changes expected](#already-compliant-no-changes-expected)
+  - [Closeout Notes (2025-12-20)](#closeout-notes-2025-12-20)
 
 ---
 

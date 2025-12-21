@@ -1,7 +1,7 @@
 # WEPPcloud Project Forking Details
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for RQ Background Tasks and Adding an RQ Background Task sections.  
-> **Related:** [weppcloud-project-archiving.md](weppcloud-project-archiving.md), [controller-contract.md](controller-contract.md), [trigger-refactor.md](control-ui-styling/trigger-refactor.md)
+> **Related:** [weppcloud-project-archiving.md](weppcloud-project-archiving.md), [controller-contract.md](controller-contract.md), [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md)
 
 ## Introduction
 The forking system clones an existing WEPPcloud run into a new run directory. The fork console lets users submit a fork job, monitor live status output, and open the new run when the job completes. Forking can optionally "undisturbify" the run by clearing disturbance artifacts, rebuilding landuse/soils, and rerunning WEPP.
