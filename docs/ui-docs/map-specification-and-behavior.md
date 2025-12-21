@@ -278,8 +278,8 @@ Assumptions:
 - Empty-run URL for missing SBS smoke coverage: `https://wc.bearhive.duckdns.org/weppcloud/runs/unpaved-neophyte/disturbed9002/`.
 
 ### Phase 4: legends framework
-- Scope: deck legend panel or reuse existing legend targets (`#sub_legend`, `#sbs_legend`).
-- Tests: Jest for legend updates; Playwright for legend visibility and content.
+- Scope: reuse existing legend targets (`#sub_legend`, `#sbs_legend`) and lock in show/hide behavior.
+- Tests: Jest covers SBS legend show/hide + opacity slider; Playwright covers SBS legend toggle, slider, and empty-run resilience.
 
 ### Phase 5: channel layer pass 1 (netful)
 - Scope: GeoJsonLayer for channels pass 1; overlay control entry.

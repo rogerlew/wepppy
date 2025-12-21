@@ -496,6 +496,27 @@ test.describe('map gl smoke', () => {
     }).toBeCloseTo(0.4, 1);
   });
 
+  test('SBS overlay toggle hides legend', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await enableSbsOverlay(page);
+    const legend = page.locator('#sbs_legend');
+    if (!outcome.success) {
+      await expect(legend).toBeHidden();
+      return;
+    }
+
+    await expect(legend).toBeVisible();
+
+    const { layerToggle } = await openOverlayPanel(page);
+    const sbsInput = page.locator('label:has-text("Burn Severity Map") input[type="checkbox"]');
+    await expect(sbsInput).toBeVisible();
+    await sbsInput.uncheck();
+    await layerToggle.click();
+
+    await expect(legend).toBeHidden();
+  });
+
   test('empty run tolerates missing SBS resources', async ({ page }) => {
     const mapVisible = await openRun(page, resolveEmptyUrl(), { allowMissingMap: true });
     if (!mapVisible) {

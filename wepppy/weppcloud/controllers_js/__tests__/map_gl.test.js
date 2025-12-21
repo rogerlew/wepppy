@@ -218,6 +218,38 @@ describe("Map GL controller", () => {
         expect(legend.innerHTML).toContain("Legend");
     });
 
+    test("SBS opacity slider updates layer opacity and emits event", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
+
+        global.WCHttp.getJson.mockResolvedValueOnce({
+            Success: true,
+            Content: {
+                bounds: [[40.0, -120.0], [41.0, -119.0]],
+                imgurl: "resources/baer.png",
+            },
+        });
+        global.WCHttp.request.mockImplementation((url) => {
+            if (String(url).includes("legends/sbs")) {
+                return Promise.resolve({ body: "<div>Legend</div>" });
+            }
+            return Promise.resolve({ body: new Blob([""], { type: "image/png" }) });
+        });
+
+        emittedEvents = [];
+        await mapInstance.loadSbsMap();
+
+        const slider = document.getElementById("baer-opacity-slider");
+        expect(slider).not.toBeNull();
+
+        slider.value = "0.4";
+        slider.dispatchEvent(new Event("input"));
+
+        expect(mapInstance.sbs_layer.props.opacity).toBeCloseTo(0.4, 1);
+        const opacityEvent = emittedEvents.find((evt) => evt.name === "baer:map:opacity");
+        expect(opacityEvent).toBeTruthy();
+    });
+
     test("loadSbsMap emits map:layer:error and clears legend on failure", async () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
@@ -238,6 +270,35 @@ describe("Map GL controller", () => {
             (evt) => evt.name === "map:layer:error" && evt.payload.name === "Burn Severity Map"
         );
         expect(errorEvent).toBeTruthy();
+        expect(legend.hidden).toBe(true);
+        expect(legend.innerHTML).toBe("");
+    });
+
+    test("removeLayer clears SBS legend", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
+
+        global.WCHttp.getJson.mockResolvedValueOnce({
+            Success: true,
+            Content: {
+                bounds: [[40.0, -120.0], [41.0, -119.0]],
+                imgurl: "resources/baer.png",
+            },
+        });
+        global.WCHttp.request.mockImplementation((url) => {
+            if (String(url).includes("legends/sbs")) {
+                return Promise.resolve({ body: "<div>Legend</div>" });
+            }
+            return Promise.resolve({ body: new Blob([""], { type: "image/png" }) });
+        });
+
+        await mapInstance.loadSbsMap();
+
+        const legend = document.getElementById("sbs_legend");
+        expect(legend.hidden).toBe(false);
+
+        mapInstance.removeLayer(mapInstance.sbs_layer);
+
         expect(legend.hidden).toBe(true);
         expect(legend.innerHTML).toBe("");
     });
