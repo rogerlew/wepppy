@@ -242,9 +242,24 @@ Assumptions:
 - Scope: parse `#input_centerloc` values (`lon, lat, [zoom]`), `go` button and Enter key handling, `map:center:requested` event, `flyTo` behavior.
 - Tests: Jest for parsing + `flyTo` call; Playwright for input entry and map center update.
 
+### Phase 1a handoff summary
+- Location parsing: accepts `lon, lat` or `lon, lat, zoom` (comma or space), keeps current zoom when omitted, validates ranges, logs warnings on invalid input.
+- Events: `map:center:requested` emitted from Enter key and `Go` button; `map:center:changed` emitted on final view update.
+- Fly-to: uses `FlyToInterpolator` when available with a 4000ms transition; falls back to `setView` when interpolator is missing.
+- Status: `#mapstatus` updates with new center/zoom after fly-to completes.
+- Tests: `controllers_js/__tests__/map_gl.test.js` covers parsing, events, validation, and transition duration.
+
 ### Phase 2: USGS/SNOTEL/NHD overlays
 - Scope: GeoJsonLayer overlays with zoom gating and label updates; `map:layer:*` events.
 - Tests: Jest for overlay refresh + label gating; Playwright toggle overlays and verify legend/status.
+
+### Phase 2 handoff summary
+- Overlay layers: deck `GeoJsonLayer` for USGS gages, SNOTEL locations, and NHD flowlines with Leaflet-matching styling and draw order (NHD below sensors).
+- Refresh: `WCHttp.getJson` fetches on `moveend`/`zoomend` with a short debounce during pan/zoom; in-flight requests abort or are ignored if stale.
+- Zoom gating + labels: USGS/SNOTEL gated at zoom >= 9; NHD gated at zoom >= 11, with HR label at zoom >= 14; overlay labels update to reflect thresholds.
+- Events: `map:layer:refreshed` and `map:layer:error` emitted on successful/failed refreshes.
+- UX: USGS/SNOTEL hover shows name; click opens a modal with HTML description (links clickable).
+- Tests: Jest covers overlay registration order and zoom gating; Playwright covers overlay toggles, panel collapse, fly-to, and modal open.
 
 ### Phase 3: SBS map (image overlay)
 - Scope: SBS raster fetch + deck BitmapLayer; link to Baer/Disturbed; legend injection.
@@ -321,6 +336,7 @@ How it works:
 - Overlays use checkbox inputs from `map.overlayMaps` / `overlayNameRegistry` and call `map.addLayer()` / `map.removeLayer()` on change.
 - `map.ctrls.addOverlay()` / `map.ctrls.removeLayer()` refresh the overlay list and keep `map.overlayMaps` in sync.
 - `map.addLayer()` / `map.removeLayer()` update deck layers and sync checkbox state.
+- Panel behavior: the overlay panel collapses on map pan, zoom, and focus interactions (pointer down or wheel) to avoid obscuring the map while navigating.
 
 Adding a new overlay:
 1. Create the deck layer in the relevant controller.

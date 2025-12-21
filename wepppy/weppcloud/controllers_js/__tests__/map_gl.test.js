@@ -64,7 +64,7 @@ describe("Map GL controller", () => {
 
         global.WCHttp = {
             postJson: jest.fn(),
-            getJson: jest.fn(),
+            getJson: jest.fn(() => Promise.resolve({ type: "FeatureCollection", features: [] })),
             request: jest.fn(),
             isHttpError: jest.fn(() => false),
         };
@@ -83,6 +83,9 @@ describe("Map GL controller", () => {
         function BitmapLayer(props) {
             this.props = props || {};
         }
+        function GeoJsonLayer(props) {
+            this.props = props || {};
+        }
         function WebMercatorViewport(opts) {
             this.opts = opts || {};
             this.getBounds = () => [
@@ -92,13 +95,16 @@ describe("Map GL controller", () => {
                 (this.opts.latitude || 0) + 1,
             ];
         }
+        function FlyToInterpolator() {}
 
         global.deck = {
             Deck: Deck,
             MapView: MapView,
             TileLayer: TileLayer,
             BitmapLayer: BitmapLayer,
+            GeoJsonLayer: GeoJsonLayer,
             WebMercatorViewport: WebMercatorViewport,
+            FlyToInterpolator: FlyToInterpolator,
         };
 
         await import("../map_gl.js");
@@ -143,6 +149,117 @@ describe("Map GL controller", () => {
         expect(status.textContent).toContain("46.8");
         expect(status.textContent).toContain("-117.5");
         expect(emittedEvents.some((evt) => evt.name === "map:center:changed")).toBe(true);
+    });
+
+    test("overlay control registers USGS/SNOTEL/NHD with zoom gating labels", () => {
+        global.MapController.getInstance();
+
+        const overlayInputs = Array.from(document.querySelectorAll('input[name="wc-map-overlay"]'));
+        expect(overlayInputs.length).toBeGreaterThanOrEqual(3);
+
+        const labels = overlayInputs.map((input) => {
+            const text = input.parentElement.querySelector(".wc-map-layer-control__text");
+            return text ? text.textContent : "";
+        });
+
+        expect(labels.some((label) => label.includes("USGS Gage Locations"))).toBe(true);
+        expect(labels.some((label) => label.includes("SNOTEL Locations"))).toBe(true);
+        expect(labels.some((label) => label.includes("NHD"))).toBe(true);
+
+        const usgsLabel = labels.find((label) => label.includes("USGS Gage Locations"));
+        expect(usgsLabel).toContain("zoom >= 9");
+
+        const usgsIndex = labels.findIndex((label) => label.includes("USGS Gage Locations"));
+        const snotelIndex = labels.findIndex((label) => label.includes("SNOTEL Locations"));
+        const nhdIndex = labels.findIndex((label) => label.includes("NHD"));
+        expect(usgsIndex).toBeLessThan(snotelIndex);
+        expect(snotelIndex).toBeLessThan(nhdIndex);
+    });
+
+    test("loadUSGSGageLocations gated by zoom and emits refreshed", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.addLayer(mapInstance.usgs_gage);
+
+        mapInstance.setView([44.0, -116.0], 8);
+        global.WCHttp.getJson.mockClear();
+        await mapInstance.loadUSGSGageLocations();
+        expect(global.WCHttp.getJson).not.toHaveBeenCalled();
+
+        mapInstance.setView([44.0, -116.0], 10);
+        global.WCHttp.getJson.mockClear();
+        emittedEvents = [];
+        await mapInstance.loadUSGSGageLocations();
+
+        expect(global.WCHttp.getJson).toHaveBeenCalled();
+        const refreshed = emittedEvents.find(
+            (evt) => evt.name === "map:layer:refreshed" && evt.payload.name === "USGS Gage Locations"
+        );
+        expect(refreshed).toBeTruthy();
+    });
+
+    test("goToEnteredLocation parses lon/lat and optional zoom", () => {
+        const mapInstance = global.MapController.getInstance();
+        const originalFlyTo = mapInstance.flyTo.bind(mapInstance);
+        const flyToSpy = jest.spyOn(mapInstance, "flyTo").mockImplementation((center, zoom) => {
+            return originalFlyTo(center, zoom);
+        });
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "-120.1595, 39.0451, 10";
+
+        mapInstance.goToEnteredLocation();
+
+        expect(flyToSpy).toHaveBeenCalledWith([39.0451, -120.1595], 10);
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(39.0451);
+        expect(center.lng).toBeCloseTo(-120.1595);
+        expect(mapInstance.getZoom()).toBe(10);
+        const status = document.getElementById("mapstatus");
+        expect(status.textContent).toContain("Zoom: 10");
+
+        const lastProps = deckInstance.setProps.mock.calls[deckInstance.setProps.mock.calls.length - 1][0];
+        expect(lastProps.viewState.transitionDuration).toBe(4000);
+        expect(lastProps.viewState.transitionInterpolator).toBeInstanceOf(global.deck.FlyToInterpolator);
+    });
+
+    test("enter key emits map:center:requested and keeps zoom when omitted", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.setView([44.5, -115.9], 7);
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "-121.0, 40.5";
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+
+        const requested = emittedEvents.find((evt) => evt.name === "map:center:requested");
+        expect(requested).toEqual(expect.objectContaining({
+            name: "map:center:requested",
+            payload: expect.objectContaining({
+                source: "input",
+                query: input.value,
+            }),
+        }));
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(40.5);
+        expect(center.lng).toBeCloseTo(-121.0);
+        expect(mapInstance.getZoom()).toBe(7);
+    });
+
+    test("invalid location input warns and does not move", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.setView([44.0, -116.0], 6);
+
+        const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+        const input = document.getElementById("input_centerloc");
+        input.value = "200, 95";
+
+        mapInstance.goToEnteredLocation();
+
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(44.0);
+        expect(center.lng).toBeCloseTo(-116.0);
+        expect(mapInstance.getZoom()).toBe(6);
+        expect(warnSpy).toHaveBeenCalled();
+        warnSpy.mockRestore();
     });
 
     test("invalidateSize resizes deck", () => {

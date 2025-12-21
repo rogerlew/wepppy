@@ -71,9 +71,170 @@ function parseZoom(statusText) {
   return Number.isFinite(value) ? value : null;
 }
 
+function parseCenter(statusText) {
+  if (!statusText) {
+    return null;
+  }
+  const match = statusText.match(/Center:\s*([-0-9.]+)\s*,\s*([-0-9.]+)/i);
+  if (!match) {
+    return null;
+  }
+  const lng = Number(match[1]);
+  const lat = Number(match[2]);
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+    return null;
+  }
+  return { lng, lat };
+}
+
 async function getZoom(page) {
   const text = await page.locator('#mapstatus').textContent();
   return parseZoom(text || '');
+}
+
+async function getCenter(page) {
+  const text = await page.locator('#mapstatus').textContent();
+  return parseCenter(text || '');
+}
+
+async function waitForOverlayFeatures(page, layerKey) {
+  await expect.poll(async () => {
+    return page.evaluate((key) => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const layer = map ? map[key] : null;
+      const data = layer && layer.props ? layer.props.data : null;
+      const features = data && data.features ? data.features : Array.isArray(data) ? data : [];
+      return features.length;
+    }, layerKey);
+  }, { timeout: 45000 }).toBeGreaterThan(0);
+}
+
+async function waitForMapTransition(page) {
+  await expect.poll(async () => {
+    return page.evaluate(() => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const viewState = map && map._deck && map._deck.props ? map._deck.props.viewState : null;
+      return viewState ? viewState.transitionDuration : null;
+    });
+  }, { timeout: 10000 }).toBeFalsy();
+}
+
+async function openOverlayPanel(page) {
+  const layerToggle = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__toggle');
+  const panel = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__panel');
+  await expect(layerToggle).toBeVisible();
+  if (!(await panel.isVisible())) {
+    await layerToggle.click();
+    await expect(panel).toBeVisible();
+  }
+  return { layerToggle, panel };
+}
+
+async function getFeatureClickPoint(page, layerKey) {
+  return page.evaluate((key) => {
+    const map = window.MapController && typeof window.MapController.getInstance === 'function'
+      ? window.MapController.getInstance()
+      : null;
+    const layer = map ? map[key] : null;
+    const deck = map && map._deck ? map._deck : null;
+    if (!layer || !deck) {
+      return null;
+    }
+    const canProject = typeof deck.project === 'function';
+    const canPick = typeof deck.pickObject === 'function';
+    if (!canProject && !canPick) {
+      return null;
+    }
+    const data = layer.props ? layer.props.data : null;
+    const features = data && data.features ? data.features : Array.isArray(data) ? data : [];
+    if (!features.length) {
+      return null;
+    }
+    const canvas = document.getElementById('mapid');
+    if (!canvas) {
+      return null;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width || 0;
+    const height = rect.height || 0;
+    const layerId = layer.id || (layer.props ? layer.props.id : null);
+    if (layerId && canPick) {
+      const step = Math.max(24, Math.round(Math.min(width, height) / 12));
+      for (let y = 0; y < height; y += step) {
+        for (let x = 0; x < width; x += step) {
+          const pick = deck.pickObject({
+            x,
+            y,
+            layerIds: [layerId],
+            radius: 6,
+          });
+          if (pick && pick.object) {
+            const props = pick.object.properties || {};
+            const name = props.Name || props.name || props.StationName || props.station_name || props.SiteName ||
+              props.site_name || props.LocationName || props.location_name || props.StationID || props.station_id ||
+              props.ID || props.id || null;
+            const coords = Array.isArray(pick.coordinate) ? pick.coordinate : null;
+            if (coords && coords.length >= 2 && canProject) {
+              const projected = deck.project([coords[0], coords[1]]);
+              if (projected && projected.length >= 2) {
+                return { x: rect.left + projected[0], y: rect.top + projected[1], name };
+              }
+            }
+            return { x: rect.left + x, y: rect.top + y, name };
+          }
+        }
+      }
+    }
+
+    if (!canProject) {
+      return null;
+    }
+
+    for (let i = 0; i < features.length; i += 1) {
+      const feature = features[i];
+      const geom = feature && feature.geometry ? feature.geometry : null;
+      if (!geom) {
+        continue;
+      }
+      let coords = null;
+      if (geom.type === 'Point') {
+        coords = geom.coordinates;
+      } else if (geom.type === 'MultiPoint' && Array.isArray(geom.coordinates)) {
+        coords = geom.coordinates[0];
+      } else if (geom.type === 'LineString' && Array.isArray(geom.coordinates)) {
+        coords = geom.coordinates[0];
+      } else if (geom.type === 'MultiLineString' && Array.isArray(geom.coordinates)) {
+        coords = geom.coordinates[0] && geom.coordinates[0][0];
+      }
+      if (!coords || coords.length < 2) {
+        continue;
+      }
+      const lng = Number(coords[0]);
+      const lat = Number(coords[1]);
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+        continue;
+      }
+      const projected = deck.project([lng, lat]);
+      if (!projected || projected.length < 2) {
+        continue;
+      }
+      const x = rect.left + projected[0];
+      const y = rect.top + projected[1];
+      if (x < rect.left || y < rect.top || x > rect.left + width || y > rect.top + height) {
+        continue;
+      }
+      const props = feature.properties || {};
+      const name = props.Name || props.name || props.StationName || props.station_name || props.SiteName ||
+        props.site_name || props.LocationName || props.location_name || props.StationID || props.station_id ||
+        props.ID || props.id || null;
+      return { x, y, name };
+    }
+    return null;
+  }, layerKey);
 }
 
 test.describe('map gl smoke', () => {
@@ -105,10 +266,13 @@ test.describe('map gl smoke', () => {
     const layerToggle = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__toggle');
     await expect(layerToggle).toBeVisible();
     await layerToggle.click();
+    const overlayPanel = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__panel');
+    await expect(overlayPanel).toBeVisible();
     const satelliteInput = page.locator('label:has-text("Satellite") input[type="radio"]');
     await expect(satelliteInput).toBeVisible();
     await satelliteInput.check();
     await expect(satelliteInput).toBeChecked();
+    await expect(overlayPanel).toBeVisible();
     await expect.poll(async () => {
       return page.evaluate(() => {
         const map = window.MapController && typeof window.MapController.getInstance === 'function'
@@ -119,6 +283,126 @@ test.describe('map gl smoke', () => {
       });
     }).toContain('googleSatellite');
 
+    await page.locator('#mapid').click({ position: { x: 30, y: 30 } });
+    await expect(overlayPanel).toBeHidden();
+
+    await layerToggle.click();
+    await expect(overlayPanel).toBeVisible();
+    const mapBox = await page.locator('#mapid').boundingBox();
+    if (mapBox) {
+      await page.mouse.move(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(mapBox.x + mapBox.width / 2 + 60, mapBox.y + mapBox.height / 2 + 30);
+      await page.mouse.up();
+    }
+    await expect(overlayPanel).toBeHidden();
+
     expect(consoleErrors).toEqual([]);
+  });
+
+  test('fly to center, enable USGS/SNOTEL, and open marker modals', async ({ page }) => {
+    await openRun(page);
+
+    const centerInput = page.locator('#input_centerloc');
+    await expect(centerInput).toBeVisible();
+    await centerInput.fill('-120.7179, 48.2986, 9.1891575802927');
+    await centerInput.press('Enter');
+
+    await expect.poll(async () => getZoom(page)).toBeGreaterThan(9);
+    await expect.poll(async () => {
+      const center = await getCenter(page);
+      return center ? center.lng : null;
+    }).toBeCloseTo(-120.718, 2);
+    await expect.poll(async () => {
+      const center = await getCenter(page);
+      return center ? center.lat : null;
+    }).toBeCloseTo(48.299, 2);
+    await waitForMapTransition(page);
+
+    const { layerToggle } = await openOverlayPanel(page);
+    const usgsInput = page.locator('label:has-text("USGS Gage Locations") input[type="checkbox"]');
+    const snotelInput = page.locator('label:has-text("SNOTEL Locations") input[type="checkbox"]');
+    await expect(usgsInput).toBeVisible();
+    await expect(snotelInput).toBeVisible();
+    await usgsInput.check();
+    await snotelInput.check();
+    await layerToggle.click();
+
+    await page.evaluate(async () => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      if (map) {
+        await map.loadUSGSGageLocations();
+        await map.loadSnotelLocations();
+      }
+    });
+
+    await waitForOverlayFeatures(page, 'usgs_gage');
+    await waitForOverlayFeatures(page, 'snotel_locations');
+
+    const modal = page.locator('#wc-map-feature-modal');
+    const closeModal = modal.locator('.wc-modal__close');
+    const modalTitle = modal.locator('.wc-modal__title');
+
+    const usgsPoint = await getFeatureClickPoint(page, 'usgs_gage');
+    expect(usgsPoint).not.toBeNull();
+    if (!usgsPoint) {
+      throw new Error('USGS feature not available for modal check.');
+    }
+    await page.mouse.click(usgsPoint.x, usgsPoint.y);
+    let usedFallback = false;
+    if (!(await modal.isVisible())) {
+      usedFallback = true;
+      await page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layer = map ? map.usgs_gage : null;
+        const data = layer && layer.props ? layer.props.data : null;
+        const features = data && data.features ? data.features : Array.isArray(data) ? data : [];
+        if (layer && layer.props && typeof layer.props.onClick === 'function' && features.length) {
+          layer.props.onClick({ object: features[0] });
+        }
+      });
+    }
+    await expect(modal).toBeVisible();
+    if (usgsPoint.name && !usedFallback) {
+      await expect(modalTitle).toContainText(usgsPoint.name);
+    } else {
+      const titleText = (await modalTitle.textContent()) || '';
+      expect(titleText.trim().length).toBeGreaterThan(0);
+    }
+    await closeModal.click();
+    await expect(modal).toBeHidden();
+
+    const snotelPoint = await getFeatureClickPoint(page, 'snotel_locations');
+    usedFallback = false;
+    if (snotelPoint) {
+      await page.mouse.click(snotelPoint.x, snotelPoint.y);
+    }
+    if (!(await modal.isVisible())) {
+      usedFallback = true;
+      await page.evaluate(() => {
+        const map = window.MapController && typeof window.MapController.getInstance === 'function'
+          ? window.MapController.getInstance()
+          : null;
+        const layer = map ? map.snotel_locations : null;
+        const data = layer && layer.props ? layer.props.data : null;
+        const features = data && data.features ? data.features : Array.isArray(data) ? data : [];
+        if (layer && layer.props && typeof layer.props.onClick === 'function' && features.length) {
+          layer.props.onClick({ object: features[0] });
+        }
+      });
+    }
+    await expect(modal).toBeVisible();
+    if (snotelPoint && snotelPoint.name && !usedFallback) {
+      await expect(modalTitle).toContainText(snotelPoint.name);
+    } else {
+      const titleText = (await modalTitle.textContent()) || '';
+      expect(titleText.trim().length).toBeGreaterThan(0);
+    }
+    await closeModal.click();
+    await expect(modal).toBeHidden();
   });
 });

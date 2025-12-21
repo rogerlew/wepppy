@@ -25,6 +25,15 @@ var MapController = (function () {
     ];
 
     var DEFAULT_VIEW = { lat: 44.0, lng: -116.0, zoom: 6 };
+    var FLY_TO_DURATION_MS = 4000;
+    var SENSOR_LAYER_MIN_ZOOM = 9;
+    var USGS_LAYER_NAME = "USGS Gage Locations";
+    var SNOTEL_LAYER_NAME = "SNOTEL Locations";
+    var NHD_LAYER_NAME = "NHD Flowlines";
+    var NHD_LAYER_MIN_ZOOM = 11;
+    var NHD_LAYER_HR_MIN_ZOOM = 14;
+    var NHD_SMALL_SCALE_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
+    var NHD_HR_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/query";
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -231,6 +240,62 @@ var MapController = (function () {
         return { lat: lat, lng: lng, zoom: zoom };
     }
 
+    function normalizeUrlPayload(input) {
+        if (!input) {
+            return null;
+        }
+        if (Array.isArray(input)) {
+            return input.length ? normalizeUrlPayload(input[0]) : null;
+        }
+        return String(input);
+    }
+
+    function isValidLatLng(lat, lng) {
+        return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    }
+
+    function buildNhdFlowlinesUrl(bbox, zoom) {
+        if (!bbox) {
+            return null;
+        }
+        var queryUrl = zoom >= NHD_LAYER_HR_MIN_ZOOM ? NHD_HR_QUERY_URL : NHD_SMALL_SCALE_QUERY_URL;
+        return queryUrl
+            + "?where=1%3D1"
+            + "&outFields=OBJECTID"
+            + "&geometry=" + encodeURIComponent(bbox)
+            + "&geometryType=esriGeometryEnvelope"
+            + "&inSR=4326&outSR=4326"
+            + "&spatialRel=esriSpatialRelIntersects"
+            + "&returnGeometry=true"
+            + "&resultRecordCount=2000"
+            + "&f=geojson";
+    }
+
+    function toOverlayId(name) {
+        var base = String(name || "overlay").toLowerCase();
+        var slug = base.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        return "map-gl-" + (slug || "overlay");
+    }
+
+    function hexToRgba(hex, alpha) {
+        if (!hex) {
+            return [0, 0, 0, Math.round((alpha === undefined ? 1 : alpha) * 255)];
+        }
+        var normalized = String(hex).trim().replace("#", "");
+        if (normalized.length === 3) {
+            normalized = normalized[0] + normalized[0] + normalized[1] + normalized[1] + normalized[2] + normalized[2];
+        }
+        var intVal = parseInt(normalized, 16);
+        if (!Number.isFinite(intVal)) {
+            return [0, 0, 0, Math.round((alpha === undefined ? 1 : alpha) * 255)];
+        }
+        var r = (intVal >> 16) & 255;
+        var g = (intVal >> 8) & 255;
+        var b = intVal & 255;
+        var a = Math.round((alpha === undefined ? 1 : alpha) * 255);
+        return [r, g, b, a];
+    }
+
     function normalizeCenter(center) {
         if (Array.isArray(center) && center.length >= 2) {
             var lat = Number(center[0]);
@@ -287,6 +352,7 @@ var MapController = (function () {
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
+        var http = helpers.http;
         var events = helpers.events;
         var deckApi = window.deck;
         var coordRound = (typeof window.coordRound === "function")
@@ -294,6 +360,12 @@ var MapController = (function () {
             : function (value) { return Math.round(value * 1000) / 1000; };
 
         ensureDeck();
+
+        function ensureGeoJsonLayer() {
+            if (!deckApi || typeof deckApi.GeoJsonLayer !== "function") {
+                throw new Error("Map GL controller requires deck.gl GeoJsonLayer (window.deck.GeoJsonLayer).");
+            }
+        }
 
         var state = {
             center: { lat: DEFAULT_VIEW.lat, lng: DEFAULT_VIEW.lng },
@@ -497,13 +569,27 @@ var MapController = (function () {
             if (!normalized) {
                 return;
             }
+            var viewState = normalized;
+            var transition = options && options.transition ? options.transition : null;
+            if (transition) {
+                viewState = Object.assign({}, normalized);
+                if (Number.isFinite(transition.duration)) {
+                    viewState.transitionDuration = transition.duration;
+                }
+                if (transition.interpolator) {
+                    viewState.transitionInterpolator = transition.interpolator;
+                }
+                if (transition.easing) {
+                    viewState.transitionEasing = transition.easing;
+                }
+            }
             updateStateFromViewState(normalized);
             if (deckgl && !(options && options.skipDeck)) {
                 var size = getCanvasSize();
                 if (!isApplyingViewState) {
                     isApplyingViewState = true;
                     deckgl.setProps({
-                        viewState: normalized,
+                        viewState: viewState,
                         width: size.width || undefined,
                         height: size.height || undefined
                     });
@@ -605,7 +691,18 @@ var MapController = (function () {
                 nextLayers.push(baseLayer);
             }
             if (layerRegistry) {
-                layerRegistry.forEach(function (layer) {
+                var overlayLayers = Array.from(layerRegistry);
+                overlayLayers.sort(function (left, right) {
+                    var leftName = overlayRegistry ? overlayRegistry.get(left) : null;
+                    var rightName = overlayRegistry ? overlayRegistry.get(right) : null;
+                    var leftOrder = overlayRenderIndex(leftName);
+                    var rightOrder = overlayRenderIndex(rightName);
+                    if (leftOrder !== rightOrder) {
+                        return leftOrder - rightOrder;
+                    }
+                    return 0;
+                });
+                overlayLayers.forEach(function (layer) {
                     nextLayers.push(layer);
                 });
             }
@@ -675,6 +772,10 @@ var MapController = (function () {
                 layerControl.panel.hidden = !expanded;
             }
 
+            function collapsePanel() {
+                setExpanded(false);
+            }
+
             toggle.addEventListener("click", function () {
                 var expanded = toggle.getAttribute("aria-expanded") === "true";
                 setExpanded(!expanded);
@@ -686,6 +787,11 @@ var MapController = (function () {
                 }
             });
 
+            if (mapCanvasElement) {
+                mapCanvasElement.addEventListener("pointerdown", collapsePanel);
+                mapCanvasElement.addEventListener("wheel", collapsePanel);
+            }
+
             layerControl = {
                 root: root,
                 toggle: toggle,
@@ -694,7 +800,8 @@ var MapController = (function () {
                 baseList: baseList,
                 overlaySection: overlaySection,
                 overlayList: overlayList,
-                overlayInputs: typeof Map === "function" ? new Map() : null
+                overlayInputs: typeof Map === "function" ? new Map() : null,
+                collapse: collapsePanel
             };
 
             return layerControl;
@@ -750,6 +857,38 @@ var MapController = (function () {
             });
         }
 
+    function overlaySortIndex(name) {
+        if (!name) {
+            return 99;
+        }
+        if (name.indexOf(USGS_LAYER_NAME) !== -1) {
+            return 0;
+        }
+        if (name.indexOf(SNOTEL_LAYER_NAME) !== -1) {
+            return 1;
+        }
+        if (name.indexOf("NHD") !== -1) {
+            return 2;
+        }
+        return 99;
+    }
+
+    function overlayRenderIndex(name) {
+        if (!name) {
+            return 99;
+        }
+        if (name.indexOf("NHD") !== -1) {
+            return 0;
+        }
+        if (name.indexOf(USGS_LAYER_NAME) !== -1) {
+            return 1;
+        }
+        if (name.indexOf(SNOTEL_LAYER_NAME) !== -1) {
+            return 2;
+        }
+        return 99;
+    }
+
         function renderOverlayLayerControl() {
             var control = ensureLayerControl();
             if (!control || !overlayNameRegistry) {
@@ -759,15 +898,27 @@ var MapController = (function () {
             if (control.overlayInputs && typeof control.overlayInputs.clear === "function") {
                 control.overlayInputs.clear();
             }
-            var entries = Array.from(overlayNameRegistry.entries());
+            var entries = Array.from(overlayNameRegistry.entries()).map(function (entry, index) {
+                return {
+                    entry: entry,
+                    index: index,
+                    order: overlaySortIndex(entry[0])
+                };
+            });
             if (!entries.length) {
                 control.overlaySection.hidden = true;
                 return;
             }
             control.overlaySection.hidden = false;
-            entries.forEach(function (entry, index) {
-                var name = entry[0];
-                var layer = entry[1];
+            entries.sort(function (a, b) {
+                if (a.order !== b.order) {
+                    return a.order - b.order;
+                }
+                return a.index - b.index;
+            });
+            entries.forEach(function (item, index) {
+                var name = item.entry[0];
+                var layer = item.entry[1];
                 var inputId = "wc-map-overlay-" + index;
                 var wrapper = document.createElement("label");
                 wrapper.className = "wc-map-layer-control__item";
@@ -912,7 +1063,23 @@ var MapController = (function () {
                 applyViewState(nextViewState, { final: true });
             },
             flyTo: function (center, zoom) {
-                map.setView(center, zoom);
+                var normalized = normalizeCenter(center);
+                if (!normalized) {
+                    return;
+                }
+                var targetZoom = Number.isFinite(zoom) ? zoom : state.zoom;
+                if (!deckApi || typeof deckApi.FlyToInterpolator !== "function") {
+                    map.setView([normalized.lat, normalized.lng], targetZoom);
+                    return;
+                }
+                var nextViewState = toViewState(normalized, targetZoom);
+                applyViewState(nextViewState, {
+                    final: true,
+                    transition: {
+                        duration: FLY_TO_DURATION_MS,
+                        interpolator: new deckApi.FlyToInterpolator()
+                    }
+                });
             },
             flyToBounds: function (bounds) {
                 if (!bounds) {
@@ -941,10 +1108,13 @@ var MapController = (function () {
                 updateMapStatus();
                 return null;
             },
-            addLayer: function (layer) {
+            addLayer: function (layer, options) {
                 if (layerRegistry && layer) {
                     layerRegistry.add(layer);
                     applyLayers();
+                }
+                if (!(options && options.skipRefresh)) {
+                    handleOverlayAdded(layer);
                 }
                 syncOverlayLayerControlSelection();
                 return layer;
@@ -980,8 +1150,66 @@ var MapController = (function () {
                 return isDrilldownSuppressed();
             },
             addGeoJsonOverlay: function () {
-                warnNotImplemented("addGeoJsonOverlay");
-                return null;
+                var options = arguments.length > 0 && arguments[0] ? arguments[0] : {};
+                var url = options.url || null;
+                if (!url) {
+                    console.warn("Map GL: addGeoJsonOverlay called without url");
+                    return map;
+                }
+                var layerName = options.layerName || "Overlay";
+                var controller = createRemoteGeoJsonLayer({
+                    layerName: layerName,
+                    url: url,
+                    layerProps: options.layerProps || {},
+                    mapKey: options.mapKey || null
+                });
+                attachLayerRefresh(layerName, controller);
+                map.registerOverlay(controller.layer, layerName);
+                map.addLayer(controller.layer);
+                controller.refresh(url).catch(function (error) {
+                    console.warn("Map GL: failed to load overlay", layerName, error);
+                });
+                return map;
+            },
+            loadUSGSGageLocations: function () {
+                if (!requireMinZoom(SENSOR_LAYER_MIN_ZOOM, USGS_LAYER_NAME)) {
+                    return null;
+                }
+                if (!map.hasLayer(map.usgs_gage) || typeof map.usgs_gage.refresh !== "function") {
+                    return null;
+                }
+                var bbox = map.getBounds().toBBoxString();
+                return map.usgs_gage.refresh("/resources/usgs/gage_locations/?&bbox=" + bbox).catch(function (error) {
+                    console.warn("Map GL: failed to refresh USGS gage locations", error);
+                });
+            },
+            loadSnotelLocations: function () {
+                if (!requireMinZoom(SENSOR_LAYER_MIN_ZOOM, SNOTEL_LAYER_NAME)) {
+                    return null;
+                }
+                if (!map.hasLayer(map.snotel_locations) || typeof map.snotel_locations.refresh !== "function") {
+                    return null;
+                }
+                var bbox = map.getBounds().toBBoxString();
+                return map.snotel_locations.refresh("/resources/snotel/snotel_locations/?&bbox=" + bbox).catch(function (error) {
+                    console.warn("Map GL: failed to refresh SNOTEL locations", error);
+                });
+            },
+            loadNhdFlowlines: function () {
+                if (!requireMinZoom(NHD_LAYER_MIN_ZOOM, NHD_LAYER_NAME)) {
+                    return null;
+                }
+                if (!map.hasLayer(map.nhd_flowlines) || typeof map.nhd_flowlines.refresh !== "function") {
+                    return null;
+                }
+                var bbox = map.getBounds().toBBoxString();
+                var url = buildNhdFlowlinesUrl(bbox, map.getZoom());
+                if (!url) {
+                    return null;
+                }
+                return map.nhd_flowlines.refresh(url).catch(function (error) {
+                    console.warn("Map GL: failed to refresh NHD flowlines", error);
+                });
             },
             subQuery: function () {
                 warnNotImplemented("subQuery");
@@ -1002,7 +1230,16 @@ var MapController = (function () {
                 }
                 var parsed = parseLocationInput(inputValue);
                 if (!parsed) {
-                    warnNotImplemented("goToEnteredLocation: unable to parse input");
+                    if (inputValue && String(inputValue).trim()) {
+                        console.warn("Map GL: invalid location input. Expected 'lon, lat[, zoom]'.", inputValue);
+                    }
+                    return;
+                }
+                if (!isValidLatLng(parsed.lat, parsed.lng)) {
+                    console.warn("Map GL: location out of range. Longitude must be between -180 and 180; latitude between -90 and 90.", {
+                        lat: parsed.lat,
+                        lng: parsed.lng
+                    });
                     return;
                 }
                 if (parsed.zoom === null) {
@@ -1040,11 +1277,572 @@ var MapController = (function () {
             }
         };
 
+        var EMPTY_GEOJSON = { type: "FeatureCollection", features: [] };
+
+        function buildGeoJsonLayer(layerId, data, layerProps) {
+            ensureGeoJsonLayer();
+            var props = Object.assign({}, layerProps || {});
+            props.id = layerId;
+            props.data = data || EMPTY_GEOJSON;
+            return new deckApi.GeoJsonLayer(props);
+        }
+
+        function createRemoteGeoJsonLayer(options) {
+            options = options || {};
+            var layerName = options.layerName || "Overlay";
+            var layerId = options.layerId || toOverlayId(layerName);
+            var layerProps = options.layerProps || {};
+            var activeAbort = null;
+            var requestToken = 0;
+            var currentLayer = buildGeoJsonLayer(layerId, EMPTY_GEOJSON, layerProps);
+            var controller = {
+                layer: currentLayer,
+                refresh: refresh
+            };
+
+            function replaceLayer(nextLayer) {
+                var label = overlayRegistry && overlayRegistry.get(currentLayer)
+                    ? overlayRegistry.get(currentLayer)
+                    : layerName;
+                var wasVisible = map.hasLayer(currentLayer);
+                if (overlayRegistry) {
+                    overlayRegistry.delete(currentLayer);
+                }
+                if (overlayNameRegistry && label) {
+                    overlayNameRegistry.delete(label);
+                }
+                if (map.overlayMaps && label) {
+                    delete map.overlayMaps[label];
+                }
+                if (wasVisible) {
+                    map.removeLayer(currentLayer);
+                }
+                currentLayer = nextLayer;
+                controller.layer = currentLayer;
+                currentLayer.refresh = controller.refresh;
+                if (options.mapKey) {
+                    map[options.mapKey] = currentLayer;
+                }
+                if (label) {
+                    if (overlayRegistry) {
+                        overlayRegistry.set(currentLayer, label);
+                    }
+                    if (overlayNameRegistry) {
+                        overlayNameRegistry.set(label, currentLayer);
+                    }
+                    if (map.overlayMaps) {
+                        map.overlayMaps[label] = currentLayer;
+                    }
+                }
+                if (wasVisible) {
+                    map.addLayer(currentLayer, { skipRefresh: true });
+                }
+                renderOverlayLayerControl();
+            }
+
+            function refresh(urlInput) {
+                var url = normalizeUrlPayload(urlInput || options.url);
+                if (!url) {
+                    return Promise.resolve();
+                }
+                if (activeAbort && typeof activeAbort.abort === "function") {
+                    activeAbort.abort();
+                }
+                var abortController = typeof AbortController === "function" ? new AbortController() : null;
+                activeAbort = abortController;
+                requestToken += 1;
+                var token = requestToken;
+
+                return http.getJson(url, {
+                    signal: abortController ? abortController.signal : undefined
+                }).then(function (data) {
+                    if (token !== requestToken) {
+                        return data;
+                    }
+                    activeAbort = null;
+                    var nextLayer = buildGeoJsonLayer(layerId, data || EMPTY_GEOJSON, layerProps);
+                    replaceLayer(nextLayer);
+                    return data;
+                }).catch(function (error) {
+                    activeAbort = null;
+                    if (http.isHttpError && http.isHttpError(error) && error.cause && error.cause.name === "AbortError") {
+                        return;
+                    }
+                    throw error;
+                });
+            }
+
+            currentLayer.refresh = refresh;
+
+            return controller;
+        }
+
+        function attachLayerRefresh(layerName, controller) {
+            var baseRefresh = controller.refresh;
+            function wrapped(url) {
+                return baseRefresh(url).then(function (data) {
+                    var layer = controller.layer;
+                    emit("map:layer:refreshed", {
+                        name: layerName,
+                        layer: layer,
+                        url: normalizeUrlPayload(url)
+                    });
+                    return data;
+                }).catch(function (error) {
+                    var layer = controller.layer;
+                    emit("map:layer:error", {
+                        name: layerName,
+                        layer: layer,
+                        url: normalizeUrlPayload(url),
+                        error: error
+                    });
+                    throw error;
+                });
+            }
+            controller.refresh = wrapped;
+            if (controller.layer) {
+                controller.layer.refresh = wrapped;
+            }
+            return controller;
+        }
+
+        function relabelOverlay(layer, newName) {
+            if (!layer || !overlayRegistry || !overlayNameRegistry) {
+                return;
+            }
+            var currentName = overlayRegistry.get(layer);
+            if (currentName === newName) {
+                return;
+            }
+            if (currentName) {
+                overlayRegistry.delete(layer);
+                overlayNameRegistry.delete(currentName);
+                if (map.overlayMaps) {
+                    delete map.overlayMaps[currentName];
+                }
+            }
+            overlayRegistry.set(layer, newName);
+            overlayNameRegistry.set(newName, layer);
+            if (map.overlayMaps) {
+                map.overlayMaps[newName] = layer;
+            }
+            renderOverlayLayerControl();
+        }
+
+        function updateSnotelOverlayLabel() {
+            if (!map.snotel_locations) {
+                return;
+            }
+            var zoom = map.getZoom();
+            var label = zoom >= SENSOR_LAYER_MIN_ZOOM
+                ? SNOTEL_LAYER_NAME
+                : SNOTEL_LAYER_NAME + " (zoom >= " + SENSOR_LAYER_MIN_ZOOM + ")";
+            relabelOverlay(map.snotel_locations, label);
+        }
+
+        function resolveNhdLabel(zoom) {
+            return zoom >= NHD_LAYER_HR_MIN_ZOOM ? "NHDPlus HR Flowlines" : NHD_LAYER_NAME;
+        }
+
+        function updateNhdOverlayLabel() {
+            if (!map.nhd_flowlines) {
+                return;
+            }
+            var zoom = map.getZoom();
+            var baseLabel = resolveNhdLabel(zoom);
+            var label = zoom >= NHD_LAYER_MIN_ZOOM
+                ? baseLabel
+                : baseLabel + " (zoom >= " + NHD_LAYER_MIN_ZOOM + ")";
+            relabelOverlay(map.nhd_flowlines, label);
+        }
+
+        function updateUSGSOverlayLabel() {
+            if (!map.usgs_gage) {
+                return;
+            }
+            var zoom = map.getZoom();
+            var label = zoom >= SENSOR_LAYER_MIN_ZOOM
+                ? USGS_LAYER_NAME
+                : USGS_LAYER_NAME + " (zoom >= " + SENSOR_LAYER_MIN_ZOOM + ")";
+            relabelOverlay(map.usgs_gage, label);
+        }
+
+        function requireMinZoom(minZoom, label) {
+            var zoom = map.getZoom();
+            if (zoom < minZoom) {
+                console.info("Map GL: " + label + " requires zoom " + minZoom + "+ (current " + zoom + ").");
+                return false;
+            }
+            return true;
+        }
+
+        function handleViewportChange() {
+            map.onMapChange();
+            updateSnotelOverlayLabel();
+            updateUSGSOverlayLabel();
+            updateNhdOverlayLabel();
+            scheduleOverlayRefresh();
+            if (layerControl && typeof layerControl.collapse === "function") {
+                layerControl.collapse();
+            }
+        }
+
+        function handleViewportSettled() {
+            if (overlayRefreshTimer) {
+                clearTimeout(overlayRefreshTimer);
+                overlayRefreshTimer = null;
+            }
+            map.loadUSGSGageLocations();
+            map.loadSnotelLocations();
+            map.loadNhdFlowlines();
+        }
+
+        function handleOverlayAdded(layer) {
+            if (layer === map.usgs_gage) {
+                map.loadUSGSGageLocations();
+            } else if (layer === map.snotel_locations) {
+                map.loadSnotelLocations();
+            } else if (layer === map.nhd_flowlines) {
+                map.loadNhdFlowlines();
+            }
+        }
+
+        function createHoverTooltip() {
+            if (typeof document === "undefined") {
+                return null;
+            }
+            var tooltip = document.createElement("div");
+            tooltip.className = "wc-map-hover-info";
+            tooltip.style.position = "fixed";
+            tooltip.style.pointerEvents = "none";
+            tooltip.style.zIndex = "1000";
+            tooltip.style.padding = "6px 8px";
+            tooltip.style.borderRadius = "6px";
+            tooltip.style.background = "rgba(10, 10, 10, 0.85)";
+            tooltip.style.color = "#f5f5f5";
+            tooltip.style.fontSize = "14px";
+            tooltip.style.lineHeight = "1.4";
+            tooltip.style.maxWidth = "280px";
+            tooltip.style.boxShadow = "0 8px 18px rgba(0, 0, 0, 0.25)";
+            tooltip.style.display = "none";
+            tooltip.style.transform = "translate(-50%, -120%)";
+            document.body.appendChild(tooltip);
+
+            return {
+                show: function (text, x, y) {
+                    tooltip.textContent = text;
+                    tooltip.style.left = x + "px";
+                    tooltip.style.top = y + "px";
+                    tooltip.style.display = "block";
+                },
+                hide: function () {
+                    tooltip.style.display = "none";
+                }
+            };
+        }
+
+        var hoverTooltip = createHoverTooltip();
+
+        function sanitizeInfoHtml(html) {
+            if (!html || typeof document === "undefined") {
+                return "";
+            }
+            var container = document.createElement("div");
+            container.innerHTML = String(html);
+
+            var blocked = container.querySelectorAll("script, style, iframe, object, embed, link");
+            Array.prototype.forEach.call(blocked, function (node) {
+                node.remove();
+            });
+
+            var nodes = container.querySelectorAll("*");
+            Array.prototype.forEach.call(nodes, function (node) {
+                if (!node.attributes) {
+                    return;
+                }
+                Array.prototype.slice.call(node.attributes).forEach(function (attr) {
+                    var name = attr.name.toLowerCase();
+                    var value = String(attr.value || "").toLowerCase();
+                    if (name.indexOf("on") === 0) {
+                        node.removeAttribute(attr.name);
+                        return;
+                    }
+                    if ((name === "href" || name === "src") && value.indexOf("javascript:") === 0) {
+                        node.removeAttribute(attr.name);
+                    }
+                });
+            });
+
+            return container.innerHTML;
+        }
+
+        function extractFeatureDescription(feature) {
+            if (!feature || !feature.properties) {
+                return null;
+            }
+            if (feature.properties.Description) {
+                return String(feature.properties.Description);
+            }
+            if (feature.properties.description) {
+                return String(feature.properties.description);
+            }
+            return null;
+        }
+
+        function extractFeatureName(feature) {
+            if (!feature || !feature.properties) {
+                return null;
+            }
+            var props = feature.properties;
+            var candidates = [
+                "Name",
+                "name",
+                "StationName",
+                "station_name",
+                "SiteName",
+                "site_name",
+                "LocationName",
+                "location_name",
+                "StationID",
+                "station_id",
+                "ID",
+                "id"
+            ];
+            for (var i = 0; i < candidates.length; i += 1) {
+                var value = props[candidates[i]];
+                if (value !== undefined && value !== null) {
+                    var text = String(value).trim();
+                    if (text) {
+                        return text;
+                    }
+                }
+            }
+            var description = extractFeatureDescription(feature);
+            if (description) {
+                var container = document.createElement("div");
+                container.innerHTML = description;
+                var content = container.textContent || "";
+                var firstLine = content.split(/\n+/)[0] || "";
+                var trimmed = firstLine.trim();
+                if (trimmed) {
+                    return trimmed;
+                }
+            }
+            return null;
+        }
+
+        function updateHoverTooltip(info) {
+            if (!hoverTooltip) {
+                return;
+            }
+            if (!info || !info.object) {
+                hoverTooltip.hide();
+                return;
+            }
+            var name = extractFeatureName(info.object);
+            if (!name) {
+                hoverTooltip.hide();
+                return;
+            }
+            var rect = mapCanvasElement ? mapCanvasElement.getBoundingClientRect() : { left: 0, top: 0 };
+            var x = rect.left + (info.x || 0);
+            var y = rect.top + (info.y || 0);
+            hoverTooltip.show(name, x, y);
+        }
+
+        function createFeatureModal() {
+            if (typeof document === "undefined") {
+                return null;
+            }
+            var modal = document.createElement("div");
+            modal.className = "wc-modal";
+            modal.id = "wc-map-feature-modal";
+            modal.setAttribute("data-modal", "");
+            modal.setAttribute("hidden", "hidden");
+
+            var overlay = document.createElement("div");
+            overlay.className = "wc-modal__overlay";
+            overlay.setAttribute("data-modal-dismiss", "");
+
+            var dialog = document.createElement("div");
+            dialog.className = "wc-modal__dialog";
+            dialog.setAttribute("role", "dialog");
+            dialog.setAttribute("aria-modal", "true");
+
+            var header = document.createElement("div");
+            header.className = "wc-modal__header";
+
+            var title = document.createElement("h2");
+            title.className = "wc-modal__title";
+            title.textContent = "";
+
+            var close = document.createElement("button");
+            close.type = "button";
+            close.className = "wc-modal__close";
+            close.setAttribute("aria-label", "Close");
+            close.setAttribute("data-modal-dismiss", "");
+            close.textContent = "×";
+
+            var body = document.createElement("div");
+            body.className = "wc-modal__body";
+
+            header.appendChild(title);
+            header.appendChild(close);
+            dialog.appendChild(header);
+            dialog.appendChild(body);
+            modal.appendChild(overlay);
+            modal.appendChild(dialog);
+            document.body.appendChild(modal);
+
+            function openModal() {
+                if (window.ModalManager && typeof window.ModalManager.open === "function") {
+                    window.ModalManager.open(modal);
+                    return;
+                }
+                modal.removeAttribute("hidden");
+                modal.setAttribute("data-modal-open", "true");
+                modal.classList.add("is-visible");
+                document.body.classList.add("wc-modal-open");
+            }
+
+            function closeModal() {
+                if (window.ModalManager && typeof window.ModalManager.close === "function") {
+                    window.ModalManager.close(modal);
+                    return;
+                }
+                modal.classList.remove("is-visible");
+                modal.removeAttribute("data-modal-open");
+                modal.setAttribute("hidden", "hidden");
+                document.body.classList.remove("wc-modal-open");
+            }
+
+            overlay.addEventListener("click", function () {
+                closeModal();
+            });
+            close.addEventListener("click", function () {
+                closeModal();
+            });
+
+            return {
+                show: function (name, html) {
+                    title.textContent = name || "Location";
+                    if (html) {
+                        body.innerHTML = sanitizeInfoHtml(html);
+                    } else {
+                        body.textContent = "No additional details available.";
+                    }
+                    openModal();
+                },
+                hide: function () {
+                    closeModal();
+                }
+            };
+        }
+
+        var featureModal = createFeatureModal();
+
+        function openFeatureModal(feature) {
+            if (!featureModal) {
+                return;
+            }
+            var name = extractFeatureName(feature) || "Location";
+            var description = extractFeatureDescription(feature);
+            featureModal.show(name, description);
+        }
+
+        var overlayRefreshTimer = null;
+        function scheduleOverlayRefresh() {
+            if (overlayRefreshTimer) {
+                clearTimeout(overlayRefreshTimer);
+            }
+            overlayRefreshTimer = setTimeout(function () {
+                overlayRefreshTimer = null;
+                handleViewportSettled();
+            }, 200);
+        }
+
         map.baseMaps = {
             Terrain: basemapDefs.googleTerrain,
             Satellite: basemapDefs.googleSatellite
         };
         map.overlayMaps = {};
+
+        function createPointLayerProps(strokeHex) {
+            var fillColor = hexToRgba(strokeHex, 0.4);
+            var strokeColor = hexToRgba(strokeHex, 1);
+            return {
+                pickable: true,
+                stroked: true,
+                filled: true,
+                pointType: "circle",
+                pointRadiusUnits: "pixels",
+                pointRadiusMinPixels: 2,
+                pointRadiusMaxPixels: 10,
+                getPointRadius: function () { return 8; },
+                lineWidthUnits: "pixels",
+                lineWidthMinPixels: 1,
+                getFillColor: function () { return fillColor; },
+                getLineColor: function () { return strokeColor; },
+                getLineWidth: function () { return 1.5; },
+                onHover: updateHoverTooltip,
+                onClick: function (info) {
+                    if (info && info.object) {
+                        openFeatureModal(info.object);
+                    }
+                }
+            };
+        }
+
+        var usgsLayerController = createRemoteGeoJsonLayer({
+            layerName: USGS_LAYER_NAME,
+            layerProps: createPointLayerProps("#ff7800"),
+            mapKey: "usgs_gage"
+        });
+        var snotelLayerController = createRemoteGeoJsonLayer({
+            layerName: SNOTEL_LAYER_NAME,
+            layerProps: createPointLayerProps("#d6336c"),
+            mapKey: "snotel_locations"
+        });
+        var nhdLayerController = createRemoteGeoJsonLayer({
+            layerName: NHD_LAYER_NAME,
+            layerProps: {
+                pickable: false,
+                stroked: true,
+                filled: false,
+                lineWidthUnits: "pixels",
+                lineWidthMinPixels: 1,
+                getLineColor: function () { return hexToRgba("#7b2cbf", 0.7); },
+                getLineWidth: function () { return 1.5; }
+            },
+            mapKey: "nhd_flowlines"
+        });
+
+        attachLayerRefresh(USGS_LAYER_NAME, usgsLayerController);
+        attachLayerRefresh(SNOTEL_LAYER_NAME, snotelLayerController);
+        attachLayerRefresh(NHD_LAYER_NAME, nhdLayerController);
+
+        map.usgs_gage = usgsLayerController.layer;
+        map.snotel_locations = snotelLayerController.layer;
+        map.nhd_flowlines = nhdLayerController.layer;
+
+        map.overlayMaps[USGS_LAYER_NAME] = map.usgs_gage;
+        map.overlayMaps[SNOTEL_LAYER_NAME] = map.snotel_locations;
+        map.overlayMaps[NHD_LAYER_NAME] = map.nhd_flowlines;
+
+        map.registerOverlay(map.usgs_gage, USGS_LAYER_NAME);
+        map.registerOverlay(map.snotel_locations, SNOTEL_LAYER_NAME);
+        map.registerOverlay(map.nhd_flowlines, NHD_LAYER_NAME);
+
+        map.addLayer(map.nhd_flowlines);
+        updateUSGSOverlayLabel();
+        updateSnotelOverlayLabel();
+        updateNhdOverlayLabel();
+
+        map.on("move", handleViewportChange);
+        map.on("zoom", handleViewportChange);
+        map.on("moveend", handleViewportSettled);
+        map.on("zoomend", handleViewportSettled);
+
         map.setBaseLayer = function (key) {
             var def = resolveBasemap(key);
             baseLayerKey = def.key;
