@@ -178,6 +178,13 @@ var Soil = (function () {
             spinner: spinnerElement
         });
 
+        function resetCompletionSeen() {
+            soil._completion_seen = false;
+        }
+
+        soil.poll_completion_event = "SOILS_BUILD_TASK_COMPLETED";
+        resetCompletionSeen();
+
         var modePanels = [
             dom.qs("#soil_mode0_controls"),
             dom.qs("#soil_mode1_controls"),
@@ -188,7 +195,12 @@ var Soil = (function () {
 
         var baseTriggerEvent = soil.triggerEvent.bind(soil);
         soil.triggerEvent = function (eventName, payload) {
-            if (eventName === "SOILS_BUILD_TASK_COMPLETED") {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "SOILS_BUILD_TASK_COMPLETED") {
+                if (soil._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                soil._completion_seen = true;
                 soil.disconnect_status_stream(soil);
                 soil.report();
                 try {
@@ -198,7 +210,7 @@ var Soil = (function () {
                 }
             }
 
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         soil.hideStacktrace = function () {
@@ -239,6 +251,7 @@ var Soil = (function () {
         soil.build = function () {
             var taskMsg = "Building soil";
             resetStatus(taskMsg);
+            resetCompletionSeen();
 
             soil.connect_status_stream(soil);
 
@@ -249,6 +262,7 @@ var Soil = (function () {
                     var response = result && result.body ? result.body : null;
                     if (response && response.Success === true) {
                         soil.append_status_message(soil, "build_soils_rq job submitted: " + response.job_id);
+                        soil.poll_completion_event = "SOILS_BUILD_TASK_COMPLETED";
                         soil.set_rq_job_id(soil, response.job_id);
                     } else if (response) {
                         soil.pushResponseStacktrace(soil, response);

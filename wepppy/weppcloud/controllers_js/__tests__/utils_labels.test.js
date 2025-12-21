@@ -20,7 +20,7 @@ describe("applyLabelHtml", () => {
         const applyLabelHtml = global.applyLabelHtml;
         const label = { html: "nope", innerHTML: "" };
         applyLabelHtml(label, "<b>value</b>");
-        expect(label.innerHTML).toEqual("<b>value</b>");
+        expect(label.innerHTML).toBe("<b>value</b>");
     });
 
     test("handles exceptions and writes textContent", async () => {
@@ -31,6 +31,6 @@ describe("applyLabelHtml", () => {
             textContent: ""
         };
         applyLabelHtml(label, "<b>value</b>");
-        expect(label.textContent).toEqual("<b>value</b>");
+        expect(label.textContent).toBe("<b>value</b>");
     });
 });

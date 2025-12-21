@@ -134,8 +134,9 @@ describe("Landuse controller", () => {
             triggerEvent: jest.fn(),
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
+        const colorMapMock = { enableColorMap: jest.fn() };
         global.SubcatchmentDelineation = {
-            getInstance: jest.fn(() => ({ enableColorMap: jest.fn() })),
+            getInstance: jest.fn(() => colorMapMock),
         };
         global.url_for_run = jest.fn((path) => path);
 
@@ -160,6 +161,11 @@ describe("Landuse controller", () => {
     });
 
     test("build submits form data and records job id", async () => {
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
         landuse.build();
         await flushPromises();
 
@@ -170,6 +176,7 @@ describe("Landuse controller", () => {
         expect(requestOptions.body).toBeInstanceOf(FormData);
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-1");
+        expect(pollCompletionValues).toEqual(["LANDUSE_BUILD_TASK_COMPLETED"]);
         expect(baseInstance.append_status_message).toHaveBeenCalledWith(
             expect.any(Object),
             expect.stringContaining("build_landuse job submitted")
@@ -251,6 +258,18 @@ describe("Landuse controller", () => {
 
         expect(started).toHaveBeenCalled();
         expect(completed).toHaveBeenCalled();
+    });
+
+    test("completion trigger is idempotent", () => {
+        const enableColorMap = global.SubcatchmentDelineation.getInstance().enableColorMap;
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+
+        landuse.triggerEvent("LANDUSE_BUILD_TASK_COMPLETED");
+        landuse.triggerEvent("LANDUSE_BUILD_TASK_COMPLETED");
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(enableColorMap).toHaveBeenCalledTimes(1);
+        expect(landuse.report).toHaveBeenCalledTimes(1);
     });
 
     test("report emits event and updates unitizer", async () => {

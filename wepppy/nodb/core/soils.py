@@ -706,6 +706,9 @@ class Soils(NoDbBase):
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag})')
         self.logger.info(f' SoilsMode: {self._mode}')
+        with self.locked():
+            self.domsoil_d = None
+            self.ssurgo_domsoil_d = None
 
         if self._mode == SoilsMode.SpatialAPI:
             self._build_spatial_api()

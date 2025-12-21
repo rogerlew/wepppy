@@ -181,9 +181,6 @@ describe("Fork console smoke", () => {
         fetchMock.mockClear();
         statusStreamInstance.append.mockClear();
         global.StatusStream.attach.mockClear();
-
-        const undisturbifyCheckbox = document.getElementById("undisturbify_checkbox");
-        expect(undisturbifyCheckbox.checked).toBe(false);
     });
 
     afterEach(() => {
@@ -199,6 +196,9 @@ describe("Fork console smoke", () => {
     });
 
     test("submitting fork form posts the fork job", async () => {
+        const undisturbifyCheckbox = document.getElementById("undisturbify_checkbox");
+        expect(undisturbifyCheckbox.checked).toBe(false);
+
         const form = document.getElementById("fork_form");
 
         form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));

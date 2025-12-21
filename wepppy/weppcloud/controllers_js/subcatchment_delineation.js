@@ -419,8 +419,8 @@ var SubcatchmentDelineation = (function () {
             var fallback = fallbackText !== undefined
                 ? fallbackText
                 : (isFiniteNumber(value) ? (unit ? value + " " + unit : String(value)) : "");
-            var applyHtml = typeof applyLabelHtml === "function"
-                ? applyLabelHtml
+            var applyHtml = typeof window !== "undefined" && typeof window.applyLabelHtml === "function"
+                ? window.applyLabelHtml
                 : function (label, html) {
                     if (label && "innerHTML" in label) {
                         label.innerHTML = html;

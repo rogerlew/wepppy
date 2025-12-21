@@ -312,8 +312,8 @@ describe("Subcatchment Delineation controller", () => {
 
         const runoffMin = document.getElementById("wepp_sub_cmap_canvas_runoff_min");
         const runoffMax = document.getElementById("wepp_sub_cmap_canvas_runoff_max");
-        expect(runoffMin.textContent).not.toEqual("");
-        expect(runoffMax.textContent).not.toEqual("");
+        expect(runoffMin.textContent).not.toBe("");
+        expect(runoffMax.textContent).not.toBe("");
 
         const runoffRange = document.getElementById("wepp_sub_cmap_range_runoff");
         runoffRange.value = "80";
@@ -326,7 +326,7 @@ describe("Subcatchment Delineation controller", () => {
 
         const lossMin = document.getElementById("wepp_sub_cmap_canvas_loss_min");
         const lossMax = document.getElementById("wepp_sub_cmap_canvas_loss_max");
-        expect(lossMin.textContent).not.toEqual("");
-        expect(lossMax.textContent).not.toEqual("");
+        expect(lossMin.textContent).not.toBe("");
+        expect(lossMax.textContent).not.toBe("");
     });
 });

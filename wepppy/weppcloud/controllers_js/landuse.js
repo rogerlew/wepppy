@@ -205,6 +205,13 @@ var Landuse = (function () {
             spinner: spinnerElement
         });
 
+        function resetCompletionSeen() {
+            landuse._completion_seen = false;
+        }
+
+        landuse.poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED";
+        resetCompletionSeen();
+
         var modePanels = [
             dom.qs("#landuse_mode0_controls"),
             dom.qs("#landuse_mode1_controls"),
@@ -217,6 +224,10 @@ var Landuse = (function () {
         landuse.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "LANDUSE_BUILD_TASK_COMPLETED") {
+                if (landuse._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                landuse._completion_seen = true;
                 landuse.disconnect_status_stream(landuse);
                 landuse.report();
                 try {
@@ -229,7 +240,7 @@ var Landuse = (function () {
                 }
             }
 
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         landuse.hideStacktrace = function () {
@@ -347,6 +358,7 @@ var Landuse = (function () {
         landuse.build = function () {
             var taskMsg = "Building landuse";
             resetStatus(taskMsg);
+            resetCompletionSeen();
 
             if (landuseEvents && typeof landuseEvents.emit === "function") {
                 landuseEvents.emit("landuse:build:started", {
@@ -366,6 +378,7 @@ var Landuse = (function () {
                 var response = result && result.body ? result.body : null;
                 if (response && response.Success === true) {
                     landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);
+                    landuse.poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED";
                     landuse.set_rq_job_id(landuse, response.job_id);
                 } else if (response) {
                     landuse.pushResponseStacktrace(landuse, response);

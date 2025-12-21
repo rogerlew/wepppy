@@ -192,6 +192,6 @@ describe("Omni controller", () => {
         );
 
         const remaining = document.querySelectorAll("[data-omni-scenario-item='true']");
-        expect(remaining.length).toBe(0);
+        expect(remaining).toHaveLength(0);
     });
 });

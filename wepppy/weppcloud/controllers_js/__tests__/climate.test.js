@@ -25,6 +25,7 @@ describe("Climate controller", () => {
                         {
                             "catalog_id": "dataset_a",
                             "label": "Dataset A",
+                            "group": "default",
                             "climate_mode": 5,
                             "help_text": "Dataset A help",
                             "inputs": ["stochastic_years", "spatial_mode"],
@@ -35,6 +36,7 @@ describe("Climate controller", () => {
                         {
                             "catalog_id": "dataset_b",
                             "label": "Dataset B",
+                            "group": "default",
                             "climate_mode": 3,
                             "description": "Dataset B description",
                             "inputs": ["stochastic_years"],
@@ -58,7 +60,7 @@ describe("Climate controller", () => {
                     </label>
                 </div>
 
-                <div id="climate_dataset_message"></div>
+                <div id="climate_dataset_message" data-climate-group-message="default"></div>
 
                 <div id="climate_userdefined" data-climate-section="upload"></div>
                 <div id="climate_cligen" data-climate-section="cligen"></div>

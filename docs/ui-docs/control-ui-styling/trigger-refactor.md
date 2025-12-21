@@ -204,10 +204,9 @@ controller.triggerEvent = function (eventName, payload) {
 
 ## Run Controls Update Checklist (do these before fork/archive)
 - [x] Subcatchment delineation (`wepppy/weppcloud/controllers_js/subcatchment_delineation.js`): per-event completion guards; `poll_completion_event = WATERSHED_ABSTRACTION_TASK_COMPLETED`; keep StatusStream for intermediate `BUILD_SUBCATCHMENTS_TASK_COMPLETED`; invalidate `subwta` on rebuild.
-- [ ] Rangeland cover (`wepppy/weppcloud/controllers_js/rangeland_cover.js`): add `_completion_seen` guard; set `poll_completion_event = "RANGELAND_COVER_BUILD_TASK_COMPLETED"`; ensure report loads once.
 - [x] Rangeland cover (`wepppy/weppcloud/controllers_js/rangeland_cover.js`): `_completion_seen` guard; `poll_completion_event = "RANGELAND_COVER_BUILD_TASK_COMPLETED"`; report idempotent; invalidate covers on rebuild.
-- [ ] Landuse (`wepppy/weppcloud/controllers_js/landuse.js`): add `_completion_seen` guard; set `poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED"`; ensure report loads once.
-- [ ] Soils (`wepppy/weppcloud/controllers_js/soil.js`): add `_completion_seen` guard; set `poll_completion_event = "SOILS_BUILD_TASK_COMPLETED"`; ensure report loads once.
+- [x] Landuse (`wepppy/weppcloud/controllers_js/landuse.js`): `_completion_seen` guard; `poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED"`; report idempotent.
+- [x] Soils (`wepppy/weppcloud/controllers_js/soil.js`): `_completion_seen` guard; `poll_completion_event = "SOILS_BUILD_TASK_COMPLETED"`; report idempotent.
 - [ ] Climate (`wepppy/weppcloud/controllers_js/climate.js`): add report idempotency guard; set `poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED"` only for build job; keep StatusStream triggers for station/spatial tasks.
 - [ ] RAP time series (`wepppy/weppcloud/controllers_js/rap_ts.js`): remove duplicate `onTrigger` re-calling `triggerEvent`; add `_completion_seen` guard; set `poll_completion_event = "RAP_TS_TASK_COMPLETED"`.
 - [ ] Treatments (`wepppy/weppcloud/controllers_js/treatments.js`): add `_completion_seen` guard (or per-event); set `poll_completion_event` to the final completion event used for build jobs.

@@ -11,6 +11,7 @@ describe("Soil controller", () => {
     let baseInstance;
     let statusStreamMock;
     let soil;
+    let colorMapMock;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -68,8 +69,9 @@ describe("Soil controller", () => {
 
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
+        colorMapMock = { enableColorMap: jest.fn() };
         global.SubcatchmentDelineation = {
-            getInstance: jest.fn(() => ({ enableColorMap: jest.fn() })),
+            getInstance: jest.fn(() => colorMapMock),
         };
 
         global.url_for_run = jest.fn((path) => path);
@@ -95,6 +97,11 @@ describe("Soil controller", () => {
     });
 
     test("build posts serialized form data and records job id", async () => {
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
         document.getElementById("soil_single_dbselection").value = "DB1";
         soil.build();
         await Promise.resolve();
@@ -106,6 +113,7 @@ describe("Soil controller", () => {
         expect(params.get("soil_single_selection")).toBe("101");
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(soil, "soil-job");
+        expect(pollCompletionValues).toEqual(["SOILS_BUILD_TASK_COMPLETED"]);
     });
 
     test("setMode posts JSON payload with parsed integers", async () => {
@@ -142,6 +150,17 @@ describe("Soil controller", () => {
         await Promise.resolve();
 
         expect(postJsonMock).toHaveBeenCalledWith("tasks/set_disturbed_sol_ver/", { sol_ver: "9002.0" }, expect.any(Object));
+    });
+
+    test("completion trigger is idempotent", () => {
+        jest.spyOn(soil, "report").mockImplementation(() => {});
+
+        soil.triggerEvent("SOILS_BUILD_TASK_COMPLETED");
+        soil.triggerEvent("SOILS_BUILD_TASK_COMPLETED");
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(colorMapMock.enableColorMap).toHaveBeenCalledTimes(1);
+        expect(soil.report).toHaveBeenCalledTimes(1);
     });
 
     test("bootstrap wires job id and restores mode", () => {
