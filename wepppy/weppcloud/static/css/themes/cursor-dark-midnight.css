@@ -1,7 +1,7 @@
 /* Generated from Cursor-Dark-Midnight-color-theme.json on 2025-11-15T01:05:53.843372+00:00 */
 :root[data-theme="cursor-dark-midnight"] {
-  --wc-color-accent: #00000000;
-  --wc-color-accent-soft: rgba(0, 0, 0, 0.180);
+  --wc-color-accent: #8FBCBB;
+  --wc-color-accent-soft: rgba(143, 188, 187, 0.22);
   --wc-color-attention: #88c0d0;
   --wc-color-attention-soft: rgba(136, 192, 208, 0.220);
   --wc-color-border: #272c36;
@@ -30,4 +30,7 @@
 :root[data-theme="cursor-dark-midnight"] .wc-card, :root[data-theme="cursor-dark-midnight"] .wc-control, :root[data-theme="cursor-dark-midnight"] .wc-panel {
   border-color: transparent;
   box-shadow: none;
+}
+:root[data-theme="cursor-dark-midnight"] {
+  --wc-button-disabled-text: var(--wc-color-text);
 }

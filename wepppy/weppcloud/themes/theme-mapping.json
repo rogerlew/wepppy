@@ -142,10 +142,15 @@
       "overrides": {
         "--wc-shadow-sm": "none",
         "--wc-shadow-md": "none",
+        "--wc-color-accent": "#8FBCBB",
+        "--wc-color-accent-soft": "rgba(143, 188, 187, 0.22)",
         "--wc-color-primary": "#8FBCBB",
         "--wc-color-primary-dark": "#6DA1A6",
         "--wc-color-on-primary": "#1E2127"
-      }
+      },
+      "extra_css": [
+        ":root[data-theme=\"cursor-dark-midnight\"] {\n  --wc-button-disabled-text: var(--wc-color-text);\n}"
+      ]
     },
     "cursor-dark-high-contrast": {
       "label": "Cursor Dark (High Contrast)",

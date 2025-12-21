@@ -90,7 +90,7 @@
   --wc-button-link-hover: var(--wc-color-link-hover);
   --wc-button-disabled-bg: var(--wc-color-border);
   --wc-button-disabled-border: var(--wc-color-border);
-  --wc-button-disabled-text: var(--wc-color-text-muted);
+  --wc-button-disabled-text: var(--wc-color-text);
   --wc-button-shadow: var(--wc-shadow-sm);
   --wc-button-shadow-hover: 0 8px 20px rgba(15, 23, 42, 0.16);
   --wc-run-header-offset: 0px;
@@ -515,7 +515,7 @@ input[type="file"]:disabled::-webkit-file-upload-button {
 .pure-button.pure-button-disabled {
   background-color: var(--wc-button-disabled-bg);
   border-color: var(--wc-button-disabled-border);
-  color: var(--wc-button-disabled-text);
+  color: var(--wc-button-disabled-text) !important;
   cursor: not-allowed;
   box-shadow: none;
   opacity: 1;
@@ -1010,6 +1010,7 @@ h5:first-child {
 .wc-run-header__toggle input {
   width: 1rem;
   height: 1rem;
+  accent-color: var(--wc-color-accent);
 }
 
 .wc-run-header__menu {
@@ -3276,6 +3277,7 @@ h5:first-child {
 }
 
 .wc-landuse-report__toggle {
+  --wc-button-primary-text: var(--wc-color-text);
   padding: var(--wc-space-2xs) var(--wc-space-xs);
   display: inline-flex;
   align-items: center;
@@ -3294,6 +3296,24 @@ h5:first-child {
   background: var(--wc-color-surface-alt);
   border-color: var(--wc-color-border-strong);
   color: var(--wc-color-text);
+}
+
+.wc-landuse-report__toggle .wc-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.wc-landuse-report__toggle .wc-icon--wrench {
+  -webkit-mask-image: url("../open-iconic/png/wrench-2x.png");
+  mask-image: url("../open-iconic/png/wrench-2x.png");
 }
 
 .wc-landuse-report__select {

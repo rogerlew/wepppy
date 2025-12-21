@@ -23,8 +23,9 @@
             class="pure-button wc-landuse-report__toggle"
             data-landuse-toggle="{{ panel_id }}"
             aria-controls="{{ panel_id }}"
-            aria-expanded="false">
-            <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}" alt="Adjust coverage for {{ row.key }}">
+            aria-expanded="false"
+            aria-label="Adjust coverage for {{ row.key }}">
+            <span class="wc-icon wc-icon--wrench" aria-hidden="true"></span>
           </button>
         </td>
         <td class="wc-landuse-report__cell">

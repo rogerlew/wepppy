@@ -247,6 +247,30 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_landuse_toggle_icon",
+            "label": "Landuse wrench vs toggle background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "icon_vs_button",
+                    "foreground": "#theme_lab_landuse_toggle_icon",
+                    "background": "#theme_lab_landuse_toggle",
+                }
+            ],
+        },
+        {
+            "id": "pure_button_disabled",
+            "label": "Disabled primary button text vs background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_disabled_button",
+                    "background": "#theme_lab_disabled_button",
+                }
+            ],
+        },
+        {
             "id": "sub_cmap_radio_default_checked",
             "label": "Subcatchment radio (checked) vs background",
             "threshold": 3.0,
