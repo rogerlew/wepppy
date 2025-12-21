@@ -107,6 +107,7 @@ describe("DssExport controller", () => {
         delete global.controlBase;
         delete window.site_prefix;
         delete global.url_for_run;
+        delete window.WCControllerBootstrap;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -121,7 +122,11 @@ describe("DssExport controller", () => {
 
     test("delegated export posts JSON payload and records job id", async () => {
         const startedEvents = [];
+        const pollCompletionValues = [];
         dss.events.on("dss:export:started", (payload) => startedEvents.push(payload));
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
 
         const button = document.querySelector("[data-action='dss-export-run']");
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -142,6 +147,7 @@ describe("DssExport controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(dss, "job-xyz");
+        expect(pollCompletionValues).toEqual(["DSS_EXPORT_TASK_COMPLETED"]);
         expect(startedEvents).not.toHaveLength(0);
         expect(startedEvents[0]).toEqual(expect.objectContaining({ task: "dss:export" }));
     });
@@ -187,6 +193,37 @@ describe("DssExport controller", () => {
             "job:completed",
             expect.objectContaining({ task: "dss:export" })
         );
+    });
+
+    test("completion trigger is idempotent", () => {
+        const completions = [];
+        dss.events.on("dss:export:completed", (payload) => completions.push(payload));
+
+        jest.spyOn(dss, "report");
+
+        dss.triggerEvent("DSS_EXPORT_TASK_COMPLETED");
+        dss.triggerEvent("DSS_EXPORT_TASK_COMPLETED");
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(dss.report).toHaveBeenCalledTimes(1);
+        expect(completions).toHaveLength(1);
+        const jobCompletedCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:completed");
+        expect(jobCompletedCalls).toHaveLength(1);
+    });
+
+    test("bootstrap wires poll completion before job id", () => {
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn(() => "job-bootstrap")
+        };
+
+        dss.bootstrap({ jobIds: {} });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(dss, "job-bootstrap");
+        expect(pollCompletionValues).toEqual(["DSS_EXPORT_TASK_COMPLETED"]);
     });
 
     test("unsuccessful payload pushes stacktrace and emits error", async () => {
@@ -284,6 +321,7 @@ describe("DssExport controller (dynamic mods)", () => {
         delete global.controlBase;
         delete window.site_prefix;
         delete global.url_for_run;
+        delete window.WCControllerBootstrap;
         if (global.WCDom) {
             delete global.WCDom;
         }

@@ -59,6 +59,7 @@ describe("DebrisFlow controller", () => {
         delete global.controlBase;
         delete global.url_for_run;
         delete global.WCForms;
+        delete window.WCControllerBootstrap;
         delete window.site_prefix;
         if (global.WCDom) {
             delete global.WCDom;
@@ -71,7 +72,11 @@ describe("DebrisFlow controller", () => {
 
     test("delegated run button posts JSON and records job id", async () => {
         const events = [];
+        const pollCompletionValues = [];
         debris.events.on("debris:run:started", (payload) => events.push({ event: "started", payload }));
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
 
         const button = document.querySelector("[data-debris-action='run']");
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -85,23 +90,46 @@ describe("DebrisFlow controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(debris, "job-123");
+        expect(pollCompletionValues).toEqual(["DEBRIS_FLOW_RUN_TASK_COMPLETED"]);
         expect(events.length).toBeGreaterThan(0);
         expect(events[0].event).toBe("started");
         expect(events[0].payload).toEqual(expect.objectContaining({ task: "debris:run" }));
     });
 
-    test("reports results and emits completion when websocket event fires", () => {
+    test("completion event is idempotent for custom trigger", () => {
         const completions = [];
         debris.events.on("debris:run:completed", (payload) => completions.push(payload));
 
         document.getElementById("debris_flow_form").dispatchEvent(new CustomEvent("DEBRIS_FLOW_RUN_TASK_COMPLETED"));
+        document.getElementById("debris_flow_form").dispatchEvent(new CustomEvent("DEBRIS_FLOW_RUN_TASK_COMPLETED"));
 
-        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
         expect(document.getElementById("info").innerHTML).toContain("report/debris_flow/");
         expect(completions).toHaveLength(1);
+        const jobCompletedCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:completed");
+        expect(jobCompletedCalls).toHaveLength(1);
+        expect(jobCompletedCalls[0][1]).toEqual(expect.objectContaining({ task: "debris:run" }));
+    });
+
+    test("poll failure fetches job info and pushes stacktrace", async () => {
+        httpMock.request.mockResolvedValueOnce({ body: { exc_info: "trace line" } });
+        debris.rq_job_id = "job-123";
+
+        debris.handle_job_status_response(debris, { status: "failed" });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            debris,
+            expect.objectContaining({
+                Error: expect.stringContaining("failed"),
+                StackTrace: expect.any(Array)
+            })
+        );
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
-            "job:completed",
-            expect.objectContaining({ task: "debris:run" })
+            "job:error",
+            expect.objectContaining({ task: "debris:run", status: "failed" })
         );
     });
 
@@ -139,6 +167,21 @@ describe("DebrisFlow controller", () => {
             expect.objectContaining({ task: "debris:run" })
         );
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    test("bootstrap wires poll completion before job id", () => {
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn(() => "job-bootstrap")
+        };
+
+        debris.bootstrap({ jobIds: {} });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(debris, "job-bootstrap");
+        expect(pollCompletionValues).toEqual(["DEBRIS_FLOW_RUN_TASK_COMPLETED"]);
     });
 });
 

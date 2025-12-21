@@ -214,8 +214,8 @@ controller.triggerEvent = function (eventName, payload) {
 - [x] Ash (`wepppy/weppcloud/controllers_js/ash.js`): add `_completion_seen` guard; set `poll_completion_event = "ASH_RUN_TASK_COMPLETED"`.
 - [x] RHEM (`wepppy/weppcloud/controllers_js/rhem.js`): remove duplicate `onTrigger` re-calling `triggerEvent`; add `_completion_seen` guard; set `poll_completion_event = "RHEM_RUN_TASK_COMPLETED"`.
 - [x] Omni (`wepppy/weppcloud/controllers_js/omni.js`): add `_completion_seen` guard; set `poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED"`.
-- [ ] Debris flow (`wepppy/weppcloud/controllers_js/debris_flow.js`): add `_completion_seen` guard; set `poll_completion_event = "DEBRIS_FLOW_RUN_TASK_COMPLETED"`; ensure CustomEvent handler stays idempotent.
-- [ ] DSS export (`wepppy/weppcloud/controllers_js/dss_export.js`): add `_completion_seen` guard; set `poll_completion_event = "DSS_EXPORT_TASK_COMPLETED"`; ensure report loads once.
+- [x] Debris flow (`wepppy/weppcloud/controllers_js/debris_flow.js`): add `_completion_seen` guard; set `poll_completion_event = "DEBRIS_FLOW_RUN_TASK_COMPLETED"`; ensure CustomEvent handler stays idempotent.
+- [x] DSS export (`wepppy/weppcloud/controllers_js/dss_export.js`): add `_completion_seen` guard; set `poll_completion_event = "DSS_EXPORT_TASK_COMPLETED"`; ensure report loads once.
 
 ### Already compliant / no changes expected
 - Channel delineation (`wepppy/weppcloud/controllers_js/channel_delineation.js`), Outlet (`wepppy/weppcloud/controllers_js/outlet.js`) already follow the hybrid pattern with `_completion_seen` + polling.

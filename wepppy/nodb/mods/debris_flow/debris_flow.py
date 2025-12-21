@@ -220,8 +220,11 @@ class DebrisFlow(NoDbBase):
             except:
                 sbs_coverage = disturbed.sbs_coverage
 
-            B = sbs_coverage['moderate'] * watershed.wsarea + \
-                sbs_coverage['high'] * watershed.wsarea
+            if sbs_coverage is None:
+                B = 0.0
+            else:
+                B = sbs_coverage.get('moderate', 0.0) * watershed.wsarea + \
+                    sbs_coverage.get('high', 0.0) * watershed.wsarea
             B_pct = 100 * B / watershed.wsarea
             B /= 1000 * 1000  # to km^2
 

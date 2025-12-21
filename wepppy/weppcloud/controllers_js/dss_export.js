@@ -391,6 +391,7 @@ var DssExport = (function () {
         controller.statusPanelEl = formElement ? dom.qs("#dss_export_status_panel") : null;
         controller.stacktracePanelEl = formElement ? dom.qs("#dss_export_stacktrace_panel") : null;
         controller.statusSpinnerEl = controller.statusPanelEl ? controller.statusPanelEl.querySelector("#braille") : null;
+        controller._completion_seen = false;
 
         controller.attach_status_stream(controller, {
             element: controller.statusPanelEl,
@@ -426,6 +427,10 @@ var DssExport = (function () {
                 stacktraceElement.style.display = "none";
             }
         };
+
+        function resetCompletionSeen() {
+            controller._completion_seen = false;
+        }
 
         function rebindDomReferences() {
             if (!controller.form) {
@@ -532,6 +537,7 @@ var DssExport = (function () {
             controller.appendStatus(EXPORT_MESSAGE + "…");
             controller.stacktrace.text("");
             controller.hideStacktrace();
+            resetCompletionSeen();
 
             var payload = controller.buildRequestPayload();
             controller.state.mode = payload.dss_export_mode || controller.state.mode || 1;
@@ -556,6 +562,7 @@ var DssExport = (function () {
                 if (normalized.Success === true || normalized.success === true) {
                     var jobId = normalized.job_id || normalized.jobId || null;
                     controller.appendStatus("post_dss_export_rq job submitted: " + jobId);
+                    controller.poll_completion_event = "DSS_EXPORT_TASK_COMPLETED";
                     controller.set_rq_job_id(controller, jobId);
                     if (controller.events && typeof controller.events.emit === "function") {
                         controller.events.emit("dss:export:started", {
@@ -637,11 +644,32 @@ var DssExport = (function () {
                     detail: detail || null
                 });
             }
-            controller.triggerEvent("job:completed", {
-                task: EXPORT_TASK,
-                jobId: controller.rq_job_id || null,
-                detail: detail || null
-            });
+            if (!controller._job_completion_dispatched) {
+                controller._job_completion_dispatched = true;
+                controller.triggerEvent("job:completed", {
+                    task: EXPORT_TASK,
+                    jobId: controller.rq_job_id || null,
+                    detail: detail || null
+                });
+            }
+        };
+
+        function handleCompletion(detail) {
+            if (controller._completion_seen) {
+                return;
+            }
+            controller._completion_seen = true;
+            controller.handleExportTaskCompleted(detail);
+        }
+
+        var baseTriggerEvent = controller.triggerEvent.bind(controller);
+        controller.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "DSS_EXPORT_TASK_COMPLETED") {
+                var detail = payload && payload.detail ? payload.detail : payload || null;
+                handleCompletion(detail);
+            }
+            return baseTriggerEvent(eventName, payload);
         };
 
         controller.show = function () {
@@ -686,7 +714,7 @@ var DssExport = (function () {
             }));
 
             formElement.addEventListener("DSS_EXPORT_TASK_COMPLETED", function (event) {
-                controller.handleExportTaskCompleted(event && event.detail ? event.detail : null);
+                handleCompletion(event && event.detail ? event.detail : null);
             });
         }
 
@@ -776,7 +804,7 @@ var DssExport = (function () {
                 }));
 
                 controller.form.addEventListener("DSS_EXPORT_TASK_COMPLETED", function (event) {
-                    controller.handleExportTaskCompleted(event && event.detail ? event.detail : null);
+                    handleCompletion(event && event.detail ? event.detail : null);
                 });
             }
             
@@ -808,6 +836,8 @@ var DssExport = (function () {
                 }
             }
             if (jobId && typeof controller.set_rq_job_id === "function") {
+                controller.poll_completion_event = "DSS_EXPORT_TASK_COMPLETED";
+                resetCompletionSeen();
                 controller.set_rq_job_id(controller, jobId);
             }
 
