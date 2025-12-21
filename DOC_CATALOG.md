@@ -65,6 +65,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/ui-docs/report-ui-conventions.md](docs/ui-docs/report-ui-conventions.md)
 - [docs/ui-docs/ui-style-guide.md](docs/ui-docs/ui-style-guide.md)
 - [docs/ui-docs/weppcloud-project-archiving.md](docs/ui-docs/weppcloud-project-archiving.md)
+- [docs/ui-docs/weppcloud-project-forking.md](docs/ui-docs/weppcloud-project-forking.md)
 - [docs/work-packages/20251023_controller_modernization/notes/archived-plans/ash-controller-migration-plan.md](docs/work-packages/20251023_controller_modernization/notes/archived-plans/ash-controller-migration-plan.md)
 - [docs/work-packages/20251023_controller_modernization/notes/archived-plans/baer-controller-plan.md](docs/work-packages/20251023_controller_modernization/notes/archived-plans/baer-controller-plan.md)
 - [docs/work-packages/20251023_controller_modernization/notes/archived-plans/batch-runner-controller-plan.md](docs/work-packages/20251023_controller_modernization/notes/archived-plans/batch-runner-controller-plan.md)
@@ -815,11 +816,25 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 - [WEPPcloud Project Archiving Details](#weppcloud-project-archiving-details)
   - [Introduction](#introduction)
-  - [Dashboard](#dashboard)
+  - [Dashboard UI](#dashboard-ui)
+  - [Front-End Orchestration](#front-end-orchestration)
   - [Blueprint](#blueprint)
   - [RQ API](#rq-api)
   - [RQ Jobs](#rq-jobs)
   - [Additional Details](#additional-details)
+
+---
+
+## docs/ui-docs/weppcloud-project-forking.md
+
+- [WEPPcloud Project Forking Details](#weppcloud-project-forking-details)
+  - [Introduction](#introduction-1)
+  - [Fork Console UI](#fork-console-ui)
+  - [Front-End Orchestration](#front-end-orchestration-1)
+  - [Blueprint](#blueprint-1)
+  - [RQ API](#rq-api-1)
+  - [RQ Jobs](#rq-jobs-1)
+  - [Additional Details](#additional-details-1)
 
 ---
 
