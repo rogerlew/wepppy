@@ -603,6 +603,7 @@ var Omni = (function () {
         omni.statusSpinnerEl = spinnerElement;
         omni.command_btn_id = "btn_run_omni";
         omni.hint = hintAdapter;
+        omni._completion_seen = false;
 
         omni.attach_status_stream(omni, {
             form: formElement,
@@ -611,10 +612,18 @@ var Omni = (function () {
             spinner: spinnerElement
         });
 
+        function resetCompletionSeen() {
+            omni._completion_seen = false;
+        }
+
         var baseTriggerEvent = omni.triggerEvent.bind(omni);
         omni.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "OMNI_SCENARIO_RUN_TASK_COMPLETED") {
+                if (omni._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                omni._completion_seen = true;
                 omni.report_scenarios();
                 omni.disconnect_status_stream(omni);
                 if (omniEvents && typeof omniEvents.emit === "function") {
@@ -624,7 +633,7 @@ var Omni = (function () {
                 omni.disconnect_status_stream(omni);
             }
 
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         function emitScenarioUpdate(scenarioItem) {
@@ -1037,6 +1046,7 @@ var Omni = (function () {
                 return;
             }
 
+            resetCompletionSeen();
             setStatus("Submitting omni run...");
             omni.connect_status_stream(omni);
 
@@ -1052,6 +1062,7 @@ var Omni = (function () {
                 var body = response && response.body ? response.body : null;
                 if (body && body.Success === true) {
                     setStatus("run_omni_rq job submitted: " + body.job_id);
+                    omni.poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED";
                     omni.set_rq_job_id(omni, body.job_id);
                     if (hintAdapter && typeof hintAdapter.html === "function") {
                         hintAdapter.html(formatJobHint(body.job_id));
@@ -1215,6 +1226,10 @@ var Omni = (function () {
                 }
             }
 
+            if (jobId) {
+                resetCompletionSeen();
+                omni.poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED";
+            }
             if (typeof omni.set_rq_job_id === "function") {
                 omni.set_rq_job_id(omni, jobId);
             }

@@ -84,6 +84,7 @@ describe("Omni controller", () => {
         delete window.Omni;
         delete global.controlBase;
         delete global.url_for_run;
+        delete window.WCControllerBootstrap;
         document.body.innerHTML = "";
     });
 
@@ -99,6 +100,11 @@ describe("Omni controller", () => {
     test("run_omni_scenarios posts FormData and emits completion event", async () => {
         const runCompleted = jest.fn();
         omni.events.on("omni:run:completed", runCompleted);
+        let pollCompletionEvent = null;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
 
         addScenarioAndSelect("uniform_low");
 
@@ -120,6 +126,7 @@ describe("Omni controller", () => {
         expect(parsed).toEqual([{ type: "uniform_low" }]);
 
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni, "job-321");
+        expect(pollCompletionEvent).toBe("OMNI_SCENARIO_RUN_TASK_COMPLETED");
         expect(runCompleted).toHaveBeenCalledWith({
             jobId: "job-321",
             scenarios: [{ type: "uniform_low" }]
@@ -193,5 +200,36 @@ describe("Omni controller", () => {
 
         const remaining = document.querySelectorAll("[data-omni-scenario-item='true']");
         expect(remaining).toHaveLength(0);
+    });
+
+    test("completion trigger is idempotent", () => {
+        const runCompleted = jest.fn();
+        omni.events.on("omni:run:completed", runCompleted);
+        omni.report_scenarios = jest.fn();
+
+        omni.triggerEvent("OMNI_SCENARIO_RUN_TASK_COMPLETED", { source: "status" });
+        omni.triggerEvent("OMNI_SCENARIO_RUN_TASK_COMPLETED", { source: "status" });
+
+        expect(omni.report_scenarios).toHaveBeenCalledTimes(1);
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(runCompleted).toHaveBeenCalledTimes(1);
+    });
+
+    test("bootstrap wires poll completion before set_rq_job_id", () => {
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn(() => "job-999")
+        };
+        let pollCompletionEvent = null;
+        omni._completion_seen = true;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
+
+        omni.bootstrap({});
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni, "job-999");
+        expect(pollCompletionEvent).toBe("OMNI_SCENARIO_RUN_TASK_COMPLETED");
+        expect(omni._completion_seen).toBe(false);
     });
 });

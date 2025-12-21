@@ -186,6 +186,7 @@ var Rhem = (function () {
         rhem.command_btn_id = "btn_run_rhem";
         rhem.statusStream = null;
         rhem.events = emitter;
+        rhem._completion_seen = false;
 
         function renderStatus(message, meta) {
             if (!message) {
@@ -258,9 +259,6 @@ var Rhem = (function () {
                 emitter.emit("rhem:status:updated", detail || {});
             },
             onTrigger: function (detail) {
-                if (detail && detail.event) {
-                    rhem.triggerEvent(detail.event, detail);
-                }
                 emitter.emit("rhem:status:updated", detail || {});
             }
         });
@@ -269,6 +267,10 @@ var Rhem = (function () {
             hasStatusStream: Boolean(rhem.statusStream),
             runId: getActiveRunId()
         });
+
+        function resetCompletionSeen() {
+            rhem._completion_seen = false;
+        }
 
         rhem.hideStacktrace = function () {
             if (stacktraceAdapter && typeof stacktraceAdapter.hide === "function") {
@@ -291,6 +293,7 @@ var Rhem = (function () {
                         appendStatus("run_rhem_rq job submitted: " + jobId, {
                             status: "queued"
                         });
+                        rhem.poll_completion_event = "RHEM_RUN_TASK_COMPLETED";
                         rhem.set_rq_job_id(rhem, jobId);
                         emitter.emit("rhem:run:queued", {
                             runId: getActiveRunId(),
@@ -316,6 +319,7 @@ var Rhem = (function () {
         rhem.run = function () {
             var taskMsg = "Submitting RHEM run";
             clearStatus(taskMsg);
+            resetCompletionSeen();
 
             rhem.triggerEvent("job:started", {
                 task: "rhem:run",
@@ -383,10 +387,14 @@ var Rhem = (function () {
         rhem.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "RHEM_RUN_TASK_COMPLETED") {
+                if (rhem._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                rhem._completion_seen = true;
                 rhem.disconnect_status_stream(rhem);
                 rhem.report();
             }
-            baseTriggerEvent(eventName, payload);
+            return baseTriggerEvent(eventName, payload);
         };
 
         dom.delegate(formElement, "click", "[data-rhem-action='run']", function (event) {
@@ -422,6 +430,10 @@ var Rhem = (function () {
             }
 
             if (typeof rhem.set_rq_job_id === "function") {
+                if (jobId) {
+                    rhem.poll_completion_event = "RHEM_RUN_TASK_COMPLETED";
+                    resetCompletionSeen();
+                }
                 rhem.set_rq_job_id(rhem, jobId);
             }
 

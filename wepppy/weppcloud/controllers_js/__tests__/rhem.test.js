@@ -69,6 +69,7 @@ describe("Rhem controller", () => {
         delete global.WCHttp;
         delete global.controlBase;
         delete global.url_for_run;
+        delete window.WCControllerBootstrap;
         delete window.Project;
         delete window.runid;
         delete window.site_prefix;
@@ -91,8 +92,12 @@ describe("Rhem controller", () => {
     test("run posts payload, connects websocket, and records lifecycle events", async () => {
         const started = jest.fn();
         const queued = jest.fn();
+        const pollCompletionValues = [];
         rhem.events.on("rhem:run:started", started);
         rhem.events.on("rhem:run:queued", queued);
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
 
         const button = document.querySelector("[data-rhem-action='run']");
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -106,6 +111,7 @@ describe("Rhem controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rhem, "job-456");
+        expect(pollCompletionValues).toEqual(["RHEM_RUN_TASK_COMPLETED"]);
         expect(started).toHaveBeenCalledWith(expect.objectContaining({ runId: "demo-run" }));
         expect(queued).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-456" }));
     });
@@ -137,6 +143,39 @@ describe("Rhem controller", () => {
         expect(statusStreamMock.append).toHaveBeenCalledWith(expect.stringContaining("Success"), expect.any(Object));
         expect(projectMock.set_preferred_units).toHaveBeenCalled();
         expect(completions).toHaveLength(1);
+    });
+
+    test("completion event is idempotent", async () => {
+        const completions = [];
+        rhem.events.on("rhem:run:completed", (payload) => completions.push(payload));
+
+        httpMock.request
+            .mockResolvedValueOnce({ body: "<div>Results</div>" })
+            .mockResolvedValueOnce({ body: "<div>Summary</div>" });
+
+        rhem.triggerEvent("RHEM_RUN_TASK_COMPLETED");
+        rhem.triggerEvent("RHEM_RUN_TASK_COMPLETED");
+        await flushPromises();
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(httpMock.request).toHaveBeenCalledTimes(2);
+        expect(completions).toHaveLength(1);
+    });
+
+    test("bootstrap wires poll completion before job id", () => {
+        const pollCompletionValues = [];
+        baseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+        window.WCControllerBootstrap = {
+            getControllerContext: jest.fn(() => ({})),
+            resolveJobId: jest.fn(() => "job-bootstrap")
+        };
+
+        rhem.bootstrap({ jobIds: {} });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rhem, "job-bootstrap");
+        expect(pollCompletionValues).toEqual(["RHEM_RUN_TASK_COMPLETED"]);
     });
 
     test("unsuccessful submission pushes stacktrace and emits error", async () => {
