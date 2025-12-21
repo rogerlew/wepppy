@@ -27,6 +27,17 @@
 - StatusStream will enrich stacktraces via `/rq/api/jobinfo/<jobid>` when the channel message includes an RQ job id (`rq:<uuid> ...`). Keep the `data-stacktrace-*` hooks intact or enrichment will fail silently.
 - Prefer `pushResponseStacktrace`/`pushErrorStacktrace` for synchronous failures; rely on StatusStream for RQ errors.
 
+### Polling completion + failure (redundant trigger path)
+- **Required for RQ controllers**: completion must be driven by **both** StatusStream triggers and polling (`set_rq_job_id` fallback). This redundancy is intentional; completion handlers must be idempotent.
+- On successful queue:
+  - Set `poll_completion_event` before calling `set_rq_job_id`.
+  - Reset `_completion_seen = false` to allow the next completion to fire once.
+- `controlBase` dispatches:
+  - `poll_completion_event` + `job:completed` once on `finished` (guarded by `_job_completion_dispatched`).
+  - `job:error` once on `failed`/`stopped`/`canceled`/`not_found` (guarded by `_job_failure_dispatched`), after fetching `/rq/api/jobinfo/<job_id>` to push stacktraces (child `exc_info` preferred).
+- Custom `onTrigger` handlers must **not** call `triggerEvent` again; `attach_status_stream` already does this. Use guarded handlers for CustomEvents to avoid recursion.
+- **See also:** [trigger-refactor.md](control-ui-styling/trigger-refactor.md) for the per-controller trigger inventory and completion event names.
+
 ### Requests
 - Use `WCHttp` and `url_for_run()` for every in-run endpoint (`rq/api/*`, `tasks/*`, `query/*`, `resources/*`). Never hardcode `/weppcloud/...` or bare paths.
 - Include `form` when posting FormData so CSRF tokens are attached automatically.
