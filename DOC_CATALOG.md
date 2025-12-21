@@ -40,7 +40,6 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/uploads-standard.md](docs/dev-notes/uploads-standard.md)
 - [docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md](docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md)
 - [docs/dev-notes/wepp_interchange.spec.md](docs/dev-notes/wepp_interchange.spec.md)
-- [docs/dev-notes/weppcloud-project-archiving.md](docs/dev-notes/weppcloud-project-archiving.md)
 - [docs/dev-notes/weppcloudr-interchange-migration.md](docs/dev-notes/weppcloudr-interchange-migration.md)
 - [docs/god-tier-prompting-strategy.md](docs/god-tier-prompting-strategy.md)
 - [docs/mini-work-packages/README.md](docs/mini-work-packages/README.md)
@@ -65,6 +64,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/ui-docs/omni-control-plan.md](docs/ui-docs/omni-control-plan.md)
 - [docs/ui-docs/report-ui-conventions.md](docs/ui-docs/report-ui-conventions.md)
 - [docs/ui-docs/ui-style-guide.md](docs/ui-docs/ui-style-guide.md)
+- [docs/ui-docs/weppcloud-project-archiving.md](docs/ui-docs/weppcloud-project-archiving.md)
 - [docs/work-packages/20251023_controller_modernization/notes/archived-plans/ash-controller-migration-plan.md](docs/work-packages/20251023_controller_modernization/notes/archived-plans/ash-controller-migration-plan.md)
 - [docs/work-packages/20251023_controller_modernization/notes/archived-plans/baer-controller-plan.md](docs/work-packages/20251023_controller_modernization/notes/archived-plans/baer-controller-plan.md)
 - [docs/work-packages/20251023_controller_modernization/notes/archived-plans/batch-runner-controller-plan.md](docs/work-packages/20251023_controller_modernization/notes/archived-plans/batch-runner-controller-plan.md)
@@ -811,7 +811,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/weppcloud-project-archiving.md
+## docs/ui-docs/weppcloud-project-archiving.md
 
 - [WEPPcloud Project Archiving Details](#weppcloud-project-archiving-details)
   - [Introduction](#introduction)
@@ -2364,4 +2364,3 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
   - [CI and Testing Context](#ci-and-testing-context)
   - [Size and Scope Guidelines](#size-and-scope-guidelines)
   - [Agent Collaboration Principles](#agent-collaboration-principles)
-

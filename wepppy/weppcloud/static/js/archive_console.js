@@ -32,16 +32,22 @@
     var statusPanel = container.querySelector("#archive_status_panel");
     var statusLog = container.querySelector("#archive_status_log");
     var stacktracePanel = container.querySelector("#archive_stacktrace_panel");
+    var archiveForm = container.querySelector("#archive_form");
     var archiveButton = container.querySelector("#archive_button");
     var refreshButton = container.querySelector("#refresh_button");
     var commentInput = container.querySelector("#archive_comment");
     var archiveEmpty = container.querySelector("#archive_empty");
     var restoreLink = container.querySelector("#restore_link");
     var tableBody = container.querySelector("#archives_table tbody");
+    var rqJob = statusPanel ? statusPanel.querySelector("#rq_job") : container.querySelector("#rq_job");
+    var spinner = statusPanel ? statusPanel.querySelector("#braille") : null;
 
     var statusStream = null;
     var pendingStatusMessages = [];
     var currentJobId = null;
+    var poller = null;
+    var completionState = { completed: false, failed: false };
+    var currentAction = null;
 
     function appendStatus(message) {
       if (message === undefined || message === null) {
@@ -69,6 +75,77 @@
       pendingStatusMessages.splice(0).forEach(function (msg) {
         statusStream.append(msg);
       });
+    }
+
+    function resetCompletionState(action) {
+      completionState.completed = false;
+      completionState.failed = false;
+      if (action !== undefined) {
+        currentAction = action;
+      }
+    }
+
+    function resolveAction(action) {
+      if (action) {
+        return action;
+      }
+      if (currentAction) {
+        return currentAction;
+      }
+      return null;
+    }
+
+    function markCompleted(action, detail) {
+      if (completionState.completed) {
+        return;
+      }
+      var resolved = resolveAction(action);
+      if (!resolved) {
+        return;
+      }
+      completionState.completed = true;
+      completionState.failed = false;
+      if (resolved === "restore") {
+        restoreFinished();
+      } else if (resolved === "archive") {
+        archiveFinished();
+      }
+    }
+
+    function markFailed(action, detail) {
+      if (completionState.failed) {
+        return;
+      }
+      var resolved = resolveAction(action);
+      if (!resolved) {
+        return;
+      }
+      completionState.failed = true;
+      completionState.completed = false;
+      if (resolved === "restore") {
+        restoreFailed();
+      } else if (resolved === "archive") {
+        archiveFailed();
+      }
+    }
+
+    function setActiveJob(jobId, action) {
+      if (!jobId) {
+        return;
+      }
+      var normalized = String(jobId);
+      if (poller && poller.rq_job_id === normalized && currentAction === action) {
+        return;
+      }
+      resetCompletionState(action || null);
+      if (poller) {
+        if (action === "restore") {
+          poller.poll_completion_event = "RESTORE_COMPLETE";
+        } else {
+          poller.poll_completion_event = "ARCHIVE_COMPLETE";
+        }
+        poller.set_rq_job_id(poller, normalized);
+      }
     }
 
     function setRestoreButtonsDisabled(disabled) {
@@ -182,6 +259,9 @@
           archiveButton.disabled = true;
         }
         currentJobId = data.job_id || null;
+        if (currentJobId) {
+          setActiveJob(currentJobId, "archive");
+        }
         setRestoreButtonsDisabled(true);
         setDeleteButtonsDisabled(true);
       } else if (!currentJobId) {
@@ -212,6 +292,7 @@
 
     function archiveFinished() {
       currentJobId = null;
+      currentAction = null;
       if (archiveButton) {
         archiveButton.disabled = false;
       }
@@ -226,6 +307,7 @@
 
     function archiveFailed() {
       currentJobId = null;
+      currentAction = null;
       if (archiveButton) {
         archiveButton.disabled = false;
       }
@@ -237,6 +319,7 @@
 
     function restoreFinished() {
       currentJobId = null;
+      currentAction = null;
       if (archiveButton) {
         archiveButton.disabled = false;
       }
@@ -256,6 +339,7 @@
 
     function restoreFailed() {
       currentJobId = null;
+      currentAction = null;
       if (archiveButton) {
         archiveButton.disabled = false;
       }
@@ -265,20 +349,48 @@
       appendStatus("Restore job failed.");
     }
 
-    function handleTrigger(detail) {
-      if (!detail || !detail.event) {
+    function handleTrigger(eventOrDetail, payload) {
+      var eventName = null;
+      var detail = null;
+      if (typeof eventOrDetail === "string") {
+        eventName = eventOrDetail;
+        detail = payload || {};
+      } else if (eventOrDetail && eventOrDetail.event) {
+        eventName = eventOrDetail.event;
+        detail = eventOrDetail;
+      }
+      if (!eventName) {
         return;
       }
-      var eventName = String(detail.event).toUpperCase();
-      if (eventName === "ARCHIVE_COMPLETE") {
-        archiveFinished();
-      } else if (eventName === "ARCHIVE_FAILED") {
-        archiveFailed();
-      } else if (eventName === "RESTORE_COMPLETE") {
-        restoreFinished();
-      } else if (eventName === "RESTORE_FAILED") {
-        restoreFailed();
+      var normalized = String(eventName).toUpperCase();
+      if (normalized === "ARCHIVE_COMPLETE") {
+        markCompleted("archive", detail);
+      } else if (normalized === "ARCHIVE_FAILED") {
+        markFailed("archive", detail);
+      } else if (normalized === "RESTORE_COMPLETE") {
+        markCompleted("restore", detail);
+      } else if (normalized === "RESTORE_FAILED") {
+        markFailed("restore", detail);
+      } else if (normalized === "JOB:COMPLETED") {
+        markCompleted(null, detail);
+      } else if (normalized === "JOB:ERROR") {
+        markFailed(null, detail);
       }
+    }
+
+    function initPoller() {
+      if (typeof controlBase !== "function") {
+        console.warn("controlBase is unavailable; archive polling disabled.");
+        return;
+      }
+      poller = controlBase();
+      poller.form = archiveForm;
+      poller.rq_job = rqJob;
+      poller.stacktrace = stacktracePanel ? stacktracePanel.querySelector("[data-stacktrace-body]") : null;
+      poller.statusSpinnerEl = spinner;
+      poller.triggerEvent = function (eventName, detail) {
+        handleTrigger(eventName, detail);
+      };
     }
 
     function startArchive() {
@@ -313,6 +425,7 @@
           }
           currentJobId = body.job_id || null;
           appendStatus("Archive job submitted: " + currentJobId);
+          setActiveJob(currentJobId, "archive");
         })
         .catch(function (err) {
           appendStatus("ERROR: " + (err.message || err));
@@ -356,6 +469,7 @@
           }
           currentJobId = body.job_id || null;
           appendStatus("Restore job submitted: " + currentJobId);
+          setActiveJob(currentJobId, "restore");
         })
         .catch(function (err) {
           appendStatus("ERROR: " + (err.message || err));
@@ -426,6 +540,9 @@
         stacktrace: stacktrace,
         onTrigger: handleTrigger
       });
+      if (poller) {
+        poller.statusStream = statusStream;
+      }
       statusPanel.addEventListener("status:error", function (event) {
         if (event && event.detail && event.detail.error) {
           console.error("Archive status stream error:", event.detail.error);
@@ -450,6 +567,7 @@
       projectLabel.textContent = "Create and manage project archives.";
     }
 
+    initPoller();
     initStatusStream();
     fetchArchives();
   }

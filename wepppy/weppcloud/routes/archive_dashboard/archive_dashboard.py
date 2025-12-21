@@ -1,5 +1,5 @@
 """Routes related to archived run artifacts."""
-# see notes/weppcloud-project-archiving.md for archive architecture
+# see docs/ui-docs/weppcloud-project-archiving.md for archive architecture
 
 import os
 import zipfile

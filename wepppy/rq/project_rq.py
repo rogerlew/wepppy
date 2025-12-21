@@ -1160,7 +1160,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
         raise
 
 # Archive Backend Functions
-# see docs/dev-notes/weppcloud-project-archiving.md for archive architecture
+# see docs/ui-docs/weppcloud-project-archiving.md for archive architecture
 @with_exception_logging
 def archive_rq(runid: str, comment: Optional[str] = None) -> None:
     """Create a zip archive of the run directory.
