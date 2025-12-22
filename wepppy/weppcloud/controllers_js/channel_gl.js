@@ -647,14 +647,41 @@ var ChannelDelineation = (function () {
             "#8AE5FE", "#65C8FE", "#479EFF", "#306EFE",
             "#2500F4", "#6600cc", "#50006b", "#6b006b"
         ];
-        var html = '<div class="wc-map-legend__header">Channel Order</div>';
-        for (var i = 0; i < items.length; i += 1) {
+        var html = '<div class="wc-map-legend__header" data-channel-legend="true">Channel Order</div>';
+        for (var i = 1; i < items.length; i += 1) {
             html += '<div class="wc-legend-item">'
                 + '<span class="wc-legend-item__swatch" style="--legend-color: ' + items[i] + ';"></span>'
                 + '<span class="wc-legend-item__label">Order ' + i + "</span>"
                 + "</div>";
         }
         return html;
+    }
+
+    function getLegendElement(target) {
+        if (!target) {
+            return null;
+        }
+        if (target.element && target.element instanceof Element) {
+            return target.element;
+        }
+        if (typeof target === "string") {
+            return document.querySelector(target);
+        }
+        if (target instanceof Element) {
+            return target;
+        }
+        if (target[0] && target[0] instanceof Element) {
+            return target[0];
+        }
+        return null;
+    }
+
+    function hasChannelLegend(target) {
+        var element = getLegendElement(target);
+        if (!element) {
+            return false;
+        }
+        return element.innerHTML.indexOf("data-channel-legend=\"true\"") !== -1;
     }
 
     function setChannelLegend(html) {
@@ -687,8 +714,49 @@ var ChannelDelineation = (function () {
         }
     }
 
+    function clearChannelLegendIfActive() {
+        try {
+            var map = MapController.getInstance();
+            if (!map || !map.sub_legend) {
+                return;
+            }
+            if (!hasChannelLegend(map.sub_legend)) {
+                return;
+            }
+            setChannelLegend("");
+        } catch (err) {
+            console.warn("[Channel GL] Failed to clear legend", err);
+        }
+    }
+
+    function resolveLayerId(layer) {
+        if (!layer) {
+            return null;
+        }
+        if (layer.id) {
+            return layer.id;
+        }
+        if (layer.props && layer.props.id) {
+            return layer.props.id;
+        }
+        return null;
+    }
+
+    function isPass2Layer(layer) {
+        return resolveLayerId(layer) === CHANNEL_PASS2_LAYER_ID;
+    }
+
+    function updateLegendForPass2Visibility(layer, visible) {
+        if (visible && isPass2Layer(layer)) {
+            setChannelLegend(buildChannelLegendHtml());
+            return;
+        }
+        clearChannelLegendIfActive();
+    }
+
     function removeLayer(channel, map) {
         clearHoverLabel(channel, map);
+        clearChannelLegendIfActive();
         if (channel.glLayer) {
             if (typeof map.unregisterOverlay === "function") {
                 map.unregisterOverlay(channel.glLayer);
@@ -1169,8 +1237,11 @@ var ChannelDelineation = (function () {
                     if (payload.name === CHANNEL_LABEL_LAYER_NAME && payload.visible) {
                         clearHoverLabel(channel, map);
                     }
-                    if (payload.name === CHANNEL_LAYER_NAME && !payload.visible) {
-                        clearHoverLabel(channel, map);
+                    if (payload.name === CHANNEL_LAYER_NAME) {
+                        updateLegendForPass2Visibility(payload.layer, payload.visible === true);
+                        if (!payload.visible) {
+                            clearHoverLabel(channel, map);
+                        }
                     }
                 });
             }

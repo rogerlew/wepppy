@@ -406,22 +406,57 @@ Assumptions:
 
 ### Phase 11: slope + aspect overlays
 - Scope: split the combined slope/aspect mode into two distinct subcatchment colormaps ("Slope" and "Aspect") to match the GL dashboard behavior.
-- Data: reuse `query/watershed/subcatchments/` payload and map numeric slope/aspect values to viridis; slope normalized to [0, 1], aspect normalized by 360.
+- Data: reuse `query/watershed/subcatchments/` payload; slope uses `slope_scalar` (0-1) with viridis, aspect uses a hue wheel palette keyed to degrees.
 - UI: replace `sub_cmap_radio_slp_asp` with separate radios (slope + aspect), update defaults (prefer slope), and keep a compatibility alias so legacy `slp_asp` requests map to `slope`.
 - Legend: replace `slope_aspect` legend with separate slope + aspect legends (new templates or dynamic legend rendering).
 - Tests: Jest for colormap switching + normalization; Playwright toggles slope/aspect modes and validates legend updates.
 
+### Phase 11 handoff summary
+- UI: `map_pure_gl.htm` now has separate `sub_cmap_radio_slope` and `sub_cmap_radio_aspect` radios (GL only; Leaflet template unchanged).
+- Data fetch: `query/watershed/subcatchments/` provides `slope_scalar` (0-1) and `aspect` (0-360) per TopazID; both modes reuse this single payload.
+- Color mapping: slope uses viridis on `slope_scalar`; aspect uses the gl-dashboard hue wheel mapping (degrees -> hue).
+- Compatibility alias: `slp_asp` mode requests map to `slope` in `subcatchments_gl.js` to avoid breaking existing run context defaults.
+- Legends: slope and aspect legends are injected inline by `subcatchments_gl.js` (slope = viridis canvas, aspect = hue wheel swatches).
+- Stroke behavior: subcatchment stroke color now follows fill color (matches fill via `getLineColor: colorFn`) for consistent choropleth rendering.
+- Rendering fix: added `updateTriggers: { getFillColor: [mode], getLineColor: [mode] }` to force deck.gl re-render when mode changes (critical for choropleth updates).
+- Tests: Jest `subcatchments_gl.test.js` covers slope/aspect mapping and alias handling; Playwright `map-gl.spec.js` toggles slope/aspect and verifies legend updates.
+- Manual validation: browser toggles between slope/aspect on https://wc.bearhive.duckdns.org/weppcloud/runs/air-cooled-broadening/disturbed9002/ show slope viridis and aspect hue-wheel choropleths with matching stroke colors.
+
+Technical notes:
+- Deck.gl layer updates: without `updateTriggers`, deck.gl does not detect getFillColor changes when the layer id remains constant. The `updateTriggers` prop is required to signal when accessors need re-evaluation.
+- Stroke-follows-fill: changed `getLineColor` from static `lineColor` to `colorFn(feature)` to render subcatchment boundaries in the same color as the fill, improving visual clarity.
+
 ### Phase 11b: landuse + soils overlays
 - Scope: landuse/soils colormaps and legend updates.
-- Tests: Playwright toggle landuse/soils modes and validate legends.
+- Tests: Playwright toggle landuse/soils modes and validate legends (`map-gl.spec.js`).
+
+### Phase 11b handoff summary
+- Overlays: Dominant Landcover and Dominant Soil choropleths already functional from Phase 9 implementation; confirmed working with updateTriggers from Phase 11.
+- Mode mapping: `dom_lc` radio maps to `landuse` mode via `renderLanduse()`; `dom_soil` radio maps to `soils` mode via `renderSoils()`.
+- Colors: Landuse renders with NLCD color palette (e.g., yellow `[255, 255, 0]` for cropland, tan `[226, 226, 193]` for grassland); Soils render with hash-based colors per mukey (e.g., `[255, 226, 138]`, `[187, 238, 255]`, `[68, 136, 153]`).
+- Stroke-follows-fill: Both landuse and soils overlays benefit from Phase 11 stroke color matching fill color for improved visual consistency.
+- updateTriggers: Both overlays include `updateTriggers: { getFillColor: [mode], getLineColor: [mode] }` to force deck.gl re-render when switching between modes.
+- Preflight gating: Radios remain disabled until data loads; `updateLayerAvailability()` enables them based on `window.lastPreflightChecklist`.
+- Tests: Playwright `map-gl.spec.js` confirms legends toggle for dominant landuse/soils; diagnostic deep-dive spec lives under `static-src/tests/smoke/diagnostics/`.
+- Manual validation: browser toggles between Dominant Landcover and Dominant Soil show distinct color palettes with matching stroke colors.
 
 ### Phase 12: landuse modify + rangeland cover modify
 - Scope: selection mode with box select, outline overlay, modify forms.
 - Tests: Playwright selection + submit; E2E run covering modify steps.
 
-### Phase 13: WEPP results visualization
+### Phase 13: WEPP results cleanup
 - Scope: remove vestigial WEPP results map overlays and legacy toggle hooks from the GL path; keep results visualization in report panels only until a future phase reintroduces map-based results.
 - Tests: Playwright run completes without console errors; verify map layer control is unchanged after WEPP completion.
+
+### Phase 14: overlay order + SBS gating + outlet marker + channel legend
+- Scope:
+  - Layer control: hide `Burn Severity Map` when SBS is absent.
+  - Outlet marker: replace with blue SVG pin marker while keeping anchor and overlay behavior.
+  - Channel order legend: show whenever pass 2 channels are visible; remove `Order 0`.
+  - Render order: enforce deterministic overlay render ordering without changing layer control order.
+- Tests:
+  - Jest: `map_gl.test.js` overlay ordering + SBS gating; `outlet_gl.test.js` marker data; `channel_gl.test.js` legend visibility + no Order 0.
+  - Playwright: `map-gl.spec.js` overlay ordering; pass 2 channel legend visibility; SBS gating on empty run.
 
 ## Test and verification gates (per phase)
 - Unit (Jest): new controller tests under `controllers_js/__tests__`.
@@ -441,6 +476,11 @@ Run the Playwright GL smoke with the configured test project:
 MAP_GL_URL="https://wc.bearhive.duckdns.org/weppcloud/runs/rlew-appreciated-tremolite/disturbed9002/" \
   wctl run-npm smoke -- --project=runs0 map-gl.spec.js
 ```
+
+## Diagnostic smoke specs (manual only)
+- Location: `wepppy/weppcloud/static-src/tests/smoke/diagnostics/`
+- Enable with `SMOKE_DIAGNOSTICS=1` and run a single spec file explicitly.
+- Prefer `MAP_GL_URL` or `SMOKE_RUN_PATH` to target a known run.
 
 ## Developer onboarding: custom map layer control (GL)
 Purpose: replace Leaflet `L.control.layers` with a deterministic, deck-compatible UI.
@@ -469,6 +509,31 @@ Changing base layers:
 Testing:
 - Jest: `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` asserts control render and base radio inputs.
 - Playwright: `wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js` asserts Satellite selection updates the deck base layer id.
+
+## Overlay render order groups (GL)
+Render order is independent of the layer control ordering. Use grouped indices to leave space for future layers.
+
+Grouped indices (bottom -> top):
+- Group 1 (base rasters): Burn Severity Map -> 10
+- Group 2 (hydro lines): NHD Flowlines -> 20
+- Group 3 (polygons): Subcatchments -> 30
+- Group 4 (polygons): Channels -> 40
+- Group 5 (points): USGS Gage Locations -> 50
+- Group 6 (points): SNOTEL Locations -> 60
+- Group 7 (points): Outlet -> 70
+- Group 8 (labels): Subcatchment Labels -> 80
+- Group 9 (labels): Channel Labels -> 90
+
+Overlay order reference (bottom -> top):
+1. Burn Severity Map
+2. NHD Flowlines
+3. Subcatchments
+4. Channels
+5. USGS Gage Locations
+6. SNOTEL Locations
+7. Outlet
+8. Subcatchment Labels
+9. Channel Labels
 
 ## Ops note: restart weppcloud on bearhive
 ```bash

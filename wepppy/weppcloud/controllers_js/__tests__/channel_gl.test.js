@@ -57,6 +57,7 @@ describe("ChannelDelineation GL controller", () => {
                 <button type="button" id="btn_build_channels_en" data-channel-action="build">Build Channels</button>
             </form>
             <small id="hint_build_channels_en"></small>
+            <div id="sub_legend"></div>
         `;
 
         await import("../dom.js");
@@ -132,6 +133,7 @@ describe("ChannelDelineation GL controller", () => {
             distance: jest.fn(() => 1500),
             flyTo: jest.fn(),
             chnQuery: jest.fn(),
+            sub_legend: "#sub_legend",
         };
         mapStub._deck = {
             getViewports: jest.fn(() => [{
@@ -383,6 +385,37 @@ describe("ChannelDelineation GL controller", () => {
         expect(typeof clickHandler).toBe("function");
         clickHandler({ object: { properties: { TopazID: 123 } } });
         expect(mapStub.chnQuery).toHaveBeenCalledWith(123);
+    });
+
+    test("pass 2 legend renders orders 1+ and clears on toggle", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({ body: "2" });
+        getJsonMock.mockResolvedValueOnce({
+            type: "FeatureCollection",
+            features: [],
+        });
+
+        await channel.show();
+
+        const legend = document.getElementById("sub_legend");
+        expect(legend.innerHTML).toContain("Channel Order");
+        expect(legend.innerHTML).toContain("Order 1");
+        expect(legend.innerHTML).not.toContain("Order 0");
+
+        mapEventHandlers["map:layer:toggled"]({
+            name: "Channels",
+            visible: false,
+            layer: channel.glLayer,
+        });
+        expect(legend.innerHTML).toBe("");
+
+        mapEventHandlers["map:layer:toggled"]({
+            name: "Channels",
+            visible: true,
+            layer: channel.glLayer,
+        });
+        expect(legend.innerHTML).toContain("Order 1");
     });
 
     test("pass 2 labels use sdf outline styling", async () => {

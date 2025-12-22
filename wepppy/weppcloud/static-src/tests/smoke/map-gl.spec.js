@@ -175,11 +175,15 @@ async function openOverlayPanel(page) {
 async function enableSbsOverlay(page) {
   const { layerToggle } = await openOverlayPanel(page);
   const sbsInput = page.locator('label:has-text("Burn Severity Map") input[type="checkbox"]');
+  const inputCount = await sbsInput.count();
+  if (!inputCount) {
+    return { available: false, success: false, legendVisible: false, hasImage: false };
+  }
   await expect(sbsInput).toBeVisible();
   await sbsInput.check();
   await layerToggle.click();
 
-  return page.evaluate(async () => {
+  const result = await page.evaluate(async () => {
     const map = window.MapController && typeof window.MapController.getInstance === 'function'
       ? window.MapController.getInstance()
       : null;
@@ -194,6 +198,7 @@ async function enableSbsOverlay(page) {
       hasImage: Boolean(map && map.sbs_layer && map.sbs_layer.props && map.sbs_layer.props.image),
     };
   });
+  return Object.assign({ available: true }, result || {});
 }
 
 async function getFeatureClickPoint(page, layerKey) {
@@ -651,10 +656,28 @@ test.describe('map gl smoke', () => {
       return (await page.locator('#drilldown').textContent()) || '';
     }, { timeout: 10000 }).toContain('Channel Summary');
 
+    const legend = page.locator('#sub_legend');
+    await expect(legend).toContainText('Channel Order');
+    await expect(legend).toContainText('Order 1');
+    await expect(legend).not.toContainText('Order 0');
+
     const { layerToggle } = await openOverlayPanel(page);
+    const channelsInput = page.locator('label:has-text("Channels") input[type="checkbox"]');
     await expect(page.locator('label:has-text("Channels")')).toHaveCount(1);
     await expect(page.locator('label:has-text("Channel Labels")')).toHaveCount(1);
+    await expect(channelsInput).toBeVisible();
+    await channelsInput.uncheck();
     await layerToggle.click();
+
+    await expect(legend).not.toContainText('Channel Order');
+
+    await openOverlayPanel(page);
+    await channelsInput.check();
+    await layerToggle.click();
+
+    await expect(legend).toContainText('Channel Order');
+    await expect(legend).toContainText('Order 1');
+    await expect(legend).not.toContainText('Order 0');
   });
 
   test('build channels submits job and renders report', async ({ page }) => {
@@ -833,6 +856,53 @@ test.describe('map gl smoke', () => {
       });
     }).toEqual({ hasTemp: false, hasOutlet: true });
 
+    const readOutletIconInfo = () => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const layers = map && map._deck && map._deck.props ? map._deck.props.layers : [];
+      const outletLayer = layers.find((layer) => layer && layer.id === 'wc-outlet-marker');
+      if (!outletLayer || !outletLayer.props || typeof outletLayer.props.getIcon !== 'function') {
+        return null;
+      }
+      const outletData = Array.isArray(outletLayer.props.data) ? outletLayer.props.data[0] : null;
+      if (!outletData) {
+        return null;
+      }
+      const iconKey = outletLayer.props.getIcon(outletData);
+      const mapping = outletLayer.props.iconMapping && iconKey
+        ? outletLayer.props.iconMapping[iconKey]
+        : null;
+      return {
+        iconAtlas: outletLayer.props.iconAtlas || null,
+        iconKey,
+        mapping: mapping
+          ? {
+            width: mapping.width,
+            height: mapping.height,
+            anchorX: mapping.anchorX,
+            anchorY: mapping.anchorY,
+            mask: mapping.mask,
+          }
+          : null,
+      };
+    };
+
+    await expect.poll(async () => {
+      return page.evaluate(readOutletIconInfo);
+    }).not.toBeNull();
+
+    const outletIcon = await page.evaluate(readOutletIconInfo);
+    expect(outletIcon).not.toBeNull();
+    expect(outletIcon.iconAtlas).toContain('/static/images/map-marker.png');
+    expect(outletIcon.iconKey).toBe('outlet-pin');
+    expect(outletIcon.mapping).not.toBeNull();
+    expect(outletIcon.mapping.width).toBe(198);
+    expect(outletIcon.mapping.height).toBe(320);
+    expect(outletIcon.mapping.anchorX).toBe(99);
+    expect(outletIcon.mapping.anchorY).toBe(320);
+    expect(outletIcon.mapping.mask).toBe(false);
+
     await expect(page.locator('label:has-text("Outlet")')).toHaveCount(1);
   });
 
@@ -842,6 +912,10 @@ test.describe('map gl smoke', () => {
     const outcome = await enableSbsOverlay(page);
 
     const legend = page.locator('#sbs_legend');
+    if (!outcome.available) {
+      await expect(legend).toBeHidden();
+      return;
+    }
     if (!outcome.success) {
       await expect(legend).toBeHidden();
       return;
@@ -858,6 +932,10 @@ test.describe('map gl smoke', () => {
 
     const legend = page.locator('#sbs_legend');
     const slider = legend.locator('#baer-opacity-slider');
+    if (!outcome.available) {
+      await expect(legend).toBeHidden();
+      return;
+    }
     if (!outcome.success) {
       await expect(legend).toBeHidden();
       return;
@@ -885,6 +963,10 @@ test.describe('map gl smoke', () => {
 
     const outcome = await enableSbsOverlay(page);
     const legend = page.locator('#sbs_legend');
+    if (!outcome.available) {
+      await expect(legend).toBeHidden();
+      return;
+    }
     if (!outcome.success) {
       await expect(legend).toBeHidden();
       return;
@@ -901,19 +983,18 @@ test.describe('map gl smoke', () => {
     await expect(legend).toBeHidden();
   });
 
-  test('empty run tolerates missing SBS resources', async ({ page }) => {
+  test('empty run hides SBS overlay control', async ({ page }) => {
     const mapVisible = await openRun(page, resolveEmptyUrl(), { allowMissingMap: true });
     if (!mapVisible) {
       test.skip(true, 'Empty run map not available.');
     }
 
-    const outcome = await enableSbsOverlay(page);
+    const { panel } = await openOverlayPanel(page);
+    const sbsToggle = panel.locator('label:has-text("Burn Severity Map")');
+    await expect(sbsToggle).toHaveCount(0);
+
     const legend = page.locator('#sbs_legend');
-    if (outcome.success) {
-      await expect(legend).toBeVisible();
-    } else {
-      await expect(legend).toBeHidden();
-    }
+    await expect(legend).toBeHidden();
   });
 
   test('subcatchments overlay toggles in GL', async ({ page }) => {
@@ -952,6 +1033,99 @@ test.describe('map gl smoke', () => {
     await layerToggle.click();
 
     await waitForOverlayLayer(page, 'Subcatchments');
+  });
+
+  test('slope/aspect modes update legend', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await page.evaluate(async () => {
+      const sub = window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === 'function'
+        ? window.SubcatchmentDelineation.getInstance()
+        : null;
+      if (!sub || typeof sub.show !== 'function') {
+        return { ok: false, reason: 'subcatchment controller missing' };
+      }
+      try {
+        await sub.show();
+      } catch (error) {
+        return { ok: false, reason: error.message || String(error) };
+      }
+      window.lastPreflightChecklist = Object.assign({}, window.lastPreflightChecklist, { subcatchments: true });
+      if (typeof sub.updateLayerAvailability === 'function') {
+        sub.updateLayerAvailability();
+      } else if (typeof sub.enableColorMap === 'function') {
+        sub.enableColorMap('slope');
+      }
+      return { ok: true };
+    });
+
+    if (!outcome.ok) {
+      test.skip(true, `Subcatchments unavailable: ${outcome.reason || 'unknown'}`);
+    }
+
+    const slopeRadio = page.locator('#sub_cmap_radio_slope');
+    const aspectRadio = page.locator('#sub_cmap_radio_aspect');
+    await expect(slopeRadio).toBeVisible();
+    await expect(aspectRadio).toBeVisible();
+
+    if (await slopeRadio.isDisabled()) {
+      test.skip(true, 'Slope/aspect colormap radios are disabled.');
+    }
+
+    const legend = page.locator('#sub_legend');
+
+    await slopeRadio.check();
+    await expect.poll(async () => (await legend.textContent()) || '').toContain('Slope');
+    await aspectRadio.check();
+    await expect.poll(async () => (await legend.textContent()) || '').toContain('Aspect');
+  });
+
+  test('landuse/soils modes update legend', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await page.evaluate(async () => {
+      const sub = window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === 'function'
+        ? window.SubcatchmentDelineation.getInstance()
+        : null;
+      if (!sub || typeof sub.show !== 'function') {
+        return { ok: false, reason: 'subcatchment controller missing' };
+      }
+      try {
+        await sub.show();
+      } catch (error) {
+        return { ok: false, reason: error.message || String(error) };
+      }
+      window.lastPreflightChecklist = Object.assign({}, window.lastPreflightChecklist, {
+        subcatchments: true,
+        landuse: true,
+        soils: true
+      });
+      if (typeof sub.updateLayerAvailability === 'function') {
+        sub.updateLayerAvailability();
+      }
+      return { ok: true };
+    });
+
+    if (!outcome.ok) {
+      test.skip(true, `Subcatchments unavailable: ${outcome.reason || 'unknown'}`);
+    }
+
+    const landuseRadio = page.locator('#sub_cmap_radio_dom_lc');
+    const soilsRadio = page.locator('#sub_cmap_radio_dom_soil');
+    await expect(landuseRadio).toBeVisible();
+    await expect(soilsRadio).toBeVisible();
+
+    if (await landuseRadio.isDisabled() || await soilsRadio.isDisabled()) {
+      test.skip(true, 'Landuse/soils colormap radios are disabled.');
+    }
+
+    const legend = page.locator('#sub_legend');
+
+    await landuseRadio.check();
+    await expect.poll(async () => (await legend.textContent()) || '').toContain('Landuse');
+
+    await soilsRadio.check();
+    await expect.poll(async () => (await legend.textContent()) || '').toContain('Soils');
   });
 
   test('gridded loss mode adds overlay and updates labels', async ({ page }) => {

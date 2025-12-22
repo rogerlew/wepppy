@@ -491,14 +491,205 @@ var SubcatchmentDelineation = (function () {
     }
 
     function renderLegendIfPresent(palette, canvasId) {
-        if (typeof window.render_legend !== "function") {
-            return;
-        }
         var canvas = document.getElementById(canvasId);
         if (!canvas) {
             return;
         }
-        window.render_legend(palette, canvasId);
+        if (typeof window.render_legend === "function") {
+            window.render_legend(palette, canvasId);
+            return;
+        }
+        if (typeof window.createColormap !== "function") {
+            return;
+        }
+        renderLegendCanvas(palette, canvas);
+    }
+
+    function renderLegendCanvas(palette, canvas) {
+        if (!canvas || typeof canvas.getContext !== "function") {
+            return;
+        }
+        var rect = canvas.getBoundingClientRect();
+        var width = Math.round(rect.width || canvas.offsetWidth || canvas.clientWidth || canvas.width || 0);
+        var height = Math.round(rect.height || canvas.offsetHeight || canvas.clientHeight || canvas.height || 0);
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        if (canvas.width !== width) {
+            canvas.width = width;
+        }
+        if (canvas.height !== height) {
+            canvas.height = height;
+        }
+        var mapper = window.createColormap({ colormap: palette, nshades: 64 });
+        if (!mapper || typeof mapper.map !== "function") {
+            return;
+        }
+        var ctx = canvas.getContext("2d");
+        if (!ctx) {
+            return;
+        }
+        var imgData = ctx.createImageData(width, height);
+        var denom = width > 1 ? width - 1 : 1;
+        for (var y = 0; y < height; y += 1) {
+            var rowOffset = y * width * 4;
+            for (var x = 0; x < width; x += 1) {
+                var t = x / denom;
+                var hex = mapper.map(t);
+                var rgba = hexToRgba(hex, 1);
+                var idx = rowOffset + x * 4;
+                imgData.data[idx] = rgba[0];
+                imgData.data[idx + 1] = rgba[1];
+                imgData.data[idx + 2] = rgba[2];
+                imgData.data[idx + 3] = rgba[3];
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    function resolveColorMapAlias(mode) {
+        if (mode === "slp_asp") {
+            return "slope";
+        }
+        return mode;
+    }
+
+    function clampNormalized(value) {
+        if (!Number.isFinite(value)) {
+            return null;
+        }
+        if (value < 0) {
+            return 0;
+        }
+        if (value > 1) {
+            return 1;
+        }
+        return value;
+    }
+
+    function resolveSlopeAspectMapper(state) {
+        if (!state.colorMappers.slopeAspect && typeof window.createColormap === "function") {
+            state.colorMappers.slopeAspect = window.createColormap({ colormap: "viridis", nshades: 64 });
+        }
+        return state.colorMappers.slopeAspect;
+    }
+
+    function resolveAspectDegrees(record) {
+        if (!record) {
+            return null;
+        }
+        var source = record.watershed && typeof record.watershed === "object" ? record.watershed : record;
+        return parseNumeric(source.aspect);
+    }
+
+    function aspectToRgb(degrees) {
+        if (!Number.isFinite(degrees)) {
+            return null;
+        }
+        var hue = degrees % 360;
+        if (hue < 0) {
+            hue += 360;
+        }
+        var h = hue / 60;
+        var c = 200;
+        var x = c * (1 - Math.abs((h % 2) - 1));
+        var r;
+        var g;
+        var b;
+        if (h < 1) { r = c; g = x; b = 0; } else if (h < 2) { r = x; g = c; b = 0; }
+        else if (h < 3) { r = 0; g = c; b = x; } else if (h < 4) { r = 0; g = x; b = c; }
+        else if (h < 5) { r = x; g = 0; b = c; } else { r = c; g = 0; b = x; }
+        return [Math.round(r + 55), Math.round(g + 55), Math.round(b + 55)];
+    }
+
+    function aspectToRgba(degrees, alpha) {
+        var rgb = aspectToRgb(degrees);
+        if (!rgb) {
+            return null;
+        }
+        var a = 255;
+        if (Number.isFinite(alpha)) {
+            a = alpha <= 1 ? Math.round(alpha * 255) : Math.round(alpha);
+        }
+        return [rgb[0], rgb[1], rgb[2], a];
+    }
+
+    function resolveSlopeAspectValue(mode, record) {
+        if (!record) {
+            return null;
+        }
+        var source = record.watershed && typeof record.watershed === "object" ? record.watershed : record;
+        if (mode === "aspect") {
+            var aspectValue = parseNumeric(source.aspect);
+            if (aspectValue === null) {
+                return null;
+            }
+            return clampNormalized(aspectValue / 360);
+        }
+        var slopeValue = parseNumeric(source.slope_scalar);
+        if (slopeValue === null) {
+            slopeValue = parseNumeric(source.slope);
+        }
+        return slopeValue === null ? null : clampNormalized(slopeValue);
+    }
+
+    function renderSlopeLegend(emit) {
+        var canvasId = "sub_cmap_canvas_slope";
+        var html = ""
+            + "<div class=\"wc-map-legend__header\">Slope (rise/run)</div>"
+            + "<div class=\"wc-color-scale\">"
+            + "<div class=\"wc-color-scale__bar\">"
+            + "<canvas id=\"" + canvasId + "\" class=\"wc-color-scale__canvas\" width=\"200\" height=\"20\"></canvas>"
+            + "</div>"
+            + "<div class=\"wc-color-scale__labels\">"
+            + "<span>0</span>"
+            + "<span>1</span>"
+            + "</div>"
+            + "</div>";
+        setSubLegend(html);
+        renderLegendIfPresent("viridis", canvasId);
+        if (typeof emit === "function") {
+            emit("subcatchment:legend:updated", { name: "slope" });
+        }
+    }
+
+    function renderAspectLegend(emit) {
+        var directions = [
+            { label: "N (0°)", degrees: 0 },
+            { label: "NE (45°)", degrees: 45 },
+            { label: "E (90°)", degrees: 90 },
+            { label: "SE (135°)", degrees: 135 },
+            { label: "S (180°)", degrees: 180 },
+            { label: "SW (225°)", degrees: 225 },
+            { label: "W (270°)", degrees: 270 },
+            { label: "NW (315°)", degrees: 315 }
+        ];
+
+        var html = "<div class=\"wc-map-legend__header\">Aspect (degrees)</div>"
+            + "<div class=\"wc-legend\">";
+        directions.forEach(function (dir) {
+            var rgb = aspectToRgb(dir.degrees);
+            var color = rgb ? "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")" : "#999999";
+            html += ""
+                + "<div class=\"wc-legend-item\">"
+                + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + color + ";\" aria-label=\"Color swatch for " + dir.label + "\"></span>"
+                + "<span class=\"wc-legend-item__label\">" + dir.label + "</span>"
+                + "</div>";
+        });
+        html += "</div>";
+        setSubLegend(html);
+        if (typeof emit === "function") {
+            emit("subcatchment:legend:updated", { name: "aspect" });
+        }
+    }
+
+    function renderSlopeAspectLegend(mode, emit) {
+        var resolvedMode = resolveColorMapAlias(mode);
+        if (resolvedMode === "aspect") {
+            renderAspectLegend(emit);
+            return;
+        }
+        renderSlopeLegend(emit);
     }
 
     function resolveLabelPosition(feature) {
@@ -586,7 +777,7 @@ var SubcatchmentDelineation = (function () {
         });
     }
 
-    function buildSubcatchmentLayer(deckApi, data, colorFn) {
+    function buildSubcatchmentLayer(deckApi, data, colorFn, mode) {
         var lineColor = hexToRgba(DEFAULT_STYLE.color, DEFAULT_STYLE.opacity);
         return new deckApi.GeoJsonLayer({
             id: SUBCATCHMENT_LAYER_ID,
@@ -597,8 +788,12 @@ var SubcatchmentDelineation = (function () {
             lineWidthUnits: "pixels",
             lineWidthMinPixels: 1,
             getLineWidth: function () { return DEFAULT_STYLE.weight; },
-            getLineColor: function () { return lineColor; },
+            getLineColor: function (feature) { return colorFn(feature); },
             getFillColor: function (feature) { return colorFn(feature); },
+            updateTriggers: {
+                getFillColor: [mode],
+                getLineColor: [mode]
+            },
             onClick: function (info) {
                 var feature = info && info.object ? info.object : null;
                 var topId = feature && feature.properties ? feature.properties.TopazID : null;
@@ -843,6 +1038,7 @@ var SubcatchmentDelineation = (function () {
                 runoff: typeof window.createColormap === "function" ? window.createColormap({ colormap: "winter", nshades: 64 }) : null,
                 loss: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
                 phosphorus: typeof window.createColormap === "function" ? window.createColormap({ colormap: "viridis", nshades: 64 }) : null,
+                slopeAspect: typeof window.createColormap === "function" ? window.createColormap({ colormap: "viridis", nshades: 64 }) : null,
                 ashLoad: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
                 ashTransport: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
                 rhemRunoff: typeof window.createColormap === "function" ? window.createColormap({ colormap: "winter", nshades: 64 }) : null,
@@ -912,10 +1108,28 @@ var SubcatchmentDelineation = (function () {
                 case "clear":
                     return function () { return clearFill; };
                 case "slp_asp":
+                case "slope":
                     return function (feature) {
                         var id = feature.properties.TopazID;
-                        var rgbHex = state.dataSlpAsp && state.dataSlpAsp[id] ? state.dataSlpAsp[id].color : null;
-                        return rgbHex ? hexToRgba(rgbHex, 0.7) : defaultFill;
+                        var record = state.dataSlpAsp && state.dataSlpAsp[id] ? state.dataSlpAsp[id] : null;
+                        var normalized = resolveSlopeAspectValue("slope", record);
+                        if (!Number.isFinite(normalized)) {
+                            return defaultFill;
+                        }
+                        var mapper = resolveSlopeAspectMapper(state);
+                        var hex = mapper ? mapper.map(normalized) : "#ffffff";
+                        return hexToRgba(hex, 0.9);
+                    };
+                case "aspect":
+                    return function (feature) {
+                        var id = feature.properties.TopazID;
+                        var record = state.dataSlpAsp && state.dataSlpAsp[id] ? state.dataSlpAsp[id] : null;
+                        var aspectValue = resolveAspectDegrees(record);
+                        var rgba = aspectToRgba(aspectValue, 0.9);
+                        if (!rgba) {
+                            return defaultFill;
+                        }
+                        return rgba;
                     };
                 case "landuse":
                     return function (feature) {
@@ -1100,7 +1314,7 @@ var SubcatchmentDelineation = (function () {
                 }
                 var deckApi = ensureDeck();
                 var cmapFn = colorFnFactory();
-                var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn);
+                var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn, state.cmapMode);
                 attachLayerRebuild(nextLayer);
                 state.glLayer = nextLayer;
                 sub.glLayer = nextLayer;
@@ -1134,7 +1348,7 @@ var SubcatchmentDelineation = (function () {
                 map.ctrls.addOverlay(nextLayer, name);
             }
             if (wasVisible && typeof map.addLayer === "function") {
-                map.addLayer(nextLayer, { skipRefresh: true });
+                map.addLayer(nextLayer);
             }
         }
 
@@ -1146,7 +1360,7 @@ var SubcatchmentDelineation = (function () {
             var deckApi = ensureDeck();
             var wasVisible = state.glLayer ? map.hasLayer(state.glLayer) : true;
             var cmapFn = colorFnFactory();
-            var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn);
+            var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn, state.cmapMode);
             attachLayerRebuild(nextLayer);
             replaceOverlayLayer(map, SUBCATCHMENT_LAYER_NAME, state.glLayer, nextLayer, wasVisible);
             state.glLayer = nextLayer;
@@ -1321,14 +1535,26 @@ var SubcatchmentDelineation = (function () {
                 });
         }
 
-        function renderSlpAsp() {
-            return renderLayer({
-                type: "watershed",
-                dataProp: "dataSlpAsp",
-                mode: "slp_asp",
-                legend: "slope_aspect",
-                label: "slope/aspect"
-            });
+        function renderSlopeAspect(mode) {
+            var resolvedMode = resolveColorMapAlias(mode);
+            var label = resolvedMode === "aspect" ? "aspect" : "slope";
+            if (statusAdapter && typeof statusAdapter.text === "function") {
+                statusAdapter.text("Loading " + label + " ...");
+            }
+            return requestJson(resolveRunScopedUrl("query/watershed/subcatchments/"))
+                .then(function (data) {
+                    state.dataSlpAsp = data;
+                    state.cmapMode = resolvedMode;
+                    resolveSlopeAspectMapper(state);
+                    updateGlLayerStyle();
+                    if (statusAdapter && typeof statusAdapter.text === "function") {
+                        statusAdapter.text(label + " loaded.");
+                    }
+                })
+                .catch(handleError)
+                .then(function () {
+                    renderSlopeAspectLegend(resolvedMode, emit);
+                });
         }
 
         function renderLanduse() {
@@ -1557,8 +1783,9 @@ var SubcatchmentDelineation = (function () {
             if (!value) {
                 return;
             }
-            sub.setColorMap(value);
-            emit("subcatchment:map:mode", { mode: value });
+            var resolvedMode = resolveColorMapAlias(value);
+            sub.setColorMap(resolvedMode);
+            emit("subcatchment:map:mode", { mode: resolvedMode });
         }
 
         function setupDelegatedEvents() {
@@ -1608,8 +1835,14 @@ var SubcatchmentDelineation = (function () {
             }
         }
 
+        function enableSlopeAspectRadios() {
+            disableRadio("sub_cmap_radio_slope", false);
+            disableRadio("sub_cmap_radio_aspect", false);
+        }
+
         sub.enableColorMap = function (cmapName) {
-            switch (cmapName) {
+            var resolvedMode = resolveColorMapAlias(cmapName);
+            switch (resolvedMode) {
                 case "dom_lc":
                     disableRadio("sub_cmap_radio_dom_lc", false);
                     break;
@@ -1619,8 +1852,9 @@ var SubcatchmentDelineation = (function () {
                 case "dom_soil":
                     disableRadio("sub_cmap_radio_dom_soil", false);
                     break;
-                case "slp_asp":
-                    disableRadio("sub_cmap_radio_slp_asp", false);
+                case "slope":
+                case "aspect":
+                    enableSlopeAspectRadios();
                     break;
                 default:
                     throw new Error("Map.enableColorMap received unexpected parameter: " + cmapName);
@@ -1632,51 +1866,54 @@ var SubcatchmentDelineation = (function () {
         };
 
         sub.setColorMap = function (mode) {
-            if (!state.glLayer && mode !== "default" && mode !== "clear" && mode !== "grd_loss") {
+            var resolvedMode = resolveColorMapAlias(mode);
+            if (!state.glLayer && resolvedMode !== "default" && resolvedMode !== "clear" && resolvedMode !== "grd_loss") {
                 throw new Error("Subcatchments have not been drawn");
             }
 
-            if (mode === "default") {
+            if (resolvedMode === "default") {
                 state.cmapMode = "default";
                 updateGlLayerStyle();
                 setSubLegend("");
-            } else if (mode === "slp_asp") {
-                renderSlpAsp();
-            } else if (mode === "dom_lc" || mode === "landuse") {
+            } else if (resolvedMode === "slope") {
+                renderSlopeAspect("slope");
+            } else if (resolvedMode === "aspect") {
+                renderSlopeAspect("aspect");
+            } else if (resolvedMode === "dom_lc" || resolvedMode === "landuse") {
                 renderLanduse();
-            } else if (mode === "rangeland_cover") {
+            } else if (resolvedMode === "rangeland_cover") {
                 renderRangelandCover();
-            } else if (mode === "dom_soil" || mode === "soils") {
+            } else if (resolvedMode === "dom_soil" || resolvedMode === "soils") {
                 renderSoils();
-            } else if (mode === "cover" || mode === "landuse_cover") {
+            } else if (resolvedMode === "cover" || resolvedMode === "landuse_cover") {
                 renderCover();
-            } else if (mode === "sub_runoff") {
+            } else if (resolvedMode === "sub_runoff") {
                 renderRunoff();
-            } else if (mode === "sub_subrunoff") {
+            } else if (resolvedMode === "sub_subrunoff") {
                 renderSubrunoff();
-            } else if (mode === "sub_baseflow") {
+            } else if (resolvedMode === "sub_baseflow") {
                 renderBaseflow();
-            } else if (mode === "sub_loss") {
+            } else if (resolvedMode === "sub_loss") {
                 renderLoss();
-            } else if (mode === "sub_phosphorus") {
+            } else if (resolvedMode === "sub_phosphorus") {
                 renderPhosphorus();
-            } else if (mode === "sub_rhem_runoff") {
+            } else if (resolvedMode === "sub_rhem_runoff") {
                 renderRhemRunoff();
-            } else if (mode === "sub_rhem_sed_yield") {
+            } else if (resolvedMode === "sub_rhem_sed_yield") {
                 renderRhemSedYield();
-            } else if (mode === "sub_rhem_soil_loss") {
+            } else if (resolvedMode === "sub_rhem_soil_loss") {
                 renderRhemSoilLoss();
-            } else if (mode === "ash_load") {
+            } else if (resolvedMode === "ash_load") {
                 renderAshLoad();
-            } else if (mode === "wind_transport (kg/ha)" || mode === "water_transport (kg/ha" || mode === "ash_transport (kg/ha)" || mode === "ash_transport") {
+            } else if (resolvedMode === "wind_transport (kg/ha)" || resolvedMode === "water_transport (kg/ha" || resolvedMode === "ash_transport (kg/ha)" || resolvedMode === "ash_transport") {
                 renderAshTransport();
-            } else if (mode === "grd_loss") {
+            } else if (resolvedMode === "grd_loss") {
                 state.cmapMode = "clear";
                 updateGlLayerStyle();
                 renderGriddedLoss();
             }
 
-            if (mode !== "grd_loss") {
+            if (resolvedMode !== "grd_loss") {
                 removeGrid();
             }
         };
@@ -1869,7 +2106,7 @@ var SubcatchmentDelineation = (function () {
                     sub.disconnect_status_stream(sub);
                 }
                 if (typeof sub.enableColorMap === "function") {
-                    sub.enableColorMap("slp_asp");
+                    sub.enableColorMap("slope");
                 }
                 try {
                     if (window.Wepp && typeof window.Wepp.getInstance === "function") {
@@ -1910,7 +2147,7 @@ var SubcatchmentDelineation = (function () {
             }
 
             if (checklist.subcatchments) {
-                disableRadio("sub_cmap_radio_slp_asp", false);
+                enableSlopeAspectRadios();
             }
             if (checklist.landuse) {
                 disableRadio("sub_cmap_radio_dom_lc", false);
@@ -1977,7 +2214,7 @@ var SubcatchmentDelineation = (function () {
                     sub.report();
                     bootstrapState.reportLoaded = true;
                 }
-                var defaultColorMap = controllerContext.defaultColorMap || "slp_asp";
+                var defaultColorMap = resolveColorMapAlias(controllerContext.defaultColorMap || "slp_asp");
                 if (!bootstrapState.defaultColorMapEnabled && typeof sub.enableColorMap === "function") {
                     sub.enableColorMap(defaultColorMap);
                     bootstrapState.defaultColorMapEnabled = true;

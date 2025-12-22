@@ -13,6 +13,7 @@ describe("Map GL controller", () => {
         global.runid = "test-run";
         global.config = "cfg";
         global.url_for_run = jest.fn((path) => `/runs/${global.runid}/${global.config}/${path}`);
+        global.window.runContext = { flags: { initialHasSbs: true } };
 
         document.body.innerHTML = `
             <form id="setloc_form">
@@ -132,6 +133,7 @@ describe("Map GL controller", () => {
         delete global.runid;
         delete global.config;
         delete global.url_for_run;
+        delete global.window.runContext;
         delete global.createImageBitmap;
         if (global.window) {
             delete global.window.createImageBitmap;
@@ -168,7 +170,7 @@ describe("Map GL controller", () => {
         expect(emittedEvents.some((evt) => evt.name === "map:center:changed")).toBe(true);
     });
 
-    test("overlay control registers USGS/SNOTEL/NHD with zoom gating labels", () => {
+    test("overlay control registers USGS/SNOTEL/NHD and SBS with zoom gating labels", () => {
         global.MapController.getInstance();
 
         const overlayInputs = Array.from(document.querySelectorAll('input[name="wc-map-overlay"]'));
@@ -192,6 +194,24 @@ describe("Map GL controller", () => {
         const nhdIndex = labels.findIndex((label) => label.includes("NHD"));
         expect(usgsIndex).toBeLessThan(snotelIndex);
         expect(snotelIndex).toBeLessThan(nhdIndex);
+    });
+
+    test("overlay control hides SBS when initialHasSbs is false", () => {
+        global.window.runContext = { flags: { initialHasSbs: false } };
+        global.MapController.getInstance();
+
+        const overlayInputs = Array.from(document.querySelectorAll('input[name="wc-map-overlay"]'));
+        expect(overlayInputs.length).toBeGreaterThanOrEqual(3);
+
+        const labels = overlayInputs.map((input) => {
+            const text = input.parentElement.querySelector(".wc-map-layer-control__text");
+            return text ? text.textContent : "";
+        });
+
+        expect(labels.some((label) => label.includes("Burn Severity Map"))).toBe(false);
+        expect(labels.some((label) => label.includes("USGS Gage Locations"))).toBe(true);
+        expect(labels.some((label) => label.includes("SNOTEL Locations"))).toBe(true);
+        expect(labels.some((label) => label.includes("NHD"))).toBe(true);
     });
 
     test("loadSbsMap emits map:layer:refreshed and shows legend", async () => {

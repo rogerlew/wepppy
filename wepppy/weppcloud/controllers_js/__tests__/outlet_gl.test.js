@@ -91,6 +91,7 @@ describe("Outlet GL controller", () => {
         global.deck = {
             GeoJsonLayer: Layer,
             TextLayer: Layer,
+            IconLayer: Layer,
         };
 
         await import("../outlet_gl.js");
@@ -175,6 +176,22 @@ describe("Outlet GL controller", () => {
         expect(mapStub.addLayer).toHaveBeenCalledWith(expect.any(Object));
         expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Outlet");
         expect(outlet.outletLayer).toBeTruthy();
+
+        const outletLayer = outlet.outletLayer;
+        const outletData = outletLayer.props.data[0];
+        const iconKey = outletLayer.props.getIcon(outletData);
+        const mapping = outletLayer.props.iconMapping[iconKey];
+
+        expect(outletLayer.props.iconAtlas).toContain("/static/images/map-marker.png");
+        expect(iconKey).toBe("outlet-pin");
+        expect(mapping.width).toBe(198);
+        expect(mapping.height).toBe(320);
+        expect(mapping.anchorX).toBe(99);
+        expect(mapping.anchorY).toBe(320);
+        expect(mapping.mask).toBe(false);
+        expect(outletLayer.props.sizeUnits).toBe("meters");
+        expect(outletLayer.props.getSize()).toBe(360);
+        expect(outletLayer.props.sizeScale).toBe(1);
     });
 
     test("bootstrap honors controllerContext.hasOutlet when watershed is missing", async () => {

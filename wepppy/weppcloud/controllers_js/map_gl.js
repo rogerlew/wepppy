@@ -466,6 +466,7 @@ var MapController = (function () {
         var baseLayerKey = basemapDefs.googleTerrain.key;
         var layerControl = null;
         var sbsLayerController = null;
+        var sbsOverlayAvailable = null;
         var elevationCooldownTimer = null;
         var mouseElevationHideTimer = null;
         var isFetchingElevation = false;
@@ -505,6 +506,53 @@ var MapController = (function () {
 
         function warnNotImplemented(action) {
             console.warn("Map GL stub: " + action + " not implemented.");
+        }
+
+        function normalizeSbsAvailability(value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
+            return Boolean(value);
+        }
+
+        function resolveInitialHasSbs(context) {
+            var ctx = context || null;
+            var flags = ctx && ctx.flags ? ctx.flags : null;
+            if (flags && flags.initialHasSbs !== undefined && flags.initialHasSbs !== null) {
+                return normalizeSbsAvailability(flags.initialHasSbs);
+            }
+            if (typeof window !== "undefined") {
+                var runContext = window.runContext || null;
+                var runFlags = runContext && runContext.flags ? runContext.flags : null;
+                if (runFlags && runFlags.initialHasSbs !== undefined && runFlags.initialHasSbs !== null) {
+                    return normalizeSbsAvailability(runFlags.initialHasSbs);
+                }
+            }
+            return null;
+        }
+
+        function setSbsOverlayAvailability(value) {
+            var normalized = normalizeSbsAvailability(value);
+            if (normalized === null) {
+                return;
+            }
+            if (sbsOverlayAvailable === normalized) {
+                return;
+            }
+            sbsOverlayAvailable = normalized;
+            if (layerControl) {
+                renderOverlayLayerControl();
+            }
+        }
+
+        function shouldRenderOverlay(name) {
+            if (!name) {
+                return false;
+            }
+            if (sbsOverlayAvailable === false && name.indexOf(SBS_LAYER_NAME) !== -1) {
+                return false;
+            }
+            return true;
         }
 
         function normalizeFeatureCollection(data) {
@@ -1399,13 +1447,17 @@ var MapController = (function () {
             if (control.overlayInputs && typeof control.overlayInputs.clear === "function") {
                 control.overlayInputs.clear();
             }
-            var entries = Array.from(overlayNameRegistry.entries()).map(function (entry, index) {
-                return {
-                    entry: entry,
-                    index: index,
-                    order: overlaySortIndex(entry[0])
-                };
-            });
+            var entries = Array.from(overlayNameRegistry.entries())
+                .filter(function (entry) {
+                    return shouldRenderOverlay(entry[0]);
+                })
+                .map(function (entry, index) {
+                    return {
+                        entry: entry,
+                        index: index,
+                        order: overlaySortIndex(entry[0])
+                    };
+                });
             if (!entries.length) {
                 control.overlaySection.hidden = true;
                 return;
@@ -1938,6 +1990,9 @@ var MapController = (function () {
                 }
 
                 var flags = context && context.flags ? context.flags : null;
+                if (flags && flags.initialHasSbs !== undefined) {
+                    setSbsOverlayAvailability(flags.initialHasSbs);
+                }
                 if (flags && flags.initialHasSbs === true && map.sbs_layer && !map.hasLayer(map.sbs_layer)) {
                     map.addLayer(map.sbs_layer);
                 }
@@ -2799,6 +2854,7 @@ var MapController = (function () {
             document.addEventListener("disturbed:has_sbs_changed", function (event) {
                 var detail = event && event.detail ? event.detail : {};
                 var hasSbs = detail.hasSbs === true;
+                setSbsOverlayAvailability(hasSbs);
                 if (hasSbs) {
                     if (map.sbs_layer && !map.hasLayer(map.sbs_layer)) {
                         map.addLayer(map.sbs_layer);
@@ -2826,6 +2882,7 @@ var MapController = (function () {
                 type: "base"
             });
         };
+        setSbsOverlayAvailability(resolveInitialHasSbs());
         renderBaseLayerControl();
         renderOverlayLayerControl();
 

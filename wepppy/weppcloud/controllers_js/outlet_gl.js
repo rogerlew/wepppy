@@ -24,6 +24,24 @@ var Outlet = (function () {
     var TEMP_DIALOG_LAYER_ID = "wc-outlet-temp-dialog";
     var TEMP_DIALOG_TEXT = "Setting outlet...";
     var TEMP_COLOR = "#1a73e8";
+    var OUTLET_PIN_SIZE_METERS = 360;
+    var OUTLET_PIN_ICON_KEY = "outlet-pin";
+    var OUTLET_PIN_ATLAS_PATH = "/static/images/map-marker.png";
+    var OUTLET_PIN_ATLAS_WIDTH = 198;
+    var OUTLET_PIN_ATLAS_HEIGHT = 320;
+    var OUTLET_PIN_ANCHOR_X = 99;
+    var OUTLET_PIN_ANCHOR_Y = 320;
+    var OUTLET_PIN_ICON_MAPPING = {
+        "outlet-pin": {
+            x: 0,
+            y: 0,
+            width: OUTLET_PIN_ATLAS_WIDTH,
+            height: OUTLET_PIN_ATLAS_HEIGHT,
+            anchorX: OUTLET_PIN_ANCHOR_X,
+            anchorY: OUTLET_PIN_ANCHOR_Y,
+            mask: false
+        }
+    };
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -47,6 +65,9 @@ var Outlet = (function () {
         var deckApi = window.deck;
         if (!deckApi || typeof deckApi.GeoJsonLayer !== "function") {
             throw new Error("Outlet GL requires deck.gl GeoJsonLayer.");
+        }
+        if (typeof deckApi.IconLayer !== "function") {
+            throw new Error("Outlet GL requires deck.gl IconLayer.");
         }
         return deckApi;
     }
@@ -172,6 +193,15 @@ var Outlet = (function () {
         return [r, g, b, Math.round(alpha * 255)];
     }
 
+    function resolveStaticPath(path) {
+        var prefix = typeof window.site_prefix === "string" ? window.site_prefix.replace(/\/+$/, "") : "";
+        var normalized = path || "";
+        if (normalized.charAt(0) !== "/") {
+            normalized = "/" + normalized;
+        }
+        return prefix + normalized;
+    }
+
     function buildPointLayer(deckApi, id, latlng, options) {
         var radius = options.radius || 6;
         var strokeWidth = options.strokeWidth || 2;
@@ -212,17 +242,23 @@ var Outlet = (function () {
         if (!outletData) {
             return null;
         }
-        var fillColor = hexToRgba(TEMP_COLOR, 0.9);
-        var strokeColor = hexToRgba(TEMP_COLOR, 1);
-        return buildPointLayer(deckApi, OUTLET_LAYER_ID, {
-            lat: outletData.lat,
-            lng: outletData.lng
-        }, {
-            radius: 8,
-            strokeWidth: 2,
-            fillColor: fillColor,
-            lineColor: strokeColor,
-            properties: outletData.properties || {}
+        return new deckApi.IconLayer({
+            id: OUTLET_LAYER_ID,
+            data: [
+                {
+                    position: [outletData.lng, outletData.lat],
+                    properties: outletData.properties || {}
+                }
+            ],
+            iconAtlas: resolveStaticPath(OUTLET_PIN_ATLAS_PATH),
+            iconMapping: OUTLET_PIN_ICON_MAPPING,
+            pickable: false,
+            sizeUnits: "meters",
+            sizeScale: 1,
+            getPosition: function (d) { return d.position; },
+            getIcon: function () { return OUTLET_PIN_ICON_KEY; },
+            getSize: function () { return OUTLET_PIN_SIZE_METERS; },
+            getColor: function () { return [255, 255, 255, 255]; }
         });
     }
 

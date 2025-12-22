@@ -35,7 +35,8 @@ describe("SubcatchmentDelineation GL controller", () => {
             <div id="sub_legend"></div>
             <input type="radio" id="sub_cmap_radio_dom_lc">
             <input type="radio" id="sub_cmap_radio_dom_soil">
-            <input type="radio" id="sub_cmap_radio_slp_asp">
+            <input type="radio" id="sub_cmap_radio_slope">
+            <input type="radio" id="sub_cmap_radio_aspect">
             <input type="radio" id="sub_cmap_radio_rangeland_cover">
             <input type="range"
                    id="wepp_sub_cmap_range_runoff"
@@ -240,7 +241,7 @@ describe("SubcatchmentDelineation GL controller", () => {
         );
         expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Subcatchments");
         expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Subcatchment Labels");
-        expect(mapStub.addLayer).toHaveBeenCalledWith(expect.any(Object), expect.any(Object));
+        expect(mapStub.addLayer).toHaveBeenCalledWith(expect.any(Object));
         expect(mapStub.clearFindFlashCache).toHaveBeenCalledWith("subcatchments");
         expect(sub.glLayer).toBeTruthy();
     });
@@ -312,6 +313,91 @@ describe("SubcatchmentDelineation GL controller", () => {
         await Promise.resolve();
         expect(document.getElementById("wepp_sub_cmap_canvas_loss_min").textContent).not.toBe("");
         expect(document.getElementById("wepp_sub_cmap_canvas_loss_max").textContent).not.toBe("");
+    });
+
+    test("setColorMap slp_asp maps to slope normalization", async () => {
+        const sub = window.SubcatchmentDelineation.getInstance();
+
+        requestMock
+            .mockResolvedValueOnce({
+                body: {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            properties: { TopazID: 1 },
+                            geometry: {
+                                type: "Polygon",
+                                coordinates: [[
+                                    [-120.1, 45.1],
+                                    [-120.2, 45.1],
+                                    [-120.2, 45.2],
+                                    [-120.1, 45.2],
+                                    [-120.1, 45.1],
+                                ]],
+                            },
+                        },
+                    ],
+                },
+            })
+            .mockResolvedValueOnce({
+                body: {
+                    "1": { slope_scalar: 0.25, aspect: 180 },
+                },
+            });
+
+        await sub.show();
+        sub.setColorMap("slp_asp");
+        await flushPromises();
+
+        const mapper = sub.state.colorMappers.slopeAspect;
+        sub.glLayer.props.getFillColor({ properties: { TopazID: 1 } });
+
+        expect(sub.state.cmapMode).toBe("slope");
+        expect(mapper.map).toHaveBeenCalledWith(0.25);
+    });
+
+    test("setColorMap aspect uses hue wheel colors", async () => {
+        const sub = window.SubcatchmentDelineation.getInstance();
+
+        requestMock
+            .mockResolvedValueOnce({
+                body: {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            properties: { TopazID: 1 },
+                            geometry: {
+                                type: "Polygon",
+                                coordinates: [[
+                                    [-120.1, 45.1],
+                                    [-120.2, 45.1],
+                                    [-120.2, 45.2],
+                                    [-120.1, 45.2],
+                                    [-120.1, 45.1],
+                                ]],
+                            },
+                        },
+                    ],
+                },
+            })
+            .mockResolvedValueOnce({
+                body: {
+                    "1": { slope_scalar: 0.25, aspect: 180 },
+                },
+            });
+
+        await sub.show();
+        sub.setColorMap("aspect");
+        await flushPromises();
+
+        const mapper = sub.state.colorMappers.slopeAspect;
+        const color = sub.glLayer.props.getFillColor({ properties: { TopazID: 1 } });
+
+        expect(sub.state.cmapMode).toBe("aspect");
+        expect(mapper.map).not.toHaveBeenCalled();
+        expect(color).toEqual([55, 255, 255, 230]);
     });
 
     test("range slider updates trigger style refresh", async () => {
@@ -397,7 +483,7 @@ describe("SubcatchmentDelineation GL controller", () => {
 
         expect(sub.report).toHaveBeenCalledTimes(1);
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(sub);
-        expect(sub.enableColorMap).toHaveBeenCalledWith("slp_asp");
+        expect(sub.enableColorMap).toHaveBeenCalledWith("slope");
         expect(updatePhosphorus).toHaveBeenCalled();
         expect(sub.show).toHaveBeenCalledTimes(1);
     });
@@ -405,11 +491,13 @@ describe("SubcatchmentDelineation GL controller", () => {
     test("updateLayerAvailability enables preflight-gated radios", async () => {
         const sub = window.SubcatchmentDelineation.getInstance();
 
-        const slpAsp = document.getElementById("sub_cmap_radio_slp_asp");
+        const slope = document.getElementById("sub_cmap_radio_slope");
+        const aspect = document.getElementById("sub_cmap_radio_aspect");
         const domLc = document.getElementById("sub_cmap_radio_dom_lc");
         const domSoil = document.getElementById("sub_cmap_radio_dom_soil");
         const rangeland = document.getElementById("sub_cmap_radio_rangeland_cover");
-        slpAsp.disabled = true;
+        slope.disabled = true;
+        aspect.disabled = true;
         domLc.disabled = true;
         domSoil.disabled = true;
         rangeland.disabled = true;
@@ -423,7 +511,8 @@ describe("SubcatchmentDelineation GL controller", () => {
 
         sub.updateLayerAvailability();
 
-        expect(slpAsp.disabled).toBe(false);
+        expect(slope.disabled).toBe(false);
+        expect(aspect.disabled).toBe(false);
         expect(domLc.disabled).toBe(false);
         expect(domSoil.disabled).toBe(false);
         expect(rangeland.disabled).toBe(false);
