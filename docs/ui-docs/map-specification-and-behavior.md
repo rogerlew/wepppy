@@ -445,6 +445,14 @@ Technical notes:
 - Tests: Playwright selection + submit; E2E run covering modify steps.
 - Deck.gl input: `mousedown/mousemove/mouseup` are unreliable for drag in deck.gl; use `pointerdown/pointermove/pointerup` (capture phase) and gate box select on `Shift`.
 
+### Phase 12 handoff summary
+- Shared selection utilities live in `wepppy/weppcloud/controllers_js/selection_utils.js` (legacy adapters, payload parsing, Topaz ID helpers, deck unproject, selection box layer).
+- GL modify controllers pull helpers from `WCSelectionUtils` and use `pointerdown/pointermove/pointerup` (capture phase) with `Shift` gating; pan/zoom remains intact when Shift is not held.
+- Deck coordinate lookup uses `viewManager.unproject` (or `getViewports().unproject`) against the deck canvas bounds; avoids `deck.unproject` which is not public on the `Deck` instance.
+- Drilldown is suppressed while selection mode is active in both landuse and rangeland cover modify (`suppressDrilldown`/`releaseDrilldown` tokens).
+- Console logging for pointer events remains enabled to debug selection initiation (only active when selection mode is on).
+- Tests: Jest coverage in `wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js` and `wepppy/weppcloud/controllers_js/__tests__/rangeland_cover_modify_gl.test.js`; Playwright smoke additions live in `wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js`.
+
 ### Phase 13: WEPP results cleanup
 - Scope: remove vestigial WEPP results map overlays and legacy toggle hooks from the GL path; keep results visualization in report panels only until a future phase reintroduces map-based results.
 - Tests: Playwright run completes without console errors; verify map layer control is unchanged after WEPP completion.

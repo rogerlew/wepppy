@@ -92,6 +92,7 @@ describe("RangelandCoverModify GL controller", () => {
         await import("../dom.js");
         await import("../forms.js");
         await import("../events.js");
+        await import("../selection_utils.js");
 
         httpPostJsonMock = jest.fn((url) => {
             if (url === "query/rangeland_cover/current_cover_summary/") {
@@ -201,6 +202,9 @@ describe("RangelandCoverModify GL controller", () => {
         }
         if (global.WCEvents) {
             delete global.WCEvents;
+        }
+        if (global.WCSelectionUtils) {
+            delete global.WCSelectionUtils;
         }
         document.body.innerHTML = "";
     });
