@@ -443,6 +443,7 @@ Technical notes:
 ### Phase 12: landuse modify + rangeland cover modify
 - Scope: selection mode with box select, outline overlay, modify forms.
 - Tests: Playwright selection + submit; E2E run covering modify steps.
+- Deck.gl input: `mousedown/mousemove/mouseup` are unreliable for drag in deck.gl; use `pointerdown/pointermove/pointerup` (capture phase) and gate box select on `Shift`.
 
 ### Phase 13: WEPP results cleanup
 - Scope: remove vestigial WEPP results map overlays and legacy toggle hooks from the GL path; keep results visualization in report panels only until a future phase reintroduces map-based results.
