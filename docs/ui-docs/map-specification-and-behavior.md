@@ -404,7 +404,14 @@ Assumptions:
 - Manual validation: browser search for Topaz/WEPP IDs flashes geometry and opens drilldown.
 - Tests: Jest `controllers_js/__tests__/map_gl.test.js` covers find/flash delegation and flash teardown.
 
-### Phase 11: landuse + soils overlays
+### Phase 11: slope + aspect overlays
+- Scope: split the combined slope/aspect mode into two distinct subcatchment colormaps ("Slope" and "Aspect") to match the GL dashboard behavior.
+- Data: reuse `query/watershed/subcatchments/` payload and map numeric slope/aspect values to viridis; slope normalized to [0, 1], aspect normalized by 360.
+- UI: replace `sub_cmap_radio_slp_asp` with separate radios (slope + aspect), update defaults (prefer slope), and keep a compatibility alias so legacy `slp_asp` requests map to `slope`.
+- Legend: replace `slope_aspect` legend with separate slope + aspect legends (new templates or dynamic legend rendering).
+- Tests: Jest for colormap switching + normalization; Playwright toggles slope/aspect modes and validates legend updates.
+
+### Phase 11b: landuse + soils overlays
 - Scope: landuse/soils colormaps and legend updates.
 - Tests: Playwright toggle landuse/soils modes and validate legends.
 
