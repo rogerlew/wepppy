@@ -170,6 +170,35 @@ describe("Map GL controller", () => {
         expect(emittedEvents.some((evt) => evt.name === "map:center:changed")).toBe(true);
     });
 
+    test("locks viewState pitch/bearing and disables rotation controls", () => {
+        const mapInstance = global.MapController.getInstance();
+
+        mapInstance.setView([46.8, -117.5], 10);
+
+        expect(deckInstance.props.controller).toEqual(expect.objectContaining({
+            dragRotate: false,
+            touchRotate: false,
+        }));
+
+        const initialViewState = deckInstance.props.initialViewState;
+        expect(initialViewState.bearing).toBe(0);
+        expect(initialViewState.pitch).toBe(0);
+
+        deckInstance.props.onViewStateChange({
+            viewState: {
+                longitude: -117.5,
+                latitude: 46.8,
+                zoom: 10,
+                bearing: 22,
+                pitch: 45,
+            },
+            interactionState: { isDragging: true },
+        });
+
+        expect(deckInstance.props.viewState.bearing).toBe(0);
+        expect(deckInstance.props.viewState.pitch).toBe(0);
+    });
+
     test("overlay control registers USGS/SNOTEL/NHD and SBS with zoom gating labels", () => {
         global.MapController.getInstance();
 

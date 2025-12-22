@@ -119,6 +119,26 @@ async function getCenter(page) {
   return parseCenter(text || '');
 }
 
+async function getViewState(page) {
+  return page.evaluate(() => {
+    const map = window.MapController && typeof window.MapController.getInstance === 'function'
+      ? window.MapController.getInstance()
+      : null;
+    const props = map && map._deck && map._deck.props ? map._deck.props : null;
+    const viewState = props ? (props.viewState || props.initialViewState) : null;
+    if (!viewState) {
+      return null;
+    }
+    return {
+      longitude: viewState.longitude,
+      latitude: viewState.latitude,
+      zoom: viewState.zoom,
+      pitch: viewState.pitch,
+      bearing: viewState.bearing,
+    };
+  });
+}
+
 async function waitForOverlayFeatures(page, layerKey) {
   await expect.poll(async () => {
     return page.evaluate((key) => {
@@ -365,6 +385,69 @@ test.describe('map gl smoke', () => {
     await expect(overlayPanel).toBeHidden();
 
     expect(consoleErrors).toEqual([]);
+  });
+
+  test('map stays north-up and ignores rotation gestures', async ({ page }) => {
+    await openRun(page);
+
+    await expect.poll(async () => {
+      const viewState = await getViewState(page);
+      if (!viewState) {
+        return null;
+      }
+      return { pitch: viewState.pitch, bearing: viewState.bearing };
+    }).toEqual({ pitch: 0, bearing: 0 });
+
+    const mapBox = await page.locator('#mapid').boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+      return;
+    }
+
+    await page.locator('#mapid').click({ position: { x: 30, y: 30 } });
+    await page.keyboard.down('Shift');
+    await page.mouse.move(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(mapBox.x + mapBox.width / 2 + 80, mapBox.y + mapBox.height / 2 + 40);
+    await page.mouse.up();
+    await page.keyboard.up('Shift');
+
+    await expect.poll(async () => {
+      const viewState = await getViewState(page);
+      if (!viewState) {
+        return null;
+      }
+      return { pitch: viewState.pitch, bearing: viewState.bearing };
+    }).toEqual({ pitch: 0, bearing: 0 });
+
+    const forced = await page.evaluate(() => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const props = map && map._deck && map._deck.props ? map._deck.props : null;
+      const current = props && (props.viewState || props.initialViewState)
+        ? (props.viewState || props.initialViewState)
+        : null;
+      if (!map || !props || typeof props.onViewStateChange !== 'function' || !current) {
+        return null;
+      }
+      props.onViewStateChange({
+        viewState: {
+          longitude: current.longitude,
+          latitude: current.latitude,
+          zoom: current.zoom,
+          bearing: 120,
+          pitch: 45,
+        },
+        interactionState: { isDragging: true },
+      });
+      const refreshed = map && map._deck && map._deck.props ? map._deck.props : null;
+      const updated = refreshed && (refreshed.viewState || refreshed.initialViewState)
+        ? (refreshed.viewState || refreshed.initialViewState)
+        : null;
+      return updated ? { pitch: updated.pitch, bearing: updated.bearing } : null;
+    });
+    expect(forced).toEqual({ pitch: 0, bearing: 0 });
   });
 
   test('overlay render order matches grouped indices when overlays are available', async ({ page }) => {

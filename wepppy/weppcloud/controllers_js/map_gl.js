@@ -1010,6 +1010,15 @@ var MapController = (function () {
             return drilldownSuppressionTokens ? drilldownSuppressionTokens.size > 0 : false;
         }
 
+        function lockViewState(viewState) {
+            if (!viewState || typeof viewState !== "object") {
+                return viewState;
+            }
+            viewState.bearing = 0;
+            viewState.pitch = 0;
+            return viewState;
+        }
+
         function normalizeViewState(viewState) {
             if (!viewState || typeof viewState !== "object") {
                 return null;
@@ -1020,15 +1029,13 @@ var MapController = (function () {
             if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
                 return null;
             }
-            var bearing = Number.isFinite(viewState.bearing) ? Number(viewState.bearing) : 0;
-            var pitch = Number.isFinite(viewState.pitch) ? Number(viewState.pitch) : 0;
-            return {
+            return lockViewState({
                 longitude: longitude,
                 latitude: latitude,
                 zoom: zoom,
-                bearing: bearing,
-                pitch: pitch
-            };
+                bearing: 0,
+                pitch: 0
+            });
         }
 
         function toViewState(center, zoom) {
@@ -1105,6 +1112,7 @@ var MapController = (function () {
                     viewState.transitionEasing = transition.easing;
                 }
             }
+            lockViewState(viewState);
             updateStateFromViewState(normalized);
             if (deckgl && !(options && options.skipDeck)) {
                 var size = getCanvasSize();
@@ -2984,7 +2992,11 @@ var MapController = (function () {
         }
         deckgl = new deckApi.Deck({
             parent: mapCanvasElement,
-            controller: true,
+            controller: {
+                dragRotate: false,
+                touchRotate: false,
+                keyboard: true
+            },
             views: deckApi.MapView ? [new deckApi.MapView({ repeat: true })] : undefined,
             initialViewState: initialViewState,
             width: size.width || undefined,
