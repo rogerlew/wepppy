@@ -214,6 +214,61 @@ describe("Map GL controller", () => {
         expect(labels.some((label) => label.includes("NHD"))).toBe(true);
     });
 
+    test("overlay render order is deterministic for grouped overlays", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.bootstrap({ map: { center: [46.8, -117.5], zoom: 10 } });
+
+        const overlayNames = [
+            "Burn Severity Map",
+            "NHD Flowlines",
+            "Subcatchments",
+            "Channels",
+            "USGS Gage Locations",
+            "SNOTEL Locations",
+            "Outlet",
+            "Subcatchment Labels",
+            "Channel Labels",
+        ];
+        const overlayLayers = {};
+
+        overlayNames.forEach((name, index) => {
+            const layer = new global.deck.GeoJsonLayer({ id: `test-overlay-${index}` });
+            overlayLayers[name] = layer;
+            mapInstance.ctrls.addOverlay(layer, name);
+        });
+
+        overlayNames.slice().reverse().forEach((name) => {
+            mapInstance.addLayer(overlayLayers[name], { skipRefresh: true });
+        });
+
+        const expectedLayers = overlayNames.map((name) => mapInstance.overlayMaps[name]);
+        expectedLayers.forEach((layer) => {
+            expect(layer).toBeTruthy();
+        });
+
+        const actualLayers = deckInstance.props.layers.filter((layer) => expectedLayers.includes(layer));
+        expect(actualLayers).toEqual(expectedLayers);
+    });
+
+    test("overlay control order remains unchanged", () => {
+        global.MapController.getInstance();
+
+        const overlayInputs = Array.from(document.querySelectorAll('input[name="wc-map-overlay"]'));
+        const labels = overlayInputs.map((input) => {
+            const text = input.parentElement.querySelector(".wc-map-layer-control__text");
+            return text ? text.textContent : "";
+        });
+
+        const usgsIndex = labels.findIndex((label) => label.includes("USGS Gage Locations"));
+        const snotelIndex = labels.findIndex((label) => label.includes("SNOTEL Locations"));
+        const nhdIndex = labels.findIndex((label) => label.includes("NHD"));
+        expect(usgsIndex).toBeGreaterThanOrEqual(0);
+        expect(snotelIndex).toBeGreaterThanOrEqual(0);
+        expect(nhdIndex).toBeGreaterThanOrEqual(0);
+        expect(usgsIndex).toBeLessThan(snotelIndex);
+        expect(snotelIndex).toBeLessThan(nhdIndex);
+    });
+
     test("loadSbsMap emits map:layer:refreshed and shows legend", async () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });

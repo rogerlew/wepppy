@@ -367,6 +367,68 @@ test.describe('map gl smoke', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('overlay render order matches grouped indices when overlays are available', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await page.evaluate(() => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const layers = map && map._deck && map._deck.props ? map._deck.props.layers : null;
+      const overlayMaps = map && map.overlayMaps ? map.overlayMaps : null;
+      if (!map || !layers || !overlayMaps) {
+        return { skip: true, reason: 'Map overlays not ready.' };
+      }
+
+      const entries = Object.entries(overlayMaps);
+      const findLayer = (needle) => {
+        const needleLower = String(needle || '').toLowerCase();
+        const match = entries.find(([name]) => String(name).toLowerCase().includes(needleLower));
+        return match ? match[1] : null;
+      };
+
+      const expected = [
+        { label: 'Burn Severity Map', layer: findLayer('Burn Severity Map') },
+        { label: 'NHD Flowlines', layer: findLayer('NHD') },
+        { label: 'Subcatchments', layer: findLayer('Subcatchments') },
+        { label: 'Channels', layer: findLayer('Channels') },
+        { label: 'USGS Gage Locations', layer: findLayer('USGS Gage Locations') },
+        { label: 'SNOTEL Locations', layer: findLayer('SNOTEL Locations') },
+        { label: 'Outlet', layer: findLayer('Outlet') },
+        { label: 'Subcatchment Labels', layer: findLayer('Subcatchment Labels') },
+        { label: 'Channel Labels', layer: findLayer('Channel Labels') },
+      ];
+
+      const missing = expected.filter((item) => !item.layer).map((item) => item.label);
+      if (missing.length) {
+        return { skip: true, reason: `Missing overlays: ${missing.join(', ')}` };
+      }
+
+      if (typeof map.addLayer === 'function') {
+        expected.forEach((item) => {
+          if (item.layer && typeof map.hasLayer === 'function' && !map.hasLayer(item.layer)) {
+            map.addLayer(item.layer, { skipRefresh: true });
+          }
+        });
+      }
+
+      const layerStack = map._deck && map._deck.props ? map._deck.props.layers : [];
+      const order = [];
+      layerStack.forEach((layer) => {
+        expected.forEach((item) => {
+          if (item.layer === layer) {
+            order.push(item.label);
+          }
+        });
+      });
+
+      return { skip: false, order, expected: expected.map((item) => item.label) };
+    });
+
+    test.skip(outcome.skip, outcome.reason || 'Overlay stack unavailable.');
+    expect(outcome.order).toEqual(outcome.expected);
+  });
+
   test('fly to center, enable USGS/SNOTEL, and open marker modals', async ({ page }) => {
     await openRun(page);
 

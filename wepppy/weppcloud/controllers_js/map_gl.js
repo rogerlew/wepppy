@@ -40,7 +40,7 @@ var MapController = (function () {
     var SBS_LAYER_NAME = "Burn Severity Map";
     var SBS_QUERY_ENDPOINT = "query/baer_wgs_map/";
     var SBS_LEGEND_ENDPOINT = "resources/legends/sbs/";
-    var SBS_DEFAULT_OPACITY = 0.7;
+    var SBS_DEFAULT_OPACITY = 0.3;
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
     var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
@@ -1402,18 +1402,34 @@ var MapController = (function () {
             if (!name) {
                 return 99;
             }
-            if (name.indexOf(SBS_LAYER_NAME) !== -1) {
-            return -1;
-        }
-        if (name.indexOf("NHD") !== -1) {
-            return 0;
-        }
-        if (name.indexOf(USGS_LAYER_NAME) !== -1) {
-            return 1;
-        }
-        if (name.indexOf(SNOTEL_LAYER_NAME) !== -1) {
-            return 2;
-        }
+            var label = String(name);
+            if (label.indexOf(SBS_LAYER_NAME) !== -1) {
+                return 10;
+            }
+            if (label.indexOf("NHD") !== -1) {
+                return 20;
+            }
+            if (label.indexOf("Subcatchment Labels") !== -1) {
+                return 80;
+            }
+            if (label.indexOf("Channel Labels") !== -1) {
+                return 90;
+            }
+            if (label.indexOf("Subcatchments") !== -1) {
+                return 30;
+            }
+            if (label.indexOf("Channels") !== -1) {
+                return 40;
+            }
+            if (label.indexOf(USGS_LAYER_NAME) !== -1) {
+                return 50;
+            }
+            if (label.indexOf(SNOTEL_LAYER_NAME) !== -1) {
+                return 60;
+            }
+            if (label.indexOf("Outlet") !== -1) {
+                return 70;
+            }
             return 99;
         }
 
