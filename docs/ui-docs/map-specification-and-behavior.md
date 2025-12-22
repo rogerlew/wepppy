@@ -75,6 +75,9 @@ Emitted via `WCEvents.useEventMap`:
 - `map:layer:refreshed`
 - `map:layer:error`
 
+## Map typography
+- Map text (labels, hover hints, modal snippets) should render at 14px or larger for legibility.
+
 ## Data sources and layers
 | Layer | Type | Source | Owner | Notes |
 | --- | --- | --- | --- | --- |
@@ -365,14 +368,41 @@ Assumptions:
 - Scope: GeoJsonLayer subcatchments, color map modes, labels, gridded loss raster.
 - Tests: Jest for color mapping; Playwright toggle subcatchment layers + legend range.
 
-### Phase 9b: subcatchments GL parity (controller + UX)
+### Phase 9 handoff summary
+- Subcatchments: GL GeoJsonLayer loads `resources/subcatchments.json`, registers `Subcatchments` overlay, and renders default fill/outline styling.
+- Labels: `Subcatchment Labels` TextLayer built from unique TopazID (polylabel if available), SDF outline styling (orange text + white stroke), registered but hidden by default.
+- Color maps: `setColorMap` supports slope/aspect, landuse, soils, cover, WEPP loss/runoff metrics (query-engine), phosphorus, ash, and RHEM modes with legend label updates.
+- Gridded loss: `Gridded Output` BitmapLayer loads `resources/flowpaths_loss.tif`, updates +/- range from `#wepp_grd_cmap_range_loss`, and refreshes unit labels (kg/m^2).
+- Tests: Jest `controllers_js/__tests__/subcatchments_gl.test.js` covers overlay registration, color map mode updates, range slider refresh, and gridded loss raster load. `wctl run-npm test -- subcatchments_gl.test.js` clean.
+
+### Phase 9b: remove Results tab from map tabset
+- Scope: remove the `Results` tab from the map control tabset in both `map_pure.htm` and `map_pure_gl.htm` (WEPP/RHEM results live in GL dashboard now).
+- Notes: keep the results templates available for the GL dashboard; this is a UI removal only. Verify no JS relies on the missing tab content.
+- Tests: smoke map tabset renders without `Results` and no console errors.
+
+### Phase 9c: subcatchments GL parity (controller + UX)
 - Scope: bring `subcatchments_gl.js` to functional parity with `subcatchment_delineation.js` (build action, status/polling, report loading, legend updates, preflight gating) while reconciling Leaflet vs. GL differences.
 - Notes: assumes Phase 9 delivered the GL subcatchment layers/colormap; this pass focuses on controller wiring and UI parity.
 - Tests: Jest for build/report/poll failure; Playwright build subcatchments -> report + legend update.
 
+### Phase 9c handoff summary
+- Build: `sub.build()` posts `rq/api/build_subcatchments_and_abstract_watershed`, wires status stream, records job id, and emits `subcatchment:build:started`/`subcatchment:build:error`.
+- Completion: `BUILD_SUBCATCHMENTS_TASK_COMPLETED` triggers `sub.show()` + channel refresh; `WATERSHED_ABSTRACTION_TASK_COMPLETED` loads report, disconnects status stream, enables slope/aspect, and updates WEPP phosphorus.
+- Report: `report/subcatchments/` HTML is injected into `#info`, status updated, and `Project.set_preferred_units()` invoked.
+- Preflight gating: radios for slope/aspect, landuse, rangeland cover, and soils are enabled based on `window.lastPreflightChecklist`, with a `preflight:update` listener attached once.
+- Manual validation: Safari (poll-only, no websockets) renders subcatchments and pass 2 channels after build completion.
+- Tests: Jest `controllers_js/__tests__/subcatchments_gl.test.js` covers build flow, completion idempotence, and preflight gating. Smoke test stubs build submit in `static-src/tests/smoke/map-gl.spec.js`.
+
 ### Phase 10: WEPP find and flash
 - Scope: deck picking + highlight, reuse search input workflows.
 - Tests: Playwright find Topaz/WEPP ID -> flash + drilldown.
+
+### Phase 10 handoff summary
+- Integration: GL map now uses a `WEPP_FIND_AND_FLASH` helper (lazy stub in `map_gl.js` if the Leaflet helper is missing) and wires `findByTopazId`/`findByWeppId` through `map.findById`.
+- Flash overlay: temporary GeoJsonLayer with a pulsed white outline/fill is added via `map.addLayer` and removed after the timeout (not registered in the layer control).
+- Drilldown: Topaz hits call `subQuery`; channel hits call `chnQuery`, matching Leaflet behavior.
+- Manual validation: browser search for Topaz/WEPP IDs flashes geometry and opens drilldown.
+- Tests: Jest `controllers_js/__tests__/map_gl.test.js` covers find/flash delegation and flash teardown.
 
 ### Phase 11: landuse + soils overlays
 - Scope: landuse/soils colormaps and legend updates.
@@ -383,8 +413,8 @@ Assumptions:
 - Tests: Playwright selection + submit; E2E run covering modify steps.
 
 ### Phase 13: WEPP results visualization
-- Scope: results modes (runoff, loss, phosphorus, ash) + scale controls.
-- Tests: Playwright switch results modes; E2E run through WEPP build + map visuals.
+- Scope: remove vestigial WEPP results map overlays and legacy toggle hooks from the GL path; keep results visualization in report panels only until a future phase reintroduces map-based results.
+- Tests: Playwright run completes without console errors; verify map layer control is unchanged after WEPP completion.
 
 ## Test and verification gates (per phase)
 - Unit (Jest): new controller tests under `controllers_js/__tests__`.

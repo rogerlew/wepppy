@@ -92,14 +92,6 @@
   <p class="wc-text-muted">Select a channel or hillslope to view information.</p>
 {% endset %}
 
-{% set results_content %}
-  {% if 'rhem' not in ron.mods %}
-    {% include "controls/map/wepp_hillslope_visualizations.htm" %}
-  {% else %}
-    {% include "controls/map/rhem_hillslope_visualizations.htm" %}
-  {% endif %}
-{% endset %}
-
 {% if show_landuse_modify %}
   {% set modify_landuse_content %}
     {% include "controls/modify_landuse.htm" %}
@@ -145,14 +137,6 @@
     }
   ] %}
 {% endif %}
-
-{% set map_tabs = map_tabs + [
-  {
-    "id": "results",
-    "label": "Results",
-    "content": results_content
-  }
-] %}
 
 {% call ui.control_shell(
      form_id="setloc_form",

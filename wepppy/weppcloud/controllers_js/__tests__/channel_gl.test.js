@@ -109,6 +109,7 @@ describe("ChannelDelineation GL controller", () => {
             removeLayer: jest.fn(),
             registerOverlay: jest.fn(),
             unregisterOverlay: jest.fn(),
+            clearFindFlashCache: jest.fn(),
             ctrls: {
                 addOverlay: jest.fn(),
                 removeLayer: jest.fn(),
@@ -222,6 +223,7 @@ describe("ChannelDelineation GL controller", () => {
         );
         expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Channels");
         expect(mapStub.addLayer).toHaveBeenCalledWith(expect.any(Object));
+        expect(mapStub.clearFindFlashCache).toHaveBeenCalledWith("channels");
         expect(emittedEvents.some((evt) => evt.name === "channel:layers:loaded")).toBe(true);
         expect(channel.glLayer).toBeTruthy();
     });

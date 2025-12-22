@@ -1303,6 +1303,9 @@ var ChannelDelineation = (function () {
             return http.getJson(url, { params: { _: Date.now() } })
                 .then(function (data) {
                     channel.glData = data || EMPTY_GEOJSON;
+                    if (map && typeof map.clearFindFlashCache === "function") {
+                        map.clearFindFlashCache("channels");
+                    }
                     channel.labelData = null;
                     channel.glLayer = buildChannelLayer(deckApi, channel.glData, {
                         layerId: CHANNEL_LAYER_ID,
@@ -1373,6 +1376,9 @@ var ChannelDelineation = (function () {
                         }
                     };
                     channel.glData = data || EMPTY_GEOJSON;
+                    if (map && typeof map.clearFindFlashCache === "function") {
+                        map.clearFindFlashCache("channels");
+                    }
                     channel.glLayer = buildChannelLayer(deckApi, channel.glData, {
                         layerId: CHANNEL_PASS2_LAYER_ID,
                         getLineColor: getLineColorPass2,

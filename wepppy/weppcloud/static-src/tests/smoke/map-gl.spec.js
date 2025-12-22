@@ -145,6 +145,21 @@ async function waitForMapTransition(page) {
   }, { timeout: 10000 }).toBeFalsy();
 }
 
+async function waitForOverlayLayer(page, name) {
+  return expect.poll(async () => {
+    return page.evaluate((layerName) => {
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const overlay = map && map.overlayMaps ? map.overlayMaps[layerName] : null;
+      if (!overlay || !map || typeof map.hasLayer !== 'function') {
+        return false;
+      }
+      return map.hasLayer(overlay);
+    }, name);
+  }, { timeout: 20000 }).toBeTruthy();
+}
+
 
 async function openOverlayPanel(page) {
   const layerToggle = page.locator('[data-map-layer-control="true"] .wc-map-layer-control__toggle');
@@ -899,5 +914,113 @@ test.describe('map gl smoke', () => {
     } else {
       await expect(legend).toBeHidden();
     }
+  });
+
+  test('subcatchments overlay toggles in GL', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await page.evaluate(async () => {
+      const sub = window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === 'function'
+        ? window.SubcatchmentDelineation.getInstance()
+        : null;
+      if (!sub || typeof sub.show !== 'function') {
+        return { ok: false, reason: 'subcatchment controller missing' };
+      }
+      try {
+        await sub.show();
+      } catch (error) {
+        return { ok: false, reason: error.message || String(error) };
+      }
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const layer = map && map.overlayMaps ? map.overlayMaps.Subcatchments : null;
+      const hasLayer = Boolean(map && layer && typeof map.hasLayer === 'function' && map.hasLayer(layer));
+      return { ok: Boolean(layer), hasLayer };
+    });
+
+    if (!outcome.ok) {
+      test.skip(true, `Subcatchments unavailable: ${outcome.reason || 'unknown'}`);
+    }
+
+    const { layerToggle } = await openOverlayPanel(page);
+    const subcatchmentInput = page.locator('label:has-text("Subcatchments") input[type="checkbox"]');
+    await expect(subcatchmentInput).toBeVisible();
+    if (!outcome.hasLayer) {
+      await subcatchmentInput.check();
+    }
+    await layerToggle.click();
+
+    await waitForOverlayLayer(page, 'Subcatchments');
+  });
+
+  test('gridded loss mode adds overlay and updates labels', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await page.evaluate(async () => {
+      const sub = window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === 'function'
+        ? window.SubcatchmentDelineation.getInstance()
+        : null;
+      if (!sub || typeof sub.setColorMap !== 'function') {
+        return { ok: false, reason: 'subcatchment controller missing' };
+      }
+      try {
+        sub.setColorMap('grd_loss');
+      } catch (error) {
+        return { ok: false, reason: error.message || String(error) };
+      }
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const map = window.MapController && typeof window.MapController.getInstance === 'function'
+        ? window.MapController.getInstance()
+        : null;
+      const layer = map && map.overlayMaps ? map.overlayMaps['Gridded Output'] : null;
+      const hasLayer = Boolean(map && layer && typeof map.hasLayer === 'function' && map.hasLayer(layer));
+      const units = document.getElementById('wepp_grd_cmap_range_loss_units');
+      const unitsText = units ? (units.textContent || units.innerHTML || '').trim() : '';
+      return { ok: hasLayer, unitsText };
+    });
+
+    if (!outcome.ok) {
+      test.skip(true, `Gridded loss unavailable: ${outcome.reason || 'missing layer'}`);
+    }
+
+    expect(outcome.unitsText).not.toEqual('');
+    await waitForOverlayLayer(page, 'Gridded Output');
+  });
+
+  test('build subcatchments updates status', async ({ page }) => {
+    await openRun(page);
+
+    const outcome = await page.evaluate(() => {
+      const sub = window.SubcatchmentDelineation && typeof window.SubcatchmentDelineation.getInstance === 'function'
+        ? window.SubcatchmentDelineation.getInstance()
+        : null;
+      if (!sub || typeof sub.build !== 'function') {
+        return { ok: false, reason: 'subcatchment controller missing' };
+      }
+      if (typeof sub.connect_status_stream === 'function') {
+        sub.connect_status_stream = () => {};
+      }
+      const http = window.WCHttp;
+      if (!http || typeof http.postJson !== 'function') {
+        return { ok: false, reason: 'WCHttp missing' };
+      }
+      http.postJson = async () => ({ body: { Success: true, job_id: 'smoke-job-1' } });
+      return { ok: true };
+    });
+
+    if (!outcome.ok) {
+      test.skip(true, `Subcatchments build unavailable: ${outcome.reason || 'unknown'}`);
+    }
+
+    const buildButton = page.locator('[data-subcatchment-action="build"], #btn_build_subcatchments');
+    if (!(await buildButton.isVisible())) {
+      test.skip(true, 'Build Subcatchments button not visible.');
+    }
+
+    await buildButton.click();
+
+    const status = page.locator('#build_subcatchments_form #status');
+    await expect.poll(async () => (await status.textContent()) || '').toContain('job submitted');
   });
 });

@@ -125,6 +125,9 @@ describe("Map GL controller", () => {
         delete global.WCHttp;
         delete global.MapController;
         delete global.WeppMap;
+        delete global.WEPP_FIND_AND_FLASH;
+        delete global.SubcatchmentDelineation;
+        delete global.ChannelDelineation;
         delete global.coordRound;
         delete global.runid;
         delete global.config;
@@ -421,6 +424,160 @@ describe("Map GL controller", () => {
         expect(drilldown.innerHTML).toContain("Channel Summary");
         expect(emittedEvents.some((evt) => evt.name === "map:drilldown:requested")).toBe(true);
         expect(emittedEvents.some((evt) => evt.name === "map:drilldown:loaded")).toBe(true);
+    });
+
+    test("findByTopazId delegates to WEPP_FIND_AND_FLASH and calls subQuery", async () => {
+        const mapInstance = global.MapController.getInstance();
+        const subQuerySpy = jest.spyOn(mapInstance, "subQuery");
+        global.WCHttp.request.mockResolvedValueOnce({ body: "<div>Sub Summary</div>" });
+
+        global.WEPP_FIND_AND_FLASH = {
+            ID_TYPE: { TOPAZ: "TopazID", WEPP: "WeppID" },
+            FEATURE_TYPE: { SUBCATCHMENT: "subcatchment", CHANNEL: "channel" },
+            findAndFlashById: jest.fn((options) => {
+                options.onFlash({
+                    hits: [{ properties: { TopazID: 7 } }],
+                    featureType: "subcatchment",
+                    idType: options.idType,
+                    value: options.value,
+                });
+                return Promise.resolve({ hits: [] });
+            }),
+        };
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "7";
+
+        await mapInstance.findByTopazId();
+
+        expect(global.WEPP_FIND_AND_FLASH.findAndFlashById).toHaveBeenCalledWith(
+            expect.objectContaining({ idType: "TopazID", value: "7" }),
+        );
+        expect(subQuerySpy).toHaveBeenCalledWith("7");
+    });
+
+    test("findByWeppId delegates to WEPP_FIND_AND_FLASH and calls chnQuery", async () => {
+        const mapInstance = global.MapController.getInstance();
+        const chnQuerySpy = jest.spyOn(mapInstance, "chnQuery").mockImplementation(() => {});
+
+        global.WEPP_FIND_AND_FLASH = {
+            ID_TYPE: { TOPAZ: "TopazID", WEPP: "WeppID" },
+            FEATURE_TYPE: { SUBCATCHMENT: "subcatchment", CHANNEL: "channel" },
+            findAndFlashById: jest.fn((options) => {
+                options.onFlash({
+                    hits: [{ properties: { TopazID: 22 } }],
+                    featureType: "channel",
+                    idType: options.idType,
+                    value: options.value,
+                });
+                return Promise.resolve({ hits: [] });
+            }),
+        };
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "W22";
+
+        await mapInstance.findByWeppId();
+
+        expect(global.WEPP_FIND_AND_FLASH.findAndFlashById).toHaveBeenCalledWith(
+            expect.objectContaining({ idType: "WeppID", value: "W22" }),
+        );
+        expect(chnQuerySpy).toHaveBeenCalledWith(22);
+    });
+
+    test("findByWeppId matches wepp_id when helper is missing", async () => {
+        jest.useFakeTimers();
+        delete global.WEPP_FIND_AND_FLASH;
+
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.subQuery = jest.fn();
+
+        global.SubcatchmentDelineation = {
+            getInstance: jest.fn(() => ({
+                state: {
+                    data: {
+                        type: "FeatureCollection",
+                        features: [
+                            {
+                                type: "Feature",
+                                properties: { wepp_id: "W-99", TopazID: 9 },
+                                geometry: {
+                                    type: "Polygon",
+                                    coordinates: [[
+                                        [-120.1, 45.1],
+                                        [-120.2, 45.1],
+                                        [-120.2, 45.2],
+                                        [-120.1, 45.2],
+                                        [-120.1, 45.1],
+                                    ]],
+                                },
+                            },
+                        ],
+                    },
+                },
+            })),
+        };
+
+        await mapInstance.findByWeppId("W-99");
+
+        expect(mapInstance.subQuery).toHaveBeenCalledWith(9);
+
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
+
+    test("findByTopazId flashes and removes highlight layer", async () => {
+        jest.useFakeTimers();
+        const mapInstance = global.MapController.getInstance();
+        jest.spyOn(mapInstance, "subQuery").mockImplementation(() => {});
+
+        global.SubcatchmentDelineation = {
+            getInstance: jest.fn(() => ({
+                state: {
+                    data: {
+                        type: "FeatureCollection",
+                        features: [
+                            {
+                                type: "Feature",
+                                properties: { TopazID: "123" },
+                                geometry: {
+                                    type: "Polygon",
+                                    coordinates: [[
+                                        [-120.1, 45.1],
+                                        [-120.2, 45.1],
+                                        [-120.2, 45.2],
+                                        [-120.1, 45.2],
+                                        [-120.1, 45.1],
+                                    ]],
+                                },
+                            },
+                        ],
+                    },
+                },
+            })),
+        };
+
+        const addSpy = jest.spyOn(mapInstance, "addLayer");
+        const removeSpy = jest.spyOn(mapInstance, "removeLayer");
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "123";
+
+        await mapInstance.findByTopazId();
+
+        const flashAdd = addSpy.mock.calls.find((call) => {
+            return call[0] && call[0].props && String(call[0].props.id).includes("wc-find-flash");
+        });
+        expect(flashAdd).toBeTruthy();
+
+        jest.advanceTimersByTime(1500);
+
+        const flashRemove = removeSpy.mock.calls.find((call) => {
+            return call[0] && call[0].props && String(call[0].props.id).includes("wc-find-flash");
+        });
+        expect(flashRemove).toBeTruthy();
+
+        jest.useRealTimers();
     });
 
     test("mousemove triggers elevation request once per cooldown", async () => {

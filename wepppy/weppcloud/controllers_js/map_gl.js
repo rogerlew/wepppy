@@ -35,6 +35,8 @@ var MapController = (function () {
     var NHD_LAYER_HR_MIN_ZOOM = 14;
     var NHD_SMALL_SCALE_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4/query";
     var NHD_HR_QUERY_URL = "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/3/query";
+    var SUBCATCHMENT_LAYER_ENDPOINT = "resources/subcatchments.json";
+    var CHANNEL_LAYER_ENDPOINT = "resources/channels.json";
     var SBS_LAYER_NAME = "Burn Severity Map";
     var SBS_QUERY_ENDPOINT = "query/baer_wgs_map/";
     var SBS_LEGEND_ENDPOINT = "resources/legends/sbs/";
@@ -43,6 +45,9 @@ var MapController = (function () {
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
     var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
     var MOUSE_ELEVATION_HIDE_DELAY_MS = 2000;
+    var FIND_FLASH_LAYER_PREFIX = "wc-find-flash";
+    var FIND_FLASH_DURATION_MS = 1200;
+    var FIND_FLASH_PULSE_INTERVAL_MS = 200;
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -465,6 +470,15 @@ var MapController = (function () {
         var mouseElevationHideTimer = null;
         var isFetchingElevation = false;
         var lastElevationAbort = null;
+        var flashState = {
+            layer: null,
+            timer: null,
+            pulseTimer: null,
+            cache: {
+                subcatchments: null,
+                channels: null
+            }
+        };
 
         function emit(eventName, payload) {
             if (mapEvents && typeof mapEvents.emit === "function") {
@@ -491,6 +505,249 @@ var MapController = (function () {
 
         function warnNotImplemented(action) {
             console.warn("Map GL stub: " + action + " not implemented.");
+        }
+
+        function normalizeFeatureCollection(data) {
+            if (!data || !data.features) {
+                return { type: "FeatureCollection", features: [] };
+            }
+            if (data.type !== "FeatureCollection") {
+                return { type: "FeatureCollection", features: data.features };
+            }
+            return data;
+        }
+
+        function featureMatches(feature, idType, value) {
+            if (!feature || !feature.properties || !idType) {
+                return false;
+            }
+            var propValue = feature.properties[idType];
+            if (propValue === undefined || propValue === null) {
+                if (idType === "WeppID") {
+                    if (feature.properties.wepp_id !== undefined && feature.properties.wepp_id !== null) {
+                        propValue = feature.properties.wepp_id;
+                    } else if (feature.properties.weppId !== undefined && feature.properties.weppId !== null) {
+                        propValue = feature.properties.weppId;
+                    }
+                }
+            }
+            if (propValue === undefined || propValue === null) {
+                var lowerKey = idType.replace(/([A-Z])/g, function (match, p1) {
+                    return "_" + p1.toLowerCase();
+                }).replace(/^_/, "");
+                propValue = feature.properties[lowerKey];
+            }
+            return String(propValue) === String(value);
+        }
+
+        function extractFeatureCollection(ctrl) {
+            if (!ctrl) {
+                return null;
+            }
+            if (ctrl.state && ctrl.state.data && ctrl.state.data.features) {
+                return ctrl.state.data;
+            }
+            if (ctrl.glData && ctrl.glData.features) {
+                return ctrl.glData;
+            }
+            if (ctrl.glLayer && ctrl.glLayer.props && ctrl.glLayer.props.data) {
+                return normalizeFeatureCollection(ctrl.glLayer.props.data);
+            }
+            return null;
+        }
+
+        function resolveLayerData(layer) {
+            if (!layer) {
+                return Promise.resolve(null);
+            }
+            var ctrl = layer.ctrl || null;
+            var type = layer.type || null;
+            var fromCtrl = extractFeatureCollection(ctrl);
+            if (fromCtrl) {
+                return Promise.resolve(fromCtrl);
+            }
+            var cacheKey = type === "channel" ? "channels" : "subcatchments";
+            var cached = flashState.cache[cacheKey];
+            if (cached) {
+                return Promise.resolve(cached);
+            }
+            var endpoint = type === "channel" ? CHANNEL_LAYER_ENDPOINT : SUBCATCHMENT_LAYER_ENDPOINT;
+            var url = resolveRunScopedUrl(endpoint);
+            if (!url) {
+                return Promise.resolve(null);
+            }
+            return http.getJson(url, { params: { _: Date.now() } })
+                .then(function (data) {
+                    var normalized = normalizeFeatureCollection(data);
+                    flashState.cache[cacheKey] = normalized;
+                    return normalized;
+                })
+                .catch(function (error) {
+                    console.warn("Map GL: failed to load layer data for find/flash", error);
+                    return null;
+                });
+        }
+
+        function clearFlashLayer() {
+            if (flashState.timer) {
+                clearTimeout(flashState.timer);
+                flashState.timer = null;
+            }
+            if (flashState.pulseTimer) {
+                clearInterval(flashState.pulseTimer);
+                flashState.pulseTimer = null;
+            }
+            if (flashState.layer) {
+                try {
+                    map.removeLayer(flashState.layer, { skipOverlay: true });
+                } catch (err) {
+                    // ignore cleanup errors
+                }
+                flashState.layer = null;
+            }
+        }
+
+        function buildFlashLayer(features, opacity, layerId) {
+            ensureGeoJsonLayer();
+            var alpha = Math.max(0, Math.min(1, opacity));
+            var lineAlpha = Math.round(255 * alpha);
+            var fillAlpha = Math.round(200 * alpha);
+            var data = { type: "FeatureCollection", features: features };
+            return new deckApi.GeoJsonLayer({
+                id: layerId,
+                data: data,
+                pickable: false,
+                stroked: true,
+                filled: true,
+                lineWidthUnits: "pixels",
+                lineWidthMinPixels: 2,
+                getLineWidth: function () { return 2; },
+                getLineColor: function () { return [255, 255, 255, lineAlpha]; },
+                getFillColor: function () { return [255, 255, 255, fillAlpha]; }
+            });
+        }
+
+        function flashFeatures(mapInstance, features, options) {
+            if (!mapInstance || !features || !features.length) {
+                return;
+            }
+            var config = options || {};
+            var duration = Number.isFinite(config.duration) ? config.duration : FIND_FLASH_DURATION_MS;
+            var layerId = FIND_FLASH_LAYER_PREFIX + "-" + Date.now();
+
+            clearFlashLayer();
+
+            var start = Date.now();
+            var ticks = 0;
+            var maxTick = Math.max(1, Math.floor(duration / FIND_FLASH_PULSE_INTERVAL_MS));
+
+            function applyFlashLayer() {
+                var progress = ticks / maxTick;
+                var pulse = Math.abs(Math.sin(progress * Math.PI * 3));
+                var opacity = 0.35 + 0.65 * pulse;
+                var layer = buildFlashLayer(features, opacity, layerId);
+                if (flashState.layer) {
+                    mapInstance.removeLayer(flashState.layer, { skipOverlay: true });
+                }
+                mapInstance.addLayer(layer, { skipRefresh: true });
+                flashState.layer = layer;
+                ticks += 1;
+            }
+
+            applyFlashLayer();
+
+            flashState.pulseTimer = setInterval(function () {
+                var elapsed = Date.now() - start;
+                if (elapsed >= duration) {
+                    return;
+                }
+                applyFlashLayer();
+            }, FIND_FLASH_PULSE_INTERVAL_MS);
+
+            flashState.timer = setTimeout(function () {
+                clearFlashLayer();
+            }, duration);
+        }
+
+        function ensureFindAndFlashHelper() {
+            if (window.WEPP_FIND_AND_FLASH && typeof window.WEPP_FIND_AND_FLASH.findAndFlashById === "function") {
+                return window.WEPP_FIND_AND_FLASH;
+            }
+
+            var helper = {
+                ID_TYPE: {
+                    TOPAZ: "TopazID",
+                    WEPP: "WeppID"
+                },
+                FEATURE_TYPE: {
+                    SUBCATCHMENT: "subcatchment",
+                    CHANNEL: "channel"
+                },
+                findAndFlashById: function (options) {
+                    options = options || {};
+                    var idType = options.idType;
+                    var value = options.value;
+                    var mapInstance = options.map || map;
+                    var layers = Array.isArray(options.layers) ? options.layers : [];
+                    var onFlash = options.onFlash;
+
+                    if (!idType || value === undefined || value === null) {
+                        return Promise.resolve(null);
+                    }
+                    if (!mapInstance) {
+                        console.warn("Map GL: findAndFlashById map instance unavailable");
+                        return Promise.resolve(null);
+                    }
+
+                    var targetValue = String(value);
+
+                    function searchLayer(index) {
+                        if (index >= layers.length) {
+                            console.warn("Map GL: findAndFlashById no feature matched", idType, targetValue);
+                            return Promise.resolve(null);
+                        }
+                        var layer = layers[index];
+                        return resolveLayerData(layer).then(function (collection) {
+                            if (!collection || !collection.features || !collection.features.length) {
+                                return searchLayer(index + 1);
+                            }
+                            var hits = collection.features.filter(function (feature) {
+                                return featureMatches(feature, idType, targetValue);
+                            });
+                            if (!hits.length) {
+                                return searchLayer(index + 1);
+                            }
+
+                            flashFeatures(mapInstance, hits, { duration: FIND_FLASH_DURATION_MS });
+
+                            var result = {
+                                hits: hits,
+                                featureType: layer.type,
+                                idType: idType,
+                                value: targetValue
+                            };
+
+                            if (typeof onFlash === "function") {
+                                try {
+                                    onFlash(result);
+                                } catch (err) {
+                                    console.error("Map GL: findAndFlashById onFlash error", err);
+                                }
+                            }
+
+                            return result;
+                        });
+                    }
+
+                    return searchLayer(0);
+                },
+                flashFeatures: function (mapInstance, features, options) {
+                    flashFeatures(mapInstance || map, features, options);
+                }
+            };
+
+            window.WEPP_FIND_AND_FLASH = helper;
+            return helper;
         }
 
         function getCanvasSize() {
@@ -1519,7 +1776,15 @@ var MapController = (function () {
                 });
             },
             subQuery: function () {
-                warnNotImplemented("subQuery");
+                if (arguments.length === 0) {
+                    return;
+                }
+                var topazId = arguments[0];
+                if (topazId === undefined || topazId === null) {
+                    return;
+                }
+                var queryUrl = window.url_for_run("report/sub_summary/" + topazId + "/");
+                map.hillQuery(queryUrl);
             },
             chnQuery: function (topazId) {
                 if (topazId === undefined || topazId === null) {
@@ -1529,10 +1794,79 @@ var MapController = (function () {
                 map.hillQuery(queryUrl);
             },
             findByTopazId: function () {
-                warnNotImplemented("findByTopazId");
+                var helper = ensureFindAndFlashHelper();
+                if (!helper) {
+                    console.warn("Map GL: WEPP_FIND_AND_FLASH helper not available");
+                    return null;
+                }
+                return map.findById(helper.ID_TYPE.TOPAZ, arguments.length ? arguments[0] : undefined);
             },
             findByWeppId: function () {
-                warnNotImplemented("findByWeppId");
+                var helper = ensureFindAndFlashHelper();
+                if (!helper) {
+                    console.warn("Map GL: WEPP_FIND_AND_FLASH helper not available");
+                    return null;
+                }
+                return map.findById(helper.ID_TYPE.WEPP, arguments.length ? arguments[0] : undefined);
+            },
+            clearFindFlashCache: function (type) {
+                if (!flashState || !flashState.cache) {
+                    return;
+                }
+                if (!type) {
+                    flashState.cache.subcatchments = null;
+                    flashState.cache.channels = null;
+                    return;
+                }
+                var normalized = String(type).toLowerCase();
+                if (normalized.indexOf("sub") !== -1) {
+                    flashState.cache.subcatchments = null;
+                }
+                if (normalized.indexOf("chn") !== -1 || normalized.indexOf("channel") !== -1) {
+                    flashState.cache.channels = null;
+                }
+            },
+            findById: function (idType, value) {
+                var helper = ensureFindAndFlashHelper();
+                if (!helper || typeof helper.findAndFlashById !== "function") {
+                    console.warn("Map GL: WEPP_FIND_AND_FLASH helper not available");
+                    return Promise.resolve(null);
+                }
+                var inputValue = value !== undefined && value !== null
+                    ? String(value).trim()
+                    : (map.centerInput && map.centerInput.value ? map.centerInput.value.trim() : "");
+                if (!inputValue) {
+                    return Promise.resolve(null);
+                }
+                var subCtrl = typeof window.SubcatchmentDelineation !== "undefined"
+                    ? window.SubcatchmentDelineation.getInstance()
+                    : null;
+                var channelCtrl = typeof window.ChannelDelineation !== "undefined"
+                    ? window.ChannelDelineation.getInstance()
+                    : null;
+                return Promise.resolve(helper.findAndFlashById({
+                    idType: idType,
+                    value: inputValue,
+                    map: map,
+                    layers: [
+                        { ctrl: subCtrl, type: helper.FEATURE_TYPE.SUBCATCHMENT },
+                        { ctrl: channelCtrl, type: helper.FEATURE_TYPE.CHANNEL }
+                    ],
+                    onFlash: function (result) {
+                        var topazId = inputValue;
+                        if (idType !== helper.ID_TYPE.TOPAZ) {
+                            var hit = result.hits && result.hits[0];
+                            if (hit && hit.properties && hit.properties.TopazID !== undefined && hit.properties.TopazID !== null) {
+                                topazId = hit.properties.TopazID;
+                            }
+                        }
+                        if (result.featureType === helper.FEATURE_TYPE.SUBCATCHMENT) {
+                            map.subQuery(topazId);
+                        } else if (result.featureType === helper.FEATURE_TYPE.CHANNEL) {
+                            map.chnQuery(topazId);
+                        }
+                    }
+                }));
             },
             goToEnteredLocation: function (value) {
                 var inputValue = value;
@@ -1542,6 +1876,19 @@ var MapController = (function () {
                 var parsed = parseLocationInput(inputValue);
                 if (!parsed) {
                     if (inputValue && String(inputValue).trim()) {
+                        var trimmed = String(inputValue).trim();
+                        var helper = ensureFindAndFlashHelper();
+                        if (helper && typeof map.findByTopazId === "function") {
+                            return Promise.resolve(map.findByTopazId(trimmed)).then(function (result) {
+                                if (result) {
+                                    return result;
+                                }
+                                if (typeof map.findByWeppId === "function") {
+                                    return map.findByWeppId(trimmed);
+                                }
+                                return null;
+                            });
+                        }
                         console.warn("Map GL: invalid location input. Expected 'lon, lat[, zoom]'.", inputValue);
                     }
                     return;
