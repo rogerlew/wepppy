@@ -8,7 +8,6 @@ from ._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
-from wepppy.weppcloud.utils.uploads import log_upload_prefix_usage
 
 huc_fire_bp = Blueprint('huc_fire', __name__)
 
@@ -24,7 +23,6 @@ def huc_fire():
 @huc_fire_bp.route('/huc-fire/tasks/upload_sbs/', methods=['POST'])
 def upload_sbs():
     from wepppy.weppcloud.app import create_run_dir, user_datastore
-    log_upload_prefix_usage("huc-fire/tasks/upload_sbs")
     try:
         file = request.files['input_upload_sbs']
     except Exception:

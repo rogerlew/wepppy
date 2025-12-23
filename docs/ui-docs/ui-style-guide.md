@@ -660,7 +660,8 @@ document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
     alert('Network error during upload');
   });
   
-  xhr.open('POST', "{{ url_for_run('tasks/upload_' ~ TASK_NAME) }}");
+  const uploadUrl = url_for_run("tasks/upload_" + "{{ TASK_NAME }}", { prefix: "/upload" });
+  xhr.open('POST', uploadUrl);
   xhr.send(formData);
 });
 </script>
@@ -687,6 +688,7 @@ document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
 - Server must accept FormData with file key matching `{{FIELD_ID}}`
 - Progress bar uses inline `style="width: X%"` for dynamic updates
 - Ensure `TASK_NAME` matches the server task slug (e.g., `"sbs_map"`) so the upload endpoint resolves correctly
+- For file uploads, use the `/upload` prefix override so Caddy applies the extended timeout (`url_for_run(..., { prefix: "/upload" })`)
 - `.wc-upload-progress*` classes are defined in `ui-foundation.css`
 
 ---
@@ -1150,7 +1152,9 @@ document.getElementById('input_upload_sbs').addEventListener('change', function(
   const formData = new FormData();
   formData.append('input_upload_sbs', file);
   
-  fetch(url_for_run('tasks/upload_sbs'), {
+  const uploadUrl = url_for_run("tasks/upload_sbs", { prefix: "/upload" });
+
+  fetch(uploadUrl, {
     method: 'POST',
     body: formData
   })

@@ -107,6 +107,7 @@ wctl logs weppcloud
 - External access happens through Caddy on `http://localhost:8080`. It proxies:
 - `/weppcloud/static/*` directly from the mounted repo (`wepppy/weppcloud/static`) using Caddy’s `file_server`.
 - `/weppcloud/*` to the Flask app, preserving `X-Forwarded-*` headers.
+- `/upload/*` to the Flask app with a 20-minute upstream timeout for file uploads; Caddy strips `/upload` and forwards `X-Forwarded-Prefix: /upload` so Flask can distinguish upload traffic.
 - `/weppcloud/runs/.../(browse|download|aria2c.spec|gdalinfo)` to the Starlette browse microservice.
 - `/weppcloudr/*` to the Plumber renderer (port 8050) for report generation (Deval in the Details).
 - `/weppcloud-microservices/status` and `/weppcloud-microservices/preflight` to the Go microservices.

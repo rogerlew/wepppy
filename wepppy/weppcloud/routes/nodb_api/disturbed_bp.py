@@ -27,7 +27,6 @@ from wepppy.nodb.mods.disturbed import Disturbed, write_disturbed_land_soil_look
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 from wepppy.weppcloud.utils.uploads import (
     UploadError,
-    log_upload_prefix_usage,
     save_run_file,
     upload_failure,
     upload_success,
@@ -253,7 +252,6 @@ def set_firedate(runid: str, config: str) -> Response:
 @authorize_and_handle_with_exception_factory
 def task_upload_sbs(runid: str, config: str) -> Response:
     """Upload and validate an SBS raster."""
-    log_upload_prefix_usage("tasks/upload_sbs")
     from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -288,7 +286,6 @@ def task_upload_sbs(runid: str, config: str) -> Response:
 @authorize_and_handle_with_exception_factory
 def task_upload_cover_transform(runid: str, config: str) -> Response:
     """Upload a user-defined cover transform for revegetation workflows."""
-    log_upload_prefix_usage("tasks/upload_cover_transform")
     from wepppy.nodb.mods.revegetation import Revegetation
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)

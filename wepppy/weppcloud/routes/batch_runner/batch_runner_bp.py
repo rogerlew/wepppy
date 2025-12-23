@@ -21,7 +21,6 @@ from wepppy.nodb.base import get_configs, get_config_dir, clear_locks, NoDbAlrea
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
-from wepppy.weppcloud.utils.uploads import log_upload_prefix_usage
 from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
 
 batch_runner_bp = Blueprint(
@@ -282,7 +281,6 @@ def _batch_runner_disabled_response():
 @roles_required("Admin")
 @handle_with_exception_factory
 def upload_geojson(batch_name: str):
-    log_upload_prefix_usage("batch/upload-geojson")
     if not _batch_runner_feature_enabled():
         return jsonify(_batch_runner_disabled_response()), 403
 
@@ -375,7 +373,6 @@ def upload_geojson(batch_name: str):
 @roles_required("Admin")
 @handle_with_exception_factory
 def upload_sbs_map(batch_name: str):
-    log_upload_prefix_usage("batch/upload-sbs-map")
     if not _batch_runner_feature_enabled():
         return jsonify(_batch_runner_disabled_response()), 403
 

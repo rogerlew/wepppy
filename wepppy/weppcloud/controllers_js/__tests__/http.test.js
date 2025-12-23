@@ -73,6 +73,24 @@ describe("WCHttp helpers", () => {
         expect(result.status).toBe(200);
     });
 
+    test("request bypasses site_prefix for upload endpoints", async () => {
+        window.site_prefix = "/weppcloud";
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: {
+                get: () => ""
+            },
+            text: () => Promise.resolve("")
+        });
+
+        await window.WCHttp.request("/upload/health", { method: "GET" });
+
+        const [url] = global.fetch.mock.calls[0];
+        expect(url).toBe("/upload/health");
+    });
+
     test("postForm serializes payloads, propagates CSRF, and throws HttpError", async () => {
         document.head.innerHTML = `<meta name="csrf-token" content="token-head">`;
         global.fetch = jest.fn().mockResolvedValue({

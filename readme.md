@@ -78,6 +78,12 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 - **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures
 - **[docs/dev-notes/](docs/dev-notes/)** - Detailed developer notes on specific topics
 
+## Operational Notes
+
+- Caddy proxies `/weppcloud/*` with default upstream timeouts and `/upload/*` with a 20-minute timeout for file uploads; clients should use `/upload` for multipart uploads.
+- On forest (`wc.bearhive.duckdns.org`) behind pfSense/HAProxy, wait for HAProxy health checks to go green after Caddy reloads to avoid transient 502s.
+- See `docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md` for forest-specific reverse proxy and auth details.
+
 ## Architecture
 
 ### System Overview

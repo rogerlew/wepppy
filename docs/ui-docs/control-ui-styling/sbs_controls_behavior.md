@@ -95,7 +95,7 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
 1. User selects file → auto-upload triggered
 2. disturbed.uploadSbs()
    - Clear hints
-   - POST /tasks/upload_sbs with FormData
+   - POST /tasks/upload_sbs with FormData (use /upload prefix via `url_for_run(..., { prefix: "/upload" })`)
 3. Backend validates, saves to baer_dir
 4. Response: {Success: true, Content: {disturbed_fn: "..."}}
 5. Frontend:

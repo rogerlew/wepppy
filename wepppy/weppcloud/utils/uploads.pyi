@@ -6,19 +6,10 @@ from typing import Any, Callable, Optional, Sequence
 from flask import Response
 from werkzeug.datastructures import FileStorage
 
-__all__ = [
-    "UploadError",
-    "log_upload_prefix_usage",
-    "save_run_file",
-    "upload_success",
-    "upload_failure",
-]
+__all__ = ["UploadError", "save_run_file", "upload_success", "upload_failure"]
 
 
 class UploadError(Exception): ...
-
-
-def log_upload_prefix_usage(route_name: str) -> None: ...
 
 
 def save_run_file(

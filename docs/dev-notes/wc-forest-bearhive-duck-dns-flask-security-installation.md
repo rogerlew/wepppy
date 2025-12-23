@@ -42,11 +42,13 @@ Environment: `forest.bearhive.internal` behind pfSense/HAProxy terminating TLS a
 
 * Because the proxy adds `/weppcloud`, Flask-Security’s default `/login` still resolves correctly as long as `APPLICATION_ROOT` is set and we expose a blueprint path at `/login`. Our custom blueprint simply calls the core Flask-Security view, avoiding duplicate logic while letting us serve branded templates.
 * The initial attempt to alias the login route using `add_url_rule('/weppcloud/login', ...)` failed once Gunicorn reloaded—Flask registered both `/login` and `/weppcloud/login`, but the proxy already prepended `/weppcloud`, resulting in `/weppcloud/weppcloud/login`. Registering the blueprint without an extra prefix is the correct approach.
+* Upload traffic now routes through `/upload/*` so Caddy can apply longer upstream timeouts. Caddy strips `/upload` before forwarding and sets `X-Forwarded-Prefix: /upload`, so Flask sees `request.script_root == "/upload"` and routes resolve without changing the underlying view paths.
 
 ## Service management tips
 
 * Gunicorn caches templates; always restart after editing Jinja files: `sudo systemctl restart gunicorn-weppcloud.service`.
 * Logs live in `/var/log/weppcloud/gunicorn-weppcloud-error.log`. The HAProxy health checks spam `/health` with OPTIONS requests—filter those when hunting for auth issues.
+* After reloading Caddy, wait for the pfSense/HAProxy health check to report green before hitting `/upload` or `/weppcloud`; transient 502s are expected while HAProxy marks the backend healthy.
 
 ## Validation checklist
 

@@ -346,7 +346,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Structure**: `ui.control_shell(collapsible=False)` with compact status + stacktrace overrides. Mode radios retain legacy IDs (`treatments_mode{1,4}`) and drive two `.wc-stack` containers for selection vs. raster upload.
 - **Inputs**: `ui.select_field('treatments_single_selection', ...)` populates treatment options from the view context. `ui.file_upload('input_upload_landuse', accept=".tif,.img")` handles raster uploads; the lookup table uses `wc-table` to list valid treatment classes.
 - **JS contract**: `treatments.js` now initialises listeners via `initializeForm()`, using `setMode()` to update NoDb state and `updateModeUI()` for visibility toggles. The build button keeps `btn_build_treatments` so ControlBase + preflight hooks continue to work.
-- **Backend**: `/rq/api/build_treatments` validates raster uploads via `save_run_file` (100&nbsp;MB cap, `.tif/.img` allow-list) before handing off to `build_landuse_rq`.
+- **Backend**: `/rq/api/build_treatments` (use `/upload` when a file is attached) validates raster uploads via `save_run_file` (100&nbsp;MB cap, `.tif/.img` allow-list) before handing off to `build_landuse_rq`.
 - **Status**: Implemented; treatments control now ships with the Pure page (no legacy wrapper required).
 
 ### Team Control (`controls/team_pure.htm`)

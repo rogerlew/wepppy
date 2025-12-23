@@ -29,7 +29,7 @@ from wepppy.weppcloud.utils.helpers import (
     error_factory,
     exception_factory,
 )
-from wepppy.weppcloud.utils.uploads import log_upload_prefix_usage, save_run_file, UploadError
+from wepppy.weppcloud.utils.uploads import save_run_file, UploadError
 
 import redis
 from rq import Queue, Callback
@@ -681,7 +681,6 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_landuse', methods=['POST'])
 def api_build_landuse(runid, config):
-    log_upload_prefix_usage("rq/api/build_landuse")
     try:
         wd = get_wd(runid)
         landuse = Landuse.getInstance(wd)
@@ -783,7 +782,6 @@ def api_build_landuse(runid, config):
 def api_build_treatments(runid, config):
     from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
 
-    log_upload_prefix_usage("rq/api/build_treatments")
     try:
         wd = get_wd(runid)
         treatments = Treatments.getInstance(wd)
@@ -1312,7 +1310,6 @@ def _task_upload_ash_map(runid, config, file_input_id, *, required=True, overwri
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni', methods=['POST'])
 def api_run_omni(runid, config):
-    log_upload_prefix_usage("rq/api/run_omni")
     wd = get_wd(runid)
     omni = Omni.getInstance(wd)
 
@@ -1350,7 +1347,6 @@ def api_run_omni(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni_contrasts', methods=['POST'])
 def run_omni_contrasts(runid, config):
-    log_upload_prefix_usage("rq/api/run_omni_contrasts")
     wd = get_wd(runid)
     omni = Omni.getInstance(wd)
 
@@ -1387,7 +1383,6 @@ def run_omni_contrasts(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_ash', methods=['POST'])
 def api_run_ash(runid, config):
-    log_upload_prefix_usage("rq/api/run_ash")
     try:
         wd = get_wd(runid)
         payload = parse_request_payload(request)

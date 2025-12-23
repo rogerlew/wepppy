@@ -686,7 +686,7 @@ class Ash(NoDbBase):
                     continue
 
                 if load_d is not None:
-                    if load_d[topaz_id] <= 0.0:
+                    if load_d.get(topaz_id, 0.0) <= 0.0:
                         continue
 
                 hill_wat_df = load_hill_wat_dataframe(

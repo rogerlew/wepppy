@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Optional, Sequence, Tuple, Any, Union
 
-from flask import Response, current_app, jsonify, request
+from flask import Response, jsonify, request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
@@ -13,7 +13,6 @@ from .helpers import get_wd
 
 __all__ = [
     "UploadError",
-    "log_upload_prefix_usage",
     "save_run_file",
     "upload_success",
     "upload_failure",
@@ -190,20 +189,3 @@ def upload_failure(error: str, status: int = 400, **extras: Any) -> Response:
     response.status_code = status
     return response
 
-
-def log_upload_prefix_usage(route_name: str) -> None:
-    """Log when upload endpoints are reached outside the /upload prefix."""
-    try:
-        script_root = (request.script_root or "").rstrip("/")
-        if script_root == "/upload":
-            return
-        if not script_root and request.path.startswith("/upload/"):
-            return
-        current_app.logger.info(
-            "upload-route-legacy route=%s prefix=%s path=%s",
-            route_name,
-            request.script_root or "",
-            request.path,
-        )
-    except Exception:
-        return

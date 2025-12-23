@@ -311,6 +311,13 @@ http.get("resources/subcatchments.json?pup=_pups/omni/scenarios/foo")
 - `/auth/` authentication routes
 - Root routes (`/`, `/index`)
 
+**Upload endpoints:** File uploads must use the `/upload` proxy prefix to receive the longer upstream timeout. Use the `url_for_run` prefix override and let `WCHttp` bypass `site_prefix` for `/upload`:
+
+```javascript
+http.request(url_for_run("tasks/upload_sbs/", { prefix: "/upload" }), { method: "POST", body: formData })
+http.request(url_for_run("rq/api/run_omni", { prefix: "/upload" }), { method: "POST", body: formData })
+```
+
 ### Bulk Fix Pattern
 
 When modernizing controllers or migrating to Pure templates, use this regex pattern to wrap unwrapped endpoints:

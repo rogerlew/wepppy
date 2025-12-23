@@ -144,6 +144,17 @@ Examples:
 - `/runs/abc123/tahoe/query/subcatchments.json`
 - `/runs/abc123/tahoe/rq/api/build_climate`
 
+### Upload Routing (`/upload`)
+
+File uploads should target `/upload/...` so Caddy applies the extended 20-minute upstream timeout. Caddy strips `/upload` before proxying to Flask and forwards `X-Forwarded-Prefix: /upload`, so `ProxyFix` sets `request.script_root` and the upload blueprint can distinguish traffic from `/weppcloud`.
+
+Health check:
+```
+GET /upload/health
+```
+
+Non-upload traffic stays under `/weppcloud` and keeps the default proxy timeouts.
+
 ## Key Concepts
 
 ### Run Lifecycle
