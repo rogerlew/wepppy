@@ -1,50 +1,50 @@
 # VS Code Theme Integration – System Documentation
-> **Status:** ✅ Production · **Last Updated:** 2025-10-28  
+> **Status:** ✅ Production · **Last Updated:** 2025-12-22  
 > **Work Package:** [`docs/work-packages/20251027_vscode_theme_integration/`](/workdir/wepppy/docs/work-packages/20251027_vscode_theme_integration/)  
 > **Audience:** UI contributors, operations engineers, stakeholders evaluating theme additions
 
 ## Overview
-The weppcloud theme system reuses curated VS Code themes to populate CSS custom properties so the interface inherits a complete palette without any bespoke design work. Eleven production themes ship today, the catalog is capped to keep choices intentional, and the entire pipeline—from token mapping to runtime persistence—runs without touching the Flask templates or Pure controls.
+The weppcloud theme system reuses curated VS Code themes to populate CSS custom properties so the interface inherits a complete palette without any bespoke design work. Thirteen generated themes ship today (plus the default base palette), the catalog is capped to keep choices intentional, and the pipeline—from token mapping to runtime persistence—does not require template or Pure control changes unless you want to expose new themes in the UI.
 
 ### Production Snapshot
 | Category | Detail |
 |----------|--------|
-| Catalog | 11 shipped themes: Default, OneDark, Ayu family (7 variants), Cursor family (3 variants) |
+| Catalog | 13 generated themes (Ayu x6, Cursor x4, OneDark, Dark Modern, Light High Contrast) + default base palette in `ui-foundation.css` |
+| Exposure | Header switcher exposes 12 non-default themes; Theme Lab/metrics uses a curated list (excludes `cursor-light`, `light-high-contrast`) |
 | Mapping | `wepppy/weppcloud/themes/theme-mapping.json` drives token → CSS variable conversion with per-theme overrides |
-| Payload | `static/css/themes/all-themes.css` ≈10 KB gzipped, delivered once and cached |
-| Persistence | `wc-theme` stored in `localStorage`; inline boot script sets `data-theme` to avoid FOUC |
-| Accessibility | Automated WCAG AA checks during conversion; 6/11 themes currently pass in production |
+| Payload | `static/css/themes/all-themes.css` ≈15.9 KB raw (≈2.2 KB gzipped), delivered once and cached |
+| Persistence | `wc-theme` stored in `localStorage`; `controllers_js/theme.js` toggles `data-theme` |
+| Accessibility | Token-based WCAG checks emitted by the converter; latest report (2025-10-28) covers 11 themes, 5 passing |
 
 ### User Experience
-- Theme picker lives in the header; selections apply instantly and persist across sessions.
-- FOUC is prevented by setting `data-theme` before paint; print media falls back to the default light palette.
-- The runtime never recalculates CSS—switching a theme only swaps CSS variables.
+- Theme picker lives in the header; selections apply instantly and persist via `localStorage`.
+- Default palette is the no-attribute state in `ui-foundation.css`; themes override variables in `all-themes.css`.
+- FOUC prevention is only in `gl_dashboard.htm` today; other pages rely on `theme.js` after DOMContentLoaded.
 
 ## Architecture
 
 ### Mapping Workflow
 - VS Code color tokens feed CSS variables through a declarative config (`theme-mapping.json`).
-- Each mapping lists multiple tokens in priority order plus a fallback value.
-- Per-theme overrides adjust individual variables without rewriting the base mapping file.
+- Each variable lists tokens in priority order plus a fallback value.
+- Per-theme overrides live under `themes.<slug>.overrides` (optional per-variable overrides are also supported).
 
 ```json
 {
-  "css_var": "--wc-color-surface",
-  "vscode_tokens": ["editor.background", "editorWidget.background"],
-  "fallback": "#ffffff",
-  "description": "Primary panel/card background"
+  "--wc-color-surface": {
+    "description": "Primary panel/card background",
+    "fallback": "#ffffff",
+    "tokens": ["editor.background", "editorWidget.background"]
+  }
 }
 ```
 
 Example override:
 ```json
-"overrides": {
-  "themes": {
-    "onedark": {
-      "--wc-color-page": {
-        "vscode_tokens": ["editorGroupHeader.tabsBackground"],
-        "reason": "Default background reads too dark for page chrome"
-      }
+"themes": {
+  "onedark": {
+    "overrides": {
+      "--wc-color-border": "#181A1F",
+      "--wc-color-border-strong": "#0F1115"
     }
   }
 }
@@ -58,48 +58,60 @@ convert_vscode_theme.py  (static-src/scripts/)
     ↓ applies theme-mapping.json + overrides
 static/css/themes/<theme>.css
     ↓ concatenated
-static/css/themes/all-themes.css  (≈10 KB gzipped)
+static/css/themes/all-themes.css  (≈2.2 KB gzipped)
 ```
 
 Key tooling (`wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py`):
+- `--theme <slug>` converts only the specified theme(s) (repeatable).
 - `--validate-only` confirms required tokens resolve before writing files.
-- `--output <path>` emits a dedicated CSS file; `all-themes.css` is rebuilt from the individual outputs.
+- `--output-dir <path>` overrides the output directory (per-theme files + combined bundle).
+- `--combined-file <name>` overrides the combined bundle filename.
 - `--report` / `--md-report` generate JSON or Markdown contrast summaries for audits.
 - `--reset-mapping` restores the default mapping when experimentation goes sideways.
 
 ### Runtime Behavior
-- `controllers_js/theme.js` reads `wc-theme` from `localStorage`, assigns `data-theme`, then stores updates.
-- A small inline script executes before the main bundle to set `data-theme` and prevent FOUC.
-- `ui-foundation.css` defines the default (grayscale) palette; themed overrides live in `all-themes.css`.
-- Print styles flip back to the default theme to keep dark palettes from burning toner.
+- `controllers_js/theme.js` reads/writes `wc-theme`, applies `data-theme`, and dispatches `wc-theme:change`.
+- Themes are derived from `<select data-theme-select>` options; selects are kept in sync.
+- Default theme removes `data-theme` and clears `localStorage`.
+- `gl_dashboard.htm` sets the theme before paint; other templates do not.
 
 ```javascript
-class ThemeManager {
-  static THEMES = {
-    default: 'Default Light',
-    onedark: 'One Dark',
-    'ayu-dark': 'Ayu Dark',
-    'ayu-light': 'Ayu Light',
-    'ayu-mirage': 'Ayu Mirage',
-    'cursor-dark': 'Cursor Dark',
-    // … other catalog entries
-  };
+(function (global) {
+  var STORAGE_KEY = "wc-theme";
+  var SELECTOR = "[data-theme-select]";
+  var root = global.document ? global.document.documentElement : null;
 
-  static get() {
-    return localStorage.getItem('wc-theme') || 'default';
+  function applyTheme(theme) {
+    if (!root) {
+      return;
+    }
+    if (!theme || theme === "default") {
+      root.removeAttribute("data-theme");
+    } else {
+      root.setAttribute("data-theme", theme);
+    }
   }
 
-  static set(themeId) {
-    document.documentElement.setAttribute('data-theme', themeId);
-    localStorage.setItem('wc-theme', themeId);
+  function init() {
+    if (!root || !global.document) {
+      return;
+    }
+    var selects = global.document.querySelectorAll(SELECTOR);
+    if (!selects.length) {
+      return;
+    }
+    var stored = global.localStorage.getItem(STORAGE_KEY);
+    var initial = stored || root.getAttribute("data-theme") || "default";
+    applyTheme(initial);
+    // sync selects + listen for change...
   }
 
-  static init() {
-    ThemeManager.set(ThemeManager.get());
+  if (global.document && global.document.readyState === "loading") {
+    global.document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
   }
-}
-
-document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
+}(typeof globalThis !== "undefined" ? globalThis : window));
 ```
 
 ### File Layout
@@ -107,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
 wepppy/weppcloud/
 ├── themes/
 │   ├── theme-mapping.json         # Token mapping + overrides (author-editable)
+│   ├── theme-mapping.defaults.json # Defaults used by --reset-mapping
 │   ├── themes-contrast.json/md    # Optional contrast reports
 │   ├── OneDark.json               # Source VS Code themes (examples)
 │   └── …                          # Additional source JSON
@@ -129,44 +142,47 @@ wepppy/weppcloud/
    cp ~/.vscode/extensions/publisher.theme-1.0.0/themes/Theme.json \
       /workdir/wepppy/wepppy/weppcloud/themes/
    ```
-2. **Validate and convert**
+2. **Add a mapping entry**
+   - Add a `themes.<slug>` entry in `theme-mapping.json` with `label`, `source`, `variant`, and any overrides.
+3. **Validate and convert**
    ```bash
    cd /workdir/wepppy/wepppy/weppcloud/static-src/scripts
-   python convert_vscode_theme.py ../../themes/Theme.json --validate-only
-   python convert_vscode_theme.py ../../themes/Theme.json \
-     --output ../../static/css/themes/theme.css
+   python convert_vscode_theme.py --theme <slug> --validate-only
+   python convert_vscode_theme.py --theme <slug>
    ```
-3. **Adjust mapping if colors miss the mark**  
+4. **Adjust mapping if colors miss the mark**  
    Edit `theme-mapping.json` to add overrides, then rerun the converter.
-4. **Register the theme in the UI**  
+5. **Register the theme in the UI**  
    - Add an `<option>` to `wepppy/weppcloud/templates/header/_theme_switcher.htm`.  
-   - Register the human-readable label in `ThemeManager.THEMES`.
-5. **Rebuild the combined bundle**  
-   Use the existing asset build (`wctl build-static-assets`) or concatenate individual CSS files into `all-themes.css`.
-6. **Restart and smoke-test**  
-   `wctl restart weppcloud`, then confirm the theme across maps, tables, and forms; run print preview to verify the fallback.
+   - If it should appear in Theme Lab/metrics, add it to `THEME_OPTIONS` in `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` (otherwise add it to the exclusions list below).
+6. **Refresh and smoke-test**  
+   - CSS changes take effect on reload.  
+   - Template changes may require a restart depending on environment caching.  
+   Confirm the theme across maps, tables, and forms.
 7. **Document and archive**  
    Update the catalog tracker under `docs/work-packages/20251027_vscode_theme_integration/notes/` with accessibility notes.
 
 ### Maintenance Checklist
 - All catalog themes produce outputs via the converter (no hand-edited CSS).
 - `themes-contrast.md` regenerated whenever a theme or mapping changes.
-- Header dropdown and `ThemeManager.THEMES` stay in sync.
-- `all-themes.css` rebuilt after any addition or removal.
-- Print preview keeps usable contrast (dark themes must not override print palette).
-- Inventory lists which themes pass WCAG AA; accessible variants are flagged explicitly.
+- Header dropdown (`_theme_switcher.htm`) and Theme Lab (`THEME_OPTIONS`) stay in sync with desired exposure.
+- Theme Lab exclusions list stays current when intentionally skipping themes.
+- `all-themes.css` rebuilt by the converter after any addition or removal.
+- If print fallback is required, add `@media print` overrides in `ui-foundation.css`.
 
 ## Accessibility & Quality
-- The converter runs WCAG AA checks; failures emit actionable warnings before CSS is written.
-- Current production ratio: 6/11 themes pass AA (goal ≥ 75%). Overrides should nudge problem tokens toward compliant colors.
+- The converter runs token-based WCAG AA checks; failures emit actionable warnings before CSS is written.
+- Latest stored report (2025-10-28) covers 11 themes with 5 passing (goal ≥ 75%). Rerun after catalog changes.
 - Guardrails to watch:
   - `--wc-color-text` vs. `--wc-color-surface`
   - `--wc-color-link` vs. `--wc-color-page`
-  - `--wc-focus-outline` must hold a 3:1 contrast with both focused control and surrounding surface.
+  - Focus outlines inherit `--wc-color-accent` (or optional `--wc-color-focus`) and should hold ≥3:1 contrast.
 - When overrides cannot rescue a palette, ship an “Accessible” variant rather than diluting the base catalog.
 
 ### Theme Lab & Metrics
-- `/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls) that the automation harness inspects. Keep this page in sync with macro updates so the rendered sample always matches production markup.
+- `/weppcloud/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls) that the automation harness inspects. Keep this page in sync with macro updates so the rendered sample always matches production markup.
+- Theme IDs are pulled from the Theme Lab `<select data-theme-select>` list (`THEME_OPTIONS` in `ui_showcase_bp.py`).
+- Theme Lab exclusions (intentional): `cursor-light`, `light-high-contrast`.
 - Run the contrast suite locally with `npm run smoke:theme-metrics` from `wepppy/weppcloud/static-src/` or through the CLI via `wctl2 run-playwright --suite theme-metrics --env local`. The harness simply hits the Theme Lab and does **not** require run provisioning, but the backend must be running so the page renders.
 - Results are written to `wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.{json,md}`. Attach the Markdown table to PRs when tweaking `theme-mapping.json` to prove contrast moved in the right direction.
 - Implementation details and expansion plan live in `docs/ui-docs/theme-metrics.spec.md`.
@@ -174,17 +190,17 @@ wepppy/weppcloud/
 ### Catalog Health
 | Metric | Target | Current | Notes |
 |--------|--------|---------|-------|
-| Catalog size | 6 – 12 themes | 11 | Avoid decision fatigue |
-| Guaranteed coverage | ≥1 light, ≥1 dark AA-compliant | ✅ | Default + OneDark Accessible backlog item |
-| Accessibility pass rate | ≥75% AA compliant | 54% | Prioritize Ayu and Cursor variants for overrides |
-| Bundle size | ≤15 KB gzipped | ≈10 KB | Plenty of headroom |
+| Catalog size | 6 – 12 themes | 13 generated (12 non-default in header, 11 non-default in Theme Lab) | Above target; avoid decision fatigue |
+| Guaranteed coverage | ≥1 light, ≥1 dark AA-compliant | ✅ (2025-10-28 report) | Cursor Light + Ayu dark variants |
+| Accessibility pass rate | ≥75% AA compliant | 5/11 (45%) in latest converter report | Prioritize Ayu Light + Cursor variants |
+| Bundle size | ≤15 KB gzipped | ≈2.2 KB gzipped (15.9 KB raw) | Plenty of headroom |
 
 ## Troubleshooting
 - **Theme renders incorrectly:** Re-run the converter with `--validate-only` to confirm tokens; add per-theme overrides for missing or unsuitable values.
-- **Theme missing from dropdown:** Ensure `_theme_switcher.htm` and `ThemeManager.THEMES` include identical keys, then rebuild `all-themes.css`.
-- **Contrast warnings:** Check `themes-contrast.md`; patch `theme-mapping.json` with overrides and regenerate the CSS.
-- **FOUC on first load:** Verify the inline script that sets `data-theme` ships ahead of the main bundle and that `wc-theme` is present in `localStorage`.
-- **Print outputs unreadable:** Confirm print media rules in `ui-foundation.css` override the active theme back to the default palette.
+- **Theme missing from dropdown:** Ensure `_theme_switcher.htm` (header) and `THEME_OPTIONS` (Theme Lab) include the key as intended, then rebuild `all-themes.css`.
+- **Contrast warnings:** Check `themes-contrast.md` (converter) and `static-src/test-results/theme-metrics/` (Playwright); patch `theme-mapping.json` overrides and regenerate the CSS.
+- **FOUC on first load:** Only `gl_dashboard.htm` sets `data-theme` before paint. Add a small inline boot script to `base_pure.htm` if you need this everywhere.
+- **Print outputs unreadable:** No print-specific overrides exist today; add `@media print` rules in `ui-foundation.css` if needed.
 
 ## Zero-Aesthetic Alignment
 | Principle | Result | Notes |
