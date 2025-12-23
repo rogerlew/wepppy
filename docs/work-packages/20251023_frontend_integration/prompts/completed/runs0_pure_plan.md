@@ -20,7 +20,7 @@ base_pure.htm
    │   ├─ Left column: Table of contents (Pure sticky list)
    │   └─ Right column: stack of control sections
    ├─ Command bar slot (Pure styling, same JS entry point)
-   └─ Footer / scripts (load controllers.js, StatusStream, run bootstrap)
+   └─ Footer / scripts (load controllers-gl.js, StatusStream, run bootstrap)
 ```
 - Each control section renders as:
   - Converted control → included directly (Pure template).
@@ -49,7 +49,7 @@ base_pure.htm
 
 ## 6. Dependencies & Outstanding Work
 - Status streaming: finalise map/delineation cleanup and migrate the treatments suite to the StatusStream pattern prior to swapping templates.
-- Global assets: ensure `controllers.js` bundle ships modal manager, StatusStream, tabset helper (done); map-related utilities will need review during the map conversion.
+- Global assets: ensure `controllers-gl.js` bundle ships modal manager, StatusStream, tabset helper (done); map-related utilities will need review during the map conversion.
 - Styling: extend `ui-foundation.css` with map-panel, delineation, and Omni-specific layout tokens once those controls migrate.
 - Documentation: continue updating `control_components.md`, `ash-control-plan.md`, and other module docs as controls move; keep `control-inventory.md` aligned with actual runtime status.
 

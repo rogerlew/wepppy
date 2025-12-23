@@ -75,10 +75,10 @@ echo ""
 # Build static assets (controllers and themes)
 echo ">>> Step 4: Building static assets..."
 
-# Build controllers.js
-echo "    Building controllers.js..."
+# Build controllers-gl.js
+echo "    Building controllers-gl.js..."
 python3 wepppy/weppcloud/controllers_js/build_controllers_js.py \
-    --output wepppy/weppcloud/static/js/controllers.js
+    --output wepppy/weppcloud/static/js/controllers-gl.js
 
 # Build themes
 if [ "${SKIP_THEMES}" = false ]; then
@@ -124,7 +124,7 @@ echo ""
 echo "============================================"
 echo "Deployment complete!"
 echo "============================================"
-echo "Controllers bundle: wepppy/weppcloud/static/js/controllers.js"
+echo "Controllers bundle: wepppy/weppcloud/static/js/controllers-gl.js"
 echo "Theme CSS: wepppy/weppcloud/static/css/themes/"
 echo ""
 echo "Remember to hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"

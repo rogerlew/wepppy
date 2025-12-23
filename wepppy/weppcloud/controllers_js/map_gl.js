@@ -27,7 +27,10 @@ var MapController = (function () {
 
     var DEFAULT_VIEW = { lat: 44.0, lng: -116.0, zoom: 6 };
     var FLY_TO_DURATION_MS = 4000;
+    var FLY_TO_BOUNDS_PADDING_PX = 48;
     var SENSOR_LAYER_MIN_ZOOM = 9;
+    var MAP_MIN_ZOOM = 0;
+    var MAP_MAX_ZOOM = 19;
     var USGS_LAYER_NAME = "USGS Gage Locations";
     var SNOTEL_LAYER_NAME = "SNOTEL Locations";
     var NHD_LAYER_NAME = "NHD Flowlines";
@@ -1038,6 +1041,54 @@ var MapController = (function () {
             });
         }
 
+        function clampZoom(value) {
+            if (!Number.isFinite(value)) {
+                return state.zoom;
+            }
+            return Math.max(MAP_MIN_ZOOM, Math.min(MAP_MAX_ZOOM, value));
+        }
+
+        function fitBoundsToViewState(bounds, options) {
+            if (!bounds || !deckApi || typeof deckApi.WebMercatorViewport !== "function") {
+                return null;
+            }
+            var sw = bounds.getSouthWest ? bounds.getSouthWest() : null;
+            var ne = bounds.getNorthEast ? bounds.getNorthEast() : null;
+            if (!sw || !ne) {
+                return null;
+            }
+            var size = getCanvasSize();
+            if (!(size.width > 0 && size.height > 0)) {
+                return null;
+            }
+            var padding = options && Number.isFinite(options.padding)
+                ? options.padding
+                : FLY_TO_BOUNDS_PADDING_PX;
+            var viewport = new deckApi.WebMercatorViewport({
+                width: size.width,
+                height: size.height,
+                longitude: state.center.lng,
+                latitude: state.center.lat,
+                zoom: state.zoom,
+                pitch: 0,
+                bearing: 0
+            });
+            if (typeof viewport.fitBounds !== "function") {
+                return null;
+            }
+            var boundsArray = [ [sw.lng, sw.lat], [ne.lng, ne.lat] ];
+            var fit = viewport.fitBounds(
+                boundsArray,
+                { padding: padding }
+            );
+            var normalized = normalizeViewState(fit);
+            if (!normalized) {
+                return null;
+            }
+            normalized.zoom = clampZoom(normalized.zoom);
+            return normalized;
+        }
+
         function toViewState(center, zoom) {
             return normalizeViewState({
                 longitude: center.lng,
@@ -1669,6 +1720,23 @@ var MapController = (function () {
                 var sw = bounds.getSouthWest ? bounds.getSouthWest() : null;
                 var ne = bounds.getNorthEast ? bounds.getNorthEast() : null;
                 if (!sw || !ne) {
+                    return;
+                }
+                var fitViewState = fitBoundsToViewState(bounds, {
+                    padding: FLY_TO_BOUNDS_PADDING_PX
+                });
+                if (fitViewState) {
+                    if (!deckApi || typeof deckApi.FlyToInterpolator !== "function") {
+                        applyViewState(fitViewState, { final: true });
+                    } else {
+                        applyViewState(fitViewState, {
+                            final: true,
+                            transition: {
+                                duration: FLY_TO_DURATION_MS,
+                                interpolator: new deckApi.FlyToInterpolator()
+                            }
+                        });
+                    }
                     return;
                 }
                 var center = {

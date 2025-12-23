@@ -804,5 +804,5 @@
 {% block script_extras %}
   {{ super() }}
   <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
-  <script src="{{ url_for('static', filename='js/controllers.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
 {% endblock %}

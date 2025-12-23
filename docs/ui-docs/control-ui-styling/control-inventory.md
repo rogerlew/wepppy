@@ -10,17 +10,17 @@ _Date: 2025-10-22 (updated audit aligned with current Pure migration status)_
 - Pair this inventory with the [NoDb API Blueprint Map](../../../wepppy/weppcloud/routes/nodb_api/README.md) when you need per-route singletons, helper stacks, or testing references.
 
 ## Interactive Controls (runs0 forms)
-| Control / Panel | Template Extends | JS Controller | Primary Backend / Routes | Inputs & Uploads | Behaviour Notes & Dependencies |
+| Control / Panel | Template Extends | JS Controller | Primary Backend / Routes | Inputs & Uploads | Behavior Notes & Dependencies |
 | --- | --- | --- | --- | --- | --- |
-| Map | Pure macros (`controls/map_pure.htm`) | `map.js` | `map_bp` (`routes/map.py`), geodata services, `elevationquery` microservice | Text input for center, tabbed map controls, Leaflet events | Pure implementation is live; UX polish & doc updates tracked in the 20251023 Frontend Integration package |
+| Map | Pure macros (`controls/map_pure_gl.htm`) | `map_gl.js` | `map_bp` (`routes/map.py`), geodata services, `elevationquery` microservice | Text input for center, tabbed map controls, deck.gl events | Deck.gl is the default; Leaflet path retired in Phase 13 |
 | BAER Upload | Pure macros (`disturbed_sbs_pure.htm`) · legacy `_base.htm` | `baer.js` | `disturbed_bp` (`tasks/upload_sbs`, `tasks/remove_sbs`, `tasks/set_firedate`) | SBS raster upload, radio-mode switches, uniform builders | Uses `FormData`, refreshes map overlays, conditional content by `ron.mods`; JS now delegates via `data-sbs-*` hooks so both layouts stay functional |
-| Road Upload | `_base.htm` | Inline wiring via `run_page_bootstrap.js` (no dedicated module) | _TBD_ – legacy `disturbed` tasks (`/tasks/upload_road/`, `/tasks/remove_road/`) require confirmation | `.geojson` upload, upload/remove buttons | Needs explicit JS controller + active route check before standardisation |
-| Channel Delineation | Pure macros (`controls/channel_delineation_pure.htm`) | `channel_delineation.js` | `watershed_bp` (`tasks/build_channels`, `tasks/update_extent`) | Map extent fields, numeric inputs, unitizer bindings | Pure implementation is live; refinements routed through the 20251023 Frontend Integration package |
-| Set Outlet | Pure macros (`controls/set_outlet_pure.htm`) | `outlet.js` | `watershed_bp` (`tasks/set_outlet`, `tasks/clear_outlet`) | Mode radio group, coordinate text input, command buttons | Uses Pure shell with legacy IDs preserved for JS/preflight compatibility |
-| Subcatchments | Pure macros (`controls/subcatchments_pure.htm`) | `subcatchment_delineation.js` | `watershed_bp` (`tasks/build_subcatchments`, `tasks/clear_subcatchments`) | Advanced options (TauDEM/Peridot), RQ-triggering buttons | Pure implementation is live; remaining color-map UX + docs tracked in the 20251023 Frontend Integration package |
-| Rangeland Cover | Pure macros (`controls/rangeland_cover_pure.htm`) · legacy `_base.htm` | `rangeland_cover.js`, `rangeland_cover_modify.js` | `rangeland_cover_bp` (`tasks/set_rangeland_cover_mode`) & `rangeland_bp` (`tasks/build_rangeland_cover`, `tasks/modify_rangeland_cover`) | Mode radios (NLCD, RAP, single value), RAP year input, foliar/ground defaults, build button | Shares StatusStream pattern with other controls; modify panel remains in map tab (controls/modify_rangeland_cover.htm) |
-| Landuse | Pure macros (`controls/landuse_pure.htm`) | `landuse.js`, `landuse_modify.js` | `landuse_bp` (`tasks/set_landuse_mode`, `tasks/modify_landuse`, `query/*`) | Multi-selects, locale-controlled lists, advanced modify forms | Pure main panel now live; modify panel remains under map tab. Dataset options supplied by `available_landuse_datasets`; JS bindings handle mode, upload, and coverage tweaks |
-| Soil | Pure macros (`controls/soil_pure.htm`) | `soil.js` | `soils_bp` (`tasks/set_soil_mode`, `query/*`, `tasks/set_soils_ksflag`) | Mode radios (per hillslope, Mukey, database), optional ksflag/determined sol_ver selects | Pure control mirrors legacy behaviour; further UX polish pending |
+| Road Upload | `_base.htm` | Inline wiring via `run_page_bootstrap.js` (no dedicated module) | _TBD_ – legacy `disturbed` tasks (`/tasks/upload_road/`, `/tasks/remove_road/`) require confirmation | `.geojson` upload, upload/remove buttons | Needs explicit JS controller + active route check before standardization |
+| Channel Delineation | Pure macros (`controls/channel_delineation_pure.htm`) | `channel_gl.js` | `watershed_bp` (`tasks/build_channels`, `tasks/update_extent`) | Map extent fields, numeric inputs, unitizer bindings | Deck.gl controller owns panel + overlay wiring |
+| Set Outlet | Pure macros (`controls/set_outlet_pure.htm`) | `outlet_gl.js` | `watershed_bp` (`tasks/set_outlet`, `tasks/clear_outlet`) | Mode radio group, coordinate text input, command buttons | Uses Pure shell with legacy IDs preserved for JS/preflight compatibility |
+| Subcatchments | Pure macros (`controls/subcatchments_pure.htm`) | `subcatchments_gl.js` | `watershed_bp` (`tasks/build_subcatchments`, `tasks/clear_subcatchments`) | Advanced options (TauDEM/Peridot), RQ-triggering buttons | Deck.gl controller owns subcatchment overlays + legend handling |
+| Rangeland Cover | Pure macros (`controls/rangeland_cover_pure.htm`) · legacy `_base.htm` | `rangeland_cover.js`, `rangeland_cover_modify_gl.js` | `rangeland_cover_bp` (`tasks/set_rangeland_cover_mode`) & `rangeland_bp` (`tasks/build_rangeland_cover`, `tasks/modify_rangeland_cover`) | Mode radios (NLCD, RAP, single value), RAP year input, foliar/ground defaults, build button | Shares StatusStream pattern with other controls; modify panel remains in map tab (controls/modify_rangeland_cover.htm) |
+| Landuse | Pure macros (`controls/landuse_pure.htm`) | `landuse.js`, `landuse_modify_gl.js` | `landuse_bp` (`tasks/set_landuse_mode`, `tasks/modify_landuse`, `query/*`) | Multi-selects, locale-controlled lists, advanced modify forms | Pure main panel now live; modify panel remains under map tab. Dataset options supplied by `available_landuse_datasets`; JS bindings handle mode, upload, and coverage tweaks |
+| Soil | Pure macros (`controls/soil_pure.htm`) | `soil.js` | `soils_bp` (`tasks/set_soil_mode`, `query/*`, `tasks/set_soils_ksflag`) | Mode radios (per hillslope, Mukey, database), optional ksflag/determined sol_ver selects | Pure control mirrors legacy behavior; further UX polish pending |
 | Climate | Pure macros (`controls/climate_pure.htm`) | `climate.js` | `climate_bp` (`tasks/update_climate`, `tasks/upload_cli`, `query/*`) | Radio groups, select inputs, `.cli` upload | Uses catalog-driven sections, delegated events, and StatusStream panels |
 | RAP Timeseries | Pure macros (`controls/rap_ts_pure.htm`) | `rap_ts.js` | `rap_ts_bp` (`tasks/run_rap_ts`) & `rq/api/acquire_rap_ts` | Action button queues RAP TS acquisition job; status stream reports progress | Secondary reporting control; mirrors StatusStream panel contract |
 | WEPP | Pure macros (`controls/wepp_pure.htm`) | `wepp.js` | `wepp_bp` (`tasks/run_wepp`, `tasks/download_results`), `/rq/api` job endpoints | Run/queue buttons, advanced options include stack | Core model execution; uses RQ polling and advanced option includes |
@@ -46,17 +46,17 @@ _Date: 2025-10-22 (updated audit aligned with current Pure migration status)_
 - `_base.htm` / `_content_base.htm`: current layout shells providing `form`, status, summary, and stacktrace placeholders; target for replacement by `_pure_base.htm`.
 - `controls/unitizer_modal.htm` + `unitizer.htm`: modal and preference controls for unit conversion (`project.js` orchestrates preference changes).
 - `controls/wepp_pure_advanced_options/*.htm`: advanced WEPP includes (baseflow, frost, clip soils, etc.) pulled into the WEPP panel via `{% include %}`; legacy `controls/wepp_advanced_options` templates were removed.
-- `controls/map/rhem_hillslope_visualizations.htm`, `wepp_hillslope_visualizations.htm`: Leaflet overlay templates consumed by MapController.
+- `controls/map/rhem_hillslope_visualizations.htm`, `wepp_hillslope_visualizations.htm`: legacy Leaflet overlay templates (not used in `map_pure_gl.htm`; map results removed in Phase 13).
 - `controls/edit_csv.htm`: generic CSV editor used by disturbed workflows.
 - `controls/poweruser_panel.htm`: global modal enabling push notifications and advanced resources; embeds extensive inline JS and CSS.
 
 ## JavaScript Infrastructure Snapshot
 - `control_base.js`: shared ControlBase mixin handling job polling, stacktrace rendering, button disables, and WebSocket wiring.
 - `status_stream.js` + `control_base.js`: Redis/Status2 WebSocket bridge; ControlBase attaches per panel via `attach_status_stream`.
-- `controllers.js` (generated via `build_controllers_js.py` and `controllers_js/templates/controllers.js.j2`): bundles singleton controllers and exposes them to templates.
+- `controllers-gl.js` (generated via `build_controllers_js.py` and the controller bundle template under `controllers_js/templates/`): bundles singleton controllers and exposes them to templates.
 - `run_page_bootstrap.js.j2`: builds a `runContext` object (run metadata, job ids, feature flags) and calls `WCControllerBootstrap.bootstrapMany` so each controller can hydrate itself via `instance.bootstrap(context)`. Cross-control hooks (BAER ↔ Disturbed, outlet map listeners, etc.) now live inside the respective controllers.
 - `project.js`, `disturbed.js`, `utils.js`, `preflight.js`: shared helpers for unit preferences, disturbed module utilities, generic DOM helpers, and preflight checks.
-- Third-party helpers (`tinyqueue`, `polylabel`, `leaflet-ajax`, `glify`) are injected at the end of `0.htm` and are tightly coupled to MapController.
+- Third-party helpers (`tinyqueue`, `polylabel`, `colormap`, `geotiff`, `plotty`) are injected at the end of `runs0_pure.htm` and are tightly coupled to MapController.
 
 ## Backend Route Overview
 - `nodb_api/watershed_bp.py`: channel delineation, outlet placement, subcatchment build/clear, plus metadata queries.
@@ -254,7 +254,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 | Non-run / Global Headers | `header/_non_run_user_header_fixed.htm`, `_global_header_fixed.htm` | Navigation for authenticated users and anonymous visitors | Minimal inputs; ensure styling aligns with Pure design tokens later |
 | Command Bar | `routes/command_bar/templates/command-bar.htm`, `command_bar.js` | Keyboard-driven palette for triggering actions | Current template mixes CSS + JS; consider extracting styles and wiring to design tokens |
 
-### Batch Runner Console (catalogued, out of main scope)
+### Batch Runner Console (cataloged, out of main scope)
 | Section | Template | Key Inputs / Actions | Backend Binding | Notes |
 | --- | --- | --- | --- | --- |
 | Resource Intake | `routes/batch_runner/templates/batch_runner_pure.htm` | `geojson_file` upload, validation status nodes | `BatchRunner.uploadGeojson()` (custom API) | Pure UI variant; legacy Bootstrap template removed |
@@ -263,7 +263,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 
 ## Next Actions
 1. Validate active routes for controls flagged `_TBD_` (Road Upload) and document required changes to align with the `/controls/<slug>/<action>` blueprint strategy.
-2. Prioritise Pure migrations/cleanup for the remaining panels: map + delineation bundle and RHEM (legacy console). Update this inventory as each control flips to Pure.
+2. Prioritize Pure migrations/cleanup for the remaining panels: map + delineation bundle and RHEM (legacy console). Update this inventory as each control flips to Pure.
 3. Extend the audit to cover:
    - Controls gated behind other run modes or blueprints (e.g., Batch Runner, RHEM reports, additional console modals).
    - JavaScript modules without direct template counterparts (`project.js`, `disturbed.js`) to plan macro data contracts.

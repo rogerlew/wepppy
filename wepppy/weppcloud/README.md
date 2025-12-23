@@ -32,7 +32,7 @@ The application is built around the Flask web framework and follows a modular st
 
 - **`templates/`**: Jinja2 templates for rendering HTML pages. Templates are co-located in subdirectories that mirror the blueprint structure (e.g., `templates/reports/rhem/`) for maintainability.
 
-- **`controllers_js/`**: Frontend JavaScript controllers that manage UI interactivity. These are bundled into a single `controllers.js` file and loaded on pages that require them. See [controllers_js/README.md](controllers_js/README.md) for details.
+- **`controllers_js/`**: Frontend JavaScript controllers that manage UI interactivity. These are bundled into a single `controllers-gl.js` file and loaded on pages that require them. See [controllers_js/README.md](controllers_js/README.md) for details.
 
 - **`static/`**: Static assets like CSS, images, and third-party JavaScript libraries. Built assets (bundled JavaScript, compiled CSS) are served via Caddy reverse proxy.
 
@@ -243,7 +243,7 @@ The `build_controllers_js.py` script automatically runs on container startup in 
 
 The frontend relies on a combination of Jinja2-rendered templates and JavaScript controllers for dynamic behavior.
 
-- **Controller Bundling**: JavaScript modules in `wepppy/weppcloud/controllers_js/` are automatically discovered and bundled into `wepppy/weppcloud/static/dist/controllers.js` by the `build_controllers_js.py` script. This script runs automatically when the `weppcloud` service starts.
+- **Controller Bundling**: JavaScript modules in `wepppy/weppcloud/controllers_js/` are automatically discovered and bundled into `wepppy/weppcloud/static/js/controllers-gl.js` by the `build_controllers_js.py` script. This script runs automatically when the `weppcloud` service starts.
 
 - **Run-Scoped URLs**: All API calls made from the frontend that are specific to a run **must** use the `url_for_run()` JavaScript helper. This function correctly prepends the `/runs/<runid>/<config>/` prefix to the URL, which is essential for routing requests within the context of a specific project run.
 
@@ -274,7 +274,7 @@ weppcloud/
 │   ├── climateController.js
 │   └── ...
 ├── static/                   # Static assets
-│   ├── dist/                 # Built assets (controllers.js, vendor bundles)
+│   ├── dist/                 # Built assets (controllers-gl.js, vendor bundles)
 │   ├── css/
 │   └── ...
 ├── static-src/               # Frontend source (build tooling)

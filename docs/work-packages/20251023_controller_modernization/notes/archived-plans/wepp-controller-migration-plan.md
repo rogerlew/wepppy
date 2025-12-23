@@ -39,6 +39,6 @@
 - ✅ Updated playbooks (`controllers_js/README.md`, `controllers_js/AGENTS.md`) call out the WEPP event emitter, lint/test commands, and Jest suite location.
 
 ## Rollback Guidance
-- Reverting controller changes restores the previous helper-light implementation; ensure `controllers_js/build_controllers_js.py` re-runs so `controllers.js` reflects the rollback.
+- Reverting controller changes restores the previous helper-light implementation; ensure `controllers_js/build_controllers_js.py` re-runs so `controllers-gl.js` reflects the rollback.
 - Backend rollback requires undoing `api_run_wepp`/`Wepp.parse_inputs` changes; tests above will fail if typed payload support is removed, signalling any mismatch.
 - Monitor `wepp:run:*` event consumers and Redis TaskEnum hooks when toggling between versions; both surfaces provide quick regression signals.

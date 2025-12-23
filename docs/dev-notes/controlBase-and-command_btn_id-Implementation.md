@@ -4,7 +4,7 @@
 
 **Date:** September 24, 2025  
 **Author:** GitHub Copilot (Claude 4 Sonnet)  
-**Source:** `/workdir/wepppy/wepppy/weppcloud/static/js/controllers.js`
+**Source:** `/workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js`
 
 ## Overview
 

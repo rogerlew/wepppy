@@ -86,12 +86,6 @@ describe("Wepp controller", () => {
             }))
         };
 
-        global.SubcatchmentDelineation = {
-            getInstance: jest.fn(() => ({
-                prefetchLossMetrics: jest.fn()
-            }))
-        };
-
         global.Observed = {
             getInstance: jest.fn(() => ({
                 onWeppRunCompleted: jest.fn()
@@ -113,7 +107,6 @@ describe("Wepp controller", () => {
         delete global.controlBase;
         delete global.StatusStream;
         delete global.Project;
-        delete global.SubcatchmentDelineation;
         delete global.Observed;
         delete global.url_for_run;
         delete window.Wepp;

@@ -8,7 +8,7 @@ This note captures the patterns we just introduced while modernizing the WEPP re
 - The command bar is included at the base template level; individual reports do not add it themselves.
 
 ## Script dependencies
-- Reports still rely on jQuery for legacy controllers. `_base_report.htm` loads the vendored `vendor/jquery/jquery.js` before `controllers.js`; keep this ordering until the controllers are converted.
+- Reports still rely on jQuery for legacy controllers. `_base_report.htm` loads the vendored `vendor/jquery/jquery.js` before `controllers-gl.js`; keep this ordering until the controllers are converted.
 - `report_csv.js` is the only bespoke JS each report needs to add the “Download CSV” behavior. It is already pulled in by `_base_report.htm`.
 
 ## Report templating

@@ -9,17 +9,17 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_ROOT=$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd)
 BUNDLE_SCRIPT="${PROJECT_ROOT}/wepppy/weppcloud/controllers_js/build_controllers_js.py"
 
-DEFAULT_OUTPUT="${CONTROLLERS_JS_OUTPUT:-${PROJECT_ROOT}/wepppy/weppcloud/static/js/controllers.js}"
+DEFAULT_OUTPUT="${CONTROLLERS_JS_OUTPUT:-${PROJECT_ROOT}/wepppy/weppcloud/static/js/controllers-gl.js}"
 EXTRA_OUTPUTS="${CONTROLLERS_JS_EXTRA_OUTPUTS:-}"
 STATIC_SYNC_DIR="${STATIC_ASSET_SYNC_DIR:-}"
 VENDOR_SOURCE="${PROJECT_ROOT}/wepppy/weppcloud/static/vendor"
 
-echo ">>> Building controllers.js bundle via ${BUNDLE_SCRIPT}..."
+echo ">>> Building controllers-gl.js bundle via ${BUNDLE_SCRIPT}..."
 python "${BUNDLE_SCRIPT}" --output "${DEFAULT_OUTPUT}"
-echo ">>> controllers.js bundle written to ${DEFAULT_OUTPUT}."
+echo ">>> controllers-gl.js bundle written to ${DEFAULT_OUTPUT}."
 
 if [ -n "${EXTRA_OUTPUTS}" ]; then
-  echo ">>> Replicating controllers.js bundle to extra targets..."
+  echo ">>> Replicating controllers-gl.js bundle to extra targets..."
   for target in ${EXTRA_OUTPUTS}; do
     target_dir=$(dirname "${target}")
     mkdir -p "${target_dir}"
@@ -39,7 +39,7 @@ if [ -n "${STATIC_SYNC_DIR}" ]; then
   fi
 fi
 
-echo ">>> controllers.js bundle ready."
+echo ">>> controllers-gl.js bundle ready."
 
 # Replace the shell with the primary process to preserve signal handling.
 exec "$@"

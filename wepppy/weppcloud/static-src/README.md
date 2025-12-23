@@ -25,7 +25,7 @@
    - `wctl build-static-assets` for readable output.
    - `wctl build-static-assets --prod` for the minified bundle (automatically implied when wctl is configured for prod).
    - Script lives at `./wepppy/weppcloud/static-src/build-static-assets.sh` if you need to invoke it directly (supports `--prod`, `--force-install`, and `--skip-controllers`).
-   - Controllers bundle (`controllers.js`) is rebuilt by default; pass `--skip-controllers` to bypass it.
+   - Controllers bundle (`controllers-gl.js`) is rebuilt by default; pass `--skip-controllers` to bypass it.
    - The script automatically rsyncs into `wepppy/weppcloud/static/vendor/`, which is `.gitignore`d so dev builds stay local.
 
 ## Docker / Production
@@ -34,8 +34,8 @@
 - `docker/docker-compose.prod.yml` sets:
   - `entrypoint: ./docker/weppcloud-entrypoint.sh`
   - `STATIC_ASSET_SYNC_DIR=/srv/weppcloud/static`
-  - `CONTROLLERS_JS_EXTRA_OUTPUTS=/srv/weppcloud/static/js/controllers.js`
-- At container start the entrypoint writes `controllers.js` and replaces `/srv/weppcloud/static/vendor/` so the Caddy container (which bind-mounts the same host path) serves current assets.
+  - `CONTROLLERS_JS_EXTRA_OUTPUTS=/srv/weppcloud/static/js/controllers-gl.js`
+- At container start the entrypoint writes `controllers-gl.js` and replaces `/srv/weppcloud/static/vendor/` so the Caddy container (which bind-mounts the same host path) serves current assets.
 
 ## Adding a New Library
 1. `npm install <package>@<version>` inside `static-src` (prefer pinned versions).

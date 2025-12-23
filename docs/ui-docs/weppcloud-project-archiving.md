@@ -21,7 +21,7 @@ Control: `wepppy/weppcloud/templates/controls/archive_console_control.htm`
 Script: `wepppy/weppcloud/static/js/archive_console.js`
 
 - Uses StatusStream for live logs + trigger events (`ARCHIVE_COMPLETE`, `ARCHIVE_FAILED`, `RESTORE_COMPLETE`, `RESTORE_FAILED`).
-- Uses `controlBase` (from `controllers.js`) as a polling fallback for job status:
+- Uses `controlBase` (from `controllers-gl.js`) as a polling fallback for job status:
   - `set_rq_job_id(...)` starts polling `/weppcloud/rq/api/jobstatus/<job_id>`.
   - `job:completed`/`job:error` dispatches funnel into the same handlers (idempotent guard).
   - Failure polling fetches `/weppcloud/rq/api/jobinfo/<job_id>` to populate stacktrace.

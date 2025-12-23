@@ -10,7 +10,7 @@ Options:
   --prod            Build minified production assets (runs `npm run build`).
                     Default runs `npm run build:dev`.
   --force-install   Always run `npm install --legacy-peer-deps` before building.
-  --skip-controllers  Do not rebuild controllers.js (defaults to rebuilding).
+  --skip-controllers  Do not rebuild controllers-gl.js (defaults to rebuilding).
   -h, --help        Show this help message.
 EOF
 }
@@ -69,7 +69,7 @@ mkdir -p "${VENDOR_DIR}"
 rsync -a --delete "${SCRIPT_DIR}/dist/vendor/" "${VENDOR_DIR}/"
 
 if [[ ${BUILD_CONTROLLERS} -eq 1 ]]; then
-  echo ">> Rebuilding controllers.js bundle..."
+  echo ">> Rebuilding controllers-gl.js bundle..."
   CONTROLLERS_SCRIPT="${PROJECT_ROOT}/controllers_js/build_controllers_js.py"
   if [[ ! -f "${CONTROLLERS_SCRIPT}" ]]; then
     echo "!! Unable to locate ${CONTROLLERS_SCRIPT}" >&2

@@ -7,8 +7,8 @@ This blueprint fuses the prior controller UI strategy drafts into a single imple
 
 ### Controller Rendering Pipeline
 - Controller-specific HTML lives in `wepppy/weppcloud/templates/controls/`, all extending `_base.htm` which defines the canonical status/summary/stacktrace blocks expected by the JS layer.【F:wepppy/weppcloud/templates/controls/_base.htm†L1-L19】
-- The `runs0` layout (`routes/run_0/templates/0.htm`) stitches the controller partials together, injects `controllers.js`, and hosts large inline CSS blocks for layout and color tweaks.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L1-L194】
-- JavaScript controllers are singletons bundled into `controllers.js`. `control_base.js` provides orchestration helpers (job polling, summary/status writers, stacktrace rendering) that every controller mixes in.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L199】
+- The `runs0` layout (`routes/run_0/templates/0.htm`) stitches the controller partials together, injects `controllers-gl.js`, and hosts large inline CSS blocks for layout and color tweaks.【F:wepppy/weppcloud/routes/run_0/templates/0.htm†L1-L194】
+- JavaScript controllers are singletons bundled into `controllers-gl.js`. `control_base.js` provides orchestration helpers (job polling, summary/status writers, stacktrace rendering) that every controller mixes in.【F:wepppy/weppcloud/controllers_js/control_base.js†L5-L199】
 
 ### Common Patterns
 - Standard controllers render static forms whose layout rarely changes. Some expose hidden sections (advanced toggles, mode-specific content) but still rely on server-rendered markup.

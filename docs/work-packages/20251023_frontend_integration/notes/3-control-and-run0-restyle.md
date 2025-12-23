@@ -10,11 +10,11 @@
 ### 1.2 Run 0 page shell
 - `runs0_pure.htm` replaced the legacy `0.htm`, providing the Pure layout, table-of-contents, and shared command bar. The previous Bootstrap-era document is archived for reference only.【F:wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm†L1-L140】
 - The page composes control sections via Pure macros and the standardized `control_shell`, eliminating bespoke spacing overrides.
-- Command routing remains orchestrated via the `controllers.js` bundle and `preflight.js`, with StatusStream helper wiring shared across controls.
+- Command routing remains orchestrated via the `controllers-gl.js` bundle and `preflight.js`, with StatusStream helper wiring shared across controls.
 
 ### 1.3 JavaScript orchestration
 - `control_base.js` defines the shared contract for ControlBase subclasses: run/job state management, stacktrace rendering, RQ job polling, and WebSocket integration via `controlBase.attach_status_stream`. Controls configure IDs and callbacks so the infrastructure can disable buttons, fetch `/rq/api/jobstatus/`, and stream status updates to the standard DOM nodes.【F:wepppy/weppcloud/controllers_js/control_base.js†L1-L138】【F:wepppy/weppcloud/controllers_js/control_base.js†L139-L220】
-- Controller modules are singletons assembled into `static/js/controllers.js` through a Jinja template, guaranteeing each panel hooks into the shared form markup once per page.【F:wepppy/weppcloud/controllers_js/README.md†L5-L62】
+- Controller modules are singletons assembled into `static/js/controllers-gl.js` through a Jinja template, guaranteeing each panel hooks into the shared form markup once per page.【F:wepppy/weppcloud/controllers_js/README.md†L5-L62】
 
 ### 1.4 Backend singletons & locales
 - NoDb controllers inherit locale context either from the run configuration (`config_get_list('general', 'locales')`) or `NoDbBase.locales`, which hard-codes fallbacks for common configs (US, EU, AU, regional overlays).【F:wepppy/nodb/core/climate.py†L786-L812】【F:wepppy/nodb/base.py†L1147-L1173】

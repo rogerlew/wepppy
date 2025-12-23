@@ -38,28 +38,6 @@ describe("SubcatchmentDelineation GL controller", () => {
             <input type="radio" id="sub_cmap_radio_slope">
             <input type="radio" id="sub_cmap_radio_aspect">
             <input type="radio" id="sub_cmap_radio_rangeland_cover">
-            <input type="range"
-                   id="wepp_sub_cmap_range_runoff"
-                   value="50"
-                   data-subcatchment-role="scale-range"
-                   data-subcatchment-scale="runoff">
-            <input type="range"
-                   id="wepp_sub_cmap_range_loss"
-                   value="50"
-                   data-subcatchment-role="scale-range"
-                   data-subcatchment-scale="loss">
-            <input type="range"
-                   id="wepp_grd_cmap_range_loss"
-                   value="10"
-                   data-subcatchment-role="scale-range"
-                   data-subcatchment-scale="grd_loss">
-            <span id="wepp_sub_cmap_canvas_runoff_min"></span>
-            <span id="wepp_sub_cmap_canvas_runoff_max"></span>
-            <span id="wepp_sub_cmap_canvas_loss_min"></span>
-            <span id="wepp_sub_cmap_canvas_loss_max"></span>
-            <span id="wepp_grd_cmap_range_loss_min"></span>
-            <span id="wepp_grd_cmap_range_loss_max"></span>
-            <span id="wepp_grd_cmap_range_loss_units"></span>
         `;
 
         HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
@@ -73,12 +51,6 @@ describe("SubcatchmentDelineation GL controller", () => {
 
         global.createColormap = jest.fn(() => ({ map: jest.fn(() => "#ff0000") }));
         global.render_legend = jest.fn();
-        global.UnitizerClient = {
-            ready: jest.fn(() => Promise.resolve({
-                renderValue: jest.fn((value, unit) => `${value} ${unit || ""}`.trim()),
-                renderUnits: jest.fn(() => "kg/m^2"),
-            })),
-        };
         const emitter = {
             on: jest.fn(),
             once: jest.fn(),
@@ -163,21 +135,6 @@ describe("SubcatchmentDelineation GL controller", () => {
 
         window.history.pushState({}, "", "/runs/test/cfg/");
 
-        global.fetch = jest.fn(() => Promise.resolve({
-            ok: true,
-            arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-        }));
-        global.GeoTIFF = {
-            fromArrayBuffer: jest.fn(() => Promise.resolve({
-                getImage: jest.fn(() => Promise.resolve({
-                    getWidth: () => 2,
-                    getHeight: () => 2,
-                    readRasters: () => Promise.resolve(new Uint8Array([0, 1, 2, 3])),
-                    getBoundingBox: () => [0, 0, 1, 1],
-                })),
-            })),
-        };
-
         await import("../subcatchments_gl.js");
     });
 
@@ -190,10 +147,7 @@ describe("SubcatchmentDelineation GL controller", () => {
         delete global.deck;
         delete global.createColormap;
         delete global.render_legend;
-        delete global.UnitizerClient;
         delete global.url_for_run;
-        delete global.fetch;
-        delete global.GeoTIFF;
         if (global.ChannelDelineation) {
             delete global.ChannelDelineation;
         }
@@ -266,53 +220,6 @@ describe("SubcatchmentDelineation GL controller", () => {
             expect.objectContaining({ form: expect.any(HTMLFormElement) }),
         );
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(sub, "job-123");
-    });
-
-    test("setColorMap updates loss style and legend labels", async () => {
-        const sub = window.SubcatchmentDelineation.getInstance();
-
-        requestMock
-            .mockResolvedValueOnce({
-                body: {
-                    type: "FeatureCollection",
-                    features: [
-                        {
-                            type: "Feature",
-                            properties: { TopazID: 1, WeppID: "1" },
-                            geometry: {
-                                type: "Polygon",
-                                coordinates: [[
-                                    [-120.1, 45.1],
-                                    [-120.2, 45.1],
-                                    [-120.2, 45.2],
-                                    [-120.1, 45.2],
-                                    [-120.1, 45.1],
-                                ]],
-                            },
-                        },
-                    ],
-                },
-            });
-
-        postJsonMock.mockResolvedValueOnce({
-            body: {
-                records: [{ wepp_id: "1", value: 5 }],
-            },
-        });
-
-        await sub.show();
-        sub.setColorMap("sub_loss");
-        await flushPromises();
-
-        expect(postJsonMock).toHaveBeenCalledWith(
-            "http://localhost/query-engine/runs/test/query",
-            expect.any(Object),
-            expect.any(Object),
-        );
-        expect(sub.state.cmapMode).toBe("loss");
-        await Promise.resolve();
-        expect(document.getElementById("wepp_sub_cmap_canvas_loss_min").textContent).not.toBe("");
-        expect(document.getElementById("wepp_sub_cmap_canvas_loss_max").textContent).not.toBe("");
     });
 
     test("setColorMap slp_asp maps to slope normalization", async () => {
@@ -398,67 +305,6 @@ describe("SubcatchmentDelineation GL controller", () => {
         expect(sub.state.cmapMode).toBe("aspect");
         expect(mapper.map).not.toHaveBeenCalled();
         expect(color).toEqual([55, 255, 255, 230]);
-    });
-
-    test("range slider updates trigger style refresh", async () => {
-        const sub = window.SubcatchmentDelineation.getInstance();
-
-        requestMock.mockResolvedValueOnce({
-            body: {
-                type: "FeatureCollection",
-                features: [
-                    {
-                        type: "Feature",
-                        properties: { TopazID: 1, WeppID: "1" },
-                        geometry: {
-                            type: "Polygon",
-                            coordinates: [[
-                                [-120.1, 45.1],
-                                [-120.2, 45.1],
-                                [-120.2, 45.2],
-                                [-120.1, 45.2],
-                                [-120.1, 45.1],
-                            ]],
-                        },
-                    },
-                ],
-            },
-        });
-
-        postJsonMock.mockResolvedValueOnce({
-            body: {
-                records: [{ wepp_id: "1", value: 5 }],
-            },
-        });
-
-        await sub.show();
-        sub.setColorMap("sub_runoff");
-        await flushPromises();
-
-        const initialAddCount = mapStub.addLayer.mock.calls.length;
-        const slider = document.getElementById("wepp_sub_cmap_range_runoff");
-        slider.value = "70";
-        slider.dispatchEvent(new Event("input", { bubbles: true }));
-
-        expect(mapStub.addLayer.mock.calls.length).toBeGreaterThan(initialAddCount);
-    });
-
-    test("setColorMap grd_loss adds raster overlay", async () => {
-        const sub = window.SubcatchmentDelineation.getInstance();
-
-        requestMock.mockResolvedValueOnce({
-            body: {
-                type: "FeatureCollection",
-                features: [],
-            },
-        });
-
-        await sub.show();
-        sub.setColorMap("grd_loss");
-        await flushPromises();
-
-        expect(mapStub.registerOverlay).toHaveBeenCalledWith(expect.any(Object), "Gridded Output");
-        expect(mapStub.addLayer).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("completion events are idempotent and trigger report wiring", async () => {

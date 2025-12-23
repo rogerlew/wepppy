@@ -181,7 +181,7 @@ install_wctl() {
 
 touch_js_files() {
   local wc_repo="$WORKDIR/wepppy"
-  local p1="$wc_repo/wepppy/weppcloud/static/js/controllers.js"
+  local p1="$wc_repo/wepppy/weppcloud/static/js/controllers-gl.js"
   local p2="$wc_repo/wepppy/weppcloud/static/js/unitizer_map.js"
   echo "==> Touching JS files for live-reload expectations"
   sudo -u "$OWNER_USER" touch "$p1" "$p2"

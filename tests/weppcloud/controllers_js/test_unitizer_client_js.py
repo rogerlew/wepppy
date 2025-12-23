@@ -33,8 +33,8 @@ def test_unitizer_bundle_contains_blank_guard() -> None:
         / "weppcloud"
         / "static"
         / "js"
-        / "controllers.js"
+        / "controllers-gl.js"
     )
     contents = bundle_path.read_text(encoding="utf-8")
     needle = 'element.dataset.unitizerCanonicalValue = "";'
-    assert needle in contents, "controllers.js is missing the blank-to-empty guard"
+    assert needle in contents, "controllers-gl.js is missing the blank-to-empty guard"

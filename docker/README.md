@@ -239,12 +239,12 @@ npm run build
 # Copy vendor assets to static directory
 cp -r dist/vendor/* ../static/vendor/
 
-# Build controllers.js and unitizer_map.js
+# Build controllers-gl.js and unitizer_map.js
 cd /workdir/wepppy/wepppy/weppcloud/controllers_js
 python build_controllers_js.py
 
 # Verify critical files exist
-ls -la /workdir/wepppy/wepppy/weppcloud/static/js/controllers.js
+ls -la /workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js
 ls -la /workdir/wepppy/wepppy/weppcloud/static/js/unitizer_map.js
 ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/purecss/pure-min.css
 ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/bootstrap/bootstrap.css
@@ -427,7 +427,7 @@ docker compose -f docker/docker-compose.prod.yml logs -f
 
 ### Common Issues & Solutions
 
-**Issue: 404 for static assets (pure-min.css, controllers.js, etc.)**
+**Issue: 404 for static assets (pure-min.css, controllers-gl.js, etc.)**
 
 **Cause:** Static vendor assets or JavaScript bundles not built on host filesystem.
 
@@ -439,7 +439,7 @@ npm ci --legacy-peer-deps
 npm run build
 cp -r dist/vendor/* ../static/vendor/
 
-# Build controllers.js and unitizer_map.js
+# Build controllers-gl.js and unitizer_map.js
 cd /workdir/wepppy/wepppy/weppcloud/controllers_js
 python build_controllers_js.py
 

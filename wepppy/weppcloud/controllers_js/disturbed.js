@@ -608,7 +608,7 @@ var Disturbed = (function () {
                                 // Call methods directly since forms are separate
                                 setTimeout(function () {
                                     if (typeof baer.show_sbs === "function") {
-                                        baer.show_sbs();
+                                        baer.show_sbs({ flyToBounds: true, reason: "upload" });
                                     }
                                     if (typeof baer.load_modify_class === "function") {
                                         baer.load_modify_class();
@@ -760,7 +760,7 @@ var Disturbed = (function () {
                                 // Call methods directly since forms are separate
                                 setTimeout(function () {
                                     if (typeof baer.show_sbs === "function") {
-                                        baer.show_sbs();
+                                        baer.show_sbs({ flyToBounds: true, reason: "uniform" });
                                     }
                                     if (typeof baer.load_modify_class === "function") {
                                         baer.load_modify_class();

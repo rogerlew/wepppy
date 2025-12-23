@@ -204,6 +204,17 @@ var Baer = (function () {
         return parsed;
     }
 
+    function dispatchDomEvent(name, detail) {
+        if (typeof CustomEvent !== "function") {
+            return;
+        }
+        try {
+            document.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+        } catch (err) {
+            console.warn("[Baer] Failed to dispatch " + name, err);
+        }
+    }
+
     function clampOpacity(value) {
         var parsed = parseFloat(value);
         if (Number.isNaN(parsed)) {
@@ -216,6 +227,28 @@ var Baer = (function () {
             return 1;
         }
         return parsed;
+    }
+
+    function buildBoundsAdapter(bounds) {
+        if (!Array.isArray(bounds) || bounds.length < 2) {
+            return null;
+        }
+        var sw = bounds[0];
+        var ne = bounds[1];
+        if (!Array.isArray(sw) || !Array.isArray(ne) || sw.length < 2 || ne.length < 2) {
+            return null;
+        }
+        var swLat = Number(sw[0]);
+        var swLng = Number(sw[1]);
+        var neLat = Number(ne[0]);
+        var neLng = Number(ne[1]);
+        if (![swLat, swLng, neLat, neLng].every(Number.isFinite)) {
+            return null;
+        }
+        return {
+            getSouthWest: function () { return { lat: swLat, lng: swLng }; },
+            getNorthEast: function () { return { lat: neLat, lng: neLng }; }
+        };
     }
 
     function createInstance() {
@@ -475,7 +508,12 @@ var Baer = (function () {
 
                         try {
                             var map = MapController.getInstance();
-                            if (baer.baer_map) {
+                            var useDeck = Boolean(map && map.sbs_layer && typeof map.loadSbsMap === "function");
+                            if (useDeck && map.sbs_layer && typeof map.hasLayer === "function") {
+                                if (map.hasLayer(map.sbs_layer)) {
+                                    map.removeLayer(map.sbs_layer);
+                                }
+                            } else if (baer.baer_map) {
                                 if (map && typeof map.removeLayer === "function") {
                                     map.removeLayer(baer.baer_map);
                                 }
@@ -739,7 +777,9 @@ var Baer = (function () {
                 });
         }
 
-        function showSbs() {
+        function showSbs(options) {
+            var opts = options || {};
+            var flyToBounds = opts.flyToBounds !== undefined ? Boolean(opts.flyToBounds) : true;
             var taskMsg = "Querying SBS map";
             startTask(taskMsg);
 
@@ -749,8 +789,55 @@ var Baer = (function () {
                 console.warn("[Baer] Unable to initialize SubcatchmentDelineation controller", err);
             }
 
+            var map = null;
             try {
-                var map = MapController.getInstance();
+                map = MapController.getInstance();
+            } catch (err) {
+                console.warn("[Baer] Unable to initialize Map controller", err);
+            }
+
+            var hasDeckSbs = Boolean(map && map.sbs_layer && typeof map.loadSbsMap === "function");
+            if (hasDeckSbs) {
+                try {
+                    if (typeof map.hasLayer === "function" && !map.hasLayer(map.sbs_layer)) {
+                        map.addLayer(map.sbs_layer);
+                    }
+                } catch (err) {
+                    console.warn("[Baer] Failed to add SBS layer to map", err);
+                }
+
+                return Promise.resolve(map.loadSbsMap()).then(function (data) {
+                    var payload = data || {};
+                    if (payload.Success === true && payload.Content) {
+                        completeTask(taskMsg);
+                        emit("baer:map:shown", {
+                            bounds: payload.Content.bounds,
+                            imgurl: payload.Content.imgurl
+                        });
+                        var boundsAdapter = buildBoundsAdapter(payload.Content.bounds);
+                        if (flyToBounds && map && boundsAdapter && typeof map.flyToBounds === "function") {
+                            map.flyToBounds(boundsAdapter);
+                        }
+                        return payload;
+                    }
+
+                    if (!payload.Error && !payload.StackTrace) {
+                        payload = Object.assign({ Error: "No SBS map has been specified." }, payload);
+                    }
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:map:error", { response: payload });
+                    return payload;
+                }).catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    baer.pushResponseStacktrace(baer, payload);
+                    failTask(taskMsg);
+                    emit("baer:map:error", { error: payload });
+                    return payload;
+                });
+            }
+
+            try {
                 if (baer.baer_map) {
                     if (map && typeof map.removeLayer === "function") {
                         map.removeLayer(baer.baer_map);
@@ -760,7 +847,7 @@ var Baer = (function () {
                     }
                     baer.baer_map = null;
                 }
-                
+
                 // Clean up any orphaned "Burn Severity Map" entries from the layer control
                 if (map && map.ctrls && map.ctrls._layers) {
                     var controlLayers = map.ctrls._layers;
@@ -773,7 +860,7 @@ var Baer = (function () {
                             }
                         }
                     }
-                    layersToRemove.forEach(function(layer) {
+                    layersToRemove.forEach(function (layer) {
                         map.ctrls.removeLayer(layer);
                         if (typeof map.removeLayer === "function") {
                             map.removeLayer(layer);
@@ -808,21 +895,15 @@ var Baer = (function () {
                                 map.ctrls.addOverlay(baer.baer_map, "Burn Severity Map");
                             }
                             emit("baer:map:shown", { bounds: bounds, imgurl: imgurl });
+                            var flyBounds = baer.baer_map && baer.baer_map._bounds
+                                ? baer.baer_map._bounds
+                                : buildBoundsAdapter(bounds);
+                            if (flyToBounds && flyBounds && typeof map.flyToBounds === "function") {
+                                map.flyToBounds(flyBounds);
+                            }
                         }
 
-                        return http.request(url_for_run("query/has_dem/"), { method: "GET" })
-                            .then(function (demResult) {
-                                var hasDem = demResult.body;
-                                if (hasDem === false && map && baer.baer_map && typeof map.flyToBounds === "function") {
-                                    map.flyToBounds(baer.baer_map._bounds);
-                                }
-                                return data;
-                            })
-                            .catch(function (error) {
-                                var payload = toResponsePayload(http, error);
-                                baer.pushResponseStacktrace(baer, payload);
-                                return data;
-                            });
+                        return data;
                     }
 
                     baer.pushResponseStacktrace(baer, data);
@@ -942,6 +1023,10 @@ var Baer = (function () {
                         var disturbed = typeof Disturbed !== "undefined" ? Disturbed.getInstance() : null;
                         if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
                             disturbed.set_has_sbs_cached(true);
+                        } else {
+                            dispatchDomEvent("disturbed:has_sbs_changed", { hasSbs: true, source: "baer" });
+                            setTimeout(function () { baer.show_sbs(); }, 100);
+                            setTimeout(function () { baer.load_modify_class(); }, 100);
                         }
                     } catch (err) {
                         console.warn("[Baer] Failed to sync Disturbed controller after SBS upload", err);
@@ -956,6 +1041,8 @@ var Baer = (function () {
                         var disturbed = typeof Disturbed !== "undefined" ? Disturbed.getInstance() : null;
                         if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
                             disturbed.set_has_sbs_cached(false);
+                        } else {
+                            dispatchDomEvent("disturbed:has_sbs_changed", { hasSbs: false, source: "baer" });
                         }
                     } catch (err) {
                         console.warn("[Baer] Failed to sync Disturbed controller after SBS removal", err);
@@ -966,7 +1053,7 @@ var Baer = (function () {
                 });
 
                 attach("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
-                    setTimeout(function () { baer.show_sbs(); }, 100);
+                    setTimeout(function () { baer.show_sbs({ flyToBounds: false, reason: "modify" }); }, 100);
                     setTimeout(function () { baer.load_modify_class(); }, 100);
                 });
 
@@ -974,7 +1061,8 @@ var Baer = (function () {
             }
 
             if (initialHasSbs && !bootstrapState.initialSbsLoaded) {
-                setTimeout(function () { baer.show_sbs(); }, 0);
+                var shouldFly = !(flags && flags.hasDem === true);
+                setTimeout(function () { baer.show_sbs({ flyToBounds: shouldFly, reason: "bootstrap" }); }, 0);
                 setTimeout(function () { baer.load_modify_class(); }, 0);
                 bootstrapState.initialSbsLoaded = true;
             }

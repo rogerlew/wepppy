@@ -450,7 +450,7 @@ NoDb subclass logger
 ## Front-End Controls & Build Automation
 - Controllers live under `wepppy/weppcloud/controllers_js/` and export singletons (`ControllerName.getInstance()`) so WebSocket connections and DOM bindings are never duplicated.
 - `controlBase` centralizes async ergonomics: it disables buttons while jobs run, manages RQ polling, and brokers WebSocket events.
-- Gunicorn’s `on_starting` hook runs `build_controllers_js.py`, which Jinja-renders `controllers.js.j2` into a single bundle with an ISO timestamp header. Rebuilds happen on each deploy so the bundle always matches the Python that emits events.
+- Gunicorn's `on_starting` hook runs `build_controllers_js.py`, which Jinja-renders `controllers.js.j2` into the `controllers-gl.js` bundle with an ISO timestamp header. Rebuilds happen on each deploy so the bundle always matches the Python that emits events.
 - The HTML surface (`templates/controls/_base.htm`) provides canonical IDs for status panes, letting new controllers inherit the telemetry pipeline without bespoke wiring.
 
 ## DevOps Notes

@@ -59,7 +59,7 @@ services:
         hard: 1000000
     environment:
       <<: *wepppy-env
-      CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers.js
+      CONTROLLERS_JS_EXTRA_OUTPUTS: /srv/weppcloud/static/js/controllers-gl.js
       STATIC_ASSET_SYNC_DIR: /srv/weppcloud/static
     volumes:
       - /wc1:/wc1

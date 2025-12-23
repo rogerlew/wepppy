@@ -418,12 +418,6 @@ var Wepp = (function () {
                 stacktraceAdapter.text("");
             }
 
-            try {
-                SubcatchmentDelineation.getInstance().prefetchLossMetrics();
-            } catch (error) {
-                console.warn("[WEPP] Unable to prefetch loss metrics", error);
-            }
-
             http.request(url_for_run("report/wepp/results/"))
                 .then(function (result) {
                     var body = result && result.body;

@@ -20,12 +20,8 @@ var SubcatchmentDelineation = (function () {
     var SUBCATCHMENT_LAYER_ID = "wc-subcatchments";
     var SUBCATCHMENT_LABEL_LAYER_NAME = "Subcatchment Labels";
     var SUBCATCHMENT_LABEL_LAYER_ID = "wc-subcatchment-labels";
-    var GRID_LAYER_NAME = "Gridded Output";
-    var GRID_LAYER_ID = "wc-gridded-loss";
 
     var SUBCATCHMENT_ENDPOINT = "resources/subcatchments.json";
-    var GRID_LOSS_ENDPOINT = "resources/flowpaths_loss.tif";
-
     var DEFAULT_STYLE = {
         color: "#ff7800",
         weight: 2,
@@ -39,74 +35,6 @@ var SubcatchmentDelineation = (function () {
         opacity: 0.65,
         fillColor: "#ffffff",
         fillOpacity: 0.0
-    };
-
-    var DEFAULT_LINEAR_RANGE = 50;
-
-    var WEPP_LOSS_METRIC_EXPRESSIONS = Object.freeze({
-        runoff: 'CAST(loss."Runoff Volume" / (NULLIF(loss."Hillslope Area", 0) * 10.0) AS DOUBLE)',
-        subrunoff: 'CAST(loss."Subrunoff Volume" / (NULLIF(loss."Hillslope Area", 0) * 10.0) AS DOUBLE)',
-        baseflow: 'CAST(loss."Baseflow Volume" / (NULLIF(loss."Hillslope Area", 0) * 10.0) AS DOUBLE)',
-        loss: 'CAST(loss."Soil Loss" / NULLIF(loss."Hillslope Area", 0) AS DOUBLE)'
-    });
-
-    var RANGE_LABEL_CONFIG = {
-        phosphorus: {
-            rangeKey: "phosphorus",
-            labelMinKey: "phosphorusMin",
-            labelMaxKey: "phosphorusMax",
-            unit: "kg/ha",
-            log: { min: 0.001, max: 10.0, maxLinear: 100 }
-        },
-        runoff: {
-            rangeKey: "runoff",
-            labelMinKey: "runoffMin",
-            labelMaxKey: "runoffMax",
-            unit: "mm",
-            log: { min: 0.1, max: 1000, maxLinear: 100 }
-        },
-        loss: {
-            rangeKey: "loss",
-            labelMinKey: "lossMin",
-            labelMaxKey: "lossMax",
-            unit: "kg/ha",
-            log: { min: 1, max: 10000, maxLinear: 100 }
-        },
-        ash_load: {
-            rangeKey: "ashLoad",
-            labelMinKey: "ashLoadMin",
-            labelMaxKey: "ashLoadMax",
-            unit: "tonne/ha",
-            log: { min: 0.001, max: 100, maxLinear: 100 }
-        },
-        ash_transport: {
-            rangeKey: "ashTransport",
-            labelMinKey: "ashTransportMin",
-            labelMaxKey: "ashTransportMax",
-            unit: "tonne/ha",
-            log: { min: 0.001, max: 20, maxLinear: 100 }
-        },
-        rhem_runoff: {
-            rangeKey: "rhemRunoff",
-            labelMinKey: "rhemRunoffMin",
-            labelMaxKey: "rhemRunoffMax",
-            unit: "mm",
-            log: { min: 0.1, max: 1000, maxLinear: 100 }
-        },
-        rhem_sed_yield: {
-            rangeKey: "rhemSedYield",
-            labelMinKey: "rhemSedYieldMin",
-            labelMaxKey: "rhemSedYieldMax",
-            unit: "mm",
-            log: { min: 1, max: 10000, maxLinear: 100 }
-        },
-        rhem_soil_loss: {
-            rangeKey: "rhemSoilLoss",
-            labelMinKey: "rhemSoilLossMin",
-            labelMaxKey: "rhemSoilLossMax",
-            unit: "kg/ha",
-            log: { min: 0.001, max: 10000, maxLinear: 100 }
-        }
     };
 
     function ensureHelpers() {
@@ -151,49 +79,10 @@ var SubcatchmentDelineation = (function () {
     function ensureDeck() {
         var deckApi = window.deck;
         if (!deckApi || typeof deckApi.GeoJsonLayer !== "function" ||
-            typeof deckApi.TextLayer !== "function" || typeof deckApi.BitmapLayer !== "function") {
-            throw new Error("SubcatchmentDelineation GL requires deck.gl GeoJsonLayer/TextLayer/BitmapLayer.");
+            typeof deckApi.TextLayer !== "function") {
+            throw new Error("SubcatchmentDelineation GL requires deck.gl GeoJsonLayer/TextLayer.");
         }
         return deckApi;
-    }
-
-    function ensureGeoTiff() {
-        var win = typeof window !== "undefined" ? window : null;
-        var globalGeoTiff = win && win.GeoTIFF && typeof win.GeoTIFF.fromArrayBuffer === "function"
-            ? win.GeoTIFF
-            : null;
-        if (globalGeoTiff) {
-            return Promise.resolve(globalGeoTiff);
-        }
-        if (win && win.geotiff) {
-            if (win.geotiff.GeoTIFF && typeof win.geotiff.GeoTIFF.fromArrayBuffer === "function") {
-                return Promise.resolve(win.geotiff.GeoTIFF);
-            }
-            if (win.geotiff.default && typeof win.geotiff.default.fromArrayBuffer === "function") {
-                return Promise.resolve(win.geotiff.default);
-            }
-        }
-        return new Promise(function (resolve, reject) {
-            if (typeof document === "undefined") {
-                reject(new Error("GeoTIFF loader unavailable in this context."));
-                return;
-            }
-            var script = document.createElement("script");
-            script.src = "https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js";
-            script.async = true;
-            script.onload = function () {
-                var loadedWin = typeof window !== "undefined" ? window : null;
-                if (loadedWin && loadedWin.GeoTIFF && typeof loadedWin.GeoTIFF.fromArrayBuffer === "function") {
-                    resolve(loadedWin.GeoTIFF);
-                } else {
-                    reject(new Error("GeoTIFF global missing after script load."));
-                }
-            };
-            script.onerror = function () {
-                reject(new Error("GeoTIFF script failed to load."));
-            };
-            document.head.appendChild(script);
-        });
     }
 
     function createLegacyAdapter(element) {
@@ -343,102 +232,6 @@ var SubcatchmentDelineation = (function () {
         }
 
         return { Error: (error && error.message) || "Request failed" };
-    }
-
-    function renderUnitLabel(value, unit, target, fallbackText) {
-        if (!target) {
-            return;
-        }
-        var fallback = fallbackText !== undefined
-            ? fallbackText
-            : (isFiniteNumber(value) ? (unit ? value + " " + unit : String(value)) : "");
-        var applyHtml = typeof window !== "undefined" && typeof window.applyLabelHtml === "function"
-            ? window.applyLabelHtml
-            : function (label, html) {
-                if (label && "innerHTML" in label) {
-                    label.innerHTML = html;
-                } else if (label && "textContent" in label) {
-                    label.textContent = html;
-                }
-            };
-
-        if (!window.UnitizerClient || typeof window.UnitizerClient.ready !== "function") {
-            applyHtml(target, fallback);
-            return;
-        }
-
-        window.UnitizerClient.ready()
-            .then(function (client) {
-                var html = client.renderValue(value, unit, { includeUnits: true });
-                applyHtml(target, html);
-            })
-            .catch(function (error) {
-                console.warn("[Subcatchment GL] Failed to update unitized label", error);
-                applyHtml(target, fallback);
-            });
-    }
-
-    function resolveRangeMax(state, mode) {
-        var cfg = RANGE_LABEL_CONFIG[mode];
-        if (!cfg) {
-            return null;
-        }
-        var rangeEl = state.rangeElements[cfg.rangeKey];
-        if (!rangeEl) {
-            return null;
-        }
-        var sliderValue = parseNumeric(rangeEl && rangeEl.value);
-        var linearValue = isFiniteNumber(sliderValue) ? sliderValue : DEFAULT_LINEAR_RANGE;
-        if (cfg.log) {
-            if (typeof window.linearToLog === "function") {
-                return window.linearToLog(linearValue, cfg.log.min, cfg.log.max, cfg.log.maxLinear);
-            }
-            return cfg.log.min * Math.pow(cfg.log.max / cfg.log.min, linearValue / cfg.log.maxLinear);
-        }
-        return linearValue;
-    }
-
-    function updateLegendLabels(state, mode) {
-        var cfg = RANGE_LABEL_CONFIG[mode];
-        if (!cfg) {
-            return;
-        }
-        var maxValue = resolveRangeMax(state, mode);
-        if (!isFiniteNumber(maxValue)) {
-            return;
-        }
-        var minValue;
-        if (typeof cfg.minValue === "function") {
-            minValue = cfg.minValue(maxValue);
-        } else if (cfg.minValue !== undefined) {
-            minValue = cfg.minValue;
-        } else {
-            minValue = 0;
-        }
-
-        renderUnitLabel(minValue, cfg.unit, state.labelElements[cfg.labelMinKey]);
-        renderUnitLabel(maxValue, cfg.unit, state.labelElements[cfg.labelMaxKey]);
-    }
-
-    function resolveWeppKey(feature) {
-        if (!feature || !feature.properties) {
-            return null;
-        }
-        var props = feature.properties;
-        var candidates = [
-            props.WeppID,
-            props.wepp_id,
-            props.weppId,
-            props.Hillslopes,
-            props.hillslope
-        ];
-        for (var i = 0; i < candidates.length; i += 1) {
-            var candidate = candidates[i];
-            if (candidate !== undefined && candidate !== null && candidate !== "") {
-                return String(candidate);
-            }
-        }
-        return null;
     }
 
     function setSubLegend(html) {
@@ -808,116 +601,6 @@ var SubcatchmentDelineation = (function () {
         });
     }
 
-    function buildBitmapLayer(deckApi, canvas, bounds) {
-        var hasData = Boolean(canvas && bounds);
-        return new deckApi.BitmapLayer({
-            id: GRID_LAYER_ID,
-            image: canvas || null,
-            bounds: bounds || [0, 0, 0, 0],
-            opacity: 1.0,
-            pickable: false,
-            visible: hasData
-        });
-    }
-
-    function colorizeRaster(values, width, height, colorFn) {
-        var canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        var ctx2d = canvas.getContext("2d");
-        var imgData = ctx2d.createImageData(width, height);
-        for (var i = 0, j = 0; i < values.length; i += 1, j += 4) {
-            var v = values[i];
-            var color = colorFn && typeof colorFn === "function" ? colorFn(v) : [180, 180, 180, 230];
-            if (!color || color.length < 3) {
-                color = [180, 180, 180, 230];
-            }
-            imgData.data[j] = color[0];
-            imgData.data[j + 1] = color[1];
-            imgData.data[j + 2] = color[2];
-            imgData.data[j + 3] = color.length > 3 ? color[3] : 230;
-        }
-        ctx2d.putImageData(imgData, 0, 0);
-        return canvas;
-    }
-
-    function loadRaster(path, colorFn) {
-        var url = resolveRunScopedUrl("browse/" + path);
-        return ensureGeoTiff().then(function (GeoTiffApi) {
-            return fetch(url).then(function (resp) {
-                if (!resp.ok) {
-                    throw new Error("Raster fetch failed " + resp.status + ": " + url);
-                }
-                return resp.arrayBuffer();
-            }).then(function (arrayBuffer) {
-                return GeoTiffApi.fromArrayBuffer(arrayBuffer);
-            }).then(function (tiff) {
-                return tiff.getImage();
-            }).then(function (image) {
-                var width = image.getWidth();
-                var height = image.getHeight();
-                return image.readRasters({ interleave: true, samples: [0] }).then(function (raster) {
-                    var values = ArrayBuffer.isView(raster) ? raster : raster[0];
-                    var canvas = colorizeRaster(values, width, height, colorFn);
-                    var bounds = image.getBoundingBox();
-                    return {
-                        canvas: canvas,
-                        bounds: bounds,
-                        values: values,
-                        width: width,
-                        height: height
-                    };
-                });
-            });
-        });
-    }
-
-    function resolveRunSlugForQuery() {
-        var prefix = typeof window.site_prefix === "string" ? window.site_prefix : "";
-        if (prefix && prefix !== "/" && prefix.charAt(0) !== "/") {
-            prefix = "/" + prefix;
-        }
-        if (prefix === "/") {
-            prefix = "";
-        }
-
-        var path = window.location && window.location.pathname ? window.location.pathname : "";
-        if (prefix && path.indexOf(prefix) === 0) {
-            path = path.slice(prefix.length);
-        }
-
-        var parts = path.split("/").filter(function (segment) {
-            return segment.length > 0;
-        });
-        var runsIndex = parts.indexOf("runs");
-        if (runsIndex === -1 || parts.length <= runsIndex + 1) {
-            return null;
-        }
-        return decodeURIComponent(parts[runsIndex + 1]);
-    }
-
-    function postQueryEngine(http, payload) {
-        var runSlug = resolveRunSlugForQuery();
-        if (!runSlug) {
-            return Promise.reject(new Error("Unable to resolve run identifier from the current URL."));
-        }
-        var origin = "";
-        if (window && window.location) {
-            if (window.location.origin) {
-                origin = window.location.origin;
-            } else if (window.location.protocol && window.location.host) {
-                origin = window.location.protocol + "//" + window.location.host;
-            }
-        }
-        var targetPath = "/query-engine/runs/" + encodeURIComponent(runSlug) + "/query";
-        var targetUrl = origin ? origin.replace(/\/+$/, "") + targetPath : targetPath;
-        return http.postJson(targetUrl, payload, {
-            headers: { Accept: "application/json" }
-        }).then(function (result) {
-            return result && result.body ? result.body : null;
-        });
-    }
-
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
@@ -988,62 +671,8 @@ var SubcatchmentDelineation = (function () {
             dataSlpAsp: null,
             dataLanduse: null,
             dataSoils: null,
-            dataRunoff: null,
-            dataLoss: null,
-            dataPhosphorus: null,
-            dataAshLoad: null,
-            dataAshTransport: null,
-            dataRhemRunoff: null,
-            dataRhemSedYield: null,
-            dataRhemSoilLoss: null,
-            ashMeasure: null,
-            grid: null,
-            gridData: null,
-            gridBounds: null,
-            gridRangeMax: null,
-            rangeElements: {
-                phosphorus: document.getElementById("wepp_sub_cmap_range_phosphorus"),
-                runoff: document.getElementById("wepp_sub_cmap_range_runoff"),
-                loss: document.getElementById("wepp_sub_cmap_range_loss"),
-                griddedLoss: document.getElementById("wepp_grd_cmap_range_loss"),
-                ashLoad: document.getElementById("ash_sub_cmap_range_load"),
-                ashTransport: document.getElementById("ash_sub_cmap_range_transport"),
-                rhemRunoff: document.getElementById("rhem_sub_cmap_range_runoff"),
-                rhemSedYield: document.getElementById("rhem_sub_cmap_range_sed_yield"),
-                rhemSoilLoss: document.getElementById("rhem_sub_cmap_range_soil_loss")
-            },
-            labelElements: {
-                phosphorusMin: document.getElementById("wepp_sub_cmap_canvas_phosphorus_min"),
-                phosphorusMax: document.getElementById("wepp_sub_cmap_canvas_phosphorus_max"),
-                runoffMin: document.getElementById("wepp_sub_cmap_canvas_runoff_min"),
-                runoffMax: document.getElementById("wepp_sub_cmap_canvas_runoff_max"),
-                lossMin: document.getElementById("wepp_sub_cmap_canvas_loss_min"),
-                lossMax: document.getElementById("wepp_sub_cmap_canvas_loss_max"),
-                griddedLossMin: document.getElementById("wepp_grd_cmap_range_loss_min"),
-                griddedLossMax: document.getElementById("wepp_grd_cmap_range_loss_max"),
-                griddedLossUnits: document.getElementById("wepp_grd_cmap_range_loss_units"),
-                ashLoadMin: document.getElementById("ash_sub_cmap_canvas_load_min"),
-                ashLoadMax: document.getElementById("ash_sub_cmap_canvas_load_max"),
-                ashTransportMin: document.getElementById("ash_sub_cmap_canvas_transport_min"),
-                ashTransportMax: document.getElementById("ash_sub_cmap_canvas_transport_max"),
-                rhemRunoffMin: document.getElementById("rhem_sub_cmap_canvas_runoff_min"),
-                rhemRunoffMax: document.getElementById("rhem_sub_cmap_canvas_runoff_max"),
-                rhemSedYieldMin: document.getElementById("rhem_sub_cmap_canvas_sed_yield_min"),
-                rhemSedYieldMax: document.getElementById("rhem_sub_cmap_canvas_sed_yield_max"),
-                rhemSoilLossMin: document.getElementById("rhem_sub_cmap_canvas_soil_loss_min"),
-                rhemSoilLossMax: document.getElementById("rhem_sub_cmap_canvas_soil_loss_max"),
-                rhemSoilLossUnits: document.getElementById("rhem_sub_cmap_canvas_soil_loss_units")
-            },
             colorMappers: {
-                runoff: typeof window.createColormap === "function" ? window.createColormap({ colormap: "winter", nshades: 64 }) : null,
-                loss: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
-                phosphorus: typeof window.createColormap === "function" ? window.createColormap({ colormap: "viridis", nshades: 64 }) : null,
                 slopeAspect: typeof window.createColormap === "function" ? window.createColormap({ colormap: "viridis", nshades: 64 }) : null,
-                ashLoad: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
-                ashTransport: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
-                rhemRunoff: typeof window.createColormap === "function" ? window.createColormap({ colormap: "winter", nshades: 64 }) : null,
-                rhemSedYield: typeof window.createColormap === "function" ? window.createColormap({ colormap: "viridis", nshades: 64 }) : null,
-                rhemSoilLoss: typeof window.createColormap === "function" ? window.createColormap({ colormap: "jet2", nshades: 64 }) : null,
                 cover: typeof window.createColormap === "function" ? window.createColormap({ colormap: "viridis", nshades: 64 }) : null
             },
             postBuildRefreshTimer: null
@@ -1157,148 +786,6 @@ var SubcatchmentDelineation = (function () {
                         var hex = mapper ? mapper.map(value) : "#ffffff";
                         return hexToRgba(hex, 0.9);
                     };
-                case "phosphorus":
-                    return function (feature) {
-                        var id = feature.properties.TopazID;
-                        var record = state.dataPhosphorus ? state.dataPhosphorus[id] : null;
-                        if (!record) {
-                            return defaultFill;
-                        }
-                        var v = parseFloat(record.value);
-                        if (!Number.isFinite(v)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "phosphorus");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.phosphorus.map(v / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "runoff":
-                    return function (feature) {
-                        var key = resolveWeppKey(feature);
-                        var record = key && state.dataRunoff ? state.dataRunoff[key] : null;
-                        var v = record ? parseFloat(record.value) : NaN;
-                        if (!record || Number.isNaN(v)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "runoff");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.runoff.map(v / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "loss":
-                    return function (feature) {
-                        var key = resolveWeppKey(feature);
-                        var record = key && state.dataLoss ? state.dataLoss[key] : null;
-                        var v = record ? parseFloat(record.value) : NaN;
-                        if (!record || Number.isNaN(v)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "loss");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.loss.map(v / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "ash_load":
-                    return function (feature) {
-                        var id = feature.properties.TopazID;
-                        var bucket = state.dataAshLoad && state.dataAshLoad[id] ? state.dataAshLoad[id] : null;
-                        if (!bucket || !state.ashMeasure) {
-                            return defaultFill;
-                        }
-                        var record = bucket[state.ashMeasure];
-                        if (!record) {
-                            return defaultFill;
-                        }
-                        var v = parseFloat(record.value);
-                        if (!Number.isFinite(v)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "ash_load");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.ashLoad.map(v / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "ash_transport":
-                    return function (feature) {
-                        var id = feature.properties.TopazID;
-                        var record = state.dataAshTransport ? state.dataAshTransport[id] : null;
-                        if (!record) {
-                            return defaultFill;
-                        }
-                        var value = parseFloat(record.value);
-                        if (!Number.isFinite(value)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "ash_transport");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.ashTransport.map(value / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "rhem_runoff":
-                    return function (feature) {
-                        var id = feature.properties.TopazID;
-                        var record = state.dataRhemRunoff ? state.dataRhemRunoff[id] : null;
-                        if (!record) {
-                            return defaultFill;
-                        }
-                        var value = parseFloat(record.value);
-                        if (!Number.isFinite(value)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "rhem_runoff");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.rhemRunoff.map(value / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "rhem_sed_yield":
-                    return function (feature) {
-                        var id = feature.properties.TopazID;
-                        var record = state.dataRhemSedYield ? state.dataRhemSedYield[id] : null;
-                        if (!record) {
-                            return defaultFill;
-                        }
-                        var value = parseFloat(record.value);
-                        if (!Number.isFinite(value)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "rhem_sed_yield");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.rhemSedYield.map(value / r);
-                        return hexToRgba(hex, 0.9);
-                    };
-                case "rhem_soil_loss":
-                    return function (feature) {
-                        var id = feature.properties.TopazID;
-                        var record = state.dataRhemSoilLoss ? state.dataRhemSoilLoss[id] : null;
-                        if (!record) {
-                            return defaultFill;
-                        }
-                        var value = parseFloat(record.value);
-                        if (!Number.isFinite(value)) {
-                            return defaultFill;
-                        }
-                        var r = resolveRangeMax(state, "rhem_soil_loss");
-                        if (!isFiniteNumber(r) || r <= 0) {
-                            return defaultFill;
-                        }
-                        var hex = state.colorMappers.rhemSoilLoss.map(value / r);
-                        return hexToRgba(hex, 0.9);
-                    };
                 default:
                     return function () { return defaultFill; };
             }
@@ -1387,121 +874,6 @@ var SubcatchmentDelineation = (function () {
             attachLabelRebuild(nextLayer);
             replaceOverlayLayer(map, SUBCATCHMENT_LABEL_LAYER_NAME, state.labelLayer, nextLayer, wasVisible);
             state.labelLayer = nextLayer;
-        }
-
-        function removeGrid() {
-            if (!state.grid) {
-                return;
-            }
-            var map = ensureMap();
-            try {
-                if (typeof map.unregisterOverlay === "function") {
-                    map.unregisterOverlay(state.grid);
-                } else if (map.ctrls && typeof map.ctrls.removeLayer === "function") {
-                    map.ctrls.removeLayer(state.grid);
-                }
-            } catch (err) {
-                // ignore
-            }
-            try {
-                map.removeLayer(state.grid, { skipOverlay: true });
-            } catch (err) {
-                console.warn("[Subcatchment GL] Failed to remove grid layer", err);
-            }
-            state.grid = null;
-            state.gridData = null;
-            state.gridBounds = null;
-            state.gridRangeMax = null;
-        }
-
-        function gridColorFnFactory(rangeMax) {
-            var mapper = state.colorMappers.loss;
-            var safeRange = isFiniteNumber(rangeMax) && rangeMax > 0 ? rangeMax : null;
-            return function (value) {
-                if (!Number.isFinite(value) || safeRange === null) {
-                    return [0, 0, 0, 0];
-                }
-                var t = (value + safeRange) / (2 * safeRange);
-                if (t < 0) {
-                    t = 0;
-                } else if (t > 1) {
-                    t = 1;
-                }
-                var hex = mapper ? mapper.map(t) : "#ffffff";
-                return hexToRgba(hex, 0.9);
-            };
-        }
-
-        function updateGriddedLossLabels(rangeMax) {
-            if (!isFiniteNumber(rangeMax)) {
-                return;
-            }
-            renderUnitLabel(-1.0 * rangeMax, "kg/m^2", state.labelElements.griddedLossMin);
-            renderUnitLabel(rangeMax, "kg/m^2", state.labelElements.griddedLossMax);
-            if (state.labelElements.griddedLossUnits) {
-                if (window.UnitizerClient && typeof window.UnitizerClient.ready === "function") {
-                    window.UnitizerClient.ready().then(function (client) {
-                        state.labelElements.griddedLossUnits.innerHTML = client.renderUnits("kg/m^2");
-                    }).catch(function () {});
-                } else {
-                    state.labelElements.griddedLossUnits.textContent = "kg/m^2";
-                }
-            }
-        }
-
-        function updateGriddedLoss() {
-            var range = state.rangeElements.griddedLoss;
-            if (!range) {
-                return;
-            }
-            var value = parseFloat(range.value);
-            if (!Number.isFinite(value)) {
-                return;
-            }
-            state.gridRangeMax = value;
-            updateGriddedLossLabels(value);
-            if (!state.gridData || !state.gridBounds) {
-                return;
-            }
-            var deckApi = ensureDeck();
-            var map = ensureMap();
-            var colorFn = gridColorFnFactory(value);
-            var canvas = colorizeRaster(state.gridData.values, state.gridData.width, state.gridData.height, colorFn);
-            var nextLayer = buildBitmapLayer(deckApi, canvas, state.gridBounds);
-            replaceOverlayLayer(map, GRID_LAYER_NAME, state.grid, nextLayer, true);
-            state.grid = nextLayer;
-        }
-
-        function renderGriddedLoss() {
-            removeGrid();
-            var deckApi = ensureDeck();
-            var map = ensureMap();
-            var range = state.rangeElements.griddedLoss;
-            var rangeValue = range ? parseFloat(range.value) : null;
-            var rangeMax = Number.isFinite(rangeValue) ? rangeValue : 1;
-            var colorFn = gridColorFnFactory(rangeMax);
-            return loadRaster(GRID_LOSS_ENDPOINT, colorFn)
-                .then(function (raster) {
-                    state.gridData = raster;
-                    state.gridBounds = raster.bounds;
-                    state.gridRangeMax = rangeMax;
-                    var layer = buildBitmapLayer(deckApi, raster.canvas, raster.bounds);
-                    state.grid = layer;
-                    if (typeof map.registerOverlay === "function") {
-                        map.registerOverlay(layer, GRID_LAYER_NAME);
-                    } else if (map.ctrls && typeof map.ctrls.addOverlay === "function") {
-                        map.ctrls.addOverlay(layer, GRID_LAYER_NAME);
-                    }
-                    if (typeof map.addLayer === "function") {
-                        map.addLayer(layer);
-                    }
-                    updateGriddedLoss();
-                    return layer;
-                })
-                .catch(function (error) {
-                    handleError(error);
-                    throw error;
-                });
         }
 
         function renderLayer(options) {
@@ -1600,185 +972,6 @@ var SubcatchmentDelineation = (function () {
                 .catch(handleError);
         }
 
-        var lossMetricCache = Object.create(null);
-        var lossMetricInflight = Object.create(null);
-
-        function fetchLossMetric(metricKey) {
-            var expression = WEPP_LOSS_METRIC_EXPRESSIONS[metricKey];
-            if (!expression) {
-                return Promise.reject(new Error("Unknown WEPP loss metric: " + metricKey));
-            }
-
-            if (lossMetricCache[metricKey]) {
-                return Promise.resolve(lossMetricCache[metricKey]);
-            }
-            if (lossMetricInflight[metricKey]) {
-                return lossMetricInflight[metricKey];
-            }
-
-            var payload = {
-                datasets: [
-                    { path: "wepp/output/interchange/loss_pw0.hill.parquet", alias: "loss" }
-                ],
-                columns: [
-                    'loss.wepp_id AS wepp_id',
-                    expression + " AS value"
-                ],
-                order_by: ["wepp_id"]
-            };
-
-            var requestPromise = postQueryEngine(http, payload).then(function (response) {
-                var records = Array.isArray(response && response.records) ? response.records : [];
-                var map = Object.create(null);
-                records.forEach(function (row) {
-                    if (!row) {
-                        return;
-                    }
-                    var weppId = row.wepp_id;
-                    if (weppId === undefined || weppId === null) {
-                        return;
-                    }
-                    map[String(weppId)] = {
-                        wepp_id: weppId,
-                        value: row.value
-                    };
-                });
-                lossMetricCache[metricKey] = map;
-                return map;
-            });
-
-            requestPromise = requestPromise.then(function (map) {
-                delete lossMetricInflight[metricKey];
-                return map;
-            }, function (error) {
-                delete lossMetricInflight[metricKey];
-                throw error;
-            });
-
-            lossMetricInflight[metricKey] = requestPromise;
-            return requestPromise;
-        }
-
-        function renderRunoff() {
-            return fetchLossMetric("runoff").then(function (data) {
-                state.dataRunoff = data;
-                state.cmapMode = "runoff";
-                updateGlLayerStyle();
-                updateLegendLabels(state, "runoff");
-            }).catch(handleError);
-        }
-
-        function renderSubrunoff() {
-            return fetchLossMetric("subrunoff").then(function (data) {
-                state.dataRunoff = state.dataRunoff || data;
-                state.cmapMode = "runoff";
-                updateGlLayerStyle();
-                updateLegendLabels(state, "runoff");
-            }).catch(handleError);
-        }
-
-        function renderBaseflow() {
-            return fetchLossMetric("baseflow").then(function (data) {
-                state.dataRunoff = state.dataRunoff || data;
-                state.cmapMode = "runoff";
-                updateGlLayerStyle();
-                updateLegendLabels(state, "runoff");
-            }).catch(handleError);
-        }
-
-        function renderLoss() {
-            return fetchLossMetric("loss").then(function (data) {
-                state.dataLoss = data;
-                state.cmapMode = "loss";
-                updateGlLayerStyle();
-                updateLegendLabels(state, "loss");
-            }).catch(handleError);
-        }
-
-        function renderPhosphorus() {
-            return requestJson(resolveRunScopedUrl("query/wepp/phosphorus/subcatchments/"))
-                .then(function (data) {
-                    state.dataPhosphorus = data;
-                    state.cmapMode = "phosphorus";
-                    updateGlLayerStyle();
-                    updateLegendLabels(state, "phosphorus");
-                })
-                .catch(handleError);
-        }
-
-        function getAshTransportMeasure() {
-            var radio = document.querySelector("input[name='wepp_sub_cmap_radio']:checked");
-            return radio ? radio.value : null;
-        }
-
-        function renderAshLoad() {
-            return requestJson(resolveRunScopedUrl("query/ash/out/"))
-                .then(function (data) {
-                    state.dataAshLoad = data;
-                    state.cmapMode = "ash_load";
-                    state.ashMeasure = getAshTransportMeasure();
-                    updateGlLayerStyle();
-                    updateLegendLabels(state, "ash_load");
-                })
-                .catch(handleError);
-        }
-
-        function renderAshTransport() {
-            return requestJson(resolveRunScopedUrl("query/ash_out/"))
-                .then(function (data) {
-                    state.dataAshTransport = data;
-                    state.cmapMode = "ash_transport";
-                    updateGlLayerStyle();
-                    updateLegendLabels(state, "ash_transport");
-                })
-                .catch(handleError);
-        }
-
-        function renderRhemRunoff() {
-            return requestJson(resolveRunScopedUrl("query/rhem/runoff/subcatchments/"))
-                .then(function (data) {
-                    state.dataRhemRunoff = data;
-                    state.cmapMode = "rhem_runoff";
-                    updateGlLayerStyle();
-                    updateLegendLabels(state, "rhem_runoff");
-                })
-                .catch(handleError);
-        }
-
-        function renderRhemSedYield() {
-            return requestJson(resolveRunScopedUrl("query/rhem/sed_yield/subcatchments/"))
-                .then(function (data) {
-                    state.dataRhemSedYield = data;
-                    state.cmapMode = "rhem_sed_yield";
-                    updateGlLayerStyle();
-                    updateLegendLabels(state, "rhem_sed_yield");
-                })
-                .catch(handleError);
-        }
-
-        function renderRhemSoilLoss() {
-            return requestJson(resolveRunScopedUrl("query/rhem/soil_loss/subcatchments/"))
-                .then(function (data) {
-                    state.dataRhemSoilLoss = data;
-                    state.cmapMode = "rhem_soil_loss";
-                    updateGlLayerStyle();
-                    updateLegendLabels(state, "rhem_soil_loss");
-                })
-                .catch(handleError);
-        }
-
-        function handleRangeUpdate(mode) {
-            if (!mode) {
-                return;
-            }
-            updateLegendLabels(state, mode);
-            if (mode === "grd_loss") {
-                updateGriddedLoss();
-                return;
-            }
-            updateGlLayerStyle();
-        }
-
         function handleColorMapChange(value) {
             if (!value) {
                 return;
@@ -1797,20 +990,6 @@ var SubcatchmentDelineation = (function () {
             dom.delegate(document, "change", "[data-subcatchment-role='cmap-option']", function () {
                 handleColorMapChange(this.value);
             });
-
-            dom.delegate(document, "input", "[data-subcatchment-role='scale-range']", function () {
-                var mode = this.getAttribute("data-subcatchment-scale");
-                handleRangeUpdate(mode);
-            });
-        }
-
-        function bindDirectFallbackListeners() {
-            var gridded = state.rangeElements.griddedLoss;
-            if (gridded && typeof gridded.addEventListener === "function") {
-                gridded.addEventListener("input", function () {
-                    handleRangeUpdate("grd_loss");
-                });
-            }
         }
 
         function disableRadio(id, disabled) {
@@ -1867,7 +1046,7 @@ var SubcatchmentDelineation = (function () {
 
         sub.setColorMap = function (mode) {
             var resolvedMode = resolveColorMapAlias(mode);
-            if (!state.glLayer && resolvedMode !== "default" && resolvedMode !== "clear" && resolvedMode !== "grd_loss") {
+            if (!state.glLayer && resolvedMode !== "default" && resolvedMode !== "clear") {
                 throw new Error("Subcatchments have not been drawn");
             }
 
@@ -1887,44 +1066,7 @@ var SubcatchmentDelineation = (function () {
                 renderSoils();
             } else if (resolvedMode === "cover" || resolvedMode === "landuse_cover") {
                 renderCover();
-            } else if (resolvedMode === "sub_runoff") {
-                renderRunoff();
-            } else if (resolvedMode === "sub_subrunoff") {
-                renderSubrunoff();
-            } else if (resolvedMode === "sub_baseflow") {
-                renderBaseflow();
-            } else if (resolvedMode === "sub_loss") {
-                renderLoss();
-            } else if (resolvedMode === "sub_phosphorus") {
-                renderPhosphorus();
-            } else if (resolvedMode === "sub_rhem_runoff") {
-                renderRhemRunoff();
-            } else if (resolvedMode === "sub_rhem_sed_yield") {
-                renderRhemSedYield();
-            } else if (resolvedMode === "sub_rhem_soil_loss") {
-                renderRhemSoilLoss();
-            } else if (resolvedMode === "ash_load") {
-                renderAshLoad();
-            } else if (resolvedMode === "wind_transport (kg/ha)" || resolvedMode === "water_transport (kg/ha" || resolvedMode === "ash_transport (kg/ha)" || resolvedMode === "ash_transport") {
-                renderAshTransport();
-            } else if (resolvedMode === "grd_loss") {
-                state.cmapMode = "clear";
-                updateGlLayerStyle();
-                renderGriddedLoss();
             }
-
-            if (resolvedMode !== "grd_loss") {
-                removeGrid();
-            }
-        };
-
-        sub.prefetchLossMetrics = function () {
-            return Promise.all([
-                fetchLossMetric("runoff").then(function (data) { state.dataRunoff = state.dataRunoff || data; }),
-                fetchLossMetric("subrunoff"),
-                fetchLossMetric("baseflow"),
-                fetchLossMetric("loss").then(function (data) { state.dataLoss = data; })
-            ]);
         };
 
         sub.build = function () {
@@ -2125,15 +1267,6 @@ var SubcatchmentDelineation = (function () {
 
         sub.initializeColorMapControls = function () {
             renderLegendIfPresent("viridis", "landuse_sub_cmap_canvas_cover");
-            renderLegendIfPresent("viridis", "wepp_sub_cmap_canvas_phosphorus");
-            renderLegendIfPresent("winter", "wepp_sub_cmap_canvas_runoff");
-            renderLegendIfPresent("jet2", "wepp_sub_cmap_canvas_loss");
-            renderLegendIfPresent("jet2", "wepp_grd_cmap_canvas_loss");
-            renderLegendIfPresent("winter", "rhem_sub_cmap_canvas_runoff");
-            renderLegendIfPresent("viridis", "rhem_sub_cmap_canvas_sed_yield");
-            renderLegendIfPresent("jet2", "rhem_sub_cmap_canvas_soil_loss");
-            renderLegendIfPresent("jet2", "ash_sub_cmap_canvas_load");
-            renderLegendIfPresent("jet2", "ash_sub_cmap_canvas_transport");
         };
 
         sub.onMapChange = function () {
@@ -2238,7 +1371,6 @@ var SubcatchmentDelineation = (function () {
         };
 
         setupDelegatedEvents();
-        bindDirectFallbackListeners();
 
         return sub;
     }

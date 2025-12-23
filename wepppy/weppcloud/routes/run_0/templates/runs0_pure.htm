@@ -11,8 +11,6 @@
 
 {% set mods_list = ron.mods or [] %}
 {% set hide_landuse_wepp = 'rhem' in mods_list and not playwright_load_all %}
-{% set use_deck_gl_map = use_deck_gl_map | default(true) %}
-
 {% set disabled_controllers = ['landuse', 'landuseModify', 'wepp'] if hide_landuse_wepp else [] %}
 
 {% set show_rangeland_cover = 'rangeland_cover' in mods_list or playwright_load_all %}
@@ -30,7 +28,6 @@
 {% block head_extras %}
 {{ super() }}
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
-{% if use_deck_gl_map %}
 <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
 <script>
   window._deckCore = window.deck;
@@ -39,19 +36,8 @@
         onload="window.deck = Object.assign({}, window._deckCore || {}, window.deck || {}); delete window._deckCore;"></script>
 <link rel="stylesheet" href="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist/stylesheet.css">
 <script src="{{ url_for('static', filename='js/controllers-gl.js') }}"></script>
-{% else %}
-<script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
-<script src="{{ url_for('static', filename='js/glify-browser.js') }}"></script>
-<script src="{{ url_for('static', filename='js/leaflet-glify-layer.js') }}"></script>
-<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-{% endif %}
 <script src="{{ url_for('static', filename='js/preflight.js') }}"></script>
 <script src="{{ url_for('static', filename='js/input-unit-converters.js') }}"></script>
-
-{% if not use_deck_gl_map %}
-<script src="{{ url_for('static', filename='js/flash-and-find-by-id.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}">
-{% endif %}
 {% include 'run_page_bootstrap.js.j2' %}
 {% endblock %}
 
@@ -147,11 +133,7 @@
 
     <section class="wc-run-layout__content">
       <section id="map">
-        {% if use_deck_gl_map %}
-          {% include 'controls/map_pure_gl.htm' %}
-        {% else %}
-          {% include 'controls/map_pure.htm' %}
-        {% endif %}
+        {% include 'controls/map_pure_gl.htm' %}
       </section>
 
       {% if show_disturbed_sbs %}
@@ -281,12 +263,6 @@
 <script src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
 <script src="{{ url_for('static', filename='js/underscore.js') }}"></script>
 <script src="{{ url_for('static', filename='js/colormap.js') }}"></script>
-{% if not use_deck_gl_map %}
-<script src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-{% endif %}
 <script src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
 <script src="{{ url_for('static', filename='js/plotty.js') }}"></script>
-{% if not use_deck_gl_map %}
-<script src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
-{% endif %}
 {% endblock %}

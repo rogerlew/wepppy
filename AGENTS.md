@@ -664,7 +664,7 @@ See `wepppy/weppcloud/controllers_js/README.md` for comprehensive controller arc
 1. Check Redis DB 2 for pub/sub activity: `redis-cli -n 2 PUBSUB CHANNELS`
 2. Verify status2 service is running and connected
 3. Check browser console for WebSocket connection state
-4. Inspect `controlBase` event handlers in controllers.js
+4. Inspect `controlBase` event handlers in controllers-gl.js
 5. Review NoDb logger output and handler chain
 
 ### Creating a Work Package
@@ -1034,7 +1034,7 @@ Before submitting changes:
 ---
 
 ## Notes for Next Pass
-- Static assets now build via `wctl build-static-assets`; re-run before image rebuilds so `controllers.js` and vendor bundles stay current.
+- Static assets now build via `wctl build-static-assets`; re-run before image rebuilds so `controllers-gl.js` and vendor bundles stay current.
 - Kubernetes migration is still pending. When that work resumes, plan on duplicating the static build stage so the proxy image (or init container) ships with the same `/weppcloud/static` tree baked in—no shared volumes required.
 - ID standardization: landuse/soils/watershed parquet export lowercase `topaz_id`/`wepp_id` Int32. Ensure docker deployments run the migration CLIs (`migrate_landuse_parquet`, `migrate_soils_parquet`, `migrate_watersheds_peridot_tables`, `migrate_wbt_geojson_ids`, `migrate_ashpost_pickles`) after rolling out the images so production runs comply.
 - DuckDB/query-engine/report consumers now expect lowercase ids; DuckDB agents intentionally fail-fast if legacy columns remain. No auto-normalization—schema drift must be fixed via migrations.

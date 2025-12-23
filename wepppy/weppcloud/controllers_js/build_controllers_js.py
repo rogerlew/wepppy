@@ -1,4 +1,4 @@
-"""Compose controllers.js from controllers_js templates.
+"""Compose controllers-gl.js from controllers_js templates.
 
 See README.md in this package for controller architecture details.
 """
@@ -33,8 +33,7 @@ DEFAULT_UNITIZER_OUTPUT: Final[Path] = _builder_module.DEFAULT_OUTPUT_PATH
 write_unitizer_module = _builder_module.write_unitizer_module
 
 TEMPLATES_DIR: Final[Path] = MODULE_DIR / "templates"
-OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers.js"
-GL_OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers-gl.js"
+OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers-gl.js"
 STATUS_STREAM_SOURCE: Final[Path] = MODULE_DIR / "status_stream.js"
 STATUS_STREAM_OUTPUT: Final[Path] = ROOT / "static" / "js" / "status_stream.js"
 PRIORITY_MODULES: Final[List[str]] = [
@@ -51,7 +50,6 @@ PRIORITY_MODULES: Final[List[str]] = [
     "bootstrap.js",
     "project.js",
 ]
-GL_PRIORITY_MODULES: Final[List[str]] = list(PRIORITY_MODULES)
 GL_EXCLUDED_MODULES: Final[Set[str]] = {
     "map.js",
     "subcatchment_delineation.js",
@@ -59,36 +57,14 @@ GL_EXCLUDED_MODULES: Final[Set[str]] = {
     "outlet.js",
     "landuse_modify.js",
     "rangeland_cover_modify.js",
-    "baer.js",
 }
 
 
 def _collect_controller_modules() -> List[str]:
     """
-    Discover controller source modules (.js files) and return an ordered list.
+    Discover controller source modules and return an ordered list.
 
-    Priority modules are emitted first to preserve dependencies (utilities,
-    control base, project). Remaining modules are appended alphabetically.
-    """
-    module_names = sorted(
-        path.name for path in MODULE_DIR.glob("*.js") if not path.name.endswith("_gl.js")
-    )
-
-    ordered: List[str] = []
-    for name in PRIORITY_MODULES:
-        if name in module_names:
-            ordered.append(name)
-            module_names.remove(name)
-
-    ordered.extend(module_names)
-    return ordered
-
-
-def _collect_gl_controller_modules() -> List[str]:
-    """
-    Discover GL controller source modules and return an ordered list.
-
-    GL bundles include helper modules, non-Leaflet controllers, plus *_gl.js stubs.
+    Bundle includes helper modules, non-Leaflet controllers, plus *_gl.js modules.
     """
     module_names = sorted(
         path.name
@@ -98,7 +74,7 @@ def _collect_gl_controller_modules() -> List[str]:
     )
 
     ordered: List[str] = []
-    for name in GL_PRIORITY_MODULES:
+    for name in PRIORITY_MODULES:
         if name in module_names:
             ordered.append(name)
             module_names.remove(name)
@@ -145,18 +121,12 @@ def render_status_stream_bundle() -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Render controllers.js from controllers_js templates",
+        description="Render controllers-gl.js from controllers_js templates",
     )
     parser.add_argument(
         "--output",
         type=Path,
         default=OUTPUT_PATH,
-        help="Override output path (defaults to static/js/controllers.js)",
-    )
-    parser.add_argument(
-        "--gl-output",
-        type=Path,
-        default=GL_OUTPUT_PATH,
         help="Override output path (defaults to static/js/controllers-gl.js)",
     )
     parser.add_argument(
@@ -181,14 +151,9 @@ def main() -> None:
 
     contents = render_controllers(
         _collect_controller_modules(),
-        bundle_name="controllers.js",
-    )
-    write_output(contents, output_path=args.output)
-    gl_contents = render_controllers(
-        _collect_gl_controller_modules(),
         bundle_name="controllers-gl.js",
     )
-    write_output(gl_contents, output_path=args.gl_output)
+    write_output(contents, output_path=args.output)
     status_stream_bundle = render_status_stream_bundle()
     write_output(status_stream_bundle, output_path=args.status_stream_output)
     write_unitizer_module(output_path=args.unitizer_output)

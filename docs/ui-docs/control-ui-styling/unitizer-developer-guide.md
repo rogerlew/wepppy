@@ -290,7 +290,7 @@ console.log('Closest modal-open:', target.closest('[data-modal-open]'));
 | Values don't convert | unitizer_map.js not loaded | Check network tab, ensure build ran |
 | Wrong units displayed | Preference state out of sync | Call `client.syncPreferencesFromDom()` |
 | POST fails | Backend error or lock | Check server logs, clear NoDb locks |
-| Modal won't open | Modal.js not loaded | Check controllers.js bundle includes modal.js |
+| Modal won't open | Modal.js not loaded | Check controllers-gl.js bundle includes modal.js |
 | Clicks do nothing | preventDefault interference | Check `defaultPrevented` in event logs |
 
 ### Testing Interactive Forms in Modals
@@ -370,7 +370,7 @@ Recommendations:
 ### Testing Changes
 
 ```bash
-# Restart to rebuild controllers.js
+# Restart to rebuild controllers-gl.js
 wctl restart weppcloud
 
 # Test in browser

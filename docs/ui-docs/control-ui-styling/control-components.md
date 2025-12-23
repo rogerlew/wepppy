@@ -103,11 +103,11 @@ _Fixed console shell_
 - When stack trace text arrives, un-hide the panel and set `open=true` so disclosure is accessible.
 
 ### 1.4 StatusStream integration
-- `StatusStream` ships in `/static/js/controllers.js`. Load that bundle (and the vendor jQuery include) before inline scripts that call `StatusStream.attach`.
+- `StatusStream` ships in `/static/js/controllers-gl.js`. Load that bundle (and the vendor jQuery include) before inline scripts that call `StatusStream.attach`.
 - Example:
 ```html
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
-<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+<script src="{{ url_for('static', filename='js/controllers-gl.js') }}"></script>
 <script>
   StatusStream.attach({
     element: document.getElementById('archive_status_panel'),
@@ -130,7 +130,7 @@ _Fixed console shell_
   1. Import `controls/_pure_macros.html`.
   2. Wrap markup in `control_shell`; set `collapsible=False` for consoles.
   3. Supply `status_panel` / `stacktrace_panel` overrides (or `''` to omit panels).
-  4. Ensure `/static/js/controllers.js` is included so `StatusStream` is available.
+  4. Ensure `/static/js/controllers-gl.js` is included so `StatusStream` is available.
   5. Call `StatusStream.attach` with the new IDs (`status_panel`, custom `log_id`, etc.).
   6. Verify existing JS selectors still match the rendered IDs (`status`, `stacktrace`, etc.).
 - Live examples: `rq-fork-console.htm`, `rq-archive-dashboard.htm`, `query_console.html`.

@@ -1,14 +1,14 @@
 # Map Specification and Behavior
 
-> Leaflet-backed map panel for `map_pure.htm`. This document captures the UI contract, event surface, layers, and controller touch points to preserve during the deck.gl swap.
-> **See also:** `wepppy/weppcloud/controllers_js/README.md`, `docs/ui-docs/controller-contract.md`, `wepppy/weppcloud/templates/controls/map_pure.htm`.
+> Deck.gl-backed map panel for `map_pure_gl.htm`. This document captures the UI contract, event surface, layers, and controller touch points; legacy Leaflet notes remain as parity reference.
+> **See also:** `wepppy/weppcloud/controllers_js/README.md`, `docs/ui-docs/controller-contract.md`, `wepppy/weppcloud/templates/controls/map_pure_gl.htm`.
 
 ## Scope
 - Run-scoped map used in WEPPcloud controls (not the gl_dashboard stub).
 - MapController behavior and the UI elements it owns.
 - Integration points with other controllers that add overlays or consume map state.
 
-## DOM contract (map_pure.htm)
+## DOM contract (map_pure_gl.htm)
 | Selector or attribute | Owner | Purpose |
 | --- | --- | --- |
 | `#setloc_form` | MapController | Delegated click handling for `data-map-action`. |
@@ -27,10 +27,11 @@
 | `canvas#landuse_sub_cmap_canvas_cover` and peers | SubcatchmentDelineation | Color scale render targets via `render_legend`. |
 
 Notes:
-- Tabs and optional panels (Modify, Rangeland Cover, Results) are conditionally rendered based on mods.
+- Tabs and optional panels (Modify, Rangeland Cover) are conditionally rendered based on mods; the Results tab is legacy Leaflet-only.
 - Keep IDs stable; other controllers query them directly.
 
-## MapController summary (controllers_js/map.js)
+## MapController summary (legacy Leaflet map.js)
+Legacy reference only; the active deck.gl controller lives in `wepppy/weppcloud/controllers_js/map_gl.js`.
 - Singleton: `window.MapController` and `window.WeppMap` expose `getInstance()`.
 - Uses `L.map("mapid")`, disables scroll wheel zoom, and creates panes:
   - `subcatchmentsGlPane` z-index 600
@@ -91,7 +92,7 @@ Emitted via `WCEvents.useEventMap`:
 | Channels (pass 1) | glify | `/resources/netful.json` | ChannelDelineation | No click handler. |
 | Channels (pass 2) | glify | `/resources/channels.json` | ChannelDelineation | Click -> `chnQuery(TopazID)`. |
 | Channel labels | LayerGroup | From channels | ChannelDelineation | Div icon markers. |
-| Gridded Output | GeoTIFF | `/resources/flowpaths_loss.tif` | SubcatchmentDelineation | Uses `leaflet-geotiff`. |
+| Gridded Output | GeoTIFF | `/resources/flowpaths_loss.tif` | SubcatchmentDelineation | Legacy Leaflet-only overlay (removed from GL path in Phase 13). |
 | Outlet marker | CircleMarker | `/query/outlet/` | Outlet | Added to `markerCustomPane`. |
 | Burn Severity Map | ImageOverlay | `/query/baer_wgs_map/` | Baer | Adds legend under `#sbs_legend`. |
 | Selection overlays | GeoJSON + Rectangle | `/resources/subcatchments.json` | LanduseModify/RangelandCoverModify | For box and click selection. |
@@ -101,14 +102,14 @@ Emitted via `WCEvents.useEventMap`:
 - Elevation: `/runs/<runid>/<config>/elevationquery/` (POST `{ lat, lng }`).
 - Drilldown: `report/sub_summary/<TopazID>/`, `report/chn_summary/<TopazID>/`.
 - Subcatchments and channels: `resources/subcatchments.json`, `resources/netful.json`, `resources/channels.json`.
-- Gridded loss: `resources/flowpaths_loss.tif`.
+- Hillslope slope/aspect: `query/watershed/subcatchments/`.
 - Legends: `resources/legends/<name>/`, `resources/legends/sbs/`.
 - SBS image: `query/baer_wgs_map/`.
 - Outlet: `query/outlet/`, `report/outlet/`, `rq/api/set_outlet`.
 - Channel build: `rq/api/fetch_dem_and_build_channels`, `query/delineation_pass/`, `query/has_dem/`.
 - Selection box: `tasks/sub_intersection/`.
 - Landuse/Rangeland modify: `tasks/modify_landuse/`, `tasks/modify_rangeland_cover/`.
-- Subcatchment results: `query/*/subcatchments/`, `query/landuse/cover/subcatchments`, query-engine endpoints (for loss metrics).
+- Subcatchment overlays: `query/landuse/subcatchments/`, `query/rangeland_cover/subcatchments/`, `query/soils/subcatchments/`, `query/landuse/cover/subcatchments`.
 
 External services:
 - NHD ArcGIS REST (`hydro.nationalmap.gov`) for flowlines.
@@ -137,7 +138,7 @@ External services:
 - `Baer`
   - Adds/removes `L.imageOverlay` for burn severity map.
   - Injects legend into `#sbs_legend` and adds opacity slider.
-  - Uses `map.flyToBounds` when DEM is missing.
+  - On SBS upload, calls `map.flyToBounds` to fit the SBS extent; on bootstrap, skips fly when `flags.hasDem` is true.
 - `Disturbed`
   - Delegates SBS removal to Baer and clears map overlay + legend.
 - `WEPP_FIND_AND_FLASH` helper
@@ -182,17 +183,16 @@ Non-reusable as-is:
 - gl-dashboard is a standalone page; `map_pure_gl` must preserve the existing DOM contract and event surface.
 
 ## Proposed file structure and code organization
-Keep existing Leaflet files as reference and fallback (no removals).
+Leaflet files are retired in Phase 13; keep this doc as parity reference for behavior only.
 
 Templates:
 - `wepppy/weppcloud/templates/controls/map_pure_gl.htm` (deck.gl map shell, keep DOM IDs/ARIA).
 
 Feature flag + bundles:
-- Use a Jinja flag (ex: `use_deck_gl_map`) to select `map_pure.htm` + `controllers.js` or `map_pure_gl.htm` + `controllers-gl.js`.
-- Extend `wepppy/weppcloud/controllers_js/build_controllers_js.py` to emit `static/js/controllers-gl.js`.
+- Deck.gl is the default; the `use_deck_gl_map` flag is removed in `runs0_pure.htm`.
+- `wepppy/weppcloud/controllers_js/build_controllers_js.py` emits only `static/js/controllers-gl.js`.
   - Include core helpers (`dom.js`, `http.js`, `events.js`, `utils.js`, `control_base.js`, `bootstrap.js`, etc.).
-  - Include `*_gl.js` modules and exclude Leaflet `map.js` when GL mode is enabled.
-  - Keep the legacy bundle intact for safe fallback and regression comparisons.
+  - Include `*_gl.js` modules and exclude Leaflet-only controllers.
 
 Controllers (controllers_js):
 - `wepppy/weppcloud/controllers_js/map_gl.js` (Deck-based MapController; exports `window.MapController` when GL template is active).
@@ -213,9 +213,10 @@ Testing:
 - `wepppy/weppcloud/static-src/tests/smoke/*` Playwright checks (new cases for map_pure_gl).
 
 ## Multiphase implementation plan (low-risk increments)
-Assumptions:
-- `map_pure_gl.htm` is opt-in behind a feature flag, query param, or config gate.
-- Leaflet map remains default until deck.gl reaches parity.
+Assumptions (historical; Phase 13 flips defaults):
+- `map_pure_gl.htm` was opt-in behind a feature flag, query param, or config gate.
+- Leaflet map remained default until deck.gl reached parity.
+- Phase 13 removes the flag and makes deck.gl the default for `runs0_pure.htm`.
 
 ### Phase 0: scaffolding + feature flag
 - Deliverables: `map_pure_gl.htm`, `map_gl.js` skeleton, feature flag routing, deck.gl script loading.
@@ -223,9 +224,9 @@ Assumptions:
 - Tests: Jest smoke for `MapController.getInstance()` + `map:ready` emission; Playwright load of map_pure_gl page.
 
 ### Phase 0 handoff summary
-- Feature flag: `use_deck_gl_map` gates `controls/map_pure_gl.htm` vs. `controls/map_pure.htm`, plus `controllers-gl.js` vs. `controllers.js` in `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm`.
-- Leaflet-only assets are gated behind the flag (`leaflet.js`, `leaflet-ajax.js`, `leaflet-geotiff.js`, `glify-browser.js`, `leaflet-glify-layer.js`, and `flash-and-find-by-id.js`).
-- GL bundle: `build_controllers_js.py` emits `static/js/controllers-gl.js` from helpers + `*_gl.js` stubs and keeps `controllers.js` Leaflet-only.
+- Historical: `use_deck_gl_map` gated `controls/map_pure_gl.htm` vs. `controls/map_pure.htm` and `controllers-gl.js` vs. the legacy Leaflet bundle in `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm` (removed in Phase 13).
+- Historical: Leaflet-only assets were gated behind the flag (`leaflet.js`, `leaflet-ajax.js`, `leaflet-geotiff.js`, `glify-browser.js`, `leaflet-glify-layer.js`, `flash-and-find-by-id.js`); removed from `runs0_pure.htm` in Phase 13.
+- Historical: `build_controllers_js.py` emitted `static/js/controllers-gl.js` plus a legacy Leaflet bundle; Phase 13 drops the legacy bundle.
 - GL controllers: `map_gl.js` defines the MapController surface and events, plus stub controllers for subcatchments/channels/outlet/landuse-modify/rangeland-cover-modify.
 - Tests: `controllers_js/__tests__/map_gl.test.js` (Jest) and `static-src/tests/smoke/map-gl.spec.js` (Playwright).
 
@@ -453,19 +454,45 @@ Technical notes:
 - Console logging for pointer events remains enabled to debug selection initiation (only active when selection mode is on).
 - Tests: Jest coverage in `wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js` and `wepppy/weppcloud/controllers_js/__tests__/rangeland_cover_modify_gl.test.js`; Playwright smoke additions live in `wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js`.
 
-### Phase 13: WEPP results cleanup
-- Scope: remove vestigial WEPP results map overlays and legacy toggle hooks from the GL path; keep results visualization in report panels only until a future phase reintroduces map-based results.
-- Tests: Playwright run completes without console errors; verify map layer control is unchanged after WEPP completion.
+### Phase 13: WEPP results cleanup + GL default
+Goal: remove legacy WEPP results map overlays and finalize the deck.gl-only path.
+
+Checklist:
+- [x] Remove Leaflet-only controllers from `wepppy/weppcloud/controllers_js/`: `map.js`, `outlet.js`, `landuse_modify.js`, `rangeland_cover_modify.js`.
+- [x] Remove legacy Jest coverage tied to the Leaflet controllers: `wepppy/weppcloud/controllers_js/__tests__/map.test.js`, `outlet.test.js`, `landuse_modify.test.js`, `rangeland_cover_modify.test.js`.
+- [x] Update `wepppy/weppcloud/controllers_js/build_controllers_js.py` to emit only `static/js/controllers-gl.js` and drop the legacy bundle output.
+- [x] Update `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm` to always load deck.gl, `controllers-gl.js`, and `controls/map_pure_gl.htm`; remove the `use_deck_gl_map` flag and Leaflet assets (`leaflet.js`, `leaflet-ajax.js`, `leaflet-geotiff.js`, `glify`, `flash-and-find-by-id.js`).
+- [x] Remove vestigial WEPP results map overlays and toggle hooks from GL controllers (focus on `wepppy/weppcloud/controllers_js/map_gl.js` and `subcatchments_gl.js`).
+- [x] Audit templates still referencing the legacy bundle and migrate to `controllers-gl.js` (ex: `wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm`, `wepppy/weppcloud/routes/batch_runner/templates/*.htm`, `wepppy/weppcloud/routes/readme_md/templates/readme_editor.htm`, `wepppy/weppcloud/routes/run_sync_dashboard/templates/rq-run-sync-dashboard.htm`, `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm`, `wepppy/weppcloud/routes/usersum/templates/usersum/layout.j2`).
+- [x] Update `docs/ui-docs/map-specification-and-behavior.md` to reflect the deck.gl default and retire Leaflet references.
+- [x] Update `docs/ui-docs/control-ui-styling/control-inventory.md` and other docs that still reference the Leaflet bundle or removed controllers.
+- [x] Validate bundle and smoke: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`, then run `wctl run-npm test -- map_gl outlet_gl landuse_modify_gl rangeland_cover_modify_gl` and the Playwright map smoke (`wctl run-npm smoke -- --project=runs0 map-gl.spec.js`).
+
+### Phase 13 handoff summary
+- GL-only default: removed Leaflet controllers/tests, `controllers-gl.js` is the single bundle, and runs/templates/scripts now load the GL bundle by default.
+- Results overlays: removed legacy WEPP/RHEM/ash/gridded-loss overlay hooks from `subcatchments_gl.js` and related controllers to complete results cleanup.
+- SBS behavior: BAER controller is included in the GL bundle; SBS upload renders the classify summary, adds the overlay, and fly-to-fits the SBS extent; reload honors `flags.hasDem` and skips the fly-to when a DEM already exists.
+- Map fly-to-extent: `map_gl.js` `flyToBounds` now uses `WebMercatorViewport.fitBounds` so the view zooms to fit the SBS extent instead of just recentering.
+- Docs/tooling: docs sweep updated bundle references to `controllers-gl.js`; deploy/build scripts point to the GL bundle.
 
 ### Phase 14: overlay order + SBS gating + outlet marker + channel legend
 - Scope:
   - Layer control: hide `Burn Severity Map` when SBS is absent.
-  - Outlet marker: replace with blue SVG pin marker while keeping anchor and overlay behavior.
+  - Outlet marker: swap to `map-marker.png` atlas (IconLayer) with tip anchor and geographic sizing (360m).
   - Channel order legend: show whenever pass 2 channels are visible; remove `Order 0`.
   - Render order: enforce deterministic overlay render ordering without changing layer control order.
+  - SBS: default opacity set to 0.3 so the legend slider starts lower.
 - Tests:
   - Jest: `map_gl.test.js` overlay ordering + SBS gating; `outlet_gl.test.js` marker data; `channel_gl.test.js` legend visibility + no Order 0.
   - Playwright: `map-gl.spec.js` overlay ordering; pass 2 channel legend visibility; SBS gating on empty run.
+
+### Phase 14 handoff summary
+- SBS gating: `map_gl.js` hides the Burn Severity Map overlay entry when `flags.initialHasSbs` is false and updates on `disturbed:has_sbs_changed`; overlay appears unchanged when SBS exists.
+- SBS opacity: `SBS_DEFAULT_OPACITY` is now `0.3`, so the slider and initial overlay opacity default to 30%.
+- Outlet marker: GL outlet marker uses `map-marker.png` via IconLayer (`iconAtlas` + `iconMapping`), anchored at the tip (99, 320) with `sizeUnits: "meters"` and a 360m size; tests validate atlas mapping and sizing.
+- Channel legend: `channel_gl.js` renders channel order legend for pass 2 only, skips Order 0, and clears the legend when Channels are toggled off.
+- Overlay order: layer render ordering is enforced without changing control list order; Jest/Playwright cover the ordering expectations (smoke enables overlays before asserting stack order).
+- Tests: updated Jest (`map_gl.test.js`, `outlet_gl.test.js`, `channel_gl.test.js`) and Playwright (`map-gl.spec.js`) to cover the Phase 14 behaviors; smoke results may vary by run state.
 
 ## Test and verification gates (per phase)
 - Unit (Jest): new controller tests under `controllers_js/__tests__`.
