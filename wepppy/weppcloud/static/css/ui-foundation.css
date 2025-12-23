@@ -958,7 +958,7 @@ h5:first-child {
 .wc-run-header__right {
   margin-left: auto;
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--wc-space-md);
 }
 
@@ -1151,6 +1151,7 @@ h5:first-child {
   .wc-run-header__right {
     justify-content: flex-start;
     margin-left: 0;
+    align-items: flex-start;
   }
 
   .wc-run-header__meta {
@@ -3292,13 +3293,16 @@ h5:first-child {
 }
 
 .wc-map-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--wc-space-sm);
-  align-items: center;
+  display: block;
+  width: 100%;
   font-size: var(--wc-font-size-base);
   color: var(--wc-color-text);
   justify-self: stretch;
+}
+
+.wc-map-status .wc-summary-pane {
+  max-width: none;
+  margin-bottom: 0;
 }
 
 .wc-map-status__spacer {
