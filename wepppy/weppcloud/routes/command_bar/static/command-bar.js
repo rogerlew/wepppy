@@ -25,6 +25,69 @@
         'clear locks         - Clear NoDb locks',
         'clear nodb_cache    - Clear Redis NoDb cache entries'
     ];
+    const ABSOLUTE_URL_PATTERN = /^([a-z][a-z\d+\-.]*:)?\/\//i;
+
+    function inferSitePrefix() {
+        if (typeof window === 'undefined' || !window.location) {
+            return '';
+        }
+        const pathname = window.location.pathname || '';
+        const runsIndex = pathname.indexOf('/runs/');
+        if (runsIndex <= 0) {
+            return '';
+        }
+        return pathname.slice(0, runsIndex);
+    }
+
+    function resolveSitePrefix() {
+        if (typeof window === 'undefined') {
+            return '';
+        }
+        const raw = typeof window.site_prefix === 'string' ? window.site_prefix : '';
+        let prefix = raw ? raw.trim() : '';
+        if (!prefix) {
+            prefix = inferSitePrefix();
+        }
+        if (!prefix) {
+            return '';
+        }
+        if (prefix !== '/' && !prefix.startsWith('/')) {
+            prefix = `/${prefix}`;
+        }
+        prefix = prefix.replace(/\/+$/, '');
+        return prefix === '/' ? '' : prefix;
+    }
+
+    function stripSitePrefix(path) {
+        const prefix = resolveSitePrefix();
+        if (!prefix) {
+            return path;
+        }
+        if (path === prefix) {
+            return '/';
+        }
+        if (path.startsWith(`${prefix}/`)) {
+            return path.slice(prefix.length);
+        }
+        return path;
+    }
+
+    function applySitePrefix(url) {
+        if (!url || ABSOLUTE_URL_PATTERN.test(url)) {
+            return url;
+        }
+        const prefix = resolveSitePrefix();
+        if (!prefix) {
+            return url;
+        }
+        if (url.startsWith(`${prefix}/`)) {
+            return url;
+        }
+        if (url.startsWith('/')) {
+            return `${prefix}${url}`;
+        }
+        return `${prefix}/${url}`;
+    }
 
     class AgentChat {
         constructor(commandBar) {
@@ -1182,12 +1245,17 @@
         }
 
         getProjectBaseUrl() {
-            const match = window.location.pathname.match(/^(?:\/weppcloud)?\/runs\/[^\/]+\/[^\/]+\//);
-            return match ? match[0] : null;
+            const path = stripSitePrefix(window.location.pathname || '');
+            const match = path.match(/^\/runs\/[^\/]+\/[^\/]+\//);
+            if (!match) {
+                return null;
+            }
+            return applySitePrefix(match[0]);
         }
 
         getRunContextFromPath() {
-            const match = window.location.pathname.match(/^(?:\/weppcloud)?\/runs\/([^\/]+)\/([^\/]+)\//);
+            const path = stripSitePrefix(window.location.pathname || '');
+            const match = path.match(/^\/runs\/([^\/]+)\/([^\/]+)\//);
             if (!match) {
                 return null;
             }
@@ -1761,7 +1829,7 @@
                 return;
             }
 
-            const jsonUrl = '/getloadavg';
+            const jsonUrl = applySitePrefix('/getloadavg');
 
             return fetch(jsonUrl, {
                 method: 'GET',
@@ -2134,7 +2202,7 @@
                 }
 
                 const params = new URLSearchParams({ q: keyword });
-                const targetUrl = `/usersum/api/keyword?${params.toString()}`;
+                const targetUrl = applySitePrefix(`/usersum/api/keyword?${params.toString()}`);
                 return this.fetchUsersumData(targetUrl);
             }
 
@@ -2161,7 +2229,7 @@
                 params.set('extended', '1');
             }
 
-            const targetUrl = `/usersum/api/parameter?${params.toString()}`;
+            const targetUrl = applySitePrefix(`/usersum/api/parameter?${params.toString()}`);
             return this.fetchUsersumData(targetUrl);
         }
 
@@ -2428,7 +2496,7 @@
             target.dataset.usersumPending = '1';
 
             const params = new URLSearchParams({ name: parameterName });
-            const targetUrl = `/usersum/api/parameter?${params.toString()}`;
+            const targetUrl = applySitePrefix(`/usersum/api/parameter?${params.toString()}`);
 
             fetch(targetUrl, {
                 method: 'GET',
