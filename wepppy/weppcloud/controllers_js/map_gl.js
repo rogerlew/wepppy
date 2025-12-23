@@ -454,7 +454,17 @@ var MapController = (function () {
         var subLegendElement = dom.qs("#sub_legend");
         var sbsLegendElement = dom.qs("#sbs_legend");
         var mapStatusElement = dom.qs("#mapstatus");
+        var mapStatusCenterElement = dom.qs("#mapstatus-center");
+        var mapStatusZoomElement = dom.qs("#mapstatus-zoom");
+        var mapStatusWidthElement = dom.qs("#mapstatus-width");
+        var mapStatusCursorElement = dom.qs("#mapstatus-cursor");
         var mouseElevationElement = dom.qs("#mouseelev");
+        var mapStatusCursorItem = mapStatusCursorElement
+            ? mapStatusCursorElement.closest(".wc-summary-pane__item")
+            : null;
+        var mouseElevationItem = mouseElevationElement
+            ? mouseElevationElement.closest(".wc-summary-pane__item")
+            : null;
         var tabsetRoot = dom.qs("#setloc_form [data-tabset]");
 
         var overlayRegistry = typeof Map === "function" ? new Map() : null;
@@ -812,7 +822,7 @@ var MapController = (function () {
         }
 
         function updateMapStatus() {
-            if (!mapStatusElement) {
+            if (!mapStatusElement && !mapStatusCenterElement && !mapStatusZoomElement && !mapStatusWidthElement) {
                 return;
             }
             var center = state.center;
@@ -820,31 +830,68 @@ var MapController = (function () {
             var width = mapCanvasElement ? Math.round(mapCanvasElement.offsetWidth || 0) : 0;
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
-            dom.setText(mapStatusElement, "Center: " + lng + ", " + lat + " | Zoom: " + zoom + " ( Map Width:" + width + "px )");
+            if (mapStatusCenterElement) {
+                dom.setText(mapStatusCenterElement, lng + ", " + lat);
+            }
+            if (mapStatusZoomElement) {
+                dom.setText(mapStatusZoomElement, zoom);
+            }
+            if (mapStatusWidthElement) {
+                dom.setText(mapStatusWidthElement, width + "px");
+            }
         }
 
-        function showMouseElevation(text) {
-            if (!mouseElevationElement) {
+        function showMouseElevation(payload) {
+            if (!mouseElevationElement && !mapStatusCursorElement) {
                 return;
             }
             if (mouseElevationHideTimer) {
                 clearTimeout(mouseElevationHideTimer);
                 mouseElevationHideTimer = null;
             }
-            dom.setText(mouseElevationElement, text);
-            dom.show(mouseElevationElement);
+            var elevationText = payload && payload.elevation ? payload.elevation : "-";
+            var cursorText = payload && payload.cursor ? payload.cursor : "-";
+            if (mouseElevationElement) {
+                dom.setText(mouseElevationElement, elevationText);
+            }
+            if (mapStatusCursorElement) {
+                dom.setText(mapStatusCursorElement, cursorText);
+            }
+            if (mouseElevationItem) {
+                dom.show(mouseElevationItem);
+            }
+            if (mapStatusCursorItem) {
+                dom.show(mapStatusCursorItem);
+            }
         }
 
         function hideMouseElevation(delayMs) {
-            if (!mouseElevationElement) {
+            if (!mouseElevationElement && !mapStatusCursorElement) {
                 return;
             }
             if (mouseElevationHideTimer) {
                 clearTimeout(mouseElevationHideTimer);
             }
             mouseElevationHideTimer = window.setTimeout(function () {
-                dom.hide(mouseElevationElement);
+                if (mouseElevationElement) {
+                    dom.setText(mouseElevationElement, "-");
+                }
+                if (mapStatusCursorElement) {
+                    dom.setText(mapStatusCursorElement, "-");
+                }
             }, typeof delayMs === "number" ? delayMs : 0);
+        }
+
+        function updateCursorStatus(latlng) {
+            if (!mapStatusCursorElement || !latlng) {
+                return;
+            }
+            var cursorLng = coordRound(latlng.lng);
+            var cursorLat = coordRound(latlng.lat);
+            dom.setText(mapStatusCursorElement, cursorLng + ", " + cursorLat);
+            if (mapStatusCursorItem) {
+                dom.show(mapStatusCursorItem);
+            }
         }
 
         function scheduleElevationCooldown() {
@@ -882,6 +929,7 @@ var MapController = (function () {
             if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
                 return;
             }
+            updateCursorStatus({ lat: lat, lng: lng });
             if (!isFetchingElevation) {
                 fetchElevation({ lat: lat, lng: lng });
             }
@@ -917,11 +965,17 @@ var MapController = (function () {
                     var suppressElevationMessage = typeof errorText === "string"
                         && errorText.toLowerCase().indexOf("dem not found under run directory") !== -1;
 
-                    if (!suppressElevationMessage) {
-                        var message = errorText || "Elevation unavailable";
-                        showMouseElevation("| Elevation: " + message + " | Cursor: " + cursorLng + ", " + cursorLat);
+                    if (suppressElevationMessage) {
+                        showMouseElevation({
+                            elevation: "-",
+                            cursor: cursorLng + ", " + cursorLat
+                        });
                     } else {
-                        hideMouseElevation(0);
+                        var message = errorText || "Elevation unavailable";
+                        showMouseElevation({
+                            elevation: message,
+                            cursor: cursorLng + ", " + cursorLat
+                        });
                     }
 
                     emit("map:elevation:error", {
@@ -933,7 +987,10 @@ var MapController = (function () {
                 }
 
                 var elev = response.Elevation.toFixed(1);
-                showMouseElevation("| Elevation: " + elev + " m | Cursor: " + cursorLng + ", " + cursorLat);
+                showMouseElevation({
+                    elevation: elev + " m",
+                    cursor: cursorLng + ", " + cursorLat
+                });
                 emit("map:elevation:loaded", {
                     elevation: response.Elevation,
                     lat: latlng.lat,

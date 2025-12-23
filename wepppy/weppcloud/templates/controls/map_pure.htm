@@ -210,9 +210,32 @@
         </button>
       </div>
       <div class="wc-map-status" aria-live="polite">
-        <span id="mapstatus"></span>
-        <span class="wc-map-status__spacer" aria-hidden="true"></span>
-        <span id="mouseelev"></span>
+        <div id="mapstatus" class="wc-control__panel-summary">
+          <div class="wc-summary-pane">
+            <dl class="wc-summary-pane__list">
+              <div class="wc-summary-pane__item">
+                <dt class="wc-summary-pane__term">Center (lon, lat)</dt>
+                <dd class="wc-summary-pane__definition" id="mapstatus-center">-</dd>
+              </div>
+              <div class="wc-summary-pane__item">
+                <dt class="wc-summary-pane__term">Zoom</dt>
+                <dd class="wc-summary-pane__definition" id="mapstatus-zoom">-</dd>
+              </div>
+              <div class="wc-summary-pane__item">
+                <dt class="wc-summary-pane__term">Map Width</dt>
+                <dd class="wc-summary-pane__definition" id="mapstatus-width">-</dd>
+              </div>
+              <div class="wc-summary-pane__item">
+                <dt class="wc-summary-pane__term">Elevation</dt>
+                <dd class="wc-summary-pane__definition" id="mouseelev">-</dd>
+              </div>
+              <div class="wc-summary-pane__item">
+                <dt class="wc-summary-pane__term">Cursor (lon, lat)</dt>
+                <dd class="wc-summary-pane__definition" id="mapstatus-cursor">-</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
       </div>
     </div>
     <div class="wc-map-layout__inspector">

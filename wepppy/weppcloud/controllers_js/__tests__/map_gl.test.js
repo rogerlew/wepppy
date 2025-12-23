@@ -34,8 +34,32 @@ describe("Map GL controller", () => {
             </form>
             <div id="sub_legend"></div>
             <div id="sbs_legend"></div>
-            <div id="mapstatus"></div>
-            <span id="mouseelev"></span>
+            <div id="mapstatus" class="wc-control__panel-summary">
+                <div class="wc-summary-pane">
+                    <dl class="wc-summary-pane__list">
+                        <div class="wc-summary-pane__item">
+                            <dt class="wc-summary-pane__term">Center (lon, lat)</dt>
+                            <dd class="wc-summary-pane__definition" id="mapstatus-center">-</dd>
+                        </div>
+                        <div class="wc-summary-pane__item">
+                            <dt class="wc-summary-pane__term">Zoom</dt>
+                            <dd class="wc-summary-pane__definition" id="mapstatus-zoom">-</dd>
+                        </div>
+                        <div class="wc-summary-pane__item">
+                            <dt class="wc-summary-pane__term">Map Width</dt>
+                            <dd class="wc-summary-pane__definition" id="mapstatus-width">-</dd>
+                        </div>
+                        <div class="wc-summary-pane__item">
+                            <dt class="wc-summary-pane__term">Elevation</dt>
+                            <dd class="wc-summary-pane__definition" id="mouseelev">-</dd>
+                        </div>
+                        <div class="wc-summary-pane__item">
+                            <dt class="wc-summary-pane__term">Cursor (lon, lat)</dt>
+                            <dd class="wc-summary-pane__definition" id="mapstatus-cursor">-</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
             <div id="mapid"></div>
         `;
 
@@ -163,10 +187,9 @@ describe("Map GL controller", () => {
 
         mapInstance.setView([46.8, -117.5], 10);
 
-        const status = document.getElementById("mapstatus");
-        expect(status.textContent).toContain("Center:");
-        expect(status.textContent).toContain("46.8");
-        expect(status.textContent).toContain("-117.5");
+        const centerValue = document.getElementById("mapstatus-center");
+        expect(centerValue.textContent).toContain("46.8");
+        expect(centerValue.textContent).toContain("-117.5");
         expect(emittedEvents.some((evt) => evt.name === "map:center:changed")).toBe(true);
     });
 
@@ -451,8 +474,8 @@ describe("Map GL controller", () => {
         expect(center.lat).toBeCloseTo(39.0451);
         expect(center.lng).toBeCloseTo(-120.1595);
         expect(mapInstance.getZoom()).toBe(10);
-        const status = document.getElementById("mapstatus");
-        expect(status.textContent).toContain("Zoom: 10");
+        const zoomValue = document.getElementById("mapstatus-zoom");
+        expect(zoomValue.textContent).toContain("10");
 
         const lastProps = deckInstance.setProps.mock.calls[deckInstance.setProps.mock.calls.length - 1][0];
         expect(lastProps.viewState.transitionDuration).toBe(4000);
@@ -720,7 +743,7 @@ describe("Map GL controller", () => {
 
         jest.advanceTimersByTime(2000);
         const mouseElev = document.getElementById("mouseelev");
-        expect(mouseElev.hidden).toBe(true);
+        expect(mouseElev.textContent).toBe("-");
 
         global.AbortController = originalAbortController;
         jest.useRealTimers();

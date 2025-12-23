@@ -85,11 +85,13 @@ function parseZoom(statusText) {
   if (!statusText) {
     return null;
   }
-  const match = statusText.match(/Zoom:\s*([0-9.]+)/i);
-  if (!match) {
-    return null;
+  const trimmed = statusText.trim();
+  const match = trimmed.match(/Zoom:\s*([0-9.]+)/i);
+  if (match) {
+    const value = Number(match[1]);
+    return Number.isFinite(value) ? value : null;
   }
-  const value = Number(match[1]);
+  const value = Number(trimmed);
   return Number.isFinite(value) ? value : null;
 }
 
@@ -97,12 +99,22 @@ function parseCenter(statusText) {
   if (!statusText) {
     return null;
   }
-  const match = statusText.match(/Center:\s*([-0-9.]+)\s*,\s*([-0-9.]+)/i);
-  if (!match) {
+  const trimmed = statusText.trim();
+  const labeledMatch = trimmed.match(/Center:\s*([-0-9.]+)\s*,\s*([-0-9.]+)/i);
+  if (labeledMatch) {
+    const lng = Number(labeledMatch[1]);
+    const lat = Number(labeledMatch[2]);
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+      return null;
+    }
+    return { lng, lat };
+  }
+  const parts = trimmed.split(",");
+  if (parts.length < 2) {
     return null;
   }
-  const lng = Number(match[1]);
-  const lat = Number(match[2]);
+  const lng = Number(parts[0].trim());
+  const lat = Number(parts[1].trim());
   if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
     return null;
   }
@@ -110,12 +122,18 @@ function parseCenter(statusText) {
 }
 
 async function getZoom(page) {
-  const text = await page.locator('#mapstatus').textContent();
+  const locator = page.locator('#mapstatus-zoom');
+  const text = (await locator.count())
+    ? await locator.textContent()
+    : await page.locator('#mapstatus').textContent();
   return parseZoom(text || '');
 }
 
 async function getCenter(page) {
-  const text = await page.locator('#mapstatus').textContent();
+  const locator = page.locator('#mapstatus-center');
+  const text = (await locator.count())
+    ? await locator.textContent()
+    : await page.locator('#mapstatus').textContent();
   return parseCenter(text || '');
 }
 
