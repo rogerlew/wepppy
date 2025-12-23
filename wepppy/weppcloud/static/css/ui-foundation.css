@@ -601,6 +601,7 @@ code,
 pre *,
 code * {
   font-family: var(--wc-font-mono);
+  font-size: 0.85rem;
 }
 
 /* Layout helpers */
@@ -1411,7 +1412,7 @@ h5:first-child {
   border-radius: var(--wc-radius-sm);
   background: var(--wc-color-surface-alt);
   font-family: var(--wc-font-mono);
-  font-size: var(--wc-font-size-sm);
+  font-size: 0.85rem;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -3321,11 +3322,9 @@ h5:first-child {
   grid-template-areas: "label input actions go";
   gap: var(--wc-space-sm);
   align-items: center;
+  margin-bottom: var(--wc-space-xl);
 }
 
-.wc-map-controls__row--hint {
-  grid-column: 1 / -1;
-}
 
 .wc-map-controls__label {
   grid-area: label;
@@ -3359,11 +3358,6 @@ h5:first-child {
   align-items: center;
 }
 
-.wc-map-controls__hint {
-  margin: 0 0 var(--wc-space-md);
-  color: var(--wc-color-text-muted);
-  font-size: 1rem;
-}
 
 @media (max-width: 960px) {
   .wc-map-controls__row--inputs {

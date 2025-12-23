@@ -35,6 +35,18 @@
       <dt class="wc-summary-pane__term">Aspect</dt>
       <dd class="wc-summary-pane__definition">{{ d.watershed.aspect|round(0) }}</dd>
     </div>
+    {% if d.meta.hill_type == "Channel"%}
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Order</dt>
+      <dd class="wc-summary-pane__definition">{{ d.watershed.order }}</dd>
+    </div>
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">Channel Type</dt>
+      <dd class="wc-summary-pane__definition">
+        <a href="view/channel_def/{{ d.watershed.channel_type }}/" target="_blank" class="wc-summary-pane__link">{{ d.watershed.channel_type }}</a>
+      </dd>
+    </div>
+    {% else %}
     <div class="wc-summary-pane__item">
       <dt class="wc-summary-pane__term">Dominant Landuse</dt>
       <dd class="wc-summary-pane__definition">
@@ -51,26 +63,6 @@
         {{ d.soil.desc }}
         (<a href="{{ url_for_run('browse.browse_tree', runid=runid, config=config, subpath='soils/' ~ d.soil.fname) }}" target="_blank" class="wc-summary-pane__link">{{ d.soil.mukey }}</a>)
         {% endif %}
-      </dd>
-    </div>
-    {% if d.meta.hill_type == "Channel"%}
-    <div class="wc-summary-pane__item">
-      <dt class="wc-summary-pane__term">Order</dt>
-      <dd class="wc-summary-pane__definition">{{ d.watershed.order }}</dd>
-    </div>
-    <div class="wc-summary-pane__item">
-      <dt class="wc-summary-pane__term">Channel Type</dt>
-      <dd class="wc-summary-pane__definition">
-        <a href="view/channel_def/{{ d.watershed.channel_type }}/" target="_blank" class="wc-summary-pane__link">{{ d.watershed.channel_type }}</a>
-      </dd>
-    </div>
-    {% endif %}
-    {% if 'ash' in ron.mods %}
-    <div class="wc-summary-pane__item">
-      <dt class="wc-summary-pane__term">Ash Transport Model (Experimental)</dt>
-      <dd class="wc-summary-pane__definition">
-        <span class="wc-summary-pane__note">Must First Run WEPP for Watershed.</span><br>
-        <a href="hillslope/{{ d.meta.topaz_id }}/ash/" target="_blank" class="wc-summary-pane__link">Run Ash Transport for Hillslope</a>
       </dd>
     </div>
     {% endif %}

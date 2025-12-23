@@ -222,6 +222,76 @@ describe("SubcatchmentDelineation GL controller", () => {
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(sub, "job-123");
     });
 
+    test("hover labels render when subcatchment labels are hidden", async () => {
+        const sub = window.SubcatchmentDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    properties: { TopazID: 321 },
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: [[
+                            [-120.1, 45.1],
+                            [-120.2, 45.1],
+                            [-120.2, 45.2],
+                            [-120.1, 45.2],
+                            [-120.1, 45.1],
+                        ]],
+                    },
+                }],
+            },
+        });
+
+        await sub.show();
+
+        mapStub.addLayer.mockClear();
+        mapStub.hasLayer.mockImplementation((layer) => layer === sub.glLayer);
+
+        const hoverHandler = sub.glLayer.props.onHover;
+        hoverHandler({ object: { properties: { TopazID: 321 } }, x: 120, y: 80 });
+
+        expect(sub.state.hoverLabelLayer).toBeTruthy();
+        expect(mapStub.addLayer).toHaveBeenCalledWith(sub.state.hoverLabelLayer, { skipRefresh: true });
+    });
+
+    test("hover labels are suppressed when the labels overlay is visible", async () => {
+        const sub = window.SubcatchmentDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    properties: { TopazID: 555 },
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: [[
+                            [-120.1, 45.1],
+                            [-120.2, 45.1],
+                            [-120.2, 45.2],
+                            [-120.1, 45.2],
+                            [-120.1, 45.1],
+                        ]],
+                    },
+                }],
+            },
+        });
+
+        await sub.show();
+
+        mapStub.addLayer.mockClear();
+        mapStub.hasLayer.mockImplementation((layer) => layer === sub.state.labelLayer);
+
+        const hoverHandler = sub.glLayer.props.onHover;
+        hoverHandler({ object: { properties: { TopazID: 555 } }, x: 120, y: 80 });
+
+        expect(sub.state.hoverLabelLayer).toBeNull();
+        expect(mapStub.addLayer).not.toHaveBeenCalled();
+    });
+
     test("setColorMap slp_asp maps to slope normalization", async () => {
         const sub = window.SubcatchmentDelineation.getInstance();
 

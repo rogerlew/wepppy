@@ -20,6 +20,11 @@ var SubcatchmentDelineation = (function () {
     var SUBCATCHMENT_LAYER_ID = "wc-subcatchments";
     var SUBCATCHMENT_LABEL_LAYER_NAME = "Subcatchment Labels";
     var SUBCATCHMENT_LABEL_LAYER_ID = "wc-subcatchment-labels";
+    var SUBCATCHMENT_HOVER_LABEL_LAYER_ID = "wc-subcatchment-hover-label";
+    var SUBCATCHMENT_LABEL_COLOR = [255, 120, 0, 255];
+    var SUBCATCHMENT_LABEL_OUTLINE_COLOR = [255, 255, 255, 255];
+    var SUBCATCHMENT_LABEL_OUTLINE_WIDTH = 2;
+    var SUBCATCHMENT_LABEL_FONT_SIZE = 16;
 
     var SUBCATCHMENT_ENDPOINT = "resources/subcatchments.json";
     var DEFAULT_STYLE = {
@@ -554,6 +559,38 @@ var SubcatchmentDelineation = (function () {
         return labels;
     }
 
+    function resolveLabelPositionFromData(labelData, key) {
+        if (!labelData || !labelData.length) {
+            return null;
+        }
+        for (var i = 0; i < labelData.length; i += 1) {
+            var label = labelData[i];
+            if (label && label.text === key && label.position) {
+                return label.position;
+            }
+        }
+        return null;
+    }
+
+    function buildHoverLabelData(feature, labelData) {
+        if (!feature || !feature.properties) {
+            return null;
+        }
+        var topId = feature.properties.TopazID;
+        if (topId === null || topId === undefined) {
+            return null;
+        }
+        var key = String(topId);
+        var position = resolveLabelPositionFromData(labelData, key) || resolveLabelPosition(feature);
+        if (!position) {
+            return null;
+        }
+        return [{
+            text: key,
+            position: position
+        }];
+    }
+
     function buildLabelLayer(deckApi, labelData) {
         return new deckApi.TextLayer({
             id: SUBCATCHMENT_LABEL_LAYER_ID,
@@ -561,16 +598,88 @@ var SubcatchmentDelineation = (function () {
             pickable: false,
             getPosition: function (d) { return d.position; },
             getText: function (d) { return d.text; },
-            getSize: function () { return 14; },
+            getSize: function () { return SUBCATCHMENT_LABEL_FONT_SIZE; },
             sizeUnits: "pixels",
-            getColor: function () { return [255, 120, 0, 255]; },
-            outlineColor: [255, 255, 255, 255],
-            outlineWidth: 2,
+            getColor: function () { return SUBCATCHMENT_LABEL_COLOR; },
+            outlineColor: SUBCATCHMENT_LABEL_OUTLINE_COLOR,
+            outlineWidth: SUBCATCHMENT_LABEL_OUTLINE_WIDTH,
             fontSettings: { sdf: true }
         });
     }
 
-    function buildSubcatchmentLayer(deckApi, data, colorFn, mode) {
+    function buildHoverLabelLayer(deckApi, labelData) {
+        return new deckApi.TextLayer({
+            id: SUBCATCHMENT_HOVER_LABEL_LAYER_ID,
+            data: labelData || [],
+            pickable: false,
+            getPosition: function (d) { return d.position; },
+            getText: function (d) { return d.text; },
+            getSize: function () { return SUBCATCHMENT_LABEL_FONT_SIZE; },
+            sizeUnits: "pixels",
+            getColor: function () { return SUBCATCHMENT_LABEL_COLOR; },
+            outlineColor: SUBCATCHMENT_LABEL_OUTLINE_COLOR,
+            outlineWidth: SUBCATCHMENT_LABEL_OUTLINE_WIDTH,
+            fontSettings: { sdf: true }
+        });
+    }
+
+    function clearHoverLabel(state, map) {
+        if (!state) {
+            return;
+        }
+        if (!state.hoverLabelLayer) {
+            state.hoverLabelKey = null;
+            return;
+        }
+        if (map && typeof map.removeLayer === "function") {
+            map.removeLayer(state.hoverLabelLayer, { skipOverlay: true });
+        }
+        state.hoverLabelLayer = null;
+        state.hoverLabelKey = null;
+    }
+
+    function updateHoverLabel(state, map, deckApi, info) {
+        if (!state || !map || !deckApi) {
+            return;
+        }
+        if (state.labelLayer && typeof map.hasLayer === "function" && map.hasLayer(state.labelLayer)) {
+            clearHoverLabel(state, map);
+            return;
+        }
+        var feature = info && info.object ? info.object : null;
+        if (!feature) {
+            clearHoverLabel(state, map);
+            return;
+        }
+        var topId = feature && feature.properties ? feature.properties.TopazID : null;
+        if (topId === null || topId === undefined) {
+            clearHoverLabel(state, map);
+            return;
+        }
+        var key = String(topId);
+        if (state.hoverLabelKey === key && state.hoverLabelLayer) {
+            return;
+        }
+        var data = buildHoverLabelData(feature, state.labelData);
+        if (!data || !data.length) {
+            clearHoverLabel(state, map);
+            return;
+        }
+        var nextLayer = buildHoverLabelLayer(deckApi, data);
+        if (!nextLayer) {
+            return;
+        }
+        if (state.hoverLabelLayer && typeof map.removeLayer === "function") {
+            map.removeLayer(state.hoverLabelLayer, { skipOverlay: true });
+        }
+        state.hoverLabelLayer = nextLayer;
+        state.hoverLabelKey = key;
+        if (typeof map.addLayer === "function") {
+            map.addLayer(nextLayer, { skipRefresh: true });
+        }
+    }
+
+    function buildSubcatchmentLayer(deckApi, data, colorFn, mode, onHover) {
         var lineColor = hexToRgba(DEFAULT_STYLE.color, DEFAULT_STYLE.opacity);
         return new deckApi.GeoJsonLayer({
             id: SUBCATCHMENT_LAYER_ID,
@@ -587,6 +696,7 @@ var SubcatchmentDelineation = (function () {
                 getFillColor: [mode],
                 getLineColor: [mode]
             },
+            onHover: typeof onHover === "function" ? onHover : null,
             onClick: function (info) {
                 var feature = info && info.object ? info.object : null;
                 var topId = feature && feature.properties ? feature.properties.TopazID : null;
@@ -666,6 +776,8 @@ var SubcatchmentDelineation = (function () {
             glLayer: null,
             labelLayer: null,
             labelData: null,
+            hoverLabelLayer: null,
+            hoverLabelKey: null,
             cmapMode: "default",
             dataCover: null,
             dataSlpAsp: null,
@@ -680,6 +792,35 @@ var SubcatchmentDelineation = (function () {
 
         sub.state = state;
         sub.glLayer = null;
+
+        var mapEventsBound = false;
+        function bindMapEvents() {
+            if (mapEventsBound) {
+                return;
+            }
+            var map;
+            try {
+                map = ensureMap();
+            } catch (err) {
+                return;
+            }
+            if (map && map.events && typeof map.events.on === "function") {
+                map.events.on("map:layer:toggled", function (payload) {
+                    if (!payload || !payload.name) {
+                        return;
+                    }
+                    if (payload.name === SUBCATCHMENT_LABEL_LAYER_NAME && payload.visible) {
+                        clearHoverLabel(state, map);
+                    }
+                    if (payload.name === SUBCATCHMENT_LAYER_NAME && !payload.visible) {
+                        clearHoverLabel(state, map);
+                    }
+                });
+            }
+            mapEventsBound = true;
+        }
+
+        bindMapEvents();
 
         function emit(eventName, payload) {
             if (subEvents && typeof subEvents.emit === "function") {
@@ -800,8 +941,12 @@ var SubcatchmentDelineation = (function () {
                     return layer;
                 }
                 var deckApi = ensureDeck();
+                var map = ensureMap();
+                var onHoverHandler = function (info) {
+                    updateHoverLabel(state, map, deckApi, info);
+                };
                 var cmapFn = colorFnFactory();
-                var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn, state.cmapMode);
+                var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn, state.cmapMode, onHoverHandler);
                 attachLayerRebuild(nextLayer);
                 state.glLayer = nextLayer;
                 sub.glLayer = nextLayer;
@@ -847,7 +992,10 @@ var SubcatchmentDelineation = (function () {
             var deckApi = ensureDeck();
             var wasVisible = state.glLayer ? map.hasLayer(state.glLayer) : true;
             var cmapFn = colorFnFactory();
-            var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn, state.cmapMode);
+            var onHoverHandler = function (info) {
+                updateHoverLabel(state, map, deckApi, info);
+            };
+            var nextLayer = buildSubcatchmentLayer(deckApi, state.data, cmapFn, state.cmapMode, onHoverHandler);
             attachLayerRebuild(nextLayer);
             replaceOverlayLayer(map, SUBCATCHMENT_LAYER_NAME, state.glLayer, nextLayer, wasVisible);
             state.glLayer = nextLayer;
@@ -874,6 +1022,9 @@ var SubcatchmentDelineation = (function () {
             attachLabelRebuild(nextLayer);
             replaceOverlayLayer(map, SUBCATCHMENT_LABEL_LAYER_NAME, state.labelLayer, nextLayer, wasVisible);
             state.labelLayer = nextLayer;
+            if (wasVisible) {
+                clearHoverLabel(state, map);
+            }
         }
 
         function renderLayer(options) {

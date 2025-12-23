@@ -444,7 +444,7 @@ describe("ChannelDelineation GL controller", () => {
 
         expect(channel.labelLayer.props.fontSettings).toEqual({ sdf: true });
         expect(channel.labelLayer.props.outlineWidth).toBe(3);
-        expect(channel.labelLayer.props.getSize()).toBe(14);
+        expect(channel.labelLayer.props.getSize()).toBe(16);
     });
 
     test("hover labels render when channel labels are hidden", async () => {
