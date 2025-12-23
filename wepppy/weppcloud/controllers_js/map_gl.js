@@ -3160,6 +3160,20 @@ var MapController = (function () {
         });
         map._deck = deckgl;
 
+        if (typeof ResizeObserver !== "undefined" && mapCanvasElement) {
+            var resizeObserver = new ResizeObserver(function () {
+                if (deckgl) {
+                    var size = getCanvasSize();
+                    deckgl.setProps({
+                        width: size.width || undefined,
+                        height: size.height || undefined
+                    });
+                    updateMapStatus();
+                }
+            });
+            resizeObserver.observe(mapCanvasElement);
+        }
+
         updateMapStatus();
         return map;
     }
