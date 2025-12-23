@@ -13,6 +13,7 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
 from wepppy.weppcloud.utils.uploads import (
     UploadError,
+    log_upload_prefix_usage,
     save_run_file,
     upload_failure,
     upload_success,
@@ -92,6 +93,7 @@ def task_upload_cli(runid: str, config: str) -> Response:
     Returns:
         Response: JSON payload indicating success or identifying why the upload failed.
     """
+    log_upload_prefix_usage("tasks/upload_cli")
     wd = get_wd(runid)
 
     ron = Ron.getInstance(wd)

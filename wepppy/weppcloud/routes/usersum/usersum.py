@@ -11,9 +11,10 @@ from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # typ
 usersum_bp = Blueprint('usersum', __name__, template_folder='templates')
 
 _BASE_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _BASE_DIR.parents[3]
 _DB_DIR = _BASE_DIR / 'db'
 _SPEC_DIR = _BASE_DIR / 'input-file-specifications'
-_DOCS_ROOT = Path(__file__).resolve().parents[4] / 'docs'
+_DOCS_ROOT = _REPO_ROOT / 'docs'
 _DEV_NOTES_DIR = _DOCS_ROOT / 'dev-notes'
 _WEPPCLOUD_DIR = _BASE_DIR / 'weppcloud'
 
@@ -99,12 +100,35 @@ def _resolve_markdown_path(category: str, filename: str) -> Path:
     return candidate
 
 
+def _resolve_src_markdown_path(rel_path: str) -> Path:
+    candidate = (_REPO_ROOT / rel_path).resolve()
+    if not candidate.is_file():
+        abort(404)
+        raise RuntimeError('unreachable')
+    if candidate.suffix.lower() != '.md' or _REPO_ROOT not in candidate.parents:
+        abort(404)
+    return candidate
+
+
 @usersum_bp.route('/usersum/view/<category>/<path:filename>')
 def view_markdown(category: str, filename: str):
     path = _resolve_markdown_path(category, filename)
     markdown_source = path.read_text(encoding='utf-8')
     content_html = markdown_to_html(markdown_source)
     display_name = _friendly_display_name(path.name)
+    return render_template(
+        'usersum/view.htm',
+        title=display_name,
+        content_html=content_html
+    )
+
+
+@usersum_bp.route('/usersum/src//<path:rel_path>')
+def view_src_markdown(rel_path: str):
+    path = _resolve_src_markdown_path(rel_path)
+    markdown_source = path.read_text(encoding='utf-8')
+    content_html = markdown_to_html(markdown_source)
+    display_name = str(path.relative_to(_REPO_ROOT))
     return render_template(
         'usersum/view.htm',
         title=display_name,

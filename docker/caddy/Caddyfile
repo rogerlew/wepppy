@@ -75,6 +75,18 @@ http://:8080 {
         }
     }
 
+    handle_path /upload* {
+        reverse_proxy weppcloud:8000 {
+            header_up X-Forwarded-Prefix /upload
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+            transport http {
+                read_timeout 20m
+                response_header_timeout 20m
+            }
+        }
+    }
+
     handle_path /weppcloud/static/* {
         root * /srv/weppcloud/static
         file_server

@@ -7,10 +7,32 @@ function coordRound(v) {
 
 // utility function to be used by ControlBase subclasses to build URLs for pup runs.
 // not to be used elsewhere.
-function url_for_run(url) {
+function url_for_run(url, options) {
     var sitePrefix = "";
     if (typeof window.site_prefix === "string" && window.site_prefix) {
         sitePrefix = window.site_prefix.replace(/\/+$/, "");
+    }
+
+    function normalizePrefix(prefix) {
+        if (!prefix) {
+            return "";
+        }
+        if (prefix === "/") {
+            return "";
+        }
+        if (prefix.charAt(0) !== "/") {
+            prefix = "/" + prefix;
+        }
+        return prefix.replace(/\/+$/, "");
+    }
+
+    var outputPrefix = sitePrefix;
+    if (options !== undefined) {
+        if (typeof options === "string") {
+            outputPrefix = normalizePrefix(options);
+        } else if (options && typeof options === "object" && Object.prototype.hasOwnProperty.call(options, "prefix")) {
+            outputPrefix = normalizePrefix(options.prefix);
+        }
     }
 
     function resolveRunContextFromLocation() {
@@ -57,7 +79,7 @@ function url_for_run(url) {
         runScopedPath = "/" + runScopedPath;
     }
 
-    return sitePrefix + runScopedPath;
+    return outputPrefix + runScopedPath;
 }
 
 function pass() {

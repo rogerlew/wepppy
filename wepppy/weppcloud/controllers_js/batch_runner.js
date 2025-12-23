@@ -257,6 +257,7 @@ var BatchRunner = (function () {
         };
         controller.sitePrefix = "";
         controller.baseUrl = "";
+        controller.uploadBaseUrl = "";
         controller.templateInitialised = false;
         controller.command_btn_id = "btn_run_batch";
         controller.statusStream = null;
@@ -380,6 +381,7 @@ var BatchRunner = (function () {
 
         controller._buildBaseUrl = buildBaseUrl;
         controller._apiUrl = apiUrl;
+        controller._uploadApiUrl = uploadApiUrl;
 
         overrideControlBase(controller);
 
@@ -396,6 +398,7 @@ var BatchRunner = (function () {
             };
             controller.sitePrefix = bootstrap.sitePrefix || "";
             controller.baseUrl = buildBaseUrl();
+            controller.uploadBaseUrl = buildBaseUrl("/upload");
             controller.templateInitialised = false;
 
             controller.form = deps.dom.qs(SELECTORS.form);
@@ -586,8 +589,13 @@ var BatchRunner = (function () {
             }
         }
 
-        function buildBaseUrl() {
-            var prefix = controller.sitePrefix || "";
+        function buildBaseUrl(prefixOverride) {
+            var prefix = "";
+            if (typeof prefixOverride === "string" && prefixOverride.length) {
+                prefix = prefixOverride;
+            } else {
+                prefix = controller.sitePrefix || "";
+            }
             if (prefix && prefix.slice(-1) === "/") {
                 prefix = prefix.slice(0, -1);
             }
@@ -600,6 +608,17 @@ var BatchRunner = (function () {
 
         function apiUrl(suffix) {
             var base = controller.baseUrl || "";
+            if (!suffix) {
+                return base;
+            }
+            if (suffix.charAt(0) !== "/") {
+                suffix = "/" + suffix;
+            }
+            return base + suffix;
+        }
+
+        function uploadApiUrl(suffix) {
+            var base = controller.uploadBaseUrl || "";
             if (!suffix) {
                 return base;
             }
@@ -1712,7 +1731,7 @@ var BatchRunner = (function () {
             });
 
             controller.http
-                .request(apiUrl("upload-geojson"), {
+                .request(uploadApiUrl("upload-geojson"), {
                     method: "POST",
                     body: formData
                 })
@@ -1830,7 +1849,7 @@ var BatchRunner = (function () {
             });
 
             controller.http
-                .request(apiUrl("upload-sbs-map"), {
+                .request(uploadApiUrl("upload-sbs-map"), {
                     method: "POST",
                     body: formData
                 })

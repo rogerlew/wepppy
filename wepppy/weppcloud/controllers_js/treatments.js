@@ -427,7 +427,7 @@ var Treatments = (function () {
 
             var formData = new FormData(formElement);
 
-            http.request(url_for_run("rq/api/build_treatments"), {
+            http.request(url_for_run("rq/api/build_treatments", { prefix: "/upload" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

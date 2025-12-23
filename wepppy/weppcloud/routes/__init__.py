@@ -110,6 +110,7 @@ from .run_0 import run_0_bp
 from ._security import security_logging_bp, security_oauth_bp, security_ui_bp
 from .ui_showcase import ui_showcase_bp
 from .recorder_bp import recorder_bp
+from .upload_bp import upload_bp
 try:
     from .test_bp import test_bp
 except ImportError:
@@ -153,6 +154,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     rq_api_bp,
     rq_jobinfo_bp,
     rq_job_dashboard_bp,
+    upload_bp,
 ])
 
 for _bp in _RUN_CONTEXT_BLUEPRINTS:
@@ -211,5 +213,6 @@ __all__ = [
     'security_oauth_bp',
     'recorder_bp',
     'ui_showcase_bp',
+    'upload_bp',
     'test_bp',
 ]

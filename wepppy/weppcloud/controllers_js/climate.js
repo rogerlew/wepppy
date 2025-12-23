@@ -1019,7 +1019,7 @@ var Climate = (function () {
             stacktraceAdapter.text("");
 
             var formData = new FormData(formElement);
-            http.request(url_for_run("tasks/upload_cli/"), {
+            http.request(url_for_run("tasks/upload_cli/", { prefix: "/upload" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

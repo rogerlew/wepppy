@@ -575,7 +575,7 @@ var Disturbed = (function () {
             disturbed.triggerEvent("job:started", { task: "disturbed:upload" });
             var formData = new window.FormData(formElement);
             return http
-                .request(url_for_run("tasks/upload_sbs/"), {
+                .request(url_for_run("tasks/upload_sbs/", { prefix: "/upload" }), {
                     method: "POST",
                     body: formData,
                     form: formElement

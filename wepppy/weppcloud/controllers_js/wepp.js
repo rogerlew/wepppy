@@ -326,7 +326,7 @@ var Wepp = (function () {
             var formData = new FormData();
             formData.append("input_upload_cover_transform", file);
 
-            http.request(url_for_run("tasks/upload_cover_transform"), {
+            http.request(url_for_run("tasks/upload_cover_transform", { prefix: "/upload" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

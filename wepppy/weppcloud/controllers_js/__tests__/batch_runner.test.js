@@ -260,7 +260,7 @@ describe("BatchRunner controller", () => {
         controller.uploadButton.dispatchEvent(new Event("click", { bubbles: true }));
         await flushPromises();
 
-        expect(requestMock).toHaveBeenCalledWith("/batch/_/demo/upload-geojson", expect.objectContaining({
+        expect(requestMock).toHaveBeenCalledWith("/upload/batch/_/demo/upload-geojson", expect.objectContaining({
             method: "POST",
             body: expect.any(FormData)
         }));

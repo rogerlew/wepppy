@@ -63,7 +63,7 @@ function uploadFile() {
 
     formData.append('input_upload_sbs', fileField.files[0]);
 
-    fetch('/weppcloud/huc-fire/tasks/upload_sbs/', {
+    fetch('/upload/huc-fire/tasks/upload_sbs/', {
         method: 'POST',
         body: formData
     })

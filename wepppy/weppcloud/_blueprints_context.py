@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 import wepppy.weppcloud.routes as routes
 
 
@@ -53,6 +53,7 @@ _BLUEPRINT_ATTRS = [
     "batch_runner_bp",
     "interchange_bp",
     "ui_showcase_bp",
+    "upload_bp",
 ]
 
 
@@ -70,6 +71,14 @@ def register_blueprints(app):
     if hasattr(app, "route"):
         @app.route('/health')
         def health():
+            script_root = (request.script_root or "").rstrip("/")
+            if script_root == "/upload":
+                return jsonify({
+                    "status": "ok",
+                    "scope": "upload",
+                    "message": "upload health endpoint",
+                    "prefix": request.script_root or "",
+                })
             return jsonify('OK')
 
     for attr in _BLUEPRINT_ATTRS:

@@ -617,7 +617,7 @@ var Ash = (function () {
                 }
             }
 
-            http.request(url_for_run("rq/api/run_ash"), {
+            http.request(url_for_run("rq/api/run_ash", { prefix: "/upload" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

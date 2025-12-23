@@ -24,6 +24,9 @@
             throw new Error("WCHttp.request requires a URL.");
         }
         var prefix = typeof global.site_prefix === "string" ? global.site_prefix : "";
+        if (url === "/upload" || url.indexOf("/upload/") === 0) {
+            return url;
+        }
         if (!prefix || isAbsoluteUrl(url)) {
             return url;
         }

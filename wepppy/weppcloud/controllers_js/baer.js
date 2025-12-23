@@ -457,7 +457,7 @@ var Baer = (function () {
             emit("baer:upload:started", {});
             jobStarted("baer:upload", {});
 
-            return http.request(url_for_run("tasks/upload_sbs/"), {
+            return http.request(url_for_run("tasks/upload_sbs/", { prefix: "/upload" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

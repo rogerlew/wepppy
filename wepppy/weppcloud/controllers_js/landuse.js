@@ -370,7 +370,7 @@ var Landuse = (function () {
 
             var formData = new FormData(formElement);
 
-            http.request(url_for_run("rq/api/build_landuse"), {
+            http.request(url_for_run("rq/api/build_landuse", { prefix: "/upload" }), {
                 method: "POST",
                 body: formData,
                 form: formElement
