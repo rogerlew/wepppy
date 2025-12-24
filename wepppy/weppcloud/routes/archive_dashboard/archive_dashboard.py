@@ -7,6 +7,7 @@ from datetime import datetime
 from glob import glob
 
 from flask import Blueprint, jsonify, render_template
+from flask_login import login_required
 from flask_security import current_user
 
 from wepppy.nodb.redis_prep import RedisPrep
@@ -19,6 +20,7 @@ archive_bp = Blueprint('archive', __name__, template_folder='templates')
 
 
 @archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard', strict_slashes=False)
+@login_required
 def rq_archive_dashboard(runid, config):
     try:
         authorize(runid, config)
@@ -29,6 +31,7 @@ def rq_archive_dashboard(runid, config):
 
 
 @archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard/archives', strict_slashes=False)
+@login_required
 def rq_archive_list(runid, config):
     authorize(runid, config)
     try:

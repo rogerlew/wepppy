@@ -15,4 +15,19 @@ def rq_fork_console(runid, config):
     if isinstance(undisturbify_arg, str):
         undisturbify = undisturbify_arg.strip().lower() in ('true', '1', 'yes', 'on')
 
-    return render_template('rq-fork-console.htm', runid=runid, config=config, undisturbify=undisturbify)
+    cap_base_url = (current_app.config.get('CAP_BASE_URL') or os.getenv('CAP_BASE_URL', '/cap')).rstrip('/')
+    cap_asset_base_url = (
+        current_app.config.get('CAP_ASSET_BASE_URL')
+        or os.getenv('CAP_ASSET_BASE_URL', f'{cap_base_url}/assets')
+    ).rstrip('/')
+    cap_site_key = current_app.config.get('CAP_SITE_KEY') or os.getenv('CAP_SITE_KEY', '')
+
+    return render_template(
+        'rq-fork-console.htm',
+        runid=runid,
+        config=config,
+        undisturbify=undisturbify,
+        cap_base_url=cap_base_url,
+        cap_asset_base_url=cap_asset_base_url,
+        cap_site_key=cap_site_key,
+    )

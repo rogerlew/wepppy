@@ -148,6 +148,15 @@ Notes:
 2. Add Cap gating for anonymous `fork` flows; authenticated users fork without CAPTCHA.
 3. Verify `batch-runner` and `archive` endpoints require authentication; document any gaps.
 
+## Phase 6 Handoff Summary
+- `/create/` index is now `@login_required`, and authenticated `GET /create/<config>` bypasses CAPTCHA (anonymous still POST + token).
+- Fork console uses a floating CAPTCHA prompt for anonymous users, disables submit until verification, and includes `cap_token` in `/rq/api/fork`; the backend now enforces token validation for anonymous requests.
+- Batch runner remains `@roles_required("Admin")`; archive dashboard + archive API routes are now `@login_required`.
+
 ### Phase 7 - Docs + rollout
 1. Document the Cap flow and config in `wepppy/weppcloud/README.md` or `docs/ui-docs/`.
 2. Add operator notes for key rotation and Cap service health checks.
+
+## Phase 7 Handoff Summary
+- Documented Cap.js configuration and operational notes (health checks, key rotation, routing/asset verification) in `wepppy/weppcloud/README.md`.
+- Added a UI docs index entry for `docs/ui-docs/cap-js-captcha-auth.md` in `docs/ui-docs/README.md`.

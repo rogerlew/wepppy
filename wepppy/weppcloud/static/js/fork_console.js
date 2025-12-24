@@ -54,6 +54,8 @@
 
     var origin = window.location.origin;
     var runId = dataset.runid || dataset.runId || "";
+    var capRequired = dataset.capRequired === true || dataset.capRequired === "true";
+    var capSection = dataset.capSection || "";
     var undisturbifyRaw = dataset.undisturbify;
     var initialUndisturbify = false;
     if (typeof undisturbifyRaw === "string") {
@@ -75,6 +77,10 @@
     var rqJob = container.querySelector("#rq_job");
     var hintElement = container.querySelector("#hint_run_fork");
     var hintAdapter = createHintAdapter(hintElement);
+    var capTokenInput = null;
+    var capPrompt = null;
+    var capTrigger = null;
+    var capStatus = null;
 
     var statusStream = null;
     var pendingStatusMessages = [];
@@ -82,6 +88,76 @@
     var newRunId = "";
     var poller = null;
     var completionState = { completed: false, failed: false };
+
+    function initCapElements() {
+      if (!capRequired || !capSection) {
+        return;
+      }
+      capTokenInput = form ? form.querySelector("[data-cap-token]") : null;
+      capPrompt = container.querySelector('.wc-cap-prompt[data-cap-section="' + capSection + '"]');
+      if (capPrompt) {
+        capTrigger = capPrompt.querySelector("[data-cap-trigger]");
+        capStatus = capPrompt.querySelector("[data-cap-status]");
+      }
+    }
+
+    function getCapToken() {
+      if (!capTokenInput) {
+        return "";
+      }
+      return (capTokenInput.value || "").trim();
+    }
+
+    function setCapVerified(token) {
+      if (!token) {
+        return;
+      }
+      if (capTokenInput) {
+        capTokenInput.value = token;
+      }
+      if (capPrompt) {
+        capPrompt.setAttribute("data-cap-verified", "true");
+      }
+      if (capTrigger) {
+        capTrigger.classList.add("is-verified");
+        capTrigger.setAttribute("aria-disabled", "true");
+        capTrigger.setAttribute("disabled", "true");
+      }
+      if (capStatus) {
+        capStatus.textContent = "Verification complete.";
+      }
+      if (submitButton) {
+        submitButton.classList.remove("is-disabled");
+        submitButton.removeAttribute("disabled");
+        submitButton.disabled = false;
+        submitButton.setAttribute("aria-disabled", "false");
+      }
+    }
+
+    function triggerCapPrompt() {
+      if (!capTrigger || capTrigger.disabled) {
+        return false;
+      }
+      capTrigger.click();
+      return true;
+    }
+
+    function attachCapHandlers() {
+      if (!capRequired || !capSection) {
+        return;
+      }
+      var widgets = container.querySelectorAll('cap-widget[data-cap-section="' + capSection + '"]');
+      widgets.forEach(function (widget) {
+        widget.addEventListener("solve", function (event) {
+          var detail = event && event.detail ? event.detail : null;
+          var token = detail && detail.token ? String(detail.token) : "";
+          if (!token) {
+            return;
+          }
+          setCapVerified(token);
+        });
+      });
+    }
 
     function appendStatus(message) {
       if (message === undefined || message === null) {
@@ -310,6 +386,14 @@
       runId = submittedRunId;
       var undisturbify = undisturbifyCheckbox ? !!undisturbifyCheckbox.checked : false;
 
+      if (capRequired) {
+        var capToken = getCapToken();
+        if (!capToken) {
+          triggerCapPrompt();
+          return;
+        }
+      }
+
       if (submitButton) {
         submitButton.disabled = true;
       }
@@ -323,6 +407,12 @@
 
       var forkUrl = origin + "/weppcloud/runs/" + runId + "/cfg/rq/api/fork";
       var payload = new URLSearchParams({ undisturbify: undisturbify ? "true" : "false" });
+      if (capRequired) {
+        var verifiedToken = getCapToken();
+        if (verifiedToken) {
+          payload.set("cap_token", verifiedToken);
+        }
+      }
 
       fetch(forkUrl, {
         method: "POST",
@@ -441,6 +531,8 @@
       });
     }
 
+    initCapElements();
+    attachCapHandlers();
     initPoller();
     connectStatusStreamForRun(runId);
     flushPendingStatus();

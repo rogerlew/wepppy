@@ -7,6 +7,7 @@ The Cap.js integration has two parts:
 - A front-end pattern that shows an on-demand floating CAPTCHA, captures the token, and enables submit buttons.
 
 This pattern is used on the interfaces landing page and will be replicated for other run page tasks.
+The fork console uses the same pattern, with the submit button disabled until verification completes.
 
 ## Cap Service (Node)
 Path: `services/cap/server.js`
@@ -91,6 +92,7 @@ Each protected action is a POST form with a hidden token.
 ```
 
 The create buttons are disabled until a `cap-widget` solve event fires. Create buttons do not carry `data-cap-floating`; the prompt trigger does.
+For fork console, the submit button is rendered with `disabled` + `is-disabled` for anonymous users and is enabled only after the `solve` event.
 
 ### JS Glue
 The controller `wepppy/weppcloud/controllers_js/interfaces_captcha.js`:
@@ -100,6 +102,11 @@ The controller `wepppy/weppcloud/controllers_js/interfaces_captcha.js`:
 - marks the prompt as verified (`data-cap-verified="true"`)
 
 The built bundle is `wepppy/weppcloud/static/js/controllers-gl.js`.
+
+Fork console uses `wepppy/weppcloud/static/js/fork_console.js` for the same flow:
+- blocks submission and triggers the floating prompt if the token is missing
+- enables the submit button after verification
+- includes `cap_token` in the POST payload
 
 ## Server-Side Verification
 Anonymous requests must verify the token:

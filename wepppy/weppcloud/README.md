@@ -164,6 +164,23 @@ High-frequency job polling endpoints are served by the rq-engine FastAPI service
 
 Clients should prefer `/rq-engine/api/...` and fall back to the legacy `/weppcloud/rq/api/...` endpoints when needed.
 
+### Cap.js CAPTCHA
+
+Anonymous create + fork actions are gated by Cap.js. See `docs/ui-docs/cap-js-captcha-auth.md` for UI wiring details.
+
+Weppcloud + Cap service config (typically `docker/.env`):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CAP_BASE_URL` | `/cap` | Cap service base URL (relative allowed) used for templates + verification |
+| `CAP_ASSET_BASE_URL` | `${CAP_BASE_URL}/assets` | Base URL for widget/floating assets |
+| `CAP_SITE_KEY` | *(required)* | Public key rendered into templates |
+| `CAP_SECRET` | *(required)* | Private key used for server verification |
+| `CAP_CORS_ORIGIN` | `*` | Cap service CORS allowlist |
+| `CAP_ASSET_ROOT` | `/workdir/cap` | Cap service asset root (must include widget + wasm bundles) |
+| `CAP_DATA_DIR` | `/var/lib/cap` | Cap service state storage |
+| `CAP_PORT` | `3000` | Cap service port |
+
 ## Key Concepts
 
 ### Run Lifecycle
@@ -231,6 +248,12 @@ Returns `200 OK` with JSON payload when the application is ready. Checks:
 - File system access to runs directory
 
 Use this endpoint for Kubernetes liveness/readiness probes or load balancer health checks.
+
+### CAPTCHA Operations
+
+- **Health check:** `curl -H 'X-Forwarded-Proto: https' http://localhost:8080/cap/health` (via Caddy) or `curl -I https://<host>/cap/health`.
+- **Key rotation:** generate a new key pair, update `CAP_SITE_KEY` + `CAP_SECRET` in the env source, restart the Cap service and weppcloud, then verify anonymous create + fork flows.
+- **Routing/asset check:** confirm `/cap` is reverse-proxied and `curl -I http://localhost:8080/cap/assets/widget.js` returns `200`; `404` usually means the `/workdir/cap` mount or `CAP_ASSET_ROOT` is wrong.
 
 ### Logging
 

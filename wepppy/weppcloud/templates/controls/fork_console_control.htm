@@ -1,5 +1,6 @@
 {% from "shared/console_macros.htm" import button_row %}
 {% import "controls/_pure_macros.html" as ui %}
+{% import "shared/cap_macros.htm" as cap_macros %}
 
 {# Front-end config guidance: see wepppy/weppcloud/AGENTS.md ("Front-end bundles") #}
 {% set wrap = fork_console_wrap if fork_console_wrap is defined else True %}
@@ -11,6 +12,8 @@
        data-runid="{{ runid }}"
        data-config="{{ config }}"
        data-undisturbify="{{ 'true' if undisturbify is sameas true else 'false' }}"
+       data-cap-required="{{ 'true' if not current_user.is_authenticated else 'false' }}"
+       data-cap-section="fork"
        hidden></div>
   {% call ui.control_shell(
        form_id="fork_form",
@@ -45,8 +48,17 @@
            'Undisturbify output (optional)',
            checked=undisturbify is sameas true
          ) }}
+      {% if not current_user.is_authenticated %}
+      {{ cap_macros.cap_prompt("fork", "cap-fork", cap_base_url, cap_site_key, status_text="Complete verification to enable forking.") }}
+      <input type="hidden" name="cap_token" value="" data-cap-token>
+      {% endif %}
       {% call button_row() %}
-        <button type="submit" class="pure-button" id="submit_button">Fork project</button>
+        <button type="submit"
+                class="pure-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
+                id="submit_button"
+                {% if not current_user.is_authenticated %}disabled aria-disabled="true"{% endif %}>
+          Fork project
+        </button>
         <button type="button" class="pure-button pure-button-secondary" id="cancel_button" hidden>Cancel job</button>
       {% endcall %}
       {{ ui.job_hint("hint_run_fork") }}

@@ -14,7 +14,7 @@ from typing import Any, Dict, Iterable
 from flask_login import login_required
 import pandas as pd
 
-from flask import abort, Blueprint, request, Response, jsonify, send_file
+from flask import abort, Blueprint, current_app, request, Response, jsonify, send_file
 
 from flask_security import current_user
 
@@ -1689,6 +1689,7 @@ def api_rap_ts_acquire(runid, config):
 def api_fork(runid, config):
     from wepppy.weppcloud.app import get_run_owners
     from wepppy.weppcloud.app import user_datastore
+    from wepppy.weppcloud.utils.cap_verify import CapVerificationError, verify_cap_token
     try:
         wd = get_wd(runid)
         
@@ -1727,6 +1728,40 @@ def api_fork(runid, config):
 
         if should_abort:
             abort(404)
+
+        if current_user.is_anonymous:
+            cap_token = request.form.get("cap_token", "").strip()
+            if not cap_token:
+                current_app.logger.warning(
+                    "CAPTCHA token missing for fork/%s from %s",
+                    runid,
+                    request.remote_addr,
+                )
+                response = error_factory("CAPTCHA token is required.")
+                response.status_code = 403
+                return response
+
+            try:
+                verification = verify_cap_token(cap_token)
+            except CapVerificationError as exc:
+                current_app.logger.error(
+                    "CAPTCHA verification error for fork/%s from %s: %s",
+                    runid,
+                    request.remote_addr,
+                    exc,
+                )
+                return exception_factory("CAPTCHA verification failed.", runid=runid)
+
+            if not verification.get("success"):
+                current_app.logger.warning(
+                    "CAPTCHA rejected for fork/%s from %s (errors=%s)",
+                    runid,
+                    request.remote_addr,
+                    verification.get("error-codes"),
+                )
+                response = error_factory("CAPTCHA verification failed.")
+                response.status_code = 403
+                return response
 
         dir_created = False
         while not dir_created:
@@ -1788,6 +1823,7 @@ def api_fork(runid, config):
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/archive', methods=['POST'])
+@login_required
 def api_archive(runid, config):
     try:
         payload = request.get_json(silent=True) or {}
