@@ -8,6 +8,9 @@ services:
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
       - caddy-data:/data
       - caddy-config:/config
+  cap:
+    environment:
+      CAP_ASSET_ROOT: /opt/cap
 
 volumes:
   caddy-data:

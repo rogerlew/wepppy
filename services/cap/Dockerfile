@@ -3,6 +3,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+ARG CAP_REPO=https://github.com/tiagozip/cap
+ARG CAP_REF=main
+
+RUN apk add --no-cache git ca-certificates && \
+    git clone --depth=1 --branch "${CAP_REF}" "${CAP_REPO}" /opt/cap && \
+    rm -rf /opt/cap/.git
+
 COPY services/cap/package.json services/cap/package-lock.json ./
 RUN npm ci --omit=dev
 

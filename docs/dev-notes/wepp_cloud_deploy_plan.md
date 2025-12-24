@@ -96,18 +96,18 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 - [x] Stop any old Docker containers (if present).
 
 ## Repos under /workdir
-- [ ] Clone `https://github.com/rogerlew/wepppy` -> `/workdir/wepppy`.
-- [ ] Clone `https://github.com/tiagozip/cap` -> `/workdir/cap` (required by `cap` service volume).
+- [x] Clone `https://github.com/rogerlew/wepppy` -> `/workdir/wepppy`.
+- [ ] `cap` assets are vendored in the prod image; clone `https://github.com/tiagozip/cap` -> `/workdir/cap` only if you want a host override.
 - [ ] Confirm which vendored deps should stay in the image (see `docker/Dockerfile`); host clones are optional unless you plan to mount overrides.
-- [ ] Install wctl: `cd /workdir/wepppy && ./wctl/install.sh prod` (optionally set `WCTL_SYMLINK_PATH`).
+- [ ] Install wctl: `cd /workdir/wepppy && ./wctl/install.sh wepp1` (optionally set `WCTL_SYMLINK_PATH`).
 - [ ] Optional clones (only if you plan to override vendored deps from `docker/Dockerfile`):
-- [ ] `https://github.com/wepp-in-the-woods/wepppy2` -> `/workdir/wepppy2`.
-- [ ] `https://github.com/wepp-in-the-woods/weppcloud2` -> `/workdir/weppcloud2`.
-- [ ] `https://github.com/rogerlew/f-esri` -> `/workdir/f-esri`.
-- [ ] `https://github.com/rogerlew/weppcloud-wbt` -> `/workdir/weppcloud-wbt`.
-- [ ] `https://github.com/wepp-in-the-woods/wepppyo3` -> `/workdir/wepppyo3`.
-- [ ] `https://github.com/rogerlew/rosetta` -> `/workdir/rosetta`.
-- [ ] `/workdir/peridot`, `/workdir/wepp-forest`, `/workdir/wepp-forest-revegetation` (only if external tooling expects host paths).
+  - [ ] `https://github.com/wepp-in-the-woods/wepppy2` -> `/workdir/wepppy2`.
+  - [ ] `https://github.com/wepp-in-the-woods/weppcloud2` -> `/workdir/weppcloud2`.
+  - [ ] `https://github.com/rogerlew/f-esri` -> `/workdir/f-esri`.
+  - [ ] `https://github.com/rogerlew/weppcloud-wbt` -> `/workdir/weppcloud-wbt`.
+  - [ ] `https://github.com/wepp-in-the-woods/wepppyo3` -> `/workdir/wepppyo3`.
+  - [ ] `https://github.com/rogerlew/rosetta` -> `/workdir/rosetta`.
+  - [ ] `/workdir/peridot`, `/workdir/wepp-forest`, `/workdir/wepp-forest-revegetation` (only if external tooling expects host paths).
 
 ## Compose env and config
 - [ ] Create `docker/.env` (keys + secrets + host config):
@@ -121,6 +121,10 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
   - CAP keys: `CAP_SITE_KEY`, `CAP_SECRET`, `CAP_CORS_ORIGIN`
   - `OPENTOPOGRAPHY_API_KEY` (if used)
 - [ ] Ensure `/wc1` and `/geodata` are mounted and readable (compose expects `/wc1` and `/wc1/geodata`).
+- [x] Ensure `/geodata/extended_mods_data` exists and clone location bundles:
+  - `https://github.com/rogerlew/wepppy-locations-laketahoe` -> `/geodata/extended_mods_data/wepppy-locations-laketahoe`
+  - `https://github.com/rogerlew/wepppy-locations-portland` -> `/geodata/extended_mods_data/wepppy-locations-portland`
+  - `https://github.com/rogerlew/wepppy-locations-seattle` -> `/geodata/extended_mods_data/wepppy-locations-seattle`
 - [ ] Set `CADDY_FILE=/workdir/wepppy/docker/caddy/Caddyfile.weppcloud` (or similar) if using a custom Caddyfile.
 
 ## Caddy + TLS

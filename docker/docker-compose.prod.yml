@@ -379,6 +379,9 @@ services:
     build:
       context: ..
       dockerfile: services/cap/Dockerfile
+      args:
+        CAP_REPO: ${CAP_REPO:-https://github.com/tiagozip/cap}
+        CAP_REF: ${CAP_REF:-main}
     restart: unless-stopped
     env_file:
       - ${WEPPPY_ENV_FILE:-.env}
@@ -386,10 +389,9 @@ services:
       CAP_SITE_KEY: ${CAP_SITE_KEY}
       CAP_SECRET: ${CAP_SECRET}
       CAP_CORS_ORIGIN: ${CAP_CORS_ORIGIN:-*}
-      CAP_ASSET_ROOT: /workdir/cap
+      CAP_ASSET_ROOT: /opt/cap
       CAP_DATA_DIR: /var/lib/cap
     volumes:
-      - /workdir/cap:/workdir/cap:ro
       - cap-data:/var/lib/cap
     expose:
       - "3000"
