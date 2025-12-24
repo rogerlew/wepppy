@@ -1390,7 +1390,7 @@ h5:first-child {
 .wc-status-panel__meta,
 .wc-status-panel__slot,
 .wc-status-panel__footer {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--wc-color-text-muted);
 }
 

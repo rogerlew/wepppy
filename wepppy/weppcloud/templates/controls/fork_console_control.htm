@@ -49,6 +49,7 @@
         <button type="submit" class="pure-button" id="submit_button">Fork project</button>
         <button type="button" class="pure-button pure-button-secondary" id="cancel_button" hidden>Cancel job</button>
       {% endcall %}
+      {{ ui.job_hint("hint_run_fork") }}
     </fieldset>
   {% endcall %}
 {% if wrap %}

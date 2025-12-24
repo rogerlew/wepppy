@@ -11,6 +11,35 @@
     }
   }
 
+  function createHintAdapter(element) {
+    if (!element) {
+      return null;
+    }
+
+    return {
+      element: element,
+      length: 1,
+      show: function () {
+        element.hidden = false;
+        if (element.style && element.style.display === "none") {
+          element.style.removeProperty("display");
+        }
+      },
+      hide: function () {
+        element.hidden = true;
+        if (element.style) {
+          element.style.display = "none";
+        }
+      },
+      html: function (value) {
+        if (value === undefined) {
+          return element.innerHTML;
+        }
+        element.innerHTML = value === null ? "" : String(value);
+      }
+    };
+  }
+
   function initForkConsole(container) {
     if (!container || container.__forkConsoleInit === true) {
       return;
@@ -44,6 +73,8 @@
     var stacktracePanel = container.querySelector("#fork_stacktrace_panel");
     var stacktraceBody = stacktracePanel ? stacktracePanel.querySelector("[data-stacktrace-body]") : null;
     var rqJob = container.querySelector("#rq_job");
+    var hintElement = container.querySelector("#hint_run_fork");
+    var hintAdapter = createHintAdapter(hintElement);
 
     var statusStream = null;
     var pendingStatusMessages = [];
@@ -218,6 +249,7 @@
       poller.form = form;
       poller.rq_job = rqJob;
       poller.stacktrace = stacktraceBody;
+      poller.hint = hintAdapter;
       poller.poll_completion_event = "FORK_COMPLETE";
       poller.triggerEvent = function (eventName, detail) {
         handleTrigger(eventName, detail);
@@ -321,14 +353,11 @@
           jobId = body.job_id || "";
           var undisturbifyFlag = body.undisturbify;
 
-          appendStatus("Fork job submitted: " + jobId);
-
           if (consoleBlock) {
             var jobDashboard = origin + "/weppcloud/rq/job-dashboard/" + jobId;
             var newRunLink = origin + "/weppcloud/runs/" + newRunId + "/cfg";
             consoleBlock.dataset.state = "attention";
             consoleBlock.innerHTML = [
-              'Fork job submitted: <a href="' + jobDashboard + '" target="_blank" rel="noopener">' + jobId + "</a>",
               'New runid: <a href="' + newRunLink + '" target="_blank" rel="noopener">' + newRunId + "</a>",
               "Undisturbify: " + undisturbifyFlag
             ].join("<br>");

@@ -11,6 +11,35 @@
     }
   }
 
+  function createHintAdapter(element) {
+    if (!element) {
+      return null;
+    }
+
+    return {
+      element: element,
+      length: 1,
+      show: function () {
+        element.hidden = false;
+        if (element.style && element.style.display === "none") {
+          element.style.removeProperty("display");
+        }
+      },
+      hide: function () {
+        element.hidden = true;
+        if (element.style) {
+          element.style.display = "none";
+        }
+      },
+      html: function (value) {
+        if (value === undefined) {
+          return element.innerHTML;
+        }
+        element.innerHTML = value === null ? "" : String(value);
+      }
+    };
+  }
+
   function initArchiveConsole(container) {
     if (!container || container.__archiveConsoleInit === true) {
       return;
@@ -41,6 +70,8 @@
     var tableBody = container.querySelector("#archives_table tbody");
     var rqJob = statusPanel ? statusPanel.querySelector("#rq_job") : container.querySelector("#rq_job");
     var spinner = statusPanel ? statusPanel.querySelector("#braille") : null;
+    var hintElement = container.querySelector("#hint_run_archive");
+    var hintAdapter = createHintAdapter(hintElement);
 
     var statusStream = null;
     var pendingStatusMessages = [];
@@ -387,6 +418,7 @@
       poller.form = archiveForm;
       poller.rq_job = rqJob;
       poller.stacktrace = stacktracePanel ? stacktracePanel.querySelector("[data-stacktrace-body]") : null;
+      poller.hint = hintAdapter;
       poller.statusSpinnerEl = spinner;
       poller.triggerEvent = function (eventName, detail) {
         handleTrigger(eventName, detail);
