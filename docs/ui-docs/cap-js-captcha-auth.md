@@ -42,6 +42,9 @@ Caddy maps `/cap*` to the cap service. Verify with:
 curl -H 'X-Forwarded-Proto: https' http://localhost:8080/cap/health
 ```
 
+### Production Asset Mount
+Production compose mounts `/workdir/cap` into the cap container and sets `CAP_ASSET_ROOT=/workdir/cap`. This is required because the server hard-fails on missing widget/wasm assets. If you want to remove the host mount, bake assets into the image or point `CAP_ASSET_ROOT` at a vendored asset path.
+
 ## Flask Template Wiring
 The interfaces route passes these template vars:
 - `cap_base_url` (ex: `/cap` or `https://<host>/cap`)
@@ -103,6 +106,16 @@ Anonymous requests must verify the token:
 1. Receive `cap_token` in the POST body.
 2. POST to `POST /cap/<siteKey>/siteverify` with `{ secret, response }`.
 3. Allow if `success` is true; reject otherwise.
+
+Notes:
+- `CAP_BASE_URL` can be relative (ex: `/cap`); the verifier resolves relative paths against the incoming request host.
+- Missing `CAP_BASE_URL`, `CAP_SITE_KEY`, or `CAP_SECRET` should fail fast.
+- Use `wepppy/weppcloud/utils/cap_verify.py` as the canonical verification helper.
+
+Create endpoint behavior:
+- Anonymous: `POST /create/<config>` requires `cap_token`.
+- Authenticated: `GET /create/<config>` is allowed (no CAPTCHA).
+- `/create/` index is restricted to authenticated users.
 
 Authenticated users should bypass CAPTCHA.
 

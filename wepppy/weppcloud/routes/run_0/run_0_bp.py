@@ -590,6 +590,7 @@ def view_mod_section(runid, config, mod_name):
     })
 
 @run_0_bp.route('/create', strict_slashes=False)
+@login_required
 @handle_with_exception_factory
 def create_index():
     configs = get_configs()
@@ -640,13 +641,59 @@ def create_run_dir(current_user):
     return runid, wd
 
 
-@run_0_bp.route('/create/<config>')
+@run_0_bp.route('/create/<config>', methods=['GET', 'POST'])
 @handle_with_exception_factory
 def create(config):
     from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
+    from wepppy.weppcloud.utils.cap_verify import CapVerificationError, verify_cap_token
     cfg = "%s.cfg" % config
 
-    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
+    if current_user.is_anonymous:
+        if request.method != 'POST':
+            response = error_factory('CAPTCHA is required for anonymous create.')
+            response.status_code = 403
+            return response
+
+        cap_token = request.form.get('cap_token', '').strip()
+        if not cap_token:
+            current_app.logger.warning(
+                'CAPTCHA token missing for create/%s from %s',
+                config,
+                request.remote_addr,
+            )
+            response = error_factory('CAPTCHA token is required.')
+            response.status_code = 403
+            return response
+
+        try:
+            verification = verify_cap_token(cap_token)
+        except CapVerificationError as exc:
+            current_app.logger.error(
+                'CAPTCHA verification error for create/%s from %s: %s',
+                config,
+                request.remote_addr,
+                exc,
+            )
+            return exception_factory('CAPTCHA verification failed.')
+
+        if not verification.get('success'):
+            current_app.logger.warning(
+                'CAPTCHA rejected for create/%s from %s (errors=%s)',
+                config,
+                request.remote_addr,
+                verification.get('error-codes'),
+            )
+            response = error_factory('CAPTCHA verification failed.')
+            response.status_code = 403
+            return response
+
+    overrides = '&'.join(
+        [
+            '{}={}'.format(k, v)
+            for k, v in request.values.items()
+            if k != 'cap_token' and v not in (None, '')
+        ]
+    )
 
     if len(overrides) > 0:
         cfg += '?%s' % overrides
@@ -669,7 +716,7 @@ def create(config):
 
     ensure_readme_on_create(runid, config)
 
-    return redirect(url_for_run('run_0.runs0', runid=runid, config=config))
+    return redirect(url_for_run('run_0.runs0', runid=runid, config=config), code=303)
 
 
 def _render_run_not_found_page() -> Response:
