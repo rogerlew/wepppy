@@ -56,7 +56,7 @@ fi
 # Build Docker images
 if [ "${SKIP_BUILD}" = false ]; then
     echo ">>> Step 2: Building Docker images..."
-    ./wctl/wctl.sh build --no-cache weppcloud rq-worker
+    wctl build --no-cache weppcloud rq-worker
     echo ""
     
     echo ">>> Step 2b: Pruning Docker build cache..."
@@ -69,7 +69,7 @@ fi
 
 # Stop services
 echo ">>> Step 3: Stopping services..."
-./wctl/wctl.sh down
+wctl  down
 echo ""
 
 # Build static assets (controllers and themes)
@@ -96,7 +96,7 @@ echo ""
 
 # Start services
 echo ">>> Step 5: Starting services..."
-./wctl/wctl.sh up -d
+wctl up -d
 echo ""
 
 # Wait for health check
