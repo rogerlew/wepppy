@@ -13,9 +13,11 @@ Key design points:
 
 ```bash
 cd /workdir/wepppy
-./wctl/install.sh dev    # pin docker/docker-compose.dev.yml (default)
+./wctl/install.sh dev     # pin docker/docker-compose.dev.yml (default)
 # or
-./wctl/install.sh prod   # pin docker/docker-compose.prod.yml
+./wctl/install.sh prod    # pin docker/docker-compose.prod.yml
+# or
+./wctl/install.sh wepp1   # prod + wepp1 override (adds docker/docker-compose.prod.wepp1.yml)
 
 # optional: install to a custom bin directory
 WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
@@ -64,6 +66,7 @@ Each passthrough call is logged (for example, `INFO:wctl2:docker compose ps`) so
 - Set `WCTL_HOST_ENV` (absolute or project-relative) to point at an additional `.env` file that should be layered on top.
 - Any shell environment variables referenced in the active compose file act as the final overrides – for example export `POSTGRES_PASSWORD` before calling `wctl up`.
 - `WCTL_COMPOSE_FILE` is exported by the shim so Typer can reuse the selected compose file without requiring extra flags on every invocation.
+- `WCTL_COMPOSE_FILE_EXTRAS` can hold additional compose files (comma or `:` separated) to apply overrides.
 
 ### **Testing & Tooling Workflow**
 

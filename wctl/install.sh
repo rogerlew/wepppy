@@ -11,7 +11,7 @@ VENDOR_DIR="${PROJECT_DIR}/.wctl/vendor"
 usage() {
   cat <<'USAGE' >&2
 Usage:
-  ./wctl/install.sh [dev|prod]
+  ./wctl/install.sh [dev|prod|wepp1]
 
 Configure the wctl Typer CLI to target the selected docker compose file.
 USAGE
@@ -34,9 +34,15 @@ ENVIRONMENT="${1:-dev}"
 case "${ENVIRONMENT}" in
   dev)
     COMPOSE_RELATIVE_PATH="docker/docker-compose.dev.yml"
+    COMPOSE_EXTRA_RELATIVE_PATH=""
     ;;
   prod)
     COMPOSE_RELATIVE_PATH="docker/docker-compose.prod.yml"
+    COMPOSE_EXTRA_RELATIVE_PATH=""
+    ;;
+  wepp1)
+    COMPOSE_RELATIVE_PATH="docker/docker-compose.prod.yml"
+    COMPOSE_EXTRA_RELATIVE_PATH="docker/docker-compose.prod.wepp1.yml"
     ;;
   *)
     usage
@@ -90,6 +96,7 @@ SCRIPT_PATH="$(resolve_realpath "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 COMPOSE_FILE_RELATIVE="__COMPOSE_FILE_RELATIVE__"
+COMPOSE_FILE_EXTRAS="__COMPOSE_FILE_EXTRAS__"
 VENDOR_DIR="__WCTL_VENDOR_DIR__"
 
 cd "${PROJECT_DIR}"
@@ -101,26 +108,35 @@ else
 fi
 
 export WCTL_COMPOSE_FILE="${COMPOSE_FILE_RELATIVE}"
+if [[ -n "${COMPOSE_FILE_EXTRAS}" ]]; then
+  export WCTL_COMPOSE_FILE_EXTRAS="${COMPOSE_FILE_EXTRAS}"
+fi
 
 python3 -m wctl2 "$@"
 EOF_SCRIPT
 
-python3 - "${WCTL_SCRIPT}" "${COMPOSE_RELATIVE_PATH}" "${VENDOR_DIR}" <<'PY'
+python3 - "${WCTL_SCRIPT}" "${COMPOSE_RELATIVE_PATH}" "${COMPOSE_EXTRA_RELATIVE_PATH}" "${VENDOR_DIR}" <<'PY'
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
 compose_relative = sys.argv[2]
-vendor_dir = sys.argv[3]
+compose_extras = sys.argv[3]
+vendor_dir = sys.argv[4]
 text = path.read_text()
 text = text.replace("__COMPOSE_FILE_RELATIVE__", compose_relative)
+text = text.replace("__COMPOSE_FILE_EXTRAS__", compose_extras)
 text = text.replace("__WCTL_VENDOR_DIR__", vendor_dir)
 path.write_text(text)
 PY
 
 chmod +x "${WCTL_SCRIPT}"
 
-echo "wctl configured for ${ENVIRONMENT} environment (${COMPOSE_RELATIVE_PATH})."
+if [[ -n "${COMPOSE_EXTRA_RELATIVE_PATH}" ]]; then
+  echo "wctl configured for ${ENVIRONMENT} environment (${COMPOSE_RELATIVE_PATH} + ${COMPOSE_EXTRA_RELATIVE_PATH})."
+else
+  echo "wctl configured for ${ENVIRONMENT} environment (${COMPOSE_RELATIVE_PATH})."
+fi
 
 if [[ -n "${SYMLINK_PATH}" ]]; then
   TARGET_REALPATH="$(resolve_realpath "${WCTL_SCRIPT}")"

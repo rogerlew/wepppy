@@ -49,10 +49,24 @@ def _compose_keys(path: Path) -> Sequence[str]:
     return [match.group(1) for match in _COMPOSE_ENV_PATTERN.finditer(text)]
 
 
+def _split_compose_list(raw: str) -> Sequence[str]:
+    cleaned = raw.replace(os.pathsep, ",")
+    return [item.strip() for item in cleaned.split(",") if item.strip()]
+
+
+def _compose_paths(project_dir: Path, compose_relative: str, env: Mapping[str, str]) -> Tuple[Sequence[Path], Sequence[str]]:
+    relatives = [compose_relative]
+    extras = env.get("WCTL_COMPOSE_FILE_EXTRAS") or env.get("WCTL_COMPOSE_FILES") or ""
+    if extras:
+        relatives.extend(_split_compose_list(extras))
+    paths = [(project_dir / rel).resolve() for rel in relatives]
+    return paths, relatives
+
+
 def _merge_env(
     docker_env: Path,
     host_env: Optional[Path],
-    compose_path: Path,
+    compose_paths: Sequence[Path],
     environ: Mapping[str, str],
 ) -> Tuple[OrderedDict[str, str], Dict[str, str]]:
     merged: "OrderedDict[str, str]" = OrderedDict()
@@ -67,12 +81,13 @@ def _merge_env(
     if host_env and host_env.exists():
         _update_from_file(host_env)
 
-    for key in _compose_keys(compose_path):
-        value = environ.get(key)
-        if value is None:
-            continue
-        raw[key] = value
-        merged[key] = value.replace("$", "$$")
+    for compose_path in compose_paths:
+        for key in _compose_keys(compose_path):
+            value = environ.get(key)
+            if value is None:
+                continue
+            raw[key] = value
+            merged[key] = value.replace("$", "$$")
 
     return merged, raw
 
@@ -121,6 +136,8 @@ class CLIContext:
     project_dir: Path
     compose_file: Path
     compose_file_relative: str
+    compose_files: Sequence[Path]
+    compose_files_relative: Sequence[str]
     docker_env_file: Path
     host_env_file: Optional[Path]
     env_file: Path
@@ -148,11 +165,12 @@ class CLIContext:
         host_env = _resolve_host_env(resolved_project, env)
 
         compose_relative = compose_file or env.get("WCTL_COMPOSE_FILE") or DEFAULT_COMPOSE_RELATIVE
-        compose_path = (resolved_project / compose_relative).resolve()
-        if not compose_path.exists():
-            raise FileNotFoundError(f"Compose file not found: {compose_path}")
+        compose_paths, compose_relatives = _compose_paths(resolved_project, compose_relative, env)
+        for compose_path in compose_paths:
+            if not compose_path.exists():
+                raise FileNotFoundError(f"Compose file not found: {compose_path}")
 
-        merged, raw = _merge_env(docker_env, host_env, compose_path, env)
+        merged, raw = _merge_env(docker_env, host_env, compose_paths, env)
         env_file_path = _write_temp_env(merged)
 
         base_env = dict(env)
@@ -160,8 +178,10 @@ class CLIContext:
 
         context = cls(
             project_dir=resolved_project,
-            compose_file=compose_path,
-            compose_file_relative=str(compose_relative),
+            compose_file=compose_paths[0],
+            compose_file_relative=str(compose_relatives[0]),
+            compose_files=compose_paths,
+            compose_files_relative=compose_relatives,
             docker_env_file=docker_env,
             host_env_file=host_env,
             env_file=env_file_path,
@@ -184,10 +204,13 @@ class CLIContext:
         return dict(self.env_mapping)
 
     def compose_base_args(self) -> Sequence[str]:
-        return ("--env-file", str(self.env_file), "-f", str(self.compose_file))
+        args = ["--env-file", str(self.env_file)]
+        for compose_path in self.compose_files:
+            args.extend(["-f", str(compose_path)])
+        return tuple(args)
 
     def env_value(self, key: str, default: Optional[str] = None) -> Optional[str]:
         return self.raw_env_mapping.get(key, default)
 
     def is_prod(self) -> bool:
-        return self.compose_file_relative.endswith("docker-compose.prod.yml")
+        return any(rel.endswith("docker-compose.prod.yml") for rel in self.compose_files_relative)

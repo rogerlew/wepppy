@@ -1,6 +1,6 @@
 # wepp.cloud deploy plan (prod refresh)
 
-> Goal: move wepp.cloud from bare-metal Flask to the docker-compose prod stack.
+> Goal: move wepp.cloud (wepp1) from bare-metal Flask to the docker-compose prod stack. wepp1 is running Ubuntu 24.04.3 LTS
 
 ## References
 - `docker/docker-compose.prod.yml`
@@ -9,6 +9,7 @@
 - `docs/dev-notes/docker_compose_plan.md` (db backup/restore)
 - `AGENTS.md` (run dirs, /wc1, /geodata)
 - `wctl/README.md` (installing wctl)
+- `scripts/README.docker_gid_993.md` (docker group GID enforcement)
 
 ## Preflight / inventory
 - [ ] Schedule maintenance window + downtime notice.
@@ -57,10 +58,10 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 ```
 
 ## Host updates
-- [ ] `sudo apt update && sudo apt -y upgrade`
-- [ ] Remove old docker/compose packages (if present):
+- [x] `sudo apt update && sudo apt -y upgrade`
+- [x] Remove old docker/compose packages (if present):
   - `sudo apt-get remove -y docker docker-engine docker.io containerd runc docker-compose`
-- [ ] Install docker engine + compose plugin:
+- [x] Install docker engine + compose plugin:
   - `sudo apt-get install -y ca-certificates curl gnupg`
   - `sudo install -m 0755 -d /etc/apt/keyrings`
   - `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
@@ -68,20 +69,31 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
   - `sudo apt update`
   - `sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin`
   - `sudo systemctl enable --now docker`
-- [ ] Install git + tooling: `sudo apt-get install -y git rsync jq`
-- [ ] Install npm (only if host-side asset builds are needed): `sudo apt-get install -y npm`
+- [x] Install git + tooling: `sudo apt-get install -y git rsync jq`
+- [x] Install npm (only if host-side asset builds are needed): `sudo apt-get install -y npm`
+
+## UID/GID normalization (roger:docker)
+- [x] Verify roger UID: `id -u roger` (expect 1002 on wepp1; dev/test hosts expect 1000).
+- [x] Verify docker GID: `getent group docker | cut -d: -f3` (expect 993 on dev/test; wepp1 uses 130 because 993 is `systemd-coredump`).
+- [ ] If docker GID is not 993 on wepp1, do not force-change it; set `GID=<docker gid>` in `docker/.env` and set `APP_GID=<docker gid>` for prod builds.
+- [ ] Run the docker GID fixer only on hosts that are supposed to be 993: `sudo ./scripts/ensure_docker_gid_993.sh fix` (see `scripts/README.docker_gid_993.md`).
+- [x] Confirm roger is in docker group: `id -nG roger | rg -w docker`.
+- [ ] After UID/GID updates, reset ownership: `sudo chown -R roger:docker /geodata`.
+  - Dev/test hosts (`wc.bearhive.duckdns.org`, `wc-prod.bearhive.duckdns.org`) keep UID 1000 in `docker/.env`.
+  - Prod (`wepp.cloud` / wepp1) should use UID 1002 and GID 130 (update `docker/docker-compose.prod.yml` build args or an override file before building).
 
 ## Backups
-- [ ] Postgres backup from bare metal to `/tmp/wepppy-YYYYMMDD.dump` (see `docs/dev-notes/docker_compose_plan.md`).
+- [x] Postgres backup from bare metal to `/tmp/wepppy-YYYYMMDD.dump` (see `docs/dev-notes/docker_compose_plan.md`).
   - `pg_dump -h localhost -U wepppy -d wepppy -Fc -f /tmp/wepppy-YYYYMMDD.dump`
-- [ ] Archive repo: `rsync -a /workdir/wepppy /workdir/_wepppy_YYYYMMDD`.
-- [ ] Snapshot old systemd units: `sudo cp /etc/systemd/system/*wepp* /workdir/_wepppy_YYYYMMDD/systemd/`.
+- [x] Archive repo: `rsync -a /workdir/wepppy /workdir/_wepppy_YYYYMMDD`.
+- [x] Snapshot old systemd units: `sudo cp /etc/systemd/system/*wepp* /workdir/_wepppy_YYYYMMDD/systemd/`.
 
 ## Stop legacy services
-- [ ] `sudo systemctl disable --now <old weppcloud units>`.
-- [ ] Stop old redis/postgres systemd units if the compose stack will own those ports.
-- [ ] Stop/disable Apache if it is still handling wepp.cloud (free 80/443 for Caddy).
-- [ ] Stop any old Docker containers (if present).
+- [x] `sudo systemctl disable --now <old weppcloud units>`.
+- [x] Stop old redis/postgres systemd units if the compose stack will own those ports.
+- [ ] Migrate Apache static sites from `/etc/apache2/sites-enabled/wsgi_sites.conf` into the Caddyfile.
+- [x] Stop/disable Apache if it is still handling wepp.cloud (free 80/443 for Caddy).
+- [x] Stop any old Docker containers (if present).
 
 ## Repos under /workdir
 - [ ] Clone `https://github.com/rogerlew/wepppy` -> `/workdir/wepppy`.
@@ -99,6 +111,7 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 
 ## Compose env and config
 - [ ] Create `docker/.env` (keys + secrets + host config):
+  - `UID`, `GID` (use host values; wepp1 uses UID 1002 and docker GID 130)
   - `SECRET_KEY`, `SECURITY_PASSWORD_SALT`
   - `POSTGRES_PASSWORD`, `DATABASE_URL` (example: `postgresql://wepppy:${POSTGRES_PASSWORD}@postgres:5432/wepppy`)
   - `WEPP_AUTH_JWT_SECRET`, `DTALE_INTERNAL_TOKEN`
@@ -111,19 +124,17 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 - [ ] Set `CADDY_FILE=/workdir/wepppy/docker/caddy/Caddyfile.weppcloud` (or similar) if using a custom Caddyfile.
 
 ## Caddy + TLS
-- [ ] Decide TLS termination: Caddy (Lets Encrypt) vs external proxy (current wepp.cloud uses Apache).
-- [ ] If Caddy terminates TLS:
-  - [ ] Create a new Caddyfile with `wepp.cloud` site block (remove `auto_https off` to allow Lets Encrypt).
-  - [ ] Ensure HTTPS redirect is enforced (Caddy does this by default when TLS is enabled).
-  - [ ] Update compose port mappings to expose 80 and 443, or add an override file.
-  - [ ] Ensure 80/443 are open to the host.
-- [ ] If external TLS terminates:
-  - [ ] Keep `docker/caddy/Caddyfile` http://:8080 and pass `X-Forwarded-Proto https`.
+- [ ] Use Caddy for TLS termination on wepp.cloud (Lets Encrypt); Apache is retired.
+- [ ] Use `docker/caddy/Caddyfile.wepp1` for wepp.cloud (TLS termination + redirects).
+- [ ] Ensure HTTPS redirect is enforced (Caddy does this by default when TLS is enabled).
+- [ ] Use the override file `docker/docker-compose.prod.wepp1.yml` to expose 80/443 and persist `/data` + `/config`.
+- [ ] Ensure 80/443 are open to the host and DNS points to wepp1.
+- [ ] If TLS is terminated externally (fallback only), keep `docker/caddy/Caddyfile` on http://:8080 and pass `X-Forwarded-Proto https`.
 
 ## Build + start stack
-- [ ] Build images: `docker compose -f docker/docker-compose.prod.yml build` (note: `wctl` targets dev compose).
-- [ ] Start stack: `docker compose -f docker/docker-compose.prod.yml up -d`.
-- [ ] Check health: `docker compose -f docker/docker-compose.prod.yml ps`.
+- [ ] Build images (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml build`.
+- [ ] Start stack (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml up -d`.
+- [ ] Check health: `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml ps`.
 
 ## Restore database + migrate
 - [ ] Stop writers: `docker compose -f docker/docker-compose.prod.yml stop weppcloud rq-worker`.

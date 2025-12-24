@@ -1,0 +1,14 @@
+services:
+  caddy:
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /workdir/wepppy/docker/caddy/Caddyfile.wepp1:/etc/caddy/Caddyfile:ro
+      - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:
