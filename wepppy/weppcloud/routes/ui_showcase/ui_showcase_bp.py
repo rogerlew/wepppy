@@ -1,7 +1,8 @@
 from collections import OrderedDict
+import os
 from types import SimpleNamespace
 from markupsafe import Markup
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app
 
 from wepppy.weppcloud.controllers_js import unitizer_map_builder
 
@@ -64,6 +65,12 @@ def _build_unitizer_demo():
 def component_gallery() -> str:
     """Render the UI component showcase gallery."""
     map_data, precisions, unitizer_stub, cls_units, str_units = _build_unitizer_demo()
+    cap_base_url = (
+        current_app.config.get("CAP_BASE_URL")
+        or os.getenv("CAP_BASE_URL")
+        or "/cap"
+    ).rstrip("/")
+    cap_site_key = current_app.config.get("CAP_SITE_KEY") or os.getenv("CAP_SITE_KEY", "demo")
 
     sample = {
         "project_name": "South Fork Demo",
@@ -101,13 +108,13 @@ def component_gallery() -> str:
     ]
     radio_mode_help = {
         "baseline": Markup(
-            "<p>Ideal for quick analyses where the run aligns with current observations.</p>"
+            "<p>Ideal for quick analyzes where the run aligns with current observations.</p>"
         ),
         "mitigation": Markup(
             "<p>Highlights mitigation levers; pairs well with the unitizer for real-time conversions.</p>"
         ),
         "workspace": Markup(
-            "<p>Currently gated to editors while we stabilise the experimental workflow.</p>"
+            "<p>Currently gated to editors while we stabilize the experimental workflow.</p>"
         ),
     }
     summary_rows = [
@@ -259,6 +266,32 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_cap_checkbox",
+            "label": "Cap checkbox border vs surface",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "border_vs_surface",
+                    "foreground": "#theme_lab_cap_checkbox",
+                    "background": "#theme_lab_cap_checkbox",
+                    "foreground_mode": "border",
+                }
+            ],
+        },
+        {
+            "id": "wc_cap_checkbox_verified",
+            "label": "Cap checkbox verified vs background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "verified_border_vs_background",
+                    "foreground": "#theme_lab_cap_checkbox_verified",
+                    "background": "#theme_lab_cap_checkbox_verified",
+                    "foreground_mode": "border",
+                }
+            ],
+        },
+        {
             "id": "pure_button_disabled",
             "label": "Disabled primary button text vs background",
             "threshold": 3.0,
@@ -357,4 +390,6 @@ def component_gallery() -> str:
         theme_options=THEME_OPTIONS,
         theme_lab_sub_cmap_options=theme_lab_sub_cmap_options,
         theme_contrast_targets=theme_contrast_targets,
+        cap_base_url=cap_base_url,
+        cap_site_key=cap_site_key,
     )

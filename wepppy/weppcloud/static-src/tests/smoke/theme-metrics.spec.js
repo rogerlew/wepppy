@@ -6,7 +6,18 @@ import {
   writeContrastReport
 } from './theme-metrics.helpers.js';
 
-const THEME_LAB_PATH = '/weppcloud/ui/components/';
+const THEME_LAB_PATH = (() => {
+  const hasSmokePrefix = Object.prototype.hasOwnProperty.call(process.env, 'SMOKE_SITE_PREFIX');
+  const rawPrefix = hasSmokePrefix
+    ? (process.env.SMOKE_SITE_PREFIX || '')
+    : (process.env.SITE_PREFIX || '/weppcloud');
+  const prefix = rawPrefix.trim();
+  if (!prefix || prefix === '/') {
+    return '/ui/components/';
+  }
+  const normalized = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+  return `${normalized}/ui/components/`;
+})();
 
 test.describe('theme contrast metrics', () => {
   test('collects rendered contrast ratios for every theme', async ({ page, browser }) => {
@@ -23,14 +34,7 @@ test.describe('theme contrast metrics', () => {
       const context = await browser.newContext();
       const themedPage = await context.newPage();
       await themedPage.addInitScript(({ themeId: currentTheme }) => {
-        const applyTheme = (theme) => {
-          const root = document.documentElement;
-          if (!root) return;
-          if (theme && theme !== 'default') {
-            root.setAttribute('data-theme', theme);
-          } else {
-            root.removeAttribute('data-theme');
-          }
+        const syncStorage = (theme) => {
           try {
             if (!theme || theme === 'default') {
               window.localStorage.removeItem('wc-theme');
@@ -41,8 +45,25 @@ test.describe('theme contrast metrics', () => {
             // ignore storage failures (private browsing, etc.)
           }
         };
-        applyTheme(currentTheme);
-        window.__applyThemeForPlaywright = applyTheme;
+        const applyTheme = (theme) => {
+          const root = document.documentElement;
+          if (!root) return;
+          if (theme && theme !== 'default') {
+            root.setAttribute('data-theme', theme);
+          } else {
+            root.removeAttribute('data-theme');
+          }
+        };
+        syncStorage(currentTheme);
+        if (document.documentElement) {
+          applyTheme(currentTheme);
+        } else {
+          document.addEventListener('DOMContentLoaded', () => applyTheme(currentTheme), { once: true });
+        }
+        window.__applyThemeForPlaywright = (theme) => {
+          syncStorage(theme);
+          applyTheme(theme);
+        };
       }, { themeId });
 
       await themedPage.goto(themeLabUrl.toString(), { waitUntil: 'networkidle' });

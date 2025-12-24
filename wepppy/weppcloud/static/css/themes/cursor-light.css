@@ -1,11 +1,11 @@
-/* Generated from Cursor-Light-color-theme.json on 2025-11-15T01:05:53.844960+00:00 */
+/* Generated from Cursor-Light-color-theme.json on 2025-12-24T22:12:26.021921+00:00 */
 :root[data-theme="cursor-light"] {
   --wc-color-accent: #FCFCFC00;
   --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
   --wc-color-attention: #F3F3F4;
   --wc-color-attention-soft: rgba(243, 243, 244, 0.220);
   --wc-color-border: #0B0B2D0A;
-  --wc-color-border-strong: #1616181A;
+  --wc-color-border-strong: rgba(21, 21, 29, 0.550);
   --wc-color-critical: #0E0E2A47;
   --wc-color-critical-soft: rgba(14, 14, 42, 0.200);
   --wc-color-link: #3173A7;

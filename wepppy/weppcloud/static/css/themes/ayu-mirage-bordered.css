@@ -1,11 +1,11 @@
-/* Generated from ayu-mirage-bordered.json on 2025-11-15T01:05:53.841723+00:00 */
+/* Generated from ayu-mirage-bordered.json on 2025-12-24T22:12:26.018630+00:00 */
 :root[data-theme="ayu-mirage-bordered"] {
   --wc-color-accent: #ffcc66b3;
   --wc-color-accent-soft: rgba(255, 204, 102, 0.180);
   --wc-color-attention: #ffcc6633;
   --wc-color-attention-soft: rgba(255, 204, 102, 0.220);
   --wc-color-border: #707a8c45;
-  --wc-color-border-strong: #171b24;
+  --wc-color-border-strong: rgba(204, 202, 194, 0.550);
   --wc-color-critical: #242936;
   --wc-color-critical-soft: rgba(36, 41, 54, 0.200);
   --wc-color-link: #ffcc66;

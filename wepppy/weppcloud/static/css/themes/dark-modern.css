@@ -1,11 +1,11 @@
-/* Generated from dark_modern.json on 2025-11-15T01:05:53.846074+00:00 */
+/* Generated from dark_modern.json on 2025-12-24T22:12:26.023027+00:00 */
 :root[data-theme="dark-modern"] {
   --wc-color-accent: #0078D4;
   --wc-color-accent-soft: rgba(0, 120, 212, 0.180);
   --wc-color-attention: #616161;
   --wc-color-attention-soft: rgba(97, 97, 97, 0.220);
   --wc-color-border: #3C3C3C;
-  --wc-color-border-strong: #3C3C3C;
+  --wc-color-border-strong: rgba(204, 204, 204, 0.550);
   --wc-color-critical: #FFFFFF;
   --wc-color-critical-soft: rgba(255, 255, 255, 0.200);
   --wc-color-link: #4daafc;

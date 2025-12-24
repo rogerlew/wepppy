@@ -1,11 +1,11 @@
-/* Generated from light-high-contrast-theme.json on 2025-11-15T01:05:53.845558+00:00 */
+/* Generated from light-high-contrast-theme.json on 2025-12-24T22:12:26.022494+00:00 */
 :root[data-theme="light-high-contrast"] {
   --wc-color-accent: #0050A4;
   --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
   --wc-color-attention: #C25A00;
   --wc-color-attention-soft: rgba(194, 90, 0, 0.220);
   --wc-color-border: #0F3A5F;
-  --wc-color-border-strong: #0F3A5F;
+  --wc-color-border-strong: rgba(5, 21, 38, 0.550);
   --wc-color-critical: #B00020;
   --wc-color-critical-soft: rgba(176, 0, 32, 0.200);
   --wc-color-link: #0050A4;

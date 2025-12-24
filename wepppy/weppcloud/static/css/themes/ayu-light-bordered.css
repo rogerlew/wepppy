@@ -1,11 +1,11 @@
-/* Generated from ayu-light-bordered.json on 2025-11-15T01:05:53.840417+00:00 */
+/* Generated from ayu-light-bordered.json on 2025-12-24T22:12:26.017306+00:00 */
 :root[data-theme="ayu-light-bordered"] {
   --wc-color-accent: #ffaa33b3;
   --wc-color-accent-soft: rgba(255, 170, 51, 0.180);
   --wc-color-attention: #ffaa3333;
   --wc-color-attention-soft: rgba(255, 170, 51, 0.220);
   --wc-color-border: #8a919945;
-  --wc-color-border-strong: #6b7d8f1f;
+  --wc-color-border-strong: rgba(92, 97, 102, 0.550);
   --wc-color-critical: #fcfcfc;
   --wc-color-critical-soft: rgba(252, 252, 252, 0.200);
   --wc-color-link: #ffaa33;

@@ -124,6 +124,12 @@ async function samplePairColors(page, pair) {
         if (normalized === 'transparent') {
           return { r: 0, g: 0, b: 0, a: 0 };
         }
+        if (normalized.startsWith('color(')) {
+          const parsed = parseColorFunction(normalized);
+          if (parsed) {
+            return parsed;
+          }
+        }
         if (normalized.startsWith('#')) {
           return parseHex(normalized);
         }
@@ -138,6 +144,41 @@ async function samplePairColors(page, pair) {
         const computed = getComputedStyle(probe).color;
         probe.remove();
         return parseRgb(computed);
+      };
+
+      const parseColorFunction = (value) => {
+        const start = value.indexOf('(');
+        const end = value.lastIndexOf(')');
+        if (start === -1 || end === -1 || end <= start + 1) {
+          return null;
+        }
+        const payload = value.slice(start + 1, end).trim();
+        if (!payload.startsWith('srgb')) {
+          return null;
+        }
+        let rest = payload.slice(4).trim();
+        let alpha = 1;
+        if (rest.includes('/')) {
+          const segments = rest.split('/');
+          rest = segments[0].trim();
+          alpha = Number.parseFloat(segments[1].trim());
+        }
+        const parts = rest.split(/\s+/).filter(Boolean);
+        if (parts.length < 3) {
+          return null;
+        }
+        const toByte = (token) => {
+          const value = Number.parseFloat(token);
+          if (Number.isNaN(value)) return 0;
+          const clamped = Math.max(0, Math.min(1, value));
+          return Math.round(clamped * 255);
+        };
+        return {
+          r: toByte(parts[0]),
+          g: toByte(parts[1]),
+          b: toByte(parts[2]),
+          a: clampAlpha(alpha),
+        };
       };
 
       const parseHex = (value) => {
@@ -220,9 +261,15 @@ async function samplePairColors(page, pair) {
         return { r: 255, g: 255, b: 255, a: 1 };
       };
 
-      const resolveForeground = (element) => {
+      const resolveForeground = (element, mode) => {
         if (!element) return null;
         const style = getComputedStyle(element);
+        const borderColor = parseColorString(style.borderTopColor);
+        if (mode === 'border') {
+          if (borderColor && borderColor.a > 0) {
+            return borderColor;
+          }
+        }
         let referenceColor = style.color;
         if (element.matches('input[type="checkbox"], input[type="radio"]') && style.accentColor) {
           referenceColor = style.accentColor;
@@ -231,7 +278,6 @@ async function samplePairColors(page, pair) {
         if (parsed && parsed.a > 0) {
           return parsed;
         }
-        const borderColor = parseColorString(style.borderTopColor);
         return borderColor || parsed;
       };
 
@@ -242,9 +288,10 @@ async function samplePairColors(page, pair) {
 
       const foregroundEl = getElement(descriptor.foreground);
       const backgroundEl = descriptor.background ? getElement(descriptor.background) : foregroundEl;
+      const foregroundMode = descriptor.foreground_mode || descriptor.foregroundMode || null;
 
       return {
-        foreground: resolveForeground(foregroundEl),
+        foreground: resolveForeground(foregroundEl, foregroundMode),
         background: resolveBackground(backgroundEl || foregroundEl),
         missingForeground: !foregroundEl,
         missingBackground: Boolean(descriptor.background && !backgroundEl),

@@ -148,18 +148,18 @@ services:
     build:
       context: ..
       dockerfile: services/cap/Dockerfile.dev
+      args:
+        CAP_REPO: ${CAP_REPO:-https://github.com/tiagozip/cap}
+        CAP_REF: ${CAP_REF:-main}
     image: wepppy-cap-dev
     container_name: wepppy-cap
     environment:
       CAP_SITE_KEY: ${CAP_SITE_KEY}
       CAP_SECRET: ${CAP_SECRET}
       CAP_CORS_ORIGIN: ${CAP_CORS_ORIGIN:-*}
-      CAP_ASSET_ROOT: /workdir/cap
+      CAP_ASSET_ROOT: /opt/cap
       CAP_DATA_DIR: /var/lib/cap
-      CAP_WIDGET_PATH: /workdir/cap/widget/src/cap.min.js
-      CAP_FLOATING_PATH: /workdir/cap/widget/src/cap-floating.min.js
     volumes:
-      - ../../cap:/workdir/cap:ro
       - cap-data:/var/lib/cap
     expose:
       - "3000"

@@ -11,7 +11,7 @@
     "notes": [
       "Tokens are evaluated in order. The first token found in a theme file is used.",
       "If no tokens resolve, the fallback value is applied.",
-      "Per-theme overrides can force specific values or opt-in to extra CSS behaviours."
+      "Per-theme overrides can force specific values or opt-in to extra CSS behaviors."
     ]
   },
   "themes": {
@@ -27,8 +27,7 @@
       "overrides": {
         "--wc-shadow-sm": "0 6px 18px rgba(0, 0, 0, 0.35)",
         "--wc-shadow-md": "0 18px 48px rgba(0, 0, 0, 0.45)",
-        "--wc-color-border": "#181A1F",
-        "--wc-color-border-strong": "#0F1115"
+        "--wc-color-border": "#181A1F"
       }
     },
     "ayu-dark": {
@@ -41,7 +40,6 @@
       },
       "overrides": {
         "--wc-color-border": "#171A1F",
-        "--wc-color-border-strong": "#101217",
         "--wc-shadow-sm": "none",
         "--wc-shadow-md": "none",
         "--wc-color-on-primary": "#0b0e14"
@@ -295,8 +293,12 @@
     },
     "--wc-color-border-strong": {
       "description": "Stronger border color for separators and hover states.",
-      "fallback": "#afb8c1",
+      "fallback": "#8b949e",
       "tokens": [
+        {
+          "token": "editor.foreground",
+          "alpha": 0.55
+        },
         "editorWidget.border",
         "pickerGroup.border",
         "statusBarItem.hoverBackground"

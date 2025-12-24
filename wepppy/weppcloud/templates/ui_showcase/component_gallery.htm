@@ -1,10 +1,124 @@
 {% extends "base_pure.htm" %}
 {% import "controls/_pure_macros.html" as ui %}
+{% import "shared/cap_macros.htm" as cap_macros %}
 
 {% block title %}UI Components Showcase{% endblock %}
 
 {% block site_header %}
   {% include 'header/header.htm' %}
+{% endblock %}
+
+{% block head_extras %}
+  {{ super() }}
+  <style>
+    .wc-cap-prompt {
+      display: grid;
+      gap: var(--wc-space-xs);
+      max-width: 360px;
+    }
+
+    .wc-cap-trigger {
+      appearance: none;
+      border: 1px solid var(--wc-color-border);
+      background: var(--wc-color-surface);
+      border-radius: var(--wc-radius-sm);
+      box-shadow: var(--wc-shadow-sm);
+      padding: var(--wc-space-sm) var(--wc-space-md);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: var(--wc-space-sm);
+      align-items: center;
+      text-align: left;
+      width: 100%;
+      color: var(--wc-color-text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .wc-cap-trigger:hover {
+      border-color: var(--wc-color-border-strong);
+    }
+
+    .wc-cap-trigger:focus-visible {
+      outline: 2px solid var(--wc-color-primary);
+      outline-offset: 2px;
+    }
+
+    .wc-cap-checkbox {
+      width: 1.1rem;
+      height: 1.1rem;
+      border: 2px solid var(--wc-color-border-strong);
+      border-radius: 0.2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--wc-color-surface);
+      flex-shrink: 0;
+    }
+
+    .wc-cap-label {
+      font-weight: 600;
+    }
+
+    .wc-cap-brand {
+      display: grid;
+      justify-items: end;
+      gap: 2px;
+      font-size: 0.65rem;
+      color: var(--wc-color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .wc-cap-brand-mark {
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--wc-color-text);
+    }
+
+    .wc-cap-brand-text {
+      font-size: 0.6rem;
+      text-transform: none;
+      letter-spacing: 0.04em;
+    }
+
+    .wc-cap-status {
+      font-size: var(--wc-font-size-sm);
+      color: var(--wc-color-text-muted);
+    }
+
+    .wc-cap-prompt[data-cap-verified="true"] .wc-cap-status {
+      color: var(--wc-color-positive);
+    }
+
+    .wc-cap-trigger.is-verified,
+    .wc-cap-trigger[disabled] {
+      cursor: default;
+    }
+
+    .wc-cap-trigger.is-verified {
+      opacity: 0.85;
+    }
+
+    .wc-cap-trigger.is-verified .wc-cap-checkbox {
+      border-color: var(--wc-color-text);
+      background: color-mix(in srgb, var(--wc-color-positive) 12%, var(--wc-color-surface));
+    }
+
+    .wc-cap-trigger.is-verified .wc-cap-checkbox::after {
+      content: "";
+      width: 0.35rem;
+      height: 0.6rem;
+      border-right: 2px solid var(--wc-color-text);
+      border-bottom: 2px solid var(--wc-color-text);
+      transform: rotate(45deg);
+      margin-top: -0.1rem;
+    }
+
+    .wc-cap-widget {
+      display: none;
+    }
+  </style>
 {% endblock %}
 
 {% block body %}
@@ -159,6 +273,20 @@
 
     {{ ui.dynamic_slot("map_slot", help="Controllers inject interactive maps or charts into slots so cards stay balanced.", attrs={"data-slot": "map-preview"}) }}
   {% endcall %}
+
+  <section class="wc-stack">
+    <h2>CAP Verification Prompt</h2>
+    <p class="wc-text-muted">
+      Cap prompts enforce anonymous verification before high-impact actions.
+    </p>
+    {{ cap_macros.cap_prompt(
+      "ui-showcase",
+      "cap-ui-showcase",
+      cap_base_url,
+      cap_site_key,
+      status_text="Complete verification to unlock create buttons."
+    ) }}
+  </section>
 
   <section class="wc-stack">
     <h2>Tabs &amp; Legends</h2>
@@ -422,6 +550,43 @@
               <input id="theme_lab_checkbox" type="checkbox" checked>
               <span>Readonly</span>
             </label>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-cap-checkbox">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">CAP checkbox border</h3>
+            <p class="wc-card__description">Cap prompt checkbox border versus surface color.</p>
+          </header>
+          <div class="wc-card__body" id="theme_lab_cap_surface">
+            {{ cap_macros.cap_prompt(
+              "theme-lab",
+              "cap-theme-lab",
+              cap_base_url,
+              cap_site_key,
+              status_text="Complete verification to unlock create buttons.",
+              checkbox_id="theme_lab_cap_checkbox"
+            ) }}
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-cap-checkbox-verified">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">CAP checkbox verified</h3>
+            <p class="wc-card__description">Verified checkbox border versus verified background.</p>
+          </header>
+          <div class="wc-card__body" id="theme_lab_cap_surface_verified">
+            {{ cap_macros.cap_prompt(
+              "theme-lab-verified",
+              "cap-theme-lab-verified",
+              cap_base_url,
+              cap_site_key,
+              status_text="Verification complete.",
+              checkbox_id="theme_lab_cap_checkbox_verified",
+              verified=True
+            ) }}
           </div>
         </article>
       </div>

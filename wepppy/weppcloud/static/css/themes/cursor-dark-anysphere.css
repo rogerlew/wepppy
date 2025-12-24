@@ -1,11 +1,11 @@
-/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-11-15T01:05:53.842672+00:00 */
+/* Generated from Cursor-Dark-Anysphere-color-theme.json on 2025-12-24T22:12:26.019595+00:00 */
 :root[data-theme="cursor-dark-anysphere"] {
   --wc-color-accent: #30373a;
   --wc-color-accent-soft: rgba(48, 55, 58, 0.180);
   --wc-color-attention: #88C0D0;
   --wc-color-attention-soft: rgba(136, 192, 208, 0.220);
   --wc-color-border: #2A2A2A;
-  --wc-color-border-strong: #2A2A2A00;
+  --wc-color-border-strong: rgba(216, 222, 233, 0.550);
   --wc-color-critical: #D8DEE9;
   --wc-color-critical-soft: rgba(216, 222, 233, 0.200);
   --wc-color-link: #81A1C1;
