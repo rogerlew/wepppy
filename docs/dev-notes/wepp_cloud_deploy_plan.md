@@ -1,0 +1,146 @@
+# wepp.cloud deploy plan (prod refresh)
+
+> Goal: move wepp.cloud from bare-metal Flask to the docker-compose prod stack.
+
+## References
+- `docker/docker-compose.prod.yml`
+- `docker/Dockerfile` (vendored repos + static asset build)
+- `docker/caddy/Caddyfile` (template, currently http://:8080)
+- `docs/dev-notes/docker_compose_plan.md` (db backup/restore)
+- `AGENTS.md` (run dirs, /wc1, /geodata)
+- `wctl/README.md` (installing wctl)
+
+## Preflight / inventory
+- [ ] Schedule maintenance window + downtime notice.
+- [ ] Record running services: `systemctl list-units --type=service | rg -i 'wepp|gunicorn|rq|redis|postgres|caddy|nginx'` (snapshot below).
+- [ ] Capture current env/secrets (OAuth, JWT, database creds, CAP keys).
+- [ ] Confirm `/wc1` path mapping (current host uses `/geodata/wc1`; ensure `/wc1` exists or bind-mount `/geodata/wc1` to `/wc1`).
+- [ ] Verify disk space on `/workdir`, `/wc1`, `/geodata`.
+- [ ] Verify DNS + firewall (80/443 open if Caddy terminates TLS).
+
+## Current host snapshot (wepp1)
+Service inventory:
+```
+● caddy.service                            loaded failed failed  Caddy
+  gunicorn-elevationquery.service          loaded active running Gunicorn for elevationquery
+  gunicorn-metquery.service                loaded active running Gunicorn for metquery
+  gunicorn-preflight.service               loaded active running Gunicorn for weppcloud preflight microservice
+  gunicorn-status.service                  loaded active running Gunicorn for weppcloud status microservice
+  gunicorn-weppcloud.service               loaded active running Gunicorn for weppcloud
+  gunicorn-wmesque.service                 loaded active running Gunicorn for wmesque
+  gunicorn-wmesque2.service                loaded active running Gunicorn for WMSesque (FastAPI)
+  irqbalance.service                       loaded active running irqbalance daemon
+  postgresql.service                       loaded active exited  PostgreSQL RDBMS
+  postgresql@16-main.service               loaded active running PostgreSQL Cluster 16-main
+  redis-server.service                     loaded active running Advanced key-value store
+  rq-wepppy-worker-pool.service            loaded active running RQ Worker Pool for Wepppy
+```
+
+Mount locations noted:
+```
+/workdir
+/geodata
+/geodata/wc1
+```
+
+Disk space:
+```
+Filesystem            Size  Used Avail Use% Mounted on
+tmpfs                  26G  1.7M   26G   1% /run
+/dev/sda1            1000G  746G  204G  79% /
+tmpfs                 126G  1.7M  126G   1% /dev/shm
+tmpfs                 5.0M     0  5.0M   0% /run/lock
+tmpfs                 8.0G   95M  8.0G   2% /media/ramdisk
+/dev/sdb1             3.5T  3.1T  205G  94% /ssd1
+nas.rocket.net:/wepp   30T   29T  1.3T  96% /geodata
+tmpfs                  26G   32K   26G   1% /run/user/1002
+```
+
+## Host updates
+- [ ] `sudo apt update && sudo apt -y upgrade`
+- [ ] Remove old docker/compose packages (if present):
+  - `sudo apt-get remove -y docker docker-engine docker.io containerd runc docker-compose`
+- [ ] Install docker engine + compose plugin:
+  - `sudo apt-get install -y ca-certificates curl gnupg`
+  - `sudo install -m 0755 -d /etc/apt/keyrings`
+  - `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
+  - `echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
+  - `sudo apt update`
+  - `sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin`
+  - `sudo systemctl enable --now docker`
+- [ ] Install git + tooling: `sudo apt-get install -y git rsync jq`
+- [ ] Install npm (only if host-side asset builds are needed): `sudo apt-get install -y npm`
+
+## Backups
+- [ ] Postgres backup from bare metal to `/tmp/wepppy-YYYYMMDD.dump` (see `docs/dev-notes/docker_compose_plan.md`).
+  - `pg_dump -h localhost -U wepppy -d wepppy -Fc -f /tmp/wepppy-YYYYMMDD.dump`
+- [ ] Archive repo: `rsync -a /workdir/wepppy /workdir/_wepppy_YYYYMMDD`.
+- [ ] Snapshot old systemd units: `sudo cp /etc/systemd/system/*wepp* /workdir/_wepppy_YYYYMMDD/systemd/`.
+
+## Stop legacy services
+- [ ] `sudo systemctl disable --now <old weppcloud units>`.
+- [ ] Stop old redis/postgres systemd units if the compose stack will own those ports.
+- [ ] Stop/disable Apache if it is still handling wepp.cloud (free 80/443 for Caddy).
+- [ ] Stop any old Docker containers (if present).
+
+## Repos under /workdir
+- [ ] Clone `https://github.com/rogerlew/wepppy` -> `/workdir/wepppy`.
+- [ ] Clone `https://github.com/tiagozip/cap` -> `/workdir/cap` (required by `cap` service volume).
+- [ ] Confirm which vendored deps should stay in the image (see `docker/Dockerfile`); host clones are optional unless you plan to mount overrides.
+- [ ] Install wctl: `cd /workdir/wepppy && ./wctl/install.sh prod` (optionally set `WCTL_SYMLINK_PATH`).
+- [ ] Optional clones (only if you plan to override vendored deps from `docker/Dockerfile`):
+- [ ] `https://github.com/wepp-in-the-woods/wepppy2` -> `/workdir/wepppy2`.
+- [ ] `https://github.com/wepp-in-the-woods/weppcloud2` -> `/workdir/weppcloud2`.
+- [ ] `https://github.com/rogerlew/f-esri` -> `/workdir/f-esri`.
+- [ ] `https://github.com/rogerlew/weppcloud-wbt` -> `/workdir/weppcloud-wbt`.
+- [ ] `https://github.com/wepp-in-the-woods/wepppyo3` -> `/workdir/wepppyo3`.
+- [ ] `https://github.com/rogerlew/rosetta` -> `/workdir/rosetta`.
+- [ ] `/workdir/peridot`, `/workdir/wepp-forest`, `/workdir/wepp-forest-revegetation` (only if external tooling expects host paths).
+
+## Compose env and config
+- [ ] Create `docker/.env` (keys + secrets + host config):
+  - `SECRET_KEY`, `SECURITY_PASSWORD_SALT`
+  - `POSTGRES_PASSWORD`, `DATABASE_URL` (example: `postgresql://wepppy:${POSTGRES_PASSWORD}@postgres:5432/wepppy`)
+  - `WEPP_AUTH_JWT_SECRET`, `DTALE_INTERNAL_TOKEN`
+  - `EXTERNAL_HOST`, `EXTERNAL_HOST_DESCRIPTION`
+  - `OAUTH_REDIRECT_HOST=wepp.cloud` (optional; defaults to `EXTERNAL_HOST`)
+  - OAuth keys: `OAUTH_GITHUB_CLIENT_ID`, `OAUTH_GITHUB_CLIENT_SECRET`, `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET`
+  - CAP keys: `CAP_SITE_KEY`, `CAP_SECRET`, `CAP_CORS_ORIGIN`
+  - `OPENTOPOGRAPHY_API_KEY` (if used)
+- [ ] Ensure `/wc1` and `/geodata` are mounted and readable (compose expects `/wc1` and `/wc1/geodata`).
+- [ ] Set `CADDY_FILE=/workdir/wepppy/docker/caddy/Caddyfile.weppcloud` (or similar) if using a custom Caddyfile.
+
+## Caddy + TLS
+- [ ] Decide TLS termination: Caddy (Lets Encrypt) vs external proxy (current wepp.cloud uses Apache).
+- [ ] If Caddy terminates TLS:
+  - [ ] Create a new Caddyfile with `wepp.cloud` site block (remove `auto_https off` to allow Lets Encrypt).
+  - [ ] Ensure HTTPS redirect is enforced (Caddy does this by default when TLS is enabled).
+  - [ ] Update compose port mappings to expose 80 and 443, or add an override file.
+  - [ ] Ensure 80/443 are open to the host.
+- [ ] If external TLS terminates:
+  - [ ] Keep `docker/caddy/Caddyfile` http://:8080 and pass `X-Forwarded-Proto https`.
+
+## Build + start stack
+- [ ] Build images: `docker compose -f docker/docker-compose.prod.yml build` (note: `wctl` targets dev compose).
+- [ ] Start stack: `docker compose -f docker/docker-compose.prod.yml up -d`.
+- [ ] Check health: `docker compose -f docker/docker-compose.prod.yml ps`.
+
+## Restore database + migrate
+- [ ] Stop writers: `docker compose -f docker/docker-compose.prod.yml stop weppcloud rq-worker`.
+- [ ] Restore the backup into the `postgres` container (see `docs/dev-notes/docker_compose_plan.md`).
+  - `docker compose -f docker/docker-compose.prod.yml cp /tmp/wepppy-YYYYMMDD.dump postgres:/tmp/restore.dump`
+  - `docker compose -f docker/docker-compose.prod.yml exec postgres pg_restore --clean --if-exists -U wepppy -d wepppy /tmp/restore.dump`
+  - `docker compose -f docker/docker-compose.prod.yml exec postgres rm /tmp/restore.dump`
+- [ ] Run migrations: `docker compose -f docker/docker-compose.prod.yml run --rm weppcloud flask db upgrade`.
+- [ ] Start services: `docker compose -f docker/docker-compose.prod.yml up -d`.
+
+## Post-deploy validation
+- [ ] `curl -fsS https://wepp.cloud/health` (or `/weppcloud/health` via proxy).
+- [ ] Confirm login + OAuth, run creation, and a smoke run.
+- [ ] Verify status/preflight WebSockets, cap UI, dtale, and browse endpoints.
+- [ ] Scan logs: `docker compose -f docker/docker-compose.prod.yml logs --tail=200`.
+
+## Rollback
+- [ ] Stop compose stack: `docker compose -f docker/docker-compose.prod.yml down`.
+- [ ] Restore `/workdir/_wepppy_YYYYMMDD` and re-enable old systemd units.
+- [ ] Restore Postgres from the pre-migration dump.

@@ -1,4 +1,4 @@
-# WEPPcloud Auth Stack on forest.bearhive.internal
+# WEPPcloud Auth Stack on forest.bearhive.internal (deprecated)
 
 Environment: `forest.bearhive.internal` behind pfSense/HAProxy terminating TLS and path-prefixing all application traffic at `/weppcloud`. Flask runs in the `wepppy310-env` conda environment (Python 3.10) with Gunicorn. Sessions backed by Redis, database in PostgreSQL.
 
