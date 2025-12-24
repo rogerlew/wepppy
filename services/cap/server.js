@@ -11,10 +11,10 @@ const DATA_DIR = process.env.CAP_DATA_DIR || "/var/lib/cap";
 const ASSET_ROOT = process.env.CAP_ASSET_ROOT || "/workdir/cap";
 
 const WIDGET_PATH =
-  process.env.CAP_WIDGET_PATH || path.join(ASSET_ROOT, "widget/src/src/cap.js");
+  process.env.CAP_WIDGET_PATH || path.join(ASSET_ROOT, "widget/src/cap.min.js");
 const FLOATING_PATH =
   process.env.CAP_FLOATING_PATH ||
-  path.join(ASSET_ROOT, "widget/src/src/cap-floating.js");
+  path.join(ASSET_ROOT, "widget/src/cap-floating.min.js");
 const WASM_JS_PATH =
   process.env.CAP_WASM_JS_PATH ||
   path.join(ASSET_ROOT, "wasm/src/browser/cap_wasm.js");

@@ -276,7 +276,20 @@ def interfaces():
         pass
 
     try:
-        return render_template('interfaces.htm', user=current_user, runs_counter=runs_counter)
+        cap_base_url = (current_app.config.get('CAP_BASE_URL') or os.getenv('CAP_BASE_URL', '/cap')).rstrip('/')
+        cap_asset_base_url = (
+            current_app.config.get('CAP_ASSET_BASE_URL')
+            or os.getenv('CAP_ASSET_BASE_URL', f'{cap_base_url}/assets')
+        ).rstrip('/')
+        cap_site_key = current_app.config.get('CAP_SITE_KEY') or os.getenv('CAP_SITE_KEY', '')
+        return render_template(
+            'interfaces.htm',
+            user=current_user,
+            runs_counter=runs_counter,
+            cap_base_url=cap_base_url,
+            cap_asset_base_url=cap_asset_base_url,
+            cap_site_key=cap_site_key,
+        )
     except Exception:
         return exception_factory()
 
@@ -295,7 +308,7 @@ def landing():
 @weppcloud_site_bp.route('/landing/light/', strict_slashes=False)
 @handle_with_exception_factory
 def landing_light():
-    """Render the light-themed (governmental aesthetic) landing page variant."""
+    """Render the light-themed (governmental esthetic) landing page variant."""
     return _render_landing_page('light')
 
 

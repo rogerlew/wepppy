@@ -1,4 +1,5 @@
 {% extends "base_pure.htm" %}
+{% import "shared/cap_macros.htm" as cap_macros %}
 
 {% block title %}WEPPcloud{% endblock %}
 
@@ -54,6 +55,127 @@
 </nav>
 {% endblock %}
 
+{% block head_extras %}
+  {{ super() }}
+  {% if not current_user.is_authenticated %}
+  <style>
+    .wc-run-button.is-disabled {
+      opacity: 0.6;
+      filter: grayscale(0.2);
+      cursor: not-allowed;
+    }
+
+    .wc-cap-prompt {
+      display: grid;
+      gap: var(--wc-space-xs);
+      max-width: 360px;
+    }
+
+    .wc-cap-trigger {
+      appearance: none;
+      border: 1px solid var(--wc-color-border);
+      background: var(--wc-color-surface);
+      border-radius: var(--wc-radius-sm);
+      box-shadow: var(--wc-shadow-sm);
+      padding: var(--wc-space-sm) var(--wc-space-md);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: var(--wc-space-sm);
+      align-items: center;
+      text-align: left;
+      width: 100%;
+      color: var(--wc-color-text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .wc-cap-trigger:hover {
+      border-color: var(--wc-color-border-strong);
+    }
+
+    .wc-cap-trigger:focus-visible {
+      outline: 2px solid var(--wc-color-primary);
+      outline-offset: 2px;
+    }
+
+    .wc-cap-checkbox {
+      width: 1.1rem;
+      height: 1.1rem;
+      border: 2px solid var(--wc-color-border-strong);
+      border-radius: 0.2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--wc-color-surface);
+      flex-shrink: 0;
+    }
+
+    .wc-cap-label {
+      font-weight: 600;
+    }
+
+    .wc-cap-brand {
+      display: grid;
+      justify-items: end;
+      gap: 2px;
+      font-size: 0.65rem;
+      color: var(--wc-color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .wc-cap-brand-mark {
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--wc-color-text);
+    }
+
+    .wc-cap-brand-text {
+      font-size: 0.6rem;
+      text-transform: none;
+      letter-spacing: 0.04em;
+    }
+
+    .wc-cap-status {
+      font-size: var(--wc-font-size-sm);
+      color: var(--wc-color-text-muted);
+    }
+
+    .wc-cap-prompt[data-cap-verified="true"] .wc-cap-status {
+      color: var(--wc-color-positive);
+    }
+
+    .wc-cap-trigger.is-verified,
+    .wc-cap-trigger[disabled] {
+      cursor: default;
+    }
+
+    .wc-cap-trigger.is-verified {
+      opacity: 0.85;
+    }
+
+    .wc-cap-trigger.is-verified .wc-cap-checkbox {
+      border-color: var(--wc-color-positive);
+      background: color-mix(in srgb, var(--wc-color-positive) 12%, var(--wc-color-surface));
+    }
+
+    .wc-cap-trigger.is-verified .wc-cap-checkbox::after {
+      content: "";
+      width: 0.35rem;
+      height: 0.6rem;
+      border-right: 2px solid var(--wc-color-positive);
+      border-bottom: 2px solid var(--wc-color-positive);
+      transform: rotate(45deg);
+      margin-top: -0.1rem;
+    }
+
+    .wc-feature__actions .wc-run-form {
+      margin: 0;
+    }
+  </style>
+  {% endif %}
+{% endblock %}
+
 {% block body %}
 <div class="wc-stack">
   <div id="run-context-menu" class="wc-context-menu" aria-hidden="true" role="menu">
@@ -81,10 +203,55 @@
           This workflow enables meaningful comparisons across unburned, burned, and treatment conditions and incorporates the Wildfire
           Ash Transport And Risk estimation tool (WATAR).
         </p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("disturbed", "cap-disturbed", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed9002') }}" title="disturbed9002" data-run-menu rel="nofollow">Start Disturbed Run (CONUS)</a>
           <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed-hi') }}" title="disturbed-hi" data-run-menu rel="nofollow">Start Disturbed-Hawaii Run (Experimental)</a>
           <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed-ak') }}" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed9002') }}" data-cap-section="disturbed" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="disturbed9002"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='disturbed9002') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Disturbed Run (CONUS)
+            </button>
+          </form>
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed-hi') }}" data-cap-section="disturbed" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="disturbed-hi"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='disturbed-hi') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Disturbed-Hawaii Run (Experimental)
+            </button>
+          </form>
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed-ak') }}" data-cap-section="disturbed" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="disturbed-ak"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='disturbed-ak') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Disturbed-Alaska Run (Experimental)
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns']) }} WATAR hillslopes) ran since January 1, 2024.
@@ -106,11 +273,69 @@
           Users can simulate stochastic wildfires, recovery trajectories, and cover transformations across perennial, annual, shrub,
           and tree components following the fire event.
         </p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("revegetation", "cap-revegetation", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='reveg') }}" title="reveg" data-run-menu rel="nofollow">Start Revegetation Run (CONUS)</a>
           <a class="pure-button" href="{{ url_for('run_0.create', config='reveg-mofe') }}" title="reveg-mofe" data-run-menu rel="nofollow">Start Multiple OFE Revegetation Run (CONUS)</a>
           <a class="pure-button" href="{{ url_for('run_0.create', config='reveg-10m-mofe') }}" title="reveg-10m-mofe" data-run-menu rel="nofollow">Start 10m Multiple OFE Revegetation Run (CONUS)</a>
           <a class="pure-button pure-button-secondary" href="{{ url_for('run_0.create', config='disturbed-ak') }}" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='reveg') }}" data-cap-section="revegetation" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="reveg"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='reveg') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Revegetation Run (CONUS)
+            </button>
+          </form>
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='reveg-mofe') }}" data-cap-section="revegetation" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="reveg-mofe"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='reveg-mofe') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Multiple OFE Revegetation Run (CONUS)
+            </button>
+          </form>
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='reveg-10m-mofe') }}" data-cap-section="revegetation" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="reveg-10m-mofe"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='reveg-10m-mofe') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start 10m Multiple OFE Revegetation Run (CONUS)
+            </button>
+          </form>
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed-ak') }}" data-cap-section="revegetation" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button pure-button-secondary wc-run-button is-disabled"
+                    title="disturbed-ak"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='disturbed-ak') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Disturbed-Alaska Run (Experimental)
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -133,8 +358,27 @@
         <p>
           This project has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No 10100389.
         </p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("eu", "cap-eu", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='eu-disturbed') }}" title="eu-disturbed" data-run-menu rel="nofollow">Start EU WEPPcloud-Disturbed Run</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='eu-disturbed') }}" data-cap-section="eu" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="eu-disturbed"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='eu-disturbed') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start EU WEPPcloud-Disturbed Run
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -152,8 +396,27 @@
       <div class="wc-feature__body">
         <h2 id="section-au">WEPPcloud-AU</h2>
         <p>WEPPcloud for Australia assigns managements from the Land Use of Australia 2010-11 dataset and constructs soils from ASRIS data. U.S. climate stations are selected using AGDC monthly precipitation and temperature patterns.</p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("au", "cap-au", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='au-disturbed') }}" title="au-disturbed" data-run-menu rel="nofollow">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='au-disturbed') }}" data-cap-section="au" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="au-disturbed"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='au-disturbed') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -174,8 +437,27 @@
           Run the Rangeland Hydrology and Erosion Model (RHEM) across the United States. Where available, foliar and ground covers are
           estimated from NLCD Shrubland 2016 data, while SURGO/STATSGO identifies soil textures.
         </p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("rhem", "cap-rhem", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='rhem') }}" title="rhem" data-run-menu rel="nofollow">Start RHEM Run (Experimental)</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='rhem') }}" data-cap-section="rhem" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="rhem"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='rhem') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start RHEM Run (Experimental)
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM hillslopes ran since January 1, 2024.
@@ -230,9 +512,39 @@
           originate from SURGO/STATSGO, landcover from the USGS National Landcover dataset, and climates from the CLIGEN database.
         </p>
         <p><strong>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</strong></p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("legacy-weppcloud", "cap-legacy-weppcloud", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='0') }}" rel="nofollow">Start WEPPcloud Run</a>
           <a class="pure-button pure-button-secondary" href="{{ url_for('run_0.create', config='13') }}" rel="nofollow">10m (Experimental)</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='0') }}" data-cap-section="legacy-weppcloud" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='0') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start WEPPcloud Run
+            </button>
+          </form>
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='13') }}" data-cap-section="legacy-weppcloud" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button pure-button-secondary wc-run-button is-disabled"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='13') }}"
+                    aria-disabled="true"
+                    disabled>
+              10m (Experimental)
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -253,8 +565,26 @@
           <a href="https://youtu.be/g8_ClR96tFU">View 15 May 2019 USDA Forest Service Webinar: <em>An Introduction to WEPPcloud-PEP</em></a>
         </p>
         <p><strong>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</strong></p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("legacy-baer", "cap-legacy-baer", cap_base_url, cap_site_key) }}
+        {% endif %}
         <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
           <a class="pure-button" href="{{ url_for('run_0.create', config='baer') }}" rel="nofollow">Start WEPPcloud Run</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='baer') }}" data-cap-section="legacy-baer" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='baer') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start WEPPcloud Run
+            </button>
+          </form>
+          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{ commafy(runs_counter['baer_ash_hillruns']) }} WATAR hillslopes) ran since January 1, 2024.
@@ -271,6 +601,13 @@
 
 {% block script_extras %}
 <script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+{% if not current_user.is_authenticated %}
+<script>
+  window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
+</script>
+<script src="{{ cap_asset_base_url }}/widget.js" defer></script>
+<script src="{{ cap_asset_base_url }}/floating.js" defer></script>
+{% endif %}
 <script>
 (() => {
   const contextMenu = document.getElementById('run-context-menu');
@@ -278,18 +615,56 @@
     return;
   }
 
-  let activeLink = null;
+  let activeTarget = null;
+  let activeForm = null;
+  let activeAction = null;
 
   const hideMenu = () => {
     contextMenu.setAttribute('aria-hidden', 'true');
     contextMenu.style.left = '-9999px';
     contextMenu.style.top = '-9999px';
-    activeLink = null;
+    activeTarget = null;
+    activeForm = null;
+    activeAction = null;
   };
 
-  const showMenu = (event, link) => {
+  const triggerCapPrompt = (form) => {
+    if (!form || !form.dataset || !form.dataset.capSection) {
+      return false;
+    }
+    const prompt = document.querySelector(`.wc-cap-prompt[data-cap-section="${form.dataset.capSection}"]`);
+    if (!prompt) {
+      return false;
+    }
+    const trigger = prompt.querySelector('[data-cap-trigger]');
+    if (!trigger || trigger.disabled) {
+      return false;
+    }
+    trigger.click();
+    return true;
+  };
+
+  const resolveAction = (target) => {
+    if (!target) {
+      return null;
+    }
+    if (target.dataset && target.dataset.runAction) {
+      return target.dataset.runAction;
+    }
+    if (target.href) {
+      return target.href;
+    }
+    if (target.form && target.form.action) {
+      return target.form.action;
+    }
+    return null;
+  };
+
+  const showMenu = (event, target) => {
     event.preventDefault();
-    activeLink = link;
+    activeTarget = target;
+    activeForm = target.closest('form');
+    activeAction = resolveAction(target);
     contextMenu.style.left = `${event.clientX}px`;
     contextMenu.style.top = `${event.clientY}px`;
     contextMenu.setAttribute('aria-hidden', 'false');
@@ -303,9 +678,9 @@
 
   hideMenu();
 
-  document.querySelectorAll('[data-run-menu]').forEach((link) => {
-    link.addEventListener('contextmenu', (event) => {
-      showMenu(event, link);
+  document.querySelectorAll('[data-run-menu]').forEach((target) => {
+    target.addEventListener('contextmenu', (event) => {
+      showMenu(event, target);
       document.addEventListener('click', onDocumentClick, { once: true });
     });
   });
@@ -318,11 +693,35 @@
 
   contextMenu.querySelectorAll('[data-unitizer]').forEach((button) => {
     button.addEventListener('click', () => {
-      if (!activeLink) {
+      if (!activeTarget || !activeAction) {
         return;
       }
 
-      const url = new URL(activeLink.href, window.location.origin);
+      if (activeForm) {
+        const unitizerInput = activeForm.querySelector('[data-unitizer-input]');
+        if (unitizerInput) {
+          unitizerInput.value = button.dataset.unitizer === 'true';
+        }
+
+        const tokenInput = activeForm.querySelector('[data-cap-token]');
+        if (tokenInput && !tokenInput.value) {
+          if (!triggerCapPrompt(activeForm) && activeTarget) {
+            activeTarget.click();
+          }
+          hideMenu();
+          return;
+        }
+
+        if (typeof activeForm.requestSubmit === 'function') {
+          activeForm.requestSubmit();
+        } else {
+          activeForm.submit();
+        }
+        hideMenu();
+        return;
+      }
+
+      const url = new URL(activeAction, window.location.origin);
       url.searchParams.set('unitizer:is_english', button.dataset.unitizer === 'true');
       window.location.href = url.toString();
       hideMenu();

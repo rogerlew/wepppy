@@ -1,0 +1,21 @@
+{% macro cap_prompt(section, widget_id, cap_base_url, cap_site_key, floating_position="top", status_text="Complete verification to unlock create buttons.", label_text="I'm not a robot", brand_text="Protected by Cap") -%}
+  <div class="wc-cap-prompt" data-cap-section="{{ section }}">
+    <button type="button"
+            class="wc-cap-trigger"
+            data-cap-trigger
+            data-cap-floating="#{{ widget_id }}"
+            data-cap-floating-position="{{ floating_position }}">
+      <span class="wc-cap-checkbox" aria-hidden="true"></span>
+      <span class="wc-cap-label" data-cap-label>{{ label_text }}</span>
+      <span class="wc-cap-brand" aria-hidden="true">
+        <span class="wc-cap-brand-mark">CAP</span>
+        <span class="wc-cap-brand-text">{{ brand_text }}</span>
+      </span>
+    </button>
+    <span class="wc-cap-status" data-cap-status>{{ status_text }}</span>
+  </div>
+  <cap-widget id="{{ widget_id }}"
+              class="wc-cap-widget"
+              data-cap-api-endpoint="{{ cap_base_url }}/{{ cap_site_key }}/"
+              data-cap-section="{{ section }}"></cap-widget>
+{%- endmacro %}

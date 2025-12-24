@@ -156,6 +156,8 @@ services:
       CAP_CORS_ORIGIN: ${CAP_CORS_ORIGIN:-*}
       CAP_ASSET_ROOT: /workdir/cap
       CAP_DATA_DIR: /var/lib/cap
+      CAP_WIDGET_PATH: /workdir/cap/widget/src/cap.min.js
+      CAP_FLOATING_PATH: /workdir/cap/widget/src/cap-floating.min.js
     volumes:
       - ../../cap:/workdir/cap:ro
       - cap-data:/var/lib/cap
