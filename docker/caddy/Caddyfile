@@ -11,6 +11,14 @@ http://:8080 {
         respond "OK"
     }
 
+    handle /cap* {
+        reverse_proxy cap:3000 {
+            header_up X-Forwarded-Prefix /cap
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     @plain_http not header X-Forwarded-Proto https
     redir @plain_http https://{host}{uri} permanent
 

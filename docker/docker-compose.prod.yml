@@ -374,6 +374,28 @@ services:
     networks:
       - backend
 
+  cap:
+    image: ${CAP_IMAGE:-wepppy-cap:latest}
+    build:
+      context: ..
+      dockerfile: services/cap/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ${WEPPPY_ENV_FILE:-.env}
+    environment:
+      CAP_SITE_KEY: ${CAP_SITE_KEY}
+      CAP_SECRET: ${CAP_SECRET}
+      CAP_CORS_ORIGIN: ${CAP_CORS_ORIGIN:-*}
+      CAP_ASSET_ROOT: /workdir/cap
+      CAP_DATA_DIR: /var/lib/cap
+    volumes:
+      - /workdir/cap:/workdir/cap:ro
+      - cap-data:/var/lib/cap
+    expose:
+      - "3000"
+    networks:
+      - backend
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -388,6 +410,8 @@ services:
       status:
         condition: service_started
       preflight:
+        condition: service_started
+      cap:
         condition: service_started
       browse:
         condition: service_started
@@ -536,3 +560,4 @@ volumes:
   postgres-data:
   weppcloudr-renv-cache:
   postgres-backups:
+  cap-data:

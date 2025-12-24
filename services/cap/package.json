@@ -1,0 +1,14 @@
+{
+  "name": "wepppy-cap-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@cap.js/server": "^4.0.5",
+    "express": "^4.19.2"
+  }
+}

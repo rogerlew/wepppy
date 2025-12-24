@@ -46,3 +46,5 @@ telemetry/
 
 wepppy/weppcloud/static-src/.playwright-browsers
 .playwright-mcp
+
+services/cap/node_modules
