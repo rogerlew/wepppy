@@ -7,6 +7,7 @@ from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.nodb.mods.observed import Observed
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 observed_bp = Blueprint('observed', __name__)
@@ -49,6 +50,7 @@ def submit_task_run_model_fit(runid, config):
 @observed_bp.route('/runs/<string:runid>/<config>/report/observed')
 @observed_bp.route('/runs/<string:runid>/<config>/report/observed/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view observed reports.")
 def report_observed(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)

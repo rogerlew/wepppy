@@ -11,6 +11,7 @@ import pandas as pd
 from flask import abort, Blueprint, request, Response, jsonify, current_app
 
 from wepppy.weppcloud.utils.helpers import error_factory
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 from ._run_context import load_run_context
 
@@ -166,6 +167,7 @@ pivottable_bp = Blueprint('pivottable', __name__)  # fixed name
 
 
 @pivottable_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/pivottable/<path:subpath>', strict_slashes=False)
+@requires_cap(gate_reason="Complete verification to view report tables.")
 def wp_pivottable_tree(runid, config, wepp, subpath):
     return pivottable_tree(runid, config, subpath)
 

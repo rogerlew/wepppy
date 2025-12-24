@@ -160,3 +160,21 @@ Notes:
 ## Phase 7 Handoff Summary
 - Documented Cap.js configuration and operational notes (health checks, key rotation, routing/asset verification) in `wepppy/weppcloud/README.md`.
 - Added a UI docs index entry for `docs/ui-docs/cap-js-captcha-auth.md` in `docs/ui-docs/README.md`.
+
+### Phase 8 - Invisible Cap.js (anonymous-only) rollout
+1. Add a reusable decorator (ex: `@requires_cap`) that:
+   - No-ops for authenticated users.
+   - Reads `cap_token` from form data or `X-Cap-Token` header.
+   - Calls `verify_cap_token()` and returns 403 on missing/invalid tokens (no raw token logging).
+2. Apply the decorator to anonymous-sensitive action endpoints (reports downloads, exports, heavy compute triggers).
+3. Optional session gate for page-render routes:
+   - Invisible widget solves -> POST `/cap/verify` -> sets `session['cap_verified_at']`.
+   - Decorator checks TTL (ex: 10–30 minutes) before requiring another solve.
+4. UI wiring:
+   - On targeted pages, load the invisible widget only for anonymous users.
+   - Use the shared Cap.js helper to fetch a token on demand and submit it with protected actions.
+
+## Phase 8 Handoff Summary
+- Added `wepppy/weppcloud/utils/cap_guard.py` with `requires_cap` + session TTL gating and the `cap_gate.htm` template for invisible verification.
+- Added `/cap/verify` endpoint in `wepppy/weppcloud/routes/weppcloud_site.py` to validate tokens and set the anonymous session flag.
+- Applied `@requires_cap` to the run landing page and report routes (WEPP, RHEM, soils, landuse, climate, watershed, ash, observed, omni, rangeland, pivottable, jsoncrack, deval details) so anonymous users complete invisible verification before viewing reports.

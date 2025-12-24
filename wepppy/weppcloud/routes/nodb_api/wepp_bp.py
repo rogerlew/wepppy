@@ -19,6 +19,7 @@ from wepppy.wepp.reports import TotalWatbalReport
 from wepppy.wepp.reports.report_base import ReportBase
 from wepppy.wepp.reports.row_data import parse_name, parse_units
 from wepppy.weppcloud.utils.helpers import (error_factory, exception_factory, parse_rec_intervals, authorize_and_handle_with_exception_factory)
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.query_engine import resolve_run_context
 from wepppy.query_engine.payload import QueryRequest
 from wepppy.query_engine import run_query
@@ -400,6 +401,7 @@ def task_set_hourly_seepage(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/results/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_results(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
@@ -455,6 +457,7 @@ def query_channels_summary(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/prep_details')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def get_wepp_prep_details(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -485,6 +488,7 @@ def query_wepp_phos_opts(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_run_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -502,6 +506,7 @@ def report_wepp_run_summary(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/summary/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_loss(runid, config):
     extraneous = request.args.get('extraneous', None) == 'true'
 
@@ -582,6 +587,7 @@ def report_wepp_loss(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_yearly_watbal(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
@@ -621,6 +627,7 @@ def report_wepp_yearly_watbal(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_avg_annual_by_landuse(runid, config):
     from wepppy.wepp.reports import AverageAnnualsByLanduseReport
     wd = get_wd(runid)
@@ -650,6 +657,7 @@ def report_wepp_avg_annual_by_landuse(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_avg_annual_watbal(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -797,6 +805,7 @@ def plot_wepp_streamflow(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_return_periods(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
@@ -901,6 +910,7 @@ def report_wepp_return_periods(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/frq_flood/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_frq_flood(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -921,6 +931,7 @@ def report_wepp_frq_flood(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_sediment_delivery(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -992,6 +1003,7 @@ def query_ron_sub_summary(runid, config, topaz_id):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_ron_chn_summary(runid, config, topaz_id):
     try:
         wd = get_wd(runid)
@@ -1020,6 +1032,7 @@ def query_topaz_wepp_map(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)

@@ -7,6 +7,7 @@ from wepppy.nodb.mods.omni import Omni
 from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.core import Watershed
 from .project_bp import set_project_mod_state
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 omni_bp = Blueprint('omni', __name__)
@@ -69,6 +70,7 @@ def omni_migration(runid, config):
 
 @omni_bp.route('/runs/<string:runid>/<config>/report/omni_scenarios')
 @omni_bp.route('/runs/<string:runid>/<config>/report/omni_scenarios/')
+@requires_cap(gate_reason="Complete verification to view Omni reports.")
 def query_omni_scenarios_report(runid, config):
     try:
         wd = get_wd(runid)

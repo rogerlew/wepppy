@@ -11,6 +11,7 @@ import pandas as pd
 from flask import abort, Blueprint, request, Response, jsonify, current_app
 
 from wepppy.weppcloud.utils.helpers import error_factory
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 from ._run_context import load_run_context
 _html = r"""
@@ -82,6 +83,7 @@ jsoncrack_bp = Blueprint('jsoncrack', __name__)  # fixed name
 
 
 @jsoncrack_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/jsoncrack/<path:subpath>', strict_slashes=False)
+@requires_cap(gate_reason="Complete verification to view report JSON.")
 def wp_jsoncrack_tree(runid, config, wepp, subpath):
     return jsoncrack_tree(runid, config, subpath)
 

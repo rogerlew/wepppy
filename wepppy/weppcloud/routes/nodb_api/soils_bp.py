@@ -18,6 +18,7 @@ from .._common import (
 
 from wepppy.nodb.core import Soils, SoilsMode
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 soils_bp = Blueprint('soils', __name__)
@@ -89,6 +90,7 @@ def query_soils_channels(runid: str, config: str) -> Response:
 
 @soils_bp.route('/runs/<string:runid>/<config>/report/soils')
 @soils_bp.route('/runs/<string:runid>/<config>/report/soils/')
+@requires_cap(gate_reason="Complete verification to view soils reports.")
 def report_soils(runid: str, config: str) -> Response:
     try:
         ctx = load_run_context(runid, config)

@@ -1,0 +1,134 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}Verification Required{% endblock %}
+
+{% block head_extras %}
+  {{ super() }}
+  <style>
+    .cap-gate {
+      max-width: 520px;
+      margin: 6vh auto;
+    }
+
+    .cap-gate__status {
+      font-size: var(--wc-font-size-sm);
+      color: var(--wc-color-text-muted);
+    }
+
+    .cap-gate__status.is-error {
+      color: var(--wc-color-critical);
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <section class="wc-panel wc-stack cap-gate" id="cap-gate">
+    <h1>Verification required</h1>
+    {% if cap_reason %}
+      <p class="wc-text-muted">{{ cap_reason }}</p>
+    {% endif %}
+    <p class="cap-gate__status" id="cap-status">Completing verification...</p>
+    <div class="wc-button-row">
+      <button type="button" class="pure-button pure-button-secondary" id="cap-retry" hidden>
+        Retry verification
+      </button>
+    </div>
+  </section>
+{% endblock %}
+
+{% block script_extras %}
+  <script>
+    window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
+  </script>
+  <script src="{{ cap_asset_base_url }}/widget.js" defer></script>
+  <script>
+    (function () {
+      var nextUrl = {{ cap_next | tojson }};
+      var verifyUrl = {{ cap_verify_url | tojson }};
+      var apiEndpoint = {{ cap_api_endpoint | tojson }};
+      var statusEl = document.getElementById("cap-status");
+      var retryButton = document.getElementById("cap-retry");
+
+      function setStatus(message, isError) {
+        if (!statusEl) {
+          return;
+        }
+        statusEl.textContent = message;
+        statusEl.classList.toggle("is-error", Boolean(isError));
+      }
+
+      function extractToken(result) {
+        if (!result) {
+          return "";
+        }
+        if (typeof result === "string") {
+          return result;
+        }
+        if (result.token) {
+          return String(result.token);
+        }
+        return "";
+      }
+
+      function handleFailure(message) {
+        setStatus(message, true);
+        if (retryButton) {
+          retryButton.hidden = false;
+        }
+      }
+
+      function solve() {
+        setStatus("Completing verification...", false);
+        if (typeof Cap === "undefined") {
+          handleFailure("CAPTCHA library failed to load.");
+          return;
+        }
+
+        var cap = new Cap({ apiEndpoint: apiEndpoint });
+        cap.solve()
+          .then(function (result) {
+            var token = extractToken(result);
+            if (!token) {
+              throw new Error("CAP token missing.");
+            }
+            return fetch(verifyUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: "cap_token=" + encodeURIComponent(token)
+            });
+          })
+          .then(function (resp) {
+            if (!resp.ok) {
+              return resp.json()
+                .then(function (payload) {
+                  var message = payload && (payload.error || payload.Error);
+                  throw new Error(message || "CAPTCHA verification failed.");
+                })
+                .catch(function () {
+                  throw new Error("CAPTCHA verification failed.");
+                });
+            }
+            return resp.json();
+          })
+          .then(function (payload) {
+            if (!payload || payload.success !== true) {
+              throw new Error("CAPTCHA verification failed.");
+            }
+            window.location.replace(nextUrl);
+          })
+          .catch(function (err) {
+            handleFailure((err && err.message) ? err.message : "CAPTCHA verification failed.");
+          });
+      }
+
+      if (retryButton) {
+        retryButton.addEventListener("click", function () {
+          retryButton.hidden = true;
+          solve();
+        });
+      }
+
+      window.addEventListener("load", solve);
+    })();
+  </script>
+{% endblock %}

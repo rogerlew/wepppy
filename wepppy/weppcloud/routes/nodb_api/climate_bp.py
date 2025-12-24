@@ -11,6 +11,7 @@ from .._common import *  # noqa: F401,F403
 from wepppy.climates.cligen import StationMeta
 from wepppy.nodb.core import Ron
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.uploads import (
     UploadError,
     save_run_file,
@@ -171,6 +172,7 @@ def query_climate_catalog(runid: str, config: str) -> Response:
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/report/climate/')
+@requires_cap(gate_reason="Complete verification to view climate reports.")
 def report_climate(runid: str, config: str) -> Response:
     """Render the HTML climate report for the selected station.
 

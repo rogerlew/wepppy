@@ -3,12 +3,14 @@
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 unitizer_bp = Blueprint('unitizer', __name__)
 
 @unitizer_bp.route('/runs/<string:runid>/<config>/report/tasks/set_unit_preferences/', methods=['POST'])
 @unitizer_bp.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])
+@requires_cap(gate_reason="Complete verification to update report units.")
 def task_set_unit_preferences(runid, config):
     try:
         ctx = load_run_context(runid, config)

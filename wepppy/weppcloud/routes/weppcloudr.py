@@ -27,6 +27,7 @@ from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.weppcloudr_rq import render_deval_details_rq
 
 from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, url_for_run
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 from wepppy.nodb.core import Ron, Wepp, Watershed
 from wepppy.query_engine.activate import activate_query_engine
@@ -389,6 +390,7 @@ def _serve_deval_file(path: Path) -> Response:
 
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details')
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details/')
+@requires_cap(gate_reason="Complete verification to view report details.")
 def deval_details(runid, config):
     ctx = load_run_context(runid, config)
     try:

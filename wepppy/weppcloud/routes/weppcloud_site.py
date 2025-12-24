@@ -294,6 +294,39 @@ def interfaces():
         return exception_factory()
 
 
+@weppcloud_site_bp.route('/cap/verify', methods=['POST'])
+@handle_with_exception_factory
+def cap_verify():
+    from wepppy.weppcloud.utils.cap_guard import mark_cap_verified
+    from wepppy.weppcloud.utils.cap_verify import CapVerificationError, verify_cap_token
+
+    payload = request.get_json(silent=True) or {}
+    cap_token = (request.form.get('cap_token') or payload.get('cap_token') or '').strip()
+    if not cap_token:
+        response = error_factory('CAPTCHA token is required.')
+        response.status_code = 403
+        return response
+
+    try:
+        verification = verify_cap_token(cap_token)
+    except CapVerificationError as exc:
+        current_app.logger.error("CAPTCHA verification error from %s: %s", request.remote_addr, exc)
+        return exception_factory('CAPTCHA verification failed.')
+
+    if not verification.get('success'):
+        current_app.logger.warning(
+            "CAPTCHA rejected from %s (errors=%s)",
+            request.remote_addr,
+            verification.get('error-codes'),
+        )
+        response = error_factory('CAPTCHA verification failed.')
+        response.status_code = 403
+        return response
+
+    mark_cap_verified()
+    return jsonify({'success': True})
+
+
 def _landing_run_locations_response() -> 'flask.Response':
     dataset = _load_or_refresh_run_locations()
     return jsonify(dataset)

@@ -29,6 +29,7 @@ from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import (
     get_wd, authorize, get_run_owners_lazy, 
     authorize_and_handle_with_exception_factory,
@@ -344,6 +345,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
 
 @run_0_bp.route('/runs/<string:runid>/<config>/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view this run.")
 def runs0(runid, config):
     assert config is not None
     

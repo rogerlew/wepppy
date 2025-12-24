@@ -7,6 +7,7 @@ from .._common import *  # noqa: F401,F403
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.watershed_abstraction import ChannelRoutingError
 from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 watershed_bp = Blueprint('watershed', __name__)
 
@@ -62,6 +63,7 @@ def query_extent(runid, config):
 
 @watershed_bp.route('/runs/<string:runid>/<config>/report/channel')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view watershed reports.")
 def report_channel(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -84,6 +86,7 @@ def query_outlet(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/report/outlet')
 @watershed_bp.route('/runs/<string:runid>/<config>/report/outlet/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view watershed reports.")
 def report_outlet(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -122,6 +125,7 @@ def query_watershed_summary_channels(runid, config):
 @watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments')
 @watershed_bp.route('/runs/<string:runid>/<config>/report/subcatchments/')
 @authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to view watershed reports.")
 def query_watershed_summary(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)

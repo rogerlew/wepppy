@@ -11,6 +11,7 @@ from .._common import *  # noqa: F401,F403
 from wepppy.nodb.core.ron import Ron
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 debris_flow_bp = Blueprint('debris_flow', __name__)
@@ -18,6 +19,7 @@ debris_flow_bp = Blueprint('debris_flow', __name__)
 
 @debris_flow_bp.route('/runs/<string:runid>/<config>/report/debris_flow')
 @debris_flow_bp.route('/runs/<string:runid>/<config>/report/debris_flow/')
+@requires_cap(gate_reason="Complete verification to view debris flow reports.")
 def report_debris_flow(runid: str, config: str) -> Response:
     """Render the debris flow summary report for the active run.
 

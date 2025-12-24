@@ -10,6 +10,7 @@ from .._common import Blueprint, jsonify, parse_request_payload, render_template
 from .._common import exception_factory, get_wd, success_factory  # noqa: F401
 
 from wepppy.nodb.core import Landuse, LanduseMode, Ron
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 landuse_bp = Blueprint('landuse', __name__)
@@ -219,6 +220,7 @@ def query_landuse_channels(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/report/landuse')
 @landuse_bp.route('/runs/<string:runid>/<config>/report/landuse/')
+@requires_cap(gate_reason="Complete verification to view landuse reports.")
 def report_landuse(runid: str, config: str) -> Response:
     """Render the HTML landuse report for the current run."""
     wd = get_wd(runid)

@@ -15,12 +15,14 @@ from wepppy.weppcloud.utils.helpers import (
     get_wd,
     authorize
 )
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 rhem_bp = Blueprint('rhem', __name__)
 
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/results')
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/results/')
+@requires_cap(gate_reason="Complete verification to view RHEM reports.")
 def report_rhem_results(runid, config):
     authorize(runid, config)
 
@@ -34,6 +36,7 @@ def report_rhem_results(runid, config):
 
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/run_summary')
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/run_summary/')
+@requires_cap(gate_reason="Complete verification to view RHEM reports.")
 def report_rhem_run_summary(runid, config):
     authorize(runid, config)
 
@@ -57,6 +60,7 @@ def report_rhem_run_summary(runid, config):
 
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/summary')
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/summary/')
+@requires_cap(gate_reason="Complete verification to view RHEM reports.")
 def report_rhem_avg_annuals(runid, config):
     authorize(runid, config)
 
@@ -81,6 +85,7 @@ def report_rhem_avg_annuals(runid, config):
 
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
 @rhem_bp.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')
+@requires_cap(gate_reason="Complete verification to view RHEM reports.")
 def report_rhem_return_periods(runid, config):
     authorize(runid, config)
 

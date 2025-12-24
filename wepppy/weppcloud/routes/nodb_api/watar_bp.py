@@ -21,6 +21,7 @@ from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models,
 from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 
 from wepppy.wepp.reports import HillSummaryReport, ChannelSummaryReport, OutletSummaryReport
+from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
 watar_bp = Blueprint('watar', __name__)
@@ -156,6 +157,7 @@ def task_set_ash_wind_transport(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/report/run_ash')
 @watar_bp.route('/runs/<string:runid>/<config>/report/run_ash/')
+@requires_cap(gate_reason="Complete verification to view ash reports.")
 def report_run_ash(runid, config):
     try:
         wd = get_wd(runid)
@@ -170,6 +172,7 @@ def report_run_ash(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash')
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash/')
+@requires_cap(gate_reason="Complete verification to view ash reports.")
 def report_ash(runid, config):
     try:
         wd = get_wd(runid)
@@ -235,6 +238,7 @@ def query_ash_out(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
+@requires_cap(gate_reason="Complete verification to view ash reports.")
 def report_contaminant(runid, config):
 
     try:

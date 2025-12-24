@@ -108,6 +108,23 @@ Fork console uses `wepppy/weppcloud/static/js/fork_console.js` for the same flow
 - enables the submit button after verification
 - includes `cap_token` in the POST payload
 
+## Invisible CAPTCHA Gate (anonymous-only)
+Some routes (run landing page + report pages) use invisible Cap.js for anonymous users. The flow:
+1. `@requires_cap` decorator checks session TTL and returns `cap_gate.htm` when verification is missing.
+2. `cap_gate.htm` loads `widget.js`, instantiates `new Cap({ apiEndpoint })`, and calls `solve()` automatically.
+3. The token posts to `/cap/verify`, which sets `session["cap_verified_at"]` on success.
+4. The gate page redirects back to the original URL.
+
+Key pieces:
+- Decorator: `wepppy/weppcloud/utils/cap_guard.py` (`requires_cap`, session TTL defaults to 20 minutes).
+- Override TTL with `CAP_SESSION_TTL_SECONDS`.
+- Gate template: `wepppy/weppcloud/templates/cap_gate.htm`.
+- Verify endpoint: `POST /cap/verify` in `wepppy/weppcloud/routes/weppcloud_site.py`.
+
+Anonymous-only behavior:
+- Authenticated users bypass the gate.
+- Missing/invalid tokens return `403` for non-GET requests; GET requests render the gate page.
+
 ## Server-Side Verification
 Anonymous requests must verify the token:
 1. Receive `cap_token` in the POST body.
