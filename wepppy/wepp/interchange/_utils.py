@@ -37,6 +37,9 @@ def _parse_float(token: str) -> float:
     stripped = token.strip()
     if not stripped:
         return 0.0
+    # Fortran overflow placeholders ("*****") should round-trip as NaN.
+    if set(stripped) == {"*"}:
+        return float("nan")
     if stripped[0] == ".":
         stripped = f"0{stripped}"
     try:
