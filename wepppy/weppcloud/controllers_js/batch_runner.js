@@ -1615,7 +1615,12 @@ var BatchRunner = (function () {
                 : undefined;
 
             controller.http
-                .postJson("/weppcloud/rq/api/jobinfo", { job_ids: jobIds }, { signal: signal })
+                .postJsonWithFallback(
+                    "/rq-engine/api/jobinfo",
+                    "/weppcloud/rq/api/jobinfo",
+                    { job_ids: jobIds },
+                    { signal: signal }
+                )
                 .then(function (response) {
                     var payload = normalizeJobInfoPayload(response.body);
                     registerTrackedJobIds(payload.job_ids);

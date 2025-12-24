@@ -103,8 +103,10 @@
         }
 
         var http = global.WCHttp;
-        if (http && typeof http.getJson === "function") {
-            return http.getJson("/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId))
+        var primaryUrl = "/rq-engine/api/jobinfo/" + encodeURIComponent(jobId);
+        var fallbackUrl = "/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId);
+        if (http && typeof http.getJsonWithFallback === "function") {
+            return http.getJsonWithFallback(primaryUrl, fallbackUrl)
                 .then(function (payload) {
                     return extractStacktrace(payload);
                 })
@@ -122,13 +124,23 @@
         }
 
         var origin = global.location && global.location.origin ? global.location.origin : "";
-        var url = origin.replace(/\/$/, "") + "/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId);
-        return fetch(url, { credentials: "same-origin" })
+        var primaryFetchUrl = origin.replace(/\/$/, "") + primaryUrl;
+        var fallbackFetchUrl = origin.replace(/\/$/, "") + fallbackUrl;
+        return fetch(primaryFetchUrl, { credentials: "same-origin" })
             .then(function (response) {
                 if (!response.ok) {
-                    return null;
+                    throw new Error("Primary jobinfo fetch failed");
                 }
                 return response.json();
+            })
+            .catch(function () {
+                return fetch(fallbackFetchUrl, { credentials: "same-origin" })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            return null;
+                        }
+                        return response.json();
+                    });
             })
             .then(function (payload) {
                 return extractStacktrace(payload);

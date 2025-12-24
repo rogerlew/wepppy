@@ -257,6 +257,22 @@ services:
     expose:
       - "8041"
 
+  rq-engine:
+    <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    command:
+      - uvicorn
+      - wepppy.microservices.rq_engine:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8042"
+    expose:
+      - "8042"
+
   weppcloudr:
     image: ${WEPPCLOUDR_IMAGE:-weppcloudr:latest}
     build:

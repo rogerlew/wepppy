@@ -56,6 +56,7 @@
   const jobId = {{ job_id|tojson }};
   const initialStatus = {{ job_status|tojson }};
   const jobStatusUrl = {{ job_status_url|tojson }};
+  const jobStatusPrimaryUrl = jobId ? `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}` : null;
   const refreshUrl = {{ refresh_url|tojson }};
   const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
   const FAILURE_STATES = new Set(["failed", "stopped", "canceled"]);
@@ -129,23 +130,42 @@
     }
   }
 
+  async function fetchJobStatusJson() {
+    if (!jobId || !jobStatusUrl) {
+      throw new Error("Job could not be enqueued.");
+    }
+
+    async function fetchOnce(url) {
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Expected JSON response, got ${contentType || 'unknown content type'}`);
+      }
+
+      return response.json();
+    }
+
+    try {
+      if (jobStatusPrimaryUrl) {
+        return await fetchOnce(jobStatusPrimaryUrl);
+      }
+    } catch (error) {
+      // Fall back to the legacy endpoint on any error.
+    }
+
+    return fetchOnce(jobStatusUrl);
+  }
+
   async function pollStatus() {
     if (!jobId || !jobStatusUrl) {
       return handleFailure("unknown", "Job could not be enqueued.");
     }
     try {
-      const response = await fetch(jobStatusUrl, { headers: { 'Accept': 'application/json' } });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      // Check if response is actually JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error(`Expected JSON response, got ${contentType || 'unknown content type'}`);
-      }
-      
-      const payload = await response.json();
+      const payload = await fetchJobStatusJson();
       const state = payload.status || payload.job_status || 'unknown';
       consecutiveErrors = 0; // Reset error counter on successful poll
       if (state === lastState) {

@@ -155,6 +155,15 @@ GET /upload/health
 
 Non-upload traffic stays under `/weppcloud` and keeps the default proxy timeouts.
 
+### RQ Polling (`/rq-engine`)
+
+High-frequency job polling endpoints are served by the rq-engine FastAPI service:
+- `GET /rq-engine/api/jobstatus/{job_id}`
+- `GET /rq-engine/api/jobinfo/{job_id}`
+- `POST /rq-engine/api/jobinfo`
+
+Clients should prefer `/rq-engine/api/...` and fall back to the legacy `/weppcloud/rq/api/...` endpoints when needed.
+
 ## Key Concepts
 
 ### Run Lifecycle

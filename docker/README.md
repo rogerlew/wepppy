@@ -93,6 +93,7 @@ wctl logs weppcloud
 | `preflight`    | Go microservice (`services/preflight2`) that streams readiness state | 9001 | Requires Redis keyspace notifications (`notify-keyspace-events Kh`). |
 | `browse`       | Starlette browse/download microservice | 9009 | Handles `/weppcloud/runs/.../browse|download|gdalinfo`. |
 | `query-engine` | FastAPI (Uvicorn) for analytical lookups | 8041 | Reload enabled for dev loop. |
+| `rq-engine`    | FastAPI (Uvicorn) for RQ job polling endpoints | 8042 | Serves `/rq-engine/api/*` jobinfo/jobstatus polling. |
 | `weppcloudr`   | R (Plumber) renderer for WEPPcloud reports | 8050 | Serves `/weppcloudr/*`; mounts R templates and run volumes; caches rendered HTML in run export dirs. |
 | `rq-worker`    | RQ worker pool servicing Redis queue DB 9 | — | Shares code volume; respects `UID`/`GID`. |
 | `redis`        | Redis 7.4 | 6379 | Dev: `.docker-data/redis`, Prod: `redis-data` volume |
@@ -108,6 +109,7 @@ wctl logs weppcloud
 - `/weppcloud/static/*` directly from the mounted repo (`wepppy/weppcloud/static`) using Caddy’s `file_server`.
 - `/weppcloud/*` to the Flask app, preserving `X-Forwarded-*` headers.
 - `/upload/*` to the Flask app with a 20-minute upstream timeout for file uploads; Caddy strips `/upload` and forwards `X-Forwarded-Prefix: /upload` so Flask can distinguish upload traffic.
+- `/rq-engine/*` to the rq-engine FastAPI service for jobstatus/jobinfo polling (Caddy strips `/rq-engine` and forwards `X-Forwarded-Prefix: /rq-engine`).
 - `/weppcloud/runs/.../(browse|download|aria2c.spec|gdalinfo)` to the Starlette browse microservice.
 - `/weppcloudr/*` to the Plumber renderer (port 8050) for report generation (Deval in the Details).
 - `/weppcloud-microservices/status` and `/weppcloud-microservices/preflight` to the Go microservices.

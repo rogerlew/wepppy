@@ -91,6 +91,24 @@ describe("WCHttp helpers", () => {
         expect(url).toBe("/upload/health");
     });
 
+    test("request bypasses site_prefix for rq-engine endpoints", async () => {
+        window.site_prefix = "/weppcloud";
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: {
+                get: () => ""
+            },
+            text: () => Promise.resolve("")
+        });
+
+        await window.WCHttp.request("/rq-engine/api/jobstatus/job-1", { method: "GET" });
+
+        const [url] = global.fetch.mock.calls[0];
+        expect(url).toBe("/rq-engine/api/jobstatus/job-1");
+    });
+
     test("postForm serializes payloads, propagates CSRF, and throws HttpError", async () => {
         document.head.innerHTML = `<meta name="csrf-token" content="token-head">`;
         global.fetch = jest.fn().mockResolvedValue({

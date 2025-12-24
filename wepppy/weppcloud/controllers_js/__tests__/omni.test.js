@@ -8,6 +8,7 @@ describe("Omni controller", () => {
     let originalHttp;
     let requestMock;
     let getJsonMock;
+    let getJsonWithFallbackMock;
     let baseInstance;
     let statusStreamMock;
     let omni;
@@ -55,9 +56,11 @@ describe("Omni controller", () => {
             Promise.resolve({ body: { Success: true, job_id: "job-321" } })
         );
         getJsonMock = jest.fn(() => Promise.resolve([]));
+        getJsonWithFallbackMock = jest.fn(() => Promise.resolve([]));
 
         global.WCHttp.request = requestMock;
         global.WCHttp.getJson = getJsonMock;
+        global.WCHttp.getJsonWithFallback = getJsonWithFallbackMock;
         global.WCHttp.isHttpError = jest.fn(() => false);
 
         ({ base: baseInstance, statusStreamMock } = createControlBaseStub({
@@ -216,14 +219,17 @@ describe("Omni controller", () => {
     });
 
     test("poll failure pushes stacktrace and emits job error", async () => {
-        getJsonMock.mockResolvedValueOnce({ exc_info: "trace line" });
+        getJsonWithFallbackMock.mockResolvedValueOnce({ exc_info: "trace line" });
         omni.rq_job_id = "job-123";
 
         omni.handle_job_status_response(omni, { status: "failed" });
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(getJsonMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(getJsonWithFallbackMock).toHaveBeenCalledWith(
+            "/rq-engine/api/jobinfo/job-123",
+            "/weppcloud/rq/api/jobinfo/job-123"
+        );
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             omni,
             expect.objectContaining({

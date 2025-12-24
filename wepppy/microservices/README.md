@@ -1,21 +1,21 @@
 # WEPPpy Microservices
 
-> Lightweight Starlette-based services for file browsing, elevation queries, and GDAL operations within the wepppy ecosystem.
+> Lightweight Starlette/FastAPI services for file browsing, elevation queries, and job polling within the wepppy ecosystem.
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for microservices architecture, deployment topology, and Redis integration notes.
 
 ## Overview
 
-This directory contains lightweight microservices built with Starlette that provide specialized functionality for the WEPPcloud application. These services are designed to be fast, focused, and independently deployable, handling tasks that benefit from dedicated processes outside the main Flask application.
+This directory contains lightweight microservices built with Starlette or FastAPI that provide specialized functionality for the WEPPcloud application. These services are designed to be fast, focused, and independently deployable, handling tasks that benefit from dedicated processes outside the main Flask application.
 
 **Key characteristics:**
-- **Async-first**: Built on Starlette/ASGI for high-concurrency scenarios
+- **Async-first**: Built on ASGI frameworks for high-concurrency scenarios
 - **Run-scoped**: Services operate within the context of specific WEPPcloud runs
 - **Self-contained**: Minimal dependencies; can be deployed independently
 - **Fast**: Optimized for specific tasks (file serving, elevation lookups, GDAL operations)
 
 **Separation from `webservices/`:**
-- `wepppy/microservices/`: Lightweight Starlette services (file browsing, elevation queries)
+- `wepppy/microservices/`: Lightweight Starlette/FastAPI services (file browsing, elevation queries, job polling)
 - `wepppy/webservices/`: Heavier Flask/FastAPI services (climate data, raster servers, D-Tale integration)
 
 ## Services
@@ -57,6 +57,19 @@ response = requests.get(
 )
 elevation = response.json()["elevation"]
 ```
+
+**Deployment**: Runs as a separate container in Docker Compose stacks; see `docker/docker-compose.dev.yml`.
+
+### RQ Engine Service
+
+**File**: `rq_engine.py`
+
+Read-only FastAPI service that exposes RQ job polling endpoints to offload frequent jobstatus/jobinfo requests from the Flask app.
+
+**Key endpoints:**
+- `GET /rq-engine/api/jobstatus/{job_id}`
+- `GET /rq-engine/api/jobinfo/{job_id}`
+- `POST /rq-engine/api/jobinfo`
 
 **Deployment**: Runs as a separate container in Docker Compose stacks; see `docker/docker-compose.dev.yml`.
 

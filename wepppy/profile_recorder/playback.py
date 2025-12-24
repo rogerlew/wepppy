@@ -443,10 +443,27 @@ class PlaybackSession:
                 normalized_path = ""
             elif normalized_path.startswith(shared_prefix):
                 normalized_path = normalized_path[len(shared_prefix) :]
-        if normalized_path.startswith("query-engine/") or normalized_path == "query-engine":
+        if (
+            normalized_path.startswith("query-engine/")
+            or normalized_path == "query-engine"
+            or normalized_path.startswith("rq-engine/")
+            or normalized_path == "rq-engine"
+        ):
             origin = urljoin(f"{base}/", "/")
             return urljoin(origin, normalized_path)
         return urljoin(f"{base}/", normalized_path)
+
+    def _get_with_fallback(self, primary_url: str, fallback_url: str, **kwargs: Any) -> requests.Response:
+        """Attempt a GET request against rq-engine, fallback to weppcloud on any error."""
+        try:
+            response = self.session.get(primary_url, **kwargs)
+        except requests.RequestException:
+            return self.session.get(fallback_url, **kwargs)
+
+        if response.ok:
+            return response
+
+        return self.session.get(fallback_url, **kwargs)
 
     def _should_wait_for_completion(self, method: str, path: str, expected_status: int) -> bool:
         """Return True when playback should poll for completion after the request."""
@@ -950,9 +967,10 @@ class PlaybackSession:
 
     def _fetch_job_info(self, job_id: str) -> Optional[dict]:
         """Retrieve job metadata for logging and diagnostics."""
-        info_url = self._build_url(f"/rq/api/jobinfo/{job_id}")
+        primary_url = self._build_url(f"/rq-engine/api/jobinfo/{job_id}")
+        fallback_url = self._build_url(f"/rq/api/jobinfo/{job_id}")
         try:
-            response = self.session.get(info_url, timeout=60)
+            response = self._get_with_fallback(primary_url, fallback_url, timeout=60)
             response.raise_for_status()
             payload = response.json()
         except Exception as exc:  # pragma: no cover - defensive logging
@@ -1052,13 +1070,19 @@ class PlaybackSession:
         task: Optional[str] = None,
     ) -> None:
         """Poll jobstatus until the queued job completes or fails."""
-        status_url = self._build_url(f"/rq/api/jobstatus/{job_id}")
+        primary_url = self._build_url(f"/rq-engine/api/jobstatus/{job_id}")
+        fallback_url = self._build_url(f"/rq/api/jobstatus/{job_id}")
         end_time = time.time() + timeout
         last_status: Optional[str] = None
 
         while True:
             try:
-                response = self.session.get(status_url, params={"_": int(time.time() * 1000)}, timeout=60)
+                response = self._get_with_fallback(
+                    primary_url,
+                    fallback_url,
+                    params={"_": int(time.time() * 1000)},
+                    timeout=60,
+                )
             except requests.RequestException as exc:
                 if self.verbose:
                     self._log(f"job {job_id} status request failed: {exc}")

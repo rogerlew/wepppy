@@ -56,7 +56,8 @@ _Success_ = true indicates the job has been succesfully submitted to the job eng
 
 ### 2. Check Job Status
 
-**GET** `/rq/api/jobinfo/{job_id}`
+**GET** `/rq-engine/api/jobinfo/{job_id}` (preferred)  
+Fallback: `/weppcloud/rq/api/jobinfo/{job_id}`
 
 Returns JSON status and progress for the submitted job.
 
@@ -65,7 +66,7 @@ _Note:_ The jobinfo is tied to redis is only available for up to 7 days as curre
 #### Sample Request
 
 ```bash
-curl https://wepp.cloud/weppcloud/rq/api/jobinfo/cc4a620e-473f-478e-b33b-71f56fd6b544
+curl https://wepp.cloud/rq-engine/api/jobinfo/cc4a620e-473f-478e-b33b-71f56fd6b544
 ```
 
 ---

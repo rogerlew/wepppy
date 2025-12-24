@@ -166,6 +166,7 @@ describe("BatchRunner controller", () => {
         global.WCHttp = {
             request: requestMock,
             postJson: postJsonMock,
+            postJsonWithFallback: postJsonMock,
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
 
@@ -388,6 +389,7 @@ describe("BatchRunner controller", () => {
         await flushPromises();
 
         expect(postJsonMock).toHaveBeenCalledWith(
+            "/rq-engine/api/jobinfo",
             "/weppcloud/rq/api/jobinfo",
             { job_ids: ["job-10"] },
             expect.objectContaining({ signal: expect.any(Object) })

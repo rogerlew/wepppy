@@ -67,6 +67,14 @@ http://:8080 {
         }
     }
 
+    handle_path /rq-engine* {
+        reverse_proxy rq-engine:8042 {
+            header_up X-Forwarded-Prefix /rq-engine
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     handle_path /weppcloudr* {
         reverse_proxy weppcloudr:8050 {
             header_up X-Forwarded-Prefix /weppcloudr

@@ -1,12 +1,6 @@
-import os
-import json
-
-from os.path import join as _join
-from os.path import split as _split
-from os.path import exists as _exists
-
-from flask import abort, Blueprint, request, jsonify
-from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, success_factory
+from flask import Blueprint, request, jsonify
+from wepppy.weppcloud.utils.helpers import exception_factory, success_factory
+from wepppy.rq.jobinfo_payloads import extract_job_ids
 
 from wepppy.rq.job_info import (
     get_wepppy_rq_job_info,
@@ -19,72 +13,9 @@ from wepppy.rq.cancel_job import cancel_jobs
 rq_jobinfo_bp = Blueprint('rq_jobinfo', __name__)
 
 
-def _normalize_job_id_inputs(raw_values):
-    normalized = []
-    if raw_values is None:
-        return normalized
-
-    seen = set()
-
-    def _consume(value):
-        if value is None:
-            return
-        if isinstance(value, str):
-            stripped = value.strip()
-            if not stripped:
-                return
-            if ',' in stripped:
-                for part in stripped.split(','):
-                    _consume(part)
-                return
-            job_id = stripped
-            if job_id in seen:
-                return
-            seen.add(job_id)
-            normalized.append(job_id)
-            return
-        if isinstance(value, dict):
-            for payload in value.values():
-                _consume(payload)
-            return
-        if isinstance(value, (list, tuple, set)):
-            for item in value:
-                _consume(item)
-            return
-
-        job_id = str(value).strip()
-        if not job_id or job_id in seen:
-            return
-        seen.add(job_id)
-        normalized.append(job_id)
-
-    _consume(raw_values)
-    return normalized
-
-
 def _extract_job_ids_from_request():
-    job_ids = []
-
     payload = request.get_json(silent=True)
-    if isinstance(payload, dict):
-        if any(key in payload for key in ('job_ids', 'jobs', 'ids')):
-            job_ids = _normalize_job_id_inputs(
-                payload.get('job_ids') or payload.get('jobs') or payload.get('ids')
-            )
-        else:
-            job_ids = _normalize_job_id_inputs(payload.values())
-    elif payload is not None:
-        job_ids = _normalize_job_id_inputs(payload)
-
-    if not job_ids:
-        arg_values = request.args.getlist('job_id')
-        if not arg_values:
-            arg_values = request.args.getlist('job_ids')
-        if not arg_values:
-            arg_values = request.args.get('job_ids')
-        job_ids = _normalize_job_id_inputs(arg_values)
-
-    return job_ids
+    return extract_job_ids(payload=payload, query_args=request.args)
 
 ## Job Status
 # The status of a job can be one of the following:
@@ -112,7 +43,7 @@ def _extract_job_ids_from_request():
 
 @rq_jobinfo_bp.route('/rq/api/jobstatus/<string:job_id>')
 def jobstatus_route(job_id):
-    # NOTE: Read-only polling endpoint; consider implementing fastapi microservice and rate limiting if worker pressure grows.
+    # NOTE: Read-only polling endpoint; rq-engine provides the preferred FastAPI offload, keep this as fallback.
     try:
         job_status = get_wepppy_rq_job_status(job_id)
         return jsonify(job_status)

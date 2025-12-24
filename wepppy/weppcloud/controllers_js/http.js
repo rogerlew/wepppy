@@ -24,7 +24,12 @@
             throw new Error("WCHttp.request requires a URL.");
         }
         var prefix = typeof global.site_prefix === "string" ? global.site_prefix : "";
-        if (url === "/upload" || url.indexOf("/upload/") === 0) {
+        if (
+            url === "/upload" ||
+            url.indexOf("/upload/") === 0 ||
+            url === "/rq-engine" ||
+            url.indexOf("/rq-engine/") === 0
+        ) {
             return url;
         }
         if (!prefix || isAbsoluteUrl(url)) {
@@ -369,6 +374,59 @@
         return http.request(url, opts);
     }
 
+    function requestWithFallback(primaryUrl, fallbackUrl, options) {
+        return http.request(primaryUrl, options || {}).catch(function (primaryError) {
+            return http.request(fallbackUrl, options || {}).catch(function (fallbackError) {
+                fallbackError.primaryError = primaryError;
+                throw fallbackError;
+            });
+        });
+    }
+
+    function getJsonWithFallback(primaryUrl, fallbackUrl, options) {
+        var opts = options || {};
+
+        function parseResult(result) {
+            var body = result.body;
+            if (body === null || body === undefined) {
+                return body;
+            }
+            if (typeof body === "string") {
+                try {
+                    return JSON.parse(body);
+                } catch (err) {
+                    throw new HttpError("Expected JSON response.", {
+                        url: result.url,
+                        status: result.status,
+                        statusText: result.statusText,
+                        body: body,
+                        cause: err,
+                        response: result.response
+                    });
+                }
+            }
+            return body;
+        }
+
+        return http.request(primaryUrl, opts)
+            .then(parseResult)
+            .catch(function (primaryError) {
+                return http.request(fallbackUrl, opts)
+                    .then(parseResult)
+                    .catch(function (fallbackError) {
+                        fallbackError.primaryError = primaryError;
+                        throw fallbackError;
+                    });
+            });
+    }
+
+    function postJsonWithFallback(primaryUrl, fallbackUrl, payload, options) {
+        var opts = options ? Object.assign({}, options) : {};
+        opts.method = opts.method || "POST";
+        opts.json = payload;
+        return requestWithFallback(primaryUrl, fallbackUrl, opts);
+    }
+
     function formDataToParams(formData) {
         var params = new URLSearchParams();
         formData.forEach(function (value, key) {
@@ -433,6 +491,9 @@
     http.getJson = getJson;
     http.postJson = postJson;
     http.postForm = postForm;
+    http.requestWithFallback = requestWithFallback;
+    http.getJsonWithFallback = getJsonWithFallback;
+    http.postJsonWithFallback = postJsonWithFallback;
     http.HttpError = HttpError;
     http.isHttpError = isHttpError;
     http.getCsrfToken = getCsrfToken;

@@ -56,10 +56,10 @@
 
 
   function fetchJobStatus() {
-    $.ajax({
-      url: `{{site_prefix}}/rq/api/jobinfo/${jobId}`,
-      method: 'GET',
-      success: function(data) {
+    const primaryUrl = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
+    const fallbackUrl = `{{site_prefix}}/rq/api/jobinfo/${encodeURIComponent(jobId)}`;
+
+    function handleSuccess(data) {
         jobCount = 0;
         queryCount ++;
 
@@ -88,14 +88,36 @@
         $('#query-interval').text(`${queryInterval}`);
 
         setTimeout(fetchJobStatus, queryInterval);
-      },
-      error: function(xhr, status, error) {
-        let response = JSON.parse(xhr.responseText);
-        if (response.StackTrace && response.StackTrace.some(line => line.includes('NoSuchJobError'))) {
-          $('#job-dashboard').html('<div class="alert alert-danger">No such job found: ' + jobId + '</div>');
-        } else {
-          $('#job-dashboard').html('<div class="alert alert-danger">Error: ' + response.Error + '</div><pre>' + response.StackTrace.join('\n') + '</pre>');
-        }
+      }
+
+    function handleError(xhr) {
+      let response = {};
+      try {
+        response = JSON.parse(xhr.responseText);
+      } catch (err) {
+        response = { Error: "Request failed", StackTrace: [] };
+      }
+      if (response.StackTrace && response.StackTrace.some(line => line.includes('NoSuchJobError'))) {
+        $('#job-dashboard').html('<div class="alert alert-danger">No such job found: ' + jobId + '</div>');
+      } else {
+        const stacktrace = Array.isArray(response.StackTrace) ? response.StackTrace.join('\\n') : '';
+        $('#job-dashboard').html('<div class="alert alert-danger">Error: ' + response.Error + '</div><pre>' + stacktrace + '</pre>');
+      }
+    }
+
+    $.ajax({
+      url: primaryUrl,
+      method: 'GET',
+      success: handleSuccess,
+      error: function() {
+        $.ajax({
+          url: fallbackUrl,
+          method: 'GET',
+          success: handleSuccess,
+          error: function(xhr) {
+            handleError(xhr);
+          }
+        });
       }
     });
   }
