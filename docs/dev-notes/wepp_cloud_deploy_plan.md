@@ -154,7 +154,7 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 - [x] Verify vendor files exist: `ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/`
 
 ## Post-deploy validation
-- [x] `curl -fsS https://wepp.cloud/health` (or `/weppcloud/health` via proxy).
+- [x] `curl -fsS https://wepp.cloud/weppcloud/health` (deploy script uses `EXTERNAL_HOST` from `docker/.env`; override with `HEALTHCHECK_URL`).
 - [x] Confirm login + OAuth, run creation, and a smoke run.
 - [x] Verify status/preflight WebSockets, cap UI, dtale, and browse endpoints.
 - [ ] Scan logs: `docker compose -f docker/docker-compose.prod.yml logs --tail=200`.

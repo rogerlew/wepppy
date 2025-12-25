@@ -7,10 +7,32 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+read_env_value() {
+    local key="$1"
+    local file="$2"
+    local value
+
+    value=$(awk -F= -v key="${key}" '
+        $0 ~ "^[[:space:]]*"key"=" {
+            sub("^[[:space:]]*"key"=", "", $0)
+            sub(/[[:space:]]+#.*$/, "", $0)
+            print $0
+            exit
+        }' "${file}")
+
+    value="${value%\"}"
+    value="${value#\"}"
+    value="${value%\'}"
+    value="${value#\'}"
+
+    echo "${value}"
+}
+
 # Parse arguments
 SKIP_PULL=false
 SKIP_BUILD=false
 SKIP_THEMES=false
+HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -103,11 +125,36 @@ echo ""
 echo ">>> Step 6: Waiting for services to be healthy..."
 sleep 5
 
+# Resolve health check URL (prefer explicit override, then EXTERNAL_HOST from docker/.env)
+if [ -z "${HEALTHCHECK_URL}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+    HEALTHCHECK_URL="$(read_env_value "HEALTHCHECK_URL" "${PROJECT_ROOT}/docker/.env")"
+fi
+if [ -z "${EXTERNAL_HOST:-}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+    EXTERNAL_HOST="$(read_env_value "EXTERNAL_HOST" "${PROJECT_ROOT}/docker/.env")"
+fi
+
+if [ -z "${HEALTHCHECK_URL}" ]; then
+    if [ -n "${EXTERNAL_HOST:-}" ]; then
+        case "${EXTERNAL_HOST}" in
+            http://*|https://*)
+                HEALTHCHECK_URL="${EXTERNAL_HOST%/}/weppcloud/health"
+                ;;
+            *)
+                HEALTHCHECK_URL="https://${EXTERNAL_HOST}/weppcloud/health"
+                ;;
+        esac
+    else
+        HEALTHCHECK_URL="http://localhost:8080/weppcloud/health"
+    fi
+fi
+
+echo "    Health check URL: ${HEALTHCHECK_URL}"
+
 # Check weppcloud health
 MAX_ATTEMPTS=30
 ATTEMPT=0
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-    if curl -fsS http://localhost:8080/weppcloud/health > /dev/null 2>&1; then
+    if curl -fsS "${HEALTHCHECK_URL}" > /dev/null 2>&1; then
         echo "✓ WEPPcloud is healthy"
         break
     fi
