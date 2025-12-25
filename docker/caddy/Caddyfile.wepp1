@@ -103,6 +103,26 @@ wepp.cloud {
         file_server
     }
 
+    handle_path /geodata/emapr/* {
+        root * /geodata/islay.ceoas.oregonstate.edu
+        file_server browse
+    }
+
+    handle_path /geodata/revegetation/* {
+        root * /geodata/revegetation
+        file_server browse
+    }
+
+    handle_path /geodata/mtbs/* {
+        root * /geodata/mtbs
+        file_server browse
+    }
+
+    handle_path /share/* {
+        root * /geodata/share
+        file_server browse
+    }
+
     handle_path /browse* {
         reverse_proxy browse:9009 {
             transport http {
