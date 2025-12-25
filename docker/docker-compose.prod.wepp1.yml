@@ -1,3 +1,18 @@
+x-wepp1-volumes: &wepp1-volumes
+  - /geodata/wc1:/wc1
+  - /geodata:/geodata
+
+x-wepppy-image: &wepppy-image
+  image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+    args:
+      APP_USER: roger
+      APP_GROUP: docker
+      APP_UID: "1002"
+      APP_GID: "130"
+
 services:
   caddy:
     ports:
@@ -11,6 +26,54 @@ services:
   cap:
     environment:
       CAP_ASSET_ROOT: /opt/cap
+  weppcloud:
+    <<: *wepppy-image
+    volumes:
+      - /geodata/wc1:/wc1
+      - /geodata:/geodata
+      - ../wepppy/weppcloud/static:/srv/weppcloud/static
+  browse:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  dtale:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  profile-playback:
+    <<: *wepppy-image
+    volumes:
+      - /geodata/wc1:/wc1
+      - /geodata:/geodata
+      - ${PROFILE_PLAYBACK_DATA_DIR:-/workdir/wepppy-test-engine-data}:/workdir/wepppy-test-engine-data
+  elevationquery:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  metquery:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  wmesque:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  wmesque2:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  query-engine:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  rq-engine:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+  rq-worker:
+    <<: *wepppy-image
+    volumes:
+      - /geodata/wc1:/wc1
+      - /geodata:/geodata
+      - /var/run/docker.sock:/var/run/docker.sock
+  weppcloudr:
+    container_name: weppcloudr
+    volumes:
+      - /geodata:/geodata
+      - /geodata/wc1:/wc1
+      - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
 
 volumes:
   caddy-data:

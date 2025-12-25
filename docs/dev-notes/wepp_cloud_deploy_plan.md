@@ -75,8 +75,8 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 ## UID/GID normalization (roger:docker)
 - [x] Verify roger UID: `id -u roger` (expect 1002 on wepp1; dev/test hosts expect 1000).
 - [x] Verify docker GID: `getent group docker | cut -d: -f3` (expect 993 on dev/test; wepp1 uses 130 because 993 is `systemd-coredump`).
-- [ ] If docker GID is not 993 on wepp1, do not force-change it; set `GID=<docker gid>` in `docker/.env` and set `APP_GID=<docker gid>` for prod builds.
-- [ ] Run the docker GID fixer only on hosts that are supposed to be 993: `sudo ./scripts/ensure_docker_gid_993.sh fix` (see `scripts/README.docker_gid_993.md`).
+- [x] If docker GID is not 993 on wepp1, do not force-change it; set `GID=<docker gid>` in `docker/.env` and set `APP_GID=<docker gid>` for prod builds.
+- [x] Run the docker GID fixer only on hosts that are supposed to be 993: `sudo ./scripts/ensure_docker_gid_993.sh fix` (see `scripts/README.docker_gid_993.md`).
 - [x] Confirm roger is in docker group: `id -nG roger | rg -w docker`.
 - [ ] After UID/GID updates, reset ownership: `sudo chown -R roger:docker /geodata`.
   - Dev/test hosts (`wc.bearhive.duckdns.org`, `wc-prod.bearhive.duckdns.org`) keep UID 1000 in `docker/.env`.
@@ -135,23 +135,28 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 - [x] Ensure 80/443 are open to the host and DNS points to wepp1.
 
 ## Build + start stack
-- [x ] Build images (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml build`.
+- [x] Build images (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml build`.
 - [x] Start stack (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml up -d`.
 - [x] Check health: `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml ps`.
 
 ## Restore database + migrate
-- [ ] Stop writers: `docker compose -f docker/docker-compose.prod.yml stop weppcloud rq-worker`.
-- [ ] Restore the backup into the `postgres` container (see `docs/dev-notes/docker_compose_plan.md`).
-  - `docker compose -f docker/docker-compose.prod.yml cp /tmp/wepppy-YYYYMMDD.dump postgres:/tmp/restore.dump`
+- [x] Stop writers: `docker compose -f docker/docker-compose.prod.yml stop weppcloud rq-worker`.
+- [x] Restore the backup into the `postgres` container (see `docs/dev-notes/docker_compose_plan.md`).
+  - `docker compose -f docker/docker-compose.prod.yml cp /tmp/wepppy-20251224.dump postgres:/tmp/restore.dump`
   - `docker compose -f docker/docker-compose.prod.yml exec postgres pg_restore --clean --if-exists -U wepppy -d wepppy /tmp/restore.dump`
   - `docker compose -f docker/docker-compose.prod.yml exec postgres rm /tmp/restore.dump`
-- [ ] Run migrations: `docker compose -f docker/docker-compose.prod.yml run --rm weppcloud flask db upgrade`.
-- [ ] Start services: `docker compose -f docker/docker-compose.prod.yml up -d`.
+- [x] Run migrations: `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml run --rm -e FLASK_APP=wepppy.weppcloud.app:app weppcloud flask db upgrade`.
+- [x] Start services: `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml up -d`.
+
+## Copy static vendor assets
+- [x] Copy vendor assets from image to host (required because volume mount overrides built assets):
+  - `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml cp weppcloud:/workdir/wepppy/wepppy/weppcloud/static/vendor /workdir/wepppy/wepppy/weppcloud/static/`
+- [x] Verify vendor files exist: `ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/`
 
 ## Post-deploy validation
-- [ ] `curl -fsS https://wepp.cloud/health` (or `/weppcloud/health` via proxy).
-- [ ] Confirm login + OAuth, run creation, and a smoke run.
-- [ ] Verify status/preflight WebSockets, cap UI, dtale, and browse endpoints.
+- [x] `curl -fsS https://wepp.cloud/health` (or `/weppcloud/health` via proxy).
+- [x] Confirm login + OAuth, run creation, and a smoke run.
+- [x] Verify status/preflight WebSockets, cap UI, dtale, and browse endpoints.
 - [ ] Scan logs: `docker compose -f docker/docker-compose.prod.yml logs --tail=200`.
 
 ## Rollback
