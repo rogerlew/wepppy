@@ -12,12 +12,12 @@
 - `scripts/README.docker_gid_993.md` (docker group GID enforcement)
 
 ## Preflight / inventory
-- [ ] Schedule maintenance window + downtime notice.
-- [ ] Record running services: `systemctl list-units --type=service | rg -i 'wepp|gunicorn|rq|redis|postgres|caddy|nginx'` (snapshot below).
-- [ ] Capture current env/secrets (OAuth, JWT, database creds, CAP keys).
-- [ ] Confirm `/wc1` path mapping (current host uses `/geodata/wc1`; ensure `/wc1` exists or bind-mount `/geodata/wc1` to `/wc1`).
-- [ ] Verify disk space on `/workdir`, `/wc1`, `/geodata`.
-- [ ] Verify DNS + firewall (80/443 open if Caddy terminates TLS).
+- [x] Schedule maintenance window + downtime notice.
+- [x] Record running services: `systemctl list-units --type=service | rg -i 'wepp|gunicorn|rq|redis|postgres|caddy|nginx'` (snapshot below).
+- [x] Capture current env/secrets (OAuth, JWT, database creds, CAP keys).
+- [x] Confirm `/wc1` path mapping (current host uses `/geodata/wc1`; ensure `/wc1` exists or bind-mount `/geodata/wc1` to `/wc1`).
+- [x] Verify disk space on `/workdir`, `/wc1`, `/geodata`.
+- [x] Verify DNS + firewall (80/443 open if Caddy terminates TLS).
 
 ## Current host snapshot (wepp1)
 Service inventory:
@@ -98,8 +98,8 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 ## Repos under /workdir
 - [x] Clone `https://github.com/rogerlew/wepppy` -> `/workdir/wepppy`.
 - [ ] `cap` assets are vendored in the prod image; clone `https://github.com/tiagozip/cap` -> `/workdir/cap` only if you want a host override.
-- [ ] Confirm which vendored deps should stay in the image (see `docker/Dockerfile`); host clones are optional unless you plan to mount overrides.
-- [ ] Install wctl: `cd /workdir/wepppy && ./wctl/install.sh wepp1` (optionally set `WCTL_SYMLINK_PATH`).
+- [x] Confirm which vendored deps should stay in the image (see `docker/Dockerfile`); host clones are optional unless you plan to mount overrides.
+- [x] Install wctl: `cd /workdir/wepppy && ./wctl/install.sh wepp1` (optionally set `WCTL_SYMLINK_PATH`).
 - [ ] Optional clones (only if you plan to override vendored deps from `docker/Dockerfile`):
   - [ ] `https://github.com/wepp-in-the-woods/wepppy2` -> `/workdir/wepppy2`.
   - [ ] `https://github.com/wepp-in-the-woods/weppcloud2` -> `/workdir/weppcloud2`.
@@ -110,7 +110,7 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
   - [ ] `/workdir/peridot`, `/workdir/wepp-forest`, `/workdir/wepp-forest-revegetation` (only if external tooling expects host paths).
 
 ## Compose env and config
-- [ ] Create `docker/.env` (keys + secrets + host config):
+- [x] Create `docker/.env` (keys + secrets + host config):
   - `UID`, `GID` (use host values; wepp1 uses UID 1002 and docker GID 130)
   - `SECRET_KEY`, `SECURITY_PASSWORD_SALT`
   - `POSTGRES_PASSWORD`, `DATABASE_URL` (example: `postgresql://wepppy:${POSTGRES_PASSWORD}@postgres:5432/wepppy`)
@@ -120,7 +120,7 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
   - OAuth keys: `OAUTH_GITHUB_CLIENT_ID`, `OAUTH_GITHUB_CLIENT_SECRET`, `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET`
   - CAP keys: `CAP_SITE_KEY`, `CAP_SECRET`, `CAP_CORS_ORIGIN`
   - `OPENTOPOGRAPHY_API_KEY` (if used)
-- [ ] Ensure `/wc1` and `/geodata` are mounted and readable (compose expects `/wc1` and `/wc1/geodata`).
+- [x] Ensure `/wc1` and `/geodata` are mounted and readable (compose expects `/wc1` and `/wc1/geodata`).
 - [x] Ensure `/geodata/extended_mods_data` exists and clone location bundles:
   - `https://github.com/rogerlew/wepppy-locations-laketahoe` -> `/geodata/extended_mods_data/wepppy-locations-laketahoe`
   - `https://github.com/rogerlew/wepppy-locations-portland` -> `/geodata/extended_mods_data/wepppy-locations-portland`
@@ -128,17 +128,16 @@ tmpfs                  26G   32K   26G   1% /run/user/1002
 - [ ] Set `CADDY_FILE=/workdir/wepppy/docker/caddy/Caddyfile.weppcloud` (or similar) if using a custom Caddyfile.
 
 ## Caddy + TLS
-- [ ] Use Caddy for TLS termination on wepp.cloud (Lets Encrypt); Apache is retired.
-- [ ] Use `docker/caddy/Caddyfile.wepp1` for wepp.cloud (TLS termination + redirects).
-- [ ] Ensure HTTPS redirect is enforced (Caddy does this by default when TLS is enabled).
-- [ ] Use the override file `docker/docker-compose.prod.wepp1.yml` to expose 80/443 and persist `/data` + `/config`.
-- [ ] Ensure 80/443 are open to the host and DNS points to wepp1.
-- [ ] If TLS is terminated externally (fallback only), keep `docker/caddy/Caddyfile` on http://:8080 and pass `X-Forwarded-Proto https`.
+- [x] Use Caddy for TLS termination on wepp.cloud (Lets Encrypt); Apache is retired.
+- [x] Use `docker/caddy/Caddyfile.wepp1` for wepp.cloud (TLS termination + redirects).
+- [x] Ensure HTTPS redirect is enforced (Caddy does this by default when TLS is enabled).
+- [x] Use the override file `docker/docker-compose.prod.wepp1.yml` to expose 80/443 and persist `/data` + `/config`.
+- [x] Ensure 80/443 are open to the host and DNS points to wepp1.
 
 ## Build + start stack
-- [ ] Build images (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml build`.
-- [ ] Start stack (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml up -d`.
-- [ ] Check health: `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml ps`.
+- [x ] Build images (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml build`.
+- [x] Start stack (wepp1 override): `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml up -d`.
+- [x] Check health: `docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml ps`.
 
 ## Restore database + migrate
 - [ ] Stop writers: `docker compose -f docker/docker-compose.prod.yml stop weppcloud rq-worker`.
