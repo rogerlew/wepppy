@@ -9,8 +9,11 @@
 - **scenario/manager.js** — Scenario + comparison switching, base data loads, diff ranges; injected callbacks for apply/legend updates.
 - **data/query-engine.js** — Query Engine HTTP helpers (sitePrefix-aware).
 - **data/wepp-data.js** — WEPP stat/yearly/event fetchers, ranges, base/comparison loads; uses injected Query Engine and picker helpers.
+- **data/rap-data.js** — RAP summary refresh + active layer selection.
+- **data/openet-data.js** — OpenET summary refresh for monthly layers (base-only).
 - **ui/graph-mode.js** — Graph mode/layout controller; year-slider placement; idempotent sync; DOM guarded.
 - **ui/year-slider.js** — Slider controller (init/show/hide/playback); DOM guarded.
+- **ui/month-slider.js** — Slider controller for monthly layers (OpenET); DOM guarded.
 - **graphs/timeseries-graph.js** — Canvas graph controller; DOM-bound to panel/canvas.
 - **graphs/graph-loaders.js** — Graph data loaders (Omni/RAP/WEPP); no DOM/deck.
 - **layers/detector.js** — Overlay detection (raster/vector) with fetch; no DOM/deck.
@@ -25,6 +28,7 @@
 - All fetches honor `ctx.sitePrefix` (browse/gdalinfo/query-engine) to avoid missing-run errors.
 - `syncGraphModeForContext()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
 - Year slider placement: climate/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
+- Monthly slider: OpenET-only; hide the year slider while OpenET is active.
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
 - Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.
@@ -35,8 +39,9 @@
 
 ## Module Contracts (injection signatures)
 - `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`
-- `createGraphModeController({ getState, setValue, domRefs, yearSlider, timeseriesGraph, onModeChange })`
+- `createGraphModeController({ getState, setValue, domRefs, yearSlider, monthSlider, timeseriesGraph, onModeChange })`
 - `createYearSlider({ el, input, valueEl, minEl, maxEl, playBtn })`
+- `createMonthSlider({ el, input, valueEl, minEl, maxEl, playBtn, formatLabel })`
 - `createWeppDataManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, pickActiveWeppEventLayer, WEPP_YEARLY_PATH, WEPP_LOSS_PATH })`
 - `colors.js` exports: `normalizeModeValue`, `resolveColormapName`, `hslToHex`, `soilColorForValue`, `hexToRgbaArray`, `rgbaStringToArray`, `normalizeColorEntry`, `createColorScales`, `viridisColor`, `winterColor`, `jet2Color`, `divergingColor`, `rdbuColor`
 

@@ -20,6 +20,13 @@ openet_ts.analyze()
 - `openet/individual/<dataset_key>/<topaz_id>.parquet` (per-hillslope cache)
 - `openet/openet_ts.parquet` (combined monthly time series)
 
+## Layers
+OpenET drives a gl-dashboard map overlay when `openet/openet_ts.parquet` is present.
+
+- The Layers control shows an OpenET section only when the parquet exists.
+- Each `dataset_key` becomes a radio option (for example, `ensemble`, `eemetric`).
+- OpenET uses the monthly time slider; the yearly slider is hidden while an OpenET layer is active.
+
 ## openet/openet_ts.parquet Specification
 Combined monthly OpenET time series aggregated at the hillslope level.
 Per-hillslope cache files use the same schema.

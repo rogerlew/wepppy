@@ -1,5 +1,5 @@
 /**
- * Graph data loaders for Omni/RAP/WEPP charts.
+ * Graph data loaders for Omni/RAP/WEPP/OpenET charts.
  * No DOM/deck usage; consumes Query Engine helpers and returns datasets for the graph renderer.
  *
  * SCENARIO QUERY ARCHITECTURE (REGRESSION GUARD)
@@ -71,6 +71,7 @@ export function createGraphLoaders(deps) {
     graphScenarios,
     postQueryEngine,
     postQueryEngineForScenario,
+    postBaseQueryEngine,
     viridisColor,
     winterColor,
     jet2Color,
@@ -83,6 +84,7 @@ export function createGraphLoaders(deps) {
     CLIMATE_YEARLY,
     RAP,
     WEPP_YEARLY,
+    OPENET,
   } = GRAPH_CONTEXT_KEYS;
 
   function scenarioColor(idx, scenarioName = null) {
@@ -1076,9 +1078,105 @@ export function createGraphLoaders(deps) {
     }
   }
 
+  function openetMonthLabel(entry) {
+    if (!entry) return '';
+    const monthIndex = Number(entry.month) - 1;
+    const monthLabel = monthIndex >= 0 && monthIndex < MONTH_LABELS.length ? MONTH_LABELS[monthIndex] : String(entry.month);
+    return entry.year ? `${monthLabel} ${entry.year}` : monthLabel;
+  }
+
+  async function buildOpenetTimeseriesData() {
+    const openetLayers = state.openetLayers || [];
+    const openetMeta = state.openetMetadata;
+    if (!openetLayers.length || !openetMeta || !Array.isArray(openetMeta.months) || !openetMeta.months.length) {
+      return null;
+    }
+    const activeLayer = openetLayers.find((layer) => layer.visible) || openetLayers[0];
+    const datasetKey = state.openetSelectedDatasetKey || (activeLayer ? activeLayer.datasetKey : null);
+    if (!datasetKey) return null;
+    if (typeof postBaseQueryEngine !== 'function') return null;
+
+    const dataPayload = {
+      datasets: [{ path: 'openet/openet_ts.parquet', alias: 'openet' }],
+      columns: ['openet.topaz_id AS topaz_id', 'openet.year AS year', 'openet.month AS month', 'openet.value AS value'],
+      filters: [{ column: 'openet.dataset_key', op: '=', value: datasetKey }],
+      order_by: ['year', 'month'],
+    };
+    const dataResult = await postBaseQueryEngine(dataPayload);
+    if (!dataResult || !dataResult.records || !dataResult.records.length) {
+      return null;
+    }
+
+    const months = openetMeta.months.map((entry) => ({
+      year: entry.year,
+      month: entry.month,
+      label: entry.label || openetMonthLabel(entry),
+    }));
+    const monthIndexMap = new Map();
+    const xValues = [];
+    const labelMap = new Map();
+    months.forEach((entry, idx) => {
+      const xVal = Number((entry.year + (entry.month - 1) / 12).toFixed(6));
+      xValues.push(xVal);
+      labelMap.set(xVal, entry.label || openetMonthLabel(entry));
+      monthIndexMap.set(`${entry.year}-${entry.month}`, idx);
+    });
+
+    const series = {};
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+    for (const row of dataResult.records) {
+      const tid = String(row.topaz_id);
+      const key = `${row.year}-${row.month}`;
+      const idx = monthIndexMap.get(key);
+      if (idx == null) continue;
+      if (!series[tid]) {
+        series[tid] = { values: new Array(xValues.length).fill(null) };
+      }
+      const value = row.value != null ? Number(row.value) : null;
+      series[tid].values[idx] = value;
+      if (Number.isFinite(value)) {
+        if (value < minVal) minVal = value;
+        if (value > maxVal) maxVal = value;
+      }
+    }
+    if (!Number.isFinite(minVal)) minVal = 0;
+    if (!Number.isFinite(maxVal)) maxVal = 1;
+    const range = maxVal - minVal || 1;
+
+    for (const tid of Object.keys(series)) {
+      const values = series[tid].values;
+      const latest = values.filter((v) => v != null).pop() || 0;
+      const normalized = Math.min(1, Math.max(0, (latest - minVal) / range));
+      series[tid].color = winterColor(normalized);
+    }
+
+    const selectedIndex = Number.isFinite(state.openetSelectedMonthIndex)
+      ? state.openetSelectedMonthIndex
+      : xValues.length - 1;
+    const currentYear = xValues[selectedIndex] != null ? xValues[selectedIndex] : null;
+
+    return {
+      type: 'line',
+      title: `OpenET ET (${datasetKey})`,
+      years: xValues,
+      series,
+      xLabel: 'Year',
+      yLabel: 'ET (mm)',
+      currentYear,
+      source: OPENET,
+      tooltipFormatter: (id, value, xVal) => {
+        const label = labelMap.get(xVal) || String(xVal);
+        const numeric = Number.isFinite(value) ? value.toFixed(2) : value;
+        return `Hillslope ${id}: ${numeric} mm (${label})`;
+      },
+    };
+  }
+
   return {
     loadGraphDataset,
     buildRapTimeseriesData,
     buildWeppYearlyTimeseriesData,
+    buildOpenetTimeseriesData,
   };
 }

@@ -100,6 +100,12 @@ export function createLayerUtils({
     return Number.isFinite(v) ? v : null;
   }
 
+  function openetValue(row) {
+    if (row == null) return null;
+    const v = Number(row);
+    return Number.isFinite(v) ? v : null;
+  }
+
   function weppValue(mode, row) {
     if (!row) return null;
     const v = Number(row[mode]);
@@ -246,6 +252,14 @@ export function createLayerUtils({
     const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
     const palette = resolveColormapName(mode, 'WEPP Event', { WATER_MEASURES, SOIL_MEASURES });
     return colorFromPalette(palette, normalized);
+  }
+
+  function openetFillColor(value) {
+    const state = getState();
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+    const range = state.openetRanges || { min: 0, max: 1 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min || 1)));
+    return winterColor(normalized);
   }
 
   function rapFillColor(row) {
@@ -431,6 +445,39 @@ export function createLayerUtils({
                 props.wepp_id);
             const row = topaz != null ? state.watarSummary[String(topaz)] : null;
             return watarFillColor(overlay.mode, row);
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function buildOpenetLayers(state) {
+    if (!state.subcatchmentsVisible) return [];
+    const activeLayers = state.openetLayers
+      .filter((l) => l.visible && state.subcatchmentsGeoJson && state.openetSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `openet-${overlay.key}`,
+          data: state.subcatchmentsGeoJson,
+          pickable: true,
+          stroked: false,
+          filled: true,
+          opacity: 0.8,
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? state.openetSummary[String(topaz)] : null;
+            return openetFillColor(openetValue(row));
+          },
+          updateTriggers: {
+            getFillColor: [state.openetSelectedMonthIndex, overlay.datasetKey, state.openetRanges],
           },
         });
       });
@@ -724,6 +771,7 @@ export function createLayerUtils({
     const weppDeckLayers = buildWeppLayers(state);
     const weppYearlyDeckLayers = buildWeppYearlyLayers(state);
     const weppEventDeckLayers = buildWeppEventLayers(state);
+    const openetDeckLayers = buildOpenetLayers(state);
     const rapDeckLayers = buildRapLayers(state);
     const labelLayers = buildSubcatchmentLabelsLayer(state);
     return [
@@ -735,6 +783,7 @@ export function createLayerUtils({
       ...weppDeckLayers,
       ...weppYearlyDeckLayers,
       ...weppEventDeckLayers,
+      ...openetDeckLayers,
       ...rapDeckLayers,
       ...rasterLayers,
       ...labelLayers,
@@ -886,6 +935,26 @@ export function createLayerUtils({
         return `Layer: ${weppEventOverlay.path}\nDate: ${state.weppEventSelectedDate}\nTopazID: ${topaz}\n${label}`;
       }
     }
+    const openetOverlay = pickActive(state.openetLayers);
+    if (info.object && openetOverlay && state.openetSummary) {
+      const props = info.object && info.object.properties;
+      const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+      const row = topaz != null ? state.openetSummary[String(topaz)] : null;
+      const val = openetValue(row);
+      if (val !== null) {
+        const metadata = state.openetMetadata;
+        const monthIndex = state.openetSelectedMonthIndex;
+        const entry =
+          metadata && Array.isArray(metadata.months) && Number.isFinite(monthIndex)
+            ? metadata.months[monthIndex]
+            : null;
+        const monthLabel = entry && entry.label ? entry.label : '';
+        const datasetLabel = openetOverlay.datasetKey || openetOverlay.label || 'OpenET';
+        const label = `ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
+        const monthLine = monthLabel ? `Month: ${monthLabel}\n` : '';
+        return `Layer: OpenET (${datasetLabel})\n${monthLine}TopazID: ${topaz}\n${label}`;
+      }
+    }
     if (info.object && state.rapSummary && (state.rapCumulativeMode || pickActive(state.rapLayers))) {
       const props = info.object && info.object.properties;
       const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
@@ -927,6 +996,7 @@ export function createLayerUtils({
       'WEPP Yearly': state.weppYearlyLayers,
       'WEPP Event': state.weppEventLayers,
       WATAR: state.watarLayers,
+      OpenET: state.openetLayers,
       Raster: state.detectedLayers,
     };
     const layers = layersByCategory[category] || [];
@@ -964,6 +1034,8 @@ export function createLayerUtils({
       if (weppYearly) active.push(weppYearly);
       const weppEvent = pickActiveLayerForLegend('WEPP Event', state);
       if (weppEvent) active.push(weppEvent);
+      const openet = pickActiveLayerForLegend('OpenET', state);
+      if (openet) active.push(openet);
       const watar = pickActiveLayerForLegend('WATAR', state);
       if (watar) active.push(watar);
     }

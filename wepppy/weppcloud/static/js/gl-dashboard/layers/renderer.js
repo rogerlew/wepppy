@@ -15,9 +15,11 @@ export function createLayerRenderer({
   activateWeppYearlyLayer,
   refreshWeppStatisticData,
   refreshRapData,
+  refreshOpenetData,
   refreshWeppEventData,
   loadRapTimeseriesData,
   loadWeppYearlyTimeseriesData,
+  loadOpenetTimeseriesData,
   applyLayers,
   syncGraphLayout,
   clearGraphModeOverride,
@@ -71,6 +73,7 @@ export function createLayerRenderer({
     wind_transport: 't/ha',
     water_transport: 't/ha',
     ash_transport: 't/ha',
+    openet_et: 'mm',
     // WEPP Event metrics
     event_P: 'mm',
     event_Q: 'mm',
@@ -264,6 +267,7 @@ export function createLayerRenderer({
       weppEventLayers = [],
       watarLayers = [],
       rapLayers = [],
+      openetLayers = [],
       detectedLayers = [],
       rapCumulativeMode,
       weppStatistic,
@@ -291,6 +295,15 @@ export function createLayerRenderer({
     }
     if (rapLayers.length) {
       subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true, stateKey: 'rapLayers' });
+    }
+    if (openetLayers.length) {
+      subcatchmentSections.push({
+        title: 'OpenET',
+        items: openetLayers,
+        isSubcatchment: true,
+        isOpenet: true,
+        stateKey: 'openetLayers',
+      });
     }
     if (weppLayers.length) {
       subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true, stateKey: 'weppLayers' });
@@ -411,6 +424,13 @@ export function createLayerRenderer({
         input.addEventListener('change', async () => {
           if (section.isSubcatchment && !isRaster) {
             await selectSubcatchmentLayer();
+            if (section.isOpenet && layer.datasetKey) {
+              setValue('openetSelectedDatasetKey', layer.datasetKey);
+              if (typeof refreshOpenetData === 'function') {
+                await refreshOpenetData();
+                updateLegendsPanel();
+              }
+            }
           } else {
             const target = layer.rasterRef || layer;
             target.visible = input.checked;
@@ -419,7 +439,7 @@ export function createLayerRenderer({
           applyLayers();
           syncGraphLayout && syncGraphLayout();
           updateLayerList();
-          if (section.isSubcatchment && !section.isRap && !section.isWeppYearly) {
+          if (section.isSubcatchment && !section.isRap && !section.isWeppYearly && !section.isOpenet) {
             clearGraphModeOverride && clearGraphModeOverride();
             setValue('activeGraphKey', null);
             setGraphFocus(false, { force: true, skipModeSync: true });
@@ -431,6 +451,8 @@ export function createLayerRenderer({
           const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
           if (section.isWeppYearly && layer.visible) {
             await loadWeppYearlyTimeseriesData();
+          } else if (section.isOpenet && layer.visible && graphVisible) {
+            await loadOpenetTimeseriesData();
           } else if (
             graphVisible &&
             !section.isSubcatchment &&
@@ -805,6 +827,12 @@ export function createLayerRenderer({
       minVal = state.weppEventRanges[mode].min;
       maxVal = state.weppEventRanges[mode].max;
       unit = LAYER_UNITS[mode] || '';
+    } else if (layer.category === 'OpenET' && state.openetRanges) {
+      if (Number.isFinite(state.openetRanges.min) && Number.isFinite(state.openetRanges.max)) {
+        minVal = state.openetRanges.min;
+        maxVal = state.openetRanges.max;
+        unit = layer.units || LAYER_UNITS[mode] || 'mm';
+      }
     } else if (layer.isCumulative) {
       minVal = 0;
       maxVal = 100;

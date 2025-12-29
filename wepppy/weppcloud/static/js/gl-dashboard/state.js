@@ -37,6 +37,7 @@ const state = {
   weppYearlyLayers: [],
   weppEventLayers: [],
   rapLayers: [],
+  openetLayers: [],
 
   landuseSummary: null,
   soilsSummary: null,
@@ -62,6 +63,11 @@ const state = {
   rapMetadata: null,
   rapSelectedYear: null,
   rapCumulativeMode: false,
+  openetSummary: null,
+  openetMetadata: null,
+  openetRanges: {},
+  openetSelectedDatasetKey: null,
+  openetSelectedMonthIndex: null,
 
   climateYearlySelectedYear: null,
   climateWaterYear: true,

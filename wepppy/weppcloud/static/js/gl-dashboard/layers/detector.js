@@ -131,6 +131,16 @@ function computeRanges(summary, modes) {
   return ranges;
 }
 
+function formatMonthLabel(entry, monthLabels) {
+  if (!entry) return '';
+  const labels = Array.isArray(monthLabels) && monthLabels.length === 12
+    ? monthLabels
+    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthIndex = Number(entry.month) - 1;
+  const monthLabel = monthIndex >= 0 && monthIndex < labels.length ? labels[monthIndex] : String(entry.month || '');
+  return monthLabel && entry.year ? `${monthLabel} ${entry.year}` : String(entry.year || '');
+}
+
 export async function detectRasterLayers({
   ctx,
   layerDefs,
@@ -183,6 +193,106 @@ export async function detectRasterLayers({
   }
 
   return { detectedLayers };
+}
+
+export async function detectOpenetOverlays({
+  buildBaseUrl,
+  postBaseQueryEngine,
+  monthLabels,
+  subcatchmentsGeoJson,
+  currentSelectedMonthIndex,
+  currentSelectedDatasetKey,
+}) {
+  try {
+    const datasetPayload = {
+      datasets: [{ path: 'openet/openet_ts.parquet', alias: 'openet' }],
+      columns: ['DISTINCT openet.dataset_key AS dataset_key'],
+      order_by: ['dataset_key'],
+    };
+    const datasetResult = await postBaseQueryEngine(datasetPayload);
+    if (!datasetResult || !datasetResult.records || !datasetResult.records.length) {
+      logDetectionInfo('OpenET overlays missing dataset keys');
+      return null;
+    }
+
+    const datasetKeys = datasetResult.records
+      .map((row) => row.dataset_key)
+      .filter((key) => typeof key === 'string' && key.length);
+    if (!datasetKeys.length) {
+      logDetectionInfo('OpenET overlays missing dataset keys');
+      return null;
+    }
+
+    const monthsPayload = {
+      datasets: [{ path: 'openet/openet_ts.parquet', alias: 'openet' }],
+      columns: ['DISTINCT openet.year AS year', 'openet.month AS month'],
+      order_by: ['year', 'month'],
+    };
+    const monthsResult = await postBaseQueryEngine(monthsPayload);
+    if (!monthsResult || !monthsResult.records || !monthsResult.records.length) {
+      logDetectionInfo('OpenET overlays missing month list');
+      return null;
+    }
+
+    const months = monthsResult.records
+      .map((row) => ({ year: Number(row.year), month: Number(row.month) }))
+      .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.month) && row.month >= 1 && row.month <= 12)
+      .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.month - b.month))
+      .map((row) => ({ ...row, label: formatMonthLabel(row, monthLabels) }));
+
+    if (!months.length) {
+      logDetectionInfo('OpenET overlays missing month list');
+      return null;
+    }
+
+    let selectedDatasetKey = null;
+    if (currentSelectedDatasetKey && datasetKeys.includes(currentSelectedDatasetKey)) {
+      selectedDatasetKey = currentSelectedDatasetKey;
+    } else if (datasetKeys.includes('ensemble')) {
+      selectedDatasetKey = 'ensemble';
+    } else {
+      selectedDatasetKey = datasetKeys[0];
+    }
+
+    let selectedMonthIndex = Number.isFinite(currentSelectedMonthIndex) ? currentSelectedMonthIndex : months.length - 1;
+    if (selectedMonthIndex < 0 || selectedMonthIndex >= months.length) {
+      selectedMonthIndex = months.length - 1;
+    }
+
+    const geoJson = await ensureSubcatchments(buildBaseUrl, subcatchmentsGeoJson);
+    if (!geoJson) {
+      return {
+        openetLayers: [],
+        openetMetadata: { months, datasetKeys },
+        openetSelectedDatasetKey: selectedDatasetKey,
+        openetSelectedMonthIndex: selectedMonthIndex,
+        subcatchmentsGeoJson: geoJson,
+      };
+    }
+
+    const openetLayers = datasetKeys.map((key) => ({
+      key,
+      label: key,
+      datasetKey: key,
+      path: 'openet/openet_ts.parquet',
+      mode: 'openet_et',
+      units: 'mm',
+      visible: false,
+    }));
+
+    return {
+      openetLayers,
+      openetMetadata: { months, datasetKeys },
+      openetSummary: null,
+      openetRanges: {},
+      openetSelectedDatasetKey: selectedDatasetKey,
+      openetSelectedMonthIndex: selectedMonthIndex,
+      subcatchmentsGeoJson: geoJson,
+    };
+  } catch (err) {
+    logDetectionWarn('failed to load OpenET overlays', err);
+    return null;
+  }
 }
 
 export async function detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl }) {

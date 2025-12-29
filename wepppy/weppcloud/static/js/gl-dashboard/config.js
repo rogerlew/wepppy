@@ -37,6 +37,7 @@ export const GRAPH_CONTEXT_KEYS = Object.freeze({
   CLIMATE_YEARLY: 'climate_yearly',
   WEPP_YEARLY: 'wepp_yearly',
   RAP: 'rap',
+  OPENET: 'openet',
   CUMULATIVE: 'cumulative',
   OMNI: 'omni',
   DEFAULT: 'default',
@@ -191,6 +192,7 @@ export const LAYER_REGISTRY = {
   wepp_yearly: { key: 'wepp_yearly', label: 'WEPP Yearly' },
   wepp_event: { key: 'wepp_event', label: 'WEPP Event' },
   watar: { key: 'watar', label: 'WATAR' },
+  openet: { key: 'openet', label: 'OpenET' },
 };
 
 export const GRAPH_DEFS = [

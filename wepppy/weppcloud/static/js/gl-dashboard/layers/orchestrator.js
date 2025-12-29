@@ -16,7 +16,9 @@ export function createDetectionController({
   weppYearlyPath,
   watarPath,
   postQueryEngine,
+  postBaseQueryEngine,
   yearSlider,
+  monthSlider,
   climateCtx,
   applyLayers,
   updateLayerList,
@@ -28,6 +30,7 @@ export function createDetectionController({
   computeComparisonDiffRanges,
   baseLayerDefs,
   rapBandLabels,
+  monthLabels,
   onBaseScenarioDetected,
 }) {
   async function detectRasterLayers() {
@@ -105,6 +108,39 @@ export function createDetectionController({
         subcatchmentsGeoJson: subcatchments,
         hillslopesLayers: result.hillslopesLayers,
       });
+      updateLayerList();
+      applyLayers();
+    }
+  }
+
+  async function detectOpenetOverlays() {
+    const result = await detectorModule.detectOpenetOverlays({
+      buildBaseUrl,
+      postBaseQueryEngine,
+      monthLabels,
+      subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
+      currentSelectedMonthIndex: getState().openetSelectedMonthIndex,
+      currentSelectedDatasetKey: getState().openetSelectedDatasetKey,
+    });
+    if (result) {
+      const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
+      setState({
+        openetLayers: result.openetLayers || [],
+        openetMetadata: result.openetMetadata || null,
+        openetSummary: result.openetSummary || null,
+        openetRanges: result.openetRanges || {},
+        openetSelectedDatasetKey: result.openetSelectedDatasetKey || null,
+        openetSelectedMonthIndex: Number.isFinite(result.openetSelectedMonthIndex)
+          ? result.openetSelectedMonthIndex
+          : getState().openetSelectedMonthIndex,
+        subcatchmentsGeoJson: subcatchments,
+      });
+      if (monthSlider && result.openetMetadata && Array.isArray(result.openetMetadata.months)) {
+        const selectedIndex = Number.isFinite(result.openetSelectedMonthIndex)
+          ? result.openetSelectedMonthIndex
+          : result.openetMetadata.months.length - 1;
+        monthSlider.setRange(result.openetMetadata.months, selectedIndex);
+      }
       updateLayerList();
       applyLayers();
     }
@@ -228,6 +264,7 @@ export function createDetectionController({
     const tasks = [
       detectRasterLayers(),
       detectHillslopesOverlays(),
+      detectOpenetOverlays(),
       detectWatarOverlays(),
       detectWeppEventOverlays(),
       detectRapOverlays(),
@@ -240,6 +277,7 @@ export function createDetectionController({
     detectLanduseOverlays,
     detectSoilsOverlays,
     detectHillslopesOverlays,
+    detectOpenetOverlays,
     detectWatarOverlays,
     detectWeppOverlays,
     detectWeppYearlyOverlays,

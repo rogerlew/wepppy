@@ -86,7 +86,7 @@ import {
 
 /**
  * Graph mode/layout controller: handles slider placement, panel collapse, and focus.
- * @param {{ getState: GetState, setValue: SetValue, domRefs?: GraphModeDomRefs, yearSlider?: YearSliderController | null, timeseriesGraph?: TimeseriesGraph | (() => TimeseriesGraph | null), onModeChange?: GraphModeChangeHandler }} params
+ * @param {{ getState: GetState, setValue: SetValue, domRefs?: GraphModeDomRefs, yearSlider?: YearSliderController | null, monthSlider?: YearSliderController | null, timeseriesGraph?: TimeseriesGraph | (() => TimeseriesGraph | null), onModeChange?: GraphModeChangeHandler }} params
  * @returns {GraphModeController}
  */
 export function createGraphModeController({
@@ -94,6 +94,7 @@ export function createGraphModeController({
   setValue,
   domRefs,
   yearSlider,
+  monthSlider,
   timeseriesGraph,
   onModeChange,
 }) {
@@ -123,6 +124,11 @@ export function createGraphModeController({
     return (stateObj.weppYearlyLayers || []).some((l) => l && l.visible);
   }
 
+  function isOpenetActive(stateObj) {
+    if (!stateObj) return false;
+    return (stateObj.openetLayers || []).some((l) => l && l.visible);
+  }
+
   const GRAPH_CONTEXT_DEFS = {
     [GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY]: {
       mode: GRAPH_MODES.FULL,
@@ -135,6 +141,11 @@ export function createGraphModeController({
       focus: false,
     },
     [GRAPH_CONTEXT_KEYS.RAP]: {
+      mode: GRAPH_MODES.SPLIT,
+      slider: GRAPH_SLIDER_PLACEMENTS.TOP,
+      focus: false,
+    },
+    [GRAPH_CONTEXT_KEYS.OPENET]: {
       mode: GRAPH_MODES.SPLIT,
       slider: GRAPH_SLIDER_PLACEMENTS.TOP,
       focus: false,
@@ -187,6 +198,15 @@ export function createGraphModeController({
       return;
     }
     slider.hide();
+  }
+
+  function positionMonthSlider(show) {
+    if (!monthSlider || !monthSlider.el) return;
+    if (show) {
+      monthSlider.show(YEAR_SLIDER_CONTEXTS.LAYER);
+    } else {
+      monthSlider.hide();
+    }
   }
 
   function currentGraphSource() {
@@ -312,6 +332,7 @@ export function createGraphModeController({
     const source = currentGraphSource();
     const rapActive = isRapActive(st);
     const yearlyActive = isWeppYearlyActive(st);
+    const openetActive = isOpenetActive(st);
     const sliderOverride = activeKey ? GRAPH_SLIDER_OVERRIDES[activeKey] : null;
 
     if (activeKey === 'climate-yearly') {
@@ -338,6 +359,7 @@ export function createGraphModeController({
     if (!activeKey) {
       if (rapActive) return { key: GRAPH_CONTEXT_KEYS.RAP, graphCapable: true };
       if (yearlyActive) return { key: GRAPH_CONTEXT_KEYS.WEPP_YEARLY, graphCapable: true };
+      if (openetActive) return { key: GRAPH_CONTEXT_KEYS.OPENET, graphCapable: true };
       return { key: GRAPH_CONTEXT_KEYS.DEFAULT, graphCapable: false };
     }
 
@@ -352,6 +374,9 @@ export function createGraphModeController({
     if (source === GRAPH_CONTEXT_KEYS.WEPP_YEARLY && yearlyActive) {
       return { key: GRAPH_CONTEXT_KEYS.WEPP_YEARLY, graphCapable: true };
     }
+    if (source === GRAPH_CONTEXT_KEYS.OPENET && openetActive) {
+      return { key: GRAPH_CONTEXT_KEYS.OPENET, graphCapable: true };
+    }
     if (source === GRAPH_CONTEXT_KEYS.OMNI) {
       return {
         key: GRAPH_CONTEXT_KEYS.OMNI,
@@ -362,6 +387,7 @@ export function createGraphModeController({
 
     if (rapActive) return { key: GRAPH_CONTEXT_KEYS.RAP, graphCapable: true };
     if (yearlyActive) return { key: GRAPH_CONTEXT_KEYS.WEPP_YEARLY, graphCapable: true };
+    if (openetActive) return { key: GRAPH_CONTEXT_KEYS.OPENET, graphCapable: true };
     return { key: GRAPH_CONTEXT_KEYS.DEFAULT, graphCapable: false };
   }
 
@@ -374,6 +400,7 @@ export function createGraphModeController({
       lastGraphContextKey = null;
     }
     const st = getState();
+    const openetActive = isOpenetActive(st);
     const context = resolveGraphContext(st);
     const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS[GRAPH_CONTEXT_KEYS.DEFAULT];
     const override = graphModeUserOverride;
@@ -382,7 +409,7 @@ export function createGraphModeController({
     const mode = graphCapable ? (override || def.mode) : GRAPH_MODES.MINIMIZED;
     const focus = override ? mode === GRAPH_MODES.FULL : def.focus || mode === GRAPH_MODES.FULL;
     const sliderReady = !!(yearSlider && yearSlider.el);
-    const layoutKey = `${context.key}|${mode}|${focus ? '1' : '0'}|${sliderPlacement}|${override || ''}|${graphCapable ? 1 : 0}|${sliderReady ? 'ready' : 'pending'}`;
+    const layoutKey = `${context.key}|${mode}|${focus ? '1' : '0'}|${sliderPlacement}|${override || ''}|${graphCapable ? 1 : 0}|${sliderReady ? 'ready' : 'pending'}|${openetActive ? 'openet' : 'no-openet'}`;
     if (layoutKey === lastGraphContextKey) {
       return;
     }
@@ -409,6 +436,10 @@ export function createGraphModeController({
     });
 
     positionYearSlider(sliderPlacement);
+    positionMonthSlider(openetActive);
+    if (openetActive && yearSlider) {
+      yearSlider.hide();
+    }
 
     if (typeof onModeChange === 'function') {
       onModeChange({

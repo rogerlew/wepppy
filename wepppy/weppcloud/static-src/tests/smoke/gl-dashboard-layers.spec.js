@@ -224,6 +224,39 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     }).toBeTruthy();
   });
 
+  test('OpenET selection shows monthly slider and renders layer', async ({ page }) => {
+    await openDashboard(page);
+    const openetSummary = page.locator('summary.gl-layer-group', { hasText: 'OpenET' });
+    if ((await openetSummary.count()) === 0) {
+      test.skip('OpenET section not present in this run');
+    }
+    await expandSection(page, 'OpenET');
+
+    const openetLayer = await page.evaluate(() => {
+      const layers = window.glDashboardState?.openetLayers || [];
+      if (!layers.length) return null;
+      return { id: `layer-OpenET-${layers[0].key}` };
+    });
+    if (!openetLayer) {
+      test.skip('OpenET layers not available in state');
+    }
+
+    const radio = page.locator(`#${openetLayer.id}`);
+    await expect(radio).toBeVisible({ timeout: 15000 });
+    await radio.click({ force: true });
+
+    await expect.poll(async () =>
+      page.evaluate(() => document.getElementById('gl-month-slider')?.classList.contains('is-visible') || false),
+    ).toBeTruthy();
+    await expect.poll(async () =>
+      page.evaluate(() => document.getElementById('gl-year-slider')?.classList.contains('is-visible') || false),
+    ).toBeFalsy();
+    await expect.poll(async () => {
+      const ids = await getDeckLayerIds(page);
+      return ids.some((id) => typeof id === 'string' && id.includes('openet-'));
+    }).toBeTruthy();
+  });
+
   test('Landuse selection persists after scenario change', async ({ page }) => {
     await openDashboard(page);
     await expandSection(page, 'Landuse');

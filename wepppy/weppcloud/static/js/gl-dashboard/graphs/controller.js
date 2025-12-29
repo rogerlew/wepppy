@@ -93,6 +93,17 @@ export function createGraphController({
     syncGraphLayout();
   }
 
+  async function loadOpenetTimeseriesData() {
+    const data = await ensureGraphLoaders().buildOpenetTimeseriesData();
+    if (!data) {
+      getGraph()?.hide();
+      syncGraphLayout();
+      return;
+    }
+    getGraph()?.setData(data);
+    syncGraphLayout();
+  }
+
   async function activateGraphItem(key, options = {}) {
     if (getState().rapCumulativeMode && key !== 'climate-yearly') {
       return;
@@ -429,6 +440,13 @@ export function createGraphController({
       await activeGraphLoad.promise.catch(() => {});
       return;
     }
+    if (!getState().activeGraphKey) {
+      const openetActive = (getState().openetLayers || []).some((layer) => layer && layer.visible);
+      if (openetActive) {
+        await loadOpenetTimeseriesData();
+      }
+      return;
+    }
     if (getState().activeGraphKey) {
       const options =
         getState().activeGraphKey === 'cumulative-contribution'
@@ -461,6 +479,7 @@ export function createGraphController({
     getCumulativeGraphOptions,
     loadRapTimeseriesData,
     loadWeppYearlyTimeseriesData,
+    loadOpenetTimeseriesData,
     activateGraphItem,
     handleGraphPanelToggle,
     bindModeButtons,

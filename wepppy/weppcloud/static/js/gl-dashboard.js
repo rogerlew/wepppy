@@ -26,6 +26,7 @@
   let graphModule;
   let graphModeModule;
   let yearSliderModule;
+  let monthSliderModule;
   let queryEngineModule;
   let graphLoadersModule;
   let detectorModule;
@@ -39,6 +40,7 @@
   let detectionControllerModule;
   let basemapControllerModule;
   let rapDataModule;
+  let openetDataModule;
 
   try {
     [
@@ -48,6 +50,7 @@
       graphModule,
       graphModeModule,
       yearSliderModule,
+      monthSliderModule,
       queryEngineModule,
       graphLoadersModule,
       detectorModule,
@@ -61,6 +64,7 @@
       detectionControllerModule,
       basemapControllerModule,
       rapDataModule,
+      openetDataModule,
     ] = await Promise.all([
       import(`${moduleBase}config.js`),
       import(`${moduleBase}colors.js`),
@@ -68,6 +72,7 @@
       import(`${moduleBase}graphs/timeseries-graph.js`),
       import(`${moduleBase}ui/graph-mode.js`),
       import(`${moduleBase}ui/year-slider.js`),
+      import(`${moduleBase}ui/month-slider.js`),
       import(`${moduleBase}data/query-engine.js`),
       import(`${moduleBase}graphs/graph-loaders.js`),
       import(`${moduleBase}layers/detector.js`),
@@ -81,6 +86,7 @@
       import(`${moduleBase}layers/orchestrator.js`),
       import(`${moduleBase}map/basemap-controller.js`),
       import(`${moduleBase}data/rap-data.js`),
+      import(`${moduleBase}data/openet-data.js`),
     ]);
   } catch (err) {
     console.error('gl-dashboard: failed to load modules', err);
@@ -138,9 +144,11 @@
   const { createTimeseriesGraph } = graphModule;
   const { createGraphModeController } = graphModeModule;
   const { createYearSlider } = yearSliderModule;
+  const { createMonthSlider } = monthSliderModule;
   const { createScenarioManager } = scenarioModule;
   const { createQueryEngine } = queryEngineModule;
   const { createWeppDataManager } = weppDataModule;
+  const { createOpenetDataManager } = openetDataModule;
   const { createRasterUtils } = rasterUtilsModule;
   const { createGraphController } = graphControllerModule;
   const { createDetectionController } = detectionControllerModule;
@@ -204,6 +212,8 @@
     'rapCumulativeMode',
     'weppYearlySelectedYear',
     'weppEventSelectedDate',
+    'openetSelectedMonthIndex',
+    'openetSelectedDatasetKey',
   ]);
   window.glDashboardState = state;
 
@@ -219,6 +229,7 @@
   let handleGraphPanelToggle = () => {};
   let loadRapTimeseriesData = async () => {};
   let loadWeppYearlyTimeseriesData = async () => {};
+  let loadOpenetTimeseriesData = async () => {};
   let activateGraphItem = async () => {};
   let getClimateGraphOptions = () => ({});
 
@@ -240,6 +251,15 @@
     maxEl: document.getElementById('gl-year-slider-max'),
     playBtn: document.getElementById('gl-year-slider-play'),
   });
+  const monthSlider = createMonthSlider({
+    el: document.getElementById('gl-month-slider'),
+    input: document.getElementById('gl-month-slider-input'),
+    valueEl: document.getElementById('gl-month-slider-value'),
+    minEl: document.getElementById('gl-month-slider-min'),
+    maxEl: document.getElementById('gl-month-slider-max'),
+    playBtn: document.getElementById('gl-month-slider-play'),
+    formatLabel: (item) => (item && item.label ? item.label : ''),
+  });
   const climateCtx = ctx.climate;
   if (climateCtx && climateCtx.startYear != null && climateCtx.endYear != null) {
     yearSlider.init({
@@ -249,6 +269,7 @@
     });
   }
   window.glDashboardYearSlider = yearSlider;
+  window.glDashboardMonthSlider = monthSlider;
 
   if (typeof createRasterUtils !== 'function') {
     throw new Error('gl-dashboard: raster utils module failed to load');
@@ -338,6 +359,16 @@
     postQueryEngine,
   });
 
+  if (typeof createOpenetDataManager !== 'function') {
+    throw new Error('gl-dashboard: OpenET data module failed to load');
+  }
+
+  const { refreshOpenetData } = createOpenetDataManager({
+    getState,
+    setState,
+    postBaseQueryEngine,
+  });
+
   const scenarioManager = createScenarioManager({
     ctx,
     getState,
@@ -373,6 +404,7 @@
       'weppYearlyLayers',
       'weppEventLayers',
       'rapLayers',
+      'openetLayers',
     ];
     const updates = {};
     keys.forEach((key) => {
@@ -544,6 +576,7 @@
     setValue,
     domRefs: { glMainEl, graphPanelEl, graphModeButtons },
     yearSlider,
+    monthSlider,
     timeseriesGraph: () => timeseriesGraph,
     onModeChange: handleGraphModeChange,
   });
@@ -593,6 +626,7 @@
     getClimateGraphOptions: graphGetClimateGraphOptions,
     loadRapTimeseriesData: graphLoadRapTimeseriesData,
     loadWeppYearlyTimeseriesData: graphLoadWeppYearlyTimeseriesData,
+    loadOpenetTimeseriesData: graphLoadOpenetTimeseriesData,
     activateGraphItem: graphActivateGraphItem,
     handleGraphPanelToggle: graphHandleGraphPanelToggle,
     bindModeButtons,
@@ -601,6 +635,7 @@
   getClimateGraphOptions = graphGetClimateGraphOptions;
   loadRapTimeseriesData = graphLoadRapTimeseriesData;
   loadWeppYearlyTimeseriesData = graphLoadWeppYearlyTimeseriesData;
+  loadOpenetTimeseriesData = graphLoadOpenetTimeseriesData;
   activateGraphItem = graphActivateGraphItem;
   handleGraphPanelToggle = graphHandleGraphPanelToggle;
 
@@ -621,7 +656,9 @@
     weppYearlyPath: WEPP_YEARLY_PATH,
     watarPath: WATAR_PATH,
     postQueryEngine,
+    postBaseQueryEngine,
     yearSlider,
+    monthSlider,
     climateCtx,
     applyLayers: () => applyLayers(),
     updateLayerList: () => updateLayerList(),
@@ -633,6 +670,7 @@
     computeComparisonDiffRanges,
     baseLayerDefs: BASE_LAYER_DEFS,
     rapBandLabels: RAP_BAND_LABELS,
+    monthLabels: MONTH_LABELS,
     onBaseScenarioDetected: (label) => setBaseScenarioLabel(label),
   });
 
@@ -687,9 +725,11 @@
     activateWeppYearlyLayer,
     refreshWeppStatisticData,
     refreshRapData,
+    refreshOpenetData,
     refreshWeppEventData,
     loadRapTimeseriesData,
     loadWeppYearlyTimeseriesData,
+    loadOpenetTimeseriesData,
     applyLayers,
     syncGraphLayout,
     clearGraphModeOverride,
@@ -770,6 +810,17 @@
     syncGraphLayout();
   }
 
+  function openetIndexToXValue(index) {
+    const meta = getState().openetMetadata;
+    if (!meta || !Array.isArray(meta.months)) return null;
+    const entry = meta.months[index];
+    if (!entry) return null;
+    const year = Number(entry.year);
+    const month = Number(entry.month);
+    if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
+    return Number((year + (month - 1) / 12).toFixed(6));
+  }
+
   yearSlider.on('change', async (year) => {
     let needsApply = false;
     const hasActiveRap = getState().rapCumulativeMode || (getState().rapLayers || []).some((l) => l.visible);
@@ -799,6 +850,27 @@
     }
     if (needsApply) {
       applyLayers();
+    }
+  });
+
+  monthSlider.on('change', async (index) => {
+    setValue('openetSelectedMonthIndex', index);
+    const changed = await refreshOpenetData();
+    if (changed) {
+      applyLayers();
+      updateLegendsPanel();
+    }
+    const graphEl = document.getElementById('gl-graph');
+    const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
+    if (graphVisible) {
+      if (timeseriesGraph && timeseriesGraph._source === GRAPH_CONTEXT_KEYS.OPENET) {
+        const xVal = openetIndexToXValue(index);
+        if (xVal != null) {
+          timeseriesGraph.setCurrentYear(xVal);
+        }
+      } else if ((getState().openetLayers || []).some((layer) => layer.visible)) {
+        await loadOpenetTimeseriesData();
+      }
     }
   });
 

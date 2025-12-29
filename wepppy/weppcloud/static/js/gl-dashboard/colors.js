@@ -16,6 +16,8 @@ const MODE_COLORMAP = {
   soil_depth: 'viridis',
   // WEPP Event
   event_ET: 'viridis',
+  // OpenET
+  openet_et: 'winter',
 };
 
 const HEX_RGB_RE = /^#?([0-9a-f]{6})$/i;
@@ -64,6 +66,7 @@ export function normalizeModeValue(mode, value) {
 export function resolveColormapName(mode, category, constants = {}) {
   const { WATER_MEASURES = [], SOIL_MEASURES = [] } = constants;
   if (MODE_COLORMAP[mode]) return MODE_COLORMAP[mode];
+  if (category === 'OpenET') return 'winter';
   if (category === 'WATAR') return 'jet2';
   if (WATER_MEASURES.includes(mode)) return 'winter';
   if (SOIL_MEASURES.includes(mode)) return 'jet2';
