@@ -20,6 +20,21 @@ openet_ts.analyze()
 - `openet/individual/<dataset_key>/<topaz_id>.parquet` (per-hillslope cache)
 - `openet/openet_ts.parquet` (combined monthly time series)
 
+## openet/openet_ts.parquet Specification
+Combined monthly OpenET time series aggregated at the hillslope level.
+Per-hillslope cache files use the same schema.
+
+| Column | Type | Units | Description |
+| --- | --- | --- | --- |
+| `topaz_id` | string | - | Hillslope identifier (TopazID) as a string. |
+| `year` | int | - | Calendar year of the monthly observation. |
+| `month` | int | - | Calendar month (1-12) of the observation. |
+| `dataset_key` | string | - | Logical dataset key (currently `ensemble`, `eemetric`). |
+| `dataset_id` | string | - | Climate Engine dataset id (`OPENET_CONUS`). |
+| `value` | float | `mm` | Monthly evapotranspiration depth. Values are rounded to 4 decimals. |
+| `units` | string | - | Unit label reported by Climate Engine (defaults to `mm`). |
+| `source` | string | - | Source label (`climateengine`). |
+
 ## Notes
 - Requires `CLIMATE_ENGINE_API_KEY`.
 - Only observed climate modes are supported.
