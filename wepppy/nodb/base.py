@@ -726,41 +726,21 @@ class NoDbBase(object):
     def _init_logging(self):
         """Initialize logging infrastructure for this NoDb controller.
         
-        CRITICAL - Handler Reuse Pattern (fixes FD exhaustion):
-        ---------------------------------------------------------
-        Multiple controller types (Ron, Climate, Watershed, Soils, etc.) share the
-        same runid, and each calls _init_logging(). Without proper handler reuse,
-        each controller would open its own FileHandler → FD leak → "Too many open files".
-        
-        The solution is to store handler references on `runid_logger` (keyed by runid),
-        NOT on `self.logger` (keyed by class name). This way:
-        - First controller for a run creates handlers and stores them on runid_logger
-        - Subsequent controllers for the SAME run reuse handlers from runid_logger
-        - Different controller TYPES still share the same file handle
-        
-        The check `getattr(self.runid_logger, '_queue_handler', None)` must match
-        where we STORE the handlers (lines 791-797). If you check runid_logger but
-        store on self.logger, the reuse logic breaks and FDs leak.
+        CRITICAL - Per-controller handler reuse:
+        ---------------------------------------
+        Each controller owns its own file + Redis status handlers (per mod). We
+        reuse handlers stored on the component logger to avoid duplicate file
+        descriptors when getInstance() re-initializes a cached controller.
+        Handler reuse must not cross controller types, or log routing breaks.
         
         See also: _safe_stop_queue_listener() which closes _run_file_handler.
         """
-        # Close any existing file handlers on this instance to prevent FD leaks
-        # This is needed when getInstance() re-initializes logging on a cached instance
-        handler = getattr(self, '_run_file_handler', None)
-        if handler is not None:
-            try:
-                handler.close()
-            except:
-                pass
-            self._run_file_handler = None
-        
         # Initialize loggers
         self.runid_logger = logging.getLogger(f'wepppy.run.{self.runid}')  # project logger
         self.logger = logging.getLogger(f'{self._logger_base_name}.{self.class_name}')  # project component logger
 
-        # Check if queue handler exists on the runid_logger (shared across all controllers for this run)
-        # IMPORTANT: This check MUST use runid_logger, matching where handlers are stored (see lines 791-797)
-        queue_handler = getattr(self.runid_logger, '_queue_handler', None)
+        # Reuse handlers on the component logger (per-controller).
+        queue_handler = getattr(self.logger, '_queue_handler', None)
 
         # Define a standard log format
         log_format = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
@@ -768,16 +748,25 @@ class NoDbBase(object):
         formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
 
         if queue_handler is None:
+            # Close stale instance-level handlers when rehydrating without logger metadata.
+            handler = getattr(self, '_run_file_handler', None)
+            if handler is not None:
+                try:
+                    handler.close()
+                except Exception:
+                    pass
+                self._run_file_handler = None
+
             # Initialize queue and queue handler
             self._log_queue = queue.Queue(-1)
             self._queue_handler = QueueHandler(self._log_queue)
 
-            # Clear existing handlers from runid_logger
+            # Clear existing handlers from component logger
             for handler in list(self.logger.handlers):
                 self.logger.removeHandler(handler)
 
             self.logger.setLevel(logging.INFO)
-            self.logger.propagate = True  # allow to propagate to runid_logger
+            self.logger.propagate = False
             self.logger.addHandler(self._queue_handler)
 
             # Redis handler to proxy to web clients
@@ -811,17 +800,7 @@ class NoDbBase(object):
             self.runid_logger.setLevel(logging.ERROR)
             self.runid_logger.propagate = True  # allow propagation to root logger
 
-            # CRITICAL: Store handlers on runid_logger (NOT self.logger) for cross-controller reuse.
-            # The check above uses getattr(self.runid_logger, '_queue_handler', None) - these MUST match.
-            # If you store on self.logger but check runid_logger, every controller opens new FDs → leak.
-            self.runid_logger._queue_handler = self._queue_handler
-            self.runid_logger._log_queue = self._log_queue
-            self.runid_logger._queue_listener = self._queue_listener
-            self.runid_logger._redis_handler = self._redis_handler
-            self.runid_logger._run_file_handler = self._run_file_handler
-            self.runid_logger._console_handler = self._console_handler
-
-            # Also attach to component logger for backward compatibility
+            # Store handlers on component logger for reuse on this controller.
             self.logger._log_queue = self._log_queue
             self.logger._queue_handler = self._queue_handler
             self.logger._queue_listener = self._queue_listener
@@ -829,13 +808,18 @@ class NoDbBase(object):
             self.logger._run_file_handler = self._run_file_handler
             self.logger._console_handler = self._console_handler
         else:
-            # Reuse existing handlers from runid_logger
-            self._queue_handler = self.runid_logger._queue_handler
-            self._log_queue = self.runid_logger._log_queue
-            self._queue_listener = self.runid_logger._queue_listener
-            self._redis_handler = self.runid_logger._redis_handler
-            self._run_file_handler = self.runid_logger._run_file_handler
-            self._console_handler = self.runid_logger._console_handler
+            # Reuse existing handlers from component logger
+            self._queue_handler = self.logger._queue_handler
+            self._log_queue = self.logger._log_queue
+            self._queue_listener = self.logger._queue_listener
+            self._redis_handler = self.logger._redis_handler
+            self._run_file_handler = self.logger._run_file_handler
+            self._console_handler = self.logger._console_handler
+
+            self.logger.setLevel(logging.INFO)
+            if self._queue_handler not in self.logger.handlers:
+                self.logger.addHandler(self._queue_handler)
+            self.logger.propagate = False
 
     def __getstate__(self) -> dict[str, Any]:
         """Remove non-serializable logger attributes before pickling."""

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from os.path import exists as _exists
 from os.path import join as _join
 from pathlib import Path
@@ -377,13 +377,20 @@ class OpenET_TS(NoDbBase):
                 if not pending:
                     continue
 
+                skipped = len(features) - len(pending)
+                if skipped:
+                    self.logger.info(
+                        "OpenET: %s skipping %d cached hillslopes",
+                        dataset_key,
+                        skipped,
+                    )
                 self.logger.info(
                     "OpenET: fetching %d hillslopes for %s", len(pending), dataset_key
                 )
 
                 failures: List[Tuple[str, str]] = []
                 with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                    futures: Dict[Future[pd.DataFrame], Tuple[str, Any]] = {}
+                    futures: Dict[Future[pd.DataFrame], Tuple[str, Any, float]] = {}
                     for topaz_id, coords in pending:
                         future = executor.submit(
                             self._fetch_one,
@@ -395,24 +402,67 @@ class OpenET_TS(NoDbBase):
                             coords,
                             topaz_id,
                         )
-                        futures[future] = (topaz_id, coords)
+                        futures[future] = (topaz_id, coords, time.time())
 
-                    for future in as_completed(futures):
-                        topaz_id, _coords = futures[future]
-                        try:
-                            df = future.result()
-                            if df.empty:
-                                failures.append((topaz_id, "empty response"))
-                                continue
-                            cache_path = dataset_dir / f"{topaz_id}.parquet"
-                            df.to_parquet(
-                                cache_path,
-                                engine="pyarrow",
-                                compression="snappy",
-                                index=False,
-                            )
-                        except Exception as exc:
-                            failures.append((topaz_id, str(exc)))
+                    futures_n = len(futures)
+                    count = 0
+                    pending_futures = set(futures)
+                    last_progress_time = time.time()
+
+                    while pending_futures:
+                        done, pending_futures = wait(
+                            pending_futures,
+                            timeout=5,
+                            return_when=FIRST_COMPLETED,
+                        )
+
+                        if not done:
+                            since_progress = time.time() - last_progress_time
+                            pending_count = len(pending_futures)
+
+                            if since_progress >= 60:
+                                self.logger.error(
+                                    "  OpenET %s tasks still pending after %.1fs; %s hillslopes waiting.",
+                                    dataset_key,
+                                    round(since_progress, 1),
+                                    pending_count,
+                                )
+                            else:
+                                self.logger.info(
+                                    "  OpenET %s waiting on hillslope tasks (pending=%s, %.1fs since last completion).",
+                                    dataset_key,
+                                    pending_count,
+                                    round(since_progress, 1),
+                                )
+                            continue
+
+                        for future in done:
+                            topaz_id, _coords, start_time = futures[future]
+                            try:
+                                df = future.result()
+                                if df.empty:
+                                    failures.append((topaz_id, "empty response"))
+                                    continue
+                                cache_path = dataset_dir / f"{topaz_id}.parquet"
+                                df.to_parquet(
+                                    cache_path,
+                                    engine="pyarrow",
+                                    compression="snappy",
+                                    index=False,
+                                )
+                                count += 1
+                                elapsed_time = round(time.time() - start_time, 1)
+                                self.logger.info(
+                                    "  (%s/%s) Completed OpenET %s for %s in %.1fs",
+                                    count,
+                                    futures_n,
+                                    dataset_key,
+                                    topaz_id,
+                                    elapsed_time,
+                                )
+                                last_progress_time = time.time()
+                            except Exception as exc:
+                                failures.append((topaz_id, str(exc)))
 
                 if failures:
                     self.logger.warning(
