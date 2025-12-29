@@ -15,6 +15,7 @@ class TaskEnum(Enum):
     build_soils = "build_soils"
     build_climate = "build_climate"
     fetch_rap_ts = "build_rap_ts"
+    fetch_openet_ts = "build_openet_ts"
     run_wepp_hillslopes = "run_wepp_hillslopes"
     run_wepp_watershed = "run_wepp_watershed"
     run_observed = "run_observed"

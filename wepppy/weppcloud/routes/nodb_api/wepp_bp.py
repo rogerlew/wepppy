@@ -411,12 +411,21 @@ def report_wepp_results(runid, config):
     except FileNotFoundError:
         prep = None
 
+    totalwatsed3_exists = _exists(
+        _join(wd, 'wepp', 'output', 'interchange', 'totalwatsed3.parquet')
+    )
+    totalwatsed2_exists = _exists(
+        _join(wd, 'wepp', 'output', 'totalwatsed2.parquet')
+    )
+
     try:
         return render_template('controls/wepp_reports.htm',
                                climate=climate,
                                prep=prep,
                                runid=runid,
                                config=config,
+                               totalwatsed3_exists=totalwatsed3_exists,
+                               totalwatsed2_exists=totalwatsed2_exists,
                                user=current_user)
     except:
         return exception_factory('Error building reports template', runid=runid)

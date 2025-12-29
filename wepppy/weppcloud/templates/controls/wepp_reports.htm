@@ -79,6 +79,22 @@
                rel="noopener">
               Sediment Characteristics Report
             </a>
+            {% if totalwatsed3_exists %}
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('download.download_with_subpath', runid=runid, config=config, subpath='wepp/output/interchange/totalwatsed3.parquet') }}?as_csv=1"
+               target="_blank"
+               rel="noopener">
+              TotalWatSed3 CSV
+            </a>
+            {% endif %}
+            {% if totalwatsed2_exists %}
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('download.download_with_subpath', runid=runid, config=config, subpath='wepp/output/totalwatsed2.parquet') }}?as_csv=1"
+               target="_blank"
+               rel="noopener">
+              TotalWatSed2 CSV
+            </a>
+            {% endif %}
             <a class="wc-link wc-link--file"
                href="{{ url_for_run('weppcloud.deval_details', runid=runid, config=config) }}"
                target="_blank"

@@ -2,6 +2,9 @@ x-wepp1-volumes: &wepp1-volumes
   - /geodata/wc1:/wc1
   - /geodata:/geodata
 
+x-wepppy-env: &wepppy-env
+  CLIMATE_ENGINE_API_KEY: ${CLIMATE_ENGINE_API_KEY}
+
 x-wepppy-image: &wepppy-image
   image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
   build:
@@ -12,6 +15,8 @@ x-wepppy-image: &wepppy-image
       APP_GROUP: docker
       APP_UID: "1002"
       APP_GID: "130"
+  environment:
+    <<: *wepppy-env
 
 services:
   caddy:
