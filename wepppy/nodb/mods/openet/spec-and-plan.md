@@ -120,10 +120,12 @@ Since both datasets are **already monthly** (pre-aggregated):
   - `fetch_openet_ts` added to `TaskEnum` + labels/icons.
 - [x] **Tests**
   - Unit tests for parsing, no-data filtering, and channel skipping.
-- [ ] **Batch runner integration**
-  - Wire into `batch_runner` (pending).
-- [ ] **Preflight integration**
-  - Hook into preflight/task readiness UX (pending).
+- [x] **Batch runner integration**
+  - Wire into `batch_runner`.
+- [x] **Preflight integration**
+  - Hook into preflight/task readiness UX.
+- [x] **RQ + controller integration**
+  - Add `/rq/api/acquire_openet_ts`, controller JS, and mods UI wiring.
 
 ## Verification Checklist
 - Climate observed start/end years line up with output.

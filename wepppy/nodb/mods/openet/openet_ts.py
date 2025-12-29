@@ -322,6 +322,7 @@ class OpenET_TS(NoDbBase):
         self,
         start_year: Optional[int] = None,
         end_year: Optional[int] = None,
+        force_refresh: bool = False,
         max_workers: int = OPENET_MAX_WORKERS,
     ) -> None:
         climate = Climate.getInstance(self.wd)
@@ -346,6 +347,7 @@ class OpenET_TS(NoDbBase):
         cache_is_current = (
             self._openet_start_year == start_year
             and self._openet_end_year == end_year
+            and not force_refresh
         )
 
         features = _load_subcatchments(subcatchments_path, skip_channels=True)

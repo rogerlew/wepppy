@@ -22,6 +22,7 @@ from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeatu
 from wepppy.weppcloud.utils.helpers import get_batch_root_dir, get_wd
 
 from wepppy.nodb.core import *
+from wepppy.nodb.mods.openet.openet_ts import OpenET_TS
 from wepppy.nodb.mods.rap.rap_ts import RAP_TS
 
 
@@ -67,6 +68,7 @@ class BatchRunner(NoDbBase):
         TaskEnum.build_soils,
         TaskEnum.build_climate,
         TaskEnum.fetch_rap_ts,
+        TaskEnum.fetch_openet_ts,
         TaskEnum.run_wepp_hillslopes,
         TaskEnum.run_wepp_watershed,
         TaskEnum.run_omni_scenarios,
@@ -303,6 +305,18 @@ class BatchRunner(NoDbBase):
             )
             logger.info(f'analyzing RAP TS')
             rap_ts.analyze()
+
+        openet_ts = OpenET_TS.tryGetInstance(runid_wd)
+        logger.info(f'openet_ts: {openet_ts}')
+        if openet_ts and self.is_task_enabled(TaskEnum.fetch_openet_ts) \
+            and prep[str(TaskEnum.fetch_openet_ts)] is None:
+            logger.info('fetching OpenET TS')
+            openet_ts.acquire_timeseries(
+                start_year=climate.observed_start_year,
+                end_year=climate.observed_end_year,
+            )
+            logger.info('analyzing OpenET TS')
+            openet_ts.analyze()
 
         run_hillslopes = self.is_task_enabled(TaskEnum.run_wepp_hillslopes) \
             and prep[str(TaskEnum.run_wepp_hillslopes)] is None

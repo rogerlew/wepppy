@@ -62,6 +62,7 @@ from wepppy.rq.project_rq import (
     run_debris_flow_rq,
     run_rhem_rq,
     fetch_and_analyze_rap_ts_rq,
+    fetch_and_analyze_openet_ts_rq,
     fork_rq,
     archive_rq,
     restore_archive_rq
@@ -1677,6 +1678,46 @@ def api_rap_ts_acquire(runid, config):
 
     except Exception:
         return exception_factory('Error Running RAP_TS', runid=runid)
+
+    response_payload: Dict[str, Any] = {'Success': True, 'job_id': job.id}
+    if job_payload:
+        response_payload['payload'] = job_payload
+
+    return jsonify(response_payload)
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/acquire_openet_ts', methods=['POST'])
+def api_openet_ts_acquire(runid, config):
+    try:
+        payload = parse_request_payload(
+            request,
+            boolean_fields=("force_refresh",),
+        )
+
+        force_refresh = None
+        if "force_refresh" in payload:
+            force_refresh = bool(payload.get("force_refresh"))
+
+        job_payload: Dict[str, Any] = {}
+        if force_refresh is not None:
+            job_payload["force_refresh"] = force_refresh
+
+        wd = get_wd(runid)
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.fetch_openet_ts)
+
+        with _redis_conn() as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(
+                fetch_and_analyze_openet_ts_rq,
+                (runid,),
+                kwargs={"payload": job_payload} if job_payload else {},
+                timeout=TIMEOUT
+            )
+            prep.set_rq_job_id('fetch_and_analyze_openet_ts_rq', job.id)
+
+    except Exception:
+        return exception_factory('Error Running OpenET_TS', runid=runid)
 
     response_payload: Dict[str, Any] = {'Success': True, 'job_id': job.id}
     if job_payload:

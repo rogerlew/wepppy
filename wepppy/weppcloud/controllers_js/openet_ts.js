@@ -1,0 +1,624 @@
+/* ----------------------------------------------------------------------------
+ * OpenET Time Series
+ * Doc: controllers_js/README.md — OpenET Time Series Controller Reference (2025 helper migration)
+ * ----------------------------------------------------------------------------
+ */
+var OPENET_TS = (function () {
+    "use strict";
+
+    var instance;
+
+    var FORM_ID = "openet_ts_form";
+    var WS_CHANNEL = "openet_ts";
+    var TASK_NAME = "openet:timeseries:run";
+    var RUN_MESSAGE = "Acquiring OpenET time series";
+    var COMPLETE_MESSAGE = "OpenET time series fetched and analyzed";
+
+    var SELECTORS = {
+        form: "#" + FORM_ID,
+        info: "#info",
+        status: "#status",
+        stacktrace: "#stacktrace",
+        rqJob: "#rq_job",
+        hint: "#hint_build_openet_ts"
+    };
+
+    var ACTIONS = {
+        run: '[data-openet-action="run"]'
+    };
+
+    var EVENT_NAMES = [
+        "openet:timeseries:run:started",
+        "openet:timeseries:run:completed",
+        "openet:timeseries:run:error",
+        "openet:timeseries:status",
+        "job:started",
+        "job:completed",
+        "job:error"
+    ];
+
+    function ensureHelpers() {
+        var dom = window.WCDom;
+        var forms = window.WCForms;
+        var http = window.WCHttp;
+        var events = window.WCEvents;
+
+        if (!dom || typeof dom.delegate !== "function" || typeof dom.qs !== "function") {
+            throw new Error("OPENET_TS controller requires WCDom helpers.");
+        }
+        if (!forms || typeof forms.serializeForm !== "function") {
+            throw new Error("OPENET_TS controller requires WCForms helpers.");
+        }
+        if (!http || typeof http.postJson !== "function" || typeof http.isHttpError !== "function") {
+            throw new Error("OPENET_TS controller requires WCHttp helpers.");
+        }
+        if (!events || typeof events.createEmitter !== "function") {
+            throw new Error("OPENET_TS controller requires WCEvents helpers.");
+        }
+
+        return { dom: dom, forms: forms, http: http, events: events };
+    }
+
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return {
+                element: element,
+                length: 0,
+                show: function () {},
+                hide: function () {},
+                text: function () {},
+                html: function () {},
+                append: function () {},
+                empty: function () {}
+            };
+        }
+
+        return {
+            element: element,
+            length: 1,
+            show: function () {
+                element.hidden = false;
+                if (element.style && element.style.display === "none") {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                if (element.style) {
+                    element.style.display = "none";
+                }
+            },
+            text: function (value) {
+                if (value === undefined) {
+                    return element.textContent;
+                }
+                element.textContent = value === null ? "" : String(value);
+            },
+            html: function (value) {
+                if (value === undefined) {
+                    return element.innerHTML;
+                }
+                element.innerHTML = value === null ? "" : String(value);
+            },
+            append: function (content) {
+                if (content === null || content === undefined) {
+                    return;
+                }
+                if (typeof content === "string") {
+                    element.insertAdjacentHTML("beforeend", content);
+                    return;
+                }
+                if (content instanceof window.Node) {
+                    element.appendChild(content);
+                }
+            },
+            empty: function () {
+                element.textContent = "";
+            }
+        };
+    }
+
+    function toResponsePayload(http, error) {
+        function normalizeErrorValue(value) {
+            if (!value) {
+                return value;
+            }
+            if (typeof value === "object") {
+                if (typeof value.Error === "string") {
+                    return value.Error;
+                }
+                if (typeof value.message === "string") {
+                    return value.message;
+                }
+                if (typeof value.detail === "string") {
+                    return value.detail;
+                }
+                try {
+                    return JSON.stringify(value);
+                } catch (err) {
+                    return String(value);
+                }
+            }
+            return value;
+        }
+
+        function finalizePayload(payload) {
+            if (!payload) {
+                return { Success: false, Error: "Request failed" };
+            }
+            if (payload.Success === undefined) {
+                payload = Object.assign({}, payload, { Success: false });
+            }
+            if (payload.Error && typeof payload.Error === "object") {
+                payload = Object.assign({}, payload, { Error: normalizeErrorValue(payload.Error) });
+            }
+            return payload;
+        }
+
+        function coerceBody(raw) {
+            if (!raw) {
+                return null;
+            }
+            if (typeof raw === "string") {
+                try {
+                    return JSON.parse(raw);
+                } catch (err) {
+                    return raw;
+                }
+            }
+            return raw;
+        }
+
+        var body = coerceBody(error && error.body ? error.body : null);
+
+        if (body && typeof body === "object") {
+            var payload = body;
+            if (payload.Error === undefined) {
+                var fallback =
+                    payload.detail ||
+                    payload.message ||
+                    payload.error ||
+                    payload.errors;
+                if (fallback !== undefined && fallback !== null) {
+                    payload = Object.assign({}, payload, { Error: normalizeErrorValue(fallback) });
+                }
+            }
+            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
+                return finalizePayload(payload);
+            }
+        } else if (typeof body === "string" && body) {
+            return finalizePayload({ Error: body });
+        }
+
+        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+            return finalizePayload(error);
+        }
+
+        if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
+            var detail = error && (error.detail || error.message);
+            return finalizePayload({ Error: normalizeErrorValue(detail) || "Request failed" });
+        }
+
+        return finalizePayload({ Error: normalizeErrorValue(error && error.message) || "Request failed" });
+    }
+
+    function createInstance() {
+        if (typeof controlBase !== "function") {
+            throw new Error("OPENET_TS controller requires controlBase helper.");
+        }
+
+        var helpers = ensureHelpers();
+        var dom = helpers.dom;
+        var forms = helpers.forms;
+        var http = helpers.http;
+        var eventsApi = helpers.events;
+
+        var base = controlBase();
+        var emitter = null;
+
+        if (eventsApi && typeof eventsApi.createEmitter === "function") {
+            var baseEmitter = eventsApi.createEmitter();
+            emitter = typeof eventsApi.useEventMap === "function"
+                ? eventsApi.useEventMap(EVENT_NAMES, baseEmitter)
+                : baseEmitter;
+        }
+
+        var formElement = null;
+        try {
+            formElement = dom.qs(SELECTORS.form);
+        } catch (err) {
+            console.warn("[OPENET_TS] Unable to resolve OpenET form:", err);
+        }
+
+        var containerElement = null;
+        if (formElement && typeof formElement.closest === "function") {
+            containerElement = formElement.closest(".controller-section");
+        }
+        if (!containerElement) {
+            containerElement = formElement || null;
+        }
+
+        var infoElement = formElement ? dom.qs(SELECTORS.info, formElement) : null;
+        var statusElement = formElement ? dom.qs(SELECTORS.status, formElement) : null;
+        var stacktraceElement = formElement ? dom.qs(SELECTORS.stacktrace, formElement) : null;
+        var rqJobElement = formElement ? dom.qs(SELECTORS.rqJob, formElement) : null;
+        var hintElement = formElement ? dom.qs(SELECTORS.hint, formElement) : null;
+        var statusPanelElement = dom.qs("#openet_ts_status_panel");
+        var stacktracePanelElement = dom.qs("#openet_ts_stacktrace_panel");
+        var statusSpinnerElement = statusPanelElement ? statusPanelElement.querySelector("#braille") : null;
+
+        var controller = Object.assign(base, {
+            dom: dom,
+            forms: forms,
+            http: http,
+            events: emitter,
+            form: formElement,
+            container: containerElement,
+            info: createLegacyAdapter(infoElement),
+            status: createLegacyAdapter(statusElement),
+            stacktrace: createLegacyAdapter(stacktraceElement),
+            rq_job: createLegacyAdapter(rqJobElement),
+            hint: createLegacyAdapter(hintElement),
+            statusPanelEl: statusPanelElement,
+            stacktracePanelEl: stacktracePanelElement,
+            statusStream: null,
+            statusSpinnerEl: statusSpinnerElement,
+            command_btn_id: "btn_build_openet_ts",
+            _delegates: [],
+            _completion_seen: false,
+            state: {
+                lastSubmission: null
+            }
+        });
+        var delegateRoot = controller.form || null;
+
+        function detachDelegates() {
+            controller._delegates.forEach(function (unsubscribe) {
+                if (typeof unsubscribe === "function") {
+                    unsubscribe();
+                }
+            });
+            controller._delegates = [];
+            delegateRoot = null;
+        }
+
+        function attachDelegates(force) {
+            if (!controller.form) {
+                detachDelegates();
+                return;
+            }
+            if (!force && delegateRoot === controller.form && controller._delegates.length) {
+                return;
+            }
+            detachDelegates();
+            controller._delegates.push(dom.delegate(controller.form, "click", ACTIONS.run, function (event) {
+                event.preventDefault();
+                controller.acquire();
+            }));
+            delegateRoot = controller.form;
+        }
+
+        function rebindDomReferences() {
+            var updated = { formChanged: false };
+
+            var nextForm = dom.qs(SELECTORS.form);
+            if (nextForm !== controller.form) {
+                controller.form = nextForm || null;
+                formElement = controller.form || null;
+                updated.formChanged = true;
+            }
+
+            if (controller.form) {
+                if (!controller.container || !controller.container.isConnected) {
+                    controller.container = typeof controller.form.closest === "function"
+                        ? controller.form.closest(".controller-section") || controller.form
+                        : controller.form;
+                }
+            } else {
+                controller.container = null;
+            }
+
+            function syncAdapter(selector, current, assign) {
+                var next = controller.form ? dom.qs(selector, controller.form) : null;
+                if (next !== current) {
+                    assign(next);
+                }
+            }
+
+            syncAdapter(SELECTORS.info, infoElement, function (next) {
+                infoElement = next;
+                controller.info = createLegacyAdapter(infoElement);
+            });
+            syncAdapter(SELECTORS.status, statusElement, function (next) {
+                statusElement = next;
+                controller.status = createLegacyAdapter(statusElement);
+            });
+            syncAdapter(SELECTORS.stacktrace, stacktraceElement, function (next) {
+                stacktraceElement = next;
+                controller.stacktrace = createLegacyAdapter(stacktraceElement);
+            });
+            syncAdapter(SELECTORS.rqJob, rqJobElement, function (next) {
+                rqJobElement = next;
+                controller.rq_job = createLegacyAdapter(rqJobElement);
+            });
+            syncAdapter(SELECTORS.hint, hintElement, function (next) {
+                hintElement = next;
+                controller.hint = createLegacyAdapter(hintElement);
+            });
+
+            var nextStatusPanel = dom.qs("#openet_ts_status_panel");
+            var nextStacktracePanel = dom.qs("#openet_ts_stacktrace_panel");
+            var nextSpinner = nextStatusPanel ? nextStatusPanel.querySelector("#braille") : null;
+            var shouldReattachStream = false;
+            if (nextStatusPanel !== controller.statusPanelEl) {
+                controller.statusPanelEl = nextStatusPanel;
+                shouldReattachStream = true;
+            }
+            if (nextStacktracePanel !== controller.stacktracePanelEl) {
+                controller.stacktracePanelEl = nextStacktracePanel;
+                shouldReattachStream = true;
+            }
+            if (nextSpinner !== controller.statusSpinnerEl) {
+                controller.statusSpinnerEl = nextSpinner;
+                shouldReattachStream = true;
+            }
+            if (shouldReattachStream && typeof controller.attach_status_stream === "function") {
+                controller.detach_status_stream(controller);
+                controller.attach_status_stream(controller, {
+                    element: controller.statusPanelEl,
+                    channel: WS_CHANNEL,
+                    runId: window.runid || window.runId || null,
+                    stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+                    spinner: controller.statusSpinnerEl,
+                    logLimit: 200
+                });
+            }
+
+            return updated;
+        }
+
+        var baseTriggerEvent = controller.triggerEvent.bind(controller);
+
+        function resetCompletionSeen() {
+            controller._completion_seen = false;
+        }
+
+        function dispatchControlEvent(eventName, payload) {
+            baseTriggerEvent(eventName, payload);
+        }
+
+        controller.appendStatus = function (message, meta) {
+            if (!message) {
+                return;
+            }
+            if (controller.statusStream && typeof controller.statusStream.append === "function") {
+                controller.statusStream.append(message, meta || null);
+            }
+            if (controller.status && typeof controller.status.html === "function") {
+                controller.status.html(message);
+            }
+        };
+
+        controller.setStatusMessage = controller.appendStatus;
+
+        controller.attach_status_stream(controller, {
+            element: controller.statusPanelEl,
+            channel: WS_CHANNEL,
+            runId: window.runid || window.runId || null,
+            stacktrace: controller.stacktracePanelEl ? { element: controller.stacktracePanelEl } : null,
+            spinner: controller.statusSpinnerEl,
+            logLimit: 200
+        });
+
+        controller.hideStacktrace = function () {
+            if (controller.stacktrace && typeof controller.stacktrace.hide === "function") {
+                controller.stacktrace.hide();
+                return;
+            }
+            if (stacktraceElement) {
+                stacktraceElement.hidden = true;
+                stacktraceElement.style.display = "none";
+            }
+        };
+
+        controller.report = function () {
+            controller.setStatusMessage(COMPLETE_MESSAGE);
+        };
+
+        controller.handleRunCompletion = function (detail) {
+            controller.report();
+            controller.disconnect_status_stream(controller);
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("openet:timeseries:run:completed", {
+                    task: TASK_NAME,
+                    jobId: controller.rq_job_id || null,
+                    submission: controller.state.lastSubmission,
+                    detail: detail || null
+                });
+                controller.events.emit("openet:timeseries:status", {
+                    status: "completed",
+                    task: TASK_NAME,
+                    jobId: controller.rq_job_id || null,
+                    submission: controller.state.lastSubmission,
+                    detail: detail || null
+                });
+            }
+            dispatchControlEvent("job:completed", {
+                task: TASK_NAME,
+                jobId: controller.rq_job_id || null,
+                detail: detail || null,
+                submission: controller.state.lastSubmission
+            });
+        };
+
+        controller.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            if (normalized === "OPENET_TS_TASK_COMPLETED") {
+                if (controller._completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                controller._completion_seen = true;
+                controller.handleRunCompletion(payload || null);
+            }
+            return baseTriggerEvent(eventName, payload);
+        };
+
+        controller.acquire = function (overridePayload) {
+            if (!controller.form) {
+                return;
+            }
+
+            resetCompletionSeen();
+            if (typeof controller.reset_panel_state === "function") {
+                controller.reset_panel_state(controller);
+            } else {
+                controller.info.html("");
+                controller.stacktrace.empty();
+            }
+            controller.hideStacktrace();
+
+            var submission = forms.serializeForm(controller.form, { format: "json" }) || {};
+            if (overridePayload && typeof overridePayload === "object") {
+                Object.keys(overridePayload).forEach(function (key) {
+                    submission[key] = overridePayload[key];
+                });
+            }
+            controller.state.lastSubmission = submission;
+
+            controller.setStatusMessage(RUN_MESSAGE + "...");
+            if (controller.events && typeof controller.events.emit === "function") {
+                controller.events.emit("openet:timeseries:run:started", {
+                    task: TASK_NAME,
+                    payload: submission
+                });
+                controller.events.emit("openet:timeseries:status", {
+                    status: "started",
+                    task: TASK_NAME,
+                    payload: submission
+                });
+            }
+            dispatchControlEvent("job:started", {
+                task: TASK_NAME,
+                payload: submission
+            });
+
+            controller.connect_status_stream(controller);
+
+            function handleError(result) {
+                controller.pushResponseStacktrace(controller, result);
+                controller.setStatusMessage("Failed to acquire OpenET time series");
+                if (controller.events && typeof controller.events.emit === "function") {
+                    controller.events.emit("openet:timeseries:run:error", {
+                        task: TASK_NAME,
+                        payload: submission,
+                        error: result
+                    });
+                    controller.events.emit("openet:timeseries:status", {
+                        status: "error",
+                        task: TASK_NAME,
+                        payload: submission,
+                        error: result
+                    });
+                }
+                dispatchControlEvent("job:error", {
+                    task: TASK_NAME,
+                    payload: submission,
+                    error: result
+                });
+                controller.disconnect_status_stream(controller);
+            }
+
+            http.postJson(url_for_run("rq/api/acquire_openet_ts"), submission, { form: controller.form }).then(function (response) {
+                var body = response && response.body !== undefined ? response.body : response;
+                var normalized = body || {};
+                if (normalized.Success === true || normalized.success === true) {
+                    var jobId = normalized.job_id || normalized.jobId || null;
+                    var message = "fetch_and_analyze_openet_ts_rq job submitted";
+                    if (jobId) {
+                        message += ": " + jobId;
+                    }
+                    controller.setStatusMessage(message, { status: "queued", jobId: jobId });
+                    controller.poll_completion_event = "OPENET_TS_TASK_COMPLETED";
+                    controller.set_rq_job_id(controller, jobId);
+                    if (controller.events && typeof controller.events.emit === "function") {
+                        controller.events.emit("openet:timeseries:status", {
+                            status: "queued",
+                            task: TASK_NAME,
+                            payload: submission,
+                            jobId: jobId,
+                            response: normalized
+                        });
+                    }
+                    return;
+                }
+
+                handleError(normalized);
+            }).catch(function (error) {
+                handleError(toResponsePayload(http, error));
+            });
+        };
+
+        controller.dispose = function () {
+            detachDelegates();
+            controller.disconnect_status_stream(controller);
+        };
+
+        controller.hideStacktrace();
+
+        attachDelegates();
+
+        controller._rebindDomReferences = rebindDomReferences;
+        controller._attachDelegates = attachDelegates;
+        controller._detachDelegates = detachDelegates;
+
+        controller.bootstrap = function bootstrap(context) {
+            var ctx = context || {};
+            var helper = window.WCControllerBootstrap || null;
+            var rebindResult = controller._rebindDomReferences();
+            if (controller.form) {
+                controller._attachDelegates(Boolean(rebindResult && rebindResult.formChanged));
+            } else {
+                controller._detachDelegates();
+            }
+
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "fetch_and_analyze_openet_ts_rq")
+                : null;
+            if (!jobId && ctx.controllers && ctx.controllers.openetTs && ctx.controllers.openetTs.jobId) {
+                jobId = ctx.controllers.openetTs.jobId;
+            }
+            if (!jobId) {
+                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "fetch_and_analyze_openet_ts_rq")) {
+                    var value = jobIds.fetch_and_analyze_openet_ts_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+            if (jobId) {
+                resetCompletionSeen();
+                controller.poll_completion_event = "OPENET_TS_TASK_COMPLETED";
+            }
+            if (typeof controller.set_rq_job_id === "function") {
+                controller.set_rq_job_id(controller, jobId);
+            }
+            return controller;
+        };
+
+        return controller;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.OPENET_TS = OPENET_TS;
+}

@@ -37,6 +37,16 @@ const controllerTestCases = [
     skipMessage: "RAP time series control not enabled for this run"
   },
   {
+    name: "openet_ts",
+    formSelector: "form#openet_ts_form",
+    actionSelector: "#btn_build_openet_ts",
+    requestUrlPattern: "**/rq/api/acquire_openet_ts",
+    stacktraceLocator: "#openet_ts_stacktrace_panel [data-stacktrace-body]",
+    stacktracePanelLocator: "#openet_ts_stacktrace_panel",
+    hintLocator: "#hint_build_openet_ts",
+    skipMessage: "OpenET time series control not enabled for this run"
+  },
+  {
     name: "ash",
     formSelector: "form#ash_form",
     actionSelector: "#btn_run_ash",

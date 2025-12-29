@@ -56,6 +56,7 @@ class OpenET_TS(NoDbBase):
         self,
         start_year: Optional[int] = ...,
         end_year: Optional[int] = ...,
+        force_refresh: bool = ...,
         max_workers: int = ...,
     ) -> None: ...
 

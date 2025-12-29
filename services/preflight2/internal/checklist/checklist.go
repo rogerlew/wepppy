@@ -31,6 +31,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"soils":           false,
 		"climate":         false,
 		"rap_ts":          false,
+		"openet_ts":       false,
 		"rhem":            false,
 		"wepp":            false,
 		"omni_scenarios":  false,
@@ -59,6 +60,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 
 	check["climate"] = safeGT(prep["timestamps:build_climate"], prep["timestamps:abstract_watershed"])
 	check["rap_ts"] = safeGT(prep["timestamps:build_rap_ts"], prep["timestamps:build_climate"])
+	check["openet_ts"] = safeGT(prep["timestamps:build_openet_ts"], prep["timestamps:build_climate"])
 
 	runWepp := firstTimestamp(prep, "timestamps:run_wepp_watershed", "timestamps:run_wepp")
 	check["wepp"] = safeGT(runWepp, prep["timestamps:build_landuse"]) &&

@@ -15,6 +15,7 @@
 
 {% set show_rangeland_cover = 'rangeland_cover' in mods_list or playwright_load_all %}
 {% set show_rap_ts = 'rap_ts' in mods_list or playwright_load_all %}
+{% set show_openet_ts = 'openet_ts' in mods_list or playwright_load_all %}
 {% set show_treatments = 'treatments' in mods_list or playwright_load_all %}
 {% set show_ash = 'ash' in mods_list or playwright_load_all %}
 {% set show_rhem = 'rhem' in mods_list or playwright_load_all %}
@@ -98,6 +99,9 @@
         <li data-mod-nav="rap_ts" {% if not show_rap_ts %}hidden{% endif %}>
           <a href="#rap-ts" class="nav-link">RAP Time Series</a>
         </li>
+        <li data-mod-nav="openet_ts" {% if not show_openet_ts %}hidden{% endif %}>
+          <a href="#openet-ts" class="nav-link">OpenET Time Series</a>
+        </li>
         <li data-mod-nav="treatments" {% if not show_treatments %}hidden{% endif %}>
           <a href="#treatments" class="nav-link">Treatments</a>
         </li>
@@ -178,6 +182,14 @@
         {% if show_rap_ts %}
         <section id="rap-ts" class="wc-stack">
           {% include 'controls/rap_ts_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
+
+      <div data-mod-section="openet_ts" {% if not show_openet_ts %}hidden{% endif %}>
+        {% if show_openet_ts %}
+        <section id="openet-ts" class="wc-stack">
+          {% include 'controls/openet_ts_pure.htm' %}
         </section>
         {% endif %}
       </div>

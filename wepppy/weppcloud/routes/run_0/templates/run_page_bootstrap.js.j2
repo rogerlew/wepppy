@@ -82,6 +82,7 @@
                 "path_ce": 'path_ce' in mods_list,
                 "debris_flow": 'debris_flow' in mods_list,
                 "rap_ts": 'rap_ts' in mods_list,
+                "openet_ts": 'openet_ts' in mods_list,
                 "treatments": 'treatments' in mods_list,
                 "observed": 'observed' in mods_list
             }
@@ -167,6 +168,7 @@
             "ash",
             "path_ce",
             "debris_flow",
+            "openet_ts",
             "dss_export"
         ].forEach(function (modName) {
             modsFlags[modName] = true;
@@ -202,6 +204,7 @@
             modFlags.ash = true;
             modFlags.path_ce = true;
             modFlags.debris_flow = true;
+            modFlags.openet_ts = true;
         }
         var disabledControllers = new Set(
             (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
@@ -235,6 +238,9 @@
             add("debrisFlow", typeof DebrisFlow !== "undefined" ? DebrisFlow : null);
         }
         add("rapTs", typeof RAP_TS !== "undefined" ? RAP_TS : null);
+        if (modFlags.openet_ts) {
+            add("openetTs", typeof OPENET_TS !== "undefined" ? OPENET_TS : null);
+        }
 
         if (modFlags.disturbed || modFlags.baer) {
             add("disturbed", typeof Disturbed !== "undefined" ? Disturbed : null);

@@ -1,0 +1,34 @@
+{# Doc: controllers_js/README.md — OpenET Time Series Controller Reference #}
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+{% set description %}
+  <p class="wc-text-muted">
+    Acquire monthly OpenET evapotranspiration time series for each hillslope using
+    the Climate Engine API. Requires observed climate years and a configured
+    <code>CLIMATE_ENGINE_API_KEY</code>.
+  </p>
+{% endset %}
+
+{% call ui.control_shell(
+     form_id="openet_ts_form",
+     title="OpenET Time Series Acquisition",
+     collapsible=True,
+     description=description,
+     status_panel_options={"id": "openet_ts_status_panel"},
+     stacktrace_panel_options={"panel_id": "openet_ts_stacktrace_panel", "body_id": "stacktrace"}
+   ) %}
+
+  <section class="wc-openet-ts">
+    {% call button_row() %}
+      <button
+        id="btn_build_openet_ts"
+        type="button"
+        class="pure-button pure-button-primary disable-readonly"
+        data-openet-action="run">
+        <span>Acquire OpenET Data</span>
+      </button>
+    {% endcall %}
+    {{ ui.job_hint("hint_build_openet_ts", extra_class="wc-field__help") }}
+  </section>
+{% endcall %}

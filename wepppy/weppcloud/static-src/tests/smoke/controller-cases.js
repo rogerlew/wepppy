@@ -127,6 +127,17 @@ const controllerCases = [
     workflow: "rq_job"
   },
   {
+    name: "openet_ts",
+    formSelector: "form#openet_ts_form",
+    actionSelector: "#btn_build_openet_ts",
+    requestUrlPattern: "**/rq/api/acquire_openet_ts",
+    stacktraceLocator: "#openet_ts_stacktrace_panel [data-stacktrace-body]",
+    stacktracePanelLocator: "#openet_ts_stacktrace_panel",
+    hintLocator: "#hint_build_openet_ts",
+    workflow: "rq_job",
+    skipMessage: "OpenET time series control not enabled for this run"
+  },
+  {
     name: "wepp",
     formSelector: "form#wepp_form",
     actionSelector: "#btn_run_wepp",

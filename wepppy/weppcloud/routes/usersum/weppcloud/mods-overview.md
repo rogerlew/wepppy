@@ -6,6 +6,11 @@
 - Use when: You need multi-year cover trends to drive WEPP runs or the GL-Dashboard. Revegetation requires the RAP TS database
 - Outputs: `rap/rap_ts.parquet`
 
+## OpenET Time Series (`openet_ts`)
+- Purpose: Acquire monthly OpenET evapotranspiration time series from Climate Engine, summarized to hillslopes.
+- Use when: You need observed monthly ET (OpenET ensemble median or eeMETRIC) aligned to your climate years.
+- Outputs: `openet/openet_ts.parquet` plus per-hillslope caches under `openet/individual/`.
+
 ## Ash Transport (`ash`)
 - Purpose: Model post-fire ash and contaminant transport using burn severity, ash load/type maps, and hydrology/climate inputs.
 - Use when: Evaluating post-fire water quality or ash delivery; depends on Landuse/BAER/Disturbed layers and optional ash rasters.

@@ -277,6 +277,7 @@ function getSelectorForKey(key) {
         "soils": 'a[href="#soils"]',
         "climate": 'a[href="#climate"]',
         "rap_ts": 'a[href="#rap-ts"]',
+        "openet_ts": 'a[href="#openet-ts"]',
         "wepp": 'a[href="#wepp"]',
         "omni_scenarios": 'a[href="#omni-scenarios"]',
         "observed": 'a[href="#observed"]',

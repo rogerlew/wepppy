@@ -45,6 +45,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
+from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.rap import RAP_TS
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -1410,6 +1411,46 @@ def fetch_and_analyze_rap_ts_rq(runid: str, payload: Mapping[str, Any] | None = 
 
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.run_rhem)
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+# OpenET_TS Functions
+
+@with_exception_logging
+def fetch_and_analyze_openet_ts_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None:
+    """Download and analyze OpenET time series data for the scenario."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:openet_ts'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        options = dict(payload) if payload else {}
+
+        climate = Climate.getInstance(wd)
+        assert climate.observed_start_year is not None
+        assert climate.observed_end_year is not None
+
+        openet_ts = OpenET_TS.getInstance(wd)
+        if options:
+            try:
+                openet_ts.logger.info('OpenET_TS job options: %s', json.dumps(options, sort_keys=True))
+            except Exception:
+                openet_ts.logger.info('OpenET_TS job options provided (%d keys)', len(options))
+
+        force_refresh = bool(options.get("force_refresh")) if options else False
+        openet_ts.acquire_timeseries(
+            start_year=climate.observed_start_year,
+            end_year=climate.observed_end_year,
+            force_refresh=force_refresh,
+        )
+        openet_ts.analyze()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   openet_ts OPENET_TS_TASK_COMPLETED')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

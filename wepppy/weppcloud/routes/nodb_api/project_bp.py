@@ -29,6 +29,7 @@ project_bp = Blueprint('project', __name__)
 
 MOD_DISPLAY_NAMES = {
     'rap_ts': 'RAP Time Series',
+    'openet_ts': 'OpenET Time Series',
     'ash': 'Ash Transport',
     'treatments': 'Treatments',
     'observed': 'Observed Data',

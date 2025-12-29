@@ -61,6 +61,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#landuse': TaskEnum.build_landuse,
     '#climate': TaskEnum.build_climate,
     '#rap-ts': TaskEnum.fetch_rap_ts,
+    '#openet-ts': TaskEnum.fetch_openet_ts,
     '#soils': TaskEnum.build_soils,
     '#treatments': TaskEnum.build_landuse,  # Using landuse emoji as placeholder
     '#wepp': TaskEnum.run_wepp_watershed,
@@ -83,6 +84,12 @@ MOD_UI_DEFINITIONS = OrderedDict([
         'section_id': 'rap-ts',
         'section_class': 'wc-stack',
         'template': 'controls/rap_ts_pure.htm',
+    }),
+    ('openet_ts', {
+        'label': 'OpenET Time Series',
+        'section_id': 'openet-ts',
+        'section_class': 'wc-stack',
+        'template': 'controls/openet_ts_pure.htm',
     }),
     ('treatments', {
         'label': 'Treatments',
@@ -259,6 +266,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
 
     mods_list = ron.mods or []
     show_rap_ts = 'rap_ts' in mods_list or playwright_load_all
+    show_openet_ts = 'openet_ts' in mods_list or playwright_load_all
     show_treatments = 'treatments' in mods_list or playwright_load_all
     show_ash = 'ash' in mods_list or playwright_load_all
     show_omni = 'omni' in mods_list or playwright_load_all
@@ -276,6 +284,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
 
     mod_visibility = {
         'rap_ts': show_rap_ts,
+        'openet_ts': show_openet_ts,
         'treatments': show_treatments,
         'ash': show_ash,
         'omni': show_omni,
@@ -331,6 +340,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         pup_relpath=ctx.pup_relpath,
         VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY,
         show_rap_ts=show_rap_ts,
+        show_openet_ts=show_openet_ts,
         show_treatments=show_treatments,
         show_ash=show_ash,
         show_omni=show_omni,

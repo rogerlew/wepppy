@@ -346,6 +346,9 @@ var Project = (function () {
             rap_ts: function (ctx) {
                 bootstrapControllerSymbol(window.RAP_TS, ctx);
             },
+            openet_ts: function (ctx) {
+                bootstrapControllerSymbol(window.OPENET_TS, ctx);
+            },
             treatments: function (ctx) {
                 bootstrapControllerSymbol(window.Treatments, ctx);
             },
