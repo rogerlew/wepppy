@@ -5,8 +5,7 @@
 {% set description %}
   <p class="wc-text-muted">
     Acquire monthly OpenET evapotranspiration time series for each hillslope using
-    the Climate Engine API. Requires observed climate years and a configured
-    <code>CLIMATE_ENGINE_API_KEY</code>.
+    the Climate Engine API. Timespan 2016 - {{ openet_ts.last_year_available }}.
   </p>
 {% endset %}
 

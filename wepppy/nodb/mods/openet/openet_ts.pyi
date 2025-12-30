@@ -44,6 +44,9 @@ class OpenET_TS(NoDbBase):
     def openet_end_year(self, value: int) -> None: ...
 
     @property
+    def last_year_available(self) -> int: ...
+
+    @property
     def openet_dir(self) -> str: ...
 
     @property

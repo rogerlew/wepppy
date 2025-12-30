@@ -35,6 +35,7 @@ OPENET_API_URL = "https://api.climateengine.org/timeseries/native/coordinates"
 OPENET_MAX_WORKERS = 8
 OPENET_RETRY_ATTEMPTS = 3
 OPENET_RETRY_BACKOFF = 2
+OPENET_LAST_AVAILABLE_YEAR = 2024
 
 OPENET_ALLOWED_CLIMATE_MODES = {
     ClimateMode.Observed,
@@ -275,6 +276,10 @@ class OpenET_TS(NoDbBase):
     @nodb_setter
     def openet_end_year(self, value: int) -> None:
         self._openet_end_year = value
+
+    @property
+    def last_year_available(self) -> int:
+        return OPENET_LAST_AVAILABLE_YEAR
 
     @property
     def openet_dir(self) -> str:

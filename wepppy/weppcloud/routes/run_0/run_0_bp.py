@@ -25,6 +25,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
+from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -231,6 +232,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     observed = Observed.tryGetInstance(wd)
     rangeland_cover = RangelandCover.tryGetInstance(wd)
     rhem = Rhem.tryGetInstance(wd)
+    openet_ts = OpenET_TS.tryGetInstance(wd)
     disturbed = Disturbed.tryGetInstance(wd)
     baer = Baer.tryGetInstance(wd) if 'baer' in ron.mods else None
     ash = Ash.tryGetInstance(wd)
@@ -306,6 +308,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         wepp=wepp,
         wepp_bin_options=wepp_bin_options,
         rhem=rhem,
+        openet_ts=openet_ts,
         disturbed=disturbed,
         baer=baer,
         ash=ash,
