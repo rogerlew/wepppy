@@ -16,9 +16,12 @@
   }
 
   const scriptUrl = (document.currentScript && document.currentScript.src) || '';
+  const scriptQueryIndex = scriptUrl.indexOf('?');
+  const scriptQuery = scriptQueryIndex >= 0 ? scriptUrl.slice(scriptQueryIndex) : '';
   const moduleBase = scriptUrl
     ? scriptUrl.replace(/gl-dashboard\.js(?:\?.*)?$/, 'gl-dashboard/')
     : `${ctx.sitePrefix || ''}/static/js/gl-dashboard/`;
+  const moduleSuffix = scriptQuery || '';
 
   let config;
   let colorsModule;
@@ -66,27 +69,27 @@
       rapDataModule,
       openetDataModule,
     ] = await Promise.all([
-      import(`${moduleBase}config.js`),
-      import(`${moduleBase}colors.js`),
-      import(`${moduleBase}state.js`),
-      import(`${moduleBase}graphs/timeseries-graph.js`),
-      import(`${moduleBase}ui/graph-mode.js`),
-      import(`${moduleBase}ui/year-slider.js`),
-      import(`${moduleBase}ui/month-slider.js`),
-      import(`${moduleBase}data/query-engine.js`),
-      import(`${moduleBase}graphs/graph-loaders.js`),
-      import(`${moduleBase}layers/detector.js`),
-      import(`${moduleBase}map/layers.js`),
-      import(`${moduleBase}map/controller.js`),
-      import(`${moduleBase}layers/renderer.js`),
-      import(`${moduleBase}scenario/manager.js`),
-      import(`${moduleBase}data/wepp-data.js`),
-      import(`${moduleBase}map/raster-utils.js`),
-      import(`${moduleBase}graphs/controller.js`),
-      import(`${moduleBase}layers/orchestrator.js`),
-      import(`${moduleBase}map/basemap-controller.js`),
-      import(`${moduleBase}data/rap-data.js`),
-      import(`${moduleBase}data/openet-data.js`),
+      import(`${moduleBase}config.js${moduleSuffix}`),
+      import(`${moduleBase}colors.js${moduleSuffix}`),
+      import(`${moduleBase}state.js${moduleSuffix}`),
+      import(`${moduleBase}graphs/timeseries-graph.js${moduleSuffix}`),
+      import(`${moduleBase}ui/graph-mode.js${moduleSuffix}`),
+      import(`${moduleBase}ui/year-slider.js${moduleSuffix}`),
+      import(`${moduleBase}ui/month-slider.js${moduleSuffix}`),
+      import(`${moduleBase}data/query-engine.js${moduleSuffix}`),
+      import(`${moduleBase}graphs/graph-loaders.js${moduleSuffix}`),
+      import(`${moduleBase}layers/detector.js${moduleSuffix}`),
+      import(`${moduleBase}map/layers.js${moduleSuffix}`),
+      import(`${moduleBase}map/controller.js${moduleSuffix}`),
+      import(`${moduleBase}layers/renderer.js${moduleSuffix}`),
+      import(`${moduleBase}scenario/manager.js${moduleSuffix}`),
+      import(`${moduleBase}data/wepp-data.js${moduleSuffix}`),
+      import(`${moduleBase}map/raster-utils.js${moduleSuffix}`),
+      import(`${moduleBase}graphs/controller.js${moduleSuffix}`),
+      import(`${moduleBase}layers/orchestrator.js${moduleSuffix}`),
+      import(`${moduleBase}map/basemap-controller.js${moduleSuffix}`),
+      import(`${moduleBase}data/rap-data.js${moduleSuffix}`),
+      import(`${moduleBase}data/openet-data.js${moduleSuffix}`),
     ]);
   } catch (err) {
     console.error('gl-dashboard: failed to load modules', err);

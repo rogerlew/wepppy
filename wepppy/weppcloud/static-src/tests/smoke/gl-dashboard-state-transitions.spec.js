@@ -18,7 +18,6 @@ async function openDashboard(page) {
 async function expandSection(page, title) {
   const summary = page.locator('summary.gl-layer-group', { hasText: title });
   await expect(summary).toBeVisible({ timeout: 15000 });
-  await summary.scrollIntoViewIfNeeded();
   // Avoid toggling an already-open <details>; explicitly open it.
   await summary.evaluate((el) => {
     const details = el.closest('details');
@@ -58,8 +57,11 @@ async function clickLanduseDominant(page) {
     .poll(async () => page.locator('input[id^="layer-Landuse-lu-dominant"]').count())
     .toBeGreaterThan(0);
   const landuseDominant = page.locator('input[id^="layer-Landuse-lu-dominant"]').first();
-  await landuseDominant.waitFor({ state: 'visible', timeout: 15000 });
-  await landuseDominant.scrollIntoViewIfNeeded();
+  await landuseDominant.waitFor({ state: 'attached', timeout: 15000 });
+  await landuseDominant.evaluate((el) => {
+    const details = el.closest('details');
+    if (details && !details.open) details.open = true;
+  });
   await landuseDominant.click({ force: true });
 }
 
@@ -419,24 +421,19 @@ test.describe('gl-dashboard state transitions', () => {
     await expect(slider).toHaveClass(/is-visible/, { timeout: 10000 });
 
     const overlays = [
-      { locator: page.locator('summary.gl-layer-group', { hasText: 'Landuse' }), selector: 'input[id^="layer-Landuse-"]' },
-      { locator: page.locator('summary.gl-layer-group', { hasText: 'Soils' }), selector: 'input[id^="layer-Soils-"]' },
-      { locator: page.locator('summary.gl-layer-group', { hasText: /^WEPP$/ }), selector: 'input[id^="layer-WEPP-"]' },
-      { locator: page.locator('summary.gl-layer-group', { hasText: 'WATAR' }), selector: 'input[id^="layer-WATAR-"]' },
+      { selector: 'input[id^="layer-Landuse-"]' },
+      { selector: 'input[id^="layer-Soils-"]' },
+      { selector: 'input[id^="layer-WEPP-"]' },
+      { selector: 'input[id^="layer-WATAR-"]' },
     ];
 
-    for (const { locator, selector } of overlays) {
-      const summary = locator.first();
-      await expect(summary).toBeVisible({ timeout: 15000 });
-      await summary.evaluate((el) => {
-        const details = el.closest('details');
-        if (details && !details.open) details.open = true;
-      });
-      await summary.scrollIntoViewIfNeeded();
-
+    for (const { selector } of overlays) {
       const input = page.locator(selector).first();
       if (await input.count()) {
-        await input.scrollIntoViewIfNeeded();
+        await input.evaluate((el) => {
+          const details = el.closest('details');
+          if (details && !details.open) details.open = true;
+        });
         await input.click({ force: true });
         await expect(slider).not.toHaveClass(/is-visible/, { timeout: 8000 });
       }

@@ -41,6 +41,10 @@ async function getGraphSource(page) {
   return page.evaluate(() => window.glDashboardTimeseriesGraph?._source || null);
 }
 
+async function getGraphData(page) {
+  return page.evaluate(() => window.glDashboardTimeseriesGraph?._data || null);
+}
+
 async function getActiveMode(page) {
   return page.evaluate(() => {
     const btn = document.querySelector('[data-graph-mode].is-active');
@@ -65,7 +69,16 @@ async function getGeometry(page) {
   });
 }
 
+async function isMonthSliderVisible(page) {
+  return page.evaluate(() => document.getElementById('gl-month-slider')?.classList.contains('is-visible') || false);
+}
+
 test.describe('gl-dashboard graph modes and slider placement', () => {
+  test('Graph list renders at least one item', async ({ page }) => {
+    await openDashboard(page);
+    await expect.poll(async () => page.locator('#gl-graph-list li').count()).toBeGreaterThan(0);
+  });
+
   test('WEPP Yearly loads split mode with top slider', async ({ page }) => {
     await openDashboard(page);
     await requireSection(page, 'WEPP Yearly');
@@ -76,6 +89,12 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     await weppRadio.check({ force: true });
 
     await expect.poll(async () => getGraphSource(page)).toBe('wepp_yearly');
+    await expect
+      .poll(async () => {
+        const data = await getGraphData(page);
+        return !!(data && data.series && Object.keys(data.series).length);
+      })
+      .toBeTruthy();
     await expect.poll(async () => getActiveMode(page)).toBe('split');
 
     const geom = await getGeometry(page);
@@ -179,6 +198,63 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     expect(geom.visible).toBeTruthy();
     expect(geom.parentId).toBe('gl-graph-container');
     expect(geom.hasBottom).toBe(true);
+  });
+
+  test('Cumulative Contribution hides the OpenET month slider', async ({ page }) => {
+    await openDashboard(page);
+    const openetSummary = page.locator('summary.gl-layer-group', { hasText: 'OpenET' });
+    if ((await openetSummary.count()) === 0) {
+      test.skip('OpenET section not present in this run');
+    }
+    await expandSection(page, 'OpenET');
+
+    const openetLayer = await page.evaluate(() => {
+      const layers = window.glDashboardState?.openetLayers || [];
+      if (!layers.length) return null;
+      return { id: `layer-OpenET-${layers[0].key}` };
+    });
+    if (!openetLayer) {
+      test.skip('OpenET layers not available in state');
+    }
+    const radio = page.locator(`#${openetLayer.id}`);
+    await expect(radio).toBeVisible({ timeout: 15000 });
+    await radio.click({ force: true });
+
+    await expect.poll(async () => isMonthSliderVisible(page)).toBeTruthy();
+
+    await expandSection(page, 'Cumulative Contribution');
+    await page.getByLabel('Cumulative contribution curve').click({ force: true });
+
+    await expect.poll(async () => isMonthSliderVisible(page)).toBeFalsy();
+  });
+
+  test('Omni Scenarios hides the OpenET month slider', async ({ page }) => {
+    await openDashboard(page);
+    const openetSummary = page.locator('summary.gl-layer-group', { hasText: 'OpenET' });
+    if ((await openetSummary.count()) === 0) {
+      test.skip('OpenET section not present in this run');
+    }
+    await expandSection(page, 'OpenET');
+
+    const openetLayer = await page.evaluate(() => {
+      const layers = window.glDashboardState?.openetLayers || [];
+      if (!layers.length) return null;
+      return { id: `layer-OpenET-${layers[0].key}` };
+    });
+    if (!openetLayer) {
+      test.skip('OpenET layers not available in state');
+    }
+    const radio = page.locator(`#${openetLayer.id}`);
+    await expect(radio).toBeVisible({ timeout: 15000 });
+    await radio.click({ force: true });
+
+    await expect.poll(async () => isMonthSliderVisible(page)).toBeTruthy();
+
+    await requireSection(page, 'Omni Scenarios');
+    await expandSection(page, 'Omni Scenarios');
+    await page.locator('#graph-omni-soil-loss-hill').click({ force: true });
+
+    await expect.poll(async () => isMonthSliderVisible(page)).toBeFalsy();
   });
 
   test('Switching to Cumulative Contribution stays full and slider hides', async ({ page }) => {

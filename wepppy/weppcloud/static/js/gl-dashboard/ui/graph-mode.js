@@ -422,8 +422,8 @@ export function createGraphModeController({
     const st = getState();
     const openetActive = isOpenetActive(st);
     const openetYearlyActive = st.activeGraphKey === 'openet-yearly';
-    const openetSliderActive = openetActive && !openetYearlyActive;
     const context = resolveGraphContext(st);
+    const openetSliderActive = openetActive && !openetYearlyActive && context.key === GRAPH_CONTEXT_KEYS.OPENET;
     const def = GRAPH_CONTEXT_DEFS[context.key] || GRAPH_CONTEXT_DEFS[GRAPH_CONTEXT_KEYS.DEFAULT];
     const override = graphModeUserOverride;
     const graphCapable = context.graphCapable;

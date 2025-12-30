@@ -5,7 +5,11 @@ import { GRAPH_MODES } from './config.js';
  * Pure state container: no DOM/deck usage.
  */
 
-const state = {
+const globalScope = typeof window !== 'undefined' ? window : globalThis;
+const STATE_KEY = '__GL_DASHBOARD_STATE__';
+const SUBSCRIBERS_KEY = '__GL_DASHBOARD_STATE_SUBSCRIBERS__';
+
+const defaultState = {
   currentScenarioPath: '',
   comparisonMode: false,
   baseSummaryCache: {},
@@ -90,7 +94,40 @@ const state = {
   geoTiffLoader: null,
 };
 
-const subscribers = [];
+const existingState = globalScope[STATE_KEY];
+const state = existingState || {};
+
+function cloneDefault(value) {
+  if (Array.isArray(value)) {
+    return [...value];
+  }
+  if (value && typeof value === 'object') {
+    return { ...value };
+  }
+  return value;
+}
+
+function ensureDefaults(target, defaults) {
+  Object.keys(defaults).forEach((key) => {
+    const fallback = defaults[key];
+    const requiresObject = Array.isArray(fallback) || (fallback && typeof fallback === 'object');
+    if (target[key] === undefined || (target[key] === null && requiresObject)) {
+      target[key] = cloneDefault(fallback);
+    }
+  });
+}
+
+if (!existingState) {
+  Object.assign(state, defaultState);
+  globalScope[STATE_KEY] = state;
+} else {
+  ensureDefaults(state, defaultState);
+}
+
+const subscribers = globalScope[SUBSCRIBERS_KEY] || [];
+if (!globalScope[SUBSCRIBERS_KEY]) {
+  globalScope[SUBSCRIBERS_KEY] = subscribers;
+}
 
 function notify(changedKeys) {
   if (!changedKeys.length) return;
