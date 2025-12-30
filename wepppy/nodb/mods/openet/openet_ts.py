@@ -35,6 +35,7 @@ OPENET_API_URL = "https://api.climateengine.org/timeseries/native/coordinates"
 OPENET_MAX_WORKERS = 8
 OPENET_RETRY_ATTEMPTS = 3
 OPENET_RETRY_BACKOFF = 2
+OPENET_FIRST_AVAILABLE_YEAR = 2016
 OPENET_LAST_AVAILABLE_YEAR = 2024
 
 OPENET_ALLOWED_CLIMATE_MODES = {
@@ -278,6 +279,10 @@ class OpenET_TS(NoDbBase):
         self._openet_end_year = value
 
     @property
+    def first_year_available(self) -> int:
+        return OPENET_FIRST_AVAILABLE_YEAR
+
+    @property
     def last_year_available(self) -> int:
         return OPENET_LAST_AVAILABLE_YEAR
 
@@ -332,10 +337,27 @@ class OpenET_TS(NoDbBase):
     ) -> None:
         climate = Climate.getInstance(self.wd)
         climate_start, climate_end = self._validate_climate(climate)
-        start_year = climate_start if start_year is None else start_year
-        end_year = climate_end if end_year is None else end_year
+        start_year = climate_start if start_year is None else int(start_year)
+        end_year = climate_end if end_year is None else int(end_year)
 
-        if start_year != climate_start or end_year != climate_end:
+        if climate_start < OPENET_FIRST_AVAILABLE_YEAR:
+            if start_year != OPENET_FIRST_AVAILABLE_YEAR:
+                self.logger.warning(
+                    "OpenET: observed climate start year %s precedes the first available year %s; "
+                    "starting acquisition at %s.",
+                    climate_start,
+                    OPENET_FIRST_AVAILABLE_YEAR,
+                    OPENET_FIRST_AVAILABLE_YEAR,
+                )
+            start_year = OPENET_FIRST_AVAILABLE_YEAR
+
+        if end_year != climate_end or (
+            start_year != climate_start
+            and not (
+                climate_start < OPENET_FIRST_AVAILABLE_YEAR
+                and start_year == OPENET_FIRST_AVAILABLE_YEAR
+            )
+        ):
             raise ValueError(
                 f"OpenET years must match observed climate years: {climate_start}-{climate_end}."
             )
