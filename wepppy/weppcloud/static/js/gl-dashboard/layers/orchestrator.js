@@ -113,6 +113,18 @@ export function createDetectionController({
     }
   }
 
+  async function detectChannelsOverlays() {
+    const result = await detectorModule.detectChannelsOverlays({ buildBaseUrl });
+    if (result) {
+      setState({
+        channelsGeoJson: result.channelsGeoJson,
+        channelLabelsData: result.channelLabelsData || [],
+      });
+      updateLayerList();
+      applyLayers();
+    }
+  }
+
   async function detectOpenetOverlays() {
     const result = await detectorModule.detectOpenetOverlays({
       buildBaseUrl,
@@ -264,6 +276,7 @@ export function createDetectionController({
     const tasks = [
       detectRasterLayers(),
       detectHillslopesOverlays(),
+      detectChannelsOverlays(),
       detectOpenetOverlays(),
       detectWatarOverlays(),
       detectWeppEventOverlays(),
@@ -277,6 +290,7 @@ export function createDetectionController({
     detectLanduseOverlays,
     detectSoilsOverlays,
     detectHillslopesOverlays,
+    detectChannelsOverlays,
     detectOpenetOverlays,
     detectWatarOverlays,
     detectWeppOverlays,

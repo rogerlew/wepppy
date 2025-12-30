@@ -185,6 +185,8 @@
     currentViewState: initialViewState,
     subcatchmentsVisible: true,
     subcatchmentLabelsVisible: false,
+    channelsVisible: true,
+    channelLabelsVisible: false,
   });
   const state = getState();
   function bindStateKeys(keys) {
@@ -207,6 +209,8 @@
     'comparisonMode',
     'subcatchmentsVisible',
     'subcatchmentLabelsVisible',
+    'channelsVisible',
+    'channelLabelsVisible',
     'currentViewState',
     'graphFocus',
     'graphMode',

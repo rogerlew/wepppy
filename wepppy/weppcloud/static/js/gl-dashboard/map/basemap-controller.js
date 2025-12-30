@@ -103,6 +103,24 @@ export function createBasemapController({ deck, basemapDefs, getState, setValue 
     }
   }
 
+  function toggleChannelLabels(visible) {
+    setValue('channelLabelsVisible', !!visible);
+    applyLayers();
+    const checkbox = document.getElementById('gl-channel-labels-toggle');
+    if (checkbox && checkbox.checked !== visible) {
+      checkbox.checked = !!visible;
+    }
+  }
+
+  function toggleChannels(visible) {
+    setValue('channelsVisible', !!visible);
+    applyLayers();
+    const checkbox = document.getElementById('gl-channels-toggle');
+    if (checkbox && checkbox.checked !== visible) {
+      checkbox.checked = !!visible;
+    }
+  }
+
   function bindBasemapControls() {
     const basemapSelect = document.getElementById('gl-basemap-select');
     if (basemapSelect) {
@@ -119,6 +137,16 @@ export function createBasemapController({ deck, basemapDefs, getState, setValue 
       subcatchmentsToggle.checked = !!getState().subcatchmentsVisible;
       subcatchmentsToggle.addEventListener('change', (e) => toggleSubcatchments(e.target.checked));
     }
+    const channelLabelsToggle = document.getElementById('gl-channel-labels-toggle');
+    if (channelLabelsToggle) {
+      channelLabelsToggle.checked = !!getState().channelLabelsVisible;
+      channelLabelsToggle.addEventListener('change', (e) => toggleChannelLabels(e.target.checked));
+    }
+    const channelsToggle = document.getElementById('gl-channels-toggle');
+    if (channelsToggle) {
+      channelsToggle.checked = !!getState().channelsVisible;
+      channelsToggle.addEventListener('change', (e) => toggleChannels(e.target.checked));
+    }
   }
 
   return {
@@ -128,8 +156,9 @@ export function createBasemapController({ deck, basemapDefs, getState, setValue 
     setBasemap,
     toggleSubcatchmentLabels,
     toggleSubcatchments,
+    toggleChannelLabels,
+    toggleChannels,
     bindBasemapControls,
     setApplyLayers,
   };
 }
-

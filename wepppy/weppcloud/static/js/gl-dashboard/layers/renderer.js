@@ -779,6 +779,14 @@ export function createLayerRenderer({
       return section;
     }
 
+    if (layer.category === 'Channels') {
+      const items = typeof layerUtils.getChannelLegendItems === 'function' ? layerUtils.getChannelLegendItems() : [];
+      if (items.length) {
+        section.appendChild(renderCategoricalLegend(items));
+      }
+      return section;
+    }
+
     let minVal = 0;
     let maxVal = 100;
     let unit = LAYER_UNITS[mode] || '';

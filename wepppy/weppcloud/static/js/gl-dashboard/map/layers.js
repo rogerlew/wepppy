@@ -5,6 +5,65 @@
 
 import { normalizeModeValue, resolveColormapName } from '../colors.js';
 
+const CHANNEL_ORDER_COLORS = [
+  '#8AE5FE',
+  '#65C8FE',
+  '#479EFF',
+  '#306EFE',
+  '#2500F4',
+  '#6600cc',
+  '#50006b',
+  '#6b006b',
+];
+const CHANNEL_LINE_OPACITY = 0.6;
+const CHANNEL_FILL_OPACITY = 0.9;
+const CHANNEL_DEFAULT_ORDER = 4;
+const CHANNEL_MAX_ORDER = 7;
+const CHANNEL_LABEL_COLOR = [26, 115, 232, 255];
+const CHANNEL_LABEL_OUTLINE_COLOR = [255, 255, 255, 255];
+const CHANNEL_LABEL_OUTLINE_WIDTH = 3;
+const CHANNEL_LABEL_FONT_SIZE = 16;
+
+function hexToRgba(hex, alpha) {
+  const normalized = String(hex || '').replace('#', '');
+  const expanded = normalized.length === 3
+    ? normalized[0] + normalized[0] + normalized[1] + normalized[1] + normalized[2] + normalized[2]
+    : normalized;
+  const intVal = Number.parseInt(expanded, 16);
+  if (!Number.isFinite(intVal)) {
+    return [0, 0, 0, Math.round(alpha * 255)];
+  }
+  return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, Math.round(alpha * 255)];
+}
+
+const CHANNEL_LINE_PALETTE = CHANNEL_ORDER_COLORS.map((color) => hexToRgba(color, CHANNEL_LINE_OPACITY));
+const CHANNEL_FILL_PALETTE = CHANNEL_ORDER_COLORS.map((color) => hexToRgba(color, CHANNEL_FILL_OPACITY));
+
+function resolveChannelOrder(feature) {
+  if (!feature || !feature.properties) return CHANNEL_DEFAULT_ORDER;
+  const raw = Number.parseInt(feature.properties.Order, 10);
+  if (!Number.isFinite(raw)) return CHANNEL_DEFAULT_ORDER;
+  return Math.max(0, Math.min(CHANNEL_MAX_ORDER, raw));
+}
+
+function getChannelLineColor(feature) {
+  const order = resolveChannelOrder(feature);
+  return CHANNEL_LINE_PALETTE[order] || CHANNEL_LINE_PALETTE[CHANNEL_DEFAULT_ORDER];
+}
+
+function getChannelFillColor(feature) {
+  const order = resolveChannelOrder(feature);
+  return CHANNEL_FILL_PALETTE[order] || CHANNEL_FILL_PALETTE[CHANNEL_DEFAULT_ORDER];
+}
+
+function buildChannelLegendItems() {
+  const items = [];
+  for (let i = 1; i < CHANNEL_ORDER_COLORS.length; i += 1) {
+    items.push({ color: CHANNEL_ORDER_COLORS[i], label: `Order ${i}` });
+  }
+  return items;
+}
+
 function pickActive(arr) {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (arr[i].visible) {
@@ -318,6 +377,49 @@ export function createLayerUtils({
         fontWeight: 'bold',
         outlineColor: [0, 0, 0, 200],
         outlineWidth: 2,
+        billboard: false,
+        sizeUnits: 'pixels',
+        pickable: false,
+      }),
+    ];
+  }
+
+  function buildChannelsLayer(state) {
+    if (!state.channelsVisible || !state.channelsGeoJson) return [];
+    return [
+      new deck.GeoJsonLayer({
+        id: 'channels-pass2',
+        data: state.channelsGeoJson,
+        pickable: false,
+        stroked: true,
+        filled: true,
+        lineWidthUnits: 'pixels',
+        lineWidthMinPixels: 1,
+        getLineWidth: () => 1.5,
+        getLineColor: getChannelLineColor,
+        getFillColor: getChannelFillColor,
+      }),
+    ];
+  }
+
+  function buildChannelLabelsLayer(state) {
+    if (!state.channelLabelsVisible || !state.channelsVisible) return [];
+    const labelData = Array.isArray(state.channelLabelsData) ? state.channelLabelsData : [];
+    if (!labelData.length) return [];
+    return [
+      new deck.TextLayer({
+        id: 'channel-labels',
+        data: labelData,
+        getPosition: (d) => d.position,
+        getText: (d) => d.text,
+        getSize: CHANNEL_LABEL_FONT_SIZE,
+        getColor: CHANNEL_LABEL_COLOR,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontWeight: 'bold',
+        outlineColor: CHANNEL_LABEL_OUTLINE_COLOR,
+        outlineWidth: CHANNEL_LABEL_OUTLINE_WIDTH,
         billboard: false,
         sizeUnits: 'pixels',
         pickable: false,
@@ -773,7 +875,9 @@ export function createLayerUtils({
     const weppEventDeckLayers = buildWeppEventLayers(state);
     const openetDeckLayers = buildOpenetLayers(state);
     const rapDeckLayers = buildRapLayers(state);
+    const channelDeckLayers = buildChannelsLayer(state);
     const labelLayers = buildSubcatchmentLabelsLayer(state);
+    const channelLabelLayers = buildChannelLabelsLayer(state);
     return [
       baseLayer,
       ...landuseDeckLayers,
@@ -786,7 +890,9 @@ export function createLayerUtils({
       ...openetDeckLayers,
       ...rapDeckLayers,
       ...rasterLayers,
+      ...channelDeckLayers,
       ...labelLayers,
+      ...channelLabelLayers,
     ];
   }
 
@@ -1041,6 +1147,9 @@ export function createLayerUtils({
       const watar = pickActiveLayerForLegend('WATAR', state);
       if (watar) active.push(watar);
     }
+    if (state.channelsVisible && state.channelsGeoJson) {
+      active.push({ key: 'channels', label: 'Channels', category: 'Channels' });
+    }
     state.detectedLayers.forEach((layer) => {
       if (layer.visible) {
         active.push({ ...layer, category: 'Raster' });
@@ -1053,6 +1162,7 @@ export function createLayerUtils({
     buildLayerStack,
     formatTooltip,
     getActiveLayersForLegend,
+    getChannelLegendItems: buildChannelLegendItems,
     constants: { NLCD_COLORMAP, NLCD_LABELS, RAP_BAND_LABELS },
     helpers: {
       landuseValue,

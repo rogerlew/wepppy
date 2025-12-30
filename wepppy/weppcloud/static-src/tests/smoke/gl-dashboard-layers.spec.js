@@ -68,6 +68,18 @@ async function waitForSubcatchments(page) {
   ).toBeTruthy();
 }
 
+async function waitForChannels(page, timeout = 20000) {
+  try {
+    await page.waitForFunction(
+      () => (window.glDashboardState?.channelsGeoJson?.features || []).length > 0,
+      { timeout },
+    );
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 async function isDetailsOpen(page, title) {
   return page.locator('summary.gl-layer-group', { hasText: title }).evaluate((el) => {
     const details = el.closest('details');
@@ -159,6 +171,54 @@ test.describe('gl-dashboard layer detection and wiring', () => {
 
     await labelsToggle.uncheck({ force: true });
     await expect.poll(async () => getDeckLayerIds(page)).not.toContain('subcatchment-labels');
+  });
+
+  test('Channels overlay toggles and legend updates', async ({ page }) => {
+    await openDashboard(page);
+    const hasChannels = await waitForChannels(page);
+    if (!hasChannels) {
+      test.skip('Channels data not available in this run');
+    }
+
+    const channelsToggle = page.locator('#gl-channels-toggle');
+    await expect(channelsToggle).toBeVisible({ timeout: 15000 });
+    await expect(channelsToggle).toBeChecked();
+
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('channels-pass2');
+    const channelLegendTitle = page.locator('#gl-legends-content .gl-legend-section__title', { hasText: 'Channels' });
+    await expect(channelLegendTitle).toBeVisible({ timeout: 15000 });
+
+    await channelsToggle.uncheck({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('channels-pass2');
+    await expect.poll(async () => channelLegendTitle.count()).toBe(0);
+
+    await channelsToggle.check({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('channels-pass2');
+    await expect.poll(async () => channelLegendTitle.count()).toBeGreaterThan(0);
+  });
+
+  test('Channel labels toggle shows/hides label layer', async ({ page }) => {
+    await openDashboard(page);
+    const hasChannels = await waitForChannels(page);
+    if (!hasChannels) {
+      test.skip('Channels data not available in this run');
+    }
+
+    const channelsToggle = page.locator('#gl-channels-toggle');
+    if (await channelsToggle.isVisible()) {
+      await channelsToggle.check({ force: true });
+    }
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('channels-pass2');
+
+    const labelsToggle = page.locator('#gl-channel-labels-toggle');
+    await expect(labelsToggle).toBeVisible({ timeout: 15000 });
+    await expect(labelsToggle).not.toBeChecked();
+
+    await labelsToggle.check({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('channel-labels');
+
+    await labelsToggle.uncheck({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('channel-labels');
   });
 
   test('RAP cumulative stays selected and panel remains open', async ({ page }) => {

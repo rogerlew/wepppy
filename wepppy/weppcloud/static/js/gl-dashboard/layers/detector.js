@@ -15,6 +15,72 @@ function logDetection(kind, message, context) {
 const logDetectionInfo = (message, context) => logDetection('info', message, context);
 const logDetectionWarn = (message, context) => logDetection('warn', message, context);
 
+function collectGeometryCoordinates(geometry) {
+  if (!geometry || !geometry.coordinates) return [];
+  const coords = geometry.coordinates;
+  switch (geometry.type) {
+    case 'Point':
+      return [coords];
+    case 'MultiPoint':
+    case 'LineString':
+      return Array.isArray(coords) ? coords : [];
+    case 'MultiLineString': {
+      const merged = [];
+      if (Array.isArray(coords)) {
+        coords.forEach((line) => {
+          if (Array.isArray(line)) {
+            merged.push(...line);
+          }
+        });
+      }
+      return merged;
+    }
+    case 'Polygon':
+      return Array.isArray(coords) && Array.isArray(coords[0]) ? coords[0] : [];
+    case 'MultiPolygon':
+      return Array.isArray(coords) && Array.isArray(coords[0]) && Array.isArray(coords[0][0]) ? coords[0][0] : [];
+    default:
+      return [];
+  }
+}
+
+function resolveGeometryCenter(geometry) {
+  const coords = collectGeometryCoordinates(geometry);
+  if (!coords.length) return null;
+  let sumX = 0;
+  let sumY = 0;
+  let count = 0;
+  coords.forEach((pt) => {
+    if (!Array.isArray(pt) || pt.length < 2) return;
+    const x = Number(pt[0]);
+    const y = Number(pt[1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    sumX += x;
+    sumY += y;
+    count += 1;
+  });
+  if (!count) return null;
+  return [sumX / count, sumY / count];
+}
+
+function buildChannelLabelData(geoJson) {
+  const labels = [];
+  const seen = new Set();
+  const features = geoJson && Array.isArray(geoJson.features) ? geoJson.features : [];
+  features.forEach((feature) => {
+    const props = feature && feature.properties ? feature.properties : {};
+    const topazId = props.TopazID || props.topaz_id || props.topaz || props.id || props.WeppID || props.wepp_id;
+    if (topazId == null) return;
+    const key = String(topazId);
+    if (seen.has(key)) return;
+    const position = resolveGeometryCenter(feature.geometry);
+    if (!position) return;
+    labels.push({ text: key, position });
+    seen.add(key);
+  });
+  return labels;
+}
+
 async function detectSbsLayer({ ctx, loadSbsImage }) {
   const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/query/baer_wgs_map`;
   const resp = await fetch(url);
@@ -397,6 +463,27 @@ export async function detectHillslopesOverlays({ buildScenarioUrl, buildBaseUrl,
     return { hillslopesSummary, subcatchmentsGeoJson: geoJson, hillslopesLayers };
   } catch (err) {
     logDetectionWarn('failed to load hillslopes overlays', err);
+    return null;
+  }
+}
+
+export async function detectChannelsOverlays({ buildBaseUrl }) {
+  try {
+    const geoUrl = buildBaseUrl(`resources/channels.json`);
+    const geoResp = await fetch(geoUrl);
+    if (!geoResp.ok) {
+      logDetectionInfo('Channels overlay missing', { geoUrl, status: geoResp.status });
+      return null;
+    }
+    const channelsGeoJson = await geoResp.json();
+    if (!channelsGeoJson || !Array.isArray(channelsGeoJson.features) || !channelsGeoJson.features.length) {
+      logDetectionInfo('Channels overlay empty', { geoUrl });
+      return null;
+    }
+    const channelLabelsData = buildChannelLabelData(channelsGeoJson);
+    return { channelsGeoJson, channelLabelsData };
+  } catch (err) {
+    logDetectionWarn('failed to load channels overlays', err);
     return null;
   }
 }

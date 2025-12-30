@@ -18,6 +18,8 @@ const defaultState = {
 
   subcatchmentsVisible: true,
   subcatchmentLabelsVisible: false,
+  channelsVisible: true,
+  channelLabelsVisible: false,
   currentBasemapKey: 'googleTerrain',
   currentViewState: null,
 
@@ -86,6 +88,8 @@ const defaultState = {
   boxplotLogScale: {},
 
   subcatchmentsGeoJson: null,
+  channelsGeoJson: null,
+  channelLabelsData: null,
   graphHighlightedTopazId: null,
 
   watarRanges: {},
