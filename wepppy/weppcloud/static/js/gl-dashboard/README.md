@@ -29,6 +29,7 @@
 - `syncGraphModeForContext()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
 - Year slider placement: climate/OpenET Yearly/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
 - Monthly slider: OpenET-only; hide the year slider while OpenET is active.
+- OpenET overlays/graphs are base-only; use `postBaseQueryEngine` even when a scenario is selected.
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
 - Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.

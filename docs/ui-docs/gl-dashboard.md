@@ -28,15 +28,18 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 2. WEPP model output analysis (yearly, event-based, cumulative)
 3. RAP (Rangeland Analysis Platform) timeseries exploration
 4. WATAR (Wildfire Ash Transport) overlay visualization
-5. Multi-scenario comparison with differential colormaps
+5. OpenET evapotranspiration overlays (monthly) and yearly ET trends
+6. Multi-scenario comparison with differential colormaps
 
 **Key Features:**
 - **Basemap Selection:** Google Terrain, Google Satellite, OpenStreetMap
-- **Layer Detection:** Automatic discovery of available datasets (landuse/nlcd.tif, soils/ssurgo.tif, WEPP outputs, RAP parquet files)
+- **Layer Detection:** Automatic discovery of available datasets (landuse/nlcd.tif, soils/ssurgo.tif, WEPP outputs, RAP parquet files, OpenET parquet)
 - **Stacked Layout:** Map viewport above a collapsible graph panel; graph focus hides the map to give the canvas full height
-- **Year Slider:** Interactive timeline control for RAP and WEPP Yearly layers
+- **Year Slider:** Interactive timeline control for RAP, WEPP Yearly, Climate Yearly, and OpenET Yearly
+- **Month Slider:** OpenET-only month index slider (play/pause) that hides the year slider
 - **Legends Panel:** Floating, collapsible panel showing active layer colormaps
 - **Omni Graph Integration:** Boxplot/bar chart visualizations for scenario analysis
+- **OpenET Yearly Graph:** Full-size ET graph with dataset radios + water year controls
 
 ## Architecture
 
@@ -56,10 +59,12 @@ wepppy/weppcloud/static/js/gl-dashboard/
 ├── scenario/manager.js          # Scenario/comparison switching + diff ranges
 ├── data/
 │   ├── query-engine.js          # Query Engine fetch helpers (sitePrefix-aware)
-│   └── wepp-data.js             # WEPP stat/yearly/event fetch + base/comparison
+│   ├── wepp-data.js             # WEPP stat/yearly/event fetch + base/comparison
+│   └── openet-data.js           # OpenET metadata + monthly summary refresh (base-only)
 ├── ui/
 │   ├── graph-mode.js            # Graph mode/layout controller + slider placement
-│   └── year-slider.js           # Timeline control (show/hide/playback)
+│   ├── year-slider.js           # Timeline control (show/hide/playback)
+│   └── month-slider.js          # Month index slider for OpenET overlays
 ├── graphs/
 │   ├── timeseries-graph.js      # Canvas-based graph renderer
 │   └── graph-loaders.js         # Data loaders for Omni/RAP/WEPP graphs
@@ -83,12 +88,13 @@ gl-dashboard.js (main)
   ├── config.js
   ├── state.js
   ├── colors.js
-  ├── colors.js                  # Added: colormap utilities
   ├── scenario/manager.js
   ├── data/query-engine.js
   ├── data/wepp-data.js
+  ├── data/openet-data.js
   ├── ui/graph-mode.js
   ├── ui/year-slider.js
+  ├── ui/month-slider.js
   ├── graphs/timeseries-graph.js
   ├── graphs/graph-loaders.js
   ├── layers/detector.js
@@ -209,6 +215,7 @@ gl-dashboard.js (main)
 - `buildSoilsLayer(summary, colorFn)`: GeoJSON layer with mukey colors
 - `buildWeppLayer(summary, mode, colorScale, ranges)`: WEPP overlay with viridis/rdbu
 - `buildRapLayer(summary, band, colorScale, ranges)`: RAP band overlay
+- `buildOpenetLayers(state)`: OpenET overlay (monthly ET)
 - `buildWatarLayer(summary, mode, colorScale, ranges)`: WATAR overlay
 - `buildRasterLayer(layerDef)`: Bitmap layer from GeoTIFF
 
@@ -216,7 +223,7 @@ gl-dashboard.js (main)
 1. Basemap tiles (Google Terrain / Satellite / ESRI / OSM / OTM)
 2. Raster overlays (landuse GeoTIFF, soils GeoTIFF, SBS map)
 3. Subcatchments GeoJSON (boundaries)
-4. Vector overlays (landuse, soils, WEPP, RAP, WATAR summaries)
+4. Vector overlays (landuse, soils, WEPP, RAP, OpenET, WATAR summaries)
 5. Subcatchment labels (TextLayer with topaz_id)
 
 #### `graphs/timeseries-graph.js`
@@ -234,7 +241,7 @@ gl-dashboard.js (main)
 {
   type: 'line' | 'boxplot' | 'bars',
   title: 'Graph Title',
-  source: 'rap' | 'wepp-yearly' | 'omni',
+  source: 'rap' | 'wepp-yearly' | 'openet' | 'openet_yearly' | 'climate_yearly' | 'omni',
   years: [2000, 2001, ...],
   series: {
     [topaz_id]: [value1, value2, ...],  // for line graphs
@@ -257,6 +264,8 @@ gl-dashboard.js (main)
 - `loadOmniRunoffHillGraph()`: Boxplot of hillslope runoff
 - `loadOmniOutletSedimentGraph()`: Bar chart of outlet sediment discharge
 - `loadOmniOutletStreamGraph()`: Bar chart of outlet stream discharge
+- `buildOpenetTimeseriesData()`: OpenET monthly hillslope timeseries (base-only)
+- `buildOpenetYearlyGraph()`: OpenET yearly ET graph (area-weighted)
 
   **Query Pattern (Omni Graphs):**
   1. For each scenario, query the interchange parquet files (`wepp/output/interchange/loss_pw0.hill.parquet`, `loss_pw0.chn.parquet`, `loss_pw0.all_years.out.parquet`).
@@ -298,6 +307,14 @@ gl-dashboard.js (main)
 }
 ```
 
+#### `data/wepp-data.js`
+**Purpose:** WEPP summary/yearly/event fetchers for base + comparison; caches ranges  
+**Notes:** Uses Query Engine helpers and scenario-aware paths; drives WEPP overlays + graphs.
+
+#### `data/openet-data.js`
+**Purpose:** OpenET metadata + monthly summary refresh (base-only)  
+**Notes:** Reads `openetSelectedDatasetKey` + month index, updates `openetSummary` + `openetRanges`.
+
 ### UI Components
 
 #### Basemap Selector
@@ -331,7 +348,7 @@ gl-dashboard.js (main)
     <summary>Landuse</summary>
     <ul class="gl-layer-items">
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-Landuse-dom" />
+        <input type="radio" name="subcatchment-overlay" id="layer-Landuse-dom" />
         <label for="layer-Landuse-dom">Dominant Cover</label>
       </li>
     </ul>
@@ -349,27 +366,27 @@ gl-dashboard.js (main)
     </div>
     <ul class="gl-layer-items">
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-WEPP-Yearly-runoff" />
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-Yearly-runoff" />
         <label for="layer-WEPP-Yearly-runoff">Runoff (mm)</label>
       </li>
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-WEPP-Yearly-subrunoff" />
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-Yearly-subrunoff" />
         <label for="layer-WEPP-Yearly-subrunoff">Lateral Flow (mm)</label>
       </li>
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-WEPP-Yearly-baseflow" />
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-Yearly-baseflow" />
         <label for="layer-WEPP-Yearly-baseflow">Baseflow (mm)</label>
       </li>
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-WEPP-Yearly-soil_loss" />
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-Yearly-soil_loss" />
         <label for="layer-WEPP-Yearly-soil_loss">Soil Loss (t/ha)</label>
       </li>
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-WEPP-Yearly-sediment_deposition" />
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-Yearly-sediment_deposition" />
         <label for="layer-WEPP-Yearly-sediment_deposition">Sediment Deposition (t/ha)</label>
       </li>
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-WEPP-Yearly-sediment_yield" />
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-Yearly-sediment_yield" />
         <label for="layer-WEPP-Yearly-sediment_yield">Sediment Yield (t/ha)</label>
       </li>
     </ul>
@@ -382,19 +399,30 @@ gl-dashboard.js (main)
     </div>
     <ul class="gl-layer-items">
       <li class="gl-layer-item">
-        <input type="checkbox" id="layer-RAP-AFG" />
+        <input type="radio" name="subcatchment-overlay" id="layer-RAP-AFG" />
         <label for="layer-RAP-AFG">Annual Forbs/Grasses (%)</label>
+      </li>
+    </ul>
+  </details>
+  <details class="gl-layer-details">
+    <summary>OpenET</summary>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="subcatchment-overlay" id="layer-OpenET-ensemble" />
+        <label for="layer-OpenET-ensemble">Ensemble (ET mm)</label>
       </li>
     </ul>
   </details>
 </ul>
 ```
+Subcatchment overlays render as radios (single selection across categories); raster entries render as checkboxes.
 
 **Handler Pattern:**
-1. Toggle checkbox → update `layer.visible` flag in state
+1. Toggle checkbox/radio → update `layer.visible` flag in state
 2. Call `deselectAllSubcatchmentOverlays()` if switching to new category (mutually exclusive)
 3. Call `applyLayers()` → rebuilds deck.gl stack
-4. Call `syncGraphModeForContext()` → determines if year slider should appear
+4. Call `syncGraphModeForContext()` → determines if year/month slider should appear
+5. OpenET radio sets `openetSelectedDatasetKey` and refreshes OpenET summary/ranges
 
 #### Graph List
 **Element:** `#gl-graph-list`  
@@ -407,6 +435,24 @@ gl-dashboard.js (main)
       <li class="gl-layer-item">
         <input type="radio" name="graph-selection" id="graph-omni-soil-loss-hill" />
         <label for="graph-omni-soil-loss-hill">Soil Loss (hillslopes, tonne/ha)</label>
+      </li>
+    </ul>
+  </details>
+  <details class="gl-layer-details">
+    <summary>OpenET Yearly</summary>
+    <div class="gl-openet-year-controls">
+      <label><input type="radio" name="openet-yearly-dataset" value="ensemble"> Ensemble</label>
+      <label><input type="radio" name="openet-yearly-dataset" value="eemetric"> eemetric</label>
+      <label><input type="radio" name="openet-year-mode" value="calendar"> Calendar Year</label>
+      <label><input type="radio" name="openet-year-mode" value="water"> Water Year</label>
+      <select id="gl-openet-year-start-month">
+        <option value="10">Oct</option>
+      </select>
+    </div>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="graph-selection" id="graph-openet-yearly" />
+        <label for="graph-openet-yearly">OpenET Yearly</label>
       </li>
     </ul>
   </details>
@@ -431,9 +477,9 @@ gl-dashboard.js (main)
 Map-only overlays (Landuse/Soils/WEPP/WEPP Event/WATAR)
   ↓ auto
 Graph minimized (controls disabled; slider hidden)
-  ↓ RAP cumulative or any visible RAP overlay OR any visible WEPP Yearly overlay
-Graph split (controls enabled; slider visible)
-  ↓ Omni graph activated OR user clicks full
+  ↓ RAP cumulative, any visible RAP overlay, any visible WEPP Yearly overlay, or OpenET overlay
+Graph split (controls enabled; slider visible; OpenET uses month slider)
+  ↓ Omni graph activated, Climate Yearly, OpenET Yearly, OR user clicks full
 Graph full (focus; map hidden; split button disabled while Omni focused)
   ↓ user minimizes
 Graph minimized
@@ -451,7 +497,7 @@ Graph minimized (controls disabled; slider hidden)
 #### Split
 **State:** `graphMode = 'split'`, `graphFocus = false`  
 **UI:** Panel height ~640px, map stacked above graph  
-**Trigger:** User clicks split, or RAP cumulative/visible RAP overlay, or WEPP Yearly overlay becomes active
+**Trigger:** User clicks split, or RAP cumulative/visible RAP overlay, or WEPP Yearly/OpenET overlay becomes active (OpenET hides year slider and shows month slider)
 
 #### Full
 **State:** `graphMode = 'full'`, `graphFocus = true`  
@@ -459,15 +505,16 @@ Graph minimized (controls disabled; slider hidden)
 **Trigger:** User clicks full, or any of the following are active:
 - Omni graphs (`omni-*` sources) or Cumulative Contribution → always force full by default
 - Climate Yearly graph → full by default
+- OpenET Yearly graph → full by default
 - Explicit user override via layout buttons
 
 #### Year Slider
 **Element:** `#gl-year-slider` (single instance reused across contexts)  
 **Placement & Visibility (context-aware):**
-- **Climate Yearly / Outlet graphs** → slider is moved **inside** `#gl-graph-container`, pinned to the **bottom**; container gets `.has-bottom-slider` to add padding. Graph defaults to **full** pane.
+- **Climate Yearly / OpenET Yearly / Outlet graphs** → slider is moved **inside** `#gl-graph-container`, pinned to the **bottom**; container gets `.has-bottom-slider` to add padding. Graph defaults to **full** pane.
 - **RAP / WEPP Yearly** → slider stays in the dedicated slot **above** the graph pane (`#gl-graph-year-slider`) at 100% width; never overlaps the graph header. Graph defaults to **split** view.
 - **Cumulative / Omni graphs** → slider is **hidden** (no timeline dimension).
-- Hidden when no RAP/WEPP/Climate Yearly graph context is active.
+- Hidden when no RAP/WEPP/Climate/OpenET Yearly graph context is active or when the OpenET month slider is visible.
 
 **Controls:**
 - Input: `#gl-year-slider-input` (range slider)
@@ -488,6 +535,24 @@ Graph minimized (controls disabled; slider hidden)
 - RAP: updates `rapSelectedYear`, refreshes overlays, and updates graph year when source is `rap`.
 - WEPP Yearly: updates `weppYearlySelectedYear`, refreshes overlays, and updates graph year when source is `wepp_yearly`.
 - Climate Yearly: updates `climateYearlySelectedYear`, refreshes the climate graph, keeps full-pane focus.
+- OpenET Yearly: updates `openetYearlySelectedYear`, refreshes the OpenET yearly graph, keeps full-pane focus.
+
+#### Month Slider
+**Element:** `#gl-month-slider` (single instance used for OpenET overlays)  
+**Placement & Visibility:**
+- Visible only when an OpenET overlay is selected.
+- Uses the top slot (`#gl-graph-year-slider`) and hides the year slider.
+
+**Controls:**
+- Input: `#gl-month-slider-input` (range slider)
+- Min/Max: `#gl-month-slider-min` / `#gl-month-slider-max`
+- Current: `#gl-month-slider-value`
+- Play: `#gl-month-slider-play` (▶ / ⏸)
+
+**Behavior:**
+- Range is an index into `openetMetadata.months` (sorted list of `{ year, month, label }`).
+- On input change → updates `openetSelectedMonthIndex` → `refreshOpenetData()` → re-renders OpenET overlay + legend.
+- Play mode: advance 1 month every 3 seconds; loops to min when exceeding max.
 
 #### Legends Panel
 **Element:** `#gl-legends-panel`  
@@ -527,7 +592,7 @@ Graph minimized (controls disabled; slider hidden)
 
 ### Layer Activation Flow
 ```
-User clicks layer checkbox
+User clicks layer checkbox/radio
   ↓
 Event handler toggles layer.visible
   ↓
@@ -546,7 +611,7 @@ deck.gl re-renders
   ↓
 updateLegendsPanel() → show/hide legends
   ↓
-syncGraphModeForContext() → year slider visibility
+syncGraphModeForContext() → year/month slider visibility
 ```
 
 ### Graph Activation Flow
@@ -576,6 +641,10 @@ setGraphFocus(data.source === 'omni')
 timeseriesGraph.render()
   ↓
 syncGraphModeForContext() updates mode buttons
+
+Notes:
+- OpenET Yearly sets focus/full + bottom year slider and highlights the selected year line.
+- OpenET overlays load a monthly hillslope timeseries only when the graph panel is visible.
 ```
 
 ### Scenario Comparison Flow
@@ -606,8 +675,10 @@ yearSlider._emit('change', year)
 Event listener updates state:
   - rapSelectedYear = year (for RAP)
   - weppYearlySelectedYear = year (for WEPP Yearly)
+  - openetYearlySelectedYear = year (for OpenET Yearly)
+  - climateYearlySelectedYear = year (for Climate Yearly)
   ↓
-refreshRapData() or refreshWeppYearlyData()
+refreshRapData(), refreshWeppYearlyData(), or reload climate/OpenET yearly graph
   ↓
 Query Engine with year filter:
   {
@@ -621,6 +692,26 @@ rapSummary or weppYearlySummary updated
 applyLayers() → rebuild GeoJSON with new data
   ↓
 timeseriesGraph.setCurrentYear(year) → update cursor in graph
+```
+
+### Month Slider Flow
+```
+User drags month slider or clicks play
+  ↓
+monthSlider._emit('change', index)
+  ↓
+Event listener updates state:
+  - openetSelectedMonthIndex = index
+  ↓
+refreshOpenetData()
+  ↓
+Query Engine with dataset + year + month filter
+  ↓
+openetSummary/openetRanges updated
+  ↓
+applyLayers() → rebuild OpenET GeoJSON overlay + legend
+  ↓
+timeseriesGraph.setCurrentYear(selectedMonthX) → update cursor in OpenET graph
 ```
 
 ## Layer System
@@ -659,7 +750,7 @@ function applyColormap(rasterData, colorMap) {
 #### Vector Overlays (Subcatchment-based)
 **Sources:** Parquet datasets queried via Query Engine  
 **Rendering:** deck.gl GeoJsonLayer with subcatchments geometry + attribute join  
-**Examples:** Landuse dom, Soils mukey, WEPP runoff, RAP AFG, WATAR ash_loading
+**Examples:** Landuse dom, Soils mukey, WEPP runoff, RAP AFG, OpenET ET, WATAR ash_loading
 
 **WEPP Output Units:**
 - **Raw data** in parquet files: Water volumes in m³, soil mass in kg
@@ -720,6 +811,14 @@ function buildWeppLayer(summary, mode, colorScale, ranges) {
 }
 ```
 
+#### OpenET Monthly Overlays
+**Source:** `openet/openet_ts.parquet` (base-only)  
+**Fields:** `dataset_key`, `year`, `month`, `topaz_id`, `value` (mm)  
+**Selection:** User picks dataset radio + month slider index (`openetSelectedMonthIndex`)  
+**Summary:** `openetSummary[topaz_id] = value` for the selected dataset + month  
+**Ranges:** `openetRanges.min/max` used for legend scaling  
+**Colormap:** winter (continuous)
+
 #### Comparison Layers (Differential Colormaps)
 **Mode:** Activated via comparison toggle  
 **Colormap:** rdbu (red-blue diverging scale)  
@@ -769,20 +868,21 @@ function computeComparisonDiffRanges() {
 - Hide corresponding legend
 
 ### Mutual Exclusivity Rules
-**Subcatchment-based overlays are mutually exclusive within categories:**
-- Landuse: Only one landuse layer visible at a time (dom, mukey, etc.)
-- Soils: Only one soils layer visible
-- WEPP: Multiple WEPP measures can coexist (runoff + soil_loss)
-- RAP: Cumulative mode XOR individual bands (enforced via radio button)
+**Subcatchment overlays share a single radio group (one visible at a time):**
+- Landuse, Soils, Hillslopes, RAP, OpenET, WEPP, WEPP Yearly, WEPP Event, WATAR.
+- RAP cumulative mode XOR individual bands (enforced via radio within RAP group).
+- Raster layers (NLCD, soils GeoTIFF, SBS) remain independent checkboxes.
 
 **Implementation:**
 ```javascript
 function deselectAllSubcatchmentOverlays() {
-  landuseLayers.forEach(l => l.visible = false);
-  soilsLayers.forEach(l => l.visible = false);
-  // ... (repeat for all categories)
+  landuseLayers.forEach((l) => (l.visible = false));
+  soilsLayers.forEach((l) => (l.visible = false));
+  openetLayers.forEach((l) => (l.visible = false));
+  // ... (repeat for all subcatchment categories)
   rapCumulativeMode = false;
   yearSlider.hide();
+  monthSlider.hide();
 }
 ```
 
@@ -813,6 +913,7 @@ function deselectAllSubcatchmentOverlays() {
 - Cursor: Vertical line at currentYear
 - Hover: Highlight line, show tooltip with topaz_id + value
 - Legend: Color swatches with topaz_id labels (right side)
+- OpenET monthly uses this shape with month-indexed X values and the month slider driving the cursor.
 
 #### Boxplot
 **Use Case:** Omni scenario comparison (soil loss, runoff across hillslopes)  
@@ -927,6 +1028,34 @@ function deselectAllSubcatchmentOverlays() {
 - Legend shows highlighted year + Tmin/Tmax keys; year slider hover updates the highlight.  
 - Hover tooltip returns nearest month/year with `P`, `Tmin`, `Tmax` values.
 
+#### OpenET Yearly (ET by month)
+**Purpose:** Aggregate OpenET ET by month and plot one line per year (base-only).  
+**Data Sources:** `openet/openet_ts.parquet` + `watershed/hillslopes.parquet` (area-weighted).  
+**Controls (Graphs → OpenET Yearly detail):**
+- Dataset radio (`ensemble`, `eemetric`, etc.)
+- Year mode toggle: `Calendar Year` or `Water Year` (default).  
+- `Water Year start month` select (default October, disabled when Calendar Year is selected).  
+- Year slider in the graph pane; highlights the selected year line.
+**Computation:**
+- Area-weighted mean ET: `SUM(openet.value * hill.area) / total_area` (values in mm).  
+- Water Year rotates months; months ≥ start month assigned to `year + 1`.  
+- No scenario support (base-only).
+**Data Format:**
+```javascript
+{
+  type: 'line',
+  title: 'OpenET Yearly (ensemble)',
+  years: [1, 2, ..., 12], // month slots
+  seriesYears: [2000, 2001, ...],
+  series: { "2000": { values: [mm...], color }, ... },
+  selectedYear: 2023,
+  highlightSeriesId: "2023",
+  xLabel: 'Month',
+  yLabel: 'ET (mm)',
+  source: 'openet_yearly'
+}
+```
+
 ### Graph Panel Modes
 
 #### Minimized
@@ -937,12 +1066,12 @@ function deselectAllSubcatchmentOverlays() {
 #### Split
 **State:** `graphMode = 'split'`, `graphFocus = false`  
 **UI:** Panel height ~640px, map width 70%, graph width 30%  
-**Trigger:** User clicks split button, or RAP/WEPP Yearly layer activated
+**Trigger:** User clicks split button, or RAP/WEPP Yearly/OpenET overlay activated
 
 #### Full
 **State:** `graphMode = 'full'`, `graphFocus = true`  
 **UI:** Panel height ~640px, map width 30%, graph width 70%  
-**Trigger:** User clicks full button, or Omni graph activated
+**Trigger:** User clicks full button, or Omni/Climate Yearly/OpenET Yearly graph activated
 
 ### Mode Transition Logic
 
@@ -983,6 +1112,7 @@ function syncGraphModeForContext() {
 ## Testing Strategy
 
 - **Playwright smoke tests:** Live in `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-*.spec.js`; run with `GL_DASHBOARD_URL="https://.../gl-dashboard" npm run smoke -- tests/smoke/gl-dashboard-*.spec.js` (or combine `SMOKE_BASE_URL` + `GL_DASHBOARD_PATH`).
+- **OpenET coverage:** `gl-dashboard-layers.spec.js` + `gl-dashboard-graph-modes.spec.js` (skip when OpenET data is missing).
 - **Fixtures:** No dedicated fixture directory; specs exercise live WEPPcloud runs with inline helpers/mocks.
 - **Exploration script:** `tests/gl-dashboard-exploration.spec.mjs` is available for manual walkthroughs and doc captures.
 - **Sanity check:** `node --check wepppy/weppcloud/static/js/gl-dashboard.js`.
@@ -1005,8 +1135,10 @@ function syncGraphModeForContext() {
 | Graph loaders | `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` |
 | Query Engine | `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js` |
 | WEPP data manager | `wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js` |
+| OpenET data manager | `wepppy/weppcloud/static/js/gl-dashboard/data/openet-data.js` |
 | Graph mode controller | `wepppy/weppcloud/static/js/gl-dashboard/ui/graph-mode.js` |
 | Year slider | `wepppy/weppcloud/static/js/gl-dashboard/ui/year-slider.js` |
+| Month slider | `wepppy/weppcloud/static/js/gl-dashboard/ui/month-slider.js` |
 | Scenario manager | `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js` |
 | Template | `wepppy/weppcloud/templates/gl_dashboard.htm` |
 | Smoke tests | `wepppy/weppcloud/static-src/tests/smoke/gl-dashboard-*.spec.js` |
@@ -1026,6 +1158,12 @@ function syncGraphModeForContext() {
 | Year slider | `#gl-year-slider` | Year slider container |
 | Year slider input | `#gl-year-slider-input` | Range input |
 | Year slider value | `#gl-year-slider-value` | Current year display |
+| Month slider | `#gl-month-slider` | Month slider container |
+| Month slider input | `#gl-month-slider-input` | Range input |
+| Month slider min | `#gl-month-slider-min` | Min label |
+| Month slider max | `#gl-month-slider-max` | Max label |
+| Month slider value | `#gl-month-slider-value` | Current month display |
+| Month slider play | `#gl-month-slider-play` | Play/pause button |
 | Basemap selector | `#gl-basemap-select` | Basemap dropdown |
 | Scenario selector | `#gl-scenario-select` | Scenario dropdown |
 | Comparison toggle | `#gl-comparison-toggle` | Comparison checkbox |
@@ -1093,6 +1231,43 @@ function syncGraphModeForContext() {
   "order_by": [
     { "column": "rap.year", "direction": "ASC" }
   ]
+}
+```
+
+### OpenET Monthly Summary (dataset + month)
+```json
+{
+  "datasets": [
+    { "path": "openet/openet_ts.parquet", "alias": "openet" }
+  ],
+  "columns": ["openet.topaz_id AS topaz_id", "openet.value AS value"],
+  "filters": [
+    { "column": "openet.dataset_key", "op": "=", "value": "ensemble" },
+    { "column": "openet.year", "op": "=", "value": 2023 },
+    { "column": "openet.month", "op": "=", "value": 7 }
+  ]
+}
+```
+
+### OpenET Yearly (area-weighted monthly mean)
+```json
+{
+  "datasets": [
+    { "path": "openet/openet_ts.parquet", "alias": "openet" },
+    { "path": "watershed/hillslopes.parquet", "alias": "hill" }
+  ],
+  "joins": [
+    { "left": "openet", "right": "hill", "on": "topaz_id", "type": "inner" }
+  ],
+  "columns": ["openet.year AS year", "openet.month AS month"],
+  "aggregations": [
+    { "expression": "SUM(openet.value * hill.area)", "alias": "area_weighted" }
+  ],
+  "filters": [
+    { "column": "openet.dataset_key", "op": "=", "value": "ensemble" }
+  ],
+  "group_by": ["openet.year", "openet.month"],
+  "order_by": ["year", "month"]
 }
 ```
 

@@ -13,7 +13,7 @@ OpenET time series data is written to `openet/openet_ts.parquet` but the gl-dash
 
 ## Non-Goals
 - No changes to OpenET acquisition, Climate Engine API calls, or NoDb logic.
-- No OpenET graphs (map-only for now).
+- No OpenET graphs beyond the OpenET Yearly graph below (monthly overlay stays map-first).
 - No new backend endpoints beyond Query Engine use of `openet/openet_ts.parquet`.
 
 ## Data Contract
@@ -121,7 +121,7 @@ Performance: assume Query Engine is performant; keep calls minimal by only re-qu
 ## Monthly Slider Implementation
 Option A (preferred): new module `ui/month-slider.js`
 - Mirror `ui/year-slider.js` API.
-- Accept `formatValue` callback for labels (ex: `Jul 2023`).
+- Accept `formatLabel` callback for labels (ex: `Jul 2023`).
 - `setRange(min, max, current)` maps to month index range.
 
 Option B: generalize `ui/year-slider.js` to `ui/time-slider.js` and instantiate twice.
@@ -209,10 +209,8 @@ Inputs:
 - `watershed/hillslopes.parquet` (area per `topaz_id`)
 
 Aggregation per dataset key:
-1. Convert ET mm to volume per hillslope: `m3 = (value_mm / 1000) * area_m2`.
-2. Sum `m3` across all hillslopes for each `(year, month)`.
-3. Compute total area: `area_m2 = sum(hillslope.area_m2)` (same source as WEPP Yearly).
-4. Convert back to mm: `et_mm = (sum_m3 / area_m2) * 1000`.
+1. Compute area-weighted mean ET per month: `et_mm = sum(value_mm * area_m2) / sum(area_m2)`.
+2. Total area is constant per run; cache it once.
 
 Water Year behavior:
 - Re-label months based on `waterYearStartMonth` (default Oct).
@@ -245,10 +243,18 @@ Single-axis monthly line plot with one series per year:
 - Selected year line is rendered with the highlight stroke (same visual weight as hover highlight).
 
 Implementation note:
-- Current line renderer highlights only hovered series. Add `selectedSeriesId` to graph data or introduce a new graph type to render a highlighted series by year.
+- Current line renderer highlights only hovered series. Use `highlightSeriesId` to render the selected year line.
 
 ## Query Engine Strategy
 Preferred (server-side aggregation):
+```json
+{
+  "datasets": [
+    { "path": "watershed/hillslopes.parquet", "alias": "hill" }
+  ],
+  "columns": ["SUM(hill.area) AS area_m2"]
+}
+```
 ```json
 {
   "datasets": [
@@ -256,11 +262,9 @@ Preferred (server-side aggregation):
     { "path": "watershed/hillslopes.parquet", "alias": "hill" }
   ],
   "joins": [{ "left": "openet", "right": "hill", "on": "topaz_id", "type": "inner" }],
-  "columns": [
-    "openet.year AS year",
-    "openet.month AS month",
-    "SUM((openet.value / 1000.0) * hill.area_m2) AS et_m3",
-    "SUM(hill.area_m2) AS area_m2"
+  "columns": ["openet.year AS year", "openet.month AS month"],
+  "aggregations": [
+    { "expression": "SUM(openet.value * hill.area)", "alias": "area_weighted" }
   ],
   "filters": [{ "column": "openet.dataset_key", "op": "=", "value": "eemetric" }],
   "group_by": ["openet.year", "openet.month"],
@@ -269,7 +273,7 @@ Preferred (server-side aggregation):
 ```
 Fallback (client aggregation):
 - Query OpenET values by dataset and join area in JS using `topaz_id`.
-- Compute monthly totals + area-weighted mm client-side.
+- Compute area-weighted mean mm client-side.
 
 ## Integration Points Checklist
 - `wepppy/weppcloud/static/js/gl-dashboard/config.js` (new graph key `openet-yearly` in `GRAPH_DEFS`)
@@ -285,7 +289,7 @@ Fallback (client aggregation):
 3. Implement OpenET Yearly loader:
    - Use `postBaseQueryEngine`.
    - Aggregate ET using hillslope area.
-   - Output `months`, `series` keyed by year, `selectedSeriesId`, `selectedYear`.
+   - Output `months`, `series` keyed by year, `highlightSeriesId`, `selectedYear`, `seriesYears`.
 4. Extend graph renderer to highlight the selected year series.
 5. Wire year slider to `openetYearlySelectedYear` and highlight update.
 6. Update graph-mode to force **full** mode and bottom slider for `openet-yearly`.
