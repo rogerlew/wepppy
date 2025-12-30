@@ -28,8 +28,9 @@
 - All fetches honor `ctx.sitePrefix` (browse/gdalinfo/query-engine) to avoid missing-run errors.
 - `syncGraphModeForContext()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
 - Year slider placement: climate/OpenET Yearly/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
-- Monthly slider: OpenET-only; hide the year slider while OpenET is active.
+- Monthly slider: OpenET-only and only when the graph context resolves to OpenET; hide for Omni/Cumulative/Climate/WEPP Yearly even if OpenET remains selected.
 - OpenET overlays/graphs are base-only; use `postBaseQueryEngine` even when a scenario is selected.
+- Module cache-busting: `gl-dashboard.js` appends its own query string to module imports; `state.js` merges defaults into `window.__GL_DASHBOARD_STATE__` to prevent split-state bugs when modules are cached out of sync.
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.
 - Query Engine endpoints are root-scoped (`/query-engine/...`); do **not** prepend `ctx.sitePrefix` when calling them.

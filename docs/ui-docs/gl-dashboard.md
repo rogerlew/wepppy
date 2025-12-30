@@ -45,7 +45,7 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 
 ### Technology Stack
 - **Rendering:** deck.gl 9.x (WebGL2 tile layer, GeoJSON layer, bitmap layer)
-- **Module System:** ES6 modules with dynamic imports
+- **Module System:** ES6 modules with dynamic imports; `gl-dashboard.js` carries its own cache-busting query string into every module import (Safari-safe), so shared state must tolerate multiple module instances.
 - **State Management:** Centralized mutable state with subscription notifications
 - **Query Engine:** DuckDB-powered backend for parquet/GeoJSON queries
 - **Color Scales:** colormap library (viridis, rdbu, winter, jet2) + custom NLCD/soil palettes
@@ -111,7 +111,7 @@ gl-dashboard.js (main)
 3. Initialize deck.gl controller with basemap tile layer
 4. Kick off detection (raster gdalinfo + parquet summaries) asynchronously; render placeholder layer controls immediately, then populate once detection resolves (non-blocking page load)
 5. Bind UI event listeners (basemap selector, scenario/comparison, layer toggles, graph mode buttons, year slider)
-6. Apply initial layer stack (subcatchments visible by default); graph layout sync via `syncGraphModeForContext()` is idempotent
+6. Apply initial layer stack (subcatchments visible by default); graph layout sync via `syncGraphLayout()` is idempotent and handles year/month slider placement
 
 ## Component Map
 
@@ -124,6 +124,10 @@ gl-dashboard.js (main)
 - `getValue(key)` → Get single value
 - `setState(updates)` → Batch update with change notification
 - `setValue(key, value)` → Single key update
+
+**Cache-Safety Notes:**
+- State lives on `window.__GL_DASHBOARD_STATE__` with subscribers on `window.__GL_DASHBOARD_STATE_SUBSCRIBERS__`.
+- `state.js` merges missing defaults into an existing global state object instead of reinitializing; this prevents missing keys when module versions are mixed (e.g., cache-busted `gl-dashboard.js` + cached submodules).
 
 **Key State Properties:**
 ```javascript
@@ -421,7 +425,7 @@ Subcatchment overlays render as radios (single selection across categories); ras
 1. Toggle checkbox/radio → update `layer.visible` flag in state
 2. Call `deselectAllSubcatchmentOverlays()` if switching to new category (mutually exclusive)
 3. Call `applyLayers()` → rebuilds deck.gl stack
-4. Call `syncGraphModeForContext()` → determines if year/month slider should appear
+4. Call `syncGraphLayout()` → determines if year/month slider should appear
 5. OpenET radio sets `openetSelectedDatasetKey` and refreshes OpenET summary/ranges
 
 #### Graph List
@@ -478,7 +482,7 @@ Map-only overlays (Landuse/Soils/WEPP/WEPP Event/WATAR)
   ↓ auto
 Graph minimized (controls disabled; slider hidden)
   ↓ RAP cumulative, any visible RAP overlay, any visible WEPP Yearly overlay, or OpenET overlay
-Graph split (controls enabled; slider visible; OpenET uses month slider)
+Graph split (controls enabled; slider visible; OpenET uses month slider only when the OpenET context is active)
   ↓ Omni graph activated, Climate Yearly, OpenET Yearly, OR user clicks full
 Graph full (focus; map hidden; split button disabled while Omni focused)
   ↓ user minimizes
@@ -497,7 +501,7 @@ Graph minimized (controls disabled; slider hidden)
 #### Split
 **State:** `graphMode = 'split'`, `graphFocus = false`  
 **UI:** Panel height ~640px, map stacked above graph  
-**Trigger:** User clicks split, or RAP cumulative/visible RAP overlay, or WEPP Yearly/OpenET overlay becomes active (OpenET hides year slider and shows month slider)
+**Trigger:** User clicks split, or RAP cumulative/visible RAP overlay, or WEPP Yearly/OpenET overlay becomes active (OpenET hides year slider and shows month slider only when OpenET is the active context)
 
 #### Full
 **State:** `graphMode = 'full'`, `graphFocus = true`  
@@ -540,7 +544,7 @@ Graph minimized (controls disabled; slider hidden)
 #### Month Slider
 **Element:** `#gl-month-slider` (single instance used for OpenET overlays)  
 **Placement & Visibility:**
-- Visible only when an OpenET overlay is selected.
+- Visible only when an OpenET overlay is selected **and** the graph context resolves to OpenET (not Omni/Cumulative/Climate/WEPP Yearly).
 - Uses the top slot (`#gl-graph-year-slider`) and hides the year slider.
 
 **Controls:**
@@ -553,6 +557,7 @@ Graph minimized (controls disabled; slider hidden)
 - Range is an index into `openetMetadata.months` (sorted list of `{ year, month, label }`).
 - On input change → updates `openetSelectedMonthIndex` → `refreshOpenetData()` → re-renders OpenET overlay + legend.
 - Play mode: advance 1 month every 3 seconds; loops to min when exceeding max.
+ - Selecting Omni/Cumulative/Climate/WEPP Yearly graphs hides the month slider even if the OpenET overlay remains selected.
 
 #### Legends Panel
 **Element:** `#gl-legends-panel`  
@@ -611,7 +616,7 @@ deck.gl re-renders
   ↓
 updateLegendsPanel() → show/hide legends
   ↓
-syncGraphModeForContext() → year/month slider visibility
+syncGraphLayout() → year/month slider visibility
 ```
 
 ### Graph Activation Flow
@@ -1075,39 +1080,33 @@ function deselectAllSubcatchmentOverlays() {
 
 ### Mode Transition Logic
 
-**`syncGraphModeForContext()` Function:**
+**`syncGraphLayout()` Function:**
 ```javascript
-function syncGraphModeForContext() {
-  const rapActive = isRapActive(state);
-  const yearlyActive = isWeppYearlyActive(state);
-  const graphCapable = rapActive || yearlyActive || !!state.activeGraphKey;
-  
-  // Generate context key for idempotency check
-  const contextKey = `${graphCapable}-${rapActive}-${yearlyActive}-${graphModeUserOverride}-${state.activeGraphKey}`;
-  if (contextKey === lastGraphContextKey) return; // No-op if context unchanged
-  lastGraphContextKey = contextKey;
-  
-  if (!graphCapable) {
-    // No graph data available
-    setGraphControlsEnabled(false);
-    setGraphMode('minimized', { source: 'auto' });
-    yearSlider.hide();
-    return;
-  }
-  
-  // Graph data available
-  setGraphControlsEnabled(true);
-  const targetMode = graphModeUserOverride || 'split';
-  setGraphMode(targetMode, { source: graphModeUserOverride ? 'user' : 'auto' });
-  
-  // Year slider visible only for RAP or WEPP Yearly
-  if (rapActive || yearlyActive) {
-    yearSlider.show();
-  } else {
+function syncGraphLayout() {
+  const context = resolveGraphContext(state);
+  const openetSliderActive = isOpenetActive(state) && context.key === 'openet' && state.activeGraphKey !== 'openet-yearly';
+
+  // Idempotent: bail if layout key unchanged.
+  // (Key includes context, mode, slider placement, and OpenET slider state.)
+
+  positionYearSlider(context.slider);
+  positionMonthSlider(openetSliderActive);
+  if (openetSliderActive) {
     yearSlider.hide();
   }
 }
 ```
+
+## State Management
+
+**Global State Contract**
+- State lives on `window.__GL_DASHBOARD_STATE__`; subscribers live on `window.__GL_DASHBOARD_STATE_SUBSCRIBERS__`.
+- `state.js` never replaces the state object after first creation. It merges missing defaults into the existing object to keep late-loaded modules consistent.
+- This is required because `gl-dashboard.js` appends its own cache-busting query string to all module imports; mixed module instances must still converge on the same state.
+
+**Do/Do Not**
+- **Do**: use `getState()`, `setState()`, `setValue()` to trigger subscribers and keep legends/layout in sync.
+- **Do not**: reassign the state object or mutate nested objects without `setState()`; it breaks change notifications.
 
 ## Testing Strategy
 
