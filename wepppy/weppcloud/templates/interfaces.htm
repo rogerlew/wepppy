@@ -195,7 +195,7 @@
         <h2 id="section-disturbed">WEPPcloud-(Un)Disturbed for United States</h2>
         <p>
           The WEPPcloud-Disturbed interface allows users to upload burn severity maps and predict erosion based on fire impacts.
-          Unburned conditions can be analyzed by skipping the burn severity map. SSURGO-derived soils and NLCD landuse parameterize
+          Unburned conditions can be analyzed by skipping the burn severity map. <a href="https://www.nrcs.usda.gov/resources/data-and-reports/soil-survey-geographic-database-ssurgo">SSURGO</a>-derived soils and <a href="https://www.usgs.gov/centers/eros/science/national-land-cover-database">NLCD</a> landuse parameterize
           unburned runs, while fire and treatment scenarios procedurally generate soils and managements from the disturbed database
           using soil texture and landuse.
         </p>
@@ -351,7 +351,7 @@
       </div>
       <div class="wc-feature__body">
         <h2 id="section-eu">WEPPcloud-EU</h2>
-        <p>WEPPcloud for Europe uses ESDAC landuses to assign managements and builds soils from ESDAC and EU-SoilHydroGrids data. U.S. climate stations are selected using E-OBS monthly precipitation and temperature patterns.</p>
+        <p>WEPPcloud for Europe uses <a href="https://esdac.jrc.ec.europa.eu/resource-type/datasets">ESDAC</a> landuses to assign managements and builds soils from ESDAC and <a href="https://esdac.jrc.ec.europa.eu/content/3d-soil-hydraulic-database-europe-1-km-and-250-m-resolution">EU-SoilHydroGrids</a> data. U.S. climate stations are selected using <a href="https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php">E-OBS</a> monthly precipitation and temperature patterns.</p>
         <p>
           The PeP interfaces extend post-fire erosion modeling and WATAR ash transport modeling by parameterizing soils based on burn severity and soil texture via Disturbed WEPP soil files.
         </p>
@@ -395,7 +395,7 @@
       </div>
       <div class="wc-feature__body">
         <h2 id="section-au">WEPPcloud-AU</h2>
-        <p>WEPPcloud for Australia assigns managements from the Land Use of Australia 2010-11 dataset and constructs soils from ASRIS data. U.S. climate stations are selected using AGDC monthly precipitation and temperature patterns.</p>
+        <p>WEPPcloud for Australia assigns managements from the Land Use of Australia 2010-11 dataset and constructs soils from <a href="https://www.asris.csiro.au">ASRIS</a> data. U.S. climate stations are selected using AGDC monthly precipitation and temperature patterns.</p>
         {% if not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("au", "cap-au", cap_base_url, cap_site_key) }}
         {% endif %}
@@ -434,7 +434,7 @@
       <div class="wc-feature__body">
         <h2 id="section-rhem">WEPPcloud-RHEM</h2>
         <p>
-          Run the Rangeland Hydrology and Erosion Model (RHEM) across the United States. Where available, foliar and ground covers are
+          Run the <a href="https://apps.tucson.ars.ag.gov/rhem/">Rangeland Hydrology and Erosion Model (RHEM)</a> across the United States. Where available, foliar and ground covers are
           estimated from NLCD Shrubland 2016 data, while SURGO/STATSGO identifies soil textures.
         </p>
         {% if not current_user.is_authenticated %}
