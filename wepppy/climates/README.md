@@ -352,7 +352,7 @@ result = interpolate_geospatial(
 # result: array of interpolated values for each hillslope
 ```
 
-This is called internally by `daymet.daily_interpolation.interpolate_daily_timeseries()` and `gridmet.client.interpolate_daily_timeseries_for_location()`.
+This is called internally by `daymet.daymet_singlelocation_client.interpolate_daily_timeseries()` and `gridmet.client.interpolate_daily_timeseries_for_location()`.
 
 ## Integration with WEPPcloud Workflow
 
@@ -366,7 +366,7 @@ climate = Climate.getInstance('/geodata/weppcloud_runs/abc123/CurCond')
 
 # Configure climate source
 climate.climate_mode = 9  # ClimateMode.OBSERVED_DAYMET
-climate.climate_spatialmode = 1  # ClimateSpatialMode.MULTIPLE (per-hillslope)
+climate.climate_spatialmode = 2  # ClimateSpatialMode.MULTIPLE_INTERPOLATED (per-hillslope)
 climate.input_years = (2018, 2020)
 
 # Fetch data and build .cli files (runs asynchronously via RQ)
@@ -375,7 +375,7 @@ climate.build_climate()
 
 Under the hood, this:
 1. Reads hillslope locations from `Watershed` controller
-2. Calls `daymet.daily_interpolation.interpolate_daily_timeseries()`
+2. Calls `daymet.daymet_singlelocation_client.interpolate_daily_timeseries()` for the multiple interpolated path
 3. Generates `.prn` files for each hillslope
 4. Invokes CLIGEN binary to convert `.prn` → `.cli`
 5. Archives raw data as `.parquet` in `wepp/runs/`

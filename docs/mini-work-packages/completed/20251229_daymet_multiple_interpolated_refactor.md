@@ -1,9 +1,9 @@
 # Daymet Multiple Interpolated Climate Build (Current Flow)
 > Investigation notes for refactor away from local Daymet v4 rasters.
-> Status: draft
+> Status: completed
 
 ## Context
-Observed Daymet with `ClimateSpatialMode.MultipleInterpolated` is the current path for generating per-hillslope observed climate files. The code still touches local Daymet v4 NetCDFs, which now fail to download after Earthdata access changes. This document captures the current flow and its dependencies to anchor the refactor.
+Observed Daymet with `ClimateSpatialMode.MultipleInterpolated` is the current path for generating per-hillslope observed climate files. The local Daymet NetCDF dependency has been removed, so the build now relies only on the Daymet single-pixel API. This document captures the current flow and its dependencies.
 
 ## Entry Points
 - `wepppy/nodb/core/climate.py` -> `Climate.build_climate()`
@@ -42,9 +42,11 @@ Observed Daymet with `ClimateSpatialMode.MultipleInterpolated` is the current pa
 - Debug output (always on): `daymet_observed_<col>,<row>_<start>-<end>.parquet`
 
 ## Observations
-- The README documents `daymet.daily_interpolation.interpolate_daily_timeseries()` (local NetCDF path), but `Climate` uses `daymet_singlelocation_client.interpolate_daily_timeseries()` (API path).
 - API call count scales with the derived grid size, not just hillslope count.
 
-## Refactor Notes (next step)
-- Align docs and code so the documented interpolation path matches the runtime path.
+## Closeout
+- Removed the `identify_pixel_coords` dependency from `_build_climate_observed_daymet_multiple`.
+- Updated `wepppy/climates/README.md` to reference `daymet_singlelocation_client` in the observed Daymet workflow.
+
+## Follow-ups
 - Evaluate caching or tiling to reduce ORNL per-pixel API calls for large watersheds.
