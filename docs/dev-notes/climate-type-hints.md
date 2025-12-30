@@ -117,7 +117,7 @@ Sample of key properties with their return types:
 
 | Property | Return Type | Description |
 |----------|-------------|-------------|
-| `daymet_last_available_year` | int | Returns 2023 |
+| `daymet_last_available_year` | int | Returns 2024 |
 | `use_gridmet_wind_when_applicable` | bool | Configuration flag |
 | `precip_scale_reference` | Optional[str] | Reference dataset for scaling |
 | `precip_monthly_scale_factors` | List[float] | Monthly scaling factors |

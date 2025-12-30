@@ -5,12 +5,13 @@ from functools import lru_cache
 from typing import Iterable, Mapping, MutableMapping, Optional, Tuple, List
 
 
+DAYMET_LAST_AVAILABLE_YEAR = 2024
 _GHCN_ONLY_LOCALES: Tuple[str, ...] = ("au", "alaska", "hawaii", "nigeria")
 
 
 @dataclass(frozen=True)
 class ClimateDataset:
-    """Descriptor for a catalogued climate configuration."""
+    """Descriptor for a cataloged climate configuration."""
 
     catalog_id: str
     climate_mode: int
@@ -111,7 +112,10 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         catalog_id="observed_daymet",
         climate_mode=9,
         label='Observed DAYMET (GRIDMET wind)',
-        description='Observed gridded DAYMET dataset (1980–latest release) with GRIDMET wind fallback.',
+        description=(
+            f'Observed gridded DAYMET dataset (1980–{DAYMET_LAST_AVAILABLE_YEAR}) '
+            'with GRIDMET wind fallback.'
+        ),
         help_text='Use when observed historical data is required (streamflow calibration, RAP).',
         group='Observed',
         group_hint='Model validation; historical disturbance analysis',
@@ -120,7 +124,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         station_modes=(-1, 0, 1),
         inputs=("observed_years", "spatial_mode"),
         rap_compatible=True,
-        metadata={"year_bounds": {"min": 1980, "max": 2023}},
+        metadata={"year_bounds": {"min": 1980, "max": DAYMET_LAST_AVAILABLE_YEAR}},
         blocked_locales=_GHCN_ONLY_LOCALES,
     ),
     ClimateDataset(
@@ -270,7 +274,7 @@ def _catalog_by_id() -> Mapping[str, ClimateDataset]:
 
 
 def iter_climate_datasets() -> Tuple[ClimateDataset, ...]:
-    """Return the full tuple of catalogued climate datasets."""
+    """Return the full tuple of cataloged climate datasets."""
     return _CLIMATE_DATASETS
 
 

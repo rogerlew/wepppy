@@ -113,6 +113,7 @@ import pyproj
 from pyproj import Proj
 
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
+from wepppy.nodb.locales.climate_catalog import DAYMET_LAST_AVAILABLE_YEAR
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 import wepppyo3
@@ -884,7 +885,7 @@ class Climate(NoDbBase):
 
     @property
     def daymet_last_available_year(self) -> int:
-        return 2023
+        return DAYMET_LAST_AVAILABLE_YEAR
 
     @property
     def use_gridmet_wind_when_applicable(self) -> bool:
@@ -2687,7 +2688,6 @@ class Climate(NoDbBase):
             self.sub_cli_fns = sub_cli_fns
 
     def _build_climate_observed_daymet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        from wepppy.climates.daymet.daily_interpolation import identify_pixel_coords
         from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries
 
         with self.locked():
@@ -2713,8 +2713,6 @@ class Climate(NoDbBase):
             hillslope_locations = {'ws': {'longitude': ws_lng, 'latitude': ws_lat}}
             for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
                 hillslope_locations[topaz_id] = {'longitude': _lng, 'latitude': _lat}
-
-            hillslope_locations = identify_pixel_coords(hillslope_locations, daymet_version=self.daymet_version)
 
             with self.timed('  interpolating daymet grids'):
                 # this retrieves concurrently
