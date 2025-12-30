@@ -153,6 +153,7 @@ parso==0.8.1
 partd==1.2.0
 passlib==1.7.4
 patsy==0.5.6
+pfdf @ git+https://github.com/rogerlew/usgs-pfdf
 pbr==5.8.0
 pexpect==4.8.0
 pickleshare==0.7.5
