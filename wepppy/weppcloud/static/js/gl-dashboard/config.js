@@ -73,6 +73,7 @@ export const COMPARISON_MEASURES = [
   'event_P',
   'event_Q',
   'event_ET',
+  'event_TSW',
   'event_peakro',
   'event_tdet',
 ];
@@ -84,6 +85,7 @@ export const WATER_MEASURES = [
   'event_P',
   'event_Q',
   'event_ET',
+  'event_TSW',
   'event_peakro',
 ];
 

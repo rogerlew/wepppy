@@ -583,6 +583,7 @@ export async function detectWeppEventOverlays({
       { key: 'wepp-event-P', label: 'Precipitation (P)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_P', visible: false },
       { key: 'wepp-event-Q', label: 'Runoff (Q)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_Q', visible: false },
       { key: 'wepp-event-ET', label: 'Total ET (Ep+Es+Er)', path: 'wepp/output/interchange/H.wat.parquet', mode: 'event_ET', visible: false },
+      { key: 'wepp-event-TSW', label: 'Total Soil Water (TSW)', path: 'wepp/output/interchange/soil_pw0.parquet', mode: 'event_TSW', visible: false },
       { key: 'wepp-event-peakro', label: 'Peak Runoff Rate', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_peakro', visible: false },
       { key: 'wepp-event-tdet', label: 'Total Detachment', path: 'wepp/output/interchange/H.pass.parquet', mode: 'event_tdet', visible: false },
     ];

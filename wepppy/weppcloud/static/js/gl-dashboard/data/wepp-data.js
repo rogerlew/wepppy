@@ -45,7 +45,7 @@ export function createWeppDataManager({
   void WEPP_LOSS_PATH;
 
   const WEPP_MODES = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
-  const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_peakro', 'event_tdet'];
+  const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_TSW', 'event_peakro', 'event_tdet'];
 
   function buildWeppAggregations(statistic) {
     const stat = (statistic || 'mean').toLowerCase();
@@ -455,6 +455,38 @@ export function createWeppDataManager({
             }
           }
         }
+      } else if (mode === 'event_TSW') {
+        const parquetPath = 'wepp/output/interchange/soil_pw0.parquet';
+        const valueExpression = 'AVG(soil.TSW)';
+        filters = [
+          { column: 'soil.year', op: '=', value: year },
+          { column: 'soil.month', op: '=', value: month },
+          { column: 'soil.day_of_month', op: '=', value: day },
+        ];
+        const dataPayload = {
+          datasets: [
+            { path: parquetPath, alias: 'soil' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          ],
+          joins: [{ left: 'soil', right: 'hill', on: 'wepp_id', type: 'inner' }],
+          columns,
+          aggregations: [{ sql: valueExpression, alias: 'value' }],
+          filters,
+          group_by: ['hill.topaz_id'],
+        };
+        const resp = await fetch(baseQueryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(dataPayload),
+        });
+        if (resp.ok) {
+          const dataResult = await resp.json();
+          if (dataResult && dataResult.records) {
+            for (const row of dataResult.records) {
+              baseQueryResult[String(row.topaz_id)] = { [mode]: row.value };
+            }
+          }
+        }
       } else if (mode === 'event_peakro' || mode === 'event_tdet') {
         const parquetPath = 'wepp/output/interchange/H.pass.parquet';
         const passColumn = mode === 'event_peakro' ? 'peakro' : 'tdet';
@@ -535,6 +567,26 @@ export function createWeppDataManager({
             { path: 'watershed/hillslopes.parquet', alias: 'hill' },
           ],
           joins: [{ left: 'wat', right: 'hill', on: 'wepp_id', type: 'inner' }],
+          columns,
+          aggregations: [{ sql: valueExpression, alias: 'value' }],
+          filters,
+          group_by: ['hill.topaz_id'],
+        };
+        dataResult = await postQueryEngine(dataPayload);
+      } else if (mode === 'event_TSW') {
+        const parquetPath = 'wepp/output/interchange/soil_pw0.parquet';
+        const valueExpression = 'AVG(soil.TSW)';
+        const filters = [
+          { column: 'soil.year', op: '=', value: year },
+          { column: 'soil.month', op: '=', value: month },
+          { column: 'soil.day_of_month', op: '=', value: day },
+        ];
+        const dataPayload = {
+          datasets: [
+            { path: parquetPath, alias: 'soil' },
+            { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+          ],
+          joins: [{ left: 'soil', right: 'hill', on: 'wepp_id', type: 'inner' }],
           columns,
           aggregations: [{ sql: valueExpression, alias: 'value' }],
           filters,

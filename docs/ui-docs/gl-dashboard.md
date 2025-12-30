@@ -163,6 +163,12 @@ gl-dashboard.js (main)
   weppYearlySelectedYear: 2023,
   weppYearlySummary: { [topaz_id]: { runoff, sedyld, ... } },
   weppYearlyLayers: [{ key, label, mode, visible, ... }],
+
+  // WEPP Event state
+  weppEventMetadata: { startDate, endDate },
+  weppEventSelectedDate: 'YYYY-MM-DD',
+  weppEventSummary: { [topaz_id]: { event_P, event_Q, event_ET, event_TSW, event_peakro, event_tdet } },
+  weppEventLayers: [{ key, label, mode, visible, ... }],
   
   // Cached data
   graphDataCache: {},
@@ -815,6 +821,12 @@ function buildWeppLayer(summary, mode, colorScale, ranges) {
   });
 }
 ```
+
+#### WEPP Event Overlays
+**Sources:** `wepp/output/interchange/H.wat.parquet`, `wepp/output/interchange/H.pass.parquet`, `wepp/output/interchange/soil_pw0.parquet`  
+**Date filter:** `year`, `month`, `day_of_month` from `weppEventSelectedDate`  
+**Metrics:** P (mm), Q (mm), ET (mm), TSW (mm), Peak Runoff Rate (m³/s), Total Detachment (kg)  
+**Aggregation:** P/Q/ET/tdet = SUM, peakro = MAX, TSW = AVG
 
 #### OpenET Monthly Overlays
 **Source:** `openet/openet_ts.parquet` (base-only)  
