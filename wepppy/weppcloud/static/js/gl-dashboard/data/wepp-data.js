@@ -45,7 +45,7 @@ export function createWeppDataManager({
   void WEPP_LOSS_PATH;
 
   const WEPP_MODES = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
-  const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_TSW', 'event_peakro', 'event_tdet'];
+  const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_Saturation', 'event_peakro', 'event_tdet'];
 
   function buildWeppAggregations(statistic) {
     const stat = (statistic || 'mean').toLowerCase();
@@ -344,6 +344,10 @@ export function createWeppDataManager({
     if (!summary) return null;
     const ranges = {};
     for (const mode of WEPP_EVENT_MODES) {
+      if (mode === 'event_Saturation') {
+        ranges[mode] = { min: 0, max: 100 };
+        continue;
+      }
       let min = Infinity;
       let max = -Infinity;
       for (const key of Object.keys(summary)) {
@@ -455,9 +459,9 @@ export function createWeppDataManager({
             }
           }
         }
-      } else if (mode === 'event_TSW') {
+      } else if (mode === 'event_Saturation') {
         const parquetPath = 'wepp/output/interchange/soil_pw0.parquet';
-        const valueExpression = 'AVG(soil.TSW)';
+        const valueExpression = 'AVG(soil.Saturation) * 100';
         filters = [
           { column: 'soil.year', op: '=', value: year },
           { column: 'soil.month', op: '=', value: month },
@@ -573,9 +577,9 @@ export function createWeppDataManager({
           group_by: ['hill.topaz_id'],
         };
         dataResult = await postQueryEngine(dataPayload);
-      } else if (mode === 'event_TSW') {
+      } else if (mode === 'event_Saturation') {
         const parquetPath = 'wepp/output/interchange/soil_pw0.parquet';
-        const valueExpression = 'AVG(soil.TSW)';
+        const valueExpression = 'AVG(soil.Saturation) * 100';
         const filters = [
           { column: 'soil.year', op: '=', value: year },
           { column: 'soil.month', op: '=', value: month },

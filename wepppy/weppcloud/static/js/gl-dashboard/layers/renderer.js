@@ -78,7 +78,7 @@ export function createLayerRenderer({
     event_P: 'mm',
     event_Q: 'mm',
     event_ET: 'mm',
-    event_TSW: 'mm',
+    event_Saturation: '%',
     event_peakro: 'm³/s',
     event_tdet: 'kg',
   };

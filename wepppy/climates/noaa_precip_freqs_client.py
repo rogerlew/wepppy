@@ -4,8 +4,9 @@ import ast
 import numpy as np
 
 from wepppy.all_your_base import try_parse_float
+from deprecated import deprecated
 
-url = 'https://hdsc.nws.noaa.gov/cgi-bin/hdsc/new/cgi_readH5.py'\
+url = 'http://hdsc.nws.noaa.gov/cgi-bin/hdsc/new/cgi_readH5.py'\
       '?lat={lat}&lon={lon}&type=pf&data=depth&units=english&series=pds'
 
 
@@ -16,11 +17,13 @@ def _eval(line):
 
     return [[try_parse_float(v) for v in row] for row in tbl]
 
-
+@deprecated(reason="This client is deprecated.")
 def fetch_pf(lat, lng):
     r = requests.get(url.format(lat=lat, lon=lng), verify=False)
 
     assert r.status_code == 200
+
+    print(r.text)
 
     lines = r.text.split('\n')
     lines = [line.strip() for line in lines]

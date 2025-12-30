@@ -925,8 +925,8 @@ export function createLayerUtils({
           label = `Runoff: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
         } else if (weppEventOverlay.mode === 'event_ET') {
           label = `Total ET: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
-        } else if (weppEventOverlay.mode === 'event_TSW') {
-          label = `Total Soil Water: ${typeof val === 'number' ? val.toFixed(2) : val} mm`;
+        } else if (weppEventOverlay.mode === 'event_Saturation') {
+          label = `Saturation: ${typeof val === 'number' ? val.toFixed(2) : val}%`;
         } else if (weppEventOverlay.mode === 'event_peakro') {
           label = `Peak Runoff Rate: ${typeof val === 'number' ? val.toFixed(4) : val} m³/s`;
         } else if (weppEventOverlay.mode === 'event_tdet') {

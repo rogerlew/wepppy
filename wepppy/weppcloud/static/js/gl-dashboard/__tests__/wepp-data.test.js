@@ -42,13 +42,13 @@ describe('gl-dashboard wepp-data ranges', () => {
         },
       },
       weppEventSummary: {
-        30: { event_P: 10, event_Q: 2, event_ET: 5, event_TSW: 25, event_peakro: 1, event_tdet: 0.5 },
-        31: { event_P: 20, event_Q: 4, event_ET: 5, event_TSW: 30, event_peakro: 1, event_tdet: 0.5 },
+        30: { event_P: 10, event_Q: 2, event_ET: 5, event_Saturation: 40, event_peakro: 1, event_tdet: 0.5 },
+        31: { event_P: 20, event_Q: 4, event_ET: 5, event_Saturation: 60, event_peakro: 1, event_tdet: 0.5 },
       },
       baseSummaryCache: {
         weppEvent: {
-          30: { event_P: 12, event_Q: 1, event_ET: 3, event_TSW: 26, event_peakro: 2, event_tdet: 1 },
-          31: { event_P: 18, event_Q: 5, event_ET: 3, event_TSW: 28, event_peakro: 1, event_tdet: 0.5 },
+          30: { event_P: 12, event_Q: 1, event_ET: 3, event_Saturation: 45, event_peakro: 2, event_tdet: 1 },
+          31: { event_P: 18, event_Q: 5, event_ET: 3, event_Saturation: 55, event_peakro: 1, event_tdet: 0.5 },
         },
       },
       comparisonDiffRanges: {},
@@ -113,7 +113,7 @@ describe('gl-dashboard wepp-data ranges', () => {
     const ranges = manager.computeWeppEventRanges();
 
     expect(ranges.event_P).toEqual({ min: 10, max: 20 });
-    expect(ranges.event_TSW).toEqual({ min: 25, max: 30 });
+    expect(ranges.event_Saturation).toEqual({ min: 0, max: 100 });
     expect(ranges.event_ET.max).toBeCloseTo(ranges.event_ET.min + 0.001);
     expect(ranges.event_peakro.max).toBeCloseTo(ranges.event_peakro.min + 0.001);
     expect(state.weppEventRanges).toEqual(ranges);
@@ -123,7 +123,7 @@ describe('gl-dashboard wepp-data ranges', () => {
     const diff = manager.computeWeppEventDiffRanges();
 
     expect(diff.event_P).toEqual({ min: -2, max: 2, p5: -2, p95: 2 });
-    expect(diff.event_TSW).toEqual({ min: -2, max: 2, p5: -2, p95: 1 });
+    expect(diff.event_Saturation).toEqual({ min: -5, max: 5, p5: -5, p95: 5 });
     expect(state.comparisonDiffRanges).toEqual(diff);
   });
 });
