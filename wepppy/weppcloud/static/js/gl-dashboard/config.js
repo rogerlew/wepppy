@@ -31,13 +31,14 @@ export const GRAPH_SLIDER_PLACEMENTS = Object.freeze({
 });
 
 /**
- * @enum {'climate_yearly' | 'wepp_yearly' | 'rap' | 'cumulative' | 'omni' | 'default'}
+ * @enum {'climate_yearly' | 'wepp_yearly' | 'rap' | 'openet' | 'openet_yearly' | 'cumulative' | 'omni' | 'default'}
  */
 export const GRAPH_CONTEXT_KEYS = Object.freeze({
   CLIMATE_YEARLY: 'climate_yearly',
   WEPP_YEARLY: 'wepp_yearly',
   RAP: 'rap',
   OPENET: 'openet',
+  OPENET_YEARLY: 'openet_yearly',
   CUMULATIVE: 'cumulative',
   OMNI: 'omni',
   DEFAULT: 'default',
@@ -200,6 +201,11 @@ export const GRAPH_DEFS = [
     key: 'climate',
     title: 'Climate Yearly',
     items: [{ key: 'climate-yearly', label: 'Climate Yearly (precip + temp)', type: 'line' }],
+  },
+  {
+    key: 'openet-yearly',
+    title: 'OpenET Yearly',
+    items: [{ key: 'openet-yearly', label: 'OpenET Yearly (monthly ET)', type: 'line' }],
   },
   {
     key: 'cumulative',

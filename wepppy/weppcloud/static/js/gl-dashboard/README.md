@@ -15,7 +15,7 @@
 - **ui/year-slider.js** — Slider controller (init/show/hide/playback); DOM guarded.
 - **ui/month-slider.js** — Slider controller for monthly layers (OpenET); DOM guarded.
 - **graphs/timeseries-graph.js** — Canvas graph controller; DOM-bound to panel/canvas.
-- **graphs/graph-loaders.js** — Graph data loaders (Omni/RAP/WEPP); no DOM/deck.
+- **graphs/graph-loaders.js** — Graph data loaders (Omni/RAP/WEPP/OpenET); no DOM/deck.
 - **layers/detector.js** — Overlay detection (raster/vector) with fetch; no DOM/deck.
 - **layers/orchestrator.js** — Detection sequencing + state wiring; no DOM.
 - **layers/renderer.js** — Sidebar + legends DOM; uses injected callbacks/state.
@@ -27,7 +27,7 @@
 ## Critical Conventions
 - All fetches honor `ctx.sitePrefix` (browse/gdalinfo/query-engine) to avoid missing-run errors.
 - `syncGraphModeForContext()` must be idempotent (context-key guard) to prevent applyLayers/graph mode loops.
-- Year slider placement: climate/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
+- Year slider placement: climate/OpenET Yearly/outlet graphs → bottom; RAP/WEPP Yearly → top; cumulative/omni → hidden; hide when no timeline context.
 - Monthly slider: OpenET-only; hide the year slider while OpenET is active.
 - Guard DOM operations (sliders, graph panel, buttons) so partial renders/tests do not throw.
 - Use injected callbacks/state (`getState`, `setValue`, `applyLayers`, etc.); avoid new globals.

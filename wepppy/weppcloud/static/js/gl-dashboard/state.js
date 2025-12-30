@@ -68,6 +68,11 @@ const state = {
   openetRanges: {},
   openetSelectedDatasetKey: null,
   openetSelectedMonthIndex: null,
+  openetYearlySelectedDatasetKey: null,
+  openetYearlyWaterYear: true,
+  openetYearlyStartMonth: 10,
+  openetYearlySelectedYear: null,
+  openetYearlyCache: {},
 
   climateYearlySelectedYear: null,
   climateWaterYear: true,

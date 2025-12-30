@@ -159,6 +159,28 @@ test.describe('gl-dashboard graph modes and slider placement', () => {
     expect(Math.abs(geom.container.bottom - geom.slider.bottom)).toBeLessThan(6);
   });
 
+  test('OpenET Yearly forces full mode with bottom slider', async ({ page }) => {
+    await openDashboard(page);
+    await requireSection(page, 'OpenET Yearly');
+    await expandSection(page, 'OpenET Yearly');
+
+    const datasetRadios = page.locator('input[name="openet-yearly-dataset"]');
+    await expect(datasetRadios.first()).toBeVisible({ timeout: 15000 });
+    await datasetRadios.first().check({ force: true });
+
+    await page.locator('#graph-openet-yearly').click({ force: true });
+
+    await expect.poll(async () => getGraphSource(page)).toBe('openet_yearly');
+    await expect.poll(async () => (await getState(page)).activeGraphKey).toBe('openet-yearly');
+    await expect.poll(async () => getActiveMode(page)).toBe('full');
+    await expect(page.locator('.gl-main')).toHaveClass(/graph-focus/);
+
+    const geom = await getGeometry(page);
+    expect(geom.visible).toBeTruthy();
+    expect(geom.parentId).toBe('gl-graph-container');
+    expect(geom.hasBottom).toBe(true);
+  });
+
   test('Switching to Cumulative Contribution stays full and slider hides', async ({ page }) => {
     await openDashboard(page);
     await expandSection(page, 'Climate Yearly');

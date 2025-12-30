@@ -85,6 +85,7 @@ export function createGraphLoaders(deps) {
     RAP,
     WEPP_YEARLY,
     OPENET,
+    OPENET_YEARLY,
   } = GRAPH_CONTEXT_KEYS;
 
   function scenarioColor(idx, scenarioName = null) {
@@ -339,6 +340,12 @@ export function createGraphLoaders(deps) {
       tmin: [scale(tmin[0]), scale(tmin[1]), scale(tmin[2]), 255],
       tmax: [scale(tmax[0]), scale(tmax[1]), scale(tmax[2]), 255],
     };
+  }
+
+  function openetYearColor(idx, total) {
+    const denom = total > 1 ? total - 1 : 1;
+    const normalized = denom ? idx / denom : 0.5;
+    return winterColor(normalized);
   }
 
   function clampPercent(val) {
@@ -654,6 +661,140 @@ export function createGraphLoaders(deps) {
     }
   }
 
+  async function getOpenetTotalAreaM2() {
+    if (state.openetYearlyCache && Number.isFinite(state.openetYearlyCache.totalAreaM2)) {
+      return state.openetYearlyCache.totalAreaM2;
+    }
+    if (typeof postBaseQueryEngine !== 'function') return null;
+    const areaPayload = {
+      datasets: [{ path: 'watershed/hillslopes.parquet', alias: 'hill' }],
+      columns: ['SUM(hill.area) AS area_m2'],
+    };
+    const areaResult = await postBaseQueryEngine(areaPayload);
+    const area = areaResult && areaResult.records && areaResult.records.length
+      ? Number(areaResult.records[0].area_m2)
+      : null;
+    if (!Number.isFinite(area) || area <= 0) return null;
+    state.openetYearlyCache = { ...(state.openetYearlyCache || {}), totalAreaM2: area };
+    return area;
+  }
+
+  async function buildOpenetYearlyGraph(options = {}) {
+    const openetMeta = state.openetMetadata;
+    const datasetKeys = openetMeta && Array.isArray(openetMeta.datasetKeys) ? openetMeta.datasetKeys : [];
+    if (!datasetKeys.length) return null;
+    const datasetKey = options.datasetKey
+      || state.openetYearlySelectedDatasetKey
+      || state.openetSelectedDatasetKey
+      || (datasetKeys.includes('ensemble') ? 'ensemble' : datasetKeys[0]);
+    if (!datasetKey) return null;
+    if (typeof postBaseQueryEngine !== 'function') return null;
+
+    const waterYear = options.waterYear !== undefined ? options.waterYear : state.openetYearlyWaterYear;
+    const startMonthRaw = options.startMonth || state.openetYearlyStartMonth || 10;
+    const startMonth = waterYear ? Math.min(12, Math.max(1, startMonthRaw)) : 1;
+
+    const monthLabels = [];
+    for (let i = 0; i < 12; i++) {
+      const idx = (startMonth - 1 + i) % 12;
+      monthLabels.push(MONTH_LABELS[idx]);
+    }
+    const xValues = Array.from({ length: 12 }, (_, i) => i + 1);
+    const monthLabelMap = new Map();
+    monthLabels.forEach((label, idx) => {
+      monthLabelMap.set(idx + 1, label);
+    });
+
+    const totalArea = await getOpenetTotalAreaM2();
+    if (!Number.isFinite(totalArea) || totalArea <= 0) return null;
+
+    const dataPayload = {
+      datasets: [
+        { path: 'openet/openet_ts.parquet', alias: 'openet' },
+        { path: 'watershed/hillslopes.parquet', alias: 'hill' },
+      ],
+      joins: [{ left: 'openet', right: 'hill', on: 'topaz_id', type: 'inner' }],
+      columns: [
+        'openet.year AS year',
+        'openet.month AS month',
+      ],
+      aggregations: [
+        { expression: 'SUM(openet.value * hill.area)', alias: 'area_weighted' },
+      ],
+      filters: [{ column: 'openet.dataset_key', op: '=', value: datasetKey }],
+      group_by: ['openet.year', 'openet.month'],
+      order_by: ['year', 'month'],
+    };
+
+    try {
+      const dataResult = await postBaseQueryEngine(dataPayload);
+      if (!dataResult || !Array.isArray(dataResult.records) || !dataResult.records.length) {
+        return null;
+      }
+
+      const byYear = {};
+      for (const row of dataResult.records) {
+        const year = Number(row.year);
+        const month = Number(row.month);
+        if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) continue;
+        const targetYear = waterYear
+          ? month >= startMonth
+            ? year + 1
+            : year
+          : year;
+        const monthIdx = waterYear ? (month - startMonth + 12) % 12 : month - 1;
+        const areaWeighted = Number(row.area_weighted);
+        if (!Number.isFinite(areaWeighted)) continue;
+        const etMm = areaWeighted / totalArea;
+        if (!byYear[targetYear]) {
+          byYear[targetYear] = Array(12).fill(null);
+        }
+        byYear[targetYear][monthIdx] = etMm;
+      }
+
+      const seriesYears = Object.keys(byYear)
+        .map((y) => Number(y))
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+      if (!seriesYears.length) return null;
+
+      const series = {};
+      seriesYears.forEach((yr, idx) => {
+        const values = byYear[yr] || Array(12).fill(null);
+        series[String(yr)] = { values, color: openetYearColor(idx, seriesYears.length) };
+      });
+
+      const selectedYear =
+        state.openetYearlySelectedYear && seriesYears.includes(state.openetYearlySelectedYear)
+          ? state.openetYearlySelectedYear
+          : seriesYears[seriesYears.length - 1];
+      state.openetYearlySelectedYear = selectedYear;
+      state.openetYearlySelectedDatasetKey = datasetKey;
+
+      return {
+        type: 'line',
+        title: `OpenET Yearly (${datasetKey})`,
+        years: xValues,
+        seriesYears,
+        series,
+        xLabel: 'Month',
+        yLabel: 'ET (mm)',
+        selectedYear,
+        highlightSeriesId: String(selectedYear),
+        source: OPENET_YEARLY,
+        tooltipFormatter: (id, value, monthVal) => {
+          const label = monthLabelMap.get(monthVal) || String(monthVal);
+          const numeric = Number.isFinite(value) ? value.toFixed(2) : value;
+          return `Year ${id}: ${numeric} mm (${label})`;
+        },
+        disableMapHighlight: true,
+      };
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load OpenET yearly data', err);
+      return null;
+    }
+  }
+
   async function buildHillSoilLossBoxplot() {
     const series = [];
     // Always include base first for clarity
@@ -837,6 +978,7 @@ export function createGraphLoaders(deps) {
 
   const graphLoadersMap = {
     'climate-yearly': buildClimateYearlyGraph,
+    'openet-yearly': buildOpenetYearlyGraph,
     'cumulative-contribution': buildCumulativeContributionGraph,
     'omni-soil-loss-hill': buildHillSoilLossBoxplot,
     'omni-soil-loss-chn': buildChannelSoilLossBoxplot,
@@ -857,6 +999,15 @@ export function createGraphLoaders(deps) {
       const water = options && options.waterYear !== undefined ? options.waterYear : state.climateWaterYear;
       const start = options && options.startMonth ? options.startMonth : state.climateStartMonth || 10;
       return `${key}:${water ? 'wy' : 'cy'}:${start}`;
+    }
+    if (key === 'openet-yearly') {
+      const dataset =
+        options && options.datasetKey
+          ? options.datasetKey
+          : state.openetYearlySelectedDatasetKey || state.openetSelectedDatasetKey || 'unknown';
+      const water = options && options.waterYear !== undefined ? options.waterYear : state.openetYearlyWaterYear;
+      const start = options && options.startMonth ? options.startMonth : state.openetYearlyStartMonth || 10;
+      return `${key}:${dataset}:${water ? 'wy' : 'cy'}:${start}`;
     }
     return key;
   }
@@ -1177,6 +1328,7 @@ export function createGraphLoaders(deps) {
     loadGraphDataset,
     buildRapTimeseriesData,
     buildWeppYearlyTimeseriesData,
+    buildOpenetYearlyGraph,
     buildOpenetTimeseriesData,
   };
 }

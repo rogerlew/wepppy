@@ -411,13 +411,19 @@ export function createTimeseriesGraph(options = {}) {
         ctx.restore();
       }
 
+      const selectedSeriesId =
+        this._data && this._data.highlightSeriesId != null ? String(this._data.highlightSeriesId) : null;
       const highlightId = this._highlightedId || this._hoveredId;
       for (const id of seriesIds) {
-        if (id === String(highlightId)) continue;
+        if (id === String(highlightId) || (selectedSeriesId && id === selectedSeriesId)) continue;
         this._drawLine(ctx, years, series[id], xScale, yScale, false);
       }
 
-      if (highlightId && series[String(highlightId)]) {
+      if (selectedSeriesId && series[selectedSeriesId]) {
+        this._drawLine(ctx, years, series[selectedSeriesId], xScale, yScale, true);
+      }
+
+      if (highlightId && series[String(highlightId)] && String(highlightId) !== selectedSeriesId) {
         this._drawLine(ctx, years, series[String(highlightId)], xScale, yScale, true);
       }
 
@@ -1213,7 +1219,9 @@ export function createTimeseriesGraph(options = {}) {
         }
       }
 
-      notifyHighlight(closestId ? parseInt(closestId, 10) : null);
+      if (!(this._data && this._data.disableMapHighlight)) {
+        notifyHighlight(closestId ? parseInt(closestId, 10) : null);
+      }
     },
 
     _onCanvasLeave() {
@@ -1224,7 +1232,9 @@ export function createTimeseriesGraph(options = {}) {
       if (this._visible && this._data) {
         this.render();
       }
-      notifyHighlight(null);
+      if (!(this._data && this._data.disableMapHighlight)) {
+        notifyHighlight(null);
+      }
     },
   };
 

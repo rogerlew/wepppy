@@ -186,3 +186,111 @@ Graph-mode updates (`ui/graph-mode.js`):
 - Use the month index list to drive the monthly slider (do not assume contiguous months).
 - Assume Query Engine performance is adequate; limit calls to dataset/month changes.
 - Month label format: `MMM YYYY` (for example, `Jul 2023`).
+
+---
+
+# OpenET Yearly Graph (new)
+> Spec + implementation plan for adding an OpenET Yearly graph control to gl-dashboard.
+
+## Goals
+- Add a **Graphs** sidebar group named **OpenET Yearly** with dataset radios (`eemetric`, `ensemble`).
+- Add **Year Mode** (Calendar vs Water Year) and **Water Year start month** controls, matching Climate Yearly UI.
+- Selecting OpenET Yearly opens a full-size graph (focus mode) and shows the bottom year slider (Climate context).
+- Plot monthly ET as single-axis lines: one line per year, aggregated across all hillslopes.
+- Highlight the selected year's line when the year slider changes.
+
+## Non-Goals
+- No OpenET yearly map overlay (graph-only).
+- No scenario overlays (OpenET Yearly remains base-only).
+
+## Data + Aggregation
+Inputs:
+- `openet/openet_ts.parquet` (ET mm per hillslope per month)
+- `watershed/hillslopes.parquet` (area per `topaz_id`)
+
+Aggregation per dataset key:
+1. Convert ET mm to volume per hillslope: `m3 = (value_mm / 1000) * area_m2`.
+2. Sum `m3` across all hillslopes for each `(year, month)`.
+3. Compute total area: `area_m2 = sum(hillslope.area_m2)` (same source as WEPP Yearly).
+4. Convert back to mm: `et_mm = (sum_m3 / area_m2) * 1000`.
+
+Water Year behavior:
+- Re-label months based on `waterYearStartMonth` (default Oct).
+- The "water year" label should match Climate Yearly (year ending in Sep for Oct start).
+
+## UX Requirements
+Graphs panel -> **OpenET Yearly** group:
+- Dataset radios (one per `dataset_key`).
+- Year Mode radio group + Water Year start month select (same layout/labels as Climate Yearly).
+Behavior:
+- Selecting OpenET Yearly:
+  - Sets `activeGraphKey = 'openet-yearly'`.
+  - Forces graph mode to **full** and shows the bottom year slider.
+- Year slider:
+  - Sets `openetYearlySelectedYear`.
+  - Highlights the selected year's line in the plot (not just a vertical marker).
+
+## State Additions
+`wepppy/weppcloud/static/js/gl-dashboard/state.js`
+- `openetYearlySelectedDatasetKey: null`
+- `openetYearlyWaterYear: true`
+- `openetYearlyStartMonth: 10`
+- `openetYearlySelectedYear: null`
+- `openetYearlyCache: {}` (optional, keyed by dataset + year mode + start month)
+
+## Graph Rendering
+Single-axis monthly line plot with one series per year:
+- x-axis: months (1-12) with labels (`Jan`, `Feb`, ...), shifted for water year.
+- y-axis: ET (mm).
+- Selected year line is rendered with the highlight stroke (same visual weight as hover highlight).
+
+Implementation note:
+- Current line renderer highlights only hovered series. Add `selectedSeriesId` to graph data or introduce a new graph type to render a highlighted series by year.
+
+## Query Engine Strategy
+Preferred (server-side aggregation):
+```json
+{
+  "datasets": [
+    { "path": "openet/openet_ts.parquet", "alias": "openet" },
+    { "path": "watershed/hillslopes.parquet", "alias": "hill" }
+  ],
+  "joins": [{ "left": "openet", "right": "hill", "on": "topaz_id", "type": "inner" }],
+  "columns": [
+    "openet.year AS year",
+    "openet.month AS month",
+    "SUM((openet.value / 1000.0) * hill.area_m2) AS et_m3",
+    "SUM(hill.area_m2) AS area_m2"
+  ],
+  "filters": [{ "column": "openet.dataset_key", "op": "=", "value": "eemetric" }],
+  "group_by": ["openet.year", "openet.month"],
+  "order_by": ["year", "month"]
+}
+```
+Fallback (client aggregation):
+- Query OpenET values by dataset and join area in JS using `topaz_id`.
+- Compute monthly totals + area-weighted mm client-side.
+
+## Integration Points Checklist
+- `wepppy/weppcloud/static/js/gl-dashboard/config.js` (new graph key `openet-yearly` in `GRAPH_DEFS`)
+- `wepppy/weppcloud/static/js/gl-dashboard/state.js` (OpenET Yearly state keys)
+- `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js` (OpenET Yearly data loader)
+- `wepppy/weppcloud/static/js/gl-dashboard/graphs/controller.js` (Graph list + control wiring)
+- `wepppy/weppcloud/static/js/gl-dashboard/ui/graph-mode.js` (OpenET Yearly -> full mode + bottom slider)
+- `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js` (highlight selected year line)
+
+## Implementation Plan (ordered)
+1. Add OpenET Yearly state keys and defaults.
+2. Add `openet-yearly` graph def + group UI (dataset radios + year mode controls).
+3. Implement OpenET Yearly loader:
+   - Use `postBaseQueryEngine`.
+   - Aggregate ET using hillslope area.
+   - Output `months`, `series` keyed by year, `selectedSeriesId`, `selectedYear`.
+4. Extend graph renderer to highlight the selected year series.
+5. Wire year slider to `openetYearlySelectedYear` and highlight update.
+6. Update graph-mode to force **full** mode and bottom slider for `openet-yearly`.
+7. Add Playwright smoke coverage for OpenET Yearly selection + year slider highlight.
+
+## Testing Plan
+- Playwright: new spec in `static-src/tests/smoke/gl-dashboard-graph-modes.spec.js` for OpenET Yearly.
+- Manual: select dataset, toggle calendar vs water year, verify month order + highlighted year line.

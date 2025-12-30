@@ -32,7 +32,7 @@ export function createGraphController({
     syncGraphLayout,
     ensureGraphExpanded,
   } = graphModeController;
-  const { OMNI, CLIMATE_YEARLY } = GRAPH_CONTEXT_KEYS;
+  const { OMNI, CLIMATE_YEARLY, OPENET_YEARLY } = GRAPH_CONTEXT_KEYS;
   const VALID_GRAPH_MODES = Object.values(GRAPH_MODES);
   const normalizeGraphMode = (value) => (VALID_GRAPH_MODES.includes(value) ? value : null);
 
@@ -71,6 +71,21 @@ export function createGraphController({
     return { waterYear: !!waterYear, startMonth };
   }
 
+  function ensureOpenetYearlySelected() {
+    setValue('activeGraphKey', 'openet-yearly');
+    const radio = document.getElementById('graph-openet-yearly');
+    if (radio && !radio.checked) {
+      radio.checked = true;
+    }
+  }
+
+  function getOpenetYearlyGraphOptions() {
+    const waterYear = getState().openetYearlyWaterYear;
+    const startMonth = waterYear ? getState().openetYearlyStartMonth || 10 : 1;
+    const datasetKey = getState().openetYearlySelectedDatasetKey || getState().openetSelectedDatasetKey;
+    return { waterYear: !!waterYear, startMonth, datasetKey };
+  }
+
   async function loadRapTimeseriesData() {
     const data = await ensureGraphLoaders().buildRapTimeseriesData();
     if (!data) {
@@ -104,8 +119,34 @@ export function createGraphController({
     syncGraphLayout();
   }
 
+  function syncOpenetYearlySelection(data) {
+    if (!data) return data;
+    const years = Array.isArray(data.seriesYears) ? data.seriesYears : [];
+    if (!years.length) return data;
+    const selected =
+      getState().openetYearlySelectedYear && years.includes(getState().openetYearlySelectedYear)
+        ? getState().openetYearlySelectedYear
+        : years[years.length - 1];
+    data.selectedYear = selected;
+    data.highlightSeriesId = String(selected);
+    return data;
+  }
+
+  async function loadOpenetYearlyTimeseriesData() {
+    const options = getOpenetYearlyGraphOptions();
+    const data = await ensureGraphLoaders().loadGraphDataset('openet-yearly', { options });
+    if (!data) {
+      getGraph()?.hide();
+      syncGraphLayout();
+      return;
+    }
+    syncOpenetYearlySelection(data);
+    getGraph()?.setData(data);
+    syncGraphLayout();
+  }
+
   async function activateGraphItem(key, options = {}) {
-    if (getState().rapCumulativeMode && key !== 'climate-yearly') {
+    if (getState().rapCumulativeMode && !['climate-yearly', 'openet-yearly'].includes(key)) {
       return;
     }
     if (activeGraphLoad && activeGraphLoad.key === key && !options.force) {
@@ -125,7 +166,12 @@ export function createGraphController({
           return;
         }
         if (!keepFocus) {
-          setGraphFocus(data.source === OMNI || data.source === CLIMATE_YEARLY);
+          setGraphFocus(
+            data.source === OMNI || data.source === CLIMATE_YEARLY || data.source === OPENET_YEARLY
+          );
+        }
+        if (key === 'openet-yearly') {
+          syncOpenetYearlySelection(data);
         }
         getGraph()?.setData(data);
         if (data.source === CLIMATE_YEARLY && Array.isArray(data.years) && data.years.length) {
@@ -134,6 +180,13 @@ export function createGraphController({
           const selYear =
             data.selectedYear != null && Number.isFinite(data.selectedYear) ? data.selectedYear : maxYear;
           setValue('climateYearlySelectedYear', selYear);
+          yearSlider.setRange(minYear, maxYear, selYear);
+        } else if (data.source === OPENET_YEARLY && Array.isArray(data.seriesYears) && data.seriesYears.length) {
+          const minYear = Math.min(...data.seriesYears);
+          const maxYear = Math.max(...data.seriesYears);
+          const selYear =
+            data.selectedYear != null && Number.isFinite(data.selectedYear) ? data.selectedYear : maxYear;
+          setValue('openetYearlySelectedYear', selYear);
           yearSlider.setRange(minYear, maxYear, selYear);
         }
       } else {
@@ -334,6 +387,125 @@ export function createGraphController({
     details.appendChild(wrapper);
   }
 
+  function renderOpenetYearlyControls(details) {
+    const monthLabelsSafe = Array.isArray(monthLabels) && monthLabels.length === 12
+      ? monthLabels
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const openetMeta = getState().openetMetadata;
+    const datasetKeys = openetMeta && Array.isArray(openetMeta.datasetKeys) ? openetMeta.datasetKeys : [];
+    if (!datasetKeys.length) return;
+
+    let selectedDataset = getState().openetYearlySelectedDatasetKey;
+    if (!selectedDataset || !datasetKeys.includes(selectedDataset)) {
+      selectedDataset = datasetKeys.includes('ensemble') ? 'ensemble' : datasetKeys[0];
+      setValue('openetYearlySelectedDatasetKey', selectedDataset);
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'gl-graph__options gl-wepp-stat__options';
+
+    const datasetLabel = document.createElement('div');
+    datasetLabel.textContent = 'Dataset';
+    datasetLabel.style.fontSize = '0.9rem';
+    datasetLabel.style.color = 'var(--wc-color-text-muted)';
+    wrapper.appendChild(datasetLabel);
+
+    const datasetContainer = document.createElement('div');
+    datasetContainer.style.display = 'flex';
+    datasetContainer.style.flexDirection = 'column';
+    datasetContainer.style.gap = '0.35rem';
+
+    datasetKeys.forEach((key) => {
+      const label = document.createElement('label');
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '0.35rem';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'openet-yearly-dataset';
+      input.value = key;
+      input.checked = key === selectedDataset;
+      input.addEventListener('change', () => handleOpenetYearlyDatasetChange(key));
+      input.addEventListener('click', () => handleOpenetYearlyDatasetChange(key));
+      const span = document.createElement('span');
+      span.textContent = key;
+      label.appendChild(input);
+      label.appendChild(span);
+      datasetContainer.appendChild(label);
+    });
+
+    wrapper.appendChild(datasetContainer);
+
+    const modeLabel = document.createElement('div');
+    modeLabel.textContent = 'Year Mode';
+    modeLabel.style.fontSize = '0.9rem';
+    modeLabel.style.color = 'var(--wc-color-text-muted)';
+    wrapper.appendChild(modeLabel);
+
+    const modeContainer = document.createElement('div');
+    modeContainer.style.display = 'flex';
+    modeContainer.style.gap = '0.75rem';
+    const calendarLabel = document.createElement('label');
+    calendarLabel.style.display = 'flex';
+    calendarLabel.style.alignItems = 'center';
+    calendarLabel.style.gap = '0.35rem';
+    const calendarInput = document.createElement('input');
+    calendarInput.type = 'radio';
+    calendarInput.name = 'openet-year-mode';
+    calendarInput.value = 'calendar';
+    calendarInput.checked = !getState().openetYearlyWaterYear;
+    calendarInput.addEventListener('change', () => handleOpenetYearlyModeChange('calendar'));
+    calendarInput.addEventListener('click', () => handleOpenetYearlyModeChange('calendar'));
+    const calendarSpan = document.createElement('span');
+    calendarSpan.textContent = 'Calendar Year';
+    calendarLabel.appendChild(calendarInput);
+    calendarLabel.appendChild(calendarSpan);
+
+    const waterLabel = document.createElement('label');
+    waterLabel.style.display = 'flex';
+    waterLabel.style.alignItems = 'center';
+    waterLabel.style.gap = '0.35rem';
+    const waterInput = document.createElement('input');
+    waterInput.type = 'radio';
+    waterInput.name = 'openet-year-mode';
+    waterInput.value = 'water';
+    waterInput.checked = !!getState().openetYearlyWaterYear;
+    waterInput.addEventListener('change', () => handleOpenetYearlyModeChange('water'));
+    waterInput.addEventListener('click', () => handleOpenetYearlyModeChange('water'));
+    const waterSpan = document.createElement('span');
+    waterSpan.textContent = 'Water Year';
+    waterLabel.appendChild(waterInput);
+    waterLabel.appendChild(waterSpan);
+
+    modeContainer.appendChild(calendarLabel);
+    modeContainer.appendChild(waterLabel);
+    wrapper.appendChild(modeContainer);
+
+    const startField = document.createElement('div');
+    startField.className = 'gl-graph__field';
+    const startLabel = document.createElement('label');
+    startLabel.textContent = 'Water Year start month';
+    startLabel.style.fontSize = '0.9rem';
+    startLabel.style.color = 'var(--wc-color-text-muted)';
+    const startSelect = document.createElement('select');
+    startSelect.id = 'gl-openet-year-start-month';
+    for (let i = 1; i <= 12; i++) {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = monthLabelsSafe[i - 1] || `Month ${i}`;
+      startSelect.appendChild(opt);
+    }
+    const startVal = getState().openetYearlyStartMonth || 10;
+    startSelect.value = String(startVal);
+    startSelect.disabled = !getState().openetYearlyWaterYear;
+    startSelect.addEventListener('change', (e) => handleOpenetYearlyStartMonthChange(e.target.value));
+
+    startField.appendChild(startLabel);
+    startField.appendChild(startSelect);
+    wrapper.appendChild(startField);
+    details.appendChild(wrapper);
+  }
+
   function handleClimateModeChange(mode) {
     const waterYear = mode === 'water';
     const currentState = getState();
@@ -363,11 +535,54 @@ export function createGraphController({
     activateGraphItem('climate-yearly', { force: true, graphOptions: options, keepFocus: true });
   }
 
+  function handleOpenetYearlyDatasetChange(datasetKey) {
+    setValue('openetYearlySelectedDatasetKey', datasetKey);
+    ensureOpenetYearlySelected();
+    const options = getOpenetYearlyGraphOptions();
+    activateGraphItem('openet-yearly', { force: true, graphOptions: options, keepFocus: true });
+  }
+
+  function handleOpenetYearlyModeChange(mode) {
+    const waterYear = mode === 'water';
+    const currentState = getState();
+    let nextStart = currentState.openetYearlyStartMonth || 10;
+    if (!waterYear) {
+      nextStart = 1;
+    } else if (!nextStart || nextStart === 1) {
+      nextStart = 10;
+    }
+    setValue('openetYearlyWaterYear', waterYear);
+    setValue('openetYearlyStartMonth', nextStart);
+    ensureOpenetYearlySelected();
+    const select = document.getElementById('gl-openet-year-start-month');
+    if (select) {
+      select.disabled = !waterYear;
+      select.value = String(nextStart);
+    }
+    const options = getOpenetYearlyGraphOptions();
+    activateGraphItem('openet-yearly', { force: true, graphOptions: options, keepFocus: true });
+  }
+
+  function handleOpenetYearlyStartMonthChange(val) {
+    const month = Math.min(12, Math.max(1, Number(val) || 10));
+    setValue('openetYearlyStartMonth', month);
+    ensureOpenetYearlySelected();
+    const options = getOpenetYearlyGraphOptions();
+    activateGraphItem('openet-yearly', { force: true, graphOptions: options, keepFocus: true });
+  }
+
   function renderGraphList() {
     if (!graphListEl) return;
     graphListEl.innerHTML = '';
     let rendered = 0;
     graphDefs.forEach((group, idx) => {
+      if (group.key === 'openet-yearly') {
+        const openetMeta = getState().openetMetadata;
+        const datasetKeys = openetMeta && Array.isArray(openetMeta.datasetKeys) ? openetMeta.datasetKeys : [];
+        if (!datasetKeys.length) {
+          return;
+        }
+      }
       const details = document.createElement('details');
       details.className = 'gl-layer-details';
       const hasActive = group.items.some((i) => i.key === getState().activeGraphKey);
@@ -399,11 +614,13 @@ export function createGraphController({
             graphOptions = getCumulativeGraphOptions();
           } else if (item.key === 'climate-yearly') {
             graphOptions = getClimateGraphOptions();
+          } else if (item.key === 'openet-yearly') {
+            graphOptions = getOpenetYearlyGraphOptions();
           }
           await activateGraphItem(item.key, {
             graphOptions,
-            force: item.key === 'climate-yearly',
-            keepFocus: item.key === 'climate-yearly',
+            force: item.key === 'climate-yearly' || item.key === 'openet-yearly',
+            keepFocus: item.key === 'climate-yearly' || item.key === 'openet-yearly',
           });
         });
         const label = document.createElement('label');
@@ -421,6 +638,9 @@ export function createGraphController({
       }
       if (group.key === 'climate') {
         renderClimateControls(details);
+      }
+      if (group.key === 'openet-yearly') {
+        renderOpenetYearlyControls(details);
       }
 
       graphListEl.appendChild(details);
@@ -453,11 +673,13 @@ export function createGraphController({
           ? getCumulativeGraphOptions()
           : getState().activeGraphKey === 'climate-yearly'
             ? getClimateGraphOptions()
+            : getState().activeGraphKey === 'openet-yearly'
+              ? getOpenetYearlyGraphOptions()
             : undefined;
       await activateGraphItem(getState().activeGraphKey, {
         keepFocus: getState().graphFocus,
         graphOptions: options,
-        force: getState().activeGraphKey === 'climate-yearly',
+        force: ['climate-yearly', 'openet-yearly'].includes(getState().activeGraphKey),
       });
     }
   }
@@ -477,9 +699,11 @@ export function createGraphController({
     renderGraphList,
     getClimateGraphOptions,
     getCumulativeGraphOptions,
+    getOpenetYearlyGraphOptions,
     loadRapTimeseriesData,
     loadWeppYearlyTimeseriesData,
     loadOpenetTimeseriesData,
+    loadOpenetYearlyTimeseriesData,
     activateGraphItem,
     handleGraphPanelToggle,
     bindModeButtons,

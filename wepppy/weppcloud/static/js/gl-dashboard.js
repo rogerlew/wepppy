@@ -137,7 +137,7 @@
     rdbuColor = colorsModule.rdbuColor,
   } = colorScales;
 
-  const { getState, setValue, setState, initState } = stateModule;
+  const { getState, setValue, setState, initState, subscribe } = stateModule;
   const { createLayerUtils } = layerUtilsModule;
   const { createMapController } = mapControllerModule;
   const { createLayerRenderer } = layerRendererModule;
@@ -214,6 +214,10 @@
     'weppEventSelectedDate',
     'openetSelectedMonthIndex',
     'openetSelectedDatasetKey',
+    'openetYearlySelectedDatasetKey',
+    'openetYearlySelectedYear',
+    'openetYearlyWaterYear',
+    'openetYearlyStartMonth',
   ]);
   window.glDashboardState = state;
 
@@ -230,6 +234,7 @@
   let loadRapTimeseriesData = async () => {};
   let loadWeppYearlyTimeseriesData = async () => {};
   let loadOpenetTimeseriesData = async () => {};
+  let loadOpenetYearlyTimeseriesData = async () => {};
   let activateGraphItem = async () => {};
   let getClimateGraphOptions = () => ({});
 
@@ -627,6 +632,7 @@
     loadRapTimeseriesData: graphLoadRapTimeseriesData,
     loadWeppYearlyTimeseriesData: graphLoadWeppYearlyTimeseriesData,
     loadOpenetTimeseriesData: graphLoadOpenetTimeseriesData,
+    loadOpenetYearlyTimeseriesData: graphLoadOpenetYearlyTimeseriesData,
     activateGraphItem: graphActivateGraphItem,
     handleGraphPanelToggle: graphHandleGraphPanelToggle,
     bindModeButtons,
@@ -636,6 +642,7 @@
   loadRapTimeseriesData = graphLoadRapTimeseriesData;
   loadWeppYearlyTimeseriesData = graphLoadWeppYearlyTimeseriesData;
   loadOpenetTimeseriesData = graphLoadOpenetTimeseriesData;
+  loadOpenetYearlyTimeseriesData = graphLoadOpenetYearlyTimeseriesData;
   activateGraphItem = graphActivateGraphItem;
   handleGraphPanelToggle = graphHandleGraphPanelToggle;
 
@@ -709,6 +716,11 @@
   }
 
   bindModeButtons();
+  if (typeof subscribe === 'function') {
+    subscribe(['openetMetadata'], () => {
+      renderGraphList();
+    });
+  }
 
   const layerRenderer = createLayerRenderer({
     getState,
@@ -847,6 +859,12 @@
       if (timeseriesGraph._source === GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY) {
         timeseriesGraph.setCurrentYear(year);
       }
+    }
+    const activeOpenetYearly =
+      getState().activeGraphKey === 'openet-yearly' || timeseriesGraph._source === GRAPH_CONTEXT_KEYS.OPENET_YEARLY;
+    if (activeOpenetYearly) {
+      setValue('openetYearlySelectedYear', year);
+      await loadOpenetYearlyTimeseriesData();
     }
     if (needsApply) {
       applyLayers();
