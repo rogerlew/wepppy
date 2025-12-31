@@ -633,7 +633,7 @@ export function createWeppDataManager({
           }
         }
       } else if (mode === 'event_Saturation') {
-        const parquetPath = 'wepp/output/interchange/soil_pw0.parquet';
+        const parquetPath = 'wepp/output/interchange/H.soil.parquet';
         const valueExpression = 'AVG(soil.Saturation) * 100';
         filters = [
           { column: 'soil.year', op: '=', value: year },
@@ -751,7 +751,7 @@ export function createWeppDataManager({
         };
         dataResult = await postQueryEngine(dataPayload);
       } else if (mode === 'event_Saturation') {
-        const parquetPath = 'wepp/output/interchange/soil_pw0.parquet';
+        const parquetPath = 'wepp/output/interchange/H.soil.parquet';
         const valueExpression = 'AVG(soil.Saturation) * 100';
         const filters = [
           { column: 'soil.year', op: '=', value: year },

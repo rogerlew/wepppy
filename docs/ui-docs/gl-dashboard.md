@@ -914,7 +914,7 @@ function buildWeppLayer(summary, mode, colorScale, ranges) {
 - Yearly channel overlays are driven by the Year slider (`weppYearlySelectedYear`).
 
 #### WEPP Event Overlays
-**Sources:** `wepp/output/interchange/H.wat.parquet`, `wepp/output/interchange/H.pass.parquet`, `wepp/output/interchange/soil_pw0.parquet`  
+**Sources:** `wepp/output/interchange/H.wat.parquet`, `wepp/output/interchange/H.pass.parquet`, `wepp/output/interchange/H.soil.parquet`  
 **Date filter:** `year`, `month`, `day_of_month` from `weppEventSelectedDate`  
 **Metrics:** P (mm), Q (mm), ET (mm), Saturation (%), Peak Runoff Rate (m³/s), Total Detachment (kg)  
 **Aggregation:** P/Q/ET/tdet = SUM, peakro = MAX, Saturation = AVG(Saturation) * 100 (fixed 0-100 scale)
