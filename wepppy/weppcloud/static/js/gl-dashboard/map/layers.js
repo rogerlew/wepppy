@@ -419,7 +419,8 @@ export function createLayerUtils({
   }
 
   function buildChannelsLayer(state) {
-    if (!state.channelsVisible || !state.channelsGeoJson) return [];
+    const activeChannelOrder = pickActive(state.channelsLayers || []);
+    if (!state.channelsVisible || !state.channelsGeoJson || !activeChannelOrder) return [];
     return [
       new deck.GeoJsonLayer({
         id: 'channels-pass2',
@@ -1272,6 +1273,7 @@ export function createLayerUtils({
       Landuse: state.landuseLayers,
       Soils: state.soilsLayers,
       Watershed: state.hillslopesLayers,
+      Channels: state.channelsLayers,
       RAP: state.rapLayers,
       WEPP: state.weppLayers,
       'WEPP Channels': state.weppChannelLayers,
@@ -1323,7 +1325,10 @@ export function createLayerUtils({
       if (watar) active.push(watar);
     }
     if (state.channelsVisible && state.channelsGeoJson) {
-      active.push({ key: 'channels', label: 'Channels', category: 'Channels' });
+      const channelsLayer = pickActiveLayerForLegend('Channels', state);
+      if (channelsLayer) {
+        active.push(channelsLayer);
+      }
     }
     const weppChannels = pickActiveLayerForLegend('WEPP Channels', state);
     if (weppChannels && state.channelsVisible) {

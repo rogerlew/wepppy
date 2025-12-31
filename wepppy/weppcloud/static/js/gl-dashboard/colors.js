@@ -15,7 +15,7 @@ const MODE_COLORMAP = {
   bd: 'viridis',
   soil_depth: 'viridis',
   // WEPP Event
-  event_ET: 'viridis',
+  event_ET: 'winter',
   // OpenET
   openet_et: 'winter',
 };

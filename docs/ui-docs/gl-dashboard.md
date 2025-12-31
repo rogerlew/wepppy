@@ -34,6 +34,7 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 **Key Features:**
 - **Basemap Selection:** Google Terrain, Google Satellite, OpenStreetMap
 - **Layer Detection:** Automatic discovery of available datasets (landuse/nlcd.tif, soils/ssurgo.tif, WEPP outputs, RAP parquet files, OpenET parquet)
+- **Channels Support:** Pass 2 channel order overlay (color by order) with optional labels, plus WEPP channel discharge/soil loss overlays (all-years + yearly)
 - **Stacked Layout:** Map viewport above a collapsible graph panel; graph focus hides the map to give the canvas full height
 - **Year Slider:** Interactive timeline control for RAP, WEPP Yearly, Climate Yearly, and OpenET Yearly
 - **Month Slider:** OpenET-only month index slider (play/pause) that hides the year slider
@@ -136,6 +137,8 @@ gl-dashboard.js (main)
   currentViewState: { longitude, latitude, zoom, pitch, bearing },
   subcatchmentsVisible: true,
   subcatchmentLabelsVisible: false,
+  channelsVisible: true,
+  channelLabelsVisible: false,
   
   // Graph state
   graphMode: 'minimized' | 'split' | 'full',
@@ -157,12 +160,24 @@ gl-dashboard.js (main)
   rapSelectedYear: 2023,
   rapCumulativeMode: false,
   rapLayers: [{ key, label, band, visible, ... }],
+
+  // Channels state
+  channelsGeoJson: FeatureCollection,
+  channelLabelsData: [{ position, text }],
+  channelsLayers: [{ key, label, mode, visible, ... }], // Channel Order
+  weppChannelSummary: { [topaz_id]: { channel_discharge_volume, channel_soil_loss, ... } },
+  weppChannelRanges: { channel_discharge_volume: { min, max }, channel_soil_loss: { min, max } },
+  weppChannelLayers: [{ key, label, mode, visible, ... }],
   
   // WEPP Yearly state
   weppYearlyMetadata: { years: [...], minYear, maxYear },
   weppYearlySelectedYear: 2023,
   weppYearlySummary: { [topaz_id]: { runoff, sedyld, ... } },
   weppYearlyLayers: [{ key, label, mode, visible, ... }],
+  weppYearlyChannelSummary: { [topaz_id]: { channel_discharge_volume, channel_soil_loss, ... } },
+  weppYearlyChannelRanges: { channel_discharge_volume: { min, max }, channel_soil_loss: { min, max } },
+  weppYearlyChannelLayers: [{ key, label, mode, visible, ... }],
+  weppYearlyChannelCache: { [year]: summary },
 
   // WEPP Event state
   weppEventMetadata: { startDate, endDate },
@@ -196,6 +211,9 @@ gl-dashboard.js (main)
 - `detectSoilsOverlays()`: Query soils summary
 - `detectHillslopesOverlays()`: Query hillslope summary (area, aspect, slope)
 - `detectWeppOverlays()`: Query WEPP summary (runoff, sediment)
+- `detectChannelsOverlays()`: Load channels GeoJSON + label positions (pass 2)
+- `detectWeppChannelOverlays()`: Query WEPP channel summary (all-years)
+- `detectWeppYearlyChannelOverlays()`: Query WEPP yearly channel metadata + summaries
 - `detectWeppYearlyOverlays()`: Query WEPP yearly metadata and years
 - `detectWeppEventOverlays()`: Query WEPP event metadata and dates
 - `detectRapOverlays()`: Query RAP metadata and bands
@@ -227,14 +245,17 @@ gl-dashboard.js (main)
 - `buildRapLayer(summary, band, colorScale, ranges)`: RAP band overlay
 - `buildOpenetLayers(state)`: OpenET overlay (monthly ET)
 - `buildWatarLayer(summary, mode, colorScale, ranges)`: WATAR overlay
+- `buildChannelsLayer(state)`: Channel Order overlay (pass 2)
+- `buildWeppChannelLayers(state)`: WEPP channel overlays (all-years)
+- `buildWeppYearlyChannelLayers(state)`: WEPP yearly channel overlays
 - `buildRasterLayer(layerDef)`: Bitmap layer from GeoTIFF
 
 **Layer Ordering (bottom to top):**
 1. Basemap tiles (Google Terrain / Satellite / ESRI / OSM / OTM)
-2. Raster overlays (landuse GeoTIFF, soils GeoTIFF, SBS map)
-3. Subcatchments GeoJSON (boundaries)
-4. Vector overlays (landuse, soils, WEPP, RAP, OpenET, WATAR summaries)
-5. Subcatchment labels (TextLayer with topaz_id)
+2. Vector overlays (landuse, soils, WEPP, RAP, OpenET, WATAR summaries)
+3. Raster overlays (landuse GeoTIFF, soils GeoTIFF, SBS map)
+4. Channels (Channel Order, WEPP channels, WEPP yearly channels)
+5. Labels (subcatchment labels, channel labels)
 
 #### `graphs/timeseries-graph.js`
 **Purpose:** Canvas-based timeseries renderer (line, boxplot, bars)  
@@ -349,6 +370,14 @@ gl-dashboard.js (main)
 **Element:** `#gl-subcatchment-labels-toggle` (checkbox)  
 **Handler:** `toggleSubcatchmentLabels(visible)` → renders TextLayer with topaz_id centroids
 
+#### Channels Toggle
+**Element:** `#gl-channels-toggle` (checkbox)  
+**Handler:** `toggleChannels(visible)` → shows/hides channel order + WEPP channel overlays
+
+#### Channel Labels Toggle
+**Element:** `#gl-channel-labels-toggle` (checkbox)  
+**Handler:** `toggleChannelLabels(visible)` → renders TextLayer with channel order labels
+
 #### Layer List
 **Element:** `#gl-layer-list`  
 **Structure:**
@@ -360,6 +389,35 @@ gl-dashboard.js (main)
       <li class="gl-layer-item">
         <input type="radio" name="subcatchment-overlay" id="layer-Landuse-dom" />
         <label for="layer-Landuse-dom">Dominant Cover</label>
+      </li>
+    </ul>
+  </details>
+  <details class="gl-layer-details">
+    <summary>Channels</summary>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="wepp-channel-overlay" id="layer-Channels-channel-order" />
+        <label for="layer-Channels-channel-order">Channel Order</label>
+      </li>
+    </ul>
+  </details>
+  <details class="gl-layer-details">
+    <summary>WEPP</summary>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="subcatchment-overlay" id="layer-WEPP-runoff" />
+        <label for="layer-WEPP-runoff">Runoff (mm)</label>
+      </li>
+    </ul>
+    <div class="gl-layer-subheading">Channels</div>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="wepp-channel-overlay" id="layer-WEPP-Channel-wepp-channel-discharge" />
+        <label for="layer-WEPP-Channel-wepp-channel-discharge">Discharge Volume (m^3)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="radio" name="wepp-channel-overlay" id="layer-WEPP-Channel-wepp-channel-soil-loss" />
+        <label for="layer-WEPP-Channel-wepp-channel-soil-loss">Soil Loss (kg)</label>
       </li>
     </ul>
   </details>
@@ -400,6 +458,17 @@ gl-dashboard.js (main)
         <label for="layer-WEPP-Yearly-sediment_yield">Sediment Yield (t/ha)</label>
       </li>
     </ul>
+    <div class="gl-layer-subheading">Channels</div>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="wepp-channel-overlay" id="layer-WEPP-Yearly-Channel-wepp-yearly-channel-discharge" />
+        <label for="layer-WEPP-Yearly-Channel-wepp-yearly-channel-discharge">Discharge Volume (m^3)</label>
+      </li>
+      <li class="gl-layer-item">
+        <input type="radio" name="wepp-channel-overlay" id="layer-WEPP-Yearly-Channel-wepp-yearly-channel-soil-loss" />
+        <label for="layer-WEPP-Yearly-Channel-wepp-yearly-channel-soil-loss">Soil Loss (kg)</label>
+      </li>
+    </ul>
   </details>
   <details class="gl-layer-details">
     <summary>RAP</summary>
@@ -426,6 +495,7 @@ gl-dashboard.js (main)
 </ul>
 ```
 Subcatchment overlays render as radios (single selection across categories); raster entries render as checkboxes.
+Channel overlays share their own radio group (`wepp-channel-overlay`) across Channel Order, WEPP channels, and WEPP Yearly channels; they remain independent from the subcatchment overlay group.
 
 **Handler Pattern:**
 1. Toggle checkbox/radio → update `layer.visible` flag in state
@@ -792,6 +862,8 @@ function applyColormap(rasterData, colorMap) {
 }
 ```
 
+**Colormap Note:** Water measures default to the winter colormap (cool gradient) unless explicitly overridden.
+
 **Rendering Function:**
 ```javascript
 function buildWeppLayer(summary, mode, colorScale, ranges) {
@@ -821,6 +893,25 @@ function buildWeppLayer(summary, mode, colorScale, ranges) {
   });
 }
 ```
+
+#### Channels (Pass 2)
+**Source:** `resources/channels.json`  
+**Rendering:** deck.gl GeoJsonLayer (lines + fills)  
+**Colormap:** Order-based categorical palette (Order 1..7)
+
+**Notes:**
+- Channel Order is its own radio option under the Channels section.
+- Controlled by the Channels toggle (`#gl-channels-toggle`).
+- Legend title shows the active channel layer label (Channel Order).
+
+#### WEPP Channel Overlays
+**Source:** `wepp/output/interchange/loss_pw0.all_years.chn.parquet`  
+**Metrics:** `channel_discharge_volume`, `channel_soil_loss`  
+**Geometry:** `channelsGeoJson` (pass 2 channels)
+
+**Notes:**
+- Channel overlays use the same channel radio group as Channel Order.
+- Yearly channel overlays are driven by the Year slider (`weppYearlySelectedYear`).
 
 #### WEPP Event Overlays
 **Sources:** `wepp/output/interchange/H.wat.parquet`, `wepp/output/interchange/H.pass.parquet`, `wepp/output/interchange/soil_pw0.parquet`  
@@ -873,7 +964,7 @@ function computeComparisonDiffRanges() {
 **Steps:**
 1. Collect all visible layers from state
 2. For each layer type, call corresponding builder (buildWeppLayer, buildRapLayer, etc.)
-3. Order layers (basemap → rasters → subcatchments → overlays → labels)
+3. Order layers (basemap → vector overlays → rasters → channels → labels)
 4. Pass array to deck.gl controller
 5. Update legends panel
 
@@ -889,6 +980,10 @@ function computeComparisonDiffRanges() {
 - Landuse, Soils, Hillslopes, RAP, OpenET, WEPP, WEPP Yearly, WEPP Event, WATAR.
 - RAP cumulative mode XOR individual bands (enforced via radio within RAP group).
 - Raster layers (NLCD, soils GeoTIFF, SBS) remain independent checkboxes.
+
+**Channel overlays share a dedicated radio group (one visible at a time):**
+- Channel Order, WEPP Channels (Discharge Volume/Soil Loss), WEPP Yearly Channels (Discharge Volume/Soil Loss).
+- Channel overlays are gated by the Channels toggle.
 
 **Implementation:**
 ```javascript

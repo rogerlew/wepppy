@@ -86,6 +86,19 @@ export function createLayerRenderer({
     event_tdet: 'kg',
   };
 
+  const CHANNEL_GROUP_KEYS = ['channelsLayers', 'weppChannelLayers', 'weppYearlyChannelLayers'];
+
+  function resetChannelGroups(exceptKey) {
+    CHANNEL_GROUP_KEYS.forEach((key) => {
+      if (key === exceptKey) return;
+      const overlays = (getState()[key] || []).map((overlay) => ({
+        ...overlay,
+        visible: false,
+      }));
+      setValue(key, overlays);
+    });
+  }
+
   function renderRapSection(details, section) {
     const state = getState();
     const itemList = document.createElement('ul');
@@ -180,21 +193,16 @@ export function createLayerRenderer({
 
   function renderWeppEventSection(details, section) {
     const state = getState();
-    const itemList = document.createElement('ul');
-    itemList.className = 'gl-layer-items';
-
-    // Date input row
-    const dateLi = document.createElement('li');
-    dateLi.className = 'gl-layer-item';
-    dateLi.style.cssText = 'flex-direction: column; align-items: flex-start; gap: 0.25rem;';
+    // Date input block
+    const dateBlock = document.createElement('div');
+    dateBlock.className = 'gl-wepp-event-date-row';
     const dateLabel = document.createElement('label');
     dateLabel.textContent = 'Event Date:';
-    dateLabel.style.cssText = 'font-size: 0.85rem; color: #8fa0c2;';
+    dateLabel.className = 'gl-wepp-event-date-label';
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
     dateInput.id = 'gl-wepp-event-date';
-    dateInput.style.cssText =
-      'width: 100%; padding: 0.25rem; background: #1f2c44; border: 1px solid #3f5070; border-radius: 4px; color: #d0d7e8; font-size: 0.85rem;';
+    dateInput.className = 'gl-wepp-event-date-input gl-custom-select__trigger';
     if (state.weppEventSelectedDate) {
       dateInput.value = state.weppEventSelectedDate;
     }
@@ -212,14 +220,17 @@ export function createLayerRenderer({
         applyLayers();
       }
     });
-    dateLi.appendChild(dateLabel);
-    dateLi.appendChild(dateInput);
-    itemList.appendChild(dateLi);
+    dateBlock.appendChild(dateLabel);
+    dateBlock.appendChild(dateInput);
+    details.appendChild(dateBlock);
 
     // Separator
-    const separatorLi = document.createElement('li');
-    separatorLi.style.cssText = 'border-top: 1px solid #1f2c44; margin: 0.5rem 0; padding: 0;';
-    itemList.appendChild(separatorLi);
+    const separator = document.createElement('div');
+    separator.className = 'gl-wepp-event-separator';
+    details.appendChild(separator);
+
+    const itemList = document.createElement('ul');
+    itemList.className = 'gl-layer-items';
 
     // Radio options for each metric
     section.items.forEach((layer) => {
@@ -266,6 +277,7 @@ export function createLayerRenderer({
       landuseLayers = [],
       soilsLayers = [],
       hillslopesLayers = [],
+      channelsLayers = [],
       weppLayers = [],
       weppChannelLayers = [],
       weppYearlyLayers = [],
@@ -298,6 +310,15 @@ export function createLayerRenderer({
     }
     if (hillslopesItems.length) {
       subcatchmentSections.push({ title: 'Hillslopes', items: hillslopesItems, isSubcatchment: true, stateKey: 'hillslopesLayers' });
+    }
+    if (channelsLayers.length) {
+      subcatchmentSections.push({
+        title: 'Channels',
+        items: channelsLayers,
+        isChannels: true,
+        radioGroupName: 'wepp-channel-overlay',
+        stateKey: 'channelsLayers',
+      });
     }
     if (rapLayers.length) {
       subcatchmentSections.push({ title: 'RAP', items: rapLayers, isSubcatchment: true, isRap: true, stateKey: 'rapLayers' });
@@ -414,9 +435,15 @@ export function createLayerRenderer({
         li.className = 'gl-layer-item';
         const input = document.createElement('input');
         const isRaster = layer.isRaster === true;
-        input.type = section.isSubcatchment && !isRaster ? 'radio' : 'checkbox';
+        const hasRadioGroup = !!(section.radioGroupName && !isRaster);
         if (section.isSubcatchment && !isRaster) {
+          input.type = 'radio';
           input.name = 'subcatchment-overlay';
+        } else if (hasRadioGroup) {
+          input.type = 'radio';
+          input.name = section.radioGroupName;
+        } else {
+          input.type = 'checkbox';
         }
         input.checked = layer.visible;
         const idPrefix = section.idPrefix || section.title;
@@ -451,6 +478,22 @@ export function createLayerRenderer({
             if (section.isOpenet && getState().activeGraphKey === 'wepp-yearly') {
               setValue('activeGraphKey', null);
             }
+          } else if (hasRadioGroup) {
+            if (!input.checked) return;
+            if (stateKey) {
+              const overlays = (getState()[stateKey] || []).map((overlay) => ({
+                ...overlay,
+                visible: overlay.key === layer.key,
+              }));
+              setValue(stateKey, overlays);
+            } else {
+              layer.visible = true;
+            }
+            if (section.isChannels) {
+              setValue('channelsVisible', true);
+              resetChannelGroups(stateKey);
+            }
+            input.checked = true;
           } else {
             const target = layer.rasterRef || layer;
             target.visible = input.checked;
@@ -523,11 +566,7 @@ export function createLayerRenderer({
             } else {
               layer.visible = true;
             }
-            const yearlyOverlays = (getState().weppYearlyChannelLayers || []).map((overlay) => ({
-              ...overlay,
-              visible: false,
-            }));
-            setValue('weppYearlyChannelLayers', yearlyOverlays);
+            resetChannelGroups(channelStateKey);
             input.checked = true;
             if (typeof refreshWeppStatisticData === 'function') {
               await refreshWeppStatisticData();
@@ -578,11 +617,7 @@ export function createLayerRenderer({
             } else {
               layer.visible = true;
             }
-            const weppOverlays = (getState().weppChannelLayers || []).map((overlay) => ({
-              ...overlay,
-              visible: false,
-            }));
-            setValue('weppChannelLayers', weppOverlays);
+            resetChannelGroups(channelStateKey);
             input.checked = true;
             if (typeof activateWeppYearlyChannelLayer === 'function') {
               await activateWeppYearlyChannelLayer();

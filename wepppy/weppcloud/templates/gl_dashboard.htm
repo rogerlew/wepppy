@@ -32,6 +32,8 @@
     display: grid;
     gap: 0.35rem;
     color: var(--wc-color-text);
+    width: 100%;
+    min-width: 0;
   }
   .gl-layer-item {
     display: flex;
@@ -45,6 +47,8 @@
     margin: 0;
     border-bottom: 1px solid var(--wc-color-border);
     padding-bottom: 0.5rem;
+    width: 100%;
+    min-width: 0;
   }
   .gl-layer-details:last-child {
     border-bottom: none;
@@ -81,6 +85,37 @@
     display: grid;
     gap: 0.25rem;
   }
+  .gl-wepp-event-date-row {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.35rem 0 0.5rem;
+    width: 100%;
+  }
+  .gl-wepp-event-date-label {
+    font-size: 0.85rem;
+    color: var(--wc-color-text-muted);
+  }
+  .gl-wepp-event-date-input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: block;
+    cursor: text;
+  }
+  .gl-wepp-event-date-input:hover {
+    border-color: var(--wc-color-primary);
+  }
+  .gl-wepp-event-date-input:focus {
+    outline: none;
+    border-color: var(--wc-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--wc-color-primary) 25%, transparent);
+  }
+  .gl-wepp-event-separator {
+    border-top: 1px solid var(--wc-color-border);
+    margin: 0.5rem 0;
+    padding: 0;
+    width: 100%;
+  }
   /* Custom dropdown using theme variables */
   .gl-custom-select {
     position: relative;
@@ -112,6 +147,10 @@
     outline: none;
     border-color: var(--wc-color-primary);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--wc-color-primary) 25%, transparent);
+  }
+  .gl-wepp-event-date-input.gl-custom-select__trigger {
+    display: block;
+    cursor: text;
   }
   .gl-custom-select__options {
     position: absolute;

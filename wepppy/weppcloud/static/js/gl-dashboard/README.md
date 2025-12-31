@@ -38,6 +38,8 @@
 - Scenario selector only affects map overlays (landuse/soils/WEPP layers); graphs use their own scenario list and loaders.
 - Base scenario labels: default to “Undisturbed”; switch to “Burned” when an SBS map is detected. UI (scenario display/select + base graph series) reflects this label.
 - Omni scenarios use the same watershed delineation as base (subcatchments/channels/topaz + WEPP IDs); scenario switches reuse existing geometry instead of redrawing hillslopes.
+- Channel overlays (Channel Order + WEPP channels + WEPP Yearly channels) share the `wepp-channel-overlay` radio group and must clear each other.
+- Channel layers require `channelsVisible`; channel labels require both `channelsVisible` + `channelLabelsVisible`.
 
 ## Module Contracts (injection signatures)
 - `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`

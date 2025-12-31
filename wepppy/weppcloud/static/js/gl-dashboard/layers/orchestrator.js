@@ -118,9 +118,30 @@ export function createDetectionController({
   async function detectChannelsOverlays() {
     const result = await detectorModule.detectChannelsOverlays({ buildBaseUrl });
     if (result) {
+      const existing = getState().channelsLayers || [];
+      const hasWeppChannelSelection = (getState().weppChannelLayers || []).some((l) => l && l.visible);
+      const hasWeppYearlyChannelSelection = (getState().weppYearlyChannelLayers || []).some((l) => l && l.visible);
+      const nextLayers = [
+        {
+          key: 'channel-order',
+          label: 'Channel Order',
+          path: 'resources/channels.json',
+          mode: 'channel_order',
+          visible: false,
+        },
+      ];
+      const prevVisible = existing.find((l) => l && l.visible);
+      if (prevVisible && nextLayers.some((l) => l && l.key === prevVisible.key)) {
+        for (const layer of nextLayers) {
+          layer.visible = layer.key === prevVisible.key;
+        }
+      } else if (getState().channelsVisible && !(hasWeppChannelSelection || hasWeppYearlyChannelSelection)) {
+        nextLayers[0].visible = true;
+      }
       setState({
         channelsGeoJson: result.channelsGeoJson,
         channelLabelsData: result.channelLabelsData || [],
+        channelsLayers: nextLayers,
       });
       updateLayerList();
       applyLayers();

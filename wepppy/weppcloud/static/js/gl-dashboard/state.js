@@ -38,6 +38,7 @@ const defaultState = {
   landuseLayers: [],
   soilsLayers: [],
   hillslopesLayers: [],
+  channelsLayers: [],
   watarLayers: [],
   weppLayers: [],
   weppChannelLayers: [],

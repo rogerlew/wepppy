@@ -215,7 +215,7 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     await expect(channelsToggle).toBeChecked();
 
     await expect.poll(async () => getDeckLayerIds(page)).toContain('channels-pass2');
-    const channelLegendTitle = page.locator('#gl-legends-content .gl-legend-section__title', { hasText: 'Channels' });
+    const channelLegendTitle = page.locator('#gl-legends-content .gl-legend-section__title', { hasText: 'Channel Order' });
     await expect(channelLegendTitle).toBeVisible({ timeout: 15000 });
 
     await channelsToggle.uncheck({ force: true });
@@ -333,6 +333,62 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     await expect(yearlyDischargeInput).not.toBeChecked();
   });
 
+  test('Channel Order radio stays exclusive with WEPP channel overlays', async ({ page }) => {
+    await openDashboard(page);
+    const hasChannels = await waitForChannels(page);
+    if (!hasChannels) {
+      test.skip('Channels data not available in this run');
+    }
+
+    const hasWeppChannels = await waitForWeppChannelLayers(page);
+    if (!hasWeppChannels) {
+      test.skip('WEPP channel overlays not available in this run');
+    }
+
+    await expandSection(page, 'Channels');
+    const channelOrder = page.locator('#layer-Channels-channel-order');
+    await expect(channelOrder).toBeVisible({ timeout: 15000 });
+    await channelOrder.check({ force: true });
+    await expect(channelOrder).toBeChecked();
+
+    await expandSection(page, 'WEPP');
+    const weppDischarge = page.locator('label[for^="layer-WEPP-Channel-"]', { hasText: 'Discharge Volume (m^3)' });
+    await expect(weppDischarge).toBeVisible({ timeout: 15000 });
+    await weppDischarge.click({ force: true });
+
+    await expect(channelOrder).not.toBeChecked();
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-channel-wepp-channel-discharge');
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('channels-pass2');
+
+    await expandSection(page, 'Channels');
+    await channelOrder.check({ force: true });
+    await expect(channelOrder).toBeChecked();
+
+    const weppDischargeInput = page.locator('#layer-WEPP-Channel-wepp-channel-discharge');
+    await expect(weppDischargeInput).not.toBeChecked();
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('channels-pass2');
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('wepp-channel-wepp-channel-discharge');
+
+    const hasWeppYearlyChannels = await waitForWeppYearlyChannelLayers(page);
+    if (!hasWeppYearlyChannels) {
+      return;
+    }
+
+    await expandSection(page, 'WEPP Yearly');
+    const yearlyDischarge = page.locator('label[for^="layer-WEPP-Yearly-Channel-"]', { hasText: 'Discharge Volume (m^3)' });
+    await expect(yearlyDischarge).toBeVisible({ timeout: 15000 });
+    await yearlyDischarge.click({ force: true });
+
+    await expect(channelOrder).not.toBeChecked();
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-yearly-channel-wepp-yearly-channel-discharge');
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('channels-pass2');
+
+    await expandSection(page, 'Channels');
+    await channelOrder.check({ force: true });
+    const yearlyDischargeInput = page.locator('#layer-WEPP-Yearly-Channel-wepp-yearly-channel-discharge');
+    await expect(yearlyDischargeInput).not.toBeChecked();
+  });
+
   test('RAP cumulative stays selected and panel remains open', async ({ page }) => {
     await openDashboard(page);
     const rapSummary = page.locator('summary.gl-layer-group', { hasText: 'RAP' });
@@ -394,6 +450,55 @@ test.describe('gl-dashboard layer detection and wiring', () => {
       const ids = await getDeckLayerIds(page);
       return ids.some((id) => typeof id === 'string' && id.includes('wepp-event'));
     }).toBeTruthy();
+  });
+
+  test('Sidebar controls share the same width', async ({ page }) => {
+    await openDashboard(page);
+    const basemapSelect = page.locator('#gl-basemap-select');
+    await expect(basemapSelect).toBeVisible({ timeout: 15000 });
+
+    const weppEventSummary = page.locator('summary.gl-layer-group', { hasText: 'WEPP Event' });
+    if ((await weppEventSummary.count()) === 0) {
+      test.skip('WEPP Event section not present in this run');
+    }
+    await expandSection(page, 'WEPP Event');
+
+    const dateInput = page.locator('#gl-wepp-event-date');
+    if ((await dateInput.count()) === 0) {
+      test.skip('WEPP Event date input not available in this run');
+    }
+    await expect(dateInput).toBeVisible({ timeout: 15000 });
+
+    const climateSummary = page.locator('summary.gl-layer-group', { hasText: 'Climate Yearly' });
+    if ((await climateSummary.count()) === 0) {
+      test.skip('Climate Yearly graph section not present in this run');
+    }
+    await expandSection(page, 'Climate Yearly');
+
+    const climateSelect = page.locator('#gl-climate-start-month');
+    if ((await climateSelect.count()) === 0) {
+      test.skip('Climate start month select not available in this run');
+    }
+    await expect(climateSelect).toBeVisible({ timeout: 15000 });
+
+    const widths = await page.evaluate(() => {
+      const basemap = document.getElementById('gl-basemap-select');
+      const date = document.getElementById('gl-wepp-event-date');
+      const climate = document.getElementById('gl-climate-start-month');
+      if (!basemap || !date || !climate) return null;
+      return {
+        basemap: basemap.getBoundingClientRect().width,
+        date: date.getBoundingClientRect().width,
+        climate: climate.getBoundingClientRect().width,
+      };
+    });
+
+    if (!widths) {
+      test.skip('Width comparison controls missing');
+    }
+
+    expect(Math.abs(widths.date - widths.basemap)).toBeLessThanOrEqual(1);
+    expect(Math.abs(widths.climate - widths.basemap)).toBeLessThanOrEqual(1);
   });
 
   test('WEPP Yearly to OpenET switches graph context to monthly slider', async ({ page }) => {
