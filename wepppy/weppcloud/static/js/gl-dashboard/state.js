@@ -40,6 +40,7 @@ const defaultState = {
   hillslopesLayers: [],
   watarLayers: [],
   weppLayers: [],
+  weppChannelLayers: [],
   weppYearlyLayers: [],
   weppEventLayers: [],
   rapLayers: [],
@@ -50,6 +51,7 @@ const defaultState = {
   hillslopesSummary: null,
   watarSummary: null,
   weppSummary: null,
+  weppChannelSummary: null,
   weppStatistic: 'mean',
 
   weppYearlyMetadata: null,
@@ -59,6 +61,10 @@ const defaultState = {
   weppYearlyDiffRanges: {},
   weppYearlyCache: {},
   baseWeppYearlyCache: {},
+  weppYearlyChannelLayers: [],
+  weppYearlyChannelSummary: null,
+  weppYearlyChannelRanges: {},
+  weppYearlyChannelCache: {},
 
   weppEventSummary: null,
   weppEventMetadata: null,
@@ -94,6 +100,7 @@ const defaultState = {
 
   watarRanges: {},
   weppRanges: {},
+  weppChannelRanges: {},
 
   geoTiffLoader: null,
 };

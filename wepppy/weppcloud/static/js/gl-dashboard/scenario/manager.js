@@ -188,6 +188,9 @@ export function createScenarioManager({
       weppYearlyDiffRanges: {},
       weppYearlyCache: {},
       baseWeppYearlyCache: {},
+      weppYearlyChannelSummary: null,
+      weppYearlyChannelRanges: {},
+      weppYearlyChannelCache: {},
     });
 
     if (typeof onScenarioChange === 'function') {

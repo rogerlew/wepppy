@@ -175,6 +175,19 @@ async function ensureSubcatchments(buildBaseUrl, subcatchmentsGeoJson) {
   return subcatchmentsGeoJson;
 }
 
+async function ensureChannels(buildBaseUrl, channelsGeoJson) {
+  if (channelsGeoJson) {
+    return channelsGeoJson;
+  }
+  const geoUrl = buildBaseUrl(`resources/channels.json`);
+  const geoResp = await fetch(geoUrl);
+  if (geoResp.ok) {
+    return geoResp.json();
+  }
+  logDetectionInfo('Channels GeoJSON missing', { geoUrl, status: geoResp.status });
+  return channelsGeoJson;
+}
+
 function computeRanges(summary, modes) {
   if (!summary) return {};
   const ranges = {};
@@ -572,6 +585,109 @@ export async function detectWeppOverlays({
     return { weppSummary, weppRanges, weppLayers, subcatchmentsGeoJson: resolvedGeo };
   } catch (err) {
     logDetectionWarn('failed to load WEPP overlays', err);
+    return null;
+  }
+}
+
+export async function detectWeppChannelOverlays({
+  buildBaseUrl,
+  fetchWeppChannelSummary,
+  weppStatistic,
+  weppChannelPath,
+  channelsGeoJson,
+}) {
+  try {
+    const [channelSummary, geoJson] = await Promise.all([
+      fetchWeppChannelSummary(weppStatistic),
+      ensureChannels(buildBaseUrl, channelsGeoJson),
+    ]);
+    const resolvedGeo = channelsGeoJson || geoJson;
+    if (!channelSummary || !resolvedGeo) {
+      logDetectionInfo('WEPP channel overlays missing summary or geometry', {
+        hasSummary: Boolean(channelSummary),
+        hasGeoJson: Boolean(resolvedGeo),
+      });
+      return null;
+    }
+
+    const channelRanges = computeRanges(channelSummary, [
+      'channel_discharge_volume',
+      'channel_soil_loss',
+    ]);
+
+    const weppChannelLayers = [
+      {
+        key: 'wepp-channel-discharge',
+        label: 'Discharge Volume (m^3)',
+        path: weppChannelPath,
+        mode: 'channel_discharge_volume',
+        visible: false,
+      },
+      {
+        key: 'wepp-channel-soil-loss',
+        label: 'Soil Loss (kg)',
+        path: weppChannelPath,
+        mode: 'channel_soil_loss',
+        visible: false,
+      },
+    ];
+
+    return {
+      weppChannelSummary: channelSummary,
+      weppChannelRanges: channelRanges,
+      weppChannelLayers,
+      channelsGeoJson: resolvedGeo,
+    };
+  } catch (err) {
+    logDetectionWarn('failed to load WEPP channel overlays', err);
+    return null;
+  }
+}
+
+export async function detectWeppYearlyChannelOverlays({
+  buildBaseUrl,
+  postQueryEngine,
+  weppChannelPath,
+  channelsGeoJson,
+}) {
+  try {
+    const yearsPayload = {
+      datasets: [{ path: weppChannelPath, alias: 'loss' }],
+      columns: ['DISTINCT loss.year AS year'],
+      order_by: ['year'],
+    };
+    const yearsResult = await postQueryEngine(yearsPayload);
+    if (!yearsResult || !yearsResult.records || !yearsResult.records.length) {
+      logDetectionInfo('WEPP yearly channel overlays missing year list', { path: weppChannelPath });
+      return { weppYearlyChannelLayers: [], channelsGeoJson };
+    }
+
+    const geoJson = await ensureChannels(buildBaseUrl, channelsGeoJson);
+    if (!geoJson) {
+      logDetectionInfo('WEPP yearly channel overlays missing channels geometry', { path: weppChannelPath });
+      return { weppYearlyChannelLayers: [], channelsGeoJson };
+    }
+
+    const weppYearlyChannelLayers = [
+      {
+        key: 'wepp-yearly-channel-discharge',
+        label: 'Discharge Volume (m^3)',
+        path: weppChannelPath,
+        mode: 'channel_discharge_volume',
+        visible: false,
+      },
+      {
+        key: 'wepp-yearly-channel-soil-loss',
+        label: 'Soil Loss (kg)',
+        path: weppChannelPath,
+        mode: 'channel_soil_loss',
+        visible: false,
+      },
+    ];
+
+    return { weppYearlyChannelLayers, channelsGeoJson: geoJson };
+  } catch (err) {
+    logDetectionWarn('failed to load WEPP yearly channel overlays', err);
     return null;
   }
 }

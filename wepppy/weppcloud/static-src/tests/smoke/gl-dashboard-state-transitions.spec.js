@@ -53,15 +53,8 @@ async function requireSection(page, title) {
 
 async function clickLanduseDominant(page) {
   await expandSection(page, 'Landuse');
-  await expect
-    .poll(async () => page.locator('input[id^="layer-Landuse-lu-dominant"]').count())
-    .toBeGreaterThan(0);
-  const landuseDominant = page.locator('input[id^="layer-Landuse-lu-dominant"]').first();
-  await landuseDominant.waitFor({ state: 'attached', timeout: 15000 });
-  await landuseDominant.evaluate((el) => {
-    const details = el.closest('details');
-    if (details && !details.open) details.open = true;
-  });
+  const landuseDominant = page.getByLabel('Dominant landuse');
+  await expect(landuseDominant).toBeVisible({ timeout: 15000 });
   await landuseDominant.click({ force: true });
 }
 

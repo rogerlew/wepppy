@@ -171,6 +171,18 @@ export function createLayerUtils({
     return Number.isFinite(v) ? v : null;
   }
 
+  function weppChannelValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function weppYearlyChannelValue(mode, row) {
+    if (!row) return null;
+    const v = Number(row[mode]);
+    return Number.isFinite(v) ? v : null;
+  }
+
   function weppYearlyValue(mode, row) {
     if (!row) return null;
     const v = Number(row[mode]);
@@ -256,6 +268,28 @@ export function createLayerUtils({
       return jet2Color(normalized);
     }
     return viridisColor(normalized);
+  }
+
+  function weppChannelFillColor(mode, row) {
+    const state = getState();
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+    const range = state.weppChannelRanges[mode] || { min: 0, max: 1 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    const palette = resolveColormapName(mode, 'WEPP Channels', { WATER_MEASURES, SOIL_MEASURES });
+    return colorFromPalette(palette, normalized);
+  }
+
+  function weppYearlyChannelFillColor(mode, row) {
+    const state = getState();
+    if (!row) return [128, 128, 128, 200];
+    const value = Number(row[mode]);
+    if (!Number.isFinite(value)) return [128, 128, 128, 200];
+    const range = state.weppYearlyChannelRanges[mode] || { min: 0, max: 1 };
+    const normalized = Math.min(1, Math.max(0, (value - range.min) / (range.max - range.min)));
+    const palette = resolveColormapName(mode, 'WEPP Yearly Channels', { WATER_MEASURES, SOIL_MEASURES });
+    return colorFromPalette(palette, normalized);
   }
 
   function weppComparisonFillColor(mode, scenarioRow, baseRow) {
@@ -628,6 +662,104 @@ export function createLayerUtils({
     return activeLayers;
   }
 
+  function buildWeppChannelLayers(state) {
+    if (!state.channelsVisible) return [];
+    const activeLayers = (state.weppChannelLayers || [])
+      .filter((l) => l.visible && state.channelsGeoJson && state.weppChannelSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `wepp-channel-${overlay.key}`,
+          data: state.channelsGeoJson,
+          pickable: true,
+          stroked: true,
+          filled: true,
+          lineWidthUnits: 'pixels',
+          lineWidthMinPixels: 1,
+          getLineWidth: () => 2,
+          getLineColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? state.weppChannelSummary[String(topaz)] : null;
+            return weppChannelFillColor(overlay.mode, row);
+          },
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? state.weppChannelSummary[String(topaz)] : null;
+            return weppChannelFillColor(overlay.mode, row);
+          },
+          updateTriggers: {
+            getLineColor: [state.weppChannelRanges[overlay.mode], state.weppStatistic],
+            getFillColor: [state.weppChannelRanges[overlay.mode], state.weppStatistic],
+          },
+        });
+      });
+    return activeLayers;
+  }
+
+  function buildWeppYearlyChannelLayers(state) {
+    if (!state.channelsVisible) return [];
+    const activeLayers = (state.weppYearlyChannelLayers || [])
+      .filter((l) => l.visible && state.channelsGeoJson && state.weppYearlyChannelSummary)
+      .map((overlay) => {
+        return new deck.GeoJsonLayer({
+          id: `wepp-yearly-channel-${overlay.key}`,
+          data: state.channelsGeoJson,
+          pickable: true,
+          stroked: true,
+          filled: true,
+          lineWidthUnits: 'pixels',
+          lineWidthMinPixels: 1,
+          getLineWidth: () => 2,
+          getLineColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? state.weppYearlyChannelSummary[String(topaz)] : null;
+            return weppYearlyChannelFillColor(overlay.mode, row);
+          },
+          getFillColor: (f) => {
+            const props = f && f.properties;
+            const topaz =
+              props &&
+              (props.TopazID ||
+                props.topaz_id ||
+                props.topaz ||
+                props.id ||
+                props.WeppID ||
+                props.wepp_id);
+            const row = topaz != null ? state.weppYearlyChannelSummary[String(topaz)] : null;
+            return weppYearlyChannelFillColor(overlay.mode, row);
+          },
+          updateTriggers: {
+            getLineColor: [state.weppYearlySelectedYear, state.weppYearlyChannelRanges[overlay.mode]],
+            getFillColor: [state.weppYearlySelectedYear, state.weppYearlyChannelRanges[overlay.mode]],
+          },
+        });
+      });
+    return activeLayers;
+  }
+
   function buildWeppYearlyLayers(state) {
     if (!state.subcatchmentsVisible) return [];
     const activeLayers = state.weppYearlyLayers
@@ -876,6 +1008,8 @@ export function createLayerUtils({
     const openetDeckLayers = buildOpenetLayers(state);
     const rapDeckLayers = buildRapLayers(state);
     const channelDeckLayers = buildChannelsLayer(state);
+    const weppChannelDeckLayers = buildWeppChannelLayers(state);
+    const weppYearlyChannelDeckLayers = buildWeppYearlyChannelLayers(state);
     const labelLayers = buildSubcatchmentLabelsLayer(state);
     const channelLabelLayers = buildChannelLabelsLayer(state);
     return [
@@ -891,6 +1025,8 @@ export function createLayerUtils({
       ...rapDeckLayers,
       ...rasterLayers,
       ...channelDeckLayers,
+      ...weppChannelDeckLayers,
+      ...weppYearlyChannelDeckLayers,
       ...labelLayers,
       ...channelLabelLayers,
     ];
@@ -988,6 +1124,43 @@ export function createLayerUtils({
           label = `${weppOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
         }
         return `Layer: ${weppOverlay.path}\nTopazID: ${topaz}\n${label}`;
+      }
+    }
+    const weppYearlyChannelOverlay = pickActive(state.weppYearlyChannelLayers || []);
+    if (info.object && weppYearlyChannelOverlay && state.weppYearlyChannelSummary) {
+      const props = info.object && info.object.properties;
+      const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+      const row = topaz != null ? state.weppYearlyChannelSummary[String(topaz)] : null;
+      const val = weppYearlyChannelValue(weppYearlyChannelOverlay.mode, row);
+      if (val !== null) {
+        let label;
+        if (weppYearlyChannelOverlay.mode === 'channel_discharge_volume') {
+          label = `Discharge Volume: ${typeof val === 'number' ? val.toFixed(2) : val} m^3`;
+        } else if (weppYearlyChannelOverlay.mode === 'channel_soil_loss') {
+          label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
+        } else {
+          label = `${weppYearlyChannelOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+        }
+        const yearLine = state.weppYearlySelectedYear != null ? `Year: ${state.weppYearlySelectedYear}\n` : '';
+        return `Layer: ${weppYearlyChannelOverlay.path}\n${yearLine}TopazID: ${topaz}\n${label}`;
+      }
+    }
+    const weppChannelOverlay = pickActive(state.weppChannelLayers || []);
+    if (info.object && weppChannelOverlay && state.weppChannelSummary) {
+      const props = info.object && info.object.properties;
+      const topaz = props && (props.TopazID || props.topaz_id || props.topaz || props.id);
+      const row = topaz != null ? state.weppChannelSummary[String(topaz)] : null;
+      const val = weppChannelValue(weppChannelOverlay.mode, row);
+      if (val !== null) {
+        let label;
+        if (weppChannelOverlay.mode === 'channel_discharge_volume') {
+          label = `Discharge Volume: ${typeof val === 'number' ? val.toFixed(2) : val} m^3`;
+        } else if (weppChannelOverlay.mode === 'channel_soil_loss') {
+          label = `Soil Loss: ${typeof val === 'number' ? val.toFixed(2) : val} kg`;
+        } else {
+          label = `${weppChannelOverlay.mode}: ${typeof val === 'number' ? val.toFixed(2) : val}`;
+        }
+        return `Layer: ${weppChannelOverlay.path}\nTopazID: ${topaz}\n${label}`;
       }
     }
     const weppYearlyOverlay = pickActive(state.weppYearlyLayers);
@@ -1101,7 +1274,9 @@ export function createLayerUtils({
       Watershed: state.hillslopesLayers,
       RAP: state.rapLayers,
       WEPP: state.weppLayers,
+      'WEPP Channels': state.weppChannelLayers,
       'WEPP Yearly': state.weppYearlyLayers,
+      'WEPP Yearly Channels': state.weppYearlyChannelLayers,
       'WEPP Event': state.weppEventLayers,
       WATAR: state.watarLayers,
       OpenET: state.openetLayers,
@@ -1150,6 +1325,14 @@ export function createLayerUtils({
     if (state.channelsVisible && state.channelsGeoJson) {
       active.push({ key: 'channels', label: 'Channels', category: 'Channels' });
     }
+    const weppChannels = pickActiveLayerForLegend('WEPP Channels', state);
+    if (weppChannels && state.channelsVisible) {
+      active.push(weppChannels);
+    }
+    const weppYearlyChannels = pickActiveLayerForLegend('WEPP Yearly Channels', state);
+    if (weppYearlyChannels && state.channelsVisible) {
+      active.push(weppYearlyChannels);
+    }
     state.detectedLayers.forEach((layer) => {
       if (layer.visible) {
         active.push({ ...layer, category: 'Raster' });
@@ -1170,6 +1353,8 @@ export function createLayerUtils({
       hillslopesValue,
       watarValue,
       weppValue,
+      weppChannelValue,
+      weppYearlyChannelValue,
       weppYearlyValue,
       weppEventValue,
       rapValue,
@@ -1178,6 +1363,7 @@ export function createLayerUtils({
       hillslopesFillColor,
       watarFillColor,
       weppFillColor,
+      weppYearlyChannelFillColor,
       weppYearlyFillColor,
       weppEventFillColor,
       rapFillColor,

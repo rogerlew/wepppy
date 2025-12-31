@@ -25,8 +25,14 @@ async function waitForDetectedLayers(page, timeout = 20000) {
   }
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function expandSection(page, title) {
-  const summary = page.locator('summary.gl-layer-group', { hasText: title });
+  const summary = page.locator('summary.gl-layer-group').filter({
+    hasText: new RegExp(`^${escapeRegExp(title)}$`),
+  });
   await expect(summary).toBeVisible({ timeout: 15000 });
   await summary.evaluate((el) => {
     const details = el.closest('details');
@@ -72,6 +78,30 @@ async function waitForChannels(page, timeout = 20000) {
   try {
     await page.waitForFunction(
       () => (window.glDashboardState?.channelsGeoJson?.features || []).length > 0,
+      { timeout },
+    );
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function waitForWeppChannelLayers(page, timeout = 20000) {
+  try {
+    await page.waitForFunction(
+      () => (window.glDashboardState?.weppChannelLayers || []).length > 0,
+      { timeout },
+    );
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function waitForWeppYearlyChannelLayers(page, timeout = 20000) {
+  try {
+    await page.waitForFunction(
+      () => (window.glDashboardState?.weppYearlyChannelLayers || []).length > 0,
       { timeout },
     );
     return true;
@@ -221,6 +251,88 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     await expect.poll(async () => getDeckLayerIds(page)).not.toContain('channel-labels');
   });
 
+  test('WEPP channel overlays stay independent from hillslope overlays', async ({ page }) => {
+    await openDashboard(page);
+    await expandSection(page, 'WEPP');
+
+    const runoffToggle = page.getByRole('radio', { name: /^Runoff \(mm\)\b/ });
+    if ((await runoffToggle.count()) === 0) {
+      test.skip('WEPP hillslope overlays not available in this run');
+    }
+
+    const hasWeppChannels = await waitForWeppChannelLayers(page);
+    if (!hasWeppChannels) {
+      test.skip('WEPP channel overlays not available in this run');
+    }
+
+    await expect(runoffToggle).toBeVisible({ timeout: 15000 });
+    await runoffToggle.first().click({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-wepp-runoff');
+
+    const dischargeToggle = page.locator('label[for^="layer-WEPP-Channel-"]', { hasText: 'Discharge Volume (m^3)' });
+    await expect(dischargeToggle).toBeVisible({ timeout: 15000 });
+    await dischargeToggle.click({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-channel-wepp-channel-discharge');
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-wepp-runoff');
+
+    const dischargeLegend = page
+      .locator('#gl-legends-content .gl-legend-section')
+      .filter({ hasText: 'Discharge Volume' })
+      .first();
+    await expect(dischargeLegend).toBeVisible({ timeout: 10000 });
+
+    const soilLossToggle = page.locator('label[for^="layer-WEPP-Channel-"]', { hasText: 'Soil Loss (kg)' });
+    await expect(soilLossToggle).toBeVisible({ timeout: 15000 });
+    await soilLossToggle.click({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-channel-wepp-channel-soil-loss');
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('wepp-channel-wepp-channel-discharge');
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-wepp-runoff');
+
+    const soilLossLegend = page
+      .locator('#gl-legends-content .gl-legend-section')
+      .filter({ hasText: 'Soil Loss (kg)' })
+      .first();
+    await expect(soilLossLegend).toBeVisible({ timeout: 10000 });
+  });
+
+  test('WEPP channel radios stay in sync with WEPP Yearly channels', async ({ page }) => {
+    await openDashboard(page);
+    await expandSection(page, 'WEPP');
+    const hasWeppChannels = await waitForWeppChannelLayers(page);
+    if (!hasWeppChannels) {
+      test.skip('WEPP channel overlays not available in this run');
+    }
+
+    await expandSection(page, 'WEPP Yearly');
+    const hasWeppYearlyChannels = await waitForWeppYearlyChannelLayers(page);
+    if (!hasWeppYearlyChannels) {
+      test.skip('WEPP yearly channel overlays not available in this run');
+    }
+
+    const weppDischarge = page.locator('label[for^="layer-WEPP-Channel-"]', { hasText: 'Discharge Volume (m^3)' });
+    await expect(weppDischarge).toBeVisible({ timeout: 15000 });
+    await weppDischarge.click({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-channel-wepp-channel-discharge');
+
+    const yearlyDischarge = page.locator('label[for^="layer-WEPP-Yearly-Channel-"]', { hasText: 'Discharge Volume (m^3)' });
+    await expect(yearlyDischarge).toBeVisible({ timeout: 15000 });
+    await yearlyDischarge.click({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-yearly-channel-wepp-yearly-channel-discharge');
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('wepp-channel-wepp-channel-discharge');
+
+    const weppDischargeInput = page.locator('#layer-WEPP-Channel-wepp-channel-discharge');
+    await expect(weppDischargeInput).not.toBeChecked();
+
+    const weppSoilLoss = page.locator('label[for^="layer-WEPP-Channel-"]', { hasText: 'Soil Loss (kg)' });
+    await expect(weppSoilLoss).toBeVisible({ timeout: 15000 });
+    await weppSoilLoss.click({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('wepp-channel-wepp-channel-soil-loss');
+    await expect.poll(async () => getDeckLayerIds(page)).not.toContain('wepp-yearly-channel-wepp-yearly-channel-discharge');
+
+    const yearlyDischargeInput = page.locator('#layer-WEPP-Yearly-Channel-wepp-yearly-channel-discharge');
+    await expect(yearlyDischargeInput).not.toBeChecked();
+  });
+
   test('RAP cumulative stays selected and panel remains open', async ({ page }) => {
     await openDashboard(page);
     const rapSummary = page.locator('summary.gl-layer-group', { hasText: 'RAP' });
@@ -282,6 +394,56 @@ test.describe('gl-dashboard layer detection and wiring', () => {
       const ids = await getDeckLayerIds(page);
       return ids.some((id) => typeof id === 'string' && id.includes('wepp-event'));
     }).toBeTruthy();
+  });
+
+  test('WEPP Yearly to OpenET switches graph context to monthly slider', async ({ page }) => {
+    await openDashboard(page);
+    const weppYearlySummary = page.locator('summary.gl-layer-group', { hasText: 'WEPP Yearly' });
+    if ((await weppYearlySummary.count()) === 0) {
+      test.skip('WEPP Yearly section not present in this run');
+    }
+    await expandSection(page, 'WEPP Yearly');
+
+    const weppYearlyRadio = page.locator('input[id^="layer-WEPP-Yearly-"]');
+    if ((await weppYearlyRadio.count()) === 0) {
+      test.skip('WEPP Yearly layers not available in this run');
+    }
+    await expect(weppYearlyRadio.first()).toBeVisible({ timeout: 15000 });
+    await weppYearlyRadio.first().click({ force: true });
+    await expect.poll(async () =>
+      page.evaluate(() => window.glDashboardTimeseriesGraph?._source || null),
+    ).toBe('wepp_yearly');
+
+    const openetSummary = page.locator('summary.gl-layer-group', { hasText: 'OpenET' });
+    if ((await openetSummary.count()) === 0) {
+      test.skip('OpenET section not present in this run');
+    }
+    await expandSection(page, 'OpenET');
+
+    const openetLayer = await page.evaluate(() => {
+      const layers = window.glDashboardState?.openetLayers || [];
+      if (!layers.length) return null;
+      const ensemble = layers.find((layer) => layer.datasetKey === 'ensemble');
+      const target = ensemble || layers[0];
+      return target ? `layer-OpenET-${target.key}` : null;
+    });
+    if (!openetLayer) {
+      test.skip('OpenET layers not available in state');
+    }
+
+    const radio = page.locator(`#${openetLayer}`);
+    await expect(radio).toBeVisible({ timeout: 15000 });
+    await radio.click({ force: true });
+
+    await expect.poll(async () =>
+      page.evaluate(() => window.glDashboardTimeseriesGraph?._source || null),
+    ).toBe('openet');
+    await expect.poll(async () =>
+      page.evaluate(() => document.getElementById('gl-month-slider')?.classList.contains('is-visible') || false),
+    ).toBeTruthy();
+    await expect.poll(async () =>
+      page.evaluate(() => document.getElementById('gl-year-slider')?.classList.contains('is-visible') || false),
+    ).toBeFalsy();
   });
 
   test('OpenET selection shows monthly slider and renders layer', async ({ page }) => {

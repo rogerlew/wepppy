@@ -82,6 +82,7 @@ export const WATER_MEASURES = [
   'runoff_volume',
   'subrunoff_volume',
   'baseflow_volume',
+  'channel_discharge_volume',
   'event_P',
   'event_Q',
   'event_ET',
@@ -92,6 +93,7 @@ export const SOIL_MEASURES = [
   'soil_loss',
   'sediment_deposition',
   'sediment_yield',
+  'channel_soil_loss',
   'event_tdet',
 ];
 

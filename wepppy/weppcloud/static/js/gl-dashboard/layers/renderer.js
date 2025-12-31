@@ -13,6 +13,7 @@ export function createLayerRenderer({
   yearSlider,
   deselectAllSubcatchmentOverlays,
   activateWeppYearlyLayer,
+  activateWeppYearlyChannelLayer,
   refreshWeppStatisticData,
   refreshRapData,
   refreshOpenetData,
@@ -70,6 +71,8 @@ export function createLayerRenderer({
     soil_loss: 't/ha',
     sediment_deposition: 't/ha',
     sediment_yield: 't/ha',
+    channel_discharge_volume: 'm^3',
+    channel_soil_loss: 'kg',
     wind_transport: 't/ha',
     water_transport: 't/ha',
     ash_transport: 't/ha',
@@ -264,7 +267,9 @@ export function createLayerRenderer({
       soilsLayers = [],
       hillslopesLayers = [],
       weppLayers = [],
+      weppChannelLayers = [],
       weppYearlyLayers = [],
+      weppYearlyChannelLayers = [],
       weppEventLayers = [],
       watarLayers = [],
       rapLayers = [],
@@ -306,10 +311,17 @@ export function createLayerRenderer({
         stateKey: 'openetLayers',
       });
     }
-    if (weppLayers.length) {
-      subcatchmentSections.push({ title: 'WEPP', items: weppLayers, isSubcatchment: true, stateKey: 'weppLayers' });
+    if (weppLayers.length || weppChannelLayers.length) {
+      subcatchmentSections.push({
+        title: 'WEPP',
+        items: weppLayers,
+        isSubcatchment: true,
+        stateKey: 'weppLayers',
+        channelItems: weppChannelLayers,
+        channelStateKey: 'weppChannelLayers',
+      });
     }
-    if (weppYearlyLayers.length) {
+    if (weppYearlyLayers.length || weppYearlyChannelLayers.length) {
       subcatchmentSections.push({
         title: 'WEPP Yearly',
         idPrefix: 'WEPP-Yearly',
@@ -317,6 +329,8 @@ export function createLayerRenderer({
         isSubcatchment: true,
         isWeppYearly: true,
         stateKey: 'weppYearlyLayers',
+        channelItems: weppYearlyChannelLayers,
+        channelStateKey: 'weppYearlyChannelLayers',
       });
     }
     if (weppEventLayers.length) {
@@ -344,7 +358,9 @@ export function createLayerRenderer({
     allSections.forEach((section, idx) => {
       const details = document.createElement('details');
       details.className = 'gl-layer-details';
-      const hasVisibleItem = section.items.some((l) => l.visible);
+      const hasVisibleItem =
+        section.items.some((l) => l.visible) ||
+        (Array.isArray(section.channelItems) && section.channelItems.some((l) => l.visible));
       details.open = idx === 0 || hasVisibleItem || (section.isRap && rapCumulativeMode);
 
       const summary = document.createElement('summary');
@@ -432,6 +448,9 @@ export function createLayerRenderer({
                 updateLegendsPanel();
               }
             }
+            if (section.isOpenet && getState().activeGraphKey === 'wepp-yearly') {
+              setValue('activeGraphKey', null);
+            }
           } else {
             const target = layer.rasterRef || layer;
             target.visible = input.checked;
@@ -452,7 +471,7 @@ export function createLayerRenderer({
           const graphVisible = graphEl && !graphEl.classList.contains('is-collapsed');
           if (section.isWeppYearly && layer.visible) {
             await loadWeppYearlyTimeseriesData();
-          } else if (section.isOpenet && layer.visible && graphVisible) {
+          } else if (section.isOpenet && layer.visible) {
             await loadOpenetTimeseriesData();
           } else if (
             graphVisible &&
@@ -473,6 +492,117 @@ export function createLayerRenderer({
       });
 
       details.appendChild(itemList);
+
+      if (section.title === 'WEPP' && Array.isArray(section.channelItems) && section.channelItems.length) {
+        const subheading = document.createElement('div');
+        subheading.textContent = 'Channels';
+        subheading.style.cssText =
+          'margin:0.5rem 0 0.25rem 0;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--wc-color-text-muted);';
+        details.appendChild(subheading);
+
+        const channelList = document.createElement('ul');
+        channelList.className = 'gl-layer-items';
+        const channelStateKey = section.channelStateKey;
+
+        section.channelItems.forEach((layer) => {
+          const li = document.createElement('li');
+          li.className = 'gl-layer-item';
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = 'wepp-channel-overlay';
+          input.checked = layer.visible;
+          input.id = `layer-WEPP-Channel-${layer.key}`;
+          input.addEventListener('change', async () => {
+            if (!input.checked) return;
+            if (channelStateKey) {
+              const overlays = (getState()[channelStateKey] || []).map((overlay) => ({
+                ...overlay,
+                visible: overlay.key === layer.key,
+              }));
+              setValue(channelStateKey, overlays);
+            } else {
+              layer.visible = true;
+            }
+            const yearlyOverlays = (getState().weppYearlyChannelLayers || []).map((overlay) => ({
+              ...overlay,
+              visible: false,
+            }));
+            setValue('weppYearlyChannelLayers', yearlyOverlays);
+            input.checked = true;
+            if (typeof refreshWeppStatisticData === 'function') {
+              await refreshWeppStatisticData();
+            }
+            applyLayers();
+            updateLayerList();
+          });
+          const label = document.createElement('label');
+          label.setAttribute('for', input.id);
+          const name = layer.label || layer.key;
+          const path = layer.path || '';
+          label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+          li.appendChild(input);
+          li.appendChild(label);
+          channelList.appendChild(li);
+        });
+
+        details.appendChild(channelList);
+      }
+
+      if (section.title === 'WEPP Yearly' && Array.isArray(section.channelItems) && section.channelItems.length) {
+        const subheading = document.createElement('div');
+        subheading.textContent = 'Channels';
+        subheading.style.cssText =
+          'margin:0.5rem 0 0.25rem 0;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--wc-color-text-muted);';
+        details.appendChild(subheading);
+
+        const channelList = document.createElement('ul');
+        channelList.className = 'gl-layer-items';
+        const channelStateKey = section.channelStateKey;
+
+        section.channelItems.forEach((layer) => {
+          const li = document.createElement('li');
+          li.className = 'gl-layer-item';
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = 'wepp-channel-overlay';
+          input.checked = layer.visible;
+          input.id = `layer-WEPP-Yearly-Channel-${layer.key}`;
+          input.addEventListener('change', async () => {
+            if (!input.checked) return;
+            if (channelStateKey) {
+              const overlays = (getState()[channelStateKey] || []).map((overlay) => ({
+                ...overlay,
+                visible: overlay.key === layer.key,
+              }));
+              setValue(channelStateKey, overlays);
+            } else {
+              layer.visible = true;
+            }
+            const weppOverlays = (getState().weppChannelLayers || []).map((overlay) => ({
+              ...overlay,
+              visible: false,
+            }));
+            setValue('weppChannelLayers', weppOverlays);
+            input.checked = true;
+            if (typeof activateWeppYearlyChannelLayer === 'function') {
+              await activateWeppYearlyChannelLayer();
+            }
+            applyLayers();
+            updateLayerList();
+          });
+          const label = document.createElement('label');
+          label.setAttribute('for', input.id);
+          const name = layer.label || layer.key;
+          const path = layer.path || '';
+          label.innerHTML = `<span class="gl-layer-name">${name}</span><br><span class="gl-layer-path">${path}</span>`;
+          li.appendChild(input);
+          li.appendChild(label);
+          channelList.appendChild(li);
+        });
+
+        details.appendChild(channelList);
+      }
+
       layerListEl.appendChild(details);
     });
   }
@@ -829,6 +959,12 @@ export function createLayerRenderer({
     } else if (state.weppRanges && state.weppRanges[mode]) {
       minVal = state.weppRanges[mode].min;
       maxVal = state.weppRanges[mode].max;
+    } else if (layer.category === 'WEPP Yearly Channels' && state.weppYearlyChannelRanges && state.weppYearlyChannelRanges[mode]) {
+      minVal = state.weppYearlyChannelRanges[mode].min;
+      maxVal = state.weppYearlyChannelRanges[mode].max;
+    } else if (state.weppChannelRanges && state.weppChannelRanges[mode]) {
+      minVal = state.weppChannelRanges[mode].min;
+      maxVal = state.weppChannelRanges[mode].max;
     } else if (state.weppYearlyRanges && state.weppYearlyRanges[mode]) {
       minVal = state.weppYearlyRanges[mode].min;
       maxVal = state.weppYearlyRanges[mode].max;

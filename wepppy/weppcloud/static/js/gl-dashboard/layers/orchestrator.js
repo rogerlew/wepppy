@@ -12,7 +12,9 @@ export function createDetectionController({
   buildScenarioUrl,
   buildBaseUrl,
   fetchWeppSummary,
+  fetchWeppChannelSummary,
   weppLossPath,
+  weppChannelPath,
   weppYearlyPath,
   watarPath,
   postQueryEngine,
@@ -202,6 +204,57 @@ export function createDetectionController({
     }
   }
 
+  async function detectWeppChannelOverlays() {
+    const result = await detectorModule.detectWeppChannelOverlays({
+      buildBaseUrl,
+      fetchWeppChannelSummary,
+      weppStatistic: getState().weppStatistic,
+      weppChannelPath: weppChannelPath || 'wepp/output/interchange/loss_pw0.all_years.chn.parquet',
+      channelsGeoJson: getState().channelsGeoJson,
+    });
+    if (result) {
+      const prevVisible = (getState().weppChannelLayers || []).find((l) => l && l.visible);
+      const nextLayers = Array.isArray(result.weppChannelLayers) ? [...result.weppChannelLayers] : [];
+      if (prevVisible && nextLayers.some((l) => l && l.key === prevVisible.key)) {
+        for (const layer of nextLayers) {
+          layer.visible = layer.key === prevVisible.key;
+        }
+      }
+      setState({
+        weppChannelSummary: result.weppChannelSummary,
+        weppChannelRanges: result.weppChannelRanges || {},
+        weppChannelLayers: nextLayers,
+        channelsGeoJson: result.channelsGeoJson || getState().channelsGeoJson,
+      });
+      updateLayerList();
+      applyLayers();
+    }
+  }
+
+  async function detectWeppYearlyChannelOverlays() {
+    const result = await detectorModule.detectWeppYearlyChannelOverlays({
+      buildBaseUrl,
+      postQueryEngine,
+      weppChannelPath: weppChannelPath || 'wepp/output/interchange/loss_pw0.all_years.chn.parquet',
+      channelsGeoJson: getState().channelsGeoJson,
+    });
+    if (result) {
+      const prevVisible = (getState().weppYearlyChannelLayers || []).find((l) => l && l.visible);
+      const nextLayers = Array.isArray(result.weppYearlyChannelLayers) ? [...result.weppYearlyChannelLayers] : [];
+      if (prevVisible && nextLayers.some((l) => l && l.key === prevVisible.key)) {
+        for (const layer of nextLayers) {
+          layer.visible = layer.key === prevVisible.key;
+        }
+      }
+      setState({
+        weppYearlyChannelLayers: nextLayers,
+        channelsGeoJson: result.channelsGeoJson || getState().channelsGeoJson,
+      });
+      updateLayerList();
+      applyLayers();
+    }
+  }
+
   async function detectWeppYearlyOverlays() {
     const result = await detectorModule.detectWeppYearlyOverlays({
       buildBaseUrl,
@@ -277,6 +330,7 @@ export function createDetectionController({
       detectRasterLayers(),
       detectHillslopesOverlays(),
       detectChannelsOverlays(),
+      detectWeppYearlyChannelOverlays(),
       detectOpenetOverlays(),
       detectWatarOverlays(),
       detectWeppEventOverlays(),
@@ -294,6 +348,8 @@ export function createDetectionController({
     detectOpenetOverlays,
     detectWatarOverlays,
     detectWeppOverlays,
+    detectWeppChannelOverlays,
+    detectWeppYearlyChannelOverlays,
     detectWeppYearlyOverlays,
     detectWeppEventOverlays,
     detectRapOverlays,

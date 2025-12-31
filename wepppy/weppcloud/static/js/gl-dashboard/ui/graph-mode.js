@@ -120,8 +120,11 @@ export function createGraphModeController({
   }
 
   function isWeppYearlyActive(stateObj) {
-    if (!stateObj || !stateObj.weppYearlySummary) return false;
-    return (stateObj.weppYearlyLayers || []).some((l) => l && l.visible);
+    if (!stateObj) return false;
+    const hasHillslope = stateObj.weppYearlySummary && (stateObj.weppYearlyLayers || []).some((l) => l && l.visible);
+    const hasChannels =
+      stateObj.weppYearlyChannelSummary && (stateObj.weppYearlyChannelLayers || []).some((l) => l && l.visible);
+    return hasHillslope || hasChannels;
   }
 
   function isOpenetActive(stateObj) {

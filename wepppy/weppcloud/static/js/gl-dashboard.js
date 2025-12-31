@@ -116,6 +116,7 @@
 
   const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
   const WEPP_LOSS_PATH = 'wepp/output/interchange/loss_pw0.hill.parquet';
+  const WEPP_CHANNEL_PATH = 'wepp/output/interchange/loss_pw0.all_years.chn.parquet';
   const WATAR_PATH = 'ash/post/hillslope_annuals.parquet';
 
   const colorScaleFactory =
@@ -336,6 +337,14 @@
     return null;
   }
 
+  function pickActiveWeppYearlyChannelLayer() {
+    const layers = getState().weppYearlyChannelLayers || [];
+    for (let i = layers.length - 1; i >= 0; i--) {
+      if (layers[i].visible) return layers[i];
+    }
+    return null;
+  }
+
   const weppDataManager = createWeppDataManager({
     ctx,
     getState,
@@ -346,12 +355,18 @@
     pickActiveWeppEventLayer,
     WEPP_YEARLY_PATH,
     WEPP_LOSS_PATH,
+    WEPP_CHANNEL_PATH,
   });
 
   const {
     fetchWeppSummary,
+    fetchWeppChannelSummary,
     refreshWeppStatisticData: refreshWeppStatisticDataCore,
+    refreshWeppChannelStatisticData: refreshWeppChannelStatisticDataCore,
     computeWeppRanges: computeWeppRangesCore,
+    computeWeppChannelRanges: computeWeppChannelRangesCore,
+    refreshWeppYearlyChannelData: refreshWeppYearlyChannelDataCore,
+    computeWeppYearlyChannelRanges: computeWeppYearlyChannelRangesCore,
     computeWeppYearlyRanges: computeWeppYearlyRangesCore,
     computeWeppYearlyDiffRanges: computeWeppYearlyDiffRangesCore,
     refreshWeppYearlyData: refreshWeppYearlyDataCore,
@@ -439,8 +454,16 @@
 
   async function refreshWeppStatisticData() {
     const changed = await refreshWeppStatisticDataCore();
+    const channelChanged = typeof refreshWeppChannelStatisticDataCore === 'function'
+      ? await refreshWeppChannelStatisticDataCore()
+      : false;
     if (changed) {
       computeWeppRangesCore();
+    }
+    if (channelChanged && typeof computeWeppChannelRangesCore === 'function') {
+      computeWeppChannelRangesCore();
+    }
+    if (changed || channelChanged) {
       applyLayers();
       updateLegendsPanel();
     }
@@ -448,11 +471,31 @@
 
   async function refreshWeppYearlyData() {
     const changed = await refreshWeppYearlyDataCore();
+    const channelChanged = typeof refreshWeppYearlyChannelDataCore === 'function'
+      ? await refreshWeppYearlyChannelDataCore()
+      : false;
     if (changed) {
       computeWeppYearlyRangesCore();
       if (getState().comparisonMode && getState().weppYearlySelectedYear != null) {
         computeWeppYearlyDiffRangesCore(getState().weppYearlySelectedYear);
       }
+    }
+    if (channelChanged && typeof computeWeppYearlyChannelRangesCore === 'function') {
+      computeWeppYearlyChannelRangesCore();
+    }
+    if (changed || channelChanged) {
+      applyLayers();
+      updateLegendsPanel();
+    }
+  }
+
+  async function refreshWeppYearlyChannelData() {
+    if (typeof refreshWeppYearlyChannelDataCore !== 'function') return;
+    const changed = await refreshWeppYearlyChannelDataCore();
+    if (changed && typeof computeWeppYearlyChannelRangesCore === 'function') {
+      computeWeppYearlyChannelRangesCore();
+    }
+    if (changed) {
       applyLayers();
       updateLegendsPanel();
     }
@@ -666,7 +709,9 @@
     buildScenarioUrl,
     buildBaseUrl,
     fetchWeppSummary,
+    fetchWeppChannelSummary,
     weppLossPath: WEPP_LOSS_PATH,
+    weppChannelPath: WEPP_CHANNEL_PATH,
     weppYearlyPath: WEPP_YEARLY_PATH,
     watarPath: WATAR_PATH,
     postQueryEngine,
@@ -692,6 +737,8 @@
     detectLanduseOverlays,
     detectSoilsOverlays,
     detectWeppOverlays,
+    detectWeppChannelOverlays,
+    detectWeppYearlyChannelOverlays,
     detectWeppYearlyOverlays,
     detectLayers,
   } = detectionController;
@@ -742,6 +789,7 @@
     yearSlider,
     deselectAllSubcatchmentOverlays,
     activateWeppYearlyLayer,
+    activateWeppYearlyChannelLayer,
     refreshWeppStatisticData,
     refreshRapData,
     refreshOpenetData,
@@ -790,7 +838,9 @@
         detectLanduseOverlays(),
         detectSoilsOverlays(),
         detectWeppOverlays(),
+        detectWeppChannelOverlays(),
         detectWeppYearlyOverlays(),
+        detectWeppYearlyChannelOverlays(),
       ]);
       return;
     }
@@ -829,6 +879,24 @@
     syncGraphLayout();
   }
 
+  async function activateWeppYearlyChannelLayer() {
+    const metadata = getState().weppYearlyMetadata;
+    if (!metadata || !metadata.years || !metadata.years.length) {
+      syncGraphLayout();
+      return;
+    }
+    const minYear = metadata.minYear;
+    const maxYear = metadata.maxYear;
+    let selected = getState().weppYearlySelectedYear;
+    if (selected == null || selected < minYear || selected > maxYear) {
+      selected = maxYear;
+    }
+    setValue('weppYearlySelectedYear', selected);
+    yearSlider.setRange(minYear, maxYear, selected);
+    await refreshWeppYearlyChannelData();
+    syncGraphLayout();
+  }
+
   function openetIndexToXValue(index) {
     const meta = getState().openetMetadata;
     if (!meta || !Array.isArray(meta.months)) return null;
@@ -852,13 +920,19 @@
       }
     }
     const activeWeppYearly = pickActiveWeppYearlyLayer();
-    if (activeWeppYearly) {
+    const activeWeppYearlyChannel = pickActiveWeppYearlyChannelLayer();
+    if (activeWeppYearly || activeWeppYearlyChannel) {
       setValue('weppYearlySelectedYear', year);
+    }
+    if (activeWeppYearly) {
       await refreshWeppYearlyData();
       needsApply = true;
       if (timeseriesGraph._source === GRAPH_CONTEXT_KEYS.WEPP_YEARLY) {
         timeseriesGraph.setCurrentYear(year);
       }
+    } else if (activeWeppYearlyChannel) {
+      await refreshWeppYearlyChannelData();
+      needsApply = true;
     }
     const activeClimate = getState().activeGraphKey === 'climate-yearly' || timeseriesGraph._source === GRAPH_CONTEXT_KEYS.CLIMATE_YEARLY;
     if (activeClimate) {
@@ -970,7 +1044,9 @@
             detectLanduseOverlays(),
             detectSoilsOverlays(),
             detectWeppOverlays(),
+            detectWeppChannelOverlays(),
             detectWeppYearlyOverlays(),
+            detectWeppYearlyChannelOverlays(),
           );
         }
         await Promise.all(detectionTasks);

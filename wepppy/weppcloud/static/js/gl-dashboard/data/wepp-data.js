@@ -9,6 +9,7 @@
  * @property {() => { mode: string } | null} pickActiveWeppEventLayer Resolve the currently selected WEPP event layer descriptor.
  * @property {string} WEPP_YEARLY_PATH Parquet path for yearly WEPP outputs (interchange/H.parquet alias).
  * @property {string} WEPP_LOSS_PATH Parquet path for soil loss outputs (reserved for future queries).
+ * @property {string} WEPP_CHANNEL_PATH Parquet path for yearly WEPP channel outputs.
  */
 
 /**
@@ -24,6 +25,11 @@
  * @property {() => Object|null} computeWeppEventDiffRanges Compute event diff ranges against base cache.
  * @property {() => Promise<Object|null>} loadBaseWeppEventData Load base WEPP event data for the selected date/layer.
  * @property {() => Promise<boolean>} refreshWeppEventData Refresh scenario event data (and base when in comparison).
+ * @property {(statistic: string, options?: { base?: boolean }) => Promise<Object|null>} fetchWeppChannelSummary Fetch WEPP channel summary aggregated by topaz_id for a statistic.
+ * @property {() => Promise<boolean>} refreshWeppChannelStatisticData Refresh active WEPP channel summary and ranges for the current statistic.
+ * @property {(summaryOverride?: Object|null) => Object|null} computeWeppChannelRanges Compute min/max for WEPP channel summaries.
+ * @property {() => Promise<boolean>} refreshWeppYearlyChannelData Refresh active WEPP yearly channel summary and ranges for the selected year.
+ * @property {(summaryOverride?: Object|null) => Object|null} computeWeppYearlyChannelRanges Compute min/max for WEPP yearly channel summaries.
  */
 
 /**
@@ -40,12 +46,23 @@ export function createWeppDataManager({
   pickActiveWeppEventLayer,
   WEPP_YEARLY_PATH,
   WEPP_LOSS_PATH,
+  WEPP_CHANNEL_PATH,
 }) {
   // Placeholder to avoid unused warning until WEPP_LOSS_PATH is used for additional queries.
   void WEPP_LOSS_PATH;
 
   const WEPP_MODES = ['runoff_volume', 'subrunoff_volume', 'baseflow_volume', 'soil_loss', 'sediment_deposition', 'sediment_yield'];
   const WEPP_EVENT_MODES = ['event_P', 'event_Q', 'event_ET', 'event_Saturation', 'event_peakro', 'event_tdet'];
+  const WEPP_CHANNEL_MODES = ['channel_discharge_volume', 'channel_soil_loss'];
+
+  function buildStatExpression(stat, expr) {
+    if (stat === 'p90') return `quantile(${expr}, 0.9)`;
+    if (stat === 'sd') return `stddev_samp(${expr})`;
+    if (stat === 'cv') {
+      return `CASE WHEN avg(${expr}) = 0 THEN NULL ELSE stddev_samp(${expr}) / avg(${expr}) * 100 END`;
+    }
+    return `avg(${expr})`;
+  }
 
   function buildWeppAggregations(statistic) {
     const stat = (statistic || 'mean').toLowerCase();
@@ -58,20 +75,29 @@ export function createWeppDataManager({
       sediment_yield: { column: '"Sediment Yield"', formula: 'loss.{col} / hill.area * 10', label: 't/ha' },
     };
 
-    function statExpression(measure) {
+    return Object.entries(measureMap).map(([alias, measure]) => {
       const expr = measure.formula.replace('{col}', measure.column);
-      if (stat === 'p90') return `quantile(${expr}, 0.9)`;
-      if (stat === 'sd') return `stddev_samp(${expr})`;
-      if (stat === 'cv') {
-        return `CASE WHEN avg(${expr}) = 0 THEN NULL ELSE stddev_samp(${expr}) / avg(${expr}) * 100 END`;
-      }
-      return `avg(${expr})`;
-    }
+      return {
+        sql: buildStatExpression(stat, expr),
+        alias,
+      };
+    });
+  }
 
-    return Object.entries(measureMap).map(([alias, measure]) => ({
-      sql: statExpression(measure),
-      alias,
-    }));
+  function buildWeppChannelAggregations(statistic) {
+    const stat = (statistic || 'mean').toLowerCase();
+    const measureMap = {
+      channel_discharge_volume: { column: '"Discharge Volume"' },
+      channel_soil_loss: { column: '"Soil Loss"' },
+    };
+
+    return Object.entries(measureMap).map(([alias, measure]) => {
+      const expr = `loss.${measure.column}`;
+      return {
+        sql: buildStatExpression(stat, expr),
+        alias,
+      };
+    });
   }
 
   async function fetchWeppSummary(statistic, { base = false } = {}) {
@@ -114,6 +140,37 @@ export function createWeppDataManager({
     return null;
   }
 
+  async function fetchWeppChannelSummary(statistic, { base = false } = {}) {
+    const aggregations = buildWeppChannelAggregations(statistic);
+    const payload = {
+      datasets: [
+        { path: WEPP_CHANNEL_PATH, alias: 'loss' },
+        { path: 'watershed/channels.parquet', alias: 'chn' },
+      ],
+      joins: [{ left: 'loss', right: 'chn', on: 'chn_enum', type: 'inner' }],
+      columns: ['chn.topaz_id AS topaz_id'],
+      group_by: ['chn.topaz_id'],
+      aggregations,
+    };
+    try {
+      const result = base ? await postBaseQueryEngine(payload) : await postQueryEngine(payload);
+      if (result && result.records) {
+        const summary = {};
+        for (const row of result.records) {
+          const topazId = row.topaz_id;
+          if (topazId != null) {
+            summary[String(topazId)] = row;
+          }
+        }
+        return summary;
+      }
+      return null;
+    } catch (err) {
+      console.warn('gl-dashboard: failed to load WEPP channel summary', err);
+      return null;
+    }
+  }
+
   function computeWeppRanges(summaryOverride) {
     const summary = summaryOverride || getState().weppSummary;
     if (!summary) return null;
@@ -135,6 +192,54 @@ export function createWeppDataManager({
       ranges[mode] = { min, max };
     }
     setValue('weppRanges', ranges);
+    return ranges;
+  }
+
+  function computeWeppChannelRanges(summaryOverride) {
+    const summary = summaryOverride || getState().weppChannelSummary;
+    if (!summary) return null;
+    const ranges = {};
+    for (const mode of WEPP_CHANNEL_MODES) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (const key of Object.keys(summary)) {
+        const row = summary[key];
+        const v = Number(row[mode]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(max)) max = 1;
+      if (max <= min) max = min + 1;
+      ranges[mode] = { min, max };
+    }
+    setValue('weppChannelRanges', ranges);
+    return ranges;
+  }
+
+  function computeWeppYearlyChannelRanges(summaryOverride) {
+    const summary = summaryOverride || getState().weppYearlyChannelSummary;
+    if (!summary) return null;
+    const ranges = {};
+    for (const mode of WEPP_CHANNEL_MODES) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (const key of Object.keys(summary)) {
+        const row = summary[key];
+        const v = Number(row[mode]);
+        if (Number.isFinite(v)) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(max)) max = 1;
+      if (max <= min) max = min + 1;
+      ranges[mode] = { min, max };
+    }
+    setValue('weppYearlyChannelRanges', ranges);
     return ranges;
   }
 
@@ -163,6 +268,74 @@ export function createWeppDataManager({
       console.warn('gl-dashboard: failed to refresh WEPP data for statistic', err);
       return false;
     }
+  }
+
+  async function refreshWeppChannelStatisticData() {
+    const state = getState();
+    const hasActiveChannel = (state.weppChannelLayers || []).some((l) => l.visible);
+    if (!hasActiveChannel) return false;
+
+    try {
+      const weppChannelSummary = await fetchWeppChannelSummary(state.weppStatistic);
+      setValue('weppChannelSummary', weppChannelSummary || null);
+      if (weppChannelSummary) {
+        computeWeppChannelRanges(weppChannelSummary);
+      }
+      return true;
+    } catch (err) {
+      console.warn('gl-dashboard: failed to refresh WEPP channel data for statistic', err);
+      return false;
+    }
+  }
+
+  async function refreshWeppYearlyChannelData() {
+    const state = getState();
+    const year = state.weppYearlySelectedYear;
+    if (!Number.isFinite(year)) return false;
+    const hasActiveChannel = (state.weppYearlyChannelLayers || []).some((l) => l.visible);
+    if (!hasActiveChannel) return false;
+
+    let summary = (state.weppYearlyChannelCache && state.weppYearlyChannelCache[year]) || null;
+    let nextCache = state.weppYearlyChannelCache || {};
+    if (!summary) {
+      const aggregations = buildWeppChannelAggregations('mean');
+      const payload = {
+        datasets: [
+          { path: WEPP_CHANNEL_PATH, alias: 'loss' },
+          { path: 'watershed/channels.parquet', alias: 'chn' },
+        ],
+        joins: [{ left: 'loss', right: 'chn', on: 'chn_enum', type: 'inner' }],
+        columns: ['chn.topaz_id AS topaz_id'],
+        group_by: ['chn.topaz_id'],
+        aggregations,
+        filters: [{ column: 'loss.year', op: '=', value: year }],
+      };
+      try {
+        const result = await postQueryEngine(payload);
+        if (result && result.records) {
+          summary = {};
+          for (const row of result.records) {
+            const topazId = row.topaz_id;
+            if (topazId != null) {
+              summary[String(topazId)] = row;
+            }
+          }
+          nextCache = { ...nextCache, [year]: summary };
+        }
+      } catch (err) {
+        console.warn('gl-dashboard: failed to refresh WEPP yearly channel data', err);
+        summary = null;
+      }
+    }
+
+    const ranges = summary ? computeWeppYearlyChannelRanges(summary) || {} : {};
+    setState({
+      weppYearlyChannelSummary: summary || null,
+      weppYearlyChannelRanges: ranges || {},
+      weppYearlyChannelCache: { ...nextCache },
+      weppYearlySelectedYear: year,
+    });
+    return true;
   }
 
   function computeWeppYearlyRanges(summaryOverride) {
@@ -648,6 +821,12 @@ export function createWeppDataManager({
     fetchWeppSummary,
     refreshWeppStatisticData,
     computeWeppRanges,
+    buildWeppChannelAggregations,
+    fetchWeppChannelSummary,
+    refreshWeppChannelStatisticData,
+    computeWeppChannelRanges,
+    refreshWeppYearlyChannelData,
+    computeWeppYearlyChannelRanges,
     computeWeppYearlyRanges,
     computeWeppYearlyDiffRanges,
     loadBaseWeppYearlyData,
