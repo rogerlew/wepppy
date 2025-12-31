@@ -224,6 +224,88 @@ export function createLayerRenderer({
     dateBlock.appendChild(dateInput);
     details.appendChild(dateBlock);
 
+    const parseIsoDate = (value) => {
+      if (!value) return null;
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      if (!match) return null;
+      return {
+        year: Number(match[1]),
+        month: Number(match[2]),
+        day: Number(match[3]),
+      };
+    };
+
+    const formatIsoDate = (year, month, day) =>
+      `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const clampDate = (date, minDate, maxDate) => {
+      if (minDate && date < minDate) return minDate;
+      if (maxDate && date > maxDate) return maxDate;
+      return date;
+    };
+
+    const resolveBaseParts = () => {
+      const current = parseIsoDate(dateInput.value);
+      if (current) return current;
+      const minParts = parseIsoDate(dateInput.min);
+      if (minParts) return minParts;
+      const maxParts = parseIsoDate(dateInput.max);
+      if (maxParts) return maxParts;
+      const now = new Date();
+      return { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1, day: now.getUTCDate() };
+    };
+
+    const stepWeppEventDate = ({ days = 0, months = 0, years = 0 }) => {
+      const base = resolveBaseParts();
+      const baseMonthIndex = base.month - 1;
+      let totalMonths = base.year * 12 + baseMonthIndex + months + years * 12;
+      let targetYear = Math.floor(totalMonths / 12);
+      let targetMonthIndex = totalMonths % 12;
+      if (targetMonthIndex < 0) {
+        targetMonthIndex += 12;
+        targetYear -= 1;
+      }
+      const lastDay = new Date(Date.UTC(targetYear, targetMonthIndex + 1, 0)).getUTCDate();
+      const targetDay = Math.min(base.day, lastDay);
+      let nextDate = new Date(Date.UTC(targetYear, targetMonthIndex, targetDay));
+      if (days) {
+        nextDate = new Date(Date.UTC(
+          nextDate.getUTCFullYear(),
+          nextDate.getUTCMonth(),
+          nextDate.getUTCDate() + days,
+        ));
+      }
+      const minDate = dateInput.min ? new Date(`${dateInput.min}T00:00:00Z`) : null;
+      const maxDate = dateInput.max ? new Date(`${dateInput.max}T00:00:00Z`) : null;
+      const clamped = clampDate(nextDate, minDate, maxDate);
+      return formatIsoDate(clamped.getUTCFullYear(), clamped.getUTCMonth() + 1, clamped.getUTCDate());
+    };
+
+    const quickControls = document.createElement('div');
+    quickControls.className = 'gl-wepp-event-controls';
+    const controls = [
+      { label: '- Y', years: -1 },
+      { label: '- M', months: -1 },
+      { label: '- D', days: -1 },
+      { label: '+ D', days: 1 },
+      { label: '+ M', months: 1 },
+      { label: '+ Y', years: 1 },
+    ];
+    controls.forEach(({ label, ...delta }) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'gl-wepp-event-control-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        const nextValue = stepWeppEventDate(delta);
+        if (!nextValue) return;
+        dateInput.value = nextValue;
+        dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      quickControls.appendChild(btn);
+    });
+    details.appendChild(quickControls);
+
     // Separator
     const separator = document.createElement('div');
     separator.className = 'gl-wepp-event-separator';

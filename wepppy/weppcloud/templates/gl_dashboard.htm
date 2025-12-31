@@ -116,6 +116,32 @@
     padding: 0;
     width: 100%;
   }
+  .gl-wepp-event-controls {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.35rem;
+    width: 100%;
+    margin-bottom: 0.35rem;
+  }
+  .gl-wepp-event-control-btn {
+    border: 1px solid var(--wc-color-border);
+    background: var(--wc-color-surface-alt);
+    color: var(--wc-color-text);
+    border-radius: 4px;
+    padding: 0.2rem 0;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+  .gl-wepp-event-control-btn:hover {
+    border-color: var(--wc-color-primary);
+    background: var(--wc-color-surface);
+  }
+  .gl-wepp-event-control-btn:focus {
+    outline: none;
+    border-color: var(--wc-color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--wc-color-primary) 25%, transparent);
+  }
   /* Custom dropdown using theme variables */
   .gl-custom-select {
     position: relative;
