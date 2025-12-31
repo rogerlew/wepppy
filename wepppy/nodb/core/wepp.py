@@ -1043,6 +1043,11 @@ class Wepp(NoDbBase):
         if _exists(fn):
             os.remove(fn)
 
+    def _prep_tc(self) -> None:
+        fn = _join(self.runs_dir, 'tc.txt')
+        with open(fn, 'w') as fp:
+            fp.write('')
+
     def _prep_tcr(self) -> None:
         fn = _join(self.runs_dir, 'tcr.txt')
         with open(fn, 'w') as fp:
@@ -2098,6 +2103,7 @@ class Wepp(NoDbBase):
         self._prep_channel_soils(translator, erodibility, critical_shear, avke)
         self._prep_channel_climate(translator)
         self._prep_channel_input()
+        self._prep_tc()
 
         if (tcr is None and self.run_tcr) or tcr:
             self._prep_tcr()

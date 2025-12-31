@@ -17,6 +17,7 @@ from .watershed_chan_peak_interchange import (
     run_wepp_watershed_chan_peak_interchange as run_wepp_watershed_chan_peak_interchange,
     chanout_dss_export as chanout_dss_export,
 )
+from .watershed_tc_out_interchange import run_wepp_watershed_tc_out_interchange as run_wepp_watershed_tc_out_interchange
 from .watershed_totalwatsed_export import (
     totalwatsed_partitioned_dss_export as totalwatsed_partitioned_dss_export,
     archive_dss_export_zip as archive_dss_export_zip,
@@ -50,6 +51,7 @@ __all__ = [
     "run_wepp_watershed_chanwb_interchange",
     "run_wepp_watershed_chan_interchange",
     "run_wepp_watershed_chan_peak_interchange",
+    "run_wepp_watershed_tc_out_interchange",
     "chanout_dss_export",
     "totalwatsed_partitioned_dss_export",
     "archive_dss_export_zip",

@@ -9,6 +9,7 @@ from .watershed_ebe_interchange import run_wepp_watershed_ebe_interchange
 from .watershed_loss_interchange import run_wepp_watershed_loss_interchange
 from .watershed_pass_interchange import run_wepp_watershed_pass_interchange
 from .watershed_soil_interchange import run_wepp_watershed_soil_interchange
+from .watershed_tc_out_interchange import run_wepp_watershed_tc_out_interchange
 from .versioning import remove_incompatible_interchange, write_version_manifest
 
 try:
@@ -46,6 +47,8 @@ def run_wepp_watershed_interchange(
         (run_wepp_watershed_chanwb_interchange, dict(start_year_kwargs)),
         (run_wepp_watershed_chan_peak_interchange, dict(start_year_kwargs)),
     ]
+    if (base / "tc_out.txt").exists():
+        tasks.append((run_wepp_watershed_tc_out_interchange, {}))
     if run_chnwb_interchange:
         tasks.append((run_wepp_watershed_chnwb_interchange, dict(start_year_kwargs)))
     if run_soil_interchange:
