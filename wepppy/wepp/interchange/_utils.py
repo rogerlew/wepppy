@@ -171,6 +171,7 @@ def _ensure_cli_parquet(
                 year_counts = ordered.groupby("year")["julian"].max().sort_index()
                 offsets = year_counts.cumsum().shift(fill_value=0)
                 ordered["sim_day_index"] = ordered["julian"] + ordered["year"].map(offsets)
+                export_df["julian"] = ordered["julian"].reindex(export_df.index).astype("Int64")
                 export_df["sim_day_index"] = ordered["sim_day_index"].reindex(export_df.index).astype("Int64")
         export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
         export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")

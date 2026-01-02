@@ -36,6 +36,7 @@ _BLUEPRINT_ATTRS = [
     "observed_bp",
     "omni_bp",
     "gl_dashboard_bp",
+    "storm_event_analyzer_bp",
     "pivottable_bp",
     "project_bp",
     "jsoncrack_bp",

@@ -174,6 +174,8 @@ def run_wepp_watershed_tc_out_interchange(wepp_output_dir: Path | str) -> Path |
         LOGGER.info("tc_out.txt has no channel rows; skipping tc_out parquet.")
         return None
 
-    target = base / TC_OUT_PARQUET
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    target = interchange_dir / TC_OUT_PARQUET
     _write_tc_out_parquet(source, target, outlet_channel=outlet_channel)
     return target
