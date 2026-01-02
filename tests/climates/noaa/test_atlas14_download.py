@@ -256,6 +256,62 @@ def test_atlas14_download_english_units():
         return False
 
 
+def test_atlas14_no_coverage():
+    """Test that proper error is raised when location has no Atlas 14 coverage"""
+
+    try:
+        from pfdf.data.noaa import atlas14
+    except ImportError:
+        return False
+
+    print("\n" + "="*80)
+    print("Testing NOAA Atlas 14 - No Coverage (Oregon)")
+    print("="*80)
+
+    # Oregon doesn't have Atlas 14 coverage
+    OREGON_LAT = 45.5152  # Portland
+    OREGON_LON = -122.6784
+
+    print(f"\nTest Location: {OREGON_LAT}°N, {OREGON_LON}°W (Portland, Oregon)")
+    print(f"Expected Result: ValueError due to no Atlas 14 coverage")
+
+    try:
+        print("\nAttempting download...")
+        result = atlas14.download(
+            OREGON_LAT,
+            OREGON_LON,
+            parent=ARTIFACTS_DIR,
+            name="test_no_coverage.csv",
+            statistic='mean',
+            data='intensity',
+            series='pds',
+            units='metric',
+            timeout=TIMEOUT,
+            overwrite=True
+        )
+
+        # If we get here, the test failed
+        print(f"✗ Test failed - download should have raised ValueError but succeeded")
+        print(f"✗ File was created at: {result}")
+        return False
+
+    except ValueError as e:
+        # This is the expected behavior
+        error_msg = str(e)
+        if "not available for this location" in error_msg:
+            print(f"✓ Test passed - correctly raised ValueError")
+            print(f"✓ Error message: {error_msg}")
+            return True
+        else:
+            print(f"✗ Test failed - ValueError raised but unexpected message:")
+            print(f"  {error_msg}")
+            return False
+
+    except Exception as e:
+        print(f"✗ Test failed - wrong exception type: {type(e).__name__}: {e}")
+        return False
+
+
 def main():
     """Run all tests and report results"""
 
@@ -270,6 +326,7 @@ def main():
     results['intensity'] = test_atlas14_download_intensity()
     results['depth'] = test_atlas14_download_depth()
     results['english'] = test_atlas14_download_english_units()
+    results['no_coverage'] = test_atlas14_no_coverage()
 
     # Summary
     print("\n" + "="*80)
