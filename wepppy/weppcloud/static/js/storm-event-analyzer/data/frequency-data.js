@@ -21,6 +21,18 @@ function normalizeIntensityLabel(durationMinutes) {
   return `${durationMinutes}-min intensity`;
 }
 
+function normalizeUnitKey(unit) {
+  if (!unit) return null;
+  const key = String(unit).trim().toLowerCase();
+  if (key === 'mm' || key === 'mm/hr' || key === 'mm/hour') {
+    return key === 'mm' ? 'mm' : 'mm/hour';
+  }
+  if (key === 'h' || key === 'hr' || key === 'hrs' || key === 'hour' || key === 'hours') {
+    return 'hours';
+  }
+  return unit;
+}
+
 function parseRecurrence(headerLine) {
   const recurrence = [];
   headerLine
@@ -152,6 +164,37 @@ export function filterIntensityRows(rows, { requireIntensityLabel = false } = {}
     });
   });
   return filtered;
+}
+
+export function filterWeppFrequencyRows(rows) {
+  const depthRow = (rows || []).find((row) => String(row.label || '').toLowerCase().includes('depth'));
+  const durationRow = (rows || []).find((row) => String(row.label || '').toLowerCase().includes('duration'));
+
+  const filtered = [];
+  if (depthRow) {
+    filtered.push({
+      ...depthRow,
+      metricKey: 'depth',
+      displayLabel: 'Depth',
+      unitKey: normalizeUnitKey(depthRow.unit) || 'mm',
+    });
+  }
+  if (durationRow) {
+    filtered.push({
+      ...durationRow,
+      metricKey: 'duration',
+      displayLabel: 'Duration',
+      unitKey: normalizeUnitKey(durationRow.unit) || 'hours',
+    });
+  }
+
+  const intensityRows = filterIntensityRows(rows, { requireIntensityLabel: true }).map((row) => ({
+    ...row,
+    metricKey: 'intensity',
+    unitKey: INTENSITY_UNIT_KEY,
+  }));
+
+  return filtered.concat(intensityRows);
 }
 
 export function alignFrequencyToRecurrence(data, recurrence) {

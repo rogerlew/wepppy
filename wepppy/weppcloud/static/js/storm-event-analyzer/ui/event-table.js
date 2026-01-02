@@ -29,10 +29,11 @@ function setUnitCell(cell, unitizer, unitKey) {
   applyHtml(cell, unitKey ? renderUnits(unitizer, unitKey) : '&nbsp;');
 }
 
-function updateUnitRow(table, unitizer) {
+function updateUnitRow(table, unitizer, measureUnitKey) {
   if (!table) return;
   const units = {
-    measure: 'mm/hour',
+    select: null,
+    measure: measureUnitKey || 'mm/hour',
     date: null,
     precip: 'mm',
     depth: 'mm',
@@ -66,12 +67,19 @@ function setSortKey(cell, value) {
   cell.setAttribute('sorttable_customkey', String(value));
 }
 
-export function renderEventTable({ table, rows, selectedEventSimDayIndex, unitizer, onSelect }) {
+export function renderEventTable({
+  table,
+  rows,
+  selectedEventSimDayIndex,
+  unitizer,
+  onSelect,
+  measureUnitKey,
+}) {
   if (!table) {
     return;
   }
   const tbody = table.tBodies[0] || table.createTBody();
-  updateUnitRow(table, unitizer);
+  updateUnitRow(table, unitizer, measureUnitKey);
   clearRows(tbody);
 
   rows.forEach((row) => {
@@ -79,16 +87,34 @@ export function renderEventTable({ table, rows, selectedEventSimDayIndex, unitiz
     tr.classList.add('storm-event-analyzer__event-row');
     tr.dataset.simDayIndex = String(row.sim_day_index);
 
-    if (Number(row.sim_day_index) === Number(selectedEventSimDayIndex)) {
-      tr.classList.add('is-selected');
-      tr.setAttribute('aria-selected', 'true');
-    } else {
-      tr.setAttribute('aria-selected', 'false');
-    }
+    tr.setAttribute('aria-selected', 'false');
+
+    const selectCell = document.createElement('td');
+    selectCell.className = 'storm-event-analyzer__select-cell';
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'storm-event-analyzer-event';
+    radio.value = String(row.sim_day_index);
+    radio.checked = false;
+    radio.setAttribute('aria-label', row.date ? `Select event ${row.date}` : 'Select event');
+    radio.addEventListener('mousedown', (event) => {
+      event.stopPropagation();
+    });
+    radio.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+    radio.addEventListener('change', (event) => {
+      event.stopPropagation();
+      if (typeof onSelect === 'function') {
+        onSelect(row.sim_day_index);
+      }
+    });
+    selectCell.appendChild(radio);
+    tr.appendChild(selectCell);
 
     const measureCell = document.createElement('td');
     measureCell.className = 'wc-text-right';
-    applyHtml(measureCell, renderValue(unitizer, row.measure_value, 'mm/hour'));
+    applyHtml(measureCell, renderValue(unitizer, row.measure_value, measureUnitKey || 'mm/hour'));
     setSortKey(measureCell, row.measure_value);
     tr.appendChild(measureCell);
 
@@ -133,13 +159,39 @@ export function renderEventTable({ table, rows, selectedEventSimDayIndex, unitiz
     setSortKey(peakCell, row.peak_discharge_m3s);
     tr.appendChild(peakCell);
 
-    tr.addEventListener('click', () => {
+    tr.addEventListener('click', (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+      const target = event.target;
+      if (target && target.closest && target.closest('input, button, a, label, select, textarea')) {
+        return;
+      }
       if (typeof onSelect === 'function') {
         onSelect(row.sim_day_index);
       }
     });
 
     tbody.appendChild(tr);
+  });
+
+  updateEventSelection({ table, selectedEventSimDayIndex });
+}
+
+export function updateEventSelection({ table, selectedEventSimDayIndex }) {
+  if (!table) {
+    return;
+  }
+  const target = selectedEventSimDayIndex == null ? null : String(selectedEventSimDayIndex);
+  const rows = table.querySelectorAll('tbody tr:not([data-sort-position="top"])');
+  rows.forEach((row) => {
+    const matches = target !== null && row.dataset.simDayIndex === target;
+    row.classList.toggle('is-selected', matches);
+    row.setAttribute('aria-selected', matches ? 'true' : 'false');
+    const radio = row.querySelector('input[type="radio"]');
+    if (radio) {
+      radio.checked = matches;
+    }
   });
 }
 

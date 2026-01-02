@@ -11,13 +11,7 @@ function buildTable() {
           <th scope="col">Units</th>
         </tr>
       </thead>
-      <tbody>
-        <tr data-storm-event-analyzer-ari-unit-row="wepp">
-          <td data-storm-event-analyzer-unit="wepp-metric">&nbsp;</td>
-          <td class="wc-text-right" data-storm-event-analyzer-unit="wepp-ari">&nbsp;</td>
-          <td data-storm-event-analyzer-unit="wepp-units">&nbsp;</td>
-        </tr>
-      </tbody>
+      <tbody></tbody>
     </table>
     <p data-noaa-unavailable hidden>NOAA Atlas 14 data unavailable.</p>
   `;

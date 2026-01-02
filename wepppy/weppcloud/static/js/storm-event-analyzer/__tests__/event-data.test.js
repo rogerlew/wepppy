@@ -21,16 +21,16 @@ describe('storm-event-analyzer event data helpers', () => {
 
   it('builds event filter payload with warm-up filter', () => {
     const payload = buildEventFilterPayload({
-      intensityColumn: 'peak_intensity_10',
+      filterColumn: 'peak_intensity_10',
       minValue: 1,
       maxValue: 2,
       warmupYear: 1999,
     });
 
-    const intensityFilters = payload.filters.filter((filter) => filter.column === 'ev.peak_intensity_10');
-    expect(intensityFilters).toHaveLength(2);
-    expect(intensityFilters[0].operator).toBe('>=');
-    expect(intensityFilters[1].operator).toBe('<=');
+    const filters = payload.filters.filter((filter) => filter.column === 'ev.peak_intensity_10');
+    expect(filters).toHaveLength(2);
+    expect(filters[0].operator).toBe('>=');
+    expect(filters[1].operator).toBe('<=');
 
     const warmupFilter = payload.filters.find((filter) => filter.column === 'ev.year');
     expect(warmupFilter).toEqual({ column: 'ev.year', operator: '>', value: 1999 });

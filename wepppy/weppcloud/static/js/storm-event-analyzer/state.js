@@ -7,6 +7,7 @@ const defaultState = {
   filterRangePct: 10,
   includeWarmup: true,
   eventRows: [],
+  hyetographSeries: [],
   selectedEventSimDayIndex: null,
   eventError: null,
   unitPrefs: null,

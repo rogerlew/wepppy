@@ -36,6 +36,21 @@ export function getIntensityColumn(durationMinutes) {
   return INTENSITY_COLUMN_BY_MINUTES[Number(durationMinutes)] || null;
 }
 
+function resolveFilterSpec(selectedMetric) {
+  const metricKey = selectedMetric && selectedMetric.metricKey ? selectedMetric.metricKey : 'intensity';
+  if (metricKey === 'depth') {
+    return { metricKey, filterColumn: 'prcp' };
+  }
+  if (metricKey === 'duration') {
+    return { metricKey, filterColumn: 'dur' };
+  }
+  const intensityColumn = getIntensityColumn(selectedMetric.durationMinutes);
+  if (!intensityColumn) {
+    throw new Error('Unsupported intensity duration for event filtering.');
+  }
+  return { metricKey, filterColumn: intensityColumn, intensityColumn };
+}
+
 export function computeIntensityRange(value, pct) {
   const numeric = Number(value);
   const percent = Number(pct);
@@ -64,7 +79,7 @@ function buildWarmupFilter(warmupYear, alias = 'ev') {
   ];
 }
 
-export function buildEventFilterPayload({ intensityColumn, minValue, maxValue, warmupYear }) {
+export function buildEventFilterPayload({ filterColumn, minValue, maxValue, warmupYear }) {
   return {
     datasets: [{ path: CLIMATE_PATH, alias: 'ev' }],
     columns: [
@@ -75,6 +90,8 @@ export function buildEventFilterPayload({ intensityColumn, minValue, maxValue, w
       'ev.prcp AS depth_mm',
       'ev.prcp AS precip_mm',
       'ev.dur AS duration_hours',
+      'ev.tp AS tp',
+      'ev.ip AS ip',
       'ev.peak_intensity_10 AS peak_intensity_10',
       'ev.peak_intensity_15 AS peak_intensity_15',
       'ev.peak_intensity_30 AS peak_intensity_30',
@@ -82,22 +99,22 @@ export function buildEventFilterPayload({ intensityColumn, minValue, maxValue, w
     ],
     filters: [
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '>=',
         value: minValue,
       },
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '<=',
         value: maxValue,
       },
       ...buildWarmupFilter(warmupYear),
     ],
-    order_by: [intensityColumn, 'sim_day_index'],
+    order_by: [filterColumn, 'sim_day_index'],
   };
 }
 
-export function buildSoilPayload({ intensityColumn, minValue, maxValue, warmupYear }) {
+export function buildSoilPayload({ filterColumn, minValue, maxValue, warmupYear }) {
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
@@ -126,12 +143,12 @@ export function buildSoilPayload({ intensityColumn, minValue, maxValue, warmupYe
     ],
     filters: [
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '>=',
         value: minValue,
       },
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '<=',
         value: maxValue,
       },
@@ -142,7 +159,7 @@ export function buildSoilPayload({ intensityColumn, minValue, maxValue, warmupYe
   };
 }
 
-export function buildSnowPayload({ intensityColumn, minValue, maxValue, warmupYear }) {
+export function buildSnowPayload({ filterColumn, minValue, maxValue, warmupYear }) {
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
@@ -171,12 +188,12 @@ export function buildSnowPayload({ intensityColumn, minValue, maxValue, warmupYe
     ],
     filters: [
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '>=',
         value: minValue,
       },
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '<=',
         value: maxValue,
       },
@@ -187,7 +204,7 @@ export function buildSnowPayload({ intensityColumn, minValue, maxValue, warmupYe
   };
 }
 
-export function buildHydrologyPayload({ intensityColumn, minValue, maxValue, warmupYear }) {
+export function buildHydrologyPayload({ filterColumn, minValue, maxValue, warmupYear }) {
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
@@ -216,12 +233,12 @@ export function buildHydrologyPayload({ intensityColumn, minValue, maxValue, war
     ],
     filters: [
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '>=',
         value: minValue,
       },
       {
-        column: `ev.${intensityColumn}`,
+        column: `ev.${filterColumn}`,
         operator: '<=',
         value: maxValue,
       },
@@ -293,10 +310,7 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
       return [];
     }
 
-    const intensityColumn = getIntensityColumn(selectedMetric.durationMinutes);
-    if (!intensityColumn) {
-      throw new Error('Unsupported intensity duration for event filtering.');
-    }
+    const filterSpec = resolveFilterSpec(selectedMetric);
 
     const range = computeIntensityRange(selectedMetric.value, filterRangePct);
     if (!range) {
@@ -306,28 +320,28 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
     const warmupYear = includeWarmup ? await fetchWarmupYear({ postQueryEngine, runid: ctx.runid }) : null;
 
     const eventPayload = buildEventFilterPayload({
-      intensityColumn,
+      filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
     });
 
     const soilPayload = buildSoilPayload({
-      intensityColumn,
+      filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
     });
 
     const snowPayload = buildSnowPayload({
-      intensityColumn,
+      filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
     });
 
     const hydroPayload = buildHydrologyPayload({
-      intensityColumn,
+      filterColumn: filterSpec.filterColumn,
       minValue: range.minValue,
       maxValue: range.maxValue,
       warmupYear,
@@ -353,7 +367,16 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
       const depth = toNumberOrNull(row.depth_mm);
       const precip = toNumberOrNull(row.precip_mm);
       const duration = toNumberOrNull(row.duration_hours);
-      const measureValue = toNumberOrNull(row[intensityColumn]);
+      const tp = toNumberOrNull(row.tp);
+      const ip = toNumberOrNull(row.ip);
+      let measureValue = null;
+      if (filterSpec.metricKey === 'depth') {
+        measureValue = depth;
+      } else if (filterSpec.metricKey === 'duration') {
+        measureValue = duration;
+      } else if (filterSpec.intensityColumn) {
+        measureValue = toNumberOrNull(row[filterSpec.intensityColumn]);
+      }
 
       return {
         sim_day_index: simDay,
@@ -365,6 +388,8 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
         depth_mm: Number.isFinite(depth) ? depth : null,
         precip_mm: Number.isFinite(precip) ? precip : Number.isFinite(depth) ? depth : null,
         duration_hours: Number.isFinite(duration) ? duration : null,
+        tp: Number.isFinite(tp) ? tp : null,
+        ip: Number.isFinite(ip) ? ip : null,
         soil_saturation_pct: Number.isFinite(simDay) && soilMap.has(simDay) ? soilMap.get(simDay) : null,
         snow_water_t1_mm: Number.isFinite(simDay) && snowMap.has(simDay) ? snowMap.get(simDay) : null,
         peak_discharge_m3s: Number.isFinite(simDay) && hydroMap.has(simDay) ? hydroMap.get(simDay) : null,

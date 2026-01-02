@@ -7,12 +7,15 @@ import { getState, initState, setState, subscribe } from './state.js';
 import {
   alignFrequencyToRecurrence,
   filterIntensityRows,
+  filterWeppFrequencyRows,
   loadFrequencyData,
-} from './data/frequency-data.js';
+} from './data/frequency-data.js?v=storm-event-analyzer';
 import { createQueryEngine } from './data/query-engine.js';
 import { createEventDataManager } from './data/event-data.js';
+import { buildHyetographSeries } from './data/hyetograph-data.js';
+import { createHyetographChart } from './charts/hyetograph.js';
 import { applyNoaaAvailability, renderFrequencyTable } from './ui/frequency-table.js';
-import { renderEventTable, setEventErrorBanner } from './ui/event-table.js';
+import { renderEventTable, setEventErrorBanner, updateEventSelection } from './ui/event-table.js';
 import { bindFilterControls } from './ui/filters.js';
 
 function getUnitizerClient() {
@@ -40,12 +43,18 @@ async function initStormEventAnalyzer() {
   const eventTable = document.getElementById('storm_event_characteristics_table');
   const eventsEmptyMessage = document.querySelector('[data-storm-event-analyzer-events-empty]');
   const eventErrorBanner = document.querySelector('[data-storm-event-analyzer-error]');
+  const hyetographSection = document.getElementById('storm-event-analyzer__hyetograph');
+  const hyetographContainer = document.querySelector('[data-storm-event-analyzer-chart]');
+  const hyetographEmptyMessage = hyetographSection
+    ? hyetographSection.querySelector('[data-empty-state]')
+    : null;
 
   initState({
     filterRangePct: DEFAULT_FILTER_RANGE_PCT,
     includeWarmup: DEFAULT_INCLUDE_WARMUP,
     selectedMetric: null,
     eventRows: [],
+    hyetographSeries: [],
     selectedEventSimDayIndex: null,
     eventError: null,
   });
@@ -60,6 +69,14 @@ async function initStormEventAnalyzer() {
   const ctx = { runid: window.runid, config: window.config };
   const { postQueryEngine } = createQueryEngine(ctx);
   const eventDataManager = createEventDataManager({ ctx, postQueryEngine });
+  const hyetographChart = createHyetographChart({
+    container: hyetographContainer,
+    emptyEl: hyetographEmptyMessage,
+    unitizer: unitizerClient,
+    unitPrefs: getState().unitPrefs,
+    onSelect: (simDayIndex) => setState({ selectedEventSimDayIndex: simDayIndex }),
+  });
+  hyetographChart.init();
 
   let frequencyData;
   try {
@@ -69,7 +86,7 @@ async function initStormEventAnalyzer() {
     return;
   }
 
-  const weppIntensityRows = filterIntensityRows(frequencyData.wepp.rows, { requireIntensityLabel: true });
+  const weppIntensityRows = filterWeppFrequencyRows(frequencyData.wepp.rows);
   const weppDisplay = {
     recurrence: frequencyData.wepp.recurrence,
     rows: weppIntensityRows,
@@ -134,17 +151,27 @@ async function initStormEventAnalyzer() {
         weppEmptyMessage.setAttribute('hidden', 'hidden');
       }
     }
+    if (hyetographEmptyMessage) {
+      if (!hasRows) {
+        hyetographEmptyMessage.removeAttribute('hidden');
+      } else {
+        hyetographEmptyMessage.setAttribute('hidden', 'hidden');
+      }
+    }
   }
 
   function renderEventRows(state) {
     if (!eventTable) {
       return;
     }
+    const measureUnitKey =
+      state.selectedMetric && state.selectedMetric.unitKey ? state.selectedMetric.unitKey : 'mm/hour';
     renderEventTable({
       table: eventTable,
       rows: state.eventRows || [],
       selectedEventSimDayIndex: state.selectedEventSimDayIndex,
       unitizer: unitizerClient,
+      measureUnitKey,
       onSelect: (simDayIndex) => setState({ selectedEventSimDayIndex: simDayIndex }),
     });
     setEventErrorBanner({ banner: eventErrorBanner, message: state.eventError });
@@ -155,7 +182,7 @@ async function initStormEventAnalyzer() {
   async function refreshEventRows() {
     const state = getState();
     if (!state.selectedMetric) {
-      setState({ eventRows: [], selectedEventSimDayIndex: null, eventError: null });
+      setState({ eventRows: [], hyetographSeries: [], selectedEventSimDayIndex: null, eventError: null });
       return;
     }
 
@@ -173,8 +200,10 @@ async function initStormEventAnalyzer() {
       const selected = rows.some((row) => row.sim_day_index === state.selectedEventSimDayIndex)
         ? state.selectedEventSimDayIndex
         : null;
+      const hyetographSeries = buildHyetographSeries(rows);
       setState({
         eventRows: rows,
+        hyetographSeries,
         selectedEventSimDayIndex: selected,
         eventError: null,
       });
@@ -202,8 +231,17 @@ async function initStormEventAnalyzer() {
     refreshEventRows();
   });
 
-  subscribe(['eventRows', 'selectedEventSimDayIndex', 'eventError'], (state) => {
+  subscribe(['eventRows', 'eventError'], (state) => {
     renderEventRows(state);
+  });
+
+  subscribe(['hyetographSeries'], (state) => {
+    hyetographChart.setSeries(state.hyetographSeries || []);
+  });
+
+  subscribe(['selectedEventSimDayIndex'], (state) => {
+    updateEventSelection({ table: eventTable, selectedEventSimDayIndex: state.selectedEventSimDayIndex });
+    hyetographChart.setSelected(state.selectedEventSimDayIndex);
   });
 
   document.addEventListener('unitizer:preferences-changed', (event) => {
@@ -212,6 +250,7 @@ async function initStormEventAnalyzer() {
     unitizerClient = window.UnitizerClient ? window.UnitizerClient.getClientSync() : unitizerClient;
     renderTables(getState().selectedMetric || null);
     renderEventRows(getState());
+    hyetographChart.setUnitizer(unitizerClient, detail);
   });
 }
 

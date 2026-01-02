@@ -436,6 +436,19 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 - Implement `charts/hyetograph.js` with multi-series render and selected-line emphasis.
 - Tests (Jest): numeric validation (monotonic cumulative, final depth matches input) and selection styling.
 
+### Phase 5 Handoff (2026-01-02)
+**Delivered**
+- Added dual-exponential hyetograph computation (`wepppy/weppcloud/static/js/storm-event-analyzer/data/hyetograph-data.js`) and appended tp/ip fields to event payload mapping.
+- Added canvas hyetograph renderer aligned with gl-dashboard theming (`wepppy/weppcloud/static/js/storm-event-analyzer/charts/hyetograph.js`) and wired state updates in `wepppy/weppcloud/static/js/storm-event-analyzer/main.js`.
+- Added Jest coverage for hyetograph numeric monotonicity and selected-series emphasis.
+- Reworked event selection UX: radio column + row click selection, header-only sorting, and distinct border styling for selected rows (`wepppy/weppcloud/static/js/storm-event-analyzer/ui/event-table.js`, `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`).
+- Enabled line-click selection in the hyetograph chart (`wepppy/weppcloud/static/js/storm-event-analyzer/charts/hyetograph.js`).
+- Updated frequency tables: removed unit rows, added NOAA spacer rows for alignment, and inserted WEPP Depth/Duration rows that drive event filtering (`wepppy/weppcloud/static/js/storm-event-analyzer/data/frequency-data.js`, `wepppy/weppcloud/static/js/storm-event-analyzer/ui/frequency-table.js`, `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`).
+- Adjusted event filtering/measure units to support depth/duration metrics and added a cache-busting import to avoid stale module exports (`wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js`, `wepppy/weppcloud/static/js/storm-event-analyzer/main.js`).
+
+**Tests run**
+- `wctl run-npm test -- --testPathPattern storm-event-analyzer` (passes; npm warns about --testPathPattern; VM Modules warning; expected console.warn from event-data test)
+
 ### Phase 6: Hydrology summary + Tc
 - Implement `ui/hydrology-summary.js` and map summary fields from selected event.
 - Hide or show `Tc` based on availability; keep "n/a" consistent with empty-state rules.

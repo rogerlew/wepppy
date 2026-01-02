@@ -77,9 +77,39 @@ function buildUnitsRow(unitRow, recurrence, unitKey, tableKey, unitizer) {
   unitRow.appendChild(unitsCell);
 }
 
+function buildEmptyRows(tbody, recurrence, count) {
+  if (!tbody || !Number.isFinite(count) || count <= 0) {
+    return;
+  }
+  for (let i = 0; i < count; i += 1) {
+    const tr = document.createElement('tr');
+    tr.setAttribute('aria-hidden', 'true');
+
+    const labelCell = document.createElement('th');
+    labelCell.scope = 'row';
+    labelCell.innerHTML = '&nbsp;';
+    tr.appendChild(labelCell);
+
+    recurrence.forEach(() => {
+      const td = document.createElement('td');
+      td.className = 'wc-text-right';
+      td.innerHTML = '&nbsp;';
+      tr.appendChild(td);
+    });
+
+    const unitsCell = document.createElement('td');
+    unitsCell.innerHTML = '&nbsp;';
+    tr.appendChild(unitsCell);
+
+    tbody.appendChild(tr);
+  }
+}
+
 function buildMetricRows({ tbody, recurrence, rows, tableKey, unitKey, unitizer, selectedMetric, onSelect }) {
   rows.forEach((row) => {
     const tr = document.createElement('tr');
+    const rowUnitKey = row.unitKey || unitKey;
+    const rowMetricKey = row.metricKey || 'intensity';
 
     const labelCell = document.createElement('th');
     labelCell.scope = 'row';
@@ -93,7 +123,7 @@ function buildMetricRows({ tbody, recurrence, rows, tableKey, unitKey, unitizer,
       td.dataset.stormEventAnalyzerCell = 'true';
       td.dataset.durationMinutes = String(row.durationMinutes || '');
       td.dataset.ari = String(ari);
-      td.dataset.unitKey = unitKey;
+      td.dataset.unitKey = rowUnitKey;
 
       if (value === null || value === undefined || value === '') {
         td.setAttribute('aria-disabled', 'true');
@@ -103,16 +133,17 @@ function buildMetricRows({ tbody, recurrence, rows, tableKey, unitKey, unitizer,
         td.setAttribute('role', 'button');
         td.tabIndex = 0;
         td.setAttribute('aria-selected', 'false');
-        applyHtml(td, renderValue(unitizer, value, unitKey));
+        applyHtml(td, renderValue(unitizer, value, rowUnitKey));
 
         td.addEventListener('click', () => {
           if (typeof onSelect === 'function') {
             onSelect({
               table: tableKey,
+              metricKey: rowMetricKey,
               durationMinutes: row.durationMinutes,
               ari,
               value,
-              unitKey,
+              unitKey: rowUnitKey,
               label: row.displayLabel || row.label,
             });
           }
@@ -128,7 +159,9 @@ function buildMetricRows({ tbody, recurrence, rows, tableKey, unitKey, unitizer,
       if (
         selectedMetric &&
         selectedMetric.table === tableKey &&
-        Number(selectedMetric.durationMinutes) === Number(row.durationMinutes) &&
+        (selectedMetric.metricKey || 'intensity') === rowMetricKey &&
+        (rowMetricKey !== 'intensity' ||
+          Number(selectedMetric.durationMinutes) === Number(row.durationMinutes)) &&
         Number(selectedMetric.ari) === Number(ari)
       ) {
         td.classList.add('is-selected');
@@ -140,8 +173,8 @@ function buildMetricRows({ tbody, recurrence, rows, tableKey, unitKey, unitizer,
 
     const unitsCell = document.createElement('td');
     unitsCell.dataset.stormEventAnalyzerUnit = `${tableKey}-row-unit`;
-    unitsCell.dataset.unitKey = unitKey;
-    applyHtml(unitsCell, renderUnits(unitizer, unitKey));
+    unitsCell.dataset.unitKey = rowUnitKey;
+    applyHtml(unitsCell, renderUnits(unitizer, rowUnitKey));
     tr.appendChild(unitsCell);
 
     tbody.appendChild(tr);
@@ -171,6 +204,9 @@ export function renderFrequencyTable({
   if (unitRow) {
     buildUnitsRow(unitRow, data.recurrence, unitKey, tableKey, unitizer);
     tbody.appendChild(unitRow);
+  }
+  if (tableKey === 'noaa') {
+    buildEmptyRows(tbody, data.recurrence, 2);
   }
 
   buildMetricRows({
