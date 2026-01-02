@@ -16,6 +16,7 @@
 - [Unitization and Formatting](#unitization-and-formatting)
 - [Sorting and Selection](#sorting-and-selection)
 - [Error and Empty States](#error-and-empty-states)
+- [Implementation Plan](#implementation-plan)
 - [Open Questions](#open-questions)
 
 ## Overview
@@ -168,6 +169,11 @@ Storm traces must reproduce WEPP's 5-minute dual-exponential model in the fronte
 - Store or derive a time series per event:
   - `event_id`, `elapsed_hours`, `cumulative_depth_mm`.
   - Chart renders multiple event series in one plot.
+- Authoritative implementation (Fortran, wepp-forest):
+  - `disag.for` (subroutine `disag`) sets up the 5-minute step function and calls `dblex`.
+  - `dblex.for` (subroutine `dblex`) computes the dual-exponential intensity (TIMEDL/INTDL).
+  - `eqroot.for` (subroutine `eqroot`) solves `1 - exp(-u) = a*u` for `dblex`.
+  - Call chain: `IDAT -> DISAG -> DBLEX -> EQROOT`.
 
 ## State Management
 Follow the gl-dashboard pattern (single state module + subscribers).
@@ -236,5 +242,56 @@ wepppy/weppcloud/templates/reports/
 - Missing snow cover or soil saturation: show "n/a" with muted styling, keep row clickable.
 - Query Engine errors: surface a banner with the error message and keep previous results until the next successful query.
 
+## Implementation Plan
+Phases should be staffed by fresh agents with targeted prompts. Reuse agents only when context is still active and relevant.
+
+### Phase 0: Discovery and alignment
+- Confirm existing outputs for `wepp_cli_pds_mean_metric.csv`, `atlas14_intensity_pds_mean_metric.csv`, `climate/wepp_cli.parquet`, `H.soil.parquet`, `H.wat.parquet`, `H.ebe.parquet`, `ebe_pw0.parquet`, `tc_out.parquet`.
+- Record the dual-exponential reference (Fortran in `wepp-forest`) and verify parameter mapping for JS.
+- Confirm route registration and navigation links for `/runs/<runid>/<config>/storm-event-analyzer`.
+- No tests; pure planning.
+
+### Phase 1: Query Engine and data products
+- Ensure event summary and join keys (including `sim_day_index`) are available and consistent across `wepp_cli.parquet`, `H.*`, and `ebe_pw0.parquet`.
+- Add or confirm Query Engine agents for:
+  - Event filtering by intensity range.
+  - Soil saturation T-1 (mean across hillslopes).
+  - Snow-water T-1 (mean across hillslopes).
+  - Hydrology metrics (runoff volume, peak discharge, sediment yield, runoff coefficient).
+  - Tc lookup when `tc_out.parquet` exists.
+- Unit tests: Python tests for agent outputs, including missing dataset handling.
+
+### Phase 2: Template skeleton and layout
+- Create `templates/reports/storm_event_analyzer.htm` using the full-width report layout.
+- Add containers for top tables, filter controls, event table, hyetograph, and hydrology summary.
+- Wire the report to `/runs/<runid>/<config>/storm-event-analyzer`.
+- Tests: Jinja render test (see `tests/weppcloud/routes/test_pure_controls_render.py`) and route load smoke check.
+
+### Phase 3: State + top tables + filters
+- Implement `static/js/storm-event-analyzer/state.js`, `config.js`, and UI modules for metric tables and filter range controls.
+- Capture base-unit values via `data-value` attributes; update on `unitizer:preferences-changed`.
+- Tests (Jest): state transitions, metric selection, filter range updates.
+
+### Phase 4: Event table + selection
+- Implement Query Engine fetch in `data/event-data.js`.
+- Render event table with sortable columns, `sorttable_customkey`, and selection highlighting.
+- Empty/error states follow spec; preserve previous results on query errors.
+- Tests (Jest): query payload construction and selection behavior.
+
+### Phase 5: Hyetograph computation + chart
+- Implement `data/hyetograph-data.js` using the dual-exponential 5-minute steps.
+- Implement `charts/hyetograph.js` with multi-series render and selected-line emphasis.
+- Tests (Jest): numeric validation (monotonic cumulative, final depth matches input) and selection styling.
+
+### Phase 6: Hydrology summary + Tc
+- Implement `ui/hydrology-summary.js` and map summary fields from selected event.
+- Hide or show `Tc` based on availability; keep "n/a" consistent with empty-state rules.
+- Tests (Jest): formatting/unitization and missing-data behavior.
+
+### Phase 7: Playwright smoke coverage
+- Add `static-src/tests/smoke/storm-event-analyzer.spec.js`.
+- Cover metric selection, filter changes, warmup toggle, event selection, hyetograph highlight, NOAA-missing scenario, and error banner persistence.
+- Tests: run via `wctl run-npm smoke` with `SMOKE_RUN_PATH` or test-support run creation.
+
 ## Open Questions
-- Confirm how to add `sim_day_index` to the `wepp_cli.parquet` export so storms can join to `H.ebe.parquet`/`H.wat.parquet`/`H.soil.parquet`/`ebe_pw0.parquet` by day.
+- None currently. Add new questions here as data gaps or UI behaviors arise.
