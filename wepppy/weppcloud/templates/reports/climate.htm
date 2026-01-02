@@ -136,7 +136,7 @@
           <tr>
             <th scope="col">Metric</th>
             {% for interval in precip_frequency.recurrence %}
-              <th scope="col" class="wc-text-center">{{ interval }}</th>
+              <th scope="col" class="wc-text-right">{{ interval }}</th>
             {% endfor %}
             <th scope="col">Units</th>
           </tr>
@@ -179,7 +179,7 @@
             <tr>
               <th scope="col">Duration</th>
               {% for interval in atlas14_frequency.recurrence %}
-                <th scope="col" class="wc-text-center">{{ interval }}</th>
+                <th scope="col" class="wc-text-right">{{ interval }}</th>
               {% endfor %}
               <th scope="col">Units</th>
             </tr>

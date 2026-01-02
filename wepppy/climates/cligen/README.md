@@ -35,9 +35,43 @@
   - `wepp_peak_intensities_from_hyetograph()` builds WEPP's 5-minute double-exponential hyetograph and applies sliding windows for peak intensities (10/15/30/60-min). `cli2pat()` remains as a legacy alias; `_make_clinp()` emits the CLIGEN input files consumed by the binaries.
 - **Cligen runner**
   - `Cligen` ties everything together. Given a `StationMeta` and working directory it copies or localizes the `.par`, feeds CLIGEN 4.3/5.2/5.3/5.3.2 binaries (bundled under `bin/`), enforces timeouts (`_run_cligen_posix`), and produces `.cli` files for multi-year or observed runs.
+  - `Cligen.run_observed()` can optionally rescale `MX .5 P` using monthly means inferred from the `.prn` (see the `adjust_mx_pt5` section below). When enabled, it writes a dedicated adjusted `.par` and uses that file for the CLIGEN run.
   - `par_mod()` is the high-level localization workflow: pull monthly means from PRISM/EOBS/AGDC, recompute wet-day probabilities (optionally Daymet-driven), optionally scale `MX .5 P` by the monthly precipitation ratio, rewrite the `.par`, and run CLIGEN in-place. It returns the simulated monthlies for quick QA.
 - **NullStation utility**
   - Provides a sentinel `StationMeta` when no catalog entry exists so calling code can still render UI elements without null checks.
+
+## Storm Generation Internals: wi(12) / MX .5 P
+CLIGEN uses the `MX .5 P` line (aka `wi(12)` in `cligen.f`) to drive storm durations and peak intensities.
+
+- **Read + conversion (sta_parms)**: `wi(i)` is read from the `.par` as max 0.5‑hr intensity (in/hr). It is halved (`wi(i) = 0.5 * wi(i)`) to convert to a 30‑minute depth (in).
+- **Monthly processing (r5monb)**: run once per simulation. `wi(mo)` is smoothed by month and converted to a dimensionless ratio:  
+  `wi(mo) = mean_max_30min_depth / mean_rain_per_wet_day`  
+  The normalized `wi(mo)` replaces the original values and is used as the alpha input.
+- **Per wet day (alphb)**: computes `r1` (alpha_0.5), the fraction of daily depth in the max 30‑min interval, using the monthly `wi(mo)` plus a gamma deviate. The upper bound depends on depth:  
+  - If depth < 1 in, upper bound = 1.0  
+  - If depth >= 1 in, upper bound = `1 - exp(-tmax/ei)` with `tmax = 125/25.4` in and `ei = r(ida)`
+- **Continuous/stochastic runs (iopt 5/6)**: each wet day uses the single random variable `r1` from `alphb` to derive duration + peak intensity.
+- **Storm duration + peak intensity (day_gen, iopt >= 4)**:
+  - `dur = 3.99 / (-2 * ln(1 - r1))` (capped at 24 h)
+  - `r5p = -2 * xr * ln(1 - r1)` where `xr = r(ida) * 25.4` mm
+  - `r5p` is capped by `tymax(itype)`
+  - `xmav = r5p / (xr / dur)` and forced >= 1.01 (WEPP output uses `xmav`)
+  - `tpr` (time-to-peak) is drawn from the station CDF (`timepk`)
+- **Observed mode (iopt = 6)**: daily precip is read from the observed file; if missing (`9999`), it is generated. Either way, if `r(ida) > 0`, `alphb` is still called and uses `wi(mo)` to derive duration/peak intensity. Observed data does **not** bypass `wi`; it only supplies (or triggers generation of) the daily depth.
+- **Key routines**: `sta_parms`, `r5monb`, `alphb`, `day_gen` in `cligen.f`.
+
+## Adjust MX .5 P (adjust_mx_pt5)
+This optional adjustment rescales `MX .5 P` to better match localized/observed monthly precipitation without changing the daily precipitation totals.
+
+**User-facing behavior**
+- Advanced Climate option: **Adjust MX .5 P Values** (`climate.adjust_mx_pt5`).
+- Enabled: `MX .5 P` is scaled by monthly precipitation ratios, clamped to [0.5, 2.0]. Months with negligible precip (< 0.05 in) are left unchanged.
+- Disabled (default): original station `MX .5 P` is used.
+
+**Developer guidance**
+- `par_mod()` (`wepppy/climates/cligen/cligen.py`) applies the scaling when building localized PRISM/EOBS/AGDC climates. It uses the ratio of localized monthly totals to station monthly totals and rewrites the `.par` in-place.
+- `Cligen.run_observed()` computes monthly means from the `.prn` and writes a **new** adjusted `.par` named `{station}_mxpt5_{cli_stem}.par` in the working directory. The original `.par` is left untouched; the adjusted copy is passed to CLIGEN.
+- The adjustment only affects the `MX .5 P` line. It does **not** recompute `MEAN P` because observed runs derive daily precipitation directly from the `.prn`; keeping the original means avoids unintended metadata churn. If you want `MEAN P` aligned for reporting, update line 3 in the `.par` as a follow-on step.
 
 ## Single-Storm Builder (`single_storm.py`)
 - Replaces the legacy REST hop by invoking the bundled CLIGEN binaries directly.
