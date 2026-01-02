@@ -107,7 +107,7 @@ schema = pa.schema([
     # ...
 ], metadata={
     'dataset_version_major': '1',
-    'dataset_version_minor': '1'
+    'dataset_version_minor': '2'
 })
 ```
 
@@ -177,7 +177,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 The package maintains semantic versioning via `INTERCHANGE_VERSION` (defined in `versioning.py`):
 
 ```python
-INTERCHANGE_VERSION = Version(major=1, minor=1)
+INTERCHANGE_VERSION = Version(major=1, minor=2)
 ```
 
 **Version compatibility rules**:
@@ -188,8 +188,8 @@ Each interchange run writes `interchange_version.json`:
 ```json
 {
   "major": 1,
-  "minor": 1,
-  "version": "1.1"
+  "minor": 2,
+  "version": "1.2"
 }
 ```
 

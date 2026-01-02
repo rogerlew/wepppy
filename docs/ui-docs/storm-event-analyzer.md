@@ -340,7 +340,7 @@ Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; r
 - `H.soil.parquet`: `sim_day_index` now absolute (not day-of-year); soil writer accepts `start_year` and is wired through `run_wepp_hillslope_interchange`.
 - `ebe_pw0.parquet`: added absolute `sim_day_index` with CLI calendar lookup; `simulation_year` preserved.
 - `tc_out.parquet`: now written under `wepp/output/interchange/` when `tc_out.txt` exists.
-- Interchange version bumped to `1.1`; README updated to match major/minor semantics.
+- Interchange version bumped to `1.2`; README updated to match major/minor semantics.
 
 **Join guidance**
 - Preferred join key across climate, soil, water, and event outputs: `sim_day_index`.
@@ -371,7 +371,7 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 ### Phase 1 Handoff (2026-01-02)
 **Delivered**
 - Added query-engine payload helpers for Storm Event Analyzer under `wepppy/query_engine/storm_event_analyzer.py` with explicit dataset constants, intensity filtering, and T-1 joins.
-- Join strategy selects `sim_day_index` when interchange version >= 1.1 and enforces column presence; legacy runs fall back to `year + julian` using date arithmetic for T-1 joins.
+- Join strategy selects `sim_day_index` when interchange version >= 1.1 (current is 1.2) and enforces column presence; legacy runs fall back to `year + julian` using date arithmetic for T-1 joins.
 - Hydrology payload computes runoff coefficient from `ebe_pw0.parquet` runoff volume and area-weighted `H.ebe.parquet` precipitation volume; Tc payload is optional when `tc_out.parquet` is missing.
 - NOAA Atlas 14 CSV generation is wired into climate building; UI should still treat the file as optional when missing.
 - Unit tests cover join strategy selection, legacy fallback joins, intensity filter payloads, hydrology coefficient presence, and missing Tc behavior (`tests/query_engine/test_storm_event_analyzer.py`).

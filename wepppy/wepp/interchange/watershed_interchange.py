@@ -48,7 +48,7 @@ def run_wepp_watershed_interchange(
         (run_wepp_watershed_chan_peak_interchange, dict(start_year_kwargs)),
     ]
     if (base / "tc_out.txt").exists():
-        tasks.append((run_wepp_watershed_tc_out_interchange, {}))
+        tasks.append((run_wepp_watershed_tc_out_interchange, dict(start_year_kwargs)))
     if run_chnwb_interchange:
         tasks.append((run_wepp_watershed_chnwb_interchange, dict(start_year_kwargs)))
     if run_soil_interchange:

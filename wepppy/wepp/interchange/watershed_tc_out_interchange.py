@@ -9,7 +9,7 @@ from typing import Dict, List
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from ._utils import _parse_float
+from ._utils import _build_cli_calendar_lookup, _compute_sim_day_index, _parse_float
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 
@@ -25,6 +25,12 @@ SCHEMA = schema_with_version(
         [
             pa_field("day", pa.int16(), description="Julian day from tc_out.txt"),
             pa_field("year", pa.int16(), description="Calendar year"),
+            pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
+            pa_field(
+                "julian",
+                pa.int16(),
+                description="Julian day from tc_out.txt (alias of day)",
+            ),
             pa_field(
                 "Time of Conc (hr)",
                 pa.float64(),
@@ -90,6 +96,8 @@ def _write_tc_out_parquet(
     *,
     outlet_channel: int,
     chunk_size: int = CHUNK_SIZE,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
+    start_year: int | None = None,
 ) -> None:
     tmp_target = target.with_suffix(f"{target.suffix}.tmp")
     if tmp_target.exists():
@@ -104,6 +112,11 @@ def _write_tc_out_parquet(
 
     store = _init_column_store()
     row_counter = 0
+
+    calendar_start_year = min(calendar_lookup) if calendar_lookup else None
+    resolved_start_year = start_year if start_year is not None else calendar_start_year
+    normalize_sim_years = resolved_start_year is not None
+    sim_start_year = resolved_start_year
 
     try:
         with source.open("r") as stream:
@@ -125,12 +138,28 @@ def _write_tc_out_parquet(
 
                 try:
                     day = int(tokens[3])
-                    year = int(tokens[4])
+                    raw_year = int(tokens[4])
                 except ValueError:
                     continue
 
+                if normalize_sim_years and raw_year < 1000 and resolved_start_year is not None:
+                    year = resolved_start_year + raw_year - 1
+                else:
+                    year = raw_year
+                if sim_start_year is None:
+                    sim_start_year = year
+                julian = day
+                sim_day_index = _compute_sim_day_index(
+                    year,
+                    julian,
+                    start_year=sim_start_year,
+                    calendar_lookup=calendar_lookup,
+                )
+
                 store["day"].append(day)
                 store["year"].append(year)
+                store["sim_day_index"].append(sim_day_index)
+                store["julian"].append(julian)
                 store["Time of Conc (hr)"].append(_parse_float(tokens[6]))
                 store["Storm Duration (hr)"].append(_parse_float(tokens[7]))
                 store["Storm Peak (hr)"].append(_parse_float(tokens[8]))
@@ -159,10 +188,19 @@ def _write_tc_out_parquet(
                 raise
 
 
-def run_wepp_watershed_tc_out_interchange(wepp_output_dir: Path | str) -> Path | None:
+def run_wepp_watershed_tc_out_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    start_year: int | None = None,
+) -> Path | None:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
+
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
 
     source = base / TC_OUT_FILENAME
     if not source.exists():
@@ -177,5 +215,17 @@ def run_wepp_watershed_tc_out_interchange(wepp_output_dir: Path | str) -> Path |
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / TC_OUT_PARQUET
-    _write_tc_out_parquet(source, target, outlet_channel=outlet_channel)
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    if not calendar_lookup:
+        LOGGER.warning(
+            "No CLI calendar lookup available for %s; falling back to Gregorian day math.",
+            base,
+        )
+    _write_tc_out_parquet(
+        source,
+        target,
+        outlet_channel=outlet_channel,
+        calendar_lookup=calendar_lookup,
+        start_year=start_year,
+    )
     return target
