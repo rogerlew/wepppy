@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 from functools import partial
@@ -13,7 +12,12 @@ import pyarrow as pa
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
-from ._utils import _parse_float
+from ._utils import (
+    _build_cli_calendar_lookup,
+    _calendar_day_to_julian,
+    _compute_sim_day_index,
+    _parse_float,
+)
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 
@@ -103,6 +107,7 @@ SCHEMA = schema_with_version(
         [
             pa_field("wepp_id", pa.int32()),
             pa_field("year", pa.int16()),
+            pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
             pa_field("month", pa.int8()),
             pa_field("day_of_month", pa.int8()),
             pa_field("julian", pa.int16()),
@@ -129,6 +134,7 @@ EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
 BASE_FIELD_NAMES: Tuple[str, ...] = (
     "wepp_id",
     "year",
+    "sim_day_index",
     "month",
     "day_of_month",
     "julian",
@@ -190,7 +196,12 @@ def _extract_tokens(lines: List[str]) -> tuple[List[str], List[str], List[str]]:
     return header_tokens, unit_tokens, data_lines
 
 
-def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
+def _parse_ebe_file(
+    path: Path,
+    *,
+    start_year: int | None = None,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
+) -> pa.Table:
     match = EBE_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized EBE filename pattern: {path}")
@@ -210,6 +221,11 @@ def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
         )
     store = _init_column_store()
 
+    calendar_start_year = min(calendar_lookup) if calendar_lookup else None
+    resolved_start_year = start_year if start_year is not None else calendar_start_year
+    normalize_sim_years = resolved_start_year is not None
+    sim_start_year = resolved_start_year
+
     for raw_line in data_lines:
         tokens = raw_line.split()
         if len(tokens) != len(column_names):
@@ -218,17 +234,31 @@ def _parse_ebe_file(path: Path, *, start_year: int | None = None) -> pa.Table:
         day_of_month = int(tokens[0])
         month = int(tokens[1])
         raw_year = int(tokens[2])
-        if start_year is not None and raw_year < 1000:
-            year = start_year + raw_year - 1
+        if normalize_sim_years and raw_year < 1000 and resolved_start_year is not None:
+            year = resolved_start_year + raw_year - 1
         else:
             year = raw_year
-            
-        julian = (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+
+        julian = _calendar_day_to_julian(
+            year,
+            month,
+            day_of_month,
+            calendar_lookup=calendar_lookup,
+        )
+        if sim_start_year is None:
+            sim_start_year = year
+        sim_day_index = _compute_sim_day_index(
+            year,
+            julian,
+            start_year=sim_start_year,
+            calendar_lookup=calendar_lookup,
+        )
         water_year = int(determine_wateryear(year, julian))
 
         row: Dict[str, object] = {
             "wepp_id": wepp_id,
             "year": year,
+            "sim_day_index": sim_day_index,
             "month": month,
             "day_of_month": day_of_month,
             "julian": julian,
@@ -272,10 +302,8 @@ def run_wepp_hillslope_ebe_interchange(
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.ebe.parquet"
 
-    if start_year is None:
-        parser = _parse_ebe_file
-    else:
-        parser = partial(_parse_ebe_file, start_year=start_year)
+    calendar_lookup = _build_cli_calendar_lookup(base)
+    parser = partial(_parse_ebe_file, start_year=start_year, calendar_lookup=calendar_lookup)
 
     write_parquet_with_pool(ebe_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

@@ -69,7 +69,11 @@ def run_wepp_hillslope_interchange(
     if run_loss_interchange:
         results["loss"] = run_wepp_hillslope_loss_interchange(base, expected_hillslopes=expected_hillslopes)
     if run_soil_interchange:
-        results["soil"] = run_wepp_hillslope_soil_interchange(base, expected_hillslopes=expected_hillslopes)
+        results["soil"] = run_wepp_hillslope_soil_interchange(
+            base,
+            start_year=start_year,
+            expected_hillslopes=expected_hillslopes,
+        )
     if run_wat_interchange:
         results["wat"] = run_wepp_hillslope_wat_interchange(base, expected_hillslopes=expected_hillslopes)
 

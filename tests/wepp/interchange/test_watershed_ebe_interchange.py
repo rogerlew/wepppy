@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 
 import pyarrow.parquet as pq
+import pytest
 
 from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 
@@ -17,6 +18,7 @@ _watershed_ebe = load_module(
     "wepppy/wepp/interchange/watershed_ebe_interchange.py",
 )
 cleanup_import_state()
+pytestmark = pytest.mark.integration
 
 run_wepp_watershed_ebe_interchange = _watershed_ebe.run_wepp_watershed_ebe_interchange
 EBE_PARQUET = _watershed_ebe.EBE_PARQUET
@@ -56,6 +58,7 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
     assert set(df["element_id"].unique()) == {4}
     assert set(df.columns) == {
         "year",
+        "sim_day_index",
         "simulation_year",
         "month",
         "day_of_month",
@@ -75,6 +78,10 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
     assert first_row["simulation_year"] == 1
     assert first_row["year"] == start_year
     assert first_row["julian"] == 1
+    assert first_row["sim_day_index"] == 1
+    assert (
+        df.sort_values(["year", "julian"])["sim_day_index"].is_monotonic_increasing
+    )
 
 
 def test_watershed_ebe_interchange_supports_legacy_file(tmp_path: Path) -> None:

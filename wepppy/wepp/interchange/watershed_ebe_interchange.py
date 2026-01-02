@@ -16,6 +16,7 @@ from ._utils import (
     _wait_for_path,
     _parse_float,
     _build_cli_calendar_lookup,
+    _compute_sim_day_index,
     _calendar_day_to_julian,
     CalendarLookup,
 )
@@ -44,6 +45,7 @@ SCHEMA = schema_with_version(
     pa.schema(
         [
             pa_field("year", pa.int16(), description="Calendar year"),
+            pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day"),
             pa_field("simulation_year", pa.int16(), description="WEPP simulation year reported in output"),
             pa_field("month", pa.int8(), description="Calendar month"),
             pa_field("day_of_month", pa.int8(), description="Calendar day of month"),
@@ -98,6 +100,11 @@ def _write_ebe_parquet(
     store = _init_column_store()
     row_counter = 0
 
+    calendar_start_year = min(calendar_lookup) if calendar_lookup else None
+    resolved_start_year = start_year if start_year is not None else calendar_start_year
+    normalize_sim_years = resolved_start_year is not None
+    sim_start_year = resolved_start_year
+
     try:
         with source.open("r") as stream:
             for raw_line in stream:
@@ -120,14 +127,24 @@ def _write_ebe_parquet(
                 day_of_month = int(tokens[0])
                 month = int(tokens[1])
                 sim_year = int(tokens[2])
-                if start_year is not None and sim_year < 1000:
-                    year = start_year + sim_year - 1
+                if normalize_sim_years and sim_year < 1000 and resolved_start_year is not None:
+                    year = resolved_start_year + sim_year - 1
                 else:
                     year = sim_year
+                if sim_start_year is None:
+                    sim_start_year = year
 
                 julian = _calendar_day_to_julian(year, month, day_of_month, calendar_lookup=calendar_lookup)
 
                 store["year"].append(year)
+                store["sim_day_index"].append(
+                    _compute_sim_day_index(
+                        year,
+                        julian,
+                        start_year=sim_start_year,
+                        calendar_lookup=calendar_lookup,
+                    )
+                )
                 store["simulation_year"].append(sim_year)
                 store["month"].append(month)
                 store["day_of_month"].append(day_of_month)

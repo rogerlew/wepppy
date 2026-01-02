@@ -1,4 +1,5 @@
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -11,6 +12,7 @@ load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
 concurrency_module = load_module("wepppy.wepp.interchange.concurrency", "wepppy/wepp/interchange/concurrency.py")
 ebe_module = load_module("wepppy.wepp.interchange.hill_ebe_interchange", "wepppy/wepp/interchange/hill_ebe_interchange.py")
 cleanup_import_state()
+pytestmark = pytest.mark.integration
 
 
 @pytest.mark.parametrize(
@@ -58,7 +60,8 @@ def test_ebe_interchange_writes_parquet(layout_name, extra_measurements, tmp_pat
 
     monkeypatch.setattr(ebe_module, "write_parquet_with_pool", _wrapper)
 
-    target = ebe_module.run_wepp_hillslope_ebe_interchange(workdir, start_year=2008)
+    start_year = 2008
+    target = ebe_module.run_wepp_hillslope_ebe_interchange(workdir, start_year=start_year)
     assert target.exists()
     assert calls
     assert all(p.name.lower().endswith(".ebe.dat") for p in calls[0]["files"])
@@ -78,6 +81,10 @@ def test_ebe_interchange_writes_parquet(layout_name, extra_measurements, tmp_pat
     assert first["day_of_month"] == 29
     assert first["julian"] == 60
     assert first["water_year"] == 2012
+    assert df["sim_day_index"].tolist() == [
+        (datetime(2012, 2, 29) - datetime(start_year, 1, 1)).days + 1,
+        (datetime(2012, 3, 1) - datetime(start_year, 1, 1)).days + 1,
+    ]
 
     if layout_name == "standard":
         assert df["Det-Len"].isna().all()

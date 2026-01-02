@@ -13,7 +13,12 @@ from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
 
 from .schema_utils import pa_field
-from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float
+from ._utils import (
+    _build_cli_calendar_lookup,
+    _compute_sim_day_index,
+    _julian_to_calendar,
+    _parse_float,
+)
 from .versioning import schema_with_version
 
 SOIL_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
@@ -158,7 +163,12 @@ def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
         store[name].append(row[name])
 
 
-def _parse_soil_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
+def _parse_soil_file(
+    path: Path,
+    *,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
+    start_year: int | None = None,
+) -> pa.Table:
     match = SOIL_FILE_RE.match(path.name)
     if not match:
         raise ValueError(f"Unrecognized SOIL filename pattern: {path}")
@@ -172,6 +182,11 @@ def _parse_soil_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, i
     expected_columns = len(header_tokens)
     store = _init_column_store()
 
+    calendar_start_year = min(calendar_lookup) if calendar_lookup else None
+    resolved_start_year = start_year if start_year is not None else calendar_start_year
+    normalize_sim_years = resolved_start_year is not None
+    sim_start_year = resolved_start_year
+
     for raw_line in data_lines:
         if not raw_line.strip():
             continue
@@ -181,16 +196,28 @@ def _parse_soil_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, i
 
         ofe = int(tokens[0])
         julian = int(tokens[1])
-        year = int(tokens[2])
+        raw_year = int(tokens[2])
+        if normalize_sim_years and raw_year < 1000 and resolved_start_year is not None:
+            year = resolved_start_year + raw_year - 1
+        else:
+            year = raw_year
+        if sim_start_year is None:
+            sim_start_year = year
 
         month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
         water_year = int(determine_wateryear(year, julian))
+        sim_day_index = _compute_sim_day_index(
+            year,
+            julian,
+            start_year=sim_start_year,
+            calendar_lookup=calendar_lookup,
+        )
 
         row: Dict[str, object] = {
             "wepp_id": wepp_id,
             "ofe_id": ofe,
             "year": year,
-            "sim_day_index": int(tokens[1]),
+            "sim_day_index": sim_day_index,
             "julian": julian,
             "month": month,
             "day_of_month": day_of_month,
@@ -210,11 +237,19 @@ def _parse_soil_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, i
 
 
 def run_wepp_hillslope_soil_interchange(
-    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+    wepp_output_dir: Path | str,
+    *,
+    start_year: int | None = None,
+    expected_hillslopes: int | None = None,
 ) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
+
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
 
     soil_files = sorted(base.glob("H*.soil.dat"))
     if expected_hillslopes is not None and len(soil_files) != expected_hillslopes:
@@ -226,7 +261,7 @@ def run_wepp_hillslope_soil_interchange(
     target_path = interchange_dir / "H.soil.parquet"
 
     calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    parser = partial(_parse_soil_file, calendar_lookup=calendar_lookup)
+    parser = partial(_parse_soil_file, calendar_lookup=calendar_lookup, start_year=start_year)
 
     write_parquet_with_pool(soil_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 EBE_FILENAME: str
 EBE_PARQUET: str
@@ -20,6 +20,7 @@ def _write_ebe_parquet(
     start_year: Optional[int] = ...,
     chunk_size: int = ...,
     legacy_element_id: Optional[int] = ...,
+    calendar_lookup: Dict[int, List[Tuple[int, int]]] | None = ...,
 ) -> None: ...
 
 def _collect_hillslope_wepp_ids(base: Path) -> Set[int]: ...

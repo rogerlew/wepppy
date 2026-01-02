@@ -57,7 +57,7 @@ class Version:
         return cls(major=major, minor=minor)
 
 
-INTERCHANGE_VERSION = Version(major=1, minor=0)
+INTERCHANGE_VERSION = Version(major=1, minor=1)
 
 
 def manifest_path(interchange_dir: Path) -> Path:

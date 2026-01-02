@@ -14,6 +14,7 @@ soil_module = load_module("wepppy.wepp.interchange.hill_soil_interchange", "wepp
 cleanup_import_state()
 
 PROFILE_DATA_ROOT = Path("/workdir/wepppy-test-engine-data/profiles")
+pytestmark = pytest.mark.integration
 
 
 def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
@@ -35,7 +36,7 @@ def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     ]
     rows = [
         "  1   15   2001   66.01  40.00  17.65   0.20   0.05 100.00   0.04   0.13   2.00    0.46   30.56",
-        "  2  200   2001   55.50  20.00  25.00   0.18   0.04  80.00   0.03   0.10   1.50    0.60   40.00",
+        "  2  200   2002   55.50  20.00  25.00   0.18   0.04  80.00   0.03   0.10   1.50    0.60   40.00",
     ]
 
     h1_path = workdir / "H1.soil.dat"
@@ -62,7 +63,8 @@ def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     df = table.to_pandas()
     assert set(df["wepp_id"].unique()) == {1}
     assert list(df["ofe_id"]) == [1, 2]
-    assert (df["julian"] == df["sim_day_index"]).all()
+    assert df.loc[0, "sim_day_index"] == 15
+    assert df.loc[1, "sim_day_index"] == 565
 
     first = df.iloc[0]
     assert first["month"] == 1

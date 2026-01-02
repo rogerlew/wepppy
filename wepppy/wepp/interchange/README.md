@@ -17,7 +17,7 @@ This package **transforms WEPP text outputs into Apache Arrow/Parquet tables** w
 
 **Solution Architecture**:
 - **Single parse, multiple reads**: Transform text → Parquet once after simulation, query indefinitely
-- **Schema versioning**: Embed `dataset_version_major/minor/patch` metadata; incompatible changes trigger automatic cleanup
+- **Schema versioning**: Embed `dataset_version_major/minor` metadata; incompatible changes trigger automatic cleanup
 - **Unit-aware metadata**: Column metadata includes `units` and `description` for self-documenting datasets
 - **Parallel processing**: Process pool fan-out for high-volume hillslope files (respects `NCPU`)
 - **Atomic writes**: Temp file pattern ensures partial writes never corrupt the interchange directory
@@ -35,7 +35,7 @@ This package **transforms WEPP text outputs into Apache Arrow/Parquet tables** w
 - **Derived products**: `totalwatsed3` joins PASS + WAT with DuckDB for watershed-wide daily summaries; DSS export tooling for HEC integration
 - **Deep dive**: see [README.dss_export.md](README.dss_export.md) for the full DSS export + browse guide (totalwatsed channels and peak-flow records).
 - **Documentation generation**: Auto-generate Markdown schema previews with sample rows for human-readable interchange inspection
-- **Version management**: Semantic versioning with major/minor/patch compatibility checks and automatic cleanup of stale schemas
+- **Version management**: Semantic versioning with major/minor compatibility checks and automatic cleanup of stale schemas
 
 ## Architecture
 
@@ -106,9 +106,8 @@ schema = pa.schema([
     pa.field('runoff', pa.float64(), metadata={'units': 'm', 'description': 'Runoff depth'}),
     # ...
 ], metadata={
-    'dataset_version_major': '2',
-    'dataset_version_minor': '1',
-    'dataset_version_patch': '0'
+    'dataset_version_major': '1',
+    'dataset_version_minor': '1'
 })
 ```
 
@@ -178,21 +177,19 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 The package maintains semantic versioning via `INTERCHANGE_VERSION` (defined in `versioning.py`):
 
 ```python
-INTERCHANGE_VERSION = (2, 1, 0)  # (major, minor, patch)
+INTERCHANGE_VERSION = Version(major=1, minor=1)
 ```
 
 **Version compatibility rules**:
 - **Major version change**: Incompatible schema (column removal, type change) → triggers `remove_incompatible_interchange()`
 - **Minor version change**: Backward-compatible addition (new columns with defaults)
-- **Patch version change**: Bug fixes, no schema impact
 
 Each interchange run writes `interchange_version.json`:
 ```json
 {
-  "major": 2,
+  "major": 1,
   "minor": 1,
-  "patch": 0,
-  "timestamp": "2025-10-23T22:15:30.123456"
+  "version": "1.1"
 }
 ```
 

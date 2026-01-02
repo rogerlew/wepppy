@@ -117,22 +117,22 @@ If any dataset is missing, add a query-engine agent or produce a derived parquet
 
 1. **Storm event summary** (per event)
    - Source: `climate/wepp_cli.parquet` (storm intensity, parameters, depth, duration).
-   - Required columns: `event_id` (derive if missing), `event_date` (or `year` + `month` + `day_of_month`), `sim_day_index` (absolute), `year`, `julian`, `duration_hours`, `depth_mm`, `tp`, `ip`, `peak_intensity_10`, `peak_intensity_15`, `peak_intensity_30`, `peak_intensity_60`.
+   - Required columns: `sim_day_index` (absolute), `year`, `julian`, `month`, `day_of_month` (or a derived `event_date`), `duration_hours`, `depth_mm`, `tp`, `ip`, `peak_intensity_10`, `peak_intensity_15`, `peak_intensity_30`, `peak_intensity_60`.
 
 2. **Soil saturation (T-1)**  
    - Source: `H.soil.parquet` (per hillslope, per day).
    - Aggregate: mean saturation across hillslopes for day = event_date - 1.
-   - Join: `H.soil.parquet` uses day-of-year `sim_day_index` (same as `julian`), so join by `year + julian`.
+   - Join: use absolute `sim_day_index`; fall back to `year + julian` for legacy runs.
 
 3. **Snow-Water (T-1)**  
    - Source: `H.wat.parquet` (`Snow-Water` column, mm).
    - Aggregate: mean snow water across hillslopes for day = event_date - 1.
-   - Join: `H.wat.parquet` includes absolute `sim_day_index` (also has `year` + `julian`), so join by either key.
+   - Join: use `sim_day_index`; fall back to `year + julian` for legacy runs.
 
 4. **Hydrology metrics**  
    - Source: `ebe_pw0.parquet` (watershed), `H.ebe.parquet` (hillslope event depth).
    - Required columns: runoff volume, peak discharge (`peak_runoff`), sediment yield, runoff coefficient.
-   - Join: `H.ebe.parquet` and `ebe_pw0.parquet` do not include `sim_day_index`; join by `year + julian`.
+   - Join: use `sim_day_index`; fall back to `year + julian` for legacy runs.
    - Peak discharge comes from `ebe_pw0.parquet.peak_runoff`; do not use `chan.out.parquet` (dual formats).
    - Runoff coefficient (event, spatialized): use outlet `runoff_volume` from `ebe_pw0.parquet` (driven by hillslope runoff volumes) and compute total event precipitation volume by area-weighting hillslope `H.ebe.parquet` `Precip` values. Formula: `C = runoff_volume_outlet_m3 / precip_volume_m3`, where `precip_volume_m3 = sum(Precip_mm * hillslope_area_m2 / 1000)`. This preserves spatialized climate while keeping the routed outlet runoff.
 
@@ -147,8 +147,10 @@ If any dataset is missing, add a query-engine agent or produce a derived parquet
     { "path": "watershed/hillslopes.parquet", "alias": "hs" }
   ],
   "columns": [
-    "ev.event_id",
-    "ev.event_date",
+    "ev.sim_day_index",
+    "ev.year",
+    "ev.month",
+    "ev.day_of_month",
     "ev.duration_hours",
     "ev.depth_mm",
     "ev.peak_intensity_10"
@@ -169,7 +171,7 @@ Storm traces must reproduce WEPP's 5-minute dual-exponential model in the fronte
 - Inputs: daily storm parameters (depth, duration, time-to-peak, peak intensity) from `climate/wepp_cli.parquet`.
 - Output: per-event 5-minute cumulative depth series.
 - Store or derive a time series per event:
-  - `event_id`, `elapsed_hours`, `cumulative_depth_mm`.
+  - `sim_day_index`, `elapsed_hours`, `cumulative_depth_mm`.
   - Chart renders multiple event series in one plot.
 - Authoritative implementation (Fortran, wepp-forest):
   - `disag.for` (subroutine `disag`) sets up the 5-minute step function and calls `dblex`.
@@ -192,7 +194,7 @@ Suggested state keys:
   },
   filterRangePct: 10,
   eventRows: [],
-  selectedEventId: null,
+  selectedEventSimDayIndex: null,
   hyetographSeries: [],
   hydrologySummary: null,
   unitPrefs: { ... } // from unitizer
@@ -209,7 +211,7 @@ wepppy/weppcloud/static/js/storm-event-analyzer/
 ├── data/
 │   ├── query-engine.js            # Reuse or wrap gl-dashboard helper
 │   ├── event-data.js              # Fetch/filter storms, hydrate table rows
-│   └── hyetograph-data.js         # Fetch series per event_id
+│   └── hyetograph-data.js         # Fetch series per sim_day_index
 ├── ui/
 │   ├── metric-table.js            # Click handlers for top tables
 │   ├── filter-range.js            # +/- range radio group
@@ -255,6 +257,7 @@ Phases should be staffed by fresh agents with targeted prompts. Reuse agents onl
 - No tests; pure planning.
 
 ### Phase 0 Handoff (2026-01-02)
+Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; retained for historical context.
 **Test target**
 - URL: `https://wc.bearhive.duckdns.org/weppcloud/runs/chinless-half-hour/disturbed9002/storm-event-analyzer`
 - Run root: `/wc1/runs/ch/chinless-half-hour/`
@@ -269,7 +272,7 @@ Phases should be staffed by fresh agents with targeted prompts. Reuse agents onl
 | --- | --- | --- | --- |
 | `wepp_cli_pds_mean_metric.csv` | present | `/wc1/runs/ch/chinless-half-hour/climate/wepp_cli_pds_mean_metric.csv` | ARIs 1,2,5,10,25; rows include depth, duration, 10/15/30/60-min intensities; units mm, hours, mm/hour. |
 | `atlas14_intensity_pds_mean_metric.csv` | present | `/wc1/runs/ch/chinless-half-hour/climate/atlas14_intensity_pds_mean_metric.csv` | ARIs 1..1000; durations include 10/15/30/60-min; take ARI intersection with WEPP table. |
-| `climate/wepp_cli.parquet` | present | `/wc1/runs/ch/chinless-half-hour/climate/wepp_cli.parquet` | `sim_day_index` (absolute 1..16437), `julian` (day-of-year), `year`, `month`, `day_of_month`, `prcp` (mm), `dur` (hours), `tp`, `ip`, `peak_intensity_10/15/30/60`, `storm_duration_hours` == `dur`. No `event_id`. |
+| `climate/wepp_cli.parquet` | present | `/wc1/runs/ch/chinless-half-hour/climate/wepp_cli.parquet` | `sim_day_index` (absolute 1..16437), `julian` (day-of-year), `year`, `month`, `day_of_month`, `prcp` (mm), `dur` (hours), `tp`, `ip`, `peak_intensity_10/15/30/60`, `storm_duration_hours` == `dur`. |
 | `H.soil.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.soil.parquet` | `sim_day_index` == `julian` (day-of-year, resets each year), `year`, `month`, `day_of_month`, `Saturation` (0..1 fraction). Join via `year + julian` for T-1. |
 | `H.wat.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.wat.parquet` | `sim_day_index` absolute (matches climate), `julian`, `Snow-Water` (mm). Join via `sim_day_index` or `year + julian`. |
 | `H.ebe.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.ebe.parquet` | No `sim_day_index`; has `julian`, `year`, `month`, `day_of_month`, `Precip`, `Runoff`, `Sed.Del`. |
@@ -278,9 +281,8 @@ Phases should be staffed by fresh agents with targeted prompts. Reuse agents onl
 | `watershed/hillslopes.parquet` | present | `/wc1/runs/ch/chinless-half-hour/watershed/hillslopes.parquet` | `area` and `wepp_id` available for runoff coefficient aggregation. |
 
 **Event identity / join notes**
-- `sim_day_index` is the preferred event identity; available in `wepp_cli.parquet` and `H.wat.parquet` (absolute), but **not** in `H.ebe.parquet` or `ebe_pw0.parquet`.
-- `H.soil.parquet` uses day-of-year `sim_day_index` (equal to `julian`), so join soil data by `year + julian`, not by absolute `sim_day_index`.
-- `julian` is now present in `wepp_cli.parquet`, `H.soil.parquet`, `H.wat.parquet`, `H.ebe.parquet`, and `ebe_pw0.parquet`, enabling a uniform `year + julian` join when needed.
+- Use absolute `sim_day_index` as the canonical event key once interchange normalization is applied.
+- For legacy runs that have not been regenerated, join on `year + julian`.
 
 **Hyetograph notes (Fortran mapping)**
 - Sources: `/workdir/wepp-forest/src/disag.for`, `/workdir/wepp-forest/src/dblex.for`, `/workdir/wepp-forest/src/eqroot.for`.
@@ -292,7 +294,6 @@ Phases should be staffed by fresh agents with targeted prompts. Reuse agents onl
 **Missing columns / unit notes**
 - `Saturation` is 0..1 fraction (convert to percent for display).
 - `storm_duration_hours` equals `dur` (hours); `peak_intensity_*` duplicates the labeled intensity columns.
-- `event_id` is not present in any source dataset; derive from `sim_day_index` or `year + julian`.
 
 **Risks / blockers**
 - `tc_out.parquet` still missing from `wepp/output/interchange/`, so Tc display must remain optional or `n/a`.
@@ -301,23 +302,63 @@ Phases should be staffed by fresh agents with targeted prompts. Reuse agents onl
 
 **Suggested follow-ups for Phase 1**
 - Generate `tc_out.parquet` in `wepp/output/interchange/` (confirm `watershed_tc_out_interchange.py` runs post-WEPP).
-- Add a derived event summary parquet with `sim_day_index`, `year`, `julian`, and `event_id` for Query Engine joins.
-- Standardize joins on `year + julian` for soil/ebe datasets and `sim_day_index` for climate/water datasets.
-- Decide whether to store a canonical `event_id` (string or int) for UI selection state.
+- Standardize joins on `sim_day_index` for normalized datasets and `year + julian` for legacy runs.
 
 **Phase 1 readiness**
-- Ready with caveats: `julian` and `sim_day_index` are now available in climate, but Tc parquet is still missing and event identity needs a derived join for `H.ebe`/`ebe_pw0`.
+- Ready with caveats: Tc parquet is still missing and legacy runs require `year + julian` joins until interchange is regenerated.
+
+### Phase 0b: Interchange normalization (absolute sim_day_index)
+- Goal: Normalize `sim_day_index` across `H.soil.parquet`, `H.ebe.parquet`, and `ebe_pw0.parquet` so the Storm Event Analyzer can key events by `sim_day_index` alone.
+- Scope:
+  - Add absolute `sim_day_index` to `H.ebe.parquet` rows and schema.
+  - Convert `H.soil.parquet` `sim_day_index` from day-of-year to absolute day since simulation start.
+  - Add absolute `sim_day_index` to `ebe_pw0.parquet` rows and schema.
+  - Use `_compute_sim_day_index` with CLI calendar lookup for non-Gregorian years.
+  - Ensure `run_wepp_hillslope_interchange` and `run_wepp_watershed_interchange` pass `start_year` into soil/ebe interchange writers.
+  - Generate `tc_out.parquet` under `wepp/output/interchange/` if missing when `tc_out.txt` exists.
+- Versioning:
+  - Bump `INTERCHANGE_VERSION` minor (schema additions).
+  - Update `wepppy/wepp/interchange/README.md` if it still documents tuple/patch semantics.
+- Tests:
+  - Update soil interchange tests to assert absolute `sim_day_index` (not equal to `julian`).
+  - Add/extend tests for `H.ebe.parquet` and `ebe_pw0.parquet` to assert `sim_day_index` presence, ordering, and calendar correctness.
+  - Run `wctl run-pytest tests/wepp/interchange/...` for the modified modules.
+
+### Phase 0b Handoff (2026-01-02)
+**Objective**
+- Normalize `sim_day_index` to be absolute and CLI-calendar aware across event datasets so the UI can use it as the sole event key.
+
+**Changes delivered**
+- `climate/wepp_cli.parquet`: now includes `julian` and absolute `sim_day_index` (1-indexed since simulation start) in both Climate NoDb export and interchange fallback export.
+- `H.ebe.parquet`: added absolute `sim_day_index` using `_compute_sim_day_index` with CLI calendar lookup.
+- `H.soil.parquet`: `sim_day_index` now absolute (not day-of-year); soil writer accepts `start_year` and is wired through `run_wepp_hillslope_interchange`.
+- `ebe_pw0.parquet`: added absolute `sim_day_index` with CLI calendar lookup; `simulation_year` preserved.
+- `tc_out.parquet`: now written under `wepp/output/interchange/` when `tc_out.txt` exists.
+- Interchange version bumped to `1.1`; README updated to match major/minor semantics.
+
+**Join guidance**
+- Preferred join key across climate, soil, water, and event outputs: `sim_day_index`.
+- For legacy runs without regenerated interchange outputs, fall back to `year + julian` joins.
+
+**Tests run**
+- `wctl run-pytest tests/wepp/interchange/test_soil_interchange.py`
+- `wctl run-pytest tests/wepp/interchange/test_watershed_ebe_interchange.py`
+- `wctl run-pytest tests/wepp/interchange/test_ebe_interchange.py`
+
+**Remaining follow-ups**
+- Re-run interchange on existing runs to materialize the new columns and updated version manifest.
+- Confirm `tc_out.parquet` appears under `wepp/output/interchange/` after rerun.
 
 ### Phase 1: Query Engine and data products
-- Ensure the event summary includes `event_id` (derive if missing), `sim_day_index` (absolute), `year`, and `julian`.
-- Normalize join strategy: `sim_day_index` for climate + `H.wat.parquet`, `year + julian` for `H.soil.parquet`, `H.ebe.parquet`, and `ebe_pw0.parquet`.
+- Ensure the event summary includes `sim_day_index` (absolute), `year`, `julian`, and calendar date fields (`month`, `day_of_month` or derived `event_date`).
+- Normalize join strategy: `sim_day_index` across climate, `H.wat.parquet`, `H.soil.parquet`, `H.ebe.parquet`, and `ebe_pw0.parquet`, with `year + julian` fallback for legacy runs.
 - Add or confirm Query Engine agents for:
   - Event filtering by intensity range.
   - Soil saturation T-1 (mean across hillslopes).
   - Snow-water T-1 (mean across hillslopes).
   - Hydrology metrics (runoff volume, peak discharge, sediment yield, runoff coefficient).
   - Tc lookup when `tc_out.parquet` exists.
-- Generate `tc_out.parquet` under `wepp/output/interchange/` if the interchange step is currently missing.
+- Verify `tc_out.parquet` exists after interchange reruns; keep Tc optional when missing.
 - Unit tests: Python tests for agent outputs, including missing dataset handling.
 
 ### Phase 2: Template skeleton and layout
