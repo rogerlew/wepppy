@@ -882,7 +882,11 @@ class Climate(NoDbBase):
             self._observed_clis_wc = _observed_clis_wc
             self._future_clis_wc = _future_clis_wc
 
-            self._use_gridmet_wind_when_applicable = self.config_get_bool('climate', 'use_gridmet_wind_when_applicable')
+            self._use_gridmet_wind_when_applicable = self.config_get_bool(
+                'climate',
+                'use_gridmet_wind_when_applicable',
+            )
+            self._adjust_mx_pt5 = self.config_get_bool('climate', 'adjust_mx_pt5', False)
             self._catalog_id = None
 
     @property
@@ -892,6 +896,10 @@ class Climate(NoDbBase):
     @property
     def use_gridmet_wind_when_applicable(self) -> bool:
         return getattr(self, '_use_gridmet_wind_when_applicable', True)
+
+    @property
+    def adjust_mx_pt5(self) -> bool:
+        return getattr(self, '_adjust_mx_pt5', False)
 
     @property
     def catalog_id(self) -> Optional[str]:
@@ -906,6 +914,11 @@ class Climate(NoDbBase):
     @nodb_setter
     def use_gridmet_wind_when_applicable(self, value: bool) -> None:
         self._use_gridmet_wind_when_applicable = value
+
+    @adjust_mx_pt5.setter
+    @nodb_setter
+    def adjust_mx_pt5(self, value: bool) -> None:
+        self._adjust_mx_pt5 = value
 
     @property
     def precip_scale_reference(self) -> Optional[str]:
@@ -2428,7 +2441,8 @@ class Climate(NoDbBase):
 
             self.monthlies = prism_mod(par=climatestation,
                                      years=years, lng=lng, lat=lat, wd=cli_dir,
-                                     logger=self.logger, nwds_method='')
+                                     logger=self.logger, nwds_method='',
+                                     adjust_mx_pt5=self.adjust_mx_pt5)
 
     def _prism_revision(self, verbose: bool = False):
         wd         = self.wd

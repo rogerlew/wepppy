@@ -23,11 +23,12 @@ _rowfmt = lambda x : '\t'.join(['%0.2f' % v for v in x])
 
 
 def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
-              nwds_method='', randseed=None, cliver=None, suffix='', logger=None):
+              nwds_method='', randseed=None, cliver=None, suffix='', logger=None,
+              adjust_mx_pt5=False):
 
     return par_mod(par=par, years=years, lng=lng, lat=lat, wd=wd, monthly_dataset='prism',
                    nwds_method=nwds_method, randseed=randseed, cliver=cliver, suffix=suffix,
-                   logger=logger)
+                   logger=logger, adjust_mx_pt5=adjust_mx_pt5)
 
 
 def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,

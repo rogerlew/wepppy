@@ -39,6 +39,7 @@ ksflag=false
 cligen_db = "2015_stations.db"
 daymet_observed  = "daymet/v4"
 use_gridmet_wind_when_applicable = true
+adjust_mx_pt5 = false
 
 [disturbed]
 sol_ver=7778

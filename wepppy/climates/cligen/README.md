@@ -35,7 +35,7 @@
   - `wepp_peak_intensities_from_hyetograph()` builds WEPP's 5-minute double-exponential hyetograph and applies sliding windows for peak intensities (10/15/30/60-min). `cli2pat()` remains as a legacy alias; `_make_clinp()` emits the CLIGEN input files consumed by the binaries.
 - **Cligen runner**
   - `Cligen` ties everything together. Given a `StationMeta` and working directory it copies or localizes the `.par`, feeds CLIGEN 4.3/5.2/5.3/5.3.2 binaries (bundled under `bin/`), enforces timeouts (`_run_cligen_posix`), and produces `.cli` files for multi-year or observed runs.
-  - `par_mod()` is the high-level localization workflow: pull monthly means from PRISM/EOBS/AGDC, recompute wet-day probabilities (optionally Daymet-driven), rewrite the `.par`, and run CLIGEN in-place. It returns the simulated monthlies for quick QA.
+  - `par_mod()` is the high-level localization workflow: pull monthly means from PRISM/EOBS/AGDC, recompute wet-day probabilities (optionally Daymet-driven), optionally scale `MX .5 P` by the monthly precipitation ratio, rewrite the `.par`, and run CLIGEN in-place. It returns the simulated monthlies for quick QA.
 - **NullStation utility**
   - Provides a sentinel `StationMeta` when no catalog entry exists so calling code can still render UI elements without null checks.
 

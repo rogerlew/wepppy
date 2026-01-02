@@ -2166,6 +2166,7 @@ def par_mod(
     suffix: str = '',
     logger=None,
     version: Union[str, int] = '2015',
+    adjust_mx_pt5: bool = False,
 ) -> dict[str, list[float]]:
     """Localize a station to PRISM/EOBS/AGDC means and rerun CLIGEN.
 
@@ -2182,6 +2183,8 @@ def par_mod(
         suffix: Appended to generated filenames (e.g., `_custom`).
         logger: Optional logging object that receives progress messages.
         version: Station catalog selector passed to `CligenStationsManager`.
+        adjust_mx_pt5: Scale `MX .5 P` monthly intensities using the ratio of
+            localized monthly precipitation to station monthly precipitation.
 
     Returns:
         Dictionary with localized monthlies as produced by `ClimateFile`.
@@ -2232,7 +2235,13 @@ def par_mod(
         else:
             raise Exception
 
-        prism_ppts = [max(0.01, v) for v in prism_ppts]
+        prism_ppts = np.array([max(0.01, v) for v in prism_ppts], dtype=float)
+        delta = np.divide(
+            prism_ppts,
+            par_monthlies,
+            out=np.ones_like(prism_ppts, dtype=float),
+            where=par_monthlies > 0.0,
+        )
 
         fp_log.write(f'monthly_dataset = {monthly_dataset} at ({lng}, {lat})\n')
         fp_log.write(f'prism_ppts (in) = {prism_ppts}\n')
@@ -2251,7 +2260,6 @@ def par_mod(
 
         else:
             station_nwds = days_in_mo * (station.pwds / (1.0 - station.pwws + station.pwds))
-            delta = prism_ppts / par_monthlies
             nwds = [float(v)for v in station_nwds]
 
             # clamp between 50% and 200% of original value
@@ -2321,6 +2329,23 @@ def par_mod(
         s2.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
         s2.lines[8] = ' TMAX AV ' + _row_formatter(prism_tmaxs) + '\r\n'
         s2.lines[9] = ' TMIN AV ' + _row_formatter(prism_tmins) + '\r\n'
+        if adjust_mx_pt5 and len(s2.lines) > 14 and 'MX .5 P' in s2.lines[14]:
+            mx_line = s2.lines[14]
+            mx_pt5 = np.array(
+                [float(mx_line[-73:][i * 6:i * 6 + 6]) for i in range(12)],
+                dtype=float,
+            )
+            mx_pt5_adjusted = mx_pt5.copy()
+            for i, (scale, prism_p, cligen_p) in enumerate(zip(delta, prism_ppts, par_monthlies)):
+                if not np.isfinite(scale) or prism_p < 0.05 or cligen_p < 0.05:
+                    continue
+                # Scale by localized monthly precipitation, clamped to +/- 2x.
+                factor = min(2.0, max(0.5, float(scale)))
+                mx_pt5_adjusted[i] = mx_pt5[i] * factor
+            prefix = mx_line[:8]
+            s2.lines[14] = f'{prefix}{_row_formatter(mx_pt5_adjusted)}\r\n'
+            fp_log.write(f'mx_pt5 station (in/hr) = {mx_pt5}\n')
+            fp_log.write(f'mx_pt5 adjusted (in/hr) = {mx_pt5_adjusted}\n')
 
         s2.write(par_fn)
 

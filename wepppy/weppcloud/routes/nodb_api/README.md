@@ -96,6 +96,7 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/view/au_heuristic_stations[/]` | `GET` | Climate.climatestation, Climate.find_au_heuristic_stations | `ignore_lock=True` AU heuristic lookup |
 | `/runs/<string:runid>/<config>/view/climate_monthlies[/]` | `GET` | Climate.climatestation_meta | — |
 | `/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable[/]` | `POST` | Climate.use_gridmet_wind_when_applicable (set) | Boolean payload normalized via `parse_request_payload` |
+| `/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5[/]` | `POST` | Climate.adjust_mx_pt5 (set) | Boolean payload normalized via `parse_request_payload` |
 
 ### Debris Flow (`wepppy.weppcloud.routes.nodb_api.debris_flow_bp`)
 - **NoDb singletons**: [Ron](../../../nodb/core/ron.py), [DebrisFlow](../../../nodb/mods/debris_flow.py), [Unitizer](../../../nodb/unitizer.py)

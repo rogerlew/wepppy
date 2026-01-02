@@ -508,6 +508,13 @@
            help="Applies GRIDMET wind fields for observed datasets that require wind data.",
            attrs={"class": "disable-readonly", "data-climate-action": "gridmet-wind"}
          ) }}
+      {{ ui.checkbox_field(
+           "checkbox_adjust_mx_pt5",
+           "Adjust MX .5 P Values",
+           checked=climate.adjust_mx_pt5,
+           help="Scales monthly MX .5 P values using localized precipitation totals.",
+           attrs={"class": "disable-readonly", "data-climate-action": "adjust-mx-pt5"}
+         ) }}
     </section>
 
     {% set precip_mode = climate.precip_scaling_mode.value %}

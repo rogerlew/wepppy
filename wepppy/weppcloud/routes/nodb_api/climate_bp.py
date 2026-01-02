@@ -180,7 +180,7 @@ def set_climatestation_mode(runid: str, config: str) -> Response:
     Returns:
         Response: JSON payload indicating success or detailing the failure reason.
     """
-    payload = parse_request_payload(request)
+    payload = parse_request_payload(request, boolean_fields={"state"})
     mode_value = payload.get('mode', None)
 
     try:
@@ -626,6 +626,33 @@ def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Respon
         climate = Climate.getInstance(wd)
         climate.use_gridmet_wind_when_applicable = state
 
+    except Exception:
+        return exception_factory('Error setting state', runid=runid)
+
+    return success_factory()
+
+
+@climate_bp.route('/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5', methods=['POST'])
+@climate_bp.route('/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5/', methods=['POST'])
+def task_set_adjust_mx_pt5(runid: str, config: str) -> Response:
+    """Toggle MX .5 P scaling for the CLIGEN localization pipeline.
+
+    Args:
+        runid: Identifier for the active run.
+        config: Configuration profile name.
+
+    Returns:
+        Response: JSON success payload or error description.
+    """
+    payload = parse_request_payload(request)
+    state = payload.get('state', None)
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        climate = Climate.getInstance(wd)
+        climate.adjust_mx_pt5 = state
     except Exception:
         return exception_factory('Error setting state', runid=runid)
 

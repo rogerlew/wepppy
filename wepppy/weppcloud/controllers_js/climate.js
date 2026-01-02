@@ -21,7 +21,8 @@ var Climate = (function () {
         "climate:precip:mode",
         "climate:upload:completed",
         "climate:upload:failed",
-        "climate:gridmet:updated"
+        "climate:gridmet:updated",
+        "climate:mxpt5:updated"
     ];
 
     function ensureHelpers() {
@@ -303,6 +304,7 @@ var Climate = (function () {
         climate.precipModeRadios = dom.qsa("input[name=\"precip_scaling_mode\"]", formElement);
         climate.buildModeRadios = dom.qsa("input[name=\"climate_build_mode\"]", formElement);
         climate.gridmetCheckbox = dom.qs("#checkbox_use_gridmet_wind_when_applicable");
+        climate.adjustMxPt5Checkbox = dom.qs("#checkbox_adjust_mx_pt5");
 
         climate.sectionNodes = dom.qsa("[data-climate-section]", formElement);
         climate.precipSections = dom.qsa("[data-precip-section]", formElement);
@@ -1062,6 +1064,28 @@ var Climate = (function () {
                 });
         };
 
+        climate.set_adjust_mx_pt5 = function (state) {
+            var normalizedState = Boolean(state);
+            statusAdapter.html("Setting adjust_mx_pt5 (" + normalizedState + ")...");
+            stacktraceAdapter.text("");
+
+            http.postJson(url_for_run("tasks/set_adjust_mx_pt5/"), { state: normalizedState }, { form: formElement })
+                .then(function (response) {
+                    var body = response.body || {};
+                    if (body.Success === true) {
+                        var message = "adjust_mx_pt5 updated.";
+                        statusAdapter.html(message);
+                        climate.appendStatus(message);
+                        climate.events.emit("climate:mxpt5:updated", { state: normalizedState });
+                        return;
+                    }
+                    climate.pushResponseStacktrace(climate, body);
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
+        };
+
         climate.setBuildMode = function (mode, options) {
             var opts = options || {};
             var parsedMode = parseInteger(mode, 0);
@@ -1181,6 +1205,12 @@ var Climate = (function () {
                 event.preventDefault();
                 var checked = matched ? matched.checked : false;
                 climate.set_use_gridmet_wind_when_applicable(checked);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"adjust-mx-pt5\"]", function (event, matched) {
+                event.preventDefault();
+                var checked = matched ? matched.checked : false;
+                climate.set_adjust_mx_pt5(checked);
             }));
 
             climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"build-mode\"]", function (event, matched) {
