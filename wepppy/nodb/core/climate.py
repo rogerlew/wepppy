@@ -1446,6 +1446,21 @@ class Climate(NoDbBase):
             export_df["year"] = export_df.get("year")
             export_df["month"] = export_df.get("mo")
             export_df["day_of_month"] = export_df.get("da")
+            if {"year", "month", "day_of_month"}.issubset(export_df.columns):
+                date_df = export_df[["year", "month", "day_of_month"]].copy()
+                for col in ("year", "month", "day_of_month"):
+                    date_df[col] = pd.to_numeric(date_df[col], errors="coerce")
+                date_df = date_df.dropna()
+                if not date_df.empty:
+                    date_df["year"] = date_df["year"].astype(int)
+                    date_df["month"] = date_df["month"].astype(int)
+                    date_df["day_of_month"] = date_df["day_of_month"].astype(int)
+                    ordered = date_df.sort_values(["year", "month", "day_of_month"])
+                    ordered["julian"] = ordered.groupby("year").cumcount() + 1
+                    year_counts = ordered.groupby("year")["julian"].max().sort_index()
+                    offsets = year_counts.cumsum().shift(fill_value=0)
+                    ordered["sim_day_index"] = ordered["julian"] + ordered["year"].map(offsets)
+                    export_df["sim_day_index"] = ordered["sim_day_index"].reindex(export_df.index).astype("Int64")
 
             export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
             export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
