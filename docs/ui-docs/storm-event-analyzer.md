@@ -388,6 +388,16 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 - Wire the report to `/runs/<runid>/<config>/storm-event-analyzer`.
 - Tests: Jinja render test (see `tests/weppcloud/routes/test_pure_controls_render.py`) and route load smoke check.
 
+### Phase 2 Handoff (2026-01-02)
+**Delivered**
+- Replaced the placeholder report with a full-width template skeleton in `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`.
+- Added top table grid, filter controls, event table, hyetograph placeholder, and hydrology summary containers with required hook IDs/classes.
+- Included section-level empty-state copy and sortable table structure per report conventions.
+- Added minimal inline layout styles for the two-column grid and hyetograph container.
+
+**Tests run**
+- Not run (template-only change).
+
 ### Phase 3: State + top tables + filters
 - Implement `static/js/storm-event-analyzer/state.js`, `config.js`, and UI modules for metric tables and filter range controls.
 - Capture base-unit values via `data-value` attributes; update on `unitizer:preferences-changed`.

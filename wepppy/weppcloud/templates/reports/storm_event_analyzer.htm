@@ -2,13 +2,242 @@
 
 {% block report_title %}Storm Event Analyzer{% endblock %}
 
+{% block head_extras %}
+{{ super() }}
+<style>
+  .storm-event-analyzer__top {
+    display: grid;
+    gap: var(--wc-space-lg);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .storm-event-analyzer__top > .wc-stack {
+    min-width: 0;
+  }
+
+  .storm-event-analyzer__hyetograph-chart {
+    min-height: 260px;
+    border: 1px dashed var(--wc-color-border);
+    border-radius: var(--wc-radius-sm);
+    background: var(--wc-color-surface);
+  }
+
+  @media (max-width: 900px) {
+    .storm-event-analyzer__top {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
+{% endblock %}
+
 {% block report_content %}
-<section class="wc-panel">
-  <header class="wc-panel__header">
-    <h1 class="wc-panel__title">Storm Event Analyzer</h1>
+<header class="wc-stack">
+  <h1 class="wc-heading__title">Storm Event Analyzer</h1>
+  <p class="wc-text-muted">
+    Compare precipitation frequency estimates, filter storm intensity ranges, and review event hydrology.
+  </p>
+</header>
+
+<section class="wc-panel wc-stack">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Precipitation frequency estimates</h2>
+    <p class="wc-text-muted">Select a metric cell to populate the storm event list.</p>
   </header>
-  <div class="wc-panel__body">
-    <p>This report is under active development. UI scaffolding and data wiring land in Phase 2.</p>
+
+  <div class="storm-event-analyzer__top" id="storm-event-analyzer__top">
+    <div class="wc-stack">
+      <h3 class="wc-heading__subtitle">WEPP CLIGEN</h3>
+      <div class="wc-table-wrapper">
+        <table class="wc-table wc-table--dense" id="storm_event_wepp_frequency">
+          <thead>
+            <tr data-storm-event-analyzer-ari-header-row="wepp">
+              <th scope="col">Metric</th>
+              <th scope="col" class="wc-text-right" data-storm-event-analyzer-ari-header>ARI</th>
+              <th scope="col">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-sort-position="top" data-storm-event-analyzer-ari-unit-row="wepp">
+              <td data-storm-event-analyzer-unit="wepp-metric">&nbsp;</td>
+              <td class="wc-text-right" data-storm-event-analyzer-unit="wepp-ari">&nbsp;</td>
+              <td data-storm-event-analyzer-unit="wepp-units">&nbsp;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+        WEPP frequency data will appear here once loaded.
+      </p>
+    </div>
+
+    <div class="wc-stack">
+      <h3 class="wc-heading__subtitle">NOAA Atlas 14</h3>
+      <div class="wc-table-wrapper">
+        <table class="wc-table wc-table--dense" id="storm_event_noaa_frequency">
+          <thead>
+            <tr data-storm-event-analyzer-ari-header-row="noaa">
+              <th scope="col">Metric</th>
+              <th scope="col" class="wc-text-right" data-storm-event-analyzer-ari-header>ARI</th>
+              <th scope="col">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-sort-position="top" data-storm-event-analyzer-ari-unit-row="noaa">
+              <td data-storm-event-analyzer-unit="noaa-metric">&nbsp;</td>
+              <td class="wc-text-right" data-storm-event-analyzer-unit="noaa-ari">&nbsp;</td>
+              <td data-storm-event-analyzer-unit="noaa-units">&nbsp;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state data-noaa-unavailable>
+        NOAA Atlas 14 data unavailable.
+      </p>
+    </div>
   </div>
+
+  <div class="storm-event-analyzer__filters wc-stack" id="storm-event-analyzer__filters">
+    <fieldset class="wc-stack">
+      <legend class="wc-text-muted">Filter range</legend>
+      <div class="wc-choice-group wc-choice-group--horizontal" role="radiogroup" aria-label="Filter range">
+        <label class="wc-choice">
+          <input type="radio" name="storm_filter_range" value="2">
+          <span class="wc-choice__body">
+            <span class="wc-choice__label">+/-2%</span>
+          </span>
+        </label>
+        <label class="wc-choice">
+          <input type="radio" name="storm_filter_range" value="5">
+          <span class="wc-choice__body">
+            <span class="wc-choice__label">+/-5%</span>
+          </span>
+        </label>
+        <label class="wc-choice">
+          <input type="radio" name="storm_filter_range" value="10" checked>
+          <span class="wc-choice__body">
+            <span class="wc-choice__label">+/-10%</span>
+          </span>
+        </label>
+        <label class="wc-choice">
+          <input type="radio" name="storm_filter_range" value="20">
+          <span class="wc-choice__body">
+            <span class="wc-choice__label">+/-20%</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <label class="wc-choice wc-choice--checkbox">
+      <input type="checkbox" name="storm_warmup" checked>
+      <span class="wc-choice__body">
+        <span class="wc-choice__label">Consider first year warm-up</span>
+      </span>
+    </label>
+    <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+      Filter results will appear after a metric is selected.
+    </p>
+  </div>
+</section>
+
+<section class="wc-panel wc-stack storm-event-analyzer__events" id="storm-event-analyzer__events">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Event characteristics</h2>
+    <p class="wc-text-muted">Sortable storm events within the selected intensity range.</p>
+  </header>
+  <div class="wc-table-wrapper">
+    <table class="wc-table wc-table--striped sortable" id="storm_event_characteristics_table">
+      <thead>
+        <tr>
+          <th scope="col">Measure</th>
+          <th scope="col">Date</th>
+          <th scope="col" class="wc-text-right">Precip</th>
+          <th scope="col" class="wc-text-right">Depth</th>
+          <th scope="col" class="wc-text-right">Duration</th>
+          <th scope="col" class="wc-text-right">Soil saturation (T-1)</th>
+          <th scope="col" class="wc-text-right">Snow-water (T-1)</th>
+          <th scope="col" class="wc-text-right">Peak discharge</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-sort-position="top">
+          <td data-storm-event-analyzer-unit="measure">&nbsp;</td>
+          <td data-storm-event-analyzer-unit="date">&nbsp;</td>
+          <td class="wc-text-right" data-storm-event-analyzer-unit="precip">&nbsp;</td>
+          <td class="wc-text-right" data-storm-event-analyzer-unit="depth">&nbsp;</td>
+          <td class="wc-text-right" data-storm-event-analyzer-unit="duration">&nbsp;</td>
+          <td class="wc-text-right" data-storm-event-analyzer-unit="saturation">&nbsp;</td>
+          <td class="wc-text-right" data-storm-event-analyzer-unit="snow-water">&nbsp;</td>
+          <td class="wc-text-right" data-storm-event-analyzer-unit="peak-discharge">&nbsp;</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+    No storms in range yet. Select a metric to populate results.
+  </p>
+</section>
+
+<section class="wc-panel wc-stack storm-event-analyzer__hyetograph" id="storm-event-analyzer__hyetograph">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Cumulative storm hyetograph</h2>
+    <p class="wc-text-muted">Cumulative depth curves for filtered events.</p>
+  </header>
+  <div class="storm-event-analyzer__hyetograph-chart" data-storm-event-analyzer-chart></div>
+  <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+    Hyetograph data will appear after events load.
+  </p>
+</section>
+
+<section class="wc-panel wc-stack storm-event-analyzer__summary" id="storm-event-analyzer__summary">
+  <header class="wc-stack">
+    <h2 class="wc-heading__subtitle">Storm event hydrology characteristics</h2>
+    <p class="wc-text-muted">Summary updates when an event row is selected.</p>
+  </header>
+  <div class="wc-table-wrapper wc-table-wrapper--compact">
+    <table class="wc-table wc-table--dense wc-table--compact" id="storm_event_hydrology_summary">
+      <thead>
+        <tr>
+          <th scope="col">Metric</th>
+          <th scope="col">Value</th>
+          <th scope="col">Units</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Runoff</th>
+          <td data-storm-event-analyzer-summary="runoff">--</td>
+          <td data-storm-event-analyzer-unit="summary-runoff">--</td>
+        </tr>
+        <tr>
+          <th scope="row">Runoff volume</th>
+          <td data-storm-event-analyzer-summary="runoff-volume">--</td>
+          <td data-storm-event-analyzer-unit="summary-runoff-volume">--</td>
+        </tr>
+        <tr>
+          <th scope="row">Tc</th>
+          <td data-storm-event-analyzer-summary="tc">--</td>
+          <td data-storm-event-analyzer-unit="summary-tc">--</td>
+        </tr>
+        <tr>
+          <th scope="row">Peak discharge</th>
+          <td data-storm-event-analyzer-summary="peak-discharge">--</td>
+          <td data-storm-event-analyzer-unit="summary-peak-discharge">--</td>
+        </tr>
+        <tr>
+          <th scope="row">Sediment yield</th>
+          <td data-storm-event-analyzer-summary="sediment-yield">--</td>
+          <td data-storm-event-analyzer-unit="summary-sediment-yield">--</td>
+        </tr>
+        <tr>
+          <th scope="row">Runoff coefficient</th>
+          <td data-storm-event-analyzer-summary="runoff-coefficient">--</td>
+          <td data-storm-event-analyzer-unit="summary-runoff-coefficient">--</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+    Select an event to view hydrology details.
+  </p>
 </section>
 {% endblock %}
