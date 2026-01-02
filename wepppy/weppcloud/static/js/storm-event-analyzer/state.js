@@ -10,6 +10,7 @@ const defaultState = {
   hyetographSeries: [],
   selectedEventSimDayIndex: null,
   eventError: null,
+  tcAvailable: false,
   unitPrefs: null,
 };
 

@@ -65,14 +65,17 @@ describe('storm-event-analyzer event data helpers', () => {
       })
       .mockRejectedValueOnce(new Error('soil missing'))
       .mockResolvedValueOnce({ records: [] })
+      .mockResolvedValueOnce({ records: [] })
+      .mockResolvedValueOnce({ records: [] })
       .mockResolvedValueOnce({ records: [] });
 
     const manager = createEventDataManager({ ctx: { runid: 'demo', config: 'disturbed' }, postQueryEngine });
-    const rows = await manager.fetchEventRows({
+    const result = await manager.fetchEventRows({
       selectedMetric: { durationMinutes: 10, value: 10 },
       filterRangePct: 10,
       includeWarmup: false,
     });
+    const rows = result.rows;
 
     expect(rows).toHaveLength(2);
     expect(rows[0].depth_mm).toBeNull();

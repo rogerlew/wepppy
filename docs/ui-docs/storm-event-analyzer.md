@@ -454,6 +454,17 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 - Hide or show `Tc` based on availability; keep "n/a" consistent with empty-state rules.
 - Tests (Jest): formatting/unitization and missing-data behavior.
 
+### Phase 6 Handoff (2026-01-02)
+**Delivered**
+- Added hydrology summary renderer with Unitizer formatting, empty-state toggles, and Tc hide/placeholder behavior (`wepppy/weppcloud/static/js/storm-event-analyzer/ui/hydrology-summary.js`).
+- Expanded event data payloads to include runoff volume, sediment yield, runoff coefficient, runoff depth, and Tc lookup with sim_day_index-first fallback (`wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js`).
+- Wired summary updates to event selection + unitizer changes in `wepppy/weppcloud/static/js/storm-event-analyzer/main.js`.
+- Added Jest coverage for summary rendering and Tc availability handling.
+
+**Tests run**
+- `wctl run-npm test -- --testPathPattern storm-event-analyzer` (passes; npm warns about --testPathPattern; VM Modules warning; expected console.warn from event-data test)
+- Manual test verifies the hydrology summary renders and unitzation is supported.
+
 ### Phase 7: Playwright smoke coverage
 - Add `static-src/tests/smoke/storm-event-analyzer.spec.js`.
 - Cover metric selection, filter changes, warm-up toggle, event selection, hyetograph highlight, NOAA-missing scenario, and error banner persistence.

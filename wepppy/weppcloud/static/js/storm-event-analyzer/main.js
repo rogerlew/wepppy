@@ -15,6 +15,7 @@ import { createEventDataManager } from './data/event-data.js';
 import { buildHyetographSeries } from './data/hyetograph-data.js';
 import { createHyetographChart } from './charts/hyetograph.js';
 import { applyNoaaAvailability, renderFrequencyTable } from './ui/frequency-table.js';
+import { renderHydrologySummary } from './ui/hydrology-summary.js';
 import { renderEventTable, setEventErrorBanner, updateEventSelection } from './ui/event-table.js';
 import { bindFilterControls } from './ui/filters.js';
 
@@ -48,6 +49,7 @@ async function initStormEventAnalyzer() {
   const hyetographEmptyMessage = hyetographSection
     ? hyetographSection.querySelector('[data-empty-state]')
     : null;
+  const hydrologySummarySection = document.getElementById('storm-event-analyzer__summary');
 
   initState({
     filterRangePct: DEFAULT_FILTER_RANGE_PCT,
@@ -57,6 +59,7 @@ async function initStormEventAnalyzer() {
     hyetographSeries: [],
     selectedEventSimDayIndex: null,
     eventError: null,
+    tcAvailable: false,
   });
 
   bindFilterControls({ setState });
@@ -178,18 +181,42 @@ async function initStormEventAnalyzer() {
     updateEmptyStates({ rows: state.eventRows, error: state.eventError });
   }
 
+  function renderSummary(state) {
+    if (!hydrologySummarySection) {
+      return;
+    }
+    const selectedRow =
+      state.selectedEventSimDayIndex == null
+        ? null
+        : (state.eventRows || []).find(
+            (row) => Number(row.sim_day_index) === Number(state.selectedEventSimDayIndex),
+          );
+    renderHydrologySummary({
+      section: hydrologySummarySection,
+      row: selectedRow || null,
+      unitizer: unitizerClient,
+      tcAvailable: !!state.tcAvailable,
+    });
+  }
+
   let eventRequestId = 0;
   async function refreshEventRows() {
     const state = getState();
     if (!state.selectedMetric) {
-      setState({ eventRows: [], hyetographSeries: [], selectedEventSimDayIndex: null, eventError: null });
+      setState({
+        eventRows: [],
+        hyetographSeries: [],
+        selectedEventSimDayIndex: null,
+        eventError: null,
+        tcAvailable: false,
+      });
       return;
     }
 
     const requestId = (eventRequestId += 1);
     setState({ eventError: null });
     try {
-      const rows = await eventDataManager.fetchEventRows({
+      const result = await eventDataManager.fetchEventRows({
         selectedMetric: state.selectedMetric,
         filterRangePct: state.filterRangePct,
         includeWarmup: state.includeWarmup,
@@ -197,6 +224,8 @@ async function initStormEventAnalyzer() {
       if (requestId !== eventRequestId) {
         return;
       }
+      const rows = result && Array.isArray(result.rows) ? result.rows : [];
+      const tcAvailable = result && typeof result.tcAvailable === 'boolean' ? result.tcAvailable : false;
       const selected = rows.some((row) => row.sim_day_index === state.selectedEventSimDayIndex)
         ? state.selectedEventSimDayIndex
         : null;
@@ -206,6 +235,7 @@ async function initStormEventAnalyzer() {
         hyetographSeries,
         selectedEventSimDayIndex: selected,
         eventError: null,
+        tcAvailable,
       });
     } catch (error) {
       if (requestId !== eventRequestId) {
@@ -233,6 +263,7 @@ async function initStormEventAnalyzer() {
 
   subscribe(['eventRows', 'eventError'], (state) => {
     renderEventRows(state);
+    renderSummary(state);
   });
 
   subscribe(['hyetographSeries'], (state) => {
@@ -242,6 +273,7 @@ async function initStormEventAnalyzer() {
   subscribe(['selectedEventSimDayIndex'], (state) => {
     updateEventSelection({ table: eventTable, selectedEventSimDayIndex: state.selectedEventSimDayIndex });
     hyetographChart.setSelected(state.selectedEventSimDayIndex);
+    renderSummary(state);
   });
 
   document.addEventListener('unitizer:preferences-changed', (event) => {
@@ -250,6 +282,7 @@ async function initStormEventAnalyzer() {
     unitizerClient = window.UnitizerClient ? window.UnitizerClient.getClientSync() : unitizerClient;
     renderTables(getState().selectedMetric || null);
     renderEventRows(getState());
+    renderSummary(getState());
     hyetographChart.setUnitizer(unitizerClient, detail);
   });
 }
