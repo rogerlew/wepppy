@@ -61,7 +61,7 @@ Below the top tables, place a radio group labeled "Filter range":
 - Uses Pure-style radio controls (`.wc-choice` pattern).
 
 Add a checkbox directly below the radio group:
-- Label: "Consider first year warmup"
+- Label: "Consider first year warm-up"
 - Default: checked
 - Behavior: when checked, exclude events from the first simulation year.
 
@@ -225,6 +225,12 @@ wepppy/weppcloud/static/js/storm-event-analyzer/
 
 wepppy/weppcloud/templates/reports/
 └── storm_event_analyzer.htm       # Full-width report template
+
+wepppy/query_engine/
+└── storm_event_analyzer.py         # Payload helpers + join strategy for analyzer queries
+
+wepppy/tests/query_engine/
+└── test_storm_event_analyzer.py    # Query-engine unit coverage for analyzer payloads
 ```
 
 ## Unitization and Formatting
@@ -350,6 +356,7 @@ Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; r
 - Confirm `tc_out.parquet` appears under `wepp/output/interchange/` after rerun.
 
 ### Phase 1: Query Engine and data products
+Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks below retained for reference.
 - Ensure the event summary includes `sim_day_index` (absolute), `year`, `julian`, and calendar date fields (`month`, `day_of_month` or derived `event_date`).
 - Normalize join strategy: `sim_day_index` across climate, `H.wat.parquet`, `H.soil.parquet`, `H.ebe.parquet`, and `ebe_pw0.parquet`, with `year + julian` fallback for legacy runs.
 - Add or confirm Query Engine agents for:
@@ -360,6 +367,20 @@ Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; r
   - Tc lookup when `tc_out.parquet` exists.
 - Verify `tc_out.parquet` exists after interchange reruns; keep Tc optional when missing.
 - Unit tests: Python tests for agent outputs, including missing dataset handling.
+
+### Phase 1 Handoff (2026-01-02)
+**Delivered**
+- Added query-engine payload helpers for Storm Event Analyzer under `wepppy/query_engine/storm_event_analyzer.py` with explicit dataset constants, intensity filtering, and T-1 joins.
+- Join strategy selects `sim_day_index` when interchange version >= 1.1 and enforces column presence; legacy runs fall back to `year + julian` using date arithmetic for T-1 joins.
+- Hydrology payload computes runoff coefficient from `ebe_pw0.parquet` runoff volume and area-weighted `H.ebe.parquet` precipitation volume; Tc payload is optional when `tc_out.parquet` is missing.
+- NOAA Atlas 14 CSV generation is wired into climate building; UI should still treat the file as optional when missing.
+- Unit tests cover join strategy selection, legacy fallback joins, intensity filter payloads, hydrology coefficient presence, and missing Tc behavior (`tests/query_engine/test_storm_event_analyzer.py`).
+
+**Tests run**
+- `wctl run-pytest ./tests/query_engine/test_storm_event_analyzer.py` (8 passed; 2 warnings from pytz/pyparsing)
+
+**Remaining gaps**
+- Front-end wiring for these payloads is pending (Phase 2+).
 
 ### Phase 2: Template skeleton and layout
 - Create `templates/reports/storm_event_analyzer.htm` using the full-width report layout.
@@ -390,7 +411,7 @@ Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; r
 
 ### Phase 7: Playwright smoke coverage
 - Add `static-src/tests/smoke/storm-event-analyzer.spec.js`.
-- Cover metric selection, filter changes, warmup toggle, event selection, hyetograph highlight, NOAA-missing scenario, and error banner persistence.
+- Cover metric selection, filter changes, warm-up toggle, event selection, hyetograph highlight, NOAA-missing scenario, and error banner persistence.
 - Tests: run via `wctl run-npm smoke` with `SMOKE_RUN_PATH` or test-support run creation.
 
 ## Open Questions
