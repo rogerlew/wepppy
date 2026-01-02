@@ -406,7 +406,7 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 ### Phase 3 Handoff (2026-01-02)
 **Delivered**
 - Added a Storm Event Analyzer front-end module set under `wepppy/weppcloud/static/js/storm-event-analyzer/` with state, CSV parsing, table rendering, and filter wiring.
-- Dynamic ARI headers/rows now render from `climate/wepp_cli_pds_mean_metric.csv` fetched directly via `url_for_run("browse/...")`, storing base-unit values in `data-value` attributes for Phase 4.
+- Dynamic ARI headers/rows now render from `climate/wepp_cli_pds_mean_metric.csv` fetched directly via `url_for_run("download/...")`, storing base-unit values in `data-value` attributes for Phase 4.
 - NOAA CSV loading is optional; the NOAA table hides and the "NOAA data unavailable" message shows when missing.
 - Unitizer hooks re-render values and units on `unitizer:preferences-changed`.
 - Added Jest coverage for state updates, CSV parsing, dynamic headers/rows, and NOAA availability; updated `wepppy/weppcloud/static-src/jest.config.mjs`.
@@ -418,7 +418,18 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 - Implement Query Engine fetch in `data/event-data.js`.
 - Render event table with sortable columns, `sorttable_customkey`, and selection highlighting.
 - Empty/error states follow spec; preserve previous results on query errors.
+- Hide the WEPP empty-state message once event rows render; show it only when the event table is truly empty or failed.
 - Tests (Jest): query payload construction and selection behavior.
+
+### Phase 4 Handoff (2026-01-02)
+**Delivered**
+- Added Query Engine client + event data loader (`wepppy/weppcloud/static/js/storm-event-analyzer/data/query-engine.js`, `data/event-data.js`) with intensity filtering, warm-up exclusion, and per-event soil/snow/peak discharge lookups.
+- Wired dynamic event table rendering/selection with unitizer formatting (`wepppy/weppcloud/static/js/storm-event-analyzer/ui/event-table.js`) and state-driven refresh logic in `wepppy/weppcloud/static/js/storm-event-analyzer/main.js`.
+- Added error banner + empty-state toggles in `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`, including hiding the WEPP empty message once event rows exist.
+- Added Jest coverage for payload construction and row selection in `wepppy/weppcloud/static/js/storm-event-analyzer/__tests__/event-data.test.js` and `wepppy/weppcloud/static/js/storm-event-analyzer/__tests__/event-table.test.js`.
+
+**Tests run**
+- `wctl run-npm test -- storm-event-analyzer` (passes; VM Modules warning from Node).
 
 ### Phase 5: Hyetograph computation + chart
 - Implement `data/hyetograph-data.js` using the dual-exponential 5-minute steps.

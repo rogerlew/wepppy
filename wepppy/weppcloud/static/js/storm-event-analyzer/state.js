@@ -8,6 +8,7 @@ const defaultState = {
   includeWarmup: true,
   eventRows: [],
   selectedEventSimDayIndex: null,
+  eventError: null,
   unitPrefs: null,
 };
 

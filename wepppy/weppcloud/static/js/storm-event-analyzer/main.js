@@ -9,7 +9,10 @@ import {
   filterIntensityRows,
   loadFrequencyData,
 } from './data/frequency-data.js';
+import { createQueryEngine } from './data/query-engine.js';
+import { createEventDataManager } from './data/event-data.js';
 import { applyNoaaAvailability, renderFrequencyTable } from './ui/frequency-table.js';
+import { renderEventTable, setEventErrorBanner } from './ui/event-table.js';
 import { bindFilterControls } from './ui/filters.js';
 
 function getUnitizerClient() {
@@ -33,11 +36,18 @@ async function initStormEventAnalyzer() {
   }
 
   const noaaMessage = document.querySelector('[data-noaa-unavailable]');
+  const weppEmptyMessage = document.querySelector('[data-storm-event-analyzer-wepp-empty]');
+  const eventTable = document.getElementById('storm_event_characteristics_table');
+  const eventsEmptyMessage = document.querySelector('[data-storm-event-analyzer-events-empty]');
+  const eventErrorBanner = document.querySelector('[data-storm-event-analyzer-error]');
 
   initState({
     filterRangePct: DEFAULT_FILTER_RANGE_PCT,
     includeWarmup: DEFAULT_INCLUDE_WARMUP,
     selectedMetric: null,
+    eventRows: [],
+    selectedEventSimDayIndex: null,
+    eventError: null,
   });
 
   bindFilterControls({ setState });
@@ -46,6 +56,10 @@ async function initStormEventAnalyzer() {
   if (unitizerClient && typeof unitizerClient.getPreferencePayload === 'function') {
     setState({ unitPrefs: unitizerClient.getPreferencePayload() });
   }
+
+  const ctx = { runid: window.runid, config: window.config };
+  const { postQueryEngine } = createQueryEngine(ctx);
+  const eventDataManager = createEventDataManager({ ctx, postQueryEngine });
 
   let frequencyData;
   try {
@@ -104,10 +118,92 @@ async function initStormEventAnalyzer() {
     }
   }
 
+  function updateEmptyStates({ rows, error }) {
+    const hasRows = Array.isArray(rows) && rows.length > 0;
+    if (eventsEmptyMessage) {
+      if (!hasRows && !error) {
+        eventsEmptyMessage.removeAttribute('hidden');
+      } else {
+        eventsEmptyMessage.setAttribute('hidden', 'hidden');
+      }
+    }
+    if (weppEmptyMessage) {
+      if (!hasRows || error) {
+        weppEmptyMessage.removeAttribute('hidden');
+      } else {
+        weppEmptyMessage.setAttribute('hidden', 'hidden');
+      }
+    }
+  }
+
+  function renderEventRows(state) {
+    if (!eventTable) {
+      return;
+    }
+    renderEventTable({
+      table: eventTable,
+      rows: state.eventRows || [],
+      selectedEventSimDayIndex: state.selectedEventSimDayIndex,
+      unitizer: unitizerClient,
+      onSelect: (simDayIndex) => setState({ selectedEventSimDayIndex: simDayIndex }),
+    });
+    setEventErrorBanner({ banner: eventErrorBanner, message: state.eventError });
+    updateEmptyStates({ rows: state.eventRows, error: state.eventError });
+  }
+
+  let eventRequestId = 0;
+  async function refreshEventRows() {
+    const state = getState();
+    if (!state.selectedMetric) {
+      setState({ eventRows: [], selectedEventSimDayIndex: null, eventError: null });
+      return;
+    }
+
+    const requestId = (eventRequestId += 1);
+    setState({ eventError: null });
+    try {
+      const rows = await eventDataManager.fetchEventRows({
+        selectedMetric: state.selectedMetric,
+        filterRangePct: state.filterRangePct,
+        includeWarmup: state.includeWarmup,
+      });
+      if (requestId !== eventRequestId) {
+        return;
+      }
+      const selected = rows.some((row) => row.sim_day_index === state.selectedEventSimDayIndex)
+        ? state.selectedEventSimDayIndex
+        : null;
+      setState({
+        eventRows: rows,
+        selectedEventSimDayIndex: selected,
+        eventError: null,
+      });
+    } catch (error) {
+      if (requestId !== eventRequestId) {
+        return;
+      }
+      let message = error && error.message ? error.message : 'Query Engine request failed.';
+      if (/sim_day_index/i.test(message)) {
+        message = 'Event data is missing sim_day_index. Re-run interchange outputs for this run.';
+      }
+      setState({ eventError: message });
+    }
+  }
+
   renderTables(null);
+  renderEventRows(getState());
 
   subscribe(['selectedMetric'], (state) => {
     renderTables(state.selectedMetric);
+    refreshEventRows();
+  });
+
+  subscribe(['filterRangePct', 'includeWarmup'], () => {
+    refreshEventRows();
+  });
+
+  subscribe(['eventRows', 'selectedEventSimDayIndex', 'eventError'], (state) => {
+    renderEventRows(state);
   });
 
   document.addEventListener('unitizer:preferences-changed', (event) => {
@@ -115,6 +211,7 @@ async function initStormEventAnalyzer() {
     setState({ unitPrefs: detail });
     unitizerClient = window.UnitizerClient ? window.UnitizerClient.getClientSync() : unitizerClient;
     renderTables(getState().selectedMetric || null);
+    renderEventRows(getState());
   });
 }
 

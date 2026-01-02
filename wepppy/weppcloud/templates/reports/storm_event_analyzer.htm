@@ -34,6 +34,11 @@
     font-weight: 600;
   }
 
+  .storm-event-analyzer__event-row.is-selected {
+    background: color-mix(in srgb, var(--wc-color-accent-soft) 60%, transparent);
+    font-weight: 600;
+  }
+
   @media (max-width: 900px) {
     .storm-event-analyzer__top {
       grid-template-columns: minmax(0, 1fr);
@@ -78,7 +83,7 @@
           </tbody>
         </table>
       </div>
-      <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+      <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state data-storm-event-analyzer-wepp-empty>
         WEPP frequency data will appear here once loaded.
       </p>
     </div>
@@ -157,6 +162,9 @@
     <h2 class="wc-heading__subtitle">Event characteristics</h2>
     <p class="wc-text-muted">Sortable storm events within the selected intensity range.</p>
   </header>
+  <div class="wc-alert wc-alert--warning storm-event-analyzer__error" role="alert" hidden data-storm-event-analyzer-error>
+    <p class="wc-alert__body" data-storm-event-analyzer-error-body></p>
+  </div>
   <div class="wc-table-wrapper">
     <table class="wc-table wc-table--striped sortable" id="storm_event_characteristics_table">
       <thead>
@@ -185,7 +193,7 @@
       </tbody>
     </table>
   </div>
-  <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state>
+  <p class="wc-text-muted storm-event-analyzer__empty" data-empty-state data-storm-event-analyzer-events-empty>
     No storms in range yet. Select a metric to populate results.
   </p>
 </section>
