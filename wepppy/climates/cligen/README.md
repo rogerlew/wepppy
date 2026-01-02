@@ -32,7 +32,7 @@
 - **ClimateFile & Prn helpers**
   - `ClimateFile` opens a CLIGEN `.cli`, standardizes headers, reports metadata (`lat`, `lng`, `elevation`), and offers utilities such as `clip`, `transform_precip`, `replace_var`, `make_storm_file`, `as_dataframe`, and `calc_monthlies`.
   - `Prn` wraps the fixed-width `.prn` format, replaces IQR outliers, and re-emits sanitized precipitation/temperature series. `df_to_prn()` converts a pandas DataFrame into a `.prn`, padding to the end of the year when needed.
-  - `cli2pat()` back-calculates fixed-duration intensities using WEPP’s double-exponential hyetograph and CLIGEN 4+ `ip` correction (0.70 by default); `_make_clinp()` emits the CLIGEN input files consumed by the binaries.
+  - `wepp_peak_intensities_from_hyetograph()` builds WEPP's 5-minute double-exponential hyetograph and applies sliding windows for peak intensities (10/15/30/60-min). `cli2pat()` remains as a legacy alias; `_make_clinp()` emits the CLIGEN input files consumed by the binaries.
 - **Cligen runner**
   - `Cligen` ties everything together. Given a `StationMeta` and working directory it copies or localizes the `.par`, feeds CLIGEN 4.3/5.2/5.3/5.3.2 binaries (bundled under `bin/`), enforces timeouts (`_run_cligen_posix`), and produces `.cli` files for multi-year or observed runs.
   - `par_mod()` is the high-level localization workflow: pull monthly means from PRISM/EOBS/AGDC, recompute wet-day probabilities (optionally Daymet-driven), rewrite the `.par`, and run CLIGEN in-place. It returns the simulated monthlies for quick QA.

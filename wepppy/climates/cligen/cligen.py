@@ -184,6 +184,263 @@ def _row_formatter(values: Iterable[float]) -> str:
     return ' '.join(s)
 
 
+def _wepp_eqroot(a: float) -> float:
+    """Solve 1 - exp(-u) = a * u for u using WEPP's eqroot logic."""
+    if a <= 0.0 or a > 1.0:
+        raise ValueError("eqroot expects 0 < a <= 1")
+
+    if a <= 0.06:
+        return 1.0 / a
+    if a < 0.999:
+        if a <= 0.2:
+            u = 1.0 / a
+        elif a <= 0.5:
+            u = 0.968732 / a - 1.55098 * a + 0.431653
+        elif a <= 0.94:
+            u = 1.13243 / a - 0.928240 * a - 0.207111
+        else:
+            u = 1.5 - math.sqrt(6.0 * a - 3.75)
+
+        while True:
+            e = math.exp(-u)
+            f = (1.0 - e) / u
+            d = a - f
+            tmpvr1 = ((u + 1.0) * f - 1.0)
+            r = a / tmpvr1
+            if r <= 1.0:
+                s = abs(d / a)
+            else:
+                s = abs(d / tmpvr1)
+            if s < 0.59e-6:
+                break
+            u = u * (1.0 + d / (e - f))
+        return float(u)
+
+    if a < 1.0:
+        return 1.5 - math.sqrt(6.0 * a - 3.75)
+    return 0.0
+
+
+def _wepp_dimensionless_hyetograph(
+    tp: float,
+    ip: float,
+    ninten: int,
+    use_const: bool,
+) -> tuple[list[float], list[float]]:
+    """Return WEPP dimensionless time/intensity arrays for disaggregation."""
+    timedl = [0.0] * ninten
+    intdl = [0.0] * ninten
+    deltfq = 1.0 / float(ninten - 1)
+
+    if use_const:
+        fqx = 0.0
+        for i in range(ninten - 1):
+            fqx += deltfq
+            timedl[i + 1] = fqx
+            intdl[i] = 1.0
+        intdl[-1] = 0.0
+        return timedl, intdl
+
+    ip = min(ip, 60.0)
+    tp = min(tp, 0.99)
+    u = _wepp_eqroot(1.0 / ip)
+    b = u / tp
+    a = ip * math.exp(-u)
+    d = u / (1.0 - tp)
+
+    timedl[-1] = 1.0
+    fqx = 0.0
+    for i in range(ninten - 1):
+        if i < ninten - 2:
+            fqx += deltfq
+            if fqx <= tp:
+                timedl[i + 1] = (1.0 / b) * math.log(1.0 + (b / a) * fqx)
+            else:
+                timedl[i + 1] = tp - (1.0 / d) * math.log(1.0 - (d / ip) * (fqx - tp))
+
+        diff = timedl[i + 1] - timedl[i]
+        if diff > 0.0:
+            intdl[i] = deltfq / diff
+        else:
+            intdl[i] = deltfq / 0.00001
+
+    intdl[-1] = 0.0
+    return timedl, intdl
+
+
+def _wepp_hyetograph_segments(
+    prcp: float,
+    dur: float,
+    tp: float,
+    ip: float,
+    *,
+    ip_correction: float,
+    time_step_minutes: float,
+) -> list[tuple[float, float, float]]:
+    """Build WEPP hyetograph segments as (start_hr, end_hr, intensity_mm_hr)."""
+    if prcp <= 0.0 or dur <= 0.0:
+        return []
+
+    ip = max(ip * ip_correction, 1.0)
+    if tp > 1.0 or ip == 1.0:
+        tp = 1.0
+    elif tp <= 0.0:
+        tp = 0.01
+
+    ninten = 11
+    while True:
+        use_const = tp >= 1.0 and ip <= 1.0
+        if ninten <= 2:
+            timedl, intdl = _wepp_dimensionless_hyetograph(tp, ip, 2, True)
+        else:
+            timedl, intdl = _wepp_dimensionless_hyetograph(tp, ip, ninten, use_const)
+
+        min_step = min((timedl[i + 1] - timedl[i]) * dur * 60.0 for i in range(len(timedl) - 1))
+        if min_step >= time_step_minutes or ninten <= 2:
+            break
+        ninten -= 1
+
+    segments: list[tuple[float, float, float]] = []
+    for i in range(len(timedl) - 1):
+        start = timedl[i] * dur
+        end = timedl[i + 1] * dur
+        if end <= start:
+            continue
+        intensity = intdl[i] * prcp / dur
+        segments.append((start, end, intensity))
+
+    return segments
+
+
+def _wepp_hyetograph_depths(
+    segments: Sequence[tuple[float, float, float]],
+    dur: float,
+    time_step_minutes: float,
+) -> tuple[list[float], float]:
+    """Return per-step depths for the fixed-step hyetograph."""
+    if dur <= 0.0:
+        return [], 0.0
+
+    dt_hours = time_step_minutes / 60.0
+    total_bins = int(math.ceil(dur / dt_hours))
+    if total_bins <= 0:
+        return [], dt_hours
+
+    depths = [0.0] * total_bins
+    if not segments:
+        return depths, dt_hours
+
+    seg_index = 0
+    seg_start, seg_end, seg_intensity = segments[0]
+    seg_count = len(segments)
+    eps = 1.0e-9
+
+    for bin_idx in range(total_bins):
+        bin_start = bin_idx * dt_hours
+        bin_end = bin_start + dt_hours
+        remaining_start = bin_start
+        depth = 0.0
+
+        while seg_index < seg_count:
+            if seg_end <= remaining_start + eps:
+                seg_index += 1
+                if seg_index < seg_count:
+                    seg_start, seg_end, seg_intensity = segments[seg_index]
+                continue
+
+            if seg_start >= bin_end - eps:
+                break
+
+            overlap_start = max(remaining_start, seg_start)
+            overlap_end = min(bin_end, seg_end)
+            if overlap_end > overlap_start:
+                depth += seg_intensity * (overlap_end - overlap_start)
+                remaining_start = overlap_end
+
+            if overlap_end >= seg_end - eps:
+                seg_index += 1
+                if seg_index < seg_count:
+                    seg_start, seg_end, seg_intensity = segments[seg_index]
+            if remaining_start >= bin_end - eps:
+                break
+
+        depths[bin_idx] = depth
+
+    return depths, dt_hours
+
+
+def wepp_peak_intensities_from_hyetograph(
+    prcp: float = 50,
+    dur: float = 2,
+    tp: float = 0.3,
+    ip: float = 4,
+    max_time: Sequence[float] = (10, 30, 60),
+    ip_correction: float = 0.70,
+    time_step_minutes: float = 5.0,
+) -> list[float]:
+    """Compute peak intensities from WEPP's 5-minute hyetograph.
+
+    Args:
+        prcp: Storm precipitation depth (millimeters).
+        dur: Total storm duration (hours).
+        tp: Time to peak as a fraction of duration (0-1).
+        ip: Relative peak intensity (dimensionless max/avg ratio).
+        max_time: Window durations (minutes) for which intensities are returned.
+        ip_correction: WEPP adjustment applied to ``ip``. Defaults to 0.70
+            (CLIGEN 4+). Use 1.0 to disable or 1.44 for CLIGEN 2.3-3.1.
+        time_step_minutes: Sliding-window step size (minutes). WEPP enforces
+            a minimum 5-minute step in its disaggregation.
+
+    Returns:
+        A list of peak intensities (mm/hour) for the requested durations.
+    """
+    if prcp <= 0.0 or dur <= 0.0:
+        return [0.0 for _ in max_time]
+    if time_step_minutes <= 0.0:
+        raise ValueError("time_step_minutes must be greater than zero.")
+
+    segments = _wepp_hyetograph_segments(
+        prcp,
+        dur,
+        tp,
+        ip,
+        ip_correction=ip_correction,
+        time_step_minutes=time_step_minutes,
+    )
+    depths, dt_hours = _wepp_hyetograph_depths(segments, dur, time_step_minutes)
+    if not depths:
+        return [0.0 for _ in max_time]
+
+    total_bins = len(depths)
+    cumulative = [0.0] * (total_bins + 1)
+    for i in range(total_bins):
+        cumulative[i + 1] = cumulative[i] + depths[i]
+
+    results: list[float] = []
+    for window_minutes in max_time:
+        window_hours = window_minutes / 60.0
+        if window_hours <= 0.0:
+            results.append(0.0)
+            continue
+
+        window_bins = int(round(window_hours / dt_hours))
+        if window_bins <= 0:
+            results.append(0.0)
+            continue
+        if window_bins > total_bins:
+            results.append(prcp / window_hours)
+            continue
+
+        max_depth = 0.0
+        for start in range(0, total_bins - window_bins + 1):
+            depth = cumulative[start + window_bins] - cumulative[start]
+            if depth > max_depth:
+                max_depth = depth
+        results.append(max_depth / window_hours)
+
+    return results
+
+
 def cli2pat(
     prcp: float = 50,
     dur: float = 2,
@@ -192,76 +449,15 @@ def cli2pat(
     max_time: Sequence[float] = (10, 30, 60),
     ip_correction: float = 0.70,
 ) -> list[float]:
-    """Compute peak intensities for fixed durations using WEPP storm inputs.
-
-    Args:
-        prcp: Storm precipitation depth (millimeters).
-        dur: Total storm duration (hours).
-        tp: Time to peak as a fraction of duration (0-1).
-        ip: Relative peak intensity (dimensionless max/avg ratio).
-        max_time: Durations (minutes) for which intensities should be returned.
-        ip_correction: WEPP adjustment applied to ``ip``. Defaults to 0.70
-            (CLIGEN 4+). Use 1.0 to disable or 1.44 for CLIGEN 2.3-3.1.
-
-    Returns:
-        A list of peak intensities (mm/hour) for the requested durations.
-    """
-    if prcp == 0 or dur == 0:
-        return [0.0 for t in max_time]
-
-    im = prcp / dur
-    ip = max(ip * ip_correction, 1.0)
-    if ip <= 1.0 or tp >= 1.0:
-        return [im for _ in max_time]
-    if tp <= 0.0:
-        tp = 0.01
-    if tp > 0.99:
-        tp = 0.99
-
-    the_b = lambda _b, _tp, _ip: (_ip - _ip * np.exp(-_b * _tp)) / _tp
-    max_time = [t / 60.0 for t in max_time]
-    peaks = len(max_time)
-    last_b = 15
-    b = 10
-    while abs(b-last_b) > 0.000001:
-        last_b = b
-        b = the_b(b, tp, ip)
-
-    d = b*tp/(1-tp)
-    starts = [None for i in max_time]
-    ends = [None for i in max_time]
-    dur_peak = [None for i in max_time]
-    I_peak = [None for i in max_time]
-    for p in range(peaks):
-        t_start = tp - max_time[p] / dur
-        t_high = tp
-        t_low = t_start
-        t_end = tp
-        i_start = ip * np.exp(b * (t_start - tp))
-        i_end = ip
-        while abs(i_start - i_end) > 0.000001:
-            if i_start < i_end:
-                t_low = t_start
-            else:
-                t_high = t_start
-            t_start = (t_high + t_low) / 2
-            t_end = t_start + max_time[p] / dur
-            i_start = ip * np.exp(b * (t_start - tp))
-            i_end = ip * np.exp(d * (tp - t_end))
-
-        if t_start < 0:
-            starts[p] = 0
-            ends[p] = 1
-        else:
-            starts[p] = t_start
-            ends[p] = t_end
-
-        dur_peak[p] = ends[p] - starts[p]
-        I_peak[p] = ((ip/b - ip/b * np.exp(b * (starts[p] - tp))) +
-                     (ip/d - ip/d * np.exp(d * (tp - ends[p])))) * \
-                    im / max(dur_peak[p], max_time[p] / dur)
-
-    return I_peak
+    """Legacy wrapper for WEPP hyetograph peak-intensity calculations."""
+    return wepp_peak_intensities_from_hyetograph(
+        prcp=prcp,
+        dur=dur,
+        tp=tp,
+        ip=ip,
+        max_time=max_time,
+        ip_correction=ip_correction,
+    )
 
 
 def _make_clinp(
@@ -971,11 +1167,13 @@ class ClimateFile(object):
                     intensities = [-1, -1, -1, -1]
                 else:
                     max_time = [10, 15, 30, 60]
-                    intensities = cli2pat(prcp=d['prcp'][-1],
-                                          dur=d['dur'][-1],
-                                          tp=d['tp'][-1],
-                                          ip=d['ip'][-1],
-                                          max_time=max_time)
+                    intensities = wepp_peak_intensities_from_hyetograph(
+                        prcp=d['prcp'][-1],
+                        dur=d['dur'][-1],
+                        tp=d['tp'][-1],
+                        ip=d['ip'][-1],
+                        max_time=max_time,
+                    )
 
                 d['10-min Peak Rainfall Intensity (mm/hour)'].append(intensities[0])
                 d['15-min Peak Rainfall Intensity (mm/hour)'].append(intensities[1])

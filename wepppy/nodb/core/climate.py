@@ -1513,7 +1513,7 @@ class Climate(NoDbBase):
                 extra={"years_count": years_count, "parquet": str(parquet_path)},
             )
             return None
-        rec_map = weibull_series(recurrence, years_count, method="cta")
+        rec_map = weibull_series(recurrence, years_count, method="pds")
 
         def _format_value(value: float) -> str:
             if value == 0 or np.isnan(value):
@@ -1552,6 +1552,30 @@ class Climate(NoDbBase):
             ("60-min intensity (mm/hour)", _values_for(("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)", "i60"))),
         ]
 
+        monthly_medians: List[float] = [0.0] * 12
+        monthly_p75s: List[float] = [0.0] * 12
+        monthly_p90s: List[float] = [0.0] * 12
+        month_column = _pick_column(("month", "mo"))
+        intensity_column = _pick_column(("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)", "i30"))
+        if month_column is None or intensity_column is None:
+            self.logger.info(
+                "CLI parquet missing monthly median intensity columns",
+                extra={"month_column": month_column, "intensity_column": intensity_column, "parquet": str(parquet_path)},
+            )
+        else:
+            monthly_df = df[[month_column, intensity_column]].copy()
+            monthly_df[month_column] = pd.to_numeric(monthly_df[month_column], errors="coerce")
+            monthly_df[intensity_column] = pd.to_numeric(monthly_df[intensity_column], errors="coerce")
+            monthly_df = monthly_df.dropna(subset=[month_column, intensity_column])
+            if not monthly_df.empty:
+                monthly_df[month_column] = monthly_df[month_column].astype(int)
+                medians = monthly_df.groupby(month_column)[intensity_column].median()
+                p75s = monthly_df.groupby(month_column)[intensity_column].quantile(0.75)
+                p90s = monthly_df.groupby(month_column)[intensity_column].quantile(0.9)
+                monthly_medians = [float(medians.get(m, 0.0)) for m in range(1, 13)]
+                monthly_p75s = [float(p75s.get(m, 0.0)) for m in range(1, 13)]
+                monthly_p90s = [float(p90s.get(m, 0.0)) for m in range(1, 13)]
+
         lat_text = "None"
         lng_text = "None"
         station_name = self.climatestation or "None"
@@ -1588,6 +1612,17 @@ class Climate(NoDbBase):
         for label, values in rows:
             line_values = ",".join(_format_value(value) for value in values)
             lines.append(f"{label}:, {line_values}")
+
+        lines.extend(
+            [
+                "",
+                "MONTHLY MODELED MX .5 P",
+                "Month:, 1,2,3,4,5,6,7,8,9,10,11,12",
+                "Median (mm/hour):, " + ",".join(_format_value(value) for value in monthly_medians),
+                "75th percentile (mm/hour):, " + ",".join(_format_value(value) for value in monthly_p75s),
+                "90th percentile(mm/hour):, " + ",".join(_format_value(value) for value in monthly_p90s),
+            ]
+        )
 
         lines.extend(
             [

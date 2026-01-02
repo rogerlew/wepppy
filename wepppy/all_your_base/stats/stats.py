@@ -30,12 +30,13 @@ def weibull_series(
     if years <= 0:
         raise ValueError('years must be greater than zero.')
 
+    method = method.lower()
     if method == 'cta':
         count = int(round(years * 365.25))
-    elif method == 'am':
+    elif method in ('am', 'annual_maximum', 'pds'):
         count = int(round(years))
     else:
-        raise ValueError('method must be either "cta" or "am".')
+        raise ValueError('method must be "cta", "am", "annual_maximum", or "pds".')
 
     ranks = np.arange(1, count + 1, dtype=float)
     if gringorten_correction:
