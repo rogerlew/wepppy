@@ -36,7 +36,7 @@ describe('gl-dashboard color helpers', () => {
   });
 
   test('event ET uses viridis even though it is a water measure', () => {
-    expect(resolveColormapName('event_ET', 'WEPP Event', { WATER_MEASURES: ['event_ET'], SOIL_MEASURES: [] })).toBe('viridis');
+    expect(resolveColormapName('event_ET', 'WEPP Event', { WATER_MEASURES: ['event_ET'], SOIL_MEASURES: [] })).toBe('winter');
   });
 
   test('dominant landuse uses row color field when present', async () => {

@@ -47,6 +47,7 @@ Note:
 
 # standard library
 import csv
+import time
 from pathlib import Path
 import os
 import inspect
@@ -101,6 +102,7 @@ from wepppy.climates.cligen.single_storm import (
     build_single_storm_cli,
 )
 from wepppy.all_your_base import isint, isfloat, NCPU
+from wepppy.all_your_base.stats import weibull_series
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.query_engine.activate import update_catalog_entry
@@ -1428,6 +1430,7 @@ class Climate(NoDbBase):
             export_df["peak_intensity_10"] = export_df.get("10-min Peak Rainfall Intensity (mm/hour)")
             export_df["peak_intensity_15"] = export_df.get("15-min Peak Rainfall Intensity (mm/hour)")
             export_df["peak_intensity_30"] = export_df.get("30-min Peak Rainfall Intensity (mm/hour)")
+            export_df["peak_intensity_60"] = export_df.get("60-min Peak Rainfall Intensity (mm/hour)")
 
             export_df["storm_duration_hours"] = export_df.get("dur")
             export_df["storm_duration"] = export_df.get("dur")
@@ -1440,6 +1443,172 @@ class Climate(NoDbBase):
             self.logger.exception(
                 "Failed exporting CLI parquet with peak intensities",
                 extra={"cli_path": str(cli_path)},
+            )
+            return None
+
+    def _export_cli_precip_frequency_csv(self, parquet_path: Path) -> Optional[Path]:
+        """Write NOAA-style PDS frequency stats derived from ``wepp_cli.parquet``."""
+        start_time = time.time()
+        if not parquet_path.exists():
+            return None
+
+        try:
+            df = pd.read_parquet(parquet_path)
+        except Exception:
+            self.logger.exception(
+                "Failed reading CLI parquet for precip frequency stats",
+                extra={"parquet": str(parquet_path)},
+            )
+            return None
+
+        if df.empty:
+            self.logger.info(
+                "CLI parquet is empty; skipping precip frequency export",
+                extra={"parquet": str(parquet_path)},
+            )
+            return None
+
+        def _pick_column(candidates: Tuple[str, ...]) -> Optional[str]:
+            for name in candidates:
+                if name in df.columns:
+                    return name
+            return None
+
+        precip_column = _pick_column(("prcp", "precip_mm", "precip", "precipitation"))
+        if precip_column is None:
+            self.logger.warning(
+                "CLI parquet missing precipitation column; skipping precip frequency export",
+                extra={"parquet": str(parquet_path)},
+            )
+            return None
+
+        df = df[df[precip_column] > 0].copy()
+        if df.empty:
+            self.logger.info(
+                "No precipitation events found; skipping precip frequency export",
+                extra={"parquet": str(parquet_path)},
+            )
+            return None
+
+        year_column = _pick_column(("year", "calendar_year"))
+        if year_column is None:
+            self.logger.warning(
+                "CLI parquet missing year column; skipping precip frequency export",
+                extra={"parquet": str(parquet_path)},
+            )
+            return None
+
+        years_count = int(pd.to_numeric(df[year_column], errors="coerce").dropna().nunique())
+        if years_count <= 0:
+            self.logger.warning(
+                "Unable to determine years for precip frequency export",
+                extra={"parquet": str(parquet_path)},
+            )
+            return None
+
+        base_recurrence = [1, 2, 5, 10, 25, 50, 100]
+        recurrence = [r for r in base_recurrence if r <= years_count]
+        if not recurrence:
+            self.logger.info(
+                "No recurrence intervals are <= climate years; skipping precip frequency export",
+                extra={"years_count": years_count, "parquet": str(parquet_path)},
+            )
+            return None
+        rec_map = weibull_series(recurrence, years_count, method="cta")
+
+        def _format_value(value: float) -> str:
+            if value == 0 or np.isnan(value):
+                return "0"
+            formatted = f"{value:.2f}"
+            return formatted.rstrip("0").rstrip(".")
+
+        def _values_for(candidates: Tuple[str, ...]) -> List[float]:
+            column = _pick_column(candidates)
+            if column is None:
+                self.logger.info(
+                    "CLI parquet missing precip frequency column",
+                    extra={"column": candidates[0], "parquet": str(parquet_path)},
+                )
+                return [0.0] * len(recurrence)
+
+            series = pd.to_numeric(df[column], errors="coerce")
+            series = series[series > 0].dropna().sort_values(ascending=False).reset_index(drop=True)
+            if series.empty:
+                return [0.0] * len(recurrence)
+
+            values: List[float] = []
+            for target in recurrence:
+                idx = rec_map.get(float(target), 0)
+                if idx >= len(series):
+                    idx = len(series) - 1
+                values.append(float(series.iloc[idx]))
+            return values
+
+        rows = [
+            ("Precipitation depth (mm)", _values_for((precip_column,))),
+            ("Storm duration (hours)", _values_for(("storm_duration_hours", "storm_duration", "dur"))),
+            ("10-min intensity (mm/hour)", _values_for(("peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)", "i10"))),
+            ("15-min intensity (mm/hour)", _values_for(("peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)", "i15"))),
+            ("30-min intensity (mm/hour)", _values_for(("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)", "i30"))),
+            ("60-min intensity (mm/hour)", _values_for(("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)", "i60"))),
+        ]
+
+        lat_text = "None"
+        lng_text = "None"
+        station_name = self.climatestation or "None"
+        try:
+            watershed = self.watershed_instance
+            if watershed and watershed.centroid:
+                lng, lat = watershed.centroid
+                lng_text = f"{float(lng):.4f} Degree"
+                lat_text = f"{float(lat):.4f} Degree"
+        except Exception:
+            self.logger.debug("Unable to resolve watershed centroid for precip frequency export", exc_info=True)
+
+        output_path = parquet_path.with_name("wepp_cli_pds_mean_metric.csv")
+        timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+        runtime = time.time() - start_time
+
+        lines = [
+            "Point precipitation frequency estimates (mm, hours, mm/hour)",
+            "WEPP CLI derived precipitation frequency statistics",
+            "Data type: Precipitation depth, storm duration, peak intensities",
+            "Time series type: Partial duration",
+            f"Project area: {self.runid}",
+            f"Location name (WEPP): {self.runid}",
+            f"Station Name: {station_name}",
+            f"Latitude: {lat_text}",
+            f"Longitude: {lng_text}",
+            "Elevation (WEPP): None",
+            "",
+            "",
+            "PRECIPITATION FREQUENCY ESTIMATES",
+            "by metric for ARI (years):, " + ",".join(str(r) for r in recurrence),
+        ]
+
+        for label, values in rows:
+            line_values = ",".join(_format_value(value) for value in values)
+            lines.append(f"{label}:, {line_values}")
+
+        lines.extend(
+            [
+                "",
+                f"Date/time (GMT):  {timestamp}",
+                f"pyRunTime:  {runtime:.6f}",
+            ]
+        )
+
+        try:
+            output_path.write_text("\n".join(lines) + "\n")
+            self.logger.info(
+                "Exported CLI precip frequency stats",
+                extra={"csv": str(output_path)},
+            )
+            return output_path
+        except Exception:
+            self.logger.exception(
+                "Failed writing CLI precip frequency stats",
+                extra={"csv": str(output_path)},
             )
             return None
 
@@ -1898,7 +2067,9 @@ class Climate(NoDbBase):
             self.logger.info('    running _scale_precip_monthlies with annual factors')
             self._scale_precip_monthlies(monthly_scale_factors, pyo3_cli_p_scale_annual_monthlies)
 
-        self._export_cli_parquet()
+        parquet_path = self._export_cli_parquet()
+        if parquet_path is not None:
+            self._export_cli_precip_frequency_csv(parquet_path)
 
         try:
             self.logger.info('  timestamping build_climate task')

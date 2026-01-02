@@ -1442,6 +1442,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
                 return dss_response
 
         contents = None
+        preview_warning = None
 
         if repr_mode:
             contents = _generate_repr_content(path)
@@ -1523,16 +1524,36 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             skiprows = 0
             if 'totalwatsed2' in path_lower:
                 skiprows = 1
-            df = await asyncio.to_thread(pd.read_csv, path, skiprows=skiprows)
-            html = await _async_df_to_html(df)
+            try:
+                df = await asyncio.to_thread(pd.read_csv, path, skiprows=skiprows)
+            except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError) as exc:
+                preview_warning = (
+                    f'CSV preview failed: {_format_exception_message(exc)}. '
+                    'Showing raw text instead.'
+                )
+                _logger.warning(
+                    'Unable to parse CSV at %s; falling back to text view',
+                    path,
+                    exc_info=True,
+                )
+            else:
+                html = await _async_df_to_html(df)
             #html = csv_to_html(path)
 
         if path_lower.endswith('.tsv'):
             skiprows = 0
             try:
                 df = await asyncio.to_thread(pd.read_table, path, sep='\t', skiprows=skiprows)
-            except Exception:
-                _logger.warning('Unable to parse TSV at %s; falling back to plain text view', path, exc_info=True)
+            except Exception as exc:
+                preview_warning = (
+                    f'TSV preview failed: {_format_exception_message(exc)}. '
+                    'Showing raw text instead.'
+                )
+                _logger.warning(
+                    'Unable to parse TSV at %s; falling back to text view',
+                    path,
+                    exc_info=True,
+                )
             else:
                 html = await _async_df_to_html(df)
 
@@ -1565,6 +1586,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             filename=basename(path),
             contents=contents,
             contents_html=contents_html,
+            preview_warning=preview_warning,
         )
 
 

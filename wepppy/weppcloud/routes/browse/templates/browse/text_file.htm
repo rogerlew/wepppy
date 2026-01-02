@@ -30,6 +30,13 @@
     white-space: pre-wrap;
     word-wrap: break-word;
   }
+  .preview-warning {
+    background-color: #fff3cd;
+    border-bottom: 1px solid #ffeeba;
+    color: #856404;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
   .command-bar-container {
     display: none !important;
   }
@@ -37,6 +44,9 @@
 </head>
 <body>
 <header><b>File:</b> {{ path }}</header>
+{% if preview_warning %}
+<div class="preview-warning">{{ preview_warning }}</div>
+{% endif %}
 <pre>{{ contents_html }}</pre>
 {% include 'command-bar.htm' %}
 </body>

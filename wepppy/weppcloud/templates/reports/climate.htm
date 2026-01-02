@@ -123,6 +123,58 @@
  </div>
 {% endif %}
 
+{% if precip_frequency %}
+<details class="wc-collapse" id="climate-precip-frequency">
+  <summary class="wc-collapse__summary">
+    <span class="wc-collapse__title">Precipitation Frequency Estimates</span>
+    <span class="wc-collapse__icon" aria-hidden="true"></span>
+  </summary>
+  <div class="wc-collapse__content">
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense">
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            {% for interval in precip_frequency.recurrence %}
+              <th scope="col" class="wc-text-center">{{ interval }}</th>
+            {% endfor %}
+            <th scope="col">Units</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in precip_frequency.rows %}
+            <tr>
+              <th scope="row">{{ row["label"] }}</th>
+              {% for value in row["values"] %}
+                <td class="wc-text-right">
+                  {% if value is none %}
+                    {{ '&mdash;' | safe }}
+                  {% elif row["unitize"] %}
+                    {{ unitizer(value, row["unit"]) | safe }}
+                  {% else %}
+                    {{ value | round(2) }}
+                  {% endif %}
+                </td>
+              {% endfor %}
+              <td>
+                {% if row["unitize"] %}
+                  {{ unitizer_units(row["unit"]) | safe }}
+                {% else %}
+                  {{ row["unit"] }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="wc-text-muted">
+      Intensity estimates use CLIGEN event peak intensities (10, 15, 30, 60 minute) derived from the daily storm shape in the generated CLI file.
+    </p>
+  </div>
+</details>
+{% endif %}
+
 <details class="wc-collapse" id="climate-files-log">
   <summary class="wc-collapse__summary">
     <span class="wc-collapse__title">View Climate Files and Log</span>

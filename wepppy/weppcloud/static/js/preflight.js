@@ -141,7 +141,10 @@ function initPreflight(runid) {
 
         preflight_ws.onopen = function() {
             isConnecting = false;
-            $("#preflight_status").html("Connected");
+            var statusEl = document.getElementById("preflight_status");
+            if (statusEl) {
+                statusEl.textContent = "Connected";
+            }
             try {
                 preflight_ws.send(JSON.stringify({ "type": "init" }));
             } catch (err) {
@@ -181,7 +184,10 @@ function initPreflight(runid) {
                 "wasClean:", event && event.wasClean
             );
             preflight_ws = null;
-            $("#preflight_status").html("Preflight Connection Closed");
+            var statusEl = document.getElementById("preflight_status");
+            if (statusEl) {
+                statusEl.textContent = "Preflight Connection Closed";
+            }
             scheduleReconnect("onclose");
         };
     }
@@ -252,15 +258,25 @@ function updateUI(checklist) {
         return;
     }
 
+    var sbsTargets = document.querySelectorAll(selector);
+
     if (readonly === true) {
-        $(selector).removeClass('burned').removeClass('unburned');
+        sbsTargets.forEach(function(target) {
+            target.classList.remove('burned', 'unburned');
+        });
         setTocEmojiState(selector, false);
     } else {
         setTocEmojiState(selector, Boolean(checklist.sbs_map));
         if (checklist.sbs_map) {
-            $(selector).addClass('burned').removeClass('unburned');
+            sbsTargets.forEach(function(target) {
+                target.classList.add('burned');
+                target.classList.remove('unburned');
+            });
         } else {
-            $(selector).addClass('unburned').removeClass('burned');
+            sbsTargets.forEach(function(target) {
+                target.classList.add('unburned');
+                target.classList.remove('burned');
+            });
         }
     }
 }
@@ -294,22 +310,23 @@ function setTocEmojiState(selector, isComplete) {
     if (!selector) {
         return;
     }
-    var $targets = $(selector);
-    if (!$targets.length) {
+    var targets = document.querySelectorAll(selector);
+    if (!targets.length) {
         return;
     }
 
-    $targets.each(function () {
-        var anchor = this;
+    targets.forEach(function (anchor) {
         if (!anchor || anchor.nodeType !== 1) {
             return;
         }
 
         if (anchor.classList) {
-            anchor.classList.remove('checked');
-            anchor.classList.remove('unchecked');
+            anchor.classList.remove('checked', 'unchecked');
         } else {
-            $(anchor).removeClass('checked unchecked');
+            anchor.className = anchor.className
+                .replace(/\bchecked\b/g, '')
+                .replace(/\bunchecked\b/g, '')
+                .trim();
         }
 
         var href = anchor.getAttribute('href');

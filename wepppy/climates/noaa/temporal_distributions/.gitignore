@@ -1,0 +1,17 @@
+# Ignore downloaded data
+data/
+
+# Ignore test data
+_scripts/test_data/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
