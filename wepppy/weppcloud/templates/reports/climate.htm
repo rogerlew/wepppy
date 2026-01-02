@@ -171,6 +171,39 @@
     <p class="wc-text-muted">
       Intensity estimates use CLIGEN event peak intensities (10, 15, 30, 60 minute) derived from the daily storm shape in the generated CLI file.
     </p>
+    {% if atlas14_frequency %}
+      <h5>NOAA Atlas 14 Precipitation Frequency Estimates</h5>
+      <div class="wc-table-wrapper">
+        <table class="wc-table wc-table--dense">
+          <thead>
+            <tr>
+              <th scope="col">Duration</th>
+              {% for interval in atlas14_frequency.recurrence %}
+                <th scope="col" class="wc-text-center">{{ interval }}</th>
+              {% endfor %}
+              <th scope="col">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in atlas14_frequency.rows %}
+              <tr>
+                <th scope="row">{{ row["label"] }}</th>
+                {% for value in row["values"] %}
+                  <td class="wc-text-right">
+                    {% if value is none %}
+                      {{ '&mdash;' | safe }}
+                    {% else %}
+                      {{ unitizer(value, row["unit"]) | safe }}
+                    {% endif %}
+                  </td>
+                {% endfor %}
+                <td>{{ unitizer_units(row["unit"]) | safe }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
   </div>
 </details>
 {% endif %}

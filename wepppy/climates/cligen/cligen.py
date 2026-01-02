@@ -190,27 +190,35 @@ def cli2pat(
     tp: float = 0.3,
     ip: float = 4,
     max_time: Sequence[float] = (10, 30, 60),
+    ip_correction: float = 0.70,
 ) -> list[float]:
-    """Compute peak intensities for fixed durations using design-storm inputs.
+    """Compute peak intensities for fixed durations using WEPP storm inputs.
 
     Args:
-        prcp: Storm precipitation depth (millimetres).
+        prcp: Storm precipitation depth (millimeters).
         dur: Total storm duration (hours).
-        tp: Time to peak as a fraction of duration.
-        ip: Maximum intensity in inches per hour.
+        tp: Time to peak as a fraction of duration (0-1).
+        ip: Relative peak intensity (dimensionless max/avg ratio).
         max_time: Durations (minutes) for which intensities should be returned.
+        ip_correction: WEPP adjustment applied to ``ip``. Defaults to 0.70
+            (CLIGEN 4+). Use 1.0 to disable or 1.44 for CLIGEN 2.3-3.1.
 
     Returns:
-        A list of peak intensities corresponding to ``max_time`` durations.
+        A list of peak intensities (mm/hour) for the requested durations.
     """
     if prcp == 0 or dur == 0:
         return [0.0 for t in max_time]
 
+    im = prcp / dur
+    ip = max(ip * ip_correction, 1.0)
+    if ip <= 1.0 or tp >= 1.0:
+        return [im for _ in max_time]
     if tp <= 0.0:
-        tp = 0.1
+        tp = 0.01
+    if tp > 0.99:
+        tp = 0.99
 
     the_b = lambda _b, _tp, _ip: (_ip - _ip * np.exp(-_b * _tp)) / _tp
-    im = prcp/dur
     max_time = [t / 60.0 for t in max_time]
     peaks = len(max_time)
     last_b = 15
@@ -218,9 +226,6 @@ def cli2pat(
     while abs(b-last_b) > 0.000001:
         last_b = b
         b = the_b(b, tp, ip)
-
-    if tp == 1:
-        tp = 0.999
 
     d = b*tp/(1-tp)
     starts = [None for i in max_time]

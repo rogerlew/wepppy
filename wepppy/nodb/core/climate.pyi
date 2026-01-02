@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 from _typeshed import Incomplete
 from enum import IntEnum
+from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, TYPE_CHECKING
 from wepppy.climates.cligen import Cligen
 from wepppy.nodb.base import NoDbBase
@@ -135,6 +136,8 @@ class Climate(NoDbBase):
     sub_par_fns: Incomplete
     sub_cli_fns: Incomplete
     def __init__(self, wd: str, cfg_fn: str, run_group: str | None = None, group_name: str | None = None) -> None: ...
+    def _export_cli_precip_frequency_csv(self, parquet_path: Path) -> Path | None: ...
+    def _download_noaa_atlas14_intensity(self) -> Path | None: ...
     @property
     def daymet_last_available_year(self) -> int: ...
     @property

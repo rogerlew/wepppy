@@ -100,6 +100,74 @@ def _load_precip_frequency(cli_dir: str) -> dict[str, Any] | None:
 
     return {"recurrence": recurrence, "rows": rows}
 
+def _load_atlas14_intensity(cli_dir: str) -> dict[str, Any] | None:
+    path = Path(cli_dir) / "atlas14_intensity_pds_mean_metric.csv"
+    if not path.exists():
+        return None
+
+    lines = path.read_text().splitlines()
+    header_idx = next(
+        (idx for idx, line in enumerate(lines) if line.lower().startswith("by duration for ari")),
+        None,
+    )
+    if header_idx is None:
+        return None
+
+    header_line = lines[header_idx]
+    recurrence: list[int] = []
+    for token in header_line.split(",")[1:]:
+        value = token.strip()
+        if not value:
+            continue
+        try:
+            recurrence.append(int(float(value)))
+        except ValueError:
+            continue
+
+    if not recurrence:
+        return None
+
+    rows: list[dict[str, Any]] = []
+    for line in lines[header_idx + 1:]:
+        if not line.strip():
+            break
+        lower_line = line.lower()
+        if lower_line.startswith("date/time") or lower_line.startswith("pyruntime"):
+            break
+        if ":" not in line:
+            continue
+        label_part, values_part = line.split(":", 1)
+        label = label_part.strip()
+
+        parsed_values: list[float | None] = []
+        for raw_value in values_part.split(","):
+            value = raw_value.strip()
+            if not value:
+                continue
+            try:
+                parsed_values.append(float(value))
+            except ValueError:
+                parsed_values.append(None)
+
+        if len(parsed_values) < len(recurrence):
+            parsed_values.extend([None] * (len(recurrence) - len(parsed_values)))
+        elif len(parsed_values) > len(recurrence):
+            parsed_values = parsed_values[:len(recurrence)]
+
+        rows.append(
+            {
+                "label": label,
+                "unit": "mm/hour",
+                "unitize": True,
+                "values": parsed_values,
+            }
+        )
+
+    if not rows:
+        return None
+
+    return {"recurrence": recurrence, "rows": rows}
+
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation_mode/', methods=['POST'])
 def set_climatestation_mode(runid: str, config: str) -> Response:
@@ -264,10 +332,12 @@ def report_climate(runid: str, config: str) -> Response:
  
     climate = Climate.getInstance(wd)
     precip_frequency = _load_precip_frequency(climate.cli_dir)
+    atlas14_frequency = _load_atlas14_intensity(climate.cli_dir)
     return render_template('reports/climate.htm', runid=runid, config=config,
                            station_meta=climate.climatestation_meta,
                            climate=climate,
-                           precip_frequency=precip_frequency)
+                           precip_frequency=precip_frequency,
+                           atlas14_frequency=atlas14_frequency)
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_mode/', methods=['POST'])

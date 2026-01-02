@@ -1460,7 +1460,6 @@ class Climate(NoDbBase):
                 extra={"parquet": str(parquet_path)},
             )
             return None
-
         if df.empty:
             self.logger.info(
                 "CLI parquet is empty; skipping precip frequency export",
@@ -1611,6 +1610,72 @@ class Climate(NoDbBase):
                 extra={"csv": str(output_path)},
             )
             return None
+
+    def _download_noaa_atlas14_intensity(self) -> Optional[Path]:
+        """Download NOAA Atlas 14 PDS mean metric intensity data for comparison."""
+        cligen_db = str(self.cligen_db or "").lower()
+        if "2015" not in cligen_db and "legacy" not in cligen_db:
+            return None
+
+        output_path = Path(self.cli_dir) / "atlas14_intensity_pds_mean_metric.csv"
+        if output_path.exists():
+            return output_path
+
+        try:
+            watershed = self.watershed_instance
+            if not watershed or not watershed.centroid:
+                self.logger.info(
+                    "Watershed centroid unavailable; skipping NOAA Atlas 14 download",
+                    extra={"cligen_db": self.cligen_db},
+                )
+                return None
+            lng, lat = watershed.centroid
+        except Exception:
+            self.logger.exception("Failed resolving watershed centroid for NOAA Atlas 14")
+            return None
+
+        try:
+            from pfdf.data.noaa import atlas14
+        except Exception:
+            self.logger.exception("Failed importing pfdf NOAA Atlas 14 client")
+            return None
+
+        try:
+            result = atlas14.download(
+                lat=float(lat),
+                lon=float(lng),
+                parent=str(output_path.parent),
+                name=output_path.name,
+                statistic="mean",
+                data="intensity",
+                series="pds",
+                units="metric",
+                timeout=30,
+                overwrite=True,
+            )
+            if result is None:
+                return None
+            result_path = Path(result)
+            if result_path.exists():
+                self.logger.info(
+                    "Downloaded NOAA Atlas 14 intensity data",
+                    extra={"csv": str(result_path)},
+                )
+                return result_path
+        except ValueError as exc:
+            self.logger.info(
+                "NOAA Atlas 14 data unavailable for location",
+                extra={"error": str(exc), "lat": lat, "lon": lng},
+            )
+            return None
+        except Exception:
+            self.logger.exception(
+                "Failed downloading NOAA Atlas 14 intensity data",
+                extra={"lat": lat, "lon": lng},
+            )
+            return None
+
+        return None
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
@@ -2068,8 +2133,10 @@ class Climate(NoDbBase):
             self._scale_precip_monthlies(monthly_scale_factors, pyo3_cli_p_scale_annual_monthlies)
 
         parquet_path = self._export_cli_parquet()
+        time.sleep(1)  # ensure parquet write is flushed
         if parquet_path is not None:
             self._export_cli_precip_frequency_csv(parquet_path)
+        self._download_noaa_atlas14_intensity()
 
         try:
             self.logger.info('  timestamping build_climate task')
