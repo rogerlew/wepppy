@@ -10,6 +10,7 @@ export default {
     testMatch: [
         "<rootDir>/controllers_js/__tests__/**/*.test.js",
         "<rootDir>/static/js/gl-dashboard/__tests__/**/*.test.js",
+        "<rootDir>/static/js/storm-event-analyzer/__tests__/**/*.test.js",
     ],
     moduleFileExtensions: ["js", "json"],
     transform: {}

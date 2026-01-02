@@ -403,6 +403,17 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 - Capture base-unit values via `data-value` attributes; update on `unitizer:preferences-changed`.
 - Tests (Jest): state transitions, metric selection, filter range updates.
 
+### Phase 3 Handoff (2026-01-02)
+**Delivered**
+- Added a Storm Event Analyzer front-end module set under `wepppy/weppcloud/static/js/storm-event-analyzer/` with state, CSV parsing, table rendering, and filter wiring.
+- Dynamic ARI headers/rows now render from `climate/wepp_cli_pds_mean_metric.csv` fetched directly via `url_for_run("browse/...")`, storing base-unit values in `data-value` attributes for Phase 4.
+- NOAA CSV loading is optional; the NOAA table hides and the "NOAA data unavailable" message shows when missing.
+- Unitizer hooks re-render values and units on `unitizer:preferences-changed`.
+- Added Jest coverage for state updates, CSV parsing, dynamic headers/rows, and NOAA availability; updated `wepppy/weppcloud/static-src/jest.config.mjs`.
+
+**Tests run**
+- Manual testing verifies frequency tables render, and unitization is functional
+
 ### Phase 4: Event table + selection
 - Implement Query Engine fetch in `data/event-data.js`.
 - Render event table with sortable columns, `sorttable_customkey`, and selection highlighting.

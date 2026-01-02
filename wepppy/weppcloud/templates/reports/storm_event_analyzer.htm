@@ -11,7 +11,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .storm-event-analyzer__top > .wc-stack {
+  .storm-event-analyzer__column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wc-space-sm);
     min-width: 0;
   }
 
@@ -22,12 +25,22 @@
     background: var(--wc-color-surface);
   }
 
+  .storm-event-analyzer__metric-cell {
+    cursor: pointer;
+  }
+
+  .storm-event-analyzer__metric-cell.is-selected {
+    background: color-mix(in srgb, var(--wc-color-accent-soft) 70%, transparent);
+    font-weight: 600;
+  }
+
   @media (max-width: 900px) {
     .storm-event-analyzer__top {
       grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>
+<script type="module" src="{{ static_url('js/storm-event-analyzer/main.js') }}" defer></script>
 {% endblock %}
 
 {% block report_content %}
@@ -45,8 +58,8 @@
   </header>
 
   <div class="storm-event-analyzer__top" id="storm-event-analyzer__top">
-    <div class="wc-stack">
-      <h3 class="wc-heading__subtitle">WEPP CLIGEN</h3>
+    <div class="storm-event-analyzer__column">
+      <h3 class="wc-heading__subtitle">WEPP Climate</h3>
       <div class="wc-table-wrapper">
         <table class="wc-table wc-table--dense" id="storm_event_wepp_frequency">
           <thead>
@@ -70,7 +83,7 @@
       </p>
     </div>
 
-    <div class="wc-stack">
+    <div class="storm-event-analyzer__column">
       <h3 class="wc-heading__subtitle">NOAA Atlas 14</h3>
       <div class="wc-table-wrapper">
         <table class="wc-table wc-table--dense" id="storm_event_noaa_frequency">

@@ -101,7 +101,7 @@ SCHEMA = schema_with_version(
             pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
             pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
             pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
-            pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
+            pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction (10mm profile)"),
             pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
         ]
     )
