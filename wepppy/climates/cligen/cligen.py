@@ -1988,6 +1988,7 @@ class Cligen:
         prn_fn: str,
         cli_fn: str = 'wepp.cli',
         verbose: bool = False,
+        adjust_mx_pt5: bool = False,
     ) -> None:
         """Replay observed `.prn` data to produce a `.cli`.
 
@@ -1995,6 +1996,9 @@ class Cligen:
             prn_fn: Path (relative to `wd`) of the observed `.prn` file.
             cli_fn: Destination `.cli` filename.
             verbose: When True, emit subprocess commands to stdout.
+            adjust_mx_pt5: When True, scale `MX .5 P` using observed monthly
+                precipitation ratios derived from the `.prn` file and write an
+                adjusted `.par` copy for CLIGEN.
         """
 
         if verbose:
@@ -2026,13 +2030,60 @@ class Cligen:
             shutil.copyfile(station_meta.parpath, par_fn)
 
         assert _exists(par_fn), par_fn
-        _, par = os.path.split(par_fn)
 
         # change to working directory
         cli_dir = self.wd
 
         prn_path = _join(cli_dir, prn_fn)
         assert _exists(prn_path), f'{prn_fn} does not exist, must be specified relative to wd of Cligen'
+
+        if adjust_mx_pt5:
+            prn = Prn(prn_path)
+            prcp_values = prn.df[prn.prcp_key].astype(float)
+            prcp_values = prcp_values.where(prcp_values < 9999)
+            prcp_inches = prcp_values / 100.0
+            monthly_totals = prcp_inches.groupby(
+                [prn.df.index.year, prn.df.index.month],
+            ).sum(min_count=1)
+            monthly_means = monthly_totals.groupby(level=1).mean()
+            observed_monthlies = np.array(
+                [monthly_means.get(month, np.nan) for month in range(1, 13)],
+                dtype=float,
+            )
+
+            station = Station(par_fn)
+            station_monthlies = station.ppts * station.nwds
+            delta = np.divide(
+                observed_monthlies,
+                station_monthlies,
+                out=np.ones_like(observed_monthlies, dtype=float),
+                where=np.isfinite(observed_monthlies) & (station_monthlies > 0.0),
+            )
+
+            if len(station.lines) > 14 and 'MX .5 P' in station.lines[14]:
+                mx_line = station.lines[14]
+                mx_pt5 = np.array(
+                    [float(mx_line[-73:][i * 6:i * 6 + 6]) for i in range(12)],
+                    dtype=float,
+                )
+                mx_pt5_adjusted = mx_pt5.copy()
+                for i, (scale, obs_p, station_p) in enumerate(zip(delta, observed_monthlies, station_monthlies)):
+                    if not np.isfinite(scale) or obs_p < 0.05 or station_p < 0.05:
+                        continue
+                    factor = min(2.0, max(0.5, float(scale)))
+                    mx_pt5_adjusted[i] = mx_pt5[i] * factor
+                prefix = mx_line[:8]
+                station.lines[14] = f'{prefix}{_row_formatter(mx_pt5_adjusted)}\r\n'
+                cli_stub = os.path.splitext(_split(cli_fn)[-1])[0]
+                par_stub = os.path.splitext(_split(par_fn)[-1])[0]
+                adjusted_par_fn = _join(
+                    self.wd,
+                    f"{par_stub}_mxpt5_{cli_stub}.par",
+                )
+                station.write(adjusted_par_fn)
+                par_fn = adjusted_par_fn
+
+        _, par = os.path.split(par_fn)
 
         # delete cli file if it exists
         if _exists(_join(cli_dir, cli_fn)):
