@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { renderHydrologySummary } from '../ui/hydrology-summary.js';
+import { buildHydrologySummaryCsv, renderHydrologySummary } from '../ui/hydrology-summary.js';
 
 function buildSummarySection() {
   document.body.innerHTML = `
@@ -302,5 +302,102 @@ describe('storm-event-analyzer hydrology summary rendering', () => {
     const tcCell = section.querySelector('[data-storm-event-analyzer-summary="tc"]');
     expect(tcCell.textContent).toBe('\u2014');
     expect(tcCell.classList.contains('wc-text-muted')).toBe(true);
+  });
+
+  it('builds CSV without scenario columns when no scenario is selected', () => {
+    const section = buildSummarySection();
+
+    renderHydrologySummary({
+      section,
+      row: {
+        date: '2024-06-03',
+        depth_mm: 20,
+        duration_hours: 2,
+        measure_value: 30,
+        soil_saturation_pct: 35,
+        snow_coverage_t1_pct: 15,
+        snow_water_t1_mm: 5,
+        runoff_mm: 12,
+        runoff_volume_m3: 50,
+        tc_hours: 1.5,
+        peak_discharge_m3s: 1.2,
+        sediment_yield_kg: 10,
+        runoff_coefficient: 0.2,
+      },
+      unitizer: null,
+      tcAvailable: true,
+      selectedMetric: {
+        table: 'wepp',
+        label: '15-min intensity',
+        ari: 10,
+        unitKey: 'mm/hour',
+      },
+      omniScenario: null,
+      omniSummary: null,
+      baseScenarioLabel: 'Undisturbed',
+    });
+
+    const table = section.querySelector('#storm_event_hydrology_summary');
+    const csv = buildHydrologySummaryCsv(table);
+    const lines = csv.split('\n');
+    expect(lines[0]).toBe('Metric,Undisturbed,Units');
+    expect(csv.includes('% change')).toBe(false);
+    const runoffLine = lines.find((line) => line.startsWith('Runoff,'));
+    expect(runoffLine).toBe('Runoff,12,mm');
+  });
+
+  it('builds CSV with scenario columns when a scenario is selected', () => {
+    const section = buildSummarySection();
+
+    renderHydrologySummary({
+      section,
+      row: {
+        date: '2024-06-03',
+        depth_mm: 20,
+        duration_hours: 2,
+        measure_value: 30,
+        soil_saturation_pct: 35,
+        snow_coverage_t1_pct: 15,
+        snow_water_t1_mm: 5,
+        runoff_mm: 12,
+        runoff_volume_m3: 50,
+        tc_hours: 1.5,
+        peak_discharge_m3s: 1.2,
+        sediment_yield_kg: 10,
+        runoff_coefficient: 0.2,
+      },
+      unitizer: null,
+      tcAvailable: true,
+      selectedMetric: {
+        table: 'wepp',
+        label: '15-min intensity',
+        ari: 10,
+        unitKey: 'mm/hour',
+      },
+      omniScenario: { name: 'Mulch 30', path: '_pups/omni/scenarios/mulch_30' },
+      omniSummary: {
+        date: '2024-06-03',
+        depth_mm: 24,
+        duration_hours: 2,
+        measure_value: 36,
+        soil_saturation_pct: 40,
+        snow_coverage_t1_pct: 10,
+        snow_water_t1_mm: 5,
+        runoff_mm: 18,
+        runoff_volume_m3: 75,
+        tc_hours: 1.5,
+        peak_discharge_m3s: 1.5,
+        sediment_yield_kg: 12,
+        runoff_coefficient: 0.3,
+      },
+      baseScenarioLabel: 'Burned',
+    });
+
+    const table = section.querySelector('#storm_event_hydrology_summary');
+    const csv = buildHydrologySummaryCsv(table);
+    const lines = csv.split('\n');
+    expect(lines[0]).toBe('Metric,Burned,Mulch 30,Units,% change');
+    const runoffLine = lines.find((line) => line.startsWith('Runoff,'));
+    expect(runoffLine).toBe('Runoff,12,18,mm,50.0');
   });
 });

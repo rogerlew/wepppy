@@ -47,6 +47,97 @@ function setScenarioColumnsVisible(section, visible) {
   });
 }
 
+function normalizeCsvText(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value).replace(/\s+/g, ' ').trim();
+}
+
+function escapeCsvValue(value) {
+  const text = normalizeCsvText(value);
+  if (!text) {
+    return '';
+  }
+  if (/["\n,]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function getVisibleColumnIndexes(headerRow) {
+  if (!headerRow) {
+    return { indexes: [], labels: [] };
+  }
+  const cells = Array.from(headerRow.children).filter((cell) => cell.tagName === 'TH' || cell.tagName === 'TD');
+  const indexes = [];
+  const labels = [];
+  cells.forEach((cell, index) => {
+    if (cell.hasAttribute('hidden')) {
+      return;
+    }
+    indexes.push(index);
+    labels.push(normalizeCsvText(cell.textContent));
+  });
+  return { indexes, labels };
+}
+
+export function buildHydrologySummaryCsv(table) {
+  if (!table) {
+    return '';
+  }
+  const headerRow = table.tHead ? table.tHead.rows[0] : table.querySelector('thead tr');
+  const { indexes, labels } = getVisibleColumnIndexes(headerRow);
+  if (!labels.length) {
+    return '';
+  }
+  const lines = [labels.map(escapeCsvValue).join(',')];
+  const bodies = Array.from(table.tBodies || []);
+  bodies.forEach((tbody) => {
+    Array.from(tbody.rows || []).forEach((row) => {
+      if (row.hasAttribute('hidden')) {
+        return;
+      }
+      const cells = Array.from(row.children).filter((cell) => cell.tagName === 'TH' || cell.tagName === 'TD');
+      const values = indexes.map((index) => {
+        const cell = cells[index];
+        if (!cell || cell.hasAttribute('hidden')) {
+          return '';
+        }
+        return normalizeCsvText(cell.textContent);
+      });
+      lines.push(values.map(escapeCsvValue).join(','));
+    });
+  });
+  return lines.join('\n');
+}
+
+function buildCsvFilename(tableId) {
+  const now = new Date();
+  const pad2 = (value) => String(value).padStart(2, '0');
+  const dateStamp = `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}`;
+  const runid = typeof window !== 'undefined' ? window.runid : null;
+  const config = typeof window !== 'undefined' ? window.config : null;
+  const parts = [tableId, runid, config, dateStamp]
+    .filter(Boolean)
+    .map((value) => String(value).replace(/[^A-Za-z0-9_-]+/g, '_'));
+  return `${parts.join('_')}.csv`;
+}
+
+function downloadCsv(csv, filename) {
+  if (!csv) {
+    return;
+  }
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+}
+
 function setValueCell(cell, value, unitKey, unitizer, placeholder) {
   if (!cell) return;
   if (value === null || value === undefined || value === '') {
@@ -224,5 +315,27 @@ export function renderHydrologySummary({
     setValueCell(scenarioCell, scenarioValues[key], unitKey, unitizer, scenarioPlaceholder);
     setUnitCell(unitCell, unitKey, unitizer);
     setChangeCell(changeCell, changeValues[key], changePlaceholder);
+  });
+}
+
+export function bindHydrologySummaryCsv({ section, tableId }) {
+  if (!section || !tableId) {
+    return;
+  }
+  const button = section.querySelector(`[data-report-csv="${tableId}"]`);
+  if (!button) {
+    return;
+  }
+  button.addEventListener('click', () => {
+    const table = section.querySelector(`#${tableId}`);
+    if (!table) {
+      return;
+    }
+    const csv = buildHydrologySummaryCsv(table);
+    if (!csv) {
+      return;
+    }
+    const filename = buildCsvFilename(tableId);
+    downloadCsv(csv, filename);
   });
 }

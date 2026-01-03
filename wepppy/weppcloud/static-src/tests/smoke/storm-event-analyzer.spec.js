@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import { test, expect } from '@playwright/test';
 
 const baseURL = process.env.SMOKE_BASE_URL || 'http://localhost:8080';
@@ -98,9 +99,16 @@ test.describe('storm event analyzer smoke', () => {
     }
 
     const createUrl = buildUrl('/weppcloud/tests/api/create-run');
-    const response = await request.post(createUrl, {
-      data: { config: configSlug },
-    });
+    let response;
+    try {
+      response = await request.post(createUrl, {
+        data: { config: configSlug },
+      });
+    } catch (error) {
+      skipSuite = true;
+      skipReason = `Failed to provision run via ${createUrl}: ${error?.message || error}`;
+      return;
+    }
 
     if (!response.ok()) {
       skipSuite = true;
@@ -218,6 +226,44 @@ test.describe('storm event analyzer smoke', () => {
       () => window.__STORM_EVENT_ANALYZER_STATE__?.selectedEventSimDayIndex,
     );
     expect(String(selectedIndex)).toBe(String(simDayIndex));
+  });
+
+  test('download csv exports hydrology summary', async ({ page }) => {
+    skipIfUnavailable();
+
+    await openStormEventAnalyzer(page);
+    await selectFirstMetric(page);
+    const eventRows = await waitForEventRows(page);
+
+    const firstRow = eventRows.first();
+    await firstRow.click();
+
+    await page.waitForFunction(() => {
+      const volumeCell = document.querySelector('[data-storm-event-analyzer-summary="runoff-volume"]');
+      const coefficientCell = document.querySelector('[data-storm-event-analyzer-summary="runoff-coefficient"]');
+      const values = [volumeCell, coefficientCell].map((cell) => (cell ? (cell.textContent || '').trim() : ''));
+      return values.some((text) => text && text !== '--' && text !== '\u2014');
+    });
+
+    const scenarioHeader = page.locator('[data-storm-event-analyzer-summary-label="scenario"]');
+    if (await scenarioHeader.count()) {
+      await expect(scenarioHeader).toHaveAttribute('hidden', 'hidden');
+    }
+
+    const downloadButton = page.locator('[data-report-csv="storm_event_hydrology_summary"]');
+    await expect(downloadButton).toBeVisible();
+
+    const [download] = await Promise.all([page.waitForEvent('download'), downloadButton.click()]);
+    const downloadPath = test.info().outputPath('storm_event_hydrology_summary.csv');
+    await download.saveAs(downloadPath);
+
+    const csv = await fs.readFile(downloadPath, 'utf8');
+    const [header, ...rows] = csv.trim().split(/\r?\n/);
+    expect(header).toContain('Metric');
+    expect(header).toContain('Units');
+    expect(header).not.toContain('Scenario');
+    expect(header).not.toContain('% change');
+    expect(rows.length).toBeGreaterThan(0);
   });
 
   test('noaa missing scenario hides table and shows message', async ({ page }) => {

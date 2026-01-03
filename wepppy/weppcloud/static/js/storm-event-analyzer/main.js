@@ -15,7 +15,7 @@ import { createEventDataManager } from './data/event-data.js';
 import { buildHyetographSeries } from './data/hyetograph-data.js';
 import { createHyetographChart } from './charts/hyetograph.js';
 import { applyNoaaAvailability, renderFrequencyTable } from './ui/frequency-table.js';
-import { renderHydrologySummary } from './ui/hydrology-summary.js';
+import { bindHydrologySummaryCsv, renderHydrologySummary } from './ui/hydrology-summary.js';
 import { renderEventTable, setEventErrorBanner, updateEventSelection } from './ui/event-table.js';
 import { bindFilterControls } from './ui/filters.js';
 
@@ -75,6 +75,10 @@ async function initStormEventAnalyzer() {
   });
 
   bindFilterControls({ setState });
+  bindHydrologySummaryCsv({
+    section: hydrologySummarySection,
+    tableId: 'storm_event_hydrology_summary',
+  });
 
   let unitizerClient = await getUnitizerClient();
   if (unitizerClient && typeof unitizerClient.getPreferencePayload === 'function') {

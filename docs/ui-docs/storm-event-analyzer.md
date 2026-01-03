@@ -522,6 +522,26 @@ Phase 9 is split into 9a/9b/9c to keep scope clear.
 **Tests run**
 - `wctl run-npm test -- storm-event-analyzer`
 
+### Phase 9c Handoff (2026-01-02)
+**Delivered**
+- Added a client-side Download CSV action for the hydrology summary table.
+- Implemented DOM-driven CSV export that respects hidden columns/rows and the current scenario selection.
+- Added Jest coverage for CSV output with and without scenario columns.
+
+**Tests run**
+- `wctl run-npm test -- storm-event-analyzer`
+
+### Phase 9 Final Handoff (2026-01-02)
+**Delivered**
+- Completed Phase 9a/9b/9c hydrology summary expansions, Omni scenario comparison, and client-side CSV export.
+- Added smoke coverage for CSV download and resilient provisioning handling in the Storm Event Analyzer smoke suite.
+- Verified Omni and non-Omni behavior on public runs.
+
+**Tests run**
+- `wctl run-npm test -- storm-event-analyzer`
+- `SMOKE_RUN_PATH="https://wc.bearhive.duckdns.org/weppcloud/runs/multiplicative-lath/disturbed9002/storm-event-analyzer" wctl run-npm smoke -- tests/smoke/storm-event-analyzer.spec.js`
+- `SMOKE_RUN_PATH="https://wc.bearhive.duckdns.org/weppcloud/runs/chinless-half-hour/disturbed9002/storm-event-analyzer" wctl run-npm smoke -- tests/smoke/storm-event-analyzer.spec.js`
+
 #### Phase 9b: Omni compare scenario column
 - If the project has the Omni mod, add a "Compare to Omni Scenario" select to the Hydrology Characteristics panel.
 - Default: no scenario selected (render &mdash; in scenario + % change cells).
