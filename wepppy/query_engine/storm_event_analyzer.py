@@ -257,12 +257,13 @@ def build_snow_water_payload(
     max_value: float | None = None,
     warmup_year: int | None = None,
 ) -> QueryRequest:
-    """Build a QueryRequest that aggregates snow water (T-1) across hillslopes."""
+    """Build a QueryRequest that aggregates snow coverage (T-1) across hillslopes."""
     climate_path = STORM_EVENT_DATASETS["climate"]
     water_path = STORM_EVENT_DATASETS["water"]
 
     strategy = resolve_join_strategy(run_dir, catalog, dataset_paths=[climate_path, water_path])
     climate_cols = _resolve_climate_columns(catalog, climate_path)
+    area_column = _select_column(catalog, water_path, ("Area", "area", "area_m2"), label="area")
 
     filters = _build_intensity_filters(
         climate_cols,
@@ -288,8 +289,12 @@ def build_snow_water_payload(
         columns=_event_key_columns("ev", climate_cols),
         aggregations=[
             {
-                "sql": f"AVG({_qualify_column('wat', 'Snow-Water')})",
-                "alias": "snow_water_t1_mm",
+                "sql": (
+                    f"SUM(CASE WHEN {_qualify_column('wat', 'Snow-Water')} > 0 THEN "
+                    f"{_qualify_column('wat', area_column)} ELSE 0 END) / "
+                    f"NULLIF(SUM({_qualify_column('wat', area_column)}), 0) * 100.0"
+                ),
+                "alias": "snow_coverage_t1_pct",
             }
         ],
         filters=filters or None,

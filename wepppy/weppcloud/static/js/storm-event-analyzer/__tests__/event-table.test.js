@@ -9,11 +9,10 @@ function buildEventTable() {
           <td data-storm-event-analyzer-unit="select"></td>
           <td data-storm-event-analyzer-unit="measure"></td>
           <td data-storm-event-analyzer-unit="date"></td>
-          <td data-storm-event-analyzer-unit="precip"></td>
           <td data-storm-event-analyzer-unit="depth"></td>
           <td data-storm-event-analyzer-unit="duration"></td>
           <td data-storm-event-analyzer-unit="saturation"></td>
-          <td data-storm-event-analyzer-unit="snow-water"></td>
+          <td data-storm-event-analyzer-unit="snow-coverage"></td>
           <td data-storm-event-analyzer-unit="peak-discharge"></td>
         </tr>
       </tbody>
@@ -30,22 +29,20 @@ describe('storm-event-analyzer event table rendering', () => {
         sim_day_index: 101,
         date: '2026-01-01',
         measure_value: 10,
-        precip_mm: 5,
         depth_mm: 5,
         duration_hours: 1,
         soil_saturation_pct: 20,
-        snow_water_t1_mm: 0,
+        snow_coverage_t1_pct: 0,
         peak_discharge_m3s: 0.5,
       },
       {
         sim_day_index: 102,
         date: '2026-01-02',
         measure_value: 12,
-        precip_mm: 6,
         depth_mm: 6,
         duration_hours: 2,
         soil_saturation_pct: 30,
-        snow_water_t1_mm: 1,
+        snow_coverage_t1_pct: 1,
         peak_discharge_m3s: 0.7,
       },
     ];
@@ -75,11 +72,10 @@ describe('storm-event-analyzer event table rendering', () => {
         sim_day_index: 200,
         date: '2026-02-01',
         measure_value: 11,
-        precip_mm: 4,
         depth_mm: 4,
         duration_hours: 1.5,
         soil_saturation_pct: 25,
-        snow_water_t1_mm: 0,
+        snow_coverage_t1_pct: 0,
         peak_discharge_m3s: 0.4,
       },
     ];
@@ -106,11 +102,10 @@ describe('storm-event-analyzer event table rendering', () => {
         sim_day_index: 210,
         date: '2026-02-10',
         measure_value: 13,
-        precip_mm: 4,
         depth_mm: 4,
         duration_hours: 1.0,
         soil_saturation_pct: 25,
-        snow_water_t1_mm: 0,
+        snow_coverage_t1_pct: 0,
         peak_discharge_m3s: 0.4,
       },
     ];
@@ -137,22 +132,20 @@ describe('storm-event-analyzer event table rendering', () => {
         sim_day_index: 201,
         date: '2026-02-02',
         measure_value: 11,
-        precip_mm: 4,
         depth_mm: 4,
         duration_hours: 1.5,
         soil_saturation_pct: 25,
-        snow_water_t1_mm: 0,
+        snow_coverage_t1_pct: 0,
         peak_discharge_m3s: 0.4,
       },
       {
         sim_day_index: 202,
         date: '2026-02-03',
         measure_value: 12,
-        precip_mm: 5,
         depth_mm: 5,
         duration_hours: 2.0,
         soil_saturation_pct: 30,
-        snow_water_t1_mm: 0.5,
+        snow_coverage_t1_pct: 0.5,
         peak_discharge_m3s: 0.6,
       },
     ];

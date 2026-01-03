@@ -34,12 +34,11 @@ function updateUnitRow(table, unitizer, measureUnitKey) {
   const units = {
     select: null,
     measure: measureUnitKey || 'mm/hour',
-    date: null,
-    precip: 'mm',
+    date: 'YY-MM-DD',
     depth: 'mm',
     duration: 'hours',
     saturation: 'pct',
-    'snow-water': 'mm',
+    'snow-coverage': 'pct',
     'peak-discharge': 'm^3/s',
   };
 
@@ -123,12 +122,6 @@ export function renderEventTable({
     setSortKey(dateCell, row.date || '');
     tr.appendChild(dateCell);
 
-    const precipCell = document.createElement('td');
-    precipCell.className = 'wc-text-right';
-    applyHtml(precipCell, renderValue(unitizer, row.precip_mm, 'mm'));
-    setSortKey(precipCell, row.precip_mm);
-    tr.appendChild(precipCell);
-
     const depthCell = document.createElement('td');
     depthCell.className = 'wc-text-right';
     applyHtml(depthCell, renderValue(unitizer, row.depth_mm, 'mm'));
@@ -149,8 +142,8 @@ export function renderEventTable({
 
     const snowCell = document.createElement('td');
     snowCell.className = 'wc-text-right';
-    applyHtml(snowCell, renderValue(unitizer, row.snow_water_t1_mm, 'mm'));
-    setSortKey(snowCell, row.snow_water_t1_mm);
+    applyHtml(snowCell, renderValue(unitizer, row.snow_coverage_t1_pct, 'pct'));
+    setSortKey(snowCell, row.snow_coverage_t1_pct);
     tr.appendChild(snowCell);
 
     const peakCell = document.createElement('td');

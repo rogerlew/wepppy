@@ -163,6 +163,8 @@ export function buildSoilPayload({ filterColumn, minValue, maxValue, warmupYear 
 }
 
 export function buildSnowPayload({ filterColumn, minValue, maxValue, warmupYear }) {
+  const coverageExpr =
+    'SUM(CASE WHEN wat."Snow-Water" > 0 THEN wat.Area ELSE 0 END) / NULLIF(SUM(wat.Area), 0) * 100.0';
   return {
     datasets: [
       { path: CLIMATE_PATH, alias: 'ev' },
@@ -185,8 +187,8 @@ export function buildSnowPayload({ filterColumn, minValue, maxValue, warmupYear 
     ],
     aggregations: [
       {
-        sql: 'AVG(wat."Snow-Water")',
-        alias: 'snow_water_t1_mm',
+        sql: coverageExpr,
+        alias: 'snow_coverage_t1_pct',
       },
     ],
     filters: [
@@ -521,7 +523,7 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
 
     const baseRows = (eventResult && eventResult.records) || [];
     const soilMap = mapBySimDay((soilResult && soilResult.records) || [], 'soil_saturation_pct');
-    const snowMap = mapBySimDay((snowResult && snowResult.records) || [], 'snow_water_t1_mm');
+    const snowMap = mapBySimDay((snowResult && snowResult.records) || [], 'snow_coverage_t1_pct');
     const hydroMap = mapRowsBySimDay((hydroResult && hydroResult.records) || []);
     const precipMap = mapRowsBySimDay((precipResult && precipResult.records) || []);
     const tcAvailable = !!(tcResult && tcResult.available);
@@ -575,7 +577,7 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
         tp: Number.isFinite(tp) ? tp : null,
         ip: Number.isFinite(ip) ? ip : null,
         soil_saturation_pct: Number.isFinite(simDay) && soilMap.has(simDay) ? soilMap.get(simDay) : null,
-        snow_water_t1_mm: Number.isFinite(simDay) && snowMap.has(simDay) ? snowMap.get(simDay) : null,
+        snow_coverage_t1_pct: Number.isFinite(simDay) && snowMap.has(simDay) ? snowMap.get(simDay) : null,
         runoff_volume_m3: Number.isFinite(runoffVolume) ? runoffVolume : null,
         peak_discharge_m3s: Number.isFinite(peakDischarge) ? peakDischarge : null,
         sediment_yield_kg: Number.isFinite(sedimentYield) ? sedimentYield : null,

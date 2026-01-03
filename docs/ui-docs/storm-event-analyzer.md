@@ -69,12 +69,11 @@ Add a checkbox directly below the radio group:
 Sortable table (`.wc-table.wc-table--striped.sortable`) with default sort by selected measure (ascending).
 Columns:
 - Measure (selected intensity, e.g., 10-min intensity in mm/hour)
-- Date
-- Precip (mm)
+- Date (YY-MM-DD)
 - Depth (mm)
 - Duration (hours)
 - Soil saturation % (T-1 day, aggregated across hillslopes from `H.soil.parquet`)
-- Snow-Water (mm) (T-1 day, aggregated across hillslopes from `H.wat.parquet`)
+- Snow coverage (T-1 day, percent of hillslope area with snow-water > 0 from `H.wat.parquet`)
 - Peak discharge (m^3/s) from `ebe_pw0.parquet` (`peak_runoff`, unitize to CFS for English)
 
 Row behavior:
@@ -124,9 +123,9 @@ If any dataset is missing, add a query-engine agent or produce a derived parquet
    - Aggregate: mean saturation across hillslopes for day = event_date - 1.
    - Join: use absolute `sim_day_index`; fall back to `year + julian` for legacy runs.
 
-3. **Snow-Water (T-1)**  
-   - Source: `H.wat.parquet` (`Snow-Water` column, mm).
-   - Aggregate: mean snow water across hillslopes for day = event_date - 1.
+3. **Snow coverage (T-1)**  
+   - Source: `H.wat.parquet` (`Snow-Water` column, mm + `Area`).
+   - Aggregate: sum area of hillslopes with `Snow-Water` > 0 divided by total area, * 100.
    - Join: use `sim_day_index`; fall back to `year + julian` for legacy runs.
 
 4. **Hydrology metrics**  
@@ -280,7 +279,7 @@ Superseded by **Phase 0b Handoff (2026-01-02)** for interchange normalization; r
 | `atlas14_intensity_pds_mean_metric.csv` | present | `/wc1/runs/ch/chinless-half-hour/climate/atlas14_intensity_pds_mean_metric.csv` | ARIs 1..1000; durations include 10/15/30/60-min; take ARI intersection with WEPP table. |
 | `climate/wepp_cli.parquet` | present | `/wc1/runs/ch/chinless-half-hour/climate/wepp_cli.parquet` | `sim_day_index` (absolute 1..16437), `julian` (day-of-year), `year`, `month`, `day_of_month`, `prcp` (mm), `dur` (hours), `tp`, `ip`, `peak_intensity_10/15/30/60`, `storm_duration_hours` == `dur`. |
 | `H.soil.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.soil.parquet` | `sim_day_index` == `julian` (day-of-year, resets each year), `year`, `month`, `day_of_month`, `Saturation` (0..1 fraction). Join via `year + julian` for T-1. |
-| `H.wat.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.wat.parquet` | `sim_day_index` absolute (matches climate), `julian`, `Snow-Water` (mm). Join via `sim_day_index` or `year + julian`. |
+| `H.wat.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.wat.parquet` | `sim_day_index` absolute (matches climate), `julian`, `Snow-Water` (mm), `Area` (m^2). Join via `sim_day_index` or `year + julian`. |
 | `H.ebe.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/H.ebe.parquet` | No `sim_day_index`; has `julian`, `year`, `month`, `day_of_month`, `Precip`, `Runoff`, `Sed.Del`. |
 | `ebe_pw0.parquet` | present | `/wc1/runs/ch/chinless-half-hour/wepp/output/interchange/ebe_pw0.parquet` | No `sim_day_index`; has `julian`, `year`, `month`, `day_of_month`, `precip`, `runoff_volume`, `peak_runoff`, `sediment_yield`, `element_id`. |
 | `tc_out.parquet` | missing | n/a | `tc_out.txt` exists under `/wc1/runs/ch/chinless-half-hour/wepp/output/` and `/wc1/runs/ch/chinless-half-hour/wepp/runs/`, but no parquet emitted into `wepp/output/interchange/`. |
@@ -477,6 +476,22 @@ Status: complete (2026-01-02). Phase 7 is done; see **Phase 7 Handoff**.
 
 **Tests run**
 - `SMOKE_RUN_PATH=\"https://wc.bearhive.duckdns.org/weppcloud/runs/chinless-half-hour/disturbed9002/storm-event-analyzer\" wctl run-npm smoke -- tests/smoke/storm-event-analyzer.spec.js` (passes; rerun 2026-01-02)
+
+### Phase 8: Event Characteristics table enhancements
+Status: complete (2026-01-02). Phase 8 is done; see **Phase 8 Handoff**.
+- Remove redundant Precip column from the Event Characteristics table.
+- Switch snow metric to Snow coverage (%) based on hillslope area with Snow-Water > 0 at T-1.
+- Clarify Date units as YY-MM-DD and update T-1 labels to use subscript.
+- Tests: run `wctl run-npm test -- storm-event-analyzer` and smoke against a public run.
+
+### Phase 8 Handoff (2026-01-02)
+**Delivered**
+- Removed the Precip column from the Event Characteristics table and updated render logic/tests (`wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`, `wepppy/weppcloud/static/js/storm-event-analyzer/ui/event-table.js`, `wepppy/weppcloud/static/js/storm-event-analyzer/__tests__/event-table.test.js`).
+- Replaced Snow-water depth with Snow coverage (%) derived from hillslope area with snow-water > 0 at T-1, updating query payloads and UI bindings (`wepppy/query_engine/storm_event_analyzer.py`, `wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js`, `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`).
+- Clarified Date units to YY-MM-DD and updated T-1 label formatting (`wepppy/weppcloud/static/js/storm-event-analyzer/ui/event-table.js`, `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm`).
+
+**Tests run**
+- Not run (wctl run-npm test -- storm-event-analyzer; wctl run-npm smoke -- tests/smoke/storm-event-analyzer.spec.js)
 
 ## Open Questions
 - None currently. Add new questions here as data gaps or UI behaviors arise.
