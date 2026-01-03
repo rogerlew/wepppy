@@ -49,6 +49,8 @@ def jinja_env() -> Environment:
         precisions={},
         cls_units=lambda value: value,
         str_units=lambda value: value,
+        omni_scenarios=[],
+        base_scenario_label="Base",
     )
     return env
 
