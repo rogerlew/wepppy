@@ -47,6 +47,7 @@ from time import sleep
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from wepppy.nodb.core import Climate, Ron, Soils, Watershed, Wepp
+from wepppy.nodb.core.climate import ClimateMode
 from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_setter
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
@@ -126,6 +127,29 @@ def _clear_nodb_cache_and_locks(runid: str, pup_relpath: Optional[str] = None) -
             LOGGER.warning('Failed to clear NoDb locks for %s: %s', runid, exc)
     except Exception as exc:
         LOGGER.warning('Failed to clear NoDb locks for %s: %s', runid, exc)
+
+
+def _post_watershed_run_cleanup(wepp: Wepp) -> None:
+    """Mirror RQ post-run cleanup by moving .out files and copying tc_out.txt."""
+    climate = Climate.getInstance(wepp.wd)
+    if climate.climate_mode == ClimateMode.SingleStormBatch:
+        for batch in climate.ss_batch_storms:
+            ss_batch_key = batch["ss_batch_key"]
+            wepp.logger.info("    moving .out files...")
+            for fn in glob(_join(wepp.runs_dir, "*.out")):
+                dst_path = _join(wepp.output_dir, ss_batch_key, _split(fn)[1])
+                shutil.move(fn, dst_path)
+    else:
+        wepp.logger.info("    moving .out files...")
+        for fn in glob(_join(wepp.runs_dir, "*.out")):
+            dst_path = _join(wepp.output_dir, _split(fn)[1])
+            shutil.move(fn, dst_path)
+
+    tc_src = _join(wepp.runs_dir, "tc_out.txt")
+    if _exists(tc_src):
+        tc_dst = _join(wepp.output_dir, "tc_out.txt")
+        wepp.logger.info("    copying tc_out.txt...")
+        shutil.copy2(tc_src, tc_dst)
 
 class OmniScenario(IntEnum):
     UniformLow = 1
@@ -256,6 +280,7 @@ def _run_contrast(
 
     wepp.make_watershed_run(wepp_id_paths=list(contrasts.values()))
     wepp.run_watershed()
+    _post_watershed_run_cleanup(wepp)
     wepp.report_loss()
 
     return new_wd
@@ -1651,6 +1676,7 @@ class Omni(NoDbBase):
         with self.timed(f'  {scenario_name}: run watershed'):
             wepp.run_watershed()
             # run_wepp_watershed_interchange and generate_interchange_documentation is at end of wepp.run_watershed()
+            _post_watershed_run_cleanup(wepp)
 
         return new_wd, scenario_name
 
