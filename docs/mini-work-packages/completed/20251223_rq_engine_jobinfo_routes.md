@@ -1,7 +1,7 @@
 # Mini Work Package: rq-engine jobinfo polling offload
 
 **Status:** Complete  
-**Last Updated:** 2025-12-23  
+**Last Updated:** 2026-01-03  
 **Primary Areas:** `wepppy/microservices/rq_engine.py`, `wepppy/weppcloud/routes/rq/api/jobinfo.py`, `wepppy/rq/job_info.py`, `wepppy/weppcloud/controllers_js/*`, `docker/docker-compose.*.yml`, `docker/caddy/Caddyfile`, docs
 
 ---
@@ -25,7 +25,7 @@ Primary poll sources to update for rq-engine priority + fallback:
 - `wepppy/weppcloud/controllers_js/control_base.js` (jobstatus + jobinfo GET)
 - `wepppy/weppcloud/controllers_js/status_stream.js` (jobinfo GET for stacktrace)
 - `wepppy/weppcloud/controllers_js/batch_runner.js` (jobinfo POST batch)
-- `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard.htm` (jobinfo polling)
+- `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard_pure.htm` (jobinfo polling)
 - `wepppy/weppcloud/templates/reports/deval_loading.htm` + `wepppy/weppcloud/routes/weppcloudr.py` (jobstatus polling)
 - `wepppy/profile_recorder/playback.py` (jobstatus/jobinfo polling)
 - Controller Jest tests in `wepppy/weppcloud/controllers_js/__tests__/*` that assert `/weppcloud/rq/api/jobinfo...`
@@ -88,7 +88,7 @@ Docs referencing jobinfo endpoints:
   - `wepppy/weppcloud/controllers_js/control_base.js`
   - `wepppy/weppcloud/controllers_js/status_stream.js`
   - `wepppy/weppcloud/controllers_js/batch_runner.js`
-  - `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard.htm`
+  - `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard_pure.htm`
   - `wepppy/weppcloud/templates/reports/deval_loading.htm`
   - `wepppy/profile_recorder/playback.py`
 - Updated Jest coverage for the new jobinfo POST fallback (`wepppy/weppcloud/controllers_js/__tests__/batch_runner.test.js`) and rq-engine prefix bypass (`wepppy/weppcloud/controllers_js/__tests__/http.test.js`).

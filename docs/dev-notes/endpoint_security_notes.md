@@ -10,7 +10,7 @@
 - `wepppy/weppcloud/routes/download.py` and `wepppy/weppcloud/routes/browse/__init__.py` – browse/download expose full run directories with no auth check.
 - `wepppy/weppcloud/routes/diff.py:20,25`, `gdalinfo.py:19,24`, `jsoncrack.py:82,87`, `pivottable.py:166,171`, `wepprepr.py:19,24` – stream run outputs (diffs, JSON/CSV, management files) without ensuring ownership.
 - `wepppy/weppcloud/routes/weppcloudr.py:196,209` – run exports and `/WEPPcloudR/proxy/<routine>` execute heavy processing and leak metadata with no auth.
-- `wepppy/weppcloud/routes/rq/job_dashboard/routes.py:17` and `rq/api/jobinfo.py:41,61` – expose job dashboards/status for any job id.
+- `wepppy/weppcloud/routes/rq/job_dashboard/routes.py:18` now uses `requires_cap`, but `rq/api/jobinfo.py:41,61` still expose job status for any job id.
 - `wepppy/weppcloud/routes/rq/api/api.py:195,222` – allow public landuse/soil extraction job submission and archive download by UUID.
 
 ## Follow-Up Actions

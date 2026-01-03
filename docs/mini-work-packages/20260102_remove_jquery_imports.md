@@ -23,7 +23,7 @@ Remove jquery.js imports and migrate remaining jQuery usage to vanilla JS while 
 - [x] Run targeted smoke/tests (`wctl run-npm test`, relevant pytest if needed).
 
 ## Completed
-- [x] `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard.htm` - Remove jquery import; replace jQuery AJAX and DOM hooks with vanilla JS (2026-01-02).
+- [x] `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard.htm` - Remove jquery import; replace jQuery AJAX and DOM hooks with vanilla JS (2026-01-02). Removed entirely in 2026-01-03 (RQ job dashboard Pure migration).
 - [x] `wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm` - Remove jquery import (2026-01-02).
 - [x] `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm` - Remove jquery import (2026-01-02).
 - [x] `wepppy/weppcloud/routes/batch_runner/templates/layout.j2` - Remove jquery import (2026-01-02).
@@ -59,7 +59,7 @@ Remove jquery.js imports and migrate remaining jQuery usage to vanilla JS while 
 - Verification: `wctl build-static-assets` (development) and `wctl run-npm test` (PASS 50 suites / 293 tests). Warnings observed were the usual VM Modules/console noise in Jest output.
 - Notes: `wepppy/weppcloud/templates/reports/storm_event_analyzer.htm` left untouched per request; TOC bootstrap now uses vanilla navigation, so reintroducing bootstrap-toc would require restoring vendor sources + init; pivottable UI is simplified and the route is deprecated in favor of D-Tale.
 
-## Script import inventory (95 total, 0 jquery)
+## Script import inventory (94 total, 0 jquery)
 Legend: [jquery] [generated] [tests]
 - [ ] `wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm:24` - `<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>`
 - [ ] `wepppy/weppcloud/routes/archive_dashboard/templates/rq-archive-dashboard.htm:25` - `<script src="{{ url_for('static', filename='js/console_utils.js') }}"></script>`
@@ -83,7 +83,6 @@ Legend: [jquery] [generated] [tests]
 - [ ] `wepppy/weppcloud/routes/pivottable.py:24` - `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>`
 - [ ] `wepppy/weppcloud/routes/readme_md/templates/readme_editor.htm:7` - `<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>`
 - [ ] `wepppy/weppcloud/routes/readme_md/templates/readme_view.htm:7` - `<script src="{{ url_for('static', filename='js/status_stream.js') }}" defer></script>`
-- [ ] `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard.htm:8` - `<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>`
 - [ ] `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm:31` - `<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>`
 - [ ] `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm:35` - `<script src="https://unpkg.com/@deck.gl/widgets@^9.0.0/dist.min.js"`
 - [ ] `wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm:38` - `<script src="{{ url_for('static', filename='js/controllers-gl.js') }}"></script>`

@@ -1,0 +1,575 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}RQ Job Dashboard{% endblock %}
+
+{% from "shared/console_macros.htm" import console_page, console_header %}
+
+{% block body %}
+{% call console_page(data_controller="rq-job-dashboard") %}
+  {% call console_header(
+    title="RQ Job Dashboard",
+    subtitle="Track queued and running jobs, view progress, and inspect failures."
+  ) %}
+    <div class="wc-toolbar wc-toolbar--end">
+      <button type="button" class="pure-button pure-button-secondary" id="cancel-job">
+        Cancel job
+      </button>
+    </div>
+  {% endcall %}
+
+  <section class="wc-panel wc-stack" aria-live="polite">
+    <h2 class="wc-heading wc-heading--sm">Summary</h2>
+    <div class="wc-summary-pane">
+      <dl class="wc-summary-pane__list">
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Job ID</dt>
+          <dd class="wc-summary-pane__definition" id="job-id">{{ job_id }}</dd>
+        </div>
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Run ID</dt>
+          <dd class="wc-summary-pane__definition" id="run-id">--</dd>
+        </div>
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Progress</dt>
+          <dd class="wc-summary-pane__definition" id="job-summary">Waiting for data...</dd>
+        </div>
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Query Count</dt>
+          <dd class="wc-summary-pane__definition" id="query-count">0</dd>
+        </div>
+        <div class="wc-summary-pane__item">
+          <dt class="wc-summary-pane__term">Query Interval (ms)</dt>
+          <dd class="wc-summary-pane__definition" id="query-interval">--</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="wc-panel wc-stack" aria-live="polite">
+    <div class="job-dashboard__header">
+      <div>
+        <h2 class="wc-heading wc-heading--sm">Job Tree</h2>
+        <p class="job-dashboard__subhead">Details for each job group and task.</p>
+      </div>
+      <div id="job-overall-progress"></div>
+    </div>
+    <div id="job-dashboard"></div>
+  </section>
+{% endcall %}
+{% endblock %}
+
+{% block head_extras %}
+  {{ super() }}
+  <style>
+    .job-dashboard__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--wc-space-md);
+    }
+
+    .job-dashboard__subhead {
+      margin: var(--wc-space-xs) 0 0;
+      color: var(--wc-color-text-muted);
+      font-size: var(--wc-font-size-sm);
+    }
+
+    .job-dashboard__header .wc-upload-progress {
+      margin-top: 0;
+    }
+
+    .wc-job-collapse .wc-collapse__summary {
+      flex-wrap: wrap;
+      gap: var(--wc-space-xs) var(--wc-space-md);
+    }
+
+    .wc-job-summary {
+      margin-left: auto;
+      color: var(--wc-color-text-muted);
+      font-size: var(--wc-font-size-sm);
+    }
+
+    .wc-job-progress {
+      max-width: 32rem;
+    }
+
+    .wc-job-progress .wc-upload-progress__status {
+      margin: 0;
+    }
+
+    .wc-job-children {
+      display: grid;
+      gap: var(--wc-space-md);
+      padding-left: var(--wc-space-md);
+      border-left: 2px solid var(--wc-color-border);
+      margin-top: var(--wc-space-sm);
+    }
+
+    .wc-job-table code {
+      font-size: var(--wc-font-size-sm);
+    }
+
+    @media (max-width: 720px) {
+      .wc-job-summary {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block script_extras %}
+<script>
+  const jobId = {{ job_id | tojson }};
+  const sitePrefix = {{ site_prefix | tojson }};
+  let runid;
+  let queryCount = 0;
+  let jobCount = 0;
+  let allFinishedCount = 0;
+  let allTotalCount = 0;
+  let allCanceledCount = 0;
+  let allStoppedCount = 0;
+  let allFailedCount = 0;
+  let allElapsedTime_s = 0.0;
+  let allSummary = "";
+  let anyFailed = false;
+  let paused = false;
+  let queryInterval = 1000;
+
+  const statusStateMap = {
+    finished: "success",
+    failed: "critical",
+    started: "attention",
+    queued: "attention",
+    deferred: "attention",
+    running: "attention",
+    canceled: "critical"
+  };
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (match) => {
+      switch (match) {
+        case "&":
+          return "&amp;";
+        case "<":
+          return "&lt;";
+        case ">":
+          return "&gt;";
+        case "\"":
+          return "&quot;";
+        case "'":
+          return "&#39;";
+        default:
+          return match;
+      }
+    });
+  }
+
+  function normalizeNodeKey(value) {
+    return String(value ?? "").replace(/[^a-zA-Z0-9_-]/g, "_");
+  }
+
+  function getStatusState(status) {
+    const key = String(status || "").toLowerCase();
+    const normalized = key.replace(/cancel+ed/g, "canceled");
+    return statusStateMap[normalized] || "info";
+  }
+
+  function formatElapsed(value, decimals = 1) {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return "N/A";
+    }
+    return `${Number(value).toFixed(decimals)} s`;
+  }
+
+  function setHtml(id, html) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.innerHTML = html;
+    }
+  }
+
+  function setText(id, text) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = text;
+    }
+  }
+
+  function getOpenNodes() {
+    const openNodes = new Set();
+    document.querySelectorAll("#job-dashboard details[data-node-id]").forEach((details) => {
+      if (details.open) {
+        openNodes.add(details.dataset.nodeId);
+      }
+    });
+    return openNodes;
+  }
+
+  async function requestJson(url) {
+    let response;
+    try {
+      response = await fetch(url, { credentials: "same-origin" });
+    } catch (err) {
+      const error = new Error("Request failed");
+      error.payload = { Error: "Request failed", StackTrace: [] };
+      throw error;
+    }
+
+    let payload = {};
+    let parseFailed = false;
+    try {
+      const text = await response.text();
+      payload = text ? JSON.parse(text) : {};
+    } catch (err) {
+      payload = { Error: "Request failed", StackTrace: [] };
+      parseFailed = true;
+    }
+
+    if (!response.ok || parseFailed) {
+      const errorMessage = payload.Error || (parseFailed ? "Invalid JSON response" : `Request failed (${response.status})`);
+      const error = new Error(errorMessage);
+      error.payload = payload;
+      throw error;
+    }
+
+    return payload;
+  }
+
+  async function fetchJobStatus() {
+    const primaryUrl = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
+    const fallbackUrl = `${sitePrefix}/rq/api/jobinfo/${encodeURIComponent(jobId)}`;
+
+    function handleSuccess(data) {
+      jobCount = 0;
+      queryCount += 1;
+
+      const openNodes = getOpenNodes();
+      setHtml("job-dashboard", renderJob(data, openNodes));
+
+      if (allFinishedCount === allTotalCount && allTotalCount > 0) {
+        return;
+      }
+
+      if (anyFailed || paused) {
+        return;
+      }
+
+      queryInterval = jobCount * 5;
+
+      if (queryInterval < 1000) {
+        queryInterval = 1000;
+      }
+
+      if (queryInterval > 5000) {
+        queryInterval = 5000;
+      }
+
+      setText("query-count", `${queryCount}`);
+      setText("query-interval", `${queryInterval}`);
+
+      setTimeout(fetchJobStatus, queryInterval);
+    }
+
+    function handleError(response) {
+      const payload = response || { Error: "Request failed", StackTrace: [] };
+      if (payload.StackTrace && payload.StackTrace.some((line) => line.includes("NoSuchJobError"))) {
+        setHtml("job-dashboard", renderError(`No such job found: ${jobId}`));
+      } else {
+        const stacktrace = Array.isArray(payload.StackTrace) ? payload.StackTrace.join("\n") : "";
+        setHtml("job-dashboard", renderError(payload.Error || "Request failed", stacktrace));
+      }
+    }
+
+    try {
+      const data = await requestJson(primaryUrl);
+      handleSuccess(data);
+    } catch (primaryError) {
+      try {
+        const data = await requestJson(fallbackUrl);
+        handleSuccess(data);
+      } catch (fallbackError) {
+        handleError(fallbackError.payload);
+      }
+    }
+  }
+
+  function renderError(message, stacktrace = "") {
+    const escapedMessage = escapeHtml(message);
+    const escapedStack = escapeHtml(stacktrace);
+    return `<div class="wc-stack">
+      <div class="wc-status-chip" data-state="critical">Error</div>
+      <div class="wc-text-muted">${escapedMessage}</div>
+      ${stacktrace ? `<pre class="wc-pre">${escapedStack}</pre>` : ""}
+    </div>`;
+  }
+
+  function renderProgressBar(percent, label) {
+    const safePercent = Math.max(0, Math.min(100, percent));
+    const escapedLabel = escapeHtml(label);
+    return `<div class="wc-upload-progress wc-job-progress">
+      <div class="wc-upload-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${safePercent}">
+        <div class="wc-upload-progress__fill" style="width: ${safePercent}%"></div>
+      </div>
+      <p class="wc-upload-progress__status">${escapedLabel}</p>
+    </div>`;
+  }
+
+  function renderJob(data, openNodes) {
+    const rootNodeId = `root-${normalizeNodeKey(jobId)}`;
+    const rootOpen = openNodes.has(rootNodeId) || openNodes.size === 0;
+    allFinishedCount = 0;
+    allTotalCount = 1;
+    allCanceledCount = 0;
+    allStoppedCount = 0;
+    allFailedCount = 0;
+    allElapsedTime_s = 0.0;
+    allSummary = "";
+
+    runid = data.runid;
+    if (runid) {
+      const runLink = `${sitePrefix}/runs/${encodeURIComponent(runid)}/cfg`;
+      setHtml("run-id", `<a href="${runLink}">${escapeHtml(runid)}</a>`);
+    } else {
+      setText("run-id", "--");
+    }
+
+    const jobsHtml = renderJobs(data.children || {}, rootNodeId, openNodes);
+
+    if (data.status === "finished") {
+      allFinishedCount += 1;
+    }
+
+    const statusLabel = data.status || "unknown";
+    const statusState = getStatusState(statusLabel);
+    const progressPercent = allTotalCount > 0 ? Math.round((allFinishedCount / allTotalCount) * 100) : 0;
+    const elapsedLabel = formatElapsed(data.elapsed_s, 1);
+    const description = escapeHtml(data.description || "Job");
+    const summaryLabel = `${allSummary || "Waiting for data..."} | ${elapsedLabel}`;
+
+    setText("job-summary", allSummary || "Waiting for data...");
+    setHtml("job-overall-progress", renderProgressBar(progressPercent, `${progressPercent}% complete`));
+
+    let html = `<details class="wc-collapse wc-job-collapse" data-node-id="${rootNodeId}"${rootOpen ? " open" : ""}>
+      <summary class="wc-collapse__summary">
+        <span class="wc-collapse__icon" aria-hidden="true"></span>
+        <span class="wc-collapse__title">${description}</span>
+        <span class="wc-job-summary">${escapeHtml(summaryLabel)}</span>
+        <span class="wc-status-chip" data-state="${statusState}">${escapeHtml(statusLabel)}</span>
+      </summary>
+      <div class="wc-collapse__content">
+        ${jobsHtml}
+      </div>
+    </details>`;
+
+    if (data.status === "failed" && data.exc_info) {
+      html += `<div class="wc-stack">
+        <div class="wc-status-chip" data-state="critical">Failed</div>
+        <pre class="wc-pre">${escapeHtml(data.exc_info)}</pre>
+      </div>`;
+    }
+
+    return html;
+  }
+
+  function renderJobs(jobs, parentNodeId, openNodes) {
+    const jobOrders = Object.keys(jobs || {});
+    if (jobOrders.length === 0) {
+      return `<div class="wc-text-muted">No child jobs reported.</div>`;
+    }
+
+    let html = '<div class="wc-stack">';
+
+    jobOrders.forEach((jobOrder) => {
+      const groupNodeId = `${parentNodeId}-order-${normalizeNodeKey(jobOrder)}`;
+      const isExpanded = openNodes.has(groupNodeId);
+      let finishedCount = 0;
+      let totalCount = 0;
+      let elapsed_s = 0.0;
+      let failed = false;
+      let failedCount = 0;
+      let canceledCount = 0;
+      let stoppedCount = 0;
+      let hasActive = false;
+
+      (jobs[jobOrder] || []).forEach((job) => {
+        totalCount += 1;
+        allTotalCount += 1;
+
+        const status = String(job.status || "").toLowerCase();
+        const normalizedStatus = status.replace(/cancel+ed/g, "canceled");
+
+        if (normalizedStatus === "finished") {
+          finishedCount += 1;
+          allFinishedCount += 1;
+        } else if (normalizedStatus === "failed") {
+          failed = true;
+          failedCount += 1;
+          allFailedCount += 1;
+          anyFailed = true;
+        } else if (normalizedStatus === "canceled") {
+          canceledCount += 1;
+          allCanceledCount += 1;
+        } else if (normalizedStatus === "stopped") {
+          stoppedCount += 1;
+          allStoppedCount += 1;
+        } else {
+          hasActive = true;
+        }
+
+        if (job.elapsed_s > elapsed_s) {
+          elapsed_s = job.elapsed_s;
+        }
+      });
+
+      const summaryParts = [`${finishedCount} of ${totalCount} jobs completed (${elapsed_s.toFixed(0)} s)`];
+      if (canceledCount > 0) {
+        summaryParts.push(`${canceledCount} canceled`);
+      }
+      if (stoppedCount > 0) {
+        summaryParts.push(`${stoppedCount} stopped`);
+      }
+      if (failedCount > 0) {
+        summaryParts.push(`${failedCount} failed`);
+      }
+
+      const summary = failed ? "Job order failed" : summaryParts.join(" | ");
+      const progressPercent = totalCount > 0 ? Math.round((finishedCount / totalCount) * 100) : 0;
+
+      allElapsedTime_s += elapsed_s;
+      const overallParts = [`Finished ${allFinishedCount} of ${allTotalCount} (${allElapsedTime_s.toFixed(0)} s)`];
+      if (allCanceledCount > 0) {
+        overallParts.push(`${allCanceledCount} canceled`);
+      }
+      if (allStoppedCount > 0) {
+        overallParts.push(`${allStoppedCount} stopped`);
+      }
+      if (allFailedCount > 0) {
+        overallParts.push(`${allFailedCount} failed`);
+      }
+      allSummary = overallParts.join(" | ");
+
+      const terminalCount = finishedCount + failedCount + canceledCount + stoppedCount;
+      const allTerminal = totalCount > 0 && terminalCount === totalCount;
+      let groupStatus = "running";
+      if (failedCount > 0) {
+        groupStatus = "failed";
+      } else if (allTerminal) {
+        if (canceledCount > 0) {
+          groupStatus = "canceled";
+        } else if (stoppedCount > 0) {
+          groupStatus = "stopped";
+        } else {
+          groupStatus = "finished";
+        }
+      } else if (!hasActive && totalCount === 0) {
+        groupStatus = "unknown";
+      }
+      const groupState = getStatusState(groupStatus);
+
+      html += `<details class="wc-collapse wc-job-collapse" data-node-id="${groupNodeId}"${isExpanded ? " open" : ""}>
+        <summary class="wc-collapse__summary">
+          <span class="wc-collapse__icon" aria-hidden="true"></span>
+          <span class="wc-collapse__title">${escapeHtml(jobOrder)} &ndash; Job Order</span>
+          <span class="wc-job-summary">${escapeHtml(summary)}</span>
+          <span class="wc-status-chip" data-state="${groupState}">${escapeHtml(groupStatus)}</span>
+        </summary>
+        <div class="wc-collapse__content">
+          ${renderProgressBar(progressPercent, `${progressPercent}% complete`)}
+          ${renderJobGroup(jobs[jobOrder], groupNodeId, openNodes)}
+        </div>
+      </details>`;
+
+      jobCount += (jobs[jobOrder] || []).length;
+    });
+
+    html += "</div>";
+    return html;
+  }
+
+  function renderJobGroup(jobGroup, parentNodeId, openNodes) {
+    if (!jobGroup || jobGroup.length === 0) {
+      return `<div class="wc-text-muted">No jobs available.</div>`;
+    }
+
+    let rows = "";
+
+    jobGroup.forEach((job, index) => {
+      const jobStatus = job.status || "unknown";
+      const statusState = getStatusState(jobStatus);
+      const jobDescription = escapeHtml(job.description || "Job");
+      const jobIdLabel = escapeHtml(job.id || "");
+      const elapsedLabel = formatElapsed(job.elapsed_s, 1);
+
+      rows += `<tr>
+        <td>${jobDescription}</td>
+        <td><code>${jobIdLabel}</code></td>
+        <td><span class="wc-status-chip" data-state="${statusState}">${escapeHtml(jobStatus)}</span></td>
+        <td class="wc-text-right">${elapsedLabel}</td>
+      </tr>`;
+
+      if (job.status === "failed" && job.exc_info) {
+        rows += `<tr>
+          <td colspan="4"><pre class="wc-pre">${escapeHtml(job.exc_info)}</pre></td>
+        </tr>`;
+      }
+
+      if (job.children) {
+        const childNodeId = `${parentNodeId}-child-${normalizeNodeKey(job.id || index)}`;
+        rows += `<tr>
+          <td colspan="4">
+            <div class="wc-job-children">
+              ${renderJobs(job.children, childNodeId, openNodes)}
+            </div>
+          </td>
+        </tr>`;
+      }
+    });
+
+    return `<div class="wc-table-wrapper">
+      <table class="wc-table wc-table--compact wc-job-table">
+        <thead>
+          <tr>
+            <th scope="col">Description</th>
+            <th scope="col">Job ID</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="wc-text-right">Elapsed</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  function confirmCancelJob() {
+    if (confirm("Are you sure you want to cancel the job?")) {
+      cancelJob();
+    }
+  }
+
+  function cancelJob() {
+    fetch(`${sitePrefix}/rq/api/canceljob/${jobId}`, { method: "GET", credentials: "same-origin" })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Request failed");
+        }
+        alert("Job canceled");
+      })
+      .catch(() => {
+        alert("Failed to cancel job");
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const cancelButton = document.getElementById("cancel-job");
+    if (cancelButton) {
+      cancelButton.addEventListener("click", confirmCancelJob);
+    }
+
+    fetchJobStatus();
+  });
+</script>
+{% endblock %}
