@@ -146,8 +146,9 @@
   const config = {{ ron.config_stem | tojson }};
   window.site_prefix = site_prefix;
   window.runid = runid;
+  window.runId = runid;
   window.config = config;
-  const project = window.Project ? window.Project.getInstance() : null;
+  let project = null;
   const unitizerButton = document.querySelector('[data-command="open-unitizer"]');
   const powerUserButton = document.querySelector('[data-command="open-poweruser"]');
   const unitizerModal = document.getElementById('unitizerModal');
@@ -161,6 +162,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    project = (window.Project && typeof window.Project.getInstance === 'function')
+      ? window.Project.getInstance()
+      : null;
     if (unitizerButton && unitizerModal) {
       unitizerButton.addEventListener('click', () => {
         if (window.ModalManager && typeof window.ModalManager.open === 'function') {
