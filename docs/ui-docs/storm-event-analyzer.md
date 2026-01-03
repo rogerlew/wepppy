@@ -466,9 +466,17 @@ Status: complete (2026-01-02). Phase 1 is done; see **Phase 1 Handoff**. Tasks b
 - Manual test verifies the hydrology summary renders and unitzation is supported.
 
 ### Phase 7: Playwright smoke coverage
+Status: complete (2026-01-02). Phase 7 is done; see **Phase 7 Handoff**.
 - Add `static-src/tests/smoke/storm-event-analyzer.spec.js`.
 - Cover metric selection, filter changes, warm-up toggle, event selection, hyetograph highlight, NOAA-missing scenario, and error banner persistence.
 - Tests: run via `wctl run-npm smoke` with `SMOKE_RUN_PATH` or test-support run creation.
+
+### Phase 7 Handoff (2026-01-02)
+**Delivered**
+- Added a Storm Event Analyzer smoke spec covering metric selection, filter and warm-up toggles, event selection summary updates, hyetograph selection state, NOAA-missing handling, and error banner persistence (`wepppy/weppcloud/static-src/tests/smoke/storm-event-analyzer.spec.js`).
+
+**Tests run**
+- `SMOKE_RUN_PATH=\"https://wc.bearhive.duckdns.org/weppcloud/runs/chinless-half-hour/disturbed9002/storm-event-analyzer\" wctl run-npm smoke -- tests/smoke/storm-event-analyzer.spec.js` (passes; rerun 2026-01-02)
 
 ## Open Questions
 - None currently. Add new questions here as data gaps or UI behaviors arise.
