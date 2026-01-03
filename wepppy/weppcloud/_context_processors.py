@@ -162,9 +162,28 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
             runid = path_parts[_indx + 1]
             ron = RonViewModel.getInstanceFromRunID(runid)
             mods = list(getattr(ron, 'mods', []) or [])
-            return dict(current_ron=ron, current_mods=mods)
+            storm_event_analyzer_ready = False
+            try:
+                from wepppy.weppcloud.utils.helpers import get_wd
+                from wepppy.nodb.core import Wepp
+
+                wd = get_wd(runid)
+                wepp = Wepp.getInstance(wd)
+                storm_event_analyzer_ready = wepp.storm_event_analyzer_ready
+            except Exception:
+                storm_event_analyzer_ready = False
+
+            return dict(
+                current_ron=ron,
+                current_mods=mods,
+                storm_event_analyzer_ready=storm_event_analyzer_ready,
+            )
         except Exception:
-            return dict(current_ron=None, current_mods=[])
+            return dict(
+                current_ron=None,
+                current_mods=[],
+                storm_event_analyzer_ready=False,
+            )
 
     @app.context_processor
     def security_processor():

@@ -11,6 +11,7 @@ from .._common import *  # noqa: F401,F403
 
 from wepppy.all_your_base import isint
 from wepppy.nodb.core import Landuse, Ron, Climate, Watershed, Wepp
+from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.unitizer import Unitizer, precisions, converters
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
@@ -581,7 +582,7 @@ def report_wepp_loss(runid, config):
         runid=runid,
         config=config,
         ron=ron,
-        current_ron=ron,
+        current_ron=RonViewModel(ron),
         extraneous=extraneous,
         out_rpt=out_rpt,
         hill_rpt=hill_rpt,

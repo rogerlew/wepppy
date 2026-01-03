@@ -180,12 +180,16 @@ from wepppy.wepp.interchange.dss_dates import (
     format_dss_date,
     parse_dss_date,
 )
+from wepppy.wepp.interchange.versioning import Version, read_version_manifest
 
 def _copyfile(src_fn: str, dst_fn: str) -> None:
     if _exists(dst_fn):
         os.remove(dst_fn)
 
     os.link(src_fn, dst_fn)
+
+
+STORM_EVENT_ANALYZER_MIN_INTERCHANGE_VERSION = Version(major=1, minor=2)
 
 
 class ChannelRoutingMethod(IntEnum):
@@ -674,6 +678,24 @@ class Wepp(NoDbBase):
     @property
     def has_dss_zip(self) -> bool:
         return _exists(_join(self.export_dir, 'dss.zip'))
+
+    @property
+    def storm_event_analyzer_ready(self) -> bool:
+        return self._interchange_version_at_least(
+            STORM_EVENT_ANALYZER_MIN_INTERCHANGE_VERSION
+        )
+
+    def _interchange_version_at_least(self, minimum: Version) -> bool:
+        interchange_dir = Path(self.wepp_interchange_dir)
+        if not interchange_dir.exists():
+            return False
+        try:
+            stored = read_version_manifest(interchange_dir)
+        except ValueError:
+            return False
+        if stored is None:
+            return False
+        return (stored.major, stored.minor) >= (minimum.major, minimum.minor)
 
     @property
     def multi_ofe(self) -> bool:

@@ -14,6 +14,7 @@ from ._common import (
     render_template,
 )
 from wepppy.nodb.core import Ron
+from wepppy.nodb.core.ron import RonViewModel
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
 
@@ -41,7 +42,7 @@ def storm_event_analyzer(runid: str, config: str) -> Response:
         runid=runid,
         config=config,
         ron=ron,
-        current_ron=ron,
+        current_ron=RonViewModel(ron),
         user=current_user,
         unitizer_nodb=unitizer,
         precisions=UNITIZER_PRECISIONS,

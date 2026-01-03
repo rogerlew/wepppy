@@ -107,6 +107,14 @@
                rel="noopener">
               GL Dashboard
             </a>
+            {% if storm_event_analyzer_ready|default(false) %}
+            <a class="wc-link wc-link--file"
+               href="{{ url_for_run('storm_event_analyzer.storm_event_analyzer', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener">
+              Storm Event Analyzer
+            </a>
+            {% endif %}
           </div>
         {% endif %}
       </section>
