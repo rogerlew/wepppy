@@ -69,6 +69,12 @@
   }
 </style>
 <script type="module" src="{{ static_url('js/storm-event-analyzer/main.js') }}" defer></script>
+<script>
+  window.STORM_EVENT_ANALYZER_CONTEXT = {{ {
+    "omniScenarios": omni_scenarios,
+    "baseScenarioLabel": base_scenario_label
+  } | tojson }};
+</script>
 {% endblock %}
 
 {% block report_content %}
@@ -225,80 +231,175 @@
     <h2 class="wc-heading__subtitle">Storm event hydrology characteristics</h2>
     <p class="wc-text-muted">Summary updates when an event row is selected.</p>
   </header>
+  {% if omni_scenarios %}
+  <div class="wc-field" data-storm-event-analyzer-omni-controls>
+    <label class="wc-field__label" for="storm-event-analyzer-omni-select">Compare to Omni Scenario</label>
+    <select class="wc-field__control" id="storm-event-analyzer-omni-select" data-storm-event-analyzer-omni-select>
+      <option value="">&mdash;</option>
+      {% for scenario in omni_scenarios %}
+      <option value="{{ scenario.path }}">{{ scenario.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
   <div class="wc-table-wrapper wc-table-wrapper--compact">
     <table class="wc-table wc-table--dense wc-table--compact" id="storm_event_hydrology_summary">
       <thead>
         <tr>
           <th scope="col">Metric</th>
-          <th scope="col">Value</th>
+          <th scope="col" class="wc-text-right" data-storm-event-analyzer-summary-label="base">{{ base_scenario_label }}</th>
+          {% if omni_scenarios %}
+          <th scope="col" class="wc-text-right" data-storm-event-analyzer-summary-label="scenario">Scenario</th>
+          {% endif %}
           <th scope="col">Units</th>
+          {% if omni_scenarios %}
+          <th scope="col" class="wc-text-right" data-storm-event-analyzer-summary-label="change">% change</th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
         <tr>
           <th scope="row">Date</th>
-          <td data-storm-event-analyzer-summary="date">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="date">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="date-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-date">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="date-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Depth</th>
-          <td data-storm-event-analyzer-summary="depth">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="depth">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="depth-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-depth">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="depth-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Duration</th>
-          <td data-storm-event-analyzer-summary="duration">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="duration">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="duration-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-duration">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="duration-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row" data-storm-event-analyzer-summary-label="selected-measure">Selected measure</th>
-          <td data-storm-event-analyzer-summary="selected-measure">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="selected-measure">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="selected-measure-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-selected-measure">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="selected-measure-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Soil saturation <sub>T-1</sub></th>
-          <td data-storm-event-analyzer-summary="soil-saturation">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="soil-saturation">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="soil-saturation-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-soil-saturation">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="soil-saturation-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Snow coverage <sub>T-1</sub></th>
-          <td data-storm-event-analyzer-summary="snow-coverage">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="snow-coverage">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="snow-coverage-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-snow-coverage">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="snow-coverage-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Snow-Water equivalent <sub>T-1</sub></th>
-          <td data-storm-event-analyzer-summary="snow-water">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="snow-water">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="snow-water-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-snow-water">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="snow-water-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Runoff</th>
-          <td data-storm-event-analyzer-summary="runoff">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-runoff">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Runoff volume</th>
-          <td data-storm-event-analyzer-summary="runoff-volume">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-volume">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-volume-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-runoff-volume">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-volume-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Tc</th>
-          <td data-storm-event-analyzer-summary="tc">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="tc">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="tc-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-tc">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="tc-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Peak discharge</th>
-          <td data-storm-event-analyzer-summary="peak-discharge">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="peak-discharge">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="peak-discharge-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-peak-discharge">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="peak-discharge-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Sediment yield</th>
-          <td data-storm-event-analyzer-summary="sediment-yield">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="sediment-yield">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="sediment-yield-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-sediment-yield">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="sediment-yield-change">--</td>
+          {% endif %}
         </tr>
         <tr>
           <th scope="row">Runoff coefficient</th>
-          <td data-storm-event-analyzer-summary="runoff-coefficient">--</td>
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-coefficient">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-coefficient-scenario">--</td>
+          {% endif %}
           <td data-storm-event-analyzer-unit="summary-runoff-coefficient">--</td>
+          {% if omni_scenarios %}
+          <td class="wc-text-right" data-storm-event-analyzer-summary="runoff-coefficient-change">--</td>
+          {% endif %}
         </tr>
       </tbody>
     </table>

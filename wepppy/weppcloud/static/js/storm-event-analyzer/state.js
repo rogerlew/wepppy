@@ -11,6 +11,10 @@ const defaultState = {
   selectedEventSimDayIndex: null,
   eventError: null,
   tcAvailable: false,
+  omniScenarios: [],
+  omniScenario: null,
+  omniSummary: null,
+  baseScenarioLabel: 'Undisturbed',
   unitPrefs: null,
 };
 

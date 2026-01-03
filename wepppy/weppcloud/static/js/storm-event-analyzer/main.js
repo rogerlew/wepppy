@@ -39,6 +39,13 @@ async function initStormEventAnalyzer() {
     return;
   }
 
+  const omniContext =
+    typeof window !== 'undefined' && window.STORM_EVENT_ANALYZER_CONTEXT
+      ? window.STORM_EVENT_ANALYZER_CONTEXT
+      : {};
+  const omniScenarios = Array.isArray(omniContext.omniScenarios) ? omniContext.omniScenarios : [];
+  const baseScenarioLabel = omniContext.baseScenarioLabel || 'Undisturbed';
+
   const noaaMessage = document.querySelector('[data-noaa-unavailable]');
   const weppEmptyMessage = document.querySelector('[data-storm-event-analyzer-wepp-empty]');
   const eventTable = document.getElementById('storm_event_characteristics_table');
@@ -50,6 +57,7 @@ async function initStormEventAnalyzer() {
     ? hyetographSection.querySelector('[data-empty-state]')
     : null;
   const hydrologySummarySection = document.getElementById('storm-event-analyzer__summary');
+  const omniSelect = document.querySelector('[data-storm-event-analyzer-omni-select]');
 
   initState({
     filterRangePct: DEFAULT_FILTER_RANGE_PCT,
@@ -60,6 +68,10 @@ async function initStormEventAnalyzer() {
     selectedEventSimDayIndex: null,
     eventError: null,
     tcAvailable: false,
+    omniScenarios,
+    omniScenario: null,
+    omniSummary: null,
+    baseScenarioLabel,
   });
 
   bindFilterControls({ setState });
@@ -70,8 +82,8 @@ async function initStormEventAnalyzer() {
   }
 
   const ctx = { runid: window.runid, config: window.config };
-  const { postQueryEngine } = createQueryEngine(ctx);
-  const eventDataManager = createEventDataManager({ ctx, postQueryEngine });
+  const { postQueryEngine, postQueryEngineForScenario } = createQueryEngine(ctx);
+  const eventDataManager = createEventDataManager({ ctx, postQueryEngine, postQueryEngineForScenario });
   const hyetographChart = createHyetographChart({
     container: hyetographContainer,
     emptyEl: hyetographEmptyMessage,
@@ -197,6 +209,24 @@ async function initStormEventAnalyzer() {
       unitizer: unitizerClient,
       tcAvailable: !!state.tcAvailable,
       selectedMetric: state.selectedMetric,
+      omniScenario: state.omniScenario,
+      omniSummary: state.omniSummary,
+      baseScenarioLabel: state.baseScenarioLabel,
+    });
+  }
+
+  function resolveOmniScenario(path) {
+    if (!path) {
+      return null;
+    }
+    return (omniScenarios || []).find((scenario) => scenario && scenario.path === path) || null;
+  }
+
+  if (omniSelect) {
+    omniSelect.addEventListener('change', (event) => {
+      const selectedPath = event.target.value || '';
+      const scenario = resolveOmniScenario(selectedPath);
+      setState({ omniScenario: scenario, omniSummary: null });
     });
   }
 
@@ -250,6 +280,38 @@ async function initStormEventAnalyzer() {
     }
   }
 
+  let omniRequestId = 0;
+  async function refreshOmniSummary() {
+    const state = getState();
+    const scenario = state.omniScenario;
+    if (!scenario || state.selectedEventSimDayIndex == null || !state.selectedMetric) {
+      if (state.omniSummary !== null) {
+        setState({ omniSummary: null });
+      }
+      return;
+    }
+
+    const requestId = (omniRequestId += 1);
+    setState({ omniSummary: null });
+    try {
+      const summary = await eventDataManager.fetchScenarioSummary({
+        selectedMetric: state.selectedMetric,
+        simDayIndex: Number(state.selectedEventSimDayIndex),
+        scenarioPath: scenario.path,
+      });
+      if (requestId !== omniRequestId) {
+        return;
+      }
+      setState({ omniSummary: summary });
+    } catch (error) {
+      if (requestId !== omniRequestId) {
+        return;
+      }
+      console.warn('Storm Event Analyzer: omni scenario fetch failed', error);
+      setState({ omniSummary: null });
+    }
+  }
+
   renderTables(null);
   renderEventRows(getState());
 
@@ -274,6 +336,14 @@ async function initStormEventAnalyzer() {
   subscribe(['selectedEventSimDayIndex'], (state) => {
     updateEventSelection({ table: eventTable, selectedEventSimDayIndex: state.selectedEventSimDayIndex });
     hyetographChart.setSelected(state.selectedEventSimDayIndex);
+    renderSummary(state);
+  });
+
+  subscribe(['selectedEventSimDayIndex', 'eventRows', 'selectedMetric', 'omniScenario'], () => {
+    refreshOmniSummary();
+  });
+
+  subscribe(['omniSummary'], (state) => {
     renderSummary(state);
   });
 

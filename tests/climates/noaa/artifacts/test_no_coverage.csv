@@ -1,0 +1,3 @@
+result = 'none';
+ErrorMsg =  'Error 3.0: Selected location is not within a project area';
+

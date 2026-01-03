@@ -436,23 +436,23 @@ function mapRowsBySimDay(records) {
   return map;
 }
 
-export function createEventDataManager({ ctx, postQueryEngine }) {
-  async function safeQuery(payload, label) {
+export function createEventDataManager({ ctx, postQueryEngine, postQueryEngineForScenario }) {
+  async function safeQuery(payload, label, postQueryEngineFn = postQueryEngine) {
     try {
-      return await postQueryEngine(payload);
+      return await postQueryEngineFn(payload);
     } catch (error) {
       console.warn(`Storm Event Analyzer: ${label} query failed`, error);
       return null;
     }
   }
 
-  async function fetchTcResult({ warmupYear }) {
+  async function fetchTcResult({ warmupYear, postQueryEngineFn = postQueryEngine }) {
     if (!ctx.runid) {
       return { available: false, records: [] };
     }
     const primary = buildTcPayloadBySimDay({ warmupYear });
     try {
-      const result = await postQueryEngine(primary);
+      const result = await postQueryEngineFn(primary);
       return { available: true, records: (result && result.records) || [] };
     } catch (error) {
       console.warn('Storm Event Analyzer: tc_out sim_day_index join failed', error);
@@ -460,12 +460,73 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
 
     const fallback = buildTcPayloadByJulian({ warmupYear });
     try {
-      const result = await postQueryEngine(fallback);
+      const result = await postQueryEngineFn(fallback);
       return { available: true, records: (result && result.records) || [] };
     } catch (error) {
       console.warn('Storm Event Analyzer: tc_out julian join failed', error);
       return { available: false, records: [] };
     }
+  }
+
+  function buildEventRow({ row, filterSpec, soilMap, snowMap, hydroMap, precipMap, tcMap, tcAvailable }) {
+    const simDay = toNumberOrNull(row.sim_day_index);
+    const year = toNumberOrNull(row.year);
+    const month = toNumberOrNull(row.month);
+    const day = toNumberOrNull(row.day_of_month);
+    const depth = toNumberOrNull(row.depth_mm);
+    const precip = toNumberOrNull(row.precip_mm);
+    const duration = toNumberOrNull(row.duration_hours);
+    const tp = toNumberOrNull(row.tp);
+    const ip = toNumberOrNull(row.ip);
+    let measureValue = null;
+    if (filterSpec.metricKey === 'depth') {
+      measureValue = depth;
+    } else if (filterSpec.metricKey === 'duration') {
+      measureValue = duration;
+    } else if (filterSpec.intensityColumn) {
+      measureValue = toNumberOrNull(row[filterSpec.intensityColumn]);
+    }
+
+    const snowRow = Number.isFinite(simDay) && snowMap.has(simDay) ? snowMap.get(simDay) : null;
+    const hydroRow = Number.isFinite(simDay) && hydroMap.has(simDay) ? hydroMap.get(simDay) : null;
+    const precipRow = Number.isFinite(simDay) && precipMap.has(simDay) ? precipMap.get(simDay) : null;
+    const runoffVolume = hydroRow ? toNumberOrNull(hydroRow.runoff_volume_m3) : null;
+    const peakDischarge = hydroRow ? toNumberOrNull(hydroRow.peak_discharge_m3s) : null;
+    const sedimentYield = hydroRow ? toNumberOrNull(hydroRow.sediment_yield_kg) : null;
+    const precipVolume = precipRow ? toNumberOrNull(precipRow.precip_volume_m3) : null;
+    const totalArea = precipRow ? toNumberOrNull(precipRow.total_area_m2) : null;
+    const runoffCoefficient =
+      Number.isFinite(runoffVolume) && Number.isFinite(precipVolume) && precipVolume > 0
+        ? runoffVolume / precipVolume
+        : null;
+    const runoffMm =
+      Number.isFinite(runoffVolume) && Number.isFinite(totalArea) && totalArea > 0
+        ? (runoffVolume / totalArea) * 1000
+        : null;
+
+    return {
+      sim_day_index: simDay,
+      year,
+      month,
+      day_of_month: day,
+      date: formatDate(year, month, day),
+      measure_value: Number.isFinite(measureValue) ? measureValue : null,
+      depth_mm: Number.isFinite(depth) ? depth : null,
+      precip_mm: Number.isFinite(precip) ? precip : Number.isFinite(depth) ? depth : null,
+      duration_hours: Number.isFinite(duration) ? duration : null,
+      tp: Number.isFinite(tp) ? tp : null,
+      ip: Number.isFinite(ip) ? ip : null,
+      soil_saturation_pct: Number.isFinite(simDay) && soilMap.has(simDay) ? soilMap.get(simDay) : null,
+      snow_coverage_t1_pct: snowRow ? toNumberOrNull(snowRow.snow_coverage_t1_pct) : null,
+      snow_water_t1_mm: snowRow ? toNumberOrNull(snowRow.snow_water_t1_mm) : null,
+      runoff_volume_m3: Number.isFinite(runoffVolume) ? runoffVolume : null,
+      peak_discharge_m3s: Number.isFinite(peakDischarge) ? peakDischarge : null,
+      sediment_yield_kg: Number.isFinite(sedimentYield) ? sedimentYield : null,
+      runoff_coefficient: Number.isFinite(runoffCoefficient) ? runoffCoefficient : null,
+      runoff_mm: Number.isFinite(runoffMm) ? runoffMm : null,
+      tc_hours: Number.isFinite(simDay) && tcAvailable && tcMap.has(simDay) ? tcMap.get(simDay) : null,
+      tc_available: tcAvailable,
+    };
   }
 
   async function fetchEventRows({ selectedMetric, filterRangePct, includeWarmup }) {
@@ -534,68 +595,113 @@ export function createEventDataManager({ ctx, postQueryEngine }) {
     const tcAvailable = !!(tcResult && tcResult.available);
     const tcMap = mapBySimDay((tcResult && tcResult.records) || [], 'tc_hours');
 
-    const rows = baseRows.map((row) => {
-      const simDay = toNumberOrNull(row.sim_day_index);
-      const year = toNumberOrNull(row.year);
-      const month = toNumberOrNull(row.month);
-      const day = toNumberOrNull(row.day_of_month);
-      const depth = toNumberOrNull(row.depth_mm);
-      const precip = toNumberOrNull(row.precip_mm);
-      const duration = toNumberOrNull(row.duration_hours);
-      const tp = toNumberOrNull(row.tp);
-      const ip = toNumberOrNull(row.ip);
-      let measureValue = null;
-      if (filterSpec.metricKey === 'depth') {
-        measureValue = depth;
-      } else if (filterSpec.metricKey === 'duration') {
-        measureValue = duration;
-      } else if (filterSpec.intensityColumn) {
-        measureValue = toNumberOrNull(row[filterSpec.intensityColumn]);
-      }
-
-      const snowRow = Number.isFinite(simDay) && snowMap.has(simDay) ? snowMap.get(simDay) : null;
-      const hydroRow = Number.isFinite(simDay) && hydroMap.has(simDay) ? hydroMap.get(simDay) : null;
-      const precipRow = Number.isFinite(simDay) && precipMap.has(simDay) ? precipMap.get(simDay) : null;
-      const runoffVolume = hydroRow ? toNumberOrNull(hydroRow.runoff_volume_m3) : null;
-      const peakDischarge = hydroRow ? toNumberOrNull(hydroRow.peak_discharge_m3s) : null;
-      const sedimentYield = hydroRow ? toNumberOrNull(hydroRow.sediment_yield_kg) : null;
-      const precipVolume = precipRow ? toNumberOrNull(precipRow.precip_volume_m3) : null;
-      const totalArea = precipRow ? toNumberOrNull(precipRow.total_area_m2) : null;
-      const runoffCoefficient =
-        Number.isFinite(runoffVolume) && Number.isFinite(precipVolume) && precipVolume > 0
-          ? runoffVolume / precipVolume
-          : null;
-      const runoffMm =
-        Number.isFinite(runoffVolume) && Number.isFinite(totalArea) && totalArea > 0
-          ? (runoffVolume / totalArea) * 1000
-          : null;
-
-      return {
-        sim_day_index: simDay,
-        year,
-        month,
-        day_of_month: day,
-        date: formatDate(year, month, day),
-        measure_value: Number.isFinite(measureValue) ? measureValue : null,
-        depth_mm: Number.isFinite(depth) ? depth : null,
-        precip_mm: Number.isFinite(precip) ? precip : Number.isFinite(depth) ? depth : null,
-        duration_hours: Number.isFinite(duration) ? duration : null,
-        tp: Number.isFinite(tp) ? tp : null,
-        ip: Number.isFinite(ip) ? ip : null,
-        soil_saturation_pct: Number.isFinite(simDay) && soilMap.has(simDay) ? soilMap.get(simDay) : null,
-        snow_coverage_t1_pct: snowRow ? toNumberOrNull(snowRow.snow_coverage_t1_pct) : null,
-        snow_water_t1_mm: snowRow ? toNumberOrNull(snowRow.snow_water_t1_mm) : null,
-        runoff_volume_m3: Number.isFinite(runoffVolume) ? runoffVolume : null,
-        peak_discharge_m3s: Number.isFinite(peakDischarge) ? peakDischarge : null,
-        sediment_yield_kg: Number.isFinite(sedimentYield) ? sedimentYield : null,
-        runoff_coefficient: Number.isFinite(runoffCoefficient) ? runoffCoefficient : null,
-        runoff_mm: Number.isFinite(runoffMm) ? runoffMm : null,
-        tc_hours: Number.isFinite(simDay) && tcAvailable && tcMap.has(simDay) ? tcMap.get(simDay) : null,
-        tc_available: tcAvailable,
-      };
-    });
+    const rows = baseRows.map((row) =>
+      buildEventRow({
+        row,
+        filterSpec,
+        soilMap,
+        snowMap,
+        hydroMap,
+        precipMap,
+        tcMap,
+        tcAvailable,
+      }),
+    );
     return { rows, tcAvailable };
   }
 
-  return { fetchEventRows };
+  async function fetchScenarioSummary({ selectedMetric, simDayIndex, scenarioPath }) {
+    if (!selectedMetric || !Number.isFinite(simDayIndex) || !scenarioPath || !postQueryEngineForScenario) {
+      return null;
+    }
+
+    const filterSpec = resolveFilterSpec(selectedMetric);
+    const filterColumn = 'sim_day_index';
+    const minValue = simDayIndex;
+    const maxValue = simDayIndex;
+    const warmupYear = null;
+    const scenarioQuery = (payload) => postQueryEngineForScenario(payload, scenarioPath);
+
+    const eventPayload = buildEventFilterPayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+    });
+
+    const soilPayload = buildSoilPayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+    });
+
+    const snowPayload = buildSnowPayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+    });
+
+    const hydroPayload = buildHydrologyPayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+    });
+
+    const precipPayload = buildPrecipVolumePayload({
+      filterColumn,
+      minValue,
+      maxValue,
+      warmupYear,
+    });
+
+    let eventResult = null;
+    let soilResult = null;
+    let snowResult = null;
+    let hydroResult = null;
+    let precipResult = null;
+    let tcResult = null;
+    try {
+      [eventResult, soilResult, snowResult, hydroResult, precipResult, tcResult] = await Promise.all([
+        scenarioQuery(eventPayload),
+        safeQuery(soilPayload, 'omni soil saturation', scenarioQuery),
+        safeQuery(snowPayload, 'omni snow water', scenarioQuery),
+        safeQuery(hydroPayload, 'omni hydrology', scenarioQuery),
+        safeQuery(precipPayload, 'omni precip volume', scenarioQuery),
+        fetchTcResult({ warmupYear, postQueryEngineFn: scenarioQuery }),
+      ]);
+    } catch (error) {
+      console.warn('Storm Event Analyzer: omni scenario query failed', error);
+      return null;
+    }
+
+    const baseRows = (eventResult && eventResult.records) || [];
+    const row =
+      baseRows.find((record) => Number(record.sim_day_index) === Number(simDayIndex)) || baseRows[0] || null;
+    if (!row) {
+      return null;
+    }
+
+    const soilMap = mapBySimDay((soilResult && soilResult.records) || [], 'soil_saturation_pct');
+    const snowMap = mapRowsBySimDay((snowResult && snowResult.records) || []);
+    const hydroMap = mapRowsBySimDay((hydroResult && hydroResult.records) || []);
+    const precipMap = mapRowsBySimDay((precipResult && precipResult.records) || []);
+    const tcAvailable = !!(tcResult && tcResult.available);
+    const tcMap = mapBySimDay((tcResult && tcResult.records) || [], 'tc_hours');
+
+    return buildEventRow({
+      row,
+      filterSpec,
+      soilMap,
+      snowMap,
+      hydroMap,
+      precipMap,
+      tcMap,
+      tcAvailable,
+    });
+  }
+
+  return { fetchEventRows, fetchScenarioSummary };
 }

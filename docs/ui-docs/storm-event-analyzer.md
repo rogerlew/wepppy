@@ -512,6 +512,16 @@ Phase 9 is split into 9a/9b/9c to keep scope clear.
 **Tests run**
 - `wctl run-npm test -- storm-event-analyzer`
 
+### Phase 9b Handoff (2026-01-02)
+**Delivered**
+- Added Omni comparison controls and summary columns (base, scenario, % change) to the hydrology characteristics table with dynamic headers.
+- Passed Omni scenario context + base scenario label from the route/template and wired scenario selection into state.
+- Added scenario-aware Query Engine calls to fetch Omni summary rows by sim_day_index and compute % change in the UI.
+- Extended Jest coverage for scenario labels, scenario values, and % change placeholder behavior.
+
+**Tests run**
+- `wctl run-npm test -- storm-event-analyzer`
+
 #### Phase 9b: Omni compare scenario column
 - If the project has the Omni mod, add a "Compare to Omni Scenario" select to the Hydrology Characteristics panel.
 - Default: no scenario selected (render &mdash; in scenario + % change cells).
