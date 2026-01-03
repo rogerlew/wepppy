@@ -228,4 +228,8 @@ def run_wepp_watershed_tc_out_interchange(
         calendar_lookup=calendar_lookup,
         start_year=start_year,
     )
+    try:
+        source.unlink()
+    except FileNotFoundError:
+        LOGGER.debug("tc_out.txt already removed before cleanup: %s", source)
     return target
