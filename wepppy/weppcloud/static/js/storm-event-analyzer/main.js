@@ -196,6 +196,7 @@ async function initStormEventAnalyzer() {
       row: selectedRow || null,
       unitizer: unitizerClient,
       tcAvailable: !!state.tcAvailable,
+      selectedMetric: state.selectedMetric,
     });
   }
 

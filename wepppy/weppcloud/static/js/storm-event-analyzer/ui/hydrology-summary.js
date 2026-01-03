@@ -40,7 +40,25 @@ function setUnitCell(cell, unitKey, unitizer) {
   applyHtml(cell, renderUnits(unitizer, unitKey));
 }
 
-export function renderHydrologySummary({ section, row, unitizer, tcAvailable }) {
+function buildSelectedMeasureLabel(selectedMetric) {
+  if (!selectedMetric) {
+    return 'Selected measure';
+  }
+  const prefix =
+    selectedMetric.table === 'wepp'
+      ? 'WEPP Climate'
+      : selectedMetric.table === 'noaa'
+        ? 'NOAA Atlas 14'
+        : 'Selected measure';
+  const label = selectedMetric.label || 'Selected measure';
+  const ari = selectedMetric.ari || '';
+  if (!ari) {
+    return `${prefix} ${label}`.trim();
+  }
+  return `${prefix} ${label} ${ari}-year ARI`.trim();
+}
+
+export function renderHydrologySummary({ section, row, unitizer, tcAvailable, selectedMetric }) {
   if (!section) {
     return;
   }
@@ -67,7 +85,20 @@ export function renderHydrologySummary({ section, row, unitizer, tcAvailable }) 
 
   const placeholder = hasSelection ? '&mdash;' : '--';
 
+  const selectedMeasureLabel = buildSelectedMeasureLabel(selectedMetric);
+  const selectedMeasureCell = section.querySelector('[data-storm-event-analyzer-summary-label="selected-measure"]');
+  if (selectedMeasureCell) {
+    selectedMeasureCell.textContent = selectedMeasureLabel;
+  }
+
   const values = {
+    date: row ? row.date : null,
+    depth: row ? row.depth_mm : null,
+    duration: row ? row.duration_hours : null,
+    'selected-measure': row ? row.measure_value : null,
+    'soil-saturation': row ? row.soil_saturation_pct : null,
+    'snow-coverage': row ? row.snow_coverage_t1_pct : null,
+    'snow-water': row ? row.snow_water_t1_mm : null,
     runoff: row ? row.runoff_mm : null,
     'runoff-volume': row ? row.runoff_volume_m3 : null,
     tc: row ? row.tc_hours : null,
@@ -77,6 +108,13 @@ export function renderHydrologySummary({ section, row, unitizer, tcAvailable }) 
   };
 
   const units = {
+    date: 'YY-MM-DD',
+    depth: 'mm',
+    duration: 'hours',
+    'selected-measure': selectedMetric ? selectedMetric.unitKey || '' : '',
+    'soil-saturation': '%',
+    'snow-coverage': '%',
+    'snow-water': 'mm',
     runoff: 'mm',
     'runoff-volume': 'm^3',
     tc: 'hours',

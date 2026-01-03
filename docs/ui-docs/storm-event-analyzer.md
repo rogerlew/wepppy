@@ -493,5 +493,38 @@ Status: complete (2026-01-02). Phase 8 is done; see **Phase 8 Handoff**.
 **Tests run**
 - Not run (wctl run-npm test -- storm-event-analyzer; wctl run-npm smoke -- tests/smoke/storm-event-analyzer.spec.js)
 
+### Phase 9: Hydrology characteristics expansion
+Phase 9 is split into 9a/9b/9c to keep scope clear.
+
+#### Phase 9a: Redundant event measures in hydrology characteristics
+- Add redundant event measures to the Storm Event Hydrology Characteristics table: Date, Depth, Duration, selected precip frequency measure label (example: "WEPP Climate 15-min intensity 10-year ARI"), Soil saturation T-1, Snow coverage T-1, and Snow-Water equivalent T-1.
+- Keep base units in state; render display values via Unitizer.
+- Snow coverage stays as percent of hillslope area with Snow-Water > 0; Snow-Water equivalent uses area averaged mm (T-1).
+- Tests: update Jest coverage for the expanded summary table.
+
+### Phase 9a Handoff (2026-01-02)
+**Delivered**
+- Added redundant event measure rows (date, depth, duration, selected measure, soil saturation T-1, snow coverage T-1, snow-water equivalent T-1) to the hydrology summary template.
+- Extended snow payloads to compute area-weighted snow-water equivalent (mm) and mapped both snow coverage + snow-water values into event rows.
+- Updated hydrology summary rendering to set the selected measure label dynamically and show the new fields with Unitizer units.
+- Wired the selected metric into the summary renderer and refreshed Jest coverage for label/unit/placeholder behavior.
+
+**Tests run**
+- `wctl run-npm test -- storm-event-analyzer`
+
+#### Phase 9b: Omni compare scenario column
+- If the project has the Omni mod, add a "Compare to Omni Scenario" select to the Hydrology Characteristics panel.
+- Default: no scenario selected (render &mdash; in scenario + % change cells).
+- When selected, query the Omni scenario run_id slug via Query Engine (mirrors gl-dashboard behavior).
+- Rename the Value column to `Burned` or `Undisturbed` based on whether the base scenario has an SBS map (follow gl-dashboard logic).
+- Insert a scenario column with the selected scenario label and values.
+- Add a `% change` column to the right of the Units column; percent change is scenario vs base (handle divide-by-zero as n/a).
+- Tests: Jest for compare rendering + percent change; Playwright for scenario selection.
+
+#### Phase 9c: Download CSV (Hydrology Characteristics)
+- Add "Download CSV" action for the hydrology characteristics table using the standard `.wc-table-actions` button markup.
+- Preferred: client-side CSV export (no backend call). Generate CSV from the current table DOM (including scenario + % change if present).
+- Tests: Jest for CSV generation; Playwright for download trigger (if feasible in smoke).
+
 ## Open Questions
 - None currently. Add new questions here as data gaps or UI behaviors arise.
