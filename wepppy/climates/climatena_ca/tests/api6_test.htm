@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>ClimateNA API Test</title>
-    <!-- Include jQuery from a CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         #clmOut {
             margin-top: 20px;
@@ -25,18 +23,68 @@
             {lat: 50.25, lon: -120, el: 100, prd: "Normal_1961_1990.nrm", varYSM: "Y"}
         ];
 
-        $.ajax({
-            url: 'https://api6.climatebc.ca/api/clmApi6/',
-            method: "POST",
-            data: { '': latlon }
-        }).done(function (result) {
-            $.each(result, function (i, field) {
-                $("#clmOut").append(JSON.stringify(result));
+        function buildParams(prefix, obj, add) {
+            if (Array.isArray(obj)) {
+                obj.forEach(function (value, index) {
+                    if (/\[\]$/.test(prefix)) {
+                        add(prefix, value);
+                    } else {
+                        buildParams(
+                            prefix + "[" + (typeof value === "object" && value != null ? index : "") + "]",
+                            value,
+                            add
+                        );
+                    }
+                });
+            } else if (obj !== null && typeof obj === "object") {
+                Object.keys(obj).forEach(function (name) {
+                    buildParams(prefix + "[" + name + "]", obj[name], add);
+                });
+            } else {
+                add(prefix, obj);
+            }
+        }
+
+        function toQuery(params) {
+            var parts = [];
+            var add = function (key, value) {
+                var resolved = value == null ? "" : value;
+                parts.push(encodeURIComponent(key) + "=" + encodeURIComponent(resolved));
+            };
+            Object.keys(params).forEach(function (prefix) {
+                buildParams(prefix, params[prefix], add);
             });
-        }).fail(function (xhr) {
-            alert(xhr.responseText);
-            alert("fail");
-        });
+            return parts.join("&");
+        }
+
+        fetch('https://api6.climatebc.ca/api/clmApi6/', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: toQuery({ "": latlon })
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response;
+                }
+                return response.json();
+            })
+            .then(function (result) {
+                document.getElementById("clmOut").textContent = JSON.stringify(result, null, 2);
+            })
+            .catch(function (error) {
+                if (error && typeof error.text === "function") {
+                    error.text().then(function (message) {
+                        alert(message);
+                        alert("fail");
+                    }).catch(function () {
+                        alert("fail");
+                    });
+                } else {
+                    alert("fail");
+                }
+            });
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 > **See also:** [AGENTS.md](../../../AGENTS.md) for Static Assets section and build command reference.
 
 ## Overview
-- All third-party browser libraries (Leaflet, Bootstrap, DataTables, jQuery, etc.) are now pulled in via `npm` from `wepppy/weppcloud/static-src`.
+- All third-party browser libraries (Leaflet, Bootstrap, PureCSS, etc.) are now pulled in via `npm` from `wepppy/weppcloud/static-src`.
 - `npm run build:dev` produces readable development assets under `static-src/dist/`; `npm run build` produces minified production assets.
 - `npm run smoke` runs the Playwright smoke suite (requires the backend running and test support endpoints). Useful environment variables:
   - `TEST_SUPPORT_ENABLED=true` on the backend to expose `/tests/api/*` endpoints.
@@ -43,10 +43,10 @@
 3. Run `npm run build` and sync to `static/vendor/` locally.
 4. Replace CDN references in templates with `{{ url_for('static', filename='vendor/<name>/<file>') }}`.
 5. Rebuild Docker images (`docker compose build weppcloud`) to bake the new assets.
-- If a library is not published on npm, drop its distribution files under `static-src/vendor-sources/<name>/` and reference them in `scripts/build.mjs` (see `bootstrap-toc` as an example).
+- If a library is not published on npm, drop its distribution files under `static-src/vendor-sources/<name>/` and reference them in `scripts/build.mjs` (see `purecss` as an example).
 
 ## Remaining CDN References
-- Some secondary pages still reference CDN Bootstrap/jQuery assets. Track TODOs via `rg "cdn.jsdelivr.net/npm/bootstrap"` and replace as we touch those templates.
+- Some secondary pages still reference CDN Bootstrap assets. Track TODOs via `rg "cdn.jsdelivr.net/npm/bootstrap"` and replace as we touch those templates.
 - Leaflet plugins that are not published on npm (e.g., custom glify layers) remain vendored under `static/js/`.
 
 ## Playwright Test Artifacts

@@ -53,13 +53,6 @@ const targets = [
     source: path.join(nodeModules, 'leaflet', 'dist', 'images'),
     outdir: path.join(distDir, 'vendor', 'leaflet', 'images'),
   },
-  // jQuery
-  {
-    kind: 'copyFile',
-    source: path.join(nodeModules, 'jquery', 'dist', pick('jquery.min.js', 'jquery.js')),
-    outfile: path.join(distDir, 'vendor', 'jquery', 'jquery.js'),
-    includeSourceMap: true,
-  },
   // Pure.css core + responsive grid
   {
     kind: 'copyFile',
@@ -79,45 +72,12 @@ const targets = [
     outfile: path.join(distDir, 'vendor', 'purecss', 'grids-responsive-min.css'),
     optional: true,
   },
-  // Bootstrap JS/CSS
-  {
-    kind: 'copyFile',
-    source: path.join(nodeModules, 'bootstrap', 'dist', 'js', pick('bootstrap.bundle.min.js', 'bootstrap.bundle.js')),
-    outfile: path.join(distDir, 'vendor', 'bootstrap', 'bootstrap.bundle.js'),
-    includeSourceMap: true,
-  },
+  // Bootstrap CSS
   {
     kind: 'copyFile',
     source: path.join(nodeModules, 'bootstrap', 'dist', 'css', pick('bootstrap.min.css', 'bootstrap.css')),
     outfile: path.join(distDir, 'vendor', 'bootstrap', 'bootstrap.css'),
     includeSourceMap: true,
-  },
-  // Bootstrap TOC
-  {
-    kind: 'copyFile',
-    source: path.join(vendorSources, 'bootstrap-toc', pick('bootstrap-toc.min.js', 'bootstrap-toc.js')),
-    outfile: path.join(distDir, 'vendor', 'bootstrap-toc', 'bootstrap-toc.js'),
-  },
-  {
-    kind: 'copyFile',
-    source: path.join(vendorSources, 'bootstrap-toc', pick('bootstrap-toc.min.css', 'bootstrap-toc.css')),
-    outfile: path.join(distDir, 'vendor', 'bootstrap-toc', 'bootstrap-toc.css'),
-  },
-  // DataTables core + Bootstrap integration
-  {
-    kind: 'copyFile',
-    source: path.join(nodeModules, 'datatables.net', 'js', 'jquery.dataTables.js'),
-    outfile: path.join(distDir, 'vendor', 'datatables', 'jquery.dataTables.js'),
-  },
-  {
-    kind: 'copyFile',
-    source: path.join(nodeModules, 'datatables.net-bs4', 'js', 'dataTables.bootstrap4.js'),
-    outfile: path.join(distDir, 'vendor', 'datatables', 'dataTables.bootstrap4.js'),
-  },
-  {
-    kind: 'copyFile',
-    source: path.join(nodeModules, 'datatables.net-bs4', 'css', 'dataTables.bootstrap4.css'),
-    outfile: path.join(distDir, 'vendor', 'datatables', 'dataTables.bootstrap4.css'),
   },
   // Leaflet AJAX plugin
   {

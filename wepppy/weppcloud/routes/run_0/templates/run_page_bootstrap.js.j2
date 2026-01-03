@@ -188,7 +188,7 @@
             try {
                 initUnitConverters(document);
             } catch (err) {
-                console.warn("[Bootstrap] Unitizer initialisation failed", err);
+                console.warn("[Bootstrap] Unitizer initialization failed", err);
             }
         }
     }
@@ -390,13 +390,6 @@
         var navElement = document.getElementById("toc");
         if (!navElement) {
             return;
-        }
-        if (typeof Toc !== "undefined" && typeof Toc.init === "function" && window.jQuery) {
-            try {
-                Toc.init(window.jQuery(navElement));
-            } catch (err) {
-                console.warn("[Bootstrap] Failed to initialize TOC", err);
-            }
         }
         registerTocEmojiMetadata(navElement, emojiMap || {});
         setupTocScroll(navElement);

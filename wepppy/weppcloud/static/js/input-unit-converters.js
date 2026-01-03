@@ -14,35 +14,114 @@
     in_to_mm: function (value) { return value * 25.4; }
   };
 
-  function initUnitConverters(root) {
-    var $root = root ? $(root) : $(document);
+  var converterState = new WeakMap();
 
-    $root.find('[data-convert-target][data-convert-func]').each(function () {
-      var $source = $(this);
-      if ($source.data('unitConverterInit')) {
+  function toDatasetKey(key) {
+    return key.replace(/-([a-z])/g, function (_, chr) { return chr.toUpperCase(); });
+  }
+
+  function parseDataValue(value) {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (value === null) {
+      return null;
+    }
+    if (value === 'true') {
+      return true;
+    }
+    if (value === 'false') {
+      return false;
+    }
+    if (value === 'null') {
+      return null;
+    }
+    if (value !== '' && !Number.isNaN(Number(value)) && String(Number(value)) === value) {
+      return Number(value);
+    }
+    if (value && value.charAt(0) === '{' && value.charAt(value.length - 1) === '}') {
+      try {
+        return JSON.parse(value);
+      } catch (err) {
+        return value;
+      }
+    }
+    return value;
+  }
+
+  function getDataValue(element, key) {
+    if (!element) {
+      return undefined;
+    }
+    var datasetKey = toDatasetKey(key);
+    if (element.dataset && Object.prototype.hasOwnProperty.call(element.dataset, datasetKey)) {
+      return parseDataValue(element.dataset[datasetKey]);
+    }
+    var attrValue = element.getAttribute('data-' + key.replace(/([A-Z])/g, '-$1').toLowerCase());
+    if (attrValue === null) {
+      return undefined;
+    }
+    return parseDataValue(attrValue);
+  }
+
+  function getInternalState(element) {
+    var state = converterState.get(element);
+    if (!state) {
+      state = {};
+      converterState.set(element, state);
+    }
+    return state;
+  }
+
+  function getInternalFlag(element, key) {
+    var state = converterState.get(element);
+    if (!state) {
+      return undefined;
+    }
+    return state[key];
+  }
+
+  function setInternalFlag(element, key, value) {
+    var state = getInternalState(element);
+    state[key] = value;
+  }
+
+  function getRootNode(root) {
+    if (root && typeof root.querySelectorAll === 'function') {
+      return root;
+    }
+    return document;
+  }
+
+  function initUnitConverters(root) {
+    var rootNode = getRootNode(root);
+    var sources = rootNode.querySelectorAll('[data-convert-target][data-convert-func]');
+
+    Array.prototype.forEach.call(sources, function (source) {
+      if (getInternalFlag(source, 'unitConverterInit')) {
         return;
       }
 
-      var targetSelector = $source.data('convertTarget');
-      var converterName = $source.data('convertFunc');
+      var targetSelector = getDataValue(source, 'convertTarget');
+      var converterName = getDataValue(source, 'convertFunc');
       var converter = UNIT_CONVERTERS[converterName];
 
       if (!targetSelector || typeof converter !== 'function') {
         return;
       }
 
-      var $target = $(targetSelector);
-      if ($target.length === 0) {
+      var targets = document.querySelectorAll(targetSelector);
+      if (!targets.length) {
         return;
       }
 
-      var eventsAttr = $source.data('convertEvents');
+      var eventsAttr = getDataValue(source, 'convertEvents');
       var events = (eventsAttr ? String(eventsAttr) : 'input').split(/\s+/).filter(Boolean);
       if (events.length === 0) {
         events = ['input'];
       }
 
-      var decimalsData = $source.data('convertDecimals');
+      var decimalsData = getDataValue(source, 'convertDecimals');
       var decimals = null;
       if (decimalsData !== undefined && decimalsData !== null && decimalsData !== '') {
         var parsed = Number(decimalsData);
@@ -51,15 +130,15 @@
         }
       }
 
-      var triggerChangeData = $source.data('convertTriggerChange');
+      var triggerChangeData = getDataValue(source, 'convertTriggerChange');
       var shouldTriggerChange = triggerChangeData === undefined ? true : Boolean(triggerChangeData);
 
       var handler = function () {
-        if ($source.data('convertLock')) {
+        if (getInternalFlag(source, 'convertLock')) {
           return;
         }
 
-        var rawValue = parseFloat($source.val());
+        var rawValue = parseFloat(source.value);
         if (!Number.isFinite(rawValue)) {
           return;
         }
@@ -71,22 +150,28 @@
 
         var formatted = decimals === null ? converted : Number(converted).toFixed(decimals);
 
-        $target.data('convertLock', true);
-        try {
-          $target.val(formatted);
-          if (shouldTriggerChange) {
-            $target.trigger('change');
+        Array.prototype.forEach.call(targets, function (target) {
+          setInternalFlag(target, 'convertLock', true);
+          try {
+            if ('value' in target) {
+              target.value = formatted;
+            } else if (target.textContent !== undefined) {
+              target.textContent = formatted;
+            }
+            if (shouldTriggerChange) {
+              target.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          } finally {
+            setInternalFlag(target, 'convertLock', false);
           }
-        } finally {
-          $target.data('convertLock', false);
-        }
+        });
       };
 
       events.forEach(function (eventName) {
-        $source.on(eventName, handler);
+        source.addEventListener(eventName, handler);
       });
 
-      $source.data('unitConverterInit', true);
+      setInternalFlag(source, 'unitConverterInit', true);
     });
   }
 

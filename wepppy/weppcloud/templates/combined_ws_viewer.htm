@@ -10,139 +10,177 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" type="text/css"
-      href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.css') }}"/>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-    <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/datatables/jquery.dataTables.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.js') }}"></script>
 <script type="text/javascript">
-var site_prefix = "{{ site_prefix }}";
+const site_prefix = "{{ site_prefix }}";
 
-function getURLParameter(sParam) {
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1];
-        }
+function getURLParameter(name) {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get(name);
+    return value === null ? undefined : value;
+}
+
+function decodeJsonParam(value) {
+    if (value === undefined) {
+        return undefined;
+    }
+    if (value === null) {
+        return null;
+    }
+    const raw = String(value);
+    try {
+        return JSON.parse(raw);
+    } catch (err) {
+        return raw;
     }
 }
 
+async function fetchJson(url) {
+    const response = await fetch(url, { credentials: 'same-origin' });
+    const text = await response.text();
+    if (!response.ok) {
+        throw new Error(`Request failed (${response.status})`);
+    }
+    if (!text) {
+        return null;
+    }
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        throw new Error('Invalid JSON response');
+    }
+}
+
+async function fetchText(url) {
+    const response = await fetch(url, { credentials: 'same-origin' });
+    if (!response.ok) {
+        throw new Error(`Request failed (${response.status})`);
+    }
+    return response.text();
+}
+
 function render_legend_cmap(cmap, canvasID) {
-    var canvas = $("#" + canvasID);
+    const canvas = document.getElementById(canvasID);
+    if (!canvas) {
+        return;
+    }
 
-    var width = canvas.outerWidth();
-    var height = canvas.outerHeight();
-    var data = new Float32Array(height * width);
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(1, Math.round(rect.width));
+    const height = Math.max(1, Math.round(rect.height));
+    canvas.width = width;
+    canvas.height = height;
+    const data = new Float32Array(height * width);
 
-    for (var y = 0; y <= height; y++) {
-        for (var x = 0; x <= width; x++) {
-            data[(y*width)+x] = x / (width - 1.0);
+    for (let y = 0; y <= height; y++) {
+        for (let x = 0; x <= width; x++) {
+            data[(y * width) + x] = x / (width - 1.0);
         }
     }
 
-    var plot = new plotty.plot({
-        canvas: canvas["0"],
+    const plot = new plotty.plot({
+        canvas: canvas,
         data: data, width: width, height: height,
         domain: [0, 1], colorScale: cmap
     });
     plot.render();
 }
 
-$(document).ready(function () {
-    var center;
-    var zoom;
-    var display_units;
-    var ws;
-    var varopts;
-    var varname;
-    var title;
+document.addEventListener('DOMContentLoaded', async () => {
+    let center;
+    let zoom;
+    let display_units;
+    let ws;
+    let varopts;
+    let varname;
+    let title;
 
-    var map = L.map('map');
+    const map = L.map('map');
 
-    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+    const googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
       maxZoom: 20,
       subdomains: ["mt0", "mt1", "mt2", "mt3"]
     });
 
-    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+    const googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
       maxZoom: 20,
       subdomains: ["mt0", "mt1", "mt2", "mt3"]
     });
 
-    var baseMaps = {
+    const baseMaps = {
       "Satellite": googleSat,
       "Terrain": googleTerrain
     };
 
-    var overlayMaps = {};
+    const overlayMaps = {};
 
     googleSat.addTo(map);
     googleTerrain.addTo(map);
 
-    var ctrls = L.control.layers(baseMaps, overlayMaps);
+    const ctrls = L.control.layers(baseMaps, overlayMaps);
     ctrls.addTo(map);
 
-    var tolerance;
-    var units = '';
-    var numvars;
-    var defaultStyle;
+    let tolerance;
+    let units = '';
+    let numvars;
+    let defaultStyle;
 
-    var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
-    var cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
-    var cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
+    const cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
+    const cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
+    const cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
 
-    var cmap, r;
-    var vmin = 0.0;
-    var vmax;
-    var cmapname;
+    let cmap;
+    let r;
+    let vmin = 0.0;
+    let vmax;
+    let cmapname;
 
-    var Legend;
-    var legend;
+    let Legend;
+    let legend;
 
-    var VarSelection;
-    var varSelection;
+    let VarSelection;
+    let varSelection;
 
-    var TitleBox;
+    let TitleBox;
 
-    var polys;
-    var data;
-    var popup;
+    let polys;
+    let data;
+    let popup;
 
-    var data_uri = getURLParameter("data_uri");
+    const dataUri = getURLParameter("data_uri");
 
-    if (data_uri !== undefined) {
-        $.getJSON(data_uri, function (data) {
-            center = data.center;
-            zoom = data.zoom;
-            display_units = data.units;
-            ws = data.ws;
-            varopts = data.varopts;
-            varname = data.varname;
-            title = data.title;
-
-            callback();
-        });
-
-    } else {
-        center = getURLParameter("center");
-        if (center === undefined) {
-            center = [39.0, -99.0];
-        } else {
-            center = decodeURIComponent((center + '').replace(/\+/g, '%20'));
-            center = JSON.parse(center);
+    if (dataUri !== undefined) {
+        try {
+            const payload = await fetchJson(dataUri);
+            if (payload) {
+                center = payload.center;
+                zoom = payload.zoom;
+                display_units = payload.units;
+                ws = payload.ws;
+                varopts = payload.varopts;
+                varname = payload.varname;
+                title = payload.title;
+            }
+            await callback();
+        } catch (error) {
+            console.error(error);
         }
 
-        zoom = getURLParameter("zoom");
-        if (zoom === undefined) {
+    } else {
+        const centerParam = getURLParameter("center");
+        if (centerParam === undefined) {
+            center = [39.0, -99.0];
+        } else {
+            center = decodeJsonParam(centerParam);
+        }
+
+        const zoomParam = getURLParameter("zoom");
+        if (zoomParam === undefined) {
             zoom = 5;
         } else {
-            zoom = JSON.parse(zoom);
+            zoom = decodeJsonParam(zoomParam);
         }
 
         display_units = getURLParameter("units");
@@ -152,14 +190,12 @@ $(document).ready(function () {
 
         ws = getURLParameter("ws");
         if (ws !== undefined) {
-            ws = decodeURIComponent((ws + '').replace(/\+/g, '%20'));
-            ws = JSON.parse(ws);
+            ws = decodeJsonParam(ws);
         }
 
         varopts = getURLParameter("varopts");
         if (varopts !== undefined) {
-            varopts = decodeURIComponent((varopts + '').replace(/\+/g, '%20'));
-            varopts = JSON.parse(varopts);
+            varopts = decodeJsonParam(varopts);
 
             if (display_units !== 'SI') {
                 if ("runoff" in varopts) {
@@ -181,16 +217,16 @@ $(document).ready(function () {
         }
 
         varname = getURLParameter("varname");
-        if (varname === undefined) {
+        if (varname === undefined && varopts) {
             varname = Object.keys(varopts)[0];
         }
 
         title = getURLParameter("title");
-        if (title !== undefined) {
-            title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
+        if (title !== undefined && title !== null) {
+            title = String(title);
         }
 
-        callback();
+        await callback();
 
     }
 
@@ -230,23 +266,31 @@ $(document).ready(function () {
     }
 
     function set_tolerance() {
-        var _scale;
+        let scale;
         if (display_units === 'SI') {
-            _scale = 1;
+            scale = 1;
         } else {
             if (units === 'mm') {
-                _scale = 25.4;
+                scale = 25.4;
             } else if (units === 'kg/ha') {
-                _scale = 1.12085;
+                scale = 1.12085;
             }
         }
 
-        tolerance = parseFloat($('#tolerance-input').val()) * _scale;
+        const input = document.getElementById('tolerance-input');
+        if (!input) {
+            return;
+        }
+        const value = parseFloat(input.value);
+        if (Number.isNaN(value)) {
+            return;
+        }
+        tolerance = value * scale;
         prep_render();
         render_legend();
         render();
     }
-    
+
     function render_legend() {
         if (legend !== undefined) {
             legend.remove();
@@ -254,47 +298,49 @@ $(document).ready(function () {
         legend = new Legend();
         map.addControl(legend);
         render_legend_cmap(cmapname, 'legend_canvas');
-        $('#set-tolerance-btn').on('click', set_tolerance);
+        const button = document.getElementById('set-tolerance-btn');
+        if (button) {
+            button.addEventListener('click', set_tolerance);
+        }
 
     }
 
-    function render() {
+    async function render() {
+        if (!Array.isArray(ws) || ws.length === 0) {
+            return;
+        }
         if (data === undefined) {
             map.spin(true);
-            let i = 0;
-            for (let w of ws) {
-                let runid = w.runid;
-                data = {};
+            data = {};
+            const tasks = ws.map(async (w) => {
+                const runid = w.runid;
 
-                $.get({
-                    url: site_prefix + "/runs/" + runid + "/cfg/query/wepp/" + varname + "/subcatchments/",
-                    success: function success(_data) {
-                        if (_data === null) {
-                            throw "query returned null";
-                        }
-                        data[runid] = _data;
-                        _render(runid, _data);
-
-                        i += 1;
-                        if (i === ws.length) {
-                            map.spin(false);
-                        }
-                    },
-                    fail: function fail(error) {
-                        data[runid] = null;
-                        map.spin(false);
+                try {
+                    const response = await fetchJson(site_prefix + "/runs/" + runid + "/cfg/query/wepp/" + varname + "/subcatchments/");
+                    if (response === null) {
+                        throw new Error('query returned null');
                     }
-                });
-            }
+                    data[runid] = response;
+                    _render(runid, response);
+                } catch (error) {
+                    data[runid] = null;
+                    console.log(error);
+                }
+            });
+            await Promise.allSettled(tasks);
+            map.spin(false);
         } else {
-            for (let w of ws) {
-                let runid = w.runid;
+            for (const w of ws) {
+                const runid = w.runid;
                 _render(runid, data[runid]);
             }
         }
     }
 
     function _render(runid, _data) {
+        if (!_data || !polys || !polys[runid]) {
+            return;
+        }
         polys[runid].eachLayer(function (layer) {
             const topId = layer.feature.properties.TopazID;
             const v = parseFloat(_data[topId].value);
@@ -310,8 +356,34 @@ $(document).ready(function () {
         });
     }
 
-    
-    function callback() {
+    function applyPopupUnits() {
+        if (display_units !== 'SI') {
+            document.querySelectorAll('.units-m').forEach((el) => el.classList.remove('invisible'));
+            document.querySelectorAll('.units-ft').forEach((el) => el.classList.add('invisible'));
+
+            document.querySelectorAll('.units-ha').forEach((el) => el.classList.remove('invisible'));
+            document.querySelectorAll('.units-acre').forEach((el) => el.classList.add('invisible'));
+        }
+    }
+
+    function attachVarRadioHandlers() {
+        document.querySelectorAll('input[type="radio"][name="varRadio"]').forEach((input) => {
+            input.addEventListener('change', () => {
+                varname = input.value;
+                tolerance = varopts[varname];
+                data = undefined;
+
+                prep_render();
+                render_legend();
+                render();
+            });
+        });
+    }
+
+    async function callback() {
+        if (!center || zoom === undefined || !varopts) {
+            return;
+        }
         map.setView(center, zoom);
         tolerance = varopts[varname];
         units = '';
@@ -334,7 +406,7 @@ $(document).ready(function () {
                 // constructor
             },
             onAdd: function (map) {
-                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
                 container.style.backgroundColor = 'white';
                 container.style.width = '240px';
@@ -358,8 +430,8 @@ $(document).ready(function () {
                         '</div>' +
                         '</div>';
                 } else {
-                    var scale;
-                    var _units;
+                    let scale;
+                    let _units;
                     if (units === 'mm') {
                         scale = 0.0393701;
                         _units = 'in';
@@ -368,9 +440,9 @@ $(document).ready(function () {
                         _units = 'lb/ha';
                     }
 
-                    var _vmin = parseFloat(vmin * scale).toFixed(2);
-                    var _vmax = parseFloat(vmax * scale).toFixed(2);
-                    var _tolerance = parseFloat(tolerance * scale).toFixed(2);
+                    const _vmin = parseFloat(vmin * scale).toFixed(2);
+                    const _vmax = parseFloat(vmax * scale).toFixed(2);
+                    const _tolerance = parseFloat(tolerance * scale).toFixed(2);
 
                     container.innerHTML =
                         '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
@@ -405,7 +477,7 @@ $(document).ready(function () {
                 // constructor
             },
             onAdd: function (map) {
-                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
                 container.style.backgroundColor = 'white';
                 container.style.width = '240px';
@@ -456,7 +528,7 @@ $(document).ready(function () {
                 // constructor
             },
             onAdd: function (map) {
-                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
                 container.style.backgroundColor = 'transparent';
                 container.style.borderColor = 'transparent';
@@ -473,79 +545,61 @@ $(document).ready(function () {
         // titleBox = TitleBox();
         // map.addControl(titleBox);
 
-        $('input[type=radio][name=varRadio]').change(function () {
-            varname = this.value;
-            tolerance = varopts[varname];
-            data;
-
-            prep_render();
-            render_legend();
-            render();
-        });
+        attachVarRadioHandlers();
 
         polys = {};
-        data;
-        popup;
+        data = undefined;
+        popup = undefined;
 
 
-        if (ws !== null) {
-            for (let w of ws) {
-                let runid = w.runid;
-                let cfg = w.cfg;
+        if (Array.isArray(ws)) {
+            for (const w of ws) {
+                const runid = w.runid;
+                const cfg = w.cfg;
                 polys[runid] = {};
 
-                $.get({
-                    url: site_prefix + "/runs/" + runid + "/cfg/resources/subcatchments.json",
-                    async: false,
-                    success: function (response) {
-                        polys[runid] = L.geoJSON(response.features, {
-                            style: defaultStyle,
-                            onEachFeature: function (feature, layer) {
-                                layer.on({
-                                    click: function click(ev) {
-                                        var topaz_id = ev.target.feature.properties.TopazID;
-                                        var query_url = site_prefix + "/runs/" + runid + "/cfg/report/sub_summary/" + topaz_id + "/";
-                                        $.get({
-                                            url: query_url,
-                                            success: function success(response) {
-                                                if (popup !== undefined) {
-                                                    popup.remove();
-                                                }
-                                                const content =
-                                                    '<h5>' + runid + '</h5>' +
-                                                    response +
-                                                    '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/" target="_blank">View Watershed Run</a>';
-
-                                                popup = L.popup()
-                                                    .setLatLng(ev.latlng)
-                                                    .setContent(content)
-                                                    .openOn(map);
-
-                                                if (display_units !== 'SI') {
-                                                    $(".units-m").removeClass("invisible");
-                                                    $(".units-ft").addClass("invisible");
-
-                                                    $(".units-ha").removeClass("invisible");
-                                                    $(".units-acre").addClass("invisible");
-                                                }
-                                            },
-                                            fail: function fail(error) {
-                                                console.log(error);
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-
-                        polys[runid].name = response.name;
-                        polys[runid].addTo(map);
-                        ctrls.addOverlay(polys[runid], runid);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        console.log(textStatus, errorThrown);
+                try {
+                    const response = await fetchJson(site_prefix + "/runs/" + runid + "/cfg/resources/subcatchments.json");
+                    if (!response || !response.features) {
+                        throw new Error('Missing subcatchments');
                     }
-                });
+                    polys[runid] = L.geoJSON(response.features, {
+                        style: defaultStyle,
+                        onEachFeature: function (feature, layer) {
+                            layer.on({
+                                click: async function click(ev) {
+                                    const topaz_id = ev.target.feature.properties.TopazID;
+                                    const query_url = site_prefix + "/runs/" + runid + "/cfg/report/sub_summary/" + topaz_id + "/";
+                                    try {
+                                        const response = await fetchText(query_url);
+                                        if (popup !== undefined) {
+                                            popup.remove();
+                                        }
+                                        const content =
+                                            '<h5>' + runid + '</h5>' +
+                                            response +
+                                            '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/" target="_blank">View Watershed Run</a>';
+
+                                        popup = L.popup()
+                                            .setLatLng(ev.latlng)
+                                            .setContent(content)
+                                            .openOn(map);
+
+                                        applyPopupUnits();
+                                    } catch (error) {
+                                        console.log(error);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    polys[runid].name = response.name;
+                    polys[runid].addTo(map);
+                    ctrls.addOverlay(polys[runid], runid);
+                } catch (error) {
+                    console.log(error);
+                }
             }
 
             prep_render();
@@ -578,7 +632,5 @@ $(document).ready(function () {
     <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-spin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
   </body>
 </html>

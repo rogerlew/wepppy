@@ -10,119 +10,139 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.css') }}"/>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-    <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/datatables/jquery.dataTables.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.js') }}"></script>
 <script type="text/javascript">
-var site_prefix = "{{ site_prefix }}";
+const site_prefix = "{{ site_prefix }}";
 
-function getURLParameter(sParam) {
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1];
-        }
+function getURLParameter(name) {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get(name);
+    return value === null ? undefined : value;
+}
+
+function decodeJsonParam(value) {
+    if (value === undefined) {
+        return undefined;
+    }
+    if (value === null) {
+        return null;
+    }
+    const raw = String(value);
+    try {
+        return JSON.parse(raw);
+    } catch (err) {
+        return raw;
     }
 }
 
+async function fetchJson(url) {
+    const response = await fetch(url, { credentials: 'same-origin' });
+    const text = await response.text();
+    if (!response.ok) {
+        throw new Error(`Request failed (${response.status})`);
+    }
+    if (!text) {
+        return null;
+    }
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        throw new Error('Invalid JSON response');
+    }
+}
 
-$(document).ready(function () {
-    var center;
-    var zoom;
-    var display_units;
-    var ws;
-    var varopts;
-    var varname;
-    var title;
+document.addEventListener('DOMContentLoaded', async () => {
+    let center;
+    let zoom;
+    let ws;
+    let title;
 
-    var map = L.map('map');
+    const map = L.map('map');
 
-    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+    const googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
       maxZoom: 20,
       subdomains: ["mt0", "mt1", "mt2", "mt3"]
     });
 
-    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+    const googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
       maxZoom: 20,
       subdomains: ["mt0", "mt1", "mt2", "mt3"]
     });
 
-    var baseMaps = {
+    const baseMaps = {
       "Satellite": googleSat,
       "Terrain": googleTerrain
     };
 
-    var overlayMaps = {};
+    const overlayMaps = {};
 
     googleSat.addTo(map);
     googleTerrain.addTo(map);
 
-    var ctrls = L.control.layers(baseMaps, overlayMaps);
+    const ctrls = L.control.layers(baseMaps, overlayMaps);
     ctrls.addTo(map);
 
-    var tolerance;
-    var numvars;
-    var defaultStyle;
+    let defaultStyle;
 
-    var TitleBox;
+    let TitleBox;
 
-    var polys;
-    var data;
-    var popup;
+    let polys;
+    let data;
+    let popup;
 
-    var data_uri = getURLParameter("data_uri");
+    const dataUri = getURLParameter("data_uri");
 
-    if (data_uri !== undefined) {
-        $.getJSON(data_uri, function (data) {
-            center = data.center;
-            zoom = data.zoom;
-            ws = data.ws;
-            title = data.title;
-
-            callback();
-        });
-
-    } else {
-        center = getURLParameter("center");
-        if (center === undefined) {
-            center = [39.0, -99.0];
-        } else {
-            center = decodeURIComponent((center + '').replace(/\+/g, '%20'));
-            center = JSON.parse(center);
+    if (dataUri !== undefined) {
+        try {
+            const payload = await fetchJson(dataUri);
+            if (payload) {
+                center = payload.center;
+                zoom = payload.zoom;
+                ws = payload.ws;
+                title = payload.title;
+            }
+            await callback();
+        } catch (error) {
+            console.error(error);
         }
 
-        zoom = getURLParameter("zoom");
-        if (zoom === undefined) {
+    } else {
+        const centerParam = getURLParameter("center");
+        if (centerParam === undefined) {
+            center = [39.0, -99.0];
+        } else {
+            center = decodeJsonParam(centerParam);
+        }
+
+        const zoomParam = getURLParameter("zoom");
+        if (zoomParam === undefined) {
             zoom = 5;
         } else {
-            zoom = JSON.parse(zoom);
+            zoom = decodeJsonParam(zoomParam);
         }
 
         ws = getURLParameter("ws");
         if (ws !== undefined) {
-            ws = decodeURIComponent((ws + '').replace(/\+/g, '%20'));
-            ws = JSON.parse(ws);
+            ws = decodeJsonParam(ws);
         }
 
         title = getURLParameter("title");
-        if (title !== undefined) {
-            title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
+        if (title !== undefined && title !== null) {
+            title = String(title);
         }
 
-        callback();
+        await callback();
 
     }
-    
-    function callback() {
+
+    async function callback() {
+        if (!center || zoom === undefined) {
+            return;
+        }
         map.setView(center, zoom);
-		
+
         defaultStyle = {
             "color": "#ff7800",
             "weight": 2,
@@ -139,7 +159,7 @@ $(document).ready(function () {
                 // constructor
             },
             onAdd: function (map) {
-                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
                 container.style.backgroundColor = 'transparent';
                 container.style.borderColor = 'transparent';
@@ -155,50 +175,51 @@ $(document).ready(function () {
         });
 
         polys = {};
-        data;
-        popup;
+        data = undefined;
+        popup = undefined;
 
-
-        if (ws !== null) {
-            for (let w of ws) {
-                let runid = w.runid;
-                let cfg = w.cfg;
+        if (Array.isArray(ws)) {
+            const tasks = ws.map(async (w) => {
+                const runid = w.runid;
+                const cfg = w.cfg;
                 polys[runid] = {};
 
-                $.get({
-                    url: site_prefix + "/runs/" + runid + "/cfg/resources/bound.json",
-                    async: false,
-                    success: function (response) {
-                        polys[runid] = L.geoJSON(response.features[0], {
-                            style: defaultStyle,
-                            onEachFeature: function (feature, layer) {
-                                layer.on({
-                                    click: function click(ev) {
-                                        if (popup !== undefined) {
-                                            popup.remove();
-                                        }
-                                        const content =
-                                            '<h5>' + runid + '</h5>' +
-                                            '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/" target="_blank">View Watershed Run</a>';
-
-                                        popup = L.popup()
-                                            .setLatLng(ev.latlng)
-                                            .setContent(content)
-                                            .openOn(map);
-                                    }
-                                });
-                            }
-                        });
-
-                        polys[runid].name = response.name;
-                        polys[runid].addTo(map);
-                        ctrls.addOverlay(polys[runid], runid);
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        console.log(textStatus, errorThrown);
+                try {
+                    const response = await fetchJson(site_prefix + "/runs/" + runid + "/cfg/resources/bound.json");
+                    if (!response || !response.features || !response.features.length) {
+                        throw new Error('Missing bound geometry');
                     }
-                });
-            }
+
+                    polys[runid] = L.geoJSON(response.features[0], {
+                        style: defaultStyle,
+                        onEachFeature: function (feature, layer) {
+                            layer.on({
+                                click: function click(ev) {
+                                    if (popup !== undefined) {
+                                        popup.remove();
+                                    }
+                                    const content =
+                                        '<h5>' + runid + '</h5>' +
+                                        '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/" target="_blank">View Watershed Run</a>';
+
+                                    popup = L.popup()
+                                        .setLatLng(ev.latlng)
+                                        .setContent(content)
+                                        .openOn(map);
+                                }
+                            });
+                        }
+                    });
+
+                    polys[runid].name = response.name;
+                    polys[runid].addTo(map);
+                    ctrls.addOverlay(polys[runid], runid);
+                } catch (error) {
+                    console.log(error);
+                }
+            });
+
+            await Promise.all(tasks);
         }
     }
 });
@@ -226,7 +247,5 @@ $(document).ready(function () {
     <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-spin.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
   </body>
 </html>

@@ -21,20 +21,7 @@ _html = r"""
     <head>
         <meta charset="utf-8">
         <title>Pivot Table</title>
-        <!-- external libs from cdnjs -->
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
-        <script src="https://cdn.plot.ly/plotly-basic-latest.min.js"></script>
-
-        <!-- PivotTable.js libs from __SITE_PREFIX__/static/pivottable/ -->
-        <link rel="stylesheet" type="text/css" href="__SITE_PREFIX__/static/pivottable/pivot.css">
-        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/pivot.js"></script>
-        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/d3_renderers.js"></script>
-        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/plotly_renderers.js"></script>
-        <script type="text/javascript" src="__SITE_PREFIX__/static/pivottable/export_renderers.js"></script>
 
         <!-- CSV payload injected server-side -->
         <script type="text/javascript">
@@ -51,114 +38,444 @@ _html = r"""
             }
             .whiteborder {border-color: white;}
             .greyborder {border-color: lightgrey;}
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 12px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                margin: 12px;
+            }
+            .control-group {
+                display: grid;
+                gap: 6px;
+                font-size: 0.9rem;
+            }
+            select,
+            textarea,
+            input[type="text"],
+            button {
+                font: inherit;
+            }
+            #textarea {
+                display: none;
+                width: 100%;
+                max-width: 420px;
+                min-height: 120px;
+            }
+            #output {
+                margin: 12px;
+                overflow-x: auto;
+            }
+            .status {
+                color: #666;
+            }
+            table.pivot-table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            table.pivot-table th,
+            table.pivot-table td {
+                border: 1px solid #ddd;
+                padding: 6px 8px;
+                text-align: right;
+                white-space: nowrap;
+            }
+            table.pivot-table th:first-child,
+            table.pivot-table td:first-child {
+                text-align: left;
+            }
+            table.pivot-table thead th {
+                background: #f5f5f5;
+            }
+            .totals {
+                background: #fafafa;
+                font-weight: 600;
+            }
             #filechooser {
                 color: #555;
                 text-decoration: underline;
                 cursor: pointer;
             }
-            .node {
-              border: solid 1px white;
-              font: 10px sans-serif;
-              line-height: 12px;
-              overflow: hidden;
-              position: absolute;
-              text-indent: 2px;
-            }
-            /* Hide textarea by default; we show it only if no INIT_CSV provided */
-            #textarea { display: none; width: 300px; }
         </style>
     </head>
     <body class="whiteborder">
-        <script type="text/javascript">
-            $(function(){
-                var renderers = $.extend(
-                    $.pivotUtilities.renderers,
-                    $.pivotUtilities.plotly_renderers,
-                    $.pivotUtilities.d3_renderers,
-                    $.pivotUtilities.export_renderers
-                );
-
-                var parseAndPivot = function(f) {
-                    $("#output").html("<p align='center' style='color:grey;'>(processing...)</p>");
-                    Papa.parse(f, {
-                        skipEmptyLines: true,
-                        dynamicTyping: false,
-                        error: function(e){ alert(e); },
-                        complete: function(parsed){
-                            try {
-                                $("#output").pivotUI(parsed.data, { renderers: renderers }, true);
-                            } catch (err) {
-                                $("#output").html("<pre style='color:red'></pre>");
-                                $("#output pre").text("Pivot render error:\\n" + (err && err.stack ? err.stack : err));
-                            }
-                        }
-                    });
-                };
-
-                // File chooser
-                $("#csv").on("change", function(event){
-                    if (event.target.files && event.target.files[0]) {
-                        parseAndPivot(event.target.files[0]);
-                    }
-                });
-
-                // Manual paste (only if visible)
-                $("#textarea").on("input change", function(){
-                    parseAndPivot($("#textarea").val());
-                });
-
-                // Drag/drop
-                var dragging = function(evt) {
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                    if (evt.originalEvent && evt.originalEvent.dataTransfer) {
-                        evt.originalEvent.dataTransfer.dropEffect = 'copy';
-                    }
-                    $("body").removeClass("whiteborder").addClass("greyborder");
-                };
-
-                var endDrag = function(evt) {
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                    if (evt.originalEvent && evt.originalEvent.dataTransfer) {
-                        evt.originalEvent.dataTransfer.dropEffect = 'copy';
-                    }
-                    $("body").removeClass("greyborder").addClass("whiteborder");
-                };
-
-                var dropped = function(evt) {
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                    $("body").removeClass("greyborder").addClass("whiteborder");
-                    if (evt.originalEvent && evt.originalEvent.dataTransfer && evt.originalEvent.dataTransfer.files.length) {
-                        parseAndPivot(evt.originalEvent.dataTransfer.files[0]);
-                    }
-                };
-
-                $("html")
-                    .on("dragover", dragging)
-                    .on("dragend", endDrag)
-                    .on("dragexit", endDrag)
-                    .on("dragleave", endDrag)
-                    .on("drop", dropped);
-
-                // Auto-run if CSV injected server-side; otherwise reveal textarea for paste.
-                if (typeof window.INIT_CSV === "string" && window.INIT_CSV.length > 0) {
-                    // set the hidden textarea (for debugging if user unhides)
-                    $("#textarea").val(window.INIT_CSV);
-                    parseAndPivot(window.INIT_CSV);
-                } else {
-                    // allow manual paste if no preloaded CSV
-                    $("#textarea").show();
-                }
-             });
-        </script>
-
         <p align="center" style="line-height: 1.5">
             __FILE__
         </p>
 
-        <div id="output" style="margin: 10px;"></div>
+        <section class="controls">
+            <div class="control-group">
+                <label for="rows">Rows</label>
+                <select id="rows" multiple size="6"></select>
+            </div>
+            <div class="control-group">
+                <label for="cols">Columns</label>
+                <select id="cols" multiple size="6"></select>
+            </div>
+            <div class="control-group">
+                <label for="value">Value</label>
+                <select id="value"></select>
+            </div>
+            <div class="control-group">
+                <label for="aggregator">Aggregator</label>
+                <select id="aggregator">
+                    <option value="count">Count</option>
+                    <option value="sum">Sum</option>
+                    <option value="avg">Average</option>
+                    <option value="min">Min</option>
+                    <option value="max">Max</option>
+                </select>
+                <button id="render-btn" type="button">Render Pivot</button>
+            </div>
+            <div class="control-group">
+                <label for="csv">Upload CSV/TSV</label>
+                <input type="file" id="csv" accept=".csv,.tsv,.txt">
+                <label for="textarea">Paste CSV</label>
+                <textarea id="textarea" placeholder="Paste CSV content here"></textarea>
+            </div>
+        </section>
+
+        <div id="output"></div>
+
+        <script type="text/javascript">
+            (function () {
+                const output = document.getElementById('output');
+                const rowsSelect = document.getElementById('rows');
+                const colsSelect = document.getElementById('cols');
+                const valueSelect = document.getElementById('value');
+                const aggregatorSelect = document.getElementById('aggregator');
+                const renderButton = document.getElementById('render-btn');
+                const fileInput = document.getElementById('csv');
+                const textarea = document.getElementById('textarea');
+
+                let dataset = [];
+                let fields = [];
+
+                function setStatus(message) {
+                    output.innerHTML = '<p class="status">' + message + '</p>';
+                }
+
+                function clearStatus() {
+                    output.innerHTML = '';
+                }
+
+                function setOptions(select, items) {
+                    select.innerHTML = '';
+                    items.forEach((item) => {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        select.appendChild(option);
+                    });
+                }
+
+                function getSelectedValues(select) {
+                    return Array.from(select.selectedOptions).map((opt) => opt.value);
+                }
+
+                function initState() {
+                    return { sum: 0, count: 0, numCount: 0, min: null, max: null };
+                }
+
+                function updateState(state, rawValue) {
+                    state.count += 1;
+                    const num = parseFloat(rawValue);
+                    if (!Number.isNaN(num)) {
+                        state.sum += num;
+                        state.numCount += 1;
+                        state.min = state.min === null ? num : Math.min(state.min, num);
+                        state.max = state.max === null ? num : Math.max(state.max, num);
+                    }
+                }
+
+                function finalize(state, aggregator) {
+                    if (!state) {
+                        return '';
+                    }
+                    switch (aggregator) {
+                        case 'count':
+                            return state.count;
+                        case 'sum':
+                            return state.numCount ? state.sum : '';
+                        case 'avg':
+                            return state.numCount ? (state.sum / state.numCount) : '';
+                        case 'min':
+                            return state.min === null ? '' : state.min;
+                        case 'max':
+                            return state.max === null ? '' : state.max;
+                        default:
+                            return '';
+                    }
+                }
+
+                function formatValue(value) {
+                    if (value === '' || value === null || value === undefined) {
+                        return '';
+                    }
+                    if (typeof value === 'number') {
+                        if (!Number.isFinite(value)) {
+                            return '';
+                        }
+                        if (Number.isInteger(value)) {
+                            return String(value);
+                        }
+                        return value.toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+                    }
+                    return String(value);
+                }
+
+                function getKeyInfo(row, fieldsList) {
+                    if (!fieldsList.length) {
+                        return { key: '__ALL__', label: 'All' };
+                    }
+                    const parts = fieldsList.map((field) => {
+                        const value = row[field];
+                        return value === undefined || value === null ? '' : String(value);
+                    });
+                    return {
+                        key: parts.join('||'),
+                        label: parts.join(' / ') || 'All'
+                    };
+                }
+
+                function renderPivot() {
+                    if (!dataset.length) {
+                        setStatus('No data loaded.');
+                        return;
+                    }
+
+                    const rowFields = getSelectedValues(rowsSelect);
+                    const colFields = getSelectedValues(colsSelect);
+                    const aggregator = aggregatorSelect.value;
+                    const valueField = valueSelect.value;
+
+                    if (aggregator !== 'count' && !valueField) {
+                        setStatus('Select a value field for this aggregator.');
+                        return;
+                    }
+
+                    const rowKeys = [];
+                    const colKeys = [];
+                    const rowLabels = new Map();
+                    const colLabels = new Map();
+                    const matrix = new Map();
+                    const rowTotals = new Map();
+                    const colTotals = new Map();
+                    const grandTotal = initState();
+
+                    dataset.forEach((row) => {
+                        const rowInfo = getKeyInfo(row, rowFields);
+                        const colInfo = getKeyInfo(row, colFields);
+                        if (!matrix.has(rowInfo.key)) {
+                            matrix.set(rowInfo.key, new Map());
+                            rowKeys.push(rowInfo.key);
+                            rowLabels.set(rowInfo.key, rowInfo.label);
+                        }
+                        if (!colLabels.has(colInfo.key)) {
+                            colKeys.push(colInfo.key);
+                            colLabels.set(colInfo.key, colInfo.label);
+                        }
+
+                        const rowMap = matrix.get(rowInfo.key);
+                        if (!rowMap.has(colInfo.key)) {
+                            rowMap.set(colInfo.key, initState());
+                        }
+                        const cellState = rowMap.get(colInfo.key);
+                        updateState(cellState, row[valueField]);
+
+                        if (!rowTotals.has(rowInfo.key)) {
+                            rowTotals.set(rowInfo.key, initState());
+                        }
+                        if (!colTotals.has(colInfo.key)) {
+                            colTotals.set(colInfo.key, initState());
+                        }
+
+                        updateState(rowTotals.get(rowInfo.key), row[valueField]);
+                        updateState(colTotals.get(colInfo.key), row[valueField]);
+                        updateState(grandTotal, row[valueField]);
+                    });
+
+                    const table = document.createElement('table');
+                    table.className = 'pivot-table';
+
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    const corner = document.createElement('th');
+                    corner.textContent = rowFields.length ? rowFields.join(' / ') : 'All';
+                    headerRow.appendChild(corner);
+
+                    colKeys.forEach((key) => {
+                        const th = document.createElement('th');
+                        th.textContent = colLabels.get(key) || '';
+                        headerRow.appendChild(th);
+                    });
+
+                    const totalHeader = document.createElement('th');
+                    totalHeader.textContent = 'Total';
+                    headerRow.appendChild(totalHeader);
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement('tbody');
+                    rowKeys.forEach((rowKey) => {
+                        const tr = document.createElement('tr');
+                        const th = document.createElement('th');
+                        th.textContent = rowLabels.get(rowKey) || '';
+                        tr.appendChild(th);
+
+                        const rowMap = matrix.get(rowKey) || new Map();
+                        colKeys.forEach((colKey) => {
+                            const td = document.createElement('td');
+                            const state = rowMap.get(colKey);
+                            td.textContent = formatValue(finalize(state, aggregator));
+                            tr.appendChild(td);
+                        });
+
+                        const totalCell = document.createElement('td');
+                        totalCell.className = 'totals';
+                        totalCell.textContent = formatValue(finalize(rowTotals.get(rowKey), aggregator));
+                        tr.appendChild(totalCell);
+
+                        tbody.appendChild(tr);
+                    });
+
+                    const totalRow = document.createElement('tr');
+                    totalRow.className = 'totals';
+                    const totalLabel = document.createElement('th');
+                    totalLabel.textContent = 'Total';
+                    totalRow.appendChild(totalLabel);
+
+                    colKeys.forEach((colKey) => {
+                        const td = document.createElement('td');
+                        td.textContent = formatValue(finalize(colTotals.get(colKey), aggregator));
+                        totalRow.appendChild(td);
+                    });
+
+                    const grandCell = document.createElement('td');
+                    grandCell.textContent = formatValue(finalize(grandTotal, aggregator));
+                    totalRow.appendChild(grandCell);
+
+                    tbody.appendChild(totalRow);
+                    table.appendChild(tbody);
+
+                    clearStatus();
+                    output.appendChild(table);
+                }
+
+                function normalizeParsedData(parsed) {
+                    let data = parsed.data || [];
+                    let headers = parsed.meta && parsed.meta.fields ? parsed.meta.fields.slice() : [];
+
+                    if (!headers.length && data.length && Array.isArray(data[0])) {
+                        headers = data[0].map((_, index) => `field_${index + 1}`);
+                        data = data.map((row) => {
+                            const obj = {};
+                            headers.forEach((header, index) => {
+                                obj[header] = row[index];
+                            });
+                            return obj;
+                        });
+                    }
+
+                    if (!headers.length && data.length) {
+                        headers = Object.keys(data[0]);
+                    }
+
+                    return { data, headers };
+                }
+
+                function loadData(parsed) {
+                    const normalized = normalizeParsedData(parsed);
+                    dataset = normalized.data;
+                    fields = normalized.headers;
+
+                    if (!fields.length) {
+                        setStatus('No fields found in CSV data.');
+                        return;
+                    }
+
+                    setOptions(rowsSelect, fields);
+                    setOptions(colsSelect, fields);
+                    setOptions(valueSelect, fields);
+
+                    valueSelect.selectedIndex = 0;
+                    renderPivot();
+                }
+
+                function parseInput(source, isFile) {
+                    setStatus('Processing...');
+                    Papa.parse(source, {
+                        skipEmptyLines: true,
+                        dynamicTyping: false,
+                        header: true,
+                        error: function (error) {
+                            setStatus('Parse error: ' + error);
+                        },
+                        complete: function (parsed) {
+                            loadData(parsed);
+                        }
+                    });
+                }
+
+                function handleFileChange(event) {
+                    const file = event.target.files && event.target.files[0];
+                    if (file) {
+                        parseInput(file, true);
+                    }
+                }
+
+                function handleTextareaInput() {
+                    const value = textarea.value;
+                    if (value && value.trim().length) {
+                        parseInput(value, false);
+                    }
+                }
+
+                function handleDragEvent(event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    document.body.classList.remove('whiteborder');
+                    document.body.classList.add('greyborder');
+                }
+
+                function handleDragEnd(event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    document.body.classList.remove('greyborder');
+                    document.body.classList.add('whiteborder');
+                }
+
+                function handleDrop(event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    document.body.classList.remove('greyborder');
+                    document.body.classList.add('whiteborder');
+
+                    const files = event.dataTransfer && event.dataTransfer.files;
+                    if (files && files.length) {
+                        parseInput(files[0], true);
+                    }
+                }
+
+                renderButton.addEventListener('click', renderPivot);
+                fileInput.addEventListener('change', handleFileChange);
+                textarea.addEventListener('input', handleTextareaInput);
+
+                document.documentElement.addEventListener('dragover', handleDragEvent);
+                document.documentElement.addEventListener('dragend', handleDragEnd);
+                document.documentElement.addEventListener('dragleave', handleDragEnd);
+                document.documentElement.addEventListener('drop', handleDrop);
+
+                if (typeof window.INIT_CSV === 'string' && window.INIT_CSV.length > 0) {
+                    textarea.value = window.INIT_CSV;
+                    parseInput(window.INIT_CSV, false);
+                } else {
+                    textarea.style.display = 'block';
+                }
+            })();
+        </script>
     </body>
 </html>
 """

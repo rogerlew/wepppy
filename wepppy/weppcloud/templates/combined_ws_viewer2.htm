@@ -21,11 +21,6 @@
       href="{{ url_for('static', filename='css/style.css') }}"
     />
     <link
-      rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.css') }}"
-    />
-    <link
       rel="shortcut icon"
       href="{{ url_for('static', filename='favicon/favicon.ico') }}"
       type="image/x-icon"
@@ -35,11 +30,7 @@
       href="{{ url_for('static', filename='favicon/favicon.ico') }}"
       type="image/x-icon"
     />
-    <script src="{{ url_for('static', filename='vendor/jquery/jquery.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/datatables/jquery.dataTables.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.js') }}"></script>
     <script src="{{ url_for('static', filename='js/glify-browser.js') }}"></script>
     <script src="{{ url_for('static', filename='js/leaflet-glify-layer.js') }}"></script>
   
@@ -58,24 +49,64 @@
           : { r: 0, g: 0, b: 0, a: 1 }; // Default to black if parse fails
       }
 
-      var site_prefix = "{{ site_prefix }}";
+      const site_prefix = "{{ site_prefix }}";
 
-      function getURLParameter(sParam) {
-        var sPageURL = window.location.search.substring(1);
-        var sURLVariables = sPageURL.split("&");
-        for (var i = 0; i < sURLVariables.length; i++) {
-          var sParameterName = sURLVariables[i].split("=");
-          if (sParameterName[0] === sParam) {
-            return sParameterName[1];
-          }
+      function getURLParameter(name) {
+        const params = new URLSearchParams(window.location.search);
+        const value = params.get(name);
+        return value === null ? undefined : value;
+      }
+
+      function decodeJsonParam(value) {
+        if (value === undefined) {
+          return undefined;
+        }
+        if (value === null) {
+          return null;
+        }
+        const raw = String(value);
+        try {
+          return JSON.parse(raw);
+        } catch (err) {
+          return raw;
         }
       }
 
-      function render_legend_cmap(cmap, canvasID) {
-        var canvas = $("#" + canvasID);
+      async function fetchJson(url) {
+        const response = await fetch(url, { credentials: "same-origin" });
+        const text = await response.text();
+        if (!response.ok) {
+          throw new Error(`Request failed (${response.status})`);
+        }
+        if (!text) {
+          return null;
+        }
+        try {
+          return JSON.parse(text);
+        } catch (err) {
+          throw new Error("Invalid JSON response");
+        }
+      }
 
-        var width = canvas.outerWidth();
-        var height = canvas.outerHeight();
+      async function fetchText(url) {
+        const response = await fetch(url, { credentials: "same-origin" });
+        if (!response.ok) {
+          throw new Error(`Request failed (${response.status})`);
+        }
+        return response.text();
+      }
+
+      function render_legend_cmap(cmap, canvasID) {
+        var canvas = document.getElementById(canvasID);
+        if (!canvas) {
+          return;
+        }
+
+        var rect = canvas.getBoundingClientRect();
+        var width = Math.max(1, Math.round(rect.width));
+        var height = Math.max(1, Math.round(rect.height));
+        canvas.width = width;
+        canvas.height = height;
         var data = new Float32Array(height * width);
 
         for (var y = 0; y <= height; y++) {
@@ -85,7 +116,7 @@
         }
 
         var plot = new plotty.plot({
-          canvas: canvas["0"],
+          canvas: canvas,
           data: data,
           width: width,
           height: height,
@@ -95,7 +126,7 @@
         plot.render();
       }
 
-      $(document).ready(function () {
+      document.addEventListener("DOMContentLoaded", async () => {
         console.log("Document ready. Initializing map viewer.");
         var center;
         var zoom;
@@ -171,32 +202,35 @@
 
         if (data_uri !== undefined) {
           console.log("Fetching data from data_uri:", data_uri);
-          $.getJSON(data_uri, function (data) {
-            center = data.center;
-            zoom = data.zoom;
-            display_units = data.units;
-            ws = data.ws;
-            varopts = data.varopts;
-            varname = data.varname;
-            title = data.title;
-
-            callback();
-          });
+          try {
+            const payload = await fetchJson(data_uri);
+            if (payload) {
+              center = payload.center;
+              zoom = payload.zoom;
+              display_units = payload.units;
+              ws = payload.ws;
+              varopts = payload.varopts;
+              varname = payload.varname;
+              title = payload.title;
+            }
+            await callback();
+          } catch (error) {
+            console.error(error);
+          }
         } else {
           console.log("Fetching data from URL parameters.");
           center = getURLParameter("center");
           if (center === undefined) {
             center = [39.0, -99.0];
           } else {
-            center = decodeURIComponent(("" + center).replace(/\+/g, "%20"));
-            center = JSON.parse(center);
+            center = decodeJsonParam(center);
           }
 
           zoom = getURLParameter("zoom");
           if (zoom === undefined) {
             zoom = 5;
           } else {
-            zoom = JSON.parse(zoom);
+            zoom = decodeJsonParam(zoom);
           }
 
           display_units = getURLParameter("units");
@@ -206,14 +240,12 @@
 
           ws = getURLParameter("ws");
           if (ws !== undefined) {
-            ws = decodeURIComponent(("" + ws).replace(/\+/g, "%20"));
-            ws = JSON.parse(ws);
+            ws = decodeJsonParam(ws);
           }
 
           varopts = getURLParameter("varopts");
           if (varopts !== undefined) {
-            varopts = decodeURIComponent(("" + varopts).replace(/\+/g, "%20"));
-            varopts = JSON.parse(varopts);
+            varopts = decodeJsonParam(varopts);
 
             if (display_units !== "SI") {
               if ("runoff" in varopts) {
@@ -235,16 +267,16 @@
           }
 
           varname = getURLParameter("varname");
-          if (varname === undefined) {
+          if (varname === undefined && varopts) {
             varname = Object.keys(varopts)[0];
           }
 
           title = getURLParameter("title");
-          if (title !== undefined) {
-            title = decodeURIComponent(("" + title).replace(/\+/g, "%20"));
+          if (title !== undefined && title !== null) {
+            title = String(title);
           }
 
-          callback();
+          await callback();
         }
 
         function prep_render() {
@@ -298,7 +330,15 @@
             }
           }
 
-          tolerance = parseFloat($("#tolerance-input").val()) * _scale;
+          const input = document.getElementById("tolerance-input");
+          if (!input) {
+            return;
+          }
+          const value = parseFloat(input.value);
+          if (Number.isNaN(value)) {
+            return;
+          }
+          tolerance = value * _scale;
           console.log("Tolerance set to:", tolerance);
           prep_render();
           render_legend();
@@ -312,58 +352,54 @@
           legend = new Legend();
           map.addControl(legend);
           render_legend_cmap(cmapname, "legend_canvas");
-          $("#set-tolerance-btn").on("click", set_tolerance);
+          const button = document.getElementById("set-tolerance-btn");
+          if (button) {
+            button.addEventListener("click", set_tolerance);
+          }
           console.log("Legend rendered.");
         }
 
-        function render() {
+        async function render() {
+          if (!Array.isArray(ws) || ws.length === 0) {
+            return;
+          }
           if (dataCache === undefined) {
             console.log(
               "Data cache is empty, fetching new data for varname:",
               varname
             );
             map.spin(true);
-            let i = 0;
             dataCache = {}; // Initialize cache object
-            for (let w of ws) {
+            const tasks = ws.map(async (w) => {
               let runid = w.runid;
 
-              $.get({
-                url:
+              try {
+                const response = await fetchJson(
                   site_prefix +
-                  "/runs/" +
-                  runid +
-                  "/cfg/query/wepp/" +
-                  varname +
-                  "/subcatchments/",
-                success: function success(_data) {
-                  if (_data === null) {
-                    console.error("Query returned null for runid:", runid);
-                    throw "query returned null";
-                  }
-                  console.log(`Successfully fetched value data for ${runid}`);
-                  dataCache[runid] = _data;
-                  _render(runid, _data);
-
-                  i += 1;
-                  if (i === ws.length) {
-                    map.spin(false);
-                    console.log("All data fetched and rendered.");
-                  }
-                },
-                fail: function fail(error) {
-                  console.error(
-                    `Failed to fetch value data for ${runid}:`,
-                    error
-                  );
-                  dataCache[runid] = null;
-                  i += 1;
-                  if (i === ws.length) {
-                    map.spin(false);
-                  }
-                },
-              });
-            }
+                    "/runs/" +
+                    runid +
+                    "/cfg/query/wepp/" +
+                    varname +
+                    "/subcatchments/"
+                );
+                if (response === null) {
+                  console.error("Query returned null for runid:", runid);
+                  throw new Error("query returned null");
+                }
+                console.log(`Successfully fetched value data for ${runid}`);
+                dataCache[runid] = response;
+                _render(runid, response);
+              } catch (error) {
+                console.error(
+                  `Failed to fetch value data for ${runid}:`,
+                  error
+                );
+                dataCache[runid] = null;
+              }
+            });
+            await Promise.allSettled(tasks);
+            map.spin(false);
+            console.log("All data fetched and rendered.");
           } else {
             console.log("Using cached data to re-render.");
             for (let w of ws) {
@@ -395,7 +431,7 @@
               return fromHex(hexColor, 0.9);
             }
             // Return a default/error color if data for this feature is missing
-            return fromHex("#808080", 0.5); // Grey for missing data
+            return fromHex("#808080", 0.5); // Gray for missing data
           };
 
           glLayers[runid].setStyle({
@@ -404,8 +440,47 @@
           console.log(`Successfully updated styles for ${runid}`);
         }
 
-        function callback() {
+        function applyPopupUnits() {
+          if (display_units !== "SI") {
+            document.querySelectorAll(".units-m").forEach((el) =>
+              el.classList.remove("invisible")
+            );
+            document.querySelectorAll(".units-ft").forEach((el) =>
+              el.classList.add("invisible")
+            );
+
+            document.querySelectorAll(".units-ha").forEach((el) =>
+              el.classList.remove("invisible")
+            );
+            document.querySelectorAll(".units-acre").forEach((el) =>
+              el.classList.add("invisible")
+            );
+          }
+        }
+
+        function attachVarRadioHandlers() {
+          document
+            .querySelectorAll('input[type="radio"][name="varRadio"]')
+            .forEach((input) => {
+              input.addEventListener("change", () => {
+                varname = input.value;
+                tolerance = varopts[varname];
+                // BUG FIX: Reset the data cache to force a re-fetch of new variable data
+                dataCache = undefined;
+
+                console.log(`Variable changed to: ${varname}. Re-rendering.`);
+                prep_render();
+                render_legend();
+                render();
+              });
+            });
+        }
+
+        async function callback() {
           console.log("Executing main callback function.");
+          if (!center || zoom === undefined || !varopts) {
+            return;
+          }
           map.setView(center, zoom);
           tolerance = varopts[varname];
           units = "";
@@ -605,110 +680,89 @@
           // titleBox = TitleBox();
           // map.addControl(titleBox);
 
-          $("input[type=radio][name=varRadio]").change(function () {
-            varname = this.value;
-            tolerance = varopts[varname];
-            // BUG FIX: Reset the data cache to force a re-fetch of new variable data
-            dataCache = undefined;
-
-            console.log(`Variable changed to: ${varname}. Re-rendering.`);
-            prep_render();
-            render_legend();
-            render();
-          });
+          attachVarRadioHandlers();
 
           // REWRITTEN: Initialize glLayers and fetch GeoJSON
           glLayers = {};
-          dataCache;
-          popup;
+          dataCache = undefined;
+          popup = undefined;
 
-          if (ws !== null) {
+          if (Array.isArray(ws)) {
             for (let w of ws) {
               let runid = w.runid;
               let cfg = w.cfg;
               glLayers[runid] = {};
 
               console.log(`Fetching subcatchments for runid: ${runid}`);
-              $.get({
-                url:
+              try {
+                const response = await fetchJson(
                   site_prefix +
-                  "/runs/" +
-                  runid +
-                  "/cfg/resources/subcatchments.json",
-                async: false, // Using sync to ensure layers are created before render() is called
-                success: function (response) {
-                  console.log(`Successfully fetched subcatchments for ${runid}`);
+                    "/runs/" +
+                    runid +
+                    "/cfg/resources/subcatchments.json"
+                );
 
-                  const defaultColor = fromHex(
-                    defaultStyle.fillColor,
-                    defaultStyle.fillOpacity
-                  );
+                console.log(`Successfully fetched subcatchments for ${runid}`);
 
-                  glLayers[runid] = L.glify.layer({
-                    geojson: response,
-                    pane: "overlayPane",
-                    glifyOptions: {
-                      opacity: 0.9,
-                      color: defaultColor, // Start with default color
-                      click: (e, feature) => {
-                        console.log("Glify layer clicked, feature:", feature);
-                        var topaz_id = feature.properties.TopazID;
-                        var query_url =
+                const defaultColor = fromHex(
+                  defaultStyle.fillColor,
+                  defaultStyle.fillOpacity
+                );
+
+                glLayers[runid] = L.glify.layer({
+                  geojson: response,
+                  pane: "overlayPane",
+                  glifyOptions: {
+                    opacity: 0.9,
+                    color: defaultColor, // Start with default color
+                    click: async (e, feature) => {
+                      console.log("Glify layer clicked, feature:", feature);
+                      var topaz_id = feature.properties.TopazID;
+                      var query_url =
+                        site_prefix +
+                        "/runs/" +
+                        runid +
+                        "/cfg/report/sub_summary/" +
+                        topaz_id +
+                        "/";
+                      try {
+                        const response = await fetchText(query_url);
+                        if (popup !== undefined) {
+                          popup.remove();
+                        }
+                        const content =
+                          "<h5>" +
+                          runid +
+                          "</h5>" +
+                          response +
+                          '<a href="' +
                           site_prefix +
                           "/runs/" +
                           runid +
-                          "/cfg/report/sub_summary/" +
-                          topaz_id +
-                          "/";
-                        $.get({
-                          url: query_url,
-                          success: function success(response) {
-                            if (popup !== undefined) {
-                              popup.remove();
-                            }
-                            const content =
-                              "<h5>" +
-                              runid +
-                              "</h5>" +
-                              response +
-                              '<a href="' +
-                              site_prefix +
-                              "/runs/" +
-                              runid +
-                              "/" +
-                              cfg +
-                              '/" target="_blank">View Watershed Run</a>';
+                          "/" +
+                          cfg +
+                          '/" target="_blank">View Watershed Run</a>';
 
-                            popup = L.popup()
-                              .setLatLng(e.latlng)
-                              .setContent(content)
-                              .openOn(map);
+                        popup = L.popup()
+                          .setLatLng(e.latlng)
+                          .setContent(content)
+                          .openOn(map);
 
-                            if (display_units !== "SI") {
-                              $(".units-m").removeClass("invisible");
-                              $(".units-ft").addClass("invisible");
-
-                              $(".units-ha").removeClass("invisible");
-                              $(".units-acre").addClass("invisible");
-                            }
-                          },
-                          fail: function fail(error) {
-                            console.log(error);
-                          },
-                        });
-                      },
+                        applyPopupUnits();
+                      } catch (error) {
+                        console.log(error);
+                      }
                     },
-                  });
+                  },
+                });
 
-                  glLayers[runid].name = response.name;
-                  glLayers[runid].addTo(map);
-                  ctrls.addOverlay(glLayers[runid], runid);
-                  console.log(`Glify layer for ${runid} added to map.`);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                  console.log(textStatus, errorThrown);
-                },
-              });
+                glLayers[runid].name = response.name;
+                glLayers[runid].addTo(map);
+                ctrls.addOverlay(glLayers[runid], runid);
+                console.log(`Glify layer for ${runid} added to map.`);
+              } catch (error) {
+                console.log(error);
+              }
             }
 
             prep_render();
@@ -769,11 +823,6 @@
     <script
       type="text/javascript"
       src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
-      crossorigin="anonymous"
     ></script>
   </body>
 </html>
