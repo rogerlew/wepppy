@@ -71,7 +71,7 @@ Use the browse service for listing/downloading artifacts instead of a culvert-sp
 This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach can be adopted for the batch runner (`/batch/{batch_uuid}/browse/`).
 
 ## DEM symlink manager
-The `Ron` class gains a new method to handle pre-existing DEMs without fetching or copying:
+The `Ron` class gains a new method to handle preexisting DEMs without fetching or copying:
 
 ```python
 def link_dem(self, dem_path: str) -> None:
@@ -100,13 +100,40 @@ This method:
 ## Payload ZIP contract (proposed)
 Top-level files/directories (required unless noted):
 - `topo/hydro-enforced-dem.tif` (GeoTIFF)
-- `topo/streams.tif` (GeoTIFF; same projection, extent, and resolution as DEM)
-- `topo/watersheds.tif` (GeoTIFF; same projection, extent, and resolution as DEM)
+- `topo/streams.tif` (GeoTIFF; binary stream raster, same projection/extent/resolution as DEM)
 - `culverts/culvert_points.geojson` (same CRS as rasters—see CRS rules below)
-- `metadata.json` (schema TBD; project level fields for observability)
-- `model-parameters.json` (schema TBD; must include everything needed for processing)
+- `culverts/watersheds.geojson` (watershed polygons with `Point_ID` attribute linking to culvert points; watershed rasters are deleted by Culvert_web_app after polygon creation)
+- `metadata.json` (schema v1; project-level fields for observability)
+- `model-parameters.json` (schema v1; optional processing overrides—excludes `mcl`/`csa` since streams are pre-computed)
 
 Note: avoid ESRI shapefiles and sidecars entirely.
+
+**Stream raster notes:**
+- The `streams.tif` from Culvert_web_app (typically `main_stream_raster_UTM.tif`) is used directly by wepp.cloud for channel delineation.
+- Since streams are provided, `mcl` (minimum channel length) and `csa` (critical source area) parameters are NOT included in `model-parameters.json`—these were already applied when Culvert_web_app generated the stream network.
+
+### `metadata.json` schema (v1)
+- `schema_version` (string, required; `culvert-metadata-v1`)
+- `source` (object, required: `system` string, `project_id` string, `user_id` string optional)
+- `created_at` (ISO 8601 string, required)
+- `culvert_count` (int, required)
+- `crs` (object, required: `proj4` string, `epsg` int optional)
+- `dem` (object, required: `path` string, `resolution_m` number, `width` int, `height` int, `nodata` number)
+- `streams` (object, required: `path` string, `nodata` number, `value_semantics` = `binary`)
+- `culvert_points` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
+- `watersheds` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
+
+Notes:
+- `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`).
+- Payload hash/size are computed by wepp.cloud at upload time and are not required in `metadata.json`.
+
+### `model-parameters.json` schema (v1)
+- `schema_version` (string, required; `culvert-model-params-v1`)
+- `base_project_runid` (string, optional)
+- `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
+
+Notes:
+- Climate duration and soils DB use defaults from `culvert.cfg` (no override keys in v1).
 
 ### Coordinate system rules
 - **Rasters must use a projected CRS with meter units** (e.g., UTM). WGS84 is NOT acceptable for rasters because cell size must be in meters for hydrological calculations.
@@ -119,33 +146,73 @@ The `culverts/culvert_points.geojson` must include a `Point_ID` attribute on eac
 - **Type:** integer or string (unique within the batch)
 - **Usage:** Used to create per-culvert run directories (`/runs/<Point_ID>/`) and to join WEPP outputs back to culvert locations
 
-### Watershed raster encoding
-The `topo/watersheds.tif` raster uses integer cell values derived from WhiteboxTools `wbt.watershed()`:
-- **Cell value:** Integer corresponding to the pour point `FID` (0-indexed row index in the pour points GeoDataFrame)
-- **NoData:** Cells outside all watersheds (typically 0 or a designated nodata value like -9999)
-- **Joining to culvert IDs:** The `VALUE` field in vectorized watersheds joins to pour point `FID`, which then maps to `Point_ID` via:
-  ```python
-  # From Culvert_web_app:
-  watershed_poly_gdf_merged = pd.merge(
-      watershed_poly_gdf, 
-      point_gdf[['FID', 'Point_ID']], 
-      left_on='VALUE', 
-      right_on='FID', 
-      how='left'
-  )
-  ```
-- wepp.cloud expects this mapping to be pre-computed; the payload should embed `Point_ID` → `watershed_value` in `metadata.json`.
+### Watershed GeoJSON structure
+The `culverts/watersheds.geojson` contains one polygon feature per culvert watershed:
+- **Geometry:** Polygon (or MultiPolygon) representing the drainage area for each culvert
+- **Required attribute:** `Point_ID` (integer or string) — must match the corresponding culvert in `culvert_points.geojson`
+- **Nested watersheds:** Watersheds may overlap (downstream culverts contain upstream culverts' watersheds). Each polygon represents the **total contributing area** to that culvert, not the incremental area.
+- **CRS:** Must match the DEM projection (UTM or other meter-based projected CRS)
+
+Note: Culvert_web_app deletes watershed rasters after polygon creation, so the GeoJSON polygons are the source of truth for watershed geometry in the payload.
+
+Example feature:
+```json
+{
+  "type": "Feature",
+  "properties": {
+    "Point_ID": 42,
+    "area_ha": 125.3
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[...], ...]]
+  }
+}
+```
+
+**Important:** The watershed geometry is used by `Watershed.find_outlet()` to locate the outlet pixel on the DEM (see Per-culvert processing below).
 
 ## wepp.cloud job behavior (proposed)
+
+### Batch initialization
 - Validate ZIP structure, verify GeoJSON + GeoTIFF alignment, and confirm coordinate system.
 - Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
-- Ensure `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif` exists (create symlink if needed).
-- Create per-culvert runs under `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/` using the `culvert` config.
-- For each culvert id:
-  - Use WhiteboxToolsTopazEmulator (parameters from `culvert.cfg`, optionally adjusted by DEM resolution) to delineate subcatchments/channels.
-  - Run WEPP using stochastic PRISM revision climates (100-year climate).
-  - Collect per-culvert results into Parquet summaries.
-- Generate consolidated artifacts at run level.
+- Place hydro-enforced DEM at `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif`.
+- Generate batch-level topo rasters from the shared DEM + streams:
+  - `wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)` → `topo/flovec.tif`
+  - `wbt.stream_junction_identifier(d8_pntr=flovec_fn, streams=topo/streams.tif, output=chnjnt_fn)` → `topo/netful.tif`
+- Create per-culvert runs under `/wc1/culverts/<culvert_batch_uuid>/runs/<Point_ID>/` using the `culvert` config.
+
+### Per-culvert processing
+For each culvert (identified by `Point_ID`):
+
+1. **Link DEM, streams, and topo rasters:** Use `Ron.link_dem()` to symlink to the shared hydro-enforced DEM. Similarly link the shared `streams.tif`, `flovec.tif`, and `netful.tif`.
+
+2. **Find outlet from watershed geometry:**
+   ```python
+   # Load the watershed polygon for this culvert from watersheds.geojson
+   watershed_geom = get_watershed_geometry(Point_ID)
+
+   # Use Watershed.find_outlet() to locate the outlet pixel
+   # This finds the lowest elevation point on the watershed boundary
+   # that intersects the stream network (from streams.tif)
+   outlet_col, outlet_row = Watershed.find_outlet(watershed_geom)
+   ```
+   The `find_outlet()` method analyzes the watershed polygon against the DEM and stream raster to determine the pour point pixel coordinates. This is more robust than using the culvert point directly, as it ensures the outlet is on the actual flow path.
+
+3. **Delineate subcatchments/channels:** Use `TopazEmulator` with the identified outlet and the provided `streams.tif`. Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
+   - `polygonize_netful(self.netful, self.netful_json)`
+   - `json_to_wgs(self.netful_json)`
+
+4. **Build inputs:** Generate landuse, soils, and climate inputs.
+
+5. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
+
+6. **Collect results:** Store per-culvert outputs and compile into Parquet summaries.
+
+### Batch finalization
+- Generate consolidated artifacts at batch level.
+- Create `run_metadata.json` with success/failure status per culvert.
 
 ## Output artifacts (required)
 - `run_metadata.json` (inputs, versions, timings, culvert run success or failure)
@@ -185,10 +252,10 @@ The `topo/watersheds.tif` raster uses integer cell values derived from WhiteboxT
 ## Missing details / open questions
 - ~~Payload contract finalization: exact filenames, required metadata schema, CRS rules, optional inputs.~~ (CRS rules documented above)
 - ~~GeoJSON attributes: canonical culvert id field and any required properties.~~ (Point_ID documented above)
-- ~~Watershed raster encoding: confirm by inspecting Culvert_web_app pipeline (value semantics, nodata rules).~~ (VALUE/FID/Point_ID mapping documented above)
+- ~~Watershed raster encoding: confirm by inspecting Culvert_web_app pipeline.~~ (Changed to GeoJSON polygons; raster not needed)
 - ~~Browse service path and expected UI flow for culvert downloads; may require a custom route.~~ (URL scheme documented above)
+- ~~Stream raster in payload.~~ (streams.tif provided by Culvert_web_app; mcl/csa not needed)
 - Retry and idempotency semantics for duplicate POSTs.
 - Long-term auth model (JWT issuance, refresh, key rotation) and webhook payload schema/retry policy.
 - Data retention policy and cleanup schedule in `/wc1/culverts/` (required).
-- `metadata.json` schema finalization: exact required fields, version numbering, timestamps.
-- `model-parameters.json` schema: WEPP configuration overrides, climate duration, soil database selection.
+- `Watershed.find_outlet()` implementation details: confirm method signature, handling of edge cases (multiple outlet candidates, watersheds that don't intersect flow network).

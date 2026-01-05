@@ -4,58 +4,69 @@
 ## Guiding requirements (spec highlights)
 - Endpoint: `POST /rq/api/culverts-wepp-batch/` (multipart, routed via `blueprint_bp` to avoid 30s Caddy timeout).
 - Storage: `/wc1/culverts/<culvert_batch_uuid>/` with per-culvert runs under `/runs/<Point_ID>/` and `_base/` seeded from `culvert.cfg`.
-- Payload ZIP: `topo/` rasters + `culverts/culvert_points.geojson` + `metadata.json` + `model-parameters.json`; all inputs in the same projected CRS (meters).
+- Payload ZIP: `topo/hydro-enforced-dem.tif` + `topo/streams.tif` + `culverts/culvert_points.geojson` + `culverts/watersheds.geojson` + `metadata.json` + `model-parameters.json`; all inputs in the same projected CRS (meters).
 - DEM handling: new `Ron.link_dem()` to symlink the canonical DEM into each run and populate `ron.map`.
+- Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
+- Watersheds: GeoJSON polygons with `Point_ID` attribute (no raster, no culvert_id_map needed).
 - RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse under `/culverts/<batch_uuid>/.../browse/`.
 - Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `run_metadata.json`.
 - Limits: max ZIP 2GB, max 300 culverts; error responses are structured 400s.
 
 ## Phase 0 - Contract finalization and fixtures
-- Scope: finalize `metadata.json` + `model-parameters.json` schema, culvert ID mapping (`Point_ID` + `culvert_id_map`), idempotency rules, retention policy; gather real payloads from `/workdir/culvert_app_instance_dir/user_data/` for validation (copy in progress).
+- Scope: finalize `metadata.json` + `model-parameters.json` schema, idempotency rules, retention policy; gather real payloads from `/workdir/culvert_app_instance_dir/user_data/` for validation (copy in progress).
 - Dependencies: Culvert_web_app owners for schema fields and retention expectations; ops for cleanup window and storage constraints; security for initial auth choice.
 - Deliverables: JSON schema docs for `metadata.json`/`model-parameters.json`, minimal sample payloads (synthetic + real), updated spec notes on retry/idempotency/retention.
 - Risks: schema churn after implementation starts; large real payloads exceeding test budgets; mismatch between culvert outputs and payload contract.
 - Verification: validate at least 2 real culvert projects against draft schema; create tiny synthetic payload fixtures for tests (sub-10MB).
 
-### Proposed `metadata.json` (POC fields)
-- `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`)
-- `source` (object: `system`, `project_id`, `user_id`)
+### `metadata.json` schema (v1)
+- `schema_version` (string, required; `culvert-metadata-v1`)
+- `source` (object, required: `system` string, `project_id` string, `user_id` string optional)
 - `created_at` (ISO 8601 string, required)
 - `culvert_count` (int, required)
-- `crs` (object: `proj_wkt`, `epsg` if available)
-- `dem` (object: `path`, `resolution_m`, `width`, `height`, `nodata`)
-- `watersheds` (object: `nodata`, `value_semantics` = `FID`, `culvert_id_map` dict of `FID` -> `Point_ID`)
-- `payload` (object: `zip_sha256`, `total_bytes`)
+- `crs` (object, required: `proj4` string, `epsg` int optional)
+- `dem` (object, required: `path` string, `resolution_m` number, `width` int, `height` int, `nodata` number)
+- `streams` (object, required: `path` string, `nodata` number, `value_semantics` = `binary`)
+- `culvert_points` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
+- `watersheds` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 
-### Proposed `model-parameters.json` (POC fields)
+Notes:
+- `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`).
+- Payload hash/size are computed by wepp.cloud at upload time and are not required in `metadata.json`.
+
+### `model-parameters.json` schema (v1)
+- `schema_version` (string, required; `culvert-model-params-v1`)
 - `base_project_runid` (string, optional)
-- `mcl` (number, optional; minimum channel length in meters)
-- `csa` (number, optional; critical source area in square meters)
-- `nlcd_db` (string, optional; overrides `landuse_nlcd`)
+- `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
+
+Notes:
+- `mcl`/`csa` parameters are NOT included—streams are pre-computed by Culvert_web_app and provided in `topo/streams.tif`.
+- Climate duration and soils DB use defaults from `culvert.cfg` (no override keys in v1).
 
 ## Phase 1 - Payload ingestion and validation
-- Scope: implement ZIP intake, extraction to `/wc1/culverts/<uuid>/`, file presence/size checks, CRS validation (rasters + GeoJSON), `Point_ID` and `culvert_id_map` validation, watershed raster semantics, structured 400 errors.
+- Scope: implement ZIP intake, extraction to `/wc1/culverts/<uuid>/`, file presence/size checks, CRS validation (rasters + GeoJSON), `Point_ID` validation in both `culvert_points.geojson` and `watersheds.geojson`, structured 400 errors.
 - Dependencies: Phase 0 schema decisions; access to real payload examples.
-- Deliverables: `payload_validator` module + error types; validation checklist (filenames, CRS, extents, nodata rules); failure payload format.
-- Risks: CRS parsing differences between raster/GeoJSON libs; `Point_ID` dtype mismatches; unexpected raster nodata encoding.
+- Deliverables: `payload_validator` module + error types; validation checklist (filenames, CRS, extents, nodata rules, Point_ID matching); failure payload format.
+- Risks: CRS parsing differences between raster/GeoJSON libs; `Point_ID` dtype mismatches; DEM/streams extent alignment.
 - Verification: pytest unit tests for validator using synthetic rasters/GeoJSON; manual validation against real payload ZIPs from `/workdir/culvert_app_instance_dir/user_data/`.
 
 ## Phase 2 - API endpoint and job enqueue
 - Scope: add `/rq/api/culverts-wepp-batch/` in rq blueprint, accept multipart upload, mint `culvert_batch_uuid`, call validator, extract payload, enqueue RQ job, return `{job_id, culvert_batch_uuid, status_url}`.
+- Request parameters (optional): `zip_sha256`, `total_bytes` to capture payload metadata since the ZIP is created client-side.
 - Dependencies: Phase 1 validator; RQ queue configuration; open endpoint for POC (auth deferred to Phase 7).
-- Deliverables: Flask route + request/response contract; RQ job function stub (`run_culvert_batch_rq`); logging to batch root.
+- Deliverables: Flask route + request/response contract; RQ job function stub (`run_culvert_batch_rq`); batch-level `topo/flovec.tif` (D8 pointer) and `topo/netful.tif` (stream junctions) generated from the shared DEM + streams; logging to batch root.
 - Risks: upload timeouts for large ZIPs; unbounded disk usage; duplicate POSTs creating multiple batches without idempotency key.
 - Verification: Flask client tests covering success and validation errors; manual curl with a real payload; verify status via `/rq-engine/api/jobstatus/{job_id}`.
 
 ## Phase 3 - Culvert batch runner scaffolding
-- Scope: create `CulvertsRunner` (or extend `BatchRunner`) to manage batch state/logging; implement `_base` project copy using `culvert.cfg` and `base_runid`; create per-culvert run dirs; add `Ron.link_dem()`; map `Point_ID` to run IDs; set run_group metadata.
+- Scope: create `CulvertsRunner` (or extend `BatchRunner`) to manage batch state/logging; implement `_base` project copy using `culvert.cfg` and `base_runid`; create per-culvert run dirs; add `Ron.link_dem()` and symlink `topo/flovec.tif` + `topo/netful.tif` into each run; map `Point_ID` to run IDs; set run_group metadata; add `symlink_channels_map` (WBT-only) to use the shared netful raster instead of `build_channels`.
 - Dependencies: Phase 2 job entrypoint; `culvert.cfg` definition; agreement on runid template and run_group name.
-- Deliverables: runner class + nodb state; `Ron.link_dem()` implementation; culvert config template; stub updates if `.pyi` exists.
+- Deliverables: runner class + nodb state; `Ron.link_dem()` implementation; `symlink_channels_map` that enforces WBT backend in raster mode and emits `netful.geojson` via `polygonize_netful()` + `json_to_wgs()`; culvert config template; stub updates if `.pyi` exists.
 - Risks: filesystem contention when creating many runs; symlink breakage on cleanup; runid collisions for non-unique `Point_ID`.
 - Verification: unit tests for `Ron.link_dem()` and run directory creation; integration test that `_base` + one run hydrate NoDb singletons without errors.
 
 ## Phase 4 - Per-culvert WEPP orchestration
-- Scope: orchestrate delineation, landuse, soils, climate, and WEPP per culvert using existing run tasks; incorporate WhiteboxToolsTopazEmulator; apply model-parameters overrides; record per-run success/failure in `run_metadata.json`.
+- Scope: orchestrate delineation, landuse, soils, climate, and WEPP per culvert using existing run tasks; incorporate WhiteboxToolsTopazEmulator; use `symlink_channels_map` to avoid `build_channels`; apply model-parameters overrides; record per-run success/failure in `run_metadata.json`.
 - Dependencies: Phase 3 scaffolding; availability of WBT, PRISM, soils datasets in container; confirmed model-parameters schema.
 - Deliverables: RQ orchestration pipeline; per-run execution logs; per-culvert metadata record (timings, versions, config).
 - Risks: long runtimes for 300 culverts; missing datasets for runs; error isolation (one culvert failure should not cancel entire batch).
@@ -89,7 +100,6 @@
 - Commands (containerized): `wctl run-pytest tests/weppcloud/routes/test_culvert_batch_api.py`, `wctl run-pytest tests/weppcloud/culvert/test_payload_validator.py`.
 
 ## Open questions / blockers (carry into Phase 0)
-- `metadata.json` and `model-parameters.json` schemas (required keys, versioning).
 - Idempotency/retry rules for duplicate POSTs (keying on payload hash? caller-supplied id?).
 - Retention/cleanup window and ownership of `/wc1/culverts/` storage.
 - Concurrency/timeouts for 300-culvert batches and RQ worker sizing.

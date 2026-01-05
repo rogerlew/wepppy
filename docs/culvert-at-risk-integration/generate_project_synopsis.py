@@ -6,15 +6,15 @@ Scans input/output directories to identify available files for wepp.cloud payloa
 and generates a markdown report.
 
 Usage:
-    # Run from user_data directory (scans all users)
-    cd /workdir/culvert_app_instance_dir/user_data
+    # Run from user_data directory (scans all users by default)
+    cd /path/to/culvert_app_instance_dir/user_data
     python /workdir/wepppy/docs/culvert-at-risk-integration/generate_project_synopsis.py
 
-    # Scan specific user
+    # Scan specific user only
     python generate_project_synopsis.py --user-id 1
 
     # Scan specific projects for a user
-    python generate_project_synopsis.py --user-id 1 --projects "Hubbard Brook Experimental Forest" "Santee_10m_no_hydroenforcement"
+    python generate_project_synopsis.py --user-id 1 --projects "Hubbard Brook Experimental Forest"
 
     # Legacy mode with explicit paths
     python generate_project_synopsis.py --inputs /path/to/inputs --outputs /path/to/outputs
@@ -42,12 +42,38 @@ def run_command(cmd: list[str], capture: bool = True) -> Optional[str]:
         return None
 
 
+def format_file_size(size_bytes: int) -> str:
+    """Format file size in human-readable format."""
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    elif size_bytes < 1024 * 1024 * 1024:
+        return f"{size_bytes / (1024 * 1024):.1f} MB"
+    else:
+        return f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
+
+
+def get_file_size(filepath: str) -> Optional[int]:
+    """Get file size in bytes."""
+    try:
+        return os.path.getsize(filepath)
+    except OSError:
+        return None
+
+
 def get_raster_info(filepath: str) -> Optional[dict]:
     """Extract raster metadata using gdalinfo."""
     if not os.path.exists(filepath):
         return None
 
     info = {"path": filepath, "exists": True}
+
+    # Get file size
+    size = get_file_size(filepath)
+    if size is not None:
+        info["size_bytes"] = size
+        info["size_human"] = format_file_size(size)
 
     # Get basic info
     output = run_command(["gdalinfo", filepath])
@@ -90,12 +116,41 @@ def get_raster_info(filepath: str) -> Optional[dict]:
     return info
 
 
+def get_shapefile_size(filepath: str) -> Optional[int]:
+    """Get total size of shapefile (all component files)."""
+    base = Path(filepath).with_suffix("")
+    extensions = [".shp", ".shx", ".dbf", ".prj", ".cpg", ".sbn", ".sbx", ".fbn", ".fbx", ".ain", ".aih", ".ixs", ".mxs", ".atx", ".xml"]
+    total_size = 0
+    found_any = False
+
+    for ext in extensions:
+        component = base.with_suffix(ext)
+        if component.exists():
+            found_any = True
+            try:
+                total_size += os.path.getsize(component)
+            except OSError:
+                pass
+
+    return total_size if found_any else None
+
+
 def get_vector_info(filepath: str) -> Optional[dict]:
     """Extract vector metadata using ogrinfo."""
     if not os.path.exists(filepath):
         return None
 
     info = {"path": filepath, "exists": True}
+
+    # Get file size (for shapefiles, sum all components)
+    if filepath.lower().endswith(".shp"):
+        size = get_shapefile_size(filepath)
+    else:
+        size = get_file_size(filepath)
+
+    if size is not None:
+        info["size_bytes"] = size
+        info["size_human"] = format_file_size(size)
 
     # Get layer name from filename
     layer_name = Path(filepath).stem
@@ -228,12 +283,14 @@ def status_icon(value: bool) -> str:
     return "Yes" if value else "No"
 
 
-def file_status(file_info: Optional[dict], key_attr: Optional[str] = None) -> str:
+def file_status(file_info: Optional[dict], key_attr: Optional[str] = None, include_size: bool = True) -> str:
     """Return file status string."""
     if file_info is None:
         return "Missing"
 
     parts = ["Present"]
+    if include_size and "size_human" in file_info:
+        parts.append(file_info["size_human"])
     if "resolution" in file_info:
         parts.append(file_info["resolution"])
     if "feature_count" in file_info:
@@ -253,9 +310,11 @@ def file_status(file_info: Optional[dict], key_attr: Optional[str] = None) -> st
 def generate_synopsis(projects: list[dict], output_file: Path) -> None:
     """Generate the markdown synopsis document."""
 
-    # Check if we have multiple users
+    # Check if we have multiple users and compute summary counts.
     user_ids = set(p.get("user_id", 0) for p in projects)
     multi_user = len(user_ids) > 1
+    total_projects = len(projects)
+    viable_projects = sum(1 for p in projects if p["ws_delineation_complete"])
 
     lines = [
         "# Culvert-at-Risk Projects Synopsis",
@@ -271,23 +330,75 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         "",
     ]
 
+    lines.extend([
+        f"- Total projects: {total_projects}",
+        f"- Users scanned: {len(user_ids)}",
+        f"- VIABLE projects (WS delineation complete): {viable_projects}",
+        "",
+    ])
+
     if multi_user:
         lines.extend([
-            "| User | Project | WS Deln | Hydro-DEM | WS Raster | Streams | Culverts |",
-            "|------|---------|---------|-----------|-----------|---------|----------|",
+            "| User | Project | WS Deln | Hydro-DEM | Watersheds | Streams | Culverts |",
+            "|------|---------|---------|-----------|------------|---------|----------|",
         ])
     else:
         lines.extend([
-            "| Project | WS Deln | Hydro-DEM | WS Raster | Streams | Culverts |",
-            "|---------|---------|-----------|-----------|---------|----------|",
+            "| Project | WS Deln | Hydro-DEM | Watersheds | Streams | Culverts |",
+            "|---------|---------|-----------|------------|---------|----------|",
         ])
 
     for p in projects:
         ws_status = "Yes" if p["ws_delineation_complete"] else "No"
-        dem_status = "Yes" if p["files"].get("hydro_enforced_dem") else "No"
-        ws_raster = "Yes" if p["files"].get("watersheds_raster") else ("Polygon" if p["files"].get("watersheds_polygon") else "No")
-        streams = "Raster" if p["files"].get("streams_raster") else ("Vector" if p["files"].get("streams_vector") else ("FlowAcc" if p["files"].get("flow_accumulation") else "No"))
-        culverts = "Yes" if p["files"].get("culvert_points") else "No"
+
+        # Hydro-DEM with size
+        hydro_dem = p["files"].get("hydro_enforced_dem")
+        if hydro_dem:
+            dem_size = hydro_dem.get("size_human", "")
+            dem_status = f"Yes ({dem_size})" if dem_size else "Yes"
+        else:
+            dem_status = "No"
+
+        # Watersheds with size
+        ws_raster_info = p["files"].get("watersheds_raster")
+        ws_polygon_info = p["files"].get("watersheds_polygon")
+        if ws_raster_info:
+            ws_size = ws_raster_info.get("size_human", "")
+            ws_raster = f"Yes ({ws_size})" if ws_size else "Yes"
+        elif ws_polygon_info:
+            ws_size = ws_polygon_info.get("size_human", "")
+            ws_raster = f"Polygon ({ws_size})" if ws_size else "Polygon"
+        else:
+            ws_raster = "No"
+
+        # Streams with size
+        stream_raster = p["files"].get("streams_raster")
+        stream_vector = p["files"].get("streams_vector")
+        flow_accum = p["files"].get("flow_accumulation")
+        if stream_raster:
+            stream_size = stream_raster.get("size_human", "")
+            streams = f"Raster ({stream_size})" if stream_size else "Raster"
+        elif stream_vector:
+            stream_size = stream_vector.get("size_human", "")
+            streams = f"Vector ({stream_size})" if stream_size else "Vector"
+        elif flow_accum:
+            streams = "FlowAcc"
+        else:
+            streams = "No"
+
+        # Culverts with count and size
+        culvert_info = p["files"].get("culvert_points")
+        if culvert_info:
+            count = culvert_info.get("feature_count")
+            size = culvert_info.get("size_human", "")
+            if count is not None:
+                culverts = f"{count} ({size})" if size else str(count)
+            elif size:
+                culverts = f"Yes ({size})"
+            else:
+                culverts = "Yes"
+        else:
+            culverts = "No"
 
         if multi_user:
             lines.append(f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {dem_status} | {ws_raster} | {streams} | {culverts} |")
@@ -299,9 +410,9 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         "**Legend:**",
         "- WS Deln: Watershed delineation completed",
         "- Hydro-DEM: Hydro-enforced DEM available",
-        "- WS Raster: Watersheds as raster (Yes/Polygon/No)",
-        "- Streams: Stream data format (Raster/Vector/FlowAcc/No)",
-        "- Culverts: Culvert points shapefile available",
+        "- Watersheds: Watershed polygons available (Polygon = shapefile, needs GeoJSON conversion; raster not required)",
+        "- Streams: Stream raster available (Raster/Vector/FlowAcc/No)",
+        "- Culverts: Culvert points available (count shown if shapefile exists)",
         "",
         "---",
         "",
@@ -373,10 +484,9 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         if ws_raster:
             lines.append(f"- Raster: {file_status(ws_raster)}")
         else:
-            lines.append("- Raster: **Missing** (needs generation from polygon)")
+            lines.append("- Raster: Missing (not required; polygons are used for payload)")
 
         if ws_polygon:
-            has_pid = "has Point_ID" if ws_polygon.get("has_point_id") else "check for Point_ID"
             lines.append(f"- Polygon: {file_status(ws_polygon, 'has_point_id')}")
         else:
             lines.append("- Polygon: Missing")
@@ -429,19 +539,17 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         else:
             todo_items.append("`topo/hydro-enforced-dem.tif` - Missing hydro-enforced DEM")
 
-        if ws_raster:
-            ready_items.append("`topo/watersheds.tif` - Ready")
-        elif ws_polygon:
-            todo_items.append("`topo/watersheds.tif` - Generate by rasterizing all_ws_polygon_UTM.shp")
-        else:
-            todo_items.append("`topo/watersheds.tif` - Missing (no source available)")
-
         if stream_raster:
             ready_items.append("`topo/streams.tif` - Ready (copy main_stream_raster_UTM.tif)")
         elif flow_accum:
             todo_items.append("`topo/streams.tif` - Generate by thresholding flow accumulation")
         else:
             todo_items.append("`topo/streams.tif` - Missing (no source available)")
+
+        if ws_polygon:
+            todo_items.append("`culverts/watersheds.geojson` - Convert from all_ws_polygon_UTM.shp")
+        else:
+            todo_items.append("`culverts/watersheds.geojson` - Missing (no watershed polygons)")
 
         if culverts:
             todo_items.append("`culverts/culvert_points.geojson` - Convert from shapefile")
@@ -466,19 +574,23 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
     lines.extend([
         "## Common Processing Commands",
         "",
-        "### Rasterize Watershed Polygons",
+        "### Convert Watershed Polygons to GeoJSON",
         "",
         "```bash",
-        "# Replace values with project-specific extent and resolution",
-        "gdal_rasterize -a Point_ID \\",
-        "  -tr <pixel_size> <pixel_size> \\",
-        "  -te <xmin> <ymin> <xmax> <ymax> \\",
-        "  -ot Int32 -of GTiff \\",
-        "  WS_deln/all_ws_polygon_UTM.shp \\",
-        "  topo/watersheds.tif",
+        "ogr2ogr -f GeoJSON \\",
+        "  culverts/watersheds.geojson \\",
+        "  WS_deln/all_ws_polygon_UTM.shp",
         "```",
         "",
-        "### Derive Streams from Flow Accumulation",
+        "### Convert Culvert Points to GeoJSON",
+        "",
+        "```bash",
+        "ogr2ogr -f GeoJSON \\",
+        "  culverts/culvert_points.geojson \\",
+        "  WS_deln/Pour_Point_UTM.shp",
+        "```",
+        "",
+        "### Derive Streams from Flow Accumulation (if stream raster missing)",
         "",
         "```bash",
         "# Threshold value (e.g., 1000) determines stream density",
@@ -486,14 +598,6 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         "  --outfile=topo/streams.tif \\",
         "  --calc=\"(A>1000)*1\" \\",
         "  --type=Byte --NoDataValue=0",
-        "```",
-        "",
-        "### Convert Shapefile to GeoJSON",
-        "",
-        "```bash",
-        "ogr2ogr -f GeoJSON \\",
-        "  culverts/culvert_points.geojson \\",
-        "  WS_deln/Pour_Point_UTM.shp",
         "```",
         "",
     ])
@@ -540,12 +644,7 @@ def main():
     parser.add_argument(
         "--user-id",
         type=int,
-        help="Specific user ID to scan (e.g., 1 for 1_inputs/1_outputs)",
-    )
-    parser.add_argument(
-        "--all-users",
-        action="store_true",
-        help="Scan all users in the directory",
+        help="Specific user ID to scan (e.g., 1 for 1_inputs/1_outputs). Default: all users",
     )
     parser.add_argument(
         "--inputs",
@@ -618,15 +717,10 @@ def main():
                 print(f"Error: User ID {args.user_id} not found", file=sys.stderr)
                 print(f"Available users: {[uid for uid, _, _ in all_user_dirs]}", file=sys.stderr)
                 sys.exit(1)
-        elif args.all_users:
-            user_dirs = all_user_dirs
         else:
-            # Default: scan user 1 or prompt
-            user_dirs = [(uid, inp, out) for uid, inp, out in all_user_dirs if uid == 1]
-            if not user_dirs:
-                print("No default user (1) found. Use --user-id or --all-users", file=sys.stderr)
-                print(f"Available users: {[uid for uid, _, _ in all_user_dirs]}", file=sys.stderr)
-                sys.exit(1)
+            # Default: scan all users
+            user_dirs = all_user_dirs
+            print(f"Scanning all {len(user_dirs)} users (use --user-id N to scan specific user)")
 
     # Scan all specified user directories
     all_projects = []

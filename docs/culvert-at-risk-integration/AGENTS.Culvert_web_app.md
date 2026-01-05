@@ -86,16 +86,9 @@ Understanding the ID chain is critical for wepp.cloud integration:
 ### wepp.cloud payload requirements
 When building the payload ZIP for wepp.cloud:
 1. **culvert_points.geojson** must include `Point_ID` on each feature
-2. **watersheds.tif** cell values correspond to row index (FID) of pour points
-3. Include a **`culvert_id_map.json`** with the FID → Point_ID mapping:
-   ```json
-   {
-     "0": "CULV_001",
-     "1": "CULV_002", 
-     "2": "CULV_003"
-   }
-   ```
-   Or embed in `metadata.json` under a `culvert_id_map` key.
+2. **watersheds.geojson** must include `Point_ID` on each polygon feature, matching the corresponding culvert point
+
+The `Point_ID` attribute in the watershed GeoJSON directly links each watershed polygon to its culvert—no separate ID mapping file is needed.
 
 ### Relevant source locations
 - `culvert_app/tasks/watershed_delineation_task.py` → sets `pour_ID='Point_ID'`
