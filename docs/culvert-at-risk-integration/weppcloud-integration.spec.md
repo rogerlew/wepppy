@@ -43,8 +43,8 @@
 6. Culvert_web_app polls job status; on completion, downloads artifacts.
 
 ## API surface (wepp.cloud)
-### POST /rq/api/culverts-wepp-batch/
-Create a batch and enqueue a culvert WEPP job. Must be routed through `blueprint_bp` to avoid the 30s Caddy timeout for weppcloud routes.
+### POST /rq-engine/api/culverts-wepp-batch/
+Create a batch and enqueue a culvert WEPP job. Implemented in rq-engine to avoid weppcloud 30s timeout enforcement for blocking workers.
 
 Request (multipart/form-data):
 - file: `payload.zip` (required)
@@ -234,7 +234,7 @@ For each culvert (identified by `Point_ID`):
 
 ## Auth and access (after proof of concept)
 - JWT tokens
-- Optional webhook callbacks for all `rq/api` routes on job-completion.
+- Optional webhook callbacks for all `rq-engine/api` routes on job-completion.
 - Treat the culvert app as the authenticated client (no per-end-user identity).
 
 ## Error handling
