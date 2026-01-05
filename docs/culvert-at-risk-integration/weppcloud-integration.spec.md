@@ -31,8 +31,8 @@
 - Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
 - Canonical DEM path: `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif`.
 - Each culvert is a canonical weppcloud project at `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/`.
-  - create a symlink to the canonical DEM path (e.g. `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif` -> `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/dem/dem.tif`)
-- Use an existing culvert `_base` project: `/wc1/culverts/<culvert_batch_uuid>/runs/_base/` used to stage shared parameters and defaults (mirrors BatchRunner pattern).
+  - DEM symlink: instead of fetching/copying the DEM for each culvert project, create a symlink from per-run path to canonical DEM (e.g., `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/dem/dem.tif` → `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif`). This is handled by a new `Ron.link_dem()` method that creates the symlink and sets `ron.map` (see DEM symlink manager below).
+- `_base` project initialization: `culvert.cfg` specifies a `base_runid` key pointing to a template project that gets copied to `/wc1/culverts/<culvert_batch_uuid>/runs/_base/`. This mirrors the BatchRunner pattern and stages shared parameters and defaults.
 
 ## End-to-end flow (proposed)
 1. User creates a project in Culvert_web_app.
@@ -63,16 +63,78 @@ Use existing RQ engine endpoints instead of custom status routes:
 ### Artifacts access (existing)
 Use the browse service for listing/downloading artifacts instead of a culvert-specific endpoint.
 
+**Browse service URL scheme:**
+- Batch root browse: `/culverts/<culvert_batch_uuid>/browse/`
+- Per-culvert browse: `/culverts/<culvert_batch_uuid>/runs/<culvert_id>/culvert/browse/`
+- Direct file download: `/culverts/<culvert_batch_uuid>/runs/<culvert_id>/culvert/browse/<path>`
+
+This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach can be adopted for the batch runner (`/batch/{batch_uuid}/browse/`).
+
+## DEM symlink manager
+The `Ron` class gains a new method to handle pre-existing DEMs without fetching or copying:
+
+```python
+def link_dem(self, dem_path: str) -> None:
+    """
+    Create a symlink to an external DEM and populate self.map.
+    
+    Used by culvert batch processing where the DEM is already available
+    at a canonical location. Replaces the fetch_dem() flow.
+    
+    Args:
+        dem_path: Absolute path to the source DEM (e.g., hydro-enforced-dem.tif)
+    
+    Side effects:
+        - Creates <wd>/dem/ directory if needed
+        - Creates symlink: <wd>/dem/dem.tif -> dem_path
+        - Reads raster metadata and sets self.map (extent, crs, resolution)
+    """
+```
+
+This method:
+1. Creates the `<wd>/dem/` directory if it does not exist
+2. Creates a symlink `<wd>/dem/dem.tif` → `dem_path`
+3. Opens the target raster and populates `self.map` with extent, CRS, and resolution metadata
+4. Does NOT copy the DEM (saves disk I/O and storage for large batches)
+
 ## Payload ZIP contract (proposed)
 Top-level files/directories (required unless noted):
 - `topo/hydro-enforced-dem.tif` (GeoTIFF)
 - `topo/streams.tif` (GeoTIFF; same projection, extent, and resolution as DEM)
 - `topo/watersheds.tif` (GeoTIFF; same projection, extent, and resolution as DEM)
-- `culverts/culvert_points.geojson` (WGS84 lat/long)
+- `culverts/culvert_points.geojson` (same CRS as rasters—see CRS rules below)
 - `metadata.json` (schema TBD; project level fields for observability)
 - `model-parameters.json` (schema TBD; must include everything needed for processing)
 
 Note: avoid ESRI shapefiles and sidecars entirely.
+
+### Coordinate system rules
+- **Rasters must use a projected CRS with meter units** (e.g., UTM). WGS84 is NOT acceptable for rasters because cell size must be in meters for hydrological calculations.
+- **GeoJSON must use the same CRS as the rasters.** Since DEMs can have 1m resolution, keeping all assets in the same projected CRS avoids reprojection artifacts and ensures pixel-accurate alignment.
+- wepp.cloud will validate that all inputs share a common CRS and reject payloads where rasters and vectors have mismatched projections.
+
+### Culvert ID attribute
+The `culverts/culvert_points.geojson` must include a `Point_ID` attribute on each feature:
+- **Field name:** `Point_ID` (matches Culvert_web_app convention)
+- **Type:** integer or string (unique within the batch)
+- **Usage:** Used to create per-culvert run directories (`/runs/<Point_ID>/`) and to join WEPP outputs back to culvert locations
+
+### Watershed raster encoding
+The `topo/watersheds.tif` raster uses integer cell values derived from WhiteboxTools `wbt.watershed()`:
+- **Cell value:** Integer corresponding to the pour point `FID` (0-indexed row index in the pour points GeoDataFrame)
+- **NoData:** Cells outside all watersheds (typically 0 or a designated nodata value like -9999)
+- **Joining to culvert IDs:** The `VALUE` field in vectorized watersheds joins to pour point `FID`, which then maps to `Point_ID` via:
+  ```python
+  # From Culvert_web_app:
+  watershed_poly_gdf_merged = pd.merge(
+      watershed_poly_gdf, 
+      point_gdf[['FID', 'Point_ID']], 
+      left_on='VALUE', 
+      right_on='FID', 
+      how='left'
+  )
+  ```
+- wepp.cloud expects this mapping to be pre-computed; the payload should embed `Point_ID` → `watershed_value` in `metadata.json`.
 
 ## wepp.cloud job behavior (proposed)
 - Validate ZIP structure, verify GeoJSON + GeoTIFF alignment, and confirm coordinate system.
@@ -121,10 +183,12 @@ Note: avoid ESRI shapefiles and sidecars entirely.
 - Run culvert watersheds in parallel (similar to batch).
 
 ## Missing details / open questions
-- Payload contract finalization: exact filenames, required metadata schema, CRS rules, optional inputs.
-- GeoJSON attributes: canonical culvert id field and any required properties.
-- Watershed raster encoding: confirm by inspecting Culvert_web_app pipeline (value semantics, nodata rules).
-- Browse service path and expected UI flow for culvert downloads; may require a custom route.
+- ~~Payload contract finalization: exact filenames, required metadata schema, CRS rules, optional inputs.~~ (CRS rules documented above)
+- ~~GeoJSON attributes: canonical culvert id field and any required properties.~~ (Point_ID documented above)
+- ~~Watershed raster encoding: confirm by inspecting Culvert_web_app pipeline (value semantics, nodata rules).~~ (VALUE/FID/Point_ID mapping documented above)
+- ~~Browse service path and expected UI flow for culvert downloads; may require a custom route.~~ (URL scheme documented above)
 - Retry and idempotency semantics for duplicate POSTs.
 - Long-term auth model (JWT issuance, refresh, key rotation) and webhook payload schema/retry policy.
 - Data retention policy and cleanup schedule in `/wc1/culverts/` (required).
+- `metadata.json` schema finalization: exact required fields, version numbering, timestamps.
+- `model-parameters.json` schema: WEPP configuration overrides, climate duration, soil database selection.

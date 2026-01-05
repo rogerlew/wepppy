@@ -55,6 +55,55 @@
   - NOTE: WEPP is not functional in this app; treat WEPP paths/outputs as disabled placeholders.
   - Details: `WEPP_steps.md` (contains some naive assumptions).
 
+## Culvert/Watershed ID bookkeeping
+Understanding the ID chain is critical for wepp.cloud integration:
+
+### ID flow through the pipeline
+1. **Pour point upload** → User uploads points with arbitrary attributes; code uses `Point_ID` as the canonical ID column (hardcoded in `watershed_delineation_task.py` via `pour_ID='Point_ID'`).
+2. **FID assignment** → GeoPandas assigns a 0-indexed `FID` to each row when reading the shapefile.
+3. **WhiteboxTools watershed** → `wbt.watershed()` creates a raster where each cell's value equals the `FID` of the associated pour point.
+4. **Raster to vector** → `wbt.raster_to_vector_polygons()` creates polygons with a `VALUE` attribute matching the raster cell value (i.e., the pour point `FID`).
+5. **ID merge** → Code joins `VALUE` back to `FID` and transfers `Point_ID`:
+   ```python
+   # From subroutine_nested_watershed_delineation.py:
+   watershed_poly_gdf['VALUE'] = watershed_poly_gdf['VALUE'].astype(int)
+   watershed_poly_gdf_merged = pd.merge(
+       watershed_poly_gdf, 
+       point_gdf[['FID', ID_column]],  # ID_column = 'Point_ID'
+       left_on='VALUE', 
+       right_on='FID', 
+       how='left'
+   )
+   ```
+
+### Key files with IDs
+| File | ID columns | Notes |
+|------|------------|-------|
+| `pour_point_filtered_UTM.shp` | `FID`, `Point_ID` | Final pour points after filtering |
+| `ws_raster_UTM.tif` | Cell values = `FID` | Temporary watershed raster |
+| `ws_polygon_filtered_by_area_UTM.shp` | `VALUE`, `FID`, `Point_ID` | Vectorized watersheds with merged IDs |
+
+### wepp.cloud payload requirements
+When building the payload ZIP for wepp.cloud:
+1. **culvert_points.geojson** must include `Point_ID` on each feature
+2. **watersheds.tif** cell values correspond to row index (FID) of pour points
+3. Include a **`culvert_id_map.json`** with the FID → Point_ID mapping:
+   ```json
+   {
+     "0": "CULV_001",
+     "1": "CULV_002", 
+     "2": "CULV_003"
+   }
+   ```
+   Or embed in `metadata.json` under a `culvert_id_map` key.
+
+### Relevant source locations
+- `culvert_app/tasks/watershed_delineation_task.py` → sets `pour_ID='Point_ID'`
+- `culvert_app/utils/subroutine_nested_watershed_delineation.py`:
+  - Lines 1189-1210: `delineate_watershed_and_convert_to_polygon()` with VALUE/FID merge
+  - Lines 838-888: Nested delineation loop adding `ID_column` and `watershed_id` to each polygon
+- `culvert_app/tasks/hydro_vuln_analysis_task.py` → uses `pour_ID="Point_ID"` throughout
+
 ## Watershed delineation file map (ws_deln)
 - Inputs (uploads or fetch):
   - `boundary_path` -> `boundary.zip` (AOI polygon zip; upload/draw routes in `culvert_app/app.py`).
