@@ -13,6 +13,7 @@ from flask import flash, session
 from flask_security import current_user
 from flask_security.utils import login_user, hash_password
 from flask_wtf.csrf import validate_csrf
+from sqlalchemy import func
 from typing import TYPE_CHECKING
 from wtforms.validators import ValidationError
 
@@ -145,6 +146,36 @@ def _normalize_email(email: Optional[str]) -> Optional[str]:
     return email.strip().lower()
 
 
+def _find_user_by_email(datastore, email: str) -> Optional["User"]:
+    user = datastore.find_user(email=email)
+    if user:
+        return user
+
+    user_model = datastore.user_model
+    candidates = (
+        user_model.query.filter(func.lower(user_model.email) == email.lower())
+        .limit(5)
+        .all()
+    )
+    if not candidates:
+        return None
+    if len(candidates) > 1:
+        for candidate in candidates:
+            if candidate.has_role("Admin") or candidate.has_role("Root"):
+                logger.warning(
+                    "Multiple users matched oauth email=%s; selecting admin user_id=%s",
+                    email,
+                    candidate.id,
+                )
+                return candidate
+        logger.warning(
+            "Multiple users matched oauth email=%s; selecting first user_id=%s",
+            email,
+            candidates[0].id,
+        )
+    return candidates[0]
+
+
 def _fetch_primary_verified_email(client, provider_settings: Dict, profile: Dict) -> Tuple[Optional[str], bool]:
     email = profile.get("email")
     verified = profile.get("email_verified") or profile.get("verified") or False
@@ -271,7 +302,7 @@ def _link_identity(
     user = account.user if account else None
 
     if not user and email:
-        user = datastore.find_user(email=email)
+        user = _find_user_by_email(datastore, email)
 
     if user and not user.active:
         abort(403, description="Account is inactive; contact support.")
