@@ -12,12 +12,12 @@
 - Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `run_metadata.json`.
 - Limits: max ZIP 2GB, max 300 culverts; error responses are structured 400s.
 
-## Phase 0 - Contract finalization and fixtures
-- Scope: finalize `metadata.json` + `model-parameters.json` schema, idempotency rules, retention policy; gather real payloads from `/workdir/culvert_app_instance_dir/user_data/` for validation (copy in progress).
+## Phase 0 - Contract finalization and fixtures (COMPLETE)
+- Scope: finalize `metadata.json` + `model-parameters.json` schema, idempotency rules, retention policy; use the `Santee_10m_no_hydroenforcement` project (local at `/wc1/culvert_app_instance_dir/user_data/`) as the baseline payload for validation.
 - Dependencies: Culvert_web_app owners for schema fields and retention expectations; ops for cleanup window and storage constraints; security for initial auth choice.
 - Deliverables: JSON schema docs for `metadata.json`/`model-parameters.json`, minimal sample payloads (synthetic + real), updated spec notes on retry/idempotency/retention.
 - Risks: schema churn after implementation starts; large real payloads exceeding test budgets; mismatch between culvert outputs and payload contract.
-- Verification: validate at least 2 real culvert projects against draft schema; create tiny synthetic payload fixtures for tests (sub-10MB).
+- Verification: validated the baseline payload from `Santee_10m_no_hydroenforcement`; created `tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip` and `tests/culverts/test_payloads/manifest.md`. The second payload will be added once the user 1 copy completes.
 
 ### `metadata.json` schema (v1)
 - `schema_version` (string, required; `culvert-metadata-v1`)
