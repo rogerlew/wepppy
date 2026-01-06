@@ -48,6 +48,103 @@ __version__ = "v.0.1.0"
 ERIN_ADJUST_FCWP = True
 
 
+def _decode_jsonpickle_safe(json_text: str) -> Any:
+    """
+    Decode jsonpickle payloads that may contain NumPy scalars from older numpy versions.
+
+    Normalizes NumPy scalars to plain Python numbers (floats/ints) and strips
+    read-only 'dtype' fields that cause setattr errors during unpickling.
+    This handles the "scalar() argument 1 must be numpy.dtype" error from numpy 1.25+.
+    """
+    import json
+    import base64
+    import struct
+
+    try:
+        return jsonpickle.decode(json_text)
+    except TypeError as e:
+        if (
+            "scalar() argument 1 must be numpy.dtype" not in str(e)
+            and "numpy" not in str(e)
+            and "dtype" not in str(e)
+        ):
+            raise
+
+    # Fall through to safe decoding
+    def _from_b64_f64(b64):
+        try:
+            return struct.unpack("<d", base64.b64decode(b64))[0]
+        except Exception:
+            return None
+
+    def _decode_numpy_scalar_from_reduce(red):
+        # [ {"py/function":"numpy.core.multiarray.scalar"},
+        #   {"py/tuple": [ <dtype or {"py/id":n}>, <valSpec>] } ]
+        if not (isinstance(red, list) and red and isinstance(red[0], dict)):
+            return None, False
+        if not str(red[0].get("py/function", "")).endswith("multiarray.scalar"):
+            return None, False
+        args = red[1]
+        tup = isinstance(args, dict) and args.get("py/tuple")
+        if not (isinstance(tup, list) and len(tup) >= 2):
+            return None, False
+        val_spec = tup[1]
+        if isinstance(val_spec, dict) and "py/b64" in val_spec:
+            v = _from_b64_f64(val_spec["py/b64"])
+            if v is not None:
+                return v, True
+        # sometimes value is already numeric/stringy
+        try:
+            return float(val_spec), True
+        except Exception:
+            return val_spec, True
+
+    def _maybe_cast_int(v):
+        # keep ints as ints if representable exactly
+        try:
+            fv = float(v)
+            return int(fv) if fv.is_integer() else fv
+        except Exception:
+            return v
+
+    def fix(o):
+        if isinstance(o, dict):
+            # Drop read-only dtype fields that will be assigned via setattr
+            if "dtype" in o and not isinstance(o["dtype"], str):
+                o = {k: v for k, v in o.items() if k != "dtype"}
+
+            # numpy scalar via py/reduce
+            red = o.get("py/reduce")
+            if isinstance(red, list):
+                val, matched = _decode_numpy_scalar_from_reduce(red)
+                if matched:
+                    return _maybe_cast_int(val)
+
+            # numpy scalar/object with value (e.g., {"py/object":"numpy.float64", "value": ...})
+            pobj = o.get("py/object", "")
+            if isinstance(pobj, str) and pobj.startswith("numpy."):
+                if "value" in o:
+                    v = o["value"]
+                    if isinstance(v, dict) and "py/b64" in v:
+                        v = _from_b64_f64(v["py/b64"])
+                    return _maybe_cast_int(v)
+                # also strip dtype here if present
+                if "dtype" in o:
+                    o = {k: v for k, v in o.items() if k != "dtype"}
+
+            # Recurse
+            return {k: fix(v) for k, v in o.items()}
+
+        if isinstance(o, list):
+            return [fix(v) for v in o]
+        return o
+
+    data = json.loads(json_text)
+    data = fix(data)
+    # decode again, now free of problematic numpy scalars/dtype attrs
+    return jsonpickle.decode(json.dumps(data))
+
+
 def _create_process_pool_executor(
     max_workers: int,
     logger: Optional[logging.Logger] = None,
@@ -698,7 +795,7 @@ class SoilSummary(object):
         if meta_fn is None:
             return None
         with open(meta_fn) as fp:
-            return jsonpickle.decode(fp.read())
+            return _decode_jsonpickle_safe(fp.read())
 
     def get_weppsoilutil(self):
         from wepppy.wepp.soils.utils import WeppSoilUtil
