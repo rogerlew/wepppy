@@ -41,6 +41,7 @@ __all__ = [
     "migrate_landuse_parquet",
     "migrate_soils_parquet",
     "migrate_soils_nodb_meta",
+    "migrate_soils_dir_paths",
     "migrate_nodb_jsonpickle_format",
     "refresh_query_catalog",
     "invalidate_redis_cache",
@@ -880,6 +881,100 @@ def migrate_soils_nodb_meta(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         return False, f"Failed to migrate soils.nodb meta: {e}"
 
 
+def migrate_soils_dir_paths(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
+    """
+    Fix relative soils_dir paths in SoilSummary objects to use absolute paths.
+
+    Old projects stored soils_dir as relative paths like "runid/soils" which
+    fail to resolve when the project is synced to a new location. This migration
+    updates them to absolute paths based on the run's working directory.
+
+    Idempotent: safe to run multiple times.
+
+    Args:
+        wd: Working directory path
+        dry_run: If True, report but don't modify
+
+    Returns:
+        (applied, message) tuple
+    """
+    run_path = Path(wd).resolve()
+    soils_nodb = run_path / "soils.nodb"
+    soils_dir_path = run_path / "soils"
+    correct_soils_dir = str(soils_dir_path)
+
+    if not soils_nodb.exists():
+        return True, "No soils.nodb file"
+
+    try:
+        import jsonpickle
+    except ImportError:
+        return False, "jsonpickle not available"
+
+    def _needs_fix(current_dir: Any) -> bool:
+        """Check if soils_dir needs to be fixed to correct_soils_dir."""
+        # Guard against None or non-string values
+        if not isinstance(current_dir, str):
+            return True
+
+        # Normalize and compare paths
+        try:
+            current_path = Path(current_dir)
+            # If relative, needs fix
+            if not current_path.is_absolute():
+                return True
+            # Compare resolved paths for equivalence (handles symlinks)
+            # Note: resolve() may fail if path doesn't exist, so compare strings
+            # for non-existent paths
+            try:
+                if current_path.resolve() != soils_dir_path:
+                    return True
+            except OSError:
+                # Path doesn't exist or is invalid - compare as strings
+                if str(current_path) != correct_soils_dir:
+                    return True
+        except (OSError, ValueError):
+            # Invalid path, needs fix
+            return True
+
+        return False
+
+    try:
+        with open(soils_nodb, 'r') as f:
+            content = f.read()
+
+        # Load the soils nodb object
+        from wepppy.nodb.base import NoDbBase
+        NoDbBase._ensure_legacy_module_imports(content)
+
+        soils_obj = jsonpickle.decode(content)
+
+        # Fix soils_dir in all SoilSummary objects
+        fixed_count = 0
+        if hasattr(soils_obj, 'soils') and soils_obj.soils:
+            for soil_summary in soils_obj.soils.values():
+                if hasattr(soil_summary, 'soils_dir'):
+                    current_dir = soil_summary.soils_dir
+                    if _needs_fix(current_dir):
+                        if not dry_run:
+                            soil_summary.soils_dir = correct_soils_dir
+                        fixed_count += 1
+
+        if fixed_count == 0:
+            return True, "No soils_dir paths to fix"
+
+        if dry_run:
+            return True, f"Would fix soils_dir in {fixed_count} soil summaries"
+
+        # Write back
+        with open(soils_nodb, 'w') as f:
+            f.write(jsonpickle.encode(soils_obj))
+
+        return True, f"Fixed soils_dir in {fixed_count} soil summaries"
+    except Exception as e:
+        return False, f"Failed to migrate soils_dir paths: {e}"
+
+
 def migrate_nodb_jsonpickle_format(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
     """
     Migrate .nodb files from old flat jsonpickle format to new py/state format.
@@ -1074,6 +1169,7 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
     ("landuse_parquet", migrate_landuse_parquet),
     ("soils_parquet", migrate_soils_parquet),
     ("soils_nodb_meta", migrate_soils_nodb_meta),
+    ("soils_dir_paths", migrate_soils_dir_paths),  # After soils_nodb_meta, fixes relative paths
     ("interchange", migrate_interchange),
     ("query_catalog", refresh_query_catalog),  # After interchange, before redis_cache
     ("redis_cache", invalidate_redis_cache),  # Always run last
@@ -1091,6 +1187,7 @@ MIGRATION_DESCRIPTIONS: Dict[str, str] = {
     "landuse_parquet": "Generate parquet files for landuse data",
     "soils_parquet": "Generate parquet files for soils data",
     "soils_nodb_meta": "Clear legacy _meta_fn attributes from soils.nodb (fixes numpy deserialization)",
+    "soils_dir_paths": "Fix relative soils_dir paths in soils.nodb to use absolute paths",
     "interchange": "Migrate WEPP interchange files to parquet format",
     "query_catalog": "Refresh query engine catalog for parquet files",
     "redis_cache": "Invalidate Redis cache for this run",
