@@ -54,7 +54,7 @@ import requests
 # Constants
 DEFAULT_HOST = "wepp.cloud"
 DEFAULT_POLL_SECONDS = 5
-DEFAULT_TIMEOUT_SECONDS = 3600
+DEFAULT_TIMEOUT_SECONDS = 3600 * 20
 UPLOAD_ENDPOINT = "/rq-engine/api/culverts-wepp-batch/"
 
 # Configure logging with timestamps

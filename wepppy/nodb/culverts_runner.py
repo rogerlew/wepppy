@@ -235,17 +235,20 @@ class CulvertsRunner(NoDbBase):
         )
 
         created_at = datetime.now(timezone.utc).isoformat()
-        with self.locked():
-            run_record = self._runs.get(run_id, {})
-            run_record.update(
-                {
-                    "runid": run_id,
-                    "point_id": run_id,
-                    "wd": run_wd,
-                    "created_at": created_at,
-                }
-            )
-            self._runs[run_id] = run_record
+        # Note: We skip locking here because in batch processing, each worker
+        # handles a unique run_id and the orchestrator tracks runs via job
+        # metadata. Locking would cause contention when multiple workers
+        # process runs in parallel.
+        run_record = self._runs.get(run_id, {})
+        run_record.update(
+            {
+                "runid": run_id,
+                "point_id": run_id,
+                "wd": run_wd,
+                "created_at": created_at,
+            }
+        )
+        self._runs[run_id] = run_record
 
     def create_runs(
         self,
