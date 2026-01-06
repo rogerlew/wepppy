@@ -183,16 +183,10 @@ def run_culvert_run_rq(
 
     payload_metadata = _load_payload_json(batch_root / "metadata.json")
     model_parameters = _load_payload_json(batch_root / "model-parameters.json")
-    run_config = runner._resolve_run_config(model_parameters)
-    with runner.locked():
-        if runner._culvert_batch_uuid != culvert_batch_uuid:
-            runner._culvert_batch_uuid = culvert_batch_uuid
-        if runner._payload_metadata is None:
-            runner._payload_metadata = deepcopy(payload_metadata)
-        if runner._model_parameters is None:
-            runner._model_parameters = deepcopy(model_parameters)
-        if runner._run_config != run_config:
-            runner._run_config = run_config
+
+    # Note: We skip locking here because run_culvert_batch_rq already
+    # initialized the shared runner state. Acquiring a lock would cause
+    # contention when multiple workers process runs in parallel.
 
     runner.create_run_if_missing(run_id, payload_metadata, model_parameters)
     watersheds_path = runner._resolve_payload_path(
