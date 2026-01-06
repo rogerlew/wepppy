@@ -498,7 +498,6 @@ def query_wepp_phos_opts(runid, config):
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary')
 @wepp_bp.route('/runs/<string:runid>/<config>/report/wepp/run_summary/')
 @authorize_and_handle_with_exception_factory
-@requires_cap(gate_reason="Complete verification to view WEPP reports.")
 def report_wepp_run_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
