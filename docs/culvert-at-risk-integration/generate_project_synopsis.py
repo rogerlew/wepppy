@@ -307,6 +307,54 @@ def file_status(file_info: Optional[dict], key_attr: Optional[str] = None, inclu
     return ", ".join(parts)
 
 
+def has_hydro_dem(project: dict) -> bool:
+    return project["files"].get("hydro_enforced_dem") is not None
+
+
+def has_watersheds(project: dict) -> bool:
+    return (
+        project["files"].get("watersheds_raster") is not None
+        or project["files"].get("watersheds_polygon") is not None
+    )
+
+
+def has_streams(project: dict) -> bool:
+    return (
+        project["files"].get("streams_raster") is not None
+        or project["files"].get("streams_vector") is not None
+        or project["files"].get("flow_accumulation") is not None
+    )
+
+
+def has_culverts(project: dict) -> bool:
+    return project["files"].get("culvert_points") is not None
+
+
+def is_viable(project: dict) -> bool:
+    return (
+        project["ws_delineation_complete"]
+        and has_hydro_dem(project)
+        and has_watersheds(project)
+        and has_streams(project)
+        and has_culverts(project)
+    )
+
+
+def missing_viable_fields(project: dict) -> list[str]:
+    missing = []
+    if not project["ws_delineation_complete"]:
+        missing.append("WS Deln")
+    if not has_hydro_dem(project):
+        missing.append("Hydro-DEM")
+    if not has_watersheds(project):
+        missing.append("Watersheds")
+    if not has_streams(project):
+        missing.append("Streams")
+    if not has_culverts(project):
+        missing.append("Culverts")
+    return missing
+
+
 def generate_synopsis(projects: list[dict], output_file: Path) -> None:
     """Generate the markdown synopsis document."""
 
@@ -314,7 +362,7 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
     user_ids = set(p.get("user_id", 0) for p in projects)
     multi_user = len(user_ids) > 1
     total_projects = len(projects)
-    viable_projects = sum(1 for p in projects if p["ws_delineation_complete"])
+    viable_projects = sum(1 for p in projects if is_viable(p))
 
     lines = [
         "# Culvert-at-Risk Projects Synopsis",
@@ -333,19 +381,19 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
     lines.extend([
         f"- Total projects: {total_projects}",
         f"- Users scanned: {len(user_ids)}",
-        f"- VIABLE projects (WS delineation complete): {viable_projects}",
+        f"- VIABLE projects (WS Deln + Hydro-DEM + Watersheds + Streams + Culverts): {viable_projects}",
         "",
     ])
 
     if multi_user:
         lines.extend([
-            "| User | Project | WS Deln | Hydro-DEM | Watersheds | Streams | Culverts |",
-            "|------|---------|---------|-----------|------------|---------|----------|",
+            "| User | Project | WS Deln | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
+            "|------|---------|---------|-----------|---------------|------------|---------|----------|-----------|",
         ])
     else:
         lines.extend([
-            "| Project | WS Deln | Hydro-DEM | Watersheds | Streams | Culverts |",
-            "|---------|---------|-----------|------------|---------|----------|",
+            "| Project | WS Deln | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
+            "|---------|---------|-----------|---------------|------------|---------|----------|-----------|",
         ])
 
     for p in projects:
@@ -355,8 +403,10 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         hydro_dem = p["files"].get("hydro_enforced_dem")
         if hydro_dem:
             dem_size = hydro_dem.get("size_human", "")
+            dem_resolution = hydro_dem.get("resolution") or "Unknown"
             dem_status = f"Yes ({dem_size})" if dem_size else "Yes"
         else:
+            dem_resolution = "—"
             dem_status = "No"
 
         # Watersheds with size
@@ -389,30 +439,33 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         # Culverts with count and size
         culvert_info = p["files"].get("culvert_points")
         if culvert_info:
-            count = culvert_info.get("feature_count")
             size = culvert_info.get("size_human", "")
-            if count is not None:
-                culverts = f"{count} ({size})" if size else str(count)
-            elif size:
-                culverts = f"Yes ({size})"
-            else:
-                culverts = "Yes"
+            culverts = f"Yes ({size})" if size else "Yes"
+            culvert_count = culvert_info.get("feature_count")
+            culvert_count_str = str(culvert_count) if culvert_count is not None else "—"
         else:
             culverts = "No"
+            culvert_count_str = "—"
 
         if multi_user:
-            lines.append(f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {dem_status} | {ws_raster} | {streams} | {culverts} |")
+            lines.append(
+                f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
+            )
         else:
-            lines.append(f"| {p['name']} | {ws_status} | {dem_status} | {ws_raster} | {streams} | {culverts} |")
+            lines.append(
+                f"| {p['name']} | {ws_status} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
+            )
 
     lines.extend([
         "",
         "**Legend:**",
         "- WS Deln: Watershed delineation completed",
         "- Hydro-DEM: Hydro-enforced DEM available",
+        "- Hydro-DEM Res: Hydro-enforced DEM pixel resolution",
         "- Watersheds: Watershed polygons available (Polygon = shapefile, needs GeoJSON conversion; raster not required)",
         "- Streams: Stream raster available (Raster/Vector/FlowAcc/No)",
-        "- Culverts: Culvert points available (count shown if shapefile exists)",
+        "- Culverts: Culvert points available",
+        "- # Culverts: Feature count from culvert points file",
         "",
         "---",
         "",
@@ -452,8 +505,18 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
             ])
             continue
 
+        missing = missing_viable_fields(p)
+        if missing:
+            lines.extend([
+                f"**Status: INCOMPLETE** - Missing: {', '.join(missing)}",
+                "",
+                "---",
+                "",
+            ])
+            continue
+
         # Viable project - show details
-        lines.append("**Status: VIABLE** - Watershed delineation complete")
+        lines.append("**Status: VIABLE** - WS Deln, Hydro-DEM, Watersheds, Streams, Culverts available")
         lines.extend(["", "#### File Inventory", ""])
 
         # DEM section
@@ -750,8 +813,11 @@ def main():
     generate_synopsis(all_projects, args.output_file)
 
     # Print summary
-    viable = sum(1 for p in all_projects if p["ws_delineation_complete"])
-    print(f"\nSummary: {viable}/{len(all_projects)} projects have completed WS delineation")
+    viable = sum(1 for p in all_projects if is_viable(p))
+    print(
+        f"\nSummary: {viable}/{len(all_projects)} projects meet viability criteria "
+        "(WS Deln + Hydro-DEM + Watersheds + Streams + Culverts)"
+    )
 
 
 if __name__ == "__main__":
