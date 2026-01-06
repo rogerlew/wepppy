@@ -2,12 +2,12 @@
 
 ### **Overview**
 
-`wctl` is now a Typer-powered Python CLI that orchestrates the WEPPcloud Docker Compose stacks and the companion tooling that lives in `tools/wctl2`. The thin shell shim installed by `./wctl/install.sh` simply resolves the project root, pins the desired compose file, exports `PYTHONPATH`/`WCTL_COMPOSE_FILE`, and defers to `python -m wctl2`. Typer’s rich help/auto-completion replaces the legacy Bash wrapper and man page while keeping command names and behaviour familiar.
+`wctl` is now a Typer-powered Python CLI that orchestrates the WEPPcloud Docker Compose stacks and the companion tooling that lives in `tools/wctl2`. The thin shell shim installed by `./wctl/install.sh` simply resolves the project root, pins the desired compose file, exports `PYTHONPATH`/`WCTL_COMPOSE_FILE`, and defers to `python -m wctl2`. Typer’s rich help/auto-completion replaces the legacy Bash wrapper and man page while keeping command names and behavior familiar.
 
 Key design points:
 - A shared `CLIContext` (see `tools/wctl2/context.py`) merges `docker/.env`, optional host overrides (`WCTL_HOST_ENV`), and any shell-provided overrides into a temporary env file that every command reuses.
 - All first-class helpers are implemented as Typer subcommands, so `wctl <command> --help` shows usage, defaults, and options without maintaining a separate manual page.
-- Anything that is not recognised as a Typer subcommand is forwarded to `docker compose`, with support for common prefixes (`wctl docker compose ps`, `wctl compose up`, etc.) and INFO-level logging so you can see the exact call.
+- Anything that is not recognized as a Typer subcommand is forwarded to `docker compose`, with support for common prefixes (`wctl docker compose ps`, `wctl compose up`, etc.) and INFO-level logging so you can see the exact call.
 
 ### **Quick Start**
 
@@ -33,7 +33,7 @@ wctl docker compose config --help
 
 ### **Available Commands**
 
-All commands mirror the legacy behaviour, but now live under the Typer dispatcher:
+All commands mirror the legacy behavior, but now live under the Typer dispatcher:
 
 - `wctl doc-lint` / `doc-catalog` / `doc-toc` / `doc-mv` / `doc-refs` / `doc-bench` – wrappers around the `markdown-doc` toolkit with argument parity.
 - `wctl build-static-assets` – calls `wepppy/weppcloud/static-src/build-static-assets.sh`, adding `--prod` automatically when the installer targets the production compose file.
@@ -45,6 +45,7 @@ All commands mirror the legacy behaviour, but now live under the Typer dispatche
 - `wctl run-stubgen` – regenerates stubs (`python tools/sync_stubs.py`).
 - `wctl check-test-stubs` / `check-test-isolation` – launch the diagnostic scripts inside the container.
 - `wctl run-test-profile` / `run-fork-profile` / `run-archive-profile` – drive the profile playback FastAPI service, defaulting to the canonical `backed-globule` smoke profile when no overrides are supplied.
+- `wctl rq-info`: shows RQ stats for the default and batch queues (extra `rq info` args are appended).
 
 Every command supports `--help`, so discovery is as simple as `wctl run-pytest --help`.
 

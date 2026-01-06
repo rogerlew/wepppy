@@ -27,7 +27,7 @@
       passthrough.py         # fallback docker compose passthrough
   ```
 - **Environment resolution**: `context.py` merges `docker/.env`, optional host overrides, and runtime overrides to a temporary env file. Commands fetch defaults through the context (e.g., playback base URL).
-- **Passthrough**: Unknown commands fall back to `docker compose` with the generated `--env-file` and `-f` flags to preserve existing behaviour.
+- **Passthrough**: Unknown commands fall back to `docker compose` with the generated `--env-file` and `-f` flags to preserve existing behavior.
 
 ## Command Mapping
 | Existing Command           | Module / Function               | Notes |
@@ -38,6 +38,7 @@
 | `run-npm`                 | `commands/npm.py`                | Validates `npm` availability, forwards args. |
 | `run-pytest`, `run-stubtest`, `run-stubgen`, `check-test-*` | `commands/python_tasks.py` | Compose exec wrappers with shared quoting helper. |
 | `run-test-profile`, `run-fork-profile`, `run-archive-profile` | `commands/playback.py` | Reuse logic from `tools/profile_playback_cli.py`; module becomes the new home. |
+| `rq-info`                 | `commands/rq.py`                  | Compose exec wrapper for `rq info` (default + batch queues). |
 | Docker Compose passthrough | `commands/passthrough.py`        | Called when no Typer command matches. |
 
 ## Implementation Phases
