@@ -55,45 +55,35 @@ def _make_topo_files(topo_dir: Path, *, crs: str = "EPSG:32611") -> dict[str, Pa
     return {"dem": dem_path, "flovec": flovec_path, "netful": netful_path}
 
 
-def _write_watersheds(path: Path) -> None:
+def _write_watersheds(path: Path, point_ids: list[object] | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    if point_ids is None:
+        point_ids = [1, "2"]
+    features = []
+    for idx, point_id in enumerate(point_ids):
+        offset = idx * 30.0
+        features.append(
+            {
+                "type": "Feature",
+                "properties": {"Point_ID": point_id},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [500000.0 + offset, 4100000.0],
+                            [500020.0 + offset, 4100000.0],
+                            [500020.0 + offset, 4100020.0],
+                            [500000.0 + offset, 4100020.0],
+                            [500000.0 + offset, 4100000.0],
+                        ]
+                    ],
+                },
+            }
+        )
     payload = {
         "type": "FeatureCollection",
         "crs": {"type": "name", "properties": {"name": "EPSG:32611"}},
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {"Point_ID": 1},
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [500000.0, 4100000.0],
-                            [500020.0, 4100000.0],
-                            [500020.0, 4100020.0],
-                            [500000.0, 4100020.0],
-                            [500000.0, 4100000.0],
-                        ]
-                    ],
-                },
-            },
-            {
-                "type": "Feature",
-                "properties": {"Point_ID": "2"},
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [500030.0, 4100000.0],
-                            [500050.0, 4100000.0],
-                            [500050.0, 4100020.0],
-                            [500030.0, 4100020.0],
-                            [500030.0, 4100000.0],
-                        ]
-                    ],
-                },
-            },
-        ],
+        "features": features,
     }
     path.write_text(json.dumps(payload), encoding="utf-8")
 
@@ -210,3 +200,23 @@ def test_culverts_runner_creates_runs_and_get_wd(
 
         runid = f"culvert;;{batch_uuid};;{run_id}"
         assert get_wd(runid) == str(run_wd)
+
+
+def test_culverts_runner_rejects_path_traversal(tmp_path: Path) -> None:
+    batch_root = tmp_path / "culverts" / "batch-9999"
+    topo_dir = batch_root / "topo"
+    culverts_dir = batch_root / "culverts"
+    batch_root.mkdir(parents=True)
+
+    _make_topo_files(topo_dir)
+    watersheds_path = culverts_dir / "watersheds.geojson"
+    _write_watersheds(watersheds_path, point_ids=["../escape"])
+
+    payload_metadata = {
+        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "watersheds": {"path": "culverts/watersheds.geojson"},
+    }
+
+    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    with pytest.raises(ValueError, match="Point_ID"):
+        runner.create_runs("batch-9999", str(batch_root), payload_metadata)

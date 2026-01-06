@@ -282,9 +282,19 @@ class CulvertsRunner(NoDbBase):
             if point_id is None or point_id == "":
                 raise ValueError(f"Feature {idx} has empty {self.POINT_ID_FIELD} value")
             run_id = str(point_id)
+            self._validate_run_id(run_id, idx)
             if run_id in seen:
                 raise ValueError(f"Duplicate Point_ID detected: {run_id}")
             seen.add(run_id)
             run_ids.append(run_id)
 
         return run_ids
+
+    def _validate_run_id(self, run_id: str, idx: int) -> None:
+        if run_id in {".", ".."}:
+            raise ValueError(f"Invalid Point_ID for feature {idx}: {run_id}")
+        separators = {"/", "\\", os.sep}
+        if os.path.altsep:
+            separators.add(os.path.altsep)
+        if any(sep for sep in separators if sep and sep in run_id):
+            raise ValueError(f"Invalid Point_ID for feature {idx}: {run_id}")

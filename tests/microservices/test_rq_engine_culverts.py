@@ -138,6 +138,67 @@ def test_culvert_ingest_missing_point_id_returns_400(
     assert any(error["code"] == "missing_point_id" for error in payload["errors"])
 
 
+def test_culvert_ingest_invalid_point_id_returns_400(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+
+    def mutate_points(name: str, data: bytes) -> bytes:
+        if name != "culverts/culvert_points.geojson":
+            return data
+        payload = json.loads(data.decode("utf-8"))
+        features = payload.get("features", [])
+        if features:
+            features[0]["properties"]["Point_ID"] = "../escape"
+        return json.dumps(payload).encode("utf-8")
+
+    bad_zip = _rewrite_payload_zip(tmp_path, mutate_points)
+
+    with bad_zip.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+            )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["success"] is False
+    assert any(error["code"] == "invalid_point_id" for error in payload["errors"])
+
+
+def test_culvert_ingest_duplicate_point_id_returns_400(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+
+    def mutate_points(name: str, data: bytes) -> bytes:
+        if name != "culverts/culvert_points.geojson":
+            return data
+        payload = json.loads(data.decode("utf-8"))
+        features = payload.get("features", [])
+        if len(features) > 1:
+            first_id = features[0]["properties"].get("Point_ID")
+            features[1]["properties"]["Point_ID"] = first_id
+        return json.dumps(payload).encode("utf-8")
+
+    bad_zip = _rewrite_payload_zip(tmp_path, mutate_points)
+
+    with bad_zip.open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+            )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["success"] is False
+    assert any(error["code"] == "duplicate_point_id" for error in payload["errors"])
+
+
 def _rewrite_payload_zip(
     tmp_path: Path, mutate: Callable[[str, bytes], Optional[bytes]]
 ) -> Path:

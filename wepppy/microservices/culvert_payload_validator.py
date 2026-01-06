@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable, Optional
@@ -11,6 +12,7 @@ from pyproj import CRS
 METADATA_SCHEMA_VERSION = "culvert-metadata-v1"
 MODEL_PARAMS_SCHEMA_VERSION = "culvert-model-params-v1"
 POINT_ID_FIELD = "Point_ID"
+MAX_CULVERT_COUNT = 300
 
 REQUIRED_PAYLOAD_PATHS = (
     "metadata.json",
@@ -196,12 +198,29 @@ def _validate_metadata(metadata: dict[str, Any], issues: list[ValidationIssue]) 
             )
 
     culvert_count = metadata.get("culvert_count")
-    if culvert_count is not None and not isinstance(culvert_count, int):
+    if culvert_count is None:
+        issues.append(
+            ValidationIssue(
+                code="missing_metadata_field",
+                message="metadata.json culvert_count is required.",
+                path="metadata.json",
+            )
+        )
+    elif not isinstance(culvert_count, int):
         issues.append(
             ValidationIssue(
                 code="invalid_metadata_field",
                 message="metadata.json culvert_count must be an integer.",
                 path="metadata.json",
+            )
+        )
+    elif culvert_count > MAX_CULVERT_COUNT:
+        issues.append(
+            ValidationIssue(
+                code="culvert_count_exceeds_limit",
+                message="metadata.json culvert_count exceeds limit.",
+                path="metadata.json",
+                detail={"max": MAX_CULVERT_COUNT, "found": culvert_count},
             )
         )
 
@@ -335,13 +354,13 @@ def _validate_geojsons(
             )
         )
 
-    culvert_ids = _extract_point_ids(
+    culvert_ids, culvert_feature_count = _extract_point_ids(
         culvert_points,
         POINT_ID_FIELD,
         issues,
         "culverts/culvert_points.geojson",
     )
-    watershed_ids = _extract_point_ids(
+    watershed_ids, _ = _extract_point_ids(
         watersheds,
         POINT_ID_FIELD,
         issues,
@@ -360,25 +379,35 @@ def _validate_geojsons(
                 )
             )
 
+    if culvert_feature_count > MAX_CULVERT_COUNT:
+        issues.append(
+            ValidationIssue(
+                code="culvert_count_exceeds_limit",
+                message="Culvert count exceeds limit.",
+                path="culverts/culvert_points.geojson",
+                detail={"max": MAX_CULVERT_COUNT, "found": culvert_feature_count},
+            )
+        )
+
     culvert_count = metadata.get("culvert_count")
-    if isinstance(culvert_count, int) and culvert_ids and culvert_count != len(culvert_ids):
+    if isinstance(culvert_count, int) and culvert_count != culvert_feature_count:
         issues.append(
             ValidationIssue(
                 code="culvert_count_mismatch",
                 message="metadata.json culvert_count does not match culvert points.",
                 path="metadata.json",
-                detail={"expected": culvert_count, "found": len(culvert_ids)},
+                detail={"expected": culvert_count, "found": culvert_feature_count},
             )
         )
 
     feature_count = (metadata.get("culvert_points") or {}).get("feature_count")
-    if isinstance(feature_count, int) and culvert_ids and feature_count != len(culvert_ids):
+    if isinstance(feature_count, int) and feature_count != culvert_feature_count:
         issues.append(
             ValidationIssue(
                 code="feature_count_mismatch",
                 message="metadata.json culvert_points.feature_count does not match features.",
                 path="metadata.json",
-                detail={"expected": feature_count, "found": len(culvert_ids)},
+                detail={"expected": feature_count, "found": culvert_feature_count},
             )
         )
 
@@ -388,7 +417,7 @@ def _extract_point_ids(
     field: str,
     issues: list[ValidationIssue],
     relpath: str,
-) -> set[str]:
+) -> tuple[set[str], int]:
     features = collection.get("features")
     if not isinstance(features, list):
         issues.append(
@@ -398,9 +427,11 @@ def _extract_point_ids(
                 path=relpath,
             )
         )
-        return set()
+        return set(), 0
 
+    feature_count = len(features)
     point_ids: set[str] = set()
+    counts: dict[str, int] = {}
     for idx, feature in enumerate(features):
         props = (feature or {}).get("properties") or {}
         if field not in props:
@@ -424,7 +455,35 @@ def _extract_point_ids(
                 )
             )
             continue
-        point_ids.add(str(value))
+        value_str = str(value)
+        invalid_reason = _invalid_point_id(value_str)
+        if invalid_reason:
+            issues.append(
+                ValidationIssue(
+                    code="invalid_point_id",
+                    message=f"{field} value is invalid.",
+                    path=relpath,
+                    detail={
+                        "feature_index": idx,
+                        "value": value_str,
+                        "reason": invalid_reason,
+                    },
+                )
+            )
+            continue
+        counts[value_str] = counts.get(value_str, 0) + 1
+        point_ids.add(value_str)
+
+    duplicates = sorted(pid for pid, count in counts.items() if count > 1)
+    if duplicates:
+        issues.append(
+            ValidationIssue(
+                code="duplicate_point_id",
+                message=f"Duplicate {field} values detected.",
+                path=relpath,
+                detail={"count": len(duplicates), "sample": duplicates[:10]},
+            )
+        )
 
     if not point_ids:
         issues.append(
@@ -435,7 +494,18 @@ def _extract_point_ids(
             )
         )
 
-    return point_ids
+    return point_ids, feature_count
+
+
+def _invalid_point_id(value: str) -> Optional[str]:
+    if value in {".", ".."}:
+        return "dot_path"
+    separators = {"/", "\\", os.sep}
+    if os.path.altsep:
+        separators.add(os.path.altsep)
+    if any(sep for sep in separators if sep and sep in value):
+        return "path_separator"
+    return None
 
 
 def _geojson_crs(collection: dict[str, Any], issues: list[ValidationIssue], relpath: str) -> Optional[CRS]:

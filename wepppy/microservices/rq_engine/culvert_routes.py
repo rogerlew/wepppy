@@ -33,6 +33,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
+
 
 @router.post("/culverts-wepp-batch/")
 async def culverts_wepp_batch(request: Request) -> JSONResponse:
@@ -56,6 +58,27 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
 
         zip_sha256 = _string_or_none(form.get("zip_sha256"))
         total_bytes = _string_or_none(form.get("total_bytes"))
+        total_bytes_value = None
+        if total_bytes is not None:
+            try:
+                total_bytes_value = int(total_bytes)
+            except ValueError:
+                total_bytes_value = None
+            else:
+                if total_bytes_value > MAX_PAYLOAD_BYTES:
+                    shutil.rmtree(batch_root, ignore_errors=True)
+                    issues = [
+                        ValidationIssue(
+                            code="payload_too_large",
+                            message="payload.zip exceeds size limit.",
+                            path="payload.zip",
+                            detail={
+                                "max_bytes": MAX_PAYLOAD_BYTES,
+                                "found": total_bytes_value,
+                            },
+                        )
+                    ]
+                    return validation_error_response(format_validation_errors(issues))
 
         payload_sha256, payload_bytes = await _save_upload_file(upload, payload_zip_path)
 
@@ -83,7 +106,6 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         netful_path = topo_dir / "netful.tif"
         _generate_batch_topo(dem_path, streams_path, flovec_path, netful_path)
 
-        total_bytes_value = int(total_bytes) if total_bytes is not None else None
         _write_batch_metadata(
             batch_root,
             culvert_batch_uuid,
@@ -199,6 +221,15 @@ def _validate_payload_size(
                 )
             )
         else:
+            if expected > MAX_PAYLOAD_BYTES:
+                issues.append(
+                    ValidationIssue(
+                        code="payload_too_large",
+                        message="payload.zip exceeds size limit.",
+                        path="payload.zip",
+                        detail={"max_bytes": MAX_PAYLOAD_BYTES, "found": expected},
+                    )
+                )
             if expected != payload_bytes:
                 issues.append(
                     ValidationIssue(
@@ -207,6 +238,16 @@ def _validate_payload_size(
                         path="total_bytes",
                     )
                 )
+
+    if payload_bytes > MAX_PAYLOAD_BYTES:
+        issues.append(
+            ValidationIssue(
+                code="payload_too_large",
+                message="payload.zip exceeds size limit.",
+                path="payload.zip",
+                detail={"max_bytes": MAX_PAYLOAD_BYTES, "found": payload_bytes},
+            )
+        )
 
     return issues
 
