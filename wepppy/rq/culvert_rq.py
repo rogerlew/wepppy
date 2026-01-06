@@ -6,10 +6,13 @@ import os
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
-from rq import get_current_job
+import redis
+from rq import Queue, get_current_job
+from rq.job import Job
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.wepp_nodb_post_utils import (
@@ -42,13 +45,8 @@ class CulvertBatchError(Exception):
         self.failed = failed
 
 
-def run_culvert_batch_rq(culvert_batch_uuid: str) -> dict[str, Any]:
-    """
-    Entrypoint for culvert batch processing.
-
-    Returns a summary dict with batch results. Raises CulvertBatchError
-    if all runs fail.
-    """
+def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
+    """Orchestrate culvert batch processing and enqueue per-run jobs."""
     job = get_current_job()
 
     if job is not None:
@@ -79,6 +77,77 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> dict[str, Any]:
 
     logger.info(f"culvert_batch {culvert_batch_uuid}: created {len(run_ids)} runs")
 
+    child_jobs: List[Job] = []
+    queued_jobs: Dict[str, str] = {}
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        q = Queue("batch", connection=redis_conn)
+        for run_id in run_ids:
+            runid = f"culvert;;{culvert_batch_uuid};;{run_id}"
+            child_job = q.enqueue_call(
+                func=run_culvert_run_rq,
+                args=[runid, culvert_batch_uuid, run_id],
+                timeout=TIMEOUT,
+            )
+            child_job.meta["runid"] = runid
+            child_job.meta["culvert_batch_uuid"] = culvert_batch_uuid
+            child_job.meta["run_id"] = run_id
+            child_job.save()
+            if job is not None:
+                job.meta[f"jobs:0,runid:{runid}"] = child_job.id
+                job.save()
+            child_jobs.append(child_job)
+            queued_jobs[run_id] = child_job.id
+
+        final_job = q.enqueue_call(
+            func=_final_culvert_batch_complete_rq,
+            args=[culvert_batch_uuid],
+            timeout=TIMEOUT,
+            depends_on=child_jobs if child_jobs else None,
+        )
+        final_job.meta["culvert_batch_uuid"] = culvert_batch_uuid
+        final_job.save()
+        if job is not None:
+            job.meta["jobs:1,func:_final_culvert_batch_complete_rq"] = final_job.id
+            job.save()
+
+    if queued_jobs:
+        with runner.locked():
+            for run_id, job_id in queued_jobs.items():
+                run_record = runner._runs.get(run_id, {})
+                run_record["job_id"] = job_id
+                runner._runs[run_id] = run_record
+
+    return final_job
+
+
+def run_culvert_run_rq(
+    runid: str,
+    culvert_batch_uuid: str,
+    run_id: str,
+) -> str:
+    """Execute a single culvert run inside the batch queue."""
+    job = get_current_job()
+    if job is not None:
+        job.meta["culvert_batch_uuid"] = culvert_batch_uuid
+        job.meta["run_id"] = run_id
+        job.save()
+
+    logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: starting")
+
+    batch_root = _resolve_batch_root(culvert_batch_uuid)
+    if not batch_root.is_dir():
+        raise FileNotFoundError(
+            f"Culvert batch root does not exist: {batch_root}"
+        )
+
+    runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
+    if runner is None:
+        raise FileNotFoundError(
+            f"Culvert batch runner not found for: {batch_root}"
+        )
+
+    payload_metadata = _load_payload_json(batch_root / "metadata.json")
     watersheds_path = runner._resolve_payload_path(
         payload_metadata,
         "watersheds",
@@ -87,22 +156,49 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     )
     watershed_features = runner.load_watershed_features(watersheds_path)
     wepppy_version = _get_wepppy_version()
+    run_wd = Path(runner.runs_dir) / run_id
+    if not run_wd.is_dir():
+        raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
 
+    return _process_culvert_run(
+        culvert_batch_uuid=culvert_batch_uuid,
+        run_id=run_id,
+        run_wd=run_wd,
+        watershed_feature=watershed_features.get(run_id),
+        run_config=runner.run_config,
+        wepppy_version=wepppy_version,
+    )
+
+
+def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
+    batch_root = _resolve_batch_root(culvert_batch_uuid)
+    if not batch_root.is_dir():
+        raise FileNotFoundError(
+            f"Culvert batch root does not exist: {batch_root}"
+        )
+
+    runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
+    if runner is None:
+        raise FileNotFoundError(
+            f"Culvert batch runner not found for: {batch_root}"
+        )
+
+    runs = runner.runs
     succeeded = 0
     failed = 0
-
-    for run_id in run_ids:
-        run_wd = Path(runner.runs_dir) / run_id
-        status = _process_culvert_run(
-            culvert_batch_uuid=culvert_batch_uuid,
-            run_id=run_id,
-            run_wd=run_wd,
-            watershed_feature=watershed_features.get(run_id),
-            run_config=runner.run_config,
-            wepppy_version=wepppy_version,
-        )
-        if status == "success":
-            succeeded += 1
+    for run_id, record in runs.items():
+        run_wd = Path(record.get("wd") or (batch_root / "runs" / run_id))
+        metadata_path = run_wd / "run_metadata.json"
+        if metadata_path.is_file():
+            try:
+                metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                metadata = {}
+            status = metadata.get("status")
+            if status == "success":
+                succeeded += 1
+            else:
+                failed += 1
         else:
             failed += 1
 
@@ -110,7 +206,7 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         runner._completed_at = datetime.now(timezone.utc).isoformat()
         runner._retention_days = runner.DEFAULT_RETENTION_DAYS
 
-    total = len(run_ids)
+    total = len(runs)
     summary = {
         "culvert_batch_uuid": culvert_batch_uuid,
         "total": total,
@@ -260,4 +356,9 @@ def _get_wepppy_version() -> Optional[str]:
         return None
 
 
-__all__ = ["TIMEOUT", "run_culvert_batch_rq", "CulvertBatchError"]
+__all__ = [
+    "TIMEOUT",
+    "run_culvert_batch_rq",
+    "run_culvert_run_rq",
+    "CulvertBatchError",
+]

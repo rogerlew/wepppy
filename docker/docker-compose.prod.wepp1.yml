@@ -74,6 +74,12 @@ services:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
       - /var/run/docker.sock:/var/run/docker.sock
+  rq-worker-batch:
+    <<: *wepppy-image
+    volumes:
+      - /geodata/wc1:/wc1
+      - /geodata:/geodata
+      - /var/run/docker.sock:/var/run/docker.sock
   weppcloudr:
     container_name: weppcloudr
     volumes:

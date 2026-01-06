@@ -78,7 +78,7 @@ def run_batch_rq(batch_name: str) -> Job:
         watershed_jobs: List[Job] = []
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
+            q = Queue("batch", connection=redis_conn)
 
             for wf in watershed_features:
                 runid = wf.runid

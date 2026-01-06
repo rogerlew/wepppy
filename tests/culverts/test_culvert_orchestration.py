@@ -5,12 +5,18 @@ from pathlib import Path
 
 import pytest
 
-from tests.culverts.test_culverts_runner import _make_topo_files, _write_watersheds
+from tests.culverts.test_culverts_runner import (
+    _init_base_project,
+    _make_topo_files,
+    _write_watersheds,
+)
+import wepppy.nodb.culverts_runner as culverts_runner_module
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.status_messenger import StatusMessenger
 import wepppy.rq.culvert_rq as culvert_rq_module
-from wepppy.rq.culvert_rq import run_culvert_batch_rq
+from wepppy.rq.culvert_rq import run_culvert_run_rq
+from wepppy.weppcloud.utils import helpers as wepp_helpers
 
 
 pytestmark = [pytest.mark.integration, pytest.mark.nodb]
@@ -32,11 +38,25 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     watersheds_path = culverts_dir / "watersheds.geojson"
     _write_watersheds(watersheds_path, point_ids=[1, 2])
 
+    base_runid = "batch;;culvert_base;;_base"
+    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    _init_base_project(base_src)
+
+    def _fake_get_wd(runid: str, *args, **kwargs) -> str:
+        if runid == base_runid:
+            return str(base_src)
+        return wepp_helpers.get_wd(runid, *args, **kwargs)
+
+    monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
+
     metadata = {
         "dem": {"path": "topo/hydro-enforced-dem.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
-    model_parameters = {"schema_version": "culvert-model-params-v1"}
+    model_parameters = {
+        "schema_version": "culvert-model-params-v1",
+        "base_project_runid": base_runid,
+    }
     (batch_root / "metadata.json").write_text(
         json.dumps(metadata), encoding="utf-8"
     )
@@ -71,7 +91,19 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     monkeypatch.setattr(culvert_rq_module, "ensure_watershed_interchange", _noop)
     monkeypatch.setattr(culvert_rq_module, "activate_query_engine_for_run", _noop)
 
-    run_culvert_batch_rq(batch_uuid)
+    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    run_ids = runner.create_runs(
+        batch_uuid,
+        str(batch_root),
+        metadata,
+        model_parameters=model_parameters,
+    )
+
+    for run_id in run_ids:
+        runid = f"culvert;;{batch_uuid};;{run_id}"
+        run_culvert_run_rq(runid, batch_uuid, run_id)
+
+    culvert_rq_module._final_culvert_batch_complete_rq(batch_uuid)
 
     run1_metadata = json.loads(
         (batch_root / "runs" / "1" / "run_metadata.json").read_text(encoding="utf-8")

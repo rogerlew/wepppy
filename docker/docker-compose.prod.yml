@@ -324,7 +324,7 @@ services:
       - rq
       - worker-pool
       - -n
-      - "4"
+      - "6"
       - -u
       - ${RQ_REDIS_URL:-redis://redis:6379/9}
       - --logging-level
@@ -332,6 +332,37 @@ services:
       - --worker-class
       - wepppy.rq.WepppyRqWorker
       - default
+
+  rq-worker-batch:
+    <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    environment:
+      <<: *wepppy-env
+      LOGLEVEL: INFO
+      RQ_LOGGING_LEVEL: INFO
+      WEPPPY_NCPU: "6"
+      # Prefer explicit RQ_REDIS_URL when running workers on external hosts
+      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+      WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+    volumes:
+      - /wc1:/wc1
+      - /wc1/geodata:/geodata
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - rq
+      - worker-pool
+      - -n
+      - "4"
+      - -u
+      - ${RQ_REDIS_URL:-redis://redis:6379/9}
+      - --logging-level
+      - INFO
+      - --worker-class
+      - wepppy.rq.WepppyRqWorker
+      - batch
 
   status:
     image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}

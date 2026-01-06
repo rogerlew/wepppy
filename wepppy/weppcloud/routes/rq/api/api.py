@@ -289,7 +289,7 @@ def api_run_batch(batch_name: str):
 
     try:
         with _redis_conn() as redis_conn:
-            q = Queue(connection=redis_conn)
+            q = Queue("batch", connection=redis_conn)
             job = q.enqueue_call(run_batch_rq, (batch_name,), timeout=TIMEOUT)
     except Exception:
         return exception_factory('Failed to enqueue batch run', runid=batch_name)

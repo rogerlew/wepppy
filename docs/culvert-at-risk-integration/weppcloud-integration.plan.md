@@ -88,6 +88,25 @@ Notes:
 - BatchRunner WEPP post-processing now explicitly ensures hillslope interchange outputs, `totalwatsed3.parquet`, watershed interchange outputs, and query-engine activation when missing (mirrors `_build_hillslope_interchange_rq`, `_build_totalwatsed3_rq`, `_post_watershed_interchange_rq` behavior).
 - Consolidated WEPP post-processing helpers into `wepppy/nodb/wepp_nodb_post_utils.py` (and `.pyi`) and refactored `wepppy/nodb/batch_runner.py` + `wepppy/rq/culvert_rq.py` to use the shared utilities.
 
+## Phase 3b - Parallelized culvert/batch execution (RQ batch queue)
+- Scope: enqueue one RQ job per culvert run (mirrors `batch_rq` pattern) so culvert batches execute in parallel without blocking interactive workloads; use a dedicated `rq-worker-batch` service and queue for both batch + culvert jobs.
+- Dependencies: Phase 3 orchestration complete; RQ queue routing decisions; agreement on per-job runid format so logging attaches to `rq.log`.
+- Deliverables:
+  - New RQ queue (e.g., `batch`) for culvert + batch work; culvert orchestrator enqueues per-run jobs into this queue and uses a finalizer job with `depends_on`.
+  - New `rq-worker-batch` service in dev/prod compose (4 workers) listening to `batch` only; increase `rq-worker` (default queue) to 6 workers for interactive traffic.
+  - Concurrency clamps for batch workers:
+    - Set `WEPPPY_NCPU=6` in the `rq-worker-batch` service (caps NCPU-driven pools in climate/watershed/etc).
+- Risks: nested pools (ProcessPool + ThreadPool) inside a single culvert run can oversubscribe CPU if batch worker count is too high; misrouted jobs could starve interactive queues.
+- Verification: enqueue a small payload (1–2 culverts) and confirm parallel job fan-out + finalizer; validate worker isolation by running an interactive job on the default queue while batch queue executes.
+
+## Phase 3b handoff summary
+- Routed culvert ingestion and batch fan-out to the `batch` RQ queue in `wepppy/microservices/rq_engine/culvert_routes.py` and `wepppy/rq/batch_rq.py`.
+- Split culvert orchestration in `wepppy/rq/culvert_rq.py` into `run_culvert_batch_rq` (orchestrator), `run_culvert_run_rq` (per-run worker, runid first arg for `rq.log`), and `_final_culvert_batch_complete_rq` (finalizer); per-run jobs are enqueued in `Queue("batch")` with `depends_on` for the finalizer.
+- Orchestrator records per-run job IDs in both `job.meta` and `CulvertsRunner._runs[run_id]["job_id"]`; finalizer reads `run_metadata.json` to compute totals and writes `batch_summary.json` while updating `CulvertsRunner._completed_at` and `_retention_days`.
+- Batch-only hillslope clamp added via `WEPPPY_BATCH_MAX_WORKERS`, applied in `wepppy/nodb/batch_runner.py` and in the per-run culvert worker when calling `wepp.prep_hillslopes()` and `wepp.run_hillslopes()`.
+- Stubs updated in `wepppy/rq/culvert_rq.pyi` and `stubs/wepppy/rq/culvert_rq.pyi`.
+- Tests updated in `tests/culverts/test_culvert_orchestration.py` to call `run_culvert_run_rq` + finalizer; verification: `wctl run-pytest tests/culverts/test_culvert_orchestration.py tests/microservices/test_rq_engine_culverts.py` (pass; warnings only).
+
 ## Phase 4 - Artifact delivery and browse integration
 - Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; write `run_metadata.json`; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.
 - Dependencies: Phase 3 outputs; browse service routing rules; decision on which artifacts are mandatory vs optional.

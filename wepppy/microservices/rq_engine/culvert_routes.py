@@ -327,7 +327,7 @@ def _write_batch_metadata(
 def _enqueue_culvert_batch_job(culvert_batch_uuid: str) -> str:
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     with redis.Redis(**conn_kwargs) as redis_conn:
-        q = Queue(connection=redis_conn)
+        q = Queue("batch", connection=redis_conn)
         job = q.enqueue_call(
             func=run_culvert_batch_rq,
             args=[culvert_batch_uuid],
