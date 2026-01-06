@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.core import Ron, Watershed
+from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.weppcloud.utils.helpers import get_wd
 
 
@@ -263,15 +264,20 @@ class CulvertsRunner(NoDbBase):
         return value
 
     def _load_run_ids(self, watersheds_src: str) -> List[str]:
-        with open(watersheds_src, "r", encoding="utf-8") as handle:
+        features = self.load_watershed_features(watersheds_src)
+        return list(features.keys())
+
+    def load_watershed_features(
+        self, watersheds_geojson_path: str
+    ) -> Dict[str, WatershedFeature]:
+        with open(watersheds_geojson_path, "r", encoding="utf-8") as handle:
             payload = json.load(handle)
 
         features = payload.get("features")
         if not isinstance(features, list) or not features:
             raise ValueError("Watersheds GeoJSON contains no features")
 
-        run_ids: List[str] = []
-        seen: set[str] = set()
+        run_features: Dict[str, WatershedFeature] = {}
         for idx, feature in enumerate(features):
             props = (feature or {}).get("properties") or {}
             if self.POINT_ID_FIELD not in props:
@@ -283,12 +289,11 @@ class CulvertsRunner(NoDbBase):
                 raise ValueError(f"Feature {idx} has empty {self.POINT_ID_FIELD} value")
             run_id = str(point_id)
             self._validate_run_id(run_id, idx)
-            if run_id in seen:
+            if run_id in run_features:
                 raise ValueError(f"Duplicate Point_ID detected: {run_id}")
-            seen.add(run_id)
-            run_ids.append(run_id)
+            run_features[run_id] = WatershedFeature(feature, runid=run_id, index=idx)
 
-        return run_ids
+        return run_features
 
     def _validate_run_id(self, run_id: str, idx: int) -> None:
         if run_id in {".", ".."}:

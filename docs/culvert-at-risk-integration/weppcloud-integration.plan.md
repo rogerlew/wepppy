@@ -77,6 +77,16 @@ Notes:
 - Risks: long runtimes for 300 culverts; missing datasets for runs; error isolation (one culvert failure should not cancel entire batch).
 - Verification: integration test with a tiny payload (1-2 culverts) using mocked heavy tasks; manual run with real payloads in the container, confirming per-culvert outputs.
 
+## Phase 3 handoff summary
+- Orchestration updated in `wepppy/rq/culvert_rq.py` to create runs, load watershed features, and execute the per-culvert pipeline sequentially: `find_outlet` (watershed polygon), `build_subcatchments`, `abstract_watershed`, `build_landuse`, `build_soils`, `build_climate`, `run_wepp_hillslopes`, `run_wepp_watershed`.
+- Per-culvert failures are isolated (caught/logged) and do not stop later runs; completion/retention timestamps are set only after all runs finish.
+- `run_metadata.json` is written per run with `runid`, `point_id`, `culvert_batch_uuid`, `config`, `status`, `started_at`, `completed_at`, `duration_seconds`, optional `wepppy_version`, and `error` details when failed.
+- `CulvertsRunner.load_watershed_features()` added to reuse Point_ID validation and construct `WatershedFeature` objects; stubs updated.
+- Integration test added in `tests/culverts/test_culvert_orchestration.py` (monkeypatched heavy methods) to validate metadata creation, failure isolation, and `completed_at` set after processing.
+- Verification: `wctl run-pytest tests/culverts/test_culvert_orchestration.py` (pass; warnings only).
+- BatchRunner WEPP post-processing now explicitly ensures hillslope interchange outputs, `totalwatsed3.parquet`, watershed interchange outputs, and query-engine activation when missing (mirrors `_build_hillslope_interchange_rq`, `_build_totalwatsed3_rq`, `_post_watershed_interchange_rq` behavior).
+- Consolidated WEPP post-processing helpers into `wepppy/nodb/wepp_nodb_post_utils.py` (and `.pyi`) and refactored `wepppy/nodb/batch_runner.py` + `wepppy/rq/culvert_rq.py` to use the shared utilities.
+
 ## Phase 4 - Artifact delivery and browse integration
 - Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; write `run_metadata.json`; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.
 - Dependencies: Phase 3 outputs; browse service routing rules; decision on which artifacts are mandatory vs optional.

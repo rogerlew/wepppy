@@ -24,6 +24,12 @@ from wepppy.weppcloud.utils.helpers import get_batch_root_dir, get_wd
 from wepppy.nodb.core import *
 from wepppy.nodb.mods.openet.openet_ts import OpenET_TS
 from wepppy.nodb.mods.rap.rap_ts import RAP_TS
+from wepppy.nodb.wepp_nodb_post_utils import (
+    activate_query_engine_for_run,
+    ensure_hillslope_interchange,
+    ensure_totalwatsed3,
+    ensure_watershed_interchange,
+)
 
 
 from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
@@ -342,11 +348,17 @@ class BatchRunner(NoDbBase):
             logger.info('calling wepp.run_hillslopes()')
             wepp.run_hillslopes()
 
+        if run_hillslopes:
+            ensure_hillslope_interchange(wepp, climate, logger)
+
         if run_watershed:
             logger.info('calling wepp.prep_watershed()')
             wepp.prep_watershed()
             logger.info('calling wepp.run_watershed()')
             wepp.run_watershed()  # also triggers post wepp processing
+            ensure_totalwatsed3(wepp, climate, logger)
+            ensure_watershed_interchange(wepp, climate, logger)
+            activate_query_engine_for_run(wepp, logger)
 
         return tuple(locks_cleared) if locks_cleared else ()
 

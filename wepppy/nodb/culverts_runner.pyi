@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, ClassVar, Dict, Optional, Tuple
 
 from wepppy.nodb.base import NoDbBase
+from wepppy.topo.watershed_collection import WatershedFeature
 
 __all__ = ["CulvertsRunner"]
 
@@ -52,3 +53,6 @@ class CulvertsRunner(NoDbBase):
         payload_metadata: Dict[str, Any],
         model_parameters: Optional[Dict[str, Any]] = ...,
     ) -> Tuple[str, ...]: ...
+    def load_watershed_features(
+        self, watersheds_geojson_path: str
+    ) -> Dict[str, WatershedFeature]: ...
