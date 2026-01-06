@@ -11,6 +11,32 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 __all__ = ["WatershedFeature", "WatershedCollection"]
 
 
+def _normalize_geojson_crs_name(name: str) -> str:
+    normalized = name.strip()
+    upper = normalized.upper()
+    if "CRS84" in upper:
+        return "EPSG:4326"
+    match = re.search(r"EPSG[:/]+(\d+)", normalized, flags=re.IGNORECASE)
+    if match:
+        return f"EPSG:{match.group(1)}"
+    return normalized
+
+
+def _extract_geojson_crs(data: Dict[str, Any]) -> Optional[str]:
+    if not isinstance(data, dict):
+        return None
+    crs = data.get("crs")
+    if isinstance(crs, str) and crs.strip():
+        return _normalize_geojson_crs_name(crs)
+    if isinstance(crs, dict):
+        name = crs.get("name")
+        if not name and isinstance(crs.get("properties"), dict):
+            name = crs["properties"].get("name")
+        if isinstance(name, str) and name.strip():
+            return _normalize_geojson_crs_name(name)
+    return None
+
+
 class WatershedFeature(object):
     """Representation of a single watershed feature within a GeoJSON collection.
 
@@ -24,13 +50,21 @@ class WatershedFeature(object):
         Zero-based index of the feature within the source FeatureCollection.
     """
 
-    def __init__(self, feature: Dict[str, Any], runid: str, *, index: int):
+    def __init__(
+        self,
+        feature: Dict[str, Any],
+        runid: str,
+        *,
+        index: int,
+        crs: Optional[str] = None,
+    ):
         self.feature: Dict[str, Any] = feature
         self.id: Any = feature.get("id")
         self.properties: Dict[str, Any] = feature.get("properties") or {}
         self.geometry: Dict[str, Any] = feature.get("geometry") or {}
         self.type: Optional[str] = self.geometry.get("type")
         self.coordinates: Any = self.geometry.get("coordinates")
+        self.crs: Optional[str] = crs
         self.runid: str = runid
         self.index: int = index
         if not self.is_valid():
@@ -43,13 +77,14 @@ class WatershedFeature(object):
         features: Dict[str, Any] = deepcopy(self.feature)
         features['properties']['runid'] = self.runid
         features['properties']['index'] = self.index
-        
+        crs_name = self.crs or "urn:ogc:def:crs:OGC:1.3:CRS84"
+
         geojson_object = {
             "type": "FeatureCollection",
             "crs": {
                 "type": "name",
                 "properties": {
-                    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                    "name": crs_name
                 }
             },
             "features": [features]
@@ -90,19 +125,19 @@ class WatershedFeature(object):
         ]
     
     def build_raster_mask(self, template_filepath: str, dst_filepath: str) -> None:
-        """Rasterise the feature geometry using the template raster's spatial metadata."""
+        """Rasterize the feature geometry using the template raster's spatial metadata."""
         import geopandas as gpd
         import rasterio
         from rasterio.features import rasterize
 
-        # 1. Create a GeoDataFrame from the feature's geometry, assuming its
-        #    source CRS is WGS84 (EPSG:4326), a common standard for GeoJSON.
+        # 1. Create a GeoDataFrame from the feature's geometry in its source CRS.
         geom = {
             "type": "Feature",
             "geometry": self.geometry,
             "properties": {},
         }
-        gdf = gpd.GeoDataFrame.from_features([geom], crs="EPSG:4326")
+        source_crs = self.crs or "EPSG:4326"
+        gdf = gpd.GeoDataFrame.from_features([geom], crs=source_crs)
 
         # 2. Open the template raster to get its CRS and other metadata.
         with rasterio.open(template_filepath) as src:
@@ -189,6 +224,7 @@ class WatershedCollection(object):
         template = self.runid_template
         features = self.geojson_features
         allowed_functions = self._get_allowed_template_functions() if template else None
+        crs_name = _extract_geojson_crs(self.data)
 
         for index, feature in enumerate(features):
             context = self.template_feature_context(index)
@@ -196,7 +232,7 @@ class WatershedCollection(object):
             runid = str(rendered).strip() or None
             if runid is None:
                 raise ValueError(f"Feature at index {index} produced an empty run id")
-            yield WatershedFeature(feature, runid=runid, index=index)
+            yield WatershedFeature(feature, runid=runid, index=index, crs=crs_name)
 
     @property
     def runid_template(self) -> Optional[str]:

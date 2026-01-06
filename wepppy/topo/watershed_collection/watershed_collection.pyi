@@ -4,6 +4,9 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 __all__ = ["WatershedFeature", "WatershedCollection"]
 
+def _normalize_geojson_crs_name(name: str) -> str: ...
+def _extract_geojson_crs(data: Dict[str, Any]) -> Optional[str]: ...
+
 class WatershedFeature:
     feature: Dict[str, Any]
     id: Any
@@ -11,11 +14,19 @@ class WatershedFeature:
     geometry: Dict[str, Any]
     type: Optional[str]
     coordinates: Any
+    crs: Optional[str]
     runid: str
     index: int
     bbox: List[float]
 
-    def __init__(self, feature: Dict[str, Any], runid: str, *, index: int) -> None: ...
+    def __init__(
+        self,
+        feature: Dict[str, Any],
+        runid: str,
+        *,
+        index: int,
+        crs: Optional[str] = ...,
+    ) -> None: ...
     def save_geojson(self, filepath: str) -> None: ...
     def is_valid(self) -> bool: ...
     def get_padded_bbox(self, pad: float) -> List[float]: ...

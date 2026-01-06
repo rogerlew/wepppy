@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.watershed_collection import WatershedFeature
+from wepppy.topo.watershed_collection.watershed_collection import _extract_geojson_crs
 from wepppy.weppcloud.utils.helpers import get_wd
 
 
@@ -278,6 +279,7 @@ class CulvertsRunner(NoDbBase):
             raise ValueError("Watersheds GeoJSON contains no features")
 
         run_features: Dict[str, WatershedFeature] = {}
+        crs_name = _extract_geojson_crs(payload)
         for idx, feature in enumerate(features):
             props = (feature or {}).get("properties") or {}
             if self.POINT_ID_FIELD not in props:
@@ -291,7 +293,9 @@ class CulvertsRunner(NoDbBase):
             self._validate_run_id(run_id, idx)
             if run_id in run_features:
                 raise ValueError(f"Duplicate Point_ID detected: {run_id}")
-            run_features[run_id] = WatershedFeature(feature, runid=run_id, index=idx)
+            run_features[run_id] = WatershedFeature(
+                feature, runid=run_id, index=idx, crs=crs_name
+            )
 
         return run_features
 
