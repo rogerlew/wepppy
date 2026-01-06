@@ -1,13 +1,9 @@
-"""FastAPI microservice for RQ job polling endpoints."""
-
 from __future__ import annotations
 
 import logging
-import traceback
 from typing import Any
 
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request
 
 from wepppy.rq.job_info import (
     get_wepppy_rq_job_info,
@@ -16,19 +12,11 @@ from wepppy.rq.job_info import (
 )
 from wepppy.rq.jobinfo_payloads import extract_job_ids
 
+from .responses import error_response
+
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0")
-
-
-def _error_response(message: str) -> JSONResponse:
-    stacktrace = traceback.format_exc().splitlines()
-    payload = {
-        "Success": False,
-        "Error": message,
-        "StackTrace": stacktrace,
-    }
-    return JSONResponse(payload, status_code=500)
+router = APIRouter()
 
 
 async def _safe_json(request: Request) -> Any:
@@ -38,33 +26,25 @@ async def _safe_json(request: Request) -> Any:
         return None
 
 
-@app.get("/health")
-def health() -> dict[str, str]:
-    return {
-        "status": "ok",
-        "scope": "rq-engine",
-    }
-
-
-@app.get("/api/jobstatus/{job_id}")
+@router.get("/jobstatus/{job_id}")
 def jobstatus(job_id: str):
     try:
         return get_wepppy_rq_job_status(job_id)
     except Exception:
         logger.exception("rq-engine jobstatus failed")
-        return _error_response("Error Handling Request")
+        return error_response("Error Handling Request")
 
 
-@app.get("/api/jobinfo/{job_id}")
+@router.get("/jobinfo/{job_id}")
 def jobinfo(job_id: str):
     try:
         return get_wepppy_rq_job_info(job_id)
     except Exception:
         logger.exception("rq-engine jobinfo failed")
-        return _error_response("Error Handling Request")
+        return error_response("Error Handling Request")
 
 
-@app.post("/api/jobinfo")
+@router.post("/jobinfo")
 async def jobinfo_batch(request: Request):
     try:
         payload = await _safe_json(request)
@@ -77,7 +57,7 @@ async def jobinfo_batch(request: Request):
         return {"jobs": job_info_map, "job_ids": ordered_ids}
     except Exception:
         logger.exception("rq-engine batch jobinfo failed")
-        return _error_response("Failed to retrieve batch job info")
+        return error_response("Failed to retrieve batch job info")
 
 
-__all__ = ["app"]
+__all__ = ["router"]

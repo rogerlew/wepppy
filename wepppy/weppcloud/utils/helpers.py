@@ -141,6 +141,9 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 if _exists(legacy_candidate):
                     scenario_path = legacy_candidate
             path = scenario_path
+        elif _group == 'culvert':
+            culverts_root = os.getenv("CULVERTS_ROOT", "/wc1/culverts")
+            path = _join(culverts_root, _name, "runs", _runid)
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:

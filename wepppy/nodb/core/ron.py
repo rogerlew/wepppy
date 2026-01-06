@@ -65,7 +65,12 @@ import requests
 from wepppy.nodb.version import read_version
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
-from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
+from wepppy.all_your_base.geo import (
+    RasterDatasetInterpolator,
+    haversine,
+    read_raster,
+    utm_srid,
+)
 
 from wepppy.locales.earth.opentopography import opentopo_retrieve
 
@@ -880,6 +885,58 @@ class Ron(NoDbBase):
 
         assert _exists(self.dem_fn)
         update_catalog_entry(self.wd, self.dem_fn)
+
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.fetch_dem)
+        except FileNotFoundError:
+            pass
+
+    def symlink_dem(self, dem_fn: str) -> None:
+        dem_src = os.path.abspath(dem_fn)
+        if not _exists(dem_src):
+            raise FileNotFoundError(f"DEM file does not exist: {dem_src}")
+
+        os.makedirs(self.dem_dir, exist_ok=True)
+        dest = self.dem_fn
+
+        if os.path.lexists(dest):
+            if os.path.islink(dest):
+                existing = os.path.realpath(dest)
+                if existing != dem_src:
+                    os.unlink(dest)
+            else:
+                if os.path.samefile(dest, dem_src):
+                    pass
+                else:
+                    raise FileExistsError(
+                        f"DEM path already exists and is not a symlink: {dest}"
+                    )
+
+        if not os.path.lexists(dest):
+            os.symlink(dem_src, dest)
+
+        rdi = RasterDatasetInterpolator(dem_src)
+        cellsize = abs(rdi.transform[1])
+        if cellsize <= 0:
+            raise ValueError(f"Invalid DEM cellsize: {cellsize}")
+        extent = list(rdi.extent)
+        center = [(extent[0] + extent[2]) / 2.0, (extent[1] + extent[3]) / 2.0]
+        zoom = getattr(self, "_zoom0", None)
+        zoom = int(zoom) if isinstance(zoom, int) else 11
+
+        with self.locked():
+            self._cellsize = cellsize
+            self._map = Map(extent, center, zoom, cellsize)
+            self._w3w = None
+
+        base = os.path.abspath(self.wd)
+        if os.path.commonpath([base, dem_src]) == base:
+            update_catalog_entry(self.wd, self.dem_fn)
+        else:
+            self.logger.info(
+                "Skipping catalog update for external DEM symlink: %s", dem_src
+            )
 
         try:
             prep = RedisPrep.getInstance(self.wd)

@@ -62,7 +62,7 @@ elevation = response.json()["elevation"]
 
 ### RQ Engine Service
 
-**File**: `rq_engine.py`
+**Package**: `rq_engine/`
 
 Read-only FastAPI service that exposes RQ job polling endpoints to offload frequent jobstatus/jobinfo requests from the Flask app.
 

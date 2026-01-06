@@ -94,7 +94,13 @@ from wepppy.topo.peridot.flowpath import (
 
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_abstraction import SlopeFile
-from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary, identify_edge_hillslopes
+from wepppy.topo.watershed_abstraction.support import (
+    ChannelSummary,
+    HillSummary,
+    identify_edge_hillslopes,
+    json_to_wgs,
+    polygonize_netful,
+)
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
@@ -872,6 +878,58 @@ class Watershed(NoDbBase):
 
         prep = RedisPrep.getInstance(self.wd)
         prep.timestamp(TaskEnum.build_channels)
+
+    def symlink_channels_map(self, flovec_src: str, netful_src: str) -> None:
+        func_name = inspect.currentframe().f_code.co_name  # type: ignore
+        self.logger.info(
+            f"{self.class_name}.{func_name}(flovec_src={flovec_src}, netful_src={netful_src})"
+        )
+
+        if not self.delineation_backend_is_wbt:
+            raise RuntimeError("symlink_channels_map requires WBT delineation backend")
+
+        flovec_src = os.path.abspath(flovec_src)
+        netful_src = os.path.abspath(netful_src)
+
+        if not _exists(flovec_src):
+            raise FileNotFoundError(f"Flow vector file does not exist: {flovec_src}")
+        if not _exists(netful_src):
+            raise FileNotFoundError(f"Stream network file does not exist: {netful_src}")
+
+        os.makedirs(self.wbt_wd, exist_ok=True)
+
+        def _ensure_symlink(src: str, dest: str) -> None:
+            if os.path.lexists(dest):
+                if os.path.islink(dest):
+                    existing = os.path.realpath(dest)
+                    if existing != src:
+                        os.unlink(dest)
+                else:
+                    if os.path.samefile(dest, src):
+                        return
+                    raise FileExistsError(
+                        f"Destination exists and is not a symlink: {dest}"
+                    )
+            if not os.path.lexists(dest):
+                os.symlink(src, dest)
+
+        _ensure_symlink(flovec_src, _join(self.wbt_wd, "flovec.tif"))
+        _ensure_symlink(netful_src, _join(self.wbt_wd, "netful.tif"))
+
+        netful_geojson = self.netful_utm_shp
+        netful_wgs_geojson = self.netful_shp
+        for path in (netful_geojson, netful_wgs_geojson):
+            if path and _exists(path):
+                os.remove(path)
+
+        polygonize_netful(self.netful, netful_geojson)
+        json_to_wgs(netful_geojson)
+
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.build_channels)
+        except FileNotFoundError:
+            pass
 
     @property
     def target_watershed_path(self) -> str:

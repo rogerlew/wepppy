@@ -3,6 +3,7 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
+from wepppy.microservices.rq_engine import job_routes
 
 
 pytestmark = pytest.mark.microservice
@@ -23,7 +24,7 @@ def test_jobstatus_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> N
         seen["job_id"] = job_id
         return {"status": "ok", "job_id": job_id}
 
-    monkeypatch.setattr(rq_engine, "get_wepppy_rq_job_status", fake_jobstatus)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", fake_jobstatus)
 
     with TestClient(rq_engine.app) as client:
         response = client.get("/api/jobstatus/job-123")
@@ -39,7 +40,7 @@ def test_jobinfo_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> Non
         seen["job_id"] = job_id
         return {"id": job_id, "status": "finished"}
 
-    monkeypatch.setattr(rq_engine, "get_wepppy_rq_job_info", fake_jobinfo)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", fake_jobinfo)
 
     with TestClient(rq_engine.app) as client:
         response = client.get("/api/jobinfo/job-abc")
@@ -48,14 +49,16 @@ def test_jobinfo_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> Non
     assert seen["job_id"] == "job-abc"
 
 
-def test_jobinfo_batch_preserves_order_and_filters_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_jobinfo_batch_preserves_order_and_filters_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     seen = {}
 
     def fake_jobs_info(job_ids: list[str]) -> dict[str, dict[str, str]]:
         seen["job_ids"] = list(job_ids)
         return {"a": {"id": "a"}, "c": {"id": "c"}}
 
-    monkeypatch.setattr(rq_engine, "get_wepppy_rq_jobs_info", fake_jobs_info)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", fake_jobs_info)
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/jobinfo", json={"job_ids": ["a", "b", "c"]})
@@ -66,11 +69,13 @@ def test_jobinfo_batch_preserves_order_and_filters_missing(monkeypatch: pytest.M
     assert payload["job_ids"] == ["a", "c"]
 
 
-def test_jobinfo_batch_uses_query_args_when_payload_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_jobinfo_batch_uses_query_args_when_payload_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     def fake_jobs_info(job_ids: list[str]) -> dict[str, dict[str, str]]:
         return {job_id: {"id": job_id} for job_id in job_ids}
 
-    monkeypatch.setattr(rq_engine, "get_wepppy_rq_jobs_info", fake_jobs_info)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", fake_jobs_info)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -86,7 +91,7 @@ def test_jobinfo_error_returns_500_payload(monkeypatch: pytest.MonkeyPatch) -> N
     def explode(job_id: str) -> dict[str, str]:
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(rq_engine, "get_wepppy_rq_job_info", explode)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", explode)
 
     with TestClient(rq_engine.app) as client:
         response = client.get("/api/jobinfo/job-err")

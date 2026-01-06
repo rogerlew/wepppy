@@ -29,10 +29,10 @@
 ## Storage layout and naming
 - Batch root: `/wc1/culverts/<culvert_batch_uuid>/`.
 - Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
-- Canonical DEM path: `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif`.
+- Canonical DEM path: `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`.
 - Each culvert is a canonical weppcloud project at `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/`.
-  - DEM symlink: instead of fetching/copying the DEM for each culvert project, create a symlink from per-run path to canonical DEM (e.g., `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/dem/dem.tif` → `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif`). This is handled by a new `Ron.link_dem()` method that creates the symlink and sets `ron.map` (see DEM symlink manager below).
-- `_base` project initialization: `culvert.cfg` specifies a `base_runid` key pointing to a template project that gets copied to `/wc1/culverts/<culvert_batch_uuid>/runs/_base/`. This mirrors the BatchRunner pattern and stages shared parameters and defaults.
+  - DEM symlink: instead of fetching/copying the DEM for each culvert project, create a symlink from per-run path to canonical DEM (e.g., `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/dem/dem.tif` → `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`). This is handled by a new `Ron.symlink_dem()` method that creates the symlink and sets `ron.map` (see DEM symlink manager below).
+- `_base` project initialization: `culvert.cfg` specifies a `base_runid` key pointing to a template project that gets copied to `/wc1/culverts/<culvert_batch_uuid>/_base/`. This mirrors the BatchRunner pattern and stages shared parameters and defaults.
 
 ## End-to-end flow (proposed)
 1. User creates a project in Culvert_web_app.
@@ -74,7 +74,7 @@ This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The s
 The `Ron` class gains a new method to handle preexisting DEMs without fetching or copying:
 
 ```python
-def link_dem(self, dem_path: str) -> None:
+def symlink_dem(self, dem_path: str) -> None:
     """
     Create a symlink to an external DEM and populate self.map.
     
@@ -109,8 +109,8 @@ Top-level files/directories (required unless noted):
 Note: avoid ESRI shapefiles and sidecars entirely.
 
 **Stream raster notes:**
-- The `streams.tif` from Culvert_web_app (typically `main_stream_raster_UTM.tif`) is used directly by wepp.cloud for channel delineation.
-- Since streams are provided, `mcl` (minimum channel length) and `csa` (critical source area) parameters are NOT included in `model-parameters.json`—these were already applied when Culvert_web_app generated the stream network.
+- The `streams.tif` from Culvert_web_app (typically `main_stream_raster_UTM.tif`) is used to generate batch-level `topo/netful.tif`.
+- Since streams are provided, `mcl` (minimum channel length) and `csa` (critical source area) parameters are NOT included in `model-parameters.json`—these were already applied when Culvert_web_app generated the stream network and `netful.tif`.
 
 ### `metadata.json` schema (v1)
 - `schema_version` (string, required; `culvert-metadata-v1`)
@@ -177,7 +177,7 @@ Example feature:
 ### Batch initialization
 - Validate ZIP structure, verify GeoJSON + GeoTIFF alignment, and confirm coordinate system.
 - Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
-- Place hydro-enforced DEM at `/wc1/culverts/<culvert_batch_uuid>/dem/hydro-enforced-dem.tif`.
+- Place hydro-enforced DEM at `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`.
 - Generate batch-level topo rasters from the shared DEM + streams:
   - `wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)` → `topo/flovec.tif`
   - `wbt.stream_junction_identifier(d8_pntr=flovec_fn, streams=topo/streams.tif, output=chnjnt_fn)` → `topo/netful.tif`
@@ -186,7 +186,7 @@ Example feature:
 ### Per-culvert processing
 For each culvert (identified by `Point_ID`):
 
-1. **Link DEM, streams, and topo rasters:** Use `Ron.link_dem()` to symlink to the shared hydro-enforced DEM. Similarly link the shared `streams.tif`, `flovec.tif`, and `netful.tif`.
+1. **Link DEM and topo rasters:** Use `Ron.symlink_dem()` to symlink to the shared hydro-enforced DEM. Similarly link the shared `flovec.tif` and `netful.tif` into each run.
 
 2. **Find outlet from watershed geometry:**
    ```python
@@ -195,12 +195,12 @@ For each culvert (identified by `Point_ID`):
 
    # Use Watershed.find_outlet() to locate the outlet pixel
    # This finds the lowest elevation point on the watershed boundary
-   # that intersects the stream network (from streams.tif)
+   # that intersects the stream network (from netful.tif)
    outlet_col, outlet_row = Watershed.find_outlet(watershed_geom)
    ```
-   The `find_outlet()` method analyzes the watershed polygon against the DEM and stream raster to determine the pour point pixel coordinates. This is more robust than using the culvert point directly, as it ensures the outlet is on the actual flow path.
+   The `find_outlet()` method analyzes the watershed polygon against the DEM and stream network raster to determine the pour point pixel coordinates. This is more robust than using the culvert point directly, as it ensures the outlet is on the actual flow path.
 
-3. **Delineate subcatchments/channels:** Use `TopazEmulator` with the identified outlet and the provided `streams.tif`. Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
+3. **Delineate subcatchments/channels:** Use the WBT Topaz emulator with the identified outlet and the shared `flovec.tif`/`netful.tif`. Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
    - `polygonize_netful(self.netful, self.netful_json)`
    - `json_to_wgs(self.netful_json)`
 
@@ -254,7 +254,7 @@ For each culvert (identified by `Point_ID`):
 - ~~GeoJSON attributes: canonical culvert id field and any required properties.~~ (Point_ID documented above)
 - ~~Watershed raster encoding: confirm by inspecting Culvert_web_app pipeline.~~ (Changed to GeoJSON polygons; raster not needed)
 - ~~Browse service path and expected UI flow for culvert downloads; may require a custom route.~~ (URL scheme documented above)
-- ~~Stream raster in payload.~~ (streams.tif provided by Culvert_web_app; mcl/csa not needed)
+- ~~Stream raster in payload.~~ (streams.tif provided by Culvert_web_app; used for batch `netful.tif` generation; mcl/csa not needed)
 - Retry and idempotency semantics for duplicate POSTs.
 - Long-term auth model (JWT issuance, refresh, key rotation) and webhook payload schema/retry policy.
 - Data retention policy and cleanup schedule in `/wc1/culverts/` (required).
