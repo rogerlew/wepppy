@@ -12,7 +12,7 @@ from os.path import join as _join
 import shutil
 from typing import Any, Dict, List, Optional, Tuple
 
-from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_collection.watershed_collection import _extract_geojson_crs
@@ -33,6 +33,7 @@ class CulvertsRunner(NoDbBase):
     DEFAULT_WATERSHEDS_REL_PATH = "culverts/watersheds.geojson"
     DEFAULT_FLOVEC_REL_PATH = "topo/flovec.tif"
     DEFAULT_NETFUL_REL_PATH = "topo/netful.tif"
+    DEFAULT_CHNJNT_REL_PATH = "topo/chnjnt.tif"
     DEFAULT_BASE_DIRNAME = "_base"
     POINT_ID_FIELD = "Point_ID"
 
@@ -128,12 +129,14 @@ class CulvertsRunner(NoDbBase):
         )
         flovec_src = _join(abs_batch_root, self.DEFAULT_FLOVEC_REL_PATH)
         netful_src = _join(abs_batch_root, self.DEFAULT_NETFUL_REL_PATH)
+        chnjnt_src = _join(abs_batch_root, self.DEFAULT_CHNJNT_REL_PATH)
 
         for path_label, path in (
             ("DEM", dem_src),
             ("watersheds", watersheds_src),
             ("flovec", flovec_src),
             ("netful", netful_src),
+            ("chnjnt", chnjnt_src),
         ):
             if not _exists(path):
                 raise FileNotFoundError(f"{path_label} file does not exist: {path}")
@@ -141,6 +144,8 @@ class CulvertsRunner(NoDbBase):
         run_ids = self._load_run_ids(watersheds_src)
 
         run_config = self._resolve_run_config(model_parameters)
+        run_group = "culvert"
+        group_name = culvert_batch_uuid
 
         with self.locked():
             self._culvert_batch_uuid = culvert_batch_uuid
@@ -157,13 +162,52 @@ class CulvertsRunner(NoDbBase):
             run_wd = _join(self.runs_dir, run_id)
             if _exists(_join(run_wd, "ron.nodb")):
                 raise FileExistsError(f"Run already exists: {run_wd}")
-            os.makedirs(run_wd, exist_ok=True)
 
-            ron = Ron(run_wd, run_config, run_group="culvert", group_name=culvert_batch_uuid)
+            # Copy entire base project to run_wd (like run_batch_project)
+            shutil.copytree(self.base_wd, run_wd, symlinks=True)
+
+            # Update wd in each .nodb file
+            for nodb_fn in glob(_join(run_wd, "*.nodb")):
+                with open(nodb_fn, "r", encoding="utf-8") as handle:
+                    state = json.load(handle)
+                if "py/state" in state and isinstance(state["py/state"], dict):
+                    state["py/state"]["wd"] = run_wd
+                    state["py/state"]["_run_group"] = run_group
+                    state["py/state"]["_group_name"] = group_name
+                state["wd"] = run_wd
+                state["_run_group"] = run_group
+                state["_group_name"] = group_name
+                with open(nodb_fn, "w", encoding="utf-8") as handle:
+                    json.dump(state, handle)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+
+            # Clear caches so getInstance() loads fresh from disk
+            clear_nodb_file_cache(f"culvert;;{culvert_batch_uuid};;{run_id}")
+            try:
+                clear_locks(f"culvert;;{culvert_batch_uuid};;{run_id}")
+            except RuntimeError:
+                pass
+
+            # Now use getInstance() to load controllers (not constructors)
+            ron = Ron.getInstance(run_wd)
             ron.symlink_dem(dem_src)
 
             watershed = Watershed.getInstance(run_wd)
-            watershed.symlink_channels_map(flovec_src, netful_src)
+            for filename in ("relief.tif", "chnjnt.tif"):
+                cleanup_path = _join(watershed.wbt_wd, filename)
+                if os.path.lexists(cleanup_path):
+                    if os.path.islink(cleanup_path):
+                        os.unlink(cleanup_path)
+                        continue
+                    if os.path.isdir(cleanup_path):
+                        raise IsADirectoryError(
+                            f"Expected file or symlink, found directory: {cleanup_path}"
+                        )
+                    os.unlink(cleanup_path)
+            watershed.symlink_channels_map(
+                flovec_src, netful_src, relief_src=dem_src, chnjnt_src=chnjnt_src
+            )
 
             created_at = datetime.now(timezone.utc).isoformat()
             run_record = {

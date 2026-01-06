@@ -879,10 +879,17 @@ class Watershed(NoDbBase):
         prep = RedisPrep.getInstance(self.wd)
         prep.timestamp(TaskEnum.build_channels)
 
-    def symlink_channels_map(self, flovec_src: str, netful_src: str) -> None:
+    def symlink_channels_map(
+        self,
+        flovec_src: str,
+        netful_src: str,
+        relief_src: Optional[str] = None,
+        chnjnt_src: Optional[str] = None,
+    ) -> None:
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(
-            f"{self.class_name}.{func_name}(flovec_src={flovec_src}, netful_src={netful_src})"
+            f"{self.class_name}.{func_name}(flovec_src={flovec_src}, netful_src={netful_src}, "
+            f"relief_src={relief_src}, chnjnt_src={chnjnt_src})"
         )
 
         if not self.delineation_backend_is_wbt:
@@ -890,11 +897,19 @@ class Watershed(NoDbBase):
 
         flovec_src = os.path.abspath(flovec_src)
         netful_src = os.path.abspath(netful_src)
+        if relief_src is not None:
+            relief_src = os.path.abspath(relief_src)
+        if chnjnt_src is not None:
+            chnjnt_src = os.path.abspath(chnjnt_src)
 
         if not _exists(flovec_src):
             raise FileNotFoundError(f"Flow vector file does not exist: {flovec_src}")
         if not _exists(netful_src):
             raise FileNotFoundError(f"Stream network file does not exist: {netful_src}")
+        if relief_src is not None and not _exists(relief_src):
+            raise FileNotFoundError(f"Relief file does not exist: {relief_src}")
+        if chnjnt_src is not None and not _exists(chnjnt_src):
+            raise FileNotFoundError(f"Channel junction file does not exist: {chnjnt_src}")
 
         os.makedirs(self.wbt_wd, exist_ok=True)
 
@@ -915,6 +930,10 @@ class Watershed(NoDbBase):
 
         _ensure_symlink(flovec_src, _join(self.wbt_wd, "flovec.tif"))
         _ensure_symlink(netful_src, _join(self.wbt_wd, "netful.tif"))
+        if relief_src is not None:
+            _ensure_symlink(relief_src, _join(self.wbt_wd, "relief.tif"))
+        if chnjnt_src is not None:
+            _ensure_symlink(chnjnt_src, _join(self.wbt_wd, "chnjnt.tif"))
 
         netful_geojson = self.netful_utm_shp
         netful_wgs_geojson = self.netful_shp
@@ -944,7 +963,7 @@ class Watershed(NoDbBase):
         watershed_feature.build_raster_mask(
             template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
     
-        wbt._wbt_runner.find_outlet(
+        wbt.wbt.find_outlet(
             d8_pntr=wbt.flovec,
             streams=wbt.netful,
             watershed=self.target_watershed_path,

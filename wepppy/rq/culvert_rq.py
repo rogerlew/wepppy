@@ -190,7 +190,7 @@ def _process_culvert_run(
         watershed = Watershed.getInstance(wd)
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
-        climate = Climate.getInstance(wd)
+        climate = Climate.getInstance(wd)  # Settings from copied base project
         wepp = Wepp.getInstance(wd)
 
         watershed.find_outlet(watershed_feature)

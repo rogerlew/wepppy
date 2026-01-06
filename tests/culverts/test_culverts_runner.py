@@ -43,16 +43,24 @@ def _make_topo_files(topo_dir: Path, *, crs: str = "EPSG:32611") -> dict[str, Pa
     flovec_data = np.ones((3, 3), dtype=np.uint8)
     netful_data = np.zeros((3, 3), dtype=np.uint8)
     netful_data[1, 1] = 1
+    chnjnt_data = np.zeros((3, 3), dtype=np.uint8)
 
     dem_path = topo_dir / "hydro-enforced-dem.tif"
     flovec_path = topo_dir / "flovec.tif"
     netful_path = topo_dir / "netful.tif"
+    chnjnt_path = topo_dir / "chnjnt.tif"
 
     _write_raster(dem_path, dem_data, transform, crs)
     _write_raster(flovec_path, flovec_data, transform, crs)
     _write_raster(netful_path, netful_data, transform, crs)
+    _write_raster(chnjnt_path, chnjnt_data, transform, crs)
 
-    return {"dem": dem_path, "flovec": flovec_path, "netful": netful_path}
+    return {
+        "dem": dem_path,
+        "flovec": flovec_path,
+        "netful": netful_path,
+        "chnjnt": chnjnt_path,
+    }
 
 
 def _write_watersheds(path: Path, point_ids: list[object] | None = None) -> None:
@@ -86,6 +94,14 @@ def _write_watersheds(path: Path, point_ids: list[object] | None = None) -> None
         "features": features,
     }
     path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _init_base_project(path: Path, *, nlcd_db: str | None = None) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    Ron(str(path), "culvert.cfg")
+    if nlcd_db is not None:
+        landuse = Landuse.getInstance(str(path))
+        landuse.nlcd_db = nlcd_db
 
 
 def test_ron_symlink_dem_sets_map_and_symlink(tmp_path: Path) -> None:
@@ -135,12 +151,12 @@ def test_culverts_runner_creates_runs_and_get_wd(
 
     base_runid = "batch;;culvert_base;;_base"
     base_src = tmp_path / "batch" / "culvert_base" / "_base"
-    base_src.mkdir(parents=True)
+    _init_base_project(base_src)
     (base_src / "README.txt").write_text("base-default", encoding="utf-8")
 
     override_runid = "batch;;culvert_override;;_base"
     override_src = tmp_path / "batch" / "culvert_override" / "_base"
-    override_src.mkdir(parents=True)
+    _init_base_project(override_src, nlcd_db="nlcd/2021")
     (override_src / "README.txt").write_text("base-override", encoding="utf-8")
 
     def _fake_get_wd(runid: str, *args, **kwargs) -> str:
@@ -195,11 +211,76 @@ def test_culverts_runner_creates_runs_and_get_wd(
         assert flovec_link.is_symlink()
         assert netful_link.is_symlink()
 
+        ron = Ron.getInstance(str(run_wd))
+        assert ron.run_group == "culvert"
+        assert ron.group_name == batch_uuid
+        assert ron.runid == f"culvert;;{batch_uuid};;{run_id}"
+
         landuse = Landuse.getInstance(str(run_wd))
         assert landuse.nlcd_db == "nlcd/2021"
 
         runid = f"culvert;;{batch_uuid};;{run_id}"
         assert get_wd(runid) == str(run_wd)
+
+
+def test_culverts_runner_cleanup_relief_and_chnjnt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
+
+    base_runid = "batch;;culvert_cleanup;;_base"
+    base_src = tmp_path / "batch" / "culvert_cleanup" / "_base"
+    _init_base_project(base_src)
+    wbt_dir = base_src / "dem" / "wbt"
+    wbt_dir.mkdir(parents=True, exist_ok=True)
+    (wbt_dir / "relief.tif").write_text("old-relief", encoding="utf-8")
+    (wbt_dir / "chnjnt.tif").write_text("old-chnjnt", encoding="utf-8")
+
+    def _fake_get_wd(runid: str, *args, **kwargs) -> str:
+        if runid == base_runid:
+            return str(base_src)
+        return wepp_helpers.get_wd(runid, *args, **kwargs)
+
+    monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
+
+    batch_uuid = "batch-5678"
+    batch_root = culverts_root / batch_uuid
+    topo_dir = batch_root / "topo"
+    culverts_dir = batch_root / "culverts"
+    batch_root.mkdir(parents=True)
+
+    topo = _make_topo_files(topo_dir)
+    watersheds_path = culverts_dir / "watersheds.geojson"
+    _write_watersheds(watersheds_path, point_ids=[1])
+
+    payload_metadata = {
+        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "watersheds": {"path": "culverts/watersheds.geojson"},
+    }
+
+    model_parameters = {
+        "schema_version": "culvert-model-params-v1",
+        "base_project_runid": base_runid,
+    }
+
+    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    run_ids = runner.create_runs(
+        batch_uuid,
+        str(batch_root),
+        payload_metadata,
+        model_parameters=model_parameters,
+    )
+
+    assert run_ids == ("1",)
+    run_wd = batch_root / "runs" / "1"
+    relief_link = run_wd / "dem" / "wbt" / "relief.tif"
+    chnjnt_link = run_wd / "dem" / "wbt" / "chnjnt.tif"
+    assert relief_link.is_symlink()
+    assert os.path.realpath(relief_link) == os.path.abspath(topo["dem"])
+    assert chnjnt_link.is_symlink()
+    assert os.path.realpath(chnjnt_link) == os.path.abspath(topo["chnjnt"])
 
 
 def test_culverts_runner_rejects_path_traversal(tmp_path: Path) -> None:

@@ -4,10 +4,13 @@
 ## Purpose
 - Provide a readable, minimal payload builder for Culvert_web_app developers.
 - Keep the payload contract aligned with `weppcloud-integration.spec.md`.
+- Submit payloads over SSL and poll until completion.
 
 ## Layout
 - `README.md` (this file)
-- `scripts/` (payload builder entrypoints and helpers)
+- `scripts/` (payload builder and submission tools)
+  - `build_payload.py` - Build payload.zip from Culvert_web_app outputs
+  - `submit_payload.py` - Submit payload.zip to wepp.cloud over SSL
 
 ## Payload preparation for wepp.cloud
 
@@ -44,6 +47,38 @@ ogr2ogr -f GeoJSON culverts/culvert_points.geojson WS_deln/Pour_Point_UTM.shp
 ### Baseline fixture
 Use the `Santee_10m_no_hydroenforcement` project as the canonical dev payload:
 `/wc1/culvert_app_instance_dir/user_data/1_outputs/Santee_10m_no_hydroenforcement`.
+
+### Pre-built test payload
+A ready-to-use payload is available in the test fixtures:
+```
+tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip  (~1.5 MB)
+```
+
+Use this for quick testing without rebuilding:
+```bash
+WEPPCLOUD_HOST=wc.bearhive.duckdns.org python scripts/submit_payload.py \
+  --payload /workdir/wepppy/tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip
+```
+
+## SSL Payload Submission
+
+After building a payload, submit it over HTTPS:
+
+```bash
+# Submit to production (wepp.cloud)
+python scripts/submit_payload.py --payload payload.zip
+
+# Submit to test server (development)
+WEPPCLOUD_HOST=wc.bearhive.duckdns.org python scripts/submit_payload.py --payload payload.zip
+```
+
+The `WEPPCLOUD_HOST` environment variable controls the target host:
+- Default: `wepp.cloud` (production)
+- Testing: `wc.bearhive.duckdns.org`
+
+All connections use HTTPS (no HTTP fallback).
+
+See `scripts/README.md` for full CLI options and observability output.
 
 ## References
 - `docs/culvert-at-risk-integration/weppcloud-integration.spec.md`

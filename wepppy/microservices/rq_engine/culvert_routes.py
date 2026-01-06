@@ -267,7 +267,15 @@ def _extract_zip(zip_path: Path, dest: Path) -> None:
 def _generate_batch_topo(
     dem_path: Path, streams_path: Path, flovec_path: Path, netful_path: Path
 ) -> None:
+    """Generate shared topo rasters for culvert batch processing.
+
+    Creates:
+        - flovec.tif: D8 flow pointer from hydro-enforced DEM
+        - netful.tif: Copy/symlink of streams.tif (pre-computed stream network)
+        - chnjnt.tif: Stream junction identifiers for subcatchment delineation
+    """
     from whitebox_tools import WhiteboxTools
+    import shutil
 
     if flovec_path.exists():
         flovec_path.unlink()
@@ -275,14 +283,24 @@ def _generate_batch_topo(
         netful_path.unlink()
 
     wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+
+    # Generate D8 flow pointer from hydro-enforced DEM
     wbt.d8_pointer(dem=str(dem_path), output=str(flovec_path), esri_pntr=False)
+
+    # Copy streams.tif to netful.tif (the pre-computed stream network)
+    shutil.copy2(streams_path, netful_path)
+
+    # Generate channel junction identifiers (required for hillslopes_topaz)
+    chnjnt_path = netful_path.parent / "chnjnt.tif"
+    if chnjnt_path.exists():
+        chnjnt_path.unlink()
     wbt.stream_junction_identifier(
         d8_pntr=str(flovec_path),
-        streams=str(streams_path),
-        output=str(netful_path),
+        streams=str(netful_path),
+        output=str(chnjnt_path),
     )
 
-    if not flovec_path.exists() or not netful_path.exists():
+    if not flovec_path.exists() or not netful_path.exists() or not chnjnt_path.exists():
         raise RuntimeError("Failed to generate batch topo rasters.")
 
 

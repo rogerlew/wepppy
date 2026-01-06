@@ -70,12 +70,12 @@ Notes:
 - Dependency update: add `python-multipart==0.0.12` to `docker/requirements-uv.txt` and rebuild the weppcloud image so multipart parsing works in fresh containers.
 - Model-parameters overrides now applied during run setup (`base_project_runid`, `nlcd_db`).
 
-## Phase 3 - Per-culvert WEPP orchestration
+## Phase 3 - Per-culvert WEPP orchestration (COMPLETE)
 - Scope: orchestrate delineation, landuse, soils, climate, and WEPP per culvert using existing run tasks; incorporate WhiteboxToolsTopazEmulator; use `symlink_channels_map` to avoid `build_channels`; apply model-parameters overrides; record per-run success/failure in `run_metadata.json`.
 - Dependencies: Phase 2 scaffolding; availability of WBT, PRISM, soils datasets in container; confirmed model-parameters schema.
 - Deliverables: RQ orchestration pipeline; per-run execution logs; per-culvert metadata record (timings, versions, config).
 - Risks: long runtimes for 300 culverts; missing datasets for runs; error isolation (one culvert failure should not cancel entire batch).
-- Verification: integration test with a tiny payload (1-2 culverts) using mocked heavy tasks; manual run with real payloads in the container, confirming per-culvert outputs.
+- Verification: integration test with a tiny payload (1-2 culverts) using mocked heavy tasks; manual run with the `santee_mini_4culverts` payload in the container, confirming per-culvert outputs.
 
 ## Phase 3 handoff summary
 - Orchestration updated in `wepppy/rq/culvert_rq.py` to create runs, load watershed features, and execute the per-culvert pipeline sequentially: `find_outlet` (watershed polygon), `build_subcatchments`, `abstract_watershed`, `build_landuse`, `build_soils`, `build_climate`, `run_wepp_hillslopes`, `run_wepp_watershed`.
@@ -84,6 +84,7 @@ Notes:
 - `CulvertsRunner.load_watershed_features()` added to reuse Point_ID validation and construct `WatershedFeature` objects; stubs updated.
 - Integration test added in `tests/culverts/test_culvert_orchestration.py` (monkeypatched heavy methods) to validate metadata creation, failure isolation, and `completed_at` set after processing.
 - Verification: `wctl run-pytest tests/culverts/test_culvert_orchestration.py` (pass; warnings only).
+- Manual run: `santee_mini_4culverts` payload completed end-to-end after fixes to WBT outlet access, shared topo generation (flovec/netful/chnjnt), and WBT symlink handling.
 - BatchRunner WEPP post-processing now explicitly ensures hillslope interchange outputs, `totalwatsed3.parquet`, watershed interchange outputs, and query-engine activation when missing (mirrors `_build_hillslope_interchange_rq`, `_build_totalwatsed3_rq`, `_post_watershed_interchange_rq` behavior).
 - Consolidated WEPP post-processing helpers into `wepppy/nodb/wepp_nodb_post_utils.py` (and `.pyi`) and refactored `wepppy/nodb/batch_runner.py` + `wepppy/rq/culvert_rq.py` to use the shared utilities.
 
@@ -112,6 +113,8 @@ Notes:
 **Implemented tests**
 - `tests/microservices/test_rq_engine_culverts.py` (rq-engine culvert ingestion).
 - `tests/microservices/test_rq_engine_jobinfo.py` (rq-engine jobinfo).
+- `tests/culverts/test_culverts_runner.py` (run scaffolding + symlinks).
+- `tests/culverts/test_culvert_orchestration.py` (per-culvert orchestration + metadata).
 - Payload fixtures: `tests/culverts/test_payloads/`.
 
 **Planned tests**
