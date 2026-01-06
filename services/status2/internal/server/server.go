@@ -22,7 +22,7 @@ import (
 	"github.com/rogerlew/wepppy/services/status2/internal/payload"
 )
 
-var channelPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$`)
+var channelPattern = regexp.MustCompile(`^[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+$`)
 
 // Server provides HTTP/WebSocket handling backed by Redis Pub/Sub.
 type Server struct {

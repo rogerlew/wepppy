@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	runIDPattern  = regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+	runIDPattern  = regexp.MustCompile(`^[A-Za-z0-9_.-]+$`)
 	pingPayload   = []byte(`{"type":"ping"}`)
 	hangupPayload = []byte(`{"type":"hangup"}`)
 )
