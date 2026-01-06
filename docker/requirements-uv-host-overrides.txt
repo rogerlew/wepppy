@@ -1,0 +1,3 @@
+# Host-only overrides for local venvs.
+# Matches Ubuntu 24.04 + ubuntugis-unstable packages.
+gdal==3.11.4

@@ -15,5 +15,13 @@
     "**/_scripts_hwd",
     "**/__pycache__"
   ],
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/wepppy"
+  ],
+  "python.analysis.stubPath": "${workspaceFolder}/stubs",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.envFile": "${workspaceFolder}/.vscode/.env",
+  "python.terminal.activateEnvironment": true,
   "python.REPL.enableREPLSmartSend": false
 }
