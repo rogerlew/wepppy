@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import inspect
 import json
+import logging
 import os
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
@@ -12,7 +12,6 @@ from rq import get_current_job
 
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
-from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.nodb.wepp_nodb_post_utils import (
     activate_query_engine_for_run,
     ensure_hillslope_interchange,
@@ -21,82 +20,127 @@ from wepppy.nodb.wepp_nodb_post_utils import (
 )
 from wepppy.topo.watershed_collection import WatershedFeature
 
+logger = logging.getLogger(__name__)
+
 TIMEOUT: int = 43_200
 
 
-def run_culvert_batch_rq(culvert_batch_uuid: str) -> None:
-    """Entrypoint for culvert batch processing."""
+class CulvertBatchError(Exception):
+    """Raised when a culvert batch fails."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        total: int = 0,
+        succeeded: int = 0,
+        failed: int = 0,
+    ) -> None:
+        super().__init__(message)
+        self.total = total
+        self.succeeded = succeeded
+        self.failed = failed
+
+
+def run_culvert_batch_rq(culvert_batch_uuid: str) -> dict[str, Any]:
+    """
+    Entrypoint for culvert batch processing.
+
+    Returns a summary dict with batch results. Raises CulvertBatchError
+    if all runs fail.
+    """
     job = get_current_job()
-    job_id = job.id if job is not None else "N/A"
-    func_name = inspect.currentframe().f_code.co_name
-    status_channel = f"{culvert_batch_uuid}:culvert_batch"
 
     if job is not None:
         job.meta["culvert_batch_uuid"] = culvert_batch_uuid
         job.save()
 
-    StatusMessenger.publish(
-        status_channel, f"rq:{job_id} STARTED {func_name}({culvert_batch_uuid})"
+    logger.info(f"culvert_batch {culvert_batch_uuid}: starting")
+
+    batch_root = _resolve_batch_root(culvert_batch_uuid)
+    if not batch_root.is_dir():
+        raise FileNotFoundError(
+            f"Culvert batch root does not exist: {batch_root}"
+        )
+
+    payload_metadata = _load_payload_json(batch_root / "metadata.json")
+    model_parameters = _load_payload_json(batch_root / "model-parameters.json")
+
+    runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
+    if runner is None:
+        runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+
+    run_ids = runner.create_runs(
+        culvert_batch_uuid,
+        str(batch_root),
+        payload_metadata,
+        model_parameters=model_parameters,
     )
 
-    try:
-        batch_root = _resolve_batch_root(culvert_batch_uuid)
-        if not batch_root.is_dir():
-            raise FileNotFoundError(
-                f"Culvert batch root does not exist: {batch_root}"
-            )
+    logger.info(f"culvert_batch {culvert_batch_uuid}: created {len(run_ids)} runs")
 
-        payload_metadata = _load_payload_json(batch_root / "metadata.json")
-        model_parameters = _load_payload_json(
-            batch_root / "model-parameters.json"
+    watersheds_path = runner._resolve_payload_path(
+        payload_metadata,
+        "watersheds",
+        runner.DEFAULT_WATERSHEDS_REL_PATH,
+        str(batch_root),
+    )
+    watershed_features = runner.load_watershed_features(watersheds_path)
+    wepppy_version = _get_wepppy_version()
+
+    succeeded = 0
+    failed = 0
+
+    for run_id in run_ids:
+        run_wd = Path(runner.runs_dir) / run_id
+        status = _process_culvert_run(
+            culvert_batch_uuid=culvert_batch_uuid,
+            run_id=run_id,
+            run_wd=run_wd,
+            watershed_feature=watershed_features.get(run_id),
+            run_config=runner.run_config,
+            wepppy_version=wepppy_version,
+        )
+        if status == "success":
+            succeeded += 1
+        else:
+            failed += 1
+
+    with runner.locked():
+        runner._completed_at = datetime.now(timezone.utc).isoformat()
+        runner._retention_days = runner.DEFAULT_RETENTION_DAYS
+
+    total = len(run_ids)
+    summary = {
+        "culvert_batch_uuid": culvert_batch_uuid,
+        "total": total,
+        "succeeded": succeeded,
+        "failed": failed,
+    }
+
+    _write_batch_summary(batch_root / "batch_summary.json", summary)
+
+    if succeeded == 0 and total > 0:
+        logger.error(
+            f"culvert_batch {culvert_batch_uuid}: all {total} runs failed"
+        )
+        raise CulvertBatchError(
+            f"All {total} culvert runs failed",
+            total=total,
+            succeeded=succeeded,
+            failed=failed,
         )
 
-        runner = CulvertsRunner.getInstance(
-            str(batch_root), allow_nonexistent=True
+    if failed > 0:
+        logger.warning(
+            f"culvert_batch {culvert_batch_uuid}: {failed}/{total} runs failed"
         )
-        if runner is None:
-            runner = CulvertsRunner(str(batch_root), "culvert.cfg")
-
-        run_ids = runner.create_runs(
-            culvert_batch_uuid,
-            str(batch_root),
-            payload_metadata,
-            model_parameters=model_parameters,
+    else:
+        logger.info(
+            f"culvert_batch {culvert_batch_uuid}: all {total} runs succeeded"
         )
 
-        watersheds_path = runner._resolve_payload_path(
-            payload_metadata,
-            "watersheds",
-            runner.DEFAULT_WATERSHEDS_REL_PATH,
-            str(batch_root),
-        )
-        watershed_features = runner.load_watershed_features(watersheds_path)
-        wepppy_version = _get_wepppy_version()
-
-        for run_id in run_ids:
-            run_wd = Path(runner.runs_dir) / run_id
-            _process_culvert_run(
-                culvert_batch_uuid=culvert_batch_uuid,
-                run_id=run_id,
-                run_wd=run_wd,
-                watershed_feature=watershed_features.get(run_id),
-                run_config=runner.run_config,
-                wepppy_version=wepppy_version,
-                status_channel=status_channel,
-            )
-
-        with runner.locked():
-            runner._completed_at = datetime.now(timezone.utc).isoformat()
-            runner._retention_days = runner.DEFAULT_RETENTION_DAYS
-
-        StatusMessenger.publish(
-            status_channel, f"rq:{job_id} COMPLETED {func_name}({culvert_batch_uuid})"
-        )
-    except Exception:
-        StatusMessenger.publish(
-            status_channel, f"rq:{job_id} EXCEPTION {func_name}({culvert_batch_uuid})"
-        )
-        raise
+    return summary
 
 
 def _resolve_batch_root(culvert_batch_uuid: str) -> Path:
@@ -125,14 +169,18 @@ def _process_culvert_run(
     watershed_feature: Optional[WatershedFeature],
     run_config: str,
     wepppy_version: Optional[str],
-    status_channel: str,
-) -> None:
+) -> str:
+    """
+    Process a single culvert run.
+
+    Returns "success" or "failed".
+    """
     runid = f"culvert;;{culvert_batch_uuid};;{run_id}"
     started_at = datetime.now(timezone.utc)
     status = "success"
     error_payload = None
 
-    StatusMessenger.publish(status_channel, f"culvert {run_id} STARTED")
+    logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: starting")
 
     try:
         if watershed_feature is None:
@@ -166,9 +214,9 @@ def _process_culvert_run(
     except Exception as exc:
         status = "failed"
         error_payload = {"type": type(exc).__name__, "message": str(exc)}
-        StatusMessenger.publish(status_channel, f"culvert {run_id} FAILED: {exc}")
+        logger.error(f"culvert_run {culvert_batch_uuid}/{run_id}: failed - {exc}")
     else:
-        StatusMessenger.publish(status_channel, f"culvert {run_id} COMPLETED")
+        logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: completed")
     finally:
         completed_at = datetime.now(timezone.utc)
         duration_seconds = (completed_at - started_at).total_seconds()
@@ -190,8 +238,16 @@ def _process_culvert_run(
 
         _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
 
+    return status
+
 
 def _write_run_metadata(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+
+
+def _write_batch_summary(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
@@ -204,6 +260,4 @@ def _get_wepppy_version() -> Optional[str]:
         return None
 
 
-
-
-__all__ = ["TIMEOUT", "run_culvert_batch_rq"]
+__all__ = ["TIMEOUT", "run_culvert_batch_rq", "CulvertBatchError"]

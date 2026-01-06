@@ -413,7 +413,7 @@ class WhiteboxToolsTopazEmulator:
         # (x_origin, x_pixel_size, x_rotation, y_origin, y_rotation, y_pixel_size)
         _transform = ds.GetGeoTransform()
 
-        if abs(_transform[1]) != abs(_transform[5]):
+        if not math.isclose(abs(_transform[1]), abs(_transform[5]), rel_tol=1e-9):
             raise Exception("input cells are not square")
 
         cellsize = abs(_transform[1])

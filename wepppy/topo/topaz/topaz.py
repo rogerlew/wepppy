@@ -719,7 +719,7 @@ class TopazRunner:
         # read and verify the _transform
         _transform = ds.GetGeoTransform()
 
-        if abs(_transform[1]) != abs(_transform[5]):
+        if not math.isclose(abs(_transform[1]), abs(_transform[5]), rel_tol=1e-9):
             raise Exception('input cells are not square')
 
         cellsize = abs(_transform[1])
