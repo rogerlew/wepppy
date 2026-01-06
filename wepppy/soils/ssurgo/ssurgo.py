@@ -779,7 +779,14 @@ class SoilSummary(object):
     def path(self):
         path = _join(self.soils_dir, self.fname)
         if not _exists(path):
-            path = _join("/geodata/weppcloud_runs", path)
+            # soils_dir may be relative like "runid/soils" - extract runid and use get_wd
+            from wepppy.weppcloud.utils.helpers import get_wd
+            parts = self.soils_dir.split(os.sep)
+            if parts:
+                runid = parts[0]
+                rest = os.sep.join(parts[1:]) if len(parts) > 1 else ''
+                wd = get_wd(runid)
+                path = _join(wd, rest, self.fname)
         return path
 
     @property
