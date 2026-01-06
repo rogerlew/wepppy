@@ -45,6 +45,7 @@
 ## API surface (wepp.cloud)
 ### POST /rq-engine/api/culverts-wepp-batch/
 Create a batch and enqueue a culvert WEPP job. Implemented in rq-engine to avoid weppcloud 30s timeout enforcement for blocking workers.
+Heavy topo generation (flovec/netful pruning/chnjnt) runs inside the RQ job, not the API handler, so the API stays fast and resilient under load.
 
 Request (multipart/form-data):
 - file: `payload.zip` (required)
@@ -69,6 +70,11 @@ Use the browse service for listing/downloading artifacts instead of a culvert-sp
 - Direct file download: `/culverts/<culvert_batch_uuid>/runs/<culvert_id>/culvert/browse/<path>`
 
 This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach can be adopted for the batch runner (`/batch/{batch_uuid}/browse/`).
+
+### DevOps system-engineering guidance
+- Keep rq-engine as a thin API layer (upload, validation, extraction, enqueue, respond).
+- Run CPU/IO-heavy work (topo generation, pruning, WEPP runs) inside RQ workers to avoid request timeouts and keep interactive workers responsive.
+- Prefer idempotent batch steps in RQ so retries can resume without re-uploading payloads.
 
 ## DEM symlink manager
 The `Ron` class gains a new method to handle preexisting DEMs without fetching or copying:
@@ -110,7 +116,8 @@ Note: avoid ESRI shapefiles and sidecars entirely.
 
 **Stream raster notes:**
 - The `streams.tif` from Culvert_web_app (typically `main_stream_raster_UTM.tif`) is used to generate batch-level `topo/netful.tif`.
-- Since streams are provided, `mcl` (minimum channel length) and `csa` (critical source area) parameters are NOT included in `model-parameters.json`—these were already applied when Culvert_web_app generated the stream network and `netful.tif`.
+- Since streams are provided, `mcl` (minimum channel length) and `csa` (critical source area) parameters are NOT included in `model-parameters.json`—these were already applied when Culvert_web_app generated the stream network.
+- wepp.cloud further post-processes `topo/netful.tif` at batch ingest: prune short stream segments, reduce stream order, then regenerate `chnjnt.tif` from the final `netful.tif`. This is needed because Culvert_web_app stream rasters can be extremely dense, which explodes hillslope counts and pushes WEPP into regimes outside typical watershed calibrations. Pruning yields a channel network closer to the scale WEPP watershed was tuned for, reducing unrealistic hillslopes and unstable channel erosion behavior.
 
 ### `metadata.json` schema (v1)
 - `schema_version` (string, required; `culvert-metadata-v1`)
@@ -175,12 +182,16 @@ Example feature:
 ## wepp.cloud job behavior (proposed)
 
 ### Batch initialization
-- Validate ZIP structure, verify GeoJSON + GeoTIFF alignment, and confirm coordinate system.
-- Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
+Payload validation/extraction happens in the rq-engine API handler; batch topo generation and run orchestration happen inside the RQ job (`run_culvert_batch_rq`).
 - Place hydro-enforced DEM at `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`.
 - Generate batch-level topo rasters from the shared DEM + streams:
   - `wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)` → `topo/flovec.tif`
-  - `wbt.stream_junction_identifier(d8_pntr=flovec_fn, streams=topo/streams.tif, output=chnjnt_fn)` → `topo/netful.tif`
+  - Copy `topo/streams.tif` → `topo/netful.tif` (no pruning yet)
+  - Prune short streams (uses `watershed.wbt.mcl` from `culvert.cfg`):
+    - `wbt.remove_short_streams(d8_pntr=flovec_fn, streams=topo/netful.tif, output=topo/netful.tif, min_length=mcl)`
+  - Reduce stream order `N` times (uses `culvert_runner.order_reduction_passes` from `culvert.cfg`):
+    - `wbt.prune_strahler_stream_order(streams=topo/netful.tif, output=topo/netful.tif)`
+  - `wbt.stream_junction_identifier(d8_pntr=flovec_fn, streams=topo/netful.tif, output=chnjnt_fn)` → `topo/chnjnt.tif`
 - Create per-culvert runs under `/wc1/culverts/<culvert_batch_uuid>/runs/<Point_ID>/` using the `culvert` config.
 
 ### Per-culvert processing

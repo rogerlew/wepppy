@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import shutil
 from copy import deepcopy
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
@@ -12,6 +13,7 @@ from typing import Any, Dict, List, Optional
 import redis
 from rq import Queue, get_current_job
 from rq.job import Job
+from whitebox_tools import WhiteboxTools
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
@@ -72,6 +74,9 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     dem_src = runner._resolve_payload_path(
         payload_metadata, "dem", runner.DEFAULT_DEM_REL_PATH, str(batch_root)
     )
+    streams_src = runner._resolve_payload_path(
+        payload_metadata, "streams", "topo/streams.tif", str(batch_root)
+    )
     watersheds_src = runner._resolve_payload_path(
         payload_metadata,
         "watersheds",
@@ -85,12 +90,39 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     for path_label, path in (
         ("DEM", dem_src),
         ("watersheds", watersheds_src),
-        ("flovec", flovec_src),
-        ("netful", netful_src),
-        ("chnjnt", chnjnt_src),
+        ("streams", streams_src),
     ):
         if not Path(path).exists():
             raise FileNotFoundError(f"{path_label} file does not exist: {path}")
+
+    _generate_batch_topo(
+        Path(dem_src),
+        Path(streams_src),
+        Path(flovec_src),
+        Path(netful_src),
+    )
+
+    min_length = runner.config_get_float("watershed.wbt", "mcl", None)
+    if min_length is None:
+        raise ValueError("watershed.wbt mcl is required for stream pruning")
+    if min_length > 0:
+        logger.info(
+            "culvert_batch %s: pruning short streams (min_length=%s)",
+            culvert_batch_uuid,
+            min_length,
+        )
+        _prune_short_streams(Path(flovec_src), Path(netful_src), min_length)
+
+    order_reduction_passes = runner.order_reduction_passes
+    if order_reduction_passes > 0:
+        logger.info(
+            "culvert_batch %s: pruning netful stream order (%s passes)",
+            culvert_batch_uuid,
+            order_reduction_passes,
+        )
+        _prune_stream_order(Path(netful_src), order_reduction_passes)
+
+    _generate_stream_junctions(Path(flovec_src), Path(netful_src), Path(chnjnt_src))
 
     run_ids = runner._load_run_ids(watersheds_src)
     run_config = runner._resolve_run_config(model_parameters)
@@ -296,6 +328,130 @@ def _load_payload_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"Payload JSON must be an object: {path}")
     return payload
+
+
+def _prune_stream_order(netful_path: Path, passes: int) -> None:
+    if passes < 0:
+        raise ValueError("order_reduction_passes must be >= 0")
+    if passes == 0:
+        return
+
+    if not netful_path.exists():
+        raise FileNotFoundError(f"Stream network file does not exist: {netful_path}")
+
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    wbt.set_working_dir(str(netful_path.parent))
+
+    current = netful_path
+    for idx in range(passes):
+        output = netful_path.with_name(f"netful.pruned_{idx + 1}.tif")
+        if output.exists():
+            output.unlink()
+        ret = wbt.prune_strahler_stream_order(
+            streams=str(current),
+            output=str(output),
+        )
+        if ret != 0:
+            raise RuntimeError(
+                "PruneStrahlerStreamOrder failed "
+                f"(pass {idx + 1}, input={current}, output={output})"
+            )
+        if current != netful_path:
+            current.unlink()
+        current = output
+
+    if current != netful_path:
+        os.replace(current, netful_path)
+
+
+def _generate_batch_topo(
+    dem_path: Path,
+    streams_path: Path,
+    flovec_path: Path,
+    netful_path: Path,
+) -> None:
+    """Generate shared topo rasters for culvert batch processing."""
+    if not dem_path.exists():
+        raise FileNotFoundError(f"DEM file does not exist: {dem_path}")
+    if not streams_path.exists():
+        raise FileNotFoundError(f"Streams file does not exist: {streams_path}")
+
+    if flovec_path.exists():
+        flovec_path.unlink()
+    if netful_path.exists():
+        netful_path.unlink()
+
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    wbt.set_working_dir(str(flovec_path.parent))
+
+    wbt.d8_pointer(dem=str(dem_path), output=str(flovec_path), esri_pntr=False)
+    shutil.copy2(streams_path, netful_path)
+
+    if not flovec_path.exists() or not netful_path.exists():
+        raise RuntimeError("Failed to generate batch topo rasters.")
+
+
+def _prune_short_streams(
+    flovec_path: Path,
+    netful_path: Path,
+    min_length: float,
+) -> None:
+    if min_length <= 0:
+        return
+    if not flovec_path.exists():
+        raise FileNotFoundError(f"Flow vector file does not exist: {flovec_path}")
+    if not netful_path.exists():
+        raise FileNotFoundError(f"Stream network file does not exist: {netful_path}")
+
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    wbt.set_working_dir(str(netful_path.parent))
+
+    output = netful_path.with_name("netful.short_pruned.tif")
+    if output.exists():
+        output.unlink()
+
+    ret = wbt.remove_short_streams(
+        d8_pntr=str(flovec_path),
+        streams=str(netful_path),
+        output=str(output),
+        min_length=min_length,
+        esri_pntr=False,
+    )
+    if ret != 0:
+        raise RuntimeError(
+            "RemoveShortStreams failed "
+            f"(input={netful_path}, output={output}, min_length={min_length})"
+        )
+
+    os.replace(output, netful_path)
+
+
+def _generate_stream_junctions(
+    flovec_path: Path,
+    netful_path: Path,
+    chnjnt_path: Path,
+) -> None:
+    if not flovec_path.exists():
+        raise FileNotFoundError(f"Flow vector file does not exist: {flovec_path}")
+    if not netful_path.exists():
+        raise FileNotFoundError(f"Stream network file does not exist: {netful_path}")
+
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    wbt.set_working_dir(str(netful_path.parent))
+
+    if chnjnt_path.exists():
+        chnjnt_path.unlink()
+
+    ret = wbt.stream_junction_identifier(
+        d8_pntr=str(flovec_path),
+        streams=str(netful_path),
+        output=str(chnjnt_path),
+    )
+    if ret != 0 or not chnjnt_path.exists():
+        raise RuntimeError(
+            "StreamJunctionIdentifier failed "
+            f"(flovec={flovec_path}, netful={netful_path}, output={chnjnt_path})"
+        )
 
 
 def _process_culvert_run(

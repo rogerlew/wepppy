@@ -12,7 +12,7 @@ from os.path import join as _join
 import shutil
 from typing import Any, Dict, List, Optional, Tuple
 
-from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks
+from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks, nodb_setter
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_collection.watershed_collection import _extract_geojson_crs
@@ -48,6 +48,14 @@ class CulvertsRunner(NoDbBase):
             self._completed_at: Optional[str] = None
             self._retention_days: Optional[int] = None
             self._run_config: str = cfg_fn
+            order_reduction = self.config_get_int(
+                "culvert_runner", "order_reduction_passes", 1
+            )
+            if order_reduction is None:
+                order_reduction = 1
+            if order_reduction < 0:
+                raise ValueError("order_reduction_passes must be >= 0")
+            self._order_reduction_passes = order_reduction
 
         os.makedirs(self.runs_dir, exist_ok=True)
 
@@ -99,6 +107,19 @@ class CulvertsRunner(NoDbBase):
     @property
     def run_config(self) -> str:
         return getattr(self, "_run_config", "culvert.cfg")
+
+    @property
+    def order_reduction_passes(self) -> int:
+        return int(getattr(self, "_order_reduction_passes", 1))
+
+    @order_reduction_passes.setter
+    @nodb_setter
+    def order_reduction_passes(self, value: int) -> None:
+        if not isinstance(value, int):
+            raise TypeError("order_reduction_passes must be an int")
+        if value < 0:
+            raise ValueError("order_reduction_passes must be >= 0")
+        self._order_reduction_passes = value
 
     def create_run_if_missing(
         self,

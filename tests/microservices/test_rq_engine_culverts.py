@@ -27,14 +27,7 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
         seen["uuid"] = batch_uuid
         return "job-123"
 
-    def fake_generate_batch_topo(dem: Path, streams: Path, flovec: Path, netful: Path) -> None:
-        assert dem.exists()
-        assert streams.exists()
-        flovec.write_bytes(b"")
-        netful.write_bytes(b"")
-
     monkeypatch.setattr(culvert_routes, "_enqueue_culvert_batch_job", fake_enqueue)
-    monkeypatch.setattr(culvert_routes, "_generate_batch_topo", fake_generate_batch_topo)
 
     with PAYLOAD_ZIP.open("rb") as handle:
         with TestClient(rq_engine.app) as client:
@@ -55,6 +48,8 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     metadata = json.loads(metadata_path.read_text())
     assert metadata["culvert_batch_uuid"] == payload["culvert_batch_uuid"]
     assert "created_at" in metadata
+    assert not (batch_root / "topo" / "flovec.tif").exists()
+    assert not (batch_root / "topo" / "netful.tif").exists()
 
 
 def test_culvert_ingest_missing_files_returns_400(
