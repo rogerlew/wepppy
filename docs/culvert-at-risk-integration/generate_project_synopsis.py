@@ -78,6 +78,7 @@ def get_raster_info(filepath: str) -> Optional[dict]:
     # Get basic info
     output = run_command(["gdalinfo", filepath])
     if not output:
+        _update_raster_info_from_rasterio(info, filepath)
         return info
 
     for line in output.split("\n"):
@@ -112,6 +113,9 @@ def get_raster_info(filepath: str) -> Optional[dict]:
                 info["crs_name"] = line[start:end]
             except (ValueError, IndexError):
                 pass
+
+    if "resolution" not in info:
+        _update_raster_info_from_rasterio(info, filepath)
 
     return info
 
@@ -155,8 +159,11 @@ def get_vector_info(filepath: str) -> Optional[dict]:
     # Get layer name from filename
     layer_name = Path(filepath).stem
 
-    output = run_command(["ogrinfo", "-so", filepath, layer_name])
+    output = run_command(["ogrinfo", "-so", "-al", filepath])
     if not output:
+        output = run_command(["ogrinfo", "-so", filepath, layer_name])
+    if not output:
+        _update_vector_info_from_fiona(info, filepath)
         return info
 
     for line in output.split("\n"):
@@ -179,7 +186,61 @@ def get_vector_info(filepath: str) -> Optional[dict]:
         elif line.startswith("Point_ID:"):
             info["has_point_id"] = True
 
+    if "feature_count" not in info:
+        _update_vector_info_from_fiona(info, filepath)
+
     return info
+
+
+def _update_raster_info_from_rasterio(info: dict, filepath: str) -> None:
+    try:
+        import rasterio
+    except Exception:
+        return
+
+    try:
+        with rasterio.open(filepath) as dataset:
+            if "width" not in info:
+                info["width"] = dataset.width
+            if "height" not in info:
+                info["height"] = dataset.height
+            if "pixel_size_x" not in info or "pixel_size_y" not in info:
+                res_x, res_y = dataset.res
+                info["pixel_size_x"] = abs(res_x)
+                info["pixel_size_y"] = abs(res_y)
+            if "resolution" not in info and "pixel_size_x" in info:
+                info["resolution"] = f"{info['pixel_size_x']:.2f}m"
+            if dataset.crs:
+                epsg = dataset.crs.to_epsg()
+                if epsg and "epsg" not in info:
+                    info["epsg"] = epsg
+                if "crs_name" not in info:
+                    info["crs_name"] = dataset.crs.name or dataset.crs.to_string()
+    except Exception:
+        return
+
+
+def _update_vector_info_from_fiona(info: dict, filepath: str) -> None:
+    try:
+        import fiona
+    except Exception:
+        return
+
+    try:
+        with fiona.open(filepath) as dataset:
+            if "feature_count" not in info:
+                info["feature_count"] = len(dataset)
+            if "geometry_type" not in info:
+                info["geometry_type"] = dataset.schema.get("geometry")
+            if dataset.crs:
+                epsg = dataset.crs.to_epsg()
+                if epsg and "epsg" not in info:
+                    info["epsg"] = epsg
+            if "has_point_id" not in info:
+                props = dataset.schema.get("properties") or {}
+                info["has_point_id"] = "Point_ID" in props
+    except Exception:
+        return
 
 
 def scan_project(project_name: str, inputs_dir: Path, outputs_dir: Path) -> dict:
