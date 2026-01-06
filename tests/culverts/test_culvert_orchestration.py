@@ -91,17 +91,14 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     monkeypatch.setattr(culvert_rq_module, "ensure_watershed_interchange", _noop)
     monkeypatch.setattr(culvert_rq_module, "activate_query_engine_for_run", _noop)
 
-    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
-    run_ids = runner.create_runs(
-        batch_uuid,
-        str(batch_root),
-        metadata,
-        model_parameters=model_parameters,
-    )
-
-    for run_id in run_ids:
+    for run_id in ("1", "2"):
         runid = f"culvert;;{batch_uuid};;{run_id}"
         run_culvert_run_rq(runid, batch_uuid, run_id)
+        run_wd = batch_root / "runs" / run_id
+        assert (run_wd / "ron.nodb").is_file()
+
+    runid = f"culvert;;{batch_uuid};;2"
+    run_culvert_run_rq(runid, batch_uuid, "2")
 
     culvert_rq_module._final_culvert_batch_complete_rq(batch_uuid)
 

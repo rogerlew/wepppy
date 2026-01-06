@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from copy import deepcopy
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
 from pathlib import Path
@@ -68,14 +69,43 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
 
-    run_ids = runner.create_runs(
-        culvert_batch_uuid,
-        str(batch_root),
-        payload_metadata,
-        model_parameters=model_parameters,
+    dem_src = runner._resolve_payload_path(
+        payload_metadata, "dem", runner.DEFAULT_DEM_REL_PATH, str(batch_root)
     )
+    watersheds_src = runner._resolve_payload_path(
+        payload_metadata,
+        "watersheds",
+        runner.DEFAULT_WATERSHEDS_REL_PATH,
+        str(batch_root),
+    )
+    flovec_src = batch_root / runner.DEFAULT_FLOVEC_REL_PATH
+    netful_src = batch_root / runner.DEFAULT_NETFUL_REL_PATH
+    chnjnt_src = batch_root / runner.DEFAULT_CHNJNT_REL_PATH
 
-    logger.info(f"culvert_batch {culvert_batch_uuid}: created {len(run_ids)} runs")
+    for path_label, path in (
+        ("DEM", dem_src),
+        ("watersheds", watersheds_src),
+        ("flovec", flovec_src),
+        ("netful", netful_src),
+        ("chnjnt", chnjnt_src),
+    ):
+        if not Path(path).exists():
+            raise FileNotFoundError(f"{path_label} file does not exist: {path}")
+
+    run_ids = runner._load_run_ids(watersheds_src)
+    run_config = runner._resolve_run_config(model_parameters)
+
+    with runner.locked():
+        runner._culvert_batch_uuid = culvert_batch_uuid
+        runner._payload_metadata = deepcopy(payload_metadata)
+        runner._model_parameters = deepcopy(model_parameters) if model_parameters else None
+        runner._runs = {}
+        runner._run_config = run_config
+
+    runner._ensure_base_project()
+    os.makedirs(runner.runs_dir, exist_ok=True)
+
+    logger.info(f"culvert_batch {culvert_batch_uuid}: enqueued {len(run_ids)} runs")
 
     child_jobs: List[Job] = []
     queued_jobs: Dict[str, str] = {}
@@ -114,7 +144,13 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     if queued_jobs:
         with runner.locked():
             for run_id, job_id in queued_jobs.items():
-                run_record = runner._runs.get(run_id, {})
+                run_record = runner._runs.get(run_id)
+                if not run_record:
+                    run_record = {
+                        "runid": run_id,
+                        "point_id": run_id,
+                        "wd": str(Path(runner.runs_dir) / run_id),
+                    }
                 run_record["job_id"] = job_id
                 runner._runs[run_id] = run_record
 
@@ -143,11 +179,22 @@ def run_culvert_run_rq(
 
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
-        raise FileNotFoundError(
-            f"Culvert batch runner not found for: {batch_root}"
-        )
+        runner = CulvertsRunner(str(batch_root), "culvert.cfg")
 
     payload_metadata = _load_payload_json(batch_root / "metadata.json")
+    model_parameters = _load_payload_json(batch_root / "model-parameters.json")
+    run_config = runner._resolve_run_config(model_parameters)
+    with runner.locked():
+        if runner._culvert_batch_uuid != culvert_batch_uuid:
+            runner._culvert_batch_uuid = culvert_batch_uuid
+        if runner._payload_metadata is None:
+            runner._payload_metadata = deepcopy(payload_metadata)
+        if runner._model_parameters is None:
+            runner._model_parameters = deepcopy(model_parameters)
+        if runner._run_config != run_config:
+            runner._run_config = run_config
+
+    runner.create_run_if_missing(run_id, payload_metadata, model_parameters)
     watersheds_path = runner._resolve_payload_path(
         payload_metadata,
         "watersheds",
@@ -155,10 +202,10 @@ def run_culvert_run_rq(
         str(batch_root),
     )
     watershed_features = runner.load_watershed_features(watersheds_path)
-    wepppy_version = _get_wepppy_version()
     run_wd = Path(runner.runs_dir) / run_id
     if not run_wd.is_dir():
         raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
+    wepppy_version = _get_wepppy_version()
 
     return _process_culvert_run(
         culvert_batch_uuid=culvert_batch_uuid,

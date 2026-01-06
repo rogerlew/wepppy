@@ -100,6 +100,153 @@ class CulvertsRunner(NoDbBase):
     def run_config(self) -> str:
         return getattr(self, "_run_config", "culvert.cfg")
 
+    def create_run_if_missing(
+        self,
+        run_id: str,
+        payload_metadata: Dict[str, Any],
+        model_parameters: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        if not run_id:
+            raise ValueError("run_id is required")
+        if not isinstance(payload_metadata, dict):
+            raise TypeError("payload_metadata must be a dict")
+        if model_parameters is not None and not isinstance(model_parameters, dict):
+            raise TypeError("model_parameters must be a dict")
+
+        culvert_batch_uuid = self.culvert_batch_uuid
+        if not culvert_batch_uuid:
+            raise ValueError("culvert_batch_uuid is required")
+
+        abs_batch_root = os.path.abspath(self.wd)
+
+        dem_src = self._resolve_payload_path(
+            payload_metadata, "dem", self.DEFAULT_DEM_REL_PATH, abs_batch_root
+        )
+        flovec_src = _join(abs_batch_root, self.DEFAULT_FLOVEC_REL_PATH)
+        netful_src = _join(abs_batch_root, self.DEFAULT_NETFUL_REL_PATH)
+        chnjnt_src = _join(abs_batch_root, self.DEFAULT_CHNJNT_REL_PATH)
+
+        for path_label, path in (
+            ("DEM", dem_src),
+            ("flovec", flovec_src),
+            ("netful", netful_src),
+            ("chnjnt", chnjnt_src),
+        ):
+            if not _exists(path):
+                raise FileNotFoundError(f"{path_label} file does not exist: {path}")
+
+        self._ensure_base_project()
+        os.makedirs(self.runs_dir, exist_ok=True)
+
+        run_wd = _join(self.runs_dir, run_id)
+        nodb_path = _join(run_wd, "ron.nodb")
+        if _exists(nodb_path):
+            ron = Ron.getInstance(run_wd)
+            watershed = Watershed.getInstance(run_wd)
+            required_paths = (
+                ron.dem_fn,
+                _join(watershed.wbt_wd, "flovec.tif"),
+                _join(watershed.wbt_wd, "netful.tif"),
+                _join(watershed.wbt_wd, "relief.tif"),
+                _join(watershed.wbt_wd, "chnjnt.tif"),
+            )
+            if all(os.path.lexists(path) for path in required_paths):
+                return
+
+            ron.symlink_dem(dem_src)
+            for filename in ("relief.tif", "chnjnt.tif"):
+                cleanup_path = _join(watershed.wbt_wd, filename)
+                if os.path.lexists(cleanup_path):
+                    if os.path.islink(cleanup_path):
+                        os.unlink(cleanup_path)
+                        continue
+                    if os.path.isdir(cleanup_path):
+                        raise IsADirectoryError(
+                            f"Expected file or symlink, found directory: {cleanup_path}"
+                        )
+                    os.unlink(cleanup_path)
+            watershed.symlink_channels_map(
+                flovec_src, netful_src, relief_src=dem_src, chnjnt_src=chnjnt_src
+            )
+
+            created_at = datetime.now(timezone.utc).isoformat()
+            with self.locked():
+                run_record = self._runs.get(run_id, {})
+                if "created_at" not in run_record:
+                    run_record["created_at"] = created_at
+                run_record.update(
+                    {
+                        "runid": run_id,
+                        "point_id": run_id,
+                        "wd": run_wd,
+                    }
+                )
+                self._runs[run_id] = run_record
+            return
+        if _exists(run_wd):
+            if not os.path.isdir(run_wd):
+                raise FileExistsError(f"Run path exists and is not a directory: {run_wd}")
+            shutil.rmtree(run_wd)
+
+        run_group = "culvert"
+        group_name = culvert_batch_uuid
+
+        shutil.copytree(self.base_wd, run_wd, symlinks=True)
+
+        for nodb_fn in glob(_join(run_wd, "*.nodb")):
+            with open(nodb_fn, "r", encoding="utf-8") as handle:
+                state = json.load(handle)
+            if "py/state" in state and isinstance(state["py/state"], dict):
+                state["py/state"]["wd"] = run_wd
+                state["py/state"]["_run_group"] = run_group
+                state["py/state"]["_group_name"] = group_name
+            state["wd"] = run_wd
+            state["_run_group"] = run_group
+            state["_group_name"] = group_name
+            with open(nodb_fn, "w", encoding="utf-8") as handle:
+                json.dump(state, handle)
+                handle.flush()
+                os.fsync(handle.fileno())
+
+        runid = f"{run_group};;{group_name};;{run_id}"
+        clear_nodb_file_cache(runid)
+        try:
+            clear_locks(runid)
+        except RuntimeError:
+            pass
+
+        ron = Ron.getInstance(run_wd)
+        ron.symlink_dem(dem_src)
+
+        watershed = Watershed.getInstance(run_wd)
+        for filename in ("relief.tif", "chnjnt.tif"):
+            cleanup_path = _join(watershed.wbt_wd, filename)
+            if os.path.lexists(cleanup_path):
+                if os.path.islink(cleanup_path):
+                    os.unlink(cleanup_path)
+                    continue
+                if os.path.isdir(cleanup_path):
+                    raise IsADirectoryError(
+                        f"Expected file or symlink, found directory: {cleanup_path}"
+                    )
+                os.unlink(cleanup_path)
+        watershed.symlink_channels_map(
+            flovec_src, netful_src, relief_src=dem_src, chnjnt_src=chnjnt_src
+        )
+
+        created_at = datetime.now(timezone.utc).isoformat()
+        with self.locked():
+            run_record = self._runs.get(run_id, {})
+            run_record.update(
+                {
+                    "runid": run_id,
+                    "point_id": run_id,
+                    "wd": run_wd,
+                    "created_at": created_at,
+                }
+            )
+            self._runs[run_id] = run_record
+
     def create_runs(
         self,
         culvert_batch_uuid: str,

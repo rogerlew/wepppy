@@ -89,6 +89,7 @@ Notes:
 - Consolidated WEPP post-processing helpers into `wepppy/nodb/wepp_nodb_post_utils.py` (and `.pyi`) and refactored `wepppy/nodb/batch_runner.py` + `wepppy/rq/culvert_rq.py` to use the shared utilities.
 
 ## Phase 3b - Parallelized culvert/batch execution (RQ batch queue)
+- Status: complete.
 - Scope: enqueue one RQ job per culvert run (mirrors `batch_rq` pattern) so culvert batches execute in parallel without blocking interactive workloads; use a dedicated `rq-worker-batch` service and queue for both batch + culvert jobs.
 - Dependencies: Phase 3 orchestration complete; RQ queue routing decisions; agreement on per-job runid format so logging attaches to `rq.log`.
 - Deliverables:
@@ -106,6 +107,26 @@ Notes:
 - `WEPPPY_NCPU` caps added for flowpath pools, soil prep, hillslope runs, fixed climate pools, and watershed interchange task fan-out in `wepppy/nodb/core/wepp.py`, `wepppy/nodb/core/climate.py`, and `wepppy/wepp/interchange/watershed_interchange.py` (no behavior change when unset).
 - Stubs updated in `wepppy/rq/culvert_rq.pyi` and `stubs/wepppy/rq/culvert_rq.pyi`.
 - Tests updated in `tests/culverts/test_culvert_orchestration.py` to call `run_culvert_run_rq` + finalizer; verification: `wctl run-pytest tests/culverts/test_culvert_orchestration.py tests/microservices/test_rq_engine_culverts.py` (pass; warnings only).
+
+## Phase 3c - Per-run creation (batch_rq parity + parallel run setup)
+- Status: complete.
+- Scope: move culvert run creation into per-run RQ jobs to match the `batch_rq`/`BatchRunner.run_batch_project` pattern, avoiding a serial `create_runs()` step in the orchestrator.
+- Dependencies: Phase 3b fan-out in place; `_base` creation is reliable; runid format and run_group metadata finalized.
+- Deliverables:
+  - `CulvertsRunner.create_run_if_missing()` (idempotent) that creates a single run directory, rewrites `.nodb` metadata, clears caches/locks, and symlinks DEM + topo rasters.
+  - `run_culvert_batch_rq` updated to only compute `run_ids`, ensure `_base`, and enqueue per-run jobs + finalizer (no full `create_runs()`).
+  - `run_culvert_run_rq` updated to call `create_run_if_missing()` before executing the per-run pipeline.
+  - Optional: helper to load a single watershed feature by `Point_ID` to avoid re-parsing the full GeoJSON on every run.
+- Risks: race conditions if multiple jobs attempt the same run_id; partial run directories if a job crashes mid-copy; repeated GeoJSON parsing overhead.
+- Verification: run a small payload (1–2 culverts) and confirm per-run creation happens inside worker jobs; verify `_base` remains unchanged, per-run logs are scoped correctly, and reruns are idempotent.
+
+## Phase 3c handoff summary
+- Added `CulvertsRunner.create_run_if_missing()` to copy `_base` into `runs/<run_id>`, rewrite `.nodb` state (`wd`, `_run_group`, `_group_name`), clear Redis cache/locks, and symlink DEM + WBT topo rasters (`flovec`, `netful`, `relief`, `chnjnt`) in `wepppy/nodb/culverts_runner.py`.
+- `run_culvert_batch_rq` now loads `run_ids`, ensures `_base`, and enqueues per-run jobs without serial `create_runs()`; per-run jobs create runs on demand in `wepppy/rq/culvert_rq.py`.
+- `run_culvert_run_rq` now instantiates `CulvertsRunner` when missing and calls `create_run_if_missing()` before executing the pipeline, preserving run_group semantics (`culvert;;<batch_uuid>;;<run_id>`).
+- Orchestrator still records job IDs in `CulvertsRunner._runs` while `create_run_if_missing()` preserves existing entries to avoid clobbering `job_id`.
+- Stubs updated in `wepppy/nodb/culverts_runner.pyi` and `stubs/wepppy/nodb/culverts_runner.pyi`.
+- Tests updated to assert per-run job creates the run directory and is idempotent; run with `wctl run-pytest tests/culverts/test_culvert_orchestration.py`.
 
 ## Phase 4 - Artifact delivery and browse integration
 - Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; write `run_metadata.json`; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.

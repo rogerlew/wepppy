@@ -15,6 +15,7 @@ class CulvertsRunner(NoDbBase):
     DEFAULT_WATERSHEDS_REL_PATH: ClassVar[str]
     DEFAULT_FLOVEC_REL_PATH: ClassVar[str]
     DEFAULT_NETFUL_REL_PATH: ClassVar[str]
+    DEFAULT_CHNJNT_REL_PATH: ClassVar[str]
     DEFAULT_BASE_DIRNAME: ClassVar[str]
     POINT_ID_FIELD: ClassVar[str]
     def __init__(self, wd: str, cfg_fn: str = "culvert.cfg") -> None: ...
@@ -38,6 +39,12 @@ class CulvertsRunner(NoDbBase):
     def retention_days(self) -> Optional[int]: ...
     @property
     def run_config(self) -> str: ...
+    def create_run_if_missing(
+        self,
+        run_id: str,
+        payload_metadata: Dict[str, Any],
+        model_parameters: Optional[Dict[str, Any]] = ...,
+    ) -> None: ...
     def create_runs(
         self,
         culvert_batch_uuid: str,
