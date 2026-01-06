@@ -103,7 +103,7 @@ Notes:
 - Routed culvert ingestion and batch fan-out to the `batch` RQ queue in `wepppy/microservices/rq_engine/culvert_routes.py` and `wepppy/rq/batch_rq.py`.
 - Split culvert orchestration in `wepppy/rq/culvert_rq.py` into `run_culvert_batch_rq` (orchestrator), `run_culvert_run_rq` (per-run worker, runid first arg for `rq.log`), and `_final_culvert_batch_complete_rq` (finalizer); per-run jobs are enqueued in `Queue("batch")` with `depends_on` for the finalizer.
 - Orchestrator records per-run job IDs in both `job.meta` and `CulvertsRunner._runs[run_id]["job_id"]`; finalizer reads `run_metadata.json` to compute totals and writes `batch_summary.json` while updating `CulvertsRunner._completed_at` and `_retention_days`.
-- Batch-only hillslope clamp added via `WEPPPY_BATCH_MAX_WORKERS`, applied in `wepppy/nodb/batch_runner.py` and in the per-run culvert worker when calling `wepp.prep_hillslopes()` and `wepp.run_hillslopes()`.
+- `WEPPPY_NCPU` caps added for flowpath pools, soil prep, hillslope runs, fixed climate pools, and watershed interchange task fan-out in `wepppy/nodb/core/wepp.py`, `wepppy/nodb/core/climate.py`, and `wepppy/wepp/interchange/watershed_interchange.py` (no behavior change when unset).
 - Stubs updated in `wepppy/rq/culvert_rq.pyi` and `stubs/wepppy/rq/culvert_rq.pyi`.
 - Tests updated in `tests/culverts/test_culvert_orchestration.py` to call `run_culvert_run_rq` + finalizer; verification: `wctl run-pytest tests/culverts/test_culvert_orchestration.py tests/microservices/test_rq_engine_culverts.py` (pass; warnings only).
 

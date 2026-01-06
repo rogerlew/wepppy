@@ -1,6 +1,9 @@
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+from wepppy.all_your_base import NCPU
 
 from .watershed_chanwb_interchange import run_wepp_watershed_chanwb_interchange
 from .watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange
@@ -55,7 +58,10 @@ def run_wepp_watershed_interchange(
         tasks.append((run_wepp_watershed_soil_interchange, {}))
     tasks.append((run_wepp_watershed_loss_interchange, {}))
 
-    with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+    max_workers = len(tasks)
+    if os.getenv("WEPPPY_NCPU"):
+        max_workers = min(max_workers, NCPU)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(func, base, **kwargs): func for func, kwargs in tasks}
         for future in as_completed(futures):
             func = futures[future]

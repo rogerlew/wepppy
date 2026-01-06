@@ -146,7 +146,8 @@ from wepppy.all_your_base import (
     isfloat,
     isnan,
     isinf,
-    NumpyEncoder
+    NumpyEncoder,
+    NCPU,
 )
 from wepppy.all_your_base import try_parse_float, isint
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator, RDIOutOfBoundsException
@@ -1318,9 +1319,13 @@ class Wepp(NoDbBase):
         wat_dir = self.wat_dir
 
         fp_slps_fns = glob(_join(self.wat_dir, 'slope_files/flowpaths/*.slps'))
+
+        flowpath_workers = 10
+        if os.getenv("WEPPPY_NCPU"):
+            flowpath_workers = min(flowpath_workers, NCPU)
         
         futures = []
-        with ThreadPoolExecutor(max_workers=10) as pool:
+        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
             for fp_slps_fn in fp_slps_fns:
                 futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
 
@@ -1353,7 +1358,7 @@ class Wepp(NoDbBase):
         fps_summary = watershed.fps_summary
 
         futures = []
-        with ThreadPoolExecutor(max_workers=10) as pool:
+        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
             for topaz_id in fps_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
                 for fp_enum  in fps_summary[topaz_id]:
@@ -1385,7 +1390,7 @@ class Wepp(NoDbBase):
         self.logger.info('  Running _run_flowpaths... ')
 
         futures = []
-        with ThreadPoolExecutor(max_workers=10) as pool:
+        with ThreadPoolExecutor(max_workers=flowpath_workers) as pool:
             for topaz_id in fps_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
                 for fp_enum  in fps_summary[topaz_id]:
@@ -1713,12 +1718,16 @@ class Wepp(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}(translator={translator})')
     
         cpu_count = os.cpu_count() or 1
+        ncpu_override = os.getenv("WEPPPY_NCPU")
         if max_workers is None:
-            max_workers = cpu_count
+            max_workers = NCPU if ncpu_override else cpu_count
 
         if max_workers < 1:
             max_workers = 1
-        if max_workers > max(cpu_count, 20):
+        if ncpu_override:
+            if max_workers > NCPU:
+                max_workers = NCPU
+        elif max_workers > max(cpu_count, 20):
             max_workers = max(cpu_count, 20)
 
         self.logger.info(f'  Using max_workers={max_workers} for soil prep')
@@ -1990,11 +1999,15 @@ class Wepp(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         cpu_count = os.cpu_count() or 1
+        ncpu_override = os.getenv("WEPPPY_NCPU")
         if max_workers is None:
-            max_workers = cpu_count
+            max_workers = NCPU if ncpu_override else cpu_count
         if max_workers < 1:
             max_workers = 1
-        if max_workers > max(cpu_count, 16):
+        if ncpu_override:
+            if max_workers > NCPU:
+                max_workers = NCPU
+        elif max_workers > max(cpu_count, 16):
             max_workers = max(cpu_count, 16)
 
         self.logger.info(f'Running Hillslopes with max_workers={max_workers}')

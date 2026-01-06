@@ -2852,7 +2852,10 @@ class Climate(NoDbBase):
             # bbox = west, north, east, south
             bbox = [extent[0], extent[3], extent[2], extent[1]]
 
-            with ProcessPoolExecutor(max_workers=12) as executor:
+            gridmet_fetch_workers = 12
+            if os.getenv("WEPPPY_NCPU"):
+                gridmet_fetch_workers = min(gridmet_fetch_workers, NCPU)
+            with ProcessPoolExecutor(max_workers=gridmet_fetch_workers) as executor:
                 futures = []
                 for measure in measures:
                     for year in range(start_year, end_year + 1):
@@ -2911,7 +2914,10 @@ class Climate(NoDbBase):
             latitudes = latitudes[::-1]
             raw_data = {k: v[:, ::-1, :] for k, v in raw_data.items()}
 
-            with ProcessPoolExecutor(max_workers=28) as executor:
+            gridmet_interp_workers = 28
+            if os.getenv("WEPPPY_NCPU"):
+                gridmet_interp_workers = min(gridmet_interp_workers, NCPU)
+            with ProcessPoolExecutor(max_workers=gridmet_interp_workers) as executor:
                 futures = []
 
                 for topaz_id, loc in hillslope_locations.items():
@@ -3046,7 +3052,10 @@ class Climate(NoDbBase):
 
             sub_par_fns = {}
             sub_cli_fns = {}
-            with ProcessPoolExecutor(max_workers=40) as executor:
+            daymet_build_workers = 40
+            if os.getenv("WEPPPY_NCPU"):
+                daymet_build_workers = min(daymet_build_workers, NCPU)
+            with ProcessPoolExecutor(max_workers=daymet_build_workers) as executor:
                 futures = []
                 for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
                     _prn_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'
