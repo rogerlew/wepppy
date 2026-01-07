@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import shutil
+import zipfile
 from copy import deepcopy
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
@@ -20,6 +21,7 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.core.watershed import NoOutletFoundError
+from wepppy.nodb.skeletonize import RUN_SKELETON_ALLOWLIST, skeletonize_run
 from wepppy.nodb.wepp_nodb_post_utils import (
     activate_query_engine_for_run,
     ensure_hillslope_interchange,
@@ -327,6 +329,14 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     }
 
     _write_batch_summary(batch_root / "batch_summary.json", summary)
+    try:
+        _write_run_skeletons_zip(batch_root)
+    except Exception as exc:
+        logger.warning(
+            "culvert_batch %s: failed to write weppcloud_run_skeletons.zip - %s",
+            culvert_batch_uuid,
+            exc,
+        )
 
     # Log skipped runs for assessment
     if skipped_no_outlet > 0:
@@ -629,6 +639,15 @@ def _process_culvert_run(
             run_metadata["error"] = error_payload
 
         _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
+        try:
+            skeletonize_run(run_wd, RUN_SKELETON_ALLOWLIST)
+        except Exception as exc:
+            logger.warning(
+                "culvert_run %s/%s: skeletonize failed - %s",
+                culvert_batch_uuid,
+                run_id,
+                exc,
+            )
 
     return status
 
@@ -643,6 +662,27 @@ def _write_batch_summary(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
+
+
+def _write_run_skeletons_zip(batch_root: Path) -> Path:
+    runs_dir = batch_root / "runs"
+    if not runs_dir.is_dir():
+        raise FileNotFoundError(f"Runs directory does not exist: {runs_dir}")
+    output_path = batch_root / "weppcloud_run_skeletons.zip"
+    if output_path.exists():
+        output_path.unlink()
+    with zipfile.ZipFile(
+        output_path, mode="w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for root, _dirnames, filenames in os.walk(
+            runs_dir, topdown=True, followlinks=False
+        ):
+            root_path = Path(root)
+            for name in filenames:
+                file_path = root_path / name
+                arcname = file_path.relative_to(batch_root).as_posix()
+                archive.write(file_path, arcname)
+    return output_path
 
 
 def _get_wepppy_version() -> Optional[str]:

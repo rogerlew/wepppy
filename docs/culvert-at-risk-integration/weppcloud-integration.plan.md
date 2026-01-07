@@ -9,7 +9,7 @@
 - Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
 - Watersheds: GeoJSON polygons with `Point_ID` attribute (no raster, no culvert_id_map needed).
 - RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse under `/culverts/<batch_uuid>/.../browse/`.
-- Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `run_metadata.json`.
+- Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `batch_summary.json` plus per-run `run_metadata.json`.
 - Limits: max ZIP 2GB, max 300 culverts; error responses are structured 400s.
 
 ## Phase 0 - Contract finalization and fixtures (COMPLETE)
@@ -104,7 +104,7 @@ Notes:
 - Status: complete.
 - Routed culvert ingestion and batch fan-out to the `batch` RQ queue in `wepppy/microservices/rq_engine/culvert_routes.py` and `wepppy/rq/batch_rq.py`.
 - Split culvert orchestration in `wepppy/rq/culvert_rq.py` into `run_culvert_batch_rq` (orchestrator), `run_culvert_run_rq` (per-run worker, runid first arg for `rq.log`), and `_final_culvert_batch_complete_rq` (finalizer); per-run jobs are enqueued in `Queue("batch")` with `depends_on` for the finalizer.
-- Orchestrator records per-run job IDs in both `job.meta` and `CulvertsRunner._runs[run_id]["job_id"]`; finalizer reads `run_metadata.json` to compute totals and writes `batch_summary.json` while updating `CulvertsRunner._completed_at` and `_retention_days`.
+- Orchestrator records per-run job IDs in both `job.meta` and `CulvertsRunner._runs[run_id]["job_id"]`; finalizer reads per-run `run_metadata.json` to compute totals and writes `batch_summary.json` while updating `CulvertsRunner._completed_at` and `_retention_days`.
 - `WEPPPY_NCPU` caps added for flowpath pools, soil prep, hillslope runs, fixed climate pools, and watershed interchange task fan-out in `wepppy/nodb/core/wepp.py`, `wepppy/nodb/core/climate.py`, and `wepppy/wepp/interchange/watershed_interchange.py` (no behavior change when unset).
 - Stubs updated in `wepppy/rq/culvert_rq.pyi` and `stubs/wepppy/rq/culvert_rq.pyi`.
 - Tests updated in `tests/culverts/test_culvert_orchestration.py` to call `run_culvert_run_rq` + finalizer; verification: `wctl run-pytest tests/culverts/test_culvert_orchestration.py tests/microservices/test_rq_engine_culverts.py` (pass; warnings only).
@@ -164,11 +164,51 @@ Notes:
 - Verification: confirmed enqueue order is largest → smallest in RQ metadata/logs for mixed-size payloads.
 
 ## Phase 4 - Artifact delivery and browse integration
-- Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; write `run_metadata.json`; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.
-- Dependencies: Phase 3 outputs; browse service routing rules; decision on which artifacts are mandatory vs optional.
-- Deliverables: artifact manifest + layout doc; browse route support for `/culverts/`; packaging helpers (copy/link outputs into `culvert/`).
-- Risks: browse service path mapping gaps; missing outputs for failed culverts; large artifact sizes.
-- Verification: browse integration test that lists and downloads artifacts; verify `run_metadata.json` and required files for successful culverts.
+- Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; copy `run_metadata.json` into `culvert/` as the per-run observability summary; skeletonize per-run folders after `_process_culvert_run` to reduce storage; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.
+- Dependencies: Phase 3 outputs; browse service routing for `/culverts/` (browse owns it today, but it does not work yet); decision on which artifacts are mandatory vs optional; agreement on skeletonization allowlist + zip naming; shared `skeletonize_run` helper in `wepppy/nodb`.
+- Required artifacts (per run, under `/culverts/<uuid>/runs/<id>/culvert/`):
+  - `run_metadata.json` (copied from the run root, not regenerated; source: `/culverts/<uuid>/runs/<id>/run_metadata.json`).
+  - `netful.WGS.geojson` (source: run topo output; WGS84 conversion already exists in Phase 2/3 symlink/polygonize path).
+  - `hillslopes.WGS.geojson` (source: weppcloud WGS conversion helper from hillslope delineation output).
+  - `channels.WGS.geojson` (source: weppcloud WGS conversion helper from channel delineation output).
+  - `totalwatsed3.parquet` (source: WEPP post-processing output).
+  - `hillslope_interchange.json` (source: WEPP post-processing output).
+  - `watershed_interchange.json` (source: WEPP post-processing output).
+- Optional artifacts (per run):
+  - `topaz.json` (source: TOPAZ/WBT diagnostics if present).
+  - `run.log` or `_logs/` bundle if we decide to surface raw logs in browse.
+- Batch-level artifact (MVP):
+  - `weppcloud_run_skeletons.zip` at `/culverts/<uuid>/weppcloud_run_skeletons.zip` containing the skeletonized `runs/` tree.
+- Skeletonization (per run, run after `run_metadata.json` is written and artifacts are packaged):
+  - Keep list (allowlist; remove everything else):
+    - `*.log`
+    - `climate.nodb`
+    - `disturbed.nodb`
+    - `landuse.nodb`
+    - `nodb.version`
+    - `soils.nodb`
+    - `redisprep.dump`
+    - `ron.nodb`
+    - `run_metadata.json`
+    - `unitizer.nodb`
+    - `watershed.nodb`
+    - `wepp.nodb`
+    - `climate/`
+    - `dem/wbt/*.geojson`
+    - `disturbed/disturbed_land_soil_lookup.csv`
+    - `landuse/landuse.parquet`
+    - `soils/soils.parquet`
+    - `watershed/channels.parquet`
+    - `watershed/hillslopes.parquet`
+    - `watershed/network.txt`
+    - `watershed/structure.pkl`
+    - `wepp/output/interchange/`
+- Failure representation:
+  - Always write/copy `run_metadata.json`; for failed runs it must include `status=failed` and the `error` block already written in Phase 3.
+  - If a required artifact is missing for a failed run, do not create empty placeholders; the manifest should list the artifact as `missing` with the failure reason pulled from `run_metadata.json`.
+- Deliverables: artifact manifest + layout doc (include required vs optional list above); browse route support for `/culverts/`; packaging helpers (copy/link outputs into `culvert/`); reusable `skeletonize_run` helper in `wepppy/nodb` + hook in `_process_culvert_run` (or equivalent); `weppcloud_run_skeletons.zip` batch artifact (MVP).
+- Risks: browse service path mapping gaps; missing outputs for failed culverts; large artifact sizes; skeletonization removing debug inputs needed for re-runs.
+- Verification: browse integration test that lists and downloads artifacts; verify `run_metadata.json` copy and required files for successful culverts; verify failed-run manifest marks missing artifacts; confirm skeletonization removes large rasters and `runs.zip` contains only the keep list.
 
 ## Phase 5 - Observability, error handling, retention
 - Scope: structured error codes for validation/execution; publish status events to Redis DB 2; update RQ job info with `error_code`/`error_detail`; implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
