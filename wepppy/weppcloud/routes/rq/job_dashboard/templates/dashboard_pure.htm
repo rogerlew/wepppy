@@ -144,7 +144,10 @@
     queued: "attention",
     deferred: "attention",
     running: "attention",
-    canceled: "critical"
+    canceled: "critical",
+    not_found: "critical",
+    error: "critical",
+    paused: "attention"
   };
 
   function escapeHtml(value) {
@@ -352,20 +355,31 @@
     const rootNodeId = `root-${normalizeNodeKey(jobId)}`;
     const rootOpen = openNodes.has(rootNodeId) || openNodes.size === 0;
     allFinishedCount = 0;
-    allTotalCount = 1;
+    allTotalCount = 0;
     allCanceledCount = 0;
     allStoppedCount = 0;
     allFailedCount = 0;
     allElapsedTime_s = 0.0;
     allSummary = "";
 
-    runid = data.runid;
+    runid = data && data.runid ? data.runid : null;
     if (runid) {
       const runLink = `${sitePrefix}/runs/${encodeURIComponent(runid)}/cfg`;
       setHtml("run-id", `<a href="${runLink}">${escapeHtml(runid)}</a>`);
     } else {
       setText("run-id", "--");
     }
+
+    if (!data || data.status === "not_found" || data.status === "error") {
+      const isError = data && data.status === "error";
+      const errorLabel = isError ? "Job info error" : `No such job found: ${jobId}`;
+      const errorDetail = isError && data && data.error ? String(data.error) : "";
+      setText("job-summary", isError ? "Job info error" : "Job not found");
+      setHtml("job-overall-progress", renderProgressBar(0, isError ? "Job info error" : "Job not found"));
+      return renderError(errorLabel, errorDetail);
+    }
+
+    allTotalCount = 1;
 
     const jobsHtml = renderJobs(data.children || {}, rootNodeId, openNodes);
     const rootStatus = String(data.status || "").toLowerCase();
@@ -449,15 +463,21 @@
       let hasActive = false;
 
       (jobs[jobOrder] || []).forEach((job) => {
+        const jobInfo = job || { status: "not_found" };
         totalCount += 1;
         allTotalCount += 1;
 
-        const status = String(job.status || "").toLowerCase();
+        const status = String(jobInfo.status || "").toLowerCase();
         const normalizedStatus = status.replace(/cancel+ed/g, "canceled");
 
         if (normalizedStatus === "finished") {
           finishedCount += 1;
           allFinishedCount += 1;
+        } else if (normalizedStatus === "not_found" || normalizedStatus === "error") {
+          failed = true;
+          failedCount += 1;
+          allFailedCount += 1;
+          anyFailed = true;
         } else if (normalizedStatus === "failed") {
           failed = true;
           failedCount += 1;
@@ -473,8 +493,8 @@
           hasActive = true;
         }
 
-        if (job.elapsed_s > elapsed_s) {
-          elapsed_s = job.elapsed_s;
+        if (jobInfo.elapsed_s > elapsed_s) {
+          elapsed_s = jobInfo.elapsed_s;
         }
       });
 
@@ -540,11 +560,12 @@
     let rows = "";
 
     jobGroup.forEach((job, index) => {
-      const jobStatus = job.status || "unknown";
+      const jobInfo = job || { status: "not_found" };
+      const jobStatus = jobInfo.status || "unknown";
       const statusState = getStatusState(jobStatus);
-      const jobDescription = escapeHtml(job.description || "Job");
-      const jobIdLabel = escapeHtml(job.id || "");
-      const elapsedLabel = formatElapsed(job.elapsed_s, 1);
+      const jobDescription = escapeHtml(jobInfo.description || (job ? "Job" : "Missing job"));
+      const jobIdLabel = escapeHtml(jobInfo.id || "");
+      const elapsedLabel = formatElapsed(jobInfo.elapsed_s, 1);
 
       rows += `<tr>
         <td>${jobDescription}</td>
@@ -553,18 +574,18 @@
         <td class="wc-text-right">${elapsedLabel}</td>
       </tr>`;
 
-      if (job.status === "failed" && job.exc_info) {
+      if (jobInfo.status === "failed" && jobInfo.exc_info) {
         rows += `<tr>
-          <td colspan="4"><pre class="wc-pre">${escapeHtml(job.exc_info)}</pre></td>
+          <td colspan="4"><pre class="wc-pre">${escapeHtml(jobInfo.exc_info)}</pre></td>
         </tr>`;
       }
 
-      if (job.children) {
-        const childNodeId = `${parentNodeId}-child-${normalizeNodeKey(job.id || index)}`;
+      if (jobInfo.children) {
+        const childNodeId = `${parentNodeId}-child-${normalizeNodeKey(jobInfo.id || index)}`;
         rows += `<tr>
           <td colspan="4">
             <div class="wc-job-children">
-              ${renderJobs(job.children, childNodeId, openNodes)}
+              ${renderJobs(jobInfo.children, childNodeId, openNodes)}
             </div>
           </td>
         </tr>`;
