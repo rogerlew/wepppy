@@ -1750,7 +1750,7 @@ class Watershed(NoDbBase):
         if not _exists(dem_path):
             raise FileNotFoundError(f"dem.tif not found at {dem_path}; cannot compute ruggedness")
 
-        dataset = gdal.Open(dem_path, GA_ReadOnly)
+        dataset = gdal.Open(dem_path, gdal.GA_ReadOnly)
         if dataset is None:
             raise RuntimeError(f"Unable to open DEM at {dem_path}")
 
