@@ -220,18 +220,18 @@ Notes:
 - Tests: added browse route tests and extended culvert orchestration test to validate manifest + NoDb summary.
 
 ## Phase 4b - Batch landuse/soils downscale (COMPLETE)
-- Scope: for culvert batches, fetch NLCD + SSURGO once at 30m for the DEM extent, then downscale locally to the shared subwta grid; store canonical rasters at the batch root and symlink into runs.
+- Scope: for culvert batches, fetch NLCD + SSURGO once at 30m for the payload DEM extent, then downscale locally to the DEM grid (matches subwta); run this in `run_culvert_batch_rq` before enqueuing child jobs, store canonical rasters at the batch root, and symlink into runs.
 - Shared batch outputs (kept outside `runs/`):
   - `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`
   - `soils/ssurgo_30m.tif`, `soils/ssurgo.tif`
 - Run behavior:
-  - Create symlinks to the batch rasters before `Landuse.build()`/`Soils.build()`.
+  - Require `landuse/nlcd.tif` + `soils/ssurgo.tif` to exist at the batch root, then symlink them before `Landuse.build()`/`Soils.build()`.
   - Call `Landuse.build(retrieve_nlcd=False)` and `Soils.build(retrieve_gridded_ssurgo=False)` to skip cleanup and remote retrieval.
 - Assumptions: all runs in a culvert batch share the same DEM grid/extent; subwta grid matches the DEM grid.
 - Notes: skeletonization removes run-local symlinks; canonical rasters live at the batch root.
 
 ## Phase 4b handoff summary
-- Batch rasters: `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`, `soils/ssurgo_30m.tif`, `soils/ssurgo.tif` generated once per batch and shared by runs.
+- Batch rasters: `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`, `soils/ssurgo_30m.tif`, `soils/ssurgo.tif` generated once per batch from the payload DEM extent before jobs are queued and shared by runs.
 - Per-run wiring: landuse/soils directories are cleaned, then symlinked to the batch rasters before `Landuse.build(retrieve_nlcd=False)` and `Soils.build(retrieve_gridded_ssurgo=False)`.
 - Overrides: `model_parameters.nlcd_db` and `model_parameters.ssurgo_db` are respected to select the 30m sources; defaults fall back to the base project settings.
 - Skeletonization: run-level symlinks are removed by skeletonization; batch rasters remain at the batch root.

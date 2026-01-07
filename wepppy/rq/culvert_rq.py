@@ -18,6 +18,7 @@ from whitebox_tools import WhiteboxTools
 from osgeo import gdal
 
 from wepppy.all_your_base.geo import raster_stacker
+from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
@@ -76,6 +77,9 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+
+    nlcd_db_override = runner._get_model_param_str(model_parameters, "nlcd_db")
+    ssurgo_db_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
 
     dem_src = runner._resolve_payload_path(
         payload_metadata, "dem", runner.DEFAULT_DEM_REL_PATH, str(batch_root)
@@ -169,7 +173,17 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
         runner._runs = {}
         runner._run_config = run_config
 
-    runner._ensure_base_project()
+    base_wd = runner._ensure_base_project()
+    if base_wd is None:
+        raise ValueError("culvert_runner.base_runid is required to start a culvert batch")
+
+    _ensure_batch_landuse_soils(
+        culvert_batch_uuid=culvert_batch_uuid,
+        dem_src=Path(dem_src),
+        base_wd=Path(base_wd),
+        nlcd_db_override=nlcd_db_override,
+        ssurgo_db_override=ssurgo_db_override,
+    )
     os.makedirs(runner.runs_dir, exist_ok=True)
 
     logger.info(f"culvert_batch {culvert_batch_uuid}: enqueued {len(run_ids)} runs")
@@ -272,6 +286,9 @@ def run_culvert_run_rq(
         raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
     wepppy_version = _get_wepppy_version()
 
+    nlcd_db_override = runner._get_model_param_str(model_parameters, "nlcd_db")
+    ssurgo_db_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
+
     status = _process_culvert_run(
         culvert_batch_uuid=culvert_batch_uuid,
         run_id=run_id,
@@ -279,7 +296,8 @@ def run_culvert_run_rq(
         watershed_feature=watershed_features.get(run_id),
         run_config=runner.run_config,
         wepppy_version=wepppy_version,
-        model_parameters=model_parameters,
+        nlcd_db_override=nlcd_db_override,
+        ssurgo_db_override=ssurgo_db_override,
     )
     if job is not None:
         job_created = job.created_at.isoformat() if job.created_at else None
@@ -615,10 +633,10 @@ def _generate_stream_junctions(
 def _ensure_batch_landuse_soils(
     *,
     culvert_batch_uuid: str,
-    watershed: Watershed,
-    landuse: Landuse,
-    soils: Soils,
-    model_parameters: Optional[Dict[str, Any]],
+    dem_src: Path,
+    base_wd: Path,
+    nlcd_db_override: Optional[str],
+    ssurgo_db_override: Optional[str],
 ) -> tuple[Path, Path]:
     batch_root = _resolve_batch_root(culvert_batch_uuid)
     landuse_root = batch_root / "landuse"
@@ -629,32 +647,23 @@ def _ensure_batch_landuse_soils(
     ssurgo_30m = soils_root / "ssurgo_30m.tif"
     ssurgo_resampled = soils_root / "ssurgo.tif"
 
-    target_grid = Path(watershed.subwta)
-    if not target_grid.exists():
-        raise FileNotFoundError(f"Subwta grid does not exist: {target_grid}")
-
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
 
-    nlcd_override = runner._get_model_param_str(model_parameters, "nlcd_db")
-    if nlcd_override is not None:
-        landuse.nlcd_db = nlcd_override
-    nlcd_db = nlcd_override or landuse.nlcd_db
+    landuse = Landuse.getInstance(str(base_wd))
+    soils = Soils.getInstance(str(base_wd))
 
-    ssurgo_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
-    if ssurgo_override is not None:
-        soils.ssurgo_db = ssurgo_override
-    ssurgo_db = ssurgo_override or soils.ssurgo_db
+    nlcd_db = nlcd_db_override or landuse.nlcd_db
+    ssurgo_db = ssurgo_db_override or soils.ssurgo_db
 
     if nlcd_db is None:
         raise ValueError("nlcd_db is required to build culvert landuse maps")
     if ssurgo_db is None:
         raise ValueError("ssurgo_db is required to build culvert soils maps")
 
-    _map = landuse.ron_instance.map
-    if _map is None:
-        raise ValueError("Run map is not available to build culvert landuse/soils")
+    rdi = RasterDatasetInterpolator(str(dem_src))
+    extent = list(rdi.extent)
 
     with runner.locked():
         os.makedirs(landuse_root, exist_ok=True)
@@ -663,7 +672,7 @@ def _ensure_batch_landuse_soils(
         if not nlcd_30m.exists():
             wmesque_retrieve(
                 nlcd_db,
-                _map.extent,
+                extent,
                 str(nlcd_30m),
                 30.0,
                 v=landuse.wmesque_version,
@@ -672,7 +681,7 @@ def _ensure_batch_landuse_soils(
         if not ssurgo_30m.exists():
             wmesque_retrieve(
                 ssurgo_db,
-                _map.extent,
+                extent,
                 str(ssurgo_30m),
                 30.0,
                 v=soils.wmesque_version,
@@ -680,9 +689,9 @@ def _ensure_batch_landuse_soils(
             )
 
         if not nlcd_resampled.exists():
-            raster_stacker(str(nlcd_30m), str(target_grid), str(nlcd_resampled), resample="near")
+            raster_stacker(str(nlcd_30m), str(dem_src), str(nlcd_resampled), resample="near")
         if not ssurgo_resampled.exists():
-            raster_stacker(str(ssurgo_30m), str(target_grid), str(ssurgo_resampled), resample="near")
+            raster_stacker(str(ssurgo_30m), str(dem_src), str(ssurgo_resampled), resample="near")
 
     return nlcd_resampled, ssurgo_resampled
 
@@ -695,7 +704,8 @@ def _process_culvert_run(
     watershed_feature: Optional[WatershedFeature],
     run_config: str,
     wepppy_version: Optional[str],
-    model_parameters: Optional[Dict[str, Any]],
+    nlcd_db_override: Optional[str],
+    ssurgo_db_override: Optional[str],
 ) -> str:
     """
     Process a single culvert run.
@@ -720,16 +730,21 @@ def _process_culvert_run(
         climate = Climate.getInstance(wd)  # Settings from copied base project
         wepp = Wepp.getInstance(wd)
 
+        if nlcd_db_override is not None:
+            landuse.nlcd_db = nlcd_db_override
+        if ssurgo_db_override is not None:
+            soils.ssurgo_db = ssurgo_db_override
+
         watershed.find_outlet()
         watershed.build_subcatchments()
         watershed.abstract_watershed()
-        nlcd_map, ssurgo_map = _ensure_batch_landuse_soils(
-            culvert_batch_uuid=culvert_batch_uuid,
-            watershed=watershed,
-            landuse=landuse,
-            soils=soils,
-            model_parameters=model_parameters,
-        )
+        batch_root = _resolve_batch_root(culvert_batch_uuid)
+        nlcd_map = batch_root / "landuse" / "nlcd.tif"
+        ssurgo_map = batch_root / "soils" / "ssurgo.tif"
+        if not nlcd_map.exists():
+            raise FileNotFoundError(f"Batch NLCD map does not exist: {nlcd_map}")
+        if not ssurgo_map.exists():
+            raise FileNotFoundError(f"Batch SSURGO map does not exist: {ssurgo_map}")
         landuse.clean()
         soils.clean()
         landuse.symlink_landuse_map(str(nlcd_map))

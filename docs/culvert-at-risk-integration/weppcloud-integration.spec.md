@@ -243,7 +243,7 @@ For each culvert (identified by `Point_ID`):
    - `json_to_wgs(self.netful_json)`
 
 4. **Build inputs:** Generate landuse, soils, and climate inputs.
-   - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared `subwta.tif` grid, and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`.
+   - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared DEM grid (matches `subwta.tif`), and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`.
    - Use `retrieve_nlcd=False` and `retrieve_gridded_ssurgo=False` so the per-run build skips cleanup and remote retrieval.
 
 5. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
