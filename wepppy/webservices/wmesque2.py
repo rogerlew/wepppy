@@ -35,8 +35,9 @@ Deployment Expectations
   ``GEODATA_DIR``.
 * GDAL command line utilities (``gdalwarp``, ``gdalinfo``, ``gdal_translate``,
   ``gdaldem``) must be on ``PATH``.
-* Temporary products are written to ``/dev/shm`` by default and removed via
-  FastAPI background tasks once responses complete.
+* Temporary products are written to ``/tmp`` by default (override with
+  ``WMESQUE_SCRATCH_DIR``) and removed via FastAPI background tasks once
+  responses complete.
 
 Example request::
 
@@ -111,7 +112,7 @@ def from_b64url_compact(s: str) -> dict:
     return json.loads(raw.decode("utf-8"))
 
 geodata_dir = os.environ.get("GEODATA_DIR", "/geodata")
-SCRATCH_DIR = "/dev/shm"
+SCRATCH_DIR = os.environ.get("WMESQUE_SCRATCH_DIR", "/tmp")
 _this_dir = os.path.dirname(__file__)
 _catalog = os.environ.get(
     'CATALOG_PATH', 

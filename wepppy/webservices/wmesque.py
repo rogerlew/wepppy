@@ -76,7 +76,7 @@ _this_dir = os.path.dirname(__file__)
 _catalog = os.path.join(_this_dir, "catalog")
 
 
-SCRATCH_DIR = "/dev/shm"
+SCRATCH_DIR = os.environ.get("WMESQUE_SCRATCH_DIR", "/tmp")
 
 
 def raster_stats(src: str) -> Dict[str, float]:
