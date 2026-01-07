@@ -131,6 +131,7 @@ __all__ = [
     'DelineationBackend',
     'WatershedNotAbstractedError',
     'WatershedNoDbLockedException',
+    'NoOutletFoundError',
     'process_channel',
     'process_subcatchment',
     'TRANSIENT_FIELDS',
@@ -157,6 +158,18 @@ class WatershedNotAbstractedError(Exception):
 
 class WatershedNoDbLockedException(Exception):
     pass
+
+
+class NoOutletFoundError(Exception):
+    """Raised when find_outlet cannot locate a valid outlet stream cell.
+
+    This typically occurs when the stream network is too sparse after pruning
+    and no stream cells intersect with the watershed mask.
+    """
+
+    def __init__(self, message: str = "No outlet stream cell found for watershed"):
+        self.message = message
+        super().__init__(self.message)
 
 
 @deprecated
@@ -956,19 +969,28 @@ class Watershed(NoDbBase):
 
     def find_outlet(self, watershed_feature: WatershedFeature) -> None:
         assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
-        
+
         wbt = self._ensure_wbt()
 
         # build raster mask from watershed feature
         watershed_feature.build_raster_mask(
             template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
-    
-        wbt.wbt.find_outlet(
-            d8_pntr=wbt.flovec,
-            streams=wbt.netful,
-            watershed=self.target_watershed_path,
-            output=wbt.outlet_geojson
-        )
+
+        try:
+            wbt.wbt.find_outlet(
+                d8_pntr=wbt.flovec,
+                streams=wbt.netful,
+                watershed=self.target_watershed_path,
+                output=wbt.outlet_geojson
+            )
+        except Exception as e:
+            error_msg = str(e)
+            # Check for sparse network error from WhiteBox tools
+            if "Failed to identify an outlet stream cell" in error_msg:
+                raise NoOutletFoundError(
+                    f"Stream network too sparse for watershed (runid={watershed_feature.runid}): {error_msg}"
+                ) from e
+            raise  # Re-raise other exceptions
 
         outlet = wbt.set_outlet_from_geojson(logger=self.logger)
         self.outlet = outlet

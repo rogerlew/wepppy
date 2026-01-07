@@ -14,10 +14,12 @@ import redis
 from rq import Queue, get_current_job
 from rq.job import Job
 from whitebox_tools import WhiteboxTools
+from osgeo import gdal
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
+from wepppy.nodb.core.watershed import NoOutletFoundError
 from wepppy.nodb.wepp_nodb_post_utils import (
     activate_query_engine_for_run,
     ensure_hillslope_interchange,
@@ -102,16 +104,22 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
         Path(netful_src),
     )
 
-    min_length = runner.config_get_float("watershed.wbt", "mcl", None)
-    if min_length is None:
-        raise ValueError("watershed.wbt mcl is required for stream pruning")
-    if min_length > 0:
-        logger.info(
-            "culvert_batch %s: pruning short streams (min_length=%s)",
-            culvert_batch_uuid,
-            min_length,
-        )
-        _prune_short_streams(Path(flovec_src), Path(netful_src), min_length)
+    # Get cellsize from DEM for minimal stream pruning (2 * cellsize)
+    ds = gdal.Open(str(dem_src))
+    if ds is None:
+        raise FileNotFoundError(f"Cannot open DEM: {dem_src}")
+    gt = ds.GetGeoTransform()
+    cellsize = abs(gt[1])  # pixel width
+    ds = None  # close dataset
+
+    min_length = 2.0 * cellsize
+    logger.info(
+        "culvert_batch %s: pruning short streams (min_length=%.1f, cellsize=%.1f)",
+        culvert_batch_uuid,
+        min_length,
+        cellsize,
+    )
+    _prune_short_streams(Path(flovec_src), Path(netful_src), min_length)
 
     order_reduction_passes = runner.order_reduction_passes
     if order_reduction_passes > 0:
@@ -259,6 +267,7 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     runs = runner.runs
     succeeded = 0
     failed = 0
+    skipped_no_outlet = 0
     for run_id, record in runs.items():
         run_wd = Path(record.get("wd") or (batch_root / "runs" / run_id))
         metadata_path = run_wd / "run_metadata.json"
@@ -270,6 +279,8 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
             status = metadata.get("status")
             if status == "success":
                 succeeded += 1
+            elif status == "skipped_no_outlet":
+                skipped_no_outlet += 1
             else:
                 failed += 1
         else:
@@ -285,16 +296,26 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         "total": total,
         "succeeded": succeeded,
         "failed": failed,
+        "skipped_no_outlet": skipped_no_outlet,
     }
 
     _write_batch_summary(batch_root / "batch_summary.json", summary)
 
-    if succeeded == 0 and total > 0:
+    # Log skipped runs for assessment
+    if skipped_no_outlet > 0:
+        logger.warning(
+            f"culvert_batch {culvert_batch_uuid}: {skipped_no_outlet}/{total} runs "
+            "skipped (no outlet - stream network too sparse)"
+        )
+
+    # Only raise error if all non-skipped runs failed
+    processable = total - skipped_no_outlet
+    if succeeded == 0 and processable > 0:
         logger.error(
-            f"culvert_batch {culvert_batch_uuid}: all {total} runs failed"
+            f"culvert_batch {culvert_batch_uuid}: all {processable} processable runs failed"
         )
         raise CulvertBatchError(
-            f"All {total} culvert runs failed",
+            f"All {processable} processable culvert runs failed ({skipped_no_outlet} skipped)",
             total=total,
             succeeded=succeeded,
             failed=failed,
@@ -306,7 +327,8 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         )
     else:
         logger.info(
-            f"culvert_batch {culvert_batch_uuid}: all {total} runs succeeded"
+            f"culvert_batch {culvert_batch_uuid}: {succeeded}/{total} runs succeeded, "
+            f"{skipped_no_outlet} skipped"
         )
 
     return summary
@@ -466,7 +488,7 @@ def _process_culvert_run(
     """
     Process a single culvert run.
 
-    Returns "success" or "failed".
+    Returns "success", "failed", or "skipped_no_outlet".
     """
     runid = f"culvert;;{culvert_batch_uuid};;{run_id}"
     started_at = datetime.now(timezone.utc)
@@ -504,6 +526,11 @@ def _process_culvert_run(
         ensure_totalwatsed3(wepp, climate)
         ensure_watershed_interchange(wepp, climate)
         activate_query_engine_for_run(wepp)
+    except NoOutletFoundError as exc:
+        # Gracefully handle sparse network - culvert watershed has no stream intersection
+        status = "skipped_no_outlet"
+        error_payload = {"type": "NoOutletFoundError", "message": str(exc)}
+        logger.warning(f"culvert_run {culvert_batch_uuid}/{run_id}: skipped (no outlet) - {exc}")
     except Exception as exc:
         status = "failed"
         error_payload = {"type": type(exc).__name__, "message": str(exc)}

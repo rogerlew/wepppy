@@ -291,37 +291,63 @@ class SsurgoRequestError(Exception):
     """Raised when the NRCS SDM Tabular service fails or is unreachable."""
 
 
+# Retry settings for SSURGO requests
+_SSURGO_MAX_RETRIES = 3
+_SSURGO_BASE_DELAY = 5  # seconds
+
+
 # noinspection PyPep8Naming
 def _makeSOAPrequest(query):
     global _ssurgo_url, _query_template
     headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
     body = _query_template.format(query=query)
 
-    try:
-        r = requests.post(_ssurgo_url, data=body, headers=headers, timeout=30)
-    except requests.exceptions.ConnectTimeout as exc:
-        message = (
-            "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) is currently "
-            "unavailable. Try again later."
-        )
-        _LOG.error(message)
-        raise SsurgoRequestError(message) from exc
-    except requests.exceptions.Timeout as exc:
-        message = (
-            "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) did not respond "
-            "before the timeout. Try again later."
-        )
-        _LOG.error(message)
-        raise SsurgoRequestError(message) from exc
-    except requests.exceptions.RequestException as exc:
-        message = f"Failed to query NRCS SDM Data Access service: {exc}"
-        _LOG.error(message)
-        raise SsurgoRequestError(message) from exc
+    last_exc = None
+    for attempt in range(_SSURGO_MAX_RETRIES):
+        try:
+            r = requests.post(_ssurgo_url, data=body, headers=headers, timeout=30)
+            if r.status_code != 200:
+                raise SsurgoRequestError((r.content, query))
+            return r.content
+        except requests.exceptions.ConnectTimeout as exc:
+            last_exc = exc
+            if attempt < _SSURGO_MAX_RETRIES - 1:
+                delay = _SSURGO_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
+                _LOG.warning(
+                    "SSURGO request timed out (attempt %d/%d), retrying in %ds...",
+                    attempt + 1, _SSURGO_MAX_RETRIES, delay
+                )
+                time.sleep(delay)
+            else:
+                message = (
+                    "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) is currently "
+                    "unavailable after %d attempts. Try again later." % _SSURGO_MAX_RETRIES
+                )
+                _LOG.error(message)
+                raise SsurgoRequestError(message) from exc
+        except requests.exceptions.Timeout as exc:
+            last_exc = exc
+            if attempt < _SSURGO_MAX_RETRIES - 1:
+                delay = _SSURGO_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
+                _LOG.warning(
+                    "SSURGO request timed out (attempt %d/%d), retrying in %ds...",
+                    attempt + 1, _SSURGO_MAX_RETRIES, delay
+                )
+                time.sleep(delay)
+            else:
+                message = (
+                    "NRCS SDM Data Access service (sdmdataaccess.nrcs.usda.gov) did not respond "
+                    "before the timeout after %d attempts. Try again later." % _SSURGO_MAX_RETRIES
+                )
+                _LOG.error(message)
+                raise SsurgoRequestError(message) from exc
+        except requests.exceptions.RequestException as exc:
+            message = f"Failed to query NRCS SDM Data Access service: {exc}"
+            _LOG.error(message)
+            raise SsurgoRequestError(message) from exc
 
-    if r.status_code != 200:
-        raise SsurgoRequestError((r.content, query))
-
-    return r.content
+    # Should not reach here, but just in case
+    raise SsurgoRequestError("SSURGO request failed") from last_exc
 
 
 def _extract_table(xml):
