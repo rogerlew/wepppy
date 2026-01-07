@@ -9,6 +9,7 @@ import wepppy.nodb.culverts_runner as culverts_runner_module
 from wepppy.all_your_base.geo import get_raster_extent
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Landuse, Ron, Watershed
+from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.weppcloud.utils import helpers as wepp_helpers
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -108,6 +109,23 @@ def _init_base_project(path: Path, *, nlcd_db: str | None = None) -> None:
         landuse.nlcd_db = nlcd_db
 
 
+def _fake_build_raster_mask(
+    self: WatershedFeature, template_filepath: str, dst_filepath: str
+) -> None:
+    with rasterio.open(template_filepath) as src:
+        meta = src.meta.copy()
+        meta.update(
+            {
+                "count": 1,
+                "dtype": "uint8",
+                "nodata": 0,
+            }
+        )
+        mask = np.ones((src.height, src.width), dtype=np.uint8)
+        with rasterio.open(dst_filepath, "w", **meta) as dst:
+            dst.write(mask, 1)
+
+
 def test_ron_symlink_dem_sets_map_and_symlink(tmp_path: Path) -> None:
     topo_dir = tmp_path / "topo"
     topo = _make_topo_files(topo_dir)
@@ -171,6 +189,7 @@ def test_culverts_runner_creates_runs_and_get_wd(
         return wepp_helpers.get_wd(runid, *args, **kwargs)
 
     monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
+    monkeypatch.setattr(WatershedFeature, "build_raster_mask", _fake_build_raster_mask)
 
     batch_uuid = "batch-1234"
     batch_root = culverts_root / batch_uuid
@@ -194,14 +213,21 @@ def test_culverts_runner_creates_runs_and_get_wd(
     }
 
     runner = CulvertsRunner(str(batch_root), "culvert.cfg")
-    run_ids = runner.create_runs(
-        batch_uuid,
-        str(batch_root),
-        payload_metadata,
-        model_parameters=model_parameters,
-    )
+    with runner.locked():
+        runner._culvert_batch_uuid = batch_uuid
+        runner._payload_metadata = dict(payload_metadata)
+        runner._model_parameters = dict(model_parameters)
+        runner._run_config = runner._resolve_run_config(model_parameters)
 
-    assert run_ids == ("1", "2")
+    run_ids = runner._load_run_ids(str(watersheds_path))
+    for run_id in run_ids:
+        runner.create_run_if_missing(
+            run_id,
+            payload_metadata,
+            model_parameters=model_parameters,
+        )
+
+    assert tuple(run_ids) == ("1", "2")
     base_copy = batch_root / "_base" / "README.txt"
     assert base_copy.read_text(encoding="utf-8") == "base-override"
     for run_id in run_ids:
@@ -248,6 +274,7 @@ def test_culverts_runner_cleanup_relief_and_chnjnt(
         return wepp_helpers.get_wd(runid, *args, **kwargs)
 
     monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
+    monkeypatch.setattr(WatershedFeature, "build_raster_mask", _fake_build_raster_mask)
 
     batch_uuid = "batch-5678"
     batch_root = culverts_root / batch_uuid
@@ -270,14 +297,21 @@ def test_culverts_runner_cleanup_relief_and_chnjnt(
     }
 
     runner = CulvertsRunner(str(batch_root), "culvert.cfg")
-    run_ids = runner.create_runs(
-        batch_uuid,
-        str(batch_root),
-        payload_metadata,
-        model_parameters=model_parameters,
-    )
+    with runner.locked():
+        runner._culvert_batch_uuid = batch_uuid
+        runner._payload_metadata = dict(payload_metadata)
+        runner._model_parameters = dict(model_parameters)
+        runner._run_config = runner._resolve_run_config(model_parameters)
 
-    assert run_ids == ("1",)
+    run_ids = runner._load_run_ids(str(watersheds_path))
+    for run_id in run_ids:
+        runner.create_run_if_missing(
+            run_id,
+            payload_metadata,
+            model_parameters=model_parameters,
+        )
+
+    assert tuple(run_ids) == ("1",)
     run_wd = batch_root / "runs" / "1"
     relief_link = run_wd / "dem" / "wbt" / "relief.tif"
     chnjnt_link = run_wd / "dem" / "wbt" / "chnjnt.tif"
@@ -304,4 +338,4 @@ def test_culverts_runner_rejects_path_traversal(tmp_path: Path) -> None:
 
     runner = CulvertsRunner(str(batch_root), "culvert.cfg")
     with pytest.raises(ValueError, match="Point_ID"):
-        runner.create_runs("batch-9999", str(batch_root), payload_metadata)
+        runner.load_watershed_features(str(watersheds_path))

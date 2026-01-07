@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional
 
 from wepppy.nodb.base import NoDbBase
 from wepppy.topo.watershed_collection import WatershedFeature
@@ -52,20 +52,6 @@ class CulvertsRunner(NoDbBase):
         payload_metadata: Dict[str, Any],
         model_parameters: Optional[Dict[str, Any]] = ...,
     ) -> None: ...
-    def create_runs(
-        self,
-        culvert_batch_uuid: str,
-        batch_root: str,
-        payload_metadata: Dict[str, Any],
-        model_parameters: Optional[Dict[str, Any]] = ...,
-    ) -> Tuple[str, ...]: ...
-    def run(
-        self,
-        culvert_batch_uuid: str,
-        batch_root: str,
-        payload_metadata: Dict[str, Any],
-        model_parameters: Optional[Dict[str, Any]] = ...,
-    ) -> Tuple[str, ...]: ...
     def load_watershed_features(
         self, watersheds_geojson_path: str
     ) -> Dict[str, WatershedFeature]: ...

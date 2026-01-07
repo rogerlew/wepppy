@@ -176,6 +176,38 @@
     return statusStateMap[normalized] || "info";
   }
 
+  function getTerminalCount() {
+    return allFinishedCount + allFailedCount + allCanceledCount + allStoppedCount;
+  }
+
+  function isAllTerminal() {
+    return allTotalCount > 0 && getTerminalCount() === allTotalCount;
+  }
+
+  function getOverallStatus(rootStatus) {
+    if (allFailedCount > 0) {
+      return "failed";
+    }
+    if (isAllTerminal()) {
+      if (allCanceledCount > 0) {
+        return "canceled";
+      }
+      if (allStoppedCount > 0) {
+        return "stopped";
+      }
+      return "finished";
+    }
+
+    const normalizedRoot = String(rootStatus || "").toLowerCase();
+    if (normalizedRoot === "paused") {
+      return "paused";
+    }
+    if (normalizedRoot === "queued" || normalizedRoot === "deferred") {
+      return normalizedRoot;
+    }
+    return "running";
+  }
+
   function formatElapsed(value, decimals = 1) {
     if (value === null || value === undefined || Number.isNaN(value)) {
       return "N/A";
@@ -248,7 +280,7 @@
       const openNodes = getOpenNodes();
       setHtml("job-dashboard", renderJob(data, openNodes));
 
-      if (allFinishedCount === allTotalCount && allTotalCount > 0) {
+      if (isAllTerminal()) {
         return;
       }
 
@@ -336,12 +368,35 @@
     }
 
     const jobsHtml = renderJobs(data.children || {}, rootNodeId, openNodes);
+    const rootStatus = String(data.status || "").toLowerCase();
+    const normalizedRootStatus = rootStatus.replace(/cancel+ed/g, "canceled");
 
-    if (data.status === "finished") {
+    if (normalizedRootStatus === "finished") {
       allFinishedCount += 1;
+    } else if (normalizedRootStatus === "failed") {
+      allFailedCount += 1;
+      anyFailed = true;
+    } else if (normalizedRootStatus === "canceled") {
+      allCanceledCount += 1;
+    } else if (normalizedRootStatus === "stopped") {
+      allStoppedCount += 1;
     }
 
-    const statusLabel = data.status || "unknown";
+    const summaryVerb = allTotalCount > 0 && allFinishedCount === allTotalCount ? "Finished" : "Completed";
+    const overallParts = [`${summaryVerb} ${allFinishedCount} of ${allTotalCount} (${allElapsedTime_s.toFixed(0)} s)`];
+    if (allCanceledCount > 0) {
+      overallParts.push(`${allCanceledCount} canceled`);
+    }
+    if (allStoppedCount > 0) {
+      overallParts.push(`${allStoppedCount} stopped`);
+    }
+    if (allFailedCount > 0) {
+      overallParts.push(`${allFailedCount} failed`);
+    }
+    allSummary = overallParts.join(" | ");
+
+    const overallStatus = getOverallStatus(normalizedRootStatus);
+    const statusLabel = overallStatus || "unknown";
     const statusState = getStatusState(statusLabel);
     const progressPercent = allTotalCount > 0 ? Math.round((allFinishedCount / allTotalCount) * 100) : 0;
     const elapsedLabel = formatElapsed(data.elapsed_s, 1);
@@ -376,7 +431,7 @@
   function renderJobs(jobs, parentNodeId, openNodes) {
     const jobOrders = Object.keys(jobs || {});
     if (jobOrders.length === 0) {
-      return `<div class="wc-text-muted">No child jobs reported.</div>`;
+      return "";
     }
 
     let html = '<div class="wc-stack">';
@@ -438,17 +493,6 @@
       const progressPercent = totalCount > 0 ? Math.round((finishedCount / totalCount) * 100) : 0;
 
       allElapsedTime_s += elapsed_s;
-      const overallParts = [`Finished ${allFinishedCount} of ${allTotalCount} (${allElapsedTime_s.toFixed(0)} s)`];
-      if (allCanceledCount > 0) {
-        overallParts.push(`${allCanceledCount} canceled`);
-      }
-      if (allStoppedCount > 0) {
-        overallParts.push(`${allStoppedCount} stopped`);
-      }
-      if (allFailedCount > 0) {
-        overallParts.push(`${allFailedCount} failed`);
-      }
-      allSummary = overallParts.join(" | ");
 
       const terminalCount = finishedCount + failedCount + canceledCount + stoppedCount;
       const allTerminal = totalCount > 0 && terminalCount === totalCount;
