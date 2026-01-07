@@ -148,6 +148,12 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
         )
 
     _generate_stream_junctions(Path(flovec_src), Path(netful_src), Path(chnjnt_src))
+    streams_chnjnt_src = batch_root / runner.DEFAULT_STREAMS_CHNJNT_REL_PATH
+    _generate_stream_junctions(
+        Path(flovec_src),
+        Path(streams_src),
+        streams_chnjnt_src,
+    )
 
     run_ids = runner._load_run_ids(watersheds_src)
     run_config = runner._resolve_run_config(model_parameters)
@@ -244,6 +250,10 @@ def run_culvert_run_rq(
     # Note: We skip locking here because run_culvert_batch_rq already
     # initialized the shared runner state. Acquiring a lock would cause
     # contention when multiple workers process runs in parallel.
+    if runner.culvert_batch_uuid is None:
+        with runner.locked():
+            if runner.culvert_batch_uuid is None:
+                runner._culvert_batch_uuid = culvert_batch_uuid
 
     runner.create_run_if_missing(run_id, payload_metadata, model_parameters)
     watersheds_path = runner._resolve_payload_path(
@@ -570,7 +580,7 @@ def _process_culvert_run(
         climate = Climate.getInstance(wd)  # Settings from copied base project
         wepp = Wepp.getInstance(wd)
 
-        watershed.find_outlet(watershed_feature)
+        watershed.find_outlet()
         watershed.build_subcatchments()
         watershed.abstract_watershed()
         landuse.build()

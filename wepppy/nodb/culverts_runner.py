@@ -11,6 +11,8 @@ from os.path import exists as _exists
 from os.path import join as _join
 import shutil
 from typing import Any, Dict, List, Optional, Tuple
+import numpy as np
+import rasterio
 
 from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks, nodb_setter
 from wepppy.nodb.core import Ron, Watershed
@@ -20,6 +22,33 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 
 __all__ = ["CulvertsRunner"]
+
+
+def _sum_masked_raster(stream_path: str, mask_path: str) -> float:
+    with rasterio.open(stream_path) as src_stream:
+        stream_arr = src_stream.read(1)
+        # Identify the nodata value for the stream network
+        stream_nodata = src_stream.nodata
+
+    with rasterio.open(mask_path) as src_mask:
+        mask_arr = src_mask.read(1)
+        # Identify the nodata value for the mask
+        mask_nodata = src_mask.nodata
+
+    # Create a boolean mask: True where mask is 1 (or not NoData)
+    # Adjust 'mask_arr == 1' if your mask uses a different value
+    boolean_mask = (mask_arr != mask_nodata) & (mask_arr > 0)
+
+    # Filter out stream NoData values and apply the watershed mask
+    valid_pixels = stream_arr[(stream_arr != stream_nodata) & boolean_mask]
+
+    return float(np.sum(valid_pixels))
+
+
+def _symlink_matches(dest: str, src: str) -> bool:
+    if not os.path.islink(dest):
+        return False
+    return os.path.realpath(dest) == os.path.abspath(src)
 
 
 class CulvertsRunner(NoDbBase):
@@ -32,6 +61,8 @@ class CulvertsRunner(NoDbBase):
     DEFAULT_DEM_REL_PATH = "topo/hydro-enforced-dem.tif"
     DEFAULT_WATERSHEDS_REL_PATH = "culverts/watersheds.geojson"
     DEFAULT_FLOVEC_REL_PATH = "topo/flovec.tif"
+    DEFAULT_FULL_STREAM_REL_PATH = "topo/streams.tif"
+    DEFAULT_STREAMS_CHNJNT_REL_PATH = "topo/chnjnt.streams.tif"
     DEFAULT_NETFUL_REL_PATH = "topo/netful.tif"
     DEFAULT_CHNJNT_REL_PATH = "topo/chnjnt.tif"
     DEFAULT_BASE_DIRNAME = "_base"
@@ -121,6 +152,58 @@ class CulvertsRunner(NoDbBase):
             raise ValueError("order_reduction_passes must be >= 0")
         self._order_reduction_passes = value
 
+    def _select_stream_sources_for_run(
+        self,
+        *,
+        run_id: str,
+        payload_metadata: Dict[str, Any],
+        abs_batch_root: str,
+        dem_src: str,
+        flovec_src: str,
+        netful_src: str,
+        chnjnt_src: str,
+        watershed: Watershed,
+    ) -> tuple[str, str]:
+        watersheds_src = self._resolve_payload_path(
+            payload_metadata,
+            "watersheds",
+            self.DEFAULT_WATERSHEDS_REL_PATH,
+            abs_batch_root,
+        )
+        features = self.load_watershed_features(watersheds_src)
+        watershed_feature = features.get(run_id)
+        if watershed_feature is None:
+            raise ValueError(f"Watershed feature not found for Point_ID {run_id}")
+
+        target_path = watershed.target_watershed_path
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        if not _exists(target_path):
+            watershed_feature.build_raster_mask(
+                template_filepath=dem_src, dst_filepath=target_path
+            )
+
+        if _sum_masked_raster(netful_src, target_path) == 0:
+            streams_src = self._resolve_payload_path(
+                payload_metadata,
+                "streams",
+                self.DEFAULT_FULL_STREAM_REL_PATH,
+                abs_batch_root,
+            )
+            if not _exists(streams_src):
+                raise FileNotFoundError(
+                    f"Streams file does not exist: {streams_src}"
+                )
+            streams_chnjnt = _join(
+                abs_batch_root, self.DEFAULT_STREAMS_CHNJNT_REL_PATH
+            )
+            if not _exists(streams_chnjnt):
+                raise FileNotFoundError(
+                    f"Stream junction file does not exist: {streams_chnjnt}"
+                )
+            return streams_src, streams_chnjnt
+
+        return netful_src, chnjnt_src
+
     def create_run_if_missing(
         self,
         run_id: str,
@@ -164,6 +247,17 @@ class CulvertsRunner(NoDbBase):
         if _exists(nodb_path):
             ron = Ron.getInstance(run_wd)
             watershed = Watershed.getInstance(run_wd)
+            netful_src, chnjnt_src = self._select_stream_sources_for_run(
+                run_id=run_id,
+                payload_metadata=payload_metadata,
+                abs_batch_root=abs_batch_root,
+                dem_src=dem_src,
+                flovec_src=flovec_src,
+                netful_src=netful_src,
+                chnjnt_src=chnjnt_src,
+                watershed=watershed,
+            )
+
             required_paths = (
                 ron.dem_fn,
                 _join(watershed.wbt_wd, "flovec.tif"),
@@ -171,7 +265,13 @@ class CulvertsRunner(NoDbBase):
                 _join(watershed.wbt_wd, "relief.tif"),
                 _join(watershed.wbt_wd, "chnjnt.tif"),
             )
-            if all(os.path.lexists(path) for path in required_paths):
+            netful_link = _join(watershed.wbt_wd, "netful.tif")
+            chnjnt_link = _join(watershed.wbt_wd, "chnjnt.tif")
+            if (
+                all(os.path.lexists(path) for path in required_paths)
+                and _symlink_matches(netful_link, netful_src)
+                and _symlink_matches(chnjnt_link, chnjnt_src)
+            ):
                 return
 
             ron.symlink_dem(dem_src)
@@ -240,6 +340,16 @@ class CulvertsRunner(NoDbBase):
         ron.symlink_dem(dem_src)
 
         watershed = Watershed.getInstance(run_wd)
+        netful_src, chnjnt_src = self._select_stream_sources_for_run(
+            run_id=run_id,
+            payload_metadata=payload_metadata,
+            abs_batch_root=abs_batch_root,
+            dem_src=dem_src,
+            flovec_src=flovec_src,
+            netful_src=netful_src,
+            chnjnt_src=chnjnt_src,
+            watershed=watershed,
+        )
         for filename in ("relief.tif", "chnjnt.tif"):
             cleanup_path = _join(watershed.wbt_wd, filename)
             if os.path.lexists(cleanup_path):

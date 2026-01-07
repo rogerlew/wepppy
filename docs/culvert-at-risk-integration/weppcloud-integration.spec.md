@@ -76,6 +76,28 @@ This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The s
 - Run CPU/IO-heavy work (topo generation, pruning, WEPP runs) inside RQ workers to avoid request timeouts and keep interactive workers responsive.
 - Prefer idempotent batch steps in RQ so retries can resume without re-uploading payloads.
 
+## Live code path (current)
+This is the concrete request-to-run flow in the current codebase (paths shown for clarity):
+1. **API ingest + enqueue:** `wepppy/microservices/rq_engine/culvert_routes.py::culverts_wepp_batch`
+   - validates payload, extracts ZIP, writes `batch_metadata.json`
+   - enqueues RQ job `run_culvert_batch_rq(culvert_batch_uuid)`
+2. **Batch topo + fan-out:** `wepppy/rq/culvert_rq.py::run_culvert_batch_rq`
+   - generates `flovec.tif` + `netful.tif`
+   - prunes short streams → builds Strahler order → prunes order (binary output on final pass)
+   - regenerates `chnjnt.tif` and generates `chnjnt.streams.tif` for fallback streams
+   - enqueues per-run jobs `run_culvert_run_rq`
+3. **Per-run setup:** `wepppy/rq/culvert_rq.py::run_culvert_run_rq`
+   - ensures `CulvertsRunner` exists and has `culvert_batch_uuid`
+   - calls `CulvertsRunner.create_run_if_missing` to create/sync run dirs and symlinks
+4. **Stream selection per run:** `wepppy/nodb/culverts_runner.py::CulvertsRunner.create_run_if_missing`
+   - rasterizes the watershed polygon to `dem/target_watershed.tif`
+   - checks for stream pixels inside the watershed boundary
+   - if none, falls back to `topo/streams.tif` and uses `topo/chnjnt.streams.tif`
+   - otherwise uses `topo/netful.tif` + `topo/chnjnt.tif`
+5. **Outlet + modeling:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
+   - `Watershed.find_outlet()` (uses `dem/target_watershed.tif` if already built)
+   - subcatchments → abstraction → landuse/soils/climate → WEPP
+
 ## DEM symlink manager
 The `Ron` class gains a new method to handle preexisting DEMs without fetching or copying:
 
@@ -118,6 +140,7 @@ Note: avoid ESRI shapefiles and sidecars entirely.
 - The `streams.tif` from Culvert_web_app (typically `main_stream_raster_UTM.tif`) is used to generate batch-level `topo/netful.tif`.
 - Since streams are provided, `mcl` (minimum channel length) and `csa` (critical source area) parameters are NOT included in `model-parameters.json`—these were already applied when Culvert_web_app generated the stream network.
 - wepp.cloud further post-processes `topo/netful.tif` at batch ingest: prune short stream segments, reduce stream order, then regenerate `chnjnt.tif` from the final `netful.tif`. This is needed because Culvert_web_app stream rasters can be extremely dense, which explodes hillslope counts and pushes WEPP into regimes outside typical watershed calibrations. Pruning yields a channel network closer to the scale WEPP watershed was tuned for, reducing unrealistic hillslopes and unstable channel erosion behavior.
+- Per-run fallback: if a watershed polygon contains no stream pixels in the pruned `netful.tif`, the run switches to the full `streams.tif` and uses `chnjnt.streams.tif` so junctions align with the fallback map.
 
 ### `metadata.json` schema (v1)
 - `schema_version` (string, required; `culvert-metadata-v1`)

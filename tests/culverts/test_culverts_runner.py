@@ -43,22 +43,26 @@ def _make_topo_files(topo_dir: Path, *, crs: str = "EPSG:32611") -> dict[str, Pa
     flovec_data = np.ones((3, 3), dtype=np.uint8)
     netful_data = np.zeros((3, 3), dtype=np.uint8)
     netful_data[1, 1] = 1
+    streams_data = netful_data.copy()
     chnjnt_data = np.zeros((3, 3), dtype=np.uint8)
 
     dem_path = topo_dir / "hydro-enforced-dem.tif"
     flovec_path = topo_dir / "flovec.tif"
     netful_path = topo_dir / "netful.tif"
+    streams_path = topo_dir / "streams.tif"
     chnjnt_path = topo_dir / "chnjnt.tif"
 
     _write_raster(dem_path, dem_data, transform, crs)
     _write_raster(flovec_path, flovec_data, transform, crs)
     _write_raster(netful_path, netful_data, transform, crs)
+    _write_raster(streams_path, streams_data, transform, crs)
     _write_raster(chnjnt_path, chnjnt_data, transform, crs)
 
     return {
         "dem": dem_path,
         "flovec": flovec_path,
         "netful": netful_path,
+        "streams": streams_path,
         "chnjnt": chnjnt_path,
     }
 
@@ -69,7 +73,7 @@ def _write_watersheds(path: Path, point_ids: list[object] | None = None) -> None
         point_ids = [1, "2"]
     features = []
     for idx, point_id in enumerate(point_ids):
-        offset = idx * 30.0
+        offset = idx * 10.0
         features.append(
             {
                 "type": "Feature",
@@ -78,11 +82,11 @@ def _write_watersheds(path: Path, point_ids: list[object] | None = None) -> None
                     "type": "Polygon",
                     "coordinates": [
                         [
-                            [500000.0 + offset, 4100000.0],
+                            [500000.0 + offset, 4099980.0],
+                            [500020.0 + offset, 4099980.0],
                             [500020.0 + offset, 4100000.0],
-                            [500020.0 + offset, 4100020.0],
-                            [500000.0 + offset, 4100020.0],
                             [500000.0 + offset, 4100000.0],
+                            [500000.0 + offset, 4099980.0],
                         ]
                     ],
                 },

@@ -142,6 +142,17 @@ Notes:
 - Risks: pruning changes the number of channels/hillslopes; ensure the weppcloud-wbt fork with `--binary_output` is deployed so downstream binary stream masks stay compatible with `polygonize_netful`.
 - Verification: run `santee_mini_4culverts` with `order_reduction_passes=1` and compare hillslope counts/logs before/after; confirm pruned `netful.tif` is used in `dem/wbt/netful.tif` symlinks, `chnjnt.tif` is regenerated from the pruned netful raster, and the batch completes.
 
+## Phase 3f - Stream coverage validation + per-run fallback
+- Status: complete.
+- Scope: ensure each run has stream pixels inside the watershed boundary before outlet detection. If the pruned `topo/netful.tif` has zero stream pixels within the watershed mask, fall back to the full `topo/streams.tif` for that run only and use the batch-generated `topo/chnjnt.streams.tif` so junctions align with the fallback stream map. Allow `Watershed.find_outlet()` to run with a pre-built `target_watershed.tif` (no feature argument) so culvert orchestration can reuse cached masks.
+- Deliverables:
+  - `CulvertsRunner` stream-source selection helper that rasterizes the watershed polygon into `dem/target_watershed.tif`, checks stream coverage, and selects either `netful.tif` + `chnjnt.tif` or `streams.tif` + `chnjnt.streams.tif`.
+  - `run_culvert_batch_rq` generates `topo/chnjnt.streams.tif` once per batch (alongside `topo/chnjnt.tif`) for per-run symlinking.
+  - `Watershed.find_outlet()` accepts an optional `WatershedFeature` and uses the cached `target_watershed.tif` when present.
+  - Stubs/tests updated to cover the new optional signature and payload fixtures include `topo/streams.tif`.
+- Risks: fallback stream maps can increase channel density for specific culverts; ensure junction maps always match the chosen stream raster.
+- Verification: run a batch where a culvert polygon does not intersect pruned `netful.tif` and confirm the run uses `streams.tif` + `chnjnt.streams.tif` while other runs keep `netful.tif`.
+
 ## Phase 4 - Artifact delivery and browse integration
 - Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; write `run_metadata.json`; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.
 - Dependencies: Phase 3 outputs; browse service routing rules; decision on which artifacts are mandatory vs optional.

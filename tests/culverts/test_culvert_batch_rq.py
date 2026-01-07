@@ -107,6 +107,16 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
         lambda *args, **kwargs: calls.append("chnjnt"),
     )
 
+    class _DummyDataset:
+        def GetGeoTransform(self) -> tuple[float, float, float, float, float, float]:
+            return (0.0, 10.0, 0.0, 0.0, 0.0, -10.0)
+
+    monkeypatch.setattr(
+        culvert_rq_module.gdal,
+        "Open",
+        lambda *_args, **_kwargs: _DummyDataset(),
+    )
+
     monkeypatch.setattr(culvert_rq_module.redis, "Redis", _DummyRedis)
     monkeypatch.setattr(culvert_rq_module, "Queue", _DummyQueue)
     monkeypatch.setattr(CulvertsRunner, "_ensure_base_project", lambda self: None)
@@ -114,4 +124,4 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     run_culvert_batch_rq(batch_uuid)
 
-    assert calls == ["generate", "prune_short", "prune_order", "chnjnt"]
+    assert calls == ["generate", "prune_short", "prune_order", "chnjnt", "chnjnt"]

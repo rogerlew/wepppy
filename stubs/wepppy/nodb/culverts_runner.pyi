@@ -14,6 +14,8 @@ class CulvertsRunner(NoDbBase):
     DEFAULT_DEM_REL_PATH: ClassVar[str]
     DEFAULT_WATERSHEDS_REL_PATH: ClassVar[str]
     DEFAULT_FLOVEC_REL_PATH: ClassVar[str]
+    DEFAULT_FULL_STREAM_REL_PATH: ClassVar[str]
+    DEFAULT_STREAMS_CHNJNT_REL_PATH: ClassVar[str]
     DEFAULT_NETFUL_REL_PATH: ClassVar[str]
     DEFAULT_CHNJNT_REL_PATH: ClassVar[str]
     DEFAULT_BASE_DIRNAME: ClassVar[str]

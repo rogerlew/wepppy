@@ -967,15 +967,22 @@ class Watershed(NoDbBase):
     def target_watershed_path(self) -> str:
         return _join(self.wd, 'dem', "target_watershed.tif")
 
-    def find_outlet(self, watershed_feature: WatershedFeature) -> None:
+    def find_outlet(
+        self, watershed_feature: Optional[WatershedFeature] = None
+    ) -> None:
         assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
 
         wbt = self._ensure_wbt()
 
         # build raster mask from watershed feature
-        watershed_feature.build_raster_mask(
-            template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
-
+        if watershed_feature is not None:
+            watershed_feature.build_raster_mask(
+                template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
+        elif not _exists(self.target_watershed_path):
+            raise FileNotFoundError(
+                f"Target watershed raster not found: {self.target_watershed_path}"
+            )
+            
         try:
             wbt.wbt.find_outlet(
                 d8_pntr=wbt.flovec,
@@ -987,8 +994,9 @@ class Watershed(NoDbBase):
             error_msg = str(e)
             # Check for sparse network error from WhiteBox tools
             if "Failed to identify an outlet stream cell" in error_msg:
+                runid = watershed_feature.runid if watershed_feature else self.runid
                 raise NoOutletFoundError(
-                    f"Stream network too sparse for watershed (runid={watershed_feature.runid}): {error_msg}"
+                    f"Stream network too sparse for watershed (runid={runid}): {error_msg}"
                 ) from e
             raise  # Re-raise other exceptions
 
