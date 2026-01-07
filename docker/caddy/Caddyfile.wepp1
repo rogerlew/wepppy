@@ -185,6 +185,24 @@ wepp.cloud {
             }
         }
 
+        @culvert_browse_proxy path_regexp culvert_browse_proxy ^/weppcloud/culverts/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
+        handle @culvert_browse_proxy {
+            reverse_proxy browse:9009 {
+                transport http {
+                    read_timeout 3m
+                }
+            }
+        }
+
+        @batch_browse_proxy path_regexp batch_browse_proxy ^/weppcloud/batch/[^/]+/(?:browse(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
+        handle @batch_browse_proxy {
+            reverse_proxy browse:9009 {
+                transport http {
+                    read_timeout 3m
+                }
+            }
+        }
+
         # Fallback to Flask weppcloud app
         handle {
             uri strip_prefix /weppcloud

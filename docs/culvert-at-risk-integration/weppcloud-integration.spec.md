@@ -65,11 +65,11 @@ Use existing RQ engine endpoints instead of custom status routes:
 Use the browse service for listing/downloading artifacts instead of a culvert-specific endpoint.
 
 **Browse service URL scheme:**
-- Batch root browse: `/culverts/<culvert_batch_uuid>/browse/`
-- Per-culvert browse: `/culverts/<culvert_batch_uuid>/runs/<culvert_id>/culvert/browse/`
-- Direct file download: `/culverts/<culvert_batch_uuid>/runs/<culvert_id>/culvert/browse/<path>`
+- Batch root browse: `/weppcloud/culverts/<culvert_batch_uuid>/browse/`
+- Per-culvert browse: `/weppcloud/culverts/<culvert_batch_uuid>/browse/runs/<culvert_id>/`
+- Direct file download: `/weppcloud/culverts/<culvert_batch_uuid>/browse/runs/<culvert_id>/<path>`
 
-This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach can be adopted for the batch runner (`/batch/{batch_uuid}/browse/`).
+This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach is used for the batch runner (`/weppcloud/batch/{batch_name}/browse/`).
 
 ### DevOps system-engineering guidance
 - Keep rq-engine as a thin API layer (upload, validation, extraction, enqueue, respond).
@@ -249,19 +249,23 @@ For each culvert (identified by `Point_ID`):
 
 ### Batch finalization
 - Generate consolidated artifacts at batch level.
-- Create `run_metadata.json` with success/failure status per culvert.
+- Write `run_metadata.json` in each run with success/failure status.
+- Skeletonize per-run directories to the agreed allowlist.
+- Write `runs_manifest.md`, update `culverts_runner.nodb` with run/job metadata + summary, and emit `weppcloud_run_skeletons.zip`.
 
-## Output artifacts (required)
-- `run_metadata.json` (inputs, versions, timings, culvert run success or failure)
-- Proof of concept: package existing outputs without new analysis or cross-culvert aggregation.
-- For each culvert pack:
-  - `subcatchments.wgs.geojson`
-  - `channels.wgs.geojson`
-  - `landuse.parquet`
-  - `soils.parquet`
-  - `hillslopes.parquet`
-  - `channels.parquet`
-  - wepp/output/interchange
+## Output artifacts (current)
+- Per-run (in run root after skeletonization):
+  - `run_metadata.json`
+  - `landuse/landuse.parquet`, `soils/soils.parquet`
+  - `watershed/hillslopes.parquet`, `watershed/channels.parquet`, `watershed/network.txt`, `watershed/structure.pkl`
+  - `dem/wbt/*.geojson`
+  - `wepp/output/interchange/` (interchange outputs)
+- Batch-level:
+  - `runs_manifest.md` (human-readable summary + job metadata)
+  - `culverts_runner.nodb` (machine-readable state + batch summary)
+  - `weppcloud_run_skeletons.zip` (archived skeletonized `runs/` tree)
+Notes:
+- `_logs/` directories from the profile recorder are not retained in skeletonized runs.
 
 
 ## Observability

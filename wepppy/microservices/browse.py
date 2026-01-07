@@ -4,7 +4,7 @@ Browse Microservice
 ===================
 
 This module houses the Starlette microservice that powers the web-based file explorer used in WEPP Cloud.  The service
-retains the original browse blueprint behaviour with minimal changes so the underlying view logic remains untouched.
+retains the original browse blueprint behavior with minimal changes so the underlying view logic remains untouched.
 
 Template Organization
 ---------------------
@@ -22,8 +22,12 @@ Routes
 ------
 - `/runs/{runid}/{config}/browse/`
 - `/runs/{runid}/{config}/browse/{subpath:path}`
+- `/culverts/{uuid}/browse/`
+- `/culverts/{uuid}/browse/{subpath:path}`
+- `/batch/{batch_name}/browse/`
+- `/batch/{batch_name}/browse/{subpath:path}`
 
-Key Behaviours
+Key Behaviors
 --------------
 - **Directory Browsing** - `browse_response` delegates to `html_dir_list` to build directory listings with pagination
   and optional shell-style filtering, then renders `directory.htm`.
@@ -219,6 +223,78 @@ def _rel_parent(rel_path: str) -> tuple[str, str]:
     if not head:
         head = '.'
     return head, tail
+
+
+def _resolve_browse_paths(request_path: str, runid: str, config: str) -> tuple[str, str]:
+    browse_marker = '/browse'
+    if browse_marker in request_path:
+        base = request_path.split(browse_marker)[0]
+        browse_base = f'{base}/browse/'
+        if '/culverts/' in base or '/batch/' in base:
+            return browse_base, browse_base
+        return browse_base, base
+    browse_base = _prefix_path(f'/runs/{runid}/{config}/browse/')
+    home_href = _prefix_path(f'/runs/{runid}/{config}')
+    return browse_base, home_href
+
+
+def _resolve_dtale_base(request_path: str, runid: str, config: str) -> str:
+    browse_base, _home_href = _resolve_browse_paths(request_path, runid, config)
+    if "/browse/" in browse_base:
+        return browse_base.replace("/browse/", "/dtale/", 1)
+    if browse_base.endswith("/browse"):
+        return browse_base[: -len("/browse")] + "/dtale/"
+    return _prefix_path(f"/runs/{runid}/{config}/dtale/")
+
+
+def _resolve_culvert_batch_root(batch_uuid: str) -> Path:
+    culverts_root = Path(os.getenv('CULVERTS_ROOT', '/wc1/culverts')).resolve()
+    return _resolve_root_child(culverts_root, batch_uuid, "culvert batch")
+
+
+def _resolve_batch_root(batch_name: str) -> Path:
+    batch_root = Path(os.getenv('BATCH_RUNNER_ROOT', '/wc1/batch')).resolve()
+    return _resolve_root_child(batch_root, batch_name, "batch")
+
+
+def _resolve_root_child(root: Path, value: str, label: str) -> Path:
+    if not value or value in (".", ".."):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=f"Invalid {label} identifier.",
+        )
+    value_path = Path(value)
+    if len(value_path.parts) != 1 or value_path.name != value:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=f"Invalid {label} identifier.",
+        )
+    root_path = Path(os.path.abspath(str(root)))
+    candidate = Path(os.path.abspath(str(root_path / value)))
+    try:
+        common = os.path.commonpath([str(root_path), str(candidate)])
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Path traversal detected.",
+        ) from exc
+    if common != str(root_path):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Path traversal detected.",
+        )
+    return candidate
+
+
+def _assert_within_root(root: str | Path, target: str | Path) -> None:
+    try:
+        common = os.path.commonpath(
+            [os.path.abspath(str(root)), os.path.abspath(str(target))]
+        )
+    except ValueError:
+        abort(403)
+    if common != os.path.abspath(str(root)):
+        abort(403)
 
 
 def _format_mtime_ns(ns: int) -> str:
@@ -757,7 +833,7 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     diff_arg = f'?diff={diff_runid}' if diff_runid else ''
 
     # Build breadcrumbs up to the point of failure
-    base_browse_url = _prefix_path(f'/runs/{runid}/{config}/browse/')
+    base_browse_url, home_href = _resolve_browse_paths(request.path, runid, config)
     breadcrumbs = [f'<a href="{base_browse_url}{diff_arg}"><b>{runid}</b></a>']
     
     # Clean the subpath for display and split into components
@@ -794,7 +870,6 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     <p>The path '<b style="font-family: monospace;">{subpath}</b>' could not be found on the server.</p>
 </div>"""
     
-    home_href = _prefix_path(f'/runs/{runid}/{config}')
     project_href = Markup(f'<a href="{home_href}">☁️</a> ')
 
     page_html = _render_browse_error_page(
@@ -951,8 +1026,7 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
         dir_path = os.path.abspath(os.path.join(wd, dir_path))
         
         # Security and existence checks
-        if not dir_path.startswith(wd):
-            abort(403)  # Prevent directory traversal
+        _assert_within_root(wd, dir_path)
             
         if not os.path.isdir(dir_path):
             return _path_not_found_response(runid, subpath, wd, request, config)
@@ -1297,10 +1371,11 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     rel_path = os.path.relpath(path, wd)
     breadcrumbs = ''
 
+    base_browse_url, home_href = _resolve_browse_paths(request.path, runid, config)
+
     if os.path.isdir(path):
         # build breadcrumb links and clickable separators that expose absolute paths
-        root_url = _prefix_path(f'/runs/{runid}/{config}/browse/')
-        root_href = f'{root_url}{query_suffix}'
+        root_href = f'{base_browse_url}{query_suffix}'
         breadcrumb_items = [(f'<a href="{root_href}"><b>{runid}</b></a>', os.path.abspath(wd))]
 
         if rel_path != '.':
@@ -1314,8 +1389,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
                 if is_last:
                     breadcrumb_html = f'<b>{part}</b>'
                 else:
-                    part_url = _prefix_path(f'/runs/{runid}/{config}/browse/{_rel_path}/')
-                    part_href = f'{part_url}{query_suffix}'
+                    part_href = f'{base_browse_url}{_rel_path}/{query_suffix}'
                     breadcrumb_html = f'<a href="{part_href}"><b>{part}</b></a>'
                 breadcrumb_items.append((breadcrumb_html, abs_part_path))
 
@@ -1406,7 +1480,6 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
             showing_text = f'<p>No items to display{manifest_note}</p>'
         
         # Combine UI elements
-        home_href = _prefix_path(f'/runs/{runid}/{config}')
         project_href = Markup(f'<a href="{home_href}">☁️</a> ')
         breadcrumbs_markup = Markup(breadcrumbs)
         listing_markup = Markup(listing_html)
@@ -1560,9 +1633,8 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         if html is not None:
             table_markup = Markup(html)
             rel_url = os.path.relpath(path, wd).replace('\\', '/')
-            dtale_url = _prefix_path(
-                f'/runs/{runid}/{config}/dtale/{quote(rel_url, safe="/")}'
-            )
+            dtale_base = _resolve_dtale_base(request.path, runid, config)
+            dtale_url = f"{dtale_base}{quote(rel_url, safe='/')}"
             return render_template(
                 'browse/data_table.htm',
                 filename=basename(path),
@@ -1635,30 +1707,90 @@ async def _maybe_render_dss_preview(path: str, runid: str, config: str):
     )
 
 
-async def _handle_browse_request(request: StarletteRequest, runid: str, config: str, subpath: str):
-    wd = os.path.abspath(get_wd(runid))
+async def _handle_browse_request(
+    request: StarletteRequest,
+    runid: str,
+    config: str,
+    subpath: str,
+    *,
+    wd_override: str | Path | None = None,
+):
+    wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
     flask_request = FlaskRequestAdapter(request)
     result = await _browse_tree_helper(runid, subpath or '', wd, flask_request, config)
     return ensure_response(result)
 
 
-async def dtale_open(request: StarletteRequest):
+async def browse_culvert_root(request: StarletteRequest):
+    batch_uuid = request.path_params['uuid']
+    batch_root = _resolve_culvert_batch_root(batch_uuid)
+    return await _handle_browse_request(
+        request,
+        runid=batch_uuid,
+        config='culvert-batch',
+        subpath='',
+        wd_override=batch_root,
+    )
+
+
+async def browse_culvert_subpath(request: StarletteRequest):
+    batch_uuid = request.path_params['uuid']
+    subpath = request.path_params.get('subpath', '')
+    batch_root = _resolve_culvert_batch_root(batch_uuid)
+    return await _handle_browse_request(
+        request,
+        runid=batch_uuid,
+        config='culvert-batch',
+        subpath=subpath,
+        wd_override=batch_root,
+    )
+
+
+async def browse_batch_root(request: StarletteRequest):
+    batch_name = request.path_params['batch_name']
+    batch_root = _resolve_batch_root(batch_name)
+    return await _handle_browse_request(
+        request,
+        runid=batch_name,
+        config='batch',
+        subpath='',
+        wd_override=batch_root,
+    )
+
+
+async def browse_batch_subpath(request: StarletteRequest):
+    batch_name = request.path_params['batch_name']
+    subpath = request.path_params.get('subpath', '')
+    batch_root = _resolve_batch_root(batch_name)
+    return await _handle_browse_request(
+        request,
+        runid=batch_name,
+        config='batch',
+        subpath=subpath,
+        wd_override=batch_root,
+    )
+
+
+async def _dtale_open_for_root(
+    request: StarletteRequest,
+    *,
+    runid: str,
+    config: str,
+    wd_override: str | Path | None = None,
+):
     if not _DTALE_SERVICE_URL:
         raise HTTPException(
             status_code=HTTPStatus.SERVICE_UNAVAILABLE,
             detail="D-Tale integration is not configured.",
         )
 
-    runid = request.path_params['runid']
-    config = request.path_params['config']
     subpath = request.path_params.get('subpath') or ''
     rel_path = subpath.lstrip('/')
 
-    wd = os.path.abspath(get_wd(runid))
+    wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
     target = os.path.abspath(os.path.join(wd, rel_path))
 
-    if not target.startswith(wd):
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Invalid path.")
+    _assert_within_root(wd, target)
 
     if not os.path.isfile(target):
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="File not found.")
@@ -1720,6 +1852,34 @@ async def dtale_open(request: StarletteRequest):
     return RedirectResponse(url=target_url, status_code=HTTPStatus.SEE_OTHER)
 
 
+async def dtale_open(request: StarletteRequest):
+    runid = request.path_params['runid']
+    config = request.path_params['config']
+    return await _dtale_open_for_root(request, runid=runid, config=config)
+
+
+async def dtale_culvert_open(request: StarletteRequest):
+    batch_uuid = request.path_params['uuid']
+    batch_root = _resolve_culvert_batch_root(batch_uuid)
+    return await _dtale_open_for_root(
+        request,
+        runid=batch_uuid,
+        config='culvert-batch',
+        wd_override=batch_root,
+    )
+
+
+async def dtale_batch_open(request: StarletteRequest):
+    batch_name = request.path_params['batch_name']
+    batch_root = _resolve_batch_root(batch_name)
+    return await _dtale_open_for_root(
+        request,
+        runid=batch_name,
+        config='batch',
+        wd_override=batch_root,
+    )
+
+
 async def browse_root(request: StarletteRequest):
     runid = request.path_params['runid']
     config = request.path_params['config']
@@ -1760,8 +1920,48 @@ def create_app():
             methods=['GET']
         ),
         Route(
+            '/weppcloud/culverts/{uuid}/browse/',
+            browse_culvert_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/culverts/{uuid}/browse',
+            browse_culvert_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/culverts/{uuid}/browse/{subpath:path}',
+            browse_culvert_subpath,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/batch/{batch_name}/browse/',
+            browse_batch_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/batch/{batch_name}/browse',
+            browse_batch_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/batch/{batch_name}/browse/{subpath:path}',
+            browse_batch_subpath,
+            methods=['GET']
+        ),
+        Route(
             '/weppcloud/runs/{runid}/{config}/dtale/{subpath:path}',
             dtale_open,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/culverts/{uuid}/dtale/{subpath:path}',
+            dtale_culvert_open,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/batch/{batch_name}/dtale/{subpath:path}',
+            dtale_batch_open,
             methods=['GET']
         ),
     ]

@@ -228,7 +228,7 @@ python /workdir/wepppy/docs/culvert-at-risk-integration/dev-package/scripts/subm
     --payload santee_payload.zip
 
 # 3. Results will be available at:
-#    https://wc.bearhive.duckdns.org/culverts/<batch_uuid>/browse/
+#    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/browse/
 ```
 
 ### Observability
@@ -263,5 +263,46 @@ The script logs each step with timestamps:
 2026-01-05 10:40:25 [INFO] Job ID: abc-123-def
 2026-01-05 10:40:25 [INFO] Batch UUID: xyz-789-uvw
 2026-01-05 10:40:25 [INFO] Final Status: finished
-2026-01-05 10:40:25 [INFO] Browse results: https://wc.bearhive.duckdns.org/culverts/xyz-789-uvw/browse/
+2026-01-05 10:40:25 [INFO] Browse results: https://wc.bearhive.duckdns.org/weppcloud/culverts/xyz-789-uvw/browse/
 ```
+
+## Batch Artifacts (Outputs)
+
+### runs_manifest.md (human-readable)
+Location: `/wc1/culverts/<batch_uuid>/runs_manifest.md`
+
+This markdown file includes a Source section (from `metadata.json`), a Batch Summary, and a table of runs. The table includes `Point_ID`, watershed label (from `watershed_` when present), subcatchment/channel counts (when available), the run slug, and job metadata. Job fields are best-effort: a failed worker can leave them as `-`.
+
+### culverts_runner.nodb (machine-readable)
+Location: `/wc1/culverts/<batch_uuid>/culverts_runner.nodb`
+
+This is the machine-readable NoDb state for the batch. It stores the batch summary and a per-run record (run directory, run id, job id, job status, job created timestamp). Treat it as JSON (jsonpickle) for programmatic ingestion.
+
+### Skeletonized runs
+Each run is skeletonized after completion to reduce storage pressure from large DEMs and intermediate rasters. Only a curated allowlist of outputs is retained, and `_logs/` directories from the profile recorder are intentionally dropped. The archive `weppcloud_run_skeletons.zip` bundles the skeletonized `runs/` tree along with `runs_manifest.md` and `culverts_runner.nodb` for download.
+
+### Run skeleton allowlist
+| Keep pattern | Description |
+| --- | --- |
+| `*.log` | Run logs for tracing pipeline steps and errors. |
+| `climate.nodb` | Climate controller state for the run. |
+| `disturbed.nodb` | Disturbed controller state (if used). |
+| `landuse.nodb` | Landuse controller state. |
+| `nodb.version` | NoDb version marker. |
+| `soils.nodb` | Soils controller state. |
+| `redisprep.dump` | Redis prep snapshot for run hydration. |
+| `ron.nodb` | Ron controller state (DEM linkage). |
+| `run_metadata.json` | Per-run observability summary and status. |
+| `unitizer.nodb` | Unitizer controller state. |
+| `watershed.nodb` | Watershed controller state. |
+| `wepp.nodb` | WEPP controller state. |
+| `climate/*` | CLIGEN/PRISM climate artifacts and summaries. |
+| `dem/wbt/*.geojson` | WBT-derived GeoJSON outputs (netful, channels, subcatchments). |
+| `disturbed/disturbed_land_soil_lookup.csv` | Disturbance lookup table (if present). |
+| `landuse/landuse.parquet` | Landuse output parquet. |
+| `soils/soils.parquet` | Soils output parquet. |
+| `watershed/channels.parquet` | Channel attributes parquet. |
+| `watershed/hillslopes.parquet` | Hillslope attributes parquet. |
+| `watershed/network.txt` | Network topology summary. |
+| `watershed/structure.pkl` | Serialized watershed structure graph. |
+| `wepp/output/interchange` | WEPP interchange outputs (parquet/JSON). |

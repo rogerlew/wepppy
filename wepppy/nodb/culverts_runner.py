@@ -78,6 +78,7 @@ class CulvertsRunner(NoDbBase):
             self._created_at: str = datetime.now(timezone.utc).isoformat()
             self._completed_at: Optional[str] = None
             self._retention_days: Optional[int] = None
+            self._summary: Optional[Dict[str, Any]] = None
             self._run_config: str = cfg_fn
             order_reduction = self.config_get_int(
                 "culvert_runner", "order_reduction_passes", 1
@@ -134,6 +135,13 @@ class CulvertsRunner(NoDbBase):
     @property
     def retention_days(self) -> Optional[int]:
         return getattr(self, "_retention_days", None)
+
+    @property
+    def summary(self) -> Optional[Dict[str, Any]]:
+        summary = getattr(self, "_summary", None)
+        if summary is None:
+            return None
+        return deepcopy(summary)
 
     @property
     def run_config(self) -> str:

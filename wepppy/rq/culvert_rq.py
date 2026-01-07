@@ -270,7 +270,7 @@ def run_culvert_run_rq(
         raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
     wepppy_version = _get_wepppy_version()
 
-    return _process_culvert_run(
+    status = _process_culvert_run(
         culvert_batch_uuid=culvert_batch_uuid,
         run_id=run_id,
         run_wd=run_wd,
@@ -278,6 +278,32 @@ def run_culvert_run_rq(
         run_config=runner.run_config,
         wepppy_version=wepppy_version,
     )
+    if job is not None:
+        job_created = job.created_at.isoformat() if job.created_at else None
+        try:
+            job_status = job.get_status()
+        except Exception:
+            job_status = None
+        if job_status == "started":
+            job_status = "finished"
+        try:
+            with runner.locked():
+                run_record = runner._runs.get(run_id, {})
+                run_record.setdefault("runid", run_id)
+                run_record.setdefault("point_id", run_id)
+                run_record.setdefault("wd", str(run_wd))
+                run_record["job_status"] = job_status
+                run_record["job_created"] = job_created
+                runner._runs[run_id] = run_record
+        except Exception as exc:
+            logger.warning(
+                "culvert_run %s/%s: failed to update job metadata - %s",
+                culvert_batch_uuid,
+                run_id,
+                exc,
+            )
+
+    return status
 
 
 def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
@@ -294,6 +320,18 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         )
 
     runs = runner.runs
+    runs_dir = batch_root / "runs"
+    if runs_dir.is_dir():
+        for entry in runs_dir.iterdir():
+            if not entry.is_dir():
+                continue
+            run_id = entry.name
+            if run_id not in runs:
+                runs[run_id] = {
+                    "runid": run_id,
+                    "point_id": run_id,
+                    "wd": str(entry),
+                }
     succeeded = 0
     failed = 0
     skipped_no_outlet = 0
@@ -315,10 +353,6 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         else:
             failed += 1
 
-    with runner.locked():
-        runner._completed_at = datetime.now(timezone.utc).isoformat()
-        runner._retention_days = runner.DEFAULT_RETENTION_DAYS
-
     total = len(runs)
     summary = {
         "culvert_batch_uuid": culvert_batch_uuid,
@@ -328,7 +362,24 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
         "skipped_no_outlet": skipped_no_outlet,
     }
 
+    with runner.locked():
+        for run_id, record in runs.items():
+            run_record = runner._runs.get(run_id, {})
+            run_record.update(record)
+            runner._runs[run_id] = run_record
+        runner._completed_at = datetime.now(timezone.utc).isoformat()
+        runner._retention_days = runner.DEFAULT_RETENTION_DAYS
+        runner._summary = summary
+
     _write_batch_summary(batch_root / "batch_summary.json", summary)
+    try:
+        _write_runs_manifest(batch_root, culvert_batch_uuid, runs, runner, summary)
+    except Exception as exc:
+        logger.warning(
+            "culvert_batch %s: failed to write runs_manifest.md - %s",
+            culvert_batch_uuid,
+            exc,
+        )
     try:
         _write_run_skeletons_zip(batch_root)
     except Exception as exc:
@@ -664,6 +715,236 @@ def _write_batch_summary(path: Path, payload: dict[str, Any]) -> None:
         json.dump(payload, handle, indent=2)
 
 
+def _escape_markdown_cell(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ").replace("\r", " ")
+
+
+def _format_manifest_value(value: Optional[Any]) -> str:
+    if value is None:
+        return "-"
+    text = str(value).strip()
+    if not text:
+        return "-"
+    return _escape_markdown_cell(text)
+
+
+def _count_parquet_rows(parquet_path: Path) -> Optional[int]:
+    if not parquet_path.is_file():
+        return None
+    try:
+        import pyarrow.parquet as pq
+
+        parquet_file = pq.ParquetFile(parquet_path)
+        metadata = parquet_file.metadata
+        if metadata is not None:
+            return int(metadata.num_rows)
+    except Exception:
+        pass
+    try:
+        import duckdb
+
+        con = duckdb.connect()
+        sanitized = str(parquet_path).replace("'", "''")
+        result = con.execute(
+            f"SELECT COUNT(*) FROM read_parquet('{sanitized}')"
+        ).fetchone()
+        con.close()
+        if result:
+            return int(result[0])
+    except Exception:
+        return None
+    return None
+
+
+def _select_watershed_label(feature: Optional[WatershedFeature]) -> Optional[str]:
+    if feature is None:
+        return None
+    props = feature.properties or {}
+    candidates = (
+        "watershed_",
+        "watershed",
+        "Watershed",
+        "watershed_name",
+        "WatershedName",
+        "name",
+        "Name",
+        "label",
+        "Label",
+        "id",
+        "ID",
+    )
+    for key in candidates:
+        value = props.get(key)
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            return text
+    if feature.id is not None:
+        text = str(feature.id).strip()
+        if text:
+            return text
+    return None
+
+
+def _load_run_metadata(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _get_rq_connection() -> Optional[redis.Redis]:
+    try:
+        conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+        conn.ping()
+        return conn
+    except Exception:
+        return None
+
+
+def _fetch_job_info(
+    job_id: Optional[str],
+    *,
+    redis_conn: Optional[redis.Redis],
+) -> tuple[Optional[str], Optional[str]]:
+    if not job_id or redis_conn is None:
+        return None, None
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+    except Exception:
+        return None, None
+    try:
+        status = job.get_status()
+    except Exception:
+        status = None
+    created_at = job.created_at.isoformat() if job.created_at else None
+    return str(status) if status is not None else None, created_at
+
+
+def _write_runs_manifest(
+    batch_root: Path,
+    culvert_batch_uuid: str,
+    runs: dict[str, Any],
+    runner: CulvertsRunner,
+    summary: dict[str, Any],
+) -> Path:
+    payload_metadata = runner.payload_metadata
+    if payload_metadata is None:
+        try:
+            payload_metadata = _load_payload_json(batch_root / "metadata.json")
+        except Exception:
+            payload_metadata = None
+
+    watershed_features: dict[str, WatershedFeature] = {}
+    if payload_metadata is not None:
+        try:
+            watersheds_src = runner._resolve_payload_path(
+                payload_metadata,
+                "watersheds",
+                runner.DEFAULT_WATERSHEDS_REL_PATH,
+                str(batch_root),
+            )
+            watershed_features = runner.load_watershed_features(watersheds_src)
+        except Exception as exc:
+            logger.warning(
+                "culvert_batch %s: unable to load watershed features for manifest - %s",
+                culvert_batch_uuid,
+                exc,
+            )
+
+    source_payload = payload_metadata.get("source") if payload_metadata else None
+    if not isinstance(source_payload, dict):
+        source_payload = {}
+
+    source_system = _format_manifest_value(source_payload.get("system"))
+    source_project = _format_manifest_value(source_payload.get("project_id"))
+    source_user = _format_manifest_value(source_payload.get("user_id"))
+    source_created = _format_manifest_value(
+        payload_metadata.get("created_at") if payload_metadata else None
+    )
+    source_culvert_count = _format_manifest_value(
+        payload_metadata.get("culvert_count") if payload_metadata else None
+    )
+
+    total_value = _format_manifest_value(summary.get("total"))
+    succeeded_value = _format_manifest_value(summary.get("succeeded"))
+    failed_value = _format_manifest_value(summary.get("failed"))
+    skipped_value = _format_manifest_value(summary.get("skipped_no_outlet"))
+
+    rows: list[str] = []
+    redis_conn = _get_rq_connection()
+    try:
+        for run_id in sorted(runs.keys(), key=lambda value: str(value)):
+            record = runs.get(run_id) or {}
+            run_wd = Path(record.get("wd") or (batch_root / "runs" / run_id))
+            run_metadata = _load_run_metadata(run_wd / "run_metadata.json")
+            runid_slug = run_metadata.get("runid") or f"culvert;;{culvert_batch_uuid};;{run_id}"
+            point_id = run_metadata.get("point_id") or run_id
+
+            watershed_label = _select_watershed_label(
+                watershed_features.get(str(run_id))
+            )
+            subcatchments = _count_parquet_rows(
+                run_wd / "watershed" / "hillslopes.parquet"
+            )
+            channels = _count_parquet_rows(
+                run_wd / "watershed" / "channels.parquet"
+            )
+
+            job_id = record.get("job_id")
+            job_status, job_created = _fetch_job_info(
+                str(job_id) if job_id else None,
+                redis_conn=redis_conn,
+            )
+
+            columns = [
+                point_id,
+                watershed_label,
+                subcatchments,
+                channels,
+                culvert_batch_uuid,
+                runid_slug,
+                job_id,
+                job_status,
+                job_created,
+            ]
+            formatted = [_format_manifest_value(value) for value in columns]
+            rows.append("| " + " | ".join(formatted) + " |")
+    finally:
+        if redis_conn is not None:
+            redis_conn.close()
+
+    manifest_path = batch_root / "runs_manifest.md"
+    lines = [
+        "# Runs Manifest",
+        "## Source",
+        f"- source.system: {source_system}",
+        f"- source.project_id: {source_project}",
+        f"- source.user_id: {source_user}",
+        f"- created_at: {source_created}",
+        f"- culvert_count: {source_culvert_count}",
+        f"- batch_uuid: {culvert_batch_uuid}",
+        f"- generated_at: {datetime.now(timezone.utc).isoformat()}",
+        "",
+        "## Batch Summary",
+        f"- total: {total_value}",
+        f"- succeeded: {succeeded_value}",
+        f"- failed: {failed_value}",
+        f"- skipped_no_outlet: {skipped_value}",
+        "",
+        "| Point_ID/runid | watershed | n_subcatchments | n_channels | batch_uuid | runid_slug | rq_job_id | job_status | job_created |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    lines.extend(rows)
+    lines.append("")
+
+    manifest_path.write_text("\n".join(lines), encoding="utf-8")
+    return manifest_path
+
+
 def _write_run_skeletons_zip(batch_root: Path) -> Path:
     runs_dir = batch_root / "runs"
     if not runs_dir.is_dir():
@@ -674,6 +955,12 @@ def _write_run_skeletons_zip(batch_root: Path) -> Path:
     with zipfile.ZipFile(
         output_path, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as archive:
+        for extra in (
+            batch_root / "runs_manifest.md",
+            batch_root / "culverts_runner.nodb",
+        ):
+            if extra.is_file():
+                archive.write(extra, extra.relative_to(batch_root).as_posix())
         for root, _dirnames, filenames in os.walk(
             runs_dir, topdown=True, followlinks=False
         ):

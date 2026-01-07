@@ -125,3 +125,14 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     runner = CulvertsRunner.getInstance(str(batch_root))
     assert runner is not None
     assert runner.completed_at is not None
+    summary = runner.summary
+    assert summary is not None
+    assert summary["total"] == 2
+    assert summary["succeeded"] == 1
+    assert summary["failed"] == 1
+    assert summary["skipped_no_outlet"] == 0
+
+    manifest_text = (batch_root / "runs_manifest.md").read_text(encoding="utf-8")
+    assert "Runs Manifest" in manifest_text
+    assert f"culvert;;{batch_uuid};;1" in manifest_text
+    assert f"culvert;;{batch_uuid};;2" in manifest_text

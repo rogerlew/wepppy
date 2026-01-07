@@ -142,19 +142,52 @@ def _make_dataset_id(runid: str, config: str, rel_path: str) -> str:
 
 def _resolve_target(runid: str, rel_path: str, *, config: str | None = None) -> tuple[Path, Path]:
     """Resolve ``rel_path`` inside the run directory, enforcing traversal safety."""
-    wd = Path(get_wd(runid)).resolve()
-    rel_candidates: list[Path] = [Path(rel_path)]
-    if config:
-        rel_candidates.append(Path(config) / rel_path)
+    if config == "culvert-batch":
+        culverts_root = Path(os.getenv("CULVERTS_ROOT", "/wc1/culverts")).resolve()
+        wd = _resolve_root_child(culverts_root, runid, "culvert batch")
+        rel_candidates = [Path(rel_path)]
+    elif config == "batch":
+        batch_root = Path(os.getenv("BATCH_RUNNER_ROOT", "/wc1/batch")).resolve()
+        wd = _resolve_root_child(batch_root, runid, "batch")
+        rel_candidates = [Path(rel_path)]
+    else:
+        wd = Path(get_wd(runid)).resolve()
+        rel_candidates = [Path(rel_path)]
+        if config:
+            rel_candidates.append(Path(config) / rel_path)
+
+    if not wd.exists():
+        abort(404, description="Run root not found.")
 
     for rel_candidate in rel_candidates:
-        candidate = (wd / rel_candidate).resolve()
-        if not str(candidate).startswith(str(wd)):
+        candidate = Path(os.path.abspath(str(wd / rel_candidate)))
+        try:
+            common = os.path.commonpath([str(wd), str(candidate)])
+        except ValueError:
+            abort(403, description="Path traversal detected.")
+        if common != str(wd):
             abort(403, description="Path traversal detected.")
         if candidate.exists() and candidate.is_file():
             return wd, candidate
 
     abort(404, description="File not found.")
+
+
+def _resolve_root_child(root: Path, value: str, label: str) -> Path:
+    if not value or value in (".", ".."):
+        abort(400, description=f"Invalid {label} identifier.")
+    value_path = Path(value)
+    if len(value_path.parts) != 1 or value_path.name != value:
+        abort(400, description=f"Invalid {label} identifier.")
+    root_path = Path(os.path.abspath(str(root)))
+    candidate = Path(os.path.abspath(str(root_path / value)))
+    try:
+        common = os.path.commonpath([str(root_path), str(candidate)])
+    except ValueError:
+        abort(403, description="Path traversal detected.")
+    if common != str(root_path):
+        abort(403, description="Path traversal detected.")
+    return candidate
 
 
 def _normalize_rel(rel_path: str) -> str:
