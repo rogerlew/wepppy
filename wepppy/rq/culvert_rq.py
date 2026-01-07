@@ -121,14 +121,31 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     )
     _prune_short_streams(Path(flovec_src), Path(netful_src), min_length)
 
+    # Check model_parameters for order_reduction_passes override
     order_reduction_passes = runner.order_reduction_passes
+    if model_parameters and "order_reduction_passes" in model_parameters:
+        try:
+            mp_value = int(model_parameters["order_reduction_passes"])
+            if mp_value >= 0:
+                order_reduction_passes = mp_value
+                logger.info(
+                    "culvert_batch %s: order_reduction_passes=%d (from model_parameters)",
+                    culvert_batch_uuid,
+                    order_reduction_passes,
+                )
+        except (TypeError, ValueError):
+            pass
     if order_reduction_passes > 0:
         logger.info(
             "culvert_batch %s: pruning netful stream order (%s passes)",
             culvert_batch_uuid,
             order_reduction_passes,
         )
-        _prune_stream_order(Path(netful_src), order_reduction_passes)
+        _prune_stream_order(
+            Path(flovec_src),
+            Path(netful_src),
+            order_reduction_passes,
+        )
 
     _generate_stream_junctions(Path(flovec_src), Path(netful_src), Path(chnjnt_src))
 
@@ -352,38 +369,83 @@ def _load_payload_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _prune_stream_order(netful_path: Path, passes: int) -> None:
+def _prune_stream_order(
+    flovec_path: Path,
+    netful_path: Path,
+    passes: int,
+) -> None:
+    """Prune first-order streams from the network.
+
+    Creates intermediate files:
+    - netful.strahler.tif (initial Strahler order raster)
+    - netful.strahler_pruned_*.tif (order rasters for intermediate passes)
+    - netful.pruned_{N}.tif (binary stream map from the final pass)
+
+    The final pruned result is copied to netful.tif, and intermediates are kept
+    for debugging and verification.
+    """
     if passes < 0:
         raise ValueError("order_reduction_passes must be >= 0")
     if passes == 0:
         return
 
+    if not flovec_path.exists():
+        raise FileNotFoundError(f"Flow vector file does not exist: {flovec_path}")
     if not netful_path.exists():
         raise FileNotFoundError(f"Stream network file does not exist: {netful_path}")
 
     wbt = WhiteboxTools(verbose=False, raise_on_error=True)
     wbt.set_working_dir(str(netful_path.parent))
 
-    current = netful_path
+    strahler_path = netful_path.with_name("netful.strahler.tif")
+    if strahler_path.exists():
+        strahler_path.unlink()
+
+    ret = wbt.strahler_stream_order(
+        d8_pntr=str(flovec_path),
+        streams=str(netful_path),
+        output=str(strahler_path),
+        esri_pntr=False,
+        zero_background=False,
+    )
+    if ret != 0 or not strahler_path.exists():
+        raise RuntimeError(
+            "StrahlerStreamOrder failed "
+            f"(flovec={flovec_path}, streams={netful_path}, output={strahler_path})"
+        )
+
+    current = strahler_path
     for idx in range(passes):
-        output = netful_path.with_name(f"netful.pruned_{idx + 1}.tif")
+        is_final = idx == passes - 1
+        output = (
+            netful_path.with_name(f"netful.pruned_{idx + 1}.tif")
+            if is_final
+            else netful_path.with_name(f"netful.strahler_pruned_{idx + 1}.tif")
+        )
         if output.exists():
             output.unlink()
         ret = wbt.prune_strahler_stream_order(
             streams=str(current),
             output=str(output),
+            binary_output=is_final,
         )
         if ret != 0:
             raise RuntimeError(
                 "PruneStrahlerStreamOrder failed "
                 f"(pass {idx + 1}, input={current}, output={output})"
             )
-        if current != netful_path:
-            current.unlink()
+        logger.info(
+            "pruned stream order pass %d: %s -> %s",
+            idx + 1,
+            current.name,
+            output.name,
+        )
+        # Keep intermediate files for debugging - only advance current pointer
         current = output
 
+    # Copy the final pruned result back to the original netful.tif
     if current != netful_path:
-        os.replace(current, netful_path)
+        shutil.copy2(current, netful_path)
 
 
 def _generate_batch_topo(

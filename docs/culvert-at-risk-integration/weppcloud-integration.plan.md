@@ -101,6 +101,7 @@ Notes:
 - Verification: enqueue a small payload (1–2 culverts) and confirm parallel job fan-out + finalizer; validate worker isolation by running an interactive job on the default queue while batch queue executes.
 
 ## Phase 3b handoff summary
+- Status: complete.
 - Routed culvert ingestion and batch fan-out to the `batch` RQ queue in `wepppy/microservices/rq_engine/culvert_routes.py` and `wepppy/rq/batch_rq.py`.
 - Split culvert orchestration in `wepppy/rq/culvert_rq.py` into `run_culvert_batch_rq` (orchestrator), `run_culvert_run_rq` (per-run worker, runid first arg for `rq.log`), and `_final_culvert_batch_complete_rq` (finalizer); per-run jobs are enqueued in `Queue("batch")` with `depends_on` for the finalizer.
 - Orchestrator records per-run job IDs in both `job.meta` and `CulvertsRunner._runs[run_id]["job_id"]`; finalizer reads `run_metadata.json` to compute totals and writes `batch_summary.json` while updating `CulvertsRunner._completed_at` and `_retention_days`.
@@ -121,6 +122,7 @@ Notes:
 - Verification: run a small payload (1–2 culverts) and confirm per-run creation happens inside worker jobs; verify `_base` remains unchanged, per-run logs are scoped correctly, and reruns are idempotent.
 
 ## Phase 3c handoff summary
+- Status: complete.
 - Added `CulvertsRunner.create_run_if_missing()` to copy `_base` into `runs/<run_id>`, rewrite `.nodb` state (`wd`, `_run_group`, `_group_name`), clear Redis cache/locks, and symlink DEM + WBT topo rasters (`flovec`, `netful`, `relief`, `chnjnt`) in `wepppy/nodb/culverts_runner.py`.
 - `run_culvert_batch_rq` now loads `run_ids`, ensures `_base`, and enqueues per-run jobs without serial `create_runs()`; per-run jobs create runs on demand in `wepppy/rq/culvert_rq.py`.
 - `run_culvert_run_rq` now instantiates `CulvertsRunner` when missing and calls `create_run_if_missing()` before executing the pipeline, preserving run_group semantics (`culvert;;<batch_uuid>;;<run_id>`).
@@ -129,14 +131,15 @@ Notes:
 - Tests updated to assert per-run job creates the run directory and is idempotent; run with `wctl run-pytest tests/culverts/test_culvert_orchestration.py`.
 
 ## Phase 3e - Stream pruning + order reduction (culvert batches)
-- Scope: add `order_reduction_passes` to `CulvertsRunner` and post-process `topo/netful.tif` once per batch before per-run jobs are enqueued: prune short streams (WBT `remove_short_streams`, using `watershed.wbt.mcl`), then run `PruneStrahlerStreamOrder` `N` times, then generate `chnjnt.tif` from the final `netful.tif`.
+- Status: complete.
+- Scope: add `order_reduction_passes` to `CulvertsRunner` and post-process `topo/netful.tif` once per batch before per-run jobs are enqueued: prune short streams (WBT `remove_short_streams`, using `watershed.wbt.mcl`), compute a Strahler order raster from the pruned stream mask, run `PruneStrahlerStreamOrder` `N` times (binary output on the final pass), then generate `chnjnt.tif` from the final `netful.tif`.
 - Sanity check: applying the prune once at the batch root keeps the per-run symlink flow intact and avoids redundant work in each culvert job; overwriting `netful.tif` is acceptable because the payload is per-batch and isolated.
-- Dependencies: `whitebox_tools` from the weppcloud fork (`/workdir/weppcloud-wbt`) must expose `PruneStrahlerStreamOrder`; payload provides `topo/streams.tif`.
+- Dependencies: `whitebox_tools` from the weppcloud fork (`/workdir/weppcloud-wbt`) must expose `StrahlerStreamOrder` and `PruneStrahlerStreamOrder` (with `--binary_output`); payload provides `topo/streams.tif`.
 - Deliverables:
   - `CulvertsRunner.order_reduction_passes` NoDb property, read from `[culvert_runner] order_reduction_passes` (default 1; allow 0 to disable).
-  - `run_culvert_batch_rq` prunes short streams (`remove_short_streams`), then prunes stream order (`PruneStrahlerStreamOrder`), then generates `topo/chnjnt.tif` from the final `topo/netful.tif` before enqueuing culvert runs.
+  - `run_culvert_batch_rq` prunes short streams (`remove_short_streams`), builds a Strahler order raster from the pruned stream mask, then prunes stream order (`PruneStrahlerStreamOrder`) with binary output on the final pass, then generates `topo/chnjnt.tif` from the final `topo/netful.tif` before enqueuing culvert runs.
   - Logs emitted showing pass count and inputs/outputs; failure raises early before jobs are enqueued.
-- Risks: pruning changes the number of channels/hillslopes; if netful is not a Strahler-order raster, confirm Culvert_web_app provides the expected stream order layer or extend the payload to include it.
+- Risks: pruning changes the number of channels/hillslopes; ensure the weppcloud-wbt fork with `--binary_output` is deployed so downstream binary stream masks stay compatible with `polygonize_netful`.
 - Verification: run `santee_mini_4culverts` with `order_reduction_passes=1` and compare hillslope counts/logs before/after; confirm pruned `netful.tif` is used in `dem/wbt/netful.tif` symlinks, `chnjnt.tif` is regenerated from the pruned netful raster, and the batch completes.
 
 ## Phase 4 - Artifact delivery and browse integration
