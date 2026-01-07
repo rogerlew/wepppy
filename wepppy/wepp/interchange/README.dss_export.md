@@ -152,7 +152,81 @@ Because DSS normalizes the D-part, the preview relies on `startDateTime` rather 
 
 ## Field Guide / Troubleshooting
 
-1. **“Browse says 2011-01-01 but I filtered Feb 2021.”**  
+### Understanding "Blocky" or Stepped Peak-Flow Hydrographs
+
+The DSS peak-flow files (`peak_chan_<id>.dss`) are direct exports of WEPP's channel routing output (`chan.out`). If you see flat-topped or stair-stepped hydrographs, this is **expected model behavior**—not an export bug.
+
+#### Why hydrographs can look stepped
+
+WEPP doesn't have access to continuous flow measurements. Instead, it reconstructs channel inflow hydrographs from three summary values computed on each hillslope:
+
+| Input | Description | Source |
+|-------|-------------|--------|
+| **Volume** (`vol`) | Total runoff volume (m³) | Hillslope water balance |
+| **Peak** (`qp`) | Peak runoff rate (m³/s) | Computed from effective length and hydraulics |
+| **Duration** (`td`) | Runoff duration (seconds) | From storm duration or upstream max |
+
+From these three numbers, WEPP synthesizes a time-varying inflow hydrograph. The shape depends on a simple ratio:
+
+```
+A = Volume / (Peak × Duration)
+```
+
+**When A < 1** — The runoff volume "fits" under a peaked hydrograph. WEPP generates a double-exponential curve: flow rises to the peak, then falls. This looks like a natural storm response.
+
+**When A ≥ 1** — The volume is too large to fit under a peaked curve. Mathematically, no solution exists for the exponential shape. WEPP falls back to a **rectangular (flat-top) hydrograph**: flow instantly jumps to the peak rate and holds there for the entire duration.
+
+This rectangular fallback is the primary cause of "blocky" hydrographs.
+
+#### The routing timestep also matters
+
+Channel routing runs at a fixed timestep (`dtchr`), typically 60 seconds. Even smooth hydrographs become stair-stepped when discretized at this resolution. Longer timesteps make the steps more visible.
+
+#### Where to look in the code
+
+| File | Function |
+|------|----------|
+| `chrqin.for` | Builds inflow hydrograph from vol/qp/td; contains the rectangular fallback |
+| `wshchr.for` | Routes flow through channels; finds peak as max of timestep series |
+| `eqroot.for` | Solves `1 - exp(-u) = A×u` for the exponential shape (only valid when 0 < A ≤ 1) |
+
+### Snowmelt and Baseflow: Why They Produce Long Plateaus
+
+Snowmelt and baseflow present a special challenge because WEPP tracks them as **daily totals**, not as sub-daily time series.
+
+#### How melt enters the channel
+
+1. **Duration defaults to 24 hours.** When melt produces runoff but no storm duration is available, WEPP assigns a 24-hour duration. This causes the runoff to be "spread" across the entire day.
+
+2. **Subsurface and baseflow are uniform.** Lateral inflow from groundwater and subsurface flow is distributed evenly over 24 hours:
+   ```
+   lateral inflow rate = daily volume / 86400 seconds
+   ```
+   This produces perfectly flat contributions to channel flow.
+
+3. **Large volumes trigger the rectangular fallback.** Melt events often produce large volumes relative to peak rates. This pushes the ratio A above 1, forcing the flat-top hydrograph.
+
+The combination of these factors means snowmelt-dominated periods often show plateau-like flow patterns lasting many hours—this reflects how WEPP internally represents melt, not measurement error.
+
+#### Interpreting melt-period hydrographs
+
+When you see a flat peak lasting 6–24 hours during spring or after snow events:
+- It likely represents melt-driven runoff
+- The peak *magnitude* is still meaningful (it's the max routed flow)
+- The *shape* reflects WEPP's daily melt accounting, not instantaneous conditions
+
+#### Options for smoother output
+
+| Approach | Tradeoff |
+|----------|----------|
+| Reduce routing timestep (`dtchr`) | More computation; doesn't fix rectangular fallback |
+| Use breakpoint climate data | May yield shorter, higher-peaked storms that avoid A ≥ 1 |
+| Adjust `MX .5 P` in CLIGEN | Changes storm intensity/duration relationships |
+| Accept the plateau | Appropriate if volume and peak magnitude matter more than shape |
+
+### Common Questions
+
+1. **"Browse says 2011-01-01 but I filtered Feb 2021."**  
    Check the `stored` count and expand the record via `read_ts`. If `startDateTime` is correct and `numberValues` matches your filter window, the export is fine—the D-part is just a DSS block key.
 
 2. **Peak flow rows show `IR-Year` with stored=3.**  
@@ -182,4 +256,5 @@ Because DSS normalizes the D-part, the preview relies on `startDateTime` rather 
 - [pydsstools documentation](https://github.com/gyanz/pydsstools)
 - `docker/Dockerfile` – runtime stack ensuring GDAL/PROJ/HDF5 libs exist for `pydsstools`.
 - `wepppy/microservices/browse.py` – browse service handler (`_maybe_render_dss_preview`).
+- `wepppy/nodb/scripts/dss_export/plot_peak_chan_compare.py` - overlay plot comparing `peak_chan_<id>.dss` vs `chan.out.parquet`.
 - `tests/wepp/interchange/test_watershed_totalwatsed_export.py` – regression test for date filtering and per-channel exports.
