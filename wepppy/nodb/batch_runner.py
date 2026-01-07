@@ -588,6 +588,14 @@ class BatchRunner(NoDbBase):
         return WatershedCollection.load_from_analysis_results(
             self._geojson_state, self._runid_template_state)
 
+    def get_watershed_features_lpt(self) -> List[WatershedFeature]:
+        watershed_features = list(self.get_watershed_collection())
+        watershed_features.sort(
+            key=lambda feature: feature.area_m2,
+            reverse=True,
+        )
+        return watershed_features
+
     @property
     def geojson_state(self) -> Optional[Dict[str, Any]]:
         if not self._geojson_state:
@@ -607,10 +615,8 @@ class BatchRunner(NoDbBase):
     # Report
     # ------------------------------------------------------------------
     def generate_runstate_report(self) -> Dict[str, Any]:
-        watershed_collection = self.get_watershed_collection()
-
         report = {}
-        for wf in watershed_collection:
+        for wf in self.get_watershed_features_lpt():
             _runid = wf.runid
             run_states = {str(task): None for task in BatchRunner.DEFAULT_TASKS}
             run_wd = _join(self.wd, "runs", _runid)
@@ -677,10 +683,8 @@ class BatchRunner(NoDbBase):
 
     def generate_runstate_cli_report(self) -> Dict[str, Any]:
         from wcwidth import wcswidth
-        watershed_collection = self.get_watershed_collection()
-
         s = []
-        for wf in watershed_collection:
+        for wf in self.get_watershed_features_lpt():
             _runid = wf.runid
             run_states = {task.value: None for task in BatchRunner.DEFAULT_TASKS}
             run_wd = _join(self.wd, "runs", _runid)

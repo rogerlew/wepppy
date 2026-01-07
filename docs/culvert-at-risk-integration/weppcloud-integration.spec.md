@@ -85,6 +85,7 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
    - generates `flovec.tif` + `netful.tif`
    - prunes short streams → builds Strahler order → prunes order (binary output on final pass)
    - regenerates `chnjnt.tif` and generates `chnjnt.streams.tif` for fallback streams
+   - orders `run_ids` by descending watershed area (LPT)
    - enqueues per-run jobs `run_culvert_run_rq`
 3. **Per-run setup:** `wepppy/rq/culvert_rq.py::run_culvert_run_rq`
    - ensures `CulvertsRunner` exists and has `culvert_batch_uuid`

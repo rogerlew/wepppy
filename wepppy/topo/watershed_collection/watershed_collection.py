@@ -8,7 +8,13 @@ import re
 from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from pyproj import CRS, Geod
+
+from wepppy.all_your_base.geo.shapefile import signed_area
+
 __all__ = ["WatershedFeature", "WatershedCollection"]
+
+WGS84_GEOD = Geod(ellps="WGS84")
 
 
 def _normalize_geojson_crs_name(name: str) -> str:
@@ -67,10 +73,17 @@ class WatershedFeature(object):
         self.crs: Optional[str] = crs
         self.runid: str = runid
         self.index: int = index
+        self._area_m2: Optional[float] = None
         if not self.is_valid():
             raise ValueError("Invalid GeoJSON feature structure")
         
         self.bbox: List[float] = self._calculate_bbox()
+
+    @property
+    def area_m2(self) -> float:
+        if self._area_m2 is None:
+            self._area_m2 = self._calculate_area_m2()
+        return self._area_m2
 
     def save_geojson(self, filepath: str) -> None:
         """Persist the feature to ``filepath`` as a standalone GeoJSON file."""
@@ -167,6 +180,52 @@ class WatershedFeature(object):
                     dtype="uint8",
                 )
                 dst.write(mask, 1)
+
+    def _calculate_area_m2(self) -> float:
+        geometry_type = self.type or ""
+        coordinates = self.coordinates
+        if geometry_type == "Polygon":
+            polygons = [coordinates]
+        elif geometry_type == "MultiPolygon":
+            polygons = coordinates
+        else:
+            return 0.0
+        if not polygons:
+            return 0.0
+
+        if self._crs_is_geographic():
+            return float(
+                sum(self._polygon_area_geodesic(WGS84_GEOD, polygon) for polygon in polygons)
+            )
+
+        return float(sum(self._polygon_area_planar(polygon) for polygon in polygons))
+
+    def _crs_is_geographic(self) -> bool:
+        crs_name = self.crs or "EPSG:4326"
+        return CRS.from_user_input(crs_name).is_geographic
+
+    def _polygon_area_planar(self, polygon: Any) -> float:
+        if not isinstance(polygon, (list, tuple)) or not polygon:
+            return 0.0
+        outer = abs(signed_area(polygon[0]))
+        holes = sum(abs(signed_area(ring)) for ring in polygon[1:] if ring)
+        return outer - holes
+
+    def _polygon_area_geodesic(self, geod: Geod, polygon: Any) -> float:
+        if not isinstance(polygon, (list, tuple)) or not polygon:
+            return 0.0
+        outer = self._geodesic_ring_area(geod, polygon[0])
+        holes = sum(
+            self._geodesic_ring_area(geod, ring) for ring in polygon[1:] if ring
+        )
+        return outer - holes
+
+    def _geodesic_ring_area(self, geod: Geod, ring: Any) -> float:
+        if not isinstance(ring, (list, tuple)) or len(ring) < 4:
+            return 0.0
+        lons, lats = zip(*ring)
+        area, _ = geod.polygon_area_perimeter(lons, lats)
+        return abs(area)
 
     def _calculate_bbox(self) -> List[float]:
         """Compute the feature's bounding box as [min_x, min_y, max_x, max_y]."""

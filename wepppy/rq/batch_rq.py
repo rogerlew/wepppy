@@ -72,7 +72,7 @@ def run_batch_rq(batch_name: str) -> Job:
         if not watershed_collection.runid_template_is_valid:
             raise ValueError('Run ID template validation is not in an OK state.')
 
-        watershed_features = list(watershed_collection)
+        watershed_features = batch_runner.get_watershed_features_lpt()
         if not watershed_features:
             raise ValueError('No watershed features available to enqueue.')
         watershed_jobs: List[Job] = []

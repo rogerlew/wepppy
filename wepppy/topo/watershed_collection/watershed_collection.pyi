@@ -17,6 +17,7 @@ class WatershedFeature:
     crs: Optional[str]
     runid: str
     index: int
+    _area_m2: Optional[float]
     bbox: List[float]
 
     def __init__(
@@ -31,6 +32,8 @@ class WatershedFeature:
     def is_valid(self) -> bool: ...
     def get_padded_bbox(self, pad: float) -> List[float]: ...
     def build_raster_mask(self, template_filepath: str, dst_filepath: str) -> None: ...
+    @property
+    def area_m2(self) -> float: ...
 
 class WatershedCollection:
     geojson_features: List[Dict[str, Any]]

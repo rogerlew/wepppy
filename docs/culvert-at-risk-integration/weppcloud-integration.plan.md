@@ -153,6 +153,16 @@ Notes:
 - Risks: fallback stream maps can increase channel density for specific culverts; ensure junction maps always match the chosen stream raster.
 - Verification: run a batch where a culvert polygon does not intersect pruned `netful.tif` and confirm the run uses `streams.tif` + `chnjnt.streams.tif` while other runs keep `netful.tif`.
 
+## Phase 3g - LPT queue ordering (area proxy)
+- Status: complete.
+- Scope: compute per-feature area inside `WatershedFeature` (geodesic for lat/long, planar for projected CRS) and enqueue runs in descending area to reduce stragglers for large batches/culvert collections.
+- Deliverables:
+  - `WatershedFeature.area_m2` cached property with geodesic fallback for geographic CRS.
+  - `run_culvert_batch_rq` orders `run_ids` by descending `area_m2`.
+  - `run_batch_rq` orders watershed jobs by descending `area_m2` (LPT).
+- Risks: area is a proxy for hillslopes/runtime; MultiPolygon holes/invalid geometries may skew ranking.
+- Verification: confirmed enqueue order is largest → smallest in RQ metadata/logs for mixed-size payloads.
+
 ## Phase 4 - Artifact delivery and browse integration
 - Scope: standardize output layout under `/culverts/<uuid>/runs/<id>/culvert/`; generate WGS84 GeoJSON outputs; write `run_metadata.json`; expose browse paths `/culverts/<uuid>/browse/` and `/culverts/<uuid>/runs/<id>/culvert/browse/`.
 - Dependencies: Phase 3 outputs; browse service routing rules; decision on which artifacts are mandatory vs optional.

@@ -591,7 +591,12 @@ class CulvertsRunner(NoDbBase):
 
     def _load_run_ids(self, watersheds_src: str) -> List[str]:
         features = self.load_watershed_features(watersheds_src)
-        return list(features.keys())
+        ordered = sorted(
+            features.values(),
+            key=lambda feature: feature.area_m2,
+            reverse=True,
+        )
+        return [feature.runid for feature in ordered]
 
     def load_watershed_features(
         self, watersheds_geojson_path: str
