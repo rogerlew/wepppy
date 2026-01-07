@@ -17,6 +17,8 @@ from rq.job import Job
 from whitebox_tools import WhiteboxTools
 from osgeo import gdal
 
+from wepppy.all_your_base.geo import raster_stacker
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
@@ -277,6 +279,7 @@ def run_culvert_run_rq(
         watershed_feature=watershed_features.get(run_id),
         run_config=runner.run_config,
         wepppy_version=wepppy_version,
+        model_parameters=model_parameters,
     )
     if job is not None:
         job_created = job.created_at.isoformat() if job.created_at else None
@@ -609,6 +612,81 @@ def _generate_stream_junctions(
         )
 
 
+def _ensure_batch_landuse_soils(
+    *,
+    culvert_batch_uuid: str,
+    watershed: Watershed,
+    landuse: Landuse,
+    soils: Soils,
+    model_parameters: Optional[Dict[str, Any]],
+) -> tuple[Path, Path]:
+    batch_root = _resolve_batch_root(culvert_batch_uuid)
+    landuse_root = batch_root / "landuse"
+    soils_root = batch_root / "soils"
+
+    nlcd_30m = landuse_root / "nlcd_30m.tif"
+    nlcd_resampled = landuse_root / "nlcd.tif"
+    ssurgo_30m = soils_root / "ssurgo_30m.tif"
+    ssurgo_resampled = soils_root / "ssurgo.tif"
+
+    target_grid = Path(watershed.subwta)
+    if not target_grid.exists():
+        raise FileNotFoundError(f"Subwta grid does not exist: {target_grid}")
+
+    runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
+    if runner is None:
+        runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+
+    nlcd_override = runner._get_model_param_str(model_parameters, "nlcd_db")
+    if nlcd_override is not None:
+        landuse.nlcd_db = nlcd_override
+    nlcd_db = nlcd_override or landuse.nlcd_db
+
+    ssurgo_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
+    if ssurgo_override is not None:
+        soils.ssurgo_db = ssurgo_override
+    ssurgo_db = ssurgo_override or soils.ssurgo_db
+
+    if nlcd_db is None:
+        raise ValueError("nlcd_db is required to build culvert landuse maps")
+    if ssurgo_db is None:
+        raise ValueError("ssurgo_db is required to build culvert soils maps")
+
+    _map = landuse.ron_instance.map
+    if _map is None:
+        raise ValueError("Run map is not available to build culvert landuse/soils")
+
+    with runner.locked():
+        os.makedirs(landuse_root, exist_ok=True)
+        os.makedirs(soils_root, exist_ok=True)
+
+        if not nlcd_30m.exists():
+            wmesque_retrieve(
+                nlcd_db,
+                _map.extent,
+                str(nlcd_30m),
+                30.0,
+                v=landuse.wmesque_version,
+                wmesque_endpoint=landuse.wmesque_endpoint,
+            )
+        if not ssurgo_30m.exists():
+            wmesque_retrieve(
+                ssurgo_db,
+                _map.extent,
+                str(ssurgo_30m),
+                30.0,
+                v=soils.wmesque_version,
+                wmesque_endpoint=soils.wmesque_endpoint,
+            )
+
+        if not nlcd_resampled.exists():
+            raster_stacker(str(nlcd_30m), str(target_grid), str(nlcd_resampled), resample="near")
+        if not ssurgo_resampled.exists():
+            raster_stacker(str(ssurgo_30m), str(target_grid), str(ssurgo_resampled), resample="near")
+
+    return nlcd_resampled, ssurgo_resampled
+
+
 def _process_culvert_run(
     *,
     culvert_batch_uuid: str,
@@ -617,6 +695,7 @@ def _process_culvert_run(
     watershed_feature: Optional[WatershedFeature],
     run_config: str,
     wepppy_version: Optional[str],
+    model_parameters: Optional[Dict[str, Any]],
 ) -> str:
     """
     Process a single culvert run.
@@ -644,8 +723,19 @@ def _process_culvert_run(
         watershed.find_outlet()
         watershed.build_subcatchments()
         watershed.abstract_watershed()
-        landuse.build()
-        soils.build()
+        nlcd_map, ssurgo_map = _ensure_batch_landuse_soils(
+            culvert_batch_uuid=culvert_batch_uuid,
+            watershed=watershed,
+            landuse=landuse,
+            soils=soils,
+            model_parameters=model_parameters,
+        )
+        landuse.clean()
+        soils.clean()
+        landuse.symlink_landuse_map(str(nlcd_map))
+        soils.symlink_soils_map(str(ssurgo_map))
+        landuse.build(retrieve_nlcd=False)
+        soils.build(retrieve_gridded_ssurgo=False)
         climate.build()
 
         wepp.clean()

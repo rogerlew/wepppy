@@ -162,9 +162,10 @@ Notes:
 - `schema_version` (string, required; `culvert-model-params-v1`)
 - `base_project_runid` (string, optional)
 - `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
+- `ssurgo_db` (string, optional; overrides `soils.ssurgo_db`)
 
 Notes:
-- Climate duration and soils DB use defaults from `culvert.cfg` (no override keys in v1).
+- Climate duration uses defaults from `culvert.cfg` (no override keys in v1).
 
 ### Coordinate system rules
 - **Rasters must use a projected CRS with meter units** (e.g., UTM). WGS84 is NOT acceptable for rasters because cell size must be in meters for hydrological calculations.
@@ -242,6 +243,8 @@ For each culvert (identified by `Point_ID`):
    - `json_to_wgs(self.netful_json)`
 
 4. **Build inputs:** Generate landuse, soils, and climate inputs.
+   - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared `subwta.tif` grid, and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`.
+   - Use `retrieve_nlcd=False` and `retrieve_gridded_ssurgo=False` so the per-run build skips cleanup and remote retrieval.
 
 5. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
 
@@ -264,6 +267,7 @@ For each culvert (identified by `Point_ID`):
   - `runs_manifest.md` (human-readable summary + job metadata)
   - `culverts_runner.nodb` (machine-readable state + batch summary)
   - `weppcloud_run_skeletons.zip` (archived skeletonized `runs/` tree)
+  - Shared rasters (batch root, not in skeleton zip): `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`, `soils/ssurgo_30m.tif`, `soils/ssurgo.tif`
 Notes:
 - `_logs/` directories from the profile recorder are not retained in skeletonized runs.
 

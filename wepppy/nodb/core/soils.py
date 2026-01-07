@@ -289,6 +289,58 @@ class Soils(NoDbBase):
             shutil.rmtree(soils_dir)
         os.mkdir(soils_dir)
 
+    def symlink_soils_map(self, soils_fn: str) -> None:
+        soils_src = os.path.abspath(soils_fn)
+        if not _exists(soils_src):
+            raise FileNotFoundError(f"Soils map does not exist: {soils_src}")
+
+        os.makedirs(self.soils_dir, exist_ok=True)
+        dest = self.ssurgo_fn
+
+        if os.path.lexists(dest):
+            if os.path.islink(dest):
+                existing = os.path.realpath(dest)
+                if existing != soils_src:
+                    os.unlink(dest)
+            else:
+                if os.path.samefile(dest, soils_src):
+                    pass
+                else:
+                    raise FileExistsError(
+                        f"Soils map path already exists and is not a symlink: {dest}"
+                    )
+
+        if not os.path.lexists(dest):
+            os.symlink(soils_src, dest)
+
+        prj_src = os.path.splitext(soils_src)[0] + ".prj"
+        if _exists(prj_src):
+            prj_dest = os.path.splitext(dest)[0] + ".prj"
+            if os.path.lexists(prj_dest):
+                if os.path.islink(prj_dest):
+                    existing = os.path.realpath(prj_dest)
+                    if existing != prj_src:
+                        os.unlink(prj_dest)
+                else:
+                    if os.path.samefile(prj_dest, prj_src):
+                        pass
+                    else:
+                        raise FileExistsError(
+                            "Soils projection path already exists and is not a symlink: "
+                            f"{prj_dest}"
+                        )
+            if not os.path.lexists(prj_dest):
+                os.symlink(prj_src, prj_dest)
+
+        base = os.path.abspath(self.wd)
+        if os.path.commonpath([base, soils_src]) == base:
+            update_catalog_entry(self.wd, dest)
+        else:
+            self.logger.info(
+                "Skipping catalog update for external soils symlink: %s",
+                soils_src,
+            )
+
     @property
     def ssurgo_db(self) -> Optional[str]:
         return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db')).replace('gNATSGO', 'gNATSGSO')
@@ -700,7 +752,8 @@ class Soils(NoDbBase):
         self, 
         initial_sat: Optional[float] = None, 
         ksflag: Optional[bool] = None, 
-        max_workers: Optional[int] = None
+        max_workers: Optional[int] = None,
+        retrieve_gridded_ssurgo: bool = True,
     ) -> None:
         self.logger.info(f'='*100)
         func_name = inspect.currentframe().f_code.co_name
@@ -744,7 +797,12 @@ class Soils(NoDbBase):
                 self._build_by_identify(build_asris_soils)
             else:
                 self.logger.info('    Using SSURGO/STATSGO database')
-                self._build_gridded(initial_sat=initial_sat, ksflag=ksflag, max_workers=max_workers)
+                self._build_gridded(
+                    initial_sat=initial_sat,
+                    ksflag=ksflag,
+                    max_workers=max_workers,
+                    retrieve_gridded_ssurgo=retrieve_gridded_ssurgo,
+                )
         elif self.mode == SoilsMode.Single:
             self.logger.info('  Single Soil Mode')
             self._build_single(initial_sat=initial_sat, ksflag=ksflag)
@@ -1055,7 +1113,8 @@ class Soils(NoDbBase):
         self, 
         initial_sat: Optional[float] = None, 
         ksflag: Optional[bool] = None, 
-        max_workers: Optional[int] = None
+        max_workers: Optional[int] = None,
+        retrieve_gridded_ssurgo: bool = True,
     ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(initial_sat={initial_sat}, ksflag={ksflag}, max_workers={max_workers})')
@@ -1075,11 +1134,18 @@ class Soils(NoDbBase):
 
             with self.timed('  Retrieving ssurgo data'):
                 ssurgo_fn = self.ssurgo_fn
-                wmesque_retrieve(self.ssurgo_db, _map.extent,
-                                ssurgo_fn, _map.cellsize,
-                                v=self.wmesque_version, 
-                                wmesque_endpoint=self.wmesque_endpoint)
-                update_catalog_entry(self.wd, ssurgo_fn)
+                if retrieve_gridded_ssurgo:
+                    wmesque_retrieve(
+                        self.ssurgo_db,
+                        _map.extent,
+                        ssurgo_fn,
+                        _map.cellsize,
+                        v=self.wmesque_version,
+                        wmesque_endpoint=self.wmesque_endpoint,
+                    )
+                    update_catalog_entry(self.wd, ssurgo_fn)
+                elif not _exists(ssurgo_fn):
+                    raise FileNotFoundError(f"'{ssurgo_fn}' not found!")
 
             with self.timed('  Building SSURGO Soils'):
                 sm = SurgoMap(ssurgo_fn)

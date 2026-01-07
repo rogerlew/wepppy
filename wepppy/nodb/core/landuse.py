@@ -357,6 +357,58 @@ class Landuse(NoDbBase):
             shutil.rmtree(lc_dir)
         os.mkdir(lc_dir)
 
+    def symlink_landuse_map(self, landuse_fn: str) -> None:
+        landuse_src = os.path.abspath(landuse_fn)
+        if not _exists(landuse_src):
+            raise FileNotFoundError(f"Landuse map does not exist: {landuse_src}")
+
+        os.makedirs(self.lc_dir, exist_ok=True)
+        dest = self.lc_fn
+
+        if os.path.lexists(dest):
+            if os.path.islink(dest):
+                existing = os.path.realpath(dest)
+                if existing != landuse_src:
+                    os.unlink(dest)
+            else:
+                if os.path.samefile(dest, landuse_src):
+                    pass
+                else:
+                    raise FileExistsError(
+                        f"Landuse map path already exists and is not a symlink: {dest}"
+                    )
+
+        if not os.path.lexists(dest):
+            os.symlink(landuse_src, dest)
+
+        prj_src = os.path.splitext(landuse_src)[0] + ".prj"
+        if _exists(prj_src):
+            prj_dest = os.path.splitext(dest)[0] + ".prj"
+            if os.path.lexists(prj_dest):
+                if os.path.islink(prj_dest):
+                    existing = os.path.realpath(prj_dest)
+                    if existing != prj_src:
+                        os.unlink(prj_dest)
+                else:
+                    if os.path.samefile(prj_dest, prj_src):
+                        pass
+                    else:
+                        raise FileExistsError(
+                            "Landuse projection path already exists and is not a symlink: "
+                            f"{prj_dest}"
+                        )
+            if not os.path.lexists(prj_dest):
+                os.symlink(prj_src, prj_dest)
+
+        base = os.path.abspath(self.wd)
+        if os.path.commonpath([base, landuse_src]) == base:
+            update_catalog_entry(self.wd, dest)
+        else:
+            self.logger.info(
+                "Skipping catalog update for external landuse symlink: %s",
+                landuse_src,
+            )
+
     def _build_ESDAC(self) -> None:
         from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
@@ -475,7 +527,7 @@ class Landuse(NoDbBase):
         with self.locked():
             self._managements = managements
 
-    def build(self) -> None:
+    def build(self, retrieve_nlcd: bool = True) -> None:
         assert not self.islocked()
         self.logger.info('Building landuse')
 
@@ -499,7 +551,7 @@ class Landuse(NoDbBase):
             return
 
         with self.locked():
-            if self._mode != LanduseMode.UserDefined:
+            if self._mode != LanduseMode.UserDefined and retrieve_nlcd:
                 self.clean()
             if self._mode == LanduseMode.UserDefined:
                 self._build_NLCD(retrieve_nlcd=False)
@@ -507,7 +559,7 @@ class Landuse(NoDbBase):
                 if 'au' in self.locales:
                     self._build_lu10v5ua()
                 else:
-                    self._build_NLCD()
+                    self._build_NLCD(retrieve_nlcd=retrieve_nlcd)
             elif self._mode == LanduseMode.Single:
                 self._build_single_selection()
             elif self._mode == LanduseMode.Undefined:
