@@ -10,10 +10,12 @@ import os
 from os.path import exists as _exists
 from os.path import join as _join
 import shutil
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import rasterio
 
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
+from wepppy.all_your_base.geo.vrt import calculate_src_window
 from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks, nodb_setter
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.watershed_collection import WatershedFeature
@@ -224,6 +226,23 @@ class CulvertsRunner(NoDbBase):
 
         return netful_src, chnjnt_src
 
+    def _compute_dem_crop_window(
+        self,
+        dem_src: str,
+        watershed_feature: WatershedFeature,
+    ) -> Tuple[int, int, int, int]:
+        rdi_src = RasterDatasetInterpolator(dem_src)
+        bbox = watershed_feature.get_padded_bbox(
+            pad=0.0,
+            output_crs=rdi_src.proj4,
+        )
+        return calculate_src_window(
+            dem_src,
+            bbox=bbox,
+            bbox_crs=rdi_src.proj4,
+            pad_px=self.crop_pad_px,
+        )
+
     def create_run_if_missing(
         self,
         run_id: str,
@@ -302,11 +321,14 @@ class CulvertsRunner(NoDbBase):
             ):
                 return
 
+            crop_window = None
+            if use_vrt:
+                assert watershed_feature is not None
+                crop_window = self._compute_dem_crop_window(dem_src, watershed_feature)
             ron.symlink_dem(
                 dem_src,
                 as_cropped_vrt=use_vrt,
-                watershed_feature=watershed_feature,
-                pad_px=self.crop_pad_px,
+                crop_window=crop_window,
             )
             for filename in ("relief.tif", "chnjnt.tif"):
                 cleanup_path = _join(watershed.wbt_wd, filename)
@@ -374,11 +396,14 @@ class CulvertsRunner(NoDbBase):
             pass
 
         ron = Ron.getInstance(run_wd)
+        crop_window = None
+        if use_vrt:
+            assert watershed_feature is not None
+            crop_window = self._compute_dem_crop_window(dem_src, watershed_feature)
         ron.symlink_dem(
             dem_src,
             as_cropped_vrt=use_vrt,
-            watershed_feature=watershed_feature,
-            pad_px=self.crop_pad_px,
+            crop_window=crop_window,
         )
 
         watershed = Watershed.getInstance(run_wd)

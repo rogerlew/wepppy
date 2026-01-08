@@ -77,7 +77,7 @@ class Landuse(NoDbBase):
         self,
         landuse_fn: str,
         *,
-        as_cropped_vrt: bool = True,
+        as_cropped_vrt: bool = False,
         crop_window: Tuple[int, int, int, int] | None = None,
     ) -> None: ...
     @property

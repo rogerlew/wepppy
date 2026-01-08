@@ -1,7 +1,6 @@
 from _typeshed import Incomplete
 from typing import Any, ClassVar, Dict, List, Tuple
 from wepppy.nodb.base import NoDbBase
-from wepppy.topo.watershed_collection import WatershedFeature
 
 __all__ = ['Map', 'RonNoDbLockedException', 'Ron', 'RonViewModel']
 
@@ -117,7 +116,13 @@ class Ron(NoDbBase):
     @property
     def crop_reference_shape(self) -> Tuple[int, int] | None: ...
     def fetch_dem(self) -> None: ...
-    def symlink_dem(self, dem_fn: str, *, as_cropped_vrt: bool = True, watershed_feature: WatershedFeature | None = None, pad_px: int = 5) -> None: ...
+    def symlink_dem(
+        self,
+        dem_fn: str,
+        *,
+        as_cropped_vrt: bool = False,
+        crop_window: Tuple[int, int, int, int] | None = None,
+    ) -> None: ...
     @property
     def has_dem(self) -> bool: ...
     def subs_summary(self, abbreviated: bool = False) -> Dict: ...

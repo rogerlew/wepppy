@@ -71,9 +71,7 @@ from wepppy.all_your_base.geo import (
     read_raster,
     utm_srid,
 )
-from wepppy.all_your_base.geo.vrt import build_windowed_vrt
-
-from wepppy.topo.watershed_collection import WatershedFeature
+from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 
 from wepppy.locales.earth.opentopography import opentopo_retrieve
 
@@ -922,9 +920,8 @@ class Ron(NoDbBase):
         self,
         dem_fn: str,
         *,
-        as_cropped_vrt: bool = True,
-        watershed_feature: Optional[WatershedFeature] = None,
-        pad_px: int = 5,
+        as_cropped_vrt: bool = False,
+        crop_window: Optional[Tuple[int, int, int, int]] = None,
     ) -> None:
         dem_src = os.path.abspath(dem_fn)
         if not _exists(dem_src):
@@ -932,38 +929,30 @@ class Ron(NoDbBase):
 
         os.makedirs(self.dem_dir, exist_ok=True)
 
-        use_vrt = as_cropped_vrt and watershed_feature is not None
-        if use_vrt and pad_px < 0:
-            raise ValueError("pad_px must be non-negative")
-        self._dem_is_vrt = use_vrt
-
+        use_vrt = bool(as_cropped_vrt)
         if use_vrt:
+            if crop_window is None:
+                crop_window = self.crop_window
+            if crop_window is None:
+                raise ValueError("Crop window cannot be identified for as_cropped_vrt=True")
             if dem_src.lower().endswith('.vrt'):
                 raise ValueError("Cannot create cropped VRT from source DEM that is already a VRT.")
 
+        self._dem_is_vrt = use_vrt
+        if use_vrt:
             # Use .vrt extension so WhiteboxTools recognizes the format
             dest = _join(self.dem_dir, "dem.vrt")
             rdi_src = RasterDatasetInterpolator(dem_src)
-            bbox = watershed_feature.get_padded_bbox(
-                pad=0.0,
-                output_crs=rdi_src.proj4,
-            )
-            src_window = build_windowed_vrt(
+            src_window = build_windowed_vrt_from_window(
                 dem_src,
                 dest,
-                bbox=bbox,
-                bbox_crs=rdi_src.proj4,
-                pad_px=pad_px,
+                crop_window,
             )
             crop_reference_geotransform = rdi_src.ds.GetGeoTransform()
             crop_reference_shape = (rdi_src.ds.RasterXSize, rdi_src.ds.RasterYSize)
         else:
             # Use .tif extension for symlinks
             dest = _join(self.dem_dir, "dem.tif")
-            if as_cropped_vrt and watershed_feature is None:
-                raise ValueError(
-                    "Cannot create cropped DEM without watershed feature."
-                )
 
             if os.path.lexists(dest):
                 if os.path.islink(dest):

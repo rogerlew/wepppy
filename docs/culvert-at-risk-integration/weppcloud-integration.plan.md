@@ -236,18 +236,18 @@ Notes:
 - Overrides: `model_parameters.nlcd_db` and `model_parameters.ssurgo_db` are respected to select the 30m sources; defaults fall back to the base project settings.
 - Skeletonization: run-level symlinks are removed by skeletonization; batch rasters remain at the batch root.
 
-## Phase 4c - Cropped VRT symlinks for large DEMs (IN PROGRESS)
+## Phase 4c - Cropped VRT symlinks for large DEMs (COMPLETE)
 - Scope: generate windowed VRTs (single SimpleSource + srcWin) for DEM + shared topo rasters using watershed feature bounds + pixel padding to reduce WBT/Peridot memory footprint.
 - Touch points:
   - `wepppy/all_your_base/geo/vrt.py` centralizes VRT creation (`build_windowed_vrt`, `build_windowed_vrt_from_window`, CRS-aware bbox handling).
-  - `Ron.symlink_dem` accepts `as_cropped_vrt` (default true), persists `_dem_is_vrt` + crop window metadata, and writes `dem.vrt` when cropping.
+  - `Ron.symlink_dem` accepts `as_cropped_vrt` (default false) + `crop_window`, persists `_dem_is_vrt` + crop window metadata, and writes `dem.vrt` when cropping.
   - `Watershed.symlink_channels_map` uses the Ron crop window to build `flovec/netful/relief/chnjnt` VRTs and persists `_flovec_netful_relief_chnjnt_are_vrt`.
-  - `Landuse.symlink_landuse_map` and `Soils.symlink_soils_map` accept `as_cropped_vrt` (default true), persist `_landuse_is_vrt`/`_soils_is_vrt`, and create `nlcd.vrt`/`ssurgo.vrt` when cropping.
+  - `Landuse.symlink_landuse_map` and `Soils.symlink_soils_map` accept `as_cropped_vrt` (default false), persist `_landuse_is_vrt`/`_soils_is_vrt`, and create `nlcd.vrt`/`ssurgo.vrt` when cropping.
   - `NoDbBase` no longer exposes `lc_dir`/`soils_dir`/`lc_fn`/`ssurgo_fn`; callers must use `Landuse`/`Soils` instances directly.
   - `WatershedFeature.get_padded_bbox` now requires an explicit `output_crs` to avoid ambiguous coordinate systems.
   - `CulvertsRunner` sources crop padding from `culvert.cfg` (`crop_pad_px`).
 - Runtime behavior:
-  - `Ron.dem_fn` composes `dem.vrt` vs `dem.tif` from `_dem_is_vrt`; call sites now resolve DEMs via Ron.
+  - `Ron.dem_fn` composes `dem.vrt` vs `dem.tif` from `_dem_is_vrt`; VRT creation requires a crop window; call sites now resolve DEMs via Ron.
   - `WhiteboxToolsTopazEmulator` composes `relief/flovec/netful/chnjnt` paths from `_flovec_netful_relief_chnjnt_are_vrt`; WBT builds reset this flag to `.tif`.
   - `Landuse.lc_fn` and `Soils.ssurgo_fn` resolve `.vrt` vs `.tif` based on `_landuse_is_vrt`/`_soils_is_vrt`; retrieval workflows reset these flags to `.tif`.
   - `elevationquery` accepts `dem.vrt`; `_compute_ruggedness_from_dem` uses `ron.dem_fn`.
