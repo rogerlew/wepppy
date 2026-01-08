@@ -938,6 +938,9 @@ class Ron(NoDbBase):
         self._dem_is_vrt = use_vrt
 
         if use_vrt:
+            if dem_src.lower().endswith('.vrt'):
+                raise ValueError("Cannot create cropped VRT from source DEM that is already a VRT.")
+
             # Use .vrt extension so WhiteboxTools recognizes the format
             dest = _join(self.dem_dir, "dem.vrt")
             rdi_src = RasterDatasetInterpolator(dem_src)
@@ -958,8 +961,8 @@ class Ron(NoDbBase):
             # Use .tif extension for symlinks
             dest = _join(self.dem_dir, "dem.tif")
             if as_cropped_vrt and watershed_feature is None:
-                self.logger.info(
-                    "symlink_dem requested VRT crop without watershed feature; using symlink"
+                raise ValueError(
+                    "Cannot create cropped DEM without watershed feature."
                 )
 
             if os.path.lexists(dest):

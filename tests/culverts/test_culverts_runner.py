@@ -133,7 +133,7 @@ def test_ron_symlink_dem_sets_map_and_symlink(tmp_path: Path) -> None:
     run_wd.mkdir()
 
     ron = Ron(str(run_wd), "culvert.cfg")
-    ron.symlink_dem(str(topo["dem"]))
+    ron.symlink_dem(str(topo["dem"]), as_cropped_vrt=False)
 
     assert os.path.islink(ron.dem_fn)
     assert os.path.realpath(ron.dem_fn) == os.path.abspath(topo["dem"])
@@ -149,10 +149,14 @@ def test_watershed_symlink_channels_map_creates_links(tmp_path: Path) -> None:
     run_wd.mkdir()
 
     ron = Ron(str(run_wd), "culvert.cfg")
-    ron.symlink_dem(str(topo["dem"]))
+    ron.symlink_dem(str(topo["dem"]), as_cropped_vrt=False)
 
     watershed = Watershed.getInstance(str(run_wd))
-    watershed.symlink_channels_map(str(topo["flovec"]), str(topo["netful"]))
+    watershed.symlink_channels_map(
+        str(topo["flovec"]),
+        str(topo["netful"]),
+        as_cropped_vrt=False,
+    )
 
     flovec_link = Path(watershed.wbt_wd) / "flovec.tif"
     netful_link = Path(watershed.wbt_wd) / "netful.tif"

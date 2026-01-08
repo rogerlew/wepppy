@@ -316,7 +316,7 @@ class Soils(NoDbBase):
         self,
         soils_fn: str,
         *,
-        as_cropped_vrt: bool = True,
+        as_cropped_vrt: bool = False,
         crop_window: Optional[Tuple[int, int, int, int]] = None,
     ) -> None:
         soils_src = os.path.abspath(soils_fn)
@@ -330,10 +330,7 @@ class Soils(NoDbBase):
             if crop_window is None:
                 crop_window = ron.crop_window
             if crop_window is None:
-                self.logger.info(
-                    "symlink_soils_map requested VRT crop without crop window; using symlink"
-                )
-                use_vrt = False
+                raise ValueError("Crop window cannot be identified for as_cropped_vrt=True")
 
         self._soils_is_vrt = use_vrt
         dest = self.ssurgo_fn

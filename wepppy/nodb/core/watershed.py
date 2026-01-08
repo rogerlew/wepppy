@@ -950,10 +950,7 @@ class Watershed(NoDbBase):
             if crop_window is None:
                 crop_window = ron.crop_window
             if crop_window is None:
-                self.logger.info(
-                    "symlink_channels_map requested VRT crop without crop window; using symlinks"
-                )
-                as_cropped_vrt = False
+                raise ValueError("Crop window cannot be identified for as_cropped_vrt=True")
 
         def _ensure_symlink(src: str, dest: str) -> None:
             if os.path.lexists(dest):

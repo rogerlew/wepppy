@@ -16,6 +16,7 @@ __all__ = [
 
 RUN_SKELETON_ALLOWLIST: tuple[str, ...] = (
     "*.log",
+    "*.vrt",
     "climate.nodb",
     "disturbed.nodb",
     "landuse.nodb",

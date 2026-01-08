@@ -75,10 +75,13 @@ class Rred(NoDbBase):
             assert _exists(_join(self.rred_dir, 'dem.asc'))
             assert _exists(_join(self.rred_dir, 'dem.prj'))
             ron = self.ron_instance
-            translate_asc_to_tif(_join(self.rred_dir, 'dem.asc'), ron.dem_fn)
+            dem_dest = _join(ron.dem_dir, "dem.tif")
 
-            data, _transform, proj = read_raster(ron.dem_fn, dtype=np.uint8)
-            utm_extent = raster_extent(ron.dem_fn)
+            translate_asc_to_tif(_join(self.rred_dir, 'dem.asc'), dem_dest)
+            ron.symlink_dem(dem_dest, as_cropped_vrt=False)
+
+            data, _transform, proj = read_raster(dem_dest, dtype=np.uint8)
+            utm_extent = raster_extent(dem_dest)
 
             assert 'utm' in proj
             self.utm_proj = proj
