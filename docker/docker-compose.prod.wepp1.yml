@@ -80,6 +80,9 @@ services:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      <<: *wepppy-env
+      PERIDOT_CPU: "4"
   weppcloudr:
     container_name: weppcloudr
     volumes:

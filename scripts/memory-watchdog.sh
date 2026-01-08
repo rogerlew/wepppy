@@ -1,11 +1,36 @@
 #!/bin/bash
 # memory-watchdog.sh
-# Host-side watchdog that kills the Docker stack when memory gets critically low
-# Run via cron every minute: * * * * * /workdir/wepppy/scripts/memory-watchdog.sh
+# Host-side watchdog that kills the Docker stack when memory gets critically low.
 #
-# This prevents OOM scenarios that make the system unresponsive before
-# anything can be logged.
-
+# PURPOSE:
+#   Prevents OOM (Out of Memory) conditions that can make the system completely
+#   unresponsive. When memory gets critically low, the Linux OOM killer may
+#   kill random processes, and by that point the system is often too degraded
+#   to log anything useful. This watchdog intervenes earlier, cleanly stopping
+#   the Docker stack while the system is still responsive.
+#
+# INSTALLATION:
+#   Run: sudo ./install-memory-watchdog.sh
+#   This sets up a systemd timer that runs every 10 seconds.
+#
+# HOW IT WORKS:
+#   1. Checks available memory every 10 seconds (via systemd timer)
+#   2. If available < WARN_THRESHOLD_MB: logs warning + container stats
+#   3. If available < KILL_THRESHOLD_MB: kills Docker stack immediately
+#
+# LOG FILE:
+#   /var/log/weppcloud-watchdog.log
+#   Contains warnings, kills, and forensic data (top memory consumers)
+#
+# TUNING:
+#   Adjust thresholds below based on your system's total RAM and workload.
+#   Current defaults assume a 128GB system where 25GB free is critical.
+#
+# COMMON CAUSES OF HIGH MEMORY:
+#   - Multiple wbt_abstract_watershed processes with high-res DEMs
+#   - Set PERIDOT_CPU env var in rq-worker-batch to limit CPU/memory per process
+#   - Reduce worker pool size (-n flag) for batch processing
+#
 # Thresholds (in MB)
 WARN_THRESHOLD_MB=30000   # Log warning when available < 30GB
 KILL_THRESHOLD_MB=25000   # Kill stack when available < 25GB

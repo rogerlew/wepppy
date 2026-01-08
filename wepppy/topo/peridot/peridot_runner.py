@@ -20,6 +20,14 @@ except Exception:  # pragma: no cover - optional catalog support
 
 LOGGER = logging.getLogger(__name__)
 
+# Default CPU count for peridot processes, can be overridden via PERIDOT_CPU env var
+_DEFAULT_PERIDOT_CPU = '24'
+
+
+def _get_peridot_ncpu() -> str:
+    """Get the number of CPUs to use for peridot processes."""
+    return os.environ.get('PERIDOT_CPU', _DEFAULT_PERIDOT_CPU)
+
 
 _thisdir = os.path.dirname(__file__)
 
@@ -54,7 +62,7 @@ def run_peridot_abstract_watershed(
 ):
     assert _exists(_join(wd, 'dem/topaz/SUBWTA.ARC'))
 
-    cmd = [_get_bin(), wd, '--ncpu', '24']
+    cmd = [_get_bin(), wd, '--ncpu', _get_peridot_ncpu()]
 
     if clip_hillslopes:
         assert clip_hillslope_length > 0.0
@@ -89,7 +97,7 @@ def run_peridot_wbt_abstract_watershed(
     """
     assert _exists(_join(wd, 'dem/wbt/subwta.tif'))
 
-    cmd = [_get_wbt_bin(), wd, '--ncpu', '24']
+    cmd = [_get_wbt_bin(), wd, '--ncpu', _get_peridot_ncpu()]
 
     if clip_hillslopes:
         assert clip_hillslope_length > 0.0
@@ -192,7 +200,7 @@ def run_peridot_wbt_sub_fields_abstraction(
     assert _exists(_join(wd, 'dem/wbt/flovec.tif')), 'dem/wbt/flovec.tif not found'
     assert _exists(_join(wd, 'ag_fields/field_boundaries.tif')), 'ag_fields/field_boundaries.tif not found'
 
-    cmd = [_get_wbt_sub_field_bin(), wd, '--ncpu', '24']
+    cmd = [_get_wbt_sub_field_bin(), wd, '--ncpu', _get_peridot_ncpu()]
 
     if clip_hillslopes:
         assert clip_hillslope_length > 0.0
