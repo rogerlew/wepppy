@@ -669,7 +669,8 @@ class Baer(NoDbBase):
         if 'lt' in ron.mods or 'portland' in ron.mods or 'seattle' in ron.mods or 'general' in ron.mods:
             return
 
-        soils_dir = self.soils_dir
+        soils = Soils.getInstance(wd)
+        soils_dir = soils.soils_dir
         baer_soils_dir = self.baer_soils_dir
 
         soils_dict = {"130-clay loam": "20-yr forest clay loam.sol",
@@ -706,8 +707,6 @@ class Baer(NoDbBase):
 
             shutil.copyfile(_join(baer_soils_dir, fn),
                             _join(soils_dir, fn))
-
-        soils = Soils.getInstance(wd)
 
         if soils.mode != SoilsMode.Gridded:
             return

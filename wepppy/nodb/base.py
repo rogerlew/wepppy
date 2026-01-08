@@ -1810,30 +1810,6 @@ class NoDbBase(object):
         return _join(self.wd, 'watershed', 'wat.json')
 
     @property
-    def lc_dir(self):
-        return _join(self.wd, 'landuse')
-
-    @property
-    def lc_fn(self):
-        return _join(self.wd, 'landuse', 'nlcd.tif')
-
-    @property
-    def domlc_fn(self):
-        return _join(self.wd, 'landuse', 'landcov.asc')
-
-    @property
-    def soils_dir(self):
-        return _join(self.wd, 'soils')
-
-    @property
-    def ssurgo_fn(self):
-        return _join(self.wd, 'soils', 'ssurgo.tif')
-
-    @property
-    def domsoil_fn(self):
-        return _join(self.wd, 'soils', 'soilscov.asc')
-
-    @property
     def cli_dir(self):
         return _join(self.wd, 'climate')
 

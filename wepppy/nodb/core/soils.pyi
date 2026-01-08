@@ -3,7 +3,7 @@ from __future__ import annotations
 from _typeshed import Incomplete
 from collections.abc import Generator
 from enum import IntEnum
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Tuple
 from wepppy.nodb.base import NoDbBase
 
 __all__ = ['SoilsNoDbLockedException', 'SoilsMode', 'Soils']
@@ -63,9 +63,23 @@ class Soils(NoDbBase):
     @property
     def has_soils(self) -> bool: ...
     @property
+    def soils_is_vrt(self) -> bool: ...
+    @property
+    def soils_dir(self) -> str: ...
+    @property
+    def ssurgo_fn(self) -> str: ...
+    @property
+    def domsoil_fn(self) -> str: ...
+    @property
     def legend(self) -> List[str]: ...
     def clean(self) -> None: ...
-    def symlink_soils_map(self, soils_fn: str) -> None: ...
+    def symlink_soils_map(
+        self,
+        soils_fn: str,
+        *,
+        as_cropped_vrt: bool = True,
+        crop_window: Tuple[int, int, int, int] | None = None,
+    ) -> None: ...
     @property
     def ssurgo_db(self) -> str | None: ...
     @ssurgo_db.setter

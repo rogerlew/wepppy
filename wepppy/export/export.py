@@ -69,7 +69,7 @@ def export_winwepp(wd: str) -> str:
     with open(_join(export_winwepp_dir, 'projects', 'ww2.prw'), 'w') as fp:
         fp.write(ww2)
 
-    shutil.copytree(ron.soils_dir, _join(export_winwepp_dir, 'wepppy.nodb.Soils'))
+    shutil.copytree(soils.soils_dir, _join(export_winwepp_dir, 'wepppy.nodb.Soils'))
 
     shutil.copytree(_management_dir, _join(export_winwepp_dir, 'managements'))
 

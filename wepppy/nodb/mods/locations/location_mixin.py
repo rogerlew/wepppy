@@ -58,8 +58,6 @@ class LocationMixin(object):
     def modify_soils(self, default_wepp_type=None, lc_lookup_fn=None):
         data_dir = self.data_dir
         wd = self.wd
-        soils_dir = self.soils_dir
-
         if default_wepp_type is None:
             default_wepp_type = self.default_wepp_type
 
@@ -71,6 +69,7 @@ class LocationMixin(object):
             soil_type_map = json.load(fp)
 
         soils = Soils.getInstance(wd)
+        soils_dir = soils.soils_dir
 
         with soils.locked():
             domsoil_d = soils.domsoil_d

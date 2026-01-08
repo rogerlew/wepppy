@@ -242,11 +242,14 @@ Notes:
   - `wepppy/all_your_base/geo/vrt.py` centralizes VRT creation (`build_windowed_vrt`, `build_windowed_vrt_from_window`, CRS-aware bbox handling).
   - `Ron.symlink_dem` accepts `as_cropped_vrt` (default true), persists `_dem_is_vrt` + crop window metadata, and writes `dem.vrt` when cropping.
   - `Watershed.symlink_channels_map` uses the Ron crop window to build `flovec/netful/relief/chnjnt` VRTs and persists `_flovec_netful_relief_chnjnt_are_vrt`.
+  - `Landuse.symlink_landuse_map` and `Soils.symlink_soils_map` accept `as_cropped_vrt` (default true), persist `_landuse_is_vrt`/`_soils_is_vrt`, and create `nlcd.vrt`/`ssurgo.vrt` when cropping.
+  - `NoDbBase` no longer exposes `lc_dir`/`soils_dir`/`lc_fn`/`ssurgo_fn`; callers must use `Landuse`/`Soils` instances directly.
   - `WatershedFeature.get_padded_bbox` now requires an explicit `output_crs` to avoid ambiguous coordinate systems.
   - `CulvertsRunner` sources crop padding from `culvert.cfg` (`crop_pad_px`).
 - Runtime behavior:
   - `Ron.dem_fn` composes `dem.vrt` vs `dem.tif` from `_dem_is_vrt`; call sites now resolve DEMs via Ron.
   - `WhiteboxToolsTopazEmulator` composes `relief/flovec/netful/chnjnt` paths from `_flovec_netful_relief_chnjnt_are_vrt`; WBT builds reset this flag to `.tif`.
+  - `Landuse.lc_fn` and `Soils.ssurgo_fn` resolve `.vrt` vs `.tif` based on `_landuse_is_vrt`/`_soils_is_vrt`; retrieval workflows reset these flags to `.tif`.
   - `elevationquery` accepts `dem.vrt`; `_compute_ruggedness_from_dem` uses `ron.dem_fn`.
 - Assumptions: culvert payloads are UTM; run raster grids are aligned so a shared crop window is valid across DEM/flovec/netful/relief/chnjnt.
 
@@ -254,6 +257,7 @@ Notes:
 - VRT helper: `wepppy/all_your_base/geo/vrt.py` provides CRS-aware window computation and VRT creation (single SimpleSource + srcWin).
 - DEM selection: `Ron` now persists `_dem_is_vrt` and owns `dem_fn`, eliminating file-system guessing in downstream modules.
 - Channel raster selection: `Watershed` persists `_flovec_netful_relief_chnjnt_are_vrt` and keeps the WBT emulator in sync; VRTs use `.vrt` extensions for WBT compatibility.
+- Landuse/soils selection: `Landuse`/`Soils` now persist `_landuse_is_vrt`/`_soils_is_vrt` and own `lc_fn`/`ssurgo_fn`; call sites use the instances directly (no `NoDbBase` helpers).
 - Culvert config: `culvert.cfg` carries `crop_pad_px` for DEM/topo crop padding; culvert runs call the new VRT-enabled symlink methods.
 
 ## Phase 5 - Observability, error handling, retention

@@ -81,6 +81,7 @@ from wepppy.soils.ssurgo import (
 from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base.geo import read_raster, raster_stacker
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
+from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
 
 from wepppy.nodb.base import (
@@ -177,6 +178,7 @@ class Soils(NoDbBase):
             self._ksflag = self.config_get_bool('soils', 'ksflag')
             self._clip_soils = self.config_get_bool('soils', 'clip_soils', False)
             self._clip_soils_depth = self.config_get_float('soils', 'clip_soils', 1000)
+            self._soils_is_vrt = False
 
             soils_dir = self.soils_dir
             if not _exists(soils_dir):
@@ -271,6 +273,23 @@ class Soils(NoDbBase):
             return self.domsoil_d is not None
 
     @property
+    def soils_is_vrt(self) -> bool:
+        return bool(getattr(self, "_soils_is_vrt", False))
+
+    @property
+    def soils_dir(self) -> str:
+        return _join(self.wd, "soils")
+
+    @property
+    def ssurgo_fn(self) -> str:
+        ext = "vrt" if self.soils_is_vrt else "tif"
+        return _join(self.soils_dir, f"ssurgo.{ext}")
+
+    @property
+    def domsoil_fn(self) -> str:
+        return _join(self.soils_dir, "soilscov.asc")
+
+    @property
     def legend(self) -> List[str]:
         mukeys = sorted(set(self.domsoil_d.values()))
         soils = [self.soils[mukey] for mukey in mukeys]
@@ -288,49 +307,80 @@ class Soils(NoDbBase):
         if _exists(soils_dir):
             shutil.rmtree(soils_dir)
         os.mkdir(soils_dir)
+        self._soils_is_vrt = False
+        if not self.islocked():
+            with self.locked():
+                self._soils_is_vrt = False
 
-    def symlink_soils_map(self, soils_fn: str) -> None:
+    def symlink_soils_map(
+        self,
+        soils_fn: str,
+        *,
+        as_cropped_vrt: bool = True,
+        crop_window: Optional[Tuple[int, int, int, int]] = None,
+    ) -> None:
         soils_src = os.path.abspath(soils_fn)
         if not _exists(soils_src):
             raise FileNotFoundError(f"Soils map does not exist: {soils_src}")
 
         os.makedirs(self.soils_dir, exist_ok=True)
+        use_vrt = bool(as_cropped_vrt)
+        ron = self.ron_instance
+        if use_vrt:
+            if crop_window is None:
+                crop_window = ron.crop_window
+            if crop_window is None:
+                self.logger.info(
+                    "symlink_soils_map requested VRT crop without crop window; using symlink"
+                )
+                use_vrt = False
+
+        self._soils_is_vrt = use_vrt
         dest = self.ssurgo_fn
 
-        if os.path.lexists(dest):
-            if os.path.islink(dest):
-                existing = os.path.realpath(dest)
-                if existing != soils_src:
-                    os.unlink(dest)
-            else:
-                if os.path.samefile(dest, soils_src):
-                    pass
+        if use_vrt:
+            build_windowed_vrt_from_window(
+                soils_src,
+                dest,
+                crop_window,
+                reference_geotransform=ron.crop_reference_geotransform,
+                reference_shape=ron.crop_reference_shape,
+            )
+        else:
+            if os.path.lexists(dest):
+                if os.path.islink(dest):
+                    existing = os.path.realpath(dest)
+                    if existing != soils_src:
+                        os.unlink(dest)
                 else:
-                    raise FileExistsError(
-                        f"Soils map path already exists and is not a symlink: {dest}"
-                    )
-
-        if not os.path.lexists(dest):
-            os.symlink(soils_src, dest)
-
-        prj_src = os.path.splitext(soils_src)[0] + ".prj"
-        if _exists(prj_src):
-            prj_dest = os.path.splitext(dest)[0] + ".prj"
-            if os.path.lexists(prj_dest):
-                if os.path.islink(prj_dest):
-                    existing = os.path.realpath(prj_dest)
-                    if existing != prj_src:
-                        os.unlink(prj_dest)
-                else:
-                    if os.path.samefile(prj_dest, prj_src):
+                    if os.path.samefile(dest, soils_src):
                         pass
                     else:
                         raise FileExistsError(
-                            "Soils projection path already exists and is not a symlink: "
-                            f"{prj_dest}"
+                            f"Soils map path already exists and is not a symlink: {dest}"
                         )
-            if not os.path.lexists(prj_dest):
-                os.symlink(prj_src, prj_dest)
+
+            if not os.path.lexists(dest):
+                os.symlink(soils_src, dest)
+
+            prj_src = os.path.splitext(soils_src)[0] + ".prj"
+            if _exists(prj_src):
+                prj_dest = os.path.splitext(dest)[0] + ".prj"
+                if os.path.lexists(prj_dest):
+                    if os.path.islink(prj_dest):
+                        existing = os.path.realpath(prj_dest)
+                        if existing != prj_src:
+                            os.unlink(prj_dest)
+                    else:
+                        if os.path.samefile(prj_dest, prj_src):
+                            pass
+                        else:
+                            raise FileExistsError(
+                                "Soils projection path already exists and is not a symlink: "
+                                f"{prj_dest}"
+                            )
+                if not os.path.lexists(prj_dest):
+                    os.symlink(prj_src, prj_dest)
 
         base = os.path.abspath(self.wd)
         if os.path.commonpath([base, soils_src]) == base:
@@ -340,6 +390,10 @@ class Soils(NoDbBase):
                 "Skipping catalog update for external soils symlink: %s",
                 soils_src,
             )
+
+        if not self.islocked():
+            with self.locked():
+                self._soils_is_vrt = use_vrt
 
     @property
     def ssurgo_db(self) -> Optional[str]:
@@ -378,6 +432,7 @@ class Soils(NoDbBase):
             if ksflag is not None:
                 self._ksflag = bool(ksflag)
 
+            self._soils_is_vrt = False
             ssurgo_fn = self.ssurgo_fn
             wmesque_retrieve(self.soils_map, _map.extent, ssurgo_fn, _map.cellsize, v=self.wmesque_version)
             update_catalog_entry(self.wd, ssurgo_fn)
@@ -706,6 +761,7 @@ class Soils(NoDbBase):
 
         _map = self.ron_instance.map
 
+        self._soils_is_vrt = False
         ssurgo_fn = self.ssurgo_fn
         soils_dir = self.soils_dir
 
@@ -746,6 +802,7 @@ class Soils(NoDbBase):
             surgo_c.logInvalidSoils(wd=soils_dir)
 
         with self.locked():
+            self._soils_is_vrt = False
             self._soils = soils
 
     def build(
@@ -1133,6 +1190,8 @@ class Soils(NoDbBase):
             watershed = self.watershed_instance
 
             with self.timed('  Retrieving ssurgo data'):
+                if retrieve_gridded_ssurgo:
+                    self._soils_is_vrt = False
                 ssurgo_fn = self.ssurgo_fn
                 if retrieve_gridded_ssurgo:
                     wmesque_retrieve(

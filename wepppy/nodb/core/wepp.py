@@ -1513,8 +1513,8 @@ class Wepp(NoDbBase):
         years = climate.input_years
 
         wat_dir = self.wat_dir
-        soils_dir = self.soils_dir
-        lc_dir = self.lc_dir
+        soils_dir = soils.soils_dir
+        lc_dir = landuse.lc_dir
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
@@ -1733,7 +1733,7 @@ class Wepp(NoDbBase):
         self.logger.info(f'  Using max_workers={max_workers} for soil prep')
 
         soils = self.soils_instance
-        soils_dir = self.soils_dir
+        soils_dir = soils.soils_dir
         watershed = self.watershed_instance
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir

@@ -75,6 +75,7 @@ from wepppy.wepp.management import get_management_summary
 from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
+from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.all_your_base.geo import read_raster
     
 from wepppy.nodb.base import (
@@ -166,6 +167,7 @@ class Landuse(NoDbBase):
 
             self._mapping = self.config_get_str('landuse', 'mapping')
             self._nlcd_db = self.config_get_path('landuse', 'nlcd_db')
+            self._landuse_is_vrt = False
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
@@ -217,6 +219,23 @@ class Landuse(NoDbBase):
             _mapping = 'lu10v5ua'
 
         return _mapping
+
+    @property
+    def landuse_is_vrt(self) -> bool:
+        return bool(getattr(self, "_landuse_is_vrt", False))
+
+    @property
+    def lc_dir(self) -> str:
+        return _join(self.wd, "landuse")
+
+    @property
+    def lc_fn(self) -> str:
+        ext = "vrt" if self.landuse_is_vrt else "tif"
+        return _join(self.lc_dir, f"nlcd.{ext}")
+
+    @property
+    def domlc_fn(self) -> str:
+        return _join(self.lc_dir, "landcov.asc")
     
     @mapping.setter
     @nodb_setter
@@ -356,49 +375,80 @@ class Landuse(NoDbBase):
         if _exists(lc_dir):
             shutil.rmtree(lc_dir)
         os.mkdir(lc_dir)
+        self._landuse_is_vrt = False
+        if not self.islocked():
+            with self.locked():
+                self._landuse_is_vrt = False
 
-    def symlink_landuse_map(self, landuse_fn: str) -> None:
+    def symlink_landuse_map(
+        self,
+        landuse_fn: str,
+        *,
+        as_cropped_vrt: bool = True,
+        crop_window: Optional[Tuple[int, int, int, int]] = None,
+    ) -> None:
         landuse_src = os.path.abspath(landuse_fn)
         if not _exists(landuse_src):
             raise FileNotFoundError(f"Landuse map does not exist: {landuse_src}")
 
         os.makedirs(self.lc_dir, exist_ok=True)
+        use_vrt = bool(as_cropped_vrt)
+        ron = self.ron_instance
+        if use_vrt:
+            if crop_window is None:
+                crop_window = ron.crop_window
+            if crop_window is None:
+                self.logger.info(
+                    "symlink_landuse_map requested VRT crop without crop window; using symlink"
+                )
+                use_vrt = False
+
+        self._landuse_is_vrt = use_vrt
         dest = self.lc_fn
 
-        if os.path.lexists(dest):
-            if os.path.islink(dest):
-                existing = os.path.realpath(dest)
-                if existing != landuse_src:
-                    os.unlink(dest)
-            else:
-                if os.path.samefile(dest, landuse_src):
-                    pass
+        if use_vrt:
+            build_windowed_vrt_from_window(
+                landuse_src,
+                dest,
+                crop_window,
+                reference_geotransform=ron.crop_reference_geotransform,
+                reference_shape=ron.crop_reference_shape,
+            )
+        else:
+            if os.path.lexists(dest):
+                if os.path.islink(dest):
+                    existing = os.path.realpath(dest)
+                    if existing != landuse_src:
+                        os.unlink(dest)
                 else:
-                    raise FileExistsError(
-                        f"Landuse map path already exists and is not a symlink: {dest}"
-                    )
-
-        if not os.path.lexists(dest):
-            os.symlink(landuse_src, dest)
-
-        prj_src = os.path.splitext(landuse_src)[0] + ".prj"
-        if _exists(prj_src):
-            prj_dest = os.path.splitext(dest)[0] + ".prj"
-            if os.path.lexists(prj_dest):
-                if os.path.islink(prj_dest):
-                    existing = os.path.realpath(prj_dest)
-                    if existing != prj_src:
-                        os.unlink(prj_dest)
-                else:
-                    if os.path.samefile(prj_dest, prj_src):
+                    if os.path.samefile(dest, landuse_src):
                         pass
                     else:
                         raise FileExistsError(
-                            "Landuse projection path already exists and is not a symlink: "
-                            f"{prj_dest}"
+                            f"Landuse map path already exists and is not a symlink: {dest}"
                         )
-            if not os.path.lexists(prj_dest):
-                os.symlink(prj_src, prj_dest)
+
+            if not os.path.lexists(dest):
+                os.symlink(landuse_src, dest)
+
+            prj_src = os.path.splitext(landuse_src)[0] + ".prj"
+            if _exists(prj_src):
+                prj_dest = os.path.splitext(dest)[0] + ".prj"
+                if os.path.lexists(prj_dest):
+                    if os.path.islink(prj_dest):
+                        existing = os.path.realpath(prj_dest)
+                        if existing != prj_src:
+                            os.unlink(prj_dest)
+                    else:
+                        if os.path.samefile(prj_dest, prj_src):
+                            pass
+                        else:
+                            raise FileExistsError(
+                                "Landuse projection path already exists and is not a symlink: "
+                                f"{prj_dest}"
+                            )
+                if not os.path.lexists(prj_dest):
+                    os.symlink(prj_src, prj_dest)
 
         base = os.path.abspath(self.wd)
         if os.path.commonpath([base, landuse_src]) == base:
@@ -408,6 +458,10 @@ class Landuse(NoDbBase):
                 "Skipping catalog update for external landuse symlink: %s",
                 landuse_src,
             )
+
+        if not self.islocked():
+            with self.locked():
+                self._landuse_is_vrt = use_vrt
 
     def _build_ESDAC(self) -> None:
         from wepppy.eu.soils.esdac import ESDAC
@@ -461,6 +515,8 @@ class Landuse(NoDbBase):
         _map = self.ron_instance.map
 
         # Get NLCD 2011 from wmesque webservice
+        if retrieve_nlcd:
+            self._landuse_is_vrt = False
         lc_fn = self.lc_fn
 
         if retrieve_nlcd:
@@ -478,7 +534,7 @@ class Landuse(NoDbBase):
             lc = LandcoverMap(lc_fn)
 
             # build the grid
-            # domlc_fn map is a property of NoDbBase
+            # domlc_fn map is a Landuse property
             # domlc_d is a dictionary with topaz_id keys
             self.domlc_d = lc.build_lcgrid(subwta_fn, None)
         else:
@@ -504,6 +560,7 @@ class Landuse(NoDbBase):
         _map = self.ron_instance.map
 
         # Get NLCD 2011 from wmesque webservice
+        self._landuse_is_vrt = False
         lc_fn = self.lc_fn
 
         wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize, 
@@ -525,6 +582,7 @@ class Landuse(NoDbBase):
             managements[dom].man_dir = self.lc_dir
 
         with self.locked():
+            self._landuse_is_vrt = False
             self._managements = managements
 
     def build(self, retrieve_nlcd: bool = True) -> None:

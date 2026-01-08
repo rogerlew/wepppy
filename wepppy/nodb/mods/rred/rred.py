@@ -107,14 +107,17 @@ class Rred(NoDbBase):
             landuse.domlc_d = lc.build_lcgrid(watershed.subwta, None)
 
     def copy_soils(self):
+        soils = Soils.getInstance(self.wd)
+        soils_dir = soils.soils_dir
         soil_fns = glob(_join(self.rred_dir, '*', '*.sol'))
         for fn in soil_fns:
-            shutil.copy(fn, self.soils_dir)
+            shutil.copy(fn, soils_dir)
 
     def build_soils(self, soils_mode=SoilsMode.RRED_Burned):
         assert soils_mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]
 
         soils = Soils.getInstance(self.wd)
+        soils_dir = soils.soils_dir
         with soils.locked():
             soils.clean()
             self.copy_soils()
@@ -144,7 +147,7 @@ class Rred(NoDbBase):
                 _domsoil_d[k] = sol
 
                 soil_fn = '%s.sol' % sol
-                soil_path = _join(self.soils_dir, soil_fn)
+                soil_path = _join(soils_dir, soil_fn)
 
                 yaml_soil = WeppSoilUtil(soil_path)
                 desc = '{slid} - {texid}'.format(**yaml_soil.obj['ofes'][0])
@@ -152,7 +155,7 @@ class Rred(NoDbBase):
                 _soils[sol] = SoilSummary(
                     mukey=sol,
                     fname=soil_fn,
-                    soils_dir=self.soils_dir,
+                    soils_dir=soils_dir,
                     build_date=str(datetime.now()),
                     desc=desc
                 )
