@@ -31,7 +31,7 @@
 - Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
 - Canonical DEM path: `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`.
 - Each culvert is a canonical weppcloud project at `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/`.
-  - DEM symlink: instead of fetching/copying the DEM for each culvert project, create a symlink from per-run path to canonical DEM (e.g., `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/dem/dem.tif` → `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`). This is handled by a new `Ron.symlink_dem()` method that creates the symlink and sets `ron.map` (see DEM symlink manager below).
+  - DEM symlink/VRT: instead of fetching/copying the DEM for each culvert project, create a per-run DEM reference. When cropping is disabled, symlink `/dem/dem.tif` → `/topo/hydro-enforced-dem.tif`. When cropping is enabled, build `/dem/dem.vrt` using a shared crop window and persist crop metadata for downstream VRTs (see DEM symlink manager below).
 - `_base` project initialization: `culvert.cfg` specifies a `base_runid` key pointing to a template project that gets copied to `/wc1/culverts/<culvert_batch_uuid>/_base/`. This mirrors the BatchRunner pattern and stages shared parameters and defaults.
 
 ## End-to-end flow (proposed)
@@ -103,26 +103,35 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
 The `Ron` class gains a new method to handle preexisting DEMs without fetching or copying:
 
 ```python
-def symlink_dem(self, dem_path: str) -> None:
+def symlink_dem(
+    self,
+    dem_path: str,
+    *,
+    as_cropped_vrt: bool = False,
+    crop_window: Optional[Tuple[int, int, int, int]] = None,
+) -> None:
     """
-    Create a symlink to an external DEM and populate self.map.
+    Create a symlink (or windowed VRT) to an external DEM and populate self.map.
     
     Used by culvert batch processing where the DEM is already available
     at a canonical location. Replaces the fetch_dem() flow.
     
     Args:
         dem_path: Absolute path to the source DEM (e.g., hydro-enforced-dem.tif)
+        as_cropped_vrt: When True, build dem.vrt using crop_window instead of a symlink.
+        crop_window: Pixel window (xoff, yoff, xsize, ysize) for VRT cropping; required when as_cropped_vrt=True.
     
     Side effects:
         - Creates <wd>/dem/ directory if needed
-        - Creates symlink: <wd>/dem/dem.tif -> dem_path
+        - Creates <wd>/dem/dem.tif symlink or <wd>/dem/dem.vrt (cropped)
         - Reads raster metadata and sets self.map (extent, crs, resolution)
+        - Persists crop metadata for reuse by other VRT symlinkers
     """
 ```
 
 This method:
 1. Creates the `<wd>/dem/` directory if it does not exist
-2. Creates a symlink `<wd>/dem/dem.tif` → `dem_path`
+2. Creates either a symlink `<wd>/dem/dem.tif` → `dem_path` or a cropped `<wd>/dem/dem.vrt`
 3. Opens the target raster and populates `self.map` with extent, CRS, and resolution metadata
 4. Does NOT copy the DEM (saves disk I/O and storage for large batches)
 
@@ -224,7 +233,7 @@ Payload validation/extraction happens in the rq-engine API handler; batch topo g
 ### Per-culvert processing
 For each culvert (identified by `Point_ID`):
 
-1. **Link DEM and topo rasters:** Use `Ron.symlink_dem()` to symlink to the shared hydro-enforced DEM. Similarly link the shared `flovec.tif` and `netful.tif` into each run.
+1. **Link DEM and topo rasters:** Use `Ron.symlink_dem()` to reference the shared hydro-enforced DEM. When VRT cropping is enabled (culvert has watershed geometry), compute a crop window from the watershed polygon (pad px from `culvert.cfg`) and pass it to `Ron.symlink_dem(as_cropped_vrt=True, crop_window=...)` so downstream VRT symlinks can reuse the same window. Similarly link or VRT-crop the shared `flovec.tif`/`netful.tif` into each run.
 
 2. **Find outlet from watershed geometry:**
    ```python
@@ -238,12 +247,12 @@ For each culvert (identified by `Point_ID`):
    ```
    The `find_outlet()` method analyzes the watershed polygon against the DEM and stream network raster to determine the pour point pixel coordinates. This is more robust than using the culvert point directly, as it ensures the outlet is on the actual flow path.
 
-3. **Delineate subcatchments/channels:** Use the WBT Topaz emulator with the identified outlet and the shared `flovec.tif`/`netful.tif`. Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
+3. **Delineate subcatchments/channels:** Use the WBT Topaz emulator with the identified outlet and the shared `flovec.tif`/`netful.tif` (or their cropped VRTs). Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
    - `polygonize_netful(self.netful, self.netful_json)`
    - `json_to_wgs(self.netful_json)`
 
 4. **Build inputs:** Generate landuse, soils, and climate inputs.
-   - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared DEM grid (matches `subwta.tif`), and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`.
+   - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared DEM grid (matches `subwta.tif`), and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`. When VRT cropping is enabled, create `nlcd.vrt`/`ssurgo.vrt` using the shared crop window.
    - Use `retrieve_nlcd=False` and `retrieve_gridded_ssurgo=False` so the per-run build skips cleanup and remote retrieval.
 
 5. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
