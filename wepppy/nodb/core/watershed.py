@@ -104,6 +104,7 @@ from wepppy.topo.watershed_abstraction.support import (
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
+from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
@@ -270,6 +271,7 @@ class Watershed(NoDbBase):
                     "watershed.wbt", "blc_dist", 1000
                 )
                 self._wbt: Optional[WhiteboxToolsTopazEmulator] = None
+                self._flovec_netful_relief_chnjnt_are_vrt = False
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
@@ -516,16 +518,22 @@ class Watershed(NoDbBase):
             return False
         return delineation_backend == DelineationBackend.WBT
 
+    @property
+    def flovec_netful_relief_chnjnt_are_vrt(self) -> bool:
+        return bool(getattr(self, "_flovec_netful_relief_chnjnt_are_vrt", False))
+
     def _ensure_wbt(self) -> WhiteboxToolsTopazEmulator:
         if not self.delineation_backend_is_wbt:
             raise RuntimeError("WhiteboxTools emulator requested for non-WBT backend")
         wbt = getattr(self, "_wbt", None)
         if wbt is None:
+            ron = self.ron_instance
             wbt = WhiteboxToolsTopazEmulator(
                 self.wbt_wd,
-                self.dem_fn,
+                ron.dem_fn,
                 logger=self.logger,
             )
+            wbt.flovec_netful_relief_chnjnt_are_vrt = self.flovec_netful_relief_chnjnt_are_vrt
             self._wbt = wbt
         return wbt
 
@@ -611,7 +619,8 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, "NETFUL.ARC")
         elif self.delineation_backend_is_wbt:
-            return _join(self.wbt_wd, "netful.tif")
+            ext = "vrt" if self.flovec_netful_relief_chnjnt_are_vrt else "tif"
+            return _join(self.wbt_wd, f"netful.{ext}")
         else:
             return _join(self.taudem_wd, "src.tif")
 
@@ -812,7 +821,8 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             relief_path = _join(self.topaz_wd, "RELIEF.ARC")
         elif self.delineation_backend_is_wbt:
-            relief_path = _join(self.wbt_wd, "relief.tif")
+            ext = "vrt" if self.flovec_netful_relief_chnjnt_are_vrt else "tif"
+            relief_path = _join(self.wbt_wd, f"relief.{ext}")
         else:
             return None
 
@@ -852,13 +862,17 @@ class Watershed(NoDbBase):
 
         self.logger.info("Building Channels")
 
-        if csa or mcl:
+        reset_channels_vrt = self.flovec_netful_relief_chnjnt_are_vrt
+        if csa is not None or mcl is not None or reset_channels_vrt:
             with self.locked():
                 if csa is not None:
                     self._csa = csa
 
                 if mcl is not None:
                     self._mcl = mcl
+
+                if reset_channels_vrt:
+                    self._flovec_netful_relief_chnjnt_are_vrt = False
 
         # Preserve outlet information during channel building
         preserved_outlet = self.outlet
@@ -870,11 +884,13 @@ class Watershed(NoDbBase):
             Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
+            ron = self.ron_instance
             wbt = WhiteboxToolsTopazEmulator(
                 self.wbt_wd,
-                self.dem_fn,
+                ron.dem_fn,
                 logger=self.logger,
             )
+            wbt.flovec_netful_relief_chnjnt_are_vrt = False
             wbt.delineate_channels(
                 csa=self.csa,
                 mcl=self.mcl,
@@ -898,6 +914,9 @@ class Watershed(NoDbBase):
         netful_src: str,
         relief_src: Optional[str] = None,
         chnjnt_src: Optional[str] = None,
+        *,
+        as_cropped_vrt: bool = True,
+        crop_window: Optional[Tuple[int, int, int, int]] = None,
     ) -> None:
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(
@@ -926,6 +945,16 @@ class Watershed(NoDbBase):
 
         os.makedirs(self.wbt_wd, exist_ok=True)
 
+        ron = self.ron_instance
+        if as_cropped_vrt:
+            if crop_window is None:
+                crop_window = ron.crop_window
+            if crop_window is None:
+                self.logger.info(
+                    "symlink_channels_map requested VRT crop without crop window; using symlinks"
+                )
+                as_cropped_vrt = False
+
         def _ensure_symlink(src: str, dest: str) -> None:
             if os.path.lexists(dest):
                 if os.path.islink(dest):
@@ -941,12 +970,37 @@ class Watershed(NoDbBase):
             if not os.path.lexists(dest):
                 os.symlink(src, dest)
 
-        _ensure_symlink(flovec_src, _join(self.wbt_wd, "flovec.tif"))
-        _ensure_symlink(netful_src, _join(self.wbt_wd, "netful.tif"))
-        if relief_src is not None:
-            _ensure_symlink(relief_src, _join(self.wbt_wd, "relief.tif"))
-        if chnjnt_src is not None:
-            _ensure_symlink(chnjnt_src, _join(self.wbt_wd, "chnjnt.tif"))
+        def _ensure_vrt(src: str, dest: str) -> None:
+            if crop_window is None:
+                raise ValueError("crop_window is required to build windowed VRTs")
+            build_windowed_vrt_from_window(
+                src,
+                dest,
+                crop_window,
+                reference_geotransform=ron.crop_reference_geotransform,
+                reference_shape=ron.crop_reference_shape,
+            )
+
+        if as_cropped_vrt:
+            # Use .vrt extension so WhiteboxTools recognizes the format
+            _ensure_vrt(flovec_src, _join(self.wbt_wd, "flovec.vrt"))
+            _ensure_vrt(netful_src, _join(self.wbt_wd, "netful.vrt"))
+            if relief_src is not None:
+                _ensure_vrt(relief_src, _join(self.wbt_wd, "relief.vrt"))
+            if chnjnt_src is not None:
+                _ensure_vrt(chnjnt_src, _join(self.wbt_wd, "chnjnt.vrt"))
+        else:
+            _ensure_symlink(flovec_src, _join(self.wbt_wd, "flovec.tif"))
+            _ensure_symlink(netful_src, _join(self.wbt_wd, "netful.tif"))
+            if relief_src is not None:
+                _ensure_symlink(relief_src, _join(self.wbt_wd, "relief.tif"))
+            if chnjnt_src is not None:
+                _ensure_symlink(chnjnt_src, _join(self.wbt_wd, "chnjnt.tif"))
+
+        channels_are_vrt = bool(as_cropped_vrt)
+        self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
+        if self._wbt is not None:
+            self._wbt.flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
 
         netful_geojson = self.netful_utm_shp
         netful_wgs_geojson = self.netful_shp
@@ -963,6 +1017,10 @@ class Watershed(NoDbBase):
         except FileNotFoundError:
             pass
 
+        if not self.islocked():
+            with self.locked():
+                self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
+
     @property
     def target_watershed_path(self) -> str:
         return _join(self.wd, 'dem', "target_watershed.tif")
@@ -973,11 +1031,12 @@ class Watershed(NoDbBase):
         assert self.delineation_backend_is_wbt, "find_outlet only works with WBT delineation backend"
 
         wbt = self._ensure_wbt()
+        ron = self.ron_instance
 
         # build raster mask from watershed feature
         if watershed_feature is not None:
             watershed_feature.build_raster_mask(
-                template_filepath=self.dem_fn, dst_filepath=self.target_watershed_path)
+                template_filepath=ron.dem_fn, dst_filepath=self.target_watershed_path)
         elif not _exists(self.target_watershed_path):
             raise FileNotFoundError(
                 f"Target watershed raster not found: {self.target_watershed_path}"
@@ -1746,9 +1805,10 @@ class Watershed(NoDbBase):
 
     def _compute_ruggedness_from_dem(self) -> float:
         """Approximate ruggedness using DEM statistics when TOPAZ values are absent."""
-        dem_path = _join(self.wd, "dem", "dem.tif")
+        ron = self.ron_instance
+        dem_path = ron.dem_fn
         if not _exists(dem_path):
-            raise FileNotFoundError(f"dem.tif not found at {dem_path}; cannot compute ruggedness")
+            raise FileNotFoundError(f"DEM not found at {dem_path}; cannot compute ruggedness")
 
         dataset = gdal.Open(dem_path, gdal.GA_ReadOnly)
         if dataset is None:

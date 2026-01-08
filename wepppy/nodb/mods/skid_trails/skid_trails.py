@@ -225,7 +225,7 @@ class SkidTrails(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
 
         # Load the DEM and the skid trails
-        with rasterio.open(watershed.dem_fn) as dem:
+        with rasterio.open(watershed.ron_instance.dem_fn) as dem:
             dem_meta = dem.meta
 
         # Read skid trails shapefile using GeoPandas
@@ -275,7 +275,7 @@ class SkidTrails(NoDbBase):
         skid[np.where(bound == 0)] = 0
 
         # read in the dem
-        dem, _transform, _proj = read_raster(watershed.dem_fn)
+        dem, _transform, _proj = read_raster(watershed.ron_instance.dem_fn)
         dem[np.where(bound == 0)] = 0
 
         geo_transformer = GeoTransformer(src_proj4=_proj, dst_epsg=4326)

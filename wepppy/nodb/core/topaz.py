@@ -188,7 +188,8 @@ class Topaz(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}(csa={csa}, mcl={mcl})')
 
         with self.locked():
-            top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
+            ron = self.ron_instance
+            top_runner = TopazRunner(self.topaz_wd, ron.dem_fn,
                                      csa=csa, mcl=mcl)
 
             top_runner.build_channels()
@@ -237,7 +238,8 @@ class Topaz(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}(lng={lng}, lat={lat}, pixelcoords={pixelcoords}, da={da})')
 
         with self.locked():
-            top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
+            ron = self.ron_instance
+            top_runner = TopazRunner(self.topaz_wd, ron.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
             if da>0:
@@ -262,7 +264,8 @@ class Topaz(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}()')
         
         with self.locked():
-            top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
+            ron = self.ron_instance
+            top_runner = TopazRunner(self.topaz_wd, ron.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
             outlet_px = self._outlet.pixel_coords

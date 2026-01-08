@@ -266,7 +266,7 @@ class BatchRunner(NoDbBase):
         if self.is_task_enabled(TaskEnum.fetch_dem) and prep[str(TaskEnum.fetch_dem)] is None:
             logger.info('fetching DEM')
             pad = 0.02
-            bbox = watershed_feature.get_padded_bbox(pad=pad)
+            bbox = watershed_feature.get_padded_bbox(pad=pad, output_crs="EPSG:4326")
             map_center = ((bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0)
             ron.set_map(bbox, center=map_center, zoom=11)
             ron.fetch_dem()

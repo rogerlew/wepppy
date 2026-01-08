@@ -1790,10 +1790,6 @@ class NoDbBase(object):
         return _join(self.wd, 'dem')
 
     @property
-    def dem_fn(self):
-        return _join(self.wd, 'dem', 'dem.tif')
-
-    @property
     def topaz_wd(self):
         return _join(self.wd, 'dem', 'topaz')
 

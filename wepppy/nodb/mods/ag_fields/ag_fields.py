@@ -254,7 +254,7 @@ class AgFields(NoDbBase):
 
         # file is in ag_fields_dir don't change 
         geojson_path = _join(self.ag_fields_dir, self.field_boundaries_geojson)
-        template_filepath = self.dem_fn
+        template_filepath = self.ron_instance.dem_fn
         output_filepath = self.field_boundaries_tif
 
         def _bounds_intersect(bounds_a, bounds_b):

@@ -273,7 +273,6 @@ def run_culvert_run_rq(
             if runner.culvert_batch_uuid is None:
                 runner._culvert_batch_uuid = culvert_batch_uuid
 
-    runner.create_run_if_missing(run_id, payload_metadata, model_parameters)
     watersheds_path = runner._resolve_payload_path(
         payload_metadata,
         "watersheds",
@@ -281,6 +280,14 @@ def run_culvert_run_rq(
         str(batch_root),
     )
     watershed_features = runner.load_watershed_features(watersheds_path)
+    watershed_feature = watershed_features.get(run_id)
+
+    runner.create_run_if_missing(
+        run_id,
+        payload_metadata,
+        model_parameters,
+        watershed_feature=watershed_feature,
+    )
     run_wd = Path(runner.runs_dir) / run_id
     if not run_wd.is_dir():
         raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
@@ -293,7 +300,7 @@ def run_culvert_run_rq(
         culvert_batch_uuid=culvert_batch_uuid,
         run_id=run_id,
         run_wd=run_wd,
-        watershed_feature=watershed_features.get(run_id),
+        watershed_feature=watershed_feature,
         run_config=runner.run_config,
         wepppy_version=wepppy_version,
         nlcd_db_override=nlcd_db_override,
@@ -735,7 +742,7 @@ def _process_culvert_run(
         if ssurgo_db_override is not None:
             soils.ssurgo_db = ssurgo_db_override
 
-        watershed.find_outlet()
+        watershed.find_outlet(watershed_feature=watershed_feature)
         watershed.build_subcatchments()
         watershed.abstract_watershed()
         batch_root = _resolve_batch_root(culvert_batch_uuid)

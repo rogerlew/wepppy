@@ -1358,8 +1358,9 @@ class Climate(NoDbBase):
         with self.locked():
             watershed = self.watershed_instance
             lng, lat = watershed.centroid
+            ron = self.ron_instance
 
-            rdi = RasterDatasetInterpolator(watershed.dem_fn)
+            rdi = RasterDatasetInterpolator(ron.dem_fn)
             elev = rdi.get_location_info(lng, lat, method='near')
 
             station_manager = CligenStationsManager(version=self.cligen_db)
@@ -1374,8 +1375,9 @@ class Climate(NoDbBase):
         with self.locked():
             watershed = self.watershed_instance
             lng, lat = watershed.centroid
+            ron = self.ron_instance
 
-            rdi = RasterDatasetInterpolator(watershed.dem_fn)
+            rdi = RasterDatasetInterpolator(ron.dem_fn)
             elev = rdi.get_location_info(lng, lat, method='near')
 
             station_manager = CligenStationsManager(version=self.cligen_db)

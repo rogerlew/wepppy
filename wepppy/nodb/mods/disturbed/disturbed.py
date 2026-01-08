@@ -398,7 +398,7 @@ class Disturbed(NoDbBase):
             sbs_fn = _join(self.disturbed_dir, 'uniform_sbs.tif')
 
             # Open the input raster file
-            with rasterio.open(self.dem_fn) as src:
+            with rasterio.open(self.ron_instance.dem_fn) as src:
                 # Read the input raster data as a numpy array
                 dem = src.read(1)
 

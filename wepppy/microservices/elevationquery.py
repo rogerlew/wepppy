@@ -199,6 +199,10 @@ def _locate_dem(active_root: Path) -> Path:
     if dem_dir.is_file():
         return dem_dir
 
+    vrt_path = dem_dir / 'dem.vrt'
+    if vrt_path.is_file():
+        return vrt_path
+
     canonical = dem_dir / 'dem.tif'
     if canonical.is_file():
         return canonical

@@ -8,7 +8,7 @@ import re
 from copy import deepcopy
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pyproj import CRS, Geod
+from pyproj import CRS, Geod, Transformer
 
 from wepppy.all_your_base.geo.shapefile import signed_area
 
@@ -125,11 +125,36 @@ class WatershedFeature(object):
             return False
         return True
     
-    def get_padded_bbox(self, pad: float) -> List[float]:
-        """Return the feature's bounding box expanded by ``pad`` (degrees)."""
+    def get_padded_bbox(self, pad: float, output_crs: str) -> List[float]:
+        """Return the feature's bounding box expanded by ``pad`` in output CRS units."""
         if pad < 0:
             raise ValueError("Padding must be non-negative")
-        min_x, min_y, max_x, max_y = self.bbox
+        if not output_crs:
+            raise ValueError("output_crs is required")
+
+        source_crs = self.crs or output_crs
+        if source_crs == output_crs:
+            min_x, min_y, max_x, max_y = self.bbox
+        else:
+            transformer = Transformer.from_crs(
+                CRS.from_user_input(source_crs),
+                CRS.from_user_input(output_crs),
+                always_xy=True,
+            )
+            min_x = min_y = max_x = max_y = None
+            for x, y in WatershedCollection._iter_coordinates(self.coordinates):
+                tx, ty = transformer.transform(x, y)
+                if min_x is None or tx < min_x:
+                    min_x = tx
+                if min_y is None or ty < min_y:
+                    min_y = ty
+                if max_x is None or tx > max_x:
+                    max_x = tx
+                if max_y is None or ty > max_y:
+                    max_y = ty
+            if None in (min_x, min_y, max_x, max_y):
+                raise ValueError("Unable to determine bounding box in output CRS")
+
         return [
             min_x - pad,
             min_y - pad,
@@ -166,6 +191,7 @@ class WatershedFeature(object):
                 "count": 1,
                 "dtype": "uint8",
                 "nodata": 0,
+                "driver": "GTiff",  # Ensure output is GeoTIFF even if template is VRT
             })
 
             # 4. Use the geometries from the *reprojected* GeoDataFrame for rasterization.

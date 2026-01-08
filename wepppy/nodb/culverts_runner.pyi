@@ -48,11 +48,15 @@ class CulvertsRunner(NoDbBase):
     def order_reduction_passes(self) -> int: ...
     @order_reduction_passes.setter
     def order_reduction_passes(self, value: int) -> None: ...
+    @property
+    def crop_pad_px(self) -> int: ...
     def create_run_if_missing(
         self,
         run_id: str,
         payload_metadata: Dict[str, Any],
         model_parameters: Optional[Dict[str, Any]] = ...,
+        watershed_feature: WatershedFeature | None = ...,
+        as_cropped_vrt: bool = ...,
     ) -> None: ...
     def load_watershed_features(
         self, watersheds_geojson_path: str

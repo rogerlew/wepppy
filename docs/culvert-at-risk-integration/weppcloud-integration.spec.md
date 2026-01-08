@@ -128,8 +128,8 @@ This method:
 
 ## Payload ZIP contract (proposed)
 Top-level files/directories (required unless noted):
-- `topo/hydro-enforced-dem.tif` (GeoTIFF)
-- `topo/streams.tif` (GeoTIFF; binary stream raster, same projection/extent/resolution as DEM)
+- `topo/hydro-enforced-dem.tif` (GeoTIFF, UTM projection—see CRS rules below)
+- `topo/streams.tif` (GeoTIFF, UTM projection; binary stream raster, same projection/extent/resolution as DEM)
 - `culverts/culvert_points.geojson` (same CRS as rasters—see CRS rules below)
 - `culverts/watersheds.geojson` (watershed polygons with `Point_ID` attribute linking to culvert points; watershed rasters are deleted by Culvert_web_app after polygon creation)
 - `metadata.json` (schema v1; project-level fields for observability)
@@ -168,9 +168,9 @@ Notes:
 - Climate duration uses defaults from `culvert.cfg` (no override keys in v1).
 
 ### Coordinate system rules
-- **Rasters must use a projected CRS with meter units** (e.g., UTM). WGS84 is NOT acceptable for rasters because cell size must be in meters for hydrological calculations.
-- **GeoJSON must use the same CRS as the rasters.** Since DEMs can have 1m resolution, keeping all assets in the same projected CRS avoids reprojection artifacts and ensures pixel-accurate alignment.
-- wepp.cloud will validate that all inputs share a common CRS and reject payloads where rasters and vectors have mismatched projections.
+- **Rasters must be in UTM projection.** Culvert_web_app reprojects all inputs to UTM during its `ws_deln` pipeline (source: `subroutine_nested_watershed_delineation.py::get_utm_crs_from_wgs84()` determines zone from boundary centroid, then `reproject_raster_from_path()` reprojects DEM unconditionally). Output files are named with `_UTM` suffix (e.g., `DEM_UTM.tif`, `D8flow_dir_UTM.tif`).
+- **GeoJSON must use the same UTM CRS as the rasters.** Since DEMs can have 1m resolution, keeping all assets in the same projected CRS avoids reprojection artifacts and ensures pixel-accurate alignment.
+- wepp.cloud will validate that all inputs share a common projected CRS (UTM expected) and reject payloads where rasters and vectors have mismatched projections or use geographic coordinates (WGS84).
 
 ### Culvert ID attribute
 The `culverts/culvert_points.geojson` must include a `Point_ID` attribute on each feature:

@@ -436,7 +436,7 @@ services:
       REDIS_HOST: redis
       MPLCONFIGDIR: /tmp/matplotlib
       WEPPPY_NCPU: "6"
-      PERIDOT_CPU: "4"
+      PERIDOT_CPU: "12"
     depends_on:
       redis:
         condition: service_started

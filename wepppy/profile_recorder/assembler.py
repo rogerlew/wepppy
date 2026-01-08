@@ -17,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 
 TASK_RULES: Dict[str, Dict[str, Any]] = {
     "rq/api/fetch_dem_and_build_channels": {
-        "expected_files": ["dem/dem.tif"],
+        "expected_files": ["dem/dem.tif"],  # VRT-only runs may skip this file.
         "ron_property": ("has_dem", {"equals": True}),
     },
     "rq/api/set_outlet": {

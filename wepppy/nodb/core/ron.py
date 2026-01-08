@@ -71,6 +71,9 @@ from wepppy.all_your_base.geo import (
     read_raster,
     utm_srid,
 )
+from wepppy.all_your_base.geo.vrt import build_windowed_vrt
+
+from wepppy.topo.watershed_collection import WatershedFeature
 
 from wepppy.locales.earth.opentopography import opentopo_retrieve
 
@@ -567,6 +570,7 @@ class Ron(NoDbBase):
             if not _exists(dem_dir):
                 os.mkdir(dem_dir)
 
+            self._dem_is_vrt = False
             self._dem_db = self.config_get_str('general', 'dem_db')
 
             _dem_map = self.config_get_path('general', 'dem_map')
@@ -869,11 +873,33 @@ class Ron(NoDbBase):
     def dem_map(self, value: str) -> None:
         self._dem_map = value
 
+    @property
+    def dem_is_vrt(self) -> bool:
+        return bool(getattr(self, "_dem_is_vrt", False))
+
+    @property
+    def dem_fn(self) -> str:
+        ext = "vrt" if self.dem_is_vrt else "tif"
+        return _join(self.dem_dir, f"dem.{ext}")
+
+    @property
+    def crop_window(self) -> Optional[Tuple[int, int, int, int]]:
+        return getattr(self, "_crop_window", None)
+
+    @property
+    def crop_reference_geotransform(self) -> Optional[Tuple[float, float, float, float, float, float]]:
+        return getattr(self, "_crop_reference_geotransform", None)
+
+    @property
+    def crop_reference_shape(self) -> Optional[Tuple[int, int]]:
+        return getattr(self, "_crop_reference_shape", None)
+
     #
     # dem
     #
     def fetch_dem(self) -> None:
         assert self.map is not None
+        self._dem_is_vrt = False
 
         if self.dem_db.startswith('opentopo://'):
             opentopo_retrieve(self.map.extent, self.dem_fn,
@@ -892,31 +918,71 @@ class Ron(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def symlink_dem(self, dem_fn: str) -> None:
+    def symlink_dem(
+        self,
+        dem_fn: str,
+        *,
+        as_cropped_vrt: bool = True,
+        watershed_feature: Optional[WatershedFeature] = None,
+        pad_px: int = 5,
+    ) -> None:
         dem_src = os.path.abspath(dem_fn)
         if not _exists(dem_src):
             raise FileNotFoundError(f"DEM file does not exist: {dem_src}")
 
         os.makedirs(self.dem_dir, exist_ok=True)
-        dest = self.dem_fn
 
-        if os.path.lexists(dest):
-            if os.path.islink(dest):
-                existing = os.path.realpath(dest)
-                if existing != dem_src:
-                    os.unlink(dest)
-            else:
-                if os.path.samefile(dest, dem_src):
-                    pass
+        use_vrt = as_cropped_vrt and watershed_feature is not None
+        if use_vrt and pad_px < 0:
+            raise ValueError("pad_px must be non-negative")
+        self._dem_is_vrt = use_vrt
+
+        if use_vrt:
+            # Use .vrt extension so WhiteboxTools recognizes the format
+            dest = _join(self.dem_dir, "dem.vrt")
+            rdi_src = RasterDatasetInterpolator(dem_src)
+            bbox = watershed_feature.get_padded_bbox(
+                pad=0.0,
+                output_crs=rdi_src.proj4,
+            )
+            src_window = build_windowed_vrt(
+                dem_src,
+                dest,
+                bbox=bbox,
+                bbox_crs=rdi_src.proj4,
+                pad_px=pad_px,
+            )
+            crop_reference_geotransform = rdi_src.ds.GetGeoTransform()
+            crop_reference_shape = (rdi_src.ds.RasterXSize, rdi_src.ds.RasterYSize)
+        else:
+            # Use .tif extension for symlinks
+            dest = _join(self.dem_dir, "dem.tif")
+            if as_cropped_vrt and watershed_feature is None:
+                self.logger.info(
+                    "symlink_dem requested VRT crop without watershed feature; using symlink"
+                )
+
+            if os.path.lexists(dest):
+                if os.path.islink(dest):
+                    existing = os.path.realpath(dest)
+                    if existing != dem_src:
+                        os.unlink(dest)
                 else:
-                    raise FileExistsError(
-                        f"DEM path already exists and is not a symlink: {dest}"
-                    )
+                    if os.path.samefile(dest, dem_src):
+                        pass
+                    else:
+                        raise FileExistsError(
+                            f"DEM path already exists and is not a symlink: {dest}"
+                        )
 
-        if not os.path.lexists(dest):
-            os.symlink(dem_src, dest)
+            if not os.path.lexists(dest):
+                os.symlink(dem_src, dest)
 
-        rdi = RasterDatasetInterpolator(dem_src)
+            src_window = None
+            crop_reference_geotransform = None
+            crop_reference_shape = None
+
+        rdi = RasterDatasetInterpolator(dest)
         cellsize = abs(rdi.transform[1])
         if cellsize <= 0:
             raise ValueError(f"Invalid DEM cellsize: {cellsize}")
@@ -929,10 +995,13 @@ class Ron(NoDbBase):
             self._cellsize = cellsize
             self._map = Map(extent, center, zoom, cellsize)
             self._w3w = None
+            self._crop_window = src_window
+            self._crop_reference_geotransform = crop_reference_geotransform
+            self._crop_reference_shape = crop_reference_shape
 
         base = os.path.abspath(self.wd)
         if os.path.commonpath([base, dem_src]) == base:
-            update_catalog_entry(self.wd, self.dem_fn)
+            update_catalog_entry(self.wd, dest)
         else:
             self.logger.info(
                 "Skipping catalog update for external DEM symlink: %s", dem_src

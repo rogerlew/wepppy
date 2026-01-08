@@ -154,6 +154,7 @@ class WhiteboxToolsTopazEmulator:
         self.csa: Optional[float] = None  # Channel Source Area
         self._wbt_runner: Optional[WhiteboxTools] = None
         self._raise_on_error: bool = raise_on_error
+        self._flovec_netful_relief_chnjnt_are_vrt: bool = False
 
         self._outlet: Optional['Outlet'] = None
         self._build_hooks: defaultdict[str, list[Callable[..., None]]] = defaultdict(list)
@@ -241,6 +242,16 @@ class WhiteboxToolsTopazEmulator:
         return self._wbt_runner
 
     @property
+    def flovec_netful_relief_chnjnt_are_vrt(self) -> bool:
+        return bool(getattr(self, "_flovec_netful_relief_chnjnt_are_vrt", False))
+
+    @flovec_netful_relief_chnjnt_are_vrt.setter
+    def flovec_netful_relief_chnjnt_are_vrt(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise ValueError("flovec_netful_relief_chnjnt_are_vrt must be a boolean value")
+        self._flovec_netful_relief_chnjnt_are_vrt = value
+
+    @property
     def dem(self):
         if not _exists(self._dem):
             raise FileNotFoundError(f"DEM file does not exist: {self._dem}")
@@ -251,7 +262,8 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the path to the relief file.
         """
-        return _join(self.wbt_wd, "relief.tif")
+        ext = "vrt" if self.flovec_netful_relief_chnjnt_are_vrt else "tif"
+        return _join(self.wbt_wd, f"relief.{ext}")
 
     @property
     def flovec(self):
@@ -263,7 +275,8 @@ class WhiteboxToolsTopazEmulator:
 
         https://www.whiteboxgeo.com/manual/wbt_book/available_tools/hydrological_analysis.html#d8pointer
         """
-        return _join(self.wbt_wd, "flovec.tif")
+        ext = "vrt" if self.flovec_netful_relief_chnjnt_are_vrt else "tif"
+        return _join(self.wbt_wd, f"flovec.{ext}")
 
     @property
     def floaccum(self):
@@ -286,7 +299,8 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the path to the stream network file.
         """
-        return _join(self.wbt_wd, "netful.tif")
+        ext = "vrt" if self.flovec_netful_relief_chnjnt_are_vrt else "tif"
+        return _join(self.wbt_wd, f"netful.{ext}")
 
     @property
     def netful_json(self):
@@ -307,7 +321,8 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the path to the stream junction file.
         """
-        return _join(self.wbt_wd, "chnjnt.tif")
+        ext = "vrt" if self.flovec_netful_relief_chnjnt_are_vrt else "tif"
+        return _join(self.wbt_wd, f"chnjnt.{ext}")
 
     @property
     def outlet_geojson(self):

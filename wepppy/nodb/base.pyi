@@ -351,9 +351,6 @@ class NoDbBase(object):
     def dem_dir(self) -> str: ...
 
     @property
-    def dem_fn(self) -> str: ...
-
-    @property
     def topaz_wd(self) -> str: ...
 
     @property

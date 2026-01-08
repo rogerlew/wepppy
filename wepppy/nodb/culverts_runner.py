@@ -88,6 +88,12 @@ class CulvertsRunner(NoDbBase):
             if order_reduction < 0:
                 raise ValueError("order_reduction_passes must be >= 0")
             self._order_reduction_passes = order_reduction
+            crop_pad_px = self.config_get_int("culvert_runner", "crop_pad_px", 5)
+            if crop_pad_px is None:
+                crop_pad_px = 5
+            if crop_pad_px < 0:
+                raise ValueError("crop_pad_px must be >= 0")
+            self._crop_pad_px = crop_pad_px
 
         os.makedirs(self.runs_dir, exist_ok=True)
 
@@ -160,6 +166,10 @@ class CulvertsRunner(NoDbBase):
             raise ValueError("order_reduction_passes must be >= 0")
         self._order_reduction_passes = value
 
+    @property
+    def crop_pad_px(self) -> int:
+        return int(getattr(self, "_crop_pad_px", 5))
+
     def _select_stream_sources_for_run(
         self,
         *,
@@ -186,6 +196,8 @@ class CulvertsRunner(NoDbBase):
         target_path = watershed.target_watershed_path
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         if not _exists(target_path):
+            # Use full DEM for stream check mask - this matches batch netful dimensions
+            # The mask will be regenerated with VRT dimensions later by find_outlet
             watershed_feature.build_raster_mask(
                 template_filepath=dem_src, dst_filepath=target_path
             )
@@ -217,6 +229,8 @@ class CulvertsRunner(NoDbBase):
         run_id: str,
         payload_metadata: Dict[str, Any],
         model_parameters: Optional[Dict[str, Any]] = None,
+        watershed_feature: Optional[WatershedFeature] = None,
+        as_cropped_vrt: bool = True,
     ) -> None:
         if not run_id:
             raise ValueError("run_id is required")
@@ -228,6 +242,12 @@ class CulvertsRunner(NoDbBase):
         culvert_batch_uuid = self.culvert_batch_uuid
         if not culvert_batch_uuid:
             raise ValueError("culvert_batch_uuid is required")
+
+        use_vrt = as_cropped_vrt and watershed_feature is not None
+        if as_cropped_vrt and watershed_feature is None:
+            self.logger.info(
+                "create_run_if_missing requested VRT crop without watershed feature; using symlinks"
+            )
 
         abs_batch_root = os.path.abspath(self.wd)
 
@@ -282,7 +302,12 @@ class CulvertsRunner(NoDbBase):
             ):
                 return
 
-            ron.symlink_dem(dem_src)
+            ron.symlink_dem(
+                dem_src,
+                as_cropped_vrt=use_vrt,
+                watershed_feature=watershed_feature,
+                pad_px=self.crop_pad_px,
+            )
             for filename in ("relief.tif", "chnjnt.tif"):
                 cleanup_path = _join(watershed.wbt_wd, filename)
                 if os.path.lexists(cleanup_path):
@@ -295,7 +320,11 @@ class CulvertsRunner(NoDbBase):
                         )
                     os.unlink(cleanup_path)
             watershed.symlink_channels_map(
-                flovec_src, netful_src, relief_src=dem_src, chnjnt_src=chnjnt_src
+                flovec_src,
+                netful_src,
+                relief_src=dem_src,
+                chnjnt_src=chnjnt_src,
+                as_cropped_vrt=use_vrt,
             )
 
             created_at = datetime.now(timezone.utc).isoformat()
@@ -345,7 +374,12 @@ class CulvertsRunner(NoDbBase):
             pass
 
         ron = Ron.getInstance(run_wd)
-        ron.symlink_dem(dem_src)
+        ron.symlink_dem(
+            dem_src,
+            as_cropped_vrt=use_vrt,
+            watershed_feature=watershed_feature,
+            pad_px=self.crop_pad_px,
+        )
 
         watershed = Watershed.getInstance(run_wd)
         netful_src, chnjnt_src = self._select_stream_sources_for_run(
@@ -370,7 +404,11 @@ class CulvertsRunner(NoDbBase):
                     )
                 os.unlink(cleanup_path)
         watershed.symlink_channels_map(
-            flovec_src, netful_src, relief_src=dem_src, chnjnt_src=chnjnt_src
+            flovec_src,
+            netful_src,
+            relief_src=dem_src,
+            chnjnt_src=chnjnt_src,
+            as_cropped_vrt=use_vrt,
         )
 
         created_at = datetime.now(timezone.utc).isoformat()

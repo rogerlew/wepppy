@@ -631,7 +631,7 @@ class Ash(NoDbBase):
 
             if self.ash_load_fn is not None:
                 self.logger.info(f"  Reading ash load map {self.ash_load_fn}\n")
-                raster_stacker(self.ash_load_fn, watershed.dem_fn, self.ash_load_cropped_fn)
+                raster_stacker(self.ash_load_fn, watershed.ron_instance.dem_fn, self.ash_load_cropped_fn)
                 load_d = identify_median_single_raster_key(
                     key_fn=watershed.subwta, parameter_fn=self.ash_load_cropped_fn)
             else:
@@ -640,7 +640,7 @@ class Ash(NoDbBase):
 
             if self.ash_type_map_fn is not None:
                 self.logger.info(f"  Reading ash type map {self.ash_type_map_fn}\n")
-                raster_stacker(self.ash_type_map_fn, watershed.dem_fn,  self.ash_type_map_cropped_fn)
+                raster_stacker(self.ash_type_map_fn, watershed.ron_instance.dem_fn,  self.ash_type_map_cropped_fn)
                 ash_type_d = identify_median_single_raster_key(
                     key_fn=watershed.subwta, parameter_fn=self.ash_type_map_cropped_fn)
             else:
