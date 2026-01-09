@@ -95,11 +95,14 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
    - checks for stream pixels inside the watershed boundary
    - if none, falls back to `topo/streams.tif` and uses `topo/chnjnt.streams.tif`
    - otherwise uses `topo/netful.tif` + `topo/chnjnt.tif`
-5. **Per-run stream junction generation:** `wepppy/rq/culvert_rq.py::_generate_masked_stream_junctions`
+5. **Culvert point validation:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
+   - validates the culvert point is inside the watershed polygon using `WatershedFeature.contains_point`
+   - on failure, writes `run_metadata.json` with `CulvertPointOutsideWatershedError` and skips modeling
+6. **Per-run stream junction generation:** `wepppy/rq/culvert_rq.py::_generate_masked_stream_junctions`
    - clips `netful.vrt` to `target_watershed.tif` mask → `netful.masked.tif`
    - runs `wbt.stream_junction_identifier(d8_pntr=flovec.vrt, streams=netful.masked.tif)` → `chnjnt.tif`
    - Note: per-run chnjnt.tif must be regenerated because stream junction topology changes when the stream network is masked to the watershed boundary
-6. **Outlet + modeling:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
+7. **Outlet + modeling:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
    - `Watershed.find_outlet()` (uses `dem/target_watershed.tif` if already built)
    - subcatchments → abstraction → landuse/soils/climate → WEPP
 
@@ -195,6 +198,7 @@ The `culverts/culvert_points.geojson` must include a `Point_ID` attribute on eac
 The `culverts/watersheds.geojson` contains one polygon feature per culvert watershed:
 - **Geometry:** Polygon (or MultiPolygon) representing the drainage area for each culvert
 - **Required attribute:** `Point_ID` (integer or string) — must match the corresponding culvert in `culvert_points.geojson`
+- **Optional attribute:** `area_sqm` (float) — used for validation metrics when present
 - **Nested watersheds:** Watersheds may overlap (downstream culverts contain upstream culverts' watersheds). Each polygon represents the **total contributing area** to that culvert, not the incremental area.
 - **CRS:** Must match the DEM projection (UTM or other meter-based projected CRS)
 
@@ -239,7 +243,12 @@ For each culvert (identified by `Point_ID`):
 
 1. **Link DEM and topo rasters:** Use `Ron.symlink_dem()` to reference the shared hydro-enforced DEM. When VRT cropping is enabled (culvert has watershed geometry), compute a crop window from the watershed polygon (pad px from `culvert.cfg`) and pass it to `Ron.symlink_dem(as_cropped_vrt=True, crop_window=...)` so downstream VRT symlinks can reuse the same window. Similarly link or VRT-crop the shared `flovec.tif`/`netful.tif` into each run.
 
-2. **Find outlet from watershed geometry:**
+2. **Validate culvert point is inside watershed polygon:**
+   - Load the culvert point from `culvert_points.geojson` for the current `Point_ID`.
+   - Use `WatershedFeature.contains_point()` to assert the point is inside the watershed polygon.
+   - If the point is outside, mark the run failed with `CulvertPointOutsideWatershedError` (written to `run_metadata.json`, merged into `culverts_runner.nodb`, and surfaced in `runs_manifest.md`) and skip modeling.
+
+3. **Find outlet from watershed geometry:**
    ```python
    # Load the watershed polygon for this culvert from watersheds.geojson
    watershed_geom = get_watershed_geometry(Point_ID)
@@ -258,24 +267,25 @@ For each culvert (identified by `Point_ID`):
    - Seed `netful` at the candidate location and ensure `chnjnt` contains a junction at that pixel.
    - Retry `find_outlet` using the cached mask.
 
-3. **Delineate subcatchments/channels:** Use the WBT Topaz emulator with the identified outlet and the shared `flovec.tif`/`netful.tif` (or their cropped VRTs). Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
+4. **Delineate subcatchments/channels:** Use the WBT Topaz emulator with the identified outlet and the shared `flovec.tif`/`netful.tif` (or their cropped VRTs). Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
    - `polygonize_netful(self.netful, self.netful_json)`
    - `json_to_wgs(self.netful_json)`
 
-4. **Build inputs:** Generate landuse, soils, and climate inputs.
+5. **Build inputs:** Generate landuse, soils, and climate inputs.
    - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared DEM grid (matches `subwta.tif`), and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`. When VRT cropping is enabled, create `nlcd.vrt`/`ssurgo.vrt` using the shared crop window.
    - Use `retrieve_nlcd=False` and `retrieve_gridded_ssurgo=False` so the per-run build skips cleanup and remote retrieval.
    - Disturbed soils: guard `pct_coverage` recalculation when `total_area <= 0.0` to avoid divide-by-zero (set to `0.0` and log a warning).
 
-5. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
+6. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
 
-6. **Collect results:** Store per-culvert outputs and compile into Parquet summaries.
+7. **Collect results:** Store per-culvert outputs and compile into Parquet summaries.
 
 ### Batch finalization
 - Generate consolidated artifacts at batch level.
 - Write `run_metadata.json` in each run with success/failure status.
 - Skeletonize per-run directories to the agreed allowlist.
-- Write `runs_manifest.md`, update `culverts_runner.nodb` with run/job metadata + summary, and emit `weppcloud_run_skeletons.zip`.
+- Write `runs_manifest.md`, update `culverts_runner.nodb` with run/job metadata + summary (including status/error merged from `run_metadata.json`), and emit `weppcloud_run_skeletons.zip`.
+- Compute validation metrics (culvert/outlet UTM coords, distance, target watershed area, bounds area) and store them in `culverts_runner.nodb` + `runs_manifest.md`.
 
 ## Output artifacts (current)
 - Per-run (in run root after skeletonization):
@@ -285,8 +295,8 @@ For each culvert (identified by `Point_ID`):
   - `dem/wbt/*.geojson`
   - `wepp/output/interchange/` (interchange outputs)
 - Batch-level:
-  - `runs_manifest.md` (human-readable summary + job metadata)
-  - `culverts_runner.nodb` (machine-readable state + batch summary)
+  - `runs_manifest.md` (human-readable summary + job metadata + status/error + validation metrics)
+  - `culverts_runner.nodb` (machine-readable state + batch summary + validation metrics)
   - `weppcloud_run_skeletons.zip` (archived skeletonized `runs/` tree)
   - Shared rasters (batch root, not in skeleton zip): `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`, `soils/ssurgo_30m.tif`, `soils/ssurgo.tif`
 Notes:
@@ -305,6 +315,8 @@ Notes:
 
 ## Error handling
 - Validation errors return HTTP 400 with structured error list.
+- Per-run validation errors (e.g., culvert point outside watershed polygon) are treated as failed runs with `CulvertPointOutsideWatershedError` in `run_metadata.json`, and are merged into `culverts_runner.nodb` + `runs_manifest.md`.
+- `NoOutletFoundError` triggers the mask-extension + outlet seeding fallback; if it still fails, the run is marked failed with the error payload.
 - Execution failures return job status `failed` with `error_code` and `error_detail` in the RQ engine status endpoint.
 - Artifacts access relies on the browse service; missing outputs should be surfaced there.
 

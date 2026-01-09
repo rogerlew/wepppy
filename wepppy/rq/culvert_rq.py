@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import logging
 import os
 import shutil
@@ -420,22 +421,38 @@ def run_culvert_run_rq(
             job_status = None
         if job_status == "started":
             job_status = "finished"
-        try:
-            with runner.locked():
-                run_record = runner._runs.get(run_id, {})
-                run_record.setdefault("runid", run_id)
-                run_record.setdefault("point_id", run_id)
-                run_record.setdefault("wd", str(run_wd))
-                run_record["job_status"] = job_status
-                run_record["job_created"] = job_created
-                runner._runs[run_id] = run_record
-        except Exception as exc:
-            logger.warning(
-                "culvert_run %s/%s: failed to update job metadata - %s",
-                culvert_batch_uuid,
-                run_id,
-                exc,
-            )
+        max_tries = 5
+        for attempt in range(max_tries):
+            try:
+                with runner.locked():
+                    run_record = runner._runs.get(run_id, {})
+                    run_record.setdefault("runid", run_id)
+                    run_record.setdefault("point_id", run_id)
+                    run_record.setdefault("wd", str(run_wd))
+                    run_record["job_status"] = job_status
+                    run_record["job_created"] = job_created
+                    runner._runs[run_id] = run_record
+            except NoDbAlreadyLockedError as exc:
+                if attempt + 1 == max_tries:
+                    logger.warning(
+                        "culvert_run %s/%s: failed to update job metadata after %d retries - %s",
+                        culvert_batch_uuid,
+                        run_id,
+                        max_tries,
+                        exc,
+                    )
+                    break
+                time.sleep(1.0)
+            except Exception as exc:
+                logger.warning(
+                    "culvert_run %s/%s: failed to update job metadata - %s",
+                    culvert_batch_uuid,
+                    run_id,
+                    exc,
+                )
+                break
+            else:
+                break
 
     return status
 
@@ -466,6 +483,37 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
                     "point_id": run_id,
                     "wd": str(entry),
                 }
+    payload_metadata = runner.payload_metadata
+    if payload_metadata is None:
+        try:
+            payload_metadata = _load_payload_json(batch_root / "metadata.json")
+        except Exception:
+            payload_metadata = None
+
+    culvert_points: Dict[str, Tuple[float, float]] = {}
+    watershed_features: Dict[str, WatershedFeature] = {}
+    if payload_metadata is not None:
+        try:
+            culvert_points_path = runner._resolve_payload_path(
+                payload_metadata,
+                "culvert_points",
+                runner.DEFAULT_CULVERT_POINTS_REL_PATH,
+                str(batch_root),
+            )
+            culvert_points, _ = runner.load_culvert_points(culvert_points_path)
+            watersheds_path = runner._resolve_payload_path(
+                payload_metadata,
+                "watersheds",
+                runner.DEFAULT_WATERSHEDS_REL_PATH,
+                str(batch_root),
+            )
+            watershed_features = runner.load_watershed_features(watersheds_path)
+        except Exception as exc:
+            logger.warning(
+                "culvert_batch %s: unable to load validation metadata - %s",
+                culvert_batch_uuid,
+                exc,
+            )
     succeeded = 0
     failed = 0
     skipped_no_outlet = 0
@@ -491,6 +539,13 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
                 record["error"] = error_payload
         else:
             failed += 1
+        metrics = _compute_validation_metrics(
+            run_wd=run_wd,
+            culvert_point=culvert_points.get(run_id),
+            watershed_feature=watershed_features.get(run_id),
+        )
+        if metrics:
+            record["validation_metrics"] = metrics
 
     total = len(runs)
     summary = {
@@ -1457,6 +1512,111 @@ def _format_manifest_error(error_payload: Any) -> Optional[str]:
     return str(error_payload)
 
 
+def _load_outlet_coords(outlet_path: Path) -> Optional[Tuple[float, float]]:
+    if not outlet_path.is_file():
+        return None
+    try:
+        payload = json.loads(outlet_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    features = payload.get("features") or []
+    if not features:
+        return None
+    feature = features[0] or {}
+    geometry = feature.get("geometry") or {}
+    if geometry.get("type") != "Point":
+        return None
+    coords = geometry.get("coordinates") or []
+    if not isinstance(coords, (list, tuple)) or len(coords) < 2:
+        return None
+    try:
+        return float(coords[0]), float(coords[1])
+    except (TypeError, ValueError):
+        return None
+
+
+def _sum_parquet_column(parquet_path: Path, column: str) -> Optional[float]:
+    if not parquet_path.is_file():
+        return None
+    try:
+        import duckdb
+
+        con = duckdb.connect()
+        sanitized = str(parquet_path).replace("'", "''")
+        result = con.execute(
+            f"SELECT SUM({column}) FROM read_parquet('{sanitized}')"
+        ).fetchone()
+        con.close()
+        if result and result[0] is not None:
+            return float(result[0])
+    except Exception:
+        pass
+    try:
+        import pyarrow.compute as pc
+        import pyarrow.parquet as pq
+
+        table = pq.read_table(parquet_path, columns=[column])
+        total = pc.sum(table[column]).as_py()
+        if total is not None:
+            return float(total)
+    except Exception:
+        return None
+    return None
+
+
+def _watershed_area_m2(feature: Optional[WatershedFeature]) -> Optional[float]:
+    if feature is None:
+        return None
+    props = feature.properties or {}
+    value = props.get("area_sqm")
+    if value is not None:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            pass
+    return float(feature.area_m2)
+
+
+def _compute_validation_metrics(
+    *,
+    run_wd: Path,
+    culvert_point: Optional[Tuple[float, float]],
+    watershed_feature: Optional[WatershedFeature],
+) -> dict[str, float]:
+    metrics: dict[str, float] = {}
+
+    if culvert_point is not None:
+        metrics["culvert_easting"] = float(culvert_point[0])
+        metrics["culvert_northing"] = float(culvert_point[1])
+
+    outlet_coords = _load_outlet_coords(run_wd / "dem" / "wbt" / "outlet.geojson")
+    if outlet_coords is not None:
+        metrics["outlet_easting"] = float(outlet_coords[0])
+        metrics["outlet_northing"] = float(outlet_coords[1])
+
+    if culvert_point is not None and outlet_coords is not None:
+        metrics["culvert_outlet_distance_m"] = float(
+            math.hypot(outlet_coords[0] - culvert_point[0], outlet_coords[1] - culvert_point[1])
+        )
+
+    target_area = _watershed_area_m2(watershed_feature)
+    if target_area is not None:
+        metrics["target_watershed_area_m2"] = target_area
+
+    hillslope_area = _sum_parquet_column(
+        run_wd / "watershed" / "hillslopes.parquet",
+        "area",
+    )
+    channel_area = _sum_parquet_column(
+        run_wd / "watershed" / "channels.parquet",
+        "area",
+    )
+    if hillslope_area is not None or channel_area is not None:
+        metrics["bounds_area_m2"] = float((hillslope_area or 0.0) + (channel_area or 0.0))
+
+    return metrics
+
+
 def _count_parquet_rows(parquet_path: Path) -> Optional[int]:
     if not parquet_path.is_file():
         return None
@@ -1632,6 +1792,14 @@ def _write_runs_manifest(
                 str(job_id) if job_id else None,
                 redis_conn=redis_conn,
             )
+            metrics = record.get("validation_metrics") or {}
+            culvert_easting = metrics.get("culvert_easting")
+            culvert_northing = metrics.get("culvert_northing")
+            outlet_easting = metrics.get("outlet_easting")
+            outlet_northing = metrics.get("outlet_northing")
+            distance_m = metrics.get("culvert_outlet_distance_m")
+            target_area_m2 = metrics.get("target_watershed_area_m2")
+            bounds_area_m2 = metrics.get("bounds_area_m2")
 
             columns = [
                 point_id,
@@ -1645,6 +1813,13 @@ def _write_runs_manifest(
                 job_created,
                 status_value,
                 error_value,
+                culvert_easting,
+                culvert_northing,
+                outlet_easting,
+                outlet_northing,
+                distance_m,
+                target_area_m2,
+                bounds_area_m2,
             ]
             formatted = [_format_manifest_value(value) for value in columns]
             rows.append("| " + " | ".join(formatted) + " |")
@@ -1670,8 +1845,8 @@ def _write_runs_manifest(
         f"- failed: {failed_value}",
         f"- skipped_no_outlet: {skipped_value}",
         "",
-        "| Point_ID/runid | watershed | n_subcatchments | n_channels | batch_uuid | runid_slug | rq_job_id | job_status | job_created | status | error |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Point_ID/runid | watershed | n_subcatchments | n_channels | batch_uuid | runid_slug | rq_job_id | job_status | job_created | status | error | culvert_easting | culvert_northing | outlet_easting | outlet_northing | culvert_outlet_distance_m | target_watershed_area_m2 | bounds_area_m2 |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     lines.extend(rows)
     lines.append("")

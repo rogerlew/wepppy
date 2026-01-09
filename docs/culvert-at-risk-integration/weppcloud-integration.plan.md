@@ -437,14 +437,26 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 - Remaining failure: Point_ID 207 WBT junction error ("Current cell is not recognized as a junction")
 
 ### Remaining work
-- [ ] Fix WBT junction detection for Point_ID 207 (separate issue)
+- [x] Point_ID 207 follow-up: the issue was malformed inputs (culvert point outside watershed), not WBT. Added a guard that validates point-in-watershed and raises `NoOutletFoundError` early.
 
 ## Phase 5 - Observability, error handling, retention
-- Scope: structured error codes for validation/execution; publish status events to Redis DB 2; update RQ job info with `error_code`/`error_detail`; implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
+- Status: in progress.
+- Scope: run-level validation + error propagation, structured error codes for validation/execution, publish status events to Redis DB 2, update RQ job info with `error_code`/`error_detail`, add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
-- Deliverables: error schema, status event payloads, cleanup job (cron or RQ) that reads `CulvertsRunner.completed_at` + retention window, run/batch log summaries.
+- Deliverables:
+  - Culvert point-in-watershed validation (`WatershedFeature.contains_point`) before modeling; failures recorded as `CulvertPointOutsideWatershedError`.
+  - Run-level errors from `run_metadata.json` merged into `culverts_runner.nodb` + `runs_manifest.md`.
+  - Finalizer computes validation metrics (culvert/outlet coords, distance, target area, bounds area) and stores them in `culverts_runner.nodb` + `runs_manifest.md`.
+  - NoDb contention retry for `CulvertsRunner` writes when batch workers overlap.
+  - Remaining: error schema in RQ job info, status event payloads, cleanup job (cron or RQ) that reads `CulvertsRunner.completed_at` + retention window, run/batch log summaries.
 - Risks: retention job deleting active batches; missing completion timestamp on failed jobs; missing error propagation in RQ engine.
-- Verification: tests for error responses and RQ job metadata; simulated cleanup run with dry-run logging; verify status streaming in Redis.
+- Verification: Hubbard Brook edge-case payload confirms outside-watershed failures appear in `run_metadata.json`, `culverts_runner.nodb`, and `runs_manifest.md`; run-level metrics populated when outputs exist.
+
+## Phase 5 handoff summary
+- Validation now checks culvert points against watershed polygons; outside points fail fast with `CulvertPointOutsideWatershedError`.
+- Finalizer merges `run_metadata.json` status/errors into `culverts_runner.nodb` and `runs_manifest.md` for consistent reporting.
+- Runs manifest includes validation metrics and culvert/outlet distance for downstream QA.
+- NoDb contention retry pattern applied to `CulvertsRunner` updates in batch jobs.
 
 ## Phase 6 - Auth and webhook enhancements (post-POC)
 - Scope: JWT issuance/rotation, webhook registration + retries, HMAC signing, opt-in callbacks on completion/failure.
