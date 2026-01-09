@@ -86,7 +86,7 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
    - prunes short streams → builds Strahler order → prunes order (binary output on final pass)
    - regenerates `chnjnt.tif` and generates `chnjnt.streams.tif` for fallback streams
    - orders `run_ids` by descending watershed area (LPT)
-   - enqueues per-run jobs `run_culvert_run_rq`
+   - enqueues per-run jobs `run_culvert_run_rq` with 1s delay between submissions (reduces VRT file contention)
 3. **Per-run setup:** `wepppy/rq/culvert_rq.py::run_culvert_run_rq`
    - ensures `CulvertsRunner` exists and has `culvert_batch_uuid`
    - calls `CulvertsRunner.create_run_if_missing` to create/sync run dirs and symlinks
@@ -95,7 +95,11 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
    - checks for stream pixels inside the watershed boundary
    - if none, falls back to `topo/streams.tif` and uses `topo/chnjnt.streams.tif`
    - otherwise uses `topo/netful.tif` + `topo/chnjnt.tif`
-5. **Outlet + modeling:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
+5. **Per-run stream junction generation:** `wepppy/rq/culvert_rq.py::_generate_masked_stream_junctions`
+   - clips `netful.vrt` to `target_watershed.tif` mask → `netful.masked.tif`
+   - runs `wbt.stream_junction_identifier(d8_pntr=flovec.vrt, streams=netful.masked.tif)` → `chnjnt.tif`
+   - Note: per-run chnjnt.tif must be regenerated because stream junction topology changes when the stream network is masked to the watershed boundary
+6. **Outlet + modeling:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
    - `Watershed.find_outlet()` (uses `dem/target_watershed.tif` if already built)
    - subcatchments → abstraction → landuse/soils/climate → WEPP
 

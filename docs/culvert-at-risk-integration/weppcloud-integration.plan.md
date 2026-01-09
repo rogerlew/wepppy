@@ -306,6 +306,27 @@ Notes:
 - `--skip-flowpaths` eliminates flowpath CSV/slope file I/O overhead but primary savings come from reduced raster footprint.
 - Memory watchdog thresholds: warn at 30GB available, kill at 25GB available (`/home/workdir/wepppy/scripts/memory-watchdog.sh`).
 
+## Phase 4f - Per-run stream junction generation + job staggering (COMPLETE)
+- Scope: optimize per-run stream junction (chnjnt.tif) generation and reduce VRT file contention during parallel batch processing.
+- Problem: culvert runs use VRT files that reference shared source TIFs; when multiple workers start simultaneously, file contention can cause transient failures.
+
+### Stream junction generation
+- **Original approach**: clip `netful.vrt` → `netful.masked.tif`, then run `stream_junction_identifier(flovec, netful.masked.tif)` → `chnjnt.tif`.
+- **Attempted optimization**: clip pre-computed `chnjnt.vrt` directly to watershed mask → `chnjnt.tif` (skip `stream_junction_identifier`).
+- **Result**: optimization failed—stream junctions must be recalculated for the masked stream network because junction topology changes at watershed boundaries.
+- **Final implementation**: kept original approach with `_generate_masked_stream_junctions()` in `wepppy/rq/culvert_rq.py`:
+  1. Clip `netful.vrt` to `target_watershed.tif` mask → `netful.masked.tif`
+  2. Run `wbt.stream_junction_identifier(d8_pntr=flovec.vrt, streams=netful.masked.tif)` → `chnjnt.tif`
+
+### Job staggering for VRT contention
+- **Problem**: transient "bound file was not created" failures when multiple workers read the same source TIF through VRT references simultaneously.
+- **Solution**: added 1-second delay between job submissions in `run_culvert_batch_rq()` to stagger worker starts.
+- **Code change**: `time.sleep(1)` after each `q.enqueue_call()` in `wepppy/rq/culvert_rq.py`.
+
+### Notes
+- `chnjnt.vrt` is created per-run as a cropped view of the batch's `topo/chnjnt.tif`, but it cannot be used directly because masking to the watershed boundary changes which stream segments exist, which changes junction locations.
+- The 1s delay adds ~N seconds to batch submission time (where N = number of runs) but prevents file contention failures.
+
 ## Phase 5 - Observability, error handling, retention
 - Scope: structured error codes for validation/execution; publish status events to Redis DB 2; update RQ job info with `error_code`/`error_detail`; implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
