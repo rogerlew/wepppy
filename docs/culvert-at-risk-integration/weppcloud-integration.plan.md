@@ -260,6 +260,52 @@ Notes:
 - Landuse/soils selection: `Landuse`/`Soils` now persist `_landuse_is_vrt`/`_soils_is_vrt` and own `lc_fn`/`ssurgo_fn`; call sites use the instances directly (no `NoDbBase` helpers).
 - Culvert config: `culvert.cfg` carries `crop_pad_px` for DEM/topo crop padding; culvert runs call the new VRT-enabled symlink methods.
 
+## Phase 4e - wbt_abstract_watershed memory optimization (COMPLETE)
+- Scope: reduce memory footprint of `wbt_abstract_watershed` (Peridot) to prevent memory-watchdog kills during parallel culvert batch processing; integrate `--skip-flowpaths` flag to eliminate unnecessary flowpath output generation.
+- Problem: initial Hubbard Brook batch (7 watersheds) with 4 concurrent workers peaked at 101GB used / 24GB available, triggering the memory-watchdog kill threshold (25GB available). Per-process memory was 15-21GB each.
+- Dependencies: optimized Peridot binary with reduced raster footprint and `--skip-flowpaths` CLI flag.
+
+### Peridot optimizations (Rust binary)
+- Raster footprint reduced: `f32` for relief/fvslop/taspec (was `f64`).
+- `flovec` uses `u8` with in-place remap (was `i8` with separate allocation).
+- Precomputed `indices_map` avoids redundant cell iteration.
+- `--skip-flowpaths` flag skips `flowpaths.csv` and `slope_files/flowpaths/` output (not needed for culvert runs).
+
+### Code changes
+- Binary: copied optimized `wbt_abstract_watershed` to `wepppy/topo/peridot/bin/`.
+- `wepppy/topo/peridot/peridot_runner.py`: added `skip_flowpaths` parameter to `run_peridot_wbt_abstract_watershed()`; updated `post_abstract_watershed()` to handle missing `flowpaths.csv`.
+- `wepppy/nodb/core/watershed.py`: added `skip_flowpaths` property with getter/setter; passed to runner in `abstract_watershed()`.
+- `wepppy/rq/culvert_rq.py`: set `watershed.skip_flowpaths = True` before `abstract_watershed()` for batch processing.
+
+### Validation metrics (Hubbard Brook batch, 7 watersheds)
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Peak memory used | 101GB | 51GB | -50% |
+| Memory available | 24GB | 73-82GB | +200% |
+| Per-process (large watershed) | 15-21GB | 7-10GB | -50% |
+| Per-process (small watershed) | 8-12GB | 3-5GB | -60% |
+| Watchdog kills | 1 | 0 | eliminated |
+
+### Per-run memory profile (from `_peridot.log`)
+| Run | Raster Cells | Hillslopes | Memory (optimized) |
+|-----|-------------|------------|-------------------|
+| 200 | 3.98M | 87 | ~10GB |
+| 174 | 3.31M | 78 | ~7GB |
+| 59 | 4.18M | 78 | ~10GB |
+| 184 | 3.55M | 78 | ~7GB |
+| 210 | 1.51M | 43 | ~3GB |
+| 1 | 1.64M | 28 | ~3GB |
+
+### Memory-heavy phases (from log analysis)
+1. **Raster loading**: ~50-70MB combined for subwta/relief/flovec/fvslop/taspec per run.
+2. **Indices map construction**: ~5-18MB depending on hillslope count.
+3. **Hillslope abstraction**: dominant memory consumer; scales with cell count × hillslope count; produces flowpath indices arrays (~15-17MB for large watersheds).
+
+### Notes
+- Memory pressure depends on concurrent process overlap, not individual watershed size; 4 large watersheds overlapping caused peak usage.
+- `--skip-flowpaths` eliminates flowpath CSV/slope file I/O overhead but primary savings come from reduced raster footprint.
+- Memory watchdog thresholds: warn at 30GB available, kill at 25GB available (`/home/workdir/wepppy/scripts/memory-watchdog.sh`).
+
 ## Phase 5 - Observability, error handling, retention
 - Scope: structured error codes for validation/execution; publish status events to Redis DB 2; update RQ job info with `error_code`/`error_detail`; implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.

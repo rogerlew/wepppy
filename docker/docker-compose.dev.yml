@@ -27,6 +27,7 @@ x-wepppy-service: &wepppy-service
     PROFILE_PLAYBACK_ARCHIVE_ROOT: ${PROFILE_PLAYBACK_ARCHIVE_ROOT:-/workdir/wepppy-test-engine-data/playback/archive}
     PROFILE_PLAYBACK_USE_CLONE: ${PROFILE_PLAYBACK_USE_CLONE:-true}
     ENABLE_PROFILE_COVERAGE: ${ENABLE_PROFILE_COVERAGE:-false}
+    DEV_MODE: ${DEV_MODE:-false}
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:
@@ -436,7 +437,7 @@ services:
       REDIS_HOST: redis
       MPLCONFIGDIR: /tmp/matplotlib
       WEPPPY_NCPU: "6"
-      PERIDOT_CPU: "12"
+      PERIDOT_CPU: "4"
     depends_on:
       redis:
         condition: service_started
