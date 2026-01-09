@@ -449,6 +449,8 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
   - Finalizer computes validation metrics (culvert/outlet coords, distance, target area, bounds area) and stores them in `culverts_runner.nodb` + `runs_manifest.md`.
   - NoDb contention retry for `CulvertsRunner` writes when batch workers overlap.
   - Retry/backoff for flaky `bound.tif` creation (WBT watershed step) to reduce VRT -> TIF contention failures.
+  - Batch-scoped logging: `culvert_rq` logger now routes into the `CulvertsRunner` file handler under the batch UUID.
+  - Outlet seeding log includes D8 neighbor mask sum from `target_watershed.tif` for diagnostics.
   - Remaining: error schema in RQ job info, status event payloads, cleanup job (cron or RQ) that reads `CulvertsRunner.completed_at` + retention window, run/batch log summaries.
 - Risks: retention job deleting active batches; missing completion timestamp on failed jobs; missing error propagation in RQ engine.
 - Verification: Hubbard Brook edge-case payload confirms outside-watershed failures appear in `run_metadata.json`, `culverts_runner.nodb`, and `runs_manifest.md`; run-level metrics populated when outputs exist.

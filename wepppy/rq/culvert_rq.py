@@ -21,6 +21,7 @@ from rq import Queue, get_current_job
 from rq.job import Job
 from whitebox_tools import WhiteboxTools
 from osgeo import gdal
+from rasterio.windows import Window
 
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
@@ -76,6 +77,17 @@ class WatershedAreaBelowMinimumError(Exception):
     """Raised when a watershed area is below the configured minimum."""
 
 
+def _attach_batch_logger(runner: CulvertsRunner) -> None:
+    base_logger = getattr(runner, "logger", None)
+    if base_logger is None:
+        return
+    batch_logger = logging.getLogger(f"{base_logger.name}.culvert_rq")
+    batch_logger.setLevel(logging.INFO)
+    batch_logger.propagate = True
+    global logger
+    logger = batch_logger
+
+
 def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     """Orchestrate culvert batch processing and enqueue per-run jobs."""
     job = get_current_job()
@@ -83,8 +95,6 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     if job is not None:
         job.meta["culvert_batch_uuid"] = culvert_batch_uuid
         job.save()
-
-    logger.info(f"culvert_batch {culvert_batch_uuid}: starting")
 
     batch_root = _resolve_batch_root(culvert_batch_uuid)
     if not batch_root.is_dir():
@@ -98,6 +108,9 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+
+    _attach_batch_logger(runner)
+    logger.info(f"culvert_batch {culvert_batch_uuid}: starting")
 
     nlcd_db_override = runner._get_model_param_str(model_parameters, "nlcd_db")
     ssurgo_db_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
@@ -288,8 +301,6 @@ def run_culvert_run_rq(
         job.meta["run_id"] = run_id
         job.save()
 
-    logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: starting")
-
     batch_root = _resolve_batch_root(culvert_batch_uuid)
     if not batch_root.is_dir():
         raise FileNotFoundError(
@@ -299,6 +310,9 @@ def run_culvert_run_rq(
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+
+    _attach_batch_logger(runner)
+    logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: starting")
 
     payload_metadata = _load_payload_json(batch_root / "metadata.json")
     model_parameters = _load_payload_json(batch_root / "model-parameters.json")
@@ -490,6 +504,7 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
             f"Culvert batch runner not found for: {batch_root}"
         )
 
+    _attach_batch_logger(runner)
     runs = runner.runs
     runs_dir = batch_root / "runs"
     if runs_dir.is_dir():
@@ -1089,6 +1104,7 @@ def _seed_outlet_pixel(
 def _ensure_outlet_junction(
     chnjnt_path: Path,
     outlet_pixel: Tuple[int, int],
+    target_mask_path: Optional[Path] = None,
 ) -> None:
     """
     Ensure a single outlet junction exists when stream_junction_identifier
@@ -1119,10 +1135,13 @@ def _ensure_outlet_junction(
         dst.write(data, 1)
 
     os.replace(seeded_chnjnt, chnjnt_path)
+    neighbor_sum = _sum_d8_neighbor_mask(target_mask_path, row, col)
     logger.info(
-        "_ensure_outlet_junction: seeded outlet junction at (%s, %s)",
+        "_ensure_outlet_junction: seeded outlet junction at (%s, %s); "
+        "target_mask_d8_neighbor_sum=%s",
         col,
         row,
+        neighbor_sum if neighbor_sum is not None else "-",
     )
 
 
@@ -1353,7 +1372,11 @@ def _process_culvert_run(
             Path(wbt.chnjnt),
         )
         if outlet_pixel is not None:
-            _ensure_outlet_junction(Path(wbt.chnjnt), outlet_pixel)
+            _ensure_outlet_junction(
+                Path(wbt.chnjnt),
+                outlet_pixel,
+                Path(watershed.target_watershed_path),
+            )
 
         watershed.build_subcatchments()
         watershed.representative_flowpath = True  # Reduce per-hillslope cost for batch processing
@@ -1611,6 +1634,48 @@ def _watershed_area_m2(feature: Optional[WatershedFeature]) -> Optional[float]:
         except (TypeError, ValueError):
             pass
     return float(feature.area_m2)
+
+
+def _sum_d8_neighbor_mask(
+    mask_path: Optional[Path],
+    row: int,
+    col: int,
+) -> Optional[int]:
+    if mask_path is None or not mask_path.exists():
+        return None
+    try:
+        with rasterio.open(mask_path) as src:
+            height = src.height
+            width = src.width
+            nodata = src.nodata
+            row_start = max(row - 1, 0)
+            col_start = max(col - 1, 0)
+            row_stop = min(row + 2, height)
+            col_stop = min(col + 2, width)
+            window = Window(
+                col_start,
+                row_start,
+                col_stop - col_start,
+                row_stop - row_start,
+            )
+            data = src.read(1, window=window)
+    except Exception:
+        return None
+
+    offset_row = row - row_start
+    offset_col = col - col_start
+    total = 0
+    for dr, dc in D8_TO_DELTA.values():
+        nr = offset_row + dr
+        nc = offset_col + dc
+        if nr < 0 or nc < 0 or nr >= data.shape[0] or nc >= data.shape[1]:
+            continue
+        value = data[nr, nc]
+        if _is_nodata_value(value, nodata):
+            continue
+        if value > 0:
+            total += 1
+    return total
 
 
 def _watershed_area_sqm_property(
