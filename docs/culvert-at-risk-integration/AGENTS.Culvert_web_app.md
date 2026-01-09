@@ -1,6 +1,7 @@
 # AGENTS.Culvert_web_app.md
 > AI Coding Agent Guide for Culvert_web_app (https://github.com/SouravDSGit/Culvert_web_app)
 > Authorship: Maintained by GitHub Copilot / Codex (per AGENTS policy).
+> Source on forest:/workdir/Culvert_web_app
 
 ## Quick Map
 - `culvert_app/app.py`: Flask app, routing, auth/session, upload endpoints, SocketIO progress, Redis/RQ setup.
