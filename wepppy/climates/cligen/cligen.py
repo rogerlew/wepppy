@@ -2357,7 +2357,14 @@ def par_mod(
             randseed = 12345
         randseed = str(randseed)
 
-        daily_ppts = [float(p)/float(n) for p, n in zip(prism_ppts, nwds)]  # in inches / day
+        daily_ppts = []
+        for i, (p, nwd) in enumerate(zip(prism_ppts, nwds)):
+            nwd_value = float(nwd)
+            if not np.isfinite(nwd_value) or nwd_value <= 0.0:
+                # Avoid divide-by-zero and keep the station baseline.
+                daily_ppts.append(float(station.ppts[i]))
+                continue
+            daily_ppts.append(float(p) / nwd_value)
         daily_ppts = [max(0.01, v) for v in daily_ppts]
 
         fp_log.write('daily_ppts (in) = {}\n'.format(daily_ppts))

@@ -265,6 +265,7 @@ For each culvert (identified by `Point_ID`):
 4. **Build inputs:** Generate landuse, soils, and climate inputs.
    - For culvert batches, retrieve NLCD + SSURGO once at 30m for the DEM extent, resample to the shared DEM grid (matches `subwta.tif`), and symlink the batch rasters into each run before `Landuse.build()`/`Soils.build()`. When VRT cropping is enabled, create `nlcd.vrt`/`ssurgo.vrt` using the shared crop window.
    - Use `retrieve_nlcd=False` and `retrieve_gridded_ssurgo=False` so the per-run build skips cleanup and remote retrieval.
+   - Disturbed soils: guard `pct_coverage` recalculation when `total_area <= 0.0` to avoid divide-by-zero (set to `0.0` and log a warning).
 
 5. **Run WEPP:** Execute using stochastic PRISM revision climates (100-year simulation).
 

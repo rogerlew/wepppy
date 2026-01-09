@@ -25,6 +25,7 @@ from wepppy.all_your_base.geo import raster_stacker
 from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.core.watershed import NoOutletFoundError
@@ -240,17 +241,32 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
             job.save()
 
     if queued_jobs:
-        with runner.locked():
-            for run_id, job_id in queued_jobs.items():
-                run_record = runner._runs.get(run_id)
-                if not run_record:
-                    run_record = {
-                        "runid": run_id,
-                        "point_id": run_id,
-                        "wd": str(Path(runner.runs_dir) / run_id),
-                    }
-                run_record["job_id"] = job_id
-                runner._runs[run_id] = run_record
+        max_tries = 5
+        for attempt in range(max_tries):
+            try:
+                with runner.locked():
+                    for run_id, job_id in queued_jobs.items():
+                        run_record = runner._runs.get(run_id)
+                        if not run_record:
+                            run_record = {
+                                "runid": run_id,
+                                "point_id": run_id,
+                                "wd": str(Path(runner.runs_dir) / run_id),
+                            }
+                        run_record["job_id"] = job_id
+                        runner._runs[run_id] = run_record
+            except NoDbAlreadyLockedError as exc:
+                if attempt + 1 == max_tries:
+                    logger.warning(
+                        "culvert_batch %s: skipping run job_id update after %d retries - %s",
+                        culvert_batch_uuid,
+                        max_tries,
+                        exc,
+                    )
+                    break
+                time.sleep(1.0)
+            else:
+                break
 
     return final_job
 
@@ -298,6 +314,80 @@ def run_culvert_run_rq(
     )
     watershed_features = runner.load_watershed_features(watersheds_path)
     watershed_feature = watershed_features.get(run_id)
+    culvert_points_path = runner._resolve_payload_path(
+        payload_metadata,
+        "culvert_points",
+        runner.DEFAULT_CULVERT_POINTS_REL_PATH,
+        str(batch_root),
+    )
+    wepppy_version = _get_wepppy_version()
+
+    try:
+        culvert_points, culvert_points_crs = runner.load_culvert_points(
+            culvert_points_path
+        )
+    except Exception as exc:
+        error_payload = {
+            "type": "CulvertPointsLoadError",
+            "message": str(exc),
+        }
+        return _record_validation_failure(
+            runner=runner,
+            run_id=run_id,
+            culvert_batch_uuid=culvert_batch_uuid,
+            run_config=runner.run_config,
+            wepppy_version=wepppy_version,
+            error_payload=error_payload,
+        )
+
+    culvert_point = culvert_points.get(run_id)
+    if culvert_point is None:
+        error_payload = {
+            "type": "CulvertPointMissingError",
+            "message": f"Culvert point missing for Point_ID {run_id}",
+        }
+        return _record_validation_failure(
+            runner=runner,
+            run_id=run_id,
+            culvert_batch_uuid=culvert_batch_uuid,
+            run_config=runner.run_config,
+            wepppy_version=wepppy_version,
+            error_payload=error_payload,
+        )
+
+    if watershed_feature is None:
+        error_payload = {
+            "type": "WatershedFeatureMissingError",
+            "message": f"Watershed feature missing for Point_ID {run_id}",
+        }
+        return _record_validation_failure(
+            runner=runner,
+            run_id=run_id,
+            culvert_batch_uuid=culvert_batch_uuid,
+            run_config=runner.run_config,
+            wepppy_version=wepppy_version,
+            error_payload=error_payload,
+        )
+
+    if not watershed_feature.contains_point(
+        culvert_point,
+        point_crs=culvert_points_crs,
+    ):
+        error_payload = {
+            "type": "CulvertPointOutsideWatershedError",
+            "message": (
+                "Culvert point is outside the watershed polygon "
+                f"(Point_ID {run_id})"
+            ),
+        }
+        return _record_validation_failure(
+            runner=runner,
+            run_id=run_id,
+            culvert_batch_uuid=culvert_batch_uuid,
+            run_config=runner.run_config,
+            wepppy_version=wepppy_version,
+            error_payload=error_payload,
+        )
 
     runner.create_run_if_missing(
         run_id,
@@ -308,7 +398,6 @@ def run_culvert_run_rq(
     run_wd = Path(runner.runs_dir) / run_id
     if not run_wd.is_dir():
         raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
-    wepppy_version = _get_wepppy_version()
 
     nlcd_db_override = runner._get_model_param_str(model_parameters, "nlcd_db")
     ssurgo_db_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
@@ -395,6 +484,11 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
                 skipped_no_outlet += 1
             else:
                 failed += 1
+            if status:
+                record["status"] = status
+            error_payload = metadata.get("error")
+            if error_payload:
+                record["error"] = error_payload
         else:
             failed += 1
 
@@ -685,12 +779,47 @@ def _generate_masked_stream_junctions(
             f"(input={netful_path}, mask={watershed_mask_path}, output={masked_netful})"
         )
 
+    chnjnt_vrt = chnjnt_path.with_suffix(".vrt")
+    fallback_chnjnt_src: Optional[Path] = None
+    if chnjnt_vrt.exists():
+        fallback_chnjnt_src = chnjnt_vrt
+    elif chnjnt_path.exists():
+        if chnjnt_path.is_symlink():
+            fallback_chnjnt_src = Path(os.path.realpath(chnjnt_path))
+        else:
+            fallback_chnjnt_src = chnjnt_path
+
+    if not _raster_has_stream_cells(masked_netful):
+        if fallback_chnjnt_src is not None and fallback_chnjnt_src.exists():
+            logger.info(
+                "masked netful has no stream cells; clipping junctions from %s",
+                fallback_chnjnt_src,
+            )
+            masked_chnjnt = chnjnt_path.with_name("chnjnt.masked.tif")
+            if masked_chnjnt.exists():
+                masked_chnjnt.unlink()
+            wbt.clip_raster_to_raster(
+                i=str(fallback_chnjnt_src),
+                mask=str(watershed_mask_path),
+                output=str(masked_chnjnt),
+            )
+            if not masked_chnjnt.exists():
+                raise RuntimeError(
+                    "ClipRasterToRaster failed "
+                    f"(input={fallback_chnjnt_src}, mask={watershed_mask_path}, output={masked_chnjnt})"
+                )
+            if chnjnt_path.exists():
+                chnjnt_path.unlink()
+            os.replace(masked_chnjnt, chnjnt_path)
+            if chnjnt_vrt.exists():
+                chnjnt_vrt.unlink()
+            return
+        logger.warning(
+            "masked netful has no stream cells and no fallback junction source"
+        )
+
     if chnjnt_path.exists():
         chnjnt_path.unlink()
-    chnjnt_vrt = chnjnt_path.with_suffix(".vrt")
-    if chnjnt_vrt.exists():
-        chnjnt_vrt.unlink()
-
     ret = wbt.stream_junction_identifier(
         d8_pntr=str(flovec_path),
         streams=str(masked_netful),
@@ -701,6 +830,8 @@ def _generate_masked_stream_junctions(
             "StreamJunctionIdentifier failed "
             f"(flovec={flovec_path}, streams={masked_netful}, output={chnjnt_path})"
         )
+    if chnjnt_vrt.exists():
+        chnjnt_vrt.unlink()
 
 
 def _is_nodata_value(value: Any, nodata: Optional[float]) -> bool:
@@ -712,6 +843,20 @@ def _is_nodata_value(value: Any, nodata: Optional[float]) -> bool:
     except TypeError:
         pass
     return value == nodata
+
+
+def _raster_has_stream_cells(raster_path: Path) -> bool:
+    with rasterio.open(raster_path) as src:
+        data = src.read(1)
+        nodata = src.nodata
+
+    if nodata is None:
+        return bool(np.any(data > 0))
+    if np.isnan(nodata):
+        valid = ~np.isnan(data)
+    else:
+        valid = data != nodata
+    return bool(np.any(valid & (data > 0)))
 
 
 def _extend_watershed_mask_to_candidate(
@@ -1096,6 +1241,19 @@ def _process_culvert_run(
         outlet = watershed.outlet
         if outlet is not None:
             outlet_pixel = outlet.pixel_coords
+        if outlet_pixel is not None:
+            target_mask = Path(watershed.target_watershed_path)
+            if target_mask.exists():
+                col, row = outlet_pixel
+                if not _extend_watershed_mask_to_candidate(target_mask, (row, col)):
+                    logger.warning(
+                        "culvert_run %s/%s: outlet pixel (%s, %s) out of bounds for %s",
+                        culvert_batch_uuid,
+                        run_id,
+                        row,
+                        col,
+                        target_mask,
+                    )
 
         _generate_masked_stream_junctions(
             Path(wbt.flovec),
@@ -1187,6 +1345,77 @@ def _process_culvert_run(
     return status
 
 
+def _record_validation_failure(
+    *,
+    runner: CulvertsRunner,
+    run_id: str,
+    culvert_batch_uuid: str,
+    run_config: str,
+    wepppy_version: Optional[str],
+    error_payload: dict[str, str],
+) -> str:
+    run_wd = Path(runner.runs_dir) / run_id
+    run_wd.mkdir(parents=True, exist_ok=True)
+
+    started_at = datetime.now(timezone.utc)
+    completed_at = started_at
+    run_metadata = {
+        "runid": f"culvert;;{culvert_batch_uuid};;{run_id}",
+        "point_id": run_id,
+        "culvert_batch_uuid": culvert_batch_uuid,
+        "config": run_config,
+        "status": "failed",
+        "started_at": started_at.isoformat(),
+        "completed_at": completed_at.isoformat(),
+        "duration_seconds": 0.0,
+        "error": error_payload,
+    }
+    if wepppy_version is not None:
+        run_metadata["wepppy_version"] = wepppy_version
+    _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
+
+    max_tries = 5
+    for attempt in range(max_tries):
+        try:
+            with runner.locked():
+                run_record = runner._runs.get(run_id, {})
+                run_record.setdefault("runid", run_id)
+                run_record.setdefault("point_id", run_id)
+                run_record.setdefault("wd", str(run_wd))
+                run_record["status"] = "failed"
+                run_record["error"] = error_payload
+                runner._runs[run_id] = run_record
+        except NoDbAlreadyLockedError as exc:
+            if attempt + 1 == max_tries:
+                logger.warning(
+                    "culvert_run %s/%s: failed to persist validation error after %d retries - %s",
+                    culvert_batch_uuid,
+                    run_id,
+                    max_tries,
+                    exc,
+                )
+                break
+            time.sleep(1.0)
+        except Exception as exc:
+            logger.warning(
+                "culvert_run %s/%s: failed to persist validation error - %s",
+                culvert_batch_uuid,
+                run_id,
+                exc,
+            )
+            break
+        else:
+            break
+
+    logger.warning(
+        "culvert_run %s/%s: validation failed - %s",
+        culvert_batch_uuid,
+        run_id,
+        error_payload.get("message"),
+    )
+    return "failed"
+
+
 def _write_run_metadata(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
@@ -1210,6 +1439,22 @@ def _format_manifest_value(value: Optional[Any]) -> str:
     if not text:
         return "-"
     return _escape_markdown_cell(text)
+
+
+def _format_manifest_error(error_payload: Any) -> Optional[str]:
+    if not error_payload:
+        return None
+    if isinstance(error_payload, dict):
+        err_type = error_payload.get("type")
+        err_message = error_payload.get("message")
+        if err_type and err_message:
+            return f"{err_type}: {err_message}"
+        if err_type:
+            return str(err_type)
+        if err_message:
+            return str(err_message)
+        return None
+    return str(error_payload)
 
 
 def _count_parquet_rows(parquet_path: Path) -> Optional[int]:
@@ -1367,6 +1612,10 @@ def _write_runs_manifest(
             run_metadata = _load_run_metadata(run_wd / "run_metadata.json")
             runid_slug = run_metadata.get("runid") or f"culvert;;{culvert_batch_uuid};;{run_id}"
             point_id = run_metadata.get("point_id") or run_id
+            status_value = run_metadata.get("status") or record.get("status")
+            error_value = _format_manifest_error(
+                run_metadata.get("error") or record.get("error")
+            )
 
             watershed_label = _select_watershed_label(
                 watershed_features.get(str(run_id))
@@ -1394,6 +1643,8 @@ def _write_runs_manifest(
                 job_id,
                 job_status,
                 job_created,
+                status_value,
+                error_value,
             ]
             formatted = [_format_manifest_value(value) for value in columns]
             rows.append("| " + " | ".join(formatted) + " |")
@@ -1419,8 +1670,8 @@ def _write_runs_manifest(
         f"- failed: {failed_value}",
         f"- skipped_no_outlet: {skipped_value}",
         "",
-        "| Point_ID/runid | watershed | n_subcatchments | n_channels | batch_uuid | runid_slug | rq_job_id | job_status | job_created |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Point_ID/runid | watershed | n_subcatchments | n_channels | batch_uuid | runid_slug | rq_job_id | job_status | job_created | status | error |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     lines.extend(rows)
     lines.append("")

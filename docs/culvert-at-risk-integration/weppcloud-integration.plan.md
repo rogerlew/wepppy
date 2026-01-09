@@ -432,13 +432,11 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 
 ### Results
 - Batch UUID: `ceed1b38-1ef4-4c19-83d8-7edd625c1d6c`
-- Summary: total 11, succeeded 9, failed 2, skipped_no_outlet 0
-- Failures:
-  - Point_ID 9: `ZeroDivisionError` (float division by zero)
-  - Point_ID 207: WBT junction error ("Current cell is not recognized as a junction")
+- Summary (pre-fix batch): total 11, succeeded 9, failed 2, skipped_no_outlet 0
+- Resolved: Point_ID 9 `ZeroDivisionError` fixed by guarding disturbed soil `pct_coverage` when `total_area <= 0.0`; run 9 now completes.
+- Remaining failure: Point_ID 207 WBT junction error ("Current cell is not recognized as a junction")
 
 ### Remaining work
-- [ ] Investigate Point_ID 9 `ZeroDivisionError`
 - [ ] Fix WBT junction detection for Point_ID 207 (separate issue)
 
 ## Phase 5 - Observability, error handling, retention

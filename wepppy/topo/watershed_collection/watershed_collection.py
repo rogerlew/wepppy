@@ -207,6 +207,40 @@ class WatershedFeature(object):
                 )
                 dst.write(mask, 1)
 
+    def contains_point(
+        self,
+        point: Tuple[float, float],
+        *,
+        point_crs: Optional[str] = None,
+    ) -> bool:
+        """Return True if the point falls inside (or on the edge of) the watershed."""
+        if not isinstance(point, (list, tuple)) or len(point) < 2:
+            raise ValueError("point must be a (x, y) coordinate")
+
+        if self.type not in {"Polygon", "MultiPolygon"}:
+            raise ValueError(f"Unsupported geometry type for watershed: {self.type}")
+
+        x, y = float(point[0]), float(point[1])
+        feature_crs = self.crs or point_crs
+        if point_crs and feature_crs:
+            point_norm = _normalize_geojson_crs_name(point_crs)
+            feature_norm = _normalize_geojson_crs_name(feature_crs)
+            if point_norm != feature_norm:
+                transformer = Transformer.from_crs(
+                    CRS.from_user_input(point_norm),
+                    CRS.from_user_input(feature_norm),
+                    always_xy=True,
+                )
+                x, y = transformer.transform(x, y)
+
+        from shapely.geometry import Point, shape
+
+        geometry = shape(self.geometry)
+        point_geom = Point(x, y)
+        if hasattr(geometry, "covers"):
+            return bool(geometry.covers(point_geom))
+        return bool(geometry.contains(point_geom) or geometry.touches(point_geom))
+
     def _calculate_area_m2(self) -> float:
         geometry_type = self.type or ""
         coordinates = self.coordinates

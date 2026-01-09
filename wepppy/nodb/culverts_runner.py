@@ -62,6 +62,7 @@ class CulvertsRunner(NoDbBase):
     DEFAULT_RETENTION_DAYS = 7
     DEFAULT_DEM_REL_PATH = "topo/hydro-enforced-dem.tif"
     DEFAULT_WATERSHEDS_REL_PATH = "culverts/watersheds.geojson"
+    DEFAULT_CULVERT_POINTS_REL_PATH = "culverts/culvert_points.geojson"
     DEFAULT_FLOVEC_REL_PATH = "topo/flovec.tif"
     DEFAULT_FULL_STREAM_REL_PATH = "topo/streams.tif"
     DEFAULT_STREAMS_CHNJNT_REL_PATH = "topo/chnjnt.streams.tif"
@@ -558,6 +559,54 @@ class CulvertsRunner(NoDbBase):
             )
 
         return run_features
+
+    def load_culvert_points(
+        self, culvert_points_geojson_path: str
+    ) -> Tuple[Dict[str, Tuple[float, float]], Optional[str]]:
+        with open(culvert_points_geojson_path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+
+        features = payload.get("features")
+        if not isinstance(features, list) or not features:
+            raise ValueError("Culvert points GeoJSON contains no features")
+
+        crs_name = _extract_geojson_crs(payload)
+        point_features: Dict[str, Tuple[float, float]] = {}
+        for idx, feature in enumerate(features):
+            props = (feature or {}).get("properties") or {}
+            if self.POINT_ID_FIELD not in props:
+                raise ValueError(
+                    f"Feature {idx} missing {self.POINT_ID_FIELD} property in culvert points GeoJSON"
+                )
+            point_id = props.get(self.POINT_ID_FIELD)
+            if point_id is None or point_id == "":
+                raise ValueError(f"Feature {idx} has empty {self.POINT_ID_FIELD} value")
+            run_id = str(point_id)
+            self._validate_run_id(run_id, idx)
+            if run_id in point_features:
+                raise ValueError(f"Duplicate Point_ID detected: {run_id}")
+
+            geometry = (feature or {}).get("geometry") or {}
+            geom_type = geometry.get("type")
+            if geom_type != "Point":
+                raise ValueError(
+                    f"Feature {idx} geometry type must be Point (found {geom_type})"
+                )
+            coords = geometry.get("coordinates")
+            if not isinstance(coords, (list, tuple)) or len(coords) < 2:
+                raise ValueError(
+                    f"Feature {idx} missing point coordinates in culvert points GeoJSON"
+                )
+            try:
+                x = float(coords[0])
+                y = float(coords[1])
+            except (TypeError, ValueError):
+                raise ValueError(
+                    f"Feature {idx} has invalid point coordinates in culvert points GeoJSON"
+                )
+            point_features[run_id] = (x, y)
+
+        return point_features, crs_name
 
     def _validate_run_id(self, run_id: str, idx: int) -> None:
         if run_id in {".", ".."}:

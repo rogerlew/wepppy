@@ -1217,9 +1217,16 @@ class Disturbed(NoDbBase):
                     soils.soils[k].area += sub_area
                     total_area += sub_area
 
-                for k in soils.soils:
-                    coverage = 100.0 * soils.soils[k].area / total_area
-                    soils.soils[k].pct_coverage = coverage
+                if total_area <= 0.0:
+                    soils.logger.warning(
+                        'Disturbed:: total_area is 0.0; setting soil pct_coverage to 0.0'
+                    )
+                    for k in soils.soils:
+                        soils.soils[k].pct_coverage = 0.0
+                else:
+                    for k in soils.soils:
+                        coverage = 100.0 * soils.soils[k].area / total_area
+                        soils.soils[k].pct_coverage = coverage
 
     def modify_soil(
         self, 
@@ -1343,9 +1350,16 @@ class Disturbed(NoDbBase):
                 total_area += sub_area
 
             # need to recalculate the pct_coverages
-            for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / total_area
-                soils.soils[k].pct_coverage = coverage
+            if total_area <= 0.0:
+                soils.logger.warning(
+                    'Disturbed:: total_area is 0.0; setting soil pct_coverage to 0.0'
+                )
+                for k in soils.soils:
+                    soils.soils[k].pct_coverage = 0.0
+            else:
+                for k in soils.soils:
+                    coverage = 100.0 * soils.soils[k].area / total_area
+                    soils.soils[k].pct_coverage = coverage
 
     def _calc_sbs_coverage(self, sbs: Optional[SoilBurnSeverityMap]) -> None:
         func_name = inspect.currentframe().f_code.co_name

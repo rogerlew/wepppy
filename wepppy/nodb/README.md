@@ -42,6 +42,39 @@ Instead of SQL queries, developers interact with rich Python objects that expose
 
 When extending NoDb, prefer these utilities over bespoke implementations—custom locking or logging code frequently regresses cross-worker behavior. See the module docstring in `wepppy/nodb/base.py` for deeper context and example usage.
 
+## Lock Contention and Retry Pattern
+
+Multi-worker tasks (RQ, API workers) can collide on the same NoDb lock. When
+`with controller.locked():` cannot acquire the Redis lock, `NoDbAlreadyLockedError`
+is raised. Use a short retry loop with backoff for lightweight metadata writes.
+Avoid keeping locks open across long-running operations.
+
+Example pattern:
+
+```python
+from wepppy.nodb.base import NoDbAlreadyLockedError
+import time
+
+max_tries = 5
+for attempt in range(max_tries):
+    try:
+        controller = Controller.getInstance(wd)
+        with controller.locked():
+            controller.some_field = value
+    except NoDbAlreadyLockedError:
+        if attempt + 1 == max_tries:
+            logger.warning("NoDb lock busy after %d retries", max_tries)
+            break
+        time.sleep(1.0)
+    else:
+        break
+```
+
+Guidelines:
+- Keep lock scope minimal; do I/O outside the lock when possible.
+- For optional metadata (job IDs, timestamps), log and skip after retries.
+- For critical state changes, bubble the exception so the caller can fail fast.
+
 ## Path Placeholders in Configs
 
 NoDb configs reference large, location-specific datasets through placeholders that
