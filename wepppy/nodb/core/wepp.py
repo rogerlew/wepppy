@@ -2152,8 +2152,21 @@ class Wepp(NoDbBase):
         self.logger.info('    Prepping _prep_structure... ')
 
         watershed = self.watershed_instance
-        structure = watershed.structure
         runs_dir = self.runs_dir
+
+        # Handle minimal watershed case: 1 hillslope, 1 channel, no network.txt
+        if watershed.abstraction_backend == 'peridot' and \
+           not _exists(_join(watershed.wat_dir, 'network.txt')) and \
+           watershed.sub_n == 1 and \
+           watershed.chn_n == 1:
+            self.logger.info('    Writing minimal structure (1 hillslope, 1 channel)')
+            with open(_join(runs_dir, 'pw0.str'), 'w') as fp:
+                fp.write('# watershed structure (1 hillslope, 1 channel)\n')
+                fp.write('94.301\n')
+                fp.write('2 0 0 1 0 0 0 0 0 0\n')
+            return
+
+        structure = watershed.structure
 
         s = ['99.1']
         for L in structure:

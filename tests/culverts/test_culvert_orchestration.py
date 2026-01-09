@@ -3,11 +3,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
+from rasterio.transform import from_origin
 
 from tests.culverts.test_culverts_runner import (
     _init_base_project,
     _make_topo_files,
+    _write_raster,
     _write_watersheds,
 )
 import wepppy.nodb.culverts_runner as culverts_runner_module
@@ -38,6 +41,15 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     watersheds_path = culverts_dir / "watersheds.geojson"
     _write_watersheds(watersheds_path, point_ids=[1, 2])
 
+    # Create dummy landuse and soils rasters (required by _process_culvert_run)
+    transform = from_origin(500000.0, 4100000.0, 10.0, 10.0)
+    crs = "EPSG:32611"
+    dummy_raster = np.ones((3, 3), dtype=np.uint8)
+    landuse_dir = batch_root / "landuse"
+    soils_dir = batch_root / "soils"
+    _write_raster(landuse_dir / "nlcd.tif", dummy_raster, transform, crs)
+    _write_raster(soils_dir / "ssurgo.tif", dummy_raster, transform, crs)
+
     base_runid = "batch;;culvert_base;;_base"
     base_src = tmp_path / "batch" / "culvert_base" / "_base"
     _init_base_project(base_src)
@@ -67,7 +79,7 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     def _noop(*_args, **_kwargs) -> None:
         return None
 
-    def _landuse_build(self: Landuse) -> None:
+    def _landuse_build(self: Landuse, **_kwargs) -> None:
         if Path(self.wd).name == "1":
             raise RuntimeError("landuse fail")
         return None
@@ -90,6 +102,7 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     monkeypatch.setattr(culvert_rq_module, "ensure_totalwatsed3", _noop)
     monkeypatch.setattr(culvert_rq_module, "ensure_watershed_interchange", _noop)
     monkeypatch.setattr(culvert_rq_module, "activate_query_engine_for_run", _noop)
+    monkeypatch.setattr(culvert_rq_module, "_generate_masked_stream_junctions", _noop)
 
     for run_id in ("1", "2"):
         runid = f"culvert;;{batch_uuid};;{run_id}"

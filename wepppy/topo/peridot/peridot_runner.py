@@ -84,7 +84,8 @@ def run_peridot_wbt_abstract_watershed(
     clip_hillslope_length: float = 300.0,
     bieger2015_widths: bool = False,
     skip_flowpaths: bool = False,
-    verbose: bool = True
+    verbose: bool = True,
+    representative_flowpath: bool = False
 ):
     """
     Run the Peridot abstract watershed tool using WhiteboxTools.
@@ -96,6 +97,7 @@ def run_peridot_wbt_abstract_watershed(
         bieger2015_widths (bool): Whether to use Bieger 2015 widths.
         skip_flowpaths (bool): If True, skip flowpath generation to reduce memory usage.
         verbose (bool): If True, print command details.
+        representative_flowpath (bool): If True, use a single representative flowpath per hillslope.
     """
     assert _exists(_join(wd, 'dem/wbt/subwta.tif'))
 
@@ -108,7 +110,9 @@ def run_peridot_wbt_abstract_watershed(
     if bieger2015_widths:
         cmd += ['--bieger2015-widths']
 
-    if skip_flowpaths:
+    if representative_flowpath:
+        cmd += ['--representative-flowpath']
+    elif skip_flowpaths:
         cmd += ['--skip-flowpaths']
 
     if verbose:

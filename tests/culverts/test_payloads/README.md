@@ -8,6 +8,18 @@ This directory holds small payload fixtures for culvert integration tests.
 | Payload | Path | Size | Description |
 |---------|------|------|-------------|
 | Santee | `santee_10m_no_hydroenforcement/payload.zip` | ~1.5 MB | 63 culverts, UTM zone 17 |
+| Hubbard Brook | `Hubbard_Brook_subset_11/payload.zip` | ~116 MB | 11 culverts (6 failed + 5 skipped edge cases) |
+
+### Hubbard Brook Edge Cases
+
+The Hubbard Brook payload contains 11 watersheds specifically selected for edge case testing:
+
+**Failed runs (6):**
+- Point_ID 26, 120, 150, 196, 207: No stream pixels in watershed boundary
+- Point_ID 147: Has stream pixels but WBT junction detection fails
+
+**Skipped (no outlet) runs (5):**
+- Point_ID 3, 7, 8, 9, 10: Sparse stream network, no outlet found
 
 ## Quick Start
 

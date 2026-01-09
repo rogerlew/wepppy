@@ -251,6 +251,13 @@ For each culvert (identified by `Point_ID`):
    ```
    The `find_outlet()` method analyzes the watershed polygon against the DEM and stream network raster to determine the pour point pixel coordinates. This is more robust than using the culvert point directly, as it ensures the outlet is on the actual flow path.
 
+   **Edge-case fallback (NoOutletFoundError):**
+   - Parse candidate row/col from the `find_outlet` error message (all candidates must converge).
+   - Ensure `dem/target_watershed.tif` exists (rebuild from the watershed polygon if missing).
+   - Extend the watershed mask to include the candidate pixel (single-pixel extension).
+   - Seed `netful` at the candidate location and ensure `chnjnt` contains a junction at that pixel.
+   - Retry `find_outlet` using the cached mask.
+
 3. **Delineate subcatchments/channels:** Use the WBT Topaz emulator with the identified outlet and the shared `flovec.tif`/`netful.tif` (or their cropped VRTs). Since streams are pre-computed by Culvert_web_app, no `mcl`/`csa` parameters are needed—the stream network is used as-is. Use a WBT-only `symlink_channels_map` flow (raster mode) instead of `build_channels`, then generate `netful.geojson` via:
    - `polygonize_netful(self.netful, self.netful_json)`
    - `json_to_wgs(self.netful_json)`
@@ -316,4 +323,4 @@ Notes:
 - Retry and idempotency semantics for duplicate POSTs.
 - Long-term auth model (JWT issuance, refresh, key rotation) and webhook payload schema/retry policy.
 - Data retention policy and cleanup schedule in `/wc1/culverts/` (required).
-- `Watershed.find_outlet()` implementation details: confirm method signature, handling of edge cases (multiple outlet candidates, watersheds that don't intersect flow network).
+- `Watershed.find_outlet()` edge cases: mask extension + seeding handle NoOutletFoundError candidates, but WBT junction errors remain (e.g., "Current cell is not recognized as a junction").

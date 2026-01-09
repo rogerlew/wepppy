@@ -515,6 +515,16 @@ class Watershed(NoDbBase):
         self._skip_flowpaths = value
 
     @property
+    def representative_flowpath(self) -> bool:
+        """Use representative flowpath mode for WBT peridot abstractions."""
+        return getattr(self, "_representative_flowpath", False)
+
+    @representative_flowpath.setter
+    @nodb_setter
+    def representative_flowpath(self, value: bool) -> None:
+        self._representative_flowpath = value
+
+    @property
     def delineation_backend_is_taudem(self) -> bool:
         delineation_backend = getattr(self, "_delineation_backend", None)
         if delineation_backend is None:
@@ -1048,7 +1058,7 @@ class Watershed(NoDbBase):
             raise FileNotFoundError(
                 f"Target watershed raster not found: {self.target_watershed_path}"
             )
-            
+
         try:
             wbt.wbt.find_outlet(
                 d8_pntr=wbt.flovec,
@@ -1215,6 +1225,7 @@ class Watershed(NoDbBase):
                     clip_hillslope_length=self.clip_hillslope_length,
                     bieger2015_widths=self.bieger2015_widths,
                     skip_flowpaths=self.skip_flowpaths,
+                    representative_flowpath=self.representative_flowpath,
                 )
 
             self._peridot_post_abstract_watershed()
@@ -1250,11 +1261,17 @@ class Watershed(NoDbBase):
             self._subs_summary = {str(topaz_id): None for topaz_id in sub_ids}
             self._chns_summary = {str(topaz_id): None for topaz_id in chn_ids}
 
-            network = self.network
-            structure_fn = _join(self.wat_dir, "structure.pkl")
-            translator = self.translator_factory()
-            translator.build_structure(network, pickle_fn=structure_fn)
-            self._structure = structure_fn
+            # Handle minimal watershed case (1 hillslope, 1 channel) where network.txt may not exist
+            network_path = _join(self.wat_dir, "network.txt")
+            if not _exists(network_path) and len(sub_ids) == 1 and len(chn_ids) == 1:
+                self.logger.info("Minimal watershed (1 hillslope, 1 channel) - skipping structure.pkl")
+                self._structure = None
+            else:
+                network = self.network
+                structure_fn = _join(self.wat_dir, "structure.pkl")
+                translator = self.translator_factory()
+                translator.build_structure(network, pickle_fn=structure_fn)
+                self._structure = structure_fn
 
             try:
                 update_catalog_entry(self.wd, 'watershed')

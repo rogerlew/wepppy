@@ -9,10 +9,12 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from importlib import metadata as importlib_metadata
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import time
 
+import numpy as np
+import rasterio
 import redis
 from rq import Queue, get_current_job
 from rq.job import Job
@@ -38,6 +40,17 @@ from wepppy.topo.watershed_collection import WatershedFeature
 logger = logging.getLogger(__name__)
 
 TIMEOUT: int = 43_200
+
+D8_TO_DELTA: Dict[int, Tuple[int, int]] = {
+    1: (-1, 1),
+    2: (0, 1),
+    4: (1, 1),
+    8: (1, 0),
+    16: (1, -1),
+    32: (0, -1),
+    64: (-1, -1),
+    128: (-1, 0),
+}
 
 
 class CulvertBatchError(Exception):
@@ -690,6 +703,229 @@ def _generate_masked_stream_junctions(
         )
 
 
+def _is_nodata_value(value: Any, nodata: Optional[float]) -> bool:
+    if nodata is None:
+        return False
+    try:
+        if np.isnan(nodata):
+            return bool(np.isnan(value))
+    except TypeError:
+        pass
+    return value == nodata
+
+
+def _extend_watershed_mask_to_candidate(
+    watershed_mask_path: Path,
+    candidate: Tuple[int, int],
+) -> bool:
+    """Ensure the watershed mask includes the candidate row/col."""
+    if not watershed_mask_path.exists():
+        raise FileNotFoundError(
+            f"Watershed mask file does not exist: {watershed_mask_path}"
+        )
+
+    row, col = candidate
+    with rasterio.open(watershed_mask_path) as src:
+        data = src.read(1)
+        profile = src.profile.copy()
+        height, width = data.shape
+
+    if row < 0 or row >= height or col < 0 or col >= width:
+        return False
+
+    if data[row, col] != 0:
+        return True
+
+    data[row, col] = 1
+    profile["driver"] = "GTiff"
+    seeded_mask = watershed_mask_path.with_name(
+        f"{watershed_mask_path.stem}.seeded.tif"
+    )
+    with rasterio.open(seeded_mask, "w", **profile) as dst:
+        dst.write(data, 1)
+
+    os.replace(seeded_mask, watershed_mask_path)
+    logger.info(
+        "_extend_watershed_mask_to_candidate: added mask pixel at (%s, %s)",
+        row,
+        col,
+    )
+    return True
+
+
+def _parse_outlet_candidates_from_error(error_msg: str) -> Optional[Tuple[int, int]]:
+    """
+    Parse FindOutlet error to extract candidate exit locations.
+
+    If all candidates exit at the same row/col, return that location.
+    Otherwise return None.
+
+    Error formats:
+    "...Candidate 0: exited raster at row 19, col 66 without hitting a stream. | Candidate 1: ..."
+    "...Candidate 0: reached raster edge at row 19, col 66 with junction count 0 (expected 1). ..."
+    """
+    import re
+    pattern = (
+        r"(?:exited raster|reached raster edge|Latest stream encountered) "
+        r"at row (\d+), col (\d+)"
+    )
+    matches = re.findall(pattern, error_msg)
+
+    if not matches:
+        return None
+
+    # Check if all candidates point to same location
+    locations = set((int(r), int(c)) for r, c in matches)
+    if len(locations) == 1:
+        row, col = locations.pop()
+        return row, col
+
+    return None
+
+
+def _seed_outlet_pixel(
+    row: int,
+    col: int,
+    netful_path: Path,
+    flovec_path: Path,
+) -> None:
+    """
+    Seed a minimal stream stub at the specified row/col location.
+
+    This writes a two-pixel stream (outlet + one upstream neighbor when found)
+    so WhiteboxTools find_outlet can satisfy the junction-count constraint.
+    """
+    logger.info(f"_seed_outlet_pixel: seeding stream at pixel ({row}, {col})")
+
+    # Read the netful and seed the pixel
+    with rasterio.open(netful_path) as src:
+        data = src.read(1)
+        profile = src.profile.copy()
+        height, width = data.shape
+
+    if row < 0 or row >= height or col < 0 or col >= width:
+        raise ValueError(
+            f"_seed_outlet_pixel: outlet pixel ({row}, {col}) out of bounds "
+            f"(height={height}, width={width})"
+        )
+
+    # Set the outlet cell to 1 (stream)
+    data[row, col] = 1
+
+    upstream_pixel = None
+    with rasterio.open(flovec_path) as fv:
+        flovec = fv.read(1)
+        flovec_nodata = fv.nodata
+
+    for ptr_val, (dr, dc) in D8_TO_DELTA.items():
+        nr = row - dr
+        nc = col - dc
+        if nr < 0 or nr >= height or nc < 0 or nc >= width:
+            continue
+        neighbor_ptr = flovec[nr, nc]
+        if _is_nodata_value(neighbor_ptr, flovec_nodata):
+            continue
+        try:
+            if int(neighbor_ptr) == ptr_val:
+                upstream_pixel = (nr, nc)
+                break
+        except (TypeError, ValueError):
+            continue
+
+    if upstream_pixel is not None:
+        up_row, up_col = upstream_pixel
+        data[up_row, up_col] = 1
+    else:
+        logger.warning(
+            "_seed_outlet_pixel: no upstream neighbor found for (%s, %s); "
+            "junction count may remain 0",
+            row,
+            col,
+        )
+
+    # Write seeded netful to a temp tif
+    seeded_tif = netful_path.with_name("netful.seeded.tif")
+    profile['driver'] = 'GTiff'
+    with rasterio.open(seeded_tif, 'w', **profile) as dst:
+        dst.write(data, 1)
+
+    if netful_path.suffix.lower() == ".vrt":
+        # Create VRT pointing to seeded tif (overwrites original VRT)
+        vrt_path = netful_path.with_name("netful.vrt")
+        result = gdal.Translate(str(vrt_path), str(seeded_tif), format="VRT")
+        if result is None:
+            raise RuntimeError(f"Failed to create VRT: {vrt_path}")
+        result = None  # Close dataset
+        logger.info(
+            f"_seed_outlet_pixel: wrote seeded netful to {seeded_tif}, updated VRT"
+        )
+    else:
+        os.replace(seeded_tif, netful_path)
+        logger.info(
+            f"_seed_outlet_pixel: wrote seeded netful to {netful_path}"
+        )
+
+
+def _ensure_outlet_junction(
+    chnjnt_path: Path,
+    outlet_pixel: Tuple[int, int],
+) -> None:
+    """
+    Ensure a single outlet junction exists when stream_junction_identifier
+    produces no junctions (common with single-pixel stream networks).
+    """
+    if not chnjnt_path.exists():
+        raise FileNotFoundError(f"Stream junction file does not exist: {chnjnt_path}")
+
+    with rasterio.open(chnjnt_path) as src:
+        data = src.read(1)
+        profile = src.profile.copy()
+
+    if np.any(data > 0):
+        return
+
+    col, row = outlet_pixel
+    height, width = data.shape
+    if row < 0 or row >= height or col < 0 or col >= width:
+        raise ValueError(
+            f"_ensure_outlet_junction: outlet pixel ({col}, {row}) out of bounds "
+            f"(height={height}, width={width})"
+        )
+
+    data[row, col] = 1
+    profile['driver'] = 'GTiff'
+    seeded_chnjnt = chnjnt_path.with_name("chnjnt.seeded.tif")
+    with rasterio.open(seeded_chnjnt, 'w', **profile) as dst:
+        dst.write(data, 1)
+
+    os.replace(seeded_chnjnt, chnjnt_path)
+    logger.info(
+        "_ensure_outlet_junction: seeded outlet junction at (%s, %s)",
+        col,
+        row,
+    )
+
+
+def _regenerate_chnjnt(flovec_path: Path, streams_path: Path, chnjnt_path: Path) -> None:
+    """Regenerate chnjnt.tif using stream_junction_identifier."""
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    wbt.set_working_dir(str(chnjnt_path.parent))
+
+    if chnjnt_path.exists():
+        chnjnt_path.unlink()
+
+    ret = wbt.stream_junction_identifier(
+        d8_pntr=str(flovec_path),
+        streams=str(streams_path),
+        output=str(chnjnt_path),
+    )
+    if ret != 0 or not chnjnt_path.exists():
+        raise RuntimeError(
+            "StreamJunctionIdentifier failed "
+            f"(flovec={flovec_path}, streams={streams_path}, output={chnjnt_path})"
+        )
+
+
 def _ensure_batch_landuse_soils(
     *,
     culvert_batch_uuid: str,
@@ -795,18 +1031,83 @@ def _process_culvert_run(
         if ssurgo_db_override is not None:
             soils.ssurgo_db = ssurgo_db_override
 
-        watershed.find_outlet(watershed_feature=watershed_feature)
-
         wbt = watershed._ensure_wbt()
+
+        # Try find_outlet; if it fails due to no streams, seed and retry
+        outlet_pixel: Optional[Tuple[int, int]] = None
+        try:
+            watershed.find_outlet(watershed_feature=watershed_feature)
+        except NoOutletFoundError as e:
+            # Parse error to find where all candidates converge
+            seed_loc = _parse_outlet_candidates_from_error(str(e))
+            if seed_loc is None:
+                # Candidates don't converge - can't seed
+                raise
+
+            candidate_row, candidate_col = seed_loc
+            target_mask = Path(watershed.target_watershed_path)
+            if not target_mask.exists():
+                logger.info(
+                    "culvert_run %s/%s: rebuilding target watershed mask at %s",
+                    culvert_batch_uuid,
+                    run_id,
+                    target_mask,
+                )
+                ron = watershed.ron_instance
+                watershed_feature.build_raster_mask(
+                    template_filepath=ron.dem_fn,
+                    dst_filepath=str(target_mask),
+                )
+
+            if not _extend_watershed_mask_to_candidate(
+                target_mask,
+                (candidate_row, candidate_col),
+            ):
+                logger.warning(
+                    "culvert_run %s/%s: candidate (%s, %s) outside watershed mask",
+                    culvert_batch_uuid,
+                    run_id,
+                    candidate_row,
+                    candidate_col,
+                )
+                raise
+
+            row, col = candidate_row, candidate_col
+            logger.info(
+                "culvert_run %s/%s: no streams in watershed, seeding at (%s, %s) "
+                "from candidate (%s, %s)",
+                culvert_batch_uuid,
+                run_id,
+                row,
+                col,
+                candidate_row,
+                candidate_col,
+            )
+
+            _seed_outlet_pixel(
+                row=row,
+                col=col,
+                netful_path=Path(wbt.netful),
+                flovec_path=Path(wbt.flovec),
+            )
+
+            # Retry find_outlet with seeded stream
+            watershed.find_outlet(watershed_feature=None)  # mask already built
+        outlet = watershed.outlet
+        if outlet is not None:
+            outlet_pixel = outlet.pixel_coords
+
         _generate_masked_stream_junctions(
             Path(wbt.flovec),
             Path(wbt.netful),
             Path(watershed.target_watershed_path),
             Path(wbt.chnjnt),
         )
+        if outlet_pixel is not None:
+            _ensure_outlet_junction(Path(wbt.chnjnt), outlet_pixel)
 
         watershed.build_subcatchments()
-        watershed.skip_flowpaths = True  # Reduce memory usage for batch processing
+        watershed.representative_flowpath = True  # Reduce per-hillslope cost for batch processing
         watershed.abstract_watershed()
         batch_root = _resolve_batch_root(culvert_batch_uuid)
         nlcd_map = batch_root / "landuse" / "nlcd.tif"
