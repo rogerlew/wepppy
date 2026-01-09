@@ -464,12 +464,74 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 - Risks: inconsistent `area_sqm` values in payloads; missing `area_sqm` means no filtering (intentional).
 - Verification: Hubbard Brook payload analysis shows 100 m^2 threshold eliminates micro-watersheds without blocking valid small catchments.
 
+## Phase 5b - Payload builder watershed reconstruction (COMPLETE)
+- Scope: update `build_payload.py` to compensate for Culvert_web_app deleting intermediate watershed files by recreating `ws_raster_UTM.tif` and generating unsimplified watershed polygons.
+- Problem: Culvert_web_app's watershed delineation pipeline deletes two valuable intermediate files:
+  1. **`ws_raster_UTM.tif`** - Watershed raster where cell values = pour point FID (essential for spatial queries and linking raster analysis to culverts).
+  2. **`ws_polygon_UTM.shp`** - Unsimplified polygons from `raster_to_vector_polygons`; the saved `all_ws_polygon_UTM.shp` is simplified with 1.0m tolerance, reducing vertices by 30-300x per watershed.
+- Irony: Culvert_web_app saves 44 TIF files (~5.5 GB) including duplicates of PRISM, NLCD, slope, and soil data, but deletes the one raster that uniquely identifies watershed membership.
+
+### build_payload.py reconstruction approach
+1. **Check for existing `ws_raster_UTM.tif`** - use if present (future-proofs for when Culvert_web_app is fixed).
+2. **Recreate watershed raster** using WhiteboxTools:
+   ```python
+   wbt.watershed(
+       d8_pntr="WS_deln/D8flow_dir_UTM.tif",
+       pour_pts="WS_deln/Pour_Point_UTM.shp",
+       output="topo/watersheds.tif"
+   )
+   ```
+3. **Convert to unsimplified vector polygons**:
+   ```python
+   wbt.raster_to_vector_polygons(i=ws_raster, output=ws_vector_shp)
+   ```
+4. **Merge properties** from simplified source (`all_ws_polygon_UTM.shp`) into unsimplified polygons by matching `VALUE` field, preserving `Point_ID` and all calculated attributes (area, slope, time of concentration, etc.).
+
+### Vertex count comparison (Hubbard Brook)
+| Point_ID | Unsimplified | Simplified | Ratio |
+|---------:|-------------:|-----------:|------:|
+| 130 | 3,958 | 62 | 64x |
+| 162 | 5,608 | 49 | 114x |
+| 112 | 1,575 | 5 | 315x |
+
+### Updated payload layout
+```
+payload.zip
+  topo/hydro-enforced-dem.tif
+  topo/streams.tif
+  topo/watersheds.tif              # NEW: recreated watershed raster
+  culverts/culvert_points.geojson
+  culverts/watersheds.geojson      # NOW: unsimplified polygons
+  metadata.json
+  model-parameters.json
+```
+
+### Dependencies
+- WhiteboxTools (`whitebox_tools` Python package) for `watershed()` and `raster_to_vector_polygons()`.
+- D8 flow direction raster (`WS_deln/D8flow_dir_UTM.tif`) must exist in Culvert_web_app outputs.
+
+### Deliverables
+- Updated `docs/culvert-at-risk-integration/dev-package/scripts/build_payload.py` with `recreate_watershed_raster()` and `create_unsimplified_watersheds()` functions.
+- Updated `docs/culvert-at-risk-integration/dev-package/README.md` documenting the deficiency and reconstruction approach.
+- Test payload: `tests/culverts/test_payloads/Hubbard_Brook_Experimental_Forest/payload.zip` (~117 MB) with unsimplified watersheds.
+
+### Recommended fix for Culvert_web_app
+Modify `watershed_delineation_task.py` to preserve these files instead of deleting them:
+```python
+# Copy from temp before cleanup:
+shutil.copy2(ws_raster_temporary_path, ws_raster_UTM_path)
+# Save unsimplified polygons before simplification
+```
+
 ## Phase 5 handoff summary
 - Validation now checks culvert points against watershed polygons; outside points fail fast with `CulvertPointOutsideWatershedError`.
 - Minimum watershed area filter rejects micro-watersheds when `area_sqm` is present, using `WatershedAreaBelowMinimumError`.
 - Finalizer merges `run_metadata.json` status/errors into `culverts_runner.nodb` and `runs_manifest.md` for consistent reporting.
 - Runs manifest includes validation metrics and culvert/outlet distance for downstream QA.
 - NoDb contention retry pattern applied to `CulvertsRunner` updates in batch jobs.
+- Payload builder (`build_payload.py`) now reconstructs deleted intermediate files: recreates watershed raster from D8 pointer + pour points, generates unsimplified polygons, and merges properties from simplified source.
+- Updated payload layout includes `topo/watersheds.tif` (watershed raster) and unsimplified `culverts/watersheds.geojson`.
+- Test payload `Hubbard_Brook_Experimental_Forest` added with full unsimplified watershed geometry.
 
 ## Phase 6 - Auth and webhook enhancements (post-POC)
 - Scope: JWT issuance/rotation, webhook registration + retries, HMAC signing, opt-in callbacks on completion/failure.

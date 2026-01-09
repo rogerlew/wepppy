@@ -3,7 +3,8 @@
 Build a wepp.cloud-compatible payload.zip from a Culvert_web_app project.
 
 This script is designed to be copied into Culvert_web_app with minimal changes.
-It uses only Python stdlib + GDAL/OGR command-line tools (gdalinfo, ogrinfo, ogr2ogr).
+It uses Python stdlib + GDAL/OGR command-line tools + WhiteboxTools for watershed
+reconstruction.
 
 Usage:
     # Basic usage (scans user directories for project)
@@ -30,13 +31,15 @@ Required files from Culvert_web_app project:
     outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif  -> topo/hydro-enforced-dem.tif
     outputs/{project}/hydrogeo_vuln/main_stream_raster_UTM.tif -> topo/streams.tif
     outputs/{project}/WS_deln/Pour_Point_UTM.shp -> culverts/culvert_points.geojson
-    outputs/{project}/WS_deln/all_ws_polygon_UTM.shp -> culverts/watersheds.geojson
+    outputs/{project}/WS_deln/all_ws_polygon_UTM.shp -> properties source for watersheds
+    outputs/{project}/WS_deln/D8flow_dir_UTM.tif -> used to recreate watershed raster
 
 Output payload.zip structure:
     topo/hydro-enforced-dem.tif
     topo/streams.tif
+    topo/watersheds.tif (recreated watershed raster)
     culverts/culvert_points.geojson
-    culverts/watersheds.geojson
+    culverts/watersheds.geojson (unsimplified, with properties from simplified source)
     metadata.json
     model-parameters.json
 """
@@ -55,6 +58,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+# WhiteboxTools for watershed reconstruction
+try:
+    from whitebox_tools import WhiteboxTools
+    WBT_AVAILABLE = True
+except ImportError:
+    WBT_AVAILABLE = False
 
 # Schema versions for JSON files
 METADATA_SCHEMA_VERSION = "culvert-metadata-v1"
@@ -272,6 +281,193 @@ def convert_to_geojson(input_shp: str, output_geojson: str) -> None:
         output_geojson,
         input_shp
     ], check=True)
+
+
+def recreate_watershed_raster(
+    d8_pointer_path: str,
+    pour_points_path: str,
+    output_raster_path: str,
+    wbt_dir: Optional[str] = None
+) -> None:
+    """
+    Recreate watershed raster using WhiteboxTools.
+
+    Args:
+        d8_pointer_path: Path to D8 flow direction raster
+        pour_points_path: Path to pour points shapefile
+        output_raster_path: Path for output watershed raster
+        wbt_dir: Optional WhiteboxTools executable directory
+    """
+    if not WBT_AVAILABLE:
+        raise PayloadError(
+            "WhiteboxTools not available. Install with: pip install whitebox-tools"
+        )
+
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    if wbt_dir:
+        wbt.set_whitebox_dir(wbt_dir)
+
+    print(f"    Running wbt.watershed()...")
+    result = wbt.watershed(
+        d8_pntr=d8_pointer_path,
+        pour_pts=pour_points_path,
+        output=output_raster_path
+    )
+
+    if result != 0:
+        raise PayloadError(f"WhiteboxTools watershed failed with code {result}")
+
+    if not os.path.exists(output_raster_path):
+        raise PayloadError(f"Watershed raster was not created: {output_raster_path}")
+
+
+def create_unsimplified_watersheds(
+    d8_pointer_path: str,
+    pour_points_path: str,
+    simplified_watersheds_path: str,
+    output_geojson_path: str,
+    output_raster_path: Optional[str] = None,
+    existing_raster_path: Optional[str] = None,
+    work_dir: Optional[str] = None,
+    wbt_dir: Optional[str] = None
+) -> str:
+    """
+    Create unsimplified watershed polygons by recreating from D8 pointer.
+
+    Merges properties from simplified watersheds source.
+
+    Args:
+        d8_pointer_path: Path to D8 flow direction raster
+        pour_points_path: Path to pour points shapefile
+        simplified_watersheds_path: Path to simplified watersheds (for properties)
+        output_geojson_path: Path for output unsimplified GeoJSON
+        output_raster_path: Optional path to save watershed raster
+        existing_raster_path: Path to existing watershed raster (skip recreation if exists)
+        work_dir: Working directory for temp files
+        wbt_dir: Optional WhiteboxTools executable directory
+
+    Returns:
+        Path to the watershed raster used (existing or recreated)
+    """
+    if not WBT_AVAILABLE:
+        raise PayloadError(
+            "WhiteboxTools not available. Install with: pip install whitebox-tools"
+        )
+
+    if work_dir is None:
+        work_dir = tempfile.mkdtemp(prefix="ws_rebuild_")
+        cleanup_work_dir = True
+    else:
+        cleanup_work_dir = False
+        os.makedirs(work_dir, exist_ok=True)
+
+    try:
+        wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+        if wbt_dir:
+            wbt.set_whitebox_dir(wbt_dir)
+
+        # Check if we can use existing watershed raster
+        if existing_raster_path and os.path.exists(existing_raster_path):
+            print(f"    Using existing watershed raster: {existing_raster_path}")
+            ws_raster = existing_raster_path
+        else:
+            # Recreate watershed raster
+            ws_raster = os.path.join(work_dir, "ws_raster_recreated.tif")
+            print(f"    Recreating watershed raster...")
+            recreate_watershed_raster(
+                d8_pointer_path, pour_points_path, ws_raster, wbt_dir
+            )
+
+        # Convert raster to unsimplified vector polygons
+        ws_vector_shp = os.path.join(work_dir, "ws_unsimplified.shp")
+        print(f"    Converting raster to vector polygons (unsimplified)...")
+        result = wbt.raster_to_vector_polygons(
+            i=ws_raster,
+            output=ws_vector_shp
+        )
+
+        if result != 0:
+            raise PayloadError(f"raster_to_vector_polygons failed with code {result}")
+
+        # Convert to GeoJSON
+        ws_vector_geojson = os.path.join(work_dir, "ws_unsimplified.geojson")
+        convert_to_geojson(ws_vector_shp, ws_vector_geojson)
+
+        # Load unsimplified polygons
+        with open(ws_vector_geojson, "r") as f:
+            unsimplified = json.load(f)
+
+        # Load simplified polygons (for properties)
+        simplified_geojson = os.path.join(work_dir, "simplified_temp.geojson")
+        convert_to_geojson(simplified_watersheds_path, simplified_geojson)
+        with open(simplified_geojson, "r") as f:
+            simplified = json.load(f)
+
+        # Build property lookup by Point_ID from simplified
+        # The simplified has VALUE field that maps to FID in pour points
+        props_by_value = {}
+        for feat in simplified.get("features", []):
+            props = feat.get("properties", {})
+            value = props.get("VALUE")
+            if value is not None:
+                props_by_value[int(value)] = props
+
+        # Also build by Point_ID
+        props_by_point_id = {}
+        for feat in simplified.get("features", []):
+            props = feat.get("properties", {})
+            point_id = props.get("Point_ID")
+            if point_id is not None:
+                props_by_point_id[point_id] = props
+
+        # Merge properties into unsimplified features
+        print(f"    Merging properties from simplified source...")
+        merged_count = 0
+        for feat in unsimplified.get("features", []):
+            props = feat.get("properties", {})
+            value = props.get("VALUE")
+
+            # Try to find matching properties
+            source_props = None
+            if value is not None:
+                source_props = props_by_value.get(int(value))
+
+            if source_props:
+                # Merge all properties from simplified, keeping geometry from unsimplified
+                for key, val in source_props.items():
+                    if key not in props or props[key] is None:
+                        props[key] = val
+                    elif key == "Point_ID":
+                        # Always use Point_ID from simplified
+                        props[key] = val
+                feat["properties"] = props
+                merged_count += 1
+
+        print(f"    Merged properties for {merged_count}/{len(unsimplified.get('features', []))} features")
+
+        # Filter out features without Point_ID
+        original_count = len(unsimplified.get("features", []))
+        unsimplified["features"] = [
+            f for f in unsimplified.get("features", [])
+            if f.get("properties", {}).get("Point_ID") is not None
+        ]
+        filtered_count = len(unsimplified.get("features", []))
+        if filtered_count < original_count:
+            print(f"    Filtered {original_count - filtered_count} features without Point_ID")
+
+        # Write output
+        with open(output_geojson_path, "w") as f:
+            json.dump(unsimplified, f)
+
+        # Copy raster to output if requested
+        if output_raster_path and ws_raster != output_raster_path:
+            shutil.copy2(ws_raster, output_raster_path)
+
+        return ws_raster
+
+    finally:
+        if cleanup_work_dir and os.path.exists(work_dir):
+            shutil.rmtree(work_dir)
 
 
 def compute_file_sha256(filepath: str) -> str:
@@ -510,6 +706,12 @@ def build_payload(
         "streams": hydrogeo / "main_stream_raster_UTM.tif",
         "culvert_points": ws_deln / "Pour_Point_UTM.shp",
         "watersheds": ws_deln / "all_ws_polygon_UTM.shp",
+        "d8_pointer": ws_deln / "D8flow_dir_UTM.tif",
+    }
+
+    # Optional files (may or may not exist)
+    optional_files = {
+        "ws_raster": ws_deln / "ws_raster_UTM.tif",
     }
 
     # Check all required files exist
@@ -520,6 +722,14 @@ def build_payload(
             missing.append(f"  {name}: {path}")
         else:
             print(f"  [OK] {name}: {path}")
+
+    # Check optional files
+    print("\nChecking optional files...")
+    for name, path in optional_files.items():
+        if path.exists():
+            print(f"  [OK] {name}: {path}")
+        else:
+            print(f"  [--] {name}: not found (will recreate)")
 
     if missing:
         raise PayloadError(
@@ -572,6 +782,7 @@ def build_payload(
 
         # Create directory structure
         (tmp_path / "culverts").mkdir()
+        (tmp_path / "topo").mkdir()
 
         # Convert vectors to GeoJSON
         print("  Converting culvert points to GeoJSON...")
@@ -581,12 +792,30 @@ def build_payload(
             str(culvert_geojson)
         )
 
-        print("  Converting watersheds to GeoJSON...")
+        # Create unsimplified watersheds from D8 pointer
+        print("  Creating unsimplified watersheds...")
         watersheds_geojson = tmp_path / "culverts" / "watersheds.geojson"
-        convert_to_geojson(
-            str(source_files["watersheds"]),
-            str(watersheds_geojson)
+        ws_raster_output = tmp_path / "topo" / "watersheds.tif"
+
+        # Check for existing ws_raster_UTM.tif
+        existing_ws_raster = optional_files.get("ws_raster")
+        existing_ws_raster_path = str(existing_ws_raster) if existing_ws_raster and existing_ws_raster.exists() else None
+
+        ws_raster_used = create_unsimplified_watersheds(
+            d8_pointer_path=str(source_files["d8_pointer"]),
+            pour_points_path=str(source_files["culvert_points"]),
+            simplified_watersheds_path=str(source_files["watersheds"]),
+            output_geojson_path=str(watersheds_geojson),
+            output_raster_path=str(ws_raster_output),
+            existing_raster_path=existing_ws_raster_path,
+            work_dir=str(tmp_path / "_ws_work"),
         )
+        print(f"  [OK] Created unsimplified watersheds.geojson")
+
+        # Clean up work directory
+        ws_work_dir = tmp_path / "_ws_work"
+        if ws_work_dir.exists():
+            shutil.rmtree(ws_work_dir)
 
         print("  Validating watershed-to-culvert mapping...")
         validate_watershed_mapping(culvert_geojson, watersheds_geojson)
@@ -597,15 +826,14 @@ def build_payload(
             print("\nPayload would contain:")
             print(f"  topo/hydro-enforced-dem.tif ({dem_meta.get('size_bytes', 0) / 1024 / 1024:.1f} MB)")
             print(f"  topo/streams.tif ({streams_meta.get('size_bytes', 0) / 1024 / 1024:.1f} MB)")
+            print(f"  topo/watersheds.tif (recreated watershed raster)")
             print(f"  culverts/culvert_points.geojson (from {culverts_meta.get('feature_count', 0)} features)")
-            print(f"  culverts/watersheds.geojson (from {watersheds_meta.get('feature_count', 0)} features)")
+            print(f"  culverts/watersheds.geojson (unsimplified, from {watersheds_meta.get('feature_count', 0)} features)")
             print("  metadata.json")
             print("  model-parameters.json")
             return
 
-        # Create topo directory and copy rasters
-        (tmp_path / "topo").mkdir()
-
+        # Copy rasters to topo directory
         print("  Copying hydro-enforced DEM...")
         shutil.copy2(source_files["hydro_dem"], tmp_path / "topo" / "hydro-enforced-dem.tif")
 
@@ -638,6 +866,11 @@ def build_payload(
                 "nodata": streams_meta.get("nodata"),
                 "value_semantics": "binary",
             },
+            "watershed_raster": {
+                "path": "topo/watersheds.tif",
+                "value_semantics": "pour_point_fid",
+                "note": "Cell values correspond to pour point FID, use to link to Point_ID",
+            },
             "culvert_points": {
                 "path": "culverts/culvert_points.geojson",
                 "feature_count": culverts_meta.get("feature_count", 0),
@@ -647,6 +880,8 @@ def build_payload(
                 "path": "culverts/watersheds.geojson",
                 "feature_count": watersheds_meta.get("feature_count", 0),
                 "point_id_field": "Point_ID",
+                "simplified": False,
+                "note": "Unsimplified polygons recreated from watershed raster",
             },
         }
 
