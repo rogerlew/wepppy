@@ -72,6 +72,10 @@ class CulvertBatchError(Exception):
         self.failed = failed
 
 
+class WatershedAreaBelowMinimumError(Exception):
+    """Raised when a watershed area is below the configured minimum."""
+
+
 def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     """Orchestrate culvert batch processing and enqueue per-run jobs."""
     job = get_current_job()
@@ -390,6 +394,21 @@ def run_culvert_run_rq(
             error_payload=error_payload,
         )
 
+    area_error = _minimum_watershed_area_error(
+        run_id=run_id,
+        watershed_feature=watershed_feature,
+        minimum_watershed_area_m2=runner.minimum_watershed_area_m2,
+    )
+    if area_error is not None:
+        return _record_validation_failure(
+            runner=runner,
+            run_id=run_id,
+            culvert_batch_uuid=culvert_batch_uuid,
+            run_config=runner.run_config,
+            wepppy_version=wepppy_version,
+            error_payload=area_error,
+        )
+
     runner.create_run_if_missing(
         run_id,
         payload_metadata,
@@ -412,6 +431,7 @@ def run_culvert_run_rq(
         wepppy_version=wepppy_version,
         nlcd_db_override=nlcd_db_override,
         ssurgo_db_override=ssurgo_db_override,
+        minimum_watershed_area_m2=runner.minimum_watershed_area_m2,
     )
     if job is not None:
         job_created = job.created_at.isoformat() if job.created_at else None
@@ -1202,6 +1222,7 @@ def _process_culvert_run(
     wepppy_version: Optional[str],
     nlcd_db_override: Optional[str],
     ssurgo_db_override: Optional[str],
+    minimum_watershed_area_m2: Optional[float],
 ) -> str:
     """
     Process a single culvert run.
@@ -1237,6 +1258,13 @@ def _process_culvert_run(
         outlet_pixel: Optional[Tuple[int, int]] = None
         try:
             watershed.find_outlet(watershed_feature=watershed_feature)
+            area_error = _minimum_watershed_area_error(
+                run_id=run_id,
+                watershed_feature=watershed_feature,
+                minimum_watershed_area_m2=minimum_watershed_area_m2,
+            )
+            if area_error is not None:
+                raise WatershedAreaBelowMinimumError(area_error["message"])
         except NoOutletFoundError as e:
             # Parse error to find where all candidates converge
             seed_loc = _parse_outlet_candidates_from_error(str(e))
@@ -1258,6 +1286,14 @@ def _process_culvert_run(
                     template_filepath=ron.dem_fn,
                     dst_filepath=str(target_mask),
                 )
+
+            area_error = _minimum_watershed_area_error(
+                run_id=run_id,
+                watershed_feature=watershed_feature,
+                minimum_watershed_area_m2=minimum_watershed_area_m2,
+            )
+            if area_error is not None:
+                raise WatershedAreaBelowMinimumError(area_error["message"])
 
             if not _extend_watershed_mask_to_candidate(
                 target_mask,
@@ -1575,6 +1611,45 @@ def _watershed_area_m2(feature: Optional[WatershedFeature]) -> Optional[float]:
         except (TypeError, ValueError):
             pass
     return float(feature.area_m2)
+
+
+def _watershed_area_sqm_property(
+    feature: Optional[WatershedFeature],
+) -> Optional[float]:
+    if feature is None:
+        return None
+    props = feature.properties or {}
+    if "area_sqm" not in props:
+        return None
+    value = props.get("area_sqm")
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _minimum_watershed_area_error(
+    *,
+    run_id: str,
+    watershed_feature: Optional[WatershedFeature],
+    minimum_watershed_area_m2: Optional[float],
+) -> Optional[dict[str, str]]:
+    if minimum_watershed_area_m2 is None or minimum_watershed_area_m2 <= 0:
+        return None
+    area_sqm = _watershed_area_sqm_property(watershed_feature)
+    if area_sqm is None:
+        return None
+    if area_sqm >= minimum_watershed_area_m2:
+        return None
+    return {
+        "type": WatershedAreaBelowMinimumError.__name__,
+        "message": (
+            f"Watershed area {area_sqm:.2f} m^2 below minimum "
+            f"{minimum_watershed_area_m2:.2f} m^2 (Point_ID {run_id})"
+        ),
+    }
 
 
 def _compute_validation_metrics(

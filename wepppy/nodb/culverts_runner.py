@@ -97,6 +97,16 @@ class CulvertsRunner(NoDbBase):
             if crop_pad_px < 0:
                 raise ValueError("crop_pad_px must be >= 0")
             self._crop_pad_px = crop_pad_px
+            min_area = self.config_get_float(
+                "culvert_runner", "minimum_watershed_area_m2", None
+            )
+            if min_area is not None:
+                min_area = float(min_area)
+                if min_area < 0:
+                    raise ValueError("minimum_watershed_area_m2 must be >= 0")
+                if min_area == 0:
+                    min_area = None
+            self._minimum_watershed_area_m2 = min_area
 
         os.makedirs(self.runs_dir, exist_ok=True)
 
@@ -172,6 +182,13 @@ class CulvertsRunner(NoDbBase):
     @property
     def crop_pad_px(self) -> int:
         return int(getattr(self, "_crop_pad_px", 5))
+
+    @property
+    def minimum_watershed_area_m2(self) -> Optional[float]:
+        value = getattr(self, "_minimum_watershed_area_m2", None)
+        if value is None:
+            return None
+        return float(value)
 
     def _select_stream_sources_for_run(
         self,

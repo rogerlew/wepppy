@@ -448,12 +448,23 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
   - Run-level errors from `run_metadata.json` merged into `culverts_runner.nodb` + `runs_manifest.md`.
   - Finalizer computes validation metrics (culvert/outlet coords, distance, target area, bounds area) and stores them in `culverts_runner.nodb` + `runs_manifest.md`.
   - NoDb contention retry for `CulvertsRunner` writes when batch workers overlap.
+  - Retry/backoff for flaky `bound.tif` creation (WBT watershed step) to reduce VRT -> TIF contention failures.
   - Remaining: error schema in RQ job info, status event payloads, cleanup job (cron or RQ) that reads `CulvertsRunner.completed_at` + retention window, run/batch log summaries.
 - Risks: retention job deleting active batches; missing completion timestamp on failed jobs; missing error propagation in RQ engine.
 - Verification: Hubbard Brook edge-case payload confirms outside-watershed failures appear in `run_metadata.json`, `culverts_runner.nodb`, and `runs_manifest.md`; run-level metrics populated when outputs exist.
 
+## Phase 5a - Minimum watershed area filtering (COMPLETE)
+- Scope: filter micro-watersheds using `culvert_runner.minimum_watershed_area_m2` (configured in `culvert.cfg`) when the watershed GeoJSON provides `area_sqm`; reject runs below the threshold with a structured validation error.
+- Deliverables:
+  - `CulvertsRunner.minimum_watershed_area_m2` config hook.
+  - Run-level guard after point-in-watershed validation and after `target_watershed_path` creation (NoOutletFoundError fallback path).
+  - Failure surfaced as `WatershedAreaBelowMinimumError` in `run_metadata.json`, `culverts_runner.nodb`, and `runs_manifest.md`.
+- Risks: inconsistent `area_sqm` values in payloads; missing `area_sqm` means no filtering (intentional).
+- Verification: Hubbard Brook payload analysis shows 100 m^2 threshold eliminates micro-watersheds without blocking valid small catchments.
+
 ## Phase 5 handoff summary
 - Validation now checks culvert points against watershed polygons; outside points fail fast with `CulvertPointOutsideWatershedError`.
+- Minimum watershed area filter rejects micro-watersheds when `area_sqm` is present, using `WatershedAreaBelowMinimumError`.
 - Finalizer merges `run_metadata.json` status/errors into `culverts_runner.nodb` and `runs_manifest.md` for consistent reporting.
 - Runs manifest includes validation metrics and culvert/outlet distance for downstream QA.
 - NoDb contention retry pattern applied to `CulvertsRunner` updates in batch jobs.

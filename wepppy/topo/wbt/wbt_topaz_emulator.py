@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import os
+import time
 from collections import defaultdict, deque
 from functools import wraps
 from os.path import exists as _exists, join as _join, split as _split
@@ -1136,14 +1137,46 @@ class WhiteboxToolsTopazEmulator:
             logger.info(f"WhiteBoxToolsTopazEmulator.{func_name}()")
         bound_fn = self.bound
 
-        remove_if_exists(bound_fn)
+        max_retries = 5
+        base_delay = 5.0
+        for attempt in range(max_retries):
+            remove_if_exists(bound_fn)
+            try:
+                self.wbt.watershed(
+                    d8_pntr=self.flovec,
+                    pour_pts=self.outlet_geojson,
+                    output=self.bound,
+                )
+            except Exception as exc:
+                if attempt + 1 == max_retries:
+                    raise
+                delay = base_delay * (2**attempt)
+                if logger is not None:
+                    logger.warning(
+                        "bound generation failed (attempt %d/%d): %s; retrying in %.1fs",
+                        attempt + 1,
+                        max_retries,
+                        exc,
+                        delay,
+                    )
+                time.sleep(delay)
+                continue
 
-        self.wbt.watershed(
-            d8_pntr=self.flovec, pour_pts=self.outlet_geojson, output=self.bound
-        )
+            if _exists(bound_fn):
+                break
 
-        if not _exists(bound_fn):
-            raise Exception(f"bound file was not created: {bound_fn}")
+            if attempt + 1 == max_retries:
+                raise Exception(f"bound file was not created: {bound_fn}")
+
+            delay = base_delay * (2**attempt)
+            if logger is not None:
+                logger.warning(
+                    "bound file missing after WBT call (attempt %d/%d); retrying in %.1fs",
+                    attempt + 1,
+                    max_retries,
+                    delay,
+                )
+            time.sleep(delay)
 
         if self.verbose:
             print(f"bound file created successfully: {bound_fn}")

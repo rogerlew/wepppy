@@ -98,6 +98,7 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
 5. **Culvert point validation:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
    - validates the culvert point is inside the watershed polygon using `WatershedFeature.contains_point`
    - on failure, writes `run_metadata.json` with `CulvertPointOutsideWatershedError` and skips modeling
+   - enforces `culvert_runner.minimum_watershed_area_m2` when `area_sqm` is present (fails with `WatershedAreaBelowMinimumError`)
 6. **Per-run stream junction generation:** `wepppy/rq/culvert_rq.py::_generate_masked_stream_junctions`
    - clips `netful.vrt` to `target_watershed.tif` mask → `netful.masked.tif`
    - runs `wbt.stream_junction_identifier(d8_pntr=flovec.vrt, streams=netful.masked.tif)` → `chnjnt.tif`
@@ -247,6 +248,7 @@ For each culvert (identified by `Point_ID`):
    - Load the culvert point from `culvert_points.geojson` for the current `Point_ID`.
    - Use `WatershedFeature.contains_point()` to assert the point is inside the watershed polygon.
    - If the point is outside, mark the run failed with `CulvertPointOutsideWatershedError` (written to `run_metadata.json`, merged into `culverts_runner.nodb`, and surfaced in `runs_manifest.md`) and skip modeling.
+   - If `culvert_runner.minimum_watershed_area_m2` is configured and the watershed feature provides `area_sqm`, reject runs below the threshold with `WatershedAreaBelowMinimumError`.
 
 3. **Find outlet from watershed geometry:**
    ```python
@@ -263,6 +265,7 @@ For each culvert (identified by `Point_ID`):
    **Edge-case fallback (NoOutletFoundError):**
    - Parse candidate row/col from the `find_outlet` error message (all candidates must converge).
    - Ensure `dem/target_watershed.tif` exists (rebuild from the watershed polygon if missing).
+   - If `culvert_runner.minimum_watershed_area_m2` is set and `area_sqm` is available, reject below-threshold watersheds before mask extension.
    - Extend the watershed mask to include the candidate pixel (single-pixel extension).
    - Seed `netful` at the candidate location and ensure `chnjnt` contains a junction at that pixel.
    - Retry `find_outlet` using the cached mask.
@@ -316,6 +319,7 @@ Notes:
 ## Error handling
 - Validation errors return HTTP 400 with structured error list.
 - Per-run validation errors (e.g., culvert point outside watershed polygon) are treated as failed runs with `CulvertPointOutsideWatershedError` in `run_metadata.json`, and are merged into `culverts_runner.nodb` + `runs_manifest.md`.
+- Runs below `culvert_runner.minimum_watershed_area_m2` (when `area_sqm` is present) fail with `WatershedAreaBelowMinimumError`.
 - `NoOutletFoundError` triggers the mask-extension + outlet seeding fallback; if it still fails, the run is marked failed with the error payload.
 - Execution failures return job status `failed` with `error_code` and `error_detail` in the RQ engine status endpoint.
 - Artifacts access relies on the browse service; missing outputs should be surfaced there.
