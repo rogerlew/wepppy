@@ -543,7 +543,7 @@ class Watershed(NoDbBase):
                 ron.dem_fn,
                 logger=self.logger,
             )
-            wbt.flovec_netful_relief_chnjnt_are_vrt = self.flovec_netful_relief_chnjnt_are_vrt
+            wbt.flovec_netful_relief_are_vrt = self.flovec_netful_relief_chnjnt_are_vrt
             self._wbt = wbt
         return wbt
 
@@ -900,7 +900,7 @@ class Watershed(NoDbBase):
                 ron.dem_fn,
                 logger=self.logger,
             )
-            wbt.flovec_netful_relief_chnjnt_are_vrt = False
+            wbt.flovec_netful_relief_are_vrt = False
             wbt.delineate_channels(
                 csa=self.csa,
                 mcl=self.mcl,
@@ -1007,7 +1007,7 @@ class Watershed(NoDbBase):
         channels_are_vrt = bool(as_cropped_vrt)
         self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
         if self._wbt is not None:
-            self._wbt.flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
+            self._wbt.flovec_netful_relief_are_vrt = channels_are_vrt
 
         netful_geojson = self.netful_utm_shp
         netful_wgs_geojson = self.netful_shp

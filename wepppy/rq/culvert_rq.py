@@ -11,6 +11,8 @@ from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import time
+
 import redis
 from rq import Queue, get_current_job
 from rq.job import Job
@@ -209,6 +211,8 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
                 job.save()
             child_jobs.append(child_job)
             queued_jobs[run_id] = child_job.id
+            # Stagger job starts to reduce file contention on shared VRT sources
+            time.sleep(1)
 
         final_job = q.enqueue_call(
             func=_final_culvert_batch_complete_rq,
@@ -637,6 +641,55 @@ def _generate_stream_junctions(
         )
 
 
+def _generate_masked_stream_junctions(
+    flovec_path: Path,
+    netful_path: Path,
+    watershed_mask_path: Path,
+    chnjnt_path: Path,
+) -> None:
+    if not flovec_path.exists():
+        raise FileNotFoundError(f"Flow vector file does not exist: {flovec_path}")
+    if not netful_path.exists():
+        raise FileNotFoundError(f"Stream network file does not exist: {netful_path}")
+    if not watershed_mask_path.exists():
+        raise FileNotFoundError(f"Watershed mask file does not exist: {watershed_mask_path}")
+
+    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+    wbt.set_working_dir(str(chnjnt_path.parent))
+
+    masked_netful = chnjnt_path.parent / "netful.masked.tif"
+    if masked_netful.exists():
+        masked_netful.unlink()
+
+    wbt.clip_raster_to_raster(
+        i=str(netful_path),
+        mask=str(watershed_mask_path),
+        output=str(masked_netful),
+    )
+    if not masked_netful.exists():
+        raise RuntimeError(
+            "ClipRasterToRaster failed "
+            f"(input={netful_path}, mask={watershed_mask_path}, output={masked_netful})"
+        )
+
+    if chnjnt_path.exists():
+        chnjnt_path.unlink()
+    chnjnt_vrt = chnjnt_path.with_suffix(".vrt")
+    if chnjnt_vrt.exists():
+        chnjnt_vrt.unlink()
+
+    ret = wbt.stream_junction_identifier(
+        d8_pntr=str(flovec_path),
+        streams=str(masked_netful),
+        output=str(chnjnt_path),
+    )
+    if ret != 0 or not chnjnt_path.exists():
+        raise RuntimeError(
+            "StreamJunctionIdentifier failed "
+            f"(flovec={flovec_path}, streams={masked_netful}, output={chnjnt_path})"
+        )
+
+
 def _ensure_batch_landuse_soils(
     *,
     culvert_batch_uuid: str,
@@ -743,7 +796,17 @@ def _process_culvert_run(
             soils.ssurgo_db = ssurgo_db_override
 
         watershed.find_outlet(watershed_feature=watershed_feature)
+
+        wbt = watershed._ensure_wbt()
+        _generate_masked_stream_junctions(
+            Path(wbt.flovec),
+            Path(wbt.netful),
+            Path(watershed.target_watershed_path),
+            Path(wbt.chnjnt),
+        )
+
         watershed.build_subcatchments()
+        watershed.skip_flowpaths = True  # Reduce memory usage for batch processing
         watershed.abstract_watershed()
         batch_root = _resolve_batch_root(culvert_batch_uuid)
         nlcd_map = batch_root / "landuse" / "nlcd.tif"
@@ -803,7 +866,15 @@ def _process_culvert_run(
 
         _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
         try:
-            skeletonize_run(run_wd, RUN_SKELETON_ALLOWLIST)
+            dev_mode = os.getenv("DEV_MODE", "false").strip().lower() in ("1", "true", "yes")
+            if dev_mode and status == "failed":
+                logger.info(
+                    "culvert_run %s/%s: skipping skeletonize (DEV_MODE + failed)",
+                    culvert_batch_uuid,
+                    run_id,
+                )
+            else:
+                skeletonize_run(run_wd, RUN_SKELETON_ALLOWLIST)
         except Exception as exc:
             logger.warning(
                 "culvert_run %s/%s: skeletonize failed - %s",

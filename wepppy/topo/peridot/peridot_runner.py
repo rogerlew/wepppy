@@ -83,16 +83,18 @@ def run_peridot_wbt_abstract_watershed(
     clip_hillslopes: bool = True,
     clip_hillslope_length: float = 300.0,
     bieger2015_widths: bool = False,
+    skip_flowpaths: bool = False,
     verbose: bool = True
 ):
     """
     Run the Peridot abstract watershed tool using WhiteboxTools.
-    
+
     Parameters:
         wd (str): Working directory where the Topaz data is located.
         clip_hillslopes (bool): Whether to clip hillslopes.
         clip_hillslope_length (float): Length to clip hillslopes.
         bieger2015_widths (bool): Whether to use Bieger 2015 widths.
+        skip_flowpaths (bool): If True, skip flowpath generation to reduce memory usage.
         verbose (bool): If True, print command details.
     """
     assert _exists(_join(wd, 'dem/wbt/subwta.tif'))
@@ -105,6 +107,9 @@ def run_peridot_wbt_abstract_watershed(
 
     if bieger2015_widths:
         cmd += ['--bieger2015-widths']
+
+    if skip_flowpaths:
+        cmd += ['--skip-flowpaths']
 
     if verbose:
         print(' '.join(cmd))
@@ -132,7 +137,7 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     translator = WeppTopTranslator(sub_ids, chn_ids)
     get_wepp_id = lambda topaz_id: translator.wepp(topaz_id)
     get_chn_enum = lambda topaz_id: translator.chn_enum(top=topaz_id)
-    
+
     hill_df['topaz_id'] = pd.to_numeric(hill_df['topaz_id'], errors='raise').astype('Int32')
     hill_df['wepp_id'] = hill_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
 
@@ -150,14 +155,17 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
     lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
 
-    fps_df = pd.read_csv(_join(wd, 'watershed/flowpaths.csv'))
-    fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
-    fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
-    fps_df.to_parquet(_join(wd, 'watershed/flowpaths.parquet'), index=False)
+    # Handle flowpaths.csv - may not exist if --skip-flowpaths was used
+    flowpaths_csv = _join(wd, 'watershed/flowpaths.csv')
+    if _exists(flowpaths_csv):
+        fps_df = pd.read_csv(flowpaths_csv)
+        fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
+        fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
+        fps_df.to_parquet(_join(wd, 'watershed/flowpaths.parquet'), index=False)
+        os.remove(flowpaths_csv)
 
     os.remove(_join(wd, 'watershed/hillslopes.csv'))
-    os.remove(_join(wd, 'watershed/channels.csv')) 
-    os.remove(_join(wd, 'watershed/flowpaths.csv'))
+    os.remove(_join(wd, 'watershed/channels.csv'))
 
     if _update_catalog_entry is not None:
         try:
