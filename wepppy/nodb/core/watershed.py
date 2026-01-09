@@ -505,6 +505,16 @@ class Watershed(NoDbBase):
         self._walk_flowpaths = value
 
     @property
+    def skip_flowpaths(self) -> bool:
+        """Skip flowpath generation in peridot to reduce memory usage."""
+        return getattr(self, "_skip_flowpaths", False)
+
+    @skip_flowpaths.setter
+    @nodb_setter
+    def skip_flowpaths(self, value: bool) -> None:
+        self._skip_flowpaths = value
+
+    @property
     def delineation_backend_is_taudem(self) -> bool:
         delineation_backend = getattr(self, "_delineation_backend", None)
         if delineation_backend is None:
@@ -1204,6 +1214,7 @@ class Watershed(NoDbBase):
                     clip_hillslopes=self.clip_hillslopes,
                     clip_hillslope_length=self.clip_hillslope_length,
                     bieger2015_widths=self.bieger2015_widths,
+                    skip_flowpaths=self.skip_flowpaths,
                 )
 
             self._peridot_post_abstract_watershed()
