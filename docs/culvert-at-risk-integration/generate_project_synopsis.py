@@ -243,6 +243,96 @@ def _update_vector_info_from_fiona(info: dict, filepath: str) -> None:
         return
 
 
+def detect_watershed_processing_method(filepath: str) -> dict:
+    """
+    Detect whether watersheds were processed with nested_basin_delineation()
+    or delineate_watersheds_for_pour_points().
+
+    Returns dict with:
+      - method: "nested" | "partitioned" | "unknown"
+      - hierarchy_columns: list of found hierarchy columns
+      - nested_count: number of watersheds marked as nested (if available)
+      - has_children_count: number of watersheds with children (if available)
+    """
+    result = {
+        "method": "unknown",
+        "hierarchy_columns": [],
+        "nested_count": None,
+        "has_children_count": None,
+    }
+
+    if not os.path.exists(filepath):
+        return result
+
+    # Hierarchy columns added by nested_basin_delineation()
+    # Note: shapefile truncates to 10 chars
+    nested_columns_full = [
+        "parent_watershed", "child_ids", "child_count",
+        "hierarchy_level", "is_nested", "watershed_id",
+        "total_area_sqkm", "incremental_area_sqkm"
+    ]
+    nested_columns_truncated = [
+        "parent_wat", "child_ids", "child_coun",
+        "hierarchy_", "is_nested", "watershed_",
+        "total_area", "incrementa"
+    ]
+
+    try:
+        import fiona
+        with fiona.open(filepath) as dataset:
+            props = dataset.schema.get("properties") or {}
+            columns = list(props.keys())
+
+            # Check for hierarchy columns
+            found_cols = []
+            for col in columns:
+                if col in nested_columns_full or col in nested_columns_truncated:
+                    found_cols.append(col)
+
+            result["hierarchy_columns"] = found_cols
+
+            if found_cols:
+                result["method"] = "nested"
+
+                # Try to count nested watersheds
+                try:
+                    nested_count = 0
+                    has_children = 0
+                    for feature in dataset:
+                        props = feature.get("properties", {})
+                        # Check is_nested
+                        is_nested = props.get("is_nested")
+                        if is_nested is True or is_nested == 1 or str(is_nested).lower() == "true":
+                            nested_count += 1
+                        # Check child_ids
+                        child_ids = props.get("child_ids", "")
+                        if child_ids and str(child_ids).strip():
+                            has_children += 1
+                    result["nested_count"] = nested_count
+                    result["has_children_count"] = has_children
+                except Exception:
+                    pass
+            else:
+                result["method"] = "partitioned"
+
+    except ImportError:
+        # Try with ogrinfo
+        output = run_command(["ogrinfo", "-so", "-al", filepath])
+        if output:
+            for col in nested_columns_full + nested_columns_truncated:
+                if col in output:
+                    result["hierarchy_columns"].append(col)
+
+            if result["hierarchy_columns"]:
+                result["method"] = "nested"
+            else:
+                result["method"] = "partitioned"
+    except Exception:
+        pass
+
+    return result
+
+
 def scan_project(project_name: str, inputs_dir: Path, outputs_dir: Path) -> dict:
     """Scan a single project for available files."""
     project = {
@@ -261,6 +351,12 @@ def scan_project(project_name: str, inputs_dir: Path, outputs_dir: Path) -> dict
             "flow_accumulation": None,
         },
         "metadata": {},
+        "watershed_method": {
+            "method": "unknown",
+            "hierarchy_columns": [],
+            "nested_count": None,
+            "has_children_count": None,
+        },
     }
 
     input_path = inputs_dir / project_name
@@ -307,6 +403,8 @@ def scan_project(project_name: str, inputs_dir: Path, outputs_dir: Path) -> dict
             ws_polygon = ws_deln / "all_ws_polygon_UTM.shp"
             if ws_polygon.exists():
                 project["files"]["watersheds_polygon"] = get_vector_info(str(ws_polygon))
+                # Detect watershed processing method
+                project["watershed_method"] = detect_watershed_processing_method(str(ws_polygon))
 
             # Check for watershed raster (various naming conventions)
             for ws_raster_name in ["ws_raster_UTM.tif", "watersheds.tif", "watershed_raster_UTM.tif"]:
@@ -391,11 +489,18 @@ def has_culverts(project: dict) -> bool:
     return project["files"].get("culvert_points") is not None
 
 
+def has_nested_watersheds(project: dict) -> bool:
+    """Check if watersheds were processed with nested_basin_delineation()."""
+    ws_method = project.get("watershed_method", {}).get("method", "unknown")
+    return ws_method == "nested"
+
+
 def is_viable(project: dict) -> bool:
     return (
         project["ws_delineation_complete"]
         and has_hydro_dem(project)
         and has_watersheds(project)
+        and has_nested_watersheds(project)
         and has_streams(project)
         and has_culverts(project)
     )
@@ -409,6 +514,8 @@ def missing_viable_fields(project: dict) -> list[str]:
         missing.append("Hydro-DEM")
     if not has_watersheds(project):
         missing.append("Watersheds")
+    if not has_nested_watersheds(project):
+        missing.append("Nested WS")
     if not has_streams(project):
         missing.append("Streams")
     if not has_culverts(project):
@@ -442,23 +549,37 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
     lines.extend([
         f"- Total projects: {total_projects}",
         f"- Users scanned: {len(user_ids)}",
-        f"- VIABLE projects (WS Deln + Hydro-DEM + Watersheds + Streams + Culverts): {viable_projects}",
+        f"- VIABLE projects (WS Deln + Hydro-DEM + Nested WS + Streams + Culverts): {viable_projects}",
         "",
     ])
 
     if multi_user:
         lines.extend([
-            "| User | Project | WS Deln | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
-            "|------|---------|---------|-----------|---------------|------------|---------|----------|-----------|",
+            "| User | Project | WS Deln | WS Method | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
+            "|------|---------|---------|-----------|-----------|---------------|------------|---------|----------|-----------|",
         ])
     else:
         lines.extend([
-            "| Project | WS Deln | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
-            "|---------|---------|-----------|---------------|------------|---------|----------|-----------|",
+            "| Project | WS Deln | WS Method | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
+            "|---------|---------|-----------|-----------|---------------|------------|---------|----------|-----------|",
         ])
 
     for p in projects:
         ws_status = "Yes" if p["ws_delineation_complete"] else "No"
+
+        # Watershed processing method
+        ws_method_info = p.get("watershed_method", {})
+        ws_method = ws_method_info.get("method", "unknown")
+        if ws_method == "nested":
+            nested_count = ws_method_info.get("nested_count")
+            if nested_count is not None:
+                ws_method_str = f"Nested ({nested_count})"
+            else:
+                ws_method_str = "Nested"
+        elif ws_method == "partitioned":
+            ws_method_str = "Partitioned"
+        else:
+            ws_method_str = "—"
 
         # Hydro-DEM with size
         hydro_dem = p["files"].get("hydro_enforced_dem")
@@ -510,17 +631,20 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
 
         if multi_user:
             lines.append(
-                f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
+                f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {ws_method_str} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
             )
         else:
             lines.append(
-                f"| {p['name']} | {ws_status} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
+                f"| {p['name']} | {ws_status} | {ws_method_str} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
             )
 
     lines.extend([
         "",
         "**Legend:**",
         "- WS Deln: Watershed delineation completed",
+        "- WS Method: Watershed processing method",
+        "  - **Nested (N)**: `nested_basin_delineation()` - overlapping watersheds with hierarchy (N = count marked nested)",
+        "  - **Partitioned**: `delineate_watersheds_for_pour_points()` - non-overlapping partitioned watersheds",
         "- Hydro-DEM: Hydro-enforced DEM available",
         "- Hydro-DEM Res: Hydro-enforced DEM pixel resolution",
         "- Watersheds: Watershed polygons available (Polygon = shapefile, needs GeoJSON conversion; raster not required)",
@@ -604,6 +728,7 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
 
         ws_raster = p["files"].get("watersheds_raster")
         ws_polygon = p["files"].get("watersheds_polygon")
+        ws_method_info = p.get("watershed_method", {})
 
         if ws_raster:
             lines.append(f"- Raster: {file_status(ws_raster)}")
@@ -614,6 +739,21 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
             lines.append(f"- Polygon: {file_status(ws_polygon, 'has_point_id')}")
         else:
             lines.append("- Polygon: Missing")
+
+        # Show watershed processing method
+        ws_method = ws_method_info.get("method", "unknown")
+        if ws_method == "nested":
+            nested_count = ws_method_info.get("nested_count")
+            has_children = ws_method_info.get("has_children_count")
+            method_desc = "**Nested** (`nested_basin_delineation`) - overlapping watersheds with hierarchy"
+            if nested_count is not None:
+                method_desc += f", {nested_count} marked nested"
+            if has_children is not None:
+                method_desc += f", {has_children} with children"
+            lines.append(f"- Processing: {method_desc}")
+        elif ws_method == "partitioned":
+            lines.append("- Processing: **Partitioned** (`delineate_watersheds_for_pour_points`) - non-overlapping watersheds")
+        # Don't show anything for unknown
 
         lines.append("")
 
@@ -877,7 +1017,7 @@ def main():
     viable = sum(1 for p in all_projects if is_viable(p))
     print(
         f"\nSummary: {viable}/{len(all_projects)} projects meet viability criteria "
-        "(WS Deln + Hydro-DEM + Watersheds + Streams + Culverts)"
+        "(WS Deln + Hydro-DEM + Nested WS + Streams + Culverts)"
     )
 
 

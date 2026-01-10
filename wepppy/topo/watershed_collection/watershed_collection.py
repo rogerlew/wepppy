@@ -212,6 +212,7 @@ class WatershedFeature(object):
         point: Tuple[float, float],
         *,
         point_crs: Optional[str] = None,
+        buffer_m: Optional[float] = None,
     ) -> bool:
         """Return True if the point falls inside (or on the edge of) the watershed."""
         if not isinstance(point, (list, tuple)) or len(point) < 2:
@@ -236,6 +237,12 @@ class WatershedFeature(object):
         from shapely.geometry import Point, shape
 
         geometry = shape(self.geometry)
+        if (
+            buffer_m is not None
+            and buffer_m > 0
+            and not self._crs_is_geographic()
+        ):
+            geometry = geometry.buffer(buffer_m)
         point_geom = Point(x, y)
         if hasattr(geometry, "covers"):
             return bool(geometry.covers(point_geom))

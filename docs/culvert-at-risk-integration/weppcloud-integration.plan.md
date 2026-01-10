@@ -311,10 +311,10 @@ Notes:
 - Problem: culvert runs use VRT files that reference shared source TIFs; when multiple workers start simultaneously, file contention can cause transient failures.
 
 ### Stream junction generation
-- **Original approach**: clip `netful.vrt` → `netful.masked.tif`, then run `stream_junction_identifier(flovec, netful.masked.tif)` → `chnjnt.tif`.
+- **Original approach**: clip `netful.vrt` → `netful.masked.tif` using `target_watershed.tif` (not `bound.tif`), then run `stream_junction_identifier(flovec, netful.masked.tif)` → `chnjnt.tif`.
 - **Attempted optimization**: clip pre-computed `chnjnt.vrt` directly to watershed mask → `chnjnt.tif` (skip `stream_junction_identifier`).
 - **Result**: optimization failed—stream junctions must be recalculated for the masked stream network because junction topology changes at watershed boundaries.
-- **Final implementation**: kept original approach with `_generate_masked_stream_junctions()` in `wepppy/rq/culvert_rq.py`:
+- **Final implementation**: kept original approach with `_generate_masked_stream_junctions()` in `wepppy/rq/culvert_rq.py` (mask source is `target_watershed.tif`, not `bound.tif`):
   1. Clip `netful.vrt` to `target_watershed.tif` mask → `netful.masked.tif`
   2. Run `wbt.stream_junction_identifier(d8_pntr=flovec.vrt, streams=netful.masked.tif)` → `chnjnt.tif`
 
@@ -326,6 +326,7 @@ Notes:
 ### Notes
 - `chnjnt.vrt` is created per-run as a cropped view of the batch's `topo/chnjnt.tif`, but it cannot be used directly because masking to the watershed boundary changes which stream segments exist, which changes junction locations.
 - The 1s delay adds ~N seconds to batch submission time (where N = number of runs) but prevents file contention failures.
+- Use `bound.tif` for masking (not `target_watershed.tif`): clipping channels to the target watershed can misidentify headwater pixels and cause mismatch with `netw0.tif`.
 
 ## Phase 4g - Representative flowpath optimization (COMPLETE)
 - Status: complete.
@@ -444,7 +445,7 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 - Scope: run-level validation + error propagation, structured error codes for validation/execution, publish status events to Redis DB 2, update RQ job info with `error_code`/`error_detail`, add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
 - Deliverables:
-  - Culvert point-in-watershed validation (`WatershedFeature.contains_point`) before modeling; failures recorded as `CulvertPointOutsideWatershedError`.
+  - Culvert point-in-watershed validation (`WatershedFeature.contains_point`) before modeling; supports `culvert_runner.contains_point_buffer_px` (buffered by DEM cellsize) to tolerate small alignment offsets; failures recorded as `CulvertPointOutsideWatershedError`.
   - Run-level errors from `run_metadata.json` merged into `culverts_runner.nodb` + `runs_manifest.md`.
   - Finalizer computes validation metrics (culvert/outlet coords, distance, target area, bounds area) and stores them in `culverts_runner.nodb` + `runs_manifest.md`.
   - NoDb contention retry for `CulvertsRunner` writes when batch workers overlap.
@@ -464,64 +465,53 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 - Risks: inconsistent `area_sqm` values in payloads; missing `area_sqm` means no filtering (intentional).
 - Verification: Hubbard Brook payload analysis shows 100 m^2 threshold eliminates micro-watersheds without blocking valid small catchments.
 
-## Phase 5b - Payload builder watershed reconstruction (COMPLETE)
-- Scope: update `build_payload.py` to compensate for Culvert_web_app deleting intermediate watershed files by recreating `ws_raster_UTM.tif` and generating unsimplified watershed polygons.
-- Problem: Culvert_web_app's watershed delineation pipeline deletes two valuable intermediate files:
-  1. **`ws_raster_UTM.tif`** - Watershed raster where cell values = pour point FID (essential for spatial queries and linking raster analysis to culverts).
-  2. **`ws_polygon_UTM.shp`** - Unsimplified polygons from `raster_to_vector_polygons`; the saved `all_ws_polygon_UTM.shp` is simplified with 1.0m tolerance, reducing vertices by 30-300x per watershed.
-- Irony: Culvert_web_app saves 44 TIF files (~5.5 GB) including duplicates of PRISM, NLCD, slope, and soil data, but deletes the one raster that uniquely identifies watershed membership.
+## Phase 5b - Watershed simplification issue documentation (COMPLETE)
+- Scope: Document critical issue where Culvert_web_app's 1.0m watershed simplification causes weppcloud to skip culverts.
+- Problem: weppcloud validates that each culvert's pour point is inside its associated watershed polygon. Simplified watersheds often fail this check.
 
-### build_payload.py reconstruction approach
-1. **Check for existing `ws_raster_UTM.tif`** - use if present (future-proofs for when Culvert_web_app is fixed).
-2. **Recreate watershed raster** using WhiteboxTools:
-   ```python
-   wbt.watershed(
-       d8_pntr="WS_deln/D8flow_dir_UTM.tif",
-       pour_pts="WS_deln/Pour_Point_UTM.shp",
-       output="topo/watersheds.tif"
-   )
-   ```
-3. **Convert to unsimplified vector polygons**:
-   ```python
-   wbt.raster_to_vector_polygons(i=ws_raster, output=ws_vector_shp)
-   ```
-4. **Merge properties** from simplified source (`all_ws_polygon_UTM.shp`) into unsimplified polygons by matching `VALUE` field, preserving `Point_ID` and all calculated attributes (area, slope, time of concentration, etc.).
+### Impact analysis (Hubbard Brook dataset)
+| Metric | Unsimplified | Simplified (1.0m) |
+|--------|-------------:|------------------:|
+| Pour points inside watershed | 208 / 210 | **116 / 210** |
+| Culverts skipped by weppcloud | 2 | **94** |
 
-### Vertex count comparison (Hubbard Brook)
+**45% of culverts will be skipped** due to simplification moving polygon boundaries.
+
+### Vertex reduction from simplification
 | Point_ID | Unsimplified | Simplified | Ratio |
 |---------:|-------------:|-----------:|------:|
 | 130 | 3,958 | 62 | 64x |
 | 162 | 5,608 | 49 | 114x |
 | 112 | 1,575 | 5 | 315x |
 
-### Updated payload layout
-```
-payload.zip
-  topo/hydro-enforced-dem.tif
-  topo/streams.tif
-  topo/watersheds.tif              # NEW: recreated watershed raster
-  culverts/culvert_points.geojson
-  culverts/watersheds.geojson      # NOW: unsimplified polygons
-  metadata.json
-  model-parameters.json
-```
+### Culvert_web_app deleted resources
+The following files are created but deleted after processing:
+1. **`ws_raster_UTM.tif`** - Watershed raster (cell values = pour point FID)
+2. **`ws_polygon_UTM.shp`** - Unsimplified polygons before simplification
 
-### Dependencies
-- WhiteboxTools (`whitebox_tools` Python package) for `watershed()` and `raster_to_vector_polygons()`.
-- D8 flow direction raster (`WS_deln/D8flow_dir_UTM.tif`) must exist in Culvert_web_app outputs.
+Source code location: `subroutine_nested_watershed_delineation.py`:
+```python
+# Line ~1198: Creates unsimplified polygons (temporary)
+wbt.raster_to_vector_polygons(i=output_watershed_raster_path, output=watershed_polygon_path)
 
-### Deliverables
-- Updated `docs/culvert-at-risk-integration/dev-package/scripts/build_payload.py` with `recreate_watershed_raster()` and `create_unsimplified_watersheds()` functions.
-- Updated `docs/culvert-at-risk-integration/dev-package/README.md` documenting the deficiency and reconstruction approach.
-- Test payload: `tests/culverts/test_payloads/Hubbard_Brook_Experimental_Forest/payload.zip` (~117 MB) with unsimplified watersheds.
+# Line ~1213: Simplifies with 1.0m tolerance BEFORE saving
+watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, tolerance=1.0)
+```
 
 ### Recommended fix for Culvert_web_app
-Modify `watershed_delineation_task.py` to preserve these files instead of deleting them:
 ```python
-# Copy from temp before cleanup:
-shutil.copy2(ws_raster_temporary_path, ws_raster_UTM_path)
-# Save unsimplified polygons before simplification
+# Preserve unsimplified polygons before calling simplify_geometry():
+ws_polygon_unsimplified_path = os.path.join(user_output_WS_deln_path, "ws_polygon_unsimplified_UTM.shp")
+watershed_poly_gdf_merged.to_file(ws_polygon_unsimplified_path)
+
+# Then apply simplification for the standard output
+watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, tolerance=1.0)
 ```
+
+### Deliverables
+- Updated `docs/culvert-at-risk-integration/dev-package/README.md` with "CRITICAL: Watershed Simplification Issue" section.
+- `build_payload.py` uses simplified watersheds as-is (no reconstruction attempted).
+- Culvert_web_app team informed: to run all culverts, provide unsimplified `watersheds.geojson`.
 
 ## Phase 5 handoff summary
 - Validation now checks culvert points against watershed polygons; outside points fail fast with `CulvertPointOutsideWatershedError`.
@@ -529,9 +519,7 @@ shutil.copy2(ws_raster_temporary_path, ws_raster_UTM_path)
 - Finalizer merges `run_metadata.json` status/errors into `culverts_runner.nodb` and `runs_manifest.md` for consistent reporting.
 - Runs manifest includes validation metrics and culvert/outlet distance for downstream QA.
 - NoDb contention retry pattern applied to `CulvertsRunner` updates in batch jobs.
-- Payload builder (`build_payload.py`) now reconstructs deleted intermediate files: recreates watershed raster from D8 pointer + pour points, generates unsimplified polygons, and merges properties from simplified source.
-- Updated payload layout includes `topo/watersheds.tif` (watershed raster) and unsimplified `culverts/watersheds.geojson`.
-- Test payload `Hubbard_Brook_Experimental_Forest` added with full unsimplified watershed geometry.
+- **Critical**: Culvert_web_app's 1.0m watershed simplification causes ~45% of culverts to fail weppcloud's point-in-polygon validation. Fix requires Culvert_web_app to preserve unsimplified polygons.
 
 ## Phase 6 - Auth and webhook enhancements (post-POC)
 - Scope: JWT issuance/rotation, webhook registration + retries, HMAC signing, opt-in callbacks on completion/failure.

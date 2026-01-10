@@ -180,6 +180,7 @@ Notes:
 - `base_project_runid` (string, optional)
 - `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
 - `ssurgo_db` (string, optional; overrides `soils.ssurgo_db`)
+- `contains_point_buffer_px` (int, optional; when set, buffer the watershed polygon by this many DEM pixels during the culvert point containment check)
 
 Notes:
 - Climate duration uses defaults from `culvert.cfg` (no override keys in v1).
@@ -203,7 +204,7 @@ The `culverts/watersheds.geojson` contains one polygon feature per culvert water
 - **Nested watersheds:** Watersheds may overlap (downstream culverts contain upstream culverts' watersheds). Each polygon represents the **total contributing area** to that culvert, not the incremental area.
 - **CRS:** Must match the DEM projection (UTM or other meter-based projected CRS)
 
-Note: Culvert_web_app deletes watershed rasters after polygon creation, so the GeoJSON polygons are the source of truth for watershed geometry in the payload.
+Note: Culvert_web_app deletes watershed rasters after polygon creation, so the GeoJSON polygons are the source of truth for watershed geometry in the payload. Older Culvert_web_app projects used a partitioned watershed algorithm that truncates contributing area; those polygons are not appropriate for WEPP runs (they can omit upstream area). Use nested watershed polygons for wepp.cloud payloads.
 
 Example feature:
 ```json
@@ -246,7 +247,7 @@ For each culvert (identified by `Point_ID`):
 
 2. **Validate culvert point is inside watershed polygon:**
    - Load the culvert point from `culvert_points.geojson` for the current `Point_ID`.
-   - Use `WatershedFeature.contains_point()` to assert the point is inside the watershed polygon.
+   - Use `WatershedFeature.contains_point()` to assert the point is inside the watershed polygon; apply a buffer of `culvert_runner.contains_point_buffer_px * dem.resolution_m` (when configured) to tolerate small alignment offsets.
    - If the point is outside, mark the run failed with `CulvertPointOutsideWatershedError` (written to `run_metadata.json`, merged into `culverts_runner.nodb`, and surfaced in `runs_manifest.md`) and skip modeling.
    - If `culvert_runner.minimum_watershed_area_m2` is configured and the watershed feature provides `area_sqm`, reject runs below the threshold with `WatershedAreaBelowMinimumError`.
 

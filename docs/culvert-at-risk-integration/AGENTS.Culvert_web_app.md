@@ -43,6 +43,93 @@
   - Flow: reproject to UTM, hydro-enforcement (optional road fill + breakline burn), D8 flow/accum, stream extraction, road-stream intersections, snap pour points, delineate and filter watersheds, flag outside-boundary polygons.
   - Outputs: shapefiles + `final_watershed_html_map.html`.
   - Key code: `culvert_app/tasks/watershed_delineation_task.py`, `culvert_app/utils/subroutine_nested_watershed_delineation.py`, `culvert_app/static/visualization/subroutine_basemap_generator.py`.
+
+## Watershed Processing Methods
+
+Two watershed delineation functions exist in `subroutine_nested_watershed_delineation.py`. The **current code uses `nested_basin_delineation()`**, but older datasets may have been processed with `delineate_watersheds_for_pour_points()`.
+
+### `nested_basin_delineation()` (Current - lines 810-935)
+
+Processes each pour point **individually** with `wbt.watershed()`:
+
+```python
+for idx, row in pour_points_sorted.iterrows():
+    # Create temp point file for single pour point
+    point_gdf = gpd.GeoDataFrame([row], crs=pour_points.crs)
+    temp_point = f"{output_dir}/temp_point_{idx}.shp"
+    point_gdf.to_file(temp_point)
+
+    # Delineate watershed for this single point
+    wbt.watershed(d8_pntr=flow_dir_path, pour_pts=snapped_point, output=watershed_raster)
+```
+
+**Result:** Overlapping/nested watershed polygons. A downstream culvert's watershed contains all upstream area, including upstream culvert watersheds.
+
+**Output columns added:**
+- `parent_wat` (parent_watershed) - Point_ID of containing watershed
+- `child_ids` - Comma-separated list of contained watershed indices
+- `child_coun` (child_count) - Number of child watersheds
+- `hierarchy_` (hierarchy_level) - Nesting depth (0 = root)
+- `is_nested` - Boolean indicating if contained by another watershed
+- `watershed_` (watershed_id) - Sequential processing index
+- `total_area` (total_area_sqkm) - Full watershed area
+- `incrementa` (incremental_area_sqkm) - Area excluding children
+
+Note: Column names are truncated to 10 characters due to shapefile format limitations.
+
+### `delineate_watersheds_for_pour_points()` (Legacy - lines 1129-1222)
+
+Passes **all pour points at once** to `wbt.watershed()`:
+
+```python
+wbt.watershed(d8_pntr=d8pointer_path, output=output_watershed_raster_path, pour_pts=Pour_points_path)
+```
+
+**Result:** Non-overlapping/partitioned watershed polygons. Each cell is assigned to exactly one pour point (the closest downstream), creating a Voronoi-like partition of the landscape.
+
+**Output columns:** Standard columns only (`Point_ID`, `FID`, `VALUE`, area/time-of-concentration attributes). No hierarchy columns.
+
+### Identifying Processing Method
+
+Check the watershed shapefile for hierarchy columns:
+
+```python
+import fiona
+with fiona.open("all_ws_polygon_UTM.shp") as src:
+    cols = list(src.schema["properties"].keys())
+    if "is_nested" in cols or "child_ids" in cols:
+        print("Nested processing")
+    else:
+        print("Partitioned processing")
+```
+
+Or use `generate_project_synopsis.py` which reports "Nested (N)" or "Partitioned" in the WS Method column.
+
+### Implications for wepp.cloud
+
+| Method | Polygon Overlap | Pour Point Inside Watershed | wepp.cloud Behavior |
+|--------|-----------------|----------------------------|---------------------|
+| Nested | Yes (83+ pairs for 36 watersheds) | Always (by construction) | Runs all culverts |
+| Partitioned | No (touch only) | Maybe (simplification can move boundaries) | May skip culverts outside polygon |
+
+With **partitioned** watersheds + 1.0m simplification tolerance, up to 45% of culverts may be skipped because their pour points fall outside the simplified polygon boundary.
+
+### Code Location
+
+The active function is selected in `watershed_delineation_task.py` around lines 2477-2498:
+
+```python
+# COMMENTED OUT (legacy):
+# delineate_watersheds_for_pour_points(...)
+
+# ACTIVE (current):
+nested_basins = nested_basin_delineation(
+    dem_path=user_output_breached_filled_DEM_file_path,
+    pour_points_path=user_output_pour_points_snapped_to_RSCS_file_path,
+    flow_dir_path=user_output_D8flow_dir_file_path,
+    ...
+)
+```
 - Hydrologic vulnerability:
   - Uses ws_deln outputs + user streamflow/precip inputs, regional frequency analysis, rational method, GPDM peak discharge, culvert capacity checks.
   - Outputs: vulnerability maps and tables.

@@ -316,6 +316,14 @@ def run_culvert_run_rq(
 
     payload_metadata = _load_payload_json(batch_root / "metadata.json")
     model_parameters = _load_payload_json(batch_root / "model-parameters.json")
+    dem_path = runner._resolve_payload_path(
+        payload_metadata, "dem", runner.DEFAULT_DEM_REL_PATH, str(batch_root)
+    )
+    cellsize_m = _get_dem_cellsize_m(payload_metadata, Path(dem_path))
+    buffer_px = runner.contains_point_buffer_px
+    buffer_m = None
+    if buffer_px > 0 and cellsize_m is not None:
+        buffer_m = float(buffer_px) * cellsize_m
 
     # Note: We skip locking here because run_culvert_batch_rq already
     # initialized the shared runner state. Acquiring a lock would cause
@@ -391,6 +399,7 @@ def run_culvert_run_rq(
     if not watershed_feature.contains_point(
         culvert_point,
         point_crs=culvert_points_crs,
+        buffer_m=buffer_m,
     ):
         error_payload = {
             "type": "CulvertPointOutsideWatershedError",
@@ -1145,26 +1154,6 @@ def _ensure_outlet_junction(
     )
 
 
-def _regenerate_chnjnt(flovec_path: Path, streams_path: Path, chnjnt_path: Path) -> None:
-    """Regenerate chnjnt.tif using stream_junction_identifier."""
-    wbt = WhiteboxTools(verbose=False, raise_on_error=True)
-    wbt.set_working_dir(str(chnjnt_path.parent))
-
-    if chnjnt_path.exists():
-        chnjnt_path.unlink()
-
-    ret = wbt.stream_junction_identifier(
-        d8_pntr=str(flovec_path),
-        streams=str(streams_path),
-        output=str(chnjnt_path),
-    )
-    if ret != 0 or not chnjnt_path.exists():
-        raise RuntimeError(
-            "StreamJunctionIdentifier failed "
-            f"(flovec={flovec_path}, streams={streams_path}, output={chnjnt_path})"
-        )
-
-
 def _ensure_batch_landuse_soils(
     *,
     culvert_batch_uuid: str,
@@ -1621,6 +1610,33 @@ def _sum_parquet_column(parquet_path: Path, column: str) -> Optional[float]:
     except Exception:
         return None
     return None
+
+
+def _get_dem_cellsize_m(
+    payload_metadata: Dict[str, Any],
+    dem_path: Path,
+) -> Optional[float]:
+    dem_meta = payload_metadata.get("dem")
+    if isinstance(dem_meta, dict):
+        value = dem_meta.get("resolution_m")
+        if value is not None:
+            try:
+                parsed = float(value)
+                if parsed > 0:
+                    return parsed
+            except (TypeError, ValueError):
+                pass
+    if not dem_path.exists():
+        return None
+    try:
+        with rasterio.open(dem_path) as src:
+            res_x, res_y = src.res
+            cellsize = abs(res_x) if res_x else abs(res_y)
+    except Exception:
+        return None
+    if cellsize <= 0:
+        return None
+    return float(cellsize)
 
 
 def _watershed_area_m2(feature: Optional[WatershedFeature]) -> Optional[float]:
