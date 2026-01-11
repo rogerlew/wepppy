@@ -529,6 +529,43 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
   - Document target-area scaling approach and recommended thresholds by DEM resolution.
   - Decide whether to re-run stream extraction for high-resolution projects or rely on order-reduction passes.
 
+## Phase 5d - Native CRS retrieval for landuse/soils + wepppyo3 nodata guard
+- Status: in progress.
+- Scope: avoid WGS84 round-trip clipping by requesting NLCD/SSURGO with native UTM extents; extend wmesque2 + client to accept native CRS bounding boxes; guard `identify_mode_single_raster_key` against 100% nodata hillslopes.
+
+### Problem analysis (batch `55b28bb9-2d61-43f3-9f45-10779e93c501`, run 7)
+- Run 7 failed with `KeyError: '1441'` in `wepp.run_hillslopes()` when looking up landcover.
+- Root cause: 6 hillslopes (1441, 1541, 1592, 1601, 1602, 1603) had 100% nodata in the NLCD raster.
+- NLCD retrieval used WGS84 bbox which, when transformed back to UTM, produced a smaller extent than the DEM:
+  - DEM extent: 261900–273608 (11.7km width)
+  - NLCD 30m extent: 262478–273068 (10.6km width, ~1km missing on edges)
+- `identify_mode_single_raster_key` (wepppyo3) correctly skipped hillslopes with all-nodata pixels, but downstream code expected all hillslope IDs to be present in `domlc_d`.
+
+### Deliverables
+1. **wmesque2 native CRS support** (in progress):
+   - wmesque2 accepts optional `bbox_crs` (EPSG/proj4) for projected extent requests.
+   - wmesque client (`wmesque_retrieve`) accepts `extent_crs` parameter, appends `bbox_crs` for v2 only.
+   - Culvert batch landuse/soils retrieval uses native UTM extent to avoid WGS84 round-trip clipping.
+
+2. **wepppyo3 nodata guard** (in progress):
+   - `identify_mode_single_raster_key` and `identify_mode_intersecting_raster_keys` must return entries for all keys in the key raster.
+   - When a hillslope has 100% nodata in the parameter raster, return the nodata value (or a sentinel) instead of silently skipping.
+   - Test fixture created: `/workdir/wepppyo3/tests/raster_characteristics/fixtures/` with `subwta_nodata_edge.tif` (4 hillslopes) and `nlcd_nodata_edge.tif` (68% nodata coverage).
+
+### Test fixture details
+- Source: cropped from batch `55b28bb9-2d61-43f3-9f45-10779e93c501` run 7
+- `subwta_nodata_edge.tif`: 500x200 px, hillslopes [1312, 1323, 1442, 1443], channel [1444]
+- `nlcd_nodata_edge.tif`: 500x200 px, 32% valid / 68% nodata (right edge nodata)
+- Expected: all 4 hillslopes must appear in `identify_mode_single_raster_key` result; 1442/1443 may have nodata as value
+
+### Risks
+- Incorrect CRS strings or non-projected CRS inputs to wmesque2.
+- Downstream code must handle nodata values returned for hillslopes with no valid landcover data.
+
+### Verification
+- wepppyo3 test using fixture confirms all keys are returned.
+- Run 7 retry succeeds after wmesque2 native CRS fix is deployed.
+
 ## Phase 5 handoff summary
 - Validation now checks culvert points against watershed polygons; outside points fail fast with `CulvertPointOutsideWatershedError`.
 - Minimum watershed area filter rejects micro-watersheds when `area_sqm` is present, using `WatershedAreaBelowMinimumError`.
