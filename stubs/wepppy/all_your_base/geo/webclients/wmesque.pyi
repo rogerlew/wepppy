@@ -31,4 +31,5 @@ def wmesque_retrieve(
     v: int = ...,
     write_meta: bool = ...,
     wmesque_endpoint: str | None = ...,
+    extent_crs: str | None = ...,
 ) -> int: ...

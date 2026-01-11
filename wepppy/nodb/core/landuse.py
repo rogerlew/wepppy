@@ -533,12 +533,13 @@ class Landuse(NoDbBase):
             # build the grid
             # domlc_fn map is a Landuse property
             # domlc_d is a dictionary with topaz_id keys
-            self.domlc_d = lc.build_lcgrid(subwta_fn, None)
+            domlc_d = lc.build_lcgrid(subwta_fn, None)
         else:
             self.logger.info('Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key')
             domlc_d = identify_mode_single_raster_key(
                 key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
-            self.domlc_d = {k: str(v) for k, v in domlc_d.items()}
+        domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
+        self.domlc_d = domlc_d
 
     def _build_single_selection(self) -> None:
         assert self.single_selection is not None
