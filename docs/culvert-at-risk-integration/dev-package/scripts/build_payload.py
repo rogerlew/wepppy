@@ -29,8 +29,11 @@ Usage:
 Required files from Culvert_web_app project:
     outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif  -> topo/hydro-enforced-dem.tif
     outputs/{project}/hydrogeo_vuln/main_stream_raster_UTM.tif -> topo/streams.tif
-    outputs/{project}/WS_deln/Pour_Point_UTM.shp -> culverts/culvert_points.geojson
+    outputs/{project}/WS_deln/pour_points_snapped_to_RSCS_UTM.shp -> culverts/culvert_points.geojson
     outputs/{project}/WS_deln/all_ws_polygon_UTM.shp -> culverts/watersheds.geojson
+
+Note: We use RSCS-snapped pour points (snapped to Road-Stream Crossing Sites) rather than
+the original Pour_Point_UTM.shp. This ensures culvert points are on the stream network.
 
 Output payload.zip structure:
     topo/hydro-enforced-dem.tif
@@ -69,6 +72,37 @@ def sanitize_project_id(name: str) -> str:
     """Normalize a project name into a stable project_id."""
     sanitized = re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_")
     return sanitized or "project"
+
+
+def extract_flow_accum_threshold(ws_deln_dir: Path) -> Optional[int]:
+    """
+    Extract flowAccumThreshold from user_ws_deln_responses.txt.
+
+    This is the flow accumulation threshold used for stream extraction in
+    Culvert_web_app. It's preserved in model-parameters.json for reference
+    and potential future use.
+
+    Returns the threshold value as an integer, or None if not found.
+    """
+    response_file = ws_deln_dir / "user_ws_deln_responses.txt"
+    if not response_file.exists():
+        return None
+
+    try:
+        with open(response_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                # Check for both hydro and no-hydro variants
+                if line.startswith("flowAccumThreshold:") or line.startswith("flowAccumThreshold_nohydro:"):
+                    value = line.split(":", 1)[1].strip()
+                    try:
+                        return int(float(value))
+                    except ValueError:
+                        pass
+    except (IOError, UnicodeDecodeError):
+        pass
+
+    return None
 
 
 def run_command(cmd: list[str], check: bool = False) -> tuple[int, str, str]:
@@ -507,7 +541,7 @@ def build_payload(
     source_files = {
         "hydro_dem": ws_deln / "breached_filled_DEM_UTM.tif",
         "streams": hydrogeo / "main_stream_raster_UTM.tif",
-        "culvert_points": ws_deln / "Pour_Point_UTM.shp",
+        "culvert_points": ws_deln / "pour_points_snapped_to_RSCS_UTM.shp",
         "watersheds": ws_deln / "all_ws_polygon_UTM.shp",
     }
 
@@ -562,6 +596,13 @@ def build_payload(
     print("\nValidating raster alignment...")
     validate_raster_alignment(dem_meta, streams_meta)
     print("  [OK] DEM and streams dimensions/resolution match")
+
+    # Extract flow accumulation threshold from project settings
+    flow_accum_threshold = extract_flow_accum_threshold(ws_deln)
+    if flow_accum_threshold is not None:
+        print(f"\nFlow accumulation threshold: {flow_accum_threshold}")
+    else:
+        print("\nFlow accumulation threshold: not found (will omit from model-parameters.json)")
 
     # Build payload in temp directory (used for dry-run validation too)
     print("\nBuilding payload...")
@@ -663,6 +704,8 @@ def build_payload(
             model_params["base_project_runid"] = base_project_runid
         if nlcd_db:
             model_params["nlcd_db"] = nlcd_db
+        if flow_accum_threshold is not None:
+            model_params["flow_accum_threshold"] = flow_accum_threshold
 
         with open(tmp_path / "model-parameters.json", "w") as f:
             json.dump(model_params, f, indent=2)

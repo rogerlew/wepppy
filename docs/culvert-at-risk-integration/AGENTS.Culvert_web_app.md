@@ -185,6 +185,114 @@ The `Point_ID` attribute in the watershed GeoJSON directly links each watershed 
   - Lines 838-888: Nested delineation loop adding `ID_column` and `watershed_id` to each polygon
 - `culvert_app/tasks/hydro_vuln_analysis_task.py` → uses `pour_ID="Point_ID"` throughout
 
+## Pour Point Snapping Pipeline (RSCS)
+
+The watershed delineation pipeline snaps user-provided culvert points to the stream network
+in two stages. The final output (`pour_points_snapped_to_RSCS_UTM.shp`) is used for wepp.cloud
+payloads because these points are guaranteed to be on the stream network.
+
+### Stage 1: Snap to Roads
+
+**Function:** `snap_points_to_nearest_line()` (lines ~580-635)
+
+**Input:** `Pour_Point_UTM_clipped.shp` (user culvert points, clipped to boundary)
+**Output:** `pour_points_snapped_to_roads_UTM.shp`
+
+Snaps each culvert point to the nearest road polyline within `pour_point_snap_distance_m`.
+This corrects for GPS inaccuracies in field-collected culvert locations.
+
+### Stage 2: Compute Road-Stream Crossing Sites (RSCS)
+
+**Function:** `find_intersections_of_polylines()` (lines ~2429-2438)
+
+**Inputs:**
+- `road_UTM.shp` (road network)
+- `stream_vector_UTM.shp` (extracted stream network from D8 flow accumulation)
+
+**Output:** `road_stream_intersect_vector_UTM.shp`
+
+Computes the geometric intersection of roads and streams. Each intersection point is a
+potential culvert location where a road crosses a stream.
+
+### Stage 3: Snap to RSCS
+
+**Function:** `snap_points_to_nearest_points_within_distance()` (lines 638-733)
+
+**Inputs:**
+- `pour_points_snapped_to_roads_UTM.shp` (road-snapped culvert points)
+- `road_stream_intersect_vector_UTM.shp` (RSCS points)
+
+**Output:** `pour_points_snapped_to_RSCS_UTM.shp`
+
+```python
+def snap_points_to_nearest_points_within_distance(points_path, target_points_path, output_path,
+                                                   ID_column, snap_distance):
+    """
+    Snap each point to the nearest target point if within snap_distance.
+    Points beyond snap_distance are EXCLUDED from the output.
+    """
+    for idx, point in points_gdf.iterrows():
+        nearest_geom = nearest_points(original_point, target_points_gdf.unary_union)[1]
+        distance_to_nearest = original_point.distance(nearest_geom)
+
+        # Only include if within snap distance
+        if distance_to_nearest <= snap_distance:
+            snapped_points.append({
+                'geometry': nearest_geom,
+                'FID': fid,
+                ID_column: point[ID_column]
+            })
+```
+
+**Key behavior:**
+- Points are relocated to the exact coordinates of their nearest RSCS point
+- Points beyond `snap_distance` (default: `pour_point_snap_distance_m`) are **dropped**
+- Original `Point_ID` is preserved on the snapped point
+- Feature count may be less than input if some culverts are far from any RSCS
+
+### Stage 4: Snap to Flow Accumulation (inside nested_basin_delineation)
+
+**Function:** `wbt.jenson_snap_pour_points()` (lines 846-853)
+
+**Input:** `pour_points_snapped_to_RSCS_UTM.shp`
+**Output:** Per-watershed temp files (`snapped_point_{idx}.shp`)
+
+Inside `nested_basin_delineation()`, each RSCS-snapped point is snapped again to the
+flow accumulation raster using WhiteboxTools' Jenson algorithm:
+
+```python
+wbt.jenson_snap_pour_points(
+    pour_pts=temp_point,
+    streams=flow_accum_path,
+    output=snapped_point,
+    snap_dist=snap_distance
+)
+```
+
+This ensures the pour point lands on a high-accumulation cell for accurate watershed delineation.
+
+### Pour Point File Summary
+
+| File | Stage | On Stream? | Notes |
+|------|-------|------------|-------|
+| `Pour_Point_UTM.shp` | Input | No | Original user-provided locations |
+| `Pour_Point_UTM_clipped.shp` | Clipped | No | Filtered to boundary extent |
+| `pour_points_snapped_to_roads_UTM.shp` | Road-snapped | No | Corrects GPS error to road centerline |
+| `road_stream_intersect_vector_UTM.shp` | RSCS | **Yes** | All road-stream crossing points |
+| `pour_points_snapped_to_RSCS_UTM.shp` | RSCS-snapped | **Yes** | Culverts relocated to stream crossings |
+| `pour_point_filtered_UTM.shp` | Area-filtered | **Yes** | After min watershed area filter |
+
+### wepp.cloud Recommendation
+
+Use `pour_points_snapped_to_RSCS_UTM.shp` for wepp.cloud payloads because:
+1. Points are guaranteed to be on the stream network (at road-stream crossings)
+2. wepp.cloud's `find_outlet()` will find an outlet very close to the input point
+3. Reduces watershed fidelity issues where the outlet diverges from the culvert location
+
+The original `Pour_Point_UTM.shp` should NOT be used because those points may be off-stream,
+causing wepp.cloud to snap to a different stream location and potentially delineate a
+different watershed than Culvert_web_app computed.
+
 ## Watershed delineation file map (ws_deln)
 - Inputs (uploads or fetch):
   - `boundary_path` -> `boundary.zip` (AOI polygon zip; upload/draw routes in `culvert_app/app.py`).

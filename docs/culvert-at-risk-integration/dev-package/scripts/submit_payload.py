@@ -315,6 +315,13 @@ def main() -> int:
         # Resolve relative URL
         full_status_url = _resolve_status_url(status_url, base_url)
 
+        # Print Job Dashboard link for real-time monitoring
+        job_id = upload_result.get("job_id")
+        if job_id:
+            dashboard_url = f"{base_url}/weppcloud/rq/job-dashboard/{job_id}"
+            logger.info("-" * 60)
+            logger.info(f"Job Dashboard: {dashboard_url}")
+
         # Poll until completion
         logger.info("-" * 60)
         final_status = poll_until_complete(

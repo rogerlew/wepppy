@@ -320,9 +320,9 @@ def run_culvert_run_rq(
         payload_metadata, "dem", runner.DEFAULT_DEM_REL_PATH, str(batch_root)
     )
     cellsize_m = _get_dem_cellsize_m(payload_metadata, Path(dem_path))
+    buffer_m = runner.contains_point_buffer_m
     buffer_px = runner.contains_point_buffer_px
-    buffer_m = None
-    if buffer_px > 0 and cellsize_m is not None:
+    if buffer_m is None and buffer_px > 0 and cellsize_m is not None:
         buffer_m = float(buffer_px) * cellsize_m
 
     # Note: We skip locking here because run_culvert_batch_rq already
@@ -1386,8 +1386,6 @@ def _process_culvert_run(
         climate.build()
 
         wepp.clean()
-        wepp._check_and_set_baseflow_map()
-        wepp._check_and_set_phosphorus_map()
         wepp.prep_hillslopes()
         wepp.run_hillslopes()
         ensure_hillslope_interchange(wepp, climate)

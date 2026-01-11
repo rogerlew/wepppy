@@ -97,6 +97,15 @@ class CulvertsRunner(NoDbBase):
             if crop_pad_px < 0:
                 raise ValueError("crop_pad_px must be >= 0")
             self._crop_pad_px = crop_pad_px
+            buffer_m = self.config_get_float(
+                "culvert_runner", "contains_point_buffer_m", None
+            )
+            if buffer_m is not None:
+                buffer_m = float(buffer_m)
+                if buffer_m < 0:
+                    raise ValueError("contains_point_buffer_m must be >= 0")
+                if buffer_m == 0:
+                    buffer_m = None
             buffer_px = self.config_get_int(
                 "culvert_runner", "contains_point_buffer_px", 0
             )
@@ -104,6 +113,7 @@ class CulvertsRunner(NoDbBase):
                 buffer_px = 0
             if buffer_px < 0:
                 raise ValueError("contains_point_buffer_px must be >= 0")
+            self._contains_point_buffer_m = buffer_m
             self._contains_point_buffer_px = buffer_px
             min_area = self.config_get_float(
                 "culvert_runner", "minimum_watershed_area_m2", None
@@ -194,6 +204,13 @@ class CulvertsRunner(NoDbBase):
     @property
     def contains_point_buffer_px(self) -> int:
         return int(getattr(self, "_contains_point_buffer_px", 0))
+
+    @property
+    def contains_point_buffer_m(self) -> Optional[float]:
+        value = getattr(self, "_contains_point_buffer_m", None)
+        if value is None:
+            return None
+        return float(value)
 
     @property
     def minimum_watershed_area_m2(self) -> Optional[float]:

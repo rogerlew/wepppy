@@ -10,6 +10,7 @@ from rasterio.transform import from_origin
 from tests.culverts.test_culverts_runner import (
     _init_base_project,
     _make_topo_files,
+    _write_culvert_points,
     _write_raster,
     _write_watersheds,
 )
@@ -40,6 +41,8 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     _make_topo_files(topo_dir)
     watersheds_path = culverts_dir / "watersheds.geojson"
     _write_watersheds(watersheds_path, point_ids=[1, 2])
+    culvert_points_path = culverts_dir / "culvert_points.geojson"
+    _write_culvert_points(culvert_points_path, point_ids=[1, 2])
 
     # Create dummy landuse and soils rasters (required by _process_culvert_run)
     transform = from_origin(500000.0, 4100000.0, 10.0, 10.0)
@@ -92,8 +95,6 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     monkeypatch.setattr(Soils, "build", _noop)
     monkeypatch.setattr(Climate, "build", _noop)
     monkeypatch.setattr(Wepp, "clean", _noop)
-    monkeypatch.setattr(Wepp, "_check_and_set_baseflow_map", _noop)
-    monkeypatch.setattr(Wepp, "_check_and_set_phosphorus_map", _noop)
     monkeypatch.setattr(Wepp, "prep_hillslopes", _noop)
     monkeypatch.setattr(Wepp, "run_hillslopes", _noop)
     monkeypatch.setattr(Wepp, "prep_watershed", _noop)

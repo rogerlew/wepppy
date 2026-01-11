@@ -243,6 +243,33 @@ def _update_vector_info_from_fiona(info: dict, filepath: str) -> None:
         return
 
 
+def extract_flow_accum_threshold(ws_deln_dir: Path) -> Optional[int]:
+    """
+    Extract flowAccumThreshold from user_ws_deln_responses.txt.
+
+    Returns the threshold value as an integer, or None if not found.
+    """
+    response_file = ws_deln_dir / "user_ws_deln_responses.txt"
+    if not response_file.exists():
+        return None
+
+    try:
+        with open(response_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                # Check for both hydro and no-hydro variants
+                if line.startswith("flowAccumThreshold:") or line.startswith("flowAccumThreshold_nohydro:"):
+                    value = line.split(":", 1)[1].strip()
+                    try:
+                        return int(float(value))
+                    except ValueError:
+                        pass
+    except (IOError, UnicodeDecodeError):
+        pass
+
+    return None
+
+
 def detect_watershed_processing_method(filepath: str) -> dict:
     """
     Detect whether watersheds were processed with nested_basin_delineation()
@@ -357,6 +384,7 @@ def scan_project(project_name: str, inputs_dir: Path, outputs_dir: Path) -> dict
             "nested_count": None,
             "has_children_count": None,
         },
+        "flow_accum_threshold": None,
     }
 
     input_path = inputs_dir / project_name
@@ -389,6 +417,9 @@ def scan_project(project_name: str, inputs_dir: Path, outputs_dir: Path) -> dict
 
         if ws_deln.exists() and any(ws_deln.iterdir()):
             project["ws_delineation_complete"] = True
+
+            # Extract flow accumulation threshold from response file
+            project["flow_accum_threshold"] = extract_flow_accum_threshold(ws_deln)
 
             # DEM files
             dem_path = ws_deln / "DEM_UTM.tif"
@@ -555,13 +586,13 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
 
     if multi_user:
         lines.extend([
-            "| User | Project | WS Deln | WS Method | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
-            "|------|---------|---------|-----------|-----------|---------------|------------|---------|----------|-----------|",
+            "| User | Project | WS Deln | WS Method | FlowAccum | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
+            "|------|---------|---------|-----------|-----------|-----------|---------------|------------|---------|----------|-----------|",
         ])
     else:
         lines.extend([
-            "| Project | WS Deln | WS Method | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
-            "|---------|---------|-----------|-----------|---------------|------------|---------|----------|-----------|",
+            "| Project | WS Deln | WS Method | FlowAccum | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |",
+            "|---------|---------|-----------|-----------|-----------|---------------|------------|---------|----------|-----------|",
         ])
 
     for p in projects:
@@ -618,6 +649,10 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         else:
             streams = "No"
 
+        # Flow accumulation threshold
+        flow_thresh = p.get("flow_accum_threshold")
+        flow_thresh_str = str(flow_thresh) if flow_thresh is not None else "—"
+
         # Culverts with count and size
         culvert_info = p["files"].get("culvert_points")
         if culvert_info:
@@ -631,11 +666,11 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
 
         if multi_user:
             lines.append(
-                f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {ws_method_str} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
+                f"| {p.get('user_id', '?')} | {p['name']} | {ws_status} | {ws_method_str} | {flow_thresh_str} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
             )
         else:
             lines.append(
-                f"| {p['name']} | {ws_status} | {ws_method_str} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
+                f"| {p['name']} | {ws_status} | {ws_method_str} | {flow_thresh_str} | {dem_status} | {dem_resolution} | {ws_raster} | {streams} | {culverts} | {culvert_count_str} |"
             )
 
     lines.extend([
@@ -645,6 +680,7 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         "- WS Method: Watershed processing method",
         "  - **Nested (N)**: `nested_basin_delineation()` - overlapping watersheds with hierarchy (N = count marked nested)",
         "  - **Partitioned**: `delineate_watersheds_for_pour_points()` - non-overlapping partitioned watersheds",
+        "- FlowAccum: Flow accumulation threshold used for stream extraction (from `user_ws_deln_responses.txt`)",
         "- Hydro-DEM: Hydro-enforced DEM available",
         "- Hydro-DEM Res: Hydro-enforced DEM pixel resolution",
         "- Watersheds: Watershed polygons available (Polygon = shapefile, needs GeoJSON conversion; raster not required)",

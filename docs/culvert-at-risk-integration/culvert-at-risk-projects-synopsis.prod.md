@@ -1,6 +1,6 @@
 # Culvert-at-Risk Projects Synopsis
 
-**Generated:** 2026-01-09 16:14:43
+**Generated:** 2026-01-10 08:26:04
 
 This document provides an automated inventory of Culvert-at-Risk projects and their
 readiness for wepp.cloud payload generation.
@@ -13,46 +13,47 @@ readiness for wepp.cloud payload generation.
 - Users scanned: 24
 - VIABLE projects (WS Deln + Hydro-DEM + Nested WS + Streams + Culverts): 1
 
-| User | Project | WS Deln | WS Method | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |
-|------|---------|---------|-----------|-----------|---------------|------------|---------|----------|-----------|
-| 1 | SANTEE | Yes | Nested | Yes (435.2 MB) | 1.00m | Polygon (810.4 KB) | Raster (217.6 MB) | Yes (64.2 KB) | 63 |
-| 1 | Santee Experimental Forest | No | — | No | — | No | No | No | — |
-| 2 | Santee Test1 | Yes | Partitioned | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Raster (217.6 MB) | Yes (66.2 KB) | 65 |
-| 3 | Santee_Culverts_Test | No | — | No | — | No | No | No | — |
-| 3 | Tallulah_Culvert | No | — | No | — | No | No | No | — |
-| 4 | ___ | Yes | Partitioned | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Raster (217.6 MB) | Yes (66.2 KB) | 65 |
-| 4 | test | No | — | No | — | No | No | No | — |
-| 4 | testes | Yes | Partitioned | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Vector (40.2 MB) | Yes (66.2 KB) | 65 |
-| 4 | testtesttest | Yes | Partitioned | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Vector (40.2 MB) | Yes (66.2 KB) | 65 |
-| 5 | Coweeta | No | — | No | — | No | No | No | — |
-| 6 | Chipola EF P001 | Yes | — | Yes (74.3 MB) | 1.00m | No | Vector (10.0 MB) | No | — |
-| 6 | Deep Creek WS_001 | Yes | Partitioned | Yes (101.5 MB) | 9.41m | Polygon (7.0 MB) | Raster (50.8 MB) | No | — |
-| 7 | Apalachicola National Forest | No | — | No | — | No | No | No | — |
-| 8 | Practice-Test | Yes | Partitioned | Yes (98.2 MB) | 9.76m | Polygon (2.9 MB) | Vector (8.8 MB) | No | — |
-| 9 | Test_Project | Yes | Partitioned | Yes (10.1 MB) | 9.37m | Polygon (258.3 KB) | Vector (1.4 MB) | No | — |
-| 10 | WO_test1 | No | — | No | — | No | No | No | — |
-| 11 | test - nd | No | — | No | — | No | No | No | — |
-| 12 | SSP_Analysis | No | — | No | — | No | No | No | — |
-| 13 | Claremont | Yes | — | Yes (3.0 MB) | 8.75m | No | Vector (579.7 KB) | No | — |
-| 14 | Test | Yes | Partitioned | Yes (51.3 MB) | 7.85m | Polygon (1.8 MB) | Vector (7.1 MB) | No | — |
-| 14 | test2 | Yes | — | Yes (9.3 MB) | 9.24m | No | Vector (2.0 MB) | No | — |
-| 15 | Garson | No | — | No | — | No | No | No | — |
-| 16 | N Pebble | No | — | No | — | No | No | No | — |
-| 17 | testing | Yes | — | No | — | No | No | Yes (1.1 KB) | 8 |
-| 17 | testing2 | No | — | No | — | No | No | No | — |
-| 19 | Test Project - Garnet Dike Area | Yes | Partitioned | Yes (5.1 MB) | 9.23m | Polygon (37.8 KB) | Vector (360.8 KB) | No | — |
-| 21 | TreatmentArea3 | No | — | No | — | No | No | No | — |
-| 25 | Test | No | — | No | — | No | No | No | — |
-| 27 | Lansing test case | Yes | Nested | Yes (7.1 MB) | 8.44m | Polygon (1.4 MB) | Vector (1.5 MB) | No | — |
-| 28 | Test Data | No | — | No | — | No | No | No | — |
-| 29 | Oklahoma Culverts | No | — | No | — | No | No | No | — |
-| 30 | Modoc NF Trial | Yes | Nested | Yes (22.0 MB) | 8.75m | Polygon (959.0 KB) | Vector (5.7 MB) | No | — |
+| User | Project | WS Deln | WS Method | FlowAccum | Hydro-DEM | Hydro-DEM Res | Watersheds | Streams | Culverts | # Culverts |
+|------|---------|---------|-----------|-----------|-----------|---------------|------------|---------|----------|-----------|
+| 1 | SANTEE | Yes | Nested | 100 | Yes (435.2 MB) | 1.00m | Polygon (810.4 KB) | Raster (217.6 MB) | Yes (64.2 KB) | 63 |
+| 1 | Santee Experimental Forest | No | — | — | No | — | No | No | No | — |
+| 2 | Santee Test1 | Yes | Partitioned | 100 | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Raster (217.6 MB) | Yes (66.2 KB) | 65 |
+| 3 | Santee_Culverts_Test | No | — | — | No | — | No | No | No | — |
+| 3 | Tallulah_Culvert | No | — | — | No | — | No | No | No | — |
+| 4 | ___ | Yes | Partitioned | 100 | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Raster (217.6 MB) | Yes (66.2 KB) | 65 |
+| 4 | test | No | — | — | No | — | No | No | No | — |
+| 4 | testes | Yes | Partitioned | 100 | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Vector (40.2 MB) | Yes (66.2 KB) | 65 |
+| 4 | testtesttest | Yes | Partitioned | 100 | Yes (435.2 MB) | 1.00m | Polygon (475.8 KB) | Vector (40.2 MB) | Yes (66.2 KB) | 65 |
+| 5 | Coweeta | No | — | — | No | — | No | No | No | — |
+| 6 | Chipola EF P001 | Yes | — | 100 | Yes (74.3 MB) | 1.00m | No | Vector (10.0 MB) | No | — |
+| 6 | Deep Creek WS_001 | Yes | Partitioned | 100 | Yes (101.5 MB) | 9.41m | Polygon (7.0 MB) | Raster (50.8 MB) | No | — |
+| 7 | Apalachicola National Forest | No | — | — | No | — | No | No | No | — |
+| 8 | Practice-Test | Yes | Partitioned | 100 | Yes (98.2 MB) | 9.76m | Polygon (2.9 MB) | Vector (8.8 MB) | No | — |
+| 9 | Test_Project | Yes | Partitioned | 100 | Yes (10.1 MB) | 9.37m | Polygon (258.3 KB) | Vector (1.4 MB) | No | — |
+| 10 | WO_test1 | No | — | — | No | — | No | No | No | — |
+| 11 | test - nd | No | — | — | No | — | No | No | No | — |
+| 12 | SSP_Analysis | No | — | — | No | — | No | No | No | — |
+| 13 | Claremont | Yes | — | — | Yes (3.0 MB) | 8.75m | No | Vector (579.7 KB) | No | — |
+| 14 | Test | Yes | Partitioned | 100 | Yes (51.3 MB) | 7.85m | Polygon (1.8 MB) | Vector (7.1 MB) | No | — |
+| 14 | test2 | Yes | — | 100 | Yes (9.3 MB) | 9.24m | No | Vector (2.0 MB) | No | — |
+| 15 | Garson | No | — | — | No | — | No | No | No | — |
+| 16 | N Pebble | No | — | — | No | — | No | No | No | — |
+| 17 | testing | Yes | — | 100 | No | — | No | No | Yes (1.1 KB) | 8 |
+| 17 | testing2 | No | — | — | No | — | No | No | No | — |
+| 19 | Test Project - Garnet Dike Area | Yes | Partitioned | 100 | Yes (5.1 MB) | 9.23m | Polygon (37.8 KB) | Vector (360.8 KB) | No | — |
+| 21 | TreatmentArea3 | No | — | — | No | — | No | No | No | — |
+| 25 | Test | No | — | — | No | — | No | No | No | — |
+| 27 | Lansing test case | Yes | Nested | 100 | Yes (7.1 MB) | 8.44m | Polygon (1.4 MB) | Raster (3.6 MB) | No | — |
+| 28 | Test Data | No | — | — | No | — | No | No | No | — |
+| 29 | Oklahoma Culverts | No | — | — | No | — | No | No | No | — |
+| 30 | Modoc NF Trial | Yes | Nested | 100 | Yes (22.0 MB) | 8.75m | Polygon (959.0 KB) | Vector (5.7 MB) | No | — |
 
 **Legend:**
 - WS Deln: Watershed delineation completed
 - WS Method: Watershed processing method
   - **Nested (N)**: `nested_basin_delineation()` - overlapping watersheds with hierarchy (N = count marked nested)
   - **Partitioned**: `delineate_watersheds_for_pour_points()` - non-overlapping partitioned watersheds
+- FlowAccum: Flow accumulation threshold used for stream extraction (from `user_ws_deln_responses.txt`)
 - Hydro-DEM: Hydro-enforced DEM available
 - Hydro-DEM Res: Hydro-enforced DEM pixel resolution
 - Watersheds: Watershed polygons available (Polygon = shapefile, needs GeoJSON conversion; raster not required)

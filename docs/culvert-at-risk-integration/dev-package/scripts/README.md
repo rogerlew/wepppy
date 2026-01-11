@@ -149,11 +149,19 @@ cat santee_payload_contents/metadata.json
 {
   "schema_version": "1.0",
   "base_project_runid": "lt_wepp_template",
-  "nlcd_db": "custom_nlcd.db"
+  "nlcd_db": "custom_nlcd.db",
+  "flow_accum_threshold": 100
 }
 ```
 
 All fields except `schema_version` are optional.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `schema_version` | string | Required. Schema version identifier. |
+| `base_project_runid` | string | Optional. Base project runid for template parameters. |
+| `nlcd_db` | string | Optional. NLCD database path override. |
+| `flow_accum_threshold` | integer | Optional. Flow accumulation threshold used for stream extraction in Culvert_web_app (extracted from `user_ws_deln_responses.txt`). Preserved for reference; streams are pre-computed in the payload. |
 
 ## submit_payload.py - SSL Payload Submission
 

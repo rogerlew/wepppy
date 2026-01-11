@@ -445,7 +445,7 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 - Scope: run-level validation + error propagation, structured error codes for validation/execution, publish status events to Redis DB 2, update RQ job info with `error_code`/`error_detail`, add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
 - Deliverables:
-  - Culvert point-in-watershed validation (`WatershedFeature.contains_point`) before modeling; supports `culvert_runner.contains_point_buffer_px` (buffered by DEM cellsize) to tolerate small alignment offsets; failures recorded as `CulvertPointOutsideWatershedError`.
+  - Culvert point-in-watershed validation (`WatershedFeature.contains_point`) before modeling; supports `culvert_runner.contains_point_buffer_m` (meters) to tolerate small alignment offsets; failures recorded as `CulvertPointOutsideWatershedError`.
   - Run-level errors from `run_metadata.json` merged into `culverts_runner.nodb` + `runs_manifest.md`.
   - Finalizer computes validation metrics (culvert/outlet coords, distance, target area, bounds area) and stores them in `culverts_runner.nodb` + `runs_manifest.md`.
   - NoDb contention retry for `CulvertsRunner` writes when batch workers overlap.
@@ -512,6 +512,22 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - Updated `docs/culvert-at-risk-integration/dev-package/README.md` with "CRITICAL: Watershed Simplification Issue" section.
 - `build_payload.py` uses simplified watersheds as-is (no reconstruction attempted).
 - Culvert_web_app team informed: to run all culverts, provide unsimplified `watersheds.geojson`.
+
+## Phase 5c - Stream network scaling (IN PROGRESS)
+- Context: `flow_accum_threshold` in Culvert_web_app is cell-count based (default 100). For high-resolution DEMs (1.0m), that yields a much denser stream network than a 9–10m DEM using the same threshold, exploding hillslopes and runtime.
+- Baseline reference: weppcloud assumes `flow_accum_threshold=100` plus one stream-order reduction pass, but the real calibration target is the 30m DEM workflow where channel initiation is driven by critical source area (typically 5–10 ha).
+- Scaling guidance:
+  - Target area: `A_target_m2 = flow_accum_threshold * (cellsize_m^2)`
+  - If re-running `extract_streams` to match the 30m/100-cell baseline (~90,000 m²), reasonable targets are:
+    - 10m DEM: `flow_accum_threshold ≈ 900`
+    - 1m DEM: `flow_accum_threshold ≈ 90,000`
+- Mitigations available today:
+  - Re-run `extract_streams` in Culvert_web_app with a scaled threshold (best fidelity).
+  - Adjust `culvert_runner.order_reduction_passes` as a heuristic simplifier when re-running streams is not feasible (less direct than thresholding).
+- Current action: test `order_reduction_passes` values (start with 2, then 3) on 1.0m DEM batches to measure hillslope and runtime reduction.
+- Deliverables:
+  - Document target-area scaling approach and recommended thresholds by DEM resolution.
+  - Decide whether to re-run stream extraction for high-resolution projects or rely on order-reduction passes.
 
 ## Phase 5 handoff summary
 - Validation now checks culvert points against watershed polygons; outside points fail fast with `CulvertPointOutsideWatershedError`.

@@ -68,6 +68,32 @@ def _make_topo_files(topo_dir: Path, *, crs: str = "EPSG:32611") -> dict[str, Pa
     }
 
 
+def _write_culvert_points(path: Path, point_ids: list[object] | None = None) -> None:
+    """Create a culvert_points.geojson with Point features for each point_id."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if point_ids is None:
+        point_ids = [1, "2"]
+    features = []
+    for idx, point_id in enumerate(point_ids):
+        offset = idx * 10.0
+        features.append(
+            {
+                "type": "Feature",
+                "properties": {"Point_ID": point_id},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [500010.0 + offset, 4099990.0],
+                },
+            }
+        )
+    payload = {
+        "type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "EPSG:32611"}},
+        "features": features,
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
 def _write_watersheds(path: Path, point_ids: list[object] | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if point_ids is None:

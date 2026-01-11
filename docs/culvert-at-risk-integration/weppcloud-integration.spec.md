@@ -180,10 +180,11 @@ Notes:
 - `base_project_runid` (string, optional)
 - `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
 - `ssurgo_db` (string, optional; overrides `soils.ssurgo_db`)
-- `contains_point_buffer_px` (int, optional; when set, buffer the watershed polygon by this many DEM pixels during the culvert point containment check)
-
+- `flow_accum_threshold` (integer, optional; flow accumulation threshold used for stream extraction in Culvert_web_app, extracted from `user_ws_deln_responses.txt`)
 Notes:
 - Climate duration uses defaults from `culvert.cfg` (no override keys in v1).
+- Culvert point containment uses `culvert_runner.contains_point_buffer_m` (meters) from `culvert.cfg`. Legacy `contains_point_buffer_px` is still honored when present.
+- `flow_accum_threshold` is preserved for reference and traceability; streams are pre-computed in the payload so this value is not used by wepp.cloud processing.
 
 ### Coordinate system rules
 - **Rasters must be in UTM projection.** Culvert_web_app reprojects all inputs to UTM during its `ws_deln` pipeline (source: `subroutine_nested_watershed_delineation.py::get_utm_crs_from_wgs84()` determines zone from boundary centroid, then `reproject_raster_from_path()` reprojects DEM unconditionally). Output files are named with `_UTM` suffix (e.g., `DEM_UTM.tif`, `D8flow_dir_UTM.tif`).
@@ -247,7 +248,7 @@ For each culvert (identified by `Point_ID`):
 
 2. **Validate culvert point is inside watershed polygon:**
    - Load the culvert point from `culvert_points.geojson` for the current `Point_ID`.
-   - Use `WatershedFeature.contains_point()` to assert the point is inside the watershed polygon; apply a buffer of `culvert_runner.contains_point_buffer_px * dem.resolution_m` (when configured) to tolerate small alignment offsets.
+   - Use `WatershedFeature.contains_point()` to assert the point is inside the watershed polygon; apply a buffer of `culvert_runner.contains_point_buffer_m` (meters) to tolerate small alignment offsets.
    - If the point is outside, mark the run failed with `CulvertPointOutsideWatershedError` (written to `run_metadata.json`, merged into `culverts_runner.nodb`, and surfaced in `runs_manifest.md`) and skip modeling.
    - If `culvert_runner.minimum_watershed_area_m2` is configured and the watershed feature provides `area_sqm`, reject runs below the threshold with `WatershedAreaBelowMinimumError`.
 
