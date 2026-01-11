@@ -228,6 +228,18 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_status_chip_success",
+            "label": "Status chip success text vs background",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "text_vs_background",
+                    "foreground": "#theme_lab_status_chip_success",
+                    "background": "#theme_lab_status_chip_success",
+                }
+            ],
+        },
+        {
             "id": "wc_checkbox_checked",
             "label": "Readonly toggle (checked)",
             "threshold": 3.0,

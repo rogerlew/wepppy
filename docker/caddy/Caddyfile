@@ -11,6 +11,10 @@ http://:8080 {
         respond "OK"
     }
 
+    handle_path /weppcloud/health* {
+        respond "OK"
+    }
+
     handle /cap* {
         reverse_proxy cap:3000 {
             header_up X-Forwarded-Prefix /cap

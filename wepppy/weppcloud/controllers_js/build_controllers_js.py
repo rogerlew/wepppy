@@ -36,6 +36,8 @@ TEMPLATES_DIR: Final[Path] = MODULE_DIR / "templates"
 OUTPUT_PATH: Final[Path] = ROOT / "static" / "js" / "controllers-gl.js"
 STATUS_STREAM_SOURCE: Final[Path] = MODULE_DIR / "status_stream.js"
 STATUS_STREAM_OUTPUT: Final[Path] = ROOT / "static" / "js" / "status_stream.js"
+THEME_SOURCE: Final[Path] = MODULE_DIR / "theme.js"
+THEME_OUTPUT: Final[Path] = ROOT / "static" / "js" / "theme.js"
 PRIORITY_MODULES: Final[List[str]] = [
     "dom.js",
     "events.js",
@@ -119,6 +121,19 @@ def render_status_stream_bundle() -> str:
     return header + source
 
 
+def render_theme_bundle() -> str:
+    source = THEME_SOURCE.read_text(encoding="utf-8")
+    header = (
+        "/* ----------------------------------------------------------------------------\n"
+        " * Theme Switcher standalone bundle\n"
+        " * NOTE: Generated via build_controllers_js.py from\n"
+        f" *       {THEME_SOURCE.relative_to(project_root)}\n"
+        " * ----------------------------------------------------------------------------\n"
+        " */\n"
+    )
+    return header + source
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Render controllers-gl.js from controllers_js templates",
@@ -147,6 +162,15 @@ def main() -> None:
             "(defaults to static/js/status_stream.js)"
         ),
     )
+    parser.add_argument(
+        "--theme-output",
+        type=Path,
+        default=THEME_OUTPUT,
+        help=(
+            "Override output path for the standalone Theme bundle "
+            "(defaults to static/js/theme.js)"
+        ),
+    )
     args = parser.parse_args()
 
     contents = render_controllers(
@@ -156,6 +180,8 @@ def main() -> None:
     write_output(contents, output_path=args.output)
     status_stream_bundle = render_status_stream_bundle()
     write_output(status_stream_bundle, output_path=args.status_stream_output)
+    theme_bundle = render_theme_bundle()
+    write_output(theme_bundle, output_path=args.theme_output)
     write_unitizer_module(output_path=args.unitizer_output)
 
 

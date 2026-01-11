@@ -1,4 +1,4 @@
-/* Generated from Cursor-Light-color-theme.json on 2025-12-24T22:12:26.021921+00:00 */
+/* Generated from Cursor-Light-color-theme.json on 2026-01-11T04:43:04.919638+00:00 */
 :root[data-theme="cursor-light"] {
   --wc-color-accent: #FCFCFC00;
   --wc-color-accent-soft: rgba(252, 252, 252, 0.180);
@@ -12,8 +12,8 @@
   --wc-color-link-hover: #3173A7;
   --wc-color-on-primary: #FCFCFC;
   --wc-color-page: #F3F3F4;
-  --wc-color-positive: #0B0B2D11;
-  --wc-color-positive-soft: rgba(11, 11, 45, 0.180);
+  --wc-color-positive: #2D8B48;
+  --wc-color-positive-soft: rgba(45, 139, 72, 0.180);
   --wc-color-primary: #3173A7;
   --wc-color-primary-dark: #245C85;
   --wc-color-surface: #FCFCFC;

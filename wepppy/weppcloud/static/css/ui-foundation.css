@@ -4219,7 +4219,7 @@ body.wc-modal-open {
 
 .wc-status-chip[data-state="success"],
 .wc-status-chip[data-state="completed"] {
-  background: var(--wc-color-positive-soft);
+  background: color-mix(in srgb, var(--wc-color-surface) 94%, var(--wc-color-positive));
   border-color: var(--wc-color-positive);
   color: var(--wc-color-positive);
 }
@@ -4227,7 +4227,7 @@ body.wc-modal-open {
 .wc-status-chip[data-state="error"],
 .wc-status-chip[data-state="failed"],
 .wc-status-chip[data-state="critical"] {
-  background: var(--wc-color-critical-soft);
+  background: color-mix(in srgb, var(--wc-color-surface) 94%, var(--wc-color-critical));
   border-color: var(--wc-color-critical);
   color: var(--wc-color-critical);
 }
@@ -4235,14 +4235,14 @@ body.wc-modal-open {
 .wc-status-chip[data-state="warning"],
 .wc-status-chip[data-state="queued"],
 .wc-status-chip[data-state="attention"] {
-  background: var(--wc-color-attention-soft);
+  background: color-mix(in srgb, var(--wc-color-surface) 94%, var(--wc-color-attention));
   border-color: var(--wc-color-attention);
   color: var(--wc-color-attention);
 }
 
 .wc-status-chip[data-state="info"],
 .wc-status-chip[data-state="running"] {
-  background: var(--wc-color-accent-soft);
+  background: color-mix(in srgb, var(--wc-color-surface) 94%, var(--wc-color-accent));
   border-color: var(--wc-color-accent);
   color: var(--wc-color-accent);
 }

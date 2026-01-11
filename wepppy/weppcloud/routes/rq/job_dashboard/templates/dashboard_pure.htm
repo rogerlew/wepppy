@@ -4,44 +4,54 @@
 
 {% from "shared/console_macros.htm" import console_page, console_header %}
 
+{% block body_container_class %}wc-container wc-container--fluid{% endblock %}
+
 {% block body %}
 {% call console_page(data_controller="rq-job-dashboard") %}
   {% call console_header(
     title="RQ Job Dashboard",
     subtitle="Track queued and running jobs, view progress, and inspect failures."
   ) %}
-    <div class="wc-toolbar wc-toolbar--end">
-      <button type="button" class="pure-button pure-button-secondary" id="cancel-job">
-        Cancel job
-      </button>
-    </div>
   {% endcall %}
 
   <section class="wc-panel wc-stack" aria-live="polite">
     <h2 class="wc-heading wc-heading--sm">Summary</h2>
-    <div class="wc-summary-pane">
-      <dl class="wc-summary-pane__list">
-        <div class="wc-summary-pane__item">
-          <dt class="wc-summary-pane__term">Job ID</dt>
-          <dd class="wc-summary-pane__definition" id="job-id">{{ job_id }}</dd>
+    <div class="job-dashboard__summary-row">
+      <div class="wc-summary-pane">
+        <dl class="wc-summary-pane__list">
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Job ID</dt>
+            <dd class="wc-summary-pane__definition" id="job-id">{{ job_id }}</dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Run ID</dt>
+            <dd class="wc-summary-pane__definition" id="run-id">--</dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Progress</dt>
+            <dd class="wc-summary-pane__definition" id="job-summary">Waiting for data...</dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Query Count</dt>
+            <dd class="wc-summary-pane__definition" id="query-count">0</dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Query Interval (ms)</dt>
+            <dd class="wc-summary-pane__definition" id="query-interval">--</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="wc-summary-pane job-dashboard__qr-pane">
+        <div class="job-dashboard__qr">
+          <canvas id="job-dashboard-qr" aria-label="QR code for this job dashboard" role="img"></canvas>
+          <span class="job-dashboard__qr-label">Scan to open on mobile</span>
         </div>
-        <div class="wc-summary-pane__item">
-          <dt class="wc-summary-pane__term">Run ID</dt>
-          <dd class="wc-summary-pane__definition" id="run-id">--</dd>
-        </div>
-        <div class="wc-summary-pane__item">
-          <dt class="wc-summary-pane__term">Progress</dt>
-          <dd class="wc-summary-pane__definition" id="job-summary">Waiting for data...</dd>
-        </div>
-        <div class="wc-summary-pane__item">
-          <dt class="wc-summary-pane__term">Query Count</dt>
-          <dd class="wc-summary-pane__definition" id="query-count">0</dd>
-        </div>
-        <div class="wc-summary-pane__item">
-          <dt class="wc-summary-pane__term">Query Interval (ms)</dt>
-          <dd class="wc-summary-pane__definition" id="query-interval">--</dd>
-        </div>
-      </dl>
+      </div>
+    </div>
+    <div class="wc-toolbar">
+      <button type="button" class="pure-button pure-button-secondary" id="cancel-job">
+        Cancel job
+      </button>
     </div>
   </section>
 
@@ -60,6 +70,18 @@
 
 {% block head_extras %}
   {{ super() }}
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("wc-theme");
+        if (theme) {
+          document.documentElement.setAttribute("data-theme", theme);
+        }
+      } catch (err) {
+        // ignore storage errors
+      }
+    })();
+  </script>
   <style>
     .job-dashboard__header {
       display: flex;
@@ -110,6 +132,59 @@
       font-size: var(--wc-font-size-sm);
     }
 
+    .job-dashboard__summary-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+      gap: var(--wc-space-md);
+      align-items: stretch;
+    }
+
+    .job-dashboard__summary-row .wc-summary-pane {
+      height: 100%;
+    }
+
+    .job-dashboard__qr-pane {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .job-dashboard__qr {
+      display: grid;
+      gap: var(--wc-space-xs);
+      justify-items: center;
+      text-align: center;
+    }
+
+    .job-dashboard__qr canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--wc-radius-sm);
+      image-rendering: pixelated;
+      background: #ffffff;
+    }
+
+    .job-dashboard__qr-label {
+      font-size: var(--wc-font-size-xs);
+      color: var(--wc-color-text-muted);
+    }
+
+    @media (max-width: 960px) {
+      .job-dashboard__summary-row {
+        grid-template-columns: 1fr;
+      }
+
+      .job-dashboard__qr-pane {
+        justify-content: flex-start;
+      }
+    }
+
+    .wc-job-table th.wc-text-right,
+    .wc-job-table td.wc-text-right {
+      min-width: 9rem;
+      width: 9rem;
+    }
+
     @media (max-width: 720px) {
       .wc-job-summary {
         margin-left: 0;
@@ -120,6 +195,8 @@
 {% endblock %}
 
 {% block script_extras %}
+<script src="{{ static_url('js/theme.js') }}"></script>
+<script src="{{ static_url('js/qrcode.js') }}"></script>
 <script>
   const jobId = {{ job_id | tojson }};
   const sitePrefix = {{ site_prefix | tojson }};
@@ -136,6 +213,7 @@
   let anyFailed = false;
   let paused = false;
   let queryInterval = 1000;
+  let qrResizeTimer = null;
 
   const statusStateMap = {
     finished: "success",
@@ -628,11 +706,56 @@
       });
   }
 
+  function setQrLabel(text) {
+    const label = document.querySelector(".job-dashboard__qr-label");
+    if (label) {
+      label.textContent = text;
+    }
+  }
+
+  function renderQrCode() {
+    if (typeof QRCode === "undefined") {
+      console.error("QRCode library unavailable.");
+      setQrLabel("QR code unavailable");
+      return;
+    }
+
+    const canvas = document.getElementById("job-dashboard-qr");
+    if (!canvas) {
+      return;
+    }
+
+    setQrLabel("Scan to open on mobile");
+
+    let qrData;
+    try {
+      qrData = QRCode.generate(window.location.href, "M");
+    } catch (err) {
+      console.error("QR code generation failed.", err);
+      setQrLabel("QR code unavailable");
+      return;
+    }
+
+    const quietZone = 4;
+    const container = canvas.parentElement;
+    const maxWidth = container && container.clientWidth ? container.clientWidth : 200;
+    const moduleSize = Math.max(2, Math.floor(maxWidth / (qrData.size + quietZone * 2)));
+    QRCode.render(canvas, qrData, moduleSize);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const cancelButton = document.getElementById("cancel-job");
     if (cancelButton) {
       cancelButton.addEventListener("click", confirmCancelJob);
     }
+
+    renderQrCode();
+    window.addEventListener("resize", () => {
+      if (qrResizeTimer) {
+        window.clearTimeout(qrResizeTimer);
+      }
+      qrResizeTimer = window.setTimeout(renderQrCode, 150);
+    });
 
     fetchJobStatus();
   });

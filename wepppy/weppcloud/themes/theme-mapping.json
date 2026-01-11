@@ -27,7 +27,9 @@
       "overrides": {
         "--wc-shadow-sm": "0 6px 18px rgba(0, 0, 0, 0.35)",
         "--wc-shadow-md": "0 18px 48px rgba(0, 0, 0, 0.45)",
-        "--wc-color-border": "#181A1F"
+        "--wc-color-border": "#181A1F",
+        "--wc-color-positive": "#98C379",
+        "--wc-color-positive-soft": "rgba(152, 195, 121, 0.18)"
       }
     },
     "ayu-dark": {
@@ -374,6 +376,9 @@
       "description": "Success/positive accent color.",
       "fallback": "#1a7f37",
       "tokens": [
+        "editorGutter.addedBackground",
+        "gitDecoration.addedResourceForeground",
+        "testing.iconPassed",
         "statusBarItem.hoverBackground",
         "list.highlightForeground"
       ]
@@ -382,6 +387,18 @@
       "description": "Soft positive background for alerts.",
       "fallback": "#e6f4ea",
       "tokens": [
+        {
+          "token": "editorGutter.addedBackground",
+          "alpha": 0.18
+        },
+        {
+          "token": "gitDecoration.addedResourceForeground",
+          "alpha": 0.18
+        },
+        {
+          "token": "testing.iconPassed",
+          "alpha": 0.18
+        },
         {
           "token": "statusBarItem.hoverBackground",
           "alpha": 0.18

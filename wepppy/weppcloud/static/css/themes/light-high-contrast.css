@@ -1,4 +1,4 @@
-/* Generated from light-high-contrast-theme.json on 2025-12-24T22:12:26.022494+00:00 */
+/* Generated from light-high-contrast-theme.json on 2026-01-11T04:43:04.920204+00:00 */
 :root[data-theme="light-high-contrast"] {
   --wc-color-accent: #0050A4;
   --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
@@ -12,8 +12,8 @@
   --wc-color-link-hover: #002347;
   --wc-color-on-primary: #FFFFFF;
   --wc-color-page: #E4EDFF;
-  --wc-color-positive: #007944;
-  --wc-color-positive-soft: rgba(0, 121, 68, 0.180);
+  --wc-color-positive: #0F8B25;
+  --wc-color-positive-soft: rgba(15, 139, 37, 0.180);
   --wc-color-primary: #0050A4;
   --wc-color-primary-dark: #004083;
   --wc-color-surface: #FFFEFA;
