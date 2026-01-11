@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2025-10-29  
+**Last Updated**: 2026-01-11  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -158,6 +158,26 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 **Dependencies**: None
 
 **Next Steps**: Create work package when bandwidth available; not blocking any current work
+
+---
+
+### Error Schema Standardization (Phase 6a)
+**Proposed**: 2026-01-11  
+**Owner**: Codex  
+**Size**: Medium (2-3 days)  
+**Priority**: Medium  
+**Status**: **Scoped — Inventory Needed**  
+**Package**: [docs/work-packages/20260111_error_schema_standardization/](docs/work-packages/20260111_error_schema_standardization/)  
+**Description**: Inventory rq/api response schemas and client callsites to standardize error payloads and remove redundant `success`/`Success` flags ahead of rq-engine migration.
+
+**Scope**:
+- Survey rq-engine and weppcloud rq/api response schemas + status codes
+- Map frontend/backend callsites and semantics
+- Draft recommendations for a unified response schema
+
+**Dependencies**: None
+
+**Next Steps**: Execute the package prompt and author the observed usage report.
 
 ---
 

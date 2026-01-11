@@ -173,7 +173,12 @@ def api_run_sync():
                 timeout=RUN_SYNC_TIMEOUT,
             )
             
-            jobs_info = {'sync_job_id': sync_job.id}
+            jobs_info = {
+                'sync_job_id': sync_job.id,
+                'job_id': sync_job.id,
+                'jobId': sync_job.id,
+            }
+            job_ids = [sync_job.id]
             
             # Optionally chain migrations job
             if run_migrations:
@@ -190,6 +195,8 @@ def api_run_sync():
                     depends_on=sync_job,
                 )
                 jobs_info['migration_job_id'] = migration_job.id
+                job_ids.append(migration_job.id)
+                jobs_info['job_ids'] = job_ids
                 
     except Exception:
         return exception_factory('Failed to enqueue run sync job', runid=runid)

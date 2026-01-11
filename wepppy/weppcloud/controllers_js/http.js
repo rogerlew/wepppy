@@ -222,6 +222,95 @@
         return contentType.indexOf("application/json") !== -1 || contentType.indexOf("+json") !== -1;
     }
 
+    function isPlainObject(value) {
+        return Object.prototype.toString.call(value) === "[object Object]";
+    }
+
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return value;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) {
+                return item === undefined || item === null ? "" : String(item);
+            }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.Error === "string") {
+                return value.Error;
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function normalizeResponsePayload(payload) {
+        if (!payload || typeof payload !== "object") {
+            return payload;
+        }
+        if (Array.isArray(payload) || !isPlainObject(payload)) {
+            return payload;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(payload, "job_id")) {
+            if (Object.prototype.hasOwnProperty.call(payload, "jobId")) {
+                payload.job_id = payload.jobId;
+            } else if (Array.isArray(payload.job_ids) && payload.job_ids.length > 0) {
+                payload.job_id = payload.job_ids[0];
+            }
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(payload, "job_ids") &&
+            Object.prototype.hasOwnProperty.call(payload, "jobIds")) {
+            payload.job_ids = payload.jobIds;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(payload, "success") &&
+            Object.prototype.hasOwnProperty.call(payload, "Success")) {
+            payload.success = payload.Success;
+        }
+
+        var hasError = Object.prototype.hasOwnProperty.call(payload, "error");
+        var hasLegacyError = Object.prototype.hasOwnProperty.call(payload, "Error");
+
+        if (!hasError && hasLegacyError) {
+            payload.error = payload.Error;
+            hasError = true;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(payload, "error_message")) {
+            var errorValue = hasError ? payload.error : (hasLegacyError ? payload.Error : undefined);
+            var errorMessage = normalizeErrorValue(errorValue);
+            if (errorMessage !== undefined && errorMessage !== null) {
+                payload.error_message = errorMessage;
+            }
+        }
+        if (!Object.prototype.hasOwnProperty.call(payload, "message") &&
+            Object.prototype.hasOwnProperty.call(payload, "error_message")) {
+            payload.message = payload.error_message;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(payload, "stacktrace") &&
+            Object.prototype.hasOwnProperty.call(payload, "StackTrace")) {
+            payload.stacktrace = payload.StackTrace;
+        }
+
+        return payload;
+    }
+
     function parseBody(response) {
         var contentType = response.headers && response.headers.get ? response.headers.get("content-type") || "" : "";
         if (!contentType) {
@@ -313,6 +402,7 @@
             .then(function (response) {
                 abort.cancelTimeout();
                 return parseBody(response).then(function (parsed) {
+                    parsed = normalizeResponsePayload(parsed);
                     var payload = {
                         ok: response.ok,
                         status: response.status,
@@ -351,7 +441,7 @@
             }
             if (typeof body === "string") {
                 try {
-                    return JSON.parse(body);
+                    return normalizeResponsePayload(JSON.parse(body));
                 } catch (err) {
                     throw new HttpError("Expected JSON response.", {
                         url: result.url,
@@ -363,7 +453,7 @@
                     });
                 }
             }
-            return body;
+            return normalizeResponsePayload(body);
         });
     }
 
@@ -393,7 +483,7 @@
             }
             if (typeof body === "string") {
                 try {
-                    return JSON.parse(body);
+                    return normalizeResponsePayload(JSON.parse(body));
                 } catch (err) {
                     throw new HttpError("Expected JSON response.", {
                         url: result.url,
@@ -405,7 +495,7 @@
                     });
                 }
             }
-            return body;
+            return normalizeResponsePayload(body);
         }
 
         return http.request(primaryUrl, opts)

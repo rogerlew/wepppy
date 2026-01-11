@@ -10,14 +10,25 @@ def error_response(message: str) -> JSONResponse:
     stacktrace = traceback.format_exc().splitlines()
     payload = {
         "Success": False,
+        "success": False,
         "Error": message,
         "StackTrace": stacktrace,
+        "error": {"message": message},
+        "stacktrace": stacktrace,
     }
     return JSONResponse(payload, status_code=500)
 
 
 def validation_error_response(errors: list[dict[str, Any]]) -> JSONResponse:
-    payload = {"success": False, "errors": errors}
+    payload = {
+        "Success": False,
+        "success": False,
+        "Error": "Validation failed",
+        "StackTrace": [],
+        "errors": errors,
+        "error": {"message": "Validation failed", "code": "validation_error"},
+        "stacktrace": [],
+    }
     return JSONResponse(payload, status_code=400)
 
 

@@ -989,8 +989,9 @@ var RangelandCoverModify = (function () {
                 return;
             }
             var checkbox = matched || event.target;
-            setSelectionMode(Boolean(checkbox && checkbox.checked), {
-                clearSelection: !Boolean(checkbox && checkbox.checked),
+            var isChecked = checkbox && checkbox.checked;
+            setSelectionMode(isChecked, {
+                clearSelection: !isChecked,
                 source: "toggle"
             });
         });

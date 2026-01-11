@@ -954,7 +954,7 @@ var Project = (function () {
                     }
                     window.alert(message);
                 } else {
-                    var errorMessage = response && (response.message || response.error) || "Error promoting profile draft.";
+                    var errorMessage = response && (response.error_message || response.message || response.error) || "Error promoting profile draft.";
                     window.alert(errorMessage);
                 }
                 return response;

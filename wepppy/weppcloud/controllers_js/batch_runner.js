@@ -1143,7 +1143,7 @@ var BatchRunner = (function () {
                     var payload = response.body || {};
                     if (!payload || payload.success !== true) {
                         var errorMsg =
-                            (payload && (payload.error || payload.message)) ||
+                            (payload && (payload.error_message || payload.message || payload.error)) ||
                             "Failed to update batch tasks.";
                         throw new Error(errorMsg);
                     }
@@ -1743,7 +1743,7 @@ var BatchRunner = (function () {
                 .then(function (response) {
                     var payload = response.body || {};
                     if (!payload.success) {
-                        var errorMsg = payload.error || payload.message || "Upload failed.";
+                        var errorMsg = payload.error_message || payload.message || payload.error || "Upload failed.";
                         throw new Error(errorMsg);
                     }
 
@@ -1861,7 +1861,7 @@ var BatchRunner = (function () {
                 .then(function (response) {
                     var payload = response.body || {};
                     if (!payload.success) {
-                        var errorMsg = payload.error || payload.message || "Upload failed.";
+                        var errorMsg = payload.error_message || payload.message || payload.error || "Upload failed.";
                         throw new Error(errorMsg);
                     }
 
@@ -1927,7 +1927,7 @@ var BatchRunner = (function () {
                     var payload = response.body || {};
                     if (!payload.validation) {
                         var errorMsg =
-                            payload.error || payload.message || "Template validation failed.";
+                            payload.error_message || payload.message || payload.error || "Template validation failed.";
                         throw new Error(errorMsg);
                     }
 
@@ -2012,7 +2012,7 @@ var BatchRunner = (function () {
                 .then(function (response) {
                     var payload = response.body || {};
                     if (!payload.success) {
-                        var errorMsg = payload.error || payload.message || "Failed to submit batch run.";
+                        var errorMsg = payload.error_message || payload.message || payload.error || "Failed to submit batch run.";
                         throw new Error(errorMsg);
                     }
 
@@ -2119,12 +2119,15 @@ var BatchRunner = (function () {
                         });
                     }
                 } else if (eventName === "BATCH_RUN_FAILED") {
+                    var errorText = payload
+                        ? (payload.error_message || payload.message || payload.error)
+                        : null;
                     ctrl.emitter.emit("batch:run:failed", {
-                        error: payload && payload.error ? payload.error : "Batch run failed.",
+                        error: errorText || "Batch run failed.",
                         batchName: ctrl.state.batchName
                     });
                     ctrl.emitter.emit("job:error", {
-                        error: payload && payload.error ? payload.error : "Batch run failed.",
+                        error: errorText || "Batch run failed.",
                         batchName: ctrl.state.batchName
                     });
                 } else if (eventName === "BATCH_WATERSHED_TASK_COMPLETED") {

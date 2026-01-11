@@ -317,8 +317,14 @@ def error_factory(msg: str = 'Error Handling Request') -> Response:
     Returns:
         Flask `Response` object with a JSON body.
     """
-    return jsonify({'Success': False,
-                    'Error': msg})
+    payload = {
+        'Success': False,
+        'Error': msg,
+        'StackTrace': [],
+        'error': {'message': msg},
+        'stacktrace': [],
+    }
+    return jsonify(payload)
 
 
 def _ensure_text(value: Any) -> str:
@@ -386,6 +392,8 @@ def exception_factory(
         'Success': False,
         'Error': message,
         'StackTrace': stacktrace_lines,
+        'error': {'message': message},
+        'stacktrace': stacktrace_lines,
     }
 
     try:

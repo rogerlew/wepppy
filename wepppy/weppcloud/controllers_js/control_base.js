@@ -106,6 +106,54 @@ function controlBase() {
         return [String(value)];
     }
 
+    function resolveErrorMessage(payload) {
+        if (!payload) {
+            return null;
+        }
+        if (payload.error !== undefined) {
+            if (typeof payload.error === "string") {
+                return payload.error;
+            }
+            if (payload.error && typeof payload.error.message === "string") {
+                return payload.error.message;
+            }
+            if (payload.error && typeof payload.error.detail === "string") {
+                return payload.error.detail;
+            }
+            if (payload.error && typeof payload.error.Error === "string") {
+                return payload.error.Error;
+            }
+            try {
+                return JSON.stringify(payload.error);
+            } catch (err) {
+                return String(payload.error);
+            }
+        }
+        if (payload.Error !== undefined) {
+            return payload.Error;
+        }
+        if (payload.message !== undefined) {
+            return payload.message;
+        }
+        if (payload.detail !== undefined) {
+            return payload.detail;
+        }
+        return null;
+    }
+
+    function resolveStacktrace(payload) {
+        if (!payload) {
+            return null;
+        }
+        if (payload.stacktrace !== undefined) {
+            return splitStacktrace(payload.stacktrace);
+        }
+        if (payload.StackTrace !== undefined) {
+            return splitStacktrace(payload.StackTrace);
+        }
+        return null;
+    }
+
     function extractJobInfoStacktrace(payload) {
         if (!payload) {
             return null;
@@ -189,7 +237,7 @@ function controlBase() {
         self._job_failure_dispatched = true;
 
         const jobId = self.rq_job_id || (statusObj && statusObj.id) || null;
-        const errorPayload = { Error: `Job ${status}.` };
+        const errorPayload = { Error: `Job ${status}.`, error: `Job ${status}.` };
 
         function emitFailure() {
             try {
@@ -230,7 +278,9 @@ function controlBase() {
             .then(function (payload) {
                 const stacktrace = extractJobInfoStacktrace(payload);
                 if (stacktrace) {
-                    errorPayload.StackTrace = splitStacktrace(stacktrace);
+                    const stackLines = splitStacktrace(stacktrace);
+                    errorPayload.StackTrace = stackLines;
+                    errorPayload.stacktrace = stackLines;
                 }
                 self.pushResponseStacktrace(self, errorPayload);
                 emitFailure();
@@ -536,7 +586,7 @@ function controlBase() {
                 return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
             }
             if (typeof value === "object") {
-                const maybeError = value.Error || value.error || value.message || value.detail;
+                const maybeError = resolveErrorMessage(value);
                 const maybeStack = value.StackTrace || value.stacktrace || value.stack;
                 const parts = [];
                 if (maybeError) {
@@ -619,12 +669,14 @@ function controlBase() {
                 return;
             }
 
-            if (response.Error !== undefined) {
-                appendHtml(self.stacktrace, "<h6>" + escapeHtml(response.Error) + "</h6>");
+            const errorMessage = resolveErrorMessage(response);
+            if (errorMessage !== null && errorMessage !== undefined) {
+                appendHtml(self.stacktrace, "<h6>" + escapeHtml(String(errorMessage)) + "</h6>");
             }
 
-            if (response.StackTrace !== undefined) {
-                const lines = Array.isArray(response.StackTrace) ? response.StackTrace : [response.StackTrace];
+            const stackLines = resolveStacktrace(response);
+            if (stackLines && stackLines.length > 0) {
+                const lines = stackLines;
                 const escaped = lines.map(escapeHtml).join("\n");
                 appendHtml(self.stacktrace, '<pre><small class="text-muted">' + escaped + "</small></pre>");
 
@@ -636,7 +688,7 @@ function controlBase() {
                 }
             }
 
-            if (response.Error === undefined && response.StackTrace === undefined) {
+            if ((errorMessage === null || errorMessage === undefined) && (!stackLines || stackLines.length === 0)) {
                 appendHtml(
                     self.stacktrace,
                     '<pre><small class="text-muted">' + escapeHtml(String(response)) + "</small></pre>"
