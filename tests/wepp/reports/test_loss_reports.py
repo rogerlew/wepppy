@@ -8,6 +8,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
+from tests.stubs import ensure_geopandas_stub
+
 if "deprecated" not in sys.modules:
     module = types.ModuleType("deprecated")
 
@@ -42,11 +44,7 @@ if "rasterio" not in sys.modules:
     sys.modules["rasterio"] = rasterio_module
     sys.modules["rasterio.warp"] = warp_module
 
-if "geopandas" not in sys.modules:
-    geopandas_module = types.ModuleType("geopandas")
-    geopandas_module.GeoDataFrame = object  # pragma: no cover - stub
-    sys.modules["geopandas"] = geopandas_module
-
+ensure_geopandas_stub()
 
 
 from wepppy.wepp.reports.loss_channel_report import ChannelSummaryReport

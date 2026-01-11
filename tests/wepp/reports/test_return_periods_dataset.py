@@ -12,6 +12,8 @@ import pandas as pd
 import pytest
 import pyarrow.parquet as pq
 
+from tests.stubs import ensure_geopandas_stub
+
 from tests.wepp.interchange.module_loader import PROJECT_OUTPUT
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -32,7 +34,7 @@ if "deprecated" not in sys.modules:
 
 sys.modules.setdefault("utm", types.ModuleType("utm"))
 sys.modules.setdefault("pyproj", types.ModuleType("pyproj"))
-sys.modules.setdefault("geopandas", types.ModuleType("geopandas"))
+ensure_geopandas_stub()
 
 if "rasterio" not in sys.modules:
     rasterio_module = types.ModuleType("rasterio")

@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from tests.stubs import ensure_geopandas_stub
+
 if "deprecated" not in sys.modules:
     module = types.ModuleType("deprecated")
 
@@ -43,7 +45,7 @@ if "rasterio" not in sys.modules:
     sys.modules["rasterio"] = rasterio_module
     sys.modules["rasterio.warp"] = warp_module
 
-sys.modules.setdefault("geopandas", types.ModuleType("geopandas"))
+ensure_geopandas_stub()
 
 
 class _Translator:

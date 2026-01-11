@@ -17,6 +17,9 @@ from wepppy.weppcloud.utils.helpers import get_wd
 pytestmark = [pytest.mark.nodb, pytest.mark.integration]
 
 rasterio = pytest.importorskip("rasterio")
+geopandas = pytest.importorskip("geopandas")
+if getattr(geopandas, "__wepppy_stub__", False):
+    pytest.skip("geopandas stubbed", allow_module_level=True)
 from rasterio.transform import from_origin
 
 

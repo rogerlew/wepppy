@@ -10,7 +10,9 @@ from wepppy.nodb.culverts_runner import CulvertsRunner
 pytestmark = [pytest.mark.integration]
 
 rasterio = pytest.importorskip("rasterio")
-pytest.importorskip("geopandas")
+geopandas = pytest.importorskip("geopandas")
+if getattr(geopandas, "__wepppy_stub__", False):
+    pytest.skip("geopandas stubbed", allow_module_level=True)
 from rasterio.transform import from_origin
 
 

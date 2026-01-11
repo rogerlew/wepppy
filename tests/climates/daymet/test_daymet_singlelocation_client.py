@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from tests.stubs import ensure_geopandas_stub
+
 module = sys.modules.get("wepppy")
 if module is None or getattr(module, "__name__", "") != "wepppy" or not hasattr(module, "__path__"):
     sys.modules.pop("wepppy", None)
@@ -33,7 +35,7 @@ if "pyproj" not in sys.modules:
     sys.modules["pyproj"] = pyproj_module
 
 sys.modules.setdefault("utm", types.ModuleType("utm"))
-sys.modules.setdefault("geopandas", types.ModuleType("geopandas"))
+ensure_geopandas_stub()
 if "deprecated" not in sys.modules:
     deprecated_module = types.ModuleType("deprecated")
     sys.modules["deprecated"] = deprecated_module

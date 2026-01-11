@@ -5,6 +5,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+geopandas = pytest.importorskip("geopandas")
+if getattr(geopandas, "__wepppy_stub__", False):
+    pytest.skip("geopandas stubbed", allow_module_level=True)
 from rasterio.transform import from_origin
 
 from tests.culverts.test_culverts_runner import (
