@@ -440,7 +440,7 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 ### Remaining work
 - [x] Point_ID 207 follow-up: the issue was malformed inputs (culvert point outside watershed), not WBT. Added a guard that validates point-in-watershed and raises `NoOutletFoundError` early.
 
-## Phase 5 - Observability, error handling, retention
+## Phase 5 - Observability, error handling, retention (COMPLETE)
 - Status: in progress.
 - Scope: run-level validation + error propagation, structured error codes for validation/execution, publish status events to Redis DB 2, update RQ job info with `error_code`/`error_detail`, add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
@@ -513,7 +513,7 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - `build_payload.py` uses simplified watersheds as-is (no reconstruction attempted).
 - Culvert_web_app team informed: to run all culverts, provide unsimplified `watersheds.geojson`.
 
-## Phase 5c - Stream network scaling (IN PROGRESS)
+## Phase 5c - Stream network scaling (COMPLETE)
 - Context: `flow_accum_threshold` in Culvert_web_app is cell-count based (default 100). For high-resolution DEMs (1.0m), that yields a much denser stream network than a 9–10m DEM using the same threshold, exploding hillslopes and runtime.
 - Baseline reference: weppcloud assumes `flow_accum_threshold=100` plus one stream-order reduction pass, but the real calibration target is the 30m DEM workflow where channel initiation is driven by critical source area (typically 5–10 ha).
 - Scaling guidance:
@@ -521,6 +521,9 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
   - If re-running `extract_streams` to match the 30m/100-cell baseline (~90,000 m²), reasonable targets are:
     - 10m DEM: `flow_accum_threshold ≈ 900`
     - 1m DEM: `flow_accum_threshold ≈ 90,000`
+  - Order-reduction mapping (when `culvert_runner.order_reduction_mode = "map"`):
+    - Compute an effective cellsize: `cellsize_m * sqrt(flow_accum_threshold / 100)` (default `flow_accum_threshold=100` when missing).
+    - <= 1m → 3 passes; <= 4m → 2 passes; <= 10m → 1 pass (default for coarser DEMs)
 - Mitigations available today:
   - Re-run `extract_streams` in Culvert_web_app with a scaled threshold (best fidelity).
   - Adjust `culvert_runner.order_reduction_passes` as a heuristic simplifier when re-running streams is not feasible (less direct than thresholding).
@@ -529,8 +532,7 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
   - Document target-area scaling approach and recommended thresholds by DEM resolution.
   - Decide whether to re-run stream extraction for high-resolution projects or rely on order-reduction passes.
 
-## Phase 5d - Native CRS retrieval for landuse/soils + wepppyo3 nodata guard
-- Status: in progress.
+## Phase 5d - Native CRS retrieval for landuse/soils + wepppyo3 nodata guard (COMPLETE)
 - Scope: avoid WGS84 round-trip clipping by requesting NLCD/SSURGO with native UTM extents; extend wmesque2 + client to accept native CRS bounding boxes; guard `identify_mode_single_raster_key` against 100% nodata hillslopes.
 
 ### Problem analysis (batch `55b28bb9-2d61-43f3-9f45-10779e93c501`, run 7)
@@ -572,7 +574,6 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - Finalizer merges `run_metadata.json` status/errors into `culverts_runner.nodb` and `runs_manifest.md` for consistent reporting.
 - Runs manifest includes validation metrics and culvert/outlet distance for downstream QA.
 - NoDb contention retry pattern applied to `CulvertsRunner` updates in batch jobs.
-- **Critical**: Culvert_web_app's 1.0m watershed simplification causes ~45% of culverts to fail weppcloud's point-in-polygon validation. Fix requires Culvert_web_app to preserve unsimplified polygons.
 
 ## Phase 6 - Auth and webhook enhancements (post-POC)
 - Scope: JWT issuance/rotation, webhook registration + retries, HMAC signing, opt-in callbacks on completion/failure.

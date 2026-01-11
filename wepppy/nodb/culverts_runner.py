@@ -17,7 +17,7 @@ import rasterio
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.vrt import calculate_src_window
 from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, clear_locks, nodb_setter
-from wepppy.nodb.core import Ron, Watershed
+from wepppy.nodb.core import Map, Ron, Watershed
 from wepppy.topo.watershed_collection import WatershedFeature
 from wepppy.topo.watershed_collection.watershed_collection import _extract_geojson_crs
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -91,6 +91,15 @@ class CulvertsRunner(NoDbBase):
             if order_reduction < 0:
                 raise ValueError("order_reduction_passes must be >= 0")
             self._order_reduction_passes = order_reduction
+            order_reduction_mode = self.config_get_str(
+                "culvert_runner", "order_reduction_mode", "fixed"
+            )
+            if order_reduction_mode is None:
+                order_reduction_mode = "fixed"
+            order_reduction_mode = order_reduction_mode.lower()
+            if order_reduction_mode not in {"fixed", "map"}:
+                raise ValueError("order_reduction_mode must be 'fixed' or 'map'")
+            self._order_reduction_mode = order_reduction_mode
             crop_pad_px = self.config_get_int("culvert_runner", "crop_pad_px", 5)
             if crop_pad_px is None:
                 crop_pad_px = 5
@@ -187,6 +196,10 @@ class CulvertsRunner(NoDbBase):
     @property
     def order_reduction_passes(self) -> int:
         return int(getattr(self, "_order_reduction_passes", 1))
+
+    @property
+    def order_reduction_mode(self) -> str:
+        return str(getattr(self, "_order_reduction_mode", "fixed"))
 
     @order_reduction_passes.setter
     @nodb_setter
@@ -341,6 +354,7 @@ class CulvertsRunner(NoDbBase):
         if _exists(nodb_path):
             ron = Ron.getInstance(run_wd)
             watershed = Watershed.getInstance(run_wd)
+            self._set_run_map(ron, watershed_feature)
             netful_src, chnjnt_src = self._select_stream_sources_for_run(
                 run_id=run_id,
                 payload_metadata=payload_metadata,
@@ -377,6 +391,7 @@ class CulvertsRunner(NoDbBase):
                 as_cropped_vrt=use_vrt,
                 crop_window=crop_window,
             )
+            self._set_run_map(ron, watershed_feature)
             for filename in ("relief.tif", "chnjnt.tif"):
                 cleanup_path = _join(watershed.wbt_wd, filename)
                 if os.path.lexists(cleanup_path):
@@ -452,6 +467,7 @@ class CulvertsRunner(NoDbBase):
             as_cropped_vrt=use_vrt,
             crop_window=crop_window,
         )
+        self._set_run_map(ron, watershed_feature)
 
         watershed = Watershed.getInstance(run_wd)
         netful_src, chnjnt_src = self._select_stream_sources_for_run(
@@ -498,6 +514,29 @@ class CulvertsRunner(NoDbBase):
             }
         )
         self._runs[run_id] = run_record
+
+    def _set_run_map(
+        self,
+        ron: Ron,
+        watershed_feature: Optional[WatershedFeature],
+    ) -> None:
+        if watershed_feature is None:
+            return
+        try:
+            bbox = watershed_feature.get_padded_bbox(
+                pad=0.0,
+                output_crs="EPSG:4326",
+            )
+        except Exception as exc:
+            self.logger.warning(
+                "culvert_run %s: failed to derive map extent from watershed feature - %s",
+                watershed_feature.runid if watershed_feature else "?",
+                exc,
+            )
+            return
+        center = [(bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0]
+        zoom = Map.zoom_for_extent(bbox)
+        ron.set_map(bbox, center=center, zoom=zoom)
 
     def _ensure_base_project(self) -> Optional[str]:
         base_runid = self.base_runid

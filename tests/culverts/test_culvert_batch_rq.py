@@ -82,7 +82,13 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
         json.dumps(metadata), encoding="utf-8"
     )
     (batch_root / "model-parameters.json").write_text(
-        json.dumps({"schema_version": "culvert-model-params-v1"}), encoding="utf-8"
+        json.dumps(
+            {
+                "schema_version": "culvert-model-params-v1",
+                "base_project_runid": "batch;;culvert_base;;_base",
+            }
+        ),
+        encoding="utf-8",
     )
 
     calls: list[str] = []
@@ -119,8 +125,17 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr(culvert_rq_module.redis, "Redis", _DummyRedis)
     monkeypatch.setattr(culvert_rq_module, "Queue", _DummyQueue)
-    monkeypatch.setattr(CulvertsRunner, "_ensure_base_project", lambda self: None)
+    monkeypatch.setattr(
+        CulvertsRunner,
+        "_ensure_base_project",
+        lambda self: str(tmp_path / "base"),
+    )
     monkeypatch.setattr(CulvertsRunner, "_load_run_ids", lambda self, path: ["1"])
+    monkeypatch.setattr(
+        culvert_rq_module,
+        "_ensure_batch_landuse_soils",
+        lambda **_kwargs: (Path("nlcd.tif"), Path("ssurgo.tif")),
+    )
 
     run_culvert_batch_rq(batch_uuid)
 

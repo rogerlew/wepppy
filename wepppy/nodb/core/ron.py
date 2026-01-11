@@ -50,6 +50,7 @@ See Also:
 import os
 import ast
 import json
+import math
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -111,7 +112,7 @@ class Map(object):
         self, 
         extent: List[float], 
         center: List[float], 
-        zoom: int, 
+        zoom: float, 
         cellsize: float = 30.0
     ) -> None:
         assert len(extent) == 4
@@ -123,7 +124,7 @@ class Map(object):
 
         self.extent: List[float] = [float(v) for v in _extent]  # in decimal degrees
         self.center: List[float] = [float(v) for v in center]
-        self.zoom: int = int(zoom)
+        self.zoom: float = float(zoom)
         self.cellsize: float = cellsize
 
         # e.g. (395201.3103811303, 5673135.241182375, 32, 'U')
@@ -227,7 +228,7 @@ class Map(object):
 
         extent = _coerce_sequence(payload_dict.get("extent"), "extent", 4)
         center = _coerce_sequence(payload_dict.get("center"), "center", 2)
-        zoom = _coerce_int(payload_dict.get("zoom"), "zoom")
+        zoom = _coerce_float(payload_dict.get("zoom"), "zoom")
         cellsize_raw = payload_dict.get("cellsize")
         if cellsize_raw in (None, ""):
             cellsize_raw = default_cellsize if default_cellsize is not None else 30.0
@@ -245,7 +246,7 @@ class Map(object):
             "py/object": f"{self.__module__}.{type(self).__name__}",
             "extent": [float(v) for v in self.extent],
             "center": [float(v) for v in self.center],
-            "zoom": int(self.zoom),
+            "zoom": float(self.zoom),
             "cellsize": float(self.cellsize),
         }
         utm_tuple = getattr(self, "utm", None)
@@ -258,6 +259,35 @@ class Map(object):
             if hasattr(self, key):
                 payload[key] = int(getattr(self, key))
         return payload
+
+    @staticmethod
+    def zoom_for_extent(
+        extent: List[float],
+        *,
+        map_px: Tuple[int, int] = (1200, 800),
+        tile_px: int = 256,
+        min_zoom: float = 1.0,
+        max_zoom: float = 20.0,
+    ) -> float:
+        """Return a Web Mercator zoom that fits the extent in the viewport."""
+        west, south, east, north = extent
+
+        def _mercator_lat(lat: float) -> float:
+            lat = max(min(lat, 85.05112878), -85.05112878)
+            return math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
+
+        lat_fraction = (_mercator_lat(north) - _mercator_lat(south)) / (2 * math.pi)
+        lng_fraction = (east - west) / 360.0
+
+        lat_fraction = max(lat_fraction, 1e-9)
+        lng_fraction = max(lng_fraction, 1e-9)
+
+        width_px, height_px = map_px
+        zoom_lat = math.log(height_px / tile_px / lat_fraction, 2)
+        zoom_lng = math.log(width_px / tile_px / lng_fraction, 2)
+        zoom = min(zoom_lat, zoom_lng)
+
+        return max(min_zoom, min(max_zoom, zoom))
 
     @property
     def utm_zone(self) -> int:
@@ -763,7 +793,7 @@ class Ron(NoDbBase):
         self, 
         extent: List[float], 
         center: List[float], 
-        zoom: int
+        zoom: float
     ) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(extent={extent}, center={center}, zoom={zoom}')

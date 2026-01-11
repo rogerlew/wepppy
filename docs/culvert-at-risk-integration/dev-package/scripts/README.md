@@ -161,7 +161,7 @@ All fields except `schema_version` are optional.
 | `schema_version` | string | Required. Schema version identifier. |
 | `base_project_runid` | string | Optional. Base project runid for template parameters. |
 | `nlcd_db` | string | Optional. NLCD database path override. |
-| `flow_accum_threshold` | integer | Optional. Flow accumulation threshold used for stream extraction in Culvert_web_app (extracted from `user_ws_deln_responses.txt`). Preserved for reference; streams are pre-computed in the payload. |
+| `flow_accum_threshold` | integer | Required. Flow accumulation threshold used for stream extraction in Culvert_web_app (extracted from `user_ws_deln_responses.txt`). Preserved for reference; streams are pre-computed in the payload. |
 
 ## submit_payload.py - SSL Payload Submission
 

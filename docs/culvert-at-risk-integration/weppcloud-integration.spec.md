@@ -184,6 +184,7 @@ Notes:
 Notes:
 - Climate duration uses defaults from `culvert.cfg` (no override keys in v1).
 - Culvert point containment uses `culvert_runner.contains_point_buffer_m` (meters) from `culvert.cfg`. Legacy `contains_point_buffer_px` is still honored when present.
+- `flow_accum_threshold` is used when `culvert_runner.order_reduction_mode = "map"` to scale order-reduction passes based on DEM resolution (defaults to 100 if missing).
 - `flow_accum_threshold` is preserved for reference and traceability; streams are pre-computed in the payload so this value is not used by wepp.cloud processing.
 
 ### Coordinate system rules

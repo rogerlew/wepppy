@@ -15,6 +15,7 @@ __all__ = [
     'DelineationBackend',
     'WatershedNotAbstractedError',
     'WatershedNoDbLockedException',
+    'NoOutletFoundError',
     'process_channel',
     'process_subcatchment',
     'TRANSIENT_FIELDS',
@@ -35,6 +36,10 @@ class WatershedNotAbstractedError(Exception):
 
 
 class WatershedNoDbLockedException(Exception): ...
+
+class NoOutletFoundError(Exception):
+    message: str
+    def __init__(self, message: str = 'No outlet stream cell found for watershed') -> None: ...
 
 
 def process_channel(args: Tuple[WatershedAbstraction, int]) -> Tuple[int, ChannelSummary, Any]: ...

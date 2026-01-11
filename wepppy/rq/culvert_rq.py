@@ -165,6 +165,28 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
 
     # Check model_parameters for order_reduction_passes override
     order_reduction_passes = runner.order_reduction_passes
+    flow_accum_threshold = _get_model_param_int(
+        model_parameters, "flow_accum_threshold"
+    )
+    flow_accum_label = (
+        str(flow_accum_threshold)
+        if flow_accum_threshold is not None
+        else "100(default)"
+    )
+    if runner.order_reduction_mode == "map":
+        mapped_passes = _map_order_reduction_passes(
+            cellsize_m=cellsize,
+            flow_accum_threshold=flow_accum_threshold,
+        )
+        if mapped_passes is not None:
+            order_reduction_passes = mapped_passes
+            logger.info(
+                "culvert_batch %s: order_reduction_passes=%d (map mode, cellsize=%.2f, flow_accum_threshold=%s)",
+                culvert_batch_uuid,
+                order_reduction_passes,
+                cellsize,
+                flow_accum_label,
+            )
     if model_parameters and "order_reduction_passes" in model_parameters:
         try:
             mp_value = int(model_parameters["order_reduction_passes"])
@@ -1658,6 +1680,42 @@ def _get_dem_cellsize_m(
     if cellsize <= 0:
         return None
     return float(cellsize)
+
+
+def _get_model_param_int(
+    model_parameters: Optional[Dict[str, Any]],
+    key: str,
+) -> Optional[int]:
+    if not model_parameters:
+        return None
+    value = model_parameters.get(key)
+    if value is None:
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    if parsed < 0:
+        return None
+    return parsed
+
+
+def _map_order_reduction_passes(
+    *,
+    cellsize_m: Optional[float],
+    flow_accum_threshold: Optional[int],
+) -> Optional[int]:
+    if cellsize_m is None or cellsize_m <= 0:
+        return None
+    effective_cellsize = cellsize_m
+    if flow_accum_threshold is None or flow_accum_threshold <= 0:
+        flow_accum_threshold = 100
+    effective_cellsize = cellsize_m * math.sqrt(flow_accum_threshold / 100.0)
+    if effective_cellsize <= 1.0:
+        return 3
+    if effective_cellsize <= 4.0:
+        return 2
+    return 1
 
 
 def _watershed_area_m2(feature: Optional[WatershedFeature]) -> Optional[float]:
