@@ -1178,6 +1178,15 @@ def _ensure_batch_landuse_soils(
     landuse = Landuse.getInstance(str(base_wd))
     soils = Soils.getInstance(str(base_wd))
 
+    if landuse.wmesque_version != 2:
+        raise ValueError(
+            f"Culvert batches require wmesque version 2 for landuse (got {landuse.wmesque_version})."
+        )
+    if soils.wmesque_version != 2:
+        raise ValueError(
+            f"Culvert batches require wmesque version 2 for soils (got {soils.wmesque_version})."
+        )
+
     nlcd_db = nlcd_db_override or landuse.nlcd_db
     ssurgo_db = ssurgo_db_override or soils.ssurgo_db
 
@@ -1187,29 +1196,43 @@ def _ensure_batch_landuse_soils(
         raise ValueError("ssurgo_db is required to build culvert soils maps")
 
     rdi = RasterDatasetInterpolator(str(dem_src))
-    extent = list(rdi.extent)
+    extent_wgs84 = list(rdi.extent)
+    extent_native = [rdi.left, rdi.lower, rdi.right, rdi.upper]
+    extent_crs = rdi.proj4 or None
 
     with runner.locked():
         os.makedirs(landuse_root, exist_ok=True)
         os.makedirs(soils_root, exist_ok=True)
 
         if not nlcd_30m.exists():
+            nlcd_extent = extent_wgs84
+            nlcd_extent_crs = None
+            if landuse.wmesque_version == 2 and extent_crs is not None:
+                nlcd_extent = extent_native
+                nlcd_extent_crs = extent_crs
             wmesque_retrieve(
                 nlcd_db,
-                extent,
+                nlcd_extent,
                 str(nlcd_30m),
                 30.0,
                 v=landuse.wmesque_version,
                 wmesque_endpoint=landuse.wmesque_endpoint,
+                extent_crs=nlcd_extent_crs,
             )
         if not ssurgo_30m.exists():
+            ssurgo_extent = extent_wgs84
+            ssurgo_extent_crs = None
+            if soils.wmesque_version == 2 and extent_crs is not None:
+                ssurgo_extent = extent_native
+                ssurgo_extent_crs = extent_crs
             wmesque_retrieve(
                 ssurgo_db,
-                extent,
+                ssurgo_extent,
                 str(ssurgo_30m),
                 30.0,
                 v=soils.wmesque_version,
                 wmesque_endpoint=soils.wmesque_endpoint,
+                extent_crs=ssurgo_extent_crs,
             )
 
         if not nlcd_resampled.exists():
