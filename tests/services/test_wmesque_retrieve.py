@@ -8,6 +8,7 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from wepppy.all_your_base.geo import read_arc, read_tif, wmesque_retrieve
+from wepppy.all_your_base.geo.webclients import wmesque as wmesque_client
 
 DEFAULT_EXTENT: Sequence[float] = (
     -120.234375,
@@ -41,6 +42,60 @@ def _download_fixture(
         wmesque_retrieve("ned1/2016", bbox, ned_path, cellsize)
     except Exception as exc:  # pragma: no cover - network variability
         pytest.skip(f"WMesque service unavailable: {exc}")
+
+
+@pytest.mark.unit
+def test_wmesque_retrieve_appends_bbox_crs(monkeypatch, tmp_path) -> None:
+    captured: dict[str, str] = {}
+
+    class _DummyResponse:
+        status = 200
+        headers: dict[str, str] = {}
+
+        def read(self, _size: int = -1) -> bytes:
+            return b""
+
+        def getcode(self) -> int:
+            return self.status
+
+        def __enter__(self) -> "_DummyResponse":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> bool:
+            return False
+
+    def _fake_urlopen(url: str, timeout: int = 0) -> _DummyResponse:
+        captured["url"] = url
+        return _DummyResponse()
+
+    monkeypatch.setattr(wmesque_client, "urlopen", _fake_urlopen)
+
+    out_fn = tmp_path / "nlcd.tif"
+    wmesque_retrieve(
+        "nlcd/2019",
+        [0.0, 0.0, 1.0, 1.0],
+        str(out_fn),
+        30.0,
+        v=2,
+        write_meta=False,
+        extent_crs="EPSG:32611",
+    )
+
+    assert "bbox_crs=EPSG%3A32611" in captured["url"]
+
+
+@pytest.mark.unit
+def test_wmesque_retrieve_rejects_extent_crs_for_v1(tmp_path) -> None:
+    with pytest.raises(ValueError, match="extent_crs"):
+        wmesque_retrieve(
+            "nlcd/2019",
+            [0.0, 0.0, 1.0, 1.0],
+            str(tmp_path / "nlcd.tif"),
+            30.0,
+            v=1,
+            write_meta=False,
+            extent_crs="EPSG:32611",
+        )
 
 
 @pytest.mark.integration
