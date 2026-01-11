@@ -149,7 +149,7 @@ def upload_payload(
             endpoint,
             files=files,
             data=form_data,
-            timeout=300,  # 5 minute upload timeout
+            timeout=(30, 3600),  # 30s connect, 60 min upload timeout
         )
 
     elapsed = time.monotonic() - start_time
