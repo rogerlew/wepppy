@@ -58,7 +58,7 @@ The script expects these files in the Culvert_web_app project:
 |-------------|--------------|-------------|
 | `outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif` | `topo/hydro-enforced-dem.tif` | Hydro-enforced DEM |
 | `outputs/{project}/hydrogeo_vuln/main_stream_raster_UTM.tif` | `topo/streams.tif` | Stream network raster |
-| `outputs/{project}/WS_deln/Pour_Point_UTM.shp` | `culverts/culvert_points.geojson` | Culvert locations |
+| `outputs/{project}/WS_deln/pour_points_snapped_to_RSCS_UTM.shp` | `culverts/culvert_points.geojson` | Culvert locations (RSCS-snapped) |
 | `outputs/{project}/WS_deln/all_ws_polygon_UTM.shp` | `culverts/watersheds.geojson` | Watershed polygons |
 
 ### Output Payload Structure
@@ -109,10 +109,11 @@ cat santee_payload_contents/metadata.json
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "culvert-metadata-v1",
   "source": {
     "system": "Culvert_web_app",
-    "project_name": "Santee_10m_no_hydroenforcement"
+    "project_id": "Santee_10m_no_hydroenforcement",
+    "user_id": "1"
   },
   "created_at": "2026-01-05T15:30:00+00:00",
   "culvert_count": 63,
@@ -147,10 +148,11 @@ cat santee_payload_contents/metadata.json
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "culvert-model-params-v1",
   "base_project_runid": "lt_wepp_template",
   "nlcd_db": "custom_nlcd.db",
-  "flow_accum_threshold": 100
+  "flow_accum_threshold": 100,
+  "order_reduction_passes": 2
 }
 ```
 
@@ -161,7 +163,8 @@ All fields except `schema_version` are optional.
 | `schema_version` | string | Required. Schema version identifier. |
 | `base_project_runid` | string | Optional. Base project runid for template parameters. |
 | `nlcd_db` | string | Optional. NLCD database path override. |
-| `flow_accum_threshold` | integer | Required. Flow accumulation threshold used for stream extraction in Culvert_web_app (extracted from `user_ws_deln_responses.txt`). Preserved for reference; streams are pre-computed in the payload. |
+| `flow_accum_threshold` | integer | Optional. Flow accumulation threshold used for stream extraction in Culvert_web_app (extracted from `user_ws_deln_responses.txt`). Used only for order-reduction pass mapping; streams are pre-computed in the payload. |
+| `order_reduction_passes` | integer | Optional. Overrides `culvert_runner.order_reduction_passes` when present. |
 
 ## submit_payload.py - SSL Payload Submission
 

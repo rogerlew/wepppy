@@ -113,7 +113,6 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     logger.info(f"culvert_batch {culvert_batch_uuid}: starting")
 
     nlcd_db_override = runner._get_model_param_str(model_parameters, "nlcd_db")
-    ssurgo_db_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
 
     dem_src = runner._resolve_payload_path(
         payload_metadata, "dem", runner.DEFAULT_DEM_REL_PATH, str(batch_root)
@@ -238,7 +237,6 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
         dem_src=Path(dem_src),
         base_wd=Path(base_wd),
         nlcd_db_override=nlcd_db_override,
-        ssurgo_db_override=ssurgo_db_override,
     )
     os.makedirs(runner.runs_dir, exist_ok=True)
 
@@ -465,7 +463,6 @@ def run_culvert_run_rq(
         raise FileNotFoundError(f"Culvert run directory missing: {run_wd}")
 
     nlcd_db_override = runner._get_model_param_str(model_parameters, "nlcd_db")
-    ssurgo_db_override = runner._get_model_param_str(model_parameters, "ssurgo_db")
 
     status = _process_culvert_run(
         culvert_batch_uuid=culvert_batch_uuid,
@@ -475,7 +472,6 @@ def run_culvert_run_rq(
         run_config=runner.run_config,
         wepppy_version=wepppy_version,
         nlcd_db_override=nlcd_db_override,
-        ssurgo_db_override=ssurgo_db_override,
         minimum_watershed_area_m2=runner.minimum_watershed_area_m2,
     )
     if job is not None:
@@ -1182,7 +1178,6 @@ def _ensure_batch_landuse_soils(
     dem_src: Path,
     base_wd: Path,
     nlcd_db_override: Optional[str],
-    ssurgo_db_override: Optional[str],
 ) -> tuple[Path, Path]:
     batch_root = _resolve_batch_root(culvert_batch_uuid)
     landuse_root = batch_root / "landuse"
@@ -1210,7 +1205,7 @@ def _ensure_batch_landuse_soils(
         )
 
     nlcd_db = nlcd_db_override or landuse.nlcd_db
-    ssurgo_db = ssurgo_db_override or soils.ssurgo_db
+    ssurgo_db = soils.ssurgo_db
 
     if nlcd_db is None:
         raise ValueError("nlcd_db is required to build culvert landuse maps")
@@ -1274,7 +1269,6 @@ def _process_culvert_run(
     run_config: str,
     wepppy_version: Optional[str],
     nlcd_db_override: Optional[str],
-    ssurgo_db_override: Optional[str],
     minimum_watershed_area_m2: Optional[float],
 ) -> str:
     """
@@ -1302,8 +1296,6 @@ def _process_culvert_run(
 
         if nlcd_db_override is not None:
             landuse.nlcd_db = nlcd_db_override
-        if ssurgo_db_override is not None:
-            soils.ssurgo_db = ssurgo_db_override
 
         wbt = watershed._ensure_wbt()
 

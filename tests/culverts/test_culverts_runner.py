@@ -372,3 +372,143 @@ def test_culverts_runner_rejects_path_traversal(tmp_path: Path) -> None:
     runner = CulvertsRunner(str(batch_root), "culvert.cfg")
     with pytest.raises(ValueError, match="Point_ID"):
         runner.load_watershed_features(str(watersheds_path))
+
+
+def test_culverts_runner_creates_vrt_cropped_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
+
+    base_runid = "batch;;culvert_base;;_base"
+    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    _init_base_project(base_src)
+
+    def _fake_get_wd(runid: str, *args, **kwargs) -> str:
+        if runid == base_runid:
+            return str(base_src)
+        return wepp_helpers.get_wd(runid, *args, **kwargs)
+
+    monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
+    monkeypatch.setattr(WatershedFeature, "build_raster_mask", _fake_build_raster_mask)
+
+    batch_uuid = "batch-vrt"
+    batch_root = culverts_root / batch_uuid
+    topo_dir = batch_root / "topo"
+    culverts_dir = batch_root / "culverts"
+    batch_root.mkdir(parents=True)
+
+    _make_topo_files(topo_dir)
+    watersheds_path = culverts_dir / "watersheds.geojson"
+    _write_watersheds(watersheds_path, point_ids=[1])
+
+    payload_metadata = {
+        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "watersheds": {"path": "culverts/watersheds.geojson"},
+    }
+    model_parameters = {
+        "schema_version": "culvert-model-params-v1",
+        "base_project_runid": base_runid,
+    }
+
+    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    with runner.locked():
+        runner._culvert_batch_uuid = batch_uuid
+        runner._payload_metadata = dict(payload_metadata)
+        runner._model_parameters = dict(model_parameters)
+        runner._run_config = runner._resolve_run_config(model_parameters)
+
+    watershed_features = runner.load_watershed_features(str(watersheds_path))
+    runner.create_run_if_missing(
+        "1",
+        payload_metadata,
+        model_parameters=model_parameters,
+        watershed_feature=watershed_features["1"],
+        as_cropped_vrt=True,
+    )
+
+    run_wd = batch_root / "runs" / "1"
+    ron = Ron.getInstance(str(run_wd))
+    assert ron.dem_is_vrt is True
+    assert Path(ron.dem_fn).is_file()
+    assert Path(ron.dem_fn).name == "dem.vrt"
+
+    watershed = Watershed.getInstance(str(run_wd))
+    wbt_dir = Path(watershed.wbt_wd)
+    assert (wbt_dir / "flovec.vrt").is_file()
+    assert (wbt_dir / "netful.vrt").is_file()
+    assert (wbt_dir / "relief.vrt").is_file()
+    assert (wbt_dir / "chnjnt.vrt").is_file()
+    assert watershed.flovec_netful_relief_chnjnt_are_vrt is True
+
+
+def test_culverts_runner_stream_fallback_uses_streams_map(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
+
+    base_runid = "batch;;culvert_base;;_base"
+    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    _init_base_project(base_src)
+
+    def _fake_get_wd(runid: str, *args, **kwargs) -> str:
+        if runid == base_runid:
+            return str(base_src)
+        return wepp_helpers.get_wd(runid, *args, **kwargs)
+
+    monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
+    monkeypatch.setattr(WatershedFeature, "build_raster_mask", _fake_build_raster_mask)
+
+    batch_uuid = "batch-fallback"
+    batch_root = culverts_root / batch_uuid
+    topo_dir = batch_root / "topo"
+    culverts_dir = batch_root / "culverts"
+    batch_root.mkdir(parents=True)
+
+    topo = _make_topo_files(topo_dir)
+    watersheds_path = culverts_dir / "watersheds.geojson"
+    _write_watersheds(watersheds_path, point_ids=[1])
+
+    transform = from_origin(500000.0, 4100000.0, 10.0, 10.0)
+    netful_empty = np.zeros((3, 3), dtype=np.uint8)
+    _write_raster(topo["netful"], netful_empty, transform, "EPSG:32611")
+    _write_raster(topo_dir / "chnjnt.streams.tif", netful_empty, transform, "EPSG:32611")
+
+    payload_metadata = {
+        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "watersheds": {"path": "culverts/watersheds.geojson"},
+        "streams": {"path": "topo/streams.tif"},
+    }
+    model_parameters = {
+        "schema_version": "culvert-model-params-v1",
+        "base_project_runid": base_runid,
+    }
+
+    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    with runner.locked():
+        runner._culvert_batch_uuid = batch_uuid
+        runner._payload_metadata = dict(payload_metadata)
+        runner._model_parameters = dict(model_parameters)
+        runner._run_config = runner._resolve_run_config(model_parameters)
+
+    runner.create_run_if_missing(
+        "1",
+        payload_metadata,
+        model_parameters=model_parameters,
+        watershed_feature=None,
+        as_cropped_vrt=False,
+    )
+
+    run_wd = batch_root / "runs" / "1"
+    watershed = Watershed.getInstance(str(run_wd))
+    netful_link = Path(watershed.wbt_wd) / "netful.tif"
+    chnjnt_link = Path(watershed.wbt_wd) / "chnjnt.tif"
+    assert netful_link.is_symlink()
+    assert chnjnt_link.is_symlink()
+    assert os.path.realpath(netful_link) == os.path.abspath(topo_dir / "streams.tif")
+    assert os.path.realpath(chnjnt_link) == os.path.abspath(
+        topo_dir / "chnjnt.streams.tif"
+    )

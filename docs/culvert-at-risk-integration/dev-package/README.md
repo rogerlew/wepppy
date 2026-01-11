@@ -53,7 +53,8 @@ Culvert_web_app computed.
 - `Point_ID` is required in both GeoJSON files.
 - `watersheds.geojson` polygons are simplified (1.0m tolerance) unless you modify the source.
 - Streams are pre-computed; no `mcl`/`csa` parameters in `model-parameters.json`.
-- `flow_accum_threshold` is extracted from `user_ws_deln_responses.txt` and included in `model-parameters.json` for traceability (not used by wepp.cloud since streams are pre-computed).
+- `flow_accum_threshold` is extracted from `user_ws_deln_responses.txt` and included in `model-parameters.json`; it only drives order-reduction pass mapping when `order_reduction_mode=map` and does not trigger stream extraction.
+- `order_reduction_passes` can be added to `model-parameters.json` to override the mapped/default pass count.
 - Payload hash/size are computed by wepp.cloud at upload time (optional request params).
 - `source.project_id` uses a sanitized project name (non-alphanumeric -> underscore, trimmed).
 

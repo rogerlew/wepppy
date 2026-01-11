@@ -224,6 +224,8 @@ def _validate_metadata(metadata: dict[str, Any], issues: list[ValidationIssue]) 
             )
         )
 
+    _validate_optional_metadata_int(metadata, "flow_accum_threshold", issues)
+
 
 def _validate_model_params(model_params: dict[str, Any], issues: list[ValidationIssue]) -> None:
     schema_version = model_params.get("schema_version")
@@ -236,6 +238,10 @@ def _validate_model_params(model_params: dict[str, Any], issues: list[Validation
                 detail={"expected": MODEL_PARAMS_SCHEMA_VERSION, "found": schema_version},
             )
         )
+    _validate_optional_model_param_str(model_params, "base_project_runid", issues)
+    _validate_optional_model_param_str(model_params, "nlcd_db", issues)
+    _validate_optional_model_param_int(model_params, "flow_accum_threshold", issues)
+    _validate_optional_model_param_int(model_params, "order_reduction_passes", issues)
 
 
 def _validate_rasters(
@@ -336,6 +342,19 @@ def _validate_geojsons(
     culvert_points_crs = _geojson_crs(culvert_points, issues, "culverts/culvert_points.geojson")
     watersheds_crs = _geojson_crs(watersheds, issues, "culverts/watersheds.geojson")
 
+    _validate_geojson_geometry(
+        culvert_points,
+        {"Point"},
+        issues,
+        "culverts/culvert_points.geojson",
+    )
+    _validate_geojson_geometry(
+        watersheds,
+        {"Polygon", "MultiPolygon"},
+        issues,
+        "culverts/watersheds.geojson",
+    )
+
     if metadata_crs and culvert_points_crs and not culvert_points_crs.equals(metadata_crs):
         issues.append(
             ValidationIssue(
@@ -410,6 +429,129 @@ def _validate_geojsons(
                 detail={"expected": feature_count, "found": culvert_feature_count},
             )
         )
+
+
+def _validate_optional_metadata_int(
+    metadata: dict[str, Any],
+    key: str,
+    issues: list[ValidationIssue],
+) -> None:
+    if key not in metadata:
+        return
+    value = metadata.get(key)
+    if value is None:
+        return
+    if isinstance(value, bool):
+        issues.append(
+            ValidationIssue(
+                code="invalid_metadata_field",
+                message=f"metadata.json {key} must be an integer.",
+                path="metadata.json",
+            )
+        )
+        return
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        issues.append(
+            ValidationIssue(
+                code="invalid_metadata_field",
+                message=f"metadata.json {key} must be an integer.",
+                path="metadata.json",
+            )
+        )
+        return
+    if parsed < 0:
+        issues.append(
+            ValidationIssue(
+                code="invalid_metadata_field",
+                message=f"metadata.json {key} must be >= 0.",
+                path="metadata.json",
+            )
+        )
+
+
+def _validate_optional_model_param_str(
+    model_params: dict[str, Any],
+    key: str,
+    issues: list[ValidationIssue],
+) -> None:
+    if key not in model_params:
+        return
+    value = model_params.get(key)
+    if value is None:
+        return
+    if not isinstance(value, str) or value.strip() == "":
+        issues.append(
+            ValidationIssue(
+                code="invalid_model_param",
+                message=f"model-parameters.json {key} must be a non-empty string.",
+                path="model-parameters.json",
+            )
+        )
+
+
+def _validate_optional_model_param_int(
+    model_params: dict[str, Any],
+    key: str,
+    issues: list[ValidationIssue],
+) -> None:
+    if key not in model_params:
+        return
+    value = model_params.get(key)
+    if value is None:
+        return
+    if isinstance(value, bool):
+        issues.append(
+            ValidationIssue(
+                code="invalid_model_param",
+                message=f"model-parameters.json {key} must be an integer.",
+                path="model-parameters.json",
+            )
+        )
+        return
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        issues.append(
+            ValidationIssue(
+                code="invalid_model_param",
+                message=f"model-parameters.json {key} must be an integer.",
+                path="model-parameters.json",
+            )
+        )
+        return
+    if parsed < 0:
+        issues.append(
+            ValidationIssue(
+                code="invalid_model_param",
+                message=f"model-parameters.json {key} must be >= 0.",
+                path="model-parameters.json",
+            )
+        )
+
+
+def _validate_geojson_geometry(
+    collection: dict[str, Any],
+    expected: set[str],
+    issues: list[ValidationIssue],
+    relpath: str,
+) -> None:
+    features = collection.get("features")
+    if not isinstance(features, list):
+        return
+    for idx, feature in enumerate(features):
+        geometry = (feature or {}).get("geometry") or {}
+        geom_type = geometry.get("type")
+        if geom_type not in expected:
+            issues.append(
+                ValidationIssue(
+                    code="invalid_geometry_type",
+                    message=f"GeoJSON geometry must be one of {sorted(expected)}.",
+                    path=relpath,
+                    detail={"feature_index": idx, "found": geom_type},
+                )
+            )
 
 
 def _extract_point_ids(

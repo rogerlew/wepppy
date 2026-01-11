@@ -56,6 +56,15 @@ Response (JSON):
 - culvert_batch_uuid (for composing download url)
 - status_url: `/rq-engine/api/jobstatus/{job_id}`
 
+### POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}
+Retry a single culvert run within an existing batch (flake-checking runs). The server removes the existing run directory and enqueues a fresh `run_culvert_run_rq` job.
+
+Response (JSON):
+- job_id
+- culvert_batch_uuid
+- point_id
+- status_url: `/rq-engine/api/jobstatus/{job_id}`
+
 ### Job status (existing)
 Use existing RQ engine endpoints instead of custom status routes:
 - `/rq-engine/api/jobstatus/{job_id}`
@@ -170,6 +179,7 @@ Note: avoid ESRI shapefiles and sidecars entirely.
 - `streams` (object, required: `path` string, `nodata` number, `value_semantics` = `binary`)
 - `culvert_points` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 - `watersheds` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
+- `flow_accum_threshold` (int, optional; preserved for traceability when provided in metadata)
 
 Notes:
 - `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`).
@@ -179,24 +189,27 @@ Notes:
 - `schema_version` (string, required; `culvert-model-params-v1`)
 - `base_project_runid` (string, optional)
 - `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
-- `ssurgo_db` (string, optional; overrides `soils.ssurgo_db`)
+- `order_reduction_passes` (integer, optional; overrides `culvert_runner.order_reduction_passes`)
 - `flow_accum_threshold` (integer, optional; flow accumulation threshold used for stream extraction in Culvert_web_app, extracted from `user_ws_deln_responses.txt`)
 Notes:
 - Climate duration uses defaults from `culvert.cfg` (no override keys in v1).
 - Culvert point containment uses `culvert_runner.contains_point_buffer_m` (meters) from `culvert.cfg`. Legacy `contains_point_buffer_px` is still honored when present.
-- `flow_accum_threshold` is used when `culvert_runner.order_reduction_mode = "map"` to scale order-reduction passes based on DEM resolution (defaults to 100 if missing).
-- `flow_accum_threshold` is preserved for reference and traceability; streams are pre-computed in the payload so this value is not used by wepp.cloud processing.
+- `order_reduction_mode` is configured in `culvert.cfg` (`fixed` or `map`). In `map` mode, `flow_accum_threshold` scales order-reduction passes based on DEM resolution (defaults to 100 if missing).
+- `order_reduction_passes` in `model-parameters.json` overrides both the config default and the map-mode calculation when present.
+- `flow_accum_threshold` is preserved for traceability and only used to map order-reduction passes; streams are still pre-computed in the payload.
 
 ### Coordinate system rules
 - **Rasters must be in UTM projection.** Culvert_web_app reprojects all inputs to UTM during its `ws_deln` pipeline (source: `subroutine_nested_watershed_delineation.py::get_utm_crs_from_wgs84()` determines zone from boundary centroid, then `reproject_raster_from_path()` reprojects DEM unconditionally). Output files are named with `_UTM` suffix (e.g., `DEM_UTM.tif`, `D8flow_dir_UTM.tif`).
 - **GeoJSON must use the same UTM CRS as the rasters.** Since DEMs can have 1m resolution, keeping all assets in the same projected CRS avoids reprojection artifacts and ensures pixel-accurate alignment.
 - wepp.cloud will validate that all inputs share a common projected CRS (UTM expected) and reject payloads where rasters and vectors have mismatched projections or use geographic coordinates (WGS84).
+- GeoJSON `crs` objects are required and must define a named CRS that matches the rasters.
 
 ### Culvert ID attribute
 The `culverts/culvert_points.geojson` must include a `Point_ID` attribute on each feature:
 - **Field name:** `Point_ID` (matches Culvert_web_app convention)
 - **Type:** integer or string (unique within the batch)
 - **Usage:** Used to create per-culvert run directories (`/runs/<Point_ID>/`) and to join WEPP outputs back to culvert locations
+- **Geometry:** Point (each feature must be a Point geometry)
 
 ### Watershed GeoJSON structure
 The `culverts/watersheds.geojson` contains one polygon feature per culvert watershed:
@@ -233,8 +246,9 @@ Payload validation/extraction happens in the rq-engine API handler; batch topo g
 - Generate batch-level topo rasters from the shared DEM + streams:
   - `wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)` → `topo/flovec.tif`
   - Copy `topo/streams.tif` → `topo/netful.tif` (no pruning yet)
-  - Prune short streams (uses `watershed.wbt.mcl` from `culvert.cfg`):
-    - `wbt.remove_short_streams(d8_pntr=flovec_fn, streams=topo/netful.tif, output=topo/netful.tif, min_length=mcl)`
+- Prune short streams using a cellsize-based minimum length:
+  - `min_length = 2 * cellsize_m`
+  - `wbt.remove_short_streams(d8_pntr=flovec_fn, streams=topo/netful.tif, output=topo/netful.tif, min_length=min_length)`
   - Build a Strahler order raster from the pruned binary stream map:
     - `wbt.strahler_stream_order(d8_pntr=flovec_fn, streams=topo/netful.tif, output=topo/netful.strahler.tif)`
   - Reduce stream order `N` times (uses `culvert_runner.order_reduction_passes` from `culvert.cfg`, final pass emits a binary stream mask):

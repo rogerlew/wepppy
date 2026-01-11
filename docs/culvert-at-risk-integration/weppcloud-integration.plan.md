@@ -5,6 +5,7 @@
 - Endpoint: `POST /rq-engine/api/culverts-wepp-batch/` (multipart, FastAPI rq-engine to avoid 30s Caddy timeout; extend timeout there as needed).
 - Storage: `/wc1/culverts/<culvert_batch_uuid>/` with per-culvert runs under `/runs/<Point_ID>/` and `_base/` seeded from `culvert.cfg`.
 - Payload ZIP: `topo/hydro-enforced-dem.tif` + `topo/streams.tif` + `culverts/culvert_points.geojson` + `culverts/watersheds.geojson` + `metadata.json` + `model-parameters.json`; all inputs in the same projected CRS (meters).
+- GeoJSON validation: `culvert_points` must use Point geometries, `watersheds` must use Polygon/MultiPolygon geometries, and each GeoJSON includes a named CRS matching the rasters.
 - DEM handling: new `Ron.symlink_dem()` to symlink the canonical DEM into each run and populate `ron.map`.
 - Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
 - Watersheds: GeoJSON polygons with `Point_ID` attribute (no raster, no culvert_id_map needed).
@@ -29,6 +30,7 @@
 - `streams` (object, required: `path` string, `nodata` number, `value_semantics` = `binary`)
 - `culvert_points` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 - `watersheds` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
+- `flow_accum_threshold` (int, optional; preserved for traceability when provided in metadata)
 
 Notes:
 - `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`).
@@ -38,13 +40,15 @@ Notes:
 - `schema_version` (string, required; `culvert-model-params-v1`)
 - `base_project_runid` (string, optional)
 - `nlcd_db` (string, optional; overrides `landuse.nlcd_db`)
+- `order_reduction_passes` (integer, optional; overrides `culvert_runner.order_reduction_passes`)
+- `flow_accum_threshold` (integer, optional; flow accumulation threshold from Culvert_web_app)
 
 Notes:
 - `mcl`/`csa` parameters are NOT included—streams are pre-computed by Culvert_web_app and provided in `topo/streams.tif`.
 - Climate duration and soils DB use defaults from `culvert.cfg` (no override keys in v1).
 
 ## Phase 1 - API ingestion, validation, and job enqueue (rq-engine) (COMPLETE)
-- Scope: implement `/rq-engine/api/culverts-wepp-batch/` in rq-engine (FastAPI); accept multipart upload, mint `culvert_batch_uuid`, validate payload inline (payload_validator), extract payload, enqueue RQ job, return `{job_id, culvert_batch_uuid, status_url}`. This keeps validation inside the ingestion path and avoids the 30s Caddy timeout applied to weppcloud routes. Long term, migrate `/rq/api/*` to `/rq-engine/api/*`.
+- Scope: implement `/rq-engine/api/culverts-wepp-batch/` in rq-engine (FastAPI); accept multipart upload, mint `culvert_batch_uuid`, validate payload inline (payload_validator), extract payload, enqueue RQ job, return `{job_id, culvert_batch_uuid, status_url}`. Add `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` for flake-checking reruns. This keeps validation inside the ingestion path and avoids the 30s Caddy timeout applied to weppcloud routes. Long term, migrate `/rq/api/*` to `/rq-engine/api/*`.
 - Request parameters (optional): `zip_sha256`, `total_bytes` to capture payload metadata since the ZIP is created client-side.
 - Dependencies: Phase 0 schema decisions; RQ queue configuration; open endpoint for POC (auth deferred to Phase 6).
 - Deliverables: rq-engine route + request/response contract; `payload_validator` module + error types; RQ job function stub (`run_culvert_batch_rq`); `batch_metadata.json` written at batch root; logging to batch root.
@@ -132,11 +136,11 @@ Notes:
 
 ## Phase 3e - Stream pruning + order reduction (culvert batches)
 - Status: complete.
-- Scope: add `order_reduction_passes` to `CulvertsRunner` and post-process `topo/netful.tif` once per batch before per-run jobs are enqueued: prune short streams (WBT `remove_short_streams`, using `watershed.wbt.mcl`), compute a Strahler order raster from the pruned stream mask, run `PruneStrahlerStreamOrder` `N` times (binary output on the final pass), then generate `chnjnt.tif` from the final `netful.tif`.
+- Scope: add `order_reduction_passes` to `CulvertsRunner` and post-process `topo/netful.tif` once per batch before per-run jobs are enqueued: prune short streams (WBT `remove_short_streams`, `min_length = 2 * cellsize_m`), compute a Strahler order raster from the pruned stream mask, run `PruneStrahlerStreamOrder` `N` times (binary output on the final pass), then generate `chnjnt.tif` from the final `netful.tif`.
 - Sanity check: applying the prune once at the batch root keeps the per-run symlink flow intact and avoids redundant work in each culvert job; overwriting `netful.tif` is acceptable because the payload is per-batch and isolated.
 - Dependencies: `whitebox_tools` from the weppcloud fork (`/workdir/weppcloud-wbt`) must expose `StrahlerStreamOrder` and `PruneStrahlerStreamOrder` (with `--binary_output`); payload provides `topo/streams.tif`.
 - Deliverables:
-  - `CulvertsRunner.order_reduction_passes` NoDb property, read from `[culvert_runner] order_reduction_passes` (default 1; allow 0 to disable).
+  - `CulvertsRunner.order_reduction_passes` NoDb property, read from `[culvert_runner] order_reduction_passes` (default `culvert.cfg` value; allow 0 to disable).
   - `run_culvert_batch_rq` prunes short streams (`remove_short_streams`), builds a Strahler order raster from the pruned stream mask, then prunes stream order (`PruneStrahlerStreamOrder`) with binary output on the final pass, then generates `topo/chnjnt.tif` from the final `topo/netful.tif` before enqueuing culvert runs.
   - Logs emitted showing pass count and inputs/outputs; failure raises early before jobs are enqueued.
 - Risks: pruning changes the number of channels/hillslopes; ensure the weppcloud-wbt fork with `--binary_output` is deployed so downstream binary stream masks stay compatible with `polygonize_netful`.
@@ -233,7 +237,7 @@ Notes:
 ## Phase 4b handoff summary
 - Batch rasters: `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`, `soils/ssurgo_30m.tif`, `soils/ssurgo.tif` generated once per batch from the payload DEM extent before jobs are queued and shared by runs.
 - Per-run wiring: landuse/soils directories are cleaned, then symlinked to the batch rasters before `Landuse.build(retrieve_nlcd=False)` and `Soils.build(retrieve_gridded_ssurgo=False)`.
-- Overrides: `model_parameters.nlcd_db` and `model_parameters.ssurgo_db` are respected to select the 30m sources; defaults fall back to the base project settings.
+- Overrides: `model_parameters.nlcd_db` is respected to select the 30m sources; defaults fall back to the base project settings.
 - Skeletonization: run-level symlinks are removed by skeletonization; batch rasters remain at the batch root.
 
 ## Phase 4c - Cropped VRT symlinks for large DEMs (COMPLETE)
@@ -441,7 +445,7 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 - [x] Point_ID 207 follow-up: the issue was malformed inputs (culvert point outside watershed), not WBT. Added a guard that validates point-in-watershed and raises `NoOutletFoundError` early.
 
 ## Phase 5 - Observability, error handling, retention (COMPLETE)
-- Status: in progress.
+- Status: complete; remaining work moved to Phase 6a and cleanup follow-ups.
 - Scope: run-level validation + error propagation, structured error codes for validation/execution, publish status events to Redis DB 2, update RQ job info with `error_code`/`error_detail`, add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
 - Deliverables:
@@ -452,7 +456,7 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
   - Retry/backoff for flaky `bound.tif` creation (WBT watershed step) to reduce VRT -> TIF contention failures.
   - Batch-scoped logging: `culvert_rq` logger now routes into the `CulvertsRunner` file handler under the batch UUID.
   - Outlet seeding log includes D8 neighbor mask sum from `target_watershed.tif` for diagnostics.
-  - Remaining: error schema in RQ job info, status event payloads, cleanup job (cron or RQ) that reads `CulvertsRunner.completed_at` + retention window, run/batch log summaries.
+  - Remaining: status event payloads, cleanup job (cron or RQ) that reads `CulvertsRunner.completed_at` + retention window, run/batch log summaries.
 - Risks: retention job deleting active batches; missing completion timestamp on failed jobs; missing error propagation in RQ engine.
 - Verification: Hubbard Brook edge-case payload confirms outside-watershed failures appear in `run_metadata.json`, `culverts_runner.nodb`, and `runs_manifest.md`; run-level metrics populated when outputs exist.
 
@@ -544,12 +548,12 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - `identify_mode_single_raster_key` (wepppyo3) correctly skipped hillslopes with all-nodata pixels, but downstream code expected all hillslope IDs to be present in `domlc_d`.
 
 ### Deliverables
-1. **wmesque2 native CRS support** (in progress):
+1. **wmesque2 native CRS support** (complete):
    - wmesque2 accepts optional `bbox_crs` (EPSG/proj4) for projected extent requests.
    - wmesque client (`wmesque_retrieve`) accepts `extent_crs` parameter, appends `bbox_crs` for v2 only.
    - Culvert batch landuse/soils retrieval uses native UTM extent to avoid WGS84 round-trip clipping.
 
-2. **wepppyo3 nodata guard** (in progress):
+2. **wepppyo3 nodata guard** (complete; updated wepppyo3 mounted in container):
    - `identify_mode_single_raster_key` and `identify_mode_intersecting_raster_keys` must return entries for all keys in the key raster.
    - When a hillslope has 100% nodata in the parameter raster, return the nodata value (or a sentinel) instead of silently skipping.
    - Test fixture created: `/workdir/wepppyo3/tests/raster_characteristics/fixtures/` with `subwta_nodata_edge.tif` (4 hillslopes) and `nlcd_nodata_edge.tif` (68% nodata coverage).
@@ -581,6 +585,13 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - Deliverables: auth middleware, webhook dispatcher, docs for Culvert_web_app.
 - Risks: callback storms for large batches; secrets management; backward compatibility with POC auth.
 - Verification: auth enforcement tests; webhook retry tests with mock endpoints; manual validation with Culvert_web_app dev instance.
+
+## Phase 6a - Error schema standardization (post-POC)
+- Scope: standardize `success`/`error` payloads across rq-engine routes and add `error_code`/`error_detail` to job status/job info outputs.
+- Dependencies: agreement on error taxonomy and client expectations for job status polling.
+- Deliverables: updated response helpers, job status payload extensions, updated spec/dev-package docs.
+- Risks: client-side parsing changes; backward compatibility for existing integrations.
+- Verification: regression tests for error responses and job status schema; manual checks against culvert payload uploads.
 
 ## Cross-phase test strategy (minimum)
 **Implemented tests**
