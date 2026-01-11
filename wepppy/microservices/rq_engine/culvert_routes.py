@@ -25,7 +25,7 @@ from wepppy.microservices.culvert_payload_validator import (
     validate_zip_members,
 )
 from wepppy.rq.culvert_rq import TIMEOUT as CULVERT_BATCH_TIMEOUT
-from wepppy.rq.culvert_rq import run_culvert_batch_rq
+from wepppy.rq.culvert_rq import run_culvert_batch_rq, run_culvert_run_rq
 
 from .responses import error_response, validation_error_response
 
@@ -121,6 +121,82 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         shutil.rmtree(batch_root, ignore_errors=True)
         logger.exception("rq-engine culvert batch ingestion failed")
         return error_response("Failed to ingest culvert batch payload")
+
+
+@router.post("/culverts-wepp-batch/{batch_uuid}/retry/{point_id}")
+async def culverts_retry_run(batch_uuid: str, point_id: str) -> JSONResponse:
+    """Retry a single culvert run within an existing batch."""
+    culverts_root = _resolve_culverts_root()
+    batch_root = culverts_root / batch_uuid
+
+    if not batch_root.is_dir():
+        return error_response(
+            f"Batch not found: {batch_uuid}",
+            status_code=404,
+        )
+
+    # Validate the point_id exists in the batch
+    watersheds_path = batch_root / "culverts" / "watersheds.geojson"
+    if not watersheds_path.is_file():
+        return error_response(
+            "Batch is missing watersheds.geojson",
+            status_code=400,
+        )
+
+    try:
+        with watersheds_path.open("r", encoding="utf-8") as f:
+            watersheds = json.load(f)
+        valid_point_ids = {
+            str(feat.get("properties", {}).get("Point_ID"))
+            for feat in watersheds.get("features", [])
+        }
+    except (json.JSONDecodeError, KeyError) as exc:
+        logger.warning(f"Failed to parse watersheds.geojson: {exc}")
+        return error_response(
+            "Failed to parse watersheds.geojson",
+            status_code=400,
+        )
+
+    if point_id not in valid_point_ids:
+        return error_response(
+            f"Point_ID {point_id} not found in batch {batch_uuid}",
+            status_code=404,
+        )
+
+    # Clean up existing run directory for a fresh retry
+    run_dir = batch_root / "runs" / point_id
+    if run_dir.is_dir():
+        shutil.rmtree(run_dir, ignore_errors=True)
+        logger.info(f"Removed existing run directory for retry: {run_dir}")
+
+    job_id = _enqueue_culvert_run_job(batch_uuid, point_id)
+    status_url = f"/rq-engine/api/jobstatus/{job_id}"
+    return JSONResponse(
+        {
+            "job_id": job_id,
+            "culvert_batch_uuid": batch_uuid,
+            "point_id": point_id,
+            "status_url": status_url,
+        }
+    )
+
+
+def _enqueue_culvert_run_job(culvert_batch_uuid: str, point_id: str) -> str:
+    """Enqueue a single culvert run job."""
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    runid = f"culvert;;{culvert_batch_uuid};;{point_id}"
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        q = Queue("batch", connection=redis_conn)
+        job = q.enqueue_call(
+            func=run_culvert_run_rq,
+            args=[runid, culvert_batch_uuid, point_id],
+            timeout=CULVERT_BATCH_TIMEOUT,
+        )
+        job.meta["culvert_batch_uuid"] = culvert_batch_uuid
+        job.meta["point_id"] = point_id
+        job.meta["runid"] = runid
+        job.save()
+    return job.id
 
 
 def _resolve_culverts_root() -> Path:
