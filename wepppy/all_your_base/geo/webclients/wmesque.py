@@ -7,6 +7,7 @@ import json
 import shutil
 import socket
 from collections.abc import Sequence
+from urllib.parse import quote
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
@@ -84,11 +85,14 @@ def wmesque_retrieve(
     v: int = 1,
     write_meta: bool = True,
     wmesque_endpoint: str | None = None,
+    extent_crs: str | None = None,
 ) -> int:
     """Download a raster tile from WMesque and persist it at ``fname``."""
     v = int(v)
 
     if v == 1:
+        if extent_crs is not None:
+            raise ValueError("extent_crs is only supported by WMesque v2")
         return _wmesque1_retrieve(dataset, extent, fname, cellsize, resample)
     
     global WMESQUE_ENDPOINT
@@ -119,6 +123,8 @@ def wmesque_retrieve(
         raise ValueError('fname must end with .tif, .asc, or .png')
 
     url = f'{wmesque_endpoint}/retrieve/{dataset}/?bbox={extent}&cellsize={cellsize}&format={fmt}'
+    if extent_crs is not None:
+        url += f'&bbox_crs={quote(extent_crs)}'
 
     if resample is not None:
         url += f'&resample={resample}'
@@ -126,7 +132,8 @@ def wmesque_retrieve(
     meta = {
         'wmesque_retrieve': {
             'url': url,
-            'wmesque_endpoint': wmesque_endpoint
+            'wmesque_endpoint': wmesque_endpoint,
+            'bbox_crs': extent_crs,
         }
     }
 

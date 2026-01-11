@@ -14,6 +14,8 @@ GDAL datasets on the fly. Requests specify:
 
 * ``dataset`` – path fragment pointing at a GDAL VRT under ``GEODATA_DIR``
 * ``bbox`` – comma-delimited ``left,bottom,right,top`` coordinates in WGS84
+  (or in ``bbox_crs`` when provided)
+* ``bbox_crs`` – optional CRS for ``bbox`` coordinates (EPSG/proj4)
 * ``cellsize`` – desired output resolution in meters (defaults to ``30``)
 * optional quality knobs such as ``resample``, ``gdaldem`` mode, and
   ``format`` (GeoTIFF, PNG, ASCII grid, or ENVI)
@@ -70,7 +72,7 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse, JSONResponse
 
-from osgeo import gdal
+from osgeo import gdal, osr
 import xml.etree.ElementTree as ET
 import base64, json, hashlib
 import zlib
@@ -187,6 +189,7 @@ def process_raster(
     resample: Optional[str],
     _format: str,
     gdaldem: Optional[str],
+    bbox_crs: Optional[str],
 ) -> Tuple[str, dict, List[str]]:
     """Warp, optionally process, and format a dataset for a given ``bbox``.
 
@@ -208,17 +211,35 @@ def process_raster(
     dst = os.path.join(SCRATCH_DIR, fn_uuid + ".tif")
     fn_list_to_cleanup = [dst]
 
-    # 2. Determine UTM projection
+    # 2. Determine target projection and extent
     left, bottom, right, top = bbox
-    ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(top, left)
-    lr_x, lr_y, _, _ = utm.from_latlon(bottom, right, force_zone_number=utm_number)
+    utm_number = None
+    utm_letter = None
+    if bbox_crs:
+        srs = osr.SpatialReference()
+        if srs.SetFromUserInput(bbox_crs) != 0:
+            raise HTTPException(status_code=400, detail=f"Invalid bbox_crs: {bbox_crs}")
+        if not srs.IsProjected():
+            raise HTTPException(
+                status_code=400,
+                detail="bbox_crs must be a projected CRS with linear units (easting/northing).",
+            )
+        proj4 = srs.ExportToProj4() or bbox_crs
+        target_srs = bbox_crs
+        ul_x, ul_y = left, top
+        lr_x, lr_y = right, bottom
+        bbox_source = "native"
+    else:
+        ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(top, left)
+        lr_x, lr_y, _, _ = utm.from_latlon(bottom, right, force_zone_number=utm_number)
+        proj4 = f"+proj=utm +zone={utm_number} +{'south' if top < 0 else 'north'} +datum=WGS84 +ellps=WGS84"
+        target_srs = proj4
+        bbox_source = "wgs84"
 
     width_px = int((lr_x - ul_x) / cellsize)
     height_px = int((ul_y - lr_y) / cellsize)
     if height_px > 4096 or width_px > 4096:
         raise HTTPException(status_code=400, detail="Output size cannot exceed 4096x4096 pixels")
-
-    proj4 = f"+proj=utm +zone={utm_number} +{'south' if top < 0 else 'north'} +datum=WGS84 +ellps=WGS84"
 
     # 3. Determine resample method
     if resample is None:
@@ -227,7 +248,7 @@ def process_raster(
 
     # 4. Build and run gdalwarp
     cmd_warp = [
-        "gdalwarp", "-t_srs", proj4,
+        "gdalwarp", "-t_srs", target_srs,
         "-tr", str(cellsize), str(cellsize),
         "-te", str(ul_x), str(lr_y), str(lr_x), str(ul_y),
         "-r", resample, src, dst,
@@ -249,9 +270,17 @@ def process_raster(
             meta = json.load(f)
     
     meta["wmesque"] = {
-        "bbox": bbox, "cache": dst, "dataset": dataset, "cellsize": cellsize,
+        "bbox": bbox,
+        "bbox_crs": bbox_crs,
+        "bbox_source": bbox_source,
+        "cache": dst,
+        "dataset": dataset,
+        "cellsize": cellsize,
         "ul": {"ul_x": ul_x, "ul_y": ul_y, "utm_number": utm_number, "utm_letter": utm_letter},
-        "proj4": proj4, "cmd": cmd_warp, "stdout": out_warp, "timestamp": datetime.now().isoformat(),
+        "proj4": proj4,
+        "cmd": cmd_warp,
+        "stdout": out_warp,
+        "timestamp": datetime.now().isoformat(),
     }
     
     # 6. Run optional gdaldem processing
@@ -336,6 +365,11 @@ async def api_dataset_retrieve(
     resample: Optional[str] = Query(None, enum=resample_methods),
     _format: str = Query("GTiff", enum=format_drivers, alias="format"),
     gdaldem: Optional[str] = Query(None, enum=gdaldem_modes),
+    bbox_crs: Optional[str] = Query(
+        None,
+        alias="bbox_crs",
+        description="Optional CRS for bbox coordinates (e.g., EPSG:32611 or a PROJ4 string).",
+    ),
 ):
     """
     Retrieves a reprojected and clipped raster dataset based on the provided parameters.
@@ -343,7 +377,7 @@ async def api_dataset_retrieve(
     try:
         # Run the entire blocking process in a separate thread
         dst_final, meta, fn_list_to_cleanup = await asyncio.to_thread(
-            process_raster, dataset, bbox, cellsize, resample, _format, gdaldem
+            process_raster, dataset, bbox, cellsize, resample, _format, gdaldem, bbox_crs
         )
     except HTTPException as e:
         # If the blocking function raised an HTTP exception, re-raise it
