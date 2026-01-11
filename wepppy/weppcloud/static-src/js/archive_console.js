@@ -1,4 +1,4 @@
-// Built from static-src/js/archive_console.js.
+// Source of truth for archive_console.js; built output lives in static/js/.
 (function () {
   "use strict";
 

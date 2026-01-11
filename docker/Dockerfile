@@ -114,6 +114,8 @@ COPY . /workdir/wepppy
 
 # Copy pre-built static vendor assets generated in the Node stage.
 COPY --from=static-builder /app/dist/vendor/ /workdir/wepppy/wepppy/weppcloud/static/vendor/
+# Copy archive console bundle into static/js.
+COPY --from=static-builder /app/dist/js/archive_console.js /workdir/wepppy/wepppy/weppcloud/static/js/archive_console.js
 
 # Seed sibling repositories that were previously mounted via .pth files.
 RUN set -euxo pipefail; \

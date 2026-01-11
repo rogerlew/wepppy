@@ -35,6 +35,12 @@ const logSkip = (label, paths) => {
 };
 
 const targets = [
+  // Archive console (local source; emitted to static/js/archive_console.js).
+  {
+    kind: 'copyFile',
+    source: path.join(projectRoot, 'js', 'archive_console.js'),
+    outfile: path.join(distDir, 'js', 'archive_console.js'),
+  },
   // Leaflet core
   {
     kind: 'copyFile',

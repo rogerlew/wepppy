@@ -5,19 +5,18 @@
 ## Quick Status
 
 **Started**: 2026-01-11  
-**Current phase**: Phase 1 compatibility implementation  
+**Current phase**: Phase 2 archive console pipeline  
 **Last updated**: 2026-01-11  
-**Next milestone**: Phase 1 compatibility verification
+**Next milestone**: Phase 2 pipeline verification
 
 ## Task Board
 
 ### Ready / Backlog
 - [ ] Validate rq-response contract with stakeholders
-- [ ] Phase 2: move `archive_console.js` into static-src build pipeline
 - [ ] Phase 3: status-code-first error responses + legacy key deprecation plan
 
 ### In Progress
-- [ ] Phase 1: response helper compatibility + client normalization
+- [ ]
 
 ### Blocked
 - [ ]
@@ -31,6 +30,8 @@
 - [x] Drafted standard schema recommendations + migration notes
 - [x] Authored `observed-error-schema-usages-report.md` artifact
 - [x] Authored `docs/schemas/rq-response-contract.md`
+- [x] Phase 1: response helper compatibility + client normalization
+- [x] Phase 2: move `archive_console.js` into static-src build pipeline
 
 ## Timeline
 
@@ -144,3 +145,10 @@
 **Work completed**:
 - Updated `WCHttp` normalization to keep canonical error objects and add `error_message` for string consumers
 - Adjusted batch runner and project error messaging to prefer `error_message`
+
+### 2026-01-11: Phase 2 archive console pipeline
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Moved `archive_console.js` source into static-src and wired build output to `static/js/archive_console.js`
+- Updated build tooling and Docker image copy step to include the archive console asset

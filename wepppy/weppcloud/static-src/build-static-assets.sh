@@ -68,6 +68,16 @@ echo ">> Syncing built assets into ${VENDOR_DIR}"
 mkdir -p "${VENDOR_DIR}"
 rsync -a --delete "${SCRIPT_DIR}/dist/vendor/" "${VENDOR_DIR}/"
 
+ARCHIVE_SRC="${SCRIPT_DIR}/dist/js/archive_console.js"
+ARCHIVE_DEST="${STATIC_DIR}/js/archive_console.js"
+if [[ ! -f "${ARCHIVE_SRC}" ]]; then
+  echo "!! Missing ${ARCHIVE_SRC}; static build did not emit archive_console.js" >&2
+  exit 1
+fi
+echo ">> Syncing archive_console.js into ${ARCHIVE_DEST}"
+mkdir -p "$(dirname "${ARCHIVE_DEST}")"
+cp "${ARCHIVE_SRC}" "${ARCHIVE_DEST}"
+
 if [[ ${BUILD_CONTROLLERS} -eq 1 ]]; then
   echo ">> Rebuilding controllers-gl.js bundle..."
   CONTROLLERS_SCRIPT="${PROJECT_ROOT}/controllers_js/build_controllers_js.py"
