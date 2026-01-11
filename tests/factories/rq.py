@@ -68,7 +68,19 @@ def make_queue(recorder: RQRecorder, *, default_job_id: str = "job-123"):
     """Return a Queue stub that records every enqueue call."""
 
     class _Queue:
-        def __init__(self, connection: Any) -> None:
+        def __init__(
+            self,
+            name: str = "default",
+            connection: Any = None,
+            *args: Any,
+            **kwargs: Any,
+        ) -> None:
+            if connection is None and args:
+                connection = args[0]
+            if connection is None and not isinstance(name, str):
+                connection = name
+                name = "default"
+            self.name = name
             self.connection = connection
             recorder.queue_connections.append(connection)
 
