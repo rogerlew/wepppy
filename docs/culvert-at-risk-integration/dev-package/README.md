@@ -4,7 +4,7 @@
      unless it is inaccurate. -->
 
 # Culvert_web_app dev package
-> Handoff docs and scripts for building `payload.zip` files for wepp.cloud.
+> Handoff doc for WEPPcloud's culverts API.
 
 ## Audience
 
