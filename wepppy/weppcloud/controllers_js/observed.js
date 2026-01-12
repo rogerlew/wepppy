@@ -117,30 +117,52 @@ var Observed = (function () {
         };
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
     function normalizeError(http, error) {
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
-            var detail = error.detail || error.message || "Request failed";
-            var stacktrace = [];
             if (error.body && typeof error.body === "object") {
-                if (Array.isArray(error.body.StackTrace)) {
-                    stacktrace = error.body.StackTrace;
-                } else if (typeof error.body.StackTrace === "string") {
-                    stacktrace = [error.body.StackTrace];
+                if (error.body.error !== undefined || error.body.errors !== undefined) {
+                    return error.body;
                 }
-                if (error.body.Error) {
-                    detail = error.body.Error;
+                if (error.body.message || error.body.detail) {
+                    return { error: { message: normalizeErrorValue(error.body.message || error.body.detail) } };
                 }
             }
-            return {
-                Success: false,
-                Error: detail,
-                StackTrace: stacktrace
-            };
+            var detail = error.detail || error.message || "Request failed";
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
-        return {
-            Success: false,
-            Error: (error && error.message) || "Request failed"
-        };
+        return { error: { message: normalizeErrorValue(error && error.message) || "Request failed" } };
     }
 
     function createInstance() {
@@ -325,7 +347,7 @@ var Observed = (function () {
                 var body = response && response.body !== undefined ? response.body : response;
                 var normalized = body || {};
 
-                if (normalized.Success === true || normalized.success === true) {
+                if (!normalized.error && !normalized.errors) {
                     controller.status.html(RUN_MESSAGE + "… done.");
                     controller.report();
                     if (controller.events && typeof controller.events.emit === "function") {

@@ -231,7 +231,7 @@ async function enableSbsOverlay(page) {
     }
     const legend = document.getElementById('sbs_legend');
     return {
-      success: Boolean(response && response.Success === true),
+      success: Boolean(response && response.Content && !response.error && !response.errors),
       legendVisible: Boolean(legend && !legend.hidden && legend.innerHTML.trim().length > 0),
       hasImage: Boolean(map && map.sbs_layer && map.sbs_layer.props && map.sbs_layer.props.image),
     };
@@ -862,7 +862,7 @@ test.describe('map gl smoke', () => {
       http.request = (url, options) => {
         const target = String(url || '');
         if (target.includes('rq/api/fetch_dem_and_build_channels')) {
-          return Promise.resolve({ body: { Success: true, job_id: 'job-channel-1' } });
+          return Promise.resolve({ body: { job_id: 'job-channel-1' } });
         }
         if (target.includes('report/channel')) {
           return Promise.resolve({ body: '<div id="channel-report">Report</div>' });
@@ -947,7 +947,7 @@ test.describe('map gl smoke', () => {
       http.request = (url, options) => {
         const target = String(url || '');
         if (target.includes('rq/api/set_outlet')) {
-          return Promise.resolve({ body: { Success: true, job_id: 'job-1' } });
+          return Promise.resolve({ body: { job_id: 'job-1' } });
         }
         if (target.includes('report/outlet')) {
           return Promise.resolve({ body: '<div>Report</div>' });
@@ -1342,7 +1342,7 @@ test.describe('map gl smoke', () => {
       if (!http || typeof http.postJson !== 'function') {
         return { ok: false, reason: 'WCHttp missing' };
       }
-      http.postJson = async () => ({ body: { Success: true, job_id: 'smoke-job-1' } });
+      http.postJson = async () => ({ body: { job_id: 'smoke-job-1' } });
       return { ok: true };
     });
 

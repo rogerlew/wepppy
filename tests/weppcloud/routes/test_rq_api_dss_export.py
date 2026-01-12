@@ -119,7 +119,7 @@ def test_post_dss_export_rq_accepts_json_payload(dss_export_app):
         response = api_module.api_post_dss_export_rq(runid, "live")
 
     assert response.status_code == 200
-    assert response.get_json() == {"Success": True, "job_id": "job-001"}
+    assert response.get_json() == {"job_id": "job-001"}
 
     assert len(recorder.queue_calls) == 1
     queue_call = recorder.queue_calls[0]
@@ -169,7 +169,7 @@ def test_post_dss_export_rq_mode2_builds_channels(dss_export_app):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "job_id": "job-001"}
+    assert body == {"job_id": "job-001"}
 
     wepp_instance = wepp_cls.getInstance(str(base_path / runid))
     assert wepp_instance.dss_export_mode == 2
@@ -225,10 +225,9 @@ def test_post_dss_export_rq_rejects_invalid_dates(dss_export_app):
     ):
         response = api_module.api_post_dss_export_rq(runid, "live")
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     body = response.get_json()
-    assert body["Success"] is False
-    assert "Invalid DSS start date" in body["Error"]
+    assert "Invalid DSS start date" in body["error"]["message"]
     assert recorder.queue_calls == []
 
 
@@ -250,8 +249,7 @@ def test_post_dss_export_rq_requires_ordered_dates(dss_export_app):
     ):
         response = api_module.api_post_dss_export_rq(runid, "live")
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     body = response.get_json()
-    assert body["Success"] is False
-    assert "start date must be on or before the end date" in body["Error"]
+    assert "start date must be on or before the end date" in body["error"]["message"]
     assert recorder.queue_calls == []

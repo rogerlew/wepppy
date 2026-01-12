@@ -80,34 +80,26 @@
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function normalizeTopazId(value) {

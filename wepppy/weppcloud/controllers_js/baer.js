@@ -160,37 +160,106 @@ var Baer = (function () {
             return raw;
         }
 
+        function normalizeErrorValue(value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
+            if (typeof value === "string") {
+                return value;
+            }
+            if (Array.isArray(value)) {
+                return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+            }
+            if (typeof value === "object") {
+                if (typeof value.message === "string") {
+                    return value.message;
+                }
+                if (typeof value.detail === "string") {
+                    return value.detail;
+                }
+                if (typeof value.details === "string") {
+                    return value.details;
+                }
+                if (value.details !== undefined) {
+                    return normalizeErrorValue(value.details);
+                }
+                try {
+                    return JSON.stringify(value);
+                } catch (err) {
+                    return String(value);
+                }
+            }
+            return String(value);
+        }
+
+        function formatErrorList(errors) {
+            if (!Array.isArray(errors)) {
+                return null;
+            }
+            var parts = [];
+            errors.forEach(function (entry) {
+                if (entry === undefined || entry === null) {
+                    return;
+                }
+                if (typeof entry === "string") {
+                    parts.push(entry);
+                    return;
+                }
+                if (typeof entry.message === "string") {
+                    parts.push(entry.message);
+                    return;
+                }
+                if (typeof entry.detail === "string") {
+                    parts.push(entry.detail);
+                    return;
+                }
+                if (typeof entry.code === "string") {
+                    parts.push(entry.code);
+                    return;
+                }
+                try {
+                    parts.push(JSON.stringify(entry));
+                } catch (err) {
+                    parts.push(String(entry));
+                }
+            });
+            return parts.length ? parts.join("\n") : null;
+        }
+
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return { Error: body };
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
             return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function parseInteger(value, fallback) {
@@ -426,7 +495,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         emit("baer:firedate:updated", { fireDate: effectiveFireDate || null });
                         return data;
@@ -464,7 +533,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
                         emit("baer:upload:completed", { response: data });
@@ -500,7 +569,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         baer.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);
                         emit("baer:remove:completed", { response: data });
@@ -566,7 +635,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         baer.triggerEvent("SBS_UPLOAD_TASK_COMPLETE", data);
                         emit("baer:uniform:completed", { response: data, value: severity });
@@ -650,7 +719,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         baer.triggerEvent("MODIFY_BURN_CLASS_TASK_COMPLETE", data);
                         emit("baer:classes:updated", { response: data });
@@ -695,7 +764,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         baer.triggerEvent("MODIFY_BURN_CLASS_TASK_COMPLETE", data);
                         emit("baer:color-map:updated", { response: data });
@@ -808,7 +877,7 @@ var Baer = (function () {
 
                 return Promise.resolve(map.loadSbsMap()).then(function (data) {
                     var payload = data || {};
-                    if (payload.Success === true && payload.Content) {
+                    if (!payload.error && !payload.errors && payload.Content) {
                         completeTask(taskMsg);
                         emit("baer:map:shown", {
                             bounds: payload.Content.bounds,
@@ -821,8 +890,8 @@ var Baer = (function () {
                         return payload;
                     }
 
-                    if (!payload.Error && !payload.StackTrace) {
-                        payload = Object.assign({ Error: "No SBS map has been specified." }, payload);
+                    if (!payload.error && !payload.errors) {
+                        payload = Object.assign({ error: { message: "No SBS map has been specified." } }, payload);
                     }
                     baer.pushResponseStacktrace(baer, payload);
                     failTask(taskMsg);
@@ -876,7 +945,7 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true && data.Content) {
+                    if (!data.error && !data.errors && data.Content) {
                         completeTask(taskMsg);
                         var map;
                         try {

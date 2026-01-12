@@ -56,7 +56,7 @@ def test_run_rhem_enqueues_without_payload(rhem_rq_app):
         response = api_module.api_run_rhem("demo", "live")
 
     assert response.status_code == 200
-    assert response.get_json() == {"Success": True, "job_id": "job-999"}
+    assert response.get_json() == {"job_id": "job-999"}
 
     assert len(recorder.queue_calls) == 1
     call = recorder.queue_calls[0]

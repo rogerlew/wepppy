@@ -44,12 +44,13 @@ function buildFailurePayload(controllerName) {
   return {
     message,
     body: {
-      Success: false,
-      Error: message,
-      StackTrace: [
-        `Controller: ${label}`,
-        'Injected stack trace for automated smoke test.'
-      ]
+      error: {
+        message: message,
+        details: [
+          `Controller: ${label}`,
+          'Injected stack trace for automated smoke test.'
+        ]
+      }
     }
   };
 }
@@ -208,7 +209,7 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ Success: true, job_id: jobId })
+          body: JSON.stringify({ job_id: jobId })
         });
   });
 
@@ -240,9 +241,10 @@ async function runRqJobWorkflow({ page, controller, hintLocator, stacktraceLocat
       status: failureStatus,
       contentType: 'application/json',
       body: JSON.stringify({
-        Success: false,
-        Error: 'Injected landuse failure',
-        StackTrace: ['Injected failure for landuse controller', 'Test stacktrace line 2']
+        error: {
+          message: 'Injected landuse failure',
+          details: ['Injected failure for landuse controller', 'Test stacktrace line 2']
+        }
       })
     });
   });

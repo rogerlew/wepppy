@@ -123,34 +123,26 @@ var Treatments = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function parseMode(value, fallback) {
@@ -346,17 +338,6 @@ var Treatments = (function () {
                 single_selection: selectionValue
             }, { form: formElement }).then(function (result) {
                 var response = result && result.body ? result.body : null;
-                if (response && response.Success === false) {
-                    treatments.pushResponseStacktrace(treatments, response);
-                    if (treatmentsEvents) {
-                        treatmentsEvents.emit("treatments:mode:error", {
-                            mode: normalized,
-                            selection: selectionValue,
-                            response: response
-                        });
-                    }
-                    return response;
-                }
                 updateScenarioEmit("server");
                 return response;
             }).catch(function (error) {
@@ -433,14 +414,14 @@ var Treatments = (function () {
                 form: formElement
             }).then(function (result) {
                 var response = result && result.body ? result.body : null;
-                if (response && response.Success === true) {
+                if (response && response.job_id) {
                     var message = "build_treatments job submitted: " + response.job_id;
                     emitStatus(message);
                     treatments.poll_completion_event = "TREATMENTS_BUILD_TASK_COMPLETED";
                     treatments.set_rq_job_id(treatments, response.job_id);
                     if (treatmentsEvents) {
                         treatmentsEvents.emit("treatments:run:submitted", {
-                            jobId: response.job_id,
+                            job_id: response.job_id,
                             mode: treatments.mode,
                             selection: getSelectionValue()
                         });

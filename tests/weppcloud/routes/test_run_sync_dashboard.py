@@ -58,7 +58,6 @@ def test_api_run_sync_enqueues_job(
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["sync_job_id"] == "job-run-sync"
     assert payload["migration_job_id"] == "job-run-migration"
 

@@ -267,6 +267,97 @@ var MapController = (function () {
         return String(input);
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
+    function resolveErrorMessage(payload, fallback) {
+        if (!payload) {
+            return fallback || null;
+        }
+        if (payload.error !== undefined) {
+            var message = normalizeErrorValue(payload.error);
+            if (message) {
+                return message;
+            }
+        }
+        if (payload.errors) {
+            var errorList = formatErrorList(payload.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (payload.message !== undefined) {
+            return normalizeErrorValue(payload.message);
+        }
+        if (payload.detail !== undefined) {
+            return normalizeErrorValue(payload.detail);
+        }
+        return fallback || null;
+    }
+
     function isValidLatLng(lat, lng) {
         return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
     }
@@ -961,7 +1052,7 @@ var MapController = (function () {
                 var cursorLat = coordRound(latlng.lat);
 
                 if (!response || typeof response.Elevation !== "number" || !isFinite(response.Elevation)) {
-                    var errorText = response && response.Error;
+                    var errorText = resolveErrorMessage(response, "Elevation unavailable");
                     var suppressElevationMessage = typeof errorText === "string"
                         && errorText.toLowerCase().indexOf("dem not found under run directory") !== -1;
 
@@ -2468,8 +2559,8 @@ var MapController = (function () {
                         return data;
                     }
                     activeAbort = null;
-                    if (!data || data.Success !== true || !data.Content) {
-                        var message = data && data.Error ? data.Error : "No SBS map has been specified.";
+                    if (!data || data.error || data.errors || !data.Content) {
+                        var message = resolveErrorMessage(data, "No SBS map has been specified.");
                         var error = new Error(message);
                         error.payload = data;
                         throw error;

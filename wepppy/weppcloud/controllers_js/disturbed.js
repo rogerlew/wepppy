@@ -127,6 +127,97 @@ var Disturbed = (function () {
         };
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
+    function resolveErrorMessage(payload, fallback) {
+        if (!payload) {
+            return fallback || null;
+        }
+        if (payload.error !== undefined) {
+            var message = normalizeErrorValue(payload.error);
+            if (message) {
+                return message;
+            }
+        }
+        if (payload.errors) {
+            var errorList = formatErrorList(payload.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (payload.message !== undefined) {
+            return normalizeErrorValue(payload.message);
+        }
+        if (payload.detail !== undefined) {
+            return normalizeErrorValue(payload.detail);
+        }
+        return fallback || null;
+    }
+
     function toResponsePayload(http, error) {
         function coerceBody(raw) {
             if (!raw) {
@@ -145,34 +236,37 @@ var Disturbed = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return { Error: body };
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
             return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: normalizeErrorValue(error && error.message) || "Request failed" } };
     }
 
     function parseInteger(value, fallback) {
@@ -514,7 +608,7 @@ var Disturbed = (function () {
                 })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(infoAdapter, "Disturbed lookup reset to defaults.");
                         disturbed.triggerEvent("job:completed", {
@@ -545,7 +639,7 @@ var Disturbed = (function () {
                 })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(infoAdapter, "Extended disturbed lookup loaded.");
                         disturbed.triggerEvent("job:completed", {
@@ -582,7 +676,7 @@ var Disturbed = (function () {
                 })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(uploadHintAdapter, "SBS raster uploaded successfully.");
                         updateHasSbs(true, "upload");
@@ -625,14 +719,14 @@ var Disturbed = (function () {
                         refreshHasSbs("upload");
                         return data;
                     }
-                    setAdapterText(uploadHintAdapter, data.Error || "Upload failed.");
+                    setAdapterText(uploadHintAdapter, resolveErrorMessage(data, "Upload failed."));
                     handleResponseError(taskMsg, data, "disturbed:upload:error", "disturbed:upload");
                     refreshHasSbs("upload");
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    setAdapterText(uploadHintAdapter, payload.Error || "Upload failed.");
+                    setAdapterText(uploadHintAdapter, resolveErrorMessage(payload, "Upload failed."));
                     handleResponseError(taskMsg, payload, "disturbed:upload:error", "disturbed:upload");
                     refreshHasSbs("upload");
                     return payload;
@@ -653,7 +747,7 @@ var Disturbed = (function () {
                 })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(removeHintAdapter, "SBS raster removed.");
                         updateHasSbs(false, "remove");
@@ -700,14 +794,14 @@ var Disturbed = (function () {
                         refreshHasSbs("remove");
                         return data;
                     }
-                    setAdapterText(removeHintAdapter, data.Error || "Failed to remove SBS.");
+                    setAdapterText(removeHintAdapter, resolveErrorMessage(data, "Failed to remove SBS."));
                     handleResponseError(taskMsg, data, "disturbed:remove:error", "disturbed:remove");
                     refreshHasSbs("remove");
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    setAdapterText(removeHintAdapter, payload.Error || "Failed to remove SBS.");
+                    setAdapterText(removeHintAdapter, resolveErrorMessage(payload, "Failed to remove SBS."));
                     handleResponseError(taskMsg, payload, "disturbed:remove:error", "disturbed:remove");
                     refreshHasSbs("remove");
                     return payload;
@@ -732,7 +826,7 @@ var Disturbed = (function () {
                 })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         updateHasSbs(true, "uniform");
                         
@@ -778,14 +872,14 @@ var Disturbed = (function () {
                         refreshHasSbs("uniform");
                         return data;
                     }
-                    setUniformHint(severity, data.Error || "Failed to generate uniform SBS.");
+                    setUniformHint(severity, resolveErrorMessage(data, "Failed to generate uniform SBS."));
                     handleResponseError(taskMsg, data, "disturbed:uniform:error", "disturbed:uniform");
                     refreshHasSbs("uniform");
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    setUniformHint(severity, payload.Error || "Failed to generate uniform SBS.");
+                    setUniformHint(severity, resolveErrorMessage(payload, "Failed to generate uniform SBS."));
                     handleResponseError(taskMsg, payload, "disturbed:uniform:error", "disturbed:uniform");
                     refreshHasSbs("uniform");
                     return payload;
@@ -814,7 +908,7 @@ var Disturbed = (function () {
                 })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true) {
+                    if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(infoAdapter, fireDate ? "Fire date set to " + fireDate + "." : "Fire date cleared.");
                         emit("disturbed:firedate:updated", { fireDate: fireDate || null });

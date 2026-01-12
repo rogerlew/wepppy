@@ -23,16 +23,53 @@ if module is None or getattr(module, "__name__", "") != "wepppy" or not hasattr(
 climates_module = importlib.import_module("wepppy.climates")
 sys.modules["wepppy"].climates = climates_module
 
-if "pyproj" not in sys.modules:
-    pyproj_module = types.ModuleType("pyproj")
+try:
+    import pyproj as pyproj_module  # type: ignore  # noqa: F401
+except Exception:
+    pyproj_module = None
+
+if pyproj_module is None or not hasattr(pyproj_module, "CRS"):
+    if "pyproj" not in sys.modules:
+        pyproj_module = types.ModuleType("pyproj")
+        sys.modules["pyproj"] = pyproj_module
+    else:
+        pyproj_module = sys.modules["pyproj"]
 
     class _FakeProj:
         def __init__(self, *args, **kwargs):
             pass
 
-    pyproj_module.Proj = _FakeProj
-    pyproj_module.transform = lambda *args, **kwargs: (0.0, 0.0)
-    sys.modules["pyproj"] = pyproj_module
+    class _FakeCRS:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        @classmethod
+        def from_user_input(cls, *args, **kwargs):
+            return cls()
+
+    class _FakeTransformer:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        @classmethod
+        def from_proj(cls, *args, **kwargs):
+            return cls()
+
+        @classmethod
+        def from_crs(cls, *args, **kwargs):
+            return cls()
+
+        def transform(self, *args, **kwargs):
+            return (0.0, 0.0)
+
+    if not hasattr(pyproj_module, "Proj"):
+        pyproj_module.Proj = _FakeProj
+    if not hasattr(pyproj_module, "CRS"):
+        pyproj_module.CRS = _FakeCRS
+    if not hasattr(pyproj_module, "Transformer"):
+        pyproj_module.Transformer = _FakeTransformer
+    if not hasattr(pyproj_module, "transform"):
+        pyproj_module.transform = lambda *args, **kwargs: (0.0, 0.0)
 
 sys.modules.setdefault("utm", types.ModuleType("utm"))
 ensure_geopandas_stub()
@@ -234,54 +271,57 @@ if "xarray" not in sys.modules:
     xarray_module.open_dataset = lambda *args, **kwargs: _FakeDataset()
     sys.modules["xarray"] = xarray_module
 
-if "wepppyo3" not in sys.modules:
+try:
+    import wepppyo3 as wepppyo3_module
+    wepppyo3_available = True
+except Exception:
+    wepppyo3_available = False
     wepppyo3_module = types.ModuleType("wepppyo3")
     wepppyo3_module.__path__ = []
     sys.modules["wepppyo3"] = wepppyo3_module
-else:
-    wepppyo3_module = sys.modules["wepppyo3"]
 
-if "wepppyo3.climate" not in sys.modules:
-    climate_module = types.ModuleType("wepppyo3.climate")
+if not wepppyo3_available:
+    if "wepppyo3.climate" not in sys.modules:
+        climate_module = types.ModuleType("wepppyo3.climate")
 
-    def _fake_interpolate_geospatial(*args, **kwargs):
-        raise NotImplementedError
+        def _fake_interpolate_geospatial(*args, **kwargs):
+            raise NotImplementedError
 
-    climate_module.interpolate_geospatial = _fake_interpolate_geospatial
-    climate_module.cli_revision = lambda *args, **kwargs: None
+        climate_module.interpolate_geospatial = _fake_interpolate_geospatial
+        climate_module.cli_revision = lambda *args, **kwargs: None
 
-    def _climate_getattr(name):
-        return lambda *args, **kwargs: None
+        def _climate_getattr(name):
+            return lambda *args, **kwargs: None
 
-    climate_module.__getattr__ = _climate_getattr
-    sys.modules["wepppyo3.climate"] = climate_module
-    wepppyo3_module.climate = climate_module
+        climate_module.__getattr__ = _climate_getattr
+        sys.modules["wepppyo3.climate"] = climate_module
+        wepppyo3_module.climate = climate_module
 
-if "wepppyo3.raster_characteristics" not in sys.modules:
-    raster_characteristics_module = types.ModuleType("wepppyo3.raster_characteristics")
-    sys.modules["wepppyo3.raster_characteristics"] = raster_characteristics_module
-else:
-    raster_characteristics_module = sys.modules["wepppyo3.raster_characteristics"]
+    if "wepppyo3.raster_characteristics" not in sys.modules:
+        raster_characteristics_module = types.ModuleType("wepppyo3.raster_characteristics")
+        sys.modules["wepppyo3.raster_characteristics"] = raster_characteristics_module
+    else:
+        raster_characteristics_module = sys.modules["wepppyo3.raster_characteristics"]
 
-if not hasattr(raster_characteristics_module, "identify_mode_single_raster_key"):
-    raster_characteristics_module.identify_mode_single_raster_key = lambda *args, **kwargs: None
-if not hasattr(raster_characteristics_module, "identify_mode_intersecting_raster_keys"):
-    raster_characteristics_module.identify_mode_intersecting_raster_keys = lambda *args, **kwargs: None
-if not hasattr(raster_characteristics_module, "identify_median_single_raster_key"):
-    raster_characteristics_module.identify_median_single_raster_key = lambda *args, **kwargs: None
-if not hasattr(raster_characteristics_module, "identify_median_intersecting_raster_keys"):
-    raster_characteristics_module.identify_median_intersecting_raster_keys = lambda *args, **kwargs: None
+    if not hasattr(raster_characteristics_module, "identify_mode_single_raster_key"):
+        raster_characteristics_module.identify_mode_single_raster_key = lambda *args, **kwargs: None
+    if not hasattr(raster_characteristics_module, "identify_mode_intersecting_raster_keys"):
+        raster_characteristics_module.identify_mode_intersecting_raster_keys = lambda *args, **kwargs: None
+    if not hasattr(raster_characteristics_module, "identify_median_single_raster_key"):
+        raster_characteristics_module.identify_median_single_raster_key = lambda *args, **kwargs: None
+    if not hasattr(raster_characteristics_module, "identify_median_intersecting_raster_keys"):
+        raster_characteristics_module.identify_median_intersecting_raster_keys = lambda *args, **kwargs: None
 
-if "wepppyo3.wepp_viz" not in sys.modules:
-    wepp_viz_module = types.ModuleType("wepppyo3.wepp_viz")
-    sys.modules["wepppyo3.wepp_viz"] = wepp_viz_module
-else:
-    wepp_viz_module = sys.modules["wepppyo3.wepp_viz"]
+    if "wepppyo3.wepp_viz" not in sys.modules:
+        wepp_viz_module = types.ModuleType("wepppyo3.wepp_viz")
+        sys.modules["wepppyo3.wepp_viz"] = wepp_viz_module
+    else:
+        wepp_viz_module = sys.modules["wepppyo3.wepp_viz"]
 
-if not hasattr(wepp_viz_module, "make_soil_loss_grid"):
-    wepp_viz_module.make_soil_loss_grid = lambda *args, **kwargs: None
-if not hasattr(wepp_viz_module, "make_soil_loss_grid_fps"):
-    wepp_viz_module.make_soil_loss_grid_fps = lambda *args, **kwargs: None
+    if not hasattr(wepp_viz_module, "make_soil_loss_grid"):
+        wepp_viz_module.make_soil_loss_grid = lambda *args, **kwargs: None
+    if not hasattr(wepp_viz_module, "make_soil_loss_grid_fps"):
+        wepp_viz_module.make_soil_loss_grid_fps = lambda *args, **kwargs: None
 
 if "wepp_runner" not in sys.modules:
     wepp_runner_module = types.ModuleType("wepp_runner")

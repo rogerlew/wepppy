@@ -63,7 +63,6 @@ def test_acquire_rap_ts_enqueues_with_payload(rap_ts_app):
     assert response.status_code == 200
     body = response.get_json()
     assert body == {
-        "Success": True,
         "job_id": "job-xyz",
         "payload": {"datasets": ["rap_ts", "ndvi"], "schedule": {"windows": ["2024"]}, "force_refresh": True},
     }
@@ -95,7 +94,7 @@ def test_acquire_rap_ts_allows_empty_payload(rap_ts_app):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "job_id": "job-xyz"}
+    assert body == {"job_id": "job-xyz"}
 
     call = recorder.queue_calls[0]
     assert call.kwargs["kwargs"] == {}
@@ -115,9 +114,7 @@ def test_acquire_rap_ts_rejects_invalid_schedule(rap_ts_app):
     ):
         response = api_module.api_rap_ts_acquire("demo", "live")
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     body = response.get_json()
-    assert body["Success"] is False
-    assert "Schedule payload must be valid JSON" in body["Error"]
+    assert "Schedule payload must be valid JSON" in body["error"]["message"]
     assert recorder.queue_calls == []
-

@@ -214,4 +214,4 @@ def run_path_cost_effective(runid: str, config: str) -> Response:
             timeout=TIMEOUT,
         )
 
-    return jsonify({"Success": True, "job_id": job.id})
+    return jsonify({"job_id": job.id})

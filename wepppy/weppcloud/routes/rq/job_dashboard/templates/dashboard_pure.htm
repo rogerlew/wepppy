@@ -296,6 +296,117 @@
     return `${Number(value).toFixed(decimals)} s`;
   }
 
+  function normalizeErrorValue(value) {
+    if (value === undefined || value === null) {
+      return value;
+    }
+    if (typeof value === "string") {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((entry) => (entry === undefined || entry === null ? "" : String(entry))).join("\n");
+    }
+    if (typeof value === "object") {
+      if (typeof value.message === "string") {
+        return value.message;
+      }
+      if (typeof value.detail === "string") {
+        return value.detail;
+      }
+      if (typeof value.details === "string") {
+        return value.details;
+      }
+      if (Object.prototype.hasOwnProperty.call(value, "details")) {
+        return normalizeErrorValue(value.details);
+      }
+      try {
+        return JSON.stringify(value);
+      } catch (err) {
+        return String(value);
+      }
+    }
+    return String(value);
+  }
+
+  function formatErrorList(errors) {
+    if (!Array.isArray(errors)) {
+      return null;
+    }
+    const parts = [];
+    errors.forEach((entry) => {
+      if (entry === undefined || entry === null) {
+        return;
+      }
+      if (typeof entry === "string") {
+        parts.push(entry);
+        return;
+      }
+      if (typeof entry.message === "string") {
+        parts.push(entry.message);
+        return;
+      }
+      if (typeof entry.detail === "string") {
+        parts.push(entry.detail);
+        return;
+      }
+      if (typeof entry.code === "string") {
+        parts.push(entry.code);
+        return;
+      }
+      try {
+        parts.push(JSON.stringify(entry));
+      } catch (err) {
+        parts.push(String(entry));
+      }
+    });
+    return parts.length ? parts.join("\n") : null;
+  }
+
+  function resolveErrorMessage(payload, fallback) {
+    if (!payload || typeof payload !== "object") {
+      return fallback || null;
+    }
+    if (payload.error !== undefined) {
+      const message = normalizeErrorValue(payload.error);
+      if (message) {
+        return message;
+      }
+    }
+    if (payload.errors) {
+      const errorList = formatErrorList(payload.errors);
+      if (errorList) {
+        return errorList;
+      }
+    }
+    if (payload.message !== undefined) {
+      const message = normalizeErrorValue(payload.message);
+      if (message) {
+        return message;
+      }
+    }
+    if (payload.detail !== undefined) {
+      const message = normalizeErrorValue(payload.detail);
+      if (message) {
+        return message;
+      }
+    }
+    return fallback || null;
+  }
+
+  function resolveErrorDetails(payload) {
+    if (!payload || typeof payload !== "object") {
+      return "";
+    }
+    if (payload.error && Object.prototype.hasOwnProperty.call(payload.error, "details")) {
+      return normalizeErrorValue(payload.error.details) || "";
+    }
+    if (payload.errors) {
+      const errorList = formatErrorList(payload.errors);
+      return errorList || "";
+    }
+    return "";
+  }
+
   function setHtml(id, html) {
     const element = document.getElementById(id);
     if (element) {
@@ -326,7 +437,7 @@
       response = await fetch(url, { credentials: "same-origin" });
     } catch (err) {
       const error = new Error("Request failed");
-      error.payload = { Error: "Request failed", StackTrace: [] };
+      error.payload = { error: { message: "Request failed" } };
       throw error;
     }
 
@@ -336,13 +447,16 @@
       const text = await response.text();
       payload = text ? JSON.parse(text) : {};
     } catch (err) {
-      payload = { Error: "Request failed", StackTrace: [] };
+      payload = { error: { message: "Invalid JSON response" } };
       parseFailed = true;
     }
 
     if (!response.ok || parseFailed) {
-      const errorMessage = payload.Error || (parseFailed ? "Invalid JSON response" : `Request failed (${response.status})`);
-      const error = new Error(errorMessage);
+      const errorMessage = resolveErrorMessage(
+        payload,
+        parseFailed ? "Invalid JSON response" : `Request failed (${response.status})`
+      );
+      const error = new Error(errorMessage || "Request failed");
       error.payload = payload;
       throw error;
     }
@@ -386,13 +500,10 @@
     }
 
     function handleError(response) {
-      const payload = response || { Error: "Request failed", StackTrace: [] };
-      if (payload.StackTrace && payload.StackTrace.some((line) => line.includes("NoSuchJobError"))) {
-        setHtml("job-dashboard", renderError(`No such job found: ${jobId}`));
-      } else {
-        const stacktrace = Array.isArray(payload.StackTrace) ? payload.StackTrace.join("\n") : "";
-        setHtml("job-dashboard", renderError(payload.Error || "Request failed", stacktrace));
-      }
+      const payload = response || { error: { message: "Request failed" } };
+      const message = resolveErrorMessage(payload, "Request failed") || "Request failed";
+      const detail = resolveErrorDetails(payload);
+      setHtml("job-dashboard", renderError(message, detail));
     }
 
     try {
@@ -403,7 +514,7 @@
         const data = await requestJson(fallbackUrl);
         handleSuccess(data);
       } catch (fallbackError) {
-        handleError(fallbackError.payload);
+        handleError((fallbackError && fallbackError.payload) || null);
       }
     }
   }

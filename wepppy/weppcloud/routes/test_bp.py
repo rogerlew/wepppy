@@ -96,7 +96,7 @@ test_bp = Blueprint("test_bp", __name__, url_prefix="/tests/api")
 @test_bp.get("/ping")
 def ping():
     _require_enabled()
-    return jsonify({"success": True, "message": "test support online"}), 200
+    return jsonify({"message": "test support online"}), 200
 
 
 @test_bp.post("/create-run")
@@ -108,7 +108,7 @@ def create_run_endpoint():
     overrides = payload.get("overrides", {}) or {}
 
     result = _spawn_run(config, overrides)
-    return jsonify({"success": True, "run": result}), 201
+    return jsonify({"run": result}), 201
 
 
 @test_bp.delete("/run/<runid>")
@@ -121,4 +121,4 @@ def delete_run_endpoint(runid: str):
         raise NotFound("Run directory not found")
 
     _cleanup_run_directory(path)
-    return jsonify({"success": True, "runid": runid}), 200
+    return jsonify({"runid": runid}), 200

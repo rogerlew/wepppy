@@ -89,7 +89,7 @@ def test_set_soil_mode_updates_controller(soils_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummySoils.getInstance(run_dir)
     assert controller.mode == soils_module.SoilsMode.UserDefined
@@ -106,7 +106,7 @@ def test_task_set_soils_ksflag_sets_boolean(soils_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummySoils.getInstance(run_dir)
     assert controller.ksflag is True
@@ -121,7 +121,7 @@ def test_task_set_disturbed_sol_ver_updates_controller(soils_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummyDisturbed.getInstance(run_dir)
     assert controller.sol_ver == pytest.approx(9002.0)

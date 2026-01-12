@@ -9,6 +9,8 @@ from flask import Flask
 from wepppy.weppcloud.utils import uploads
 from wepppy.weppcloud.utils.uploads import UploadError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def app() -> Flask:
@@ -165,16 +167,15 @@ def test_upload_helpers_responses(app: Flask) -> None:
     with app.app_context():
         response = uploads.upload_success()
         assert response.status_code == 200
-        assert response.get_json() == {"Success": True}
+        assert response.get_json() == {}
 
         response = uploads.upload_success(message="ok", content={"foo": "bar"})
         assert response.status_code == 200
         assert response.get_json() == {
-            "Success": True,
-            "Message": "ok",
+            "message": "ok",
             "Content": {"foo": "bar"},
         }
 
         response = uploads.upload_failure("bad request", status=422)
         assert response.status_code == 422
-        assert response.get_json() == {"Success": False, "Error": "bad request"}
+        assert response.get_json() == {"error": {"message": "bad request"}}

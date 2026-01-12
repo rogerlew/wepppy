@@ -47,8 +47,8 @@ def test_run_batch_enqueue_job(rq_batch_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["success"] is True
     assert payload["job_id"] == "batch-job-1"
+    assert payload["message"] == "Batch run submitted."
 
     queue_call = env.recorder.queue_calls[0]
     assert queue_call.func is rq_api_module.run_batch_rq
@@ -77,4 +77,4 @@ def test_run_batch_returns_404_for_missing_batch(monkeypatch, rq_batch_client):
 
     assert response.status_code == 404
     payload = response.get_json()
-    assert payload["success"] is False
+    assert payload["error"]["message"] == "missing"

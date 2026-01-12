@@ -326,7 +326,6 @@ describe("Map GL controller", () => {
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
 
         global.WCHttp.getJson.mockResolvedValueOnce({
-            Success: true,
             Content: {
                 bounds: [[40.0, -120.0], [41.0, -119.0]],
                 imgurl: "resources/baer.png",
@@ -356,7 +355,6 @@ describe("Map GL controller", () => {
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
 
         global.WCHttp.getJson.mockResolvedValueOnce({
-            Success: true,
             Content: {
                 bounds: [[40.0, -120.0], [41.0, -119.0]],
                 imgurl: "resources/baer.png",
@@ -392,8 +390,7 @@ describe("Map GL controller", () => {
         legend.hidden = false;
 
         global.WCHttp.getJson.mockResolvedValueOnce({
-            Success: false,
-            Error: "No SBS map has been specified",
+            error: { message: "No SBS map has been specified" },
         });
 
         emittedEvents = [];
@@ -412,7 +409,6 @@ describe("Map GL controller", () => {
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
 
         global.WCHttp.getJson.mockResolvedValueOnce({
-            Success: true,
             Content: {
                 bounds: [[40.0, -120.0], [41.0, -119.0]],
                 imgurl: "resources/baer.png",

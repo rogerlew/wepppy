@@ -97,37 +97,106 @@ var Wepp = (function () {
             return raw;
         }
 
+        function normalizeErrorValue(value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
+            if (typeof value === "string") {
+                return value;
+            }
+            if (Array.isArray(value)) {
+                return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+            }
+            if (typeof value === "object") {
+                if (typeof value.message === "string") {
+                    return value.message;
+                }
+                if (typeof value.detail === "string") {
+                    return value.detail;
+                }
+                if (typeof value.details === "string") {
+                    return value.details;
+                }
+                if (value.details !== undefined) {
+                    return normalizeErrorValue(value.details);
+                }
+                try {
+                    return JSON.stringify(value);
+                } catch (err) {
+                    return String(value);
+                }
+            }
+            return String(value);
+        }
+
+        function formatErrorList(errors) {
+            if (!Array.isArray(errors)) {
+                return null;
+            }
+            var parts = [];
+            errors.forEach(function (entry) {
+                if (entry === undefined || entry === null) {
+                    return;
+                }
+                if (typeof entry === "string") {
+                    parts.push(entry);
+                    return;
+                }
+                if (typeof entry.message === "string") {
+                    parts.push(entry.message);
+                    return;
+                }
+                if (typeof entry.detail === "string") {
+                    parts.push(entry.detail);
+                    return;
+                }
+                if (typeof entry.code === "string") {
+                    parts.push(entry.code);
+                    return;
+                }
+                try {
+                    parts.push(JSON.stringify(entry));
+                } catch (err) {
+                    parts.push(String(entry));
+                }
+            });
+            return parts.length ? parts.join("\n") : null;
+        }
+
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return { Error: body };
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
             return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function createInstance() {
@@ -302,15 +371,15 @@ var Wepp = (function () {
             return http.postJson(url_for_run("tasks/set_run_wepp_routine/"), { routine: routine, state: state }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
-                        var message = taskMsg + "... Success";
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html(message);
-                        }
-                        wepp.appendStatus(message);
-                    } else if (response) {
+                    if (response && (response.error || response.errors)) {
                         wepp.pushResponseStacktrace(wepp, response);
+                        return;
                     }
+                    var message = taskMsg + "... Success";
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message);
                 })
                 .catch(function (error) {
                     wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
@@ -381,19 +450,19 @@ var Wepp = (function () {
             http.postJson(url_for_run("rq/api/run_wepp"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
-                        var message = "run_wepp_rq job submitted: " + response.job_id;
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html(message);
-                        }
-                        wepp.appendStatus(message, { job_id: response.job_id });
-                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
-                        wepp.set_rq_job_id(wepp, response.job_id);
-                        if (weppEvents && typeof weppEvents.emit === "function") {
-                            weppEvents.emit("wepp:run:queued", { jobId: response.job_id, payload: payload });
-                        }
-                    } else if (response) {
+                    if (response && (response.error || response.errors)) {
                         wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = "run_wepp_rq job submitted: " + response.job_id;
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message, { job_id: response.job_id });
+                    wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+                    wepp.set_rq_job_id(wepp, response.job_id);
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run:queued", { job_id: response.job_id, payload: payload });
                     }
                 })
                 .catch(function (error) {
@@ -482,19 +551,19 @@ var Wepp = (function () {
             http.postJson(url_for_run("rq/api/run_wepp_watershed"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
-                        var message = "run_wepp_watershed_rq job submitted: " + response.job_id;
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html(message);
-                        }
-                        wepp.appendStatus(message, { job_id: response.job_id });
-                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
-                        wepp.set_rq_job_id(wepp, response.job_id);
-                        if (weppEvents && typeof weppEvents.emit === "function") {
-                            weppEvents.emit("wepp:run_watershed:queued", { jobId: response.job_id, payload: payload });
-                        }
-                    } else if (response) {
+                    if (response && (response.error || response.errors)) {
                         wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = "run_wepp_watershed_rq job submitted: " + response.job_id;
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message, { job_id: response.job_id });
+                    wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+                    wepp.set_rq_job_id(wepp, response.job_id);
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run_watershed:queued", { job_id: response.job_id, payload: payload });
                     }
                 })
                 .catch(function (error) {
@@ -559,8 +628,8 @@ var Wepp = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "run_wepp_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

@@ -359,6 +359,107 @@ const runid = '{{ runid }}';
 const config = '{{ config }}';
 let pollInterval = null;
 
+function normalizeErrorValue(value) {
+  if (value === undefined || value === null) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => (entry === undefined || entry === null ? '' : String(entry))).join('\n');
+  }
+  if (typeof value === 'object') {
+    if (typeof value.message === 'string') {
+      return value.message;
+    }
+    if (typeof value.detail === 'string') {
+      return value.detail;
+    }
+    if (typeof value.details === 'string') {
+      return value.details;
+    }
+    if (Object.prototype.hasOwnProperty.call(value, 'details')) {
+      return normalizeErrorValue(value.details);
+    }
+    try {
+      return JSON.stringify(value);
+    } catch (err) {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+function formatErrorList(errors) {
+  if (!Array.isArray(errors)) {
+    return null;
+  }
+  const parts = [];
+  errors.forEach((entry) => {
+    if (entry === undefined || entry === null) {
+      return;
+    }
+    if (typeof entry === 'string') {
+      parts.push(entry);
+      return;
+    }
+    if (typeof entry.message === 'string') {
+      parts.push(entry.message);
+      return;
+    }
+    if (typeof entry.detail === 'string') {
+      parts.push(entry.detail);
+      return;
+    }
+    if (typeof entry.code === 'string') {
+      parts.push(entry.code);
+      return;
+    }
+    try {
+      parts.push(JSON.stringify(entry));
+    } catch (err) {
+      parts.push(String(entry));
+    }
+  });
+  return parts.length ? parts.join('\n') : null;
+}
+
+function resolveErrorMessage(payload, fallback) {
+  if (!payload || typeof payload !== 'object') {
+    return fallback || null;
+  }
+  if (payload.error !== undefined) {
+    const message = normalizeErrorValue(payload.error);
+    if (message) {
+      return message;
+    }
+  }
+  if (payload.errors) {
+    const errorList = formatErrorList(payload.errors);
+    if (errorList) {
+      return errorList;
+    }
+  }
+  if (payload.message !== undefined) {
+    const message = normalizeErrorValue(payload.message);
+    if (message) {
+      return message;
+    }
+  }
+  if (payload.detail !== undefined) {
+    const message = normalizeErrorValue(payload.detail);
+    if (message) {
+      return message;
+    }
+  }
+  return fallback || null;
+}
+
+function hasErrorPayload(payload) {
+  return !!(payload && (payload.error || payload.errors));
+}
+
 async function runMigrations() {
   const btn = document.getElementById('run-migrations-btn');
   const btnText = document.getElementById('btn-text');
@@ -383,11 +484,22 @@ async function runMigrations() {
       })
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
 
-    if (data.Success) {
-      const jobId = data.Content.job_id;
-      const wasReadonly = data.Content.was_readonly;
+    if (!response.ok || hasErrorPayload(data)) {
+      const message = resolveErrorMessage(
+        data,
+        `Failed to queue migration job (HTTP ${response.status})`
+      );
+      throw new Error(message || 'Failed to queue migration job');
+    }
+
+    const content = data.Content || data.content || {};
+    const jobId = content.job_id;
+    const wasReadonly = content.was_readonly;
+    if (!jobId) {
+      throw new Error('Failed to queue migration job: missing job id.');
+    }
       
       resultDiv.className = 'alert alert-info mt-2';
       resultDiv.innerHTML = `
@@ -405,9 +517,6 @@ async function runMigrations() {
       
       // Start polling for status
       startStatusPolling(jobId);
-    } else {
-      throw new Error(data.Message || 'Failed to queue migration job');
-    }
   } catch (error) {
     resultDiv.className = 'alert alert-danger mt-2';
     resultDiv.innerHTML = `<strong>❌ Failed to start migration:</strong> ${error.message}`;
@@ -429,11 +538,17 @@ function startStatusPolling(jobId) {
   pollInterval = setInterval(async () => {
     try {
       const response = await fetch(`/weppcloud/runs/${runid}/${config}/migrate/status/${jobId}`);
-      const data = await response.json();
-      
-      if (data.Success) {
-        const status = data.Content;
-        statusText.textContent = status.status_message || `Status: ${status.status}`;
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || hasErrorPayload(data)) {
+        const message = resolveErrorMessage(
+          data,
+          `Failed to fetch status (HTTP ${response.status})`
+        );
+        throw new Error(message || 'Failed to fetch status.');
+      }
+
+      const status = data.Content || data.content || data;
+      statusText.textContent = status.status_message || `Status: ${status.status}`;
         
         // Update progress bar
         if (status.progress) {
@@ -461,7 +576,6 @@ function startStatusPolling(jobId) {
           stopPolling();
           onMigrationFailed(status.error || 'Unknown error');
         }
-      }
     } catch (error) {
       console.error('Error polling status:', error);
     }

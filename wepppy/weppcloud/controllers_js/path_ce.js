@@ -762,7 +762,7 @@ var PathCE = (function () {
             return http.postJson(ENDPOINTS.run(), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
-                    var jobId = response && (response.job_id || response.jobId);
+                    var jobId = response && response.job_id;
                     state.lastJobId = jobId || null;
                     state.lastEmittedStatus = "running";
                     state.lastStatusValue = "running";
@@ -805,8 +805,8 @@ var PathCE = (function () {
                 ? helper.resolveJobId(ctx, "run_path_ce")
                 : null;
 
-            if (!jobId && controllerContext && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
 
             if (!jobId) {

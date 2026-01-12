@@ -103,34 +103,26 @@ var SubcatchmentDelineation = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function resolveById(id) {
@@ -1632,7 +1624,7 @@ var SubcatchmentDelineation = (function () {
             http.postJson(url_for_run("rq/api/build_subcatchments_and_abstract_watershed"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
+                    if (response && response.job_id) {
                         if (statusAdapter && typeof statusAdapter.html === "function") {
                             statusAdapter.html("build_subcatchments_and_abstract_watershed_rq job submitted: " + response.job_id);
                         } else {
@@ -1738,8 +1730,8 @@ var SubcatchmentDelineation = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "build_subcatchments_and_abstract_watershed_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

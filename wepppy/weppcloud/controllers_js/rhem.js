@@ -112,34 +112,26 @@ var Rhem = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function getActiveRunId() {
@@ -288,20 +280,21 @@ var Rhem = (function () {
             http.postJson(url_for_run("rq/api/run_rhem_rq"), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
-                    if (response && (response.Success === true || response.success === true)) {
-                        var jobId = response.job_id || response.jobId || null;
+                    if (response && response.job_id) {
+                        var jobId = response.job_id;
                         appendStatus("run_rhem_rq job submitted: " + jobId, {
-                            status: "queued"
+                            status: "queued",
+                            job_id: jobId
                         });
                         rhem.poll_completion_event = "RHEM_RUN_TASK_COMPLETED";
                         rhem.set_rq_job_id(rhem, jobId);
                         emitter.emit("rhem:run:queued", {
                             runId: getActiveRunId(),
-                            jobId: jobId
+                            job_id: jobId
                         });
                         return;
                     }
-                    var errorPayload = response || { Error: "RHEM job submission failed." };
+                    var errorPayload = response || { error: { message: "RHEM job submission failed." } };
                     rhem.pushResponseStacktrace(rhem, errorPayload);
                     emitter.emit("rhem:run:failed", {
                         runId: getActiveRunId(),
@@ -327,7 +320,7 @@ var Rhem = (function () {
             });
             emitter.emit("rhem:run:started", {
                 runId: getActiveRunId(),
-                jobId: null
+                job_id: null
             });
 
             rhem.connect_status_stream(rhem);
@@ -374,11 +367,11 @@ var Rhem = (function () {
 
                 emitter.emit("rhem:run:completed", {
                     runId: getActiveRunId(),
-                    jobId: rhem.rq_job_id || null
+                    job_id: rhem.rq_job_id || null
                 });
                 rhem.triggerEvent("job:completed", {
                     task: "rhem:run",
-                    jobId: rhem.rq_job_id || null
+                    job_id: rhem.rq_job_id || null
                 });
             }).catch(handleError);
         };
@@ -416,8 +409,8 @@ var Rhem = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "run_rhem_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

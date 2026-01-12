@@ -324,7 +324,7 @@ def cap_verify():
         return response
 
     mark_cap_verified()
-    return jsonify({'success': True})
+    return jsonify({})
 
 
 def _landing_run_locations_response() -> 'flask.Response':

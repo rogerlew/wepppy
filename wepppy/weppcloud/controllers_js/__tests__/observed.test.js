@@ -37,7 +37,7 @@ describe("Observed controller", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true } })),
+            postJson: jest.fn(() => Promise.resolve({ body: {} })),
             getJson: jest.fn(() => Promise.resolve(true)),
             isHttpError: jest.fn((error) => Boolean(error && error.isHttpError))
         };
@@ -130,7 +130,7 @@ describe("Observed controller", () => {
         const error = {
             isHttpError: true,
             detail: "Invalid dataset",
-            body: { Error: "Invalid dataset", StackTrace: ["line 1"] }
+            body: { error: { message: "Invalid dataset" } }
         };
         httpMock.postJson.mockImplementationOnce(() => Promise.reject(error));
 
@@ -144,7 +144,7 @@ describe("Observed controller", () => {
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             expect.any(Object),
-            expect.objectContaining({ Error: "Invalid dataset" })
+            expect.objectContaining({ error: { message: "Invalid dataset" } })
         );
         expect(errors).toHaveLength(1);
         expect(errors[0]).toEqual(expect.objectContaining({ task: "observed:model-fit" }));

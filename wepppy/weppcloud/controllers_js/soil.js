@@ -98,34 +98,26 @@ var Soil = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function parseInteger(value, fallback) {
@@ -260,7 +252,7 @@ var Soil = (function () {
             http.postForm(url_for_run("rq/api/build_soils"), params, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
+                    if (response && response.job_id) {
                         soil.append_status_message(soil, "build_soils_rq job submitted: " + response.job_id);
                         soil.poll_completion_event = "SOILS_BUILD_TASK_COMPLETED";
                         soil.set_rq_job_id(soil, response.job_id);
@@ -300,12 +292,7 @@ var Soil = (function () {
 
             http.postJson(url_for_run("tasks/set_soils_ksflag/"), { ksflag: Boolean(state) }, { form: formElement })
                 .then(function (result) {
-                    var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
-                        soil.append_status_message(soil, taskMsg + "... Success");
-                    } else if (response) {
-                        soil.pushResponseStacktrace(soil, response);
-                    }
+                    soil.append_status_message(soil, taskMsg + "... Success");
                 })
                 .catch(handleError);
         };
@@ -320,12 +307,7 @@ var Soil = (function () {
 
             http.postJson(url_for_run("tasks/set_disturbed_sol_ver/"), { sol_ver: value }, { form: formElement })
                 .then(function (result) {
-                    var response = result && result.body ? result.body : null;
-                    if (response && response.Success === true) {
-                        soil.append_status_message(soil, taskMsg + "... Success");
-                    } else if (response) {
-                        soil.pushResponseStacktrace(soil, response);
-                    }
+                    soil.append_status_message(soil, taskMsg + "... Success");
                 })
                 .catch(handleError);
         };
@@ -354,12 +336,7 @@ var Soil = (function () {
                 soil_single_selection: singleSelection,
                 soil_single_dbselection: singleDbSelection
             }, { form: formElement }).then(function (result) {
-                var response = result && result.body ? result.body : null;
-                if (response && response.Success === true) {
-                    soil.append_status_message(soil, taskMsg + "... Success");
-                } else if (response) {
-                    soil.pushResponseStacktrace(soil, response);
-                }
+                soil.append_status_message(soil, taskMsg + "... Success");
             }).catch(handleError);
 
             soil.showHideControls(resolvedMode);
@@ -447,8 +424,8 @@ var Soil = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "build_soils_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

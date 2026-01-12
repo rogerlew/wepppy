@@ -93,43 +93,98 @@ var Team = (function () {
         };
     }
 
-    function toResponsePayload(http, error) {
-        function normalizeErrorValue(value) {
-            if (!value) {
-                return value;
-            }
-            if (typeof value === "object") {
-                if (typeof value.Error === "string") {
-                    return value.Error;
-                }
-                if (typeof value.message === "string") {
-                    return value.message;
-                }
-                if (typeof value.detail === "string") {
-                    return value.detail;
-                }
-                try {
-                    return JSON.stringify(value);
-                } catch (err) {
-                    return String(value);
-                }
-            }
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
             return value;
         }
-
-        function finalizePayload(payload) {
-            if (!payload) {
-                return { Success: false, Error: "Request failed" };
-            }
-            if (payload.Success === undefined) {
-                payload = Object.assign({}, payload, { Success: false });
-            }
-            if (payload.Error && typeof payload.Error === "object") {
-                payload = Object.assign({}, payload, { Error: normalizeErrorValue(payload.Error) });
-            }
-            return payload;
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
         }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
 
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
+    function resolveErrorMessage(payload, fallback) {
+        if (!payload) {
+            return fallback || null;
+        }
+        if (payload.error !== undefined) {
+            var message = normalizeErrorValue(payload.error);
+            if (message) {
+                return message;
+            }
+        }
+        if (payload.errors) {
+            var errorList = formatErrorList(payload.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (payload.message !== undefined) {
+            return normalizeErrorValue(payload.message);
+        }
+        if (payload.detail !== undefined) {
+            return normalizeErrorValue(payload.detail);
+        }
+        return fallback || null;
+    }
+
+    function toResponsePayload(http, error) {
         function coerceBody(raw) {
             if (!raw) {
                 return null;
@@ -147,34 +202,37 @@ var Team = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: normalizeErrorValue(fallback) });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return finalizePayload(payload);
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return finalizePayload({ Error: body });
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return finalizePayload(error);
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
+            return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return finalizePayload({ Error: normalizeErrorValue(detail) || "Request failed" });
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return finalizePayload({ Error: normalizeErrorValue(error && error.message) || "Request failed" });
+        return { error: { message: normalizeErrorValue(error && error.message) || "Request failed" } };
     }
 
     function getActiveRunId() {
@@ -370,10 +428,8 @@ var Team = (function () {
                 return html;
             }).catch(function (error) {
                 var payload = toResponsePayload(http, error);
-                if (!payload.Error) {
-                    payload.Error = "Unable to load collaborator list.";
-                }
-                team.appendStatus(payload.Error);
+                var message = resolveErrorMessage(payload, "Unable to load collaborator list.");
+                team.appendStatus(message);
                 team.pushResponseStacktrace(team, payload);
                 emitter.emit("team:list:failed", {
                     error: payload
@@ -388,8 +444,8 @@ var Team = (function () {
             var trimmed = (email || "").trim();
 
             if (!trimmed) {
-                var validationError = { Error: "Email address is required." };
-                team.appendStatus(validationError.Error);
+                var validationError = { error: { message: "Email address is required." } };
+                team.appendStatus(resolveErrorMessage(validationError));
                 emitter.emit("team:invite:failed", {
                     email: "",
                     error: validationError
@@ -405,8 +461,8 @@ var Team = (function () {
             return http.postJson(url_for_run("tasks/adduser/"), { email: trimmed }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
-                    if (!response || response.Success !== true) {
-                        throw response || { Error: "Collaborator invite failed." };
+                    if (response && (response.error || response.errors)) {
+                        throw response;
                     }
                     var content = response.Content || response.content || {};
                     var alreadyMember = Boolean(content.already_member);
@@ -436,10 +492,8 @@ var Team = (function () {
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    if (!payload.Error) {
-                        payload.Error = "Collaborator invite failed.";
-                    }
-                    team.appendStatus(payload.Error);
+                    var message = resolveErrorMessage(payload, "Collaborator invite failed.");
+                    team.appendStatus(message);
                     team.pushResponseStacktrace(team, payload);
                     emitter.emit("team:invite:failed", {
                         email: trimmed,
@@ -463,8 +517,8 @@ var Team = (function () {
             var normalisedId = normaliseUserId(userId);
 
             if (normalisedId === null) {
-                var validationError = { Error: "user_id is required." };
-                team.appendStatus(validationError.Error);
+                var validationError = { error: { message: "user_id is required." } };
+                team.appendStatus(resolveErrorMessage(validationError));
                 emitter.emit("team:member:remove:failed", {
                     userId: userId,
                     error: validationError
@@ -480,8 +534,8 @@ var Team = (function () {
             return http.postJson(url_for_run("tasks/removeuser/"), { user_id: normalisedId }, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
-                    if (!response || response.Success !== true) {
-                        throw response || { Error: "Collaborator removal failed." };
+                    if (response && (response.error || response.errors)) {
+                        throw response;
                     }
                     var content = response.Content || response.content || {};
                     var alreadyRemoved = Boolean(content.already_removed);
@@ -508,10 +562,8 @@ var Team = (function () {
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    if (!payload.Error) {
-                        payload.Error = "Collaborator removal failed.";
-                    }
-                    team.appendStatus(payload.Error);
+                    var message = resolveErrorMessage(payload, "Collaborator removal failed.");
+                    team.appendStatus(message);
                     team.pushResponseStacktrace(team, payload);
                     emitter.emit("team:member:remove:failed", {
                         userId: normalisedId,

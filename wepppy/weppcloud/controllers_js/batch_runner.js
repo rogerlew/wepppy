@@ -215,13 +215,53 @@ var BatchRunner = (function () {
         return STATUS_STATE_MAP.default;
     }
 
+    function resolveErrorMessage(error, fallback) {
+        if (error && typeof error === "object") {
+            if (error.error !== undefined) {
+                if (typeof error.error === "string") {
+                    return error.error;
+                }
+                if (error.error && typeof error.error.message === "string") {
+                    return error.error.message;
+                }
+            }
+            if (Array.isArray(error.errors) && error.errors.length) {
+                return error.errors.map(function (entry) {
+                    if (!entry) {
+                        return "";
+                    }
+                    if (typeof entry === "string") {
+                        return entry;
+                    }
+                    if (typeof entry.message === "string") {
+                        return entry.message;
+                    }
+                    if (typeof entry.detail === "string") {
+                        return entry.detail;
+                    }
+                    if (typeof entry.code === "string") {
+                        return entry.code;
+                    }
+                    return JSON.stringify(entry);
+                }).filter(Boolean).join("\n");
+            }
+            if (typeof error.detail === "string" && error.detail) {
+                return error.detail;
+            }
+            if (typeof error.message === "string" && error.message) {
+                return error.message;
+            }
+        }
+        return fallback;
+    }
+
     function buildValidationMessage(summary) {
         if (!summary || typeof summary !== "object") {
             return [];
         }
         var items = [];
         if (summary.feature_count != null) {
-            items.push("Features analysed: " + summary.feature_count);
+            items.push("Features analyzed: " + summary.feature_count);
         }
         if (summary.unique_runids != null) {
             items.push("Unique run IDs: " + summary.unique_runids);
@@ -1141,10 +1181,8 @@ var BatchRunner = (function () {
                 .postJson(apiUrl("run-directives"), { run_directives: values })
                 .then(function (response) {
                     var payload = response.body || {};
-                    if (!payload || payload.success !== true) {
-                        var errorMsg =
-                            (payload && (payload.error_message || payload.message || payload.error)) ||
-                            "Failed to update batch tasks.";
+                    if (payload.error || payload.errors) {
+                        var errorMsg = resolveErrorMessage(payload, "Failed to update batch tasks.");
                         throw new Error(errorMsg);
                     }
 
@@ -1158,7 +1196,6 @@ var BatchRunner = (function () {
 
                     setRunDirectivesStatus("Batch tasks updated.", "success");
                     controller.emitter.emit("batch:run-directives:updated", {
-                        success: true,
                         batchName: controller.state.batchName,
                         directives: controller.state.snapshot.run_directives || []
                     });
@@ -1166,8 +1203,7 @@ var BatchRunner = (function () {
                     renderRunControls();
                 })
                 .catch(function (error) {
-                    var message =
-                        error && error.message ? error.message : "Failed to update batch tasks.";
+                    var message = resolveErrorMessage(error, "Failed to update batch tasks.");
                     setRunDirectivesStatus(message, "critical");
                     controller.emitter.emit("batch:run-directives:update-failed", {
                         error: message,
@@ -1742,8 +1778,8 @@ var BatchRunner = (function () {
                 })
                 .then(function (response) {
                     var payload = response.body || {};
-                    if (!payload.success) {
-                        var errorMsg = payload.error_message || payload.message || payload.error || "Upload failed.";
+                    if (payload.error || payload.errors) {
+                        var errorMsg = resolveErrorMessage(payload, "Upload failed.");
                         throw new Error(errorMsg);
                     }
 
@@ -1818,7 +1854,7 @@ var BatchRunner = (function () {
                     });
                 })
                 .catch(function (error) {
-                    var message = error && error.message ? error.message : "Upload failed.";
+                    var message = resolveErrorMessage(error, "Upload failed.");
                     setUploadStatus(message, "critical");
                     controller.emitter.emit("batch:upload:failed", {
                         error: message,
@@ -1860,8 +1896,8 @@ var BatchRunner = (function () {
                 })
                 .then(function (response) {
                     var payload = response.body || {};
-                    if (!payload.success) {
-                        var errorMsg = payload.error_message || payload.message || payload.error || "Upload failed.";
+                    if (payload.error || payload.errors) {
+                        var errorMsg = resolveErrorMessage(payload, "Upload failed.");
                         throw new Error(errorMsg);
                     }
 
@@ -1883,13 +1919,12 @@ var BatchRunner = (function () {
                     renderSbsResource();
 
                     controller.emitter.emit("batch:sbs-upload:completed", {
-                        success: true,
                         batchName: controller.state.batchName,
                         snapshot: controller.state.snapshot
                     });
                 })
                 .catch(function (error) {
-                    var message = error && error.message ? error.message : "Upload failed.";
+                    var message = resolveErrorMessage(error, "Upload failed.");
                     setSbsUploadStatus(message, "critical");
                     controller.emitter.emit("batch:sbs-upload:failed", {
                         error: message,
@@ -1926,8 +1961,7 @@ var BatchRunner = (function () {
                 .then(function (response) {
                     var payload = response.body || {};
                     if (!payload.validation) {
-                        var errorMsg =
-                            payload.error_message || payload.message || payload.error || "Template validation failed.";
+                        var errorMsg = resolveErrorMessage(payload, "Template validation failed.");
                         throw new Error(errorMsg);
                     }
 
@@ -1945,14 +1979,12 @@ var BatchRunner = (function () {
                     render();
 
                     controller.emitter.emit("batch:template:validate-completed", {
-                        success: true,
                         batchName: controller.state.batchName,
                         validation: payload.validation
                     });
                 })
                 .catch(function (error) {
-                    var message =
-                        error && error.message ? error.message : "Template validation failed.";
+                    var message = resolveErrorMessage(error, "Template validation failed.");
                     setText(controller.templateStatus, message);
                     applyDataState(controller.templateStatus, "critical");
                     controller.emitter.emit("batch:template:validate-failed", {
@@ -2011,8 +2043,8 @@ var BatchRunner = (function () {
                 .postJson(apiUrl(url_for_run("rq/api/run-batch")), {})
                 .then(function (response) {
                     var payload = response.body || {};
-                    if (!payload.success) {
-                        var errorMsg = payload.error_message || payload.message || payload.error || "Failed to submit batch run.";
+                    if (payload.error || payload.errors) {
+                        var errorMsg = resolveErrorMessage(payload, "Failed to submit batch run.");
                         throw new Error(errorMsg);
                     }
 
@@ -2027,16 +2059,15 @@ var BatchRunner = (function () {
 
                     controller.emitter.emit("batch:run:started", {
                         batchName: controller.state.batchName,
-                        jobId: payload.job_id || null
+                        job_id: payload.job_id || null
                     });
                     controller.emitter.emit("job:started", {
                         batchName: controller.state.batchName,
-                        jobId: payload.job_id || null
+                        job_id: payload.job_id || null
                     });
                 })
                 .catch(function (error) {
-                    var message =
-                        error && error.message ? error.message : "Failed to submit batch run.";
+                    var message = resolveErrorMessage(error, "Failed to submit batch run.");
                     setRunBatchMessage(message, "critical");
                     if (controller.infoPanel) {
                         controller.infoPanel.innerHTML =
@@ -2106,15 +2137,13 @@ var BatchRunner = (function () {
                     refreshJobInfo({ force: true });
                     if (eventName === "BATCH_RUN_COMPLETED") {
                         ctrl.emitter.emit("batch:run:completed", {
-                            success: true,
                             batchName: ctrl.state.batchName,
-                            jobId: ctrl.rq_job_id || null,
+                            job_id: ctrl.rq_job_id || null,
                             payload: payload || null
                         });
                         ctrl.emitter.emit("job:completed", {
-                            success: true,
                             batchName: ctrl.state.batchName,
-                            jobId: ctrl.rq_job_id || null,
+                            job_id: ctrl.rq_job_id || null,
                             payload: payload || null
                         });
                     }

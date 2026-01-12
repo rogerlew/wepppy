@@ -1112,7 +1112,7 @@ var ChannelDelineation = (function () {
                     channel.report();
                     emit("channel:build:completed", payload || {});
                     baseTriggerEvent("job:completed", {
-                        jobId: channel.rq_job_id,
+                        job_id: channel.rq_job_id,
                         task: "channel:build",
                         payload: payload || {}
                     });
@@ -1123,7 +1123,7 @@ var ChannelDelineation = (function () {
                     payload: payload || {}
                 });
                 baseTriggerEvent("job:error", {
-                    jobId: channel.rq_job_id,
+                    job_id: channel.rq_job_id,
                     task: "channel:build",
                     payload: payload || {}
                 });
@@ -1316,13 +1316,13 @@ var ChannelDelineation = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    if (data.Success === true && data.job_id) {
+                    if (!data.error && !data.errors && data.job_id) {
                         if (statusAdapter && typeof statusAdapter.html === "function") {
                             statusAdapter.html("fetch_dem_and_build_channels_rq job submitted: " + data.job_id);
                         }
                         channel.set_rq_job_id(channel, data.job_id);
                         channel.triggerEvent("job:started", {
-                            jobId: data.job_id,
+                            job_id: data.job_id,
                             task: "channel:build",
                             payload: payload
                         });
@@ -1518,13 +1518,13 @@ var ChannelDelineation = (function () {
                     var response = result && Object.prototype.hasOwnProperty.call(result, "body") ? result.body : result;
                     var pass = parseInt(response, 10);
                     if ([0, 1, 2].indexOf(pass) === -1) {
-                        channel.pushResponseStacktrace(channel, { Error: "Error Determining Delineation Pass" });
+                        channel.pushResponseStacktrace(channel, { error: { message: "Error Determining Delineation Pass" } });
                         showErrorStatus("Error determining delineation pass.");
                         setChannelLegend("");
                         return null;
                     }
                     if (pass === 0) {
-                        channel.pushResponseStacktrace(channel, { Error: "Channels not delineated" });
+                        channel.pushResponseStacktrace(channel, { error: { message: "Channels not delineated" } });
                         showErrorStatus("Channels have not been delineated yet.");
                         setChannelLegend("");
                         return null;
@@ -1577,8 +1577,8 @@ var ChannelDelineation = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "fetch_dem_and_build_channels_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

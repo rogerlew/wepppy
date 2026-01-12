@@ -1,7 +1,7 @@
 import json
 import zipfile
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 import pytest
 
@@ -16,6 +16,10 @@ pytestmark = pytest.mark.microservice
 PAYLOAD_ZIP = Path(
     "tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip"
 )
+
+def assert_validation_error(payload: dict[str, Any], code: str) -> None:
+    assert payload["error"]["code"] == "validation_error"
+    assert any(error["code"] == code for error in payload["errors"])
 
 
 def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -71,8 +75,7 @@ def test_culvert_ingest_missing_files_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "missing_file" for error in payload["errors"])
+    assert_validation_error(payload, "missing_file")
 
 
 def test_culvert_ingest_crs_mismatch_returns_400(
@@ -99,8 +102,7 @@ def test_culvert_ingest_crs_mismatch_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "crs_mismatch" for error in payload["errors"])
+    assert_validation_error(payload, "crs_mismatch")
 
 
 def test_culvert_ingest_missing_point_id_returns_400(
@@ -129,8 +131,7 @@ def test_culvert_ingest_missing_point_id_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "missing_point_id" for error in payload["errors"])
+    assert_validation_error(payload, "missing_point_id")
 
 
 def test_culvert_ingest_invalid_point_id_returns_400(
@@ -159,8 +160,7 @@ def test_culvert_ingest_invalid_point_id_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "invalid_point_id" for error in payload["errors"])
+    assert_validation_error(payload, "invalid_point_id")
 
 
 def test_culvert_ingest_duplicate_point_id_returns_400(
@@ -190,8 +190,7 @@ def test_culvert_ingest_duplicate_point_id_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "duplicate_point_id" for error in payload["errors"])
+    assert_validation_error(payload, "duplicate_point_id")
 
 
 def test_culvert_ingest_invalid_metadata_schema_returns_400(
@@ -218,8 +217,7 @@ def test_culvert_ingest_invalid_metadata_schema_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "invalid_schema_version" for error in payload["errors"])
+    assert_validation_error(payload, "invalid_schema_version")
 
 
 def test_culvert_ingest_invalid_model_params_schema_returns_400(
@@ -246,8 +244,7 @@ def test_culvert_ingest_invalid_model_params_schema_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "invalid_schema_version" for error in payload["errors"])
+    assert_validation_error(payload, "invalid_schema_version")
 
 
 def test_culvert_ingest_zip_sha256_mismatch_returns_400(
@@ -266,8 +263,7 @@ def test_culvert_ingest_zip_sha256_mismatch_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "zip_sha256_mismatch" for error in payload["errors"])
+    assert_validation_error(payload, "zip_sha256_mismatch")
 
 
 def test_culvert_ingest_total_bytes_mismatch_returns_400(
@@ -287,8 +283,7 @@ def test_culvert_ingest_total_bytes_mismatch_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "total_bytes_mismatch" for error in payload["errors"])
+    assert_validation_error(payload, "total_bytes_mismatch")
 
 
 def test_culvert_ingest_invalid_zip_member_path_returns_400(
@@ -309,10 +304,7 @@ def test_culvert_ingest_invalid_zip_member_path_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(
-        error["code"] == "invalid_member_path" for error in payload["errors"]
-    )
+    assert_validation_error(payload, "invalid_member_path")
 
 
 def test_culvert_ingest_raster_mismatch_returns_400(
@@ -365,8 +357,7 @@ def test_culvert_ingest_raster_mismatch_returns_400(
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["success"] is False
-    assert any(error["code"] == "raster_mismatch" for error in payload["errors"])
+    assert_validation_error(payload, "raster_mismatch")
 
 
 def _rewrite_payload_zip(

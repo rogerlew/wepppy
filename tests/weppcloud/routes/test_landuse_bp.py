@@ -109,7 +109,7 @@ def test_set_landuse_mode_updates_controller(landuse_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.mode == landuse_module.LanduseMode.UserDefined
@@ -124,7 +124,7 @@ def test_modify_landuse_coverage_records_change(landuse_client):
         json={"dom": "1", "cover": "forest", "value": 75},
     )
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.cover_changes == [("1", "forest", 75.0)]
@@ -151,7 +151,7 @@ def test_task_modify_landuse_parses_ids(landuse_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.modify_calls == [(['1', '2', '3'], '5')]
@@ -166,7 +166,7 @@ def test_set_landuse_mode_accepts_json_payload(landuse_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.mode == landuse_module.LanduseMode.UserDefined
@@ -182,7 +182,7 @@ def test_task_modify_landuse_accepts_list_payload(landuse_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.modify_calls == [(['1', '2', '3'], '7')]
@@ -198,8 +198,7 @@ def test_task_modify_landuse_rejects_invalid_ids(landuse_client):
 
     assert response.status_code == 500
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "invalid topaz id" in payload["Error"].lower()
+    assert "invalid topaz id" in payload["error"]["message"].lower()
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.modify_calls == []
@@ -215,8 +214,7 @@ def test_task_modify_landuse_requires_landuse_code(landuse_client):
 
     assert response.status_code == 500
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "landuse" in payload["Error"].lower()
+    assert "landuse" in payload["error"]["message"].lower()
 
     controller = DummyLanduse.getInstance(run_dir)
     assert controller.modify_calls == []

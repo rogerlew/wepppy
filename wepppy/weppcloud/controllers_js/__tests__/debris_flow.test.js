@@ -29,7 +29,7 @@ describe("DebrisFlow controller", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-123" } })),
+            postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
             request: jest.fn(),
             isHttpError: jest.fn(() => false)
         };
@@ -123,17 +123,23 @@ describe("DebrisFlow controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             debris,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("handles unsuccessful payload by pushing stacktrace and emitting error", async () => {
-        httpMock.postJson.mockResolvedValueOnce({ body: { Success: false, Error: "failed" } });
+        const httpError = new Error("Bad Request");
+        httpError.name = "HttpError";
+        httpError.body = {
+            error: { message: "failed" }
+        };
+        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.isHttpError.mockReturnValue(true);
         const errors = [];
         debris.events.on("debris:run:error", (payload) => errors.push(payload));
 
@@ -141,7 +147,7 @@ describe("DebrisFlow controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(debris, { Success: false, Error: "failed" });
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(debris, httpError.body);
         expect(errors).toHaveLength(1);
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
             "job:error",
@@ -159,7 +165,7 @@ describe("DebrisFlow controller", () => {
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             debris,
-            expect.objectContaining({ Error: "network" })
+            expect.objectContaining({ error: { message: "network" } })
         );
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
             "job:error",

@@ -89,7 +89,7 @@ async function detectSbsLayer({ ctx, loadSbsImage }) {
     return null;
   }
   const payload = await resp.json();
-  if (!payload || payload.Success !== true || !payload.Content) {
+  if (!payload || !payload.Content) {
     logDetectionInfo('SBS response missing content', { url });
     return null;
   }

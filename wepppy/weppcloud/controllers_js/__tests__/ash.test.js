@@ -124,8 +124,8 @@ describe("Ash controller", () => {
         await import("../events.js");
         await import("../http.js");
 
-        requestMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "ash-job" } }));
-        postJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true } }));
+        requestMock = jest.fn(() => Promise.resolve({ body: { job_id: "ash-job" } }));
+        postJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
             request: requestMock,
@@ -253,7 +253,7 @@ describe("Ash controller", () => {
         ]));
 
         expect(runStarted).toHaveBeenCalledWith({
-            jobId: "ash-job",
+            job_id: "ash-job",
             payload: expect.objectContaining({ ash_model: "multi" })
         });
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(ash, "ash-job");
@@ -271,7 +271,7 @@ describe("Ash controller", () => {
         await Promise.resolve();
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(ash, expect.any(Object));
-        expect(runCompleted).toHaveBeenCalledWith(expect.objectContaining({ jobId: null }));
+        expect(runCompleted).toHaveBeenCalledWith(expect.objectContaining({ job_id: null }));
     });
 
     test("validateBeforeRun flags invalid upload", () => {
@@ -303,7 +303,7 @@ describe("Ash controller", () => {
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
         expect(ash.report).toHaveBeenCalledTimes(1);
         expect(completed).toHaveBeenCalledWith({
-            jobId: "finished-job",
+            job_id: "finished-job",
             payload: null
         });
         expect(completed).toHaveBeenCalledTimes(1);
@@ -321,13 +321,13 @@ describe("Ash controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             ash,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("bootstrap wires poll completion before set_rq_job_id", () => {

@@ -93,7 +93,7 @@ def test_api_build_subcatchments_accepts_json_payload(rq_subcatchments_client):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "job_id": "job-999"}
+    assert body == {"job_id": "job-999"}
 
     watershed = WatershedStub.getInstance(state["run_dir"])
     assert watershed.clip_hillslopes is True
@@ -130,7 +130,7 @@ def test_api_build_subcatchments_short_circuits_for_batch_runs(rq_subcatchments_
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "Content": "Set watershed inputs for batch processing"}
+    assert body == {"Content": "Set watershed inputs for batch processing"}
     assert env.recorder.queue_calls == []
     prep = env.redis_prep_class.getInstance(state["run_dir"])
     assert not prep.job_ids

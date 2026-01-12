@@ -648,7 +648,7 @@ var LanduseModify = (function () {
             var ids = Array.from(selectionSet);
             var landuseValue = normalizeTopazId(formSnapshot.selection_modify_landuse || selectionElement.value);
             if (!landuseValue) {
-                var payload = { Error: "Select a landuse value before modifying." };
+                var payload = { error: { message: "Select a landuse value before modifying." } };
                 modify.pushResponseStacktrace(modify, payload);
                 emitter.emit("landuse:modify:error", { error: payload });
                 return;
@@ -668,7 +668,7 @@ var LanduseModify = (function () {
                 landuse: landuseValue
             }, { form: formElement }).then(function (response) {
                 var payload = response.body || {};
-                if (payload.Success === true || payload.success === true) {
+                if (!payload.error && !payload.errors) {
                     applySelection([], { source: "modify", silent: true });
 
                     suppressToggleSync = true;

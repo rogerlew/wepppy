@@ -135,7 +135,7 @@ describe("PathCE controller", () => {
             throw new Error("Unexpected URL " + url);
         });
         httpPostJson.mockImplementation((url) => {
-            return Promise.resolve({ body: { Success: true, url: url } });
+            return Promise.resolve({ body: { url: url } });
         });
     }
 
@@ -202,7 +202,7 @@ describe("PathCE controller", () => {
                     })
                 ])
             );
-            return Promise.resolve({ body: { Success: true, config: payload } });
+            return Promise.resolve({ body: { config: payload } });
         });
 
         await controller.saveConfig();
@@ -238,7 +238,7 @@ describe("PathCE controller", () => {
         });
         httpPostJson.mockImplementationOnce((url) => {
             expect(url).toBe("tasks/path_cost_effective_run");
-            return Promise.resolve({ body: { Success: true, job_id: "job-42" } });
+            return Promise.resolve({ body: { job_id: "job-42" } });
         });
 
         const stacktrace = document.querySelector("#path_ce_stacktrace");

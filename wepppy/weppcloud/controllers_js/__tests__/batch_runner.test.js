@@ -160,8 +160,8 @@ describe("BatchRunner controller", () => {
             serializeForm: jest.fn(() => new URLSearchParams())
         };
 
-        requestMock = jest.fn(() => Promise.resolve({ body: { success: true } }));
-        postJsonMock = jest.fn(() => Promise.resolve({ body: { success: true } }));
+        requestMock = jest.fn(() => Promise.resolve({ body: {} }));
+        postJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
             request: requestMock,
@@ -237,7 +237,6 @@ describe("BatchRunner controller", () => {
 
         requestMock.mockResolvedValueOnce({
             body: {
-                success: true,
                 snapshot: {
                     resources: {
                         watershed_geojson: {
@@ -330,7 +329,6 @@ describe("BatchRunner controller", () => {
     test("toggle run directive posts selection", async () => {
         postJsonMock.mockResolvedValueOnce({
             body: {
-                success: true,
                 run_directives: [
                     { slug: "fetch_dem", label: "Fetch DEM", enabled: true },
                     { slug: "build_channels", label: "Build Channels", enabled: true }
@@ -363,7 +361,6 @@ describe("BatchRunner controller", () => {
     test("runBatch posts to RQ endpoint and emits start event", async () => {
         postJsonMock.mockResolvedValueOnce({
             body: {
-                success: true,
                 job_id: "job-42",
                 message: "Batch run submitted."
             }
@@ -377,7 +374,7 @@ describe("BatchRunner controller", () => {
         await flushPromises();
 
         expect(postJsonMock).toHaveBeenCalledWith("/batch/_/demo/rq/api/run-batch", {});
-        expect(started).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-42" }));
+        expect(started).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-42" }));
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 

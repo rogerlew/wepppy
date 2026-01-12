@@ -169,8 +169,99 @@ var Project = (function () {
         return result;
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
+    function resolveErrorMessage(response, fallback) {
+        if (!response) {
+            return fallback || null;
+        }
+        if (response.error !== undefined) {
+            var message = normalizeErrorValue(response.error);
+            if (message) {
+                return message;
+            }
+        }
+        if (response.errors) {
+            var errorList = formatErrorList(response.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (response.message !== undefined) {
+            return normalizeErrorValue(response.message);
+        }
+        if (response.detail !== undefined) {
+            return normalizeErrorValue(response.detail);
+        }
+        return fallback || null;
+    }
+
     function isSuccess(response) {
-        return response && response.Success === true;
+        return response && !response.error && !response.errors;
     }
 
     function getContent(response) {
@@ -523,7 +614,7 @@ var Project = (function () {
             options = options || {};
             var trimmed = (name || "").trim();
             if (trimmed === state.name) {
-                return Promise.resolve({ Success: true, skipped: true });
+                return Promise.resolve({ skipped: true });
             }
 
             var previous = state.name;
@@ -611,7 +702,7 @@ var Project = (function () {
             options = options || {};
             var trimmed = (scenario || "").trim();
             if (trimmed === state.scenario) {
-                return Promise.resolve({ Success: true, skipped: true });
+                return Promise.resolve({ skipped: true });
             }
 
             var previous = state.scenario;
@@ -807,10 +898,10 @@ var Project = (function () {
         project.load_mod_section = function (modName) {
             var endpoint = "view/mod/" + encodeURIComponent(modName);
             return http.getJson(url_for_run(endpoint)).then(function (response) {
-                if (response && response.Success === true) {
+                if (response && !response.error && !response.errors) {
                     return response.Content || response.content || response;
                 }
-                return Promise.reject(response || { Error: "Failed to load module section" });
+                return Promise.reject(response || { error: { message: "Failed to load module section" } });
             });
         };
 
@@ -832,7 +923,7 @@ var Project = (function () {
             }).then(function (result) {
                 var response = unpackResponse(result);
                 if (!isSuccess(response)) {
-                    var message = response && (response.Error || response.Message || response.message);
+                    var message = resolveErrorMessage(response, null);
                     if (input) {
                         input.disabled = false;
                         input.checked = !desiredState;
@@ -913,7 +1004,7 @@ var Project = (function () {
                 params: { _: Date.now() }
             }).then(function (result) {
                 var response = unpackResponse(result);
-                if (response && response.Success === true) {
+                if (isSuccess(response)) {
                     window.alert("Locks have been cleared");
                 } else {
                     window.alert("Error clearing locks");
@@ -946,7 +1037,7 @@ var Project = (function () {
 
             return http.postJson(url_for_run("recorder/promote"), payload).then(function (result) {
                 var response = result && result.body ? result.body : result;
-                if (response && response.success) {
+                if (response && !response.error && !response.errors) {
                     var profileRoot = response.profile && response.profile.profile_root;
                     var message = "Profile draft promoted.";
                     if (profileRoot) {
@@ -954,7 +1045,7 @@ var Project = (function () {
                     }
                     window.alert(message);
                 } else {
-                    var errorMessage = response && (response.error_message || response.message || response.error) || "Error promoting profile draft.";
+                    var errorMessage = resolveErrorMessage(response, "Error promoting profile draft.");
                     window.alert(errorMessage);
                 }
                 return response;

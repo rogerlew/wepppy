@@ -71,9 +71,9 @@ def recorder_promote(runid: str, config: str) -> Response:
             slug=slug,
         )
     except FileNotFoundError as exc:
-        return jsonify({"success": False, "message": str(exc)}), 404
+        return jsonify({"error": {"message": str(exc)}}), 404
     except Exception as exc:
         current_app.logger.exception("Failed to promote recorder draft for %s", runid)
-        return jsonify({"success": False, "message": str(exc)}), 500
+        return jsonify({"error": {"message": str(exc)}}), 500
 
-    return jsonify({"success": True, "profile": result})
+    return jsonify({"profile": result})

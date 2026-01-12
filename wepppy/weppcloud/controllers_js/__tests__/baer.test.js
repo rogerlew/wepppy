@@ -60,18 +60,17 @@ describe("Baer controller", () => {
 
         httpRequestMock = jest.fn((url) => {
             if (url === "tasks/upload_sbs/") {
-                return Promise.resolve({ body: { Success: true } });
+                return Promise.resolve({ body: {} });
             }
             if (url === "tasks/remove_sbs") {
-                return Promise.resolve({ body: { Success: true } });
+                return Promise.resolve({ body: {} });
             }
             if (url === "tasks/build_uniform_sbs/1") {
-                return Promise.resolve({ body: { Success: true } });
+                return Promise.resolve({ body: {} });
             }
             if (url === "query/baer_wgs_map/") {
                 return Promise.resolve({
                     body: {
-                        Success: true,
                         Content: {
                             bounds: [[0, 0], [1, 1]],
                             imgurl: "resources/baer.png",
@@ -85,7 +84,7 @@ describe("Baer controller", () => {
             if (url === "resources/legends/sbs/") {
                 return Promise.resolve({ body: "<div>legend</div>" });
             }
-            return Promise.resolve({ body: { Success: true } });
+            return Promise.resolve({ body: {} });
         });
 
         global.WCHttp = {
@@ -184,7 +183,7 @@ describe("Baer controller", () => {
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith("job:started", expect.objectContaining({ task: "baer:upload" }));
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith("job:completed", expect.objectContaining({ task: "baer:upload" }));
         expect(emitter.emit).toHaveBeenCalledWith("baer:upload:started", {});
-        expect(emitter.emit).toHaveBeenCalledWith("baer:upload:completed", expect.objectContaining({ response: { Success: true } }));
+        expect(emitter.emit).toHaveBeenCalledWith("baer:upload:completed", expect.objectContaining({ response: {} }));
     });
 
     test("remove_sbs removes overlay and clears info", async () => {

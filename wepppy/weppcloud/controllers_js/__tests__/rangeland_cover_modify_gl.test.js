@@ -113,7 +113,7 @@ describe("RangelandCoverModify GL controller", () => {
                 return Promise.resolve({ body: ["7", "9"] });
             }
             if (url === "tasks/modify_rangeland_cover/") {
-                return Promise.resolve({ body: { Success: true } });
+                return Promise.resolve({ body: {} });
             }
             return Promise.resolve({ body: {} });
         });

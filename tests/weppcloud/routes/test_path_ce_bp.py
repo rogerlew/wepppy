@@ -129,7 +129,6 @@ def test_update_config_normalizes_payload(path_ce_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     content = payload["Content"]["config"]
     assert content["sddc_threshold"] == 12.0
     assert content["sdyd_threshold"] == 4.5
@@ -168,7 +167,6 @@ def test_run_enqueues_job(path_ce_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["job_id"] == "job-321"
 
     queue_call = rq_environment.recorder.queue_calls[0]
@@ -221,5 +219,4 @@ def test_run_requires_sbs_map(path_ce_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "SBS map" in payload["Error"]
+    assert "SBS map" in payload["error"]["message"]

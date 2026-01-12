@@ -149,7 +149,7 @@ describe("Subcatchment Delineation controller", () => {
             useEventMap: jest.fn((events, emitter) => emitter),
         };
 
-        httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-77" } }));
+        httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { job_id: "job-77" } }));
         httpRequestMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
@@ -285,7 +285,7 @@ describe("Subcatchment Delineation controller", () => {
         await Promise.resolve();
 
         expect(events).toHaveLength(1);
-        expect(events[0].error).toEqual({ Error: "failure" });
+        expect(events[0].error).toEqual({ error: { message: "failure" } });
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
     });
 
@@ -301,13 +301,13 @@ describe("Subcatchment Delineation controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             subcatchment,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("final completion trigger is idempotent", () => {

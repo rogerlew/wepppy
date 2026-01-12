@@ -128,7 +128,7 @@ describe("Outlet GL controller", () => {
         outlet.bootstrap({});
         outlet.setCursorSelection(true);
 
-        global.WCHttp.request.mockResolvedValueOnce({ body: { Success: true, job_id: "job-123" } });
+        global.WCHttp.request.mockResolvedValueOnce({ body: { job_id: "job-123" } });
 
         await clickHandler({ latlng: { lat: 45.1, lng: -120.3 } });
 
@@ -150,7 +150,7 @@ describe("Outlet GL controller", () => {
         outlet.bootstrap({});
         outlet.setCursorSelection(true);
 
-        global.WCHttp.request.mockResolvedValueOnce({ body: { Success: true, job_id: "job-123" } });
+        global.WCHttp.request.mockResolvedValueOnce({ body: { job_id: "job-123" } });
         global.WCHttp.getJson.mockResolvedValueOnce({ lat: 45.2, lng: -120.4 });
         global.WCHttp.request.mockResolvedValueOnce({ body: "<div>Report</div>" });
 

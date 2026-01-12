@@ -64,7 +64,7 @@ def test_set_mode_accepts_json_payload(treatments_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True}
+    assert payload == {}
 
     instance = TreatmentsStub.getInstance(run_dir)
     assert instance.mode_assignments[-1] == treatments_module.TreatmentsMode.UserDefinedMap
@@ -80,7 +80,7 @@ def test_set_mode_accepts_legacy_form_payload(treatments_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True}
+    assert payload == {}
 
     instance = TreatmentsStub.getInstance(run_dir)
     assert instance.mode_assignments[-1] == treatments_module.TreatmentsMode.UserDefinedSelection
@@ -97,7 +97,7 @@ def test_set_mode_requires_value(treatments_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": False, "Error": "mode must be provided"}
+    assert payload["error"]["message"] == "mode must be provided"
     assert TreatmentsStub.getInstance(run_dir).mode_assignments == []
 
 
@@ -111,5 +111,5 @@ def test_set_mode_validates_integer_input(treatments_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": False, "Error": "mode must be an integer"}
+    assert payload["error"]["message"] == "mode must be an integer"
     assert TreatmentsStub.getInstance(run_dir).mode_assignments == []

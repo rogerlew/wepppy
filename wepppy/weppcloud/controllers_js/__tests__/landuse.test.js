@@ -109,7 +109,7 @@ describe("Landuse controller", () => {
 
         httpRequestMock = jest.fn((url) => {
             if (url === "rq/api/build_landuse") {
-                return Promise.resolve({ body: { Success: true, job_id: "job-1" } });
+                return Promise.resolve({ body: { job_id: "job-1" } });
             }
             if (url === "report/landuse/") {
                 return Promise.resolve({ body: "<div>report</div>" });
@@ -117,7 +117,7 @@ describe("Landuse controller", () => {
             return Promise.resolve({ body: {} });
         });
 
-        httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true } }));
+        httpPostJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
             request: httpRequestMock,
@@ -195,13 +195,13 @@ describe("Landuse controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             landuse,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("modify_mapping posts payload and refreshes report", async () => {
@@ -264,7 +264,7 @@ describe("Landuse controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(landuse, { Error: "boom" });
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(landuse, { error: { message: "boom" } });
     });
 
     test("emits lifecycle events", async () => {

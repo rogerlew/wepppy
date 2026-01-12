@@ -126,7 +126,7 @@ def test_set_mode_parses_payload(rangeland_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     instance = RangelandStub.getInstance(run_dir)
     from wepppy.nodb.mods.rangeland_cover import RangelandCoverMode
@@ -156,7 +156,6 @@ def test_build_accepts_json_defaults(rangeland_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["job_id"] == "job-1"
 
     instance = RangelandStub.getInstance(run_dir)
@@ -207,7 +206,6 @@ def test_build_supports_legacy_form_payload(rangeland_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["job_id"] == "job-1"
 
     instance = RangelandStub.getInstance(run_dir)
@@ -260,7 +258,7 @@ def test_modify_rangeland_cover_normalizes_payload(rangeland_client):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body["Success"] is True
+    assert body == {}
 
     instance = RangelandStub.getInstance(run_dir)
     assert instance.modify_calls[-1] == {
@@ -303,8 +301,7 @@ def test_modify_rangeland_cover_validates_cover_range(rangeland_client):
 
     assert response.status_code == 500
     body = response.get_json()
-    assert body["Success"] is False
-    assert "between 0 and 100" in body["Error"]
+    assert "between 0 and 100" in body["error"]["message"]
 
     instance = RangelandStub.getInstance(run_dir)
     assert instance.modify_calls == []
@@ -335,8 +332,7 @@ def test_modify_rangeland_cover_requires_topaz_ids(rangeland_client):
 
     assert response.status_code == 500
     body = response.get_json()
-    assert body["Success"] is False
-    assert "Topaz ID" in body["Error"] or "provide at least one" in body["Error"]
+    assert "Topaz ID" in body["error"]["message"] or "provide at least one" in body["error"]["message"]
 
     instance = RangelandStub.getInstance(run_dir)
     assert instance.modify_calls == []

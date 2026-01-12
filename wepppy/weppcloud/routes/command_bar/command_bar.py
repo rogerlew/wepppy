@@ -12,7 +12,7 @@ The `command_bar/static/command-bar.js` file holds the companion frontend code.
 Keep endpoints small and focused. Here are some guidelines:
 1. Validate payload + authorization, always call `authorize()`
 2. Delegate work to existing NoDB helpers or service objects (as needed)
-3. Return `{Success, Content?, Error?}` JSON for the command bar to display
+3. Return JSON payloads with `Content` for success and canonical `error` payloads for failures
 
 """
 
@@ -58,19 +58,19 @@ def set_log_level(runid, config):
     level = payload.get('level')
 
     if not level:
-        return jsonify({'Success': False, 'Error': 'Missing "level" parameter.'}), 400
+        return jsonify({'error': {'message': 'Missing "level" parameter.'}}), 400
 
     level_key = str(level).lower()
     if level_key not in _ALLOWED_LEVELS:
         expected = ', '.join(sorted(_ALLOWED_LEVELS))
-        return jsonify({'Success': False, 'Error': f'Invalid log level "{level}". Expected one of {expected}.'}), 400
+        return jsonify({'error': {'message': f'Invalid log level "{level}". Expected one of {expected}.'}}), 400
 
     try:
         try_redis_set_log_level(runid, level_key)
         effective_value = try_redis_get_log_level(runid)
     except Exception as exc:
         logging.error('Unexpected error setting log level for %s: %s', runid, exc)
-        return jsonify({'Success': False, 'Error': 'Failed to update log level. Please try again.'}), 500
+        return jsonify({'error': {'message': 'Failed to update log level. Please try again.'}}), 500
 
     try:
         effective_label = LogLevel(effective_value).name.lower()
@@ -78,7 +78,6 @@ def set_log_level(runid, config):
         effective_label = str(effective_value)
 
     return jsonify({
-        'Success': True,
         'Content': {
             'log_level': effective_label,
             'log_level_value': effective_value
@@ -95,10 +94,10 @@ def get_lock_statuses(runid, config):
         statuses = lock_statuses(runid)
     except RuntimeError as exc:
         logging.error('Lock status unavailable for %s: %s', runid, exc)
-        return jsonify({'Success': False, 'Error': 'Lock service unavailable. Please try again later.'}), 503
+        return jsonify({'error': {'message': 'Lock service unavailable. Please try again later.'}}), 503
     except Exception as exc:  # pragma: no cover - defensive logging
         logging.exception('Unexpected error retrieving lock statuses for %s', runid)
-        return jsonify({'Success': False, 'Error': 'Unexpected error retrieving lock statuses.'}), 500
+        return jsonify({'error': {'message': 'Unexpected error retrieving lock statuses.'}}), 500
 
     locked_files = sorted([
         str(filename)
@@ -107,7 +106,6 @@ def get_lock_statuses(runid, config):
     ])
 
     return jsonify({
-        'Success': True,
         'Content': {
             'locked_files': locked_files
         }
@@ -191,10 +189,10 @@ def issue_query_engine_mcp_token(runid, config):
             audience=["query-engine"],
         )
     except JWTConfigurationError as exc:
-        return jsonify({'Success': False, 'Error': f'JWT configuration error: {exc}'}), 500
+        return jsonify({'error': {'message': f'JWT configuration error: {exc}'}}), 500
     except Exception as exc:  # pragma: no cover - defensive logging
         logging.exception("Failed to issue Query Engine MCP token for %s", runid)
-        return jsonify({'Success': False, 'Error': 'Unexpected error generating MCP token.'}), 500
+        return jsonify({'error': {'message': 'Unexpected error generating MCP token.'}}), 500
 
     claims = token_payload.get('claims', {})
     expires_at = claims.get('exp')
@@ -242,7 +240,6 @@ def issue_query_engine_mcp_token(runid, config):
         )
 
     return jsonify({
-        'Success': True,
         'Content': {
             'token': token_value,
             'expires_at': expires_at,

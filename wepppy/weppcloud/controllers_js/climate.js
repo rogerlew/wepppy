@@ -128,34 +128,26 @@ var Climate = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function parseJsonScript(id) {
@@ -772,12 +764,8 @@ var Climate = (function () {
             return http.postJson(url_for_run("tasks/set_climate_mode/"), payload, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
-                    if (body.Success === true) {
-                        climate.triggerEvent("CLIMATE_SETMODE_TASK_COMPLETED", body);
-                        return body;
-                    }
-                    climate.pushResponseStacktrace(climate, body);
-                    return Promise.reject(body);
+                    climate.triggerEvent("CLIMATE_SETMODE_TASK_COMPLETED", body);
+                    return body;
                 })
                 .catch(function (error) {
                     handleError(error);
@@ -810,17 +798,13 @@ var Climate = (function () {
             return http.postJson(url_for_run("tasks/set_climatestation_mode/"), { mode: parsedMode }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
-                    if (body.Success === true) {
-                        var eventPayload = Object.assign({}, body, {
-                            mode: parsedMode,
-                            skipRefresh: Boolean(opts.skipRefresh),
-                            skipMonthlies: Boolean(opts.skipMonthlies)
-                        });
-                        climate.triggerEvent("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", eventPayload);
-                        return body;
-                    }
-                    climate.pushResponseStacktrace(climate, body);
-                    return Promise.reject(body);
+                    var eventPayload = Object.assign({}, body, {
+                        mode: parsedMode,
+                        skipRefresh: Boolean(opts.skipRefresh),
+                        skipMonthlies: Boolean(opts.skipMonthlies)
+                    });
+                    climate.triggerEvent("CLIMATE_SETSTATIONMODE_TASK_COMPLETED", eventPayload);
+                    return body;
                 })
                 .catch(function (error) {
                     handleError(error);
@@ -845,12 +829,8 @@ var Climate = (function () {
             return http.postJson(url_for_run("tasks/set_climate_spatialmode/"), { spatialmode: parsedMode }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
-                    if (body.Success === true) {
-                        climate.triggerEvent("CLIMATE_SETSPATIALMODE_TASK_COMPLETED", body);
-                        return body;
-                    }
-                    climate.pushResponseStacktrace(climate, body);
-                    return Promise.reject(body);
+                    climate.triggerEvent("CLIMATE_SETSPATIALMODE_TASK_COMPLETED", body);
+                    return body;
                 })
                 .catch(function (error) {
                     handleError(error);
@@ -916,12 +896,8 @@ var Climate = (function () {
             http.postJson(url_for_run("tasks/set_climatestation/"), { station: selectedStation }, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
-                    if (body.Success === true) {
-                        climate.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED", body);
-                        climate.resetParPreview();
-                        return;
-                    }
-                    climate.pushResponseStacktrace(climate, body);
+                    climate.triggerEvent("CLIMATE_SETSTATION_TASK_COMPLETED", body);
+                    climate.resetParPreview();
                 })
                 .catch(function (error) {
                     handleError(error);
@@ -998,13 +974,13 @@ var Climate = (function () {
             http.postJson(url_for_run("rq/api/build_climate"), payload, { form: formElement })
                 .then(function (response) {
                     var body = response.body || {};
-                    if (body.Success === true) {
+                    if (body.job_id) {
                         var message = "build_climate job submitted: " + body.job_id;
                         statusAdapter.html(message);
                         climate.appendStatus(message);
                         climate.poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED";
                         climate.set_rq_job_id(climate, body.job_id);
-                        climate.events.emit("climate:build:completed", { jobId: body.job_id, payload: payload });
+                        climate.events.emit("climate:build:completed", { job_id: body.job_id, payload: payload });
                         return;
                     }
                     climate.pushResponseStacktrace(climate, body);
@@ -1027,15 +1003,10 @@ var Climate = (function () {
                 form: formElement
             }).then(function (response) {
                 var body = response.body || {};
-                if (body.Success === true) {
-                    climate.appendStatus("User-defined climate uploaded successfully.");
-                    resetCompletionSeen();
-                    climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED", body);
-                    climate.events.emit("climate:upload:completed", body);
-                    return;
-                }
-                climate.pushResponseStacktrace(climate, body);
-                climate.events.emit("climate:upload:failed", body);
+                climate.appendStatus("User-defined climate uploaded successfully.");
+                resetCompletionSeen();
+                climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED", body);
+                climate.events.emit("climate:upload:completed", body);
             }).catch(function (error) {
                 handleError(error);
                 climate.events.emit("climate:upload:failed", { error: error });
@@ -1049,15 +1020,10 @@ var Climate = (function () {
 
             http.postJson(url_for_run("tasks/set_use_gridmet_wind_when_applicable/"), { state: normalizedState }, { form: formElement })
                 .then(function (response) {
-                    var body = response.body || {};
-                    if (body.Success === true) {
-                        var message = "use_gridmet_wind_when_applicable updated.";
-                        statusAdapter.html(message);
-                        climate.appendStatus(message);
-                        climate.events.emit("climate:gridmet:updated", { state: normalizedState });
-                        return;
-                    }
-                    climate.pushResponseStacktrace(climate, body);
+                    var message = "use_gridmet_wind_when_applicable updated.";
+                    statusAdapter.html(message);
+                    climate.appendStatus(message);
+                    climate.events.emit("climate:gridmet:updated", { state: normalizedState });
                 })
                 .catch(function (error) {
                     handleError(error);
@@ -1071,15 +1037,10 @@ var Climate = (function () {
 
             http.postJson(url_for_run("tasks/set_adjust_mx_pt5/"), { state: normalizedState }, { form: formElement })
                 .then(function (response) {
-                    var body = response.body || {};
-                    if (body.Success === true) {
-                        var message = "adjust_mx_pt5 updated.";
-                        statusAdapter.html(message);
-                        climate.appendStatus(message);
-                        climate.events.emit("climate:mxpt5:updated", { state: normalizedState });
-                        return;
-                    }
-                    climate.pushResponseStacktrace(climate, body);
+                    var message = "adjust_mx_pt5 updated.";
+                    statusAdapter.html(message);
+                    climate.appendStatus(message);
+                    climate.events.emit("climate:mxpt5:updated", { state: normalizedState });
                 })
                 .catch(function (error) {
                     handleError(error);
@@ -1275,8 +1236,8 @@ var Climate = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "build_climate_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

@@ -48,8 +48,8 @@ describe("Soil controller", () => {
         await import("../dom.js");
         await import("../forms.js");
 
-        postFormMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "soil-job" } }));
-        postJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true } }));
+        postFormMock = jest.fn(() => Promise.resolve({ body: { job_id: "soil-job" } }));
+        postJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
         requestMock = jest.fn(() => Promise.resolve({ body: "<div>soil report</div>" }));
 
         global.WCHttp = {
@@ -128,13 +128,13 @@ describe("Soil controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             soil,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("setMode posts JSON payload with parsed integers", async () => {

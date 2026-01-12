@@ -194,7 +194,7 @@ def test_adduser_accepts_json_payload(team_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"user_id": 2, "email": "collab@example.com"}}
+    assert payload == {"Content": {"user_id": 2, "email": "collab@example.com"}}
     assert datastore.added == [(collaborator, run)]
     assert run in collaborator.runs
     assert collaborator in run.members
@@ -211,7 +211,6 @@ def test_adduser_returns_already_member_flag_for_existing_owner(team_client):
     assert response.status_code == 200
     payload = response.get_json()
     assert payload == {
-        "Success": True,
         "Content": {"already_member": True, "user_id": 1, "email": "owner@example.com"},
     }
 
@@ -225,8 +224,7 @@ def test_adduser_requires_email(team_client):
     )
 
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "Email address is required."
+    assert payload["error"]["message"] == "Email address is required."
 
 
 def test_adduser_errors_when_user_unknown(team_client):
@@ -238,8 +236,7 @@ def test_adduser_errors_when_user_unknown(team_client):
     )
 
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "missing@example.com does not have a WeppCloud account."
+    assert payload["error"]["message"] == "missing@example.com does not have a WeppCloud account."
 
 
 def test_removeuser_accepts_json_payload(team_client):
@@ -260,7 +257,7 @@ def test_removeuser_accepts_json_payload(team_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"user_id": 3}}
+    assert payload == {"Content": {"user_id": 3}}
     assert datastore.removed == [(collaborator, run)]
     assert run not in collaborator.runs
     assert collaborator not in run.members
@@ -280,7 +277,7 @@ def test_removeuser_reports_already_removed_when_not_member(team_client):
     )
 
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"already_removed": True, "user_id": 4}}
+    assert payload == {"Content": {"already_removed": True, "user_id": 4}}
 
 
 def test_removeuser_validates_user_id_type(team_client):
@@ -292,8 +289,7 @@ def test_removeuser_validates_user_id_type(team_client):
     )
 
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "user_id must be an integer."
+    assert payload["error"]["message"] == "user_id must be an integer."
 
 
 def test_removeuser_rejects_unknown_user(team_client):
@@ -305,8 +301,7 @@ def test_removeuser_rejects_unknown_user(team_client):
     )
 
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "User 999 not found."
+    assert payload["error"]["message"] == "User 999 not found."
 
 
 def test_removeuser_rejects_non_collaborator(team_client):
@@ -321,5 +316,4 @@ def test_removeuser_rejects_non_collaborator(team_client):
     )
 
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "User is not a collaborator on this project."
+    assert payload["error"]["message"] == "User is not a collaborator on this project."

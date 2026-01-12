@@ -914,7 +914,7 @@
           if (url && url.indexOf("set_unit_preferences") !== -1 && method === "POST") {
             var payload = init && init.body;
             console.log("[UI Showcase] Simulated POST", url, payload);
-            return Promise.resolve(new Response(JSON.stringify({ Success: true }), {
+            return Promise.resolve(new Response(JSON.stringify({ Content: { preferences: {} } }), {
               status: 200,
               headers: { "Content-Type": "application/json" }
             }));

@@ -306,7 +306,11 @@ def readme_save(runid, config):
             if not client_uuid:
                 reason = "missing_uuid"
             _invalidate_editor_session(runid, config, client_uuid)
-            return jsonify({"Success": False, "invalidated": True, "reason": reason})
+            return jsonify({
+                "error": {"message": "README editor lock mismatch", "code": reason},
+                "invalidated": True,
+                "reason": reason,
+            })
         _write_markdown(ctx, markdown)
         ron = Ron.getInstance(str(ctx.active_root))
         previous_state = _get_editor_state(runid, config, client_uuid) if client_uuid else {}
@@ -321,7 +325,7 @@ def readme_save(runid, config):
             ron_update["scenario"] = current_scenario
         if client_uuid:
             _refresh_editor_session(runid, config, client_uuid, ron)
-        response = {"Success": True}
+        response = {}
         if ron_update:
             response["ronUpdate"] = ron_update
         return jsonify(response)

@@ -98,6 +98,97 @@ var RangelandCover = (function () {
         };
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
+    function resolveErrorMessage(payload, fallback) {
+        if (!payload) {
+            return fallback || null;
+        }
+        if (payload.error !== undefined) {
+            var message = normalizeErrorValue(payload.error);
+            if (message) {
+                return message;
+            }
+        }
+        if (payload.errors) {
+            var errorList = formatErrorList(payload.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (payload.message !== undefined) {
+            return normalizeErrorValue(payload.message);
+        }
+        if (payload.detail !== undefined) {
+            return normalizeErrorValue(payload.detail);
+        }
+        return fallback || null;
+    }
+
     function toResponsePayload(http, error) {
         function coerceBody(raw) {
             if (!raw) {
@@ -116,34 +207,37 @@ var RangelandCover = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return { Error: body };
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
             return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: normalizeErrorValue(error && error.message) || "Request failed" } };
     }
 
     function parseInteger(value, fallback) {
@@ -328,7 +422,8 @@ var RangelandCover = (function () {
         function handleError(error, contextMessage) {
             var payload = toResponsePayload(http, error);
             rangeland.pushResponseStacktrace(rangeland, payload);
-            setStatusMessage(contextMessage || payload.Error || "Request failed.");
+            var message = resolveErrorMessage(payload, "Request failed.");
+            setStatusMessage(contextMessage || message || "Request failed.");
         }
 
         rangeland.hideStacktrace = function () {
@@ -386,10 +481,10 @@ var RangelandCover = (function () {
                 rap_year: rapYearValue
             }, { form: formElement }).then(function (result) {
                 var response = result && result.body ? result.body : null;
-                if (response && response.Success === true) {
-                    setStatusMessage(taskMsg + "... Success");
-                } else if (response) {
+                if (response && (response.error || response.errors)) {
                     rangeland.pushResponseStacktrace(rangeland, response);
+                } else {
+                    setStatusMessage(taskMsg + "... Success");
                 }
             }).catch(function (error) {
                 handleError(error, "Failed to set rangeland cover mode.");
@@ -435,8 +530,8 @@ var RangelandCover = (function () {
                 defaults: state.defaults
             }, { form: formElement }).then(function (result) {
                 var response = result && result.body ? result.body : null;
-                if (response && response.Success === true) {
-                    var jobId = response.job_id || response.jobId || null;
+                if (response && !response.error && !response.errors) {
+                    var jobId = response.job_id || null;
                     var submittedMessage = jobId ? taskMsg + "... Submitted (job " + jobId + ")" : taskMsg + "... Submitted";
                     setStatusMessage(submittedMessage);
                     if (typeof rangeland.append_status_message === "function" && jobId) {
@@ -564,8 +659,8 @@ var RangelandCover = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "build_rangeland_cover_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

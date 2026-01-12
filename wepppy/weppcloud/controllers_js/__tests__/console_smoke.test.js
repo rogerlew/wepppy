@@ -37,7 +37,7 @@ describe("Archive console smoke", () => {
             if (url === "/runs/demo/config/rq/api/archive") {
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve({ Success: true, job_id: "job-123" }),
+                    json: () => Promise.resolve({ job_id: "job-123" }),
                 });
             }
             throw new Error(`Unexpected fetch: ${url} (${JSON.stringify(options)})`);
@@ -136,14 +136,14 @@ describe("Fork console smoke", () => {
 
         fetchMock = jest.fn((url, options = {}) => {
             if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq/api/fork") {
+                const payload = {
+                    job_id: "job-456",
+                    new_runid: "demo-run-new",
+                    undisturbify: false,
+                };
                 return Promise.resolve({
                     ok: true,
-                    json: () => Promise.resolve({
-                        Success: true,
-                        job_id: "job-456",
-                        new_runid: "demo-run-new",
-                        undisturbify: false,
-                    }),
+                    text: () => Promise.resolve(JSON.stringify(payload)),
                 });
             }
             if (url === "http://localhost/weppcloud/rq/job-dashboard/job-456") {
@@ -226,13 +226,12 @@ describe("Fork console smoke", () => {
     test("failed fork surfaces stacktrace", async () => {
         fetchMock.mockImplementation((url) => {
             if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq/api/fork") {
+                const payload = {
+                    error: { message: "Error forking project", details: ["trace line 1", "trace line 2"] },
+                };
                 return Promise.resolve({
-                    ok: true,
-                    json: () => Promise.resolve({
-                        Success: false,
-                        Error: "Error forking project",
-                        StackTrace: ["trace line 1", "trace line 2"],
-                    }),
+                    ok: false,
+                    text: () => Promise.resolve(JSON.stringify(payload)),
                 });
             }
             return Promise.reject(new Error(`Unexpected fetch: ${url}`));

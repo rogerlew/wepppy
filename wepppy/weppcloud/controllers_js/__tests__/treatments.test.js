@@ -78,7 +78,7 @@ describe("Treatments controller", () => {
 
         httpRequestMock = jest.fn((url) => {
             if (url === "rq/api/build_treatments") {
-                return Promise.resolve({ body: { Success: true, job_id: "job-123" } });
+                return Promise.resolve({ body: { job_id: "job-123" } });
             }
             if (url === "report/treatments/") {
                 return Promise.resolve({ body: "<p>report</p>" });
@@ -86,7 +86,7 @@ describe("Treatments controller", () => {
             return Promise.resolve({ body: {} });
         });
 
-        postJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true } }));
+        postJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
             request: httpRequestMock,
@@ -231,13 +231,13 @@ describe("Treatments controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             treatments,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("build failure records stacktrace and emits error event", async () => {
@@ -250,11 +250,11 @@ describe("Treatments controller", () => {
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             treatments,
-            { Error: "Upload failed" }
+            { error: { message: "Upload failed" } }
         );
 
         const errorEvent = emittedEvents.find((entry) => entry.event === "treatments:run:error");
         expect(errorEvent).toBeTruthy();
-        expect(errorEvent.payload.error).toEqual({ Error: "Upload failed" });
+        expect(errorEvent.payload.error).toEqual({ error: { message: "Upload failed" } });
     });
 });

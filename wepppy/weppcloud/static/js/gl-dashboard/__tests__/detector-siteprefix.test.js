@@ -57,7 +57,6 @@ describe('gl-dashboard detector URL construction', () => {
     global.fetch.mockResolvedValue({
       ok: true,
       json: async () => ({
-        Success: true,
         Content: { bounds: [[45, -120], [46, -121]], imgurl: 'http://example.com/sbs.png' },
       }),
     });

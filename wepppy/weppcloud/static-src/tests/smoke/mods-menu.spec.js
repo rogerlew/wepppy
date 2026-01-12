@@ -258,7 +258,9 @@ async function ensureModState(page, modName, desiredState) {
   await checkbox.click();
   const modResponse = await modResponsePromise;
   const payload = await modResponse.json().catch(() => null);
-  expect(payload?.Success).toBeTruthy();
+  expect(payload && !payload.error).toBeTruthy();
+  expect(payload?.Content?.mod).toBe(modName);
+  expect(payload?.Content?.enabled).toBe(desiredState);
   await viewResponsePromise;
 
   await expectRunContextState(page, modName, desiredState, `runContext failed to update for ${modName}`);

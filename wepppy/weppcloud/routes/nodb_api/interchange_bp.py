@@ -54,7 +54,7 @@ def _enqueue_interchange_job(runid: str, config: str, wepp_output_subpath: Optio
             timeout=TIMEOUT,
         )
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @interchange_bp.route('/runs/<string:runid>/<config>/tasks/interchange/migrate', methods=['POST'])

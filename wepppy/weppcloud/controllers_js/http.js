@@ -245,8 +245,11 @@
             if (typeof value.detail === "string") {
                 return value.detail;
             }
-            if (typeof value.Error === "string") {
-                return value.Error;
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
             }
             try {
                 return JSON.stringify(value);
@@ -255,6 +258,40 @@
             }
         }
         return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
     }
 
     function normalizeResponsePayload(payload) {
@@ -266,34 +303,17 @@
         }
 
         if (!Object.prototype.hasOwnProperty.call(payload, "job_id")) {
-            if (Object.prototype.hasOwnProperty.call(payload, "jobId")) {
-                payload.job_id = payload.jobId;
-            } else if (Array.isArray(payload.job_ids) && payload.job_ids.length > 0) {
+            if (Array.isArray(payload.job_ids) && payload.job_ids.length > 0) {
                 payload.job_id = payload.job_ids[0];
             }
         }
 
-        if (!Object.prototype.hasOwnProperty.call(payload, "job_ids") &&
-            Object.prototype.hasOwnProperty.call(payload, "jobIds")) {
-            payload.job_ids = payload.jobIds;
-        }
-
-        if (!Object.prototype.hasOwnProperty.call(payload, "success") &&
-            Object.prototype.hasOwnProperty.call(payload, "Success")) {
-            payload.success = payload.Success;
-        }
-
-        var hasError = Object.prototype.hasOwnProperty.call(payload, "error");
-        var hasLegacyError = Object.prototype.hasOwnProperty.call(payload, "Error");
-
-        if (!hasError && hasLegacyError) {
-            payload.error = payload.Error;
-            hasError = true;
-        }
-
         if (!Object.prototype.hasOwnProperty.call(payload, "error_message")) {
-            var errorValue = hasError ? payload.error : (hasLegacyError ? payload.Error : undefined);
+            var errorValue = Object.prototype.hasOwnProperty.call(payload, "error") ? payload.error : undefined;
             var errorMessage = normalizeErrorValue(errorValue);
+            if (!errorMessage) {
+                errorMessage = formatErrorList(payload.errors);
+            }
             if (errorMessage !== undefined && errorMessage !== null) {
                 payload.error_message = errorMessage;
             }
@@ -301,11 +321,6 @@
         if (!Object.prototype.hasOwnProperty.call(payload, "message") &&
             Object.prototype.hasOwnProperty.call(payload, "error_message")) {
             payload.message = payload.error_message;
-        }
-
-        if (!Object.prototype.hasOwnProperty.call(payload, "stacktrace") &&
-            Object.prototype.hasOwnProperty.call(payload, "StackTrace")) {
-            payload.stacktrace = payload.StackTrace;
         }
 
         return payload;
@@ -340,13 +355,47 @@
         return response.arrayBuffer ? response.arrayBuffer() : response.text();
     }
 
+    function resolveErrorDetail(body) {
+        if (!body || typeof body !== "object") {
+            return null;
+        }
+        if (body.error) {
+            if (typeof body.error === "string") {
+                return body.error;
+            }
+            if (body.error && typeof body.error.message === "string") {
+                return body.error.message;
+            }
+            if (body.error && typeof body.error.detail === "string") {
+                return body.error.detail;
+            }
+            if (body.error && Object.prototype.hasOwnProperty.call(body.error, "details")) {
+                return body.error.details;
+            }
+        }
+        if (body.errors) {
+            var errorList = formatErrorList(body.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (typeof body.message === "string") {
+            return body.message;
+        }
+        if (typeof body.detail === "string") {
+            return body.detail;
+        }
+        return null;
+    }
+
     function buildError(url, response, body, cause) {
         var message = "HTTP request failed";
         var detail = null;
         if (response) {
             message = "HTTP " + response.status + " " + (response.statusText || "");
             if (body && typeof body === "object") {
-                detail = body.detail || body.message || body.error || body;
+                var resolved = resolveErrorDetail(body);
+                detail = resolved !== null ? resolved : body;
             } else if (body) {
                 detail = body;
             }

@@ -12,6 +12,8 @@ import wepppy.weppcloud.routes.nodb_api.interchange_bp as interchange_module
 RUN_ID = "test-run"
 CONFIG = "cfg"
 
+pytestmark = pytest.mark.routes
+
 
 def test_sanitize_subpath_variants():
     sanitize = interchange_module._sanitize_subpath
@@ -69,7 +71,7 @@ def test_migrate_default_interchange_enqueues_job(interchange_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "job_id": "job-123"}
+    assert payload == {"job_id": "job-123"}
 
     assert dispatched["context"] == (RUN_ID, CONFIG)
     queue_call = env.recorder.queue_calls[0]
@@ -88,4 +90,4 @@ def test_migrate_default_interchange_rejects_bad_path(interchange_client):
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["Success"] is False
+    assert payload["error"]["message"] == "Invalid subpath"

@@ -958,7 +958,7 @@ class PlaybackSession:
                 self._log("response JSON decode failed when extracting job id")
             return None
         if isinstance(payload, dict):
-            job_id = payload.get("job_id") or payload.get("jobId")
+            job_id = payload.get("job_id")
             if isinstance(job_id, str) and job_id.strip():
                 return job_id.strip()
             if self.verbose:

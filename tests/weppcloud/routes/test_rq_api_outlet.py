@@ -64,7 +64,7 @@ def test_api_set_outlet_accepts_json_payload(rq_outlet_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "job_id": "job-456"}
+    assert payload == {"job_id": "job-456"}
 
     prep = env.redis_prep_class.getInstance(state["run_dir"])
     assert rq_api_module.TaskEnum.set_outlet in prep.removed
@@ -86,7 +86,7 @@ def test_api_set_outlet_accepts_coordinate_object(rq_outlet_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["job_id"] == "job-456"
 
     queue_call = env.recorder.queue_calls[0]
     assert queue_call.args == (RUN_ID, -118.9, 43.2)
@@ -99,7 +99,6 @@ def test_api_set_outlet_requires_coordinates(rq_outlet_client):
         json={"latitude": None, "longitude": -120},
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     data = response.get_json()
-    assert data["Success"] is False
-    assert "latitude and longitude must be provided as floats" in data["Error"]
+    assert "latitude and longitude must be provided as floats" in data["error"]["message"]

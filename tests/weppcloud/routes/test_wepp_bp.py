@@ -97,7 +97,7 @@ def test_set_run_wepp_routine_accepts_json_boolean(wepp_client, routine, method_
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"routine": routine, "state": True}}
+    assert payload == {"Content": {"routine": routine, "state": True}}
 
     controller = DummyWepp.getInstance(run_dir)
     assert controller.calls[method_name] is True
@@ -113,8 +113,7 @@ def test_set_run_wepp_routine_rejects_non_boolean_state(wepp_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "state must be boolean"
+    assert payload["error"]["message"] == "state must be boolean"
 
 
 def test_set_run_wepp_routine_requires_known_routine(wepp_client):
@@ -127,8 +126,7 @@ def test_set_run_wepp_routine_requires_known_routine(wepp_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "routine not in" in payload["Error"]
+    assert "routine not in" in payload["error"]["message"]
 
 
 @pytest.fixture()
@@ -315,7 +313,7 @@ def test_run_wepp_accepts_json_payload(run_wepp_api_client):
     )
 
     assert response.status_code == 200
-    assert response.get_json() == {"Success": True, "job_id": "job-123"}
+    assert response.get_json() == {"job_id": "job-123"}
 
     run_dir = ctx["run_dir"]
     wepp_instance = ctx["wepp_cls"].getInstance(run_dir)
@@ -368,9 +366,7 @@ def test_run_wepp_returns_json_error_on_unhandled_exception(run_wepp_api_client,
 
     assert response.status_code == 500
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "forced failure" in payload["Error"]
-    assert isinstance(payload.get("StackTrace"), list)
+    assert "forced failure" in payload["error"]["message"]
 
     env = ctx["env"]
     assert env.recorder.queue_calls == []

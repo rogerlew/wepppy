@@ -14,7 +14,7 @@ from typing import Any, Dict, Iterable
 from flask_login import login_required
 import pandas as pd
 
-from flask import abort, Blueprint, current_app, request, Response, jsonify, send_file
+from flask import Blueprint, current_app, request, Response, jsonify, send_file
 
 from flask_security import current_user
 
@@ -275,7 +275,7 @@ def hello_world(runid, config):
     
     time.sleep(2)
 
-    return jsonify({'Success': True, 'job_id': job.id, 'exc_info': job.exc_info, 'is_failed': job.is_failed})
+    return jsonify({'job_id': job.id, 'exc_info': job.exc_info, 'is_failed': job.is_failed})
 
 
 @rq_api_bp.route('/batch/_/<string:batch_name>/rq/api/run-batch', methods=['POST'])
@@ -285,7 +285,7 @@ def api_run_batch(batch_name: str):
     try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
-        return jsonify({'success': False, 'error': str(exc)}), 404
+        return error_factory(str(exc), status_code=404)
 
     try:
         with _redis_conn() as redis_conn:
@@ -295,7 +295,6 @@ def api_run_batch(batch_name: str):
         return exception_factory('Failed to enqueue batch run', runid=batch_name)
 
     payload = {
-        'success': True,
         'job_id': job.id,
         'message': 'Batch run submitted.',
     }
@@ -367,7 +366,10 @@ def _parse_map_change(payload: Dict[str, Any]):
             zoom = _as_float(map_object.zoom, 'zoom')
         else:
             if center_raw is None or zoom_raw is None or bounds_raw is None or mcl_raw is None or csa_raw is None:
-                error = error_factory('Expecting center, zoom, bounds, mcl, and csa')
+                error = error_factory(
+                    'Expecting center, zoom, bounds, mcl, and csa',
+                    status_code=400,
+                )
                 return error, None
             center = _as_float_sequence(center_raw, 2, 'center')
             extent = _as_float_sequence(bounds_raw, 4, 'bounds')
@@ -403,7 +405,7 @@ def _parse_map_change(payload: Dict[str, Any]):
             map_bounds_text = ', '.join([str(v) for v in extent])
 
     except ValueError as exc:
-        error = exception_factory(str(exc))
+        error = error_factory(str(exc), status_code=400)
         return error, None
 
     return None, [extent, center, zoom, mcl, csa, wbt_fill_or_breach, wbt_blc_dist, set_extent_mode, map_bounds_text, map_object]
@@ -420,7 +422,7 @@ def build_landuse_and_soils():
         print(f'extent: {extent} {type(extent)}')
         
         if extent is None:
-            return error_factory('Expecting extent')
+            return error_factory('Expecting extent', status_code=400)
         
         cfg = data.get('cfg', None)
         nlcd_db = data.get('nlcd_db', None)
@@ -433,14 +435,14 @@ def build_landuse_and_soils():
     except Exception as e:
         return exception_factory('land_and_soil_rq Failed', runid=uuid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/rq/api/landuse_and_soils/<string:uuid>.tar.gz')
 def download_landuse_and_soils(uuid):
 
     if '.' in uuid or '/' in uuid:
-        return error_factory('Invalid uuid')
+        return error_factory('Invalid uuid', status_code=400)
     
     if _exists(f'/wc1/land_and_soil_rq/{uuid}.tar.gz'):
         return send_file(f'/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True, download_name=f'{uuid}.tar.gz')
@@ -448,7 +450,7 @@ def download_landuse_and_soils(uuid):
     if _exists(f'/geodata/wc1/land_and_soil_rq/{uuid}.tar.gz'):
         return send_file(f'/geodata/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True, download_name=f'{uuid}.tar.gz')
     
-    return error_factory('File not found')
+    return error_factory('File not found', status_code=404)
         
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fetch_dem_and_build_channels', methods=['POST'])
@@ -458,7 +460,7 @@ def fetch_dem_and_build_channels(runid, config):
         error, args = _parse_map_change(payload)
 
         if error is not None:
-            return jsonify(error)
+            return error
 
         (extent, center, zoom,
           mcl, csa, 
@@ -499,11 +501,11 @@ def fetch_dem_and_build_channels(runid, config):
             prep.set_rq_job_id('fetch_dem_and_build_channels_rq', job.id)
     except Exception as e:
         if isinstance(e, MinimumChannelLengthTooShortError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
+            return exception_factory(e.__name__, e.__doc__, runid=runid, status_code=400)
         else:
             return exception_factory('fetch_dem_and_build_channels Failed', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/set_outlet', methods=['POST'])
@@ -537,7 +539,7 @@ def api_set_outlet(runid, config):
         outlet_lng = _to_float(_resolve_coordinate("longitude"))
         outlet_lat = _to_float(_resolve_coordinate("latitude"))
     except (TypeError, ValueError):
-        return exception_factory('latitude and longitude must be provided as floats', runid=runid)
+        return error_factory('latitude and longitude must be provided as floats', status_code=400)
 
     try:    
         wd = get_wd(runid)
@@ -550,7 +552,7 @@ def api_set_outlet(runid, config):
     except Exception as e:
         return exception_factory('Could not set outlet', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_subcatchments_and_abstract_watershed', methods=['POST'])
@@ -671,13 +673,13 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
                 prep.set_rq_job_id('build_subcatchments_and_abstract_watershed_rq', job.id)
         except Exception as e:
             if isinstance(e, WatershedBoundaryTouchesEdgeError):
-                return exception_factory(e.__name__, e.__doc__, runid=runid)
+                return exception_factory(e.__name__, e.__doc__, runid=runid, status_code=400)
             else:
                 return exception_factory('Building Subcatchments Failed', runid=runid)
     except:
         return exception_factory('Building Subcatchments Failed', runid=runid)
     
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_landuse', methods=['POST'])
@@ -704,7 +706,7 @@ def api_build_landuse(runid, config):
         try:
             landuse.parse_inputs(payload)
         except ValueError as exc:
-            return exception_factory(str(exc), runid=runid)
+            return error_factory(str(exc), status_code=400)
 
         if 'disturbed' in landuse.mods:
             disturbed = Disturbed.getInstance(wd)
@@ -728,22 +730,22 @@ def api_build_landuse(runid, config):
             watershed = Watershed.getInstance(wd)
 
             if mapping is None:
-                return error_factory('landuse_management_mapping_selection must be provided')
+                return error_factory('landuse_management_mapping_selection must be provided', status_code=400)
 
             landuse.mapping = mapping
 
             try:
                 file = request.files['input_upload_landuse']
             except Exception:
-                return exception_factory('Could not find file', runid=runid)
+                return error_factory('Could not find file', status_code=400)
 
             try:
                 if file.filename == '':
-                    return error_factory('no filename specified')
+                    return error_factory('no filename specified', status_code=400)
 
                 filename = secure_filename(file.filename)
             except Exception:
-                return exception_factory('Could not obtain filename', runid=runid)
+                return error_factory('Could not obtain filename', status_code=400)
 
             user_defined_fn = _join(landuse.lc_dir, f'_{filename}')
             try:
@@ -754,10 +756,10 @@ def api_build_landuse(runid, config):
             try:
                 raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
             except Exception:
-                return exception_factory('Failed validating file', runid=runid)
+                return error_factory('Failed validating file', status_code=400)
 
             if not _exists(landuse.lc_fn):
-                return error_factory('Failed creating landuse file')
+                return error_factory('Failed creating landuse file', status_code=400)
 
         if landuse.run_group == 'batch':
             return success_factory('Set landuse inputs for batch processing')
@@ -772,11 +774,11 @@ def api_build_landuse(runid, config):
         
     except Exception as e:
         if isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
+            return exception_factory(e.__name__, e.__doc__, runid=runid, status_code=400)
         else:
             return exception_factory('Building Landuse Failed', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_treatments', methods=['POST'])
@@ -795,7 +797,7 @@ def api_build_treatments(runid, config):
 
             mapping = request.form.get('landuse_management_mapping_selection', None)
             if mapping is None:
-                return error_factory('landuse_management_mapping_selection must be provided')
+                return error_factory('landuse_management_mapping_selection must be provided', status_code=400)
             else:
                 landuse.mapping = mapping
 
@@ -812,17 +814,17 @@ def api_build_treatments(runid, config):
                     max_bytes=100 * 1024 * 1024,
                 )
             except UploadError as exc:
-                return exception_factory(str(exc), runid=runid)
+                return error_factory(str(exc), status_code=400)
 
             user_defined_fn = str(saved_path)
 
             try:
                 raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
             except Exception:
-                return exception_factory('Failed validating file', runid=runid)
+                return error_factory('Failed validating file', status_code=400)
 
             if not _exists(landuse.lc_fn):
-                return error_factory('Failed creating landuse file')
+                return error_factory('Failed creating landuse file', status_code=400)
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_landuse)
@@ -834,11 +836,11 @@ def api_build_treatments(runid, config):
         
     except Exception as e:
         if isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
+            return exception_factory(e.__name__, e.__doc__, runid=runid, status_code=400)
         else:
             return exception_factory('Building Landuse Failed', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_soils', methods=['POST'])
@@ -849,12 +851,18 @@ def api_build_soils(runid, config):
         prep.remove_timestamp(TaskEnum.build_soils)
 
         soils = Soils.getInstance(wd)
-        initial_sat = float(request.form.get('initial_sat'))
+        try:
+            initial_sat = float(request.form.get('initial_sat'))
+        except (TypeError, ValueError):
+            return error_factory('initial_sat must be numeric', status_code=400)
         soils.initial_sat = initial_sat
 
         if 'disturbed' in soils.mods:
             disturbed = Disturbed.getInstance(wd)
-            disturbed.sol_ver = float(request.form.get('sol_ver'))
+            try:
+                disturbed.sol_ver = float(request.form.get('sol_ver'))
+            except (TypeError, ValueError):
+                return error_factory('sol_ver must be numeric', status_code=400)
 
         if soils.run_group == 'batch':
             return success_factory('Set soils inputs for batch processing')
@@ -866,11 +874,11 @@ def api_build_soils(runid, config):
             
     except Exception as e:
         if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
+            return exception_factory(e.__name__, e.__doc__, runid=runid, status_code=400)
         else:
             return exception_factory('Building Soil Failed', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_climate', methods=['POST'])
@@ -882,7 +890,7 @@ def api_build_climate(runid, config):
         payload = parse_request_payload(request)
         climate.parse_inputs(payload)
     except Exception:
-        return exception_factory('Error parsing climate inputs', runid=runid)
+        return error_factory('Error parsing climate inputs', status_code=400)
 
     if climate.run_group == 'batch':
         return success_factory('Set climate inputs for batch processing')
@@ -899,11 +907,11 @@ def api_build_climate(runid, config):
         if isinstance(e, NoClimateStationSelectedError) or \
            isinstance(e, ClimateModeIsUndefinedError) or \
            isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
+            return exception_factory(e.__name__, e.__doc__, runid=runid, status_code=400)
         else:
             return exception_factory('Error building climate', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/post_dss_export_rq', methods=['POST'])
@@ -992,15 +1000,15 @@ def api_post_dss_export_rq(runid, config):
     try:
         start_date = parse_dss_date(_first_value(payload.get("dss_start_date")))
     except ValueError:
-        return error_factory("Invalid DSS start date; use MM/DD/YYYY.")
+        return error_factory("Invalid DSS start date; use MM/DD/YYYY.", status_code=400)
 
     try:
         end_date = parse_dss_date(_first_value(payload.get("dss_end_date")))
     except ValueError:
-        return error_factory("Invalid DSS end date; use MM/DD/YYYY.")
+        return error_factory("Invalid DSS end date; use MM/DD/YYYY.", status_code=400)
 
     if start_date and end_date and start_date > end_date:
-        return error_factory("DSS start date must be on or before the end date.")
+        return error_factory("DSS start date must be on or before the end date.", status_code=400)
 
     with wepp.locked():
         if dss_export_mode is not None:
@@ -1020,7 +1028,7 @@ def api_post_dss_export_rq(runid, config):
     except Exception:
         return exception_factory()
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 def _handle_run_wepp(runid: str, config: str) -> Response:
@@ -1121,6 +1129,8 @@ def _handle_run_wepp(runid: str, config: str) -> Response:
 
     try:
         wepp.parse_inputs(controller_payload)
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
     except Exception as exc:
         return exception_factory(exc, runid=runid)
 
@@ -1146,7 +1156,7 @@ def _handle_run_wepp(runid: str, config: str) -> Response:
     except Exception:
         return exception_factory()
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_wepp', methods=['POST'])
@@ -1246,6 +1256,8 @@ def _handle_run_wepp_watershed(runid, config):
 
     try:
         wepp.parse_inputs(controller_payload)
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
     except Exception as exc:
         return exception_factory(exc, runid=runid)
 
@@ -1271,7 +1283,7 @@ def _handle_run_wepp_watershed(runid, config):
     except Exception:
         return exception_factory()
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_wepp_watershed', methods=['POST'])
@@ -1328,7 +1340,7 @@ def api_run_omni(runid, config):
         omni.parse_scenarios(parsed_inputs)
 
     except ValueError as exc:
-        return error_factory(str(exc))
+        return error_factory(str(exc), status_code=400)
     except Exception as e:
         return exception_factory(f'Error parsing omni inputs: {str(e)}', runid=runid)
 
@@ -1343,7 +1355,7 @@ def api_run_omni(runid, config):
     except Exception:
         return exception_factory()
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni_contrasts', methods=['POST'])
@@ -1365,7 +1377,7 @@ def run_omni_contrasts(runid, config):
         omni.parse_scenarios(parsed_inputs)
 
     except ValueError as exc:
-        return error_factory(str(exc))
+        return error_factory(str(exc), status_code=400)
     except Exception as e:
         return exception_factory(f'Error parsing omni inputs: {str(e)}', runid=runid)
 
@@ -1380,7 +1392,7 @@ def run_omni_contrasts(runid, config):
     except Exception:
         return exception_factory()
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_ash', methods=['POST'])
 def api_run_ash(runid, config):
@@ -1390,13 +1402,19 @@ def api_run_ash(runid, config):
 
         mode_raw = payload.get('ash_depth_mode')
         if mode_raw is None:
-            return exception_factory("ash_depth_mode is required (0=loads, 1=depths, 2=maps)", runid=runid)
+            return error_factory(
+                "ash_depth_mode is required (0=loads, 1=depths, 2=maps)",
+                status_code=400,
+            )
         try:
             ash_depth_mode = int(mode_raw)
         except (TypeError, ValueError):
-            return exception_factory("ash_depth_mode must be an integer (0, 1, or 2)", runid=runid)
+            return error_factory(
+                "ash_depth_mode must be an integer (0, 1, or 2)",
+                status_code=400,
+            )
         if ash_depth_mode not in (0, 1, 2):
-            return exception_factory("ash_depth_mode must be 0, 1, or 2", runid=runid)
+            return error_factory("ash_depth_mode must be 0, 1, or 2", status_code=400)
         payload['ash_depth_mode'] = ash_depth_mode
 
         fire_date = payload.get('fire_date')
@@ -1418,15 +1436,21 @@ def api_run_ash(runid, config):
                 ini_white_ash_depth_mm = _require_float('ini_white_depth')
             except KeyError as exc:
                 missing = exc.args[0]
-                return exception_factory(f"Missing field: {missing} when ash_depth_mode=1", runid=runid)
+                return error_factory(
+                    f"Missing field: {missing} when ash_depth_mode=1",
+                    status_code=400,
+                )
             except ValueError as exc:
                 invalid = exc.args[0]
-                return exception_factory(f"Field must be numeric: {invalid}", runid=runid)
+                return error_factory(f"Field must be numeric: {invalid}", status_code=400)
         elif ash_depth_mode == 0:
             required = ('ini_black_load', 'ini_white_load', 'field_black_bulkdensity', 'field_white_bulkdensity')
             missing = [name for name in required if payload.get(name) is None]
             if missing:
-                return exception_factory(f"Missing fields for ash_depth_mode=0: {', '.join(missing)}", runid=runid)
+                return error_factory(
+                    f"Missing fields for ash_depth_mode=0: {', '.join(missing)}",
+                    status_code=400,
+                )
             try:
                 ini_black_load = _require_float('ini_black_load')
                 ini_white_load = _require_float('ini_white_load')
@@ -1436,9 +1460,9 @@ def api_run_ash(runid, config):
                 ini_white_ash_depth_mm = ini_white_load / field_white_bulkdensity
             except ValueError as exc:
                 invalid = exc.args[0]
-                return exception_factory(f"Field must be numeric: {invalid}", runid=runid)
+                return error_factory(f"Field must be numeric: {invalid}", status_code=400)
             except ZeroDivisionError:
-                return exception_factory("Bulk density cannot be zero", runid=runid)
+                return error_factory("Bulk density cannot be zero", status_code=400)
         else:  # ash_depth_mode == 2
             ini_black_ash_depth_mm = 3.0  # placeholder; replaced by map inputs
             ini_white_ash_depth_mm = 3.0
@@ -1452,15 +1476,15 @@ def api_run_ash(runid, config):
                 try:
                     ash._ash_load_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_load', required=True)
                 except ValueError as exc:
-                    return exception_factory(str(exc), runid=runid)
+                    return error_factory(str(exc), status_code=400)
 
                 try:
                     ash._ash_type_map_fn = _task_upload_ash_map(runid, config, 'input_upload_ash_type_map', required=False)
                 except ValueError as exc:
-                    return exception_factory(str(exc), runid=runid)
+                    return error_factory(str(exc), status_code=400)
 
             if ash.ash_load_fn is None:
-                return exception_factory('Expecting ashload map"', runid=runid)
+                return error_factory('Expecting ashload map"', status_code=400)
 
         ash.ash_depth_mode = ash_depth_mode
 
@@ -1477,7 +1501,7 @@ def api_run_ash(runid, config):
             )
             prep.set_rq_job_id('run_ash_rq', job.id)
 
-        return jsonify(Success=True, job_id=job.id), 200
+        return jsonify({'job_id': job.id}), 200
 
     except Exception:
         return exception_factory('Error Running Ash Transport', runid=runid)
@@ -1496,13 +1520,13 @@ def api_run_debris_flow(runid, config):
             try:
                 clay_pct = float(clay_pct)
             except (TypeError, ValueError):
-                return exception_factory('clay_pct must be numeric', runid=runid)
+                return error_factory('clay_pct must be numeric', status_code=400)
 
         if liquid_limit is not None:
             try:
                 liquid_limit = float(liquid_limit)
             except (TypeError, ValueError):
-                return exception_factory('liquid_limit must be numeric', runid=runid)
+                return error_factory('liquid_limit must be numeric', status_code=400)
 
         if datasource is not None:
             datasource = str(datasource).strip() or None
@@ -1536,7 +1560,7 @@ def api_run_debris_flow(runid, config):
     except Exception:
         return exception_factory('Error Running Debris Flow', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_rhem_rq', methods=['POST'])
@@ -1575,7 +1599,7 @@ def api_run_rhem(runid, config):
     except Exception:
         return exception_factory('Error Running RHEM', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/acquire_rap_ts', methods=['POST'])
@@ -1648,7 +1672,7 @@ def api_rap_ts_acquire(runid, config):
             try:
                 schedule = _normalize_schedule(raw_schedule)
             except ValueError as exc:
-                return exception_factory(str(exc), runid=runid)
+                return error_factory(str(exc), status_code=400)
 
         force_refresh = None
         if raw_force_refresh is not None:
@@ -1679,7 +1703,7 @@ def api_rap_ts_acquire(runid, config):
     except Exception:
         return exception_factory('Error Running RAP_TS', runid=runid)
 
-    response_payload: Dict[str, Any] = {'Success': True, 'job_id': job.id}
+    response_payload: Dict[str, Any] = {'job_id': job.id}
     if job_payload:
         response_payload['payload'] = job_payload
 
@@ -1719,7 +1743,7 @@ def api_openet_ts_acquire(runid, config):
     except Exception:
         return exception_factory('Error Running OpenET_TS', runid=runid)
 
-    response_payload: Dict[str, Any] = {'Success': True, 'job_id': job.id}
+    response_payload: Dict[str, Any] = {'job_id': job.id}
     if job_payload:
         response_payload['payload'] = job_payload
 
@@ -1735,7 +1759,10 @@ def api_fork(runid, config):
         wd = get_wd(runid)
         
         if not _exists(wd):
-            return exception_factory('Error forking project, run_id={runid} does not exist', runid=runid)
+            return error_factory(
+                f'Error forking project, run_id={runid} does not exist',
+                status_code=404,
+            )
 
         source_config = Ron.getInstance(wd).config_stem
         
@@ -1768,7 +1795,7 @@ def api_fork(runid, config):
                 should_abort = False
 
         if should_abort:
-            abort(404)
+            return error_factory('Run not found', status_code=404)
 
         if current_user.is_anonymous:
             cap_token = request.form.get("cap_token", "").strip()
@@ -1778,9 +1805,7 @@ def api_fork(runid, config):
                     runid,
                     request.remote_addr,
                 )
-                response = error_factory("CAPTCHA token is required.")
-                response.status_code = 403
-                return response
+                return error_factory("CAPTCHA token is required.", status_code=403)
 
             try:
                 verification = verify_cap_token(cap_token)
@@ -1800,9 +1825,7 @@ def api_fork(runid, config):
                     request.remote_addr,
                     verification.get("error-codes"),
                 )
-                response = error_factory("CAPTCHA verification failed.")
-                response.status_code = 403
-                return response
+                return error_factory("CAPTCHA verification failed.", status_code=403)
 
         dir_created = False
         while not dir_created:
@@ -1860,7 +1883,7 @@ def api_fork(runid, config):
     except Exception:
         return exception_factory('Error forking project', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id, 'new_runid': new_runid, 'undisturbify': undisturbify})
+    return jsonify({'job_id': job.id, 'new_runid': new_runid, 'undisturbify': undisturbify})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/archive', methods=['POST'])
@@ -1881,11 +1904,14 @@ def api_archive(runid, config):
 
         wd = get_wd(runid)
         if not _exists(wd):
-            return exception_factory(f'Project {runid} not found', runid=runid)
+            return error_factory(f'Project {runid} not found', status_code=404)
 
         locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
         if locked:
-            return exception_factory('Cannot archive while files are locked: ' + ', '.join(locked), runid=runid)
+            return error_factory(
+                'Cannot archive while files are locked: ' + ', '.join(locked),
+                status_code=400,
+            )
 
         prep = RedisPrep.getInstance(wd)
         existing_job_id = prep.get_archive_job_id()
@@ -1898,7 +1924,7 @@ def api_archive(runid, config):
                 status = None
 
             if status in ('queued', 'started', 'deferred'):
-                return exception_factory('An archive job is already running for this project', runid=runid)
+                return error_factory('An archive job is already running for this project', status_code=400)
             else:
                 prep.clear_archive_job_id()
 
@@ -1909,7 +1935,7 @@ def api_archive(runid, config):
         prep.set_archive_job_id(job.id)
         StatusMessenger.publish(f'{runid}:archive', f'rq:{job.id} ENQUEUED archive_rq({runid})')
 
-        return jsonify({'Success': True, 'job_id': job.id})
+        return jsonify({'job_id': job.id})
     except Exception:
         return exception_factory('Error enqueueing archive job', runid=runid)
 
@@ -1921,19 +1947,22 @@ def api_restore_archive(runid, config):
         payload = request.get_json(silent=True) or {}
         archive_name = payload.get('archive_name') or request.form.get('archive_name')
         if not archive_name:
-            return exception_factory('Missing archive_name parameter', runid=runid)
+            return error_factory('Missing archive_name parameter', status_code=400)
 
         wd = get_wd(runid)
         if not _exists(wd):
-            return exception_factory(f'Project {runid} not found', runid=runid)
+            return error_factory(f'Project {runid} not found', status_code=404)
 
         locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
         if locked:
-            return exception_factory('Cannot restore while files are locked: ' + ', '.join(locked), runid=runid)
+            return error_factory(
+                'Cannot restore while files are locked: ' + ', '.join(locked),
+                status_code=400,
+            )
 
         archive_path = os.path.join(wd, 'archives', archive_name)
         if not os.path.exists(archive_path):
-            return exception_factory(f'Archive {archive_name} not found', runid=runid)
+            return error_factory(f'Archive {archive_name} not found', status_code=404)
 
         prep = RedisPrep.getInstance(wd)
         existing_job_id = prep.get_archive_job_id()
@@ -1946,7 +1975,7 @@ def api_restore_archive(runid, config):
                 status = None
 
             if status in ('queued', 'started', 'deferred'):
-                return exception_factory('An archive job is already running for this project', runid=runid)
+                return error_factory('An archive job is already running for this project', status_code=400)
             else:
                 prep.clear_archive_job_id()
 
@@ -1957,7 +1986,7 @@ def api_restore_archive(runid, config):
         prep.set_archive_job_id(job.id)
         StatusMessenger.publish(f'{runid}:archive', f'rq:{job.id} ENQUEUED restore_archive_rq({runid}, {archive_name})')
 
-        return jsonify({'Success': True, 'job_id': job.id})
+        return jsonify({'job_id': job.id})
     except Exception:
         return exception_factory('Error enqueueing restore job', runid=runid)
 
@@ -1969,19 +1998,22 @@ def api_delete_archive(runid, config):
         payload = request.get_json(silent=True) or {}
         archive_name = payload.get('archive_name') or request.form.get('archive_name')
         if not archive_name:
-            return exception_factory('Missing archive_name parameter', runid=runid)
+            return error_factory('Missing archive_name parameter', status_code=400)
 
         wd = get_wd(runid)
         if not _exists(wd):
-            return exception_factory(f'Project {runid} not found', runid=runid)
+            return error_factory(f'Project {runid} not found', status_code=404)
 
         locked = [name for name, state in lock_statuses(runid).items() if name.endswith('.nodb') and state]
         if locked:
-            return exception_factory('Cannot delete while files are locked: ' + ', '.join(locked), runid=runid)
+            return error_factory(
+                'Cannot delete while files are locked: ' + ', '.join(locked),
+                status_code=400,
+            )
 
         archive_path = os.path.join(wd, 'archives', archive_name)
         if not os.path.exists(archive_path):
-            return exception_factory(f'Archive {archive_name} not found', runid=runid)
+            return error_factory(f'Archive {archive_name} not found', status_code=404)
 
         prep = RedisPrep.getInstance(wd)
         existing_job_id = prep.get_archive_job_id()
@@ -1994,13 +2026,13 @@ def api_delete_archive(runid, config):
                 status = None
 
             if status in ('queued', 'started', 'deferred'):
-                return exception_factory('An archive job is already running for this project', runid=runid)
+                return error_factory('An archive job is already running for this project', status_code=400)
             else:
                 prep.clear_archive_job_id()
 
         os.remove(archive_path)
         StatusMessenger.publish(f'{runid}:archive', f'Archive deleted: {archive_name}')
 
-        return jsonify({'Success': True})
+        return jsonify({})
     except Exception:
         return exception_factory('Error deleting archive', runid=runid)

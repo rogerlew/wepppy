@@ -109,34 +109,26 @@ var DebrisFlow = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return { Error: body };
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return error;
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function createInstance() {
@@ -260,18 +252,18 @@ var DebrisFlow = (function () {
             });
 
             debris.triggerEvent("job:started", { task: "debris:run" });
-            emitter.emit("debris:run:started", { jobId: null, task: "debris:run" });
+            emitter.emit("debris:run:started", { job_id: null, task: "debris:run" });
 
             debris.connect_status_stream(debris);
 
             http.postJson(url_for_run("rq/api/run_debris_flow"), cleanPayload, { form: formElement }).then(function (response) {
                 var payload = response.body || {};
-                if (payload.Success === true || payload.success === true) {
+                if (payload.job_id) {
                     statusAdapter.html("run_debris_flow_rq job submitted: " + payload.job_id);
                     debris.poll_completion_event = "DEBRIS_FLOW_RUN_TASK_COMPLETED";
                     debris.set_rq_job_id(debris, payload.job_id);
                     emitter.emit("debris:run:started", {
-                        jobId: payload.job_id,
+                        job_id: payload.job_id,
                         task: "debris:run",
                         status: "queued"
                     });
@@ -288,14 +280,14 @@ var DebrisFlow = (function () {
         debris.report = function () {
             infoAdapter.html("<a href='" + url_for_run("report/debris_flow/") + "' target='_blank'>View Debris Flow Model Results</a>");
             emitter.emit("debris:run:completed", {
-                jobId: debris.rq_job_id || null,
+                job_id: debris.rq_job_id || null,
                 task: "debris:run"
             });
             if (!debris._job_completion_dispatched) {
                 debris._job_completion_dispatched = true;
                 debris.triggerEvent("job:completed", {
                     task: "debris:run",
-                    jobId: debris.rq_job_id || null
+                    job_id: debris.rq_job_id || null
                 });
             }
         };
@@ -333,8 +325,8 @@ var DebrisFlow = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "run_debris_flow_rq")
                 : null;
-            if (!jobId && ctx.controllers && ctx.controllers.debrisFlow && ctx.controllers.debrisFlow.jobId) {
-                jobId = ctx.controllers.debrisFlow.jobId;
+            if (!jobId && ctx.controllers && ctx.controllers.debrisFlow && ctx.controllers.debrisFlow.job_id) {
+                jobId = ctx.controllers.debrisFlow.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

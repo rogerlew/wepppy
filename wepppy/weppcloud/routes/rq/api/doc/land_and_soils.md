@@ -45,12 +45,11 @@ curl -X POST https://wepp.cloud/weppcloud/rq/api/landuse_and_soils \
 
 ```json
 {
-  "Success": true,
   "job_id": "cc4a620e-473f-478e-b33b-71f56fd6b544"
 }
 ```
 
-_Success_ = true indicates the job has been succesfully submitted to the job engine
+The presence of `job_id` indicates the job has been successfully submitted to the job engine.
 
 ---
 

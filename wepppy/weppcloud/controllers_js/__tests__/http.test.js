@@ -149,4 +149,21 @@ describe("WCHttp helpers", () => {
 
         expect(result.body).toEqual({ type: "FeatureCollection", features: [] });
     });
+
+    test("request uses error.details when message is missing", async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: "Bad Request",
+            headers: {
+                get: () => "application/json"
+            },
+            text: () => Promise.resolve(JSON.stringify({ error: { details: "Detailed info" } }))
+        });
+
+        await expect(window.WCHttp.request("/api/fail", { method: "POST" })).rejects.toMatchObject({
+            status: 400,
+            detail: "Detailed info"
+        });
+    });
 });

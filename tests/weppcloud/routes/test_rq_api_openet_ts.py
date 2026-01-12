@@ -61,7 +61,7 @@ def test_acquire_openet_ts_enqueues_with_payload(openet_ts_app):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "job_id": "job-xyz", "payload": {"force_refresh": True}}
+    assert body == {"job_id": "job-xyz", "payload": {"force_refresh": True}}
 
     assert len(recorder.queue_calls) == 1
     call = recorder.queue_calls[0]
@@ -88,7 +88,7 @@ def test_acquire_openet_ts_allows_empty_payload(openet_ts_app):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "job_id": "job-xyz"}
+    assert body == {"job_id": "job-xyz"}
 
     call = recorder.queue_calls[0]
     assert call.kwargs["kwargs"] == {}

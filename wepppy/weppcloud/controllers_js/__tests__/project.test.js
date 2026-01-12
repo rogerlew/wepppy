@@ -98,27 +98,27 @@ describe("Project controller", () => {
 
         postJsonMock = jest.fn((url, payload) => {
             if (url.indexOf("tasks/setname/") !== -1) {
-                return Promise.resolve({ body: { Success: true, Content: { name: payload.name } } });
+                return Promise.resolve({ body: { Content: { name: payload.name } } });
             }
             if (url.indexOf("tasks/setscenario/") !== -1) {
-                return Promise.resolve({ body: { Success: true, Content: { scenario: payload.scenario } } });
+                return Promise.resolve({ body: { Content: { scenario: payload.scenario } } });
             }
             if (url.indexOf("tasks/set_readonly") !== -1) {
-                return Promise.resolve({ body: { Success: true, Content: { readonly: payload.readonly, job_id: "job-1" } } });
+                return Promise.resolve({ body: { Content: { readonly: payload.readonly, job_id: "job-1" } } });
             }
             if (url.indexOf("tasks/set_public") !== -1) {
-                return Promise.resolve({ body: { Success: true, Content: { public: payload.public } } });
+                return Promise.resolve({ body: { Content: { public: payload.public } } });
             }
             if (url.indexOf("tasks/set_unit_preferences") !== -1) {
-                return Promise.resolve({ body: { Success: true, Content: { preferences: payload } } });
+                return Promise.resolve({ body: { Content: { preferences: payload } } });
             }
-            return Promise.resolve({ body: { Success: true } });
+            return Promise.resolve({ body: {} });
         });
 
         global.WCHttp = {
             postJson: postJsonMock,
-            request: jest.fn(() => Promise.resolve({ body: { Success: true } })),
-            getJson: jest.fn(() => Promise.resolve({ body: { Success: true } })),
+            request: jest.fn(() => Promise.resolve({ body: {} })),
+            getJson: jest.fn(() => Promise.resolve({ body: {} })),
             isHttpError: jest.fn(() => false)
         };
 

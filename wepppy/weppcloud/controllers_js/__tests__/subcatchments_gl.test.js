@@ -204,7 +204,7 @@ describe("SubcatchmentDelineation GL controller", () => {
         const sub = window.SubcatchmentDelineation.getInstance();
 
         postJsonMock.mockResolvedValueOnce({
-            body: { Success: true, job_id: "job-123" },
+            body: { job_id: "job-123" },
         });
 
         await sub.build();

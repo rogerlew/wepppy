@@ -40,6 +40,102 @@
     };
   }
 
+  function normalizeErrorValue(value) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    if (typeof value === "string") {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map(function (item) {
+        return item === undefined || item === null ? "" : String(item);
+      }).join("\n");
+    }
+    if (typeof value === "object") {
+      if (typeof value.message === "string") {
+        return value.message;
+      }
+      if (typeof value.detail === "string") {
+        return value.detail;
+      }
+      if (typeof value.details === "string") {
+        return value.details;
+      }
+      if (value.details !== undefined) {
+        return normalizeErrorValue(value.details);
+      }
+      try {
+        return JSON.stringify(value);
+      } catch (err) {
+        return String(value);
+      }
+    }
+    return String(value);
+  }
+
+  function formatErrorList(errors) {
+    if (!Array.isArray(errors)) {
+      return null;
+    }
+    var parts = [];
+    errors.forEach(function (entry) {
+      if (entry === undefined || entry === null) {
+        return;
+      }
+      if (typeof entry === "string") {
+        parts.push(entry);
+        return;
+      }
+      if (typeof entry.message === "string") {
+        parts.push(entry.message);
+        return;
+      }
+      if (typeof entry.detail === "string") {
+        parts.push(entry.detail);
+        return;
+      }
+      if (typeof entry.code === "string") {
+        parts.push(entry.code);
+        return;
+      }
+      try {
+        parts.push(JSON.stringify(entry));
+      } catch (err) {
+        parts.push(String(entry));
+      }
+    });
+    return parts.length ? parts.join("\n") : null;
+  }
+
+  function resolveErrorMessage(body, fallback) {
+    if (body && typeof body === "object") {
+      if (body.error !== undefined) {
+        var message = normalizeErrorValue(body.error);
+        if (message) {
+          return message;
+        }
+      }
+      if (body.errors) {
+        var errorList = formatErrorList(body.errors);
+        if (errorList) {
+          return errorList;
+        }
+      }
+      if (body.message !== undefined) {
+        return normalizeErrorValue(body.message);
+      }
+      if (body.detail !== undefined) {
+        return normalizeErrorValue(body.detail);
+      }
+    }
+    return fallback || null;
+  }
+
+  function hasErrorPayload(body) {
+    return Boolean(body && typeof body === "object" && (body.error || body.errors));
+  }
+
   function initForkConsole(container) {
     if (!container || container.__forkConsoleInit === true) {
       return;
@@ -366,8 +462,44 @@
       if (typeof stacktracePanel.open !== "undefined") {
         stacktracePanel.open = true;
       }
-      var text = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
+      var text = "";
+      if (Array.isArray(lines)) {
+        text = lines.map(function (item) {
+          return item === undefined || item === null ? "" : String(item);
+        }).join("\n");
+      } else if (lines && typeof lines === "object") {
+        try {
+          text = JSON.stringify(lines, null, 2);
+        } catch (err) {
+          text = String(lines);
+        }
+      } else {
+        text = String(lines || "");
+      }
       stacktraceBody.textContent = text;
+    }
+
+    function renderErrorDetails(body) {
+      if (!stacktracePanel || !stacktraceBody) {
+        return;
+      }
+      var details = null;
+      if (body && typeof body === "object") {
+        if (body.error && Object.prototype.hasOwnProperty.call(body.error, "details")) {
+          details = body.error.details;
+        } else if (body.errors) {
+          details = body.errors;
+        }
+      }
+      if (details === null || details === undefined) {
+        stacktraceBody.textContent = "";
+        stacktracePanel.hidden = true;
+        if (typeof stacktracePanel.open !== "undefined") {
+          stacktracePanel.open = false;
+        }
+        return;
+      }
+      showStacktrace(details);
     }
 
     function forkProject(event) {
@@ -420,19 +552,42 @@
         body: payload.toString()
       })
         .then(function (resp) {
-          return resp.json();
+          return resp.text().then(function (text) {
+            var body = null;
+            if (text) {
+              try {
+                body = JSON.parse(text);
+              } catch (err) {
+                body = text;
+              }
+            }
+            return { ok: resp.ok, body: body };
+          });
         })
-        .then(function (body) {
-          if (!body.Success) {
-            var errMsg = body.Error || "Fork submission failed";
+        .then(function (result) {
+          var body = result.body || {};
+          if (!result.ok || hasErrorPayload(body)) {
+            var errMsg = resolveErrorMessage(body, "Fork submission failed");
             if (consoleBlock) {
               consoleBlock.dataset.state = "critical";
               consoleBlock.textContent = "Error: " + errMsg;
             }
             appendStatus("Error submitting fork job: " + errMsg);
-            if (body.StackTrace) {
-              showStacktrace(body.StackTrace);
+            renderErrorDetails(body);
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.hidden = false;
             }
+            return;
+          }
+          if (!body || typeof body !== "object") {
+            var unknownErr = "Fork submission failed";
+            if (consoleBlock) {
+              consoleBlock.dataset.state = "critical";
+              consoleBlock.textContent = "Error: " + unknownErr;
+            }
+            appendStatus("Error submitting fork job: " + unknownErr);
+            renderErrorDetails(null);
             if (submitButton) {
               submitButton.disabled = false;
               submitButton.hidden = false;
@@ -472,6 +627,7 @@
             consoleBlock.textContent = "Error: " + (err.message || err);
           }
           appendStatus("Error submitting fork job: " + (err.message || err));
+          renderErrorDetails(err && err.details ? { error: { details: err.details } } : null);
           if (err && err.stack) {
             showStacktrace(err.stack.split("\n"));
           }

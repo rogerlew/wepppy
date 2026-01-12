@@ -210,6 +210,119 @@
       return value.toFixed(value >= 10 || index === 0 ? 0 : 1) + " " + units[index];
     }
 
+    function parseJsonResponse(response) {
+      return response.json().then(function (body) {
+        return {
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+          body: body
+        };
+      });
+    }
+
+    function normalizeErrorValue(value) {
+      if (value === undefined || value === null) {
+        return value;
+      }
+      if (typeof value === "string") {
+        return value;
+      }
+      if (Array.isArray(value)) {
+        return value.map(function (entry) {
+          return entry === undefined || entry === null ? "" : String(entry);
+        }).join("\n");
+      }
+      if (typeof value === "object") {
+        if (typeof value.message === "string") {
+          return value.message;
+        }
+        if (typeof value.detail === "string") {
+          return value.detail;
+        }
+        if (typeof value.details === "string") {
+          return value.details;
+        }
+        if (value.details !== undefined) {
+          return normalizeErrorValue(value.details);
+        }
+        try {
+          return JSON.stringify(value);
+        } catch (err) {
+          return String(value);
+        }
+      }
+      return String(value);
+    }
+
+    function formatErrorList(errors) {
+      if (!Array.isArray(errors)) {
+        return null;
+      }
+      var parts = [];
+      errors.forEach(function (entry) {
+        if (entry === undefined || entry === null) {
+          return;
+        }
+        if (typeof entry === "string") {
+          parts.push(entry);
+          return;
+        }
+        if (typeof entry.message === "string") {
+          parts.push(entry.message);
+          return;
+        }
+        if (typeof entry.detail === "string") {
+          parts.push(entry.detail);
+          return;
+        }
+        if (typeof entry.code === "string") {
+          parts.push(entry.code);
+          return;
+        }
+        try {
+          parts.push(JSON.stringify(entry));
+        } catch (err) {
+          parts.push(String(entry));
+        }
+      });
+      return parts.length ? parts.join("\n") : null;
+    }
+
+    function resolveErrorMessage(body, fallback) {
+      if (body) {
+        if (body.error !== undefined) {
+          var message = normalizeErrorValue(body.error);
+          if (message) {
+            return message;
+          }
+        }
+        if (body.errors) {
+          var errorList = formatErrorList(body.errors);
+          if (errorList) {
+            return errorList;
+          }
+        }
+        if (body.message !== undefined) {
+          var messageText = normalizeErrorValue(body.message);
+          if (messageText) {
+            return messageText;
+          }
+        }
+        if (body.detail !== undefined) {
+          var detailText = normalizeErrorValue(body.detail);
+          if (detailText) {
+            return detailText;
+          }
+        }
+      }
+      return fallback;
+    }
+
+    function hasErrorPayload(body) {
+      return !!(body && (body.error || body.errors));
+    }
+
     function renderArchiveRow(item) {
       var tr = document.createElement("tr");
 
@@ -449,12 +562,11 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comment: comment })
       })
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (body) {
-          if (!body.Success) {
-            throw new Error(body.Error || "Archive submission failed");
+        .then(parseJsonResponse)
+        .then(function (result) {
+          var body = result.body || {};
+          if (!result.ok || hasErrorPayload(body)) {
+            throw new Error(resolveErrorMessage(body, "Archive submission failed"));
           }
           currentJobId = body.job_id || null;
           appendStatus("Archive job submitted: " + currentJobId);
@@ -493,12 +605,11 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archive_name: name })
       })
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (body) {
-          if (!body.Success) {
-            throw new Error(body.Error || "Restore failed");
+        .then(parseJsonResponse)
+        .then(function (result) {
+          var body = result.body || {};
+          if (!result.ok || hasErrorPayload(body)) {
+            throw new Error(resolveErrorMessage(body, "Restore failed"));
           }
           currentJobId = body.job_id || null;
           appendStatus("Restore job submitted: " + currentJobId);
@@ -533,12 +644,11 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archive_name: name })
       })
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (body) {
-          if (!body.Success) {
-            throw new Error(body.Error || "Delete failed");
+        .then(parseJsonResponse)
+        .then(function (result) {
+          var body = result.body || {};
+          if (!result.ok || hasErrorPayload(body)) {
+            throw new Error(resolveErrorMessage(body, "Delete failed"));
           }
           fetchArchives();
         })

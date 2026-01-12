@@ -36,7 +36,7 @@ describe("RAP_TS controller", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-123" } })),
+            postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.isHttpError))
         };
@@ -156,20 +156,22 @@ describe("RAP_TS controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             controller,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("acquire surfaces HTTP errors and disconnects websocket", async () => {
         const error = {
             isHttpError: true,
             detail: "Service unavailable",
-            body: { Error: "Service unavailable" }
+            body: {
+                error: { message: "Service unavailable" }
+            }
         };
         httpMock.postJson.mockImplementationOnce(() => Promise.reject(error));
 
@@ -181,16 +183,17 @@ describe("RAP_TS controller", () => {
 
         await flushPromises();
 
-        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(expect.any(Object), {
-            Success: false,
-            Error: "Service unavailable"
-        });
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            expect.any(Object),
+            expect.objectContaining({
+                error: { message: "Service unavailable" }
+            })
+        );
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(errors).toHaveLength(1);
-        expect(errors[0]).toEqual({
-            Success: false,
-            Error: "Service unavailable"
-        });
+        expect(errors[0]).toEqual(expect.objectContaining({
+            error: { message: "Service unavailable" }
+        }));
     });
 
     test("completion trigger is idempotent", () => {

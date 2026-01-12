@@ -60,7 +60,7 @@ def test_run_debris_flow_enqueues_with_payload(debris_flow_app):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Success": True, "job_id": "job-123"}
+    assert body == {"job_id": "job-123"}
 
     assert len(recorder.queue_calls) == 1
     call = recorder.queue_calls[0]
@@ -86,10 +86,9 @@ def test_run_debris_flow_rejects_invalid_numeric(debris_flow_app):
     ):
         response = api_module.api_run_debris_flow("demo", "live")
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     body = response.get_json()
-    assert body["Success"] is False
-    assert "clay_pct must be numeric" in body["Error"]
+    assert "clay_pct must be numeric" in body["error"]["message"]
     assert recorder.queue_calls == []
 
 

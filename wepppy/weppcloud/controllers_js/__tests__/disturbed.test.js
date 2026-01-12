@@ -55,7 +55,7 @@ describe("Disturbed controller", () => {
             serializeForm: jest.fn(() => ({ firedate: "2024-01-01" })),
         };
 
-        httpRequestMock = jest.fn(() => Promise.resolve({ body: { Success: true } }));
+        httpRequestMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
             request: httpRequestMock,
@@ -138,7 +138,7 @@ describe("Disturbed controller", () => {
             expect(url).toBe("tasks/build_uniform_sbs");
             expect(options.json).toEqual({ value: 2 });
             expect(options.method).toBe("POST");
-            return Promise.resolve({ body: { Success: true } });
+            return Promise.resolve({ body: {} });
         });
 
         const controller = getController();
@@ -153,7 +153,7 @@ describe("Disturbed controller", () => {
         httpRequestMock.mockImplementationOnce((url, options) => {
             expect(url).toBe("tasks/reset_disturbed");
             expect(options.method).toBe("POST");
-            return Promise.resolve({ body: { Success: true } });
+            return Promise.resolve({ body: {} });
         });
 
         const controller = getController();

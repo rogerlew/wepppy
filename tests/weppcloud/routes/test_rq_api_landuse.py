@@ -106,12 +106,11 @@ def test_api_build_landuse_parses_payload_and_toggles(rq_landuse_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["job_id"] == "job-123"
 
     landuse = LanduseStub.getInstance(state["run_dir"])
     assert landuse.mofe_buffer_selection == 12
-    assert landuse.parse_inputs_calls, "parse_inputs should be invoked for payload normalisation"
+    assert landuse.parse_inputs_calls, "parse_inputs should be invoked for payload normalization"
 
     disturbed = DisturbedStub.getInstance(landuse.wd)
     assert disturbed.burn_shrubs is True
@@ -136,10 +135,9 @@ def test_api_build_landuse_requires_mapping_for_user_defined(rq_landuse_client):
 
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/rq/api/build_landuse", json={})
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "landuse_management_mapping_selection" in payload["Error"]
+    assert "landuse_management_mapping_selection" in payload["error"]["message"]
     assert env.recorder.queue_calls == []
     assert landuse.mapping is None
 
@@ -172,7 +170,7 @@ def test_api_build_landuse_user_defined_upload(monkeypatch: pytest.MonkeyPatch, 
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["job_id"] == "job-123"
 
     assert landuse.mapping == "disturbed"
     assert landuse.mofe_buffer_selection == 5

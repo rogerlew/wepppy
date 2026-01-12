@@ -176,7 +176,6 @@ def api_run_sync():
             jobs_info = {
                 'sync_job_id': sync_job.id,
                 'job_id': sync_job.id,
-                'jobId': sync_job.id,
             }
             job_ids = [sync_job.id]
             
@@ -206,7 +205,7 @@ def api_run_sync():
         f"rq:{sync_job.id} ENQUEUED run_sync_rq({runid})",
     )
 
-    return jsonify({'Success': True, **jobs_info})
+    return jsonify(jobs_info)
 
 
 @run_sync_dashboard_bp.route('/rq/api/run-sync/status', methods=['GET'])

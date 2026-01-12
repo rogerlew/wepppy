@@ -89,6 +89,107 @@
         return `${prefix}/${url}`;
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return value;
+        }
+        if (typeof value === 'string') {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map((entry) => (entry === undefined || entry === null ? '' : String(entry))).join('\n');
+        }
+        if (typeof value === 'object') {
+            if (typeof value.message === 'string') {
+                return value.message;
+            }
+            if (typeof value.detail === 'string') {
+                return value.detail;
+            }
+            if (typeof value.details === 'string') {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        const parts = [];
+        errors.forEach((entry) => {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === 'string') {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === 'string') {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === 'string') {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === 'string') {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join('\n') : null;
+    }
+
+    function resolveErrorMessage(payload, fallback) {
+        if (!payload || typeof payload !== 'object') {
+            return fallback || null;
+        }
+        if (payload.error !== undefined) {
+            const message = normalizeErrorValue(payload.error);
+            if (message) {
+                return message;
+            }
+        }
+        if (payload.errors) {
+            const errorList = formatErrorList(payload.errors);
+            if (errorList) {
+                return errorList;
+            }
+        }
+        if (payload.message !== undefined) {
+            const message = normalizeErrorValue(payload.message);
+            if (message) {
+                return message;
+            }
+        }
+        if (payload.detail !== undefined) {
+            const message = normalizeErrorValue(payload.detail);
+            if (message) {
+                return message;
+            }
+        }
+        return fallback || null;
+    }
+
+    function hasErrorPayload(payload) {
+        return !!(payload && (payload.error || payload.errors));
+    }
+
     class AgentChat {
         constructor(commandBar) {
             this.commandBar = commandBar;
@@ -331,8 +432,8 @@
             let message = response.statusText || 'Request failed';
             try {
                 const data = await response.json();
-                if (data && (data.error || data.message)) {
-                    message = data.error || data.message;
+                if (data) {
+                    message = resolveErrorMessage(data, message) || message;
                 }
             } catch (error) {
                 try {
@@ -1589,13 +1690,11 @@
             return fetch(targetUrl, { method: 'GET', cache: 'no-store', headers: { 'Accept': 'application/json' } })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
-                    if (!response.ok) {
-                        const message = (data && (data.Error || data.error)) || `Could not clear locks. HTTP ${response.status}`;
-                        throw new Error(message);
-                    }
-
-                    if (data && data.Success === false) {
-                        const message = (data && (data.Error || data.error)) || 'Unable to clear locks.';
+                    if (!response.ok || hasErrorPayload(data)) {
+                        const message = resolveErrorMessage(
+                            data,
+                            `Could not clear locks. HTTP ${response.status}`
+                        );
                         throw new Error(message);
                     }
 
@@ -1618,13 +1717,11 @@
             return fetch(targetUrl, { method: 'GET', cache: 'no-store', headers: { 'Accept': 'application/json' } })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
-                    if (!response.ok) {
-                        const message = (data && (data.Error || data.error)) || `Could not clear NoDb cache. HTTP ${response.status}`;
-                        throw new Error(message);
-                    }
-
-                    if (data && data.Success === false) {
-                        const message = (data && (data.Error || data.error)) || 'Unable to clear NoDb cache.';
+                    if (!response.ok || hasErrorPayload(data)) {
+                        const message = resolveErrorMessage(
+                            data,
+                            `Could not clear NoDb cache. HTTP ${response.status}`
+                        );
                         throw new Error(message);
                     }
 
@@ -1881,8 +1978,11 @@
                 }
                 return response.json();
             }).then((data) => {
-                if (!data || data.Success !== true) {
-                    const message = (data && (data.Error || data.error)) || 'Unexpected response while fetching lock statuses.';
+                if (!data || hasErrorPayload(data)) {
+                    const message = resolveErrorMessage(
+                        data,
+                        'Unexpected response while fetching lock statuses.'
+                    );
                     throw new Error(message);
                 }
 
@@ -2117,8 +2217,8 @@
             })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
-                    if (!response.ok || !data || data.Success !== true) {
-                        const message = (data && (data.Error || data.error || data.message)) || `HTTP ${response.status}`;
+                    if (!response.ok || !data || hasErrorPayload(data)) {
+                        const message = resolveErrorMessage(data, `HTTP ${response.status}`);
                         throw new Error(message);
                     }
 
@@ -2157,13 +2257,11 @@
                 body: JSON.stringify(payload)
             }).then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
-                    if (!response.ok) {
-                        const message = (data && (data.Error || data.error || data.message)) || `HTTP ${response.status}`;
-                        throw new Error(message);
-                    }
-
-                    if (!data || data.Success !== true) {
-                        const message = (data && (data.Error || data.error || data.message)) || 'Unknown error';
+                    if (!response.ok || !data || hasErrorPayload(data)) {
+                        const message = resolveErrorMessage(
+                            data,
+                            `HTTP ${response.status}`
+                        );
                         throw new Error(message);
                     }
                     const jobId = data.job_id || (data.Content && data.Content.job_id);
@@ -2243,14 +2341,14 @@
             }).then((response) => {
                 if (!response.ok) {
                     return response.json().catch(() => ({})).then((data) => {
-                        const message = data.error || data.Error || `HTTP ${response.status}`;
+                        const message = resolveErrorMessage(data, `HTTP ${response.status}`);
                         throw new Error(message);
                     });
                 }
                 return response.json();
             }).then((data) => {
-                if (!data || !data.success) {
-                    throw new Error((data && (data.error || data.Error)) || 'Unknown error');
+                if (!data || hasErrorPayload(data)) {
+                    throw new Error(resolveErrorMessage(data, 'Unknown error'));
                 }
 
                 const lines = Array.isArray(data.lines) ? data.lines : [];
@@ -2407,14 +2505,14 @@
             }).then((response) => {
                 if (!response.ok) {
                     return response.json().catch(() => ({})).then((data) => {
-                        const message = data.Error || `HTTP ${response.status}`;
+                        const message = resolveErrorMessage(data, `HTTP ${response.status}`);
                         throw new Error(message);
                     });
                 }
                 return response.json();
             }).then((data) => {
-                if (!data || !data.Success) {
-                    throw new Error((data && data.Error) || 'Unknown error');
+                if (!data || hasErrorPayload(data)) {
+                    throw new Error(resolveErrorMessage(data, 'Unknown error'));
                 }
 
                 const content = data.Content || {};
@@ -2507,14 +2605,14 @@
             }).then((response) => {
                 if (!response.ok) {
                     return response.json().catch(() => ({})).then((data) => {
-                        const message = data.error || data.Error || `HTTP ${response.status}`;
+                        const message = resolveErrorMessage(data, `HTTP ${response.status}`);
                         throw new Error(message);
                     });
                 }
                 return response.json();
             }).then((data) => {
-                if (!data || !data.success) {
-                    throw new Error((data && (data.error || data.Error)) || 'Unknown error');
+                if (!data || hasErrorPayload(data)) {
+                    throw new Error(resolveErrorMessage(data, 'Unknown error'));
                 }
 
                 const lines = Array.isArray(data.lines) ? data.lines : [];

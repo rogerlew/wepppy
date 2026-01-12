@@ -78,7 +78,7 @@ describe("DssExport controller", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } })),
+            postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-xyz" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
@@ -217,13 +217,13 @@ describe("DssExport controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             dss,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.arrayContaining(["child trace line"])
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.arrayContaining(["child trace line"])
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("completion trigger is idempotent", () => {
@@ -258,7 +258,13 @@ describe("DssExport controller", () => {
     });
 
     test("unsuccessful payload pushes stacktrace and emits error", async () => {
-        httpMock.postJson.mockResolvedValueOnce({ body: { Success: false, Error: "failed" } });
+        const httpError = new Error("Bad Request");
+        httpError.name = "HttpError";
+        httpError.body = {
+            error: { message: "failed" }
+        };
+        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.isHttpError.mockReturnValue(true);
         const errors = [];
         dss.events.on("dss:export:error", (payload) => errors.push(payload));
 
@@ -266,7 +272,7 @@ describe("DssExport controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(dss, { Success: false, Error: "failed" });
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(dss, httpError.body);
         expect(errors.length).toBeGreaterThan(0);
         expect(baseInstance.triggerEvent).toHaveBeenCalledWith(
             "job:error",
@@ -295,7 +301,9 @@ describe("DssExport controller", () => {
     test("http errors with JSON bodies push response stacktrace", async () => {
         const httpError = new Error("server boom");
         httpError.name = "HttpError";
-        httpError.body = { Error: "Injected failure", StackTrace: ["trace line"] };
+        httpError.body = {
+            error: { message: "Injected failure" }
+        };
         httpMock.postJson.mockRejectedValueOnce(httpError);
         httpMock.isHttpError.mockReturnValue(true);
 
@@ -324,7 +332,7 @@ describe("DssExport controller (dynamic mods)", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-xyz" } })),
+            postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-xyz" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };

@@ -5,18 +5,17 @@
 ## Quick Status
 
 **Started**: 2026-01-11  
-**Current phase**: Phase 2 archive console pipeline  
+**Current phase**: Phase 4 deprecation cleanup  
 **Last updated**: 2026-01-11  
-**Next milestone**: Phase 2 pipeline verification
+**Next milestone**: Phase 4 validation + test gates
 
 ## Task Board
 
 ### Ready / Backlog
 - [ ] Validate rq-response contract with stakeholders
-- [ ] Phase 3: status-code-first error responses + legacy key deprecation plan
 
 ### In Progress
-- [ ]
+- [ ] Phase 4: deprecation cleanup (remove legacy keys, align clients/tests)
 
 ### Blocked
 - [ ]
@@ -32,6 +31,7 @@
 - [x] Authored `docs/schemas/rq-response-contract.md`
 - [x] Phase 1: response helper compatibility + client normalization
 - [x] Phase 2: move `archive_console.js` into static-src build pipeline
+- [x] Phase 3: status-code-first error responses + legacy key deprecation plan
 
 ## Timeline
 
@@ -152,3 +152,35 @@
 **Work completed**:
 - Moved `archive_console.js` source into static-src and wired build output to `static/js/archive_console.js`
 - Updated build tooling and Docker image copy step to include the archive console asset
+
+### 2026-01-11: Phase 3 status-code-first errors
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Shifted rq/api validation errors to HTTP 4xx while keeping 5xx for server faults
+- Updated error helpers to emit canonical error objects with legacy keys preserved
+- Adjusted WCHttp/batch runner/archive console error handling and refreshed route + frontend tests
+
+**Next steps**:
+- Run Phase 3 test gates (pytest + npm lint/test)
+
+### 2026-01-11: Phase 3 observability refinements
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Documented error helper usage in `docs/dev-notes/controller_foundations.md`
+- Added stacktrace capture + logging for `error_factory` and rq-engine validation responses
+- Extended WCHttp to recognize canonical `error.details`
+- Added route tests for landuse/soils and archive/fork 4xx payloads
+- Added WCHttp unit coverage for `error.details` fallback
+
+### 2026-01-11: Phase 4 deprecation cleanup
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Removed legacy key expectations in backend/frontend tests and smoke fixtures in favor of canonical error payloads.
+- Updated control-base stacktrace handling to read `error.details` for display.
+- Aligned batch runner, interchange, and upload helpers/tests with canonical response shapes.
+
+**Open questions**:
+- Keep jobstatus/jobinfo `status: not_found` on HTTP 200, or move to 404 now that Phase 4 is underway?

@@ -73,6 +73,44 @@
         return div.innerHTML;
     }
 
+    function resolveErrorMessage(payload, fallback) {
+        if (!payload) {
+            return fallback || null;
+        }
+        if (payload.error !== undefined) {
+            if (typeof payload.error === "string") {
+                return payload.error;
+            }
+            if (payload.error) {
+                return payload.error.message || payload.error.detail || payload.error.details || fallback || null;
+            }
+        }
+        if (payload.errors && Array.isArray(payload.errors) && payload.errors.length) {
+            return payload.errors.map(function (entry) {
+                if (!entry) {
+                    return "";
+                }
+                if (typeof entry === "string") {
+                    return entry;
+                }
+                if (typeof entry.message === "string") {
+                    return entry.message;
+                }
+                if (typeof entry.detail === "string") {
+                    return entry.detail;
+                }
+                if (typeof entry.code === "string") {
+                    return entry.code;
+                }
+                return JSON.stringify(entry);
+            }).filter(Boolean).join("\n");
+        }
+        if (payload.message) {
+            return payload.message;
+        }
+        return fallback || null;
+    }
+
     function showStacktrace(container, errorPayload) {
         var stacktraceEl = container.querySelector("#stacktrace");
         if (!stacktraceEl) {
@@ -82,14 +120,16 @@
         stacktraceEl.style.display = "block";
         stacktraceEl.hidden = false;
 
-        if (errorPayload.Error) {
+        var errorMessage = resolveErrorMessage(errorPayload, null);
+        if (errorMessage) {
             var heading = document.createElement("h6");
-            heading.textContent = errorPayload.Error;
+            heading.textContent = errorMessage;
             stacktraceEl.appendChild(heading);
         }
 
-        if (errorPayload.StackTrace) {
-            var lines = Array.isArray(errorPayload.StackTrace) ? errorPayload.StackTrace : [errorPayload.StackTrace];
+        var rawStack = errorPayload ? (errorPayload.stacktrace || (errorPayload.error && errorPayload.error.details)) : null;
+        if (rawStack) {
+            var lines = Array.isArray(rawStack) ? rawStack : [rawStack];
             var pre = document.createElement("pre");
             var small = document.createElement("small");
             small.className = "text-muted";
@@ -268,7 +308,7 @@
                 try {
                     var payload = JSON.parse(exceptionMatch[1]);
                     showStacktrace(container, payload);
-                    markFailed(payload.Error || "Unknown error");
+                    markFailed(resolveErrorMessage(payload, "Unknown error"));
                 } catch (e) {
                     // JSON parse failed, ignore
                 }
@@ -509,7 +549,11 @@
                 appendStatus("Enqueueing run sync job...");
                 http.postJson(apiUrl, payload)
                     .then(function (response) {
-                        var syncJobId = response.sync_job_id || response.job_id || response.jobId || "";
+                        var body = response && response.body ? response.body : response;
+                        if (body && (body.error || body.errors)) {
+                            throw new Error(body.message || "Run sync submit failed.");
+                        }
+                        var syncJobId = body && (body.sync_job_id || body.job_id) ? (body.sync_job_id || body.job_id) : "";
                         appendStatus("Job enqueued: " + syncJobId);
                         startStream(container, payload.runid, statusChannel);
                         if (poller && typeof poller.connect_status_stream === "function") {

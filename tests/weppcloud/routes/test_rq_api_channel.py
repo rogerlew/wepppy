@@ -86,7 +86,6 @@ def test_fetch_dem_and_build_channels_accepts_json_payload(rq_channel_client):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body["Success"] is True
     assert body["job_id"] == "job-123"
 
     queue_call = env.recorder.queue_calls[0]
@@ -143,7 +142,7 @@ def test_fetch_dem_and_build_channels_accepts_map_object_payload(rq_channel_clie
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body["Success"] is True
+    assert body["job_id"] == "job-123"
 
     queue_call = env.recorder.queue_calls[0]
     args = queue_call.args
@@ -175,7 +174,7 @@ def test_fetch_dem_and_build_channels_accepts_form_payload(rq_channel_client):
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body["Success"] is True
+    assert body["job_id"] == "job-123"
 
     queue_call = env.recorder.queue_calls[0]
     args = queue_call.args
@@ -213,7 +212,6 @@ def test_fetch_dem_and_build_channels_batch_mode_short_circuits(rq_channel_clien
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body["Success"] is True
     assert body["Content"] == 'Set watershed inputs for batch processing'
 
     assert "_lock_calls" in vars(watershed)

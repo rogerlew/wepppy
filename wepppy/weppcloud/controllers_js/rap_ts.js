@@ -120,42 +120,6 @@ var RAP_TS = (function () {
     }
 
     function toResponsePayload(http, error) {
-        function normalizeErrorValue(value) {
-            if (!value) {
-                return value;
-            }
-            if (typeof value === "object") {
-                if (typeof value.Error === "string") {
-                    return value.Error;
-                }
-                if (typeof value.message === "string") {
-                    return value.message;
-                }
-                if (typeof value.detail === "string") {
-                    return value.detail;
-                }
-                try {
-                    return JSON.stringify(value);
-                } catch (err) {
-                    return String(value);
-                }
-            }
-            return value;
-        }
-
-        function finalizePayload(payload) {
-            if (!payload) {
-                return { Success: false, Error: "Request failed" };
-            }
-            if (payload.Success === undefined) {
-                payload = Object.assign({}, payload, { Success: false });
-            }
-            if (payload.Error && typeof payload.Error === "object") {
-                payload = Object.assign({}, payload, { Error: normalizeErrorValue(payload.Error) });
-            }
-            return payload;
-        }
-
         function coerceBody(raw) {
             if (!raw) {
                 return null;
@@ -173,34 +137,26 @@ var RAP_TS = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: normalizeErrorValue(fallback) });
-                }
+            if (body.error || body.errors) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return finalizePayload(payload);
+            if (body.message || body.detail) {
+                return { error: { message: body.message || body.detail, details: body.details } };
             }
+            return body;
         } else if (typeof body === "string" && body) {
-            return finalizePayload({ Error: body });
-        }
-
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return finalizePayload(error);
+            return { error: { message: body } };
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return finalizePayload({ Error: normalizeErrorValue(detail) || "Request failed" });
+            if (detail && typeof detail === "object" && (detail.error || detail.errors)) {
+                return detail;
+            }
+            return { error: { message: detail || "Request failed" } };
         }
 
-        return finalizePayload({ Error: normalizeErrorValue(error && error.message) || "Request failed" });
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function parseSchedule(dom) {
@@ -455,21 +411,21 @@ var RAP_TS = (function () {
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("rap:timeseries:run:completed", {
                     task: TASK_NAME,
-                    jobId: controller.rq_job_id || null,
+                    job_id: controller.rq_job_id || null,
                     submission: controller.state.lastSubmission,
                     detail: detail || null
                 });
                 controller.events.emit("rap:timeseries:status", {
                     status: "completed",
                     task: TASK_NAME,
-                    jobId: controller.rq_job_id || null,
+                    job_id: controller.rq_job_id || null,
                     submission: controller.state.lastSubmission,
                     detail: detail || null
                 });
             }
             dispatchControlEvent("job:completed", {
                 task: TASK_NAME,
-                jobId: controller.rq_job_id || null,
+                job_id: controller.rq_job_id || null,
                 detail: detail || null,
                 submission: controller.state.lastSubmission
             });
@@ -551,13 +507,13 @@ var RAP_TS = (function () {
             http.postJson(url_for_run("rq/api/acquire_rap_ts"), submission, { form: controller.form }).then(function (response) {
                 var body = response && response.body !== undefined ? response.body : response;
                 var normalized = body || {};
-                if (normalized.Success === true || normalized.success === true) {
-                    var jobId = normalized.job_id || normalized.jobId || null;
+                if (normalized.job_id) {
+                    var jobId = normalized.job_id;
                     var message = "fetch_and_analyze_rap_ts_rq job submitted";
                     if (jobId) {
                         message += ": " + jobId;
                     }
-                    controller.setStatusMessage(message, { status: "queued", jobId: jobId });
+                    controller.setStatusMessage(message, { status: "queued", job_id: jobId });
                     controller.poll_completion_event = "RAP_TS_TASK_COMPLETED";
                     controller.set_rq_job_id(controller, jobId);
                     if (controller.events && typeof controller.events.emit === "function") {
@@ -565,7 +521,7 @@ var RAP_TS = (function () {
                             status: "queued",
                             task: TASK_NAME,
                             payload: submission,
-                            jobId: jobId,
+                            job_id: jobId,
                             response: normalized
                         });
                     }
@@ -628,8 +584,8 @@ var RAP_TS = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "fetch_and_analyze_rap_ts_rq")
                 : null;
-            if (!jobId && ctx.controllers && ctx.controllers.rapTs && ctx.controllers.rapTs.jobId) {
-                jobId = ctx.controllers.rapTs.jobId;
+            if (!jobId && ctx.controllers && ctx.controllers.rapTs && ctx.controllers.rapTs.job_id) {
+                jobId = ctx.controllers.rapTs.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

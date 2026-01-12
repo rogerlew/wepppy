@@ -111,7 +111,7 @@ def test_create_requires_cap_token(run_0_client):
     response = client.post(f"/weppcloud/create/{CONFIG}", data={})
 
     assert response.status_code == 403
-    assert response.get_json()["Error"] == "CAPTCHA token is required."
+    assert response.get_json()["error"]["message"] == "CAPTCHA token is required."
     assert "cfg" not in captured
 
 
@@ -130,7 +130,7 @@ def test_create_rejects_invalid_token(run_0_client, monkeypatch: pytest.MonkeyPa
     )
 
     assert response.status_code == 403
-    assert response.get_json()["Error"] == "CAPTCHA verification failed."
+    assert response.get_json()["error"]["message"] == "CAPTCHA verification failed."
     assert "cfg" not in captured
 
 

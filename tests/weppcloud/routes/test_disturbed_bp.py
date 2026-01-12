@@ -182,7 +182,7 @@ def test_reset_disturbed_parameters_uses_post(disturbed_client):
     client, *_, dispatched, _ = disturbed_client
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/reset_disturbed")
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
     assert dispatched["reset_called"] == 1
 
 
@@ -190,7 +190,7 @@ def test_load_extended_lookup_uses_post(disturbed_client):
     client, *_, dispatched, _ = disturbed_client
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/load_extended_land_soil_lookup")
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
     assert dispatched["extended_lookup"] == 1
 
 
@@ -203,7 +203,7 @@ def test_task_modify_disturbed_writes_lookup(disturbed_client):
         content_type="application/json",
     )
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
     lookup_path, data = dispatched["write_lookup"]
     assert lookup_path == DisturbedStub.getInstance(run_dir).lookup_fn
     # The endpoint now extracts rows from the payload dict
@@ -215,7 +215,6 @@ def test_query_baer_wgs_map_returns_metadata(disturbed_client):
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/baer_wgs_map")
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     content = payload["Content"]
     assert content["imgurl"] == "resources/baer.png"
     assert "bounds" in content
@@ -228,7 +227,7 @@ def test_task_baer_modify_color_map_converts_keys(disturbed_client):
         json={"color_map": {"255_0_0": "High"}},
     )
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
     controller = BaerStub.getInstance(run_dir)
     assert controller.color_map_updates[-1] == {(255, 0, 0): "High"}
 
@@ -241,7 +240,7 @@ def test_task_baer_modify_class_parses_integers(disturbed_client):
     )
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
     controller = BaerStub.getInstance(run_dir)
     assert controller.burn_class_updates[-1] == ([1, 2, 3, 4], "999")
 
@@ -254,8 +253,7 @@ def test_task_baer_modify_class_requires_four_values(disturbed_client):
     )
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "four" in payload["Error"].lower()
+    assert "four" in payload["error"]["message"].lower()
 
 
 def test_resources_baer_sbs_uses_send_file(disturbed_client):
@@ -276,7 +274,7 @@ def test_set_firedate_updates_controller(disturbed_client):
     )
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
     controller = DisturbedStub.getInstance(run_dir)
     assert controller.fire_date == "2024-09-01"
 
@@ -288,7 +286,7 @@ def test_set_firedate_accepts_short_format(disturbed_client):
         json={"fire_date": "8/4"},
     )
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
     controller = DisturbedStub.getInstance(run_dir)
     assert controller.fire_date == "8/4"
 
@@ -297,7 +295,7 @@ def test_task_remove_sbs_calls_baer(disturbed_client):
     client, DisturbedStub, BaerStub, RonStub, _, run_dir = disturbed_client
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/remove_sbs")
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    assert response.get_json() == {}
     controller = BaerStub.getInstance(run_dir)
     assert controller.sbs_removed == 1
 
@@ -309,7 +307,8 @@ def test_task_build_uniform_sbs_runs_validation(disturbed_client):
         json={"value": 7},
     )
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    payload = response.get_json()
+    assert payload["Content"]["disturbed_fn"].endswith("uniform_7.tif")
     controller = DisturbedStub.getInstance(run_dir)
     assert controller.uniform_values[-1] == 7
     assert controller.validated[-1].endswith("uniform_7.tif")
@@ -324,7 +323,8 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     client, DisturbedStub, BaerStub, RonStub, _, run_dir = disturbed_client
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/build_uniform_sbs/9")
     assert response.status_code == 200
-    assert response.get_json()["Success"] is True
+    payload = response.get_json()
+    assert payload["Content"]["disturbed_fn"].endswith("uniform_9.tif")
     controller = DisturbedStub.getInstance(run_dir)
     assert controller.uniform_values[-1] == 9
     assert controller.validated[-1].endswith("uniform_9.tif")
@@ -358,7 +358,7 @@ def test_task_upload_sbs_renames_conflicting_basename(disturbed_client, monkeypa
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["Content"]["disturbed_fn"] == expected_path.name
     assert expected_path.exists()
     controller = BaerStub.getInstance(run_dir)
     assert controller.validated[-1] == expected_path.name

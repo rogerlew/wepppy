@@ -39,7 +39,7 @@ describe("Rhem controller", () => {
         await import("../forms.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-456" } })),
+            postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-456" } })),
             request: jest
                 .fn()
                 .mockResolvedValue({ body: "<section>ok</section>" }),
@@ -113,7 +113,7 @@ describe("Rhem controller", () => {
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(rhem, "job-456");
         expect(pollCompletionValues).toEqual(["RHEM_RUN_TASK_COMPLETED"]);
         expect(started).toHaveBeenCalledWith(expect.objectContaining({ runId: "demo-run" }));
-        expect(queued).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-456" }));
+        expect(queued).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-456" }));
     });
 
     test("completion event triggers report rendering and completion emission", async () => {
@@ -173,13 +173,13 @@ describe("Rhem controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rhem,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("bootstrap wires poll completion before job id", () => {
@@ -199,7 +199,13 @@ describe("Rhem controller", () => {
     });
 
     test("unsuccessful submission pushes stacktrace and emits error", async () => {
-        httpMock.postJson.mockResolvedValueOnce({ body: { Success: false, Error: "Nope" } });
+        const httpError = new Error("Bad Request");
+        httpError.name = "HttpError";
+        httpError.body = {
+            error: { message: "Nope" }
+        };
+        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.isHttpError.mockReturnValue(true);
         const errors = [];
         rhem.events.on("rhem:run:failed", (payload) => errors.push(payload));
 
@@ -208,7 +214,7 @@ describe("Rhem controller", () => {
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rhem,
-            expect.objectContaining({ Success: false, Error: "Nope" })
+            httpError.body
         );
         expect(errors).toHaveLength(1);
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
@@ -223,7 +229,7 @@ describe("Rhem controller", () => {
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rhem,
-            expect.objectContaining({ Error: "network failure" })
+            expect.objectContaining({ error: { message: "network failure" } })
         );
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });

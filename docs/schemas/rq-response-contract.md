@@ -21,8 +21,6 @@
   - Optional: `job_id` (primary job id; if present, must be `job_ids[0]`)
 - Specialized fields (allowed but not authoritative):
   - `sync_job_id`, `migration_job_id`, etc. must be accompanied by `job_id` or `job_ids`.
-- Backward compatibility:
-  - `jobId` may be emitted for legacy clients but is deprecated.
 
 Example (single job):
 ```json
@@ -73,17 +71,11 @@ Example (multi job):
   ]
 }
 ```
-- Debug stacktraces (dev-only):
-  - `stacktrace: [ "line 1", "line 2" ]`
-
-## Deprecated keys (compat only)
-- `Success`, `success`, `Error`, `StackTrace`, `jobId`.
-- Emit only while supporting legacy clients; new clients must not depend on them.
 
 ## Non-JSON responses
 - File downloads may return non-JSON payloads on success; errors must still conform to the error schema.
 
 ## Compatibility rules (must)
-- Servers MAY emit legacy keys, but MUST emit canonical keys.
-- Clients MUST normalize legacy keys into canonical keys before use.
+- Servers MUST emit canonical keys only.
+- Clients MUST rely on canonical keys.
 - If both `job_id` and `job_ids` are present, `job_ids[0]` MUST equal `job_id`.

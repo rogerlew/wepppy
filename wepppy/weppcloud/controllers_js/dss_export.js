@@ -559,8 +559,8 @@ var DssExport = (function () {
                 var body = response && response.body ? response.body : response;
                 var normalized = body || {};
 
-                if (normalized.Success === true || normalized.success === true) {
-                    var jobId = normalized.job_id || normalized.jobId || null;
+                if (normalized.job_id) {
+                    var jobId = normalized.job_id;
                     controller.appendStatus("post_dss_export_rq job submitted: " + jobId);
                     controller.poll_completion_event = "DSS_EXPORT_TASK_COMPLETED";
                     controller.set_rq_job_id(controller, jobId);
@@ -568,7 +568,7 @@ var DssExport = (function () {
                         controller.events.emit("dss:export:started", {
                             task: EXPORT_TASK,
                             payload: payload,
-                            jobId: jobId,
+                            job_id: jobId,
                             status: "queued"
                         });
                     }
@@ -595,19 +595,10 @@ var DssExport = (function () {
                         try {
                             payload = JSON.parse(payload);
                         } catch (err) {
-                            payload = {
-                                Error: error.statusText || "Request failed",
-                                StackTrace: [payload]
-                            };
+                            payload = null;
                         }
                     }
-                    if (!payload && error && error.status) {
-                        payload = {
-                            Error: error.statusText || "Request failed",
-                            StackTrace: [error.message || ("HTTP " + error.status)]
-                        };
-                    }
-                    if (payload) {
+                    if (payload && (payload.error || payload.errors)) {
                         controller.pushResponseStacktrace(controller, payload);
                         handled = true;
                     }
@@ -640,7 +631,7 @@ var DssExport = (function () {
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("dss:export:completed", {
                     task: EXPORT_TASK,
-                    jobId: controller.rq_job_id || null,
+                    job_id: controller.rq_job_id || null,
                     detail: detail || null
                 });
             }
@@ -648,7 +639,7 @@ var DssExport = (function () {
                 controller._job_completion_dispatched = true;
                 controller.triggerEvent("job:completed", {
                     task: EXPORT_TASK,
-                    jobId: controller.rq_job_id || null,
+                    job_id: controller.rq_job_id || null,
                     detail: detail || null
                 });
             }
@@ -823,8 +814,8 @@ var DssExport = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "post_dss_export_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

@@ -103,7 +103,7 @@ def test_setname_accepts_json_payload(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"name": "Watershed Scenario"}}
+    assert payload == {"Content": {"name": "Watershed Scenario"}}
 
     controller = RonStub.getInstance(run_dir)
     assert controller.name == "Watershed Scenario"
@@ -119,7 +119,7 @@ def test_setname_defaults_to_untitled_when_blank(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"name": "Untitled"}}
+    assert payload == {"Content": {"name": "Untitled"}}
 
     controller = RonStub.getInstance(run_dir)
     assert controller.name == "Untitled"
@@ -135,7 +135,7 @@ def test_setscenario_handles_form_payload(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"scenario": "fire response"}}
+    assert payload == {"Content": {"scenario": "fire response"}}
 
     controller = RonStub.getInstance(run_dir)
     assert controller.scenario == "fire response"
@@ -150,7 +150,7 @@ def test_set_public_accepts_boolean_variants(project_client):
     )
     assert response_json.status_code == 200
     payload_json = response_json.get_json()
-    assert payload_json == {"Success": True, "Content": {"public": True}}
+    assert payload_json == {"Content": {"public": True}}
     assert RonStub.getInstance(run_dir).public is True
 
     response_form = client.post(
@@ -159,7 +159,7 @@ def test_set_public_accepts_boolean_variants(project_client):
     )
     assert response_form.status_code == 200
     payload_form = response_form.get_json()
-    assert payload_form == {"Success": True, "Content": {"public": False}}
+    assert payload_form == {"Content": {"public": False}}
     assert RonStub.getInstance(run_dir).public is False
 
 
@@ -173,8 +173,7 @@ def test_set_public_rejects_non_boolean_token(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert payload["Error"] == "state must be boolean"
+    assert payload["error"]["message"] == "state must be boolean"
 
 
 def test_set_readonly_enqueues_background_job(project_client):
@@ -187,7 +186,7 @@ def test_set_readonly_enqueues_background_job(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"readonly": True, "job_id": "job-123"}}
+    assert payload == {"Content": {"readonly": True, "job_id": "job-123"}}
 
     assert dispatched["redis_db"] == project_module.RedisDB.RQ
     client_entry = next(entry for entry in env.recorder.redis_entries if isinstance(entry, tuple))
@@ -214,7 +213,6 @@ def test_set_mod_enables_simple_module(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["Content"]["mod"] == "rap_ts"
     assert payload["Content"]["enabled"] is True
     assert "rap_ts" in controller.mods
@@ -232,7 +230,6 @@ def test_set_mod_disables_module_when_no_guards(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["Content"]["enabled"] is False
     assert controller.mods == []
 
@@ -249,8 +246,7 @@ def test_set_mod_blocks_dependency_violation(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "Disable Omni" in payload["Error"]
+    assert "Disable Omni" in payload["error"]["message"]
     assert controller.mods == ["omni", "treatments"]
 
 
@@ -266,8 +262,7 @@ def test_set_mod_rejects_unknown_module(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "Unknown module" in payload["Error"]
+    assert "Unknown module" in payload["error"]["message"]
     assert controller.mods == []
 
 
@@ -285,7 +280,8 @@ def test_set_mod_disable_moves_nodb_to_backup(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["Content"]["mod"] == "rap_ts"
+    assert payload["Content"]["enabled"] is False
     backup_path = Path(run_dir) / "rap_ts.bak"
     assert not nodb_path.exists()
     assert backup_path.exists()
@@ -306,7 +302,8 @@ def test_set_mod_enable_restores_backup(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["Content"]["mod"] == "rap_ts"
+    assert payload["Content"]["enabled"] is True
     nodb_path = Path(run_dir) / "rap_ts.nodb"
     assert nodb_path.exists()
     assert nodb_path.read_text() == "restored-state"

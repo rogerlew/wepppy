@@ -34,7 +34,7 @@ describe("OPENET_TS controller", () => {
         await import("../events.js");
 
         httpMock = {
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-123" } })),
+            postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.isHttpError))
         };

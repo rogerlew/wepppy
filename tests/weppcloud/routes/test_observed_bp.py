@@ -76,7 +76,7 @@ def test_submit_run_model_fit_accepts_json_payload(observed_app):
         )
 
     assert response.status_code == 200
-    assert response.get_json() == {"Success": True}
+    assert response.get_json() == {}
 
     instance = observed_cls.getInstance(run_dir)
     assert instance.parse_calls == [payload]
@@ -96,7 +96,7 @@ def test_submit_run_model_fit_accepts_form_payload(observed_app):
         )
 
     assert response.status_code == 200
-    assert response.get_json() == {"Success": True}
+    assert response.get_json() == {}
 
     instance = observed_cls.getInstance(run_dir)
     assert instance.parse_calls == [payload]
@@ -115,8 +115,7 @@ def test_submit_run_model_fit_requires_payload(observed_app):
 
     assert response.status_code == 400
     body = response.get_json()
-    assert body["Success"] is False
-    assert "No observed dataset" in body["Error"]
+    assert "No observed dataset" in body["error"]["message"]
 
     instance = observed_cls.getInstance(run_dir)
     assert instance.parse_calls == []
@@ -138,8 +137,7 @@ def test_submit_run_model_fit_handles_processing_errors(observed_app):
 
     assert response.status_code == 500
     body = response.get_json()
-    assert body["Success"] is False
-    assert body["Error"] == "Error parsing text"
+    assert body["error"]["message"] == "Error parsing text"
 
     instance.raise_parse_error = False
     instance.raise_calc_error = True
@@ -153,8 +151,7 @@ def test_submit_run_model_fit_handles_processing_errors(observed_app):
 
     assert response.status_code == 500
     body = response.get_json()
-    assert body["Success"] is False
-    assert body["Error"] == "Error running model fit"
+    assert body["error"]["message"] == "Error running model fit"
 
     instance = observed_cls.getInstance(run_dir)
     assert instance.calc_calls == 0

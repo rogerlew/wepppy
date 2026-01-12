@@ -320,8 +320,8 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
     def _fake_seed(
         row: int,
         col: int,
-        _netful_path: Path,
-        _flovec_path: Path,
+        netful_path: Path,
+        flovec_path: Path,
     ) -> None:
         seeded["seeded"] = (row, col)
 
@@ -329,12 +329,23 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
         def __init__(self, pixel_coords: tuple[int, int]) -> None:
             self.pixel_coords = pixel_coords
 
+    class _DummyWbt:
+        def __init__(self, wbt_wd: Path) -> None:
+            self.netful = str(wbt_wd / "netful.tif")
+            self.flovec = str(wbt_wd / "flovec.tif")
+            self.chnjnt = str(wbt_wd / "chnjnt.tif")
+
     def _fake_find_outlet(self: Watershed, watershed_feature=None) -> None:
         if watershed_feature is not None:
             raise NoOutletFoundError(
                 "Candidate 0: exited raster at row 1, col 2 without hitting a stream."
             )
-        self.outlet = _DummyOutlet((2, 1))
+        self._outlet = _DummyOutlet((2, 1))
+
+    def _fake_ensure_wbt(self: Watershed) -> _DummyWbt:
+        wbt_wd = Path(self.wbt_wd)
+        wbt_wd.mkdir(parents=True, exist_ok=True)
+        return _DummyWbt(wbt_wd)
 
     def _noop(*_args, **_kwargs) -> None:
         return None
@@ -345,6 +356,7 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
     monkeypatch.setattr(culvert_rq_module, "_ensure_outlet_junction", _noop)
     monkeypatch.setattr(StatusMessenger, "publish", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(Watershed, "find_outlet", _fake_find_outlet)
+    monkeypatch.setattr(Watershed, "_ensure_wbt", _fake_ensure_wbt)
     monkeypatch.setattr(Watershed, "build_subcatchments", _noop)
     monkeypatch.setattr(Watershed, "abstract_watershed", _noop)
     monkeypatch.setattr(Landuse, "clean", _noop)

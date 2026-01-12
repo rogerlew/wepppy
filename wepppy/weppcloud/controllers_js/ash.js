@@ -115,37 +115,106 @@ var Ash = (function () {
             return raw;
         }
 
+        function normalizeErrorValue(value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
+            if (typeof value === "string") {
+                return value;
+            }
+            if (Array.isArray(value)) {
+                return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+            }
+            if (typeof value === "object") {
+                if (typeof value.message === "string") {
+                    return value.message;
+                }
+                if (typeof value.detail === "string") {
+                    return value.detail;
+                }
+                if (typeof value.details === "string") {
+                    return value.details;
+                }
+                if (value.details !== undefined) {
+                    return normalizeErrorValue(value.details);
+                }
+                try {
+                    return JSON.stringify(value);
+                } catch (err) {
+                    return String(value);
+                }
+            }
+            return String(value);
+        }
+
+        function formatErrorList(errors) {
+            if (!Array.isArray(errors)) {
+                return null;
+            }
+            var parts = [];
+            errors.forEach(function (entry) {
+                if (entry === undefined || entry === null) {
+                    return;
+                }
+                if (typeof entry === "string") {
+                    parts.push(entry);
+                    return;
+                }
+                if (typeof entry.message === "string") {
+                    parts.push(entry.message);
+                    return;
+                }
+                if (typeof entry.detail === "string") {
+                    parts.push(entry.detail);
+                    return;
+                }
+                if (typeof entry.code === "string") {
+                    parts.push(entry.code);
+                    return;
+                }
+                try {
+                    parts.push(JSON.stringify(entry));
+                } catch (err) {
+                    parts.push(String(entry));
+                }
+            });
+            return parts.length ? parts.join("\n") : null;
+        }
+
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: fallback });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return payload;
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return { Error: body };
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
             return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return { Error: detail || "Request failed" };
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return { Error: (error && error.message) || "Request failed" };
+        return { error: { message: (error && error.message) || "Request failed" } };
     }
 
     function parseDepthMode(value, fallback) {
@@ -350,7 +419,7 @@ var Ash = (function () {
         function handleError(error, context) {
             var payload = toResponsePayload(http, error);
             ash.pushResponseStacktrace(ash, payload);
-            var eventPayload = { jobId: null, error: payload };
+            var eventPayload = { job_id: null, error: payload };
             if (context && context.snapshot) {
                 eventPayload.payload = context.snapshot;
             }
@@ -623,18 +692,18 @@ var Ash = (function () {
                 form: formElement
             }).then(function (response) {
                 var payload = response.body || {};
-                if (payload.Success === true) {
+                if (!payload.error && !payload.errors) {
                     statusAdapter.html("run_ash job submitted: " + payload.job_id);
                     ash.poll_completion_event = "ASH_RUN_TASK_COMPLETED";
                     ash.set_rq_job_id(ash, payload.job_id);
                     ash.rq_job_id = payload.job_id;
                     emitter.emit("ash:run:started", {
-                        jobId: payload.job_id,
+                        job_id: payload.job_id,
                         payload: payloadSnapshot
                     });
                 } else {
                     ash.pushResponseStacktrace(ash, payload);
-                    var failureEvent = { jobId: null, error: payload };
+                    var failureEvent = { job_id: null, error: payload };
                     if (payloadSnapshot) {
                         failureEvent.payload = payloadSnapshot;
                     }
@@ -655,10 +724,10 @@ var Ash = (function () {
                 form: formElement
             }).then(function (response) {
                 var payload = response.body || {};
-                if (payload.Success === true || payload.success === true) {
-                    statusAdapter.html(taskMsg + "... Success");
-                } else {
+                if (payload.error || payload.errors) {
                     ash.pushResponseStacktrace(ash, payload);
+                } else {
+                    statusAdapter.html(taskMsg + "... Success");
                 }
             }).catch(function (error) {
                 var payload = toResponsePayload(http, error);
@@ -706,7 +775,7 @@ var Ash = (function () {
                 ash.disconnect_status_stream(ash);
                 ash.report();
                 emitter.emit("ash:run:completed", {
-                    jobId: ash.rq_job_id || null,
+                    job_id: ash.rq_job_id || null,
                     payload: payload || null
                 });
             }
@@ -770,8 +839,8 @@ var Ash = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "run_ash_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

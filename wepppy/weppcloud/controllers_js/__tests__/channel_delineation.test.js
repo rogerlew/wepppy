@@ -74,7 +74,7 @@ describe("Channel Delineation controller", () => {
 
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
-        requestMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-99" } }));
+        requestMock = jest.fn(() => Promise.resolve({ body: { job_id: "job-99" } }));
         getJsonMock = jest.fn(() => Promise.resolve({ type: "FeatureCollection", features: [] }));
 
         global.WCHttp = {
@@ -185,7 +185,7 @@ describe("Channel Delineation controller", () => {
 
         const result = await channel.build();
 
-        expect(result).toMatchObject({ Success: true, job_id: "job-99" });
+        expect(result).toMatchObject({ job_id: "job-99" });
         expect(requestMock).toHaveBeenCalledWith(
             "rq/api/fetch_dem_and_build_channels",
             expect.objectContaining({
@@ -230,7 +230,7 @@ describe("Channel Delineation controller", () => {
         document.getElementById("map_object").value = JSON.stringify(mapObject);
 
         const result = await channel.build();
-        expect(result).toMatchObject({ Success: true, job_id: "job-99" });
+        expect(result).toMatchObject({ job_id: "job-99" });
 
         const jsonPayload = requestMock.mock.calls[0][1].json;
         expect(jsonPayload.set_extent_mode).toBe(2);

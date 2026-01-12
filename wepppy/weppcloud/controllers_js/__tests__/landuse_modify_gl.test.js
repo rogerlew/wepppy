@@ -73,7 +73,7 @@ describe("LanduseModify GL controller", () => {
                 return Promise.resolve({ body: ["5", "6"] });
             }
             if (url === "tasks/modify_landuse/") {
-                return Promise.resolve({ body: { Success: true } });
+                return Promise.resolve({ body: {} });
             }
             return Promise.resolve({ body: {} });
         });

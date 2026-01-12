@@ -49,7 +49,7 @@ describe("Team controller", () => {
         global.StatusStream = undefined;
 
         requestMock = jest.fn(() => Promise.resolve({ body: "<p>initial roster</p>" }));
-        postJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true, Content: { user_id: 2 } } }));
+        postJsonMock = jest.fn(() => Promise.resolve({ body: { Content: { user_id: 2 } } }));
 
         global.WCHttp = {
             request: requestMock,
@@ -134,7 +134,7 @@ describe("Team controller", () => {
     test("removeMemberById posts collaborator id and emits events", async () => {
         await flushPromises();
         requestMock.mockClear();
-        postJsonMock.mockResolvedValueOnce({ body: { Success: true, Content: { user_id: 77 } } });
+        postJsonMock.mockResolvedValueOnce({ body: { Content: { user_id: 77 } } });
 
         const removedHandler = jest.fn();
         team.events.on("team:member:removed", removedHandler);
@@ -160,7 +160,7 @@ describe("Team controller", () => {
         requestMock.mockClear();
 
         const error = new Error("boom");
-        error.detail = { Error: "Failed" };
+        error.detail = { error: { message: "Failed" } };
         global.WCHttp.isHttpError.mockReturnValueOnce(true);
         postJsonMock.mockRejectedValueOnce(error);
 
@@ -168,13 +168,13 @@ describe("Team controller", () => {
         team.events.on("team:invite:failed", failedHandler);
 
         await expect(team.inviteCollaborator("user@example.com")).rejects.toEqual(
-            expect.objectContaining({ Error: "Failed" })
+            expect.objectContaining({ error: { message: "Failed" } })
         );
         await flushPromises();
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalled();
         expect(failedHandler).toHaveBeenCalledWith(
-            expect.objectContaining({ error: expect.objectContaining({ Error: "Failed" }) })
+            expect.objectContaining({ error: expect.objectContaining({ error: { message: "Failed" } }) })
         );
         expect(triggerEventMock).toHaveBeenCalledWith(
             "job:error",

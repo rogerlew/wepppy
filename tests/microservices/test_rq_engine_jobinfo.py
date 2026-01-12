@@ -98,6 +98,4 @@ def test_jobinfo_error_returns_500_payload(monkeypatch: pytest.MonkeyPatch) -> N
 
     payload = response.json()
     assert response.status_code == 500
-    assert payload["Success"] is False
-    assert isinstance(payload["Error"], str)
-    assert isinstance(payload["StackTrace"], list)
+    assert isinstance(payload["error"]["message"], str)

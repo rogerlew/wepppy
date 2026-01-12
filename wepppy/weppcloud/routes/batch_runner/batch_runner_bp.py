@@ -253,10 +253,10 @@ def update_run_directives(batch_name: str):
     payload = parse_request_payload(request, trim_strings=True)
     raw_directives = payload.get('run_directives')
     if raw_directives is None:
-        return jsonify({'success': False, 'error': 'run_directives payload is required.'}), 400
+        return jsonify({'error': {'message': 'run_directives payload is required.'}}), 400
 
     if not isinstance(raw_directives, dict):
-        return jsonify({'success': False, 'error': 'run_directives must be an object mapping task names to booleans.'}), 400
+        return jsonify({'error': {'message': 'run_directives must be an object mapping task names to booleans.'}}), 400
 
     directives_payload = {str(key): value for key, value in raw_directives.items()}
 
@@ -265,7 +265,6 @@ def update_run_directives(batch_name: str):
     snapshot = _build_batch_runner_snapshot(batch_runner)
 
     return jsonify({
-        'success': True,
         'run_directives': snapshot.get('run_directives', []),
         'snapshot': snapshot,
     })
@@ -273,8 +272,7 @@ def update_run_directives(batch_name: str):
 
 def _batch_runner_disabled_response():
     return {
-        "success": False,
-        "error": "Batch Runner is currently disabled.",
+        "error": {"message": "Batch Runner is currently disabled."},
     }
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/upload-geojson", methods=["POST"])
@@ -288,19 +286,19 @@ def upload_geojson(batch_name: str):
     
     storage = request.files.get("geojson_file") or request.files.get("file")
     if storage is None:
-        return jsonify({"success": False, "error": "No file part named 'geojson_file'."}), 400
+        return jsonify({"error": {"message": "No file part named 'geojson_file'."}}), 400
 
     filename = storage.filename or ""
     if not filename:
-        return jsonify({"success": False, "error": "Filename is required."}), 400
+        return jsonify({"error": {"message": "Filename is required."}}), 400
 
     safe_name = secure_filename(filename)
     if not safe_name:
-        return jsonify({"success": False, "error": "Filename contains no safe characters."}), 400
+        return jsonify({"error": {"message": "Filename contains no safe characters."}}), 400
 
     lower_name = safe_name.lower()
     if not lower_name.endswith((".geojson", ".json")):
-        return jsonify({"success": False, "error": "Only .geojson or .json files are supported."}), 400
+        return jsonify({"error": {"message": "Only .geojson or .json files are supported."}}), 400
 
     resources_dir = batch_runner.resources_dir
     os.makedirs(resources_dir, exist_ok=True)
@@ -314,21 +312,21 @@ def upload_geojson(batch_name: str):
         analysis_results = watershed_collection.analysis_results  # lazy runs analysis
     except ValueError as exc:
         _safe_unlink(dest_path)
-        return jsonify({"success": False, "error": f"GeoJSON must be a FeatureCollection: {exc}"}), 400
+        return jsonify({"error": {"message": f"GeoJSON must be a FeatureCollection: {exc}"}}), 400
     except Exception as exc:  # pragma: no cover - unexpected errors
         _safe_unlink(dest_path)
         current_app.logger.exception("Failed to ingest GeoJSON upload")
-        return jsonify({"success": False, "error": "Failed to process GeoJSON upload."}), 500
+        return jsonify({"error": {"message": "Failed to process GeoJSON upload."}}), 500
 
     if analysis_results.get("feature_count", 0) == 0:
         _safe_unlink(dest_path)
-        return jsonify({"success": False, "error": "GeoJSON contains no features."}), 400
+        return jsonify({"error": {"message": "GeoJSON contains no features."}}), 400
 
     limit_bytes = _max_geojson_size_bytes()
     if os.path.getsize(dest_path) > limit_bytes:
         _safe_unlink(dest_path)
         limit_mb = max(1, int(limit_bytes // (1024 * 1024)))
-        return jsonify({"success": False, "error": f"GeoJSON file exceeds maximum size of {limit_mb} MB."}), 400
+        return jsonify({"error": {"message": f"GeoJSON file exceeds maximum size of {limit_mb} MB."}}), 400
 
     relative_path = os.path.relpath(dest_path, batch_runner.wd)
     metadata = {
@@ -351,15 +349,13 @@ def upload_geojson(batch_name: str):
     try:
         batch_runner.register_geojson(watershed_collection, metadata=metadata)
     except ValueError as exc:
-        response_payload = {"success": False, "error": str(exc)}
-        return jsonify(response_payload), 400
+        return jsonify({"error": {"message": str(exc)}}), 400
 
     snapshot = _build_batch_runner_snapshot(batch_runner)
     resource_payload = snapshot.get("resources", {}).get("watershed_geojson")
     template_state = snapshot.get("metadata", {}).get("template_validation")
 
     response_payload = {
-        "success": True,
         "resource": resource_payload,
         "template_validation": template_state,
         "snapshot": snapshot,
@@ -380,19 +376,19 @@ def upload_sbs_map(batch_name: str):
 
     storage = request.files.get("sbs_map") or request.files.get("file")
     if storage is None:
-        return jsonify({"success": False, "error": "No file part named 'sbs_map'."}), 400
+        return jsonify({"error": {"message": "No file part named 'sbs_map'."}}), 400
 
     filename = storage.filename or ""
     if not filename:
-        return jsonify({"success": False, "error": "Filename is required."}), 400
+        return jsonify({"error": {"message": "Filename is required."}}), 400
 
     safe_name = secure_filename(filename)
     if not safe_name:
-        return jsonify({"success": False, "error": "Filename contains no safe characters."}), 400
+        return jsonify({"error": {"message": "Filename contains no safe characters."}}), 400
 
     lower_name = safe_name.lower()
     if not lower_name.endswith((".tif", ".tiff", ".img", ".vrt")):
-        return jsonify({"success": False, "error": "Only GeoTIFF/IMG/VRT rasters are supported."}), 400
+        return jsonify({"error": {"message": "Only GeoTIFF/IMG/VRT rasters are supported."}}), 400
 
     resources_dir = batch_runner.resources_dir
     os.makedirs(resources_dir, exist_ok=True)
@@ -408,7 +404,7 @@ def upload_sbs_map(batch_name: str):
     sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
     if sanity_status != 0:
         _safe_unlink(dest_path)
-        return jsonify({"success": False, "error": sanity_message or "Invalid SBS map."}), 400
+        return jsonify({"error": {"message": sanity_message or "Invalid SBS map."}}), 400
 
     try:
         relative_path = os.path.relpath(dest_path, batch_runner.wd)
@@ -445,7 +441,6 @@ def upload_sbs_map(batch_name: str):
     resource_payload = snapshot.get("resources", {}).get("sbs_map")
 
     return jsonify({
-        "success": True,
         "resource": resource_payload,
         "snapshot": snapshot,
         "message": "SBS map uploaded successfully."
@@ -469,16 +464,16 @@ def validate_template(batch_name: str):
     try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
-        return jsonify({"success": False, "error": str(exc)}), 404
+        return jsonify({"error": {"message": str(exc)}}), 404
     payload = parse_request_payload(request, trim_strings=True)
     template = payload.get("template")
     if not template:
-        return jsonify({"success": False, "error": "Template is required."}), 400
+        return jsonify({"error": {"message": "Template is required."}}), 400
 
     try:
         watershed_collection = batch_runner.get_watershed_collection()
     except ValueError as exc:
-        return jsonify({"success": False, "error": str(exc)}), 400
+        return jsonify({"error": {"message": str(exc)}}), 400
 
     validation = watershed_collection.validate_template(template)
     status = "ok" if validation["summary"]["is_valid"] else "invalid"
@@ -499,7 +494,6 @@ def validate_template(batch_name: str):
     snapshot = _build_batch_runner_snapshot(batch_runner)
     stored_state = snapshot.get("metadata", {}).get("template_validation")
     response_payload = {
-        "success": status == "ok",
         "status": status,
         "validation": validation,
         "stored": stored_state,

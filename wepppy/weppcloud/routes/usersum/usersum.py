@@ -257,14 +257,14 @@ def _format_parameter_entry(entry: ParameterEntry, include_extended: bool) -> Li
 def usersum_api_parameter():
     name = request.args.get('name', '').strip()
     if not name:
-        return jsonify({'success': False, 'error': 'Parameter name is required.'}), 400
+        return jsonify({'error': {'message': 'Parameter name is required.'}}), 400
 
     include_extended = _coerce_bool(request.args.get('extended'))
     by_name, _ = _load_parameter_catalog()
     entries = by_name.get(name.lower())
 
     if not entries:
-        return jsonify({'success': False, 'error': f'No entries found for "{name}".'}), 404
+        return jsonify({'error': {'message': f'No entries found for "{name}".'}}), 404
 
     lines: List[str] = []
     for entry in entries:
@@ -274,18 +274,18 @@ def usersum_api_parameter():
     if lines:
         lines.pop()
 
-    return jsonify({'success': True, 'lines': lines})
+    return jsonify({'lines': lines})
 
 
 @usersum_bp.route('/usersum/api/keyword')
 def usersum_api_keyword():
     keyword = request.args.get('q') or request.args.get('keyword')
     if not keyword:
-        return jsonify({'success': False, 'error': 'Keyword is required.'}), 400
+        return jsonify({'error': {'message': 'Keyword is required.'}}), 400
 
     term = keyword.strip().lower()
     if not term:
-        return jsonify({'success': False, 'error': 'Keyword is required.'}), 400
+        return jsonify({'error': {'message': 'Keyword is required.'}}), 400
 
     _, entries = _load_parameter_catalog()
     matches: List[ParameterEntry] = []
@@ -302,7 +302,7 @@ def usersum_api_keyword():
             break
 
     if not matches:
-        return jsonify({'success': True, 'lines': [f'No matches found for "{keyword}".']}), 200
+        return jsonify({'lines': [f'No matches found for "{keyword}".']}), 200
 
     lines: List[str] = []
     for entry in matches:
@@ -317,7 +317,7 @@ def usersum_api_keyword():
         else:
             lines.append(f"{entry['parameter']} — {entry['summary']} ({entry['file']})")
 
-    return jsonify({'success': True, 'lines': lines})
+    return jsonify({'lines': lines})
 
 
 __all__ = ['usersum_bp']

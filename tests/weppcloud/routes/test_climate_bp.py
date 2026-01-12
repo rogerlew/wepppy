@@ -133,7 +133,7 @@ def test_set_climatestation_mode_updates_controller(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climatestation_mode == climate_module.ClimateStationMode.Heuristic
@@ -148,7 +148,7 @@ def test_set_climatestation_mode_accepts_json(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climatestation_mode == climate_module.ClimateStationMode.EUHeuristic
@@ -163,7 +163,7 @@ def test_set_climatestation_accepts_json(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climatestation == "STA-42"
@@ -178,7 +178,7 @@ def test_set_climate_mode_updates_catalog_from_json(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climate_mode == ClimateMode.Future
@@ -194,7 +194,7 @@ def test_set_climate_spatialmode_accepts_json(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climate_spatialmode == 1
@@ -224,7 +224,7 @@ def test_task_set_use_gridmet_wind_when_applicable_updates_flag(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.use_gridmet_wind_when_applicable is True
@@ -240,7 +240,7 @@ def test_task_set_adjust_mx_pt5_updates_flag(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.adjust_mx_pt5 is True
@@ -260,7 +260,7 @@ def test_task_upload_cli_persists_file(climate_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload == {}
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.latest_cli_filename == "custom.cli"

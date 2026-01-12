@@ -118,43 +118,73 @@ var OPENET_TS = (function () {
         };
     }
 
-    function toResponsePayload(http, error) {
-        function normalizeErrorValue(value) {
-            if (!value) {
-                return value;
-            }
-            if (typeof value === "object") {
-                if (typeof value.Error === "string") {
-                    return value.Error;
-                }
-                if (typeof value.message === "string") {
-                    return value.message;
-                }
-                if (typeof value.detail === "string") {
-                    return value.detail;
-                }
-                try {
-                    return JSON.stringify(value);
-                } catch (err) {
-                    return String(value);
-                }
-            }
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
             return value;
         }
-
-        function finalizePayload(payload) {
-            if (!payload) {
-                return { Success: false, Error: "Request failed" };
-            }
-            if (payload.Success === undefined) {
-                payload = Object.assign({}, payload, { Success: false });
-            }
-            if (payload.Error && typeof payload.Error === "object") {
-                payload = Object.assign({}, payload, { Error: normalizeErrorValue(payload.Error) });
-            }
-            return payload;
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
         }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
 
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        var parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
+    function toResponsePayload(http, error) {
         function coerceBody(raw) {
             if (!raw) {
                 return null;
@@ -172,34 +202,37 @@ var OPENET_TS = (function () {
         var body = coerceBody(error && error.body ? error.body : null);
 
         if (body && typeof body === "object") {
-            var payload = body;
-            if (payload.Error === undefined) {
-                var fallback =
-                    payload.detail ||
-                    payload.message ||
-                    payload.error ||
-                    payload.errors;
-                if (fallback !== undefined && fallback !== null) {
-                    payload = Object.assign({}, payload, { Error: normalizeErrorValue(fallback) });
-                }
+            if (body.error !== undefined || body.errors !== undefined) {
+                return body;
             }
-            if (payload.StackTrace !== undefined || payload.Error !== undefined) {
-                return finalizePayload(payload);
+            var fallbackMessage = normalizeErrorValue(body.message || body.detail);
+            var errorList = formatErrorList(body.errors);
+            if (fallbackMessage || errorList) {
+                return {
+                    error: {
+                        message: fallbackMessage || errorList || "Request failed",
+                        details: body.details !== undefined ? body.details : undefined
+                    },
+                    errors: body.errors
+                };
             }
         } else if (typeof body === "string" && body) {
-            return finalizePayload({ Error: body });
+            return { error: { message: body } };
         }
 
-        if (error && typeof error === "object" && (error.Error !== undefined || error.StackTrace !== undefined)) {
-            return finalizePayload(error);
+        if (error && typeof error === "object" && (error.error !== undefined || error.errors !== undefined)) {
+            return error;
         }
 
         if (http && typeof http.isHttpError === "function" && http.isHttpError(error)) {
             var detail = error && (error.detail || error.message);
-            return finalizePayload({ Error: normalizeErrorValue(detail) || "Request failed" });
+            if (detail && typeof detail === "object" && (detail.error !== undefined || detail.errors !== undefined)) {
+                return detail;
+            }
+            return { error: { message: normalizeErrorValue(detail) || "Request failed" } };
         }
 
-        return finalizePayload({ Error: normalizeErrorValue(error && error.message) || "Request failed" });
+        return { error: { message: normalizeErrorValue(error && error.message) || "Request failed" } };
     }
 
     function createInstance() {
@@ -431,21 +464,21 @@ var OPENET_TS = (function () {
             if (controller.events && typeof controller.events.emit === "function") {
                 controller.events.emit("openet:timeseries:run:completed", {
                     task: TASK_NAME,
-                    jobId: controller.rq_job_id || null,
+                    job_id: controller.rq_job_id || null,
                     submission: controller.state.lastSubmission,
                     detail: detail || null
                 });
                 controller.events.emit("openet:timeseries:status", {
                     status: "completed",
                     task: TASK_NAME,
-                    jobId: controller.rq_job_id || null,
+                    job_id: controller.rq_job_id || null,
                     submission: controller.state.lastSubmission,
                     detail: detail || null
                 });
             }
             dispatchControlEvent("job:completed", {
                 task: TASK_NAME,
-                jobId: controller.rq_job_id || null,
+                job_id: controller.rq_job_id || null,
                 detail: detail || null,
                 submission: controller.state.lastSubmission
             });
@@ -531,13 +564,13 @@ var OPENET_TS = (function () {
             http.postJson(url_for_run("rq/api/acquire_openet_ts"), submission, { form: controller.form }).then(function (response) {
                 var body = response && response.body !== undefined ? response.body : response;
                 var normalized = body || {};
-                if (normalized.Success === true || normalized.success === true) {
-                    var jobId = normalized.job_id || normalized.jobId || null;
+                if (!normalized.error && !normalized.errors) {
+                    var jobId = normalized.job_id || null;
                     var message = "fetch_and_analyze_openet_ts_rq job submitted";
                     if (jobId) {
                         message += ": " + jobId;
                     }
-                    controller.setStatusMessage(message, { status: "queued", jobId: jobId });
+                    controller.setStatusMessage(message, { status: "queued", job_id: jobId });
                     controller.poll_completion_event = "OPENET_TS_TASK_COMPLETED";
                     controller.set_rq_job_id(controller, jobId);
                     if (controller.events && typeof controller.events.emit === "function") {
@@ -545,7 +578,7 @@ var OPENET_TS = (function () {
                             status: "queued",
                             task: TASK_NAME,
                             payload: submission,
-                            jobId: jobId,
+                            job_id: jobId,
                             response: normalized
                         });
                     }
@@ -584,8 +617,8 @@ var OPENET_TS = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "fetch_and_analyze_openet_ts_rq")
                 : null;
-            if (!jobId && ctx.controllers && ctx.controllers.openetTs && ctx.controllers.openetTs.jobId) {
-                jobId = ctx.controllers.openetTs.jobId;
+            if (!jobId && ctx.controllers && ctx.controllers.openetTs && ctx.controllers.openetTs.job_id) {
+                jobId = ctx.controllers.openetTs.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

@@ -254,4 +254,4 @@ def task_build_rangeland_cover(runid, config):
     except Exception:
         return exception_factory('Building RangelandCover Failed', runid=runid)
 
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})

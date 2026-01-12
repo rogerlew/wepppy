@@ -161,9 +161,9 @@ def upload_success(
     Returns:
         Flask `Response` instance.
     """
-    payload: dict[str, Any] = {"Success": True}
+    payload: dict[str, Any] = {}
     if message is not None:
-        payload["Message"] = message
+        payload["message"] = message
     if content is not None:
         payload["Content"] = content
     payload.update(extras)
@@ -183,9 +183,10 @@ def upload_failure(error: str, status: int = 400, **extras: Any) -> Response:
     Returns:
         Flask `Response` instance.
     """
-    payload: dict[str, Any] = {"Success": False, "Error": error}
-    payload.update(extras)
+    error_payload: dict[str, Any] = {"message": error}
+    if extras:
+        error_payload["details"] = extras
+    payload: dict[str, Any] = {"error": error_payload}
     response = jsonify(payload)
     response.status_code = status
     return response
-

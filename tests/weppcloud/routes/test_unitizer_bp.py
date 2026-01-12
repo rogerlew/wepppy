@@ -70,7 +70,7 @@ def test_set_unit_preferences_accepts_json(unitizer_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"preferences": {"discharge": "metric"}}}
+    assert payload == {"Content": {"preferences": {"discharge": "metric"}}}
 
     controller = DummyUnitizer.getInstance(run_dir)
     assert controller.preferences == {"discharge": "metric"}
@@ -86,7 +86,7 @@ def test_set_unit_preferences_accepts_form_payload(unitizer_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Success": True, "Content": {"preferences": {"discharge": "units-english"}}}
+    assert payload == {"Content": {"preferences": {"discharge": "units-english"}}}
 
     controller = DummyUnitizer.getInstance(run_dir)
     assert controller.preferences == {"discharge": "units-english"}

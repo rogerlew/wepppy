@@ -146,7 +146,7 @@ describe("RangelandCover controller", () => {
         };
 
     httpRequestMock = jest.fn(() => Promise.resolve({ body: "<div>report</div>" }));
-    httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-123" } }));
+    httpPostJsonMock = jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } }));
 
         global.WCHttp = {
             request: httpRequestMock,
@@ -327,13 +327,13 @@ describe("RangelandCover controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rangeland,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("build failure surfaces stack trace and emits failure event", async () => {
@@ -421,7 +421,7 @@ describe("RangelandCover legacy compatibility", () => {
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
         global.WCHttp = {
             request: jest.fn(() => Promise.resolve({ body: "" })),
-            postJson: jest.fn(() => Promise.resolve({ body: { Success: true } })),
+            postJson: jest.fn(() => Promise.resolve({ body: {} })),
             isHttpError: jest.fn(() => false)
         };
         global.url_for_run = jest.fn((path) => path);

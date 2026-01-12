@@ -106,37 +106,90 @@ function controlBase() {
         return [String(value)];
     }
 
+    function normalizeErrorValue(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === "string") {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (item) { return item === undefined || item === null ? "" : String(item); }).join("\n");
+        }
+        if (typeof value === "object") {
+            if (typeof value.message === "string") {
+                return value.message;
+            }
+            if (typeof value.detail === "string") {
+                return value.detail;
+            }
+            if (typeof value.details === "string") {
+                return value.details;
+            }
+            if (value.details !== undefined) {
+                return normalizeErrorValue(value.details);
+            }
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+        return String(value);
+    }
+
+    function formatErrorList(errors) {
+        if (!Array.isArray(errors)) {
+            return null;
+        }
+        const parts = [];
+        errors.forEach(function (entry) {
+            if (entry === undefined || entry === null) {
+                return;
+            }
+            if (typeof entry === "string") {
+                parts.push(entry);
+                return;
+            }
+            if (typeof entry.message === "string") {
+                parts.push(entry.message);
+                return;
+            }
+            if (typeof entry.detail === "string") {
+                parts.push(entry.detail);
+                return;
+            }
+            if (typeof entry.code === "string") {
+                parts.push(entry.code);
+                return;
+            }
+            try {
+                parts.push(JSON.stringify(entry));
+            } catch (err) {
+                parts.push(String(entry));
+            }
+        });
+        return parts.length ? parts.join("\n") : null;
+    }
+
     function resolveErrorMessage(payload) {
         if (!payload) {
             return null;
         }
         if (payload.error !== undefined) {
-            if (typeof payload.error === "string") {
-                return payload.error;
-            }
-            if (payload.error && typeof payload.error.message === "string") {
-                return payload.error.message;
-            }
-            if (payload.error && typeof payload.error.detail === "string") {
-                return payload.error.detail;
-            }
-            if (payload.error && typeof payload.error.Error === "string") {
-                return payload.error.Error;
-            }
-            try {
-                return JSON.stringify(payload.error);
-            } catch (err) {
-                return String(payload.error);
-            }
+            return normalizeErrorValue(payload.error);
         }
-        if (payload.Error !== undefined) {
-            return payload.Error;
+        if (payload.errors) {
+            const errorList = formatErrorList(payload.errors);
+            if (errorList) {
+                return errorList;
+            }
         }
         if (payload.message !== undefined) {
-            return payload.message;
+            return normalizeErrorValue(payload.message);
         }
         if (payload.detail !== undefined) {
-            return payload.detail;
+            return normalizeErrorValue(payload.detail);
         }
         return null;
     }
@@ -148,8 +201,13 @@ function controlBase() {
         if (payload.stacktrace !== undefined) {
             return splitStacktrace(payload.stacktrace);
         }
-        if (payload.StackTrace !== undefined) {
-            return splitStacktrace(payload.StackTrace);
+        if (payload.error && typeof payload.error === "object") {
+            if (Object.prototype.hasOwnProperty.call(payload.error, "details")) {
+                return splitStacktrace(payload.error.details);
+            }
+            if (Object.prototype.hasOwnProperty.call(payload.error, "detail")) {
+                return splitStacktrace(payload.error.detail);
+            }
         }
         return null;
     }
@@ -207,7 +265,7 @@ function controlBase() {
                 self.triggerEvent(self.poll_completion_event, {
                     source: source || "poll",
                     status: statusObj,
-                    jobId: self.rq_job_id || null
+                    job_id: self.rq_job_id || null
                 });
             } catch (err) {
                 console.warn("controlBase poll completion dispatch error:", err);
@@ -216,7 +274,7 @@ function controlBase() {
 
         try {
             self.triggerEvent("job:completed", {
-                jobId: self.rq_job_id || null,
+                job_id: self.rq_job_id || null,
                 status: statusObj,
                 source: source || "poll"
             });
@@ -237,12 +295,12 @@ function controlBase() {
         self._job_failure_dispatched = true;
 
         const jobId = self.rq_job_id || (statusObj && statusObj.id) || null;
-        const errorPayload = { Error: `Job ${status}.`, error: `Job ${status}.` };
+        const errorPayload = { error: { message: `Job ${status}.` } };
 
         function emitFailure() {
             try {
                 self.triggerEvent("job:error", {
-                    jobId: jobId,
+                    job_id: jobId,
                     status: status,
                     source: source || "poll"
                 });
@@ -279,14 +337,13 @@ function controlBase() {
                 const stacktrace = extractJobInfoStacktrace(payload);
                 if (stacktrace) {
                     const stackLines = splitStacktrace(stacktrace);
-                    errorPayload.StackTrace = stackLines;
                     errorPayload.stacktrace = stackLines;
                 }
                 self.pushResponseStacktrace(self, errorPayload);
                 emitFailure();
             })
             .catch(function (error) {
-                self.pushErrorStacktrace(self, error, status, errorPayload.Error);
+                self.pushErrorStacktrace(self, error, status, errorPayload.error.message);
                 emitFailure();
             });
     }
@@ -587,7 +644,7 @@ function controlBase() {
             }
             if (typeof value === "object") {
                 const maybeError = resolveErrorMessage(value);
-                const maybeStack = value.StackTrace || value.stacktrace || value.stack;
+                const maybeStack = value.stacktrace || value.stack;
                 const parts = [];
                 if (maybeError) {
                     parts.push(String(maybeError));

@@ -1364,7 +1364,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     query_suffix = f'?{urlencode(base_query)}' if base_query else ''
     
     if not _exists(path):
-        return jsonify({'Success': False, 'Error': 'path does not exist'})
+        return jsonify({'error': {'message': 'path does not exist'}}), 404
     
     path_lower = path.lower()
 

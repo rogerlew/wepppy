@@ -113,7 +113,6 @@ def test_run_ash_depth_mode_one_enqueues_job(rq_ash_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["job_id"] == "job-ash"
 
     ash = AshStub.getInstance(state["run_dir"])
@@ -150,7 +149,7 @@ def test_run_ash_mode_zero_converts_loads(rq_ash_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["job_id"] == "job-ash"
 
     queue_call = env.recorder.queue_calls[0]
     assert queue_call.args[2] == pytest.approx(10.0)
@@ -175,7 +174,7 @@ def test_run_ash_mode_two_handles_uploads(rq_ash_client):
 
     assert response.status_code == 200
     res_json = response.get_json()
-    assert res_json["Success"] is True
+    assert res_json["job_id"] == "job-ash"
 
     assert state["uploads"][0]["field"] == "input_upload_ash_load"
     assert state["uploads"][1]["field"] == "input_upload_ash_type_map"
@@ -198,10 +197,9 @@ def test_run_ash_missing_required_fields_returns_error(rq_ash_client):
         },
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "Field must be numeric" in payload["Error"]
+    assert "Field must be numeric" in payload["error"]["message"]
 
     assert env.recorder.queue_calls == []
 
@@ -223,9 +221,8 @@ def test_run_ash_mode_two_missing_load_errors(monkeypatch: pytest.MonkeyPatch, r
         content_type="multipart/form-data",
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 400
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "Missing file" in payload["Error"]
+    assert "Missing file" in payload["error"]["message"]
 
     assert env.recorder.queue_calls == []

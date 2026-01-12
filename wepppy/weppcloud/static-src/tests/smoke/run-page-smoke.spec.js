@@ -58,12 +58,13 @@ function buildFailurePayload(controllerName) {
   return {
     errorMessage,
     body: {
-      Success: false,
-      Error: errorMessage,
-      StackTrace: [
-        `Controller: ${label}`,
-        'Injected stack trace for automated smoke test.'
-      ]
+      error: {
+        message: errorMessage,
+        details: [
+          `Controller: ${label}`,
+          'Injected stack trace for automated smoke test.'
+        ]
+      }
     }
   };
 }

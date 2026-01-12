@@ -82,7 +82,6 @@ def test_api_run_omni_accepts_json_payload(rq_omni_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
     assert payload["job_id"] == "job-omni"
 
     omni = OmniStub.getInstance(state["run_dir"])
@@ -114,10 +113,9 @@ def test_api_run_omni_requires_sbs_upload(rq_omni_client):
         content_type="multipart/form-data",
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     payload = response.get_json()
-    assert payload["Success"] is False
-    assert "Missing SBS file" in payload["Error"]
+    assert "Missing SBS file" in payload["error"]["message"]
 
     assert env.recorder.queue_calls == []
 
@@ -136,7 +134,7 @@ def test_api_run_omni_uploads_sbs_files(rq_omni_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["Success"] is True
+    assert payload["job_id"] == "job-omni"
 
     omni = OmniStub.getInstance(state["run_dir"])
     scenario_enum, params = omni.scenario_calls[0][0]

@@ -147,14 +147,14 @@ describe("Climate controller", () => {
 
         postJsonMock = jest.fn((url) => {
             if (url === "rq/api/build_climate") {
-                return Promise.resolve({ body: { Success: true, job_id: "job-123" } });
+                return Promise.resolve({ body: { job_id: "job-123" } });
             }
-            return Promise.resolve({ body: { Success: true } });
+            return Promise.resolve({ body: {} });
         });
 
         requestMock = jest.fn((url, options) => {
             if (url === "tasks/upload_cli/") {
-                return Promise.resolve({ body: { Success: true } });
+                return Promise.resolve({ body: {} });
             }
             if (url === "view/closest_stations/") {
                 return Promise.resolve({ body: "<option value='STA-1'>Station 1</option>" });
@@ -309,7 +309,7 @@ describe("Climate controller", () => {
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, "job-123");
         expect(pollCompletionValues).toEqual(["CLIMATE_BUILD_TASK_COMPLETED"]);
         expect(started).toHaveBeenCalled();
-        expect(completed).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-123" }));
+        expect(completed).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-123" }));
     });
 
     test("build completion is idempotent", () => {
@@ -333,13 +333,13 @@ describe("Climate controller", () => {
         expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             climate,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = controlBaseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("upload posts FormData and emits completion event", async () => {

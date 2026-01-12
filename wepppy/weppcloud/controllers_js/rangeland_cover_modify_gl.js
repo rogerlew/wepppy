@@ -806,7 +806,7 @@ var RangelandCoverModify = (function () {
 
             var ids = Array.from(selectionSet);
             if (!ids.length) {
-                var payloadNoSelection = { Error: "Select at least one subcatchment before modifying cover values." };
+                var payloadNoSelection = { error: { message: "Select at least one subcatchment before modifying cover values." } };
                 modify.pushResponseStacktrace(modify, payloadNoSelection);
                 emitter.emit("rangeland:modify:run:error", {
                     topazIds: ids.slice(),
@@ -820,7 +820,7 @@ var RangelandCoverModify = (function () {
             var coversResult = readCoverValues();
             var validationError = buildValidationError(coversResult.invalidFields, coversResult.outOfRangeFields);
             if (validationError) {
-                var payloadValidation = { Error: validationError };
+                var payloadValidation = { error: { message: validationError } };
                 modify.pushResponseStacktrace(modify, payloadValidation);
                 emitter.emit("rangeland:modify:run:error", {
                     topazIds: ids.slice(),
@@ -848,7 +848,7 @@ var RangelandCoverModify = (function () {
                 covers: coversResult.covers
             }, { form: formElement }).then(function (response) {
                 var payload = response.body || {};
-                if (payload.Success === true || payload.success === true) {
+                if (!payload.error && !payload.errors) {
                     applySelection([], { source: "modify", silent: true });
 
                     suppressToggleSync = true;

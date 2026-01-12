@@ -644,7 +644,7 @@ var Outlet = (function () {
                 coordinates: coordinates,
                 source: source || "cursor",
                 enqueuedAt: Date.now(),
-                jobId: null
+                job_id: null
             };
 
             return http.request(url_for_run("rq/api/set_outlet"), {
@@ -657,22 +657,22 @@ var Outlet = (function () {
             })
                 .then(function (result) {
                     var data = result.body || {};
-                    var success = data.Success === true && data.job_id;
+                    var success = !data.error && !data.errors && data.job_id;
                     if (success) {
                         setStatusMessage("set_outlet job submitted: " + data.job_id);
                         outlet.set_rq_job_id(outlet, data.job_id);
                         if (outlet.events && typeof outlet.events.emit === "function") {
                             outlet.events.emit("outlet:set:queued", {
-                                jobId: data.job_id,
+                                job_id: data.job_id,
                                 coordinates: coordinates,
                                 source: source || "cursor"
                             });
                         }
                         if (lastSubmission) {
-                            lastSubmission.jobId = data.job_id;
+                            lastSubmission.job_id = data.job_id;
                         }
                         outlet.triggerEvent("job:started", {
-                            jobId: data.job_id,
+                            job_id: data.job_id,
                             task: "outlet:set",
                             coordinates: coordinates,
                             source: source || "cursor"
@@ -733,13 +733,13 @@ var Outlet = (function () {
                     outlet.show();
                     if (outlet.events && typeof outlet.events.emit === "function") {
                         outlet.events.emit("outlet:set:success", {
-                            jobId: outlet.rq_job_id || (lastSubmission && lastSubmission.jobId) || null,
+                            job_id: outlet.rq_job_id || (lastSubmission && lastSubmission.job_id) || null,
                             submission: lastSubmission,
                             payload: payload || {}
                         });
                     }
                     baseTriggerEvent("job:completed", {
-                        jobId: outlet.rq_job_id || null,
+                        job_id: outlet.rq_job_id || null,
                         task: "outlet:set",
                         payload: payload || {}
                     });
@@ -940,8 +940,8 @@ var Outlet = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "set_outlet_rq")
                 : null;
-            if (!jobId && controllerContext.jobId) {
-                jobId = controllerContext.jobId;
+            if (!jobId && controllerContext.job_id) {
+                jobId = controllerContext.job_id;
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

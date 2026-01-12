@@ -308,23 +308,48 @@ def url_for_run(endpoint: str, **values: Any) -> str:
     return _apply_site_prefix(url)
 
 
-def error_factory(msg: str = 'Error Handling Request') -> Response:
+def error_factory(
+    msg: str = 'Error Handling Request',
+    *,
+    status_code: int | None = None,
+    code: Optional[str] = None,
+    details: Any | None = None,
+    errors: Optional[list[Any]] = None,
+) -> Response:
     """Return a consistent JSON error payload for lightweight failures.
 
     Args:
         msg: Human-readable error message.
+        status_code: Optional HTTP status override.
+        code: Optional machine-readable error code.
+        details: Optional structured error details.
+        errors: Optional validation error list payload.
 
     Returns:
         Flask `Response` object with a JSON body.
     """
+    message = _ensure_text(msg)
+    stacktrace_text = ''.join(traceback.format_stack())
+
+    status_label = f' ({status_code})' if status_code is not None else ''
+    logger.warning('Error handling request%s: %s\n%s', status_label, message, stacktrace_text)
+
+    error_payload = {'message': message}
+    if code:
+        error_payload['code'] = code
+    if details is not None:
+        error_payload['details'] = details
+
     payload = {
-        'Success': False,
-        'Error': msg,
-        'StackTrace': [],
-        'error': {'message': msg},
-        'stacktrace': [],
+        'error': error_payload,
     }
-    return jsonify(payload)
+    if errors is not None:
+        payload['errors'] = errors
+
+    response = jsonify(payload)
+    if status_code is not None:
+        response.status_code = status_code
+    return response
 
 
 def _ensure_text(value: Any) -> str:
@@ -356,6 +381,10 @@ def exception_factory(
     msg: BaseException | str = 'Error Handling Request',
     stacktrace: Optional[str] = None,
     runid: Optional[str] = None,
+    *,
+    status_code: int = 500,
+    code: Optional[str] = None,
+    details: Any | None = None,
 ) -> Response:
     """Log an exception and return the standard error payload.
 
@@ -372,7 +401,6 @@ def exception_factory(
 
     message = _format_error_message(msg)
     stacktrace_text = stacktrace if isinstance(stacktrace, str) else _ensure_text(stacktrace)
-    stacktrace_lines = stacktrace_text.splitlines() if isinstance(stacktrace_text, str) else [_ensure_text(stacktrace_text)]
 
     log_suffix = f' for run {runid}' if runid else ''
     logger.error('Exception handling request%s: %s\n%s', log_suffix, message, stacktrace_text)
@@ -388,36 +416,36 @@ def exception_factory(
             except OSError as log_error:
                 logger.warning('Error writing run exception log for %s: %s', runid, log_error)
 
+    error_payload = {'message': message}
+    if code:
+        error_payload['code'] = code
+    if details is not None:
+        error_payload['details'] = details
+
     payload = {
-        'Success': False,
-        'Error': message,
-        'StackTrace': stacktrace_lines,
-        'error': {'message': message},
-        'stacktrace': stacktrace_lines,
+        'error': error_payload,
     }
 
     try:
-        return make_response(jsonify(payload), 500)
+        return make_response(jsonify(payload), status_code)
     except TypeError:
-        fallback = make_response(json.dumps(payload), 500)
+        fallback = make_response(json.dumps(payload), status_code)
         fallback.mimetype = 'application/json'
         return fallback
 
 
-def success_factory(kwds: Optional[dict[str, Any]] = None) -> Response:
+def success_factory(kwds: Any | None = None) -> Response:
     """Return a success response optionally embedding content.
 
     Args:
         kwds: Optional dictionary attached under the `Content` key.
 
     Returns:
-        Flask `Response` with a JSON body and success flag.
+        Flask `Response` with a JSON body.
     """
     if kwds is None:
-        return jsonify({'Success': True})
-    else:
-        return jsonify({'Success': True,
-                        'Content': kwds})
+        return jsonify({})
+    return jsonify({'Content': kwds})
 
 
 def authorize(runid: str, config: str, require_owner: bool = False) -> None:

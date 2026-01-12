@@ -267,10 +267,10 @@ describe("ChannelDelineation GL controller", () => {
     test("build posts payload and records job id", async () => {
         const channel = window.ChannelDelineation.getInstance();
 
-        requestMock.mockResolvedValueOnce({ body: { Success: true, job_id: "job-99" } });
+        requestMock.mockResolvedValueOnce({ body: { job_id: "job-99" } });
         const result = await channel.build();
 
-        expect(result).toMatchObject({ Success: true, job_id: "job-99" });
+        expect(result).toMatchObject({ job_id: "job-99" });
         expect(requestMock).toHaveBeenCalledWith(
             "/runs/test/cfg/rq/api/fetch_dem_and_build_channels",
             expect.objectContaining({

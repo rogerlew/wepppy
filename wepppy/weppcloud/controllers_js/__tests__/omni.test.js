@@ -53,7 +53,7 @@ describe("Omni controller", () => {
         originalHttp = { ...global.WCHttp };
 
         requestMock = jest.fn(() =>
-            Promise.resolve({ body: { Success: true, job_id: "job-321" } })
+            Promise.resolve({ body: { job_id: "job-321" } })
         );
         getJsonMock = jest.fn(() => Promise.resolve([]));
         getJsonWithFallbackMock = jest.fn(() => Promise.resolve([]));
@@ -131,7 +131,7 @@ describe("Omni controller", () => {
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni, "job-321");
         expect(pollCompletionEvent).toBe("OMNI_SCENARIO_RUN_TASK_COMPLETED");
         expect(runCompleted).toHaveBeenCalledWith({
-            jobId: "job-321",
+            job_id: "job-321",
             scenarios: [{ type: "uniform_low" }]
         });
         const hint = document.getElementById("hint_run_omni");
@@ -182,7 +182,7 @@ describe("Omni controller", () => {
         selectToggle.dispatchEvent(new window.Event("change", { bubbles: true }));
 
         requestMock.mockResolvedValueOnce({
-            body: { Success: true, Content: { removed: ["uniform_low"], missing: [] } }
+            body: { Content: { removed: ["uniform_low"], missing: [] } }
         });
 
         const deleteButton = document.querySelector("[data-omni-action='delete-selected']");
@@ -233,13 +233,13 @@ describe("Omni controller", () => {
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             omni,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = baseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("bootstrap wires poll completion before set_rq_job_id", () => {

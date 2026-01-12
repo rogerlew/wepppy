@@ -60,7 +60,7 @@ describe("Wepp controller", () => {
 
         global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
-        postJsonMock = jest.fn(() => Promise.resolve({ body: { Success: true, job_id: "job-1" } }));
+        postJsonMock = jest.fn(() => Promise.resolve({ body: { job_id: "job-1" } }));
         getJsonMock = jest.fn(() => Promise.resolve({
             surf_runoff: 1.23456,
             lateral_flow: 2.34567,
@@ -175,7 +175,7 @@ describe("Wepp controller", () => {
         await Promise.resolve();
         await Promise.resolve();
         expect(started).toHaveBeenCalled();
-        expect(queued).toHaveBeenCalledWith(expect.objectContaining({ jobId: "job-1" }));
+        expect(queued).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-1" }));
 
         wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED");
         expect(completed).toHaveBeenCalled();
@@ -207,13 +207,13 @@ describe("Wepp controller", () => {
         expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             wepp,
             expect.objectContaining({
-                Error: expect.stringContaining("failed"),
-                StackTrace: expect.any(Array)
+                error: expect.objectContaining({ message: expect.stringContaining("failed") }),
+                stacktrace: expect.any(Array)
             })
         );
         const jobErrorCalls = controlBaseInstance.triggerEvent.mock.calls.filter((call) => call[0] === "job:error");
         expect(jobErrorCalls).toHaveLength(1);
-        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ jobId: "job-123", status: "failed", source: "poll" }));
+        expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
     test("set_run_wepp_routine posts JSON payload via delegate", async () => {

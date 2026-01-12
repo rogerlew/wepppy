@@ -19,6 +19,8 @@ except ImportError:
 if not hasattr(bp_module, "_current_user_email"):
     pytest.skip("Batch runner blueprint not fully configured in this environment", allow_module_level=True)
 
+pytestmark = pytest.mark.routes
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "batch_runner"
 
 
@@ -82,7 +84,7 @@ def test_upload_geojson_success(client, app):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["success"] is True
+    assert "error" not in payload
     assert payload["resource"]["feature_count"] == 3
 
     state = _read_state(app)
@@ -101,8 +103,7 @@ def test_upload_geojson_rejects_invalid_geojson(client):
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["success"] is False
-    assert "FeatureCollection" in payload["error"]
+    assert "FeatureCollection" in payload["error"]["message"]
 
 
 def test_upload_geojson_respects_size_limit(client, monkeypatch):
@@ -118,7 +119,7 @@ def test_upload_geojson_respects_size_limit(client, monkeypatch):
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["success"] is False
+    assert "error" in payload
 
 
 def test_validate_template_requires_resource(client, app):
@@ -129,8 +130,7 @@ def test_validate_template_requires_resource(client, app):
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["success"] is False
-    assert "Upload a GeoJSON" in payload["error"]
+    assert "Upload a GeoJSON" in payload["error"]["message"]
 
 
 def test_validate_template_reports_duplicates(client, app):
@@ -187,7 +187,7 @@ def test_update_run_directives_accepts_booleans(client, app):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["success"] is True
+    assert "error" not in payload
 
     directives = {entry["slug"]: entry["enabled"] for entry in payload["run_directives"]}
     assert directives["fetch_dem"] is True
@@ -212,7 +212,7 @@ def test_update_run_directives_coerces_string_booleans(client, app):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["success"] is True
+    assert "error" not in payload
 
     directives = {entry["slug"]: entry["enabled"] for entry in payload["run_directives"]}
     assert directives["fetch_dem"] is False
@@ -234,4 +234,4 @@ def test_update_run_directives_rejects_non_mapping(client):
 
     assert response.status_code == 400
     payload = response.get_json()
-    assert payload["success"] is False
+    assert "error" in payload
