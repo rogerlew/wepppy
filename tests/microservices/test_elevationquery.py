@@ -63,11 +63,11 @@ def test_returns_elevation_from_run_dem(tmp_path: Path, monkeypatch, load_servic
         )
 
     payload = response.json()
-    assert payload["Elevation"] == pytest.approx(100.0)
-    assert payload["Units"] == "m"
-    assert payload["Latitude"] == pytest.approx(49.9995)
-    assert payload["Longitude"] == pytest.approx(-119.9995)
-    assert "Error" not in payload
+    assert payload["elevation"] == pytest.approx(100.0)
+    assert payload["units"] == "m"
+    assert payload["latitude"] == pytest.approx(49.9995)
+    assert payload["longitude"] == pytest.approx(-119.9995)
+    assert "error" not in payload
 
 
 def test_reports_missing_dem(tmp_path: Path, monkeypatch, load_service):
@@ -82,8 +82,8 @@ def test_reports_missing_dem(tmp_path: Path, monkeypatch, load_service):
         )
 
     payload = response.json()
-    assert payload["Elevation"] is None
-    assert "dem" in payload["Error"].lower()
+    assert payload["elevation"] is None
+    assert "dem" in payload["error"]["message"].lower()
 
 
 def test_returns_error_for_out_of_bounds_query(tmp_path: Path, monkeypatch, load_service):
@@ -104,8 +104,8 @@ def test_returns_error_for_out_of_bounds_query(tmp_path: Path, monkeypatch, load
         )
 
     payload = response.json()
-    assert payload["Elevation"] is None
-    assert "outside" in payload["Error"].lower()
+    assert payload["elevation"] is None
+    assert "outside" in payload["error"]["message"].lower()
 
 
 def test_unhandled_exception_returns_transparent_payload(tmp_path: Path, monkeypatch, load_service):
@@ -126,5 +126,5 @@ def test_unhandled_exception_returns_transparent_payload(tmp_path: Path, monkeyp
 
     assert response.status_code == 500
     payload = response.json()
-    assert payload["Elevation"] is None
-    assert "DEM exploded" in payload["Error"]
+    assert payload["elevation"] is None
+    assert "DEM exploded" in payload["error"]["message"]

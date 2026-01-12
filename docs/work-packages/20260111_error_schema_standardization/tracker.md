@@ -5,14 +5,14 @@
 ## Quick Status
 
 **Started**: 2026-01-11  
-**Current phase**: Phase 4 deprecation cleanup (complete)  
-**Last updated**: 2026-01-11  
-**Next milestone**: Phase 4 validation + test gates (npm lint/test)
+**Current phase**: Closed  
+**Last updated**: 2026-01-12  
+**Next milestone**: None (package closed)
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Validate rq-response contract with stakeholders
+- None
 
 ### In Progress
 - [ ]
@@ -33,6 +33,8 @@
 - [x] Phase 2: move `archive_console.js` into static-src build pipeline
 - [x] Phase 3: status-code-first error responses + legacy key deprecation plan
 - [x] Phase 4: deprecation cleanup (remove legacy keys, align clients/tests/docs)
+- [x] Validate rq-response contract with stakeholders
+- [x] Phase 4 validation gate (npm lint/test) completed
 
 ## Timeline
 
@@ -44,6 +46,11 @@
 - Specialized job fields (for example `sync_job_id`, `migration_job_id`) may remain, but must include canonical job ids.
 - Move `archive_console.js` into the standard static-src build pipeline.
 - Keep `status: not_found` with HTTP 200 during the deprecation window; revisit 404 later.
+
+### 2026-01-12
+- Switch jobstatus/jobinfo `status: not_found` responses to HTTP 404 and update polling callsites/tests.
+- No external notification required for the jobstatus/jobinfo 404 change.
+- `/rq/api/landuse_and_soils*` and culvert ingestion remain SaaS routes without in-repo consumers.
 
 ## Implementation Plan
 ### Phase 0 - Contract (done)
@@ -81,6 +88,9 @@
 ### Documentation
 - [x] Report artifact completed
 - [x] Package tracker updated with findings
+
+### Tests
+- [x] Phase 4 validation gate (npm lint/test)
 
 ## Progress Notes
 
@@ -185,4 +195,19 @@
 - Updated UI/dev documentation to reflect canonical payloads.
 
 **Open questions**:
-- Keep jobstatus/jobinfo `status: not_found` on HTTP 200, or move to 404 now that Phase 4 is underway?
+- Resolved: no external notification needed for jobstatus/jobinfo HTTP 404 responses.
+
+### 2026-01-12: Package closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Stakeholder validation recorded for the rq-response contract.
+- Phase 4 validation gate completed (npm lint/test).
+- Prompts archived under `prompts/completed` and package marked closed.
+
+**Notes**:
+- No external notification needed for the jobstatus/jobinfo 404 change.
+- `/rq/api/landuse_and_soils*` and culvert ingestion remain SaaS routes.
+
+**Next steps**:
+- None (package closed).

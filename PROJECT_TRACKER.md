@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-01-11  
-**Active Packages**: 2  
+**Last Updated**: 2026-01-12  
+**Active Packages**: 1  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -161,26 +161,6 @@ Work packages that are scoped but not yet started. Dependencies and prerequisite
 
 ---
 
-### Error Schema Standardization (Phase 6a)
-**Proposed**: 2026-01-11  
-**Owner**: Codex  
-**Size**: Medium (2-3 days)  
-**Priority**: Medium  
-**Status**: **Scoped — Inventory Needed**  
-**Package**: [docs/work-packages/20260111_error_schema_standardization/](docs/work-packages/20260111_error_schema_standardization/)  
-**Description**: Inventory rq/api response schemas and client callsites to standardize error payloads and remove redundant `success`/`Success` flags ahead of rq-engine migration.
-
-**Scope**:
-- Survey rq-engine and weppcloud rq/api response schemas + status codes
-- Map frontend/backend callsites and semantics
-- Draft recommendations for a unified response schema
-
-**Dependencies**: None
-
-**Next Steps**: Execute the package prompt and author the observed usage report.
-
----
-
 ### Rename markdown-extract Repo to markdown-toolkit
 **Proposed**: 2025-10-28  
 **Size**: Small (1 hour)  
@@ -231,7 +211,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 2 packages ✅
+**Current WIP Count**: 1 package ✅
 
 ---
 
@@ -282,6 +262,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Error Schema Standardization (RQ API Migration)
+**Completed**: 2026-01-12  
+**Duration**: 2 days  
+**Status**: ✅ **COMPLETE**  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260111_error_schema_standardization/](docs/work-packages/20260111_error_schema_standardization/)  
+**Description**: Standardized rq-engine and rq/api responses with canonical keys and status-code-first errors, removing legacy aliases.
+
+**Outcome**: Contract published, legacy keys removed, job polling updated for 404 not_found, tests/docs aligned.
+
+**Deliverables**:
+- ✅ observed-error-schema-usages report
+- ✅ rq-response contract documentation
+- ✅ canonical error payloads with 4xx/5xx semantics
+- ✅ jobstatus/jobinfo 404 polling updates
+- ✅ updated tests and documentation
+
+---
 
 ### VS Code Theme Integration
 **Completed**: 2025-10-29  

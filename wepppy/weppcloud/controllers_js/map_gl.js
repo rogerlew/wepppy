@@ -1051,7 +1051,10 @@ var MapController = (function () {
                 var cursorLng = coordRound(latlng.lng);
                 var cursorLat = coordRound(latlng.lat);
 
-                if (!response || typeof response.Elevation !== "number" || !isFinite(response.Elevation)) {
+                var elevationValue = response && typeof response.elevation === "number"
+                    ? response.elevation
+                    : response ? response.Elevation : undefined;
+                if (!response || typeof elevationValue !== "number" || !isFinite(elevationValue)) {
                     var errorText = resolveErrorMessage(response, "Elevation unavailable");
                     var suppressElevationMessage = typeof errorText === "string"
                         && errorText.toLowerCase().indexOf("dem not found under run directory") !== -1;
@@ -1077,13 +1080,13 @@ var MapController = (function () {
                     return;
                 }
 
-                var elev = response.Elevation.toFixed(1);
+                var elev = elevationValue.toFixed(1);
                 showMouseElevation({
                     elevation: elev + " m",
                     cursor: cursorLng + ", " + cursorLat
                 });
                 emit("map:elevation:loaded", {
-                    elevation: response.Elevation,
+                    elevation: elevationValue,
                     lat: latlng.lat,
                     lng: latlng.lng
                 });

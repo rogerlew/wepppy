@@ -212,7 +212,7 @@ def test_fetch_dem_and_build_channels_batch_mode_short_circuits(rq_channel_clien
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body["Content"] == 'Set watershed inputs for batch processing'
+    assert body["message"] == "Set watershed inputs for batch processing"
 
     assert "_lock_calls" in vars(watershed)
     assert watershed._lock_calls == 1

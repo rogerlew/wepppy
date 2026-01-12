@@ -13,6 +13,7 @@
 
 ## Job submission responses
 - Use HTTP 202 for async job submission; 200 only for synchronous updates (no job enqueued).
+- Synchronous 200 responses must use `message` (and optional `result`/`warnings`); do not return legacy keys like `Content`.
 - Single job:
   - Required: `job_id`
   - Optional: `job_ids` (if present, must include `job_id` as the first element)
@@ -40,11 +41,17 @@ Example (multi job):
 }
 ```
 
+Example (sync update):
+```json
+{
+  "message": "Already up to date."
+}
+```
+
 ## Job polling responses
 - Job status (jobstatus):
   - `{id, runid, status, started_at, ended_at}`
-  - During deprecation window, unknown jobs return HTTP 200 with `status: "not_found"`.
-  - A future 404 for unknown jobs is allowed only after client updates.
+  - Unknown jobs return HTTP 404 with `status: "not_found"`.
 - Job info (jobinfo):
   - `{id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children}`
 

@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, status
+from fastapi.responses import JSONResponse
 
 from wepppy.rq.job_info import (
     get_wepppy_rq_job_info,
@@ -29,7 +30,10 @@ async def _safe_json(request: Request) -> Any:
 @router.get("/jobstatus/{job_id}")
 def jobstatus(job_id: str):
     try:
-        return get_wepppy_rq_job_status(job_id)
+        payload = get_wepppy_rq_job_status(job_id)
+        if payload.get("status") == "not_found":
+            return JSONResponse(payload, status_code=status.HTTP_404_NOT_FOUND)
+        return payload
     except Exception:
         logger.exception("rq-engine jobstatus failed")
         return error_response("Error Handling Request")
@@ -38,7 +42,10 @@ def jobstatus(job_id: str):
 @router.get("/jobinfo/{job_id}")
 def jobinfo(job_id: str):
     try:
-        return get_wepppy_rq_job_info(job_id)
+        payload = get_wepppy_rq_job_info(job_id)
+        if payload.get("status") == "not_found":
+            return JSONResponse(payload, status_code=status.HTTP_404_NOT_FOUND)
+        return payload
     except Exception:
         logger.exception("rq-engine jobinfo failed")
         return error_response("Error Handling Request")

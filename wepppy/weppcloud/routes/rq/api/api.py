@@ -485,7 +485,7 @@ def fetch_dem_and_build_channels(runid, config):
                 ron = Ron.getInstance(wd)
                 ron.set_map_object(map_object)
     
-            return success_factory('Set watershed inputs for batch processing')
+            return jsonify({"message": "Set watershed inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.fetch_dem)
@@ -654,7 +654,7 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
 
         if watershed.run_group == 'batch':
             _apply_watershed_updates(watershed, updates)
-            return success_factory('Set watershed inputs for batch processing')
+            return jsonify({"message": "Set watershed inputs for batch processing"})
 
         _apply_watershed_updates(watershed, updates)
 
@@ -762,7 +762,7 @@ def api_build_landuse(runid, config):
                 return error_factory('Failed creating landuse file', status_code=400)
 
         if landuse.run_group == 'batch':
-            return success_factory('Set landuse inputs for batch processing')
+            return jsonify({"message": "Set landuse inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_landuse)
@@ -865,7 +865,7 @@ def api_build_soils(runid, config):
                 return error_factory('sol_ver must be numeric', status_code=400)
 
         if soils.run_group == 'batch':
-            return success_factory('Set soils inputs for batch processing')
+            return jsonify({"message": "Set soils inputs for batch processing"})
     
         with _redis_conn() as redis_conn:
             q = Queue(connection=redis_conn)
@@ -893,7 +893,7 @@ def api_build_climate(runid, config):
         return error_factory('Error parsing climate inputs', status_code=400)
 
     if climate.run_group == 'batch':
-        return success_factory('Set climate inputs for batch processing')
+        return jsonify({"message": "Set climate inputs for batch processing"})
 
     try:
         prep = RedisPrep.getInstance(wd)

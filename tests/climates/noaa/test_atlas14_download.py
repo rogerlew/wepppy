@@ -16,8 +16,11 @@ The script will:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
+
+import pytest
 
 # Test configuration
 TEST_LAT = 39.0  # Denver, CO area
@@ -28,10 +31,23 @@ TIMEOUT = 30  # seconds
 TEST_DIR = Path(__file__).parent
 ARTIFACTS_DIR = TEST_DIR / "artifacts"
 ARTIFACTS_DIR.mkdir(exist_ok=True)
+_RUN_FLAG = "ATLAS14_DOWNLOADS"
+_TRUE_VALUES = {"1", "true", "yes", "on"}
+
+pytestmark = [pytest.mark.integration, pytest.mark.requires_network, pytest.mark.slow]
+
+
+def _ensure_network_enabled() -> None:
+    """Skip live NOAA Atlas 14 downloads unless explicitly enabled."""
+    if os.getenv("PYTEST_CURRENT_TEST") is None:
+        return
+    if os.getenv(_RUN_FLAG, "").strip().lower() not in _TRUE_VALUES:
+        pytest.skip(f"Set {_RUN_FLAG}=1 to run NOAA Atlas 14 live download tests.")
 
 
 def test_atlas14_download_intensity():
     """Test downloading precipitation intensity data from NOAA Atlas 14"""
+    _ensure_network_enabled()
 
     try:
         from pfdf.data.noaa import atlas14
@@ -120,6 +136,7 @@ def test_atlas14_download_intensity():
 
 def test_atlas14_download_depth():
     """Test downloading precipitation depth data from NOAA Atlas 14"""
+    _ensure_network_enabled()
 
     try:
         from pfdf.data.noaa import atlas14
@@ -206,6 +223,7 @@ def test_atlas14_download_depth():
 
 def test_atlas14_download_english_units():
     """Test downloading with English units (inches/hour)"""
+    _ensure_network_enabled()
 
     try:
         from pfdf.data.noaa import atlas14
@@ -258,6 +276,7 @@ def test_atlas14_download_english_units():
 
 def test_atlas14_no_coverage():
     """Test that proper error is raised when location has no Atlas 14 coverage"""
+    _ensure_network_enabled()
 
     try:
         from pfdf.data.noaa import atlas14

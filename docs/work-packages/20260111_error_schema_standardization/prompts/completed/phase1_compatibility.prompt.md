@@ -1,3 +1,6 @@
+# Outcome (2026-01-12)
+- Added canonical job_id/job_ids and error payloads while preserving legacy aliases; updated client normalization.
+
 # Agent Prompt: Phase 1 Compatibility Layer (RQ Response Contract)
 
 ## Goal

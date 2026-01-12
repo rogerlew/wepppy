@@ -7,22 +7,21 @@ service. It mirrors the request/response format exposed at
 ``/weppcloud/runs/{runid}/{config}/elevationquery/`` and samples elevations
 from the run's locally staged ``dem/dem.tif`` raster whenever available.
 
-Expected JSON response payloads follow the historical shape:
+Expected JSON response payloads follow the canonical shape:
 
 .. code-block:: json
 
     {
-        "Elevation": 1234.5,
-        "Units": "m",
-        "Longitude": -116.123,
-        "Latitude": 45.987,
-        "Error": "Optional diagnostic message"
+        "elevation": 1234.5,
+        "units": "m",
+        "longitude": -116.123,
+        "latitude": 45.987,
+        "error": { "message": "Optional diagnostic message" }
     }
 
 When the DEM is missing or a coordinate falls outside of the raster bounds the
-service returns ``Elevation: null`` alongside an ``Error`` field describing the
-issue while keeping the HTTP status at 200 so existing clients continue to
-function without change.
+service returns ``elevation: null`` alongside an ``error`` field describing the
+issue while keeping the HTTP status at 200.
 """
 
 from __future__ import annotations
@@ -263,14 +262,14 @@ def _build_response(
     status_code: int = 200,
 ) -> JSONResponse:
     payload: Dict[str, Any] = {
-        'Elevation': elevation,
-        'Units': 'm',
-        'Longitude': lng,
-        'Latitude': lat,
+        'elevation': elevation,
+        'units': 'm',
+        'longitude': lng,
+        'latitude': lat,
     }
 
     if error:
-        payload['Error'] = error
+        payload['error'] = {'message': error}
 
     return JSONResponseCompat(payload, status_code=status_code)
 

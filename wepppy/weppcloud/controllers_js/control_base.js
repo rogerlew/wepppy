@@ -309,7 +309,7 @@ function controlBase() {
             }
         }
 
-        if (!jobId) {
+        if (!jobId || status === "not_found") {
             self.pushResponseStacktrace(self, errorPayload);
             emitFailure();
             return;
@@ -975,6 +975,26 @@ function controlBase() {
 
         handle_job_status_error: function handle_job_status_error(self, error) {
             const parts = deriveErrorParts(error);
+            const statusCode = parts.statusCode;
+            const isNotFound = (error && error.status === 404) || statusCode === "404";
+            if (isNotFound) {
+                let payload = error && error.body && typeof error.body === "object" ? error.body : {};
+                if (!payload.status) {
+                    payload.status = "not_found";
+                }
+                if (!payload.id && self.rq_job_id) {
+                    payload.id = self.rq_job_id;
+                }
+                self._job_status_error = null;
+                self._job_status_error_parts = null;
+                self.rq_job_status = payload;
+                self.render_job_status(self);
+                self.manage_status_stream(self, payload.status);
+                self.stop_job_status_polling(self);
+                maybeDispatchFailure(self, payload, "poll");
+                self.update_command_button_state(self);
+                return;
+            }
             self._job_status_error = `${parts.statusCode} ${parts.statusText}`.trim();
             self._job_status_error_parts = parts;
             self.render_job_status(self);

@@ -45,7 +45,7 @@ This document captures the patterns, conventions, and principles established dur
 - Cross-reference these contracts in `wepppy/weppcloud/routes/nodb_api/README.md` (the NoDb API Blueprint Map)
 
 **Error response helpers**:
-- Use `error_factory` for expected validation/input failures (4xx). It emits canonical `error` payloads, keeps legacy keys, supports `errors` lists for validation detail, and includes stacktraces for observability.
+- Use `error_factory` for expected validation/input failures (4xx). It emits canonical `error` payloads, supports `errors` lists for validation detail, and includes stacktraces for observability.
 - Use `exception_factory` for unexpected failures (5xx) and true exception paths. It logs at error level, writes run exception logs when available, and includes stacktraces.
 - Prefer `error_factory` for direct validation branches; reserve `exception_factory` for `except` blocks or server faults.
 

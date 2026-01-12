@@ -10,6 +10,9 @@
 - **Codex can't compress verbose docs** (bulk loads context, no compression pass). Keep code docs dense/terse—every verbose token reduces code-reading capacity. Claude compresses on-the-fly so tolerates verbosity but it's wasteful. Write for Codex's token budget.
 - Do not add “fallback” wrappers that silently mask missing required dependencies (for example, swallowing ImportError for coverage instrumentation). Prefer explicit failures so debugging stays fast and obvious.
 
+## Key Contracts
+- RQ response schema and canonical error payloads: `docs/schemas/rq-response-contract.md`
+
 ## Repository Overview
 
 wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling. The architechture as a whole strives for openness, flexibility, and observability.
@@ -181,7 +184,7 @@ wctl run-stubgen                      # sync stubs/wepppy/
 - If you encounter incorrect or missing substitutions, adjust `/workdir/uk2us/config/uk2us_rules.json`.
   - `skip_replacements` prevents unwanted conversions.
   - `forced_mappings` adds explicit word mappings.
-  - Agents have authority to edit this file; rerun `uk2us` after changes to confirm the fix.
+  - Agents have full authorship authority to edit this file; rerun `uk2us` after changes to confirm the fix.
 
 ### README.md Authoring and Maintenance
 Every module, service, and significant package should have a README.md that serves multiple audiences: GitHub visitors, web indexers, domain experts (hydrologists, land managers), and developers (human and AI agents).

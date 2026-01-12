@@ -1,6 +1,6 @@
 # Error Schema Standardization (RQ API Migration)
 
-**Status**: Open (2026-01-11)
+**Status**: Closed 2026-01-12
 
 ## Overview
 The rq/api surface mixes `success` and `Success` payloads with inconsistent error semantics between weppcloud and rq-engine. This package scopes a comprehensive inventory of response schemas and client callsites to support a future migration of rq/api routes into rq-engine with consistent, status-code-first behavior.
@@ -30,10 +30,10 @@ The rq/api surface mixes `success` and `Success` payloads with inconsistent erro
 - **Informed**: Culvert integration stakeholders
 
 ## Success Criteria
-- [ ] `observed-error-schema-usages-report.md` artifact authored with endpoint + callsite inventory.
-- [ ] Redundant `success`/`Success` usages identified and categorized (status-code vs job-status semantics).
-- [ ] Proposed standard response schema and migration outline documented.
-- [ ] Tracker updated with decisions and risks.
+- [x] `observed-error-schema-usages-report.md` artifact authored with endpoint + callsite inventory.
+- [x] Redundant `success`/`Success` usages identified and categorized (status-code vs job-status semantics).
+- [x] Proposed standard response schema and migration outline documented.
+- [x] Tracker updated with decisions and risks.
 
 ## Dependencies
 
@@ -60,17 +60,21 @@ The rq/api surface mixes `success` and `Success` payloads with inconsistent erro
 - `docs/culvert-at-risk-integration/weppcloud-integration.plan.md` - Phase 6a context
 
 ## Deliverables
-- (To be filled on closure)
+- `docs/work-packages/20260111_error_schema_standardization/artifacts/observed-error-schema-usages-report.md`
+- `docs/schemas/rq-response-contract.md` (canonical keys + error shapes)
+- Status-code-first responses across rq-engine/rq/api with canonical error payloads
+- Jobstatus/jobinfo 404 behavior with polling updates
+- Updated tests and docs for canonical responses
 
 ## Follow-up Work
-- (To be filled on closure)
+- Content/message refactor for response copy (separate initiative)
 
 ## Closure Notes
 
-**Closed**: YYYY-MM-DD
+**Closed**: 2026-01-12
 
-**Summary**: 
+**Summary**: Standardized rq-engine and rq/api response payloads around canonical keys and status-code-first semantics, removed legacy aliases, and aligned clients/tests/docs.
 
-**Lessons Learned**: 
+**Lessons Learned**: Explicitly tracking contract changes and prompt outcomes reduces drift across frontend/backends and documentation.
 
-**Archive Status**: 
+**Archive Status**: Closed; prompts archived under `prompts/completed/`.

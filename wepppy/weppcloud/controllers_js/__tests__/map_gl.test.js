@@ -706,7 +706,7 @@ describe("Map GL controller", () => {
     test("mousemove triggers elevation request once per cooldown", async () => {
         global.MapController.getInstance();
 
-        global.WCHttp.postJson.mockResolvedValueOnce({ body: { Elevation: 123.4 } });
+        global.WCHttp.postJson.mockResolvedValueOnce({ body: { elevation: 123.4 } });
 
         deckInstance.props.onHover({ coordinate: [-120.5, 45.25] });
         deckInstance.props.onHover({ coordinate: [-120.6, 45.35] });
@@ -717,7 +717,7 @@ describe("Map GL controller", () => {
         await Promise.resolve();
         await new Promise((resolve) => setTimeout(resolve, 250));
 
-        global.WCHttp.postJson.mockResolvedValueOnce({ body: { Elevation: 130.0 } });
+        global.WCHttp.postJson.mockResolvedValueOnce({ body: { elevation: 130.0 } });
         deckInstance.props.onHover({ coordinate: [-120.7, 45.45] });
 
         expect(global.WCHttp.postJson).toHaveBeenCalledTimes(2);

@@ -1,3 +1,6 @@
+# Outcome (2026-01-12)
+- Moved archive_console.js into the static-src build pipeline and aligned references/tests.
+
 # Agent Prompt: Phase 2 Archive Console Pipeline
 
 ## Goal

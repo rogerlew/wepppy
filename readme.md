@@ -73,6 +73,7 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 - **[API_REFERENCE.md](API_REFERENCE.md)** - Quick reference for key APIs and patterns
 - **[AGENTS.md](AGENTS.md)** - AI agent coding guide and conventions
 - **[CONTRIBUTING_AGENTS.md](CONTRIBUTING_AGENTS.md)** - Contributing guide for AI coding assistants
+- **[docs/schemas/rq-response-contract.md](docs/schemas/rq-response-contract.md)** - RQ and rq-engine response contract (canonical keys and error shape)
 - **[docs/README_AUDIT.md](docs/README_AUDIT.md)** - README.md quality audit and improvement recommendations
 - **[docs/prompt_templates/readme_authoring_template.md](docs/prompt_templates/readme_authoring_template.md)** - Standard template for authoring README.md files
 - **[docs/schemas/](docs/schemas/)** - JSON schemas for data structures

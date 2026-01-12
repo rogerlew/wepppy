@@ -130,7 +130,7 @@ def test_api_build_subcatchments_short_circuits_for_batch_runs(rq_subcatchments_
 
     assert response.status_code == 200
     body = response.get_json()
-    assert body == {"Content": "Set watershed inputs for batch processing"}
+    assert body == {"message": "Set watershed inputs for batch processing"}
     assert env.recorder.queue_calls == []
     prep = env.redis_prep_class.getInstance(state["run_dir"])
     assert not prep.job_ids

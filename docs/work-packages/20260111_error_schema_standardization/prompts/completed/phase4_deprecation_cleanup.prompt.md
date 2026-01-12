@@ -1,3 +1,6 @@
+# Outcome (2026-01-12)
+- Removed legacy response keys, aligned clients/tests/docs with canonical payloads, and switched jobstatus/jobinfo not_found to HTTP 404.
+
 # Agent Prompt: Phase 4 Deprecation Cleanup
 
 ## Goal

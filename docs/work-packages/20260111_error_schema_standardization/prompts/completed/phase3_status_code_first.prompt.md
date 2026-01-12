@@ -1,3 +1,6 @@
+# Outcome (2026-01-12)
+- Shifted validation errors to 4xx, kept 5xx for server faults, and updated clients/tests for canonical errors.
+
 # Agent Prompt: Phase 3 Status-Code-First Errors
 
 ## Goal

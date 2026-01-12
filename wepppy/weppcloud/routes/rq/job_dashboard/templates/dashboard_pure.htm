@@ -451,6 +451,12 @@
       parseFailed = true;
     }
 
+    const normalizedStatus = payload && typeof payload === "object"
+      ? String(payload.status || "").toLowerCase()
+      : "";
+    if (!parseFailed && response.status === 404 && normalizedStatus === "not_found") {
+      return payload;
+    }
     if (!response.ok || parseFailed) {
       const errorMessage = resolveErrorMessage(
         payload,
@@ -475,6 +481,9 @@
       const openNodes = getOpenNodes();
       setHtml("job-dashboard", renderJob(data, openNodes));
 
+      if (data && String(data.status || "").toLowerCase() === "not_found") {
+        return;
+      }
       if (isAllTerminal()) {
         return;
       }
@@ -499,12 +508,12 @@
       setTimeout(fetchJobStatus, queryInterval);
     }
 
-    function handleError(response) {
-      const payload = response || { error: { message: "Request failed" } };
-      const message = resolveErrorMessage(payload, "Request failed") || "Request failed";
-      const detail = resolveErrorDetails(payload);
-      setHtml("job-dashboard", renderError(message, detail));
-    }
+  function handleError(response) {
+    const payload = response || { error: { message: "Request failed" } };
+    const message = resolveErrorMessage(payload, "Request failed") || "Request failed";
+    const detail = resolveErrorDetails(payload);
+    setHtml("job-dashboard", renderError(message, detail, "Request failed"));
+  }
 
     try {
       const data = await requestJson(primaryUrl);
@@ -519,11 +528,12 @@
     }
   }
 
-  function renderError(message, stacktrace = "") {
+  function renderError(message, stacktrace = "", label) {
     const escapedMessage = escapeHtml(message);
     const escapedStack = escapeHtml(stacktrace);
+    const chipLabel = escapeHtml(label || "Error");
     return `<div class="wc-stack">
-      <div class="wc-status-chip" data-state="critical">Error</div>
+      <div class="wc-status-chip" data-state="critical">${chipLabel}</div>
       <div class="wc-text-muted">${escapedMessage}</div>
       ${stacktrace ? `<pre class="wc-pre">${escapedStack}</pre>` : ""}
     </div>`;
@@ -562,10 +572,11 @@
     if (!data || data.status === "not_found" || data.status === "error") {
       const isError = data && data.status === "error";
       const errorLabel = isError ? "Job info error" : `No such job found: ${jobId}`;
+      const chipLabel = isError ? "Job info error" : "Not found";
       const errorDetail = isError && data && data.error ? String(data.error) : "";
       setText("job-summary", isError ? "Job info error" : "Job not found");
       setHtml("job-overall-progress", renderProgressBar(0, isError ? "Job info error" : "Job not found"));
-      return renderError(errorLabel, errorDetail);
+      return renderError(errorLabel, errorDetail, chipLabel);
     }
 
     allTotalCount = 1;

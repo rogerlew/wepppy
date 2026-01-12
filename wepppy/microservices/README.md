@@ -44,7 +44,7 @@ Run-scoped elevation tile server that provides on-demand DEM queries for watersh
 
 **Key features:**
 - Serves elevation data from configured DEM sources
-- Mirrors legacy elevation service API for backward compatibility
+- Emits lower_snake_case payloads with canonical error objects
 - Custom exception handlers for transparent error reporting
 - Starlette-based for high throughput
 

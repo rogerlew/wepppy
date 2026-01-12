@@ -46,7 +46,8 @@ def jobstatus_route(job_id):
     # NOTE: Read-only polling endpoint; rq-engine provides the preferred FastAPI offload, keep this as fallback.
     try:
         job_status = get_wepppy_rq_job_status(job_id)
-        return jsonify(job_status)
+        status_code = 404 if job_status.get("status") == "not_found" else 200
+        return jsonify(job_status), status_code
     except Exception:
         return exception_factory()
 
@@ -55,7 +56,8 @@ def jobstatus_route(job_id):
 def jobinfo_route(job_id):
     try:
         job_info = get_wepppy_rq_job_info(job_id)
-        return jsonify(job_info)
+        status_code = 404 if job_info.get("status") == "not_found" else 200
+        return jsonify(job_info), status_code
     except Exception:
         return exception_factory()
 

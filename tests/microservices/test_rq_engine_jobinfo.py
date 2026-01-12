@@ -33,6 +33,19 @@ def test_jobstatus_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> N
     assert seen["job_id"] == "job-123"
 
 
+def test_jobstatus_not_found_returns_404(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_jobstatus(job_id: str) -> dict[str, str]:
+        return {"id": job_id, "status": "not_found"}
+
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", fake_jobstatus)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/jobstatus/job-missing")
+
+    assert response.status_code == 404
+    assert response.json() == {"id": "job-missing", "status": "not_found"}
+
+
 def test_jobinfo_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     seen = {}
 
@@ -47,6 +60,19 @@ def test_jobinfo_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert response.json() == {"id": "job-abc", "status": "finished"}
     assert seen["job_id"] == "job-abc"
+
+
+def test_jobinfo_not_found_returns_404(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_jobinfo(job_id: str) -> dict[str, str]:
+        return {"id": job_id, "status": "not_found"}
+
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", fake_jobinfo)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/jobinfo/job-missing")
+
+    assert response.status_code == 404
+    assert response.json() == {"id": "job-missing", "status": "not_found"}
 
 
 def test_jobinfo_batch_preserves_order_and_filters_missing(

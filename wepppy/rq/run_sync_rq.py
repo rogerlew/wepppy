@@ -53,15 +53,16 @@ def _publish_exception(channel: str, job_id: str, exc: Exception) -> None:
     
     error_msg = str(exc)
     tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
-    tb_text = "".join(tb_lines)
     
     # Publish the exception info as a JSON payload for the dashboard
     import json
     payload = json.dumps({
         "type": "EXCEPTION",
         "job_id": job_id,
-        "Error": error_msg,
-        "StackTrace": tb_lines,
+        "error": {
+            "message": error_msg,
+            "details": tb_lines,
+        },
     })
     StatusMessenger.publish(channel, f"rq:{job_id} EXCEPTION_JSON {payload}")
 
