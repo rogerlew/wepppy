@@ -1,5 +1,14 @@
+<!-- AGENT DIRECTIVE: This documentation is for human developers integrating with wepp.cloud.
+     DO NOT summarize, condense, or remove details from this file. All sections, examples,
+     directory trees, and tables are intentionally comprehensive. Preserve all content,
+     unless it is inaccurate. -->
+
 # Culvert_web_app dev package
 > Handoff docs and scripts for building `payload.zip` files for wepp.cloud.
+
+## Audience
+
+Culvert_web_app developers and stakeholders integrating with the wepp.cloud culvert batch API.
 
 ## Purpose
 - Provide a readable, minimal payload builder for Culvert_web_app developers.
@@ -14,10 +23,44 @@
 
 ## Quick Start
 
-1. Build a payload from Culvert_web_app outputs (or use a pre-built test payload)
+1. Build a payload from Culvert_web_app outputs using `build_payload.py`
 2. POST to `https://{host}/rq-engine/api/culverts-wepp-batch/`
 3. Poll `status_url` until job completes
-4. Browse results at `https://{host}/weppcloud/culverts/{batch_uuid}/browse/`
+4. Download `weppcloud_run_skeletons.zip` from `https://{host}/weppcloud/culverts/{batch_uuid}/browse/`
+5. (Optional) Browse results interactively at `https://{host}/weppcloud/culverts/{batch_uuid}/browse/`
+
+## Authentication (JWT)
+
+`/rq-engine/api/culverts-wepp-batch/*` now requires a bearer token. `jobstatus`/`jobinfo` remain open
+for read-only polling.
+
+Required scopes (service token): `culvert:batch:submit`, `culvert:batch:retry`,
+`culvert:batch:read`, `rq:status`.
+
+Recommended claims: `aud=rq-engine`, `token_class=service`, `service_groups=culverts`,
+`jti=<uuid>` (required for revocation).
+
+TTL guidance: culvert service tokens should default to ~90 days. Rotate or revoke on compromise
+using `wctl revoke-auth-token` (see `docs/dev-notes/auth-token.spec.md`).
+
+The `scripts/submit_payload.py` helper reads `WEPPCLOUD_TOKEN` or `--token-file` when provided.
+
+Example minting (host):
+```bash
+wctl issue-auth-token culvert-app \
+  --audience rq-engine \
+  --scope culvert:batch:submit \
+  --scope culvert:batch:retry \
+  --scope culvert:batch:read \
+  --scope rq:status \
+  --claim token_class=service \
+  --claim service_groups=culverts \
+  --claim jti=deadbeefdeadbeefdeadbeefdeadbeef \
+  --expires-in 7776000 \
+  --json
+```
+
+Send the token as `Authorization: Bearer <token>`.
 
 ## Payload preparation for wepp.cloud
 
@@ -44,43 +87,100 @@ payload.zip
 the original `Pour_Point_UTM.shp`. This ensures culvert points are on the stream network,
 improving outlet detection fidelity in wepp.cloud.
 
-## CRITICAL: Watershed Simplification Issue
+**Open Standards Preference:** wepp.cloud uses **GeoTIFF** (OGC) and **GeoJSON** (IETF RFC 7946)—open,
+non-proprietary formats. This ensures compatibility with domestic and international open data
+requirements:
 
-**45% of culverts may be skipped** if you provide simplified watershed polygons.
+| Organization | Scope | Relevant Standards |
+|--------------|-------|-------------------|
+| FGDC (US) | US Federal agencies | FGDC-endorsed formats (GeoTIFF, GeoJSON, OGC services) |
+| INSPIRE (EU) | EU Member States | OGC/ISO-based (GML, WMS/WFS, ISO 191xx metadata) |
+| USGS, EPA, NGA | US agencies | GeoTIFF, GeoJSON, OGC web services |
+| National SDIs | India, UK, Australia, etc. | OGC/ISO, FAIR principles |
 
-wepp.cloud validates that each culvert's pour point is inside its associated watershed polygon
-(with a configurable buffer, default 30m). Culvert_web_app applies 1.0m polygon simplification
-by default, which can move polygon boundaries enough to exclude the pour point.
+Shapefiles are converted to GeoJSON during payload creation to maintain open format compliance.
 
-### Impact (Hubbard Brook dataset example)
-| Metric | Unsimplified | Simplified (1.0m) |
-|--------|-------------:|------------------:|
-| Pour points inside watershed | 208 / 210 | **116 / 210** |
-| Culverts skipped by wepp.cloud | 2 | **94** |
+### `metadata.json` schema
 
-### Recommendation
-
-Preserve unsimplified polygons before calling `simplify_geometry()` in
-`subroutine_nested_watershed_delineation.py`:
-
-```python
-# Save unsimplified polygons BEFORE simplification
-ws_polygon_unsimplified_path = os.path.join(output_path, "ws_polygon_unsimplified_UTM.shp")
-watershed_poly_gdf_merged.to_file(ws_polygon_unsimplified_path)
-
-# Then apply simplification for the standard output
-watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, tolerance=1.0)
+```json
+{
+  "schema_version": "culvert-metadata-v1",
+  "source": {
+    "system": "Culvert_web_app",
+    "project_id": "Santee_10m_no_hydroenforcement",
+    "user_id": "1"
+  },
+  "created_at": "2026-01-11T10:30:00+00:00",
+  "culvert_count": 63,
+  "crs": {
+    "proj4": "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs"
+  },
+  "dem": {
+    "path": "topo/hydro-enforced-dem.tif",
+    "width": 833,
+    "height": 789,
+    "resolution_m": 9.33,
+    "nodata": 0.0
+  },
+  "streams": {
+    "path": "topo/streams.tif",
+    "nodata": -32768.0,
+    "value_semantics": "binary"
+  },
+  "culvert_points": {
+    "path": "culverts/culvert_points.geojson",
+    "feature_count": 63,
+    "point_id_field": "Point_ID"
+  },
+  "watersheds": {
+    "path": "culverts/watersheds.geojson",
+    "feature_count": 36,
+    "point_id_field": "Point_ID",
+    "simplified": true,
+    "simplification_tolerance_m": 1.0
+  },
+  "flow_accum_threshold": 100
+}
 ```
 
-Use `ws_polygon_unsimplified_UTM.shp` when building payloads for wepp.cloud.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `schema_version` | string | Yes | Schema version identifier (`culvert-metadata-v1`) |
+| `source.system` | string | Yes | Source system name (`Culvert_web_app`) |
+| `source.project_id` | string | Yes | Sanitized project name |
+| `source.user_id` | string | No | User identifier from source system |
+| `created_at` | string | Yes | ISO 8601 timestamp |
+| `culvert_count` | integer | Yes | Number of culvert points |
+| `crs.proj4` | string | Yes | Proj4 string for coordinate reference system |
+| `dem.*` | object | Yes | DEM metadata (path, dimensions, resolution, nodata) |
+| `streams.*` | object | Yes | Streams raster metadata |
+| `culvert_points.*` | object | Yes | Culvert points metadata |
+| `watersheds.*` | object | Yes | Watersheds metadata |
+| `flow_accum_threshold` | integer | No | Flow accumulation threshold from Culvert_web_app |
 
-### Culvert_web_app files deleted during processing
+### `model-parameters.json` schema
 
-These files are created but deleted after processing:
-- `ws_raster_UTM.tif` - Watershed raster (cell values = pour point FID)
-- `ws_polygon_UTM.shp` - Unsimplified polygons before simplification
+```json
+{
+  "schema_version": "culvert-model-params-v1",
+  "flow_accum_threshold": 100,
+  "order_reduction_passes": 2
+}
+```
 
-Consider retaining the unsimplified polygons if you need full culvert coverage.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `schema_version` | string | Yes | Schema version identifier (`culvert-model-params-v1`) |
+| `flow_accum_threshold` | integer | No | Flow accumulation threshold (for order-reduction mapping) |
+| `order_reduction_passes` | integer | No | Override stream network pruning passes |
+| `base_project_runid` | string | No | Base project runid for template parameters |
+| `nlcd_db` | string | No | NLCD database path override |
+
+## Culvert Point Validation
+
+wepp.cloud validates that each culvert's pour point is inside its associated watershed polygon
+(with a 30m buffer to account for simplification and snapping tolerances). Culverts failing
+this check are skipped to ensure the modeled watershed matches the intended catchment area.
 
 ## Nested vs Partitioned Watersheds
 
@@ -105,8 +205,12 @@ with fiona.open("all_ws_polygon_UTM.shp") as src:
 ```
 
 ## Contract notes
-- CRS must match across rasters and GeoJSON; record `crs.proj4` in `metadata.json`.
-- `Point_ID` is required in both GeoJSON files.
+- **CRS must be UTM.** wepp.cloud expects all rasters and GeoJSON files in a projected UTM coordinate
+  system. The CRS must match across all files; record `crs.proj4` in `metadata.json`. Current
+  Culvert_web_app enforces this constraint.
+- **`Point_ID` is required** in both `culvert_points.geojson` and `watersheds.geojson`. The value
+  can be integer or string in the source GeoJSON; wepp.cloud treats it as a string internally.
+  Each watershed must have a matching culvert point by `Point_ID`.
 - `watersheds.geojson` polygons are simplified (1.0m tolerance) unless you modify the source.
 - Streams are pre-computed; no `mcl`/`csa` parameters in `model-parameters.json`.
 - `flow_accum_threshold` is extracted from `user_ws_deln_responses.txt` and included in `model-parameters.json`; it only drives order-reduction pass mapping when `order_reduction_mode=map` and does not trigger stream extraction.
@@ -114,77 +218,514 @@ with fiona.open("all_ws_polygon_UTM.shp") as src:
 - Payload hash/size are computed by wepp.cloud at upload time (optional request params).
 - `source.project_id` uses a sanitized project name (non-alphanumeric -> underscore, trimmed).
 
-## Stream Network Scaling for High-Resolution DEMs
+## Minimum Watershed Size Filter
+
+wepp.cloud skips culverts whose rasterized watershed area falls below a configurable threshold
+(default: 100 m²). This filters out micro-catchments that are too small for meaningful WEPP
+modeling and often result from snapping artifacts or DEM noise.
+
+**Impact on small watersheds** (Hubbard Brook dataset, 127 culverts with <1 ha watersheds):
+
+```
+  ┌──────────────────┬─────────┬──────┬────────┐
+  │  Min Threshold   │ Removed │ Kept │ % Kept │
+  ├──────────────────┼─────────┼──────┼────────┤
+  │ 10 m²            │      11 │  116 │    91% │
+  ├──────────────────┼─────────┼──────┼────────┤
+  │ 100 m² (0.01 ha) │      56 │   71 │    56% │  ← default
+  ├──────────────────┼─────────┼──────┼────────┤
+  │ 500 m² (0.05 ha) │      78 │   49 │    39% │
+  ├──────────────────┼─────────┼──────┼────────┤
+  │ 1000 m² (0.1 ha) │     100 │   27 │    21% │
+  └──────────────────┴─────────┴──────┴────────┘
+```
+
+Culverts filtered by this threshold are marked `skipped_no_outlet` in batch results with
+error `WatershedAreaBelowMinimumError`.
+
+## Stream Network Handling
 
 `flow_accum_threshold` in Culvert_web_app is cell-count based (default 100). For high-resolution
-DEMs, this yields a much denser stream network than coarser DEMs, which can explode hillslope
-counts and runtime.
+DEMs, this yields a much denser stream network than coarser DEMs.
 
-### Scaling guidance
+wepp.cloud automatically simplifies the stream network at batch ingest using **Strahler stream
+order pruning**. This process removes first-order (headwater) streams from the network, reducing
+complexity while preserving the main drainage structure. Each pruning pass:
+1. Computes Strahler order for all stream segments
+2. Removes order-1 (smallest headwater) streams
+3. Decrements the order of remaining streams
 
-Target area: `A_target_m2 = flow_accum_threshold * (cellsize_m^2)`
+The number of pruning passes is determined by DEM resolution:
+| DEM Resolution | Pruning passes | Effect |
+|----------------|----------------|--------|
+| 1m | 3 passes | Removes order 1, 2, and 3 streams |
+| 4m | 2 passes | Removes order 1 and 2 streams |
+| 10m+ | 1 pass | Removes order 1 streams only |
 
-To match the 30m/100-cell baseline (~90,000 m^2):
-| DEM Resolution | Recommended `flow_accum_threshold` |
-|----------------|-----------------------------------|
-| 30m | 100 (default) |
-| 10m | 900 |
-| 1m | 90,000 |
+This keeps hillslope counts and runtimes manageable without requiring changes in Culvert_web_app.
+You can override this by setting `order_reduction_passes` in `model-parameters.json` if needed.
 
-### Mitigations
+## WEPPcloud Model Parameters
 
-1. **Re-run `extract_streams`** in Culvert_web_app with a scaled threshold (best fidelity)
-2. **Use `order_reduction_passes`** in `model-parameters.json` as a heuristic simplifier
-   - 1m DEM: 3 passes
-   - 4m DEM: 2 passes
-   - 10m DEM: 1 pass (default)
+wepp.cloud uses the following data sources and configurations for culvert batch runs:
 
-### Baseline fixture
-Use the `Santee_10m_no_hydroenforcement` project as the canonical dev payload:
-`/wc1/culvert_app_instance_dir/user_data/1_outputs/Santee_10m_no_hydroenforcement`.
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| Delineation backend | [weppcloud-wbt](https://github.com/rogerlew/weppcloud-wbt) | WhiteboxTools fork with TOPAZ-style hillslope identifiers |
+| Land use | [NLCD 2024 Ever Forest](https://github.com/rogerlew/us-conus-nlcd-ever-forest) | NLCD with persistent forest classification |
+| Soils | gNATSGO 2024 | Gridded National Soil Survey Geographic Database |
+| Climate | PRISM stochastic | 51-year simulation using closest climate station |
 
-### Pre-built test payloads
-Ready-to-use payloads are available in the test fixtures:
-```
-tests/culverts/test_payloads/santee_mini_4culverts/payload.zip  (~1.3 MB, 4 culverts, 9.33m)
-tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip  (~1.5 MB, 63 culverts, 9.33m)
-tests/culverts/test_payloads/Tallulah_River/payload.zip  (~595 MB, 49 culverts, 0.82m)
-```
+### Outlet Finding Algorithm
 
-Use for quick testing without rebuilding:
+wepp.cloud does not use the culvert point directly as the watershed outlet. Instead, it uses the
+[FindOutlet](https://github.com/rogerlew/weppcloud-wbt) algorithm to locate a hydrologically valid
+outlet on the stream network. This ensures the modeled watershed actually drains to a stream cell
+rather than an arbitrary point.
+
+**Why not use the exact culvert location?**
+- The culvert point may be slightly off the stream centerline due to GPS error or snapping tolerances
+- WEPP requires the outlet to be on a stream cell with proper junction topology
+- The FindOutlet algorithm validates that flow actually reaches the outlet
+
+**Algorithm overview:**
+1. Build a raster mask from the watershed polygon
+2. Compute the centroid and identify perimeter cells
+3. Rank interior cells by distance from boundary (deepest interior first)
+4. For each candidate, trace D8 flow downstream until reaching the watershed boundary
+5. Accept the first boundary cell that is on a stream with junction count = 1
+
+The outlet coordinates in `run_metadata.json` reflect the algorithmically determined outlet, which
+may differ slightly from the input culvert point. The `culvert_outlet_distance_m` validation metric
+captures this offset.
+
+**Single-hillslope fallback for streamless watersheds:**
+
+When a culvert watershed contains no stream pixels (common for very small catchments or areas where
+the stream network was pruned), FindOutlet fails. wepp.cloud implements a fallback:
+
+1. Parse the FindOutlet error to find where all flow candidates converge
+2. If candidates converge to a single location, use that as a "seed" outlet
+3. Mark the seed cell and one upstream neighbor as stream pixels
+4. Retry FindOutlet with the seeded stream network
+5. The result is a minimal single-channel watershed suitable for WEPP modeling
+
+This fallback ensures small watersheds without mapped streams can still be processed, producing
+valid erosion estimates based on the terrain and land cover even without explicit channel routing.
+
+### Watershed Abstraction with Representative Flowpaths
+
+For culvert batch processing, wepp.cloud uses **representative flowpath mode** to dramatically reduce
+hillslope delineation time. This is implemented in [peridot](https://github.com/wepp-in-the-woods/peridot),
+a Rust-based watershed abstraction tool.
+
+**Standard mode** (used for interactive WEPPcloud runs):
+- Traces a flowpath from every pixel in the hillslope boundary
+- Aggregates all flowpaths into a weighted-average slope profile
+- Produces detailed per-pixel flowpath metadata
+- Processing time scales with watershed pixel count
+
+**Representative flowpath mode** (used for culvert batches):
+- Selects a single "seed" cell per hillslope using distance-to-channel analysis
+- Traces one flowpath from the median-distance source cell
+- Builds the hillslope slope profile from that single representative path
+- Skips per-pixel flowpath generation entirely
+
+This reduces hillslope abstraction time by 10-100x depending on watershed size, making batch
+processing of hundreds of culverts feasible. The representative flowpath approach preserves
+erosion modeling accuracy by selecting flowpaths that approximate median hillslope length,
+avoiding bias toward longest or shortest paths.
+
+## Building Payloads with `build_payload.py`
+
+The `scripts/build_payload.py` script creates wepp.cloud-compatible payload.zip files from
+Culvert_web_app project outputs. It uses only Python stdlib + GDAL/OGR command-line tools,
+making it easy to integrate into Culvert_web_app.
+
+### What it does
+
+1. **Discovers** project directories from the Culvert_web_app user_data layout
+2. **Validates** all required files exist and have correct attributes
+3. **Extracts metadata** from rasters (gdalinfo) and vectors (ogrinfo)
+4. **Validates alignment**:
+   - CRS matches across all files (proj4 comparison)
+   - DEM and streams have identical dimensions and resolution
+   - Point_ID attribute exists in both culvert points and watersheds
+   - All watershed Point_IDs map to culvert Point_IDs
+5. **Converts** shapefiles to GeoJSON (ogr2ogr)
+6. **Generates** `metadata.json` and `model-parameters.json`
+7. **Creates** the final `payload.zip`
+
+### Requirements
+
+- Python 3.9+
+- GDAL/OGR command-line tools: `gdalinfo`, `ogrinfo`, `ogr2ogr`, `gdalsrsinfo`
+
+### CLI Usage
+
 ```bash
-# Minimal payload (4 culverts, fastest for dev iteration)
-WEPPCLOUD_HOST=wc.bearhive.duckdns.org python scripts/submit_payload.py \
-  --payload /workdir/wepppy/tests/culverts/test_payloads/santee_mini_4culverts/payload.zip
+# Basic usage - auto-discovers project in user_data directories
+python build_payload.py "MyProject"
 
-# Small payload (63 culverts, 9.33m resolution)
-WEPPCLOUD_HOST=wc.bearhive.duckdns.org python scripts/submit_payload.py \
-  --payload /workdir/wepppy/tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip
+# Specify user ID if project exists in multiple user directories
+python build_payload.py "MyProject" --user-id 1
 
-# Large payload (49 culverts, 0.82m high-res LiDAR)
-WEPPCLOUD_HOST=wc.bearhive.duckdns.org python scripts/submit_payload.py \
-  --payload /workdir/wepppy/tests/culverts/test_payloads/Tallulah_River_Demo/payload.zip
+# Custom output path
+python build_payload.py "MyProject" --output /path/to/payload.zip
+
+# Dry run - validate without creating files
+python build_payload.py "MyProject" --dry-run
+
+# Extract payload contents for inspection
+python build_payload.py "MyProject" --out-dir ./payload_contents
+
+# With model parameter overrides
+python build_payload.py "MyProject" \
+    --nlcd-db custom_nlcd.db \
+    --base-project-runid lt_wepp_template
 ```
 
-## SSL Payload Submission
+### CLI Options
 
-After building a payload, submit it over HTTPS:
+| Option | Description |
+|--------|-------------|
+| `project` | Project name (required) |
+| `--base-dir` | Base user_data directory (default: `/wc1/culvert_app_instance_dir/user_data`) |
+| `--user-id` | User ID to disambiguate projects |
+| `--output`, `-o` | Output ZIP path (default: `payload.zip`) |
+| `--out-dir` | Also extract payload to directory for inspection |
+| `--dry-run`, `-n` | Validate only, don't create files |
+| `--nlcd-db` | NLCD database override for model-parameters.json |
+| `--base-project-runid` | Base project runid for model-parameters.json |
+
+### Programmatic Usage (Module Integration)
+
+The script can be imported and used programmatically in Culvert_web_app workflows:
+
+```python
+from pathlib import Path
+from build_payload import build_payload, PayloadError
+
+# Build payload after watershed delineation completes
+try:
+    build_payload(
+        project_name="MyProject",
+        base_dir=Path("/path/to/user_data"),
+        output_path=Path("/path/to/payload.zip"),
+        user_id=1,                          # Optional: specify user
+        out_dir=Path("/path/to/inspect"),   # Optional: extract for inspection
+        dry_run=False,                      # Set True to validate only
+        nlcd_db=None,                       # Optional: NLCD override
+        base_project_runid=None,            # Optional: base project
+    )
+    print("Payload created successfully")
+except PayloadError as e:
+    print(f"Payload build failed: {e}")
+```
+
+### Integration into Culvert_web_app Task Pipeline
+
+To automatically build payloads after watershed delineation:
+
+```python
+# In your task completion handler (e.g., after hydrogeo_vuln completes)
+from build_payload import build_payload, PayloadError
+
+def on_analysis_complete(user_id: int, project_name: str, user_data_dir: Path):
+    """Called when watershed + hydrogeo analysis completes."""
+
+    payload_path = user_data_dir / f"{user_id}_outputs" / project_name / "payload.zip"
+
+    try:
+        build_payload(
+            project_name=project_name,
+            base_dir=user_data_dir,
+            output_path=payload_path,
+            user_id=user_id,
+        )
+        # Payload ready for submission to wepp.cloud
+        return payload_path
+    except PayloadError as e:
+        # Log validation failure - missing files, CRS mismatch, etc.
+        logger.error(f"Payload build failed for {project_name}: {e}")
+        return None
+```
+
+### Validation Errors
+
+The script raises `PayloadError` with descriptive messages for:
+
+| Error | Cause |
+|-------|-------|
+| Missing required files | DEM, streams, culvert points, or watersheds not found |
+| CRS mismatch | Files have different coordinate systems |
+| Raster dimension mismatch | DEM and streams have different width/height |
+| Missing Point_ID | Culvert points or watersheds lack Point_ID attribute |
+| Unmapped watershed IDs | Watershed Point_ID not found in culvert points |
+
+### Helper Functions
+
+The module exposes these functions for custom workflows:
+
+```python
+from build_payload import (
+    get_raster_metadata,      # Extract width, height, resolution, CRS, nodata
+    get_vector_metadata,      # Extract feature count, geometry type, CRS, has_point_id
+    convert_to_geojson,       # Convert shapefile to GeoJSON
+    validate_crs_alignment,   # Check all files share same CRS
+    validate_raster_alignment,# Check DEM/streams dimensions match
+    sanitize_project_id,      # Normalize project name for metadata
+    extract_flow_accum_threshold,  # Read from user_ws_deln_responses.txt
+)
+```
+
+## SSL Payload Submission with `submit_payload.py`
+
+The `scripts/submit_payload.py` script uploads `payload.zip` to the wepp.cloud culvert batch
+endpoint, polls until job completion, and reports the final status.
+
+### Requirements
+
+- Python 3.9+
+- `requests` library (`pip install requests`)
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEPPCLOUD_HOST` | `wepp.cloud` | Target host (no protocol prefix) |
+| `WEPPCLOUD_TOKEN` | unset | Bearer token for authenticated endpoints |
+
+### CLI Usage
 
 ```bash
 # Submit to production (wepp.cloud)
 python scripts/submit_payload.py --payload payload.zip
 
+# Submit with bearer token (required for culvert endpoints)
+WEPPCLOUD_TOKEN=token-value python scripts/submit_payload.py --payload payload.zip
+
 # Submit to test server (development)
 WEPPCLOUD_HOST=wc.bearhive.duckdns.org python scripts/submit_payload.py --payload payload.zip
+
+# Or use --host flag
+python scripts/submit_payload.py --payload payload.zip --host wc.bearhive.duckdns.org
+
+# With pre-computed hash/size (skips local computation)
+python scripts/submit_payload.py --payload payload.zip \
+    --zip-sha256 abc123def456... \
+    --total-bytes 12345678
+
+# Custom polling configuration
+python scripts/submit_payload.py --payload payload.zip \
+    --poll-seconds 1 \
+    --timeout-seconds 7200
+
+# Provide token via file
+python scripts/submit_payload.py --payload payload.zip --token-file /path/to/token.txt
 ```
 
-The `WEPPCLOUD_HOST` environment variable controls the target host:
-- Default: `wepp.cloud` (production)
-- Testing: `wc.bearhive.duckdns.org`
+### CLI Options
 
-All connections use HTTPS (no HTTP fallback).
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `--payload` | Yes | - | Path to payload.zip |
+| `--host` | No | `WEPPCLOUD_HOST` or `wepp.cloud` | Target host |
+| `--zip-sha256` | No | (computed) | SHA256 hash of payload |
+| `--total-bytes` | No | (computed) | Payload size in bytes |
+| `--poll-seconds` | No | 5 | Polling interval in seconds |
+| `--timeout-seconds` | No | 3600 | Maximum wait time in seconds |
+| `--token` | No | `WEPPCLOUD_TOKEN` | Bearer token for authenticated endpoints |
+| `--token-file` | No | - | Read bearer token from file |
 
-See `scripts/README.md` for full CLI options and observability output.
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Job completed successfully |
+| 1 | Job failed or error occurred |
+| 2 | Timeout exceeded |
+| 3 | Invalid arguments or payload not found |
+
+### Example: End-to-End Workflow
+
+```bash
+# 1. Build the payload
+python scripts/build_payload.py "MyProject" --output payload.zip
+
+# 2. Submit to test server and wait for completion
+WEPPCLOUD_HOST=wc.bearhive.duckdns.org \
+WEPPCLOUD_TOKEN=$MY_TOKEN \
+python scripts/submit_payload.py --payload payload.zip
+
+# 3. Results will be available at:
+#    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/browse/
+```
+
+### Observability Output
+
+The script logs each step with timestamps:
+
+```
+2026-01-05 10:30:00 [INFO] ============================================================
+2026-01-05 10:30:00 [INFO] Culvert Batch Payload Submission
+2026-01-05 10:30:00 [INFO] ============================================================
+2026-01-05 10:30:00 [INFO] Host: wc.bearhive.duckdns.org
+2026-01-05 10:30:00 [INFO] Payload file: payload.zip
+2026-01-05 10:30:00 [INFO] Payload size: 45,678,901 bytes
+2026-01-05 10:30:01 [INFO] Computing SHA256 hash...
+2026-01-05 10:30:02 [INFO] Uploading payload...
+2026-01-05 10:30:15 [INFO] Upload completed in 13.2s, status: 200
+2026-01-05 10:30:15 [INFO] Response: job_id=abc-123-def
+2026-01-05 10:30:15 [INFO] Response: culvert_batch_uuid=xyz-789-uvw
+2026-01-05 10:30:15 [INFO] Polling status (1s interval)...
+2026-01-05 10:40:25 [INFO] Job completed successfully after 610.2s
+2026-01-05 10:40:25 [INFO] Browse results: https://wc.bearhive.duckdns.org/weppcloud/culverts/xyz-789-uvw/browse/
+```
+
+## Run Skeletons (`weppcloud_run_skeletons.zip`)
+
+After batch completion, download `weppcloud_run_skeletons.zip` to retrieve model outputs:
+```
+https://{host}/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip
+```
+This archive contains all runs with essential outputs preserved and large intermediate
+files removed.
+
+### Why Skeletonization?
+
+Each WEPP run generates significant intermediate data:
+- Full-resolution DEM clips (can be 100+ MB for high-res LiDAR)
+- Hillslope rasters and intermediate flow grids
+- Temporary soil/landuse processing files
+- Debug logs from profile recorders
+
+For a batch of 50+ culverts, uncompressed outputs can exceed 50 GB. Skeletonization
+reduces this to ~1-5 GB by keeping only the files needed for analysis while discarding
+reproducible intermediates.
+
+### Archive Contents
+
+```
+weppcloud_run_skeletons.zip
+  runs_manifest.md              # Batch summary and per-run table
+  culverts_runner.nodb          # Machine-readable batch state (JSON)
+  runs/
+    {point_id}/                 # One directory per culvert
+      run_metadata.json         # Run status, timing, errors
+      *.nodb                    # Controller state files
+      *.log                     # Processing logs
+      climate/                  # Climate inputs and summaries
+      dem/wbt/                  # Watershed geometry (GeoJSON)
+      watershed/                # Channel/hillslope attributes
+      landuse/                  # Land use parquet
+      soils/                    # Soil logs
+      wepp/output/interchange/  # WEPP model outputs (parquet)
+```
+
+### Run Directory Structure
+
+Each `runs/{point_id}/` directory contains:
+
+```
+{point_id}/
+  run_metadata.json           # Status, timing, error details
+  climate.nodb                # Climate controller state
+  ron.nodb                    # DEM/topography controller state
+  watershed.nodb              # Watershed controller state
+  landuse.nodb                # Land use controller state
+  soils.nodb                  # Soils controller state
+  wepp.nodb                   # WEPP model controller state
+  unitizer.nodb               # Unit conversion state
+  disturbed.nodb              # Disturbance controller state
+  nodb.version                # NoDb version marker
+  redisprep.dump              # Redis state snapshot
+  *.log                       # Processing logs for each stage
+
+  climate/
+    sc*.cli                   # CLIGEN climate file
+    sc*.par                   # CLIGEN parameters
+    sc*.inp                   # CLIGEN input
+    wepp_cli.parquet          # Climate summary (parquet)
+    wepp_cli_pds_mean_metric.csv
+    atlas14_intensity_pds_mean_metric.csv
+
+  dem/wbt/
+    outlet.geojson            # Detected outlet point
+    channels.geojson          # Channel network (UTM)
+    channels.WGS.geojson      # Channel network (WGS84)
+    subcatchments.geojson     # Subcatchment polygons (UTM)
+    subcatchments.WGS.geojson # Subcatchment polygons (WGS84)
+    netful.geojson            # Full stream network
+    netful.WGS.geojson        # Full stream network (WGS84)
+    subwta.geojson            # Subcatchment attributes
+    *.vrt                     # Virtual raster references
+
+  watershed/
+    channels.parquet          # Channel attributes
+    hillslopes.parquet        # Hillslope attributes
+    network.txt               # Network topology summary
+    structure.pkl             # Serialized watershed graph
+
+  landuse/
+    landuse.parquet           # Land use classification
+    nlcd.vrt                  # NLCD virtual raster reference
+
+  soils/
+    *.log                     # Per-soil-unit processing logs
+
+  wepp/output/interchange/
+    interchange_version.json  # Output format version
+    README.md                 # Output documentation
+    # Annual summaries
+    loss_pw0.out.parquet      # Watershed outlet losses
+    loss_pw0.chn.parquet      # Channel losses
+    loss_pw0.hill.parquet     # Hillslope losses
+    loss_pw0.class_data.parquet
+    # All-years time series
+    loss_pw0.all_years.out.parquet
+    loss_pw0.all_years.chn.parquet
+    loss_pw0.all_years.hill.parquet
+    loss_pw0.all_years.class_data.parquet
+    # Hydrologic outputs
+    totalwatsed3.parquet      # Total water/sediment
+    chanwb.parquet            # Channel water balance
+    chnwb.parquet             # Channel water balance (alt format)
+    ebe_pw0.parquet           # Event-based erosion
+    pass_pw0.events.parquet   # Pass event data
+    pass_pw0.metadata.parquet # Pass metadata
+    # Hillslope detail (H.* files)
+    H.loss.parquet            # Hillslope losses
+    H.ebe.parquet             # Hillslope event erosion
+    H.element.parquet         # Hillslope elements
+    H.soil.parquet            # Hillslope soils
+    H.wat.parquet             # Hillslope water balance
+    chan.out.parquet          # Channel outputs
+    soil_pw0.parquet          # Soil outputs
+```
+
+### Key Output Files
+
+| File | Description |
+|------|-------------|
+| `run_metadata.json` | Run status (`success`/`failed`), timing, error details |
+| `dem/wbt/channels.geojson` | Channel network geometry for visualization |
+| `dem/wbt/subcatchments.geojson` | Subcatchment boundaries for visualization |
+| `watershed/channels.parquet` | Channel attributes (length, slope, contributing area) |
+| `watershed/hillslopes.parquet` | Hillslope attributes (area, slope, aspect) |
+| `wepp/output/interchange/loss_pw0.out.parquet` | Annual sediment/runoff at watershed outlet |
+| `wepp/output/interchange/totalwatsed3.parquet` | Total water and sediment summary |
+
+### What's NOT in the Skeleton
+
+These files are deleted during skeletonization:
+- `dem/*.tif` - Full-resolution DEM clips
+- `dem/wbt/*.tif` - Intermediate raster products (flow direction, accumulation, etc.)
+- `_logs/` directories - Profile recorder debug logs
+- Temporary files from soil/landuse processing
+
+If you need full rasters for a specific run, re-run that culvert individually or
+request the full (non-skeletonized) output.
 
 ## API Reference
 
@@ -244,7 +785,8 @@ Retry a single culvert run within an existing batch (for flake-checking or after
 
 ### GET `/rq-engine/api/jobstatus/{job_id}`
 
-Poll job status until completion.
+Poll job status until completion. **Recommended polling interval: 1 second.** The endpoint is
+lightweight and designed for frequent polling.
 
 **Response:**
 ```json
@@ -283,6 +825,13 @@ After job completion, browse results at:
 ```
 https://{host}/weppcloud/culverts/{batch_uuid}/browse/
 ```
+
+**Progress tracking:** The browse endpoint is accessible while the batch is running. Developers can
+monitor partial results as individual culvert runs complete. However, this is not recommended for
+end-user interfaces—wait for job completion before presenting results.
+
+**Webhook/callback notifications:** Push notifications for job completion are on the backlog. For
+now, use polling.
 
 Key artifacts:
 | Path | Description |
