@@ -233,7 +233,7 @@ def api_build_landuse(runid, config):
         else:
             return exception_factory('Building Landuse Failed', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id})
+    return jsonify({'job_id': job.id})
 ```
 
 ### Step 4: Handle Special Cases

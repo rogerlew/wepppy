@@ -40,7 +40,7 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
   - `task_upload_sbs`: Upload and validate raster
   - `task_build_uniform_sbs`: Generate uniform severity raster
   - `task_remove_sbs`: Remove SBS raster
-  - Upload/uniform responses include `{'disturbed_fn': ...}` (no HTML payload today)
+  - Upload/uniform responses include `{ Content: { disturbed_fn: ... } }` (no HTML payload today)
   - `view/modify_burn_class`: Returns HTML summary used in the SBS panel
 
 - **NoDb**: `wepppy/nodb/mods/baer/baer.py` and `wepppy/nodb/mods/disturbed/disturbed.py`
@@ -97,7 +97,7 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
    - Clear hints
    - POST /tasks/upload_sbs with FormData (use /upload prefix via `url_for_run(..., { prefix: "/upload" })`)
 3. Backend validates, saves to baer_dir
-4. Response: {Success: true, Content: {disturbed_fn: "..."}}
+4. Response: { Content: { disturbed_fn: "..." } }
 5. Frontend:
    - Updates "Current SBS map" display
    - Triggers SBS_UPLOAD_TASK_COMPLETE event
@@ -112,7 +112,7 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
    - Clear hints
    - POST /tasks/build_uniform_sbs with {value: severity}
 3. Backend generates uniform raster
-4. Response: {Success: true, Content: {disturbed_fn: "..."}}
+4. Response: { Content: { disturbed_fn: "..." } }
 5. Frontend: (same as upload flow with BAER summary reflecting uniform severity)
 ```
 
@@ -122,7 +122,7 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
 2. disturbed.removeSbs()
    - POST /tasks/remove_sbs
 3. Backend deletes raster file
-4. Response: {Success: true}
+4. Response: {}
 5. Frontend:
    - Removes map layer directly via MapController
    - Removes layer from control

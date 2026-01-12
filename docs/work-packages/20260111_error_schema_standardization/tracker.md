@@ -5,9 +5,9 @@
 ## Quick Status
 
 **Started**: 2026-01-11  
-**Current phase**: Phase 4 deprecation cleanup  
+**Current phase**: Phase 4 deprecation cleanup (complete)  
 **Last updated**: 2026-01-11  
-**Next milestone**: Phase 4 validation + test gates
+**Next milestone**: Phase 4 validation + test gates (npm lint/test)
 
 ## Task Board
 
@@ -15,7 +15,7 @@
 - [ ] Validate rq-response contract with stakeholders
 
 ### In Progress
-- [ ] Phase 4: deprecation cleanup (remove legacy keys, align clients/tests)
+- [ ]
 
 ### Blocked
 - [ ]
@@ -32,6 +32,7 @@
 - [x] Phase 1: response helper compatibility + client normalization
 - [x] Phase 2: move `archive_console.js` into static-src build pipeline
 - [x] Phase 3: status-code-first error responses + legacy key deprecation plan
+- [x] Phase 4: deprecation cleanup (remove legacy keys, align clients/tests/docs)
 
 ## Timeline
 
@@ -39,7 +40,7 @@
 
 ## Decisions Log
 ### 2026-01-11
-- Standardize job submission payloads on `job_id` and `job_ids`; keep `jobId` as a compatibility alias.
+- Standardize job submission payloads on `job_id` and `job_ids`; retire `jobId` alias in Phase 4.
 - Specialized job fields (for example `sync_job_id`, `migration_job_id`) may remain, but must include canonical job ids.
 - Move `archive_console.js` into the standard static-src build pipeline.
 - Keep `status: not_found` with HTTP 200 during the deprecation window; revisit 404 later.
@@ -181,6 +182,7 @@
 - Removed legacy key expectations in backend/frontend tests and smoke fixtures in favor of canonical error payloads.
 - Updated control-base stacktrace handling to read `error.details` for display.
 - Aligned batch runner, interchange, and upload helpers/tests with canonical response shapes.
+- Updated UI/dev documentation to reflect canonical payloads.
 
 **Open questions**:
 - Keep jobstatus/jobinfo `status: not_found` on HTTP 200, or move to 404 now that Phase 4 is underway?

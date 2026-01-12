@@ -279,14 +279,14 @@ console.log('Closest modal-open:', target.closest('[data-modal-open]'));
 ```javascript
 // Network tab → Filter by "set_unit_preferences"
 // Should see POST requests after radio changes
-// Check response: {Success: true, ...}
+// Check response: { Content: { preferences: ... } }
 ```
 
 ### Common Issues
 
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
-| Radios don't check | Controller not initialised | Ensure `Project.getInstance()` loads (check console) and that markup includes `data-project-unitizer` attributes |
+| Radios don't check | Controller not initialized | Ensure `Project.getInstance()` loads (check console) and that markup includes `data-project-unitizer` attributes |
 | Values don't convert | unitizer_map.js not loaded | Check network tab, ensure build ran |
 | Wrong units displayed | Preference state out of sync | Call `client.syncPreferencesFromDom()` |
 | POST fails | Backend error or lock | Check server logs, clear NoDb locks |

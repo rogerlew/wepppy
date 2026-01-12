@@ -483,7 +483,7 @@ describe('Dynamic Mod Loading', () => {
         
         // 3. Fetch mod HTML
         const modResponse = await client.get(`/runs/${runid}/${config}/view/mod/dss_export`);
-        expect(modResponse.body.Success).toBe(true);
+        expect(modResponse.body.error).toBeUndefined();
         
         // 4. Simulate frontend: insert HTML and bootstrap
         const html = modResponse.body.Content.html;

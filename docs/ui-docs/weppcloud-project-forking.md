@@ -42,7 +42,7 @@ Module: `wepppy/weppcloud/routes/rq/api/api.py`
   - Validates permissions (run owners, admin users, public runs, or ownerless runs).
   - Allocates a new run ID via `awesome_codename` when no target is supplied.
   - Registers the new run in the user database (when available).
-  - Responds with `{ Success, job_id, new_runid, undisturbify }`.
+  - Responds with `{ job_id, new_runid, undisturbify }`.
 
 ## RQ Jobs
 Module: `wepppy/rq/project_rq.py`

@@ -220,7 +220,7 @@ controller.events.on('climate:build:completed', (payload) => {
 });
 
 // Bridge to DOM
-emitDom(document, 'BUILD_CLIMATE_TASK_COMPLETED', { jobId });
+emitDom(document, 'BUILD_CLIMATE_TASK_COMPLETED', { job_id: jobId });
 ```
 
 **Form serialization**:
@@ -469,8 +469,8 @@ def test_build_climate_route(tmp_path, rq_environment):
         response = build_climate('test-run', 'default')
         
         # Assert
-        assert response['Success'] is True
-        assert 'job_id' in response
+        payload = response.get_json()
+        assert 'job_id' in payload
         assert climate.mode == 'station'
 ```
 
