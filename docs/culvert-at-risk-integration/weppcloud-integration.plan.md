@@ -586,7 +586,7 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - Risks: callback storms for large batches; secrets management; backward compatibility with POC auth.
 - Verification: auth enforcement tests; webhook retry tests with mock endpoints; manual validation with Culvert_web_app dev instance.
 
-## Phase 6a - Error schema standardization (post-POC)
+## Phase 6a - Error schema standardization (COMPLETE)
 - Scope: standardize `success`/`error` payloads across rq-engine routes and add `error_code`/`error_detail` to job status/job info outputs.
 - Dependencies: agreement on error taxonomy and client expectations for job status polling.
 - Deliverables: updated response helpers, job status payload extensions, updated spec/dev-package docs.
