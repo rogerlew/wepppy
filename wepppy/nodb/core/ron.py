@@ -730,12 +730,14 @@ class Ron(NoDbBase):
     def remove_mod(self, mod_name: str) -> None:
         from wepppy.nodb.base import iter_nodb_mods_subclasses, clear_locks, clear_nodb_file_cache
 
-        clear_locks(self.runid)
+        mod_relpath = f'{mod_name}.nodb'
+        # Only clear locks/cache for the target mod to avoid disrupting in-flight jobs.
+        clear_locks(self.runid, pup_relpath=mod_relpath)
         if mod_name in self.mods:
             with self.locked():
                 self._mods.remove(mod_name)
 
-        mod_nodb_fn = _join(self.wd, f'{mod_name}.nodb')
+        mod_nodb_fn = _join(self.wd, mod_relpath)
         if _exists(mod_nodb_fn):
             os.remove(mod_nodb_fn)
 
@@ -746,7 +748,7 @@ class Ron(NoDbBase):
                     with mod_instance.locked():
                         self._mods.remove(mod_name)
 
-        clear_nodb_file_cache(self.runid)
+        clear_nodb_file_cache(self.runid, pup_relpath=mod_relpath)
 
     #
     # map
