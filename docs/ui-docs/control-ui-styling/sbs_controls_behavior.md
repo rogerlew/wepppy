@@ -95,9 +95,9 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
 1. User selects file → auto-upload triggered
 2. disturbed.uploadSbs()
    - Clear hints
-   - POST /tasks/upload_sbs with FormData (use /upload prefix via `url_for_run(..., { prefix: "/upload" })`)
+   - POST /tasks/upload-sbs with FormData (use `/rq-engine/api` via `url_for_run(..., { prefix: "/rq-engine/api" })`)
 3. Backend validates, saves to baer_dir
-4. Response: { Content: { disturbed_fn: "..." } }
+4. Response: { result: { disturbed_fn: "..." } }
 5. Frontend:
    - Updates "Current SBS map" display
    - Triggers SBS_UPLOAD_TASK_COMPLETE event
@@ -112,7 +112,7 @@ The SBS (Soil Burn Severity) controls coordinate the Disturbed, Baer, and Map co
    - Clear hints
    - POST /tasks/build_uniform_sbs with {value: severity}
 3. Backend generates uniform raster
-4. Response: { Content: { disturbed_fn: "..." } }
+4. Response: { result: { disturbed_fn: "..." } }
 5. Frontend: (same as upload flow with BAER summary reflecting uniform severity)
 ```
 

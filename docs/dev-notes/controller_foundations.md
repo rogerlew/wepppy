@@ -177,14 +177,14 @@ const { request, getJson, postJson, postForm, HttpError } = WCHttp;
 const data = await getJson(url_for_run('query/status'));
 await postJson(url_for_run('tasks/set_mode'), { mode: 2 });
 
-// Form submissions
+// Form submissions (rq-engine run-scoped)
 const payload = WCForms.serializeForm(form, { format: 'json' });
-await postJson(url_for_run('rq/api/build'), payload, { form });
+await postJson(url_for_run('build-climate', { prefix: '/rq-engine/api' }), payload, { form });
 
-// File uploads
+// File uploads (rq-engine run-scoped)
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
-await request(url_for_run('tasks/upload'), { 
+await request(url_for_run('tasks/upload-cli', { prefix: '/rq-engine/api' }), {
   method: 'POST', 
   body: formData,
   form: formElement 
@@ -249,16 +249,16 @@ applyValues(form, { mode: 2, name: 'Updated' });
 
 ```javascript
 // ✅ Correct
-http.postJson(url_for_run('rq/api/build_climate'), payload);
+http.postJson(url_for_run('build-climate', { prefix: '/rq-engine/api' }), payload);
 http.get(url_for_run('resources/subcatchments.json'));
 
 // ❌ Wrong - breaks in multi-config deployments
-http.postJson('rq/api/build_climate', payload);
+http.postJson('/rq-engine/api/build-climate', payload);
 ```
 
 The helper reads `window.runId` and `window.config` to construct `/runs/<runid>/<config>/...` paths automatically.
 
-**Scope**: Applies to `rq/api/*`, `tasks/*`, `query/*`, `resources/*`  
+**Scope**: Applies to `rq-engine/api/*`, `tasks/*`, `query/*`, `resources/*`  
 **Exceptions**: `/batch/`, `/api/`, `/auth/`, root routes
 
 ### Template Data Hooks
@@ -352,7 +352,7 @@ var Climate = (function () {
       const payload = forms.serializeForm(that.form, { format: 'json' });
       try {
         const response = await http.postJson(
-          url_for_run('rq/api/build_climate'), 
+          url_for_run('build-climate', { prefix: '/rq-engine/api' }),
           payload,
           { form: that.form }
         );

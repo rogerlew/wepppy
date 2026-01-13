@@ -105,8 +105,8 @@ Emitted via `WCEvents.useEventMap`:
 - Hillslope slope/aspect: `query/watershed/subcatchments/`.
 - Legends: `resources/legends/<name>/`, `resources/legends/sbs/`.
 - SBS image: `query/baer_wgs_map/`.
-- Outlet: `query/outlet/`, `report/outlet/`, `rq/api/set_outlet`.
-- Channel build: `rq/api/fetch_dem_and_build_channels`, `query/delineation_pass/`, `query/has_dem/`.
+- Outlet: `query/outlet/`, `report/outlet/`, `rq-engine/api/runs/<runid>/<config>/set-outlet`.
+- Channel build: `rq-engine/api/runs/<runid>/<config>/fetch-dem-and-build-channels`, `query/delineation_pass/`, `query/has_dem/`.
 - Selection box: `tasks/sub_intersection/`.
 - Landuse/Rangeland modify: `tasks/modify_landuse/`, `tasks/modify_rangeland_cover/`.
 - Subcatchment overlays: `query/landuse/subcatchments/`, `query/rangeland_cover/subcatchments/`, `query/soils/subcatchments/`, `query/landuse/cover/subcatchments`.
@@ -314,7 +314,7 @@ Assumptions (historical; Phase 13 flips defaults):
 - Tests: Jest in `map_gl.test.js` asserts single request per cooldown and abort/hide on mouseout.
 
 ### Phase 7: outlet selection
-- Scope: deck `onClick` dispatches `{ latlng }` to map click handlers; outlet cursor mode submits `rq/api/set_outlet`, shows temp feedback, and renders the final outlet marker from `query/outlet/`.
+- Scope: deck `onClick` dispatches `{ latlng }` to map click handlers; outlet cursor mode submits `rq-engine/api/runs/<runid>/<config>/set-outlet`, shows temp feedback, and renders the final outlet marker from `query/outlet/`.
 - Tests: Jest covers GL outlet selection; Playwright covers cursor click + overlay cleanup.
 
 ### Phase 7 handoff summary
@@ -337,7 +337,7 @@ Assumptions (historical; Phase 13 flips defaults):
 
 ### Phase 7b handoff summary
 - Controller parity: `channel_gl.js` now wires the build form, status/stacktrace panels, status stream, job id handling, and report loading while keeping the netful overlay.
-- Build flow: `rq/api/fetch_dem_and_build_channels` submission sets the job id, uses an idempotent completion guard, and triggers report + netful reload on completion.
+- Build flow: `rq-engine/api/runs/<runid>/<config>/fetch-dem-and-build-channels` submission sets the job id, uses an idempotent completion guard, and triggers report + netful reload on completion.
 - Bootstrap: job id recovery checks `fetch_dem_and_build_channels_rq`, applies `zoomMin`, and loads report + netful when channels already exist.
 - Map integration: `onMapChange` binds to map move/zoom + `map:ready`, updates map input fields, and gates the build button by zoom min.
 - Tests: Jest `controllers_js/__tests__/channel_gl.test.js` covers build payload, completion idempotence, failure job:error, and map gating; Playwright `static-src/tests/smoke/map-gl.spec.js` adds a build flow with report and layer assertions.
@@ -349,7 +349,7 @@ Assumptions (historical; Phase 13 flips defaults):
 
 ### Phase 7c handoff summary
 - Controller parity: `outlet_gl.js` wires DOM hooks, status/stacktrace panels, status stream, job id handling, and controlBase lifecycle events (`job:started`, `job:completed`, `job:error`).
-- Cursor flow: cursor toggle uses map click events, posts `rq/api/set_outlet`, and cleans up temporary feedback layers on success or error.
+- Cursor flow: cursor toggle uses map click events, posts `rq-engine/api/runs/<runid>/<config>/set-outlet`, and cleans up temporary feedback layers on success or error.
 - Display: `query/outlet/` renders the outlet marker overlay and `report/outlet/` hydrates the info panel; emits `outlet:display:refresh` after successful render.
 - Tests: Jest `controllers_js/__tests__/outlet_gl.test.js` covers cursor submit, completion idempotence, and report refresh; Playwright smoke asserts temp feedback and final marker/report.
 
@@ -387,7 +387,7 @@ Assumptions (historical; Phase 13 flips defaults):
 - Tests: Jest for build/report/poll failure; Playwright build subcatchments -> report + legend update.
 
 ### Phase 9c handoff summary
-- Build: `sub.build()` posts `rq/api/build_subcatchments_and_abstract_watershed`, wires status stream, records job id, and emits `subcatchment:build:started`/`subcatchment:build:error`.
+- Build: `sub.build()` posts `rq-engine/api/runs/<runid>/<config>/build-subcatchments-and-abstract-watershed`, wires status stream, records job id, and emits `subcatchment:build:started`/`subcatchment:build:error`.
 - Completion: `BUILD_SUBCATCHMENTS_TASK_COMPLETED` triggers `sub.show()` + channel refresh; `WATERSHED_ABSTRACTION_TASK_COMPLETED` loads report, disconnects status stream, enables slope/aspect, and updates WEPP phosphorus.
 - Report: `report/subcatchments/` HTML is injected into `#info`, status updated, and `Project.set_preferred_units()` invoked.
 - Preflight gating: radios for slope/aspect, landuse, rangeland cover, and soils are enabled based on `window.lastPreflightChecklist`, with a `preflight:update` listener attached once.

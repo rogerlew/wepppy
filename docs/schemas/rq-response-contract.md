@@ -1,8 +1,8 @@
 # RQ Response Contract
-> Authoritative contract for rq-engine and weppcloud rq/api JSON responses.
+> Authoritative contract for rq-engine JSON responses (legacy weppcloud rq/api is removed).
 
 ## Scope
-- Applies to rq-engine (FastAPI) and weppcloud rq/api (Flask).
+- Applies to rq-engine (FastAPI). Legacy weppcloud rq/api routes are removed.
 - Defines canonical keys, error shapes, and job submission/polling payloads.
 - Clients (controllers_js, static, profile_recorder) must normalize to this contract.
 

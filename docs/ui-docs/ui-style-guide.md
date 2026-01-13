@@ -660,7 +660,7 @@ document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
     alert('Network error during upload');
   });
   
-  const uploadUrl = url_for_run("tasks/upload_" + "{{ TASK_NAME }}", { prefix: "/upload" });
+  const uploadUrl = url_for_run("tasks/upload-" + "{{ TASK_NAME }}", { prefix: "/rq-engine/api" });
   xhr.open('POST', uploadUrl);
   xhr.send(formData);
 });
@@ -687,8 +687,8 @@ document.getElementById('{{FIELD_ID}}').addEventListener('change', function(e) {
 - Always validate file size client-side before upload
 - Server must accept FormData with file key matching `{{FIELD_ID}}`
 - Progress bar uses inline `style="width: X%"` for dynamic updates
-- Ensure `TASK_NAME` matches the server task slug (e.g., `"sbs_map"`) so the upload endpoint resolves correctly
-- For file uploads, use the `/upload` prefix override so Caddy applies the extended timeout (`url_for_run(..., { prefix: "/upload" })`)
+- Ensure `TASK_NAME` matches the server task slug (e.g., `"sbs"`, `"cli"`, `"cover-transform"`) so the upload endpoint resolves correctly
+- For file uploads, use the `/rq-engine/api` prefix override so Caddy applies the extended timeout (`url_for_run(..., { prefix: "/rq-engine/api" })`)
 - `.wc-upload-progress*` classes are defined in `ui-foundation.css`
 
 ---
@@ -1152,7 +1152,7 @@ document.getElementById('input_upload_sbs').addEventListener('change', function(
   const formData = new FormData();
   formData.append('input_upload_sbs', file);
   
-  const uploadUrl = url_for_run("tasks/upload_sbs", { prefix: "/upload" });
+  const uploadUrl = url_for_run("tasks/upload-sbs", { prefix: "/rq-engine/api" });
 
   fetch(uploadUrl, {
     method: 'POST',
