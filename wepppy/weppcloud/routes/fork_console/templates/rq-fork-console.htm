@@ -131,9 +131,9 @@
 {% endblock %}
 
 {% block script_extras %}
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/console_utils.js') }}"></script>
-<script src="{{ url_for('static', filename='js/status_stream.js') }}"></script>
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/console_utils.js') }}"></script>
+<script src="{{ static_url('js/status_stream.js') }}"></script>
 {% if not current_user.is_authenticated %}
 <script>
   window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
@@ -141,5 +141,5 @@
 <script src="{{ cap_asset_base_url }}/widget.js" defer></script>
 <script src="{{ cap_asset_base_url }}/floating.js" defer></script>
 {% endif %}
-<script src="{{ url_for('static', filename='js/fork_console.js') }}"></script>
+<script src="{{ static_url('js/fork_console.js') }}"></script>
 {% endblock %}
