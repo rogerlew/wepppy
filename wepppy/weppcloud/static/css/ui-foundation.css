@@ -3972,10 +3972,10 @@ body.wc-modal-open {
   padding: var(--wc-space-xs) var(--wc-space-sm);
 }
 
-/* Compact width variant */
+/* Compact width variant - table sizes to content */
 .wc-table--compact {
   width: auto;
-  min-width: 50%;
+  min-width: 0;
 }
 
 .wc-table input[type="checkbox"] {
