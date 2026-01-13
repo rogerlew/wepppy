@@ -190,8 +190,19 @@ Move all run-scoped RQ endpoints from Flask (`/weppcloud/rq/api/*`) to rq-engine
 - Verify UI workflows: enqueue + polling + cancel + results display.
 - Confirm `jobstatus/jobinfo` remain reachable without auth tokens.
 - Add tests for rq-engine parity (including upload routes).
-- Write a follow-on removal checklist once prod is migrated.
+- Draft a follow-on removal checklist once prod is migrated.
 - Manual smoke test completed in dev; schedule a fresh agent review before removing legacy routes in prod.
+- Jobstatus/jobinfo spot check (2026-01-13): `/rq-engine/api/jobstatus/4e8a87af-49c4-4eac-8385-dfc2a6843406` and `/rq-engine/api/jobinfo/4e8a87af-49c4-4eac-8385-dfc2a6843406` returned `status=finished` for run `brocaded-confection` with no `exc_info` in children.
+
+## Follow-on removal checklist (post-prod migration)
+- [ ] Confirm there are still no external clients relying on `/rq/api/*` or `/upload/*` before removing any compatibility shims.
+- [ ] Remove legacy Flask upload endpoints once confirmed unused:
+  - `wepppy/weppcloud/routes/nodb_api/climate_bp.py` (`/runs/<runid>/<config>/tasks/upload_cli/`)
+  - `wepppy/weppcloud/routes/nodb_api/disturbed_bp.py` (`/runs/<runid>/<config>/tasks/upload_sbs/`, `/runs/<runid>/<config>/tasks/upload_cover_transform`)
+  - `wepppy/weppcloud/routes/huc_fire.py` (`/huc-fire/tasks/upload_sbs/`)
+  - `wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py` (`/batch/_/<batch_name>/upload-geojson`, `/batch/_/<batch_name>/upload-sbs-map`)
+- [ ] Retire legacy `/rq/api` replay fallbacks once old captures are archived (`wepppy/profile_recorder/*`).
+- [ ] Sweep archival docs for `/rq/api` or `/upload` mentions if the historical notes are no longer needed.
 
 ## Exit Criteria
 - All UI controller calls use `/rq-engine/api/*` for rq endpoints.
