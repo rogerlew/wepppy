@@ -73,16 +73,15 @@ Each blueprint section below documents:
 ## Blueprint Catalog
 
 ### Climate (`wepppy.weppcloud.routes.nodb_api.climate_bp`)
-- **NoDb singletons**: [Climate](../../../nodb/core/climate.py), [Ron](../../../nodb/core/ron.py)
+- **NoDb singletons**: [Climate](../../../nodb/core/climate.py)
 - **Controller docs**: [Climate Controller Reference (2024 helper migration)](../../controllers_js/README.md#climate-controller-reference-2024-helper-migration)
-- **Helper stack**: `parse_request_payload`, `get_wd`, `success_factory`, `exception_factory`, `render_template`, `jsonify`, `save_run_file`, `upload_success`, `upload_failure`
-- **Testing**: [tests/weppcloud/routes/test_climate_bp.py](../../../../tests/weppcloud/routes/test_climate_bp.py) — monkeypatches dummy Climate/Ron instances; update fixtures when payloads change.
+- **Helper stack**: `parse_request_payload`, `get_wd`, `success_factory`, `exception_factory`, `render_template`, `jsonify`
+- **Testing**: [tests/weppcloud/routes/test_climate_bp.py](../../../../tests/weppcloud/routes/test_climate_bp.py) — monkeypatches dummy Climate instances; update fixtures when payloads change.
 
 | Route | Methods | NoDb interactions | Notes |
 | --- | --- | --- | --- |
 | `/runs/<string:runid>/<config>/tasks/set_climatestation_mode[/]` | `POST` | Climate.climatestation_mode (set) | — |
 | `/runs/<string:runid>/<config>/tasks/set_climatestation[/]` | `POST` | Climate.climatestation (set) | — |
-| `/runs/<string:runid>/<config>/tasks/upload_cli[/]` | `POST` | Climate.cli_dir, Climate.set_user_defined_cli | Uses `save_run_file()` plus `upload_success` / `upload_failure` for feedback |
 | `/runs/<string:runid>/<config>/query/climatestation[/]` | `GET` | Climate.climatestation | — |
 | `/runs/<string:runid>/<config>/query/climate_has_observed[/]` | `GET` | Climate.has_observed | — |
 | `/runs/<string:runid>/<config>/query/climate_catalog[/]` | `GET` | Climate.catalog_datasets_payload | — |
@@ -109,10 +108,10 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/report/debris_flow[/]` | `GET` | DebrisFlow (template context), Ron (template context), Unitizer (template context) | Renders `reports/debris_flow.htm` with singleton instances in context |
 
 ### Disturbed / BAER (`wepppy.weppcloud.routes.nodb_api.disturbed_bp`)
-- **NoDb singletons**: [Disturbed](../../../nodb/mods/disturbed.py), [Baer](../../../nodb/mods/baer/__init__.py), [Revegetation](../../../nodb/mods/revegetation.py), [Ron](../../../nodb/core/ron.py)
+- **NoDb singletons**: [Disturbed](../../../nodb/mods/disturbed.py), [Baer](../../../nodb/mods/baer/__init__.py), [Ron](../../../nodb/core/ron.py)
 - **Controller docs**: [Disturbed Controller Reference (2025 helper migration)](../../controllers_js/README.md#disturbed-controller-reference-2025-helper-migration), [BAER Controller Reference (2025 helper migration)](../../controllers_js/README.md#baer-controller-reference-2025-helper-migration)
-- **Helper stack**: `authorize`, `authorize_and_handle_with_exception_factory`, `load_run_context`, `parse_request_payload`, `secure_filename`, `send_file`, `save_run_file`, `upload_success`, `upload_failure`, `success_factory`, `exception_factory`, `error_factory`
-- **Testing**: [tests/weppcloud/routes/test_disturbed_bp.py](../../../../tests/weppcloud/routes/test_disturbed_bp.py) — uses `tests.factories.singleton_factory` to stub Disturbed/Baer/Revegetation; keep stub signatures aligned.
+- **Helper stack**: `authorize`, `authorize_and_handle_with_exception_factory`, `load_run_context`, `parse_request_payload`, `send_file`, `success_factory`, `exception_factory`, `error_factory`
+- **Testing**: [tests/weppcloud/routes/test_disturbed_bp.py](../../../../tests/weppcloud/routes/test_disturbed_bp.py) — uses `tests.factories.singleton_factory` to stub Disturbed/Baer; keep stub signatures aligned.
 
 | Route | Methods | NoDb interactions | Notes |
 | --- | --- | --- | --- |
@@ -127,8 +126,6 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/tasks/modify_color_map` | `POST` | Disturbed.has_map, Disturbed.modify_color_map, Ron.mods | — |
 | `/runs/<string:runid>/<config>/resources/baer.png` | `GET` | Disturbed.baer_rgb_png, Disturbed.has_map, Ron.mods | Streams RGB overlay from either BAER or Disturbed controller |
 | `/runs/<string:runid>/<config>/tasks/set_firedate[/]` | `POST` | Disturbed.fire_date (set) | — |
-| `/runs/<string:runid>/<config>/tasks/upload_sbs[/]` | `POST` | Disturbed.baer_dir, Disturbed.validate, Ron.mods | Persists SBS raster, runs `sbs_map_sanity_check`, then validates via controller |
-| `/runs/<string:runid>/<config>/tasks/upload_cover_transform` | `POST` | Revegetation.validate_user_defined_cover_transform | Delegates to `Revegetation.validate_user_defined_cover_transform()` |
 | `/runs/<string:runid>/<config>/tasks/remove_sbs` | `POST` | Baer.remove_sbs, Disturbed.remove_sbs, Ron.mods | Removes SBS raster from whichever controller owns it |
 | `/runs/<string:runid>/<config>/tasks/build_uniform_sbs<br>/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>` | `POST` | Disturbed.build_uniform_sbs, Disturbed.validate | Builds uniform raster then validates; accepts optional severity parameter |
 

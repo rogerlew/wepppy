@@ -12,15 +12,8 @@ from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir
 from .._common import *  # noqa: F401,F403
 
 from wepppy.climates.cligen import StationMeta
-from wepppy.nodb.core import Ron
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
 from wepppy.weppcloud.utils.cap_guard import requires_cap
-from wepppy.weppcloud.utils.uploads import (
-    UploadError,
-    save_run_file,
-    upload_failure,
-    upload_success,
-)
 
 StationOption = MutableMapping[str, Any]
 
@@ -226,50 +219,6 @@ def set_climatestation(runid: str, config: str) -> Response:
     return success_factory()
 
 
-@climate_bp.route('/runs/<string:runid>/<config>/tasks/upload_cli/', methods=['POST'])
-def task_upload_cli(runid: str, config: str) -> Response:
-    """Persist a user-uploaded CLIGEN `.cli` file for the active run.
-
-    Args:
-        runid: Identifier for the working directory.
-        config: Configuration profile name.
-
-    Returns:
-        Response: JSON payload indicating success or identifying why the upload failed.
-    """
-    wd = get_wd(runid)
-
-    ron = Ron.getInstance(wd)
-    climate = Climate.getInstance(wd)
-
-    cli_dir = climate.cli_dir
-
-    try:
-        saved_path = save_run_file(
-            runid=runid,
-            config=config,
-            form_field='input_upload_cli',
-            allowed_extensions=('cli',),
-            dest_subdir='',
-            run_root=cli_dir,
-            filename_transform=lambda value: value,
-            overwrite=True,
-        )
-    except UploadError as exc:
-        return upload_failure(str(exc))
-    except Exception:
-        return exception_factory('Could not save file', runid=runid)
-
-    try:
-        climate.set_user_defined_cli(saved_path.name)
-    except UploadError as exc:
-        return upload_failure(str(exc))
-    except Exception:
-        return exception_factory('Failed validating file', runid=runid)
-
-    return upload_success()
-
-
 @climate_bp.route('/runs/<string:runid>/<config>/query/climatestation')
 @climate_bp.route('/runs/<string:runid>/<config>/query/climatestation/')
 def query_climatestation(runid: str, config: str) -> Response:
@@ -305,7 +254,7 @@ def query_climate_has_observed(runid: str, config: str) -> Response:
 @climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog')
 @climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog/')
 def query_climate_catalog(runid: str, config: str) -> Response:
-    """Return the catalogued climate datasets for the active run."""
+    """Return the cataloged climate datasets for the active run."""
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
     try:

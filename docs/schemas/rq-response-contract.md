@@ -69,6 +69,7 @@ Example (sync update):
   }
 }
 ```
+- `error.details` is required for error responses; include a stacktrace (string) for exception-driven failures and structured context for validation errors.
 - Validation error list:
 ```json
 {

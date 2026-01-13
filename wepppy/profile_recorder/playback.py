@@ -177,9 +177,7 @@ class PlaybackSession:
             effective_path = self._remap_run_path(path)
             self._guard_sandbox_target(effective_path, request_id)
 
-            if method == "GET" and (
-                "/rq-engine/api/jobstatus/" in effective_path or "/rq/api/jobstatus/" in effective_path
-            ):
+            if method == "GET" and "/rq-engine/api/jobstatus/" in effective_path:
                 self.results.append((request_id, f"{effective_path}: skipped recorded jobstatus poll"))
                 continue
             if "/elevationquery/" in effective_path:
@@ -539,11 +537,11 @@ class PlaybackSession:
         recorded_values = self._extract_form_values(request_meta)
 
         try:
-            if normalized.endswith("rq/api/build_landuse") or normalized.endswith("build-landuse"):
+            if normalized.endswith("build-landuse"):
                 self._populate_landuse_form(data, files)
-            elif normalized.endswith("rq/api/build_treatments") or normalized.endswith("build-treatments"):
+            elif normalized.endswith("build-treatments"):
                 self._populate_landuse_form(data, files)
-            elif normalized.endswith("rq/api/build_soils") or normalized.endswith("build-soils"):
+            elif normalized.endswith("build-soils"):
                 self._populate_soils_form(data)
             elif normalized.endswith("tasks/upload_sbs") or normalized.endswith("tasks/upload-sbs"):
                 self._populate_sbs_form(data, files)
@@ -551,9 +549,9 @@ class PlaybackSession:
                 self._populate_cover_transform_form(files)
             elif normalized.endswith("tasks/upload_cli") or normalized.endswith("tasks/upload-cli"):
                 self._populate_cli_form(files)
-            elif normalized.endswith("rq/api/run_ash") or normalized.endswith("run-ash"):
+            elif normalized.endswith("run-ash"):
                 self._populate_ash_form(data, files)
-            elif normalized.endswith("rq/api/run_omni") or normalized.endswith("run-omni"):
+            elif normalized.endswith("run-omni"):
                 self._populate_omni_form(data, files)
         except Exception as exc:
             self._log(f"Failed to build form-data payload for {path}: {exc}")

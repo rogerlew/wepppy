@@ -80,7 +80,7 @@ A FastAPI microservice that rehydrates sandboxed runs and replays captured traff
 - Rewrites URLs from `/runs/<original>/` to `/runs/{playback_run_id}/`; the FastAPI service issues playback run IDs in the form `profile;;tmp;;<sandbox_uuid>` so sandbox runs stay isolated while the original ID remains available for reporting
 - Skips recorded elevation queries and jobstatus polls (replays generate fresh job IDs)
 - Automatically rebuilds multipart form-data payloads using seed assets (landuse, SBS, CLI, ash, omni uploads)
-- Polls new job IDs until completion via `/rq-engine/api/jobinfo/<id>`, parses hierarchical job trees on failures (legacy `/rq/api` still replays for older captures)
+- Polls new job IDs until completion via `/rq-engine/api/jobinfo/<id>`, parses hierarchical job trees on failures
 - Applies 1-second delays between requests to prevent race conditions in async workflows
 
 **Authentication:**
@@ -246,7 +246,7 @@ Additional per-command flags:
    - Open PowerUser Panel via hamburger menu or keyboard shortcut
    - Click "Promote Profile Draft" button (visible to Admin users)
    - Enter desired profile slug when prompted (defaults to run ID)
-   - Confirm promotion in success dialog showing saved location
+   - Confirm promotion in success dialogue showing saved location
 
    The UI triggers `POST /runs/<runid>/<config>/recorder/promote` with the slug. Advanced users with PowerUser role can also call the endpoint directly with JSON payload `{"slug": "profile-name"}`.
 

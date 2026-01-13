@@ -6,7 +6,6 @@ from flask import Blueprint, Response
 
 from wepppy.climates.cligen import StationMeta
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
-from wepppy.nodb.core import Ron
 
 StationOption = MutableMapping[str, Any]
 
@@ -15,8 +14,6 @@ climate_bp: Blueprint
 def set_climatestation_mode(runid: str, config: str) -> Response: ...
 
 def set_climatestation(runid: str, config: str) -> Response: ...
-
-def task_upload_cli(runid: str, config: str) -> Response: ...
 
 def query_climatestation(runid: str, config: str) -> Response: ...
 

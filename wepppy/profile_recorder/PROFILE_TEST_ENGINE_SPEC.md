@@ -82,7 +82,7 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
   - Only 2xx response events with matching request metadata are executed.
   - Supports GET and POST (JSON or known form-data). Unsupported payloads are logged and recorded as failures.
   - Paths are remapped from `/runs/<original>/...` to `/runs/{playback_run_id}/...`, ensuring NoDb resolves the sandbox workspace.
-  - Elevation queries and recorded `rq-engine/api/jobstatus/` polls are skipped; playback polls real jobs instead (legacy `/rq/api` paths still replay for older captures).
+  - Elevation queries and recorded `rq-engine/api/jobstatus/` polls are skipped; playback polls real jobs instead.
   - After each POST, the runner inspects the JSON response for `job_id` and waits for completion via `/rq-engine/api/jobinfo/<id>` before proceeding.
   - Additional polling is performed for GETs ending with known work-complete suffixes (`_WAIT_SUFFIXES`).
   - Responses are summarized in `PlaybackSession.results`, exposed through the streamed log and persisted run report.

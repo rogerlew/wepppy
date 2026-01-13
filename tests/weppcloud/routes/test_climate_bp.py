@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -39,23 +38,6 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         return str(run_dir)
 
     monkeypatch.setattr(climate_module, "get_wd", fake_get_wd)
-
-    class DummyRon:
-        _instances: dict[str, "DummyRon"] = {}
-
-        def __init__(self, wd: str) -> None:
-            self.wd = wd
-            self.readonly = False
-
-        @classmethod
-        def getInstance(cls, wd: str) -> "DummyRon":
-            instance = cls._instances.get(wd)
-            if instance is None:
-                instance = cls(wd)
-                cls._instances[wd] = instance
-            return instance
-
-    monkeypatch.setattr(climate_module, "Ron", DummyRon)
 
     class DummyClimate:
         _instances: dict[str, "DummyClimate"] = {}
@@ -114,13 +96,11 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
     monkeypatch.setattr(climate_module, "Climate", DummyClimate)
 
-    DummyRon._instances.clear()
     DummyClimate._instances.clear()
 
     with app.test_client() as client:
         yield client, DummyClimate, run_dir
 
-    DummyRon._instances.clear()
     DummyClimate._instances.clear()
 
 
@@ -245,27 +225,3 @@ def test_task_set_adjust_mx_pt5_updates_flag(climate_client):
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.adjust_mx_pt5 is True
 
-
-def test_task_upload_cli_persists_file(climate_client):
-    client, climate_cls, run_dir = climate_client
-
-    payload = {
-        "input_upload_cli": (io.BytesIO(b"cli content"), "custom.cli"),
-    }
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/upload_cli/",
-        data=payload,
-        content_type="multipart/form-data",
-    )
-
-    assert response.status_code == 200
-    payload = response.get_json()
-    assert payload == {}
-
-    controller = climate_cls.getInstance(str(run_dir))
-    assert controller.latest_cli_filename == "custom.cli"
-    assert controller.set_cli_calls == 1
-
-    saved_file = Path(controller.cli_dir) / "custom.cli"
-    assert saved_file.exists()
-    assert saved_file.read_bytes() == b"cli content"

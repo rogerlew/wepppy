@@ -1,13 +1,10 @@
 
 """Routes for huc fire blueprint extracted from app.py."""
 
-from datetime import datetime
-from subprocess import PIPE, Popen
 import uuid
 
 from ._common import *  # noqa: F401,F403
 
-from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils import auth_tokens
 
@@ -66,55 +63,6 @@ def huc_fire():
         return exception_factory(f"JWT configuration error: {exc}")
     except:
         return exception_factory()
-
-
-@huc_fire_bp.route('/huc-fire/tasks/upload_sbs/', methods=['POST'])
-def upload_sbs():
-    from wepppy.weppcloud.app import create_run_dir, user_datastore
-    try:
-        file = request.files['input_upload_sbs']
-    except Exception:
-        return exception_factory('Could not find file')
-
-    try:
-        if file.filename == '':
-            return error_factory('no filename specified')
-
-        filename = secure_filename(file.filename)
-    except Exception:
-        return exception_factory('Could not obtain filename')
-
-    runid, wd = create_run_dir(current_user)
-
-    config = 'disturbed9002'
-    cfg = f'{config}.cfg'
-
-    try:
-        Ron(wd, cfg)
-    except Exception:
-        return exception_factory('Could not create run')
-
-    if not current_user.is_anonymous:
-        try:
-            user_datastore.create_run(runid, config, current_user)
-        except Exception:
-            return exception_factory('Could not add run to user database')
-
-
-    disturbed = Disturbed.getInstance(wd)
-    file_path = _join(disturbed.disturbed_dir, filename)
-    try:
-        file.save(file_path)
-    except Exception:
-        return exception_factory('Could not save file')
-
-    try:
-        res = disturbed.validate(filename, mode=0)
-    except Exception:
-        os.remove(file_path)
-        return exception_factory('Failed validating file')
-
-    return jsonify(dict(runid=runid))
 
 
 # noinspection PyBroadException

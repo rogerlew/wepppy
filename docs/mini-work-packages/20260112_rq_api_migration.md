@@ -196,12 +196,12 @@ Move all run-scoped RQ endpoints from Flask (`/weppcloud/rq/api/*`) to rq-engine
 
 ## Follow-on removal checklist (post-prod migration)
 - [ ] Confirm there are still no external clients relying on `/rq/api/*` or `/upload/*` before removing any compatibility shims.
-- [ ] Remove legacy Flask upload endpoints once confirmed unused:
+- [x] Remove legacy Flask upload endpoints once confirmed unused:
   - `wepppy/weppcloud/routes/nodb_api/climate_bp.py` (`/runs/<runid>/<config>/tasks/upload_cli/`)
   - `wepppy/weppcloud/routes/nodb_api/disturbed_bp.py` (`/runs/<runid>/<config>/tasks/upload_sbs/`, `/runs/<runid>/<config>/tasks/upload_cover_transform`)
   - `wepppy/weppcloud/routes/huc_fire.py` (`/huc-fire/tasks/upload_sbs/`)
   - `wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py` (`/batch/_/<batch_name>/upload-geojson`, `/batch/_/<batch_name>/upload-sbs-map`)
-- [ ] Retire legacy `/rq/api` replay fallbacks once old captures are archived (`wepppy/profile_recorder/*`).
+- [x] Retire legacy `/rq/api` replay fallbacks once old captures are archived (`wepppy/profile_recorder/*`).
 - [ ] Sweep archival docs for `/rq/api` or `/upload` mentions if the historical notes are no longer needed.
 
 ## Exit Criteria

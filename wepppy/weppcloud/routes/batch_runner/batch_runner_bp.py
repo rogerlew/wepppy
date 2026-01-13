@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-import hashlib
 import os
-import json
 import re
 from copy import deepcopy
 from typing import Any, Dict, Optional, Sequence, Union
@@ -13,16 +10,13 @@ from typing import Any, Dict, Optional, Sequence, Union
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_security import current_user
 
-from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
-
-from .._common import Blueprint, roles_required, secure_filename, parse_request_payload
+from .._common import Blueprint, roles_required, parse_request_payload
 from wepppy.nodb import unitizer as unitizer_module
-from wepppy.nodb.base import get_configs, get_config_dir, clear_locks, NoDbAlreadyLockedError
+from wepppy.nodb.base import get_configs, get_config_dir
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.weppcloud.utils import auth_tokens
-from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
-from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
+from wepppy.weppcloud.utils.helpers import get_batch_root_dir, handle_with_exception_factory
 
 batch_runner_bp = Blueprint(
     "batch_runner",
@@ -296,185 +290,6 @@ def _batch_runner_disabled_response():
     return {
         "error": {"message": "Batch Runner is currently disabled."},
     }
-
-@batch_runner_bp.route("/batch/_/<string:batch_name>/upload-geojson", methods=["POST"])
-@roles_required("Admin")
-@handle_with_exception_factory
-def upload_geojson(batch_name: str):
-    if not _batch_runner_feature_enabled():
-        return jsonify(_batch_runner_disabled_response()), 403
-
-    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-    
-    storage = request.files.get("geojson_file") or request.files.get("file")
-    if storage is None:
-        return jsonify({"error": {"message": "No file part named 'geojson_file'."}}), 400
-
-    filename = storage.filename or ""
-    if not filename:
-        return jsonify({"error": {"message": "Filename is required."}}), 400
-
-    safe_name = secure_filename(filename)
-    if not safe_name:
-        return jsonify({"error": {"message": "Filename contains no safe characters."}}), 400
-
-    lower_name = safe_name.lower()
-    if not lower_name.endswith((".geojson", ".json")):
-        return jsonify({"error": {"message": "Only .geojson or .json files are supported."}}), 400
-
-    resources_dir = batch_runner.resources_dir
-    os.makedirs(resources_dir, exist_ok=True)
-    dest_path = os.path.join(resources_dir, safe_name)
-    replaced = os.path.exists(dest_path)
-    storage.save(dest_path)
-
-    # initial validation for security
-    try:
-        watershed_collection = WatershedCollection(dest_path)
-        analysis_results = watershed_collection.analysis_results  # lazy runs analysis
-    except ValueError as exc:
-        _safe_unlink(dest_path)
-        return jsonify({"error": {"message": f"GeoJSON must be a FeatureCollection: {exc}"}}), 400
-    except Exception as exc:  # pragma: no cover - unexpected errors
-        _safe_unlink(dest_path)
-        current_app.logger.exception("Failed to ingest GeoJSON upload")
-        return jsonify({"error": {"message": "Failed to process GeoJSON upload."}}), 500
-
-    if analysis_results.get("feature_count", 0) == 0:
-        _safe_unlink(dest_path)
-        return jsonify({"error": {"message": "GeoJSON contains no features."}}), 400
-
-    limit_bytes = _max_geojson_size_bytes()
-    if os.path.getsize(dest_path) > limit_bytes:
-        _safe_unlink(dest_path)
-        limit_mb = max(1, int(limit_bytes // (1024 * 1024)))
-        return jsonify({"error": {"message": f"GeoJSON file exceeds maximum size of {limit_mb} MB."}}), 400
-
-    relative_path = os.path.relpath(dest_path, batch_runner.wd)
-    metadata = {
-        "resource_type": "geojson",
-        "filename": safe_name,
-        "original_filename": filename,
-        "relative_path": relative_path,
-        "content_type": storage.mimetype,
-        "replaced": replaced
-    }
-
-    metadata["uploaded_at"] = datetime.now(timezone.utc).isoformat()
-    uploader = _current_user_email()
-    if uploader:
-        metadata["uploaded_by"] = str(uploader)
-
-    watershed_collection.update_analysis_results(metadata)
-
-    # let BatchRunner verify it meets the requirements
-    try:
-        batch_runner.register_geojson(watershed_collection, metadata=metadata)
-    except ValueError as exc:
-        return jsonify({"error": {"message": str(exc)}}), 400
-
-    snapshot = _build_batch_runner_snapshot(batch_runner)
-    resource_payload = snapshot.get("resources", {}).get("watershed_geojson")
-    template_state = snapshot.get("metadata", {}).get("template_validation")
-
-    response_payload = {
-        "resource": resource_payload,
-        "template_validation": template_state,
-        "snapshot": snapshot,
-        "message": "GeoJSON uploaded successfully."
-    }
-
-    return jsonify(response_payload), 200
-
-
-@batch_runner_bp.route("/batch/_/<string:batch_name>/upload-sbs-map", methods=["POST"])
-@roles_required("Admin")
-@handle_with_exception_factory
-def upload_sbs_map(batch_name: str):
-    if not _batch_runner_feature_enabled():
-        return jsonify(_batch_runner_disabled_response()), 403
-
-    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-
-    storage = request.files.get("sbs_map") or request.files.get("file")
-    if storage is None:
-        return jsonify({"error": {"message": "No file part named 'sbs_map'."}}), 400
-
-    filename = storage.filename or ""
-    if not filename:
-        return jsonify({"error": {"message": "Filename is required."}}), 400
-
-    safe_name = secure_filename(filename)
-    if not safe_name:
-        return jsonify({"error": {"message": "Filename contains no safe characters."}}), 400
-
-    lower_name = safe_name.lower()
-    if not lower_name.endswith((".tif", ".tiff", ".img", ".vrt")):
-        return jsonify({"error": {"message": "Only GeoTIFF/IMG/VRT rasters are supported."}}), 400
-
-    resources_dir = batch_runner.resources_dir
-    os.makedirs(resources_dir, exist_ok=True)
-    dest_path = os.path.join(resources_dir, safe_name)
-    replaced = os.path.exists(dest_path)
-    storage.save(dest_path)
-
-    try:
-        size_bytes = os.path.getsize(dest_path)
-    except OSError:
-        size_bytes = None
-
-    sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
-    if sanity_status != 0:
-        _safe_unlink(dest_path)
-        return jsonify({"error": {"message": sanity_message or "Invalid SBS map."}}), 400
-
-    try:
-        relative_path = os.path.relpath(dest_path, batch_runner.wd)
-    except ValueError:
-        relative_path = dest_path
-
-    metadata: Dict[str, Any] = {
-        "resource_type": "sbs_map",
-        "filename": safe_name,
-        "original_filename": filename,
-        "relative_path": relative_path,
-        "content_type": storage.mimetype,
-        "replaced": replaced,
-        "sanity_status": sanity_status,
-        "sanity_message": sanity_message,
-        "size_bytes": size_bytes,
-    }
-
-    metadata["uploaded_at"] = datetime.now(timezone.utc).isoformat()
-    uploader = _current_user_email()
-    if uploader:
-        metadata["uploaded_by"] = str(uploader)
-
-    try:
-        batch_runner.sbs_map = relative_path
-        batch_runner.sbs_map_metadata = metadata
-    except NoDbAlreadyLockedError:
-        # Clear stale lock and retry once to keep the upload flow resilient.
-        clear_locks(batch_runner.runid)
-        batch_runner.sbs_map = relative_path
-        batch_runner.sbs_map_metadata = metadata
-
-    snapshot = _build_batch_runner_snapshot(batch_runner)
-    resource_payload = snapshot.get("resources", {}).get("sbs_map")
-
-    return jsonify({
-        "resource": resource_payload,
-        "snapshot": snapshot,
-        "message": "SBS map uploaded successfully."
-    })
-
-
-def _safe_unlink(path: Union[str, os.PathLike[str]]) -> None:
-    try:
-        os.remove(path)
-    except FileNotFoundError:
-        pass
-
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/validate-template", methods=["POST"])
 @roles_required("Admin")

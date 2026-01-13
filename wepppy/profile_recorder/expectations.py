@@ -119,17 +119,7 @@ _PROFILE_EXPECTATIONS: Dict[str, List[JobExpectation]] = {
             check=_check_ash_remaining_ash,
         ),
         JobExpectation(
-            endpoint_suffix="rq/api/run_ash",
-            description="H46 remaining_ash equals 22.0 after run_ash",
-            check=_check_ash_remaining_ash,
-        ),
-        JobExpectation(
             endpoint_suffix="post-dss-export-rq",
-            description="totalwatsed3 channel 104/124 DSS exports exist",
-            check=_check_dss_exports_exist,
-        ),
-        JobExpectation(
-            endpoint_suffix="rq/api/post_dss_export_rq",
             description="totalwatsed3 channel 104/124 DSS exports exist",
             check=_check_dss_exports_exist,
         ),
@@ -137,11 +127,6 @@ _PROFILE_EXPECTATIONS: Dict[str, List[JobExpectation]] = {
     "double-ash-load": [
         JobExpectation(
             endpoint_suffix="run-ash",
-            description="H10 remaining_ash equals 22.0 after run_ash",
-            check=_check_ash_remaining_ash_h10,
-        ),
-        JobExpectation(
-            endpoint_suffix="rq/api/run_ash",
             description="H10 remaining_ash equals 22.0 after run_ash",
             check=_check_ash_remaining_ash_h10,
         ),

@@ -15,8 +15,6 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - `/batch/create/` is gated by `roles_required("Admin")` and the `BATCH_RUNNER_ENABLED` flag. It collects a batch name and base config, then calls `_create_batch_project()`.
 - `_create_batch_project()` resolves the batch root (`get_batch_root_dir()`), creates `<batch_name>/`, and instantiates `BatchRunner`, which immediately bootstraps `_base/` using the selected config.
 - `/batch/_/<batch_name>/` resolves `BatchRunner.getInstanceFromBatchName()`, reaches into the `_base/` directory, and hydrates the same NoDb singletons that the run-0 blueprint exposes (Ron, Landuse, Soils, Watershed, Omni, etc.). The manage view renders `manage_pure.htm` which includes `batch_runner_pure.htm`.
-- `/upload-geojson` accepts GeoJSON/JSON uploads, persists them into `<batch_name>/resources/`, instantiates a `WatershedCollection`, and lets `BatchRunner` record the analysis metadata.
-- `/upload-sbs-map` (Admin) accepts a soil burn severity raster, validates it with `sbs_map_sanity_check`, stores it once under `<batch_name>/resources/`, and records metadata on the `BatchRunner` so each per-watershed run can crop it after DEM fetch.
 - `/validate-template` replays the stored `WatershedCollection`, runs template evaluation, and persists the results on the `BatchRunner` instance before returning a JSON payload to the UI.
 
 ### `BatchRunner` (NoDb)
@@ -39,7 +37,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 ## Request Lifecycle (Current PoC)
 1. **Create** – Admin loads `/batch/create/`, submits a batch name and base config. The server validates inputs, scaffolds the workspace, and redirects to the manage view.
 2. **Manage** – `/batch/_/<batch_name>/` renders the standard controls for the `_base` project. The page currently lacks bespoke batch-runner bootstrap data; the context rebuild is queued as a follow-up.
-3. **GeoJSON Intake** – Upload endpoint stores the file under `resources/`, runs analysis via `WatershedCollection`, and persists the metadata through `BatchRunner.register_geojson()`.
+3. **GeoJSON Intake** – Uploads flow through rq-engine (`/rq-engine/api/batch/_/<batch_name>/upload-geojson`), which stores the file under `resources/` and persists metadata via `BatchRunner.register_geojson()`.
 4. **Template Preview** – Template validation rebuilds the `WatershedCollection`, generates prospective run IDs, records the summary (`_runid_template_state`), and returns duplicates/errors for UI display.
 
 ## Current Constraints & Gaps

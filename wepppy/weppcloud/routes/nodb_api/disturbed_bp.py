@@ -16,7 +16,6 @@ from .._common import (
     parse_request_payload,
     render_template,
     request,
-    secure_filename,
     send_file,
     success_factory,
     _join,
@@ -25,12 +24,6 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed, write_disturbed_land_soil_lookup
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
-from wepppy.weppcloud.utils.uploads import (
-    UploadError,
-    save_run_file,
-    upload_failure,
-    upload_success,
-)
 
 disturbed_bp = Blueprint('disturbed', __name__)
 
@@ -246,70 +239,6 @@ def set_firedate(runid: str, config: str) -> Response:
         return success_factory()
     except Exception:
         return exception_factory("failed to set firedate", runid=runid)
-
-
-@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
-@authorize_and_handle_with_exception_factory
-def task_upload_sbs(runid: str, config: str) -> Response:
-    """Upload and validate an SBS raster."""
-    from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
-    ctx = load_run_context(runid, config)
-    wd = str(ctx.active_root)
-
-    ron = Ron.getInstance(wd)
-    if 'baer' in ron.mods:
-        baer = Baer.getInstance(wd)
-    else:
-        baer = Disturbed.getInstance(wd)
-
-    file_storage = request.files.get('input_upload_sbs')
-    if file_storage is None or not file_storage.filename:
-        return error_factory('input_upload_sbs must be provided')
-
-    filename = secure_filename(file_storage.filename)
-    if not filename:
-        return error_factory('input_upload_sbs must have a valid filename')
-    if filename.lower() == 'baer.cropped.tif':
-        # Prevent collisions with derived baer.cropped.tif artifacts generated later.
-        filename = '_baer.cropped.tif'
-
-    file_storage.save(_join(baer.baer_dir, filename))
-
-    ret, description = sbs_map_sanity_check(_join(baer.baer_dir, filename))
-    if ret != 0:
-        return exception_factory(description, runid=runid)
-    baer.validate(filename, mode=0)
-    return success_factory({'disturbed_fn': baer.disturbed_fn})
-
-
-@disturbed_bp.route('/runs/<string:runid>/<config>/tasks/upload_cover_transform', methods=['POST'])
-@authorize_and_handle_with_exception_factory
-def task_upload_cover_transform(runid: str, config: str) -> Response:
-    """Upload a user-defined cover transform for revegetation workflows."""
-    from wepppy.nodb.mods.revegetation import Revegetation
-    ctx = load_run_context(runid, config)
-    wd = str(ctx.active_root)
-    reveg = Revegetation.getInstance(wd)
-    try:
-        saved_path = save_run_file(
-            runid=runid,
-            config=config,
-            form_field='input_upload_cover_transform',
-            allowed_extensions=('csv',),
-            dest_subdir='revegetation',
-            run_root=wd,
-            filename_transform=lambda value: value,
-            overwrite=True,
-        )
-    except UploadError as exc:
-        return upload_failure(str(exc))
-
-    try:
-        res = reveg.validate_user_defined_cover_transform(saved_path.name)
-    except UploadError as exc:
-        return upload_failure(str(exc))
-
-    return upload_success(content=res)
 
 
 @disturbed_bp.route('/runs/<string:runid>/<config>/tasks/remove_sbs', methods=['POST'])

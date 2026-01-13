@@ -10,6 +10,7 @@ from queue import Queue
 from pathlib import Path
 from typing import Dict, List, Optional
 from uuid import uuid4
+from urllib.parse import urljoin
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -643,7 +644,7 @@ def _poll_job_completion(
     if not job_id:
         raise ProfileOperationError("Fork/archive response did not include a job identifier")
 
-    jobinfo_url = f"{base_url.rstrip('/')}/rq/api/jobinfo/{job_id}"
+    jobinfo_url = urljoin(f"{base_url.rstrip('/')}/", f"/rq-engine/api/jobinfo/{job_id}")
     deadline = time.monotonic() + timeout_seconds
     last_payload: Dict[str, object] = {}
     while True:
@@ -679,7 +680,10 @@ def fork_profile(profile: str, payload: ProfileForkRequest, logger: Optional[log
 
     fork_uuid = uuid4().hex
     target_runid = payload.target_runid or f"profile;;fork;;{fork_uuid}"
-    fork_url = f"{base_url}/runs/{sandbox_run_id}/{config_slug}/rq/api/fork"
+    fork_url = urljoin(
+        f"{base_url.rstrip('/')}/",
+        f"/rq-engine/api/runs/{sandbox_run_id}/{config_slug}/fork",
+    )
     form_data = {
         "undisturbify": "true" if payload.undisturbify else "false",
         "target_runid": target_runid,
@@ -731,7 +735,10 @@ def archive_profile(profile: str, payload: ProfileArchiveRequest, logger: Option
     session = _ensure_session(base_url, payload.cookie, logger=log)
     config_slug = _read_active_config(sandbox_run_dir)
 
-    archive_url = f"{base_url}/runs/{sandbox_run_id}/{config_slug}/rq/api/archive"
+    archive_url = urljoin(
+        f"{base_url.rstrip('/')}/",
+        f"/rq-engine/api/runs/{sandbox_run_id}/{config_slug}/archive",
+    )
     body_payload: Dict[str, object] = {}
     if payload.comment is not None:
         body_payload["comment"] = payload.comment
