@@ -195,7 +195,7 @@
 {% endblock %}
 
 {% block script_extras %}
-<script src="{{ static_url('js/theme.js') }}"></script>
+<script src="{{ static_url('js/controllers-gl.js') }}"></script>
 <script src="{{ static_url('js/qrcode.js') }}"></script>
 <script>
   const jobId = {{ job_id | tojson }};
@@ -492,7 +492,11 @@
       throw new Error("Run ID unavailable for session token");
     }
 
-    const tokenUrl = `/rq-engine/api/runs/${encodeURIComponent(runid)}/${encodeURIComponent(sessionTokenConfig)}/session-token`;
+    const tokenUrl = url_for_run("session-token", {
+      prefix: "/rq-engine/api",
+      runId: runid,
+      config: sessionTokenConfig
+    });
     sessionTokenPromise = fetch(tokenUrl, { method: "POST", credentials: "same-origin" })
       .then(async (response) => {
         const text = await response.text();

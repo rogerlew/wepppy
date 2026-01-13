@@ -158,7 +158,15 @@
         }
 
         var opts = options ? Object.assign({}, options) : {};
-        var url = "/rq-engine/api/runs/" + encodeURIComponent(runId) + "/" + encodeURIComponent(config) + "/session-token";
+        var urlForRun = global.url_for_run;
+        if (typeof urlForRun !== "function") {
+            throw new Error("url_for_run is required to build session token URLs");
+        }
+        var url = urlForRun("session-token", {
+            prefix: "/rq-engine/api",
+            runId: runId,
+            config: config
+        });
 
         entry = entry || {};
         entry.promise = http.request(url, { method: "POST", credentials: "same-origin", timeoutMs: opts.timeoutMs })

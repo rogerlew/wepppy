@@ -3,6 +3,7 @@
  */
 
 beforeAll(async () => {
+    await import("../utils.js");
     await import("../forms.js");
     await import("../http.js");
 });

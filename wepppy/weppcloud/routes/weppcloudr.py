@@ -412,7 +412,6 @@ def deval_details(runid, config):
         refresh_kwargs['pup'] = ctx.pup_relpath
 
     refresh_url = url_for_run('weppcloud.deval_details', **refresh_kwargs)
-    job_status_url = url_for('rq_jobinfo.jobstatus_route', job_id=job_id) if job_id else None
     job_dashboard_url = url_for('rq_job_dashboard.job_dashboard_route', job_id=job_id) if job_id else None
 
     context = {
@@ -420,7 +419,6 @@ def deval_details(runid, config):
         'config': config,
         'job_id': job_id,
         'job_status': job_status,
-        'job_status_url': job_status_url,
         'job_dashboard_url': job_dashboard_url,
         'refresh_url': refresh_url,
         'skip_cache': skip_cache,

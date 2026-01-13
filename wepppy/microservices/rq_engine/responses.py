@@ -14,11 +14,11 @@ def error_response(
     details: Any | None = None,
     errors: list[dict[str, Any]] | None = None,
 ) -> JSONResponse:
-    error_payload: dict[str, Any] = {"message": message}
+    if details is None:
+        details = {"errors": errors} if errors is not None else ""
+    error_payload: dict[str, Any] = {"message": message, "details": details}
     if code:
         error_payload["code"] = code
-    if details is not None:
-        error_payload["details"] = details
     payload = {
         "error": error_payload,
     }
@@ -44,11 +44,13 @@ def error_response_with_traceback(
 
 
 def validation_error_response(errors: list[dict[str, Any]]) -> JSONResponse:
-    payload = {
-        "errors": errors,
-        "error": {"message": "Validation failed", "code": "validation_error"},
-    }
-    return JSONResponse(payload, status_code=400)
+    return error_response(
+        "Validation failed",
+        status_code=400,
+        code="validation_error",
+        details={"errors": errors},
+        errors=errors,
+    )
 
 
 __all__ = ["error_response", "error_response_with_traceback", "validation_error_response"]

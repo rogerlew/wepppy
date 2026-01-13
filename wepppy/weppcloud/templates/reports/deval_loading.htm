@@ -55,7 +55,6 @@
 <script>
   const jobId = {{ job_id|tojson }};
   const initialStatus = {{ job_status|tojson }};
-  const jobStatusUrl = {{ job_status_url|tojson }};
   const jobStatusPrimaryUrl = jobId ? `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}` : null;
   const refreshUrl = {{ refresh_url|tojson }};
   const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
@@ -131,7 +130,7 @@
   }
 
   async function fetchJobStatusJson() {
-    if (!jobId || !jobStatusUrl) {
+    if (!jobId || !jobStatusPrimaryUrl) {
       throw new Error("Job could not be enqueued.");
     }
 
@@ -149,19 +148,11 @@
       return response.json();
     }
 
-    try {
-      if (jobStatusPrimaryUrl) {
-        return await fetchOnce(jobStatusPrimaryUrl);
-      }
-    } catch (error) {
-      // Fall back to the legacy endpoint on any error.
-    }
-
-    return fetchOnce(jobStatusUrl);
+    return fetchOnce(jobStatusPrimaryUrl);
   }
 
   async function pollStatus() {
-    if (!jobId || !jobStatusUrl) {
+    if (!jobId || !jobStatusPrimaryUrl) {
       return handleFailure("unknown", "Job could not be enqueued.");
     }
     try {

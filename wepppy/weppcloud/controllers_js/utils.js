@@ -27,11 +27,23 @@ function url_for_run(url, options) {
     }
 
     var outputPrefix = sitePrefix;
+    var runIdOverride;
+    var configOverride;
     if (options !== undefined) {
         if (typeof options === "string") {
             outputPrefix = normalizePrefix(options);
-        } else if (options && typeof options === "object" && Object.prototype.hasOwnProperty.call(options, "prefix")) {
-            outputPrefix = normalizePrefix(options.prefix);
+        } else if (options && typeof options === "object") {
+            if (Object.prototype.hasOwnProperty.call(options, "prefix")) {
+                outputPrefix = normalizePrefix(options.prefix);
+            }
+            if (Object.prototype.hasOwnProperty.call(options, "runId")) {
+                runIdOverride = options.runId;
+            } else if (Object.prototype.hasOwnProperty.call(options, "runid")) {
+                runIdOverride = options.runid;
+            }
+            if (Object.prototype.hasOwnProperty.call(options, "config")) {
+                configOverride = options.config;
+            }
         }
     }
 
@@ -67,6 +79,13 @@ function url_for_run(url, options) {
     var activeRunId = resolved && resolved.runId ? resolved.runId : (typeof window.runId === "string" ? window.runId : "");
     var activeConfig = resolved && resolved.config ? resolved.config : (typeof window.config === "string" ? window.config : "");
 
+    if (runIdOverride !== undefined && runIdOverride !== null) {
+        activeRunId = String(runIdOverride).trim();
+    }
+    if (configOverride !== undefined && configOverride !== null) {
+        activeConfig = String(configOverride).trim();
+    }
+
     var runScopedPath = normalizedUrl;
     if (activeRunId && activeConfig) {
         runScopedPath = "runs/" + encodeURIComponent(activeRunId) + "/" + encodeURIComponent(activeConfig) + "/";
@@ -80,6 +99,13 @@ function url_for_run(url, options) {
     }
 
     return outputPrefix + runScopedPath;
+}
+
+if (typeof globalThis !== "undefined") {
+    globalThis.url_for_run = url_for_run;
+}
+if (typeof window !== "undefined") {
+    window.url_for_run = url_for_run;
 }
 
 function pass() {

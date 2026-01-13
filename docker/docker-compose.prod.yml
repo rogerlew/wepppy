@@ -281,6 +281,7 @@ services:
       context: ..
       dockerfile: weppcloudR/Dockerfile
     restart: unless-stopped
+    container_name: weppcloudr
     environment:
       PORT: ${WEPPCLOUDR_PORT:-8050}
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
