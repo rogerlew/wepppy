@@ -9,9 +9,9 @@
          data-runid="{{ runid }}"
          data-config="{{ config }}"
          data-archives-url="{{ url_for_run('archive.rq_archive_list', runid=runid, config=config) }}"
-         data-archive-api-url="{{ url_for_run('rq_api.api_archive', runid=runid, config=config) }}"
-         data-restore-api-url="{{ url_for_run('rq_api.api_restore_archive', runid=runid, config=config) }}"
-         data-delete-api-url="{{ url_for_run('rq_api.api_delete_archive', runid=runid, config=config) }}"
+         data-archive-api-url="/rq-engine/api/runs/{{ runid }}/{{ config }}/archive"
+         data-restore-api-url="/rq-engine/api/runs/{{ runid }}/{{ config }}/restore-archive"
+         data-delete-api-url="/rq-engine/api/runs/{{ runid }}/{{ config }}/delete-archive"
          data-project-path="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}"
          data-user-anonymous="{{ 'true' if user.is_anonymous else 'false' }}">
 {% endif %}
@@ -19,9 +19,9 @@
        data-runid="{{ runid }}"
        data-config="{{ config }}"
        data-archives-url="{{ url_for_run('archive.rq_archive_list', runid=runid, config=config) }}"
-       data-archive-api-url="{{ url_for_run('rq_api.api_archive', runid=runid, config=config) }}"
-       data-restore-api-url="{{ url_for_run('rq_api.api_restore_archive', runid=runid, config=config) }}"
-       data-delete-api-url="{{ url_for_run('rq_api.api_delete_archive', runid=runid, config=config) }}"
+       data-archive-api-url="/rq-engine/api/runs/{{ runid }}/{{ config }}/archive"
+       data-restore-api-url="/rq-engine/api/runs/{{ runid }}/{{ config }}/restore-archive"
+       data-delete-api-url="/rq-engine/api/runs/{{ runid }}/{{ config }}/delete-archive"
        data-project-path="{{ url_for_run('run_0.runs0', runid=runid, config=config) }}"
        data-user-anonymous="{{ 'true' if user.is_anonymous else 'false' }}"
        hidden></div>

@@ -54,6 +54,9 @@ var Outlet = (function () {
         if (!http || typeof http.request !== "function" || typeof http.getJson !== "function") {
             throw new Error("Outlet GL requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("Outlet GL requires WCHttp.requestWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Outlet GL requires WCEvents helpers.");
         }
@@ -647,14 +650,17 @@ var Outlet = (function () {
                 job_id: null
             };
 
-            return http.request(url_for_run("rq/api/set_outlet"), {
+            return http.requestWithSessionToken(
+                url_for_run("set-outlet", { prefix: "/rq-engine/api" }),
+                {
                 method: "POST",
                 json: {
                     latitude: coordinates.lat,
                     longitude: coordinates.lng
                 },
                 form: formElement
-            })
+                }
+            )
                 .then(function (result) {
                     var data = result.body || {};
                     var success = !data.error && !data.errors && data.job_id;

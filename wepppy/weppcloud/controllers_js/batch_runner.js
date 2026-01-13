@@ -436,9 +436,10 @@ var BatchRunner = (function () {
                 validation: extractValidation(bootstrap.state || {}),
                 geojsonLimitMb: bootstrap.geojsonLimitMb
             };
+            controller.rqEngineToken = bootstrap.rqEngineToken || "";
             controller.sitePrefix = bootstrap.sitePrefix || "";
             controller.baseUrl = buildBaseUrl();
-            controller.uploadBaseUrl = buildBaseUrl("/upload");
+            controller.uploadBaseUrl = buildBaseUrl("/rq-engine/api");
             controller.templateInitialised = false;
 
             controller.form = deps.dom.qs(SELECTORS.form);
@@ -666,6 +667,13 @@ var BatchRunner = (function () {
                 suffix = "/" + suffix;
             }
             return base + suffix;
+        }
+
+        function buildAuthHeaders() {
+            if (!controller.rqEngineToken) {
+                return undefined;
+            }
+            return { Authorization: "Bearer " + controller.rqEngineToken };
         }
 
         function extractValidation(snapshot) {
@@ -1651,9 +1659,8 @@ var BatchRunner = (function () {
                 : undefined;
 
             controller.http
-                .postJsonWithFallback(
+                .postJson(
                     "/rq-engine/api/jobinfo",
-                    "/weppcloud/rq/api/jobinfo",
                     { job_ids: jobIds },
                     { signal: signal }
                 )
@@ -1774,7 +1781,8 @@ var BatchRunner = (function () {
             controller.http
                 .request(uploadApiUrl("upload-geojson"), {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    headers: buildAuthHeaders()
                 })
                 .then(function (response) {
                     var payload = response.body || {};
@@ -1892,7 +1900,8 @@ var BatchRunner = (function () {
             controller.http
                 .request(uploadApiUrl("upload-sbs-map"), {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    headers: buildAuthHeaders()
                 })
                 .then(function (response) {
                     var payload = response.body || {};
@@ -2040,7 +2049,13 @@ var BatchRunner = (function () {
             }
 
             controller.http
-                .postJson(apiUrl(url_for_run("rq/api/run-batch")), {})
+                .postJson(
+                    "/rq-engine/api/batch/_/" + encodeURIComponent(controller.state.batchName) + "/run-batch",
+                    {},
+                    controller.rqEngineToken
+                        ? { headers: { Authorization: "Bearer " + controller.rqEngineToken } }
+                        : undefined
+                )
                 .then(function (response) {
                     var payload = response.body || {};
                     if (payload.error || payload.errors) {

@@ -500,8 +500,13 @@ def get_run_owners_lazy(runid: str) -> Any:
     Returns:
         Whatever `get_run_owners` returns (typically a collection of users).
     """
+    from flask import has_app_context
     from wepppy.weppcloud.app import get_run_owners
-    return get_run_owners(runid)
+    if has_app_context():
+        return get_run_owners(runid)
+    from wepppy.weppcloud.app import app as flask_app
+    with flask_app.app_context():
+        return get_run_owners(runid)
 
 
 def get_user_models() -> tuple[Any, Any, Any]:

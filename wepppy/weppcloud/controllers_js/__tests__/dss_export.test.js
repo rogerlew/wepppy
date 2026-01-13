@@ -79,6 +79,7 @@ describe("DssExport controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-xyz" } })),
+            postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-xyz" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
@@ -95,7 +96,12 @@ describe("DssExport controller", () => {
 
         window.site_prefix = "/weppcloud";
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../dss_export.js");
         dss = window.DssExport.getInstance();
@@ -135,8 +141,8 @@ describe("DssExport controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(httpMock.postJson).toHaveBeenCalledWith(
-            "rq/api/post_dss_export_rq",
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/post-dss-export-rq",
             {
                 dss_export_mode: 1,
                 dss_export_channel_ids: [12, 34],
@@ -213,7 +219,7 @@ describe("DssExport controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             dss,
             expect.objectContaining({
@@ -263,7 +269,7 @@ describe("DssExport controller", () => {
         httpError.body = {
             error: { message: "failed" }
         };
-        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(httpError);
         httpMock.isHttpError.mockReturnValue(true);
         const errors = [];
         dss.events.on("dss:export:error", (payload) => errors.push(payload));
@@ -283,7 +289,7 @@ describe("DssExport controller", () => {
 
     test("request rejection routes through pushErrorStacktrace", async () => {
         const error = new Error("network");
-        httpMock.postJson.mockRejectedValueOnce(error);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(error);
         httpMock.isHttpError.mockReturnValue(false);
 
         dss.export();
@@ -304,7 +310,7 @@ describe("DssExport controller", () => {
         httpError.body = {
             error: { message: "Injected failure" }
         };
-        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(httpError);
         httpMock.isHttpError.mockReturnValue(true);
 
         dss.export();
@@ -333,6 +339,7 @@ describe("DssExport controller (dynamic mods)", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-xyz" } })),
+            postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-xyz" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
@@ -348,7 +355,12 @@ describe("DssExport controller (dynamic mods)", () => {
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
         window.site_prefix = "/weppcloud";
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../dss_export.js");
         dss = window.DssExport.getInstance();

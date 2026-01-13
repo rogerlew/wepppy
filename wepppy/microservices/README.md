@@ -70,6 +70,11 @@ Read-only FastAPI service that exposes RQ job polling endpoints to offload frequ
 - `GET /rq-engine/api/jobstatus/{job_id}`
 - `GET /rq-engine/api/jobinfo/{job_id}`
 - `POST /rq-engine/api/jobinfo`
+- `POST /rq-engine/api/canceljob/{job_id}` (JWT required; `rq:status` scope)
+
+**Auth notes:**
+- `jobstatus`/`jobinfo` remain unsecured for read-only polling.
+- `canceljob` requires a bearer token validated against the JWT contract.
 
 **Deployment**: Runs as a separate container in Docker Compose stacks; see `docker/docker-compose.dev.yml`.
 

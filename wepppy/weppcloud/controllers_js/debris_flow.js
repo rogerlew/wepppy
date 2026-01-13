@@ -27,6 +27,9 @@ var DebrisFlow = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("DebrisFlow controller requires WCHttp helpers.");
         }
+        if (typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("DebrisFlow controller requires WCHttp.postJsonWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("DebrisFlow controller requires WCEvents helpers.");
         }
@@ -256,7 +259,11 @@ var DebrisFlow = (function () {
 
             debris.connect_status_stream(debris);
 
-            http.postJson(url_for_run("rq/api/run_debris_flow"), cleanPayload, { form: formElement }).then(function (response) {
+            http.postJsonWithSessionToken(
+                url_for_run("run-debris-flow", { prefix: "/rq-engine/api" }),
+                cleanPayload,
+                { form: formElement }
+            ).then(function (response) {
                 var payload = response.body || {};
                 if (payload.job_id) {
                     statusAdapter.html("run_debris_flow_rq job submitted: " + payload.job_id);

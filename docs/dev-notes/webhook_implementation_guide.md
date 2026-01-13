@@ -1,6 +1,6 @@
 # Webhook Implementation Guide
 
-> **Quick reference for implementing webhook support in RQ API routes**
+> **Quick reference for implementing webhook support in rq-engine routes**
 
 ## TL;DR
 
@@ -13,7 +13,7 @@ with _redis_conn() as redis_conn:
     job = q.enqueue_call(build_landuse_rq, (runid,), timeout=TIMEOUT)
 
 # After
-from wepppy.weppcloud.routes.rq.api._webhook_utils import enqueue_with_webhook
+from wepppy.microservices.rq_engine.webhook_utils import enqueue_with_webhook
 
 with _redis_conn() as redis_conn:
     q = Queue(connection=redis_conn)
@@ -59,19 +59,19 @@ Total routes requiring updates: **~25-30**
 
 ### New Files
 ```
-wepppy/rq/webhook_callbacks.py              # Core webhook dispatcher
-wepppy/weppcloud/routes/rq/api/_webhook_utils.py  # Helper for routes
+wepppy/rq/webhook_callbacks.py                   # Core webhook dispatcher
+wepppy/microservices/rq_engine/webhook_utils.py  # Helper for routes
 wepppy/config/webhook_settings.py           # Configuration
-tests/weppcloud/routes/rq/test_webhook_integration.py  # Unit tests
+tests/microservices/test_rq_engine_webhook_integration.py  # Unit tests
 tests/integration/test_webhook_e2e.py       # Integration tests
 docs/api-specs/webhook_api.md               # API documentation
 ```
 
 ### Modified Files
 ```
-wepppy/weppcloud/routes/rq/api/api.py       # All route handlers (~25 functions)
-docker/docker-compose.dev.yml               # Add WEPPCLOUD_WEBHOOKS_ENABLED
-docker/docker-compose.prod.yml              # Add WEPPCLOUD_WEBHOOKS_ENABLED
+wepppy/microservices/rq_engine/*_routes.py  # Route handlers (~25 functions)
+docker/docker-compose.dev.yml               # Add RQ_ENGINE_WEBHOOKS_ENABLED (or equivalent)
+docker/docker-compose.prod.yml              # Add RQ_ENGINE_WEBHOOKS_ENABLED (or equivalent)
 docker/requirements-uv.txt                  # Add 'requests' if not present
 ```
 
@@ -104,13 +104,15 @@ with _redis_conn() as redis_conn:
 
 ### Step 2: Create Batch Migration Script
 
+Before running the script, add `from .webhook_utils import enqueue_with_webhook` to each rq-engine route module that enqueues jobs.
+
 ```python
 #!/usr/bin/env python3
 # scripts/migrate_routes_to_webhooks.py
 import re
 from pathlib import Path
 
-API_FILE = Path('wepppy/weppcloud/routes/rq/api/api.py')
+ROUTE_FILES = list(Path("wepppy/microservices/rq_engine").glob("*_routes.py"))
 
 # Pattern to match enqueue_call
 PATTERN_A = re.compile(
@@ -163,26 +165,17 @@ def migrate_pattern_b(match):
     )
 
 def main():
-    content = API_FILE.read_text()
-    
-    # Add import at top
-    if 'from wepppy.weppcloud.routes.rq.api._webhook_utils import enqueue_with_webhook' not in content:
-        import_line = 'from wepppy.weppcloud.routes.rq.api._webhook_utils import enqueue_with_webhook\n'
-        # Insert after other imports
-        content = content.replace(
-            'from ..._common import roles_required, parse_request_payload\n',
-            'from ..._common import roles_required, parse_request_payload\n' + import_line
-        )
-    
-    # Migrate Pattern A
-    content = PATTERN_A.sub(migrate_pattern_a, content)
-    
-    # Migrate Pattern B
-    content = PATTERN_B.sub(migrate_pattern_b, content)
-    
-    # Write back
-    API_FILE.write_text(content)
-    print(f'✅ Migrated {API_FILE}')
+    for api_file in ROUTE_FILES:
+        content = api_file.read_text()
+
+        # Migrate Pattern A
+        content = PATTERN_A.sub(migrate_pattern_a, content)
+
+        # Migrate Pattern B
+        content = PATTERN_B.sub(migrate_pattern_b, content)
+
+        api_file.write_text(content)
+        print(f"✅ Migrated {api_file}")
 
 if __name__ == '__main__':
     main()
@@ -193,8 +186,8 @@ if __name__ == '__main__':
 **Example: `api_build_landuse`**
 
 ```diff
-@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_landuse', methods=['POST'])
-def api_build_landuse(runid, config):
+@router.post("/runs/{runid}/{config}/build-landuse")
+async def build_landuse(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         wd = get_wd(runid)
         landuse = Landuse.getInstance(wd)
@@ -293,7 +286,7 @@ export WEPPCLOUD_WEBHOOKS_ENABLED=true
 ngrok http 5000
 
 # 3. Make API call with webhook
-curl -X POST http://localhost:8000/runs/test-run/dev.cfg/rq/api/build_landuse \
+curl -X POST http://localhost:8000/rq-engine/api/runs/test-run/dev.cfg/build-landuse \
   -H "Content-Type: application/json" \
   -d '{
     "landuse_mode": "1",
@@ -334,7 +327,7 @@ def test_api_build_landuse_webhook(tmp_path):
     
     with app.test_client() as client:
         response = client.post(
-            f'/runs/{runid}/{config}/rq/api/build_landuse',
+            f"/rq-engine/api/runs/{runid}/{config}/build-landuse",
             json={
                 'landuse_mode': '1',
                 'landuse_db': 'nlcd',

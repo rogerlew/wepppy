@@ -669,7 +669,7 @@ var Disturbed = (function () {
             disturbed.triggerEvent("job:started", { task: "disturbed:upload" });
             var formData = new window.FormData(formElement);
             return http
-                .request(url_for_run("tasks/upload_sbs/", { prefix: "/upload" }), {
+                .requestWithSessionToken(url_for_run("tasks/upload-sbs/", { prefix: "/rq-engine/api" }), {
                     method: "POST",
                     body: formData,
                     form: formElement
@@ -682,9 +682,9 @@ var Disturbed = (function () {
                         updateHasSbs(true, "upload");
                         
                         // Update filename display if provided
-                        var content = data.Content || {};
-                        if (content.disturbed_fn) {
-                            updateCurrentFilename(content.disturbed_fn);
+                        var result = data.result || {};
+                        if (result.disturbed_fn) {
+                            updateCurrentFilename(result.disturbed_fn);
                         }
 
                         syncModeFromServer(0, null);

@@ -35,6 +35,7 @@ describe("OPENET_TS controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
+            postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.isHttpError))
         };
@@ -58,7 +59,12 @@ describe("OPENET_TS controller", () => {
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../openet_ts.js");
         const openetFactory = globalThis.OPENET_TS || (typeof window !== "undefined" ? window.OPENET_TS : undefined);
@@ -119,8 +125,8 @@ describe("OPENET_TS controller", () => {
 
         await flushPromises();
 
-        expect(httpMock.postJson).toHaveBeenCalledWith(
-            "rq/api/acquire_openet_ts",
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/acquire-openet-ts",
             {},
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );

@@ -1,5 +1,5 @@
 # Profile Test Engine Specification
-> Current behaviour of the WEPPcloud profile recording, assembly, and playback toolchain.
+> Current behavior of the WEPPcloud profile recording, assembly, and playback toolchain.
 
 ## Overview
 - Capture backend-visible WEPPcloud activity into per-run audit logs.
@@ -11,13 +11,13 @@ The stack favors append-only JSONL streams and direct filesystem snapshots over 
 
 ## Data Roots
 - `PROFILE_DATA_ROOT` (Flask config, default `/workdir/wepppy-test-engine-data`) anchors recorder output.
-- Recorder audit logs land under `<run_dir>/_logs/profile.events.jsonl`. When the working directory is unknown, events fall back to `PROFILE_DATA_ROOT/audit/<sanitised-run>/profile.events.jsonl`.
+- Recorder audit logs land under `<run_dir>/_logs/profile.events.jsonl`. When the working directory is unknown, events fall back to `PROFILE_DATA_ROOT/audit/<sanitized-run>/profile.events.jsonl`.
 - Draft profiles and promoted captures live under `PROFILE_DATA_ROOT/profiles/**`.
 - Playback workspaces default to `/workdir/wepppy-test-engine-data/playback/runs/<sandbox_uuid>` and may be overridden via `PROFILE_PLAYBACK_BASE` / `PROFILE_PLAYBACK_RUN_ROOT`.
 
 ## Recorder Pipeline
 1. `ProfileRecorder.append_event` accepts JSON events emitted by WEPPcloud middleware.
-2. Events are normalised with UTC timestamps and optional user metadata.
+2. Events are normalized with UTC timestamps and optional user metadata.
 3. The recorder resolves the run working directory (when possible) and appends the event to `_logs/profile.events.jsonl`.
 4. When the assembler is enabled (`PROFILE_RECORDER_ASSEMBLER_ENABLED`, default `True`) the same event is forwarded for draft construction alongside file hints extracted from known payload keys.
 
@@ -27,9 +27,9 @@ Event payloads intentionally match what the playback runner expects: `stage` (`r
 - Drafts are created under `profiles/_drafts/<run>/<capture>` where `<capture>` defaults to `stream`.
 - Every event is appended to `events.jsonl`; the assembler also stores the source run directory pointer (`run_dir.txt`) on first sight.
 - File hints and upload events snapshot seed assets into `seed/`:
-  - `seed/uploads/<type>/...` for landuse, SBS, CLI, cover transform, ash, and omni artefacts.
+  - `seed/uploads/<type>/...` for landuse, SBS, CLI, cover transform, ash, and omni artifacts.
   - Task-driven rules (`TASK_RULES`) also capture derived outputs (DEM tiles, channel shapefiles) and record RON expectations in `validation.log`.
-- `promote_draft(run_id, capture_id="stream", slug=Optional[str])` materialises a profile by copying the draft tree into `profiles/<slug>/capture` and cloning the run snapshot into `profiles/<slug>/run`.
+- `promote_draft(run_id, capture_id="stream", slug=Optional[str])` materializes a profile by copying the draft tree into `profiles/<slug>/capture` and cloning the run snapshot into `profiles/<slug>/run`.
 - The assembler currently focuses on preservation. Higher-level YAML manifests or curated step lists do not exist yet; consumers read the JSONL stream directly.
 
 ## Profile Layout
@@ -37,7 +37,7 @@ Event payloads intentionally match what the playback runner expects: `stage` (`r
 profiles/<slug>/
   capture/
     events.jsonl          # ordered response stream (requests are embedded via ids)
-    seed/                 # uploads and task artefacts
+    seed/                 # uploads and task artifacts
       uploads/...
       <task-label>.missing/.dir.exists markers
     validation.log        # optional task-rule notes
@@ -56,11 +56,11 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
   - `POST /archive/{profile}` – trigger archive jobs against a sandbox run.
 - Environment knobs:
   - `PROFILE_PLAYBACK_ROOT` – profile library root (defaults to `/workdir/wepppy-test-engine-data/profiles`).
-  - `PROFILE_PLAYBACK_RUN_ROOT`, `PROFILE_PLAYBACK_FORK_ROOT`, `PROFILE_PLAYBACK_ARCHIVE_ROOT` – sandbox destinations for run, fork, and archive artefacts.
+  - `PROFILE_PLAYBACK_RUN_ROOT`, `PROFILE_PLAYBACK_FORK_ROOT`, `PROFILE_PLAYBACK_ARCHIVE_ROOT` – sandbox destinations for run, fork, and archive artifacts.
   - `PROFILE_PLAYBACK_BASE_URL` – default WEPPcloud origin (`https://wc.bearhive.duckdns.org/weppcloud`).
-  - `PROFILE_PLAYBACK_COLOR` / `NO_COLOR` – toggle ANSI colour output (`True` by default unless `NO_COLOR` is set).
+  - `PROFILE_PLAYBACK_COLOR` / `NO_COLOR` – toggle ANSI color output (`True` by default unless `NO_COLOR` is set).
   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` – required for automated authentication when a raw cookie is not supplied.
-- Streaming output arrives via an asyncio queue; each log line is formatted with ANSI colours:
+- Streaming output arrives via an asyncio queue; each log line is formatted with ANSI colors:
   - Timestamps and `[profile_playback]` tag: bright magenta.
   - `HTTP 2xx`: bright green; non-2xx statuses: bright red.
   - `job <uuid>` tokens: purple3.
@@ -82,10 +82,10 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
   - Only 2xx response events with matching request metadata are executed.
   - Supports GET and POST (JSON or known form-data). Unsupported payloads are logged and recorded as failures.
   - Paths are remapped from `/runs/<original>/...` to `/runs/{playback_run_id}/...`, ensuring NoDb resolves the sandbox workspace.
-  - Elevation queries and recorded `rq/api/jobstatus/` polls are skipped; playback polls real jobs instead.
-  - After each POST, the runner inspects the JSON response for `job_id` and waits for completion via `/rq/api/jobinfo/<id>` before proceeding.
+  - Elevation queries and recorded `rq-engine/api/jobstatus/` polls are skipped; playback polls real jobs instead (legacy `/rq/api` paths still replay for older captures).
+  - After each POST, the runner inspects the JSON response for `job_id` and waits for completion via `/rq-engine/api/jobinfo/<id>` before proceeding.
   - Additional polling is performed for GETs ending with known work-complete suffixes (`_WAIT_SUFFIXES`).
-  - Responses are summarised in `PlaybackSession.results`, exposed through the streamed log and persisted run report.
+  - Responses are summarized in `PlaybackSession.results`, exposed through the streamed log and persisted run report.
   - Verbose mode logs request line, parameters, payload hints, status codes, response previews, and job tracking messages.
 
 ## `wctl` Integration (`tools/wctl2/commands/playback.py`)
@@ -107,15 +107,15 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
 ## Fork and Archive Helpers
 - `POST /fork/{profile}`:
   - Copies the profile run snapshot into the sandbox.
-  - Authenticates, submits `/rq/api/fork`, waits for the job via `/rq/api/jobinfo/<id>`, and copies resulting fork artefacts into `PROFILE_PLAYBACK_FORK_ROOT`.
+  - Authenticates, submits `/rq-engine/api/runs/<runid>/<config>/fork`, waits for the job via `/rq-engine/api/jobinfo/<id>`, and copies resulting fork artifacts into `PROFILE_PLAYBACK_FORK_ROOT`.
 - `POST /archive/{profile}`:
-  - Repeats the sandbox copy/authentication flow, submits `/rq/api/archive`, waits for completion, and mirrors generated archives into `PROFILE_PLAYBACK_ARCHIVE_ROOT/<runid>`.
-- Both endpoints reuse the colourised log formatter so their status messages integrate cleanly with the streaming output.
+  - Repeats the sandbox copy/authentication flow, submits `/rq-engine/api/runs/<runid>/<config>/archive`, waits for completion, and mirrors generated archives into `PROFILE_PLAYBACK_ARCHIVE_ROOT/<runid>`.
+- Both endpoints reuse the colorized log formatter so their status messages integrate cleanly with the streaming output.
 
 ## Limitations & Backlog
 - Recorder does not yet expose explicit “start/stop capture” signals in the UI; it streams all backend events continuously.
 - Profile assembly stops at event preservation plus seed snapshots; higher level manifests (`profile.yaml`, ordered step descriptions, diff baselines) are future work.
-- Playback expects the data repository to provide required seed uploads; missing artefacts are reported but not regenerated.
+- Playback expects the data repository to provide required seed uploads; missing artifacts are reported but not regenerated.
 - Parallel playback runs share global Redis locks; queuing long-running profiles may require coordination.
 - Fork/Archive helpers assume RQ job APIs remain stable; additional error surface (e.g., transient failures) should be captured in future revisions.
 

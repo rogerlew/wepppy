@@ -32,7 +32,7 @@ Goal: define a consistent, minimal component set that we can apply to existing c
 | `summary_panel_override` | HTML or `''` | Custom or suppressed summary panel. |
 | `stacktrace_panel_override` | HTML or `''` | Custom or suppressed stack trace panel. |
 
-**Behaviour**
+**Behavior**
 - Supply inputs with `{% call control_shell(...) %} ... {% endcall %}`. Content renders inside `.wc-control__inputs`.
 - Override hooks let callers swap in `status_panel` / `stacktrace_panel` or opt out entirely with `''`.
 - Legacy run controls still rely on the default panels; migrate them once ControlBase switches to `StatusStream`.
@@ -169,8 +169,8 @@ _Fixed console shell_
 
 ---
 
-## 3. Component Catalogue (macro inventory)
-Every macro below now lives in `controls/_pure_macros.html` and is showcased inside `/ui/components/` (`component_gallery.htm`). Update both the macro and the gallery in tandem whenever arguments or markup change so reviewers can trace behaviour end-to-end.
+## 3. Component Catalog (macro inventory)
+Every macro below now lives in `controls/_pure_macros.html` and is showcased inside `/ui/components/` (`component_gallery.htm`). Update both the macro and the gallery in tandem whenever arguments or markup change so reviewers can trace behavior end-to-end.
 
 - All field-style macros now accept an optional `error` argument. When provided, the macro flags the control as invalid (`aria-invalid="true"` on inputs or radiogroups), appends the error id to `aria-describedby`, and emits a `.wc-field__message.wc-field__message--error` block announced via `role="alert"`.
 
@@ -276,12 +276,12 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Purpose**: Accessible tab navigation for inspector panes (map overlays, drilldowns, results dashboards).
 - **Layout**: `<div class="wc-tabs" data-tabset>` containing a `.wc-tabs__nav` button row and aligned `.wc-tabs__panels`. Buttons carry `role="tab"`, `aria-controls`, and `data-tab-target`; panels use `role="tabpanel"` and toggle `hidden`.
 - **Args**: `tabs` list where each item sets `id`, optional `icon`, `label`, optional `active`, and `content` (HTML string). Active state defaults to the first tab when not supplied.
-- **Behaviour**: Helper JS toggles the `is-active` class, updates `aria-selected`/`tabindex`, and fires a custom `wc-tabset:change` event. Controls can listen for that event to refresh Leaflet overlays or invalidate tile layers.
+- **Behavior**: Helper JS toggles the `is-active` class, updates `aria-selected`/`tabindex`, and fires a custom `wc-tabset:change` event. Controls can listen for that event to refresh Leaflet overlays or invalidate tile layers.
 - **Status**: Implemented and showcased; use the macro instead of Bootstrap nav-tabs.
 
 ### 3.16 `color_scale`
 - **Purpose**: Bundles slider, legend canvas, and value labels for map visualization controls.
-- **Layout**: `.wc-color-scale` grid with labelled range input, optional units element, framed canvas (`wc-color-scale__bar` + `wc-color-scale__canvas`), and flexed min/max spans.
+- **Layout**: `.wc-color-scale` grid with labeled range input, optional units element, framed canvas (`wc-color-scale__bar` + `wc-color-scale__canvas`), and flexed min/max spans.
 - **Args**: Required `range_id`, `canvas_id`, `min_id`, `max_id`; optional `label`, `range_attrs`, `canvas_attrs`, `units_id`, and `help`.
 - **Notes**: IDs must match the JS contract used by `SubcatchmentDelineation`. Range attrs support `min`, `max`, `step`, `value` without inline styles. Canvas width/height handled via CSS.
 - **Status**: Implemented; map/rangeland partials now use the macro instead of bespoke Bootstrap grids.
@@ -305,7 +305,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 
 ### Soil Burn Severity Control (`controls/disturbed_sbs_pure.htm`)
 - **Structure**: `ui.control_shell` keeps the SBS workflow inside a non-collapsible console. Mode selection uses `ui.radio_group`; upload view relies on `ui.file_upload` and `ui.text_display` for the current raster; uniform builders are rendered as `button_row()` actions with Pure buttons.
-- **JS contract**: Buttons expose `data-sbs-action` (`upload`, `remove`, `set-firedate`) and `data-sbs-uniform` for low/moderate/high presets. `baer.js` delegates events off the form and initialises visibility via `showHideControls` so both legacy and Pure markup stay in sync.
+- **JS contract**: Buttons expose `data-sbs-action` (`upload`, `remove`, `set-firedate`) and `data-sbs-uniform` for low/moderate/high presets. `baer.js` delegates events off the form and initializes visibility via `showHideControls` so both legacy and Pure markup stay in sync.
 - **Compatibility**: Legacy IDs (`#sbs_upload_form`, `#sbs_mode{0,1}_controls`, `hint_*`) are preserved to keep ControlBase logging and StatusStream wiring unchanged. The classic Bootstrap template (`controls/baer_upload.htm`) has been removed; Pure is the sole template.
 - **Status**: Implemented; TOC entry appears when `baer` or `disturbed` mods are active and `lt` is not present.
 
@@ -326,7 +326,7 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 - **Status**: Implemented; legacy Bootstrap template removed now that the Pure layout is default.
 
 ### Debris Flow Control (`controls/debris_flow_pure.htm`)
-- **Structure**: `ui.control_shell(collapsible=False)` with a brief model disclaimer followed by a `button_row()` that retains `btn_run_debris_flow`. The PowerUser gate lives at the template include to mirror legacy behaviour.
+- **Structure**: `ui.control_shell(collapsible=False)` with a brief model disclaimer followed by a `button_row()` that retains `btn_run_debris_flow`. The PowerUser gate lives at the template include to mirror legacy behavior.
 - **Status wiring**: Uses `ui.status_panel` (`debris_flow_status_panel`) and `ui.stacktrace_panel` so ControlBase continues to stream RQ updates via `debris_flow.js`. The lock image `run_debris_flow_lock` remains for preflight integration.
 - **Status**: Implemented; legacy template remains on `0.htm` until the Pure layout becomes default.
 
@@ -345,8 +345,8 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 ### Treatments Control (`controls/treatments_pure.htm`)
 - **Structure**: `ui.control_shell(collapsible=False)` with compact status + stacktrace overrides. Mode radios retain legacy IDs (`treatments_mode{1,4}`) and drive two `.wc-stack` containers for selection vs. raster upload.
 - **Inputs**: `ui.select_field('treatments_single_selection', ...)` populates treatment options from the view context. `ui.file_upload('input_upload_landuse', accept=".tif,.img")` handles raster uploads; the lookup table uses `wc-table` to list valid treatment classes.
-- **JS contract**: `treatments.js` now initialises listeners via `initializeForm()`, using `setMode()` to update NoDb state and `updateModeUI()` for visibility toggles. The build button keeps `btn_build_treatments` so ControlBase + preflight hooks continue to work.
-- **Backend**: `/rq/api/build_treatments` (use `/upload` when a file is attached) validates raster uploads via `save_run_file` (100&nbsp;MB cap, `.tif/.img` allow-list) before handing off to `build_landuse_rq`.
+- **JS contract**: `treatments.js` now initializes listeners via `initializeForm()`, using `setMode()` to update NoDb state and `updateModeUI()` for visibility toggles. The build button keeps `btn_build_treatments` so ControlBase + preflight hooks continue to work.
+- **Backend**: `/rq-engine/api/runs/<runid>/<config>/build-treatments` validates raster uploads via `save_run_file` (100&nbsp;MB cap, `.tif/.img` allow-list) before handing off to `build_landuse_rq`.
 - **Status**: Implemented; treatments control now ships with the Pure page (no legacy wrapper required).
 
 ### Team Control (`controls/team_pure.htm`)
@@ -370,6 +370,6 @@ Every macro below now lives in `controls/_pure_macros.html` and is showcased ins
 
 ## 5. Next Steps
 1. Pilot the new macros on a low-risk production control (e.g. channel delineation) and document migration lessons in the inventory.
-2. Finalise metadata contracts (what each macro expects from NoDb controllers: labels, units, validation rules).
+2. Finalize metadata contracts (what each macro expects from NoDb controllers: labels, units, validation rules).
 3. Define validation/error state patterns (visual + ARIA) and extend macros once the contract is agreed.
 4. Keep this document and the showcase in sync as each production control migrates.

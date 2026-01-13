@@ -22,13 +22,15 @@
 <form id="uploadForm" enctype="multipart/form-data">
     <label for="input_upload_sbs">Upload SBS Map:</label>
     <input type="file" id="input_upload_sbs" name="input_upload_sbs">
-    <input type="button" value="Upload" onclick="uploadFile()">
+    <input type="button" id="uploadButton" value="Upload">
+    <p id="uploadMessage"></p>
 </form>
 <div id="map"></div>
 
 <script>
 
 var map = L.map('map');
+var rqEngineToken = {{ rq_engine_token | tojson }};
 
 var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
     maxZoom: 20,
@@ -58,14 +60,22 @@ ctrls.addTo(map);
 
 
 function uploadFile() {
+    if (!rqEngineToken) {
+        setUploadMessage("Sign in to upload SBS maps.");
+        return;
+    }
     let formData = new FormData();
     let fileField = document.querySelector("#input_upload_sbs");
 
     formData.append('input_upload_sbs', fileField.files[0]);
 
-    fetch('/upload/huc-fire/tasks/upload_sbs/', {
+    fetch('/rq-engine/api/huc-fire/tasks/upload-sbs/', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: "same-origin",
+        headers: {
+            Authorization: "Bearer " + rqEngineToken
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -88,6 +98,22 @@ function uploadFile() {
         map.fitBounds(geojsonLayer.getBounds());
     })
     .catch(error => console.error('Error:', error));
+}
+
+function setUploadMessage(message) {
+    var messageElement = document.getElementById("uploadMessage");
+    if (messageElement) {
+        messageElement.textContent = message || "";
+    }
+}
+
+var uploadButton = document.getElementById("uploadButton");
+if (uploadButton) {
+    uploadButton.addEventListener("click", uploadFile);
+    if (!rqEngineToken) {
+        uploadButton.disabled = true;
+        setUploadMessage("Sign in to upload SBS maps.");
+    }
 }
 </script>
 </body>

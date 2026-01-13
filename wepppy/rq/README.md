@@ -8,7 +8,7 @@
 - Provides orchestration primitives shared by Flask routes and CLI scripts: queue setup (`redis_connection_kwargs`), task gating via `RedisPrep`/`TaskEnum`, and consistent timeout/logging behavior.
 
 ## Architecture & Workflow
-- **Queues & worker class.** All jobs run on Redis DB 9 (`RedisDB.RQ`) and are consumed by `WepppyRqWorker`, a thin wrapper around `rq.Worker` that (a) sets `default_result_ttl=604800`, (b) attaches per-run log files, (c) handles SIGUSR1 cancellations, and (d) publishes job lifecycle events to `<runid>:rq`.
+- **Queues & worker class.** All jobs run on Redis DB 9 (`RedisDB.RQ`) and are consumed by `WepppyRqWorker`, a thin wrapper around `rq.Worker` that (a) sets `default_result_ttl=604800`, (b) attaches per-run log files, (c) handles SIGUSR1 cancelations, and (d) publishes job lifecycle events to `<runid>:rq`.
 - **Status fan-out.** Tasks publish human-readable updates using `StatusMessenger`. Channels follow the `<runid>:<panel>` convention (`:wepp`, `:batch`, `:omni`, `:path_ce`, etc.) so the UI knows which dashboard panes to refresh. Long-running flows additionally trigger synthetic events (for example `TRIGGER omni END_BROADCAST`).
 - **Job metadata + cancellation.** Parent tasks stash child job ids under `job.meta["jobs:{order},..."]`. The `cancel_job` module relies on this ordering to propagate stop commands; `job_info.py` walks the same tree when the UI needs a recursive status snapshot.
 - **RedisPrep integration.** Project-scoped tasks update `RedisPrep` timestamps (`TaskEnum.*`) to keep the progress bars in sync with what actually ran. New tasks must cooperate with these timestamps to avoid double-running expensive steps.
@@ -39,7 +39,7 @@ wctl exec weppcloud bash -lc \
   "rq worker -u redis://$REDIS_HOST:6379/9 \
    --worker-class 'wepppy.rq.WepppyRqWorker' high default low"
 ```
-- The worker class automatically listens for `SIGUSR1` so UI-driven cancellations take effect immediately.
+- The worker class automatically listens for `SIGUSR1` so UI-driven cancelations take effect immediately.
 - Use `rq worker-pool -n 8 -u redis://... --worker-class wepppy.rq.WepppyRqWorker high default low` when you need multiple OS processes on bare metal (see `wepppy/weppcloud/_baremetal/...` for full instructions).
 
 ### Enqueue a WEPP run from a shell
@@ -72,10 +72,10 @@ cancel_jobs(job.id)
 - **RedisPrep timestamps.** When a task materially advances a `TaskEnum`, call `prep.remove_timestamp(...)` just before the work starts and `prep.timestamp(...)` once it finishes. This keeps the dashboard in sync and prevents accidental short-circuiting the next time the run resumes.
 - **Job dependencies.** Parent tasks (batch, omni, project) should save child job ids in `job.meta['jobs:{order},runid:{child_runid}] = child_job.id`. The ordering string is arbitrary but should remain stable so `cancel_job` and `job_info` can display the tree predictably.
 - **Status channels & UI triggers.** Use `StatusMessenger.publish(channel, f"rq:{job.id} TRIGGER <panel> <event>")` whenever the front-end needs to broadcast custom lifecycle events (for example, `BATCH_RUN_COMPLETED`, `OMNI_SCENARIO_RUN_TASK_COMPLETED`).
-- **Testing.** Route-level tests under `tests/weppcloud/routes/test_rq_api_*.py` exercise the Flask APIs that enqueue these tasks. Run them via `wctl run-pytest tests/weppcloud/routes -k rq_api` before shipping changes to queue wiring. Worker-specific helpers (job_info/cancel_job) are covered by unit tests in the same suite; extend them when adding new metadata conventions.
+- **Testing.** Route-level tests under `tests/microservices/test_rq_engine_*.py` exercise the rq-engine APIs that enqueue these tasks. Run them via `wctl run-pytest tests/microservices -k rq_engine` before shipping changes to queue wiring. Worker-specific helpers (job_info/cancel_job) are covered by unit tests in the same suite; extend them when adding new metadata conventions.
 - **Type stubs & linting.** Whenever you adjust task signatures, edit the companion `.pyi` and run `python tools/sync_stubs.py`. The existing modules already import `from __future__ import annotations` for forward references—maintain that style.
 
 ## Further Reading
 - `AGENTS.md` – operational expectations for RQ workers within the broader WEPPcloud stack.
 - `docs/prompt_templates/module_documentation_workflow.prompt.md` – the workflow used for writing/maintaining documentation like this README.
-- `wepppy/weppcloud/routes/rq/api/` – Flask endpoints that call into these modules; useful when tracing how user actions map to background jobs.
+- `wepppy/microservices/rq_engine/` – rq-engine endpoints that call into these modules; useful when tracing how user actions map to background jobs.

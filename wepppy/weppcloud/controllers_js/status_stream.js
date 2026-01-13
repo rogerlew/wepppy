@@ -104,9 +104,8 @@
 
         var http = global.WCHttp;
         var primaryUrl = "/rq-engine/api/jobinfo/" + encodeURIComponent(jobId);
-        var fallbackUrl = "/weppcloud/rq/api/jobinfo/" + encodeURIComponent(jobId);
-        if (http && typeof http.getJsonWithFallback === "function") {
-            return http.getJsonWithFallback(primaryUrl, fallbackUrl)
+        if (http && typeof http.getJson === "function") {
+            return http.getJson(primaryUrl)
                 .then(function (payload) {
                     return extractStacktrace(payload);
                 })
@@ -125,22 +124,12 @@
 
         var origin = global.location && global.location.origin ? global.location.origin : "";
         var primaryFetchUrl = origin.replace(/\/$/, "") + primaryUrl;
-        var fallbackFetchUrl = origin.replace(/\/$/, "") + fallbackUrl;
         return fetch(primaryFetchUrl, { credentials: "same-origin" })
             .then(function (response) {
                 if (!response.ok) {
-                    throw new Error("Primary jobinfo fetch failed");
+                    return null;
                 }
                 return response.json();
-            })
-            .catch(function () {
-                return fetch(fallbackFetchUrl, { credentials: "same-origin" })
-                    .then(function (response) {
-                        if (!response.ok) {
-                            return null;
-                        }
-                        return response.json();
-                    });
             })
             .then(function (payload) {
                 return extractStacktrace(payload);

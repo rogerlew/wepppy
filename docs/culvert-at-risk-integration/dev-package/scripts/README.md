@@ -61,6 +61,19 @@ The script expects these files in the Culvert_web_app project:
 | `outputs/{project}/WS_deln/pour_points_snapped_to_RSCS_UTM.shp` | `culverts/culvert_points.geojson` | Culvert locations (RSCS-snapped) |
 | `outputs/{project}/WS_deln/all_ws_polygon_UTM.shp` | `culverts/watersheds.geojson` | Watershed polygons |
 
+**Open Standards Preference:** wepp.cloud uses **GeoTIFF** (OGC) and **GeoJSON** (IETF RFC 7946)—open,
+non-proprietary formats. This ensures compatibility with domestic and international open data
+requirements:
+
+| Organization | Scope | Relevant Standards |
+|--------------|-------|-------------------|
+| FGDC (US) | US Federal agencies | FGDC-endorsed formats (GeoTIFF, GeoJSON, OGC services) |
+| INSPIRE (EU) | EU Member States | OGC/ISO-based (GML, WMS/WFS, ISO 191xx metadata) |
+| USGS, EPA, NGA | US agencies | GeoTIFF, GeoJSON, OGC web services |
+| National SDIs | India, UK, Australia, etc. | OGC/ISO, FAIR principles |
+
+Shapefiles are converted to GeoJSON during payload creation to maintain open format compliance.
+
 ### Output Payload Structure
 
 ```
@@ -169,6 +182,7 @@ All fields except `schema_version` are optional.
 ## submit_payload.py - SSL Payload Submission
 
 Uploads `payload.zip` to the wepp.cloud culvert batch endpoint and polls until job completion.
+The culvert batch endpoints require a bearer token; set `WEPPCLOUD_TOKEN` or use `--token-file`.
 
 ### Requirements
 
@@ -180,12 +194,16 @@ Uploads `payload.zip` to the wepp.cloud culvert batch endpoint and polls until j
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `WEPPCLOUD_HOST` | `wepp.cloud` | Target host (no protocol prefix) |
+| `WEPPCLOUD_TOKEN` | unset | Bearer token for authenticated endpoints |
 
 ### Usage
 
 ```bash
 # Submit to production (wepp.cloud)
 python submit_payload.py --payload /path/to/payload.zip
+
+# Submit with bearer token (environment)
+WEPPCLOUD_TOKEN=token-value python submit_payload.py --payload payload.zip
 
 # Submit to test server
 WEPPCLOUD_HOST=wc.bearhive.duckdns.org python submit_payload.py --payload payload.zip
@@ -202,6 +220,9 @@ python submit_payload.py --payload payload.zip \
 python submit_payload.py --payload payload.zip \
     --poll-seconds 10 \
     --timeout-seconds 7200
+
+# Provide token via file
+python submit_payload.py --payload payload.zip --token-file /path/to/token.txt
 ```
 
 ### CLI Options
@@ -214,6 +235,8 @@ python submit_payload.py --payload payload.zip \
 | `--total-bytes` | No | (computed) | Payload size in bytes |
 | `--poll-seconds` | No | 5 | Polling interval |
 | `--timeout-seconds` | No | 3600 | Maximum wait time |
+| `--token` | No | `WEPPCLOUD_TOKEN` | Bearer token for authenticated endpoints |
+| `--token-file` | No | - | Read bearer token from file |
 
 ### Exit Codes
 

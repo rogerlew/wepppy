@@ -201,6 +201,10 @@
   const jobId = {{ job_id | tojson }};
   const sitePrefix = {{ site_prefix | tojson }};
   let runid;
+  const sessionTokenConfig = "cfg";
+  let sessionToken = null;
+  let sessionTokenExpiresAt = 0;
+  let sessionTokenPromise = null;
   let queryCount = 0;
   let jobCount = 0;
   let allFinishedCount = 0;
@@ -470,9 +474,48 @@
     return payload;
   }
 
+  function hasValidSessionToken() {
+    if (!sessionToken || !sessionTokenExpiresAt) {
+      return false;
+    }
+    return (Date.now() / 1000) < (sessionTokenExpiresAt - 30);
+  }
+
+  async function fetchSessionToken() {
+    if (hasValidSessionToken()) {
+      return sessionToken;
+    }
+    if (sessionTokenPromise) {
+      return sessionTokenPromise;
+    }
+    if (!runid) {
+      throw new Error("Run ID unavailable for session token");
+    }
+
+    const tokenUrl = `/rq-engine/api/runs/${encodeURIComponent(runid)}/${encodeURIComponent(sessionTokenConfig)}/session-token`;
+    sessionTokenPromise = fetch(tokenUrl, { method: "POST", credentials: "same-origin" })
+      .then(async (response) => {
+        const text = await response.text();
+        const payload = text ? JSON.parse(text) : {};
+        if (!response.ok) {
+          const message = resolveErrorMessage(payload, "Session token request failed");
+          throw new Error(message || "Session token request failed");
+        }
+        if (!payload || !payload.token) {
+          throw new Error("Session token missing from response");
+        }
+        sessionToken = payload.token;
+        sessionTokenExpiresAt = Number(payload.expires_at || 0);
+        return sessionToken;
+      })
+      .finally(() => {
+        sessionTokenPromise = null;
+      });
+    return sessionTokenPromise;
+  }
+
   async function fetchJobStatus() {
     const primaryUrl = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
-    const fallbackUrl = `${sitePrefix}/rq/api/jobinfo/${encodeURIComponent(jobId)}`;
 
     function handleSuccess(data) {
       jobCount = 0;
@@ -518,13 +561,8 @@
     try {
       const data = await requestJson(primaryUrl);
       handleSuccess(data);
-    } catch (primaryError) {
-      try {
-        const data = await requestJson(fallbackUrl);
-        handleSuccess(data);
-      } catch (fallbackError) {
-        handleError((fallbackError && fallbackError.payload) || null);
-      }
+    } catch (error) {
+      handleError((error && error.payload) || null);
     }
   }
 
@@ -815,17 +853,26 @@
     }
   }
 
-  function cancelJob() {
-    fetch(`${sitePrefix}/rq/api/canceljob/${jobId}`, { method: "GET", credentials: "same-origin" })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Request failed");
+  async function cancelJob() {
+    try {
+      const token = await fetchSessionToken();
+      const response = await fetch(
+        `/rq-engine/api/canceljob/${encodeURIComponent(jobId)}`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-        alert("Job canceled");
-      })
-      .catch(() => {
-        alert("Failed to cancel job");
-      });
+      );
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
+      alert("Job canceled");
+    } catch (err) {
+      alert("Failed to cancel job");
+    }
   }
 
   function setQrLabel(text) {

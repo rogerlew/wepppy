@@ -35,6 +35,13 @@ class RedisDB(IntEnum):
     LOG_LEVEL = 15
 
 
+def _parse_url(raw_url: str) -> Optional[ParseResult]:
+    parsed = urlparse(raw_url)
+    if not parsed.scheme or not parsed.hostname:
+        return None
+    return parsed
+
+
 @lru_cache(maxsize=1)
 def _base_url() -> Optional[ParseResult]:
     """
@@ -53,11 +60,19 @@ def _base_url() -> Optional[ParseResult]:
     if not raw_url:
         return None
 
-    parsed = urlparse(raw_url)
-    if not parsed.scheme or not parsed.hostname:
-        return None
+    return _parse_url(raw_url)
 
-    return parsed
+
+@lru_cache(maxsize=1)
+def _session_base_url() -> Optional[ParseResult]:
+    raw_url = (
+        os.getenv("SESSION_REDIS_URL")
+        or os.getenv("REDIS_URL")
+        or os.getenv("RQ_REDIS_URL")
+    )
+    if not raw_url:
+        return None
+    return _parse_url(raw_url)
 
 
 @lru_cache(maxsize=1)
@@ -133,6 +148,41 @@ def redis_connection_kwargs(
         kwargs.update(extra)
 
     return kwargs
+
+
+def _session_db(default: Union[int, RedisDB]) -> int:
+    raw = os.getenv("SESSION_REDIS_DB")
+    if raw is not None:
+        return int(raw)
+    return int(default)
+
+
+@lru_cache(maxsize=1)
+def session_redis_url(db_default: Union[int, RedisDB] = RedisDB.SESSION) -> str:
+    """
+    Build a Redis URL for Flask session storage.
+
+    - Prefer SESSION_REDIS_URL when provided.
+    - Respect SESSION_REDIS_DB overrides.
+    - Fall back to REDIS_URL/RQ_REDIS_URL host settings with the session DB.
+    """
+
+    session_url = os.getenv("SESSION_REDIS_URL")
+    session_db_raw = os.getenv("SESSION_REDIS_DB")
+    db = _session_db(db_default)
+
+    if session_url:
+        parsed = _session_base_url()
+        if parsed is not None:
+            if session_db_raw is None and parsed.path and parsed.path != "/":
+                return urlunparse(parsed)
+            return _apply_db(parsed, db)
+
+    parsed = _session_base_url()
+    if parsed is not None:
+        return _apply_db(parsed, db)
+
+    return f"redis://{redis_host()}:{redis_port()}/{db}"
 
 
 def redis_client(

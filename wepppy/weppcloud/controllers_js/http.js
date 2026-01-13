@@ -6,6 +6,7 @@
     var DEFAULT_TIMEOUT_MS = 0;
     var doc = global.document;
     var http = {};
+    var sessionTokenCache = {};
 
     function isAbsoluteUrl(url) {
         return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
@@ -24,12 +25,7 @@
             throw new Error("WCHttp.request requires a URL.");
         }
         var prefix = typeof global.site_prefix === "string" ? global.site_prefix : "";
-        if (
-            url === "/upload" ||
-            url.indexOf("/upload/") === 0 ||
-            url === "/rq-engine" ||
-            url.indexOf("/rq-engine/") === 0
-        ) {
+        if (url === "/rq-engine" || url.indexOf("/rq-engine/") === 0) {
             return url;
         }
         if (!prefix || isAbsoluteUrl(url)) {
@@ -135,6 +131,150 @@
 
     function isHttpError(error) {
         return error instanceof HttpError || (error && error.name === "HttpError");
+    }
+
+    function _sessionCacheKey(runId, config) {
+        return String(runId || "") + "::" + String(config || "");
+    }
+
+    function _isSessionTokenValid(entry) {
+        if (!entry || !entry.token || !entry.expiresAt) {
+            return false;
+        }
+        return (Date.now() / 1000) < (entry.expiresAt - 30);
+    }
+
+    function getSessionToken(runId, config, options) {
+        if (!runId || !config) {
+            return Promise.reject(new HttpError("Run ID and config are required for session tokens"));
+        }
+        var key = _sessionCacheKey(runId, config);
+        var entry = sessionTokenCache[key];
+        if (_isSessionTokenValid(entry)) {
+            return Promise.resolve(entry.token);
+        }
+        if (entry && entry.promise) {
+            return entry.promise;
+        }
+
+        var opts = options ? Object.assign({}, options) : {};
+        var url = "/rq-engine/api/runs/" + encodeURIComponent(runId) + "/" + encodeURIComponent(config) + "/session-token";
+
+        entry = entry || {};
+        entry.promise = http.request(url, { method: "POST", credentials: "same-origin", timeoutMs: opts.timeoutMs })
+            .then(function (result) {
+                var body = result.body || {};
+                if (!body || !body.token) {
+                    throw new HttpError("Session token missing from response", {
+                        url: result.url,
+                        status: result.status,
+                        statusText: result.statusText,
+                        body: body,
+                        response: result.response
+                    });
+                }
+                entry.token = body.token;
+                entry.expiresAt = Number(body.expires_at || 0);
+                entry.scopes = body.scopes || null;
+                entry.promise = null;
+                sessionTokenCache[key] = entry;
+                return entry.token;
+            })
+            .catch(function (error) {
+                entry.promise = null;
+                sessionTokenCache[key] = entry;
+                throw error;
+            });
+
+        sessionTokenCache[key] = entry;
+        return entry.promise;
+    }
+
+    function clearSessionToken(runId, config) {
+        if (!runId && !config) {
+            sessionTokenCache = {};
+            return;
+        }
+        delete sessionTokenCache[_sessionCacheKey(runId, config)];
+    }
+
+    function resolveRunContext(options) {
+        var runId = options && options.runId ? String(options.runId) : "";
+        var config = options && options.config ? String(options.config) : "";
+
+        if (!runId) {
+            if (typeof global.runid === "string" && global.runid) {
+                runId = global.runid;
+            } else if (typeof global.runId === "string" && global.runId) {
+                runId = global.runId;
+            }
+        }
+
+        if (!config) {
+            if (typeof global.config === "string" && global.config) {
+                config = global.config;
+            }
+        }
+
+        if (!runId || !config) {
+            var path = global.location && typeof global.location.pathname === "string" ? global.location.pathname : "";
+            var prefix = typeof global.site_prefix === "string" ? global.site_prefix : "";
+            if (prefix) {
+                var normalizedPrefix = prefix.charAt(0) === "/" ? prefix : "/" + prefix;
+                normalizedPrefix = normalizedPrefix.replace(/\/+$/, "");
+                if (normalizedPrefix && path.indexOf(normalizedPrefix) === 0) {
+                    path = path.slice(normalizedPrefix.length);
+                }
+            }
+
+            var parts = path.split("/").filter(function (segment) {
+                return segment.length > 0;
+            });
+            var runsIndex = parts.indexOf("runs");
+            if (runsIndex !== -1 && parts.length > runsIndex + 2) {
+                if (!runId) {
+                    runId = decodeURIComponent(parts[runsIndex + 1]);
+                }
+                if (!config) {
+                    config = decodeURIComponent(parts[runsIndex + 2]);
+                }
+            }
+        }
+
+        return { runId: runId, config: config };
+    }
+
+    function requestWithSessionToken(url, options) {
+        var opts = options ? Object.assign({}, options) : {};
+        var context = resolveRunContext(opts);
+        if (!context.runId || !context.config) {
+            return Promise.reject(new HttpError("Run ID and config are required for session tokens"));
+        }
+
+        var tokenOptions = {};
+        if (opts.tokenTimeoutMs !== undefined) {
+            tokenOptions.timeoutMs = opts.tokenTimeoutMs;
+        } else if (opts.timeoutMs !== undefined) {
+            tokenOptions.timeoutMs = opts.timeoutMs;
+        }
+
+        delete opts.runId;
+        delete opts.config;
+        delete opts.tokenTimeoutMs;
+
+        return getSessionToken(context.runId, context.config, tokenOptions).then(function (token) {
+            var headers = opts.headers ? Object.assign({}, opts.headers) : {};
+            headers.Authorization = "Bearer " + token;
+            opts.headers = headers;
+            return request(url, opts);
+        });
+    }
+
+    function postJsonWithSessionToken(url, payload, options) {
+        var opts = options ? Object.assign({}, options) : {};
+        opts.method = opts.method || "POST";
+        opts.json = payload;
+        return requestWithSessionToken(url, opts);
     }
 
     // Normalize request bodies, setting content-type as needed and supporting JSON, urlencoded, and FormData payloads.
@@ -633,9 +773,13 @@
     http.requestWithFallback = requestWithFallback;
     http.getJsonWithFallback = getJsonWithFallback;
     http.postJsonWithFallback = postJsonWithFallback;
+    http.requestWithSessionToken = requestWithSessionToken;
+    http.postJsonWithSessionToken = postJsonWithSessionToken;
     http.HttpError = HttpError;
     http.isHttpError = isHttpError;
     http.getCsrfToken = getCsrfToken;
+    http.getSessionToken = getSessionToken;
+    http.clearSessionToken = clearSessionToken;
 
     global.WCHttp = http;
 })(typeof window !== "undefined" ? window : this);

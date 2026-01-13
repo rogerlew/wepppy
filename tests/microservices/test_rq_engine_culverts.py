@@ -8,7 +8,9 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
+from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import culvert_routes
+from wepppy.weppcloud.utils import auth_tokens
 
 
 pytestmark = pytest.mark.microservice
@@ -17,14 +19,64 @@ PAYLOAD_ZIP = Path(
     "tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip"
 )
 
+
+def _issue_culvert_token(
+    monkeypatch: pytest.MonkeyPatch, *, scopes: list[str] | None = None
+) -> str:
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+    payload = auth_tokens.issue_token(
+        "culvert-tester",
+        scopes=scopes or ["culvert:batch:submit"],
+        audience="rq-engine",
+        extra_claims={"jti": "test-jti"},
+    )
+    return payload["token"]
+
+
+def _auth_headers(
+    monkeypatch: pytest.MonkeyPatch, *, scopes: list[str] | None = None
+) -> dict[str, str]:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    token = _issue_culvert_token(monkeypatch, scopes=scopes)
+    return {"Authorization": f"Bearer {token}"}
+
 def assert_validation_error(payload: dict[str, Any], code: str) -> None:
     assert payload["error"]["code"] == "validation_error"
     assert any(error["code"] == code for error in payload["errors"])
 
 
+def test_culvert_ingest_requires_auth(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/culverts-wepp-batch/")
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["code"] == "unauthorized"
+
+
+def test_culvert_ingest_rejects_missing_scope(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch, scopes=["runs:read"])
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/culverts-wepp-batch/", headers=auth_headers)
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+
+
 def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
     seen = {}
 
     def fake_enqueue(batch_uuid: str) -> str:
@@ -38,6 +90,7 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 200
@@ -61,6 +114,7 @@ def test_culvert_ingest_missing_files_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
     bad_zip = _rewrite_payload_zip(
         tmp_path,
         lambda name, data: None if name == "topo/streams.tif" else data,
@@ -71,6 +125,7 @@ def test_culvert_ingest_missing_files_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -83,6 +138,7 @@ def test_culvert_ingest_crs_mismatch_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     def mutate_metadata(name: str, data: bytes) -> bytes:
         if name != "metadata.json":
@@ -98,6 +154,7 @@ def test_culvert_ingest_crs_mismatch_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -110,6 +167,7 @@ def test_culvert_ingest_missing_point_id_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     def mutate_points(name: str, data: bytes) -> bytes:
         if name != "culverts/culvert_points.geojson":
@@ -127,6 +185,7 @@ def test_culvert_ingest_missing_point_id_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -139,6 +198,7 @@ def test_culvert_ingest_invalid_point_id_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     def mutate_points(name: str, data: bytes) -> bytes:
         if name != "culverts/culvert_points.geojson":
@@ -156,6 +216,7 @@ def test_culvert_ingest_invalid_point_id_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -168,6 +229,7 @@ def test_culvert_ingest_duplicate_point_id_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     def mutate_points(name: str, data: bytes) -> bytes:
         if name != "culverts/culvert_points.geojson":
@@ -186,6 +248,7 @@ def test_culvert_ingest_duplicate_point_id_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -198,6 +261,7 @@ def test_culvert_ingest_invalid_metadata_schema_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     def mutate_metadata(name: str, data: bytes) -> bytes:
         if name != "metadata.json":
@@ -213,6 +277,7 @@ def test_culvert_ingest_invalid_metadata_schema_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -225,6 +290,7 @@ def test_culvert_ingest_invalid_model_params_schema_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     def mutate_model_params(name: str, data: bytes) -> bytes:
         if name != "model-parameters.json":
@@ -240,6 +306,7 @@ def test_culvert_ingest_invalid_model_params_schema_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -252,6 +319,7 @@ def test_culvert_ingest_zip_sha256_mismatch_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     with PAYLOAD_ZIP.open("rb") as handle:
         with TestClient(rq_engine.app) as client:
@@ -259,6 +327,7 @@ def test_culvert_ingest_zip_sha256_mismatch_returns_400(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
                 data={"zip_sha256": "deadbeef"},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -271,6 +340,7 @@ def test_culvert_ingest_total_bytes_mismatch_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
     total_bytes = PAYLOAD_ZIP.stat().st_size
 
     with PAYLOAD_ZIP.open("rb") as handle:
@@ -279,6 +349,7 @@ def test_culvert_ingest_total_bytes_mismatch_returns_400(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
                 data={"total_bytes": str(total_bytes + 1)},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -291,6 +362,7 @@ def test_culvert_ingest_invalid_zip_member_path_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
     bad_zip = _rewrite_payload_zip_with_member(
         tmp_path, "../escape.txt", b"nope"
     )
@@ -300,6 +372,7 @@ def test_culvert_ingest_invalid_zip_member_path_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400
@@ -312,6 +385,7 @@ def test_culvert_ingest_raster_mismatch_returns_400(
 ) -> None:
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
 
     rasterio = pytest.importorskip("rasterio")
     import numpy as np
@@ -353,6 +427,7 @@ def test_culvert_ingest_raster_mismatch_returns_400(
             response = client.post(
                 "/api/culverts-wepp-batch/",
                 files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
             )
 
     assert response.status_code == 400

@@ -3,19 +3,67 @@
 
 from datetime import datetime
 from subprocess import PIPE, Popen
+import uuid
 
 from ._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.weppcloud.utils import auth_tokens
 
 huc_fire_bp = Blueprint('huc_fire', __name__)
+
+
+def _issue_rq_engine_token() -> str | None:
+    if current_user.is_anonymous:
+        return None
+
+    subject = None
+    if hasattr(current_user, "get_id"):
+        subject = current_user.get_id()
+    if not subject:
+        subject = getattr(current_user, "id", None)
+    if not subject:
+        subject = getattr(current_user, "email", None)
+    if not subject:
+        raise RuntimeError("Unable to resolve user subject for rq-engine token")
+
+    roles = [
+        str(getattr(role, "name", role)).strip()
+        for role in (getattr(current_user, "roles", None) or [])
+        if str(getattr(role, "name", role)).strip()
+    ]
+
+    token_payload = auth_tokens.issue_token(
+        str(subject),
+        scopes=["rq:enqueue"],
+        audience="rq-engine",
+        extra_claims={
+            "roles": roles,
+            "token_class": "user",
+            "email": getattr(current_user, "email", None),
+            "jti": uuid.uuid4().hex,
+        },
+    )
+    token = token_payload.get("token")
+    if not token:
+        raise RuntimeError("Failed to issue rq-engine token")
+    return token
+
 
 @huc_fire_bp.route('/huc-fire')
 @huc_fire_bp.route('/huc-fire/')
 def huc_fire():
     try:
-        return render_template('huc-fire/index.html', user=current_user)
+        rq_engine_token = _issue_rq_engine_token()
+        return render_template(
+            'huc-fire/index.html',
+            user=current_user,
+            rq_engine_token=rq_engine_token,
+        )
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("Failed to issue rq-engine token for huc-fire")
+        return exception_factory(f"JWT configuration error: {exc}")
     except:
         return exception_factory()
 

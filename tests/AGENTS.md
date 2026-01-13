@@ -13,7 +13,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 |------|----------|-------|
 | Smoke/import checks | `tests/test_0_imports.py`, `tests/test_imports.py` | Early detection of missing optional dependencies or circular imports |
 | Utility modules | `tests/test_all_your_base*.py` | Core helpers used across controllers, raster IO, geometry utilities |
-| NoDb controllers | `tests/nodb/` | Singleton behaviour, locking semantics, serialization |
+| NoDb controllers | `tests/nodb/` | Singleton behavior, locking semantics, serialization |
 | Climate/soils/wepp | `tests/climates/`, `tests/wepp/`, `tests/soils/` | Integration against data pipelines and WEPP executables |
 | Microservices | `tests/microservices/` | Starlette/FastAPI endpoints, payload validation |
 | Query engine | `tests/query_engine/` | DuckDB-backed analytics, MCP endpoints |
@@ -95,7 +95,7 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 **Recent example:** The `isint` import error occurred because:
 - `/workdir/wepppy/wepppy/weppcloud/controllers_js/unitizer_map_builder.py` created a stub with only `isfloat` and `isnan`
 - `/workdir/wepppy/tests/wepp/soils/utils/test_wepp_soil_util.py` created a stub with only `try_parse`, `try_parse_float`, and `isfloat`
-- Both were missing `isint`, which `/workdir/wepppy/wepppy/weppcloud/routes/rq/api/api.py` imports
+- Both were missing `isint`, which `/workdir/wepppy/wepppy/weppcloud/utils/helpers.py` imports
 
 **Fix:** Added `isint` to both stubs to match the real module's `__all__` list.
 

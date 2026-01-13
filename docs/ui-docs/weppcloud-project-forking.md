@@ -19,13 +19,13 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 Script: `wepppy/weppcloud/static/js/fork_console.js`
 
 - Reads run context from `data-fork-console-config` and the form.
-- Submits the fork request with `fetch` to `/runs/<runid>/<config>/rq/api/fork` (form-encoded `undisturbify`).
+- Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` (form-encoded `undisturbify`).
 - Starts StatusStream on channel `fork` and uses `controlBase` polling to keep job status fresh:
-  - `set_rq_job_id(...)` polls `/weppcloud/rq/api/jobstatus/<job_id>` for status/started/ended timestamps.
-  - Polling failures fetch `/weppcloud/rq/api/jobinfo/<job_id>` to populate stacktraces.
+  - `set_rq_job_id(...)` polls `/rq-engine/api/jobstatus/<job_id>` for status/started/ended timestamps.
+  - Polling failures fetch `/rq-engine/api/jobinfo/<job_id>` to populate stacktraces.
   - `job:completed`/`job:error` fallback handlers are idempotent.
 - Completion updates the console with the new run link; failure surfaces the status log + stacktrace panel.
-- Cancel uses `/weppcloud/rq/canceljob/<job_id>` to request termination.
+- Cancel uses `/rq-engine/api/canceljob/<job_id>` to request termination.
 
 ## Blueprint
 Module: `wepppy/weppcloud/routes/fork_console/fork_console.py`
@@ -35,9 +35,9 @@ Module: `wepppy/weppcloud/routes/fork_console/fork_console.py`
   - `rq_fork_console`: renders the console template, parses optional `undisturbify` query param, and authorizes the run.
 
 ## RQ API
-Module: `wepppy/weppcloud/routes/rq/api/api.py`
+Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 
-- `api_fork` (POST): queues `fork_rq` for the source run.
+- `fork` (POST): queues `fork_rq` for the source run.
   - Payload: form fields `undisturbify` and optional `target_runid`.
   - Validates permissions (run owners, admin users, public runs, or ownerless runs).
   - Allocates a new run ID via `awesome_codename` when no target is supplied.

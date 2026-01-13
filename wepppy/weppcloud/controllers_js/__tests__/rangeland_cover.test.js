@@ -323,7 +323,7 @@ describe("RangelandCover controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(httpRequestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rangeland,
             expect.objectContaining({

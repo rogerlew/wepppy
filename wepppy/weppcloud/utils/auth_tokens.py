@@ -34,6 +34,7 @@ class JWTDecodeError(RuntimeError):
 @dataclass(frozen=True)
 class JWTServiceConfig:
     secret: str
+    validation_secrets: tuple[str, ...]
     algorithms: tuple[str, ...]
     issuer: str | None
     default_audience: str | None
@@ -69,6 +70,16 @@ def _parse_algorithms(value: str | None) -> tuple[str, ...]:
     return tuple(algs)
 
 
+def _parse_secrets(value: str | None) -> tuple[str, ...] | None:
+    """Parse a comma-delimited secret list, preserving order."""
+    if not value:
+        return None
+    secrets = [item.strip() for item in value.split(",") if item.strip()]
+    if not secrets:
+        raise JWTConfigurationError("WEPP_AUTH_JWT_SECRETS must include at least one secret")
+    return tuple(dict.fromkeys(secrets))
+
+
 @lru_cache(maxsize=1)
 def get_jwt_config() -> JWTServiceConfig:
     """Load and cache JWT issuance settings from environment variables.
@@ -79,9 +90,15 @@ def get_jwt_config() -> JWTServiceConfig:
     Raises:
         JWTConfigurationError: If the shared secret cannot be resolved.
     """
+    secret_list = _parse_secrets(os.getenv(f"{ENV_PREFIX}SECRETS"))
     secret = os.getenv(f"{ENV_PREFIX}SECRET")
-    if not secret:
-        raise JWTConfigurationError("WEPP_AUTH_JWT_SECRET must be set to issue tokens")
+    if secret_list:
+        secret = secret_list[0]
+        validation_secrets = secret_list
+    else:
+        if not secret:
+            raise JWTConfigurationError("WEPP_AUTH_JWT_SECRET must be set to issue tokens")
+        validation_secrets = (secret,)
 
     algorithms = _parse_algorithms(os.getenv(f"{ENV_PREFIX}ALGORITHMS"))
     issuer = os.getenv(f"{ENV_PREFIX}ISSUER") or None
@@ -92,6 +109,7 @@ def get_jwt_config() -> JWTServiceConfig:
 
     return JWTServiceConfig(
         secret=secret,
+        validation_secrets=validation_secrets,
         algorithms=algorithms,
         issuer=issuer,
         default_audience=default_audience,
@@ -204,6 +222,43 @@ def decode_jwt(token: str, *, secret: str, algorithms: Sequence[str], audience: 
     digest_factory = SUPPORTED_HS_ALGORITHMS.get(algorithm)
     expected = hmac.new(secret.encode("utf-8"), signing_input, digest_factory).digest()
     if not hmac.compare_digest(expected, signature):
+        raise JWTDecodeError("Token signature mismatch")
+
+    _validate_time_claims(payload, issuer=issuer, audience=audience, leeway=leeway)
+    return payload
+
+
+def decode_jwt_with_secrets(
+    token: str,
+    *,
+    secrets: Sequence[str],
+    algorithms: Sequence[str],
+    audience: Sequence[str] | None = None,
+    issuer: str | None = None,
+    leeway: int = 0,
+) -> Mapping[str, Any]:
+    """Validate and decode a JWT using multiple candidate secrets."""
+    if not secrets:
+        raise JWTDecodeError("Token secret list is empty")
+
+    header, payload, signature = _decode_segments(token)
+
+    algorithm = header.get("alg")
+    if algorithm not in algorithms:
+        raise JWTDecodeError("Token signed with unsupported algorithm")
+
+    digest_factory = SUPPORTED_HS_ALGORITHMS.get(algorithm)
+    if digest_factory is None:
+        raise JWTDecodeError("Token signed with unsupported algorithm")
+
+    signing_input = ".".join(token.split(".")[:2]).encode("ascii")
+    matched = False
+    for secret in secrets:
+        expected = hmac.new(secret.encode("utf-8"), signing_input, digest_factory).digest()
+        if hmac.compare_digest(expected, signature):
+            matched = True
+            break
+    if not matched:
         raise JWTDecodeError("Token signature mismatch")
 
     _validate_time_claims(payload, issuer=issuer, audience=audience, leeway=leeway)
@@ -378,9 +433,9 @@ def decode_token(token: str, *, audience: Sequence[str] | str | None = None) -> 
     else:
         audience_set = list(audience)
 
-    return decode_jwt(
+    return decode_jwt_with_secrets(
         token,
-        secret=config.secret,
+        secrets=config.validation_secrets,
         algorithms=config.algorithms,
         audience=audience_set,
         issuer=config.issuer,

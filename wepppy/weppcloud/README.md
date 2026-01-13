@@ -142,18 +142,11 @@ All run-scoped routes follow the pattern:
 Examples:
 - `/runs/abc123/tahoe/tasks/set_outlet`
 - `/runs/abc123/tahoe/query/subcatchments.json`
-- `/runs/abc123/tahoe/rq/api/build_climate`
+- `/rq-engine/api/runs/abc123/tahoe/build-climate`
 
-### Upload Routing (`/upload`)
+### Upload Routing
 
-File uploads should target `/upload/...` so Caddy applies the extended 20-minute upstream timeout. Caddy strips `/upload` before proxying to Flask and forwards `X-Forwarded-Prefix: /upload`, so `ProxyFix` sets `request.script_root` and the upload blueprint can distinguish traffic from `/weppcloud`.
-
-Health check:
-```
-GET /upload/health
-```
-
-Non-upload traffic stays under `/weppcloud` and keeps the default proxy timeouts.
+Upload-capable endpoints now live under `/rq-engine/api/...` so the rq-engine upstream timeouts cover long-running multipart requests. Controllers should prefer `/rq-engine/api/...` for upload flows; non-upload traffic stays under `/weppcloud` and keeps the default proxy timeouts.
 
 ### RQ Polling (`/rq-engine`)
 
@@ -162,7 +155,7 @@ High-frequency job polling endpoints are served by the rq-engine FastAPI service
 - `GET /rq-engine/api/jobinfo/{job_id}`
 - `POST /rq-engine/api/jobinfo`
 
-Clients should prefer `/rq-engine/api/...` and fall back to the legacy `/weppcloud/rq/api/...` endpoints when needed.
+Clients should use `/rq-engine/api/...` for job polling and enqueue endpoints.
 
 ### Cap.js CAPTCHA
 

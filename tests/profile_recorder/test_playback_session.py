@@ -159,7 +159,10 @@ def _prepare_playback_session(
         suffix = spec.get("endpoint_suffix", "")
         suffix = suffix.lstrip("/")
         event = dict(spec)
-        event["endpoint"] = f"{base_url}/runs/{run_id}/{config_slug}/{suffix}"
+        if suffix.startswith("rq-engine/"):
+            event["endpoint"] = f"{base_url}/{suffix}"
+        else:
+            event["endpoint"] = f"{base_url}/runs/{run_id}/{config_slug}/{suffix}"
         events.append(event)
 
     events_path = capture_dir / "events.jsonl"
@@ -207,7 +210,10 @@ def test_playback_session_form_payloads(monkeypatch: pytest.MonkeyPatch, tmp_pat
 
     def execute(endpoint_suffix: str, request_meta: Dict[str, Any] | None = None) -> Dict[str, Any]:
         meta = {"bodyType": "form-data"} if request_meta is None else request_meta
-        original_path = f"/runs/{session.original_run_id}/{info['config_slug']}/{endpoint_suffix}"
+        if endpoint_suffix.startswith("rq-engine/"):
+            original_path = f"/{endpoint_suffix}"
+        else:
+            original_path = f"/runs/{session.original_run_id}/{info['config_slug']}/{endpoint_suffix}"
         effective_path = session._remap_run_path(original_path)
         url = session._build_url(effective_path)
         form_data, files_info = session._build_form_request(effective_path, meta)
@@ -225,22 +231,31 @@ def test_playback_session_form_payloads(monkeypatch: pytest.MonkeyPatch, tmp_pat
         call_log.clear()
         return recording_session.calls[-1][2]
 
-    landuse_kwargs = execute("rq/api/build_landuse")
+    landuse_kwargs = execute(
+        f"rq-engine/api/runs/{session.original_run_id}/{info['config_slug']}/build-landuse"
+    )
     assert landuse_kwargs["data"]["landuse_mode"] == "2"
     assert landuse_kwargs["data"]["checkbox_burn_shrubs"] == "true"
     assert landuse_kwargs["files"]["input_upload_landuse"][0] == "input_upload_landuse.tif"
 
-    soils_kwargs = execute("rq/api/build_soils", request_meta={})
+    soils_kwargs = execute(
+        f"rq-engine/api/runs/{session.original_run_id}/{info['config_slug']}/build-soils",
+        request_meta={},
+    )
     assert soils_kwargs["data"]["initial_sat"] == "0.42"
     assert soils_kwargs["data"]["sol_ver"] == "7.5"
 
-    ash_kwargs = execute("rq/api/run_ash")
+    ash_kwargs = execute(
+        f"rq-engine/api/runs/{session.original_run_id}/{info['config_slug']}/run-ash"
+    )
     assert ash_kwargs["data"]["ash_depth_mode"] == "1"
     assert ash_kwargs["data"]["fire_date"] == "5/17"
     assert ash_kwargs["files"]["input_upload_ash_load"][0] == "input_upload_ash_load.tif"
     assert ash_kwargs["files"]["input_upload_ash_type_map"][0] == "input_upload_ash_type_map.tif"
 
-    omni_kwargs = execute("rq/api/run_omni")
+    omni_kwargs = execute(
+        f"rq-engine/api/runs/{session.original_run_id}/{info['config_slug']}/run-omni"
+    )
     scenarios = json.loads(omni_kwargs["data"]["scenarios"])
     assert scenarios[0]["sbs_file"] == "scenario_seed.tif"
     assert omni_kwargs["files"]["scenarios[0][sbs_file]"][0] == "scenario_seed.tif"
@@ -255,7 +270,9 @@ def test_playback_session_prefers_recorded_form_values(monkeypatch: pytest.Monke
     session, recording_session, call_log, info = _prepare_playback_session(tmp_path, monkeypatch, event_specs=events)
 
     def execute_with_meta(meta: Dict[str, Any]) -> Dict[str, Any]:
-        original_path = f"/runs/{session.original_run_id}/{info['config_slug']}/rq/api/run_ash"
+        original_path = (
+            f"/rq-engine/api/runs/{session.original_run_id}/{info['config_slug']}/run-ash"
+        )
         effective_path = session._remap_run_path(original_path)
         url = session._build_url(effective_path)
         form_data, files_info = session._build_form_request(effective_path, meta)
@@ -324,14 +341,49 @@ def test_playback_session_build_url_strips_duplicate_prefix(monkeypatch: pytest.
 @pytest.mark.unit
 def test_playback_session_waits_and_skips_polling(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     events = [
-        {"stage": "request", "id": "1", "method": "POST", "endpoint_suffix": "rq/api/build_landuse", "requestMeta": {"bodyType": "form-data"}},
-        {"stage": "response", "id": "1", "status": 200, "ok": True, "endpoint_suffix": "rq/api/build_landuse"},
-        {"stage": "request", "id": "2", "method": "GET", "endpoint_suffix": "rq/api/jobstatus/demo-job"},
-        {"stage": "response", "id": "2", "status": 200, "ok": True, "endpoint_suffix": "rq/api/jobstatus/demo-job"},
+        {
+            "stage": "request",
+            "id": "1",
+            "method": "POST",
+            "endpoint_suffix": "rq-engine/api/runs/original-run/demo-config/build-landuse",
+            "requestMeta": {"bodyType": "form-data"},
+        },
+        {
+            "stage": "response",
+            "id": "1",
+            "status": 200,
+            "ok": True,
+            "endpoint_suffix": "rq-engine/api/runs/original-run/demo-config/build-landuse",
+        },
+        {
+            "stage": "request",
+            "id": "2",
+            "method": "GET",
+            "endpoint_suffix": "rq-engine/api/jobstatus/demo-job",
+        },
+        {
+            "stage": "response",
+            "id": "2",
+            "status": 200,
+            "ok": True,
+            "endpoint_suffix": "rq-engine/api/jobstatus/demo-job",
+        },
         {"stage": "request", "id": "3", "method": "GET", "endpoint_suffix": "elevationquery/sample"},
         {"stage": "response", "id": "3", "status": 200, "ok": True, "endpoint_suffix": "elevationquery/sample"},
-        {"stage": "request", "id": "4", "method": "POST", "endpoint_suffix": "rq/api/run_ash", "requestMeta": {"bodyType": "form-data"}},
-        {"stage": "response", "id": "4", "status": 200, "ok": True, "endpoint_suffix": "rq/api/run_ash"},
+        {
+            "stage": "request",
+            "id": "4",
+            "method": "POST",
+            "endpoint_suffix": "rq-engine/api/runs/original-run/demo-config/run-ash",
+            "requestMeta": {"bodyType": "form-data"},
+        },
+        {
+            "stage": "response",
+            "id": "4",
+            "status": 200,
+            "ok": True,
+            "endpoint_suffix": "rq-engine/api/runs/original-run/demo-config/run-ash",
+        },
     ]
     session, recording_session, call_log, _ = _prepare_playback_session(tmp_path, monkeypatch, event_specs=events)
 
@@ -352,7 +404,7 @@ def test_playback_session_waits_and_skips_polling(monkeypatch: pytest.MonkeyPatc
     assert log_sequence == ["request", "wait", "request", "wait"]
 
     assert wait_calls == ["job-1", "job-2"]
-    assert all("/rq/api/jobstatus/" not in call[1] for call in recording_session.calls)
+    assert all("/rq-engine/api/jobstatus/" not in call[1] for call in recording_session.calls)
     assert all("/elevationquery/" not in call[1] for call in recording_session.calls)
 
     statuses = {status for _, status in session.results}

@@ -22,10 +22,12 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
 2. **Prefer host vs container clarity**
    - Host commands (e.g., `run-npm`) should continue to check for required binaries (`npm`, etc.) inside the Typer command implementations.
    - Container commands must route through the compose helpers in `tools/wctl2/docker.py` so that context logging stays consistent.
+   - Auth token helpers (`issue-auth-token`, `revoke-auth-token`) must run inside the `weppcloud` container so they inherit `WEPP_AUTH_JWT_*` config.
 
 3. **Environment handling**
    - `CLIContext` already merges `docker/.env` → optional host override (`.env` or `WCTL_HOST_ENV`) → shell overrides. New commands should reuse the context instead of re-opening env files.
    - Avoid leaking secrets to stdout/stderr. Mask or omit sensitive values.
+   - When issuing or revoking JWTs, prefer passing tokens via stdin or files instead of command-line args.
 
 4. **Error handling & exit codes**
    - The shim still runs with `set -euo pipefail`; Typer commands should raise `typer.Exit` with appropriate codes.
@@ -48,7 +50,7 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
      wctl doc-refs README.md --path docs
      wctl doc-bench --path docs --warmup 0 --iterations 1
      ```
-     For `doc-mv`, the repository currently blocks traversal of `.docker-data/redis`; use a docs subdirectory (for example files under `tests/tmp/`) or temporarily prepend a mock `markdown-doc` binary to `PATH` to validate the dry-run/prompt behaviour.
+     For `doc-mv`, the repository currently blocks traversal of `.docker-data/redis`; use a docs subdirectory (for example files under `tests/tmp/`) or temporarily prepend a mock `markdown-doc` binary to `PATH` to validate the dry-run/prompt behavior.
 
 6. **Backward compatibility**
    - When removing or renaming a command, note the change in `wctl/README.md` or release notes and provide Typer-friendly migration guidance (`wctl <command> --help`).

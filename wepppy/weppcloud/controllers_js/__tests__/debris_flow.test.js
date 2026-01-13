@@ -30,6 +30,7 @@ describe("DebrisFlow controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
+            postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
             request: jest.fn(),
             isHttpError: jest.fn(() => false)
         };
@@ -45,7 +46,12 @@ describe("DebrisFlow controller", () => {
             hideStacktrace: jest.fn()
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
         window.site_prefix = "";
 
         await import("../debris_flow.js");
@@ -83,8 +89,8 @@ describe("DebrisFlow controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(httpMock.postJson).toHaveBeenCalledWith(
-            "rq/api/run_debris_flow",
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/run-debris-flow",
             {},
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -119,7 +125,7 @@ describe("DebrisFlow controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             debris,
             expect.objectContaining({
@@ -138,7 +144,7 @@ describe("DebrisFlow controller", () => {
         httpError.body = {
             error: { message: "failed" }
         };
-        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(httpError);
         httpMock.isHttpError.mockReturnValue(true);
         const errors = [];
         debris.events.on("debris:run:error", (payload) => errors.push(payload));
@@ -157,7 +163,7 @@ describe("DebrisFlow controller", () => {
 
     test("handles request rejection with controlBase stacktrace", async () => {
         const error = new Error("network");
-        httpMock.postJson.mockRejectedValueOnce(error);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(error);
 
         debris.run();
         await Promise.resolve();
@@ -202,6 +208,7 @@ describe("DebrisFlow controller without DOM bindings", () => {
 
         global.WCHttp = {
             postJson: jest.fn(),
+            postJsonWithSessionToken: jest.fn(),
             request: jest.fn(),
             isHttpError: jest.fn(() => false)
         };

@@ -49,8 +49,8 @@ var OPENET_TS = (function () {
         if (!forms || typeof forms.serializeForm !== "function") {
             throw new Error("OPENET_TS controller requires WCForms helpers.");
         }
-        if (!http || typeof http.postJson !== "function" || typeof http.isHttpError !== "function") {
-            throw new Error("OPENET_TS controller requires WCHttp helpers.");
+        if (!http || typeof http.postJsonWithSessionToken !== "function" || typeof http.isHttpError !== "function") {
+            throw new Error("OPENET_TS controller requires WCHttp.postJsonWithSessionToken.");
         }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("OPENET_TS controller requires WCEvents helpers.");
@@ -561,7 +561,11 @@ var OPENET_TS = (function () {
                 controller.disconnect_status_stream(controller);
             }
 
-            http.postJson(url_for_run("rq/api/acquire_openet_ts"), submission, { form: controller.form }).then(function (response) {
+            http.postJsonWithSessionToken(
+                url_for_run("acquire-openet-ts", { prefix: "/rq-engine/api" }),
+                submission,
+                { form: controller.form }
+            ).then(function (response) {
                 var body = response && response.body !== undefined ? response.body : response;
                 var normalized = body || {};
                 if (!normalized.error && !normalized.errors) {

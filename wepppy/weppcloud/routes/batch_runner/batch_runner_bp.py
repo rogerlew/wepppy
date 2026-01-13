@@ -20,6 +20,7 @@ from wepppy.nodb import unitizer as unitizer_module
 from wepppy.nodb.base import get_configs, get_config_dir, clear_locks, NoDbAlreadyLockedError
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
 from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
 
@@ -53,6 +54,11 @@ def _current_user_email() -> Optional[str]:
         if value:
             return str(value)
     return None
+
+
+def _current_user_subject() -> str:
+    candidate = getattr(current_user, "id", None) or _current_user_email()
+    return str(candidate) if candidate is not None else "user"
 
 def _validate_batch_name(raw_name: str) -> str:
     name = (raw_name or "").strip()
@@ -220,6 +226,21 @@ def view_batch(batch_name: str):
     base_config = batch_runner.base_config
     batch_runner_state = _build_batch_runner_snapshot(batch_runner)
     ron = RonViewModel.getInstanceFromRunID(base_runid)
+    roles = [
+        str(getattr(role, "name", role)).strip()
+        for role in (getattr(current_user, "roles", None) or [])
+        if str(getattr(role, "name", role)).strip()
+    ]
+    token_payload = auth_tokens.issue_token(
+        _current_user_subject(),
+        scopes=["rq:enqueue"],
+        audience="rq-engine",
+        extra_claims={
+            "roles": roles,
+            "token_class": "user",
+            "email": getattr(current_user, "email", None),
+        },
+    )
 
     context: Dict[str, Any] = {
         "feature_enabled": feature_enabled,
@@ -234,6 +255,7 @@ def view_batch(batch_name: str):
         "runid": base_runid,
         "batch_base_runid": base_runid,
         "pup_relpath": None,
+        "rq_engine_token": token_payload.get("token"),
     }
 
     context.setdefault("site_prefix", current_app.config.get("SITE_PREFIX", ""))

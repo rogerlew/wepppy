@@ -20,6 +20,9 @@ var Landuse = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Landuse controller requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("Landuse controller requires WCHttp.requestWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Landuse controller requires WCEvents helpers.");
         }
@@ -362,11 +365,14 @@ var Landuse = (function () {
 
             var formData = new FormData(formElement);
 
-            http.request(url_for_run("rq/api/build_landuse", { prefix: "/upload" }), {
-                method: "POST",
-                body: formData,
-                form: formElement
-            }).then(function (result) {
+            http.requestWithSessionToken(
+                url_for_run("build-landuse", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    body: formData,
+                    form: formElement
+                }
+            ).then(function (result) {
                 var response = result && result.body ? result.body : null;
                 if (response && response.job_id) {
                     landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);

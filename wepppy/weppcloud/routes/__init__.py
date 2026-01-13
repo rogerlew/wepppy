@@ -103,15 +103,12 @@ from .user import user_bp
 from .run_sync_dashboard import run_sync_dashboard_bp
 from .locations import locations_bp
 from .weppcloudr import weppcloudr_bp
-from .rq.api.jobinfo import rq_jobinfo_bp
-from .rq.api.api import rq_api_bp
 from .rq.job_dashboard.routes import rq_job_dashboard_bp
 from .stats import stats_bp
 from .run_0 import run_0_bp
 from ._security import security_logging_bp, security_oauth_bp, security_ui_bp
 from .ui_showcase import ui_showcase_bp
 from .recorder_bp import recorder_bp
-from .upload_bp import upload_bp
 try:
     from .test_bp import test_bp
 except ImportError:
@@ -153,10 +150,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     watershed_bp,
     wepp_bp,
     weppcloudr_bp,
-    rq_api_bp,
-    rq_jobinfo_bp,
     rq_job_dashboard_bp,
-    upload_bp,
 ])
 
 for _bp in _RUN_CONTEXT_BLUEPRINTS:
@@ -206,8 +200,6 @@ __all__ = [
     'wepp_bp',
     'locations_bp',
     'weppcloudr_bp',
-    'rq_jobinfo_bp',
-    'rq_api_bp',
     'rq_job_dashboard_bp',
     'stats_bp',
     'run_0_bp',
@@ -216,6 +208,5 @@ __all__ = [
     'security_oauth_bp',
     'recorder_bp',
     'ui_showcase_bp',
-    'upload_bp',
     'test_bp',
 ]

@@ -56,11 +56,17 @@ describe("Outlet GL controller", () => {
 
         global.WCHttp = {
             request: jest.fn(),
+            requestWithSessionToken: jest.fn(),
             getJson: jest.fn(),
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         clickHandler = null;
         mapStub = {
@@ -128,12 +134,12 @@ describe("Outlet GL controller", () => {
         outlet.bootstrap({});
         outlet.setCursorSelection(true);
 
-        global.WCHttp.request.mockResolvedValueOnce({ body: { job_id: "job-123" } });
+        global.WCHttp.requestWithSessionToken.mockResolvedValueOnce({ body: { job_id: "job-123" } });
 
         await clickHandler({ latlng: { lat: 45.1, lng: -120.3 } });
 
-        expect(global.WCHttp.request).toHaveBeenCalledWith(
-            "rq/api/set_outlet",
+        expect(global.WCHttp.requestWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/set-outlet",
             expect.objectContaining({
                 method: "POST",
                 json: { latitude: 45.1, longitude: -120.3 },
@@ -150,7 +156,7 @@ describe("Outlet GL controller", () => {
         outlet.bootstrap({});
         outlet.setCursorSelection(true);
 
-        global.WCHttp.request.mockResolvedValueOnce({ body: { job_id: "job-123" } });
+        global.WCHttp.requestWithSessionToken.mockResolvedValueOnce({ body: { job_id: "job-123" } });
         global.WCHttp.getJson.mockResolvedValueOnce({ lat: 45.2, lng: -120.4 });
         global.WCHttp.request.mockResolvedValueOnce({ body: "<div>Report</div>" });
 

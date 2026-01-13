@@ -15,6 +15,8 @@ sys.modules["wepppy.weppcloud.utils.auth_tokens"] = auth_tokens
 assert spec.loader is not None
 spec.loader.exec_module(auth_tokens)
 
+pytestmark = pytest.mark.unit
+
 
 def _configure_env(monkeypatch):
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
@@ -22,6 +24,16 @@ def _configure_env(monkeypatch):
     monkeypatch.setenv("WEPP_AUTH_JWT_ISSUER", "weppcloud")
     monkeypatch.setenv("WEPP_AUTH_JWT_DEFAULT_AUDIENCE", "wepp-services")
     monkeypatch.setenv("WEPP_AUTH_JWT_DEFAULT_TTL_SECONDS", "600")
+    auth_tokens.get_jwt_config.cache_clear()
+
+
+def _configure_rotation_env(monkeypatch):
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRETS", "new-secret,old-secret")
+    monkeypatch.setenv("WEPP_AUTH_JWT_ALGORITHMS", "HS256")
+    monkeypatch.setenv("WEPP_AUTH_JWT_ISSUER", "weppcloud")
+    monkeypatch.setenv("WEPP_AUTH_JWT_DEFAULT_AUDIENCE", "wepp-services")
+    monkeypatch.setenv("WEPP_AUTH_JWT_DEFAULT_TTL_SECONDS", "600")
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRET", raising=False)
     auth_tokens.get_jwt_config.cache_clear()
 
 
@@ -66,5 +78,32 @@ def test_decode_token_rejects_mismatched_audience(monkeypatch):
 def test_missing_configuration_raises(monkeypatch):
     auth_tokens.get_jwt_config.cache_clear()
     monkeypatch.delenv("WEPP_AUTH_JWT_SECRET", raising=False)
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
     with pytest.raises(auth_tokens.JWTConfigurationError):
         auth_tokens.issue_token("user")
+
+
+def test_decode_token_accepts_rotated_secret(monkeypatch):
+    _configure_rotation_env(monkeypatch)
+    result = auth_tokens.issue_token("user-789")
+    claims = result["claims"]
+    config = auth_tokens.get_jwt_config()
+
+    rotated_token = auth_tokens.encode_jwt(
+        claims,
+        "old-secret",
+        algorithm=config.algorithms[0],
+    )
+    decoded = auth_tokens.decode_token(rotated_token, audience="wepp-services")
+
+    assert decoded["sub"] == "user-789"
+    assert config.secret == "new-secret"
+    assert config.validation_secrets == ("new-secret", "old-secret")
+
+    bad_token = auth_tokens.encode_jwt(
+        claims,
+        "unknown-secret",
+        algorithm=config.algorithms[0],
+    )
+    with pytest.raises(auth_tokens.JWTDecodeError):
+        auth_tokens.decode_token(bad_token, audience="wepp-services")

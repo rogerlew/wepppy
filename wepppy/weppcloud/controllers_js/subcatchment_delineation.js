@@ -21,6 +21,9 @@ var SubcatchmentDelineation = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("SubcatchmentDelineation controller requires WCHttp helpers.");
         }
+        if (typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("SubcatchmentDelineation controller requires WCHttp.postJsonWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("SubcatchmentDelineation controller requires WCEvents helpers.");
         }
@@ -1621,7 +1624,11 @@ var SubcatchmentDelineation = (function () {
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
-            http.postJson(url_for_run("rq/api/build_subcatchments_and_abstract_watershed"), payload, { form: formElement })
+            http.postJsonWithSessionToken(
+                url_for_run("build-subcatchments-and-abstract-watershed", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.job_id) {

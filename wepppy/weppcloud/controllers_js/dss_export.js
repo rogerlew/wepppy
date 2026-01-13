@@ -56,8 +56,8 @@ var DssExport = (function () {
         if (!forms || typeof forms.serializeForm !== "function") {
             throw new Error("DssExport controller requires WCForms helpers.");
         }
-        if (!http || typeof http.postJson !== "function") {
-            throw new Error("DssExport controller requires WCHttp helpers.");
+        if (!http || typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("DssExport controller requires WCHttp.postJsonWithSessionToken.");
         }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("DssExport controller requires WCEvents helpers.");
@@ -555,7 +555,11 @@ var DssExport = (function () {
 
             controller.connect_status_stream(controller);
 
-            http.postJson(url_for_run("rq/api/post_dss_export_rq"), payload, { form: controller.form }).then(function (response) {
+            http.postJsonWithSessionToken(
+                url_for_run("post-dss-export-rq", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: controller.form }
+            ).then(function (response) {
                 var body = response && response.body ? response.body : response;
                 var normalized = body || {};
 

@@ -15,11 +15,9 @@ def _require_env(name: str) -> str:
 
 
 def _build_session_redis(db_default: int = 11) -> redis.Redis:
-    url = os.getenv("SESSION_REDIS_URL") or os.getenv("REDIS_URL")
-    db = int(os.getenv("SESSION_REDIS_DB", db_default))
+    from wepppy.config import redis_settings
 
-    if url:
-        return redis.from_url(url, db=db)
+    return redis.from_url(redis_settings.session_redis_url(db_default))
 
     host = os.getenv("SESSION_REDIS_HOST", os.getenv("REDIS_HOST", "localhost"))
     port = int(os.getenv("SESSION_REDIS_PORT", os.getenv("REDIS_PORT", "6379")))
@@ -249,6 +247,7 @@ def config_app(app: Any):
     app.config["SESSION_USE_SIGNER"] = True
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_KEY_PREFIX"] = "session:"
+    app.config["SESSION_COOKIE_PATH"] = os.getenv("SESSION_COOKIE_PATH", "/")
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
     app.config["SESSION_COOKIE_SAMESITE"] = "None"
     app.config["SESSION_COOKIE_SECURE"] = True

@@ -97,11 +97,16 @@ describe("ChannelDelineation GL controller", () => {
 
         global.WCHttp = {
             request: requestMock,
+            requestWithSessionToken: requestMock,
             getJson: getJsonMock,
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        global.url_for_run = jest.fn((path) => `/runs/test/cfg/${path}`);
+        global.url_for_run = jest.fn((path, options) => {
+            var prefix = options && options.prefix ? options.prefix.replace(/\/+$/, "") : "";
+            var base = `${prefix}/runs/test/cfg/${path}`;
+            return prefix ? base : `/runs/test/cfg/${path}`;
+        });
 
         mapEventHandlers = {};
         mapStub = {
@@ -272,7 +277,7 @@ describe("ChannelDelineation GL controller", () => {
 
         expect(result).toMatchObject({ job_id: "job-99" });
         expect(requestMock).toHaveBeenCalledWith(
-            "/runs/test/cfg/rq/api/fetch_dem_and_build_channels",
+            "/rq-engine/api/runs/test/cfg/fetch-dem-and-build-channels",
             expect.objectContaining({
                 method: "POST",
                 json: expect.any(Object),

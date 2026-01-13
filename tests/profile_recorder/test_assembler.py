@@ -109,13 +109,24 @@ def test_capture_file_upload_writes_expected_seeds(monkeypatch: pytest.MonkeyPat
     assembler = ProfileAssembler(data_repo_root)
 
     def make_event(path: str) -> dict[str, Any]:
-        return {"endpoint": f"/runs/demo/config/{path}", "stage": "response", "category": "file_upload"}
+        endpoint = path if path.startswith("/") else f"/runs/demo/config/{path}"
+        return {"endpoint": endpoint, "stage": "response", "category": "file_upload"}
 
-    assembler._capture_file_upload(make_event("tasks/upload_sbs"), draft_root, run_dir)
-    assembler._capture_file_upload(make_event("tasks/upload_cover_transform"), draft_root, run_dir)
-    assembler._capture_file_upload(make_event("tasks/upload_cli"), draft_root, run_dir)
-    assembler._capture_file_upload(make_event("rq/api/run_ash"), draft_root, run_dir)
-    assembler._capture_file_upload(make_event("rq/api/run_omni"), draft_root, run_dir)
+    assembler._capture_file_upload(
+        make_event("/rq-engine/api/runs/demo/config/tasks/upload-sbs"), draft_root, run_dir
+    )
+    assembler._capture_file_upload(
+        make_event("/rq-engine/api/runs/demo/config/tasks/upload-cover-transform"), draft_root, run_dir
+    )
+    assembler._capture_file_upload(
+        make_event("/rq-engine/api/runs/demo/config/tasks/upload-cli"), draft_root, run_dir
+    )
+    assembler._capture_file_upload(
+        make_event("/rq-engine/api/runs/demo/config/run-ash"), draft_root, run_dir
+    )
+    assembler._capture_file_upload(
+        make_event("/rq-engine/api/runs/demo/config/run-omni"), draft_root, run_dir
+    )
 
     seed_root = draft_root / "seed" / "uploads"
 

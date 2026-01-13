@@ -69,7 +69,7 @@ describe("SubcatchmentDelineation GL controller", () => {
         global.WCHttp = {
             request: requestMock,
             getJson: requestMock,
-            postJson: postJsonMock,
+            postJsonWithSessionToken: postJsonMock,
             isHttpError: jest.fn().mockReturnValue(false),
         };
         global.WCForms = {
@@ -131,7 +131,11 @@ describe("SubcatchmentDelineation GL controller", () => {
             BitmapLayer,
         };
 
-        global.url_for_run = jest.fn((path) => `/runs/test/cfg/${path}`);
+        global.url_for_run = jest.fn((path, options) => {
+            var prefix = options && options.prefix ? options.prefix.replace(/\/+$/, "") : "";
+            var base = `${prefix}/runs/test/cfg/${path}`;
+            return prefix ? base : `/runs/test/cfg/${path}`;
+        });
 
         window.history.pushState({}, "", "/runs/test/cfg/");
 
@@ -215,7 +219,7 @@ describe("SubcatchmentDelineation GL controller", () => {
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(sub);
         expect(postJsonMock).toHaveBeenCalledWith(
-            "/runs/test/cfg/rq/api/build_subcatchments_and_abstract_watershed",
+            "/rq-engine/api/runs/test/cfg/build-subcatchments-and-abstract-watershed",
             expect.any(Object),
             expect.objectContaining({ form: expect.any(HTMLFormElement) }),
         );

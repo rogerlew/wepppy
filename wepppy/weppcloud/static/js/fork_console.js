@@ -150,6 +150,7 @@
 
     var origin = window.location.origin;
     var runId = dataset.runid || dataset.runId || "";
+    var config = dataset.config || dataset.configSlug || "cfg";
     var capRequired = dataset.capRequired === true || dataset.capRequired === "true";
     var capSection = dataset.capSection || "";
     var undisturbifyRaw = dataset.undisturbify;
@@ -236,6 +237,32 @@
       }
       capTrigger.click();
       return true;
+    }
+
+    function fetchSessionToken() {
+      var sessionHelper = window.WCHttp && typeof window.WCHttp.getSessionToken === "function"
+        ? window.WCHttp
+        : null;
+      if (sessionHelper) {
+        return sessionHelper.getSessionToken(runId, config);
+      }
+      var tokenUrl = origin + "/rq-engine/api/runs/" + runId + "/" + config + "/session-token";
+      return fetch(tokenUrl, { method: "POST", headers: { Accept: "application/json" } })
+        .then(function (resp) {
+          return resp.json().then(function (payload) {
+            if (!resp.ok) {
+              var message = resolveErrorMessage(payload, "Session token request failed");
+              throw new Error(message);
+            }
+            return payload;
+          });
+        })
+        .then(function (payload) {
+          if (!payload || !payload.token) {
+            throw new Error("Session token response missing token");
+          }
+          return payload.token;
+        });
     }
 
     function attachCapHandlers() {
@@ -537,7 +564,7 @@
       resetStatusLog();
       appendStatus("Submitting fork job...");
 
-      var forkUrl = origin + "/weppcloud/runs/" + runId + "/cfg/rq/api/fork";
+      var forkUrl = origin + "/rq-engine/api/runs/" + runId + "/" + config + "/fork";
       var payload = new URLSearchParams({ undisturbify: undisturbify ? "true" : "false" });
       if (capRequired) {
         var verifiedToken = getCapToken();
@@ -546,10 +573,18 @@
         }
       }
 
-      fetch(forkUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: payload.toString()
+      var tokenPromise = capRequired ? Promise.resolve(null) : fetchSessionToken();
+
+      tokenPromise.then(function (token) {
+        var headers = { "Content-Type": "application/x-www-form-urlencoded" };
+        if (token) {
+          headers.Authorization = "Bearer " + token;
+        }
+        return fetch(forkUrl, {
+          method: "POST",
+          headers: headers,
+          body: payload.toString()
+        });
       })
         .then(function (resp) {
           return resp.text().then(function (text) {
@@ -645,15 +680,33 @@
       if (cancelButton) {
         cancelButton.disabled = true;
       }
-      appendStatus("Cancelling job " + jobId + "...");
-      var cancelUrl = origin + "/weppcloud/rq/canceljob/" + jobId;
-      fetch(cancelUrl, { method: "GET" })
-        .then(function (resp) {
-          if (!resp.ok) {
-            throw new Error("Cancel job failed");
-          }
+      appendStatus("Canceling job " + jobId + "...");
+      var sessionHelper = window.WCHttp && typeof window.WCHttp.getSessionToken === "function"
+        ? window.WCHttp
+        : null;
+      if (!sessionHelper) {
+        appendStatus("Cancel request failed: session token helper unavailable.");
+        window.alert("Unable to cancel job.");
+        if (cancelButton) {
+          cancelButton.disabled = false;
+        }
+        return;
+      }
+      sessionHelper.getSessionToken(runId, config)
+        .then(function (token) {
+          return sessionHelper.request(
+            "/rq-engine/api/canceljob/" + encodeURIComponent(jobId),
+            {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + token
+              }
+            }
+          );
+        })
+        .then(function () {
           appendStatus("Cancel request acknowledged for " + jobId + ".");
-          window.alert("Job cancelled");
+          window.alert("Job canceled");
         })
         .catch(function (err) {
           console.error(err);

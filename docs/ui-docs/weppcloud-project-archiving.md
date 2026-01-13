@@ -22,9 +22,9 @@ Script: `wepppy/weppcloud/static/js/archive_console.js`
 
 - Uses StatusStream for live logs + trigger events (`ARCHIVE_COMPLETE`, `ARCHIVE_FAILED`, `RESTORE_COMPLETE`, `RESTORE_FAILED`).
 - Uses `controlBase` (from `controllers-gl.js`) as a polling fallback for job status:
-  - `set_rq_job_id(...)` starts polling `/weppcloud/rq/api/jobstatus/<job_id>`.
+  - `set_rq_job_id(...)` starts polling `/rq-engine/api/jobstatus/<job_id>`.
   - `job:completed`/`job:error` dispatches funnel into the same handlers (idempotent guard).
-  - Failure polling fetches `/weppcloud/rq/api/jobinfo/<job_id>` to populate stacktrace.
+  - Failure polling fetches `/rq-engine/api/jobinfo/<job_id>` to populate stacktrace.
 - `setActiveJob(...)` is called on submit and when `rq_archive_list` reports `in_progress` so polling resumes after reloads.
 - Fetches archive/restore/delete/list with `fetch` (requests are not routed through WCHttp).
 
@@ -37,11 +37,11 @@ Module: `wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py`
   - `rq_archive_list`: returns JSON describing the run's archive zips (including comments). Creates `archives/` on demand, enumerates zip entries, and records `archive_job_id` state (so the dashboard can disable buttons while a job is running).
 
 ## RQ API
-Module: `wepppy/weppcloud/routes/rq/api/api.py`
+Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 
-- `api_archive` (POST): queues `archive_rq` and accepts an optional `comment` value (JSON or form) trimmed to 40 chars. Rejects missing runs, active `.nodb` locks, or an already running archive job (`RedisPrep.get_archive_job_id()`).
-- `api_restore_archive` (POST, login required): queues `restore_archive_rq`. Rejects missing runs, active locks, missing archive files, or a running archive job. Accepts `archive_name`.
-- `api_delete_archive` (POST, login required): synchronously removes a selected archive. Same guards as restore.
+- `archive` (POST): queues `archive_rq` and accepts an optional `comment` value (JSON or form) trimmed to 40 chars. Rejects missing runs, active `.nodb` locks, or an already running archive job (`RedisPrep.get_archive_job_id()`).
+- `restore-archive` (POST): queues `restore_archive_rq`. Rejects missing runs, active locks, missing archive files, or a running archive job. Accepts `archive_name`.
+- `delete-archive` (POST): synchronously removes a selected archive. Same guards as restore.
 - Enqueue operations publish `ENQUEUED` status messages; deletes emit `Archive deleted: <name>` on the status stream.
 
 ## RQ Jobs

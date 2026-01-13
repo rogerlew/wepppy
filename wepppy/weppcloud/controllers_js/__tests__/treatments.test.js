@@ -74,10 +74,15 @@ describe("Treatments controller", () => {
             useEventMap: jest.fn((events, emitter) => emitter),
         };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         httpRequestMock = jest.fn((url) => {
-            if (url === "rq/api/build_treatments") {
+            if (url === "/rq-engine/api/runs/test/cfg/build-treatments") {
                 return Promise.resolve({ body: { job_id: "job-123" } });
             }
             if (url === "report/treatments/") {
@@ -90,6 +95,7 @@ describe("Treatments controller", () => {
 
         global.WCHttp = {
             request: httpRequestMock,
+            requestWithSessionToken: httpRequestMock,
             postJson: postJsonMock,
             isHttpError: jest.fn().mockReturnValue(false),
         };
@@ -192,7 +198,7 @@ describe("Treatments controller", () => {
         await flushPromises();
 
         expect(httpRequestMock).toHaveBeenCalledWith(
-            "rq/api/build_treatments",
+            "/rq-engine/api/runs/test/cfg/build-treatments",
             expect.objectContaining({ method: "POST", body: expect.any(FormData) })
         );
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
@@ -227,7 +233,7 @@ describe("Treatments controller", () => {
         treatments.handle_job_status_response(treatments, { status: "failed" });
         await flushPromises();
 
-        expect(httpRequestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             treatments,
             expect.objectContaining({

@@ -79,6 +79,9 @@ var ChannelDelineation = (function () {
         if (!http || typeof http.request !== "function" || typeof http.getJson !== "function") {
             throw new Error("ChannelDelineation GL requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("ChannelDelineation GL requires WCHttp.requestWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("ChannelDelineation GL requires WCEvents helpers.");
         }
@@ -965,6 +968,10 @@ var ChannelDelineation = (function () {
             } else {
                 buildButton.disabled = !enabled;
             }
+            if (channel.rq_job_id && typeof channel.render_job_hint === "function") {
+                channel.render_job_hint(channel);
+                return;
+            }
             setHint(enabled ? "" : reason);
         }
 
@@ -1309,11 +1316,14 @@ var ChannelDelineation = (function () {
                 payload: payload
             });
 
-            return http.request(window.url_for_run("rq/api/fetch_dem_and_build_channels"), {
+            return http.requestWithSessionToken(
+                window.url_for_run("fetch-dem-and-build-channels", { prefix: "/rq-engine/api" }),
+                {
                 method: "POST",
                 json: payload,
                 form: formElement
-            })
+                }
+            )
                 .then(function (result) {
                     var data = result.body || {};
                     if (!data.error && !data.errors && data.job_id) {

@@ -54,8 +54,11 @@ var SubcatchmentDelineation = (function () {
         if (!forms || typeof forms.serializeForm !== "function") {
             throw new Error("SubcatchmentDelineation GL requires WCForms helpers.");
         }
-        if (!http || typeof http.request !== "function" || typeof http.getJson !== "function" || typeof http.postJson !== "function") {
+        if (!http || typeof http.request !== "function" || typeof http.getJson !== "function") {
             throw new Error("SubcatchmentDelineation GL requires WCHttp helpers.");
+        }
+        if (typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("SubcatchmentDelineation GL requires WCHttp.postJsonWithSessionToken.");
         }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("SubcatchmentDelineation GL requires WCEvents helpers.");
@@ -184,11 +187,11 @@ var SubcatchmentDelineation = (function () {
         return [r, g, b, a];
     }
 
-    function resolveRunScopedUrl(path) {
+    function resolveRunScopedUrl(path, options) {
         if (typeof window.url_for_run !== "function") {
             throw new Error("SubcatchmentDelineation GL requires url_for_run.");
         }
-        return window.url_for_run(path);
+        return window.url_for_run(path, options);
     }
 
     function toResponsePayload(http, error) {
@@ -1308,7 +1311,11 @@ var SubcatchmentDelineation = (function () {
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
-            return http.postJson(resolveRunScopedUrl("rq/api/build_subcatchments_and_abstract_watershed"), payload, { form: formElement })
+            return http.postJsonWithSessionToken(
+                resolveRunScopedUrl("build-subcatchments-and-abstract-watershed", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && (response.error || response.errors)) {

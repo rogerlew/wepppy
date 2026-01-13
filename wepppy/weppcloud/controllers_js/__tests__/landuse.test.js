@@ -108,7 +108,7 @@ describe("Landuse controller", () => {
         };
 
         httpRequestMock = jest.fn((url) => {
-            if (url === "rq/api/build_landuse") {
+            if (url === "/rq-engine/api/runs/test/cfg/build-landuse") {
                 return Promise.resolve({ body: { job_id: "job-1" } });
             }
             if (url === "report/landuse/") {
@@ -121,6 +121,7 @@ describe("Landuse controller", () => {
 
         global.WCHttp = {
             request: httpRequestMock,
+            requestWithSessionToken: httpRequestMock,
             postJson: httpPostJsonMock,
             postForm: jest.fn(),
             getJson: jest.fn(),
@@ -138,7 +139,12 @@ describe("Landuse controller", () => {
         global.SubcatchmentDelineation = {
             getInstance: jest.fn(() => colorMapMock),
         };
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../landuse.js");
         landuse = window.Landuse.getInstance();
@@ -169,7 +175,7 @@ describe("Landuse controller", () => {
         landuse.build();
         await flushPromises();
 
-        expect(httpRequestMock).toHaveBeenCalledWith("rq/api/build_landuse", expect.objectContaining({
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/runs/test/cfg/build-landuse", expect.objectContaining({
             method: "POST",
         }));
         const requestOptions = httpRequestMock.mock.calls[0][1];
@@ -191,7 +197,7 @@ describe("Landuse controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             landuse,
             expect.objectContaining({

@@ -40,6 +40,7 @@ describe("Rhem controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-456" } })),
+            postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-456" } })),
             request: jest
                 .fn()
                 .mockResolvedValue({ body: "<section>ok</section>" }),
@@ -55,7 +56,12 @@ describe("Rhem controller", () => {
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
         projectMock = { set_preferred_units: jest.fn() };
         window.Project = { getInstance: jest.fn(() => projectMock) };
 
@@ -104,8 +110,8 @@ describe("Rhem controller", () => {
 
         await flushPromises();
 
-        expect(httpMock.postJson).toHaveBeenCalledWith(
-            "rq/api/run_rhem_rq",
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/run-rhem",
             expect.objectContaining({ clean: true, prep: false }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -169,7 +175,7 @@ describe("Rhem controller", () => {
         rhem.handle_job_status_response(rhem, { status: "failed" });
         await flushPromises();
 
-        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             rhem,
             expect.objectContaining({
@@ -204,7 +210,7 @@ describe("Rhem controller", () => {
         httpError.body = {
             error: { message: "Nope" }
         };
-        httpMock.postJson.mockRejectedValueOnce(httpError);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(httpError);
         httpMock.isHttpError.mockReturnValue(true);
         const errors = [];
         rhem.events.on("rhem:run:failed", (payload) => errors.push(payload));
@@ -222,7 +228,7 @@ describe("Rhem controller", () => {
 
     test("request rejection surfaces through controlBase stacktrace", async () => {
         const error = new Error("network failure");
-        httpMock.postJson.mockRejectedValueOnce(error);
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(error);
 
         rhem.run();
         await flushPromises();

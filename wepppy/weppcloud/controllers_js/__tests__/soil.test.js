@@ -53,7 +53,7 @@ describe("Soil controller", () => {
         requestMock = jest.fn(() => Promise.resolve({ body: "<div>soil report</div>" }));
 
         global.WCHttp = {
-            postForm: postFormMock,
+            requestWithSessionToken: postFormMock,
             postJson: postJsonMock,
             request: requestMock,
             getJson: jest.fn(),
@@ -74,7 +74,12 @@ describe("Soil controller", () => {
             getInstance: jest.fn(() => colorMapMock),
         };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../soil.js");
         soil = window.Soil.getInstance();
@@ -106,10 +111,12 @@ describe("Soil controller", () => {
         soil.build();
         await Promise.resolve();
 
-        expect(postFormMock).toHaveBeenCalledWith("rq/api/build_soils", expect.any(URLSearchParams), expect.objectContaining({
+        expect(postFormMock).toHaveBeenCalledWith("/rq-engine/api/runs/test/cfg/build-soils", expect.objectContaining({
+            method: "POST",
+            body: expect.any(URLSearchParams),
             form: expect.any(HTMLFormElement),
         }));
-        const params = postFormMock.mock.calls[0][1];
+        const params = postFormMock.mock.calls[0][1].body;
         expect(params.get("soil_single_selection")).toBe("101");
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(soil, "soil-job");
@@ -124,7 +131,7 @@ describe("Soil controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             soil,
             expect.objectContaining({

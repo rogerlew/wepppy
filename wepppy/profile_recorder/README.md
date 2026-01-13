@@ -80,7 +80,7 @@ A FastAPI microservice that rehydrates sandboxed runs and replays captured traff
 - Rewrites URLs from `/runs/<original>/` to `/runs/{playback_run_id}/`; the FastAPI service issues playback run IDs in the form `profile;;tmp;;<sandbox_uuid>` so sandbox runs stay isolated while the original ID remains available for reporting
 - Skips recorded elevation queries and jobstatus polls (replays generate fresh job IDs)
 - Automatically rebuilds multipart form-data payloads using seed assets (landuse, SBS, CLI, ash, omni uploads)
-- Polls new job IDs until completion via `/rq/api/jobinfo/<id>`, parses hierarchical job trees on failures
+- Polls new job IDs until completion via `/rq-engine/api/jobinfo/<id>`, parses hierarchical job trees on failures (legacy `/rq/api` still replays for older captures)
 - Applies 1-second delays between requests to prevent race conditions in async workflows
 
 **Authentication:**
@@ -147,11 +147,11 @@ PlaybackSession.run()
 
 wctl run-fork-profile <slug>
   ↓
-fork_profile() → POST /rq/api/fork → Poll job → Copy fork artifacts
+fork_profile() → POST /rq-engine/api/runs/<runid>/<config>/fork → Poll job → Copy fork artifacts
 
 wctl run-archive-profile <slug>
   ↓
-archive_profile() → POST /rq/api/archive → Poll job → Mirror archives
+archive_profile() → POST /rq-engine/api/runs/<runid>/<config>/archive → Poll job → Mirror archives
 ```
 
 ## Profile Layout
@@ -179,8 +179,8 @@ profiles/backed-globule/
         omni/
           _limbo/
             scenario_0_sbs.tif
-      rq-api-fetch_dem_and_build_channels-dem-dem.tif
-      rq-api-build_subcatchments_and_abstract_watershed-dem-channels.shp
+      rq-engine-api-fetch-dem-and-build-channels-dem-dem.tif
+      rq-engine-api-build-subcatchments-and-abstract-watershed-dem-channels.shp
     validation.log           # Task rule verification notes
     run_dir.txt              # Original run directory pointer
   run/                       # Snapshot of working directory

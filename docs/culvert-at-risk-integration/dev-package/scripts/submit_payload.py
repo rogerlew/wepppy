@@ -23,8 +23,15 @@ Usage:
     python submit_payload.py --payload payload.zip \\
         --poll-seconds 10 --timeout-seconds 7200
 
+    # With bearer token from environment
+    WEPPCLOUD_TOKEN=token-value python submit_payload.py --payload payload.zip
+
+    # With bearer token from file
+    python submit_payload.py --payload payload.zip --token-file /path/to/token.txt
+
 Environment variables:
     WEPPCLOUD_HOST: Override the default wepp.cloud host (no http/https prefix).
+    WEPPCLOUD_TOKEN: Optional bearer token for authenticated endpoints.
 
 Test payload (pre-built):
     tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip
@@ -53,6 +60,7 @@ import requests
 
 # Constants
 DEFAULT_HOST = "wepp.cloud"
+TOKEN_ENV_VAR = "WEPPCLOUD_TOKEN"
 DEFAULT_POLL_SECONDS = 5
 DEFAULT_TIMEOUT_SECONDS = 3600 * 20
 UPLOAD_ENDPOINT = "/rq-engine/api/culverts-wepp-batch/"
@@ -113,6 +121,7 @@ def upload_payload(
     base_url: str,
     zip_sha256: Optional[str] = None,
     total_bytes: Optional[int] = None,
+    auth_token: Optional[str] = None,
 ) -> dict[str, Any]:
     """
     Upload payload.zip to the culvert batch endpoint.
@@ -143,12 +152,17 @@ def upload_payload(
     logger.info(f"Uploading payload to {endpoint}...")
     start_time = time.monotonic()
 
+    headers = {}
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+
     with payload_path.open("rb") as f:
         files = {"payload.zip": (payload_path.name, f, "application/zip")}
         response = requests.post(
             endpoint,
             files=files,
             data=form_data,
+            headers=headers or None,
             timeout=(30, 3600),  # 30s connect, 60 min upload timeout
         )
 
@@ -176,6 +190,7 @@ def poll_until_complete(
     status_url: str,
     poll_seconds: int = DEFAULT_POLL_SECONDS,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    auth_token: Optional[str] = None,
 ) -> dict[str, Any]:
     """
     Poll the status URL until the job completes, fails, or times out.
@@ -189,6 +204,10 @@ def poll_until_complete(
     last_status = None
     poll_count = 0
 
+    headers = {}
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+
     while True:
         poll_count += 1
         elapsed = time.monotonic() - start_time
@@ -198,7 +217,7 @@ def poll_until_complete(
             raise SubmissionError("Polling timeout exceeded")
 
         try:
-            response = requests.get(status_url, timeout=30)
+            response = requests.get(status_url, timeout=30, headers=headers or None)
             response.raise_for_status()
             status_data = response.json()
         except requests.RequestException as e:
@@ -276,8 +295,22 @@ def main() -> int:
         default=DEFAULT_TIMEOUT_SECONDS,
         help=f"Maximum wait time in seconds (default: {DEFAULT_TIMEOUT_SECONDS})",
     )
+    parser.add_argument(
+        "--token",
+        type=str,
+        default=None,
+        help="Bearer token for authenticated endpoints (or set WEPPCLOUD_TOKEN).",
+    )
+    parser.add_argument(
+        "--token-file",
+        type=Path,
+        default=None,
+        help="Path to a file containing the bearer token.",
+    )
 
     args = parser.parse_args()
+    if args.token and args.token_file:
+        parser.error("--token and --token-file are mutually exclusive")
 
     # Validate payload exists
     if not args.payload.exists():
@@ -297,6 +330,25 @@ def main() -> int:
     logger.info(f"Host: {host}")
     logger.info(f"Base URL: {base_url}")
 
+    auth_token = None
+    if args.token_file:
+        try:
+            auth_token = args.token_file.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            logger.error(f"Failed to read token file: {exc}")
+            return 3
+    elif args.token:
+        auth_token = args.token.strip()
+    else:
+        env_token = os.getenv(TOKEN_ENV_VAR)
+        if env_token:
+            auth_token = env_token.strip()
+
+    if auth_token:
+        logger.info("Auth token: provided")
+    else:
+        logger.warning("Auth token: not provided (upload may fail if JWT is required)")
+
     try:
         # Upload payload
         upload_result = upload_payload(
@@ -304,6 +356,7 @@ def main() -> int:
             base_url=base_url,
             zip_sha256=args.zip_sha256,
             total_bytes=args.total_bytes,
+            auth_token=auth_token,
         )
 
         # Get status URL
@@ -328,6 +381,7 @@ def main() -> int:
             status_url=full_status_url,
             poll_seconds=args.poll_seconds,
             timeout_seconds=args.timeout_seconds,
+            auth_token=auth_token,
         )
 
         # Summary

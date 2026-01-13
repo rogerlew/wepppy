@@ -108,8 +108,7 @@ wctl logs weppcloud
 - External access happens through Caddy on `http://localhost:8080`. It proxies:
 - `/weppcloud/static/*` directly from the mounted repo (`wepppy/weppcloud/static`) using Caddy’s `file_server`.
 - `/weppcloud/*` to the Flask app, preserving `X-Forwarded-*` headers.
-- `/upload/*` to the Flask app with a 20-minute upstream timeout for file uploads; Caddy strips `/upload` and forwards `X-Forwarded-Prefix: /upload` so Flask can distinguish upload traffic.
-- `/rq-engine/*` to the rq-engine FastAPI service for jobstatus/jobinfo polling (Caddy strips `/rq-engine` and forwards `X-Forwarded-Prefix: /rq-engine`).
+- `/rq-engine/*` to the rq-engine FastAPI service for jobstatus/jobinfo polling and upload-capable endpoints (Caddy strips `/rq-engine` and forwards `X-Forwarded-Prefix: /rq-engine`; extended upstream timeouts apply there).
 - `/weppcloud/runs/.../(browse|download|aria2c.spec|gdalinfo)` to the Starlette browse microservice.
 - `/weppcloudr/*` to the Plumber renderer (port 8050) for report generation (Deval in the Details).
 - `/weppcloud-microservices/status` and `/weppcloud-microservices/preflight` to the Go microservices.
@@ -211,6 +210,9 @@ DTALE_INTERNAL_TOKEN=${DTALE_INTERNAL_TOKEN}
 
 # JWT secret for authentication
 WEPP_AUTH_JWT_SECRET=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
+# Optional: comma-delimited rotation list (first is active).
+# Keep WEPP_AUTH_JWT_SECRET aligned with the first entry for query-engine MCP validation.
+# WEPP_AUTH_JWT_SECRETS=active-secret,previous-secret
 
 # WeppcloudR container name (must match actual container name from docker compose)
 WEPPCLOUDR_CONTAINER=docker-weppcloudr-1
@@ -539,7 +541,7 @@ docker compose -f docker/docker-compose.prod.yml up -d --build weppcloud
 
 For AI agents performing deployments:
 
-1. **Pre-flight checks:**
+1. **Preflight checks:**
    - Verify git branch/commit
    - Check `.env` file exists with required secrets
    - Confirm static assets are built

@@ -41,6 +41,7 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl run-npm` – runs host-side npm/Yarn scripts with `--prefix wepppy/weppcloud/static-src` (plain npm commands like `install`, `test`, `lint`, etc.).
 - `wctl run-pytest` – executes pytest inside the running `weppcloud` container (`pytest tests` by default).
 - `wctl run-python` – opens the project virtualenv's Python inside the container, defaulting to an interactive REPL when no script/args are supplied.
+- `wctl issue-auth-token` / `revoke-auth-token` – mint or revoke WEPPcloud JWTs (e.g., `wctl issue-auth-token culvert-app --scope culvert:batch:submit --audience rq-engine --expires-in 7776000`).
 - `wctl run-stubtest` – runs stubtest from the container (default target `wepppy.nodb.core`).
 - `wctl run-stubgen` – regenerates stubs (`python tools/sync_stubs.py`).
 - `wctl check-test-stubs` / `check-test-isolation` – launch the diagnostic scripts inside the container.

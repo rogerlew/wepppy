@@ -65,8 +65,8 @@
   - New blueprint under `wepppy/weppcloud/routes/run_sync_dashboard/` with template `rq-run-sync-dashboard.htm`.
   - Expose page route (admin login required) and API endpoints:
     - `GET /rq/run-sync` → render dashboard.
-    - `POST /rq/api/run-sync` → enqueue `run_sync_rq`.
-    - `GET /rq/api/run-sync/status` → list recent sync jobs + DB records for filtering.
+    - `POST /rq-engine/api/run-sync` → enqueue `run_sync_rq`.
+    - `GET /rq-engine/api/run-sync/status` → list recent sync jobs + DB records for filtering.
   - Controller JS: add small controller to `controllers_js/` (Pure style) to submit form, stream websocket logs from `<runid>:run_sync`, and refresh status table.
   - Form fields: source host (default `wepp.cloud`), runid, config, target root (default), owner email, auth token (optional), allow push toggle.
 - **Provenance writing:**

@@ -19,6 +19,9 @@ var Soil = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Soil controller requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("Soil controller requires WCHttp.requestWithSessionToken.");
+        }
 
         return { dom: dom, forms: forms, http: http };
     }
@@ -249,7 +252,10 @@ var Soil = (function () {
 
             var params = forms.serializeForm(formElement, { format: "url" });
 
-            http.postForm(url_for_run("rq/api/build_soils"), params, { form: formElement })
+            http.requestWithSessionToken(
+                url_for_run("build-soils", { prefix: "/rq-engine/api" }),
+                { method: "POST", body: params, form: formElement }
+            )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.job_id) {

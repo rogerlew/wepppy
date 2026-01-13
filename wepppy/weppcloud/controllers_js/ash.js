@@ -36,6 +36,9 @@ var Ash = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Ash controller requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("Ash controller requires WCHttp.requestWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Ash controller requires WCEvents helpers.");
         }
@@ -686,11 +689,14 @@ var Ash = (function () {
                 }
             }
 
-            http.request(url_for_run("rq/api/run_ash", { prefix: "/upload" }), {
-                method: "POST",
-                body: formData,
-                form: formElement
-            }).then(function (response) {
+            http.requestWithSessionToken(
+                url_for_run("run-ash", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    body: formData,
+                    form: formElement
+                }
+            ).then(function (response) {
                 var payload = response.body || {};
                 if (!payload.error && !payload.errors) {
                     statusAdapter.html("run_ash job submitted: " + payload.job_id);

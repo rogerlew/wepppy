@@ -27,7 +27,8 @@ from wepppy.microservices.culvert_payload_validator import (
 from wepppy.rq.culvert_rq import TIMEOUT as CULVERT_BATCH_TIMEOUT
 from wepppy.rq.culvert_rq import run_culvert_batch_rq, run_culvert_run_rq
 
-from .responses import error_response, validation_error_response
+from .auth import AuthError, require_jwt
+from .responses import error_response, error_response_with_traceback, validation_error_response
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,14 @@ MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 
 @router.post("/culverts-wepp-batch/")
 async def culverts_wepp_batch(request: Request) -> JSONResponse:
+    try:
+        require_jwt(request, required_scopes=["culvert:batch:submit"])
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine culvert batch auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
     culverts_root = _resolve_culverts_root()
     culvert_batch_uuid, batch_root = _reserve_batch_root(culverts_root)
     payload_zip_path = batch_root / "payload.zip"
@@ -120,12 +129,22 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
     except Exception:
         shutil.rmtree(batch_root, ignore_errors=True)
         logger.exception("rq-engine culvert batch ingestion failed")
-        return error_response("Failed to ingest culvert batch payload")
+        return error_response_with_traceback("Failed to ingest culvert batch payload")
 
 
 @router.post("/culverts-wepp-batch/{batch_uuid}/retry/{point_id}")
-async def culverts_retry_run(batch_uuid: str, point_id: str) -> JSONResponse:
+async def culverts_retry_run(
+    batch_uuid: str, point_id: str, request: Request
+) -> JSONResponse:
     """Retry a single culvert run within an existing batch."""
+    try:
+        require_jwt(request, required_scopes=["culvert:batch:retry"])
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine culvert retry auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
     culverts_root = _resolve_culverts_root()
     batch_root = culverts_root / batch_uuid
 

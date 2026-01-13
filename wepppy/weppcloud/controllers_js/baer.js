@@ -526,7 +526,7 @@ var Baer = (function () {
             emit("baer:upload:started", {});
             jobStarted("baer:upload", {});
 
-            return http.request(url_for_run("tasks/upload_sbs/", { prefix: "/upload" }), {
+            return http.requestWithSessionToken(url_for_run("tasks/upload-sbs/", { prefix: "/rq-engine/api" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

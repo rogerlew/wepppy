@@ -861,7 +861,7 @@ test.describe('map gl smoke', () => {
       }
       http.request = (url, options) => {
         const target = String(url || '');
-        if (target.includes('rq/api/fetch_dem_and_build_channels')) {
+        if (target.includes('/rq-engine/api/') && target.includes('fetch-dem-and-build-channels')) {
           return Promise.resolve({ body: { job_id: 'job-channel-1' } });
         }
         if (target.includes('report/channel')) {
@@ -946,7 +946,7 @@ test.describe('map gl smoke', () => {
       }
       http.request = (url, options) => {
         const target = String(url || '');
-        if (target.includes('rq/api/set_outlet')) {
+        if (target.includes('/rq-engine/api/') && target.includes('set-outlet')) {
           return Promise.resolve({ body: { job_id: 'job-1' } });
         }
         if (target.includes('report/outlet')) {

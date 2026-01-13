@@ -39,6 +39,12 @@ describe("WCHttp helpers", () => {
         document.head.innerHTML = "";
         document.body.innerHTML = "";
         delete window.site_prefix;
+        delete window.runId;
+        delete window.runid;
+        delete window.config;
+        if (window.WCHttp && typeof window.WCHttp.clearSessionToken === "function") {
+            window.WCHttp.clearSessionToken();
+        }
     });
 
     afterAll(() => {
@@ -71,24 +77,6 @@ describe("WCHttp helpers", () => {
         expect(options.headers.get("Accept")).toContain("application/json");
         expect(result.ok).toBe(true);
         expect(result.status).toBe(200);
-    });
-
-    test("request bypasses site_prefix for upload endpoints", async () => {
-        window.site_prefix = "/weppcloud";
-        global.fetch = jest.fn().mockResolvedValue({
-            ok: true,
-            status: 200,
-            statusText: "OK",
-            headers: {
-                get: () => ""
-            },
-            text: () => Promise.resolve("")
-        });
-
-        await window.WCHttp.request("/upload/health", { method: "GET" });
-
-        const [url] = global.fetch.mock.calls[0];
-        expect(url).toBe("/upload/health");
     });
 
     test("request bypasses site_prefix for rq-engine endpoints", async () => {
@@ -165,5 +153,66 @@ describe("WCHttp helpers", () => {
             status: 400,
             detail: "Detailed info"
         });
+    });
+
+    test("getSessionToken caches tokens per run/config", async () => {
+        window.site_prefix = "/weppcloud";
+        const nowSpy = jest.spyOn(Date, "now").mockReturnValue(0);
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: {
+                get: () => "application/json"
+            },
+            text: () => Promise.resolve(JSON.stringify({ token: "tok-1", expires_at: 9999999999 }))
+        });
+
+        const token1 = await window.WCHttp.getSessionToken("run-1", "cfg");
+        const token2 = await window.WCHttp.getSessionToken("run-1", "cfg");
+
+        expect(token1).toBe("tok-1");
+        expect(token2).toBe("tok-1");
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+
+        const [url, options] = global.fetch.mock.calls[0];
+        expect(url).toBe("/rq-engine/api/runs/run-1/cfg/session-token");
+        expect(options.method).toBe("POST");
+
+        nowSpy.mockRestore();
+    });
+
+    test("requestWithSessionToken attaches Authorization header", async () => {
+        window.runId = "run-1";
+        window.config = "cfg";
+        global.fetch = jest.fn()
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: "OK",
+                headers: {
+                    get: () => "application/json"
+                },
+                text: () => Promise.resolve(JSON.stringify({ token: "tok-1", expires_at: 9999999999 }))
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: "OK",
+                headers: {
+                    get: () => "application/json"
+                },
+                text: () => Promise.resolve(JSON.stringify({ ok: true }))
+            });
+
+        const result = await window.WCHttp.requestWithSessionToken(
+            "/rq-engine/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+            { method: "POST", json: { demo: true } },
+        );
+
+        expect(result.body).toEqual({ ok: true });
+        expect(global.fetch).toHaveBeenCalledTimes(2);
+        const [, options] = global.fetch.mock.calls[1];
+        expect(options.headers.get("Authorization")).toBe("Bearer tok-1");
     });
 });

@@ -1,6 +1,6 @@
-# Webhook Integration Strategy for RQ API
+# Webhook Integration Strategy for rq-engine
 
-> **Context**: Proposal to add webhook notifications to RQ API routes so they can function as standalone APIs independent of the WEPPcloud web interface.
+> **Context**: Proposal to add webhook notifications to rq-engine routes so they can function as standalone APIs independent of the WEPPcloud web interface.
 
 ## Executive Summary
 
@@ -11,7 +11,7 @@
 ## Current Architecture
 
 ### RQ Job Lifecycle
-1. **Route Handler** (`wepppy/weppcloud/routes/rq/api/api.py`)
+1. **Route Handler** (`wepppy/microservices/rq_engine/*_routes.py`)
    - Parses request payload
    - Validates inputs
    - Updates NoDb controller state
@@ -311,7 +311,7 @@ def webhook_on_failure(job: Job, connection: redis.Redis, type, value, traceback
 
 
 def webhook_on_stopped(job: Job, connection: redis.Redis):
-    """Callback invoked when RQ job is stopped/cancelled."""
+    """Callback invoked when RQ job is stopped/canceled."""
     config = _get_webhook_config(job.id)
     if not config:
         return
@@ -342,7 +342,7 @@ def webhook_on_stopped(job: Job, connection: redis.Redis):
 Create a helper function to wrap job enqueuing:
 
 ```python
-# wepppy/weppcloud/routes/rq/api/_webhook_utils.py
+# wepppy/microservices/rq_engine/webhook_utils.py
 from typing import Any, Callable, Dict, Optional, Tuple
 
 import redis
@@ -655,7 +655,7 @@ def test_build_landuse_webhook_delivery(app, tmp_path):
     with app.test_client() as client:
         # Make API call with webhook
         response = client.post(
-            f'/runs/{runid}/{config}/rq/api/build_landuse',
+            f"/rq-engine/api/runs/{runid}/{config}/build-landuse",
             json={
                 'landuse_mode': '1',
                 'landuse_db': 'nlcd',
@@ -740,7 +740,7 @@ def get_job_webhook_status(job_id):
 
 ### Request Format
 ```json
-POST /runs/{runid}/{config}/rq/api/build_landuse
+POST /rq-engine/api/runs/{runid}/{config}/build-landuse
 {
   "landuse_mode": "1",
   "landuse_db": "nlcd",

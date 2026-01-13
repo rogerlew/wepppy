@@ -3,8 +3,6 @@ import wepppy.weppcloud.routes as routes
 
 
 _BLUEPRINT_ATTRS = [
-    "rq_api_bp",
-    "rq_jobinfo_bp",
     "security_logging_bp",
     "security_oauth_bp",
     "security_ui_bp",
@@ -54,7 +52,6 @@ _BLUEPRINT_ATTRS = [
     "batch_runner_bp",
     "interchange_bp",
     "ui_showcase_bp",
-    "upload_bp",
 ]
 
 
@@ -72,14 +69,6 @@ def register_blueprints(app):
     if hasattr(app, "route"):
         @app.route('/health')
         def health():
-            script_root = (request.script_root or "").rstrip("/")
-            if script_root == "/upload":
-                return jsonify({
-                    "status": "ok",
-                    "scope": "upload",
-                    "message": "upload health endpoint",
-                    "prefix": request.script_root or "",
-                })
             return jsonify('OK')
 
     for attr in _BLUEPRINT_ATTRS:

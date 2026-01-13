@@ -34,7 +34,13 @@ describe("Archive console smoke", () => {
                     json: () => Promise.resolve({ archives: [] }),
                 });
             }
-            if (url === "/runs/demo/config/rq/api/archive") {
+            if (url === "/rq-engine/api/runs/demo/config/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/archive") {
                 return Promise.resolve({
                     ok: true,
                     json: () => Promise.resolve({ job_id: "job-123" }),
@@ -51,9 +57,9 @@ describe("Archive console smoke", () => {
                     data-runid="demo"
                     data-config="config"
                     data-archives-url="/runs/demo/config/archive-list"
-                    data-archive-api-url="/runs/demo/config/rq/api/archive"
-                    data-restore-api-url="/runs/demo/config/rq/api/restore"
-                    data-delete-api-url="/runs/demo/config/rq/api/delete"
+                    data-archive-api-url="/rq-engine/api/runs/demo/config/archive"
+                    data-restore-api-url="/rq-engine/api/runs/demo/config/restore-archive"
+                    data-delete-api-url="/rq-engine/api/runs/demo/config/delete-archive"
                     data-project-path="/runs/demo/config"
                     data-user-anonymous="false"
                     hidden>
@@ -97,12 +103,18 @@ describe("Archive console smoke", () => {
         document.getElementById("archive_button").click();
         await flushPromises();
 
-        expect(fetchMock).toHaveBeenCalledTimes(1);
-        const [url, options] = fetchMock.mock.calls[0];
-        expect(url).toBe("/runs/demo/config/rq/api/archive");
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        const [tokenUrl, tokenOptions] = fetchMock.mock.calls[0];
+        expect(tokenUrl).toBe("/rq-engine/api/runs/demo/config/session-token");
+        expect(tokenOptions).toMatchObject({
+            method: "POST",
+            headers: { Accept: "application/json" },
+        });
+        const [url, options] = fetchMock.mock.calls[1];
+        expect(url).toBe("/rq-engine/api/runs/demo/config/archive");
         expect(options).toMatchObject({
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", Authorization: "Bearer session-token" },
             body: JSON.stringify({ comment: "Smoke test comment" }),
         });
 
@@ -135,7 +147,13 @@ describe("Fork console smoke", () => {
         };
 
         fetchMock = jest.fn((url, options = {}) => {
-            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq/api/fork") {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
                 const payload = {
                     job_id: "job-456",
                     new_runid: "demo-run-new",
@@ -204,12 +222,21 @@ describe("Fork console smoke", () => {
         form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
         await flushPromises();
 
-        expect(fetchMock).toHaveBeenCalledTimes(1);
-        const [url, options] = fetchMock.mock.calls[0];
-        expect(url).toBe("http://localhost/weppcloud/runs/demo-run/cfg/rq/api/fork");
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        const [tokenUrl, tokenOptions] = fetchMock.mock.calls[0];
+        expect(tokenUrl).toBe("http://localhost/rq-engine/api/runs/demo-run/cfg/session-token");
+        expect(tokenOptions).toMatchObject({
+            method: "POST",
+            headers: { Accept: "application/json" },
+        });
+        const [url, options] = fetchMock.mock.calls[1];
+        expect(url).toBe("http://localhost/rq-engine/api/runs/demo-run/cfg/fork");
         expect(options).toMatchObject({
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: "Bearer session-token",
+            },
             body: "undisturbify=false",
         });
 
@@ -225,7 +252,13 @@ describe("Fork console smoke", () => {
 
     test("failed fork surfaces stacktrace", async () => {
         fetchMock.mockImplementation((url) => {
-            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq/api/fork") {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
                 const payload = {
                     error: { message: "Error forking project", details: ["trace line 1", "trace line 2"] },
                 };

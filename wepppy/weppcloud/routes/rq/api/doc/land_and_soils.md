@@ -9,7 +9,7 @@ Build management and soil files for WEPP based on a specified geographic extent.
 ## Base URL
 
 ```
-https://wepp.cloud/weppcloud
+https://wepp.cloud/rq-engine/api
 ```
 
 ---
@@ -18,7 +18,7 @@ https://wepp.cloud/weppcloud
 
 ### 1. Submit Job
 
-**POST** `/rq/api/landuse_and_soils`
+**POST** `/landuse-and-soils`
 
 #### Request Body (JSON)
 
@@ -32,7 +32,7 @@ https://wepp.cloud/weppcloud
 #### Sample Request
 
 ```bash
-curl -X POST https://wepp.cloud/weppcloud/rq/api/landuse_and_soils \
+curl -X POST https://wepp.cloud/rq-engine/api/landuse-and-soils \
   -H "Content-Type: application/json" \
   -d '{
     "extent": [-116.41064222362726, 45.24964993419109, -116.34096842541693, 45.298680435792484],
@@ -55,8 +55,7 @@ The presence of `job_id` indicates the job has been successfully submitted to th
 
 ### 2. Check Job Status
 
-**GET** `/rq-engine/api/jobinfo/{job_id}` (preferred)  
-Fallback: `/weppcloud/rq/api/jobinfo/{job_id}`
+**GET** `/jobinfo/{job_id}`
 
 Returns JSON status and progress for the submitted job.
 
@@ -72,14 +71,14 @@ curl https://wepp.cloud/rq-engine/api/jobinfo/cc4a620e-473f-478e-b33b-71f56fd6b5
 
 ### 3. Download Project
 
-**GET** `/rq/api/landuse_and_soils/{job_id}.tar.gz`
+**GET** `/landuse-and-soils/{job_id}.tar.gz`
 
 Once the job is complete, download the resulting WEPPcloud project as a `.tar.gz`.
 
 #### Sample Request
 
 ```bash
-wget https://wepp.cloud/weppcloud/rq/api/landuse_and_soils/cc4a620e-473f-478e-b33b-71f56fd6b544.tar.gz
+wget https://wepp.cloud/rq-engine/api/landuse-and-soils/cc4a620e-473f-478e-b33b-71f56fd6b544.tar.gz
 mkdir <output_dir>
 tar -xvzf cc4a620e-473f-478e-b33b-71f56fd6b544.tar.gz -C <output_dir>
 ```
@@ -107,6 +106,7 @@ soils/
 
 ## Notes & Caveats
 
+- **Migration**: `/rq/api/landuse_and_soils` was removed; use `/rq-engine/api/landuse-and-soils`.
 - **Extent format** is strict: `xmin,ymax,xmax,ymin` in decimal degrees.
 - **Defaults**: if not supplied, uses `nlcd/2019` and `ssurgo/gNATSGO/2025`.
 - **NLCD**: annual maps available from 1985 through 2023.

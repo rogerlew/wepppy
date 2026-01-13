@@ -20,6 +20,9 @@ var Wepp = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Wepp controller requires WCHttp helpers.");
         }
+        if (typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("Wepp controller requires WCHttp.postJsonWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Wepp controller requires WCEvents helpers.");
         }
@@ -395,7 +398,7 @@ var Wepp = (function () {
             var formData = new FormData();
             formData.append("input_upload_cover_transform", file);
 
-            http.request(url_for_run("tasks/upload_cover_transform", { prefix: "/upload" }), {
+            http.requestWithSessionToken(url_for_run("tasks/upload-cover-transform", { prefix: "/rq-engine/api" }), {
                 method: "POST",
                 body: formData,
                 form: formElement
@@ -447,7 +450,11 @@ var Wepp = (function () {
                 weppEvents.emit("wepp:run:started", { payload: payload });
             }
 
-            http.postJson(url_for_run("rq/api/run_wepp"), payload, { form: formElement })
+            http.postJsonWithSessionToken(
+                url_for_run("run-wepp", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && (response.error || response.errors)) {
@@ -548,7 +555,11 @@ var Wepp = (function () {
                 weppEvents.emit("wepp:run_watershed:started", { payload: payload });
             }
 
-            http.postJson(url_for_run("rq/api/run_wepp_watershed"), payload, { form: formElement })
+            http.postJsonWithSessionToken(
+                url_for_run("run-wepp-watershed", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && (response.error || response.errors)) {

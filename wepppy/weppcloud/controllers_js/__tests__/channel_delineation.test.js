@@ -79,11 +79,17 @@ describe("Channel Delineation controller", () => {
 
         global.WCHttp = {
             request: requestMock,
+            requestWithSessionToken: requestMock,
             getJson: getJsonMock,
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         mapStub = {
             _zoom: 13,
@@ -187,7 +193,7 @@ describe("Channel Delineation controller", () => {
 
         expect(result).toMatchObject({ job_id: "job-99" });
         expect(requestMock).toHaveBeenCalledWith(
-            "rq/api/fetch_dem_and_build_channels",
+            "/rq-engine/api/runs/test/cfg/fetch-dem-and-build-channels",
             expect.objectContaining({
                 method: "POST",
                 json: expect.any(Object),
@@ -206,6 +212,15 @@ describe("Channel Delineation controller", () => {
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, "job-99");
         expect(events).toHaveLength(1);
         expect(events[0].payload.payload.map_center).toEqual([-117.52, 46.88]);
+    });
+
+    test("map changes keep job hint when a job is active", () => {
+        channel.rq_job_id = "job-99";
+        channel.render_job_hint(channel);
+
+        channel.onMapChange();
+
+        expect(document.getElementById("hint_build_channels_en").textContent).toContain("job-99");
     });
 
     test("build sends map object payload when Set Map Object is selected", async () => {

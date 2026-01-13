@@ -52,6 +52,7 @@
       : null;
     var dataset = configReader ? configReader(container, "[data-archive-dashboard-config]") : {};
     var runId = dataset.runid || dataset.runId || "";
+    var config = dataset.config || dataset.configSlug || "cfg";
     var archivesUrl = dataset.archivesUrl || dataset.archivesurl || "";
     var archiveApiUrl = dataset.archiveApiUrl || dataset.archiveapiurl || "";
     var restoreApiUrl = dataset.restoreApiUrl || dataset.restoreapiurl || "";
@@ -80,6 +81,7 @@
     var poller = null;
     var completionState = { completed: false, failed: false };
     var currentAction = null;
+    var sessionTokenPromise = null;
 
     function appendStatus(message) {
       if (message === undefined || message === null) {
@@ -218,6 +220,56 @@
           statusText: response.statusText,
           body: body
         };
+      });
+    }
+
+    function fetchSessionToken() {
+      if (!runId || !config) {
+        return Promise.reject(new Error("Missing run context for session token"));
+      }
+      if (sessionTokenPromise) {
+        return sessionTokenPromise;
+      }
+      var sessionHelper = window.WCHttp && typeof window.WCHttp.getSessionToken === "function"
+        ? window.WCHttp
+        : null;
+      if (sessionHelper) {
+        sessionTokenPromise = sessionHelper.getSessionToken(runId, config)
+          .catch(function (err) {
+            sessionTokenPromise = null;
+            throw err;
+          });
+        return sessionTokenPromise;
+      }
+      var tokenUrl = "/rq-engine/api/runs/" + encodeURIComponent(runId) + "/" + encodeURIComponent(config) + "/session-token";
+      sessionTokenPromise = fetch(tokenUrl, { method: "POST", headers: { Accept: "application/json" } })
+        .then(parseJsonResponse)
+        .then(function (result) {
+          var body = result.body || {};
+          if (!result.ok) {
+            throw new Error(resolveErrorMessage(body, "Session token request failed"));
+          }
+          if (!body.token) {
+            throw new Error("Session token response missing token");
+          }
+          return body.token;
+        })
+        .catch(function (err) {
+          sessionTokenPromise = null;
+          throw err;
+        });
+      return sessionTokenPromise;
+    }
+
+    function fetchWithSessionToken(url, options) {
+      options = options || {};
+      return fetchSessionToken().then(function (token) {
+        var headers = options.headers || {};
+        if (token) {
+          headers.Authorization = "Bearer " + token;
+        }
+        options.headers = headers;
+        return fetch(url, options);
       });
     }
 
@@ -557,7 +609,7 @@
         }
       }
       appendStatus("Submitting archive job...");
-      fetch(archiveApiUrl, {
+      fetchWithSessionToken(archiveApiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comment: comment })
@@ -600,7 +652,7 @@
       setRestoreButtonsDisabled(true);
       setDeleteButtonsDisabled(true);
       appendStatus("Restoring archive " + name + "...");
-      fetch(restoreApiUrl, {
+      fetchWithSessionToken(restoreApiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archive_name: name })
@@ -639,7 +691,7 @@
       }
       setDeleteButtonsDisabled(true);
       appendStatus("Deleting archive " + name + "...");
-      fetch(deleteApiUrl, {
+      fetchWithSessionToken(deleteApiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archive_name: name })

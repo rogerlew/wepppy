@@ -13,8 +13,8 @@
   ) %}{% endcall %}
 
   <div id="run_sync_config"
-       data-api-url="{{ url_for('run_sync_dashboard.api_run_sync') }}"
-       data-status-url="{{ url_for('run_sync_dashboard.run_sync_status') }}"
+       data-api-url="/rq-engine/api/run-sync"
+       data-status-url="/rq-engine/api/run-sync/status"
        data-default-host="wepp.cloud"
        data-default-root="{{ default_target_root }}"
        data-status-channel="{{ status_channel_suffix }}"

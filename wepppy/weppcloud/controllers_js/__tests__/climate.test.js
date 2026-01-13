@@ -146,14 +146,14 @@ describe("Climate controller", () => {
         global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
         postJsonMock = jest.fn((url) => {
-            if (url === "rq/api/build_climate") {
+            if (url === "/rq-engine/api/runs/test/cfg/build-climate") {
                 return Promise.resolve({ body: { job_id: "job-123" } });
             }
             return Promise.resolve({ body: {} });
         });
 
         requestMock = jest.fn((url, options) => {
-            if (url === "tasks/upload_cli/") {
+            if (url === "/rq-engine/api/runs/test/cfg/tasks/upload-cli/") {
                 return Promise.resolve({ body: {} });
             }
             if (url === "view/closest_stations/") {
@@ -183,7 +183,9 @@ describe("Climate controller", () => {
 
         global.WCHttp = {
             request: requestMock,
+            requestWithSessionToken: requestMock,
             postJson: postJsonMock,
+            postJsonWithSessionToken: postJsonMock,
             getJson: jest.fn(),
             isHttpError: jest.fn(() => false)
         };
@@ -198,7 +200,12 @@ describe("Climate controller", () => {
             }))
         };
 
-        global.url_for_run = (path) => path;
+        global.url_for_run = (path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        };
         window.runid = "test-run";
         window.Node = window.Node || Element;
 
@@ -302,7 +309,7 @@ describe("Climate controller", () => {
         await Promise.resolve();
 
         expect(postJsonMock).toHaveBeenCalledWith(
-            "rq/api/build_climate",
+            "/rq-engine/api/runs/test/cfg/build-climate",
             expect.objectContaining({ climate_catalog_id: "dataset_a" }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -329,7 +336,7 @@ describe("Climate controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             climate,
             expect.objectContaining({
@@ -353,7 +360,7 @@ describe("Climate controller", () => {
         await Promise.resolve();
 
         expect(requestMock).toHaveBeenCalledWith(
-            "tasks/upload_cli/",
+            "/rq-engine/api/runs/test/cfg/tasks/upload-cli/",
             expect.objectContaining({
                 method: "POST",
                 body: expect.any(Object),

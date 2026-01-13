@@ -154,10 +154,10 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 
 | DB | Purpose | TTL | Key Patterns |
 |----|---------|-----|--------------|
-| 0 | Run metadata, distributed locks | Persistent | `locked:*.nodb`, run manifests |
+| 0 | Run metadata, distributed locks, JWT revocations | Persistent | `locked:*.nodb`, `auth:jwt:revoked:*` |
 | 2 | Status message pub/sub | Ephemeral | `<runid>:wepp`, `<runid>:status` |
 | 9 | Redis Queue (RQ) job management | Persistent | `rq:queue:*`, `rq:job:*` |
-| 11 | Flask session storage | 24 hours | `session:*` |
+| 11 | Flask session storage, session JWT markers | 12 hours (Flask) / 4 days (session JWT) | `session:*`, `auth:session:run:*` |
 | 13 | NoDb JSON caching | 72 hours | `nodb:<runid>:<controller>` |
 | 14 | README editor locks | Persistent | `readme:lock:*` |
 | 15 | Log level configuration | Persistent | `log_level:<runid>` |
@@ -461,7 +461,7 @@ NoDb subclass logger
 - The HTML surface (`templates/controls/_base.htm`) provides canonical IDs for status panes, letting new controllers inherit the telemetry pipeline without bespoke wiring.
 
 ## DevOps Notes
-- Redis is mission control. DB 0 tracks run metadata, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `docs/dev-notes/redis_dev_notes.md` for ops drills.
+- Redis is mission control. DB 0 tracks run metadata and JWT revocations, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions plus session JWT markers, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `docs/dev-notes/redis_dev_notes.md` for ops drills.
 - Coding conventions live in `docs/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
 - The microservices are lightweight Go services (`services/preflight2`, `services/status2`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
 - Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while `wepppy/weppcloud/routes/rq/api` exposes REST endpoints for job orchestration, cancellation, and status polling.

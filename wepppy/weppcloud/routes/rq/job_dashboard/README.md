@@ -3,15 +3,14 @@
 > **See also:** [`AGENTS.md`](../../../../../AGENTS.md) for UI and documentation conventions, [`docs/ui-docs/ui-style-guide.md`](../../../../../docs/ui-docs/ui-style-guide.md) for Pure layout patterns.
 
 ## Overview
-The job dashboard renders a live view of RQ job trees with status chips, progress summaries, and stack traces. It prefers the rq-engine polling endpoint and falls back to the legacy Flask endpoint on error.
+The job dashboard renders a live view of RQ job trees with status chips, progress summaries, and stack traces. It polls rq-engine for job info.
 
 ## Routes
 | Route | Method | Purpose |
 | --- | --- | --- |
 | `/weppcloud/rq/job-dashboard/<job_id>` | GET | Render the dashboard UI (`dashboard_pure.htm`). |
 | `/rq-engine/api/jobinfo/<job_id>` | GET | Primary polling endpoint for job status. |
-| `/weppcloud/rq/api/jobinfo/<job_id>` | GET | Fallback polling endpoint. |
-| `/weppcloud/rq/api/canceljob/<job_id>` | GET | Cancel a job. |
+| `/rq-engine/api/canceljob/<job_id>` | POST | Cancel a job (JWT scope `rq:status`, session token required for run-scoped jobs). |
 
 ## Templates
 | File | Notes |
@@ -25,4 +24,4 @@ The job dashboard renders a live view of RQ job trees with status chips, progres
 
 ## Security
 - The dashboard route is gated by `requires_cap` for anonymous users.
-- Job info and cancel endpoints are still public; see `docs/dev-notes/endpoint_security_notes.md`.
+- Job info endpoints are public; cancel is JWT-protected. See `docs/dev-notes/endpoint_security_notes.md`.

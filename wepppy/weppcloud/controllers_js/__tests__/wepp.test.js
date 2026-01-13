@@ -71,7 +71,9 @@ describe("Wepp controller", () => {
 
         global.WCHttp = {
             request: requestMock,
+            requestWithSessionToken: requestMock,
             postJson: postJsonMock,
+            postJsonWithSessionToken: postJsonMock,
             getJson: getJsonMock,
             isHttpError: jest.fn(() => false)
         };
@@ -92,7 +94,12 @@ describe("Wepp controller", () => {
             }))
         };
 
-        global.url_for_run = (path) => path;
+        global.url_for_run = (path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        };
         window.runid = "test-run";
         window.Node = window.Node || Element;
 
@@ -134,7 +141,7 @@ describe("Wepp controller", () => {
         await Promise.resolve();
 
         expect(postJsonMock).toHaveBeenCalledWith(
-            "rq/api/run_wepp",
+            "/rq-engine/api/runs/test/cfg/run-wepp",
             expect.objectContaining({ clip_soils: true, initial_sat: "0.3" }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -154,7 +161,7 @@ describe("Wepp controller", () => {
         await Promise.resolve();
 
         expect(postJsonMock).toHaveBeenCalledWith(
-            "rq/api/run_wepp_watershed",
+            "/rq-engine/api/runs/test/cfg/run-wepp-watershed",
             expect.objectContaining({ clip_soils: true, initial_sat: "0.3" }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -203,7 +210,7 @@ describe("Wepp controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(getJsonMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(getJsonMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(controlBaseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             wepp,
             expect.objectContaining({
@@ -273,8 +280,8 @@ describe("Wepp controller", () => {
         await Promise.resolve();
 
         expect(postJsonMock).not.toHaveBeenCalledWith("tasks/upload_cover_transform");
-        expect(WCHttp.request).toHaveBeenCalledWith(
-            "tasks/upload_cover_transform",
+        expect(WCHttp.requestWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/tasks/upload-cover-transform",
             expect.objectContaining({ method: "POST", form: expect.any(HTMLFormElement) })
         );
     });

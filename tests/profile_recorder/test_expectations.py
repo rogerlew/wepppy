@@ -44,13 +44,13 @@ def test_expectations_pass_for_rattlesnake_profile(tmp_path: Path) -> None:
     for name in ("totalwatsed3_chan_104.dss", "totalwatsed3_chan_124.dss"):
         (export_dir / name).write_text("demo", encoding="utf-8")
 
-    ash_messages = evaluate_job_expectations(slug, run_dir, "/runs/demo/cfg/rq/api/run_ash")
+    ash_messages = evaluate_job_expectations(slug, run_dir, "/rq-engine/api/runs/demo/cfg/run-ash")
     assert ash_messages == ["H46 remaining_ash equals 22.0 after run_ash"]
 
     dss_messages = evaluate_job_expectations(
         slug,
         run_dir,
-        "/runs/demo/cfg/rq/api/post_dss_export_rq",
+        "/rq-engine/api/runs/demo/cfg/post-dss-export-rq",
     )
     assert dss_messages == ["totalwatsed3 channel 104/124 DSS exports exist"]
 
@@ -62,7 +62,7 @@ def test_expectations_pass_for_double_ash_load(tmp_path: Path) -> None:
     run_dir.mkdir()
     _write_single_value_parquet(run_dir / "ash" / "H10_ash.parquet", _ASH_COLUMN, 22.0)
 
-    ash_messages = evaluate_job_expectations(slug, run_dir, "/runs/demo/cfg/rq/api/run_ash")
+    ash_messages = evaluate_job_expectations(slug, run_dir, "/rq-engine/api/runs/demo/cfg/run-ash")
     assert ash_messages == ["H10 remaining_ash equals 22.0 after run_ash"]
 
 
@@ -75,14 +75,14 @@ def test_expectations_raise_when_artifacts_missing(tmp_path: Path) -> None:
     _write_single_value_parquet(run_dir / "ash" / "H46_ash.parquet", _ASH_COLUMN, 25.0)
 
     with pytest.raises(ProfileExpectationError) as excinfo:
-        evaluate_job_expectations(slug, run_dir, "/runs/demo/cfg/rq/api/run_ash")
+        evaluate_job_expectations(slug, run_dir, "/rq-engine/api/runs/demo/cfg/run-ash")
     assert "remaining_ash" in str(excinfo.value)
 
     # Ensure missing DSS export raises as well.
     (run_dir / "export" / "dss").mkdir(parents=True, exist_ok=True)
     (run_dir / "export" / "dss" / "totalwatsed3_chan_144.dss").write_text("demo", encoding="utf-8")
     with pytest.raises(ProfileExpectationError) as excinfo:
-        evaluate_job_expectations(slug, run_dir, "/runs/demo/cfg/rq/api/post_dss_export_rq")
+        evaluate_job_expectations(slug, run_dir, "/rq-engine/api/runs/demo/cfg/post-dss-export-rq")
     assert "Missing DSS export" in str(excinfo.value)
 
 
@@ -94,5 +94,5 @@ def test_expectations_raise_for_double_ash_load(tmp_path: Path) -> None:
     _write_single_value_parquet(run_dir / "ash" / "H10_ash.parquet", _ASH_COLUMN, 5.0)
 
     with pytest.raises(ProfileExpectationError) as excinfo:
-        evaluate_job_expectations(slug, run_dir, "/runs/demo/cfg/rq/api/run_ash")
+        evaluate_job_expectations(slug, run_dir, "/rq-engine/api/runs/demo/cfg/run-ash")
     assert "remaining_ash" in str(excinfo.value)

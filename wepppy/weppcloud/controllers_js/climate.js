@@ -46,6 +46,9 @@ var Climate = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Climate controller requires WCHttp helpers.");
         }
+        if (typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("Climate controller requires WCHttp.postJsonWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Climate controller requires WCEvents helpers.");
         }
@@ -971,7 +974,11 @@ var Climate = (function () {
             var payload = forms.serializeForm(formElement, { format: "json" });
             climate.events.emit("climate:build:started", { payload: payload });
 
-            http.postJson(url_for_run("rq/api/build_climate"), payload, { form: formElement })
+            http.postJsonWithSessionToken(
+                url_for_run("build-climate", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
                 .then(function (response) {
                     var body = response.body || {};
                     if (body.job_id) {
@@ -997,7 +1004,7 @@ var Climate = (function () {
             stacktraceAdapter.text("");
 
             var formData = new FormData(formElement);
-            http.request(url_for_run("tasks/upload_cli/", { prefix: "/upload" }), {
+            http.requestWithSessionToken(url_for_run("tasks/upload-cli/", { prefix: "/rq-engine/api" }), {
                 method: "POST",
                 body: formData,
                 form: formElement

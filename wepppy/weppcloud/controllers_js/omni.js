@@ -173,6 +173,9 @@ var Omni = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Omni controller requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("Omni controller requires WCHttp.requestWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Omni controller requires WCEvents helpers.");
         }
@@ -1148,11 +1151,14 @@ var Omni = (function () {
                 omniEvents.emit("omni:run:started", { scenarios: payload.scenarios });
             }
 
-            http.request(url_for_run("rq/api/run_omni", { prefix: "/upload" }), {
-                method: "POST",
-                body: payload.formData,
-                form: formElement
-            }).then(function (response) {
+            http.requestWithSessionToken(
+                url_for_run("run-omni", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    body: payload.formData,
+                    form: formElement
+                }
+            ).then(function (response) {
                 var body = response && response.body ? response.body : null;
                 if (body && (body.error || body.errors)) {
                     omni.pushResponseStacktrace(omni, body);

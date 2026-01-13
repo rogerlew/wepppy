@@ -30,6 +30,9 @@ var Rhem = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("Rhem controller requires WCHttp helpers.");
         }
+        if (typeof http.postJsonWithSessionToken !== "function") {
+            throw new Error("Rhem controller requires WCHttp.postJsonWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("Rhem controller requires WCEvents helpers.");
         }
@@ -277,7 +280,11 @@ var Rhem = (function () {
 
         function submitRunRequest() {
             var payload = forms.serializeForm(formElement, { format: "object" }) || {};
-            http.postJson(url_for_run("rq/api/run_rhem_rq"), payload, { form: formElement })
+            http.postJsonWithSessionToken(
+                url_for_run("run-rhem", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.job_id) {

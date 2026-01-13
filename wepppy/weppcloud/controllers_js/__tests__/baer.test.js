@@ -59,7 +59,7 @@ describe("Baer controller", () => {
         };
 
         httpRequestMock = jest.fn((url) => {
-            if (url === "tasks/upload_sbs/") {
+            if (url === "/rq-engine/api/runs/test/cfg/tasks/upload-sbs/") {
                 return Promise.resolve({ body: {} });
             }
             if (url === "tasks/remove_sbs") {
@@ -89,6 +89,7 @@ describe("Baer controller", () => {
 
         global.WCHttp = {
             request: httpRequestMock,
+            requestWithSessionToken: httpRequestMock,
             isHttpError: jest.fn().mockReturnValue(false),
         };
 
@@ -125,7 +126,12 @@ describe("Baer controller", () => {
             imageOverlay: jest.fn(() => overlayMock),
         };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../baer.js");
     });
@@ -151,7 +157,7 @@ describe("Baer controller", () => {
         return window.Baer.getInstance();
     }
 
-    test("initialises and toggles modes via delegated handlers", () => {
+    test("initializes and toggles modes via delegated handlers", () => {
         const baer = getController();
         const mode0 = document.querySelector("#sbs_mode0_controls");
         const mode1 = document.querySelector("#sbs_mode1_controls");
@@ -175,7 +181,7 @@ describe("Baer controller", () => {
         await baer.upload_sbs();
         await Promise.resolve();
 
-        expect(httpRequestMock).toHaveBeenCalledWith("tasks/upload_sbs/", expect.objectContaining({
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/runs/test/cfg/tasks/upload-sbs/", expect.objectContaining({
             method: "POST",
             body: expect.any(FormData),
             form: expect.any(HTMLFormElement),

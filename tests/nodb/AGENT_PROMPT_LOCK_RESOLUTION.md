@@ -28,7 +28,7 @@
    - `getInstance()` singleton pattern (lines ~830-890)
    - Redis lock key management and TTL handling
 
-4. **[wepppy/weppcloud/routes/rq/api/api.py](../../wepppy/weppcloud/routes/rq/api/api.py)** - Fixed build_climate endpoint
+4. **[wepppy/microservices/rq_engine/climate_routes.py](../../wepppy/microservices/rq_engine/climate_routes.py)** - Fixed build-climate endpoint
    - Contains implemented `time.sleep(1.0)` mitigation
    - Shows pattern for preventing rapid sequential lock acquisition
 
@@ -71,7 +71,7 @@ Any other test files that fail                   # Fix specific issues
 
 **Reference Files (Dependencies):**
 ```
-wepppy/weppcloud/routes/rq/api/api.py            # Shows working mitigation pattern
+wepppy/microservices/rq_engine/climate_routes.py  # Shows working mitigation pattern
 wepppy/profile_recorder/playback.py              # Shows delay implementation
 wepppy/nodb/core/climate.py                      # Example NoDb controller
 wepppy/all_your_base/*.py                        # Utility functions
@@ -174,7 +174,7 @@ wctl run-pytest tests/nodb/test_lock_race_conditions.py -v --count=3  # No inter
 
 ### 5.1 Original Bug Investigation
 **Date:** November 2025  
-**Symptom:** 504 Gateway Timeout in `/runs/<runid>/<config>/rq/api/build_climate` endpoint  
+**Symptom:** 504 Gateway Timeout in `/rq-engine/api/runs/<runid>/<config>/build-climate` endpoint  
 **Trigger:** Profile playback system making rapid sequential requests  
 **Timeline:** Requests taking 30+ seconds, exceeding HAProxy timeout  
 

@@ -177,7 +177,9 @@ class PlaybackSession:
             effective_path = self._remap_run_path(path)
             self._guard_sandbox_target(effective_path, request_id)
 
-            if method == "GET" and "/rq/api/jobstatus/" in effective_path:
+            if method == "GET" and (
+                "/rq-engine/api/jobstatus/" in effective_path or "/rq/api/jobstatus/" in effective_path
+            ):
                 self.results.append((request_id, f"{effective_path}: skipped recorded jobstatus poll"))
                 continue
             if "/elevationquery/" in effective_path:
@@ -453,18 +455,6 @@ class PlaybackSession:
             return urljoin(origin, normalized_path)
         return urljoin(f"{base}/", normalized_path)
 
-    def _get_with_fallback(self, primary_url: str, fallback_url: str, **kwargs: Any) -> requests.Response:
-        """Attempt a GET request against rq-engine, fallback to weppcloud on any error."""
-        try:
-            response = self.session.get(primary_url, **kwargs)
-        except requests.RequestException:
-            return self.session.get(fallback_url, **kwargs)
-
-        if response.ok:
-            return response
-
-        return self.session.get(fallback_url, **kwargs)
-
     def _should_wait_for_completion(self, method: str, path: str, expected_status: int) -> bool:
         """Return True when playback should poll for completion after the request."""
         if method != "GET" or expected_status != 200:
@@ -549,21 +539,21 @@ class PlaybackSession:
         recorded_values = self._extract_form_values(request_meta)
 
         try:
-            if normalized.endswith("rq/api/build_landuse"):
+            if normalized.endswith("rq/api/build_landuse") or normalized.endswith("build-landuse"):
                 self._populate_landuse_form(data, files)
-            elif normalized.endswith("rq/api/build_treatments"):
+            elif normalized.endswith("rq/api/build_treatments") or normalized.endswith("build-treatments"):
                 self._populate_landuse_form(data, files)
-            elif normalized.endswith("rq/api/build_soils"):
+            elif normalized.endswith("rq/api/build_soils") or normalized.endswith("build-soils"):
                 self._populate_soils_form(data)
-            elif normalized.endswith("tasks/upload_sbs"):
+            elif normalized.endswith("tasks/upload_sbs") or normalized.endswith("tasks/upload-sbs"):
                 self._populate_sbs_form(data, files)
-            elif normalized.endswith("tasks/upload_cover_transform"):
+            elif normalized.endswith("tasks/upload_cover_transform") or normalized.endswith("tasks/upload-cover-transform"):
                 self._populate_cover_transform_form(files)
-            elif normalized.endswith("tasks/upload_cli"):
+            elif normalized.endswith("tasks/upload_cli") or normalized.endswith("tasks/upload-cli"):
                 self._populate_cli_form(files)
-            elif normalized.endswith("rq/api/run_ash"):
+            elif normalized.endswith("rq/api/run_ash") or normalized.endswith("run-ash"):
                 self._populate_ash_form(data, files)
-            elif normalized.endswith("rq/api/run_omni"):
+            elif normalized.endswith("rq/api/run_omni") or normalized.endswith("run-omni"):
                 self._populate_omni_form(data, files)
         except Exception as exc:
             self._log(f"Failed to build form-data payload for {path}: {exc}")
@@ -967,10 +957,8 @@ class PlaybackSession:
 
     def _fetch_job_info(self, job_id: str) -> Optional[dict]:
         """Retrieve job metadata for logging and diagnostics."""
-        primary_url = self._build_url(f"/rq-engine/api/jobinfo/{job_id}")
-        fallback_url = self._build_url(f"/rq/api/jobinfo/{job_id}")
         try:
-            response = self._get_with_fallback(primary_url, fallback_url, timeout=60)
+            response = self.session.get(self._build_url(f"/rq-engine/api/jobinfo/{job_id}"), timeout=60)
             response.raise_for_status()
             payload = response.json()
         except Exception as exc:  # pragma: no cover - defensive logging
@@ -1071,15 +1059,13 @@ class PlaybackSession:
     ) -> None:
         """Poll jobstatus until the queued job completes or fails."""
         primary_url = self._build_url(f"/rq-engine/api/jobstatus/{job_id}")
-        fallback_url = self._build_url(f"/rq/api/jobstatus/{job_id}")
         end_time = time.time() + timeout
         last_status: Optional[str] = None
 
         while True:
             try:
-                response = self._get_with_fallback(
+                response = self.session.get(
                     primary_url,
-                    fallback_url,
                     params={"_": int(time.time() * 1000)},
                     timeout=60,
                 )

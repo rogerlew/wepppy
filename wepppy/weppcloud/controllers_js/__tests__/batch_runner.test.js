@@ -195,6 +195,7 @@ describe("BatchRunner controller", () => {
             enabled: true,
             batchName: "demo",
             geojsonLimitMb: 16,
+            rqEngineToken: "token-123",
             state: {
                 run_directives: [
                     { slug: "fetch_dem", label: "Fetch DEM", enabled: true },
@@ -260,9 +261,10 @@ describe("BatchRunner controller", () => {
         controller.uploadButton.dispatchEvent(new Event("click", { bubbles: true }));
         await flushPromises();
 
-        expect(requestMock).toHaveBeenCalledWith("/upload/batch/_/demo/upload-geojson", expect.objectContaining({
+        expect(requestMock).toHaveBeenCalledWith("/rq-engine/api/batch/_/demo/upload-geojson", expect.objectContaining({
             method: "POST",
-            body: expect.any(FormData)
+            body: expect.any(FormData),
+            headers: { Authorization: "Bearer token-123" }
         }));
         expect(completed).toHaveBeenCalled();
         expect(controller.resourceDetails.hidden).toBe(false);
@@ -373,7 +375,11 @@ describe("BatchRunner controller", () => {
         controller.runBatchButton.dispatchEvent(new Event("click", { bubbles: true }));
         await flushPromises();
 
-        expect(postJsonMock).toHaveBeenCalledWith("/batch/_/demo/rq/api/run-batch", {});
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "/rq-engine/api/batch/_/demo/run-batch",
+            {},
+            { headers: { Authorization: "Bearer token-123" } }
+        );
         expect(started).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-42" }));
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
@@ -387,7 +393,6 @@ describe("BatchRunner controller", () => {
 
         expect(postJsonMock).toHaveBeenCalledWith(
             "/rq-engine/api/jobinfo",
-            "/weppcloud/rq/api/jobinfo",
             { job_ids: ["job-10"] },
             expect.objectContaining({ signal: expect.any(Object) })
         );

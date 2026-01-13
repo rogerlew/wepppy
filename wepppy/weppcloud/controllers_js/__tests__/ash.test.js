@@ -129,6 +129,7 @@ describe("Ash controller", () => {
 
         global.WCHttp = {
             request: requestMock,
+            requestWithSessionToken: requestMock,
             postJson: postJsonMock,
             isHttpError: jest.fn(() => false),
             HttpError: class extends Error {}
@@ -150,7 +151,12 @@ describe("Ash controller", () => {
             getInstance: jest.fn(() => projectInstance)
         };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../ash.js");
         ash = window.Ash.getInstance();
@@ -237,7 +243,7 @@ describe("Ash controller", () => {
         ash.run();
         await Promise.resolve();
 
-        expect(requestMock).toHaveBeenCalledWith("rq/api/run_ash", expect.objectContaining({
+        expect(requestMock).toHaveBeenCalledWith("/rq-engine/api/runs/test/cfg/run-ash", expect.objectContaining({
             method: "POST",
             form: expect.any(HTMLFormElement),
             body: expect.any(FormData)
@@ -262,7 +268,7 @@ describe("Ash controller", () => {
 
     test("run failures push stacktrace and emit completed", async () => {
         const error = new Error("network");
-        global.WCHttp.request = jest.fn(() => Promise.reject(error));
+        global.WCHttp.requestWithSessionToken = jest.fn(() => Promise.reject(error));
         const runCompleted = jest.fn();
         ash.events.on("ash:run:completed", runCompleted);
 
@@ -317,7 +323,7 @@ describe("Ash controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(requestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(requestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             ash,
             expect.objectContaining({

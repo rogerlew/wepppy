@@ -6,8 +6,8 @@
 - **Prevent drift**: A single helper for `REDIS_HOST` ensures every component respects the same environment override. Today the string "localhost" is scattered everywhere, which makes switching hosts brittle.
 - **Minimal overhead**: Because Redis is intrinsic infrastructure, a light-weight module is sufficient—no need for a heavier config system or runtime schema.
 
-## Proposed Module
-Create `wepppy/config/redis_settings.py` to define DB aliases and expose host/URL helpers:
+## Current Module (Implemented)
+`wepppy/config/redis_settings.py` defines DB aliases plus host/URL helpers:
 
 ```python
 # wepppy/config/redis_settings.py
@@ -22,6 +22,7 @@ class RedisDB(IntEnum):
     LOG_LEVEL = 15
     RQ = 9
     WD_CACHE = 11
+    SESSION = 11
 
 @lru_cache(maxsize=1)
 def redis_host() -> str:
@@ -32,19 +33,17 @@ def redis_port() -> int:
 
 def redis_url(db: RedisDB) -> str:
     return f"redis://{redis_host()}:{redis_port()}/{int(db)}"
+
+def session_redis_url(db_default: RedisDB = RedisDB.SESSION) -> str:
+    """Prefer SESSION_REDIS_URL/SESSION_REDIS_DB, otherwise use REDIS_URL host with DB 11."""
+    ...
 ```
 
-## Rollout Plan
-1. **Add module** under `wepppy/config/` and include it in the controller bundle build (if necessary for JS) or simply import wherever Redis clients are constructed.
-2. **Update Redis clients** to use the shared helpers:
-   - `wepppy/nodb/base.py` for NoDb cache/status/locks/log-level connections.
-   - `wepppy/rq/rq_worker.py` for queue DB usage.
-   - `wepppy/weppcloud/utils/helpers.py` for working-directory cache.
-   - `services/status2` and `services/preflight2` for WebSocket pub/sub.
-3. **Avoid redundant env reads**: remove direct `os.getenv("REDIS_HOST", ...)` calls in these modules and defer to `redis_host()` / `redis_port()`.
-4. **Smoke test** by running the Flask app and background workers with the default host, then override `REDIS_HOST` in the environment to confirm all services still connect.
-5. **Document the change** in deployment notes—`REDIS_HOST` remains the only knob; DB IDs are now part of the enum and are centralized if they ever need to change.
+## Usage Notes
+- `RedisDB.SESSION` aliases DB 11 (shared with `WD_CACHE`).
+- `session_redis_url()` enforces DB 11 unless `SESSION_REDIS_DB` overrides it.
+- `SESSION_REDIS_URL` takes precedence; if omitted, session URLs inherit host/credentials from `REDIS_URL` (or `RQ_REDIS_URL`) while swapping in the session DB.
+- Weppcloud session storage uses `session_redis_url()` to avoid `REDIS_URL` path drift.
 
 ## Follow-up Ideas
-- Provide an optional `redis_client(db: RedisDB)` helper that builds a configured `StrictRedis` instance to reduce boilerplate even further.
-- Add a quick unit test verifying that `redis_url(RedisDB.RQ)` reflects an overridden `REDIS_HOST`/`REDIS_PORT`.
+- Add a doc blurb in deployment notes listing `SESSION_REDIS_URL` and `SESSION_REDIS_DB` as supported overrides.

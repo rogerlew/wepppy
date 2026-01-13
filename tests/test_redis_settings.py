@@ -19,14 +19,18 @@ def reset_redis_env(monkeypatch):
         monkeypatch.delenv(key, raising=False)
 
     redis_settings._base_url.cache_clear()
+    redis_settings._session_base_url.cache_clear()
     redis_settings.redis_host.cache_clear()
     redis_settings.redis_port.cache_clear()
     redis_settings.redis_url.cache_clear()
+    redis_settings.session_redis_url.cache_clear()
     yield
     redis_settings._base_url.cache_clear()
+    redis_settings._session_base_url.cache_clear()
     redis_settings.redis_host.cache_clear()
     redis_settings.redis_port.cache_clear()
     redis_settings.redis_url.cache_clear()
+    redis_settings.session_redis_url.cache_clear()
 
 
 def test_defaults_to_localhost_and_standard_port():
@@ -155,3 +159,25 @@ def test_async_url_matches_sync_url(monkeypatch):
 
     db = redis_settings.RedisDB.NODB_CACHE
     assert redis_settings.redis_async_url(db) == redis_settings.redis_url(db)
+
+
+def test_session_url_uses_session_override_db(monkeypatch):
+    monkeypatch.setenv("SESSION_REDIS_URL", "redis://session-cache:6380/5")
+    monkeypatch.setenv("SESSION_REDIS_DB", "11")
+
+    assert redis_settings.session_redis_url() == "redis://session-cache:6380/11"
+
+
+def test_session_url_preserves_session_url_path(monkeypatch):
+    monkeypatch.setenv("SESSION_REDIS_URL", "redis://session-cache:6380/5")
+    monkeypatch.delenv("SESSION_REDIS_DB", raising=False)
+
+    assert redis_settings.session_redis_url() == "redis://session-cache:6380/5"
+
+
+def test_session_url_overrides_base_url_db(monkeypatch):
+    monkeypatch.setenv("REDIS_URL", "redis://cache:6379/0")
+    monkeypatch.delenv("SESSION_REDIS_URL", raising=False)
+    monkeypatch.delenv("SESSION_REDIS_DB", raising=False)
+
+    assert redis_settings.session_redis_url() == "redis://cache:6379/11"

@@ -108,12 +108,9 @@
                   throw new Error("CAPTCHA verification failed.");
                 });
             }
-            return resp.json();
+            return null;
           })
-          .then(function (payload) {
-            if (!payload || payload.success !== true) {
-              throw new Error("CAPTCHA verification failed.");
-            }
+          .then(function () {
             window.location.replace(nextUrl);
           })
           .catch(function (err) {

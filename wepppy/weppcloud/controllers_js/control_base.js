@@ -325,12 +325,9 @@ function controlBase() {
         }
 
         const jobInfoPrimaryUrl = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
-        const jobInfoFallbackUrl = `/weppcloud/rq/api/jobinfo/${encodeURIComponent(jobId)}`;
-        const fetchJobInfo = typeof http.getJsonWithFallback === "function"
-            ? http.getJsonWithFallback(jobInfoPrimaryUrl, jobInfoFallbackUrl)
-            : typeof http.getJson === "function"
-                ? http.getJson(jobInfoFallbackUrl)
-                : http.request(jobInfoFallbackUrl).then(normalizeJobInfoPayload);
+        const fetchJobInfo = typeof http.getJson === "function"
+            ? http.getJson(jobInfoPrimaryUrl)
+            : http.request(jobInfoPrimaryUrl).then(normalizeJobInfoPayload);
 
         Promise.resolve(fetchJobInfo)
             .then(function (payload) {
@@ -930,12 +927,9 @@ function controlBase() {
             self._job_status_fetch_inflight = true;
             const http = ensureHttp();
             const primaryUrl = `/rq-engine/api/jobstatus/${encodeURIComponent(self.rq_job_id)}`;
-            const fallbackUrl = `/weppcloud/rq/api/jobstatus/${encodeURIComponent(self.rq_job_id)}`;
-            const fetchJobStatus = typeof http.getJsonWithFallback === "function"
-                ? http.getJsonWithFallback(primaryUrl, fallbackUrl, { params: { _: Date.now() } })
-                : typeof http.getJson === "function"
-                    ? http.getJson(fallbackUrl, { params: { _: Date.now() } })
-                    : http.request(fallbackUrl, { params: { _: Date.now() } }).then(normalizeJobInfoPayload);
+            const fetchJobStatus = typeof http.getJson === "function"
+                ? http.getJson(primaryUrl, { params: { _: Date.now() } })
+                : http.request(primaryUrl, { params: { _: Date.now() } }).then(normalizeJobInfoPayload);
 
             fetchJobStatus
                 .then(function (data) {

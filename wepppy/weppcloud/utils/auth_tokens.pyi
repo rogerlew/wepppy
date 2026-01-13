@@ -16,6 +16,7 @@ class JWTDecodeError(RuntimeError): ...
 class JWTServiceConfig:
     __match_args__ = (
         "secret",
+        "validation_secrets",
         "algorithms",
         "issuer",
         "default_audience",
@@ -24,6 +25,7 @@ class JWTServiceConfig:
         "leeway_seconds",
     )
     secret: str
+    validation_secrets: tuple[str, ...]
     algorithms: tuple[str, ...]
     issuer: str | None
     default_audience: str | None
@@ -34,6 +36,7 @@ class JWTServiceConfig:
     def __init__(
         self,
         secret: str,
+        validation_secrets: tuple[str, ...],
         algorithms: tuple[str, ...],
         issuer: str | None,
         default_audience: str | None,
@@ -53,6 +56,17 @@ def decode_jwt(
     token: str,
     *,
     secret: str,
+    algorithms: Sequence[str],
+    audience: Sequence[str] | None = ...,
+    issuer: str | None = ...,
+    leeway: int = ...,
+) -> Mapping[str, Any]: ...
+
+
+def decode_jwt_with_secrets(
+    token: str,
+    *,
+    secrets: Sequence[str],
     algorithms: Sequence[str],
     audience: Sequence[str] | None = ...,
     issuer: str | None = ...,

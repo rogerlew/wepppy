@@ -1458,7 +1458,7 @@ h5:first-child {
   border-radius: var(--wc-radius-sm);
   background: var(--wc-color-surface-alt);
   font-family: var(--wc-font-mono);
-  font-size: var(--wc-font-size-sm);
+  font-size: var(--wc-font-size-xs);
   white-space: pre;
 }
 
@@ -3990,6 +3990,12 @@ body.wc-modal-open {
 .wc-table input[type="checkbox"]:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Table column width utilities */
+.wc-col-shrink {
+  width: 1%;
+  white-space: nowrap;
 }
 
 /* =============================================================================

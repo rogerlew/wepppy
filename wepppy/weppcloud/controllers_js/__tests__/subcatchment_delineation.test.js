@@ -153,7 +153,7 @@ describe("Subcatchment Delineation controller", () => {
         httpRequestMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
-            postJson: httpPostJsonMock,
+            postJsonWithSessionToken: httpPostJsonMock,
             request: httpRequestMock,
             isHttpError: jest.fn().mockReturnValue(false),
         };
@@ -194,7 +194,12 @@ describe("Subcatchment Delineation controller", () => {
             renderValue: jest.fn((value, unit) => `${value} ${unit || ""}`.trim()),
             renderUnits: jest.fn(() => "kg/m^2"),
         })) };
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
         global.polylabel = jest.fn(() => [0, 0]);
 
         global.L = {
@@ -255,7 +260,7 @@ describe("Subcatchment Delineation controller", () => {
         await Promise.resolve();
 
         expect(httpPostJsonMock).toHaveBeenCalledWith(
-            "rq/api/build_subcatchments_and_abstract_watershed",
+            "/rq-engine/api/runs/test/cfg/build-subcatchments-and-abstract-watershed",
             { clip_hillslopes: true },
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -297,7 +302,7 @@ describe("Subcatchment Delineation controller", () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(httpRequestMock).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpRequestMock).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             subcatchment,
             expect.objectContaining({

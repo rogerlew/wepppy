@@ -20,13 +20,26 @@ TASK_RULES: Dict[str, Dict[str, Any]] = {
         "expected_files": ["dem/dem.tif"],  # VRT-only runs may skip this file.
         "ron_property": ("has_dem", {"equals": True}),
     },
+    "rq-engine/api/fetch-dem-and-build-channels": {
+        "expected_files": ["dem/dem.tif"],  # VRT-only runs may skip this file.
+        "ron_property": ("has_dem", {"equals": True}),
+    },
     "rq/api/set_outlet": {
+        "ron_property": ("watershed_instance.outlet", {"exists": True}),
+    },
+    "rq-engine/api/set-outlet": {
         "ron_property": ("watershed_instance.outlet", {"exists": True}),
     },
     "rq/api/build_subcatchments_and_abstract_watershed": {
         "expected_files": ["dem/channels.shp", "dem/subwta.shp"],
     },
+    "rq-engine/api/build-subcatchments-and-abstract-watershed": {
+        "expected_files": ["dem/channels.shp", "dem/subwta.shp"],
+    },
     "rq/api/build_landuse": {
+        "ron_property": ("landuse_instance.domlc_d", {"exists": True}),
+    },
+    "rq-engine/api/build-landuse": {
         "ron_property": ("landuse_instance.domlc_d", {"exists": True}),
     },
 }
@@ -175,12 +188,21 @@ class ProfileAssembler:
         endpoint = event.get("endpoint")
         if not endpoint or not isinstance(endpoint, str):
             return None
+        parsed = urlparse(endpoint)
+        path = parsed.path or endpoint
+        if "/rq-engine/api/" in path:
+            if "/rq-engine/api/runs/" in path:
+                suffix = path.split("/rq-engine/api/runs/", 1)[1]
+                parts = suffix.split("/")
+                remainder = "/".join(parts[2:]) if len(parts) > 2 else ""
+                return "rq-engine/api/" + remainder if remainder else "rq-engine/api"
+            return "rq-engine/api/" + path.split("/rq-engine/api/", 1)[1].lstrip("/")
         # If the endpoint contains a run-scoped prefix, strip it.
-        parts = endpoint.split("/rq/", 1)
+        parts = path.split("/rq/", 1)
         if len(parts) == 2:
-            return "rq/" + parts[1]
+            return "rq/" + parts[1].lstrip("/")
         # Fall back to stripping leading slash.
-        return endpoint.lstrip("/")
+        return path.lstrip("/")
 
     def _apply_task_rules(
         self,
@@ -241,19 +263,19 @@ class ProfileAssembler:
         seed_root = draft_root / "seed" / "uploads"
         seed_root.mkdir(parents=True, exist_ok=True)
 
-        if endpoint == "rq/api/build_landuse":
+        if endpoint in {"rq/api/build_landuse", "rq-engine/api/build-landuse"}:
             self._snapshot_landuse_upload(seed_root, Path(run_dir))
-        elif endpoint.endswith("tasks/upload_sbs"):
+        elif endpoint.endswith("tasks/upload_sbs") or endpoint.endswith("tasks/upload-sbs"):
             self._snapshot_sbs_upload(seed_root, Path(run_dir))
-        elif endpoint.endswith("tasks/upload_cover_transform"):
+        elif endpoint.endswith("tasks/upload_cover_transform") or endpoint.endswith("tasks/upload-cover-transform"):
             self._snapshot_cover_transform_upload(seed_root, Path(run_dir))
-        elif endpoint.endswith("tasks/upload_cli"):
+        elif endpoint.endswith("tasks/upload_cli") or endpoint.endswith("tasks/upload-cli"):
             self._snapshot_cli_upload(seed_root, Path(run_dir))
-        elif endpoint == "rq/api/build_treatments":
+        elif endpoint in {"rq/api/build_treatments", "rq-engine/api/build-treatments"}:
             self._snapshot_landuse_upload(seed_root, Path(run_dir))
-        elif endpoint == "rq/api/run_ash":
+        elif endpoint in {"rq/api/run_ash", "rq-engine/api/run-ash"}:
             self._snapshot_ash_upload(seed_root, Path(run_dir))
-        elif endpoint == "rq/api/run_omni":
+        elif endpoint in {"rq/api/run_omni", "rq-engine/api/run-omni"}:
             self._snapshot_omni_upload(seed_root, Path(run_dir))
 
     def _snapshot_landuse_upload(self, seed_root: Path, run_dir: Path) -> None:

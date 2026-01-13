@@ -23,9 +23,9 @@ When adding support for a new multipart/form-data workflow:
 - **Documentation:** Record any special handling (e.g., temporary directories, additional derived files) here or in the spec (`PROFILE_TEST_ENGINE_SPEC.md`) so future agents know the expectations.
 
 ## Operational Notes
-- Playback always initialises a clean workspace; never assume prior run assets are restored. Keep the capture seeds authoritative for every upload/config dependency.
+- Playback always initializes a clean workspace; never assume prior run assets are restored. Keep the capture seeds authoritative for every upload/config dependency.
 - Replay rewrites `/runs/<original>/<config>/...` → `/runs/{playback_run_id}/<config>/...`; the FastAPI service generates playback run IDs as `profile;;tmp;;<sandbox_uuid>` so production runs remain untouched while tracking the source identifier for reporting.
-- Recorded `/rq/api/jobstatus/<id>` polls and `elevationquery` requests are skipped during replay; the runner waits on the fresh job IDs emitted by each POST response instead.
+- Recorded `/rq-engine/api/jobstatus/<id>` polls and `elevationquery` requests are skipped during replay; the runner waits on the fresh job IDs emitted by each POST response instead. Legacy `/rq/api` paths still replay for older captures.
 - Authentication defaults to automated login using `ADMIN_EMAIL` / `ADMIN_PASSWORD` (see `docker/.env`). If a profile needs user-scoped permissions, record with the appropriate account and capture the session cookie for playback (`--cookie-file`).
 - The recorder runs globally even when not actively capturing profiles; audit logs under each run’s `_logs/` folder always append new events. Promotion copies only the slice under `_drafts/<run>/<capture>/`.
 
@@ -41,10 +41,10 @@ When adding support for a new multipart/form-data workflow:
 | `/runs/<runid>/<config>/tasks/upload_sbs/` | `input_upload_sbs` | `<run>/baer/` or `<run>/disturbed/` | BAER or Disturbed SBS raster. **Recorder/playback support implemented.** |
 | `/runs/<runid>/<config>/tasks/upload_cover_transform` | `input_upload_cover_transform` | `<run>/revegetation/` | Revegetation user-defined cover transform CSV. **Capture/playback supported.** |
 | `/runs/<runid>/<config>/tasks/upload_cli/` | `input_upload_cli` | `Climate.cli_dir` (typically `<run>/climate/`) | CLIGEN `.cli` uploads. **Capture/playback supported.** |
-| `/runs/<runid>/<config>/rq/api/build_landuse` | `input_upload_landuse` (UserDefined mode) | `Landuse.lc_dir` (copied to `_filename`, stacked into `landuse.lc_fn`) | Landuse user-defined raster. **Supported** through existing landuse form logic. |
-| `/runs/<runid>/<config>/rq/api/build_treatments` | `input_upload_landuse` | `Landuse.lc_dir` | Treatments user-defined map; shares plumbing with landuse. **Handled via landuse replay helpers.** |
-| `/runs/<runid>/<config>/rq/api/run_ash` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `<run>/ash/` | Ash load/type rasters. **Capture/playback supported (with optional type map).** |
-| `/runs/<runid>/<config>/rq/api/run_omni` (SBS scenario) | `scenarios[i][sbs_file]` (indexed per scenario) | `<run>/omni/_limbo/<idx>/` | Omni scenario SBS uploads. **Capture/playback supported (per-index seed + JSON replay).** |
+| `/rq-engine/api/runs/<runid>/<config>/build-landuse` | `input_upload_landuse` (UserDefined mode) | `Landuse.lc_dir` (copied to `_filename`, stacked into `landuse.lc_fn`) | Landuse user-defined raster. **Supported** through existing landuse form logic. |
+| `/rq-engine/api/runs/<runid>/<config>/build-treatments` | `input_upload_landuse` | `Landuse.lc_dir` | Treatments user-defined map; shares plumbing with landuse. **Handled via landuse replay helpers.** |
+| `/rq-engine/api/runs/<runid>/<config>/run-ash` | `input_upload_ash_load` (required), `input_upload_ash_type_map` (optional) | `<run>/ash/` | Ash load/type rasters. **Capture/playback supported (with optional type map).** |
+| `/rq-engine/api/runs/<runid>/<config>/run-omni` (SBS scenario) | `scenarios[i][sbs_file]` (indexed per scenario) | `<run>/omni/_limbo/<idx>/` | Omni scenario SBS uploads. **Capture/playback supported (per-index seed + JSON replay).** |
 | `/huc-fire/tasks/upload_sbs/` | `input_upload_sbs` | `<new run>/disturbed/` | HUC fire helper (creates run on upload). Optional for profile engine; document before adding support. |
 | `/batch/_/<batch_name>/upload-geojson` | `geojson_file` / `file` | `batch/<batch_name>/resources/` | Batch runner GeoJSON ingest (outside run context). Capture optional; treat as future enhancement. |
 

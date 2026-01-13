@@ -37,6 +37,7 @@ describe("RAP_TS controller", () => {
 
         httpMock = {
             postJson: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
+            postJsonWithSessionToken: jest.fn(() => Promise.resolve({ body: { job_id: "job-123" } })),
             request: jest.fn(),
             isHttpError: jest.fn((error) => Boolean(error && error.isHttpError))
         };
@@ -60,7 +61,12 @@ describe("RAP_TS controller", () => {
         }));
         global.controlBase = jest.fn(() => Object.assign({}, baseInstance));
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../rap_ts.js");
         const rapFactory = globalThis.RAP_TS || (typeof window !== "undefined" ? window.RAP_TS : undefined);
@@ -129,8 +135,8 @@ describe("RAP_TS controller", () => {
 
         await flushPromises();
 
-        expect(httpMock.postJson).toHaveBeenCalledWith(
-            "rq/api/acquire_rap_ts",
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/acquire-rap-ts",
             {},
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );
@@ -152,7 +158,7 @@ describe("RAP_TS controller", () => {
         controller.handle_job_status_response(controller, { status: "failed" });
         await flushPromises();
 
-        expect(httpMock.request).toHaveBeenCalledWith("/weppcloud/rq/api/jobinfo/job-123");
+        expect(httpMock.request).toHaveBeenCalledWith("/rq-engine/api/jobinfo/job-123");
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             controller,
             expect.objectContaining({
@@ -173,7 +179,7 @@ describe("RAP_TS controller", () => {
                 error: { message: "Service unavailable" }
             }
         };
-        httpMock.postJson.mockImplementationOnce(() => Promise.reject(error));
+        httpMock.postJsonWithSessionToken.mockImplementationOnce(() => Promise.reject(error));
 
         const errors = [];
         controller.events.on("rap:timeseries:run:error", (payload) => errors.push(payload.error));

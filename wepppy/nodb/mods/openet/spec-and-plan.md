@@ -125,7 +125,7 @@ Since both datasets are **already monthly** (pre-aggregated):
 - [x] **Preflight integration**
   - Hook into preflight/task readiness UX.
 - [x] **RQ + controller integration**
-  - Add `/rq/api/acquire_openet_ts`, controller JS, and mods UI wiring.
+  - Add `/rq-engine/api/runs/<runid>/<config>/acquire-openet-ts`, controller JS, and mods UI wiring.
 
 ## Verification Checklist
 - Climate observed start/end years line up with output.

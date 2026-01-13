@@ -402,11 +402,22 @@
         }
     }
 
+    function prefetchSessionToken() {
+        var helper = window.WCHttp && typeof window.WCHttp.getSessionToken === "function" ? window.WCHttp : null;
+        if (!helper || !runId || !runConfig) {
+            return;
+        }
+        helper.getSessionToken(runId, runConfig).catch(function (err) {
+            console.warn("[Bootstrap] Failed to prefetch session token", err);
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         initUnitizers();
         bootstrapControllers(runContext);
         window.tocTaskEmojis = runContext.ui && runContext.ui.tocTaskEmojis ? runContext.ui.tocTaskEmojis : {};
         initializeToc(window.tocTaskEmojis);
+        prefetchSessionToken();
     });
 
     window.addEventListener("load", function () {

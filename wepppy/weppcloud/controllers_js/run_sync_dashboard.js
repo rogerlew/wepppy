@@ -492,8 +492,8 @@
 
             var configEl = container.querySelector("#run_sync_config");
             var dataset = (configEl && configEl.dataset) || {};
-            var apiUrl = dataset.apiUrl || "/rq/api/run-sync";
-            var statusUrl = dataset.statusUrl || "/rq/api/run-sync/status";
+            var apiUrl = dataset.apiUrl || "/rq-engine/api/run-sync";
+            var statusUrl = dataset.statusUrl || "/rq-engine/api/run-sync/status";
             var defaults = {
                 defaultHost: dataset.defaultHost || "wepp.cloud",
                 defaultRoot: dataset.defaultRoot || "",

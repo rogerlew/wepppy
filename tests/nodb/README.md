@@ -253,5 +253,5 @@ print(f"Operation took {duration:.2f}s (TTL: {LOCK_DEFAULT_TTL}s)")
 
 - [AGENTS.md](../../AGENTS.md#race-contention-scenarios-in-nodb-distributed-locking) - Full race condition analysis
 - [wepppy/nodb/base.py](../../wepppy/nodb/base.py) - NoDb locking implementation
-- [wepppy/weppcloud/routes/rq/api/api.py](../../wepppy/weppcloud/routes/rq/api/api.py) - Fixed build_climate endpoint
+- [wepppy/microservices/rq_engine/climate_routes.py](../../wepppy/microservices/rq_engine/climate_routes.py) - Fixed build-climate endpoint
 - [wepppy/profile_recorder/playback.py](../../wepppy/profile_recorder/playback.py) - Fixed playback delays
