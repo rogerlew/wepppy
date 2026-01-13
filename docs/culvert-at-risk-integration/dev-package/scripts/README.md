@@ -196,6 +196,9 @@ The culvert batch endpoints require a bearer token; set `WEPPCLOUD_TOKEN` or use
 | `WEPPCLOUD_HOST` | `wepp.cloud` | Target host (no protocol prefix) |
 | `WEPPCLOUD_TOKEN` | unset | Bearer token for authenticated endpoints |
 
+If `scripts/.env` exists, the script loads values from it (without overriding
+existing environment variables).
+
 ### Usage
 
 ```bash

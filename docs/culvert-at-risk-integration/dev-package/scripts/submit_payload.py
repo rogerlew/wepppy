@@ -32,6 +32,7 @@ Usage:
 Environment variables:
     WEPPCLOUD_HOST: Override the default wepp.cloud host (no http/https prefix).
     WEPPCLOUD_TOKEN: Optional bearer token for authenticated endpoints.
+    Values in .env (next to this script) are loaded if present.
 
 Test payload (pre-built):
     tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip
@@ -61,6 +62,7 @@ import requests
 # Constants
 DEFAULT_HOST = "wepp.cloud"
 TOKEN_ENV_VAR = "WEPPCLOUD_TOKEN"
+DOTENV_FILENAME = ".env"
 DEFAULT_POLL_SECONDS = 5
 DEFAULT_TIMEOUT_SECONDS = 3600 * 20
 UPLOAD_ENDPOINT = "/rq-engine/api/culverts-wepp-batch/"
@@ -106,6 +108,44 @@ def _build_base_url(host: str) -> str:
     # Strip any existing protocol prefix
     host = host.replace("https://", "").replace("http://", "").rstrip("/")
     return f"https://{host}"
+
+
+def _strip_optional_quotes(value: str) -> str:
+    """Remove surrounding single or double quotes when present."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        return value[1:-1]
+    return value
+
+
+def _load_dotenv() -> None:
+    """Load environment variables from a local .env file if present."""
+    env_path = Path(__file__).resolve().parent / DOTENV_FILENAME
+    if not env_path.exists():
+        return
+    try:
+        content = env_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        logger.warning(f"Failed to read {env_path.name}: {exc}")
+        return
+    for line_num, raw in enumerate(content.splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            logger.warning(
+                f"Skipping invalid {env_path.name} entry on line {line_num}"
+            )
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if not key:
+            logger.warning(
+                f"Skipping empty {env_path.name} key on line {line_num}"
+            )
+            continue
+        if key in os.environ:
+            continue
+        os.environ[key] = _strip_optional_quotes(value.strip())
 
 
 def _resolve_status_url(status_url: str, base_url: str) -> str:
@@ -311,6 +351,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.token and args.token_file:
         parser.error("--token and --token-file are mutually exclusive")
+
+    _load_dotenv()
 
     # Validate payload exists
     if not args.payload.exists():
