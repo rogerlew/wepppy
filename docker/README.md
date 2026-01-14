@@ -96,6 +96,7 @@ wctl logs weppcloud
 | `rq-engine`    | FastAPI (Uvicorn) for RQ job polling endpoints | 8042 | Serves `/rq-engine/api/*` jobinfo/jobstatus polling. |
 | `weppcloudr`   | R (Plumber) renderer for WEPPcloud reports | 8050 | Serves `/weppcloudr/*`; mounts R templates and run volumes; caches rendered HTML in run export dirs. |
 | `rq-worker`    | RQ worker pool servicing Redis queue DB 9 | — | Shares code volume; respects `UID`/`GID`. |
+| `rq-worker-batch` | RQ worker pool for batch queue (long-running jobs) | — | 4 workers, 8GB shm, higher resource limits. |
 | `redis`        | Redis 7.4 | 6379 | Dev: `.docker-data/redis`, Prod: `redis-data` volume |
 | `postgres`     | PostgreSQL 16 | 5432 | Dev: `.docker-data/postgres`, Prod: `postgres-data` volume |
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |
