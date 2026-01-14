@@ -386,6 +386,39 @@ different watershed than Culvert_web_app computed.
   - `wdfm_output_watershed_path` -> `hydrogeo_vuln/wdfm/wdfm_final_output_watershed_polygon.shp`.
   - `ehvi_results_path` -> `hydrogeo_vuln/ehvi/ehvi_final_output_watershed_polygon.shp`.
 
+## Regional Frequency Analysis (RFA) routine
+- Entry points:
+  - `culvert_app/tasks/hydro_vuln_analysis_task.py`:
+    - Case 5 (streamflow RFA): builds `gst_list_filenames`, ensures ROI files when multiple gauges, calls `main_regional_freq_analysis(... var='stream', roi=1, ...)`, then passes the GeoDataFrame to `vuln_by_comparing_peak_Q_with_discharge_capacity` to write `RF_vuln_results.shp`.
+    - Case 2 (PI frequency for Rational Method): calls `main_regional_freq_analysis(... var='precip', roi=0, ...)` to generate `PIDF_cmperhr_per_watershed_UTM_reprojected.csv/.shp` used by PI-based RM.
+- Core implementation:
+  - R logic embedded in `culvert_app/utils/subroutine_regional_freq_analysis.py` via `robjects.r("""...""")` defines:
+    - `detect_and_remove_outliers` (`Zscore`, `IQR`, `None`).
+    - `single_site_freq_estimation` (Mann-Kendall trend test; stationary vs non-stationary GEV; model selection by AIC/DIC).
+    - `regional_growth_curve_estimation` (bootstrap GEV growth curves).
+    - `main_regional_freq_analysis` (orchestrates per-site fits, pooling, ROI logic, and output files).
+  - Python wrapper `main_regional_freq_analysis` converts the watershed shapefile to a temp CSV, runs the R function, then merges results back to the GeoDataFrame and writes the final shapefile.
+  - R packages are loaded at app init in `culvert_app/utils/subroutine_initialize_r_environment.py` (notably `extRemes`, `Kendall`, `openxlsx`, `dplyr`, `nsRFA`, `lmomRFA`).
+- Input expectations:
+  - Time series filenames follow `full_stream_series_<gst>.csv`, `ams_stream_series_<gst>.csv`, `full_precip_series_<gst>.csv`, `ams_precip_series_<gst>.csv`.
+  - `site_name` is parsed from the filename and matched to `geodata$GWS_ID` to find `Point_ID` (warns if missing).
+  - Full series are reduced to annual maxima by `Year`; AMS uses raw series.
+  - `Flow` values are normalized by `Area_km2`; `PI` uses raw values.
+  - `NS_logic=1` uses `cov_data_column_name` when present; otherwise a normalized sequential index is injected and saved as `processed_<var>_<filename>` for debugging.
+- Regional pooling logic:
+  - Index flood is `mean(fit_data)` and stored as `Ind_val` on `geodata`.
+  - Weighted averages of loc/scale/shape (weights = `sample_len`) feed `regional_growth_curve_estimation`.
+  - Stream outputs apply `growth_curve * Ind_val * (area_ha/100)` into `RF{RP}yrL/E/U` columns.
+  - Precip outputs apply the growth curve directly into `PI{RP}yrL/E/U` columns.
+- ROI branch (streamflow, `roi=1`, multiple gauges):
+  - Expects ROI outputs from `culvert_app/utils/subroutine_roi_identification.py`: `roi_hom.csv`, `roi_hom_gauged.csv`, `roi_index.csv`.
+  - Builds growth curves per homogeneous region and applies them to gauged and ungaged sites via ROI mapping.
+  - Writes per-region growth curves to `*_growth_curves_by_hom_region.xlsx`.
+- Outputs:
+  - Stream: `RFA_results_of_return_values.csv/.shp`, `*_gauged_site_specific_stats.csv`, `*_gauged_site_specific_return_values.xlsx`.
+  - Precip: `PIDF_cmperhr_per_watershed_UTM_reprojected.csv/.shp`, `*_gauged_site_specific_stats.csv`, `*_gauged_site_specific_return_values.xlsx`.
+  - ROI: `*_ungauged_site_hom_region_ID_with_ROI.csv`, `*_growth_curves_by_hom_region.xlsx`.
+
 ## Hydrogeo vulnerability file map (hydrogeo_vuln)
 - Inputs:
   - `user_dir_inputs` -> `.../<user_id>_outputs/<project>/WS_deln`.
