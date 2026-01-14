@@ -172,7 +172,7 @@ wepp.cloud {
         handle @browse_proxy {
             reverse_proxy browse:9009 {
                 transport http {
-                    read_timeout 3m
+                    read_timeout 10m
                 }
             }
         }
