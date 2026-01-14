@@ -10,8 +10,9 @@ import subprocess
 import tempfile
 from collections import deque
 from datetime import datetime, timezone
+from glob import glob
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import requests
@@ -34,6 +35,103 @@ STATUS_EVENTS = (
     "COMPLETE",
     "EXCEPTION",
 )
+
+# Known source path patterns that need normalization when syncing runs.
+# These are absolute paths used on different WEPPcloud deployments.
+SOURCE_PATH_REPLACEMENTS: List[Tuple[str, str]] = [
+    ("/geodata/wc1/runs/", "/wc1/runs/"),
+    ("/geodata/weppcloud_runs/", "/wc1/runs/"),  # legacy path format
+]
+
+
+def _normalize_nodb_paths(run_root: Path, runid: str) -> int:
+    """Replace source server paths with local paths in all nodb files.
+
+    When syncing runs from remote servers (e.g., wepp.cloud using /geodata/wc1/runs),
+    the nodb files contain embedded absolute paths. This function normalizes those
+    paths to match the local server's path structure (/wc1/runs).
+
+    Args:
+        run_root: Path to the run directory.
+        runid: Run identifier.
+
+    Returns:
+        Number of nodb files that were modified.
+    """
+    modified_count = 0
+    nodb_files = glob(str(run_root / "*.nodb"))
+
+    for nodb_path in nodb_files:
+        try:
+            with open(nodb_path, 'r', encoding='utf-8') as fp:
+                content = fp.read()
+
+            original_content = content
+            for source_pattern, target_pattern in SOURCE_PATH_REPLACEMENTS:
+                content = content.replace(source_pattern, target_pattern)
+
+            if content != original_content:
+                with open(nodb_path, 'w', encoding='utf-8') as fp:
+                    fp.write(content)
+                modified_count += 1
+        except Exception:
+            # Skip files that can't be read/written (binary, permissions, etc.)
+            continue
+
+    return modified_count
+
+
+def _normalize_parquet_paths(run_root: Path) -> int:
+    """Normalize paths in parquet files containing path columns.
+
+    Parquet files like soils.parquet and landuse.parquet contain columns
+    with absolute paths (e.g., soils_dir). This function updates those
+    paths to match the local server's path structure.
+
+    Args:
+        run_root: Path to the run directory.
+
+    Returns:
+        Number of parquet files that were modified.
+    """
+    try:
+        import pandas as pd
+    except ImportError:
+        return 0
+
+    modified_count = 0
+    # Known parquet files that may contain path columns
+    parquet_locations = [
+        run_root / "soils" / "soils.parquet",
+        run_root / "landuse" / "landuse.parquet",
+    ]
+
+    for parquet_path in parquet_locations:
+        if not parquet_path.exists():
+            continue
+
+        try:
+            df = pd.read_parquet(parquet_path)
+            modified = False
+
+            # Check string columns for path patterns
+            for col in df.select_dtypes(include=['object']).columns:
+                for source_pattern, target_pattern in SOURCE_PATH_REPLACEMENTS:
+                    mask = df[col].astype(str).str.contains(source_pattern, regex=False, na=False)
+                    if mask.any():
+                        df[col] = df[col].astype(str).str.replace(
+                            source_pattern, target_pattern, regex=False
+                        )
+                        modified = True
+
+            if modified:
+                df.to_parquet(parquet_path, index=False)
+                modified_count += 1
+        except Exception:
+            # Skip files that can't be read/written
+            continue
+
+    return modified_count
 
 
 def _status_channel(runid: str) -> str:
@@ -305,6 +403,16 @@ def run_sync_rq(
         _run_aria2c(spec_file, run_root, headers, stream_aria2)
         _verify_download(run_root)
         _publish_status(status_channel, job_id, "CHECKSUM_OK")
+
+        # Normalize paths in nodb files to match local server configuration
+        nodb_modified = _normalize_nodb_paths(run_root, normalized_runid)
+        parquet_modified = _normalize_parquet_paths(run_root)
+        total_modified = nodb_modified + parquet_modified
+        if total_modified > 0:
+            _publish_status(
+                status_channel, job_id, "PATH_NORMALIZED",
+                f"Updated {nodb_modified} nodb file(s), {parquet_modified} parquet file(s)"
+            )
 
         version_at_pull = read_version(run_root)
         provenance = {

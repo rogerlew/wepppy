@@ -1100,6 +1100,15 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
                 s = fp.read()
 
             s = s.replace(wd, new_wd).replace(runid, new_runid)
+
+            # Normalize legacy path patterns to canonical /wc1/runs/ format
+            # This handles cases where source nodb files contain old paths
+            for src_pattern, dst_pattern in [
+                ("/geodata/wc1/runs/", "/wc1/runs/"),
+                ("/geodata/weppcloud_runs/", "/wc1/runs/"),
+            ]:
+                s = s.replace(src_pattern, dst_pattern)
+
             with open(fn, 'w') as fp:
                 fp.write(s)
 
