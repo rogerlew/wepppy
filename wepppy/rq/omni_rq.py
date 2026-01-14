@@ -350,7 +350,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
+            q = Queue("batch", connection=redis_conn)
 
             for task in stage1_tasks:
                 child_job = q.enqueue_call(

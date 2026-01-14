@@ -229,7 +229,7 @@ async def _run_omni(
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
+            q = Queue("batch", connection=redis_conn)
             job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id("run_omni_rq", job.id)
     except Exception:
