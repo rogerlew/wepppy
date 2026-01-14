@@ -499,6 +499,7 @@
                 defaultRoot: dataset.defaultRoot || "",
             };
             var statusChannel = dataset.statusChannel || "run_sync";
+            var rqEngineToken = dataset.rqEngineToken || "";
 
             var form = container.querySelector("#run_sync_form");
             statusPanel = container.querySelector("#run_sync_status_panel");
@@ -507,8 +508,23 @@
             stacktraceBody = container.querySelector("[data-stacktrace-body]") || container.querySelector("#stacktrace");
             summaryElement = container.querySelector("#run_sync_summary");
 
+            function buildAuthHeaders() {
+                if (!rqEngineToken) {
+                    return {};
+                }
+                return { Authorization: "Bearer " + rqEngineToken };
+            }
+
             function refreshStatus() {
-                http.getJson(statusUrl)
+                if (!rqEngineToken) {
+                    var missingMessage = "Missing rq-engine token; reload after signing in.";
+                    if (missingMessage !== lastStatusRefreshError) {
+                        appendStatus(missingMessage);
+                        lastStatusRefreshError = missingMessage;
+                    }
+                    return;
+                }
+                http.getJson(statusUrl, { headers: buildAuthHeaders() })
                     .then(function (payload) {
                         renderJobs(container, payload.jobs || []);
                         renderMigrations(container, payload.migrations || []);
@@ -536,6 +552,10 @@
                 if (!form) {
                     return;
                 }
+                if (!rqEngineToken) {
+                    appendStatus("Missing rq-engine token; reload after signing in.");
+                    return;
+                }
                 var payload = buildPayload(form, defaults);
                 if (!payload.runid) {
                     appendStatus("runid is required.");
@@ -547,7 +567,7 @@
                 clearSummary();
                 resetStatusLog();
                 appendStatus("Enqueueing run sync job...");
-                http.postJson(apiUrl, payload)
+                http.postJson(apiUrl, payload, { headers: buildAuthHeaders() })
                     .then(function (response) {
                         var body = response && response.body ? response.body : response;
                         if (body && (body.error || body.errors)) {

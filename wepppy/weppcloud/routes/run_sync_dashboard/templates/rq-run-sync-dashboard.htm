@@ -19,6 +19,7 @@
        data-default-root="{{ default_target_root }}"
        data-status-channel="{{ status_channel_suffix }}"
        data-migrations-channel="{{ migrations_channel_suffix }}"
+       data-rq-engine-token="{{ rq_engine_token | default('', true) | e }}"
        hidden></div>
 
   <div class="wc-stack">
