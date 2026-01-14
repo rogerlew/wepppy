@@ -50,7 +50,7 @@ def _make_topo_files(topo_dir: Path, *, crs: str = "EPSG:32611") -> dict[str, Pa
     streams_data = netful_data.copy()
     chnjnt_data = np.zeros((3, 3), dtype=np.uint8)
 
-    dem_path = topo_dir / "hydro-enforced-dem.tif"
+    dem_path = topo_dir / "breached_filled_DEM_UTM.tif"
     flovec_path = topo_dir / "flovec.tif"
     netful_path = topo_dir / "netful.tif"
     streams_path = topo_dir / "streams.tif"
@@ -235,7 +235,7 @@ def test_culverts_runner_creates_runs_and_get_wd(
     _write_watersheds(watersheds_path)
 
     payload_metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
 
@@ -320,7 +320,7 @@ def test_culverts_runner_cleanup_relief_and_chnjnt(
     _write_watersheds(watersheds_path, point_ids=[1])
 
     payload_metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
 
@@ -365,7 +365,7 @@ def test_culverts_runner_rejects_path_traversal(tmp_path: Path) -> None:
     _write_watersheds(watersheds_path, point_ids=["../escape"])
 
     payload_metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
 
@@ -404,7 +404,7 @@ def test_culverts_runner_creates_vrt_cropped_run(
     _write_watersheds(watersheds_path, point_ids=[1])
 
     payload_metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
     model_parameters = {
@@ -478,7 +478,7 @@ def test_culverts_runner_stream_fallback_uses_streams_map(
     _write_raster(topo_dir / "chnjnt.streams.tif", netful_empty, transform, "EPSG:32611")
 
     payload_metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
         "streams": {"path": "topo/streams.tif"},
     }

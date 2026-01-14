@@ -4,7 +4,7 @@
 ## Guiding requirements (spec highlights)
 - Endpoint: `POST /rq-engine/api/culverts-wepp-batch/` (multipart, FastAPI rq-engine to avoid 30s Caddy timeout; extend timeout there as needed).
 - Storage: `/wc1/culverts/<culvert_batch_uuid>/` with per-culvert runs under `/runs/<Point_ID>/` and `_base/` seeded from `culvert.cfg`.
-- Payload ZIP: `topo/hydro-enforced-dem.tif` + `topo/streams.tif` + `culverts/culvert_points.geojson` + `culverts/watersheds.geojson` + `metadata.json` + `model-parameters.json`; all inputs in the same projected CRS (meters).
+- Payload ZIP: `topo/breached_filled_DEM_UTM.tif` + `topo/streams.tif` + `culverts/culvert_points.geojson` + `culverts/watersheds.geojson` + `metadata.json` + `model-parameters.json`; all inputs in the same projected CRS (meters).
 - GeoJSON validation: `culvert_points` must use Point geometries, `watersheds` must use Polygon/MultiPolygon geometries, and each GeoJSON includes a named CRS matching the rasters.
 - DEM handling: new `Ron.symlink_dem()` to symlink the canonical DEM into each run and populate `ron.map`.
 - Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
@@ -31,6 +31,7 @@
 - `culvert_points` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 - `watersheds` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 - `flow_accum_threshold` (int, optional; preserved for traceability when provided in metadata)
+- `hydro_enforcement_select` (string, optional; normalized from `hydroEnforcementSelect` in Culvert_web_app)
 
 Notes:
 - `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`).
@@ -592,6 +593,17 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - Deliverables: updated response helpers, job status payload extensions, updated spec/dev-package docs.
 - Risks: client-side parsing changes; backward compatibility for existing integrations.
 - Verification: regression tests for error responses and job status schema; manual checks against culvert payload uploads.
+
+## Phase 6b - Payload naming + ws_deln metadata alignment (READY FOR REVIEW)
+- Scope: rename the DEM payload path to `topo/breached_filled_DEM_UTM.tif` (no misleading "hydro-enforced" filename) and capture `hydroEnforcementSelect` as `hydro_enforcement_select` in `metadata.json`.
+- Dependencies: Culvert_web_app form values and `user_ws_deln_responses.txt` output; payload builder updates in the dev package.
+- Deliverables:
+  - Payload validator + runner use the new DEM filename.
+  - `build_payload.py` copies the DEM to `topo/breached_filled_DEM_UTM.tif` and emits `hydro_enforcement_select` in `metadata.json`.
+  - Docs/specs updated to reference the new DEM filename and metadata field.
+- Compatibility: this is a breaking rename as we move from dev to production; older payloads using `topo/hydro-enforced-dem.tif` are intentionally unsupported and must be reexported.
+- Risks: culvert docs drifting out of sync.
+- Verification: update culvert tests/fixtures to use `topo/breached_filled_DEM_UTM.tif`; validate a real payload from `/wc1/culvert_app_instance_dir/user_data/`.
 
 ## Cross-phase test strategy (minimum)
 **Implemented tests**

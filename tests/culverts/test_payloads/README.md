@@ -10,6 +10,9 @@ This directory holds small payload fixtures for culvert integration tests.
 | Santee | `santee_10m_no_hydroenforcement/payload.zip` | ~1.5 MB | 63 culverts, UTM zone 17 |
 | Hubbard Brook | `Hubbard_Brook_subset_11/payload.zip` | ~116 MB | 11 culverts (outlet seeding, outside watershed, junction mask) |
 
+## Source data location
+- Culvert_web_app projects used by `build_payload.py` live under `/wc1/culvert_app_instance_dir/user_data`.
+
 ### Hubbard Brook Edge Cases
 
 The Hubbard Brook payload contains 11 watersheds specifically selected for edge case testing:

@@ -89,7 +89,7 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     monkeypatch.setattr(culverts_runner_module, "get_wd", _fake_get_wd)
 
     metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
     model_parameters = {
@@ -193,7 +193,7 @@ def test_culvert_run_outside_watershed_validation(
     _write_culvert_points_custom(culvert_points_path, 1, (600000.0, 4200000.0))
 
     metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif", "resolution_m": 10.0},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif", "resolution_m": 10.0},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
     model_parameters = {"schema_version": "culvert-model-params-v1"}
@@ -237,7 +237,7 @@ def test_culvert_run_minimum_area_validation(
     _write_culvert_points(culvert_points_path, point_ids=[1])
 
     metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif", "resolution_m": 10.0},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif", "resolution_m": 10.0},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
     model_parameters = {"schema_version": "culvert-model-params-v1"}
@@ -297,7 +297,7 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
     monkeypatch.setattr(WatershedFeature, "build_raster_mask", _fake_build_raster_mask)
 
     metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif", "resolution_m": 10.0},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif", "resolution_m": 10.0},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
     model_parameters = {

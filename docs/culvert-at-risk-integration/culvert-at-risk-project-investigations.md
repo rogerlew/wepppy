@@ -23,6 +23,9 @@
 | santee_bayesian_rfa | **Not run** | N/A | N/A | N/A | Input only |
 | Santee_10m_no_hydroenforcement | Complete | **Present** (despite name) | Missing (polygon only) | Present | Shapefile (63 pts) |
 
+## Payload metadata note
+- `metadata.json` should include `hydro_enforcement_select` (normalized from `hydroEnforcementSelect` in `user_ws_deln_responses.txt`) for traceability only; no branching depends on it yet.
+
 ---
 
 ## Project 1: Hubbard Brook Experimental Forest
@@ -31,7 +34,7 @@
 
 | Payload Target | File Path | CRS | Resolution | Status |
 |----------------|-----------|-----|------------|--------|
-| `topo/hydro-enforced-dem.tif` | `WS_deln/breached_filled_DEM_UTM.tif` | EPSG:32619 (WGS84/UTM 19N) | 1m | Ready |
+| `topo/breached_filled_DEM_UTM.tif` | `WS_deln/breached_filled_DEM_UTM.tif` | EPSG:32619 (WGS84/UTM 19N) | 1m | Ready |
 | `topo/dem.tif` (fallback) | `WS_deln/DEM_UTM.tif` | EPSG:32619 | 1m | Ready |
 | `topo/watersheds.tif` | **MISSING** | - | - | Only `all_ws_polygon_UTM.shp` available |
 | `topo/streams.tif` | **MISSING** | - | - | No stream raster; only flow accumulation |
@@ -96,7 +99,7 @@ The outputs folder is **empty** - watershed delineation was never completed.
 
 | Payload Target | File Path | CRS | Resolution | Status |
 |----------------|-----------|-----|------------|--------|
-| `topo/hydro-enforced-dem.tif` | `WS_deln/breached_filled_DEM_UTM.tif` | EPSG:32617 (WGS84/UTM 17N) | ~9.3m | Ready |
+| `topo/breached_filled_DEM_UTM.tif` | `WS_deln/breached_filled_DEM_UTM.tif` | EPSG:32617 (WGS84/UTM 17N) | ~9.3m | Ready |
 | `topo/dem.tif` (original) | `WS_deln/DEM_UTM.tif` | EPSG:32617 | ~9.3m | Ready |
 | `topo/watersheds.tif` | **MISSING** | - | - | Only `all_ws_polygon_UTM.shp` available |
 | `topo/streams.tif` | `hydrogeo_vuln/main_stream_raster_UTM.tif` | EPSG:32617 | ~9.3m | Ready, aligned with DEM |
@@ -156,7 +159,7 @@ This project is recommended as the primary candidate for payload assembly.
 
 ```
 topo/
-├── hydro-enforced-dem.tif    ← breached_filled_DEM_UTM.tif (copy)
+├── breached_filled_DEM_UTM.tif    ← WS_deln/breached_filled_DEM_UTM.tif (copy)
 ├── streams.tif               ← main_stream_raster_UTM.tif (copy)
 └── watersheds.tif            ← GENERATE: rasterize all_ws_polygon_UTM.shp
 
@@ -185,7 +188,7 @@ ogr2ogr -f GeoJSON \
 
 ```
 topo/
-├── hydro-enforced-dem.tif    ← breached_filled_DEM_UTM.tif (copy)
+├── breached_filled_DEM_UTM.tif    ← WS_deln/breached_filled_DEM_UTM.tif (copy)
 ├── streams.tif               ← GENERATE: threshold bD8Flow_accum_UTM.tif
 └── watersheds.tif            ← GENERATE: rasterize all_ws_polygon_UTM.shp
 

@@ -56,13 +56,13 @@ The script expects these files in the Culvert_web_app project:
 
 | Source Path | Payload Path | Description |
 |-------------|--------------|-------------|
-| `outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif` | `topo/hydro-enforced-dem.tif` | Hydro-enforced DEM |
+| `outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif` | `topo/breached_filled_DEM_UTM.tif` | Breached/filled DEM |
 | `outputs/{project}/hydrogeo_vuln/main_stream_raster_UTM.tif` | `topo/streams.tif` | Stream network raster |
 | `outputs/{project}/WS_deln/pour_points_snapped_to_RSCS_UTM.shp` | `culverts/culvert_points.geojson` | Culvert locations (RSCS-snapped) |
 | `outputs/{project}/WS_deln/all_ws_polygon_UTM.shp` | `culverts/watersheds.geojson` | Watershed polygons |
 
 **Open Standards Preference:** wepp.cloud uses **GeoTIFF** (OGC) and **GeoJSON** (IETF RFC 7946)—open,
-non-proprietary formats. This ensures compatibility with domestic and international open data
+nonproprietary formats. This ensures compatibility with domestic and international open data
 requirements:
 
 | Organization | Scope | Relevant Standards |
@@ -79,7 +79,7 @@ Shapefiles are converted to GeoJSON during payload creation to maintain open for
 ```
 payload.zip
   topo/
-    hydro-enforced-dem.tif    # Copy of breached_filled_DEM_UTM.tif
+    breached_filled_DEM_UTM.tif    # Copy of WS_deln/breached_filled_DEM_UTM.tif
     streams.tif               # Copy of main_stream_raster_UTM.tif
   culverts/
     culvert_points.geojson    # Converted from Pour_Point_UTM.shp
@@ -134,7 +134,7 @@ cat santee_payload_contents/metadata.json
     "proj4": "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs"
   },
   "dem": {
-    "path": "topo/hydro-enforced-dem.tif",
+    "path": "topo/breached_filled_DEM_UTM.tif",
     "width": 1234,
     "height": 5678,
     "resolution_m": 9.33,
@@ -153,7 +153,8 @@ cat santee_payload_contents/metadata.json
     "path": "culverts/watersheds.geojson",
     "feature_count": 36,
     "point_id_field": "Point_ID"
-  }
+  },
+  "hydro_enforcement_select": "hydroenf_required"
 }
 ```
 

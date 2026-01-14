@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from .batch_routes import router as batch_router
 from .climate_routes import router as climate_router
@@ -29,6 +29,15 @@ from .wepp_routes import router as wepp_router
 from .ash_routes import router as ash_router
 
 app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0")
+
+
+@app.middleware("http")
+async def forwarded_prefix_middleware(request: Request, call_next):
+    prefix = request.headers.get("X-Forwarded-Prefix")
+    if prefix:
+        normalized = prefix.rstrip("/")
+        request.scope["root_path"] = normalized if normalized else ""
+    return await call_next(request)
 
 
 @app.get("/health")

@@ -53,7 +53,7 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
     topo_dir.mkdir(parents=True)
     culverts_dir.mkdir(parents=True)
 
-    (topo_dir / "hydro-enforced-dem.tif").write_bytes(b"dem")
+    (topo_dir / "breached_filled_DEM_UTM.tif").write_bytes(b"dem")
     (topo_dir / "streams.tif").write_bytes(b"streams")
 
     watersheds = {
@@ -74,7 +74,7 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
     )
 
     metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "streams": {"path": "topo/streams.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }
@@ -155,7 +155,7 @@ def test_culvert_batch_order_reduction_map_mode(
     topo_dir.mkdir(parents=True)
     culverts_dir.mkdir(parents=True)
 
-    (topo_dir / "hydro-enforced-dem.tif").write_bytes(b"dem")
+    (topo_dir / "breached_filled_DEM_UTM.tif").write_bytes(b"dem")
     (topo_dir / "streams.tif").write_bytes(b"streams")
 
     watersheds = {
@@ -176,7 +176,7 @@ def test_culvert_batch_order_reduction_map_mode(
     )
 
     metadata = {
-        "dem": {"path": "topo/hydro-enforced-dem.tif"},
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
         "streams": {"path": "topo/streams.tif"},
         "watersheds": {"path": "culverts/watersheds.geojson"},
     }

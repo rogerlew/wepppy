@@ -835,9 +835,11 @@ def generate_synopsis(projects: list[dict], output_file: Path) -> None:
         todo_items = []
 
         if hydro_info:
-            ready_items.append("`topo/hydro-enforced-dem.tif` - Ready (copy breached_filled_DEM_UTM.tif)")
+            ready_items.append(
+                "`topo/breached_filled_DEM_UTM.tif` - Ready (copy WS_deln/breached_filled_DEM_UTM.tif)"
+            )
         else:
-            todo_items.append("`topo/hydro-enforced-dem.tif` - Missing hydro-enforced DEM")
+            todo_items.append("`topo/breached_filled_DEM_UTM.tif` - Missing breached/filled DEM")
 
         if stream_raster:
             ready_items.append("`topo/streams.tif` - Ready (copy main_stream_raster_UTM.tif)")

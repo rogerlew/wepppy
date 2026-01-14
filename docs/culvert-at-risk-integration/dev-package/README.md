@@ -67,7 +67,7 @@ Send the token as `Authorization: Bearer <token>`.
 ### Required layout
 ```
 payload.zip
-  topo/hydro-enforced-dem.tif
+  topo/breached_filled_DEM_UTM.tif
   topo/streams.tif
   culverts/culvert_points.geojson
   culverts/watersheds.geojson
@@ -78,7 +78,7 @@ payload.zip
 ### Source mapping (Culvert_web_app outputs)
 | Culvert_web_app Output | Payload Path | Notes |
 |------------------------|--------------|-------|
-| `WS_deln/breached_filled_DEM_UTM.tif` | `topo/hydro-enforced-dem.tif` | Hydro-conditioned DEM |
+| `WS_deln/breached_filled_DEM_UTM.tif` | `topo/breached_filled_DEM_UTM.tif` | Opttionally/Hydro-conditioned DEM |
 | `hydrogeo_vuln/main_stream_raster_UTM.tif` | `topo/streams.tif` | Binary stream raster |
 | `WS_deln/all_ws_polygon_UTM.shp` | `culverts/watersheds.geojson` | Nested watershed polygons |
 | `WS_deln/pour_points_snapped_to_RSCS_UTM.shp` | `culverts/culvert_points.geojson` | Pour points snapped to road-stream crossings |
@@ -88,7 +88,7 @@ the original `Pour_Point_UTM.shp`. This ensures culvert points are on the stream
 improving outlet detection fidelity in wepp.cloud.
 
 **Open Standards Preference:** wepp.cloud uses **GeoTIFF** (OGC) and **GeoJSON** (IETF RFC 7946)—open,
-non-proprietary formats. This ensures compatibility with domestic and international open data
+nonproprietary formats. This ensures compatibility with domestic and international open data
 requirements:
 
 | Organization | Scope | Relevant Standards |
@@ -116,7 +116,7 @@ Shapefiles are converted to GeoJSON during payload creation to maintain open for
     "proj4": "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs"
   },
   "dem": {
-    "path": "topo/hydro-enforced-dem.tif",
+    "path": "topo/breached_filled_DEM_UTM.tif",
     "width": 833,
     "height": 789,
     "resolution_m": 9.33,
@@ -139,7 +139,8 @@ Shapefiles are converted to GeoJSON during payload creation to maintain open for
     "simplified": true,
     "simplification_tolerance_m": 1.0
   },
-  "flow_accum_threshold": 100
+  "flow_accum_threshold": 100,
+  "hydro_enforcement_select": "hydroenf_required"
 }
 ```
 
@@ -157,6 +158,7 @@ Shapefiles are converted to GeoJSON during payload creation to maintain open for
 | `culvert_points.*` | object | Yes | Culvert points metadata |
 | `watersheds.*` | object | Yes | Watersheds metadata |
 | `flow_accum_threshold` | integer | No | Flow accumulation threshold from Culvert_web_app |
+| `hydro_enforcement_select` | string | No | Hydro-enforcement select value from `user_ws_deln_responses.txt` |
 
 ### `model-parameters.json` schema
 
@@ -764,7 +766,7 @@ Submit a culvert batch payload.
   "success": false,
   "error": "Validation failed",
   "error_code": "VALIDATION_ERROR",
-  "error_detail": "Missing required file: topo/hydro-enforced-dem.tif"
+  "error_detail": "Missing required file: topo/breached_filled_DEM_UTM.tif"
 }
 ```
 

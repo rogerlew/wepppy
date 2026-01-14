@@ -336,6 +336,10 @@ different watershed than Culvert_web_app computed.
 
 ## Hydro-enforcement pipeline (ws_deln)
 - Trigger: `hydro_enforcement_select` from form key `hydroEnforcementSelect`.
+- `hydroEnforcementSelect` parameterization (form select + `user_ws_deln_responses.txt`):
+  - `hydroenf_select`: default placeholder; UI validation blocks submit until a real choice.
+  - `hydroenf_required`: enables road fill + breakline burn; `breached_filled_DEM_UTM.tif` is derived from the hydro-conditioned DEM.
+  - `hydroenf_not_required`: skips road fill/breakline burn; `breached_filled_DEM_UTM.tif` is derived from the raw `DEM_UTM.tif`.
 - Breaklines: `create_breaklines(...)` writes `user_output_breaklines_file_path` (`breaklines_UTM.shp`) using `user_output_road_file_path` + `user_output_pour_points_snapped_to_roads_file_path`.
 - Road fill: `adjust_dem_along_polyline(..., burn=False)` writes `user_output_Road_elevated_DEM_file_path` (`road_elevated_DEM_UTM.tif`) with `road_fill_dem_by_m` and `road_fill_Dem_buffer_m`.
 - Breakline burn: `adjust_dem_along_polyline(..., burn=True)` writes `user_output_breaklines_burned_DEM_file_path` (`breaklines_burned_DEM_UTM.tif`) with `breakline_burn_Dem_by_m` and `breakline_burn_dem_buffer_m`.

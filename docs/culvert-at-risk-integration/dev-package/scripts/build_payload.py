@@ -27,7 +27,7 @@ Usage:
         --base-project-runid lt_wepp_template
 
 Required files from Culvert_web_app project:
-    outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif  -> topo/hydro-enforced-dem.tif
+    outputs/{project}/WS_deln/breached_filled_DEM_UTM.tif  -> topo/breached_filled_DEM_UTM.tif
     outputs/{project}/hydrogeo_vuln/main_stream_raster_UTM.tif -> topo/streams.tif
     outputs/{project}/WS_deln/pour_points_snapped_to_RSCS_UTM.shp -> culverts/culvert_points.geojson
     outputs/{project}/WS_deln/all_ws_polygon_UTM.shp -> culverts/watersheds.geojson
@@ -36,7 +36,7 @@ Note: We use RSCS-snapped pour points (snapped to Road-Stream Crossing Sites) ra
 the original Pour_Point_UTM.shp. This ensures culvert points are on the stream network.
 
 Output payload.zip structure:
-    topo/hydro-enforced-dem.tif
+    topo/breached_filled_DEM_UTM.tif
     topo/streams.tif
     culverts/culvert_points.geojson
     culverts/watersheds.geojson
@@ -99,6 +99,29 @@ def extract_flow_accum_threshold(ws_deln_dir: Path) -> Optional[int]:
                         return int(float(value))
                     except ValueError:
                         pass
+    except (IOError, UnicodeDecodeError):
+        pass
+
+    return None
+
+
+def extract_hydro_enforcement_select(ws_deln_dir: Path) -> Optional[str]:
+    """
+    Extract hydroEnforcementSelect from user_ws_deln_responses.txt.
+
+    Returns the selected value (e.g., "hydroenf_required"), or None if not found.
+    """
+    response_file = ws_deln_dir / "user_ws_deln_responses.txt"
+    if not response_file.exists():
+        return None
+
+    try:
+        with open(response_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("hydroEnforcementSelect:"):
+                    value = line.split(":", 1)[1].strip()
+                    return value or None
     except (IOError, UnicodeDecodeError):
         pass
 
@@ -604,6 +627,12 @@ def build_payload(
     else:
         print("\nFlow accumulation threshold: not found (will omit from model-parameters.json)")
 
+    hydro_enforcement_select = extract_hydro_enforcement_select(ws_deln)
+    if hydro_enforcement_select:
+        print(f"Hydro enforcement select: {hydro_enforcement_select}")
+    else:
+        print("Hydro enforcement select: not found (will omit from metadata.json)")
+
     # Build payload in temp directory (used for dry-run validation too)
     print("\nBuilding payload...")
 
@@ -636,7 +665,9 @@ def build_payload(
         if dry_run:
             print("\n[DRY RUN] Validation complete. No files created.")
             print("\nPayload would contain:")
-            print(f"  topo/hydro-enforced-dem.tif ({dem_meta.get('size_bytes', 0) / 1024 / 1024:.1f} MB)")
+            print(
+                f"  topo/breached_filled_DEM_UTM.tif ({dem_meta.get('size_bytes', 0) / 1024 / 1024:.1f} MB)"
+            )
             print(f"  topo/streams.tif ({streams_meta.get('size_bytes', 0) / 1024 / 1024:.1f} MB)")
             print(f"  culverts/culvert_points.geojson (from {culverts_meta.get('feature_count', 0)} features)")
             print(f"  culverts/watersheds.geojson (from {watersheds_meta.get('feature_count', 0)} features)")
@@ -645,8 +676,8 @@ def build_payload(
             return
 
         # Copy rasters to topo directory
-        print("  Copying hydro-enforced DEM...")
-        shutil.copy2(source_files["hydro_dem"], tmp_path / "topo" / "hydro-enforced-dem.tif")
+        print("  Copying breached/filled DEM...")
+        shutil.copy2(source_files["hydro_dem"], tmp_path / "topo" / "breached_filled_DEM_UTM.tif")
 
         print("  Copying streams raster...")
         shutil.copy2(source_files["streams"], tmp_path / "topo" / "streams.tif")
@@ -666,7 +697,7 @@ def build_payload(
                 "proj4": dem_meta.get("proj4", ""),
             },
             "dem": {
-                "path": "topo/hydro-enforced-dem.tif",
+                "path": "topo/breached_filled_DEM_UTM.tif",
                 "width": dem_meta.get("width"),
                 "height": dem_meta.get("height"),
                 "resolution_m": dem_meta.get("pixel_size_x"),
@@ -691,6 +722,8 @@ def build_payload(
                 "note": "Simplified polygons from Culvert_web_app (1.0m tolerance)",
             },
         }
+        if hydro_enforcement_select:
+            metadata["hydro_enforcement_select"] = hydro_enforcement_select
 
         with open(tmp_path / "metadata.json", "w") as f:
             json.dump(metadata, f, indent=2)

@@ -29,9 +29,9 @@
 ## Storage layout and naming
 - Batch root: `/wc1/culverts/<culvert_batch_uuid>/`.
 - Extract payload to `/wc1/culverts/<culvert_batch_uuid>/`.
-- Canonical DEM path: `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`.
+- Canonical DEM path: `/wc1/culverts/<culvert_batch_uuid>/topo/breached_filled_DEM_UTM.tif`.
 - Each culvert is a canonical weppcloud project at `/wc1/culverts/<culvert_batch_uuid>/runs/<culvert_id>/`.
-  - DEM symlink/VRT: instead of fetching/copying the DEM for each culvert project, create a per-run DEM reference. When cropping is disabled, symlink `/dem/dem.tif` → `/topo/hydro-enforced-dem.tif`. When cropping is enabled, build `/dem/dem.vrt` using a shared crop window and persist crop metadata for downstream VRTs (see DEM symlink manager below).
+  - DEM symlink/VRT: instead of fetching/copying the DEM for each culvert project, create a per-run DEM reference. When cropping is disabled, symlink `/dem/dem.tif` → `/topo/breached_filled_DEM_UTM.tif`. When cropping is enabled, build `/dem/dem.vrt` using a shared crop window and persist crop metadata for downstream VRTs (see DEM symlink manager below).
 - `_base` project initialization: `culvert.cfg` specifies a `base_runid` key pointing to a template project that gets copied to `/wc1/culverts/<culvert_batch_uuid>/_base/`. This mirrors the BatchRunner pattern and stages shared parameters and defaults.
 
 ## End-to-end flow (proposed)
@@ -134,7 +134,7 @@ def symlink_dem(
     at a canonical location. Replaces the fetch_dem() flow.
     
     Args:
-        dem_path: Absolute path to the source DEM (e.g., hydro-enforced-dem.tif)
+        dem_path: Absolute path to the source DEM (e.g., breached_filled_DEM_UTM.tif)
         as_cropped_vrt: When True, build dem.vrt using crop_window instead of a symlink.
         crop_window: Pixel window (xoff, yoff, xsize, ysize) for VRT cropping; required when as_cropped_vrt=True.
     
@@ -154,7 +154,7 @@ This method:
 
 ## Payload ZIP contract (proposed)
 Top-level files/directories (required unless noted):
-- `topo/hydro-enforced-dem.tif` (GeoTIFF, UTM projection—see CRS rules below)
+- `topo/breached_filled_DEM_UTM.tif` (GeoTIFF, UTM projection—see CRS rules below)
 - `topo/streams.tif` (GeoTIFF, UTM projection; binary stream raster, same projection/extent/resolution as DEM)
 - `culverts/culvert_points.geojson` (same CRS as rasters—see CRS rules below)
 - `culverts/watersheds.geojson` (watershed polygons with `Point_ID` attribute linking to culvert points; watershed rasters are deleted by Culvert_web_app after polygon creation)
@@ -180,10 +180,12 @@ Note: avoid ESRI shapefiles and sidecars entirely.
 - `culvert_points` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 - `watersheds` (object, required: `path` string, `point_id_field` = `Point_ID`, `feature_count` int optional)
 - `flow_accum_threshold` (int, optional; preserved for traceability when provided in metadata)
+- `hydro_enforcement_select` (string, optional; normalized from `hydroEnforcementSelect`)
 
 Notes:
 - `culvert_batch_uuid` is minted by wepp.cloud and returned in the API response (not required in `metadata.json`).
 - Payload hash/size are computed by wepp.cloud at upload time and are not required in `metadata.json`.
+- `hydro_enforcement_select` is captured for traceability only; no branching behavior depends on it yet.
 
 ### `model-parameters.json` schema (v1)
 - `schema_version` (string, required; `culvert-model-params-v1`)
@@ -242,7 +244,7 @@ Example feature:
 
 ### Batch initialization
 Payload validation/extraction happens in the rq-engine API handler; batch topo generation and run orchestration happen inside the RQ job (`run_culvert_batch_rq`).
-- Place hydro-enforced DEM at `/wc1/culverts/<culvert_batch_uuid>/topo/hydro-enforced-dem.tif`.
+- Place breached/filled DEM at `/wc1/culverts/<culvert_batch_uuid>/topo/breached_filled_DEM_UTM.tif`.
 - Generate batch-level topo rasters from the shared DEM + streams:
   - `wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)` → `topo/flovec.tif`
   - Copy `topo/streams.tif` → `topo/netful.tif` (no pruning yet)

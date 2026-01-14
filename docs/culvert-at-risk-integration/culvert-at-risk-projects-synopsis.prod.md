@@ -61,6 +61,9 @@ readiness for wepp.cloud payload generation.
 - Culverts: Culvert points available
 - # Culverts: Feature count from culvert points file
 
+## Payload metadata note
+- `metadata.json` should include `hydro_enforcement_select` (normalized from `hydroEnforcementSelect` in `user_ws_deln_responses.txt`) for traceability only; no branching depends on it yet.
+
 ---
 
 ## Detailed Project Reports
@@ -98,7 +101,7 @@ readiness for wepp.cloud payload generation.
 #### Payload Readiness
 
 **Ready:**
-- `topo/hydro-enforced-dem.tif` - Ready (copy breached_filled_DEM_UTM.tif)
+- `topo/breached_filled_DEM_UTM.tif` - Ready (copy WS_deln/breached_filled_DEM_UTM.tif)
 - `topo/streams.tif` - Ready (copy main_stream_raster_UTM.tif)
 
 **Requires Processing:**

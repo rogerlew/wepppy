@@ -17,7 +17,7 @@ MAX_CULVERT_COUNT = 300
 REQUIRED_PAYLOAD_PATHS = (
     "metadata.json",
     "model-parameters.json",
-    "topo/hydro-enforced-dem.tif",
+    "topo/breached_filled_DEM_UTM.tif",
     "topo/streams.tif",
     "culverts/culvert_points.geojson",
     "culverts/watersheds.geojson",
@@ -84,7 +84,7 @@ def validate_payload_root(root: Path) -> list[ValidationIssue]:
     if model_params is not None:
         _validate_model_params(model_params, issues)
 
-    dem_path = payload_paths["topo/hydro-enforced-dem.tif"]
+    dem_path = payload_paths["topo/breached_filled_DEM_UTM.tif"]
     streams_path = payload_paths["topo/streams.tif"]
     _validate_rasters(dem_path, streams_path, metadata, issues)
 
@@ -169,7 +169,7 @@ def _validate_metadata(metadata: dict[str, Any], issues: list[ValidationIssue]) 
         )
 
     for section, relpath in (
-        ("dem", "topo/hydro-enforced-dem.tif"),
+        ("dem", "topo/breached_filled_DEM_UTM.tif"),
         ("streams", "topo/streams.tif"),
         ("culvert_points", "culverts/culvert_points.geojson"),
         ("watersheds", "culverts/watersheds.geojson"),
@@ -250,7 +250,7 @@ def _validate_rasters(
     metadata: dict[str, Any],
     issues: list[ValidationIssue],
 ) -> None:
-    dem_crs = _raster_crs(dem_path, issues, "topo/hydro-enforced-dem.tif")
+    dem_crs = _raster_crs(dem_path, issues, "topo/breached_filled_DEM_UTM.tif")
     streams_crs = _raster_crs(streams_path, issues, "topo/streams.tif")
 
     metadata_crs = _parse_crs(
@@ -265,7 +265,7 @@ def _validate_rasters(
             ValidationIssue(
                 code="crs_mismatch",
                 message="DEM CRS does not match metadata CRS.",
-                path="topo/hydro-enforced-dem.tif",
+                path="topo/breached_filled_DEM_UTM.tif",
             )
         )
 

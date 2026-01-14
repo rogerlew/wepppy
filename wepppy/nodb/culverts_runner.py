@@ -60,7 +60,7 @@ class CulvertsRunner(NoDbBase):
     filename = "culverts_runner.nodb"
 
     DEFAULT_RETENTION_DAYS = 7
-    DEFAULT_DEM_REL_PATH = "topo/hydro-enforced-dem.tif"
+    DEFAULT_DEM_REL_PATH = "topo/breached_filled_DEM_UTM.tif"
     DEFAULT_WATERSHEDS_REL_PATH = "culverts/watersheds.geojson"
     DEFAULT_CULVERT_POINTS_REL_PATH = "culverts/culvert_points.geojson"
     DEFAULT_FLOVEC_REL_PATH = "topo/flovec.tif"
