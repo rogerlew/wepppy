@@ -49,6 +49,7 @@ services:
   weppcloud:
     <<: *wepppy-service
     container_name: weppcloud
+    cpuset: "40-47"
     shm_size: "1g"
     ulimits:
       nofile:
@@ -89,6 +90,7 @@ services:
       dockerfile: services/status2/Dockerfile
     image: status2-dev
     container_name: weppcloud-status
+    cpuset: "40-47"
     environment:
       STATUS_REDIS_URL: redis://redis:6379/2
       STATUS_LISTEN_ADDR: 0.0.0.0:9002
@@ -136,6 +138,7 @@ services:
       dockerfile: services/preflight2/Dockerfile
     image: preflight2-dev
     container_name: weppcloud-preflight
+    cpuset: "40-47"
     environment:
       PREFLIGHT_REDIS_URL: redis://redis:6379/0
       PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
@@ -156,6 +159,7 @@ services:
         CAP_REF: ${CAP_REF:-main}
     image: wepppy-cap-dev
     container_name: wepppy-cap
+    cpuset: "40-47"
     environment:
       CAP_SITE_KEY: ${CAP_SITE_KEY}
       CAP_SECRET: ${CAP_SECRET}
@@ -170,6 +174,7 @@ services:
   profile-playback:
     <<: *wepppy-service
     container_name: profile-playback
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -197,6 +202,7 @@ services:
   browse:
     <<: *wepppy-service
     container_name: wepppy-browse
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 1000000
@@ -218,6 +224,7 @@ services:
   dtale:
     <<: *wepppy-service
     container_name: wepppy-dtale
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -243,6 +250,7 @@ services:
   elevationquery:
     <<: *wepppy-service
     container_name: wepppy-elevationquery
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -264,6 +272,7 @@ services:
   metquery:
     <<: *wepppy-service
     container_name: wepppy-metquery
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -283,6 +292,7 @@ services:
   wmesque:
     <<: *wepppy-service
     container_name: wepppy-wmesque
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -302,6 +312,7 @@ services:
   wmesque2:
     <<: *wepppy-service
     container_name: wepppy-wmesque2
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -323,6 +334,7 @@ services:
   query-engine:
     <<: *wepppy-service
     container_name: wepppy-query-engine
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -347,6 +359,7 @@ services:
   rq-engine:
     <<: *wepppy-service
     container_name: wepppy-rq-engine
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -368,6 +381,7 @@ services:
       dockerfile: weppcloudR/Dockerfile
     image: weppcloudr-dev
     container_name: weppcloudr
+    cpuset: "40-47"
     environment:
       PORT: "8050"
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
@@ -384,6 +398,7 @@ services:
   rq-worker:
     <<: *wepppy-service
     container_name: wepppy-rq-worker
+    cpuset: "0-39"
     shm_size: "8g"
     ulimits:
       nofile:
@@ -414,6 +429,7 @@ services:
   rq-worker-batch:
     <<: *wepppy-service
     container_name: wepppy-rq-worker-batch
+    cpuset: "0-39"
     shm_size: "8g"
     ulimits:
       nofile:
@@ -477,6 +493,7 @@ services:
   redis:
     image: redis:7.4.6
     container_name: wepppy-redis
+    cpuset: "40-47"
     command: ["redis-server", "--notify-keyspace-events", "Kh", "--save", "", "--appendonly", "no"]
     ports:
       - "6379:6379"
@@ -492,6 +509,7 @@ services:
   postgres:
     image: postgres:16
     container_name: wepppy-postgres
+    cpuset: "40-47"
     stop_grace_period: 120s
     environment:
       POSTGRES_DB: wepppy
@@ -591,6 +609,7 @@ services:
       context: ../..
       dockerfile: wepppy/docker/Dockerfile.rq-dashboard
     container_name: wepppy-rq-dashboard
+    cpuset: "40-47"
     environment:
       RQ_DASHBOARD_REDIS_URL: redis://redis:6379/9
       RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
@@ -620,6 +639,7 @@ services:
   caddy:
     image: caddy:2
     container_name: wepppy-caddy
+    cpuset: "40-47"
     ports:
       - "8080:8080"
     volumes:

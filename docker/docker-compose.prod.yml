@@ -55,6 +55,7 @@ x-wepppy-service: &wepppy-service
 services:
   weppcloud:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 1000000
@@ -92,6 +93,7 @@ services:
 
   browse:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 1000000
@@ -115,6 +117,7 @@ services:
 
   dtale:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -136,6 +139,7 @@ services:
 
   profile-playback:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -163,6 +167,7 @@ services:
 
   elevationquery:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -183,6 +188,7 @@ services:
 
   metquery:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -201,6 +207,7 @@ services:
 
   wmesque:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -219,6 +226,7 @@ services:
 
   wmesque2:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -239,6 +247,7 @@ services:
 
   query-engine:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -261,6 +270,7 @@ services:
 
   rq-engine:
     <<: *wepppy-service
+    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -284,6 +294,7 @@ services:
       dockerfile: weppcloudR/Dockerfile
     restart: unless-stopped
     container_name: weppcloudr
+    cpuset: "40-47"
     environment:
       PORT: ${WEPPCLOUDR_PORT:-8050}
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
@@ -309,6 +320,7 @@ services:
 
   rq-worker:
     <<: *wepppy-service
+    cpuset: "0-39"
     ulimits:
       nofile:
         soft: 1000000
@@ -339,6 +351,7 @@ services:
 
   rq-worker-batch:
     <<: *wepppy-service
+    cpuset: "0-39"
     ulimits:
       nofile:
         soft: 1000000
@@ -375,6 +388,7 @@ services:
       context: ..
       dockerfile: services/status2/Dockerfile
     restart: unless-stopped
+    cpuset: "40-47"
     env_file:
       - ${WEPPPY_ENV_FILE:-.env}
     environment:
@@ -396,6 +410,7 @@ services:
       context: ..
       dockerfile: services/preflight2/Dockerfile
     restart: unless-stopped
+    cpuset: "40-47"
     env_file:
       - ${WEPPPY_ENV_FILE:-.env}
     environment:
@@ -420,6 +435,7 @@ services:
         CAP_REPO: ${CAP_REPO:-https://github.com/tiagozip/cap}
         CAP_REF: ${CAP_REF:-main}
     restart: unless-stopped
+    cpuset: "40-47"
     env_file:
       - ${WEPPPY_ENV_FILE:-.env}
     environment:
@@ -438,6 +454,7 @@ services:
   caddy:
     image: caddy:2
     restart: unless-stopped
+    cpuset: "40-47"
     ports:
       - "${CADDY_PORT:-8080}:8080"
     volumes:
@@ -477,6 +494,7 @@ services:
   redis:
     image: redis:7.4.6
     restart: unless-stopped
+    cpuset: "40-47"
     command: ["redis-server", "--notify-keyspace-events", "Kh"]
     volumes:
       - redis-data:/data
@@ -494,6 +512,7 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
+    cpuset: "40-47"
     environment:
       POSTGRES_DB: wepppy
       POSTGRES_USER: wepppy
