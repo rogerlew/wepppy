@@ -120,6 +120,14 @@
       margin: 0;
     }
 
+    .wc-job-collapse .wc-collapse__content {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wc-job-collapse .wc-collapse__content > * {
+      min-width: 0;
+    }
+
     .wc-job-children {
       display: grid;
       gap: var(--wc-space-md);
@@ -130,6 +138,10 @@
 
     .wc-job-table code {
       font-size: var(--wc-font-size-sm);
+    }
+
+    .wc-job-table {
+      min-width: 100%;
     }
 
     .job-dashboard__summary-row {
