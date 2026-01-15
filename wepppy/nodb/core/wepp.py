@@ -2210,7 +2210,7 @@ class Wepp(NoDbBase):
             lines = f.readlines()
             version = float(lines[0].strip())
 
-            if version >= 2025.0:
+            if version >= 2023.1:
                 with open(_join(runs_dir, 'pw0.slp'), 'w') as f:
                     f.write('99.1\n')
                     n_chns = int(lines[1].strip())
