@@ -110,6 +110,15 @@
         return [value];
     }
 
+    // Get the value to submit for a field, using the canonical (base unit) value
+    // if available from the unitizer, otherwise using the displayed value.
+    function getFieldSubmitValue(field) {
+        if (field.dataset && field.dataset.unitizerCanonicalValue !== undefined && field.dataset.unitizerCanonicalValue !== "") {
+            return field.dataset.unitizerCanonicalValue;
+        }
+        return field.value;
+    }
+
     function serializeFormToParams(form, includeDisabled) {
         var params = new URLSearchParams();
         toElementArray(form).forEach(function (field) {
@@ -133,7 +142,7 @@
                 }
                 return;
             }
-            params.append(field.name, field.value);
+            params.append(field.name, getFieldSubmitValue(field));
         });
         return params;
     }
@@ -182,7 +191,7 @@
                 }
                 return;
             }
-            appendValue(result, field.name, field.value);
+            appendValue(result, field.name, getFieldSubmitValue(field));
         });
 
         Object.keys(checkboxGroups).forEach(function (name) {
@@ -278,6 +287,24 @@
         return serializeForm(form, { format: "json" });
     }
 
+    // Set field value and reset unitizer state to prevent serialization from
+    // using outdated data and to ensure correct unit interpretation after programmatic updates.
+    function setFieldValue(field, value) {
+        field.value = value === undefined || value === null ? "" : value;
+        if (field.dataset) {
+            // Clear stale canonical value so serialization falls back to the new displayed value.
+            if (field.dataset.unitizerCanonicalValue !== undefined) {
+                field.dataset.unitizerCanonicalValue = "";
+            }
+            // Reset active unit to canonical so unitizer interprets the new value correctly.
+            // Without this, updateNumericFields would treat the value as being in the old
+            // active unit (e.g., lb/ft³) and convert incorrectly.
+            if (field.dataset.unitizerActiveUnit !== undefined && field.dataset.unitizerUnit) {
+                field.dataset.unitizerActiveUnit = field.dataset.unitizerUnit;
+            }
+        }
+    }
+
     // Apply an object's values back onto the matching form controls (radios, checkboxes, selects, text).
     function applyValues(form, values) {
         if (!values || typeof values !== "object") {
@@ -314,7 +341,7 @@
                         });
                         return;
                     }
-                    field.value = value;
+                    setFieldValue(field, value);
                 });
                 return;
             }
@@ -346,7 +373,7 @@
                 });
                 return;
             }
-            singleField.value = value === undefined || value === null ? "" : value;
+            setFieldValue(singleField, value);
         });
     }
 
