@@ -2237,7 +2237,7 @@ class Wepp(NoDbBase):
                 # this version produces suspiciously small channel widths
                 raise ValueError(
                     f'Unsupported channel slope file version {version} in {src_fn}. '
-                    'Please update the PERIDOT TO compatible version.'
+                    'Please update the PERIDOT to compatible version.'
                 )
             else:
                 dst_fn = _join(runs_dir, 'pw0.slp')
