@@ -457,6 +457,16 @@ class Wepp(NoDbBase):
     __name__ = 'Wepp'
 
     filename = 'wepp.nodb'
+
+    _SNOW_NEWSNW_BOUNDS = (25.0, 500.0)
+    _SNOW_SSD_BOUNDS = (75.0, 750.0)
+    _TCR_TAUMIN_BOUNDS = (5.0, 400.0)
+    _TCR_TAUMAX_BOUNDS = (5.0, 400.0)
+
+    _SNOW_NEWSNW_DEFAULT = 100.0
+    _SNOW_SSD_DEFAULT = 250.0
+    _TCR_TAUMIN_DEFAULT = 35.0
+    _TCR_TAUMAX_DEFAULT = 70.0
     
     def __init__(self, wd: str, cfg_fn: str, run_group: Optional[str] = None, group_name: Optional[str] = None) -> None:
         super(Wepp, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
@@ -487,6 +497,8 @@ class Wepp(NoDbBase):
                 taumax=self.config_get_float('tcr_opts', 'taumax'),
                 kch=self.config_get_float('tcr_opts', 'kch'),
                 nch=self.config_get_float('tcr_opts', 'nch'))
+
+            self._guard_unitized_bounds()
            
             self.channel_critical_shear_map = self.config_get_path('wepp', 'channel_critical_shear_map')
 
@@ -807,6 +819,80 @@ class Wepp(NoDbBase):
                 baseflow=baseflow,
                 sediment=sediment)
 
+    def _resolve_unitized_default(self, section: str, option: str, fallback: float,
+                                  min_value: float, max_value: float) -> float:
+        value = self.config_get_float(section, option, fallback)
+        if not isfloat(value):
+            return fallback
+        value_float = float(value)
+        if isnan(value_float) or isinf(value_float) or value_float < min_value or value_float > max_value:
+            return fallback
+        return value_float
+
+    def _guard_unitized_value(self, section: str, option: str, value: Optional[float],
+                              min_value: float, max_value: float, fallback: float) -> float:
+        default_value = self._resolve_unitized_default(section, option, fallback, min_value, max_value)
+        if not isfloat(value):
+            self.logger.warning(
+                'Resetting %s.%s from %s to %s (bounds %s..%s)',
+                section,
+                option,
+                value,
+                default_value,
+                min_value,
+                max_value,
+            )
+            return default_value
+        value_float = float(value)
+        if isnan(value_float) or isinf(value_float) or value_float < min_value or value_float > max_value:
+            self.logger.warning(
+                'Resetting %s.%s from %s to %s (bounds %s..%s)',
+                section,
+                option,
+                value,
+                default_value,
+                min_value,
+                max_value,
+            )
+            return default_value
+        return value_float
+
+    def _guard_unitized_bounds(self) -> None:
+        if hasattr(self, 'snow_opts'):
+            self.snow_opts.newsnw = self._guard_unitized_value(
+                'snow_opts',
+                'newsnw',
+                self.snow_opts.newsnw,
+                self._SNOW_NEWSNW_BOUNDS[0],
+                self._SNOW_NEWSNW_BOUNDS[1],
+                self._SNOW_NEWSNW_DEFAULT,
+            )
+            self.snow_opts.ssd = self._guard_unitized_value(
+                'snow_opts',
+                'ssd',
+                self.snow_opts.ssd,
+                self._SNOW_SSD_BOUNDS[0],
+                self._SNOW_SSD_BOUNDS[1],
+                self._SNOW_SSD_DEFAULT,
+            )
+        if hasattr(self, 'tcr_opts'):
+            self.tcr_opts.taumin = self._guard_unitized_value(
+                'tcr_opts',
+                'taumin',
+                self.tcr_opts.taumin,
+                self._TCR_TAUMIN_BOUNDS[0],
+                self._TCR_TAUMIN_BOUNDS[1],
+                self._TCR_TAUMIN_DEFAULT,
+            )
+            self.tcr_opts.taumax = self._guard_unitized_value(
+                'tcr_opts',
+                'taumax',
+                self.tcr_opts.taumax,
+                self._TCR_TAUMAX_BOUNDS[0],
+                self._TCR_TAUMAX_BOUNDS[1],
+                self._TCR_TAUMAX_DEFAULT,
+            )
+
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
             self.baseflow_opts.parse_inputs(kwds)
@@ -816,6 +902,8 @@ class Wepp(NoDbBase):
 
             if hasattr(self, 'snow_opts'):
                 self.snow_opts.parse_inputs(kwds)
+
+            self._guard_unitized_bounds()
 
             _channel_critical_shear = kwds.get('channel_critical_shear', None)
             if isfloat(_channel_critical_shear):
