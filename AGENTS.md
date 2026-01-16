@@ -15,7 +15,7 @@
 
 ## Repository Overview
 
-wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling. The architechture as a whole strives for openness, flexibility, and observability.
+wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling. The architecture as a whole strives for openness, flexibility, and observability.
 
 ## Core Architecture Patterns
 
@@ -32,7 +32,7 @@ Instead of a monolithic database, run state is serialized to disk, memoized in R
 - **DB 0**: Run metadata and distributed locks
 - **DB 2**: Status message pub/sub streaming
 - **DB 9**: Redis Queue (RQ) job management
-- **DB 11**: Flask session storage
+- **DB 11**: WD cache + Flask session storage
 - **DB 13**: NoDb JSON caching (72-hour TTL)
 - **DB 14**: README editor locks
 - **DB 15**: Log level configuration
@@ -75,25 +75,26 @@ NoDb subclass logger
 
 #### Webservices
 Run on production server to provide access to large geospatial datasets
-- **wepppy/microservices/elevationquery** - run-scoped elevation service powered by Starlette
+- **wepppy/microservices/elevationquery.py** - run-scoped elevation service powered by Starlette
   - Mirrors legacy payloads and surfaces descriptive JSON errors via custom exception handlers for transparency.
-- **wepppy/webservices/metquery** - queries monthly data
-- **wepppy/webservices/wmesque** - raster server (deprecated)
-- **wepppy/webservices/wmesque2** - raster server (fastapi)
-- **wepppy/webservices/dtale.py** - WEPP run-aware D-Tale wrapper for interactive tabular exploration
+- **wepppy/webservices/elevationquery.py** - legacy Flask elevation query service (NED tiles)
+- **wepppy/webservices/metquery.py** - queries monthly data
+- **wepppy/webservices/wmesque.py** - raster server (deprecated)
+- **wepppy/webservices/wmesque2.py** - raster server (FastAPI)
+- **wepppy/webservices/dtale/** - WEPP run-aware D-Tale wrapper for interactive tabular exploration
 
 ### Go Microservices
 - **services/preflight2** - Preflight checklist WebSocket streamer
 - **services/status2** - Log/status WebSocket proxy with heartbeat
 
 ### Rust Integration
-- **/workdir/wepppyo3/wepppyo3** - Python bindings for climate interpolation, raster lookups, soil loss grids
-- **/workdir/peridot/peridot** - Watershed abstraction engine
+- **/workdir/wepppyo3** - Python bindings for climate interpolation, raster lookups, soil loss grids
+- **/workdir/peridot** - Watershed abstraction engine
 - **/workdir/weppcloud-wbt** - WhiteboxTools Hillslope delineation, FindOutlet, other tools
 
 ### Fixed FORTRAN 77
-- **/workdir/wepp-forest** -  WEPP Watershed with baseflow model
-- **/workdir/wepp-forest-revegetation** -  WEPP Watershed with revegetation modeling and baseflow (Beta)
+- **/workdir/wepp-forest** - WEPP Watershed with baseflow model
+- **/workdir/wepp-forest-revegetation** - WEPP Watershed with revegetation modeling and baseflow (beta; optional checkout)
 
 ### Other Stack Components
 - **/workdir/wepppy2** - Contains WEPP Runner (python wrapper) and WEPP binaries (separate to support FSWEPP2)
@@ -108,7 +109,11 @@ Every NoDb controller module declares an explicit `__all__` that captures the pu
 
 **When adding new public functions or classes, update the module's `__all__` immediately.**
 
-Package aggregators (`wepppy.nodb.core`, `wepppy.nodb.mods`) build their own `__all__` from per-module lists, keeping the top-level namespace tidy while preserving ergonomic imports like:
+Package aggregators keep the namespace tidy but behave differently:
+- `wepppy.nodb.core` imports and lists symbols explicitly in `__all__`.
+- `wepppy.nodb.mods` lazily resolves attributes via `__getattr__`/`__dir__`; its `__all__` only includes `MODS_DIR`/`EXTENDED_MODS_DATA`.
+
+Ergonomic imports still work as expected:
 ```python
 from wepppy.nodb.core import Wepp
 from wepppy.nodb.mods import Disturbed
@@ -172,7 +177,7 @@ wctl run-stubgen                      # sync stubs/wepppy/
 ```
 
 ### American English Normalization
-- When you modify files, run the `uk2us` tool to normalize any British spellings (for example, `colour` → `color`).
+- When you modify files, run the `uk2us` tool to normalize any British spellings (for example, prefer `color` in prose and comments).
   - **Always preview changes first** using diff to avoid breaking code blocks or making nonsensical substitutions:
     ```bash
     diff -u path/to/file.py <(uk2us path/to/file.py)
@@ -342,10 +347,12 @@ wepppy/
 │   ├── weppcloud/           # Flask web application
 │   │   ├── app.py           # Application factory
 │   │   ├── controllers_js/  # Front-end modules
-│   │   ├── controllers_js/  # Front-end modules
 │   │   ├── routes/          # Flask blueprints
 │   │   ├── templates/       # Jinja templates
-│   │   └── webservices/     # fastapi, flask services
+│   │   ├── static/          # Built static assets
+│   │   └── static-src/      # Front-end source assets
+│   ├── microservices/       # Starlette/Flask microservices
+│   ├── webservices/         # Dataset/query services (metquery, wmesque, dtale)
 │   ├── rq/                  # Background job modules
 │   ├── climates/            # Climate data integrations
 │   ├── soils/               # Soil databases
@@ -417,7 +424,7 @@ Logs automatically flow to:
 ### NoDb Testing Patterns
 1. Use `tmp_path`/`tmpdir` for isolated working directories.
 2. Wrap mutations with `with controller.locked():` and call `dump_and_unlock()` before inspecting persisted state.
-3. Verify singleton behaviour by comparing identity of two `getInstance` calls.
+3. Verify singleton behavior by comparing identity of two `getInstance` calls.
 4. Reset class-level caches between tests (clear `_instances` dicts) to prevent bleed-over.
 
 Example:
@@ -506,7 +513,7 @@ Consistent pytest markers keep the suite selectable (fast unit loops vs. full in
 
 - **Placement.** Decorators belong directly above the test function or on a class definition (applies to every method). For entire modules, `pytestmark = pytest.mark.slow` is acceptable when every test shares the same requirement.
 
-- **Combined markers.** It is acceptable to combine (e.g., `@pytest.mark.integration` + `@pytest.mark.slow`) when both attributes apply. Avoid contradictory combinations such as `unit` + `slow`—re-evaluate whether the test should be refactored.
+- **Combined markers.** It is acceptable to combine (e.g., `@pytest.mark.integration` + `@pytest.mark.slow`) when both attributes apply. Avoid contradictory combinations such as `unit` + `slow`—reconsider whether the test should be refactored.
 
 - **Review existing markers before adding new ones.** Keep the marker vocabulary tight; if a new category is required, document it in `tests/AGENTS.md` and announce it in PR notes.
 
@@ -542,7 +549,7 @@ Until the automated marker checker lands (`wctl check-test-markers` from the too
 
 Consult `docs/ui-docs/ui-style-guide.md` for shared layout patterns (summary panes, panel spacing, typography tokens) and `docs/ui-docs/README.md` for the full index of UI documentation. Control-specific behavior should either live with the control or under `docs/ui-docs/control-ui-styling/` if a standalone note is needed.
 
-**Theme System:** WEPPcloud supports VS Code theme integration with 11 production themes. See `docs/ui-docs/theme-system.md` for adding themes, configurable mapping, and WCAG AA compliance. Controls remain theme-agnostic via CSS variables.
+**Theme System:** WEPPcloud supports VS Code theme integration with 13 generated themes plus the default base palette. See `docs/ui-docs/theme-system.md` for adding themes, configurable mapping, and WCAG AA compliance. Controls remain theme-agnostic via CSS variables.
 
 ### Controller Bundling
 Controllers live in `wepppy/weppcloud/controllers_js/` and export singletons:
@@ -571,7 +578,7 @@ wctl exec weppcloud bash -lc "python wepppy/weppcloud/controllers_js/build_contr
 
 After creating or significantly editing a Pure control template, run the render smoke test to catch Jinja macro issues early:
 ```bash
-wctl run "pytest tests/weppcloud/routes/test_pure_controls_render.py"
+wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py
 ```
 The fixture stubs required globals so most templates render without additional setup.
 
@@ -615,13 +622,13 @@ http.get("resources/subcatchments.json")
 **Verification Pattern:**
 ```bash
 # Find unwrapped run-scoped endpoints (potential bugs)
-grep -rh '"rq/api/\|"tasks/\|"query/\|"resources/' wepppy/weppcloud/controllers_js/*.js | grep -v url_for_run
+rg -n '"(rq/api/|tasks/|query/|resources/)' wepppy/weppcloud/controllers_js/*.js | rg -v url_for_run
 
-# After controller changes, restart to rebuild bundle
-wctl restart weppcloud
+# After controller changes, rebuild the bundle (or restart to trigger entrypoint rebuild)
+wctl exec weppcloud bash -lc "python wepppy/weppcloud/controllers_js/build_controllers_js.py"
 
-# Verify rebuild succeeded
-docker logs weppcloud | grep "Building controllers"
+# Verify rebuild succeeded (bundle header includes a UTC timestamp)
+rg -n "Generated via build_controllers_js.py" wepppy/weppcloud/static/js/controllers-gl.js
 ```
 
 **Bulk Fix Pattern (for migrations):**
@@ -647,7 +654,7 @@ See `wepppy/weppcloud/controllers_js/README.md` for comprehensive controller arc
 1. Create package in `wepppy/nodb/mods/<mod_name>/`
 2. Implement NoDb controller subclass
 3. Define `__all__` with public exports
-4. Add to `wepppy/nodb/mods/__init__.py` aggregator
+4. No explicit aggregator update needed; `wepppy.nodb.mods` discovers modules automatically (use `_import_mod_module` for overrides)
 5. Document in mod's README
 6. Add integration tests
 
@@ -742,7 +749,7 @@ See `docs/work-packages/README.md` for full guidelines and `docs/work-packages/2
 ### Container Security
 - Production image runs as non-root `wepp` user
 - Keep base images updated
-- Scan images with `docker scan` or Trivia
+- Scan images with `docker scan` or Trivy
 - Minimize secrets in environment variables
 
 ## Code Style and Conventions
@@ -817,8 +824,8 @@ Rust-based geospatial tools via `wepppy/topo/wbt/`:
 ### Peridot (Rust Watershed Abstraction)
 Python calls Rust binary for watershed abstraction:
 ```python
-from wepppy.topo.peridot.runner import run_peridot
-run_peridot(wd, config)
+from wepppy.topo.peridot.peridot_runner import run_peridot_abstract_watershed
+run_peridot_abstract_watershed(wd)
 ```
 
 ## Further Reading
@@ -838,7 +845,8 @@ run_peridot(wd, config)
 - `wepppy/nodb/core/watershed.py` - Watershed abstraction
 - `wepppy/weppcloud/app.py` - Flask application factory
 - `wepppy/rq/project_rq.py` - Project orchestration
-- `services/status2/cmd/preflight2/main.go` - Go WebSocket service
+- `services/preflight2/cmd/preflight2/main.go` - Preflight WebSocket service
+- `services/status2/cmd/status2/main.go` - Status WebSocket service
 
 ### External Projects
 - [wepppyo3](https://github.com/wepp-in-the-woods/wepppyo3) - Rust Python bindings
