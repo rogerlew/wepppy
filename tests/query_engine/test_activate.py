@@ -10,6 +10,8 @@ import pytest
 
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
 
+pytestmark = pytest.mark.unit
+
 
 def _write_parquet(path: Path, table: pa.Table) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -20,6 +22,23 @@ def test_activate_query_engine_readonly(tmp_path: Path) -> None:
     (tmp_path / "READONLY").write_text("locked", encoding="utf-8")
     with pytest.raises(PermissionError):
         activate_query_engine(tmp_path, run_interchange=False)
+
+
+def test_activate_query_engine_readonly_reuses_catalog(tmp_path: Path) -> None:
+    table = pa.table({"id": [1], "value": ["a"]})
+    rel = "data/sample.parquet"
+    file_path = tmp_path / rel
+    _write_parquet(file_path, table)
+
+    activate_query_engine(tmp_path, run_interchange=False)
+    catalog_path = tmp_path / "_query_engine" / "catalog.json"
+    initial_mtime = catalog_path.stat().st_mtime
+
+    (tmp_path / "READONLY").write_text("locked", encoding="utf-8")
+    catalog = activate_query_engine(tmp_path, run_interchange=False)
+
+    assert catalog_path.stat().st_mtime == initial_mtime
+    assert any(entry["path"] == rel for entry in catalog["files"])
 
 
 def test_update_catalog_entry(tmp_path: Path) -> None:

@@ -53,18 +53,23 @@ def activate_query_engine(
     if not base.exists():
         raise FileNotFoundError(base)
 
-    _raise_if_readonly(base)
-
     query_engine_dir = base / "_query_engine"
     catalog_path = query_engine_dir / "catalog.json"
+    readonly = (base / READONLY_SENTINEL).exists()
 
     if not force_refresh and catalog_path.exists():
         try:
-            cache_dir = query_engine_dir / "cache"
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            return json.loads(catalog_path.read_text(encoding="utf-8"))
+            catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
         except Exception:  # pragma: no cover - fall back to full rebuild
             LOGGER.warning("Existing catalog unreadable for %s; rebuilding", base, exc_info=True)
+        else:
+            if not readonly:
+                cache_dir = query_engine_dir / "cache"
+                cache_dir.mkdir(parents=True, exist_ok=True)
+            return catalog
+
+    if readonly:
+        _raise_if_readonly(base)
 
     query_engine_dir.mkdir(exist_ok=True)
     cache_dir = query_engine_dir / "cache"
