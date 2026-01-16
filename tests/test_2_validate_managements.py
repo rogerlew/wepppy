@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+import pytest
+
 from wepppy.wepp.management import (
     _management_dir,
     get_disturbed_classes,
@@ -10,6 +12,7 @@ from wepppy.wepp.management import (
     ManagementSummary,
 )
 
+pytestmark = pytest.mark.unit
 
 EXPECTED_DISTURBED_CLASSES = {
     None,
@@ -79,6 +82,17 @@ class TestLoadMap(unittest.TestCase):
                 data = load_map(map_name)
                 self.assertIn(key, data)
                 self.assertEqual(data[key]["Description"], expected_desc)
+
+    def test_ca_disturbed_severity_entries_match_disturbed_map(self):
+        ca_disturbed = load_map("ca-disturbed")
+        disturbed = load_map("disturbed")
+        severity_keys = ("105", "106", "118", "119", "120", "121", "129", "130", "131")
+        for key in severity_keys:
+            with self.subTest(key=key):
+                self.assertIn(key, ca_disturbed)
+                self.assertEqual(ca_disturbed[key]["DisturbedClass"], disturbed[key]["DisturbedClass"])
+                self.assertEqual(ca_disturbed[key]["Description"], disturbed[key]["Description"])
+                self.assertEqual(ca_disturbed[key]["ManagementFile"], disturbed[key]["ManagementFile"])
 
     def test_unknown_map_falls_back_to_default(self):
         default = load_map()
