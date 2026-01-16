@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import NamedTuple
 
 import yaml as pyyaml
+import yaml
+import pytest
+
+pytestmark = pytest.mark.integration
 
 if "deprecated" not in sys.modules:
     deprecated_stub = types.ModuleType("deprecated")
@@ -30,114 +34,122 @@ WEPP_SOIL_UTIL_PATH = (
 )
 
 
-def _ensure_package(name: str, path: Path):
+def _ensure_package(name: str, path: Path) -> bool:
     if name in sys.modules:
-        return
+        return False
     module = types.ModuleType(name)
     module.__path__ = [str(path)]
     sys.modules[name] = module
+    return True
 
 
-_ensure_package("wepppy", REPO_ROOT / "wepppy")
-_ensure_package("wepppy.wepp", REPO_ROOT / "wepppy" / "wepp")
-_ensure_package("wepppy.wepp.soils", REPO_ROOT / "wepppy" / "wepp" / "soils")
-_ensure_package(
-    "wepppy.wepp.soils.utils", REPO_ROOT / "wepppy" / "wepp" / "soils" / "utils"
-)
+def _build_all_your_base_stub() -> types.ModuleType:
+    all_your_base_stub = types.ModuleType("wepppy.all_your_base")
+
+    def _stub_try_parse(value):
+        if isinstance(value, (int, float)):
+            return value
+        try:
+            as_float = float(value)
+        except Exception:
+            return value
+        try:
+            as_int = int(value)
+            return as_int
+        except Exception:
+            return as_float
+
+    def _stub_try_parse_float(value, default=0.0):
+        try:
+            return float(value)
+        except Exception:
+            return default
+
+    def _stub_isfloat(value):
+        try:
+            float(value)
+            return True
+        except Exception:
+            return False
+
+    def _stub_isint(value):
+        try:
+            return float(int(value)) == float(value)
+        except Exception:
+            return False
+
+    def _stub_isnan(value):
+        try:
+            return math.isnan(float(value))
+        except Exception:
+            return False
+
+    def _stub_isinf(value):
+        try:
+            return math.isinf(float(value))
+        except Exception:
+            return False
+
+    all_your_base_stub.try_parse = _stub_try_parse
+    all_your_base_stub.try_parse_float = _stub_try_parse_float
+    all_your_base_stub.isfloat = _stub_isfloat
+    all_your_base_stub.isint = _stub_isint
+    all_your_base_stub.isnan = _stub_isnan
+    all_your_base_stub.isinf = _stub_isinf
+    all_your_base_stub.NCPU = 1
+
+    class _StubRGBA(NamedTuple):
+        red: int
+        green: int
+        blue: int
+        alpha: int = 255
+
+        def tohex(self) -> str:
+            return "#" + "".join(f"{component:02X}" for component in self)
+
+    all_your_base_stub.RGBA = _StubRGBA
+    return all_your_base_stub
 
 
-all_your_base_stub = types.ModuleType("wepppy.all_your_base")
+@pytest.fixture(scope="module")
+def wepp_soil_util_module():
+    created_packages = []
+    if _ensure_package("wepppy", REPO_ROOT / "wepppy"):
+        created_packages.append("wepppy")
+    if _ensure_package("wepppy.wepp", REPO_ROOT / "wepppy" / "wepp"):
+        created_packages.append("wepppy.wepp")
+    if _ensure_package("wepppy.wepp.soils", REPO_ROOT / "wepppy" / "wepp" / "soils"):
+        created_packages.append("wepppy.wepp.soils")
+    if _ensure_package(
+        "wepppy.wepp.soils.utils", REPO_ROOT / "wepppy" / "wepp" / "soils" / "utils"
+    ):
+        created_packages.append("wepppy.wepp.soils.utils")
 
+    original_all_your_base = sys.modules.get("wepppy.all_your_base")
+    sys.modules["wepppy.all_your_base"] = _build_all_your_base_stub()
 
-def _stub_try_parse(value):
-    if isinstance(value, (int, float)):
-        return value
+    module_name = "wepppy.wepp.soils.utils.wepp_soil_util"
+    original_module = sys.modules.get(module_name)
+    module_spec = importlib.util.spec_from_file_location(module_name, WEPP_SOIL_UTIL_PATH)
+    module = importlib.util.module_from_spec(module_spec)
+    sys.modules[module_name] = module
+    module_spec.loader.exec_module(module)
+
     try:
-        as_float = float(value)
-    except Exception:
-        return value
-    try:
-        as_int = int(value)
-        return as_int
-    except Exception:
-        return as_float
+        yield module
+    finally:
+        if original_all_your_base is not None:
+            sys.modules["wepppy.all_your_base"] = original_all_your_base
+        else:
+            sys.modules.pop("wepppy.all_your_base", None)
 
+        if original_module is not None:
+            sys.modules[module_name] = original_module
+        else:
+            sys.modules.pop(module_name, None)
 
-def _stub_try_parse_float(value, default=0.0):
-    try:
-        return float(value)
-    except Exception:
-        return default
-
-
-def _stub_isfloat(value):
-    try:
-        float(value)
-        return True
-    except Exception:
-        return False
-
-
-def _stub_isint(value):
-    try:
-        return float(int(value)) == float(value)
-    except Exception:
-        return False
-
-
-def _stub_isnan(value):
-    try:
-        return math.isnan(float(value))
-    except Exception:
-        return False
-
-
-def _stub_isinf(value):
-    try:
-        return math.isinf(float(value))
-    except Exception:
-        return False
-
-
-all_your_base_stub.try_parse = _stub_try_parse
-all_your_base_stub.try_parse_float = _stub_try_parse_float
-all_your_base_stub.isfloat = _stub_isfloat
-all_your_base_stub.isint = _stub_isint
-all_your_base_stub.isnan = _stub_isnan
-all_your_base_stub.isinf = _stub_isinf
-all_your_base_stub.NCPU = 1
-class _StubRGBA(NamedTuple):
-    red: int
-    green: int
-    blue: int
-    alpha: int = 255
-
-    def tohex(self) -> str:
-        return "#" + "".join(f"{component:02X}" for component in self)
-
-all_your_base_stub.RGBA = _StubRGBA
-sys.modules["wepppy.all_your_base"] = all_your_base_stub
-
-
-module_spec = importlib.util.spec_from_file_location(
-    "wepppy.wepp.soils.utils.wepp_soil_util", WEPP_SOIL_UTIL_PATH
-)
-module = importlib.util.module_from_spec(module_spec)
-sys.modules[module_spec.name] = module
-module_spec.loader.exec_module(module)
-
-import yaml
-import pytest
-
-WeppSoilUtil = module.WeppSoilUtil
-_replace_parameter = module._replace_parameter
-_pars_to_string = module._pars_to_string
-
-from wepppy.wepp.soils.utils.wepp_soil_util import (
-    WeppSoilUtil,
-    _replace_parameter,
-    _pars_to_string,
-)
+        for name in created_packages:
+            sys.modules.pop(name, None)
 
 
 def _soil_payload(luse="test use"):
@@ -219,23 +231,23 @@ def make_soil_yaml(workspace_tmp_dir):
     return _factory
 
 
-def test_replace_parameter_with_multiplier():
-    assert _replace_parameter("10", "*2") == "20.0"
+def test_replace_parameter_with_multiplier(wepp_soil_util_module):
+    assert wepp_soil_util_module._replace_parameter("10", "*2") == "20.0"
 
 
-def test_replace_parameter_with_none_like_string():
-    assert _replace_parameter("10", "None") == "10"
-    assert _replace_parameter("10", " none ") == "10"
+def test_replace_parameter_with_none_like_string(wepp_soil_util_module):
+    assert wepp_soil_util_module._replace_parameter("10", "None") == "10"
+    assert wepp_soil_util_module._replace_parameter("10", " none ") == "10"
 
 
-def test_pars_to_string_formats_values():
-    formatted = _pars_to_string({"a": "value", "b": 1.5})
+def test_pars_to_string_formats_values(wepp_soil_util_module):
+    formatted = wepp_soil_util_module._pars_to_string({"a": "value", "b": 1.5})
     assert formatted == "(a='value', b=1.5)"
 
 
-def test_modify_initial_sat_updates_all_ofes_and_header(make_soil_yaml):
+def test_modify_initial_sat_updates_all_ofes_and_header(make_soil_yaml, wepp_soil_util_module):
     path = make_soil_yaml()
-    util = WeppSoilUtil(str(path))
+    util = wepp_soil_util_module.WeppSoilUtil(str(path))
 
     util.modify_initial_sat(0.9)
 
@@ -246,9 +258,9 @@ def test_modify_initial_sat_updates_all_ofes_and_header(make_soil_yaml):
     )
 
 
-def test_modify_kslast_skips_developed_soils(make_soil_yaml):
+def test_modify_kslast_skips_developed_soils(make_soil_yaml, wepp_soil_util_module):
     path = make_soil_yaml(luse="Highly Developed area")
-    util = WeppSoilUtil(str(path))
+    util = wepp_soil_util_module.WeppSoilUtil(str(path))
     original_header = list(util.obj["header"])
     original_kslast = util.obj["ofes"][0]["res_lyr"]["kslast"]
 
@@ -259,9 +271,9 @@ def test_modify_kslast_skips_developed_soils(make_soil_yaml):
     assert util.obj["res_lyr"]["kslast"] == original_kslast
 
 
-def test_modify_kslast_updates_soil_and_header(make_soil_yaml):
+def test_modify_kslast_updates_soil_and_header(make_soil_yaml, wepp_soil_util_module):
     path = make_soil_yaml()
-    util = WeppSoilUtil(str(path))
+    util = wepp_soil_util_module.WeppSoilUtil(str(path))
 
     util.modify_kslast(1.8, pars={"reason": "adjusted"})
 
@@ -273,9 +285,9 @@ def test_modify_kslast_updates_soil_and_header(make_soil_yaml):
     )
 
 
-def test_clip_soil_depth_truncates_horizons(make_soil_yaml):
+def test_clip_soil_depth_truncates_horizons(make_soil_yaml, wepp_soil_util_module):
     path = make_soil_yaml()
-    util = WeppSoilUtil(str(path))
+    util = wepp_soil_util_module.WeppSoilUtil(str(path))
 
     util.clip_soil_depth(120)
 
@@ -289,11 +301,11 @@ def test_clip_soil_depth_truncates_horizons(make_soil_yaml):
     )
 
 
-def test_dump_yaml_round_trip(workspace_tmp_dir):
+def test_dump_yaml_round_trip(workspace_tmp_dir, wepp_soil_util_module):
     payload = _soil_payload()
     src = workspace_tmp_dir / "source.yaml"
     src.write_text(yaml.dump(payload))
-    util = WeppSoilUtil(str(src))
+    util = wepp_soil_util_module.WeppSoilUtil(str(src))
 
     dst = workspace_tmp_dir / "round_trip.yaml"
     util.dump_yaml(str(dst))
