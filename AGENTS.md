@@ -94,7 +94,7 @@ Run on production server to provide access to large geospatial datasets
 
 ### Fixed FORTRAN 77
 - **/workdir/wepp-forest** - WEPP Watershed with baseflow model
-- **/workdir/wepp-forest-revegetation** - WEPP Watershed with revegetation modeling and baseflow (beta; optional checkout)
+- **/workdir/wepp-forest-revegetation** - WEPP Watershed with revegetation modeling and baseflow (beta)
 
 ### Other Stack Components
 - **/workdir/wepppy2** - Contains WEPP Runner (python wrapper) and WEPP binaries (separate to support FSWEPP2)
