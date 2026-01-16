@@ -215,7 +215,7 @@ services:
     command:
       - gunicorn
       - --workers
-      - "2"
+      - "4"
       - --bind
       - 0.0.0.0:8003
       - --log-level
