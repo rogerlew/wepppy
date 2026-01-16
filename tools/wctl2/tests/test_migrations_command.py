@@ -44,26 +44,25 @@ def test_migrate_run_with_runid(monkeypatch, temp_project) -> None:
     )
 
     assert result.exit_code == 0
-    expected = quote_args(
-        [
-            "cd",
-            "/workdir/wepppy",
-            "&&",
-            "PYTHONPATH=/workdir/wepppy",
-            "MYPY_CACHE_DIR=/tmp/mypy_cache",
-            "/opt/venv/bin/python",
-            "-m",
-            "wepppy.tools.migrations.migrate_run",
-            "--runid",
-            "lt_202012_demo",
-            "--dry-run",
-            "--force",
-            "--verbose",
-            "--only",
-            "run_paths",
-            "--only",
-            "landuse_parquet",
-        ]
+    python_args = [
+        "/opt/venv/bin/python",
+        "-m",
+        "wepppy.tools.migrations.migrate_run",
+        "--runid",
+        "lt_202012_demo",
+        "--dry-run",
+        "--force",
+        "--verbose",
+        "--only",
+        "run_paths",
+        "--only",
+        "landuse_parquet",
+    ]
+    expected = (
+        "cd /workdir/wepppy && "
+        "PYTHONPATH=/workdir/wepppy "
+        "MYPY_CACHE_DIR=/tmp/mypy_cache "
+        f"{quote_args(python_args)}"
     )
     assert recorded == [("weppcloud", expected, False, False)]
 
@@ -90,18 +89,17 @@ def test_migrate_run_with_wd(monkeypatch, temp_project) -> None:
     )
 
     assert result.exit_code == 0
-    expected = quote_args(
-        [
-            "cd",
-            "/workdir/wepppy",
-            "&&",
-            "PYTHONPATH=/workdir/wepppy",
-            "MYPY_CACHE_DIR=/tmp/mypy_cache",
-            "/opt/venv/bin/python",
-            "-m",
-            "wepppy.tools.migrations.migrate_run",
-            "--wd",
-            "/wc1/runs/lt/lt_202012_demo",
-        ]
+    python_args = [
+        "/opt/venv/bin/python",
+        "-m",
+        "wepppy.tools.migrations.migrate_run",
+        "--wd",
+        "/wc1/runs/lt/lt_202012_demo",
+    ]
+    expected = (
+        "cd /workdir/wepppy && "
+        "PYTHONPATH=/workdir/wepppy "
+        "MYPY_CACHE_DIR=/tmp/mypy_cache "
+        f"{quote_args(python_args)}"
     )
     assert recorded == [("weppcloud", expected, False, False)]

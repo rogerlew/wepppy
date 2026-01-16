@@ -66,11 +66,6 @@ def register(app: typer.Typer) -> None:
             raise typer.BadParameter("Provide a runid or --wd.")
 
         args: List[str] = [
-            "cd",
-            "/workdir/wepppy",
-            "&&",
-            "PYTHONPATH=/workdir/wepppy",
-            "MYPY_CACHE_DIR=/tmp/mypy_cache",
             "/opt/venv/bin/python",
             "-m",
             "wepppy.tools.migrations.migrate_run",
@@ -93,6 +88,11 @@ def register(app: typer.Typer) -> None:
             for migration in only:
                 args.extend(["--only", migration])
 
-        command = quote_args(args)
+        command = (
+            "cd /workdir/wepppy && "
+            "PYTHONPATH=/workdir/wepppy "
+            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+            f"{quote_args(args)}"
+        )
         result = compose_exec(context, "weppcloud", command, tty=False, check=False)
         _exit_from_result(result)
