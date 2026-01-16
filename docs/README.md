@@ -8,6 +8,7 @@ This directory holds top-level documentation that supports the codebase. Use the
 - `dev-notes/` — Deep dives, design investigations, and subsystem notes that should live close to—but outside—the source tree.
 - `ui-docs/` — Front-end documentation: control behaviors, style guidance, and UI-focused how-tos.
 - `prompt_templates/` — Prompt scaffolds for recurring agent tasks (documentation workflows, code migrations, etc.).
+- `release-notes/` — Yearly summaries of notable feature additions and improvements from the commit history.
 
 Prefer to keep documentation alongside the relevant source module when practical. Use the `docs/` tree for cross-cutting references, UI guidance, or coordinated efforts (work packages and mini packages).
 
@@ -15,4 +16,3 @@ Prefer to keep documentation alongside the relevant source module when practical
 - Always reference the authoritative guides in `AGENTS.md` when creating or updating docs.
 - Link related source files so future readers know where behavior is implemented.
 - When a mini package graduates into a broader initiative, migrate it into `work-packages/` and note the transition in its tracker.
-
