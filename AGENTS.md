@@ -479,7 +479,7 @@ When tests need to isolate heavy modules (e.g., `wepppy.all_your_base`, `wepppy.
 **Case study (October 2025):** The `test_disturbed_bp.py` import failure was caused by:
 - `unitizer_map_builder.py` creating a stub with only `isfloat`/`isnan`
 - `test_wepp_soil_util.py` creating a stub with only `try_parse`/`try_parse_float`/`isfloat`
-- Both missing `isint`, which `routes/rq/api/api.py` imports
+- Both missing `isint`, which `routes/run_0/run_0_bp.py` imports
 - Pytest collected the stub-creating test first, then failed when `test_disturbed_bp.py` tried to import routes
 
 **Fix:** Added `isint` to both stubs to match `wepppy.all_your_base.__all__`. See `tests/AGENTS.md` for detailed stub management guidance.

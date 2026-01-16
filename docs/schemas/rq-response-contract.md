@@ -50,10 +50,9 @@ Example (sync update):
 
 ## Job polling responses
 - Job status (jobstatus):
-  - `{id, runid, status, started_at, ended_at}`
-  - Unknown jobs return HTTP 404 with `status: "not_found"`.
+  - `{job_id, runid, status, started_at, ended_at}`
 - Job info (jobinfo):
-  - `{id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children}`
+  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children}`
 
 ## Error responses
 - Use status-code-first semantics:
@@ -65,15 +64,21 @@ Example (sync update):
   "error": {
     "message": "Human-readable summary",
     "code": "optional_code",
-    "details": { "optional": "context" }
+    "details": "Stacktrace string or error details"
   }
 }
 ```
-- `error.details` is required for error responses; include a stacktrace (string) for exception-driven failures and structured context for validation errors.
+- `error.details` is required for error responses; include a stacktrace (string) for exception-driven failures and a human-readable summary for validation errors (structured details belong in `errors`).
+- Job polling not-found:
+  - `/rq-engine/api/jobstatus/<job_id>` and `/rq-engine/api/jobinfo/<job_id>` return HTTP 404 with the canonical error payload and `error.code="not_found"`.
 - Validation error list:
 ```json
 {
-  "error": { "message": "Validation failed", "code": "validation_error" },
+  "error": {
+    "message": "Validation failed",
+    "code": "validation_error",
+    "details": "payload.zip is required."
+  },
   "errors": [
     { "code": "missing_field", "message": "payload.zip is required.", "path": "payload.zip" }
   ]

@@ -30,7 +30,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
             elapsed_s = (now - job.started_at).total_seconds()
 
     job_info: Dict[str, Any] = {
-        "id": job.id,
+        "job_id": job.id,
         "runid": job.meta.get('runid'),
         "status": job.get_status(),
         "result": job.result,
@@ -62,10 +62,10 @@ def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
         try:
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:
-            return {"id": job_id, "status": "not_found"}
+            return {"job_id": job_id, "status": "not_found"}
 
         if not job:
-            return {"id": job_id, "status": "not_found"}
+            return {"job_id": job_id, "status": "not_found"}
 
         return recursive_get_job_details(job, redis_conn, now)
 
@@ -99,27 +99,27 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
             try:
                 job = Job.fetch(job_id, connection=redis_conn)
             except NoSuchJobError:
-                results[job_id] = {"id": job_id, "status": "not_found"}
+                results[job_id] = {"job_id": job_id, "status": "not_found"}
                 continue
             except Exception as exc:  # pragma: no cover - defensive guard
                 results[job_id] = {
-                    "id": job_id,
+                    "job_id": job_id,
                     "status": "error",
-                    "error": str(exc),
+                    "exc_info": str(exc),
                 }
                 continue
 
             if not job:
-                results[job_id] = {"id": job_id, "status": "not_found"}
+                results[job_id] = {"job_id": job_id, "status": "not_found"}
                 continue
 
             try:
                 results[job_id] = recursive_get_job_details(job, redis_conn, now)
             except Exception as exc:  # pragma: no cover - defensive guard
                 results[job_id] = {
-                    "id": job_id,
+                    "job_id": job_id,
                     "status": "error",
-                    "error": str(exc),
+                    "exc_info": str(exc),
                 }
 
     return results
@@ -149,10 +149,10 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         try:
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:
-            return {"id": job_id, "status": "not_found"}
+            return {"job_id": job_id, "status": "not_found"}
 
         if not job:
-            return {"id": job_id, "status": "not_found"}
+            return {"job_id": job_id, "status": "not_found"}
 
         all_jobs_tree = recursive_get_job_details(job, redis_conn, now)
 
@@ -181,7 +181,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
             last_ended_at = None
 
         return {
-            "id": job.id,
+            "job_id": job.id,
             "runid": job.meta.get("runid"),
             "status": aggregated_status,
             "started_at": str(job.started_at) if job.started_at else None,

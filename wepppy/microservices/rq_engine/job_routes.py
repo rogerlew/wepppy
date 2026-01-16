@@ -4,7 +4,6 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, Request, status
-from fastapi.responses import JSONResponse
 
 from wepppy.rq.cancel_job import cancel_jobs
 from wepppy.rq.job_info import (
@@ -34,7 +33,12 @@ def jobstatus(job_id: str):
     try:
         payload = get_wepppy_rq_job_status(job_id)
         if payload.get("status") == "not_found":
-            return JSONResponse(payload, status_code=status.HTTP_404_NOT_FOUND)
+            return error_response(
+                "Job not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                code="not_found",
+                details=f"Job {job_id} not found.",
+            )
         return payload
     except Exception:
         logger.exception("rq-engine jobstatus failed")
@@ -46,7 +50,12 @@ def jobinfo(job_id: str):
     try:
         payload = get_wepppy_rq_job_info(job_id)
         if payload.get("status") == "not_found":
-            return JSONResponse(payload, status_code=status.HTTP_404_NOT_FOUND)
+            return error_response(
+                "Job not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+                code="not_found",
+                details=f"Job {job_id} not found.",
+            )
         return payload
     except Exception:
         logger.exception("rq-engine jobinfo failed")
@@ -82,7 +91,12 @@ def canceljob(job_id: str, request: Request):
     try:
         job_info = get_wepppy_rq_job_info(job_id)
         if job_info.get("status") == "not_found":
-            return error_response("Job not found", status_code=404)
+            return error_response(
+                "Job not found",
+                status_code=404,
+                code="not_found",
+                details=f"Job {job_id} not found.",
+            )
 
         runid = job_info.get("runid")
         if runid:
@@ -90,7 +104,12 @@ def canceljob(job_id: str, request: Request):
 
         payload = cancel_jobs(job_id)
         if "error" in payload:
-            return error_response(payload["error"], status_code=404)
+            return error_response(
+                payload["error"],
+                status_code=404,
+                code="not_found",
+                details=str(payload["error"]),
+            )
         return payload
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)

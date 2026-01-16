@@ -426,7 +426,7 @@ NoDb subclass logger
 - Redis is mission control. DB 0 tracks run metadata and JWT revocations, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions plus session JWT markers, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `docs/dev-notes/redis_dev_notes.md` for ops drills.
 - Coding conventions live in `docs/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
 - The microservices are lightweight Go services (`services/preflight2`, `services/status2`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
-- Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while `wepppy/weppcloud/routes/rq/api` exposes REST endpoints for job orchestration, cancellation, and status polling.
+- Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while rq-engine (`wepppy/microservices/rq_engine`) exposes REST endpoints for job orchestration, cancellation, and status polling.
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
 
 ## Docker Compose Dev Stack (Recommended)

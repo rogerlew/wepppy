@@ -106,7 +106,7 @@ soils/
 
 ## Notes & Caveats
 
-- **Migration**: `/rq/api/landuse_and_soils` was removed; use `/rq-engine/api/landuse-and-soils`.
+- **Endpoint**: use `/rq-engine/api/landuse-and-soils`.
 - **Extent format** is strict: `xmin,ymax,xmax,ymin` in decimal degrees.
 - **Defaults**: if not supplied, uses `nlcd/2019` and `ssurgo/gNATSGO/2025`.
 - **NLCD**: annual maps available from 1985 through 2023.

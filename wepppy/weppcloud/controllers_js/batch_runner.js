@@ -1541,10 +1541,10 @@ var BatchRunner = (function () {
                 return;
             }
             jobInfos.forEach(function (info) {
-                if (info && info.id) {
-                    registerTrackedJobId(info.id);
+                if (info && info.job_id) {
+                    registerTrackedJobId(info.job_id);
                     if (controller._jobInfoTerminalStatuses.has(info.status)) {
-                        controller.jobInfo.completedIds.add(String(info.id).trim());
+                        controller.jobInfo.completedIds.add(String(info.job_id).trim());
                     }
                 }
             });
@@ -1554,10 +1554,10 @@ var BatchRunner = (function () {
             var seen = new Set();
             var result = [];
             nodes.forEach(function (node) {
-                if (!node || !node.id) {
+                if (!node || !node.job_id) {
                     return;
                 }
-                var normalized = String(node.id).trim();
+                var normalized = String(node.job_id).trim();
                 if (seen.has(normalized)) {
                     return;
                 }
@@ -1572,10 +1572,10 @@ var BatchRunner = (function () {
                 return;
             }
             nodes.forEach(function (node) {
-                if (!node || !node.id) {
+                if (!node || !node.job_id) {
                     return;
                 }
-                var id = String(node.id).trim();
+                var id = String(node.job_id).trim();
                 if (!id) {
                     return;
                 }

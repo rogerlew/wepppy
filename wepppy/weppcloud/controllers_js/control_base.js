@@ -294,7 +294,7 @@ function controlBase() {
 
         self._job_failure_dispatched = true;
 
-        const jobId = self.rq_job_id || (statusObj && statusObj.id) || null;
+        const jobId = self.rq_job_id || (statusObj && statusObj.job_id) || null;
         const errorPayload = { error: { message: `Job ${status}.` } };
 
         function emitFailure() {
@@ -976,8 +976,8 @@ function controlBase() {
                 if (!payload.status) {
                     payload.status = "not_found";
                 }
-                if (!payload.id && self.rq_job_id) {
-                    payload.id = self.rq_job_id;
+                if (!payload.job_id && self.rq_job_id) {
+                    payload.job_id = self.rq_job_id;
                 }
                 self._job_status_error = null;
                 self._job_status_error_parts = null;

@@ -12,6 +12,7 @@ from .fork_archive_routes import router as fork_archive_router
 from .job_routes import router as job_router
 from .landuse_routes import router as landuse_router
 from .landuse_soils_routes import router as landuse_soils_router
+from .migration_routes import router as migration_router
 from .omni_routes import router as omni_router
 from .openet_ts_routes import router as openet_ts_router
 from .run_sync_routes import router as run_sync_router
@@ -55,6 +56,7 @@ app.include_router(session_router, prefix="/api")
 app.include_router(debug_router, prefix="/api")
 app.include_router(landuse_soils_router, prefix="/api")
 app.include_router(landuse_router, prefix="/api")
+app.include_router(migration_router, prefix="/api")
 app.include_router(soils_router, prefix="/api")
 app.include_router(climate_router, prefix="/api")
 app.include_router(watershed_router, prefix="/api")

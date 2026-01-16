@@ -354,10 +354,12 @@
 {% endblock %}
 
 {% block script_extras %}
+<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
 <script>
 const runid = '{{ runid }}';
 const config = '{{ config }}';
 let pollInterval = null;
+let lastStatus = null;
 
 function normalizeErrorValue(value) {
   if (value === undefined || value === null) {
@@ -425,12 +427,38 @@ function formatErrorList(errors) {
   return parts.length ? parts.join('\n') : null;
 }
 
+function escapeHtml(value) {
+  if (value === undefined || value === null) {
+    return '';
+  }
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function resolveErrorMessage(payload, fallback) {
+  if (typeof payload === 'string') {
+    return payload;
+  }
   if (!payload || typeof payload !== 'object') {
     return fallback || null;
   }
   if (payload.error !== undefined) {
-    const message = normalizeErrorValue(payload.error);
+    const errorValue = payload.error;
+    if (errorValue && typeof errorValue === 'object') {
+      const message = normalizeErrorValue(
+        Object.prototype.hasOwnProperty.call(errorValue, 'message') ? errorValue.message : errorValue
+      );
+      const details = normalizeErrorValue(errorValue.details);
+      if (details && message && details !== message) {
+        return `${message}\n${details}`;
+      }
+      return message || details;
+    }
+    const message = normalizeErrorValue(errorValue);
     if (message) {
       return message;
     }
@@ -460,67 +488,145 @@ function hasErrorPayload(payload) {
   return !!(payload && (payload.error || payload.errors));
 }
 
+function renderFailure(resultDiv, heading, errorMessage) {
+  if (!resultDiv) {
+    return;
+  }
+  const messageText = normalizeErrorValue(errorMessage) || 'Unknown error';
+  resultDiv.className = 'alert alert-danger mt-2';
+  resultDiv.innerHTML = `
+    <strong>❌ ${escapeHtml(heading || 'Migration failed')}:</strong>
+    <div class="log-output mt-1" data-role="migration-error"></div>
+  `;
+  const logOutput = resultDiv.querySelector('[data-role="migration-error"]');
+  if (logOutput) {
+    const line = document.createElement('div');
+    line.className = 'log-line';
+    line.textContent = messageText;
+    logOutput.appendChild(line);
+  }
+  resultDiv.classList.remove('hidden');
+}
+
+function resolveMigrationStatusLabel(status) {
+  switch (status) {
+    case 'queued':
+      return 'Job is queued, waiting to start...';
+    case 'started':
+      return 'Migration in progress...';
+    case 'finished':
+      return 'Migration completed!';
+    case 'failed':
+      return 'Migration failed.';
+    case 'deferred':
+      return 'Job deferred...';
+    case 'scheduled':
+      return 'Job scheduled...';
+    case 'canceled':
+      return 'Migration canceled.';
+    case 'stopped':
+      return 'Migration stopped.';
+    default:
+      return status ? `Status: ${status}` : 'Status: unknown';
+  }
+}
+
+function resolveMigrationProgress(status) {
+  switch (status) {
+    case 'queued':
+      return 10;
+    case 'started':
+      return 50;
+    case 'finished':
+      return 100;
+    case 'failed':
+    case 'stopped':
+    case 'canceled':
+      return 100;
+    default:
+      return 0;
+  }
+}
+
+function resolveHttpClient() {
+  return window.WCHttp || null;
+}
+
+function buildMigrationUrl() {
+  if (typeof window.url_for_run === 'function') {
+    return window.url_for_run('migrate-run', {
+      prefix: '/rq-engine/api',
+      runId: runid,
+      config: config
+    });
+  }
+  return `/rq-engine/api/runs/${encodeURIComponent(runid)}/${encodeURIComponent(config)}/migrate-run`;
+}
+
 async function runMigrations() {
   const btn = document.getElementById('run-migrations-btn');
   const btnText = document.getElementById('btn-text');
   const btnSpinner = document.getElementById('btn-spinner');
   const resultDiv = document.getElementById('migration-result');
   const createArchive = document.getElementById('create-archive').checked;
+  const http = resolveHttpClient();
 
   // Disable button and show spinner
   btn.disabled = true;
   btnText.textContent = 'Queueing...';
   btnSpinner.classList.remove('hidden');
   resultDiv.classList.add('hidden');
+  lastStatus = null;
 
   try {
-    const response = await fetch('{{ url_for("run_0.run_migrations", runid=runid, config=config) }}', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        create_archive: createArchive
-      })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok || hasErrorPayload(data)) {
-      const message = resolveErrorMessage(
-        data,
-        `Failed to queue migration job (HTTP ${response.status})`
-      );
-      throw new Error(message || 'Failed to queue migration job');
+    if (!http || typeof http.postJsonWithSessionToken !== 'function') {
+      throw new Error('Missing rq-engine client; reload and try again.');
     }
 
-    const content = data.Content || data.content || {};
-    const jobId = content.job_id;
-    const wasReadonly = content.was_readonly;
+    const response = await http.postJsonWithSessionToken(
+      buildMigrationUrl(),
+      { create_archive: createArchive },
+      { runId: runid, config: config }
+    );
+    const data = response && response.body ? response.body : {};
+    if (hasErrorPayload(data)) {
+      const message = resolveErrorMessage(
+        data,
+        'Failed to queue migration job.'
+      );
+      throw new Error(message || 'Failed to queue migration job.');
+    }
+
+    const jobId = data.job_id || (Array.isArray(data.job_ids) ? data.job_ids[0] : null);
     if (!jobId) {
       throw new Error('Failed to queue migration job: missing job id.');
     }
-      
-      resultDiv.className = 'alert alert-info mt-2';
-      resultDiv.innerHTML = `
-        <strong>⏳ Migration job queued</strong>
-        <p class="mb-1">Job ID: <code>${jobId}</code></p>
-        <p class="mb-1" id="status-text">Waiting for job to start...</p>
-        ${wasReadonly ? '<p class="wc-text-muted">Readonly state will be restored after migration.</p>' : ''}
-        <div class="progress-bar mt-1">
-          <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
-        </div>
-        <div id="log-output" class="log-output mt-1"></div>
-      `;
-      resultDiv.classList.remove('hidden');
-      btnText.textContent = 'Running...';
-      
-      // Start polling for status
-      startStatusPolling(jobId);
-  } catch (error) {
-    resultDiv.className = 'alert alert-danger mt-2';
-    resultDiv.innerHTML = `<strong>❌ Failed to start migration:</strong> ${error.message}`;
+    const statusUrl = data.status_url || `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}`;
+    const wasReadonly = data.result && data.result.was_readonly;
+    const safeJobId = escapeHtml(jobId);
+
+    resultDiv.className = 'alert alert-info mt-2';
+    resultDiv.innerHTML = `
+      <strong>⏳ Migration job queued</strong>
+      <p class="mb-1">Job ID: <code>${safeJobId}</code></p>
+      <p class="mb-1" id="status-text">Waiting for job to start...</p>
+      ${wasReadonly ? '<p class="wc-text-muted">Readonly state will be restored after migration.</p>' : ''}
+      <div class="progress-bar mt-1">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <div id="log-output" class="log-output mt-1"></div>
+    `;
     resultDiv.classList.remove('hidden');
+    btnText.textContent = 'Running...';
+
+    // Start polling for status
+    startStatusPolling(jobId, statusUrl);
+  } catch (error) {
+    const message = resolveErrorMessage(
+      error && error.body ? error.body : null,
+      error.message
+    );
+    renderFailure(resultDiv, 'Failed to start migration', message || 'Unknown error');
     
     // Re-enable button
     btn.disabled = false;
@@ -529,53 +635,109 @@ async function runMigrations() {
   }
 }
 
-function startStatusPolling(jobId) {
+async function fetchJobInfo(jobId) {
+  const http = resolveHttpClient();
+  const url = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
+  if (http && typeof http.getJson === 'function') {
+    try {
+      return await http.getJson(url);
+    } catch (error) {
+      console.error('Failed to fetch job info:', error);
+      return null;
+    }
+  }
+  const response = await fetch(url, { credentials: 'same-origin' });
+  if (!response.ok) {
+    return null;
+  }
+  return response.json().catch(() => null);
+}
+
+async function fetchJobStatus(statusUrl) {
+  const http = resolveHttpClient();
+  const bust = { params: { _: Date.now() } };
+  if (http && typeof http.getJson === 'function') {
+    try {
+      return await http.getJson(statusUrl, bust);
+    } catch (error) {
+      if (http.isHttpError && http.isHttpError(error) && error.body) {
+        if (typeof error.body === 'string') {
+          return { error: { message: error.body } };
+        }
+        return error.body;
+      }
+      if (http.isHttpError && http.isHttpError(error)) {
+        return { error: { message: error.message || 'Failed to fetch status.' } };
+      }
+      throw error;
+    }
+  }
+  const response = await fetch(statusUrl, { credentials: 'same-origin' });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (hasErrorPayload(payload)) {
+      return payload;
+    }
+    throw new Error(`Failed to fetch status (HTTP ${response.status})`);
+  }
+  return payload;
+}
+
+function appendStatusLog(message) {
+  const logOutput = document.getElementById('log-output');
+  if (!logOutput || !message) {
+    return;
+  }
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.textContent = message;
+  logOutput.appendChild(line);
+  logOutput.scrollTop = logOutput.scrollHeight;
+}
+
+function startStatusPolling(jobId, statusUrl) {
   const statusText = document.getElementById('status-text');
   const progressFill = document.getElementById('progress-fill');
-  const logOutput = document.getElementById('log-output');
-  let logMessages = [];
   
   pollInterval = setInterval(async () => {
     try {
-      const response = await fetch(`/weppcloud/runs/${runid}/${config}/migrate/status/${jobId}`);
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || hasErrorPayload(data)) {
+      const statusPayload = await fetchJobStatus(statusUrl);
+      if (hasErrorPayload(statusPayload)) {
         const message = resolveErrorMessage(
-          data,
-          `Failed to fetch status (HTTP ${response.status})`
+          statusPayload,
+          'Failed to fetch migration status.'
         );
-        throw new Error(message || 'Failed to fetch status.');
+        stopPolling();
+        onMigrationFailed(message || 'Failed to fetch migration status.');
+        return;
       }
 
-      const status = data.Content || data.content || data;
-      statusText.textContent = status.status_message || `Status: ${status.status}`;
+      const statusValue = statusPayload && statusPayload.status ? String(statusPayload.status).toLowerCase() : '';
+      statusText.textContent = resolveMigrationStatusLabel(statusValue);
         
-        // Update progress bar
-        if (status.progress) {
-          progressFill.style.width = `${status.progress}%`;
-        }
+      // Update progress bar
+      if (progressFill) {
+        progressFill.style.width = `${resolveMigrationProgress(statusValue)}%`;
+      }
+      if (statusValue && statusValue !== lastStatus) {
+        appendStatusLog(resolveMigrationStatusLabel(statusValue));
+        lastStatus = statusValue;
+      }
         
-        // Add new log messages
-        if (status.log_messages && status.log_messages.length > logMessages.length) {
-          const newMessages = status.log_messages.slice(logMessages.length);
-          logMessages = status.log_messages;
-          newMessages.forEach(msg => {
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.textContent = msg;
-            logOutput.appendChild(line);
-            logOutput.scrollTop = logOutput.scrollHeight;
-          });
-        }
-        
-        // Check if job is complete
-        if (status.status === 'finished') {
-          stopPolling();
-          onMigrationComplete(status.result);
-        } else if (status.status === 'failed') {
-          stopPolling();
-          onMigrationFailed(status.error || 'Unknown error');
-        }
+      // Check if job is complete
+      if (statusValue === 'finished') {
+        stopPolling();
+        const jobInfo = await fetchJobInfo(jobId);
+        onMigrationComplete(jobInfo ? jobInfo.result : null);
+      } else if (statusValue === 'failed' || statusValue === 'stopped' || statusValue === 'canceled') {
+        stopPolling();
+        const jobInfo = await fetchJobInfo(jobId);
+        const errorText = jobInfo && jobInfo.exc_info ? jobInfo.exc_info : 'Unknown error';
+        onMigrationFailed(errorText);
+      } else if (statusValue === 'not_found') {
+        stopPolling();
+        onMigrationFailed('Migration job was not found.');
+      }
     } catch (error) {
       console.error('Error polling status:', error);
     }
@@ -598,14 +760,16 @@ function onMigrationComplete(result) {
   btnSpinner.classList.add('hidden');
   btnText.textContent = 'Complete!';
   
-  const applied = result.applied || [];
-  const skipped = result.skipped || [];
+  const applied = result && Array.isArray(result.applied) ? result.applied : [];
+  const skipped = result && Array.isArray(result.skipped) ? result.skipped : [];
+  const appliedText = applied.length ? escapeHtml(applied.join(', ')) : 'None';
+  const skippedText = skipped.length ? escapeHtml(skipped.join(', ')) : 'None';
   
   resultDiv.className = 'alert alert-success mt-2';
   resultDiv.innerHTML = `
     <strong>✅ Migrations completed successfully!</strong>
-    <p class="mb-1">Applied: ${applied.join(', ') || 'None'}</p>
-    <p class="mb-1">Skipped: ${skipped.join(', ') || 'None'}</p>
+    <p class="mb-1">Applied: ${appliedText}</p>
+    <p class="mb-1">Skipped: ${skippedText}</p>
     <p class="mt-2">
       <a href="{{ url_for('run_0.runs0', runid=runid, config=config, skip_migration_check='true') }}" class="pure-button pure-button-primary">
         Continue to Project
@@ -619,13 +783,13 @@ function onMigrationFailed(error) {
   const btnText = document.getElementById('btn-text');
   const btnSpinner = document.getElementById('btn-spinner');
   const resultDiv = document.getElementById('migration-result');
+  const errorMessage = normalizeErrorValue(error) || 'Unknown error';
   
   btnSpinner.classList.add('hidden');
   btn.disabled = false;
   btnText.textContent = 'Retry Migrations';
   
-  resultDiv.className = 'alert alert-danger mt-2';
-  resultDiv.innerHTML = `<strong>❌ Migration failed:</strong> ${error}`;
+  renderFailure(resultDiv, 'Migration failed', errorMessage);
 }
 
 // Clean up on page unload

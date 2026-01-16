@@ -9,20 +9,41 @@ from jinja2 import DebugUndefined, Environment, FileSystemLoader
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
 COMMAND_BAR_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "command_bar" / "templates"
+RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / "templates"
 PURE_TEMPLATES = [
     "controls/path_cost_effective_pure.htm",
     "reports/storm_event_analyzer.htm",
+    "run_0/rq-migration-status.htm",
 ]
+
+pytestmark = pytest.mark.routes
 
 
 @pytest.fixture(scope="module")
 def jinja_env() -> Environment:
     env = Environment(
-        loader=FileSystemLoader([str(TEMPLATE_ROOT), str(COMMAND_BAR_TEMPLATE_ROOT)]),
+        loader=FileSystemLoader(
+            [
+                str(TEMPLATE_ROOT),
+                str(COMMAND_BAR_TEMPLATE_ROOT),
+                str(RUN_0_TEMPLATE_ROOT),
+            ]
+        ),
         undefined=DebugUndefined,
     )
     stub_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
     stub_unitizer = SimpleNamespace(is_english=False, preferences={})
+    stub_migration_status = SimpleNamespace(
+        needs_migration=True,
+        migrations=[
+            SimpleNamespace(
+                would_apply=True,
+                name="migration_001",
+                description="Test migration",
+                message="Pending",
+            )
+        ],
+    )
     env.globals.update(
         url_for=lambda *args, **kwargs: "",
         url_for_run=lambda *args, **kwargs: "",
@@ -51,6 +72,11 @@ def jinja_env() -> Environment:
         str_units=lambda value: value,
         omni_scenarios=[],
         base_scenario_label="Base",
+        migration_status=stub_migration_status,
+        can_migrate=True,
+        is_readonly=False,
+        is_owner=True,
+        is_admin=False,
     )
     return env
 

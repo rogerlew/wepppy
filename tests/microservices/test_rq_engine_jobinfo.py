@@ -37,7 +37,7 @@ def test_jobstatus_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_jobstatus_not_found_returns_404(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_jobstatus(job_id: str) -> dict[str, str]:
-        return {"id": job_id, "status": "not_found"}
+        return {"job_id": job_id, "status": "not_found"}
 
     monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", fake_jobstatus)
 
@@ -45,7 +45,10 @@ def test_jobstatus_not_found_returns_404(monkeypatch: pytest.MonkeyPatch) -> Non
         response = client.get("/api/jobstatus/job-missing")
 
     assert response.status_code == 404
-    assert response.json() == {"id": "job-missing", "status": "not_found"}
+    payload = response.json()
+    assert payload["error"]["code"] == "not_found"
+    assert "Job not found" in payload["error"]["message"]
+    assert "job-missing" in payload["error"]["details"]
 
 
 def test_jobinfo_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -53,20 +56,20 @@ def test_jobinfo_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> Non
 
     def fake_jobinfo(job_id: str) -> dict[str, str]:
         seen["job_id"] = job_id
-        return {"id": job_id, "status": "finished"}
+        return {"job_id": job_id, "status": "finished"}
 
     monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", fake_jobinfo)
 
     with TestClient(rq_engine.app) as client:
         response = client.get("/api/jobinfo/job-abc")
 
-    assert response.json() == {"id": "job-abc", "status": "finished"}
+    assert response.json() == {"job_id": "job-abc", "status": "finished"}
     assert seen["job_id"] == "job-abc"
 
 
 def test_jobinfo_not_found_returns_404(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_jobinfo(job_id: str) -> dict[str, str]:
-        return {"id": job_id, "status": "not_found"}
+        return {"job_id": job_id, "status": "not_found"}
 
     monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", fake_jobinfo)
 
@@ -74,7 +77,10 @@ def test_jobinfo_not_found_returns_404(monkeypatch: pytest.MonkeyPatch) -> None:
         response = client.get("/api/jobinfo/job-missing")
 
     assert response.status_code == 404
-    assert response.json() == {"id": "job-missing", "status": "not_found"}
+    payload = response.json()
+    assert payload["error"]["code"] == "not_found"
+    assert "Job not found" in payload["error"]["message"]
+    assert "job-missing" in payload["error"]["details"]
 
 
 def test_jobinfo_batch_preserves_order_and_filters_missing(
@@ -84,7 +90,7 @@ def test_jobinfo_batch_preserves_order_and_filters_missing(
 
     def fake_jobs_info(job_ids: list[str]) -> dict[str, dict[str, str]]:
         seen["job_ids"] = list(job_ids)
-        return {"a": {"id": "a"}, "c": {"id": "c"}}
+        return {"a": {"job_id": "a"}, "c": {"job_id": "c"}}
 
     monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", fake_jobs_info)
 
@@ -93,7 +99,7 @@ def test_jobinfo_batch_preserves_order_and_filters_missing(
 
     payload = response.json()
     assert seen["job_ids"] == ["a", "b", "c"]
-    assert payload["jobs"] == {"a": {"id": "a"}, "c": {"id": "c"}}
+    assert payload["jobs"] == {"a": {"job_id": "a"}, "c": {"job_id": "c"}}
     assert payload["job_ids"] == ["a", "c"]
 
 
@@ -101,7 +107,7 @@ def test_jobinfo_batch_uses_query_args_when_payload_invalid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def fake_jobs_info(job_ids: list[str]) -> dict[str, dict[str, str]]:
-        return {job_id: {"id": job_id} for job_id in job_ids}
+        return {job_id: {"job_id": job_id} for job_id in job_ids}
 
     monkeypatch.setattr(job_routes, "get_wepppy_rq_jobs_info", fake_jobs_info)
 
@@ -112,7 +118,7 @@ def test_jobinfo_batch_uses_query_args_when_payload_invalid(
             headers={"content-type": "application/json"},
         )
 
-    assert response.json() == {"jobs": {"job-99": {"id": "job-99"}}, "job_ids": ["job-99"]}
+    assert response.json() == {"jobs": {"job-99": {"job_id": "job-99"}}, "job_ids": ["job-99"]}
 
 
 def test_jobinfo_error_returns_500_payload(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -158,7 +164,7 @@ def test_canceljob_rejects_missing_scope(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -182,7 +188,7 @@ def test_canceljob_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(job_routes, "cancel_jobs", fake_cancel)
 
@@ -206,7 +212,7 @@ def test_canceljob_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -239,7 +245,7 @@ def test_canceljob_rejects_session_without_marker(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(
         rq_auth,
@@ -278,7 +284,7 @@ def test_canceljob_accepts_session_with_marker(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         job_routes,
         "get_wepppy_rq_job_info",
-        lambda job_id: {"id": job_id, "status": "finished", "runid": "run-1"},
+        lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(rq_auth, "_check_session_marker", lambda session_id, runid: None)
     monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id: {"status": "ok"})

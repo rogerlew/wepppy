@@ -451,8 +451,6 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/routes/readme_md/readme_md.py`
 - [ ] `wepppy/weppcloud/routes/recorder_bp.py`
 - [ ] `wepppy/weppcloud/routes/rq/__init__.py`
-- [ ] `wepppy/weppcloud/routes/rq/api/api.py`
-- [ ] `wepppy/weppcloud/routes/rq/api/jobinfo.py`
 - [ ] `wepppy/weppcloud/routes/rq/job_dashboard/__init__.py`
 - [ ] `wepppy/weppcloud/routes/rq/job_dashboard/routes.py`
 - [ ] `wepppy/weppcloud/routes/run_0/__init__.py`
