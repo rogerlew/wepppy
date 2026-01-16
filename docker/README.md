@@ -216,7 +216,7 @@ WEPP_AUTH_JWT_SECRET=$(python -c 'import secrets; print(secrets.token_urlsafe(64
 # WEPP_AUTH_JWT_SECRETS=active-secret,previous-secret
 
 # WeppcloudR container name (must match actual container name from docker compose)
-WEPPCLOUDR_CONTAINER=docker-weppcloudr-1
+WEPPCLOUDR_CONTAINER=weppcloudr
 
 # Optional: Override default ports if needed
 # WEPPCLOUD_PORT=8000
