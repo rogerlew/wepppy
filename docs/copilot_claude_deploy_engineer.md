@@ -37,8 +37,8 @@
 
 **wepp.cloud (Production)**
 - **Role:** Production environment
-- **Services:** legacy
-- **Stack:** systemd
+- **Services:** full stack (app, workers, microservices, Redis, Postgres, Caddy)
+- **Stack:** Docker Compose (`docker/docker-compose.prod.yml`) — systemd legacy retired
 
 ### CI Samurai Nightly / Daytime Emphemeral Development Hosts
 

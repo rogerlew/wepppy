@@ -425,7 +425,7 @@ NoDb subclass logger
 ## DevOps Notes
 - Redis is mission control. DB 0 tracks run metadata and JWT revocations, DB 2 streams status, DB 9 powers RQ, DB 11 stores Flask sessions plus session JWT markers, DB 13 caches NoDb JSON, DB 14 manages README editor locks, DB 15 holds log levels. See `docs/dev-notes/redis_dev_notes.md` for ops drills.
 - Coding conventions live in `docs/dev-notes/style-guide.md`; skim it before touching batch runners, NoDb modules, or microservices.
-- The microservices are lightweight Go services (`services/preflight2`, `services/status2`) that boot via systemd or the dev scripts under `_scripts/`. They require Redis keyspace notifications (`notify-keyspace-events Kh`) for preflight streaming.
+- The microservices are lightweight Go services (`services/preflight2`, `services/status2`) that boot via Docker Compose in production and the dev scripts under `_scripts/` for local debugging. Legacy systemd snippets are historical.
 - Workers scale horizontally. `wepppy/rq/*.py` modules provide CLI entry points, while rq-engine (`wepppy/microservices/rq_engine`) exposes REST endpoints for job orchestration, cancellation, and status polling.
 - Structured logging is collected per run in the working directory (`<runid>/_logs/`). The queue handler replicates to console, file, and Redis so you get local artifacts plus live dashboards.
 
@@ -487,8 +487,9 @@ WEPPCLOUD_IMAGE=registry.example.com/wepppy:2025.02 docker compose -f docker/doc
 - WC1/GeoData are mounted as named volumes (`wc1-data`, `geodata-data`) by default. Swap them for bind mounts or CSI-backed volumes in Kubernetes as needed.
 - Health checks (`/health`) gate container readiness. For Kubernetes, reuse the same endpoint for your liveness/readiness probes.
 - The production image runs as the non-root `wepp` user (UID/GID configurable via build args) to satisfy PodSecurity/OCI hardening requirements.
+- wepp.cloud production runs this Docker Compose stack; systemd services are retired.
 
-## Baremetal (not recommended)
+## Bare-metal (legacy, not recommended)
 - Provision Python 3.10 + Poetry/conda (see `install/` and `wepppy/weppcloud/_baremetal/` for reference scripts).
 - Prefer the Docker stacks (`docker/docker-compose.*`) plus the `docker/weppcloud-entrypoint.sh` bootstrapper; legacy systemd snippets remain in `_scripts/` if you absolutely must run without containers.
 

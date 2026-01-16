@@ -1,6 +1,7 @@
 # wepp.cloud deploy plan (prod refresh)
 
-> Goal: move wepp.cloud (wepp1) from bare-metal Flask to the docker-compose prod stack. wepp1 is running Ubuntu 24.04.3 LTS
+> Status: completed. wepp.cloud (wepp1) runs the docker-compose prod stack.
+> Historical reference: systemd inventory and bare-metal steps below remain for rollback context.
 
 ## References
 - `docker/docker-compose.prod.yml`
@@ -19,7 +20,7 @@
 - [x] Verify disk space on `/workdir`, `/wc1`, `/geodata`.
 - [x] Verify DNS + firewall (80/443 open if Caddy terminates TLS).
 
-## Current host snapshot (wepp1)
+## Historical host snapshot (pre-compose wepp1)
 Service inventory:
 ```
 ● caddy.service                            loaded failed failed  Caddy

@@ -45,6 +45,7 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl run-stubtest` – runs stubtest from the container (default target `wepppy.nodb.core`).
 - `wctl run-stubgen` – regenerates stubs (`python tools/sync_stubs.py`).
 - `wctl check-test-stubs` / `check-test-isolation` – launch the diagnostic scripts inside the container.
+- `wctl migrate-run` – run run-level migrations by run id (or `--wd` path) and skip already-migrated runs by default.
 - `wctl run-test-profile` / `run-fork-profile` / `run-archive-profile` – drive the profile playback FastAPI service, defaulting to the canonical `backed-globule` smoke profile when no overrides are supplied.
 - `wctl rq-info`: shows RQ stats for the default and batch queues (extra `rq info` args are appended).
 

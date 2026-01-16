@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typer
 
-from . import auth, doc, go_services, maintenance, npm, playback, playwright, python_tasks, rq
+from . import auth, doc, go_services, maintenance, migrations, npm, playback, playwright, python_tasks, rq
 
 __all__ = ["register"]
 
@@ -15,6 +15,7 @@ def register(app: typer.Typer) -> None:
     auth.register(app)
     doc.register(app)
     maintenance.register(app)
+    migrations.register(app)
     npm.register(app)
     python_tasks.register(app)
     go_services.register(app)

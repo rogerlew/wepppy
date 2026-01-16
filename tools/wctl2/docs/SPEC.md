@@ -39,6 +39,7 @@
 | `run-pytest`, `run-stubtest`, `run-stubgen`, `check-test-*` | `commands/python_tasks.py` | Compose exec wrappers with shared quoting helper. |
 | `run-test-profile`, `run-fork-profile`, `run-archive-profile` | `commands/playback.py` | Reuse logic from `tools/profile_playback_cli.py`; module becomes the new home. |
 | `rq-info`                 | `commands/rq.py`                  | Compose exec wrapper for `rq info` (default + batch queues). |
+| `migrate-run`             | `commands/migrations.py`          | Run migrations for a run id or working directory. |
 | Docker Compose passthrough | `commands/passthrough.py`        | Called when no Typer command matches. |
 
 ## Implementation Phases
