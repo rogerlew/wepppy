@@ -466,6 +466,10 @@ read_subcatchments = function(runid) {
   if (!"TopazID" %in% names(landuse) && "topaz_id" %in% names(landuse)) {
     landuse$TopazID <- landuse$topaz_id
   }
+  # Handle legacy runs that don't have disturbed_class column
+  if (!"disturbed_class" %in% names(landuse)) {
+    landuse$disturbed_class <- NA_character_
+  }
   landuse <- landuse %>%
     dplyr::mutate(
       TopazID = as.integer(TopazID),
