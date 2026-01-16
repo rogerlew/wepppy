@@ -2696,7 +2696,8 @@ class Climate(NoDbBase):
 
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
-            self.catalog_id = 'user_defined_cli'
+            # Avoid nodb_setter recursion while already holding the lock.
+            self._catalog_id = 'user_defined_cli'
             
         self._post_defined_climate(verbose=verbose)
 

@@ -768,6 +768,27 @@ def build_climate_rq(runid: str) -> None:
 
 
 @with_exception_logging
+def upload_cli_rq(runid: str, cli_filename: str) -> None:
+    """Apply a user-uploaded CLI file to the run climate state."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:climate'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        climate = Climate.getInstance(wd)
+        climate.set_user_defined_cli(cli_filename)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_climate)
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
 def run_ash_rq(
     runid: str,
     fire_date: str,
@@ -856,7 +877,7 @@ def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> N
         runid: Identifier used to locate the working directory.
         payload: Optional controller-supplied overrides that adjust which stages
             execute (``clean``, ``prep``, ``run`` booleans). Defaults run every
-            stage to preserve legacy behaviour.
+            stage to preserve legacy behavior.
 
     Raises:
         Exception: Propagates errors from RHEM preprocessing or execution.

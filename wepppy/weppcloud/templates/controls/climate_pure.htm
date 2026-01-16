@@ -449,14 +449,25 @@
         type="file"
         class="wc-field__control file disable-readonly">
     </div>
+    {% set current_cli_fn = climate.cli_fn or climate.orig_cli_fn %}
+    {% if selected_catalog_id == 'user_defined_cli' and current_cli_fn %}
+      {% set current_cli_display %}<code>{{ current_cli_fn.rsplit('/', 1)[-1] }}</code>{% endset %}
+      {{ ui.text_display(
+           label="Current CLI file",
+           content=current_cli_display
+      ) }}
+    {% endif %}
     <div class="wc-field">
-      <button
-        id="btn_upload_cli"
-        class="pure-button pure-button-secondary disable-readonly"
-        data-climate-action="upload-cli"
-        type="button">
-        Upload .cli
-      </button>
+      {% call button_row() %}
+        <button
+          id="btn_upload_cli"
+          class="pure-button pure-button-primary disable-readonly"
+          data-climate-action="upload-cli"
+          type="button"
+          style="min-width: 180px;">
+          Upload .cli
+        </button>
+      {% endcall %}
       {{ ui.job_hint("hint_upload_cli", extra_class="wc-field__help") }}
     </div>
   </section>

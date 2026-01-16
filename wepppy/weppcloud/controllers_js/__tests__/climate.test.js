@@ -43,6 +43,16 @@ describe("Climate controller", () => {
                             "station_modes": [-1, 0, 1],
                             "spatial_modes": [0],
                             "rap_compatible": true
+                        },
+                        {
+                            "catalog_id": "user_defined_cli",
+                            "label": "User Defined",
+                            "group": "User-Defined",
+                            "climate_mode": 12,
+                            "inputs": ["upload"],
+                            "station_modes": [4],
+                            "spatial_modes": [0],
+                            "rap_compatible": false
                         }
                     ]
                 </script>
@@ -57,6 +67,10 @@ describe("Climate controller", () => {
                     <label class="wc-choice">
                         <input type="radio" name="climate_dataset_choice" value="dataset_b" data-climate-action="dataset">
                         <span>Dataset B</span>
+                    </label>
+                    <label class="wc-choice">
+                        <input type="radio" name="climate_dataset_choice" value="user_defined_cli" data-climate-action="dataset">
+                        <span>User Defined</span>
                     </label>
                 </div>
 
@@ -154,7 +168,7 @@ describe("Climate controller", () => {
 
         requestMock = jest.fn((url, options) => {
             if (url === "/rq-engine/api/runs/test/cfg/tasks/upload-cli/") {
-                return Promise.resolve({ body: {} });
+                return Promise.resolve({ body: { job_id: "job-456" } });
             }
             if (url === "view/closest_stations/") {
                 return Promise.resolve({ body: "<option value='STA-1'>Station 1</option>" });
@@ -367,7 +381,20 @@ describe("Climate controller", () => {
                 form: expect.any(HTMLFormElement)
             })
         );
-        expect(uploadHandler).toHaveBeenCalled();
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(climate, "job-456");
+        expect(uploadHandler).toHaveBeenCalledWith({ job_id: "job-456" });
+    });
+
+    test("user-defined dataset hides the build button", async () => {
+        const radio = document.querySelector('input[name="climate_dataset_choice"][value="user_defined_cli"]');
+        radio.checked = true;
+        radio.dispatchEvent(new Event("change", { bubbles: true }));
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const buildButton = document.getElementById("btn_build_climate");
+        expect(buildButton.hidden).toBe(true);
     });
 
     test("gridmet checkbox posts JSON and emits event", async () => {

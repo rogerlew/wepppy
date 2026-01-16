@@ -307,6 +307,9 @@ var Climate = (function () {
         climate.parDetails = dom.qs("[data-climate-par]", formElement);
         climate.parBody = climate.parDetails ? climate.parDetails.querySelector("[data-climate-par-body]") : null;
         climate._parLoaded = false;
+        climate.uploadInput = dom.qs("#input_upload_cli", formElement);
+        climate.buildButton = dom.qs("#btn_build_climate", formElement);
+        climate.buildHintElement = hintBuildElement;
 
         climate.catalogData = ensureArray(parseJsonScript("climate_catalog_data"));
         climate.datasetMap = {};
@@ -584,6 +587,39 @@ var Climate = (function () {
             });
         };
 
+        climate.updateBuildButtonVisibility = function (dataset) {
+            if (!climate.buildButton) {
+                return;
+            }
+            var isUserDefined = dataset && String(dataset.catalog_id || "") === "user_defined_cli";
+            if (isUserDefined) {
+                dom.hide(climate.buildButton);
+                if (climate.buildHintElement) {
+                    dom.hide(climate.buildHintElement);
+                }
+            } else {
+                dom.show(climate.buildButton);
+                if (climate.buildHintElement) {
+                    dom.show(climate.buildHintElement);
+                }
+            }
+        };
+
+        function updateCurrentCliFilename(filename) {
+            if (!filename || !formElement) {
+                return;
+            }
+            var displays = formElement.querySelectorAll(".wc-field--display .wc-text-display");
+            for (var i = 0; i < displays.length; i += 1) {
+                var display = displays[i];
+                var label = display.parentElement ? display.parentElement.querySelector(".wc-field__label") : null;
+                if (label && label.textContent && label.textContent.indexOf("Current CLI file") !== -1) {
+                    display.innerHTML = "<code>" + filename + "</code>";
+                    break;
+                }
+            }
+        }
+
         climate.updateSpatialModes = function (dataset, options) {
             var opts = options || {};
             if (!climate.spatialModeRadios || climate.spatialModeRadios.length === 0) {
@@ -707,6 +743,7 @@ var Climate = (function () {
             }
             climate.updateDatasetMessage(dataset);
             climate.updateSectionVisibility(dataset);
+            climate.updateBuildButtonVisibility(dataset);
             climate.updateSpatialModes(dataset, options || {});
             climate.updateStationModes(dataset, options || {});
             climate.updateStationVisibility(dataset);
@@ -1000,9 +1037,22 @@ var Climate = (function () {
         };
 
         climate.upload_cli = function () {
+            if (!climate._statusStreamHandle) {
+                climate.attachStatusStream({ autoConnect: false });
+            }
+            resetCompletionSeen();
+            climate.connect_status_stream(climate);
+
+            var taskMsg = "Uploading climate CLI";
+            climate.reset_panel_state(climate, { taskMessage: taskMsg, hintTarget: climate.hintUpload });
+
             infoAdapter.text("");
             stacktraceAdapter.text("");
 
+            var uploadedFilename = null;
+            if (climate.uploadInput && climate.uploadInput.files && climate.uploadInput.files.length > 0) {
+                uploadedFilename = climate.uploadInput.files[0].name;
+            }
             var formData = new FormData(formElement);
             http.requestWithSessionToken(url_for_run("tasks/upload-cli/", { prefix: "/rq-engine/api" }), {
                 method: "POST",
@@ -1010,8 +1060,23 @@ var Climate = (function () {
                 form: formElement
             }).then(function (response) {
                 var body = response.body || {};
+                if (body.job_id) {
+                    var message = "upload_cli job submitted: " + body.job_id;
+                    statusAdapter.html(message);
+                    climate.appendStatus(message);
+                    climate.poll_completion_event = "CLIMATE_BUILD_TASK_COMPLETED";
+                    var previousHint = climate.hint;
+                    if (climate.hintUpload) {
+                        climate.hint = climate.hintUpload;
+                    }
+                    climate.set_rq_job_id(climate, body.job_id);
+                    climate.hint = previousHint;
+                    updateCurrentCliFilename(uploadedFilename);
+                    climate.events.emit("climate:upload:completed", { job_id: body.job_id });
+                    return;
+                }
                 climate.appendStatus("User-defined climate uploaded successfully.");
-                resetCompletionSeen();
+                updateCurrentCliFilename(uploadedFilename);
                 climate.triggerEvent("CLIMATE_BUILD_TASK_COMPLETED", body);
                 climate.events.emit("climate:upload:completed", body);
             }).catch(function (error) {

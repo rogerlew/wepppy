@@ -11,23 +11,58 @@ from wepppy.microservices.rq_engine import upload_climate_routes
 pytestmark = pytest.mark.microservice
 
 
+def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(upload_climate_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(upload_climate_routes, "authorize_run_access", lambda claims, runid: None)
+
+
+def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+    class DummyJob:
+        id = job_id
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            return DummyJob()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(upload_climate_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(upload_climate_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+
+def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
+    class DummyPrep:
+        def remove_timestamp(self, *args, **kwargs) -> None:
+            return None
+
+        def set_rq_job_id(self, *args, **kwargs) -> None:
+            return None
+
+    monkeypatch.setattr(upload_climate_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+
+
 def test_upload_cli_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     cli_dir = run_dir / "cli"
     cli_dir.mkdir(parents=True)
 
-    monkeypatch.setattr(upload_climate_routes, "require_jwt", lambda request, required_scopes=None: {})
-    monkeypatch.setattr(upload_climate_routes, "authorize_run_access", lambda claims, runid: None)
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-77")
+    _stub_prep(monkeypatch)
     monkeypatch.setattr(upload_climate_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(upload_climate_routes.Ron, "getInstance", lambda wd: object())
 
     class DummyClimate:
         def __init__(self, cli_dir: Path) -> None:
             self.cli_dir = str(cli_dir)
-            self.saved: str | None = None
-
-        def set_user_defined_cli(self, name: str) -> None:
-            self.saved = name
 
     climate = DummyClimate(cli_dir)
     monkeypatch.setattr(upload_climate_routes.Climate, "getInstance", lambda wd: climate)
@@ -40,4 +75,4 @@ def test_upload_cli_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
         )
 
     assert response.status_code == 200
-    assert climate.saved == "demo.cli"
+    assert response.json()["job_id"] == "job-77"
