@@ -16,3 +16,6 @@
 ## Follow-Up Actions
 1. Decide which endpoints should call `authorize`, require `@login_required`, or enforce stronger role checks (start with RQ run-management routes and job cancellation API).
 2. Add tests that assert unauthenticated/unauthorized callers are blocked once protections are in place.
+
+## Dependency Alerts (Acknowledged)
+- Dependabot alert #1044 (nbconvert uncontrolled search path on Windows, `docker/requirements-uv.txt`): not applicable to Linux deployments and no patched version is available; ignore until upstream ships a fix.
