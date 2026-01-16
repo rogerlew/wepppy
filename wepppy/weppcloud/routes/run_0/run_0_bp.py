@@ -14,7 +14,6 @@ from flask import current_app
 import wepppy
 from wepppy.all_your_base import isint
 from wepppy.nodb.base import get_configs
-from wepppy.nodb.version import CURRENT_VERSION, read_version
 from wepppy.nodb.core import * 
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.mods.observed import Observed
@@ -369,8 +368,20 @@ def runs0(runid, config):
     if not skip_migration_check and not playwright_load_all:
         wd = get_wd(runid)
         if _exists(wd):
-            nodb_version = read_version(wd)
-            if nodb_version < CURRENT_VERSION:
+            from wepppy.tools.migrations.runner import check_migrations_needed
+
+            migration_status = check_migrations_needed(wd)
+            gated_migrations = {
+                "nodb_version",
+                "watersheds",
+                "landuse_parquet",
+                "soils_parquet",
+            }
+            needs_migration = any(
+                entry.get("name") in gated_migrations and entry.get("would_apply")
+                for entry in migration_status.get("migrations", [])
+            )
+            if needs_migration:
                 # Redirect to migration page
                 return redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
     
@@ -391,12 +402,10 @@ def migration_page(runid, config):
     if not _exists(wd):
         abort(404)
     
-    nodb_version = read_version(wd)
-    if nodb_version >= CURRENT_VERSION:
-        return redirect(url_for_run('run_0.runs0', runid=runid, config=config))
-    
     ron = Ron.getInstance(wd)
     migration_status = check_migrations_needed(wd)
+    if not migration_status.get("needs_migration"):
+        return redirect(url_for_run('run_0.runs0', runid=runid, config=config))
     
     # Check if user can migrate (owner or admin)
     is_owner = False
