@@ -78,5 +78,8 @@ taumax=70.0
 kch=0.02
 nch=1.0
 
+[wmesque]
+version=2
+
 [ash]
 run_wind_transport=false
