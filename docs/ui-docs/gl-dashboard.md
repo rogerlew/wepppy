@@ -964,7 +964,7 @@ function computeComparisonDiffRanges() {
 **Steps:**
 1. Collect all visible layers from state
 2. For each layer type, call corresponding builder (buildWeppLayer, buildRapLayer, etc.)
-3. Order layers (basemap → vector overlays → rasters → channels → labels)
+3. Order layers (basemap → vector overlays → rasters → channels → D8 arrows → labels)
 4. Pass array to deck.gl controller
 5. Update legends panel
 
@@ -980,6 +980,7 @@ function computeComparisonDiffRanges() {
 - Landuse, Soils, Hillslopes, RAP, OpenET, WEPP, WEPP Yearly, WEPP Event, WATAR.
 - RAP cumulative mode XOR individual bands (enforced via radio within RAP group).
 - Raster layers (NLCD, soils GeoTIFF, SBS) remain independent checkboxes.
+- D8 Direction (flow arrows from `dem/wbt/flovec.tif`) is a Hillslopes checkbox and does not participate in the radio group.
 
 **Channel overlays share a dedicated radio group (one visible at a time):**
 - Channel Order, WEPP Channels (Discharge Volume/Soil Loss), WEPP Yearly Channels (Discharge Volume/Soil Loss).

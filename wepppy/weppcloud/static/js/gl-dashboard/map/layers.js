@@ -23,6 +23,8 @@ const CHANNEL_LABEL_COLOR = [26, 115, 232, 255];
 const CHANNEL_LABEL_OUTLINE_COLOR = [255, 255, 255, 255];
 const CHANNEL_LABEL_OUTLINE_WIDTH = 3;
 const CHANNEL_LABEL_FONT_SIZE = 16;
+const D8_DIRECTION_COLOR = [255, 105, 180, 230];
+const D8_DIRECTION_LINE_WIDTH = 1.2;
 
 function hexToRgba(hex, alpha) {
   const normalized = String(hex || '').replace('#', '');
@@ -457,6 +459,24 @@ export function createLayerUtils({
         outlineWidth: CHANNEL_LABEL_OUTLINE_WIDTH,
         billboard: false,
         sizeUnits: 'pixels',
+        pickable: false,
+      }),
+    ];
+  }
+
+  function buildD8DirectionLayer(state) {
+    const layer = state.d8DirectionLayer;
+    if (!state.subcatchmentsVisible || !layer || !layer.visible || !Array.isArray(layer.data) || !layer.data.length) return [];
+    return [
+      new deck.PathLayer({
+        id: 'd8-direction-arrows',
+        data: layer.data,
+        getPath: (d) => d.path,
+        getColor: D8_DIRECTION_COLOR,
+        getWidth: () => D8_DIRECTION_LINE_WIDTH,
+        widthUnits: 'pixels',
+        jointRounded: true,
+        capRounded: true,
         pickable: false,
       }),
     ];
@@ -1011,6 +1031,7 @@ export function createLayerUtils({
     const channelDeckLayers = buildChannelsLayer(state);
     const weppChannelDeckLayers = buildWeppChannelLayers(state);
     const weppYearlyChannelDeckLayers = buildWeppYearlyChannelLayers(state);
+    const d8DirectionLayer = buildD8DirectionLayer(state);
     const labelLayers = buildSubcatchmentLabelsLayer(state);
     const channelLabelLayers = buildChannelLabelsLayer(state);
     return [
@@ -1028,6 +1049,7 @@ export function createLayerUtils({
       ...channelDeckLayers,
       ...weppChannelDeckLayers,
       ...weppYearlyChannelDeckLayers,
+      ...d8DirectionLayer,
       ...labelLayers,
       ...channelLabelLayers,
     ];

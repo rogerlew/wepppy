@@ -13,7 +13,8 @@
 
 /**
  * @typedef {Object} RasterUtils
- * @property {(path: string, colorMap?: Object | ((value: number) => number[] | string | null)) => Promise<{ canvas: HTMLCanvasElement, bounds: number[], values: any, width: number, height: number, sampleMode: string }>} loadRaster Fetch and render a GeoTIFF to canvas with optional colormap.
+ * @property {(path: string, colorMap?: Object | ((value: number) => number[] | string | null)) => Promise<{ canvas: HTMLCanvasElement, bounds: number[], values: any, width: number, height: number, sampleMode: string, nodata: number | null }>} loadRaster Fetch and render a GeoTIFF to canvas with optional colormap.
+ * @property {(path: string, colorMap?: Object | ((value: number) => number[] | string | null)) => Promise<{ canvas: HTMLCanvasElement, bounds: number[], values: any, width: number, height: number, sampleMode: string, nodata: number | null }>} loadRasterFromDownload Fetch and render a GeoTIFF to canvas via download routes.
  * @property {(imgurl: string) => Promise<{ canvas: HTMLCanvasElement, width: number, height: number, values: Uint8ClampedArray, sampleMode: 'rgba' }>} loadSbsImage Load an SBS PNG/JPEG into a canvas and extract RGBA values.
  * @property {(path: string) => Promise<Object|null>} fetchGdalInfo Fetch GDAL info JSON for a raster path.
  */
@@ -187,9 +188,13 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     return canvas;
   }
 
-  async function loadRaster(path, colorMap) {
+  function buildRasterUrl(path, source) {
+    const base = source === 'download' ? 'download' : 'browse';
+    return `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${base}/${path}`;
+  }
+
+  async function loadRasterFromUrl(url, colorMap) {
     const GT = await ensureGeoTiff();
-    const url = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/browse/${path}`;
     const resp = await fetch(url);
     if (!resp.ok) {
       throw new Error(`Raster fetch failed ${resp.status}: ${url}`);
@@ -203,6 +208,12 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
     const values = ArrayBuffer.isView(raster) ? raster : raster[0];
     const canvas = colorize(values, width, height, colorMap);
     const bounds = image.getBoundingBox();
+    const rawNoData = typeof image.getGDALNoData === 'function' ? image.getGDALNoData() : null;
+    let nodata = null;
+    if (rawNoData !== null && rawNoData !== undefined && rawNoData !== '') {
+      const parsed = Number(rawNoData);
+      nodata = Number.isFinite(parsed) ? parsed : null;
+    }
     return {
       canvas,
       bounds,
@@ -210,8 +221,19 @@ export function createRasterUtils({ ctx, getState, setValue, colorFn }) {
       width,
       height,
       sampleMode: colorMap ? 'palette' : 'scalar',
+      nodata,
     };
   }
 
-  return { loadRaster, loadSbsImage, fetchGdalInfo };
+  async function loadRaster(path, colorMap) {
+    const url = buildRasterUrl(path, 'browse');
+    return loadRasterFromUrl(url, colorMap);
+  }
+
+  async function loadRasterFromDownload(path, colorMap) {
+    const url = buildRasterUrl(path, 'download');
+    return loadRasterFromUrl(url, colorMap);
+  }
+
+  return { loadRaster, loadRasterFromDownload, loadSbsImage, fetchGdalInfo };
 }

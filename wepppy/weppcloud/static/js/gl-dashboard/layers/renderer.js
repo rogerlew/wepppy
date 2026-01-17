@@ -359,6 +359,7 @@ export function createLayerRenderer({
       landuseLayers = [],
       soilsLayers = [],
       hillslopesLayers = [],
+      d8DirectionLayer,
       channelsLayers = [],
       weppLayers = [],
       weppChannelLayers = [],
@@ -382,7 +383,14 @@ export function createLayerRenderer({
     const soilsRasters = detectedLayers
       .filter((l) => l.key === 'soils')
       .map((r) => ({ ...r, isRaster: true, rasterRef: r }));
-    const hillslopesItems = hillslopesLayers || [];
+    const hillslopesItems = Array.isArray(hillslopesLayers) ? [...hillslopesLayers] : [];
+    if (d8DirectionLayer) {
+      hillslopesItems.push({
+        ...d8DirectionLayer,
+        isRaster: true,
+        rasterRef: d8DirectionLayer,
+      });
+    }
 
     if (landuseLayers.length || landuseRasters.length) {
       subcatchmentSections.push({ title: 'Landuse', items: [...landuseLayers, ...landuseRasters], isSubcatchment: true, stateKey: 'landuseLayers' });

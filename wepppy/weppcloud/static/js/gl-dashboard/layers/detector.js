@@ -15,6 +15,87 @@ function logDetection(kind, message, context) {
 const logDetectionInfo = (message, context) => logDetection('info', message, context);
 const logDetectionWarn = (message, context) => logDetection('warn', message, context);
 
+const D8_POINTER_DELTAS = Object.freeze({
+  1: [1, 1],
+  2: [1, 0],
+  4: [1, -1],
+  8: [0, -1],
+  16: [-1, -1],
+  32: [-1, 0],
+  64: [-1, 1],
+  128: [0, 1],
+});
+
+const DEFAULT_D8_MAX_ARROWS = Number.POSITIVE_INFINITY;
+
+function computeSampleStride(totalCells, maxArrows) {
+  if (!Number.isFinite(totalCells) || totalCells <= 0) return 1;
+  if (!Number.isFinite(maxArrows) || maxArrows <= 0) return 1;
+  if (totalCells <= maxArrows) return 1;
+  return Math.max(1, Math.ceil(Math.sqrt(totalCells / maxArrows)));
+}
+
+function buildD8ArrowData({ values, width, height, bounds, nodata, maxArrows }) {
+  if (!values || !Number.isFinite(width) || !Number.isFinite(height) || !Array.isArray(bounds) || bounds.length !== 4) {
+    return { data: [], stride: 1 };
+  }
+  const [west, south, east, north] = bounds;
+  const cellWidth = (east - west) / width;
+  const cellHeight = (north - south) / height;
+  if (!Number.isFinite(cellWidth) || !Number.isFinite(cellHeight) || cellWidth === 0 || cellHeight === 0) {
+    return { data: [], stride: 1 };
+  }
+
+  const totalCells = width * height;
+  const stride = computeSampleStride(totalCells, maxArrows);
+  const arrowScale = 0.6;
+  const headScale = 0.35;
+  const headWidthScale = 0.35;
+  const data = [];
+
+  for (let row = 0; row < height; row += stride) {
+    const lat = north - (row + 0.5) * cellHeight;
+    const rowOffset = row * width;
+    for (let col = 0; col < width; col += stride) {
+      const code = values[rowOffset + col];
+      if (code === 0 || (nodata !== null && nodata !== undefined && code === nodata)) {
+        continue;
+      }
+      const delta = D8_POINTER_DELTAS[code];
+      if (!delta) continue;
+      const [dxCell, dyCell] = delta;
+      const lon = west + (col + 0.5) * cellWidth;
+      const dx = dxCell * cellWidth * arrowScale;
+      const dy = dyCell * cellHeight * arrowScale;
+      const endLon = lon + dx;
+      const endLat = lat + dy;
+      const len = Math.hypot(dx, dy);
+      if (!Number.isFinite(len) || len === 0) continue;
+      const ux = dx / len;
+      const uy = dy / len;
+      const headLength = len * headScale;
+      const headWidth = len * headWidthScale;
+      const perpX = -uy;
+      const perpY = ux;
+      const leftLon = endLon - ux * headLength + perpX * headWidth;
+      const leftLat = endLat - uy * headLength + perpY * headWidth;
+      const rightLon = endLon - ux * headLength - perpX * headWidth;
+      const rightLat = endLat - uy * headLength - perpY * headWidth;
+      data.push({
+        path: [
+          [lon, lat],
+          [endLon, endLat],
+          [leftLon, leftLat],
+          [endLon, endLat],
+          [rightLon, rightLat],
+        ],
+      });
+    }
+  }
+
+  return { data, stride };
+}
+
 function collectGeometryCoordinates(geometry) {
   if (!geometry || !geometry.coordinates) return [];
   const coords = geometry.coordinates;
@@ -476,6 +557,61 @@ export async function detectHillslopesOverlays({ buildScenarioUrl, buildBaseUrl,
     return { hillslopesSummary, subcatchmentsGeoJson: geoJson, hillslopesLayers };
   } catch (err) {
     logDetectionWarn('failed to load hillslopes overlays', err);
+    return null;
+  }
+}
+
+export async function detectD8DirectionLayer({ fetchGdalInfo, loadRasterFromDownload }) {
+  if (typeof fetchGdalInfo !== 'function' || typeof loadRasterFromDownload !== 'function') {
+    logDetectionInfo('D8 direction loader missing');
+    return null;
+  }
+  const path = 'dem/wbt/flovec.tif';
+  try {
+    const info = await fetchGdalInfo(path);
+    if (!info) {
+      logDetectionInfo('D8 direction raster missing', { path });
+      return null;
+    }
+
+    const raster = await loadRasterFromDownload(path);
+    if (!raster || !raster.values || !raster.width || !raster.height) {
+      logDetectionInfo('D8 direction raster empty', { path });
+      return null;
+    }
+
+    const bounds = computeBoundsFromGdal(info) || raster.bounds;
+    if (!bounds) {
+      logDetectionInfo('D8 direction raster missing bounds', { path });
+      return null;
+    }
+
+    const { data, stride } = buildD8ArrowData({
+      values: raster.values,
+      width: raster.width,
+      height: raster.height,
+      bounds,
+      nodata: raster.nodata,
+      maxArrows: DEFAULT_D8_MAX_ARROWS,
+    });
+    if (!data.length) {
+      logDetectionInfo('D8 direction raster has no arrows', { path });
+      return null;
+    }
+
+    return {
+      d8DirectionLayer: {
+        key: 'd8-direction',
+        label: 'D8 Direction',
+        path,
+        visible: false,
+        data,
+        bounds,
+        stride,
+      },
+    };
+  } catch (err) {
+    logDetectionWarn('failed to load D8 direction layer', err);
     return null;
   }
 }

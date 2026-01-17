@@ -27,6 +27,7 @@ export function createDetectionController({
   nlcdColormap,
   soilColorForValue,
   loadRaster,
+  loadRasterFromDownload,
   loadSbsImage,
   fetchGdalInfo,
   computeComparisonDiffRanges,
@@ -110,6 +111,19 @@ export function createDetectionController({
         subcatchmentsGeoJson: subcatchments,
         hillslopesLayers: result.hillslopesLayers,
       });
+      updateLayerList();
+      applyLayers();
+    }
+  }
+
+  async function detectD8DirectionLayer() {
+    if (typeof detectorModule.detectD8DirectionLayer !== 'function') return;
+    const result = await detectorModule.detectD8DirectionLayer({
+      fetchGdalInfo,
+      loadRasterFromDownload,
+    });
+    if (result && result.d8DirectionLayer) {
+      setValue('d8DirectionLayer', result.d8DirectionLayer);
       updateLayerList();
       applyLayers();
     }
@@ -350,6 +364,7 @@ export function createDetectionController({
     const tasks = [
       detectRasterLayers(),
       detectHillslopesOverlays(),
+      detectD8DirectionLayer(),
       detectChannelsOverlays(),
       detectWeppYearlyChannelOverlays(),
       detectOpenetOverlays(),
@@ -365,6 +380,7 @@ export function createDetectionController({
     detectLanduseOverlays,
     detectSoilsOverlays,
     detectHillslopesOverlays,
+    detectD8DirectionLayer,
     detectChannelsOverlays,
     detectOpenetOverlays,
     detectWatarOverlays,

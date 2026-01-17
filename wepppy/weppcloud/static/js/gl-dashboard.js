@@ -288,7 +288,7 @@
     throw new Error('gl-dashboard: raster utils module failed to load');
   }
 
-  const { loadRaster, loadSbsImage, fetchGdalInfo } = createRasterUtils({
+  const { loadRaster, loadRasterFromDownload, loadSbsImage, fetchGdalInfo } = createRasterUtils({
     ctx,
     getState,
     setValue,
@@ -724,6 +724,7 @@
     nlcdColormap: NLCD_COLORMAP,
     soilColorForValue: colorsModule.soilColorForValue,
     loadRaster,
+    loadRasterFromDownload,
     loadSbsImage,
     fetchGdalInfo,
     computeComparisonDiffRanges,
