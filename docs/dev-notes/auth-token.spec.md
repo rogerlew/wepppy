@@ -95,6 +95,29 @@ Downstream services should verify signatures using
 `WEPP_AUTH_JWT_SECRET` and ensure the audience and scopes are
 appropriate for the requested operation.
 
+## RQ job auth actor metadata
+rq-engine tags enqueued RQ jobs with a sanitized auth actor payload stored in
+`job.meta["auth_actor"]` so jobinfo/jobstatus tooling can identify who or what
+started a job without exposing JWTs or email.
+
+Schema (optional):
+```json
+{
+  "token_class": "user|session|service|mcp",
+  "user_id": 123,
+  "session_id": "session-abc",
+  "sub": "service-name",
+  "service_groups": ["culverts"]
+}
+```
+
+Rules:
+- `token_class=user` uses `user_id` only; `sub` must parse as int or the actor is omitted.
+- `token_class=session` uses `session_id` from `session_id` or `sub`.
+- `token_class=service` uses `sub` and optional `service_groups`.
+- `token_class=mcp` uses `sub` only.
+- Never store JWTs, email, or Authorization headers in job metadata.
+
 ## Token issuance utility
 
 The script `_scripts/issue_auth_token.py` issues tokens from the CLI:

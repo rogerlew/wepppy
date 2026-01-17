@@ -36,6 +36,11 @@ from wepppy.profile_coverage.runtime import (
     reset_profile_trace_slug,
     set_profile_trace_slug,
 )
+from wepppy.rq.auth_actor import (
+    install_rq_auth_actor_hook,
+    reset_auth_actor,
+    set_auth_actor,
+)
 try:
     from coverage import Coverage
     from coverage.exceptions import CoverageException
@@ -55,6 +60,8 @@ PROFILE_COVERAGE_SETTINGS = load_settings_from_env()
 if PROFILE_COVERAGE_SETTINGS.enabled and Coverage is not None:
     PROFILE_COVERAGE_SETTINGS.ensure_data_root(LOGGER)
     install_rq_hooks()
+
+install_rq_auth_actor_hook()
 
 
 class JobCancelledException(Exception):
@@ -130,6 +137,12 @@ class WepppyRqWorker(Worker):
         job.meta['runid'] = runid
         job.save()
 
+        auth_token = None
+        if isinstance(job.meta, dict):
+            auth_actor = job.meta.get("auth_actor")
+            if isinstance(auth_actor, dict) and auth_actor:
+                auth_token = set_auth_actor(auth_actor)
+
         wd = None
         if runid is not None:
             try:
@@ -152,6 +165,8 @@ class WepppyRqWorker(Worker):
         finally:
             if coverage_state:
                 self._stop_job_coverage(coverage_state)
+            if auth_token is not None:
+                reset_auth_actor(auth_token)
             if file_handler:
                 self.log.removeHandler(file_handler)
                 

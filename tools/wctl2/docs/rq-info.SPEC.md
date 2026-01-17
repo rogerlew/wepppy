@@ -14,6 +14,8 @@
 
 ```
 wctl rq-info [RQ_INFO_ARGS...]
+wctl rq-info --detail [RQ_INFO_ARGS...]
+wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 ```
 
 ## Behavior
@@ -22,11 +24,15 @@ wctl rq-info [RQ_INFO_ARGS...]
 - Appends any extra CLI args after `default batch`.
 - Returns the exit code from the underlying `rq info` command.
 - Logs the full docker compose exec invocation at INFO level.
+- `--detail` appends a job summary (runid, description, auth actor) using the RQ Python API.
+- `--detail-limit` caps the number of jobs per state and queue (default: 50; 0 = unlimited).
 
 ## Examples
 
 ```bash
 wctl rq-info
+wctl rq-info --detail
+wctl rq-info --detail --detail-limit 10
 wctl rq-info --interval 1
 wctl rq-info --raw
 ```

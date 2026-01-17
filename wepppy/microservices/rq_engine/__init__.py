@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from fastapi import FastAPI, Request
 
+from wepppy.rq.auth_actor import install_rq_auth_actor_hook
+
 from .batch_routes import router as batch_router
 from .climate_routes import router as climate_router
 from .culvert_routes import router as culvert_router
@@ -30,6 +32,7 @@ from .wepp_routes import router as wepp_router
 from .ash_routes import router as ash_router
 
 app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0")
+install_rq_auth_actor_hook()
 
 
 @app.middleware("http")

@@ -16,10 +16,16 @@
    - Confirm the screen refreshes every second.
    - Stop with `Ctrl-C` after at least one refresh.
 
+3. Run `wctl rq-info --detail`.
+   - Confirm the standard `rq info` output appears.
+   - Confirm a `Jobs (started, queued)` section follows with columns for `runid`, `description`, and `auth_actor`.
+   - If output is too large, rerun with `--detail-limit 10` and confirm the job list is shorter.
+
 ## Pass Criteria
 
 - The command exits successfully and displays queue + worker stats for both queues.
 - Extra args (like `--interval 1`) are honored without changing the default queue set.
+- `--detail` appends job metadata without breaking the base `rq info` output.
 
 ---
 

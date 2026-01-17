@@ -52,7 +52,8 @@ Example (sync update):
 - Job status (jobstatus):
   - `{job_id, runid, status, started_at, ended_at}`
 - Job info (jobinfo):
-  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children}`
+  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor}`
+  - `auth_actor` is optional and only includes non-PII identifiers (no JWTs, no email).
 
 ## Error responses
 - Use status-code-first semantics:

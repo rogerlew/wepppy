@@ -8,6 +8,7 @@ from fastapi import Request
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
+from wepppy.rq.auth_actor import set_auth_actor
 from wepppy.weppcloud.utils.auth_tokens import (
     JWTConfigurationError,
     JWTDecodeError,
@@ -85,6 +86,54 @@ def _normalize_roles(raw: Any) -> set[str]:
     return set()
 
 
+def _parse_user_id(raw: Any) -> int | None:
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        return int(str(raw).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _sanitize_auth_actor(claims: Mapping[str, Any]) -> dict[str, Any] | None:
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    if not token_class:
+        return None
+
+    actor: dict[str, Any] = {"token_class": token_class}
+
+    if token_class == "user":
+        user_id = _parse_user_id(claims.get("sub"))
+        if user_id is None:
+            return None
+        actor["user_id"] = user_id
+        return actor
+
+    if token_class == "session":
+        session_id = claims.get("session_id") or claims.get("sub")
+        if not session_id:
+            return None
+        actor["session_id"] = str(session_id)
+        return actor
+
+    if token_class == "service":
+        service_sub = str(claims.get("sub") or "").strip()
+        if service_sub:
+            actor["sub"] = service_sub
+        service_groups = _normalize_list(claims.get("service_groups"))
+        if service_groups:
+            actor["service_groups"] = service_groups
+        return actor if len(actor) > 1 else None
+
+    if token_class == "mcp":
+        mcp_sub = str(claims.get("sub") or "").strip()
+        if mcp_sub:
+            actor["sub"] = mcp_sub
+        return actor if len(actor) > 1 else None
+
+    return None
+
+
 def require_roles(claims: Mapping[str, Any], required_roles: Sequence[str]) -> None:
     roles = _normalize_roles(claims.get("roles"))
     missing = [role for role in required_roles if role.lower() not in roles]
@@ -139,7 +188,11 @@ def _check_session_marker(session_id: str, runid: str) -> None:
     conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
     with redis.Redis(**conn_kwargs) as redis_conn:
         if not redis_conn.exists(key):
-            raise AuthError("Session token expired or invalid", status_code=403, code="forbidden")
+            raise AuthError(
+                "Session token invalid or expired. Reload the page to continue.",
+                status_code=403,
+                code="forbidden",
+            )
 
 
 def require_session_marker(claims: Mapping[str, Any], runid: str) -> None:
@@ -203,6 +256,10 @@ def require_jwt(
                 status_code=403,
                 code="forbidden",
             )
+
+    auth_actor = _sanitize_auth_actor(claims)
+    if auth_actor is not None:
+        set_auth_actor(auth_actor)
 
     return claims
 

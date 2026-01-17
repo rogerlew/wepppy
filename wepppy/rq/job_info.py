@@ -29,6 +29,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         else:
             elapsed_s = (now - job.started_at).total_seconds()
 
+    auth_actor = job.meta.get("auth_actor") if isinstance(job.meta, dict) else None
     job_info: Dict[str, Any] = {
         "job_id": job.id,
         "runid": job.meta.get('runid'),
@@ -39,6 +40,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         "description": job.description,
         "elapsed_s": elapsed_s,
         "exc_info": job.meta.get('exc_string'),
+        "auth_actor": auth_actor if isinstance(auth_actor, dict) else None,
         "children": {}
     }
 

@@ -55,3 +55,39 @@ def test_rq_info_appends_args(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
             False,
         )
     ]
+
+
+def test_rq_info_detail_runs_summary(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    result, recorded = _run_command(monkeypatch, temp_project, ["rq-info", "--detail"])
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "rq-worker",
+            "/opt/venv/bin/rq info -u redis://redis:6379/9 default batch",
+            True,
+            False,
+        ),
+        (
+            "rq-worker",
+            "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch --limit 50",
+            True,
+            False,
+        ),
+    ]
+
+
+def test_rq_info_detail_limit(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    result, recorded = _run_command(
+        monkeypatch,
+        temp_project,
+        ["rq-info", "--detail", "--detail-limit", "10"],
+    )
+
+    assert result.exit_code == 0
+    assert recorded[-1] == (
+        "rq-worker",
+        "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch --limit 10",
+        True,
+        False,
+    )
