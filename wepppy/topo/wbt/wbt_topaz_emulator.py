@@ -582,6 +582,7 @@ class WhiteboxToolsTopazEmulator:
         warped = gdal.Warp(flovec_wgs_fn, src_ds, **warp_kwargs)
         if warped is None:
             raise Exception(f"Flow vector WGS84 file was not created: {flovec_wgs_fn}")
+        warped.SetMetadataItem("WEPP_CELL_SIZE_M", str(self.cellsize))
         warped.FlushCache()
         del warped
         del src_ds

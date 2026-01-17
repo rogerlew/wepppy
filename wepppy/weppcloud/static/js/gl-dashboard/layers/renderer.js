@@ -87,6 +87,7 @@ export function createLayerRenderer({
   };
 
   const CHANNEL_GROUP_KEYS = ['channelsLayers', 'weppChannelLayers', 'weppYearlyChannelLayers'];
+  const layerSectionOpen = new Set();
 
   function resetChannelGroups(exceptKey) {
     CHANNEL_GROUP_KEYS.forEach((key) => {
@@ -354,6 +355,14 @@ export function createLayerRenderer({
 
   function updateLayerList() {
     if (!layerListEl) return;
+    layerListEl.querySelectorAll('details.gl-layer-details').forEach((detailsEl) => {
+      if (!detailsEl.open) return;
+      const summary = detailsEl.querySelector('summary');
+      const title = summary && summary.textContent ? summary.textContent.trim() : '';
+      if (title) {
+        layerSectionOpen.add(title);
+      }
+    });
     const state = getState();
     const {
       landuseLayers = [],
@@ -472,7 +481,14 @@ export function createLayerRenderer({
       const hasVisibleItem =
         section.items.some((l) => l.visible) ||
         (Array.isArray(section.channelItems) && section.channelItems.some((l) => l.visible));
-      details.open = idx === 0 || hasVisibleItem || (section.isRap && rapCumulativeMode);
+      details.open = layerSectionOpen.has(section.title) || idx === 0 || hasVisibleItem || (section.isRap && rapCumulativeMode);
+      details.addEventListener('toggle', () => {
+        if (details.open) {
+          layerSectionOpen.add(section.title);
+        } else {
+          layerSectionOpen.delete(section.title);
+        }
+      });
 
       const summary = document.createElement('summary');
       summary.className = 'gl-layer-group';

@@ -16,13 +16,13 @@ const logDetectionInfo = (message, context) => logDetection('info', message, con
 const logDetectionWarn = (message, context) => logDetection('warn', message, context);
 
 const D8_POINTER_DELTAS = Object.freeze({
-  1: [1, 1],
-  2: [1, 0],
-  4: [1, -1],
+  1: [-1, 1],
+  2: [-1, 0],
+  4: [-1, -1],
   8: [0, -1],
-  16: [-1, -1],
-  32: [-1, 0],
-  64: [-1, 1],
+  16: [1, -1],
+  32: [1, 0],
+  64: [1, 1],
   128: [0, 1],
 });
 
@@ -48,9 +48,6 @@ function buildD8ArrowData({ values, width, height, bounds, nodata, maxArrows }) 
 
   const totalCells = width * height;
   const stride = computeSampleStride(totalCells, maxArrows);
-  const arrowScale = 0.6;
-  const headScale = 0.35;
-  const headWidthScale = 0.35;
   const data = [];
 
   for (let row = 0; row < height; row += stride) {
@@ -65,35 +62,29 @@ function buildD8ArrowData({ values, width, height, bounds, nodata, maxArrows }) 
       if (!delta) continue;
       const [dxCell, dyCell] = delta;
       const lon = west + (col + 0.5) * cellWidth;
-      const dx = dxCell * cellWidth * arrowScale;
-      const dy = dyCell * cellHeight * arrowScale;
-      const endLon = lon + dx;
-      const endLat = lat + dy;
-      const len = Math.hypot(dx, dy);
-      if (!Number.isFinite(len) || len === 0) continue;
-      const ux = dx / len;
-      const uy = dy / len;
-      const headLength = len * headScale;
-      const headWidth = len * headWidthScale;
-      const perpX = -uy;
-      const perpY = ux;
-      const leftLon = endLon - ux * headLength + perpX * headWidth;
-      const leftLat = endLat - uy * headLength + perpY * headWidth;
-      const rightLon = endLon - ux * headLength - perpX * headWidth;
-      const rightLat = endLat - uy * headLength - perpY * headWidth;
+      const angle = (Math.atan2(dyCell, dxCell) * 180) / Math.PI;
+      if (!Number.isFinite(angle)) continue;
       data.push({
-        path: [
-          [lon, lat],
-          [endLon, endLat],
-          [leftLon, leftLat],
-          [endLon, endLat],
-          [rightLon, rightLat],
-        ],
+        position: [lon, lat],
+        angle,
       });
     }
   }
 
   return { data, stride };
+}
+
+function resolveD8CellSizeMeters(info) {
+  if (!info || typeof info !== 'object') return null;
+  const metadata = info.metadata;
+  if (!metadata || typeof metadata !== 'object') return null;
+  const domain = metadata[''] || metadata.DEFAULT || metadata.default || null;
+  let raw = domain && typeof domain === 'object' ? domain.WEPP_CELL_SIZE_M : undefined;
+  if (raw === undefined && Object.prototype.hasOwnProperty.call(metadata, 'WEPP_CELL_SIZE_M')) {
+    raw = metadata.WEPP_CELL_SIZE_M;
+  }
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
 }
 
 function collectGeometryCoordinates(geometry) {
@@ -573,6 +564,11 @@ export async function detectD8DirectionLayer({ fetchGdalInfo, loadRasterFromDown
       logDetectionInfo('D8 direction raster missing', { path });
       return null;
     }
+    const cellSizeMeters = resolveD8CellSizeMeters(info);
+    if (!Number.isFinite(cellSizeMeters)) {
+      logDetectionInfo('D8 direction raster missing cell size metadata', { path });
+      return null;
+    }
 
     const raster = await loadRasterFromDownload(path);
     if (!raster || !raster.values || !raster.width || !raster.height) {
@@ -608,6 +604,7 @@ export async function detectD8DirectionLayer({ fetchGdalInfo, loadRasterFromDown
         data,
         bounds,
         stride,
+        cellSizeMeters,
       },
     };
   } catch (err) {

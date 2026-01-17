@@ -24,7 +24,13 @@ const CHANNEL_LABEL_OUTLINE_COLOR = [255, 255, 255, 255];
 const CHANNEL_LABEL_OUTLINE_WIDTH = 3;
 const CHANNEL_LABEL_FONT_SIZE = 16;
 const D8_DIRECTION_COLOR = [255, 105, 180, 230];
-const D8_DIRECTION_LINE_WIDTH = 1.2;
+const D8_DIRECTION_ICON_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path fill="white" d="M8 29.5H38.4V22L56 32L38.4 42V34.5H8Z"/></svg>';
+const D8_DIRECTION_ICON_ATLAS = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(D8_DIRECTION_ICON_SVG)}`;
+const D8_DIRECTION_ICON_MAPPING = Object.freeze({
+  arrow: { x: 0, y: 0, width: 64, height: 64, mask: true },
+});
+const D8_DIRECTION_ICON_ID = 'arrow';
 
 function hexToRgba(hex, alpha) {
   const normalized = String(hex || '').replace('#', '');
@@ -468,15 +474,18 @@ export function createLayerUtils({
     const layer = state.d8DirectionLayer;
     if (!state.subcatchmentsVisible || !layer || !layer.visible || !Array.isArray(layer.data) || !layer.data.length) return [];
     return [
-      new deck.PathLayer({
+      new deck.IconLayer({
         id: 'd8-direction-arrows',
         data: layer.data,
-        getPath: (d) => d.path,
-        getColor: D8_DIRECTION_COLOR,
-        getWidth: () => D8_DIRECTION_LINE_WIDTH,
-        widthUnits: 'pixels',
-        jointRounded: true,
-        capRounded: true,
+        iconAtlas: D8_DIRECTION_ICON_ATLAS,
+        iconMapping: D8_DIRECTION_ICON_MAPPING,
+        getIcon: () => D8_DIRECTION_ICON_ID,
+        getPosition: (d) => d.position,
+        getAngle: (d) => d.angle,
+        getColor: () => D8_DIRECTION_COLOR,
+        getSize: () => layer.cellSizeMeters,
+        sizeUnits: 'meters',
+        billboard: false,
         pickable: false,
       }),
     ];
