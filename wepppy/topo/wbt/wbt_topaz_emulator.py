@@ -278,6 +278,13 @@ class WhiteboxToolsTopazEmulator:
         return _join(self.wbt_wd, f"flovec.{ext}")
 
     @property
+    def flovec_wgs(self) -> str:
+        """
+        Returns the path to the WGS84 flow vector file.
+        """
+        return _join(self.wbt_wd, "flovec.wgs.tif")
+
+    @property
     def floaccum(self):
         """
         Returns the path to the d8 flow accumulation file.
@@ -557,8 +564,33 @@ class WhiteboxToolsTopazEmulator:
         if not _exists(flovec_fn):
             raise Exception(f"Flow vector file was not created: {flovec_fn}")
 
+        flovec_wgs_fn = self.flovec_wgs
+        remove_if_exists(flovec_wgs_fn)
+        src_ds = gdal.Open(flovec_fn)
+        if src_ds is None:
+            raise Exception(f"Flow vector file could not be opened: {flovec_fn}")
+        src_band = src_ds.GetRasterBand(1)
+        src_nodata = src_band.GetNoDataValue()
+        warp_kwargs = {
+            "dstSRS": "EPSG:4326",
+            "format": "GTiff",
+            "resampleAlg": "near",
+            "outputType": src_band.DataType,
+        }
+        if src_nodata is not None:
+            warp_kwargs["dstNodata"] = src_nodata
+        warped = gdal.Warp(flovec_wgs_fn, src_ds, **warp_kwargs)
+        if warped is None:
+            raise Exception(f"Flow vector WGS84 file was not created: {flovec_wgs_fn}")
+        warped.FlushCache()
+        del warped
+        del src_ds
+        if not _exists(flovec_wgs_fn):
+            raise Exception(f"Flow vector WGS84 file was not created: {flovec_wgs_fn}")
+
         if self.verbose:
             print(f"Flow vector file created successfully: {flovec_fn}")
+            print(f"Flow vector WGS84 file created successfully: {flovec_wgs_fn}")
 
     @build_step("flow_accumulation")
     def _create_flow_accumulation(self, logger: Optional[logging.Logger] = None) -> None:
@@ -702,6 +734,16 @@ class WhiteboxToolsTopazEmulator:
         self.mcl = mcl
         self.csa = csa
 
+        bound_fn = self.bound
+        if _exists(bound_fn):
+            if logger is not None:
+                logger.info(
+                    "WhiteBoxToolsTopazEmulator.%s(): removing stale bound %s",
+                    inspect.currentframe().f_code.co_name,
+                    bound_fn,
+                )
+            remove_if_exists(bound_fn)
+
         self._create_relief(fill_or_breach, blc_dist=blc_dist, logger=logger)
         self._create_flow_vector(logger=logger)
         self._create_flow_accumulation(logger=logger)
@@ -836,7 +878,26 @@ class WhiteboxToolsTopazEmulator:
 
         watershed_mask = getattr(self, "bound", None)
         if watershed_mask and _exists(watershed_mask):
-            kwargs["watershed"] = watershed_mask
+            try:
+                flovec_ds = gdal.Open(self.flovec)
+                bound_ds = gdal.Open(watershed_mask)
+                if flovec_ds and bound_ds:
+                    if (
+                        flovec_ds.RasterXSize == bound_ds.RasterXSize
+                        and flovec_ds.RasterYSize == bound_ds.RasterYSize
+                    ):
+                        kwargs["watershed"] = watershed_mask
+                    elif logger is not None:
+                        logger.warning(
+                            "Skipping watershed mask for find_outlet due to dimension mismatch: flovec=%s bound=%s",
+                            (flovec_ds.RasterXSize, flovec_ds.RasterYSize),
+                            (bound_ds.RasterXSize, bound_ds.RasterYSize),
+                        )
+            finally:
+                if "flovec_ds" in locals() and flovec_ds is not None:
+                    del flovec_ds
+                if "bound_ds" in locals() and bound_ds is not None:
+                    del bound_ds
 
         self.wbt.find_outlet(**kwargs)
 

@@ -566,7 +566,7 @@ export async function detectD8DirectionLayer({ fetchGdalInfo, loadRasterFromDown
     logDetectionInfo('D8 direction loader missing');
     return null;
   }
-  const path = 'dem/wbt/flovec.tif';
+  const path = 'dem/wbt/flovec.wgs.tif';
   try {
     const info = await fetchGdalInfo(path);
     if (!info) {

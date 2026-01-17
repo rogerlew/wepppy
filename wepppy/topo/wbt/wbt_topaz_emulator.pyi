@@ -90,6 +90,9 @@ class WhiteboxToolsTopazEmulator:
     def flovec(self) -> str: ...
 
     @property
+    def flovec_wgs(self) -> str: ...
+
+    @property
     def floaccum(self) -> str: ...
 
     @property
