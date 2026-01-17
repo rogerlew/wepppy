@@ -18,6 +18,11 @@
     .cap-gate__status.is-error {
       color: var(--wc-color-critical);
     }
+
+    .cap-gate__help {
+      font-size: var(--wc-font-size-sm);
+      color: var(--wc-color-text-muted);
+    }
   </style>
 {% endblock %}
 
@@ -28,9 +33,13 @@
       <p class="wc-text-muted">{{ cap_reason }}</p>
     {% endif %}
     <p class="cap-gate__status" id="cap-status">Completing verification...</p>
+    <p class="cap-gate__help" id="cap-help">If verification does not start, click Verify now or reload the page.</p>
     <div class="wc-button-row">
-      <button type="button" class="pure-button pure-button-secondary" id="cap-retry" hidden>
-        Retry verification
+      <button type="button" class="pure-button pure-button-primary" id="cap-retry">
+        Verify now
+      </button>
+      <button type="button" class="pure-button pure-button-secondary" id="cap-reload">
+        Reload page
       </button>
     </div>
   </section>
@@ -48,6 +57,8 @@
       var apiEndpoint = {{ cap_api_endpoint | tojson }};
       var statusEl = document.getElementById("cap-status");
       var retryButton = document.getElementById("cap-retry");
+      var reloadButton = document.getElementById("cap-reload");
+      var isBusy = false;
 
       function setStatus(message, isError) {
         if (!statusEl) {
@@ -55,6 +66,13 @@
         }
         statusEl.textContent = message;
         statusEl.classList.toggle("is-error", Boolean(isError));
+      }
+
+      function setBusy(busy) {
+        isBusy = busy;
+        if (retryButton) {
+          retryButton.disabled = busy;
+        }
       }
 
       function extractToken(result) {
@@ -71,16 +89,18 @@
       }
 
       function handleFailure(message) {
+        setBusy(false);
         setStatus(message, true);
-        if (retryButton) {
-          retryButton.hidden = false;
-        }
       }
 
       function solve() {
+        if (isBusy) {
+          return;
+        }
+        setBusy(true);
         setStatus("Completing verification...", false);
         if (typeof Cap === "undefined") {
-          handleFailure("CAPTCHA library failed to load.");
+          handleFailure("CAPTCHA library failed to load. Reload the page and try again.");
           return;
         }
 
@@ -120,8 +140,13 @@
 
       if (retryButton) {
         retryButton.addEventListener("click", function () {
-          retryButton.hidden = true;
           solve();
+        });
+      }
+
+      if (reloadButton) {
+        reloadButton.addEventListener("click", function () {
+          window.location.reload();
         });
       }
 
