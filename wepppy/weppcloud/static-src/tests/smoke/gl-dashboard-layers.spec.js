@@ -203,6 +203,25 @@ test.describe('gl-dashboard layer detection and wiring', () => {
     await expect.poll(async () => getDeckLayerIds(page)).not.toContain('subcatchment-labels');
   });
 
+  test('D8 Direction toggle keeps Hillslopes section open', async ({ page }) => {
+    await openDashboard(page);
+    await waitForSubcatchments(page);
+    await expandSection(page, 'Hillslopes');
+
+    const d8Toggle = page.getByLabel('D8 Direction');
+    if ((await d8Toggle.count()) === 0) {
+      test.skip('D8 Direction overlay not available in this run');
+    }
+
+    await expect(d8Toggle).toBeVisible({ timeout: 15000 });
+    await d8Toggle.check({ force: true });
+    await expect.poll(async () => getDeckLayerIds(page)).toContain('d8-direction-arrows');
+    await expect.poll(async () => isDetailsOpen(page, 'Hillslopes')).toBeTruthy();
+
+    await d8Toggle.uncheck({ force: true });
+    await expect.poll(async () => isDetailsOpen(page, 'Hillslopes')).toBeTruthy();
+  });
+
   test('Channels overlay toggles and legend updates', async ({ page }) => {
     await openDashboard(page);
     const hasChannels = await waitForChannels(page);

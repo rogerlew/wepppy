@@ -10,7 +10,7 @@ Watershed abstraction begins by acquiring a Digital Elevation Map or DEM.
 ## Watershed Abstraction General Workflow from Online Interface
 
 1. Acquire a DEM (raster)
-   - can be from different sources depending on logation
+- can be from different sources depending on location
    - can be at various spatial resolutions
    - could be lidar
 
@@ -60,12 +60,13 @@ Watershed abstraction begins by acquiring a Digital Elevation Map or DEM.
 - fork of whitebox-tools
 - no gdal, but geotiff support
 - performant
-- tools are written in a straight-forward encapulated procedural style and relatively easy to extend
-- `HillslopesTopaz` in wbt-weppcloud and `WhiteboxToolsTopazEmulator` in wepppy provide `NoDb.Watershed` a substantially similiar interface to TOPAZ resources
+- tools are written in a straightforward encapsulated procedural style and relatively easy to extend
+- `HillslopesTopaz` in wbt-weppcloud and `WhiteboxToolsTopazEmulator` in wepppy provide `NoDb.Watershed` a substantially similar interface to TOPAZ resources
 
 ## Flow Vector Outputs (WBT only)
 
 - `flovec.tif` is the WhiteboxTools D8 pointer raster (`64 128 1 / 32 0 2 / 16 8 4`).
+- Pointer mapping uses the WhiteboxTools default (not ESRI): 1=NE, 2=E, 4=SE, 8=S, 16=SW, 32=W, 64=NW, 128=N.
 - `flovec.wgs.tif` is a WGS84 warp of `flovec.tif` (EPSG:4326, nearest-neighbor, same data type).
 - `flovec.wgs.tif` includes metadata `WEPP_CELL_SIZE_M` so UI overlays can size arrows in meters.
 - The gl-dashboard D8 Direction overlay loads `dem/wbt/flovec.wgs.tif` via the browse download routes; re-delineate WBT runs to generate it.
