@@ -31,7 +31,7 @@ Omni snapshots the working directory into `_pups/omni/scenarios/<scenario_name>`
 
 ## Architecture
 
-Omni follows the NoDb singleton pattern. The controller persists state in `omni.nodb` (scenarios, contrasts, dependency trees, run states) and uses Redis DB 13 for 72-hour caching. All scenario workspaces live under `<parent_wd>/_pups/omni/scenarios/<scenario_name>` and are themselves valid WEPPcloud projects (symlinked climate/watershed, copied disturbed/landuse/soils).
+Omni follows the NoDb singleton pattern. The controller persists state in `omni.nodb` (scenarios, contrast names, dependency trees, run states) and uses Redis DB 13 for 72-hour caching. Contrast mappings are stored as ASCII sidecar TSVs under `omni/contrasts` so large watersheds do not balloon the NoDb payload. All scenario workspaces live under `<parent_wd>/_pups/omni/scenarios/<scenario_name>` and are themselves valid WEPPcloud projects (symlinked climate/watershed, copied disturbed/landuse/soils).
 
 ### Components
 
@@ -72,7 +72,7 @@ wepppy/weppcloud/templates/controls/
 2. **Hillslope Selection**: `build_contrasts()` resets existing contrast definitions, reads `wepp/output/interchange/loss_pw0.hill.parquet` (control scenario), sorts hillslopes by objective parameter, and selects top contributors up to threshold
 3. **Selection Sidecar**: Each contrast mapping is written to `omni/contrasts/contrast_<id>.tsv` as tab-delimited `topaz_id` + hillslope pass path for fast reloads on large watersheds
 4. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates `_pups/omni/contrasts/<contrast_id>`, symlinks the watershed run inputs (excluding `pw0.run`/`pw0.err`), and regenerates `pw0.run` with mixed hillslope pass files
-5. **WEPP Execution**: `run_omni_contrasts()` clears existing `_pups/omni/contrasts/<id>` runs, then executes the watershed model and writes outputs under `_pups/omni/contrasts/<contrast_id>/wepp/output`
+5. **WEPP Execution**: `run_omni_contrasts()` clears existing `_pups/omni/contrasts/<id>` runs (excluding `_uploads`), then executes the watershed model and writes outputs under `_pups/omni/contrasts/<contrast_id>/wepp/output`
 6. **Reporting**: `contrasts_report()` joins control and contrast loss metrics, computes deltas, and persists `contrasts.out.parquet`
 
 ### Contrast Selection Modes
@@ -114,6 +114,8 @@ Each contrast mapping is persisted to `omni/contrasts/contrast_<id>.tsv` to keep
 ```
 <topaz_id>\t<wepp_hillslope_pass_path>
 ```
+
+Omni intentionally omits `_contrasts` from `omni.nodb` and reloads these sidecars on demand.
 
 ### Dependency Tree Persistence
 

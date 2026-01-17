@@ -579,7 +579,6 @@ class Omni(NoDbBase):
             self._contrast_geojson_path = None
             self._contrast_geojson_name_key = None
             self._contrast_order_reduction_passes = None
-            self._mulching_base_scenario = None
 
             self._scenario_dependency_tree = {}
             self._contrast_dependency_tree = {}
