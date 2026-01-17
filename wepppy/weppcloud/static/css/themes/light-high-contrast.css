@@ -1,4 +1,4 @@
-/* Generated from light-high-contrast-theme.json on 2026-01-11T04:43:04.920204+00:00 */
+/* Generated from light-high-contrast-theme.json on 2026-01-17T18:00:59.098349+00:00 */
 :root[data-theme="light-high-contrast"] {
   --wc-color-accent: #0050A4;
   --wc-color-accent-soft: rgba(0, 80, 164, 0.180);
@@ -16,6 +16,7 @@
   --wc-color-positive-soft: rgba(15, 139, 37, 0.180);
   --wc-color-primary: #0050A4;
   --wc-color-primary-dark: #004083;
+  --wc-color-scheme: light;
   --wc-color-surface: #FFFEFA;
   --wc-color-surface-alt: #E2ECFF;
   --wc-color-text: #051526;

@@ -28,6 +28,7 @@
   --wc-font-weight-semibold: 600;
   --wc-font-weight-normal: 400;
   --wc-line-height: 1.5;
+  --wc-color-scheme: light;
 
   /* Light theme color palette (grayscale inspired) */
   --wc-color-page: #f6f8fa;
@@ -95,6 +96,7 @@
   --wc-button-shadow: var(--wc-shadow-sm);
   --wc-button-shadow-hover: 0 8px 20px rgba(15, 23, 42, 0.16);
   --wc-run-header-offset: 0px;
+  color-scheme: var(--wc-color-scheme);
 }
 
 html {

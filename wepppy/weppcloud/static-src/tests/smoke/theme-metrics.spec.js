@@ -24,14 +24,16 @@ test.describe('theme contrast metrics', () => {
     const baseUrl = process.env.SMOKE_BASE_URL || 'http://localhost:8080';
     const themeLabUrl = new URL(THEME_LAB_PATH, baseUrl);
     themeLabUrl.hash = 'theme-lab';
+    const extraHeaders = { 'X-Forwarded-Proto': 'https' };
 
+    await page.setExtraHTTPHeaders(extraHeaders);
     await page.goto(themeLabUrl.toString(), { waitUntil: 'networkidle' });
     const themeIds = await extractThemeIds(page);
     const targets = await readContrastTargets(page);
 
     const results = [];
     for (const themeId of themeIds) {
-      const context = await browser.newContext();
+      const context = await browser.newContext({ extraHTTPHeaders: extraHeaders });
       const themedPage = await context.newPage();
       await themedPage.addInitScript(({ themeId: currentTheme }) => {
         const syncStorage = (theme) => {

@@ -255,6 +255,26 @@
         }
       ]
     },
+    "--wc-color-scheme": {
+      "description": "Preferred color scheme hint for browser-native form controls.",
+      "fallback": "light",
+      "tokens": [
+        {
+          "literal": "light"
+        }
+      ],
+      "overrides": {
+        "onedark": "dark",
+        "ayu-dark": "dark",
+        "ayu-dark-bordered": "dark",
+        "ayu-mirage": "dark",
+        "ayu-mirage-bordered": "dark",
+        "cursor-dark-anysphere": "dark",
+        "cursor-dark-midnight": "dark",
+        "cursor-dark-high-contrast": "dark",
+        "dark-modern": "dark"
+      }
+    },
     "--wc-color-page": {
       "description": "Body background behind control shells and layout chrome.",
       "fallback": "#f6f8fa",

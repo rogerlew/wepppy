@@ -244,7 +244,14 @@ async function samplePairColors(page, pair) {
         return Math.max(0, Math.min(1, Number(value)));
       };
 
-      const resolveBackground = (element) => {
+      const resolveBackground = (element, pseudo) => {
+        if (element && pseudo) {
+          const pseudoStyle = getComputedStyle(element, pseudo);
+          const pseudoColor = parseColorString(pseudoStyle.backgroundColor);
+          if (pseudoColor && pseudoColor.a > 0) {
+            return pseudoColor;
+          }
+        }
         let current = element;
         while (current) {
           const style = getComputedStyle(current);
@@ -261,9 +268,9 @@ async function samplePairColors(page, pair) {
         return { r: 255, g: 255, b: 255, a: 1 };
       };
 
-      const resolveForeground = (element, mode) => {
+      const resolveForeground = (element, mode, pseudo) => {
         if (!element) return null;
-        const style = getComputedStyle(element);
+        const style = pseudo ? getComputedStyle(element, pseudo) : getComputedStyle(element);
         const borderColor = parseColorString(style.borderTopColor);
         if (mode === 'border') {
           if (borderColor && borderColor.a > 0) {
@@ -271,7 +278,7 @@ async function samplePairColors(page, pair) {
           }
         }
         let referenceColor = style.color;
-        if (element.matches('input[type="checkbox"], input[type="radio"]') && style.accentColor) {
+        if (!pseudo && element.matches('input[type="checkbox"], input[type="radio"]') && style.accentColor) {
           referenceColor = style.accentColor;
         }
         let parsed = parseColorString(referenceColor);
@@ -289,10 +296,12 @@ async function samplePairColors(page, pair) {
       const foregroundEl = getElement(descriptor.foreground);
       const backgroundEl = descriptor.background ? getElement(descriptor.background) : foregroundEl;
       const foregroundMode = descriptor.foreground_mode || descriptor.foregroundMode || null;
+      const foregroundPseudo = descriptor.foreground_pseudo || descriptor.foregroundPseudo || null;
+      const backgroundPseudo = descriptor.background_pseudo || descriptor.backgroundPseudo || null;
 
       return {
-        foreground: resolveForeground(foregroundEl, foregroundMode),
-        background: resolveBackground(backgroundEl || foregroundEl),
+        foreground: resolveForeground(foregroundEl, foregroundMode, foregroundPseudo),
+        background: resolveBackground(backgroundEl || foregroundEl, backgroundPseudo),
         missingForeground: !foregroundEl,
         missingBackground: Boolean(descriptor.background && !backgroundEl),
       };

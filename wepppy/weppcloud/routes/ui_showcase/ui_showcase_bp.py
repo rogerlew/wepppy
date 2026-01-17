@@ -210,8 +210,9 @@ def component_gallery() -> str:
             "pairs": [
                 {
                     "name": "spin_vs_input",
-                    "foreground": "#theme_lab_numeric_spin",
+                    "foreground": "#theme_lab_numeric",
                     "background": "#theme_lab_numeric",
+                    "foreground_pseudo": "::-webkit-inner-spin-button",
                 }
             ],
         },

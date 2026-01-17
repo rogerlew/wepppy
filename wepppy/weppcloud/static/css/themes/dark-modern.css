@@ -1,4 +1,4 @@
-/* Generated from dark_modern.json on 2026-01-11T04:43:04.920658+00:00 */
+/* Generated from dark_modern.json on 2026-01-17T18:00:59.098835+00:00 */
 :root[data-theme="dark-modern"] {
   --wc-color-accent: #0078D4;
   --wc-color-accent-soft: rgba(0, 120, 212, 0.180);
@@ -16,6 +16,7 @@
   --wc-color-positive-soft: rgba(46, 160, 67, 0.180);
   --wc-color-primary: #0078D4;
   --wc-color-primary-dark: #0060AA;
+  --wc-color-scheme: dark;
   --wc-color-surface: #1F1F1F;
   --wc-color-surface-alt: #181818;
   --wc-color-text: #CCCCCC;
