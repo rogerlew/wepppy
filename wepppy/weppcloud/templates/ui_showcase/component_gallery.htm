@@ -495,15 +495,20 @@
             <p class="wc-card__description">Tests hint text against `.wc-field__control` for numeric inputs.</p>
           </header>
           <div class="wc-card__body">
-            {{ ui.numeric_field(
-                 "theme_lab_numeric",
-                 "Rainfall (mm)",
-                 value="250",
-                 min="0",
-                 max="5000",
-                 precision="1",
-                 help="Enter a value between 0 and 5000 mm."
-               ) }}
+            <div class="wc-stack">
+              {{ ui.numeric_field(
+                   "theme_lab_numeric",
+                   "Rainfall (mm)",
+                   value="250",
+                   min="0",
+                   max="5000",
+                   precision="1",
+                   help="Enter a value between 0 and 5000 mm."
+                 ) }}
+              <div class="wc-theme-lab__spin-swatch" aria-hidden="true">
+                <span id="theme_lab_numeric_spin" class="wc-theme-lab__spin-icon">&#9650;&#9660;</span>
+              </div>
+            </div>
           </div>
         </article>
       </div>

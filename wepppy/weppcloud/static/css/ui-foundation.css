@@ -77,6 +77,7 @@
   --wc-select-padding-y: calc(var(--wc-space-xs) + 1px);
   --wc-select-padding-x: var(--wc-space-sm);
   --wc-select-chevron-color: var(--wc-color-text-muted);
+  --wc-number-spin-color: var(--wc-color-text);
   --wc-button-padding-y: calc(var(--wc-space-xs) + 1px);
   --wc-button-padding-x: var(--wc-space-lg);
   --wc-button-primary-bg: var(--wc-color-primary);
@@ -284,6 +285,12 @@ textarea {
 :where(input, textarea)::placeholder {
   color: var(--wc-color-text-muted);
   color: color-mix(in srgb, var(--wc-color-text) 45%, transparent);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  color: var(--wc-number-spin-color);
+  opacity: 1;
 }
 
 .pure-form :is(select, .wc-select),
@@ -1637,6 +1644,24 @@ h5:first-child {
   width: 120px;
   min-width: 100px;
   flex: 0 0 auto;
+}
+
+.wc-theme-lab__spin-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  min-width: 3rem;
+  padding: var(--wc-space-xs) var(--wc-space-sm);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background-color: var(--wc-color-surface-alt);
+}
+
+.wc-theme-lab__spin-icon {
+  color: var(--wc-number-spin-color);
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 .wc-field__unit {

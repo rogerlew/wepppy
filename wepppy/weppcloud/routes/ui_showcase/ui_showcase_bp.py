@@ -204,6 +204,18 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_field_spin_button",
+            "label": "Numeric spin button vs input background",
+            "threshold": 3.0,
+            "pairs": [
+                {
+                    "name": "spin_vs_input",
+                    "foreground": "#theme_lab_numeric_spin",
+                    "background": "#theme_lab_numeric",
+                }
+            ],
+        },
+        {
             "id": "wc_text_muted",
             "label": "Muted copy vs surface",
             "threshold": 3.0,
