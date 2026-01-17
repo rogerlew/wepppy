@@ -16,10 +16,10 @@
 - **ui/month-slider.js** — Slider controller for monthly layers (OpenET); DOM guarded.
 - **graphs/timeseries-graph.js** — Canvas graph controller; DOM-bound to panel/canvas.
 - **graphs/graph-loaders.js** — Graph data loaders (Omni/RAP/WEPP/OpenET); no DOM/deck.
-- **layers/detector.js** — Overlay detection (raster/vector) with fetch; no DOM/deck.
+- **layers/detector.js** — Overlay detection (raster/vector) with fetch; no DOM/deck. D8 Direction expects `dem/wbt/flovec.wgs.tif` via download routes and reads `WEPP_CELL_SIZE_M` from gdalinfo metadata.
 - **layers/orchestrator.js** — Detection sequencing + state wiring; no DOM.
 - **layers/renderer.js** — Sidebar + legends DOM; uses injected callbacks/state.
-- **map/layers.js** — Deck layer builders + tooltip/legend helpers; pure.
+- **map/layers.js** — Deck layer builders + tooltip/legend helpers; pure. D8 Direction renders a hot-pink IconLayer sized in meters and uses WhiteboxTools D8 pointer mapping.
 - **map/controller.js** — deck.gl wrapper for view state + layer stack.
 - **map/raster-utils.js** — GeoTIFF/SBS loaders, gdalinfo fetch; sitePrefix-aware.
 - **gl-dashboard.js** — Orchestrator wiring: imports, DI, DOM lookups, event binding, initializeDashboard, global hooks.
@@ -40,6 +40,7 @@
 - Omni scenarios use the same watershed delineation as base (subcatchments/channels/topaz + WEPP IDs); scenario switches reuse existing geometry instead of redrawing hillslopes.
 - Channel overlays (Channel Order + WEPP channels + WEPP Yearly channels) share the `wepp-channel-overlay` radio group and must clear each other.
 - Channel layers require `channelsVisible`; channel labels require both `channelsVisible` + `channelLabelsVisible`.
+- D8 Direction overlay is WBT-only: it consumes `dem/wbt/flovec.wgs.tif` (EPSG:4326) plus `WEPP_CELL_SIZE_M` metadata for meter sizing. The pointer mapping follows the WhiteboxTools grid (`64 128 1 / 32 0 2 / 16 8 4`).
 
 ## Module Contracts (injection signatures)
 - `createScenarioManager({ ctx, getState, setValue, setState, postQueryEngine, postBaseQueryEngine, fetchWeppSummary, weppDataManager, onScenarioChange, onComparisonChange })`

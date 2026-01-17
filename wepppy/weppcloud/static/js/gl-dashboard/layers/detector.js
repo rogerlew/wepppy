@@ -16,13 +16,13 @@ const logDetectionInfo = (message, context) => logDetection('info', message, con
 const logDetectionWarn = (message, context) => logDetection('warn', message, context);
 
 const D8_POINTER_DELTAS = Object.freeze({
-  1: [-1, 1],
-  2: [-1, 0],
-  4: [-1, -1],
+  1: [1, 1],
+  2: [1, 0],
+  4: [1, -1],
   8: [0, -1],
-  16: [1, -1],
-  32: [1, 0],
-  64: [1, 1],
+  16: [-1, -1],
+  32: [-1, 0],
+  64: [-1, 1],
   128: [0, 1],
 });
 
