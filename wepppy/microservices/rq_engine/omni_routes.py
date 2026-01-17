@@ -6,6 +6,7 @@ import os
 import shutil
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import redis
 from fastapi import APIRouter, Request
@@ -17,7 +18,7 @@ from werkzeug.utils import secure_filename
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.rq.omni_rq import run_omni_scenarios_rq
+from wepppy.rq.omni_rq import run_omni_contrasts_rq, run_omni_scenarios_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -32,6 +33,9 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 SBS_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 SBS_MAX_BYTES = 100 * 1024 * 1024
+GEOJSON_ALLOWED_EXTENSIONS = ("geojson", "json")
+GEOJSON_MAX_BYTES = 100 * 1024 * 1024
+CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
 
 
 def _normalize_extensions(allowed_extensions: tuple[str, ...]) -> set[str]:
@@ -135,6 +139,61 @@ def _extract_upload(form: FormData, key: str) -> UploadFile | None:
     return None
 
 
+def _normalize_contrast_selection_mode(value: Any) -> str:
+    if value is None:
+        return CONTRAST_SELECTION_MODE_DEFAULT
+    token = str(value).strip().lower()
+    if not token:
+        return CONTRAST_SELECTION_MODE_DEFAULT
+    aliases = {
+        "objective": "cumulative",
+        "objective_parameter": "cumulative",
+        "cumulative_objective": "cumulative",
+        "cumulative_obj_param": "cumulative",
+    }
+    return aliases.get(token, token)
+
+
+def _coerce_optional_float(value: Any, field_name: str) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be a number") from exc
+
+
+def _coerce_optional_int(value: Any, field_name: str) -> int | None:
+    if value is None or value == "":
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be an integer") from exc
+
+
+def _coerce_optional_int_list(value: Any, field_name: str) -> list[int] | None:
+    if value is None or value == "":
+        return None
+    raw_values: list[Any]
+    if isinstance(value, str):
+        raw_values = [item.strip() for item in value.split(",") if item.strip()]
+    elif isinstance(value, (list, tuple, set)):
+        raw_values = list(value)
+    else:
+        raw_values = [value]
+
+    parsed: list[int] = []
+    for item in raw_values:
+        if item is None or item == "":
+            continue
+        try:
+            parsed.append(int(item))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{field_name} entries must be integers") from exc
+    return parsed or None
+
+
 def _prepare_omni_scenarios(
     payload: dict[str, Any],
     raw_json: Any,
@@ -193,6 +252,89 @@ def _prepare_omni_scenarios(
     return parsed_inputs
 
 
+def _prepare_omni_contrasts(
+    payload: dict[str, Any],
+    raw_json: Any,
+    form: FormData,
+    *,
+    runid: str,
+    config: str,
+    wd: str,
+) -> dict[str, Any]:
+    selection_mode = _normalize_contrast_selection_mode(payload.get("omni_contrast_selection_mode"))
+    control_scenario = payload.get("omni_control_scenario")
+    contrast_scenario = payload.get("omni_contrast_scenario")
+
+    if not control_scenario:
+        raise ValueError("Missing control scenario")
+    if not contrast_scenario:
+        raise ValueError("Missing contrast scenario")
+
+    objective_parameter = payload.get("omni_contrast_objective_parameter") or "Runoff_mm"
+    threshold_fraction = _coerce_optional_float(
+        payload.get("omni_contrast_cumulative_obj_param_threshold_fraction"),
+        "omni_contrast_cumulative_obj_param_threshold_fraction",
+    )
+    hillslope_limit = _coerce_optional_int(
+        payload.get("omni_contrast_hillslope_limit"),
+        "omni_contrast_hillslope_limit",
+    )
+    hill_min_slope = _coerce_optional_float(
+        payload.get("omni_contrast_hill_min_slope"),
+        "omni_contrast_hill_min_slope",
+    )
+    hill_max_slope = _coerce_optional_float(
+        payload.get("omni_contrast_hill_max_slope"),
+        "omni_contrast_hill_max_slope",
+    )
+    burn_severities = _coerce_optional_int_list(
+        payload.get("omni_contrast_select_burn_severities"),
+        "omni_contrast_select_burn_severities",
+    )
+    topaz_ids = _coerce_optional_int_list(
+        payload.get("omni_contrast_select_topaz_ids"),
+        "omni_contrast_select_topaz_ids",
+    )
+    order_reduction_passes = _coerce_optional_int(
+        payload.get("order_reduction_passes"),
+        "order_reduction_passes",
+    )
+
+    geojson_name_key = payload.get("omni_contrast_geojson_name_key")
+    geojson_path = payload.get("omni_contrast_geojson_path")
+    upload = _extract_upload(form, "omni_contrast_geojson")
+    if upload and upload.filename:
+        allowed_extensions = _normalize_extensions(GEOJSON_ALLOWED_EXTENSIONS)
+        uploads_dir = Path(wd) / "_pups" / "omni" / "contrasts" / "_uploads" / uuid4().hex
+        try:
+            geojson_path = str(
+                _save_upload(
+                    upload,
+                    destination_dir=uploads_dir,
+                    allowed_extensions=allowed_extensions,
+                    max_bytes=GEOJSON_MAX_BYTES,
+                )
+            )
+        except ValueError as exc:
+            raise ValueError(f"Invalid GeoJSON upload: {exc}") from exc
+
+    return {
+        "omni_contrast_selection_mode": selection_mode,
+        "omni_control_scenario": control_scenario,
+        "omni_contrast_scenario": contrast_scenario,
+        "omni_contrast_objective_parameter": objective_parameter,
+        "omni_contrast_cumulative_obj_param_threshold_fraction": threshold_fraction,
+        "omni_contrast_hillslope_limit": hillslope_limit,
+        "omni_contrast_hill_min_slope": hill_min_slope,
+        "omni_contrast_hill_max_slope": hill_max_slope,
+        "omni_contrast_select_burn_severities": burn_severities,
+        "omni_contrast_select_topaz_ids": topaz_ids,
+        "omni_contrast_geojson_name_key": geojson_name_key,
+        "omni_contrast_geojson_path": geojson_path,
+        "order_reduction_passes": order_reduction_passes,
+    }
+
+
 async def _run_omni(
     runid: str,
     config: str,
@@ -239,6 +381,80 @@ async def _run_omni(
     return JSONResponse({"job_id": job.id})
 
 
+async def _run_omni_contrasts(
+    runid: str,
+    config: str,
+    request: Request,
+) -> JSONResponse:
+    wd = get_wd(runid)
+    omni = Omni.getInstance(wd)
+
+    payload = await parse_request_payload(request)
+    try:
+        raw_json = await request.json()
+    except Exception:
+        raw_json = None
+    form = await request.form()
+
+    try:
+        parsed_inputs = _prepare_omni_contrasts(
+            payload,
+            raw_json,
+            form,
+            runid=runid,
+            config=config,
+            wd=wd,
+        )
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception as exc:
+        return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
+
+    selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
+    if selection_mode != "cumulative":
+        return error_response(
+            f'Contrast selection mode "{selection_mode}" is not implemented yet.',
+            status_code=400,
+        )
+
+    try:
+        omni.parse_inputs(parsed_inputs)
+        threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
+        if threshold_fraction is None:
+            threshold_fraction = 0.8
+        objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+        omni.build_contrasts(
+            control_scenario_def={"type": parsed_inputs.get("omni_control_scenario")},
+            contrast_scenario_def={"type": parsed_inputs.get("omni_contrast_scenario")},
+            obj_param=objective_parameter,
+            contrast_cumulative_obj_param_threshold_fraction=threshold_fraction,
+            contrast_hillslope_limit=parsed_inputs.get("omni_contrast_hillslope_limit"),
+            hill_min_slope=parsed_inputs.get("omni_contrast_hill_min_slope"),
+            hill_max_slope=parsed_inputs.get("omni_contrast_hill_max_slope"),
+            select_burn_severities=parsed_inputs.get("omni_contrast_select_burn_severities"),
+            select_topaz_ids=parsed_inputs.get("omni_contrast_select_topaz_ids"),
+        )
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception as exc:
+        return error_response_with_traceback(f"Error building omni contrasts: {exc}")
+
+    try:
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.run_omni_contrasts)
+
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue("batch", connection=redis_conn)
+            job = q.enqueue_call(run_omni_contrasts_rq, (runid,), timeout=RQ_TIMEOUT)
+            prep.set_rq_job_id("run_omni_contrasts_rq", job.id)
+    except Exception:
+        logger.exception("rq-engine run-omni-contrasts enqueue failed")
+        return error_response_with_traceback("Error Handling Request")
+
+    return JSONResponse({"job_id": job.id})
+
+
 @router.post("/runs/{runid}/{config}/run-omni")
 async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
     try:
@@ -264,7 +480,7 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
         logger.exception("rq-engine run-omni-contrasts auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
-    return await _run_omni(runid, config, request)
+    return await _run_omni_contrasts(runid, config, request)
 
 
 __all__ = ["router"]

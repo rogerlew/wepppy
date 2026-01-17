@@ -25,8 +25,15 @@ var Omni = (function () {
         "omni:scenario:updated",
         "omni:run:started",
         "omni:run:completed",
-        "omni:run:error"
+        "omni:run:error",
+        "omni:contrast:run:completed"
     ];
+    var CONTRAST_COMPLETION_EVENT = "OMNI_CONTRAST_RUN_TASK_COMPLETED";
+    var CONTRAST_SELECTION_MODES = {
+        cumulative: "cumulative",
+        user_defined_areas: "user_defined_areas",
+        stream_order_pruning: "stream_order_pruning"
+    };
 
     var SCENARIO_CATALOG = {
         uniform_low: {
@@ -685,6 +692,19 @@ var Omni = (function () {
         deleteModalList = deleteModal ? deleteModal.querySelector("[data-omni-role='delete-list']") : null;
         deleteModalConfirm = deleteModal ? deleteModal.querySelector("[data-omni-action='confirm-delete']") : null;
         var scenarioContainer = dom.ensureElement("#scenario-container", "Omni scenario container not found.");
+        var contrastFormElement = dom.qs("#omni_contrasts_form");
+        var contrastModeSelect = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-role='selection-mode']")
+            : null;
+        var contrastControlSelect = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-role='control-scenario']")
+            : null;
+        var contrastScenarioSelect = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-role='contrast-scenario']")
+            : null;
+        var contrastRunButton = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-action='run-contrasts']")
+            : null;
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -701,6 +721,48 @@ var Omni = (function () {
         omni.command_btn_id = "btn_run_omni";
         omni.hint = hintAdapter;
         omni._completion_seen = false;
+
+        var contrastController = null;
+        var contrastInfoAdapter = null;
+        var contrastStatusAdapter = null;
+        var contrastStacktraceAdapter = null;
+        var contrastRqJobAdapter = null;
+        var contrastHintAdapter = null;
+
+        if (contrastFormElement) {
+            var contrastInfoElement = dom.qs("#omni_contrasts_form #info");
+            var contrastStatusElement = dom.qs("#omni_contrasts_form #status");
+            var contrastStacktraceElement = dom.qs("#omni_contrasts_form #stacktrace");
+            var contrastRqJobElement = dom.qs("#omni_contrasts_form #rq_job");
+            var contrastSpinnerElement = dom.qs("#omni_contrasts_form #braille");
+            var contrastHintElement = dom.qs("#hint_run_omni_contrasts");
+
+            contrastInfoAdapter = createLegacyAdapter(contrastInfoElement);
+            contrastStatusAdapter = createLegacyAdapter(contrastStatusElement);
+            contrastStacktraceAdapter = createLegacyAdapter(contrastStacktraceElement);
+            contrastRqJobAdapter = createLegacyAdapter(contrastRqJobElement);
+            contrastHintAdapter = createLegacyAdapter(contrastHintElement);
+
+            contrastController = controlBase();
+            contrastController.form = contrastFormElement;
+            contrastController.info = contrastInfoAdapter;
+            contrastController.status = contrastStatusAdapter;
+            contrastController.stacktrace = contrastStacktraceAdapter;
+            contrastController.rq_job = contrastRqJobAdapter;
+            contrastController.statusSpinnerEl = contrastSpinnerElement;
+            contrastController.command_btn_id = "btn_run_omni_contrasts";
+            contrastController.hint = contrastHintAdapter;
+            contrastController._completion_seen = false;
+
+            contrastController.attach_status_stream(contrastController, {
+                form: contrastFormElement,
+                channel: "omni_contrasts",
+                runId: window.runid || window.runId || null,
+                spinner: contrastSpinnerElement
+            });
+
+            omni.contrastController = contrastController;
+        }
 
         omni.attach_status_stream(omni, {
             form: formElement,
@@ -732,6 +794,30 @@ var Omni = (function () {
 
             return baseTriggerEvent(eventName, payload);
         };
+
+        if (contrastController) {
+            var baseContrastTriggerEvent = contrastController.triggerEvent.bind(contrastController);
+            contrastController.triggerEvent = function (eventName, payload) {
+                var normalized = eventName ? String(eventName).toUpperCase() : "";
+                if (normalized === CONTRAST_COMPLETION_EVENT) {
+                    if (contrastController._completion_seen) {
+                        return baseContrastTriggerEvent(eventName, payload);
+                    }
+                    contrastController._completion_seen = true;
+                    if (contrastInfoAdapter && typeof contrastInfoAdapter.html === "function") {
+                        contrastInfoAdapter.html("Omni contrasts completed.");
+                    }
+                    contrastController.disconnect_status_stream(contrastController);
+                    if (omniEvents && typeof omniEvents.emit === "function") {
+                        omniEvents.emit("omni:contrast:run:completed", payload || {});
+                    }
+                } else if (normalized === "END_BROADCAST") {
+                    contrastController.disconnect_status_stream(contrastController);
+                }
+
+                return baseContrastTriggerEvent(eventName, payload);
+            };
+        }
 
         function emitScenarioUpdate(scenarioItem) {
             if (!omniEvents || typeof omniEvents.emit !== "function") {
@@ -901,6 +987,7 @@ var Omni = (function () {
                     emitScenarioUpdate(select.closest("[data-omni-scenario-item='true']"));
                 }
             });
+            updateContrastScenarioOptions();
         }
 
         function updateScenarioControls(scenarioItem, values) {
@@ -1074,6 +1161,129 @@ var Omni = (function () {
             }
         }
 
+        function clearContrastStatus() {
+            if (contrastStatusAdapter && typeof contrastStatusAdapter.html === "function") {
+                contrastStatusAdapter.html("");
+            }
+            if (contrastStacktraceAdapter && typeof contrastStacktraceAdapter.html === "function") {
+                contrastStacktraceAdapter.html("");
+            }
+        }
+
+        function setContrastStatus(message) {
+            if (contrastStatusAdapter && typeof contrastStatusAdapter.html === "function") {
+                contrastStatusAdapter.html(message || "");
+            }
+        }
+
+        function normalizeContrastMode(value) {
+            var token = value ? String(value).trim().toLowerCase() : "";
+            if (token === "user-defined-areas" || token === "user_defined_areas") {
+                return CONTRAST_SELECTION_MODES.user_defined_areas;
+            }
+            if (token === "stream-order-pruning" || token === "stream_order_pruning") {
+                return CONTRAST_SELECTION_MODES.stream_order_pruning;
+            }
+            return CONTRAST_SELECTION_MODES.cumulative;
+        }
+
+        function resolveBaseScenarioOption() {
+            var runFlags = window.runContext && window.runContext.flags ? window.runContext.flags : null;
+            var hasSbs = runFlags ? Boolean(runFlags.initialHasSbs) : false;
+            return {
+                value: hasSbs ? "sbs_map" : "undisturbed",
+                label: hasSbs ? "Base Scenario (SBS Map)" : "Base Scenario (Undisturbed)"
+            };
+        }
+
+        function buildContrastScenarioOptions(definitions) {
+            var options = [{ value: "", label: "Select scenario" }];
+            var baseOption = resolveBaseScenarioOption();
+            var seen = new Set();
+            if (baseOption && baseOption.value) {
+                options.push(baseOption);
+                seen.add(baseOption.value);
+            }
+
+            (definitions || []).forEach(function (definition) {
+                var scenarioName = scenarioNameFromDefinition(definition);
+                if (!scenarioName || seen.has(scenarioName)) {
+                    return;
+                }
+                seen.add(scenarioName);
+                options.push({ value: scenarioName, label: scenarioName });
+            });
+
+            return options;
+        }
+
+        function collectScenarioDefinitions() {
+            if (!scenarioContainer) {
+                return [];
+            }
+            var items = scenarioContainer.querySelectorAll("[data-omni-scenario-item='true']");
+            var definitions = [];
+            items.forEach(function (item) {
+                var definition = readScenarioDefinition(item);
+                if (definition) {
+                    definitions.push(definition);
+                }
+            });
+            return definitions;
+        }
+
+        function updateContrastScenarioOptions(definitions) {
+            if (!contrastControlSelect && !contrastScenarioSelect) {
+                return;
+            }
+            var options = buildContrastScenarioOptions(definitions || collectScenarioDefinitions());
+            var selects = [contrastControlSelect, contrastScenarioSelect];
+            selects.forEach(function (select) {
+                if (!select) {
+                    return;
+                }
+                var saved = select.getAttribute("data-omni-contrast-selected") || "";
+                var savedApplied = select.dataset && select.dataset.omniContrastSelectedApplied === "true";
+                var previous = select.value;
+                if (!previous && saved && !savedApplied) {
+                    previous = saved;
+                }
+                select.innerHTML = "";
+                options.forEach(function (option) {
+                    var node = document.createElement("option");
+                    node.value = option.value;
+                    node.textContent = option.label;
+                    select.appendChild(node);
+                });
+                if (previous && options.some(function (opt) { return opt.value === previous; })) {
+                    select.value = previous;
+                    if (saved && previous === saved && select.dataset) {
+                        select.dataset.omniContrastSelectedApplied = "true";
+                    }
+                }
+            });
+        }
+
+        function syncContrastMode() {
+            if (!contrastFormElement || !contrastModeSelect) {
+                return;
+            }
+            var mode = normalizeContrastMode(contrastModeSelect.value);
+            var sections = contrastFormElement.querySelectorAll("[data-omni-contrast-mode]");
+            sections.forEach(function (section) {
+                var allowed = section.dataset.omniContrastMode
+                    ? section.dataset.omniContrastMode.split(/\s+/)
+                    : [];
+                section.hidden = allowed.indexOf(mode) === -1;
+            });
+            if (contrastRunButton) {
+                contrastRunButton.disabled = mode !== CONTRAST_SELECTION_MODES.cumulative;
+            }
+            if (mode !== CONTRAST_SELECTION_MODES.cumulative) {
+                setContrastStatus("Selected mode is scaffolded. Switch to cumulative mode to run contrasts.");
+            }
+        }
+
         function openModal(modal) {
             if (!modal) {
                 return;
@@ -1194,6 +1404,65 @@ var Omni = (function () {
             });
         };
 
+        omni.run_omni_contrasts = function () {
+            if (!contrastController || !contrastFormElement) {
+                return;
+            }
+            clearContrastStatus();
+
+            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            if (mode !== CONTRAST_SELECTION_MODES.cumulative) {
+                setContrastStatus("Selected mode is scaffolded. Switch to cumulative mode to run contrasts.");
+                return;
+            }
+
+            var controlValue = contrastControlSelect ? contrastControlSelect.value : "";
+            var contrastValue = contrastScenarioSelect ? contrastScenarioSelect.value : "";
+            if (!controlValue || !contrastValue) {
+                setContrastStatus("Select both control and contrast scenarios.");
+                return;
+            }
+
+            contrastController._completion_seen = false;
+            setContrastStatus("Submitting omni contrasts...");
+            contrastController.connect_status_stream(contrastController);
+
+            var formData = new FormData(contrastFormElement);
+            if (typeof formData.set === "function") {
+                formData.set("omni_contrast_selection_mode", mode);
+            }
+
+            http.requestWithSessionToken(
+                url_for_run("run-omni-contrasts", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    body: formData,
+                    form: contrastFormElement
+                }
+            ).then(function (response) {
+                var body = response && response.body ? response.body : null;
+                if (body && (body.error || body.errors)) {
+                    contrastController.pushResponseStacktrace(contrastController, body);
+                    return;
+                }
+                if (body) {
+                    setContrastStatus("run_omni_contrasts_rq job submitted: " + body.job_id);
+                    contrastController.poll_completion_event = CONTRAST_COMPLETION_EVENT;
+                    contrastController.set_rq_job_id(contrastController, body.job_id);
+                    if (contrastHintAdapter && typeof contrastHintAdapter.html === "function") {
+                        contrastHintAdapter.html(formatJobHint(body.job_id));
+                        if (typeof contrastHintAdapter.show === "function") {
+                            contrastHintAdapter.show();
+                        }
+                    }
+                }
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                contrastController.pushResponseStacktrace(contrastController, payload);
+                setContrastStatus(resolveErrorMessage(payload, "Omni contrasts failed."));
+            });
+        };
+
         omni.runOmniScenarios = omni.run_omni_scenarios;
 
         omni.load_scenarios_from_backend = function () {
@@ -1218,6 +1487,7 @@ var Omni = (function () {
                 });
 
                 refreshScenarioOptions();
+                updateContrastScenarioOptions(data);
                 updateDeleteButtonState();
 
                 if (omniEvents && typeof omniEvents.emit === "function") {
@@ -1268,6 +1538,20 @@ var Omni = (function () {
             event.preventDefault();
             omni.run_omni_scenarios();
         });
+
+        if (contrastFormElement) {
+            dom.delegate(contrastFormElement, "click", "[data-omni-contrast-action='run-contrasts']", function (event) {
+                event.preventDefault();
+                omni.run_omni_contrasts();
+            });
+            if (contrastModeSelect) {
+                contrastModeSelect.addEventListener("change", function () {
+                    syncContrastMode();
+                });
+            }
+            syncContrastMode();
+            updateContrastScenarioOptions();
+        }
 
         dom.delegate(scenarioContainer, "change", "[data-omni-role='scenario-select']", function (event, matched) {
             var item = matched.closest("[data-omni-scenario-item='true']");
@@ -1334,6 +1618,28 @@ var Omni = (function () {
             }
             if (typeof omni.set_rq_job_id === "function") {
                 omni.set_rq_job_id(omni, jobId);
+            }
+
+            if (contrastController) {
+                var contrastJobId = helper && typeof helper.resolveJobId === "function"
+                    ? helper.resolveJobId(ctx, "run_omni_contrasts_rq")
+                    : null;
+                if (!contrastJobId) {
+                    var jobIds = ctx && (ctx.jobIds || ctx.jobs);
+                    if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_omni_contrasts_rq")) {
+                        var contrastValue = jobIds.run_omni_contrasts_rq;
+                        if (contrastValue !== undefined && contrastValue !== null) {
+                            contrastJobId = String(contrastValue);
+                        }
+                    }
+                }
+                if (contrastJobId) {
+                    contrastController._completion_seen = false;
+                    contrastController.poll_completion_event = CONTRAST_COMPLETION_EVENT;
+                }
+                if (typeof contrastController.set_rq_job_id === "function") {
+                    contrastController.set_rq_job_id(contrastController, contrastJobId);
+                }
             }
 
             if (!bootstrapState.scenariosLoaded && typeof omni.load_scenarios_from_backend === "function") {

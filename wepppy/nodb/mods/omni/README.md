@@ -1,6 +1,6 @@
 # Omni Scenario Orchestration Module
 
-> Manages scenario cloning, treatment application, and contrast analyzes for WEPPcloud wildfire response modeling. Omni enables land managers and hydrologists to evaluate multiple post-fire mitigation strategies (mulching, thinning, prescribed fire) and compare their erosion, runoff, and sediment transport outcomes without manually rerunning the entire WEPP stack.
+> Manages scenario cloning, treatment application, and contrast analyses for WEPPcloud wildfire response modeling. Omni enables land managers and hydrologists to evaluate multiple post-fire mitigation strategies (mulching, thinning, prescribed fire) and compare their erosion, runoff, and sediment transport outcomes without manually rerunning the entire WEPP stack.
 
 > **See also:** [AGENTS.md](../../../../AGENTS.md) for NoDb controller patterns, scenario management workflows, and RQ orchestration guidance.
 
@@ -12,13 +12,13 @@ The Omni mod orchestrates erosion prediction scenarios by cloning a parent WEPPc
 - **How does thinning to 65% canopy cover compare to prescribed fire?**
 - **Which hillslopes contribute the most runoff under uniform moderate severity, and what happens if we treat them?**
 
-Omni snapshots the working directory into `_pups/omni/scenarios/<scenario_name>`, symlinks shared inputs (climate, watershed topology), copies mutable state (disturbed, landuse, soils), applies treatments via the `Treatments` mod, reruns WEPP, and stores outputs in per-scenario directories. Contrast analyzes identify high-risk hillslopes from one scenario (the "control") and substitute treated hillslopes from another (the "contrast"), enabling targeted mitigation evaluation.
+Omni snapshots the working directory into `_pups/omni/scenarios/<scenario_name>`, symlinks shared inputs (climate, watershed topology), copies mutable state (disturbed, landuse, soils), applies treatments via the `Treatments` mod, reruns WEPP, and stores outputs in per-scenario directories. Contrast analyses identify high-risk hillslopes from one scenario (the "control") and substitute treated hillslopes from another (the "contrast"), enabling targeted mitigation evaluation.
 
 ### Key Capabilities
 
 - **Scenario Types**: Uniform burn severities (low/moderate/high), custom SBS maps, undisturbed baseline, thinning (canopy/ground cover reduction), mulching (ground cover increase), prescribed fire
 - **Dependency Tracking**: SHA1-based hashing detects when upstream scenarios change and skips redundant rebuilds
-- **Contrast Analysis**: Select hillslopes by cumulative objective parameter (runoff, soil loss, phosphorus) up to a threshold fraction; contrast runs blend control and treatment outputs
+- **Contrast Analysis**: Cumulative objective parameter mode is implemented; user-defined area and stream-order pruning modes are scaffolded in the UI but rejected by the backend until their pipelines land
 - **Concurrency Options**: Run scenarios serially (`run_omni_scenarios()`) or dispatch to RQ workers (`run_omni_scenarios_rq()`) with lock retry and process pool fallback for CPU-heavy soil preparation
 - **Parquet Reporting**: Aggregates scenario outputs into `scenarios.out.parquet`, `scenarios.hillslope_summaries.parquet`, and `contrasts.out.parquet` for downstream analytics (D-Tale, dashboards, R scripts)
 
@@ -27,7 +27,7 @@ Omni snapshots the working directory into `_pups/omni/scenarios/<scenario_name>`
 - **BAER Teams**: Rapid evaluation of mulching/seeding/thinning effectiveness post-wildfire
 - **Forest Service Planners**: Pre-fire prescribed burn vs. post-fire treatment tradeoffs
 - **Hydrologists**: Calibration and uncertainty quantification across burn severity distributions
-- **Researchers**: Sensitivity analyzes for treatment timing, coverage, and spatial configuration
+- **Researchers**: Sensitivity analyses for treatment timing, coverage, and spatial configuration
 
 ## Architecture
 
@@ -49,7 +49,7 @@ wepppy/weppcloud/routes/nodb_api/
 └── omni_bp.py           # Flask routes for scenario CRUD and reporting
 
 wepppy/weppcloud/controllers_js/
-├── omni.js              # Frontend controller (scenario builder, contrast definitions)
+├── omni.js              # Frontend controller (scenario builder + contrast runner UI)
 └── __tests__/omni.test.js  # Jest unit tests
 
 wepppy/weppcloud/templates/controls/
@@ -69,10 +69,42 @@ wepppy/weppcloud/templates/controls/
 ### Contrast Execution Flow
 
 1. **Definition**: User selects control/contrast scenarios, objective parameter (runoff, soil loss), and cumulative threshold
-2. **Hillslope Selection**: `build_contrasts()` queries the control scenario's GeoPackage, sorts hillslopes by objective parameter, and selects top contributors up to threshold
-3. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates a contrast clone that symlinks most hillslopes from the control but substitutes the treated hillslope from the contrast scenario
-4. **WEPP Execution**: Contrast clone runs watershed model with hybrid inputs
+2. **Hillslope Selection**: `build_contrasts()` reads `wepp/output/interchange/loss_pw0.hill.parquet` (control scenario), sorts hillslopes by objective parameter, and selects top contributors up to threshold
+3. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates `_pups/omni/contrasts/<contrast_id>`, symlinks the watershed run inputs (excluding `pw0.run`/`pw0.err`), and regenerates `pw0.run` with mixed hillslope pass files
+4. **WEPP Execution**: Contrast clone runs the watershed model and writes outputs under `_pups/omni/contrasts/<contrast_id>/wepp/output`
 5. **Reporting**: `contrasts_report()` joins control and contrast loss metrics, computes deltas, and persists `contrasts.out.parquet`
+
+### Contrast Selection Modes
+
+Omni groups hillslopes into contrast runs using a selection mode. The cumulative objective-parameter mode is implemented today; the additional modes below are scaffolded in the UI but rejected by the backend until their implementations are complete.
+
+#### Cumulative objective parameter (current)
+
+- Sort control-scenario hillslopes by the objective parameter and select until the cumulative fraction (plus optional hillslope limit) is reached.
+- Each selected hillslope becomes its own contrast run.
+
+#### User-defined areas (scaffolded)
+
+- Users upload a GeoJSON polygon file and provide a feature property key to name each contrast.
+- Each polygon is intersected with hillslopes to derive a set of Topaz IDs; the resulting group becomes one contrast run.
+- Contrast names come from the feature property value; contrast directories still use enumerated IDs for safe filesystem names.
+
+#### Stream-order pruning (scaffolded)
+
+- Apply `order_reduction_passes` (same variable name as culverts) to the channel map to prune stream order N times.
+- Run the `weppcloud-wbt` `hillslopes_topaz` routine to derive grouped hillslopes from the pruned network.
+- Multiply the resulting `subwta.tif` values by 10 so hillslopes remain 10/20/30 and channels 40, keeping the output distinct from `dem/wbt/subwta.tif`.
+- Each grouped hillslope set becomes a contrast run.
+
+### Contrast Build Audit (`build_report.ndjson`)
+
+Each contrast selection writes one line to `_pups/omni/contrasts/build_report.ndjson` with:
+
+- `contrast_id`: 1-based identifier used for the contrast directory
+- `control_scenario`: scenario name normalized to the base scenario when control is `None`
+- `contrast_scenario`: selected scenario name (or `null` for base scenario)
+- `wepp_id`, `topaz_id`: selected hillslope identifiers
+- `obj_param`, `running_obj_param`, `pct_cumulative`: objective parameter values and cumulative contribution
 
 ### Dependency Tree Persistence
 
@@ -330,9 +362,10 @@ To add a new scenario (e.g., seeding):
 
 ### RQ Tasks
 
-- `run_omni_scenarios_rq(runid)`: Dispatches `run_omni_scenario_rq` jobs for each scenario, then calls `_finalize_omni_scenarios_rq` to compile reports
-- `run_omni_scenario_rq(runid, scenario, ...)`: Executes single scenario, updates dependency tree, publishes `OMNI_SCENARIO_RUN_TASK_COMPLETED` event
-- `_finalize_omni_scenarios_rq(runid)`: Calls `compile_hillslope_summaries()` and `scenarios_report()`, publishes `END_BROADCAST` to disconnect WebSocket streams
+- `run_omni_scenarios_rq(runid)`: Dispatches `run_omni_scenario_rq` jobs for each scenario, then schedules `_compile_hillslope_summaries_rq` and `_finalize_omni_scenarios_rq`
+- `run_omni_scenario_rq(runid, scenario, ...)`: Executes single scenario and updates the dependency tree
+- `_compile_hillslope_summaries_rq(runid)`: Runs `compile_hillslope_summaries()`, `compile_channel_summaries()`, and `scenarios_report()`
+- `_finalize_omni_scenarios_rq(runid)`: Stamps Redis prep state, publishes `OMNI_SCENARIO_RUN_TASK_COMPLETED`, then `END_BROADCAST` to close WebSocket streams
 
 ### Flask Routes
 

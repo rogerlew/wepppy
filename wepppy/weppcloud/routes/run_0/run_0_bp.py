@@ -105,9 +105,9 @@ MOD_UI_DEFINITIONS = OrderedDict([
     }),
     ('omni', {
         'label': 'Omni Scenarios',
-        'section_id': 'omni-scenarios',
+        'section_id': 'omni-wrapper',
         'section_class': 'wc-stack',
-        'template': 'controls/omni_scenarios_pure.htm',
+        'template': 'controls/omni_mod_pure.htm',
     }),
     ('observed', {
         'label': 'Observed Data',

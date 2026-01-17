@@ -159,8 +159,6 @@ def run_omni_scenario_rq(
             status_channel,
             f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {elapsed:.3f})',
         )
-
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
         return status, elapsed
 
     except Exception:
@@ -338,7 +336,6 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
 
         if scenarios_ran_count == 0:
             omni.logger.info('  run_omni_scenarios: All scenarios up to date, nothing to run')
-            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
 
         stale = set(dependency_tree.keys()) - active_scenarios
         for scenario_name in stale:
@@ -413,6 +410,38 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
 
 
 @with_exception_logging
+def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
+    """Run Omni contrasts and emit completion triggers for the contrast UI."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:omni_contrasts'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        omni = Omni.getInstance(wd)
+        omni.run_omni_contrasts()
+
+        try:
+            prep = RedisPrep.getInstance(wd)
+            prep.timestamp(TaskEnum.run_omni_contrasts)
+        except FileNotFoundError:
+            pass
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} TRIGGER omni_contrasts OMNI_CONTRAST_RUN_TASK_COMPLETED',
+        )
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
+        return None
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
 def _compile_hillslope_summaries_rq(runid: str) -> None:
     """Compile Omni hillslope summaries after scenario execution."""
     try:
@@ -458,6 +487,7 @@ def _finalize_omni_scenarios_rq(runid: str) -> None:
                 pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END_BROADCAST')
 
     except Exception:

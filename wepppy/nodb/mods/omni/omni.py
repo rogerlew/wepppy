@@ -30,8 +30,10 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from os.path import isdir
+from os.path import isfile as _isfile
 
 from csv import DictWriter
+from collections import namedtuple
 
 import base64
 
@@ -42,9 +44,6 @@ from glob import glob
 import json
 import shutil
 from time import sleep
-
-# wepppy
-from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from wepppy.nodb.core import Climate, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.core.climate import ClimateMode
@@ -75,6 +74,7 @@ CoverValues = Dict[str, float]
 RhemRunResult = Tuple[bool, str, float]
 ScenarioDef = Dict[str, Any]
 ScenarioDependency = Dict[str, Dict[str, Any]]
+ObjectiveParameter = namedtuple('ObjectiveParameter', ['topaz_id', 'wepp_id', 'value'])
 
 
 def _update_nodb_wd(d: Dict[str, Any], new_wd: str, parent_wd: Optional[str] = None) -> None:
@@ -247,7 +247,7 @@ def _run_contrast(
             if not _exists(dst):
                 os.symlink(src, dst)
 
-    for nodb_fn in ['wepp.nodb']:
+    for nodb_fn in ['ron.nodb', 'wepp.nodb']:
         src = _join(wd, nodb_fn)
         dst = _join(new_wd, nodb_fn)
         if not _exists(dst):
@@ -272,13 +272,28 @@ def _run_contrast(
     omni_runs_dir = _join(new_wd, 'wepp', 'runs/')
     for fn in os.listdir(og_runs_dir):
         _fn = _split(fn)[-1]
-        if _fn.startswith('pw0') or _fn.endswith('.txt') or _fn.endswith('.inp'):
-            src = _join(og_runs_dir, fn)
-            dst = _join(omni_runs_dir, fn)
-            if not _exists(dst):
-                os.symlink(src, dst)
+        if _fn in ('pw0.run', 'pw0.err'):
+            continue
+        src = _join(og_runs_dir, fn)
+        if not _isfile(src):
+            continue
+        dst = _join(omni_runs_dir, fn)
+        if not _exists(dst):
+            os.symlink(src, dst)
 
-    wepp.make_watershed_run(wepp_id_paths=list(contrasts.values()))
+    old_prefix = _join(wd, 'omni')
+    new_prefix = _join(wd, OMNI_REL_DIR)
+    normalized_contrasts: Dict[int | str, str] = {}
+    for topaz_id, wepp_id_path in contrasts.items():
+        normalized_path = wepp_id_path
+        if isinstance(wepp_id_path, str) and wepp_id_path.startswith(old_prefix):
+            candidate = new_prefix + wepp_id_path[len(old_prefix):]
+            if _exists(f"{candidate}.pass.dat"):
+                LOGGER.info('Updating contrast path %s -> %s', wepp_id_path, candidate)
+                normalized_path = candidate
+        normalized_contrasts[topaz_id] = normalized_path
+
+    wepp.make_watershed_run(wepp_id_paths=list(normalized_contrasts.values()))
     wepp.run_watershed()
     _post_watershed_run_cleanup(wepp)
     wepp.report_loss()
@@ -431,24 +446,29 @@ def _scenario_name_from_scenario_definition(scenario_def: Dict[str, Any]) -> str
     :return: The scenario name.
     """
     _scenario = scenario_def.get('type')
+    scenario_enum: Optional[OmniScenario]
+    try:
+        scenario_enum = OmniScenario.parse(_scenario) if _scenario is not None else None
+    except Exception:
+        scenario_enum = None
 
-    if _scenario == OmniScenario.Thinning:
+    if scenario_enum == OmniScenario.Thinning:
         canopy_cover = scenario_def.get('canopy_cover')
         ground_cover = scenario_def.get('ground_cover')
-        return f'{_scenario}_{canopy_cover}_{ground_cover}'.replace('%', '')
-    elif _scenario == OmniScenario.Mulch:
+        return f'{scenario_enum}_{canopy_cover}_{ground_cover}'.replace('%', '')
+    elif scenario_enum == OmniScenario.Mulch:
         ground_cover_increase = scenario_def.get('ground_cover_increase')
         base_scenario = scenario_def.get('base_scenario')
-        return f'{_scenario}_{ground_cover_increase}_{base_scenario}'.replace('%', '')
-    elif _scenario == OmniScenario.SBSmap:
+        return f'{scenario_enum}_{ground_cover_increase}_{base_scenario}'.replace('%', '')
+    elif scenario_enum == OmniScenario.SBSmap:
         sbs_file_path = scenario_def.get('sbs_file_path', None)
         if sbs_file_path is not None:
             sbs_fn = _split(sbs_file_path)[-1]
             sbs_hash = base64.b64encode(bytes(sbs_fn, 'utf-8')).decode('utf-8').rstrip('=')
-            return f'{_scenario}_{sbs_hash}'
-        return f'{_scenario}'
+            return f'{scenario_enum}_{sbs_hash}'
+        return f'{scenario_enum}'
     else:
-        return str(_scenario)
+        return str(scenario_enum or _scenario)
 
 
 def _hash_file_sha1(path: Optional[str]) -> Optional[str]:
@@ -555,6 +575,10 @@ class Omni(NoDbBase):
             self._contrast_hill_max_slope = None
             self._contrast_select_burn_severities = None
             self._contrast_select_topaz_ids = None
+            self._contrast_selection_mode = None
+            self._contrast_geojson_path = None
+            self._contrast_geojson_name_key = None
+            self._contrast_order_reduction_passes = None
             self._mulching_base_scenario = None
 
             self._scenario_dependency_tree = {}
@@ -720,14 +744,26 @@ class Omni(NoDbBase):
         """
         this is called from the web backend to set the parameters in the nodb
         """
+        def normalize_scenario_value(value: Any) -> Optional[str]:
+            if value is None:
+                return None
+            if isinstance(value, OmniScenario):
+                return str(value)
+            if isinstance(value, int):
+                try:
+                    return str(OmniScenario(value))
+                except ValueError:
+                    return str(value)
+            return str(value)
+
         with self.locked():
             control_scenario = kwds.get('omni_control_scenario', None)
             if control_scenario is not None:
-                self._control_scenario =OmniScenario.parse(control_scenario)
+                self._control_scenario = normalize_scenario_value(control_scenario)
 
             contrast_scenario = kwds.get('omni_contrast_scenario', None)
             if contrast_scenario is not None:
-                self._contrast_scenario = OmniScenario.parse(contrast_scenario)
+                self._contrast_scenario = normalize_scenario_value(contrast_scenario)
 
             omni_contrast_objective_parameter = kwds.get('omni_contrast_objective_parameter', None)
             if omni_contrast_objective_parameter is not None:
@@ -745,7 +781,7 @@ class Omni(NoDbBase):
             if hill_min_slope is not None:
                 self._contrast_hill_min_slope = hill_min_slope
 
-            hill_max_slope = kwds.get('ommni_contrast_hill_max_slope', None)
+            hill_max_slope = kwds.get('omni_contrast_hill_max_slope', None)
             if hill_max_slope is not None:
                 self._contrast_hill_max_slope = hill_max_slope
                 
@@ -756,6 +792,22 @@ class Omni(NoDbBase):
             select_topaz_ids = kwds.get('omni_contrast_select_topaz_ids', None)
             if select_topaz_ids is not None:
                 self._contrast_select_topaz_ids = select_topaz_ids
+
+            contrast_selection_mode = kwds.get('omni_contrast_selection_mode', None)
+            if contrast_selection_mode is not None:
+                self._contrast_selection_mode = str(contrast_selection_mode)
+
+            contrast_geojson_path = kwds.get('omni_contrast_geojson_path', None)
+            if contrast_geojson_path is not None:
+                self._contrast_geojson_path = str(contrast_geojson_path)
+
+            contrast_geojson_name_key = kwds.get('omni_contrast_geojson_name_key', None)
+            if contrast_geojson_name_key is not None:
+                self._contrast_geojson_name_key = str(contrast_geojson_name_key)
+
+            order_reduction_passes = kwds.get('order_reduction_passes', None)
+            if order_reduction_passes is not None:
+                self._contrast_order_reduction_passes = order_reduction_passes
 
     @property
     def contrasts(self) -> Optional[List[ContrastMapping]]:
@@ -785,6 +837,123 @@ class Omni(NoDbBase):
         self._contrast_dependency_tree = value
 
     @property
+    def control_scenario(self) -> Optional[str]:
+        return getattr(self, '_control_scenario', None)
+
+    @control_scenario.setter
+    @nodb_setter
+    def control_scenario(self, value: Optional[str]) -> None:
+        self._control_scenario = value
+
+    @property
+    def contrast_scenario(self) -> Optional[str]:
+        return getattr(self, '_contrast_scenario', None)
+
+    @contrast_scenario.setter
+    @nodb_setter
+    def contrast_scenario(self, value: Optional[str]) -> None:
+        self._contrast_scenario = value
+
+    @property
+    def contrast_object_param(self) -> Optional[str]:
+        return getattr(self, '_contrast_object_param', None)
+
+    @contrast_object_param.setter
+    @nodb_setter
+    def contrast_object_param(self, value: Optional[str]) -> None:
+        self._contrast_object_param = value
+
+    @property
+    def contrast_cumulative_obj_param_threshold_fraction(self) -> Optional[float]:
+        return getattr(self, '_contrast_cumulative_obj_param_threshold_fraction', None)
+
+    @contrast_cumulative_obj_param_threshold_fraction.setter
+    @nodb_setter
+    def contrast_cumulative_obj_param_threshold_fraction(self, value: Optional[float]) -> None:
+        self._contrast_cumulative_obj_param_threshold_fraction = value
+
+    @property
+    def contrast_hillslope_limit(self) -> Optional[int]:
+        return getattr(self, '_contrast_hillslope_limit', None)
+
+    @contrast_hillslope_limit.setter
+    @nodb_setter
+    def contrast_hillslope_limit(self, value: Optional[int]) -> None:
+        self._contrast_hillslope_limit = value
+
+    @property
+    def contrast_hill_min_slope(self) -> Optional[float]:
+        return getattr(self, '_contrast_hill_min_slope', None)
+
+    @contrast_hill_min_slope.setter
+    @nodb_setter
+    def contrast_hill_min_slope(self, value: Optional[float]) -> None:
+        self._contrast_hill_min_slope = value
+
+    @property
+    def contrast_hill_max_slope(self) -> Optional[float]:
+        return getattr(self, '_contrast_hill_max_slope', None)
+
+    @contrast_hill_max_slope.setter
+    @nodb_setter
+    def contrast_hill_max_slope(self, value: Optional[float]) -> None:
+        self._contrast_hill_max_slope = value
+
+    @property
+    def contrast_select_burn_severities(self) -> Optional[List[int]]:
+        return getattr(self, '_contrast_select_burn_severities', None)
+
+    @contrast_select_burn_severities.setter
+    @nodb_setter
+    def contrast_select_burn_severities(self, value: Optional[List[int]]) -> None:
+        self._contrast_select_burn_severities = value
+
+    @property
+    def contrast_select_topaz_ids(self) -> Optional[List[int]]:
+        return getattr(self, '_contrast_select_topaz_ids', None)
+
+    @contrast_select_topaz_ids.setter
+    @nodb_setter
+    def contrast_select_topaz_ids(self, value: Optional[List[int]]) -> None:
+        self._contrast_select_topaz_ids = value
+
+    @property
+    def contrast_selection_mode(self) -> Optional[str]:
+        return getattr(self, '_contrast_selection_mode', None)
+
+    @contrast_selection_mode.setter
+    @nodb_setter
+    def contrast_selection_mode(self, value: Optional[str]) -> None:
+        self._contrast_selection_mode = value
+
+    @property
+    def contrast_geojson_path(self) -> Optional[str]:
+        return getattr(self, '_contrast_geojson_path', None)
+
+    @contrast_geojson_path.setter
+    @nodb_setter
+    def contrast_geojson_path(self, value: Optional[str]) -> None:
+        self._contrast_geojson_path = value
+
+    @property
+    def contrast_geojson_name_key(self) -> Optional[str]:
+        return getattr(self, '_contrast_geojson_name_key', None)
+
+    @contrast_geojson_name_key.setter
+    @nodb_setter
+    def contrast_geojson_name_key(self, value: Optional[str]) -> None:
+        self._contrast_geojson_name_key = value
+
+    @property
+    def contrast_order_reduction_passes(self) -> Optional[int]:
+        return getattr(self, '_contrast_order_reduction_passes', None)
+
+    @contrast_order_reduction_passes.setter
+    @nodb_setter
+    def contrast_order_reduction_passes(self, value: Optional[int]) -> None:
+        self._contrast_order_reduction_passes = value
+
+    @property
     def omni_dir(self) -> str:
         # `wd/omni` contains the aggregated .parquet outputs and _limbo
         # `_pups/omni` contains the scenario clones and contrasts to make _pups generic to all projects
@@ -792,13 +961,83 @@ class Omni(NoDbBase):
         return _join(self.wd, 'omni')
     
     def get_objective_parameter_from_gpkg(self, objective_parameter: str, scenario: Optional[str] = None) -> Tuple[List[Any], float]:
-        if scenario is None:
-            gpkg_fn = glob(_join(self.wd, 'export/arcmap/*.gpkg'))[0]
-        else:
-            gpkg_fn = glob(_join(self.wd, f'omni/scenarios/{scenario}/export/arcmap/*.gpkg'))[0]
+        """Return objective parameter ranking using interchange loss_pw0.hill.parquet."""
+        global OMNI_REL_DIR
+        scenario_suffix = None if scenario in (None, '', 'None') else str(scenario)
 
-        objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn, obj_param=objective_parameter)
-        return objective_parameter_descending, total_objective_parameter
+        if scenario_suffix is None:
+            hill_fn = _join(self.wd, 'wepp', 'output', 'interchange', 'loss_pw0.hill.parquet')
+        else:
+            hill_fn = _join(
+                self.wd,
+                OMNI_REL_DIR,
+                'scenarios',
+                scenario_suffix,
+                'wepp',
+                'output',
+                'interchange',
+                'loss_pw0.hill.parquet',
+            )
+
+        if not _exists(hill_fn):
+            raise FileNotFoundError(f"Interchange hillslope summary not found: {hill_fn}")
+
+        param_key = str(objective_parameter).strip()
+        param_lookup = {
+            'soil_loss_kg': {'column': 'Soil Loss', 'mode': 'scalar'},
+            'runoff_volume_m3': {'column': 'Runoff Volume', 'mode': 'scalar'},
+            'subrunoff_volume_m3': {'column': 'Subrunoff Volume', 'mode': 'scalar'},
+            'runoff_mm': {'column': 'Runoff Volume', 'mode': 'depth'},
+            'subrunoff_mm': {'column': 'Subrunoff Volume', 'mode': 'depth'},
+            'total_phosphorus_kg': {'column': 'Total Pollutant', 'mode': 'scalar'},
+        }
+        param_spec = param_lookup.get(param_key.lower())
+        if not param_spec:
+            raise ValueError(f"Invalid objective parameter: {objective_parameter}")
+
+        df = pd.read_parquet(hill_fn)
+
+        if 'Type' in df.columns:
+            df = df[df['Type'].astype(str).str.lower() == 'hill']
+
+        if 'wepp_id' not in df.columns:
+            raise ValueError(f"Interchange hillslope summary missing wepp_id: {hill_fn}")
+
+        column = param_spec['column']
+        if column not in df.columns:
+            raise ValueError(f"Interchange hillslope summary missing column '{column}': {hill_fn}")
+
+        values = pd.to_numeric(df[column], errors='coerce')
+        if param_spec['mode'] == 'depth':
+            if 'Hillslope Area' not in df.columns:
+                raise ValueError(f"Interchange hillslope summary missing Hillslope Area: {hill_fn}")
+            area_ha = pd.to_numeric(df['Hillslope Area'], errors='coerce')
+            area_m2 = area_ha * 10000.0
+            values = values / area_m2 * 1000.0
+
+        df = df.assign(_objective_value=values)
+        df = df[df['_objective_value'].notna() & (df['_objective_value'] > 0.0)]
+
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        top2wepp = {
+            k: v
+            for k, v in translator.top2wepp.items()
+            if not (str(k).endswith('4') or int(k) == 0)
+        }
+        wepp2topaz = {str(v): str(k) for k, v in top2wepp.items()}
+
+        records: List[ObjectiveParameter] = []
+        for _, row in df.iterrows():
+            wepp_id = str(row['wepp_id'])
+            topaz_id = wepp2topaz.get(wepp_id)
+            if topaz_id is None:
+                continue
+            records.append(ObjectiveParameter(topaz_id, wepp_id, float(row['_objective_value'])))
+
+        records.sort(key=lambda item: item.value, reverse=True)
+        total_value = float(sum(item.value for item in records))
+        return records, total_value
     
     def clear_contrasts(self) -> None:
         with self.locked():
@@ -919,7 +1158,9 @@ class Omni(NoDbBase):
         contrasts = []
         contrast_names = []
 
-        report_fn = _join(self.wd, OMNI_REL_DIR, 'contrasts', 'build_report.ndjson')
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
+        os.makedirs(contrasts_dir, exist_ok=True)
+        report_fn = _join(contrasts_dir, 'build_report.ndjson')
         report_fp = open(report_fn, 'a')
 
         running_obj_param = 0.0
@@ -928,8 +1169,6 @@ class Omni(NoDbBase):
                 break
 
             running_obj_param += d.value
-            if running_obj_param / total_erosion_kg > contrast_cumulative_obj_param_threshold_fraction:
-                break
 
             topaz_id = d.topaz_id
             wepp_id = d.wepp_id
@@ -937,6 +1176,8 @@ class Omni(NoDbBase):
                 contrast_name = f'{control_scenario},{topaz_id}__to__{self.base_scenario}'
             else:
                 contrast_name = f'{control_scenario},{topaz_id}__to__{contrast_scenario}'
+            contrast_id = len(contrasts) + 1
+            report_control_scenario = control_scenario or str(self.base_scenario)
             
             contrast = {}
             for _topaz_id, _wepp_id in top2wepp.items():
@@ -946,19 +1187,36 @@ class Omni(NoDbBase):
                     if contrast_scenario is None:
                         wepp_id_path = _join(wd, f'wepp/output/H{wepp_id}')   
                     else: 
-                        wepp_id_path = _join(wd, f'omni/scenarios/{contrast_scenario}/wepp/output/H{wepp_id}')
+                        wepp_id_path = _join(
+                            wd,
+                            OMNI_REL_DIR,
+                            'scenarios',
+                            contrast_scenario,
+                            'wepp',
+                            'output',
+                            f'H{wepp_id}',
+                        )
                 else:
                     if control_scenario is None:
                         wepp_id_path = _join(wd, f'wepp/output/H{_wepp_id}')
                     else:
-                        wepp_id_path = _join(wd, f'omni/scenarios/{control_scenario}/wepp/output/H{_wepp_id}')
+                        wepp_id_path = _join(
+                            wd,
+                            OMNI_REL_DIR,
+                            'scenarios',
+                            control_scenario,
+                            'wepp',
+                            'output',
+                            f'H{_wepp_id}',
+                        )
                 contrast[_topaz_id] = wepp_id_path  # os.path.relpath(wepp_id_path, contrast_dir)
 
             contrasts.append(contrast)
             contrast_names.append(contrast_name)
             
             report_fp.write(json.dumps({
-                'control_scenario': control_scenario,
+                'contrast_id': contrast_id,
+                'control_scenario': report_control_scenario,
                 'contrast_scenario': contrast_scenario,
                 'wepp_id': wepp_id,
                 'topaz_id': topaz_id,
@@ -966,6 +1224,9 @@ class Omni(NoDbBase):
                 'running_obj_param': running_obj_param,
                 'pct_cumulative': running_obj_param / total_erosion_kg * 100
             }) + '\n')
+
+            if running_obj_param / total_erosion_kg >= contrast_cumulative_obj_param_threshold_fraction:
+                break
 
         report_fp.close()
 

@@ -116,6 +116,9 @@
         <li data-mod-nav="omni" {% if not show_omni %}hidden{% endif %}>
           <a href="#omni-scenarios" class="nav-link">Omni Scenarios</a>
         </li>
+        <li data-mod-nav="omni" {% if not show_omni %}hidden{% endif %}>
+          <a href="#omni-contrasts" class="nav-link">Omni Contrasts</a>
+        </li>
         <li data-mod-nav="observed" {% if not show_observed %}hidden{% endif %}>
           <a href="#observed" class="nav-link">Observed Data</a>
         </li>
@@ -225,6 +228,9 @@
         {% if show_omni %}
         <section id="omni-scenarios" class="wc-stack">
           {% include 'controls/omni_scenarios_pure.htm' %}
+        </section>
+        <section id="omni-contrasts" class="wc-stack">
+          {% include 'controls/omni_contrasts_pure.htm' %}
         </section>
         {% endif %}
       </div>
