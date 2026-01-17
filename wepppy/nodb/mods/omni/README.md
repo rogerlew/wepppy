@@ -69,10 +69,11 @@ wepppy/weppcloud/templates/controls/
 ### Contrast Execution Flow
 
 1. **Definition**: User selects control/contrast scenarios, objective parameter (runoff, soil loss), and cumulative threshold
-2. **Hillslope Selection**: `build_contrasts()` reads `wepp/output/interchange/loss_pw0.hill.parquet` (control scenario), sorts hillslopes by objective parameter, and selects top contributors up to threshold
-3. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates `_pups/omni/contrasts/<contrast_id>`, symlinks the watershed run inputs (excluding `pw0.run`/`pw0.err`), and regenerates `pw0.run` with mixed hillslope pass files
-4. **WEPP Execution**: Contrast clone runs the watershed model and writes outputs under `_pups/omni/contrasts/<contrast_id>/wepp/output`
-5. **Reporting**: `contrasts_report()` joins control and contrast loss metrics, computes deltas, and persists `contrasts.out.parquet`
+2. **Hillslope Selection**: `build_contrasts()` resets existing contrast definitions, reads `wepp/output/interchange/loss_pw0.hill.parquet` (control scenario), sorts hillslopes by objective parameter, and selects top contributors up to threshold
+3. **Selection Sidecar**: Each contrast mapping is written to `omni/contrasts/contrast_<id>.tsv` as tab-delimited `topaz_id` + hillslope pass path for fast reloads on large watersheds
+4. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates `_pups/omni/contrasts/<contrast_id>`, symlinks the watershed run inputs (excluding `pw0.run`/`pw0.err`), and regenerates `pw0.run` with mixed hillslope pass files
+5. **WEPP Execution**: `run_omni_contrasts()` clears existing `_pups/omni/contrasts/<id>` runs, then executes the watershed model and writes outputs under `_pups/omni/contrasts/<contrast_id>/wepp/output`
+6. **Reporting**: `contrasts_report()` joins control and contrast loss metrics, computes deltas, and persists `contrasts.out.parquet`
 
 ### Contrast Selection Modes
 
@@ -105,6 +106,14 @@ Each contrast selection writes one line to `_pups/omni/contrasts/build_report.nd
 - `contrast_scenario`: selected scenario name (or `null` for base scenario)
 - `wepp_id`, `topaz_id`: selected hillslope identifiers
 - `obj_param`, `running_obj_param`, `pct_cumulative`: objective parameter values and cumulative contribution
+
+### Contrast Selection Sidecars
+
+Each contrast mapping is persisted to `omni/contrasts/contrast_<id>.tsv` to keep large watersheds fast to inspect. The format is ASCII TSV:
+
+```
+<topaz_id>\t<wepp_hillslope_pass_path>
+```
 
 ### Dependency Tree Persistence
 
@@ -257,8 +266,7 @@ print(omni.scenario_dependency_tree)
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `_scenarios` | `List[Dict[str, Any]]` | Scenario definitions (type, parameters) |
-| `_contrasts` | `List[Dict[int \| str, str]]` | Per-hillslope path mappings for contrasts |
-| `_contrast_names` | `List[str]` | Human-readable contrast identifiers |
+| `_contrast_names` | `List[str]` | Human-readable contrast identifiers (mapping sidecars live under `omni/contrasts/`) |
 | `_control_scenario` | `OmniScenario` | Control scenario for contrast analysis |
 | `_contrast_scenario` | `OmniScenario` | Treatment scenario for contrast analysis |
 | `_contrast_object_param` | `str` | Objective parameter for hillslope selection (e.g., `Runoff_mm`) |

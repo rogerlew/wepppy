@@ -524,7 +524,7 @@ class Omni(NoDbBase):
     Public Attributes (stored in omni.nodb):
         - wd: working directory for WEPP inputs/outputs
         - _scenarios: list of scenario definition dicts
-        - _contrasts: dict mapping contrast names to input/output path mappings
+        - _contrast_names: list of contrast identifiers (sidecar mappings live under omni/contrasts)
         - _control_scenario, _contrast_scenario: OmniScenario enums
         - _contrast_object_param, _contrast_cumulative_obj_param_threshold_fraction, etc.: parameters
             controlling contrast selection and filtering
@@ -584,6 +584,15 @@ class Omni(NoDbBase):
             self._scenario_dependency_tree = {}
             self._contrast_dependency_tree = {}
             self._scenario_run_state = []
+
+    def __getstate__(self) -> dict[str, Any]:
+        state = super().__getstate__()
+        state.pop('_contrasts', None)
+        return state
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self.__dict__.pop('_contrasts', None)
 
     def _refresh_catalog(self, rel_path: Optional[str] = None) -> None:
         """Best-effort catalog refresh for Omni artifacts."""
@@ -811,7 +820,20 @@ class Omni(NoDbBase):
 
     @property
     def contrasts(self) -> Optional[List[ContrastMapping]]:
-        return getattr(self, '_contrasts', None)
+        contrasts = getattr(self, '_contrasts', None)
+        if contrasts is not None:
+            return contrasts
+        contrast_names = self.contrast_names or []
+        if not contrast_names:
+            return None
+        loaded: List[ContrastMapping] = []
+        for contrast_id in range(1, len(contrast_names) + 1):
+            try:
+                loaded.append(self._load_contrast_sidecar(contrast_id))
+            except FileNotFoundError:
+                return None
+        self._contrasts = loaded
+        return loaded
     
     @contrasts.setter
     @nodb_setter
@@ -1043,6 +1065,51 @@ class Omni(NoDbBase):
         with self.locked():
             self._contrasts = None
             self._contrast_names = None
+        sidecar_dir = _join(self.omni_dir, 'contrasts')
+        if _exists(sidecar_dir):
+            shutil.rmtree(sidecar_dir)
+
+    def _clean_contrast_runs(self) -> None:
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
+        if not _exists(contrasts_dir):
+            return
+        for entry in os.listdir(contrasts_dir):
+            if entry == '_uploads':
+                continue
+            path = _join(contrasts_dir, entry)
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+
+    def _contrast_sidecar_dir(self) -> str:
+        return _join(self.omni_dir, 'contrasts')
+
+    def _contrast_sidecar_path(self, contrast_id: int) -> str:
+        return _join(self._contrast_sidecar_dir(), f'contrast_{contrast_id:05d}.tsv')
+
+    def _load_contrast_sidecar(self, contrast_id: int) -> ContrastMapping:
+        sidecar_fn = self._contrast_sidecar_path(contrast_id)
+        if not _exists(sidecar_fn):
+            raise FileNotFoundError(f'Contrast sidecar missing: {sidecar_fn}')
+        contrast: ContrastMapping = {}
+        with open(sidecar_fn, 'r', encoding='ascii') as fp:
+            for line in fp:
+                line = line.rstrip('\n')
+                if not line:
+                    continue
+                topaz_id, sep, wepp_id_path = line.partition('\t')
+                if not sep:
+                    continue
+                contrast[topaz_id] = wepp_id_path
+        return contrast
+
+    def _write_contrast_sidecar(self, contrast_id: int, contrast: ContrastMapping) -> str:
+        sidecar_dir = self._contrast_sidecar_dir()
+        os.makedirs(sidecar_dir, exist_ok=True)
+        sidecar_fn = self._contrast_sidecar_path(contrast_id)
+        with open(sidecar_fn, 'w', encoding='ascii', newline='\n') as fp:
+            for topaz_id, wepp_id_path in contrast.items():
+                fp.write(f'{topaz_id}\t{wepp_id_path}\n')
+        return sidecar_fn
 
     def build_contrasts(
         self,
@@ -1155,13 +1222,23 @@ class Omni(NoDbBase):
         if len(obj_param_descending) == 0:
             raise Exception('No soil erosion data found!')
         
-        contrasts = []
-        contrast_names = []
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = []
+
+        sidecar_dir = self._contrast_sidecar_dir()
+        if _exists(sidecar_dir):
+            shutil.rmtree(sidecar_dir)
+        os.makedirs(sidecar_dir, exist_ok=True)
+
+        contrasts: List[ContrastMapping] = []
+        contrast_names: List[str] = []
+        existing_contrast_count = 0
 
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
         os.makedirs(contrasts_dir, exist_ok=True)
         report_fn = _join(contrasts_dir, 'build_report.ndjson')
-        report_fp = open(report_fn, 'a')
+        report_fp = open(report_fn, 'w')
 
         running_obj_param = 0.0
         for i, d in enumerate(obj_param_descending):
@@ -1176,7 +1253,7 @@ class Omni(NoDbBase):
                 contrast_name = f'{control_scenario},{topaz_id}__to__{self.base_scenario}'
             else:
                 contrast_name = f'{control_scenario},{topaz_id}__to__{contrast_scenario}'
-            contrast_id = len(contrasts) + 1
+            contrast_id = existing_contrast_count + len(contrasts) + 1
             report_control_scenario = control_scenario or str(self.base_scenario)
             
             contrast = {}
@@ -1213,6 +1290,7 @@ class Omni(NoDbBase):
 
             contrasts.append(contrast)
             contrast_names.append(contrast_name)
+            self._write_contrast_sidecar(contrast_id, contrast)
             
             report_fp.write(json.dumps({
                 'contrast_id': contrast_id,
@@ -1231,31 +1309,31 @@ class Omni(NoDbBase):
         report_fp.close()
 
         with self.locked():
-            if self._contrasts is None:
-                self._contrasts = contrasts
-                self._contrast_names = contrast_names
-            else:
-                self._contrasts.extend(contrasts)
-                self._contrast_names.extend(contrast_names)
+            self._contrasts = None
+            self._contrast_names = contrast_names
 
     def run_omni_contrasts(self) -> None:
         global OMNI_REL_DIR
 
         self.logger.info('run_omni_contrasts')
 
-        if not self.contrasts or not self.contrast_names:
+        if not self.contrast_names:
             self.logger.info('  run_omni_contrasts: No contrasts to run')
             return
+
+        self._clean_contrast_runs()
+        if self.contrast_dependency_tree:
+            self.contrast_dependency_tree = {}
 
         dependency_tree: ContrastDependency = dict(self.contrast_dependency_tree)
         active_contrasts: Set[str] = set()
 
-        contrasts: List[ContrastMapping] = self.contrasts or []
         contrast_names: List[str] = self.contrast_names or []
-        total_contrasts = len(contrasts)
+        total_contrasts = len(contrast_names)
 
-        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(contrast_names, contrasts), start=1):
+        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
             active_contrasts.add(contrast_name)
+            _contrasts = self._load_contrast_sidecar(contrast_id)
             dependencies = self._contrast_dependencies(contrast_name)
             signature = self._contrast_signature(contrast_name, _contrasts)
 
@@ -1290,9 +1368,8 @@ class Omni(NoDbBase):
     def run_omni_contrast(self, contrast_id: int) -> str:
         self.logger.info(f'run_omni_contrast {contrast_id}')
         contrast_names = self.contrast_names or []
-        contrasts = self.contrasts or []
         contrast_name = contrast_names[contrast_id - 1]
-        _contrasts = contrasts[contrast_id - 1]
+        _contrasts = self._load_contrast_sidecar(contrast_id)
         omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
         self._post_omni_run(omni_wd, contrast_name)
         return omni_wd
@@ -1302,10 +1379,10 @@ class Omni(NoDbBase):
 
         parquet_files = {}
 
-        if not self.contrast_names or not self.contrasts:
+        if not self.contrast_names:
             return pd.DataFrame(columns=['key', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
 
-        for contrast_id, (contrast_name, _contrasts) in enumerate(zip(self.contrast_names or [], self.contrasts or []), start=1):
+        for contrast_id, contrast_name in enumerate(self.contrast_names or [], start=1):
             parquet_files[contrast_name] = _join(self.wd, 'contrasts', str(contrast_id), 'wepp', 'output', 'loss_pw0.out.parquet')
 
         dfs = []
