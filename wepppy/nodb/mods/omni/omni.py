@@ -47,7 +47,13 @@ from time import sleep
 
 from wepppy.nodb.core import Climate, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.core.climate import ClimateMode
-from wepppy.nodb.base import NoDbBase, clear_locks, clear_nodb_file_cache, nodb_setter
+from wepppy.nodb.base import (
+    NoDbAlreadyLockedError,
+    NoDbBase,
+    clear_locks,
+    clear_nodb_file_cache,
+    nodb_setter,
+)
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
 from wepppy.wepp.interchange import run_wepp_hillslope_interchange
@@ -96,7 +102,8 @@ def _update_nodb_wd(d: Dict[str, Any], new_wd: str, parent_wd: Optional[str] = N
 
 
 ContrastMapping = Dict[int | str, str]
-ContrastDependency = Dict[str, Dict[str, Optional[str]]]
+ContrastDependencies = Dict[str, Dict[str, Optional[str]]]
+ContrastDependency = Dict[str, Dict[str, Any]]
 
 
 def _clear_nodb_cache_and_locks(runid: str, pup_relpath: Optional[str] = None) -> None:
@@ -1090,6 +1097,18 @@ class Omni(NoDbBase):
             if os.path.isdir(path):
                 shutil.rmtree(path)
 
+    def _clean_stale_contrast_runs(self, active_ids: Iterable[int]) -> None:
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
+        if not _exists(contrasts_dir):
+            return
+        active = {str(contrast_id) for contrast_id in active_ids}
+        for entry in os.listdir(contrasts_dir):
+            if entry == '_uploads':
+                continue
+            path = _join(contrasts_dir, entry)
+            if os.path.isdir(path) and entry not in active:
+                shutil.rmtree(path)
+
     def _contrast_sidecar_dir(self) -> str:
         return _join(self.omni_dir, 'contrasts')
 
@@ -1120,6 +1139,125 @@ class Omni(NoDbBase):
             for topaz_id, wepp_id_path in contrast.items():
                 fp.write(f'{topaz_id}\t{wepp_id_path}\n')
         return sidecar_fn
+
+    def _contrast_run_readme_path(self, contrast_id: int) -> str:
+        return _join(
+            self.wd,
+            OMNI_REL_DIR,
+            'contrasts',
+            str(contrast_id),
+            'wepp',
+            'output',
+            'interchange',
+            'README.md',
+        )
+
+    def _redisprep_snapshot(self, path: str) -> Optional[Dict[str, Any]]:
+        if not _exists(path):
+            return None
+        try:
+            with open(path, 'r', encoding='utf-8') as fp:
+                payload = json.load(fp)
+        except (OSError, json.JSONDecodeError) as exc:
+            self.logger.debug('Failed to read redisprep snapshot from %s: %s', path, exc)
+            return None
+        if not isinstance(payload, dict):
+            return None
+        snapshot = {
+            key: value
+            for key, value in payload.items()
+            if str(key).startswith('timestamps:')
+        }
+        if 'timestamps:run_wepp_watershed' not in snapshot:
+            return None
+        return snapshot
+
+    def _scenario_redisprep_snapshot(self, scenario_key: str) -> Optional[Dict[str, Any]]:
+        if scenario_key == str(self.base_scenario):
+            redisprep_path = _join(self.wd, 'redisprep.dump')
+        else:
+            redisprep_path = _join(
+                self.wd,
+                OMNI_REL_DIR,
+                'scenarios',
+                scenario_key,
+                'redisprep.dump',
+            )
+        return self._redisprep_snapshot(redisprep_path)
+
+    def _contrast_scenario_keys(self, contrast_name: str) -> Tuple[str, str]:
+        control_part, target_part = contrast_name.split('__to__')
+        control_scenario_raw = control_part.split(',')[0]
+        control_key = self._normalize_scenario_key(control_scenario_raw)
+        target_key = self._normalize_scenario_key(target_part)
+        return control_key, target_key
+
+    def _contrast_run_status(self, contrast_id: int, contrast_name: str) -> str:
+        run_marker = self._contrast_run_readme_path(contrast_id)
+        if not _exists(run_marker):
+            return 'needs_run'
+
+        sidecar_sha1 = _hash_file_sha1(self._contrast_sidecar_path(contrast_id))
+        if not sidecar_sha1:
+            return 'needs_run'
+
+        control_key, target_key = self._contrast_scenario_keys(contrast_name)
+        control_snapshot = self._scenario_redisprep_snapshot(control_key)
+        contrast_snapshot = self._scenario_redisprep_snapshot(target_key)
+        if control_snapshot is None or contrast_snapshot is None:
+            return 'needs_run'
+
+        prev_entry = self.contrast_dependency_tree.get(contrast_name)
+        if not prev_entry:
+            return 'needs_run'
+        if prev_entry.get('sidecar_sha1') != sidecar_sha1:
+            return 'needs_run'
+        if prev_entry.get('control_redisprep') != control_snapshot:
+            return 'needs_run'
+        if prev_entry.get('contrast_redisprep') != contrast_snapshot:
+            return 'needs_run'
+
+        return 'up_to_date'
+
+    def _contrast_dependency_entry(
+        self,
+        contrast_id: int,
+        contrast_name: str,
+    ) -> Dict[str, Any]:
+        dependencies = self._contrast_dependencies(contrast_name)
+        sidecar_sha1 = _hash_file_sha1(self._contrast_sidecar_path(contrast_id))
+        control_key, target_key = self._contrast_scenario_keys(contrast_name)
+        control_snapshot = self._scenario_redisprep_snapshot(control_key)
+        contrast_snapshot = self._scenario_redisprep_snapshot(target_key)
+        return {
+            'dependencies': dependencies,
+            'sidecar_sha1': sidecar_sha1,
+            'control_redisprep': control_snapshot,
+            'contrast_redisprep': contrast_snapshot,
+            'last_run': time.time(),
+        }
+
+    def _update_contrast_dependency_tree(
+        self,
+        contrast_name: str,
+        dependency_entry: Dict[str, Any],
+        *,
+        max_tries: int = 5,
+        delay: float = 1.0,
+    ) -> None:
+        for attempt in range(max_tries):
+            try:
+                omni = type(self).getInstance(self.wd)
+                with omni.locked():
+                    dependency_tree = dict(omni.contrast_dependency_tree)
+                    dependency_tree[contrast_name] = dependency_entry
+                    omni._contrast_dependency_tree = dependency_tree
+            except NoDbAlreadyLockedError:
+                if attempt + 1 == max_tries:
+                    raise
+                time.sleep(delay)
+            else:
+                break
 
     def build_contrasts(
         self,
@@ -1240,6 +1378,8 @@ class Omni(NoDbBase):
                 )
                 contrast_hillslope_limit = None
 
+        contrast_hillslope_limit_max = 100 if selection_mode == 'cumulative' else None
+
         if contrast_hillslope_limit is not None:
             try:
                 contrast_hillslope_limit = int(contrast_hillslope_limit)
@@ -1247,6 +1387,13 @@ class Omni(NoDbBase):
                 raise ValueError("omni_contrast_hillslope_limit must be an integer") from exc
             if contrast_hillslope_limit <= 0:
                 raise ValueError("omni_contrast_hillslope_limit must be >= 1")
+            if contrast_hillslope_limit_max is not None and contrast_hillslope_limit > contrast_hillslope_limit_max:
+                self.logger.warning(
+                    "omni_contrast_hillslope_limit capped at %d (requested %d).",
+                    contrast_hillslope_limit_max,
+                    contrast_hillslope_limit,
+                )
+                contrast_hillslope_limit = contrast_hillslope_limit_max
 
         def _normalize_int_set(value: Any, label: str) -> Optional[Set[int]]:
             if value is None or value == "":
@@ -1421,7 +1568,14 @@ class Omni(NoDbBase):
 
         running_obj_param = 0.0
         for d in obj_param_descending:
-            if contrast_hillslope_limit is not None and len(contrasts) >= contrast_hillslope_limit:
+            if contrast_hillslope_limit is not None:
+                if len(contrasts) >= contrast_hillslope_limit:
+                    break
+            elif contrast_hillslope_limit_max is not None and len(contrasts) >= contrast_hillslope_limit_max:
+                self.logger.warning(
+                    "Contrast selection reached cap of %d hillslopes without an explicit limit; stopping.",
+                    contrast_hillslope_limit_max,
+                )
                 break
 
             running_obj_param += d.value
@@ -1748,11 +1902,10 @@ class Omni(NoDbBase):
 
         if not self.contrast_names:
             self.logger.info('  run_omni_contrasts: No contrasts to run')
+            if self.contrast_dependency_tree:
+                self.contrast_dependency_tree = {}
+            self._clean_stale_contrast_runs([])
             return
-
-        self._clean_contrast_runs()
-        if self.contrast_dependency_tree:
-            self.contrast_dependency_tree = {}
 
         dependency_tree: ContrastDependency = dict(self.contrast_dependency_tree)
         active_contrasts: Set[str] = set()
@@ -1767,12 +1920,22 @@ class Omni(NoDbBase):
 
         if total_contrasts == 0:
             self.logger.info("  run_omni_contrasts: No contrasts to run")
+            if dependency_tree:
+                dependency_tree.clear()
+                self.contrast_dependency_tree = dependency_tree
+            self._clean_stale_contrast_runs(active_ids)
             return
 
         for ordinal, contrast_id in enumerate(active_ids, start=1):
             contrast_name = contrast_names[contrast_id - 1]
             if not contrast_name:
                 continue
+            active_contrasts.add(contrast_name)
+            run_status = self._contrast_run_status(contrast_id, contrast_name)
+            if run_status == 'up_to_date':
+                self.logger.info('  run_omni_contrasts: %s up-to-date, skipping', contrast_name)
+                continue
+
             try:
                 _contrasts = self._load_contrast_sidecar(contrast_id)
             except FileNotFoundError:
@@ -1780,22 +1943,6 @@ class Omni(NoDbBase):
                     "  run_omni_contrasts: Missing sidecar for contrast_id=%s, skipping.",
                     contrast_id,
                 )
-                continue
-            active_contrasts.add(contrast_name)
-            dependencies = self._contrast_dependencies(contrast_name)
-            signature = self._contrast_signature(contrast_name, _contrasts)
-
-            prev_entry = dependency_tree.get(contrast_name)
-            dep_match = False
-            if prev_entry and prev_entry.get('dependencies'):
-                prev_deps = prev_entry['dependencies']
-                dep_match = (
-                    set(prev_deps.keys()) == set(dependencies.keys()) and
-                    all(prev_deps[key].get('sha1') == dependencies[key].get('sha1') for key in dependencies)
-                )
-
-            if prev_entry and prev_entry.get('signature') == signature and dep_match:
-                self.logger.info(f'  run_omni_contrasts: {contrast_name} up-to-date, skipping')
                 continue
 
             self.logger.info(
@@ -1808,16 +1955,14 @@ class Omni(NoDbBase):
             omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
             self._post_omni_run(omni_wd, contrast_name)
 
-            dependency_tree[contrast_name] = {
-                'signature': signature,
-                'dependencies': dependencies,
-            }
+            dependency_tree[contrast_name] = self._contrast_dependency_entry(contrast_id, contrast_name)
             self.contrast_dependency_tree = dependency_tree
 
         stale = set(dependency_tree.keys()) - active_contrasts
         for contrast_name in stale:
             dependency_tree.pop(contrast_name, None)
         self.contrast_dependency_tree = dependency_tree
+        self._clean_stale_contrast_runs(active_ids)
 
     def run_omni_contrast(self, contrast_id: int) -> str:
         self.logger.info(f'run_omni_contrast {contrast_id}')
@@ -1830,6 +1975,8 @@ class Omni(NoDbBase):
         _contrasts = self._load_contrast_sidecar(contrast_id)
         omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
         self._post_omni_run(omni_wd, contrast_name)
+        dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
+        self._update_contrast_dependency_tree(contrast_name, dependency_entry)
         return omni_wd
 
     def contrasts_report(self) -> pd.DataFrame:
@@ -1993,14 +2140,14 @@ class Omni(NoDbBase):
             return scenario_def.get('base_scenario')
         return str(self.base_scenario)
 
-    def _contrast_dependencies(self, contrast_name: str) -> ContrastDependency:
+    def _contrast_dependencies(self, contrast_name: str) -> ContrastDependencies:
         control_part, target_part = contrast_name.split('__to__')
         control_scenario_raw = control_part.split(',')[0]
         control_key = self._normalize_scenario_key(control_scenario_raw)
         target_key = self._normalize_scenario_key(target_part)
 
         scenarios = {control_key, target_key}
-        dependencies: Dict[str, Dict[str, Optional[str]]] = {}
+        dependencies: ContrastDependencies = {}
         for scenario_name in scenarios:
             loss_path = self._loss_pw0_path_for_scenario(scenario_name)
             dependencies[scenario_name] = {

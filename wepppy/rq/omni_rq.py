@@ -214,18 +214,6 @@ def run_omni_contrast_rq(
 
         omni.run_omni_contrast(contrast_id)
 
-        contrast_payload = omni._load_contrast_sidecar(contrast_id)
-        dependencies = omni._contrast_dependencies(contrast_name)
-        signature = omni._contrast_signature(contrast_name, contrast_payload)
-        _update_contrast_dependency_state(
-            omni,
-            contrast_name,
-            {
-                'signature': signature,
-                'dependencies': dependencies,
-            },
-        )
-
         elapsed = time.time() - start_ts
         status = True
         StatusMessenger.publish(
@@ -500,14 +488,21 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
         contrast_names = omni.contrast_names or []
         if not contrast_names:
             omni.logger.info('  run_omni_contrasts: No contrasts to run')
+            if omni.contrast_dependency_tree:
+                omni.contrast_dependency_tree = {}
+            omni._clean_stale_contrast_runs([])
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
             return None
 
         active_ids: List[int] = []
+        active_contrasts: Set[str] = set()
+        run_ids: List[int] = []
         for contrast_id, contrast_name in enumerate(contrast_names, start=1):
             if not contrast_name:
                 continue
+            active_ids.append(contrast_id)
+            active_contrasts.add(contrast_name)
             sidecar_path = omni._contrast_sidecar_path(contrast_id)
             if not os.path.isfile(sidecar_path):
                 omni.logger.info(
@@ -515,23 +510,42 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
                     contrast_id,
                 )
                 continue
-            active_ids.append(contrast_id)
+            run_status = omni._contrast_run_status(contrast_id, contrast_name)
+            if run_status == 'up_to_date':
+                omni.logger.info(
+                    '  run_omni_contrasts: %s up-to-date, skipping',
+                    contrast_name,
+                )
+                continue
+            run_ids.append(contrast_id)
 
         if not active_ids:
             omni.logger.info('  run_omni_contrasts: No contrasts to run')
+            if omni.contrast_dependency_tree:
+                omni.contrast_dependency_tree = {}
+            omni._clean_stale_contrast_runs(active_ids)
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
             return None
 
-        omni._clean_contrast_runs()
-        if omni.contrast_dependency_tree:
-            omni.contrast_dependency_tree = {}
+        dependency_tree = dict(omni.contrast_dependency_tree)
+        stale = set(dependency_tree.keys()) - active_contrasts
+        for contrast_name in stale:
+            dependency_tree.pop(contrast_name, None)
+        omni.contrast_dependency_tree = dependency_tree
+        omni._clean_stale_contrast_runs(active_ids)
+
+        if not run_ids:
+            omni.logger.info('  run_omni_contrasts: All contrasts up to date, nothing to run')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
+            return None
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
             contrast_jobs: List[Job] = []
-            for contrast_id in active_ids:
+            for contrast_id in run_ids:
                 child_job = q.enqueue_call(
                     func=run_omni_contrast_rq,
                     args=[runid, contrast_id],

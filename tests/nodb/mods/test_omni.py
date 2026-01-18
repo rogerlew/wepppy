@@ -575,27 +575,142 @@ def test_build_contrasts_ignores_filters_when_not_cumulative(tmp_path, monkeypat
     ]
 
 
-def test_run_omni_contrasts_reruns_all_when_clean_slate(monkeypatch, omni_module):
+def test_build_contrasts_clamps_hillslope_limit(tmp_path, monkeypatch, omni_module, caplog):
     omni = omni_module.Omni.__new__(omni_module.Omni)
-    omni.wd = "/tmp/run-123"
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_cap")
+    omni.locked = _noop_lock
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 1.0
+    omni._contrast_hillslope_limit = 150
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._contrast_selection_mode = "cumulative"
+    omni._contrast_scenario = None
+    omni._control_scenario = None
+    omni._contrast_names = []
+    omni._contrasts = None
+    omni._contrast_dependency_tree = {}
+
+    class DummyTranslator:
+        top2wepp = {i: i for i in range(1, 121)}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    obj_params = [
+        omni_module.ObjectiveParameter(str(i), str(i), 1.0) for i in range(1, 121)
+    ]
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "get_objective_parameter_from_gpkg",
+        lambda self, objective_parameter, scenario=None: (obj_params, 120.0),
+    )
+
+    with caplog.at_level(logging.WARNING, logger=omni.logger.name):
+        omni._build_contrasts()
+
+    assert len(omni._contrast_names) == 100
+    assert "capped at 100" in caplog.text
+
+
+def test_build_contrasts_caps_when_no_limit(tmp_path, monkeypatch, omni_module, caplog):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_cap_default")
+    omni.locked = _noop_lock
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 1.0
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._contrast_selection_mode = "cumulative"
+    omni._contrast_scenario = None
+    omni._control_scenario = None
+    omni._contrast_names = []
+    omni._contrasts = None
+    omni._contrast_dependency_tree = {}
+
+    class DummyTranslator:
+        top2wepp = {i: i for i in range(1, 151)}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    obj_params = [
+        omni_module.ObjectiveParameter(str(i), str(i), 1.0) for i in range(1, 151)
+    ]
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "get_objective_parameter_from_gpkg",
+        lambda self, objective_parameter, scenario=None: (obj_params, 150.0),
+    )
+
+    with caplog.at_level(logging.WARNING, logger=omni.logger.name):
+        omni._build_contrasts()
+
+    assert len(omni._contrast_names) == 100
+    assert "Contrast selection reached cap of 100 hillslopes" in caplog.text
+
+
+def test_run_omni_contrasts_skips_up_to_date(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
     omni.logger = logging.getLogger("tests.omni.run_contrasts")
     omni.locked = _noop_lock
-    omni._contrast_names = [
-        "None,10__to__undisturbed",
-        "None,20__to__undisturbed",
-    ]
+    omni._contrast_names = ["None,10__to__undisturbed"]
+    omni._contrast_dependency_tree = {}
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    sidecar_path = Path(omni._contrast_sidecar_path(1))
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text("10\t/tmp/H10\n", encoding="ascii")
+
+    readme_path = tmp_path / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "output" / "interchange" / "README.md"
+    readme_path.parent.mkdir(parents=True, exist_ok=True)
+    readme_path.write_text("ok", encoding="ascii")
+
+    redisprep_path = tmp_path / "redisprep.dump"
+    snapshot = {"timestamps:run_wepp_watershed": 123}
+    redisprep_path.write_text(json.dumps(snapshot), encoding="ascii")
+
     omni._contrast_dependency_tree = {
         "None,10__to__undisturbed": {
-            "signature": "sig",
-            "dependencies": {"undisturbed": {"sha1": "hash"}},
+            "dependencies": {},
+            "sidecar_sha1": omni_module._hash_file_sha1(str(sidecar_path)),
+            "control_redisprep": snapshot,
+            "contrast_redisprep": snapshot,
+            "last_run": 1.0,
         }
     }
-
-    monkeypatch.setattr(omni, "_clean_contrast_runs", lambda: None)
-    monkeypatch.setattr(omni, "_load_contrast_sidecar", lambda contrast_id: {"1": f"/tmp/H{contrast_id}"})
-    monkeypatch.setattr(omni, "_contrast_dependencies", lambda name: {"undisturbed": {"sha1": "hash"}})
-    monkeypatch.setattr(omni, "_contrast_signature", lambda name, payload: "sig")
-    monkeypatch.setattr(omni, "_post_omni_run", lambda wd, name: None)
 
     calls = []
 
@@ -604,13 +719,136 @@ def test_run_omni_contrasts_reruns_all_when_clean_slate(monkeypatch, omni_module
         return f"{wd}/_pups/omni/contrasts/{contrast_id}"
 
     monkeypatch.setattr(omni_module, "_run_contrast", fake_run)
+    monkeypatch.setattr(omni, "_post_omni_run", lambda wd, name: None)
 
     omni.run_omni_contrasts()
 
-    assert len(calls) == 2
+    assert calls == []
+
+
+def test_run_omni_contrasts_runs_when_readme_missing(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.run_contrasts_missing_readme")
+    omni.locked = _noop_lock
+    omni._contrast_names = ["None,10__to__undisturbed"]
+    omni._contrast_dependency_tree = {}
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    sidecar_path = Path(omni._contrast_sidecar_path(1))
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text("10\t/tmp/H10\n", encoding="ascii")
+
+    redisprep_path = tmp_path / "redisprep.dump"
+    snapshot = {"timestamps:run_wepp_watershed": 456}
+    redisprep_path.write_text(json.dumps(snapshot), encoding="ascii")
+
+    calls = []
+
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid):
+        calls.append((contrast_id, contrast_name))
+        contrast_dir = Path(wd) / "_pups" / "omni" / "contrasts" / contrast_id
+        (contrast_dir / "wepp" / "output" / "interchange").mkdir(parents=True, exist_ok=True)
+        return str(contrast_dir)
+
+    monkeypatch.setattr(omni_module, "_run_contrast", fake_run)
+    monkeypatch.setattr(omni, "_post_omni_run", lambda wd, name: None)
+
+    omni.run_omni_contrasts()
+
+    assert calls
     assert calls[0][0] == "1"
-    assert calls[1][0] == "2"
-    assert set(omni.contrast_dependency_tree.keys()) == set(omni._contrast_names)
+    assert "None,10__to__undisturbed" in omni.contrast_dependency_tree
+
+
+def test_run_omni_contrasts_runs_when_sidecar_changes(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.run_contrasts_sidecar")
+    omni.locked = _noop_lock
+    omni._contrast_names = ["None,10__to__undisturbed"]
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    sidecar_path = Path(omni._contrast_sidecar_path(1))
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text("10\t/tmp/H10\n", encoding="ascii")
+
+    readme_path = tmp_path / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "output" / "interchange" / "README.md"
+    readme_path.parent.mkdir(parents=True, exist_ok=True)
+    readme_path.write_text("ok", encoding="ascii")
+
+    redisprep_path = tmp_path / "redisprep.dump"
+    snapshot = {"timestamps:run_wepp_watershed": 789}
+    redisprep_path.write_text(json.dumps(snapshot), encoding="ascii")
+
+    omni._contrast_dependency_tree = {
+        "None,10__to__undisturbed": {
+            "dependencies": {},
+            "sidecar_sha1": "stale",
+            "control_redisprep": snapshot,
+            "contrast_redisprep": snapshot,
+            "last_run": 1.0,
+        }
+    }
+
+    calls = []
+
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid):
+        calls.append((contrast_id, contrast_name))
+        contrast_dir = Path(wd) / "_pups" / "omni" / "contrasts" / contrast_id
+        (contrast_dir / "wepp" / "output" / "interchange").mkdir(parents=True, exist_ok=True)
+        return str(contrast_dir)
+
+    monkeypatch.setattr(omni_module, "_run_contrast", fake_run)
+    monkeypatch.setattr(omni, "_post_omni_run", lambda wd, name: None)
+
+    omni.run_omni_contrasts()
+
+    assert calls
+    assert calls[0][0] == "1"
+
+
+def test_run_omni_contrasts_cleans_stale_runs(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.run_contrasts_stale")
+    omni.locked = _noop_lock
+    omni._contrast_names = ["None,10__to__undisturbed"]
+    omni._contrast_dependency_tree = {}
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    contrasts_root = tmp_path / "_pups" / "omni" / "contrasts"
+    (contrasts_root / "1").mkdir(parents=True, exist_ok=True)
+    (contrasts_root / "2").mkdir(parents=True, exist_ok=True)
+    (contrasts_root / "_uploads").mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(omni, "_contrast_run_status", lambda contrast_id, name: "up_to_date")
+    monkeypatch.setattr(omni_module, "_run_contrast", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni, "_post_omni_run", lambda wd, name: None)
+
+    omni.run_omni_contrasts()
+
+    assert (contrasts_root / "1").exists()
+    assert not (contrasts_root / "2").exists()
+    assert (contrasts_root / "_uploads").exists()
 
 
 def test_contrasts_report_reads_contrast_outputs_from_pups(tmp_path, monkeypatch, omni_module):
