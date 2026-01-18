@@ -851,6 +851,148 @@ def test_run_omni_contrasts_cleans_stale_runs(tmp_path, monkeypatch, omni_module
     assert (contrasts_root / "_uploads").exists()
 
 
+def test_build_contrasts_dry_run_report_cumulative_statuses(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.dry_run_cumulative")
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    def fake_build_contrasts(*args, **kwargs):
+        omni._contrast_selection_mode = "cumulative"
+        omni._contrast_names = [
+            "None,10__to__undisturbed",
+            "None,20__to__undisturbed",
+        ]
+        sidecar1 = Path(omni._contrast_sidecar_path(1))
+        sidecar1.parent.mkdir(parents=True, exist_ok=True)
+        sidecar1.write_text("10\t/tmp/H10\n", encoding="ascii")
+        sidecar2 = Path(omni._contrast_sidecar_path(2))
+        sidecar2.write_text("20\t/tmp/H20\n", encoding="ascii")
+
+        snapshot = {"timestamps:run_wepp_watershed": 123}
+        (tmp_path / "redisprep.dump").write_text(json.dumps(snapshot), encoding="ascii")
+
+        readme_path = Path(omni._contrast_run_readme_path(1))
+        readme_path.parent.mkdir(parents=True, exist_ok=True)
+        readme_path.write_text("ok", encoding="ascii")
+
+        omni._contrast_dependency_tree = {
+            "None,10__to__undisturbed": {
+                "dependencies": {},
+                "sidecar_sha1": omni_module._hash_file_sha1(str(sidecar1)),
+                "control_redisprep": snapshot,
+                "contrast_redisprep": snapshot,
+                "last_run": 1.0,
+            }
+        }
+
+    monkeypatch.setattr(omni, "build_contrasts", fake_build_contrasts)
+
+    report = omni.build_contrasts_dry_run_report(
+        control_scenario_def={"type": "uniform_low"},
+        contrast_scenario_def={"type": "mulch"},
+    )
+
+    assert report["selection_mode"] == "cumulative"
+    assert report["items"][0]["run_status"] == "up_to_date"
+    assert report["items"][1]["run_status"] == "needs_run"
+    assert report["items"][0]["topaz_id"] == "10"
+    assert report["items"][1]["topaz_id"] == "20"
+
+
+def test_build_contrasts_dry_run_report_user_defined(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.dry_run_user_defined")
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    def fake_build_contrasts(*args, **kwargs):
+        omni._contrast_selection_mode = "user_defined_areas"
+        omni._control_scenario = None
+        omni._contrast_scenario = None
+        omni._contrast_names = [
+            None,
+            "None,2__to__undisturbed",
+        ]
+        omni._contrast_labels = {1: "A1", 2: "A2"}
+
+        report_path = Path(omni._contrast_build_report_path())
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_lines = [
+            {
+                "contrast_id": 1,
+                "control_scenario": "undisturbed",
+                "contrast_scenario": "undisturbed",
+                "selection_mode": "user_defined_areas",
+                "area_label": "A1",
+                "n_hillslopes": 0,
+                "topaz_ids": [],
+                "status": "skipped",
+            },
+            {
+                "contrast_id": 2,
+                "control_scenario": "undisturbed",
+                "contrast_scenario": "undisturbed",
+                "selection_mode": "user_defined_areas",
+                "area_label": "A2",
+                "n_hillslopes": 2,
+                "topaz_ids": ["10", "11"],
+            },
+        ]
+        report_path.write_text(
+            "\n".join(json.dumps(line) for line in report_lines) + "\n",
+            encoding="ascii",
+        )
+
+        sidecar2 = Path(omni._contrast_sidecar_path(2))
+        sidecar2.parent.mkdir(parents=True, exist_ok=True)
+        sidecar2.write_text("10\t/tmp/H10\n", encoding="ascii")
+
+        snapshot = {"timestamps:run_wepp_watershed": 456}
+        (tmp_path / "redisprep.dump").write_text(json.dumps(snapshot), encoding="ascii")
+
+        readme_path = Path(omni._contrast_run_readme_path(2))
+        readme_path.parent.mkdir(parents=True, exist_ok=True)
+        readme_path.write_text("ok", encoding="ascii")
+
+        omni._contrast_dependency_tree = {
+            "None,2__to__undisturbed": {
+                "dependencies": {},
+                "sidecar_sha1": omni_module._hash_file_sha1(str(sidecar2)),
+                "control_redisprep": snapshot,
+                "contrast_redisprep": snapshot,
+                "last_run": 1.0,
+            }
+        }
+
+    monkeypatch.setattr(omni, "build_contrasts", fake_build_contrasts)
+
+    report = omni.build_contrasts_dry_run_report(
+        control_scenario_def={"type": "uniform_low"},
+        contrast_scenario_def={"type": "mulch"},
+    )
+
+    assert report["selection_mode"] == "user_defined_areas"
+    assert report["items"][0]["run_status"] == "skipped"
+    assert report["items"][0]["skip_status"]["reason"] == "no_hillslopes"
+    assert report["items"][1]["run_status"] == "up_to_date"
+    assert report["items"][1]["skip_status"]["skipped"] is False
+
+
 def test_contrasts_report_reads_contrast_outputs_from_pups(tmp_path, monkeypatch, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)

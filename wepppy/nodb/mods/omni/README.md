@@ -116,30 +116,36 @@ Upcoming changes to contrast execution and UI behavior:
     - `sidecar_sha1` matches the current sidecar contents, and
     - `control_redisprep`/`contrast_redisprep` match the current scenario redisprep snapshots.
 - **Stale cleanup**: remove contrast run directories that are no longer in the active contrast list.
-- **Dry Run**: new rq-engine endpoint that uses the same contrast build logic and returns a list of contrasts + run status without output metrics.
+- **Dry Run**: rq-engine endpoint that uses the same contrast build logic and returns a list of contrasts + run status (no output metrics, no WEPP execution).
+  - **Endpoint**: `POST /rq-engine/api/runs/<runid>/<config>/run-omni-contrasts-dry-run`
   - Cumulative: `contrast_id`, `topaz_id`, `run_status`
   - User-defined areas: `contrast_id`, `control_scenario`, `contrast_scenario`, `area_label`, `n_hillslopes`, `skip_status`, `run_status`
   - Stream-order pruning: `contrast_id`, `control_scenario`, `contrast_scenario`, `n_hillslopes`, `skip_status`, `run_status`
-  - Run status should report up-to-date vs needs-run (and skipped when applicable).
+  - Run status reports up-to-date vs needs-run (and skipped when applicable).
   - **Dry Run response schema (official)**:
     ```json
     {
-      "selection_mode": "cumulative|user_defined_areas|stream_order_pruning",
-      "items": [
-        {
-          "contrast_id": 12,
-          "control_scenario": "uniform_low",
-          "contrast_scenario": "mulch",
-          "topaz_id": "8122",
-          "area_label": "LRx03",
-          "n_hillslopes": 27,
-          "skip_status": {
-            "skipped": false,
-            "reason": null
-          },
-          "run_status": "up_to_date"
-        }
-      ]
+      "message": "Dry run complete.",
+      "result": {
+        "runid": "example-runid",
+        "config": "0",
+        "selection_mode": "cumulative|user_defined_areas|stream_order_pruning",
+        "items": [
+          {
+            "contrast_id": 12,
+            "control_scenario": "uniform_low",
+            "contrast_scenario": "mulch",
+            "topaz_id": "8122",
+            "area_label": "LRx03",
+            "n_hillslopes": 27,
+            "skip_status": {
+              "skipped": false,
+              "reason": null
+            },
+            "run_status": "up_to_date"
+          }
+        ]
+      }
     }
     ```
     - `run_status` enum: `up_to_date`, `needs_run`, `skipped`

@@ -457,6 +457,76 @@ async def _run_omni_contrasts(
     return JSONResponse({"job_id": job.id})
 
 
+async def _dry_run_omni_contrasts(
+    runid: str,
+    config: str,
+    request: Request,
+) -> JSONResponse:
+    wd = get_wd(runid)
+    omni = Omni.getInstance(wd)
+
+    payload = await parse_request_payload(request)
+    try:
+        raw_json = await request.json()
+    except Exception:
+        raw_json = None
+    form = await request.form()
+
+    try:
+        parsed_inputs = _prepare_omni_contrasts(
+            payload,
+            raw_json,
+            form,
+            runid=runid,
+            config=config,
+            wd=wd,
+        )
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception as exc:
+        return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
+
+    selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
+    if selection_mode not in {"cumulative", "user_defined_areas"}:
+        return error_response(
+            f'Contrast selection mode "{selection_mode}" is not implemented yet.',
+            status_code=400,
+        )
+
+    try:
+        omni.parse_inputs(parsed_inputs)
+        threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
+        if threshold_fraction is None:
+            threshold_fraction = 0.8
+        objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+        report = omni.build_contrasts_dry_run_report(
+            control_scenario_def={"type": parsed_inputs.get("omni_control_scenario")},
+            contrast_scenario_def={"type": parsed_inputs.get("omni_contrast_scenario")},
+            obj_param=objective_parameter,
+            contrast_cumulative_obj_param_threshold_fraction=threshold_fraction,
+            contrast_hillslope_limit=parsed_inputs.get("omni_contrast_hillslope_limit"),
+            hill_min_slope=parsed_inputs.get("omni_contrast_hill_min_slope"),
+            hill_max_slope=parsed_inputs.get("omni_contrast_hill_max_slope"),
+            select_burn_severities=parsed_inputs.get("omni_contrast_select_burn_severities"),
+            select_topaz_ids=parsed_inputs.get("omni_contrast_select_topaz_ids"),
+        )
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception as exc:
+        return error_response_with_traceback(f"Error building omni contrast dry-run: {exc}")
+
+    report = dict(report)
+    report["runid"] = runid
+    report["config"] = config
+
+    return JSONResponse(
+        {
+            "message": "Dry run complete.",
+            "result": report,
+        }
+    )
+
+
 @router.post("/runs/{runid}/{config}/run-omni")
 async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
     try:
@@ -483,6 +553,20 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     return await _run_omni_contrasts(runid, config, request)
+
+
+@router.post("/runs/{runid}/{config}/run-omni-contrasts-dry-run")
+async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine run-omni-contrasts-dry-run auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    return await _dry_run_omni_contrasts(runid, config, request)
 
 
 __all__ = ["router"]

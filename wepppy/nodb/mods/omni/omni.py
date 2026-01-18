@@ -1115,6 +1115,27 @@ class Omni(NoDbBase):
     def _contrast_sidecar_path(self, contrast_id: int) -> str:
         return _join(self._contrast_sidecar_dir(), f'contrast_{contrast_id:05d}.tsv')
 
+    def _contrast_build_report_path(self) -> str:
+        return _join(self.wd, OMNI_REL_DIR, 'contrasts', 'build_report.ndjson')
+
+    def _load_contrast_build_report(self) -> List[Dict[str, Any]]:
+        report_path = self._contrast_build_report_path()
+        if not _exists(report_path):
+            return []
+        entries: List[Dict[str, Any]] = []
+        with open(report_path, 'r', encoding='utf-8') as fp:
+            for line in fp:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    payload = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(payload, dict):
+                    entries.append(payload)
+        return entries
+
     def _load_contrast_sidecar(self, contrast_id: int) -> ContrastMapping:
         sidecar_fn = self._contrast_sidecar_path(contrast_id)
         if not _exists(sidecar_fn):
@@ -1894,6 +1915,121 @@ class Omni(NoDbBase):
             self._contrasts = None
             self._contrast_names = contrast_names
             self._contrast_labels = contrast_labels
+
+    def build_contrasts_dry_run_report(
+        self,
+        control_scenario_def: ScenarioDef,
+        contrast_scenario_def: ScenarioDef,
+        obj_param: str = 'Runoff_mm',
+        contrast_cumulative_obj_param_threshold_fraction: float = 0.8,
+        contrast_hillslope_limit: Optional[int] = None,
+        hill_min_slope: Optional[float] = None,
+        hill_max_slope: Optional[float] = None,
+        select_burn_severities: Optional[List[int]] = None,
+        select_topaz_ids: Optional[List[int]] = None,
+    ) -> Dict[str, Any]:
+        self.build_contrasts(
+            control_scenario_def=control_scenario_def,
+            contrast_scenario_def=contrast_scenario_def,
+            obj_param=obj_param,
+            contrast_cumulative_obj_param_threshold_fraction=contrast_cumulative_obj_param_threshold_fraction,
+            contrast_hillslope_limit=contrast_hillslope_limit,
+            hill_min_slope=hill_min_slope,
+            hill_max_slope=hill_max_slope,
+            select_burn_severities=select_burn_severities,
+            select_topaz_ids=select_topaz_ids,
+        )
+
+        selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
+        if selection_mode not in {"cumulative", "user_defined_areas"}:
+            raise ValueError(f'Contrast selection mode "{selection_mode}" is not implemented yet.')
+        contrast_names = self.contrast_names or []
+
+        if selection_mode == "user_defined_areas":
+            report_entries = {}
+            for entry in self._load_contrast_build_report():
+                if entry.get("selection_mode") != "user_defined_areas":
+                    continue
+                contrast_id = entry.get("contrast_id")
+                if isinstance(contrast_id, str):
+                    try:
+                        contrast_id = int(contrast_id)
+                    except ValueError:
+                        continue
+                if isinstance(contrast_id, int):
+                    report_entries[contrast_id] = entry
+
+            control_scenario = self._normalize_scenario_key(self._control_scenario)
+            contrast_scenario = self._normalize_scenario_key(self._contrast_scenario)
+            contrast_labels = getattr(self, "_contrast_labels", None) or {}
+
+            items: List[Dict[str, Any]] = []
+            for contrast_id in range(1, len(contrast_names) + 1):
+                contrast_name = contrast_names[contrast_id - 1]
+                report_entry = report_entries.get(contrast_id, {})
+                label = report_entry.get("area_label")
+                if not label:
+                    label = contrast_labels.get(contrast_id) or contrast_labels.get(str(contrast_id))
+                if not label:
+                    label = str(contrast_id)
+
+                raw_count = report_entry.get("n_hillslopes")
+                if raw_count is None:
+                    topaz_ids = report_entry.get("topaz_ids")
+                    if isinstance(topaz_ids, list):
+                        raw_count = len(topaz_ids)
+                try:
+                    n_hillslopes = int(raw_count) if raw_count is not None else 0
+                except (TypeError, ValueError):
+                    n_hillslopes = 0
+
+                skipped = (
+                    not contrast_name
+                    or report_entry.get("status") == "skipped"
+                    or n_hillslopes == 0
+                )
+                if skipped:
+                    run_status = "skipped"
+                    skip_status = {"skipped": True, "reason": "no_hillslopes"}
+                else:
+                    run_status = self._contrast_run_status(contrast_id, contrast_name)
+                    skip_status = {"skipped": False, "reason": None}
+
+                items.append(
+                    {
+                        "contrast_id": contrast_id,
+                        "control_scenario": report_entry.get("control_scenario") or control_scenario,
+                        "contrast_scenario": report_entry.get("contrast_scenario") or contrast_scenario,
+                        "area_label": label,
+                        "n_hillslopes": n_hillslopes,
+                        "skip_status": skip_status,
+                        "run_status": run_status,
+                    }
+                )
+
+            return {"selection_mode": selection_mode, "items": items}
+
+        items = []
+        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+            topaz_id = None
+            if contrast_name:
+                try:
+                    control_part, _ = contrast_name.split("__to__", maxsplit=1)
+                    _, topaz_id = control_part.split(",", maxsplit=1)
+                except ValueError:
+                    topaz_id = None
+                run_status = self._contrast_run_status(contrast_id, contrast_name)
+            else:
+                run_status = "skipped"
+            items.append(
+                {
+                    "contrast_id": contrast_id,
+                    "topaz_id": str(topaz_id) if topaz_id is not None else None,
+                    "run_status": run_status,
+                }
+            )
+
+        return {"selection_mode": selection_mode, "items": items}
 
     def run_omni_contrasts(self) -> None:
         global OMNI_REL_DIR

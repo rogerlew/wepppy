@@ -216,6 +216,10 @@ class Omni(NoDbBase):
 
     def _contrast_sidecar_path(self, contrast_id: int) -> str: ...
 
+    def _contrast_build_report_path(self) -> str: ...
+
+    def _load_contrast_build_report(self) -> List[Dict[str, Any]]: ...
+
     def _load_contrast_sidecar(self, contrast_id: int) -> ContrastMapping: ...
 
     def _write_contrast_sidecar(self, contrast_id: int, contrast: ContrastMapping) -> str: ...
@@ -260,6 +264,19 @@ class Omni(NoDbBase):
     def _build_contrasts(self) -> None: ...
 
     def _build_contrasts_user_defined_areas(self) -> None: ...
+
+    def build_contrasts_dry_run_report(
+        self,
+        control_scenario_def: ScenarioDef,
+        contrast_scenario_def: ScenarioDef,
+        obj_param: str = ...,
+        contrast_cumulative_obj_param_threshold_fraction: float = ...,
+        contrast_hillslope_limit: Optional[int] = ...,
+        hill_min_slope: Optional[float] = ...,
+        hill_max_slope: Optional[float] = ...,
+        select_burn_severities: Optional[List[int]] = ...,
+        select_topaz_ids: Optional[List[int]] = ...,
+    ) -> Dict[str, Any]: ...
 
     def run_omni_contrasts(self) -> None: ...
 

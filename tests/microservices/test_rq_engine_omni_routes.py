@@ -146,3 +146,98 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-22"
     assert captured["payload"]["omni_contrast_geojson_path"] == "/tmp/uploaded.geojson"
+
+
+def test_run_omni_contrasts_dry_run_cumulative(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts_dry_run_report(self, *args, **kwargs) -> dict:
+            return {
+                "selection_mode": "cumulative",
+                "items": [
+                    {"contrast_id": 1, "topaz_id": "10", "run_status": "up_to_date"},
+                    {"contrast_id": 2, "topaz_id": "20", "run_status": "needs_run"},
+                ],
+            }
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
+            json={
+                "omni_contrast_selection_mode": "cumulative",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["message"] == "Dry run complete."
+    result = payload["result"]
+    assert result["runid"] == "run-1"
+    assert result["config"] == "cfg"
+    assert result["selection_mode"] == "cumulative"
+    assert result["items"][0]["run_status"] == "up_to_date"
+    assert result["items"][1]["run_status"] == "needs_run"
+
+
+def test_run_omni_contrasts_dry_run_user_defined(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts_dry_run_report(self, *args, **kwargs) -> dict:
+            return {
+                "selection_mode": "user_defined_areas",
+                "items": [
+                    {
+                        "contrast_id": 1,
+                        "control_scenario": "uniform_low",
+                        "contrast_scenario": "mulch",
+                        "area_label": "A1",
+                        "n_hillslopes": 0,
+                        "skip_status": {"skipped": True, "reason": "no_hillslopes"},
+                        "run_status": "skipped",
+                    },
+                    {
+                        "contrast_id": 2,
+                        "control_scenario": "uniform_low",
+                        "contrast_scenario": "mulch",
+                        "area_label": "A2",
+                        "n_hillslopes": 3,
+                        "skip_status": {"skipped": False, "reason": None},
+                        "run_status": "up_to_date",
+                    },
+                ],
+            }
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
+            json={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+                "omni_contrast_geojson_path": "/tmp/areas.geojson",
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    result = payload["result"]
+    assert result["selection_mode"] == "user_defined_areas"
+    assert result["items"][0]["run_status"] == "skipped"
+    assert result["items"][0]["skip_status"]["reason"] == "no_hillslopes"
+    assert result["items"][1]["run_status"] == "up_to_date"
