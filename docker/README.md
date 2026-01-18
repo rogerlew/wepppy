@@ -104,6 +104,40 @@ wctl logs weppcloud
 | `webpush`      | Placeholder container for future WebPush service | — | No-op until implemented. |
 | `f-esri`       | Auxiliary image for ESRI tooling | — | Stays idle (`tail -f /dev/null`). |
 
+### Scaling rq-worker-batch
+
+`rq-worker-batch` uses a fixed `container_name`, so Compose scaling is not available. To add a second pool without interrupting the stack, clone the existing batch worker configuration and start another container on the same network.
+
+Preparation (one-time):
+```bash
+# Store the batch worker env in the repo (ignored by git).
+mv /tmp/wepppy-rq-worker-batch.env docker/wepppy-rq-worker-batch.env
+```
+
+Start a second batch worker pool:
+```bash
+docker run -d \
+  --name wepppy-rq-worker-batch-2 \
+  --network wepppy-net \
+  --cpuset-cpus "0-39" \
+  --shm-size 8g \
+  --ulimit nofile=1000000:1000000 \
+  --user 1000:993 \
+  --workdir /workdir/wepppy \
+  --env-file docker/wepppy-rq-worker-batch.env \
+  --volumes-from wepppy-rq-worker-batch \
+  --init wepppy-dev \
+  rq worker-pool -n "4" -u redis://redis:6379/9 --logging-level INFO \
+  --worker-class wepppy.rq.WepppyRqWorker batch
+```
+
+Inspect and stop:
+```bash
+wctl rq-info
+docker stop wepppy-rq-worker-batch-2
+docker rm wepppy-rq-worker-batch-2
+```
+
 ### Networking
 - All services share the default Compose network; Caddy resolves others by container name.
 - External access happens through Caddy on `http://localhost:8080`. It proxies:
