@@ -12,6 +12,113 @@ from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 omni_bp = Blueprint('omni', __name__)
 
+def _summarize_omni_outlet_metrics(df_report, scenario_names):
+    scenarios = []
+    if df_report is None or df_report.empty:
+        return scenarios
+
+    report_dict = df_report.to_dict()
+    value_key = 'value' if 'value' in report_dict else ('v' if 'v' in report_dict else None)
+    if value_key is None:
+        return scenarios
+
+    water_discharge_key = "Avg. Ann. water discharge from outlet"
+    soil_loss_key = "Avg. Ann. total hillslope soil loss"
+
+    scenario_index = {
+        name: {'name': name, 'water_discharge': None, 'soil_loss': None}
+        for name in scenario_names
+    }
+
+    for idx in report_dict.get('scenario', {}):
+        scenario_name = report_dict['scenario'][idx]
+        if scenario_name not in scenario_index:
+            continue
+        key_desc = report_dict.get('key', {}).get(idx)
+        if key_desc == water_discharge_key:
+            scenario_index[scenario_name]['water_discharge'] = {
+                'value': report_dict[value_key][idx],
+                'unit': report_dict.get('units', {}).get(idx)
+            }
+        elif key_desc == soil_loss_key:
+            scenario_index[scenario_name]['soil_loss'] = {
+                'value': report_dict[value_key][idx],
+                'unit': report_dict.get('units', {}).get(idx)
+            }
+
+    for scenario_name in scenario_names:
+        entry = scenario_index.get(scenario_name)
+        if entry and entry['water_discharge'] and entry['soil_loss']:
+            scenarios.append(entry)
+
+    return scenarios
+
+
+def _summarize_omni_contrast_outlet_metrics(df_report, selection_mode):
+    contrasts = []
+    if df_report is None or df_report.empty:
+        return contrasts
+
+    report_dict = df_report.to_dict()
+    value_key = 'value' if 'value' in report_dict else ('v' if 'v' in report_dict else None)
+    if value_key is None:
+        return contrasts
+
+    label_key = None
+    if selection_mode == 'cumulative' and 'contrast_topaz_id' in report_dict:
+        label_key = 'contrast_topaz_id'
+    if label_key is None:
+        if 'contrast' in report_dict:
+            label_key = 'contrast'
+        elif 'contrast_id' in report_dict:
+            label_key = 'contrast_id'
+        else:
+            return contrasts
+
+    water_discharge_key = "Avg. Ann. water discharge from outlet"
+    soil_loss_key = "Avg. Ann. total hillslope soil loss"
+
+    contrast_index = {}
+    for idx in report_dict.get('key', {}):
+        label_value = report_dict.get(label_key, {}).get(idx)
+        if label_value is None:
+            continue
+        label = str(label_value)
+        entry = contrast_index.setdefault(label, {
+            'name': label,
+            'contrast_id': report_dict.get('contrast_id', {}).get(idx),
+            'water_discharge': None,
+            'soil_loss': None
+        })
+
+        key_desc = report_dict.get('key', {}).get(idx)
+        if key_desc == water_discharge_key:
+            entry['water_discharge'] = {
+                'value': report_dict[value_key][idx],
+                'unit': report_dict.get('units', {}).get(idx)
+            }
+        elif key_desc == soil_loss_key:
+            entry['soil_loss'] = {
+                'value': report_dict[value_key][idx],
+                'unit': report_dict.get('units', {}).get(idx)
+            }
+
+    for entry in contrast_index.values():
+        if entry['water_discharge'] and entry['soil_loss']:
+            contrasts.append(entry)
+
+    def sort_key(item):
+        contrast_id = item.get('contrast_id')
+        if contrast_id is None:
+            return item.get('name', '')
+        try:
+            return int(contrast_id)
+        except (TypeError, ValueError):
+            return str(contrast_id)
+
+    contrasts.sort(key=sort_key)
+    return contrasts
+
 
 @omni_bp.route('/runs/<string:runid>/<config>/api/omni/get_scenarios')
 def get_scenarios(runid, config):
@@ -77,41 +184,9 @@ def query_omni_scenarios_report(runid, config):
         omni = Omni.getInstance(wd)
         df_report = omni.scenarios_report()
 
-        # Convert DataFrame to dictionary if needed (assuming df_report is a DataFrame-like object)
-        report_dict = df_report.to_dict()
-
-        # Initialize result list for scenarios
-        scenarios = []
-
         # Get unique scenarios
-        unique_scenarios = set(report_dict['scenario'].values())
-
-        # Define target metrics
-        water_discharge_key = "Avg. Ann. water discharge from outlet"
-        soil_loss_key = "Avg. Ann. total hillslope soil loss"
-
-        # Process each scenario
-        for scenario in unique_scenarios:
-            scenario_data = {'name': scenario, 'water_discharge': None, 'soil_loss': None}
-
-            # Iterate through report entries
-            for idx in report_dict['scenario']:
-                if report_dict['scenario'][idx] == scenario:
-                    key_desc = report_dict['key'][idx]
-                    if key_desc == water_discharge_key:
-                        scenario_data['water_discharge'] = {
-                            'value': report_dict['value'][idx],
-                            'unit': report_dict['units'][idx]
-                        }
-                    elif key_desc == soil_loss_key:
-                        scenario_data['soil_loss'] = {
-                            'value': report_dict['value'][idx],
-                            'unit': report_dict['units'][idx]
-                        }
-
-            # Only add scenario if both metrics are found
-            if scenario_data['water_discharge'] and scenario_data['soil_loss']:
-                scenarios.append(scenario_data)
+        unique_scenarios = sorted(set(df_report['scenario'].values.tolist())) if 'scenario' in df_report else []
+        scenarios = _summarize_omni_outlet_metrics(df_report, unique_scenarios)
 
         # Sort scenarios for consistent display
         scenarios.sort(key=lambda x: x['name'])
@@ -120,6 +195,31 @@ def query_omni_scenarios_report(runid, config):
                                user=current_user,
                                watershed=Watershed.getInstance(wd),
                                scenarios=scenarios)
+
+    except:
+        return exception_factory(runid=runid)
+
+
+@omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts')
+@omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts/')
+@requires_cap(gate_reason="Complete verification to view Omni reports.")
+def query_omni_contrasts_report(runid, config):
+    try:
+        wd = get_wd(runid)
+        omni = Omni.getInstance(wd)
+        df_report = omni.contrasts_report()
+
+        selection_mode = omni.contrast_selection_mode or "cumulative"
+        label_header = "Topaz ID" if selection_mode == "cumulative" else "Contrast"
+        contrasts = _summarize_omni_contrast_outlet_metrics(df_report, selection_mode)
+        control_name = omni._normalize_scenario_key(omni.control_scenario)
+
+        return render_template('reports/omni/omni_contrasts_summary.htm', runid=runid, config=config,
+                               user=current_user,
+                               watershed=Watershed.getInstance(wd),
+                               contrasts=contrasts,
+                               control_name=control_name,
+                               label_header=label_header)
 
     except:
         return exception_factory(runid=runid)

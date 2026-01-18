@@ -93,6 +93,30 @@ def _update_dependency_state(
             break
 
 
+def _update_contrast_dependency_state(
+    omni: Omni,
+    contrast_name: str,
+    dependency_entry: Dict[str, Any],
+) -> None:
+    """Persist contrast dependency metadata with retry semantics."""
+
+    from wepppy.nodb.base import NoDbAlreadyLockedError
+
+    max_tries = 5
+    for attempt in range(max_tries):
+        try:
+            omni = Omni.getInstance(omni.wd)
+            with omni.locked():
+                omni.contrast_dependency_tree[contrast_name] = dependency_entry
+
+        except NoDbAlreadyLockedError:
+            if attempt + 1 == max_tries:
+                raise OmniLockTimeout('max retries exceeded')
+            time.sleep(1.0)
+        else:
+            break
+
+
 @with_exception_logging
 def run_omni_scenario_rq(
     runid: str,
@@ -158,6 +182,57 @@ def run_omni_scenario_rq(
         StatusMessenger.publish(
             status_channel,
             f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {elapsed:.3f})',
+        )
+        return status, elapsed
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
+def run_omni_contrast_rq(
+    runid: str,
+    contrast_id: int,
+) -> Tuple[bool, float]:
+    """Run a single Omni contrast, emitting completion triggers for reporting."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:omni_contrasts'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        start_ts = time.time()
+
+        omni = Omni.getInstance(wd)
+        contrast_names = omni.contrast_names or []
+        if contrast_id < 1 or contrast_id > len(contrast_names):
+            raise ValueError(f'Contrast id {contrast_id} is out of range')
+        contrast_name = contrast_names[contrast_id - 1]
+
+        omni.run_omni_contrast(contrast_id)
+
+        contrast_payload = omni._load_contrast_sidecar(contrast_id)
+        dependencies = omni._contrast_dependencies(contrast_name)
+        signature = omni._contrast_signature(contrast_name, contrast_payload)
+        _update_contrast_dependency_state(
+            omni,
+            contrast_name,
+            {
+                'signature': signature,
+                'dependencies': dependencies,
+            },
+        )
+
+        elapsed = time.time() - start_ts
+        status = True
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {elapsed:.3f})',
+        )
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} TRIGGER omni_contrasts OMNI_CONTRAST_RUN_TASK_COMPLETED',
         )
         return status, elapsed
 
@@ -420,7 +495,57 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         omni = Omni.getInstance(wd)
-        omni.run_omni_contrasts()
+        contrast_names = omni.contrast_names or []
+        if not contrast_names:
+            omni.logger.info('  run_omni_contrasts: No contrasts to run')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
+            return None
+
+        omni._clean_contrast_runs()
+        if omni.contrast_dependency_tree:
+            omni.contrast_dependency_tree = {}
+
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue("batch", connection=redis_conn)
+            contrast_jobs: List[Job] = []
+            for contrast_id in range(1, len(contrast_names) + 1):
+                child_job = q.enqueue_call(
+                    func=run_omni_contrast_rq,
+                    args=[runid, contrast_id],
+                    timeout=TIMEOUT,
+                )
+                job.meta[f'jobs:contrast:{contrast_id}'] = child_job.id
+                contrast_jobs.append(child_job)
+                job.save()
+
+            final_job = q.enqueue_call(
+                func=_finalize_omni_contrasts_rq,
+                args=[runid],
+                timeout=TIMEOUT,
+                depends_on=contrast_jobs,
+            )
+            job.meta['jobs:finalize:_finalize_omni_contrasts_rq'] = final_job.id
+            job.save()
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        return final_job
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
+def _finalize_omni_contrasts_rq(runid: str) -> None:
+    """Finalize Omni contrasts, stamping Redis prep state and notifying subscribers."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:omni_contrasts'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         try:
             prep = RedisPrep.getInstance(wd)
@@ -429,12 +554,7 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
             pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(
-            status_channel,
-            f'rq:{job.id} TRIGGER omni_contrasts OMNI_CONTRAST_RUN_TASK_COMPLETED',
-        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
-        return None
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

@@ -100,6 +100,7 @@ Controllers (e.g., subcatchment_delineation.js)
 | `watar` | WATAR (ash transport) run | `TaskEnum.run_watar` |
 | `wepp` | WEPP model run | `TaskEnum.run_wepp_watershed` |
 | `omni_scenarios` | Omni scenario runner completed after the latest WEPP run | `TaskEnum.run_omni_scenarios` |
+| `omni_contrasts` | Omni contrast runner completed after Omni scenarios | `TaskEnum.run_omni_contrasts` |
 | `run_path_ce` | PATH Cost-Effective solver completed | `TaskEnum.run_path_cost_effective` |
 
 ---
@@ -125,12 +126,12 @@ re-renders the associated control panel alongside its TOC entry.
 1. `project.js` listens for checkbox changes and posts to `tasks/set_mod`.
 2. Successful responses fetch `/view/mod/<mod>` and update both the nav entry
    (`data-mod-nav`) and section placeholder (`data-mod-section`).
-3. `MOD_BOOTSTRAP_MAP` reinitialises controller JS (Omni remounts its event handlers,
+3. `MOD_BOOTSTRAP_MAP` reinitializes controller JS (Omni remounts its event handlers,
    Ash/Treatments rebuild their forms, etc.) so the new panel behaves as if the page was refreshed.
 
 When adding a new module, update the header list, append metadata in `MOD_UI_DEFINITIONS`,
 drop a `data-mod-section` wrapper in `runs0_pure.htm`, and optionally register a bootstrap
-handler so the controller self-initialises after dynamic inserts.
+handler so the controller self-initializes after dynamic inserts.
 
 ---
 
@@ -559,6 +560,15 @@ redis-cli -n 2 SUBSCRIBE preflight:*
 
 # Or check Go service logs
 docker logs -f preflight2
+```
+
+### Rebuild Preflight2 (Fresh Image)
+
+Use this when Go changes are not reflected after a restart.
+
+```bash
+wctl build --no-cache preflight
+wctl up -d --force-recreate preflight
 ```
 
 ---

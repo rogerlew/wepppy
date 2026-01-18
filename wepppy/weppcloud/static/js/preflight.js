@@ -296,6 +296,7 @@ function getSelectorForKey(key) {
         "openet_ts": 'a[href="#openet-ts"]',
         "wepp": 'a[href="#wepp"]',
         "omni_scenarios": 'a[href="#omni-scenarios"]',
+        "omni_contrasts": 'a[href="#omni-contrasts"]',
         "observed": 'a[href="#observed"]',
         "debris": 'a[href="#debris-flow"]',
         "watar": 'a[href="#ash"]',

@@ -35,6 +35,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"rhem":            false,
 		"wepp":            false,
 		"omni_scenarios":  false,
+		"omni_contrasts":  false,
 		"observed":        false,
 		"debris":          false,
 		"watar":           false,
@@ -67,6 +68,13 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(runWepp, prep["timestamps:build_soils"]) &&
 		safeGT(runWepp, prep["timestamps:build_climate"])
 
+	omniRun := prep["timestamps:run_omni_scenarios"]
+	if runWepp == "" {
+		check["omni_scenarios"] = omniRun != ""
+	} else {
+		check["omni_scenarios"] = safeGT(omniRun, runWepp)
+	}
+
 	check["observed"] = safeGT(prep["timestamps:run_observed"], prep["timestamps:build_landuse"]) &&
 		safeGT(prep["timestamps:run_observed"], prep["timestamps:build_soils"]) &&
 		safeGT(prep["timestamps:run_observed"], prep["timestamps:build_climate"]) &&
@@ -82,7 +90,18 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_watar"], prep["timestamps:build_climate"]) &&
 		safeGT(prep["timestamps:run_watar"], runWepp)
 
-	check["omni_scenarios"] = safeGT(prep["timestamps:run_omni_scenarios"], runWepp)
+	omniContrastBaseline := maxTimestamp(
+		prep,
+		"timestamps:run_omni_scenarios",
+		"timestamps:run_wepp_watershed",
+		"timestamps:run_wepp",
+	)
+	omniContrastsRun := prep["timestamps:run_omni_contrasts"]
+	if omniContrastBaseline == "" {
+		check["omni_contrasts"] = omniContrastsRun != ""
+	} else {
+		check["omni_contrasts"] = safeGT(omniContrastsRun, omniContrastBaseline)
+	}
 
 	runPathCe := prep["timestamps:run_path_ce"]
 	check["run_path_ce"] = safeGT(runPathCe, runWepp)

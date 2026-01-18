@@ -1,11 +1,20 @@
 import importlib
+import json
 import logging
 import sys
 import types
 from contextlib import contextmanager
 from pathlib import Path
 
+import pandas as pd
 import pytest
+
+pytestmark = pytest.mark.unit
+
+
+@contextmanager
+def _noop_lock():
+    yield
 
 
 def _ensure_package(name: str, path: Path | None):
@@ -177,3 +186,187 @@ def test_clear_cache_and_locks_handles_runtime_errors(monkeypatch, omni_module, 
 
     assert "Redis NoDb cache unavailable" in caplog.text
     assert "Redis lock client unavailable" in caplog.text
+
+
+def test_contrast_sidecar_roundtrip(tmp_path, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+
+    contrast = {
+        10: "/tmp/contrast/H10",
+        "11": "/tmp/contrast/H11"
+    }
+
+    sidecar_path = omni._write_contrast_sidecar(1, contrast)
+    with open(sidecar_path, "r", encoding="ascii") as fp:
+        contents = fp.read()
+
+    assert "\t" in contents
+
+    loaded = omni._load_contrast_sidecar(1)
+    assert loaded == {
+        "10": "/tmp/contrast/H10",
+        "11": "/tmp/contrast/H11"
+    }
+
+
+def test_build_contrasts_report_normalizes_control_scenario(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.build_contrasts")
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 1.0
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._contrast_scenario = None
+    omni._control_scenario = None
+    omni._contrast_names = []
+    omni._contrasts = None
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    class DummyTranslator:
+        top2wepp = {10: 20}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False
+    )
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "get_objective_parameter_from_gpkg",
+        lambda self, objective_parameter, scenario=None: (
+            [omni_module.ObjectiveParameter("10", "20", 5.0)],
+            5.0,
+        ),
+    )
+
+    omni._build_contrasts()
+
+    report_path = tmp_path / "_pups" / "omni" / "contrasts" / "build_report.ndjson"
+    assert report_path.exists()
+
+    payload = json.loads(report_path.read_text().splitlines()[0])
+    assert payload["control_scenario"] == str(omni_module.OmniScenario.Undisturbed)
+    assert payload["contrast_id"] == 1
+
+
+def test_build_contrasts_applies_advanced_filters(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_filters")
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 1.0
+    omni._contrast_hillslope_limit = 1
+    omni._contrast_hill_min_slope = 30.0
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = [2, 3]
+    omni._contrast_select_topaz_ids = [102, 103]
+    omni._contrast_selection_mode = "cumulative"
+    omni._contrast_scenario = None
+    omni._control_scenario = "uniform_high"
+    omni._contrast_names = []
+    omni._contrasts = None
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    class DummyTranslator:
+        top2wepp = {101: 201, 102: 202, 103: 203}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+        def hillslope_slope(self, topaz_id):
+            return {"101": 0.2, "102": 0.4, "103": 0.6}[str(topaz_id)]
+
+    class DummyLanduse:
+        def identify_burn_class(self, topaz_id):
+            return {"101": "Low", "102": "Moderate", "103": "High"}[str(topaz_id)]
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    import wepppy.nodb.core as nodb_core
+    monkeypatch.setattr(nodb_core.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "get_objective_parameter_from_gpkg",
+        lambda self, objective_parameter, scenario=None: (
+            [
+                omni_module.ObjectiveParameter("101", "201", 10.0),
+                omni_module.ObjectiveParameter("102", "202", 9.0),
+                omni_module.ObjectiveParameter("103", "203", 8.0),
+            ],
+            27.0,
+        ),
+    )
+
+    omni._build_contrasts()
+
+    assert omni._contrast_names == ["uniform_high,102__to__undisturbed"]
+
+
+def test_contrasts_report_reads_contrast_outputs_from_pups(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrasts_report")
+    omni._contrast_names = ["None,10__to__undisturbed"]
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False
+    )
+
+    contrast_path = tmp_path / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "output" / "interchange" / "loss_pw0.out.parquet"
+    contrast_path.parent.mkdir(parents=True, exist_ok=True)
+    contrast_path.touch()
+
+    control_path = tmp_path / "wepp" / "output" / "interchange" / "loss_pw0.out.parquet"
+    control_path.parent.mkdir(parents=True, exist_ok=True)
+    control_path.touch()
+
+    read_calls = []
+
+    def fake_read_parquet(path, *args, **kwargs):
+        read_calls.append(str(path))
+        if str(path) == str(contrast_path):
+            return pd.DataFrame({
+                "key": ["Avg. Ann. water discharge from outlet"],
+                "value": [1.0],
+                "units": ["m^3/yr"]
+            })
+        return pd.DataFrame({
+            "key": ["Avg. Ann. water discharge from outlet"],
+            "value": [2.0],
+            "units": ["m^3/yr"]
+        })
+
+    monkeypatch.setattr(omni_module.pd, "read_parquet", fake_read_parquet)
+    monkeypatch.setattr(
+        omni_module.pd.DataFrame,
+        "to_parquet",
+        lambda self, *args, **kwargs: None
+    )
+
+    df = omni.contrasts_report()
+
+    assert str(contrast_path) in read_calls
+    assert str(control_path) in read_calls
+    assert df["control-contrast_v"].iloc[0] == 1.0

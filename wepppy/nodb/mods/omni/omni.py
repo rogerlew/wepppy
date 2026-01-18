@@ -1064,6 +1064,8 @@ class Omni(NoDbBase):
         with self.locked():
             self._contrasts = None
             self._contrast_names = None
+            self._contrast_dependency_tree = {}
+        self._clean_contrast_runs()
         sidecar_dir = _join(self.omni_dir, 'contrasts')
         if _exists(sidecar_dir):
             shutil.rmtree(sidecar_dir)
@@ -1189,6 +1191,8 @@ class Omni(NoDbBase):
         contrast_select_topaz_ids = self._contrast_select_topaz_ids
         contrast_scenario = self._contrast_scenario
         control_scenario = self._control_scenario
+        selection_mode_value = getattr(self, "_contrast_selection_mode", None)
+        selection_mode = (selection_mode_value or 'cumulative').strip().lower()
 
         if contrast_scenario == str(self.base_scenario):
             contrast_scenario = None
@@ -1196,17 +1200,90 @@ class Omni(NoDbBase):
         if control_scenario == str(self.base_scenario):
             control_scenario = None
 
-        # TODO
-        # filter
-        #   hillslope slope steepness criteria < 60%
-        #   slope length, aspect, etc.
-        #   manually defined topaz_ids
-        #   burn severity filter 
-
-        # filter and selection report
-
-
         from wepppy.nodb.core import Watershed
+        apply_advanced_filters = selection_mode == 'cumulative'
+        if not apply_advanced_filters:
+            if any(
+                value is not None
+                for value in (
+                    contrast_hill_min_slope,
+                    contrast_hill_max_slope,
+                    contrast_select_burn_severities,
+                    contrast_select_topaz_ids,
+                )
+            ):
+                self.logger.info(
+                    "Contrast selection mode '%s' ignores advanced filters; apply cumulative mode to use them.",
+                    selection_mode,
+                )
+            contrast_hill_min_slope = None
+            contrast_hill_max_slope = None
+            contrast_select_burn_severities = None
+            contrast_select_topaz_ids = None
+
+        if contrast_hillslope_limit is not None:
+            try:
+                contrast_hillslope_limit = int(contrast_hillslope_limit)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("omni_contrast_hillslope_limit must be an integer") from exc
+            if contrast_hillslope_limit <= 0:
+                raise ValueError("omni_contrast_hillslope_limit must be >= 1")
+
+        def _normalize_int_set(value: Any, label: str) -> Optional[Set[int]]:
+            if value is None or value == "":
+                return None
+            if isinstance(value, str):
+                raw_items = [item.strip() for item in value.split(",") if item.strip()]
+            elif isinstance(value, (list, tuple, set)):
+                raw_items = list(value)
+            else:
+                raw_items = [value]
+            parsed: Set[int] = set()
+            for item in raw_items:
+                if item is None or item == "":
+                    continue
+                try:
+                    parsed.add(int(item))
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(f"{label} entries must be integers") from exc
+            return parsed or None
+
+        def _normalize_slope(value: Any, label: str) -> Optional[float]:
+            if value is None or value == "":
+                return None
+            try:
+                slope = float(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"{label} must be a number") from exc
+            if slope < 0:
+                raise ValueError(f"{label} must be >= 0")
+            if slope > 1.0:
+                slope = slope / 100.0
+            return slope
+
+        if apply_advanced_filters:
+            contrast_hill_min_slope = _normalize_slope(
+                contrast_hill_min_slope,
+                "omni_contrast_hill_min_slope",
+            )
+            contrast_hill_max_slope = _normalize_slope(
+                contrast_hill_max_slope,
+                "omni_contrast_hill_max_slope",
+            )
+            if (
+                contrast_hill_min_slope is not None
+                and contrast_hill_max_slope is not None
+                and contrast_hill_min_slope > contrast_hill_max_slope
+            ):
+                raise ValueError("omni_contrast_hill_min_slope must be <= omni_contrast_hill_max_slope")
+            contrast_select_burn_severities = _normalize_int_set(
+                contrast_select_burn_severities,
+                "omni_contrast_select_burn_severities",
+            )
+            contrast_select_topaz_ids = _normalize_int_set(
+                contrast_select_topaz_ids,
+                "omni_contrast_select_topaz_ids",
+            )
 
         wd = self.wd
 
@@ -1220,6 +1297,90 @@ class Omni(NoDbBase):
 
         if len(obj_param_descending) == 0:
             raise Exception('No soil erosion data found!')
+
+        if apply_advanced_filters and any(
+            value is not None
+            for value in (
+                contrast_hill_min_slope,
+                contrast_hill_max_slope,
+                contrast_select_burn_severities,
+                contrast_select_topaz_ids,
+            )
+        ):
+            original_count = len(obj_param_descending)
+            topaz_filter = None
+            if contrast_select_topaz_ids is not None:
+                topaz_filter = {str(topaz_id) for topaz_id in contrast_select_topaz_ids}
+
+            slope_lookup: Dict[str, float] = {}
+            burn_lookup: Dict[str, int] = {}
+            burn_set = contrast_select_burn_severities
+            landuse = None
+            if burn_set is not None:
+                burn_set = set(burn_set)
+                invalid = [val for val in burn_set if val not in {0, 1, 2, 3}]
+                if invalid:
+                    raise ValueError(
+                        f"omni_contrast_select_burn_severities must be 0-3; got {sorted(invalid)}"
+                    )
+                from wepppy.nodb.core import Landuse
+
+                control_wd = self.wd if control_scenario is None else _join(
+                    self.wd,
+                    OMNI_REL_DIR,
+                    'scenarios',
+                    control_scenario,
+                )
+                landuse = Landuse.getInstance(control_wd)
+
+            def _burn_value(label: Optional[str]) -> int:
+                name = (label or "Unburned").strip().lower()
+                mapping = {
+                    "unburned": 0,
+                    "low": 1,
+                    "moderate": 2,
+                    "mod": 2,
+                    "high": 3,
+                }
+                if name not in mapping:
+                    raise ValueError(f"Unknown burn class '{label}' while filtering contrasts")
+                return mapping[name]
+
+            filtered: List[ObjectiveParameter] = []
+            for item in obj_param_descending:
+                topaz_id = str(item.topaz_id)
+                if topaz_filter is not None and topaz_id not in topaz_filter:
+                    continue
+                if contrast_hill_min_slope is not None or contrast_hill_max_slope is not None:
+                    slope = slope_lookup.get(topaz_id)
+                    if slope is None:
+                        slope = watershed.hillslope_slope(topaz_id)
+                        slope_lookup[topaz_id] = slope
+                    if contrast_hill_min_slope is not None and slope < contrast_hill_min_slope:
+                        continue
+                    if contrast_hill_max_slope is not None and slope > contrast_hill_max_slope:
+                        continue
+                if burn_set is not None and landuse is not None:
+                    burn_class = burn_lookup.get(topaz_id)
+                    if burn_class is None:
+                        burn_class = _burn_value(landuse.identify_burn_class(topaz_id))
+                        burn_lookup[topaz_id] = burn_class
+                    if burn_class not in burn_set:
+                        continue
+                filtered.append(item)
+
+            obj_param_descending = filtered
+            total_erosion_kg = float(sum(item.value for item in obj_param_descending))
+            self.logger.info(
+                "  contrast filters reduced candidates from %d to %d",
+                original_count,
+                len(obj_param_descending),
+            )
+
+        if not obj_param_descending:
+            raise ValueError("No hillslopes matched contrast filters.")
+        if total_erosion_kg <= 0:
+            raise ValueError("Contrast objective parameter total is zero after filtering.")
         
         with self.locked():
             self._contrasts = None
@@ -1240,8 +1401,8 @@ class Omni(NoDbBase):
         report_fp = open(report_fn, 'w')
 
         running_obj_param = 0.0
-        for i, d in enumerate(obj_param_descending):
-            if contrast_hillslope_limit is not None and i >= contrast_hillslope_limit:
+        for d in obj_param_descending:
+            if contrast_hillslope_limit is not None and len(contrasts) >= contrast_hillslope_limit:
                 break
 
             running_obj_param += d.value
@@ -1376,13 +1537,31 @@ class Omni(NoDbBase):
     def contrasts_report(self) -> pd.DataFrame:
         global OMNI_REL_DIR
 
+        def _resolve_loss_out_parquet(output_dir: str) -> str:
+            interchange_path = _join(output_dir, 'interchange', 'loss_pw0.out.parquet')
+            legacy_path = _join(output_dir, 'loss_pw0.out.parquet')
+            return interchange_path if _exists(interchange_path) else legacy_path
+
+        def _ensure_value_columns(frame: pd.DataFrame) -> pd.DataFrame:
+            needs_v = 'v' not in frame.columns and 'value' in frame.columns
+            needs_value = 'value' not in frame.columns and 'v' in frame.columns
+            if not (needs_v or needs_value):
+                return frame
+            frame = frame.copy()
+            if needs_v:
+                frame['v'] = frame['value']
+            if needs_value:
+                frame['value'] = frame['v']
+            return frame
+
         parquet_files = {}
 
         if not self.contrast_names:
-            return pd.DataFrame(columns=['key', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
+            return pd.DataFrame(columns=['key', 'value', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
 
         for contrast_id, contrast_name in enumerate(self.contrast_names or [], start=1):
-            parquet_files[contrast_name] = _join(self.wd, 'contrasts', str(contrast_id), 'wepp', 'output', 'loss_pw0.out.parquet')
+            output_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts', str(contrast_id), 'wepp', 'output')
+            parquet_files[contrast_name] = _resolve_loss_out_parquet(output_dir)
 
         dfs = []
         for contrast_id, (contrast_name, path) in enumerate(parquet_files.items(), start=1):
@@ -1394,21 +1573,22 @@ class Omni(NoDbBase):
 
             if control_scenario == 'None':
                 control_scenario = str(self.base_scenario)
-                ctrl_parquet = _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')
+                ctrl_output_dir = _join(self.wd, 'wepp', 'output')
             else:
-                ctrl_parquet = _join(self.wd, OMNI_REL_DIR, 'scenarios', control_scenario, 'wepp', 'output', 'loss_pw0.out.parquet')
+                ctrl_output_dir = _join(self.wd, OMNI_REL_DIR, 'scenarios', control_scenario, 'wepp', 'output')
+            ctrl_parquet = _resolve_loss_out_parquet(ctrl_output_dir)
 
             if not _exists(ctrl_parquet):
                 raise FileNotFoundError(f"Control scenario parquet file '{ctrl_parquet}' does not exist!")
 
-            df = pd.read_parquet(path)         # expects columns: key, v, units
+            df = _ensure_value_columns(pd.read_parquet(path))
             df['control_scenario'] = control_scenario
             df['contrast_topaz_id'] = topaz_id
             df['contrast'] = contrast_name
             df['_contrast_name'] = str(contrast_name)
             df['contrast_id'] = contrast_id
 
-            ctrl_df = pd.read_parquet(ctrl_parquet)
+            ctrl_df = _ensure_value_columns(pd.read_parquet(ctrl_parquet))
 
             # Join control metrics by 'key' and add difference (control - contrast)
             _ctrl = (
@@ -1431,7 +1611,7 @@ class Omni(NoDbBase):
 
         if not dfs:
             # nothing to do
-            return pd.DataFrame(columns=['key', 'v', 'units', 'contrast'])
+            return pd.DataFrame(columns=['key', 'value', 'v', 'units', 'contrast'])
 
         combined = pd.concat(dfs, ignore_index=True)
         out_path = _join(self.omni_dir, 'contrasts.out.parquet')
@@ -2031,6 +2211,27 @@ class Omni(NoDbBase):
                 return False
 
         return True
+
+    @property
+    def has_ran_contrasts(self) -> bool:
+        global OMNI_REL_DIR
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
+        if not _exists(contrasts_dir):
+            return False
+
+        for entry in os.listdir(contrasts_dir):
+            if entry == '_uploads':
+                continue
+            entry_dir = _join(contrasts_dir, entry)
+            if not os.path.isdir(entry_dir):
+                continue
+            output_dir = _join(entry_dir, 'wepp', 'output')
+            if _exists(_join(output_dir, 'interchange', 'loss_pw0.out.parquet')):
+                return True
+            if _exists(_join(output_dir, 'loss_pw0.out.parquet')):
+                return True
+
+        return False
 
     def scenarios_report(self) -> pd.DataFrame:
         """

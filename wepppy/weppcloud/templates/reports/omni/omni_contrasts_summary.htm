@@ -1,0 +1,38 @@
+{% set first_contrast = contrasts|first if contrasts else None %}
+{% set water_units = first_contrast.water_discharge.unit if first_contrast and first_contrast.water_discharge.unit else 'm^3/yr' %}
+{% set soil_units = first_contrast.soil_loss.unit if first_contrast and first_contrast.soil_loss.unit else 'tonne/yr' %}
+
+{% if control_name %}
+  <p class="wc-text-muted">Control scenario: {{ control_name }}</p>
+{% endif %}
+
+<div class="wc-table-wrapper">
+  <table class="wc-table wc-table--dense">
+    <thead>
+      <tr>
+        <th scope="col">{{ label_header or "Contrast" }}</th>
+        <th scope="col" class="wc-text-right">
+          <div>Avg. Ann. Water Discharge from Outlet</div>
+          {{ unitizer_units(water_units) | safe }}
+        </th>
+        <th scope="col" class="wc-text-right">
+          <div>Avg. Ann. Total Hillslope Soil Loss</div>
+          {{ unitizer_units(soil_units) | safe }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for contrast in contrasts %}
+      <tr>
+        <th scope="row">{{ contrast.name }}</th>
+        <td class="wc-text-right">
+          {{ unitizer(contrast.water_discharge.value, contrast.water_discharge.unit or water_units) | safe }}
+        </td>
+        <td class="wc-text-right">
+          {{ unitizer(contrast.soil_loss.value, contrast.soil_loss.unit or soil_units) | safe }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

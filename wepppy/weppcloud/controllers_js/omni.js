@@ -800,14 +800,11 @@ var Omni = (function () {
             contrastController.triggerEvent = function (eventName, payload) {
                 var normalized = eventName ? String(eventName).toUpperCase() : "";
                 if (normalized === CONTRAST_COMPLETION_EVENT) {
-                    if (contrastController._completion_seen) {
-                        return baseContrastTriggerEvent(eventName, payload);
-                    }
-                    contrastController._completion_seen = true;
-                    if (contrastInfoAdapter && typeof contrastInfoAdapter.html === "function") {
+                    if (typeof omni.report_contrasts === "function") {
+                        omni.report_contrasts();
+                    } else if (contrastInfoAdapter && typeof contrastInfoAdapter.html === "function") {
                         contrastInfoAdapter.html("Omni contrasts completed.");
                     }
-                    contrastController.disconnect_status_stream(contrastController);
                     if (omniEvents && typeof omniEvents.emit === "function") {
                         omniEvents.emit("omni:contrast:run:completed", payload || {});
                     }
@@ -1155,6 +1152,12 @@ var Omni = (function () {
             }
         }
 
+        function clearSummary() {
+            if (infoAdapter && typeof infoAdapter.html === "function") {
+                infoAdapter.html("");
+            }
+        }
+
         function setStatus(message) {
             if (statusAdapter && typeof statusAdapter.html === "function") {
                 statusAdapter.html(message || "");
@@ -1167,6 +1170,12 @@ var Omni = (function () {
             }
             if (contrastStacktraceAdapter && typeof contrastStacktraceAdapter.html === "function") {
                 contrastStacktraceAdapter.html("");
+            }
+        }
+
+        function clearContrastSummary() {
+            if (contrastInfoAdapter && typeof contrastInfoAdapter.html === "function") {
+                contrastInfoAdapter.html("");
             }
         }
 
@@ -1353,6 +1362,7 @@ var Omni = (function () {
                 return;
             }
 
+            clearSummary();
             resetCompletionSeen();
             setStatus("Submitting omni run...");
             omni.connect_status_stream(omni);
@@ -1423,6 +1433,7 @@ var Omni = (function () {
                 return;
             }
 
+            clearContrastSummary();
             contrastController._completion_seen = false;
             setContrastStatus("Submitting omni contrasts...");
             contrastController.connect_status_stream(contrastController);
@@ -1519,6 +1530,28 @@ var Omni = (function () {
             });
         };
 
+        omni.report_contrasts = function () {
+            if (!contrastInfoAdapter || typeof contrastInfoAdapter.html !== "function") {
+                return;
+            }
+            contrastInfoAdapter.html("");
+
+            http.request(url_for_run("report/omni_contrasts/"), {
+                method: "GET",
+                headers: { Accept: "text/html" }
+            }).then(function (response) {
+                var body = response && response.body ? response.body : "";
+                contrastInfoAdapter.html(body);
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                if (contrastController && typeof contrastController.pushResponseStacktrace === "function") {
+                    contrastController.pushResponseStacktrace(contrastController, payload);
+                } else {
+                    omni.pushResponseStacktrace(omni, payload);
+                }
+            });
+        };
+
         dom.delegate(formElement, "click", "[data-omni-action='add-scenario']", function (event) {
             event.preventDefault();
             addScenario();
@@ -1586,7 +1619,8 @@ var Omni = (function () {
 
         var bootstrapState = {
             scenariosLoaded: false,
-            reportDisplayed: false
+            reportDisplayed: false,
+            contrastReportDisplayed: false
         };
 
         omni.bootstrap = function bootstrap(context) {
@@ -1652,10 +1686,18 @@ var Omni = (function () {
             if (hasRanScenarios === undefined) {
                 hasRanScenarios = omniData.hasRanScenarios;
             }
+            var hasRanContrasts = controllerContext.hasRanContrasts;
+            if (hasRanContrasts === undefined) {
+                hasRanContrasts = omniData.hasRanContrasts;
+            }
 
             if (hasRanScenarios && !bootstrapState.reportDisplayed && typeof omni.report_scenarios === "function") {
                 omni.report_scenarios();
                 bootstrapState.reportDisplayed = true;
+            }
+            if (hasRanContrasts && !bootstrapState.contrastReportDisplayed && typeof omni.report_contrasts === "function") {
+                omni.report_contrasts();
+                bootstrapState.contrastReportDisplayed = true;
             }
 
             return omni;

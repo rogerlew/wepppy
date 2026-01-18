@@ -30,6 +30,12 @@
             {% set omni_has_ran_scenarios = omni.has_ran_scenarios %}
         {% endif %}
     {% endif %}
+    {% if omni_has_ran_contrasts is not defined %}
+        {% set omni_has_ran_contrasts = False %}
+        {% if 'omni' in mods_list and omni %}
+            {% set omni_has_ran_contrasts = omni.has_ran_contrasts %}
+        {% endif %}
+    {% endif %}
 
     {% set rhem_has_run = False %}
     {% if 'rhem' in mods_list %}
@@ -131,7 +137,8 @@
                 "hasDssZip": wepp.has_dss_zip
             },
             "omni": {
-                "hasRanScenarios": omni_has_ran_scenarios
+                "hasRanScenarios": omni_has_ran_scenarios,
+                "hasRanContrasts": omni_has_ran_contrasts
             },
             "rhem": {
                 "hasRun": rhem_has_run
@@ -149,7 +156,7 @@
             "outlet": {},
             "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
             "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform},
-            "omni": {"hasRanScenarios": omni_has_ran_scenarios}
+            "omni": {"hasRanScenarios": omni_has_ran_scenarios, "hasRanContrasts": omni_has_ran_contrasts}
         },
         "ui": {
             "tocTaskEmojis": toc_task_emojis,
