@@ -98,6 +98,84 @@ Omni groups hillslopes into contrast runs using a selection mode. Cumulative obj
 - Multiply the resulting `subwta.tif` values by 10 so hillslopes remain 10/20/30 and channels 40, keeping the output distinct from `dem/wbt/subwta.tif`.
 - Each grouped hillslope set becomes a contrast run.
 
+### Contrast Spec Amendments (Planned)
+
+Upcoming changes to contrast execution and UI behavior:
+
+- **Incremental contrast runs**: move from clean-slate reruns to running only contrasts that have not been ran. A contrast is considered ran when `_pups/omni/contrasts/<id>/wepp/output/interchange/README.md` exists.
+- **Invalidation tracking**: store scenario redisprep timestamps plus a sidecar hash so contrasts can be re-run when upstream outputs or contrast definitions change.
+  - Persist in `contrast_dependency_tree` (keyed by `contrast_name`) as:
+    - `dependencies`: existing hash bundle (control + contrast loss file sha1)
+    - `sidecar_sha1`: sha1 of `omni/contrasts/contrast_<id>.tsv`
+    - `control_redisprep`: parsed `redisprep.dump` snapshot for the control scenario
+    - `contrast_redisprep`: parsed `redisprep.dump` snapshot for the contrast scenario
+    - `last_run`: timestamp of contrast execution
+  - The redisprep snapshot should at minimum include `timestamps:run_wepp_watershed` (plus any other timestamps required to verify run freshness).
+  - A contrast is **up-to-date** only when:
+    - its run README exists,
+    - `sidecar_sha1` matches the current sidecar contents, and
+    - `control_redisprep`/`contrast_redisprep` match the current scenario redisprep snapshots.
+- **Stale cleanup**: remove contrast run directories that are no longer in the active contrast list.
+- **Dry Run**: new rq-engine endpoint that uses the same contrast build logic and returns a list of contrasts + run status without output metrics.
+  - Cumulative: `contrast_id`, `topaz_id`, `run_status`
+  - User-defined areas: `contrast_id`, `control_scenario`, `contrast_scenario`, `area_label`, `n_hillslopes`, `skip_status`, `run_status`
+  - Stream-order pruning: `contrast_id`, `control_scenario`, `contrast_scenario`, `n_hillslopes`, `skip_status`, `run_status`
+  - Run status should report up-to-date vs needs-run (and skipped when applicable).
+  - **Dry Run response schema (official)**:
+    ```json
+    {
+      "selection_mode": "cumulative|user_defined_areas|stream_order_pruning",
+      "items": [
+        {
+          "contrast_id": 12,
+          "control_scenario": "uniform_low",
+          "contrast_scenario": "mulch",
+          "topaz_id": "8122",
+          "area_label": "LRx03",
+          "n_hillslopes": 27,
+          "skip_status": {
+            "skipped": false,
+            "reason": null
+          },
+          "run_status": "up_to_date"
+        }
+      ]
+    }
+    ```
+    - `run_status` enum: `up_to_date`, `needs_run`, `skipped`
+    - `skip_status.reason` enum (when `skipped=true`): `no_hillslopes`, `invalid_geometry`, `missing_inputs`
+- **Contrast cap**: enforce a hard maximum of 100 hillslopes for cumulative mode. Backend clamps and warns; UI validates max of 100.
+- **Multi-pair list builder**: for user-defined areas and stream-order pruning, users provide a list of `(control_scenario, contrast_scenario)` pairs. Each pair runs against the same GeoJSON/pruning settings; contrast IDs are global (append-only) and duplicate pairs are skipped.
+- **Scenario gating**: UI blocks pairs when either scenario has not been ran (use scenario `wepp/output/interchange/README.md` as the readiness marker).
+- **UI actions**: add a row of contrast buttons `[ Run Omni Contrasts ] [ Dry Run ] [ Delete Contrasts ]` with confirmation for delete.
+
+### Appendix A: Remaining Implementation Scope
+
+Phasing for the remaining contrast work:
+
+1) **Incremental runs + invalidation**
+   - Run only contrasts that are missing or stale (per README marker, sidecar hash, redisprep snapshots).
+   - Delete contrast runs that are no longer in the active list.
+   - Enforce the cumulative-mode 100-hillslope cap (backend clamp + warning).
+
+2) **Dry Run endpoint**
+   - Add rq-engine dry-run endpoint that reuses the build logic and returns the official schema.
+   - Report `run_status` (`up_to_date`, `needs_run`, `skipped`) without output metrics.
+
+3) **UI actions + reporting**
+   - Add `[ Run Omni Contrasts ] [ Dry Run ] [ Delete Contrasts ]` with confirmation for delete.
+   - Render dry-run list in the contrasts panel (mode-specific columns).
+   - UI validation of the 100-hillslope cap.
+
+4) **User-defined multi-pair list builder**
+   - Implement the list builder UI and backend handling for user-defined areas only.
+   - Block pairs that reference scenarios that have not been ran.
+   - Preserve global contrast IDs (append-only) across pairs.
+
+5) **Stream-order pruning implementation**
+   - Define the detailed stream-order algorithm + payload schema.
+   - Implement selection + list builder support once the spec is finalized.
+
 ### Contrast Build Audit (`build_report.ndjson`)
 
 Each contrast selection writes one line to `_pups/omni/contrasts/build_report.ndjson` with:
