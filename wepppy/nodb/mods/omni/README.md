@@ -18,7 +18,7 @@ Omni snapshots the working directory into `_pups/omni/scenarios/<scenario_name>`
 
 - **Scenario Types**: Uniform burn severities (low/moderate/high), custom SBS maps, undisturbed baseline, thinning (canopy/ground cover reduction), mulching (ground cover increase), prescribed fire
 - **Dependency Tracking**: SHA1-based hashing detects when upstream scenarios change and skips redundant rebuilds
-- **Contrast Analysis**: Cumulative objective parameter mode is implemented; user-defined area and stream-order pruning modes are scaffolded in the UI but rejected by the backend until their pipelines land
+- **Contrast Analysis**: Cumulative objective parameter and user-defined area modes are implemented; stream-order pruning remains scaffolded until its pipeline lands
 - **Concurrency Options**: Run scenarios serially (`run_omni_scenarios()`) or dispatch to RQ workers (`run_omni_scenarios_rq()`) with lock retry and process pool fallback for CPU-heavy soil preparation
 - **Parquet Reporting**: Aggregates scenario outputs into `scenarios.out.parquet`, `scenarios.hillslope_summaries.parquet`, and `contrasts.out.parquet` for downstream analytics (D-Tale, dashboards, R scripts)
 
@@ -77,18 +77,19 @@ wepppy/weppcloud/templates/controls/
 
 ### Contrast Selection Modes
 
-Omni groups hillslopes into contrast runs using a selection mode. The cumulative objective-parameter mode is implemented today; the additional modes below are scaffolded in the UI but rejected by the backend until their implementations are complete.
+Omni groups hillslopes into contrast runs using a selection mode. Cumulative objective-parameter and user-defined area modes are implemented today; stream-order pruning remains scaffolded until its implementation is complete.
 
 #### Cumulative objective parameter (current)
 
 - Sort control-scenario hillslopes by the objective parameter and select until the cumulative fraction (plus optional hillslope limit) is reached.
 - Each selected hillslope becomes its own contrast run.
 
-#### User-defined areas (scaffolded)
+#### User-defined areas (GeoJSON)
 
 - Users upload a GeoJSON polygon file and provide a feature property key to name each contrast.
-- Each polygon is intersected with hillslopes to derive a set of Topaz IDs; the resulting group becomes one contrast run.
-- Contrast names come from the feature property value; contrast directories still use enumerated IDs for safe filesystem names.
+- Each polygon is intersected with hillslopes to derive a set of Topaz IDs; a hillslope is included when the polygon covers at least 50% of its area.
+- Overlapping polygons are allowed; hillslopes can appear in multiple contrasts.
+- Contrast names remain parseable (`<control_scenario>,<contrast_id>__to__<contrast_scenario>`); feature labels appear in reports and fall back to the contrast ID when missing.
 
 #### Stream-order pruning (scaffolded)
 
@@ -106,6 +107,7 @@ Each contrast selection writes one line to `_pups/omni/contrasts/build_report.nd
 - `contrast_scenario`: selected scenario name (or `null` for base scenario)
 - `wepp_id`, `topaz_id`: selected hillslope identifiers
 - `obj_param`, `running_obj_param`, `pct_cumulative`: objective parameter values and cumulative contribution
+- User-defined areas append `selection_mode`, `feature_index`, `area_label`, `n_hillslopes`, and `topaz_ids` while preserving the original keys (unused values are `null`).
 
 ### Contrast Selection Sidecars
 
@@ -268,7 +270,7 @@ print(omni.scenario_dependency_tree)
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `_scenarios` | `List[Dict[str, Any]]` | Scenario definitions (type, parameters) |
-| `_contrast_names` | `List[str]` | Human-readable contrast identifiers (mapping sidecars live under `omni/contrasts/`) |
+| `_contrast_names` | `List[Optional[str]]` | Contrast identifiers aligned to feature order; skipped features leave `None` gaps (sidecars live under `omni/contrasts/`) |
 | `_control_scenario` | `OmniScenario` | Control scenario for contrast analysis |
 | `_contrast_scenario` | `OmniScenario` | Treatment scenario for contrast analysis |
 | `_contrast_object_param` | `str` | Objective parameter for hillslope selection (e.g., `Runoff_mm`) |

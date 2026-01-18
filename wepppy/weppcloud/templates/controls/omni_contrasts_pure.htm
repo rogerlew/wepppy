@@ -9,7 +9,7 @@
   </p>
   <p class="wc-text-muted">
     Selection modes: cumulative objective parameter (available now), user-defined areas (GeoJSON),
-    and stream-order pruning (culvert-style). Only the cumulative mode is enabled today.
+    and stream-order pruning (culvert-style). Stream-order pruning is scaffolded.
   </p>
 {% endset %}
 
@@ -153,7 +153,7 @@
          "omni_contrast_geojson",
          "Contrast areas GeoJSON",
          accept=".geojson,application/geo+json",
-         help="Upload a polygon GeoJSON; each feature becomes a contrast area.",
+         help="Upload a polygon GeoJSON; each feature becomes a contrast area (file order defines contrast IDs).",
          extra_control_class="disable-readonly"
        ) }}
 
@@ -161,7 +161,7 @@
          "omni_contrast_geojson_name_key",
          "Feature property key for names",
          value=omni.contrast_geojson_name_key if omni.contrast_geojson_name_key is defined else "",
-         help="Property used to label each contrast in reports.",
+         help="Optional property used to label each contrast in reports (falls back to contrast ID).",
          extra_control_class="disable-readonly"
        ) }}
   </div>
@@ -178,8 +178,8 @@
        ) }}
   </div>
 
-  <p class="wc-text-muted" data-omni-contrast-mode="user_defined_areas stream_order_pruning" hidden>
-    This mode is scaffolded for upcoming work. Switch back to cumulative mode to run contrasts today.
+  <p class="wc-text-muted" data-omni-contrast-mode="stream_order_pruning" hidden>
+    Stream-order pruning is scaffolded for upcoming work. Switch to cumulative or user-defined areas to run contrasts today.
   </p>
 
   {% call button_row() %}

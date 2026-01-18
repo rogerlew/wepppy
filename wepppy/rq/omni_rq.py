@@ -209,6 +209,8 @@ def run_omni_contrast_rq(
         if contrast_id < 1 or contrast_id > len(contrast_names):
             raise ValueError(f'Contrast id {contrast_id} is out of range')
         contrast_name = contrast_names[contrast_id - 1]
+        if not contrast_name:
+            raise ValueError(f'Contrast id {contrast_id} is skipped')
 
         omni.run_omni_contrast(contrast_id)
 
@@ -502,6 +504,25 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
             return None
 
+        active_ids: List[int] = []
+        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+            if not contrast_name:
+                continue
+            sidecar_path = omni._contrast_sidecar_path(contrast_id)
+            if not os.path.isfile(sidecar_path):
+                omni.logger.info(
+                    "  run_omni_contrasts: Missing sidecar for contrast_id=%s, skipping.",
+                    contrast_id,
+                )
+                continue
+            active_ids.append(contrast_id)
+
+        if not active_ids:
+            omni.logger.info('  run_omni_contrasts: No contrasts to run')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
+            return None
+
         omni._clean_contrast_runs()
         if omni.contrast_dependency_tree:
             omni.contrast_dependency_tree = {}
@@ -510,7 +531,7 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
             contrast_jobs: List[Job] = []
-            for contrast_id in range(1, len(contrast_names) + 1):
+            for contrast_id in active_ids:
                 child_job = q.enqueue_call(
                     func=run_omni_contrast_rq,
                     args=[runid, contrast_id],

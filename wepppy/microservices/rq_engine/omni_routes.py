@@ -317,6 +317,8 @@ def _prepare_omni_contrasts(
             )
         except ValueError as exc:
             raise ValueError(f"Invalid GeoJSON upload: {exc}") from exc
+    if selection_mode == "user_defined_areas" and not geojson_path:
+        raise ValueError("GeoJSON upload or path is required for user-defined contrasts.")
 
     return {
         "omni_contrast_selection_mode": selection_mode,
@@ -411,7 +413,7 @@ async def _run_omni_contrasts(
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
-    if selection_mode != "cumulative":
+    if selection_mode not in {"cumulative", "user_defined_areas"}:
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,

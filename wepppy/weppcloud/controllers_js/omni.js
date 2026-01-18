@@ -705,6 +705,9 @@ var Omni = (function () {
         var contrastRunButton = contrastFormElement
             ? contrastFormElement.querySelector("[data-omni-contrast-action='run-contrasts']")
             : null;
+        var contrastGeojsonInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='omni_contrast_geojson']")
+            : null;
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -1285,11 +1288,15 @@ var Omni = (function () {
                     : [];
                 section.hidden = allowed.indexOf(mode) === -1;
             });
+            var canRun = mode === CONTRAST_SELECTION_MODES.cumulative
+                || mode === CONTRAST_SELECTION_MODES.user_defined_areas;
             if (contrastRunButton) {
-                contrastRunButton.disabled = mode !== CONTRAST_SELECTION_MODES.cumulative;
+                contrastRunButton.disabled = !canRun;
             }
-            if (mode !== CONTRAST_SELECTION_MODES.cumulative) {
-                setContrastStatus("Selected mode is scaffolded. Switch to cumulative mode to run contrasts.");
+            if (!canRun) {
+                setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to run contrasts.");
+            } else {
+                clearContrastStatus();
             }
         }
 
@@ -1421,9 +1428,18 @@ var Omni = (function () {
             clearContrastStatus();
 
             var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
-            if (mode !== CONTRAST_SELECTION_MODES.cumulative) {
-                setContrastStatus("Selected mode is scaffolded. Switch to cumulative mode to run contrasts.");
+            var canRun = mode === CONTRAST_SELECTION_MODES.cumulative
+                || mode === CONTRAST_SELECTION_MODES.user_defined_areas;
+            if (!canRun) {
+                setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to run contrasts.");
                 return;
+            }
+            if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                var fileList = contrastGeojsonInput ? contrastGeojsonInput.files : null;
+                if (!fileList || !fileList.length) {
+                    setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+                    return;
+                }
             }
 
             var controlValue = contrastControlSelect ? contrastControlSelect.value : "";

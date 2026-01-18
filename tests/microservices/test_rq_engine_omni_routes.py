@@ -52,6 +52,12 @@ def _stub_omni(monkeypatch: pytest.MonkeyPatch) -> None:
         def parse_scenarios(self, scenarios) -> None:
             return None
 
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            return None
+
     monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
 
 
@@ -86,3 +92,57 @@ def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"] == "Missing scenarios data"
+
+
+def test_run_omni_contrasts_requires_geojson_in_user_defined_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "GeoJSON upload or path is required for user-defined contrasts."
+
+
+def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-22")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    captured = {}
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            captured["payload"] = payload
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            captured["build"] = kwargs
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+    monkeypatch.setattr(omni_routes, "_save_upload", lambda *args, **kwargs: "/tmp/uploaded.geojson")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            data={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+            files={"omni_contrast_geojson": ("areas.geojson", b"{}", "application/geo+json")},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-22"
+    assert captured["payload"]["omni_contrast_geojson_path"] == "/tmp/uploaded.geojson"

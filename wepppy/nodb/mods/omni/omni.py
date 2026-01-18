@@ -524,7 +524,8 @@ class Omni(NoDbBase):
     Public Attributes (stored in omni.nodb):
         - wd: working directory for WEPP inputs/outputs
         - _scenarios: list of scenario definition dicts
-        - _contrast_names: list of contrast identifiers (sidecar mappings live under omni/contrasts)
+        - _contrast_names: list of contrast identifiers aligned to feature order (sidecar mappings live under omni/contrasts)
+        - _contrast_labels: optional mapping of contrast_id → display label for reports
         - _control_scenario, _contrast_scenario: OmniScenario enums
         - _contrast_object_param, _contrast_cumulative_obj_param_threshold_fraction, etc.: parameters
             controlling contrast selection and filtering
@@ -565,6 +566,7 @@ class Omni(NoDbBase):
             self._scenarios = []
             self._contrasts = None
             self._contrast_names = None
+            self._contrast_labels = None
 
             self._contrast_scenario = None
             self._control_scenario = None
@@ -826,11 +828,17 @@ class Omni(NoDbBase):
         if not contrast_names:
             return None
         loaded: List[ContrastMapping] = []
-        for contrast_id in range(1, len(contrast_names) + 1):
+        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+            if not contrast_name:
+                continue
             try:
                 loaded.append(self._load_contrast_sidecar(contrast_id))
             except FileNotFoundError:
-                return None
+                self.logger.info(
+                    "Contrast sidecar missing for contrast_id=%s; skipping load.",
+                    contrast_id,
+                )
+                continue
         self._contrasts = loaded
         return loaded
     
@@ -840,12 +848,12 @@ class Omni(NoDbBase):
         self._contrasts = value
 
     @property
-    def contrast_names(self) -> Optional[List[str]]:
+    def contrast_names(self) -> Optional[List[Optional[str]]]:
         return getattr(self, '_contrast_names', None)
 
     @contrast_names.setter
     @nodb_setter
-    def contrast_names(self, value: Optional[List[str]]) -> None:
+    def contrast_names(self, value: Optional[List[Optional[str]]]) -> None:
         self._contrast_names = value
 
     @property
@@ -1064,6 +1072,7 @@ class Omni(NoDbBase):
         with self.locked():
             self._contrasts = None
             self._contrast_names = None
+            self._contrast_labels = None
             self._contrast_dependency_tree = {}
         self._clean_contrast_runs()
         sidecar_dir = _join(self.omni_dir, 'contrasts')
@@ -1194,6 +1203,10 @@ class Omni(NoDbBase):
         selection_mode_value = getattr(self, "_contrast_selection_mode", None)
         selection_mode = (selection_mode_value or 'cumulative').strip().lower()
 
+        if selection_mode == "user_defined_areas":
+            self._build_contrasts_user_defined_areas()
+            return
+
         if contrast_scenario == str(self.base_scenario):
             contrast_scenario = None
 
@@ -1220,6 +1233,12 @@ class Omni(NoDbBase):
             contrast_hill_max_slope = None
             contrast_select_burn_severities = None
             contrast_select_topaz_ids = None
+            if contrast_hillslope_limit is not None:
+                self.logger.info(
+                    "Contrast selection mode '%s' ignores omni_contrast_hillslope_limit.",
+                    selection_mode,
+                )
+                contrast_hillslope_limit = None
 
         if contrast_hillslope_limit is not None:
             try:
@@ -1472,6 +1491,256 @@ class Omni(NoDbBase):
             self._contrasts = None
             self._contrast_names = contrast_names
 
+    def _build_contrasts_user_defined_areas(self) -> None:
+        global OMNI_REL_DIR
+
+        geojson_path = getattr(self, "_contrast_geojson_path", None)
+        if not geojson_path:
+            raise ValueError("omni_contrast_geojson_path is required for user_defined_areas mode")
+        if not _exists(geojson_path):
+            raise FileNotFoundError(f"Contrast GeoJSON not found: {geojson_path}")
+
+        ignored_fields = []
+        if self._contrast_hillslope_limit is not None:
+            ignored_fields.append("omni_contrast_hillslope_limit")
+        if self._contrast_hill_min_slope is not None:
+            ignored_fields.append("omni_contrast_hill_min_slope")
+        if self._contrast_hill_max_slope is not None:
+            ignored_fields.append("omni_contrast_hill_max_slope")
+        if self._contrast_select_burn_severities is not None:
+            ignored_fields.append("omni_contrast_select_burn_severities")
+        if self._contrast_select_topaz_ids is not None:
+            ignored_fields.append("omni_contrast_select_topaz_ids")
+        if ignored_fields:
+            self.logger.info(
+                "User-defined contrast selection ignores filters: %s",
+                ", ".join(ignored_fields),
+            )
+
+        try:
+            import geopandas as gpd
+        except ImportError as exc:  # pragma: no cover - optional dependency
+            raise ImportError("geopandas is required for user-defined contrast selection") from exc
+
+        watershed = Watershed.getInstance(self.wd)
+        hillslope_path = watershed.subwta_utm_shp
+        if not hillslope_path or not _exists(hillslope_path):
+            raise FileNotFoundError("Hillslope polygons not found for user-defined contrasts.")
+
+        hillslope_gdf = gpd.read_file(hillslope_path)
+        if hillslope_gdf.empty:
+            raise ValueError("No hillslope polygons available for user-defined contrasts.")
+
+        ron = Ron.getInstance(self.wd)
+        project_srid = getattr(ron, "srid", None)
+        target_crs = hillslope_gdf.crs
+        if target_crs is None:
+            if project_srid:
+                target_crs = f"EPSG:{project_srid}"
+                hillslope_gdf = hillslope_gdf.set_crs(target_crs)
+                self.logger.info(
+                    "Hillslope GeoJSON missing CRS; setting to project CRS EPSG:%s",
+                    project_srid,
+                )
+            else:
+                raise ValueError("Project CRS unavailable; cannot align contrast GeoJSON.")
+
+        user_gdf = gpd.read_file(geojson_path)
+        if user_gdf.empty:
+            raise ValueError("Contrast GeoJSON contains no features.")
+        if user_gdf.crs is None:
+            user_gdf = user_gdf.set_crs(epsg=4326)
+            self.logger.info("Contrast GeoJSON missing CRS; assuming WGS84 (EPSG:4326).")
+        if target_crs is None:
+            raise ValueError("Target CRS unavailable for user-defined contrasts.")
+        user_gdf = user_gdf.to_crs(target_crs)
+
+        translator = watershed.translator_factory()
+        top2wepp = {
+            str(k): str(v)
+            for k, v in translator.top2wepp.items()
+            if not (str(k).endswith("4") or int(k) == 0)
+        }
+
+        id_column = None
+        for candidate in ("TopazID", "topaz_id", "TOPAZ_ID"):
+            if candidate in hillslope_gdf.columns:
+                id_column = candidate
+                break
+        if id_column is None:
+            raise ValueError("Hillslope polygons missing a TopazID field.")
+
+        hillslope_lookup: Dict[int, Dict[str, Any]] = {}
+        missing_topaz = 0
+        for idx, row in hillslope_gdf.iterrows():
+            topaz_raw = row.get(id_column)
+            if topaz_raw in (None, ""):
+                continue
+            topaz_id = str(topaz_raw)
+            if topaz_id.endswith("4") or topaz_id == "0":
+                continue
+            if topaz_id not in top2wepp:
+                missing_topaz += 1
+                continue
+            geom = row.geometry
+            if geom is None or getattr(geom, "is_empty", False):
+                continue
+            area = float(getattr(geom, "area", 0.0) or 0.0)
+            if area <= 0.0:
+                continue
+            hillslope_lookup[idx] = {
+                "topaz_id": topaz_id,
+                "geometry": geom,
+                "area": area,
+            }
+
+        if missing_topaz:
+            self.logger.info(
+                "Skipped %d hillslopes with Topaz IDs missing from translator.",
+                missing_topaz,
+            )
+        if not hillslope_lookup:
+            raise ValueError("No valid hillslopes available for user-defined contrasts.")
+
+        sindex = getattr(hillslope_gdf, "sindex", None)
+        hill_indices = list(hillslope_lookup.keys())
+
+        contrast_scenario = self._contrast_scenario
+        control_scenario = self._control_scenario
+        if contrast_scenario == str(self.base_scenario):
+            contrast_scenario = None
+        if control_scenario == str(self.base_scenario):
+            control_scenario = None
+
+        name_key = getattr(self, "_contrast_geojson_name_key", None)
+        feature_count = len(user_gdf)
+
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = []
+            self._contrast_labels = {}
+
+        sidecar_dir = self._contrast_sidecar_dir()
+        if _exists(sidecar_dir):
+            shutil.rmtree(sidecar_dir)
+        os.makedirs(sidecar_dir, exist_ok=True)
+
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, "contrasts")
+        os.makedirs(contrasts_dir, exist_ok=True)
+        report_fn = _join(contrasts_dir, "build_report.ndjson")
+
+        contrast_names: List[Optional[str]] = [None] * feature_count
+        contrast_labels: Dict[int, str] = {}
+        report_control_scenario = control_scenario or str(self.base_scenario)
+
+        def _sorted_topaz_ids(values: Set[str]) -> List[str]:
+            try:
+                return sorted(values, key=lambda item: int(item))
+            except (TypeError, ValueError):
+                return sorted(values)
+
+        with open(report_fn, "w", encoding="ascii") as report_fp:
+            for feature_index, (_, row) in enumerate(user_gdf.iterrows(), start=1):
+                label = None
+                if name_key:
+                    raw_label = row.get(name_key)
+                    if raw_label not in (None, ""):
+                        label = str(raw_label).strip()
+                if not label:
+                    label = str(feature_index)
+                contrast_labels[feature_index] = label
+
+                geom = row.geometry
+                selected_topaz: Set[str] = set()
+                if geom is not None and not getattr(geom, "is_empty", False):
+                    try:
+                        if sindex is not None:
+                            candidate_indices = list(sindex.intersection(geom.bounds))
+                        else:
+                            candidate_indices = hill_indices
+                        for idx in candidate_indices:
+                            hill = hillslope_lookup.get(idx)
+                            if not hill:
+                                continue
+                            hill_area = hill["area"]
+                            if hill_area <= 0.0:
+                                continue
+                            inter_area = float(geom.intersection(hill["geometry"]).area)
+                            if inter_area / hill_area >= 0.5:
+                                selected_topaz.add(hill["topaz_id"])
+                    except Exception as exc:
+                        self.logger.info(
+                            "Failed to evaluate contrast feature %s: %s",
+                            feature_index,
+                            exc,
+                        )
+
+                contrast_id = feature_index
+                report_entry = {
+                    "contrast_id": contrast_id,
+                    "control_scenario": report_control_scenario,
+                    "contrast_scenario": contrast_scenario,
+                    "wepp_id": None,
+                    "topaz_id": None,
+                    "obj_param": None,
+                    "running_obj_param": None,
+                    "pct_cumulative": None,
+                    "selection_mode": "user_defined_areas",
+                    "feature_index": feature_index,
+                    "area_label": label,
+                    "n_hillslopes": len(selected_topaz),
+                    "topaz_ids": _sorted_topaz_ids(selected_topaz),
+                }
+
+                if not selected_topaz:
+                    report_entry["status"] = "skipped"
+                    report_fp.write(json.dumps(report_entry) + "\n")
+                    continue
+
+                if contrast_scenario is None:
+                    contrast_name = f"{control_scenario},{contrast_id}__to__{self.base_scenario}"
+                else:
+                    contrast_name = f"{control_scenario},{contrast_id}__to__{contrast_scenario}"
+
+                contrast: ContrastMapping = {}
+                for topaz_id, wepp_id in top2wepp.items():
+                    if topaz_id in selected_topaz:
+                        if contrast_scenario is None:
+                            wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                        else:
+                            wepp_id_path = _join(
+                                self.wd,
+                                OMNI_REL_DIR,
+                                "scenarios",
+                                contrast_scenario,
+                                "wepp",
+                                "output",
+                                f"H{wepp_id}",
+                            )
+                    else:
+                        if control_scenario is None:
+                            wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                        else:
+                            wepp_id_path = _join(
+                                self.wd,
+                                OMNI_REL_DIR,
+                                "scenarios",
+                                control_scenario,
+                                "wepp",
+                                "output",
+                                f"H{wepp_id}",
+                            )
+                    contrast[topaz_id] = wepp_id_path
+
+                contrast_names[contrast_id - 1] = contrast_name
+                self._write_contrast_sidecar(contrast_id, contrast)
+                report_fp.write(json.dumps(report_entry) + "\n")
+
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = contrast_names
+            self._contrast_labels = contrast_labels
+
     def run_omni_contrasts(self) -> None:
         global OMNI_REL_DIR
 
@@ -1488,12 +1757,31 @@ class Omni(NoDbBase):
         dependency_tree: ContrastDependency = dict(self.contrast_dependency_tree)
         active_contrasts: Set[str] = set()
 
-        contrast_names: List[str] = self.contrast_names or []
-        total_contrasts = len(contrast_names)
+        contrast_names: List[Optional[str]] = self.contrast_names or []
+        active_ids = [
+            contrast_id
+            for contrast_id, contrast_name in enumerate(contrast_names, start=1)
+            if contrast_name
+        ]
+        total_contrasts = len(active_ids)
 
-        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+        if total_contrasts == 0:
+            self.logger.info("  run_omni_contrasts: No contrasts to run")
+            return
+
+        for ordinal, contrast_id in enumerate(active_ids, start=1):
+            contrast_name = contrast_names[contrast_id - 1]
+            if not contrast_name:
+                continue
+            try:
+                _contrasts = self._load_contrast_sidecar(contrast_id)
+            except FileNotFoundError:
+                self.logger.info(
+                    "  run_omni_contrasts: Missing sidecar for contrast_id=%s, skipping.",
+                    contrast_id,
+                )
+                continue
             active_contrasts.add(contrast_name)
-            _contrasts = self._load_contrast_sidecar(contrast_id)
             dependencies = self._contrast_dependencies(contrast_name)
             signature = self._contrast_signature(contrast_name, _contrasts)
 
@@ -1510,7 +1798,13 @@ class Omni(NoDbBase):
                 self.logger.info(f'  run_omni_contrasts: {contrast_name} up-to-date, skipping')
                 continue
 
-            self.logger.info(f'  run_omni_contrasts: Running contrast {contrast_id} of {total_contrasts}: {contrast_name}')
+            self.logger.info(
+                "  run_omni_contrasts: Running contrast %s of %s (id=%s): %s",
+                ordinal,
+                total_contrasts,
+                contrast_id,
+                contrast_name,
+            )
             omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
             self._post_omni_run(omni_wd, contrast_name)
 
@@ -1528,7 +1822,11 @@ class Omni(NoDbBase):
     def run_omni_contrast(self, contrast_id: int) -> str:
         self.logger.info(f'run_omni_contrast {contrast_id}')
         contrast_names = self.contrast_names or []
+        if contrast_id < 1 or contrast_id > len(contrast_names):
+            raise ValueError(f"Contrast id {contrast_id} is out of range")
         contrast_name = contrast_names[contrast_id - 1]
+        if not contrast_name:
+            raise ValueError(f"Contrast id {contrast_id} is skipped")
         _contrasts = self._load_contrast_sidecar(contrast_id)
         omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
         self._post_omni_run(omni_wd, contrast_name)
@@ -1554,17 +1852,21 @@ class Omni(NoDbBase):
                 frame['value'] = frame['v']
             return frame
 
-        parquet_files = {}
+        parquet_entries: List[Tuple[int, str, str]] = []
 
         if not self.contrast_names:
             return pd.DataFrame(columns=['key', 'value', 'v', 'units', 'control_scenario', 'contrast_topaz_id', 'contrast'])
 
         for contrast_id, contrast_name in enumerate(self.contrast_names or [], start=1):
+            if not contrast_name:
+                continue
             output_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts', str(contrast_id), 'wepp', 'output')
-            parquet_files[contrast_name] = _resolve_loss_out_parquet(output_dir)
+            parquet_entries.append((contrast_id, contrast_name, _resolve_loss_out_parquet(output_dir)))
 
         dfs = []
-        for contrast_id, (contrast_name, path) in enumerate(parquet_files.items(), start=1):
+        selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
+        contrast_labels = getattr(self, "_contrast_labels", None) or {}
+        for contrast_id, contrast_name, path in parquet_entries:
             if not os.path.isfile(path):
                 continue
 
@@ -1584,7 +1886,13 @@ class Omni(NoDbBase):
             df = _ensure_value_columns(pd.read_parquet(path))
             df['control_scenario'] = control_scenario
             df['contrast_topaz_id'] = topaz_id
-            df['contrast'] = contrast_name
+            if selection_mode == "user_defined_areas":
+                label = contrast_labels.get(contrast_id)
+                if label is None:
+                    label = contrast_labels.get(str(contrast_id))
+                df['contrast'] = label or str(contrast_id)
+            else:
+                df['contrast'] = contrast_name
             df['_contrast_name'] = str(contrast_name)
             df['contrast_id'] = contrast_id
 
