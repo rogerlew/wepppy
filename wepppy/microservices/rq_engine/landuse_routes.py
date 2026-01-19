@@ -104,24 +104,32 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             form = await request.form()
             upload = _extract_upload(form, "input_upload_landuse")
-            if upload is None:
-                return error_response("Could not find file", status_code=400)
-            if not upload.filename:
-                return error_response("no filename specified", status_code=400)
+            filename = None
+            user_defined_fn = None
 
-            try:
-                filename = secure_filename(upload.filename)
-            except Exception:
-                return error_response_with_traceback("Could not obtain filename", status_code=400)
-            if not filename:
-                return error_response("Could not obtain filename", status_code=400)
+            if upload is not None:
+                if not upload.filename:
+                    return error_response("no filename specified", status_code=400)
 
-            user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
-            try:
-                with open(user_defined_fn, "wb") as dest:
-                    shutil.copyfileobj(upload.file, dest)
-            except Exception:
-                return error_response_with_traceback("Could not save file")
+                try:
+                    filename = secure_filename(upload.filename)
+                except Exception:
+                    return error_response_with_traceback("Could not obtain filename", status_code=400)
+                if not filename:
+                    return error_response("Could not obtain filename", status_code=400)
+
+                user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
+                try:
+                    with open(user_defined_fn, "wb") as dest:
+                        shutil.copyfileobj(upload.file, dest)
+                except Exception:
+                    return error_response_with_traceback("Could not save file")
+            else:
+                filename = landuse.user_defined_landcover_fn
+                if filename:
+                    user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
+                if not filename or not user_defined_fn or not _exists(user_defined_fn):
+                    return error_response("Could not find file", status_code=400)
 
             try:
                 raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
@@ -132,7 +140,8 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             if not _exists(landuse.lc_fn):
                 return error_response("Failed creating landuse file", status_code=400)
-            landuse.user_defined_landcover_fn = filename
+            if filename:
+                landuse.user_defined_landcover_fn = filename
 
         if landuse.run_group == "batch":
             return JSONResponse({"message": "Set landuse inputs for batch processing"})
