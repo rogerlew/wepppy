@@ -37,7 +37,7 @@ _Date: 2025-10-22 (updated audit aligned with current Pure migration status)_
 ## Read-Only & Report Panels
 | Panel | Template Extends | Entry Point(s) | What It Surfaces | Notes |
 | --- | --- | --- | --- | --- |
-| Export | `_content_base.htm` | Included on runs0 (`controls/export.htm`) | Links to packaged downloads (ZIP, JSON) | Styling tied to legacy `.controller-section`; no JS |
+| Export Downloads | _Removed (no panel)_ | N/A | Direct links now hit `/rq-engine/api/runs/<runid>/<config>/export/{ermit,geopackage,geodatabase,prep_details}` or the archive dashboard | If reintroduced, target rq-engine export routes (Flask `export_bp` removed) |
 | WEPP Reports | `_content_base.htm` | Conditional include (`controls/wepp_reports.htm`) | Links to WEPP summary/return period reports & fork actions | Locale-aware text, heavy reliance on `url_for_run` helpers |
 | RHEM Reports | `_content_base.htm` | Conditional include (`controls/rhem_reports.htm`) | Report shortcuts for RHEM outputs | Only visible when RHEM runs; inherits Bootstrap list styling |
 | Climate Monthlies | Partial table (`controls/climate_monthlies.htm`) | Rendered inside climate dialogs | Tabular summary of climate stats with unitizer helpers | Uses inline `<table>` markup; designed for modal display |
@@ -239,7 +239,7 @@ To prepare for macro-driven rendering, the tables below document the primary for
 ### Read-Only / Content Panels
 | Panel | Template | Key Links / Content | Notes |
 | --- | --- | --- | --- |
-| Export | `controls/export.htm` | Download links for GeoPackage, geodatabase, return-period TSVs, prep details, archive dashboard, ERMiT CSV | No JS; relies on `ron.mods` to toggle ERMiT & daily water balance sections. Macro should focus on semantics & spacing |
+| Export Downloads | _Removed (no panel)_ | Direct links now hit `/rq-engine/api/runs/<runid>/<config>/export/{ermit,geopackage,geodatabase,prep_details}` or the archive dashboard | If reintroduced, target rq-engine export routes; remove legacy `controls/export.htm` references |
 | WEPP Reports | `controls/wepp_reports.htm` | Links to watershed summaries, return periods, sediment characteristics, Deval report, fork project actions | Conditional content based on `climate.is_single_storm`, `prep.has_sbs`, user roles | Requires external anchor styling but no inputs |
 | RHEM Reports | `controls/rhem_reports.htm` | Average annuals, return periods, run log links | Visible only when RHEM mod active; minimal markup |
 | Climate Monthlies | `controls/climate_monthlies.htm` | Tabular summary with `unitizer` helpers for monthly stats | Embedded via modals/summary blocks; ensure macros preserve table classes |

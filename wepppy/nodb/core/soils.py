@@ -1390,6 +1390,9 @@ class Soils(NoDbBase):
             else:
                 df['wepp_id'] = pd.Series(pd.array([pd.NA] * len(df), dtype='Int32'))
 
+        if 'area' in df.columns or 'Area' in df.columns:
+            df.drop(columns=['area', 'Area'], errors='ignore', inplace=True)
+
         for legacy_col in ('TopazID', 'WeppID'):
             if legacy_col in df.columns:
                 df.drop(columns=[legacy_col], inplace=True)

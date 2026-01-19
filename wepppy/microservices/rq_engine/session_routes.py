@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 SESSION_TOKEN_TTL_SECONDS = 4 * 24 * 60 * 60
-SESSION_TOKEN_SCOPES = ["rq:status", "rq:enqueue"]
+SESSION_TOKEN_SCOPES = ["rq:status", "rq:enqueue", "rq:export"]
 SESSION_TOKEN_REQUIRED_SCOPES = ["rq:status"]
 SESSION_KEY_PREFIX = "session:"
 

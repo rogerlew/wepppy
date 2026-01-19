@@ -248,22 +248,22 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 ## 1. Purpose and Scope
 - Enable MCP-compatible LLM agents and tooling to explore, validate, and execute WEPPcloud Query Engine jobs in a safe and observable way.
 - Provide a uniform JSON interface that mirrors the existing Starlette console features (run activation, schema browsing, preset payloads, query execution).
-- Support both read-only catalogue discovery and opt-in query execution with clear permission boundaries.
+- Support both read-only catalog discovery and opt-in query execution with clear permission boundaries.
 
 ## 2. Architectural Context
 - The MCP API is delivered as part of the existing Starlette application under the `/mcp` URL prefix (behind the same reverse proxy as `/query-engine`).
 - Each call is stateless and authenticated via bearer token. Tokens embed run-level scopes.
 - The API builds on existing modules:
   - `query_engine.activate_query_engine` for activation.
-  - `query_engine.resolve_run_context` for catalogue access.
+  - `query_engine.resolve_run_context` for catalog access.
   - `query_engine.run_query` for execution.
   - `query_engine.app.query_presets.QUERY_PRESETS` for curated examples.
 
 ## 3. Authentication and Authorization
 - **Scheme**: `Authorization: Bearer <token>`.
 - **Scopes**:
-  - `runs:read` – discover accessible runs and catalogue metadata.
-  - `runs:activate` – initiate catalogue activation.
+  - `runs:read` – discover accessible runs and catalog metadata.
+  - `runs:activate` – initiate catalog activation.
   - `queries:validate` – call validation endpoint.
   - `queries:execute` – execute queries (implies validate).
 - Tokens are mapped to a user identity and an allow-list of run IDs. All endpoints verify both scope and run ownership.
@@ -287,8 +287,8 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 | --- | --- | --- |
 | `GET /mcp/ping` | Health probe; returns service metadata. | none |
 | `GET /mcp/runs/{runid}` | Detailed run info (activation status, last refresh). | `runs:read` |
-| `POST /mcp/runs/{runid}/activate` | Trigger catalogue activation; returns activation job status. | `runs:activate` |
-| `GET /mcp/runs/{runid}/catalog` | Fetch the curated catalogue for a run (full dataset list, excluding internal files); supports `include_fields` and `limit[fields]` to tune schema verbosity. | `runs:read` |
+| `POST /mcp/runs/{runid}/activate` | Trigger catalog activation; returns activation job status. | `runs:activate` |
+| `GET /mcp/runs/{runid}/catalog` | Fetch the curated catalog for a run (full dataset list, excluding internal files); supports `include_fields` and `limit[fields]` to tune schema verbosity. | `runs:read` |
 | `GET /mcp/runs/{runid}/presets` | Retrieve curated query presets. | `runs:read` |
 | `GET /mcp/runs/{runid}/prompt-template` | Hydrated Markdown prompt with schema snapshot and endpoint URLs. | `runs:read` |
 | `POST /mcp/runs/{runid}/queries/validate` | Validate payload; respond with normalized payload and warnings. | `queries:validate` |
@@ -296,13 +296,13 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 
 - Every endpoint responds with JSON using: `{ "data": ..., "meta": ..., "errors": [...] }`.
 - Errors include machine-readable `code` (`catalog_missing`, `validation_failed`, `permission_denied`, `rate_limited`, `activation_in_progress`, `internal_error`) and human `detail`.
-- `GET` endpoints return metadata that includes the original catalogue totals and a trace identifier for diagnostics.
+- `GET` endpoints return metadata that includes the original catalog totals and a trace identifier for diagnostics.
 - Run-level responses include both `links.query_execute` and `links.query_validate`; the legacy `links.query` is maintained as a deprecated alias for `links.query_execute` to avoid breaking existing clients.
 
 ## 6. Request / Response Contracts
 
 ### 6.1 `GET /mcp/runs/{runid}`
-- Returns a single run record including catalogue status metadata when available.
+- Returns a single run record including catalog status metadata when available.
 - Errors:
   - `404` when the run is not visible to the current token.
   - `403` if the run exists but the token lacks `runs:read`.
@@ -337,11 +337,11 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 ```
 
 ### 6.2 `GET /mcp/runs/{runid}/catalog`
-- Returns the curated dataset catalogue (internal files such as `ash/H*.parquet` are excluded automatically).
+- Returns the curated dataset catalog (internal files such as `ash/H*.parquet` are excluded automatically).
 - Query parameters: `include_fields` to toggle schema hydration and `limit[fields]` (`limit_fields`) to cap the number of fields per dataset in the response.
 - Errors:
   - `404` (`not_found`) when the run is not visible to the token.
-  - `404` (`catalog_missing`) when the catalogue has not been generated.
+  - `404` (`catalog_missing`) when the catalog has not been generated.
   - `400` (`invalid_request`) for malformed boolean or limit values.
 
 ### 6.3 `POST /mcp/runs/{runid}/queries/validate`
@@ -351,7 +351,7 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 - `computed_columns` require an `alias` and exactly one of `sql`, `expression`, or `date_parts`.
 - Errors:
   - `400` (`invalid_request`) for invalid JSON bodies.
-  - `404` (`catalog_missing`) when the catalogue has not been generated.
+  - `404` (`catalog_missing`) when the catalog has not been generated.
   - `422` (`invalid_payload`, `dataset_missing`) for payload validation issues.
 ```json
 {
@@ -412,9 +412,9 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
 }
 ```
 
-## 7. Catalogue Filtering Rules
+## 7. Catalog Filtering Rules
 - Skip entries whose path starts with `.mypy_cache/`, `_query_engine/`, or any value configured in `IGNORED_CATALOG_PREFIXES`.
-- Entire `ash` datasets (e.g., `ash/` parquet outputs, `ash.nodb`) are excluded to keep catalogues concise.
+- Entire `ash` datasets (e.g., `ash/` parquet outputs, `ash.nodb`) are excluded to keep catalogs concise.
 - `limit_fields` trims schema field listings per dataset; all datasets are always returned.
 - Provide `meta.catalog.total`, `meta.catalog.filtered`, and `meta.catalog.returned` so clients know how many items were produced and removed.
 - `/mcp/runs/{runid}/catalog` query parameters:
@@ -444,7 +444,7 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
   ```
 - When the job is accepted but still running, the API returns `202 Accepted`, sets a `Retry-After` header, and includes `meta.poll_after_seconds` to guide status polling.
 - If activation is already running, return `202` with `status: "in_progress"` and include both a `Retry-After` header and `meta.poll_after_seconds`.
-- A `409` response is under consideration for clients that prefer an immediate conflict signal instead of polling; the current behaviour remains `202 Accepted`.
+- A `409` response is under consideration for clients that prefer an immediate conflict signal instead of polling; the current behavior remains `202 Accepted`.
 - Upon completion, `GET /mcp/runs/{runid}` reflects updated `last_catalog_refresh`.
 
 ## 9. Prompt Template Endpoint
@@ -1202,22 +1202,18 @@ Query responses are JSON objects with these properties:
 {
   "records": [
     {
-      "TopazID": 121,
+      "topaz_id": 121,
       "landuse": "Evergreen Forest",
-      "simple_texture": "loam",
-      "area": 675.18,
-      "area_hectares": 0.0675
+      "simple_texture": "loam"
     }
   ],
   "row_count": 1,
   "schema": [
-    {"name": "TopazID", "type": "int64"},
+    {"name": "topaz_id", "type": "int64"},
     {"name": "landuse", "type": "string"},
-    {"name": "simple_texture", "type": "string"},
-    {"name": "area", "type": "double"},
-    {"name": "area_hectares", "type": "double"}
+    {"name": "simple_texture", "type": "string"}
   ],
-  "sql": "SELECT lu.TopazID, lu.desc AS landuse, s.simple_texture, lu.area, lu.area / 10000 AS area_hectares FROM read_parquet(...) AS lu INNER JOIN read_parquet(...) AS s ON lu.TopazID = s.TopazID WHERE lu.key = 42 ORDER BY lu.area DESC LIMIT 1"
+  "sql": "SELECT lu.topaz_id, lu.desc AS landuse, s.simple_texture FROM read_parquet(...) AS lu INNER JOIN read_parquet(...) AS s ON lu.topaz_id = s.topaz_id WHERE lu.key = 42 LIMIT 1"
 }
 ```
 
@@ -1239,15 +1235,21 @@ When a query fails, the response includes error details:
 Get total area and hillslope count for each landuse type:
 ```json
 {
-  "datasets": [{"path": "landuse/landuse.parquet", "alias": "lu"}],
-  "columns": ["key", "lu.desc AS landuse_type"],
-  "group_by": ["key", "landuse_type"],
-  "aggregations": [
-    {"fn": "sum", "column": "area", "alias": "total_area"},
-    {"fn": "count", "column": "*", "alias": "hillslope_count"},
-    {"fn": "avg", "column": "cancov", "alias": "avg_canopy"}
+  "datasets": [
+    {"path": "landuse/landuse.parquet", "alias": "lu"},
+    {"path": "watershed/hillslopes.parquet", "alias": "hill"}
   ],
-  "order_by": ["total_area DESC"],
+  "joins": [
+    {"left": "lu", "right": "hill", "left_on": ["topaz_id"], "right_on": ["topaz_id"]}
+  ],
+  "columns": ["lu.key", "lu.desc AS landuse_type"],
+  "group_by": ["lu.key", "landuse_type"],
+  "aggregations": [
+    {"fn": "sum", "column": "hill.area / 10000.0", "alias": "total_area_ha"},
+    {"fn": "count", "column": "*", "alias": "hillslope_count"},
+    {"fn": "avg", "column": "lu.cancov", "alias": "avg_canopy"}
+  ],
+  "order_by": ["total_area_ha DESC"],
   "include_schema": true
 }
 ```
@@ -1256,14 +1258,20 @@ Get total area and hillslope count for each landuse type:
 Find distribution of soil textures across the watershed:
 ```json
 {
-  "datasets": ["soils/soils.parquet"],
-  "columns": ["simple_texture"],
-  "group_by": ["simple_texture"],
+  "datasets": [
+    {"path": "soils/soils.parquet", "alias": "s"},
+    {"path": "watershed/hillslopes.parquet", "alias": "hill"}
+  ],
+  "joins": [
+    {"left": "s", "right": "hill", "left_on": ["topaz_id"], "right_on": ["topaz_id"]}
+  ],
+  "columns": ["s.simple_texture"],
+  "group_by": ["s.simple_texture"],
   "aggregations": [
-    {"fn": "sum", "column": "area", "alias": "total_area"},
+    {"fn": "sum", "column": "hill.area / 10000.0", "alias": "total_area_ha"},
     {"fn": "count", "column": "*", "alias": "hillslope_count"}
   ],
-  "order_by": ["total_area DESC"]
+  "order_by": ["total_area_ha DESC"]
 }
 ```
 
@@ -1273,18 +1281,22 @@ Join landuse and soils, filter to forest areas, compute weighted soil properties
 {
   "datasets": [
     {"path": "landuse/landuse.parquet", "alias": "lu"},
-    {"path": "soils/soils.parquet", "alias": "s"}
+    {"path": "soils/soils.parquet", "alias": "s"},
+    {"path": "watershed/hillslopes.parquet", "alias": "hill"}
   ],
-  "joins": [{"left": "lu", "right": "s", "on": ["TopazID"]}],
+  "joins": [
+    {"left": "lu", "right": "s", "on": ["topaz_id"]},
+    {"left": "lu", "right": "hill", "on": ["topaz_id"]}
+  ],
   "filters": [
     {"column": "lu.desc", "operator": "LIKE", "value": "%Forest%"}
   ],
   "computed_columns": [
-    {"alias": "weighted_clay", "expression": "s.clay * lu.area"},
-    {"alias": "area_hectares", "expression": "lu.area / 10000"}
+    {"alias": "weighted_clay", "expression": "s.clay * hill.area"},
+    {"alias": "area_hectares", "expression": "hill.area / 10000"}
   ],
   "columns": [
-    "lu.TopazID",
+    "lu.topaz_id",
     "lu.desc",
     "s.simple_texture",
     "area_hectares",

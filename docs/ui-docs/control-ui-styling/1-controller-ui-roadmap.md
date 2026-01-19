@@ -68,7 +68,7 @@ This note captures the current shape of WEPPcloud controller views, the JavaScri
 
 ## 7. Implementation Phases (Recommended)
 1. **Document & Audit** – Catalog each controller’s inputs, AJAX routes, and summary outputs in a shared spreadsheet/doc to confirm edge cases (file uploads, advanced toggles). Use this document as the canonical reference when migrating markup.
-2. **Build Pure CSS Shell** – Implement the new control shell components and CSS utilities, wire them into `_content_base.htm` for purely informational panels, and migrate one simple controller (e.g., `export.htm`) as a pilot.【F:wepppy/weppcloud/templates/controls/_content_base.htm†L1-L5】
+2. **Build Pure CSS Shell** – Implement the new control shell components and CSS utilities, wire them into `_content_base.htm` for purely informational panels, and migrate one simple controller (e.g., `wepp_reports.htm`) as a pilot.【F:wepppy/weppcloud/templates/controls/_content_base.htm†L1-L5】
 3. **Standardize Async Pipeline** – Introduce the unified jobs endpoint + metadata-driven polling, update `controlBase` to prefer WebSocket events, and retrofit controllers incrementally.
 4. **Refactor Complex Controllers** – Address Omni and BatchRunner once the shell/utilities are battle-tested. Extract shared file upload widgets and adopt htmx for dynamic scenario/validation fragments.
 5. **Locale Registry & Unit Helpers** – Implement the locale inheritance registry, surface locale metadata to templates, and retrofit climate/landuse/soil controls to use declarative options. Pair this with unit-aware input helpers so additional controls can opt-in without new routes.

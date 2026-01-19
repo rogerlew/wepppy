@@ -155,6 +155,7 @@ If validation fails a `JWTDecodeError` is raised.
 - Behavior:
   - Requires run authorization (public or owner).
   - Issues a session JWT (`token_class=session`) scoped to the run.
+  - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
   - Stores a Redis marker `auth:session:run:<runid>:<session_id>` (DB 11) with TTL.
 
 ## Revocation and rotation
@@ -191,6 +192,7 @@ If validation fails a `JWTDecodeError` is raised.
 | `queries:execute` | Execute queries (POST to `/query`). |
 | `rq:status` | Poll job status/info. |
 | `rq:enqueue` | Submit RQ jobs (future). |
+| `rq:export` | Request rq-engine export artifacts. |
 | `culvert:batch:submit` | Submit culvert batch payloads. |
 | `culvert:batch:retry` | Retry culvert runs. |
 | `culvert:batch:read` | Read culvert batch/job metadata. |

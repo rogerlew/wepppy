@@ -6,6 +6,10 @@
 - Defines canonical keys, error shapes, and job submission/polling payloads.
 - Clients (controllers_js, static, profile_recorder) must normalize to this contract.
 
+## Auth expectations
+- Export endpoints require `rq:export` and run access checks.
+- Job polling endpoints require `rq:status`.
+
 ## Canonical keys
 - All keys use lower_snake_case.
 - Job identifiers: `job_id` (single), `job_ids` (multi).

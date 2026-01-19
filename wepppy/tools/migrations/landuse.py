@@ -101,6 +101,8 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         "TopazID" in field_names
         or "WeppID" in field_names
         or ("topaz_id" not in field_names and "TopazID" not in field_names)
+        or "area" in field_names
+        or "Area" in field_names
     )
 
     if not needs_migration:
@@ -126,6 +128,7 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
 
         # Drop uppercase columns
         df = df.drop(columns=["TopazID", "WeppID"], errors="ignore")
+        df = df.drop(columns=["area", "Area"], errors="ignore")
 
         # Write back
         df.to_parquet(landuse_parquet, index=False)

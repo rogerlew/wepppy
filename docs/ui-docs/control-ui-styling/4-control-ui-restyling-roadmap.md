@@ -89,7 +89,7 @@ This note captures the current state of controller views and the `runs0` experie
 
 ## Implementation Roadmap
 1. **Inventory + Audit**
-   - Catalogue each controller template, noting input types, file uploads, dynamic behaviors, and backend routes. Capture this in a shared spreadsheet to prioritize work.
+   - Catalog each controller template, noting input types, file uploads, dynamic behaviors, and backend routes. Capture this in a shared spreadsheet to prioritize work.
 2. **Design system scaffolding**
    - Create `static/css/controls.css` with Pure CSS modules (`control-card`, layout tokens). Refactor `_base.htm` to import the stylesheet and expose semantic blocks.
 3. **Runs0 shell refactor**
@@ -110,5 +110,5 @@ This note captures the current state of controller views and the `runs0` experie
 
 ## Next Steps
 - Socialize this roadmap with the core maintainers to confirm priorities.
-- Prototype the Pure CSS `control-card` on a low-risk controller (e.g., `export`) to vet spacing and htmx patterns.
+- Prototype the Pure CSS `control-card` on a low-risk controller (e.g., `wepp_reports`) to vet spacing and htmx patterns.
 - Draft locale class skeletons and run manifest schema updates so backend changes can land in parallel with UI refactors.

@@ -26,7 +26,6 @@ _BLUEPRINT_ATTRS = [
     "run_sync_dashboard_bp",
     "debris_flow_bp",
     "disturbed_bp",
-    "export_bp",
     "geodata_bp",
     "huc_fire_bp",
     "diff_bp",
