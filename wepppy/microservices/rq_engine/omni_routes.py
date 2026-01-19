@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
+from wepppy.nodb.core import Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.omni_rq import run_omni_contrasts_rq, run_omni_scenarios_rq
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -196,6 +197,8 @@ def _normalize_contrast_selection_mode(value: Any) -> str:
         "objective_parameter": "cumulative",
         "cumulative_objective": "cumulative",
         "cumulative_obj_param": "cumulative",
+        "stream_order_pruning": "stream_order",
+        "stream-order-pruning": "stream_order",
     }
     return aliases.get(token, token)
 
@@ -312,13 +315,20 @@ def _prepare_omni_contrasts(
     control_scenario = payload.get("omni_control_scenario")
     contrast_scenario = payload.get("omni_contrast_scenario")
 
-    if selection_mode != "user_defined_areas":
+    if selection_mode == "cumulative":
         if not control_scenario:
             raise ValueError("Missing control scenario")
         if not contrast_scenario:
             raise ValueError("Missing contrast scenario")
-    if selection_mode == "user_defined_areas" and not contrast_pairs:
-        raise ValueError("contrast_pairs is required for user-defined contrasts")
+    if selection_mode == "user_defined_areas":
+        if not contrast_pairs:
+            raise ValueError("contrast_pairs is required for user-defined contrasts")
+    if selection_mode == "stream_order":
+        if not contrast_pairs:
+            raise ValueError("contrast_pairs is required for stream-order contrasts")
+        watershed = Watershed.getInstance(wd)
+        if not watershed.delineation_backend_is_wbt:
+            raise ValueError("Stream-order pruning requires the WBT delineation backend.")
 
     objective_parameter = payload.get("omni_contrast_objective_parameter") or "Runoff_mm"
     threshold_fraction = _coerce_optional_float(
@@ -349,6 +359,11 @@ def _prepare_omni_contrasts(
         payload.get("order_reduction_passes"),
         "order_reduction_passes",
     )
+    if selection_mode == "stream_order":
+        if order_reduction_passes is None or order_reduction_passes == 0:
+            order_reduction_passes = 1
+        if order_reduction_passes < 0:
+            raise ValueError("order_reduction_passes must be >= 1")
 
     geojson_name_key = payload.get("omni_contrast_geojson_name_key")
     geojson_path = payload.get("omni_contrast_geojson_path")
@@ -468,7 +483,7 @@ async def _run_omni_contrasts(
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
-    if selection_mode not in {"cumulative", "user_defined_areas"}:
+    if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,
@@ -481,7 +496,7 @@ async def _run_omni_contrasts(
             threshold_fraction = 0.8
         objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
         contrast_pairs = parsed_inputs.get("omni_contrast_pairs")
-        if selection_mode == "user_defined_areas":
+        if selection_mode in {"user_defined_areas", "stream_order"}:
             control_def = None
             contrast_def = None
         else:
@@ -554,7 +569,7 @@ async def _dry_run_omni_contrasts(
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
-    if selection_mode not in {"cumulative", "user_defined_areas"}:
+    if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,
@@ -567,7 +582,7 @@ async def _dry_run_omni_contrasts(
             threshold_fraction = 0.8
         objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
         contrast_pairs = parsed_inputs.get("omni_contrast_pairs")
-        if selection_mode == "user_defined_areas":
+        if selection_mode in {"user_defined_areas", "stream_order"}:
             control_def = None
             contrast_def = None
         else:

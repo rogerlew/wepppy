@@ -8,8 +8,8 @@
     Scenario Runner; rerun Omni after updating these values.
   </p>
   <p class="wc-text-muted">
-    Selection modes: cumulative objective parameter (available now), user-defined areas (GeoJSON),
-    and stream-order pruning (culvert-style). Stream-order pruning is scaffolded.
+    Selection modes: cumulative objective parameter, user-defined areas (GeoJSON),
+    and stream-order pruning (WBT-only).
   </p>
 {% endset %}
 
@@ -20,18 +20,42 @@
      description=description
    ) %}
 
-  {{ ui.select_field(
+  {% set selected_mode = omni.contrast_selection_mode if omni.contrast_selection_mode is defined else "cumulative" %}
+  {% if selected_mode in ["stream_order_pruning", "stream-order-pruning"] %}
+    {% set selected_mode = "stream_order" %}
+  {% endif %}
+  {% set stream_order_allowed = watershed.delineation_backend_is_wbt if watershed is defined else false %}
+
+  {{ ui.radio_group(
        "omni_contrast_selection_mode",
        "Contrast selection mode",
        options=[
-         ("cumulative", "Cumulative objective parameter"),
-         ("user_defined_areas", "User-defined areas (GeoJSON)"),
-         ("stream_order_pruning", "Stream-order pruning")
+         {
+           "value": "cumulative",
+           "label": "Cumulative objective parameter",
+           "selected": selected_mode == "cumulative"
+         },
+         {
+           "value": "user_defined_areas",
+           "label": "User-defined areas (GeoJSON)",
+           "selected": selected_mode == "user_defined_areas"
+         },
+         {
+           "value": "stream_order",
+           "label": "Stream-order pruning",
+           "description": "Requires WBT delineation.",
+           "selected": selected_mode == "stream_order",
+           "disabled": not stream_order_allowed
+         }
        ],
-       selected=omni.contrast_selection_mode if omni.contrast_selection_mode is defined else "cumulative",
-       extra_control_class="disable-readonly",
        attrs={"data-omni-contrast-role": "selection-mode"}
      ) }}
+
+  {% if not stream_order_allowed %}
+    <p class="wc-text-muted">
+      Stream-order pruning is only available when channel delineation uses the WBT backend.
+    </p>
+  {% endif %}
 
   {% set scenario_option_labels = [
     ("", "Select scenario"),
@@ -45,7 +69,7 @@
     ("prescribed_fire", "Prescribed Fire")
   ] %}
 
-  <div class="wc-stack" data-omni-contrast-mode="cumulative stream_order_pruning">
+  <div class="wc-stack" data-omni-contrast-mode="cumulative">
   {{ ui.select_field(
        "omni_control_scenario",
        "Control scenario",
@@ -157,7 +181,7 @@
 
   {% set contrast_pairs_value = omni.contrast_pairs if omni.contrast_pairs is defined else [] %}
 
-  <div class="wc-stack" data-omni-contrast-mode="user_defined_areas" hidden>
+  <div class="wc-stack" data-omni-contrast-mode="user_defined_areas stream_order" hidden>
     <div class="wc-card">
       <div class="wc-card__body wc-stack">
         <div class="wc-stack" data-omni-contrast-role="pair-container"></div>
@@ -178,7 +202,9 @@
     <p class="wc-text-muted">
       Each pair selects contrasts only after both scenarios have run. Duplicate pairs are blocked.
     </p>
+  </div>
 
+  <div class="wc-stack" data-omni-contrast-mode="user_defined_areas" hidden>
     {% set current_geojson_path = omni.contrast_geojson_path if omni.contrast_geojson_path is defined else None %}
     {% if current_geojson_path == "None" %}
       {% set current_geojson_path = None %}
@@ -214,21 +240,17 @@
        ) }}
   </div>
 
-  <div class="wc-stack" data-omni-contrast-mode="stream_order_pruning" hidden>
+  <div class="wc-stack" data-omni-contrast-mode="stream_order" hidden>
     {{ ui.numeric_field(
          "order_reduction_passes",
          "Order reduction passes",
-         value=omni.contrast_order_reduction_passes if omni.contrast_order_reduction_passes is not none else "",
+         value=omni.contrast_order_reduction_passes if omni.contrast_order_reduction_passes is not none else 1,
          precision="1",
-         min=0,
-         help="Number of stream-order pruning passes (same as culverts).",
+         min=1,
+         help="Number of stream-order pruning passes (minimum 1).",
          extra_control_class="disable-readonly"
        ) }}
   </div>
-
-  <p class="wc-text-muted" data-omni-contrast-mode="stream_order_pruning" hidden>
-    Stream-order pruning is scaffolded for upcoming work. Switch to cumulative or user-defined areas to run contrasts today.
-  </p>
 
   {% call button_row() %}
     <button id="btn_run_omni_contrasts"

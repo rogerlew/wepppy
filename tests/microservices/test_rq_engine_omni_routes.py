@@ -140,6 +140,86 @@ def test_run_omni_contrasts_requires_pairs_in_user_defined_mode(monkeypatch: pyt
     assert payload["error"]["message"] == "contrast_pairs is required for user-defined contrasts"
 
 
+def test_run_omni_contrasts_requires_pairs_in_stream_order_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={"omni_contrast_selection_mode": "stream_order"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "contrast_pairs is required for stream-order contrasts"
+
+
+def test_run_omni_contrasts_stream_order_defaults_passes(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-33")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = True
+
+    monkeypatch.setattr(omni_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    captured = {}
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            captured["payload"] = payload
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            captured["build"] = kwargs
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "stream_order",
+                "omni_contrast_pairs": [
+                    {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+                ],
+                "order_reduction_passes": 0,
+            },
+        )
+
+    assert response.status_code == 202
+    assert captured["payload"]["order_reduction_passes"] == 1
+
+
+def test_run_omni_contrasts_stream_order_requires_wbt(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = False
+
+    monkeypatch.setattr(omni_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "stream_order",
+                "omni_contrast_pairs": [
+                    {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+                ],
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Stream-order pruning requires the WBT delineation backend."
+
+
 def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-22")

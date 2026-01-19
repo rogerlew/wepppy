@@ -7,6 +7,7 @@ from collections import Counter
 from contextlib import contextmanager
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -675,7 +676,7 @@ def test_build_contrasts_ignores_filters_when_not_cumulative(tmp_path, monkeypat
     omni._contrast_hill_max_slope = 0.5
     omni._contrast_select_burn_severities = [3]
     omni._contrast_select_topaz_ids = [101]
-    omni._contrast_selection_mode = "stream_order_pruning"
+    omni._contrast_selection_mode = "objective"
     omni._contrast_scenario = None
     omni._control_scenario = "uniform_high"
     omni._contrast_names = []
@@ -1219,3 +1220,100 @@ def test_contrasts_report_reads_contrast_outputs_from_pups(tmp_path, monkeypatch
     assert str(contrast_path) in read_calls
     assert str(control_path) in read_calls
     assert df["control-contrast_v"].iloc[0] == 1.0
+
+
+def test_stream_order_contrasts_grouping_and_skip(tmp_path, omni_module, monkeypatch):
+    wbt_dir = tmp_path / "dem" / "wbt"
+    wbt_dir.mkdir(parents=True)
+
+    for stem in ("flovec", "netful", "relief", "chnjnt", "bound", "subwta"):
+        (wbt_dir / f"{stem}.tif").write_text("", encoding="ascii")
+    (wbt_dir / "outlet.geojson").write_text("{}", encoding="ascii")
+
+    (wbt_dir / "netful.strahler.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netful.pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netful.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "chnjnt.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "subwta.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netw.strahler_pruned_1.tsv").write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1, 2, 3]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 2, "20": 1, "30": 1}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1", "20": "2", "30": "3"}
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = True
+        wbt_wd = str(wbt_dir)
+
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.stream_order")
+    omni._contrast_selection_mode = "stream_order"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._contrast_order_reduction_passes = 1
+
+    omni._build_contrasts()
+
+    assert omni.contrast_names[:4] == [
+        "uniform_low,1__to__mulch",
+        "uniform_low,2__to__thinning",
+        "uniform_low,3__to__mulch",
+        "uniform_low,4__to__thinning",
+    ]
+    assert omni.contrast_names[4:] == [None, None]
+
+    sidecar_path = omni._contrast_sidecar_path(1)
+    sidecar = {}
+    with open(sidecar_path, "r", encoding="ascii") as handle:
+        for line in handle:
+            topaz_id, _, wepp_path = line.strip().partition("\t")
+            sidecar[topaz_id] = wepp_path
+
+    assert sidecar["20"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H2")
+    assert sidecar["30"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H3")
+    assert sidecar["10"].endswith("/_pups/omni/scenarios/uniform_low/wepp/output/H1")
+
+    report = omni.contrast_status_report()
+    report_index = {item["contrast_id"]: item for item in report["items"]}
+    assert report_index[1]["subcatchments_group"] == 10
+    assert report_index[3]["subcatchments_group"] == 20
+    assert report_index[5]["subcatchments_group"] == 30
+    skipped = next(item for item in report["items"] if item["contrast_id"] == 5)
+    assert skipped["run_status"] == "skipped"
+    assert skipped["skip_status"]["reason"] == "no_hillslopes"

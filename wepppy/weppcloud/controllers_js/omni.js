@@ -32,7 +32,7 @@ var Omni = (function () {
     var CONTRAST_SELECTION_MODES = {
         cumulative: "cumulative",
         user_defined_areas: "user_defined_areas",
-        stream_order_pruning: "stream_order_pruning"
+        stream_order: "stream_order"
     };
     var CONTRAST_HILLSLOPE_LIMIT_MAX = 100;
 
@@ -697,6 +697,9 @@ var Omni = (function () {
         var contrastModeSelect = contrastFormElement
             ? contrastFormElement.querySelector("[data-omni-contrast-role='selection-mode']")
             : null;
+        var contrastStreamOrderInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='omni_contrast_selection_mode'][value='stream_order']")
+            : null;
         var contrastControlSelect = contrastFormElement
             ? contrastFormElement.querySelector("[data-omni-contrast-role='control-scenario']")
             : null;
@@ -714,6 +717,9 @@ var Omni = (function () {
             : null;
         var contrastHillslopeLimitInput = contrastFormElement
             ? contrastFormElement.querySelector("input[name='omni_contrast_hillslope_limit']")
+            : null;
+        var contrastOrderReductionInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='order_reduction_passes']")
             : null;
         var contrastPairsInput = contrastFormElement
             ? contrastFormElement.querySelector("[data-omni-contrast-role='pairs']")
@@ -1323,7 +1329,7 @@ var Omni = (function () {
             if (!contrastHillslopeLimitInput) {
                 return;
             }
-            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            var mode = resolveContrastMode();
             if (mode !== CONTRAST_SELECTION_MODES.cumulative) {
                 return;
             }
@@ -1350,7 +1356,7 @@ var Omni = (function () {
                 return;
             }
 
-            var selectionMode = report.selection_mode || "";
+            var selectionMode = normalizeContrastMode(report.selection_mode || "");
             var items = Array.isArray(report.items) ? report.items : [];
             if (!items.length) {
                 contrastInfoAdapter.html('<p class="wc-text-muted">No contrasts available for dry run.</p>');
@@ -1368,11 +1374,12 @@ var Omni = (function () {
                     { key: "skip_status", label: "Skip status" },
                     { key: "run_status", label: "Run status" }
                 ];
-            } else if (selectionMode === CONTRAST_SELECTION_MODES.stream_order_pruning) {
+            } else if (selectionMode === CONTRAST_SELECTION_MODES.stream_order) {
                 columns = [
                     { key: "contrast_id", label: "Contrast" },
                     { key: "control_scenario", label: "Control" },
                     { key: "contrast_scenario", label: "Contrast" },
+                    { key: "subcatchments_group", label: "Subcatchments group" },
                     { key: "n_hillslopes", label: "Hillslopes" },
                     { key: "skip_status", label: "Skip status" },
                     { key: "run_status", label: "Run status" }
@@ -1423,10 +1430,37 @@ var Omni = (function () {
             if (token === "user-defined-areas" || token === "user_defined_areas") {
                 return CONTRAST_SELECTION_MODES.user_defined_areas;
             }
-            if (token === "stream-order-pruning" || token === "stream_order_pruning") {
-                return CONTRAST_SELECTION_MODES.stream_order_pruning;
+            if (
+                token === "stream-order-pruning"
+                || token === "stream_order_pruning"
+                || token === "stream_order"
+            ) {
+                return CONTRAST_SELECTION_MODES.stream_order;
             }
             return CONTRAST_SELECTION_MODES.cumulative;
+        }
+
+        function resolveContrastMode() {
+            var rawValue = "";
+            if (contrastFormElement) {
+                var checked = contrastFormElement.querySelector(
+                    "input[name='omni_contrast_selection_mode']:checked"
+                );
+                if (checked && checked.value) {
+                    rawValue = checked.value;
+                }
+            }
+            if (!rawValue && contrastModeSelect && contrastModeSelect.value) {
+                rawValue = contrastModeSelect.value;
+            }
+            return normalizeContrastMode(rawValue);
+        }
+
+        function isStreamOrderAllowed() {
+            if (!contrastStreamOrderInput) {
+                return true;
+            }
+            return !contrastStreamOrderInput.disabled;
         }
 
         function resolveBaseScenarioOption() {
@@ -1768,18 +1802,49 @@ var Omni = (function () {
             return Boolean(path);
         }
 
+        function validateOrderReductionPasses() {
+            if (!contrastOrderReductionInput) {
+                return true;
+            }
+            var raw = contrastOrderReductionInput.value;
+            if (!raw) {
+                contrastOrderReductionInput.value = "1";
+                return true;
+            }
+            var parsed = Number(raw);
+            if (!Number.isFinite(parsed)) {
+                return false;
+            }
+            if (Math.floor(parsed) !== parsed) {
+                return false;
+            }
+            return parsed >= 1;
+        }
+
         function updateContrastActionState() {
-            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
-            var canRunMode = mode === CONTRAST_SELECTION_MODES.cumulative
-                || mode === CONTRAST_SELECTION_MODES.user_defined_areas;
+            var mode = resolveContrastMode();
+            var streamOrderAllowed = mode !== CONTRAST_SELECTION_MODES.stream_order || isStreamOrderAllowed();
+            var canRunMode = (
+                mode === CONTRAST_SELECTION_MODES.cumulative
+                || mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                || mode === CONTRAST_SELECTION_MODES.stream_order
+            ) && streamOrderAllowed;
             var hasGeojson = mode !== CONTRAST_SELECTION_MODES.user_defined_areas || hasContrastGeojson();
             var pairsValid = true;
-            if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+            if (
+                mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                || mode === CONTRAST_SELECTION_MODES.stream_order
+            ) {
                 ensureContrastPairsInitialized();
                 pairsValid = validateContrastPairs();
             }
+            var orderPassesValid = true;
+            if (mode === CONTRAST_SELECTION_MODES.stream_order) {
+                orderPassesValid = validateOrderReductionPasses();
+            }
             var canSubmit = canRunMode
-                && (mode !== CONTRAST_SELECTION_MODES.user_defined_areas || (pairsValid && hasGeojson));
+                && (mode !== CONTRAST_SELECTION_MODES.user_defined_areas || (pairsValid && hasGeojson))
+                && (mode !== CONTRAST_SELECTION_MODES.stream_order || (pairsValid && orderPassesValid));
             if (contrastRunButton) {
                 contrastRunButton.disabled = !canSubmit;
             }
@@ -1791,6 +1856,7 @@ var Omni = (function () {
                 canRunMode: canRunMode,
                 hasGeojson: hasGeojson,
                 pairsValid: pairsValid,
+                orderPassesValid: orderPassesValid,
                 canSubmit: canSubmit
             };
         }
@@ -1798,8 +1864,11 @@ var Omni = (function () {
         function updateContrastScenarioOptions(definitions) {
             var options = buildContrastScenarioOptions(definitions || collectScenarioDefinitions());
             contrastScenarioOptions = options;
-            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
-            if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+            var mode = resolveContrastMode();
+            if (
+                mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                || mode === CONTRAST_SELECTION_MODES.stream_order
+            ) {
                 ensureContrastPairsInitialized();
             }
             var selects = [contrastControlSelect, contrastScenarioSelect];
@@ -1832,10 +1901,10 @@ var Omni = (function () {
         }
 
         function syncContrastMode() {
-            if (!contrastFormElement || !contrastModeSelect) {
+            if (!contrastFormElement) {
                 return;
             }
-            var mode = normalizeContrastMode(contrastModeSelect.value);
+            var mode = resolveContrastMode();
             var sections = contrastFormElement.querySelectorAll("[data-omni-contrast-mode]");
             sections.forEach(function (section) {
                 var allowed = section.dataset.omniContrastMode
@@ -1845,14 +1914,30 @@ var Omni = (function () {
             });
             var state = updateContrastActionState();
             if (!state.canRunMode) {
-                setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to run contrasts.");
-            } else if (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas && !state.hasGeojson) {
-                setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
-            } else if (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas && !state.pairsValid) {
-                setContrastStatus("Resolve contrast pair errors to run contrasts.");
-            } else {
+                if (state.mode === CONTRAST_SELECTION_MODES.stream_order && !isStreamOrderAllowed()) {
+                    setContrastStatus("Stream-order pruning requires WBT channel delineation.");
+                    return;
+                }
                 clearContrastStatus();
+                return;
             }
+            if (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas && !state.hasGeojson) {
+                setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+                return;
+            }
+            if (
+                (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                    || state.mode === CONTRAST_SELECTION_MODES.stream_order)
+                && !state.pairsValid
+            ) {
+                setContrastStatus("Resolve contrast pair errors to run contrasts.");
+                return;
+            }
+            if (state.mode === CONTRAST_SELECTION_MODES.stream_order && !state.orderPassesValid) {
+                setContrastStatus("Order reduction passes must be at least 1.");
+                return;
+            }
+            clearContrastStatus();
         }
 
         function openModal(modal) {
@@ -1983,10 +2068,14 @@ var Omni = (function () {
             }
             clearContrastStatus();
 
-            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            var mode = resolveContrastMode();
             var state = updateContrastActionState();
             if (!state.canRunMode) {
-                setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to run contrasts.");
+                if (mode === CONTRAST_SELECTION_MODES.stream_order && !isStreamOrderAllowed()) {
+                    setContrastStatus("Stream-order pruning requires WBT channel delineation.");
+                    return;
+                }
+                setContrastStatus("Select a valid contrast selection mode.");
                 return;
             }
             if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
@@ -1996,6 +2085,15 @@ var Omni = (function () {
                 }
                 if (!hasContrastGeojson()) {
                     setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+                    return;
+                }
+            } else if (mode === CONTRAST_SELECTION_MODES.stream_order) {
+                if (!state.pairsValid) {
+                    setContrastStatus("Resolve contrast pair errors before running contrasts.");
+                    return;
+                }
+                if (!state.orderPassesValid) {
+                    setContrastStatus("Order reduction passes must be at least 1.");
                     return;
                 }
             } else {
@@ -2016,7 +2114,10 @@ var Omni = (function () {
             var formData = new FormData(contrastFormElement);
             if (typeof formData.set === "function") {
                 formData.set("omni_contrast_selection_mode", mode);
-                if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                if (
+                    mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                    || mode === CONTRAST_SELECTION_MODES.stream_order
+                ) {
                     formData.delete("omni_control_scenario");
                     formData.delete("omni_contrast_scenario");
                 }
@@ -2059,10 +2160,14 @@ var Omni = (function () {
             }
             clearContrastStatus();
 
-            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            var mode = resolveContrastMode();
             var state = updateContrastActionState();
             if (!state.canRunMode) {
-                setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to dry run.");
+                if (mode === CONTRAST_SELECTION_MODES.stream_order && !isStreamOrderAllowed()) {
+                    setContrastStatus("Stream-order pruning requires WBT channel delineation.");
+                    return;
+                }
+                setContrastStatus("Select a valid contrast selection mode.");
                 return;
             }
             if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
@@ -2072,6 +2177,15 @@ var Omni = (function () {
                 }
                 if (!hasContrastGeojson()) {
                     setContrastStatus("Upload a GeoJSON file to dry run user-defined contrasts.");
+                    return;
+                }
+            } else if (mode === CONTRAST_SELECTION_MODES.stream_order) {
+                if (!state.pairsValid) {
+                    setContrastStatus("Resolve contrast pair errors before dry run.");
+                    return;
+                }
+                if (!state.orderPassesValid) {
+                    setContrastStatus("Order reduction passes must be at least 1.");
                     return;
                 }
             } else {
@@ -2090,7 +2204,10 @@ var Omni = (function () {
             var formData = new FormData(contrastFormElement);
             if (typeof formData.set === "function") {
                 formData.set("omni_contrast_selection_mode", mode);
-                if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                if (
+                    mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                    || mode === CONTRAST_SELECTION_MODES.stream_order
+                ) {
                     formData.delete("omni_control_scenario");
                     formData.delete("omni_contrast_scenario");
                 }
@@ -2265,6 +2382,16 @@ var Omni = (function () {
                 });
                 contrastHillslopeLimitInput.addEventListener("blur", function () {
                     clampContrastHillslopeLimit();
+                });
+            }
+            if (contrastOrderReductionInput) {
+                contrastOrderReductionInput.addEventListener("change", function () {
+                    updateContrastActionState();
+                    syncContrastMode();
+                });
+                contrastOrderReductionInput.addEventListener("blur", function () {
+                    updateContrastActionState();
+                    syncContrastMode();
                 });
             }
             if (contrastGeojsonInput) {

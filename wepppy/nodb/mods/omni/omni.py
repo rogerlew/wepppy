@@ -25,6 +25,7 @@ import os
 import hashlib
 import time
 import logging
+from pathlib import Path
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -58,6 +59,7 @@ from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.version import copy_version_for_clone
 from wepppy.wepp.interchange import run_wepp_hillslope_interchange
 from wepppy.wepp.reports import refresh_return_period_events
+from wepppy.rq.topo_utils import _prune_stream_order
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -1317,6 +1319,23 @@ class Omni(NoDbBase):
         prev_entry = self.contrast_dependency_tree.get(contrast_name)
         if not prev_entry:
             return 'needs_run'
+        selection_mode = (getattr(self, "_contrast_selection_mode", None) or "cumulative").strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
+        if selection_mode == "stream_order":
+            try:
+                current_passes = self._resolve_order_reduction_passes()
+            except ValueError:
+                return "needs_run"
+            prev_passes = prev_entry.get("order_reduction_passes")
+            if prev_passes is None:
+                return "needs_run"
+            try:
+                prev_passes = int(prev_passes)
+            except (TypeError, ValueError):
+                return "needs_run"
+            if prev_passes != current_passes:
+                return "needs_run"
         prev_control = self._normalize_contrast_redisprep_snapshot(prev_entry.get('control_redisprep'))
         prev_contrast = self._normalize_contrast_redisprep_snapshot(prev_entry.get('contrast_redisprep'))
         if prev_control is None or prev_contrast is None:
@@ -1340,13 +1359,19 @@ class Omni(NoDbBase):
         control_key, target_key = self._contrast_scenario_keys(contrast_name)
         control_snapshot = self._scenario_redisprep_snapshot(control_key)
         contrast_snapshot = self._scenario_redisprep_snapshot(target_key)
-        return {
+        entry = {
             'dependencies': dependencies,
             'sidecar_sha1': sidecar_sha1,
             'control_redisprep': control_snapshot,
             'contrast_redisprep': contrast_snapshot,
             'last_run': time.time(),
         }
+        selection_mode = (getattr(self, "_contrast_selection_mode", None) or "cumulative").strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
+        if selection_mode == "stream_order":
+            entry["order_reduction_passes"] = self._resolve_order_reduction_passes()
+        return entry
 
     def _update_contrast_dependency_tree(
         self,
@@ -1417,6 +1442,8 @@ class Omni(NoDbBase):
 
         selection_mode_value = getattr(self, "_contrast_selection_mode", None)
         selection_mode = (selection_mode_value or "cumulative").strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
 
         control_scenario = (
             _scenario_name_from_scenario_definition(control_scenario_def)
@@ -1428,7 +1455,10 @@ class Omni(NoDbBase):
             if contrast_scenario_def is not None
             else None
         )
-        if selection_mode != "user_defined_areas" and (control_scenario is None or contrast_scenario is None):
+        if selection_mode not in {"user_defined_areas", "stream_order"} and (
+            control_scenario is None
+            or contrast_scenario is None
+        ):
             raise ValueError("control_scenario_def and contrast_scenario_def are required for contrast builds")
 
         # save parameters for defining contrasts
@@ -1456,6 +1486,18 @@ class Omni(NoDbBase):
     def _build_contrasts(self) -> None:
         global OMNI_REL_DIR
 
+        selection_mode_value = getattr(self, "_contrast_selection_mode", None)
+        selection_mode = (selection_mode_value or 'cumulative').strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
+
+        if selection_mode == "user_defined_areas":
+            self._build_contrasts_user_defined_areas()
+            return
+        if selection_mode == "stream_order":
+            self._build_contrasts_stream_order()
+            return
+
         obj_param = self._contrast_object_param
         contrast_cumulative_obj_param_threshold_fraction = self._contrast_cumulative_obj_param_threshold_fraction
         contrast_hillslope_limit = self._contrast_hillslope_limit
@@ -1465,12 +1507,6 @@ class Omni(NoDbBase):
         contrast_select_topaz_ids = self._contrast_select_topaz_ids
         contrast_scenario = self._contrast_scenario
         control_scenario = self._control_scenario
-        selection_mode_value = getattr(self, "_contrast_selection_mode", None)
-        selection_mode = (selection_mode_value or 'cumulative').strip().lower()
-
-        if selection_mode == "user_defined_areas":
-            self._build_contrasts_user_defined_areas()
-            return
 
         if contrast_scenario == str(self.base_scenario):
             contrast_scenario = None
@@ -1772,6 +1808,285 @@ class Omni(NoDbBase):
             self._contrasts = None
             self._contrast_names = contrast_names
 
+    def _resolve_order_reduction_passes(self) -> int:
+        raw_value = getattr(self, "_contrast_order_reduction_passes", None)
+        if raw_value in (None, ""):
+            raw_value = self.config_get_int("omni", "order_reduction_passes", 1)
+        try:
+            passes = int(raw_value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("order_reduction_passes must be an integer") from exc
+        if passes == 0:
+            return 1
+        if passes < 0:
+            raise ValueError("order_reduction_passes must be >= 1")
+        return passes
+
+    def _build_contrasts_stream_order(self) -> None:
+        global OMNI_REL_DIR
+
+        watershed = Watershed.getInstance(self.wd)
+        if not watershed.delineation_backend_is_wbt:
+            raise ValueError("Stream-order pruning requires the WBT delineation backend.")
+
+        contrast_pairs = self._normalize_contrast_pairs(getattr(self, "_contrast_pairs", None))
+        if not contrast_pairs:
+            raise ValueError("omni_contrast_pairs is required for stream-order pruning")
+
+        order_reduction_passes = self._resolve_order_reduction_passes()
+
+        wbt_dir = Path(getattr(watershed, "wbt_wd", _join(self.wd, "dem", "wbt")))
+        if not wbt_dir.exists():
+            raise FileNotFoundError(f"WBT workspace not found: {wbt_dir}")
+
+        def _resolve_wbt_raster(stem: str) -> Path:
+            tif_path = wbt_dir / f"{stem}.tif"
+            vrt_path = wbt_dir / f"{stem}.vrt"
+            if tif_path.exists():
+                return tif_path
+            if vrt_path.exists():
+                return vrt_path
+            return tif_path
+
+        flovec_path = _resolve_wbt_raster("flovec")
+        netful_path = _resolve_wbt_raster("netful")
+        relief_path = _resolve_wbt_raster("relief")
+        chnjnt_path = _resolve_wbt_raster("chnjnt")
+        bound_path = _resolve_wbt_raster("bound")
+        subwta_path = _resolve_wbt_raster("subwta")
+        outlet_path = wbt_dir / "outlet.geojson"
+
+        for required_path, label in (
+            (flovec_path, "flow vector"),
+            (netful_path, "stream network"),
+            (relief_path, "relief"),
+            (chnjnt_path, "channel junctions"),
+            (bound_path, "watershed boundary"),
+            (subwta_path, "subwta"),
+            (outlet_path, "outlet"),
+        ):
+            if not required_path.exists():
+                raise FileNotFoundError(f"Missing WBT {label} file: {required_path}")
+
+        strahler_path = netful_path.with_name("netful.strahler.tif")
+        pruned_streams_path = netful_path.with_name(
+            f"netful.pruned_{order_reduction_passes}.tif"
+        )
+        if not (strahler_path.exists() and pruned_streams_path.exists()):
+            _prune_stream_order(
+                flovec_path,
+                netful_path,
+                order_reduction_passes,
+                overwrite_netful=False,
+            )
+
+        if not strahler_path.exists():
+            raise FileNotFoundError(f"Missing Strahler order raster: {strahler_path}")
+        if not pruned_streams_path.exists():
+            raise FileNotFoundError(f"Missing pruned stream raster: {pruned_streams_path}")
+
+        subwta_pruned_path = wbt_dir / f"subwta.strahler_pruned_{order_reduction_passes}.tif"
+        netw_pruned_path = wbt_dir / f"netw.strahler_pruned_{order_reduction_passes}.tsv"
+        order_pruned_path = wbt_dir / f"netful.strahler_pruned_{order_reduction_passes}.tif"
+        chnjnt_pruned_path = wbt_dir / f"chnjnt.strahler_pruned_{order_reduction_passes}.tif"
+        if not (subwta_pruned_path.exists() and netw_pruned_path.exists()):
+            from whitebox_tools import WhiteboxTools
+
+            wbt = WhiteboxTools(verbose=False, raise_on_error=True)
+            wbt.set_working_dir(str(wbt_dir))
+            if not order_pruned_path.exists():
+                ret = wbt.strahler_stream_order(
+                    d8_pntr=str(flovec_path),
+                    streams=str(pruned_streams_path),
+                    output=str(order_pruned_path),
+                    esri_pntr=False,
+                    zero_background=False,
+                )
+                if ret != 0 or not order_pruned_path.exists():
+                    raise RuntimeError(
+                        "StrahlerStreamOrder failed "
+                        f"(flovec={flovec_path}, streams={pruned_streams_path}, output={order_pruned_path})"
+                    )
+            if not chnjnt_pruned_path.exists():
+                ret = wbt.stream_junction_identifier(
+                    d8_pntr=str(flovec_path),
+                    streams=str(pruned_streams_path),
+                    output=str(chnjnt_pruned_path),
+                )
+                if ret != 0 or not chnjnt_pruned_path.exists():
+                    raise RuntimeError(
+                        "StreamJunctionIdentifier failed "
+                        f"(flovec={flovec_path}, streams={pruned_streams_path}, output={chnjnt_pruned_path})"
+                    )
+            ret = wbt.hillslopes_topaz(
+                dem=str(relief_path),
+                d8_pntr=str(flovec_path),
+                streams=str(pruned_streams_path),
+                pour_pts=str(outlet_path),
+                watershed=str(bound_path),
+                chnjnt=str(chnjnt_pruned_path),
+                subwta=str(subwta_pruned_path),
+                order=str(order_pruned_path),
+                netw=str(netw_pruned_path),
+            )
+            if ret != 0:
+                raise RuntimeError(
+                    "hillslopes_topaz failed "
+                    f"(subwta={subwta_pruned_path}, netw={netw_pruned_path})"
+                )
+        if not subwta_pruned_path.exists():
+            raise FileNotFoundError(f"Missing stream-order subwta raster: {subwta_pruned_path}")
+        if not netw_pruned_path.exists():
+            raise FileNotFoundError(f"Missing stream-order netw table: {netw_pruned_path}")
+
+        from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+        import numpy as np
+        import rasterio
+
+        group_assignments = identify_mode_single_raster_key(
+            key_fn=str(subwta_path),
+            parameter_fn=str(subwta_pruned_path),
+            ignore_channels=True,
+        )
+
+        with rasterio.open(subwta_pruned_path) as dataset:
+            data = dataset.read(1, masked=True)
+        unique_values = np.unique(data.compressed()) if data is not None else []
+
+        group_map: Dict[int, List[str]] = {}
+        for raw_value in unique_values:
+            try:
+                group_value = int(raw_value)
+            except (TypeError, ValueError):
+                continue
+            if group_value <= 0:
+                continue
+            if str(group_value).endswith("4"):
+                continue
+            group_map[group_value * 10] = []
+
+        translator = watershed.translator_factory()
+        top2wepp = {
+            str(k): str(v)
+            for k, v in translator.top2wepp.items()
+            if not (str(k).endswith("4") or int(k) == 0)
+        }
+        valid_topaz = set(top2wepp.keys())
+
+        for topaz_id, group_value in group_assignments.items():
+            topaz_key = str(topaz_id)
+            if topaz_key not in valid_topaz:
+                continue
+            try:
+                group_id = int(group_value)
+            except (TypeError, ValueError):
+                continue
+            if group_id <= 0:
+                continue
+            if str(group_id).endswith("4"):
+                continue
+            group_id = group_id * 10
+            group_map.setdefault(group_id, []).append(topaz_key)
+
+        def _sorted_group_ids(values: Iterable[int]) -> List[int]:
+            try:
+                return sorted(values, key=lambda item: int(item))
+            except (TypeError, ValueError):
+                return sorted(values)
+
+        with self.locked():
+            self._contrast_order_reduction_passes = order_reduction_passes
+            self._contrasts = None
+            self._contrast_names = []
+            self._contrast_labels = {}
+
+        sidecar_dir = self._contrast_sidecar_dir()
+        if _exists(sidecar_dir):
+            shutil.rmtree(sidecar_dir)
+        os.makedirs(sidecar_dir, exist_ok=True)
+
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, "contrasts")
+        os.makedirs(contrasts_dir, exist_ok=True)
+        report_fn = _join(contrasts_dir, "build_report.ndjson")
+
+        contrast_names: List[Optional[str]] = []
+        contrast_id = 0
+
+        with open(report_fn, "w", encoding="ascii") as report_fp:
+            for group_id in _sorted_group_ids(group_map.keys()):
+                topaz_ids = group_map.get(group_id, [])
+                n_hillslopes = len(topaz_ids)
+                topaz_set = set(topaz_ids)
+
+                for pair in contrast_pairs:
+                    control_key = self._normalize_scenario_key(pair.get("control_scenario"))
+                    contrast_key = self._normalize_scenario_key(pair.get("contrast_scenario"))
+                    control_scenario = None if control_key == str(self.base_scenario) else control_key
+                    contrast_scenario = None if contrast_key == str(self.base_scenario) else contrast_key
+
+                    contrast_id += 1
+                    while len(contrast_names) < contrast_id:
+                        contrast_names.append(None)
+
+                    report_entry = {
+                        "contrast_id": contrast_id,
+                        "control_scenario": control_key,
+                        "contrast_scenario": contrast_key,
+                        "wepp_id": None,
+                        "topaz_id": None,
+                        "obj_param": None,
+                        "running_obj_param": None,
+                        "pct_cumulative": None,
+                        "selection_mode": "stream_order",
+                        "n_hillslopes": n_hillslopes,
+                        "subcatchments_group": group_id,
+                    }
+
+                    if n_hillslopes == 0:
+                        report_entry["status"] = "skipped"
+                        report_fp.write(json.dumps(report_entry) + "\n")
+                        continue
+
+                    contrast_name = f"{control_key},{contrast_id}__to__{contrast_key}"
+
+                    contrast: ContrastMapping = {}
+                    for topaz_key, wepp_id in top2wepp.items():
+                        if topaz_key in topaz_set:
+                            if contrast_scenario is None:
+                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                            else:
+                                wepp_id_path = _join(
+                                    self.wd,
+                                    OMNI_REL_DIR,
+                                    "scenarios",
+                                    contrast_scenario,
+                                    "wepp",
+                                    "output",
+                                    f"H{wepp_id}",
+                                )
+                        else:
+                            if control_scenario is None:
+                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                            else:
+                                wepp_id_path = _join(
+                                    self.wd,
+                                    OMNI_REL_DIR,
+                                    "scenarios",
+                                    control_scenario,
+                                    "wepp",
+                                    "output",
+                                    f"H{wepp_id}",
+                                )
+                        contrast[topaz_key] = wepp_id_path
+
+                    contrast_names[contrast_id - 1] = contrast_name
+                    self._write_contrast_sidecar(contrast_id, contrast)
+                    report_fp.write(json.dumps(report_entry) + "\n")
+
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = contrast_names
+
     def _build_contrasts_user_defined_areas(self) -> None:
         global OMNI_REL_DIR
 
@@ -2065,7 +2380,9 @@ class Omni(NoDbBase):
 
     def contrast_status_report(self) -> Dict[str, Any]:
         selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
-        if selection_mode not in {"cumulative", "user_defined_areas"}:
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
+        if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
             raise ValueError(f'Contrast selection mode "{selection_mode}" is not implemented yet.')
         contrast_names = self.contrast_names or []
 
@@ -2128,6 +2445,71 @@ class Omni(NoDbBase):
                         "control_scenario": report_entry.get("control_scenario") or control_scenario,
                         "contrast_scenario": report_entry.get("contrast_scenario") or contrast_scenario,
                         "area_label": label,
+                        "n_hillslopes": n_hillslopes,
+                        "skip_status": skip_status,
+                        "run_status": run_status,
+                    }
+                )
+
+            return {"selection_mode": selection_mode, "items": items}
+
+        if selection_mode == "stream_order":
+            report_entries = {}
+            for entry in self._load_contrast_build_report():
+                if entry.get("selection_mode") != "stream_order":
+                    continue
+                contrast_id = entry.get("contrast_id")
+                if isinstance(contrast_id, str):
+                    try:
+                        contrast_id = int(contrast_id)
+                    except ValueError:
+                        continue
+                if isinstance(contrast_id, int):
+                    report_entries[contrast_id] = entry
+
+            items: List[Dict[str, Any]] = []
+            max_id = max(report_entries.keys(), default=0)
+            if len(contrast_names) > max_id:
+                max_id = len(contrast_names)
+            for contrast_id in range(1, max_id + 1):
+                contrast_name = contrast_names[contrast_id - 1] if contrast_id - 1 < len(contrast_names) else None
+                report_entry = report_entries.get(contrast_id, {})
+
+                control_scenario = report_entry.get("control_scenario")
+                contrast_scenario = report_entry.get("contrast_scenario")
+                if (control_scenario is None or contrast_scenario is None) and contrast_name:
+                    try:
+                        control_part, target_part = contrast_name.split("__to__", maxsplit=1)
+                        control_scenario = control_part.split(",", maxsplit=1)[0]
+                        contrast_scenario = target_part
+                    except ValueError:
+                        control_scenario = control_scenario or None
+                        contrast_scenario = contrast_scenario or None
+
+                raw_count = report_entry.get("n_hillslopes")
+                try:
+                    n_hillslopes = int(raw_count) if raw_count is not None else 0
+                except (TypeError, ValueError):
+                    n_hillslopes = 0
+
+                skipped = (
+                    not contrast_name
+                    or report_entry.get("status") == "skipped"
+                    or n_hillslopes == 0
+                )
+                if skipped:
+                    run_status = "skipped"
+                    skip_status = {"skipped": True, "reason": "no_hillslopes"}
+                else:
+                    run_status = self._contrast_run_status(contrast_id, contrast_name)
+                    skip_status = {"skipped": False, "reason": None}
+
+                items.append(
+                    {
+                        "contrast_id": contrast_id,
+                        "control_scenario": control_scenario,
+                        "contrast_scenario": contrast_scenario,
+                        "subcatchments_group": report_entry.get("subcatchments_group"),
                         "n_hillslopes": n_hillslopes,
                         "skip_status": skip_status,
                         "run_status": run_status,
@@ -2289,27 +2671,26 @@ class Omni(NoDbBase):
 
         dfs = []
         selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
         contrast_labels = getattr(self, "_contrast_labels", None) or {}
         for contrast_id, contrast_name, path in parquet_entries:
             if not os.path.isfile(path):
                 continue
 
-            control_scenario, contrast_scenario = contrast_name.split('__to__')
-            control_scenario, topaz_id = control_scenario.split(',')
-
-            if control_scenario == 'None':
-                control_scenario = str(self.base_scenario)
-                ctrl_output_dir = _join(self.wd, 'wepp', 'output')
-            else:
-                ctrl_output_dir = _join(self.wd, OMNI_REL_DIR, 'scenarios', control_scenario, 'wepp', 'output')
-            ctrl_parquet = _resolve_loss_out_parquet(ctrl_output_dir)
-
-            if not _exists(ctrl_parquet):
-                raise FileNotFoundError(f"Control scenario parquet file '{ctrl_parquet}' does not exist!")
+            try:
+                control_part, contrast_scenario = contrast_name.split('__to__')
+                control_scenario, topaz_id = control_part.split(',', maxsplit=1)
+            except ValueError:
+                continue
 
             df = _ensure_value_columns(pd.read_parquet(path))
+            base_control = control_scenario == 'None'
+            if base_control:
+                control_scenario = str(self.base_scenario)
             df['control_scenario'] = control_scenario
-            df['contrast_topaz_id'] = topaz_id
+            if selection_mode == "cumulative":
+                df['contrast_topaz_id'] = topaz_id
             if selection_mode == "user_defined_areas":
                 label = contrast_labels.get(contrast_id)
                 if label is None:
@@ -2320,7 +2701,26 @@ class Omni(NoDbBase):
             df['_contrast_name'] = str(contrast_name)
             df['contrast_id'] = contrast_id
 
-            ctrl_df = _ensure_value_columns(pd.read_parquet(ctrl_parquet))
+            if selection_mode == "stream_order":
+                ctrl_df = df[["key", "v", "units"]].drop_duplicates(subset=["key"])
+            else:
+                if base_control:
+                    ctrl_output_dir = _join(self.wd, 'wepp', 'output')
+                else:
+                    ctrl_output_dir = _join(
+                        self.wd,
+                        OMNI_REL_DIR,
+                        'scenarios',
+                        control_scenario,
+                        'wepp',
+                        'output',
+                    )
+                ctrl_parquet = _resolve_loss_out_parquet(ctrl_output_dir)
+                if not _exists(ctrl_parquet):
+                    raise FileNotFoundError(
+                        f"Control scenario parquet file '{ctrl_parquet}' does not exist!"
+                    )
+                ctrl_df = _ensure_value_columns(pd.read_parquet(ctrl_parquet))
 
             # Join control metrics by 'key' and add difference (control - contrast)
             _ctrl = (

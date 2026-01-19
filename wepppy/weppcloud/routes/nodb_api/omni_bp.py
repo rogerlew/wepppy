@@ -61,6 +61,9 @@ def _summarize_omni_contrast_outlet_metrics(df_report, selection_mode):
     if df_report is None or df_report.empty:
         return contrasts
 
+    if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+        selection_mode = "stream_order"
+
     report_dict = df_report.to_dict()
     value_key = 'value' if 'value' in report_dict else ('v' if 'v' in report_dict else None)
     if value_key is None:
@@ -70,6 +73,8 @@ def _summarize_omni_contrast_outlet_metrics(df_report, selection_mode):
     if selection_mode == 'cumulative' and 'contrast_topaz_id' in report_dict:
         label_key = 'contrast_topaz_id'
     elif selection_mode == 'user_defined_areas' and 'contrast_id' in report_dict:
+        label_key = 'contrast_id'
+    elif selection_mode == 'stream_order' and 'contrast_id' in report_dict:
         label_key = 'contrast_id'
     if label_key is None:
         if 'contrast' in report_dict:
@@ -213,6 +218,8 @@ def query_omni_contrasts_report(runid, config):
         wd = get_wd(runid)
         omni = Omni.getInstance(wd)
         selection_mode = (omni.contrast_selection_mode or "cumulative").strip().lower()
+        if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
+            selection_mode = "stream_order"
         df_report = omni.contrasts_report()
         contrasts = _summarize_omni_contrast_outlet_metrics(df_report, selection_mode)
 
@@ -244,6 +251,21 @@ def query_omni_contrasts_report(runid, config):
                         "soil_loss": metrics.get("soil_loss") if metrics else None,
                     }
                 )
+        elif selection_mode == "stream_order":
+            for entry in status_report.get("items", []):
+                contrast_id = entry.get("contrast_id")
+                metrics = metrics_index.get(contrast_id) or metrics_index.get(str(contrast_id))
+                items.append(
+                    {
+                        "contrast_id": contrast_id,
+                        "control_scenario": entry.get("control_scenario"),
+                        "contrast_scenario": entry.get("contrast_scenario"),
+                        "subcatchments_group": entry.get("subcatchments_group"),
+                        "n_hillslopes": entry.get("n_hillslopes"),
+                        "water_discharge": metrics.get("water_discharge") if metrics else None,
+                        "soil_loss": metrics.get("soil_loss") if metrics else None,
+                    }
+                )
         else:
             for entry in status_report.get("items", []):
                 contrast_id = entry.get("contrast_id")
@@ -267,5 +289,5 @@ def query_omni_contrasts_report(runid, config):
                                watershed=Watershed.getInstance(wd),
                                report=report)
 
-    except:
-        return exception_factory(runid=runid)
+    except Exception as exc:
+        return exception_factory(msg=exc, runid=runid, details=traceback.format_exc())
