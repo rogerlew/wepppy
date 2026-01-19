@@ -132,6 +132,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
             if not _exists(landuse.lc_fn):
                 return error_response("Failed creating landuse file", status_code=400)
+            landuse.user_defined_landcover_fn = filename
 
         if landuse.run_group == "batch":
             return JSONResponse({"message": "Set landuse inputs for batch processing"})

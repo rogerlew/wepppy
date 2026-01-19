@@ -125,6 +125,14 @@
          accept=".img,.tif",
          extra_control_class="disable-readonly"
        ) }}
+    {% set current_landcover_fn = landuse.user_defined_landcover_fn %}
+    {% if current_landcover_fn %}
+      {% set current_landcover_content %}<code>{{ current_landcover_fn }}</code>{% endset %}
+      {{ ui.text_display(
+           label="Current landcover map",
+           content=current_landcover_content
+      ) }}
+    {% endif %}
     {{ ui.select_field(
          "landuse_management_mapping_selection",
          "Select management mapping",

@@ -181,6 +181,7 @@ class Landuse(NoDbBase):
                     shutil.copyfile(_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj')
 
             self._landuse_map = _landuse_map
+            self._user_defined_landcover_fn = None
 
             self.domlc_mofe_d = None
             self._mofe_buffer_selection = self.config_get_int('landuse', 'mofe_buffer_selection')
@@ -236,6 +237,25 @@ class Landuse(NoDbBase):
     @property
     def domlc_fn(self) -> str:
         return _join(self.lc_dir, "landcov.asc")
+
+    @property
+    def user_defined_landcover_fn(self) -> Optional[str]:
+        filename = getattr(self, "_user_defined_landcover_fn", None)
+        if not filename:
+            return None
+        candidate = _join(self.lc_dir, f"_{filename}")
+        if _exists(candidate):
+            return filename
+        return None
+
+    @user_defined_landcover_fn.setter
+    @nodb_setter
+    def user_defined_landcover_fn(self, value: Optional[str]) -> None:
+        if value is None:
+            self._user_defined_landcover_fn = None
+            return
+        token = str(value).strip()
+        self._user_defined_landcover_fn = token or None
     
     @mapping.setter
     @nodb_setter
@@ -1294,6 +1314,21 @@ class Landuse(NoDbBase):
                 df['wepp_id'] = pd.Series(pd.array(wepp_values, dtype='Int32'))
             else:
                 df['wepp_id'] = pd.Series(pd.array([pd.NA] * len(df), dtype='Int32'))
+
+        if 'key' in df.columns:
+            key_series = df['key']
+            if key_series.dtype == object:
+                key_series = key_series.map(
+                    lambda value: value.decode('utf-8')
+                    if isinstance(value, (bytes, bytearray))
+                    else value
+                )
+            numeric_key = pd.to_numeric(key_series, errors='coerce')
+            non_null = key_series.notna()
+            if numeric_key[non_null].notna().all():
+                df['key'] = numeric_key.astype('Int32')
+            else:
+                df['key'] = key_series.astype('string')
 
         for legacy_col in ('TopazID', 'WeppID'):
             if legacy_col in df.columns:

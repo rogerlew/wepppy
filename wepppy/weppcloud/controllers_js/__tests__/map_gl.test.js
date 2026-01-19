@@ -463,6 +463,21 @@ describe("Map GL controller", () => {
         expect(lastProps.viewState.transitionInterpolator).toBeInstanceOf(global.deck.FlyToInterpolator);
     });
 
+    test("goToEnteredLocation accepts degree symbols", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.setView([44.0, -116.0], 6);
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "-120.7545\u00b0, 50.7233\u00b0";
+
+        mapInstance.goToEnteredLocation();
+
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(50.7233);
+        expect(center.lng).toBeCloseTo(-120.7545);
+        expect(mapInstance.getZoom()).toBe(6);
+    });
+
     test("enter key emits map:center:requested and keeps zoom when omitted", () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.setView([44.5, -115.9], 7);

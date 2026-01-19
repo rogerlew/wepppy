@@ -236,7 +236,7 @@ var MapController = (function () {
         if (!value) {
             return [];
         }
-        var sanitized = String(value).replace(/[a-zA-Z{}\[\]\\|\/<>';:]/g, "");
+        var sanitized = String(value).replace(/[a-zA-Z{}\[\]\\|\/<>';:\u00b0]/g, "");
         return sanitized.split(/[\s,]+/).filter(function (item) {
             return item !== "";
         });
