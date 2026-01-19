@@ -292,6 +292,16 @@ class Treatments(NoDbBase):
         self.logger.info(f'  _apply_treatment: {topaz_id} -> {landuse_instance.domlc_d[topaz_id]}\n')
 
         return retcode
+
+    def _mulch_management_key(self, dom_key: str, treatment: str) -> str:
+        base_token = str(dom_key).split("-", maxsplit=1)[0]
+        percent_token = treatment.replace("mulch_", "").strip()
+        try:
+            base_value = int(base_token)
+            percent_value = int(percent_token)
+        except (TypeError, ValueError):
+            return f"{dom_key}-{treatment}"
+        return str(base_value * 1000 + percent_value)
     
     def _apply_mulch(self, 
                      landuse_instance: Landuse, 
@@ -347,15 +357,20 @@ class Treatments(NoDbBase):
             new_man_summary.man_dir = _join(self.wd, 'landuse')
             new_man_summary.man_fn = new_man_fn
             new_man_summary.disturbed_class = f'{disturbed_class}-{treatment}'
-            new_man_summary.desc += f'{man_summary.desc} - {treatment}'
+            new_man_summary.desc = f'{man_summary.desc} - {treatment}'
             new_man_summary.inrcov = new_inrcov
             new_man_summary.rilcov = new_rilcov
 
-            new_dom = f'{landuse_instance.domlc_d[topaz_id]}-{treatment}'
+            base_dom = landuse_instance.domlc_d[topaz_id]
+            new_dom = self._mulch_management_key(base_dom, treatment)
             landuse_instance.domlc_d[topaz_id] = new_dom
             self.logger.info(f'  _apply_mulch: {topaz_id} -> {new_dom}\n')
 
             if new_dom not in landuse_instance.managements:
+                try:
+                    new_man_summary.key = int(new_dom)
+                except (TypeError, ValueError):
+                    new_man_summary.key = new_dom
                 landuse_instance.managements[new_dom] = new_man_summary
 
             return 1
@@ -453,14 +468,25 @@ class Treatments(NoDbBase):
         texid = simple_texture(clay=clay, sand=sand)
 
         dom = landuse_instance.domlc_d[topaz_id]
-
-        if 'mulch' in dom:
-            disturbed_class = 'mulch'
-        elif 'thinning' in dom:
-            disturbed_class = 'thinning'
+        man_summary = landuse_instance.managements.get(dom)
+        if man_summary is not None:
+            disturbed_class = getattr(man_summary, "disturbed_class", None)
+            if isinstance(disturbed_class, str):
+                if "mulch" in disturbed_class:
+                    disturbed_class = "mulch"
+                elif "thinning" in disturbed_class:
+                    disturbed_class = "thinning"
         else:
-            man = get_management_summary(dom, landuse_instance.mapping)
-            disturbed_class = man.disturbed_class
+            disturbed_class = None
+
+        if disturbed_class is None:
+            if 'mulch' in dom:
+                disturbed_class = 'mulch'
+            elif 'thinning' in dom:
+                disturbed_class = 'thinning'
+            else:
+                man = get_management_summary(dom, landuse_instance.mapping)
+                disturbed_class = man.disturbed_class
 
         key = (texid, disturbed_class)
         if key not in land_soil_replacements_d:

@@ -334,6 +334,8 @@ Contrast execution follows the same hashing approach via `contrast_dependency_tr
 }
 ```
 
+Mulch scenarios assign scenario-local management keys (e.g., `base_key * 1000 + mulch_pct`) so `landuse.parquet` distinguishes treatment intensities; these keys are not added to the static mapping JSON.
+
 #### SBS Map
 
 ```python
