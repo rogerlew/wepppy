@@ -374,6 +374,11 @@ def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
     (contrasts_dir / "_uploads").mkdir(parents=True)
     (contrasts_dir / "1").mkdir(parents=True)
     (contrasts_dir / "2").mkdir(parents=True)
+    report_path = contrasts_dir / "build_report.ndjson"
+    report_path.write_text("{}", encoding="ascii")
+    contrasts_report = tmp_path / "omni" / "contrasts.out.parquet"
+    contrasts_report.parent.mkdir(parents=True, exist_ok=True)
+    contrasts_report.write_text("placeholder", encoding="ascii")
 
     omni.clear_contrasts()
 
@@ -381,6 +386,8 @@ def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
     assert omni._contrast_names is None
     assert omni._contrast_dependency_tree == {}
     assert not sidecar_dir.exists()
+    assert not report_path.exists()
+    assert not contrasts_report.exists()
     assert (contrasts_dir / "_uploads").exists()
     assert not (contrasts_dir / "1").exists()
     assert not (contrasts_dir / "2").exists()
@@ -953,6 +960,39 @@ def test_run_omni_contrasts_runs_when_sidecar_changes(tmp_path, monkeypatch, omn
 
     assert calls
     assert calls[0][0] == "1"
+
+
+def test_contrast_run_status_needs_run_when_redisprep_missing_watershed_timestamp(
+    tmp_path, monkeypatch, omni_module
+):
+    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False))
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.redisprep_missing")
+
+    contrast_name = "None,10__to__undisturbed"
+    sidecar_path = Path(omni._contrast_sidecar_path(1))
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text("10\t/tmp/H1\n", encoding="ascii")
+    readme_path = Path(omni._contrast_run_readme_path(1))
+    readme_path.parent.mkdir(parents=True, exist_ok=True)
+    readme_path.write_text("done", encoding="ascii")
+
+    redisprep_path = tmp_path / "redisprep.dump"
+    redisprep_path.write_text(
+        json.dumps({"timestamps:run_wepp_hillslopes": 123}),
+        encoding="utf-8",
+    )
+
+    omni._contrast_dependency_tree = {
+        contrast_name: {
+            "sidecar_sha1": omni_module._hash_file_sha1(str(sidecar_path)),
+            "control_redisprep": {"timestamps:run_wepp_watershed": 123},
+            "contrast_redisprep": {"timestamps:run_wepp_watershed": 123},
+        }
+    }
+
+    assert omni._contrast_run_status(1, contrast_name) == "needs_run"
 
 
 def test_run_omni_contrasts_cleans_stale_runs(tmp_path, monkeypatch, omni_module):

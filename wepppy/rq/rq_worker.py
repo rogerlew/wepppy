@@ -13,6 +13,7 @@ import logging
 
 import json
 import traceback
+from typing import Any, cast
 from multiprocessing import Process
 
 import redis
@@ -100,7 +101,7 @@ class WepppyRqWorker(Worker):
             kwargs.get("context"),
         )
         try:
-            cov = Coverage(**kwargs)
+            cov = Coverage(**cast(dict[str, Any], kwargs))
             try:
                 cov.load()
             except CoverageException:
@@ -204,17 +205,15 @@ class WepppyRqWorker(Worker):
 
 def start_worker() -> None:
     """Start a worker that listens on the high/default/low queues."""
-    from redis import Connection as RedisConnection
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     redis_conn = redis.Redis(**conn_kwargs)
-    with RedisConnection(redis_conn):
-        qs = [
-            Queue('high', connection=redis_conn),
-            Queue('default', connection=redis_conn),
-            Queue('low', connection=redis_conn),
-        ]
-        w = WepppyRqWorker(qs, connection=redis_conn)
-        w.work()
+    qs = [
+        Queue('high', connection=redis_conn),
+        Queue('default', connection=redis_conn),
+        Queue('low', connection=redis_conn),
+    ]
+    w = WepppyRqWorker(qs, connection=redis_conn)
+    w.work()
 
 
 if __name__ == '__main__':

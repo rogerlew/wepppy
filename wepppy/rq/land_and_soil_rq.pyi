@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Optional, Sequence, Tuple
 
+REDIS_HOST: str
+RQ_DB: int
 TIMEOUT: int
 
 def land_and_soil_rq(

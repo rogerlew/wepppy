@@ -32,7 +32,7 @@ def test_summarize_omni_contrast_outlet_metrics_uses_topaz_id_for_cumulative():
     assert result[0]["soil_loss"]["value"] == 2.0
 
 
-def test_summarize_omni_contrast_outlet_metrics_uses_contrast_name_for_other_modes():
+def test_summarize_omni_contrast_outlet_metrics_uses_contrast_id_for_user_defined():
     df = pd.DataFrame({
         "key": [
             "Avg. Ann. water discharge from outlet",
@@ -47,6 +47,6 @@ def test_summarize_omni_contrast_outlet_metrics_uses_contrast_name_for_other_mod
     result = omni_bp._summarize_omni_contrast_outlet_metrics(df, "user_defined_areas")
 
     assert len(result) == 1
-    assert result[0]["name"] == "Area A"
+    assert result[0]["name"] == "7"
     assert result[0]["water_discharge"]["value"] == 5.0
     assert result[0]["soil_loss"]["value"] == 6.0

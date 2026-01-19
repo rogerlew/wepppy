@@ -1135,6 +1135,18 @@ class Omni(NoDbBase):
         sidecar_dir = _join(self.omni_dir, 'contrasts')
         if _exists(sidecar_dir):
             shutil.rmtree(sidecar_dir)
+        report_path = self._contrast_build_report_path()
+        if _exists(report_path):
+            try:
+                os.remove(report_path)
+            except Exception as exc:
+                self.logger.debug('Failed to remove contrast build report %s: %s', report_path, exc)
+        contrasts_report = _join(self.omni_dir, 'contrasts.out.parquet')
+        if _exists(contrasts_report):
+            try:
+                os.remove(contrasts_report)
+            except Exception as exc:
+                self.logger.debug('Failed to remove contrast summary %s: %s', contrasts_report, exc)
 
     def _clean_contrast_runs(self) -> None:
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
@@ -2151,10 +2163,23 @@ class Omni(NoDbBase):
 
         self.logger.info('run_omni_contrasts')
 
+        def _set_dependency_tree_with_retry(tree: ContrastDependency) -> None:
+            max_tries = 5
+            for attempt in range(max_tries):
+                try:
+                    with self.locked():
+                        self._contrast_dependency_tree = tree
+                except NoDbAlreadyLockedError:
+                    if attempt + 1 == max_tries:
+                        raise
+                    time.sleep(1.0)
+                else:
+                    break
+
         if not self.contrast_names:
             self.logger.info('  run_omni_contrasts: No contrasts to run')
             if self.contrast_dependency_tree:
-                self.contrast_dependency_tree = {}
+                _set_dependency_tree_with_retry({})
             self._clean_stale_contrast_runs([])
             return
 
@@ -2173,7 +2198,7 @@ class Omni(NoDbBase):
             self.logger.info("  run_omni_contrasts: No contrasts to run")
             if dependency_tree:
                 dependency_tree.clear()
-                self.contrast_dependency_tree = dependency_tree
+                _set_dependency_tree_with_retry(dependency_tree)
             self._clean_stale_contrast_runs(active_ids)
             return
 
@@ -2206,13 +2231,14 @@ class Omni(NoDbBase):
             omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
             self._post_omni_run(omni_wd, contrast_name)
 
-            dependency_tree[contrast_name] = self._contrast_dependency_entry(contrast_id, contrast_name)
-            self.contrast_dependency_tree = dependency_tree
+            dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
+            dependency_tree[contrast_name] = dependency_entry
+            _set_dependency_tree_with_retry(dependency_tree)
 
         stale = set(dependency_tree.keys()) - active_contrasts
         for contrast_name in stale:
             dependency_tree.pop(contrast_name, None)
-        self.contrast_dependency_tree = dependency_tree
+        _set_dependency_tree_with_retry(dependency_tree)
         self._clean_stale_contrast_runs(active_ids)
 
     def run_omni_contrast(self, contrast_id: int) -> str:

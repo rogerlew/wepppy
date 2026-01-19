@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 from wepppy.nodb.base import NoDbBase
+from wepppy.topo.watershed_collection import WatershedFeature
 
 __all__ = ["CulvertsRunner"]
 
@@ -13,6 +14,7 @@ class CulvertsRunner(NoDbBase):
     DEFAULT_RETENTION_DAYS: ClassVar[int]
     DEFAULT_DEM_REL_PATH: ClassVar[str]
     DEFAULT_WATERSHEDS_REL_PATH: ClassVar[str]
+    DEFAULT_CULVERT_POINTS_REL_PATH: ClassVar[str]
     DEFAULT_FLOVEC_REL_PATH: ClassVar[str]
     DEFAULT_FULL_STREAM_REL_PATH: ClassVar[str]
     DEFAULT_STREAMS_CHNJNT_REL_PATH: ClassVar[str]
@@ -65,3 +67,9 @@ class CulvertsRunner(NoDbBase):
         watershed_feature: WatershedFeature | None = ...,
         as_cropped_vrt: bool = ...,
     ) -> None: ...
+    def load_watershed_features(
+        self, watersheds_geojson_path: str
+    ) -> Dict[str, WatershedFeature]: ...
+    def load_culvert_points(
+        self, culvert_points_geojson_path: str
+    ) -> Tuple[Dict[str, Tuple[float, float]], Optional[str]]: ...

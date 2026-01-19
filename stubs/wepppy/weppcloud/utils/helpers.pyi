@@ -23,6 +23,9 @@ def _playback_path(env_var: str, subdir: str) -> str: ...
 def get_wd(runid: str, *, prefer_active: bool = ...) -> str: ...
 
 
+def get_primary_wd(runid: str) -> str: ...
+
+
 def get_batch_wd(batch_name: str) -> str: ...
 
 
@@ -38,17 +41,28 @@ def get_batch_run_wd(batch_name: str, runid: str) -> str: ...
 def url_for_run(endpoint: str, **values: Any) -> str: ...
 
 
-def error_factory(msg: str = ...) -> Response: ...
+def error_factory(
+    msg: str = ...,
+    *,
+    status_code: int | None = ...,
+    code: Optional[str] = ...,
+    details: Any | None = ...,
+    errors: Optional[list[Any]] = ...,
+) -> Response: ...
 
 
 def exception_factory(
     msg: BaseException | str = ...,
     stacktrace: str | None = ...,
     runid: str | None = ...,
+    *,
+    status_code: int = ...,
+    code: Optional[str] = ...,
+    details: Any | None = ...,
 ) -> Response: ...
 
 
-def success_factory(kwds: Optional[dict[str, Any]] = ...) -> Response: ...
+def success_factory(kwds: Any | None = ...) -> Response: ...
 
 
 def authorize(runid: str, config: str, require_owner: bool = ...) -> None: ...

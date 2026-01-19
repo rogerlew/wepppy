@@ -431,7 +431,11 @@ async def _run_omni(
         logger.exception("rq-engine run-omni enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 
-    return JSONResponse({"job_id": job.id})
+    status_url = f"/rq-engine/api/jobstatus/{job.id}"
+    return JSONResponse(
+        {"job_id": job.id, "message": "Job enqueued.", "status_url": status_url},
+        status_code=202,
+    )
 
 
 async def _run_omni_contrasts(
@@ -513,7 +517,11 @@ async def _run_omni_contrasts(
         logger.exception("rq-engine run-omni-contrasts enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 
-    return JSONResponse({"job_id": job.id})
+    status_url = f"/rq-engine/api/jobstatus/{job.id}"
+    return JSONResponse(
+        {"job_id": job.id, "message": "Job enqueued.", "status_url": status_url},
+        status_code=202,
+    )
 
 
 async def _dry_run_omni_contrasts(

@@ -32,5 +32,5 @@ def run_wepp_hillslope_soil_interchange(
     wepp_output_dir: Path | str,
     *,
     start_year: int | None = ...,
-    expected_hillslopes: int | None = ...,
+    expected_hillslopes: int | None = None,
 ) -> Path: ...

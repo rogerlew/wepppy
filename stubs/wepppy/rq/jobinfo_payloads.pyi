@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-__all__: list[str]
+__all__: list[str] = ["extract_job_ids", "normalize_job_id_inputs"]
 
 def normalize_job_id_inputs(raw_values: Any) -> list[str]: ...
 

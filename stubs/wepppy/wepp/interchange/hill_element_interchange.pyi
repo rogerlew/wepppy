@@ -34,4 +34,5 @@ def run_wepp_hillslope_element_interchange(
     wepp_output_dir: Path | str,
     *,
     start_year: Optional[int] = ...,
+    expected_hillslopes: int | None = ...,
 ) -> Path: ...

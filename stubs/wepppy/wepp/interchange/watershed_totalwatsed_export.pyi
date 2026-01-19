@@ -17,8 +17,8 @@ def totalwatsed_partitioned_dss_export(
     export_channel_ids: Optional[List[int]] = ...,
     status_channel: Optional[str] = ...,
     *,
-    start_date: Optional[date] = ...,
-    end_date: Optional[date] = ...,
+    start_date: date | None = ...,
+    end_date: date | None = ...,
 ) -> None: ...
 
 def archive_dss_export_zip(wd: Path | str, status_channel: Optional[str] = ...) -> None: ...

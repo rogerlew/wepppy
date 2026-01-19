@@ -75,8 +75,11 @@ def test_run_omni_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
             json={"scenarios": [{"type": "uniform_low"}]},
         )
 
-    assert response.status_code == 200
-    assert response.json()["job_id"] == "job-11"
+    assert response.status_code == 202
+    payload = response.json()
+    assert payload["job_id"] == "job-11"
+    assert payload["message"] == "Job enqueued."
+    assert payload["status_url"] == "/rq-engine/api/jobstatus/job-11"
 
 
 def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -173,8 +176,11 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
             files={"omni_contrast_geojson": ("areas.geojson", b"{}", "application/geo+json")},
         )
 
-    assert response.status_code == 200
-    assert response.json()["job_id"] == "job-22"
+    assert response.status_code == 202
+    payload = response.json()
+    assert payload["job_id"] == "job-22"
+    assert payload["message"] == "Job enqueued."
+    assert payload["status_url"] == "/rq-engine/api/jobstatus/job-22"
     assert captured["payload"]["omni_contrast_geojson_path"] == "/tmp/uploaded.geojson"
     assert captured["payload"]["omni_contrast_pairs"] == [
         {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}

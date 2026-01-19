@@ -4,6 +4,9 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 __all__ = ["WatershedFeature", "WatershedCollection"]
 
+def _normalize_geojson_crs_name(name: str) -> str: ...
+def _extract_geojson_crs(data: Dict[str, Any]) -> Optional[str]: ...
+
 class WatershedFeature:
     feature: Dict[str, Any]
     id: Any
