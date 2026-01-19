@@ -71,7 +71,7 @@ wepppy/weppcloud/templates/controls/
 1. **Definition**: User selects control/contrast scenarios, objective parameter (runoff, soil loss), and cumulative threshold
 2. **Hillslope Selection**: `build_contrasts()` resets existing contrast definitions, reads `wepp/output/interchange/loss_pw0.hill.parquet` (control scenario), sorts hillslopes by objective parameter, and selects top contributors up to threshold
 3. **Selection Sidecar**: Each contrast mapping is written to `omni/contrasts/contrast_<id>.tsv` as tab-delimited `topaz_id` + hillslope pass path for fast reloads on large watersheds
-4. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates `_pups/omni/contrasts/<contrast_id>`, symlinks the watershed run inputs (excluding `pw0.run`/`pw0.err`), and regenerates `pw0.run` with mixed hillslope pass files
+4. **Clone Assembly**: For each selected hillslope, `_run_contrast()` creates `_pups/omni/contrasts/<contrast_id>`, symlinks the watershed run inputs (excluding `pw0.run`/`pw0.err`), merges landuse/soils parquet outputs from the control + contrast scenarios, and regenerates `pw0.run` with mixed hillslope pass files
 5. **WEPP Execution**: `run_omni_contrasts()` runs only missing or stale contrasts (run marker + sidecar SHA1 + redisprep snapshots), cleans stale contrast run directories not in the active list, and writes outputs under `_pups/omni/contrasts/<contrast_id>/wepp/output` (run marker: `wepp/output/interchange/README.md`).
 6. **Reporting**: `contrasts_report()` joins control and contrast loss metrics, computes deltas, and persists `contrasts.out.parquet`. `contrast_status_report()` supplies run-status lists for dry-run/UI, while the HTML summary report is metric-focused.
 
@@ -108,6 +108,8 @@ Omni groups hillslopes into contrast runs using a selection mode. Cumulative obj
 ### Contrast Execution Details (Current)
 
 - **Incremental contrast runs**: only missing or stale contrasts are executed. A contrast is considered run when `_pups/omni/contrasts/<id>/wepp/output/interchange/README.md` exists.
+- **Merged landuse/soils parquets**: contrast runs materialize `landuse/landuse.parquet` and `soils/soils.parquet` by taking contrast hillslopes from the contrast scenario parquet and all remaining hillslopes from the control scenario parquet.
+- **Shared NoDb links**: contrast runs symlink `unitizer.nodb` and (when present) `treatments.nodb` from the parent run to keep unit precision and treatment metadata available in the UI.
 - **Invalidation tracking**: `contrast_dependency_tree` stores sidecar SHA1 + redisprep snapshots so contrasts can be re-run when upstream outputs or contrast definitions change.
   - Stored per `contrast_name` as `{ dependencies, sidecar_sha1, control_redisprep, contrast_redisprep, last_run }`.
   - Redisprep snapshots are normalized to `timestamps:run_wepp_hillslopes` and `timestamps:run_wepp_watershed`.
@@ -666,5 +668,5 @@ Set `WEPPPY_LOG_LEVEL=DEBUG` in `docker/.env` to capture detailed cloning/hashin
 
 ---
 
-**Last Updated**: 2025-10-24  
+**Last Updated**: 2026-01-19  
 **Maintainer**: AI Coding Agents (per AGENTS.md authorship policy)

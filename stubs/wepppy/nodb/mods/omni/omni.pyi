@@ -52,6 +52,8 @@ def _run_contrast(
     contrasts: ContrastMapping,
     wd: str,
     runid: str,
+    control_scenario_key: str,
+    contrast_scenario_key: str,
     wepp_bin: str = ...,
 ) -> str: ...
 

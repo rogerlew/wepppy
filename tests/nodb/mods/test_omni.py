@@ -857,7 +857,7 @@ def test_run_omni_contrasts_skips_up_to_date(tmp_path, monkeypatch, omni_module)
 
     calls = []
 
-    def fake_run(contrast_id, contrast_name, contrasts, wd, runid):
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key):
         calls.append((contrast_id, contrast_name))
         return f"{wd}/_pups/omni/contrasts/{contrast_id}"
 
@@ -894,7 +894,7 @@ def test_run_omni_contrasts_runs_when_readme_missing(tmp_path, monkeypatch, omni
 
     calls = []
 
-    def fake_run(contrast_id, contrast_name, contrasts, wd, runid):
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key):
         calls.append((contrast_id, contrast_name))
         contrast_dir = Path(wd) / "_pups" / "omni" / "contrasts" / contrast_id
         (contrast_dir / "wepp" / "output" / "interchange").mkdir(parents=True, exist_ok=True)
@@ -948,7 +948,7 @@ def test_run_omni_contrasts_runs_when_sidecar_changes(tmp_path, monkeypatch, omn
 
     calls = []
 
-    def fake_run(contrast_id, contrast_name, contrasts, wd, runid):
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key):
         calls.append((contrast_id, contrast_name))
         contrast_dir = Path(wd) / "_pups" / "omni" / "contrasts" / contrast_id
         (contrast_dir / "wepp" / "output" / "interchange").mkdir(parents=True, exist_ok=True)

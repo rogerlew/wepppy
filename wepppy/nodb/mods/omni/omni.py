@@ -226,12 +226,91 @@ class OmniScenario(IntEnum):
         return False
     
 
+def _resolve_base_scenario_key(wd: str) -> str:
+    from wepppy.nodb.mods.disturbed import Disturbed
+
+    disturbed = Disturbed.getInstance(wd)
+    if disturbed.has_sbs:
+        return str(OmniScenario.SBSmap)
+    return str(OmniScenario.Undisturbed)
+
+
+def _resolve_contrast_scenario_wd(wd: str, scenario_key: str, base_key: str) -> str:
+    if scenario_key == base_key:
+        return wd
+    scenario_dir = _join(wd, OMNI_REL_DIR, "scenarios", scenario_key)
+    if not _exists(scenario_dir):
+        raise FileNotFoundError(f"Scenario directory missing for {scenario_key}: {scenario_dir}")
+    return scenario_dir
+
+
+def _contrast_topaz_ids_from_mapping(
+    contrasts: Dict[int | str, str],
+    contrast_wd: str,
+) -> Set[int]:
+    contrast_output_dir = os.path.normpath(_join(contrast_wd, "wepp", "output"))
+    prefix = contrast_output_dir + os.sep
+    contrast_topaz_ids: Set[int] = set()
+    for topaz_id, wepp_id_path in contrasts.items():
+        if not isinstance(wepp_id_path, str):
+            continue
+        normalized_path = os.path.normpath(wepp_id_path)
+        if normalized_path == contrast_output_dir or normalized_path.startswith(prefix):
+            try:
+                contrast_topaz_ids.add(int(topaz_id))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Invalid topaz id in contrast mapping: {topaz_id}") from exc
+    return contrast_topaz_ids
+
+
+def _merge_contrast_parquet(
+    *,
+    control_parquet_fn: str,
+    contrast_parquet_fn: str,
+    output_parquet_fn: str,
+    contrast_topaz_ids: Set[int],
+    label: str,
+) -> None:
+    if not _exists(control_parquet_fn):
+        raise FileNotFoundError(f"Missing control parquet for {label}: {control_parquet_fn}")
+    if not _exists(contrast_parquet_fn):
+        raise FileNotFoundError(f"Missing contrast parquet for {label}: {contrast_parquet_fn}")
+
+    if not contrast_topaz_ids:
+        shutil.copyfile(control_parquet_fn, output_parquet_fn)
+        return
+
+    control_df = pd.read_parquet(control_parquet_fn)
+    contrast_df = pd.read_parquet(contrast_parquet_fn)
+
+    if "topaz_id" not in control_df.columns or "topaz_id" not in contrast_df.columns:
+        raise ValueError(f"{label} parquet must include topaz_id column.")
+
+    control_topaz = pd.to_numeric(control_df["topaz_id"], errors="coerce")
+    contrast_topaz = pd.to_numeric(contrast_df["topaz_id"], errors="coerce")
+    available_contrast_ids = set(contrast_topaz.dropna().astype(int).tolist())
+    missing = contrast_topaz_ids - available_contrast_ids
+    if missing:
+        missing_list = ", ".join(str(value) for value in sorted(missing))
+        raise ValueError(f"{label} contrast parquet is missing topaz ids: {missing_list}")
+
+    control_mask = control_topaz.isin(contrast_topaz_ids)
+    contrast_mask = contrast_topaz.isin(contrast_topaz_ids)
+    merged = pd.concat(
+        [control_df[~control_mask], contrast_df[contrast_mask]],
+        ignore_index=True,
+    )
+    merged.to_parquet(output_parquet_fn, index=False)
+
+
 def _run_contrast(
     contrast_id: str,
     contrast_name: str,
     contrasts: Dict[int | str, str],
     wd: str,
     runid: str,
+    control_scenario_key: str,
+    contrast_scenario_key: str,
     wepp_bin: str = 'wepp_a557997'
 ) -> str:
     from wepppy.nodb.core import Landuse, Soils, Wepp
@@ -251,7 +330,16 @@ def _run_contrast(
     os.makedirs(_join(new_wd, 'landuse'), exist_ok=True)
 
     for fn in os.listdir(wd):
-        if fn in ['climate', 'watershed', 'climate.nodb', 'watershed.nodb', 'landuse.nodb', 'soils.nodb']:
+        if fn in [
+            'climate',
+            'watershed',
+            'climate.nodb',
+            'watershed.nodb',
+            'landuse.nodb',
+            'soils.nodb',
+            'unitizer.nodb',
+            'treatments.nodb',
+        ]:
             src = _join(wd, fn)
             dst = _join(new_wd, fn)
             if not _exists(dst):
@@ -302,6 +390,28 @@ def _run_contrast(
                 LOGGER.info('Updating contrast path %s -> %s', wepp_id_path, candidate)
                 normalized_path = candidate
         normalized_contrasts[topaz_id] = normalized_path
+
+    base_key = _resolve_base_scenario_key(wd)
+    control_wd = _resolve_contrast_scenario_wd(wd, control_scenario_key, base_key)
+    contrast_wd = _resolve_contrast_scenario_wd(wd, contrast_scenario_key, base_key)
+    contrast_topaz_ids = _contrast_topaz_ids_from_mapping(normalized_contrasts, contrast_wd)
+    if not contrast_topaz_ids and control_scenario_key != contrast_scenario_key:
+        raise ValueError(f"No contrast hillslopes detected for {contrast_name}.")
+
+    _merge_contrast_parquet(
+        control_parquet_fn=_join(control_wd, "landuse", "landuse.parquet"),
+        contrast_parquet_fn=_join(contrast_wd, "landuse", "landuse.parquet"),
+        output_parquet_fn=_join(new_wd, "landuse", "landuse.parquet"),
+        contrast_topaz_ids=contrast_topaz_ids,
+        label="landuse",
+    )
+    _merge_contrast_parquet(
+        control_parquet_fn=_join(control_wd, "soils", "soils.parquet"),
+        contrast_parquet_fn=_join(contrast_wd, "soils", "soils.parquet"),
+        output_parquet_fn=_join(new_wd, "soils", "soils.parquet"),
+        contrast_topaz_ids=contrast_topaz_ids,
+        label="soils",
+    )
 
     wepp.make_watershed_run(wepp_id_paths=list(normalized_contrasts.values()))
     wepp.run_watershed()
@@ -2645,7 +2755,16 @@ class Omni(NoDbBase):
                 contrast_id,
                 contrast_name,
             )
-            omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
+            control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
+            omni_wd = _run_contrast(
+                str(contrast_id),
+                contrast_name,
+                _contrasts,
+                self.wd,
+                self.runid,
+                control_key,
+                contrast_key,
+            )
             self._post_omni_run(omni_wd, contrast_name)
 
             dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
@@ -2667,7 +2786,16 @@ class Omni(NoDbBase):
         if not contrast_name:
             raise ValueError(f"Contrast id {contrast_id} is skipped")
         _contrasts = self._load_contrast_sidecar(contrast_id)
-        omni_wd = _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd, self.runid)
+        control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
+        omni_wd = _run_contrast(
+            str(contrast_id),
+            contrast_name,
+            _contrasts,
+            self.wd,
+            self.runid,
+            control_key,
+            contrast_key,
+        )
         self._post_omni_run(omni_wd, contrast_name)
         dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
         self._update_contrast_dependency_tree(contrast_name, dependency_entry)
