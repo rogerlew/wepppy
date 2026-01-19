@@ -368,6 +368,58 @@ def test_run_omni_contrasts_dry_run_user_defined(monkeypatch: pytest.MonkeyPatch
     assert result["items"][1]["run_status"] == "up_to_date"
 
 
+def test_run_omni_contrasts_dry_run_stream_order(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = True
+
+    monkeypatch.setattr(omni_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts_dry_run_report(self, *args, **kwargs) -> dict:
+            return {
+                "selection_mode": "stream_order",
+                "items": [
+                    {
+                        "contrast_id": 1,
+                        "control_scenario": "uniform_low",
+                        "contrast_scenario": "mulch",
+                        "subcatchments_group": 10,
+                        "n_hillslopes": 0,
+                        "skip_status": {"skipped": True, "reason": "no_hillslopes"},
+                        "run_status": "skipped",
+                    }
+                ],
+            }
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
+            json={
+                "omni_contrast_selection_mode": "stream_order",
+                "omni_contrast_pairs": [
+                    {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+                ],
+                "order_reduction_passes": 1,
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    result = payload["result"]
+    assert result["selection_mode"] == "stream_order"
+    assert result["items"][0]["subcatchments_group"] == 10
+    assert result["items"][0]["skip_status"]["reason"] == "no_hillslopes"
+    assert result["items"][0]["run_status"] == "skipped"
+
+
 def test_delete_omni_contrasts(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")

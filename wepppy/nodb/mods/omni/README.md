@@ -102,8 +102,8 @@ Omni groups hillslopes into contrast runs using a selection mode. Cumulative obj
 
 - Apply `order_reduction_passes` (same variable name as culverts) to the channel map to prune stream order N times.
 - Run the `weppcloud-wbt` `hillslopes_topaz` routine to derive grouped hillslopes from the pruned network.
-- Multiply the resulting `subwta.tif` values by 10 so hillslopes remain 10/20/30 and channels 40, keeping the output distinct from `dem/wbt/subwta.tif`.
-- Each grouped hillslope set becomes a contrast run.
+- Scale group IDs in the group map (`group_id *= 10`) after intersection so hillslopes remain 10/20/30 and channels 40; the pruned raster is not rewritten.
+- Each grouped hillslope set becomes a contrast run for each contrast pair (N pairs × M groups).
 
 ### Contrast Execution Details (Current)
 
@@ -127,7 +127,7 @@ Dry run uses the same contrast build logic as a real run and reports run status 
 - **Selection modes**:
   - Cumulative: `contrast_id`, `topaz_id`, `run_status`
   - User-defined areas: `contrast_id`, `control_scenario`, `contrast_scenario`, `area_label`, `n_hillslopes`, `skip_status`, `run_status`
-  - Stream-order pruning: includes contrast_id, control_scenario, contrast_scenario, n_hillslopes, skip_status, run_status
+  - Stream-order pruning: includes contrast_id, control_scenario, contrast_scenario, subcatchments_group, n_hillslopes, skip_status, run_status
 - **Run status**: `up_to_date`, `needs_run`, `skipped`
 - **Skip status**: `skip_status = { skipped: bool, reason: "no_hillslopes" | null }` (current implementation)
 
@@ -188,9 +188,9 @@ This appendix defines the stream-order pruning contrast mode and the implementat
 - **No GeoJSON**: Stream-order mode does not use GeoJSON uploads or contrast hillslope limits.
 - **Working directory**: Operate in `dem/wbt` (WBT delineation workspace). Use the pruned outputs created by `_prune_stream_order` and avoid overwriting the original `netful.tif`.
 - **Pruning step**:
-  - Use the shared helper `_prune_stream_order(flovec, netful, passes)` (to be moved into `wepppy/rq/topo_utils.py`).
+  - Use the shared helper `_prune_stream_order(flovec, netful, passes)` in `wepppy/rq/topo_utils.py`.
   - Keep intermediate files and do not delete them.
-  - If a pruned output already exists, do not re-run pruning.
+  - If pruned outputs exist and are newer than the RedisPrep `build_subcatchments` timestamp, do not re-run pruning.
 - **Order + junction rasters**: Build order and junction maps for the pruned network so `hillslopes_topaz` uses inputs consistent with `netful.pruned_<passes>.tif`:
   - `netful.strahler_pruned_<passes>.tif` from `strahler_stream_order` using the pruned stream raster.
   - `chnjnt.strahler_pruned_<passes>.tif` from `stream_junction_identifier` using the pruned stream raster.
@@ -200,10 +200,10 @@ This appendix defines the stream-order pruning contrast mode and the implementat
   - Suggested outputs in `dem/wbt`:
     - `subwta.strahler_pruned_<passes>.tif`
     - `netw.strahler_pruned_<passes>.tsv`
-  - Do not rerun if the output files already exist.
+  - Do not rerun if the output files already exist and are newer than the RedisPrep `build_subcatchments` timestamp.
 - **Group assignment**:
   - Use `identify_mode_single_raster_key` with `key_fn=subwta.tif`, `parameter_fn=subwta.strahler_pruned_<passes>.tif`, and `ignore_channels=True`.
-  - Scale group IDs after intersection (`group_id *= 10`) so hillslope IDs end in 10/20/30.
+  - Scale group IDs after intersection (`group_id *= 10`) so hillslope IDs end in 10/20/30; the raster values are not rewritten.
   - Skip group IDs ending in `4` (channel groups) when building the group map.
   - Invert into `group_id -> [topaz_id, ...]` mappings.
 - **Contrast expansion**:
@@ -215,7 +215,8 @@ This appendix defines the stream-order pruning contrast mode and the implementat
 - **Incremental runs and invalidation**:
   - Run marker remains `wepp/output/interchange/README.md`.
   - `contrast_dependency_tree` continues to store sidecar SHA1 and redisprep snapshots.
-  - Invalidate on `order_reduction_passes` changes only (no raster hash).
+  - Invalidate contrast runs on `order_reduction_passes` changes (no raster hash).
+  - Stream-order derived WBT outputs are invalidated when RedisPrep `build_subcatchments` is newer than existing outputs.
   - NoDb writes under contention follow the existing retry pattern.
 
 #### Dry Run Schema (Stream-Order)

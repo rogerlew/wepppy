@@ -56,6 +56,7 @@ from wepppy.nodb.base import (
     nodb_setter,
 )
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.version import copy_version_for_clone
 from wepppy.wepp.interchange import run_wepp_hillslope_interchange
 from wepppy.wepp.reports import refresh_return_period_events
@@ -1868,11 +1869,28 @@ class Omni(NoDbBase):
             if not required_path.exists():
                 raise FileNotFoundError(f"Missing WBT {label} file: {required_path}")
 
+        prep = RedisPrep.getInstance(self.wd)
+        build_subcatchments_ts = prep[TaskEnum.build_subcatchments]
+
+        def _is_stale(path: Path) -> bool:
+            if build_subcatchments_ts is None:
+                return False
+            try:
+                return path.stat().st_mtime < build_subcatchments_ts
+            except FileNotFoundError:
+                return True
+
         strahler_path = netful_path.with_name("netful.strahler.tif")
         pruned_streams_path = netful_path.with_name(
             f"netful.pruned_{order_reduction_passes}.tif"
         )
-        if not (strahler_path.exists() and pruned_streams_path.exists()):
+        needs_prune = (
+            not strahler_path.exists()
+            or not pruned_streams_path.exists()
+            or _is_stale(strahler_path)
+            or _is_stale(pruned_streams_path)
+        )
+        if needs_prune:
             _prune_stream_order(
                 flovec_path,
                 netful_path,
@@ -1889,12 +1907,24 @@ class Omni(NoDbBase):
         netw_pruned_path = wbt_dir / f"netw.strahler_pruned_{order_reduction_passes}.tsv"
         order_pruned_path = wbt_dir / f"netful.strahler_pruned_{order_reduction_passes}.tif"
         chnjnt_pruned_path = wbt_dir / f"chnjnt.strahler_pruned_{order_reduction_passes}.tif"
-        if not (subwta_pruned_path.exists() and netw_pruned_path.exists()):
+        needs_hillslopes = (
+            needs_prune
+            or not subwta_pruned_path.exists()
+            or not netw_pruned_path.exists()
+            or _is_stale(subwta_pruned_path)
+            or _is_stale(netw_pruned_path)
+        )
+        if needs_hillslopes:
             from whitebox_tools import WhiteboxTools
 
             wbt = WhiteboxTools(verbose=False, raise_on_error=True)
             wbt.set_working_dir(str(wbt_dir))
-            if not order_pruned_path.exists():
+            rebuild_order = (
+                needs_prune
+                or not order_pruned_path.exists()
+                or _is_stale(order_pruned_path)
+            )
+            if rebuild_order:
                 ret = wbt.strahler_stream_order(
                     d8_pntr=str(flovec_path),
                     streams=str(pruned_streams_path),
@@ -1907,7 +1937,12 @@ class Omni(NoDbBase):
                         "StrahlerStreamOrder failed "
                         f"(flovec={flovec_path}, streams={pruned_streams_path}, output={order_pruned_path})"
                     )
-            if not chnjnt_pruned_path.exists():
+            rebuild_chnjnt = (
+                needs_prune
+                or not chnjnt_pruned_path.exists()
+                or _is_stale(chnjnt_pruned_path)
+            )
+            if rebuild_chnjnt:
                 ret = wbt.stream_junction_identifier(
                     d8_pntr=str(flovec_path),
                     streams=str(pruned_streams_path),
