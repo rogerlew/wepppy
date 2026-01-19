@@ -7,9 +7,11 @@ from collections import OrderedDict
 from datetime import datetime
 import awesome_codename
 import json
+import traceback
 
 from .._common import *  # noqa: F401,F403
 from flask import current_app
+from werkzeug.exceptions import HTTPException
 
 import wepppy
 from wepppy.all_your_base import isint
@@ -365,39 +367,48 @@ def _build_runs0_context(runid, config, playwright_load_all):
     return context
 
 @run_0_bp.route('/runs/<string:runid>/<config>/')
-@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view this run.")
 def runs0(runid, config):
     assert config is not None
-    
-    # Check if migrations are needed (unless skip_migration_check is set)
-    skip_migration_check = request.args.get('skip_migration_check', '').lower() in ('true', '1', 'yes')
-    playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
-    
-    if not skip_migration_check and not playwright_load_all:
-        wd = get_wd(runid)
-        if _exists(wd):
-            from wepppy.tools.migrations.runner import check_migrations_needed
 
-            migration_status = check_migrations_needed(wd)
-            gated_migrations = {
-                "nodb_version",
-                "watersheds",
-                "landuse_parquet",
-                "soils_parquet",
-            }
-            needs_migration = any(
-                entry.get("name") in gated_migrations and entry.get("would_apply")
-                for entry in migration_status.get("migrations", [])
-            )
-            if needs_migration:
-                # Redirect to migration page
-                return redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
-    
-    context = _build_runs0_context(runid, config, playwright_load_all)
-    if 'redirect' in context:
-        return redirect(context['redirect'])
-    return render_template('runs0_pure.htm', **context)
+    try:
+        authorize(runid, config)
+
+        # Check if migrations are needed (unless skip_migration_check is set)
+        skip_migration_check = request.args.get('skip_migration_check', '').lower() in ('true', '1', 'yes')
+        playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
+
+        if not skip_migration_check and not playwright_load_all:
+            wd = get_wd(runid)
+            if _exists(wd):
+                from wepppy.tools.migrations.runner import check_migrations_needed
+
+                migration_status = check_migrations_needed(wd)
+                gated_migrations = {
+                    "nodb_version",
+                    "watersheds",
+                    "landuse_parquet",
+                    "soils_parquet",
+                }
+                needs_migration = any(
+                    entry.get("name") in gated_migrations and entry.get("would_apply")
+                    for entry in migration_status.get("migrations", [])
+                )
+                if needs_migration:
+                    # Redirect to migration page
+                    return redirect(url_for_run('run_0.migration_page', runid=runid, config=config))
+
+        context = _build_runs0_context(runid, config, playwright_load_all)
+        if 'redirect' in context:
+            return redirect(context['redirect'])
+        return render_template('runs0_pure.htm', **context)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        stacktrace = traceback.format_exc()
+        # Reuse exception_factory for logging + run exception log side effects.
+        exception_factory(msg=exc, stacktrace=stacktrace, runid=runid, details=stacktrace)
+        return _render_run_internal_error_page(runid, config, stacktrace)
 
 
 @run_0_bp.route('/runs/<string:runid>/<config>/migrate')
@@ -615,6 +626,15 @@ def _render_run_not_found_page() -> Response:
         "page_title": "Run Not Found",
     }
     return make_response(render_template("browse/not_found.htm", **context), 404)
+
+
+def _render_run_internal_error_page(runid: str, config: str, stacktrace: str) -> Response:
+    context = {
+        "runid": runid,
+        "config": config,
+        "stacktrace": stacktrace,
+    }
+    return make_response(render_template("errors/run_0_internal_error.htm", **context), 500)
 
 
 @run_0_bp.app_errorhandler(403)

@@ -609,9 +609,15 @@ def authorize_and_handle_with_exception_factory(
         except HTTPException:
             # Preserve Flask/Werkzeug HTTP errors such as abort(403).
             raise
-        except Exception:
-            # For unexpected errors, return the standard exception payload.
-            return exception_factory(runid=runid)
+        except Exception as exc:
+            # For unexpected errors, return the standard exception payload with details.
+            stacktrace = traceback.format_exc()
+            return exception_factory(
+                msg=exc,
+                stacktrace=stacktrace,
+                runid=runid,
+                details=stacktrace,
+            )
             
     return wrapper
 
@@ -645,9 +651,15 @@ def handle_with_exception_factory(
         except HTTPException:
             # Preserve deliberate HTTP errors such as abort(404) / abort(403).
             raise
-        except Exception:
+        except Exception as exc:
             # Anything else becomes our standard error response, optionally tagged with runid.
-            return exception_factory(runid=runid)
+            stacktrace = traceback.format_exc()
+            return exception_factory(
+                msg=exc,
+                stacktrace=stacktrace,
+                runid=runid,
+                details=stacktrace,
+            )
 
     return wrapper
 

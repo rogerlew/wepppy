@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<title>{{ runid }} - Internal Server Error</title>
+<style>
+  body {
+    font-family: var(--wc-font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif);
+  }
+  a { text-decoration: none; }
+  .error-panel {
+    padding: 1em 0 0 2em;
+  }
+  .stacktrace {
+    margin-top: 1em;
+    padding: 1em;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    max-width: 95vw;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+</style>
+</head>
+<body>
+<div class="error-panel">
+    <h3 style="color: #d9534f;">500 - Internal Server Error</h3>
+    <p>Run '<b style="font-family: monospace;">{{ runid }}</b>' (config {{ config }}) failed to render.</p>
+    <p>Stacktrace:</p>
+    <pre class="stacktrace">{{ stacktrace|e }}</pre>
+</div>
+</body>
+</html>
