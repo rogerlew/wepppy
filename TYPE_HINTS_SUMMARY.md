@@ -257,7 +257,7 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/rhem/out/rhemtotalwatsed.py`
 - [x] `wepppy/rhem/rhem.py`
 - [ ] `wepppy/rq/__init__.py`
-- [ ] `wepppy/rq/agent_rq.py`
+- [x] `wepppy/rq/agent_rq.py`
 - [x] `wepppy/rq/batch_rq.py`
 - [x] `wepppy/rq/cancel_job.py`
 - [x] `wepppy/rq/interchange_rq.py`
@@ -266,7 +266,7 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/rq/omni_rq.py`
 - [x] `wepppy/rq/path_ce_rq.py`
 - [x] `wepppy/rq/project_rq.py`
-- [ ] `wepppy/rq/rq_worker.py`
+- [x] `wepppy/rq/rq_worker.py`
 - [x] `wepppy/rq/wepp_rq.py`
 - [x] `wepppy/rq/weppcloudr_rq.py`
 - [ ] `wepppy/soils/__init__.py`

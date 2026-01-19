@@ -117,6 +117,7 @@ Omni groups hillslopes into contrast runs using a selection mode. Cumulative obj
 - **User-defined list builder**: `contrast_pairs` is required for `user_defined_areas` (duplicates deduped, N pairs × M polygons, stable IDs by `control|contrast|area_label`).
 - **Scenario gating**: UI blocks pairs when either scenario has not been run (`wepp/output/interchange/README.md`).
 - **UI actions**: contrasts panel includes Run, Dry Run, and Delete (with confirmation).
+- **Delete cleanup**: Delete removes contrast runs, sidecars, `_pups/omni/contrasts/build_report.ndjson`, and `omni/contrasts.out.parquet`.
 
 #### Dry Run Endpoint
 
