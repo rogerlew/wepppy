@@ -101,8 +101,7 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
         "TopazID" in field_names
         or "WeppID" in field_names
         or ("topaz_id" not in field_names and "TopazID" not in field_names)
-        or "area" in field_names
-        or "Area" in field_names
+        or ("area" not in field_names and "Area" in field_names)
     )
 
     if not needs_migration:
@@ -119,6 +118,8 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
             df["topaz_id"] = df["TopazID"].astype("Int32")
         if "WeppID" in df.columns and "wepp_id" not in df.columns:
             df["wepp_id"] = df["WeppID"].astype("Int32")
+        if "Area" in df.columns and "area" not in df.columns:
+            df["area"] = pd.to_numeric(df["Area"], errors="coerce")
 
         # Ensure types
         if "topaz_id" in df.columns:
@@ -128,7 +129,8 @@ def migrate_landuse_parquet(wd: str, *, dry_run: bool = False) -> Tuple[bool, st
 
         # Drop uppercase columns
         df = df.drop(columns=["TopazID", "WeppID"], errors="ignore")
-        df = df.drop(columns=["area", "Area"], errors="ignore")
+        if "Area" in df.columns and "area" in df.columns:
+            df = df.drop(columns=["Area"], errors="ignore")
 
         # Write back
         df.to_parquet(landuse_parquet, index=False)

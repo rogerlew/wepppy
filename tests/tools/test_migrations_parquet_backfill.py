@@ -109,7 +109,7 @@ def test_landuse_parquet_normalization_does_not_write_index(tmp_path: Path) -> N
     landuse_dir = run_dir / "landuse"
     landuse_dir.mkdir(parents=True)
     landuse_parquet = landuse_dir / "landuse.parquet"
-    df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "name": ["test"]})
+    df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "name": ["test"], "area": [123.0]})
     df.to_parquet(landuse_parquet, index=False)
 
     applied, _ = migrate_landuse_parquet(str(run_dir), dry_run=False)
@@ -119,6 +119,8 @@ def test_landuse_parquet_normalization_does_not_write_index(tmp_path: Path) -> N
     assert "topaz_id" in updated.columns
     assert "TopazID" not in updated.columns
     assert "WeppID" not in updated.columns
+    assert "area" in updated.columns
+    assert updated["area"].iloc[0] == 123.0
     assert "index" not in updated.columns
     assert "__index_level_0__" not in updated.columns
 
@@ -128,7 +130,7 @@ def test_soils_parquet_normalization_does_not_write_index(tmp_path: Path) -> Non
     soils_dir = run_dir / "soils"
     soils_dir.mkdir(parents=True)
     soils_parquet = soils_dir / "soils.parquet"
-    df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "mukey": ["123"]})
+    df = pd.DataFrame({"TopazID": [1], "WeppID": [2], "mukey": ["123"], "area": [456.0]})
     df.to_parquet(soils_parquet, index=False)
 
     applied, _ = migrate_soils_parquet(str(run_dir), dry_run=False)
@@ -138,6 +140,8 @@ def test_soils_parquet_normalization_does_not_write_index(tmp_path: Path) -> Non
     assert "topaz_id" in updated.columns
     assert "TopazID" not in updated.columns
     assert "WeppID" not in updated.columns
+    assert "area" in updated.columns
+    assert updated["area"].iloc[0] == 456.0
     assert "index" not in updated.columns
     assert "__index_level_0__" not in updated.columns
 
