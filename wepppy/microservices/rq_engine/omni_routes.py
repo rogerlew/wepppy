@@ -132,6 +132,52 @@ def _coerce_omni_scenario_list(payload: dict[str, Any], raw_json: Any) -> list[d
     raise ValueError("Scenarios data must be a list")
 
 
+def _coerce_contrast_pairs(payload: dict[str, Any], raw_json: Any) -> list[dict[str, str]] | None:
+    raw_pairs: Any = None
+    if isinstance(raw_json, dict):
+        raw_pairs = raw_json.get("contrast_pairs") or raw_json.get("omni_contrast_pairs")
+    if raw_pairs is None:
+        raw_pairs = payload.get("omni_contrast_pairs") or payload.get("contrast_pairs")
+    if raw_pairs is None:
+        return None
+
+    if isinstance(raw_pairs, str):
+        try:
+            parsed = json.loads(raw_pairs)
+        except json.JSONDecodeError as exc:
+            raise ValueError("contrast_pairs must be valid JSON") from exc
+    else:
+        parsed = raw_pairs
+
+    if isinstance(parsed, dict):
+        parsed_list = [parsed]
+    elif isinstance(parsed, list):
+        parsed_list = parsed
+    else:
+        raise ValueError("contrast_pairs must be a list")
+
+    normalized: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for idx, entry in enumerate(parsed_list, start=1):
+        if not isinstance(entry, dict):
+            raise ValueError(f"contrast_pairs[{idx}] must be an object")
+        control_raw = entry.get("control_scenario")
+        contrast_raw = entry.get("contrast_scenario")
+        if control_raw in (None, "") or contrast_raw in (None, ""):
+            raise ValueError("contrast_pairs entries require control_scenario and contrast_scenario")
+        control = str(control_raw).strip()
+        contrast = str(contrast_raw).strip()
+        if not control or not contrast:
+            raise ValueError("contrast_pairs entries require control_scenario and contrast_scenario")
+        key = (control, contrast)
+        if key in seen:
+            continue
+        normalized.append({"control_scenario": control, "contrast_scenario": contrast})
+        seen.add(key)
+
+    return normalized or None
+
+
 def _extract_upload(form: FormData, key: str) -> UploadFile | None:
     upload = form.get(key)
     if isinstance(upload, UploadFile):
@@ -262,13 +308,17 @@ def _prepare_omni_contrasts(
     wd: str,
 ) -> dict[str, Any]:
     selection_mode = _normalize_contrast_selection_mode(payload.get("omni_contrast_selection_mode"))
+    contrast_pairs = _coerce_contrast_pairs(payload, raw_json)
     control_scenario = payload.get("omni_control_scenario")
     contrast_scenario = payload.get("omni_contrast_scenario")
 
-    if not control_scenario:
-        raise ValueError("Missing control scenario")
-    if not contrast_scenario:
-        raise ValueError("Missing contrast scenario")
+    if selection_mode != "user_defined_areas":
+        if not control_scenario:
+            raise ValueError("Missing control scenario")
+        if not contrast_scenario:
+            raise ValueError("Missing contrast scenario")
+    if selection_mode == "user_defined_areas" and not contrast_pairs:
+        raise ValueError("contrast_pairs is required for user-defined contrasts")
 
     objective_parameter = payload.get("omni_contrast_objective_parameter") or "Runoff_mm"
     threshold_fraction = _coerce_optional_float(
@@ -324,6 +374,7 @@ def _prepare_omni_contrasts(
         "omni_contrast_selection_mode": selection_mode,
         "omni_control_scenario": control_scenario,
         "omni_contrast_scenario": contrast_scenario,
+        "omni_contrast_pairs": contrast_pairs,
         "omni_contrast_objective_parameter": objective_parameter,
         "omni_contrast_cumulative_obj_param_threshold_fraction": threshold_fraction,
         "omni_contrast_hillslope_limit": hillslope_limit,
@@ -425,9 +476,16 @@ async def _run_omni_contrasts(
         if threshold_fraction is None:
             threshold_fraction = 0.8
         objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+        contrast_pairs = parsed_inputs.get("omni_contrast_pairs")
+        if selection_mode == "user_defined_areas":
+            control_def = None
+            contrast_def = None
+        else:
+            control_def = {"type": parsed_inputs.get("omni_control_scenario")}
+            contrast_def = {"type": parsed_inputs.get("omni_contrast_scenario")}
         omni.build_contrasts(
-            control_scenario_def={"type": parsed_inputs.get("omni_control_scenario")},
-            contrast_scenario_def={"type": parsed_inputs.get("omni_contrast_scenario")},
+            control_scenario_def=control_def,
+            contrast_scenario_def=contrast_def,
             obj_param=objective_parameter,
             contrast_cumulative_obj_param_threshold_fraction=threshold_fraction,
             contrast_hillslope_limit=parsed_inputs.get("omni_contrast_hillslope_limit"),
@@ -435,6 +493,7 @@ async def _run_omni_contrasts(
             hill_max_slope=parsed_inputs.get("omni_contrast_hill_max_slope"),
             select_burn_severities=parsed_inputs.get("omni_contrast_select_burn_severities"),
             select_topaz_ids=parsed_inputs.get("omni_contrast_select_topaz_ids"),
+            contrast_pairs=contrast_pairs,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
@@ -499,9 +558,16 @@ async def _dry_run_omni_contrasts(
         if threshold_fraction is None:
             threshold_fraction = 0.8
         objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+        contrast_pairs = parsed_inputs.get("omni_contrast_pairs")
+        if selection_mode == "user_defined_areas":
+            control_def = None
+            contrast_def = None
+        else:
+            control_def = {"type": parsed_inputs.get("omni_control_scenario")}
+            contrast_def = {"type": parsed_inputs.get("omni_contrast_scenario")}
         report = omni.build_contrasts_dry_run_report(
-            control_scenario_def={"type": parsed_inputs.get("omni_control_scenario")},
-            contrast_scenario_def={"type": parsed_inputs.get("omni_contrast_scenario")},
+            control_scenario_def=control_def,
+            contrast_scenario_def=contrast_def,
             obj_param=objective_parameter,
             contrast_cumulative_obj_param_threshold_fraction=threshold_fraction,
             contrast_hillslope_limit=parsed_inputs.get("omni_contrast_hillslope_limit"),
@@ -509,6 +575,7 @@ async def _dry_run_omni_contrasts(
             hill_max_slope=parsed_inputs.get("omni_contrast_hill_max_slope"),
             select_burn_severities=parsed_inputs.get("omni_contrast_select_burn_severities"),
             select_topaz_ids=parsed_inputs.get("omni_contrast_select_topaz_ids"),
+            contrast_pairs=contrast_pairs,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
@@ -523,6 +590,22 @@ async def _dry_run_omni_contrasts(
         {
             "message": "Dry run complete.",
             "result": report,
+        }
+    )
+
+
+async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
+    wd = get_wd(runid)
+    omni = Omni.getInstance(wd)
+    try:
+        omni.clear_contrasts()
+    except Exception as exc:
+        return error_response_with_traceback(f"Error deleting omni contrasts: {exc}")
+
+    return JSONResponse(
+        {
+            "message": "Contrasts deleted.",
+            "result": {"deleted": True},
         }
     )
 
@@ -567,6 +650,20 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     return await _dry_run_omni_contrasts(runid, config, request)
+
+
+@router.post("/runs/{runid}/{config}/delete-omni-contrasts")
+async def delete_omni_contrasts(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine delete-omni-contrasts auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    return await _delete_omni_contrasts(runid, config)
 
 
 __all__ = ["router"]

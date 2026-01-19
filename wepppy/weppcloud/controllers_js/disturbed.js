@@ -682,9 +682,9 @@ var Disturbed = (function () {
                         updateHasSbs(true, "upload");
                         
                         // Update filename display if provided
-                        var result = data.result || {};
-                        if (result.disturbed_fn) {
-                            updateCurrentFilename(result.disturbed_fn);
+                        var resultPayload = data.result || {};
+                        if (resultPayload.disturbed_fn) {
+                            updateCurrentFilename(resultPayload.disturbed_fn);
                         }
 
                         syncModeFromServer(0, null);

@@ -1,3 +1,4 @@
+import json
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -104,6 +105,9 @@ def test_run_omni_contrasts_requires_geojson_in_user_defined_mode(monkeypatch: p
             "/api/runs/run-1/cfg/run-omni-contrasts",
             json={
                 "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_pairs": [
+                    {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+                ],
                 "omni_control_scenario": "uniform_low",
                 "omni_contrast_scenario": "mulch",
             },
@@ -112,6 +116,25 @@ def test_run_omni_contrasts_requires_geojson_in_user_defined_mode(monkeypatch: p
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["message"] == "GeoJSON upload or path is required for user-defined contrasts."
+
+
+def test_run_omni_contrasts_requires_pairs_in_user_defined_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_geojson_path": "/tmp/areas.geojson",
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "contrast_pairs is required for user-defined contrasts"
 
 
 def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -131,12 +154,19 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
 
     monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
     monkeypatch.setattr(omni_routes, "_save_upload", lambda *args, **kwargs: "/tmp/uploaded.geojson")
+    pairs_payload = json.dumps(
+        [
+            {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+            {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        ]
+    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/run-omni-contrasts",
             data={
                 "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_pairs": pairs_payload,
                 "omni_control_scenario": "uniform_low",
                 "omni_contrast_scenario": "mulch",
             },
@@ -146,6 +176,12 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-22"
     assert captured["payload"]["omni_contrast_geojson_path"] == "/tmp/uploaded.geojson"
+    assert captured["payload"]["omni_contrast_pairs"] == [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+    ]
+    assert captured["build"]["contrast_pairs"] == [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+    ]
 
 
 def test_run_omni_contrasts_dry_run_cumulative(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -228,6 +264,9 @@ def test_run_omni_contrasts_dry_run_user_defined(monkeypatch: pytest.MonkeyPatch
             "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
             json={
                 "omni_contrast_selection_mode": "user_defined_areas",
+                "omni_contrast_pairs": [
+                    {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+                ],
                 "omni_control_scenario": "uniform_low",
                 "omni_contrast_scenario": "mulch",
                 "omni_contrast_geojson_path": "/tmp/areas.geojson",
@@ -241,3 +280,24 @@ def test_run_omni_contrasts_dry_run_user_defined(monkeypatch: pytest.MonkeyPatch
     assert result["items"][0]["run_status"] == "skipped"
     assert result["items"][0]["skip_status"]["reason"] == "no_hillslopes"
     assert result["items"][1]["run_status"] == "up_to_date"
+
+
+def test_delete_omni_contrasts(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+    cleared = {"done": False}
+
+    class DummyOmni:
+        def clear_contrasts(self) -> None:
+            cleared["done"] = True
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/delete-omni-contrasts")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["message"] == "Contrasts deleted."
+    assert payload["result"]["deleted"] is True
+    assert cleared["done"] is True

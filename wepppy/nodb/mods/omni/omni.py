@@ -588,6 +588,7 @@ class Omni(NoDbBase):
             self._contrast_geojson_path = None
             self._contrast_geojson_name_key = None
             self._contrast_order_reduction_passes = None
+            self._contrast_pairs = []
 
             self._scenario_dependency_tree = {}
             self._contrast_dependency_tree = {}
@@ -826,6 +827,45 @@ class Omni(NoDbBase):
             if order_reduction_passes is not None:
                 self._contrast_order_reduction_passes = order_reduction_passes
 
+            contrast_pairs = kwds.get("omni_contrast_pairs", None)
+            if contrast_pairs is None:
+                contrast_pairs = kwds.get("contrast_pairs", None)
+            if contrast_pairs is not None:
+                self._contrast_pairs = self._normalize_contrast_pairs(contrast_pairs)
+
+    def _normalize_contrast_pairs(self, value: Any) -> List[Dict[str, str]]:
+        if value in (None, ""):
+            return []
+        if isinstance(value, dict):
+            candidates = [value]
+        elif isinstance(value, (list, tuple)):
+            candidates = list(value)
+        else:
+            return []
+
+        normalized: List[Dict[str, str]] = []
+        seen: Set[str] = set()
+        for entry in candidates:
+            if not isinstance(entry, dict):
+                continue
+            control_raw = entry.get("control_scenario")
+            contrast_raw = entry.get("contrast_scenario")
+            if control_raw in (None, "") or contrast_raw in (None, ""):
+                continue
+            control_key = self._normalize_scenario_key(control_raw)
+            contrast_key = self._normalize_scenario_key(contrast_raw)
+            pair_key = f"{control_key}::{contrast_key}"
+            if pair_key in seen:
+                continue
+            normalized.append(
+                {
+                    "control_scenario": control_key,
+                    "contrast_scenario": contrast_key,
+                }
+            )
+            seen.add(pair_key)
+        return normalized
+
     @property
     def contrasts(self) -> Optional[List[ContrastMapping]]:
         contrasts = getattr(self, '_contrasts', None)
@@ -990,6 +1030,15 @@ class Omni(NoDbBase):
         self._contrast_order_reduction_passes = value
 
     @property
+    def contrast_pairs(self) -> List[Dict[str, str]]:
+        return getattr(self, "_contrast_pairs", []) or []
+
+    @contrast_pairs.setter
+    @nodb_setter
+    def contrast_pairs(self, value: List[Dict[str, str]]) -> None:
+        self._contrast_pairs = value
+
+    @property
     def omni_dir(self) -> str:
         # `wd/omni` contains the aggregated .parquet outputs and _limbo
         # `_pups/omni` contains the scenario clones and contrasts to make _pups generic to all projects
@@ -1081,6 +1130,7 @@ class Omni(NoDbBase):
             self._contrast_names = None
             self._contrast_labels = None
             self._contrast_dependency_tree = {}
+            self._contrast_pairs = []
         self._clean_contrast_runs()
         sidecar_dir = _join(self.omni_dir, 'contrasts')
         if _exists(sidecar_dir):
@@ -1173,6 +1223,21 @@ class Omni(NoDbBase):
             'README.md',
         )
 
+    def _scenario_run_readme_path(self, scenario_name: Optional[Any]) -> str:
+        scenario_key = self._normalize_scenario_key(scenario_name)
+        if scenario_key == str(self.base_scenario):
+            return _join(self.wd, "wepp", "output", "interchange", "README.md")
+        return _join(
+            self.wd,
+            OMNI_REL_DIR,
+            "scenarios",
+            scenario_key,
+            "wepp",
+            "output",
+            "interchange",
+            "README.md",
+        )
+
     def _redisprep_snapshot(self, path: str) -> Optional[Dict[str, Any]]:
         if not _exists(path):
             return None
@@ -1189,9 +1254,18 @@ class Omni(NoDbBase):
             for key, value in payload.items()
             if str(key).startswith('timestamps:')
         }
-        if 'timestamps:run_wepp_watershed' not in snapshot:
+        return self._normalize_contrast_redisprep_snapshot(snapshot)
+
+    def _normalize_contrast_redisprep_snapshot(
+        self, snapshot: Optional[Dict[str, Any]]
+    ) -> Optional[Dict[str, Any]]:
+        if not snapshot:
             return None
-        return snapshot
+        keep_keys = {"timestamps:run_wepp_hillslopes", "timestamps:run_wepp_watershed"}
+        filtered = {key: snapshot.get(key) for key in keep_keys if key in snapshot}
+        if "timestamps:run_wepp_watershed" not in filtered:
+            return None
+        return filtered
 
     def _scenario_redisprep_snapshot(self, scenario_key: str) -> Optional[Dict[str, Any]]:
         if scenario_key == str(self.base_scenario):
@@ -1231,11 +1305,15 @@ class Omni(NoDbBase):
         prev_entry = self.contrast_dependency_tree.get(contrast_name)
         if not prev_entry:
             return 'needs_run'
+        prev_control = self._normalize_contrast_redisprep_snapshot(prev_entry.get('control_redisprep'))
+        prev_contrast = self._normalize_contrast_redisprep_snapshot(prev_entry.get('contrast_redisprep'))
+        if prev_control is None or prev_contrast is None:
+            return 'needs_run'
         if prev_entry.get('sidecar_sha1') != sidecar_sha1:
             return 'needs_run'
-        if prev_entry.get('control_redisprep') != control_snapshot:
+        if prev_control != control_snapshot:
             return 'needs_run'
-        if prev_entry.get('contrast_redisprep') != contrast_snapshot:
+        if prev_contrast != contrast_snapshot:
             return 'needs_run'
 
         return 'up_to_date'
@@ -1282,15 +1360,16 @@ class Omni(NoDbBase):
 
     def build_contrasts(
         self,
-        control_scenario_def: ScenarioDef,
-        contrast_scenario_def: ScenarioDef,
+        control_scenario_def: Optional[ScenarioDef],
+        contrast_scenario_def: Optional[ScenarioDef],
         obj_param: str = 'Runoff_mm',
         contrast_cumulative_obj_param_threshold_fraction: float = 0.8,
         contrast_hillslope_limit: Optional[int] = None,
         hill_min_slope: Optional[float] = None,
         hill_max_slope: Optional[float] = None,
         select_burn_severities: Optional[List[int]] = None,
-        select_topaz_ids: Optional[List[int]] = None
+        select_topaz_ids: Optional[List[int]] = None,
+        contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> None:
         """
         Extracts the specified objective parameter from the specified GeoPackage file.
@@ -1324,8 +1403,21 @@ class Omni(NoDbBase):
 
         self.logger.info('build_contrasts')
 
-        control_scenario = _scenario_name_from_scenario_definition(control_scenario_def)
-        contrast_scenario = _scenario_name_from_scenario_definition(contrast_scenario_def)
+        selection_mode_value = getattr(self, "_contrast_selection_mode", None)
+        selection_mode = (selection_mode_value or "cumulative").strip().lower()
+
+        control_scenario = (
+            _scenario_name_from_scenario_definition(control_scenario_def)
+            if control_scenario_def is not None
+            else None
+        )
+        contrast_scenario = (
+            _scenario_name_from_scenario_definition(contrast_scenario_def)
+            if contrast_scenario_def is not None
+            else None
+        )
+        if selection_mode != "user_defined_areas" and (control_scenario is None or contrast_scenario is None):
+            raise ValueError("control_scenario_def and contrast_scenario_def are required for contrast builds")
 
         # save parameters for defining contrasts
         with self.locked():
@@ -1338,6 +1430,8 @@ class Omni(NoDbBase):
             self._contrast_hill_max_slope = hill_max_slope
             self._contrast_select_burn_severities = select_burn_severities
             self._contrast_select_topaz_ids = select_topaz_ids
+            if contrast_pairs is not None:
+                self._contrast_pairs = self._normalize_contrast_pairs(contrast_pairs)
             
         self._build_contrasts()
 
@@ -1675,6 +1769,10 @@ class Omni(NoDbBase):
         if not _exists(geojson_path):
             raise FileNotFoundError(f"Contrast GeoJSON not found: {geojson_path}")
 
+        contrast_pairs = self._normalize_contrast_pairs(getattr(self, "_contrast_pairs", None))
+        if not contrast_pairs:
+            raise ValueError("omni_contrast_pairs is required for user_defined_areas mode")
+
         ignored_fields = []
         if self._contrast_hillslope_limit is not None:
             ignored_fields.append("omni_contrast_hillslope_limit")
@@ -1780,15 +1878,10 @@ class Omni(NoDbBase):
         sindex = getattr(hillslope_gdf, "sindex", None)
         hill_indices = list(hillslope_lookup.keys())
 
-        contrast_scenario = self._contrast_scenario
-        control_scenario = self._control_scenario
-        if contrast_scenario == str(self.base_scenario):
-            contrast_scenario = None
-        if control_scenario == str(self.base_scenario):
-            control_scenario = None
+        existing_signature_map = self._load_user_defined_signature_map()
+        next_id = max(existing_signature_map.values(), default=0) + 1
 
         name_key = getattr(self, "_contrast_geojson_name_key", None)
-        feature_count = len(user_gdf)
 
         with self.locked():
             self._contrasts = None
@@ -1804,9 +1897,8 @@ class Omni(NoDbBase):
         os.makedirs(contrasts_dir, exist_ok=True)
         report_fn = _join(contrasts_dir, "build_report.ndjson")
 
-        contrast_names: List[Optional[str]] = [None] * feature_count
+        contrast_names: List[Optional[str]] = []
         contrast_labels: Dict[int, str] = {}
-        report_control_scenario = control_scenario or str(self.base_scenario)
 
         def _sorted_topaz_ids(values: Set[str]) -> List[str]:
             try:
@@ -1815,101 +1907,116 @@ class Omni(NoDbBase):
                 return sorted(values)
 
         with open(report_fn, "w", encoding="ascii") as report_fp:
-            for feature_index, (_, row) in enumerate(user_gdf.iterrows(), start=1):
-                label = None
-                if name_key:
-                    raw_label = row.get(name_key)
-                    if raw_label not in (None, ""):
-                        label = str(raw_label).strip()
-                if not label:
-                    label = str(feature_index)
-                contrast_labels[feature_index] = label
+            for pair_index, pair in enumerate(contrast_pairs, start=1):
+                control_key = self._normalize_scenario_key(pair.get("control_scenario"))
+                contrast_key = self._normalize_scenario_key(pair.get("contrast_scenario"))
+                control_scenario = None if control_key == str(self.base_scenario) else control_key
+                contrast_scenario = None if contrast_key == str(self.base_scenario) else contrast_key
 
-                geom = row.geometry
-                selected_topaz: Set[str] = set()
-                if geom is not None and not getattr(geom, "is_empty", False):
-                    try:
-                        if sindex is not None:
-                            candidate_indices = list(sindex.intersection(geom.bounds))
-                        else:
-                            candidate_indices = hill_indices
-                        for idx in candidate_indices:
-                            hill = hillslope_lookup.get(idx)
-                            if not hill:
-                                continue
-                            hill_area = hill["area"]
-                            if hill_area <= 0.0:
-                                continue
-                            inter_area = float(geom.intersection(hill["geometry"]).area)
-                            if inter_area / hill_area >= 0.5:
-                                selected_topaz.add(hill["topaz_id"])
-                    except Exception as exc:
-                        self.logger.info(
-                            "Failed to evaluate contrast feature %s: %s",
-                            feature_index,
-                            exc,
-                        )
+                for feature_index, (_, row) in enumerate(user_gdf.iterrows(), start=1):
+                    label = None
+                    if name_key:
+                        raw_label = row.get(name_key)
+                        if raw_label not in (None, ""):
+                            label = str(raw_label).strip()
+                    if not label:
+                        label = str(feature_index)
 
-                contrast_id = feature_index
-                report_entry = {
-                    "contrast_id": contrast_id,
-                    "control_scenario": report_control_scenario,
-                    "contrast_scenario": contrast_scenario,
-                    "wepp_id": None,
-                    "topaz_id": None,
-                    "obj_param": None,
-                    "running_obj_param": None,
-                    "pct_cumulative": None,
-                    "selection_mode": "user_defined_areas",
-                    "feature_index": feature_index,
-                    "area_label": label,
-                    "n_hillslopes": len(selected_topaz),
-                    "topaz_ids": _sorted_topaz_ids(selected_topaz),
-                }
+                    signature = self._contrast_pair_signature(control_key, contrast_key, label)
+                    contrast_id = existing_signature_map.get(signature)
+                    if contrast_id is None:
+                        contrast_id = next_id
+                        next_id += 1
+                        existing_signature_map[signature] = contrast_id
+                    contrast_labels[contrast_id] = label
+                    while len(contrast_names) < contrast_id:
+                        contrast_names.append(None)
 
-                if not selected_topaz:
-                    report_entry["status"] = "skipped"
-                    report_fp.write(json.dumps(report_entry) + "\n")
-                    continue
-
-                if contrast_scenario is None:
-                    contrast_name = f"{control_scenario},{contrast_id}__to__{self.base_scenario}"
-                else:
-                    contrast_name = f"{control_scenario},{contrast_id}__to__{contrast_scenario}"
-
-                contrast: ContrastMapping = {}
-                for topaz_id, wepp_id in top2wepp.items():
-                    if topaz_id in selected_topaz:
-                        if contrast_scenario is None:
-                            wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                        else:
-                            wepp_id_path = _join(
-                                self.wd,
-                                OMNI_REL_DIR,
-                                "scenarios",
-                                contrast_scenario,
-                                "wepp",
-                                "output",
-                                f"H{wepp_id}",
+                    geom = row.geometry
+                    selected_topaz: Set[str] = set()
+                    if geom is not None and not getattr(geom, "is_empty", False):
+                        try:
+                            if sindex is not None:
+                                candidate_indices = list(sindex.intersection(geom.bounds))
+                            else:
+                                candidate_indices = hill_indices
+                            for idx in candidate_indices:
+                                hill = hillslope_lookup.get(idx)
+                                if not hill:
+                                    continue
+                                hill_area = hill["area"]
+                                if hill_area <= 0.0:
+                                    continue
+                                inter_area = float(geom.intersection(hill["geometry"]).area)
+                                if inter_area / hill_area >= 0.5:
+                                    selected_topaz.add(hill["topaz_id"])
+                        except Exception as exc:
+                            self.logger.info(
+                                "Failed to evaluate contrast feature %s: %s",
+                                feature_index,
+                                exc,
                             )
+
+                    report_entry = {
+                        "contrast_id": contrast_id,
+                        "control_scenario": control_key,
+                        "contrast_scenario": contrast_key,
+                        "wepp_id": None,
+                        "topaz_id": None,
+                        "obj_param": None,
+                        "running_obj_param": None,
+                        "pct_cumulative": None,
+                        "selection_mode": "user_defined_areas",
+                        "feature_index": feature_index,
+                        "area_label": label,
+                        "n_hillslopes": len(selected_topaz),
+                        "topaz_ids": _sorted_topaz_ids(selected_topaz),
+                        "pair_index": pair_index,
+                    }
+
+                    if not selected_topaz:
+                        report_entry["status"] = "skipped"
+                        report_fp.write(json.dumps(report_entry) + "\n")
+                        continue
+
+                    if contrast_scenario is None:
+                        contrast_name = f"{control_scenario},{contrast_id}__to__{self.base_scenario}"
                     else:
-                        if control_scenario is None:
-                            wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
-                        else:
-                            wepp_id_path = _join(
-                                self.wd,
-                                OMNI_REL_DIR,
-                                "scenarios",
-                                control_scenario,
-                                "wepp",
-                                "output",
-                                f"H{wepp_id}",
-                            )
-                    contrast[topaz_id] = wepp_id_path
+                        contrast_name = f"{control_scenario},{contrast_id}__to__{contrast_scenario}"
 
-                contrast_names[contrast_id - 1] = contrast_name
-                self._write_contrast_sidecar(contrast_id, contrast)
-                report_fp.write(json.dumps(report_entry) + "\n")
+                    contrast: ContrastMapping = {}
+                    for topaz_id, wepp_id in top2wepp.items():
+                        if topaz_id in selected_topaz:
+                            if contrast_scenario is None:
+                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                            else:
+                                wepp_id_path = _join(
+                                    self.wd,
+                                    OMNI_REL_DIR,
+                                    "scenarios",
+                                    contrast_scenario,
+                                    "wepp",
+                                    "output",
+                                    f"H{wepp_id}",
+                                )
+                        else:
+                            if control_scenario is None:
+                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                            else:
+                                wepp_id_path = _join(
+                                    self.wd,
+                                    OMNI_REL_DIR,
+                                    "scenarios",
+                                    control_scenario,
+                                    "wepp",
+                                    "output",
+                                    f"H{wepp_id}",
+                                )
+                        contrast[topaz_id] = wepp_id_path
+
+                    contrast_names[contrast_id - 1] = contrast_name
+                    self._write_contrast_sidecar(contrast_id, contrast)
+                    report_fp.write(json.dumps(report_entry) + "\n")
 
         with self.locked():
             self._contrasts = None
@@ -1918,8 +2025,8 @@ class Omni(NoDbBase):
 
     def build_contrasts_dry_run_report(
         self,
-        control_scenario_def: ScenarioDef,
-        contrast_scenario_def: ScenarioDef,
+        control_scenario_def: Optional[ScenarioDef],
+        contrast_scenario_def: Optional[ScenarioDef],
         obj_param: str = 'Runoff_mm',
         contrast_cumulative_obj_param_threshold_fraction: float = 0.8,
         contrast_hillslope_limit: Optional[int] = None,
@@ -1927,6 +2034,7 @@ class Omni(NoDbBase):
         hill_max_slope: Optional[float] = None,
         select_burn_severities: Optional[List[int]] = None,
         select_topaz_ids: Optional[List[int]] = None,
+        contrast_pairs: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
         self.build_contrasts(
             control_scenario_def=control_scenario_def,
@@ -1938,8 +2046,12 @@ class Omni(NoDbBase):
             hill_max_slope=hill_max_slope,
             select_burn_severities=select_burn_severities,
             select_topaz_ids=select_topaz_ids,
+            contrast_pairs=contrast_pairs,
         )
 
+        return self.contrast_status_report()
+
+    def contrast_status_report(self) -> Dict[str, Any]:
         selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
         if selection_mode not in {"cumulative", "user_defined_areas"}:
             raise ValueError(f'Contrast selection mode "{selection_mode}" is not implemented yet.')
@@ -1964,8 +2076,11 @@ class Omni(NoDbBase):
             contrast_labels = getattr(self, "_contrast_labels", None) or {}
 
             items: List[Dict[str, Any]] = []
-            for contrast_id in range(1, len(contrast_names) + 1):
-                contrast_name = contrast_names[contrast_id - 1]
+            max_id = max(report_entries.keys(), default=0)
+            if len(contrast_names) > max_id:
+                max_id = len(contrast_names)
+            for contrast_id in range(1, max_id + 1):
+                contrast_name = contrast_names[contrast_id - 1] if contrast_id - 1 < len(contrast_names) else None
                 report_entry = report_entries.get(contrast_id, {})
                 label = report_entry.get("area_label")
                 if not label:
@@ -2299,6 +2414,48 @@ class Omni(NoDbBase):
         }
         return hashlib.sha1(json.dumps(payload_serializable, sort_keys=True).encode('utf-8')).hexdigest()
 
+    def _contrast_pair_signature(self, control_key: str, contrast_key: str, area_label: str) -> str:
+        return f"{control_key}|{contrast_key}|{area_label}"
+
+    def _load_user_defined_signature_map(self) -> Dict[str, int]:
+        signature_map: Dict[str, int] = {}
+        for entry in self._load_contrast_build_report():
+            if entry.get("selection_mode") != "user_defined_areas":
+                continue
+            contrast_id = entry.get("contrast_id")
+            if isinstance(contrast_id, str):
+                try:
+                    contrast_id = int(contrast_id)
+                except (TypeError, ValueError):
+                    continue
+            if not isinstance(contrast_id, int):
+                continue
+            control_key = self._normalize_scenario_key(entry.get("control_scenario"))
+            contrast_key = self._normalize_scenario_key(entry.get("contrast_scenario"))
+            label = entry.get("area_label")
+            if label in (None, ""):
+                label = str(contrast_id)
+            signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+            signature_map[signature] = contrast_id
+        if signature_map:
+            return signature_map
+
+        contrast_labels = getattr(self, "_contrast_labels", None) or {}
+        contrast_names = self.contrast_names or []
+        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+            if not contrast_name:
+                continue
+            try:
+                control_part, target_part = contrast_name.split("__to__", maxsplit=1)
+            except ValueError:
+                continue
+            control_key = self._normalize_scenario_key(control_part.split(",")[0])
+            contrast_key = self._normalize_scenario_key(target_part)
+            label = contrast_labels.get(contrast_id) or str(contrast_id)
+            signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+            signature_map[signature] = contrast_id
+        return signature_map
+
     def _post_omni_run(self, omni_wd: str, scenario_name: str):
         from wepppy.nodb.core import Ron
         ron = Ron.getInstance(omni_wd)
@@ -2326,6 +2483,16 @@ class Omni(NoDbBase):
                 ran_scenarios.append(_scenario_name)
                 
         return ran_scenarios
+
+    def scenario_run_markers(self) -> Dict[str, bool]:
+        markers: Dict[str, bool] = {}
+        for scenario_def in self.scenarios:
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            markers[scenario_name] = _exists(self._scenario_run_readme_path(scenario_name))
+        base_name = str(self.base_scenario)
+        if base_name not in markers:
+            markers[base_name] = _exists(self._scenario_run_readme_path(base_name))
+        return markers
     
     @property
     def use_rq_job_pool_concurrency(self) -> bool:

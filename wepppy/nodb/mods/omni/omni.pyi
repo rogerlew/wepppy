@@ -202,6 +202,12 @@ class Omni(NoDbBase):
     def contrast_order_reduction_passes(self, value: Optional[int]) -> None: ...
 
     @property
+    def contrast_pairs(self) -> List[Dict[str, str]]: ...
+
+    @contrast_pairs.setter
+    def contrast_pairs(self, value: List[Dict[str, str]]) -> None: ...
+
+    @property
     def omni_dir(self) -> str: ...
 
     def get_objective_parameter_from_gpkg(self, objective_parameter: str, scenario: Optional[str] = ...) -> Tuple[List[Any], float]: ...
@@ -226,6 +232,10 @@ class Omni(NoDbBase):
 
     def _contrast_run_readme_path(self, contrast_id: int) -> str: ...
 
+    def _scenario_run_readme_path(self, scenario_name: Optional[Any]) -> str: ...
+
+    def _normalize_contrast_pairs(self, value: Any) -> List[Dict[str, str]]: ...
+
     def _redisprep_snapshot(self, path: str) -> Optional[Dict[str, Any]]: ...
 
     def _scenario_redisprep_snapshot(self, scenario_key: str) -> Optional[Dict[str, Any]]: ...
@@ -247,8 +257,8 @@ class Omni(NoDbBase):
 
     def build_contrasts(
         self,
-        control_scenario_def: ScenarioDef,
-        contrast_scenario_def: ScenarioDef,
+        control_scenario_def: Optional[ScenarioDef],
+        contrast_scenario_def: Optional[ScenarioDef],
         obj_param: str = ...,
         contrast_cumulative_obj_param_threshold_fraction: float = ...,
         contrast_hillslope_limit: Optional[int] = ...,
@@ -256,6 +266,7 @@ class Omni(NoDbBase):
         hill_max_slope: Optional[float] = ...,
         select_burn_severities: Optional[List[int]] = ...,
         select_topaz_ids: Optional[List[int]] = ...,
+        contrast_pairs: Optional[List[Dict[str, str]]] = ...,
     ) -> None: ...
 
     @property
@@ -267,8 +278,8 @@ class Omni(NoDbBase):
 
     def build_contrasts_dry_run_report(
         self,
-        control_scenario_def: ScenarioDef,
-        contrast_scenario_def: ScenarioDef,
+        control_scenario_def: Optional[ScenarioDef],
+        contrast_scenario_def: Optional[ScenarioDef],
         obj_param: str = ...,
         contrast_cumulative_obj_param_threshold_fraction: float = ...,
         contrast_hillslope_limit: Optional[int] = ...,
@@ -276,7 +287,10 @@ class Omni(NoDbBase):
         hill_max_slope: Optional[float] = ...,
         select_burn_severities: Optional[List[int]] = ...,
         select_topaz_ids: Optional[List[int]] = ...,
+        contrast_pairs: Optional[List[Dict[str, str]]] = ...,
     ) -> Dict[str, Any]: ...
+
+    def contrast_status_report(self) -> Dict[str, Any]: ...
 
     def run_omni_contrasts(self) -> None: ...
 
@@ -296,10 +310,16 @@ class Omni(NoDbBase):
 
     def _contrast_signature(self, contrast_name: str, contrast_payload: ContrastMapping) -> str: ...
 
+    def _contrast_pair_signature(self, control_key: str, contrast_key: str, area_label: str) -> str: ...
+
+    def _load_user_defined_signature_map(self) -> Dict[str, int]: ...
+
     def _post_omni_run(self, omni_wd: str, scenario_name: str) -> None: ...
 
     @property
     def ran_scenarios(self) -> List[str]: ...
+
+    def scenario_run_markers(self) -> Dict[str, bool]: ...
 
     @property
     def use_rq_job_pool_concurrency(self) -> bool: ...

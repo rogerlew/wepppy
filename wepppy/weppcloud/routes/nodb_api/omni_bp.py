@@ -1,5 +1,7 @@
 """Routes for omni blueprint extracted from app.py."""
 
+import traceback
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron
@@ -67,6 +69,8 @@ def _summarize_omni_contrast_outlet_metrics(df_report, selection_mode):
     label_key = None
     if selection_mode == 'cumulative' and 'contrast_topaz_id' in report_dict:
         label_key = 'contrast_topaz_id'
+    elif selection_mode == 'user_defined_areas' and 'contrast_id' in report_dict:
+        label_key = 'contrast_id'
     if label_key is None:
         if 'contrast' in report_dict:
             label_key = 'contrast'
@@ -138,7 +142,8 @@ def get_scenario_run_state(runid, config):
         omni = Omni.getInstance(wd)
         return jsonify({
             'run_state': omni.scenario_run_state,
-            'dependency_tree': omni.scenario_dependency_tree
+            'dependency_tree': omni.scenario_dependency_tree,
+            'run_markers': omni.scenario_run_markers(),
         })
     except Exception:
         return exception_factory('Error Getting Scenario Run State', runid=runid)
@@ -196,8 +201,8 @@ def query_omni_scenarios_report(runid, config):
                                watershed=Watershed.getInstance(wd),
                                scenarios=scenarios)
 
-    except:
-        return exception_factory(runid=runid)
+    except Exception as exc:
+        return exception_factory(msg=exc, runid=runid, details=traceback.format_exc())
 
 
 @omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts')
@@ -207,19 +212,60 @@ def query_omni_contrasts_report(runid, config):
     try:
         wd = get_wd(runid)
         omni = Omni.getInstance(wd)
+        selection_mode = (omni.contrast_selection_mode or "cumulative").strip().lower()
         df_report = omni.contrasts_report()
-
-        selection_mode = omni.contrast_selection_mode or "cumulative"
-        label_header = "Topaz ID" if selection_mode == "cumulative" else "Contrast"
         contrasts = _summarize_omni_contrast_outlet_metrics(df_report, selection_mode)
-        control_name = omni._normalize_scenario_key(omni.control_scenario)
+
+        metrics_index = {}
+        for entry in contrasts:
+            contrast_id = entry.get("contrast_id")
+            if contrast_id is None:
+                continue
+            try:
+                key = int(contrast_id)
+            except (TypeError, ValueError):
+                key = str(contrast_id)
+            metrics_index[key] = entry
+
+        status_report = omni.contrast_status_report()
+        items = []
+        if selection_mode == "user_defined_areas":
+            for entry in status_report.get("items", []):
+                contrast_id = entry.get("contrast_id")
+                metrics = metrics_index.get(contrast_id) or metrics_index.get(str(contrast_id))
+                items.append(
+                    {
+                        "contrast_id": contrast_id,
+                        "control_scenario": entry.get("control_scenario"),
+                        "contrast_scenario": entry.get("contrast_scenario"),
+                        "area_label": entry.get("area_label"),
+                        "n_hillslopes": entry.get("n_hillslopes"),
+                        "water_discharge": metrics.get("water_discharge") if metrics else None,
+                        "soil_loss": metrics.get("soil_loss") if metrics else None,
+                    }
+                )
+        else:
+            for entry in status_report.get("items", []):
+                contrast_id = entry.get("contrast_id")
+                metrics = metrics_index.get(contrast_id) or metrics_index.get(str(contrast_id))
+                topaz_id = entry.get("topaz_id")
+                if topaz_id is None and metrics:
+                    topaz_id = metrics.get("name")
+                items.append(
+                    {
+                        "contrast_id": contrast_id,
+                        "topaz_id": topaz_id,
+                        "water_discharge": metrics.get("water_discharge") if metrics else None,
+                        "soil_loss": metrics.get("soil_loss") if metrics else None,
+                    }
+                )
+
+        report = {"selection_mode": selection_mode, "items": items}
 
         return render_template('reports/omni/omni_contrasts_summary.htm', runid=runid, config=config,
                                user=current_user,
                                watershed=Watershed.getInstance(wd),
-                               contrasts=contrasts,
-                               control_name=control_name,
-                               label_header=label_header)
+                               report=report)
 
     except:
         return exception_factory(runid=runid)

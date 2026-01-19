@@ -45,15 +45,16 @@
     ("prescribed_fire", "Prescribed Fire")
   ] %}
 
+  <div class="wc-stack" data-omni-contrast-mode="cumulative stream_order_pruning">
   {{ ui.select_field(
        "omni_control_scenario",
        "Control scenario",
        options=scenario_option_labels,
-       selected=omni.control_scenario if omni.control_scenario is defined else "",
+       selected=omni.control_scenario if omni.control_scenario is not none else "",
        extra_control_class="disable-readonly",
        attrs={
          "data-omni-contrast-role": "control-scenario",
-         "data-omni-contrast-selected": omni.control_scenario if omni.control_scenario is defined else ""
+         "data-omni-contrast-selected": omni.control_scenario if omni.control_scenario is not none else ""
        }
      ) }}
 
@@ -61,13 +62,14 @@
        "omni_contrast_scenario",
        "Contrast scenario",
        options=scenario_option_labels,
-       selected=omni.contrast_scenario if omni.contrast_scenario is defined else "",
+       selected=omni.contrast_scenario if omni.contrast_scenario is not none else "",
        extra_control_class="disable-readonly",
        attrs={
          "data-omni-contrast-role": "contrast-scenario",
-         "data-omni-contrast-selected": omni.contrast_scenario if omni.contrast_scenario is defined else ""
+         "data-omni-contrast-selected": omni.contrast_scenario if omni.contrast_scenario is not none else ""
        }
      ) }}
+  </div>
 
   <div class="wc-stack" data-omni-contrast-mode="cumulative">
     {{ ui.select_field(
@@ -99,12 +101,17 @@
     {{ ui.numeric_field(
          "omni_contrast_hillslope_limit",
          "Hillslope limit (optional)",
-         value=omni.contrast_hillslope_limit if omni.contrast_hillslope_limit is defined else "",
+         value=omni.contrast_hillslope_limit if omni.contrast_hillslope_limit is not none else "",
          precision="1",
          min=1,
-         help="Cap the number of contrasts for large watersheds.",
+         max=100,
+         help="Cap the number of contrasts for large watersheds (max 100).",
          extra_control_class="disable-readonly"
        ) }}
+
+    <p class="wc-text-muted" data-omni-contrast-role="hillslope-cap-note">
+      Cumulative mode caps contrast selection at 100 hillslopes.
+    </p>
 
     <details class="wc-callout wc-callout--compact">
       <summary>Advanced filters</summary>
@@ -112,7 +119,7 @@
         {{ ui.numeric_field(
              "omni_contrast_hill_min_slope",
              "Minimum slope (%)",
-             value=omni.contrast_hill_min_slope if omni.contrast_hill_min_slope is defined else "",
+             value=omni.contrast_hill_min_slope if omni.contrast_hill_min_slope is not none else "",
              precision="0.1",
              min=0.0,
              help="Optional slope filter for candidate hillslopes.",
@@ -122,7 +129,7 @@
         {{ ui.numeric_field(
              "omni_contrast_hill_max_slope",
              "Maximum slope (%)",
-             value=omni.contrast_hill_max_slope if omni.contrast_hill_max_slope is defined else "",
+             value=omni.contrast_hill_max_slope if omni.contrast_hill_max_slope is not none else "",
              precision="0.1",
              min=0.0,
              help="Optional slope filter for candidate hillslopes.",
@@ -148,7 +155,35 @@
     </details>
   </div>
 
+  {% set contrast_pairs_value = omni.contrast_pairs if omni.contrast_pairs is defined else [] %}
+
   <div class="wc-stack" data-omni-contrast-mode="user_defined_areas" hidden>
+    <div class="wc-card">
+      <div class="wc-card__body wc-stack">
+        <div class="wc-stack" data-omni-contrast-role="pair-container"></div>
+        <input type="hidden"
+               name="omni_contrast_pairs"
+               value='{{ contrast_pairs_value | tojson }}'
+               data-omni-contrast-role="pairs">
+        <div class="contrast-pair-actions">
+          <button type="button"
+                  class="pure-button pure-button-secondary disable-readonly"
+                  data-omni-contrast-action="add-pair">
+            Add pair
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="wc-text-muted">
+      Each pair selects contrasts only after both scenarios have run. Duplicate pairs are blocked.
+    </p>
+
+    {% set current_geojson_path = omni.contrast_geojson_path if omni.contrast_geojson_path is defined else None %}
+    {% if current_geojson_path == "None" %}
+      {% set current_geojson_path = None %}
+    {% endif %}
+
     {{ ui.file_upload(
          "omni_contrast_geojson",
          "Contrast areas GeoJSON",
@@ -156,6 +191,19 @@
          help="Upload a polygon GeoJSON; each feature becomes a contrast area (file order defines contrast IDs).",
          extra_control_class="disable-readonly"
        ) }}
+
+    {% if current_geojson_path %}
+      {% set current_geojson_display %}<code>{{ current_geojson_path.rsplit('/', 1)[-1] }}</code>{% endset %}
+      {{ ui.text_display(
+           label="Current contrast GeoJSON",
+           content=current_geojson_display
+      ) }}
+    {% endif %}
+
+    <input type="hidden"
+           name="omni_contrast_geojson_path"
+           value="{{ current_geojson_path if current_geojson_path else '' }}"
+           data-omni-contrast-role="geojson-path">
 
     {{ ui.text_field(
          "omni_contrast_geojson_name_key",
@@ -170,7 +218,7 @@
     {{ ui.numeric_field(
          "order_reduction_passes",
          "Order reduction passes",
-         value=omni.contrast_order_reduction_passes if omni.contrast_order_reduction_passes is defined else "",
+         value=omni.contrast_order_reduction_passes if omni.contrast_order_reduction_passes is not none else "",
          precision="1",
          min=0,
          help="Number of stream-order pruning passes (same as culverts).",
@@ -189,7 +237,45 @@
             data-omni-contrast-action="run-contrasts">
       Run Omni contrasts
     </button>
+    <button class="pure-button pure-button-secondary disable-readonly"
+            type="button"
+            data-omni-contrast-action="dry-run">
+      Dry run
+    </button>
+    <button class="pure-button pure-button-secondary disable-readonly"
+            type="button"
+            data-omni-contrast-action="delete-contrasts">
+      Delete contrasts
+    </button>
   {% endcall %}
   {{ ui.job_hint("hint_run_omni_contrasts", extra_class="wc-field__help") }}
+
+  <div class="wc-modal" id="omni-contrasts-delete-modal" data-modal hidden>
+    <div class="wc-modal__overlay" data-modal-dismiss></div>
+    <div class="wc-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="omniContrastsDeleteModalTitle">
+      <header class="wc-modal__header">
+        <h2 class="wc-modal__title" id="omniContrastsDeleteModalTitle">Delete contrasts</h2>
+        <button type="button"
+                class="wc-modal__close"
+                data-modal-dismiss
+                aria-label="Close delete contrasts dialog">
+          &times;
+        </button>
+      </header>
+      <div class="wc-modal__body">
+        <p class="wc-text-muted">
+          This removes all contrast definitions, sidecars, and outputs for this run.
+        </p>
+      </div>
+      <footer class="wc-modal__footer">
+        <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Cancel</button>
+        <button type="button"
+                class="pure-button button-error"
+                data-omni-contrast-action="confirm-delete-contrasts">
+          Delete contrasts
+        </button>
+      </footer>
+    </div>
+  </div>
 
 {% endcall %}

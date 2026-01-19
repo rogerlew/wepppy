@@ -34,6 +34,7 @@ var Omni = (function () {
         user_defined_areas: "user_defined_areas",
         stream_order_pruning: "stream_order_pruning"
     };
+    var CONTRAST_HILLSLOPE_LIMIT_MAX = 100;
 
     var SCENARIO_CATALOG = {
         uniform_low: {
@@ -708,6 +709,25 @@ var Omni = (function () {
         var contrastGeojsonInput = contrastFormElement
             ? contrastFormElement.querySelector("input[name='omni_contrast_geojson']")
             : null;
+        var contrastGeojsonPathInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='omni_contrast_geojson_path']")
+            : null;
+        var contrastHillslopeLimitInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='omni_contrast_hillslope_limit']")
+            : null;
+        var contrastPairsInput = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-role='pairs']")
+            : null;
+        var contrastPairContainer = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-role='pair-container']")
+            : null;
+        var contrastDryRunButton = contrastFormElement
+            ? contrastFormElement.querySelector("[data-omni-contrast-action='dry-run']")
+            : null;
+        var contrastDeleteModal = dom.qs("#omni-contrasts-delete-modal");
+        var contrastDeleteModalConfirm = contrastDeleteModal
+            ? contrastDeleteModal.querySelector("[data-omni-contrast-action='confirm-delete-contrasts']")
+            : null;
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -767,6 +787,10 @@ var Omni = (function () {
             omni.contrastController = contrastController;
         }
 
+        var contrastScenarioOptions = null;
+        var contrastPairsInitialized = false;
+        var contrastPairRunMarkers = null;
+
         omni.attach_status_stream(omni, {
             form: formElement,
             channel: "omni",
@@ -787,6 +811,10 @@ var Omni = (function () {
                 }
                 omni._completion_seen = true;
                 omni.report_scenarios();
+                if (typeof omni.load_scenarios_from_backend === "function") {
+                    omni.load_scenarios_from_backend();
+                }
+                loadContrastPairRunMarkers();
                 omni.disconnect_status_stream(omni);
                 if (omniEvents && typeof omniEvents.emit === "function") {
                     omniEvents.emit("omni:run:completed", payload || {});
@@ -975,6 +1003,58 @@ var Omni = (function () {
                         deleteModalConfirm.disabled = false;
                     }
                     closeModal(deleteModal);
+                });
+        }
+
+        function openContrastDeleteModal() {
+            if (!contrastDeleteModal) {
+                setContrastStatus("Delete dialog unavailable.");
+                return;
+            }
+            openModal(contrastDeleteModal);
+        }
+
+        function confirmDeleteContrasts() {
+            if (!contrastFormElement) {
+                return;
+            }
+            setContrastStatus("Deleting contrasts...");
+            clearContrastSummary();
+
+            if (contrastDeleteModalConfirm) {
+                contrastDeleteModalConfirm.disabled = true;
+            }
+
+            http.requestWithSessionToken(
+                url_for_run("delete-omni-contrasts", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    form: contrastFormElement
+                }
+            )
+                .then(function (response) {
+                    var body = response && response.body ? response.body : null;
+                    if (body && (body.error || body.errors)) {
+                        contrastController.pushResponseStacktrace(contrastController, body);
+                        setContrastStatus(resolveErrorMessage(body, "Failed to delete contrasts."));
+                        return;
+                    }
+                    var message = body && body.message ? body.message : "Contrasts deleted.";
+                    setContrastStatus(message);
+                    if (contrastInfoAdapter && typeof contrastInfoAdapter.html === "function") {
+                        contrastInfoAdapter.html("");
+                    }
+                })
+                .catch(function (error) {
+                    var payload = toResponsePayload(http, error);
+                    contrastController.pushResponseStacktrace(contrastController, payload);
+                    setContrastStatus(resolveErrorMessage(payload, "Failed to delete contrasts."));
+                })
+                .finally(function () {
+                    if (contrastDeleteModalConfirm) {
+                        contrastDeleteModalConfirm.disabled = false;
+                    }
+                    closeModal(contrastDeleteModal);
                 });
         }
 
@@ -1188,6 +1268,156 @@ var Omni = (function () {
             }
         }
 
+        function escapeHtml(value) {
+            var text = value === undefined || value === null ? "" : String(value);
+            return text.replace(/[&<>"']/g, function (match) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                }[match] || match;
+            });
+        }
+
+        function runStatusLabel(status) {
+            if (!status) {
+                return "unknown";
+            }
+            return String(status).replace(/_/g, " ");
+        }
+
+        function runStatusState(status) {
+            var token = status ? String(status) : "";
+            if (token === "up_to_date") {
+                return "success";
+            }
+            if (token === "needs_run") {
+                return "warning";
+            }
+            if (token === "skipped") {
+                return "attention";
+            }
+            return "info";
+        }
+
+        function formatRunStatusChip(status) {
+            var label = runStatusLabel(status);
+            var state = runStatusState(status);
+            return '<span class="wc-status-chip" data-state="' + state + '">' + escapeHtml(label) + "</span>";
+        }
+
+        function formatSkipStatus(skipStatus) {
+            if (!skipStatus || !skipStatus.skipped) {
+                return "-";
+            }
+            var reason = skipStatus.reason ? String(skipStatus.reason) : "";
+            if (!reason) {
+                return "Skipped";
+            }
+            return 'Skipped <span class="wc-text-muted">(Reason: ' + escapeHtml(reason) + ")</span>";
+        }
+
+        function clampContrastHillslopeLimit() {
+            if (!contrastHillslopeLimitInput) {
+                return;
+            }
+            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            if (mode !== CONTRAST_SELECTION_MODES.cumulative) {
+                return;
+            }
+            var rawValue = contrastHillslopeLimitInput.value;
+            if (!rawValue) {
+                return;
+            }
+            var parsed = parseInt(rawValue, 10);
+            if (!Number.isFinite(parsed)) {
+                return;
+            }
+            if (parsed > CONTRAST_HILLSLOPE_LIMIT_MAX) {
+                contrastHillslopeLimitInput.value = String(CONTRAST_HILLSLOPE_LIMIT_MAX);
+                setContrastStatus("Hillslope limit capped at " + CONTRAST_HILLSLOPE_LIMIT_MAX + " for cumulative mode.");
+            }
+        }
+
+        function renderContrastDryRunReport(report) {
+            if (!contrastInfoAdapter || typeof contrastInfoAdapter.html !== "function") {
+                return;
+            }
+            if (!report || !report.items) {
+                contrastInfoAdapter.html('<p class="wc-text-muted">No contrasts available for dry run.</p>');
+                return;
+            }
+
+            var selectionMode = report.selection_mode || "";
+            var items = Array.isArray(report.items) ? report.items : [];
+            if (!items.length) {
+                contrastInfoAdapter.html('<p class="wc-text-muted">No contrasts available for dry run.</p>');
+                return;
+            }
+
+            var columns = [];
+            if (selectionMode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                columns = [
+                    { key: "contrast_id", label: "Contrast" },
+                    { key: "control_scenario", label: "Control" },
+                    { key: "contrast_scenario", label: "Contrast" },
+                    { key: "area_label", label: "Area" },
+                    { key: "n_hillslopes", label: "Hillslopes" },
+                    { key: "skip_status", label: "Skip status" },
+                    { key: "run_status", label: "Run status" }
+                ];
+            } else if (selectionMode === CONTRAST_SELECTION_MODES.stream_order_pruning) {
+                columns = [
+                    { key: "contrast_id", label: "Contrast" },
+                    { key: "control_scenario", label: "Control" },
+                    { key: "contrast_scenario", label: "Contrast" },
+                    { key: "n_hillslopes", label: "Hillslopes" },
+                    { key: "skip_status", label: "Skip status" },
+                    { key: "run_status", label: "Run status" }
+                ];
+            } else {
+                columns = [
+                    { key: "contrast_id", label: "Contrast" },
+                    { key: "topaz_id", label: "Topaz ID" },
+                    { key: "run_status", label: "Run status" }
+                ];
+            }
+
+            var headerCells = columns.map(function (column) {
+                return "<th>" + escapeHtml(column.label) + "</th>";
+            }).join("");
+
+            var bodyRows = items.map(function (item) {
+                var cells = columns.map(function (column) {
+                    var value = item ? item[column.key] : "";
+                    if (column.key === "run_status") {
+                        return "<td>" + formatRunStatusChip(value) + "</td>";
+                    }
+                    if (column.key === "skip_status") {
+                        return "<td>" + formatSkipStatus(value) + "</td>";
+                    }
+                    return "<td>" + escapeHtml(value === undefined || value === null ? "-" : value) + "</td>";
+                }).join("");
+                return "<tr>" + cells + "</tr>";
+            }).join("");
+
+            var html = [
+                '<div class="wc-stack">',
+                '<p class="wc-text-muted">Dry run results (' + escapeHtml(selectionMode || "cumulative") + ').</p>',
+                '<div class="wc-table-wrapper wc-table-wrapper--compact">',
+                '<table class="wc-table wc-table--dense wc-table--compact">',
+                "<thead><tr>" + headerCells + "</tr></thead>",
+                "<tbody>" + bodyRows + "</tbody>",
+                "</table>",
+                "</div>",
+                "</div>"
+            ].join("");
+
+            contrastInfoAdapter.html(html);
+        }
+
         function normalizeContrastMode(value) {
             var token = value ? String(value).trim().toLowerCase() : "";
             if (token === "user-defined-areas" || token === "user_defined_areas") {
@@ -1244,11 +1474,334 @@ var Omni = (function () {
             return definitions;
         }
 
-        function updateContrastScenarioOptions(definitions) {
-            if (!contrastControlSelect && !contrastScenarioSelect) {
+        function parseContrastPairsInput() {
+            if (!contrastPairsInput) {
+                return [];
+            }
+            var raw = contrastPairsInput.value;
+            if (!raw) {
+                return [];
+            }
+            try {
+                var parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) {
+                    return [];
+                }
+                return parsed
+                    .map(function (entry) {
+                        if (!entry || typeof entry !== "object") {
+                            return null;
+                        }
+                        var control = entry.control_scenario;
+                        var contrast = entry.contrast_scenario;
+                        if (!control || !contrast) {
+                            return null;
+                        }
+                        return {
+                            control_scenario: String(control),
+                            contrast_scenario: String(contrast)
+                        };
+                    })
+                    .filter(Boolean);
+            } catch (err) {
+                return [];
+            }
+        }
+
+        function getContrastPairRows() {
+            if (!contrastPairContainer) {
+                return [];
+            }
+            return Array.prototype.slice.call(
+                contrastPairContainer.querySelectorAll("[data-omni-contrast-pair-item='true']")
+            );
+        }
+
+        function setContrastPairRowError(row, message) {
+            if (!row) {
                 return;
             }
+            var errorEl = row.querySelector("[data-omni-contrast-pair-role='error']");
+            if (!errorEl) {
+                return;
+            }
+            if (!message) {
+                errorEl.textContent = "";
+                errorEl.hidden = true;
+                return;
+            }
+            errorEl.textContent = message;
+            errorEl.hidden = false;
+        }
+
+        function collectContrastPairs() {
+            var rows = getContrastPairRows();
+            var pairs = [];
+            var seen = new Set();
+            rows.forEach(function (row) {
+                var control = row.querySelector("[data-omni-contrast-pair-field='control']");
+                var contrast = row.querySelector("[data-omni-contrast-pair-field='contrast']");
+                var controlValue = control && control.value ? String(control.value).trim() : "";
+                var contrastValue = contrast && contrast.value ? String(contrast.value).trim() : "";
+                if (!controlValue || !contrastValue) {
+                    return;
+                }
+                var key = controlValue + "::" + contrastValue;
+                if (seen.has(key)) {
+                    return;
+                }
+                seen.add(key);
+                pairs.push({
+                    control_scenario: controlValue,
+                    contrast_scenario: contrastValue
+                });
+            });
+            return pairs;
+        }
+
+        function syncContrastPairsInput() {
+            if (!contrastPairsInput) {
+                return;
+            }
+            var pairs = collectContrastPairs();
+            contrastPairsInput.value = JSON.stringify(pairs);
+        }
+
+        function applyContrastPairOptions(select, options) {
+            if (!select) {
+                return;
+            }
+            var saved = select.dataset ? select.dataset.omniContrastPairSelected : "";
+            var savedApplied = select.dataset
+                ? select.dataset.omniContrastPairSelectedApplied === "true"
+                : false;
+            var previous = select.value;
+            if (!previous && saved && !savedApplied) {
+                previous = saved;
+            }
+            select.innerHTML = "";
+            options.forEach(function (option) {
+                var node = document.createElement("option");
+                node.value = option.value;
+                var label = option.label;
+                if (
+                    contrastPairRunMarkers
+                    && option.value
+                    && contrastPairRunMarkers[option.value] === false
+                ) {
+                    node.disabled = true;
+                    label = option.label + " (not run)";
+                }
+                node.textContent = label;
+                select.appendChild(node);
+            });
+            if (previous && options.some(function (opt) { return opt.value === previous; })) {
+                select.value = previous;
+                if (saved && previous === saved && select.dataset) {
+                    select.dataset.omniContrastPairSelectedApplied = "true";
+                }
+            }
+        }
+
+        function updateContrastPairOptions(options) {
+            if (!contrastPairContainer) {
+                return;
+            }
+            getContrastPairRows().forEach(function (row) {
+                var controlSelect = row.querySelector("[data-omni-contrast-pair-field='control']");
+                var contrastSelect = row.querySelector("[data-omni-contrast-pair-field='contrast']");
+                applyContrastPairOptions(controlSelect, options);
+                applyContrastPairOptions(contrastSelect, options);
+            });
+            updateContrastActionState();
+        }
+
+        function createContrastPairRow(pair) {
+            var row = document.createElement("div");
+            row.className = "contrast-pair-item scenario-item wc-card wc-card--subtle";
+            row.dataset.omniContrastPairItem = "true";
+            row.innerHTML = [
+                '<div class="wc-card__body wc-stack">',
+                '  <div class="scenario-item__body contrast-pair-item__body">',
+                '    <div class="scenario-item__inputs contrast-pair-item__inputs">',
+                '      <span class="scenario-item__selector" aria-hidden="true"></span>',
+                '      <div class="wc-field scenario-item__field">',
+                '        <label class="wc-field__label">Control scenario</label>',
+                '        <select class="wc-field__control" data-omni-contrast-pair-field="control"></select>',
+                '      </div>',
+                '      <div class="wc-field scenario-item__field">',
+                '        <label class="wc-field__label">Contrast scenario</label>',
+                '        <select class="wc-field__control" data-omni-contrast-pair-field="contrast"></select>',
+                '      </div>',
+                '      <div class="contrast-pair-item__placeholder" aria-hidden="true"></div>',
+                '    </div>',
+                '    <div class="scenario-item__actions">',
+                '      <button type="button" class="pure-button button-error disable-readonly" data-omni-contrast-action="remove-pair">Remove</button>',
+                '    </div>',
+                '  </div>',
+                '  <p class="wc-field__help wc-text-muted" data-omni-contrast-pair-role="error" hidden></p>',
+                '</div>'
+            ].join("");
+
+            var controlSelect = row.querySelector("[data-omni-contrast-pair-field='control']");
+            var contrastSelect = row.querySelector("[data-omni-contrast-pair-field='contrast']");
+            if (controlSelect && pair && pair.control_scenario) {
+                controlSelect.dataset.omniContrastPairSelected = String(pair.control_scenario);
+            }
+            if (contrastSelect && pair && pair.contrast_scenario) {
+                contrastSelect.dataset.omniContrastPairSelected = String(pair.contrast_scenario);
+            }
+            return row;
+        }
+
+        function addContrastPairRow(pair) {
+            if (!contrastPairContainer) {
+                return;
+            }
+            var row = createContrastPairRow(pair || {});
+            contrastPairContainer.appendChild(row);
+            if (contrastScenarioOptions) {
+                updateContrastPairOptions(contrastScenarioOptions);
+            }
+        }
+
+        function ensureContrastPairsInitialized() {
+            if (contrastPairsInitialized || !contrastPairContainer) {
+                return;
+            }
+            contrastPairsInitialized = true;
+            var pairs = parseContrastPairsInput();
+            if (!pairs.length) {
+                addContrastPairRow();
+            } else {
+                pairs.forEach(function (pair) {
+                    addContrastPairRow(pair);
+                });
+            }
+            syncContrastPairsInput();
+            validateContrastPairs();
+        }
+
+        function validateContrastPairs() {
+            if (!contrastPairContainer) {
+                return true;
+            }
+            var rows = getContrastPairRows();
+            if (!rows.length) {
+                return false;
+            }
+            var pairMap = new Map();
+            rows.forEach(function (row) {
+                var control = row.querySelector("[data-omni-contrast-pair-field='control']");
+                var contrast = row.querySelector("[data-omni-contrast-pair-field='contrast']");
+                var controlValue = control && control.value ? String(control.value).trim() : "";
+                var contrastValue = contrast && contrast.value ? String(contrast.value).trim() : "";
+                if (!controlValue || !contrastValue) {
+                    return;
+                }
+                var key = controlValue + "::" + contrastValue;
+                var entries = pairMap.get(key) || [];
+                entries.push(row);
+                pairMap.set(key, entries);
+            });
+
+            var hasErrors = false;
+            rows.forEach(function (row) {
+                var control = row.querySelector("[data-omni-contrast-pair-field='control']");
+                var contrast = row.querySelector("[data-omni-contrast-pair-field='contrast']");
+                var controlValue = control && control.value ? String(control.value).trim() : "";
+                var contrastValue = contrast && contrast.value ? String(contrast.value).trim() : "";
+                var message = "";
+                if (!controlValue || !contrastValue) {
+                    message = "Select both control and contrast scenarios.";
+                } else if (contrastPairRunMarkers && contrastPairRunMarkers[controlValue] === false) {
+                    message = "Control scenario has not run.";
+                } else if (contrastPairRunMarkers && contrastPairRunMarkers[contrastValue] === false) {
+                    message = "Contrast scenario has not run.";
+                } else {
+                    var key = controlValue + "::" + contrastValue;
+                    if (pairMap.get(key) && pairMap.get(key).length > 1) {
+                        message = "Duplicate pair.";
+                    }
+                }
+                setContrastPairRowError(row, message);
+                if (message) {
+                    hasErrors = true;
+                }
+            });
+
+            syncContrastPairsInput();
+            return !hasErrors && collectContrastPairs().length > 0;
+        }
+
+        function loadContrastPairRunMarkers() {
+            if (!contrastFormElement) {
+                return;
+            }
+            http.getJson(url_for_run("api/omni/get_scenario_run_state")).then(function (data) {
+                contrastPairRunMarkers = data && data.run_markers ? data.run_markers : {};
+                if (contrastScenarioOptions) {
+                    updateContrastPairOptions(contrastScenarioOptions);
+                }
+            }).catch(function () {
+                contrastPairRunMarkers = null;
+                if (contrastScenarioOptions) {
+                    updateContrastPairOptions(contrastScenarioOptions);
+                }
+            });
+        }
+
+        function getContrastGeojsonPath() {
+            if (!contrastGeojsonPathInput) {
+                return "";
+            }
+            var value = contrastGeojsonPathInput.value;
+            return value ? String(value).trim() : "";
+        }
+
+        function hasContrastGeojson() {
+            var fileList = contrastGeojsonInput ? contrastGeojsonInput.files : null;
+            if (fileList && fileList.length) {
+                return true;
+            }
+            var path = getContrastGeojsonPath();
+            return Boolean(path);
+        }
+
+        function updateContrastActionState() {
+            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            var canRunMode = mode === CONTRAST_SELECTION_MODES.cumulative
+                || mode === CONTRAST_SELECTION_MODES.user_defined_areas;
+            var hasGeojson = mode !== CONTRAST_SELECTION_MODES.user_defined_areas || hasContrastGeojson();
+            var pairsValid = true;
+            if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                ensureContrastPairsInitialized();
+                pairsValid = validateContrastPairs();
+            }
+            var canSubmit = canRunMode
+                && (mode !== CONTRAST_SELECTION_MODES.user_defined_areas || (pairsValid && hasGeojson));
+            if (contrastRunButton) {
+                contrastRunButton.disabled = !canSubmit;
+            }
+            if (contrastDryRunButton) {
+                contrastDryRunButton.disabled = !canSubmit;
+            }
+            return {
+                mode: mode,
+                canRunMode: canRunMode,
+                hasGeojson: hasGeojson,
+                pairsValid: pairsValid,
+                canSubmit: canSubmit
+            };
+        }
+
+        function updateContrastScenarioOptions(definitions) {
             var options = buildContrastScenarioOptions(definitions || collectScenarioDefinitions());
+            contrastScenarioOptions = options;
+            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                ensureContrastPairsInitialized();
+            }
             var selects = [contrastControlSelect, contrastScenarioSelect];
             selects.forEach(function (select) {
                 if (!select) {
@@ -1274,6 +1827,8 @@ var Omni = (function () {
                     }
                 }
             });
+            updateContrastPairOptions(options);
+            updateContrastActionState();
         }
 
         function syncContrastMode() {
@@ -1288,13 +1843,13 @@ var Omni = (function () {
                     : [];
                 section.hidden = allowed.indexOf(mode) === -1;
             });
-            var canRun = mode === CONTRAST_SELECTION_MODES.cumulative
-                || mode === CONTRAST_SELECTION_MODES.user_defined_areas;
-            if (contrastRunButton) {
-                contrastRunButton.disabled = !canRun;
-            }
-            if (!canRun) {
+            var state = updateContrastActionState();
+            if (!state.canRunMode) {
                 setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to run contrasts.");
+            } else if (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas && !state.hasGeojson) {
+                setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+            } else if (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas && !state.pairsValid) {
+                setContrastStatus("Resolve contrast pair errors to run contrasts.");
             } else {
                 clearContrastStatus();
             }
@@ -1348,6 +1903,7 @@ var Omni = (function () {
         }
 
         bindModalDismiss(deleteModal);
+        bindModalDismiss(contrastDeleteModal);
 
         omni.serializeScenarios = serializeScenarios;
 
@@ -1428,28 +1984,31 @@ var Omni = (function () {
             clearContrastStatus();
 
             var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
-            var canRun = mode === CONTRAST_SELECTION_MODES.cumulative
-                || mode === CONTRAST_SELECTION_MODES.user_defined_areas;
-            if (!canRun) {
+            var state = updateContrastActionState();
+            if (!state.canRunMode) {
                 setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to run contrasts.");
                 return;
             }
             if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
-                var fileList = contrastGeojsonInput ? contrastGeojsonInput.files : null;
-                if (!fileList || !fileList.length) {
+                if (!state.pairsValid) {
+                    setContrastStatus("Resolve contrast pair errors before running contrasts.");
+                    return;
+                }
+                if (!hasContrastGeojson()) {
                     setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
+                    return;
+                }
+            } else {
+                var controlValue = contrastControlSelect ? contrastControlSelect.value : "";
+                var contrastValue = contrastScenarioSelect ? contrastScenarioSelect.value : "";
+                if (!controlValue || !contrastValue) {
+                    setContrastStatus("Select both control and contrast scenarios.");
                     return;
                 }
             }
 
-            var controlValue = contrastControlSelect ? contrastControlSelect.value : "";
-            var contrastValue = contrastScenarioSelect ? contrastScenarioSelect.value : "";
-            if (!controlValue || !contrastValue) {
-                setContrastStatus("Select both control and contrast scenarios.");
-                return;
-            }
-
             clearContrastSummary();
+            clampContrastHillslopeLimit();
             contrastController._completion_seen = false;
             setContrastStatus("Submitting omni contrasts...");
             contrastController.connect_status_stream(contrastController);
@@ -1457,6 +2016,10 @@ var Omni = (function () {
             var formData = new FormData(contrastFormElement);
             if (typeof formData.set === "function") {
                 formData.set("omni_contrast_selection_mode", mode);
+                if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                    formData.delete("omni_control_scenario");
+                    formData.delete("omni_contrast_scenario");
+                }
             }
 
             http.requestWithSessionToken(
@@ -1487,6 +2050,76 @@ var Omni = (function () {
                 var payload = toResponsePayload(http, error);
                 contrastController.pushResponseStacktrace(contrastController, payload);
                 setContrastStatus(resolveErrorMessage(payload, "Omni contrasts failed."));
+            });
+        };
+
+        omni.dry_run_omni_contrasts = function () {
+            if (!contrastController || !contrastFormElement) {
+                return;
+            }
+            clearContrastStatus();
+
+            var mode = normalizeContrastMode(contrastModeSelect ? contrastModeSelect.value : "");
+            var state = updateContrastActionState();
+            if (!state.canRunMode) {
+                setContrastStatus("Selected mode is scaffolded. Switch to cumulative or user-defined areas to dry run.");
+                return;
+            }
+            if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                if (!state.pairsValid) {
+                    setContrastStatus("Resolve contrast pair errors before dry run.");
+                    return;
+                }
+                if (!hasContrastGeojson()) {
+                    setContrastStatus("Upload a GeoJSON file to dry run user-defined contrasts.");
+                    return;
+                }
+            } else {
+                var controlValue = contrastControlSelect ? contrastControlSelect.value : "";
+                var contrastValue = contrastScenarioSelect ? contrastScenarioSelect.value : "";
+                if (!controlValue || !contrastValue) {
+                    setContrastStatus("Select both control and contrast scenarios.");
+                    return;
+                }
+            }
+
+            clearContrastSummary();
+            clampContrastHillslopeLimit();
+            setContrastStatus("Running dry run...");
+
+            var formData = new FormData(contrastFormElement);
+            if (typeof formData.set === "function") {
+                formData.set("omni_contrast_selection_mode", mode);
+                if (mode === CONTRAST_SELECTION_MODES.user_defined_areas) {
+                    formData.delete("omni_control_scenario");
+                    formData.delete("omni_contrast_scenario");
+                }
+            }
+
+            http.requestWithSessionToken(
+                url_for_run("run-omni-contrasts-dry-run", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    body: formData,
+                    form: contrastFormElement
+                }
+            ).then(function (response) {
+                var body = response && response.body ? response.body : null;
+                if (body && (body.error || body.errors)) {
+                    contrastController.pushResponseStacktrace(contrastController, body);
+                    setContrastStatus(resolveErrorMessage(body, "Dry run failed."));
+                    return;
+                }
+                if (!body || !body.result) {
+                    setContrastStatus("Dry run response missing results.");
+                    return;
+                }
+                setContrastStatus("Dry run complete.");
+                renderContrastDryRunReport(body.result);
+            }).catch(function (error) {
+                var payload = toResponsePayload(http, error);
+                contrastController.pushResponseStacktrace(contrastController, payload);
+                setContrastStatus(resolveErrorMessage(payload, "Dry run failed."));
             });
         };
 
@@ -1593,13 +2226,55 @@ var Omni = (function () {
                 event.preventDefault();
                 omni.run_omni_contrasts();
             });
+            dom.delegate(contrastFormElement, "click", "[data-omni-contrast-action='dry-run']", function (event) {
+                event.preventDefault();
+                omni.dry_run_omni_contrasts();
+            });
+            dom.delegate(contrastFormElement, "click", "[data-omni-contrast-action='delete-contrasts']", function (event) {
+                event.preventDefault();
+                openContrastDeleteModal();
+            });
+            dom.delegate(contrastFormElement, "click", "[data-omni-contrast-action='add-pair']", function (event) {
+                event.preventDefault();
+                ensureContrastPairsInitialized();
+                addContrastPairRow();
+                updateContrastActionState();
+            });
+            dom.delegate(contrastFormElement, "click", "[data-omni-contrast-action='remove-pair']", function (event) {
+                event.preventDefault();
+                var row = event.target.closest("[data-omni-contrast-pair-item='true']");
+                if (row && row.parentNode) {
+                    row.parentNode.removeChild(row);
+                }
+                if (getContrastPairRows().length === 0) {
+                    addContrastPairRow();
+                }
+                updateContrastActionState();
+            });
+            dom.delegate(contrastFormElement, "change", "[data-omni-contrast-pair-field]", function () {
+                updateContrastActionState();
+            });
             if (contrastModeSelect) {
                 contrastModeSelect.addEventListener("change", function () {
                     syncContrastMode();
                 });
             }
+            if (contrastHillslopeLimitInput) {
+                contrastHillslopeLimitInput.addEventListener("change", function () {
+                    clampContrastHillslopeLimit();
+                });
+                contrastHillslopeLimitInput.addEventListener("blur", function () {
+                    clampContrastHillslopeLimit();
+                });
+            }
+            if (contrastGeojsonInput) {
+                contrastGeojsonInput.addEventListener("change", function () {
+                    updateContrastActionState();
+                });
+            }
             syncContrastMode();
             updateContrastScenarioOptions();
+            loadContrastPairRunMarkers();
         }
 
         dom.delegate(scenarioContainer, "change", "[data-omni-role='scenario-select']", function (event, matched) {
@@ -1632,6 +2307,12 @@ var Omni = (function () {
                 confirmDeleteSelected();
             });
         }
+        if (contrastDeleteModalConfirm) {
+            contrastDeleteModalConfirm.addEventListener("click", function (event) {
+                event.preventDefault();
+                confirmDeleteContrasts();
+            });
+        }
 
         var bootstrapState = {
             scenariosLoaded: false,
@@ -1645,6 +2326,7 @@ var Omni = (function () {
             var controllerContext = helper && typeof helper.getControllerContext === "function"
                 ? helper.getControllerContext(ctx, "omni")
                 : {};
+            var jobIds = ctx && (ctx.jobIds || ctx.jobs);
 
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "run_omni_rq")
@@ -1653,7 +2335,6 @@ var Omni = (function () {
                 jobId = controllerContext.job_id;
             }
             if (!jobId) {
-                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
                 if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_omni_rq")) {
                     var value = jobIds.run_omni_rq;
                     if (value !== undefined && value !== null) {
@@ -1675,7 +2356,6 @@ var Omni = (function () {
                     ? helper.resolveJobId(ctx, "run_omni_contrasts_rq")
                     : null;
                 if (!contrastJobId) {
-                    var jobIds = ctx && (ctx.jobIds || ctx.jobs);
                     if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_omni_contrasts_rq")) {
                         var contrastValue = jobIds.run_omni_contrasts_rq;
                         if (contrastValue !== undefined && contrastValue !== null) {

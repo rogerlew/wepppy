@@ -3,6 +3,7 @@ import json
 import logging
 import sys
 import types
+from collections import Counter
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -15,6 +16,153 @@ pytestmark = pytest.mark.unit
 @contextmanager
 def _noop_lock():
     yield
+
+
+class Rect:
+    def __init__(self, xmin, ymin, xmax, ymax):
+        self.xmin = xmin
+        self.ymin = ymin
+        self.xmax = xmax
+        self.ymax = ymax
+
+    @property
+    def bounds(self):
+        return (self.xmin, self.ymin, self.xmax, self.ymax)
+
+    @property
+    def area(self):
+        return max(0.0, self.xmax - self.xmin) * max(0.0, self.ymax - self.ymin)
+
+    @property
+    def is_empty(self):
+        return self.area == 0.0
+
+    def intersection(self, other):
+        xmin = max(self.xmin, other.xmin)
+        ymin = max(self.ymin, other.ymin)
+        xmax = min(self.xmax, other.xmax)
+        ymax = min(self.ymax, other.ymax)
+        if xmin >= xmax or ymin >= ymax:
+            return Rect(0.0, 0.0, 0.0, 0.0)
+        return Rect(xmin, ymin, xmax, ymax)
+
+
+class DummyRow(dict):
+    @property
+    def geometry(self):
+        return self.get("geometry")
+
+
+class DummySpatialIndex:
+    def __init__(self, rows):
+        self._rows = rows
+
+    def intersection(self, bounds):
+        results = []
+        for idx, row in enumerate(self._rows):
+            geom = row.get("geometry")
+            if geom is None:
+                continue
+            left, bottom, right, top = bounds
+            g_left, g_bottom, g_right, g_top = geom.bounds
+            if right <= g_left or g_right <= left or top <= g_bottom or g_top <= bottom:
+                continue
+            results.append(idx)
+        return results
+
+
+class DummyGeoDataFrame:
+    def __init__(self, rows, crs=None):
+        self._rows = [DummyRow(row) for row in rows]
+        self.crs = crs
+        self.columns = list(rows[0].keys()) if rows else []
+
+    def __len__(self):
+        return len(self._rows)
+
+    @property
+    def empty(self):
+        return not self._rows
+
+    def iterrows(self):
+        for idx, row in enumerate(self._rows):
+            yield idx, row
+
+    def set_crs(self, epsg=None, crs=None):
+        if crs is not None:
+            self.crs = crs
+        elif epsg is not None:
+            self.crs = f"EPSG:{epsg}"
+        return self
+
+    def to_crs(self, crs):
+        self.crs = crs
+        return self
+
+    @property
+    def sindex(self):
+        return DummySpatialIndex(self._rows)
+
+
+def _stub_user_defined_geodata(
+    monkeypatch,
+    omni_module,
+    tmp_path,
+    *,
+    hillslope_rows,
+    user_rows,
+    hillslope_crs="EPSG:32611",
+    user_crs=None,
+    top2wepp=None,
+    srid="32611",
+):
+    hillslope_path = tmp_path / "subwta.geojson"
+    user_geojson_path = tmp_path / "areas.geojson"
+    hillslope_path.write_text("{}", encoding="ascii")
+    user_geojson_path.write_text("{}", encoding="ascii")
+
+    hillslope_gdf = DummyGeoDataFrame(hillslope_rows, crs=hillslope_crs)
+    user_gdf = DummyGeoDataFrame(user_rows, crs=user_crs)
+
+    geopandas_stub = types.ModuleType("geopandas")
+    geopandas_stub.read_file = lambda path: hillslope_gdf if str(path) == str(hillslope_path) else user_gdf
+    monkeypatch.setitem(sys.modules, "geopandas", geopandas_stub)
+
+    if top2wepp is None:
+        top2wepp = {}
+        for idx, row in enumerate(hillslope_rows, start=1):
+            topaz_id = row.get("TopazID")
+            if topaz_id not in (None, ""):
+                top2wepp[str(topaz_id)] = str(idx)
+
+    mapping = {str(k): str(v) for k, v in top2wepp.items()}
+
+    class DummyTranslator:
+        pass
+
+    DummyTranslator.top2wepp = mapping
+
+    class DummyWatershed:
+        def __init__(self, subwta_utm_shp):
+            self.subwta_utm_shp = subwta_utm_shp
+
+        def translator_factory(self):
+            return DummyTranslator()
+
+    class DummyRon:
+        pass
+
+    DummyRon.srid = srid
+
+    monkeypatch.setattr(
+        omni_module.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(str(hillslope_path)),
+    )
+    monkeypatch.setattr(omni_module.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False))
+
+    return user_geojson_path
 
 
 def _ensure_package(name: str, path: Path | None):
@@ -239,133 +387,22 @@ def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
 
 
 def test_user_defined_areas_contrast_builds_sidecars_with_overlap(tmp_path, omni_module, monkeypatch):
-    class Rect:
-        def __init__(self, xmin, ymin, xmax, ymax):
-            self.xmin = xmin
-            self.ymin = ymin
-            self.xmax = xmax
-            self.ymax = ymax
-
-        @property
-        def bounds(self):
-            return (self.xmin, self.ymin, self.xmax, self.ymax)
-
-        @property
-        def area(self):
-            return max(0.0, self.xmax - self.xmin) * max(0.0, self.ymax - self.ymin)
-
-        @property
-        def is_empty(self):
-            return self.area == 0.0
-
-        def intersection(self, other):
-            xmin = max(self.xmin, other.xmin)
-            ymin = max(self.ymin, other.ymin)
-            xmax = min(self.xmax, other.xmax)
-            ymax = min(self.ymax, other.ymax)
-            if xmin >= xmax or ymin >= ymax:
-                return Rect(0.0, 0.0, 0.0, 0.0)
-            return Rect(xmin, ymin, xmax, ymax)
-
-    class DummyRow(dict):
-        @property
-        def geometry(self):
-            return self.get("geometry")
-
-    class DummySpatialIndex:
-        def __init__(self, rows):
-            self._rows = rows
-
-        def intersection(self, bounds):
-            results = []
-            for idx, row in enumerate(self._rows):
-                geom = row.get("geometry")
-                if geom is None:
-                    continue
-                left, bottom, right, top = bounds
-                g_left, g_bottom, g_right, g_top = geom.bounds
-                if right <= g_left or g_right <= left or top <= g_bottom or g_top <= bottom:
-                    continue
-                results.append(idx)
-            return results
-
-    class DummyGeoDataFrame:
-        def __init__(self, rows, crs=None):
-            self._rows = [DummyRow(row) for row in rows]
-            self.crs = crs
-            self.columns = list(rows[0].keys()) if rows else []
-
-        def __len__(self):
-            return len(self._rows)
-
-        @property
-        def empty(self):
-            return not self._rows
-
-        def iterrows(self):
-            for idx, row in enumerate(self._rows):
-                yield idx, row
-
-        def set_crs(self, epsg=None, crs=None):
-            if crs is not None:
-                self.crs = crs
-            elif epsg is not None:
-                self.crs = f"EPSG:{epsg}"
-            return self
-
-        def to_crs(self, crs):
-            self.crs = crs
-            return self
-
-        @property
-        def sindex(self):
-            return DummySpatialIndex(self._rows)
-
-    hillslope_path = tmp_path / "subwta.geojson"
-    user_geojson_path = tmp_path / "areas.geojson"
-    hillslope_path.write_text("{}", encoding="ascii")
-    user_geojson_path.write_text("{}", encoding="ascii")
-
-    hillslope_gdf = DummyGeoDataFrame(
-        [
-            {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
-            {"TopazID": "20", "geometry": Rect(10.0, 0.0, 20.0, 10.0)},
-        ],
-        crs="EPSG:32611",
+    hillslope_rows = [
+        {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+        {"TopazID": "20", "geometry": Rect(10.0, 0.0, 20.0, 10.0)},
+    ]
+    user_rows = [
+        {"name": "Alpha", "geometry": Rect(0.0, 0.0, 6.0, 10.0)},
+        {"name": None, "geometry": Rect(5.0, 0.0, 15.0, 10.0)},
+        {"name": "Gamma", "geometry": Rect(30.0, 0.0, 40.0, 10.0)},
+    ]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        omni_module,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
     )
-    user_gdf = DummyGeoDataFrame(
-        [
-            {"name": "Alpha", "geometry": Rect(0.0, 0.0, 6.0, 10.0)},
-            {"name": None, "geometry": Rect(5.0, 0.0, 15.0, 10.0)},
-            {"name": "Gamma", "geometry": Rect(30.0, 0.0, 40.0, 10.0)},
-        ],
-        crs=None,
-    )
-
-    geopandas_stub = types.ModuleType("geopandas")
-    geopandas_stub.read_file = lambda path: hillslope_gdf if str(path) == str(hillslope_path) else user_gdf
-    monkeypatch.setitem(sys.modules, "geopandas", geopandas_stub)
-
-    class DummyTranslator:
-        top2wepp = {"10": "1", "20": "2"}
-
-    class DummyWatershed:
-        def __init__(self, subwta_utm_shp):
-            self.subwta_utm_shp = subwta_utm_shp
-
-        def translator_factory(self):
-            return DummyTranslator()
-
-    class DummyRon:
-        srid = "32611"
-
-    monkeypatch.setattr(
-        omni_module.Watershed,
-        "getInstance",
-        lambda wd: DummyWatershed(str(hillslope_path)),
-    )
-    monkeypatch.setattr(omni_module.Ron, "getInstance", lambda wd: DummyRon())
-    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False))
 
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -374,6 +411,9 @@ def test_user_defined_areas_contrast_builds_sidecars_with_overlap(tmp_path, omni
     omni._contrast_selection_mode = "user_defined_areas"
     omni._contrast_geojson_path = str(user_geojson_path)
     omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+    ]
     omni._contrast_object_param = "Runoff_mm"
     omni._contrast_cumulative_obj_param_threshold_fraction = 0.8
     omni._contrast_hillslope_limit = None
@@ -409,6 +449,101 @@ def test_user_defined_areas_contrast_builds_sidecars_with_overlap(tmp_path, omni
     assert contrast2["10"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H1")
     assert contrast2["20"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H2")
     assert not Path(omni._contrast_sidecar_path(3)).exists()
+
+
+def test_user_defined_contrast_pairs_expand_and_skip_duplicates(tmp_path, omni_module, monkeypatch):
+    hillslope_rows = [
+        {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+        {"TopazID": "20", "geometry": Rect(10.0, 0.0, 20.0, 10.0)},
+    ]
+    user_rows = [
+        {"name": "Alpha", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+        {"name": "Beta", "geometry": Rect(10.0, 0.0, 20.0, 10.0)},
+    ]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        omni_module,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.user_defined_pairs")
+    omni._contrast_selection_mode = "user_defined_areas"
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 0.8
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._control_scenario = None
+    omni._contrast_scenario = None
+
+    omni._build_contrasts()
+
+    names = [name for name in omni.contrast_names or [] if name]
+    assert len(names) == 4
+    assert Counter(omni._contrast_labels.values()) == Counter({"Alpha": 2, "Beta": 2})
+
+
+def test_user_defined_contrast_ids_stable_on_rebuild(tmp_path, omni_module, monkeypatch):
+    hillslope_rows = [
+        {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+    ]
+    user_rows = [
+        {"name": "Alpha", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+    ]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        omni_module,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.user_defined_ids")
+    omni._contrast_selection_mode = "user_defined_areas"
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+    ]
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 0.8
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._control_scenario = None
+    omni._contrast_scenario = None
+
+    omni._build_contrasts()
+    first_names = list(omni.contrast_names or [])
+    assert first_names == ["uniform_low,1__to__mulch"]
+
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._build_contrasts()
+
+    assert omni.contrast_names[0] == first_names[0]
+    assert omni.contrast_names[1] == "uniform_low,2__to__thinning"
 
 
 def test_build_contrasts_report_normalizes_control_scenario(tmp_path, monkeypatch, omni_module):
@@ -898,6 +1033,7 @@ def test_build_contrasts_dry_run_report_cumulative_statuses(tmp_path, monkeypatc
     report = omni.build_contrasts_dry_run_report(
         control_scenario_def={"type": "uniform_low"},
         contrast_scenario_def={"type": "mulch"},
+        contrast_pairs=[{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}],
     )
 
     assert report["selection_mode"] == "cumulative"
