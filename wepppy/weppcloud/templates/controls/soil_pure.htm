@@ -58,7 +58,7 @@
 
   {% set mode0_style = '' if current_mode == 0 else 'display: none;' %}
   <div id="soil_mode0_controls" class="wc-stack hide-readonly"{% if mode0_style %} style="{{ mode0_style }}"{% endif %}>
-    <input id="initial_sat" name="initial_sat" type="hidden" value="{{ soils.initial_sat }}">
+    <input id="soil_initial_sat" name="initial_sat" type="hidden" value="{{ soils.initial_sat }}">
   </div>
 
   {% set mode1_style = '' if current_mode == 1 else 'display: none;' %}

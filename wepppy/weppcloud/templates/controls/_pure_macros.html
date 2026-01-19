@@ -832,7 +832,7 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None, max_width='750px') -%}
+{% macro file_upload(field_id, label, accept=None, help=None, current_filename=None, attrs=None, error=None, extra_control_class=None, max_width='750px', field_name=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
@@ -858,7 +858,7 @@
   <label class="wc-field__label" for="{{ field_id }}">{{ label }}</label>
   <input class="{{ ' '.join(control_classes) }}"
          id="{{ field_id }}"
-         name="{{ field_id }}"
+         name="{{ field_name or field_id }}"
          type="file"
          {% if accept %}accept="{{ accept }}"{% endif %}
          {% if error %}aria-invalid="true"{% endif %}

@@ -50,7 +50,7 @@ describe("Treatments controller", () => {
                     <option value="mulch_30" selected>Mulch 30</option>
                     <option value="mulch_60">Mulch 60</option>
                 </select>
-                <input type="file" id="input_upload_landuse" data-treatments-role="upload">
+                <input type="file" id="input_upload_treatments" data-treatments-role="upload">
                 <button id="btn_build_treatments" type="button" data-treatments-action="build">Build</button>
             </form>
             <p id="hint_build_treatments" data-treatments-role="hint"></p>

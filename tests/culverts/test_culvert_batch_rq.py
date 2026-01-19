@@ -23,6 +23,9 @@ class _DummyRedis:
     def __exit__(self, exc_type, exc, tb) -> None:  # type: ignore[override]
         return None
 
+    def publish(self, *_args, **_kwargs) -> int:
+        return 0
+
 
 class _DummyJob:
     def __init__(self, job_id: str) -> None:

@@ -82,11 +82,12 @@
        data-treatments-panel="upload"
        {% if mode4_style %}style="{{ mode4_style }}"{% endif %}>
     {{ ui.file_upload(
-         "input_upload_landuse",
+         "input_upload_treatments",
          label="Treatment map (.tif or .img)",
          accept=".tif,.img",
          help="Raster should encode treatment class keys; it will be aligned to the watershed automatically.",
-         attrs={"class": "disable-readonly", "data-treatments-role": "upload"}
+         attrs={"class": "disable-readonly", "data-treatments-role": "upload"},
+         field_name="input_upload_landuse"
        ) }}
 
     <div class="wc-stack">
