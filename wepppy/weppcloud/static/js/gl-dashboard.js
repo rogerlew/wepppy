@@ -577,7 +577,9 @@
     basemapController.setApplyLayers(applyLayers);
   }
 
-  const omniScenarios = Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
+  const isOmniChild = !!ctx.isOmniChild;
+  const omniScenarios = !isOmniChild && Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
+  const graphDefs = isOmniChild ? GRAPH_DEFS.filter((group) => group.key !== 'omni') : GRAPH_DEFS;
   let baseScenarioLabel = getState().baseScenarioLabel || 'Undisturbed';
   const graphScenarios = [{ name: baseScenarioLabel, path: '' }].concat(
     omniScenarios.map((s, idx) => {
@@ -650,7 +652,7 @@
   }
 
   const graphController = createGraphController({
-    graphDefs: GRAPH_DEFS,
+    graphDefs,
     graphScenarios,
     graphLoadersFactory: () =>
       graphLoadersModule.createGraphLoaders({

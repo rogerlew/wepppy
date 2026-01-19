@@ -66,6 +66,56 @@ def _playback_path(env_var: str, subdir: str) -> str:
     return os.environ.get(env_var, _join(base, subdir))
 
 
+def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
+    """Ensure omni child runs have symlinked shared inputs from their parent."""
+    if not _exists(run_root):
+        return
+
+    for dirname in ("climate", "dem", "watershed"):
+        src = _join(base_root, dirname)
+        dst = _join(run_root, dirname)
+        if _exists(dst) or not _exists(src):
+            continue
+        try:
+            os.symlink(src, dst)
+        except FileExistsError:
+            continue
+        except OSError as exc:
+            logger.warning(
+                "Failed to link omni shared input %s -> %s: %s",
+                src,
+                dst,
+                exc,
+            )
+
+
+def is_omni_child_run(
+    runid: str,
+    *,
+    wd: Optional[str] = None,
+    pup_relpath: Optional[str] = None,
+) -> bool:
+    """Return True when the request targets an omni scenario or contrast child run."""
+    if ";;omni;;" in runid or ";;omni-contrast;;" in runid:
+        return True
+
+    if pup_relpath:
+        normalized = pup_relpath.replace("\\", "/").lstrip("/")
+        if normalized.startswith("_pups/"):
+            normalized = normalized[len("_pups/"):]
+        if normalized.startswith("omni/"):
+            return True
+
+    if wd:
+        normalized = wd.replace("\\", "/")
+        parts = [part for part in normalized.split("/") if part]
+        for idx in range(len(parts) - 1):
+            if parts[idx] == "_pups" and parts[idx + 1] == "omni":
+                return True
+
+    return False
+
+
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     """Return the working directory path for a run, caching lookups in Redis.
 
@@ -131,7 +181,11 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         elif _group == 'profile' and _name == 'archive':
             playback_root = _playback_path("PROFILE_PLAYBACK_ARCHIVE_ROOT", "archive")
             path = _join(playback_root, _runid)
-        elif _group == 'omni':
+        elif _group == 'culvert':
+            culverts_root = os.getenv("CULVERTS_ROOT", "/wc1/culverts")
+            path = _join(culverts_root, _name, "runs", _runid)
+        elif _name == 'omni':
+            _name, _group = _group, _name
             # Omni scenarios live under the parent run's _pups directory.
             base_root = get_primary_wd(_name)
             scenario_path = _join(base_root, '_pups', 'omni', 'scenarios', _runid)
@@ -139,11 +193,23 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
                 legacy_base_root = _join('/geodata/weppcloud_runs', _name)
                 legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'scenarios', _runid)
                 if _exists(legacy_candidate):
+                    base_root = legacy_base_root
                     scenario_path = legacy_candidate
             path = scenario_path
-        elif _group == 'culvert':
-            culverts_root = os.getenv("CULVERTS_ROOT", "/wc1/culverts")
-            path = _join(culverts_root, _name, "runs", _runid)
+            _ensure_omni_shared_inputs(base_root, scenario_path)
+        elif _name == 'omni-contrast':
+            _name, _group = _group, _name
+            # Omni contrasts live under the parent run's _pups directory.
+            base_root = get_primary_wd(_name)
+            scenario_path = _join(base_root, '_pups', 'omni', 'contrasts', _runid)
+            if not _exists(scenario_path):
+                legacy_base_root = _join('/geodata/weppcloud_runs', _name)
+                legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'contrasts', _runid)
+                if _exists(legacy_candidate):
+                    base_root = legacy_base_root
+                    scenario_path = legacy_candidate
+            path = scenario_path
+            _ensure_omni_shared_inputs(base_root, scenario_path)
         else:
             raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:

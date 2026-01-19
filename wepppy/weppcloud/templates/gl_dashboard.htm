@@ -857,7 +857,7 @@
         <option value="osm">OpenStreetMap</option>
       </select>
     </div>
-    {% if omni_scenarios %}
+    {% if omni_scenarios and not is_omni_child %}
     <div class="gl-scenario-selector">
       <h3>Scenario</h3>
       <select id="gl-scenario-select" style="margin-top:0.5rem;">
@@ -866,7 +866,7 @@
         <option value="{{ scenario.path }}">{{ scenario.name }}</option>
         {% endfor %}
       </select>
-      {% if omni_scenarios %}
+      {% if omni_scenarios and not is_omni_child %}
       <label class="gl-layer-item" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.35rem;">
         <input type="checkbox" id="gl-comparison-toggle" />
         <span>Compare to Base Scenario</span>
@@ -908,7 +908,7 @@
     <div class="gl-topbar">
       <div class="gl-topbar__meta">
         <span>Run <strong><a class="gl-run-link" href="{{ site_prefix }}/runs/{{ runid }}/{{ config }}/">{{ runid }}</a></strong></span>
-        <span id="gl-scenario-display">{% if omni_scenarios %}Scenario <strong>Base</strong>{% else %}Config <strong>{{ config }}</strong>{% endif %}</span>
+        <span id="gl-scenario-display">{% if omni_scenarios and not is_omni_child %}Scenario <strong>Base</strong>{% else %}Config <strong>{{ config }}</strong>{% endif %}</span>
         <span id="gl-comparison-indicator" style="display:none;"><span class="gl-comparison-badge">Difference Map</span></span>
       </div>
       <div class="gl-topbar__actions">
@@ -1053,7 +1053,8 @@
       "mapCenter": map_center,
       "mapZoom": map_zoom,
       "climate": climate_context,
-      "omniScenarios": omni_scenarios
+      "omniScenarios": omni_scenarios,
+      "isOmniChild": is_omni_child
     } | tojson }};
   </script>
   <script src="https://unpkg.com/geotiff@2.1.3/dist-browser/geotiff.js"></script>

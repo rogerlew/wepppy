@@ -19,7 +19,6 @@
 {% set show_treatments = 'treatments' in mods_list or playwright_load_all %}
 {% set show_ash = 'ash' in mods_list or playwright_load_all %}
 {% set show_rhem = 'rhem' in mods_list or playwright_load_all %}
-{% set show_omni = 'omni' in mods_list or playwright_load_all %}
 {% set show_observed = 'observed' in mods_list or playwright_load_all %}
 {% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
 {% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow %}

@@ -31,7 +31,8 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import (
-    get_wd, authorize, get_run_owners_lazy, 
+    get_wd, authorize, get_run_owners_lazy,
+    is_omni_child_run,
     authorize_and_handle_with_exception_factory,
     handle_with_exception_factory
 )
@@ -270,7 +271,12 @@ def _build_runs0_context(runid, config, playwright_load_all):
     show_openet_ts = 'openet_ts' in mods_list or playwright_load_all
     show_treatments = 'treatments' in mods_list or playwright_load_all
     show_ash = 'ash' in mods_list or playwright_load_all
-    show_omni = 'omni' in mods_list or playwright_load_all
+    is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
+    show_omni = (
+        (('omni' in mods_list) or playwright_load_all)
+        and ((omni is not None) or playwright_load_all)
+        and not is_omni_child
+    )
     show_observed = (observed is not None) or playwright_load_all
     allow_debris_flow = (
         current_user.has_role('PowerUser')
@@ -351,6 +357,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_debris_flow=show_debris_flow,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
+        is_omni_child=is_omni_child,
         omni_has_ran_scenarios=omni_has_ran_scenarios,
         omni_has_ran_contrasts=omni_has_ran_contrasts,
         mod_visibility=mod_visibility

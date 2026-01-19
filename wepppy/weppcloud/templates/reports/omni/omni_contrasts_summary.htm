@@ -3,6 +3,7 @@
 {% set first_item = items|first if items else None %}
 {% set water_units = first_item["water_discharge"]["unit"] if first_item and first_item["water_discharge"] and first_item["water_discharge"]["unit"] else 'm^3/yr' %}
 {% set soil_units = first_item["soil_loss"]["unit"] if first_item and first_item["soil_loss"] and first_item["soil_loss"]["unit"] else 'tonne/yr' %}
+{% set parent_runid = runid.split(';;')[0] if ';;' in runid else runid %}
 
 {% if not items %}
   <p class="wc-text-muted">No contrasts available.</p>
@@ -58,9 +59,12 @@
       </thead>
       <tbody>
         {% for item in items %}
+        {% set contrast_runid = parent_runid ~ ';;omni-contrast;;' ~ item.contrast_id %}
         <tr>
           {% if selection_mode == "cumulative" %}
-            <th scope="row">{{ item.contrast_id }}</th>
+            <th scope="row">
+              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+            </th>
             <td>{{ item.topaz_id if item.topaz_id is not none else "-" }}</td>
             <td class="wc-text-right">
               {% if item["water_discharge"] %}
@@ -77,7 +81,9 @@
               {% endif %}
             </td>
           {% elif selection_mode == "user_defined_areas" %}
-            <th scope="row">{{ item.contrast_id }}</th>
+            <th scope="row">
+              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+            </th>
             <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
             <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
             <td>{{ item.area_label }}</td>
@@ -97,7 +103,9 @@
               {% endif %}
             </td>
           {% elif selection_mode == "stream_order" %}
-            <th scope="row">{{ item.contrast_id }}</th>
+            <th scope="row">
+              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+            </th>
             <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
             <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
             <td>{{ item.subcatchments_group if item.subcatchments_group is not none else "-" }}</td>
@@ -117,7 +125,9 @@
               {% endif %}
             </td>
           {% else %}
-            <th scope="row">{{ item.contrast_id }}</th>
+            <th scope="row">
+              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+            </th>
             <td>{{ item.run_status }}</td>
           {% endif %}
         </tr>

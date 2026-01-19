@@ -7,6 +7,7 @@ from flask import current_app
 
 from ._common import *  # noqa: F401,F403
 from wepppy.nodb.core import Ron, Climate
+from wepppy.weppcloud.utils.helpers import is_omni_child_run
 
 
 gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
@@ -52,8 +53,9 @@ def gl_dashboard(runid: str, config: str):
         "GL_DASHBOARD_BASE_TILE_URL", "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
     )
     
-    # Check for omni scenarios
-    omni_scenarios = _get_omni_scenarios(wd)
+    # Check for omni scenarios (skip when viewing omni child runs).
+    is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
+    omni_scenarios = None if is_omni_child else _get_omni_scenarios(wd)
 
     # Get map extent/center/zoom from Ron if available
     map_extent = None
@@ -111,4 +113,5 @@ def gl_dashboard(runid: str, config: str):
         map_zoom=map_zoom,
         climate_context=climate_context,
         omni_scenarios=omni_scenarios,
+        is_omni_child=is_omni_child,
     )

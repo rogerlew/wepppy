@@ -67,18 +67,67 @@ export function createScenarioManager({
   void postQueryEngine;
   void postBaseQueryEngine;
 
-  function buildScenarioUrl(relativePath) {
-    const baseUrl = `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${relativePath}`;
-    const { currentScenarioPath } = getState();
-    if (currentScenarioPath) {
-      const pupPath = currentScenarioPath.replace(/^_pups\//, '');
-      return `${baseUrl}?pup=${encodeURIComponent(pupPath)}`;
+  function normalizeSitePrefix(prefix) {
+    if (!prefix) return '';
+    return String(prefix).replace(/\/+$/, '');
+  }
+
+  function normalizeRelativePath(value) {
+    if (!value) return '';
+    return String(value).replace(/^\/+/, '');
+  }
+
+  function resolveParentRunId(runid) {
+    const raw = String(runid || '');
+    const parts = raw.split(';;');
+    if (parts.length === 3 && parts[0]) {
+      return parts[0];
     }
-    return baseUrl;
+    return raw;
+  }
+
+  function extractOmniScenarioName(scenarioPath) {
+    if (!scenarioPath) return '';
+    const normalized = String(scenarioPath).replace(/^_pups\//, '').replace(/^\/+/, '');
+    const match = normalized.match(/^omni\/scenarios\/([^/]+)/);
+    return match ? match[1] : '';
+  }
+
+  const sitePrefix = normalizeSitePrefix(ctx.sitePrefix);
+
+  function buildRunUrl(runid, relativePath) {
+    const runSlug = String(runid || '').trim();
+    const configSlug = String(ctx.config || '').trim();
+    const path = normalizeRelativePath(relativePath);
+    const encodedRunId =
+      runSlug.indexOf(';;') !== -1
+        ? runSlug
+            .split(';;')
+            .map((segment) => encodeURIComponent(segment))
+            .join(';;')
+        : encodeURIComponent(runSlug);
+    const runPath = `/runs/${encodedRunId}/${encodeURIComponent(configSlug)}/`;
+    return (sitePrefix ? sitePrefix + runPath : runPath) + path;
+  }
+
+  function buildScenarioUrl(relativePath) {
+    const { currentScenarioPath } = getState();
+    if (!currentScenarioPath) {
+      return buildRunUrl(ctx.runid, relativePath);
+    }
+
+    const scenarioName = extractOmniScenarioName(currentScenarioPath);
+    if (!scenarioName) {
+      return buildRunUrl(ctx.runid, relativePath);
+    }
+
+    const parentRunId = resolveParentRunId(ctx.runid);
+    const compositeRunId = `${parentRunId};;omni;;${scenarioName}`;
+    return buildRunUrl(compositeRunId, relativePath);
   }
 
   function buildBaseUrl(relativePath) {
-    return `${ctx.sitePrefix}/runs/${ctx.runid}/${ctx.config}/${relativePath}`;
+    return buildRunUrl(ctx.runid, relativePath);
   }
 
   function computeComparisonDiffRanges(baseSummaryOverride) {

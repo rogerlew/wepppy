@@ -430,7 +430,7 @@
     window.addEventListener("load", function () {
         if (typeof initPreflight === "function") {
             try {
-                initPreflight({{ run_id | tojson }});
+                initPreflight({{ ron.runid | tojson }});
             } catch (err) {
                 console.warn("[Bootstrap] Failed to initialize preflight", err);
             }

@@ -10,14 +10,18 @@
 {% set last_modified_dt = get_last_modified(current_ron.runid) %}
 {% set last_modified_display = last_modified_dt.strftime('%Y-%m-%d %H:%M:%S') ~ ' UTC' if last_modified_dt else None %}
 {% set last_modified_epoch = last_modified_dt.timestamp()|int if last_modified_dt else None %}
+{% set view_args = request.view_args if request and request.view_args else {} %}
+{% set view_runid = view_args.get('runid', current_ron.runid) %}
+{% set view_config = view_args.get('config', current_ron.config_stem) %}
 <header class="wc-header wc-run-header">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
       <div class="wc-run-header__title-row">
         <a class="wc-brand" href="{{ url_for('weppcloud_site.index') }}">WEPPcloud</a>
-        <a class="wc-run-header__descriptor" href="{{ url_for_run('run_0.runs0', runid=current_ron.runid, config=current_ron.config_stem) }}">
-          {{ current_ron.runid }} {{ current_ron.config_stem }}
+        <a class="wc-run-header__descriptor" href="{{ url_for_run('run_0.runs0', runid=view_runid, config=view_config) }}">
+          {{ view_runid }}
         </a>
+        <span class="wc-run-header__version">{{ view_config }}</span>
         <span class="wc-run-header__version">
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
@@ -152,7 +156,7 @@
   const powerUserButton = document.querySelector('[data-command="open-poweruser"]');
   const unitizerModal = document.getElementById('unitizerModal');
   const powerUserModal = document.getElementById('puModal');
-  const pupRelPath = {{ current_ron.pup_relpath | tojson }};
+  const pupRelPath = {{ pup_relpath | tojson }};
 
   function triggerUnitChange() {
     if (project && typeof project.unitChangeEvent === 'function') {

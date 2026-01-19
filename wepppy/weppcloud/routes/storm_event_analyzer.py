@@ -16,7 +16,11 @@ from ._common import (
 from wepppy.nodb.core import Ron
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.weppcloud.utils.cap_guard import requires_cap
-from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import (
+    exception_factory,
+    handle_with_exception_factory,
+    is_omni_child_run,
+)
 
 from .gl_dashboard import _get_omni_scenarios
 
@@ -34,7 +38,8 @@ def storm_event_analyzer(runid: str, config: str) -> Response:
     wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
-    omni_scenarios = _get_omni_scenarios(wd)
+    is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
+    omni_scenarios = None if is_omni_child else _get_omni_scenarios(wd)
     base_scenario_label = "Burned" if ron.has_sbs else "Undisturbed"
 
     return render_template(
