@@ -7,7 +7,6 @@ _BLUEPRINT_ATTRS = [
     "security_oauth_bp",
     "security_ui_bp",
     "unitizer_bp",
-    "map_bp",
     "user_bp",
     "landuse_bp",
     "soils_bp",

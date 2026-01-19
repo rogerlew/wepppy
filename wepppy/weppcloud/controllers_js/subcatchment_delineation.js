@@ -589,22 +589,98 @@ var SubcatchmentDelineation = (function () {
             }
         }
 
-        function loadLegend(name) {
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return "";
+            }
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function buildLegendItems(summary, options) {
+            if (!summary) {
+                return [];
+            }
+            var keyField = options && options.keyField ? options.keyField : "key";
+            var labelField = options && options.labelField ? options.labelField : "desc";
+            var itemsByKey = {};
+
+            Object.keys(summary).forEach(function (topazId) {
+                var entry = summary[topazId];
+                if (!entry || !entry.color) {
+                    return;
+                }
+                var key = entry[keyField];
+                if (key === undefined || key === null || key === "") {
+                    return;
+                }
+                var label = entry[labelField] || entry.desc || entry.name || entry.label || key;
+                var mapKey = String(key);
+                if (!itemsByKey[mapKey]) {
+                    itemsByKey[mapKey] = { key: key, label: label, color: entry.color };
+                }
+            });
+
+            var items = Object.keys(itemsByKey).map(function (key) {
+                return itemsByKey[key];
+            });
+
+            items.sort(function (a, b) {
+                var aNum = Number(a.key);
+                var bNum = Number(b.key);
+                if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
+                    return aNum - bNum;
+                }
+                var aKey = String(a.key);
+                var bKey = String(b.key);
+                if (aKey < bKey) {
+                    return -1;
+                }
+                if (aKey > bKey) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            return items;
+        }
+
+        function buildLegendHtml(title, items) {
+            if (!items || items.length === 0) {
+                return "";
+            }
+            var html = "<div class=\"wc-map-legend__header\">" + escapeHtml(title) + "</div>";
+            html += "<div class=\"wc-legend\">";
+            items.forEach(function (item) {
+                html += ""
+                    + "<div class=\"wc-legend-item\">"
+                    + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
+                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")</span>"
+                    + "</div>";
+            });
+            html += "</div>";
+            return html;
+        }
+
+        function renderLegend(name) {
             if (!name) {
                 return Promise.resolve();
             }
-            var legendUrl = url_for_run("resources/legends/" + name + "/");
-            return http.request(legendUrl, {
-                method: "GET",
-                headers: { Accept: "text/html,application/xhtml+xml" }
-            }).then(function (result) {
-                var html = typeof result.body === "string" ? result.body : "";
-                setSubLegend(html);
-                emit("subcatchment:legend:updated", { name: name });
-            }).catch(function (error) {
-                // propagate through standard handler while keeping console noise minimal
-                handleError(error);
-            });
+            var html = "";
+            if (name === "landuse") {
+                html = buildLegendHtml("Landuse Legend", buildLegendItems(state.dataLanduse, { keyField: "key" }));
+            } else if (name === "soils") {
+                html = buildLegendHtml("Soils Legend", buildLegendItems(state.dataSoils, { keyField: "mukey" }));
+            } else {
+                return Promise.resolve();
+            }
+            setSubLegend(html);
+            emit("subcatchment:legend:updated", { name: name });
+            return Promise.resolve(html);
         }
 
         function renderLayer(options) {
@@ -637,7 +713,7 @@ var SubcatchmentDelineation = (function () {
                 .catch(handleError)
                 .then(function () {
                     if (legend) {
-                        return loadLegend(legend);
+                        return renderLegend(legend);
                     }
                     return undefined;
                 });
@@ -1322,7 +1398,6 @@ var SubcatchmentDelineation = (function () {
                 type: "watershed",
                 dataProp: "dataSlpAsp",
                 mode: "slp_asp",
-                legend: "slope_aspect",
                 label: "slope/aspect"
             });
         }

@@ -94,7 +94,7 @@ Emitted via `WCEvents.useEventMap`:
 | Channel labels | LayerGroup | From channels | ChannelDelineation | Div icon markers. |
 | Gridded Output | GeoTIFF | `/resources/flowpaths_loss.tif` | SubcatchmentDelineation | Legacy Leaflet-only overlay (removed from GL path in Phase 13). |
 | Outlet marker | CircleMarker | `/query/outlet/` | Outlet | Added to `markerCustomPane`. |
-| Burn Severity Map | ImageOverlay | `/query/baer_wgs_map/` | Baer | Adds legend under `#sbs_legend`. |
+| Burn Severity Map | ImageOverlay | `/query/baer_wgs_map/` | Baer | Renders legend under `#sbs_legend` (client-side). |
 | Selection overlays | GeoJSON + Rectangle | `/resources/subcatchments.json` | LanduseModify/RangelandCoverModify | For box and click selection. |
 | Boundary overlay | GeoJSON | `context.map.boundary.url` | MapController | Added during bootstrap. |
 
@@ -103,7 +103,7 @@ Emitted via `WCEvents.useEventMap`:
 - Drilldown: `report/sub_summary/<TopazID>/`, `report/chn_summary/<TopazID>/`.
 - Subcatchments and channels: `resources/subcatchments.json`, `resources/netful.json`, `resources/channels.json`.
 - Hillslope slope/aspect: `query/watershed/subcatchments/`.
-- Legends: `resources/legends/<name>/`, `resources/legends/sbs/`.
+- Legends: client-side rendering for landuse, soils, and SBS; slope/aspect uses local renderers.
 - SBS image: `query/baer_wgs_map/`.
 - Outlet: `query/outlet/`, `report/outlet/`, `rq-engine/api/runs/<runid>/<config>/set-outlet`.
 - Channel build: `rq-engine/api/runs/<runid>/<config>/fetch-dem-and-build-channels`, `query/delineation_pass/`, `query/has_dem/`.
@@ -270,12 +270,12 @@ Assumptions (historical; Phase 13 flips defaults):
 - Tests: Jest covers overlay registration order and zoom gating; Playwright covers overlay toggles, panel collapse, fly-to, and modal open.
 
 ### Phase 3: SBS map (image overlay)
-- Scope: SBS raster fetch + deck BitmapLayer; link to Baer/Disturbed; legend injection.
+- Scope: SBS raster fetch + deck BitmapLayer; link to Baer/Disturbed; client-side legend injection.
 - Tests: Playwright load SBS, verify legend and opacity changes.
 
 ### Phase 3 handoff summary
 - Overlay layer: deck `BitmapLayer` for SBS image with run-scoped `/query/baer_wgs_map/` metadata and `resources/baer.png` fetch (bounds normalized for deck).
-- Legend: `#sbs_legend` hydrated from `/resources/legends/sbs/`, with opacity slider wired to `map.sbs_layer.setOpacity`.
+- Legend: `#sbs_legend` rendered client-side, with opacity slider wired to `map.sbs_layer.setOpacity`.
 - Events: `map:layer:refreshed` / `map:layer:error` emitted on SBS refresh; `map:layer:toggled` on overlay toggle.
 - State sync: listens for `disturbed:has_sbs_changed` to add/remove overlay and clear the legend when SBS is removed.
 - Tests: Jest validates SBS refresh success/error + legend visibility; Playwright covers toggle + opacity slider updates.
@@ -287,7 +287,7 @@ Assumptions (historical; Phase 13 flips defaults):
 
 ### Phase 4 handoff summary
 - Legend targets: SBS and subcatchment legends stay on `#sbs_legend` / `#sub_legend`, with show/hide controlled by overlay state.
-- SBS legend: loads from `/resources/legends/sbs/`, injects the opacity slider, and clears content when SBS is removed or refresh fails.
+- SBS legend: rendered client-side, injects the opacity slider, and clears content when SBS is removed or refresh fails.
 - Events: `baer:map:opacity` emitted on slider changes; SBS refresh emits `map:layer:refreshed`/`map:layer:error`.
 - Tests: Jest covers SBS legend show/hide + opacity slider updates; Playwright covers toggle visibility, slider updates, and empty-run behavior.
 
@@ -424,7 +424,7 @@ Assumptions (historical; Phase 13 flips defaults):
 - Manual validation: browser toggles between slope/aspect on https://wc.bearhive.duckdns.org/weppcloud/runs/air-cooled-broadening/disturbed9002/ show slope viridis and aspect hue-wheel choropleths with matching stroke colors.
 
 Technical notes:
-- Deck.gl layer updates: without `updateTriggers`, deck.gl does not detect getFillColor changes when the layer id remains constant. The `updateTriggers` prop is required to signal when accessors need re-evaluation.
+- Deck.gl layer updates: without `updateTriggers`, deck.gl does not detect getFillColor changes when the layer id remains constant. The `updateTriggers` prop is required to signal when accessors need reevaluation.
 - Stroke-follows-fill: changed `getLineColor` from static `lineColor` to `colorFn(feature)` to render subcatchment boundaries in the same color as the fill, improving visual clarity.
 
 ### Phase 11b: landuse + soils overlays

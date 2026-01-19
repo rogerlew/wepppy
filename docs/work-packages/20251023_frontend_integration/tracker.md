@@ -36,7 +36,7 @@
 ## Decisions Log
 - *2025-02-24* – Use controller-defined bootstrap hooks and StatusStream emitters as the foundation for the new run-page bootstrap.
 - *2025-02-24* – Smoke testing will begin as scripted manual commands; automation framework evaluation follows once the scripts are stable.
-- *2025-10-23* – Centralise run context construction in `run_page_bootstrap.js.j2`; controllers own job wiring/report hydration via their `bootstrap` implementation. `WCControllerBootstrap` mediates context access and testing defaults.
+- *2025-10-23* – Centralize run context construction in `run_page_bootstrap.js.j2`; controllers own job wiring/report hydration via their `bootstrap` implementation. `WCControllerBootstrap` mediates context access and testing defaults.
 
 ## Risks / Watch List
 - Map/delineation conversion may expose missing Pure CSS tokens; be prepared to extend `ui-foundation.css`.
@@ -56,7 +56,7 @@ Seven outstanding issues identified and documented in `package.md` with comprehe
 
 1. **Legend Visual Styling** ✅ COMPLETED: Implemented 2-column grid layout for map legends with color swatches.
    - Created new CSS classes: `.wc-legend`, `.wc-legend-item`, `.wc-legend-item__swatch`, `.wc-legend-item__label`
-   - Updated templates: `color_legend.htm`, `landuse.htm`, `soil.htm`, `slope_aspect.htm`
+   - Updated templates: legacy legend partials (now removed after client-side migration)
    - Swatches use CSS custom property `--legend-color` for inline color assignment
    - Removed Bootstrap grid classes (`col-sm-*`) and inline styles
    - Added header styling (`.wc-map-legend__header`) and image wrapper (`.wc-map-legend__image`)

@@ -81,9 +81,6 @@ describe("Baer controller", () => {
             if (url === "query/has_dem/") {
                 return Promise.resolve({ body: false });
             }
-            if (url === "resources/legends/sbs/") {
-                return Promise.resolve({ body: "<div>legend</div>" });
-            }
             return Promise.resolve({ body: {} });
         });
 

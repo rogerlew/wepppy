@@ -42,6 +42,12 @@ var Baer = (function () {
     var DEFAULT_OPACITY = 0.7;
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
+    var SBS_LEGEND_ITEMS = [
+        { key: 130, label: "No Burn", color: "#00734A" },
+        { key: 131, label: "Low Severity Burn", color: "#4DE600" },
+        { key: 132, label: "Moderate Severity Burn", color: "#FFFF00" },
+        { key: 133, label: "High Severity Burn", color: "#FF0000" }
+    ];
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -828,22 +834,42 @@ var Baer = (function () {
             legendElement.appendChild(container);
         }
 
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return "";
+            }
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function buildSbsLegendHtml(items) {
+            if (!items || items.length === 0) {
+                return "";
+            }
+            var html = "<div class=\"wc-map-legend__header\">SBS Legend</div>";
+            html += "<div class=\"wc-legend\">";
+            items.forEach(function (item) {
+                html += ""
+                    + "<div class=\"wc-legend-item\">"
+                    + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
+                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")</span>"
+                    + "</div>";
+            });
+            html += "</div>";
+            return html;
+        }
+
         function loadLegend() {
-            return http.request(url_for_run("resources/legends/sbs/"), {
-                method: "GET"
-            })
-                .then(function (result) {
-                    var content = result.body;
-                    var legend = dom.qs("#sbs_legend");
-                    if (legend) {
-                        legend.innerHTML = content === null || content === undefined ? "" : String(content);
-                        attachOpacitySlider(legend);
-                    }
-                })
-                .catch(function (error) {
-                    var payload = toResponsePayload(http, error);
-                    baer.pushResponseStacktrace(baer, payload);
-                });
+            var legend = dom.qs("#sbs_legend");
+            if (legend) {
+                legend.innerHTML = buildSbsLegendHtml(SBS_LEGEND_ITEMS);
+                attachOpacitySlider(legend);
+            }
+            return Promise.resolve();
         }
 
         function showSbs(options) {

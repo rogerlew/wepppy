@@ -331,12 +331,7 @@ describe("Map GL controller", () => {
                 imgurl: "resources/baer.png",
             },
         });
-        global.WCHttp.request.mockImplementation((url) => {
-            if (String(url).includes("legends/sbs")) {
-                return Promise.resolve({ body: "<div>Legend</div>" });
-            }
-            return Promise.resolve({ body: new Blob([""], { type: "image/png" }) });
-        });
+        global.WCHttp.request.mockResolvedValue({ body: new Blob([""], { type: "image/png" }) });
 
         emittedEvents = [];
         await mapInstance.loadSbsMap();
@@ -347,7 +342,7 @@ describe("Map GL controller", () => {
         expect(refreshed).toBeTruthy();
         const legend = document.getElementById("sbs_legend");
         expect(legend.hidden).toBe(false);
-        expect(legend.innerHTML).toContain("Legend");
+        expect(legend.innerHTML).toContain("SBS Legend");
     });
 
     test("SBS opacity slider updates layer opacity and emits event", async () => {
@@ -360,12 +355,7 @@ describe("Map GL controller", () => {
                 imgurl: "resources/baer.png",
             },
         });
-        global.WCHttp.request.mockImplementation((url) => {
-            if (String(url).includes("legends/sbs")) {
-                return Promise.resolve({ body: "<div>Legend</div>" });
-            }
-            return Promise.resolve({ body: new Blob([""], { type: "image/png" }) });
-        });
+        global.WCHttp.request.mockResolvedValue({ body: new Blob([""], { type: "image/png" }) });
 
         emittedEvents = [];
         await mapInstance.loadSbsMap();
@@ -414,12 +404,7 @@ describe("Map GL controller", () => {
                 imgurl: "resources/baer.png",
             },
         });
-        global.WCHttp.request.mockImplementation((url) => {
-            if (String(url).includes("legends/sbs")) {
-                return Promise.resolve({ body: "<div>Legend</div>" });
-            }
-            return Promise.resolve({ body: new Blob([""], { type: "image/png" }) });
-        });
+        global.WCHttp.request.mockResolvedValue({ body: new Blob([""], { type: "image/png" }) });
 
         await mapInstance.loadSbsMap();
 

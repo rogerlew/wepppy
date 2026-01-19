@@ -92,7 +92,6 @@ from .geodata import geodata_bp
 from .gl_dashboard import gl_dashboard_bp
 from .storm_event_analyzer import storm_event_analyzer_bp
 from .huc_fire import huc_fire_bp
-from .map import map_bp
 from .pivottable import pivottable_bp
 from .jsoncrack import jsoncrack_bp
 from .readme_md import readme_bp
@@ -129,7 +128,6 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     huc_fire_bp,
     jsoncrack_bp,
     landuse_bp,
-    map_bp,
     observed_bp,
     omni_bp,
     path_ce_bp,
@@ -174,7 +172,6 @@ __all__ = [
     'geodata_bp',
     'huc_fire_bp',
     'landuse_bp',
-    'map_bp',
     'observed_bp',
     'omni_bp',
     'path_ce_bp',

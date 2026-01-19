@@ -42,8 +42,13 @@ var MapController = (function () {
     var CHANNEL_LAYER_ENDPOINT = "resources/channels.json";
     var SBS_LAYER_NAME = "Burn Severity Map";
     var SBS_QUERY_ENDPOINT = "query/baer_wgs_map/";
-    var SBS_LEGEND_ENDPOINT = "resources/legends/sbs/";
     var SBS_DEFAULT_OPACITY = 0.3;
+    var SBS_LEGEND_ITEMS = [
+        { key: 130, label: "No Burn", color: "#00734A" },
+        { key: 131, label: "Low Severity Burn", color: "#4DE600" },
+        { key: 132, label: "Moderate Severity Burn", color: "#FFFF00" },
+        { key: 133, label: "High Severity Burn", color: "#FF0000" }
+    ];
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
     var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
@@ -2306,24 +2311,44 @@ var MapController = (function () {
             });
         }
 
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return "";
+            }
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function buildSbsLegendHtml(items) {
+            if (!items || items.length === 0) {
+                return "";
+            }
+            var html = "<div class=\"wc-map-legend__header\">SBS Legend</div>";
+            html += "<div class=\"wc-legend\">";
+            items.forEach(function (item) {
+                html += ""
+                    + "<div class=\"wc-legend-item\">"
+                    + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
+                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")</span>"
+                    + "</div>";
+            });
+            html += "</div>";
+            return html;
+        }
+
         function loadSbsLegend() {
             if (!sbsLegendElement) {
                 return Promise.resolve(null);
             }
-            var legendUrl = resolveRunScopedUrl(SBS_LEGEND_ENDPOINT);
-            if (!legendUrl) {
-                return Promise.resolve(null);
-            }
-            return http.request(legendUrl, { method: "GET" }).then(function (result) {
-                var content = result.body;
-                sbsLegendElement.innerHTML = content === null || content === undefined ? "" : String(content);
-                attachSbsOpacitySlider(sbsLegendElement);
-                dom.show(sbsLegendElement);
-                return content;
-            }).catch(function (error) {
-                console.warn("Map GL: failed to load SBS legend", error);
-                throw error;
-            });
+            var html = buildSbsLegendHtml(SBS_LEGEND_ITEMS);
+            sbsLegendElement.innerHTML = html;
+            attachSbsOpacitySlider(sbsLegendElement);
+            dom.show(sbsLegendElement);
+            return Promise.resolve(html);
         }
 
         function clearSbsLegend() {
