@@ -3919,6 +3919,7 @@ class Omni(NoDbBase):
         compiles the loss_pw0.out.parquet across the scenarios
         """
         global OMNI_REL_DIR
+        parquet_files = {}
         _legacy_path = _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')
         if _exists(_legacy_path):
             parquet_files = {str(self.base_scenario): _legacy_path}
