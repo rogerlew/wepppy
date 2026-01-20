@@ -3,6 +3,7 @@ wepppy/climates/daymet/test
 wepppy/validation/*
 *.swp
 *.pyc
+__pycache__/
 *.zip
 venv/*
 devnotes.txt

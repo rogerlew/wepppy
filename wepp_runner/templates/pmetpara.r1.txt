@@ -1,0 +1,9 @@
+8
+mic_0547,0.95,0.70,1,undistub/thin
+Shr_8709,0.95,0.70,2,Mica_clearcut
+For_8425,0.95,0.70,3,undistub/thin
+For_5352,0.95,0.75,4,forest
+For_5688,0.95,0.75,5,forest
+Tah_4899,0.95,0.70,6,old forest
+Tah_9591,0.95,0.70,7,shrub
+Tah_7670,0.95,0.70,8,sod grass

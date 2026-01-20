@@ -1,0 +1,34 @@
+M                               # English or Metric
+Yes                             # Y: Batch mode, N: Shell mode
+1                               # 1: Continuous, 2: Single Storm
+2                               # 1: hilslope version, 2: hillslope/watershed, 3: watershed
+../output/pass_pw0.txt          # master watershed pass file
+{sub_n}{hillslopes_block}       # number of hillslopes, English or Metric, Y: Use existing pass file, name of pass file
+
+Yes                             # Do you wish to model impoundments on the watershed
+No                              # Do you want initial condition scenario output
+1                               # Soil loss output options, 1: yearly for watershed
+../output/loss_pw0.txt          #
+Yes                             # Water balance output
+../output/chnwb.txt             #
+No                              # Crop output
+Yes                             # Soil output
+../output/soil_pw0.txt          #
+Yes                             # Channel erosion plotting (not implmemented)
+../output/plot_pw0.txt          #
+No                              # Large watershed graphics output
+Yes                             # Event Output
+../output/ebe_pw0.txt           #
+No                              # Final Summary output (not implemented?)
+No                              # Daily Winter output
+No                              # Plant yield output
+No                              # Impoundment output
+pw0.str                         # Watershed structure file
+pw0.chn                         # Watershed channel data
+pw0.imp                         # Impoundment data
+pw0.man                         # Management data
+pw0.slp                         # Slope data
+pw0.cli                         # Climate
+pw0.sol                         # Soil
+0                               # Irrigation Option, 0: no irrigation
+{sim_years}                     #
