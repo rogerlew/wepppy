@@ -99,7 +99,6 @@ RUN /opt/venv/bin/python -c "import duckdb; \
 RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" && \
     printf '/workdir/wepppy/\n' > "${SITE_PACKAGES}/wepppy.pth" && \
     printf '/workdir/wepppy/services/cao/src/\n' > "${SITE_PACKAGES}/cao.pth" && \
-    printf '/workdir/wepppy2/\n' > "${SITE_PACKAGES}/wepp_runner.pth" && \
     printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" && \
     printf '/workdir/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
     printf '/workdir/f-esri/\n' > "${SITE_PACKAGES}/f_esri.pth" && \

@@ -33,7 +33,6 @@ x-wepppy-service: &wepppy-service
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:
     - ../:/workdir/wepppy
-    - ../../wepppy2:/workdir/wepppy2
     - ../../rosetta:/workdir/rosetta
     - ../../peridot:/workdir/peridot
     - ../../weppcloud-wbt:/workdir/weppcloud-wbt
@@ -482,7 +481,6 @@ services:
     command: ["tail", "-f", "/dev/null"]
     volumes:
       - ../:/workdir/wepppy
-      - ../../wepppy2:/workdir/wepppy2
       - ../../rosetta:/workdir/rosetta
       - ../../peridot:/workdir/peridot
       - ../../weppcloud-wbt:/workdir/weppcloud-wbt

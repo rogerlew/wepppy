@@ -27,8 +27,6 @@ ARG WBT_REPO=https://github.com/rogerlew/weppcloud-wbt.git
 ARG WBT_REF=master
 ARG WEPPCLOUD2_REPO=https://github.com/wepp-in-the-woods/weppcloud2.git
 ARG WEPPCLOUD2_REF=main
-ARG WEPPPY2_REPO=https://github.com/wepp-in-the-woods/wepppy2.git
-ARG WEPPPY2_REF=main
 ARG WEPPPYO3_REPO=https://github.com/wepp-in-the-woods/wepppyo3.git
 ARG WEPPPYO3_REF=main
 
@@ -133,13 +131,11 @@ RUN set -euxo pipefail; \
         popd >/dev/null; \
         rm -rf "${dest}/.git"; \
     }; \
-    clone_repo "${WEPPPY2_REF}" "${WEPPPY2_REPO}" /opt/vendor/wepppy2; \
     clone_repo "${WEPPCLOUD2_REF}" "${WEPPCLOUD2_REPO}" /opt/vendor/weppcloud2; \
     clone_repo "${F_ESRI_REF}" "${F_ESRI_REPO}" /opt/vendor/f-esri; \
     clone_repo "${WBT_REF}" "${WBT_REPO}" /opt/vendor/weppcloud-wbt; \
     clone_repo "${WEPPPYO3_REF}" "${WEPPPYO3_REPO}" /opt/vendor/wepppyo3; \
-    rm -rf /workdir/wepppy2 /workdir/weppcloud2 /workdir/f-esri /workdir/weppcloud-wbt /workdir/wepppyo3; \
-    ln -s /opt/vendor/wepppy2 /workdir/wepppy2; \
+    rm -rf /workdir/weppcloud2 /workdir/f-esri /workdir/weppcloud-wbt /workdir/wepppyo3; \
     ln -s /opt/vendor/weppcloud2 /workdir/weppcloud2; \
     ln -s /opt/vendor/f-esri /workdir/f-esri; \
     ln -s /opt/vendor/weppcloud-wbt /workdir/weppcloud-wbt; \
@@ -156,7 +152,6 @@ RUN set -euxo pipefail; \
     SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
     printf "/workdir/wepppy/\n" > "${SITE_PACKAGES}/wepppy.pth"; \
     printf "/workdir/wepppy/services/cao/src/\n" > "${SITE_PACKAGES}/cao.pth"; \
-    printf "/workdir/wepppy2/\n" > "${SITE_PACKAGES}/wepp_runner.pth"; \
     printf "/workdir/weppcloud2/\n" > "${SITE_PACKAGES}/weppcloud2.pth"; \
     printf "/workdir/weppcloud-wbt/WBT/\n" > "${SITE_PACKAGES}/wbt.pth"; \
     printf "/workdir/f-esri/\n" > "${SITE_PACKAGES}/f_esri.pth"; \
