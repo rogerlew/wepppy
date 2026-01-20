@@ -105,6 +105,44 @@ Omni groups hillslopes into contrast runs using a selection mode. Cumulative obj
 - Scale group IDs in the group map (`group_id *= 10`) after intersection so hillslopes remain 10/20/30 and channels 40; the pruned raster is not rewritten.
 - Each grouped hillslope set becomes a contrast run for each contrast pair (N pairs × M groups).
 
+### Contrast ID Overlay Maps (GeoJSON)
+
+Omni builds a run-scoped overlay used by Run0 map layers (Contrast IDs + labels). The output is always WGS84 and lives at `omni/contrasts/contrast_ids.wgs.geojson`. Each feature is a unioned polygon for one selection, and properties include `contrast_label` and `label` (used for hover and label overlays). The overlay is regenerated whenever contrasts are built (dry run or run) using `build_report.ndjson` as the selection source.
+
+#### Output artifacts
+
+- `omni/contrasts/contrast_ids.wgs.geojson` (final WGS84 overlay)
+- `omni/contrasts/contrast_ids.utm.geojson` (UTM intermediate for raster polygonization in user-defined/stream-order modes; replaced on each build)
+- `omni/contrasts/build_report.ndjson` (contrast selection metadata emitted during build; consumed by overlay generation)
+
+#### Cumulative objective parameter
+
+- **Selection source**: `build_report.ndjson` rows with `topaz_id`.
+- **Geometry**: union hillslope polygons from `Watershed.subwta_shp` (WGS GeoJSON).
+- **Labels**: `contrast_label = topaz_id` (one hillslope per feature).
+
+#### User-defined areas
+
+- **Selection source**: `build_report.ndjson` rows with `feature_index` and `topaz_ids`.
+- **Geometry**: polygonize `Watershed.subwta` raster in UTM; for each feature, mask raster cells whose value is in `topaz_ids`, union shapes, then reproject to WGS with `json_to_wgs`.
+- **Labels**: `contrast_label = feature_index` (1-based feature order, not contrast ID).
+- **Deduping**: same polygon appears once even if multiple contrast pairs reference it.
+
+#### Stream-order pruning (WBT-only)
+
+- **Selection source**: `build_report.ndjson` rows with `subcatchments_group` (10× group ID).
+- **Geometry**: polygonize `dem/wbt/subwta.strahler_pruned_<passes>.tif` in UTM; union shapes for each raster value and reproject to WGS with `json_to_wgs`.
+- **Labels**: `contrast_label = subcatchments_group`.
+- **Deduping**: same group polygon appears once even if multiple contrast pairs reference it.
+
+#### Stream-order intermediates (WBT)
+
+- `dem/wbt/netful.pruned_<passes>.tif`
+- `dem/wbt/netful.strahler_pruned_<passes>.tif`
+- `dem/wbt/chnjnt.strahler_pruned_<passes>.tif`
+- `dem/wbt/subwta.strahler_pruned_<passes>.tif`
+- `dem/wbt/netw.strahler_pruned_<passes>.tsv`
+
 ### Contrast Execution Details (Current)
 
 - **Incremental contrast runs**: only missing or stale contrasts are executed. A contrast is considered run when `_pups/omni/contrasts/<id>/wepp/output/interchange/README.md` exists.

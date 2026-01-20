@@ -718,6 +718,327 @@ def test_build_contrasts_ignores_filters_when_not_cumulative(tmp_path, monkeypat
     ]
 
 
+def _install_json_to_wgs_stub(monkeypatch):
+    support_stub = types.ModuleType("wepppy.topo.watershed_abstraction.support")
+
+    def _json_to_wgs(src_fn, s_srs=None):
+        src_path = Path(src_fn)
+        dst_path = src_path.with_suffix(".WGS.geojson")
+        dst_path.write_text(src_path.read_text(encoding="ascii"), encoding="ascii")
+        return str(dst_path)
+
+    support_stub.json_to_wgs = _json_to_wgs
+
+    wa_stub = types.ModuleType("wepppy.topo.watershed_abstraction")
+    wa_stub.__path__ = []
+    wa_stub.support = support_stub
+
+    monkeypatch.setitem(sys.modules, "wepppy.topo.watershed_abstraction", wa_stub)
+    monkeypatch.setitem(sys.modules, "wepppy.topo.watershed_abstraction.support", support_stub)
+
+
+def _install_shapely_shape_stub(monkeypatch):
+    shapely_stub = types.ModuleType("shapely")
+    shapely_geometry_stub = types.ModuleType("shapely.geometry")
+    shapely_ops_stub = types.ModuleType("shapely.ops")
+
+    class DummyShape:
+        def __init__(self, geom):
+            self.__geo_interface__ = geom
+            self.is_empty = False
+
+    shapely_geometry_stub.shape = lambda geom: DummyShape(geom)
+    shapely_ops_stub.unary_union = lambda geoms: geoms[0] if geoms else None
+
+    monkeypatch.setitem(sys.modules, "shapely", shapely_stub)
+    monkeypatch.setitem(sys.modules, "shapely.geometry", shapely_geometry_stub)
+    monkeypatch.setitem(sys.modules, "shapely.ops", shapely_ops_stub)
+
+
+def test_build_contrast_ids_geojson_cumulative(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids")
+    omni.locked = _noop_lock
+    omni._contrast_selection_mode = "cumulative"
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps({"topaz_id": 101}) + "\n", encoding="ascii")
+
+    hillslope_path = tmp_path / "subwta.wgs.geojson"
+    hillslope_path.write_text("{}", encoding="ascii")
+    hillslope_rows = [{"TopazID": "101", "geometry": Rect(0.0, 0.0, 1.0, 1.0)}]
+    hillslope_gdf = DummyGeoDataFrame(hillslope_rows, crs="EPSG:4326")
+
+    geopandas_stub = types.ModuleType("geopandas")
+    geopandas_stub.read_file = lambda path: hillslope_gdf
+    monkeypatch.setitem(sys.modules, "geopandas", geopandas_stub)
+
+    shapely_stub = types.ModuleType("shapely")
+    shapely_geometry_stub = types.ModuleType("shapely.geometry")
+    shapely_ops_stub = types.ModuleType("shapely.ops")
+    shapely_geometry_stub.mapping = lambda geom: {
+        "type": "Polygon",
+        "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]],
+    }
+    shapely_ops_stub.unary_union = lambda geoms: geoms[0] if geoms else None
+    monkeypatch.setitem(sys.modules, "shapely", shapely_stub)
+    monkeypatch.setitem(sys.modules, "shapely.geometry", shapely_geometry_stub)
+    monkeypatch.setitem(sys.modules, "shapely.ops", shapely_ops_stub)
+
+    class DummyWatershed:
+        subwta_shp = str(hillslope_path)
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    output_path = omni._build_contrast_ids_geojson()
+
+    payload = json.loads(Path(output_path).read_text(encoding="ascii"))
+    assert payload["type"] == "FeatureCollection"
+    assert payload["features"]
+    assert payload["features"][0]["properties"]["contrast_label"] == "101"
+
+
+def test_build_contrast_ids_geojson_user_defined_areas(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids.user_defined")
+    omni.locked = _noop_lock
+    omni._contrast_selection_mode = "user_defined_areas"
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    entries = [
+        {
+            "selection_mode": "user_defined_areas",
+            "feature_index": 1,
+            "topaz_ids": ["8122", "8123"],
+        },
+        {
+            "selection_mode": "user_defined_areas",
+            "feature_index": 1,
+            "topaz_ids": ["8122", "8123"],
+        },
+        {
+            "selection_mode": "user_defined_areas",
+            "feature_index": 2,
+            "topaz_ids": ["8201", "8202"],
+        },
+    ]
+    report_path.write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="ascii",
+    )
+
+    subwta_path = tmp_path / "dem" / "wbt" / "subwta.tif"
+    subwta_path.parent.mkdir(parents=True, exist_ok=True)
+    subwta_path.write_text("", encoding="ascii")
+
+    class DummyWatershed:
+        subwta = str(subwta_path)
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    data = np.ma.array([[8122, 8201], [8123, 8202]], mask=False)
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return data
+
+        @property
+        def transform(self):
+            return "transform"
+
+        @property
+        def crs(self):
+            return "EPSG:32611"
+
+    def _shapes(*args, **kwargs):
+        return [
+            (
+                {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [0.0, 0.0],
+                            [1.0, 0.0],
+                            [1.0, 1.0],
+                            [0.0, 1.0],
+                            [0.0, 0.0],
+                        ]
+                    ],
+                },
+                1,
+            )
+        ]
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    if not hasattr(rasterio_stub, "__path__"):
+        rasterio_stub.__path__ = []
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    features_stub = types.ModuleType("rasterio.features")
+    features_stub.shapes = _shapes
+    monkeypatch.setitem(sys.modules, "rasterio.features", features_stub)
+    rasterio_stub.features = features_stub
+
+    _install_shapely_shape_stub(monkeypatch)
+    _install_json_to_wgs_stub(monkeypatch)
+
+    output_path = omni._build_contrast_ids_geojson()
+
+    utm_path = output_path.replace(".wgs.geojson", ".utm.geojson")
+    assert Path(utm_path).exists()
+
+    payload = json.loads(Path(output_path).read_text(encoding="ascii"))
+    labels = [feature["properties"]["contrast_label"] for feature in payload["features"]]
+    assert labels == ["1", "2"]
+    for feature in payload["features"]:
+        assert feature["properties"]["label"] == feature["properties"]["contrast_label"]
+        assert feature["properties"]["selection_mode"] == "user_defined_areas"
+
+
+def test_build_contrast_ids_geojson_stream_order(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids.stream_order")
+    omni.locked = _noop_lock
+    omni._contrast_selection_mode = "stream_order"
+    omni._contrast_order_reduction_passes = 1
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    entries = [
+        {
+            "selection_mode": "stream_order",
+            "subcatchments_group": 220,
+            "n_hillslopes": 8,
+        },
+        {
+            "selection_mode": "stream_order",
+            "subcatchments_group": 220,
+            "n_hillslopes": 8,
+        },
+        {
+            "selection_mode": "stream_order",
+            "subcatchments_group": 230,
+            "n_hillslopes": 6,
+        },
+        {
+            "selection_mode": "stream_order",
+            "subcatchments_group": 240,
+            "n_hillslopes": 0,
+            "status": "skipped",
+        },
+    ]
+    report_path.write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="ascii",
+    )
+
+    wbt_dir = tmp_path / "dem" / "wbt"
+    wbt_dir.mkdir(parents=True, exist_ok=True)
+    subwta_pruned_path = wbt_dir / "subwta.strahler_pruned_1.tif"
+    subwta_pruned_path.write_text("", encoding="ascii")
+
+    class DummyWatershed:
+        wbt_wd = str(wbt_dir)
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    data = np.ma.array([[22, 23], [0, 0]], mask=False)
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return data
+
+        @property
+        def transform(self):
+            return "transform"
+
+        @property
+        def crs(self):
+            return "EPSG:32611"
+
+    def _shapes(*args, **kwargs):
+        return [
+            (
+                {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [0.0, 0.0],
+                            [1.0, 0.0],
+                            [1.0, 1.0],
+                            [0.0, 1.0],
+                            [0.0, 0.0],
+                        ]
+                    ],
+                },
+                22,
+            ),
+            (
+                {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [2.0, 2.0],
+                            [3.0, 2.0],
+                            [3.0, 3.0],
+                            [2.0, 3.0],
+                            [2.0, 2.0],
+                        ]
+                    ],
+                },
+                23,
+            ),
+        ]
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    if not hasattr(rasterio_stub, "__path__"):
+        rasterio_stub.__path__ = []
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    features_stub = types.ModuleType("rasterio.features")
+    features_stub.shapes = _shapes
+    monkeypatch.setitem(sys.modules, "rasterio.features", features_stub)
+    rasterio_stub.features = features_stub
+
+    _install_shapely_shape_stub(monkeypatch)
+    _install_json_to_wgs_stub(monkeypatch)
+
+    output_path = omni._build_contrast_ids_geojson()
+
+    utm_path = output_path.replace(".wgs.geojson", ".utm.geojson")
+    assert Path(utm_path).exists()
+
+    payload = json.loads(Path(output_path).read_text(encoding="ascii"))
+    labels = [feature["properties"]["contrast_label"] for feature in payload["features"]]
+    assert labels == ["220", "230"]
+    for feature in payload["features"]:
+        assert feature["properties"]["selection_mode"] == "stream_order"
+        assert "subcatchments_group" in feature["properties"]
+
+
 def test_build_contrasts_clamps_hillslope_limit(tmp_path, monkeypatch, omni_module, caplog):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)

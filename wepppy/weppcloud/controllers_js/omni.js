@@ -26,7 +26,8 @@ var Omni = (function () {
         "omni:run:started",
         "omni:run:completed",
         "omni:run:error",
-        "omni:contrast:run:completed"
+        "omni:contrast:run:completed",
+        "omni:contrast:dry-run:completed"
     ];
     var CONTRAST_COMPLETION_EVENT = "OMNI_CONTRAST_RUN_TASK_COMPLETED";
     var CONTRAST_SELECTION_MODES = {
@@ -2233,6 +2234,9 @@ var Omni = (function () {
                 }
                 setContrastStatus("Dry run complete.");
                 renderContrastDryRunReport(body.result);
+                if (omniEvents && typeof omniEvents.emit === "function") {
+                    omniEvents.emit("omni:contrast:dry-run:completed", { result: body.result });
+                }
             }).catch(function (error) {
                 var payload = toResponsePayload(http, error);
                 contrastController.pushResponseStacktrace(contrastController, payload);

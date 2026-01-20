@@ -1627,11 +1627,17 @@ var MapController = (function () {
             if (label.indexOf("Subcatchment Labels") !== -1) {
                 return 80;
             }
+            if (label.indexOf("Contrast ID Labels") !== -1) {
+                return 85;
+            }
             if (label.indexOf("Channel Labels") !== -1) {
                 return 90;
             }
             if (label.indexOf("Subcatchments") !== -1) {
                 return 30;
+            }
+            if (label.indexOf("Contrast IDs") !== -1) {
+                return 35;
             }
             if (label.indexOf("Channels") !== -1) {
                 return 40;
