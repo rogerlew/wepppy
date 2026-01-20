@@ -1,5 +1,5 @@
 # Mini Work Package: WEPPcloud idle transactions + FD leak hardening
-Status: Implemented (pending deploy)
+Status: Implemented (deployed)
 Last Updated: 2026-01-20
 Primary Areas: `wepppy/nodb/base.py`, `wepppy/nodb/core/ron.py`, `wepppy/weppcloud/routes/user.py`, `wepppy/weppcloud/routes/admin.py`, `wepppy/weppcloud/_context_processors.py`, `wepppy/weppcloud/configuration.py`
 
