@@ -225,6 +225,16 @@ def config_app(app: Any):
         or os.getenv("DATABASE_URL")
         or "postgresql://wepppy:c0ff33@postgres/wepppy"
     )
+    idle_in_tx_timeout = os.getenv("POSTGRES_IDLE_IN_TX_TIMEOUT")
+    if idle_in_tx_timeout:
+        engine_options = dict(app.config.get("SQLALCHEMY_ENGINE_OPTIONS") or {})
+        connect_args = dict(engine_options.get("connect_args") or {})
+        existing_options = connect_args.get("options", "")
+        parts = [existing_options] if existing_options else []
+        parts.append(f"-c idle_in_transaction_session_timeout={idle_in_tx_timeout}")
+        connect_args["options"] = " ".join(parts).strip()
+        engine_options["connect_args"] = connect_args
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
 
     app.config["SECURITY_EMAIL_SENDER"] = "cals-wepp@uidaho.edu"
     app.config["SECURITY_CONFIRMABLE"] = True

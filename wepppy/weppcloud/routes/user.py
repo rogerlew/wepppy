@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import wepppy
-from datetime import datetime
+from sqlalchemy import String, cast
 from ._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import *
@@ -97,6 +97,104 @@ def _normalize_direction(raw_value: Optional[str]) -> str:
     return 'asc' if value == 'asc' else 'desc'
 
 
+def _runs_query_for_user(user_id: Optional[int]):
+    from wepppy.weppcloud.app import Run, User, runs_users
+    owner_join = cast(User.id, String) == Run.owner_id
+    query = (
+        Run.query.with_entities(
+            Run.runid,
+            Run.config,
+            Run.date_created,
+            Run.last_modified,
+            Run.owner_id,
+            User.email.label("owner_email"),
+        )
+        .outerjoin(User, owner_join)
+    )
+    if user_id is not None:
+        query = query.join(runs_users).filter(runs_users.c.user_id == user_id)
+    return query
+
+
+def _run_row_from_record(record: Any) -> Dict[str, Any]:
+    runid = record.runid
+    return {
+        "wd": get_wd(runid),
+        "owner": record.owner_email or "<anonymous>",
+        "runid": runid,
+        "date_created": record.date_created,
+        "last_modified": record.last_modified,
+        "owner_id": record.owner_id,
+        "config": record.config,
+    }
+
+
+def _collect_run_rows(query) -> List[Dict[str, Any]]:
+    from wepppy.weppcloud.app import db
+    try:
+        rows = query.all()
+    finally:
+        db.session.remove()
+    return [_run_row_from_record(row) for row in rows]
+
+
+def _paginate_run_rows(query, page: int, per_page: int):
+    from wepppy.weppcloud.app import db
+    try:
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        rows = list(pagination.items)
+    finally:
+        db.session.remove()
+    return [_run_row_from_record(row) for row in rows], pagination
+
+
+def _run_meta_inputs(run: Any) -> tuple[str, Dict[str, Any]]:
+    if isinstance(run, dict):
+        runid = run.get("runid")
+        wd = run.get("wd") or (get_wd(runid) if runid else None)
+        attrs = {
+            "owner": run.get("owner") or "<anonymous>",
+            "runid": runid,
+            "date_created": run.get("date_created"),
+            "last_modified": run.get("last_modified"),
+            "owner_id": run.get("owner_id"),
+            "config": run.get("config"),
+        }
+        return wd, attrs
+
+    owner = getattr(run, "owner", None)
+    if not owner:
+        owner = getattr(run, "owner_email", None) or "<anonymous>"
+    wd = getattr(run, "wd", None) or get_wd(run.runid)
+    attrs = {
+        "owner": owner,
+        "runid": run.runid,
+        "date_created": run.date_created,
+        "last_modified": run.last_modified,
+        "owner_id": run.owner_id,
+        "config": run.config,
+    }
+    return wd, attrs
+
+
+def _run_map_inputs(run: Any) -> tuple[str, Dict[str, Any]]:
+    if isinstance(run, dict):
+        runid = run.get("runid")
+        wd = run.get("wd") or (get_wd(runid) if runid else None)
+        attrs = {
+            "runid": runid,
+            "config": run.get("config"),
+        }
+        return wd, attrs
+
+    wd = getattr(run, "wd", None) or get_wd(run.runid)
+    attrs = {
+        "runid": run.runid,
+        "config": run.config,
+    }
+    return wd, attrs
+
+
 def _collect_metas_for_runs(runs) -> List[dict]:
     """Build metadata payloads for the provided runs in parallel."""
     if not runs:
@@ -108,15 +206,7 @@ def _collect_metas_for_runs(runs) -> List[dict]:
         futures = {
             pool.submit(
                 _build_meta,
-                run.wd,
-                {
-                    "owner": run.owner,
-                    "runid": run.runid,
-                    "date_created": run.date_created,
-                    "last_modified": run.last_modified,
-                    "owner_id": run.owner_id,
-                    "config": run.config,
-                },
+                *_run_meta_inputs(run),
             ): idx
             for idx, run in enumerate(runs)
         }
@@ -189,7 +279,7 @@ def profile():
 
 def _build_meta(wd, attrs: dict):
         try:
-            ron = Ron.getInstance(wd)
+            ron = Ron.load_detached(wd)
         except:
             return None
 
@@ -203,7 +293,7 @@ def _build_meta(wd, attrs: dict):
 
 def _build_map_meta(wd, attrs: dict):
         try:
-            ron = Ron.getInstance(wd)
+            ron = Ron.load_detached(wd)
         except:
             return None
 
@@ -236,11 +326,7 @@ def _collect_map_metas_for_runs(runs) -> List[dict]:
         futures = {
             pool.submit(
                 _build_map_meta,
-                run.wd,
-                {
-                    "runid": run.runid,
-                    "config": run.config,
-                },
+                *_run_map_inputs(run),
             ): idx
             for idx, run in enumerate(runs)
         }
@@ -262,7 +348,7 @@ def _collect_map_metas_for_runs(runs) -> List[dict]:
 @login_required
 def runs():
     try:
-        from wepppy.weppcloud.app import runs_users, Run
+        from wepppy.weppcloud.app import Run
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 25, type=int)
         if per_page <= 0:
@@ -274,11 +360,9 @@ def runs():
 
         format_param = (request.args.get('format') or request.args.get('fomat') or '').lower()
         if format_param == 'json':
-            base_query = (
-                Run.query
-                .join(runs_users)
-                .filter(runs_users.c.user_id == current_user.id)
-                .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
+            base_query = _runs_query_for_user(current_user.id).order_by(
+                Run.last_modified.desc().nullslast(),
+                Run.id.desc(),
             )
 
             pagination = None
@@ -295,11 +379,11 @@ def runs():
 
                 secondary_expr = Run.id.desc() if is_desc else Run.id.asc()
                 query = query.order_by(order_expr, secondary_expr)
-                pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-                metas = _collect_metas_for_runs(pagination.items)
+                run_rows, pagination = _paginate_run_rows(query, page, per_page)
+                metas = _collect_metas_for_runs(run_rows)
             else:
-                runs_all = base_query.all()
-                metas_all = _collect_metas_for_runs(runs_all)
+                run_rows = _collect_run_rows(base_query)
+                metas_all = _collect_metas_for_runs(run_rows)
                 metas_all = _sort_metas(metas_all, sort_param, is_desc)
                 metas, pagination = _slice_for_page(metas_all, page, per_page)
 
@@ -329,21 +413,15 @@ def runs():
 @login_required
 def runs_catalog():
     try:
-        from wepppy.weppcloud.app import runs_users, Run
         sort_param = _normalize_sort_param(request.args.get('sort'))
         direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
         is_desc = direction_param == 'desc'
 
         scope = (request.args.get('scope') or '').lower()
         if scope == 'all' and (current_user.has_role('Admin') or current_user.has_role('Root')):
-            runs_all = Run.query.all()
+            runs_all = _collect_run_rows(_runs_query_for_user(None))
         else:
-            runs_all = (
-                Run.query
-                .join(runs_users)
-                .filter(runs_users.c.user_id == current_user.id)
-                .all()
-            )
+            runs_all = _collect_run_rows(_runs_query_for_user(current_user.id))
 
         metas = _collect_metas_for_runs(runs_all)
         metas = _sort_metas(metas, sort_param, is_desc)
@@ -360,23 +438,20 @@ def runs_catalog():
 @login_required
 def runs_map_data():
     try:
-        from wepppy.weppcloud.app import runs_users, Run
+        from wepppy.weppcloud.app import Run
         scope = (request.args.get('scope') or '').lower()
         if scope == 'all' and (current_user.has_role('Admin') or current_user.has_role('Root')):
-            runs_all = (
-                Run.query
-                .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
-                .all()
+            query = _runs_query_for_user(None).order_by(
+                Run.last_modified.desc().nullslast(),
+                Run.id.desc(),
             )
         else:
-            runs_all = (
-                Run.query
-                .join(runs_users)
-                .filter(runs_users.c.user_id == current_user.id)
-                .order_by(Run.last_modified.desc().nullslast(), Run.id.desc())
-                .all()
+            query = _runs_query_for_user(current_user.id).order_by(
+                Run.last_modified.desc().nullslast(),
+                Run.id.desc(),
             )
-        metas = _collect_map_metas_for_runs(runs_all)
+        run_rows = _collect_run_rows(query)
+        metas = _collect_map_metas_for_runs(run_rows)
         return jsonify(runs=metas)
     except:
         return exception_factory()

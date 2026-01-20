@@ -1278,5 +1278,5 @@ class RonViewModel(object):
 
     @classmethod
     def getInstanceFromRunID(cls, runid: str) -> 'RonViewModel':
-        ron = Ron.getInstanceFromRunID(runid)
+        ron = Ron.load_detached_from_runid(runid)
         return cls(ron)

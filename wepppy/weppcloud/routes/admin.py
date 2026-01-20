@@ -42,9 +42,9 @@ def runid_query():
     wds = [wd for wd in wds if _exists(_join(wd, 'ron.nodb'))]
 
     if name is not None:
-        wds = [wd for wd in wds if name in Ron.getInstance(wd).name]
+        wds = [wd for wd in wds if name in Ron.load_detached(wd).name]
 
-    return jsonify([_join('weppcloud/runs', _split(wd)[-1], Ron.getInstance(wd).config_stem) for wd in wds])
+    return jsonify([_join('weppcloud/runs', _split(wd)[-1], Ron.load_detached(wd).config_stem) for wd in wds])
   
 
 @admin_bp.route('/usermod', strict_slashes=False)

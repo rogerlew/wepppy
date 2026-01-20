@@ -897,7 +897,7 @@ class NoDbBase(object):
         readonly: bool,
     ) -> Optional['NoDbBase']:
         """Load a controller instance from Redis cache or disk."""
-        global redis_nodb_cache_client, REDIS_NODB_EXPIRY
+        global redis_nodb_cache_client
 
         filepath = cls._get_nodb_path(abs_wd)
 
@@ -1036,6 +1036,80 @@ class NoDbBase(object):
 
         instance._init_logging()
         return instance
+
+    @classmethod
+    def load_detached(
+        cls,
+        wd: str = '.',
+        allow_nonexistent: bool = False,
+    ) -> Optional['NoDbBase']:
+        """Load a NoDb instance without caching or logging initialization."""
+        global redis_nodb_cache_client
+
+        abs_wd = os.path.abspath(wd)
+        filepath = cls._get_nodb_path(abs_wd)
+        readonly = _exists(_join(abs_wd, 'READONLY'))
+
+        if not readonly and _exists(filepath):
+            ensure_version(abs_wd)
+
+        if redis_nodb_cache_client is not None:
+            cached_data = redis_nodb_cache_client.get(filepath)
+            if cached_data is not None:
+                try:
+                    db = cls._decode_jsonpickle(cached_data)
+                    if isinstance(db, cls):
+                        db = cls._post_instance_loaded(db)
+                        db.wd = abs_wd
+                        return db
+                except Exception:
+                    redis_nodb_cache_client.delete(filepath)
+
+        if not _exists(filepath):
+            if allow_nonexistent:
+                return None
+            raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
+            json_text = fp.read()
+
+        json_text = cls._preprocess_json_for_decode(json_text)
+        cls._ensure_legacy_module_imports(json_text)
+        db = cls._decode_jsonpickle(json_text)
+
+        if not isinstance(db, cls):
+            decoded_type = type(db)
+            types_match_by_name = (
+                decoded_type.__module__ == cls.__module__
+                and decoded_type.__name__ == cls.__name__
+            )
+
+            if types_match_by_name:
+                try:
+                    db.__class__ = cls
+                except TypeError:
+                    pass
+
+        if not isinstance(db, cls):
+            raise TypeError(
+                "Decoded object type "
+                f"{type(db)} (id={id(type(db))}) does not match expected "
+                f"{cls} (id={id(cls)})"
+            )
+
+        db = cls._post_instance_loaded(db)
+        db.wd = abs_wd
+        return db
+
+    @classmethod
+    def load_detached_from_runid(
+        cls,
+        runid: str,
+        allow_nonexistent: bool = False,
+    ) -> Optional['NoDbBase']:
+        from wepppy.weppcloud.utils.helpers import get_wd
+
+        return cls.load_detached(get_wd(runid), allow_nonexistent=allow_nonexistent)
     
     @classmethod
     def cleanup_all_instances(cls) -> None:

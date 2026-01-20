@@ -19,9 +19,8 @@ UserModel: Optional[Type] = None
 
 def _get_run_name(runid):
     try:
-        wd = get_wd(runid)
-        name = Ron.getInstance(wd).name
-        return name
+        ron = Ron.load_detached_from_runid(runid)
+        return ron.name
     except:
         return '-'
 
@@ -38,14 +37,29 @@ def _get_run_owner(runid):
         if RunModel is None or UserModel is None:
             return '-'
 
-        run = RunModel.query.filter(RunModel.runid == runid).first()
-        if run is None:
-            return '-'
-        if run.owner_id is None:
-            return 'anonymous'
+        from sqlalchemy import String, cast, select
+        from wepppy.weppcloud.app import db
 
-        owner = UserModel.query.filter(UserModel.id == run.owner_id).first()
-        return owner.email
+        run_table = RunModel.__table__
+        user_table = UserModel.__table__
+        owner_join = cast(user_table.c.id, String) == run_table.c.owner_id
+        stmt = (
+            select(
+                run_table.c.owner_id,
+                user_table.c.email.label("owner_email"),
+            )
+            .select_from(run_table.outerjoin(user_table, owner_join))
+            .where(run_table.c.runid == runid)
+            .limit(1)
+        )
+        with db.engine.connect() as conn:
+            row = conn.execute(stmt).first()
+
+        if row is None:
+            return '-'
+        if row.owner_id is None:
+            return 'anonymous'
+        return row.owner_email or '-'
     except:
         return '-'
 
@@ -168,8 +182,10 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
                 from wepppy.nodb.core import Wepp
 
                 wd = get_wd(runid)
-                wepp = Wepp.getInstance(wd)
-                storm_event_analyzer_ready = wepp.storm_event_analyzer_ready
+                wepp = Wepp.load_detached(wd)
+                storm_event_analyzer_ready = bool(
+                    wepp and wepp.storm_event_analyzer_ready
+                )
             except Exception:
                 storm_event_analyzer_ready = False
 

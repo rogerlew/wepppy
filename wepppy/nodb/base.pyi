@@ -190,6 +190,20 @@ class NoDbBase(object):
     ) -> "NoDbBase": ...
 
     @classmethod
+    def load_detached(
+        cls,
+        wd: str = ...,
+        allow_nonexistent: bool = ...,
+    ) -> Optional["NoDbBase"]: ...
+
+    @classmethod
+    def load_detached_from_runid(
+        cls,
+        runid: str,
+        allow_nonexistent: bool = ...,
+    ) -> Optional["NoDbBase"]: ...
+
+    @classmethod
     def tryGetInstance(
         cls,
         wd: str = ...,
