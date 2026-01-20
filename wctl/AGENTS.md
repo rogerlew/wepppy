@@ -11,6 +11,7 @@ The `wctl` toolset is composed of:
 - `wctl/README.md` — human-facing quick reference for the Typer CLI.
 
 The legacy man page has been retired; Typer help (`wctl --help`) is now the canonical documentation. Changes to any of the pieces above must be reflected in this document.
+`install.sh` currently supports `dev`, `prod`, `wepp1`, and `worker` presets; update this list and the README when adding new targets.
 
 ## Requirements When Adding or Removing Commands
 

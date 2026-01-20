@@ -495,13 +495,15 @@ services:
     image: redis:7.4.6
     restart: unless-stopped
     cpuset: "40-47"
-    command: ["redis-server", "--notify-keyspace-events", "Kh"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: ["redis-server", "--notify-keyspace-events", "Kh", "--requirepass", "${REDIS_PASSWORD}"]
     volumes:
       - redis-data:/data
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-p", "6379", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "-h", "127.0.0.1", "-p", "6379", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

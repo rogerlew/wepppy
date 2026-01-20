@@ -18,6 +18,8 @@ cd /workdir/wepppy
 ./wctl/install.sh prod    # pin docker/docker-compose.prod.yml
 # or
 ./wctl/install.sh wepp1   # prod + wepp1 override (adds docker/docker-compose.prod.wepp1.yml)
+# or
+./wctl/install.sh worker  # pin docker/docker-compose.prod.worker.yml
 
 # optional: install to a custom bin directory
 WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev

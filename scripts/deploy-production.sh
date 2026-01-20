@@ -58,10 +58,25 @@ done
 
 cd "${PROJECT_ROOT}"
 
+COMPOSE_SERVICES="$(wctl docker compose config --services)"
+HAS_WEPPCLOUD=false
+if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
+    HAS_WEPPCLOUD=true
+fi
+
+if [ "${HAS_WEPPCLOUD}" = true ]; then
+    DEPLOY_MODE="full"
+    BUILD_SERVICES=(weppcloud rq-worker)
+else
+    DEPLOY_MODE="worker"
+    BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
+fi
+
 echo "============================================"
 echo "WEPPcloud Production Deployment"
 echo "============================================"
 echo "Project root: ${PROJECT_ROOT}"
+echo "Mode: ${DEPLOY_MODE}"
 echo "Timestamp: $(date --iso-8601=seconds)"
 echo ""
 
@@ -78,7 +93,7 @@ fi
 # Build Docker images
 if [ "${SKIP_BUILD}" = false ]; then
     echo ">>> Step 2: Building Docker images..."
-    wctl build --no-cache weppcloud rq-worker
+    wctl build --no-cache "${BUILD_SERVICES[@]}"
     echo ""
     
     echo ">>> Step 2b: Pruning Docker build cache..."
@@ -95,26 +110,31 @@ wctl  down
 echo ""
 
 # Build static assets (controllers and themes)
-echo ">>> Step 4: Building static assets..."
+if [ "${HAS_WEPPCLOUD}" = true ]; then
+    echo ">>> Step 4: Building static assets..."
 
-# Build controllers-gl.js
-echo "    Building controllers-gl.js..."
-python3 wepppy/weppcloud/controllers_js/build_controllers_js.py \
-    --output wepppy/weppcloud/static/js/controllers-gl.js
+    # Build controllers-gl.js
+    echo "    Building controllers-gl.js..."
+    python3 wepppy/weppcloud/controllers_js/build_controllers_js.py \
+        --output wepppy/weppcloud/static/js/controllers-gl.js
 
-# Build themes
-if [ "${SKIP_THEMES}" = false ]; then
-    echo "    Building theme CSS files..."
-    if [ -f "wepppy/weppcloud/static-src/themes/build-themes.js" ]; then
-        npm --prefix wepppy/weppcloud/static-src run build:themes
+    # Build themes
+    if [ "${SKIP_THEMES}" = false ]; then
+        echo "    Building theme CSS files..."
+        if [ -f "wepppy/weppcloud/static-src/themes/build-themes.js" ]; then
+            npm --prefix wepppy/weppcloud/static-src run build:themes
+        else
+            echo "    Warning: Theme build script not found, skipping"
+        fi
     else
-        echo "    Warning: Theme build script not found, skipping"
+        echo "    Skipping theme build (--skip-themes)"
     fi
-else
-    echo "    Skipping theme build (--skip-themes)"
-fi
 
-echo ""
+    echo ""
+else
+    echo ">>> Step 4: Skipping static assets (worker stack detected)..."
+    echo ""
+fi
 
 # Start services
 echo ">>> Step 5: Starting services..."
@@ -122,50 +142,54 @@ wctl up -d
 echo ""
 
 # Wait for health check
-echo ">>> Step 6: Waiting for services to be healthy..."
-sleep 5
+if [ "${HAS_WEPPCLOUD}" = true ]; then
+    echo ">>> Step 6: Waiting for services to be healthy..."
+    sleep 5
 
-# Resolve health check URL (prefer explicit override, then EXTERNAL_HOST from docker/.env)
-if [ -z "${HEALTHCHECK_URL}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
-    HEALTHCHECK_URL="$(read_env_value "HEALTHCHECK_URL" "${PROJECT_ROOT}/docker/.env")"
-fi
-if [ -z "${EXTERNAL_HOST:-}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
-    EXTERNAL_HOST="$(read_env_value "EXTERNAL_HOST" "${PROJECT_ROOT}/docker/.env")"
-fi
-
-if [ -z "${HEALTHCHECK_URL}" ]; then
-    if [ -n "${EXTERNAL_HOST:-}" ]; then
-        case "${EXTERNAL_HOST}" in
-            http://*|https://*)
-                HEALTHCHECK_URL="${EXTERNAL_HOST%/}/weppcloud/health"
-                ;;
-            *)
-                HEALTHCHECK_URL="https://${EXTERNAL_HOST}/weppcloud/health"
-                ;;
-        esac
-    else
-        HEALTHCHECK_URL="http://localhost:8080/weppcloud/health"
+    # Resolve health check URL (prefer explicit override, then EXTERNAL_HOST from docker/.env)
+    if [ -z "${HEALTHCHECK_URL}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+        HEALTHCHECK_URL="$(read_env_value "HEALTHCHECK_URL" "${PROJECT_ROOT}/docker/.env")"
     fi
+    if [ -z "${EXTERNAL_HOST:-}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+        EXTERNAL_HOST="$(read_env_value "EXTERNAL_HOST" "${PROJECT_ROOT}/docker/.env")"
+    fi
+
+    if [ -z "${HEALTHCHECK_URL}" ]; then
+        if [ -n "${EXTERNAL_HOST:-}" ]; then
+            case "${EXTERNAL_HOST}" in
+                http://*|https://*)
+                    HEALTHCHECK_URL="${EXTERNAL_HOST%/}/weppcloud/health"
+                    ;;
+                *)
+                    HEALTHCHECK_URL="https://${EXTERNAL_HOST}/weppcloud/health"
+                    ;;
+            esac
+        else
+            HEALTHCHECK_URL="http://localhost:8080/weppcloud/health"
+        fi
+    fi
+
+    echo "    Health check URL: ${HEALTHCHECK_URL}"
+
+    # Check weppcloud health
+    MAX_ATTEMPTS=30
+    ATTEMPT=0
+    while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+        if curl -fsS "${HEALTHCHECK_URL}" > /dev/null 2>&1; then
+            echo "✓ WEPPcloud is healthy"
+            break
+        fi
+        ATTEMPT=$((ATTEMPT + 1))
+        if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+            echo "✗ WEPPcloud health check failed after ${MAX_ATTEMPTS} attempts"
+            exit 1
+        fi
+        echo "  Waiting for WEPPcloud to be ready (attempt ${ATTEMPT}/${MAX_ATTEMPTS})..."
+        sleep 2
+    done
+else
+    echo ">>> Step 6: Skipping WEPPcloud health check (worker stack detected)..."
 fi
-
-echo "    Health check URL: ${HEALTHCHECK_URL}"
-
-# Check weppcloud health
-MAX_ATTEMPTS=30
-ATTEMPT=0
-while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-    if curl -fsS "${HEALTHCHECK_URL}" > /dev/null 2>&1; then
-        echo "✓ WEPPcloud is healthy"
-        break
-    fi
-    ATTEMPT=$((ATTEMPT + 1))
-    if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-        echo "✗ WEPPcloud health check failed after ${MAX_ATTEMPTS} attempts"
-        exit 1
-    fi
-    echo "  Waiting for WEPPcloud to be ready (attempt ${ATTEMPT}/${MAX_ATTEMPTS})..."
-    sleep 2
-done
 
 echo ""
 echo "============================================"
