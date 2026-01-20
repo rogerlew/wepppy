@@ -57,6 +57,23 @@ def test_rq_info_appends_args(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
     ]
 
 
+def test_rq_info_uses_password_from_env(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    docker_env = temp_project / "docker" / ".env"
+    docker_env.write_text(docker_env.read_text() + "REDIS_PASSWORD=sekret\n")
+
+    result, recorded = _run_command(monkeypatch, temp_project, ["rq-info"])
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "rq-worker",
+            "/opt/venv/bin/rq info -u redis://:sekret@redis:6379/9 default batch",
+            True,
+            False,
+        )
+    ]
+
+
 def test_rq_info_detail_runs_summary(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
     result, recorded = _run_command(monkeypatch, temp_project, ["rq-info", "--detail"])
 

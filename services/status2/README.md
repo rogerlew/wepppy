@@ -140,7 +140,7 @@ Each connection includes:
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `STATUS_REDIS_URL` | `redis://localhost:6379/2` | Target Redis DB. |
+| `STATUS_REDIS_URL` | `redis://localhost:6379/2` | Target Redis DB (injects `REDIS_PASSWORD` if the URL lacks auth; falls back to `REDIS_URL` when unset). |
 | `STATUS_LISTEN_ADDR` | `:9002` | Bind address. |
 | `STATUS_PING_INTERVAL` | `5s` | Heartbeat cadence. |
 | `STATUS_PONG_TIMEOUT` | `75s` | Idle cutoff (set ≥60s in production). |

@@ -12,8 +12,8 @@ x-wepppy-image: &wepppy-image
 x-worker-env: &worker-env
   PYTHONUNBUFFERED: "1"
   MPLCONFIGDIR: /tmp/matplotlib
-  RQ_REDIS_URL: ${RQ_REDIS_URL}
-  REDIS_URL: ${RQ_REDIS_URL}
+  RQ_REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
+  REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
   WC1_DIR: /wc1
   GEODATA_DIR: /geodata
   OPENTOPOGRAPHY_API_KEY: ${OPENTOPOGRAPHY_API_KEY}
@@ -50,7 +50,7 @@ services:
       - -n
       - "6"
       - -u
-      - ${RQ_REDIS_URL}
+      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class
@@ -74,7 +74,7 @@ services:
       - -n
       - "4"
       - -u
-      - ${RQ_REDIS_URL}
+      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class

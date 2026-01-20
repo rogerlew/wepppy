@@ -122,6 +122,38 @@ func TestLoadEnvironmentOverrides(t *testing.T) {
 	}
 }
 
+func TestLoadRedisURLFallbackWithPassword(t *testing.T) {
+	clearStatusEnv(t)
+
+	t.Setenv("REDIS_URL", "redis://redis:6379/2")
+	t.Setenv("REDIS_PASSWORD", "sekret")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned error: %v", err)
+	}
+
+	if cfg.RedisURL != "redis://:sekret@redis:6379/2" {
+		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/2", cfg.RedisURL)
+	}
+}
+
+func TestLoadStatusRedisURLInjectsPassword(t *testing.T) {
+	clearStatusEnv(t)
+
+	t.Setenv("STATUS_REDIS_URL", "redis://redis:6379/2")
+	t.Setenv("REDIS_PASSWORD", "sekret")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned error: %v", err)
+	}
+
+	if cfg.RedisURL != "redis://:sekret@redis:6379/2" {
+		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/2", cfg.RedisURL)
+	}
+}
+
 func clearStatusEnv(t *testing.T) {
 	t.Helper()
 	for _, env := range os.Environ() {
@@ -135,6 +167,9 @@ func clearStatusEnv(t *testing.T) {
 			continue
 		}
 		key := env[:findEquals(env)]
+		os.Unsetenv(key)
+	}
+	for _, key := range []string{"REDIS_URL", "REDIS_PASSWORD", "REDIS_HOST", "REDIS_PORT"} {
 		os.Unsetenv(key)
 	}
 }

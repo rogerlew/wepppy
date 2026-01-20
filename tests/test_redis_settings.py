@@ -15,6 +15,7 @@ def reset_redis_env(monkeypatch):
         "SESSION_REDIS_URL",
         "REDIS_HOST",
         "REDIS_PORT",
+        "REDIS_PASSWORD",
     ):
         monkeypatch.delenv(key, raising=False)
 
@@ -92,6 +93,27 @@ def test_invalid_url_falls_back_to_env_defaults(monkeypatch):
     )
 
 
+def test_password_injected_into_url(monkeypatch):
+    monkeypatch.setenv("REDIS_HOST", "secure-cache")
+    monkeypatch.setenv("REDIS_PORT", "6379")
+    monkeypatch.setenv("REDIS_PASSWORD", "sekret")
+
+    assert (
+        redis_settings.redis_url(redis_settings.RedisDB.WD_CACHE)
+        == "redis://:sekret@secure-cache:6379/11"
+    )
+
+
+def test_password_applies_to_url_override(monkeypatch):
+    monkeypatch.setenv("REDIS_URL", "redis://redis.internal:6380/12?ssl=true")
+    monkeypatch.setenv("REDIS_PASSWORD", "sekret")
+
+    assert (
+        redis_settings.redis_url(redis_settings.RedisDB.STATUS)
+        == "redis://:sekret@redis.internal:6380/2?ssl=true"
+    )
+
+
 def test_connection_kwargs_merge_extra(monkeypatch):
     monkeypatch.setenv("REDIS_HOST", "config-host")
     monkeypatch.setenv("REDIS_PORT", "6370")
@@ -107,6 +129,16 @@ def test_connection_kwargs_merge_extra(monkeypatch):
     assert kwargs["host"] == "override-host"
     assert kwargs["port"] == 6370
     assert kwargs["socket_timeout"] == 5
+
+
+def test_connection_kwargs_include_password(monkeypatch):
+    monkeypatch.setenv("REDIS_HOST", "secure-cache")
+    monkeypatch.setenv("REDIS_PORT", "6379")
+    monkeypatch.setenv("REDIS_PASSWORD", "sekret")
+
+    kwargs = redis_settings.redis_connection_kwargs(redis_settings.RedisDB.LOCK)
+
+    assert kwargs["password"] == "sekret"
 
 
 def test_redis_client_uses_default_class(monkeypatch):

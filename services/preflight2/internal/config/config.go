@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log/slog"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -30,6 +31,9 @@ const (
 	envPrefix                 = "PREFLIGHT_"
 	defaultListenAddr         = ":9001"
 	defaultRedisURL           = "redis://localhost:6379/0"
+	defaultRedisHost          = "localhost"
+	defaultRedisPort          = "6379"
+	defaultRedisDB            = "0"
 	defaultPingInterval       = 5 * time.Second
 	defaultPongTimeout        = 75 * time.Second
 	defaultWriteTimeout       = 2 * time.Second
@@ -45,7 +49,7 @@ const (
 func Load() (Config, error) {
 	cfg := Config{
 		ListenAddr:          getEnv("LISTEN_ADDR", defaultListenAddr),
-		RedisURL:            getEnv("REDIS_URL", defaultRedisURL),
+		RedisURL:            resolveRedisURL(),
 		PingInterval:        getDurationEnv("PING_INTERVAL", defaultPingInterval),
 		PongTimeout:         getDurationEnv("PONG_TIMEOUT", defaultPongTimeout),
 		WriteTimeout:        getDurationEnv("WRITE_TIMEOUT", defaultWriteTimeout),
@@ -76,6 +80,54 @@ func Load() (Config, error) {
 
 func envKey(key string) string {
 	return envPrefix + key
+}
+
+func resolveRedisURL() string {
+	password := os.Getenv("REDIS_PASSWORD")
+	if v := os.Getenv(envKey("REDIS_URL")); v != "" {
+		return applyRedisPassword(v, password)
+	}
+	if v := os.Getenv("REDIS_URL"); v != "" {
+		return applyRedisPassword(v, password)
+	}
+
+	host := os.Getenv("REDIS_HOST")
+	if host == "" {
+		host = defaultRedisHost
+	}
+	port := os.Getenv("REDIS_PORT")
+	if port == "" {
+		port = defaultRedisPort
+	}
+	return buildRedisURL(host, port, password)
+}
+
+func applyRedisPassword(rawURL string, password string) string {
+	if password == "" {
+		return rawURL
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return rawURL
+	}
+	if parsed.User != nil {
+		if _, hasPassword := parsed.User.Password(); hasPassword {
+			return rawURL
+		}
+		username := parsed.User.Username()
+		parsed.User = url.UserPassword(username, password)
+		return parsed.String()
+	}
+	parsed.User = url.UserPassword("", password)
+	return parsed.String()
+}
+
+func buildRedisURL(host string, port string, password string) string {
+	creds := ""
+	if password != "" {
+		creds = url.UserPassword("", password).String() + "@"
+	}
+	return fmt.Sprintf("redis://%s%s:%s/%s", creds, host, port, defaultRedisDB)
 }
 
 func getEnv(key, fallback string) string {

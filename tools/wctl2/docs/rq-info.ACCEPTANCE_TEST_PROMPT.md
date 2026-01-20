@@ -9,6 +9,7 @@
 
 1. Run `wctl rq-info`.
    - Confirm the log line shows: `docker compose exec rq-worker bash -lc /opt/venv/bin/rq info -u redis://redis:6379/9 default batch`.
+   - If Redis auth is enabled, expect the URL credentials to be redacted in the log (for example `redis://***@redis:6379/9`).
    - Confirm output lists both queues (`default` and `batch`).
    - If workers are running, confirm each worker line includes `jobs: X finished, X failed`.
 

@@ -14,7 +14,7 @@ import os
 from enum import IntEnum
 from functools import lru_cache
 from typing import Any, Dict, Iterable, Mapping, Optional, Union
-from urllib.parse import ParseResult, urlparse, urlunparse
+from urllib.parse import ParseResult, quote, urlparse, urlunparse
 
 try:
     import redis  # type: ignore
@@ -42,6 +42,51 @@ def _parse_url(raw_url: str) -> Optional[ParseResult]:
     return parsed
 
 
+def _redis_password() -> Optional[str]:
+    password = os.getenv("REDIS_PASSWORD")
+    if password:
+        return password
+    return None
+
+
+def _format_netloc(parsed: ParseResult) -> str:
+    hostname = parsed.hostname
+    if not hostname:
+        return ""
+    host = hostname
+    if ":" in hostname and not hostname.startswith("["):
+        host = f"[{hostname}]"
+    if parsed.port:
+        return f"{host}:{parsed.port}"
+    return host
+
+
+def _apply_password(parsed: ParseResult, password: Optional[str]) -> ParseResult:
+    if not password or parsed.password:
+        return parsed
+    netloc = _format_netloc(parsed)
+    if not netloc:
+        return parsed
+    username = parsed.username or ""
+    password_enc = quote(password, safe="")
+    if username:
+        username_enc = quote(username, safe="")
+        auth = f"{username_enc}:{password_enc}"
+    else:
+        auth = f":{password_enc}"
+    return parsed._replace(netloc=f"{auth}@{netloc}")
+
+
+def _auth_from_parsed(parsed: Optional[ParseResult]) -> tuple[Optional[str], Optional[str]]:
+    if parsed is None:
+        return None, None
+    username = parsed.username or None
+    password = parsed.password
+    if password:
+        return username, password
+    return username, None
+
+
 @lru_cache(maxsize=1)
 def _base_url() -> Optional[ParseResult]:
     """
@@ -60,7 +105,10 @@ def _base_url() -> Optional[ParseResult]:
     if not raw_url:
         return None
 
-    return _parse_url(raw_url)
+    parsed = _parse_url(raw_url)
+    if parsed is None:
+        return None
+    return _apply_password(parsed, _redis_password())
 
 
 @lru_cache(maxsize=1)
@@ -72,7 +120,10 @@ def _session_base_url() -> Optional[ParseResult]:
     )
     if not raw_url:
         return None
-    return _parse_url(raw_url)
+    parsed = _parse_url(raw_url)
+    if parsed is None:
+        return None
+    return _apply_password(parsed, _redis_password())
 
 
 @lru_cache(maxsize=1)
@@ -118,6 +169,10 @@ def redis_url(db: Union[int, RedisDB]) -> str:
     if parsed is not None:
         return _apply_db(parsed, int(db))
 
+    password = _redis_password()
+    if password:
+        password_enc = quote(password, safe="")
+        return f"redis://:{password_enc}@{redis_host()}:{redis_port()}/{int(db)}"
     return f"redis://{redis_host()}:{redis_port()}/{int(db)}"
 
 
@@ -135,11 +190,19 @@ def redis_connection_kwargs(
     keyword arguments through `extra`.
     """
 
+    username, password = _auth_from_parsed(_base_url())
+    if not password:
+        password = _redis_password()
     kwargs: Dict[str, Any] = {
         "host": redis_host(),
         "port": redis_port(),
         "db": int(db),
     }
+
+    if password:
+        kwargs["password"] = password
+        if username:
+            kwargs["username"] = username
 
     if decode_responses is not None:
         kwargs["decode_responses"] = decode_responses

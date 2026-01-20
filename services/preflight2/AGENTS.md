@@ -13,7 +13,8 @@
 
 ## Configuration
 All environment variables use the `PREFLIGHT_` prefix:
-- `PREFLIGHT_REDIS_URL` – full Redis URL including auth/tls if required.
+- `PREFLIGHT_REDIS_URL` – full Redis URL including auth/tls if required (injects `REDIS_PASSWORD` if missing).
+  - Falls back to `REDIS_URL` + `REDIS_PASSWORD` (or `REDIS_HOST`/`REDIS_PORT`) when unset.
 - `PREFLIGHT_LISTEN_ADDR` – bind address (default `:9001`).
 - `PREFLIGHT_PING_INTERVAL`, `PREFLIGHT_PONG_TIMEOUT` – WebSocket heartbeat intervals.
 - `PREFLIGHT_ALLOWED_ORIGINS` – optional comma-separated whitelist for strict Origin enforcement.

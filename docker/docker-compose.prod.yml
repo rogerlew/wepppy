@@ -12,7 +12,7 @@ x-wepppy-image: &wepppy-image
 x-wepppy-env: &wepppy-env
   PYTHONUNBUFFERED: "1"
   MPLCONFIGDIR: /tmp/matplotlib
-  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
   REDIS_HOST: ${REDIS_HOST:-redis}
   DATABASE_URL: ${DATABASE_URL}
   SITE_PREFIX: ${SITE_PREFIX:-/weppcloud}
@@ -100,7 +100,7 @@ services:
         hard: 1000000
     environment:
       <<: *wepppy-env
-      REDIS_URL: ${BROWSE_REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${BROWSE_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
     command:
       - gunicorn
       - --workers
@@ -330,7 +330,7 @@ services:
       LOGLEVEL: INFO
       RQ_LOGGING_LEVEL: INFO
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
-      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+      REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
     volumes:
       - /wc1:/wc1
@@ -342,7 +342,7 @@ services:
       - -n
       - "6"
       - -u
-      - ${RQ_REDIS_URL:-redis://redis:6379/9}
+      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class
@@ -363,7 +363,7 @@ services:
       WEPPPY_NCPU: "6"
       PERIDOT_CPU: "12"
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
-      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+      REDIS_URL: ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
     volumes:
       - /wc1:/wc1
@@ -375,7 +375,7 @@ services:
       - -n
       - "4"
       - -u
-      - ${RQ_REDIS_URL:-redis://redis:6379/9}
+      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class
@@ -392,7 +392,7 @@ services:
     env_file:
       - ${WEPPPY_ENV_FILE:-.env}
     environment:
-      STATUS_REDIS_URL: redis://redis:6379/2
+      STATUS_REDIS_URL: ${STATUS_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/2}
       STATUS_LISTEN_ADDR: 0.0.0.0:9002
       STATUS_LOG_LEVEL: info
       STATUS_METRICS_ENABLED: "true"
@@ -414,7 +414,7 @@ services:
     env_file:
       - ${WEPPPY_ENV_FILE:-.env}
     environment:
-      PREFLIGHT_REDIS_URL: redis://redis:6379/0
+      PREFLIGHT_REDIS_URL: ${PREFLIGHT_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
       PREFLIGHT_LOG_LEVEL: info
       PREFLIGHT_METRICS_ENABLED: "true"

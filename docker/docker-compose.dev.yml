@@ -8,7 +8,7 @@ x-wepppy-service: &wepppy-service
   working_dir: /workdir/wepppy
   environment: &wepppy-env
     PYTHONUNBUFFERED: "1"
-    REDIS_URL: redis://redis:6379/0
+    REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
     REDIS_HOST: redis
     MPLCONFIGDIR: /tmp/matplotlib
     DATABASE_URL: ${DATABASE_URL}
@@ -92,7 +92,7 @@ services:
     container_name: weppcloud-status
     cpuset: "40-47"
     environment:
-      STATUS_REDIS_URL: redis://redis:6379/2
+      STATUS_REDIS_URL: ${STATUS_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/2}
       STATUS_LISTEN_ADDR: 0.0.0.0:9002
       STATUS_LOG_LEVEL: info
       STATUS_METRICS_ENABLED: "true"
@@ -140,7 +140,7 @@ services:
     container_name: weppcloud-preflight
     cpuset: "40-47"
     environment:
-      PREFLIGHT_REDIS_URL: redis://redis:6379/0
+      PREFLIGHT_REDIS_URL: ${PREFLIGHT_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
       PREFLIGHT_LOG_LEVEL: info
       PREFLIGHT_METRICS_ENABLED: "true"
@@ -410,7 +410,7 @@ services:
       - -n
       - "6"
       - -u
-      - redis://redis:6379/9
+      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class
@@ -441,7 +441,7 @@ services:
       - -n
       - "4"
       - -u
-      - redis://redis:6379/9
+      - ${RQ_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       - --logging-level
       - INFO
       - --worker-class
@@ -494,13 +494,15 @@ services:
     image: redis:7.4.6
     container_name: wepppy-redis
     cpuset: "40-47"
-    command: ["redis-server", "--notify-keyspace-events", "Kh", "--save", "", "--appendonly", "no"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: ["redis-server", "--notify-keyspace-events", "Kh", "--save", "", "--appendonly", "no", "--requirepass", "${REDIS_PASSWORD}"]
     ports:
       - "6379:6379"
     volumes:
       - ../.docker-data/redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-p", "6379", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "-h", "127.0.0.1", "-p", "6379", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -611,7 +613,7 @@ services:
     container_name: wepppy-rq-dashboard
     cpuset: "40-47"
     environment:
-      RQ_DASHBOARD_REDIS_URL: redis://redis:6379/9
+      RQ_DASHBOARD_REDIS_URL: ${RQ_DASHBOARD_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
     volumes:

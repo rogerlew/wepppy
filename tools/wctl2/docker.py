@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import re
 import shlex
 import subprocess
 from typing import Iterable, List, Mapping, Sequence
 
 from .context import CLIContext
+
+_REDIS_URL_RE = re.compile(r"(rediss?://)[^@/\s]*@")
 
 
 def _format_args(args: Iterable[str]) -> str:
@@ -43,7 +46,8 @@ def compose_exec(
         exec_args.append("-T")
     exec_args.extend([service, "bash", "-lc", exec_command])
     command = _compose_prefix(context) + exec_args
-    context.logger.info("docker compose exec %s bash -lc %s", service, exec_command)
+    log_command = _REDIS_URL_RE.sub(r"\1***@", exec_command)
+    context.logger.info("docker compose exec %s bash -lc %s", service, log_command)
     return subprocess.run(
         command,
         check=check,

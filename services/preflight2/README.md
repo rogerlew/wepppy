@@ -165,7 +165,7 @@ runaway calls during outages.
 
 | Env Var | Default | Description |
 |---------|---------|-------------|
-| `PREFLIGHT_REDIS_URL` | `redis://localhost:6379/0` | Target Redis DB. |
+| `PREFLIGHT_REDIS_URL` | `redis://localhost:6379/0` | Target Redis DB (injects `REDIS_PASSWORD` if the URL lacks auth; falls back to `REDIS_URL` when unset). |
 | `PREFLIGHT_LISTEN_ADDR` | `:9001` | Bind address. |
 | `PREFLIGHT_PING_INTERVAL` | `5s` | Heartbeat cadence. |
 | `PREFLIGHT_PONG_TIMEOUT` | `75s` | Idle cutoff (set ≥60s in production). |

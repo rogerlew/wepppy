@@ -13,10 +13,10 @@
 
 ## Runtime Configuration
 Environment variables are prefixed with `STATUS_`. Common options:
-- `STATUS_REDIS_URL` – connection string; supports TLS/password via Go-Redis URL syntax.
+- `STATUS_REDIS_URL` – connection string; supports TLS/password via Go-Redis URL syntax (injects `REDIS_PASSWORD` if missing).
 - `STATUS_LISTEN_ADDR` – bind address (default `:9002`).
 - `STATUS_PING_INTERVAL`, `STATUS_PONG_TIMEOUT` – WebSocket heartbeat timings.
-- `STATUS_REDIS_RETRY_BASE`, `STATUS_REDIS_RETRY_MAX`, `STATUS_REDIS_MAX_RETRIES` – control startup retry behaviour. Use `0` retries for infinite.
+- `STATUS_REDIS_RETRY_BASE`, `STATUS_REDIS_RETRY_MAX`, `STATUS_REDIS_MAX_RETRIES` – control startup retry behavior. Use `0` retries for infinite.
 - `STATUS_ALLOWED_ORIGINS` – comma-separated list for strict Origin checks.
 
 ## Local Development
