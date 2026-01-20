@@ -498,11 +498,27 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
         active_ids: List[int] = []
         active_contrasts: Set[str] = set()
         run_ids: List[int] = []
+        landuse_cache: Dict[str, Optional[Dict[int, Optional[str]]]] = {}
+        skipped_landuse: Set[str] = set()
         for contrast_id, contrast_name in enumerate(contrast_names, start=1):
             if not contrast_name:
                 continue
             active_ids.append(contrast_id)
             active_contrasts.add(contrast_name)
+            skip_reason = omni._contrast_landuse_skip_reason(
+                contrast_id,
+                contrast_name,
+                landuse_cache=landuse_cache,
+            )
+            if skip_reason:
+                omni.logger.info(
+                    "  run_omni_contrasts: %s skipped (%s)",
+                    contrast_name,
+                    skip_reason,
+                )
+                omni._clean_contrast_run(contrast_id)
+                skipped_landuse.add(contrast_name)
+                continue
             sidecar_path = omni._contrast_sidecar_path(contrast_id)
             if not os.path.isfile(sidecar_path):
                 omni.logger.info(
@@ -529,6 +545,8 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
             return None
 
         dependency_tree = dict(omni.contrast_dependency_tree)
+        for contrast_name in skipped_landuse:
+            dependency_tree.pop(contrast_name, None)
         stale = set(dependency_tree.keys()) - active_contrasts
         for contrast_name in stale:
             dependency_tree.pop(contrast_name, None)

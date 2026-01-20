@@ -1389,6 +1389,7 @@ var Omni = (function () {
                 columns = [
                     { key: "contrast_id", label: "Contrast" },
                     { key: "topaz_id", label: "Topaz ID" },
+                    { key: "skip_status", label: "Skip status" },
                     { key: "run_status", label: "Run status" }
                 ];
             }

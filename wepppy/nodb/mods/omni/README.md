@@ -165,11 +165,11 @@ Dry run uses the same contrast build logic as a real run and reports run status 
 
 - **Endpoint**: `POST /rq-engine/api/runs/<runid>/<config>/run-omni-contrasts-dry-run`
 - **Selection modes**:
-  - Cumulative: `contrast_id`, `topaz_id`, `run_status`
+  - Cumulative: `contrast_id`, `topaz_id`, `skip_status`, `run_status`
   - User-defined areas: `contrast_id`, `control_scenario`, `contrast_scenario`, `area_label`, `n_hillslopes`, `skip_status`, `run_status`
   - Stream-order pruning: includes contrast_id, control_scenario, contrast_scenario, subcatchments_group, n_hillslopes, skip_status, run_status
 - **Run status**: `up_to_date`, `needs_run`, `skipped`
-- **Skip status**: `skip_status = { skipped: bool, reason: "no_hillslopes" | null }` (current implementation)
+- **Skip status**: `skip_status = { skipped: bool, reason: "no_hillslopes" | "landuse_unchanged" | null }`
 
 **Dry Run response schema (official):**
 ```json
@@ -196,7 +196,7 @@ Dry run uses the same contrast build logic as a real run and reports run status 
   }
 }
 ```
-For cumulative mode, items include `topaz_id` and omit the `area_label`/`n_hillslopes`/`skip_status` fields.
+For cumulative mode, items include `topaz_id` and `skip_status` and omit the `area_label`/`n_hillslopes` fields.
 
 #### Contrast Summary Report (HTML)
 
@@ -206,7 +206,7 @@ The HTML report at `/weppcloud/runs/<runid>/<config>/report/omni_contrasts/` is 
 - **User-defined areas**: `contrast_id`, `control_scenario`, `contrast_scenario`, `area_label`, `n_hillslopes`, Avg. Ann. Water Discharge from Outlet, Avg. Ann. Total Hillslope Soil Loss
 - **Stream-order**: `contrast_id`, `control_scenario`, `contrast_scenario`, `subcatchments_group`, `n_hillslopes`, Avg. Ann. Water Discharge from Outlet, Avg. Ann. Total Hillslope Soil Loss
 
-### Appendix A: Remaining Implementation Scope
+### Appendix A: Remaining Implementation Scope (COMPLETED 1/19/2026)
 
 Stream-order pruning is implemented per Appendix B. Use the appendix as the authoritative reference when extending or refactoring this mode.
 
@@ -252,6 +252,7 @@ This appendix defines the stream-order pruning contrast mode and the implementat
 - Contrast IDs are stable across rebuilds by sorting `group_id` in ascending order and assigning `contrast_id` based on that ordering.
 - **Skip policy**:
   - If a group has no hillslopes, mark `skip_status.reason = "no_hillslopes"` and do not run WEPP.
+  - If all selected hillslopes retain the same landuse key between control and contrast, mark `skip_status.reason = "landuse_unchanged"` and do not run WEPP.
 - **Incremental runs and invalidation**:
   - Run marker remains `wepp/output/interchange/README.md`.
   - `contrast_dependency_tree` continues to store sidecar SHA1 and redisprep snapshots.
@@ -268,7 +269,7 @@ Dry run uses the same build logic and returns run status only (no WEPP output me
 - `contrast_scenario`
 - `subcatchments_group`
 - `n_hillslopes`
-- `skip_status` (`{ skipped: bool, reason: "no_hillslopes" | null }`)
+- `skip_status` (`{ skipped: bool, reason: "no_hillslopes" | "landuse_unchanged" | null }`)
 - `run_status` (`up_to_date`, `needs_run`, `skipped`)
 
 Dry run responses must follow `docs/schemas/rq-response-contract.md`.

@@ -222,6 +222,8 @@ class Omni(NoDbBase):
 
     def _clean_stale_contrast_runs(self, active_ids: Iterable[int]) -> None: ...
 
+    def _clean_contrast_run(self, contrast_id: int) -> None: ...
+
     def _contrast_sidecar_dir(self) -> str: ...
 
     def _contrast_sidecar_path(self, contrast_id: int) -> str: ...
@@ -237,6 +239,18 @@ class Omni(NoDbBase):
     def _write_contrast_sidecar(self, contrast_id: int, contrast: ContrastMapping) -> str: ...
 
     def _contrast_run_readme_path(self, contrast_id: int) -> str: ...
+
+    def _normalize_landuse_key(self, value: Any) -> Optional[str]: ...
+
+    def _load_landuse_key_map(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]: ...
+
+    def _contrast_landuse_skip_reason(
+        self,
+        contrast_id: int,
+        contrast_name: str,
+        *,
+        landuse_cache: Optional[Dict[str, Optional[Dict[int, Optional[str]]]]] = ...,
+    ) -> Optional[str]: ...
 
     def _scenario_run_readme_path(self, scenario_name: Optional[Any]) -> str: ...
 
@@ -260,6 +274,14 @@ class Omni(NoDbBase):
         self,
         contrast_name: str,
         dependency_entry: Dict[str, Any],
+        *,
+        max_tries: int = ...,
+        delay: float = ...,
+    ) -> None: ...
+
+    def _remove_contrast_dependency_entry(
+        self,
+        contrast_name: str,
         *,
         max_tries: int = ...,
         delay: float = ...,

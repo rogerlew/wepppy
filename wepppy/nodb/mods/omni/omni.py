@@ -1284,6 +1284,12 @@ class Omni(NoDbBase):
             if os.path.isdir(path) and entry not in active:
                 shutil.rmtree(path)
 
+    def _clean_contrast_run(self, contrast_id: int) -> None:
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
+        path = _join(contrasts_dir, str(contrast_id))
+        if isdir(path):
+            shutil.rmtree(path)
+
     def _contrast_sidecar_dir(self) -> str:
         return _join(self.omni_dir, 'contrasts')
 
@@ -1350,6 +1356,98 @@ class Omni(NoDbBase):
             'interchange',
             'README.md',
         )
+
+    def _normalize_landuse_key(self, value: Any) -> Optional[str]:
+        if value is None or pd.isna(value):
+            return None
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            try:
+                numeric_value = float(value)
+            except (TypeError, ValueError):
+                return str(value)
+            if numeric_value.is_integer():
+                return str(int(numeric_value))
+        return str(value)
+
+    def _load_landuse_key_map(self, landuse_wd: str) -> Optional[Dict[int, Optional[str]]]:
+        parquet_fn = _join(landuse_wd, "landuse", "landuse.parquet")
+        if not _exists(parquet_fn):
+            return None
+
+        for id_column in ("topaz_id", "TopazID"):
+            try:
+                df = pd.read_parquet(parquet_fn, columns=[id_column, "key"])
+            except Exception:
+                continue
+            if id_column not in df.columns or "key" not in df.columns:
+                continue
+            key_map: Dict[int, Optional[str]] = {}
+            for row in df.itertuples(index=False):
+                topaz_value = getattr(row, id_column, None)
+                if topaz_value is None or pd.isna(topaz_value):
+                    continue
+                try:
+                    topaz_id = int(topaz_value)
+                except (TypeError, ValueError):
+                    continue
+                key_map[topaz_id] = self._normalize_landuse_key(getattr(row, "key", None))
+            if key_map:
+                return key_map
+        return None
+
+    def _contrast_landuse_skip_reason(
+        self,
+        contrast_id: int,
+        contrast_name: str,
+        *,
+        landuse_cache: Optional[Dict[str, Optional[Dict[int, Optional[str]]]]] = None,
+    ) -> Optional[str]:
+        if not contrast_name:
+            return None
+
+        try:
+            contrast_payload = self._load_contrast_sidecar(contrast_id)
+        except FileNotFoundError:
+            return None
+
+        control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
+        if control_key == contrast_key:
+            return "landuse_unchanged"
+
+        base_key = _resolve_base_scenario_key(self.wd)
+        try:
+            contrast_wd = _resolve_contrast_scenario_wd(self.wd, contrast_key, base_key)
+        except FileNotFoundError:
+            return None
+
+        contrast_topaz_ids = _contrast_topaz_ids_from_mapping(contrast_payload, contrast_wd)
+        if not contrast_topaz_ids:
+            return None
+
+        cache = landuse_cache if landuse_cache is not None else {}
+        if control_key not in cache:
+            try:
+                control_wd = _resolve_contrast_scenario_wd(self.wd, control_key, base_key)
+            except FileNotFoundError:
+                return None
+            cache[control_key] = self._load_landuse_key_map(control_wd)
+        if contrast_key not in cache:
+            cache[contrast_key] = self._load_landuse_key_map(contrast_wd)
+
+        control_map = cache.get(control_key)
+        contrast_map = cache.get(contrast_key)
+        if not control_map or not contrast_map:
+            return None
+
+        for topaz_id in contrast_topaz_ids:
+            control_value = control_map.get(int(topaz_id))
+            contrast_value = contrast_map.get(int(topaz_id))
+            if control_value is None or contrast_value is None:
+                return None
+            if control_value != contrast_value:
+                return None
+
+        return "landuse_unchanged"
 
     def _scenario_run_readme_path(self, scenario_name: Optional[Any]) -> str:
         scenario_key = self._normalize_scenario_key(scenario_name)
@@ -1501,6 +1599,27 @@ class Omni(NoDbBase):
                 with omni.locked():
                     dependency_tree = dict(omni.contrast_dependency_tree)
                     dependency_tree[contrast_name] = dependency_entry
+                    omni._contrast_dependency_tree = dependency_tree
+            except NoDbAlreadyLockedError:
+                if attempt + 1 == max_tries:
+                    raise
+                time.sleep(delay)
+            else:
+                break
+
+    def _remove_contrast_dependency_entry(
+        self,
+        contrast_name: str,
+        *,
+        max_tries: int = 5,
+        delay: float = 1.0,
+    ) -> None:
+        for attempt in range(max_tries):
+            try:
+                omni = type(self).getInstance(self.wd)
+                with omni.locked():
+                    dependency_tree = dict(omni.contrast_dependency_tree)
+                    dependency_tree.pop(contrast_name, None)
                     omni._contrast_dependency_tree = dependency_tree
             except NoDbAlreadyLockedError:
                 if attempt + 1 == max_tries:
@@ -2864,6 +2983,7 @@ class Omni(NoDbBase):
         if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
             raise ValueError(f'Contrast selection mode "{selection_mode}" is not implemented yet.')
         contrast_names = self.contrast_names or []
+        landuse_cache: Dict[str, Optional[Dict[int, Optional[str]]]] = {}
 
         if selection_mode == "user_defined_areas":
             report_entries = {}
@@ -2915,8 +3035,17 @@ class Omni(NoDbBase):
                     run_status = "skipped"
                     skip_status = {"skipped": True, "reason": "no_hillslopes"}
                 else:
-                    run_status = self._contrast_run_status(contrast_id, contrast_name)
-                    skip_status = {"skipped": False, "reason": None}
+                    skip_reason = self._contrast_landuse_skip_reason(
+                        contrast_id,
+                        contrast_name,
+                        landuse_cache=landuse_cache,
+                    )
+                    if skip_reason:
+                        run_status = "skipped"
+                        skip_status = {"skipped": True, "reason": skip_reason}
+                    else:
+                        run_status = self._contrast_run_status(contrast_id, contrast_name)
+                        skip_status = {"skipped": False, "reason": None}
 
                 items.append(
                     {
@@ -2980,8 +3109,17 @@ class Omni(NoDbBase):
                     run_status = "skipped"
                     skip_status = {"skipped": True, "reason": "no_hillslopes"}
                 else:
-                    run_status = self._contrast_run_status(contrast_id, contrast_name)
-                    skip_status = {"skipped": False, "reason": None}
+                    skip_reason = self._contrast_landuse_skip_reason(
+                        contrast_id,
+                        contrast_name,
+                        landuse_cache=landuse_cache,
+                    )
+                    if skip_reason:
+                        run_status = "skipped"
+                        skip_status = {"skipped": True, "reason": skip_reason}
+                    else:
+                        run_status = self._contrast_run_status(contrast_id, contrast_name)
+                        skip_status = {"skipped": False, "reason": None}
 
                 items.append(
                     {
@@ -3006,13 +3144,25 @@ class Omni(NoDbBase):
                     _, topaz_id = control_part.split(",", maxsplit=1)
                 except ValueError:
                     topaz_id = None
-                run_status = self._contrast_run_status(contrast_id, contrast_name)
+                skip_reason = self._contrast_landuse_skip_reason(
+                    contrast_id,
+                    contrast_name,
+                    landuse_cache=landuse_cache,
+                )
+                if skip_reason:
+                    run_status = "skipped"
+                    skip_status = {"skipped": True, "reason": skip_reason}
+                else:
+                    run_status = self._contrast_run_status(contrast_id, contrast_name)
+                    skip_status = {"skipped": False, "reason": None}
             else:
                 run_status = "skipped"
+                skip_status = {"skipped": True, "reason": "no_hillslopes"}
             items.append(
                 {
                     "contrast_id": contrast_id,
                     "topaz_id": str(topaz_id) if topaz_id is not None else None,
+                    "skip_status": skip_status,
                     "run_status": run_status,
                 }
             )
@@ -3046,6 +3196,7 @@ class Omni(NoDbBase):
 
         dependency_tree: ContrastDependency = dict(self.contrast_dependency_tree)
         active_contrasts: Set[str] = set()
+        landuse_cache: Dict[str, Optional[Dict[int, Optional[str]]]] = {}
 
         contrast_names: List[Optional[str]] = self.contrast_names or []
         active_ids = [
@@ -3068,6 +3219,20 @@ class Omni(NoDbBase):
             if not contrast_name:
                 continue
             active_contrasts.add(contrast_name)
+            skip_reason = self._contrast_landuse_skip_reason(
+                contrast_id,
+                contrast_name,
+                landuse_cache=landuse_cache,
+            )
+            if skip_reason:
+                self.logger.info(
+                    "  run_omni_contrasts: %s skipped (%s)",
+                    contrast_name,
+                    skip_reason,
+                )
+                self._clean_contrast_run(contrast_id)
+                dependency_tree.pop(contrast_name, None)
+                continue
             run_status = self._contrast_run_status(contrast_id, contrast_name)
             if run_status == 'up_to_date':
                 self.logger.info('  run_omni_contrasts: %s up-to-date, skipping', contrast_name)
@@ -3119,6 +3284,12 @@ class Omni(NoDbBase):
         contrast_name = contrast_names[contrast_id - 1]
         if not contrast_name:
             raise ValueError(f"Contrast id {contrast_id} is skipped")
+        skip_reason = self._contrast_landuse_skip_reason(contrast_id, contrast_name)
+        if skip_reason:
+            self.logger.info("run_omni_contrast: %s skipped (%s)", contrast_name, skip_reason)
+            self._clean_contrast_run(contrast_id)
+            self._remove_contrast_dependency_entry(contrast_name)
+            return _join(self.wd, OMNI_REL_DIR, "contrasts", str(contrast_id))
         _contrasts = self._load_contrast_sidecar(contrast_id)
         control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
         omni_wd = _run_contrast(
