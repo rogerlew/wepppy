@@ -51,6 +51,25 @@
   --wc-color-primary: #1f6feb;
   --wc-color-primary-dark: #0d4bcf;
   --wc-color-on-primary: #ffffff;
+  /* Status surfaces */
+  --wc-status-text: var(--wc-color-text);
+  --wc-status-text-muted: color-mix(in srgb, var(--wc-color-text) 80%, var(--wc-color-text-muted));
+  --wc-info: var(--wc-color-accent);
+  --wc-info-bg: color-mix(in srgb, var(--wc-color-surface) 88%, var(--wc-color-accent));
+  --wc-info-text: var(--wc-status-text);
+  --wc-info-fg: var(--wc-color-accent);
+  --wc-success: var(--wc-color-positive);
+  --wc-success-bg: color-mix(in srgb, var(--wc-color-surface) 88%, var(--wc-color-positive));
+  --wc-success-text: var(--wc-status-text);
+  --wc-success-fg: var(--wc-color-positive);
+  --wc-warning: var(--wc-color-attention);
+  --wc-warning-bg: color-mix(in srgb, var(--wc-color-surface) 88%, var(--wc-color-attention));
+  --wc-warning-text: var(--wc-status-text);
+  --wc-warning-fg: var(--wc-color-attention);
+  --wc-error: var(--wc-color-critical);
+  --wc-error-bg: color-mix(in srgb, var(--wc-color-surface) 88%, var(--wc-color-critical));
+  --wc-error-text: var(--wc-status-text);
+  --wc-error-fg: var(--wc-color-critical);
 
   /* Shadows & radii */
   --wc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
@@ -755,6 +774,62 @@ code * {
   min-height: 256px;
   margin-top: var(--wc-space-2xl);
   margin-bottom: var(--wc-space-2xl);
+}
+
+/* Alerts */
+.wc-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-space-md);
+  padding: var(--wc-space-md) var(--wc-space-lg);
+  border-radius: var(--wc-radius-sm);
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-surface-alt);
+  color: var(--wc-status-text);
+}
+
+.wc-alert__body {
+  flex: 1;
+  margin: 0;
+}
+
+.wc-alert__dismiss {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 var(--wc-space-xs);
+  line-height: 1;
+}
+
+.wc-alert--banner {
+  margin: var(--wc-space-sm) var(--wc-space-lg);
+}
+
+.wc-alert--warning {
+  background: var(--wc-warning-bg);
+  border-color: var(--wc-warning);
+  color: var(--wc-warning-text);
+}
+
+.wc-alert--info {
+  background: var(--wc-info-bg);
+  border-color: var(--wc-info);
+  color: var(--wc-info-text);
+}
+
+.wc-alert--error {
+  background: var(--wc-error-bg);
+  border-color: var(--wc-error);
+  color: var(--wc-error-text);
+}
+
+.wc-alert--success {
+  background: var(--wc-success-bg);
+  border-color: var(--wc-success);
+  color: var(--wc-success-text);
 }
 
 /* Text utilities */
