@@ -10,6 +10,7 @@ Prevent WEPPcloud workers from stalling due to runaway NoDb log handlers and lon
 - Add detached NoDb loading helpers that avoid per-run logging initialization.
 - Update run listing and context processors to use detached loading and avoid lazy DB work after query execution.
 - Close SQLAlchemy sessions immediately after run listing queries complete.
+- Restore ORM run listing to avoid duplicate runs and unstable counts.
 - Update admin run lookup to use detached loading.
 - Add a DB-level safety net by configuring `idle_in_transaction_session_timeout` via SQLAlchemy engine options.
 
@@ -22,6 +23,7 @@ Prevent WEPPcloud workers from stalling due to runaway NoDb log handlers and lon
 - Gunicorn workers accumulate open file descriptors (e.g., hundreds of `ron.log`/`wepp.log` handles per worker).
 - PostgreSQL shows `idle in transaction` sessions for hours on run listing queries.
 - Health checks hang as workers block on I/O and logging fan-out.
+- `/runs/catalog` shows duplicate runs and inconsistent totals.
 
 ## Empirical Findings (2026-01-20)
 
@@ -92,6 +94,7 @@ Each run accessed creates loggers via `logging.getLogger(f'wepppy.run.{runid}.{c
 - `Ron.getInstance()` and `Wepp.getInstance()` initialize per-run logging (FileHandler + QueueListener) on read-only code paths.
 - Template context processors and `/runs` JSON endpoints touch many runs, causing log handler/thread buildup.
 - The run listing query executes first, then metadata I/O stalls, leaving the transaction open in "idle in transaction" state.
+- Switching `/runs` queries to raw row joins removed ORM de-duplication, surfacing duplicate run rows in `/runs/catalog`.
 
 ## Changes
 ### Detached NoDb Loading
@@ -101,9 +104,9 @@ Each run accessed creates loggers via `logging.getLogger(f'wepppy.run.{runid}.{c
 
 ### Run Listing Query Closure
 - `/runs`, `/runs/catalog`, and `/runs/map-data` now:
-  - Execute a short query that fetches only needed columns (including owner email via join).
-  - Immediately call `db.session.remove()` once rows are materialized.
-  - Build run metadata from in-memory records (no DB access after closing the session).
+  - Query ORM `Run` objects (restoring identity de-duplication).
+  - Resolve owner emails in a follow-up query and build metadata in-memory.
+  - Call `db.session.remove()` once rows and owner emails are materialized.
 
 ### Context Processor Hardening
 - `_get_run_name()` now uses detached Ron.
@@ -113,6 +116,7 @@ Each run accessed creates loggers via `logging.getLogger(f'wepppy.run.{runid}.{c
 ### DB Safety Net
 - `POSTGRES_IDLE_IN_TX_TIMEOUT` env var wires `idle_in_transaction_session_timeout` into `SQLALCHEMY_ENGINE_OPTIONS`.
   - Example: `POSTGRES_IDLE_IN_TX_TIMEOUT=15min`.
+- **Not deployed, this might cause oauth and cap verify to break (correlational but not causal determination at this point).**
 
 ## Files Touched
 - `wepppy/nodb/base.py` (add detached loaders)
@@ -128,6 +132,7 @@ Each run accessed creates loggers via `logging.getLogger(f'wepppy.run.{runid}.{c
 - Hit `/weppcloud/runs?format=json` for a large user.
 - Hit `/weppcloud/runs/catalog` and `/weppcloud/runs/map-data` for the same user.
 - As admin, hit `/weppcloud/dev/runid_query?wc=<prefix>&name=<filter>` to exercise name filtering and config lookup.
+- Confirm `/weppcloud/runs/catalog` totals are stable and no duplicate run IDs appear.
 - Confirm in `pg_stat_activity` that run listing sessions close quickly (no long "idle in transaction").
 - Check worker FD counts do not grow with repeated run listings.
 

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import wepppy
-from sqlalchemy import String, cast
 from ._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import *
@@ -98,54 +97,70 @@ def _normalize_direction(raw_value: Optional[str]) -> str:
 
 
 def _runs_query_for_user(user_id: Optional[int]):
-    from wepppy.weppcloud.app import Run, User, runs_users
-    owner_join = cast(User.id, String) == Run.owner_id
-    query = (
-        Run.query.with_entities(
-            Run.runid,
-            Run.config,
-            Run.date_created,
-            Run.last_modified,
-            Run.owner_id,
-            User.email.label("owner_email"),
-        )
-        .outerjoin(User, owner_join)
-    )
+    from wepppy.weppcloud.app import Run, runs_users
+    query = Run.query
     if user_id is not None:
         query = query.join(runs_users).filter(runs_users.c.user_id == user_id)
     return query
 
 
-def _run_row_from_record(record: Any) -> Dict[str, Any]:
-    runid = record.runid
+def _owner_email_map(runs: List[Any]) -> Dict[str, str]:
+    from wepppy.weppcloud.app import User
+    owner_ids = {str(run.owner_id) for run in runs if run.owner_id}
+    if not owner_ids:
+        return {}
+    owner_ints: List[int] = []
+    for raw in owner_ids:
+        try:
+            owner_ints.append(int(raw))
+        except (TypeError, ValueError):
+            continue
+    if not owner_ints:
+        return {}
+    owners = User.query.filter(User.id.in_(owner_ints)).all()
+    return {str(owner.id): owner.email for owner in owners}
+
+
+def _run_row_from_run(run: Any, owner_email: Optional[str]) -> Dict[str, Any]:
+    runid = run.runid
     return {
         "wd": get_wd(runid),
-        "owner": record.owner_email or "<anonymous>",
+        "owner": owner_email or "<anonymous>",
         "runid": runid,
-        "date_created": record.date_created,
-        "last_modified": record.last_modified,
-        "owner_id": record.owner_id,
-        "config": record.config,
+        "date_created": run.date_created,
+        "last_modified": run.last_modified,
+        "owner_id": run.owner_id,
+        "config": run.config,
     }
 
 
 def _collect_run_rows(query) -> List[Dict[str, Any]]:
     from wepppy.weppcloud.app import db
     try:
-        rows = query.all()
+        runs = query.all()
+        owner_emails = _owner_email_map(runs)
+        rows = [
+            _run_row_from_run(run, owner_emails.get(str(run.owner_id)))
+            for run in runs
+        ]
     finally:
         db.session.remove()
-    return [_run_row_from_record(row) for row in rows]
+    return rows
 
 
 def _paginate_run_rows(query, page: int, per_page: int):
     from wepppy.weppcloud.app import db
     try:
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-        rows = list(pagination.items)
+        runs = list(pagination.items)
+        owner_emails = _owner_email_map(runs)
+        rows = [
+            _run_row_from_run(run, owner_emails.get(str(run.owner_id)))
+            for run in runs
+        ]
     finally:
         db.session.remove()
-    return [_run_row_from_record(row) for row in rows], pagination
+    return rows, pagination
 
 
 def _run_meta_inputs(run: Any) -> tuple[str, Dict[str, Any]]:
