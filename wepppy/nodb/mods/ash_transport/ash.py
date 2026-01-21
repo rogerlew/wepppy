@@ -709,8 +709,10 @@ class Ash(NoDbBase):
 
                 else:
                     self.logger.info(f'      load_d: {load_d[topaz_id]} tonne/ha')
+                    # Map values are tonne/ha; convert to kg/m^2 (1 t/ha = 0.1 kg/m^2).
                     _load_kg_m2 = load_d[topaz_id] * 0.1
 
+                    # Depth in mm = (kg/m^2) / (g/cm^3); uses field bulk density.
                     white_ash_depth = _load_kg_m2 / field_white_ash_bulkdensity  # in g/cm3
                     black_ash_depth = _load_kg_m2 / field_black_ash_bulkdensity  # in g/cm3
 
