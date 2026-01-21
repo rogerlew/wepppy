@@ -156,6 +156,46 @@ def test_run_omni_contrasts_requires_pairs_in_stream_order_mode(monkeypatch: pyt
     assert payload["error"]["message"] == "contrast_pairs is required for stream-order contrasts"
 
 
+def test_run_omni_contrasts_requires_pairs_in_hillslope_group_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={"omni_contrast_selection_mode": "user_defined_hillslope_groups"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "contrast_pairs is required for user-defined hillslope groups"
+
+
+def test_run_omni_contrasts_requires_groups_in_hillslope_group_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "user_defined_hillslope_groups",
+                "omni_contrast_pairs": [
+                    {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+                ],
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert (
+        payload["error"]["message"]
+        == "omni_contrast_hillslope_groups is required for user-defined hillslope groups"
+    )
+
+
 def test_run_omni_contrasts_stream_order_defaults_passes(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-33")

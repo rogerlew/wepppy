@@ -192,6 +192,18 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "wc_textbox_help",
+            "label": "Textbox helper copy vs input background",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "helper_vs_textbox",
+                    "foreground": "#theme_lab_textbox_help",
+                    "background": "#theme_lab_textbox",
+                }
+            ],
+        },
+        {
             "id": "wc_field_hint_text",
             "label": "Numeric hint vs input background",
             "threshold": 4.5,

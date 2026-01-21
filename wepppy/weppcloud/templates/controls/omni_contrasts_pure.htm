@@ -9,7 +9,7 @@
   </p>
   <p class="wc-text-muted">
     Selection modes: cumulative objective parameter, user-defined areas (GeoJSON),
-    and stream-order pruning (WBT-only).
+    user-defined hillslope groups (textbox), and stream-order pruning (WBT-only).
   </p>
 {% endset %}
 
@@ -24,6 +24,9 @@
   {% if selected_mode in ["stream_order_pruning", "stream-order-pruning"] %}
     {% set selected_mode = "stream_order" %}
   {% endif %}
+  {% if selected_mode in ["user-defined-hillslope-groups", "user-defined-hillslope-group"] %}
+    {% set selected_mode = "user_defined_hillslope_groups" %}
+  {% endif %}
   {% set stream_order_allowed = watershed.delineation_backend_is_wbt if watershed is defined else false %}
 
   {{ ui.radio_group(
@@ -35,16 +38,21 @@
            "label": "Cumulative objective parameter",
            "selected": selected_mode == "cumulative"
          },
-         {
-           "value": "user_defined_areas",
-           "label": "User-defined areas (GeoJSON)",
-           "selected": selected_mode == "user_defined_areas"
-         },
-         {
-           "value": "stream_order",
-           "label": "Stream-order pruning",
-           "description": "Requires WBT delineation.",
-           "selected": selected_mode == "stream_order",
+        {
+          "value": "user_defined_areas",
+          "label": "User-defined areas (GeoJSON)",
+          "selected": selected_mode == "user_defined_areas"
+        },
+        {
+          "value": "user_defined_hillslope_groups",
+          "label": "User-defined hillslope groups",
+          "selected": selected_mode == "user_defined_hillslope_groups"
+        },
+        {
+          "value": "stream_order",
+          "label": "Stream-order pruning",
+          "description": "Requires WBT delineation.",
+          "selected": selected_mode == "stream_order",
            "disabled": not stream_order_allowed
          }
        ],
@@ -181,7 +189,7 @@
 
   {% set contrast_pairs_value = omni.contrast_pairs if omni.contrast_pairs is defined else [] %}
 
-  <div class="wc-stack" data-omni-contrast-mode="user_defined_areas stream_order" hidden>
+  <div class="wc-stack" data-omni-contrast-mode="user_defined_areas user_defined_hillslope_groups stream_order" hidden>
     <div class="wc-card">
       <div class="wc-card__body wc-stack">
         <div class="wc-stack" data-omni-contrast-role="pair-container"></div>
@@ -202,6 +210,22 @@
     <p class="wc-text-muted">
       Each pair selects contrasts only after both scenarios have run. Duplicate pairs are blocked.
     </p>
+  </div>
+
+  <div class="wc-stack" data-omni-contrast-mode="user_defined_hillslope_groups" hidden>
+    {% set current_groups = omni.contrast_hillslope_groups if omni.contrast_hillslope_groups is defined else "" %}
+    {% if current_groups == "None" %}
+      {% set current_groups = "" %}
+    {% endif %}
+    {{ ui.textbox_field(
+         "omni_contrast_hillslope_groups",
+         "Hillslope group list",
+         value=current_groups,
+         rows=6,
+         help="Enter one group per line. Use commas or spaces between Topaz IDs; trailing semicolons are allowed. Duplicate IDs are allowed.",
+         placeholder="23,21,31\n231 452 653",
+         extra_control_class="disable-readonly"
+       ) }}
   </div>
 
   <div class="wc-stack" data-omni-contrast-mode="user_defined_areas" hidden>

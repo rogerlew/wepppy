@@ -1751,6 +1751,12 @@ h5:first-child {
   flex: 0 0 auto;
 }
 
+.wc-field__control--textarea {
+  min-height: 6rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
 .wc-theme-lab__spin-swatch {
   display: inline-flex;
   align-items: center;

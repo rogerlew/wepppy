@@ -216,12 +216,12 @@
          error="The last upload failed checksum validation."
        ) }}
 
-    {{ ui.textarea_field(
+    {{ ui.textbox_field(
          "notes",
          "Notes",
          rows=4,
          placeholder="Document expected behavior, constraints, and open questions.",
-         help="Textarea macro mirrors the text field spacing while supporting helper copy.",
+         help="Textbox macro mirrors the text field spacing while supporting helper copy.",
          error="Add at least one sentence so collaborators have context."
        ) }}
 
@@ -484,6 +484,23 @@
                  value="South Fork Fire",
                  placeholder="Required field",
                  help="Helper text should remain legible against the field background."
+               ) }}
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-textbox-help">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Textbox helper copy</h3>
+            <p class="wc-card__description">Multiline helper text vs the textbox background.</p>
+          </header>
+          <div class="wc-card__body">
+            {{ ui.textbox_field(
+                 "theme_lab_textbox",
+                 "Scenario notes",
+                 value="Summarize the constraints and expected outcomes here.",
+                 rows=4,
+                 help="Helper text should remain legible against the textbox background."
                ) }}
           </div>
         </article>

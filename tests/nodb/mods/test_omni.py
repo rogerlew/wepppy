@@ -554,6 +554,54 @@ def test_user_defined_contrast_ids_stable_on_rebuild(tmp_path, omni_module, monk
     assert omni.contrast_names[1] == "uniform_low,2__to__thinning"
 
 
+def test_user_defined_hillslope_group_ids_stable_on_rebuild(tmp_path, omni_module, monkeypatch):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.hillslope_groups_ids")
+    omni._contrast_selection_mode = "user_defined_hillslope_groups"
+    omni._contrast_hillslope_groups = "11 12\n13"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+    ]
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+
+    class DummyTranslator:
+        top2wepp = {11: 1, 12: 2, 13: 3}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    omni._build_contrasts()
+
+    first_names = list(omni.contrast_names or [])
+    assert first_names == ["uniform_low,1__to__mulch", "uniform_low,2__to__mulch"]
+
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._build_contrasts()
+
+    assert omni.contrast_names[0] == first_names[0]
+    assert omni.contrast_names[1] == first_names[1]
+    assert omni.contrast_names[2] == "uniform_low,3__to__thinning"
+    assert omni.contrast_names[3] == "uniform_low,4__to__thinning"
+
+
 def test_build_contrasts_report_normalizes_control_scenario(tmp_path, monkeypatch, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -908,6 +956,73 @@ def test_build_contrast_ids_geojson_user_defined_areas(tmp_path, monkeypatch, om
         assert feature["properties"]["selection_mode"] == "user_defined_areas"
 
 
+def test_build_contrast_ids_geojson_user_defined_hillslope_groups(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids.hillslope_groups")
+    omni.locked = _noop_lock
+    omni._contrast_selection_mode = "user_defined_hillslope_groups"
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    entries = [
+        {
+            "selection_mode": "user_defined_hillslope_groups",
+            "group_index": 2,
+            "topaz_ids": ["101", "102"],
+        },
+        {
+            "selection_mode": "user_defined_hillslope_groups",
+            "group_index": 1,
+            "topaz_ids": ["103"],
+        },
+    ]
+    report_path.write_text(
+        "\n".join(json.dumps(entry) for entry in entries) + "\n",
+        encoding="ascii",
+    )
+
+    hillslope_path = tmp_path / "subwta.wgs.geojson"
+    hillslope_path.write_text("{}", encoding="ascii")
+    hillslope_rows = [
+        {"TopazID": "101", "geometry": Rect(0.0, 0.0, 1.0, 1.0)},
+        {"TopazID": "102", "geometry": Rect(1.0, 0.0, 2.0, 1.0)},
+        {"TopazID": "103", "geometry": Rect(2.0, 0.0, 3.0, 1.0)},
+    ]
+    hillslope_gdf = DummyGeoDataFrame(hillslope_rows, crs="EPSG:4326")
+
+    geopandas_stub = types.ModuleType("geopandas")
+    geopandas_stub.read_file = lambda path: hillslope_gdf
+    monkeypatch.setitem(sys.modules, "geopandas", geopandas_stub)
+
+    shapely_stub = types.ModuleType("shapely")
+    shapely_geometry_stub = types.ModuleType("shapely.geometry")
+    shapely_ops_stub = types.ModuleType("shapely.ops")
+    shapely_geometry_stub.mapping = lambda geom: {
+        "type": "Polygon",
+        "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]],
+    }
+    shapely_ops_stub.unary_union = lambda geoms: geoms[0] if geoms else None
+    monkeypatch.setitem(sys.modules, "shapely", shapely_stub)
+    monkeypatch.setitem(sys.modules, "shapely.geometry", shapely_geometry_stub)
+    monkeypatch.setitem(sys.modules, "shapely.ops", shapely_ops_stub)
+
+    class DummyWatershed:
+        subwta_shp = str(hillslope_path)
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    output_path = omni._build_contrast_ids_geojson()
+
+    payload = json.loads(Path(output_path).read_text(encoding="ascii"))
+    labels = [feature["properties"]["contrast_label"] for feature in payload["features"]]
+    assert labels == ["1", "2"]
+    for feature in payload["features"]:
+        assert feature["properties"]["selection_mode"] == "user_defined_hillslope_groups"
+        assert feature["properties"]["label"] == feature["properties"]["contrast_label"]
+        assert "group_index" in feature["properties"]
+
+
 def test_build_contrast_ids_geojson_stream_order(tmp_path, monkeypatch, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -1195,7 +1310,8 @@ def test_run_omni_contrasts_runs_when_readme_missing(tmp_path, monkeypatch, omni
     omni.wd = str(tmp_path)
     omni.logger = logging.getLogger("tests.omni.run_contrasts_missing_readme")
     omni.locked = _noop_lock
-    omni._contrast_names = ["None,10__to__undisturbed"]
+    contrast_name = "uniform_low,10__to__mulch"
+    omni._contrast_names = [contrast_name]
     omni._contrast_dependency_tree = {}
 
     monkeypatch.setattr(
@@ -1203,6 +1319,11 @@ def test_run_omni_contrasts_runs_when_readme_missing(tmp_path, monkeypatch, omni
         "base_scenario",
         property(lambda self: omni_module.OmniScenario.Undisturbed),
         raising=False,
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "_resolve_base_scenario_key",
+        lambda wd: str(omni_module.OmniScenario.Undisturbed),
     )
 
     sidecar_path = Path(omni._contrast_sidecar_path(1))
@@ -1228,7 +1349,7 @@ def test_run_omni_contrasts_runs_when_readme_missing(tmp_path, monkeypatch, omni
 
     assert calls
     assert calls[0][0] == "1"
-    assert "None,10__to__undisturbed" in omni.contrast_dependency_tree
+    assert contrast_name in omni.contrast_dependency_tree
 
 
 def test_run_omni_contrasts_runs_when_sidecar_changes(tmp_path, monkeypatch, omni_module):
@@ -1236,13 +1357,18 @@ def test_run_omni_contrasts_runs_when_sidecar_changes(tmp_path, monkeypatch, omn
     omni.wd = str(tmp_path)
     omni.logger = logging.getLogger("tests.omni.run_contrasts_sidecar")
     omni.locked = _noop_lock
-    omni._contrast_names = ["None,10__to__undisturbed"]
+    omni._contrast_names = ["uniform_low,10__to__mulch"]
 
     monkeypatch.setattr(
         omni_module.Omni,
         "base_scenario",
         property(lambda self: omni_module.OmniScenario.Undisturbed),
         raising=False,
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "_resolve_base_scenario_key",
+        lambda wd: str(omni_module.OmniScenario.Undisturbed),
     )
 
     sidecar_path = Path(omni._contrast_sidecar_path(1))
@@ -1353,6 +1479,7 @@ def test_build_contrasts_dry_run_report_cumulative_statuses(tmp_path, monkeypatc
     omni.wd = str(tmp_path)
     omni.logger = logging.getLogger("tests.omni.dry_run_cumulative")
     omni.locked = _noop_lock
+    monkeypatch.setattr(omni, "_contrast_landuse_skip_reason", lambda *args, **kwargs: None)
 
     monkeypatch.setattr(
         omni_module.Omni,
@@ -1410,6 +1537,7 @@ def test_build_contrasts_dry_run_report_user_defined(tmp_path, monkeypatch, omni
     omni.wd = str(tmp_path)
     omni.logger = logging.getLogger("tests.omni.dry_run_user_defined")
     omni.locked = _noop_lock
+    monkeypatch.setattr(omni, "_contrast_landuse_skip_reason", lambda *args, **kwargs: None)
 
     monkeypatch.setattr(
         omni_module.Omni,
@@ -1596,6 +1724,11 @@ def test_stream_order_contrasts_grouping_and_skip(tmp_path, omni_module, monkeyp
         "base_scenario",
         property(lambda self: omni_module.OmniScenario.Undisturbed),
         raising=False,
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "_resolve_base_scenario_key",
+        lambda wd: str(omni_module.OmniScenario.Undisturbed),
     )
 
     omni = omni_module.Omni.__new__(omni_module.Omni)

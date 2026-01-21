@@ -25,6 +25,7 @@ import os
 import hashlib
 import time
 import logging
+import re
 from pathlib import Path
 
 from os.path import exists as _exists
@@ -709,6 +710,7 @@ class Omni(NoDbBase):
             self._contrast_selection_mode = None
             self._contrast_geojson_path = None
             self._contrast_geojson_name_key = None
+            self._contrast_hillslope_groups = None
             self._contrast_order_reduction_passes = None
             self._contrast_pairs = []
 
@@ -945,6 +947,10 @@ class Omni(NoDbBase):
             if contrast_geojson_name_key is not None:
                 self._contrast_geojson_name_key = str(contrast_geojson_name_key)
 
+            contrast_hillslope_groups = kwds.get("omni_contrast_hillslope_groups", None)
+            if contrast_hillslope_groups is not None:
+                self._contrast_hillslope_groups = contrast_hillslope_groups
+
             order_reduction_passes = kwds.get('order_reduction_passes', None)
             if order_reduction_passes is not None:
                 self._contrast_order_reduction_passes = order_reduction_passes
@@ -1141,6 +1147,15 @@ class Omni(NoDbBase):
     @nodb_setter
     def contrast_geojson_name_key(self, value: Optional[str]) -> None:
         self._contrast_geojson_name_key = value
+
+    @property
+    def contrast_hillslope_groups(self) -> Optional[str]:
+        return getattr(self, "_contrast_hillslope_groups", None)
+
+    @contrast_hillslope_groups.setter
+    @nodb_setter
+    def contrast_hillslope_groups(self, value: Optional[str]) -> None:
+        self._contrast_hillslope_groups = value
 
     @property
     def contrast_order_reduction_passes(self) -> Optional[int]:
@@ -1686,6 +1701,8 @@ class Omni(NoDbBase):
         selection_mode = (selection_mode_value or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
+        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+            selection_mode = "user_defined_hillslope_groups"
 
         control_scenario = (
             _scenario_name_from_scenario_definition(control_scenario_def)
@@ -1697,7 +1714,7 @@ class Omni(NoDbBase):
             if contrast_scenario_def is not None
             else None
         )
-        if selection_mode not in {"user_defined_areas", "stream_order"} and (
+        if selection_mode not in {"user_defined_areas", "stream_order", "user_defined_hillslope_groups"} and (
             control_scenario is None
             or contrast_scenario is None
         ):
@@ -1733,9 +1750,14 @@ class Omni(NoDbBase):
         selection_mode = (selection_mode_value or 'cumulative').strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
+        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+            selection_mode = "user_defined_hillslope_groups"
 
         if selection_mode == "user_defined_areas":
             self._build_contrasts_user_defined_areas()
+            return
+        if selection_mode == "user_defined_hillslope_groups":
+            self._build_contrasts_user_defined_hillslope_groups()
             return
         if selection_mode == "stream_order":
             self._build_contrasts_stream_order()
@@ -2055,6 +2077,8 @@ class Omni(NoDbBase):
         selection_mode = (getattr(self, "_contrast_selection_mode", None) or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
+        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+            selection_mode = "user_defined_hillslope_groups"
 
         report_entries = self._load_contrast_build_report()
 
@@ -2089,6 +2113,28 @@ class Omni(NoDbBase):
                 feature_map[feature_key] = (label, topaz_set, {"feature_index": feature_key})
             for key in _sorted_keys(feature_map.keys()):
                 selections.append(feature_map[key])
+        elif selection_mode == "user_defined_hillslope_groups":
+            group_map: Dict[Any, Tuple[str, Set[str], Dict[str, Any]]] = {}
+            for entry in report_entries:
+                if entry.get("selection_mode") != "user_defined_hillslope_groups":
+                    continue
+                group_index = entry.get("group_index")
+                if group_index in (None, ""):
+                    continue
+                try:
+                    group_key: Any = int(group_index)
+                except (TypeError, ValueError):
+                    group_key = str(group_index)
+                if group_key in group_map:
+                    continue
+                topaz_ids = entry.get("topaz_ids") or []
+                topaz_set = {str(item) for item in topaz_ids if item not in (None, "")}
+                if not topaz_set:
+                    continue
+                label = str(group_key)
+                group_map[group_key] = (label, topaz_set, {"group_index": group_key})
+            for key in _sorted_keys(group_map.keys()):
+                selections.append(group_map[key])
         elif selection_mode == "stream_order":
             group_map: Dict[Any, Dict[str, Any]] = {}
             for entry in report_entries:
@@ -2694,6 +2740,222 @@ class Omni(NoDbBase):
             self._contrasts = None
             self._contrast_names = contrast_names
 
+    def _build_contrasts_user_defined_hillslope_groups(self) -> None:
+        global OMNI_REL_DIR
+
+        contrast_groups_raw = getattr(self, "_contrast_hillslope_groups", None)
+
+        def _parse_groups(value: Any) -> List[List[str]]:
+            if value in (None, ""):
+                return []
+            if isinstance(value, (list, tuple)):
+                rows = list(value)
+            else:
+                rows = str(value).splitlines()
+            groups: List[List[str]] = []
+            for row in rows:
+                if row is None:
+                    continue
+                if isinstance(row, (list, tuple, set)):
+                    tokens = [str(item) for item in row if item not in (None, "")]
+                else:
+                    line = str(row).strip()
+                    if not line:
+                        continue
+                    line = line.rstrip(";")
+                    tokens = [token for token in re.split(r"[,\s;]+", line) if token]
+                if not tokens:
+                    continue
+                group: List[str] = []
+                for token in tokens:
+                    value_str = str(token).strip()
+                    if not value_str:
+                        continue
+                    try:
+                        parsed = int(value_str)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError(
+                            "omni_contrast_hillslope_groups entries must be integers"
+                        ) from exc
+                    group.append(str(parsed))
+                if group:
+                    groups.append(group)
+            return groups
+
+        group_rows = _parse_groups(contrast_groups_raw)
+        if not group_rows:
+            raise ValueError(
+                "omni_contrast_hillslope_groups is required for user_defined_hillslope_groups mode"
+            )
+
+        contrast_pairs = self._normalize_contrast_pairs(getattr(self, "_contrast_pairs", None))
+        if not contrast_pairs:
+            raise ValueError(
+                "omni_contrast_pairs is required for user_defined_hillslope_groups mode"
+            )
+
+        ignored_fields = []
+        if self._contrast_hillslope_limit is not None:
+            ignored_fields.append("omni_contrast_hillslope_limit")
+        if self._contrast_hill_min_slope is not None:
+            ignored_fields.append("omni_contrast_hill_min_slope")
+        if self._contrast_hill_max_slope is not None:
+            ignored_fields.append("omni_contrast_hill_max_slope")
+        if self._contrast_select_burn_severities is not None:
+            ignored_fields.append("omni_contrast_select_burn_severities")
+        if self._contrast_select_topaz_ids is not None:
+            ignored_fields.append("omni_contrast_select_topaz_ids")
+        if ignored_fields:
+            self.logger.info(
+                "User-defined hillslope groups ignore filters: %s",
+                ", ".join(ignored_fields),
+            )
+
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        top2wepp = {
+            str(k): str(v)
+            for k, v in translator.top2wepp.items()
+            if not (str(k).endswith("4") or int(k) == 0)
+        }
+        valid_topaz = set(top2wepp.keys())
+
+        def _sorted_topaz_ids(values: Set[str]) -> List[str]:
+            try:
+                return sorted(values, key=lambda item: int(item))
+            except (TypeError, ValueError):
+                return sorted(values)
+
+        missing_topaz: Set[str] = set()
+
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = []
+            self._contrast_labels = {}
+
+        sidecar_dir = self._contrast_sidecar_dir()
+        if _exists(sidecar_dir):
+            shutil.rmtree(sidecar_dir)
+        os.makedirs(sidecar_dir, exist_ok=True)
+
+        contrasts_dir = _join(self.wd, OMNI_REL_DIR, "contrasts")
+        os.makedirs(contrasts_dir, exist_ok=True)
+        report_fn = _join(contrasts_dir, "build_report.ndjson")
+
+        existing_signature_map = self._load_user_defined_hillslope_group_signature_map()
+        next_id = max(existing_signature_map.values(), default=0) + 1
+
+        contrast_names: List[Optional[str]] = []
+        contrast_labels: Dict[int, str] = {}
+
+        with open(report_fn, "w", encoding="ascii") as report_fp:
+            for group_index, raw_group in enumerate(group_rows, start=1):
+                selected_topaz: Set[str] = set()
+                for topaz_key in raw_group:
+                    if topaz_key in (None, ""):
+                        continue
+                    if topaz_key == "0" or str(topaz_key).endswith("4"):
+                        continue
+                    if topaz_key not in valid_topaz:
+                        missing_topaz.add(str(topaz_key))
+                        continue
+                    selected_topaz.add(topaz_key)
+
+                topaz_ids = _sorted_topaz_ids(selected_topaz)
+                n_hillslopes = len(selected_topaz)
+
+                for pair_index, pair in enumerate(contrast_pairs, start=1):
+                    control_key = self._normalize_scenario_key(pair.get("control_scenario"))
+                    contrast_key = self._normalize_scenario_key(pair.get("contrast_scenario"))
+                    control_scenario = None if control_key == str(self.base_scenario) else control_key
+                    contrast_scenario = None if contrast_key == str(self.base_scenario) else contrast_key
+
+                    signature = self._contrast_pair_signature(
+                        control_key,
+                        contrast_key,
+                        str(group_index),
+                    )
+                    contrast_id = existing_signature_map.get(signature)
+                    if contrast_id is None:
+                        contrast_id = next_id
+                        next_id += 1
+                        existing_signature_map[signature] = contrast_id
+
+                    contrast_labels[contrast_id] = str(group_index)
+                    while len(contrast_names) < contrast_id:
+                        contrast_names.append(None)
+
+                    report_entry = {
+                        "contrast_id": contrast_id,
+                        "control_scenario": control_key,
+                        "contrast_scenario": contrast_key,
+                        "wepp_id": None,
+                        "topaz_id": None,
+                        "obj_param": None,
+                        "running_obj_param": None,
+                        "pct_cumulative": None,
+                        "selection_mode": "user_defined_hillslope_groups",
+                        "group_index": group_index,
+                        "n_hillslopes": n_hillslopes,
+                        "topaz_ids": topaz_ids,
+                        "pair_index": pair_index,
+                    }
+
+                    if not selected_topaz:
+                        report_entry["status"] = "skipped"
+                        report_fp.write(json.dumps(report_entry) + "\n")
+                        continue
+
+                    if contrast_scenario is None:
+                        contrast_name = f"{control_scenario},{contrast_id}__to__{self.base_scenario}"
+                    else:
+                        contrast_name = f"{control_scenario},{contrast_id}__to__{contrast_scenario}"
+
+                    contrast: ContrastMapping = {}
+                    for topaz_id, wepp_id in top2wepp.items():
+                        if topaz_id in selected_topaz:
+                            if contrast_scenario is None:
+                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                            else:
+                                wepp_id_path = _join(
+                                    self.wd,
+                                    OMNI_REL_DIR,
+                                    "scenarios",
+                                    contrast_scenario,
+                                    "wepp",
+                                    "output",
+                                    f"H{wepp_id}",
+                                )
+                        else:
+                            if control_scenario is None:
+                                wepp_id_path = _join(self.wd, f"wepp/output/H{wepp_id}")
+                            else:
+                                wepp_id_path = _join(
+                                    self.wd,
+                                    OMNI_REL_DIR,
+                                    "scenarios",
+                                    control_scenario,
+                                    "wepp",
+                                    "output",
+                                    f"H{wepp_id}",
+                                )
+                        contrast[topaz_id] = wepp_id_path
+
+                    contrast_names[contrast_id - 1] = contrast_name
+                    self._write_contrast_sidecar(contrast_id, contrast)
+                    report_fp.write(json.dumps(report_entry) + "\n")
+
+        if missing_topaz:
+            self.logger.info(
+                "Skipped %d hillslopes missing from translator during group parsing.",
+                len(missing_topaz),
+            )
+
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = contrast_names
+            self._contrast_labels = contrast_labels
+
     def _build_contrasts_user_defined_areas(self) -> None:
         global OMNI_REL_DIR
 
@@ -2989,7 +3251,9 @@ class Omni(NoDbBase):
         selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
-        if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
+        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+            selection_mode = "user_defined_hillslope_groups"
+        if selection_mode not in {"cumulative", "user_defined_areas", "user_defined_hillslope_groups", "stream_order"}:
             raise ValueError(f'Contrast selection mode "{selection_mode}" is not implemented yet.')
         contrast_names = self.contrast_names or []
         landuse_cache: Dict[str, Optional[Dict[int, Optional[str]]]] = {}
@@ -3062,6 +3326,90 @@ class Omni(NoDbBase):
                         "control_scenario": report_entry.get("control_scenario") or control_scenario,
                         "contrast_scenario": report_entry.get("contrast_scenario") or contrast_scenario,
                         "area_label": label,
+                        "n_hillslopes": n_hillslopes,
+                        "skip_status": skip_status,
+                        "run_status": run_status,
+                    }
+                )
+
+            return {"selection_mode": selection_mode, "items": items}
+
+        if selection_mode == "user_defined_hillslope_groups":
+            report_entries = {}
+            for entry in self._load_contrast_build_report():
+                if entry.get("selection_mode") != "user_defined_hillslope_groups":
+                    continue
+                contrast_id = entry.get("contrast_id")
+                if isinstance(contrast_id, str):
+                    try:
+                        contrast_id = int(contrast_id)
+                    except ValueError:
+                        continue
+                if isinstance(contrast_id, int):
+                    report_entries[contrast_id] = entry
+
+            contrast_labels = getattr(self, "_contrast_labels", None) or {}
+
+            items: List[Dict[str, Any]] = []
+            max_id = max(report_entries.keys(), default=0)
+            if len(contrast_names) > max_id:
+                max_id = len(contrast_names)
+            for contrast_id in range(1, max_id + 1):
+                contrast_name = contrast_names[contrast_id - 1] if contrast_id - 1 < len(contrast_names) else None
+                report_entry = report_entries.get(contrast_id, {})
+
+                control_scenario = report_entry.get("control_scenario")
+                contrast_scenario = report_entry.get("contrast_scenario")
+                if (control_scenario is None or contrast_scenario is None) and contrast_name:
+                    try:
+                        control_part, target_part = contrast_name.split("__to__", maxsplit=1)
+                        control_scenario = control_part.split(",", maxsplit=1)[0]
+                        contrast_scenario = target_part
+                    except ValueError:
+                        control_scenario = control_scenario or None
+                        contrast_scenario = contrast_scenario or None
+
+                group_index = report_entry.get("group_index")
+                if group_index in (None, ""):
+                    group_index = contrast_labels.get(contrast_id) or contrast_labels.get(str(contrast_id))
+
+                raw_count = report_entry.get("n_hillslopes")
+                if raw_count is None:
+                    topaz_ids = report_entry.get("topaz_ids")
+                    if isinstance(topaz_ids, list):
+                        raw_count = len(topaz_ids)
+                try:
+                    n_hillslopes = int(raw_count) if raw_count is not None else 0
+                except (TypeError, ValueError):
+                    n_hillslopes = 0
+
+                skipped = (
+                    not contrast_name
+                    or report_entry.get("status") == "skipped"
+                    or n_hillslopes == 0
+                )
+                if skipped:
+                    run_status = "skipped"
+                    skip_status = {"skipped": True, "reason": "no_hillslopes"}
+                else:
+                    skip_reason = self._contrast_landuse_skip_reason(
+                        contrast_id,
+                        contrast_name,
+                        landuse_cache=landuse_cache,
+                    )
+                    if skip_reason:
+                        run_status = "skipped"
+                        skip_status = {"skipped": True, "reason": skip_reason}
+                    else:
+                        run_status = self._contrast_run_status(contrast_id, contrast_name)
+                        skip_status = {"skipped": False, "reason": None}
+
+                items.append(
+                    {
+                        "contrast_id": contrast_id,
+                        "control_scenario": control_scenario,
+                        "contrast_scenario": contrast_scenario,
+                        "group_index": group_index,
                         "n_hillslopes": n_hillslopes,
                         "skip_status": skip_status,
                         "run_status": run_status,
@@ -3350,6 +3698,8 @@ class Omni(NoDbBase):
         selection_mode = (self._contrast_selection_mode or "cumulative").strip().lower()
         if selection_mode in {"stream_order_pruning", "stream-order-pruning"}:
             selection_mode = "stream_order"
+        if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
+            selection_mode = "user_defined_hillslope_groups"
         contrast_labels = getattr(self, "_contrast_labels", None) or {}
         for contrast_id, contrast_name, path in parquet_entries:
             if not os.path.isfile(path):
@@ -3373,6 +3723,16 @@ class Omni(NoDbBase):
                 if label is None:
                     label = contrast_labels.get(str(contrast_id))
                 df['contrast'] = label or str(contrast_id)
+            elif selection_mode == "user_defined_hillslope_groups":
+                label = contrast_labels.get(contrast_id)
+                if label is None:
+                    label = contrast_labels.get(str(contrast_id))
+                label_value = label or str(contrast_id)
+                df["contrast"] = label_value
+                try:
+                    df["group_index"] = int(label_value)
+                except (TypeError, ValueError):
+                    df["group_index"] = label_value
             else:
                 df['contrast'] = contrast_name
             df['_contrast_name'] = str(contrast_name)
@@ -3539,6 +3899,45 @@ class Omni(NoDbBase):
             if label in (None, ""):
                 label = str(contrast_id)
             signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+            signature_map[signature] = contrast_id
+        if signature_map:
+            return signature_map
+
+        contrast_labels = getattr(self, "_contrast_labels", None) or {}
+        contrast_names = self.contrast_names or []
+        for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+            if not contrast_name:
+                continue
+            try:
+                control_part, target_part = contrast_name.split("__to__", maxsplit=1)
+            except ValueError:
+                continue
+            control_key = self._normalize_scenario_key(control_part.split(",")[0])
+            contrast_key = self._normalize_scenario_key(target_part)
+            label = contrast_labels.get(contrast_id) or str(contrast_id)
+            signature = self._contrast_pair_signature(control_key, contrast_key, str(label))
+            signature_map[signature] = contrast_id
+        return signature_map
+
+    def _load_user_defined_hillslope_group_signature_map(self) -> Dict[str, int]:
+        signature_map: Dict[str, int] = {}
+        for entry in self._load_contrast_build_report():
+            if entry.get("selection_mode") != "user_defined_hillslope_groups":
+                continue
+            contrast_id = entry.get("contrast_id")
+            if isinstance(contrast_id, str):
+                try:
+                    contrast_id = int(contrast_id)
+                except (TypeError, ValueError):
+                    continue
+            if not isinstance(contrast_id, int):
+                continue
+            group_index = entry.get("group_index")
+            if group_index in (None, ""):
+                continue
+            control_key = self._normalize_scenario_key(entry.get("control_scenario"))
+            contrast_key = self._normalize_scenario_key(entry.get("contrast_scenario"))
+            signature = self._contrast_pair_signature(control_key, contrast_key, str(group_index))
             signature_map[signature] = contrast_id
         if signature_map:
             return signature_map

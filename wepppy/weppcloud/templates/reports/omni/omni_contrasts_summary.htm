@@ -37,6 +37,20 @@
               <div>Avg. Ann. Total Hillslope Soil Loss</div>
               {{ unitizer_units(soil_units) | safe }}
             </th>
+          {% elif selection_mode == "user_defined_hillslope_groups" %}
+            <th scope="col">Contrast ID</th>
+            <th scope="col">Control scenario</th>
+            <th scope="col">Contrast scenario</th>
+            <th scope="col">Group</th>
+            <th scope="col" class="wc-text-right">Hillslopes</th>
+            <th scope="col" class="wc-text-right">
+              <div>Avg. Ann. Water Discharge from Outlet</div>
+              {{ unitizer_units(water_units) | safe }}
+            </th>
+            <th scope="col" class="wc-text-right">
+              <div>Avg. Ann. Total Hillslope Soil Loss</div>
+              {{ unitizer_units(soil_units) | safe }}
+            </th>
           {% elif selection_mode == "stream_order" %}
             <th scope="col">Contrast ID</th>
             <th scope="col">Control scenario</th>
@@ -87,6 +101,28 @@
             <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
             <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
             <td>{{ item.area_label }}</td>
+            <td class="wc-text-right">{{ item.n_hillslopes }}</td>
+            <td class="wc-text-right">
+              {% if item["water_discharge"] %}
+                {{ unitizer(item["water_discharge"]["value"], item["water_discharge"]["unit"] or water_units) | safe }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="wc-text-right">
+              {% if item["soil_loss"] %}
+                {{ unitizer(item["soil_loss"]["value"], item["soil_loss"]["unit"] or soil_units) | safe }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          {% elif selection_mode == "user_defined_hillslope_groups" %}
+            <th scope="row">
+              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+            </th>
+            <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
+            <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
+            <td>{{ item.group_index if item.group_index is not none else "-" }}</td>
             <td class="wc-text-right">{{ item.n_hillslopes }}</td>
             <td class="wc-text-right">
               {% if item["water_discharge"] %}

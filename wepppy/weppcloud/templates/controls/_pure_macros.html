@@ -1027,7 +1027,7 @@
 {% if error %}
   {% set field_classes = field_classes + ['wc-field--error'] %}
 {% endif %}
-{% set control_classes = ['wc-field__control'] %}
+{% set control_classes = ['wc-field__control', 'wc-field__control--textarea'] %}
 {% if extra_control_class %}
   {% set control_classes = control_classes + [extra_control_class] %}
 {% endif %}
@@ -1050,6 +1050,21 @@
   <p id="{{ error_id }}" class="wc-field__message wc-field__message--error" role="alert">{{ error }}</p>
   {% endif %}
 </div>
+{%- endmacro %}
+
+{% macro textbox_field(field_id, label, value='', rows=4, help=None, placeholder=None, attrs=None, error=None, extra_control_class=None, max_width='750px') -%}
+{{ textarea_field(
+     field_id,
+     label,
+     value=value,
+     rows=rows,
+     help=help,
+     placeholder=placeholder,
+     attrs=attrs,
+     error=error,
+     extra_control_class=extra_control_class,
+     max_width=max_width
+   ) }}
 {%- endmacro %}
 
 {% macro text_display(label=None, content='', variant=None, actions=None, max_width='750px') -%}

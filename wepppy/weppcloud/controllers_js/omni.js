@@ -33,6 +33,7 @@ var Omni = (function () {
     var CONTRAST_SELECTION_MODES = {
         cumulative: "cumulative",
         user_defined_areas: "user_defined_areas",
+        user_defined_hillslope_groups: "user_defined_hillslope_groups",
         stream_order: "stream_order"
     };
     var CONTRAST_HILLSLOPE_LIMIT_MAX = 100;
@@ -716,6 +717,11 @@ var Omni = (function () {
         var contrastGeojsonPathInput = contrastFormElement
             ? contrastFormElement.querySelector("input[name='omni_contrast_geojson_path']")
             : null;
+        var contrastHillslopeGroupsInput = contrastFormElement
+            ? contrastFormElement.querySelector(
+                "textarea[name='omni_contrast_hillslope_groups'], input[name='omni_contrast_hillslope_groups']"
+            )
+            : null;
         var contrastHillslopeLimitInput = contrastFormElement
             ? contrastFormElement.querySelector("input[name='omni_contrast_hillslope_limit']")
             : null;
@@ -1375,6 +1381,16 @@ var Omni = (function () {
                     { key: "skip_status", label: "Skip status" },
                     { key: "run_status", label: "Run status" }
                 ];
+            } else if (selectionMode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups) {
+                columns = [
+                    { key: "contrast_id", label: "Contrast" },
+                    { key: "control_scenario", label: "Control" },
+                    { key: "contrast_scenario", label: "Contrast" },
+                    { key: "group_index", label: "Group" },
+                    { key: "n_hillslopes", label: "Hillslopes" },
+                    { key: "skip_status", label: "Skip status" },
+                    { key: "run_status", label: "Run status" }
+                ];
             } else if (selectionMode === CONTRAST_SELECTION_MODES.stream_order) {
                 columns = [
                     { key: "contrast_id", label: "Contrast" },
@@ -1431,6 +1447,13 @@ var Omni = (function () {
             var token = value ? String(value).trim().toLowerCase() : "";
             if (token === "user-defined-areas" || token === "user_defined_areas") {
                 return CONTRAST_SELECTION_MODES.user_defined_areas;
+            }
+            if (
+                token === "user-defined-hillslope-groups"
+                || token === "user-defined-hillslope-group"
+                || token === "user_defined_hillslope_groups"
+            ) {
+                return CONTRAST_SELECTION_MODES.user_defined_hillslope_groups;
             }
             if (
                 token === "stream-order-pruning"
@@ -1804,6 +1827,14 @@ var Omni = (function () {
             return Boolean(path);
         }
 
+        function hasContrastHillslopeGroups() {
+            if (!contrastHillslopeGroupsInput) {
+                return false;
+            }
+            var value = contrastHillslopeGroupsInput.value;
+            return Boolean(value && String(value).trim());
+        }
+
         function validateOrderReductionPasses() {
             if (!contrastOrderReductionInput) {
                 return true;
@@ -1829,12 +1860,15 @@ var Omni = (function () {
             var canRunMode = (
                 mode === CONTRAST_SELECTION_MODES.cumulative
                 || mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
                 || mode === CONTRAST_SELECTION_MODES.stream_order
             ) && streamOrderAllowed;
             var hasGeojson = mode !== CONTRAST_SELECTION_MODES.user_defined_areas || hasContrastGeojson();
+            var hasGroups = mode !== CONTRAST_SELECTION_MODES.user_defined_hillslope_groups || hasContrastHillslopeGroups();
             var pairsValid = true;
             if (
                 mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
                 || mode === CONTRAST_SELECTION_MODES.stream_order
             ) {
                 ensureContrastPairsInitialized();
@@ -1846,6 +1880,7 @@ var Omni = (function () {
             }
             var canSubmit = canRunMode
                 && (mode !== CONTRAST_SELECTION_MODES.user_defined_areas || (pairsValid && hasGeojson))
+                && (mode !== CONTRAST_SELECTION_MODES.user_defined_hillslope_groups || (pairsValid && hasGroups))
                 && (mode !== CONTRAST_SELECTION_MODES.stream_order || (pairsValid && orderPassesValid));
             if (contrastRunButton) {
                 contrastRunButton.disabled = !canSubmit;
@@ -1857,6 +1892,7 @@ var Omni = (function () {
                 mode: mode,
                 canRunMode: canRunMode,
                 hasGeojson: hasGeojson,
+                hasGroups: hasGroups,
                 pairsValid: pairsValid,
                 orderPassesValid: orderPassesValid,
                 canSubmit: canSubmit
@@ -1869,6 +1905,7 @@ var Omni = (function () {
             var mode = resolveContrastMode();
             if (
                 mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
                 || mode === CONTRAST_SELECTION_MODES.stream_order
             ) {
                 ensureContrastPairsInitialized();
@@ -1929,10 +1966,15 @@ var Omni = (function () {
             }
             if (
                 (state.mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                    || state.mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
                     || state.mode === CONTRAST_SELECTION_MODES.stream_order)
                 && !state.pairsValid
             ) {
                 setContrastStatus("Resolve contrast pair errors to run contrasts.");
+                return;
+            }
+            if (state.mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups && !state.hasGroups) {
+                setContrastStatus("Enter hillslope groups to run user-defined contrasts.");
                 return;
             }
             if (state.mode === CONTRAST_SELECTION_MODES.stream_order && !state.orderPassesValid) {
@@ -2089,6 +2131,15 @@ var Omni = (function () {
                     setContrastStatus("Upload a GeoJSON file to run user-defined contrasts.");
                     return;
                 }
+            } else if (mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups) {
+                if (!state.pairsValid) {
+                    setContrastStatus("Resolve contrast pair errors before running contrasts.");
+                    return;
+                }
+                if (!hasContrastHillslopeGroups()) {
+                    setContrastStatus("Enter hillslope groups to run user-defined contrasts.");
+                    return;
+                }
             } else if (mode === CONTRAST_SELECTION_MODES.stream_order) {
                 if (!state.pairsValid) {
                     setContrastStatus("Resolve contrast pair errors before running contrasts.");
@@ -2118,6 +2169,7 @@ var Omni = (function () {
                 formData.set("omni_contrast_selection_mode", mode);
                 if (
                     mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                    || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
                     || mode === CONTRAST_SELECTION_MODES.stream_order
                 ) {
                     formData.delete("omni_control_scenario");
@@ -2181,6 +2233,15 @@ var Omni = (function () {
                     setContrastStatus("Upload a GeoJSON file to dry run user-defined contrasts.");
                     return;
                 }
+            } else if (mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups) {
+                if (!state.pairsValid) {
+                    setContrastStatus("Resolve contrast pair errors before dry run.");
+                    return;
+                }
+                if (!hasContrastHillslopeGroups()) {
+                    setContrastStatus("Enter hillslope groups to dry run user-defined contrasts.");
+                    return;
+                }
             } else if (mode === CONTRAST_SELECTION_MODES.stream_order) {
                 if (!state.pairsValid) {
                     setContrastStatus("Resolve contrast pair errors before dry run.");
@@ -2208,6 +2269,7 @@ var Omni = (function () {
                 formData.set("omni_contrast_selection_mode", mode);
                 if (
                     mode === CONTRAST_SELECTION_MODES.user_defined_areas
+                    || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
                     || mode === CONTRAST_SELECTION_MODES.stream_order
                 ) {
                     formData.delete("omni_control_scenario");
@@ -2402,6 +2464,16 @@ var Omni = (function () {
             if (contrastGeojsonInput) {
                 contrastGeojsonInput.addEventListener("change", function () {
                     updateContrastActionState();
+                });
+            }
+            if (contrastHillslopeGroupsInput) {
+                contrastHillslopeGroupsInput.addEventListener("input", function () {
+                    updateContrastActionState();
+                    syncContrastMode();
+                });
+                contrastHillslopeGroupsInput.addEventListener("change", function () {
+                    updateContrastActionState();
+                    syncContrastMode();
                 });
             }
             syncContrastMode();

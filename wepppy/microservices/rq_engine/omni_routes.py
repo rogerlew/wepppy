@@ -199,6 +199,8 @@ def _normalize_contrast_selection_mode(value: Any) -> str:
         "cumulative_obj_param": "cumulative",
         "stream_order_pruning": "stream_order",
         "stream-order-pruning": "stream_order",
+        "user-defined-hillslope-groups": "user_defined_hillslope_groups",
+        "user-defined-hillslope-group": "user_defined_hillslope_groups",
     }
     return aliases.get(token, token)
 
@@ -314,6 +316,7 @@ def _prepare_omni_contrasts(
     contrast_pairs = _coerce_contrast_pairs(payload, raw_json)
     control_scenario = payload.get("omni_control_scenario")
     contrast_scenario = payload.get("omni_contrast_scenario")
+    hillslope_groups = payload.get("omni_contrast_hillslope_groups")
 
     if selection_mode == "cumulative":
         if not control_scenario:
@@ -323,6 +326,21 @@ def _prepare_omni_contrasts(
     if selection_mode == "user_defined_areas":
         if not contrast_pairs:
             raise ValueError("contrast_pairs is required for user-defined contrasts")
+    if selection_mode == "user_defined_hillslope_groups":
+        if not contrast_pairs:
+            raise ValueError("contrast_pairs is required for user-defined hillslope groups")
+        if hillslope_groups is None:
+            raise ValueError(
+                "omni_contrast_hillslope_groups is required for user-defined hillslope groups"
+            )
+        if isinstance(hillslope_groups, str) and not hillslope_groups.strip():
+            raise ValueError(
+                "omni_contrast_hillslope_groups is required for user-defined hillslope groups"
+            )
+        if isinstance(hillslope_groups, (list, tuple)) and not hillslope_groups:
+            raise ValueError(
+                "omni_contrast_hillslope_groups is required for user-defined hillslope groups"
+            )
     if selection_mode == "stream_order":
         if not contrast_pairs:
             raise ValueError("contrast_pairs is required for stream-order contrasts")
@@ -330,36 +348,47 @@ def _prepare_omni_contrasts(
         if not watershed.delineation_backend_is_wbt:
             raise ValueError("Stream-order pruning requires the WBT delineation backend.")
 
-    objective_parameter = payload.get("omni_contrast_objective_parameter") or "Runoff_mm"
-    threshold_fraction = _coerce_optional_float(
-        payload.get("omni_contrast_cumulative_obj_param_threshold_fraction"),
-        "omni_contrast_cumulative_obj_param_threshold_fraction",
-    )
-    hillslope_limit = _coerce_optional_int(
-        payload.get("omni_contrast_hillslope_limit"),
-        "omni_contrast_hillslope_limit",
-    )
-    hill_min_slope = _coerce_optional_float(
-        payload.get("omni_contrast_hill_min_slope"),
-        "omni_contrast_hill_min_slope",
-    )
-    hill_max_slope = _coerce_optional_float(
-        payload.get("omni_contrast_hill_max_slope"),
-        "omni_contrast_hill_max_slope",
-    )
-    burn_severities = _coerce_optional_int_list(
-        payload.get("omni_contrast_select_burn_severities"),
-        "omni_contrast_select_burn_severities",
-    )
-    topaz_ids = _coerce_optional_int_list(
-        payload.get("omni_contrast_select_topaz_ids"),
-        "omni_contrast_select_topaz_ids",
-    )
-    order_reduction_passes = _coerce_optional_int(
-        payload.get("order_reduction_passes"),
-        "order_reduction_passes",
-    )
-    if selection_mode == "stream_order":
+    objective_parameter = payload.get("omni_contrast_objective_parameter")
+    threshold_fraction = None
+    hillslope_limit = None
+    hill_min_slope = None
+    hill_max_slope = None
+    burn_severities = None
+    topaz_ids = None
+    order_reduction_passes = None
+
+    if selection_mode == "cumulative":
+        if not objective_parameter:
+            objective_parameter = "Runoff_mm"
+        threshold_fraction = _coerce_optional_float(
+            payload.get("omni_contrast_cumulative_obj_param_threshold_fraction"),
+            "omni_contrast_cumulative_obj_param_threshold_fraction",
+        )
+        hillslope_limit = _coerce_optional_int(
+            payload.get("omni_contrast_hillslope_limit"),
+            "omni_contrast_hillslope_limit",
+        )
+        hill_min_slope = _coerce_optional_float(
+            payload.get("omni_contrast_hill_min_slope"),
+            "omni_contrast_hill_min_slope",
+        )
+        hill_max_slope = _coerce_optional_float(
+            payload.get("omni_contrast_hill_max_slope"),
+            "omni_contrast_hill_max_slope",
+        )
+        burn_severities = _coerce_optional_int_list(
+            payload.get("omni_contrast_select_burn_severities"),
+            "omni_contrast_select_burn_severities",
+        )
+        topaz_ids = _coerce_optional_int_list(
+            payload.get("omni_contrast_select_topaz_ids"),
+            "omni_contrast_select_topaz_ids",
+        )
+    elif selection_mode == "stream_order":
+        order_reduction_passes = _coerce_optional_int(
+            payload.get("order_reduction_passes"),
+            "order_reduction_passes",
+        )
         if order_reduction_passes is None or order_reduction_passes == 0:
             order_reduction_passes = 1
         if order_reduction_passes < 0:
@@ -390,6 +419,7 @@ def _prepare_omni_contrasts(
         "omni_control_scenario": control_scenario,
         "omni_contrast_scenario": contrast_scenario,
         "omni_contrast_pairs": contrast_pairs,
+        "omni_contrast_hillslope_groups": hillslope_groups,
         "omni_contrast_objective_parameter": objective_parameter,
         "omni_contrast_cumulative_obj_param_threshold_fraction": threshold_fraction,
         "omni_contrast_hillslope_limit": hillslope_limit,
@@ -483,7 +513,12 @@ async def _run_omni_contrasts(
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
-    if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
+    if selection_mode not in {
+        "cumulative",
+        "user_defined_areas",
+        "user_defined_hillslope_groups",
+        "stream_order",
+    }:
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,
@@ -491,12 +526,30 @@ async def _run_omni_contrasts(
 
     try:
         omni.parse_inputs(parsed_inputs)
-        threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
-        if threshold_fraction is None:
-            threshold_fraction = 0.8
-        objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+        if selection_mode == "cumulative":
+            threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
+            if threshold_fraction is None:
+                threshold_fraction = 0.8
+            objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+            hillslope_limit = parsed_inputs.get("omni_contrast_hillslope_limit")
+            hill_min_slope = parsed_inputs.get("omni_contrast_hill_min_slope")
+            hill_max_slope = parsed_inputs.get("omni_contrast_hill_max_slope")
+            burn_severities = parsed_inputs.get("omni_contrast_select_burn_severities")
+            topaz_ids = parsed_inputs.get("omni_contrast_select_topaz_ids")
+        else:
+            threshold_fraction = getattr(
+                omni, "contrast_cumulative_obj_param_threshold_fraction", None
+            )
+            if threshold_fraction is None:
+                threshold_fraction = 0.8
+            objective_parameter = getattr(omni, "contrast_object_param", None) or "Runoff_mm"
+            hillslope_limit = getattr(omni, "contrast_hillslope_limit", None)
+            hill_min_slope = getattr(omni, "contrast_hill_min_slope", None)
+            hill_max_slope = getattr(omni, "contrast_hill_max_slope", None)
+            burn_severities = getattr(omni, "contrast_select_burn_severities", None)
+            topaz_ids = getattr(omni, "contrast_select_topaz_ids", None)
         contrast_pairs = parsed_inputs.get("omni_contrast_pairs")
-        if selection_mode in {"user_defined_areas", "stream_order"}:
+        if selection_mode in {"user_defined_areas", "user_defined_hillslope_groups", "stream_order"}:
             control_def = None
             contrast_def = None
         else:
@@ -507,11 +560,11 @@ async def _run_omni_contrasts(
             contrast_scenario_def=contrast_def,
             obj_param=objective_parameter,
             contrast_cumulative_obj_param_threshold_fraction=threshold_fraction,
-            contrast_hillslope_limit=parsed_inputs.get("omni_contrast_hillslope_limit"),
-            hill_min_slope=parsed_inputs.get("omni_contrast_hill_min_slope"),
-            hill_max_slope=parsed_inputs.get("omni_contrast_hill_max_slope"),
-            select_burn_severities=parsed_inputs.get("omni_contrast_select_burn_severities"),
-            select_topaz_ids=parsed_inputs.get("omni_contrast_select_topaz_ids"),
+            contrast_hillslope_limit=hillslope_limit,
+            hill_min_slope=hill_min_slope,
+            hill_max_slope=hill_max_slope,
+            select_burn_severities=burn_severities,
+            select_topaz_ids=topaz_ids,
             contrast_pairs=contrast_pairs,
         )
     except ValueError as exc:
@@ -569,7 +622,12 @@ async def _dry_run_omni_contrasts(
         return error_response_with_traceback(f"Error parsing omni contrast inputs: {exc}")
 
     selection_mode = parsed_inputs.get("omni_contrast_selection_mode") or CONTRAST_SELECTION_MODE_DEFAULT
-    if selection_mode not in {"cumulative", "user_defined_areas", "stream_order"}:
+    if selection_mode not in {
+        "cumulative",
+        "user_defined_areas",
+        "user_defined_hillslope_groups",
+        "stream_order",
+    }:
         return error_response(
             f'Contrast selection mode "{selection_mode}" is not implemented yet.',
             status_code=400,
@@ -577,12 +635,30 @@ async def _dry_run_omni_contrasts(
 
     try:
         omni.parse_inputs(parsed_inputs)
-        threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
-        if threshold_fraction is None:
-            threshold_fraction = 0.8
-        objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+        if selection_mode == "cumulative":
+            threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
+            if threshold_fraction is None:
+                threshold_fraction = 0.8
+            objective_parameter = parsed_inputs.get("omni_contrast_objective_parameter") or "Runoff_mm"
+            hillslope_limit = parsed_inputs.get("omni_contrast_hillslope_limit")
+            hill_min_slope = parsed_inputs.get("omni_contrast_hill_min_slope")
+            hill_max_slope = parsed_inputs.get("omni_contrast_hill_max_slope")
+            burn_severities = parsed_inputs.get("omni_contrast_select_burn_severities")
+            topaz_ids = parsed_inputs.get("omni_contrast_select_topaz_ids")
+        else:
+            threshold_fraction = getattr(
+                omni, "contrast_cumulative_obj_param_threshold_fraction", None
+            )
+            if threshold_fraction is None:
+                threshold_fraction = 0.8
+            objective_parameter = getattr(omni, "contrast_object_param", None) or "Runoff_mm"
+            hillslope_limit = getattr(omni, "contrast_hillslope_limit", None)
+            hill_min_slope = getattr(omni, "contrast_hill_min_slope", None)
+            hill_max_slope = getattr(omni, "contrast_hill_max_slope", None)
+            burn_severities = getattr(omni, "contrast_select_burn_severities", None)
+            topaz_ids = getattr(omni, "contrast_select_topaz_ids", None)
         contrast_pairs = parsed_inputs.get("omni_contrast_pairs")
-        if selection_mode in {"user_defined_areas", "stream_order"}:
+        if selection_mode in {"user_defined_areas", "user_defined_hillslope_groups", "stream_order"}:
             control_def = None
             contrast_def = None
         else:
@@ -593,11 +669,11 @@ async def _dry_run_omni_contrasts(
             contrast_scenario_def=contrast_def,
             obj_param=objective_parameter,
             contrast_cumulative_obj_param_threshold_fraction=threshold_fraction,
-            contrast_hillslope_limit=parsed_inputs.get("omni_contrast_hillslope_limit"),
-            hill_min_slope=parsed_inputs.get("omni_contrast_hill_min_slope"),
-            hill_max_slope=parsed_inputs.get("omni_contrast_hill_max_slope"),
-            select_burn_severities=parsed_inputs.get("omni_contrast_select_burn_severities"),
-            select_topaz_ids=parsed_inputs.get("omni_contrast_select_topaz_ids"),
+            contrast_hillslope_limit=hillslope_limit,
+            hill_min_slope=hill_min_slope,
+            hill_max_slope=hill_max_slope,
+            select_burn_severities=burn_severities,
+            select_topaz_ids=topaz_ids,
             contrast_pairs=contrast_pairs,
         )
     except ValueError as exc:

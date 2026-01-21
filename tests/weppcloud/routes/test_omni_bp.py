@@ -50,3 +50,27 @@ def test_summarize_omni_contrast_outlet_metrics_uses_contrast_id_for_user_define
     assert result[0]["name"] == "7"
     assert result[0]["water_discharge"]["value"] == 5.0
     assert result[0]["soil_loss"]["value"] == 6.0
+
+
+def test_summarize_omni_contrast_outlet_metrics_uses_contrast_id_for_hillslope_groups():
+    df = pd.DataFrame({
+        "key": [
+            "Avg. Ann. water discharge from outlet",
+            "Avg. Ann. total hillslope soil loss",
+        ],
+        "value": [8.0, 9.0],
+        "units": ["m^3/yr", "tonne/yr"],
+        "contrast": ["Group 1", "Group 1"],
+        "contrast_id": [5, 5],
+        "group_index": [1, 1],
+    })
+
+    result = omni_bp._summarize_omni_contrast_outlet_metrics(
+        df,
+        "user_defined_hillslope_groups",
+    )
+
+    assert len(result) == 1
+    assert result[0]["name"] == "5"
+    assert result[0]["water_discharge"]["value"] == 8.0
+    assert result[0]["soil_loss"]["value"] == 9.0
