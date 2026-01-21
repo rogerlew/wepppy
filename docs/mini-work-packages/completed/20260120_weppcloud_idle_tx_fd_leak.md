@@ -1,6 +1,6 @@
 # Mini Work Package: WEPPcloud idle transactions + FD leak hardening
-Status: Implemented (deployed)
-Last Updated: 2026-01-20
+Status: Completed
+Last Updated: 2026-01-21
 Primary Areas: `wepppy/nodb/base.py`, `wepppy/nodb/core/ron.py`, `wepppy/weppcloud/routes/user.py`, `wepppy/weppcloud/routes/admin.py`, `wepppy/weppcloud/_context_processors.py`, `wepppy/weppcloud/configuration.py`
 
 ## Objective
@@ -139,6 +139,38 @@ Each run accessed creates loggers via `logging.getLogger(f'wepppy.run.{runid}.{c
 ## Rollout Notes
 - Requires container restart to apply `POSTGRES_IDLE_IN_TX_TIMEOUT`.
 - If desired, set the timeout at Postgres level using `ALTER SYSTEM` and `pg_reload_conf()`.
+
+## Post-Fix Validation (2026-01-21)
+
+After 25 hours uptime with the detached loading fixes deployed:
+
+### Worker FD Counts
+| Worker | Total FDs | Log Files |
+|--------|-----------|-----------|
+| 8 | 344 | 70 |
+| 9 | 209 | 45 |
+| 10 | 174 | 32 |
+| 11 | 176 | 37 |
+
+### Comparison with Pre-Fix State
+| Worker | Before (11h) | After (25h) | Log Handle Reduction |
+|--------|--------------|-------------|----------------------|
+| 8 | 439 FDs / ~200 logs | 344 FDs / 70 logs | 65% fewer |
+| 9 | 1,356 FDs / 532 logs | 209 FDs / 45 logs | 92% fewer |
+| 10 | 330 FDs / ~150 logs | 174 FDs / 32 logs | 79% fewer |
+| 11 | 769 FDs / ~350 logs | 176 FDs / 37 logs | 89% fewer |
+
+### Other Metrics
+- **PostgreSQL idle in transaction:** 0 sessions (was 3 sessions running 7-10+ hours)
+- **DB connections:** 12 idle, 1 active (healthy)
+- **Zombie health checks:** 0 (was 412)
+- **Server load:** 1.22 (was 4.04)
+
+### Interpretation
+
+The detached loading fixes are working as intended. Log file accumulation now comes only from actual run page views (expected behavior), not from run listings or context processors. The leak rate dropped from ~10-19 log handles/minute to approximately 3/hour.
+
+The remaining open log handles are from direct run access where users view a run page, which initializes logging. This is acceptable since users typically view only a handful of runs per session, and the accumulation rate is sustainable for multi-day uptimes.
 
 ## Open Questions
 - Should a default timeout be enforced even if `POSTGRES_IDLE_IN_TX_TIMEOUT` is unset?
