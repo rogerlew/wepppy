@@ -329,31 +329,40 @@ def _run_contrast(
     os.makedirs(_join(new_wd, 'soils'), exist_ok=True)
     os.makedirs(_join(new_wd, 'landuse'), exist_ok=True)
 
+    symlink_entries = {
+        'climate',
+        'watershed',
+        'climate.nodb',
+        'watershed.nodb',
+        'landuse.nodb',
+        'soils.nodb',
+        'unitizer.nodb',
+        'treatments.nodb',
+    }
+    symlink_nodb_files = {entry for entry in symlink_entries if entry.endswith('.nodb')}
+
     for fn in os.listdir(wd):
-        if fn in [
-            'climate',
-            'watershed',
-            'climate.nodb',
-            'watershed.nodb',
-            'landuse.nodb',
-            'soils.nodb',
-            'unitizer.nodb',
-            'treatments.nodb',
-        ]:
+        if fn in symlink_entries:
             src = _join(wd, fn)
             dst = _join(new_wd, fn)
             if not _exists(dst):
                 os.symlink(src, dst)
 
-    for nodb_fn in ['ron.nodb', 'wepp.nodb']:
+    for nodb_fn in os.listdir(wd):
+        if not nodb_fn.endswith('.nodb'):
+            continue
+        if nodb_fn in symlink_nodb_files:
+            continue
         src = _join(wd, nodb_fn)
+        if not _isfile(src):
+            continue
         dst = _join(new_wd, nodb_fn)
         if not _exists(dst):
             shutil.copy(src, dst)
 
         with open(dst, 'r') as f:
             d = json.load(f)
-        
+
         _update_nodb_wd(d, new_wd, parent_wd=wd)
 
         with open(dst, 'w') as fp:
