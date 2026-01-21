@@ -45,10 +45,16 @@
 - Supported keys:
   - `model`: `"multi"` (Srivastava 2023) or `"alex"` (Watanabe 2025).
   - `run_wind_transport`: Enables wind thresholds (`wind_transport_thresholds.py`).
-  - `ash_load_fn`, `ash_bulk_density_fn`, `ash_type_map_fn`: Rasters in kg m⁻² / g cm⁻³ / categorical. When absent, fall back to defaults derived from burn class and configuration.
+  - `ash_load_fn`, `ash_bulk_density_fn`, `ash_type_map_fn`: Rasters in tonne/ha / g/cm^3 / categorical. When absent, fall back to defaults derived from burn class and configuration.
   - `black_ash_bulkdensity`, `white_ash_bulkdensity`: Overrides for simulated ash bulk density (distinct from field bulk densities used to back-calculate depth).
   - `ash.contaminants.<severity>.<name>`: Optional per-severity concentration values. `Ash` seeds defaults via `get_cc_default`.
 - Fire timing: `fire_date` defaults to 8/4 (YearlessDate). `run_ash` accepts overrides as MM/DD strings.
+
+## Load Map Units and Code Path
+- `ash_load_fn` values are treated as tonne/ha (UI label: "Load map (tonne/ha)"); do not supply kg/m^2.
+- Upload path: `wepppy/microservices/rq_engine/ash_routes.py` saves the raster to `ash._ash_load_fn` when `ash_depth_mode=2`.
+- Conversion path: `wepppy/nodb/mods/ash_transport/ash.py` loads `load_d` (tonne/ha), converts to kg/m^2 via `load_d * 0.1`, then depth in mm via `kg/m^2 / field_*_bulkdensity (g/cm^3)`. Equivalent: `depth_mm = t/ha / (10 * g/cm^3)`.
+- Model usage: `wepppy/nodb/mods/ash_transport/ash_multi_year_model.py` and `_alex.py` recompute `ash_depth_mm = remaining_ash (tonne/ha) / (10 * bulk_density_gmpcm3)` and use depth for runoff storage (`ash_depth_mm * porosity`).
 
 ## Interactions & Dependencies
 - Relies on upstream NoDb controllers: `Watershed`, `Wepp`, `Climate`, `Landuse`, `Ron`. Ensure they are hydrated before invoking `Ash`.
