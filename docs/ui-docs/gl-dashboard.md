@@ -39,7 +39,7 @@ The GL Dashboard is a WebGL-powered visualization tool that provides real-time e
 - **Year Slider:** Interactive timeline control for RAP, WEPP Yearly, Climate Yearly, and OpenET Yearly
 - **Month Slider:** OpenET-only month index slider (play/pause) that hides the year slider
 - **Legends Panel:** Floating, collapsible panel showing active layer colormaps
-- **Omni Graph Integration:** Boxplot/bar chart visualizations for scenario analysis
+- **Omni Graph Integration:** Boxplot/bar chart visualizations for scenario + contrast analysis
 - **OpenET Yearly Graph:** Full-size ET graph with dataset radios + water year controls
 
 ## Architecture
@@ -107,7 +107,7 @@ gl-dashboard.js (main)
 ```
 
 **Initialization Flow:**
-1. Load context from `window.GL_DASHBOARD_CONTEXT` (injected by Flask template)
+1. Load context from `window.GL_DASHBOARD_CONTEXT` (injected by Flask template; includes `omniScenarios` and `omniContrasts` when available)
 2. Dynamic `import()` of modules; instantiate controllers with dependency injection (state getters/setters, fetch helpers, render callbacks)
 3. Initialize deck.gl controller with basemap tile layer
 4. Kick off detection (raster gdalinfo + parquet summaries) asynchronously; render placeholder layer controls immediately, then populate once detection resolves (non-blocking page load)
@@ -199,7 +199,7 @@ gl-dashboard.js (main)
 - `COMPARISON_MEASURES`: Array of measure keys for scenario diff
 - `WATER_MEASURES`, `SOIL_MEASURES`: Categorization for colormaps
 - `BASE_LAYER_DEFS`: Raster layer paths (landuse/nlcd.tif, soils/ssurgo.tif)
-- `GRAPH_DEFS`: Graph definitions for sidebar (Omni scenarios)
+- `GRAPH_DEFS`: Graph definitions for sidebar (Omni scenarios + Omni contrasts)
 - `createBasemapDefs()`: Basemap tile URL templates
 - `createColorScales(colormapFn)`: Viridis, rdbu, winter, jet2 scales
 
@@ -279,7 +279,7 @@ gl-dashboard.js (main)
     // OR
     [topaz_id]: { stats: { min, q1, median, q3, max } }  // for boxplot
   },
-  categories: ['Base', 'Scenario1', ...],  // for bars
+  categories: ['Base', 'Scenario1', 'Contrast 1', ...],  // for bars
   currentYear: 2023,
   tooltipFormatter: (data) => '<div>...',
 }
@@ -290,7 +290,7 @@ gl-dashboard.js (main)
 **Exports:** `createGraphLoaders(options)`  
 **Methods:**
 - `loadGraphDataset(key, options)`: Dispatcher for graph types
-- `loadOmniSoilLossHillGraph()`: Boxplot of hillslope soil loss across scenarios
+- `loadOmniSoilLossHillGraph()`: Boxplot of hillslope soil loss across scenarios (and contrasts)
 - `loadOmniSoilLossChnGraph()`: Boxplot of channel soil loss
 - `loadOmniRunoffHillGraph()`: Boxplot of hillslope runoff
 - `loadOmniOutletSedimentGraph()`: Bar chart of outlet sediment discharge
@@ -299,13 +299,14 @@ gl-dashboard.js (main)
 - `buildOpenetYearlyGraph()`: OpenET yearly ET graph (area-weighted)
 
   **Query Pattern (Omni Graphs):**
-  1. For each scenario, query the interchange parquet files (`wepp/output/interchange/loss_pw0.hill.parquet`, `loss_pw0.chn.parquet`, `loss_pw0.all_years.out.parquet`).
+  1. For each scenario or contrast, query the interchange parquet files (`wepp/output/interchange/loss_pw0.hill.parquet`, `loss_pw0.chn.parquet`, `loss_pw0.all_years.out.parquet`).
   2. Join with hillslope area (in m²) from `watershed/hillslopes.parquet` for unit conversions.
   3. Apply unit conversions:
      - Water measures (runoff, subrunoff, baseflow): `(m³ / area_m²) * 1000 = mm` (depth)
      - Soil measures (soil_loss, sediment_deposition, sediment_yield): `(kg / area_m²) * 10 = t/ha` (mass per area)
-  4. Compute statistics (min, q1, median, q3, max) per scenario for boxplots; outlet bars come from `loss_pw0.all_years.out.parquet`.
-  5. Return boxplot series keyed by scenario and outlet bar series keyed by year.
+  4. Compute statistics (min, q1, median, q3, max) per scenario/contrast for boxplots; outlet bars come from `loss_pw0.all_years.out.parquet`.
+  5. Return boxplot series keyed by scenario/contrast and outlet bar series keyed by year.
+  6. Contrast runs are queried via composite runid (`{parent};;omni-contrast;;<id>`) and do **not** use the body `scenario` parameter.
 
 #### `data/query-engine.js`
 **Purpose:**
@@ -313,9 +314,10 @@ gl-dashboard.js (main)
  Abstracts Query Engine HTTP calls  
 **Exports:** `createQueryEngine(ctx)`  
 **Methods:**
-- `postQueryEngine(payload)`: POST to `/query-engine/runs/{runid}/{scenario}/query`
-- `postBaseQueryEngine(payload)`: POST to base run (no scenario path)
-- `postQueryEngineForScenario(payload, scenarioPath)`: POST to specific scenario
+- `postQueryEngine(payload)`: POST to `/query-engine/runs/{runid}/{config}/query` (current scenario in body)
+- `postBaseQueryEngine(payload)`: POST to base run (no scenario body)
+- `postQueryEngineForScenario(payload, scenarioPath)`: POST to specific Omni scenario (adds `scenario` to body)
+- **Omni contrasts:** use runid `{parent};;omni-contrast;;<id>` and the base POST path; do not set `scenario`.
 
 **Query Payload Format:**
 ```javascript
@@ -355,7 +357,7 @@ gl-dashboard.js (main)
 
 #### Scenario Selector
 **Element:** `#gl-scenario-select` (select dropdown)  
-**Options:** Base (empty path) + Omni scenarios from `ctx.omniScenarios`  
+**Options:** Base (empty path) + Omni scenarios from `ctx.omniScenarios` + Omni contrasts from `ctx.omniContrasts` (appended)  
 **Handler:** `setScenario(scenarioPath)` → updates state, refetches overlays, recalculates comparison diff ranges
 
 #### Comparison Toggle
@@ -519,6 +521,15 @@ Channel overlays share their own radio group (`wepp-channel-overlay`) across Cha
     </ul>
   </details>
   <details class="gl-layer-details">
+    <summary>Omni Contrasts</summary>
+    <ul class="gl-layer-items">
+      <li class="gl-layer-item">
+        <input type="radio" name="graph-selection" id="graph-omni-contrast-soil-loss-hill" />
+        <label for="graph-omni-contrast-soil-loss-hill">Soil Loss (hillslopes, tonne/ha)</label>
+      </li>
+    </ul>
+  </details>
+  <details class="gl-layer-details">
     <summary>OpenET Yearly</summary>
     <div class="gl-openet-year-controls">
       <label><input type="radio" name="openet-yearly-dataset" value="ensemble"> Ensemble</label>
@@ -583,7 +594,7 @@ Graph minimized (controls disabled; slider hidden)
 **State:** `graphMode = 'full'`, `graphFocus = true`  
 **UI:** Graph focus hides the map viewport (graph stretches vertically)  
 **Trigger:** User clicks full, or any of the following are active:
-- Omni graphs (`omni-*` sources) or Cumulative Contribution → always force full by default
+- Omni graphs (scenarios + contrasts) or Cumulative Contribution → always force full by default
 - Climate Yearly graph → full by default
 - OpenET Yearly graph → full by default
 - Explicit user override via layout buttons
@@ -593,7 +604,7 @@ Graph minimized (controls disabled; slider hidden)
 **Placement & Visibility (context-aware):**
 - **Climate Yearly / OpenET Yearly / Outlet graphs** → slider is moved **inside** `#gl-graph-container`, pinned to the **bottom**; container gets `.has-bottom-slider` to add padding. Graph defaults to **full** pane.
 - **RAP / WEPP Yearly** → slider stays in the dedicated slot **above** the graph pane (`#gl-graph-year-slider`) at 100% width; never overlaps the graph header. Graph defaults to **split** view.
-- **Cumulative / Omni graphs** → slider is **hidden** (no timeline dimension).
+- **Cumulative / Omni graphs (scenarios + contrasts)** → slider is **hidden** (no timeline dimension).
 - Hidden when no RAP/WEPP/Climate/OpenET Yearly graph context is active or when the OpenET month slider is visible.
 
 **Controls:**
@@ -1029,7 +1040,7 @@ function deselectAllSubcatchmentOverlays() {
 - OpenET monthly uses this shape with month-indexed X values and the month slider driving the cursor.
 
 #### Boxplot
-**Use Case:** Omni scenario comparison (soil loss, runoff across hillslopes)  
+**Use Case:** Omni scenario + contrast comparison (soil loss, runoff across hillslopes)  
 **Data Format:**
 ```javascript
 {
@@ -1045,14 +1056,14 @@ function deselectAllSubcatchmentOverlays() {
 ```
 
 **Rendering:**
-- X-axis: Categories (scenarios)
+- X-axis: Categories (scenarios + contrasts)
 - Y-axis: Measure value (auto-scaled)
-- Boxes: One per scenario, drawn with whiskers (min/max), box (q1/q3), median line
-- Hover: Show stats for hovered scenario
+- Boxes: One per scenario/contrast, drawn with whiskers (min/max), box (q1/q3), median line
+- Hover: Show stats for hovered scenario/contrast
 - Color: Alternating shades from GRAPH_COLORS
 
 #### Bar Chart
-**Use Case:** Omni outlet discharge (sediment, stream)  
+**Use Case:** Omni outlet discharge (sediment, stream) for scenarios + contrasts  
 **Data Format:**
 ```javascript
 {
@@ -1076,15 +1087,15 @@ function deselectAllSubcatchmentOverlays() {
 
 #### Cumulative Contribution (Omni)
 **Use Case:** Rank hillslopes by per-area contribution for a selected measure and plot cumulative contribution by percent of total hillslope area.  
-**Data Sources:** `wepp/output/interchange/loss_pw0.hill.parquet` + `watershed/hillslopes.parquet` (per scenario).  
+**Data Sources:** `wepp/output/interchange/loss_pw0.hill.parquet` + `watershed/hillslopes.parquet` (per scenario or contrast).  
 **Measures:** Runoff (m³), Lateral Flow (m³), Baseflow (m³), Soil Loss (t), Sed Deposition (t), Sed Yield (t).  
 **Controls (sidebar → Graphs → Cumulative Contribution detail):**
 - **Measure** dropdown (`CUMULATIVE_MEASURE_OPTIONS`) to choose the variable.
-- **Select Scenarios** checkboxes (all Omni scenarios plus implicit Base); Base is always included even if unchecked/unchecked logic defaults to selected set.
+- **Select Scenarios** checkboxes (all Omni scenarios, then a small divider, then Omni contrasts, plus implicit Base). Base is always included even if unchecked/unchecked logic defaults to selected set.
 **Computation:**
-- For each scenario independently, compute per-area derivative = measure / area_ha, sort descending, cumulative sum by area and value.
+- For each scenario/contrast independently, compute per-area derivative = measure / area_ha, sort descending, cumulative sum by area and value.
 - Values converted to tonne for soil measures; water values stay in m³.
-- Percent-of-area axis uses a fixed 0.5% step (0 → 100) and each scenario is linearly interpolated onto that axis (prevents jagged traces when scenarios have different hillslope counts).
+- Percent-of-area axis uses a fixed 0.5% step (0 → 100) and each scenario/contrast is linearly interpolated onto that axis (prevents jagged traces when selections have different hillslope counts).
 **Data Format:**
 ```javascript
 {
@@ -1104,8 +1115,8 @@ function deselectAllSubcatchmentOverlays() {
 **Rendering:**
 - X-axis: Percent of total hillslope area.
 - Y-axis: Cumulative measure.
-- Lines: One per scenario; Base always shown. Legend uses scenario names.
-- Hover: Shows scenario, cumulative value, and percent-of-area for the nearest point.
+- Lines: One per scenario/contrast; Base always shown. Legend uses scenario/contrast names.
+- Hover: Shows scenario/contrast, cumulative value, and percent-of-area for the nearest point.
 
 #### Climate Yearly (precip + temp)
 **Purpose:** Visualize yearly climate by month with support for calendar year or water year start. Two stacked subplots share the month axis.  

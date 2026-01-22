@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from flask import current_app
 
 from ._common import *  # noqa: F401,F403
 from wepppy.nodb.core import Ron, Climate
+from wepppy.nodb.mods.omni import Omni
 from wepppy.weppcloud.utils.helpers import is_omni_child_run
 
 
 gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
+logger = logging.getLogger(__name__)
 
 
 def _get_omni_scenarios(wd: str):
@@ -40,6 +43,48 @@ def _get_omni_scenarios(wd: str):
     return scenarios if scenarios else None
 
 
+def _get_omni_contrasts(wd: str):
+    """Get list of omni contrasts if the project has the omni mod.
+
+    Returns a list of contrast dicts with 'id', 'name', and 'path' keys, or None if not omni-enabled.
+    """
+    omni_nodb_path = os.path.join(wd, 'omni.nodb')
+    if not os.path.exists(omni_nodb_path):
+        return None
+
+    contrasts_dir = os.path.join(wd, '_pups', 'omni', 'contrasts')
+    if not os.path.isdir(contrasts_dir):
+        return None
+
+    try:
+        omni = Omni.getInstance(wd)
+        contrast_names = omni.contrast_names or []
+    except Exception:
+        logger.warning("gl_dashboard: failed to load omni contrasts for %s", wd, exc_info=True)
+        return None
+
+    if not contrast_names:
+        return None
+
+    contrasts = []
+    for contrast_id, contrast_name in enumerate(contrast_names, start=1):
+        if not contrast_name:
+            continue
+        contrast_path = os.path.join(contrasts_dir, str(contrast_id))
+        if not os.path.isdir(contrast_path):
+            continue
+        marker = os.path.join(contrast_path, 'wepp', 'output', 'interchange', 'README.md')
+        if not os.path.exists(marker):
+            continue
+        contrasts.append({
+            'id': contrast_id,
+            'name': contrast_name,
+            'path': f'_pups/omni/contrasts/{contrast_id}'
+        })
+
+    return contrasts if contrasts else None
+
+
 @gl_dashboard_bp.route(
     "/runs/<string:runid>/<config>/gl-dashboard", strict_slashes=False
 )
@@ -56,6 +101,7 @@ def gl_dashboard(runid: str, config: str):
     # Check for omni scenarios (skip when viewing omni child runs).
     is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
     omni_scenarios = None if is_omni_child else _get_omni_scenarios(wd)
+    omni_contrasts = None if is_omni_child else _get_omni_contrasts(wd)
 
     # Get map extent/center/zoom from Ron if available
     map_extent = None
@@ -113,5 +159,6 @@ def gl_dashboard(runid: str, config: str):
         map_zoom=map_zoom,
         climate_context=climate_context,
         omni_scenarios=omni_scenarios,
+        omni_contrasts=omni_contrasts,
         is_omni_child=is_omni_child,
     )

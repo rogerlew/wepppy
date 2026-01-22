@@ -9,23 +9,48 @@ import { getValue } from '../state.js';
  * Scenario is passed in the request body as "scenario" parameter.
  */
 export function createQueryEngine(ctx) {
-  function getBaseUrl() {
-    let queryPath = `runs/${ctx.runid}`;
+  function getBaseUrl(runidOverride = null) {
+    const runid = runidOverride || ctx.runid;
+    let queryPath = `runs/${runid}`;
     if (ctx.config) {
       queryPath += `/${ctx.config}`;
     }
     return `/query-engine/${queryPath}/query`;
   }
 
-  async function postQueryEngine(payload) {
-    const targetUrl = getBaseUrl();
-    const scenarioPath = getValue('currentScenarioPath');
-    // Extract scenario name from path like "_pups/omni/scenarios/scenario_name"
-    let scenario = null;
-    if (scenarioPath) {
-      const match = scenarioPath.match(/_pups\/omni\/scenarios\/([^/]+)/);
-      scenario = match ? match[1] : null;
+  function resolveParentRunId(runid) {
+    const raw = String(runid || '');
+    const parts = raw.split(';;');
+    if (parts.length === 3 && parts[1] && (parts[1] === 'omni' || parts[1] === 'omni-contrast')) {
+      return parts[0];
     }
+    return raw;
+  }
+
+  function extractScenarioName(scenarioPath) {
+    if (!scenarioPath) return null;
+    const match = scenarioPath.match(/_pups\/omni\/scenarios\/([^/]+)/);
+    return match ? match[1] : null;
+  }
+
+  function extractContrastId(scenarioPath) {
+    if (!scenarioPath) return null;
+    const match = scenarioPath.match(/_pups\/omni\/contrasts\/([^/]+)/);
+    return match ? match[1] : null;
+  }
+
+  function resolveContrastRunId(scenarioPath) {
+    const contrastId = extractContrastId(scenarioPath);
+    if (!contrastId) return null;
+    const parentRunId = resolveParentRunId(ctx.runid);
+    return `${parentRunId};;omni-contrast;;${contrastId}`;
+  }
+
+  async function postQueryEngine(payload) {
+    const scenarioPath = getValue('currentScenarioPath');
+    const contrastRunId = resolveContrastRunId(scenarioPath);
+    const targetUrl = getBaseUrl(contrastRunId);
+    const scenario = contrastRunId ? null : extractScenarioName(scenarioPath);
     const body = scenario ? { ...payload, scenario } : payload;
     const resp = await fetch(targetUrl, {
       method: 'POST',
@@ -48,13 +73,9 @@ export function createQueryEngine(ctx) {
   }
 
   async function postQueryEngineForScenario(payload, scenarioPath) {
-    const targetUrl = getBaseUrl();
-    // Extract scenario name from path like "_pups/omni/scenarios/scenario_name"
-    let scenario = null;
-    if (scenarioPath) {
-      const match = scenarioPath.match(/_pups\/omni\/scenarios\/([^/]+)/);
-      scenario = match ? match[1] : null;
-    }
+    const contrastRunId = resolveContrastRunId(scenarioPath);
+    const targetUrl = getBaseUrl(contrastRunId);
+    const scenario = contrastRunId ? null : extractScenarioName(scenarioPath);
     const body = scenario ? { ...payload, scenario } : payload;
     const resp = await fetch(targetUrl, {
       method: 'POST',

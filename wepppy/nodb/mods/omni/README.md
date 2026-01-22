@@ -231,6 +231,76 @@ The HTML report at `/weppcloud/runs/<runid>/<config>/report/omni_contrasts/` is 
 - **User-defined hillslope groups**: `contrast_id`, `control_scenario`, `contrast_scenario`, `group_index`, `n_hillslopes`, Avg. Ann. Water Discharge from Outlet, Avg. Ann. Total Hillslope Soil Loss
 - **Stream-order**: `contrast_id`, `control_scenario`, `contrast_scenario`, `subcatchments_group`, `n_hillslopes`, Avg. Ann. Water Discharge from Outlet, Avg. Ann. Total Hillslope Soil Loss
 
+## GL Dashboard: Omni Contrast Support (Specification)
+
+Add Omni contrast visibility to the gl-dashboard with minimal regression risk. Keep Omni scenarios behavior unchanged and layer contrast support alongside it.
+
+### Data Detection (Backend)
+
+- **Do not modify** `_get_omni_scenarios()`; it is shared with storm-event analyzer.
+- Add `_get_omni_contrasts(wd)` in `wepppy/weppcloud/routes/gl_dashboard.py`:
+  - Require `omni.nodb` and `_pups/omni/contrasts/` to exist.
+  - Load `Omni.getInstance(wd)` and read `contrast_names` (index + 1 = `contrast_id`).
+  - Build a list of contrast descriptors using `contrast_id` + `contrast_name`.
+  - Validate each contrast run directory: `_pups/omni/contrasts/<contrast_id>/wepp/output/interchange/README.md` exists (interchange assets are created last; this is the run-complete marker).
+  - Output shape (example): `{ "id": 12, "name": "<contrast_name>", "path": "_pups/omni/contrasts/12" }`.
+- Pass the list to the template as `omni_contrasts` and to JS as `ctx.omniContrasts`.
+- Honor `is_omni_child`: when True, omit both scenarios and contrasts from context/UI.
+
+### Scenario Selector (Template)
+
+- In `wepppy/weppcloud/templates/gl_dashboard.htm`, append contrast options **after** Omni scenarios:
+  - `<option value="_pups/omni/contrasts/<id>">{{ contrast.name }}</option>`
+  - Use `contrast.name` (the raw `contrast_name` string) as the label.
+- Keep existing base option, Omni scenario options, and comparison toggle unchanged.
+
+### Scenario Path Semantics (Frontend)
+
+- Omni scenarios keep the existing path form: `_pups/omni/scenarios/<scenario_name>`.
+- Omni contrasts use: `_pups/omni/contrasts/<contrast_id>` (numeric directory name).
+- Update `scenario/manager.js` to recognize contrast paths:
+  - New helper: `extractOmniContrastId()` (regex on `omni/contrasts/<id>`).
+  - Build composite runid for contrast overlays: `{parent_runid};;omni-contrast;;{contrast_id}`.
+  - Keep scenario composite runid `{parent_runid};;omni;;{scenario_name}` untouched.
+- Update `data/query-engine.js` to handle contrast paths:
+  - If current scenario path matches `_pups/omni/contrasts/<id>`, **do not** set body `scenario`.
+  - Instead, issue queries against `/query-engine/runs/{parent_runid};;omni-contrast;;<id>/{config}/query`.
+  - This uses `get_wd()` support for `omni-contrast` (already implemented).
+  - Keep existing `scenario` body parameter behavior for Omni scenarios.
+
+### Graph Groups
+
+- **Omni Scenarios** graph group stays identical and **must not** include contrasts.
+- Add a second graph group: **Omni Contrasts**.
+  - Same graph items as Omni Scenarios (soil loss hillslope/channel, runoff hillslope, outlet sediment/stream).
+  - Use unique keys (example: `omni-contrast-soil-loss-hill`, etc.) to avoid cache collisions.
+  - Only render when `ctx.omniContrasts` is non-empty.
+  - Use `contrast_name` for labels in legends/tooltips.
+- Implement contrast graph loading by reusing the Omni loader logic with a **contrast scenario list**:
+  - Keep `graphScenarios` for Omni scenarios.
+  - Add `contrastScenarios` for contrasts.
+  - Extend `createGraphLoaders` to accept a scenario list override (or create a second loader instance) so contrast graph keys resolve against contrast runs.
+  - For `data.source`, reuse `GRAPH_CONTEXT_KEYS.OMNI` to keep focus/slider behavior identical (or add `OMNI_CONTRAST` and treat it the same in `graph-mode.js`).
+- Update slider overrides in `ui/graph-mode.js` for the new contrast graph keys to mirror Omni settings.
+
+### Cumulative Contribution Scenario List
+
+- Keep cumulative graph as-is but **extend the selection list**:
+  - After Omni scenarios, insert a small horizontal rule (`<hr class="gl-graph__divider">` or inline style).
+  - Append contrast scenarios with `contrast_name` labels.
+- The cumulative graph loader must operate on a **combined** scenario list (base + Omni + contrasts).
+  - Do not append contrasts to `graphScenarios`, otherwise Omni graphs will include them.
+  - Instead, pass a dedicated `graphCumulativeScenarios` list to the cumulative loader.
+  - Scenario selection state remains a list of scenario paths; contrast paths are unique and stable.
+
+### Verification Checklist (Example Run)
+
+- `/wc1/runs/ap/apostolic-saw/_pups/omni/contrasts/<id>/` directories exist with `wepp.nodb`.
+- `omni.contrast_names` maps `<id>` to `contrast_name` (index + 1).
+- gl-scenario-select shows base, Omni scenarios, then contrast entries labeled with `contrast_name`.
+- Omni Scenarios graphs remain unchanged; Omni Contrasts graphs show only contrast runs.
+- Cumulative Contribution list shows a separator then contrast entries.
+
 ### Appendix A: Remaining Implementation Scope (COMPLETED 1/19/2026)
 
 Stream-order pruning is implemented per Appendix B. Use the appendix as the authoritative reference when extending or refactoring this mode.

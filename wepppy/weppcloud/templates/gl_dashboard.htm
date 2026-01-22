@@ -857,13 +857,16 @@
         <option value="osm">OpenStreetMap</option>
       </select>
     </div>
-    {% if omni_scenarios and not is_omni_child %}
+    {% if (omni_scenarios or omni_contrasts) and not is_omni_child %}
     <div class="gl-scenario-selector">
       <h3>Scenario</h3>
       <select id="gl-scenario-select" style="margin-top:0.5rem;">
         <option value="" selected>Base Scenario</option>
         {% for scenario in omni_scenarios %}
         <option value="{{ scenario.path }}">{{ scenario.name }}</option>
+        {% endfor %}
+        {% for contrast in omni_contrasts %}
+        <option value="{{ contrast.path }}">{{ contrast.name }}</option>
         {% endfor %}
       </select>
       {% if omni_scenarios and not is_omni_child %}
@@ -1054,6 +1057,7 @@
       "mapZoom": map_zoom,
       "climate": climate_context,
       "omniScenarios": omni_scenarios,
+      "omniContrasts": omni_contrasts,
       "isOmniChild": is_omni_child
     } | tojson }};
   </script>

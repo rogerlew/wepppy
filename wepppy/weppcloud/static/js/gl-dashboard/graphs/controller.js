@@ -8,6 +8,7 @@ import { GRAPH_CONTEXT_KEYS, GRAPH_MODES } from '../config.js';
 export function createGraphController({
   graphDefs,
   graphScenarios,
+  graphContrastScenarios,
   graphLoadersFactory,
   yearSlider,
   getState,
@@ -21,6 +22,7 @@ export function createGraphController({
   cumulativeMeasureOptions,
   monthLabels,
 }) {
+  const contrastScenarios = Array.isArray(graphContrastScenarios) ? graphContrastScenarios : [];
   let graphLoaders;
   let activeGraphLoad = null;
   const getGraph = typeof timeseriesGraph === 'function' ? timeseriesGraph : () => timeseriesGraph;
@@ -282,25 +284,44 @@ export function createGraphController({
     const scenarioList = document.createElement('div');
     scenarioList.className = 'gl-graph__scenario-list';
     const selectedSet = new Set(getState().cumulativeScenarioSelections || []);
-    graphScenarios.slice(1).forEach((scenario, idx) => {
-      const scenarioKey = scenario.path || `_pups/omni/scenarios/${scenario.name || `scenario-${idx}`}`;
-      const id = `gl-cumulative-scenario-${idx}`;
-      const wrapper = document.createElement('label');
-      wrapper.className = 'gl-layer-item';
-      wrapper.style.display = 'flex';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.gap = '0.5rem';
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.id = id;
-      input.value = scenarioKey;
-      input.checked = selectedSet.has(scenarioKey);
-      input.addEventListener('change', (e) => handleCumulativeScenarioToggle(scenarioKey, e.target.checked));
-      const span = document.createElement('span');
-      span.textContent = scenario.name || scenario.path || `Scenario ${idx + 1}`;
-      wrapper.appendChild(input);
-      wrapper.appendChild(span);
-      scenarioList.appendChild(wrapper);
+    const scenarioGroups = [
+      { items: (graphScenarios || []).slice(1) },
+      { items: contrastScenarios },
+    ];
+    let renderedAny = false;
+    let scenarioIndex = 0;
+    scenarioGroups.forEach((group, groupIndex) => {
+      if (!group.items || !group.items.length) return;
+      if (renderedAny && groupIndex > 0) {
+        const divider = document.createElement('hr');
+        divider.className = 'gl-graph__divider';
+        divider.style.border = '0';
+        divider.style.borderTop = '1px solid var(--wc-color-border-muted, #2d3a4a)';
+        divider.style.margin = '0.35rem 0';
+        scenarioList.appendChild(divider);
+      }
+      group.items.forEach((scenario) => {
+        const scenarioKey = scenario.path || `_pups/omni/scenarios/${scenario.name || `scenario-${scenarioIndex}`}`;
+        const id = `gl-cumulative-scenario-${scenarioIndex}`;
+        scenarioIndex += 1;
+        const wrapper = document.createElement('label');
+        wrapper.className = 'gl-layer-item';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '0.5rem';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.value = scenarioKey;
+        input.checked = selectedSet.has(scenarioKey);
+        input.addEventListener('change', (e) => handleCumulativeScenarioToggle(scenarioKey, e.target.checked));
+        const span = document.createElement('span');
+        span.textContent = scenario.name || scenario.path || `Scenario ${scenarioIndex}`;
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
+        scenarioList.appendChild(wrapper);
+      });
+      renderedAny = true;
     });
     scenarioField.appendChild(scenarioLabel);
     scenarioField.appendChild(scenarioList);

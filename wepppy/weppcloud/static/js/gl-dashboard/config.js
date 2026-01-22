@@ -226,6 +226,17 @@ export const GRAPH_DEFS = [
       { key: 'omni-outlet-stream', label: 'Stream discharge (mm)', type: 'bars' },
     ],
   },
+  {
+    key: 'omni-contrasts',
+    title: 'Omni Contrasts',
+    items: [
+      { key: 'omni-contrast-soil-loss-hill', label: 'Soil Loss (hillslopes, tonne/ha)', type: 'boxplot' },
+      { key: 'omni-contrast-soil-loss-chn', label: 'Soil Loss (channels, tonne)', type: 'boxplot' },
+      { key: 'omni-contrast-runoff-hill', label: 'Runoff (hillslopes, mm)', type: 'boxplot' },
+      { key: 'omni-contrast-outlet-sediment', label: 'Sediment discharge (tonne/ha)', type: 'bars' },
+      { key: 'omni-contrast-outlet-stream', label: 'Stream discharge (mm)', type: 'bars' },
+    ],
+  },
 ];
 
 export function createColorScales(colormapFn) {

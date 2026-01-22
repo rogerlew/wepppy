@@ -80,7 +80,7 @@ export function createScenarioManager({
   function resolveParentRunId(runid) {
     const raw = String(runid || '');
     const parts = raw.split(';;');
-    if (parts.length === 3 && parts[0]) {
+    if (parts.length === 3 && parts[1] && (parts[1] === 'omni' || parts[1] === 'omni-contrast')) {
       return parts[0];
     }
     return raw;
@@ -90,6 +90,13 @@ export function createScenarioManager({
     if (!scenarioPath) return '';
     const normalized = String(scenarioPath).replace(/^_pups\//, '').replace(/^\/+/, '');
     const match = normalized.match(/^omni\/scenarios\/([^/]+)/);
+    return match ? match[1] : '';
+  }
+
+  function extractOmniContrastId(scenarioPath) {
+    if (!scenarioPath) return '';
+    const normalized = String(scenarioPath).replace(/^_pups\//, '').replace(/^\/+/, '');
+    const match = normalized.match(/^omni\/contrasts\/([^/]+)/);
     return match ? match[1] : '';
   }
 
@@ -114,6 +121,13 @@ export function createScenarioManager({
     const { currentScenarioPath } = getState();
     if (!currentScenarioPath) {
       return buildRunUrl(ctx.runid, relativePath);
+    }
+
+    const contrastId = extractOmniContrastId(currentScenarioPath);
+    if (contrastId) {
+      const parentRunId = resolveParentRunId(ctx.runid);
+      const compositeRunId = `${parentRunId};;omni-contrast;;${contrastId}`;
+      return buildRunUrl(compositeRunId, relativePath);
     }
 
     const scenarioName = extractOmniScenarioName(currentScenarioPath);

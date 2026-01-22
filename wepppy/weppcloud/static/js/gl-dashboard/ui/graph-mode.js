@@ -184,6 +184,11 @@ export function createGraphModeController({
     'omni-soil-loss-hill': GRAPH_SLIDER_PLACEMENTS.HIDE,
     'omni-soil-loss-chn': GRAPH_SLIDER_PLACEMENTS.HIDE,
     'omni-runoff-hill': GRAPH_SLIDER_PLACEMENTS.HIDE,
+    'omni-contrast-outlet-sediment': GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+    'omni-contrast-outlet-stream': GRAPH_SLIDER_PLACEMENTS.BOTTOM,
+    'omni-contrast-soil-loss-hill': GRAPH_SLIDER_PLACEMENTS.HIDE,
+    'omni-contrast-soil-loss-chn': GRAPH_SLIDER_PLACEMENTS.HIDE,
+    'omni-contrast-runoff-hill': GRAPH_SLIDER_PLACEMENTS.HIDE,
   };
 
   function positionYearSlider(position) {

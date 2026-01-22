@@ -84,4 +84,46 @@ describe('scenario manager', () => {
       '/weppcloud/runs/decimal-pleasing;;omni;;treated/disturbed9002_wbt/query/soils/subcatchments',
     );
   });
+
+  test('buildScenarioUrl uses composite runid for omni contrast paths', () => {
+    const state = { currentScenarioPath: '_pups/omni/contrasts/12' };
+    const scenarioManager = createScenarioManager({
+      ctx: { sitePrefix: '/weppcloud', runid: 'decimal-pleasing', config: 'disturbed9002_wbt' },
+      getState: () => state,
+      setValue: () => {},
+      setState: () => {},
+      postQueryEngine: jest.fn(),
+      postBaseQueryEngine: jest.fn(),
+      fetchWeppSummary: jest.fn(),
+      weppDataManager: {},
+      onScenarioChange: jest.fn(),
+    });
+
+    const url = scenarioManager.buildScenarioUrl('query/landuse/subcatchments');
+
+    expect(url).toBe(
+      '/weppcloud/runs/decimal-pleasing;;omni-contrast;;12/disturbed9002_wbt/query/landuse/subcatchments',
+    );
+  });
+
+  test('buildScenarioUrl preserves grouped runid segments for omni contrasts', () => {
+    const state = { currentScenarioPath: '_pups/omni/contrasts/3' };
+    const scenarioManager = createScenarioManager({
+      ctx: { sitePrefix: '/weppcloud', runid: 'batch;;spring-2025;;run-001', config: 'disturbed9002_wbt' },
+      getState: () => state,
+      setValue: () => {},
+      setState: () => {},
+      postQueryEngine: jest.fn(),
+      postBaseQueryEngine: jest.fn(),
+      fetchWeppSummary: jest.fn(),
+      weppDataManager: {},
+      onScenarioChange: jest.fn(),
+    });
+
+    const url = scenarioManager.buildScenarioUrl('query/landuse/subcatchments');
+
+    expect(url).toBe(
+      '/weppcloud/runs/batch;;spring-2025;;run-001;;omni-contrast;;3/disturbed9002_wbt/query/landuse/subcatchments',
+    );
+  });
 });

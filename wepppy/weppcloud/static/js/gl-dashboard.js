@@ -579,7 +579,17 @@
 
   const isOmniChild = !!ctx.isOmniChild;
   const omniScenarios = !isOmniChild && Array.isArray(ctx.omniScenarios) ? ctx.omniScenarios : [];
-  const graphDefs = isOmniChild ? GRAPH_DEFS.filter((group) => group.key !== 'omni') : GRAPH_DEFS;
+  const omniContrasts = !isOmniChild && Array.isArray(ctx.omniContrasts) ? ctx.omniContrasts : [];
+  let graphDefs = GRAPH_DEFS;
+  if (isOmniChild) {
+    graphDefs = graphDefs.filter((group) => group.key !== 'omni' && group.key !== 'omni-contrasts');
+  }
+  if (!omniScenarios.length) {
+    graphDefs = graphDefs.filter((group) => group.key !== 'omni');
+  }
+  if (!omniContrasts.length) {
+    graphDefs = graphDefs.filter((group) => group.key !== 'omni-contrasts');
+  }
   let baseScenarioLabel = getState().baseScenarioLabel || 'Undisturbed';
   const graphScenarios = [{ name: baseScenarioLabel, path: '' }].concat(
     omniScenarios.map((s, idx) => {
@@ -588,6 +598,13 @@
       return { name, path };
     }),
   );
+  const graphContrastScenarios = omniContrasts.map((c, idx) => {
+    const id = c.id != null ? c.id : idx + 1;
+    const name = c.name || `contrast-${id}`;
+    const path = c.path || `_pups/omni/contrasts/${id}`;
+    return { id, name, path };
+  });
+  const graphCumulativeScenarios = graphScenarios.concat(graphContrastScenarios);
 
   function handleComparisonChange() {
     applyLayers();
@@ -654,9 +671,12 @@
   const graphController = createGraphController({
     graphDefs,
     graphScenarios,
+    graphContrastScenarios,
     graphLoadersFactory: () =>
       graphLoadersModule.createGraphLoaders({
         graphScenarios,
+        contrastScenarios: graphContrastScenarios,
+        graphCumulativeScenarios,
         postQueryEngine,
         postBaseQueryEngine,
         postQueryEngineForScenario,
@@ -768,6 +788,9 @@
 
     if (graphScenarios.length) {
       graphScenarios[0].name = normalized;
+      if (graphCumulativeScenarios.length) {
+        graphCumulativeScenarios[0].name = normalized;
+      }
       renderGraphList();
     }
   }

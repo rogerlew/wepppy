@@ -69,6 +69,8 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 export function createGraphLoaders(deps) {
   const {
     graphScenarios,
+    contrastScenarios,
+    graphCumulativeScenarios,
     postQueryEngine,
     postQueryEngineForScenario,
     postBaseQueryEngine,
@@ -77,6 +79,13 @@ export function createGraphLoaders(deps) {
     jet2Color,
     RAP_BAND_LABELS,
   } = deps;
+
+  const omniScenarios = Array.isArray(graphScenarios) ? graphScenarios : [];
+  const omniContrastScenarios = Array.isArray(contrastScenarios) ? contrastScenarios : [];
+  const cumulativeScenarioCatalog =
+    Array.isArray(graphCumulativeScenarios) && graphCumulativeScenarios.length
+      ? graphCumulativeScenarios
+      : omniScenarios;
 
   const state = getState();
   const {
@@ -97,7 +106,7 @@ export function createGraphLoaders(deps) {
         return [c[0], c[1], c[2], 255];
       }
     }
-    // Use Math.abs to handle negative indices (e.g., when prepending base scenario)
+    // Use Math.abs to handle negative indices (e.g., when adding base scenario first)
     const safeIdx = Math.abs(idx) % GRAPH_COLORS.length;
     const c = GRAPH_COLORS[safeIdx];
     return [c[0], c[1], c[2], 255];
@@ -170,6 +179,27 @@ export function createGraphLoaders(deps) {
       return getState().baseScenarioLabel || 'Base';
     }
     return scenario?.name || scenario?.path || 'Scenario';
+  }
+
+  function resolveScenarioList(options, fallback) {
+    if (options && Array.isArray(options.scenarios) && options.scenarios.length) {
+      return options.scenarios;
+    }
+    if (Array.isArray(fallback)) {
+      return fallback;
+    }
+    return [];
+  }
+
+  function buildScenarioList(options, fallback) {
+    const scenarios = resolveScenarioList(options, fallback);
+    if (!scenarios.length) return [];
+    const includeBase = options && options.includeBase !== undefined ? options.includeBase : true;
+    if (!includeBase) {
+      return scenarios.slice();
+    }
+    const base = scenarios[0];
+    return [{ ...base, _base: true }].concat(scenarios.slice(1));
   }
 
   async function loadHillLossScenario(scenPath) {
@@ -448,12 +478,13 @@ export function createGraphLoaders(deps) {
     const measureKey = CUMULATIVE_MEASURE_MAP[options.measureKey] ? options.measureKey : 'runoff_volume';
     const measureDef = CUMULATIVE_MEASURE_MAP[measureKey];
     const selectedScenarioPaths = Array.isArray(options.scenarioPaths) ? options.scenarioPaths : [];
+    const scenarioCatalog = resolveScenarioList(options, cumulativeScenarioCatalog);
     
     console.debug('gl-dashboard: buildCumulativeContributionGraph input', {
       measureKey,
       selectedScenarioPaths,
-      graphScenariosCount: graphScenarios.length,
-      graphScenarios: graphScenarios.map((s) => ({ name: s.name, path: s.path })),
+      graphScenariosCount: scenarioCatalog.length,
+      graphScenarios: scenarioCatalog.map((s) => ({ name: s.name, path: s.path })),
     });
     
     // Build set of selected scenario keys
@@ -469,8 +500,8 @@ export function createGraphLoaders(deps) {
     
     // Filter and process scenarios
     const scenarios = [];
-    for (let i = 0; i < graphScenarios.length; i++) {
-      const s = graphScenarios[i];
+    for (let i = 0; i < scenarioCatalog.length; i++) {
+      const s = scenarioCatalog[i];
       const key = scenarioKey(s);
       const path = scenarioPath(s);
       console.debug('gl-dashboard: checking scenario', { i, name: s.name, key, path, inSet: scenarioSet.has(key) });
@@ -795,10 +826,9 @@ export function createGraphLoaders(deps) {
     }
   }
 
-  async function buildHillSoilLossBoxplot() {
+  async function buildHillSoilLossBoxplot(options = {}) {
     const series = [];
-    // Always include base first for clarity
-    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    const scenarios = buildScenarioList(options, omniScenarios);
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
       const path = scenarioPath(scenario);
@@ -826,9 +856,9 @@ export function createGraphLoaders(deps) {
     };
   }
 
-  async function buildHillRunoffBoxplot() {
+  async function buildHillRunoffBoxplot(options = {}) {
     const series = [];
-    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    const scenarios = buildScenarioList(options, omniScenarios);
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
       const path = scenarioPath(scenario);
@@ -856,9 +886,9 @@ export function createGraphLoaders(deps) {
     };
   }
 
-  async function buildChannelSoilLossBoxplot() {
+  async function buildChannelSoilLossBoxplot(options = {}) {
     const series = [];
-    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    const scenarios = buildScenarioList(options, omniScenarios);
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
       const path = scenarioPath(scenario);
@@ -884,10 +914,10 @@ export function createGraphLoaders(deps) {
     };
   }
 
-  async function buildOutletSedimentBars() {
+  async function buildOutletSedimentBars(options = {}) {
     const yearsSet = new Set();
     const scenarioData = [];
-    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    const scenarios = buildScenarioList(options, omniScenarios);
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
       const path = scenarioPath(scenario);
@@ -932,10 +962,10 @@ export function createGraphLoaders(deps) {
     };
   }
 
-  async function buildOutletStreamBars() {
+  async function buildOutletStreamBars(options = {}) {
     const yearsSet = new Set();
     const scenarioData = [];
-    const scenarios = [{ ...graphScenarios[0], _base: true }].concat(graphScenarios.slice(1));
+    const scenarios = buildScenarioList(options, omniScenarios);
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
       const path = scenarioPath(scenario);
@@ -976,6 +1006,10 @@ export function createGraphLoaders(deps) {
     };
   }
 
+  function mergeScenarioOptions(options, overrides) {
+    return { ...(options || {}), ...overrides };
+  }
+
   const graphLoadersMap = {
     'climate-yearly': buildClimateYearlyGraph,
     'openet-yearly': buildOpenetYearlyGraph,
@@ -985,6 +1019,26 @@ export function createGraphLoaders(deps) {
     'omni-runoff-hill': buildHillRunoffBoxplot,
     'omni-outlet-sediment': buildOutletSedimentBars,
     'omni-outlet-stream': buildOutletStreamBars,
+    'omni-contrast-soil-loss-hill': (options) =>
+      buildHillSoilLossBoxplot(
+        mergeScenarioOptions(options, { scenarios: omniContrastScenarios, includeBase: false })
+      ),
+    'omni-contrast-soil-loss-chn': (options) =>
+      buildChannelSoilLossBoxplot(
+        mergeScenarioOptions(options, { scenarios: omniContrastScenarios, includeBase: false })
+      ),
+    'omni-contrast-runoff-hill': (options) =>
+      buildHillRunoffBoxplot(
+        mergeScenarioOptions(options, { scenarios: omniContrastScenarios, includeBase: false })
+      ),
+    'omni-contrast-outlet-sediment': (options) =>
+      buildOutletSedimentBars(
+        mergeScenarioOptions(options, { scenarios: omniContrastScenarios, includeBase: false })
+      ),
+    'omni-contrast-outlet-stream': (options) =>
+      buildOutletStreamBars(
+        mergeScenarioOptions(options, { scenarios: omniContrastScenarios, includeBase: false })
+      ),
   };
 
   function graphCacheKey(key, options) {
