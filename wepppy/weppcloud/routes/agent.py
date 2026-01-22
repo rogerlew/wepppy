@@ -18,6 +18,7 @@ from wepppy.weppcloud.utils.agent_auth import (
     generate_agent_token,
 )
 from wepppy.rq.agent_rq import spawn_wojak_session
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 
 agent_bp = Blueprint("agent", __name__)
 
@@ -61,6 +62,7 @@ def _agent_secret() -> str:
 
 @agent_bp.route("/runs/<runid>/<config>/agent/chat", methods=["POST"])
 @login_required
+@authorize_and_handle_with_exception_factory
 def initialize_agent_chat(runid: str, config: str) -> Response:
     """
     Initialize a Wojak agent session for the authenticated user.
@@ -106,6 +108,7 @@ def initialize_agent_chat(runid: str, config: str) -> Response:
 
 @agent_bp.route("/runs/<runid>/<config>/agent/chat/<session_id>", methods=["POST"])
 @login_required
+@authorize_and_handle_with_exception_factory
 def send_agent_message(runid: str, config: str, session_id: str) -> Response:
     """
     Publish a user message to the Wojak agent channel.
@@ -135,6 +138,7 @@ def send_agent_message(runid: str, config: str, session_id: str) -> Response:
 
 @agent_bp.route("/runs/<runid>/<config>/agent/chat/<session_id>", methods=["DELETE"])
 @login_required
+@authorize_and_handle_with_exception_factory
 def terminate_agent_session(runid: str, config: str, session_id: str) -> Response:
     """
     Signal the Wojak agent session to terminate and clear activity metadata.

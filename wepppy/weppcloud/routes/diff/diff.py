@@ -21,6 +21,7 @@ diff_bp = Blueprint('diff', __name__,
     static_url_path='/diff/static')
 
 @diff_bp.route('/runs/<string:runid>/<config>/diff/<path:subpath>', strict_slashes=False)
+@authorize_and_handle_with_exception_factory
 def diff_comparer(runid, config, subpath):
     ctx = load_run_context(runid, config)
     wd = os.path.abspath(str(ctx.active_root))

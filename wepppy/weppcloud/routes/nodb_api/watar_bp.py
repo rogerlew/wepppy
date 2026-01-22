@@ -28,6 +28,7 @@ watar_bp = Blueprint('watar', __name__)
 
 @watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
+@authorize_and_handle_with_exception_factory
 def hillslope0_ash(runid, config, topaz_id):
     assert config is not None
 
@@ -136,6 +137,7 @@ def hillslope0_ash(runid, config, topaz_id):
 
 @watar_bp.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport', methods=['POST'])
 @watar_bp.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_ash_wind_transport(runid, config):
 
     try:
@@ -157,6 +159,7 @@ def task_set_ash_wind_transport(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/report/run_ash')
 @watar_bp.route('/runs/<string:runid>/<config>/report/run_ash/')
+@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view ash reports.")
 def report_run_ash(runid, config):
     try:
@@ -172,6 +175,7 @@ def report_run_ash(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash')
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash/')
+@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view ash reports.")
 def report_ash(runid, config):
     try:
@@ -224,6 +228,7 @@ def report_ash(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/query/ash_out')
 @watar_bp.route('/runs/<string:runid>/<config>/query/ash_out/')
+@authorize_and_handle_with_exception_factory
 def query_ash_out(runid, config):
     try:
         wd = get_wd(runid)
@@ -238,6 +243,7 @@ def query_ash_out(runid, config):
 
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @watar_bp.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
+@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view ash reports.")
 def report_contaminant(runid, config):
 

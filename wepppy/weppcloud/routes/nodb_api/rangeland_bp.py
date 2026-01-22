@@ -162,7 +162,7 @@ def _parse_build_payload(payload):
 rangeland_bp = Blueprint('rangeland', __name__)
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/tasks/modify_rangeland_cover/', methods=['POST'])
-@handle_with_exception_factory
+@authorize_and_handle_with_exception_factory
 def task_modify_rangeland_cover(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -200,7 +200,7 @@ def task_modify_rangeland_cover(runid, config):
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')
 @rangeland_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')
-@handle_with_exception_factory
+@authorize_and_handle_with_exception_factory
 def query_rangeland_cover_subcatchments(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -209,7 +209,7 @@ def query_rangeland_cover_subcatchments(runid, config):
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/report/rangeland_cover')
 @rangeland_bp.route('/runs/<string:runid>/<config>/report/rangeland_cover/')
-@handle_with_exception_factory
+@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view rangeland reports.")
 def report_rangeland_cover(runid, config):
     ctx = load_run_context(runid, config)
@@ -222,7 +222,7 @@ def report_rangeland_cover(runid, config):
 
 
 @rangeland_bp.route('/runs/<string:runid>/<config>/tasks/build_rangeland_cover/', methods=['POST'])
-@handle_with_exception_factory
+@authorize_and_handle_with_exception_factory
 def task_build_rangeland_cover(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)

@@ -15,6 +15,7 @@ observed_bp = Blueprint('observed', __name__)
 
 @observed_bp.route('/runs/<string:runid>/<config>/tasks/run_model_fit', methods=['POST'])
 @observed_bp.route('/runs/<string:runid>/<config>/tasks/run_model_fit/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def submit_task_run_model_fit(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
@@ -124,6 +125,7 @@ def report_observed(runid, config):
 
 
 @observed_bp.route('/runs/<string:runid>/<config>/resources/observed/<file>')
+@authorize_and_handle_with_exception_factory
 def resources_observed_data(runid, config, file):
 
     wd = get_wd(runid)

@@ -10,7 +10,7 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify, current_app
 
-from wepppy.weppcloud.utils.helpers import error_factory
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, error_factory
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 from ._run_context import load_run_context
@@ -89,6 +89,7 @@ def wp_jsoncrack_tree(runid, config, wepp, subpath):
 
 
 @jsoncrack_bp.route('/runs/<string:runid>/<config>/jsoncrack/<path:subpath>', strict_slashes=False)
+@authorize_and_handle_with_exception_factory
 def jsoncrack_tree(runid, config, subpath):
     """
     Serve a pivot UI for a specific file under a run working directory.

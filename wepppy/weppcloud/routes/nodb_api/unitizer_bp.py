@@ -10,6 +10,7 @@ unitizer_bp = Blueprint('unitizer', __name__)
 
 @unitizer_bp.route('/runs/<string:runid>/<config>/report/tasks/set_unit_preferences/', methods=['POST'])
 @unitizer_bp.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to update report units.")
 def task_set_unit_preferences(runid, config):
     try:
@@ -30,6 +31,7 @@ def task_set_unit_preferences(runid, config):
 
 @unitizer_bp.route('/runs/<string:runid>/<config>/unitizer')
 @unitizer_bp.route('/runs/<string:runid>/<config>/unitizer/')
+@authorize_and_handle_with_exception_factory
 def unitizer_route(runid, config):
 
     try:
@@ -50,6 +52,7 @@ def unitizer_route(runid, config):
 
 @unitizer_bp.route('/runs/<string:runid>/<config>/unitizer_units')
 @unitizer_bp.route('/runs/<string:runid>/<config>/unitizer_units/')
+@authorize_and_handle_with_exception_factory
 def unitizer_units_route(runid, config):
 
     try:

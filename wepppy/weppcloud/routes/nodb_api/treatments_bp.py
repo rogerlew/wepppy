@@ -8,6 +8,7 @@ from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
 treatments_bp = Blueprint('treatments', __name__)
 
 @treatments_bp.route('/runs/<string:runid>/<config>/tasks/set_treatments_mode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_treatments_mode(runid: str, config: str):
     payload = parse_request_payload(request)
 

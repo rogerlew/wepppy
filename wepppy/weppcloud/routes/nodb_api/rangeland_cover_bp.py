@@ -54,6 +54,7 @@ def _normalize_topaz_ids(raw):
 rangeland_cover_bp = Blueprint('rangeland_cover', __name__)
 
 @rangeland_cover_bp.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def query_rangeland_cover_current(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -65,6 +66,7 @@ def query_rangeland_cover_current(runid, config):
 
 
 @rangeland_cover_bp.route('/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_rangeland_cover_mode(runid, config):
     payload = parse_request_payload(request)
 

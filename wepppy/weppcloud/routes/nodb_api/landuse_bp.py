@@ -6,7 +6,14 @@ from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Sequence,
 
 from flask import Response
 
-from .._common import Blueprint, jsonify, parse_request_payload, render_template, request
+from .._common import (
+    Blueprint,
+    authorize_and_handle_with_exception_factory,
+    jsonify,
+    parse_request_payload,
+    render_template,
+    request,
+)
 from .._common import exception_factory, get_wd, success_factory  # noqa: F401
 
 from wepppy.nodb.core import Landuse, LanduseMode, Ron
@@ -101,6 +108,7 @@ def build_landuse_report_context(landuse: Landuse) -> Dict[str, object]:
 
 
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/set_landuse_mode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_landuse_mode(runid: str, config: str) -> Response:
     """Update landuse mode and single selection for the active run."""
     payload = parse_request_payload(request)
@@ -132,6 +140,7 @@ def set_landuse_mode(runid: str, config: str) -> Response:
 
 
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/set_landuse_db/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_landuse_db(runid: str, config: str) -> Response:
     """Persist NLCD database selection for the landuse controller."""
     payload = parse_request_payload(request)
@@ -153,6 +162,7 @@ def set_landuse_db(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/modify_landuse_coverage', methods=['POST'])
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/modify_landuse_coverage/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def modify_landuse_coverage(runid: str, config: str) -> Response:
     """Adjust coverage percentages for a given domain and cover class."""
     wd = get_wd(runid)
@@ -174,6 +184,7 @@ def modify_landuse_coverage(runid: str, config: str) -> Response:
 
 
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/modify_landuse_mapping/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_modify_landuse_mapping(runid: str, config: str) -> Response:
     """Re-map domain identifiers in the landuse controller."""
     wd = get_wd(runid)
@@ -196,6 +207,7 @@ def task_modify_landuse_mapping(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse')
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/')
+@authorize_and_handle_with_exception_factory
 def query_landuse(runid: str, config: str) -> Response:
     """Return the landuse domain metadata dictionary."""
     wd = get_wd(runid)
@@ -204,6 +216,7 @@ def query_landuse(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_landuse_subcatchments(runid: str, config: str) -> Response:
     """Return subcatchment summary table for landuse."""
     wd = get_wd(runid)
@@ -212,6 +225,7 @@ def query_landuse_subcatchments(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/channels')
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/channels/')
+@authorize_and_handle_with_exception_factory
 def query_landuse_channels(runid: str, config: str) -> Response:
     """Return channel summary table for landuse."""
     wd = get_wd(runid)
@@ -220,6 +234,7 @@ def query_landuse_channels(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/report/landuse')
 @landuse_bp.route('/runs/<string:runid>/<config>/report/landuse/')
+@authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to view landuse reports.")
 def report_landuse(runid: str, config: str) -> Response:
     """Render the HTML landuse report for the current run."""
@@ -247,6 +262,7 @@ def report_landuse(runid: str, config: str) -> Response:
 
 
 @landuse_bp.route('/runs/<string:runid>/<config>/tasks/modify_landuse/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_modify_landuse(runid: str, config: str) -> Response:
     """Bulk modify landuse codes for the supplied Topaz identifiers."""
     wd = get_wd(runid)
@@ -273,6 +289,7 @@ def task_modify_landuse(runid: str, config: str) -> Response:
 
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments')
 @landuse_bp.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments/')
+@authorize_and_handle_with_exception_factory
 def query_landuse_cover_subcatchments(runid: str, config: str) -> Response:
     """Return coverage summaries for hillslope landuse."""
     wd = get_wd(runid)

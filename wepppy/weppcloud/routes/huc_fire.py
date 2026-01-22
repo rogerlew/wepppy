@@ -67,6 +67,7 @@ def huc_fire():
 
 # noinspection PyBroadException
 @huc_fire_bp.route('/runs/<string:runid>/<config>/resources/huc.json')
+@authorize_and_handle_with_exception_factory
 def huc(runid, config):
 
     ctx = load_run_context(runid, config)

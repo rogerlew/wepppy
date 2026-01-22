@@ -6,6 +6,7 @@ from flask import abort
 from ._common import (
     Blueprint,
     Response,
+    authorize_and_handle_with_exception_factory,
     jsonify,
     request,
     current_app,
@@ -26,6 +27,7 @@ def _normalise_events(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 @recorder_bp.route("/runs/<runid>/<config>/recorder/events", methods=["POST"])
+@authorize_and_handle_with_exception_factory
 def recorder_events(runid: str, config: str) -> Response:
     payload = request.get_json(silent=True)
     if not isinstance(payload, dict):
@@ -54,6 +56,7 @@ def recorder_events(runid: str, config: str) -> Response:
 
 @recorder_bp.route("/runs/<runid>/<config>/recorder/promote", methods=["POST"])
 @login_required
+@authorize_and_handle_with_exception_factory
 def recorder_promote(runid: str, config: str) -> Response:
     if not current_user.has_role("PowerUser"):
         abort(403)
