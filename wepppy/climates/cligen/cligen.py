@@ -1447,7 +1447,8 @@ class StationMeta:
         self.lat_distance = None
         self.rank = None
 
-        self.id = par.replace('.par', '').replace('.PAR', '')
+        id_source = par1 if par0 else par
+        self.id = id_source.replace('.par', '').replace('.PAR', '')
 
         self.desc = desc.split(str(self.id))[0].strip()
 
@@ -1495,16 +1496,32 @@ class StationMeta:
         }
 
         if include_monthlies:
-            station = self.get_station()
-            d["monthlies"] = {
-                "ppts": list(station.ppts),
-                "nwds": list(station.nwds),
-                "tmaxs": list(station.tmaxs),
-                "tmins": list(station.tmins)
-            }
-            d['sum_ppt'] = np.sum(v * d for v, d in zip(station.ppts, station.nwds))
-            d['ave_monthly_tmax'] = np.mean(station.tmaxs)
-            d['ave_monthly_tmin'] = np.mean(station.tmins)
+            override = getattr(self, "_monthlies_override", None)
+            if override is not None:
+                ppts = list(override.get("ppts", []))
+                nwds = list(override.get("nwds", []))
+                tmaxs = list(override.get("tmaxs", []))
+                tmins = list(override.get("tmins", []))
+                d["monthlies"] = {
+                    "ppts": ppts,
+                    "nwds": nwds,
+                    "tmaxs": tmaxs,
+                    "tmins": tmins,
+                }
+                d["sum_ppt"] = float(np.sum([v * d for v, d in zip(ppts, nwds)])) if ppts else 0.0
+                d["ave_monthly_tmax"] = float(np.mean(tmaxs)) if tmaxs else 0.0
+                d["ave_monthly_tmin"] = float(np.mean(tmins)) if tmins else 0.0
+            else:
+                station = self.get_station()
+                d["monthlies"] = {
+                    "ppts": list(station.ppts),
+                    "nwds": list(station.nwds),
+                    "tmaxs": list(station.tmaxs),
+                    "tmins": list(station.tmins)
+                }
+                d['sum_ppt'] = np.sum(v * d for v, d in zip(station.ppts, station.nwds))
+                d['ave_monthly_tmax'] = np.mean(station.tmaxs)
+                d['ave_monthly_tmin'] = np.mean(station.tmins)
 
         return d
 

@@ -47,6 +47,7 @@ Note:
 
 # standard library
 import csv
+import re
 import time
 from pathlib import Path
 import os
@@ -95,7 +96,8 @@ from wepppy.climates.cligen import (
     CligenStationsManager, 
     ClimateFile, 
     Cligen,
-    df_to_prn
+    df_to_prn,
+    StationMeta,
 )
 from wepppy.climates.cligen.single_storm import (
     SingleStormResult,
@@ -248,6 +250,150 @@ CLIMATE_MAX_YEARS = 1000
 
 if NCPU > 24:
     NCPU = 24
+
+
+def _format_par_line(label: str, values: List[float]) -> str:
+    values = list(values)
+    if len(values) < 12:
+        values.extend([0.0] * (12 - len(values)))
+    elif len(values) > 12:
+        values = values[:12]
+    values_str = "".join(f"{value:6.2f}" for value in values)
+    return f"{label:<8}{values_str}\n"
+
+
+def _write_user_defined_par_stub(
+    par_path: Path,
+    desc: str,
+    station_id: str,
+    lat: float,
+    lng: float,
+    elevation_ft: Optional[float],
+    years: Optional[int],
+    monthlies_override: Optional[Dict[str, List[float]]],
+) -> None:
+    if par_path.exists():
+        return
+
+    ppts = monthlies_override.get("ppts", []) if monthlies_override else []
+    tmaxs = monthlies_override.get("tmaxs", []) if monthlies_override else []
+    tmins = monthlies_override.get("tmins", []) if monthlies_override else []
+    zeros = [0.0] * 12
+
+    elev_ft = elevation_ft if elevation_ft is not None else 0.0
+    years_val = int(years or 0)
+    desc_line = f"{desc} {station_id} 0".strip()
+
+    lines = [
+        f"{desc_line}\n",
+        f" LATT= {lat:7.2f} LONG={lng:7.2f} YEARS= {years_val:2d}. TYPE= 0\n",
+        f" ELEVATION = {elev_ft:.0f}. TP5 = 0.00 TP6= 0.00\n",
+        _format_par_line("MEAN P", ppts),
+        _format_par_line("S DEV P", zeros),
+        _format_par_line("SKEW  P", zeros),
+        _format_par_line("P(W/W)", zeros),
+        _format_par_line("P(W/D)", zeros),
+        _format_par_line("TMAX AV", tmaxs),
+        _format_par_line("TMIN AV", tmins),
+    ]
+    par_path.write_text("".join(lines))
+
+
+def _build_user_defined_station_meta_from_cli(
+    cli: ClimateFile,
+    cli_filename: str,
+    cli_dir: str,
+    monthlies: Optional[Dict[str, List[float]]],
+) -> StationMeta:
+    desc = None
+    for line in cli.header:
+        if re.match(r"\s*Station\s*:", line, re.IGNORECASE):
+            desc = line.split(":", 1)[1].strip()
+            if "CLIGEN VER." in desc:
+                desc = desc.split("CLIGEN VER.", 1)[0].strip()
+            break
+    if not desc:
+        desc = "User defined climate"
+
+    station_id = None
+    for line in cli.header:
+        match = re.search(r"([A-Za-z0-9._/\\\\-]+\\.par)", line, re.IGNORECASE)
+        if match:
+            token = match.group(1).strip()
+            if token.startswith("-"):
+                token = token.lstrip("-")
+                if token.lower().startswith("i") and token[1:].lower().endswith(".par"):
+                    token = token[1:]
+            station_id = Path(token).stem
+            break
+    if not station_id:
+        station_id = Path(cli_filename).stem
+
+    station_id = re.sub(r"[^A-Za-z0-9_-]+", "", station_id) or "user_defined"
+
+    state = None
+    if len(station_id) >= 2 and station_id[:2].isalpha():
+        state = station_id[:2].upper()
+    else:
+        tokens = desc.split()
+        if tokens and len(tokens[-1]) == 2 and tokens[-1].isalpha():
+            state = tokens[-1].upper()
+    if not state:
+        state = "NA"
+
+    elevation_ft = None
+    if cli.elevation is not None:
+        elevation_ft = round(cli.elevation / 0.3048, 2)
+
+    monthlies_override = None
+    annual_ppt = None
+    if monthlies:
+        monthly_ppts = [float(v) for v in monthlies.get("ppts", [])]
+        nwds = [float(v) for v in monthlies.get("nwds", [])]
+        tmaxs = [float(v) for v in monthlies.get("tmaxs", [])]
+        tmins = [float(v) for v in monthlies.get("tmins", [])]
+        ppts_per_wet_day: List[float] = []
+        for ppt, nwd in zip(monthly_ppts, nwds):
+            if nwd:
+                ppts_per_wet_day.append(ppt / nwd)
+            else:
+                ppts_per_wet_day.append(0.0)
+        monthlies_override = {
+            "ppts": ppts_per_wet_day,
+            "nwds": nwds,
+            "tmaxs": tmaxs,
+            "tmins": tmins,
+        }
+        annual_ppt = float(sum(monthly_ppts))
+
+    par_path = Path(cli_dir) / f"{station_id}.par"
+    _write_user_defined_par_stub(
+        par_path=par_path,
+        desc=desc,
+        station_id=station_id,
+        lat=cli.lat,
+        lng=cli.lng,
+        elevation_ft=elevation_ft,
+        years=cli.input_years,
+        monthlies_override=monthlies_override,
+    )
+
+    station_meta = StationMeta(
+        state,
+        desc,
+        str(par_path),
+        cli.lat,
+        cli.lng,
+        cli.input_years,
+        0,
+        elevation_ft,
+        None,
+        None,
+        annual_ppt,
+    )
+    if monthlies_override is not None:
+        station_meta._monthlies_override = monthlies_override
+    return station_meta
 
 class ClimateSummary(object):
     def __init__(self) -> None:
@@ -895,6 +1041,7 @@ class Climate(NoDbBase):
             )
             self._adjust_mx_pt5 = self.config_get_bool('climate', 'adjust_mx_pt5', False)
             self._catalog_id = None
+            self._user_station_meta = None
 
     @property
     def daymet_last_available_year(self) -> int:
@@ -1205,6 +1352,13 @@ class Climate(NoDbBase):
 
     @property
     def climatestation_meta(self) -> Any:
+        user_station_meta = getattr(self, "_user_station_meta", None)
+        if user_station_meta is not None and (
+            self.catalog_id == "user_defined_cli"
+            or self._climate_mode in (ClimateMode.UserDefined, ClimateMode.UserDefinedSingleStorm)
+        ):
+            return user_station_meta
+
         climatestation = self.climatestation
 
         if climatestation is None:
@@ -2695,9 +2849,16 @@ class Climate(NoDbBase):
                 self._climate_mode = ClimateMode.UserDefinedSingleStorm
 
             self._input_years = cli.input_years
-            self.monthlies = cli.calc_monthlies()
+            monthlies = cli.calc_monthlies()
+            self.monthlies = monthlies
             # Avoid nodb_setter recursion while already holding the lock.
             self._catalog_id = 'user_defined_cli'
+            self._user_station_meta = _build_user_defined_station_meta_from_cli(
+                cli=cli,
+                cli_filename=cli_fn,
+                cli_dir=self.cli_dir,
+                monthlies=monthlies,
+            )
             
         self._post_defined_climate(verbose=verbose)
 
