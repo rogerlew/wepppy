@@ -10,6 +10,11 @@ suppressPackageStartupMessages({
 PRIMARY_RUN_ROOT <- Sys.getenv("PRIMARY_RUN_ROOT", "/geodata/weppcloud_runs")
 PARTITIONED_RUN_ROOT <- Sys.getenv("PARTITIONED_RUN_ROOT", "/wc1/runs")
 BATCH_ROOT <- Sys.getenv("BATCH_ROOT", "/wc1/batch")
+CULVERTS_ROOT <- Sys.getenv("CULVERTS_ROOT", "/wc1/culverts")
+PROFILE_PLAYBACK_BASE <- Sys.getenv("PROFILE_PLAYBACK_BASE", "/workdir/wepppy-test-engine-data/playback")
+PROFILE_PLAYBACK_RUN_ROOT <- Sys.getenv("PROFILE_PLAYBACK_RUN_ROOT", file.path(PROFILE_PLAYBACK_BASE, "runs"))
+PROFILE_PLAYBACK_FORK_ROOT <- Sys.getenv("PROFILE_PLAYBACK_FORK_ROOT", file.path(PROFILE_PLAYBACK_BASE, "fork"))
+PROFILE_PLAYBACK_ARCHIVE_ROOT <- Sys.getenv("PROFILE_PLAYBACK_ARCHIVE_ROOT", file.path(PROFILE_PLAYBACK_BASE, "archive"))
 TEMPLATE_ROOT <- Sys.getenv("TEMPLATE_ROOT", "/srv/weppcloudr/templates")
 DEFAULT_TEMPLATE <- Sys.getenv("DEVAL_TEMPLATE", file.path(TEMPLATE_ROOT, "new_report.Rmd"))
 
@@ -24,14 +29,7 @@ resolve_batch_run_root <- function(batch_name, runid) {
   file.path(batch_dir, "runs", runid)
 }
 
-resolve_run_root <- function(runid) {
-  if (grepl(";;", runid, fixed = TRUE)) {
-    tokens <- strsplit(runid, ";;", fixed = TRUE)[[1]]
-    if (length(tokens) == 3 && identical(tokens[1], "batch")) {
-      return(resolve_batch_run_root(tokens[2], tokens[3]))
-    }
-    return(NULL)
-  }
+resolve_primary_run_root <- function(runid) {
   primary_path <- file.path(PRIMARY_RUN_ROOT, runid)
   if (dir.exists(primary_path)) {
     return(primary_path)
@@ -42,6 +40,64 @@ resolve_run_root <- function(runid) {
     return(partitioned_path)
   }
   NULL
+}
+
+resolve_profile_run_root <- function(profile_type, runid) {
+  candidate <- switch(
+    profile_type,
+    "tmp" = file.path(PROFILE_PLAYBACK_RUN_ROOT, runid),
+    "fork" = file.path(PROFILE_PLAYBACK_FORK_ROOT, runid),
+    "archive" = file.path(PROFILE_PLAYBACK_ARCHIVE_ROOT, runid),
+    NULL
+  )
+  if (is.null(candidate)) {
+    return(NULL)
+  }
+  if (dir.exists(candidate)) {
+    return(candidate)
+  }
+  NULL
+}
+
+resolve_run_root <- function(runid) {
+  if (is.null(runid) || !nzchar(runid)) {
+    return(NULL)
+  }
+  if (grepl(";;", runid, fixed = TRUE)) {
+    tokens <- strsplit(runid, ";;", fixed = TRUE)[[1]]
+    if (length(tokens) >= 3) {
+      suffix_group <- tokens[length(tokens) - 1]
+      suffix_id <- tokens[length(tokens)]
+      if (suffix_group %in% c("omni", "omni-contrast")) {
+        parent_runid <- paste(tokens[1:(length(tokens) - 2)], collapse = ";;")
+        parent_root <- resolve_run_root(parent_runid)
+        if (is.null(parent_root)) {
+          return(NULL)
+        }
+        child_dir <- if (identical(suffix_group, "omni")) "scenarios" else "contrasts"
+        candidate <- file.path(parent_root, "_pups", "omni", child_dir, suffix_id)
+        if (dir.exists(candidate)) {
+          return(candidate)
+        }
+        return(NULL)
+      }
+    }
+    if (length(tokens) == 3 && identical(tokens[1], "batch")) {
+      return(resolve_batch_run_root(tokens[2], tokens[3]))
+    }
+    if (length(tokens) == 3 && identical(tokens[1], "culvert")) {
+      culvert_path <- file.path(CULVERTS_ROOT, tokens[2], "runs", tokens[3])
+      if (dir.exists(culvert_path)) {
+        return(culvert_path)
+      }
+      return(NULL)
+    }
+    if (length(tokens) == 3 && identical(tokens[1], "profile")) {
+      return(resolve_profile_run_root(tokens[2], tokens[3]))
+    }
+    return(NULL)
+  }
+  resolve_primary_run_root(runid)
 }
 
 resolve_run_dir <- function(runid, config, pup = NULL) {
