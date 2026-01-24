@@ -452,7 +452,7 @@ services:
       - backend
 
   caddy:
-    image: caddy:2
+    image: caddy:2-alpine
     restart: unless-stopped
     cpuset: "40-47"
     ports:
@@ -492,7 +492,7 @@ services:
       - backend
 
   redis:
-    image: redis:7.4.6
+    image: redis:latest
     restart: unless-stopped
     cpuset: "40-47"
     environment:

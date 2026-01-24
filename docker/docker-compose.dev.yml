@@ -489,7 +489,7 @@ services:
       - ${GEODATA_DIR}:/geodata
 
   redis:
-    image: redis:7.4.6
+    image: redis:latest
     container_name: wepppy-redis
     cpuset: "40-47"
     environment:
@@ -637,7 +637,7 @@ services:
         condition: service_started
 
   caddy:
-    image: caddy:2
+    image: caddy:2-alpine
     container_name: wepppy-caddy
     cpuset: "40-47"
     ports:

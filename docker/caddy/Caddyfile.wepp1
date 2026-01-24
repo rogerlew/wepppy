@@ -73,6 +73,10 @@ wepp.cloud {
             header_up X-Forwarded-Prefix /rq-engine
             header_up X-Forwarded-Proto {scheme}
             header_up Host {host}
+            transport http {
+                read_timeout 10m
+                response_header_timeout 10m
+            }
         }
     }
 
