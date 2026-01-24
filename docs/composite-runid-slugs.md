@@ -41,6 +41,7 @@ Composite runids resolve to a WD using `get_wd(runid)`:
 Notes:
 - `<parent_wd>` resolves via the canonical run root `/wc1/runs/<prefix>/<parent_runid>` with a legacy fallback to `/geodata/weppcloud_runs/<parent_runid>` if present.
 - Omni child runs link shared inputs (`climate/`, `dem/`, `watershed/`) from the parent if missing.
+- The parent segment can itself be composite (for example `batch;;spring-2025;;run-001;;omni-contrast;;3`); resolvers should strip the trailing `;;omni;;...`/`;;omni-contrast;;...` suffix and resolve the parent runid first.
 
 ## Behavior and Semantics
 
@@ -79,6 +80,7 @@ The same composite runid string is valid for RQ endpoints:
 - Resolver: `wepppy/weppcloud/utils/helpers.py:get_wd`
 - Run context: `wepppy/weppcloud/routes/_run_context.py:load_run_context`
 - NoDb runid behavior: `wepppy/nodb/base.py:NoDbBase.runid`
+- weppcloudR resolver: `weppcloudR/plumber.R:resolve_run_root`, `weppcloudR/templates/scripts/users/*/weppcloudr_report_functions.R:resolve_run_root`
 
 ## Resolution by Service
 
@@ -93,6 +95,7 @@ This is the current map of how services resolve a runid into a working directory
 | RQ worker (batch) | `wepppy/nodb/batch_runner.py` | `get_wd()` | Batch runner constructs `batch;;<batch_name>;;<runid>` and relies on `get_wd` to target `/wc1/batch/...`. |
 | Query engine | `wepppy/query_engine/app/helpers.py` | `get_wd()` | Accepts `runid` or `runid/config`; scenario strings resolved under `_pups/omni`. |
 | Elevation query (Starlette) | `wepppy/microservices/elevationquery.py` | `get_wd()` | Resolves `runid` and optional `?pup=` directly; **does not** ignore `pup` when `runid` is composite (needs patch). |
+| weppcloudR (R renderer) | `weppcloudR/plumber.R`, `weppcloudR/templates/scripts/users/*/weppcloudr_report_functions.R` | `resolve_run_root()` | Used by DEVAL and report helper scripts; now supports omni scenarios/contrasts (including composite parents) plus batch/culvert/profile slugs. |
 
 ## Preflight and Telemetry Routing
 
