@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "colors": [
+    {"rgb": [0, 100, 0], "severity": "unburned"},
+    {"rgb": [0, 0, 0], "severity": "unburned"},
+    {"rgb": [0, 115, 74], "severity": "unburned"},
+    {"rgb": [0, 175, 166], "severity": "unburned"},
+    {"rgb": [102, 204, 204], "severity": "low"},
+    {"rgb": [102, 205, 205], "severity": "low"},
+    {"rgb": [115, 255, 223], "severity": "low"},
+    {"rgb": [127, 255, 212], "severity": "low"},
+    {"rgb": [0, 255, 255], "severity": "low"},
+    {"rgb": [77, 230, 0], "severity": "low"},
+    {"rgb": [255, 255, 0], "severity": "mod"},
+    {"rgb": [255, 232, 32], "severity": "mod"},
+    {"rgb": [255, 0, 0], "severity": "high"}
+  ]
+}

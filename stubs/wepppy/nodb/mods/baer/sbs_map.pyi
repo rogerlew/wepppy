@@ -25,6 +25,7 @@ __all__ = [
 def get_sbs_color_table(
     fn: str,
     color_to_severity_map: Optional[Mapping[RGBColor, str]] = ...,
+    summary: Optional[Mapping[str, object]] = ...,
 ) -> tuple[Optional[ColorIndexMap], ColorCounts, Optional[ColorLookup]]: ...
 
 

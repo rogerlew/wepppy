@@ -11,11 +11,13 @@
 from __future__ import annotations
 
 import os
+import logging
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from collections import Counter
 from functools import lru_cache
+import json
 from collections.abc import Mapping, Sequence
 from typing import Literal, Optional, Tuple, TypeAlias
 
@@ -31,6 +33,37 @@ from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import read_raster, validate_srs
 
 from wepppy.landcover import LandcoverMap
+
+logger = logging.getLogger(__name__)
+
+_SBS_COLOR_MAP_PATH = _join(_split(__file__)[0], "data", "sbs_color_map.json")
+
+_DEFAULT_COLOR_TO_SEVERITY: dict[RGBColor, str] = {
+    (0, 100, 0): "unburned",
+    (0, 0, 0): "unburned",
+    (0, 115, 74): "unburned",
+    (0, 175, 166): "unburned",
+    (102, 204, 204): "low",
+    (102, 205, 205): "low",
+    (115, 255, 223): "low",
+    (127, 255, 212): "low",
+    (0, 255, 255): "low",
+    (77, 230, 0): "low",
+    (255, 255, 0): "mod",
+    (255, 232, 32): "mod",
+    (255, 0, 0): "high",
+}
+
+try:
+    from wepppyo3 import sbs_map as _rust_sbs_map
+except Exception:
+    _rust_sbs_map = None
+
+_RUST_SUMMARY_LOGGED = False
+_RUST_RECLASS_LOGGED = False
+_RUST_EXPORT_LOGGED = False
+_RUST_CT_LOGGED = False
+_RUST_CT_SUMMARY_LOGGED = False
 
 SeverityClass: TypeAlias = Literal["unburned", "low", "mod", "high"]
 RGBColor: TypeAlias = Tuple[int, int, int]
@@ -48,9 +81,291 @@ __all__ = [
     "SoilBurnSeverityMap",
 ]
 
+
+@lru_cache(maxsize=1)
+def _load_sbs_color_map(path: str | None = None) -> dict[RGBColor, str]:
+    """Load the SBS RGB->severity mapping from JSON, falling back to defaults."""
+    color_map_path = path or _SBS_COLOR_MAP_PATH
+    try:
+        with open(color_map_path, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        colors = data.get("colors", [])
+        mapping = {tuple(entry["rgb"]): entry["severity"] for entry in colors}
+        if mapping:
+            return mapping
+    except Exception:
+        pass
+    return dict(_DEFAULT_COLOR_TO_SEVERITY)
+
+
+def _summarize_sbs_raster_rust(path: str) -> Optional[dict]:
+    global _RUST_SUMMARY_LOGGED
+
+    if _rust_sbs_map is None:
+        if not _RUST_SUMMARY_LOGGED:
+            logger.warning("Rust SBS summary module unavailable; falling back to Python.")
+            _RUST_SUMMARY_LOGGED = True
+        return None
+    summarize = getattr(_rust_sbs_map, "summarize_sbs_raster", None)
+    if not callable(summarize):
+        if not _RUST_SUMMARY_LOGGED:
+            logger.warning("Rust SBS summary function missing; falling back to Python.")
+            _RUST_SUMMARY_LOGGED = True
+        return None
+    try:
+        return summarize(path, color_map_path=_SBS_COLOR_MAP_PATH)
+    except Exception:
+        if not _RUST_SUMMARY_LOGGED:
+            logger.exception("Rust SBS summary failed; falling back to Python.")
+            _RUST_SUMMARY_LOGGED = True
+        return None
+
+
+def _read_color_table_rust(path: str) -> Optional[dict]:
+    global _RUST_CT_LOGGED
+
+    if _rust_sbs_map is None:
+        if not _RUST_CT_LOGGED:
+            logger.warning("Rust SBS color table helper unavailable; falling back to Python.")
+            _RUST_CT_LOGGED = True
+        return None
+    read_ct = getattr(_rust_sbs_map, "read_color_table", None)
+    if not callable(read_ct):
+        if not _RUST_CT_LOGGED:
+            logger.warning("Rust SBS read_color_table missing; falling back to Python.")
+            _RUST_CT_LOGGED = True
+        return None
+    try:
+        return read_ct(path, color_map_path=_SBS_COLOR_MAP_PATH)
+    except Exception:
+        if not _RUST_CT_LOGGED:
+            logger.exception("Rust SBS read_color_table failed; falling back to Python.")
+            _RUST_CT_LOGGED = True
+        return None
+
+
+def _summarize_color_table_rust(path: str) -> Optional[dict]:
+    global _RUST_CT_SUMMARY_LOGGED
+
+    if _rust_sbs_map is None:
+        if not _RUST_CT_SUMMARY_LOGGED:
+            logger.warning("Rust SBS color table summary unavailable; falling back to Python.")
+            _RUST_CT_SUMMARY_LOGGED = True
+        return None
+    summarize = getattr(_rust_sbs_map, "summarize_color_table", None)
+    if not callable(summarize):
+        if not _RUST_CT_SUMMARY_LOGGED:
+            logger.warning("Rust SBS summarize_color_table missing; falling back to Python.")
+            _RUST_CT_SUMMARY_LOGGED = True
+        return None
+    try:
+        return summarize(path, color_map_path=_SBS_COLOR_MAP_PATH)
+    except Exception:
+        if not _RUST_CT_SUMMARY_LOGGED:
+            logger.exception("Rust SBS summarize_color_table failed; falling back to Python.")
+            _RUST_CT_SUMMARY_LOGGED = True
+        return None
+
+
+def _reclassify_sbs_raster_rust(
+    path: str,
+    *,
+    breaks: Optional[Sequence[int | float]],
+    ct: Optional[Mapping[SeverityClass, Sequence[int]]],
+    nodata_vals: Sequence[int | float],
+    offset: int,
+) -> Optional[NDArray[np.uint8]]:
+    global _RUST_RECLASS_LOGGED
+
+    if _rust_sbs_map is None:
+        if not _RUST_RECLASS_LOGGED:
+            logger.warning("Rust SBS reclass module unavailable; falling back to Python.")
+            _RUST_RECLASS_LOGGED = True
+        return None
+    reclassify = getattr(_rust_sbs_map, "reclassify_sbs_raster", None)
+    if not callable(reclassify):
+        if not _RUST_RECLASS_LOGGED:
+            logger.warning("Rust SBS reclass function missing; falling back to Python.")
+            _RUST_RECLASS_LOGGED = True
+        return None
+    try:
+        return reclassify(
+            path,
+            breaks=breaks,
+            ct=ct,
+            nodata=list(nodata_vals),
+            offset=offset,
+            color_map_path=_SBS_COLOR_MAP_PATH,
+        )
+    except Exception:
+        if not _RUST_RECLASS_LOGGED:
+            logger.exception("Rust SBS reclass failed; falling back to Python.")
+            _RUST_RECLASS_LOGGED = True
+        return None
+
+
+def _export_sbs_4class_rust(
+    path: str,
+    dst_path: str,
+    *,
+    breaks: Optional[Sequence[int | float]],
+    ct: Optional[Mapping[SeverityClass, Sequence[int]]],
+    nodata_vals: Sequence[int | float],
+) -> bool:
+    global _RUST_EXPORT_LOGGED
+
+    if _rust_sbs_map is None:
+        if not _RUST_EXPORT_LOGGED:
+            logger.warning("Rust SBS export module unavailable; falling back to Python.")
+            _RUST_EXPORT_LOGGED = True
+        return False
+    export_fn = getattr(_rust_sbs_map, "export_sbs_4class", None)
+    if not callable(export_fn):
+        if not _RUST_EXPORT_LOGGED:
+            logger.warning("Rust SBS export function missing; falling back to Python.")
+            _RUST_EXPORT_LOGGED = True
+        return False
+    try:
+        export_fn(
+            path,
+            dst_path,
+            breaks=breaks,
+            ct=ct,
+            nodata=list(nodata_vals),
+            color_map_path=_SBS_COLOR_MAP_PATH,
+        )
+    except Exception:
+        if not _RUST_EXPORT_LOGGED:
+            logger.exception("Rust SBS export failed; falling back to Python.")
+            _RUST_EXPORT_LOGGED = True
+        return False
+    return True
+
+
+def _summary_cache_key(path: str) -> tuple[str, int, int]:
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return path, 0, 0
+    return path, stat.st_mtime_ns, stat.st_size
+
+
+def _normalize_count_value(value: int | float) -> int | float:
+    if isint(value):
+        return int(value)
+    return float(value)
+
+
+def _summarize_sbs_raster_python(path: str) -> dict:
+    ds = gdal.Open(path)
+    if ds is None:
+        raise RuntimeError(f"Failed to open {path}")
+
+    band = ds.GetRasterBand(1)
+    data = band.ReadAsArray(0, 0, ds.RasterXSize, ds.RasterYSize)
+    counts: ColorCounts = Counter(list(data.flatten())).most_common()
+    counts = [(_normalize_count_value(value), int(count)) for value, count in counts]
+
+    classes = np.unique(data)
+    unique_classes: list[int | float] = []
+    has_non_integer = False
+    for value in classes:
+        if isint(value):
+            unique_classes.append(int(value))
+        else:
+            unique_classes.append(float(value))
+            has_non_integer = True
+
+    class_count = len(unique_classes)
+
+    color_to_severity_map = _load_sbs_color_map()
+    ct = band.GetRasterColorTable()
+    has_color_table = ct is not None
+    color_table_severities: list[str] = []
+    color_table_valid = False
+
+    if has_color_table:
+        severity_set: set[str] = set()
+        for i in range(ct.GetCount()):
+            entry = tuple(int(v) for v in ct.GetColorEntry(i)[:3])
+            severity = color_to_severity_map.get(entry)
+            if severity:
+                severity_set.add(severity)
+        color_table_severities = sorted(severity_set)
+        color_table_valid = any(sev in ("low", "mod", "high") for sev in severity_set)
+
+    srs_valid = validate_srs(path)
+
+    if not srs_valid:
+        sanity_status = 1
+        sanity_message = "Map contains an invalid projection. Try reprojecting to UTM."
+    elif class_count > 256:
+        sanity_status = 1
+        sanity_message = "Map has more than 256 classes"
+    elif has_non_integer:
+        sanity_status = 1
+        sanity_message = "Map has non-integer classes"
+    elif has_color_table:
+        if color_table_valid:
+            sanity_status = 0
+            sanity_message = "Map has valid color table"
+        else:
+            sanity_status = 1
+            sanity_message = "Map has no valid color table"
+    else:
+        sanity_status = 0
+        sanity_message = "Map has valid classes"
+
+    ds = None
+
+    return {
+        "srs_valid": bool(srs_valid),
+        "class_count": int(class_count),
+        "unique_classes": unique_classes,
+        "class_counts": counts,
+        "has_non_integer": bool(has_non_integer),
+        "has_color_table": bool(has_color_table),
+        "color_table_severities": color_table_severities,
+        "color_table_valid": bool(color_table_valid),
+        "sanity_status": int(sanity_status),
+        "sanity_message": sanity_message,
+        "size_bytes": os.path.getsize(path),
+    }
+
+
+@lru_cache(maxsize=8)
+def _summarize_sbs_raster_cached(path: str, mtime_ns: int, size: int) -> Optional[dict]:
+    summary = _summarize_sbs_raster_rust(path)
+    if summary is not None:
+        return summary
+    return _summarize_sbs_raster_python(path)
+
+
+def _summarize_sbs_raster(path: str) -> Optional[dict]:
+    path_key = _summary_cache_key(path)
+    return _summarize_sbs_raster_cached(*path_key)
+
+
+def _counts_from_summary(summary: Optional[Mapping[str, object]]) -> Optional[ColorCounts]:
+    if not summary:
+        return None
+    raw_counts = summary.get("class_counts")
+    if not raw_counts:
+        return None
+    counts: ColorCounts = []
+    for entry in raw_counts:
+        try:
+            value, count = entry
+        except (TypeError, ValueError):
+            continue
+        counts.append((_normalize_count_value(value), int(count)))
+    return counts or None
+
+
 def get_sbs_color_table(
     fn: str,
     color_to_severity_map: Optional[Mapping[RGBColor, str]] = None,
+    summary: Optional[Mapping[str, object]] = None,
 ) -> tuple[Optional[ColorIndexMap], ColorCounts, Optional[ColorLookup]]:
     """Read the SBS raster color table and map entries to severity classes.
 
@@ -68,31 +383,36 @@ def get_sbs_color_table(
         * ``color_map`` provides the reverse mapping of RGB colors to severity
           class names (or ``None`` when no table is present).
     """
-    ds = gdal.Open(fn)
-    band = ds.GetRasterBand(1)
-    data = band.ReadAsArray(0, 0, ds.RasterXSize, ds.RasterYSize)
-    counts: ColorCounts = Counter(list(data.flatten())).most_common()
+    if summary is None:
+        summary = _summarize_sbs_raster(fn)
+
+    counts = _counts_from_summary(summary)
+    if counts is None:
+        ds = gdal.Open(fn)
+        band = ds.GetRasterBand(1)
+        data = band.ReadAsArray(0, 0, ds.RasterXSize, ds.RasterYSize)
+        counts = Counter(list(data.flatten())).most_common()
+        counts = [(_normalize_count_value(value), int(count)) for value, count in counts]
+        ds = None
 
     if color_to_severity_map is None:
-        color_to_severity_map = {
-            (0, 100, 0): "unburned",
-            (0, 0, 0): "unburned",
-            (0, 115, 74): "unburned",
-            (0, 175, 166): "unburned",
-            (102, 204, 204): "low",
-            (102, 205, 205): "low",
-            (115, 255, 223): "low",
-            (127, 255, 212): "low",
-            (0, 255, 255): "low",
-            (102, 205, 205): "low",
-            (77, 230, 0): "low",
-            (255, 255, 0): "mod",
-            (255, 232, 32): "mod",
-            (255, 0, 0): "high",
-        }
+        rust_ct = _read_color_table_rust(fn)
+        if rust_ct is not None:
+            if rust_ct.get("has_color_table"):
+                return (
+                    rust_ct.get("class_index_map"),
+                    counts,
+                    rust_ct.get("color_map"),
+                )
+            return None, counts, None
 
+        color_to_severity_map = _load_sbs_color_map()
+
+    ds = gdal.Open(fn)
+    band = ds.GetRasterBand(1)
     ct = band.GetRasterColorTable()
     if ct is None:
+        ds = None
         return None, counts, None
 
     color_map: ColorLookup = {}
@@ -289,6 +609,31 @@ def sbs_map_sanity_check(fname: str) -> tuple[int, str]:
     if not _exists(fname):
         return 1, "File does not exist"
 
+    summary = _summarize_sbs_raster(fname)
+    if summary is not None:
+        srs_valid = summary.get("srs_valid", False)
+        class_count = summary.get("class_count", 0)
+        has_non_integer = summary.get("has_non_integer", False)
+        has_color_table = summary.get("has_color_table", False)
+        color_table_valid = summary.get("color_table_valid", False)
+
+        ct_summary = _summarize_color_table_rust(fname)
+        if ct_summary is not None:
+            has_color_table = ct_summary.get("has_color_table", False)
+            color_table_valid = ct_summary.get("color_table_valid", False)
+
+        if not srs_valid:
+            return 1, "Map contains an invalid projection. Try reprojecting to UTM."
+        if class_count > 256:
+            return 1, "Map has more than 256 classes"
+        if has_non_integer:
+            return 1, "Map has non-integer classes"
+        if has_color_table:
+            if color_table_valid:
+                return 0, "Map has valid color table"
+            return 1, "Map has no valid color table"
+        return 0, "Map has valid classes"
+
     if not validate_srs(fname):
         return 1, "Map contains an invalid projection. Try reprojecting to UTM."
 
@@ -357,8 +702,11 @@ class SoilBurnSeverityMap(LandcoverMap):
 
         assert _exists(fname)
 
+        summary = _summarize_sbs_raster(fname)
         ct, counts, explicit_color_map = get_sbs_color_table(
-            fname, color_to_severity_map=color_map
+            fname,
+            color_to_severity_map=color_map,
+            summary=summary,
         )
         if ignore_ct:
             ct = None
@@ -445,6 +793,17 @@ class SoilBurnSeverityMap(LandcoverMap):
         ct = self.ct
         breaks = self.breaks
         nodata_vals = self.nodata_vals
+
+        rust_data = _reclassify_sbs_raster_rust(
+            fname,
+            breaks=breaks,
+            ct=ct,
+            nodata_vals=nodata_vals,
+            offset=130,
+        )
+        if rust_data is not None:
+            self._data = rust_data
+            return rust_data
 
         data, _transform, _proj = read_raster(fname, dtype=np.uint8)
         n, m = data.shape
@@ -669,6 +1028,16 @@ class SoilBurnSeverityMap(LandcoverMap):
         assert _exists(fname)
 
         ct = self.ct
+
+        if _export_sbs_4class_rust(
+            fname,
+            fn,
+            breaks=self.breaks,
+            ct=ct,
+            nodata_vals=self.nodata_vals,
+        ):
+            assert _exists(fn)
+            return
 
         _data, transform, proj = read_raster(fname, dtype=np.uint8)
         data = np.ones(_data.shape) * 255

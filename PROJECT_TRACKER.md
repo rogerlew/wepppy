@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-01-12  
-**Active Packages**: 1  
+**Last Updated**: 2026-01-24  
+**Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -211,7 +211,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 1 package ✅
+**Current WIP Count**: 2 packages ✅
 
 ---
 
@@ -256,6 +256,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 1. **Immediate** (Nov 2-8): Resolve RFC decisions (4 decisions), finalize integration (onboarding docs, release notes)
 2. **Phase 4 Gate** (Nov 18): Review telemetry data, resolve Phase 4 open questions (index storage, watch mode, UI integration, search patterns), make go/no-go decision
 3. **If Phase 4 Greenlit**: Create Phase 4 work package structure, draft agent prompts, assign ownership, schedule M1 target (~Dec 6)
+
+---
+
+### SBS Map Refactor (Rust Acceleration)
+**Started**: 2026-01-24  
+**Status**: Discovery/Benchmarking  
+**Size**: Medium (multi-phase refactor)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260124_sbs_map_refactor/](docs/work-packages/20260124_sbs_map_refactor/)  
+**Description**: Replace slow Python raster scanning and per-pixel loops in `sbs_map.py` with Rust + GDAL implementations. Adds large-fixture regression tests and benchmarks on real SBS maps.
+
+**Current Status**:
+- Baseline large fixtures captured with expectations and gated regression tests.
+- Benchmarks recorded for two SBS maps; Python path is minutes long for multiple methods.
+- Rust summary + reclassification modules scoped but not implemented yet.
+
+**Next Steps**:
+1. Implement `wepppyo3.sbs_map.summarize_sbs_raster`.
+2. Wire `sbs_map_sanity_check` to Rust summary (keep Python fallback).
+3. Implement Rust reclassification + export helpers and update tests.
 
 ---
 

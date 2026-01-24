@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-01-24 06:39:32",
+  "paths": [
+    "/wc1/runs/sh/short-order-slickness/disturbed/prediction_wgs84_merged.tif",
+    "/wc1/runs/de/decimal-pleasing/disturbed/Rattlesnake.tif"
+  ],
+  "skip_data": false,
+  "skip_export": false,
+  "benchmarks": [
+    {
+      "path": "/wc1/runs/sh/short-order-slickness/disturbed/prediction_wgs84_merged.tif",
+      "basename": "prediction_wgs84_merged.tif",
+      "steps": [
+        {
+          "label": "sbs_map_sanity_check",
+          "seconds": 4.7722113891504705,
+          "error": null,
+          "result": [
+            0,
+            "Map has valid classes"
+          ]
+        },
+        {
+          "label": "get_sbs_color_table",
+          "seconds": 0.03154956176877022,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.__init__",
+          "seconds": 0.0017579267732799053,
+          "error": null,
+          "result": "ok"
+        },
+        {
+          "label": "SoilBurnSeverityMap.class_map",
+          "seconds": 3.4096650779247284e-05,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.class_pixel_map",
+          "seconds": 1.261802390217781e-05,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.data",
+          "seconds": 12.444973297882825,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.export_4class_map",
+          "seconds": 14.229332725983113,
+          "error": null,
+          "result": null
+        }
+      ],
+      "export_path": "/tmp/sbs-bench-03luoa9a/prediction_wgs84_merged.4class.tif",
+      "export_size_bytes": 11092361
+    },
+    {
+      "path": "/wc1/runs/de/decimal-pleasing/disturbed/Rattlesnake.tif",
+      "basename": "Rattlesnake.tif",
+      "steps": [
+        {
+          "label": "sbs_map_sanity_check",
+          "seconds": 0.019982102792710066,
+          "error": null,
+          "result": [
+            0,
+            "Map has valid color table"
+          ]
+        },
+        {
+          "label": "get_sbs_color_table",
+          "seconds": 0.0010053208097815514,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.__init__",
+          "seconds": 0.0023531639017164707,
+          "error": null,
+          "result": "ok"
+        },
+        {
+          "label": "SoilBurnSeverityMap.class_map",
+          "seconds": 0.01638514269143343,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.class_pixel_map",
+          "seconds": 0.0024330238811671734,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.data",
+          "seconds": 0.020791651215404272,
+          "error": null,
+          "result": null
+        },
+        {
+          "label": "SoilBurnSeverityMap.export_4class_map",
+          "seconds": 0.04806918278336525,
+          "error": null,
+          "result": null
+        }
+      ],
+      "export_path": "/tmp/sbs-bench-vxbvyyeq/Rattlesnake.4class.tif",
+      "export_size_bytes": 43542
+    }
+  ]
+}
