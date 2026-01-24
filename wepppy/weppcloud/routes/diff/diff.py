@@ -24,39 +24,45 @@ diff_bp = Blueprint('diff', __name__,
 @authorize_and_handle_with_exception_factory
 def diff_comparer(runid, config, subpath):
     ctx = load_run_context(runid, config)
-    wd = os.path.abspath(str(ctx.active_root))
-    dir_path = os.path.abspath(os.path.join(wd, subpath))
+    wd_root = os.path.abspath(str(ctx.active_root))
+    dir_path = os.path.abspath(os.path.join(wd_root, subpath))
 
     diff_runid = request.args.get('diff', None)
     if diff_runid is None:
         abort(403)
 
-    if not dir_path.startswith(wd):
+    # Do not resolve symlinks here: critical functionality for browsing batch,
+    # culverts, omni scenarios, and omni-contrast projects.
+    if not dir_path.startswith(wd_root + os.sep) and dir_path != wd_root:
         abort(403)
 
-    if not _exists(dir_path):
+    if not os.path.exists(dir_path):
         return error_factory(f'path: `{dir_path}` does not exist')
 
     if os.path.isdir(dir_path):
         abort(404)
 
-    diff_wd = get_wd(diff_runid)
-    diff_path = os.path.join(diff_wd, subpath)
+    relative_subpath = os.path.relpath(dir_path, wd_root)
+    diff_root = os.path.abspath(get_wd(diff_runid))
+    diff_path = os.path.abspath(os.path.join(diff_root, relative_subpath))
+    if not diff_path.startswith(diff_root + os.sep) and diff_path != diff_root:
+        abort(403)
 
-    if not _exists(diff_path):
+    if not os.path.exists(diff_path):
         return error_factory(f'path: `{diff_path}` does not exist')
 
+    safe_subpath = relative_subpath.replace(os.sep, "/")
     left_download_url = url_for_run(
                     'download.download_with_subpath',
                     runid=runid,
                     config=config,
-                    subpath=subpath
+                    subpath=safe_subpath
                 )
     right_download_url = url_for_run(
                     'download.download_with_subpath',
                     runid=diff_runid,
                     config=config,
-                    subpath=subpath
+                    subpath=safe_subpath
                 )
 
     # render template with client side diff. client will fetch the files from diff
@@ -64,7 +70,7 @@ def diff_comparer(runid, config, subpath):
                             runid=runid,  # left
                             config=config,
                             diff_runid=diff_runid,  # right
-                            subpath=subpath,
+                            subpath=safe_subpath,
                             left_download_url=left_download_url,
                             right_download_url=right_download_url
                            )

@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -8,7 +9,6 @@ from flask import (
     jsonify,
     request,
     abort,
-    render_template_string,
     render_template,
     redirect,
 )
@@ -16,6 +16,7 @@ from flask_security import current_user
 
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip install cmarkgfm
 # https://github.com/sindresorhus/github-markdown-css for styling
+from jinja2.sandbox import SandboxedEnvironment
 from wepppy.weppcloud.utils.helpers import exception_factory, authorize, get_wd, url_for_run
 from wepppy.nodb.core import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
@@ -56,6 +57,8 @@ _BASE_DIR = Path(__file__).resolve().parent
 
 README_FILENAME = "README.md"
 DEFAULT_TEMPLATE = _BASE_DIR / "templates" / "default.md.j2"
+_SAFE_MARKDOWN_ENV = SandboxedEnvironment(autoescape=False)
+logger = logging.getLogger(__name__)
 
 
 def _readme_path(wd):
@@ -99,6 +102,32 @@ def _template_context(ctx: RunContext):
     return context
 
 
+def _safe_markdown_context(context: dict) -> dict:
+    ron = context.get("ron")
+    run_record = context.get("run_record")
+    safe_context = {
+        "runid": context.get("runid"),
+        "config": context.get("config"),
+        "pup_relpath": context.get("pup_relpath"),
+        "ron": {
+            "name": getattr(ron, "name", None),
+            "scenario": getattr(ron, "scenario", None),
+            "mods": list(getattr(ron, "mods", None) or []),
+            "public": getattr(ron, "public", None),
+            "readonly": getattr(ron, "readonly", None),
+        },
+        "run_record": {
+            "date_created": getattr(run_record, "date_created", None),
+        },
+        "created": getattr(run_record, "date_created", None),
+    }
+
+    nodb_context = context.get("nodb")
+    if isinstance(nodb_context, dict):
+        safe_context["nodb"] = nodb_context
+    return safe_context
+
+
 def _ensure_readme(wd, runid, config):
     path = _readme_path(wd)
     if os.path.exists(path):
@@ -121,7 +150,12 @@ def ensure_readme(ctx: RunContext):
 
 
 def _render_markdown(markdown_source, context):
-    rendered_markdown = render_template_string(markdown_source, **context)
+    safe_context = _safe_markdown_context(context)
+    try:
+        rendered_markdown = _SAFE_MARKDOWN_ENV.from_string(markdown_source).render(safe_context)
+    except Exception as exc:
+        logger.warning("README template render failed: %s", exc)
+        rendered_markdown = "**ERROR**: README template failed to render."
     return markdown_to_html(rendered_markdown)
 
 

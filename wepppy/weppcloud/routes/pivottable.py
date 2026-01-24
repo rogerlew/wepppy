@@ -496,20 +496,22 @@ def pivottable_tree(runid, config, subpath):
     Serve a pivot UI for a specific file under a run working directory.
     """
     ctx = load_run_context(runid, config)
-    wd = os.path.abspath(str(ctx.active_root))
-    dir_path = os.path.abspath(os.path.join(wd, subpath))
+    wd_root = os.path.abspath(str(ctx.active_root))
+    dir_path = os.path.abspath(os.path.join(wd_root, subpath))
 
-    # jail within run wd
-    if not dir_path.startswith(wd + os.sep) and dir_path != wd:
+    # Do not resolve symlinks here: critical functionality for browsing batch,
+    # culverts, omni scenarios, and omni-contrast projects.
+    if not dir_path.startswith(wd_root + os.sep) and dir_path != wd_root:
         abort(403)
 
-    if not _exists(dir_path):
+    if not os.path.exists(dir_path):
         abort(404)
 
     if os.path.isdir(dir_path):
         abort(404)
 
-    return pivottable_response(dir_path, subpath)
+    safe_subpath = os.path.relpath(dir_path, wd_root).replace(os.sep, "/")
+    return pivottable_response(dir_path, safe_subpath)
 
 
 def pivottable_response(path, subpath):

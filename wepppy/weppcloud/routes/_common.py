@@ -37,6 +37,7 @@ from werkzeug.utils import secure_filename
 
 from wepppy.weppcloud.utils.helpers import (
     authorize,
+    authorize_and_handle_with_exception_factory,
     error_factory,
     exception_factory,
     get_wd,
@@ -49,6 +50,7 @@ __all__ = [
     'LoggedBlueprint',
     'abort',
     'authorize',
+    'authorize_and_handle_with_exception_factory',
     'current_app',
     'g',
     'current_user',

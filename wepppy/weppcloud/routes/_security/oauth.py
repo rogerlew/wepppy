@@ -6,6 +6,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 import secrets
 from typing import Any, Dict, Optional, Tuple
+from urllib.parse import urlsplit
 
 import re
 
@@ -110,6 +111,53 @@ def _build_redirect_uri(provider: str, provider_settings: Dict) -> str:
         _external=True,
         _scheme=scheme,
     )
+
+
+def _allowed_redirect_hosts() -> set[str]:
+    hosts: set[str] = set()
+    for key in ("OAUTH_REDIRECT_HOST", "SERVER_NAME"):
+        value = current_app.config.get(key)
+        if value:
+            hosts.add(str(value))
+    return hosts
+
+
+def _host_matches(netloc: str, allowed_host: str) -> bool:
+    if netloc == allowed_host:
+        return True
+    if ":" in netloc and ":" not in allowed_host:
+        host, _, _port = netloc.partition(":")
+        return host == allowed_host
+    return False
+
+
+def _sanitize_next_url(next_url: Optional[str]) -> Optional[str]:
+    if not next_url:
+        return None
+
+    try:
+        parsed = urlsplit(str(next_url))
+    except Exception:
+        return None
+
+    if parsed.scheme or parsed.netloc:
+        allowed_hosts = _allowed_redirect_hosts()
+        if not allowed_hosts:
+            return None
+        if not any(_host_matches(parsed.netloc, host) for host in allowed_hosts):
+            return None
+        safe_path = parsed.path or "/"
+    else:
+        safe_path = parsed.path or ""
+
+    if not safe_path or safe_path.startswith("//"):
+        return None
+
+    if parsed.query:
+        safe_path = f"{safe_path}?{parsed.query}"
+    if parsed.fragment:
+        safe_path = f"{safe_path}#{parsed.fragment}"
+    return safe_path
 
 
 def _extract_name_from_profile(profile: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
@@ -341,9 +389,7 @@ def _link_identity(
 
 def _resolve_next(provider: str) -> Optional[str]:
     next_hint = _pop_session_value(_SESSION_NEXT_KEY, provider)
-    if next_hint:
-        return next_hint
-    return request.args.get("next")
+    return _sanitize_next_url(next_hint) or _sanitize_next_url(request.args.get("next"))
 
 
 @security_oauth_bp.route("/oauth/<provider>/login", methods=["GET"], strict_slashes=False)
@@ -363,6 +409,7 @@ def oauth_login(provider: str):
     _store_session_value(_SESSION_PKCE_KEY, provider, code_verifier)
 
     next_param = request.args.get("next")
+    next_param = _sanitize_next_url(next_param)
     if next_param:
         _store_session_value(_SESSION_NEXT_KEY, provider, next_param)
 

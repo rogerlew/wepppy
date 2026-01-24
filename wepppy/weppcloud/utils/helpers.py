@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from ast import literal_eval
 from datetime import datetime
 from functools import wraps
 import inspect
@@ -17,7 +16,7 @@ from os.path import split as _split
 from typing import Any, Callable, Optional, ParamSpec, TypeVar
 
 import redis
-from flask import Request, Response, current_app, g, jsonify, make_response, url_for
+from flask import Request, Response, abort, current_app, g, jsonify, make_response, url_for
 from werkzeug.exceptions import HTTPException
 
 from wepppy.all_your_base.all_your_base import isint
@@ -689,7 +688,36 @@ def parse_rec_intervals(request: Request, years: int) -> list[int]:
             rec_intervals.append(1000)
         rec_intervals = rec_intervals[::-1]
     else:
-        rec_intervals = literal_eval(rec_intervals)
-        assert all([isint(x) for x in rec_intervals])
+        raw = rec_intervals
+        values: list[Any]
+        if isinstance(raw, (list, tuple, set)):
+            values = list(raw)
+        else:
+            raw_text = str(raw).strip()
+            if not raw_text:
+                raise ValueError("rec_intervals must be a non-empty list")
+            parsed = None
+            try:
+                parsed = json.loads(raw_text)
+            except json.JSONDecodeError:
+                cleaned = raw_text
+                if cleaned.startswith("(") and cleaned.endswith(")"):
+                    cleaned = f"[{cleaned[1:-1]}]"
+                if cleaned.startswith("[") and cleaned.endswith("]"):
+                    cleaned = cleaned[1:-1]
+                parsed = [part.strip() for part in cleaned.split(",") if part.strip()]
+            values = list(parsed) if isinstance(parsed, (list, tuple, set)) else [parsed]
+
+        intervals: list[int] = []
+        for value in values:
+            if value in (None, ''):
+                continue
+            if not isint(value):
+                raise ValueError("rec_intervals must be a list of integers")
+            intervals.append(int(value))
+
+        if not intervals:
+            raise ValueError("rec_intervals must be a non-empty list")
+        rec_intervals = intervals
 
     return rec_intervals

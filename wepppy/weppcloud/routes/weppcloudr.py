@@ -104,14 +104,45 @@ def viz_r(runid, config, r_format, routine):
 
 
 
-def _weppcloudr_script_locator(routine, user=None):
-    global WEPPCLOUDR_DIR 
+def _normalize_user_segment(user: Optional[str]) -> Optional[str]:
     if user is None:
-        return _join(WEPPCLOUDR_DIR, routine)
+        return None
+    user_str = str(user).strip()
+    if not user_str or user_str in {'.', '..'}:
+        raise ValueError("Invalid user path segment")
+    if Path(user_str).name != user_str:
+        raise ValueError("Invalid user path segment")
+    if '/' in user_str or '\\' in user_str:
+        raise ValueError("Invalid user path segment")
+    return user_str
+
+
+def _normalize_routine_name(routine: str) -> str:
+    routine_str = str(routine).strip()
+    if not routine_str:
+        raise ValueError("Routine is required")
+    if Path(routine_str).name != routine_str:
+        raise ValueError("Invalid routine name")
+    if '/' in routine_str or '\\' in routine_str:
+        raise ValueError("Invalid routine name")
+    return routine_str
+
+
+def _weppcloudr_script_locator(routine, user=None):
+    global WEPPCLOUDR_DIR
+    base_dir = Path(WEPPCLOUDR_DIR).resolve()
+    routine_name = _normalize_routine_name(routine)
+    user_segment = _normalize_user_segment(user)
+    if user_segment is None:
+        candidate = base_dir / routine_name
     else:
-        rscript =  _join(WEPPCLOUDR_DIR, 'users', user, routine)
-        assert pathlib.Path(WEPPCLOUDR_DIR) in  pathlib.Path(rscript).parents
-        return rscript
+        candidate = base_dir / 'users' / user_segment / routine_name
+    resolved = candidate.resolve()
+    try:
+        resolved.relative_to(base_dir)
+    except ValueError:
+        raise ValueError("Routine path escapes WEPPcloudR directory")
+    return str(resolved)
 
 
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>')
@@ -164,6 +195,7 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
     sub_sha = get_file_sha1(sub_fn)
 
     try:
+        routine = _normalize_routine_name(routine)
         assert routine.endswith('.R') or routine.endswith('.Rmd'), routine
 
         r_format = routine.split('.')[-1] 
@@ -176,7 +208,24 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
             if r_format.lower() == 'r':
                 cmd = ['Rscript', rscript, runid]
             elif r_format.lower() == "rmd":
-                cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
+                cmd = [
+                    'R',
+                    '-e',
+                    (
+                        'library("rmarkdown"); '
+                        'rmarkdown::render('
+                        'commandArgs(TRUE)[1], '
+                        'params=list(proj_runid=commandArgs(TRUE)[2]), '
+                        'output_file=commandArgs(TRUE)[3], '
+                        'output_dir=commandArgs(TRUE)[4]'
+                        ')'
+                    ),
+                    '--args',
+                    rscript,
+                    runid,
+                    rpt_fn,
+                    viz_export_dir,
+                ]
 
             p = Popen(cmd, stdout=PIPE, stderr=PIPE)
             output, errors = p.communicate()

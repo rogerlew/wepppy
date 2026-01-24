@@ -9,6 +9,7 @@ import hmac
 import json
 import os
 import time
+import uuid
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Iterable, Mapping, Sequence
@@ -382,6 +383,7 @@ def issue_token(
     claims["sub"] = subject
     claims["iat"] = now
     claims["exp"] = now + ttl
+    claims.setdefault("jti", uuid.uuid4().hex)
 
     if config.issuer:
         claims.setdefault("iss", config.issuer)

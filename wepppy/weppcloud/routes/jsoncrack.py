@@ -60,7 +60,8 @@ div {
       
       // Using a variable allows for easier debugging and readability
       const dataToPost = {
-        json: JSON.stringify(__THE_JSON__)
+        // __THE_JSON__ is already a JSON-encoded string literal.
+        json: __THE_JSON__
       };
       
       // Wait for the iframe to load before posting the message
@@ -95,20 +96,22 @@ def jsoncrack_tree(runid, config, subpath):
     Serve a pivot UI for a specific file under a run working directory.
     """
     ctx = load_run_context(runid, config)
-    wd = os.path.abspath(str(ctx.active_root))
-    dir_path = os.path.abspath(os.path.join(wd, subpath))
+    wd_root = os.path.abspath(str(ctx.active_root))
+    dir_path = os.path.abspath(os.path.join(wd_root, subpath))
 
-    # jail within run wd
-    if not dir_path.startswith(wd + os.sep) and dir_path != wd:
+    # Do not resolve symlinks here: critical functionality for browsing batch,
+    # culverts, omni scenarios, and omni-contrast projects.
+    if not dir_path.startswith(wd_root + os.sep) and dir_path != wd_root:
         abort(403)
 
-    if not _exists(dir_path):
+    if not os.path.exists(dir_path):
         abort(404)
 
     if os.path.isdir(dir_path):
         abort(404)
 
-    return jsoncrack_response(dir_path, subpath)
+    safe_subpath = os.path.relpath(dir_path, wd_root).replace(os.sep, "/")
+    return jsoncrack_response(dir_path, safe_subpath)
 
 
 def jsoncrack_response(path, subpath):
@@ -125,7 +128,9 @@ def jsoncrack_response(path, subpath):
     except Exception as e:
         return error_factory(f'failed to read data: {e}')
 
-    page = _html.replace("__THE_JSON__", json_str)\
+    json_payload = json.dumps(json_str).replace("</", "<\\/")
+
+    page = _html.replace("__THE_JSON__", json_payload)\
                 .replace("__FILE__", subpath)\
                 .replace("__SITE_PREFIX__", current_app.config.get('SITE_PREFIX', ''))
     return Response(page, mimetype='text/html; charset=utf-8')
