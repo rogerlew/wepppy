@@ -39,6 +39,9 @@
     align-content: start;
     min-height: auto;
   }
+  #batch-runner-root .wc-summary-pane {
+    max-width: 950px;
+  }
   .batch-runner-status {
     display: inline-flex;
     align-items: center;
@@ -62,6 +65,50 @@
     max-width: fit-content;
     margin-bottom: 0;
   }
+  .batch-runner-runstate {
+    --batch-runstate-cols: 5;
+    font-size: 0.8rem;
+    min-height: 4rem;
+    white-space: normal;
+    max-height: none;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: repeat(var(--batch-runstate-cols), minmax(0, 1fr));
+    column-gap: var(--wc-space-lg);
+    row-gap: 0;
+  }
+  @media (max-width: 1400px) {
+    .batch-runner-runstate {
+      --batch-runstate-cols: 4;
+    }
+  }
+  @media (max-width: 1100px) {
+    .batch-runner-runstate {
+      --batch-runstate-cols: 3;
+    }
+  }
+  @media (max-width: 860px) {
+    .batch-runner-runstate {
+      --batch-runstate-cols: 2;
+    }
+  }
+  @media (max-width: 600px) {
+    .batch-runner-runstate {
+      --batch-runstate-cols: 1;
+    }
+  }
+  .batch-runner-runstate-cell {
+    display: block;
+    white-space: pre;
+  }
+  .batch-runner-runstate-meta {
+    font-size: 0.8rem;
+    margin: var(--wc-space-xs) 0 0;
+  }
+  #batch-runner-root [data-role="upload-status"]:empty,
+  #batch-runner-root [data-role="sbs-upload-status"]:empty {
+    display: none;
+  }
 </style>
 
 {% call ui.control_shell(
@@ -78,8 +125,8 @@
        "variant": "compact"
      },
      summary_panel_options={
-       "summary_id": "info",
-       "title": "Summary"
+       "title": "Batch Progress",
+       "body_html": "<pre id=\"batch_runstate\" class=\"wc-pre wc-pre--compact batch-runner-runstate\" data-role=\"runstate\" aria-live=\"polite\">No batch runs are available yet.</pre><p id=\"batch_runstate_interval\" class=\"wc-text-muted batch-runner-runstate-meta\"></p>"
      },
      stacktrace_panel_options={
        "panel_id": "batch_runner_stacktrace_panel",
@@ -248,7 +295,7 @@
                   id="batch-runner-template-input"
                   rows="3"
                   data-role="template-input"
-                  placeholder="e.g. {slug(properties['HucName'])}-{zfill(one_based_index, 3)}"
+                  placeholder="e.g. {replace(slug(properties['HucName']), '-', '_')}-{zfill(one_based_index, 3)}"
                   {% if not feature_enabled %}disabled{% endif %}></textarea>
         <p class="wc-field__help">Validate to preview run IDs and catch duplicate or missing values before orchestration.</p>
       </div>
@@ -312,7 +359,8 @@
         Run Batch
       </button>
     </div>
-    <div id="hint_run_batch" class="wc-status-chip batch-runner-status" role="status" aria-live="polite"></div>
+    <div id="batch_run_message" class="wc-status-chip batch-runner-status" role="status" aria-live="polite"></div>
+    <p id="hint_run_batch" data-job-hint class="wc-job-hint wc-text-muted"></p>
   </section>
 </div>
 {% endcall %}

@@ -92,6 +92,7 @@ class BatchRunner(NoDbBase):
             self._sbs_map_metadata: Optional[Dict[str, Any]] = None
             self._run_directives = {task: True for task in self.DEFAULT_TASKS}
             self._run_directives[TaskEnum.if_exists_rmtree] = False
+            self._rq_job_ids: Dict[str, str] = {}
 
         self._init_base_project()
 
@@ -122,6 +123,8 @@ class BatchRunner(NoDbBase):
         deserialize _run_directives keys from strings to TaskEnum
         """
         instance = super()._post_instance_loaded(instance)
+        if not hasattr(instance, "_rq_job_ids") or instance._rq_job_ids is None:
+            instance._rq_job_ids = {}
         if instance._run_directives:
             instance._run_directives = {
                 TaskEnum(k): v for k, v in instance._run_directives.items()
@@ -137,6 +140,21 @@ class BatchRunner(NoDbBase):
 
     def is_task_enabled(self, task: TaskEnum) -> bool:
         return bool(self._run_directives.get(task, True))
+
+    @property
+    def rq_job_ids(self) -> Dict[str, str]:
+        return deepcopy(self._rq_job_ids) if self._rq_job_ids else {}
+
+    def set_rq_job_id(self, key: str, job_id: Optional[str]) -> None:
+        if not key:
+            return
+        with self.locked():
+            if not self._rq_job_ids:
+                self._rq_job_ids = {}
+            if job_id:
+                self._rq_job_ids[key] = job_id
+            else:
+                self._rq_job_ids.pop(key, None)
 
     def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
         
@@ -652,6 +670,9 @@ class BatchRunner(NoDbBase):
             snapshot["metadata"]["template_validation"] = deepcopy(self._runid_template_state)
             snapshot["runid_template"] = self._runid_template_state.get("template")
 
+        if self._rq_job_ids:
+            snapshot["metadata"]["rq_job_ids"] = deepcopy(self._rq_job_ids)
+
         for task in self.DEFAULT_TASKS:
             snapshot["run_directives"].append({
                 "slug": task.value,
@@ -681,8 +702,7 @@ class BatchRunner(NoDbBase):
 
         return resource
 
-    def generate_runstate_cli_report(self) -> Dict[str, Any]:
-        from wcwidth import wcswidth
+    def generate_runstate_cli_report(self) -> str:
         s = []
         for wf in self.get_watershed_features_lpt():
             _runid = wf.runid
@@ -695,23 +715,9 @@ class BatchRunner(NoDbBase):
                 
             _checked_states = ''.join(
                 TaskEnum(k).emoji() if v is not None else ' ' for k, v in run_states.items())
-            s.append(f'{_runid:10} {_checked_states}')
+            s.append(f'{_runid} {_checked_states}')
 
-        # arrange in columns
-        n_cols = 6
+        if not s:
+            return ""
 
-        # 2. Use wcswidth instead of len to get the true visual width
-        col_width = max(wcswidth(line) for line in s) + 4 
-
-        rows = [s[i:i+n_cols] for i in range(0, len(s), n_cols)]
-        formatted_rows = []
-        for row in rows:
-            # 3. Use a helper function for padding since f-string padding is based on len()
-            formatted_row = ''.join(f"{item}{' ' * (col_width - wcswidth(item))}" for item in row)
-            formatted_rows.append(formatted_row)
-        cli_report = '\n'.join(formatted_rows)
-
-        # clear screen and print
-        cli_report = '\033c' + cli_report
-
-        print(cli_report)
+        return '\n'.join(s)

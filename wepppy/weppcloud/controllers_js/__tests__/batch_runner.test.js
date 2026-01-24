@@ -45,7 +45,7 @@ describe("BatchRunner controller", () => {
             <form id="batch_runner_form">
                 <div id="status"></div>
                 <div id="stacktrace"></div>
-                <div id="info"></div>
+                <pre id="batch_runstate"></pre>
                 <div id="rq_job"></div>
             </form>
             <div id="batch-runner-root">
@@ -85,7 +85,8 @@ describe("BatchRunner controller", () => {
             </div>
             <div class="form-group" id="batch_runner_run_container">
                 <button id="btn_run_batch" data-action="batch-run" type="button">Run Batch</button>
-                <small id="hint_run_batch"></small>
+                <div id="batch_run_message"></div>
+                <small id="hint_run_batch" data-job-hint></small>
                 <img id="run_batch_lock" style="display:none;">
             </div>
         `;
@@ -162,11 +163,13 @@ describe("BatchRunner controller", () => {
 
         requestMock = jest.fn(() => Promise.resolve({ body: {} }));
         postJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
+        const getJsonMock = jest.fn(() => Promise.resolve({ report: "" }));
 
         global.WCHttp = {
             request: requestMock,
             postJson: postJsonMock,
             postJsonWithFallback: postJsonMock,
+            getJson: getJsonMock,
             isHttpError: jest.fn((error) => Boolean(error && error.name === "HttpError"))
         };
 
@@ -208,6 +211,9 @@ describe("BatchRunner controller", () => {
     });
 
     afterEach(() => {
+        if (controller && typeof controller.destroy === "function") {
+            controller.destroy();
+        }
         delegateTeardowns.forEach((fn) => fn());
         jest.clearAllMocks();
 
@@ -224,7 +230,7 @@ describe("BatchRunner controller", () => {
 
     test("init disables run button until prerequisites satisfied", () => {
         expect(controller.runBatchButton.disabled).toBe(true);
-        expect(document.getElementById("hint_run_batch").textContent).toContain("Upload a watershed");
+        expect(document.getElementById("batch_run_message").textContent).toContain("Upload a watershed");
     });
 
     test("uploadGeojson posts FormData and emits completion event", async () => {
@@ -384,17 +390,16 @@ describe("BatchRunner controller", () => {
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
     });
 
-    test("refreshJobInfo posts job info request when forced", async () => {
-        controller.rq_job_id = "job-10";
-        postJsonMock.mockResolvedValueOnce({ body: { jobs: [] } });
+    test("refreshRunstate requests the runstate report", async () => {
+        global.WCHttp.getJson.mockResolvedValueOnce({ report: "demo  🌍" });
 
-        controller.refreshJobInfo({ force: true });
+        controller.refreshRunstate({ force: true });
         await flushPromises();
 
-        expect(postJsonMock).toHaveBeenCalledWith(
-            "/rq-engine/api/jobinfo",
-            { job_ids: ["job-10"] },
-            expect.objectContaining({ signal: expect.any(Object) })
+        expect(global.WCHttp.getJson).toHaveBeenCalledWith(
+            "/batch/_/demo/runstate",
+            expect.objectContaining({ params: expect.any(Object) })
         );
+        expect(document.getElementById("batch_runstate").textContent).toContain("demo");
     });
 });

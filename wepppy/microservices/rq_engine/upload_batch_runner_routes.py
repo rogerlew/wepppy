@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from wepppy.nodb.base import NoDbAlreadyLockedError, clear_locks
 from wepppy.nodb.batch_runner import BatchRunner
-from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
+from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap, sbs_map_sanity_check
 from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
 from .auth import AuthError, require_jwt, require_roles
@@ -302,12 +302,16 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
     except OSError:
         size_bytes = None
 
-#    sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
-#    if sanity_status != 0:
-#        _safe_unlink(dest_path)
-#        return error_response(sanity_message or "Invalid SBS map.", status_code=400)
-    sanity_status = 0
-    sanity_message = "Sanity check skipped."
+    sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
+    if sanity_status != 0:
+        _safe_unlink(dest_path)
+        return error_response(sanity_message or "Invalid SBS map.", status_code=400)
+
+    burn_class_counts: Optional[Dict[str, int]] = None
+    try:
+        burn_class_counts = SoilBurnSeverityMap(dest_path).burn_class_counts
+    except Exception as exc:
+        logger.warning("rq-engine upload-sbs-map burn class summary failed: %s", exc)
     
     try:
         relative_path = os.path.relpath(dest_path, batch_runner.wd)
@@ -325,6 +329,8 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         "sanity_message": sanity_message,
         "size_bytes": size_bytes,
     }
+    if burn_class_counts:
+        metadata["burn_class_counts"] = burn_class_counts
 
     metadata["uploaded_at"] = datetime.now(timezone.utc).isoformat()
     uploader = _resolve_uploader(claims)

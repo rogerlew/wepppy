@@ -24,6 +24,7 @@ window.batchRunnerBootstrap = {
     sitePrefix: {{ site_prefix | tojson }},
     geojsonLimitMb: {{ geojson_limit_mb | default(10, true) | tojson }},
     state: {{ batch_runner_state | default({}, true) | tojson }},
+    jobIds: {{ batch_runner_state.get("metadata", {}).get("rq_job_ids", {}) | default({}, true) | tojson }},
     rqEngineToken: {{ rq_engine_token | tojson }},
 };
 

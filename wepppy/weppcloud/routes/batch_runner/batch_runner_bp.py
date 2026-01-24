@@ -121,6 +121,10 @@ def _build_batch_runner_snapshot(batch_runner: BatchRunner) -> Dict[str, Any]:
         snapshot.setdefault("metadata", {})["template_validation"] = deepcopy(template_state)
         snapshot["runid_template"] = template_state.get("template")
 
+    rq_job_ids = batch_runner.rq_job_ids
+    if rq_job_ids:
+        snapshot.setdefault("metadata", {})["rq_job_ids"] = deepcopy(rq_job_ids)
+
     return snapshot
 
 
@@ -338,3 +342,37 @@ def validate_template(batch_name: str):
     }
 
     return jsonify(response_payload), 200
+
+
+@batch_runner_bp.route("/batch/_/<string:batch_name>/runstate", methods=["GET"])
+@roles_required("Admin")
+@handle_with_exception_factory
+def runstate(batch_name: str):
+    if not _batch_runner_feature_enabled():
+        return jsonify(_batch_runner_disabled_response()), 403
+
+    try:
+        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    except FileNotFoundError as exc:
+        return jsonify({"error": {"message": str(exc)}}), 404
+
+    try:
+        report = batch_runner.generate_runstate_cli_report()
+    except ValueError as exc:
+        return jsonify({
+            "status": "empty",
+            "message": str(exc),
+            "report": "",
+        }), 200
+
+    if not report:
+        return jsonify({
+            "status": "empty",
+            "message": "No batch runs are available yet.",
+            "report": "",
+        }), 200
+
+    return jsonify({
+        "status": "ok",
+        "report": report,
+    }), 200

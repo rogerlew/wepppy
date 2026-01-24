@@ -24,6 +24,7 @@ def test_build_batch_runner_snapshot_minimal():
         base_config = "disturbed9002_wbt"
         geojson_state = None
         runid_template_state = None
+        rq_job_ids = {}
 
         def __init__(self) -> None:
             self.run_directives = {task: True}

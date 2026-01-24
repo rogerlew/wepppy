@@ -34,7 +34,7 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
-        BatchRunner.getInstanceFromBatchName(batch_name)
+        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404)
 
@@ -46,6 +46,11 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
     except Exception:
         logger.exception("rq-engine run-batch enqueue failed")
         return error_response_with_traceback("Failed to enqueue batch run")
+
+    try:
+        batch_runner.set_rq_job_id("run_batch_rq", job.id)
+    except Exception:
+        logger.warning("rq-engine run-batch: failed to persist job id", exc_info=True)
 
     return JSONResponse(
         {

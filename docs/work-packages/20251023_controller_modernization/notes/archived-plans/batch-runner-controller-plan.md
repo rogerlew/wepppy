@@ -3,7 +3,7 @@
 
 > Living contract for the batch runner controller (`wepppy/weppcloud/controllers_js/batch_runner.js`) and paired routes. Update this document whenever payloads, events, or helper usage changes.
 
-## Current State (2025 Q2)
+## Current State (2026 Q1)
 - **Helpers everywhere.** The controller is fully migrated onto `WCDom`, `WCForms`, `WCHttp`, `WCEvents`, and `controlBase`; no jQuery dependencies remain. DOM wiring relies on `data-action="batch-upload|batch-validate|batch-run"` and `data-run-directive="<slug>"` hooks, while resource/validation panels keep using the established `data-role` markers (`resource-*`, `validation-*`).
 - **Event emitter.** `BatchRunner.getInstance().emitter = WCEvents.useEventMap([...])` broadcasts:
   - `batch:upload:started`, `batch:upload:completed`, `batch:upload:failed`
@@ -11,14 +11,14 @@
   - `batch:run-directives:updated`, `batch:run-directives:update-failed`
   - `batch:run:started`, `batch:run:failed`, `batch:run:completed`
   - `controlBase` lifecycle relays: `job:started`, `job:completed`, `job:error`
-  WebSocket notifications (`BATCH_RUN_COMPLETED`, `END_BROADCAST`, `BATCH_WATERSHED_TASK_COMPLETED`) simply trigger `refreshJobInfo()` so dashboards stay in sync without bespoke polling.
-- **Backend alignment.** Flask routes now call `parse_request_payload`; `BatchRunner.update_run_directives` coerces `"true"/"false"/"on"/"off"/"0"/"1"` into native booleans. The controller posts `FormData` uploads to `/batch/_/<name>/upload-geojson`, JSON payloads to `/validate-template` and `/run-directives`, and submits batch runs to `/rq/api/run-batch`. Job telemetry polls `/weppcloud/rq/api/jobinfo` using tracked IDs with `AbortController` support for restarts.
-- **Testing.** Jest coverage (`controllers_js/__tests__/batch_runner.test.js`) exercises upload/validate flows, directive toggles, run submission, event emission, and job-info polling. Backend tests live in `tests/weppcloud/test_batch_runner_endpoints.py` (upload, validation, directives) and `tests/weppcloud/routes/test_rq_api_batch_runner.py` (queue wiring) using the shared `rq_environment` + `singleton_factory`.
+  WebSocket notifications (`BATCH_RUN_COMPLETED`, `END_BROADCAST`, `BATCH_WATERSHED_TASK_COMPLETED`) trigger `refreshRunstate()` so dashboards stay in sync with the polling loop.
+- **Backend alignment.** Flask routes now call `parse_request_payload`; `BatchRunner.update_run_directives` coerces `"true"/"false"/"on"/"off"/"0"/"1"` into native booleans. The controller posts `FormData` uploads to `/rq-engine/api/batch/_/<name>/upload-geojson` (and `/upload-sbs-map`), JSON payloads to `/batch/_/<name>/validate-template` and `/batch/_/<name>/run-directives`, and submits batch runs to `/rq-engine/api/batch/_/<name>/run-batch`. Job telemetry uses the status stream plus `/batch/_/<name>/runstate` polling (10s) instead of job-info endpoints.
+- **Testing.** Jest coverage (`controllers_js/__tests__/batch_runner.test.js`) exercises upload/validate flows, directive toggles, run submission, event emission, and runstate polling. Backend tests live in `tests/weppcloud/test_batch_runner_endpoints.py` (upload, validation, directives, runstate) and `tests/weppcloud/routes/test_rq_api_batch_runner.py` (queue wiring) using the shared `rq_environment` + `singleton_factory`.
 
 ## Key Design Points
-- **controlBase integration.** The controller delegates button state, job status rendering, and lifecycle events to `controlBase`. Override hooks (`set_rq_job_id`, `handle_job_status_response`, `triggerEvent`) only layer on job-info refreshes and WebSocket hygiene.
-- **Job telemetry.** `jobInfo` state tracks `trackedIds`, `completedIds`, last payloads, and the pending fetch; always route new logic through `_registerTrackedJobId(s)` to keep abort/cancel semantics intact.
-- **Run directives.** Checkbox state serialises to `{slug: boolean}` before POSTing. Treat the response snapshot as authoritative—controllers should re-render based on `payload.snapshot.run_directives`.
+- **controlBase integration.** The controller delegates button state, job status rendering, and lifecycle events to `controlBase`. Override hooks (`set_rq_job_id`, `handle_job_status_response`, `triggerEvent`) only layer on runstate refreshes and WebSocket hygiene.
+- **Runstate telemetry.** The runstate panel renders a CLI-style report in a 5-column responsive grid; polling is fixed at 10s and marked "LPT (largest area first)" to match enqueue order.
+- **Run directives.** Checkbox state serializes to `{slug: boolean}` before POSTing. Treat the response snapshot as authoritative—controllers should re-render based on `payload.snapshot.run_directives`.
 - **Template validation.** Stored previews/summary render from the backend payload; controller-only changes should avoid mutating that structure.
 
 ## Backend Checklist (when touching routes)

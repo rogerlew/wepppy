@@ -49,6 +49,7 @@ def app(tmp_path, monkeypatch):
 
     _unwrap("batch_runner.validate_template")
     _unwrap("batch_runner.update_run_directives")
+    _unwrap("batch_runner.runstate")
 
     with application.app_context():
         root = Path(application.config["BATCH_RUNNER_ROOT"])
@@ -182,3 +183,12 @@ def test_update_run_directives_rejects_non_mapping(client):
     assert response.status_code == 400
     payload = response.get_json()
     assert "error" in payload
+
+
+def test_runstate_reports_empty_state(client):
+    response = client.get("/batch/_/demo/runstate")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["status"] == "empty"
+    assert "report" in payload

@@ -28,53 +28,20 @@ var BatchRunner = (function () {
         "job:error"
     ];
 
-    var JOB_INFO_TERMINAL_STATUSES = new Set([
-        "finished",
-        "failed",
-        "stopped",
-        "canceled",
-        "not_found",
-        "complete",
-        "completed",
-        "success",
-        "error"
-    ]);
-
-    var STATUS_STATE_MAP = {
-        success: "success",
-        ok: "success",
-        completed: "success",
-        complete: "success",
-        finished: "success",
-        error: "critical",
-        failed: "critical",
-        failure: "critical",
-        stopped: "critical",
-        canceled: "critical",
-        cancelled: "critical",
-        not_found: "warning",
-        started: "info",
-        warning: "warning",
-        attention: "warning",
-        queued: "warning",
-        pending: "warning",
-        info: "info",
-        running: "info",
-        active: "info",
-        default: ""
-    };
 
     var SELECTORS = {
         form: "#batch_runner_form",
         statusDisplay: "#batch_runner_form #status",
         stacktrace: "#batch_runner_form #stacktrace",
-        infoPanel: "#batch_runner_form #info",
+        runstatePanel: "#batch_runner_form #batch_runstate",
+        runstateInterval: "#batch_runner_form #batch_runstate_interval",
         rqJob: "#batch_runner_form #rq_job",
         container: "#batch-runner-root",
         resourceCard: "#batch-runner-resource-card",
         sbsCard: "#batch-runner-sbs-card",
         templateCard: "#batch-runner-template-card",
         runBatchButton: "#btn_run_batch",
+        runBatchStatus: "#batch_run_message",
         runBatchHint: "#hint_run_batch",
         runBatchLock: "#run_batch_lock"
     };
@@ -130,7 +97,7 @@ var BatchRunner = (function () {
         if (!forms || typeof forms.serializeForm !== "function") {
             throw new Error("BatchRunner controller requires WCForms helpers.");
         }
-        if (!http || typeof http.request !== "function") {
+        if (!http || typeof http.request !== "function" || typeof http.getJson !== "function") {
             throw new Error("BatchRunner controller requires WCHttp helpers.");
         }
         if (!events || typeof events.createEmitter !== "function" || typeof events.useEventMap !== "function") {
@@ -152,6 +119,33 @@ var BatchRunner = (function () {
             .replace(/'/g, "&#39;");
     }
 
+    function createLegacyAdapter(element) {
+        if (!element) {
+            return null;
+        }
+        return {
+            element: element,
+            html: function (value) {
+                element.innerHTML = value === undefined || value === null ? "" : String(value);
+            },
+            text: function (value) {
+                element.textContent = value === undefined || value === null ? "" : String(value);
+            },
+            show: function () {
+                element.hidden = false;
+                if (element.style) {
+                    element.style.removeProperty("display");
+                }
+            },
+            hide: function () {
+                element.hidden = true;
+                if (element.style) {
+                    element.style.display = "none";
+                }
+            }
+        };
+    }
+
     function formatBytes(bytes) {
         if (bytes === undefined || bytes === null || isNaN(bytes)) {
             return "—";
@@ -164,6 +158,17 @@ var BatchRunner = (function () {
             return (size / 1024).toFixed(1) + " KB";
         }
         return (size / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function formatCount(value) {
+        if (value === undefined || value === null || isNaN(value)) {
+            return "—";
+        }
+        var num = Number(value);
+        if (!isFinite(num)) {
+            return "—";
+        }
+        return Math.round(num).toLocaleString();
     }
 
     function formatBBox(bbox) {
@@ -204,16 +209,6 @@ var BatchRunner = (function () {
         }
     }
 
-    function resolveStatusState(status) {
-        if (!status) {
-            return STATUS_STATE_MAP.default;
-        }
-        var key = String(status).toLowerCase();
-        if (Object.prototype.hasOwnProperty.call(STATUS_STATE_MAP, key)) {
-            return STATUS_STATE_MAP[key];
-        }
-        return STATUS_STATE_MAP.default;
-    }
 
     function resolveErrorMessage(error, fallback) {
         if (error && typeof error === "object") {
@@ -302,22 +297,22 @@ var BatchRunner = (function () {
         controller.command_btn_id = "btn_run_batch";
         controller.statusStream = null;
         controller.statusSpinnerEl = null;
+        controller.statusPanelEl = null;
+        controller.stacktracePanelEl = null;
         controller._statusStreamRunId = null;
 
         controller._delegates = [];
         controller._runDirectivesSaving = false;
         controller._runDirectivesStatus = { message: "", state: "" };
 
-        controller.jobInfo = {
-            pollIntervalMs: 3000,
+        controller.runstate = {
+            pollIntervalMs: 10000,
             refreshTimer: null,
             fetchInFlight: false,
             refreshPending: false,
             lastFetchStartedAt: 0,
             forceNextFetch: false,
-            trackedIds: new Set(),
-            completedIds: new Set(),
-            lastPayload: null,
+            lastReport: null,
             abortController: null
         };
 
@@ -328,9 +323,11 @@ var BatchRunner = (function () {
         controller.form = null;
         controller.statusDisplay = null;
         controller.stacktrace = null;
-        controller.infoPanel = null;
+        controller.runstatePanel = null;
+        controller.runstateInterval = null;
         controller.rq_job = null;
         controller.runBatchButton = null;
+        controller.runBatchStatus = null;
         controller.runBatchHint = null;
         controller.runBatchLock = null;
 
@@ -366,15 +363,11 @@ var BatchRunner = (function () {
         controller.validationPreview = null;
         controller.previewBody = null;
 
-        controller._jobInfoTerminalStatuses = JOB_INFO_TERMINAL_STATUSES;
-        controller._jobInfoTrackedIds = controller.jobInfo.trackedIds;
-        controller._jobInfoCompletedIds = controller.jobInfo.completedIds;
-
         controller.init = init;
         controller.initCreate = init;
         controller.initManage = init;
         controller.destroy = destroy;
-        controller.refreshJobInfo = refreshJobInfo;
+        controller.refreshRunstate = refreshRunstate;
         controller.runBatch = runBatch;
         controller.uploadGeojson = uploadGeojson;
         controller.validateTemplate = validateTemplate;
@@ -404,20 +397,11 @@ var BatchRunner = (function () {
         controller._submitRunDirectives = submitRunDirectives;
 
         controller._renderCoreStatus = renderCoreStatus;
-        controller._renderJobInfo = renderJobInfo;
-        controller._collectJobNodes = collectJobNodes;
-        controller._registerTrackedJobId = registerTrackedJobId;
-        controller._registerTrackedJobIds = registerTrackedJobIds;
-        controller._unregisterTrackedJobId = unregisterTrackedJobId;
-        controller._bootstrapTrackedJobIds = bootstrapTrackedJobIds;
-        controller._resolveJobInfoRequestIds = resolveJobInfoRequestIds;
-        controller._normalizeJobInfoPayload = normalizeJobInfoPayload;
-        controller._registerJobInfoTrees = registerJobInfoTrees;
-        controller._dedupeJobNodes = dedupeJobNodes;
-        controller._pruneCompletedJobIds = pruneCompletedJobIds;
-        controller._cancelJobInfoTimer = cancelJobInfoTimer;
-        controller._ensureJobInfoFetchScheduled = ensureJobInfoFetchScheduled;
-        controller._performJobInfoFetch = performJobInfoFetch;
+        controller._renderRunstate = renderRunstate;
+        controller._renderRunstateInterval = renderRunstateInterval;
+        controller._cancelRunstateTimer = cancelRunstateTimer;
+        controller._ensureRunstateFetchScheduled = ensureRunstateFetchScheduled;
+        controller._performRunstateFetch = performRunstateFetch;
 
         controller._buildBaseUrl = buildBaseUrl;
         controller._apiUrl = apiUrl;
@@ -445,16 +429,26 @@ var BatchRunner = (function () {
             controller.form = deps.dom.qs(SELECTORS.form);
             controller.statusDisplay = deps.dom.qs(SELECTORS.statusDisplay);
             controller.stacktrace = deps.dom.qs(SELECTORS.stacktrace);
-            controller.infoPanel = deps.dom.qs(SELECTORS.infoPanel);
+            controller.runstatePanel = deps.dom.qs(SELECTORS.runstatePanel);
+            controller.runstateInterval = deps.dom.qs(SELECTORS.runstateInterval);
             controller.rq_job = deps.dom.qs(SELECTORS.rqJob);
+            controller.statusPanelEl = controller.form
+                ? controller.form.querySelector("[data-status-panel]")
+                : null;
+            controller.stacktracePanelEl = controller.form
+                ? controller.form.querySelector("[data-stacktrace-panel]")
+                : null;
 
             controller.container = deps.dom.qs(SELECTORS.container);
             controller.resourceCard = deps.dom.qs(SELECTORS.resourceCard);
             controller.templateCard = deps.dom.qs(SELECTORS.templateCard);
 
             controller.runBatchButton = deps.dom.qs(SELECTORS.runBatchButton);
+            controller.runBatchStatus = deps.dom.qs(SELECTORS.runBatchStatus);
             controller.runBatchHint = deps.dom.qs(SELECTORS.runBatchHint);
             controller.runBatchLock = deps.dom.qs(SELECTORS.runBatchLock);
+            controller.hint = createLegacyAdapter(controller.runBatchHint);
+            controller.summaryElement = controller.runstatePanel;
             if (!controller.statusSpinnerEl && controller.form) {
                 try {
                     controller.statusSpinnerEl = controller.form.querySelector("#braille");
@@ -473,11 +467,12 @@ var BatchRunner = (function () {
 
             updateStatusStream(controller.state.batchName);
 
-            bootstrapTrackedJobIds(bootstrap);
+            hydrateJobId(bootstrap);
 
             renderCoreStatus();
             render();
-            refreshJobInfo();
+            renderRunstateInterval();
+            refreshRunstate({ force: true });
             controller.render_job_status(controller);
 
             return controller;
@@ -494,7 +489,11 @@ var BatchRunner = (function () {
                 channel: "batch",
                 runId: desiredRunId,
                 spinner: controller.statusSpinnerEl,
-                logLimit: 400
+                logLimit: 400,
+                stacktrace: {
+                    element: controller.stacktracePanelEl,
+                    body: controller.stacktrace
+                }
             });
             controller._statusStreamRunId = desiredRunId;
         }
@@ -510,12 +509,13 @@ var BatchRunner = (function () {
                 }
             });
             controller._delegates = [];
-            cancelJobInfoTimer();
-            if (controller.jobInfo.abortController && typeof controller.jobInfo.abortController.abort === "function") {
+            cancelRunstateTimer();
+            controller.runstate.refreshPending = false;
+            if (controller.runstate.abortController && typeof controller.runstate.abortController.abort === "function") {
                 try {
-                    controller.jobInfo.abortController.abort();
+                    controller.runstate.abortController.abort();
                 } catch (err) {
-                    console.warn("Failed to abort job info request during destroy", err);
+                    console.warn("Failed to abort runstate request during destroy", err);
                 }
             }
         }
@@ -831,6 +831,22 @@ var BatchRunner = (function () {
             if (resource.sanity_message) {
                 metaRows.push(renderMetaRow("Validation", resource.sanity_message));
             }
+            if (resource.burn_class_counts && typeof resource.burn_class_counts === "object") {
+                var burnCounts = resource.burn_class_counts;
+                [
+                    { key: "No Burn", label: "Pixels: No Burn" },
+                    { key: "Low Severity Burn", label: "Pixels: Low Severity" },
+                    { key: "Moderate Severity Burn", label: "Pixels: Moderate Severity" },
+                    { key: "High Severity Burn", label: "Pixels: High Severity" },
+                    { key: "No Data", label: "Pixels: No Data" }
+                ].forEach(function (entry) {
+                    var count = burnCounts[entry.key];
+                    if (count === undefined || count === null) {
+                        count = 0;
+                    }
+                    metaRows.push(renderMetaRow(entry.label, formatCount(count)));
+                });
+            }
             if (resource.replaced) {
                 metaRows.push(renderMetaRow("Replaced existing file", resource.replaced ? "Yes" : "No"));
             }
@@ -1108,11 +1124,11 @@ var BatchRunner = (function () {
         }
 
         function setRunBatchMessage(message, state) {
-            if (!controller.runBatchHint) {
+            if (!controller.runBatchStatus) {
                 return;
             }
-            applyDataState(controller.runBatchHint, state);
-            setText(controller.runBatchHint, message || "");
+            applyDataState(controller.runBatchStatus, state);
+            setText(controller.runBatchStatus, message || "");
         }
 
         function setUploadBusy(busy, message) {
@@ -1245,429 +1261,149 @@ var BatchRunner = (function () {
             submitRunDirectives(values);
         }
 
-        function renderJobInfo(payload) {
-            var infoPanel = controller.infoPanel;
-            if (!infoPanel) {
+        function renderRunstate(payload) {
+            var panel = controller.runstatePanel;
+            if (!panel) {
                 return;
             }
-
-            if (!payload) {
-                infoPanel.innerHTML = '<div class="wc-text-muted">Job information unavailable.</div>';
+            var report = "";
+            var message = "";
+            if (payload && typeof payload === "object") {
+                report = payload.report || "";
+                message = payload.message || "";
+            }
+            if (report) {
+                renderRunstateGrid(report);
+                controller.runstate.lastReport = report;
                 return;
             }
-
-            controller.jobInfo.lastPayload = payload;
-            var normalized = normalizeJobInfoPayload(payload);
-            var jobInfos = Array.isArray(normalized.jobs) ? normalized.jobs : [];
-
-            if (!jobInfos.length) {
-                infoPanel.innerHTML = '<div class="wc-text-muted">Job information unavailable.</div>';
+            if (message) {
+                panel.textContent = message;
                 return;
             }
+            if (controller.runstate.lastReport) {
+                renderRunstateGrid(controller.runstate.lastReport);
+                return;
+            }
+            panel.textContent = "No batch runs are available yet.";
+        }
 
-            registerJobInfoTrees(jobInfos);
-
-            var nodes = [];
-            jobInfos.forEach(function (info) {
-                collectJobNodes(info, nodes);
-            });
-            var dedupedNodes = dedupeJobNodes(nodes);
-            pruneCompletedJobIds(dedupedNodes);
-
-            var watershedNodes = dedupedNodes.filter(function (node) {
-                return node && node.runid;
-            });
-
-            var totalWatersheds = watershedNodes.length;
-            var completedWatersheds = watershedNodes.filter(function (node) {
-                return node.status === "finished";
-            }).length;
-            var failedWatersheds = watershedNodes.filter(function (node) {
-                return (
-                    node.status === "failed" ||
-                    node.status === "stopped" ||
-                    node.status === "canceled"
-                );
-            });
-            var activeWatersheds = watershedNodes.filter(function (node) {
-                return (
-                    node.status &&
-                    node.status !== "finished" &&
-                    node.status !== "failed" &&
-                    node.status !== "stopped" &&
-                    node.status !== "canceled"
-                );
-            });
-
-            var parts = ['<div class="wc-stack">'];
-
-            if (jobInfos.length === 1) {
-                var rootInfo = jobInfos[0] || {};
-                parts.push(
-                    '<div class="wc-status-chip"' +
-                        (resolveStatusState(rootInfo.status) ? ' data-state="' + resolveStatusState(rootInfo.status) + '"' : "") +
-                        ">Batch status: " +
-                        escapeHtml(rootInfo.status || "unknown") +
-                        "</div>"
-                );
-                if (rootInfo.id) {
-                    parts.push(
-                        '<div class="wc-text-muted">Job ID: <code>' + escapeHtml(rootInfo.id) + "</code></div>"
-                    );
-                }
-            } else {
-                parts.push("<div class=\"wc-text-muted\">Tracked jobs:</div>");
-                var maxJobsToShow = 6;
-                var jobBadges = jobInfos.slice(0, maxJobsToShow).map(function (info) {
-                    var safeStatus = escapeHtml((info && info.status) || "unknown");
-                    var safeId = escapeHtml((info && info.id) || "—");
-                    var state = resolveStatusState(info && info.status);
-                    return (
-                        '<span class="wc-status-chip"' +
-                        (state ? ' data-state="' + state + '"' : "") +
-                        ">" +
-                        safeStatus +
-                        " · <code>" +
-                        safeId +
-                        "</code></span>"
-                    );
+        function renderRunstateGrid(report) {
+            var panel = controller.runstatePanel;
+            if (!panel) {
+                return;
+            }
+            var lines = String(report || "")
+                .split("\n")
+                .filter(function (line) {
+                    return line !== "";
                 });
-                if (jobInfos.length > maxJobsToShow) {
-                    jobBadges.push('<span class="wc-text-muted">…</span>');
-                }
-                parts.push('<div>' + jobBadges.join(" ") + "</div>");
-            }
 
-            var allNotFound = jobInfos.every(function (info) {
-                return info && info.status === "not_found";
-            });
+            panel.textContent = "";
 
-            if (allNotFound) {
-                parts.push(
-                    '<div class="wc-text-muted">Requested job IDs were not found in the queue.</div>'
-                );
-                parts.push("</div>");
-                infoPanel.innerHTML = parts.join("");
+            if (!lines.length) {
+                panel.textContent = "No batch runs are available yet.";
                 return;
             }
 
-            if (totalWatersheds > 0) {
-                parts.push(
-                    '<div class="wc-text-muted">Watersheds: ' +
-                        completedWatersheds +
-                        "/" +
-                        totalWatersheds +
-                        " finished</div>"
-                );
-            } else {
-                parts.push('<div class="wc-text-muted">Watershed tasks have not started yet.</div>');
-            }
-
-            if (activeWatersheds.length) {
-                var activeList = activeWatersheds.slice(0, 6).map(function (node) {
-                    var state = resolveStatusState(node.status || "running");
-                    return (
-                        '<span class="wc-status-chip"' +
-                        (state ? ' data-state="' + state + '"' : "") +
-                        ">" +
-                        escapeHtml(node.runid) +
-                        " · " +
-                        escapeHtml(node.status || "pending") +
-                        "</span>"
-                    );
-                });
-                if (activeWatersheds.length > activeList.length) {
-                    activeList.push('<span class="wc-text-muted">…</span>');
-                }
-                parts.push(
-                    '<div class="wc-stack"><strong>Active</strong><div>' +
-                        activeList.join(" ") +
-                        "</div></div>"
-                );
-            }
-
-            if (failedWatersheds.length) {
-                var failedList = failedWatersheds.slice(0, 6).map(function (node) {
-                    return (
-                        '<span class="wc-status-chip" data-state="critical">' +
-                        escapeHtml(node.runid) +
-                        "</span>"
-                    );
-                });
-                if (failedWatersheds.length > failedList.length) {
-                    failedList.push('<span class="wc-text-muted">…</span>');
-                }
-                parts.push(
-                    '<div class="wc-stack"><strong>Failures</strong><div>' +
-                        failedList.join(" ") +
-                        "</div></div>"
-                );
-            }
-
-            parts.push("</div>");
-            infoPanel.innerHTML = parts.join("");
-        }
-
-        function collectJobNodes(jobInfo, acc) {
-            if (!jobInfo) {
-                return;
-            }
-            acc.push(jobInfo);
-            var children = jobInfo.children || {};
-            Object.keys(children).forEach(function (orderKey) {
-                var bucket = children[orderKey] || [];
-                bucket.forEach(function (child) {
-                    if (child) {
-                        collectJobNodes(child, acc);
-                    }
-                });
+            lines.forEach(function (line) {
+                var cell = document.createElement("span");
+                cell.className = "batch-runner-runstate-cell";
+                cell.textContent = line;
+                panel.appendChild(cell);
             });
         }
 
-        function registerTrackedJobId(jobId) {
-            if (jobId === undefined || jobId === null) {
-                return false;
+        function formatRunstateInterval(ms) {
+            if (ms === undefined || ms === null) {
+                return "";
             }
-            var normalized = String(jobId).trim();
-            if (!normalized) {
-                return false;
+            var seconds = Number(ms) / 1000;
+            if (!isFinite(seconds) || seconds <= 0) {
+                return "";
             }
-            if (controller.jobInfo.completedIds.has(normalized)) {
-                return false;
-            }
-            if (!controller.jobInfo.trackedIds.has(normalized)) {
-                controller.jobInfo.trackedIds.add(normalized);
-                return true;
-            }
-            return false;
+            var label = Number.isInteger(seconds)
+                ? String(seconds)
+                : seconds.toFixed(1);
+            return "Updates every " + label + "s. Jobs are queued LPT (largest area first).";
         }
 
-        function unregisterTrackedJobId(jobId) {
-            if (jobId === undefined || jobId === null) {
-                return false;
-            }
-            var normalized = String(jobId).trim();
-            if (!normalized) {
-                return false;
-            }
-            if (controller.jobInfo.trackedIds.has(normalized)) {
-                controller.jobInfo.trackedIds.delete(normalized);
-                return true;
-            }
-            return false;
-        }
-
-        function registerTrackedJobIds(collection) {
-            if (!collection) {
+        function renderRunstateInterval() {
+            if (!controller.runstateInterval) {
                 return;
             }
-            if (Array.isArray(collection)) {
-                collection.forEach(registerTrackedJobId);
-                return;
-            }
-            if (typeof collection === "object") {
-                Object.keys(collection).forEach(function (key) {
-                    registerTrackedJobId(collection[key]);
-                });
-                return;
-            }
-            registerTrackedJobId(collection);
+            var text = formatRunstateInterval(controller.runstate.pollIntervalMs);
+            setText(controller.runstateInterval, text);
         }
 
-        function bootstrapTrackedJobIds(bootstrap) {
-            if (!bootstrap || typeof bootstrap !== "object") {
-                return;
-            }
-
-            if (Array.isArray(bootstrap.jobIds)) {
-                registerTrackedJobIds(bootstrap.jobIds);
-            }
-
-            if (bootstrap.rqJobIds && typeof bootstrap.rqJobIds === "object") {
-                registerTrackedJobIds(bootstrap.rqJobIds);
-            }
-
-            var snapshot = bootstrap.state || {};
-            var metadata =
-                snapshot && typeof snapshot === "object" ? snapshot.metadata || {} : {};
-
-            registerTrackedJobIds(snapshot.job_ids);
-            registerTrackedJobIds(metadata.job_ids);
-            registerTrackedJobIds(metadata.rq_job_ids);
-            registerTrackedJobIds(metadata.tracked_job_ids);
-        }
-
-        function resolveJobInfoRequestIds() {
-            var ids = new Set();
-
-            if (controller.rq_job_id) {
-                var rootId = String(controller.rq_job_id).trim();
-                if (rootId && !controller.jobInfo.completedIds.has(rootId)) {
-                    ids.add(rootId);
-                }
-            }
-
-            controller.jobInfo.trackedIds.forEach(function (value) {
-                if (!value) {
-                    return;
-                }
-                var normalizedTracked = String(value).trim();
-                if (normalizedTracked && !controller.jobInfo.completedIds.has(normalizedTracked)) {
-                    ids.add(normalizedTracked);
-                }
-            });
-
-            return Array.from(ids);
-        }
-
-        function normalizeJobInfoPayload(payload) {
-            if (!payload || typeof payload !== "object") {
-                return { jobs: [] };
-            }
-            if (Array.isArray(payload.jobs)) {
-                return payload;
-            }
-            if (Array.isArray(payload.job_info)) {
-                return { jobs: payload.job_info };
-            }
-            if (payload.jobs && typeof payload.jobs === "object") {
-                return { jobs: Object.values(payload.jobs) };
-            }
-            return { jobs: [] };
-        }
-
-        function registerJobInfoTrees(jobInfos) {
-            if (!Array.isArray(jobInfos)) {
-                return;
-            }
-            jobInfos.forEach(function (info) {
-                if (info && info.job_id) {
-                    registerTrackedJobId(info.job_id);
-                    if (controller._jobInfoTerminalStatuses.has(info.status)) {
-                        controller.jobInfo.completedIds.add(String(info.job_id).trim());
-                    }
-                }
-            });
-        }
-
-        function dedupeJobNodes(nodes) {
-            var seen = new Set();
-            var result = [];
-            nodes.forEach(function (node) {
-                if (!node || !node.job_id) {
-                    return;
-                }
-                var normalized = String(node.job_id).trim();
-                if (seen.has(normalized)) {
-                    return;
-                }
-                seen.add(normalized);
-                result.push(node);
-            });
-            return result;
-        }
-
-        function pruneCompletedJobIds(nodes) {
-            if (!Array.isArray(nodes)) {
-                return;
-            }
-            nodes.forEach(function (node) {
-                if (!node || !node.job_id) {
-                    return;
-                }
-                var id = String(node.job_id).trim();
-                if (!id) {
-                    return;
-                }
-                if (controller._jobInfoTerminalStatuses.has(node.status)) {
-                    controller.jobInfo.completedIds.add(id);
-                    controller.jobInfo.trackedIds.delete(id);
-                }
-            });
-        }
-
-        function cancelJobInfoTimer() {
-            if (controller.jobInfo.refreshTimer) {
-                clearTimeout(controller.jobInfo.refreshTimer);
-                controller.jobInfo.refreshTimer = null;
+        function cancelRunstateTimer() {
+            if (controller.runstate.refreshTimer) {
+                clearTimeout(controller.runstate.refreshTimer);
+                controller.runstate.refreshTimer = null;
             }
         }
 
-        function ensureJobInfoFetchScheduled() {
-            if (controller.jobInfo.fetchInFlight) {
+        function ensureRunstateFetchScheduled() {
+            if (controller.runstate.fetchInFlight) {
                 return;
             }
 
             var now = Date.now();
-            var interval = controller.jobInfo.pollIntervalMs || 0;
-            var lastStarted = controller.jobInfo.lastFetchStartedAt || 0;
+            var interval = controller.runstate.pollIntervalMs || 0;
+            var lastStarted = controller.runstate.lastFetchStartedAt || 0;
             var elapsed = now - lastStarted;
-            var forceNext = controller.jobInfo.forceNextFetch === true;
+            var forceNext = controller.runstate.forceNextFetch === true;
 
             if (!forceNext && interval > 0 && elapsed < interval) {
-                if (controller.jobInfo.refreshTimer) {
+                if (controller.runstate.refreshTimer) {
                     return;
                 }
-                controller.jobInfo.refreshTimer = setTimeout(function () {
-                    controller.jobInfo.refreshTimer = null;
-                    performJobInfoFetch();
+                controller.runstate.refreshTimer = setTimeout(function () {
+                    controller.runstate.refreshTimer = null;
+                    performRunstateFetch();
                 }, interval - elapsed);
                 return;
             }
 
-            controller.jobInfo.forceNextFetch = false;
-            performJobInfoFetch();
+            controller.runstate.forceNextFetch = false;
+            performRunstateFetch();
         }
 
-        function performJobInfoFetch() {
-            if (!controller.infoPanel) {
+        function performRunstateFetch() {
+            if (!controller.runstatePanel) {
+                return;
+            }
+            if (!controller.state.batchName) {
+                return;
+            }
+            if (controller.runstate.fetchInFlight) {
+                return;
+            }
+            if (!controller.http || typeof controller.http.getJson !== "function") {
+                console.warn("BatchRunner requires WCHttp.getJson for runstate polling.");
                 return;
             }
 
-            if (controller.jobInfo.fetchInFlight) {
-                return;
-            }
-
-            cancelJobInfoTimer();
-            controller.jobInfo.forceNextFetch = false;
-
-            var jobIds = resolveJobInfoRequestIds();
-            if (!jobIds.length) {
-                controller.jobInfo.refreshPending = false;
-                if (!controller.jobInfo.lastPayload) {
-                    controller.infoPanel.innerHTML =
-                        '<div class="wc-text-muted">No batch job submitted yet.</div>';
-                }
-                return;
-            }
-
-            jobIds.forEach(registerTrackedJobId);
-
-            controller.jobInfo.refreshPending = false;
-            controller.jobInfo.fetchInFlight = true;
-            controller.jobInfo.lastFetchStartedAt = Date.now();
+            cancelRunstateTimer();
+            controller.runstate.forceNextFetch = false;
+            controller.runstate.fetchInFlight = true;
+            controller.runstate.lastFetchStartedAt = Date.now();
 
             if (typeof AbortController !== "undefined") {
-                if (controller.jobInfo.abortController) {
-                    controller.jobInfo.abortController.abort();
+                if (controller.runstate.abortController) {
+                    controller.runstate.abortController.abort();
                 }
-                controller.jobInfo.abortController = new AbortController();
+                controller.runstate.abortController = new AbortController();
             }
 
-            var signal = controller.jobInfo.abortController
-                ? controller.jobInfo.abortController.signal
+            var signal = controller.runstate.abortController
+                ? controller.runstate.abortController.signal
                 : undefined;
 
             controller.http
-                .postJson(
-                    "/rq-engine/api/jobinfo",
-                    { job_ids: jobIds },
-                    { signal: signal }
-                )
-                .then(function (response) {
-                    var payload = normalizeJobInfoPayload(response.body);
-                    registerTrackedJobIds(payload.job_ids);
-                    renderJobInfo(payload);
+                .getJson(apiUrl("runstate"), { params: { _: Date.now() }, signal: signal })
+                .then(function (payload) {
+                    renderRunstate(payload);
                 })
                 .catch(function (error) {
                     if (
@@ -1678,41 +1414,81 @@ var BatchRunner = (function () {
                     ) {
                         return;
                     }
-                    console.warn("Unable to refresh batch job info:", error);
-                    if (controller.infoPanel) {
-                        controller.infoPanel.innerHTML =
-                            '<div class="wc-text-muted">Unable to refresh batch job details.</div>';
+                    var message = resolveErrorMessage(error, "Unable to refresh batch progress.");
+                    console.warn("Unable to refresh batch runstate:", error);
+                    if (!controller.runstate.lastReport && controller.runstatePanel) {
+                        controller.runstatePanel.textContent = message;
                     }
                 })
                 .finally(function () {
-                    if (controller.jobInfo.abortController) {
-                        controller.jobInfo.abortController = null;
+                    if (controller.runstate.abortController) {
+                        controller.runstate.abortController = null;
                     }
-                    controller.jobInfo.fetchInFlight = false;
-                    if (controller.jobInfo.refreshPending) {
-                        ensureJobInfoFetchScheduled();
+                    controller.runstate.fetchInFlight = false;
+                    if (controller.runstate.refreshPending) {
+                        ensureRunstateFetchScheduled();
                     }
                 });
         }
 
-        function refreshJobInfo(options) {
+        function refreshRunstate(options) {
             options = options || {};
-            if (!controller.infoPanel) {
+            if (!controller.runstatePanel) {
                 return;
             }
 
             if (options.force === true) {
-                controller.jobInfo.forceNextFetch = true;
-                controller.jobInfo.refreshPending = true;
-                cancelJobInfoTimer();
-                if (!controller.jobInfo.fetchInFlight) {
-                    performJobInfoFetch();
+                controller.runstate.forceNextFetch = true;
+                controller.runstate.refreshPending = true;
+                cancelRunstateTimer();
+                if (!controller.runstate.fetchInFlight) {
+                    performRunstateFetch();
                 }
                 return;
             }
 
-            controller.jobInfo.refreshPending = true;
-            ensureJobInfoFetchScheduled();
+            controller.runstate.refreshPending = true;
+            ensureRunstateFetchScheduled();
+        }
+
+        function hydrateJobId(bootstrap) {
+            var ctx = bootstrap || {};
+            var helper = window.WCControllerBootstrap || null;
+            var jobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "run_batch_rq")
+                : null;
+
+            if (!jobId && ctx.job_id) {
+                jobId = ctx.job_id;
+            }
+
+            if (!jobId) {
+                var jobIds = ctx.jobIds || ctx.jobs;
+                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_batch_rq")) {
+                    var value = jobIds.run_batch_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                    }
+                }
+            }
+
+            if (!jobId) {
+                var snapshot = ctx.state || {};
+                var metadata = snapshot && typeof snapshot === "object" ? snapshot.metadata || {} : {};
+                if (metadata && metadata.rq_job_ids && metadata.rq_job_ids.run_batch_rq) {
+                    jobId = String(metadata.rq_job_ids.run_batch_rq);
+                } else if (metadata && metadata.job_ids && metadata.job_ids.run_batch_rq) {
+                    jobId = String(metadata.job_ids.run_batch_rq);
+                }
+            }
+
+            if (jobId) {
+                controller.poll_completion_event = "BATCH_RUN_COMPLETED";
+            }
+
+            if (typeof controller.set_rq_job_id === "function") {
+                controller.set_rq_job_id(controller, jobId);
+            }
         }
 
         function applyResourceVisibility() {
@@ -2016,37 +1792,14 @@ var BatchRunner = (function () {
                 return;
             }
 
-            if (
-                controller.jobInfo.abortController &&
-                typeof controller.jobInfo.abortController.abort === "function"
-            ) {
-                try {
-                    controller.jobInfo.abortController.abort();
-                } catch (abortError) {
-                    console.warn(
-                        "Failed to abort in-flight job info request before submitting batch:",
-                        abortError
-                    );
-                }
-                controller.jobInfo.abortController = null;
+            if (typeof controller.reset_panel_state === "function") {
+                controller.reset_panel_state(controller);
             }
-            cancelJobInfoTimer();
-            controller.jobInfo.fetchInFlight = false;
-            controller.jobInfo.refreshPending = false;
-            controller.jobInfo.forceNextFetch = false;
-            controller.jobInfo.lastFetchStartedAt = 0;
-            controller.jobInfo.trackedIds.clear();
-            controller.jobInfo.completedIds.clear();
-            controller.jobInfo.lastPayload = null;
+            cancelRunstateTimer();
 
             setRunBatchBusy(true, "Submitting batch run…", "info");
 
             controller.connect_status_stream(controller);
-
-            if (controller.infoPanel) {
-                controller.infoPanel.innerHTML =
-                    '<div class="wc-status-chip" data-state="info">Submitting batch job…</div>';
-            }
 
             controller.http
                 .postJson(
@@ -2064,6 +1817,7 @@ var BatchRunner = (function () {
                     }
 
                     if (payload.job_id) {
+                        controller.poll_completion_event = "BATCH_RUN_COMPLETED";
                         controller.set_rq_job_id(controller, payload.job_id);
                     } else {
                         controller.update_command_button_state(controller);
@@ -2080,16 +1834,11 @@ var BatchRunner = (function () {
                         batchName: controller.state.batchName,
                         job_id: payload.job_id || null
                     });
+                    refreshRunstate({ force: true });
                 })
                 .catch(function (error) {
                     var message = resolveErrorMessage(error, "Failed to submit batch run.");
                     setRunBatchMessage(message, "critical");
-                    if (controller.infoPanel) {
-                        controller.infoPanel.innerHTML =
-                            '<div class="wc-status-chip" data-state="critical">' +
-                            escapeHtml(message) +
-                            "</div>";
-                    }
                     controller.disconnect_status_stream(controller);
                     controller.emitter.emit("batch:run:failed", {
                         error: message,
@@ -2121,17 +1870,7 @@ var BatchRunner = (function () {
                 baseSetRqJobId.call(ctrl, self, jobId);
                 if (self === ctrl) {
                     if (jobId) {
-                        var normalizedJobId = String(jobId).trim();
-                        if (ctrl.jobInfo.completedIds) {
-                            ctrl.jobInfo.completedIds.delete(normalizedJobId);
-                        }
-                        registerTrackedJobId(normalizedJobId);
-                    }
-                    if (jobId) {
-                        refreshJobInfo({ force: true });
-                    } else if (ctrl.infoPanel) {
-                        ctrl.infoPanel.innerHTML =
-                            '<div class="wc-text-muted">No batch job submitted yet.</div>';
+                        refreshRunstate({ force: true });
                     }
                 }
             };
@@ -2140,7 +1879,7 @@ var BatchRunner = (function () {
             ctrl.handle_job_status_response = function (self, data) {
                 baseHandleJobStatusResponse.call(ctrl, self, data);
                 if (self === ctrl) {
-                    refreshJobInfo();
+                    refreshRunstate();
                 }
             };
 
@@ -2149,7 +1888,7 @@ var BatchRunner = (function () {
                 if (eventName === "BATCH_RUN_COMPLETED" || eventName === "END_BROADCAST") {
                     ctrl.disconnect_status_stream(ctrl);
                     ctrl.reset_status_spinner(ctrl);
-                    refreshJobInfo({ force: true });
+                    refreshRunstate({ force: true });
                     if (eventName === "BATCH_RUN_COMPLETED") {
                         ctrl.emitter.emit("batch:run:completed", {
                             batchName: ctrl.state.batchName,
@@ -2174,8 +1913,9 @@ var BatchRunner = (function () {
                         error: errorText || "Batch run failed.",
                         batchName: ctrl.state.batchName
                     });
+                    refreshRunstate({ force: true });
                 } else if (eventName === "BATCH_WATERSHED_TASK_COMPLETED") {
-                    refreshJobInfo();
+                    refreshRunstate();
                 }
 
                 baseTriggerEvent.call(ctrl, eventName, payload);
