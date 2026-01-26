@@ -64,27 +64,7 @@ var Omni = (function () {
         },
         undisturbed: {
             label: "Undisturbed",
-            controls: [],
-            condition: function (ctx) {
-                var disturbed = resolveDisturbed();
-                if (!disturbed) {
-                    return false;
-                }
-                if (typeof disturbed.get_has_sbs_cached === "function") {
-                    var cached = disturbed.get_has_sbs_cached();
-                    if (cached !== undefined) {
-                        return cached === true;
-                    }
-                }
-                if (typeof disturbed.has_sbs === "function") {
-                    try {
-                        return disturbed.has_sbs({ forceRefresh: false }) === true;
-                    } catch (err) {
-                        console.warn("[Omni] Disturbed.has_sbs failed", err);
-                    }
-                }
-                return false;
-            }
+            controls: []
         },
         prescribed_fire: {
             label: "Prescribed Fire",
