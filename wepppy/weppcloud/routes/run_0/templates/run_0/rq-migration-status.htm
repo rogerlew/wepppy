@@ -602,13 +602,14 @@ async function runMigrations() {
       throw new Error('Failed to queue migration job: missing job id.');
     }
     const statusUrl = data.status_url || `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}`;
+    const dashboardUrl = `/rq/job-dashboard/${encodeURIComponent(jobId)}`;
     const wasReadonly = data.result && data.result.was_readonly;
     const safeJobId = escapeHtml(jobId);
 
     resultDiv.className = 'alert alert-info mt-2';
     resultDiv.innerHTML = `
       <strong>⏳ Migration job queued</strong>
-      <p class="mb-1">Job ID: <code>${safeJobId}</code></p>
+      <p class="mb-1">Job ID: <a href="${dashboardUrl}" target="_blank" rel="noopener noreferrer"><code>${safeJobId}</code></a></p>
       <p class="mb-1" id="status-text">Waiting for job to start...</p>
       ${wasReadonly ? '<p class="wc-text-muted">Readonly state will be restored after migration.</p>' : ''}
       <div class="progress-bar mt-1">
