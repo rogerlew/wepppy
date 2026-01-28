@@ -34,9 +34,10 @@ from wepppy.config.redis_settings import (
 )
 
 from wepppy.wepp.interchange import (
-    run_wepp_hillslope_interchange, 
-    run_wepp_watershed_interchange, 
-    generate_interchange_documentation
+    generate_interchange_documentation,
+    run_wepp_hillslope_interchange,
+    run_wepp_watershed_interchange,
+    run_wepp_watershed_tc_out_interchange,
 )
 from wepppy.wepp.interchange.dss_dates import parse_dss_date
 from wepppy.wepp.interchange.hec_ras_boundary import build_boundary_condition_features
@@ -1005,8 +1006,10 @@ def _post_run_cleanup_out_rq(runid: str) -> None:
         tc_src = _join(wepp.runs_dir, 'tc_out.txt')
         if _exists(tc_src):
             tc_dst = _join(wepp.output_dir, 'tc_out.txt')
-            wepp.logger.info('    copying tc_out.txt...')
-            shutil.copy2(tc_src, tc_dst)
+            wepp.logger.info('    moving tc_out.txt...')
+            shutil.move(tc_src, tc_dst)
+            if _exists(tc_dst):
+                run_wepp_watershed_tc_out_interchange(wepp.output_dir)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:

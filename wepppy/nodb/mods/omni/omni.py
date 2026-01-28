@@ -59,7 +59,10 @@ from wepppy.nodb.base import (
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.version import copy_version_for_clone
-from wepppy.wepp.interchange import run_wepp_hillslope_interchange
+from wepppy.wepp.interchange import (
+    run_wepp_hillslope_interchange,
+    run_wepp_watershed_tc_out_interchange,
+)
 from wepppy.wepp.reports import refresh_return_period_events
 from wepppy.rq.topo_utils import _prune_stream_order
 
@@ -159,8 +162,10 @@ def _post_watershed_run_cleanup(wepp: Wepp) -> None:
     tc_src = _join(wepp.runs_dir, "tc_out.txt")
     if _exists(tc_src):
         tc_dst = _join(wepp.output_dir, "tc_out.txt")
-        wepp.logger.info("    copying tc_out.txt...")
-        shutil.copy2(tc_src, tc_dst)
+        wepp.logger.info("    moving tc_out.txt...")
+        shutil.move(tc_src, tc_dst)
+        if _exists(tc_dst):
+            run_wepp_watershed_tc_out_interchange(wepp.output_dir)
 
 class OmniScenario(IntEnum):
     UniformLow = 1
