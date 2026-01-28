@@ -1392,14 +1392,16 @@ class NoDbBase(object):
         from wepppy.nodb.mods.baer import Baer
 
         try:
-            baer = Disturbed.getInstance(self.wd)
-            return baer.has_map
+            disturbed = Disturbed.getInstance(self.wd)
+            if disturbed.has_map:
+                return True
         except:
             pass
 
         try:
             baer = Baer.getInstance(self.wd)
-            return baer.has_map
+            if baer.has_map:
+                return True
         except:
             pass
 
