@@ -81,6 +81,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
         start_year: Optional[int] = climate.calendar_start_year
         baseflow_opts = wepp.baseflow_opts
         is_single_storm = climate.is_single_storm
+        delete_after_interchange = wepp.delete_after_interchange
     except Exception as e:
         print(f"❌ Failed to load run configuration: {e}")
         return
@@ -137,6 +138,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
             run_loss_interchange=not is_single_storm,
             run_soil_interchange=not is_single_storm,
             run_wat_interchange=not is_single_storm,
+            delete_after_interchange=delete_after_interchange,
         )
         print(f"✅ Hillslope interchange complete: {result_dir}")
         
@@ -160,6 +162,7 @@ def migrate_run_interchange(run_dir: str, force: bool = False) -> None:
                 start_year=start_year,
                 run_soil_interchange=not is_single_storm,
                 run_chnwb_interchange=not is_single_storm,
+                delete_after_interchange=delete_after_interchange,
             )
             print(f"✅ Watershed interchange complete")
             

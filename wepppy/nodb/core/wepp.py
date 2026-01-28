@@ -2706,6 +2706,7 @@ class Wepp(NoDbBase):
             start_year=start_year,
             run_soil_interchange=not is_single_storm,
             run_chnwb_interchange=not is_single_storm,
+            delete_after_interchange=self.delete_after_interchange,
         )
         generate_interchange_documentation(self.wepp_interchange_dir)
 

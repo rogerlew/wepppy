@@ -43,6 +43,7 @@ def ensure_hillslope_interchange(
         run_loss_interchange=not climate.is_single_storm,
         run_soil_interchange=not climate.is_single_storm,
         run_wat_interchange=not climate.is_single_storm,
+        delete_after_interchange=wepp.delete_after_interchange,
     )
 
 
@@ -80,6 +81,7 @@ def ensure_watershed_interchange(
         start_year=climate.calendar_start_year,
         run_soil_interchange=not climate.is_single_storm,
         run_chnwb_interchange=not climate.is_single_storm,
+        delete_after_interchange=wepp.delete_after_interchange,
     )
     generate_interchange_documentation(wepp.wepp_interchange_dir)
 

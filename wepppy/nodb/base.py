@@ -1411,6 +1411,10 @@ class NoDbBase(object):
     def config_stem(self):
         return self._config.split('.cfg')[0]
 
+    @property
+    def delete_after_interchange(self) -> bool:
+        return bool(self.config_get_bool("interchange", "delete_after_interchange", False))
+
     def config_get_bool(self, section: str, option: str, default=None):
         assert default is None or isbool(default)
         try:

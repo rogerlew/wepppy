@@ -6,4 +6,5 @@ def run_wepp_watershed_tc_out_interchange(
     wepp_output_dir: Path | str,
     *,
     start_year: int | None = ...,
+    delete_after_interchange: bool = ...,
 ) -> Path | None: ...

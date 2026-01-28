@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import errno
 import logging
+from datetime import datetime, timezone
 import shutil
 from pathlib import Path
 from typing import Dict, List
@@ -18,6 +19,15 @@ TC_OUT_PARQUET = "tc_out.parquet"
 CHUNK_SIZE = 250_000
 
 LOGGER = logging.getLogger(__name__)
+
+def _audit_log(log_path: Path, message: str) -> None:
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        with log_path.open("a", encoding="utf-8") as stream:
+            stream.write(f"{timestamp} {message}\n")
+    except Exception:
+        LOGGER.warning("Failed to write interchange audit log: %s", log_path, exc_info=True)
 
 
 SCHEMA = schema_with_version(
@@ -192,6 +202,7 @@ def run_wepp_watershed_tc_out_interchange(
     wepp_output_dir: Path | str,
     *,
     start_year: int | None = None,
+    delete_after_interchange: bool = False,
 ) -> Path | None:
     base = Path(wepp_output_dir)
     if not base.exists():
@@ -228,8 +239,10 @@ def run_wepp_watershed_tc_out_interchange(
         calendar_lookup=calendar_lookup,
         start_year=start_year,
     )
-    try:
-        source.unlink()
-    except FileNotFoundError:
-        LOGGER.debug("tc_out.txt already removed before cleanup: %s", source)
+    if delete_after_interchange:
+        try:
+            source.unlink()
+            _audit_log(base / "interchange.log", f"removed {source}")
+        except FileNotFoundError:
+            LOGGER.debug("tc_out.txt already removed before cleanup: %s", source)
     return target

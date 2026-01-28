@@ -502,12 +502,21 @@ def report_wepp_run_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    flowpaths_n = len(glob(_join(wd, 'wepp/flowpaths/output/*.plot.dat')))
-    subs_n = len(glob(_join(wd, 'wepp/output/*.pass.dat')))
-    subs_n += len(glob(_join(wd, 'wepp/output/*/*.pass.dat')))
+    subs_n = None
+    interchange_path = _join(wd, "wepp/output/interchange/loss_pw0.hill.parquet")
+    if _exists(interchange_path):
+        try:
+            import pyarrow.parquet as pq
+
+            subs_n = pq.ParquetFile(interchange_path).metadata.num_rows
+        except Exception:
+            subs_n = None
+
+    if subs_n is None:
+        subs_n = len(glob(_join(wd, 'wepp/output/*.pass.dat')))
+        subs_n += len(glob(_join(wd, 'wepp/output/*/*.pass.dat')))
 
     return render_template('reports/wepp_run_summary.htm', runid=runid, config=config,
-                           flowpaths_n=flowpaths_n,
                            subs_n=subs_n,
                            ron=ron)
 

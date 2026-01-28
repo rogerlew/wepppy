@@ -7,4 +7,12 @@ from typing import Optional
 LOGGER: logging.Logger
 _update_catalog_entry: Optional[object]
 
-def run_wepp_hillslope_interchange(wepp_output_dir: Path | str, *, start_year: Optional[int] = ...) -> Path: ...
+def run_wepp_hillslope_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    start_year: Optional[int] = ...,
+    run_loss_interchange: bool = ...,
+    run_soil_interchange: bool = ...,
+    run_wat_interchange: bool = ...,
+    delete_after_interchange: bool = ...,
+) -> Path: ...

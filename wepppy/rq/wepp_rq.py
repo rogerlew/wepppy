@@ -1009,7 +1009,10 @@ def _post_run_cleanup_out_rq(runid: str) -> None:
             wepp.logger.info('    moving tc_out.txt...')
             shutil.move(tc_src, tc_dst)
             if _exists(tc_dst):
-                run_wepp_watershed_tc_out_interchange(wepp.output_dir)
+                run_wepp_watershed_tc_out_interchange(
+                    wepp.output_dir,
+                    delete_after_interchange=wepp.delete_after_interchange,
+                )
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
@@ -1058,6 +1061,7 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         climate = Climate.getInstance(wd)
+        delete_after_interchange = climate.delete_after_interchange
         start_year = climate.calendar_start_year
         is_single_storm = climate.is_single_storm
         # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat files
@@ -1067,6 +1071,7 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
             run_loss_interchange=not is_single_storm,
             run_soil_interchange=not is_single_storm,
             run_wat_interchange=not is_single_storm,
+            delete_after_interchange=delete_after_interchange,
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
@@ -1164,6 +1169,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         climate = Climate.getInstance(wd)
+        delete_after_interchange = climate.delete_after_interchange
         start_year = climate.calendar_start_year
         run_soil_interchange = not climate.is_single_storm
         run_chnwb_interchange = not climate.is_single_storm
@@ -1172,6 +1178,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
             start_year=start_year,
             run_soil_interchange=run_soil_interchange,
             run_chnwb_interchange=run_chnwb_interchange,
+            delete_after_interchange=delete_after_interchange,
         )
         generate_interchange_documentation(_join(wd, 'wepp/output/interchange'))
         activate_query_engine(wd, run_interchange=False, force_refresh=True)

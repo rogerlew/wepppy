@@ -153,8 +153,8 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 ## Key APIs
 | Function | Purpose |
 | --- | --- |
-| `run_wepp_hillslope_interchange(wepp_output_dir, start_year=None)` | Serial hillslope pipeline; returns `Path` to `interchange/` and writes the version manifest. |
-| `run_wepp_watershed_interchange(wepp_output_dir, start_year=None)` | Threaded watershed pipeline; fans out to individual writers and finalizes the manifest. |
+| `run_wepp_hillslope_interchange(wepp_output_dir, start_year=None)` | Serial hillslope pipeline; returns `Path` to `interchange/` and writes the version manifest (supports `delete_after_interchange` to remove raw text outputs). |
+| `run_wepp_watershed_interchange(wepp_output_dir, start_year=None)` | Threaded watershed pipeline; fans out to individual writers and finalizes the manifest (supports `delete_after_interchange` to remove raw text outputs). |
 | `write_parquet_with_pool(files, parser, schema, target_path, **kwargs)` | Shared fan-out writer that parallelizes parsing, buffers results, and commits atomically (respects `WEPP_INTERCHANGE_FORCE_SERIAL`). |
 | `load_hill_wat_dataframe(wepp_output_dir, wepp_id, collapse='daily')` | Convenience accessor returning either daily aggregated or raw OFE-level WAT records via DuckDB. |
 | `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` | Produces watershed-wide daily hydrologic summaries, baseflow diagnostics, and ash transport mass totals from interchange + `ash` parquet files. |
@@ -163,6 +163,9 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | `generate_interchange_documentation(interchange_dir, to_readme_md=True)` | Builds Markdown documentation (schema + previews) for the current interchange directory. |
 
 ## Configuration
+
+### Run Config Flags
+- `[interchange] delete_after_interchange=true` removes WEPP text outputs after successful Parquet conversion and appends removals to `wepp/output/interchange.log`. This is only honored by explicit interchange generation paths (run completion, RQ, Omni, migrate scripts), not by query engine auto-activation.
 
 ### Environment Variables
 
@@ -664,7 +667,7 @@ interchange/
 ### Debugging Tips
 
 1. **Force serial processing**: `export WEPP_INTERCHANGE_FORCE_SERIAL=1` to disable process pool
-2. **Inspect raw text**: Compare Parquet output to source `.dat` files line-byline
+2. **Inspect raw text**: Compare Parquet output to source `.dat` files line-by-line
 3. **Use Parquet tools**: `parquet-tools schema H.pass.parquet` or `parquet-tools head H.pass.parquet`
 4. **DuckDB shell**: `duckdb` then `SELECT * FROM 'H.pass.parquet' LIMIT 10;`
 5. **Check version manifest**: `cat interchange_version.json` to verify compatibility

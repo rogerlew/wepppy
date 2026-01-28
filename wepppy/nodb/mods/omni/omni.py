@@ -165,7 +165,10 @@ def _post_watershed_run_cleanup(wepp: Wepp) -> None:
         wepp.logger.info("    moving tc_out.txt...")
         shutil.move(tc_src, tc_dst)
         if _exists(tc_dst):
-            run_wepp_watershed_tc_out_interchange(wepp.output_dir)
+            run_wepp_watershed_tc_out_interchange(
+                wepp.output_dir,
+                delete_after_interchange=wepp.delete_after_interchange,
+            )
 
 class OmniScenario(IntEnum):
     UniformLow = 1
@@ -4450,7 +4453,11 @@ class Omni(NoDbBase):
                 if normalized is not None:
                     start_year = normalized
                     break
-            run_wepp_hillslope_interchange(wepp.output_dir, start_year=start_year)
+            run_wepp_hillslope_interchange(
+                wepp.output_dir,
+                start_year=start_year,
+                delete_after_interchange=self.delete_after_interchange,
+            )
 
         with self.timed(f'  {scenario_name}: prep watershed'):
             wepp.prep_watershed()
