@@ -10,11 +10,12 @@ summary events when an entire batch completes so the UI can react in real time.
 import inspect
 import json
 import logging
+import os
 import socket
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import redis
 from rq import Queue, get_current_job
@@ -27,9 +28,11 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb.base import NoDbAlreadyLockedError
+from wepppy.nodb.base import NoDbAlreadyLockedError, clear_nodb_file_cache
 from wepppy.nodb.batch_runner import BatchRunner
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.topo.watershed_collection import WatershedFeature
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -47,6 +50,32 @@ logger = logging.getLogger(__name__)
 
 def _write_run_metadata(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+def _reset_omni_nodb_from_base(base_wd: Path, runid_wd: Path, runid: str) -> None:
+    base_omni = base_wd / "omni.nodb"
+    if not base_omni.exists():
+        logger.info("batch_rq: omni.nodb missing in base_wd=%s; skipping reset", base_wd)
+        return
+
+    with base_omni.open("r", encoding="utf-8") as fp:
+        state = json.load(fp)
+
+    if "py/state" in state:
+        state["py/state"]["wd"] = str(runid_wd)
+    else:
+        state["wd"] = str(runid_wd)
+
+    runid_wd.mkdir(parents=True, exist_ok=True)
+    target = runid_wd / "omni.nodb"
+    with target.open("w", encoding="utf-8") as fp:
+        json.dump(state, fp)
+        fp.flush()
+        os.fsync(fp.fileno())
+
+    try:
+        clear_nodb_file_cache(runid)
+    except Exception as exc:
+        logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
 
 def run_batch_rq(batch_name: str) -> Job:
     """Enqueue a batch run for each watershed feature and a finalizer task.
@@ -159,6 +188,19 @@ def run_batch_watershed_rq(
                 status_channel,
                 f'rq:{job_id} INFO cleared stale locks {list(locks_cleared)}',
             )
+
+        runid_wd = Path(get_wd(runid))
+        prep: Optional[RedisPrep] = None
+        try:
+            prep = RedisPrep.getInstance(str(runid_wd))
+        except FileNotFoundError:
+            prep = None
+
+        if batch_runner.is_task_enabled(TaskEnum.run_omni_scenarios) and (
+            prep is None or prep[str(TaskEnum.run_omni_scenarios)] is None
+        ):
+            _reset_omni_nodb_from_base(Path(batch_runner.base_wd), runid_wd, runid)
+            run_omni_scenarios_rq(runid)
 
         elapsed = time.time() - start_ts
         status = True
