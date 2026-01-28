@@ -288,6 +288,9 @@ def get_batch_root_dir() -> str:
         root = current_app.config.get("BATCH_RUNNER_ROOT")
         if root:
             return os.fspath(root)
+    env_root = os.getenv("BATCH_RUNNER_ROOT")
+    if env_root:
+        return os.fspath(env_root)
     return "/wc1/batch"
 
 
