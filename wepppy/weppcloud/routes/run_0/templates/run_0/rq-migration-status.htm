@@ -602,7 +602,7 @@ async function runMigrations() {
       throw new Error('Failed to queue migration job: missing job id.');
     }
     const statusUrl = data.status_url || `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}`;
-    const dashboardUrl = `/rq/job-dashboard/${encodeURIComponent(jobId)}`;
+    const dashboardUrl = `/weppcloud/rq/job-dashboard/${encodeURIComponent(jobId)}`;
     const wasReadonly = data.result && data.result.was_readonly;
     const safeJobId = escapeHtml(jobId);
 
