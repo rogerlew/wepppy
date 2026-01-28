@@ -11,6 +11,7 @@ import inspect
 import json
 import logging
 import os
+import shutil
 import socket
 import time
 from datetime import datetime, timezone
@@ -76,6 +77,16 @@ def _reset_omni_nodb_from_base(base_wd: Path, runid_wd: Path, runid: str) -> Non
         clear_nodb_file_cache(runid)
     except Exception as exc:
         logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
+
+    base_omni_dir = base_wd / "_pups" / "omni"
+    if not base_omni_dir.exists():
+        logger.info("batch_rq: omni dir missing in base_wd=%s; skipping sync", base_omni_dir)
+        return
+
+    target_omni_dir = runid_wd / "_pups" / "omni"
+    if target_omni_dir.exists():
+        shutil.rmtree(target_omni_dir)
+    shutil.copytree(base_omni_dir, target_omni_dir)
 
 def run_batch_rq(batch_name: str) -> Job:
     """Enqueue a batch run for each watershed feature and a finalizer task.
