@@ -203,18 +203,15 @@ def delete_run(runid, config):
         return error_factory('cannot delete readonly project')
 
     try:
-        shutil.rmtree(wd)
-    except:
-        return exception_factory('Error removing project folder', runid=runid)
+        from wepppy.rq.project_rq import delete_run_rq, TIMEOUT
 
-    try:
-        Run, User, user_datastore = get_user_models()
-        run = Run.query.filter(Run.runid == runid).first()
-        user_datastore.delete_run(run)
-    except:
-        return exception_factory('Error removing run from database', runid=runid)
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+            queue = Queue(connection=redis_conn)
+            job = queue.enqueue_call(delete_run_rq, (runid, wd), timeout=TIMEOUT)
+    except Exception:
+        return exception_factory('Error queuing delete task', runid=runid)
 
-    return success_factory()
+    return success_factory({'job_id': job.id})
 
 
 @project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')

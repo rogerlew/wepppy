@@ -91,6 +91,7 @@
       </div>
       <div class="wc-toolbar wc-toolbar--end">
         <button type="button" class="pure-button pure-button-secondary" id="delete_runs_button" onclick="deleteRuns()" disabled>Delete selected</button>
+        <div id="runs-delete-status" class="wc-text-muted" aria-live="polite" style="margin-left: var(--wc-space-sm);"></div>
       </div>
 
       <div class="wc-table-wrapper">
@@ -145,6 +146,7 @@
   const runsSearchInput = document.getElementById('runs_search_input');
   const runsSearchClear = document.getElementById('runs_search_clear');
   const runsSearchGo = document.getElementById('runs_search_go');
+  const runsDeleteStatus = document.getElementById('runs-delete-status');
   const showOwner = {{ show_owner | tojson }};
   const runsSortParam = {{ sort | default('last_modified', true) | tojson }};
   const runsDirectionParam = {{ direction | default('desc', true) | tojson }};
@@ -164,6 +166,12 @@
   let searchQuery = '';
   let runsMapInitialized = false;
   let runsMapDeck = null;
+  const deleteTracker = {
+    total: 0,
+    completed: 0,
+    failed: 0,
+    pending: new Map(),
+  };
 
   const initialParams = new URLSearchParams(window.location.search);
   const pageParam = parseInt(initialParams.get('page'), 10);
@@ -399,13 +407,109 @@
     updateRunsUrl();
   }
 
-  async function deleteRun(runid) {
-    const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, { method: 'POST' });
-    if (response.ok) {
-      runsCatalog = runsCatalog.filter((run) => run.runid !== runid);
-      applyRunsFilter({ resetPage: false });
+  function setDeleteStatus(message, isError) {
+    if (!runsDeleteStatus) {
+      return;
+    }
+    runsDeleteStatus.textContent = message || '';
+    runsDeleteStatus.classList.toggle('wc-text-danger', Boolean(isError));
+  }
+
+  function updateDeleteSummary() {
+    if (!deleteTracker.total) {
+      setDeleteStatus('');
+      return;
+    }
+    const pendingCount = deleteTracker.pending.size;
+    const completed = deleteTracker.completed;
+    const failed = deleteTracker.failed;
+    if (pendingCount > 0) {
+      setDeleteStatus(`Deleting runs... ${completed}/${deleteTracker.total} complete`, false);
+      return;
+    }
+    if (failed > 0) {
+      setDeleteStatus(`Delete finished with ${failed} error${failed === 1 ? '' : 's'}.`, true);
     } else {
-      console.error('Failed to delete run', runid);
+      setDeleteStatus(`Delete complete (${completed}/${deleteTracker.total}).`, false);
+    }
+  }
+
+  function extractJobId(payload) {
+    if (!payload) {
+      return null;
+    }
+    if (payload.job_id) {
+      return payload.job_id;
+    }
+    if (payload.Content && payload.Content.job_id) {
+      return payload.Content.job_id;
+    }
+    return null;
+  }
+
+  async function pollDeleteJob(jobId, runid, attempt = 0) {
+    const maxAttempts = 120;
+    const delayMs = Math.min(2000 + attempt * 500, 8000);
+    try {
+      const response = await fetch(`/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}`, {
+        credentials: 'same-origin',
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.error) {
+        throw new Error(payload?.error?.message || 'Delete job status failed');
+      }
+      const status = String(payload.status || '').toLowerCase();
+      if (status === 'finished') {
+        deleteTracker.pending.delete(jobId);
+        deleteTracker.completed += 1;
+        runsCatalog = runsCatalog.filter((run) => run.runid !== runid);
+        applyRunsFilter({ resetPage: false });
+        updateDeleteSummary();
+        return;
+      }
+      if (['failed', 'stopped', 'canceled', 'error'].includes(status)) {
+        deleteTracker.pending.delete(jobId);
+        deleteTracker.failed += 1;
+        updateDeleteSummary();
+        return;
+      }
+      if (attempt < maxAttempts) {
+        updateDeleteSummary();
+        window.setTimeout(() => pollDeleteJob(jobId, runid, attempt + 1), delayMs);
+      } else {
+        deleteTracker.pending.delete(jobId);
+        deleteTracker.failed += 1;
+        updateDeleteSummary();
+      }
+    } catch (error) {
+      if (attempt < maxAttempts) {
+        window.setTimeout(() => pollDeleteJob(jobId, runid, attempt + 1), delayMs);
+      } else {
+        deleteTracker.pending.delete(jobId);
+        deleteTracker.failed += 1;
+        updateDeleteSummary();
+      }
+    }
+  }
+
+  async function deleteRun(runid) {
+    try {
+      const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, { method: 'POST' });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || (payload && payload.error)) {
+        throw new Error(payload?.error?.message || 'Failed to enqueue delete');
+      }
+      const jobId = extractJobId(payload);
+      if (!jobId) {
+        throw new Error('Delete job id missing');
+      }
+      deleteTracker.pending.set(jobId, { runid });
+      updateDeleteSummary();
+      pollDeleteJob(jobId, runid);
+    } catch (error) {
+      deleteTracker.failed += 1;
+      updateDeleteSummary();
+      console.error('Failed to delete run', runid, error);
     }
   }
 
@@ -461,7 +565,7 @@
     }
   }
 
-  function deleteRuns() {
+  async function deleteRuns() {
     if (!runsTable) {
       return;
     }
@@ -474,7 +578,9 @@
     if (!confirmed) {
       return;
     }
-    runids.forEach(deleteRun);
+    deleteTracker.total += runids.length;
+    updateDeleteSummary();
+    await Promise.all(runids.map((runid) => deleteRun(runid)));
   }
 
   function setRunsView(view) {

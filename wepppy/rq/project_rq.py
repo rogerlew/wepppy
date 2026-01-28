@@ -8,6 +8,7 @@ ingest and landuse building through run forking and archive restoration -
 emitting status updates for the front-end while coordinating NoDb controllers.
 """
 
+import errno
 import inspect
 import json
 import os
@@ -325,6 +326,89 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid}, readonly={readonly})')
         raise
+
+
+@with_exception_logging
+def delete_run_rq(runid: str, wd: Optional[str] = None) -> None:
+    """Delete a run directory and its database record in the background."""
+    job = get_current_job()
+    job_id = getattr(job, "id", "sync")
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:wepp'
+    StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({runid})')
+
+    target = Path(wd or get_wd(runid)).resolve()
+    attempts = 5
+    delay_s = 0.5
+
+    if target.exists():
+        for attempt in range(1, attempts + 1):
+            try:
+                shutil.rmtree(target)
+            except FileNotFoundError:
+                break
+            except OSError as exc:
+                if attempt >= attempts or exc.errno not in {
+                    errno.ENOTEMPTY,
+                    errno.EACCES,
+                    errno.EBUSY,
+                }:
+                    raise
+                StatusMessenger.publish(
+                    status_channel,
+                    f'rq:{job_id} STATUS delete retry {attempt}/{attempts} ({exc})',
+                )
+                time.sleep(delay_s)
+                delay_s = min(delay_s * 2, 5.0)
+            else:
+                if not target.exists():
+                    break
+        if target.exists():
+            raise OSError(errno.ENOTEMPTY, f'Failed to remove {target}')
+
+    try:
+        cleared = clear_nodb_file_cache(runid)
+        if cleared:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} STATUS cleared {len(cleared)} NoDb cache entries',
+            )
+    except Exception as exc:
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job_id} STATUS failed to clear NoDb cache ({exc})',
+        )
+
+    try:
+        clear_locks(runid)
+    except Exception as exc:
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job_id} STATUS failed to clear NoDb locks ({exc})',
+        )
+
+    def _delete_db() -> None:
+        from wepppy.weppcloud.utils.helpers import get_user_models
+
+        Run, _User, user_datastore = get_user_models()
+        run = Run.query.filter(Run.runid == runid).first()
+        if run is not None:
+            user_datastore.delete_run(run)
+
+    try:
+        from flask import has_app_context
+        from wepppy.weppcloud.app import app as flask_app
+
+        if has_app_context():
+            _delete_db()
+        else:
+            with flask_app.app_context():
+                _delete_db()
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({runid})')
+        raise
+
+    StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({runid})')
 
 
 @with_exception_logging
