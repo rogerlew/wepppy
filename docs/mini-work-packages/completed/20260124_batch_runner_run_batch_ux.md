@@ -1,5 +1,5 @@
 # Mini Work Package: Batch Runner Run Batch UX + Progress Polling
-Status: Draft
+Status: Completed
 Last Updated: 2026-01-24
 Primary Areas: `wepppy/rq/batch_rq.py`, `wepppy/nodb/batch_runner.py`, `wepppy/weppcloud/routes/batch_runner/*`, `wepppy/weppcloud/controllers_js/batch_runner.js`
 

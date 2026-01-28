@@ -73,20 +73,23 @@
           <a class="pure-button pure-button-secondary"
              href="{{ url_for_run('readme.readme_editor', runid=view_runid, config=view_config) }}"
              target="_blank"
-             rel="noopener">
+             rel="noopener"
+             data-open-tab-pref>
             README
           </a>
           {% if not pup_relpath %}
           <a class="pure-button pure-button-secondary"
              href="{{ url_for_run('fork.rq_fork_console', runid=view_runid, config=view_config) }}"
              target="_blank"
-             rel="noopener">
+             rel="noopener"
+             data-open-tab-pref>
             FORK
           </a>
           <a class="pure-button pure-button-secondary"
              href="{{ url_for_run('archive.rq_archive_dashboard', runid=view_runid, config=view_config) }}"
              target="_blank"
-             rel="noopener">
+             rel="noopener"
+             data-open-tab-pref>
             ARCHIVE
           </a>
           {% endif %}
@@ -112,7 +115,8 @@
               <a class="wc-run-header__menu-link"
                  href="{{ url_for('usersum.view_markdown', category='weppcloud', filename='mods-overview.md') }}"
                  target="_blank"
-                 rel="noopener">
+                 rel="noopener"
+                 data-open-tab-pref>
                 Mods help
               </a>
             </div>
@@ -122,8 +126,18 @@
               More
             </summary>
             <div class="wc-run-header__menu-content">
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_open_links_new_tab"
+                       type="checkbox"
+                       data-open-tab-pref-toggle
+                       checked>
+                <span>Open links in new tabs</span>
+              </label>
               <a class="pure-button"
-                 href="{{ url_for_run('browse.browse_tree', runid=view_runid, config=view_config, subpath='') }}">
+                 href="{{ url_for_run('browse.browse_tree', runid=view_runid, config=view_config, subpath='') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
                 Browse
               </a>
               <button type="button"
@@ -160,16 +174,25 @@
               <a class="pure-button pure-button-secondary"
                  href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem) }}"
                  target="_blank"
-                 rel="noopener">
+                 rel="noopener"
+                 data-open-tab-pref>
                 Access log
               </a>
               {% endif %}
               {% if user.is_authenticated %}
               <hr aria-hidden="true">
-              <a class="pure-button pure-button-secondary" href="{{ url_for('user.profile') }}">
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('user.profile') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
                 Profile
               </a>
-              <a class="pure-button pure-button-secondary" href="{{ url_for('user.runs') }}">
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('user.runs') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
                 Runs
               </a>
               <a class="pure-button pure-button-secondary" href="{{ url_for('security.logout') }}">
@@ -430,3 +453,4 @@
     }, { passive: true });
   })();
 </script>
+<script src="{{ static_url('js/link_target_pref.js') }}" defer></script>

@@ -66,10 +66,28 @@
           </label>
         </div>
         <div class="wc-run-header__actions">
-          <a class="pure-button pure-button-secondary" href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">README</a>
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for_run('readme.readme_editor', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             target="_blank"
+             rel="noopener"
+             data-open-tab-pref>
+            README
+          </a>
           {% if not pup_relpath %}
-          <a class="pure-button pure-button-secondary" href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">FORK</a>
-          <a class="pure-button pure-button-secondary" href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}" target="_blank" rel="noopener">ARCHIVE</a>
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for_run('fork.rq_fork_console', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             target="_blank"
+             rel="noopener"
+             data-open-tab-pref>
+            FORK
+          </a>
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for_run('archive.rq_archive_dashboard', runid=current_ron.runid, config=current_ron.config_stem) }}"
+             target="_blank"
+             rel="noopener"
+             data-open-tab-pref>
+            ARCHIVE
+          </a>
           {% endif %}
         </div>
         <div class="wc-run-header__right">
@@ -79,8 +97,18 @@
           <details class="wc-run-header__menu">
             <summary class="wc-run-header__menu-button pure-button pure-button-secondary">More</summary>
             <div class="wc-run-header__menu-content">
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_open_links_new_tab"
+                       type="checkbox"
+                       data-open-tab-pref-toggle
+                       checked>
+                <span>Open links in new tabs</span>
+              </label>
               <a class="pure-button"
-                 href="{{ url_for_run('browse.browse_tree', runid=current_ron.runid, config=current_ron.config_stem, subpath='') }}">
+                 href="{{ url_for_run('browse.browse_tree', runid=current_ron.runid, config=current_ron.config_stem, subpath='') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
                 Browse
               </a>
               <button type="button" class="pure-button" data-command="open-poweruser">PowerUser</button>
@@ -100,12 +128,30 @@
                 <span>Public</span>
               </label>
               {% if user.has_role('Admin') %}
-              <a class="pure-button pure-button-secondary" href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}" target="_blank" rel="noopener">Access log</a>
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
+                Access log
+              </a>
               {% endif %}
               {% if user.is_authenticated %}
               <hr aria-hidden="true">
-              <a class="pure-button pure-button-secondary" href="{{ url_for('user.profile') }}">Profile</a>
-              <a class="pure-button pure-button-secondary" href="{{ url_for('user.runs') }}">Runs</a>
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('user.profile') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
+                Profile
+              </a>
+              <a class="pure-button pure-button-secondary"
+                 href="{{ url_for('user.runs') }}"
+                 target="_blank"
+                 rel="noopener"
+                 data-open-tab-pref>
+                Runs
+              </a>
               <a class="pure-button pure-button-secondary" href="{{ url_for('security.logout') }}">Logout</a>
               {% endif %}
             </div>
@@ -124,6 +170,7 @@
 {{ super() }}
 <script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
 <script src="{{ url_for('static', filename='js/report_csv.js') }}" defer></script>
+<script src="{{ static_url('js/link_target_pref.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}

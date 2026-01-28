@@ -20,13 +20,15 @@
         <a class="pure-button pure-button-secondary"
            href="{{ browse_url(nodb_path) }}"
            target="_blank"
-           rel="noopener">
+           rel="noopener"
+           data-open-tab-pref>
           NODB
         </a>
         <a class="pure-button pure-button-secondary"
            href="{{ browse_url(log_path) }}"
            target="_blank"
-           rel="noopener">
+           rel="noopener"
+           data-open-tab-pref>
           LOG
         </a>
       </div>
@@ -191,25 +193,25 @@
         <section class="pu-modal__column" aria-labelledby="puBrowseColumn">
           <h3 class="pu-modal__section-title" id="puBrowseColumn">Browse &amp; data</h3>
           <ul class="pu-link-list">
-            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('') }}">/</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('') }}">/</a></li>
             {% if 'rred' in ron.mods %}
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('rred/') }}">rred/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('rred/') }}">rred/</a></li>
             {% endif %}
             {% if 'rhem' not in ron.mods %}
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('wepp/runs/') }}">wepp/runs/</a></li>
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('wepp/output/') }}">wepp/output/</a></li>
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ site_prefix }}/usersum/">usersum</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('wepp/runs/') }}">wepp/runs/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('wepp/output/') }}">wepp/output/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ site_prefix }}/usersum/">usersum</a></li>
             {% else %}
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('rhem/runs/') }}">rhem/runs/</a></li>
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('rhem/output/') }}">rhem/output/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('rhem/runs/') }}">rhem/runs/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('rhem/output/') }}">rhem/output/</a></li>
             {% endif %}
             {% if 'ash' in ron.mods %}
-              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('ash/') }}">ash/</a></li>
+              <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('ash/') }}">ash/</a></li>
             {% endif %}
-            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('watershed/hillslopes.parquet/') }}">hillslopes table</a></li>
-            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('watershed/channels.parquet') }}">channels table</a></li>
-            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('landuse/landuse.parquet/') }}">landuse table</a></li>
-            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" href="{{ browse_url('soils/soils.parquet/') }}">soils table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('watershed/hillslopes.parquet/') }}">hillslopes table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('watershed/channels.parquet') }}">channels table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('landuse/landuse.parquet/') }}">landuse table</a></li>
+            <li><a class="wc-link wc-link--file" target="_blank" rel="noopener" data-open-tab-pref href="{{ browse_url('soils/soils.parquet/') }}">soils table</a></li>
           </ul>
         </section>
 
@@ -219,14 +221,16 @@
             <a class="pure-button pure-button-secondary"
                href="{{ url_for_run('gl_dashboard.gl_dashboard', runid=runid, config=config) }}"
                target="_blank"
-               rel="noopener">
+               rel="noopener"
+               data-open-tab-pref>
               GL Dashboard
             </a>
             {% if storm_event_analyzer_ready|default(false) %}
             <a class="pure-button pure-button-secondary"
                href="{{ url_for_run('storm_event_analyzer.storm_event_analyzer', runid=runid, config=config) }}"
                target="_blank"
-               rel="noopener">
+               rel="noopener"
+               data-open-tab-pref>
               Storm Event Analyzer
             </a>
             {% endif %}
@@ -239,7 +243,8 @@
               <a class="pure-button pure-button-secondary"
                  href="{{ url_for_run('disturbed.modify_disturbed', runid=runid, config=config) }}"
                  target="_blank"
-                 rel="noopener">
+                 rel="noopener"
+                 data-open-tab-pref>
                 Modify Disturbed Parameters
               </a>
               <button type="button"
@@ -255,7 +260,8 @@
               <a class="pure-button pure-button-secondary"
                  href="https://doc.wepp.cloud/disturbed_land_soil_lookup_doc.html"
                  target="_blank"
-                 rel="noopener">
+                 rel="noopener"
+                 data-open-tab-pref>
                 Disturbed Parameters Doc
               </a>
             {% endif %}
