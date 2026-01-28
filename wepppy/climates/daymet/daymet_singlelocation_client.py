@@ -50,6 +50,9 @@ class HillslopeLocation(TypedDict, total=False):
 InterpolationSpec = Mapping[str, dict[str, float | str]]
 RawDaymetCube = Mapping[str, np.ndarray]
 
+_DAYMET_MAX_RETRIES = 3
+_DAYMET_BASE_DELAY = 5  # seconds
+
 
 def retrieve_historical_timeseries(
     lon: float,
@@ -95,35 +98,43 @@ def retrieve_historical_timeseries(
           '&year={years}'\
           .format(lat=lat, lon=lon, years=years)
 
-    attempts = 0
     txt = None
-    while txt is None and attempts < 10:
-        r = requests.get(url)
+    last_exc = None
+    r = None
+    for attempt in range(_DAYMET_MAX_RETRIES):
+        try:
+            r = requests.get(url)
+            if r.status_code != 200:
+                raise Exception(r.text)
 
-        if r.status_code != 200:
-            attempts += 1
-            continue
+            lines = r.text.split('\n')
 
-        lines = r.text.split('\n')
+            if len(lines) < (start_year - end_year) * 365:
+                raise Exception(r.text)
 
-        if len(lines) < (start_year - end_year) * 365:
-            attempts += 1
-            continue
+            skip = 0
+            for L in lines:
+                if L.lower().startswith('year'):
+                    break
 
-        skip = 0
-        for L in lines:
-            if L.lower().startswith('year'):
-                break
+                skip += 1
 
-            skip += 1
+            txt = r.text.replace('YEAR,', 'year,')\
+                        .replace('DAY,', 'yday,')
+            break
+        except requests.exceptions.RequestException as exc:
+            last_exc = exc
+        except Exception as exc:
+            last_exc = exc
 
-        attempts += 1
-
-        txt = r.text.replace('YEAR,', 'year,')\
-                    .replace('DAY,', 'yday,')
+        if attempt < _DAYMET_MAX_RETRIES - 1:
+            delay = _DAYMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
+            time.sleep(delay)
 
     if txt is None:
-        raise Exception('Error retrieving from daymet:\n' + r.text)
+        if r is not None:
+            raise Exception('Error retrieving from daymet:\n' + r.text) from last_exc
+        raise Exception('Error retrieving from daymet: request failed') from last_exc
 
     # create a virtual file to create pandas dataframe
     fp = io.StringIO()

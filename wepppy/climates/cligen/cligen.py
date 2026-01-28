@@ -2116,12 +2116,29 @@ class Cligen:
             print(cmd)
 
         # run cligen
+        cli_path = _join(cli_dir, cli_fn)
         _log = open(_join(cli_dir, "cligen_{}.log".format(_split(cli_fn)[-1][:-4])), "w")
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
-        p.wait(timeout=5)
-        _log.close()
+        try:
+            p.wait(timeout=5)
+        except TimeoutExpired as exc:
+            _log.write("cligen run_observed timed out; attempting to terminate/kill.\n")
+            p.terminate()
+            try:
+                p.wait(timeout=2)
+            except TimeoutExpired:
+                _log.write("cligen run_observed terminate timed out; killing.\n")
+                p.kill()
+                try:
+                    p.wait(timeout=2)
+                except TimeoutExpired:
+                    _log.write("cligen run_observed kill timed out; process may linger.\n")
+            if not (_exists(cli_path) and os.path.getsize(cli_path) > 0):
+                raise AssertionError(f'Failed to create {cli_fn}') from exc
+        finally:
+            _log.close()
 
-        if not _exists(_join(cli_dir, cli_fn)): 
+        if not (_exists(cli_path) and os.path.getsize(cli_path) > 0):
             raise AssertionError(f'Failed to create {cli_fn}')
 
 

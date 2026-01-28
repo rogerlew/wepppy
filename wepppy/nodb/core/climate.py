@@ -808,7 +808,15 @@ def build_observed_gridmet_interpolated(
     _parquet_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.parquet'
     df = pd.read_parquet(_join(cli_dir,  _parquet_fn))
 
-    cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+    max_retries = 3
+    for retry in range(max_retries):
+        try:
+            cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+            break
+        except AssertionError:
+            if retry == max_retries - 1:
+                raise
+            time.sleep(0.5 * (retry + 1))
 
     dates = df.index
 

@@ -20,6 +20,9 @@ from calendar import isleap
 
 from wepppy.all_your_base import isint
 
+_GRIDMET_MAX_RETRIES = 3
+_GRIDMET_BASE_DELAY = 5  # seconds
+
 
 def retrieve_historical_precip(lon, lat, start_year, end_year):
     yesterday = datetime.now() - timedelta(2)
@@ -35,15 +38,22 @@ def retrieve_historical_precip(lon, lat, start_year, end_year):
 
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
 
-    response = requests.get(url, headers=headers)
+    response_data = None
+    for attempt in range(_GRIDMET_MAX_RETRIES):
+        try:
+            response = requests.get(url, headers=headers)
 
-    if response.status_code != 200:
-        raise Exception(response.text)
-    
-    try:
-        response_data = response.json()
-    except:
-        raise Exception(response.text)
+            if response.status_code != 200:
+                raise Exception(response.text)
+
+            response_data = response.json()
+            break
+        except Exception:
+            if attempt < _GRIDMET_MAX_RETRIES - 1:
+                delay = _GRIDMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
+                time.sleep(delay)
+            else:
+                raise
 
     data = response_data['data'][0]
 
@@ -68,17 +78,29 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
           f"filename=gridmet_ts.shaw"
 
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
-    response = requests.get(url, headers=headers)
+    response_data = None
+    for attempt in range(_GRIDMET_MAX_RETRIES):
+        try:
+            response = requests.get(url, headers=headers)
 
-    if response.status_code != 200:
-        raise Exception(response.text)
-    
-    try:
-        response_data = response.json()
-    except Exception as e:
-        raise Exception("Failed to parse JSON response from downscaledForecast server.\n"
-                        "URL: %s\nStatus: %s\nResponse: %s\nError: %s" % 
-                        (url, response.status_code, response.text[:500], str(e)))
+            if response.status_code != 200:
+                raise Exception(response.text)
+
+            try:
+                response_data = response.json()
+                break
+            except Exception as e:
+                raise Exception(
+                    "Failed to parse JSON response from downscaledForecast server.\n"
+                    "URL: %s\nStatus: %s\nResponse: %s\nError: %s"
+                    % (url, response.status_code, response.text[:500], str(e))
+                )
+        except Exception:
+            if attempt < _GRIDMET_MAX_RETRIES - 1:
+                delay = _GRIDMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
+                time.sleep(delay)
+            else:
+                raise
 
 
     data = response_data['data'][0]
@@ -115,15 +137,22 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 #          f"data-path=PATH_TO_DODS/agg_met_vpd_1979_CurrentYear_CONUS.nc&variable=daily_mean_vapor_pressure_deficit&variable-name=vpd&start-date={start_year}-01-01&end-date={end_date}&"\
 
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
-    response = requests.get(url, headers=headers)
+    response_data = None
+    for attempt in range(_GRIDMET_MAX_RETRIES):
+        try:
+            response = requests.get(url, headers=headers)
 
-    if response.status_code != 200:
-        raise Exception(response.text)
-    
-    try:
-        response_data = response.json()
-    except:
-        raise Exception(response.text)
+            if response.status_code != 200:
+                raise Exception(response.text)
+
+            response_data = response.json()
+            break
+        except Exception:
+            if attempt < _GRIDMET_MAX_RETRIES - 1:
+                delay = _GRIDMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
+                time.sleep(delay)
+            else:
+                raise
 
     data = response_data['data'][0]
 
@@ -160,4 +189,3 @@ if __name__ == '__main__':
 
     df = retrieve_historical_timeseries(lon, lat, start_year, end_year)
     print(df.info())
-
