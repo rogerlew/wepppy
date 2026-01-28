@@ -3,6 +3,7 @@ from __future__ import annotations
 """RQ orchestration for Omni scenario execution and dependent post-processing."""
 
 import inspect
+import json
 import os
 import socket
 import time
@@ -185,8 +186,23 @@ def run_omni_scenario_rq(
         )
         return status, elapsed
 
-    except Exception:
+    except Exception as exc:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        try:
+            payload = {
+                "type": type(exc).__name__,
+                "message": str(exc),
+                "scenario": locals().get("scenario_name"),
+                "scenario_type": str(locals().get("scenario_enum")) if locals().get("scenario_enum") is not None else None,
+                "dependency_target": locals().get("dependency_target_key"),
+                "dependency_path": locals().get("dependency_loss_path"),
+            }
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job.id} EXCEPTION_JSON {json.dumps(payload)}',
+            )
+        except Exception:
+            pass
         raise
 
 
