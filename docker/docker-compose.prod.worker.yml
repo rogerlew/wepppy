@@ -30,8 +30,8 @@ x-worker-service: &worker-service
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:
-    - /geodata/wc1:/wc1
-    - /geodata:/geodata
+    - ${WC1_DIR:-/geodata/wc1}:/wc1
+    - ${GEODATA_DIR:-/geodata}:/geodata
     - /var/run/docker.sock:/var/run/docker.sock
 
 services:
@@ -94,8 +94,8 @@ services:
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
       DEVAL_TEMPLATE: /srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd
     volumes:
-      - /geodata:/geodata
-      - /geodata/wc1:/wc1
+      - ${WC1_DIR:-/geodata/wc1}:/wc1
+      - ${GEODATA_DIR:-/geodata}:/geodata
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
       - "${WEPPCLOUDR_PORT:-8050}:${WEPPCLOUDR_PORT:-8050}"
