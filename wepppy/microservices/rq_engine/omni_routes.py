@@ -19,7 +19,11 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.rq.omni_rq import run_omni_contrasts_rq, run_omni_scenarios_rq
+from wepppy.rq.omni_rq import (
+    delete_omni_contrasts_rq,
+    run_omni_contrasts_rq,
+    run_omni_scenarios_rq,
+)
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -695,16 +699,27 @@ async def _dry_run_omni_contrasts(
 
 async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
     wd = get_wd(runid)
-    omni = Omni.getInstance(wd)
     try:
-        omni.clear_contrasts()
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.run_omni_contrasts)
+    except FileNotFoundError:
+        prep = None
+
+    try:
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue("batch", connection=redis_conn)
+            job = q.enqueue_call(delete_omni_contrasts_rq, (runid,), timeout=RQ_TIMEOUT)
+            if prep is not None:
+                prep.set_rq_job_id("delete_omni_contrasts_rq", job.id)
     except Exception as exc:
+        logger.exception("rq-engine delete-omni-contrasts enqueue failed")
         return error_response_with_traceback(f"Error deleting omni contrasts: {exc}")
 
     return JSONResponse(
         {
-            "message": "Contrasts deleted.",
-            "result": {"deleted": True},
+            "message": "Delete contrasts job submitted.",
+            "result": {"job_id": job.id, "queued": True},
         }
     )
 

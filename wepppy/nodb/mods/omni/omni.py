@@ -4276,7 +4276,7 @@ class Omni(NoDbBase):
         elif scenario == OmniScenario.Undisturbed:
             self.logger.info(f' {scenario_name}: scenario == undisturbed')
 
-            if not Disturbed.getInstance(wd).has_sbs:
+            if not self.has_sbs:
                 raise Exception('Undisturbed scenario requires a base scenario with sbs')
 
             with self.timed(f'  {scenario_name}: remove sbs'):

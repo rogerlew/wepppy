@@ -615,6 +615,32 @@ def _finalize_omni_contrasts_rq(runid: str) -> None:
 
 
 @with_exception_logging
+def delete_omni_contrasts_rq(runid: str) -> None:
+    """Delete Omni contrasts and clear prep state."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:omni_contrasts'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        omni = Omni.getInstance(wd)
+        omni.clear_contrasts()
+
+        try:
+            prep = RedisPrep.getInstance(wd)
+            prep.remove_timestamp(TaskEnum.run_omni_contrasts)
+        except FileNotFoundError:
+            pass
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni_contrasts END_BROADCAST')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
 def _compile_hillslope_summaries_rq(runid: str) -> None:
     """Compile Omni hillslope summaries after scenario execution."""
     try:
