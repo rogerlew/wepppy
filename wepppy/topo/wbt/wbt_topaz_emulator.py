@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import os
+import subprocess
 import time
 from collections import defaultdict, deque
 from functools import wraps
@@ -1242,6 +1243,41 @@ class WhiteboxToolsTopazEmulator:
 
         if self.verbose:
             print(f"bound file created successfully: {bound_fn}")
+
+        remove_if_exists(self.bound_json)
+        remove_if_exists(self.bound_wgs_json)
+
+        contour_cmd = [
+            "gdal_contour",
+            "-p",
+            "-fl",
+            "1",
+            "-f",
+            "GeoJSON",
+            bound_fn,
+            self.bound_json,
+        ]
+        contour_result = subprocess.run(
+            contour_cmd,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if contour_result.returncode != 0:
+            raise RuntimeError(
+                "gdal_contour failed for bound output: "
+                f"{contour_result.stderr.strip() or contour_result.stdout.strip()}"
+            )
+
+        if not _exists(self.bound_json):
+            raise RuntimeError(f"bound geojson was not created: {self.bound_json}")
+
+        json_to_wgs(self.bound_json, s_srs=f"EPSG:{self.epsg}")
+
+        if not _exists(self.bound_wgs_json):
+            raise RuntimeError(
+                f"bound WGS geojson was not created: {self.bound_wgs_json}"
+            )
 
         return bound_fn
 
