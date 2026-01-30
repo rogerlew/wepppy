@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import math
 import re
 from collections import OrderedDict
@@ -26,6 +27,9 @@ except ModuleNotFoundError:
     loader.exec_module(module)
     pa_field = module.pa_field
 from .versioning import schema_with_version
+
+LOGGER = logging.getLogger(__name__)
+from ._rust_interchange import load_rust_interchange, version_args
 
 
 class ParsedLossData(TypedDict):
@@ -743,7 +747,7 @@ def _enrich_loss_tables(tables: Dict[str, pa.Table]) -> Dict[str, pa.Table]:
     return enriched
 
 
-def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
+def _run_wepp_watershed_loss_interchange_python(wepp_output_dir: Path | str) -> Dict[str, Path]:
     """Generate Parquet interchange tables from a WEPP watershed run.
 
     Args:
@@ -788,3 +792,61 @@ def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str
         outputs[key] = path
 
     return outputs
+
+
+def run_wepp_watershed_loss_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
+    """Generate Parquet interchange tables from a WEPP watershed run.
+
+    Args:
+        wepp_output_dir: Path to the WEPP run directory containing ``loss_pw0.txt``.
+
+    Returns:
+        Mapping of table identifiers to generated Parquet paths.
+    """
+    base = Path(wepp_output_dir)
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    source = base / LOSS_FILENAME
+    if not source.exists():
+        raise FileNotFoundError(source)
+
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+
+    mapping = {
+        "average_hill": interchange_dir / AVERAGE_FILENAMES["hill"],
+        "average_chn": interchange_dir / AVERAGE_FILENAMES["chn"],
+        "average_out": interchange_dir / AVERAGE_FILENAMES["out"],
+        "average_class": interchange_dir / AVERAGE_FILENAMES["class_data"],
+        "all_years_hill": interchange_dir / ALL_YEARS_FILENAMES["hill"],
+        "all_years_chn": interchange_dir / ALL_YEARS_FILENAMES["chn"],
+        "all_years_out": interchange_dir / ALL_YEARS_FILENAMES["out"],
+        "all_years_class": interchange_dir / ALL_YEARS_FILENAMES["class_data"],
+    }
+
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        major, minor = version_args()
+        try:
+            rust_mod.watershed_loss_to_parquet(
+                str(source),
+                str(interchange_dir),
+                major,
+                minor,
+            )
+            LOGGER.info("wepp interchange: LOSS via Rust")
+            return mapping
+        except Exception as exc:
+            LOGGER.warning(
+                "wepp interchange: Rust LOSS failed; falling back to Python (%s)",
+                exc,
+                exc_info=True,
+            )
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for LOSS; falling back to Python (%s)",
+            rust_err,
+        )
+
+    return _run_wepp_watershed_loss_interchange_python(base)

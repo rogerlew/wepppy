@@ -10,7 +10,22 @@ from typing import List
 os.environ.setdefault("WEPP_INTERCHANGE_FORCE_SERIAL", "1")
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-PROJECT_OUTPUT = REPO_ROOT / "tests" / "wepp" / "interchange" / "test_project" / "output"
+DEFAULT_PROJECT_OUTPUT = (
+    REPO_ROOT
+    / "tests"
+    / "wepp"
+    / "interchange"
+    / "test_project"
+    / "output"
+)
+_fixture_override = os.getenv("WEPPPY_INTERCHANGE_FIXTURE")
+if _fixture_override:
+    override_path = Path(_fixture_override)
+    if not override_path.is_absolute():
+        override_path = REPO_ROOT / override_path
+    PROJECT_OUTPUT = override_path
+else:
+    PROJECT_OUTPUT = DEFAULT_PROJECT_OUTPUT
 _CLEANUP_TARGETS: List[str] = []
 
 

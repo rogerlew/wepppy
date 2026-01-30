@@ -22,6 +22,7 @@ from ._utils import (
 )
 from .schema_utils import pa_field
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 EBE_FILENAME = "ebe_pw0.txt"
 EBE_PARQUET = "ebe_pw0.parquet"
@@ -262,18 +263,7 @@ def _infer_outlet_element_id(base: Path) -> int | None:
 
     return None
 
-def run_wepp_watershed_ebe_interchange(
-    wepp_output_dir: Path | str, *, start_year: int | None = None
-) -> Path:
-    base = Path(wepp_output_dir)
-    if not base.exists():
-        raise FileNotFoundError(base)
-
-    try:
-        start_year = int(start_year)  # type: ignore
-    except (TypeError, ValueError):
-        start_year = None
-
+def _run_wepp_watershed_ebe_interchange_python(base: Path, *, start_year: int | None) -> Path:
     ebe_path = base / EBE_FILENAME
     _wait_for_path(ebe_path)
 
@@ -296,3 +286,55 @@ def run_wepp_watershed_ebe_interchange(
         calendar_lookup=calendar_lookup,
     )
     return target
+
+
+def run_wepp_watershed_ebe_interchange(
+    wepp_output_dir: Path | str, *, start_year: int | None = None
+) -> Path:
+    base = Path(wepp_output_dir)
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
+
+    ebe_path = base / EBE_FILENAME
+    _wait_for_path(ebe_path)
+
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    target = interchange_dir / EBE_PARQUET
+    outlet_element_id = _infer_outlet_element_id(base)
+
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        try:
+            rust_mod.watershed_ebe_to_parquet(
+                str(ebe_path),
+                str(target),
+                major,
+                minor,
+                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+                start_year=start_year,
+                legacy_element_id=outlet_element_id,
+                chunk_rows=CHUNK_SIZE,
+            )
+            LOGGER.info("wepp interchange: EBE via Rust")
+            return target
+        except Exception as exc:
+            LOGGER.warning(
+                "wepp interchange: Rust EBE failed; falling back to Python (%s)",
+                exc,
+                exc_info=True,
+            )
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for EBE; falling back to Python (%s)",
+            rust_err,
+        )
+
+    return _run_wepp_watershed_ebe_interchange_python(base, start_year=start_year)

@@ -30,6 +30,7 @@ import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
 from ._utils import _build_cli_calendar_lookup, _compute_sim_day_index, _julian_to_calendar
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 
 PASS_FILENAME = "pass_pw0.txt"
@@ -514,21 +515,20 @@ def _parse_pass_file(stream) -> Tuple[Dict[str, object], pa.Table, int, List[int
     return global_meta, metadata_table, npart, hillslope_ids, nhill, climate_files, stripped_lines
 
 
-def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
+def _run_wepp_watershed_pass_interchange_python(wepp_output_dir: Path | str) -> Dict[str, Path]:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
     pass_path = base / PASS_FILENAME
     source_stream = None
-    is_gzip = False
     if not pass_path.exists():
         gz_path = pass_path.with_suffix(pass_path.suffix + ".gz")
         if gz_path.exists():
             pass_path = gz_path
-            is_gzip = True
         else:
             raise FileNotFoundError(base / PASS_FILENAME)
+    is_gzip = pass_path.suffix == ".gz"
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
@@ -557,3 +557,54 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
     pq.write_table(metadata_table, metadata_path, compression="snappy", use_dictionary=True)
 
     return {"events": events_path, "metadata": metadata_path}
+
+
+def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str, Path]:
+    base = Path(wepp_output_dir)
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    pass_path = base / PASS_FILENAME
+    is_gzip = False
+    if not pass_path.exists():
+        gz_path = pass_path.with_suffix(pass_path.suffix + ".gz")
+        if gz_path.exists():
+            pass_path = gz_path
+            is_gzip = True
+        else:
+            raise FileNotFoundError(base / PASS_FILENAME)
+
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    events_path = interchange_dir / EVENTS_PARQUET
+    metadata_path = interchange_dir / METADATA_PARQUET
+
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        try:
+            rust_mod.watershed_pass_to_parquet(
+                str(pass_path),
+                str(events_path),
+                str(metadata_path),
+                major,
+                minor,
+                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+                chunk_rows=EVENT_CHUNK_SIZE,
+            )
+            LOGGER.info("wepp interchange: PASS via Rust")
+            return {"events": events_path, "metadata": metadata_path}
+        except Exception as exc:
+            LOGGER.warning(
+                "wepp interchange: Rust PASS failed; falling back to Python (%s)",
+                exc,
+                exc_info=True,
+            )
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for PASS; falling back to Python (%s)",
+            rust_err,
+        )
+
+    return _run_wepp_watershed_pass_interchange_python(base)

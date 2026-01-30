@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from functools import partial
 from pathlib import Path
+import logging
 from typing import Dict, List, Optional
 
 import re
@@ -12,8 +14,10 @@ from .concurrency import write_parquet_with_pool
 from ._utils import _parse_float
 from .schema_utils import pa_field
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, version_args
 
 LOSS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
+LOGGER = logging.getLogger(__name__)
 
 MEASUREMENT_COLUMNS = [
     "Class",
@@ -116,6 +120,28 @@ def _parse_loss_file(path: Path) -> pa.Table:
     return pa.table(store, schema=SCHEMA)
 
 
+def _parse_loss_file_rust(path: Path, *, version: tuple[int, int]) -> pa.Table:
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is None:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope LOSS; falling back to Python (%s)",
+            rust_err,
+        )
+        return _parse_loss_file(path)
+
+    major, minor = version
+    try:
+        columns = rust_mod.hillslope_loss_to_columns(str(path), major, minor)
+        return pa.table(columns, schema=SCHEMA)
+    except Exception as exc:
+        LOGGER.warning(
+            "wepp interchange: Rust hillslope LOSS failed; falling back to Python (%s)",
+            exc,
+            exc_info=True,
+        )
+        return _parse_loss_file(path)
+
+
 def run_wepp_hillslope_loss_interchange(
     wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
 ) -> Path:
@@ -133,5 +159,17 @@ def run_wepp_hillslope_loss_interchange(
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.loss.parquet"
 
-    write_parquet_with_pool(loss_files, _parse_loss_file, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        major, minor = version_args()
+        parser = partial(_parse_loss_file_rust, version=(major, minor))
+        LOGGER.info("wepp interchange: hillslope LOSS via Rust")
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope LOSS; falling back to Python (%s)",
+            rust_err,
+        )
+        parser = _parse_loss_file
+
+    write_parquet_with_pool(loss_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

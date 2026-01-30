@@ -14,6 +14,7 @@ from wepppy.all_your_base.hydro import determine_wateryear
 from .schema_utils import pa_field
 from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float, _wait_for_path
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 CHAN_FILENAME = "chanwb.out"
 CHAN_PARQUET = "chanwb.parquet"
@@ -147,6 +148,20 @@ def _write_chan_parquet(
                 raise
 
 
+def _run_wepp_watershed_chanwb_interchange_python(
+    base: Path, *, start_year: int | None = None
+) -> Path:
+    source = base / CHAN_FILENAME
+    _wait_for_path(source)
+
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    target = interchange_dir / CHAN_PARQUET
+    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
+    _write_chan_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
+    return target
+
+
 def run_wepp_watershed_chanwb_interchange(
     wepp_output_dir: Path | str, *, start_year: int | None = None
 ) -> Path:
@@ -165,6 +180,33 @@ def run_wepp_watershed_chanwb_interchange(
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHAN_PARQUET
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    _write_chan_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
-    return target
+
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        try:
+            rust_mod.watershed_chanwb_to_parquet(
+                str(source),
+                str(target),
+                major,
+                minor,
+                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+                start_year=start_year,
+                chunk_rows=500_000,
+            )
+            LOGGER.info("wepp interchange: CHANWB via Rust")
+            return target
+        except Exception as exc:
+            LOGGER.warning(
+                "wepp interchange: Rust CHANWB failed; falling back to Python (%s)",
+                exc,
+                exc_info=True,
+            )
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for CHANWB; falling back to Python (%s)",
+            rust_err,
+        )
+
+    return _run_wepp_watershed_chanwb_interchange_python(base, start_year=start_year)

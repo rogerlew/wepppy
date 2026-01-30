@@ -28,6 +28,7 @@ import pyarrow.parquet as pq
 from wepppy.all_your_base.hydro import determine_wateryear
 from ._utils import _build_cli_calendar_lookup, _julian_to_calendar
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 SOIL_FILENAME = "soil_pw0.txt"
 SOIL_PARQUET = "soil_pw0.parquet"
@@ -215,7 +216,7 @@ def _write_soil_parquet(
                 raise
 
 
-def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
+def _run_wepp_watershed_soil_interchange_python(wepp_output_dir: Path | str) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -247,3 +248,50 @@ def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
     else:
         _write_soil_parquet(soil_path, target, calendar_lookup=calendar_lookup)
     return target
+
+
+def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
+    base = Path(wepp_output_dir)
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    soil_path = base / SOIL_FILENAME
+    if not soil_path.exists():
+        gz_path = soil_path.with_suffix(soil_path.suffix + ".gz")
+        if gz_path.exists():
+            soil_path = gz_path
+        else:
+            raise FileNotFoundError(base / SOIL_FILENAME)
+
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    target = interchange_dir / SOIL_PARQUET
+
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        try:
+            rust_mod.watershed_soil_to_parquet(
+                str(soil_path),
+                str(target),
+                major,
+                minor,
+                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+                chunk_rows=CHUNK_SIZE,
+            )
+            LOGGER.info("wepp interchange: SOIL via Rust")
+            return target
+        except Exception as exc:
+            LOGGER.warning(
+                "wepp interchange: Rust SOIL failed; falling back to Python (%s)",
+                exc,
+                exc_info=True,
+            )
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for SOIL; falling back to Python (%s)",
+            rust_err,
+        )
+
+    return _run_wepp_watershed_soil_interchange_python(base)

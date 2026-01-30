@@ -104,12 +104,14 @@
             </summary>
             <div class="wc-run-header__menu-content">
               {% for mod_name, mod_label in header_mod_options %}
+              {% if mod_name != 'openet_ts' or user.has_role('Admin') %}
               <label class="wc-run-header__toggle">
                 <input type="checkbox"
                        data-project-mod="{{ mod_name }}"
                        {% if mod_name in current_mods %}checked{% endif %}>
                 <span>{{ mod_label }}</span>
               </label>
+              {% endif %}
               {% endfor %}
               <hr>
               <a class="wc-run-header__menu-link"

@@ -20,6 +20,7 @@ from ._utils import (
     _parse_float,
 )
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 SOIL_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -236,6 +237,41 @@ def _parse_soil_file(
     return pa.table(store, schema=SCHEMA)
 
 
+def _parse_soil_file_rust(
+    path: Path,
+    *,
+    cli_calendar_path: str | None,
+    version: tuple[int, int],
+    start_year: int | None,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None,
+) -> pa.Table:
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is None:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope SOIL; falling back to Python (%s)",
+            rust_err,
+        )
+        return _parse_soil_file(path, calendar_lookup=calendar_lookup, start_year=start_year)
+
+    major, minor = version
+    try:
+        columns = rust_mod.hillslope_soil_to_columns(
+            str(path),
+            major,
+            minor,
+            cli_calendar_path=cli_calendar_path,
+            start_year=start_year,
+        )
+        return pa.table(columns, schema=SCHEMA)
+    except Exception as exc:
+        LOGGER.warning(
+            "wepp interchange: Rust hillslope SOIL failed; falling back to Python (%s)",
+            exc,
+            exc_info=True,
+        )
+        return _parse_soil_file(path, calendar_lookup=calendar_lookup, start_year=start_year)
+
+
 def run_wepp_hillslope_soil_interchange(
     wepp_output_dir: Path | str,
     *,
@@ -261,7 +297,24 @@ def run_wepp_hillslope_soil_interchange(
     target_path = interchange_dir / "H.soil.parquet"
 
     calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    parser = partial(_parse_soil_file, calendar_lookup=calendar_lookup, start_year=start_year)
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        parser = partial(
+            _parse_soil_file_rust,
+            cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+            version=(major, minor),
+            start_year=start_year,
+            calendar_lookup=calendar_lookup,
+        )
+        LOGGER.info("wepp interchange: hillslope SOIL via Rust")
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope SOIL; falling back to Python (%s)",
+            rust_err,
+        )
+        parser = partial(_parse_soil_file, calendar_lookup=calendar_lookup, start_year=start_year)
 
     write_parquet_with_pool(soil_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

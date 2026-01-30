@@ -228,7 +228,7 @@ def run_omni_contrast_rq(
         if not contrast_name:
             raise ValueError(f'Contrast id {contrast_id} is skipped')
 
-        omni.run_omni_contrast(contrast_id)
+        omni.run_omni_contrast(contrast_id, rq_job_id=job.id)
 
         elapsed = time.time() - start_ts
         status = True
@@ -549,6 +549,12 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
                     contrast_name,
                 )
                 continue
+            if run_status == "in_progress":
+                omni.logger.info(
+                    "  run_omni_contrasts: %s already running, skipping",
+                    contrast_name,
+                )
+                continue
             run_ids.append(contrast_id)
 
         if not active_ids:
@@ -579,21 +585,30 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
             contrast_jobs: List[Job] = []
-            for contrast_id in run_ids:
-                child_job = q.enqueue_call(
-                    func=run_omni_contrast_rq,
-                    args=[runid, contrast_id],
-                    timeout=TIMEOUT,
-                )
-                job.meta[f'jobs:contrast:{contrast_id}'] = child_job.id
-                contrast_jobs.append(child_job)
-                job.save()
+            batch_depends: Optional[List[Job]] = None
+            batch_size = omni.contrast_batch_size
+            if batch_size < 1:
+                batch_size = 1
+            for start in range(0, len(run_ids), batch_size):
+                batch_jobs: List[Job] = []
+                for contrast_id in run_ids[start:start + batch_size]:
+                    child_job = q.enqueue_call(
+                        func=run_omni_contrast_rq,
+                        args=[runid, contrast_id],
+                        timeout=TIMEOUT,
+                        depends_on=batch_depends,
+                    )
+                    job.meta[f'jobs:contrast:{contrast_id}'] = child_job.id
+                    batch_jobs.append(child_job)
+                    contrast_jobs.append(child_job)
+                    job.save()
+                batch_depends = batch_jobs
 
             final_job = q.enqueue_call(
                 func=_finalize_omni_contrasts_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=contrast_jobs,
+                depends_on=batch_depends,
             )
             job.meta['jobs:finalize:_finalize_omni_contrasts_rq'] = final_job.id
             job.save()

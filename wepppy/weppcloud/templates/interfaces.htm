@@ -260,6 +260,47 @@
     </article>
   </section>
 
+  <section class="wc-panel" aria-labelledby="section-disturbed-wbt">
+    <article class="wc-feature">
+      <div class="wc-feature__media">
+        <img src="{{ url_for('static', filename='images/interfaces/disturbed_wbt.png') }}?v=20260129" alt="Disturbed WBT interface illustration" />
+      </div>
+      <div class="wc-feature__body">
+        <h2 id="section-disturbed-wbt">WEPPcloud-(Un)Disturbed-WBT</h2>
+        <p>
+          WEPPcloud-(Un)Disturbed-WBT is the successor to TOPAZ-based delineation for the (Un)Disturbed workflow. It uses the
+          WhiteboxTools hard fork <a href="https://github.com/rogerlew/weppcloud-wbt">WEPPcloud-WBT</a> for watershed preprocessing and hillslope delineation.
+        </p>
+        <p>
+          In addition to improved performance, the WBT backend emits useful GeoTIFF (`.tif`) raster products, supports additional
+          batch-processing utilities, and enables advanced workflows such as Omni contrasts (for example, stream-order pruning).
+        </p>
+        {% if not current_user.is_authenticated %}
+        {{ cap_macros.cap_prompt("disturbed", "cap-disturbed-wbt", cap_base_url, cap_site_key) }}
+        {% endif %}
+        <div class="wc-feature__actions">
+          {% if current_user.is_authenticated %}
+          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed9002_wbt') }}" title="disturbed9002_wbt" data-run-menu rel="nofollow">Start Disturbed Run (CONUS)</a>
+          {% else %}
+          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed9002_wbt') }}" data-cap-section="disturbed" data-cap-required="true">
+            <input type="hidden" name="cap_token" value="" data-cap-token>
+            <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
+            <button type="button"
+                    class="pure-button wc-run-button is-disabled"
+                    title="disturbed9002_wbt"
+                    data-run-menu
+                    data-run-action="{{ url_for('run_0.create', config='disturbed9002_wbt') }}"
+                    aria-disabled="true"
+                    disabled>
+              Start Disturbed Run (CONUS)
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+  </section>
+
   <section class="wc-panel" aria-labelledby="section-revegetation">
     <article class="wc-feature">
       <div class="wc-feature__media">

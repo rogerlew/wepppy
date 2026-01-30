@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from calendar import monthrange
+import logging
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -16,6 +17,7 @@ from .concurrency import write_parquet_with_pool
 from .schema_utils import pa_field
 from ._utils import _parse_float
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, version_args
 
 ELEMENT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 
@@ -72,6 +74,8 @@ ELEMENT_FIELD_WIDTHS = [
     7,  # RilWid
     9,  # SedLeave
 ]
+
+LOGGER = logging.getLogger(__name__)
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -242,6 +246,38 @@ def _parse_element_file(path: Path, *, start_year: Optional[int] = None) -> pa.T
     return pa.table(out, schema=SCHEMA)
 
 
+def _parse_element_file_rust(
+    path: Path,
+    *,
+    version: tuple[int, int],
+    start_year: Optional[int],
+) -> pa.Table:
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is None:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope ELEMENT; falling back to Python (%s)",
+            rust_err,
+        )
+        return _parse_element_file(path, start_year=start_year)
+
+    major, minor = version
+    try:
+        columns = rust_mod.hillslope_element_to_columns(
+            str(path),
+            major,
+            minor,
+            start_year=start_year,
+        )
+        return pa.table(columns, schema=SCHEMA)
+    except Exception as exc:
+        LOGGER.warning(
+            "wepp interchange: Rust hillslope ELEMENT failed; falling back to Python (%s)",
+            exc,
+            exc_info=True,
+        )
+        return _parse_element_file(path, start_year=start_year)
+
+
 def run_wepp_hillslope_element_interchange(
     wepp_output_dir: Path | str,
     *,
@@ -261,10 +297,24 @@ def run_wepp_hillslope_element_interchange(
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.element.parquet"
 
-    if start_year is None:
-        parser = _parse_element_file
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        major, minor = version_args()
+        parser = partial(
+            _parse_element_file_rust,
+            version=(major, minor),
+            start_year=start_year,
+        )
+        LOGGER.info("wepp interchange: hillslope ELEMENT via Rust")
     else:
-        parser = partial(_parse_element_file, start_year=start_year)
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope ELEMENT; falling back to Python (%s)",
+            rust_err,
+        )
+        if start_year is None:
+            parser = _parse_element_file
+        else:
+            parser = partial(_parse_element_file, start_year=start_year)
 
     write_parquet_with_pool(element_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

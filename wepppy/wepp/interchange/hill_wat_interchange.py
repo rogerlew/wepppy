@@ -23,6 +23,7 @@ from ._utils import (
 )
 from .schema_utils import pa_field
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 WAT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 RAW_HEADER_SUBSTITUTIONS = (
@@ -293,6 +294,39 @@ def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, in
     return pa.table(out, schema=SCHEMA)
 
 
+def _parse_wat_file_rust(
+    path: Path,
+    *,
+    cli_calendar_path: str | None,
+    version: tuple[int, int],
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None,
+) -> pa.Table:
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is None:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope WAT; falling back to Python (%s)",
+            rust_err,
+        )
+        return _parse_wat_file(path, calendar_lookup=calendar_lookup)
+
+    major, minor = version
+    try:
+        columns = rust_mod.hillslope_wat_to_columns(
+            str(path),
+            major,
+            minor,
+            cli_calendar_path=cli_calendar_path,
+        )
+        return pa.table(columns, schema=SCHEMA)
+    except Exception as exc:
+        LOGGER.warning(
+            "wepp interchange: Rust hillslope WAT failed; falling back to Python (%s)",
+            exc,
+            exc_info=True,
+        )
+        return _parse_wat_file(path, calendar_lookup=calendar_lookup)
+
+
 def run_wepp_hillslope_wat_interchange(
     wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
 ) -> Path:
@@ -310,7 +344,23 @@ def run_wepp_hillslope_wat_interchange(
     target_path = interchange_dir / "H.wat.parquet"
 
     calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    parser = partial(_parse_wat_file, calendar_lookup=calendar_lookup)
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        parser = partial(
+            _parse_wat_file_rust,
+            cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+            version=(major, minor),
+            calendar_lookup=calendar_lookup,
+        )
+        LOGGER.info("wepp interchange: hillslope WAT via Rust")
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope WAT; falling back to Python (%s)",
+            rust_err,
+        )
+        parser = partial(_parse_wat_file, calendar_lookup=calendar_lookup)
 
     write_parquet_with_pool(
         wat_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE

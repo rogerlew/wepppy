@@ -413,6 +413,15 @@ NoDb subclass logger
   - `PruneStrahlerStreamOrder` - First-order link removal with downstream order adjustment
   - `RemoveShortStreams` - Enhanced with `--max_junctions` pruning for iterative branch deletion
   - `Watershed` - Extended to accept GeoJSON pour-point inputs (Point/MultiPoint)
+
+### WBT Delineation Backend (When It’s Required)
+
+The WBT delineation backend (`[watershed] delineation_backend = "wbt"`) is required for a few workflows that have no TOPAZ/TauDEM equivalent in wepppy today:
+
+- **Automatic outlet derivation**: `Watershed.find_outlet(...)` (used by batch runs and culvert batches) requires WBT because it runs the Whitebox `FindOutlet`/`find_outlet` tool against `flovec` + `netful` + a watershed mask.
+- **Reusing precomputed channel rasters**: `Watershed.symlink_channels_map(...)` is WBT-only; it wires external `flovec`/`netful`/`chnjnt` rasters into `dem/wbt/` (used by `CulvertsRunner`).
+- **Stream-order pruning + regrouped hillslopes**: Omni “stream order” contrast selection requires WBT because it depends on Strahler order rasters, `PruneStrahlerStreamOrder`, and `HillslopesTopaz` outputs (see `wepppy.nodb.mods.omni` and `wepppy.rq.topo_utils`).
+
 - The watershed abstraction is delegated to [`peridot`](https://github.com/wepp-in-the-woods/peridot), a Rust-powered watershed abstraction engine.
 - Raster-heavy routines (NLCD landcover, soils, RAP) all try `wepppyo3.raster_characteristics` first, using Python fallbacks only when the Rust extension is missing.
 

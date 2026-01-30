@@ -462,20 +462,15 @@ def test_run_omni_contrasts_dry_run_stream_order(monkeypatch: pytest.MonkeyPatch
 
 def test_delete_omni_contrasts(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-77")
+    _stub_prep(monkeypatch)
     monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
-    cleared = {"done": False}
-
-    class DummyOmni:
-        def clear_contrasts(self) -> None:
-            cleared["done"] = True
-
-    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/delete-omni-contrasts")
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["message"] == "Contrasts deleted."
-    assert payload["result"]["deleted"] is True
-    assert cleared["done"] is True
+    assert payload["message"] == "Delete contrasts job submitted."
+    assert payload["result"]["job_id"] == "job-77"
+    assert payload["result"]["queued"] is True

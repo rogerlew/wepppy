@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import logging
 from pathlib import Path
 from typing import Dict, List, Tuple
 from functools import partial
@@ -20,6 +21,7 @@ from ._utils import (
 )
 from .schema_utils import pa_field
 from .versioning import schema_with_version
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 EBE_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 UNIT_SKIP_TOKENS = {"---", "--", "----"}
@@ -130,6 +132,7 @@ SCHEMA = schema_with_version(
 )
 
 EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
+LOGGER = logging.getLogger(__name__)
 
 BASE_FIELD_NAMES: Tuple[str, ...] = (
     "wepp_id",
@@ -278,6 +281,41 @@ def _parse_ebe_file(
     return table
 
 
+def _parse_ebe_file_rust(
+    path: Path,
+    *,
+    cli_calendar_path: str | None,
+    version: tuple[int, int],
+    start_year: int | None,
+    calendar_lookup: dict[int, list[tuple[int, int]]] | None,
+) -> pa.Table:
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is None:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope EBE; falling back to Python (%s)",
+            rust_err,
+        )
+        return _parse_ebe_file(path, start_year=start_year, calendar_lookup=calendar_lookup)
+
+    major, minor = version
+    try:
+        columns = rust_mod.hillslope_ebe_to_columns(
+            str(path),
+            major,
+            minor,
+            cli_calendar_path=cli_calendar_path,
+            start_year=start_year,
+        )
+        return pa.table(columns, schema=SCHEMA)
+    except Exception as exc:
+        LOGGER.warning(
+            "wepp interchange: Rust hillslope EBE failed; falling back to Python (%s)",
+            exc,
+            exc_info=True,
+        )
+        return _parse_ebe_file(path, start_year=start_year, calendar_lookup=calendar_lookup)
+
+
 def run_wepp_hillslope_ebe_interchange(
     wepp_output_dir: Path | str,
     *,
@@ -303,7 +341,24 @@ def run_wepp_hillslope_ebe_interchange(
     target_path = interchange_dir / "H.ebe.parquet"
 
     calendar_lookup = _build_cli_calendar_lookup(base)
-    parser = partial(_parse_ebe_file, start_year=start_year, calendar_lookup=calendar_lookup)
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        parser = partial(
+            _parse_ebe_file_rust,
+            cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+            version=(major, minor),
+            start_year=start_year,
+            calendar_lookup=calendar_lookup,
+        )
+        LOGGER.info("wepp interchange: hillslope EBE via Rust")
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for hillslope EBE; falling back to Python (%s)",
+            rust_err,
+        )
+        parser = partial(_parse_ebe_file, start_year=start_year, calendar_lookup=calendar_lookup)
 
     write_parquet_with_pool(ebe_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path

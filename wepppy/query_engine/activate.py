@@ -249,6 +249,30 @@ def _build_catalog(base: Path) -> list[dict[str, object]]:
         Sorted list of catalog entries keyed by path.
     """
 
+    try:
+        from wepppy.wepp.interchange._rust_interchange import load_rust_interchange
+    except Exception:
+        load_rust_interchange = None
+
+    if load_rust_interchange is not None:
+        rust_mod, rust_err = load_rust_interchange()
+        if rust_mod is not None:
+            try:
+                entries = rust_mod.catalog_scan(str(base))
+                LOGGER.info("wepp interchange: catalog scan via Rust")
+                return entries
+            except Exception as exc:
+                LOGGER.warning(
+                    "wepp interchange: Rust catalog scan failed; falling back to Python (%s)",
+                    exc,
+                    exc_info=True,
+                )
+        else:
+            LOGGER.warning(
+                "wepp interchange: Rust module unavailable for catalog scan; falling back to Python (%s)",
+                rust_err,
+            )
+
     entries: list[dict[str, object]] = []
     for path in _iter_catalog_files(base):
         entry = _build_entry(base, path)

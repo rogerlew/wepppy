@@ -17,6 +17,7 @@ from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_floa
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 from .date_filters import apply_date_filters
+from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
 CHAN_PEAK_FILENAME = "chan.out"
 CHAN_PEAK_PARQUET = "chan.out.parquet"
@@ -147,7 +148,7 @@ def _write_chan_peak_parquet(
                 raise
 
 
-def run_wepp_watershed_chan_peak_interchange(
+def _run_wepp_watershed_chan_peak_interchange_python(
     wepp_output_dir: Path | str, *, start_year: int | None = None
 ) -> Path:
     base = Path(wepp_output_dir)
@@ -168,6 +169,56 @@ def run_wepp_watershed_chan_peak_interchange(
     calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
     _write_chan_peak_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
     return target
+
+
+def run_wepp_watershed_chan_peak_interchange(
+    wepp_output_dir: Path | str, *, start_year: int | None = None
+) -> Path:
+    base = Path(wepp_output_dir)
+    if not base.exists():
+        raise FileNotFoundError(base)
+
+    try:
+        start_year = int(start_year)  # type: ignore
+    except (TypeError, ValueError):
+        start_year = None
+
+    source = base / CHAN_PEAK_FILENAME
+    _wait_for_path(source)
+
+    interchange_dir = base / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    target = interchange_dir / CHAN_PEAK_PARQUET
+
+    rust_mod, rust_err = load_rust_interchange()
+    if rust_mod is not None:
+        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        major, minor = version_args()
+        try:
+            rust_mod.watershed_chan_peak_to_parquet(
+                str(source),
+                str(target),
+                major,
+                minor,
+                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+                start_year=start_year,
+                chunk_rows=CHUNK_SIZE,
+            )
+            LOGGER.info("wepp interchange: CHAN_PEAK via Rust")
+            return target
+        except Exception as exc:
+            LOGGER.warning(
+                "wepp interchange: Rust CHAN_PEAK failed; falling back to Python (%s)",
+                exc,
+                exc_info=True,
+            )
+    else:
+        LOGGER.warning(
+            "wepp interchange: Rust module unavailable for CHAN_PEAK; falling back to Python (%s)",
+            rust_err,
+        )
+
+    return _run_wepp_watershed_chan_peak_interchange_python(base, start_year=start_year)
 
 
 def chanout_dss_export(

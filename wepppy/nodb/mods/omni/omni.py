@@ -720,6 +720,7 @@ class Omni(NoDbBase):
             self._contrast_geojson_name_key = None
             self._contrast_hillslope_groups = None
             self._contrast_order_reduction_passes = None
+            self._contrast_batch_size = None
             self._contrast_pairs = []
 
             self._scenario_dependency_tree = {}
@@ -1049,6 +1050,22 @@ class Omni(NoDbBase):
         self._contrast_dependency_tree = value
 
     @property
+    def contrast_batch_size(self) -> int:
+        raw_value = getattr(self, "_contrast_batch_size", None)
+        if raw_value in (None, ""):
+            raw_value = self.config_get_int("omni", "contrast_batch_size", 6)
+        try:
+            batch_size = int(raw_value)
+        except (TypeError, ValueError):
+            batch_size = 6
+        return max(batch_size, 1)
+
+    @contrast_batch_size.setter
+    @nodb_setter
+    def contrast_batch_size(self, value: Optional[int]) -> None:
+        self._contrast_batch_size = value
+
+    @property
     def control_scenario(self) -> Optional[str]:
         return getattr(self, '_control_scenario', None)
 
@@ -1293,34 +1310,74 @@ class Omni(NoDbBase):
             except Exception as exc:
                 self.logger.debug('Failed to remove contrast summary %s: %s', contrasts_report, exc)
 
+    def _reset_contrast_build_state(self) -> None:
+        with self.locked():
+            self._contrasts = None
+            self._contrast_names = []
+            self._contrast_labels = {}
+            self._contrast_dependency_tree = {}
+        self._clean_contrast_runs()
+
     def _clean_contrast_runs(self) -> None:
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
         if not _exists(contrasts_dir):
-            return
-        for entry in os.listdir(contrasts_dir):
-            if entry == '_uploads':
-                continue
-            path = _join(contrasts_dir, entry)
-            if os.path.isdir(path):
-                shutil.rmtree(path)
+            contrasts_dir = None
+        if contrasts_dir:
+            for entry in os.listdir(contrasts_dir):
+                if entry == '_uploads':
+                    continue
+                path = _join(contrasts_dir, entry)
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+        status_dir = self._contrast_sidecar_dir()
+        if _exists(status_dir):
+            for entry in os.listdir(status_dir):
+                if not entry.endswith(".status.json"):
+                    continue
+                path = _join(status_dir, entry)
+                if _exists(path):
+                    try:
+                        os.remove(path)
+                    except OSError as exc:
+                        self.logger.debug("Failed to remove contrast status %s: %s", path, exc)
 
     def _clean_stale_contrast_runs(self, active_ids: Iterable[int]) -> None:
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
         if not _exists(contrasts_dir):
-            return
+            contrasts_dir = None
         active = {str(contrast_id) for contrast_id in active_ids}
-        for entry in os.listdir(contrasts_dir):
-            if entry == '_uploads':
-                continue
-            path = _join(contrasts_dir, entry)
-            if os.path.isdir(path) and entry not in active:
-                shutil.rmtree(path)
+        if contrasts_dir:
+            for entry in os.listdir(contrasts_dir):
+                if entry == '_uploads':
+                    continue
+                path = _join(contrasts_dir, entry)
+                if os.path.isdir(path) and entry not in active:
+                    shutil.rmtree(path)
+        status_dir = self._contrast_sidecar_dir()
+        if _exists(status_dir):
+            for entry in os.listdir(status_dir):
+                if not entry.endswith(".status.json"):
+                    continue
+                stem = entry.rsplit(".", maxsplit=2)[0]
+                contrast_token = stem.replace("contrast_", "")
+                try:
+                    contrast_id = int(contrast_token)
+                except (TypeError, ValueError):
+                    continue
+                if str(contrast_id) not in active:
+                    path = _join(status_dir, entry)
+                    if _exists(path):
+                        try:
+                            os.remove(path)
+                        except OSError as exc:
+                            self.logger.debug("Failed to remove contrast status %s: %s", path, exc)
 
     def _clean_contrast_run(self, contrast_id: int) -> None:
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
         path = _join(contrasts_dir, str(contrast_id))
         if isdir(path):
             shutil.rmtree(path)
+        self._clear_contrast_run_status(contrast_id)
 
     def _contrast_sidecar_dir(self) -> str:
         return _join(self.omni_dir, 'contrasts')
@@ -1388,6 +1445,58 @@ class Omni(NoDbBase):
             'interchange',
             'README.md',
         )
+
+    def _contrast_run_status_path(self, contrast_id: int) -> str:
+        return _join(self._contrast_sidecar_dir(), f"contrast_{contrast_id:05d}.status.json")
+
+    def _load_contrast_run_status(self, contrast_id: int) -> Optional[Dict[str, Any]]:
+        path = self._contrast_run_status_path(contrast_id)
+        if not _exists(path):
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                payload = json.load(fp)
+        except (OSError, json.JSONDecodeError) as exc:
+            self.logger.debug("Failed to read contrast status from %s: %s", path, exc)
+            return None
+        if not isinstance(payload, dict):
+            return None
+        return payload
+
+    def _write_contrast_run_status(
+        self,
+        contrast_id: int,
+        contrast_name: str,
+        status: str,
+        *,
+        job_id: Optional[str] = None,
+        error: Optional[str] = None,
+    ) -> None:
+        payload: Dict[str, Any] = {
+            "contrast_id": contrast_id,
+            "contrast_name": contrast_name,
+            "status": status,
+            "timestamp": time.time(),
+        }
+        if job_id:
+            payload["job_id"] = job_id
+        if error:
+            payload["error"] = error
+        path = self._contrast_run_status_path(contrast_id)
+        os.makedirs(self._contrast_sidecar_dir(), exist_ok=True)
+        try:
+            with open(path, "w", encoding="utf-8") as fp:
+                json.dump(payload, fp)
+        except OSError as exc:
+            self.logger.debug("Failed to write contrast status to %s: %s", path, exc)
+
+    def _clear_contrast_run_status(self, contrast_id: int) -> None:
+        path = self._contrast_run_status_path(contrast_id)
+        if _exists(path):
+            try:
+                os.remove(path)
+            except OSError as exc:
+                self.logger.debug("Failed to remove contrast status %s: %s", path, exc)
 
     def _normalize_landuse_key(self, value: Any) -> Optional[str]:
         if value is None or pd.isna(value):
@@ -1548,6 +1657,9 @@ class Omni(NoDbBase):
     def _contrast_run_status(self, contrast_id: int, contrast_name: str) -> str:
         run_marker = self._contrast_run_readme_path(contrast_id)
         if not _exists(run_marker):
+            status_entry = self._load_contrast_run_status(contrast_id)
+            if status_entry and status_entry.get("status") == "started":
+                return "in_progress"
             return 'needs_run'
 
         sidecar_sha1 = _hash_file_sha1(self._contrast_sidecar_path(contrast_id))
@@ -1760,6 +1872,8 @@ class Omni(NoDbBase):
             selection_mode = "stream_order"
         if selection_mode in {"user-defined-hillslope-groups", "user-defined-hillslope-group"}:
             selection_mode = "user_defined_hillslope_groups"
+
+        self._reset_contrast_build_state()
 
         if selection_mode == "user_defined_areas":
             self._build_contrasts_user_defined_areas()
@@ -3602,6 +3716,9 @@ class Omni(NoDbBase):
             if run_status == 'up_to_date':
                 self.logger.info('  run_omni_contrasts: %s up-to-date, skipping', contrast_name)
                 continue
+            if run_status == "in_progress":
+                self.logger.info("  run_omni_contrasts: %s already running, skipping", contrast_name)
+                continue
 
             try:
                 _contrasts = self._load_contrast_sidecar(contrast_id)
@@ -3641,7 +3758,7 @@ class Omni(NoDbBase):
         _set_dependency_tree_with_retry(dependency_tree)
         self._clean_stale_contrast_runs(active_ids)
 
-    def run_omni_contrast(self, contrast_id: int) -> str:
+    def run_omni_contrast(self, contrast_id: int, *, rq_job_id: Optional[str] = None) -> str:
         self.logger.info(f'run_omni_contrast {contrast_id}')
         contrast_names = self.contrast_names or []
         if contrast_id < 1 or contrast_id > len(contrast_names):
@@ -3654,21 +3771,44 @@ class Omni(NoDbBase):
             self.logger.info("run_omni_contrast: %s skipped (%s)", contrast_name, skip_reason)
             self._clean_contrast_run(contrast_id)
             self._remove_contrast_dependency_entry(contrast_name)
+            self._clear_contrast_run_status(contrast_id)
             return _join(self.wd, OMNI_REL_DIR, "contrasts", str(contrast_id))
         _contrasts = self._load_contrast_sidecar(contrast_id)
         control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
-        omni_wd = _run_contrast(
-            str(contrast_id),
+        self._write_contrast_run_status(
+            contrast_id,
             contrast_name,
-            _contrasts,
-            self.wd,
-            self.runid,
-            control_key,
-            contrast_key,
+            "started",
+            job_id=rq_job_id,
         )
-        self._post_omni_run(omni_wd, contrast_name)
-        dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
-        self._update_contrast_dependency_tree(contrast_name, dependency_entry)
+        try:
+            omni_wd = _run_contrast(
+                str(contrast_id),
+                contrast_name,
+                _contrasts,
+                self.wd,
+                self.runid,
+                control_key,
+                contrast_key,
+            )
+            self._post_omni_run(omni_wd, contrast_name)
+            dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)
+            self._update_contrast_dependency_tree(contrast_name, dependency_entry)
+        except Exception as exc:
+            self._write_contrast_run_status(
+                contrast_id,
+                contrast_name,
+                "failed",
+                job_id=rq_job_id,
+                error=str(exc),
+            )
+            raise
+        self._write_contrast_run_status(
+            contrast_id,
+            contrast_name,
+            "completed",
+            job_id=rq_job_id,
+        )
         return omni_wd
 
     def contrasts_report(self) -> pd.DataFrame:
