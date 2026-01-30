@@ -515,6 +515,28 @@ def _parse_pass_file(stream) -> Tuple[Dict[str, object], pa.Table, int, List[int
     return global_meta, metadata_table, npart, hillslope_ids, nhill, climate_files, stripped_lines
 
 
+def _extract_cli_hint(pass_path: Path, is_gzip: bool) -> str | None:
+    opener = gzip.open if is_gzip else open
+    try:
+        with opener(pass_path, "rt") as stream:
+            header_lines: List[str] = []
+            for line in stream:
+                if line.strip() == "BEGIN HILLSLOPE HYDROLOGY AND SEDIMENT INFORMATION":
+                    break
+                header_lines.append(line.rstrip("\n"))
+            else:
+                return None
+        _, _, _, _, _, climate_files = _parse_metadata(header_lines)
+    except Exception:
+        LOGGER.debug("Unable to extract PASS metadata for CLI hint", exc_info=True)
+        return None
+
+    for name in climate_files:
+        if name:
+            return name
+    return None
+
+
 def _run_wepp_watershed_pass_interchange_python(wepp_output_dir: Path | str) -> Dict[str, Path]:
     base = Path(wepp_output_dir)
     if not base.exists():
@@ -581,7 +603,8 @@ def run_wepp_watershed_pass_interchange(wepp_output_dir: Path | str) -> Dict[str
 
     rust_mod, rust_err = load_rust_interchange()
     if rust_mod is not None:
-        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+        cli_hint = _extract_cli_hint(pass_path, is_gzip)
+        cli_calendar_path = resolve_cli_calendar_path(base, cli_hint=cli_hint, log=LOGGER)
         major, minor = version_args()
         try:
             rust_mod.watershed_pass_to_parquet(

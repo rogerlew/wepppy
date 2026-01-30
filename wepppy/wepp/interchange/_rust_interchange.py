@@ -40,4 +40,20 @@ def resolve_cli_calendar_path(
     if cli_dir is None:
         return None
 
-    return _ensure_cli_parquet(cli_dir, cli_file_hint=cli_hint, log=log)
+    parquet_path = _ensure_cli_parquet(cli_dir, cli_file_hint=cli_hint, log=log)
+    if parquet_path is None or not parquet_path.exists():
+        return None
+
+    try:
+        import pyarrow.parquet as pq
+
+        pq.ParquetFile(parquet_path)
+    except Exception:
+        (log or logging.getLogger(__name__)).warning(
+            "wepp interchange: CLI calendar unreadable at %s; falling back to Gregorian",
+            parquet_path,
+            exc_info=True,
+        )
+        return None
+
+    return parquet_path
