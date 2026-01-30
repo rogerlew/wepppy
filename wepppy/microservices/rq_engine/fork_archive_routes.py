@@ -6,7 +6,6 @@ import shutil
 from os.path import exists as _exists
 from typing import Any, Mapping
 
-import awesome_codename
 import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -21,6 +20,7 @@ from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.project_rq import archive_rq, fork_rq, restore_archive_rq
 from wepppy.weppcloud.utils.archive import has_archive
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
+from wepppy.weppcloud.utils.runid import generate_runid
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .payloads import parse_request_payload
@@ -184,25 +184,17 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             _verify_cap_token(request, str(cap_token).strip())
 
         source_config = Ron.getInstance(wd).config_stem
+        owners = list(get_run_owners_lazy(runid) or [])
 
         dir_created = False
         while not dir_created:
             if requested_runid:
                 new_runid = requested_runid
             else:
-                new_runid = awesome_codename.generate_codename().replace(" ", "-")
-
                 email = ""
                 if claims is not None:
                     email = str(claims.get("email") or "")
-                if email.startswith("rogerlew@"):
-                    new_runid = f"rlew-{new_runid}"
-                elif email.startswith("mdobre@"):
-                    new_runid = f"mdobre-{new_runid}"
-                elif email.startswith("srivas42@"):
-                    new_runid = f"srivas42-{new_runid}"
-                elif request.client and request.client.host == "127.0.0.1":
-                    new_runid = f"devvm-{new_runid}"
+                new_runid = generate_runid(email)
 
             new_wd = get_primary_wd(new_runid)
 
@@ -211,7 +203,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             else:
                 if _exists(new_wd):
                     continue
-                if has_archive(runid):
+                if has_archive(new_runid):
                     continue
                 dir_created = True
 
@@ -227,12 +219,32 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 raise RuntimeError(f"Run directory already exists: {new_wd}")
 
         register_run = not new_runid.startswith("profile;;")
-        if register_run and claims is not None and claims.get("token_class") == "user":
-            user, user_datastore, flask_app = _resolve_user_from_claims(claims)
-            if user is None or user_datastore is None or flask_app is None:
-                return error_response("Could not add run to user database", status_code=500)
+        should_register = register_run and (owners or (claims is not None and claims.get("token_class") == "user"))
+        if should_register:
+            user = None
+            user_datastore = None
+            flask_app = None
+            if claims is not None and claims.get("token_class") == "user":
+                user, user_datastore, flask_app = _resolve_user_from_claims(claims)
+                if user is None or user_datastore is None or flask_app is None:
+                    return error_response("Could not add run to user database", status_code=500)
+
+            if user_datastore is None or flask_app is None:
+                from wepppy.weppcloud.app import app as flask_app, user_datastore
+
             with flask_app.app_context():
-                user_datastore.create_run(new_runid, source_config, user)
+                run_record = None
+                if user is not None:
+                    run_record = user_datastore.create_run(new_runid, source_config, user)
+                elif owners:
+                    run_record = user_datastore.create_run(new_runid, source_config, owners[0])
+
+                if run_record is not None:
+                    for owner in owners:
+                        if run_record not in owner.runs:
+                            user_datastore.add_run_to_user(owner, run_record)
+                    if user is not None and run_record not in user.runs:
+                        user_datastore.add_run_to_user(user, run_record)
 
         prep = RedisPrep.getInstance(wd)
 

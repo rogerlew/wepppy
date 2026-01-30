@@ -59,6 +59,7 @@ def test_fork_requires_cap_for_anonymous(monkeypatch: pytest.MonkeyPatch, tmp_pa
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "_ensure_anonymous_access", lambda runid, wd: None)
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/fork")
@@ -83,16 +84,13 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
         "_exists",
         lambda path: True if str(path) == str(run_dir) else False,
     )
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
 
     class DummyRon:
         config_stem = "cfg"
 
     monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: DummyRon())
-    monkeypatch.setattr(
-        fork_archive_routes.awesome_codename,
-        "generate_codename",
-        lambda: "new-run",
-    )
+    monkeypatch.setattr(fork_archive_routes, "generate_runid", lambda email=None: "new-run")
 
     class DummyUserDatastore:
         def create_run(self, *args, **kwargs) -> None:
@@ -145,16 +143,13 @@ def test_fork_failure_returns_stacktrace(monkeypatch: pytest.MonkeyPatch, tmp_pa
         "_exists",
         lambda path: True if str(path) == str(run_dir) else False,
     )
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
 
     class DummyRon:
         config_stem = "cfg"
 
     monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: DummyRon())
-    monkeypatch.setattr(
-        fork_archive_routes.awesome_codename,
-        "generate_codename",
-        lambda: "new-run",
-    )
+    monkeypatch.setattr(fork_archive_routes, "generate_runid", lambda email=None: "new-run")
 
     def _raise_prep(_wd: str):
         raise RuntimeError("prep failed")

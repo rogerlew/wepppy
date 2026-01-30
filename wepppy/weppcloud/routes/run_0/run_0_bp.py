@@ -5,7 +5,7 @@ import pathlib
 from collections import OrderedDict
 
 from datetime import datetime
-import awesome_codename
+from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
 
@@ -513,13 +513,8 @@ def create_run_dir(current_user):
     wd = None
     dir_created = False
     while not dir_created:
-        runid = awesome_codename.generate_codename().replace(' ', '-').replace("'", '')
-
-        email = getattr(current_user, 'email', '')
-        if email.startswith('mdobre@'):
-            runid = 'mdobre-' + runid
-        elif email.startswith('srivas42@'):
-            runid = 'srivas42-' + runid
+        email = getattr(current_user, "email", "")
+        runid = generate_runid(email)
 
         wd = get_wd(runid)
         if _exists(wd):

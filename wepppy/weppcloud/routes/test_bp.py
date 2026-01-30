@@ -5,8 +5,6 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
-import awesome_codename
-
 from flask import Blueprint, jsonify, request, current_app
 from flask_security import current_user
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
@@ -14,6 +12,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 from wepppy.weppcloud.routes.run_0.run_0_bp import create_run_dir
 from wepppy.weppcloud.utils.helpers import url_for_run, get_wd
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
+from wepppy.weppcloud.utils.runid import generate_runid
 from wepppy.nodb.core.ron import Ron
 
 
@@ -82,7 +81,7 @@ def _create_run_dir_override(run_root: str) -> Tuple[str, str]:
     root_path.mkdir(parents=True, exist_ok=True)
 
     while True:
-        runid = awesome_codename.generate_codename().replace(' ', '-').replace("'", '')
+        runid = generate_runid()
         wd_path = root_path / runid
         if wd_path.exists():
             continue
