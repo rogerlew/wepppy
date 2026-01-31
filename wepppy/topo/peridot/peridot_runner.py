@@ -4,6 +4,8 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 import shutil
+import time
+from typing import Optional
 
 import math
 import numpy as np
@@ -23,10 +25,69 @@ LOGGER = logging.getLogger(__name__)
 # Default CPU count for peridot processes, can be overridden via PERIDOT_CPU env var
 _DEFAULT_PERIDOT_CPU = '24'
 
+_DEFAULT_PERIDOT_INPUT_WAIT_S = 10.0
+_DEFAULT_PERIDOT_INPUT_POLL_S = 0.25
+
 
 def _get_peridot_ncpu() -> str:
     """Get the number of CPUs to use for peridot processes."""
     return os.environ.get('PERIDOT_CPU', _DEFAULT_PERIDOT_CPU)
+
+def _get_peridot_input_wait_s() -> float:
+    raw = os.environ.get('PERIDOT_INPUT_WAIT_S')
+    if raw is None:
+        return _DEFAULT_PERIDOT_INPUT_WAIT_S
+    try:
+        wait_s = float(raw)
+    except ValueError as exc:
+        raise ValueError('PERIDOT_INPUT_WAIT_S must be a float') from exc
+    if wait_s < 0:
+        raise ValueError('PERIDOT_INPUT_WAIT_S must be >= 0')
+    return wait_s
+
+
+def _get_peridot_input_poll_s() -> float:
+    raw = os.environ.get('PERIDOT_INPUT_POLL_S')
+    if raw is None:
+        return _DEFAULT_PERIDOT_INPUT_POLL_S
+    try:
+        poll_s = float(raw)
+    except ValueError as exc:
+        raise ValueError('PERIDOT_INPUT_POLL_S must be a float') from exc
+    if poll_s <= 0:
+        raise ValueError('PERIDOT_INPUT_POLL_S must be > 0')
+    return poll_s
+
+
+def _wait_for_file(
+    path: str,
+    *,
+    timeout_s: float,
+    poll_s: float = _DEFAULT_PERIDOT_INPUT_POLL_S,
+    logger: Optional[logging.Logger] = None,
+) -> None:
+    """
+    Wait for ``path`` to exist before proceeding.
+
+    This is a defensive guard for cases where upstream tools create files
+    asynchronously and downstream jobs begin before writes are visible.
+    """
+    if _exists(path):
+        return
+
+    if timeout_s <= 0:
+        raise FileNotFoundError(f'Expected file {path} to exist')
+
+    if logger is not None:
+        logger.info('Waiting up to %.2fs for %s', timeout_s, path)
+
+    deadline = time.monotonic() + timeout_s
+    while True:
+        if _exists(path):
+            return
+        if time.monotonic() >= deadline:
+            raise FileNotFoundError(f'Expected file {path} to be available within {timeout_s:.2f}s')
+        time.sleep(poll_s)
 
 
 _thisdir = os.path.dirname(__file__)
@@ -60,7 +121,12 @@ def run_peridot_abstract_watershed(
     bieger2015_widths: bool = False,
     verbose: bool = True
 ):
-    assert _exists(_join(wd, 'dem/topaz/SUBWTA.ARC'))
+    _wait_for_file(
+        _join(wd, 'dem/topaz/SUBWTA.ARC'),
+        timeout_s=_get_peridot_input_wait_s(),
+        poll_s=_get_peridot_input_poll_s(),
+        logger=LOGGER,
+    )
 
     cmd = [_get_bin(), wd, '--ncpu', _get_peridot_ncpu()]
 
@@ -74,9 +140,9 @@ def run_peridot_abstract_watershed(
     if verbose:
         print(' '.join(cmd))
 
-    _log = open(_join(wd, '_peridot.log'), 'w')
-    p = Popen(cmd, stdout=_log, stderr=_log)
-    p.wait()
+    with open(_join(wd, '_peridot.log'), 'w') as _log:
+        p = Popen(cmd, stdout=_log, stderr=_log)
+        p.wait()
 
 def run_peridot_wbt_abstract_watershed(
     wd: str,
@@ -99,7 +165,12 @@ def run_peridot_wbt_abstract_watershed(
         verbose (bool): If True, print command details.
         representative_flowpath (bool): If True, use a single representative flowpath per hillslope.
     """
-    assert _exists(_join(wd, 'dem/wbt/subwta.tif'))
+    _wait_for_file(
+        _join(wd, 'dem/wbt/subwta.tif'),
+        timeout_s=_get_peridot_input_wait_s(),
+        poll_s=_get_peridot_input_poll_s(),
+        logger=LOGGER,
+    )
 
     cmd = [_get_wbt_bin(), wd, '--ncpu', _get_peridot_ncpu()]
 
@@ -118,9 +189,9 @@ def run_peridot_wbt_abstract_watershed(
     if verbose:
         print(' '.join(cmd))
 
-    _log = open(_join(wd, '_peridot.log'), 'w')
-    p = Popen(cmd, stdout=_log, stderr=_log)
-    p.wait()
+    with open(_join(wd, '_peridot.log'), 'w') as _log:
+        p = Popen(cmd, stdout=_log, stderr=_log)
+        p.wait()
 
 
 def post_abstract_watershed(wd: str, verbose: bool = True):
