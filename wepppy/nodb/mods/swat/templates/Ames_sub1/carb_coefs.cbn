@@ -1,0 +1,47 @@
+File: carb_coefs.cbn   Carbon coefficients used if cswat == 2
+
+# carbdb coefficients
+#               1st_lyr     other_lyrs
+hp_rate         1.2e-05     1.2e-05     
+hs_rate         2.92e-04    1.81e-04    
+microb_rate     0.0164      0.02        
+meta_rate       0.0405      0.0507      
+str_rate        0.0107      0.0134  
+microb_top_rate 0.0164      0.02            
+hs_hp           0.05        0.05 
+
+# org_allo coefficients
+#               1st_lyr     other_lyrs
+a1co2           0.600       0.55
+asco2           0.55        0.55
+apco2           0.55        0.55 
+abco2           0.55        0.0
+
+# carbon water partitioning coefficients
+prmt_21         1000.   
+prmt_44         0.5
+
+# Length of days that a tillage event will be effective
+till_eff_days   30
+
+# Manure carbon coefficients
+rtof        0.5
+man_to_c    0.42           
+
+# meta, str, and lignin partioning fractions
+meta_frac       0.85
+str_frac        0.15
+lig_frac        0.12
+
+# temperature effect equation parameters
+tn             -0.5
+top            35.0
+tx             50.0
+
+# Soil Test Values (sname and depth_mm are required, enter 0.0 for missing values).
+# If sand, silt, clay are not 0.0 they must total to 100.0
+# data are assumed to be weighted average values down to depth_mm
+nmbr_soil_tests  2
+#         soil_name      depth_mm  bulk_density carbon %sand    %silt   %clay
+soil_test soil_01-h1     150        2.0         4.0     30.0     30.0    40.0 
+soil_test soil_03-h3     150        1.6         3.0     40.0     30.0    30.0
