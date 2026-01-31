@@ -367,8 +367,8 @@ def task_set_hourly_seepage(runid, config):
         return error_factory('routine is None')
 
     routine = str(routine)
-    if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']:
-        return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']")
+    if routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']:
+        return error_factory("routine not in ['wepp_ui', 'wepp_watershed', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']")
 
     state = payload.get('state', None)
     if state is None:
@@ -382,6 +382,8 @@ def task_set_hourly_seepage(runid, config):
 
         if routine == 'wepp_ui':
             wepp.set_run_wepp_ui(bool(state))
+        elif routine == 'wepp_watershed':
+            wepp.set_run_wepp_watershed(bool(state))
         elif routine == 'pmet':
             wepp.set_run_pmet(bool(state))
         elif routine == 'frost':

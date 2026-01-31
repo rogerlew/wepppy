@@ -337,6 +337,9 @@ def run_wepp_rq(runid: str) -> Job:
         wepp_bin = wepp.wepp_bin
 
         wepp.logger.info('    wepp_bin:{}'.format(wepp_bin))
+        run_watershed = wepp.run_wepp_watershed
+        if not run_watershed:
+            wepp.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
 
         # everything below here is asynchronous, performed by workers
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
@@ -384,10 +387,15 @@ def run_wepp_rq(runid: str) -> Job:
 
             #
             # Prep Watershed
-            job2_watershed_prep = q.enqueue_call(_prep_watershed_rq, (runid,),
-                                  timeout=TIMEOUT,
-                                  depends_on=jobs1_hillslopes)
-            job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
+            job2_watershed_prep: Job | None = None
+            if run_watershed:
+                job2_watershed_prep = q.enqueue_call(
+                    _prep_watershed_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=jobs1_hillslopes,
+                )
+                job.meta['jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
 
             job2_totalwatsed2: Job | None = None
             job2_hillslope_interchange: Job | None = None
@@ -419,96 +427,115 @@ def run_wepp_rq(runid: str) -> Job:
                 job.meta['jobs:2,func:run_flowpaths_rq'] = jobs2_flowpaths.id
                 job.save()
 
-            #
-            # Run Watershed
-            wepp.logger.info(f'Running Watershed wepp_bin:{wepp_bin}... ')
+            swat_job_run: Job | None = None
+            if wepp.mods and 'swat' in wepp.mods:
+                swat_dependencies = [job2_hillslope_interchange]
+                if job2_watershed_prep is not None:
+                    swat_dependencies.append(job2_watershed_prep)
+                swat_job_build = q.enqueue_call(
+                    _build_swat_inputs_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=swat_dependencies,
+                )
+                job.meta['jobs:2,func:_build_swat_inputs_rq'] = swat_job_build.id
+                job.save()
 
-            # jobs:3
+                swat_job_run = q.enqueue_call(
+                    _run_swat_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=swat_job_build,
+                )
+                job.meta['jobs:3,func:_run_swat_rq'] = swat_job_run.id
+                job.save()
+
+            # jobs:3 + 4 (watershed only)
             jobs3_watersheds: list[Job] = []
-            if climate.climate_mode == ClimateMode.SingleStormBatch:
+            jobs4_post: list[Job] = []
+            if run_watershed:
+                wepp.logger.info(f'Running Watershed wepp_bin:{wepp_bin}... ')
+                if climate.climate_mode == ClimateMode.SingleStormBatch:
 
-                for d in climate.ss_batch_storms:
-                    ss_batch_key = d['ss_batch_key']
-                    ss_batch_id = d['ss_batch_id']
+                    for d in climate.ss_batch_storms:
+                        ss_batch_key = d['ss_batch_key']
+                        ss_batch_id = d['ss_batch_id']
 
+                        _job = q.enqueue_call(
+                                func=run_ss_batch_watershed_rq,
+                                args=[runid],
+                                kwargs=dict(wepp_bin=wepp_bin, ss_batch_id=ss_batch_id),
+                                timeout=TIMEOUT,
+                                depends_on=job2_watershed_prep)
+                        job.meta[f'jobs:3,func:run_ss_batch_watershed_rq,ss_batch_id:{ss_batch_id}'] = _job.id
+                        jobs3_watersheds.append(_job)
+                        job.save()
+
+                else:
                     _job = q.enqueue_call(
-                            func=run_ss_batch_watershed_rq,
+                            func=run_watershed_rq,
                             args=[runid],
-                            kwargs=dict(wepp_bin=wepp_bin, ss_batch_id=ss_batch_id),
+                            kwargs=dict(wepp_bin=wepp_bin),
                             timeout=TIMEOUT,
                             depends_on=job2_watershed_prep)
-                    job.meta[f'jobs:3,func:run_ss_batch_watershed_rq,ss_batch_id:{ss_batch_id}'] = _job.id
+                    job.meta[f'jobs:3,func:run_watershed_rq'] = _job.id
                     jobs3_watersheds.append(_job)
                     job.save()
 
-            else:
-                _job = q.enqueue_call(
-                        func=run_watershed_rq,
-                        args=[runid],
-                        kwargs=dict(wepp_bin=wepp_bin),
-                        timeout=TIMEOUT,
-                        depends_on=job2_watershed_prep)
-                job.meta[f'jobs:3,func:run_watershed_rq'] = _job.id
-                jobs3_watersheds.append(_job)
-                job.save()
+                post_dependencies = jobs3_watersheds or [job2_watershed_prep]
 
-            post_dependencies = jobs3_watersheds or [job2_watershed_prep]
-
-            # jobs:4
-            jobs4_post: list[Job] = []
-
-            _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-            job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = _job.id
-            jobs4_post.append(_job)
-            job.save()
-
-            if wepp.prep_details_on_run_completion:
-                _job = q.enqueue_call(_post_prep_details_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_post_prep_details_rq'] = _job.id
+                _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = _job.id
                 jobs4_post.append(_job)
                 job.save()
 
-            if not climate.is_single_storm:
-                _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_run_hillslope_watbal_rq'] = _job.id
-                jobs4_post.append(_job)
-                job.save()
+                if wepp.prep_details_on_run_completion:
+                    _job = q.enqueue_call(_post_prep_details_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                    job.meta['jobs:4,func:_post_prep_details_rq'] = _job.id
+                    jobs4_post.append(_job)
+                    job.save()
 
-            if not wepp.multi_ofe:
-                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_post_make_loss_grid_rq'] = _job.id
-                jobs4_post.append(_job)
-                job.save()
+                if not climate.is_single_storm:
+                    _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                    job.meta['jobs:4,func:_run_hillslope_watbal_rq'] = _job.id
+                    jobs4_post.append(_job)
+                    job.save()
 
-            job_post_watershed_interchange = q.enqueue_call(
-                _post_watershed_interchange_rq,
-                (runid,),
-                timeout=TIMEOUT,
-                depends_on=post_dependencies,
-            )
-            job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
-            jobs4_post.append(job_post_watershed_interchange)
-            job.save()
+                if not wepp.multi_ofe:
+                    _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                    job.meta['jobs:4,func:_post_make_loss_grid_rq'] = _job.id
+                    jobs4_post.append(_job)
+                    job.save()
 
-            if not climate.is_single_storm:
-                _job = q.enqueue_call(
-                    _analyze_return_periods_rq,
+                job_post_watershed_interchange = q.enqueue_call(
+                    _post_watershed_interchange_rq,
                     (runid,),
                     timeout=TIMEOUT,
-                    depends_on=job_post_watershed_interchange,
+                    depends_on=post_dependencies,
                 )
-                job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
-                jobs4_post.append(_job)
+                job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
+                jobs4_post.append(job_post_watershed_interchange)
                 job.save()
 
+                if not climate.is_single_storm:
+                    _job = q.enqueue_call(
+                        _analyze_return_periods_rq,
+                        (runid,),
+                        timeout=TIMEOUT,
+                        depends_on=job_post_watershed_interchange,
+                    )
+                    job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
+                    jobs4_post.append(_job)
+                    job.save()
+
             jobs5_post: list[Job] = []
-            if wepp.legacy_arc_export_on_run_completion:
+            if run_watershed and wepp.legacy_arc_export_on_run_completion:
                 _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=TIMEOUT, depends_on=jobs4_post)
                 job.meta['jobs:5,func:_post_legacy_arc_export_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 
-            if wepp.arc_export_on_run_completion:
+            if run_watershed and wepp.arc_export_on_run_completion:
                 _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs4_post)
                 job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
                 jobs5_post.append(_job)
@@ -525,6 +552,9 @@ def run_wepp_rq(runid: str) -> Job:
 
             if jobs2_flowpaths is not None:
                 jobs5_post.append(jobs2_flowpaths)
+
+            if swat_job_run is not None:
+                jobs5_post.append(swat_job_run)
 
             # jobs:6
             job6_finalfinal: Job
@@ -575,6 +605,16 @@ def run_wepp_watershed_rq(runid: str) -> Job:
 
         if wepp.islocked():
             raise Exception(f'{runid} is locked')
+
+        if not wepp.run_wepp_watershed:
+            wepp.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
+            conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+            with redis.Redis(**conn_kwargs) as redis_conn:
+                q = Queue(connection=redis_conn)
+                job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,))
+                job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
+                job.save()
+            return job6_finalfinal
 
         # send feedback to user
         wepp.logger.info('Running Wepp Watershed\n')
@@ -1524,6 +1564,48 @@ def _post_make_loss_grid_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
         wepp.make_loss_grid()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
+def _build_swat_inputs_rq(runid: str) -> None:
+    """Build SWAT+ TxtInOut inputs from WEPP hillslope outputs."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:swat'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        from wepppy.nodb.mods.swat import Swat
+
+        swat = Swat.getInstance(wd)
+        swat.build_inputs()
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
+def _run_swat_rq(runid: str) -> None:
+    """Execute SWAT+ from the prepared TxtInOut directory."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:swat'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        from wepppy.nodb.mods.swat import Swat
+
+        swat = Swat.getInstance(wd)
+        swat.run_swat()
+
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

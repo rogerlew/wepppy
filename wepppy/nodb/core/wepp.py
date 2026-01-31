@@ -514,6 +514,7 @@ class Wepp(NoDbBase):
             self.baseflow_bfthreshold_map = self.config_get_path('baseflow_opts', 'bfthreshold_map')
 
             self._run_wepp_ui = self.config_get_bool('wepp', 'wepp_ui')
+            self._run_wepp_watershed = self.config_get_bool('wepp', 'run_wepp_watershed', True)
             self._run_pmet = self.config_get_bool('wepp', 'pmet')
             self._run_frost = self.config_get_bool('wepp', 'frost')
             self._run_tcr = self.config_get_bool('wepp', 'tcr')
@@ -759,6 +760,10 @@ class Wepp(NoDbBase):
     @property
     def run_wepp_ui(self) -> bool:
         return getattr(self, '_run_wepp_ui', self.config_get_bool('wepp', 'wepp_ui'))
+
+    @property
+    def run_wepp_watershed(self) -> bool:
+        return getattr(self, '_run_wepp_watershed', self.config_get_bool('wepp', 'run_wepp_watershed', True))
 
     @property
     def run_pmet(self) -> bool:
@@ -2619,6 +2624,9 @@ class Wepp(NoDbBase):
             export_channels_prep_details,
             export_hillslopes_prep_details
         )
+        if not self.run_wepp_watershed:
+            self.logger.info('Skipping WEPP watershed run (wepp.run_wepp_watershed=False)')
+            return
         wd = self.wd
         climate = self.climate_instance
         wepp_bin = self.wepp_bin
@@ -2875,6 +2883,11 @@ class Wepp(NoDbBase):
         assert state in [True, False]
         with self.locked():
             self.run_flowpaths = state
+
+    def set_run_wepp_watershed(self, state: bool) -> None:
+        assert state in [True, False]
+        with self.locked():
+            self._run_wepp_watershed = state
 
     def set_run_wepp_ui(self, state: bool) -> None:
         assert state in [True, False]
