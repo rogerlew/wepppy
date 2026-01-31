@@ -231,7 +231,10 @@ function controlBase() {
                 }
             }
         }
-        if (payload.description) {
+        const status = String(payload.status || "").toLowerCase();
+        const normalizedStatus = status.replace(/cancel+ed/g, "canceled");
+        const isFailure = FAILURE_JOB_STATUSES.has(normalizedStatus) || normalizedStatus === "error";
+        if (isFailure && payload.description) {
             return payload.description;
         }
         return null;
