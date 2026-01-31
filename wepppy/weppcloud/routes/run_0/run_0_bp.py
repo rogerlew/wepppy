@@ -1,6 +1,7 @@
 """Routes for wepp blueprint extracted from app.py."""
 
 import wepppy
+import os
 import pathlib
 from collections import OrderedDict
 
@@ -8,6 +9,7 @@ from datetime import datetime
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
+from urllib.parse import urlencode
 
 from .._common import *  # noqa: F401,F403
 from flask import current_app
@@ -66,7 +68,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#rap-ts': TaskEnum.fetch_rap_ts,
     '#openet-ts': TaskEnum.fetch_openet_ts,
     '#soils': TaskEnum.build_soils,
-    '#treatments': TaskEnum.build_landuse,  # Using landuse emoji as placeholder
+    '#treatments': TaskEnum.build_treatments,
     '#wepp': TaskEnum.run_wepp_watershed,
     '#ash': TaskEnum.run_watar,
     '#rhem': TaskEnum.run_rhem,
@@ -483,7 +485,6 @@ def view_mod_section(runid, config, mod_name):
     })
 
 @run_0_bp.route('/create', strict_slashes=False)
-@login_required
 @handle_with_exception_factory
 def create_index():
     configs = get_configs()
@@ -493,20 +494,46 @@ def create_index():
             continue
 
         base_url = url_for_run('run_0.create', config=cfg)
-        rows.append(
-            '<tr>'
-            f'<td><a href="{base_url}" rel="nofollow">{cfg}</a></td>'
-            f'<td><a href="{base_url}?general:dem_db=ned1/2016" rel="nofollow">{cfg} ned1/2016</a></td>'
-            f'<td><a href="{base_url}?watershed:delineation_backend=wbt" rel="nofollow">{cfg} WhiteBoxTools</a></td>'
-            '</tr>'
-        )
+        variants = [
+            {
+                "label": cfg,
+                "overrides": {},
+                "url": base_url,
+                "action_url": base_url,
+            },
+            {
+                "label": f"{cfg} ned1/2016",
+                "overrides": {"general:dem_db": "ned1/2016"},
+                "url": f"{base_url}?{urlencode({'general:dem_db': 'ned1/2016'}, safe=':')}",
+                "action_url": base_url,
+            },
+            {
+                "label": f"{cfg} WhiteBoxTools",
+                "overrides": {"watershed:delineation_backend": "wbt"},
+                "url": f"{base_url}?{urlencode({'watershed:delineation_backend': 'wbt'}, safe=':')}",
+                "action_url": base_url,
+            },
+        ]
+        rows.append({"config": cfg, "base_url": base_url, "variants": variants})
 
-    bootstrap_css = url_for('static', filename='vendor/bootstrap/bootstrap.css')
-    return (
-        '<!DOCTYPE html><html><body>'
-        f'<link rel="stylesheet" href="{bootstrap_css}">'
-        '\n<table class="table">{}</table>\n</body></html>'
-    ).format('\n'.join(rows))
+    cap_base_url = None
+    cap_asset_base_url = None
+    cap_site_key = None
+    if current_user.is_anonymous:
+        cap_base_url = (current_app.config.get("CAP_BASE_URL") or os.getenv("CAP_BASE_URL", "/cap")).rstrip("/")
+        cap_asset_base_url = (
+            current_app.config.get("CAP_ASSET_BASE_URL")
+            or os.getenv("CAP_ASSET_BASE_URL", f"{cap_base_url}/assets")
+        ).rstrip("/")
+        cap_site_key = current_app.config.get("CAP_SITE_KEY") or os.getenv("CAP_SITE_KEY", "")
+
+    return render_template(
+        "run_0/create_index.htm",
+        rows=rows,
+        cap_base_url=cap_base_url,
+        cap_asset_base_url=cap_asset_base_url,
+        cap_site_key=cap_site_key,
+    )
 
 def create_run_dir(current_user):
     from wepppy.weppcloud.utils.archive import has_archive

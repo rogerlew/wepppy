@@ -1,0 +1,69 @@
+{% extends "base_pure.htm" %}
+{% import "shared/cap_macros.htm" as cap_macros %}
+
+{% block title %}Create Run{% endblock %}
+
+{% block body %}
+  <section class="wc-panel wc-stack">
+    <h1>Create a run</h1>
+    <p class="wc-text-muted">Choose a configuration to start a new run.</p>
+    {% if current_user.is_anonymous %}
+      <p class="wc-text-muted">Anonymous create requires verification.</p>
+      {{ cap_macros.cap_prompt("create-index", "cap-create-index", cap_base_url, cap_site_key) }}
+    {% endif %}
+
+    <div class="wc-table-scroll">
+      <table class="pure-table wc-table">
+        <thead>
+          <tr>
+            <th>Config</th>
+            <th>Default</th>
+            <th>ned1/2016</th>
+            <th>WhiteBoxTools</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.config }}</td>
+              {% for variant in row.variants %}
+                <td>
+                  {% if current_user.is_anonymous %}
+                    <form class="wc-run-form" method="post" action="{{ variant.action_url }}" data-cap-section="create-index" data-cap-required="true">
+                      <input type="hidden" name="cap_token" value="" data-cap-token>
+                      {% for key, value in variant.overrides.items() %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                      {% endfor %}
+                      <button type="submit"
+                              class="pure-button wc-run-button is-disabled"
+                              data-run-action="{{ variant.url }}"
+                              aria-disabled="true"
+                              disabled>
+                        {{ variant.label }}
+                      </button>
+                    </form>
+                  {% else %}
+                    <a class="pure-button wc-run-button" href="{{ variant.url }}" rel="nofollow">
+                      {{ variant.label }}
+                    </a>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
+
+{% block script_extras %}
+  {% if current_user.is_anonymous %}
+    <script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+    <script>
+      window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
+    </script>
+    <script src="{{ cap_asset_base_url }}/widget.js" defer></script>
+    <script src="{{ cap_asset_base_url }}/floating.js" defer></script>
+  {% endif %}
+{% endblock %}
