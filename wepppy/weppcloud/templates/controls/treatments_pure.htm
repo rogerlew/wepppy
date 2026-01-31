@@ -2,7 +2,11 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
 
-{% set current_mode = treatments.mode.value if treatments.mode is not none else -1 %}
+{% set current_mode = treatments.mode.value if treatments.mode is not none else 1 %}
+{% set current_mode = current_mode | int %}
+{% if current_mode not in [1, 4] %}
+  {% set current_mode = 1 %}
+{% endif %}
 
 {% set description %}
   <p class="wc-text-muted">
@@ -41,6 +45,13 @@
 {% for opt in treatmentoptions %}
   {% set treatment_select_options = treatment_select_options + [(opt['Key'], opt['Key'] ~ ' — ' ~ opt['Description'])] %}
 {% endfor %}
+{% set mapping_ns = namespace(options=[]) %}
+{% if landuse_management_mapping_options %}
+  {% for option in landuse_management_mapping_options %}
+    {% set mapping_ns.options = mapping_ns.options + [(option['Key'], option['Key'] ~ ' — ' ~ option['Description'])] %}
+  {% endfor %}
+{% endif %}
+{% set mapping_field_id = "treatments_landuse_management_mapping_selection" %}
 
 {% call ui.control_shell(
      form_id="treatments_form",
@@ -61,10 +72,12 @@
        help="Switch modes to assign treatments directly or upload a treated landcover map."
      ) }}
 
+  {% set mode1_hidden = current_mode != 1 %}
   {% set mode1_style = '' if current_mode == 1 else 'display: none;' %}
   <div id="treatments_mode1_controls"
        class="wc-stack hide-readonly"
        data-treatments-panel="selection"
+       {% if mode1_hidden %}hidden{% endif %}
        {% if mode1_style %}style="{{ mode1_style }}"{% endif %}>
     {{ ui.select_field(
          "treatments_single_selection",
@@ -76,10 +89,12 @@
        ) }}
   </div>
 
+  {% set mode4_hidden = current_mode != 4 %}
   {% set mode4_style = '' if current_mode == 4 else 'display: none;' %}
   <div id="treatments_mode4_controls"
        class="wc-stack hide-readonly"
        data-treatments-panel="upload"
+       {% if mode4_hidden %}hidden{% endif %}
        {% if mode4_style %}style="{{ mode4_style }}"{% endif %}>
     {{ ui.file_upload(
          "input_upload_treatments",
@@ -89,6 +104,20 @@
          attrs={"class": "disable-readonly", "data-treatments-role": "upload"},
          field_name="input_upload_landuse"
        ) }}
+    <div class="wc-field" style="max-width: 750px;">
+      <label class="wc-field__label" for="{{ mapping_field_id }}">Select management mapping</label>
+      <select class="wc-field__control disable-readonly"
+              id="{{ mapping_field_id }}"
+              name="landuse_management_mapping_selection"
+              aria-describedby="{{ mapping_field_id }}_help">
+        {% for value, text in mapping_ns.options %}
+        <option value="{{ value }}"{% if value == landuse.mapping %} selected{% endif %}>{{ text }}</option>
+        {% endfor %}
+      </select>
+      <p id="{{ mapping_field_id }}_help" class="wc-field__help">
+        Mappings define how raster values translate to WEPP management files.
+      </p>
+    </div>
 
     <div class="wc-stack">
       {% call ui.collapsible_card(

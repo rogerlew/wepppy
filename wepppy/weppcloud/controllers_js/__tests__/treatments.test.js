@@ -141,6 +141,16 @@ describe("Treatments controller", () => {
         expect(scenarioEvent.payload).toMatchObject({ mode: 1, selection: "mulch_30" });
     });
 
+    test("initial render hides upload controls when Specify Hillslopes is selected", () => {
+        const selectionPanel = document.querySelector("#treatments_mode1_controls");
+        const uploadPanel = document.querySelector("#treatments_mode4_controls");
+
+        expect(selectionPanel.hidden).toBe(false);
+        expect(selectionPanel.style.display).toBe("");
+        expect(uploadPanel.hidden).toBe(true);
+        expect(uploadPanel.style.display).toBe("none");
+    });
+
     test("setMode posts normalized payload and toggles panels", async () => {
         postJsonMock.mockClear();
         emittedEvents.length = 0;
