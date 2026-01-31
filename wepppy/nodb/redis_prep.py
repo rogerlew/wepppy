@@ -25,6 +25,7 @@ class TaskEnum(Enum):
     find_outlet = 'find_outlet'
     build_subcatchments = 'build_subcatchments'
     build_landuse = 'build_landuse'
+    build_treatments = 'build_treatments'
     build_rangeland_cover = 'build_rangeland_cover'
     build_soils = 'build_soils'
     build_climate = 'build_climate'
@@ -60,6 +61,7 @@ class TaskEnum(Enum):
             TaskEnum.find_outlet: 'Find Outlet',
             TaskEnum.build_subcatchments: 'Build Subcatchments',
             TaskEnum.build_landuse: 'Build Landuse',
+            TaskEnum.build_treatments: 'Build Treatments',
             TaskEnum.build_rangeland_cover: 'Build Rangeland Cover',
             TaskEnum.build_soils: 'Build Soils',
             TaskEnum.build_climate: 'Build Climate',
@@ -93,6 +95,7 @@ class TaskEnum(Enum):
             TaskEnum.find_outlet: '📍',
             TaskEnum.build_subcatchments: '🧩',
             TaskEnum.build_landuse: '🌲',
+            TaskEnum.build_treatments: '💊',
             TaskEnum.build_rangeland_cover: '🦎',
             TaskEnum.build_soils: '🪱',
             TaskEnum.build_climate: '☁️',

@@ -146,6 +146,7 @@ handler so the controller self-initializes after dynamic inserts.
        '#disturbed-sbs': TaskEnum.init_sbs_map,
        '#channel-delineation': TaskEnum.build_channels,
        '#rangeland-cover': TaskEnum.build_rangeland_cover,
+       '#treatments': TaskEnum.build_treatments,
        # ... etc
    }
    
@@ -200,7 +201,8 @@ def emoji(self) -> str:
         TaskEnum.build_channels: '🌊',
         TaskEnum.build_subcatchments: '🧩',
         TaskEnum.build_landuse: '🌲',
-    TaskEnum.build_rangeland_cover: '🦎',
+        TaskEnum.build_treatments: '💊',
+        TaskEnum.build_rangeland_cover: '🦎',
         TaskEnum.build_soils: '🪱',
         TaskEnum.build_climate: '☁️',
         TaskEnum.fetch_rap_ts: '🗺️',
@@ -503,7 +505,7 @@ document.addEventListener('preflight:update', function(event) {
 | `watar` | `#ash` | `run_watar` | 🌋 |
 | `dss_export` | `#dss-export` | `dss_export` | 📤 |
 
-**Note:** Controls without direct TaskEnum mapping (e.g., `#map`, `#team`, `#treatments`) use placeholder emojis defined in `run_0_bp.py`.
+**Note:** Controls without checklist keys (for example, `#map` and `#team`) will not flip their TOC emoji state until `preflight2` emits a matching checklist key. Treatments now maps to `TaskEnum.build_treatments` (💊) in `run_0_bp.py`.
 
 ### DSS Export Dependency Rules
 

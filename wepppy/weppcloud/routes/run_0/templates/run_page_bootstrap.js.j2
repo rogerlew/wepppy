@@ -212,6 +212,7 @@
             modFlags.path_ce = true;
             modFlags.debris_flow = true;
             modFlags.openet_ts = true;
+            modFlags.treatments = true;
         }
         var disabledControllers = new Set(
             (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
@@ -241,6 +242,9 @@
         add("observed", typeof Observed !== "undefined" ? Observed : null);
         add("wepp", typeof Wepp !== "undefined" ? Wepp : null);
         add("dssExport", typeof DssExport !== "undefined" ? DssExport : null);
+        if (modFlags.treatments) {
+            add("treatments", typeof Treatments !== "undefined" ? Treatments : null);
+        }
         if (modFlags.debris_flow) {
             add("debrisFlow", typeof DebrisFlow !== "undefined" ? DebrisFlow : null);
         }
