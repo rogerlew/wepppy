@@ -48,10 +48,12 @@ from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.rap import RAP_TS
+from wepppy.nodb.mods.treatments import Treatments
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.wepp.interchange import run_totalwatsed3
+from wepppy.io_wait import wait_for_paths
 from wepppy.rq.exception_logging import with_exception_logging
 from .wepp_rq import run_wepp_rq
 
@@ -796,6 +798,30 @@ def build_landuse_rq(runid: str) -> None:
 
 
 @with_exception_logging
+def build_treatments_rq(runid: str) -> None:
+    """Apply treatments to landuse and soils."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:treatments'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        treatments = Treatments.getInstance(wd)
+        treatments.build_treatments()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} TRIGGER   treatments TREATMENTS_BUILD_TASK_COMPLETED',
+        )
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_treatments)
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@with_exception_logging
 def build_soils_rq(runid: str) -> None:
     """Build soil layers for the watershed.
 
@@ -1231,6 +1257,17 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
         StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC... done.\n')
 
         if undisturbify:
+            StatusMessenger.publish(status_channel, 'Waiting for forked .nodb files to settle...\n')
+            required_nodbs = [
+                os.path.join(new_wd, 'ron.nodb'),
+                os.path.join(new_wd, 'wepp.nodb'),
+                os.path.join(new_wd, 'landuse.nodb'),
+                os.path.join(new_wd, 'soils.nodb'),
+                os.path.join(new_wd, 'disturbed.nodb'),
+            ]
+            wait_for_paths(required_nodbs)
+            StatusMessenger.publish(status_channel, 'Forked .nodb files ready.\n')
+
             StatusMessenger.publish(status_channel, 'Undisturbifying Project...\n')
             ron = Ron.getInstance(new_wd)
             ron.scenario = 'Undisturbed'

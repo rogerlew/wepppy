@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 import shutil
-from os.path import exists as _exists
 from os.path import join as _join
 from typing import Any
 
@@ -15,10 +14,10 @@ from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.core import Landuse, Watershed, WatershedNotAbstractedError
+from wepppy.nodb.core import Landuse, WatershedNotAbstractedError
 from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
-from wepppy.rq.project_rq import build_landuse_rq
+from wepppy.rq.project_rq import build_treatments_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -55,10 +54,17 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
         wd = get_wd(runid)
         treatments = Treatments.getInstance(wd)
         landuse = Landuse.getInstance(wd)
+        payload = await parse_request_payload(request)
+        mode_value = payload.get("mode")
+        if mode_value is None:
+            mode_value = payload.get("treatments_mode")
+        if mode_value is not None:
+            try:
+                treatments.mode = int(mode_value)
+            except (TypeError, ValueError):
+                return error_response("treatments_mode must be an integer", status_code=400)
 
         if treatments.mode == TreatmentsMode.UserDefinedMap:
-            watershed = Watershed.getInstance(wd)
-            payload = await parse_request_payload(request)
 
             def _first(value: Any) -> Any:
                 if isinstance(value, (list, tuple)):
@@ -89,7 +95,7 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
             if not filename:
                 return error_response("Could not obtain filename", status_code=400)
 
-            user_defined_fn = _join(landuse.lc_dir, f"_{filename}")
+            user_defined_fn = _join(treatments.treatments_dir, filename)
             try:
                 with open(user_defined_fn, "wb") as dest:
                     shutil.copyfileobj(upload.file, dest)
@@ -97,25 +103,20 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
                 return error_response_with_traceback("Could not save file")
 
             try:
-                from wepppy.all_your_base.geo import raster_stacker
-
-                raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
+                treatments.validate(user_defined_fn)
             except Exception:
                 return error_response_with_traceback(
                     "Failed validating file", status_code=400
                 )
 
-            if not _exists(landuse.lc_fn):
-                return error_response("Failed creating landuse file", status_code=400)
-
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.build_landuse)
+        prep.remove_timestamp(TaskEnum.build_treatments)
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_landuse_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("build_landuse_rq", job.id)
+            job = q.enqueue_call(build_treatments_rq, (runid,), timeout=RQ_TIMEOUT)
+            prep.set_rq_job_id("build_treatments_rq", job.id)
         return JSONResponse({"job_id": job.id})
     except WatershedNotAbstractedError as exc:
         return error_response(

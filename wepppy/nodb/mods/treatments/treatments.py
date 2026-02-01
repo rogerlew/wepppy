@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 import os
 import ast
 import csv
@@ -133,49 +133,56 @@ class Treatments(NoDbBase):
 
         fn should be a gdal friendly raster file (e.g. .tif, .img) stored in the treatments directory.
         """
-
         subwta_fn = Watershed.getInstance(self.wd).subwta
-        
-        # check it exists
-        if not _exists(fn):
-            raise FileNotFoundError(f"'{fn}' not found!")
-        
-        # check it is in the treatments_dir
-        if not _exists(_join(self.treatments_dir, fn)):
+
+        # resolve path (accept basename or absolute path)
+        if _exists(fn):
+            treatment_path = fn
+        else:
+            treatment_path = _join(self.treatments_dir, fn)
+            if not _exists(treatment_path):
+                raise FileNotFoundError(f"'{fn}' not found!")
+        treatment_path = os.path.abspath(treatment_path)
+
+        # ensure file lives in treatments_dir
+        if os.path.abspath(os.path.dirname(treatment_path)) != os.path.abspath(self.treatments_dir):
             raise FileNotFoundError(f"'{fn}' not found in '{self.treatments_dir}'!")
 
         # check it is a gdal friendly raster
         try:
-            ds = gdal.Open(fn)
+            ds = gdal.Open(treatment_path)
             if ds is None:
-                raise ValueError(f"'{fn}' is not a valid gdal raster file!")
+                raise ValueError(f"'{treatment_path}' is not a valid gdal raster file!")
 
             # validate it has an srs
             srs = ds.GetProjection()
             if not validate_srs(srs):
-                raise ValueError(f"'{fn}' does not have a valid srs!")
-        except:
-            raise ValueError(f"'{fn}' is not a valid gdal raster file!")
+                raise ValueError(f"'{treatment_path}' does not have a valid srs!")
+        except Exception:
+            raise ValueError(f"'{treatment_path}' is not a valid gdal raster file!")
 
         # reproject to align with the subwta
         if not _exists(subwta_fn):
             raise FileNotFoundError(f"'{subwta_fn}' not found!")
 
-        raster_stacker(fn, subwta_fn, self.treatments_map)
+        raster_stacker(treatment_path, subwta_fn, self.treatments_map)
 
-        with self.locked():
-            # identify treatments from map
-            domlc_d = identify_mode_single_raster_key(
-                key_fn=subwta_fn, 
-                parameter_fn=self.treatments_map, 
-                ignore_channels=True, 
-                ignore_keys=set())
-            domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
+        # identify treatments from map
+        domlc_d = identify_mode_single_raster_key(
+            key_fn=subwta_fn,
+            parameter_fn=self.treatments_map,
+            ignore_channels=True,
+            ignore_keys=set(),
+        )
+        domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
 
-            # filter out non treatment keys
-            valid_keys = self.get_valid_treatment_keys()
-            domlc_d = {k: v for k, v in domlc_d.items() if k in valid_keys}
-            self._treatments_dom_lc = {k: str(v) for k, v in domlc_d.items()}
+        # filter out non treatment keys
+        valid_keys = set(self.get_valid_treatment_keys())
+        domlc_d = {k: v for k, v in domlc_d.items() if v in valid_keys}
+        if domlc_d:
+            self.treatments_domlc_d = domlc_d
+        else:
+            self.logger.info("Treatments map contained no valid treatment keys.")
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -240,30 +247,110 @@ class Treatments(NoDbBase):
         self.logger.info(f'Applying treatments to {len(treatments_domlc_d)} hillslopes')
         disturbed = Disturbed.getInstance(self.wd)
 
+        def _infer_mulch_base(dom_value: str) -> Optional[str]:
+            if not dom_value.isdigit():
+                return None
+            dom_int = int(dom_value)
+            pct = dom_int % 1000
+            if pct not in (15, 30, 60):
+                return None
+            base = dom_int // 1000
+            return str(base) if base > 0 else None
+
         with landuse.locked():
+            domlc_d = dict(landuse.domlc_d or {})
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 treatment = mapping[treatment_dom]['DisturbedClass']  # 'mulch_30', 'mulch_60', 'thinning_40_90', 'prescribed_fire'
                 dom = landuse.domlc_d[topaz_id]  # -> key from map
-
-                man_summary = landuse.managements[dom]  # -> ManagementSummary instance
+                dom_key = str(dom)
+                man_summary = landuse.managements.get(dom_key)
+                if man_summary is None:
+                    base_dom = _infer_mulch_base(dom_key)
+                    if base_dom is not None and base_dom in landuse.managements:
+                        dom = base_dom
+                        dom_key = base_dom
+                        landuse.domlc_d[topaz_id] = base_dom
+                        domlc_d[str(topaz_id)] = base_dom
+                        man_summary = landuse.managements[base_dom]
+                if man_summary is None:
+                    raise KeyError(dom_key)
                 disturbed_class = getattr(man_summary, 'disturbed_class', None)  # 'tall grass', 'shrub', 'forest', 'forest high sev' etc.
-                self._apply_treatment(landuse, disturbed, topaz_id, treatment, man_summary, disturbed_class)
+                new_dom = self._apply_treatment(
+                    landuse,
+                    disturbed,
+                    topaz_id,
+                    treatment,
+                    man_summary,
+                    disturbed_class,
+                )
+                if new_dom is not None:
+                    domlc_d[str(topaz_id)] = str(new_dom)
+            landuse.domlc_d = domlc_d
+            missing_dom_keys = sorted(
+                {str(dom) for dom in domlc_d.values() if str(dom) not in landuse.managements}
+            )
+            for dom_key in missing_dom_keys:
+                base_dom = _infer_mulch_base(dom_key)
+                if base_dom is None or base_dom not in landuse.managements:
+                    continue
+                pct = int(dom_key) % 1000
+                treatment = f"mulch_{pct}"
+                base_summary = landuse.managements[base_dom]
+                man = base_summary.get_management()
+
+                mulch_application = float(pct) / 30.0
+                inrcov = man.inis[0].data.inrcov
+                new_inrcov = mulch_ground_cover_change(
+                    initial_ground_cover_pct=inrcov * 100.0,
+                    mulch_tonperacre=mulch_application,
+                ) / 100.0
+                man.inis[0].data.inrcov = new_inrcov
+
+                rilcov = man.inis[0].data.rilcov
+                new_rilcov = mulch_ground_cover_change(
+                    initial_ground_cover_pct=rilcov * 100.0,
+                    mulch_tonperacre=mulch_application,
+                ) / 100.0
+                man.inis[0].data.rilcov = new_rilcov
+
+                new_man_fn = _split(base_summary.man_fn)[-1][:-4] + f'_{treatment}.man'
+                new_man_path = _join(self.wd, 'landuse', new_man_fn)
+                if not _exists(new_man_path):
+                    with open(new_man_path, 'w') as f:
+                        f.write(str(man))
+
+                new_man_summary = deepcopy(base_summary)
+                new_man_summary.man_dir = _join(self.wd, 'landuse')
+                new_man_summary.man_fn = new_man_fn
+                base_disturbed = getattr(base_summary, 'disturbed_class', None)
+                if base_disturbed:
+                    new_man_summary.disturbed_class = f'{base_disturbed}-{treatment}'
+                new_man_summary.desc = f'{base_summary.desc} - {treatment}'
+                new_man_summary.inrcov = new_inrcov
+                new_man_summary.rilcov = new_rilcov
+                try:
+                    new_man_summary.key = int(dom_key)
+                except (TypeError, ValueError):
+                    new_man_summary.key = dom_key
+                landuse.managements[dom_key] = new_man_summary
 
         land_soil_replacements_d = disturbed.land_soil_replacements_d
 
         soils = Soils.getInstance(self.wd)
+        landuse.dump_landuse_parquet()
         with soils.locked():
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 self._modify_soil(landuse, soils, disturbed, topaz_id)
 
 
-    def _apply_treatment(self, 
+    def _apply_treatment(
+                         self,
                          landuse_instance: Landuse, 
                          disturbed_instance: Disturbed,
                          topaz_id: str, 
                          treatment: str, 
                          man_summary: ManagementSummary, 
-                         disturbed_class: str):
+                         disturbed_class: str) -> Optional[str]:
         """
         Apply the treatment to the hillslope.
         """
@@ -278,20 +365,41 @@ class Treatments(NoDbBase):
             return
         self.logger.info(f'topaz_id: {topaz_id}\t treatment:{treatment}\t disturbed_class: {disturbed_class}\n')
 
-        retcode = 0
+        new_dom = None
         if 'mulch' in treatment:
-            retcode = self._apply_mulch(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            new_dom = self._apply_mulch(
+                landuse_instance,
+                disturbed_instance,
+                topaz_id,
+                treatment,
+                man_summary,
+                disturbed_class,
+            )
 
         elif 'prescribed_fire' in treatment:
-            retcode = self._apply_prescribed_fire(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            new_dom = self._apply_prescribed_fire(
+                landuse_instance,
+                disturbed_instance,
+                topaz_id,
+                treatment,
+                man_summary,
+                disturbed_class,
+            )
 
         elif 'thinning' in treatment:
-            retcode = self._apply_thinning(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            new_dom = self._apply_thinning(
+                landuse_instance,
+                disturbed_instance,
+                topaz_id,
+                treatment,
+                man_summary,
+                disturbed_class,
+            )
 
             
         self.logger.info(f'  _apply_treatment: {topaz_id} -> {landuse_instance.domlc_d[topaz_id]}\n')
 
-        return retcode
+        return new_dom
 
     def _mulch_management_key(self, dom_key: str, treatment: str) -> str:
         base_token = str(dom_key).split("-", maxsplit=1)[0]
@@ -303,13 +411,14 @@ class Treatments(NoDbBase):
             return f"{dom_key}-{treatment}"
         return str(base_value * 1000 + percent_value)
     
-    def _apply_mulch(self, 
+    def _apply_mulch(
+                     self,
                      landuse_instance: Landuse, 
                      disturbed_instance: Disturbed,
                      topaz_id: str, 
                      treatment: str, 
                      man_summary: ManagementSummary, 
-                     disturbed_class: str):
+                     disturbed_class: str) -> Optional[str]:
         """
         Apply the mulch treatment to the hillslope.
         """
@@ -373,18 +482,19 @@ class Treatments(NoDbBase):
                     new_man_summary.key = new_dom
                 landuse_instance.managements[new_dom] = new_man_summary
 
-            return 1
+            return new_dom
 
         self.logger.info(f'Could not apply mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
         
 
-    def _apply_prescribed_fire(self, 
+    def _apply_prescribed_fire(
+                     self,
                      landuse_instance: Landuse, 
                      disturbed_instance: Disturbed,
                      topaz_id: str, 
                      treatment: str, 
                      man_summary: ManagementSummary, 
-                     disturbed_class: str):
+                     disturbed_class: str) -> Optional[str]:
         """
         Apply the prescribed fire treatment to the hillslope.
         """
@@ -416,13 +526,16 @@ class Treatments(NoDbBase):
             man = get_management_summary(prescribed_dom, landuse_instance.mapping)
             landuse_instance.managements[prescribed_dom] = man
 
-    def _apply_thinning(self, 
+        return prescribed_dom
+
+    def _apply_thinning(
+                     self,
                      landuse_instance: Landuse, 
                      disturbed_instance: Disturbed,
                      topaz_id: str, 
                      treatment: str, 
                      man_summary: ManagementSummary, 
-                     disturbed_class: str):
+                     disturbed_class: str) -> Optional[str]:
         """
         Apply the prescribed fire treatment to the hillslope.
         """
@@ -440,6 +553,8 @@ class Treatments(NoDbBase):
         if treatment_dom is not None and treatment_dom not in landuse_instance.managements:
             man = get_management_summary(treatment_dom, landuse_instance.mapping)
             landuse_instance.managements[treatment_dom] = man
+
+        return treatment_dom if disturbed_class in ['forest'] else None
 
     def _modify_soil(self, 
                      landuse_instance: Landuse, 

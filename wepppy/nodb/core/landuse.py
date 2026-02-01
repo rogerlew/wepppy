@@ -1312,9 +1312,13 @@ class Landuse(NoDbBase):
         returns a list of managements sorted by coverage in
         descending order
         """
-        used_mans = [dom for dom, man in self.managements.items() if man.area > 0]
+        used_mans = [
+            dom
+            for dom, man in self.managements.items()
+            if man.area is not None and man.area > 0
+        ]
         report = [self.managements[str(dom)] for dom in used_mans]
-        report.sort(key=lambda x: x.pct_coverage, reverse=True)
+        report.sort(key=lambda x: x.pct_coverage or 0, reverse=True)
         return [man.as_dict() for man in report]
 
     #
