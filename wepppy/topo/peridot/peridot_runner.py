@@ -14,6 +14,11 @@ import pandas as pd
 from subprocess import Popen, PIPE
 
 from.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
+from wepppy.io_wait import (
+    DEFAULT_PERIDOT_INPUT_POLL_S,
+    get_peridot_input_wait_s,
+    get_peridot_input_poll_s,
+)
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -25,45 +30,17 @@ LOGGER = logging.getLogger(__name__)
 # Default CPU count for peridot processes, can be overridden via PERIDOT_CPU env var
 _DEFAULT_PERIDOT_CPU = '24'
 
-_DEFAULT_PERIDOT_INPUT_WAIT_S = 10.0
-_DEFAULT_PERIDOT_INPUT_POLL_S = 0.25
-
 
 def _get_peridot_ncpu() -> str:
     """Get the number of CPUs to use for peridot processes."""
     return os.environ.get('PERIDOT_CPU', _DEFAULT_PERIDOT_CPU)
-
-def _get_peridot_input_wait_s() -> float:
-    raw = os.environ.get('PERIDOT_INPUT_WAIT_S')
-    if raw is None:
-        return _DEFAULT_PERIDOT_INPUT_WAIT_S
-    try:
-        wait_s = float(raw)
-    except ValueError as exc:
-        raise ValueError('PERIDOT_INPUT_WAIT_S must be a float') from exc
-    if wait_s < 0:
-        raise ValueError('PERIDOT_INPUT_WAIT_S must be >= 0')
-    return wait_s
-
-
-def _get_peridot_input_poll_s() -> float:
-    raw = os.environ.get('PERIDOT_INPUT_POLL_S')
-    if raw is None:
-        return _DEFAULT_PERIDOT_INPUT_POLL_S
-    try:
-        poll_s = float(raw)
-    except ValueError as exc:
-        raise ValueError('PERIDOT_INPUT_POLL_S must be a float') from exc
-    if poll_s <= 0:
-        raise ValueError('PERIDOT_INPUT_POLL_S must be > 0')
-    return poll_s
 
 
 def _wait_for_file(
     path: str,
     *,
     timeout_s: float,
-    poll_s: float = _DEFAULT_PERIDOT_INPUT_POLL_S,
+    poll_s: float = DEFAULT_PERIDOT_INPUT_POLL_S,
     logger: Optional[logging.Logger] = None,
 ) -> None:
     """
@@ -123,8 +100,8 @@ def run_peridot_abstract_watershed(
 ):
     _wait_for_file(
         _join(wd, 'dem/topaz/SUBWTA.ARC'),
-        timeout_s=_get_peridot_input_wait_s(),
-        poll_s=_get_peridot_input_poll_s(),
+        timeout_s=get_peridot_input_wait_s(),
+        poll_s=get_peridot_input_poll_s(),
         logger=LOGGER,
     )
 
@@ -167,8 +144,8 @@ def run_peridot_wbt_abstract_watershed(
     """
     _wait_for_file(
         _join(wd, 'dem/wbt/subwta.tif'),
-        timeout_s=_get_peridot_input_wait_s(),
-        poll_s=_get_peridot_input_poll_s(),
+        timeout_s=get_peridot_input_wait_s(),
+        poll_s=get_peridot_input_poll_s(),
         logger=LOGGER,
     )
 

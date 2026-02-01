@@ -53,11 +53,12 @@ Warning:
 import csv
 import json
 
+import logging
 import os
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
-from typing import Optional, Dict, List, Any, Tuple, Mapping
+from typing import Optional, Dict, List, Any, Tuple, Mapping, Callable
 import shutil
 from enum import IntEnum
 import time
@@ -94,6 +95,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.landcover.rap import RAP_Band
 
 from wepppy.nodb.locales import LanduseDataset, available_landuse_datasets
+from wepppy.io_wait import get_peridot_input_wait_s, get_peridot_input_poll_s
 
 __all__ = [
     'LanduseNoDbLockedException',
@@ -105,6 +107,128 @@ __all__ = [
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+
+_GDAL_OPEN_PROBE: Optional[Callable[[str], bool]] = None
+_GDAL_OPEN_PROBE_INIT = False
+
+def _get_gdal_open_probe(logger: Optional[logging.Logger]) -> Optional[Callable[[str], bool]]:
+    global _GDAL_OPEN_PROBE
+    global _GDAL_OPEN_PROBE_INIT
+
+    if _GDAL_OPEN_PROBE_INIT:
+        return _GDAL_OPEN_PROBE
+
+    _GDAL_OPEN_PROBE_INIT = True
+
+    try:
+        from osgeo import gdal  # type: ignore[import-not-found]
+
+        def _probe(path: str) -> bool:
+            ds = gdal.OpenEx(path, gdal.OF_RASTER | gdal.OF_READONLY)
+            if ds is None:
+                return False
+            ds = None
+            return True
+
+        _GDAL_OPEN_PROBE = _probe
+        return _GDAL_OPEN_PROBE
+    except Exception:
+        pass
+
+    try:
+        import ctypes
+        import ctypes.util
+
+        libname = ctypes.util.find_library('gdal')
+        if libname is None:
+            raise FileNotFoundError('libgdal not found')
+
+        libgdal = ctypes.CDLL(libname)
+        libgdal.GDALOpen.argtypes = [ctypes.c_char_p, ctypes.c_int]
+        libgdal.GDALOpen.restype = ctypes.c_void_p
+        libgdal.GDALClose.argtypes = [ctypes.c_void_p]
+        libgdal.GDALClose.restype = None
+
+        def _probe(path: str) -> bool:
+            ds = libgdal.GDALOpen(path.encode('utf-8'), 0)
+            if not ds:
+                return False
+            libgdal.GDALClose(ds)
+            return True
+
+        _GDAL_OPEN_PROBE = _probe
+        return _GDAL_OPEN_PROBE
+    except Exception as exc:
+        if logger is not None:
+            logger.warning(
+                'GDAL open probe unavailable (%s); waiting only for filesystem visibility for %s',
+                exc,
+                __name__,
+            )
+        _GDAL_OPEN_PROBE = None
+        return None
+
+
+def _wait_for_gdal_openable_raster(
+    path: str,
+    *,
+    timeout_s: float,
+    poll_s: float,
+    logger: Optional[logging.Logger] = None,
+) -> None:
+    """
+    Wait for a raster to exist and be GDAL-openable.
+
+    This guards against NFS latency and asynchronous writers leaving a target
+    path present but temporarily unreadable, which can trigger a fatal panic in
+    wepppyo3 (GDALOpenEx returning null).
+    """
+    probe = _get_gdal_open_probe(logger)
+
+    def _try_open() -> bool:
+        if not _exists(path):
+            return False
+        if probe is None:
+            return True
+        return bool(probe(path))
+
+    if _exists(path):
+        try:
+            size0 = os.stat(path).st_size
+        except FileNotFoundError:
+            size0 = None
+        if size0 is not None and _try_open():
+            time.sleep(min(poll_s, max(0.0, timeout_s)))
+            try:
+                size1 = os.stat(path).st_size
+            except FileNotFoundError:
+                size1 = None
+            if size1 is not None and size1 == size0 and _try_open():
+                return
+
+    if timeout_s <= 0:
+        raise FileNotFoundError(f'Expected GDAL-openable raster {path}')
+
+    if logger is not None:
+        logger.info('Waiting up to %.2fs for GDAL-openable raster %s', timeout_s, path)
+
+    last_size: Optional[int] = None
+    deadline = time.monotonic() + timeout_s
+    while True:
+        if _exists(path):
+            try:
+                size = os.stat(path).st_size
+            except FileNotFoundError:
+                size = None
+            if _try_open() and size is not None:
+                if last_size is not None and size == last_size:
+                    return
+                last_size = size
+            else:
+                last_size = None
+        if time.monotonic() >= deadline:
+            raise FileNotFoundError(f'Expected GDAL-openable raster {path} to be available within {timeout_s:.2f}s')
+        time.sleep(poll_s)
 
 class LanduseNoDbLockedException(Exception):
     pass
@@ -556,6 +680,10 @@ class Landuse(NoDbBase):
             domlc_d = lc.build_lcgrid(subwta_fn, None)
         else:
             self.logger.info('Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key')
+            wait_s = get_peridot_input_wait_s()
+            poll_s = get_peridot_input_poll_s()
+            _wait_for_gdal_openable_raster(subwta_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+            _wait_for_gdal_openable_raster(lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
             domlc_d = identify_mode_single_raster_key(
                 key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
         domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
@@ -745,6 +873,10 @@ class Landuse(NoDbBase):
 
         frac_d = {}
         dom_d = {}
+        wait_s = get_peridot_input_wait_s()
+        poll_s = get_peridot_input_poll_s()
+        if wepppyo3 is not None:
+            _wait_for_gdal_openable_raster(subwta_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
         for frac in fractionals:
             lc_fn = _join(frac_dir, frac.replace('/', '_') + '.tif')
             wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize, 
@@ -757,6 +889,7 @@ class Landuse(NoDbBase):
                 dom_d[frac] = lc.build_lcgrid(subwta_fn)
                 frac_d[frac] = lc.calc_fractionals(subwta_fn)
             else:
+                _wait_for_gdal_openable_raster(lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
                 dom_d[frac] = identify_mode_single_raster_key(
                     key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
                 dom_d[frac] = {k: str(v) for k, v in dom_d[frac].items()}
@@ -788,6 +921,11 @@ class Landuse(NoDbBase):
             lc = LandcoverMap(self.lc_fn)
             domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
         else:
+            wait_s = get_peridot_input_wait_s()
+            poll_s = get_peridot_input_poll_s()
+            _wait_for_gdal_openable_raster(watershed.subwta, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+            _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+            _wait_for_gdal_openable_raster(self.lc_fn, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
             domlc_d = identify_mode_intersecting_raster_keys(
                 key_fn=watershed.subwta,
                 key2_fn=watershed.mofe_map,
@@ -807,6 +945,11 @@ class Landuse(NoDbBase):
             if sbs is not None:
                 self.logger.info('Applying burn severities to landuse by multiple OFE')
 
+                wait_s = get_peridot_input_wait_s()
+                poll_s = get_peridot_input_poll_s()
+                _wait_for_gdal_openable_raster(watershed.subwta, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+                _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
+                _wait_for_gdal_openable_raster(disturbed.disturbed_cropped, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
                 sbs_lc_d = identify_mode_intersecting_raster_keys(
                     key_fn=watershed.subwta,
                     key2_fn=watershed.mofe_map,
