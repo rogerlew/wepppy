@@ -85,7 +85,7 @@ folium==0.20.0
 fs==2.4.12
 fsspec==2022.1.0
 gast==0.5.2
-geopandas==0.14.4
+geopandas==1.1.2
 gdal==3.10.2
 git-filter-repo==2.45.0
 gunicorn==23.0.0
