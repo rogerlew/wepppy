@@ -28,25 +28,25 @@
               <td>{{ row.config }}</td>
               {% for variant in row.variants %}
                 <td>
-                  {% if current_user.is_anonymous %}
-                    <form class="wc-run-form" method="post" action="{{ variant.action_url }}" data-cap-section="create-index" data-cap-required="true">
-                      <input type="hidden" name="cap_token" value="" data-cap-token>
-                      {% for key, value in variant.overrides.items() %}
-                        <input type="hidden" name="{{ key }}" value="{{ value }}">
-                      {% endfor %}
-                      <button type="submit"
-                              class="pure-button wc-run-button is-disabled"
-                              data-run-action="{{ variant.url }}"
-                              aria-disabled="true"
-                              disabled>
-                        {{ variant.label }}
-                      </button>
-                    </form>
-                  {% else %}
-                    <a class="pure-button wc-run-button" href="{{ variant.url }}" rel="nofollow">
+                  <form class="wc-run-form" method="post" action="{{ variant.action_url }}"{% if current_user.is_anonymous %} data-cap-section="create-index" data-cap-required="true"{% endif %}>
+                    {% if rq_engine_token %}
+                    <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+                    {% endif %}
+                    <input type="hidden" name="config" value="{{ variant.config }}">
+                    {% if current_user.is_anonymous %}
+                    <input type="hidden" name="cap_token" value="" data-cap-token>
+                    {% endif %}
+                    {% for key, value in variant.overrides.items() %}
+                      <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endfor %}
+                    <button type="submit"
+                            class="pure-button wc-run-button{% if current_user.is_anonymous %} is-disabled{% endif %}"
+                            style="width: 100%;"
+                            data-run-action="{{ variant.action_url }}"
+                            {% if current_user.is_anonymous %}aria-disabled="true" disabled{% endif %}>
                       {{ variant.label }}
-                    </a>
-                  {% endif %}
+                    </button>
+                  </form>
                 </td>
               {% endfor %}
             </tr>

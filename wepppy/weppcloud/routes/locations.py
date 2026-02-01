@@ -1,12 +1,48 @@
 """Routes for locations blueprint extracted from app.py."""
 
 from datetime import datetime
+import uuid
 from subprocess import PIPE, Popen
 
 from ._common import *  # noqa: F401,F403
+from wepppy.weppcloud.utils import auth_tokens
 
 
 locations_bp = Blueprint('locations', __name__)
+
+
+def _issue_rq_engine_token() -> str:
+    subject = None
+    if hasattr(current_user, "get_id"):
+        subject = current_user.get_id()
+    if not subject:
+        subject = getattr(current_user, "id", None)
+    if not subject:
+        subject = getattr(current_user, "email", None)
+    if not subject:
+        raise RuntimeError("Unable to resolve user subject for rq-engine token")
+
+    roles = [
+        str(getattr(role, "name", role)).strip()
+        for role in (getattr(current_user, "roles", None) or [])
+        if str(getattr(role, "name", role)).strip()
+    ]
+
+    token_payload = auth_tokens.issue_token(
+        str(subject),
+        scopes=["rq:enqueue"],
+        audience="rq-engine",
+        extra_claims={
+            "roles": roles,
+            "token_class": "user",
+            "email": getattr(current_user, "email", None),
+            "jti": uuid.uuid4().hex,
+        },
+    )
+    token = token_payload.get("token")
+    if not token:
+        raise RuntimeError("Failed to issue rq-engine token")
+    return token
 
 @locations_bp.route('/joh')
 @locations_bp.route('/joh/')
@@ -25,7 +61,27 @@ def joh_map():
 @locations_bp.route('/locations/portland-municipal/')
 @roles_required('PortlandGroup')
 def portland_index():
-    return render_template('locations/portland/index.htm', user=current_user)
+    try:
+        rq_engine_token = _issue_rq_engine_token()
+        cap_base_url = (current_app.config.get("CAP_BASE_URL") or os.getenv("CAP_BASE_URL", "/cap")).rstrip("/")
+        cap_asset_base_url = (
+            current_app.config.get("CAP_ASSET_BASE_URL")
+            or os.getenv("CAP_ASSET_BASE_URL", f"{cap_base_url}/assets")
+        ).rstrip("/")
+        cap_site_key = current_app.config.get("CAP_SITE_KEY") or os.getenv("CAP_SITE_KEY", "")
+        return render_template(
+            'locations/portland/index.htm',
+            user=current_user,
+            rq_engine_token=rq_engine_token,
+            cap_base_url=cap_base_url,
+            cap_asset_base_url=cap_asset_base_url,
+            cap_site_key=cap_site_key,
+        )
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("Failed to issue rq-engine token for portland interface")
+        return exception_factory(f"JWT configuration error: {exc}")
+    except Exception:
+        return exception_factory()
 
 
 @locations_bp.route('/portland-municipal/results')

@@ -1,3 +1,7 @@
+{% import "shared/cap_macros.htm" as cap_macros %}
+{% set cap_base_url = cap_base_url | default("/cap", true) %}
+{% set cap_asset_base_url = cap_asset_base_url | default(cap_base_url ~ "/assets", true) %}
+{% set cap_site_key = cap_site_key | default("", true) %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -131,23 +135,83 @@ a.disabled {
     <hr/>
     <hr/>
     <h2>Run WEPP</h2>
+    {% if not current_user.is_authenticated %}
+    {{ cap_macros.cap_prompt("locations-portland", "cap-locations-portland", cap_base_url, cap_site_key) }}
+    {% endif %}
     <div style="margin-left: 1.5em;">
         <h3>Current conditions and managements</h3>
         <div style="margin-left: 1.5em;">
             <h4>Delineate new watershed</h4>
-            <div><a href="{{ url_for('run_0.create', config='portland-wepp_bd16b69_snow') }}" rel="nofollow">Run WEPP</a></div>
+            <div>
+              <form method="post"
+                    action="/rq-engine/create/"
+                    style="display:inline;"
+                    {% if not current_user.is_authenticated %}data-cap-section="locations-portland" data-cap-required="true"{% endif %}>
+                {% if rq_engine_token %}
+                <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+                {% endif %}
+                <input type="hidden" name="config" value="portland-wepp_bd16b69_snow">
+                {% if not current_user.is_authenticated %}
+                <input type="hidden" name="cap_token" value="" data-cap-token>
+                {% endif %}
+                <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                        class="btn btn-link p-0 wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
+                        data-run-action="/rq-engine/create/"
+                        {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
+                  Run WEPP
+                </button>
+              </form>
+            </div>
             <div style="height: 1em;"></div>
         </div>
         <h3>Simfire - Eagle</h3>
         <div style="margin-left: 1.5em;">
             <h4>Delineate new watershed</h4>
-            <div><a href="{{ url_for('run_0.create', config='portland-simfire-eagle-snow') }}" rel="nofollow">Run WEPP</a></div>
+            <div>
+              <form method="post"
+                    action="/rq-engine/create/"
+                    style="display:inline;"
+                    {% if not current_user.is_authenticated %}data-cap-section="locations-portland" data-cap-required="true"{% endif %}>
+                {% if rq_engine_token %}
+                <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+                {% endif %}
+                <input type="hidden" name="config" value="portland-simfire-eagle-snow">
+                {% if not current_user.is_authenticated %}
+                <input type="hidden" name="cap_token" value="" data-cap-token>
+                {% endif %}
+                <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                        class="btn btn-link p-0 wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
+                        data-run-action="/rq-engine/create/"
+                        {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
+                  Run WEPP
+                </button>
+              </form>
+            </div>
             <div style="height: 1em;"></div>
         </div>
         <h3>Simfire - Norse</h3>
         <div style="margin-left: 1.5em;">
             <h4>Delineate new watershed</h4>
-            <div><a href="{{ url_for('run_0.create', config='portland-simfire-norse-snow') }}" rel="nofollow">Run WEPP</a></div>
+            <div>
+              <form method="post"
+                    action="/rq-engine/create/"
+                    style="display:inline;"
+                    {% if not current_user.is_authenticated %}data-cap-section="locations-portland" data-cap-required="true"{% endif %}>
+                {% if rq_engine_token %}
+                <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+                {% endif %}
+                <input type="hidden" name="config" value="portland-simfire-norse-snow">
+                {% if not current_user.is_authenticated %}
+                <input type="hidden" name="cap_token" value="" data-cap-token>
+                {% endif %}
+                <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                        class="btn btn-link p-0 wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
+                        data-run-action="/rq-engine/create/"
+                        {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
+                  Run WEPP
+                </button>
+              </form>
+            </div>
             <div style="height: 1em;"></div>
         </div>
     </div>
@@ -158,6 +222,14 @@ a.disabled {
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
 {% include("_analytics.htm") %}
+{% if not current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+    <script>
+      window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
+    </script>
+    <script src="{{ cap_asset_base_url }}/widget.js" defer></script>
+    <script src="{{ cap_asset_base_url }}/floating.js" defer></script>
+{% endif %}
     </div>
   </body>
 </html>

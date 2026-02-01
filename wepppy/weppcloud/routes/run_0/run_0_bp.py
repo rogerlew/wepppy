@@ -6,10 +6,10 @@ import pathlib
 from collections import OrderedDict
 
 from datetime import datetime
+import uuid
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
-from urllib.parse import urlencode
 
 from .._common import *  # noqa: F401,F403
 from flask import current_app
@@ -34,6 +34,7 @@ from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
 from wepppy.weppcloud.utils.cap_guard import requires_cap
+from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import (
     get_wd, authorize, get_run_owners_lazy,
     is_omni_child_run,
@@ -485,36 +486,45 @@ def view_mod_section(runid, config, mod_name):
     })
 
 @run_0_bp.route('/create', strict_slashes=False)
+@login_required
 @handle_with_exception_factory
 def create_index():
+    try:
+        rq_engine_token = _issue_rq_engine_token()
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("Failed to issue rq-engine token for create index")
+        return exception_factory(f"JWT configuration error: {exc}")
+    except Exception:
+        return exception_factory()
+
     configs = get_configs()
     rows = []
+    create_action = "/rq-engine/create/"
     for cfg in sorted(configs):
         if cfg == '_defaults':
             continue
 
-        base_url = url_for_run('run_0.create', config=cfg)
         variants = [
             {
                 "label": cfg,
                 "overrides": {},
-                "url": base_url,
-                "action_url": base_url,
+                "config": cfg,
+                "action_url": create_action,
             },
             {
                 "label": f"{cfg} ned1/2016",
                 "overrides": {"general:dem_db": "ned1/2016"},
-                "url": f"{base_url}?{urlencode({'general:dem_db': 'ned1/2016'}, safe=':')}",
-                "action_url": base_url,
+                "config": cfg,
+                "action_url": create_action,
             },
             {
                 "label": f"{cfg} WhiteBoxTools",
                 "overrides": {"watershed:delineation_backend": "wbt"},
-                "url": f"{base_url}?{urlencode({'watershed:delineation_backend': 'wbt'}, safe=':')}",
-                "action_url": base_url,
+                "config": cfg,
+                "action_url": create_action,
             },
         ]
-        rows.append({"config": cfg, "base_url": base_url, "variants": variants})
+        rows.append({"config": cfg, "variants": variants})
 
     cap_base_url = None
     cap_asset_base_url = None
@@ -533,6 +543,7 @@ def create_index():
         cap_base_url=cap_base_url,
         cap_asset_base_url=cap_asset_base_url,
         cap_site_key=cap_site_key,
+        rq_engine_token=rq_engine_token,
     )
 
 def create_run_dir(current_user):
@@ -556,82 +567,38 @@ def create_run_dir(current_user):
     return runid, wd
 
 
-@run_0_bp.route('/create/<config>', methods=['GET', 'POST'])
-@handle_with_exception_factory
-def create(config):
-    from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
-    from wepppy.weppcloud.utils.cap_verify import CapVerificationError, verify_cap_token
-    cfg = "%s.cfg" % config
+def _issue_rq_engine_token() -> str:
+    subject = None
+    if hasattr(current_user, "get_id"):
+        subject = current_user.get_id()
+    if not subject:
+        subject = getattr(current_user, "id", None)
+    if not subject:
+        subject = getattr(current_user, "email", None)
+    if not subject:
+        raise RuntimeError("Unable to resolve user subject for rq-engine token")
 
-    if current_user.is_anonymous:
-        if request.method != 'POST':
-            response = error_factory('CAPTCHA is required for anonymous create.')
-            response.status_code = 403
-            return response
+    roles = [
+        str(getattr(role, "name", role)).strip()
+        for role in (getattr(current_user, "roles", None) or [])
+        if str(getattr(role, "name", role)).strip()
+    ]
 
-        cap_token = request.form.get('cap_token', '').strip()
-        if not cap_token:
-            current_app.logger.warning(
-                'CAPTCHA token missing for create/%s from %s',
-                config,
-                request.remote_addr,
-            )
-            response = error_factory('CAPTCHA token is required.')
-            response.status_code = 403
-            return response
-
-        try:
-            verification = verify_cap_token(cap_token)
-        except CapVerificationError as exc:
-            current_app.logger.error(
-                'CAPTCHA verification error for create/%s from %s: %s',
-                config,
-                request.remote_addr,
-                exc,
-            )
-            return exception_factory('CAPTCHA verification failed.')
-
-        if not verification.get('success'):
-            current_app.logger.warning(
-                'CAPTCHA rejected for create/%s from %s (errors=%s)',
-                config,
-                request.remote_addr,
-                verification.get('error-codes'),
-            )
-            response = error_factory('CAPTCHA verification failed.')
-            response.status_code = 403
-            return response
-
-    overrides = '&'.join(
-        [
-            '{}={}'.format(k, v)
-            for k, v in request.values.items()
-            if k != 'cap_token' and v not in (None, '')
-        ]
+    token_payload = auth_tokens.issue_token(
+        str(subject),
+        scopes=["rq:enqueue"],
+        audience="rq-engine",
+        extra_claims={
+            "roles": roles,
+            "token_class": "user",
+            "email": getattr(current_user, "email", None),
+            "jti": uuid.uuid4().hex,
+        },
     )
-
-    if len(overrides) > 0:
-        cfg += '?%s' % overrides
-
-    try:
-        runid, wd = create_run_dir(current_user)
-    except PermissionError:
-        return exception_factory('Could not create run directory. NAS may be down.')
-    except Exception:
-        return exception_factory('Could not create run directory.')
-
-    try:
-        Ron(wd, cfg)
-    except Exception:
-        return exception_factory('Could not create run')
-
-    if not current_user.is_anonymous:
-        from wepppy.weppcloud.app import user_datastore
-        user_datastore.create_run(runid, config, current_user)
-
-    ensure_readme_on_create(runid, config)
-
-    return redirect(url_for_run('run_0.runs0', runid=runid, config=config), code=303)
+    token = token_payload.get("token")
+    if not token:
+        raise RuntimeError("Failed to issue rq-engine token")
+    return token
 
 
 def _render_run_not_found_page() -> Response:

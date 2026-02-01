@@ -1,5 +1,6 @@
 from collections import Counter
 from datetime import datetime
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -8,6 +9,7 @@ from flask import send_from_directory
 from flask_security import current_user
 
 from ._common import *  # noqa: F401,F403
+from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
 
 
@@ -65,6 +67,43 @@ def _derive_run_name(runid: str) -> str:
     if not slug:
         return runid
     return slug.replace('-', ' ')
+
+
+def _issue_rq_engine_token() -> str | None:
+    if current_user.is_anonymous:
+        return None
+
+    subject = None
+    if hasattr(current_user, "get_id"):
+        subject = current_user.get_id()
+    if not subject:
+        subject = getattr(current_user, "id", None)
+    if not subject:
+        subject = getattr(current_user, "email", None)
+    if not subject:
+        raise RuntimeError("Unable to resolve user subject for rq-engine token")
+
+    roles = [
+        str(getattr(role, "name", role)).strip()
+        for role in (getattr(current_user, "roles", None) or [])
+        if str(getattr(role, "name", role)).strip()
+    ]
+
+    token_payload = auth_tokens.issue_token(
+        str(subject),
+        scopes=["rq:enqueue"],
+        audience="rq-engine",
+        extra_claims={
+            "roles": roles,
+            "token_class": "user",
+            "email": getattr(current_user, "email", None),
+            "jti": uuid.uuid4().hex,
+        },
+    )
+    token = token_payload.get("token")
+    if not token:
+        raise RuntimeError("Failed to issue rq-engine token")
+    return token
 
 
 def _resolve_access_log_path() -> Path:
@@ -282,6 +321,7 @@ def interfaces():
             or os.getenv('CAP_ASSET_BASE_URL', f'{cap_base_url}/assets')
         ).rstrip('/')
         cap_site_key = current_app.config.get('CAP_SITE_KEY') or os.getenv('CAP_SITE_KEY', '')
+        rq_engine_token = _issue_rq_engine_token()
         return render_template(
             'interfaces.htm',
             user=current_user,
@@ -289,7 +329,11 @@ def interfaces():
             cap_base_url=cap_base_url,
             cap_asset_base_url=cap_asset_base_url,
             cap_site_key=cap_site_key,
+            rq_engine_token=rq_engine_token,
         )
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("Failed to issue rq-engine token for interfaces")
+        return exception_factory(f"JWT configuration error: {exc}")
     except Exception:
         return exception_factory()
 

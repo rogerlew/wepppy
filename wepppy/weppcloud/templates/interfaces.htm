@@ -1,5 +1,6 @@
 {% extends "base_pure.htm" %}
 {% import "shared/cap_macros.htm" as cap_macros %}
+{% set create_action = "/rq-engine/create/" %}
 
 {% block title %}WEPPcloud{% endblock %}
 
@@ -207,51 +208,60 @@
         {{ cap_macros.cap_prompt("disturbed", "cap-disturbed", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed9002') }}" title="disturbed9002" data-run-menu rel="nofollow">Start Disturbed Run (CONUS)</a>
-          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed-hi') }}" title="disturbed-hi" data-run-menu rel="nofollow">Start Disturbed-Hawaii Run (Experimental)</a>
-          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed-ak') }}" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed9002') }}" data-cap-section="disturbed" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="disturbed9002">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="disturbed9002"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='disturbed9002') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Disturbed Run (CONUS)
             </button>
           </form>
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed-hi') }}" data-cap-section="disturbed" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="disturbed-hi">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="disturbed-hi"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='disturbed-hi') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Disturbed-Hawaii Run (Experimental)
             </button>
           </form>
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed-ak') }}" data-cap-section="disturbed" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="disturbed-ak">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="disturbed-ak"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='disturbed-ak') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Disturbed-Alaska Run (Experimental)
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns']) }} WATAR hillslopes) ran since January 1, 2024.
@@ -279,23 +289,24 @@
         {{ cap_macros.cap_prompt("disturbed", "cap-disturbed-wbt", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='disturbed9002_wbt') }}" title="disturbed9002_wbt" data-run-menu rel="nofollow">Start Disturbed Run (CONUS)</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed9002_wbt') }}" data-cap-section="disturbed" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="disturbed9002_wbt">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="disturbed9002_wbt"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='disturbed9002_wbt') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Disturbed Run (CONUS)
             </button>
           </form>
-          {% endif %}
         </div>
       </div>
     </article>
@@ -318,65 +329,78 @@
         {{ cap_macros.cap_prompt("revegetation", "cap-revegetation", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='reveg') }}" title="reveg" data-run-menu rel="nofollow">Start Revegetation Run (CONUS)</a>
-          <a class="pure-button" href="{{ url_for('run_0.create', config='reveg-mofe') }}" title="reveg-mofe" data-run-menu rel="nofollow">Start Multiple OFE Revegetation Run (CONUS)</a>
-          <a class="pure-button" href="{{ url_for('run_0.create', config='reveg-10m-mofe') }}" title="reveg-10m-mofe" data-run-menu rel="nofollow">Start 10m Multiple OFE Revegetation Run (CONUS)</a>
-          <a class="pure-button pure-button-secondary" href="{{ url_for('run_0.create', config='disturbed-ak') }}" title="disturbed-ak" data-run-menu rel="nofollow">Start Disturbed-Alaska Run (Experimental)</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='reveg') }}" data-cap-section="revegetation" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="reveg">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="reveg"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='reveg') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Revegetation Run (CONUS)
             </button>
           </form>
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='reveg-mofe') }}" data-cap-section="revegetation" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="reveg-mofe">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="reveg-mofe"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='reveg-mofe') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Multiple OFE Revegetation Run (CONUS)
             </button>
           </form>
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='reveg-10m-mofe') }}" data-cap-section="revegetation" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="reveg-10m-mofe">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="reveg-10m-mofe"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='reveg-10m-mofe') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start 10m Multiple OFE Revegetation Run (CONUS)
             </button>
           </form>
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='disturbed-ak') }}" data-cap-section="revegetation" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="disturbed-ak">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button pure-button-secondary wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button pure-button-secondary wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="disturbed-ak"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='disturbed-ak') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start Disturbed-Alaska Run (Experimental)
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -403,23 +427,24 @@
         {{ cap_macros.cap_prompt("eu", "cap-eu", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='eu-disturbed') }}" title="eu-disturbed" data-run-menu rel="nofollow">Start EU WEPPcloud-Disturbed Run</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='eu-disturbed') }}" data-cap-section="eu" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="eu" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="eu-disturbed">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="eu-disturbed"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='eu-disturbed') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start EU WEPPcloud-Disturbed Run
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -441,23 +466,24 @@
         {{ cap_macros.cap_prompt("au", "cap-au", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='au-disturbed') }}" title="au-disturbed" data-run-menu rel="nofollow">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='au-disturbed') }}" data-cap-section="au" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="au" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="au-disturbed">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="au-disturbed"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='au-disturbed') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -482,23 +508,24 @@
         {{ cap_macros.cap_prompt("rhem", "cap-rhem", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='rhem') }}" title="rhem" data-run-menu rel="nofollow">Start RHEM Run (Experimental)</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='rhem') }}" data-cap-section="rhem" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="rhem" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="rhem">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     title="rhem"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='rhem') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start RHEM Run (Experimental)
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM hillslopes ran since January 1, 2024.
@@ -557,35 +584,40 @@
         {{ cap_macros.cap_prompt("legacy-weppcloud", "cap-legacy-weppcloud", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='0') }}" rel="nofollow">Start WEPPcloud Run</a>
-          <a class="pure-button pure-button-secondary" href="{{ url_for('run_0.create', config='13') }}" rel="nofollow">10m (Experimental)</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='0') }}" data-cap-section="legacy-weppcloud" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="0">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='0') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start WEPPcloud Run
             </button>
           </form>
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='13') }}" data-cap-section="legacy-weppcloud" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="13">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button pure-button-secondary wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button pure-button-secondary wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='13') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               10m (Experimental)
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since January 1, 2024.
@@ -610,22 +642,23 @@
         {{ cap_macros.cap_prompt("legacy-baer", "cap-legacy-baer", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
-          {% if current_user.is_authenticated %}
-          <a class="pure-button" href="{{ url_for('run_0.create', config='baer') }}" rel="nofollow">Start WEPPcloud Run</a>
-          {% else %}
-          <form class="wc-run-form" method="post" action="{{ url_for('run_0.create', config='baer') }}" data-cap-section="legacy-baer" data-cap-required="true">
+          <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-baer" data-cap-required="true"{% endif %}>
+            {% if rq_engine_token %}
+            <input type="hidden" name="rq_token" value="{{ rq_engine_token }}">
+            {% endif %}
+            <input type="hidden" name="config" value="baer">
+            {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
+            {% endif %}
             <input type="hidden" name="unitizer:is_english" value="" data-unitizer-input>
-            <button type="button"
-                    class="pure-button wc-run-button is-disabled"
+            <button type="{% if current_user.is_authenticated %}submit{% else %}button{% endif %}"
+                    class="pure-button wc-run-button{% if not current_user.is_authenticated %} is-disabled{% endif %}"
                     data-run-menu
-                    data-run-action="{{ url_for('run_0.create', config='baer') }}"
-                    aria-disabled="true"
-                    disabled>
+                    data-run-action="{{ create_action }}"
+                    {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
               Start WEPPcloud Run
             </button>
           </form>
-          {% endif %}
         </div>
         <p class="wc-feature__metrics">
           {{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{ commafy(runs_counter['baer_ash_hillruns']) }} WATAR hillslopes) ran since January 1, 2024.

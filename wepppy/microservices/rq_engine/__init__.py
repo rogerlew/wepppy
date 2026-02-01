@@ -18,6 +18,7 @@ from .landuse_soils_routes import router as landuse_soils_router
 from .migration_routes import router as migration_router
 from .omni_routes import router as omni_router
 from .openet_ts_routes import router as openet_ts_router
+from .project_routes import router as project_router
 from .run_sync_routes import router as run_sync_router
 from .rap_ts_routes import router as rap_ts_router
 from .rhem_routes import router as rhem_router
@@ -80,6 +81,7 @@ app.include_router(upload_climate_router, prefix="/api")
 app.include_router(upload_disturbed_router, prefix="/api")
 app.include_router(upload_huc_fire_router, prefix="/api")
 app.include_router(upload_batch_runner_router, prefix="/api")
+app.include_router(project_router)
 
 
 __all__ = ["app"]
