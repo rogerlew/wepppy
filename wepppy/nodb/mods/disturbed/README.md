@@ -71,6 +71,9 @@ To keep undisturbed vs. disturbed comparisons strictly "static to static," the l
 As part of this static-alignment work, `UnDisturbed/Shrub.man` was updated to match the Tahoe shrub template by setting `hmax=2.0` and `ini.data.sumrtm`/`ini.data.sumsrm` to `0.30`.
 
 We also switched NLCD key `72` (Sedge/Herbaceous) to `UnDisturbed/Tall_Grass.man` in `wepppy/wepp/management/data/disturbed.json` to keep tall grass comparisons aligned with the static template.
+
+We are keeping `UnDisturbed/Shrub.man` in sync with `Tahoe/Tahoe_Shrub.man` (the file is treated as the canonical shrub baseline for disturbed comparisons).
+
 ## Landuse Parameterization (Forest, Shrub, Grass)
 
 The tables below capture the initial conditions (`IniLoopCropland`) and plant parameters (`PlantLoopCropland`) for the management files used by disturbed classes. Values are from the `.man` files under `wepppy/wepp/management/data/` and are shown here because Disturbed remaps hillslopes directly to these classes.
@@ -105,7 +108,7 @@ The tables below capture the initial conditions (`IniLoopCropland`) and plant pa
 
 | Disturbed class | Management file | cancov | inrcov | rilcov | rspace | rfcum | rhinit | rrinit |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| shrub | `UnDisturbed/Shrub.man` | 0.40 | 0.85 | 0.85 | 0.00 | 1000.00 | 0.10 | 0.10 |
+| shrub | `UnDisturbed/Shrub.man` | 0.70 | 0.90 | 0.90 | 2.00 | 400.00 | 0.06 | 0.06 |
 | shrub low sev fire | `UnDisturbed/Shrub_Low_Severity_Fire.man` | 0.33 | 0.80 | 0.80 | 2.00 | 400.00 | 0.06 | 0.06 |
 | shrub moderate sev fire | `UnDisturbed/Shrub_Moderate_Severity_Fire.man` | 0.27 | 0.55 | 0.55 | 2.00 | 400.00 | 0.06 | 0.06 |
 | shrub high sev fire | `UnDisturbed/Shrub_High_Severity_Fire.man` | 0.05 | 0.30 | 0.30 | 2.00 | 400.00 | 0.06 | 0.06 |
@@ -115,11 +118,33 @@ The tables below capture the initial conditions (`IniLoopCropland`) and plant pa
 
 | Disturbed class | rdmax | xmxlai | hmax | cuthgt |
 | --- | --- | --- | --- | --- |
-| shrub | 0.40 | 2.0 | 1.0 | 1.2 |
+| shrub | 0.50 | 10.0 | 2.0 | 4.0 |
 | shrub low sev fire | 0.20 | 3.0 | 2.0 | 4.0 |
 | shrub moderate sev fire | 0.20 | 2.0 | 2.0 | 4.0 |
 | shrub high sev fire | 0.20 | 1.0 | 2.0 | 4.0 |
 | shrub prescribed fire | 0.50 | 10.0 | 2.0 | 4.0 |
+
+### Runoff event counts (assiduous-topside)
+
+Event counts compare base (burned) vs. omni undisturbed runoff by matching `wepp_id`, `year`, and `julian` in `H.pass.parquet`. Totals are reported for the full series and with the first year (1980) removed. Moderate-severity counts are from the base run where `p58=shrub moderate sev fire` and `p67=forest moderate sev fire` (pre-uniform high-severity rerun). High-severity counts are from the current uniform high-severity base run. Textures for the reported hillslopes are **sand loam** for shrub (`p58`) and **loam** for forest (`p67`).
+
+**Full series**
+
+| Disturbed class | WEPP ID | Total events | Burned > undisturbed | Undisturbed > burned | Equal |
+| --- | --- | --- | --- | --- | --- |
+| forest moderate sev fire | 67 | 16,437 | 127 | 116 | 16,194 |
+| forest high sev fire | 67 | 16,437 | 534 | 52 | 15,851 |
+| shrub moderate sev fire | 58 | 16,437 | 137 | 29 | 16,271 |
+| shrub high sev fire | 58 | 16,437 | 1,154 | 0 | 15,283 |
+
+**Excluding first year (1980)**
+
+| Disturbed class | WEPP ID | Total events | Burned > undisturbed | Undisturbed > burned | Equal |
+| --- | --- | --- | --- | --- | --- |
+| forest moderate sev fire | 67 | 16,071 | 117 | 111 | 15,843 |
+| forest high sev fire | 67 | 16,071 | 519 | 49 | 15,503 |
+| shrub moderate sev fire | 58 | 16,071 | 133 | 25 | 15,913 |
+| shrub high sev fire | 58 | 16,071 | 1,124 | 0 | 14,947 |
 
 ### Grass (Tall and Short)
 
@@ -179,6 +204,16 @@ Disturbed updates parameters that are consumed directly by the WEPP-forest Fortr
 - **Hydraulic conductivity adjustments** (`avke`, `ksatadj`, `ksatfac`, `ksatrec`, `lkeff`).
   - `input.for` reads these fields from the soil file (9001+ and 9003+ formats).
   - `infpar.for` applies the hydrophobicity logic when `ksatadj=1`, computing effective K from saturation fraction and enforcing `lkeff` lower bounds for 9003/9005.
+
+## Runoff Events
+
+WEPP computes event runoff from the daily water balance: rainfall intensity and duration drive infiltration, which is limited by effective conductivity (`Keff`) and suction across the wetting front (`Suct`). Surface storage and routing are further adjusted by random roughness (`rrinit`/`Rough`) and cover/residue (`cancov`, `inrcov`, `rilcov`, `sumrtm`, `sumsrm`). These terms evolve with antecedent soil moisture and daily state, so the runoff response is time-varying even with fixed management and soil inputs.
+
+When `ksatadj=1`, WEPP recalculates effective conductivity from saturation fraction (`sat_frac`) and the `ksatfac`/`ksatrec` controls (or enforces `lkeff` for 9003/9005 soils). This makes `Keff` time-varying as soils wet up or dry down. When `ksatadj=0`, `Keff` tracks the surface horizon `ksat` (which is sourced from `avke` in the disturbed lookup).
+
+Suction (`Suct`) is computed from soil texture/porosity and current water content, so it is sensitive to antecedent wetness. Higher `Suct` increases infiltration demand and can suppress runoff; lower `Suct` does the opposite. The event count tables therefore capture not only management/soil differences but also day-to-day moisture state, which is why a minority of events can show undisturbed runoff exceeding burned runoff.
+
+The disturbed parameterization is **directionally correct** at the regime level (burned classes lower cover and typically lower effective conductivity, so runoff and sediment delivery tend to increase), but it does **not guarantee** that every individual event will produce more runoff than the undisturbed case. A dry antecedent state can raise `Suct` and reduce runoff in burned conditions, while a wetter undisturbed state can do the opposite. This is expected behavior in the WEPP hydrology, so comparisons should focus on distributions and seasonal/annual totals rather than a per-event monotonicity assumption.
 
 ## Quick Start
 
