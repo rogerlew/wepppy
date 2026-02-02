@@ -64,6 +64,10 @@ If a management entry defines `SoilFile`/`sol_path`, the controller copies that 
 - For fire treatments that append suffixes (`-mulch_15`, `-thinning`, etc.), the soil lookup uses the base disturbed class (e.g., `forest moderate sev fire`).
 - If a class is missing from the lookup during MOFE processing and `sol_ver` requires 9002+, defaults are injected so the soil can still be synthesized.
 
+### Static management overrides (added February 2, 2026)
+
+To keep undisturbed vs. disturbed comparisons strictly "static to static," the lookup table now supports `plant.data.decfct` and `plant.data.dropfc` overrides. For all landuses except `agriculture crops`, these are set to `1` in the default lookup so management files do not decay or drop plant material during the comparison window. This avoids unintended differences in residue/root mass (and therefore `kr` adjustment factors) that would otherwise arise from differing growth/decay timing between management templates.
+
 ## Landuse Parameterization (Forest, Shrub, Grass)
 
 The tables below capture the initial conditions (`IniLoopCropland`) and plant parameters (`PlantLoopCropland`) for the management files used by disturbed classes. Values are from the `.man` files under `wepppy/wepp/management/data/` and are shown here because Disturbed remaps hillslopes directly to these classes.

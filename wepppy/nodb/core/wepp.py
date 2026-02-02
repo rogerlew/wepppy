@@ -170,6 +170,7 @@ from wepppy.nodb.base import (
     nodb_timed,
     createProcessPoolExecutor,
 )
+from wepppy.nodb.core.management_overrides import apply_disturbed_management_overrides
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
@@ -1774,9 +1775,10 @@ class Wepp(NoDbBase):
                         management.set_xmxlai(float(xmxlai))
 
                     if (texid, disturbed_class) in _land_soil_replacements_d:
-                        for (attr, value) in _land_soil_replacements_d[(texid, disturbed_class)].items():
-                            if attr.startswith('plant.data.') or attr.startswith('ini.data.'):
-                                management[attr] = value
+                        apply_disturbed_management_overrides(
+                            management,
+                            _land_soil_replacements_d[(texid, disturbed_class)],
+                        )
 
                     meoization_key = (mukey, dom, disturbed_class)
 

@@ -143,6 +143,25 @@
       gap: var(--wc-space-sm);
     }
 
+    .pu-action-feedback {
+      min-height: 1.1rem;
+      margin-top: var(--wc-space-xs);
+      font-size: 0.85rem;
+      color: var(--wc-status-text-muted);
+    }
+
+    .pu-action-feedback[data-state="pending"] {
+      color: var(--wc-info-fg);
+    }
+
+    .pu-action-feedback[data-state="success"] {
+      color: var(--wc-success-fg);
+    }
+
+    .pu-action-feedback[data-state="error"] {
+      color: var(--wc-error-fg);
+    }
+
     .pu-modal__dialog .wc-modal__footer {
       height: 3rem;
     }
@@ -264,6 +283,11 @@
                  data-open-tab-pref>
                 Disturbed Parameters Doc
               </a>
+              <div class="pu-action-feedback"
+                   data-disturbed-lookup-status
+                   role="status"
+                   aria-live="polite"
+                   aria-atomic="true"></div>
             {% endif %}
             {% if ron.profile_recorder_assembler_enabled and current_user.has_role('Admin') %}
               <button type="button"

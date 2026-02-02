@@ -327,6 +327,7 @@ var Disturbed = (function () {
         var stacktraceElement = formElement ? dom.qs("#stacktrace", formElement) : null;
         var rqJobElement = formElement ? dom.qs("#rq_job", formElement) : null;
         var spinnerElement = formElement ? dom.qs("#braille", formElement) : null;
+        var lookupStatusElement = dom.qs("[data-disturbed-lookup-status]") || null;
 
         var uploadHintElement = formElement ? dom.qs("#hint_upload_sbs", formElement) : null;
         var removeHintElement = formElement ? dom.qs("#hint_remove_sbs", formElement) : null;
@@ -335,6 +336,7 @@ var Disturbed = (function () {
         var statusAdapter = createLegacyAdapter(statusElement);
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
+        var lookupStatusAdapter = createLegacyAdapter(lookupStatusElement);
         var uploadHintAdapter = createLegacyAdapter(uploadHintElement);
         var removeHintAdapter = createLegacyAdapter(removeHintElement);
 
@@ -350,6 +352,7 @@ var Disturbed = (function () {
         disturbed.status = statusAdapter;
         disturbed.stacktrace = stacktraceAdapter;
         disturbed.rq_job = rqJobAdapter;
+        disturbed.lookup_status = lookupStatusAdapter;
         disturbed.infoElement = infoElement;
         disturbed.statusSpinnerEl = spinnerElement;
 
@@ -431,6 +434,25 @@ var Disturbed = (function () {
             if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
                 stacktraceAdapter.text("");
             }
+        }
+
+        function setLookupStatus(message, state) {
+            if (!lookupStatusAdapter || typeof lookupStatusAdapter.text !== "function") {
+                return;
+            }
+            lookupStatusAdapter.text(message || "");
+            if (lookupStatusAdapter.element) {
+                if (state) {
+                    lookupStatusAdapter.element.dataset.state = state;
+                } else if (lookupStatusAdapter.element.dataset) {
+                    delete lookupStatusAdapter.element.dataset.state;
+                }
+            }
+        }
+
+        function setLookupStatusError(payload, fallback) {
+            var message = resolveErrorMessage(payload, fallback) || fallback || "Request failed";
+            setLookupStatus(message, "error");
         }
 
         function completeTask(taskMsg) {
@@ -598,6 +620,7 @@ var Disturbed = (function () {
 
         function resetLandSoilLookup() {
             var taskMsg = "Resetting disturbed lookup";
+            setLookupStatus("Resetting disturbed parameters...", "pending");
             startTask(taskMsg);
             emit("disturbed:lookup:reset", {});
             disturbed.triggerEvent("job:started", { task: "disturbed:lookup:reset" });
@@ -611,17 +634,20 @@ var Disturbed = (function () {
                     if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(infoAdapter, "Disturbed lookup reset to defaults.");
+                        setLookupStatus("Disturbed parameters reset to defaults.", "success");
                         disturbed.triggerEvent("job:completed", {
                             task: "disturbed:lookup:reset",
                             response: data
                         });
                         return data;
                     }
+                    setLookupStatusError(data, "Failed to reset disturbed parameters.");
                     handleResponseError(taskMsg, data, "disturbed:lookup:error", "disturbed:lookup:reset");
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
+                    setLookupStatusError(payload, "Failed to reset disturbed parameters.");
                     handleResponseError(taskMsg, payload, "disturbed:lookup:error", "disturbed:lookup:reset");
                     return payload;
                 });
@@ -629,6 +655,7 @@ var Disturbed = (function () {
 
         function loadExtendedLandSoilLookup() {
             var taskMsg = "Loading extended disturbed lookup";
+            setLookupStatus("Loading extended disturbed parameters...", "pending");
             startTask(taskMsg);
             emit("disturbed:lookup:extended", {});
             disturbed.triggerEvent("job:started", { task: "disturbed:lookup:extended" });
@@ -642,17 +669,20 @@ var Disturbed = (function () {
                     if (!data.error && !data.errors) {
                         completeTask(taskMsg);
                         setAdapterText(infoAdapter, "Extended disturbed lookup loaded.");
+                        setLookupStatus("Extended disturbed parameters loaded.", "success");
                         disturbed.triggerEvent("job:completed", {
                             task: "disturbed:lookup:extended",
                             response: data
                         });
                         return data;
                     }
+                    setLookupStatusError(data, "Failed to load extended disturbed parameters.");
                     handleResponseError(taskMsg, data, "disturbed:lookup:error", "disturbed:lookup:extended");
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
+                    setLookupStatusError(payload, "Failed to load extended disturbed parameters.");
                     handleResponseError(taskMsg, payload, "disturbed:lookup:error", "disturbed:lookup:extended");
                     return payload;
                 });
