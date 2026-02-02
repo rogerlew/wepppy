@@ -231,29 +231,45 @@ def _build_event_columns(npart: int) -> Tuple[List[str], List[str], List[str]]:
 def _build_event_schema(npart: int, meta: Dict[str, object], nhill: int) -> pa.Schema:
     base_columns, sed_columns, frc_columns = _build_event_columns(npart)
     schema_fields = [
-        pa.field("event", pa.string()),
-        pa.field("year", pa.int16()),
-        pa.field("sim_day_index", pa.int32()),
-        pa.field("julian", pa.int16()),
-        pa.field("month", pa.int8()),
-        pa.field("day_of_month", pa.int8()),
-        pa.field("water_year", pa.int16()),
-        pa.field("wepp_id", pa.int32()),
-        pa.field("dur", pa.float64()),
-        pa.field("tcs", pa.float64()),
-        pa.field("oalpha", pa.float64()),
-        pa.field("runoff", pa.float64()),
-        pa.field("runvol", pa.float64()),
-        pa.field("sbrunf", pa.float64()),
-        pa.field("sbrunv", pa.float64()),
-        pa.field("drainq", pa.float64()),
-        pa.field("drrunv", pa.float64()),
-        pa.field("peakro", pa.float64()),
-        pa.field("tdet", pa.float64()),
-        pa.field("tdep", pa.float64()),
-        pa.field("gwbfv", pa.float64()),
-        pa.field("gwdsv", pa.float64()),
-    ] + [pa.field(name, pa.float64()) for name in sed_columns + frc_columns]
+        pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
+        pa_field("year", pa.int16()),
+        pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day since start year"),
+        pa_field("julian", pa.int16()),
+        pa_field("month", pa.int8()),
+        pa_field("day_of_month", pa.int8()),
+        pa_field("water_year", pa.int16()),
+        pa_field("wepp_id", pa.int32()),
+        pa_field("dur", pa.float64(), units="s", description="Storm duration"),
+        pa_field("tcs", pa.float64(), units="h", description="Overland flow time of concentration"),
+        pa_field("oalpha", pa.float64(), units="unitless", description="Overland flow alpha parameter"),
+        pa_field("runoff", pa.float64(), units="m", description="Runoff depth"),
+        pa_field("runvol", pa.float64(), units="m^3", description="Runoff volume"),
+        pa_field("sbrunf", pa.float64(), units="m", description="Subsurface runoff depth"),
+        pa_field("sbrunv", pa.float64(), units="m^3", description="Subsurface runoff volume"),
+        pa_field("drainq", pa.float64(), units="m/day", description="Drainage flux"),
+        pa_field("drrunv", pa.float64(), units="m^3", description="Tile Drainage volume"),
+        pa_field("peakro", pa.float64(), units="m^3/s", description="Peak runoff rate"),
+        pa_field("tdet", pa.float64(), units="kg", description="Total detachment"),
+        pa_field("tdep", pa.float64(), units="kg", description="Total deposition"),
+        pa_field("gwbfv", pa.float64(), description="Groundwater baseflow"),
+        pa_field("gwdsv", pa.float64(), description="Groundwater deep seepage"),
+    ] + [
+        pa_field(
+            name,
+            pa.float64(),
+            units="kg/m^3",
+            description=f"Sediment concentration {idx + 1}",
+        )
+        for idx, name in enumerate(sed_columns)
+    ] + [
+        pa_field(
+            name,
+            pa.float64(),
+            units="unitless",
+            description=f"Fraction of particle class {idx + 1} in flow",
+        )
+        for idx, name in enumerate(frc_columns)
+    ]
 
     schema = schema_with_version(
         pa.schema(schema_fields).with_metadata(

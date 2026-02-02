@@ -172,7 +172,7 @@ wepp.cloud {
             }
         }
 
-        @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
+        @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|files(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
         handle @browse_proxy {
             reverse_proxy browse:9009 {
                 transport http {
