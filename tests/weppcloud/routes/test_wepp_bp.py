@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict
 
 import pytest
 
 pytest.importorskip("flask")
 from flask import Flask
+from wepppy.weppcloud.utils import cap_guard
 
 pytestmark = pytest.mark.unit
 
@@ -127,3 +129,106 @@ def test_set_run_wepp_routine_requires_known_routine(wepp_client):
     payload = response.get_json()
     assert "routine not in" in payload["error"]["message"]
 
+
+def _touch_wepp_results(run_dir: str) -> None:
+    output_dir = Path(run_dir) / "wepp" / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "loss_pw0.txt").write_text("results")
+
+
+def test_report_wepp_results_marks_stale_when_invalidated(wepp_client, monkeypatch: pytest.MonkeyPatch):
+    client, _, run_dir = wepp_client
+    _touch_wepp_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+
+    class DummyRedis:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self._values = values
+
+        def hget(self, run_id: str, key: str):
+            return self._values.get(key)
+
+    class DummyRedisPrep:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self.run_id = RUN_ID
+            self.redis = DummyRedis(values)
+
+        @staticmethod
+        def getInstance(wd: str):
+            return DummyRedisPrep(
+                {
+                    "timestamps:build_landuse": "200",
+                    "timestamps:build_soils": "200",
+                    "timestamps:build_climate": "200",
+                    "timestamps:run_wepp_watershed": "100",
+                }
+            )
+
+    monkeypatch.setattr(wepp_module, "RedisPrep", DummyRedisPrep)
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/wepp_reports.htm"
+        return str(kwargs["run_results_title"])
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "Run Results (stale)"
+
+
+def test_report_wepp_results_not_stale_when_current(wepp_client, monkeypatch: pytest.MonkeyPatch):
+    client, _, run_dir = wepp_client
+    _touch_wepp_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+
+    class DummyRedis:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self._values = values
+
+        def hget(self, run_id: str, key: str):
+            return self._values.get(key)
+
+    class DummyRedisPrep:
+        def __init__(self, values: Dict[str, str]) -> None:
+            self.run_id = RUN_ID
+            self.redis = DummyRedis(values)
+
+        @staticmethod
+        def getInstance(wd: str):
+            return DummyRedisPrep(
+                {
+                    "timestamps:build_landuse": "200",
+                    "timestamps:build_soils": "200",
+                    "timestamps:build_climate": "200",
+                    "timestamps:run_wepp_watershed": "300",
+                }
+            )
+
+    monkeypatch.setattr(wepp_module, "RedisPrep", DummyRedisPrep)
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/wepp_reports.htm"
+        return str(kwargs["run_results_title"])
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "Run Results"

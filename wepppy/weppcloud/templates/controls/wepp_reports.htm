@@ -9,10 +9,12 @@
   </p>
 {% endset %}
 
+{% set results_title = run_results_title if run_results_title is defined else "Run Results" %}
+
 {% block content %}
   <div class="wc-stack">
     {% call ui.card_shell(
-         "Run Reports",
+         results_title,
          collapsible=True,
          description=card_description | trim) %}
       {% set is_single_storm = climate.is_single_storm %}

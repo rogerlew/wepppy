@@ -38,6 +38,60 @@ def _wants_csv() -> bool:
     return 'text/csv' in accept.lower()
 
 
+def _safe_gt_timestamp(a, b) -> bool:
+    if a is None or b is None:
+        return False
+    try:
+        return int(a) > int(b)
+    except Exception:
+        return False
+
+
+def _first_valid_timestamp(prep, *redis_fields):
+    for field in redis_fields:
+        try:
+            value = prep.redis.hget(prep.run_id, field)
+        except Exception:
+            value = None
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _wepp_outputs_exist(wd: str, climate: Climate) -> bool:
+    output_dir = _join(wd, "wepp", "output")
+    loss_pw0 = _join(output_dir, "loss_pw0.txt")
+    if _exists(loss_pw0):
+        return True
+
+    try:
+        ss_batch_storms = getattr(climate, "ss_batch_storms", None)
+        if ss_batch_storms:
+            for storm in ss_batch_storms:
+                ss_batch_key = storm.get("ss_batch_key")
+                if not ss_batch_key:
+                    continue
+                if _exists(_join(output_dir, f"{ss_batch_key}/loss_pw0.txt")):
+                    return True
+    except Exception:
+        return False
+
+    return False
+
+
+def _wepp_results_invalidated(prep) -> bool:
+    run_wepp = _first_valid_timestamp(
+        prep,
+        "timestamps:run_wepp_watershed",
+        "timestamps:run_wepp",
+    )
+    return not (
+        _safe_gt_timestamp(run_wepp, prep.redis.hget(prep.run_id, "timestamps:build_landuse"))
+        and _safe_gt_timestamp(run_wepp, prep.redis.hget(prep.run_id, "timestamps:build_soils"))
+        and _safe_gt_timestamp(run_wepp, prep.redis.hget(prep.run_id, "timestamps:build_climate"))
+    )
+
+
 def _render_report_csv(*, runid, report: ReportBase, unitizer, slug, table=None):
     df = report.to_dataframe()
     df = _apply_unitizer_preferences(df, unitizer)
@@ -414,6 +468,10 @@ def report_wepp_results(runid, config):
     except FileNotFoundError:
         prep = None
 
+    has_results = _wepp_outputs_exist(wd, climate)
+    wepp_results_stale = bool(prep is not None and has_results and _wepp_results_invalidated(prep))
+    run_results_title = "Run Results" + (" (stale)" if wepp_results_stale else "")
+
     totalwatsed3_exists = _exists(
         _join(wd, 'wepp', 'output', 'interchange', 'totalwatsed3.parquet')
     )
@@ -427,6 +485,8 @@ def report_wepp_results(runid, config):
                                prep=prep,
                                runid=runid,
                                config=config,
+                               run_results_title=run_results_title,
+                               wepp_results_stale=wepp_results_stale,
                                totalwatsed3_exists=totalwatsed3_exists,
                                totalwatsed2_exists=totalwatsed2_exists,
                                user=current_user)
