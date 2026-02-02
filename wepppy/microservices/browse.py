@@ -50,7 +50,9 @@ import math
 import json
 import logging
 import html
+import mimetypes
 import traceback
+import fnmatch
 from html import escape as html_escape
 import sqlite3
 
@@ -63,9 +65,9 @@ from os.path import exists as _exists
 from os.path import abspath, basename
 
 import gzip
-from functools import lru_cache
+from functools import lru_cache, cmp_to_key
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from http import HTTPStatus
 
 import httpx
@@ -314,6 +316,181 @@ def _format_human_size(size_bytes: int) -> str:
     return f'{scaled} {size_units[unit_index]}'
 
 
+FILES_DEFAULT_LIMIT = 1000
+FILES_MAX_LIMIT = 10000
+
+
+def _accepts_json(request: StarletteRequest) -> bool:
+    accept = request.headers.get('accept', '')
+    if not accept:
+        return True
+    for part in accept.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        media, *params = [segment.strip() for segment in part.split(';')]
+        q_value = 1.0
+        for param in params:
+            if param.lower().startswith('q='):
+                try:
+                    q_value = float(param.split('=', 1)[1])
+                except (TypeError, ValueError):
+                    q_value = 0.0
+                break
+        if q_value <= 0:
+            continue
+        media = media.lower()
+        if media in ('*/*', 'application/json', 'application/*') or media.endswith('+json'):
+            return True
+    return False
+
+
+def _build_error_payload(message: str, code: str | None = None, details: str | None = None, errors=None) -> dict:
+    payload = {
+        'error': {
+            'message': message,
+            'code': code,
+            'details': details or message,
+        }
+    }
+    if errors:
+        payload['errors'] = errors
+    return payload
+
+
+def _raise_files_error(status_code: int, message: str, *, code: str | None = None, details: str | None = None, errors=None) -> None:
+    raise HTTPException(
+        status_code=status_code,
+        detail=_build_error_payload(message, code=code, details=details, errors=errors),
+    )
+
+
+def _normalize_files_rel_path(raw_path: str) -> str:
+    if not raw_path:
+        return '.'
+    if '\x00' in raw_path:
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details="Null byte in path.",
+        )
+    raw_path = raw_path.replace('\\', '/')
+    if raw_path.startswith('/'):
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details="Absolute paths are not allowed.",
+        )
+    parts = [part for part in raw_path.split('/') if part not in ('', '.')]
+    if any(part == '..' for part in parts):
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details="Path traversal segments are not allowed.",
+        )
+    rel_path = '/'.join(parts) or '.'
+    return rel_path
+
+
+def _enforce_no_symlink_traversal(root: str, rel_path: str, *, meta: bool) -> None:
+    if rel_path in ('.', ''):
+        return
+    parts = [part for part in rel_path.split('/') if part]
+    current = os.path.abspath(root)
+    for index, part in enumerate(parts):
+        current = os.path.join(current, part)
+        if os.path.islink(current):
+            if index < len(parts) - 1:
+                _raise_files_error(
+                    HTTPStatus.BAD_REQUEST,
+                    "Invalid path.",
+                    code="path_outside_root",
+                    details="Symlink traversal is not allowed.",
+                )
+            if not meta:
+                path_display = _display_rel_path(rel_path) or '.'
+                _raise_files_error(
+                    HTTPStatus.BAD_REQUEST,
+                    f"Path '{path_display}' is not a directory",
+                    code='not_a_directory',
+                    details="Symlink traversal is not allowed.",
+                )
+            return
+
+
+def _resolve_files_path(root: str, rel_path: str) -> str:
+    root_abs = os.path.abspath(root)
+    join_path = rel_path if rel_path != '.' else ''
+    abs_path = os.path.abspath(os.path.join(root_abs, join_path))
+    try:
+        common = os.path.commonpath([root_abs, abs_path])
+    except ValueError:
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details="Path traversal detected.",
+        )
+    if common != root_abs:
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details="Path traversal detected.",
+        )
+    return abs_path
+
+
+def _format_iso_mtime(stat_result) -> str | None:
+    if stat_result is None:
+        return None
+    mtime_ns = getattr(stat_result, 'st_mtime_ns', None)
+    if mtime_ns is None:
+        mtime_ns = int(stat_result.st_mtime * 1_000_000_000)
+    try:
+        dt = datetime.fromtimestamp(mtime_ns / 1_000_000_000, tz=timezone.utc)
+    except (OSError, OverflowError, ValueError):
+        dt = datetime.fromtimestamp(0, tz=timezone.utc)
+    return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
+def _parse_child_count(value: str) -> int | None:
+    if not value:
+        return None
+    match = re.match(r'^(\d+)', value.strip())
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
+
+
+def _display_rel_path(rel_path: str) -> str:
+    return '' if rel_path in ('.', '') else rel_path
+
+
+def _safe_symlink_target(root: str, entry_path: str, target: str) -> str | None:
+    if not target:
+        return None
+    if os.path.isabs(target):
+        candidate = target
+    else:
+        candidate = os.path.abspath(os.path.join(os.path.dirname(entry_path), target))
+    root_abs = os.path.abspath(root)
+    try:
+        common = os.path.commonpath([root_abs, candidate])
+    except ValueError:
+        return None
+    if common != root_abs:
+        return None
+    rel_target = os.path.relpath(candidate, root_abs).replace('\\', '/')
+    return _display_rel_path(_normalize_rel_path(rel_target))
+
+
 # NOTE: Simplified url_for shim mimics Flask asset lookup.
 # Extend this mapping or integrate with Starlette routing before using additional blueprint templates.
 def url_for(endpoint: str, **values) -> str:
@@ -353,11 +530,15 @@ def render_template(template_name, **context):
 
 
 async def _run_shell_command(command: str, cwd: str) -> tuple[int, str, str]:
+    env = os.environ.copy()
+    env.setdefault('LC_ALL', 'C')
+    env.setdefault('LANG', 'C')
     process = await asyncio.create_subprocess_shell(
         command,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         cwd=cwd,
+        env=env,
     )
     stdout, stderr = await process.communicate()
     stdout_text = stdout.decode('utf-8', errors='replace')
@@ -443,6 +624,37 @@ def ensure_response(value):
 
 MAX_FILE_LIMIT = 100
 MARKDOWN_EXTENSIONS = ('.md', '.markdown', '.mdown', '.mkdn')
+
+_FILES_PREVIEW_EXTENSIONS = (
+    MARKDOWN_EXTENSIONS
+    + _DTALE_SUPPORTED_SUFFIXES
+    + (
+        '.arc',
+        '.csv',
+        '.dss',
+        '.dump',
+        '.json',
+        '.log',
+        '.man',
+        '.md',
+        '.markdown',
+        '.mdown',
+        '.mkdn',
+        '.nodb',
+        '.out',
+        '.pkl',
+        '.pickle',
+        '.sol',
+        '.tsv',
+        '.txt',
+        '.xml',
+    )
+)
+
+
+def _preview_available(path: str) -> bool:
+    lower_path = path.lower()
+    return lower_path.endswith(_FILES_PREVIEW_EXTENSIONS)
 
 
 _logger = logging.getLogger(__name__)
@@ -635,8 +847,10 @@ def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str
         where_clause = 'dir_path = ?'
         params = [rel_dir]
         if filter_pattern:
-            where_clause += ' AND name GLOB ?'
-            params.append(filter_pattern)
+            prefilter_clause, prefilter_params = _pattern_sql_prefilter(filter_pattern)
+            if prefilter_clause:
+                where_clause += f' AND {prefilter_clause}'
+                params += prefilter_params
 
         sort_column = {
             'date': 'mtime_ns',
@@ -648,23 +862,39 @@ def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str
             primary_sort = f'{sort_column} COLLATE NOCASE {direction}'
         else:
             primary_sort = f'{sort_column} {direction}'
-        order_clause = f'ORDER BY sort_rank DESC, {primary_sort}, name COLLATE NOCASE ASC'
+        order_clause = (
+            f'ORDER BY sort_rank DESC, {primary_sort}, '
+            'name COLLATE NOCASE ASC, name COLLATE BINARY ASC'
+        )
 
-        total_items = conn.execute(
-            f'SELECT COUNT(*) AS total FROM entries WHERE {where_clause}',
-            params,
-        ).fetchone()['total']
+        select_clause = f'''SELECT name, is_dir, is_symlink, symlink_is_dir, size_bytes, mtime_ns,
+                                   child_count, symlink_target, sort_rank
+                            FROM entries
+                            WHERE {where_clause}
+                            {order_clause}'''
 
-        offset = max(0, (page - 1) * page_size)
-        rows = conn.execute(
-            f'''SELECT name, is_dir, is_symlink, symlink_is_dir, size_bytes, mtime_ns,
-                       child_count, symlink_target, sort_rank
-                FROM entries
-                WHERE {where_clause}
-                {order_clause}
-                LIMIT ? OFFSET ?''',
-            params + [page_size, offset],
-        ).fetchall()
+        if filter_pattern:
+            start_index = max(0, (page - 1) * page_size)
+            end_index = start_index + page_size
+            total_items = 0
+            rows = []
+            for row in conn.execute(select_clause, params):
+                name = row['name']
+                if not fnmatch.fnmatchcase(name, filter_pattern):
+                    continue
+                if total_items >= start_index and len(rows) < page_size:
+                    rows.append(row)
+                total_items += 1
+        else:
+            total_items = conn.execute(
+                f'SELECT COUNT(*) AS total FROM entries WHERE {where_clause}',
+                params,
+            ).fetchone()['total']
+            offset = max(0, (page - 1) * page_size)
+            rows = conn.execute(
+                f'{select_clause} LIMIT ? OFFSET ?',
+                params + [page_size, offset],
+            ).fetchall()
     finally:
         conn.close()
 
@@ -768,12 +998,35 @@ def _validate_filter_pattern(pattern):
     Validate filter_pattern to ensure it’s a safe wildcard pattern.
     Returns True if valid, False otherwise.
     """
-    # Allowed: alphanumeric, *, ?, [], -, ., _
-    # Disallowed: shell metacharacters like &, |, ;, <, >, $, `, ", ', etc.
     if not pattern:  # Empty pattern is valid
         return True
-    safe_pattern = r'^[a-zA-Z0-9_*?[\]\-\.]+$'
-    return bool(re.match(safe_pattern, pattern))
+    if '\x00' in pattern:
+        return False
+    if '/' in pattern or '\\' in pattern:
+        return False
+    return True
+
+
+def _escape_like(value: str) -> str:
+    return value.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+
+
+def _pattern_sql_prefilter(pattern: str) -> tuple[str | None, list[str]]:
+    if not pattern:
+        return None, []
+    for index, char in enumerate(pattern):
+        if char in ('*', '?', '['):
+            break
+    else:
+        return 'name = ?', [pattern]
+
+    if index == 0:
+        return None, []
+    prefix = pattern[:index]
+    if not prefix:
+        return None, []
+    escaped_prefix = _escape_like(prefix)
+    return "name LIKE ? ESCAPE '\\'", [f'{escaped_prefix}%']
 
 
 _SORT_FIELDS = {'name', 'date', 'size'}
@@ -792,6 +1045,175 @@ def _normalize_sort_params(args) -> tuple[str, str]:
 
     return sort_by, sort_order
 
+
+def _is_files_request(request: StarletteRequest) -> bool:
+    path_parts = [part for part in (request.url.path or '').split('/') if part]
+    try:
+        runs_index = path_parts.index('runs')
+    except ValueError:
+        return False
+    files_index = runs_index + 3
+    if files_index >= len(path_parts):
+        return False
+    if path_parts[files_index] != 'files':
+        return False
+    return True
+
+
+def _parse_files_query_params(request: StarletteRequest) -> tuple[int, int, str, str, str, bool]:
+    params = request.query_params
+    errors = []
+
+    def _add_error(path: str, message: str) -> None:
+        errors.append({
+            'code': 'invalid_value',
+            'message': message,
+            'path': path,
+        })
+
+    limit_raw = params.get('limit')
+    if limit_raw is None:
+        limit = FILES_DEFAULT_LIMIT
+    else:
+        try:
+            limit = int(limit_raw)
+        except (TypeError, ValueError):
+            limit = FILES_DEFAULT_LIMIT
+            _add_error('limit', 'limit must be an integer.')
+        else:
+            if limit < 1 or limit > FILES_MAX_LIMIT:
+                _add_error('limit', f'limit must be between 1 and {FILES_MAX_LIMIT}.')
+
+    offset_raw = params.get('offset')
+    if offset_raw is None:
+        offset = 0
+    else:
+        try:
+            offset = int(offset_raw)
+        except (TypeError, ValueError):
+            offset = 0
+            _add_error('offset', 'offset must be an integer.')
+        else:
+            if offset < 0:
+                _add_error('offset', 'offset must be >= 0.')
+
+    pattern = params.get('pattern') or ''
+    if pattern and not _validate_filter_pattern(pattern):
+        _add_error('pattern', 'pattern contains unsupported characters.')
+
+    sort_by = (params.get('sort') or 'name').lower()
+    if sort_by not in _SORT_FIELDS:
+        _add_error('sort', 'sort must be one of: name, date, size.')
+
+    sort_order = (params.get('order') or 'asc').lower()
+    if sort_order not in _SORT_ORDERS:
+        _add_error('order', 'order must be one of: asc, desc.')
+
+    meta_raw = params.get('meta')
+    if meta_raw is None:
+        meta = False
+    else:
+        meta_value = meta_raw.strip().lower()
+        if meta_value in ('1', 'true', 'yes', 'y', 'on'):
+            meta = True
+        elif meta_value in ('0', 'false', 'no', 'n', 'off'):
+            meta = False
+        else:
+            meta = False
+            _add_error('meta', 'meta must be a boolean.')
+
+    if errors:
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            'Validation failed',
+            code='validation_error',
+            details=errors[0]['message'],
+            errors=errors,
+        )
+
+    return limit, offset, pattern, sort_by, sort_order, meta
+
+
+def _resolve_files_root(runid: str) -> str:
+    try:
+        wd = os.path.abspath(get_wd(runid))
+    except Exception as exc:
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"Run '{runid}' not found",
+            code='run_not_found',
+            details=str(exc) or f'No run directory for runid={runid}',
+        )
+    if not os.path.isdir(wd):
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"Run '{runid}' not found",
+            code='run_not_found',
+            details=f'No run directory for runid={runid}',
+        )
+    return wd
+
+
+def _build_files_entry_payload(*,
+                               name: str,
+                               rel_dir: str,
+                               root: str,
+                               is_dir: bool,
+                               is_symlink: bool,
+                               symlink_is_dir: bool,
+                               hr_value: str,
+                               runid: str,
+                               config: str,
+                               include_meta: bool) -> dict:
+    rel_path = _rel_join(rel_dir, name)
+    abs_path = os.path.abspath(os.path.join(root, rel_path))
+    try:
+        stat_result = os.lstat(abs_path)
+    except OSError:
+        stat_result = None
+
+    payload = {
+        'name': name,
+        'path': _display_rel_path(rel_path),
+        'type': 'file',
+    }
+
+    modified_iso = _format_iso_mtime(stat_result)
+    if modified_iso:
+        payload['modified_iso'] = modified_iso
+
+    if is_symlink:
+        payload['type'] = 'symlink'
+        payload['symlink_is_dir'] = bool(symlink_is_dir)
+        try:
+            target = os.readlink(abs_path)
+        except OSError:
+            target = ''
+        safe_target = _safe_symlink_target(root, abs_path, target)
+        if safe_target is not None:
+            payload['symlink_target'] = safe_target
+        return payload
+
+    if is_dir:
+        payload['type'] = 'directory'
+        child_count = _parse_child_count(hr_value)
+        if child_count is not None:
+            payload['child_count'] = child_count
+        return payload
+
+    if stat_result is not None:
+        payload['size_bytes'] = int(stat_result.st_size)
+
+    payload['download_url'] = _prefix_path(
+        f"/runs/{runid}/{config}/download/{quote(rel_path, safe='/')}"
+    )
+
+    if include_meta:
+        content_type, _encoding = mimetypes.guess_type(name)
+        payload['content_type'] = content_type or 'application/octet-stream'
+        payload['preview_available'] = _preview_available(name)
+
+    return payload
 
 def _ensure_markup(value):
     if isinstance(value, Markup):
@@ -895,7 +1317,13 @@ async def browse_http_exception_handler(request: StarletteRequest, exc: HTTPExce
                 detail = HTTPStatus(exc.status_code).phrase
             except ValueError:
                 detail = 'Error'
-        response = PlainTextResponse(str(detail), status_code=exc.status_code)
+        if _is_files_request(request):
+            response = JSONResponse(
+                _build_error_payload(str(detail), details=str(detail)),
+                status_code=exc.status_code,
+            )
+        else:
+            response = PlainTextResponse(str(detail), status_code=exc.status_code)
 
     if exc.headers:
         response.headers.update(exc.headers)
@@ -944,6 +1372,16 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
 
     _logger.exception('Unhandled exception for %s', request.url)
     _log_exception_details(stacktrace_text, runid)
+
+    if _is_files_request(request):
+        return JSONResponse(
+            _build_error_payload(
+                'Internal server error',
+                code='internal_error',
+                details=stacktrace_display,
+            ),
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
 
     message = _format_exception_message(exc)
     escaped_message = html_escape(message)
@@ -1037,94 +1475,121 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
         return await browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
 
 
-async def get_entries(directory, filter_pattern, start, end, page_size, sort_by: str = 'name', sort_order: str = 'asc'):
-    """Retrieve paginated directory entries using ls -l with ISO time style."""
+def _scan_directory_snapshot(directory: str,
+                             filter_pattern: str,
+                             sort_by: str,
+                             sort_order: str) -> tuple[list[dict], int]:
+    entries = []
+    try:
+        with os.scandir(directory) as it:
+            for entry in it:
+                name = entry.name
+                if name in ('.', '..'):
+                    continue
+                if filter_pattern and not fnmatch.fnmatchcase(name, filter_pattern):
+                    continue
 
-    sort_flag = '--sort=name'
-    reverse_flag = ''
-    if sort_by == 'date':
-        sort_flag = '--sort=time'
-        reverse_flag = '-r' if sort_order == 'asc' else ''
-    elif sort_by == 'size':
-        sort_flag = '--sort=size'
-        reverse_flag = '-r' if sort_order == 'asc' else ''
-    else:
-        reverse_flag = '-r' if sort_order == 'desc' else ''
+                try:
+                    stat_result = entry.stat(follow_symlinks=False)
+                except OSError:
+                    stat_result = None
 
-    sort_parts = f"{sort_flag}"
-    if reverse_flag:
-        sort_parts = f"{sort_parts} {reverse_flag}"
+                size_bytes = stat_result.st_size if stat_result else 0
+                if stat_result is not None:
+                    mtime_ns = getattr(stat_result, 'st_mtime_ns', None)
+                    if mtime_ns is None:
+                        mtime_ns = int(stat_result.st_mtime * 1_000_000_000)
+                else:
+                    mtime_ns = 0
 
-    if filter_pattern:
-        cmd = (
-            f"ls -l --time-style=long-iso --group-directories-first {sort_parts} {filter_pattern} "
-            f"| sed '/^total /d' | sed -n '{start},{end}p'"
-        )
-    else:
-        cmd = (
-            f"ls -l --time-style=long-iso --group-directories-first {sort_parts} "
-            f"| sed '/^total /d' | sed -n '{start},{end}p'"
-        )
+                is_dir = entry.is_dir(follow_symlinks=False)
+                is_symlink = entry.is_symlink()
+                symlink_is_dir = False
+                symlink_target = ''
+                if is_symlink:
+                    try:
+                        symlink_target = os.readlink(entry.path)
+                    except OSError:
+                        symlink_target = ''
+                    try:
+                        symlink_is_dir = os.path.isdir(entry.path)
+                    except OSError:
+                        symlink_is_dir = False
 
-    returncode, stdout, _ = await _run_shell_command(cmd, directory)
-    if returncode != 0:
+                entries.append({
+                    'name': name,
+                    'name_casefold': name.casefold(),
+                    'is_dir': is_dir,
+                    'is_symlink': is_symlink,
+                    'symlink_is_dir': symlink_is_dir,
+                    'symlink_target': symlink_target,
+                    'size_bytes': int(size_bytes),
+                    'mtime_ns': int(mtime_ns),
+                    'sort_rank': 2 if is_dir else 0,
+                })
+    except OSError:
+        return [], 0
+
+    sort_by = sort_by if sort_by in _SORT_FIELDS else 'name'
+    sort_order = sort_order if sort_order in _SORT_ORDERS else 'asc'
+
+    def _compare_entries(left: dict, right: dict) -> int:
+        if left['sort_rank'] != right['sort_rank']:
+            return -1 if left['sort_rank'] > right['sort_rank'] else 1
+
+        if sort_by == 'date':
+            left_primary = left['mtime_ns']
+            right_primary = right['mtime_ns']
+        elif sort_by == 'size':
+            left_primary = left['size_bytes']
+            right_primary = right['size_bytes']
+        else:
+            left_primary = left['name_casefold']
+            right_primary = right['name_casefold']
+
+        if left_primary != right_primary:
+            if sort_order == 'asc':
+                return -1 if left_primary < right_primary else 1
+            return -1 if left_primary > right_primary else 1
+
+        if left['name_casefold'] != right['name_casefold']:
+            return -1 if left['name_casefold'] < right['name_casefold'] else 1
+        if left['name'] != right['name']:
+            return -1 if left['name'] < right['name'] else 1
+        return 0
+
+    entries.sort(key=cmp_to_key(_compare_entries))
+    return entries, len(entries)
+
+
+async def _format_page_entries(entries: list[dict], directory: str) -> list[tuple]:
+    if not entries:
         return []
 
-    entries = []
+    formatted = []
     dir_indices = []
-    index = 0
-    for line in stdout.splitlines():
-        if line == '':
-            break
+    for index, entry in enumerate(entries):
+        name = entry['name']
+        is_dir = entry['is_dir']
+        is_symlink = entry['is_symlink']
+        symlink_is_dir = entry['symlink_is_dir']
 
-        parts = line.split(maxsplit=7)
-        if len(parts) < 8:
-            continue
-
-        flag = parts[0]
-        is_dir = flag.startswith('d')
-        is_symlink = flag.startswith('l')
-        symlink_is_dir = False
-
-        modified_time = f"{parts[5]} {parts[6]}"
-
-        file_field = parts[7]
-        if is_symlink and " -> " in file_field:
-            name, _, sym_target = file_field.partition(" -> ")
-            name = name.strip()
-            sym_target = '->' + sym_target.strip()
-        else:
-            name = file_field
-            sym_target = ""
-
-        entry_path = _join(directory, name)
+        sym_target = ''
         if is_symlink:
-            try:
-                symlink_is_dir = os.path.isdir(entry_path)
-            except OSError:
-                symlink_is_dir = False
-            if symlink_is_dir and sym_target.startswith('->') and not sym_target.endswith('/'):
-                sym_target = sym_target + '/'
+            target = entry.get('symlink_target') or ''
+            if symlink_is_dir and target and not target.endswith('/'):
+                target = f'{target}/'
+            sym_target = f'->{target}' if target else '->'
 
         if is_dir:
-            hr_size = ""
-            dir_indices.append((index, entry_path))
+            hr_value = ''
+            dir_indices.append((index, _join(directory, name)))
         else:
-            try:
-                size_bytes = int(parts[4])
-            except ValueError:
-                size_bytes = 0
-            if size_bytes == 0:
-                hr_size = "0 B"
-            else:
-                size_name = ("B", "KB", "MB", "GB", "TB")
-                i = int(math.floor(math.log(size_bytes, 1024))) if size_bytes > 0 else 0
-                p = math.pow(1024, i)
-                s = round(size_bytes / p, 2)
-                hr_size = f"{s} {size_name[i]}"
+            hr_value = _format_human_size(entry['size_bytes'])
 
-        entries.append((name, is_dir, modified_time, hr_size, is_symlink, sym_target, symlink_is_dir))
-        index += 1
+        formatted.append(
+            (name, is_dir, _format_mtime_ns(entry['mtime_ns']), hr_value, is_symlink, sym_target, symlink_is_dir)
+        )
 
     if dir_indices:
         loop = asyncio.get_running_loop()
@@ -1143,8 +1608,8 @@ async def get_entries(directory, filter_pattern, start, end, page_size, sort_by:
         for (entry_index, _), total_items in zip(dir_indices, totals):
             if isinstance(total_items, Exception):
                 raise total_items
-            entry = entries[entry_index]
-            entries[entry_index] = (
+            entry = formatted[entry_index]
+            formatted[entry_index] = (
                 entry[0],
                 entry[1],
                 entry[2],
@@ -1154,20 +1619,44 @@ async def get_entries(directory, filter_pattern, start, end, page_size, sort_by:
                 entry[6],
             )
 
-    return entries
+    return formatted
+
+
+def _count_directory_items(directory: str, filter_pattern: str) -> int:
+    total = 0
+    try:
+        with os.scandir(directory) as it:
+            for entry in it:
+                name = entry.name
+                if name in ('.', '..'):
+                    continue
+                if filter_pattern and not fnmatch.fnmatchcase(name, filter_pattern):
+                    continue
+                total += 1
+    except OSError:
+        return 0
+    return total
+
+
+async def get_entries(directory, filter_pattern, start, end, page_size, sort_by: str = 'name', sort_order: str = 'asc'):
+    """Retrieve paginated directory entries using deterministic ordering."""
+
+    entries, _total_items = await asyncio.to_thread(
+        _scan_directory_snapshot,
+        directory,
+        filter_pattern,
+        sort_by,
+        sort_order,
+    )
+    start_index = max(0, start - 1)
+    end_index = min(len(entries), end)
+    return await _format_page_entries(entries[start_index:end_index], directory)
 
 
 async def get_total_items(directory, filter_pattern=''):
     """Count total items in the directory, respecting the filter_pattern."""
 
-    total_cmd = "ls | wc -l" if filter_pattern == '' else f"ls {filter_pattern} | wc -l"
-    returncode, stdout, _ = await _run_shell_command(total_cmd, directory)
-    if returncode != 0:
-        return 0
-    try:
-        return int(stdout.strip())
-    except (TypeError, ValueError):
-        return 0
+    return await asyncio.to_thread(_count_directory_items, directory, filter_pattern)
 
 
 async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='', sort_by: str = 'name', sort_order: str = 'asc'):
@@ -1187,26 +1676,26 @@ async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filt
         entries, total_items = manifest_result
         return entries, total_items, True
 
-    start = (page - 1) * page_size + 1
-    end = page * page_size
-
-    entries_task = asyncio.create_task(
-        get_entries(directory, filter_pattern, start, end, page_size, sort_by, sort_order)
-    )
-    total_task = asyncio.create_task(
-        get_total_items(directory, filter_pattern)
-    )
+    start_index = max(0, (page - 1) * page_size)
+    end_index = start_index + page_size
 
     loop = asyncio.get_running_loop()
     start_time = loop.time()
-    entries, total_items = await asyncio.gather(entries_task, total_task)
+    entries, total_items = await asyncio.to_thread(
+        _scan_directory_snapshot,
+        directory,
+        filter_pattern,
+        sort_by,
+        sort_order,
+    )
+    page_entries = await _format_page_entries(entries[start_index:end_index], directory)
     elapsed = loop.time() - start_time
     if elapsed > 5:
         _logger.warning(
             'browse.get_page_entries() completed after %.1f seconds; large directories may impact responsiveness.',
             elapsed,
         )
-    return entries, total_items, False
+    return page_entries, total_items, False
 
 
 def get_pad(x):
@@ -1410,7 +1899,8 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         )
 
         breadcrumb_segments.append(
-            f'<input type="text" id="pathInput" value="{filter_pattern}" placeholder="../output/p1.*" size="50">'
+            f'<input type="text" id="pathInput" value="{html_escape(filter_pattern, quote=True)}" '
+            'placeholder="../output/p1.*" size="50">'
         )
         breadcrumbs = ''.join(breadcrumb_segments)
 
@@ -1707,6 +2197,205 @@ async def _maybe_render_dss_preview(path: str, runid: str, config: str):
     )
 
 
+async def _files_list_response(*,
+                               runid: str,
+                               config: str,
+                               wd: str,
+                               rel_path: str,
+                               abs_path: str,
+                               limit: int,
+                               offset: int,
+                               pattern: str,
+                               sort_by: str,
+                               sort_order: str) -> JSONResponse:
+    page = (offset // limit) + 1
+    page_offset = offset % limit
+
+    entries, total_items, using_manifest = await get_page_entries(
+        wd,
+        abs_path,
+        page=page,
+        page_size=limit,
+        filter_pattern=pattern,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+
+    if total_items == 0 or offset >= total_items:
+        entries = []
+    elif page_offset:
+        entries = entries[page_offset:]
+        if len(entries) < limit and (offset + len(entries)) < total_items:
+            next_entries, _next_total, next_using_manifest = await get_page_entries(
+                wd,
+                abs_path,
+                page=page + 1,
+                page_size=limit,
+                filter_pattern=pattern,
+                sort_by=sort_by,
+                sort_order=sort_order,
+            )
+            using_manifest = using_manifest or next_using_manifest
+            needed = limit - len(entries)
+            if needed > 0:
+                entries.extend(next_entries[:needed])
+
+    payload_entries = []
+    for entry in entries:
+        name, is_dir, _mtime_display, hr_value, is_symlink, _sym_target, symlink_is_dir = entry
+        payload_entries.append(
+            _build_files_entry_payload(
+                name=name,
+                rel_dir=rel_path,
+                root=wd,
+                is_dir=is_dir,
+                is_symlink=is_symlink,
+                symlink_is_dir=symlink_is_dir,
+                hr_value=hr_value,
+                runid=runid,
+                config=config,
+                include_meta=False,
+            )
+        )
+
+    response_payload = {
+        'runid': runid,
+        'config': config,
+        'path': _display_rel_path(rel_path),
+        'entries': payload_entries,
+        'total': total_items,
+        'limit': limit,
+        'offset': offset,
+        'has_more': (offset + len(payload_entries)) < total_items,
+    }
+    if using_manifest:
+        response_payload['cached'] = True
+    return JSONResponse(response_payload)
+
+
+async def _files_meta_response(*,
+                               runid: str,
+                               config: str,
+                               wd: str,
+                               rel_path: str,
+                               abs_path: str,
+                               using_manifest: bool) -> JSONResponse:
+    name = '' if rel_path in ('.', '') else os.path.basename(abs_path.rstrip(os.sep))
+    is_symlink = os.path.islink(abs_path)
+    symlink_is_dir = False
+    if is_symlink:
+        try:
+            symlink_is_dir = os.path.isdir(abs_path)
+        except OSError:
+            symlink_is_dir = False
+    is_dir = False if is_symlink else os.path.isdir(abs_path)
+
+    hr_value = ''
+    if is_dir:
+        child_count = await get_total_items(abs_path, '')
+        hr_value = f'{child_count} items'
+
+    entry_payload = _build_files_entry_payload(
+        name=name,
+        rel_dir=_rel_parent(rel_path)[0] if rel_path not in ('.', '') else '.',
+        root=wd,
+        is_dir=is_dir,
+        is_symlink=is_symlink,
+        symlink_is_dir=symlink_is_dir,
+        hr_value=hr_value,
+        runid=runid,
+        config=config,
+        include_meta=True,
+    )
+
+    response_payload = {
+        'runid': runid,
+        'config': config,
+        **entry_payload,
+    }
+
+    return JSONResponse(response_payload)
+
+
+async def _handle_files_request(
+    request: StarletteRequest,
+    runid: str,
+    config: str,
+    subpath: str,
+):
+    if not _accepts_json(request):
+        _raise_files_error(
+            HTTPStatus.NOT_ACCEPTABLE,
+            'Only application/json is supported.',
+            code='not_acceptable',
+            details='Accept header must allow application/json.',
+        )
+
+    limit, offset, pattern, sort_by, sort_order, meta = _parse_files_query_params(request)
+
+    wd = _resolve_files_root(runid)
+    rel_path = _normalize_files_rel_path(subpath or '')
+    abs_path = _resolve_files_path(wd, rel_path)
+    _enforce_no_symlink_traversal(wd, rel_path, meta=meta)
+
+    if not os.path.lexists(abs_path):
+        path_display = _display_rel_path(rel_path) or '.'
+        label = 'Path' if meta else 'Directory'
+        _raise_files_error(
+            HTTPStatus.NOT_FOUND,
+            f"{label} '{path_display}' does not exist",
+            code='path_not_found',
+            details=f'No entry at {path_display}',
+        )
+
+    using_manifest = os.path.exists(_manifest_path(wd))
+
+    if meta:
+        return await _files_meta_response(
+            runid=runid,
+            config=config,
+            wd=wd,
+            rel_path=rel_path,
+            abs_path=abs_path,
+            using_manifest=using_manifest,
+        )
+
+    if not os.path.isdir(abs_path):
+        path_display = _display_rel_path(rel_path) or '.'
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            f"Path '{path_display}' is not a directory",
+            code='not_a_directory',
+            details='Requested path is not a directory.',
+        )
+
+    return await _files_list_response(
+        runid=runid,
+        config=config,
+        wd=wd,
+        rel_path=rel_path,
+        abs_path=abs_path,
+        limit=limit,
+        offset=offset,
+        pattern=pattern,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+
+
+async def files_root(request: StarletteRequest):
+    runid = request.path_params['runid']
+    config = request.path_params['config']
+    return await _handle_files_request(request, runid, config, '')
+
+
+async def files_subpath(request: StarletteRequest):
+    runid = request.path_params['runid']
+    config = request.path_params['config']
+    subpath = request.path_params.get('subpath', '')
+    return await _handle_files_request(request, runid, config, subpath)
+
+
 async def _handle_browse_request(
     request: StarletteRequest,
     runid: str,
@@ -1902,6 +2591,21 @@ def create_app():
         Route(
             '/health',
             health,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/files/',
+            files_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/files',
+            files_root,
+            methods=['GET']
+        ),
+        Route(
+            '/weppcloud/runs/{runid}/{config}/files/{subpath:path}',
+            files_subpath,
             methods=['GET']
         ),
         Route(
