@@ -7,17 +7,17 @@ Yes                             # Y: Batch mode, N: Shell mode
 
 Yes                             # Do you wish to model impoundments on the watershed
 No                              # Do you want initial condition scenario output
-1                               # Soil loss output options, 1: yearly for watershed
+{soil_loss_output_option}       # Soil loss output options, 1: yearly for watershed
 ../output/loss_pw0.txt          #
-Yes                             # Water balance output
+{water_balance_output}          # Water balance output
 ../output/chnwb.txt             #
 No                              # Crop output
-Yes                             # Soil output
+{soil_output}                   # Soil output
 ../output/soil_pw0.txt          #
-Yes                             # Channel erosion plotting (not implmemented)
+{plot_output}                   # Channel erosion plotting (not implmemented)
 ../output/plot_pw0.txt          #
 No                              # Large watershed graphics output
-Yes                             # Event Output
+{event_output}                  # Event Output
 ../output/ebe_pw0.txt           #
 No                              # Final Summary output (not implemented?)
 No                              # Daily Winter output

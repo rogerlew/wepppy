@@ -2,9 +2,10 @@
 {% import "shared/cap_macros.htm" as cap_macros %}
 
 {% block title %}Create Run{% endblock %}
+{% block body_container_class %}wc-container wc-container--fluid{% endblock %}
 
 {% block body %}
-  <section class="wc-panel wc-stack">
+  <section class="wc-panel wc-stack wc-create-index">
     <h1>Create a run</h1>
     <p class="wc-text-muted">Choose a configuration to start a new run.</p>
     {% if current_user.is_anonymous %}
@@ -12,7 +13,7 @@
       {{ cap_macros.cap_prompt("create-index", "cap-create-index", cap_base_url, cap_site_key) }}
     {% endif %}
 
-    <div class="wc-table-scroll">
+    <div class="wc-table-wrapper">
       <table class="pure-table wc-table">
         <thead>
           <tr>
@@ -41,7 +42,6 @@
                     {% endfor %}
                     <button type="submit"
                             class="pure-button wc-run-button{% if current_user.is_anonymous %} is-disabled{% endif %}"
-                            style="width: 100%;"
                             data-run-action="{{ variant.action_url }}"
                             {% if current_user.is_anonymous %}aria-disabled="true" disabled{% endif %}>
                       {{ variant.label }}

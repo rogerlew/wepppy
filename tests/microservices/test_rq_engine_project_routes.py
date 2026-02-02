@@ -96,7 +96,7 @@ def test_create_accepts_valid_cap_token(create_client, monkeypatch: pytest.Monke
     response = client.post(
         "/create/",
         data={"config": CONFIG, "cap_token": "good-token", "unitizer:is_english": ""},
-        allow_redirects=False,
+        follow_redirects=False,
     )
 
     assert response.status_code == 303
@@ -125,7 +125,7 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     response = client.post(
         "/create/",
         data={"config": CONFIG, "rq_token": token, "unitizer:is_english": "true"},
-        allow_redirects=False,
+        follow_redirects=False,
     )
 
     assert response.status_code == 303

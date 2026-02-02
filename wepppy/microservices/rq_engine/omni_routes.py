@@ -249,6 +249,22 @@ def _coerce_optional_int_list(value: Any, field_name: str) -> list[int] | None:
     return parsed or None
 
 
+def _coerce_optional_bool(value: Any, field_name: str) -> bool | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"1", "true", "yes", "on"}:
+            return True
+        if token in {"0", "false", "no", "off"}:
+            return False
+    raise ValueError(f"{field_name} must be a boolean")
+
+
 def _prepare_omni_scenarios(
     payload: dict[str, Any],
     raw_json: Any,
@@ -418,6 +434,18 @@ def _prepare_omni_contrasts(
     if selection_mode == "user_defined_areas" and not geojson_path:
         raise ValueError("GeoJSON upload or path is required for user-defined contrasts.")
 
+    output_options: dict[str, Any] = {}
+    for key in (
+        "omni_contrast_output_chan_out",
+        "omni_contrast_output_tcr_out",
+        "omni_contrast_output_chnwb",
+        "omni_contrast_output_soil_pw0",
+        "omni_contrast_output_plot_pw0",
+        "omni_contrast_output_ebe_pw0",
+    ):
+        if key in payload:
+            output_options[key] = _coerce_optional_bool(payload.get(key), key)
+
     return {
         "omni_contrast_selection_mode": selection_mode,
         "omni_control_scenario": control_scenario,
@@ -434,6 +462,7 @@ def _prepare_omni_contrasts(
         "omni_contrast_geojson_name_key": geojson_name_key,
         "omni_contrast_geojson_path": geojson_path,
         "order_reduction_passes": order_reduction_passes,
+        **output_options,
     }
 
 

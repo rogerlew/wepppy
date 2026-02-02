@@ -274,6 +274,40 @@ def omni_module():
             sys.modules.pop(name, None)
 
 
+def test_apply_contrast_output_triggers_creates_and_removes_files(tmp_path, omni_module):
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    created = {"chan": 0}
+
+    class DummyWepp:
+        def __init__(self, runs_dir):
+            self.runs_dir = str(runs_dir)
+            self.logger = logging.getLogger("tests.omni.output_triggers")
+
+        def _prep_channel_input(self):
+            created["chan"] += 1
+            (Path(self.runs_dir) / "chan.inp").write_text("chan", encoding="ascii")
+
+    wepp = DummyWepp(runs_dir)
+
+    omni_module._apply_contrast_output_triggers(
+        wepp,
+        {"chan_out": True, "tcr_out": True},
+    )
+
+    assert (runs_dir / "chan.inp").exists()
+    assert (runs_dir / "tc.txt").exists()
+    assert created["chan"] == 1
+
+    omni_module._apply_contrast_output_triggers(
+        wepp,
+        {"chan_out": False, "tcr_out": False},
+    )
+
+    assert not (runs_dir / "chan.inp").exists()
+    assert not (runs_dir / "tc.txt").exists()
+
+
 def test_omni_scenario_parse_roundtrip(omni_module):
     scenario = omni_module.OmniScenario.parse("mulch")
     assert scenario is omni_module.OmniScenario.Mulch
@@ -505,6 +539,45 @@ def test_user_defined_contrast_pairs_expand_and_skip_duplicates(tmp_path, omni_m
     assert Counter(omni._contrast_labels.values()) == Counter({"Alpha": 2, "Beta": 2})
 
 
+def test_user_defined_areas_contrast_limit_enforced(tmp_path, omni_module, monkeypatch):
+    hillslope_rows = [
+        {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+    ]
+    user_rows = [
+        {"name": f"Area {idx}", "geometry": Rect(0.0, 0.0, 10.0, 10.0)}
+        for idx in range(101)
+    ]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        omni_module,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.user_defined_limit")
+    omni._contrast_selection_mode = "user_defined_areas"
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+
+    with pytest.raises(ValueError) as excinfo:
+        omni._build_contrasts()
+
+    assert "limited to 200" in str(excinfo.value)
+
+
 def test_user_defined_contrast_ids_stable_on_rebuild(tmp_path, omni_module, monkeypatch):
     hillslope_rows = [
         {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
@@ -600,6 +673,29 @@ def test_user_defined_hillslope_group_ids_stable_on_rebuild(tmp_path, omni_modul
     assert omni.contrast_names[1] == first_names[1]
     assert omni.contrast_names[2] == "uniform_low,3__to__thinning"
     assert omni.contrast_names[3] == "uniform_low,4__to__thinning"
+
+
+def test_user_defined_hillslope_groups_contrast_limit_enforced(tmp_path, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.hillslope_group_limit")
+    omni._contrast_selection_mode = "user_defined_hillslope_groups"
+    omni._contrast_hillslope_groups = "\n".join(["11"] * 101)
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+
+    with pytest.raises(ValueError) as excinfo:
+        omni._build_contrasts()
+
+    assert "limited to 200" in str(excinfo.value)
 
 
 def test_build_contrasts_report_normalizes_control_scenario(tmp_path, monkeypatch, omni_module):
@@ -1293,7 +1389,7 @@ def test_run_omni_contrasts_skips_up_to_date(tmp_path, monkeypatch, omni_module)
 
     calls = []
 
-    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key):
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key, **_kwargs):
         calls.append((contrast_id, contrast_name))
         return f"{wd}/_pups/omni/contrasts/{contrast_id}"
 
@@ -1336,7 +1432,7 @@ def test_run_omni_contrasts_runs_when_readme_missing(tmp_path, monkeypatch, omni
 
     calls = []
 
-    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key):
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key, **_kwargs):
         calls.append((contrast_id, contrast_name))
         contrast_dir = Path(wd) / "_pups" / "omni" / "contrasts" / contrast_id
         (contrast_dir / "wepp" / "output" / "interchange").mkdir(parents=True, exist_ok=True)
@@ -1395,7 +1491,7 @@ def test_run_omni_contrasts_runs_when_sidecar_changes(tmp_path, monkeypatch, omn
 
     calls = []
 
-    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key):
+    def fake_run(contrast_id, contrast_name, contrasts, wd, runid, control_key, contrast_key, **_kwargs):
         calls.append((contrast_id, contrast_name))
         contrast_dir = Path(wd) / "_pups" / "omni" / "contrasts" / contrast_id
         (contrast_dir / "wepp" / "output" / "interchange").mkdir(parents=True, exist_ok=True)
@@ -1669,6 +1765,82 @@ def test_contrasts_report_reads_contrast_outputs_from_pups(tmp_path, monkeypatch
     assert str(contrast_path) in read_calls
     assert str(control_path) in read_calls
     assert df["control-contrast_v"].iloc[0] == 1.0
+
+
+def test_stream_order_contrast_limit_enforced(tmp_path, omni_module, monkeypatch):
+    wbt_dir = tmp_path / "dem" / "wbt"
+    wbt_dir.mkdir(parents=True)
+
+    for stem in ("flovec", "netful", "relief", "chnjnt", "bound", "subwta"):
+        (wbt_dir / f"{stem}.tif").write_text("", encoding="ascii")
+    (wbt_dir / "outlet.geojson").write_text("{}", encoding="ascii")
+
+    (wbt_dir / "netful.strahler.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netful.pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netful.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "chnjnt.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "subwta.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netw.strahler_pruned_1.tsv").write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([list(range(1, 226))], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 1}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1"}
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = True
+        wbt_wd = str(wbt_dir)
+
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        omni_module,
+        "_resolve_base_scenario_key",
+        lambda wd: str(omni_module.OmniScenario.Undisturbed),
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.stream_order_limit")
+    omni._contrast_selection_mode = "stream_order"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+    ]
+    omni._contrast_order_reduction_passes = 1
+
+    with pytest.raises(ValueError) as excinfo:
+        omni._build_contrasts()
+
+    assert "limited to 200" in str(excinfo.value)
 
 
 def test_stream_order_contrasts_grouping_and_skip(tmp_path, omni_module, monkeypatch):

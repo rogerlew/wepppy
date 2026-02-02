@@ -56,6 +56,8 @@ def run_wepp_watershed_interchange(
     wepp_output_dir: Path | str,
     *,
     start_year: int | None = None,
+    run_ebe_interchange: bool = True,
+    run_chan_out_interchange: bool = True,
     run_soil_interchange: bool = True,
     run_chnwb_interchange: bool = True,
     delete_after_interchange: bool = False,
@@ -76,10 +78,12 @@ def run_wepp_watershed_interchange(
 
     tasks = [
         (run_wepp_watershed_pass_interchange, {}),
-        (run_wepp_watershed_ebe_interchange, dict(start_year_kwargs)),
-        (run_wepp_watershed_chanwb_interchange, dict(start_year_kwargs)),
-        (run_wepp_watershed_chan_peak_interchange, dict(start_year_kwargs)),
     ]
+    if run_ebe_interchange:
+        tasks.append((run_wepp_watershed_ebe_interchange, dict(start_year_kwargs)))
+    if run_chan_out_interchange:
+        tasks.append((run_wepp_watershed_chanwb_interchange, dict(start_year_kwargs)))
+        tasks.append((run_wepp_watershed_chan_peak_interchange, dict(start_year_kwargs)))
     # tc_out is handled by post-run cleanup after the file is moved into output.
     if run_chnwb_interchange:
         tasks.append((run_wepp_watershed_chnwb_interchange, dict(start_year_kwargs)))

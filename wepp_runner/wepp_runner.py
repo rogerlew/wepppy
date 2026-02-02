@@ -156,6 +156,21 @@ def _ss_batch_watershed_template_loader():
     return _template_loader("ss_batch_watershed.template")
 
 
+def _normalize_yes_no(value):
+    return "Yes" if value else "No"
+
+
+def _resolve_output_flag(options, key, default):
+    if not options:
+        return default
+    if key not in options:
+        return default
+    value = options.get(key)
+    if value is None:
+        return default
+    return bool(value)
+
+
 
 def _hillstub_omni_contrasts_template_loader():
     return """
@@ -489,7 +504,7 @@ def run_flowpath(fp_id, wepp_id, runs_dir, fp_runs_dir, wepp_bin=None, status_ch
     raise Exception(f'Error running wepp for {fp_id}\nSee {_stderr_fn}')
 
 
-def make_watershed_omni_contrasts_run(sim_years, wepp_path_ids, runs_dir):
+def make_watershed_omni_contrasts_run(sim_years, wepp_path_ids, runs_dir, *, output_options=None):
 
     block = []
     for wepp_path_id in wepp_path_ids:
@@ -498,9 +513,38 @@ def make_watershed_omni_contrasts_run(sim_years, wepp_path_ids, runs_dir):
 
     _watershed_template = _watershed_template_loader()
 
+    water_balance_output = _normalize_yes_no(_resolve_output_flag(output_options, "chnwb", False))
+    soil_output = _normalize_yes_no(_resolve_output_flag(output_options, "soil_pw0", False))
+    plot_output = _normalize_yes_no(_resolve_output_flag(output_options, "plot_pw0", False))
+    event_output = _normalize_yes_no(_resolve_output_flag(output_options, "ebe_pw0", True))
+    loss_output_option = 1
+
     s = _watershed_template.format(sub_n=len(wepp_path_ids),
                                    hillslopes_block=block,
-                                   sim_years=sim_years)
+                                   sim_years=sim_years,
+                                   soil_loss_output_option=loss_output_option,
+                                   water_balance_output=water_balance_output,
+                                   soil_output=soil_output,
+                                   plot_output=plot_output,
+                                   event_output=event_output)
+
+    disabled_outputs = set()
+    if water_balance_output == "No":
+        disabled_outputs.add("../output/chnwb.txt")
+    if soil_output == "No":
+        disabled_outputs.add("../output/soil_pw0.txt")
+    if plot_output == "No":
+        disabled_outputs.add("../output/plot_pw0.txt")
+    if event_output == "No":
+        disabled_outputs.add("../output/ebe_pw0.txt")
+
+    if disabled_outputs:
+        lines = []
+        for line in s.splitlines():
+            if line.strip() in disabled_outputs:
+                continue
+            lines.append(line)
+        s = "\n".join(lines)
 
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:
@@ -517,9 +561,20 @@ def make_watershed_run(sim_years, wepp_ids, runs_dir):
 
     _watershed_template = _watershed_template_loader()
 
+    water_balance_output = _normalize_yes_no(True)
+    soil_output = _normalize_yes_no(True)
+    plot_output = _normalize_yes_no(True)
+    event_output = _normalize_yes_no(True)
+    loss_output_option = 1
+
     s = _watershed_template.format(sub_n=len(wepp_ids),
                                    hillslopes_block=block,
-                                   sim_years=sim_years)
+                                   sim_years=sim_years,
+                                   soil_loss_output_option=loss_output_option,
+                                   water_balance_output=water_balance_output,
+                                   soil_output=soil_output,
+                                   plot_output=plot_output,
+                                   event_output=event_output)
 
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:

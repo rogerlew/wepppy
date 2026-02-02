@@ -3999,6 +3999,10 @@ body.wc-modal-open {
   min-width: 0;
 }
 
+.wc-create-index .wc-run-button {
+  width: 100%;
+}
+
 .wc-table th,
 .wc-table td {
   padding: var(--wc-space-sm) var(--wc-space-md);

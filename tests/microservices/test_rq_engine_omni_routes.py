@@ -62,6 +62,35 @@ def _stub_omni(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
 
 
+def _limit_error_message(
+    selection_mode: str,
+    pair_count: int,
+    group_count: int,
+    group_label: str,
+    *,
+    limit: int = 200,
+) -> str:
+    labels = {
+        "user_defined_areas": "User-defined areas",
+        "user_defined_hillslope_groups": "User-defined hillslope groups",
+        "stream_order": "Stream-order grouping",
+    }
+    total = pair_count * group_count
+    mode_label = labels.get(selection_mode, selection_mode)
+    return (
+        f"{mode_label} contrasts are limited to {limit}. "
+        f"You requested {total} ({pair_count} contrast pairs x {group_count} {group_label}). "
+        f"Reduce the number of contrast pairs or {group_label} to {limit} or fewer."
+    )
+
+
+def _make_pairs(count: int) -> list[dict[str, str]]:
+    return [
+        {"control_scenario": f"control_{idx}", "contrast_scenario": f"contrast_{idx}"}
+        for idx in range(1, count + 1)
+    ]
+
+
 def test_run_omni_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-11")
@@ -194,6 +223,90 @@ def test_run_omni_contrasts_requires_groups_in_hillslope_group_mode(monkeypatch:
         payload["error"]["message"]
         == "omni_contrast_hillslope_groups is required for user-defined hillslope groups"
     )
+
+
+@pytest.mark.parametrize(
+    "selection_mode, group_label, extra_payload, group_count",
+    [
+        (
+            "user_defined_areas",
+            "areas",
+            {"omni_contrast_geojson_path": "/tmp/areas.geojson"},
+            101,
+        ),
+        (
+            "user_defined_hillslope_groups",
+            "hillslope groups",
+            {"omni_contrast_hillslope_groups": ["11"] * 101},
+            101,
+        ),
+        ("stream_order", "stream-order groups", {}, 101),
+    ],
+)
+def test_run_omni_contrasts_limit_error(
+    monkeypatch: pytest.MonkeyPatch,
+    selection_mode: str,
+    group_label: str,
+    extra_payload: dict[str, object],
+    group_count: int,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    if selection_mode == "stream_order":
+        class DummyWatershed:
+            delineation_backend_is_wbt = True
+
+        monkeypatch.setattr(omni_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    pair_count = 2
+    expected_message = _limit_error_message(
+        selection_mode,
+        pair_count,
+        group_count,
+        group_label,
+    )
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            queue_called["called"] = True
+            return None
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            raise ValueError(expected_message)
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    payload = {
+        "omni_contrast_selection_mode": selection_mode,
+        "omni_contrast_pairs": _make_pairs(pair_count),
+        **extra_payload,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-omni-contrasts", json=payload)
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == expected_message
+    assert queue_called["called"] is False
 
 
 def test_run_omni_contrasts_stream_order_defaults_passes(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -458,6 +571,73 @@ def test_run_omni_contrasts_dry_run_stream_order(monkeypatch: pytest.MonkeyPatch
     assert result["items"][0]["subcatchments_group"] == 10
     assert result["items"][0]["skip_status"]["reason"] == "no_hillslopes"
     assert result["items"][0]["run_status"] == "skipped"
+
+
+@pytest.mark.parametrize(
+    "selection_mode, group_label, extra_payload, group_count",
+    [
+        (
+            "user_defined_areas",
+            "areas",
+            {"omni_contrast_geojson_path": "/tmp/areas.geojson"},
+            101,
+        ),
+        (
+            "user_defined_hillslope_groups",
+            "hillslope groups",
+            {"omni_contrast_hillslope_groups": ["11"] * 101},
+            101,
+        ),
+        ("stream_order", "stream-order groups", {}, 101),
+    ],
+)
+def test_run_omni_contrasts_dry_run_limit_error(
+    monkeypatch: pytest.MonkeyPatch,
+    selection_mode: str,
+    group_label: str,
+    extra_payload: dict[str, object],
+    group_count: int,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    if selection_mode == "stream_order":
+        class DummyWatershed:
+            delineation_backend_is_wbt = True
+
+        monkeypatch.setattr(omni_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    pair_count = 2
+    expected_message = _limit_error_message(
+        selection_mode,
+        pair_count,
+        group_count,
+        group_label,
+    )
+
+    class DummyOmni:
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts_dry_run_report(self, *args, **kwargs) -> dict:
+            raise ValueError(expected_message)
+
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    payload = {
+        "omni_contrast_selection_mode": selection_mode,
+        "omni_contrast_pairs": _make_pairs(pair_count),
+        **extra_payload,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts-dry-run",
+            json=payload,
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == expected_message
 
 
 def test_delete_omni_contrasts(monkeypatch: pytest.MonkeyPatch) -> None:

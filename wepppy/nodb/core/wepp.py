@@ -2595,11 +2595,11 @@ class Wepp(NoDbBase):
         src_fn = _join(self.cli_dir, climate.cli_fn)
         _copyfile(src_fn, dst_fn)
 
-    def make_watershed_run(self, wepp_id_paths=None):
+    def make_watershed_run(self, wepp_id_paths=None, output_options: Optional[Dict[str, Any]] = None):
         translator = self.watershed_instance.translator_factory()
-        self._make_watershed_run(translator, wepp_id_paths=wepp_id_paths)
+        self._make_watershed_run(translator, wepp_id_paths=wepp_id_paths, output_options=output_options)
 
-    def _make_watershed_run(self, translator, wepp_id_paths=None):
+    def _make_watershed_run(self, translator, wepp_id_paths=None, output_options: Optional[Dict[str, Any]] = None):
         runs_dir = self.runs_dir
         wepp_ids = list(translator.iter_wepp_sub_ids())
         wepp_ids.sort()
@@ -2608,7 +2608,9 @@ class Wepp(NoDbBase):
         years = climate.input_years
 
         if wepp_id_paths is not None:
-            make_watershed_omni_contrasts_run(years, wepp_id_paths, runs_dir)
+            if output_options is None:
+                output_options = getattr(self, "_contrast_output_options", None)
+            make_watershed_omni_contrasts_run(years, wepp_id_paths, runs_dir, output_options=output_options)
         elif climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
             make_ss_watershed_run(wepp_ids, runs_dir)
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
@@ -2709,11 +2711,25 @@ class Wepp(NoDbBase):
         start_year = climate.calendar_start_year
         is_single_storm = climate.is_single_storm
 
+        output_options = getattr(self, "_contrast_output_options", None)
+        if self.is_omni_contrasts_run and isinstance(output_options, dict):
+            run_ebe_interchange = bool(output_options.get("ebe_pw0", True))
+            run_chan_out_interchange = bool(output_options.get("chan_out", False))
+            run_chnwb_interchange = bool(output_options.get("chnwb", False)) and not is_single_storm
+            run_soil_interchange = bool(output_options.get("soil_pw0", False)) and not is_single_storm
+        else:
+            run_ebe_interchange = True
+            run_chan_out_interchange = True
+            run_chnwb_interchange = not is_single_storm
+            run_soil_interchange = not is_single_storm
+
         run_wepp_watershed_interchange(
             self.output_dir,
             start_year=start_year,
-            run_soil_interchange=not is_single_storm,
-            run_chnwb_interchange=not is_single_storm,
+            run_ebe_interchange=run_ebe_interchange,
+            run_chan_out_interchange=run_chan_out_interchange,
+            run_soil_interchange=run_soil_interchange,
+            run_chnwb_interchange=run_chnwb_interchange,
             delete_after_interchange=self.delete_after_interchange,
         )
         generate_interchange_documentation(self.wepp_interchange_dir)

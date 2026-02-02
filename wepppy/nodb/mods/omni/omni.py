@@ -80,6 +80,7 @@ __all__ = [
 ]
 
 OMNI_REL_DIR = '_pups/omni'
+USER_DEFINED_CONTRAST_LIMIT = 200
 
 LOGGER = logging.getLogger(__name__)
 
@@ -88,6 +89,32 @@ RhemRunResult = Tuple[bool, str, float]
 ScenarioDef = Dict[str, Any]
 ScenarioDependency = Dict[str, Dict[str, Any]]
 ObjectiveParameter = namedtuple('ObjectiveParameter', ['topaz_id', 'wepp_id', 'value'])
+
+
+def _enforce_user_defined_contrast_limit(
+    selection_mode: str,
+    pair_count: int,
+    group_count: int,
+    *,
+    group_label: str,
+    limit: int = USER_DEFINED_CONTRAST_LIMIT,
+) -> None:
+    if pair_count <= 0 or group_count <= 0:
+        return
+    total = pair_count * group_count
+    if total <= limit:
+        return
+    labels = {
+        "user_defined_areas": "User-defined areas",
+        "user_defined_hillslope_groups": "User-defined hillslope groups",
+        "stream_order": "Stream-order grouping",
+    }
+    mode_label = labels.get(selection_mode, selection_mode)
+    raise ValueError(
+        f"{mode_label} contrasts are limited to {limit}. "
+        f"You requested {total} ({pair_count} contrast pairs x {group_count} {group_label}). "
+        f"Reduce the number of contrast pairs or {group_label} to {limit} or fewer."
+    )
 
 
 def _update_nodb_wd(d: Dict[str, Any], new_wd: str, parent_wd: Optional[str] = None) -> None:
@@ -169,6 +196,30 @@ def _post_watershed_run_cleanup(wepp: Wepp) -> None:
                 wepp.output_dir,
                 delete_after_interchange=wepp.delete_after_interchange,
             )
+
+
+def _apply_contrast_output_triggers(wepp: Wepp, output_options: Dict[str, bool]) -> None:
+    runs_dir = wepp.runs_dir
+
+    chan_inp_path = _join(runs_dir, "chan.inp")
+    if output_options.get("chan_out", False):
+        if not _exists(chan_inp_path):
+            try:
+                wepp._prep_channel_input()
+            except Exception as exc:
+                LOGGER.warning("Failed to prepare chan.inp for contrast outputs: %s", exc)
+    else:
+        if _exists(chan_inp_path):
+            os.remove(chan_inp_path)
+
+    tc_path = _join(runs_dir, "tc.txt")
+    if output_options.get("tcr_out", False):
+        if not _exists(tc_path):
+            with open(tc_path, "w", encoding="ascii", newline="\n") as fp:
+                fp.write("")
+    else:
+        if _exists(tc_path):
+            os.remove(tc_path)
 
 class OmniScenario(IntEnum):
     UniformLow = 1
@@ -320,7 +371,8 @@ def _run_contrast(
     runid: str,
     control_scenario_key: str,
     contrast_scenario_key: str,
-    wepp_bin: str = 'wepp_a557997'
+    wepp_bin: str = 'wepp_a557997',
+    output_options: Optional[Dict[str, bool]] = None,
 ) -> str:
     from wepppy.nodb.core import Landuse, Soils, Wepp
     global OMNI_REL_DIR
@@ -431,7 +483,14 @@ def _run_contrast(
         label="soils",
     )
 
-    wepp.make_watershed_run(wepp_id_paths=list(normalized_contrasts.values()))
+    if output_options is None:
+        output_options = {}
+    wepp._contrast_output_options = dict(output_options)
+    wepp.make_watershed_run(
+        wepp_id_paths=list(normalized_contrasts.values()),
+        output_options=output_options,
+    )
+    _apply_contrast_output_triggers(wepp, output_options)
     wepp.run_watershed()
     _post_watershed_run_cleanup(wepp)
     wepp.report_loss()
@@ -722,6 +781,12 @@ class Omni(NoDbBase):
             self._contrast_order_reduction_passes = None
             self._contrast_batch_size = None
             self._contrast_pairs = []
+            self._contrast_output_chan_out = False
+            self._contrast_output_tcr_out = False
+            self._contrast_output_chnwb = False
+            self._contrast_output_soil_pw0 = False
+            self._contrast_output_plot_pw0 = False
+            self._contrast_output_ebe_pw0 = True
 
             self._scenario_dependency_tree = {}
             self._contrast_dependency_tree = {}
@@ -907,6 +972,21 @@ class Omni(NoDbBase):
                     return str(value)
             return str(value)
 
+        def normalize_bool(value: Any) -> Optional[bool]:
+            if value in (None, ""):
+                return None
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, (int, float)):
+                return bool(value)
+            if isinstance(value, str):
+                token = value.strip().lower()
+                if token in {"1", "true", "yes", "on"}:
+                    return True
+                if token in {"0", "false", "no", "off"}:
+                    return False
+            return None
+
         with self.locked():
             control_scenario = kwds.get('omni_control_scenario', None)
             if control_scenario is not None:
@@ -969,6 +1049,25 @@ class Omni(NoDbBase):
                 contrast_pairs = kwds.get("contrast_pairs", None)
             if contrast_pairs is not None:
                 self._contrast_pairs = self._normalize_contrast_pairs(contrast_pairs)
+
+            if "omni_contrast_output_chan_out" in kwds:
+                value = normalize_bool(kwds.get("omni_contrast_output_chan_out"))
+                self._contrast_output_chan_out = value if value is not None else False
+            if "omni_contrast_output_tcr_out" in kwds:
+                value = normalize_bool(kwds.get("omni_contrast_output_tcr_out"))
+                self._contrast_output_tcr_out = value if value is not None else False
+            if "omni_contrast_output_chnwb" in kwds:
+                value = normalize_bool(kwds.get("omni_contrast_output_chnwb"))
+                self._contrast_output_chnwb = value if value is not None else False
+            if "omni_contrast_output_soil_pw0" in kwds:
+                value = normalize_bool(kwds.get("omni_contrast_output_soil_pw0"))
+                self._contrast_output_soil_pw0 = value if value is not None else False
+            if "omni_contrast_output_plot_pw0" in kwds:
+                value = normalize_bool(kwds.get("omni_contrast_output_plot_pw0"))
+                self._contrast_output_plot_pw0 = value if value is not None else False
+            if "omni_contrast_output_ebe_pw0" in kwds:
+                value = normalize_bool(kwds.get("omni_contrast_output_ebe_pw0"))
+                self._contrast_output_ebe_pw0 = value if value is not None else True
 
     def _normalize_contrast_pairs(self, value: Any) -> List[Dict[str, str]]:
         if value in (None, ""):
@@ -1199,6 +1298,88 @@ class Omni(NoDbBase):
     @nodb_setter
     def contrast_pairs(self, value: List[Dict[str, str]]) -> None:
         self._contrast_pairs = value
+
+    @property
+    def contrast_output_chan_out(self) -> bool:
+        value = getattr(self, "_contrast_output_chan_out", None)
+        if value is None:
+            return False
+        return bool(value)
+
+    @contrast_output_chan_out.setter
+    @nodb_setter
+    def contrast_output_chan_out(self, value: bool) -> None:
+        self._contrast_output_chan_out = bool(value)
+
+    @property
+    def contrast_output_tcr_out(self) -> bool:
+        value = getattr(self, "_contrast_output_tcr_out", None)
+        if value is None:
+            return False
+        return bool(value)
+
+    @contrast_output_tcr_out.setter
+    @nodb_setter
+    def contrast_output_tcr_out(self, value: bool) -> None:
+        self._contrast_output_tcr_out = bool(value)
+
+    @property
+    def contrast_output_chnwb(self) -> bool:
+        value = getattr(self, "_contrast_output_chnwb", None)
+        if value is None:
+            return False
+        return bool(value)
+
+    @contrast_output_chnwb.setter
+    @nodb_setter
+    def contrast_output_chnwb(self, value: bool) -> None:
+        self._contrast_output_chnwb = bool(value)
+
+    @property
+    def contrast_output_soil_pw0(self) -> bool:
+        value = getattr(self, "_contrast_output_soil_pw0", None)
+        if value is None:
+            return False
+        return bool(value)
+
+    @contrast_output_soil_pw0.setter
+    @nodb_setter
+    def contrast_output_soil_pw0(self, value: bool) -> None:
+        self._contrast_output_soil_pw0 = bool(value)
+
+    @property
+    def contrast_output_plot_pw0(self) -> bool:
+        value = getattr(self, "_contrast_output_plot_pw0", None)
+        if value is None:
+            return False
+        return bool(value)
+
+    @contrast_output_plot_pw0.setter
+    @nodb_setter
+    def contrast_output_plot_pw0(self, value: bool) -> None:
+        self._contrast_output_plot_pw0 = bool(value)
+
+    @property
+    def contrast_output_ebe_pw0(self) -> bool:
+        value = getattr(self, "_contrast_output_ebe_pw0", None)
+        if value is None:
+            return True
+        return bool(value)
+
+    @contrast_output_ebe_pw0.setter
+    @nodb_setter
+    def contrast_output_ebe_pw0(self, value: bool) -> None:
+        self._contrast_output_ebe_pw0 = bool(value)
+
+    def contrast_output_options(self) -> Dict[str, bool]:
+        return {
+            "chan_out": self.contrast_output_chan_out,
+            "tcr_out": self.contrast_output_tcr_out,
+            "chnwb": self.contrast_output_chnwb,
+            "soil_pw0": self.contrast_output_soil_pw0,
+            "plot_pw0": self.contrast_output_plot_pw0,
+            "ebe_pw0": self.contrast_output_ebe_pw0,
+        }
 
     @property
     def omni_dir(self) -> str:
@@ -2763,6 +2944,13 @@ class Omni(NoDbBase):
             group_id = group_id * 10
             group_map.setdefault(group_id, []).append(topaz_key)
 
+        _enforce_user_defined_contrast_limit(
+            "stream_order",
+            len(contrast_pairs),
+            len(group_map),
+            group_label="stream-order groups",
+        )
+
         def _sorted_group_ids(values: Iterable[int]) -> List[int]:
             try:
                 return sorted(values, key=lambda item: int(item))
@@ -2915,6 +3103,12 @@ class Omni(NoDbBase):
             raise ValueError(
                 "omni_contrast_pairs is required for user_defined_hillslope_groups mode"
             )
+        _enforce_user_defined_contrast_limit(
+            "user_defined_hillslope_groups",
+            len(contrast_pairs),
+            len(group_rows),
+            group_label="hillslope groups",
+        )
 
         ignored_fields = []
         if self._contrast_hillslope_limit is not None:
@@ -3145,6 +3339,12 @@ class Omni(NoDbBase):
         if target_crs is None:
             raise ValueError("Target CRS unavailable for user-defined contrasts.")
         user_gdf = user_gdf.to_crs(target_crs)
+        _enforce_user_defined_contrast_limit(
+            "user_defined_areas",
+            len(contrast_pairs),
+            len(user_gdf),
+            group_label="areas",
+        )
 
         translator = watershed.translator_factory()
         top2wepp = {
@@ -3684,6 +3884,7 @@ class Omni(NoDbBase):
             if contrast_name
         ]
         total_contrasts = len(active_ids)
+        output_options = self.contrast_output_options()
 
         if total_contrasts == 0:
             self.logger.info("  run_omni_contrasts: No contrasts to run")
@@ -3745,6 +3946,7 @@ class Omni(NoDbBase):
                 self.runid,
                 control_key,
                 contrast_key,
+                output_options=output_options,
             )
             self._post_omni_run(omni_wd, contrast_name)
 
@@ -3775,6 +3977,7 @@ class Omni(NoDbBase):
             return _join(self.wd, OMNI_REL_DIR, "contrasts", str(contrast_id))
         _contrasts = self._load_contrast_sidecar(contrast_id)
         control_key, contrast_key = self._contrast_scenario_keys(contrast_name)
+        output_options = self.contrast_output_options()
         self._write_contrast_run_status(
             contrast_id,
             contrast_name,
@@ -3790,6 +3993,7 @@ class Omni(NoDbBase):
                 self.runid,
                 control_key,
                 contrast_key,
+                output_options=output_options,
             )
             self._post_omni_run(omni_wd, contrast_name)
             dependency_entry = self._contrast_dependency_entry(contrast_id, contrast_name)

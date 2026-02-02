@@ -145,46 +145,6 @@
       Cumulative mode caps contrast selection at 100 hillslopes.
     </p>
 
-    <details class="wc-callout wc-callout--compact">
-      <summary>Advanced filters</summary>
-      <div class="wc-stack">
-        {{ ui.numeric_field(
-             "omni_contrast_hill_min_slope",
-             "Minimum slope (%)",
-             value=omni.contrast_hill_min_slope if omni.contrast_hill_min_slope is not none else "",
-             precision="0.1",
-             min=0.0,
-             help="Optional slope filter for candidate hillslopes.",
-             extra_control_class="disable-readonly"
-           ) }}
-
-        {{ ui.numeric_field(
-             "omni_contrast_hill_max_slope",
-             "Maximum slope (%)",
-             value=omni.contrast_hill_max_slope if omni.contrast_hill_max_slope is not none else "",
-             precision="0.1",
-             min=0.0,
-             help="Optional slope filter for candidate hillslopes.",
-             extra_control_class="disable-readonly"
-           ) }}
-
-        {{ ui.text_field(
-             "omni_contrast_select_burn_severities",
-             "Burn severities (optional)",
-             value=omni.contrast_select_burn_severities|join(", ") if omni.contrast_select_burn_severities is defined and omni.contrast_select_burn_severities else "",
-             help="Comma-separated values (1, 2, 3).",
-             extra_control_class="disable-readonly"
-           ) }}
-
-        {{ ui.text_field(
-             "omni_contrast_select_topaz_ids",
-             "Topaz IDs (optional)",
-             value=omni.contrast_select_topaz_ids|join(", ") if omni.contrast_select_topaz_ids is defined and omni.contrast_select_topaz_ids else "",
-             help="Comma-separated list of Topaz IDs to include.",
-             extra_control_class="disable-readonly"
-           ) }}
-      </div>
-    </details>
   </div>
 
   {% set contrast_pairs_value = omni.contrast_pairs if omni.contrast_pairs is defined else [] %}
@@ -275,6 +235,98 @@
          extra_control_class="disable-readonly"
        ) }}
   </div>
+
+  {% call ui.collapsible_card(title="Advanced options", expanded=False, card_id="omni_contrasts_advanced_options") %}
+    <div class="wc-stack">
+      {% call ui.card(
+           "Cumulative filters",
+           description="Only applies to cumulative mode.",
+           attrs={"data-omni-contrast-mode": "cumulative"}
+      ) %}
+        <div class="wc-stack">
+          {{ ui.numeric_field(
+               "omni_contrast_hill_min_slope",
+               "Minimum slope (%)",
+               value=omni.contrast_hill_min_slope if omni.contrast_hill_min_slope is not none else "",
+               precision="0.1",
+               min=0.0,
+               help="Optional slope filter for candidate hillslopes.",
+               extra_control_class="disable-readonly"
+             ) }}
+
+          {{ ui.numeric_field(
+               "omni_contrast_hill_max_slope",
+               "Maximum slope (%)",
+               value=omni.contrast_hill_max_slope if omni.contrast_hill_max_slope is not none else "",
+               precision="0.1",
+               min=0.0,
+               help="Optional slope filter for candidate hillslopes.",
+               extra_control_class="disable-readonly"
+             ) }}
+
+          {{ ui.text_field(
+               "omni_contrast_select_burn_severities",
+               "Burn severities (optional)",
+               value=omni.contrast_select_burn_severities|join(", ") if omni.contrast_select_burn_severities is defined and omni.contrast_select_burn_severities else "",
+               help="Comma-separated values (1, 2, 3).",
+               extra_control_class="disable-readonly"
+             ) }}
+
+          {{ ui.text_field(
+               "omni_contrast_select_topaz_ids",
+               "Topaz IDs (optional)",
+               value=omni.contrast_select_topaz_ids|join(", ") if omni.contrast_select_topaz_ids is defined and omni.contrast_select_topaz_ids else "",
+               help="Comma-separated list of Topaz IDs to include.",
+               extra_control_class="disable-readonly"
+             ) }}
+        </div>
+      {% endcall %}
+      {% call ui.card(
+           "Watershed outputs",
+           description="Select which watershed outputs to generate for Omni contrasts. Loss output is always yearly to support the contrast summary report."
+      ) %}
+      {{ ui.checkbox_field(
+           "omni_contrast_output_ebe_pw0",
+           "Event output (ebe_pw0.txt)",
+           checked=omni.contrast_output_ebe_pw0,
+           help="Required for event-based summaries; enabled by default.",
+           attrs={"class": "disable-readonly"}
+      ) }}
+      {{ ui.checkbox_field(
+           "omni_contrast_output_chan_out",
+           "Channel output (chan.out)",
+           checked=omni.contrast_output_chan_out,
+           help="Requires chan.inp + ipeak > 2; also enables channel peak interchange.",
+           attrs={"class": "disable-readonly"}
+      ) }}
+      {{ ui.checkbox_field(
+           "omni_contrast_output_tcr_out",
+           "Time of concentration (tc_out.txt)",
+           checked=omni.contrast_output_tcr_out,
+           help="Triggered by tc.txt in the run directory.",
+           attrs={"class": "disable-readonly"}
+      ) }}
+      {{ ui.checkbox_field(
+           "omni_contrast_output_chnwb",
+           "Channel water balance (chnwb.txt)",
+           checked=omni.contrast_output_chnwb,
+           attrs={"class": "disable-readonly"}
+      ) }}
+      {{ ui.checkbox_field(
+           "omni_contrast_output_soil_pw0",
+           "Soil output (soil_pw0.txt)",
+           checked=omni.contrast_output_soil_pw0,
+           attrs={"class": "disable-readonly"}
+      ) }}
+      {{ ui.checkbox_field(
+           "omni_contrast_output_plot_pw0",
+           "Plot output (plot_pw0.txt)",
+           checked=omni.contrast_output_plot_pw0,
+           attrs={"class": "disable-readonly"}
+      ) }}
+      {% endcall %}
+    </div>
+  {% endcall %}
 
   {% call button_row() %}
     <button id="btn_run_omni_contrasts"

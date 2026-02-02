@@ -99,11 +99,6 @@ def test_build_treatments_requires_mapping(monkeypatch: pytest.MonkeyPatch) -> N
         "getInstance",
         lambda wd: DummyLanduse(),
     )
-    monkeypatch.setattr(
-        treatments_routes.Watershed,
-        "getInstance",
-        lambda wd: object(),
-    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/build-treatments", json={})

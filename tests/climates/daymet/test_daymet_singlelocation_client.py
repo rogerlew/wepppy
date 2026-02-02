@@ -323,26 +323,29 @@ if not wepppyo3_available:
     if not hasattr(wepp_viz_module, "make_soil_loss_grid_fps"):
         wepp_viz_module.make_soil_loss_grid_fps = lambda *args, **kwargs: None
 
-if "wepp_runner" not in sys.modules:
-    wepp_runner_module = types.ModuleType("wepp_runner")
-    wepp_runner_module.__path__ = []
-    sys.modules["wepp_runner"] = wepp_runner_module
-else:
-    wepp_runner_module = sys.modules["wepp_runner"]
+try:
+    import wepp_runner.wepp_runner as wepp_runner_impl  # type: ignore  # noqa: F401
+except Exception:
+    if "wepp_runner" not in sys.modules:
+        wepp_runner_module = types.ModuleType("wepp_runner")
+        wepp_runner_module.__path__ = []
+        sys.modules["wepp_runner"] = wepp_runner_module
+    else:
+        wepp_runner_module = sys.modules["wepp_runner"]
 
-if "wepp_runner.wepp_runner" not in sys.modules:
-    wepp_runner_impl = types.ModuleType("wepp_runner.wepp_runner")
-    sys.modules["wepp_runner.wepp_runner"] = wepp_runner_impl
-else:
-    wepp_runner_impl = sys.modules["wepp_runner.wepp_runner"]
+    if "wepp_runner.wepp_runner" not in sys.modules:
+        wepp_runner_impl = types.ModuleType("wepp_runner.wepp_runner")
+        sys.modules["wepp_runner.wepp_runner"] = wepp_runner_impl
+    else:
+        wepp_runner_impl = sys.modules["wepp_runner.wepp_runner"]
 
-if not hasattr(wepp_runner_impl, "make_hillslope_run"):
-    wepp_runner_impl.make_hillslope_run = lambda *args, **kwargs: None
+    if not hasattr(wepp_runner_impl, "make_hillslope_run"):
+        wepp_runner_impl.make_hillslope_run = lambda *args, **kwargs: None
 
-def _wepp_runner_getattr(name):
-    return lambda *args, **kwargs: None
+    def _wepp_runner_getattr(name):
+        return lambda *args, **kwargs: None
 
-wepp_runner_impl.__getattr__ = _wepp_runner_getattr
+    wepp_runner_impl.__getattr__ = _wepp_runner_getattr
 
 from wepppy.climates.daymet.daymet_singlelocation_client import retrieve_historical_timeseries
 

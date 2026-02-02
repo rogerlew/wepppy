@@ -721,6 +721,14 @@ var Omni = (function () {
         var contrastDeleteModalConfirm = contrastDeleteModal
             ? contrastDeleteModal.querySelector("[data-omni-contrast-action='confirm-delete-contrasts']")
             : null;
+        var contrastOutputInputs = contrastFormElement ? {
+            ebe: contrastFormElement.querySelector("input[name='omni_contrast_output_ebe_pw0']"),
+            chanOut: contrastFormElement.querySelector("input[name='omni_contrast_output_chan_out']"),
+            tcrOut: contrastFormElement.querySelector("input[name='omni_contrast_output_tcr_out']"),
+            chnwb: contrastFormElement.querySelector("input[name='omni_contrast_output_chnwb']"),
+            soil: contrastFormElement.querySelector("input[name='omni_contrast_output_soil_pw0']"),
+            plot: contrastFormElement.querySelector("input[name='omni_contrast_output_plot_pw0']")
+        } : null;
 
         var infoAdapter = createLegacyAdapter(infoElement);
         var statusAdapter = createLegacyAdapter(statusElement);
@@ -1628,7 +1636,6 @@ var Omni = (function () {
                     && option.value
                     && contrastPairRunMarkers[option.value] === false
                 ) {
-                    node.disabled = true;
                     label = option.label + " (not run)";
                 }
                 node.textContent = label;
@@ -1750,21 +1757,22 @@ var Omni = (function () {
                 var contrast = row.querySelector("[data-omni-contrast-pair-field='contrast']");
                 var controlValue = control && control.value ? String(control.value).trim() : "";
                 var contrastValue = contrast && contrast.value ? String(contrast.value).trim() : "";
-                var message = "";
+                var blockingMessage = "";
+                var warningMessage = "";
                 if (!controlValue || !contrastValue) {
-                    message = "Select both control and contrast scenarios.";
-                } else if (contrastPairRunMarkers && contrastPairRunMarkers[controlValue] === false) {
-                    message = "Control scenario has not run.";
-                } else if (contrastPairRunMarkers && contrastPairRunMarkers[contrastValue] === false) {
-                    message = "Contrast scenario has not run.";
+                    blockingMessage = "Select both control and contrast scenarios.";
                 } else {
                     var key = controlValue + "::" + contrastValue;
                     if (pairMap.get(key) && pairMap.get(key).length > 1) {
-                        message = "Duplicate pair.";
+                        blockingMessage = "Duplicate pair.";
+                    } else if (contrastPairRunMarkers && contrastPairRunMarkers[controlValue] === false) {
+                        warningMessage = "Control scenario has not run.";
+                    } else if (contrastPairRunMarkers && contrastPairRunMarkers[contrastValue] === false) {
+                        warningMessage = "Contrast scenario has not run.";
                     }
                 }
-                setContrastPairRowError(row, message);
-                if (message) {
+                setContrastPairRowError(row, blockingMessage || warningMessage);
+                if (blockingMessage) {
                     hasErrors = true;
                 }
             });
@@ -1832,6 +1840,38 @@ var Omni = (function () {
                 return false;
             }
             return parsed >= 1;
+        }
+
+        function collectContrastOutputOptions() {
+            var defaults = {
+                omni_contrast_output_ebe_pw0: true,
+                omni_contrast_output_chan_out: false,
+                omni_contrast_output_tcr_out: false,
+                omni_contrast_output_chnwb: false,
+                omni_contrast_output_soil_pw0: false,
+                omni_contrast_output_plot_pw0: false
+            };
+            if (!contrastOutputInputs) {
+                return defaults;
+            }
+            return {
+                omni_contrast_output_ebe_pw0: contrastOutputInputs.ebe ? contrastOutputInputs.ebe.checked : defaults.omni_contrast_output_ebe_pw0,
+                omni_contrast_output_chan_out: contrastOutputInputs.chanOut ? contrastOutputInputs.chanOut.checked : defaults.omni_contrast_output_chan_out,
+                omni_contrast_output_tcr_out: contrastOutputInputs.tcrOut ? contrastOutputInputs.tcrOut.checked : defaults.omni_contrast_output_tcr_out,
+                omni_contrast_output_chnwb: contrastOutputInputs.chnwb ? contrastOutputInputs.chnwb.checked : defaults.omni_contrast_output_chnwb,
+                omni_contrast_output_soil_pw0: contrastOutputInputs.soil ? contrastOutputInputs.soil.checked : defaults.omni_contrast_output_soil_pw0,
+                omni_contrast_output_plot_pw0: contrastOutputInputs.plot ? contrastOutputInputs.plot.checked : defaults.omni_contrast_output_plot_pw0
+            };
+        }
+
+        function appendContrastOutputOptions(formData) {
+            if (!formData || typeof formData.set !== "function") {
+                return;
+            }
+            var options = collectContrastOutputOptions();
+            Object.keys(options).forEach(function (key) {
+                formData.set(key, options[key] ? "true" : "false");
+            });
         }
 
         function updateContrastActionState() {
@@ -2147,6 +2187,7 @@ var Omni = (function () {
             var formData = new FormData(contrastFormElement);
             if (typeof formData.set === "function") {
                 formData.set("omni_contrast_selection_mode", mode);
+                appendContrastOutputOptions(formData);
                 if (
                     mode === CONTRAST_SELECTION_MODES.user_defined_areas
                     || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
@@ -2247,6 +2288,7 @@ var Omni = (function () {
             var formData = new FormData(contrastFormElement);
             if (typeof formData.set === "function") {
                 formData.set("omni_contrast_selection_mode", mode);
+                appendContrastOutputOptions(formData);
                 if (
                     mode === CONTRAST_SELECTION_MODES.user_defined_areas
                     || mode === CONTRAST_SELECTION_MODES.user_defined_hillslope_groups
