@@ -68,6 +68,9 @@ If a management entry defines `SoilFile`/`sol_path`, the controller copies that 
 
 To keep undisturbed vs. disturbed comparisons strictly "static to static," the lookup table now supports `plant.data.decfct` and `plant.data.dropfc` overrides. For all landuses except `agriculture crops`, these are set to `1` in the default lookup so management files do not decay or drop plant material during the comparison window. This avoids unintended differences in residue/root mass (and therefore `kr` adjustment factors) that would otherwise arise from differing growth/decay timing between management templates.
 
+As part of this static-alignment work, `UnDisturbed/Shrub.man` was updated to match the Tahoe shrub template by setting `hmax=2.0` and `ini.data.sumrtm`/`ini.data.sumsrm` to `0.30`.
+
+We also switched NLCD key `72` (Sedge/Herbaceous) to `UnDisturbed/Tall_Grass.man` in `wepppy/wepp/management/data/disturbed.json` to keep tall grass comparisons aligned with the static template.
 ## Landuse Parameterization (Forest, Shrub, Grass)
 
 The tables below capture the initial conditions (`IniLoopCropland`) and plant parameters (`PlantLoopCropland`) for the management files used by disturbed classes. Values are from the `.man` files under `wepppy/wepp/management/data/` and are shown here because Disturbed remaps hillslopes directly to these classes.
