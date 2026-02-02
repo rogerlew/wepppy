@@ -30,6 +30,7 @@ var Omni = (function () {
         "omni:contrast:dry-run:completed"
     ];
     var CONTRAST_COMPLETION_EVENT = "OMNI_CONTRAST_RUN_TASK_COMPLETED";
+    var CONTRAST_DELETE_COMPLETION_EVENT = "OMNI_CONTRAST_DELETE_TASK_COMPLETED";
     var CONTRAST_SELECTION_MODES = {
         cumulative: "cumulative",
         user_defined_areas: "user_defined_areas",
@@ -840,6 +841,9 @@ var Omni = (function () {
                     if (omniEvents && typeof omniEvents.emit === "function") {
                         omniEvents.emit("omni:contrast:run:completed", payload || {});
                     }
+                } else if (normalized === CONTRAST_DELETE_COMPLETION_EVENT) {
+                    clearContrastSummary();
+                    setContrastStatus("Contrasts deleted.");
                 } else if (normalized === "END_BROADCAST") {
                     contrastController.disconnect_status_stream(contrastController);
                 }
@@ -1026,6 +1030,10 @@ var Omni = (function () {
                 contrastDeleteModalConfirm.disabled = true;
             }
 
+            if (contrastController && typeof contrastController.connect_status_stream === "function") {
+                contrastController.connect_status_stream(contrastController);
+            }
+
             http.requestWithSessionToken(
                 url_for_run("delete-omni-contrasts", { prefix: "/rq-engine/api" }),
                 {
@@ -1040,6 +1048,34 @@ var Omni = (function () {
                         setContrastStatus(resolveErrorMessage(body, "Failed to delete contrasts."));
                         return;
                     }
+                    var jobId = null;
+                    if (body) {
+                        if (body.job_id) {
+                            jobId = body.job_id;
+                        } else if (body.result && body.result.job_id) {
+                            jobId = body.result.job_id;
+                        } else if (body.Content && body.Content.job_id) {
+                            jobId = body.Content.job_id;
+                        }
+                    }
+
+                    if (jobId) {
+                        setContrastStatus("delete_omni_contrasts_rq job submitted: " + jobId);
+                        if (contrastController) {
+                            contrastController.poll_completion_event = CONTRAST_DELETE_COMPLETION_EVENT;
+                            if (typeof contrastController.set_rq_job_id === "function") {
+                                contrastController.set_rq_job_id(contrastController, jobId);
+                            }
+                        }
+                        if (contrastHintAdapter && typeof contrastHintAdapter.html === "function") {
+                            contrastHintAdapter.html(formatJobHint(jobId));
+                            if (typeof contrastHintAdapter.show === "function") {
+                                contrastHintAdapter.show();
+                            }
+                        }
+                        return;
+                    }
+
                     var message = body && body.message ? body.message : "Contrasts deleted.";
                     setContrastStatus(message);
                     if (contrastInfoAdapter && typeof contrastInfoAdapter.html === "function") {

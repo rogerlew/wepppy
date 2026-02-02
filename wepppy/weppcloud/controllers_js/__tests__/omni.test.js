@@ -35,11 +35,31 @@ describe("Omni controller", () => {
                         data-omni-action="run-scenarios">Run</button>
             </form>
             <p id="hint_run_omni"></p>
+            <form id="omni_contrasts_form">
+                <div id="info"></div>
+                <div id="status"></div>
+                <div id="stacktrace"></div>
+                <div id="rq_job"></div>
+                <div id="braille"></div>
+                <label>
+                    <input type="radio" name="omni_contrast_selection_mode" value="cumulative" checked />
+                    Cumulative
+                </label>
+                <button type="button" data-omni-contrast-action="run-contrasts">Run contrasts</button>
+                <button type="button" data-omni-contrast-action="delete-contrasts">Delete contrasts</button>
+            </form>
+            <p id="hint_run_omni_contrasts"></p>
             <div id="omni-delete-modal" data-modal hidden>
                 <div data-modal-dismiss></div>
                 <div>
                     <ul data-omni-role="delete-list"></ul>
                     <button data-omni-action="confirm-delete">Confirm</button>
+                </div>
+            </div>
+            <div id="omni-contrasts-delete-modal" data-modal hidden>
+                <div data-modal-dismiss></div>
+                <div>
+                    <button data-omni-contrast-action="confirm-delete-contrasts">Confirm delete contrasts</button>
                 </div>
             </div>
         `;
@@ -207,6 +227,40 @@ describe("Omni controller", () => {
         expect(remaining).toHaveLength(0);
     });
 
+    test("delete contrasts submits job and updates hint/status", async () => {
+        const hint = document.getElementById("hint_run_omni_contrasts");
+        const statusElement = document.querySelector("#omni_contrasts_form #status");
+        let pollCompletionEvent = null;
+        baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
+            pollCompletionEvent = self.poll_completion_event;
+            return jobId;
+        });
+
+        requestMock.mockResolvedValueOnce({
+            body: { message: "Delete contrasts job submitted.", result: { job_id: "job-456" } }
+        });
+
+        const deleteButton = document.querySelector("[data-omni-contrast-action='delete-contrasts']");
+        deleteButton.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+
+        const confirmButton = document.querySelector("[data-omni-contrast-action='confirm-delete-contrasts']");
+        confirmButton.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+
+        await requestMock.mock.results[0].value;
+
+        expect(requestMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/delete-omni-contrasts",
+            expect.objectContaining({
+                method: "POST",
+                form: document.getElementById("omni_contrasts_form")
+            })
+        );
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni.contrastController, "job-456");
+        expect(pollCompletionEvent).toBe("OMNI_CONTRAST_DELETE_TASK_COMPLETED");
+        expect(hint.innerHTML).toContain("job-456");
+        expect(statusElement.textContent).toContain("job-456");
+    });
+
     test("completion trigger is idempotent", () => {
         const runCompleted = jest.fn();
         omni.events.on("omni:run:completed", runCompleted);
@@ -245,17 +299,17 @@ describe("Omni controller", () => {
         window.WCControllerBootstrap = {
             resolveJobId: jest.fn(() => "job-999")
         };
-        let pollCompletionEvent = null;
+        const pollCompletionEvents = new Map();
         omni._completion_seen = true;
         baseInstance.set_rq_job_id.mockImplementation((self, jobId) => {
-            pollCompletionEvent = self.poll_completion_event;
+            pollCompletionEvents.set(self, self.poll_completion_event);
             return jobId;
         });
 
         omni.bootstrap({});
 
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni, "job-999");
-        expect(pollCompletionEvent).toBe("OMNI_SCENARIO_RUN_TASK_COMPLETED");
+        expect(pollCompletionEvents.get(omni)).toBe("OMNI_SCENARIO_RUN_TASK_COMPLETED");
         expect(omni._completion_seen).toBe(false);
     });
 });
