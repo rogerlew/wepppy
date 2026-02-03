@@ -54,8 +54,9 @@ Source:
 - https://swat.tamu.edu/media/116078/inputs_swatplus.pdf (RECALL.DAY.REC example + variable definitions)
 
 ### Output controls and verification
-- `print.prt` controls which objects are printed and at what time step.
-- Recall outputs include `recall_day.txt`, `recall_mon.txt`, `recall_yr.txt`, and `recall_aa.txt`.
+- `print.prt` controls which objects are printed and at what time step. WEPPpy stores it as `Swat.print_prt` (bitmask per object) seeded from the template and renders it during build.
+- Default daily outputs enable `channel_sd`, `hyd`, and basin `basin_wb`; `recall` is off unless explicitly enabled for QA.
+- Recall outputs include `recall_day.txt`, `recall_mon.txt`, `recall_yr.txt`, and `recall_aa.txt` and are optional (enable when validating the WEPP handoff).
 - Routing unit outputs include `ru_day.txt`, `ru_mon.txt`, `ru_yr.txt`, and `ru_aa.txt`.
 - Hydrograph outputs (`hydin_*` and `hydout_*`) can be enabled to confirm object-to-object connections.
 
@@ -65,7 +66,6 @@ Sources:
 - https://swatplus.gitbook.io/io-docs/swat%2B-output-files/recall
 - https://swatplus.gitbook.io/io-docs/swat%2B-output-files/hydrographs
 - https://swatplus.gitbook.io/io-docs/swat%2B-output-files/routing-unit
-
 ### Channel routing choice: SWAT-DEG vs. standard channel objects
 - The SWAT+ IO docs mark `channel` output objects as "currently not used," while `channel_sd` is the SWAT-DEG channel output object.
 - Connectivity for SWAT-DEG channels uses `chandeg.con`, which points to `channel-lte.cha`; the `channel.con` connection is currently not used.
@@ -231,7 +231,10 @@ Notes:
 
 ### Recall (point source/inlet) inputs
 **Sufficient** to build SWAT+ recall time series:
-- Daily water volume: `runvol` from `pass_pw0.events.parquet` (m^3).
+- Daily water volume (m^3): `runvol` plus optional components controlled by flags:
+  - `include_subsurface`: add `sbrunv`
+  - `include_tile`: add `drrunv`
+  - `include_baseflow`: add `gwbfv` (WEPP-forest baseflow; written separately from `runvol/sbrunv/drrunv`)
 - Daily sediment by class: use WEPP `sedcon_1..5` and `frcflw_1..5` with `runvol` to compute class loads, then map to SWAT+ CLA/SIL/SAG/LAG/SAN.
 - Stable ID mapping: `topaz_id` → `wepp_id` (WEPPpy) and channel connectivity from `network.txt`.
 
@@ -344,9 +347,8 @@ swat:
 ```
 
 ## Validation checkpoints
-- Enable recall outputs in `print.prt` and compare `recall_day.txt` to the injected WEPP time series to confirm the handoff is lossless.
+- If validating recall handoff, enable recall outputs in `print.prt` (toggle `swat.print_prt.objects.recall` or the mask) and compare `recall_day.txt` to the injected WEPP time series.
 - Enable routing unit outputs to verify downstream mass balance and channel routing response.
-
 ## Open questions / risk items
 - What level of sediment partitioning is needed (total SED only vs. size-class fractions) for channel process fidelity?
 - Are nutrient/pesticide loads required, or is hydrology + sediment sufficient for the first phase?

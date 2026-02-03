@@ -47,7 +47,7 @@ Design constraint for WEPPcloud UX: expose *few* knobs by default; group the res
 
 Primary goal: match observed **hydrograph timing and attenuation** given fixed inflows.
 
-Recall note: if your WEPP variant provides explicit groundwater baseflow volume (e.g., `gwbfv` in `H.pass.parquet`), you can include it in recall `flo` to match WEPP watershed streamflow. Deep seepage (`gwdsv`) should not be injected; it is a loss on the WEPP side.
+Recall note: if your WEPP variant provides explicit groundwater baseflow volume (e.g., `gwbfv` in `H.pass.parquet`), include it in recall `flo` (set `swat.include_baseflow=true`) to better match WEPP watershed streamflow. Deep seepage (`gwdsv`) should not be injected; it is a loss on the WEPP side.
 
 Recommended additions (high leverage, low ambiguity):
 
@@ -137,8 +137,7 @@ Recommended (only if verified in your SWAT+ revision that they are active in the
 ### Phase 1 (keep UI small; immediately useful)
 - Routing: `channel_mann`, `channel_k`, `channel_wd_scale`, `channel_dp_scale`, `channel_slp_scale`
 - Sediment: `channel_erod_fact`, `channel_cov_fact`, `channel_d50_mm`, `channel_bed_load_frac`
-- “Advanced output controls”: a small `print.prt` preset toggle (daily `channel_sd`, `recall`, `hyd`) to support calibration debugging.
-
+- “Advanced output controls”: `print.prt` defaults enable daily `channel_sd` + `hyd` and basin `basin_wb`; enable `recall` only for QA (or reapply via `Swat.enable_print_prt_daily_channel_outputs()`).
 ### Phase 2 (water quality enablement)
 - Recall constituent injection (time series or concentration-derived loads).
 - `nutrients.cha` profile selection + a short list of expert overrides.

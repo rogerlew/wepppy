@@ -23,5 +23,6 @@ run_wepp_watershed = true
 
 ## Developer notes
 - Build/run logic is implemented in `Swat.build_inputs()` and `Swat.run_swat()`.
+- `print.prt` is managed via `Swat.print_prt` (template-seeded `PrintPrtConfig`) and rendered during build; defaults enable daily `basin_wb`, `channel_sd`, and `hyd` with `recall` off unless explicitly enabled.
 - Outputs are archived under `swat/outputs/run_<timestamp>/` with an `index.json` summary.
 - SWAT-DEG (`channel_sd`, `chandeg.con`, `channel-lte.cha`, `hyd-sed-lte.cha`) is canonical.

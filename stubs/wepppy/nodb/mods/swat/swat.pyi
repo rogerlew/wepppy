@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, ClassVar, Dict, List, Optional
 
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.mods.swat.print_prt import PrintPrtConfig
 
 __all__: list[str] = ["SwatNoDbLockedException", "Swat"]
 
@@ -38,6 +39,9 @@ class Swat(NoDbBase):
     qswat_dm: float
     qswat_de: float
     channel_params: Dict[str, Any]
+    print_prt: PrintPrtConfig
+    print_prt_template_dir: Optional[str]
+    print_prt_defaults_applied: bool
     recall_manifest: Optional[List[Dict[str, Any]]]
     build_summary: Optional[Dict[str, Any]]
     last_build_at: Optional[str]
@@ -84,5 +88,6 @@ class Swat(NoDbBase):
         recall_manifest: List[Dict[str, Any]],
         channels: List[Dict[str, Any]],
     ) -> Optional[tuple[int, int, int, int]]: ...
-    def run_swat(self) -> Dict[str, Any]: ...
+    def enable_print_prt_daily_channel_outputs(self) -> None: ...
+    def run_swat(self, status_channel: Optional[str] = ...) -> Dict[str, Any]: ...
     def validate(self, recall_manifest: List[Dict[str, Any]], channels: List[Dict[str, Any]]) -> None: ...

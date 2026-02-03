@@ -22,12 +22,12 @@ Provide a concrete, implementation-ready contract for a SWAT NoDb mod that:
 - Recall filenames are flattened (no `/` in `recall.rec`), and recall files are copied into `TxtInOut/` even when `recall_subdir` is used.
 - `recall.con` AREA_HA is patched from `watershed/hillslopes.parquet`.
 - `time.sim` alignment uses recall bounds; `force_time_start_year` forces recall/time alignment when needed.
+- `print.prt` is parsed from the template into `PrintPrtConfig`, stored in `swat.nodb`, and re-rendered each build; defaults enable daily `basin_wb`, `channel_sd`, and `hyd`, with `recall` off unless explicitly enabled.
 - Channel connectivity emits `chandeg.con`, `channel-lte.cha`, and `hyd-sed-lte.cha` with width/geometry derived from Peridot/WBT inputs.
 - WST validation enforces `weather-sta.cli` entries; `recall_wst=auto` picks the first available station.
 - Template safety patches: generate `om_water.ini` and `plant.ini` if missing; set `hru-data.hru` `surf_stor` to `null` to avoid wetland init failures.
 - Aquifer outputs are disabled by default (`disable_aquifer=true`) unless aquifer connectivity is provided.
 - SWAT+ numeric guards are maintained in `rogerlew/swatplus` `wepppy/guards` and the guarded binary is bundled under `wepppy/nodb/mods/swat/bin/`.
-
 ## Non-goals (Phase 1)
 - Full calibration workflows or parameter estimation beyond channel defaults.
 - A mod menu toggle (SWAT remains config-only until UI is ready).
@@ -80,12 +80,14 @@ Notes:
 - `outputs_dir: str` (SWAT+ outputs archive root)
 - `recall_manifest: list[dict] | None`
 - `channel_params: dict`
+- `print_prt: PrintPrtConfig` (template-seeded output controls stored in swat.nodb)
+- `print_prt_template_dir: str | None` (template dir used to seed `print_prt`)
+- `print_prt_defaults_applied: bool` (true once default masks are applied)
 - `build_summary: dict | None`
 - `last_build_at: str | None` (ISO-8601)
 - `run_summary: dict | None`
 - `last_run_at: str | None` (ISO-8601)
 - `status: str` (idle/building/ready/error)
-
 ### Key methods
 - `build_inputs()`
   - Orchestrates recall generation, connectivity build, and template patching.
@@ -96,12 +98,13 @@ Notes:
 - `build_connectivity()`
   - Writes `recall.con` (and `chandeg.con` if channel objects are emitted).
 - `patch_txtinout()`
-  - Copies a template and applies changes to `file.cio`, `time.sim`, channel parameter files, and `print.prt` if required.
+  - Copies a template and applies changes to `file.cio`, `time.sim`, channel parameter files, and renders `print.prt` from the `print_prt` config (template-seeded).
+- `enable_print_prt_daily_channel_outputs()`
+  - Convenience helper: sets the daily bit for `basin_wb`, `channel_sd`, and `hyd` in `print.prt` while preserving other masks (defaults already applied on init).
 - `validate()`
   - Lightweight checks (file existence, count alignment, summary totals).
 
 All mutations must run inside `with self.locked():` and finish with `dump_and_unlock()`.
-
 ## Configuration surface (proposed)
 Config is read from the run config file (for example `config.cfg`).
 
@@ -125,6 +128,7 @@ recall_filename_template = hill_{wepp_id:05d}.rec
 recall_subdir = recall
 include_subsurface = true
 include_tile = true
+include_baseflow = true
 cli_calendar_path =
 recall_wst = auto
 recall_object_type = sdc
@@ -180,11 +184,10 @@ Use a curated SWAT+ template directory and patch only the pieces WEPPpy owns:
 - `recall/` files + `recall.rec` (written by Rust) + `recall.con` (when recall connections are provided)
 - `file.cio` entries for recall and connectivity
 - `time.sim` start/end alignment
-- `print.prt` outputs for verification (optional)
+- `print.prt` rendered from the `print_prt` config (template-seeded; outputs controlled via per-object bitmasks)
 - `channel-lte.cha` / `hyd-sed-lte.cha` when channel overrides are enabled
 
 This avoids re-implementing SWAT+ project assembly and keeps SWAT version drift localized to the template.
-
 ### Full TxtInOut generation in Rust (assessment + gotchas)
 Using `wepppyo3.swat_utils` to create an entire `TxtInOut` directory is possible but risky. Major gotchas:
 - **Template parity**: SWAT+ expects many files to be consistent with each other (object counts, file.cio lists, print.prt objects). Recreating all of them in Rust duplicates SWAT+ template logic.
@@ -199,11 +202,11 @@ Using `wepppyo3.swat_utils` to create an entire `TxtInOut` directory is possible
 - Rust (wepppyo3) writes per-hillslope recall files and returns a manifest.
 - Rust writes `recall.rec` always and `recall.con` when `recall_connections` are provided; Python supplies the mapping.
 - Python patches `file.cio`/`time.sim` and applies channel parameter overrides.
-
+- Python parses template `print.prt` into `PrintPrtConfig`, stores it in swat.nodb, and renders `TxtInOut/print.prt` during build.
 ## Recall generation contract (summary)
 - Inputs: `wepp/output/H<wepp_id>.pass.dat` files.
 - Output: per-hillslope recall daily files (default: `hill_{wepp_id:05d}.rec`) plus `recall.rec` (always) and `recall.con` when recall connections are provided.
-- FLO: `runvol + sbrunv + drrunv` (flags control inclusion).
+- FLO: `runvol + sbrunv + drrunv + gwbfv` (flags control inclusion; `gwbfv` is WEPP-forest baseflow volume).
 - SED: sum of per-class loads from `sedcon_i * runvol`.
 - Class mapping: `CLA, SIL, SAG, LAG, SAN` from WEPP class 1..5; `GRV = 0`.
 - All other recall fields are `0` until explicitly supported.

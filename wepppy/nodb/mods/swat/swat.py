@@ -11,8 +11,10 @@ import importlib
 import json
 import os
 import shutil
+import signal
 import subprocess
 import time
+from collections import deque
 from datetime import datetime
 from os.path import exists as _exists
 from os.path import join as _join
@@ -21,10 +23,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
 
+from wepppy.nodb.mods.swat.print_prt import PRINT_PRT_DAILY, PrintPrtConfig, load_print_prt
 from wepppy.nodb.base import NoDbBase
 from wepppy.topo.peridot.peridot_runner import read_network
 from wepppy.wepp.interchange._rust_interchange import resolve_cli_calendar_path, version_args
 from wepppy.wepp.interchange._utils import CalendarLookup, _build_cli_calendar_lookup, _julian_to_calendar
+from wepppy.nodb.status_messenger import StatusMessenger
 
 __all__ = [
     'SwatNoDbLockedException',
@@ -47,10 +51,19 @@ class Swat(NoDbBase):
             instance.width_fallback = "error"
         if not hasattr(instance, "netw_area_units"):
             instance.netw_area_units = "auto"
+        if not hasattr(instance, "include_baseflow"):
+            instance.include_baseflow = True
         if not hasattr(instance, "_recall_calendar_lookup"):
             instance._recall_calendar_lookup = None
         if not hasattr(instance, "_recall_calendar_ready"):
             instance._recall_calendar_ready = False
+        if not hasattr(instance, "print_prt"):
+            instance.print_prt = instance._load_print_prt_template() or PrintPrtConfig()
+        if not hasattr(instance, "print_prt_template_dir"):
+            instance.print_prt_template_dir = instance.template_dir
+        if not hasattr(instance, "print_prt_defaults_applied"):
+            instance._apply_print_prt_defaults(instance.print_prt)
+            instance.print_prt_defaults_applied = True
         return instance
 
     filename = 'swat.nodb'
@@ -85,6 +98,7 @@ class Swat(NoDbBase):
                 self.config_get_bool('swat', 'include_subsurface', True)
             )
             self.include_tile = bool(self.config_get_bool('swat', 'include_tile', True))
+            self.include_baseflow = bool(self.config_get_bool('swat', 'include_baseflow', True))
             self.cli_calendar_path = self.config_get_path('swat', 'cli_calendar_path', None)
             if isinstance(self.cli_calendar_path, str) and self.cli_calendar_path.lower() == "none":
                 self.cli_calendar_path = None
@@ -119,6 +133,12 @@ class Swat(NoDbBase):
             self.status: str = 'idle'
             self._recall_calendar_lookup: Optional[CalendarLookup] = None
             self._recall_calendar_ready = False
+            self.print_prt_template_dir: Optional[str] = None
+            self.print_prt = self._load_print_prt_template() or PrintPrtConfig()
+            if self.print_prt_template_dir is None:
+                self.print_prt_template_dir = self.template_dir
+            self._apply_print_prt_defaults(self.print_prt)
+            self.print_prt_defaults_applied = True
 
             os.makedirs(self.swat_dir, exist_ok=True)
             os.makedirs(self.swat_txtinout_dir, exist_ok=True)
@@ -286,6 +306,7 @@ class Swat(NoDbBase):
             self._append_log(build_log, "START build_inputs")
             self.logger.info("SWAT build: copying template TxtInOut")
 
+            self._ensure_print_prt_template_sync()
             self._prepare_txtinout()
             self._normalize_climate_nbyr()
             self._validate_recall_wst()
@@ -327,6 +348,21 @@ class Swat(NoDbBase):
 
         return summary
 
+    def enable_print_prt_daily_channel_outputs(self) -> None:
+        """Enable daily outputs for basin water balance + channel routing."""
+        with self.locked():
+            if self.print_prt is None:
+                self.print_prt = self._load_print_prt_template() or PrintPrtConfig()
+                if self.print_prt_template_dir is None:
+                    self.print_prt_template_dir = self.template_dir
+
+            for object_name in ("basin_wb", "channel_sd", "hyd"):
+                attr_name = object_name.replace("-", "_")
+                if not hasattr(self.print_prt.objects, attr_name):
+                    continue
+                current = int(getattr(self.print_prt.objects, attr_name))
+                self.print_prt.objects.set_mask(object_name, current | PRINT_PRT_DAILY)
+
     def build_recall(self, recall_connections: List[Tuple[int, int]]) -> List[Dict[str, Any]]:
         wepp_output_dir = _join(self.wd, 'wepp', 'output')
         if not _exists(wepp_output_dir):
@@ -365,6 +401,7 @@ class Swat(NoDbBase):
             filename_template=self.recall_filename_template,
             include_subsurface=self.include_subsurface,
             include_tile=self.include_tile,
+            include_baseflow=self.include_baseflow,
             recall_connections=recall_connections,
             recall_wst=self.recall_wst,
             recall_object_type=self.recall_object_type,
@@ -400,11 +437,12 @@ class Swat(NoDbBase):
         recall_count = len(recall_manifest)
         total_area_ha = self._estimate_total_area_ha()
         self._patch_object_counts(channel_count, self._count_written_recall(recall_manifest), total_area_ha)
+        self._write_print_prt()
         if self.disable_aquifer:
             self._patch_rout_unit_con()
         return time_range
 
-    def run_swat(self) -> Dict[str, Any]:
+    def run_swat(self, status_channel: Optional[str] = None) -> Dict[str, Any]:
         if not self.enabled:
             raise SwatNoDbLockedException("SWAT mod is disabled in the run config.")
 
@@ -424,29 +462,61 @@ class Swat(NoDbBase):
             self.last_run_at = datetime.utcnow().isoformat()
             self.logger.info("SWAT run: starting SWAT+ binary")
 
+        if status_channel is None:
+            status_channel = self._status_channel
+
+        stdout_tail_lines: deque[str] = deque(maxlen=20)
+        stdout_bytes = 0
+
         start_time = time.time()
-        result = subprocess.run(
-            [self.swat_bin],
-            cwd=self.swat_txtinout_dir,
-            capture_output=True,
-            text=True,
-        )
-        self.logger.info("SWAT run: SWAT+ exit code %s", result.returncode)
+        returncode: Optional[int] = None
 
         with open(log_path, "w") as handle:
-            handle.write(result.stdout or "")
-            if result.stderr:
-                handle.write("\n[stderr]\n")
-                handle.write(result.stderr)
+            process = subprocess.Popen(
+                [self.swat_bin],
+                cwd=self.swat_txtinout_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+            try:
+                while True:
+                    line = process.stdout.readline() if process.stdout is not None else ""
+                    if line == "" and process.poll() is not None:
+                        break
+                    line = line.strip()
+                    if not line:
+                        continue
+                    handle.write(line + "\n")
+                    handle.flush()
+                    stdout_bytes += len(line) + 1
+                    stdout_tail_lines.append(line)
+                    if status_channel:
+                        StatusMessenger.publish(status_channel, line)
+            finally:
+                if process.stdout is not None:
+                    process.stdout.close()
+                returncode = process.wait()
 
+        signal_name = _signal_name(returncode or 0)
+        self.logger.info("SWAT run: SWAT+ exit code %s", returncode)
+        if signal_name:
+            self.logger.warning("SWAT run: SWAT+ terminated by signal %s", signal_name)
+
+        stdout_tail = _tail_text("\n".join(stdout_tail_lines))
+        stderr_tail = ""
         output_files = self._collect_run_outputs(start_time)
         copied = self._copy_outputs(output_files, run_dir)
 
         run_summary = {
             "run_id": run_id,
-            "returncode": result.returncode,
-            "stdout_bytes": len(result.stdout or ""),
-            "stderr_bytes": len(result.stderr or ""),
+            "returncode": returncode,
+            "signal": signal_name,
+            "stdout_bytes": stdout_bytes,
+            "stderr_bytes": 0,
+            "stdout_tail": stdout_tail,
+            "stderr_tail": stderr_tail,
             "output_files": copied,
             "txtinout_dir": self.swat_txtinout_dir,
             "log_path": log_path,
@@ -454,15 +524,23 @@ class Swat(NoDbBase):
 
         with self.locked():
             self.run_summary = run_summary
-            self.status = 'ready' if result.returncode == 0 else 'error'
+            self.status = 'ready' if (returncode or 0) == 0 else 'error'
             self.logger.info("SWAT run: outputs archived under %s", run_dir)
-
-        if result.returncode != 0:
-            raise RuntimeError(f"SWAT+ run failed with return code {result.returncode}")
 
         index_path = _join(run_dir, "index.json")
         with open(index_path, "w") as handle:
             json.dump(run_summary, handle, indent=2)
+
+        if (returncode or 0) != 0:
+            message = f"SWAT+ run failed with return code {returncode}"
+            if signal_name:
+                message += f" ({signal_name})"
+            if stderr_tail:
+                message += f"; stderr tail:\n{stderr_tail}"
+            elif stdout_tail:
+                message += f"; stdout tail:\n{stdout_tail}"
+            message += f"\nSee log: {log_path}"
+            raise RuntimeError(message)
 
         return run_summary
 
@@ -487,12 +565,84 @@ class Swat(NoDbBase):
         if not _exists(chandeg_con):
             raise FileNotFoundError(f"Missing chandeg.con: {chandeg_con}")
 
+    def _ensure_print_prt_template_sync(self) -> None:
+        if self.print_prt_template_dir == self.template_dir and self.print_prt is not None:
+            return
+
+        template_cfg = self._load_print_prt_template()
+        if template_cfg is None:
+            return
+
+        if self.print_prt is not None:
+            self._merge_print_prt_objects(template_cfg, self.print_prt)
+
+        self.print_prt = template_cfg
+        self.print_prt_template_dir = self.template_dir
+        if not getattr(self, "print_prt_defaults_applied", False):
+            self._apply_print_prt_defaults(self.print_prt)
+            self.print_prt_defaults_applied = True
+
+    def _merge_print_prt_objects(self, target: PrintPrtConfig, source: PrintPrtConfig) -> None:
+        source_masks = source.objects.__dict__
+        for object_name in target.object_order:
+            attr_name = object_name.replace("-", "_")
+            if attr_name not in source_masks:
+                continue
+            target.objects.set_mask(object_name, int(source_masks[attr_name]))
+
+    def _load_print_prt_template(self) -> Optional[PrintPrtConfig]:
+        template_path = _join(self.template_dir, "print.prt")
+        if not _exists(template_path):
+            self.logger.warning(
+                "SWAT build: template print.prt missing at %s; using defaults",
+                template_path,
+            )
+            return None
+        try:
+            return load_print_prt(template_path)
+        except Exception as exc:
+            self.logger.warning(
+                "SWAT build: failed to parse template print.prt (%s); using defaults",
+                exc,
+            )
+            return None
+
+    def _apply_print_prt_defaults(self, print_prt: PrintPrtConfig) -> None:
+        if print_prt is None:
+            return
+        for object_name in ("basin_wb", "channel_sd", "hyd"):
+            attr_name = object_name.replace("-", "_")
+            if not hasattr(print_prt.objects, attr_name):
+                continue
+            current = int(getattr(print_prt.objects, attr_name))
+            print_prt.objects.set_mask(object_name, current | PRINT_PRT_DAILY)
+
+        if hasattr(print_prt.objects, "recall"):
+            print_prt.objects.set_mask("recall", 0)
+
+    def _write_print_prt(self) -> None:
+        if self.print_prt is None:
+            return
+        print_path = _join(self.swat_txtinout_dir, "print.prt")
+        with open(print_path, "w") as handle:
+            handle.write(self.print_prt.render())
+
     def _prepare_txtinout(self) -> None:
         if not _exists(self.template_dir):
             raise FileNotFoundError(f"Missing SWAT template directory: {self.template_dir}")
         if _exists(self.swat_txtinout_dir):
             shutil.rmtree(self.swat_txtinout_dir)
         shutil.copytree(self.template_dir, self.swat_txtinout_dir)
+        recall_dirs = set()
+        if self.recall_subdir:
+            recall_dirs.add(self.recall_subdir)
+        recall_dirs.add("recall")
+        for dir_name in recall_dirs:
+            if not dir_name:
+                continue
+            candidate = _join(self.swat_txtinout_dir, dir_name)
+            if _exists(candidate):
+                shutil.rmtree(candidate)
         self._ensure_om_water_init()
         self._ensure_plant_ini()
         self._patch_hru_surf_storage()
@@ -1009,31 +1159,54 @@ class Swat(NoDbBase):
 
         calendar_lookup = self._get_recall_calendar_lookup()
         warned_calendar = False
+        warned_bounds = False
 
-        def _month_day(year: int, jday: int) -> tuple[int, int]:
+        def _year_length(year: int) -> int:
+            if year < 1:
+                return 365
+            try:
+                return (datetime(year + 1, 1, 1) - datetime(year, 1, 1)).days
+            except ValueError:
+                return 365
+
+        def _normalize_jday(year: int, jday: int) -> tuple[int, int, int]:
             nonlocal warned_calendar
-            if jday < 1:
-                return 1, 1
+            nonlocal warned_bounds
+
             if calendar_lookup and year in calendar_lookup:
                 days = calendar_lookup.get(year, [])
-                if 0 < jday <= len(days):
-                    month, day = days[jday - 1]
-                    return int(month), int(day)
-                if not warned_calendar:
-                    self.logger.warning(
-                        "SWAT recall: Julian day %s outside CLI calendar for year %s; "
-                        "clamping to year length %s",
-                        jday,
-                        year,
-                        len(days),
-                    )
-                    warned_calendar = True
                 if days:
-                    month, day = days[-1]
-                    return int(month), int(day)
+                    max_day = len(days)
+                    if jday < 1 or jday > max_day:
+                        if not warned_calendar:
+                            self.logger.warning(
+                                "SWAT recall: Julian day %s outside CLI calendar for year %s; "
+                                "clamping to 1..%s",
+                                jday,
+                                year,
+                                max_day,
+                            )
+                            warned_calendar = True
+                        jday = max(1, min(jday, max_day))
+                    month, day = days[jday - 1]
+                    return jday, int(month), int(day)
 
-            base_year = 2000 if jday > 365 else 2001
-            return _julian_to_calendar(base_year, jday, calendar_lookup=None)
+            max_day = _year_length(year)
+            if jday < 1 or jday > max_day:
+                if not warned_bounds:
+                    self.logger.warning(
+                        "SWAT recall: Julian day %s outside year length %s for year %s; "
+                        "clamping to bounds",
+                        jday,
+                        max_day,
+                        year,
+                    )
+                    warned_bounds = True
+                jday = max(1, min(jday, max_day))
+
+            calendar_year = year if year >= 1 else 2001
+            month, day = _julian_to_calendar(calendar_year, jday, calendar_lookup=None)
+            return jday, month, day
 
         data_rows: List[str] = []
         years: List[int] = []
@@ -1048,7 +1221,7 @@ class Swat(NoDbBase):
                 istep = int(float(parts[index["ISTEP"]]))
             except (ValueError, IndexError):
                 continue
-            mo, day_mo = _month_day(iyr, istep)
+            jday, mo, day_mo = _normalize_jday(iyr, istep)
             years.append(iyr)
             values = []
             for key in required[2:]:
@@ -1058,7 +1231,7 @@ class Swat(NoDbBase):
                     values.append(0.0)
             formatted = " ".join(f"{val:.6f}" for val in values)
             data_rows.append(
-                f"{istep} {mo} {day_mo} {iyr} {ob_typ} {ob_name} {formatted}"
+                f"{jday} {mo} {day_mo} {iyr} {ob_typ} {ob_name} {formatted}"
             )
 
         if not data_rows:
@@ -1138,6 +1311,28 @@ class Swat(NoDbBase):
         return recall_paths
 
     def _resolve_recall_start_year(self) -> Optional[int]:
+        wepp_start = self._read_wepp_cli_start_year()
+        if wepp_start is not None and wepp_start > 1:
+            override = None
+            if self._configparser.has_option("swat", "time_start_year"):
+                override = self.config_get_int("swat", "time_start_year", None)
+                if override is not None and override < 1:
+                    raise SwatNoDbLockedException(
+                        f"time_start_year must be >= 1; got {override}"
+                    )
+                if override is not None and override > 1 and override != wepp_start:
+                    self.logger.warning(
+                        "SWAT build: time_start_year %s ignored; using WEPP climate start year %s",
+                        override,
+                        wepp_start,
+                    )
+            if self.force_time_start_year and override is not None and override != wepp_start:
+                self.logger.warning(
+                    "SWAT build: force_time_start_year ignored; using WEPP climate start year %s",
+                    wepp_start,
+                )
+            return wepp_start
+
         if self._configparser.has_option("swat", "time_start_year"):
             override = self.config_get_int("swat", "time_start_year", None)
             if override is None:
@@ -1153,7 +1348,7 @@ class Swat(NoDbBase):
         if time_start is not None and time_start > 1:
             return time_start
 
-        climate_start = self._read_climate_start_year()
+        climate_start = self._read_swat_pcp_start_year()
         if climate_start is not None and climate_start > 1:
             return climate_start
 
@@ -1179,7 +1374,56 @@ class Swat(NoDbBase):
             return year_start
         return None
 
-    def _read_climate_start_year(self) -> Optional[int]:
+    def _read_wepp_cli_start_year(self) -> Optional[int]:
+        cli_path = self._find_wepp_cli_path()
+        if cli_path is None or not _exists(cli_path):
+            return None
+
+        with open(cli_path) as handle:
+            lines = handle.read().splitlines()
+
+        header_idx = None
+        for idx, line in enumerate(lines):
+            tokens = line.strip().lower().split()
+            if not tokens:
+                continue
+            if tokens[0] in ("da", "day") and ("year" in tokens or "yr" in tokens):
+                header_idx = idx
+                break
+
+        if header_idx is None:
+            return None
+
+        for line in lines[header_idx + 1 :]:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("("):
+                continue
+            parts = line.split()
+            if len(parts) < 3:
+                continue
+            try:
+                return int(float(parts[2]))
+            except ValueError:
+                continue
+        return None
+
+    def _find_wepp_cli_path(self) -> Optional[str]:
+        base = Path(self.wd)
+        for candidate in (base, *base.parents):
+            climate_dir = candidate / "climate"
+            if not climate_dir.exists():
+                continue
+            wepp_cli = climate_dir / "wepp.cli"
+            if wepp_cli.exists():
+                return str(wepp_cli)
+            cli_candidates = sorted(climate_dir.glob("*.cli"))
+            if cli_candidates:
+                return str(cli_candidates[0])
+        return None
+
+    def _read_swat_pcp_start_year(self) -> Optional[int]:
         cli_path = _join(self.swat_txtinout_dir, "pcp.cli")
         if not _exists(cli_path):
             return None
@@ -1936,3 +2180,22 @@ def _escape_sql_path(path: str) -> str:
 
 def _quote_ident(identifier: str) -> str:
     return f"\"{identifier.replace('\"', '\"\"')}\""
+
+
+def _signal_name(returncode: int) -> Optional[str]:
+    if returncode >= 0:
+        return None
+    try:
+        return signal.Signals(-returncode).name
+    except Exception:
+        return None
+
+
+def _tail_text(text: Optional[str], max_lines: int = 20, max_chars: int = 2000) -> str:
+    if not text:
+        return ""
+    lines = text.rstrip().splitlines()
+    tail = "\n".join(lines[-max_lines:])
+    if len(tail) > max_chars:
+        tail = tail[-max_chars:]
+    return tail

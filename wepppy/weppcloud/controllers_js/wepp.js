@@ -258,6 +258,8 @@ var Wepp = (function () {
         wepp.stacktracePanelEl = dom.qs("#wepp_stacktrace_panel");
         wepp.statusSpinnerEl = wepp.statusPanelEl ? wepp.statusPanelEl.querySelector("#braille") : null;
         wepp.statusStream = null;
+        wepp._swatStatusStream = null;
+        wepp._swatStatusPanelEl = null;
         wepp._delegates = [];
 
         if (weppEvents) {
@@ -284,24 +286,74 @@ var Wepp = (function () {
             spinner: wepp.statusSpinnerEl,
             logLimit: 400
         };
-        var statusStreamChannel = null;
 
-        function ensureStatusStreamChannel(channel) {
-            if (!channel) {
-                return;
+        function ensureWeppStatusStream() {
+            if (!wepp.statusStream) {
+                wepp.attach_status_stream(wepp, Object.assign({}, statusStreamConfig, { channel: "wepp" }));
             }
-            if (statusStreamChannel === channel) {
-                if (!wepp.statusStream) {
-                    wepp.attach_status_stream(wepp, Object.assign({}, statusStreamConfig, { channel: channel }));
-                }
-                return;
-            }
-            statusStreamChannel = channel;
-            wepp.detach_status_stream(wepp);
-            wepp.attach_status_stream(wepp, Object.assign({}, statusStreamConfig, { channel: channel }));
         }
 
-        ensureStatusStreamChannel("wepp");
+        function ensureSwatStatusStream() {
+            if (wepp._swatStatusStream) {
+                return wepp._swatStatusStream;
+            }
+            if (typeof window === "undefined" || typeof window.StatusStream === "undefined") {
+                return null;
+            }
+
+            var hostElement = wepp.statusPanelEl || formElement;
+            if (!hostElement || typeof document === "undefined") {
+                return null;
+            }
+
+            var panel = document.createElement("div");
+            panel.setAttribute("data-status-panel", "");
+            panel.style.display = "none";
+
+            var logNode = document.createElement("div");
+            logNode.setAttribute("data-status-log", "");
+            panel.appendChild(logNode);
+            hostElement.appendChild(panel);
+
+            var swatStream = window.StatusStream.attach({
+                element: panel,
+                logElement: logNode,
+                channel: "swat",
+                runId: statusStreamConfig.runId,
+                logLimit: statusStreamConfig.logLimit,
+                stacktrace: statusStreamConfig.stacktrace,
+                autoConnect: false,
+                onAppend: function (detail) {
+                    var message = detail && detail.raw !== undefined ? detail.raw : detail ? detail.message : "";
+                    if (message) {
+                        wepp.appendStatus(message, detail && detail.meta ? detail.meta : null);
+                    }
+                },
+                onTrigger: function (detail) {
+                    if (detail && detail.event) {
+                        wepp.triggerEvent(detail.event, detail);
+                    }
+                }
+            });
+
+            wepp._swatStatusStream = swatStream;
+            wepp._swatStatusPanelEl = panel;
+            return swatStream;
+        }
+
+        function connectSwatStatusStream() {
+            if (wepp._swatStatusStream && typeof wepp._swatStatusStream.connect === "function") {
+                wepp._swatStatusStream.connect();
+            }
+        }
+
+        function disconnectSwatStatusStream() {
+            if (wepp._swatStatusStream && typeof wepp._swatStatusStream.disconnect === "function") {
+                wepp._swatStatusStream.disconnect();
+            }
+        }
+
+        ensureWeppStatusStream();
 
         wepp._completion_seen = false;
         wepp._swat_completion_seen = false;
@@ -338,12 +390,12 @@ var Wepp = (function () {
                     return baseTriggerEvent(eventName, payload);
                 }
                 wepp._swat_completion_seen = true;
-                wepp.disconnect_status_stream(wepp);
+                disconnectSwatStatusStream();
                 if (statusAdapter && typeof statusAdapter.html === "function") {
                     statusAdapter.html("SWAT run completed.");
                 }
                 wepp.appendStatus("SWAT run completed.");
-                ensureStatusStreamChannel("wepp");
+                ensureWeppStatusStream();
             }
 
             return baseTriggerEvent(eventName, payload);
@@ -478,7 +530,7 @@ var Wepp = (function () {
             });
 
             resetCompletionSeen();
-            ensureStatusStreamChannel("wepp");
+            ensureWeppStatusStream();
             wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
@@ -584,7 +636,7 @@ var Wepp = (function () {
             });
 
             resetCompletionSeen();
-            ensureStatusStreamChannel("wepp");
+            ensureWeppStatusStream();
             wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
@@ -635,8 +687,10 @@ var Wepp = (function () {
             wepp.resultsContainer = cachedResults;
 
             resetSwatCompletionSeen();
-            ensureStatusStreamChannel("swat");
+            ensureWeppStatusStream();
+            ensureSwatStatusStream();
             wepp.connect_status_stream(wepp);
+            connectSwatStatusStream();
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
@@ -726,7 +780,6 @@ var Wepp = (function () {
                 ? helper.resolveJobId(ctx, "run_wepp_rq")
                 : null;
             var completionEvent = null;
-            var statusChannel = null;
             if (!jobId && controllerContext.job_id) {
                 jobId = controllerContext.job_id;
             }
@@ -737,7 +790,6 @@ var Wepp = (function () {
                     if (value !== undefined && value !== null) {
                         jobId = String(value);
                         completionEvent = "WEPP_RUN_TASK_COMPLETED";
-                        statusChannel = "wepp";
                     }
                 }
                 if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_watershed_rq")) {
@@ -745,7 +797,6 @@ var Wepp = (function () {
                     if (watershedValue !== undefined && watershedValue !== null) {
                         jobId = String(watershedValue);
                         completionEvent = "WEPP_RUN_TASK_COMPLETED";
-                        statusChannel = "wepp";
                     }
                 }
                 if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_swat_rq")) {
@@ -753,7 +804,6 @@ var Wepp = (function () {
                     if (swatValue !== undefined && swatValue !== null) {
                         jobId = String(swatValue);
                         completionEvent = "SWAT_RUN_TASK_COMPLETED";
-                        statusChannel = "swat";
                     }
                 }
             }
@@ -763,10 +813,12 @@ var Wepp = (function () {
                     wepp.poll_completion_event = completionEvent || "WEPP_RUN_TASK_COMPLETED";
                     if (wepp.poll_completion_event === "SWAT_RUN_TASK_COMPLETED") {
                         resetSwatCompletionSeen();
-                        ensureStatusStreamChannel(statusChannel || "swat");
+                        ensureWeppStatusStream();
+                        ensureSwatStatusStream();
+                        connectSwatStatusStream();
                     } else {
                         resetCompletionSeen();
-                        ensureStatusStreamChannel(statusChannel || "wepp");
+                        ensureWeppStatusStream();
                     }
                 }
                 wepp.set_rq_job_id(wepp, jobId);

@@ -1650,7 +1650,7 @@ def _run_swat_rq(runid: str) -> None:
         from wepppy.nodb.mods.swat import Swat
 
         swat = Swat.getInstance(wd)
-        swat.run_swat()
+        swat.run_swat(status_channel=status_channel)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
