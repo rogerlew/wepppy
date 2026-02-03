@@ -164,9 +164,14 @@ class Swat(NoDbBase):
             self.swat_interchange_delete_manifest = bool(
                 self.config_get_bool('swat', 'swat_interchange_delete_manifest', False)
             )
-            self.swat_interchange_delete_after_interchange = bool(
-                self.config_get_bool('swat', 'swat_interchange_delete_after_interchange', False)
+            delete_after = self.config_get_bool(
+                'swat', 'swat_interchange_delete_after_interchange', None
             )
+            if delete_after is None:
+                delete_after = self.config_get_bool(
+                    'interchange', 'delete_after_interchange', False
+                )
+            self.swat_interchange_delete_after_interchange = bool(delete_after)
             self.swat_interchange_dry_run = bool(
                 self.config_get_bool('swat', 'swat_interchange_dry_run', False)
             )
@@ -579,6 +584,10 @@ class Swat(NoDbBase):
         stdout_tail = _tail_text("\n".join(stdout_tail_lines))
         stderr_tail = ""
         output_files = self._collect_run_outputs(start_time)
+        manifest_rel = "files_out.out"
+        manifest_src = _join(self.swat_txtinout_dir, manifest_rel)
+        if _exists(manifest_src) and manifest_rel not in output_files:
+            output_files.append(manifest_rel)
         copied = self._copy_outputs(output_files, run_dir)
 
         run_summary = {
@@ -624,6 +633,9 @@ class Swat(NoDbBase):
                 run_summary["interchange_summary"] = interchange_summary
                 with open(index_path, "w") as handle:
                     json.dump(run_summary, handle, indent=2)
+                with self.locked():
+                    self.run_summary = run_summary
+                    self.status = 'ready'
 
         return run_summary
 
@@ -649,6 +661,28 @@ class Swat(NoDbBase):
 
         interchange_dir = _join(run_dir, "interchange")
         manifest_path = _join(run_dir, "files_out.out")
+        if not _exists(manifest_path):
+            source_manifest = _join(self.swat_txtinout_dir, "files_out.out")
+            latest_run = self._resolve_latest_run_dir(None)
+            is_latest = latest_run is None or os.path.abspath(latest_run) == run_dir
+            if self.swat_interchange_delete_manifest:
+                self.logger.debug(
+                    "SWAT interchange: manifest fallback disabled because delete_manifest is set"
+                )
+            elif not is_latest and _exists(source_manifest):
+                self.logger.warning(
+                    "SWAT interchange: skipping manifest fallback for historical run %s",
+                    run_dir,
+                )
+            elif _exists(source_manifest):
+                try:
+                    shutil.copy2(source_manifest, manifest_path)
+                except OSError as exc:
+                    self.logger.warning(
+                        "SWAT interchange: unable to copy files_out.out into %s: %s",
+                        run_dir,
+                        exc,
+                    )
         include = self.swat_interchange_include or None
         exclude = self.swat_interchange_exclude or None
 
@@ -657,6 +691,7 @@ class Swat(NoDbBase):
 
         with self.locked():
             self.swat_interchange_status = "running"
+            self.swat_interchange_summary = None
             self.last_swat_interchange_at = datetime.utcnow().isoformat()
 
         if status_channel:
@@ -681,18 +716,25 @@ class Swat(NoDbBase):
                 overwrite=self.swat_interchange_overwrite,
             )
         except Exception:
+            status = self._resolve_interchange_status(interchange_dir, None)
             with self.locked():
-                self.swat_interchange_status = "error"
+                self.swat_interchange_status = status
+                self.swat_interchange_summary = None
             if status_channel:
-                StatusMessenger.publish(status_channel, "SWAT interchange: error")
+                StatusMessenger.publish(
+                    status_channel, f"SWAT interchange: {self.swat_interchange_status}"
+                )
             raise
 
+        status = self._resolve_interchange_status(interchange_dir, summary)
         with self.locked():
             self.swat_interchange_summary = summary
-            self.swat_interchange_status = "complete"
+            self.swat_interchange_status = status
 
         if status_channel:
-            StatusMessenger.publish(status_channel, "SWAT interchange: complete")
+            StatusMessenger.publish(
+                status_channel, f"SWAT interchange: {self.swat_interchange_status}"
+            )
 
         try:
             from wepppy.query_engine.activate import update_catalog_entry
@@ -706,6 +748,45 @@ class Swat(NoDbBase):
             )
 
         return summary
+
+    def _resolve_interchange_status(
+        self,
+        interchange_dir: str,
+        summary: Optional[Dict[str, Any]],
+    ) -> str:
+        version_path = _join(interchange_dir, "interchange_version.json")
+        if _exists(version_path):
+            try:
+                with open(version_path) as handle:
+                    version = json.load(handle)
+                status = version.get("status")
+                if isinstance(status, str) and status:
+                    return status
+            except Exception:
+                self.logger.warning(
+                    "SWAT interchange: unable to read interchange_version.json at %s",
+                    version_path,
+                    exc_info=True,
+                )
+
+        if summary is None:
+            return "error"
+
+        error_reasons = {
+            "header_error",
+            "parse_error",
+            "column_mismatch",
+            "decode_error",
+            "file_changed",
+        }
+        skipped = summary.get("skipped") if isinstance(summary, dict) else None
+        if skipped:
+            for entry in skipped:
+                if not isinstance(entry, dict):
+                    continue
+                if entry.get("reason") in error_reasons:
+                    return "partial"
+        return "complete"
 
     def validate(
         self,

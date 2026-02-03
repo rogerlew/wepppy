@@ -88,6 +88,9 @@ Notes:
 - `run_summary: dict | None`
 - `last_run_at: str | None` (ISO-8601)
 - `status: str` (idle/building/ready/error)
+- `swat_interchange_summary: dict | None`
+- `last_swat_interchange_at: str | None` (ISO-8601)
+- `swat_interchange_status: str` (idle/running/complete/partial/error/failed)
 ### Key methods
 - `build_inputs()`
   - Orchestrates recall generation, connectivity build, and template patching.
@@ -158,6 +161,21 @@ disable_aquifer = true
 swat_interchange_enabled = true
 swat_interchange_chunk_rows = 100000
 swat_interchange_compression = snappy
+swat_interchange_ncpu =
+swat_interchange_write_manifest = true
+swat_interchange_delete_manifest = false
+swat_interchange_delete_after_interchange = false
+swat_interchange_dry_run = false
+swat_interchange_fail_fast = false
+swat_interchange_overwrite = false
+swat_interchange_stale_after_hours =
+swat_interchange_include = []
+swat_interchange_exclude = []
+
+[interchange]
+# Legacy/global interchange flag; SWAT uses this as a fallback for
+# swat_interchange_delete_after_interchange when the swat key is unset.
+delete_after_interchange = false
 
 [wepp]
 # Controls whether the WEPP watershed run executes and whether WEPP channel options are shown.
