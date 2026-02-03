@@ -150,9 +150,9 @@ all 4 soil textures. Results aggregated from 100-year simulations (48 total runs
 | forest | low | 1,308 | 1,122 | 17 | 169 |
 | forest | moderate | 1,240 | 966 | 31 | 243 |
 | forest | high | 1,202 | 912 | 22 | 268 |
-| shrub | low | 1,406 | 1,216 | 3 | 187 |
-| shrub | moderate | 1,391 | 1,081 | 65 | 245 |
-| shrub | high | 1,380 | 957 | 43 | 380 |
+| shrub | low | 1,404 | 1,017 | 60 | 327 |
+| shrub | moderate | 1,392 | 1,007 | 51 | 334 |
+| shrub | high | 1,387 | 1,009 | 37 | 341 |
 | tall grass | low | 1,493 | 359 | 981 | 153 |
 | tall grass | moderate | 1,480 | 746 | 181 | 553 |
 | tall grass | high | 1,459 | 773 | 73 | 613 |
@@ -164,9 +164,9 @@ all 4 soil textures. Results aggregated from 100-year simulations (48 total runs
 | forest | low | 1,308 | 114 | 1,191 | 3 |
 | forest | moderate | 1,240 | 134 | 1,104 | 2 |
 | forest | high | 1,202 | 236 | 966 | 0 |
-| shrub | low | 1,406 | 51 | 1,191 | 164 |
-| shrub | moderate | 1,391 | 86 | 1,170 | 135 |
-| shrub | high | 1,380 | 255 | 1,093 | 32 |
+| shrub | low | 1,404 | 289 | 1,072 | 43 |
+| shrub | moderate | 1,392 | 181 | 1,146 | 65 |
+| shrub | high | 1,387 | 353 | 1,029 | 5 |
 | tall grass | low | 1,493 | 80 | 1,405 | 8 |
 | tall grass | moderate | 1,480 | 87 | 1,388 | 5 |
 | tall grass | high | 1,459 | 278 | 1,181 | 0 |
@@ -183,12 +183,12 @@ Statistics aggregated across all 4 soil textures for 100-year simulations.
 | | | unburned | 19.15 | 17.69 | 14.26 | 23,663 |
 | forest | high | burned | 21.07 | 19.15 | 15.47 | 25,159 |
 | | | unburned | 19.23 | 17.86 | 14.30 | 23,023 |
-| shrub | low | burned | 19.82 | 18.52 | 14.53 | 27,638 |
-| | | unburned | 19.05 | 18.51 | 13.60 | 26,581 |
-| shrub | moderate | burned | 19.85 | 18.48 | 14.60 | 27,393 |
-| | | unburned | 19.17 | 18.56 | 13.79 | 26,468 |
-| shrub | high | burned | 19.73 | 18.36 | 14.78 | 27,038 |
-| | | unburned | 19.24 | 18.60 | 13.93 | 26,366 |
+| shrub | low | burned | 20.10 | 18.49 | 14.80 | 27,996 |
+| | | unburned | 19.05 | 18.53 | 13.62 | 26,554 |
+| shrub | moderate | burned | 20.11 | 18.44 | 15.05 | 27,791 |
+| | | unburned | 19.14 | 18.57 | 13.81 | 26,463 |
+| shrub | high | burned | 19.85 | 18.34 | 14.91 | 27,332 |
+| | | unburned | 19.17 | 18.59 | 13.84 | 26,396 |
 | tall grass | low | burned | 19.00 | 18.29 | 13.51 | 28,191 |
 | | | unburned | 18.65 | 18.05 | 13.15 | 27,694 |
 | tall grass | moderate | burned | 19.15 | 18.33 | 13.65 | 28,185 |
@@ -206,12 +206,12 @@ Statistics aggregated across all 4 soil textures for 100-year simulations.
 | | | unburned | 0.022 | 0.132 | 0.000 | 30.6 |
 | forest | high | burned | 4.072 | 12.020 | 0.000 | 5,338.0 |
 | | | unburned | 0.023 | 0.134 | 0.000 | 30.6 |
-| shrub | low | burned | 0.099 | 0.433 | 0.000 | 149.0 |
-| | | unburned | 0.118 | 0.402 | 0.000 | 188.4 |
-| shrub | moderate | burned | 0.230 | 1.019 | 0.000 | 350.7 |
-| | | unburned | 0.119 | 0.404 | 0.000 | 188.4 |
-| shrub | high | burned | 1.874 | 5.836 | 0.000 | 2,775.7 |
-| | | unburned | 0.120 | 0.406 | 0.000 | 188.4 |
+| shrub | low | burned | 0.402 | 1.307 | 0.000 | 613.8 |
+| | | unburned | 0.118 | 0.403 | 0.000 | 188.4 |
+| shrub | moderate | burned | 0.819 | 3.023 | 0.000 | 1,232.3 |
+| | | unburned | 0.120 | 0.404 | 0.000 | 188.4 |
+| shrub | high | burned | 2.925 | 7.970 | 0.000 | 4,341.9 |
+| | | unburned | 0.120 | 0.405 | 0.000 | 188.4 |
 | tall grass | low | burned | 0.179 | 0.923 | 0.000 | 291.6 |
 | | | unburned | 0.149 | 0.775 | 0.000 | 242.7 |
 | tall grass | moderate | burned | 0.330 | 1.742 | 0.000 | 537.4 |
@@ -223,11 +223,11 @@ Statistics aggregated across all 4 soil textures for 100-year simulations.
 
 1. **Runoff increases with burn severity**: For forest and shrub, burned conditions consistently show more runoff events than unburned (e.g., forest low: 86% burned > unburned). Tall grass shows more variable response due to already low cover.
 
-2. **Sediment delivery increases dramatically with high severity fire**: Forest high severity shows 174x more total sediment delivery than unburned (5,338 vs 30.6 kg/m). Shrub and tall grass show similar patterns.
+2. **Sediment delivery increases dramatically with high severity fire**: Forest high severity shows 174x more total sediment delivery than unburned (5,338 vs 30.6 kg/m). Shrub high severity shows 23x increase (4,342 vs 188 kg/m). Tall grass shows similar patterns.
 
-3. **Directional consistency**: High severity fire produces more sediment in 100% of matched events for forest (236 burned > unburned, 0 unburned > burned) and tall grass. Lower severities show more mixed results due to moisture state interactions.
+3. **Directional consistency**: High severity fire produces more sediment in 100% of matched events for forest (236 burned > unburned, 0 unburned > burned) and tall grass. Shrub high severity shows 353 burned > unburned vs only 5 unburned > burned.
 
-4. **Shrub baseline caveat**: Shrub unburned shows higher sediment than shrub low/moderate severity in some events (164 and 135 respectively), likely due to parameter differences in baseline shrub vs fire recovery management files
+4. **Shrub parameterization validated**: After bb=14 and severity-based hmax updates (Feb 2026), shrub burned conditions now consistently produce more sediment than unburned across all severities (289/181/353 burned > unburned for low/mod/high).
 
 #### Runoff Event Counts by Soil Texture
 
@@ -240,9 +240,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 388 | 322 | 11 | 55 |
 | forest | moderate | 368 | 267 | 20 | 81 |
 | forest | high | 357 | 256 | 10 | 91 |
-| shrub | low | 415 | 363 | 1 | 51 |
-| shrub | moderate | 410 | 305 | 22 | 83 |
-| shrub | high | 406 | 276 | 16 | 114 |
+| shrub | low | 413 | 286 | 21 | 106 |
+| shrub | moderate | 409 | 288 | 17 | 104 |
+| shrub | high | 408 | 293 | 11 | 104 |
 | tall grass | low | 434 | 94 | 298 | 42 |
 | tall grass | moderate | 427 | 204 | 64 | 159 |
 | tall grass | high | 421 | 222 | 22 | 177 |
@@ -254,9 +254,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 349 | 301 | 4 | 44 |
 | forest | moderate | 332 | 267 | 4 | 61 |
 | forest | high | 323 | 253 | 2 | 68 |
-| shrub | low | 385 | 336 | 1 | 48 |
-| shrub | moderate | 380 | 310 | 15 | 55 |
-| shrub | high | 378 | 270 | 13 | 95 |
+| shrub | low | 385 | 285 | 18 | 82 |
+| shrub | moderate | 382 | 283 | 15 | 84 |
+| shrub | high | 382 | 286 | 10 | 86 |
 | tall grass | low | 405 | 95 | 271 | 39 |
 | tall grass | moderate | 401 | 200 | 52 | 149 |
 | tall grass | high | 397 | 205 | 24 | 168 |
@@ -268,9 +268,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 249 | 219 | 0 | 30 |
 | forest | moderate | 235 | 192 | 2 | 41 |
 | forest | high | 227 | 181 | 4 | 42 |
-| shrub | low | 265 | 223 | 0 | 42 |
-| shrub | moderate | 263 | 213 | 4 | 46 |
-| shrub | high | 261 | 186 | 5 | 70 |
+| shrub | low | 266 | 204 | 7 | 55 |
+| shrub | moderate | 264 | 199 | 5 | 60 |
+| shrub | high | 262 | 194 | 5 | 63 |
 | tall grass | low | 289 | 79 | 177 | 33 |
 | tall grass | moderate | 289 | 154 | 25 | 110 |
 | tall grass | high | 281 | 153 | 11 | 117 |
@@ -282,9 +282,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 322 | 280 | 2 | 40 |
 | forest | moderate | 305 | 240 | 5 | 60 |
 | forest | high | 295 | 222 | 6 | 67 |
-| shrub | low | 341 | 294 | 1 | 46 |
-| shrub | moderate | 338 | 253 | 24 | 61 |
-| shrub | high | 335 | 225 | 9 | 101 |
+| shrub | low | 340 | 242 | 14 | 84 |
+| shrub | moderate | 337 | 237 | 14 | 86 |
+| shrub | high | 335 | 236 | 11 | 88 |
 | tall grass | low | 365 | 91 | 235 | 39 |
 | tall grass | moderate | 363 | 188 | 40 | 135 |
 | tall grass | high | 360 | 193 | 16 | 151 |
@@ -298,9 +298,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 388 | 68 | 319 | 1 |
 | forest | moderate | 368 | 78 | 289 | 1 |
 | forest | high | 357 | 134 | 223 | 0 |
-| shrub | low | 415 | 20 | 265 | 130 |
-| shrub | moderate | 410 | 30 | 258 | 122 |
-| shrub | high | 406 | 133 | 243 | 30 |
+| shrub | low | 413 | 194 | 181 | 38 |
+| shrub | moderate | 409 | 94 | 257 | 58 |
+| shrub | high | 408 | 190 | 214 | 4 |
 | tall grass | low | 434 | 49 | 381 | 4 |
 | tall grass | moderate | 427 | 51 | 373 | 3 |
 | tall grass | high | 421 | 195 | 226 | 0 |
@@ -312,9 +312,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 349 | 23 | 324 | 2 |
 | forest | moderate | 332 | 32 | 299 | 1 |
 | forest | high | 323 | 43 | 280 | 0 |
-| shrub | low | 385 | 6 | 351 | 28 |
-| shrub | moderate | 380 | 25 | 345 | 10 |
-| shrub | high | 378 | 49 | 329 | 0 |
+| shrub | low | 385 | 59 | 322 | 4 |
+| shrub | moderate | 382 | 45 | 332 | 5 |
+| shrub | high | 382 | 65 | 317 | 0 |
 | tall grass | low | 405 | 21 | 381 | 3 |
 | tall grass | moderate | 401 | 25 | 374 | 2 |
 | tall grass | high | 397 | 53 | 344 | 0 |
@@ -326,9 +326,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 249 | 6 | 243 | 0 |
 | forest | moderate | 235 | 6 | 229 | 0 |
 | forest | high | 227 | 19 | 208 | 0 |
-| shrub | low | 265 | 8 | 257 | 0 |
-| shrub | moderate | 263 | 9 | 254 | 0 |
-| shrub | high | 261 | 25 | 236 | 0 |
+| shrub | low | 266 | 11 | 255 | 0 |
+| shrub | moderate | 264 | 13 | 251 | 0 |
+| shrub | high | 262 | 39 | 223 | 0 |
 | tall grass | low | 289 | 2 | 287 | 0 |
 | tall grass | moderate | 289 | 2 | 287 | 0 |
 | tall grass | high | 281 | 12 | 269 | 0 |
@@ -340,9 +340,9 @@ Rows grouped by texture to highlight texture-specific response patterns.
 | forest | low | 322 | 17 | 305 | 0 |
 | forest | moderate | 305 | 18 | 287 | 0 |
 | forest | high | 295 | 40 | 255 | 0 |
-| shrub | low | 341 | 17 | 318 | 6 |
-| shrub | moderate | 338 | 22 | 313 | 3 |
-| shrub | high | 335 | 48 | 285 | 2 |
+| shrub | low | 340 | 25 | 314 | 1 |
+| shrub | moderate | 337 | 29 | 306 | 2 |
+| shrub | high | 335 | 59 | 275 | 1 |
 | tall grass | low | 365 | 8 | 356 | 1 |
 | tall grass | moderate | 363 | 9 | 354 | 0 |
 | tall grass | high | 360 | 18 | 342 | 0 |
@@ -351,7 +351,7 @@ Rows grouped by texture to highlight texture-specific response patterns.
 
 1. **Clay loam** shows the highest sediment response - more events with burned > unburned across all veg types
 2. **Sand loam** shows minimal sediment differences - high infiltration capacity reduces erosion even when burned
-3. **Shrub anomaly** in clay loam: 130 events where unburned > burned for low severity - suggests baseline shrub parameters produce more erosion than low-severity fire recovery in fine-textured soils
+3. **Shrub directional consistency**: After bb/hmax updates, shrub burned > unburned dominates across all textures (e.g., clay loam low: 194 vs 38)
 4. **Tall grass runoff** shows high "Equal" counts across all textures at low severity, indicating minimal hydrologic impact from low-severity grass fires
 
 ### Grass (Tall and Short)
