@@ -59,6 +59,11 @@
       {% call ui.card("WEPP Exec", attrs={"id": "wepp_binary_selection"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
       {% endcall %}
+      {% if swat %}
+        {% call ui.card("SWAT Exec", attrs={"id": "swat_exec_options"}) %}
+        {% include "controls/wepp_pure_advanced_options/swat_exec.htm" %}
+        {% endcall %}
+      {% endif %}
       {% if reveg %}
         {% call ui.card("Revegetation Scenarios", attrs={"id": "wepp_revegetation_options"}) %}
           {% include "controls/wepp_pure_advanced_options/revegetation.htm" %}

@@ -233,6 +233,7 @@ var Wepp = (function () {
         var stacktraceElement = dom.qs("#wepp_form #stacktrace");
         var rqJobElement = dom.qs("#wepp_form #rq_job");
         var hintElement = dom.qs("#hint_run_wepp");
+        var swatHintElement = dom.qs("#hint_run_swat");
         var resultsContainer = dom.qs("#wepp-results");
         var revegSelect = dom.qs("#reveg_scenario");
         var coverTransformContainer = dom.qs("#user_defined_cover_transform_container");
@@ -242,6 +243,7 @@ var Wepp = (function () {
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
         var hintAdapter = createLegacyAdapter(hintElement);
+        var swatHintAdapter = createLegacyAdapter(swatHintElement);
 
         wepp.form = formElement;
         wepp.info = infoAdapter;
@@ -275,19 +277,41 @@ var Wepp = (function () {
             }
         };
 
-        wepp.attach_status_stream(wepp, {
+        var statusStreamConfig = {
             element: wepp.statusPanelEl,
-            channel: "wepp",
             runId: window.runid || window.runId || null,
             stacktrace: wepp.stacktracePanelEl ? { element: wepp.stacktracePanelEl } : null,
             spinner: wepp.statusSpinnerEl,
             logLimit: 400
-        });
+        };
+        var statusStreamChannel = null;
+
+        function ensureStatusStreamChannel(channel) {
+            if (!channel) {
+                return;
+            }
+            if (statusStreamChannel === channel) {
+                if (!wepp.statusStream) {
+                    wepp.attach_status_stream(wepp, Object.assign({}, statusStreamConfig, { channel: channel }));
+                }
+                return;
+            }
+            statusStreamChannel = channel;
+            wepp.detach_status_stream(wepp);
+            wepp.attach_status_stream(wepp, Object.assign({}, statusStreamConfig, { channel: channel }));
+        }
+
+        ensureStatusStreamChannel("wepp");
 
         wepp._completion_seen = false;
+        wepp._swat_completion_seen = false;
 
         function resetCompletionSeen() {
             wepp._completion_seen = false;
+        }
+
+        function resetSwatCompletionSeen() {
+            wepp._swat_completion_seen = false;
         }
 
         var baseTriggerEvent = wepp.triggerEvent.bind(wepp);
@@ -308,6 +332,18 @@ var Wepp = (function () {
                 if (weppEvents && typeof weppEvents.emit === "function") {
                     weppEvents.emit("wepp:run:completed", payload || {});
                 }
+            }
+            if (normalized === "SWAT_RUN_TASK_COMPLETED") {
+                if (wepp._swat_completion_seen) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                wepp._swat_completion_seen = true;
+                wepp.disconnect_status_stream(wepp);
+                if (statusAdapter && typeof statusAdapter.html === "function") {
+                    statusAdapter.html("SWAT run completed.");
+                }
+                wepp.appendStatus("SWAT run completed.");
+                ensureStatusStreamChannel("wepp");
             }
 
             return baseTriggerEvent(eventName, payload);
@@ -442,6 +478,7 @@ var Wepp = (function () {
             });
 
             resetCompletionSeen();
+            ensureStatusStreamChannel("wepp");
             wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
@@ -547,6 +584,7 @@ var Wepp = (function () {
             });
 
             resetCompletionSeen();
+            ensureStatusStreamChannel("wepp");
             wepp.connect_status_stream(wepp);
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
@@ -585,6 +623,47 @@ var Wepp = (function () {
                 });
         };
 
+        wepp.runSwat = function () {
+            var taskMsg = "Submitting SWAT run";
+
+            var cachedResults = wepp.resultsContainer;
+            wepp.resultsContainer = null;
+            wepp.reset_panel_state(wepp, {
+                taskMessage: taskMsg,
+                hintTarget: swatHintAdapter
+            });
+            wepp.resultsContainer = cachedResults;
+
+            resetSwatCompletionSeen();
+            ensureStatusStreamChannel("swat");
+            wepp.connect_status_stream(wepp);
+
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+
+            http.postJsonWithSessionToken(
+                url_for_run("run-swat", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.error || response.errors)) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = "run_swat_rq job submitted: " + response.job_id;
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message, { job_id: response.job_id });
+                    wepp.poll_completion_event = "SWAT_RUN_TASK_COMPLETED";
+                    wepp.set_rq_job_id(wepp, response.job_id);
+                })
+                .catch(function (error) {
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
         function ensureDelegates() {
             if (wepp._delegates && wepp._delegates.length) {
                 return;
@@ -602,6 +681,13 @@ var Wepp = (function () {
                     event.preventDefault();
                 }
                 wepp.runWatershed();
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-swat"]', function (event) {
+                if (event && typeof event.preventDefault === "function") {
+                    event.preventDefault();
+                }
+                wepp.runSwat();
             }));
 
             wepp._delegates.push(dom.delegate(formElement, "change", "[data-wepp-routine]", function () {
@@ -639,6 +725,8 @@ var Wepp = (function () {
             var jobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "run_wepp_rq")
                 : null;
+            var completionEvent = null;
+            var statusChannel = null;
             if (!jobId && controllerContext.job_id) {
                 jobId = controllerContext.job_id;
             }
@@ -648,20 +736,38 @@ var Wepp = (function () {
                     var value = jobIds.run_wepp_rq;
                     if (value !== undefined && value !== null) {
                         jobId = String(value);
+                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+                        statusChannel = "wepp";
                     }
                 }
                 if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_watershed_rq")) {
                     var watershedValue = jobIds.run_wepp_watershed_rq;
                     if (watershedValue !== undefined && watershedValue !== null) {
                         jobId = String(watershedValue);
+                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+                        statusChannel = "wepp";
+                    }
+                }
+                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_swat_rq")) {
+                    var swatValue = jobIds.run_swat_rq;
+                    if (swatValue !== undefined && swatValue !== null) {
+                        jobId = String(swatValue);
+                        completionEvent = "SWAT_RUN_TASK_COMPLETED";
+                        statusChannel = "swat";
                     }
                 }
             }
 
             if (typeof wepp.set_rq_job_id === "function") {
                 if (jobId) {
-                    wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
-                    resetCompletionSeen();
+                    wepp.poll_completion_event = completionEvent || "WEPP_RUN_TASK_COMPLETED";
+                    if (wepp.poll_completion_event === "SWAT_RUN_TASK_COMPLETED") {
+                        resetSwatCompletionSeen();
+                        ensureStatusStreamChannel(statusChannel || "swat");
+                    } else {
+                        resetCompletionSeen();
+                        ensureStatusStreamChannel(statusChannel || "wepp");
+                    }
                 }
                 wepp.set_rq_job_id(wepp, jobId);
             }

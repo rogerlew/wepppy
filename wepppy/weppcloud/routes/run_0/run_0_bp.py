@@ -28,6 +28,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
+from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
@@ -247,6 +248,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     treatments = Treatments.tryGetInstance(wd)
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
+    swat = Swat.tryGetInstance(wd) if 'swat' in ron.mods else None
 
     if redis_prep is not None:
         rq_job_ids = redis_prep.get_rq_job_ids()
@@ -333,6 +335,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         OmniScenario=OmniScenario,
         treatments=treatments,
         debris_flow=debris_flow,
+        swat=swat,
         rq_job_ids=rq_job_ids,
         landuseoptions=landuseoptions,
         landcover_datasets=landuse.landcover_datasets,

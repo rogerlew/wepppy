@@ -1,0 +1,16 @@
+{% from "shared/console_macros.htm" import button_row %}
+
+  <p class="wc-text-muted">
+    Build SWAT+ inputs from existing WEPP hillslope outputs and run SWAT+ without rerunning hillslopes.
+  </p>
+
+  {% call button_row() %}
+    <button
+      id="btn_run_swat"
+      type="button"
+      class="pure-button pure-button-secondary disable-readonly"
+      data-wepp-action="run-swat">
+      Run SWAT+
+    </button>
+  {% endcall %}
+  <p class="wc-text-muted" id="hint_run_swat">Requires existing WEPP hillslope pass outputs.</p>

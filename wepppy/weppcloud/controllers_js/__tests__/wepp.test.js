@@ -169,6 +169,26 @@ describe("Wepp controller", () => {
         expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
     });
 
+    test("runSwat submits JSON payload and sets job id", async () => {
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+
+        wepp.runSwat();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/run-swat",
+            expect.objectContaining({ clip_soils: true, initial_sat: "0.3" }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-1");
+        expect(pollCompletionValues).toEqual(["SWAT_RUN_TASK_COMPLETED"]);
+    });
+
     test("run emits lifecycle events", async () => {
         const started = jest.fn();
         const queued = jest.fn();
