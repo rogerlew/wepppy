@@ -480,6 +480,64 @@ Test artifacts:
 - `tests/disturbed/conftest.py` - shared fixtures (paths, run directories)
 - `tests/disturbed/analysis_results.md` - standalone results summary
 
+### Hillslope ID Manifest
+
+The 48 simulations in the test archive (`disturbed_matrix_results.tar.gz`) map to hillslope IDs as follows.
+Files are named `p{id}.sol`, `p{id}.man`, `p{id}.slp`, `p{id}.cli`, `H{id}.ebe.dat`, etc.
+
+ID formula: `texture_idx * 12 + veg_idx * 4 + severity + 1`
+
+| ID | Texture | Veg Type | Severity |
+|---:|---------|----------|----------|
+| 1 | clay loam | forest | unburned |
+| 2 | clay loam | forest | low |
+| 3 | clay loam | forest | moderate |
+| 4 | clay loam | forest | high |
+| 5 | clay loam | shrub | unburned |
+| 6 | clay loam | shrub | low |
+| 7 | clay loam | shrub | moderate |
+| 8 | clay loam | shrub | high |
+| 9 | clay loam | tall grass | unburned |
+| 10 | clay loam | tall grass | low |
+| 11 | clay loam | tall grass | moderate |
+| 12 | clay loam | tall grass | high |
+| 13 | loam | forest | unburned |
+| 14 | loam | forest | low |
+| 15 | loam | forest | moderate |
+| 16 | loam | forest | high |
+| 17 | loam | shrub | unburned |
+| 18 | loam | shrub | low |
+| 19 | loam | shrub | moderate |
+| 20 | loam | shrub | high |
+| 21 | loam | tall grass | unburned |
+| 22 | loam | tall grass | low |
+| 23 | loam | tall grass | moderate |
+| 24 | loam | tall grass | high |
+| 25 | sand loam | forest | unburned |
+| 26 | sand loam | forest | low |
+| 27 | sand loam | forest | moderate |
+| 28 | sand loam | forest | high |
+| 29 | sand loam | shrub | unburned |
+| 30 | sand loam | shrub | low |
+| 31 | sand loam | shrub | moderate |
+| 32 | sand loam | shrub | high |
+| 33 | sand loam | tall grass | unburned |
+| 34 | sand loam | tall grass | low |
+| 35 | sand loam | tall grass | moderate |
+| 36 | sand loam | tall grass | high |
+| 37 | silt loam | forest | unburned |
+| 38 | silt loam | forest | low |
+| 39 | silt loam | forest | moderate |
+| 40 | silt loam | forest | high |
+| 41 | silt loam | shrub | unburned |
+| 42 | silt loam | shrub | low |
+| 43 | silt loam | shrub | moderate |
+| 44 | silt loam | shrub | high |
+| 45 | silt loam | tall grass | unburned |
+| 46 | silt loam | tall grass | low |
+| 47 | silt loam | tall grass | moderate |
+| 48 | silt loam | tall grass | high |
+
 Results from the test matrix are summarized in the [Test Matrix Analysis Results](#test-matrix-analysis-results-february-2026) section above.
 
 ## Further Reading
