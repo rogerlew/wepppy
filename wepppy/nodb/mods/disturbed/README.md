@@ -462,9 +462,30 @@ Values are read from the `disturbed` section of the run config.
 - `lookup_disturbed_class()` strips treatment suffixes (mulch/thinning) so soils are keyed by burn severity, not treatment type.
 - For MOFE runs, each OFE gets its own disturbed soil file and is reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.
 
+## Testing
+
+The disturbed module has a comprehensive test suite that validates the soil/management parameterization workflow:
+
+```bash
+# Run the 48-simulation matrix test (4 textures x 3 veg types x 4 severities)
+pytest tests/disturbed/test_disturbed_matrix.py -v
+
+# Analyze results after test completion
+python tests/disturbed/analyze_matrix.py
+```
+
+Test artifacts:
+- `tests/disturbed/test_disturbed_matrix.py` - pytest-based matrix runner
+- `tests/disturbed/analyze_matrix.py` - post-run analysis generating event counts and statistics
+- `tests/disturbed/conftest.py` - shared fixtures (paths, run directories)
+- `tests/disturbed/analysis_results.md` - standalone results summary
+
+Results from the test matrix are summarized in the [Test Matrix Analysis Results](#test-matrix-analysis-results-february-2026) section above.
+
 ## Further Reading
 
 - `wepppy/wepp/management/AGENTS.md` (management file conventions)
 - `wepppy/wepp/soils/utils/README.md` (soil migration utilities)
 - `wepppy/weppcloud/routes/usersum/weppcloud/disturbed-land-soil-lookup.md` (parameter definitions)
 - `docs/ui-docs/control-ui-styling/sbs_controls_behavior.md` (SBS control behavior)
+- `tests/disturbed/` (disturbed matrix test suite and analysis)
