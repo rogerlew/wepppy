@@ -103,3 +103,24 @@ def _run_swat_rq(runid: str) -> None:
     except Exception:
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise
+
+
+@with_exception_logging
+def run_swat_interchange_rq(runid: str) -> None:
+    """Generate SWAT interchange parquet outputs for the latest SWAT run."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f"{runid}:swat"
+        StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
+
+        from wepppy.nodb.mods.swat import Swat
+
+        swat = Swat.getInstance(wd)
+        swat.run_swat_interchange(status_channel=status_channel)
+
+        StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
+    except Exception:
+        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
+        raise

@@ -154,6 +154,11 @@ channel_cov_fact = 0.01
 channel_d50_mm = 12.0
 disable_aquifer = true
 
+# SWAT interchange outputs
+swat_interchange_enabled = true
+swat_interchange_chunk_rows = 100000
+swat_interchange_compression = snappy
+
 [wepp]
 # Controls whether the WEPP watershed run executes and whether WEPP channel options are shown.
 run_wepp_watershed = true
@@ -175,6 +180,7 @@ WEPP run -> hillslope pass files
    -> Python assembly (file.cio/time.sim patch + channel params)
    -> SWAT+ TxtInOut
    -> SWAT+ run + outputs
+   -> swat_interchange parquet (optional)
 ```
 
 ## TxtInOut build strategy

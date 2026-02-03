@@ -64,6 +64,38 @@ class Swat(NoDbBase):
         if not hasattr(instance, "print_prt_defaults_applied"):
             instance._apply_print_prt_defaults(instance.print_prt)
             instance.print_prt_defaults_applied = True
+        if not hasattr(instance, "swat_interchange_enabled"):
+            instance.swat_interchange_enabled = True
+        if not hasattr(instance, "swat_interchange_chunk_rows"):
+            instance.swat_interchange_chunk_rows = 100_000
+        if not hasattr(instance, "swat_interchange_ncpu"):
+            instance.swat_interchange_ncpu = None
+        if not hasattr(instance, "swat_interchange_compression"):
+            instance.swat_interchange_compression = "snappy"
+        if not hasattr(instance, "swat_interchange_write_manifest"):
+            instance.swat_interchange_write_manifest = True
+        if not hasattr(instance, "swat_interchange_delete_manifest"):
+            instance.swat_interchange_delete_manifest = False
+        if not hasattr(instance, "swat_interchange_delete_after_interchange"):
+            instance.swat_interchange_delete_after_interchange = False
+        if not hasattr(instance, "swat_interchange_dry_run"):
+            instance.swat_interchange_dry_run = False
+        if not hasattr(instance, "swat_interchange_fail_fast"):
+            instance.swat_interchange_fail_fast = False
+        if not hasattr(instance, "swat_interchange_overwrite"):
+            instance.swat_interchange_overwrite = False
+        if not hasattr(instance, "swat_interchange_stale_after_hours"):
+            instance.swat_interchange_stale_after_hours = None
+        if not hasattr(instance, "swat_interchange_include"):
+            instance.swat_interchange_include = []
+        if not hasattr(instance, "swat_interchange_exclude"):
+            instance.swat_interchange_exclude = []
+        if not hasattr(instance, "swat_interchange_summary"):
+            instance.swat_interchange_summary = None
+        if not hasattr(instance, "last_swat_interchange_at"):
+            instance.last_swat_interchange_at = None
+        if not hasattr(instance, "swat_interchange_status"):
+            instance.swat_interchange_status = "idle"
         return instance
 
     filename = 'swat.nodb'
@@ -116,6 +148,43 @@ class Swat(NoDbBase):
             self.qswat_we = float(self.config_get_float('swat', 'qswat_we', 0.5))
             self.qswat_dm = float(self.config_get_float('swat', 'qswat_dm', 0.5))
             self.qswat_de = float(self.config_get_float('swat', 'qswat_de', 0.4))
+            self.swat_interchange_enabled = bool(
+                self.config_get_bool('swat', 'swat_interchange_enabled', True)
+            )
+            self.swat_interchange_chunk_rows = int(
+                self.config_get_int('swat', 'swat_interchange_chunk_rows', 100_000)
+            )
+            self.swat_interchange_ncpu = self.config_get_int('swat', 'swat_interchange_ncpu', None)
+            self.swat_interchange_compression = self.config_get_str(
+                'swat', 'swat_interchange_compression', 'snappy'
+            )
+            self.swat_interchange_write_manifest = bool(
+                self.config_get_bool('swat', 'swat_interchange_write_manifest', True)
+            )
+            self.swat_interchange_delete_manifest = bool(
+                self.config_get_bool('swat', 'swat_interchange_delete_manifest', False)
+            )
+            self.swat_interchange_delete_after_interchange = bool(
+                self.config_get_bool('swat', 'swat_interchange_delete_after_interchange', False)
+            )
+            self.swat_interchange_dry_run = bool(
+                self.config_get_bool('swat', 'swat_interchange_dry_run', False)
+            )
+            self.swat_interchange_fail_fast = bool(
+                self.config_get_bool('swat', 'swat_interchange_fail_fast', False)
+            )
+            self.swat_interchange_overwrite = bool(
+                self.config_get_bool('swat', 'swat_interchange_overwrite', False)
+            )
+            self.swat_interchange_stale_after_hours = self.config_get_float(
+                'swat', 'swat_interchange_stale_after_hours', None
+            )
+            self.swat_interchange_include = self.config_get_list(
+                'swat', 'swat_interchange_include', []
+            )
+            self.swat_interchange_exclude = self.config_get_list(
+                'swat', 'swat_interchange_exclude', []
+            )
 
             self.channel_params: Dict[str, Any] = {
                 'mann': self.config_get_float('swat', 'channel_mann', 0.05),
@@ -131,6 +200,9 @@ class Swat(NoDbBase):
             self.run_summary: Optional[dict] = None
             self.last_run_at: Optional[str] = None
             self.status: str = 'idle'
+            self.swat_interchange_summary: Optional[dict] = None
+            self.last_swat_interchange_at: Optional[str] = None
+            self.swat_interchange_status: str = "idle"
             self._recall_calendar_lookup: Optional[CalendarLookup] = None
             self._recall_calendar_ready = False
             self.print_prt_template_dir: Optional[str] = None
@@ -542,7 +614,98 @@ class Swat(NoDbBase):
             message += f"\nSee log: {log_path}"
             raise RuntimeError(message)
 
+        interchange_summary = None
+        if self.swat_interchange_enabled:
+            interchange_summary = self.run_swat_interchange(
+                run_dir=run_dir,
+                status_channel=status_channel,
+            )
+            if interchange_summary is not None:
+                run_summary["interchange_summary"] = interchange_summary
+                with open(index_path, "w") as handle:
+                    json.dump(run_summary, handle, indent=2)
+
         return run_summary
+
+    def run_swat_interchange(
+        self,
+        run_dir: Optional[str] = None,
+        *,
+        status_channel: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        if not self.swat_interchange_enabled:
+            return None
+
+        run_dir = self._resolve_latest_run_dir(run_dir)
+        if run_dir is None:
+            raise FileNotFoundError("No SWAT run directory found for interchange.")
+        run_dir = os.path.abspath(run_dir)
+        if not _exists(run_dir):
+            raise FileNotFoundError(f"Missing SWAT run directory: {run_dir}")
+
+        rust_mod, rust_err = _load_rust_swat_interchange()
+        if rust_mod is None:
+            raise RuntimeError(f"swat_interchange module unavailable: {rust_err}")
+
+        interchange_dir = _join(run_dir, "interchange")
+        manifest_path = _join(run_dir, "files_out.out")
+        include = self.swat_interchange_include or None
+        exclude = self.swat_interchange_exclude or None
+
+        if status_channel is None:
+            status_channel = self._status_channel
+
+        with self.locked():
+            self.swat_interchange_status = "running"
+            self.last_swat_interchange_at = datetime.utcnow().isoformat()
+
+        if status_channel:
+            StatusMessenger.publish(status_channel, "SWAT interchange: starting")
+
+        try:
+            summary = rust_mod.swat_outputs_to_parquet(
+                run_dir,
+                interchange_dir=interchange_dir,
+                manifest_path=manifest_path if _exists(manifest_path) else None,
+                ncpu=self.swat_interchange_ncpu,
+                chunk_rows=self.swat_interchange_chunk_rows,
+                delete_after_interchange=self.swat_interchange_delete_after_interchange,
+                dry_run=self.swat_interchange_dry_run,
+                delete_manifest=self.swat_interchange_delete_manifest,
+                fail_fast=self.swat_interchange_fail_fast,
+                include=include,
+                exclude=exclude,
+                write_manifest=self.swat_interchange_write_manifest,
+                compression=self.swat_interchange_compression,
+                stale_after_hours=self.swat_interchange_stale_after_hours,
+                overwrite=self.swat_interchange_overwrite,
+            )
+        except Exception:
+            with self.locked():
+                self.swat_interchange_status = "error"
+            if status_channel:
+                StatusMessenger.publish(status_channel, "SWAT interchange: error")
+            raise
+
+        with self.locked():
+            self.swat_interchange_summary = summary
+            self.swat_interchange_status = "complete"
+
+        if status_channel:
+            StatusMessenger.publish(status_channel, "SWAT interchange: complete")
+
+        try:
+            from wepppy.query_engine.activate import update_catalog_entry
+
+            update_catalog_entry(self.wd, interchange_dir)
+        except Exception:
+            self.logger.warning(
+                "SWAT interchange: query-engine catalog update failed for %s",
+                interchange_dir,
+                exc_info=True,
+            )
+
+        return summary
 
     def validate(
         self,
@@ -2112,12 +2275,50 @@ class Swat(NoDbBase):
         path = self.config_get_path('swat', 'swat_template_dir', default)
         return os.path.abspath(path) if path is not None else default
 
+    def _resolve_latest_run_dir(self, run_dir: Optional[str]) -> Optional[str]:
+        if run_dir is not None:
+            return run_dir
+        if self.run_summary and self.run_summary.get("run_id"):
+            return _join(self.swat_outputs_dir, f"run_{self.run_summary['run_id']}")
+        if not _exists(self.swat_outputs_dir):
+            return None
+        latest_path = None
+        latest_mtime = None
+        for entry in os.scandir(self.swat_outputs_dir):
+            if not entry.is_dir():
+                continue
+            if not entry.name.startswith("run_"):
+                continue
+            try:
+                mtime = entry.stat().st_mtime
+            except OSError:
+                continue
+            if latest_mtime is None or mtime > latest_mtime:
+                latest_mtime = mtime
+                latest_path = entry.path
+        return latest_path
+
 
 def _load_rust_swat_utils() -> Tuple[Optional[object], Optional[Exception]]:
     try:
         return importlib.import_module("wepppyo3.swat_utils"), None
     except Exception as exc:
         for module_name in ("wepppyo3.swat_utils_rust", "wepppyo3.swat_utils.swat_utils_rust"):
+            try:
+                return importlib.import_module(module_name), None
+            except Exception:
+                continue
+        return None, exc
+
+
+def _load_rust_swat_interchange() -> Tuple[Optional[object], Optional[Exception]]:
+    try:
+        return importlib.import_module("wepppyo3.swat_interchange"), None
+    except Exception as exc:
+        for module_name in (
+            "wepppyo3.swat_interchange_rust",
+            "wepppyo3.swat_interchange.swat_interchange_rust",
+        ):
             try:
                 return importlib.import_module(module_name), None
             except Exception:
