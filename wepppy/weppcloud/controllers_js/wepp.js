@@ -520,6 +520,123 @@ var Wepp = (function () {
             }
         };
 
+        function buildSwatPrintPrtPayload(element) {
+            if (!element || typeof element.closest !== "function") {
+                return null;
+            }
+            var row = element.closest("[data-swat-print-prt-row]");
+            if (!row) {
+                return null;
+            }
+            var objectName = row.getAttribute("data-swat-object");
+            if (!objectName) {
+                return null;
+            }
+            var payload = { object: objectName };
+            var fields = row.querySelectorAll("[data-swat-print-prt-field]");
+            fields.forEach(function (field) {
+                var key = field.getAttribute("data-swat-print-prt-field");
+                if (!key) {
+                    return;
+                }
+                payload[key] = Boolean(field.checked);
+            });
+            return payload;
+        }
+
+        function buildSwatPrintPrtMetaPayload() {
+            var payload = {};
+            var fields = formElement ? formElement.querySelectorAll("[data-swat-print-prt-meta]") : [];
+            fields.forEach(function (field) {
+                if (!field || !field.name) {
+                    return;
+                }
+                var key = field.name.replace("swat_print_prt_", "");
+                if (!key) {
+                    return;
+                }
+                payload[key] = field.value;
+            });
+            return payload;
+        }
+
+        wepp.updateSwatPrintPrt = function (payload) {
+            if (!payload || !payload.object) {
+                return;
+            }
+            var taskMsg = "Updating SWAT print.prt (" + payload.object + ")";
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(taskMsg + "...");
+            }
+            wepp.appendStatus(taskMsg + "...");
+
+            return http.postJsonWithSessionToken(
+                url_for_run("swat/print-prt", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.error || response.errors)) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = taskMsg + "... Success";
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message);
+                })
+                .catch(function (error) {
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
+        wepp.updateSwatPrintPrtMeta = function (payload) {
+            if (!payload) {
+                return;
+            }
+            var taskMsg = "Updating SWAT print.prt header";
+            if (statusAdapter && typeof statusAdapter.html === "function") {
+                statusAdapter.html(taskMsg + "...");
+            }
+            wepp.appendStatus(taskMsg + "...");
+
+            return http.postJsonWithSessionToken(
+                url_for_run("swat/print-prt/meta", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.error || response.errors)) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = taskMsg + "... Success";
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message);
+                })
+                .catch(function (error) {
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
+        wepp.handleSwatPrintPrtChange = function (input) {
+            var payload = buildSwatPrintPrtPayload(input);
+            if (!payload) {
+                return;
+            }
+            wepp.updateSwatPrintPrt(payload);
+        };
+
+        wepp.handleSwatPrintPrtMetaChange = function () {
+            var payload = buildSwatPrintPrtMetaPayload();
+            wepp.updateSwatPrintPrtMeta(payload);
+        };
+
         wepp.run = function () {
             var taskMsg = "Submitting wepp run";
 
@@ -758,6 +875,14 @@ var Wepp = (function () {
 
             wepp._delegates.push(dom.delegate(formElement, "change", '[data-wepp-role="reveg-scenario"]', function () {
                 wepp.handleRevegetationScenarioChange(this.value);
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "change", "[data-swat-print-prt]", function () {
+                wepp.handleSwatPrintPrtChange(this);
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "change", "[data-swat-print-prt-meta]", function () {
+                wepp.handleSwatPrintPrtMetaChange();
             }));
         }
 

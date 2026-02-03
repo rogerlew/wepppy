@@ -29,6 +29,7 @@ from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.swat import Swat
+from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.core.climate import Climate
@@ -249,6 +250,32 @@ def _build_runs0_context(runid, config, playwright_load_all):
     redis_prep = RedisPrep.tryGetInstance(wd)
     debris_flow = DebrisFlow.tryGetInstance(wd) if 'debris_flow' in ron.mods else None
     swat = Swat.tryGetInstance(wd) if 'swat' in ron.mods else None
+    swat_print_prt_rows = []
+    swat_print_prt_meta = {}
+    if swat is not None and swat.print_prt is not None:
+        swat_print_prt_meta = {
+            "nyskip": int(swat.print_prt.nyskip),
+            "day_start": int(swat.print_prt.day_start),
+            "yrc_start": int(swat.print_prt.yrc_start),
+            "day_end": int(swat.print_prt.day_end),
+            "yrc_end": int(swat.print_prt.yrc_end),
+            "interval": int(swat.print_prt.interval),
+        }
+        try:
+            rows = swat.print_prt.objects.iter_rows(swat.print_prt.object_order)
+        except Exception:
+            rows = swat.print_prt.objects.iter_rows()
+        for object_name, mask in rows:
+            daily, monthly, yearly, avann = mask_to_tokens(int(mask))
+            swat_print_prt_rows.append(
+                {
+                    "object": object_name,
+                    "daily": daily == "y",
+                    "monthly": monthly == "y",
+                    "yearly": yearly == "y",
+                    "avann": avann == "y",
+                }
+            )
 
     if redis_prep is not None:
         rq_job_ids = redis_prep.get_rq_job_ids()
@@ -336,6 +363,8 @@ def _build_runs0_context(runid, config, playwright_load_all):
         treatments=treatments,
         debris_flow=debris_flow,
         swat=swat,
+        swat_print_prt_rows=swat_print_prt_rows,
+        swat_print_prt_meta=swat_print_prt_meta,
         rq_job_ids=rq_job_ids,
         landuseoptions=landuseoptions,
         landcover_datasets=landuse.landcover_datasets,

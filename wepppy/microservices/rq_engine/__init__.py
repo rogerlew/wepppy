@@ -24,6 +24,7 @@ from .rap_ts_routes import router as rap_ts_router
 from .rhem_routes import router as rhem_router
 from .session_routes import router as session_router
 from .soils_routes import router as soils_router
+from .swat_routes import router as swat_router
 from .treatments_routes import router as treatments_router
 from .upload_batch_runner_routes import router as upload_batch_runner_router
 from .upload_climate_routes import router as upload_climate_router
@@ -68,6 +69,7 @@ app.include_router(watershed_router, prefix="/api")
 app.include_router(treatments_router, prefix="/api")
 app.include_router(dss_export_router, prefix="/api")
 app.include_router(wepp_router, prefix="/api")
+app.include_router(swat_router, prefix="/api")
 app.include_router(debris_flow_router, prefix="/api")
 app.include_router(rhem_router, prefix="/api")
 app.include_router(rap_ts_router, prefix="/api")

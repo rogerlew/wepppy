@@ -1,0 +1,103 @@
+<p class="wc-text-muted">
+  Configure SWAT+ print.prt output frequency by object.
+</p>
+
+{% set meta = swat_print_prt_meta or {} %}
+<div class="wc-table-wrapper">
+  <table class="wc-table wc-table--dense wc-table--compact" style="width: 70%; table-layout: fixed;" aria-describedby="swat_print_prt_help">
+    <thead>
+      <tr>
+        <th scope="col"><code>nyskip</code></th>
+        <th scope="col"><code>day_start</code></th>
+        <th scope="col"><code>yrc_start</code></th>
+        <th scope="col"><code>day_end</code></th>
+        <th scope="col"><code>yrc_end</code></th>
+        <th scope="col"><code>interval</code></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <input type="number" class="disable-readonly" data-swat-print-prt-meta name="swat_print_prt_nyskip" value="{{ meta.nyskip | default(3) }}">
+        </td>
+        <td>
+          <input type="number" class="disable-readonly" data-swat-print-prt-meta name="swat_print_prt_day_start" value="{{ meta.day_start | default(0) }}">
+        </td>
+        <td>
+          <input type="number" class="disable-readonly" data-swat-print-prt-meta name="swat_print_prt_yrc_start" value="{{ meta.yrc_start | default(0) }}">
+        </td>
+        <td>
+          <input type="number" class="disable-readonly" data-swat-print-prt-meta name="swat_print_prt_day_end" value="{{ meta.day_end | default(0) }}">
+        </td>
+        <td>
+          <input type="number" class="disable-readonly" data-swat-print-prt-meta name="swat_print_prt_yrc_end" value="{{ meta.yrc_end | default(0) }}">
+        </td>
+        <td>
+          <input type="number" class="disable-readonly" data-swat-print-prt-meta name="swat_print_prt_interval" value="{{ meta.interval | default(1) }}">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="wc-table-wrapper">
+  <table class="wc-table wc-table--dense wc-table--compact" style="width: 70%; table-layout: fixed;" aria-describedby="swat_print_prt_help">
+    <thead>
+      <tr>
+        <th scope="col"><code>objects</code></th>
+        <th scope="col" class="wc-text-center"><code>daily</code></th>
+        <th scope="col" class="wc-text-center"><code>monthly</code></th>
+        <th scope="col" class="wc-text-center"><code>yearly</code></th>
+        <th scope="col" class="wc-text-center"><code>avann</code></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in swat_print_prt_rows %}
+      <tr data-swat-print-prt-row data-swat-object="{{ row.object }}">
+        <th scope="row"><code>{{ row.object }}</code></th>
+        <td>
+          <input
+            type="checkbox"
+            class="disable-readonly"
+            name="swat_print_prt_{{ row.object }}_daily"
+            data-swat-print-prt
+            data-swat-print-prt-field="daily"
+            aria-label="Daily output for {{ row.object }}"
+            {% if row.daily %}checked{% endif %}>
+        </td>
+        <td>
+          <input
+            type="checkbox"
+            class="disable-readonly"
+            name="swat_print_prt_{{ row.object }}_monthly"
+            data-swat-print-prt
+            data-swat-print-prt-field="monthly"
+            aria-label="Monthly output for {{ row.object }}"
+            {% if row.monthly %}checked{% endif %}>
+        </td>
+        <td>
+          <input
+            type="checkbox"
+            class="disable-readonly"
+            name="swat_print_prt_{{ row.object }}_yearly"
+            data-swat-print-prt
+            data-swat-print-prt-field="yearly"
+            aria-label="Yearly output for {{ row.object }}"
+            {% if row.yearly %}checked{% endif %}>
+        </td>
+        <td>
+          <input
+            type="checkbox"
+            class="disable-readonly"
+            name="swat_print_prt_{{ row.object }}_avann"
+            data-swat-print-prt
+            data-swat-print-prt-field="avann"
+            aria-label="Average annual output for {{ row.object }}"
+            {% if row.avann %}checked{% endif %}>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="wc-text-muted" id="swat_print_prt_help">Updates apply to the next SWAT+ build.</p>

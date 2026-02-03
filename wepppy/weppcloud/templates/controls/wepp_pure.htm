@@ -60,8 +60,11 @@
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
       {% endcall %}
       {% if swat %}
+        {% call ui.card("SWAT Print.prt", attrs={"id": "swat_print_prt_options"}) %}
+        {% include "controls/swat_pure_advanced_options/swat_print_prt.htm" %}
+        {% endcall %}
         {% call ui.card("SWAT Exec", attrs={"id": "swat_exec_options"}) %}
-        {% include "controls/wepp_pure_advanced_options/swat_exec.htm" %}
+        {% include "controls/swat_pure_advanced_options/swat_exec.htm" %}
         {% endcall %}
       {% endif %}
       {% if reveg %}

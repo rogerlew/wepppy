@@ -81,6 +81,7 @@ from wepppy.export.prep_details import (
 )
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.rq.exception_logging import with_exception_logging
+from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -741,52 +742,6 @@ def run_wepp_watershed_rq(runid: str) -> Job:
         raise
 
     return job6_finalfinal
-
-
-@with_exception_logging
-def run_swat_rq(runid: str) -> Job:
-    """Enqueue SWAT+ input build + execution using existing WEPP outputs."""
-    try:
-        job = get_current_job()
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:swat'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-
-        wd = get_wd(runid)
-        wepp = Wepp.getInstance(wd)
-
-        if wepp.islocked():
-            raise Exception(f'{runid} is locked')
-
-        if not wepp.mods or 'swat' not in wepp.mods:
-            raise Exception('SWAT mod is not enabled for this run')
-
-        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
-
-            job_build = q.enqueue_call(_build_swat_inputs_rq, (runid,), timeout=TIMEOUT)
-            job.meta['jobs:0,func:_build_swat_inputs_rq'] = job_build.id
-            job.save()
-
-            job_run = q.enqueue_call(
-                _run_swat_rq,
-                (runid,),
-                timeout=TIMEOUT,
-                depends_on=job_build,
-            )
-            job.meta['jobs:1,func:_run_swat_rq'] = job_run.id
-            job.save()
-
-        StatusMessenger.publish(
-            status_channel,
-            f'rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job_run.id}',
-        )
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-    return job_run
 
 
 @with_exception_logging
@@ -1610,48 +1565,6 @@ def _post_make_loss_grid_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
         wepp.make_loss_grid()
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-
-@with_exception_logging
-def _build_swat_inputs_rq(runid: str) -> None:
-    """Build SWAT+ TxtInOut inputs from WEPP hillslope outputs."""
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:swat'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-
-        from wepppy.nodb.mods.swat import Swat
-
-        swat = Swat.getInstance(wd)
-        swat.build_inputs()
-
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-
-@with_exception_logging
-def _run_swat_rq(runid: str) -> None:
-    """Execute SWAT+ from the prepared TxtInOut directory."""
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:swat'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-
-        from wepppy.nodb.mods.swat import Swat
-
-        swat = Swat.getInstance(wd)
-        swat.run_swat(status_channel=status_channel)
-
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
