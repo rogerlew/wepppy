@@ -119,9 +119,9 @@ The tables below capture the initial conditions (`IniLoopCropland`) and plant pa
 | Disturbed class | rdmax | xmxlai | hmax | cuthgt |
 | --- | --- | --- | --- | --- |
 | shrub | 0.50 | 10.0 | 2.0 | 4.0 |
-| shrub low sev fire | 0.20 | 3.0 | 2.0 | 4.0 |
-| shrub moderate sev fire | 0.20 | 2.0 | 2.0 | 4.0 |
-| shrub high sev fire | 0.20 | 1.0 | 2.0 | 4.0 |
+| shrub low sev fire | 0.20 | 3.0 | 1.5 | 4.0 |
+| shrub moderate sev fire | 0.20 | 2.0 | 1.0 | 4.0 |
+| shrub high sev fire | 0.20 | 1.0 | 0.5 | 4.0 |
 | shrub prescribed fire | 0.50 | 10.0 | 2.0 | 4.0 |
 
 ### Test Matrix Analysis Results (February 2026)
