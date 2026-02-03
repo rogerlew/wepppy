@@ -24,7 +24,7 @@ def make_observed_stub():
             raise ValueError("parse failure")
         self.parse_calls.append(text)
 
-    def calc_model_fit(self):
+    def calc_model_fit(self, model_source=None):
         if getattr(self, "raise_calc_error", False):
             raise RuntimeError("calc failure")
         self.calc_calls += 1
