@@ -2117,10 +2117,12 @@ def _load_rust_swat_utils() -> Tuple[Optional[object], Optional[Exception]]:
     try:
         return importlib.import_module("wepppyo3.swat_utils"), None
     except Exception as exc:
-        try:
-            return importlib.import_module("wepppyo3.swat_utils.swat_utils_rust"), None
-        except Exception:
-            return None, exc
+        for module_name in ("wepppyo3.swat_utils_rust", "wepppyo3.swat_utils.swat_utils_rust"):
+            try:
+                return importlib.import_module(module_name), None
+            except Exception:
+                continue
+        return None, exc
 
 
 def _read_parquet_columns(con: duckdb.DuckDBPyConnection, parquet_path: str) -> List[str]:

@@ -50,6 +50,13 @@ class TestImports(unittest.TestCase):
             import wepppyo3  # noqa: F401
         except ModuleNotFoundError:
             self.skipTest("wepppyo3 package not installed in this environment")
+
+    def test_wepppyo3_swat_utils(self):
+        try:
+            import importlib
+            importlib.import_module("wepppyo3.swat_utils")
+        except ModuleNotFoundError:
+            self.skipTest("wepppyo3.swat_utils not installed in this environment")
     
 
 if __name__ == '__main__':
