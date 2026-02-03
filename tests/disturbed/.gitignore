@@ -1,0 +1,4 @@
+# Ignore test output directories
+output/
+disturbed_matrix*/
+__pycache__/

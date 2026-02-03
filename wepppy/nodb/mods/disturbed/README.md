@@ -124,27 +124,235 @@ The tables below capture the initial conditions (`IniLoopCropland`) and plant pa
 | shrub high sev fire | 0.20 | 1.0 | 2.0 | 4.0 |
 | shrub prescribed fire | 0.50 | 10.0 | 2.0 | 4.0 |
 
-### Runoff event counts (assiduous-topside)
+### Test Matrix Analysis Results (February 2026)
 
-Event counts compare base (burned) vs. omni undisturbed runoff by matching `wepp_id`, `year`, and `julian` in `H.pass.parquet`. Totals are reported for the full series and with the first year (1980) removed. Moderate-severity counts are from the base run where `p58=shrub moderate sev fire` and `p67=forest moderate sev fire` (pre-uniform high-severity rerun). High-severity counts are from the current uniform high-severity base run. Textures for the reported hillslopes are **sand loam** for shrub (`p58`) and **loam** for forest (`p67`).
+Analysis of 48 hillslope simulations across:
+- 4 soil textures (clay loam, loam, sand loam, silt loam)
+- 3 vegetation types (forest, shrub, tall grass)
+- 4 burn severities (unburned, low, moderate, high)
 
-**Full series**
+**Climate**: MC KENZIE BRIDGE RS, OR - 100 years, ~1,194 mm/yr precipitation
 
-| Disturbed class | WEPP ID | Total events | Burned > undisturbed | Undisturbed > burned | Equal |
-| --- | --- | --- | --- | --- | --- |
-| forest moderate sev fire | 67 | 16,437 | 127 | 116 | 16,194 |
-| forest high sev fire | 67 | 16,437 | 534 | 52 | 15,851 |
-| shrub moderate sev fire | 58 | 16,437 | 137 | 29 | 16,271 |
-| shrub high sev fire | 58 | 16,437 | 1,154 | 0 | 15,283 |
+**Slope**: 201.68m variable profile (avg ~43% grade)
 
-**Excluding first year (1980)**
+**Soil format**: 9002 with hydrophobicity parameters
 
-| Disturbed class | WEPP ID | Total events | Burned > undisturbed | Undisturbed > burned | Equal |
-| --- | --- | --- | --- | --- | --- |
-| forest moderate sev fire | 67 | 16,071 | 117 | 111 | 15,843 |
-| forest high sev fire | 67 | 16,071 | 519 | 49 | 15,503 |
-| shrub moderate sev fire | 58 | 16,071 | 133 | 25 | 15,913 |
-| shrub high sev fire | 58 | 16,071 | 1,124 | 0 | 14,947 |
+Test script: `tests/disturbed/test_disturbed_matrix.py`
+Analysis script: `tests/disturbed/analyze_matrix.py`
+
+#### Runoff Event Counts (Burned vs Unburned)
+
+Event counts compare burned vs unburned runoff by matching day/month/year across
+all 4 soil textures. Results aggregated from 100-year simulations (48 total runs).
+
+| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|-------------:|------------------:|------:|------------------:|
+| forest | low | 1,308 | 1,122 | 17 | 169 |
+| forest | moderate | 1,240 | 966 | 31 | 243 |
+| forest | high | 1,202 | 912 | 22 | 268 |
+| shrub | low | 1,406 | 1,216 | 3 | 187 |
+| shrub | moderate | 1,391 | 1,081 | 65 | 245 |
+| shrub | high | 1,380 | 957 | 43 | 380 |
+| tall grass | low | 1,493 | 359 | 981 | 153 |
+| tall grass | moderate | 1,480 | 746 | 181 | 553 |
+| tall grass | high | 1,459 | 773 | 73 | 613 |
+
+#### Sediment Delivery Event Counts (Burned vs Unburned)
+
+| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|-------------:|------------------:|------:|------------------:|
+| forest | low | 1,308 | 114 | 1,191 | 3 |
+| forest | moderate | 1,240 | 134 | 1,104 | 2 |
+| forest | high | 1,202 | 236 | 966 | 0 |
+| shrub | low | 1,406 | 51 | 1,191 | 164 |
+| shrub | moderate | 1,391 | 86 | 1,170 | 135 |
+| shrub | high | 1,380 | 255 | 1,093 | 32 |
+| tall grass | low | 1,493 | 80 | 1,405 | 8 |
+| tall grass | moderate | 1,480 | 87 | 1,388 | 5 |
+| tall grass | high | 1,459 | 278 | 1,181 | 0 |
+
+#### Runoff Descriptive Statistics (mm)
+
+Statistics aggregated across all 4 soil textures for 100-year simulations.
+
+| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
+|----------|----------|-----------|-----:|--------:|-------:|------:|
+| forest | low | burned | 20.26 | 19.00 | 15.03 | 26,344 |
+| | | unburned | 18.90 | 17.45 | 14.09 | 24,633 |
+| forest | moderate | burned | 20.91 | 19.19 | 15.34 | 25,765 |
+| | | unburned | 19.15 | 17.69 | 14.26 | 23,663 |
+| forest | high | burned | 21.07 | 19.15 | 15.47 | 25,159 |
+| | | unburned | 19.23 | 17.86 | 14.30 | 23,023 |
+| shrub | low | burned | 19.82 | 18.52 | 14.53 | 27,638 |
+| | | unburned | 19.05 | 18.51 | 13.60 | 26,581 |
+| shrub | moderate | burned | 19.85 | 18.48 | 14.60 | 27,393 |
+| | | unburned | 19.17 | 18.56 | 13.79 | 26,468 |
+| shrub | high | burned | 19.73 | 18.36 | 14.78 | 27,038 |
+| | | unburned | 19.24 | 18.60 | 13.93 | 26,366 |
+| tall grass | low | burned | 19.00 | 18.29 | 13.51 | 28,191 |
+| | | unburned | 18.65 | 18.05 | 13.15 | 27,694 |
+| tall grass | moderate | burned | 19.15 | 18.33 | 13.65 | 28,185 |
+| | | unburned | 18.77 | 18.07 | 13.35 | 27,658 |
+| tall grass | high | burned | 19.29 | 18.35 | 14.16 | 27,972 |
+| | | unburned | 19.00 | 18.10 | 13.64 | 27,562 |
+
+#### Sediment Delivery Descriptive Statistics (kg/m)
+
+| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
+|----------|----------|-----------|-----:|--------:|-------:|------:|
+| forest | low | burned | 0.334 | 1.447 | 0.000 | 468.5 |
+| | | unburned | 0.021 | 0.129 | 0.000 | 30.6 |
+| forest | moderate | burned | 0.888 | 3.366 | 0.000 | 1,229.2 |
+| | | unburned | 0.022 | 0.132 | 0.000 | 30.6 |
+| forest | high | burned | 4.072 | 12.020 | 0.000 | 5,338.0 |
+| | | unburned | 0.023 | 0.134 | 0.000 | 30.6 |
+| shrub | low | burned | 0.099 | 0.433 | 0.000 | 149.0 |
+| | | unburned | 0.118 | 0.402 | 0.000 | 188.4 |
+| shrub | moderate | burned | 0.230 | 1.019 | 0.000 | 350.7 |
+| | | unburned | 0.119 | 0.404 | 0.000 | 188.4 |
+| shrub | high | burned | 1.874 | 5.836 | 0.000 | 2,775.7 |
+| | | unburned | 0.120 | 0.406 | 0.000 | 188.4 |
+| tall grass | low | burned | 0.179 | 0.923 | 0.000 | 291.6 |
+| | | unburned | 0.149 | 0.775 | 0.000 | 242.7 |
+| tall grass | moderate | burned | 0.330 | 1.742 | 0.000 | 537.4 |
+| | | unburned | 0.151 | 0.779 | 0.000 | 242.7 |
+| tall grass | high | burned | 3.941 | 12.201 | 0.000 | 6,398.5 |
+| | | unburned | 0.153 | 0.784 | 0.000 | 242.7 |
+
+#### Key Findings
+
+1. **Runoff increases with burn severity**: For forest and shrub, burned conditions consistently show more runoff events than unburned (e.g., forest low: 86% burned > unburned). Tall grass shows more variable response due to already low cover.
+
+2. **Sediment delivery increases dramatically with high severity fire**: Forest high severity shows 174x more total sediment delivery than unburned (5,338 vs 30.6 kg/m). Shrub and tall grass show similar patterns.
+
+3. **Directional consistency**: High severity fire produces more sediment in 100% of matched events for forest (236 burned > unburned, 0 unburned > burned) and tall grass. Lower severities show more mixed results due to moisture state interactions.
+
+4. **Shrub baseline caveat**: Shrub unburned shows higher sediment than shrub low/moderate severity in some events (164 and 135 respectively), likely due to parameter differences in baseline shrub vs fire recovery management files
+
+#### Runoff Event Counts by Soil Texture
+
+Rows grouped by texture to highlight texture-specific response patterns.
+
+**Clay Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 388 | 322 | 11 | 55 |
+| forest | moderate | 368 | 267 | 20 | 81 |
+| forest | high | 357 | 256 | 10 | 91 |
+| shrub | low | 415 | 363 | 1 | 51 |
+| shrub | moderate | 410 | 305 | 22 | 83 |
+| shrub | high | 406 | 276 | 16 | 114 |
+| tall grass | low | 434 | 94 | 298 | 42 |
+| tall grass | moderate | 427 | 204 | 64 | 159 |
+| tall grass | high | 421 | 222 | 22 | 177 |
+
+**Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 349 | 301 | 4 | 44 |
+| forest | moderate | 332 | 267 | 4 | 61 |
+| forest | high | 323 | 253 | 2 | 68 |
+| shrub | low | 385 | 336 | 1 | 48 |
+| shrub | moderate | 380 | 310 | 15 | 55 |
+| shrub | high | 378 | 270 | 13 | 95 |
+| tall grass | low | 405 | 95 | 271 | 39 |
+| tall grass | moderate | 401 | 200 | 52 | 149 |
+| tall grass | high | 397 | 205 | 24 | 168 |
+
+**Sand Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 249 | 219 | 0 | 30 |
+| forest | moderate | 235 | 192 | 2 | 41 |
+| forest | high | 227 | 181 | 4 | 42 |
+| shrub | low | 265 | 223 | 0 | 42 |
+| shrub | moderate | 263 | 213 | 4 | 46 |
+| shrub | high | 261 | 186 | 5 | 70 |
+| tall grass | low | 289 | 79 | 177 | 33 |
+| tall grass | moderate | 289 | 154 | 25 | 110 |
+| tall grass | high | 281 | 153 | 11 | 117 |
+
+**Silt Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 322 | 280 | 2 | 40 |
+| forest | moderate | 305 | 240 | 5 | 60 |
+| forest | high | 295 | 222 | 6 | 67 |
+| shrub | low | 341 | 294 | 1 | 46 |
+| shrub | moderate | 338 | 253 | 24 | 61 |
+| shrub | high | 335 | 225 | 9 | 101 |
+| tall grass | low | 365 | 91 | 235 | 39 |
+| tall grass | moderate | 363 | 188 | 40 | 135 |
+| tall grass | high | 360 | 193 | 16 | 151 |
+
+#### Sediment Delivery Event Counts by Soil Texture
+
+**Clay Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 388 | 68 | 319 | 1 |
+| forest | moderate | 368 | 78 | 289 | 1 |
+| forest | high | 357 | 134 | 223 | 0 |
+| shrub | low | 415 | 20 | 265 | 130 |
+| shrub | moderate | 410 | 30 | 258 | 122 |
+| shrub | high | 406 | 133 | 243 | 30 |
+| tall grass | low | 434 | 49 | 381 | 4 |
+| tall grass | moderate | 427 | 51 | 373 | 3 |
+| tall grass | high | 421 | 195 | 226 | 0 |
+
+**Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 349 | 23 | 324 | 2 |
+| forest | moderate | 332 | 32 | 299 | 1 |
+| forest | high | 323 | 43 | 280 | 0 |
+| shrub | low | 385 | 6 | 351 | 28 |
+| shrub | moderate | 380 | 25 | 345 | 10 |
+| shrub | high | 378 | 49 | 329 | 0 |
+| tall grass | low | 405 | 21 | 381 | 3 |
+| tall grass | moderate | 401 | 25 | 374 | 2 |
+| tall grass | high | 397 | 53 | 344 | 0 |
+
+**Sand Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 249 | 6 | 243 | 0 |
+| forest | moderate | 235 | 6 | 229 | 0 |
+| forest | high | 227 | 19 | 208 | 0 |
+| shrub | low | 265 | 8 | 257 | 0 |
+| shrub | moderate | 263 | 9 | 254 | 0 |
+| shrub | high | 261 | 25 | 236 | 0 |
+| tall grass | low | 289 | 2 | 287 | 0 |
+| tall grass | moderate | 289 | 2 | 287 | 0 |
+| tall grass | high | 281 | 12 | 269 | 0 |
+
+**Silt Loam**
+
+| Veg Type | Severity | Total | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|------:|------------------:|------:|------------------:|
+| forest | low | 322 | 17 | 305 | 0 |
+| forest | moderate | 305 | 18 | 287 | 0 |
+| forest | high | 295 | 40 | 255 | 0 |
+| shrub | low | 341 | 17 | 318 | 6 |
+| shrub | moderate | 338 | 22 | 313 | 3 |
+| shrub | high | 335 | 48 | 285 | 2 |
+| tall grass | low | 365 | 8 | 356 | 1 |
+| tall grass | moderate | 363 | 9 | 354 | 0 |
+| tall grass | high | 360 | 18 | 342 | 0 |
+
+#### Texture Pattern Observations
+
+1. **Clay loam** shows the highest sediment response - more events with burned > unburned across all veg types
+2. **Sand loam** shows minimal sediment differences - high infiltration capacity reduces erosion even when burned
+3. **Shrub anomaly** in clay loam: 130 events where unburned > burned for low severity - suggests baseline shrub parameters produce more erosion than low-severity fire recovery in fine-textured soils
+4. **Tall grass runoff** shows high "Equal" counts across all textures at low severity, indicating minimal hydrologic impact from low-severity grass fires
 
 ### Grass (Tall and Short)
 
