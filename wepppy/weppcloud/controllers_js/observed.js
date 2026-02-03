@@ -328,6 +328,10 @@ var Observed = (function () {
             }
 
             var submission = { data: text };
+            var modelSource = payload.model_source || payload.observed_model_source;
+            if (typeof modelSource === "string" && modelSource.trim()) {
+                submission.model_source = modelSource.trim();
+            }
 
             controller.triggerEvent("job:started", {
                 task: TASK_NAME,

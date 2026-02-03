@@ -28,6 +28,19 @@
          extra_control_class="disable-readonly"
        ) }}
 
+    {% if ron and 'swat' in ron.mods %}
+      {% set model_source = observed.model_source if observed and observed.model_source else 'wepp' %}
+      {{ ui.radio_group(
+           "observed_model_source",
+           label="Model output source",
+           options=[
+             {"value": "wepp", "label": "WEPP", "checked": model_source == "wepp"},
+             {"value": "swat", "label": "SWAT+", "checked": model_source == "swat"}
+           ],
+           help="Select which model output to compare against the observed data."
+         ) }}
+    {% endif %}
+
     {% call button_row() %}
       <button
         id="btn_run_observed"

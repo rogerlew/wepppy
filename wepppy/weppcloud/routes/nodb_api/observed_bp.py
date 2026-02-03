@@ -24,6 +24,9 @@ def submit_task_run_model_fit(runid, config):
     textdata = payload.get('data')
     if textdata is None:
         textdata = payload.get('observed_text')
+    model_source = payload.get('model_source')
+    if model_source is None:
+        model_source = payload.get('observed_model_source')
 
     if textdata is None:
         response = error_factory('No observed dataset supplied.')
@@ -41,7 +44,7 @@ def submit_task_run_model_fit(runid, config):
         return exception_factory('Error parsing text', runid=runid)
     # TODO refactor as RQ task?
     try:
-        observed.calc_model_fit()
+        observed.calc_model_fit(model_source=model_source)
     except Exception:
         return exception_factory('Error running model fit', runid=runid)
 

@@ -80,6 +80,8 @@ class Observed(NoDbBase):
 
         with self.locked():
             self.results = None
+            if not hasattr(self, "model_source"):
+                self.model_source = "wepp"
             if not _exists(self.observed_dir):
                 os.mkdir(self.observed_dir)
 
@@ -117,49 +119,66 @@ class Observed(NoDbBase):
     def has_results(self):
         return self.results is not None
 
-    def calc_model_fit(self):
+    def calc_model_fit(self, model_source=None):
         assert self.has_observed
 
+        model_source = self._normalize_model_source(model_source)
         total_start = perf_counter()
         observed_df = pd.read_csv(self.observed_fn)
 
-        start = perf_counter()
-        hillslope_sim, wsarea_m2 = self._load_hillslope_simulation()
-        hillslope_load_time = perf_counter() - start
-        first_year = hillslope_sim['Year'].min() if not hillslope_sim.empty else None
-        results = {}
-
-        def _run_hillslopes():
+        if model_source == "swat":
             start = perf_counter()
-            hillslope_results = self.run_measures(observed_df, hillslope_sim, 'Hillslopes')
-            return hillslope_results, perf_counter() - start
-
-        def _run_channels():
+            swat_sim = self._load_swat_simulation()
+            swat_load_time = perf_counter() - start
             start = perf_counter()
-            channel_sim = self._load_channel_simulation(wsarea_m2, first_year)
-            channel_load_time = perf_counter() - start
+            results = {
+                "Channels": self.run_measures(observed_df, swat_sim, "Channels"),
+            }
+            swat_fit_time = perf_counter() - start
+            hillslope_load_time = 0.0
+            hillslope_fit_time = 0.0
+            channel_load_time = swat_load_time
+            channel_fit_time = swat_fit_time
+        else:
             start = perf_counter()
-            channel_results = self.run_measures(observed_df, channel_sim, 'Channels')
-            channel_fit_time = perf_counter() - start
-            return channel_results, channel_load_time, channel_fit_time
+            hillslope_sim, wsarea_m2 = self._load_hillslope_simulation()
+            hillslope_load_time = perf_counter() - start
+            first_year = hillslope_sim['Year'].min() if not hillslope_sim.empty else None
+            results = {}
 
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            hillslope_future = executor.submit(_run_hillslopes)
-            channel_future = executor.submit(_run_channels)
-            results['Hillslopes'], hillslope_fit_time = hillslope_future.result()
-            results['Channels'], channel_load_time, channel_fit_time = channel_future.result()
+            def _run_hillslopes():
+                start = perf_counter()
+                hillslope_results = self.run_measures(observed_df, hillslope_sim, 'Hillslopes')
+                return hillslope_results, perf_counter() - start
+
+            def _run_channels():
+                start = perf_counter()
+                channel_sim = self._load_channel_simulation(wsarea_m2, first_year)
+                channel_load_time = perf_counter() - start
+                start = perf_counter()
+                channel_results = self.run_measures(observed_df, channel_sim, 'Channels')
+                channel_fit_time = perf_counter() - start
+                return channel_results, channel_load_time, channel_fit_time
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                hillslope_future = executor.submit(_run_hillslopes)
+                channel_future = executor.submit(_run_channels)
+                results['Hillslopes'], hillslope_fit_time = hillslope_future.result()
+                results['Channels'], channel_load_time, channel_fit_time = channel_future.result()
 
         total_time = perf_counter() - total_start
         with self.locked():
             self.results = results
+            self.model_source = model_source
             self.logger.info(
                 "Observed calc_model_fit timings: hillslope_load=%.3fs hillslope_stats=%.3fs "
-                "channel_load=%.3fs channel_stats=%.3fs total=%.3fs",
+                "channel_load=%.3fs channel_stats=%.3fs total=%.3fs model_source=%s",
                 hillslope_load_time,
                 hillslope_fit_time,
                 channel_load_time,
                 channel_fit_time,
                 total_time,
+                model_source,
             )
             
         try:
@@ -170,8 +189,28 @@ class Observed(NoDbBase):
 
     @property
     def stat_names(self):
-        measure0 = list(self.results['Hillslopes'].keys())[0]
-        return list(self.results['Hillslopes'][measure0]['Daily'].keys())
+        if not self.results:
+            return []
+        for group in self.results.values():
+            if not group:
+                continue
+            measure0 = next(iter(group.keys()), None)
+            if measure0 is None:
+                continue
+            daily = group[measure0].get('Daily', {})
+            return list(daily.keys())
+        return []
+
+    def _normalize_model_source(self, model_source):
+        source = model_source
+        if source is None:
+            source = getattr(self, "model_source", None)
+        if source is None:
+            source = "wepp"
+        source = str(source).strip().lower()
+        if source not in ("wepp", "swat"):
+            source = "wepp"
+        return source
 
     def run_measures(self, obs, sim, hillorChannel):
 
@@ -464,6 +503,171 @@ class Observed(NoDbBase):
 
         ebe_df.sort_values(['Year', 'Julian', 'Day'], inplace=True, ignore_index=True)
         return ebe_df
+
+    def _load_swat_simulation(self):
+        output_dir = self._resolve_swat_output_dir()
+        if output_dir is None:
+            raise ObservedNoDbLockedException("No SWAT output directory found for observed comparison.")
+
+        ru_path = output_dir / "ru_day.txt"
+        if not ru_path.exists():
+            alt = Path(self.wd) / "swat" / "TxtInOut" / "ru_day.txt"
+            ru_path = alt if alt.exists() else ru_path
+
+        ru_df = self._read_swat_table(ru_path) if ru_path.exists() else pd.DataFrame()
+
+        basin_path = output_dir / "basin_wb_day.txt"
+        basin_df = self._read_swat_table(basin_path) if basin_path.exists() else pd.DataFrame()
+
+        required = {"jday", "mon", "day", "yr"}
+        if not basin_df.empty and not required.issubset(basin_df.columns):
+            raise ObservedNoDbLockedException(
+                f"SWAT basin water balance output missing required date columns: {basin_path}"
+            )
+        if not ru_df.empty and not required.issubset(ru_df.columns):
+            raise ObservedNoDbLockedException(
+                f"SWAT routing unit output missing required date columns: {ru_path}"
+            )
+
+        if basin_df.empty and ru_df.empty:
+            return self._empty_observed_frame()
+
+        ru_daily = pd.DataFrame()
+        if not ru_df.empty:
+            agg_map = {}
+            if "flo" in ru_df.columns:
+                agg_map["flo"] = "sum"
+            if "sed" in ru_df.columns:
+                agg_map["sed"] = "sum"
+            if agg_map:
+                ru_daily = ru_df.groupby(["yr", "mon", "day", "jday"], as_index=False).agg(agg_map)
+
+        basin_daily = pd.DataFrame()
+        if not basin_df.empty and "wateryld" in basin_df.columns:
+            basin_daily = basin_df.groupby(["yr", "mon", "day", "jday"], as_index=False).agg(
+                {"wateryld": "sum"}
+            )
+
+        streamflow_mm = None
+        if not basin_daily.empty and "wateryld" in basin_daily.columns:
+            streamflow_mm = basin_daily["wateryld"]
+            if not ru_daily.empty:
+                ru_daily = ru_daily.merge(
+                    basin_daily,
+                    on=["yr", "mon", "day", "jday"],
+                    how="left",
+                )
+        elif not ru_daily.empty and "flo" in ru_daily.columns:
+            area_m2 = self._read_swat_area_m2(output_dir)
+            if area_m2 > 0:
+                streamflow_mm = ru_daily["flo"] * 86400.0 / area_m2 * 1000.0
+            else:
+                streamflow_mm = np.nan
+        else:
+            streamflow_mm = np.nan
+
+        date_source = None
+        if not basin_daily.empty:
+            date_source = basin_daily
+        elif not ru_daily.empty:
+            date_source = ru_daily
+        else:
+            return self._empty_observed_frame()
+
+        sim = pd.DataFrame({
+            "Year": date_source["yr"].astype(int, copy=False),
+            "Month": date_source["mon"].astype(int, copy=False),
+            "Day": date_source["day"].astype(int, copy=False),
+            "Julian": date_source["jday"].astype(int, copy=False),
+        })
+        sim["Water Year"] = sim["Year"] + (sim["Julian"] > 273).astype(int)
+        sim["Streamflow (mm)"] = streamflow_mm
+        if not ru_daily.empty and "sed" in ru_daily.columns:
+            sim["Sed Del (kg)"] = ru_daily["sed"] * 1000.0
+        else:
+            sim["Sed Del (kg)"] = np.nan
+
+        for col in ("Total P (kg)", "Soluble Reactive P (kg)", "Particulate P (kg)"):
+            sim[col] = np.nan
+
+        sim.sort_values(["Year", "Julian", "Day"], inplace=True, ignore_index=True)
+        return sim
+
+    def _resolve_swat_output_dir(self):
+        base = Path(self.wd) / "swat" / "outputs"
+        if not base.exists():
+            return None
+
+        run_id = None
+        try:
+            from wepppy.nodb.mods.swat import Swat
+
+            swat = Swat.tryGetInstance(self.wd)
+            if swat is not None and swat.run_summary:
+                run_id = swat.run_summary.get("run_id")
+        except Exception:
+            run_id = None
+
+        if run_id:
+            candidate = base / f"run_{run_id}"
+            if candidate.exists():
+                return candidate
+
+        candidates = sorted(base.glob("run_*"), key=lambda p: p.stat().st_mtime, reverse=True)
+        return candidates[0] if candidates else None
+
+    def _read_swat_table(self, path: Path):
+        with open(path) as handle:
+            header = handle.readline()
+            if not header:
+                return pd.DataFrame()
+            columns_line = handle.readline()
+            if not columns_line:
+                return pd.DataFrame()
+            columns = columns_line.split()
+            _ = handle.readline()
+
+        if not columns:
+            return pd.DataFrame()
+
+        df = pd.read_csv(path, delim_whitespace=True, skiprows=3, names=columns)
+        if "null" in df.columns:
+            df.drop(columns=["null"], inplace=True)
+        return df
+
+    def _read_swat_area_m2(self, output_dir: Path) -> float:
+        candidates = [
+            output_dir / "object.cnt",
+            output_dir / "SWIFT" / "object.cnt",
+            Path(self.wd) / "swat" / "TxtInOut" / "object.cnt",
+        ]
+        for path in candidates:
+            if not path.exists():
+                continue
+            try:
+                with open(path) as handle:
+                    lines = handle.read().splitlines()
+            except OSError:
+                continue
+            for line in lines[1:]:
+                parts = line.split()
+                if len(parts) < 3:
+                    continue
+                try:
+                    tot_area = float(parts[2])
+                except ValueError:
+                    continue
+                if tot_area > 0:
+                    return tot_area * 10000.0
+        return 0.0
+
+    def _empty_observed_frame(self):
+        empty_columns = [
+            'Year', 'Month', 'Day', 'Julian', 'Water Year',
+            'Streamflow (mm)', 'Sed Del (kg)',
+            'Total P (kg)', 'Soluble Reactive P (kg)', 'Particulate P (kg)',
+        ]
+        return pd.DataFrame(columns=empty_columns)
 
     def _write_measure(self, Qm, Qo, dates, measure, hillorChannel, dailyorYearly):
         assert len(Qm) == len(Qo)
