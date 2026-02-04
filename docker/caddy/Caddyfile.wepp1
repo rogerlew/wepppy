@@ -1,4 +1,11 @@
 wepp.cloud {
+    # Bot blocking - aggressive crawlers (see docs/mini-work-packages/20260203_resource_contraints.md)
+    @blocked_bots {
+        header User-Agent *meta-externalagent*
+        header User-Agent *Bytespider*
+    }
+    respond @blocked_bots 403
+
     handle_path /health* {
         respond "OK"
     }

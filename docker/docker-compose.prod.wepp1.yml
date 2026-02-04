@@ -20,7 +20,7 @@ x-wepppy-image: &wepppy-image
 
 services:
   caddy:
-    cpuset: "48-55"
+    cpuset: "32-47"
     ports:
       - "80:80"
       - "443:443"
@@ -35,60 +35,84 @@ services:
       CAP_ASSET_ROOT: /opt/cap
   weppcloud:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
       - ../wepppy/weppcloud/static:/srv/weppcloud/static
+    command:
+      - gunicorn
+      - --workers
+      - "8"
+      - --threads
+      - "4"
+      - --timeout
+      - "1800"
+      - --bind
+      - 0.0.0.0:8000
+      - --log-level
+      - info
+      - wepppy.weppcloud.app:app
   browse:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
+    command:
+      - gunicorn
+      - --workers
+      - "8"
+      - --bind
+      - 0.0.0.0:9009
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - wepppy.microservices.browse:app
   dtale:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   profile-playback:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
       - ${PROFILE_PLAYBACK_DATA_DIR:-/workdir/wepppy-test-engine-data}:/workdir/wepppy-test-engine-data
   elevationquery:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   metquery:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   wmesque:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   wmesque2:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   query-engine:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   rq-engine:
     <<: *wepppy-image
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes: *wepp1-volumes
   rq-worker:
     <<: *wepppy-image
-    cpuset: "0-47"
+    cpuset: "0-31"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
       - /var/run/docker.sock:/var/run/docker.sock
   rq-worker-batch:
     <<: *wepppy-image
-    cpuset: "0-47"
+    cpuset: "0-31"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
@@ -98,7 +122,7 @@ services:
       PERIDOT_CPU: "4"
   weppcloudr:
     container_name: weppcloudr
-    cpuset: "48-55"
+    cpuset: "32-47"
     volumes:
       - /geodata:/geodata
       - /geodata/wc1:/wc1
