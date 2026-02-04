@@ -19,6 +19,14 @@
     </div>
   {% endif %}
 
+  {{ ui.checkbox_field(
+       "checkbox_wepp_watershed",
+       "Run WEPP Watershed",
+       checked=wepp.run_wepp_watershed,
+       help="When enabled, WEPP runs include the watershed routing and channel outputs.",
+       attrs={"class": "disable-readonly", "data-wepp-routine": "wepp_watershed"}
+     ) }}
+
   {% call button_row() %}
     <button
       id="btn_run_wepp_watershed"

@@ -79,6 +79,10 @@ def _build_swat_inputs_rq(runid: str) -> None:
         swat.build_inputs()
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job.id} TRIGGER   swat SWAT_RUN_TASK_COMPLETED",
+        )
     except Exception:
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise

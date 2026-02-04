@@ -234,6 +234,8 @@ var Wepp = (function () {
         var rqJobElement = dom.qs("#wepp_form #rq_job");
         var hintElement = dom.qs("#hint_run_wepp");
         var swatHintElement = dom.qs("#hint_run_swat");
+        var swatExecButton = formElement ? formElement.querySelector('[data-wepp-action="run-swat"]') : null;
+        var hasSwatControls = Boolean(swatHintElement || swatExecButton);
         var resultsContainer = dom.qs("#wepp-results");
         var revegSelect = dom.qs("#reveg_scenario");
         var coverTransformContainer = dom.qs("#user_defined_cover_transform_container");
@@ -253,6 +255,7 @@ var Wepp = (function () {
         wepp.hint = hintAdapter;
         wepp.command_btn_id = "btn_run_wepp";
         wepp.resultsContainer = resultsContainer;
+        wepp.hasSwatControls = hasSwatControls;
 
         wepp.statusPanelEl = dom.qs("#wepp_status_panel");
         wepp.stacktracePanelEl = dom.qs("#wepp_stacktrace_panel");
@@ -649,6 +652,11 @@ var Wepp = (function () {
             resetCompletionSeen();
             ensureWeppStatusStream();
             wepp.connect_status_stream(wepp);
+            if (hasSwatControls) {
+                resetSwatCompletionSeen();
+                ensureSwatStatusStream();
+                connectSwatStatusStream();
+            }
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
@@ -755,6 +763,11 @@ var Wepp = (function () {
             resetCompletionSeen();
             ensureWeppStatusStream();
             wepp.connect_status_stream(wepp);
+            if (hasSwatControls) {
+                resetSwatCompletionSeen();
+                ensureSwatStatusStream();
+                connectSwatStatusStream();
+            }
 
             var payload = forms.serializeForm(formElement, { format: "json" }) || {};
 
@@ -944,6 +957,11 @@ var Wepp = (function () {
                     } else {
                         resetCompletionSeen();
                         ensureWeppStatusStream();
+                        if (hasSwatControls) {
+                            resetSwatCompletionSeen();
+                            ensureSwatStatusStream();
+                            connectSwatStatusStream();
+                        }
                     }
                 }
                 wepp.set_rq_job_id(wepp, jobId);
