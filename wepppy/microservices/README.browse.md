@@ -32,18 +32,19 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 ## Routes & options
 | Route | What it does | Notable query params |
 |-------|---------------|----------------------|
-| `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run. |
+| `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run, `include_hidden=1` to show dot-prefixed entries. |
 | `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables (pandas), and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet/CSV viewers expose convenience links (pivot, CSV). |
 | `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion. |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
 
 All routes honor the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
-
 ## Behavior details
 - **Security**
   - Path traversal is blocked by comparing real paths against the resolved run directory.
   - Missing resources return 404/JSON errors rather than Flask responses.
+- **Hidden entries**
+  - Dot-prefixed entries are omitted from listings unless `include_hidden=1` is set.
 - **Performance**
   - Async subprocesses mean directory listings are ~4–10× faster for most runs.
   - Large file conversions run in thread executors; gunicorn workers stay responsive.
@@ -51,7 +52,6 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
   - `url_for` supports the common `command_bar.static` and `static` endpoints. Extend the shim before pulling additional Flask templates.
 - **Logging**
   - `/health` polling is filtered from gunicorn/uvicorn access logs.
-
 ## Manifest-backed directory listings
 - `manifest.db` is created when a project flips to readonly; it lives at the run root and is built by `create_manifest` in `browse.py` using the same traversal logic as on-demand browsing.
 - SQLite stays in WAL mode with `synchronous=NORMAL` for fast reads. The `entries` table stores `dir_path`, `name`, `entry_type` (file, directory, symlink), `size_bytes`, `mtime_ns`, `child_count`, and `symlink_target`. `entry_type` sorts with raw byte ordering so listings match `ls`.

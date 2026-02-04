@@ -901,7 +901,7 @@ def test_files_manifest_pattern_filtering(tmp_path: Path, monkeypatch, load_brow
     assert names == {"alpha.txt", "beta.txt"}
 
 
-def test_files_dotfiles_consistent_with_manifest(tmp_path: Path, monkeypatch, load_browse):
+def test_files_dotfiles_hidden_by_default(tmp_path: Path, monkeypatch, load_browse):
     runid = "run-564"
     config = "disturbed9002_wbt"
     run_root = tmp_path / "run"
@@ -920,12 +920,28 @@ def test_files_dotfiles_consistent_with_manifest(tmp_path: Path, monkeypatch, lo
     assert response.status_code == 200
     payload = response.json()
     names = {entry["name"] for entry in payload["entries"]}
+    assert ".secret" not in names
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/?include_hidden=1")
+
+    assert response.status_code == 200
+    payload = response.json()
+    names = {entry["name"] for entry in payload["entries"]}
     assert ".secret" in names
 
     browse.create_manifest(str(run_root))
     app = browse.create_app()
     with TestClient(app) as client:
         response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+
+    assert response.status_code == 200
+    payload = response.json()
+    names = {entry["name"] for entry in payload["entries"]}
+    assert ".secret" not in names
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/?include_hidden=1")
 
     assert response.status_code == 200
     payload = response.json()

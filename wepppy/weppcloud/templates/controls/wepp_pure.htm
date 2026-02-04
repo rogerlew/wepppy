@@ -3,7 +3,7 @@
 
 {% call ui.control_shell(
      form_id="wepp_form",
-     title="WEPP",
+     title=("WEPP-SWAT+" if swat else "WEPP"),
      collapsible=True,
      status_panel_options={"id": "wepp_status_panel"},
      stacktrace_panel_options={"panel_id": "wepp_stacktrace_panel", "body_id": "stacktrace"}
@@ -15,7 +15,7 @@
     for detailed guidance.
   </p>
 
-  {% call ui.collapsible_card(title="Advanced options", expanded=False, card_id="wepp_advanced_options") %}
+  {% call ui.collapsible_card(title="WEPP Advanced Options", expanded=False, card_id="wepp_advanced_options") %}
     <div class="wc-stack" data-wepp-advanced>
       {% call ui.card("WEPP UI - Hourly Seepage", attrs={"id": "wepp_hourly_seepage"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_ui.htm" %}
@@ -59,14 +59,6 @@
       {% call ui.card("WEPP Exec", attrs={"id": "wepp_binary_selection"}) %}
       {% include "controls/wepp_pure_advanced_options/wepp_bin.htm" %}
       {% endcall %}
-      {% if swat %}
-        {% call ui.card("SWAT Print.prt", attrs={"id": "swat_print_prt_options"}) %}
-        {% include "controls/swat_pure_advanced_options/swat_print_prt.htm" %}
-        {% endcall %}
-        {% call ui.card("SWAT Exec", attrs={"id": "swat_exec_options"}) %}
-        {% include "controls/swat_pure_advanced_options/swat_exec.htm" %}
-        {% endcall %}
-      {% endif %}
       {% if reveg %}
         {% call ui.card("Revegetation Scenarios", attrs={"id": "wepp_revegetation_options"}) %}
           {% include "controls/wepp_pure_advanced_options/revegetation.htm" %}
@@ -74,6 +66,19 @@
       {% endif %}
     </div>
   {% endcall %}
+
+  {% if swat %}
+    {% call ui.collapsible_card(title="SWAT+ Advanced Options", expanded=False, card_id="swat_advanced_options") %}
+      <div class="wc-stack" data-swat-advanced>
+        {% call ui.card("SWAT Print.prt", attrs={"id": "swat_print_prt_options"}) %}
+        {% include "controls/swat_pure_advanced_options/swat_print_prt.htm" %}
+        {% endcall %}
+        {% call ui.card("SWAT Exec", attrs={"id": "swat_exec_options"}) %}
+        {% include "controls/swat_pure_advanced_options/swat_exec.htm" %}
+        {% endcall %}
+      </div>
+    {% endcall %}
+  {% endif %}
 
   <div class="wc-stack">
     {% call button_row() %}
@@ -83,7 +88,7 @@
         class="pure-button pure-button-primary disable-readonly"
         data-wepp-action="run">
         <img id="run_wepp_lock" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" alt="Lock" style="display:none;">
-        Run WEPP
+        {% if swat %}Run WEPP-SWAT+{% else %}Run WEPP{% endif %}
       </button>
     {% endcall %}
   </div>
