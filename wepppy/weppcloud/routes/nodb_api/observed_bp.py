@@ -1,5 +1,7 @@
 """Routes for observed blueprint extracted from app.py."""
 
+import traceback
+
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron
@@ -46,7 +48,11 @@ def submit_task_run_model_fit(runid, config):
     try:
         observed.calc_model_fit(model_source=model_source)
     except Exception:
-        return exception_factory('Error running model fit', runid=runid)
+        return exception_factory(
+            'Error running model fit',
+            runid=runid,
+            details=traceback.format_exc(),
+        )
 
     return success_factory()
 

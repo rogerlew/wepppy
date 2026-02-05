@@ -509,24 +509,48 @@ class Observed(NoDbBase):
         if output_dir is None:
             raise ObservedNoDbLockedException("No SWAT output directory found for observed comparison.")
 
-        ru_path = output_dir / "ru_day.txt"
-        if not ru_path.exists():
-            alt = Path(self.wd) / "swat" / "TxtInOut" / "ru_day.txt"
-            ru_path = alt if alt.exists() else ru_path
+        interchange_dir = output_dir / "interchange"
+        ru_parquet = interchange_dir / "ru_day.parquet"
+        basin_parquet = interchange_dir / "basin_wb_day.parquet"
 
-        ru_df = self._read_swat_table(ru_path) if ru_path.exists() else pd.DataFrame()
+        ru_df = pd.DataFrame()
+        basin_df = pd.DataFrame()
+        ru_source = ru_parquet
+        basin_source = basin_parquet
+        used_interchange = ru_parquet.exists() or basin_parquet.exists()
 
-        basin_path = output_dir / "basin_wb_day.txt"
-        basin_df = self._read_swat_table(basin_path) if basin_path.exists() else pd.DataFrame()
+        if used_interchange:
+            if ru_parquet.exists():
+                ru_df = self._read_swat_interchange_table(ru_parquet)
+            if basin_parquet.exists():
+                basin_df = self._read_swat_interchange_table(basin_parquet)
+        else:
+            self.logger.warning(
+                "SWAT interchange outputs not found under %s; falling back to text outputs",
+                interchange_dir,
+            )
+            ru_path = output_dir / "ru_day.txt"
+            if not ru_path.exists():
+                alt = Path(self.wd) / "swat" / "TxtInOut" / "ru_day.txt"
+                ru_path = alt if alt.exists() else ru_path
+            ru_source = ru_path
+            ru_df = self._read_swat_table(ru_path) if ru_path.exists() else pd.DataFrame()
+
+            basin_path = output_dir / "basin_wb_day.txt"
+            basin_source = basin_path
+            basin_df = self._read_swat_table(basin_path) if basin_path.exists() else pd.DataFrame()
+
+        ru_df = self._normalize_swat_columns(ru_df)
+        basin_df = self._normalize_swat_columns(basin_df)
 
         required = {"jday", "mon", "day", "yr"}
         if not basin_df.empty and not required.issubset(basin_df.columns):
             raise ObservedNoDbLockedException(
-                f"SWAT basin water balance output missing required date columns: {basin_path}"
+                f"SWAT basin water balance output missing required date columns: {basin_source}"
             )
         if not ru_df.empty and not required.issubset(ru_df.columns):
             raise ObservedNoDbLockedException(
-                f"SWAT routing unit output missing required date columns: {ru_path}"
+                f"SWAT routing unit output missing required date columns: {ru_source}"
             )
 
         if basin_df.empty and ru_df.empty:
@@ -592,6 +616,58 @@ class Observed(NoDbBase):
 
         sim.sort_values(["Year", "Julian", "Day"], inplace=True, ignore_index=True)
         return sim
+
+    def _read_swat_interchange_table(self, path: Path) -> pd.DataFrame:
+        try:
+            return pd.read_parquet(path)
+        except Exception as exc:
+            raise ObservedNoDbLockedException(
+                f"Failed to read SWAT interchange output: {path}"
+            ) from exc
+
+    def _normalize_swat_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        if df.empty:
+            return df
+        rename = {col: str(col).strip().lower() for col in df.columns}
+        df.rename(columns=rename, inplace=True)
+        if "null" in df.columns:
+            df.drop(columns=["null"], inplace=True)
+        self._coerce_swat_date_columns(df)
+        for col in ("wateryld", "flo", "sed"):
+            if col in df.columns:
+                self._coerce_swat_numeric_column(df, col)
+        return df
+
+    def _coerce_swat_date_columns(self, df: pd.DataFrame) -> None:
+        date_cols = ("yr", "mon", "day", "jday")
+        if not any(col in df.columns for col in date_cols):
+            return
+
+        if "day" in df.columns and df["day"].dtype == object:
+            day_text = df["day"].astype(str)
+            if day_text.str.contains(r"\s", regex=True, na=False).any():
+                parts = day_text.str.split(expand=True)
+                df["day"] = pd.to_numeric(parts[0], errors="coerce")
+
+                if "yr" in df.columns and parts.shape[1] > 1:
+                    century = pd.to_numeric(parts[1], errors="coerce")
+                    year = pd.to_numeric(df["yr"], errors="coerce")
+                    mask = century.notna() & year.notna() & (year >= 0) & (year < 100)
+                    df["yr"] = year.where(~mask, century * 100 + year)
+
+        for col in date_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    def _coerce_swat_numeric_column(self, df: pd.DataFrame, column: str) -> None:
+        series = df[column]
+        if series.dtype == object:
+            text = series.astype(str)
+            if text.str.contains(r"\s", regex=True, na=False).any():
+                text = text.str.split().str[0]
+            df[column] = pd.to_numeric(text, errors="coerce")
+        else:
+            df[column] = pd.to_numeric(series, errors="coerce")
 
     def _resolve_swat_output_dir(self):
         base = Path(self.wd) / "swat" / "outputs"
