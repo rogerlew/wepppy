@@ -506,6 +506,9 @@ If this tracker format isn't working or you have suggestions:
 - ❌ NoDb ACID Transaction Update (cancelled 2025-10-25) - Unviable architecture, file-first approach retained
 - ✅ Controller Modernization Documentation Backlog (completed 2025-10-23) - Helper-first docs established
 
+### February 2026
+- ✅ NED1 VRT Alignment Audit + Correction (completed 2026-02-05) - Audit script + corrected VRT + USGS report delivered
+
 ### [Month YYYY]
 - [Package name] (completed YYYY-MM-DD) - [One line outcome]
 

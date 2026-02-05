@@ -1,0 +1,81 @@
+<h1 id="usgs-ned1-seamless-vrt-alignment-issue-preliminary-report">USGS
+NED1 Seamless VRT Alignment Issue (Preliminary Report)</h1>
+<h2 id="summary">Summary</h2>
+<p>We found a spatial misalignment in the VRT distributed at:</p>
+<ul>
+<li><code>https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1/TIFF/USGS_Seamless_DEM_1.vrt</code></li>
+</ul>
+<p>The VRT’s global origin and a subset of tile placements are shifted
+relative to the source tiles by approximately <strong>4
+arc-seconds</strong> (4 pixels at 1” resolution), resulting in a visible
+northwest offset when mosaicked.</p>
+<h2 id="data-sources">Data Sources</h2>
+<ul>
+<li>VRT: <code>USGS_Seamless_DEM_1.vrt</code> (1 arc-second, NAD83)</li>
+<li>Tile examples:
+<ul>
+<li><code>.../Elevation/1/TIFF/current/n45w124/USGS_1_n45w124.tif</code></li>
+<li><code>.../Elevation/1/TIFF/current/n33w100/USGS_1_n33w100.tif</code></li>
+</ul></li>
+</ul>
+<h2 id="determination-method">Determination Method</h2>
+<p>We authored a GDAL-based audit tool that:</p>
+<ol type="1">
+<li>Parses the VRT and enumerates all <code>ComplexSource</code>
+entries.</li>
+<li>Opens each tile via <code>vsicurl</code> and reads the tile
+geotransform.</li>
+<li>Computes each tile’s expected upper-left (UL) position from the
+VRT.</li>
+<li>Reports offsets in degrees, arc-seconds, and pixel units.</li>
+</ol>
+<p>Script location: -
+<code>docs/work-packages/20260205_ned1_vrt_alignment/tools/ned_vrt_audit.py</code></p>
+<h2 id="findings">Findings</h2>
+<ul>
+<li>Total tiles analyzed: <strong>3811</strong></li>
+<li>Tiles with ~4” NW offset: <strong>37</strong></li>
+<li>The outlier tiles are consistently shifted by:
+<ul>
+<li><strong>dx = -4 arc-seconds</strong> (west)</li>
+<li><strong>dy = +4 arc-seconds</strong> (north)</li>
+</ul></li>
+<li>All other tiles are aligned within ~0.001 arc-seconds.</li>
+</ul>
+<p>Outlier list: -
+<code>docs/work-packages/20260205_ned1_vrt_alignment/artifacts/outlier_tiles.txt</code></p>
+<p>Example mismatch (n45w124): - Tile UL (from tile GeoTransform):
+<code>(-124.0005555565, 45.0005555563)</code> - VRT UL (computed from
+VRT GeoTransform + DstRect):
+<code>(-124.0016666671, 45.0016666669)</code> - Offset:
+<strong>-0.001111111 deg</strong>, <strong>+0.001111111 deg</strong>
+(exactly 4 arc-seconds)</p>
+<h2 id="correction">Correction</h2>
+<p>We generated a corrected VRT that repositions the affected tiles by
+recomputing <code>DstRect</code> offsets while keeping the global
+geotransform intact. The corrected file:</p>
+<ul>
+<li><code>docs/work-packages/20260205_ned1_vrt_alignment/artifacts/USGS_Seamless_DEM_1.corrected.vrt</code></li>
+</ul>
+<p>Re-auditing the corrected VRT shows residual offsets within ~5e-7
+arc-seconds (sub-micro-arcsecond), indicating the fix is clean.</p>
+<h2 id="reproduction-steps">Reproduction Steps</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> docs/work-packages/20260205_ned1_vrt_alignment/tools/ned_vrt_audit.py <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--vrt</span> /wc1/geodata/ned1/2024/.vrt <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--out-dir</span> /wc1/geodata/ned1/2024/audit</span></code></pre></div>
+<p>To generate a corrected VRT:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> docs/work-packages/20260205_ned1_vrt_alignment/tools/ned_vrt_audit.py <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--vrt</span> /wc1/geodata/ned1/2024/.vrt <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--out-dir</span> /wc1/geodata/ned1/2024/audit <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--correction-mode</span> dstrect <span class="dt">\</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--write-corrected-vrt</span> /wc1/geodata/ned1/2024/USGS_Seamless_DEM_1.corrected.vrt</span></code></pre></div>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>The VRT’s global origin appears to be shifted by 4 arc-seconds from
+the expected NED 1” grid.</li>
+<li>Only a small subset of tiles are impacted in the current VRT (37 /
+3811), but the offset is large enough to cause a visible map shift.</li>
+<li>We can provide full CSV audit output upon request.</li>
+</ul>
