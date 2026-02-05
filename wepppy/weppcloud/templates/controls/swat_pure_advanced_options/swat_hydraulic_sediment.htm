@@ -1,0 +1,52 @@
+{% import "controls/_pure_macros.html" as ui %}
+
+{% set params = swat.channel_params if swat and swat.channel_params else {} %}
+{% set mann_value = params.get("mann") %}
+{% set fpn_value = params.get("fpn") %}
+{% set erod_fact_value = params.get("erod_fact") %}
+{% set cov_fact_value = params.get("cov_fact") %}
+{% set d50_value = params.get("d50_mm") %}
+
+  <p class="wc-text-muted">
+    Uniform overrides applied to all SWAT-DEG channel records in <code>hyd-sed-lte.cha</code>.
+    Updates apply to the next SWAT+ build.
+  </p>
+  {{ ui.numeric_field(
+       "channel_mann",
+       "Channel Manning's n (mann)",
+       value=mann_value if mann_value is not none else "",
+       help="Higher values increase roughness, slow routing, and dampen peak flow.",
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.numeric_field(
+       "channel_fpn",
+       "Floodplain Manning's n (fpn)",
+       value=fpn_value if fpn_value is not none else "",
+       help="Higher values increase overbank resistance and attenuate peaks when floodplains engage. Leave blank to use the template default.",
+       nullable=True,
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.numeric_field(
+       "channel_erod_fact",
+       "Channel erodibility factor (erod_fact)",
+       value=erod_fact_value if erod_fact_value is not none else "",
+       help="Higher values increase bank and bed erosion, raising sediment loads.",
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.numeric_field(
+       "channel_cov_fact",
+       "Channel cover factor (cov_fact)",
+       value=cov_fact_value if cov_fact_value is not none else "",
+       help="Higher values increase protection/armoring and reduce erosion.",
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}
+  {{ ui.numeric_field(
+       "channel_d50_mm",
+       "Median bed material size (d50)",
+       value=d50_value if d50_value is not none else "",
+       unit_label="mm",
+       unit_category="xs-distance",
+       unit_name="mm",
+       help="Larger values indicate a coarser bed, generally increasing critical shear and reducing transport.",
+       attrs={"class": "disable-readonly", "inputmode": "decimal"}
+     ) }}

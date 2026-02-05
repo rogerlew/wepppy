@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_from_flags
 from wepppy.nodb.redis_prep import RedisPrep
@@ -58,7 +59,13 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
 
     try:
         wd = get_wd(runid)
-        await parse_request_payload(request)
+        payload = await parse_request_payload(request)
+
+        ron = Ron.getInstance(wd)
+        mods = ron.mods or []
+        if "swat" in mods:
+            swat = Swat.getInstance(wd)
+            swat.parse_inputs(payload)
 
         prep = RedisPrep.getInstance(wd)
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)

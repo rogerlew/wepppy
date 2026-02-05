@@ -10,7 +10,8 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.core import Soils, Watershed, Wepp
+from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
+from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.wepp_rq import run_wepp_rq, run_wepp_watershed_rq
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -55,6 +56,15 @@ def _parse_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _apply_swat_channel_params(wd: str, payload: dict[str, Any]) -> None:
+    ron = Ron.getInstance(wd)
+    mods = ron.mods or []
+    if "swat" not in mods:
+        return
+    swat = Swat.getInstance(wd)
+    swat.parse_inputs(payload)
 
 
 async def _handle_run_wepp_request(
@@ -132,6 +142,8 @@ async def _handle_run_wepp_request(
     except Exception as exc:
         logger.exception("rq-engine run-wepp parse failed")
         return error_response_with_traceback(str(exc))
+
+    _apply_swat_channel_params(wd, controller_payload)
 
     with wepp.locked():
         wepp._prep_details_on_run_completion = prep_details_on_run_completion

@@ -42,6 +42,13 @@ class SwatNoDbLockedException(Exception):
 
 class Swat(NoDbBase):
     __name__ = 'Swat'
+    _CHANNEL_PARAM_FIELDS = {
+        'channel_mann': 'mann',
+        'channel_fpn': 'fpn',
+        'channel_erod_fact': 'erod_fact',
+        'channel_cov_fact': 'cov_fact',
+        'channel_d50_mm': 'd50_mm',
+    }
 
     @classmethod
     def _post_instance_loaded(cls, instance: "Swat") -> "Swat":
@@ -223,6 +230,41 @@ class Swat(NoDbBase):
             os.makedirs(self.swat_manifests_dir, exist_ok=True)
             os.makedirs(self.swat_logs_dir, exist_ok=True)
             os.makedirs(self.swat_outputs_dir, exist_ok=True)
+
+    def _parse_channel_param_updates(self, kwds: Dict[str, Any]) -> Dict[str, Optional[float]]:
+        def _coerce_scalar(value: Any) -> Any:
+            if isinstance(value, (list, tuple, set)):
+                for item in value:
+                    if item not in (None, '', False):
+                        return item
+                return ''
+            return value
+
+        updates: Dict[str, Optional[float]] = {}
+        for input_key, param_key in self._CHANNEL_PARAM_FIELDS.items():
+            if input_key not in kwds:
+                continue
+            raw_value = _coerce_scalar(kwds.get(input_key))
+            if raw_value in (None, '', False):
+                if input_key == 'channel_fpn':
+                    updates[param_key] = None
+                continue
+            try:
+                parsed = float(raw_value)
+            except (TypeError, ValueError):
+                continue
+            updates[param_key] = parsed
+        return updates
+
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
+        updates = self._parse_channel_param_updates(kwds)
+        if not updates:
+            return
+        with self.locked():
+            if not isinstance(getattr(self, 'channel_params', None), dict):
+                self.channel_params = {}
+            for key, value in updates.items():
+                self.channel_params[key] = value
 
     @property
     def swat_dir(self) -> str:

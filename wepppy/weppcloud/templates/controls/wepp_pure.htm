@@ -70,6 +70,9 @@
   {% if swat %}
     {% call ui.collapsible_card(title="SWAT+ Advanced Options", expanded=False, card_id="swat_advanced_options") %}
       <div class="wc-stack" data-swat-advanced>
+        {% call ui.card("Hydraulic-Sediment Parameters", attrs={"id": "swat_hydraulic_sediment_params"}) %}
+        {% include "controls/swat_pure_advanced_options/swat_hydraulic_sediment.htm" %}
+        {% endcall %}
         {% call ui.card("SWAT Print.prt", attrs={"id": "swat_print_prt_options"}) %}
         {% include "controls/swat_pure_advanced_options/swat_print_prt.htm" %}
         {% endcall %}
