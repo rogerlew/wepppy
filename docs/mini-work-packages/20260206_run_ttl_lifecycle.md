@@ -74,6 +74,28 @@ Policy meanings:
 - RQ job: `gc_runs_rq(root="/wc1/runs", limit=200, dry_run=false)`.
 - Scans for `wd/TTL` records with `policy=rolling_90d` and `expires_at <= now`.
 - Calls `delete_run_rq` for expired runs and logs failures to `gc:ttl` status channel.
+- Scheduled via `wepppy.tools.scheduler` sidecar in compose, configured in `docker/scheduled-tasks.yml` to enqueue daily.
+
+**Implementation Status**
+- Implemented `wd/TTL` lifecycle helpers in `wepppy/weppcloud/utils/run_ttl.py`.
+- Wired TTL initialization for run creation (rq-engine create, HUC fire, test support) and fork reset.
+- Synced TTL policy on readonly toggles via `set_run_readonly_rq`.
+- Touches TTL from access-log aggregation in `_build_run_location_dataset`.
+- Added TTL disable endpoint + UI toggle (PowerUser/Admin/Root).
+- Added delete touchpoints (mark `delete_state=queued`, record `db_cleared`).
+- Added GC job `gc_runs_rq` to purge expired runs.
+- Added scheduler sidecar to enqueue GC from `docker/scheduled-tasks.yml`.
+
+**Checklist**
+- [x] Add TTL metadata file and helpers.
+- [x] Initialize TTL on create (rq-engine, HUC fire, test support) and reset on fork.
+- [x] Sync TTL policy on readonly toggle.
+- [x] Touch TTL from access log aggregation.
+- [x] Add TTL disable endpoint + UI toggle.
+- [x] Add delete touchpoints to mark delete state.
+- [x] Add GC job for expired runs.
+- [x] Schedule GC job via compose scheduler sidecar.
+- [ ] Decide on rename-to-trash deletion fallback for NFS `EBUSY`.
 
 ## Validation
 - Create a run and confirm `wd/TTL` is created with `expires_at` set.
@@ -85,4 +107,4 @@ Policy meanings:
 ## Follow-ups
 - Rename-to-trash deletion fallback for NFS `EBUSY`.
 - Dedicated UI to display TTL metadata and delete state.
-- Scheduled GC job configuration (cron or systemd timer).
+- Tune GC schedule, jitter, and limits as usage grows.

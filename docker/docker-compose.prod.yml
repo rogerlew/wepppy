@@ -639,6 +639,22 @@ services:
           run_backup || echo "Scheduled backup failed"
         done
 
+  scheduler:
+    <<: *wepppy-service
+    container_name: wepppy-scheduler
+    depends_on:
+      redis:
+        condition: service_started
+    environment:
+      <<: *wepppy-env
+      SCHEDULE_CONFIG: /workdir/wepppy/docker/scheduled-tasks.yml
+      SCHEDULE_SLEEP_SECONDS: "30"
+      SCHEDULE_LOG_LEVEL: INFO
+    command:
+      - python
+      - -m
+      - wepppy.tools.scheduler
+
 networks:
   backend:
     driver: bridge

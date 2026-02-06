@@ -1,0 +1,16 @@
+version: 1
+default_queue: default
+initial_delay_seconds: 900
+jitter_seconds: 300
+
+tasks:
+  - name: ttl_gc
+    func: wepppy.rq.project_rq.gc_runs_rq
+    interval_seconds: 86400
+    queue: default
+    job_timeout: 3600
+    result_ttl: 86400
+    kwargs:
+      root: /wc1/runs
+      limit: 200
+      dry_run: false

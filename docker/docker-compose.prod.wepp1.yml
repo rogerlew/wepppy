@@ -128,6 +128,18 @@ services:
     environment:
       <<: *wepppy-env
       PERIDOT_CPU: "4"
+  scheduler:
+    <<: *wepppy-image
+    cpuset: "32-47"
+    environment:
+      <<: *wepppy-env
+      SCHEDULE_CONFIG: /workdir/wepppy/docker/scheduled-tasks.yml
+      SCHEDULE_SLEEP_SECONDS: "30"
+      SCHEDULE_LOG_LEVEL: INFO
+    command:
+      - python
+      - -m
+      - wepppy.tools.scheduler
   weppcloudr:
     container_name: weppcloudr
     cpuset: "32-47"

@@ -279,6 +279,7 @@ wctl exec weppcloud bash  # Shell into container
 wctl restart weppcloud    # Restart service
 ```
 
+Note: The compose stack includes a `scheduler` sidecar that reads `docker/scheduled-tasks.yml` and enqueues scheduled RQ jobs (for example the TTL GC).
 ### Example: Creating a WEPP Run Programmatically
 
 ```python

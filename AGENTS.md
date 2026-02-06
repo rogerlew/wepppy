@@ -308,6 +308,7 @@ Services include:
 - Go microservices (status2, preflight2)
 - Redis, PostgreSQL
 - RQ worker pool with custom worker `WepppyRqWorker(rq.Worker)`
+- Scheduler sidecar (`scheduler`) enqueues scheduled RQ tasks from `docker/scheduled-tasks.yml`
 - D-Tale explorer (`dtale`) for large Parquet/CSV inspection at `/weppcloud/dtale`
   - Runs as a single Gunicorn worker; D-Tale keeps state in-process and will misbehave with multiple workers
   - Loader auto-registers watershed/AgField GeoJSON so Maps → Location Mode defaults to the current run's subcatchments (channels and ag fields stay one click away)
