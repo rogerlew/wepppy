@@ -1,4 +1,5 @@
 """Admin-related routes blueprint extracted from app.py."""
+import html
 from glob import glob
 
 from os.path import exists as _exists
@@ -24,10 +25,11 @@ def view_access_log(runid, config):
     wd = get_wd(runid)
     access_fn = wd.replace(runid, f'.{runid}').rstrip('/')
 
-    contents = '<i>no access data available</i>'
-    if _exists(access_fn):
-        with open(access_fn) as fp:
-            contents = fp.read()
+    if not _exists(access_fn):
+        return '<!DOCTYPE html><html><i>no access data available</i></html>'
+
+    with open(access_fn) as fp:
+        contents = html.escape(fp.read())
 
     return f'<!DOCTYPE html><html><pre>{contents}</pre></html>'
 
