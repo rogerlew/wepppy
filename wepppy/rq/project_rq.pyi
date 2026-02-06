@@ -14,6 +14,20 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None: ...
 
 def delete_run_rq(runid: str, wd: Optional[str] = ..., *, delete_files: bool = ...) -> None: ...
 
+def gc_runs_rq(
+    root: str = ...,
+    limit: int = ...,
+    dry_run: bool = ...,
+) -> Mapping[str, Any]: ...
+
+def compile_dot_logs_rq(
+    *,
+    access_log_path: Optional[str] = ...,
+    run_locations_path: Optional[str] = ...,
+    run_roots: Optional[list[str]] = ...,
+    legacy_roots: Optional[list[str]] = ...,
+) -> Mapping[str, Any]: ...
+
 def init_sbs_map_rq(runid: str, sbs_map: str) -> None: ...
 
 def fetch_dem_rq(

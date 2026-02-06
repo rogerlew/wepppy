@@ -14,3 +14,9 @@ tasks:
       root: /wc1/runs
       limit: 200
       dry_run: false
+  - name: access_log_compile
+    func: wepppy.rq.project_rq.compile_dot_logs_rq
+    interval_seconds: 86400
+    queue: default
+    job_timeout: 3600
+    result_ttl: 86400

@@ -10,6 +10,7 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 
 import errno
 import inspect
+import logging
 import json
 import os
 import queue
@@ -58,6 +59,7 @@ from wepppy.rq.exception_logging import with_exception_logging
 from .wepp_rq import run_wepp_rq
 
 _hostname = socket.gethostname()
+_logger = logging.getLogger(__name__)
 
 from dotenv import load_dotenv
 _thisdir = os.path.dirname(__file__)
@@ -352,12 +354,18 @@ def delete_run_rq(runid: str, wd: Optional[str] = None, *, delete_files: bool = 
     target = Path(wd or get_wd(runid)).resolve()
     attempts = 5
     delay_s = 0.5
+    delete_failed = False
+    delete_deferred = False
+    delete_error: Optional[Exception] = None
+    deferred_errnos = {errno.ENOTEMPTY, errno.EACCES, errno.EBUSY}
 
+    mark_failed = False
     try:
         from wepppy.weppcloud.utils.run_ttl import mark_delete_state
 
         mark_delete_state(str(target), "queued", touched_by="delete_rq")
     except Exception as exc:
+        mark_failed = True
         StatusMessenger.publish(
             status_channel,
             f'rq:{job_id} STATUS TTL delete mark failed ({exc})',
@@ -370,23 +378,60 @@ def delete_run_rq(runid: str, wd: Optional[str] = None, *, delete_files: bool = 
             except FileNotFoundError:
                 break
             except OSError as exc:
-                if attempt >= attempts or exc.errno not in {
-                    errno.ENOTEMPTY,
-                    errno.EACCES,
-                    errno.EBUSY,
-                }:
-                    raise
+                delete_error = exc
+                if exc.errno in deferred_errnos:
+                    delete_deferred = True
+                    _logger.warning(
+                        "delete_run_rq deferred filesystem delete for %s (attempt %s/%s): %s",
+                        target,
+                        attempt,
+                        attempts,
+                        exc,
+                    )
+                    if attempt < attempts:
+                        time.sleep(delay_s)
+                        delay_s = min(delay_s * 2, 5.0)
+                        continue
+                    break
+                delete_failed = True
+                delete_deferred = False
                 StatusMessenger.publish(
                     status_channel,
-                    f'rq:{job_id} STATUS delete retry {attempt}/{attempts} ({exc})',
+                    f'rq:{job_id} STATUS delete failed ({exc})',
                 )
-                time.sleep(delay_s)
-                delay_s = min(delay_s * 2, 5.0)
+                break
             else:
                 if not target.exists():
                     break
         if target.exists():
-            raise OSError(errno.ENOTEMPTY, f'Failed to remove {target}')
+            if delete_error is None:
+                delete_error = OSError(errno.ENOTEMPTY, f'Failed to remove {target}')
+            if delete_deferred:
+                _logger.warning(
+                    "delete_run_rq deferred filesystem delete for %s (directory still present)",
+                    target,
+                )
+            else:
+                delete_failed = True
+                StatusMessenger.publish(
+                    status_channel,
+                    f'rq:{job_id} STATUS delete deferred (directory still present)',
+                )
+
+    if target.exists() and (delete_failed or delete_deferred or mark_failed):
+        try:
+            from wepppy.weppcloud.utils.run_ttl import mark_delete_state
+
+            mark_delete_state(
+                str(target),
+                "queued",
+                touched_by="delete_deferred" if delete_deferred and not delete_failed else "delete_failed",
+            )
+        except Exception as exc:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} STATUS TTL delete retry failed ({exc})',
+            )
 
     try:
         cleared = clear_nodb_file_cache(runid)
@@ -445,6 +490,11 @@ def delete_run_rq(runid: str, wd: Optional[str] = None, *, delete_files: bool = 
                 status_channel,
                 f'rq:{job_id} STATUS TTL db_cleared mark failed ({exc})',
             )
+        if delete_files and delete_failed and delete_error is not None and not delete_deferred:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} STATUS delete deferred ({delete_error})',
+            )
 
     StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({runid})')
 
@@ -477,6 +527,7 @@ def gc_runs_rq(
 
     candidates = collect_gc_candidates(root=root, limit=limit)
     deleted = 0
+    deferred = 0
     errors: list[dict[str, str]] = []
 
     for entry in candidates:
@@ -494,7 +545,14 @@ def gc_runs_rq(
         try:
             mark_delete_state(wd, "queued", touched_by="gc")
             delete_run_rq(str(runid), str(wd), delete_files=True)
-            deleted += 1
+            if Path(str(wd)).exists():
+                deferred += 1
+                _logger.warning(
+                    "gc_runs_rq deferred filesystem delete for %s (directory still present)",
+                    runid,
+                )
+            else:
+                deleted += 1
         except Exception as exc:
             errors.append({"runid": str(runid), "error": str(exc)})
             StatusMessenger.publish(
@@ -504,14 +562,58 @@ def gc_runs_rq(
 
     StatusMessenger.publish(
         status_channel,
-        f'rq:{job_id} COMPLETED {func_name}(expired={len(candidates)}, deleted={deleted}, errors={len(errors)})',
+        f'rq:{job_id} COMPLETED {func_name}(expired={len(candidates)}, deleted={deleted}, deferred={deferred}, errors={len(errors)})',
     )
 
     return {
         "expired": len(candidates),
         "deleted": deleted,
+        "deferred": deferred,
         "errors": errors,
     }
+
+
+@with_exception_logging
+def compile_dot_logs_rq(
+    *,
+    access_log_path: Optional[str] = None,
+    run_locations_path: Optional[str] = None,
+    run_roots: Optional[list[str]] = None,
+    legacy_roots: Optional[list[str]] = None,
+) -> Mapping[str, Any]:
+    """Compile access logs and landing run-locations cache."""
+    job = get_current_job()
+    job_id = getattr(job, "id", "sync")
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = "maintenance:access_log"
+
+    StatusMessenger.publish(
+        status_channel,
+        f"rq:{job_id} STARTED {func_name}",
+    )
+
+    try:
+        from wepppy.weppcloud._scripts.compile_dot_logs import compile_dot_logs
+    except Exception as exc:
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job_id} EXCEPTION {func_name}({exc})",
+        )
+        raise
+
+    result = compile_dot_logs(
+        access_log_path=access_log_path,
+        run_locations_path=run_locations_path,
+        run_roots=run_roots,
+        legacy_roots=legacy_roots,
+    )
+
+    StatusMessenger.publish(
+        status_channel,
+        f"rq:{job_id} COMPLETED {func_name}",
+    )
+
+    return result
 
 
 @with_exception_logging
