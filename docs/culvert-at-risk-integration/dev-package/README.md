@@ -667,7 +667,7 @@ Each `runs/{point_id}/` directory contains:
     channels.parquet          # Channel attributes
     hillslopes.parquet        # Hillslope attributes
     network.txt               # Network topology summary
-    structure.pkl             # Serialized watershed graph
+    structure.json            # Serialized watershed graph
 
   landuse/
     landuse.parquet           # Land use classification
@@ -705,7 +705,6 @@ Each `runs/{point_id}/` directory contains:
     chan.out.parquet          # Channel outputs
     soil_pw0.parquet          # Soil outputs
 ```
-
 ### Key Output Files
 
 | File | Description |

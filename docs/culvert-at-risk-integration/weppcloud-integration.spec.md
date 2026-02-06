@@ -310,10 +310,11 @@ For each culvert (identified by `Point_ID`):
 - Compute validation metrics (culvert/outlet UTM coords, distance, target watershed area, bounds area) and store them in `culverts_runner.nodb` + `runs_manifest.md`.
 
 ## Output artifacts (current)
+
 - Per-run (in run root after skeletonization):
   - `run_metadata.json`
   - `landuse/landuse.parquet`, `soils/soils.parquet`
-  - `watershed/hillslopes.parquet`, `watershed/channels.parquet`, `watershed/network.txt`, `watershed/structure.pkl`
+  - `watershed/hillslopes.parquet`, `watershed/channels.parquet`, `watershed/network.txt`, `watershed/structure.json`
   - `dem/wbt/*.geojson`
   - `wepp/output/interchange/` (interchange outputs)
 - Batch-level:
@@ -323,8 +324,6 @@ For each culvert (identified by `Point_ID`):
   - Shared rasters (batch root, not in skeleton zip): `landuse/nlcd_30m.tif`, `landuse/nlcd.tif`, `soils/ssurgo_30m.tif`, `soils/ssurgo.tif`
 Notes:
 - `_logs/` directories from the profile recorder are not retained in skeletonized runs.
-
-
 ## Observability
 - RQ job status exposed via existing RQ engine endpoints (polling).
 - Optional: emit status events into Redis DB 2 so Culvert_web_app can subscribe later.

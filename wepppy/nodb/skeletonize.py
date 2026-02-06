@@ -36,6 +36,7 @@ RUN_SKELETON_ALLOWLIST: tuple[str, ...] = (
     "watershed/channels.parquet",
     "watershed/hillslopes.parquet",
     "watershed/network.txt",
+    "watershed/structure.json",
     "watershed/structure.pkl",
     "wepp/output/interchange",
 )

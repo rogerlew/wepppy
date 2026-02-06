@@ -342,5 +342,5 @@ Each run is skeletonized after completion to reduce storage pressure from large 
 | `watershed/channels.parquet` | Channel attributes parquet. |
 | `watershed/hillslopes.parquet` | Hillslope attributes parquet. |
 | `watershed/network.txt` | Network topology summary. |
-| `watershed/structure.pkl` | Serialized watershed structure graph. |
+| `watershed/structure.json` | Serialized watershed structure graph. |
 | `wepp/output/interchange` | WEPP interchange outputs (parquet/JSON). |

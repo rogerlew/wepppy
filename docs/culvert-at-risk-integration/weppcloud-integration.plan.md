@@ -169,6 +169,7 @@ Notes:
 - Verification: confirmed enqueue order is largest → smallest in RQ metadata/logs for mixed-size payloads.
 
 ## Phase 4 - Artifact delivery and browse integration (COMPLETE)
+
 - Scope: expose browse access for culvert + batch roots; skeletonize per-run folders after `run_metadata.json` is written; package the skeletonized runs into a batch artifact (`weppcloud_run_skeletons.zip`). Do not copy artifacts into a `culvert/` subfolder in this phase.
 - Dependencies: Phase 3 outputs; browse service routing for `/weppcloud/culverts/` and `/weppcloud/batch/`; agreement on skeletonization allowlist + denylist; shared `skeletonize_run` helper in `wepppy/nodb`.
 - Required per-run artifact (MVP, stored in run root):
@@ -202,7 +203,7 @@ Notes:
     - `watershed/channels.parquet`
     - `watershed/hillslopes.parquet`
     - `watershed/network.txt`
-    - `watershed/structure.pkl`
+    - `watershed/structure.json`
     - `wepp/output/interchange/`
   - Exclude list (denylist; override allowlist):
     - `wepp/output/interchange/H.pass.parquet`
@@ -216,7 +217,6 @@ Notes:
 - Deliverables: browse route support for `/weppcloud/culverts/` + `/weppcloud/batch/`; reusable `skeletonize_run` helper in `wepppy/nodb` + hook in `_process_culvert_run` (or equivalent); `weppcloud_run_skeletons.zip` batch artifact (MVP).
 - Risks: browse service path mapping gaps; missing outputs for failed culverts; large artifact sizes; skeletonization removing debug inputs needed for re-runs.
 - Verification: browse integration test that lists the batch root and `runs/` tree; confirm `run_metadata.json` is present in skeletonized runs; confirm `weppcloud_run_skeletons.zip` contains only the allowlist minus denylist; verify `runs_manifest.md` has one row per run.
-
 ## Phase 4 handoff summary
 - Skeletonization: added reusable `skeletonize_run` (git clean allowlist/denylist) and invoked it after `run_metadata.json` is written; `_logs/` are intentionally dropped; `wepp/output/interchange/H.pass.parquet` is explicitly excluded.
 - Batch artifacts: finalizer writes `batch_summary.json`, `runs_manifest.md` (Source + Batch Summary + runs table), and `weppcloud_run_skeletons.zip` (includes skeletonized `runs/`, `runs_manifest.md`, and `culverts_runner.nodb`).

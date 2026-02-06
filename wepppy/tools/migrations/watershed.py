@@ -444,7 +444,7 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
     the _subs_summary, _fps_summary, and _chns_summary dictionaries are no longer needed
     in watershed.nodb. Removing them reduces file size dramatically for large watersheds.
 
-    Also migrates inline _structure data to structure.pkl file if not already externalized.
+    Also migrates inline _structure data to structure.json file if not already externalized.
 
     Idempotent: safe to run multiple times.
 
@@ -497,13 +497,27 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
     found_keys = [k for k in legacy_keys if needs_slimming(k)]
 
     # Check for inline _structure that needs to be externalized
-    structure_pkl_path = watershed_dir / "structure.pkl"
+    structure_json_path = watershed_dir / "structure.json"
     structure_data = state.get("_structure")
-    needs_structure_migration = (
-        structure_data is not None
-        and not isinstance(structure_data, str)  # Not already a path
-        and not structure_pkl_path.exists()  # Pickle doesn't exist yet
-    )
+    legacy_pickle_path = None
+    needs_structure_migration = False
+
+    if structure_json_path.exists():
+        needs_structure_migration = False
+    elif isinstance(structure_data, str):
+        structure_path = Path(structure_data)
+        if structure_path.suffix == ".pkl" and structure_path.exists():
+            legacy_pickle_path = structure_path
+            needs_structure_migration = True
+        elif structure_path.suffix == ".json" and structure_path.exists():
+            needs_structure_migration = False
+    elif structure_data is not None:
+        needs_structure_migration = True
+    else:
+        fallback_pickle = watershed_dir / "structure.pkl"
+        if fallback_pickle.exists():
+            legacy_pickle_path = fallback_pickle
+            needs_structure_migration = True
 
     if not found_keys and not needs_structure_migration:
         return True, "No legacy summaries or inline structure in watershed.nodb"
@@ -516,7 +530,7 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         if found_keys:
             msgs.append(f"slim {len(found_keys)} legacy summary dict(s)")
         if needs_structure_migration:
-            msgs.append("externalize _structure to structure.pkl")
+            msgs.append("externalize _structure to structure.json")
         return True, f"Would {' and '.join(msgs)}"
 
     # Load topaz_ids from parquet files to create placeholder dicts
@@ -556,21 +570,33 @@ def migrate_watershed_nodb_slim(wd: str, *, dry_run: bool = False) -> Tuple[bool
         state["_fps_summary"] = None  # flowpaths don't need iteration compatibility
         changes.append("removed _fps_summary")
 
-    # Externalize _structure to pickle file if needed
+    # Externalize _structure to JSON file if needed
     if needs_structure_migration:
         try:
-            # The structure data from JSON needs to be decoded via jsonpickle
-            import jsonpickle
-            structure_json = json.dumps(structure_data)
-            structure_obj = jsonpickle.decode(structure_json)
+            structure_obj = None
 
-            # Write to pickle file
-            with open(structure_pkl_path, "wb") as f:
-                pickle.dump(structure_obj, f)
+            if legacy_pickle_path is not None:
+                with open(legacy_pickle_path, "rb") as f:
+                    structure_obj = pickle.load(f)
+            elif structure_data is not None and not isinstance(structure_data, str):
+                # The structure data from JSON needs to be decoded via jsonpickle
+                import jsonpickle
+                structure_json = json.dumps(structure_data)
+                structure_obj = jsonpickle.decode(structure_json)
+
+            if structure_obj is None:
+                raise ValueError("structure data unavailable for migration")
+
+            normalized_structure = [
+                [int(value) for value in row] for row in structure_obj
+            ]
+
+            with open(structure_json_path, "w", encoding="utf-8") as f:
+                json.dump(normalized_structure, f)
 
             # Update _structure to be the path string
-            state["_structure"] = str(structure_pkl_path)
-            changes.append("externalized _structure to structure.pkl")
+            state["_structure"] = str(structure_json_path)
+            changes.append("externalized _structure to structure.json")
         except Exception as exc:
             # Non-fatal - structure migration can be skipped
             changes.append(f"_structure migration skipped: {exc}")

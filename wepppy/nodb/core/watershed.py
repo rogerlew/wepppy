@@ -58,6 +58,7 @@ import time
 import os
 import inspect
 import math
+import json
 
 from enum import IntEnum
 
@@ -774,16 +775,87 @@ class Watershed(NoDbBase):
     def wsarea(self) -> float:
         return getattr(self, "_wsarea", 1)
 
+    def _structure_json_path(self) -> str:
+        return _join(self.wat_dir, "structure.json")
+
+    def _load_structure_json(self, path: str) -> List[List[int]]:
+        with open(path, "r", encoding="utf-8") as fp:
+            payload = json.load(fp)
+
+        if not isinstance(payload, list):
+            raise ValueError("structure.json must contain a list of rows")
+        structure: List[List[int]] = []
+        for row in payload:
+            if not isinstance(row, list):
+                raise ValueError("structure.json rows must be lists")
+            structure.append([int(value) for value in row])
+        return structure
+
+    def _write_structure_json(self, structure: List[List[int]]) -> str:
+        path = self._structure_json_path()
+        tmp_path = f"{path}.tmp"
+        os.makedirs(self.wat_dir, exist_ok=True)
+        with open(tmp_path, "w", encoding="utf-8") as fp:
+            json.dump(structure, fp)
+        os.replace(tmp_path, path)
+        return path
+
+    def _build_structure_from_network(self) -> Optional[List[List[int]]]:
+        network_path = _join(self.wat_dir, "network.txt")
+        if not _exists(network_path):
+            return None
+        try:
+            network = read_network(network_path)
+        except Exception as exc:
+            self.logger.warning("Failed to read network.txt for structure rebuild: %s", exc)
+            return None
+
+        try:
+            translator = self.translator_factory()
+        except Exception as exc:
+            self.logger.warning("Failed to build translator for structure rebuild: %s", exc)
+            return None
+
+        try:
+            return translator.build_structure(network)
+        except Exception as exc:
+            self.logger.warning("Failed to rebuild structure from network: %s", exc)
+            return None
+
     @property
     def structure(self) -> Any:
-        structure_path = self._structure
-        if structure_path is not None and _exists(_join(self.wat_dir, "structure.pkl")):
-            import pickle
+        structure_data = self._structure
 
-            with open(structure_path, "rb") as fp:
-                return pickle.load(fp)
+        if isinstance(structure_data, list):
+            if not _exists(self._structure_json_path()):
+                try:
+                    self._write_structure_json(structure_data)
+                except Exception as exc:
+                    self.logger.debug("Failed to persist structure.json: %s", exc)
+            return structure_data
 
-        return self._structure
+        if isinstance(structure_data, str):
+            if structure_data.endswith(".json") and _exists(structure_data):
+                return self._load_structure_json(structure_data)
+
+        structure_json = self._structure_json_path()
+        if _exists(structure_json):
+            return self._load_structure_json(structure_json)
+
+        rebuilt = self._build_structure_from_network()
+        if rebuilt is not None:
+            try:
+                self._write_structure_json(rebuilt)
+            except Exception as exc:
+                self.logger.debug("Failed to persist rebuilt structure.json: %s", exc)
+            return rebuilt
+
+        if structure_data is not None:
+            self.logger.warning(
+                "structure.json missing for %s; run watershed migration to regenerate structure data.",
+                self.wd,
+            )
+        return None
 
     @property
     def csa(self) -> Optional[float]:
@@ -1264,14 +1336,17 @@ class Watershed(NoDbBase):
             # Handle minimal watershed case (1 hillslope, 1 channel) where network.txt may not exist
             network_path = _join(self.wat_dir, "network.txt")
             if not _exists(network_path) and len(sub_ids) == 1 and len(chn_ids) == 1:
-                self.logger.info("Minimal watershed (1 hillslope, 1 channel) - skipping structure.pkl")
+                self.logger.info("Minimal watershed (1 hillslope, 1 channel) - skipping structure.json")
                 self._structure = None
             else:
                 network = self.network
-                structure_fn = _join(self.wat_dir, "structure.pkl")
                 translator = self.translator_factory()
-                translator.build_structure(network, pickle_fn=structure_fn)
-                self._structure = structure_fn
+                structure = translator.build_structure(network)
+                if structure is not None:
+                    structure_path = self._write_structure_json(structure)
+                    self._structure = structure_path
+                else:
+                    self._structure = None
 
             try:
                 update_catalog_entry(self.wd, 'watershed')
@@ -1556,7 +1631,17 @@ class Watershed(NoDbBase):
             )
             self._centroid = _abs.centroid.lnglat
             self._outlet_top_id = str(_abs.outlet_top_id)
-            self._structure = _abs.structure
+            structure = _abs.structure
+            if structure is not None:
+                try:
+                    structure_path = self._write_structure_json(structure)
+                except Exception as exc:
+                    self.logger.debug("Failed to persist structure.json: %s", exc)
+                    self._structure = structure
+                else:
+                    self._structure = structure_path
+            else:
+                self._structure = None
 
             del _abs
             pool.close()

@@ -127,8 +127,7 @@ A WEPPcloud project is built through a sequence of discrete stages. Understandin
 -   **Artifacts**:
     -   `watershed/hillslopes.parquet`, `watershed/channels.parquet`: Contain detailed summaries of every hillslope and channel.
     -   `watershed/slope_files/*.slp`: Individual slope profile files for each hillslope, required by WEPP.
-    -   `watershed/structure.pkl`: A pickled object defining the topological network of the watershed.
-
+    -   `watershed/structure.json`: JSON representation of the topological network of the watershed.
 ### Stage 5: Component Builds (`Landuse`, `Soils`, `Climate`)
 
 -   **Entry Point**: `landuse.build()`, `soils.build()`, `climate.build()`.

@@ -2262,6 +2262,10 @@ class Wepp(NoDbBase):
             return
 
         structure = watershed.structure
+        if structure is None:
+            raise RuntimeError(
+                "Watershed structure is missing. Run the watershed migration to regenerate structure.json."
+            )
 
         s = ['99.1']
         for L in structure:
