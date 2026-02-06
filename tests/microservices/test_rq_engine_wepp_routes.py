@@ -50,6 +50,9 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _stub_wepp_stack(monkeypatch: pytest.MonkeyPatch, *, parse_error: bool = False) -> None:
+    class DummyRon:
+        mods = []
+
     class DummySoils:
         clip_soils = False
         clip_soils_depth = None
@@ -74,6 +77,7 @@ def _stub_wepp_stack(monkeypatch: pytest.MonkeyPatch, *, parse_error: bool = Fal
     monkeypatch.setattr(wepp_routes.Soils, "getInstance", lambda wd: DummySoils())
     monkeypatch.setattr(wepp_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
     monkeypatch.setattr(wepp_routes.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(wepp_routes.Ron, "getInstance", lambda wd: DummyRon())
 
 
 def test_run_wepp_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:

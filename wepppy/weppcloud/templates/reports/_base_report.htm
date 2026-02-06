@@ -127,6 +127,15 @@
                        {% if current_ron.public %}checked{% endif %}>
                 <span>Public</span>
               </label>
+              {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
+              <label class="wc-run-header__toggle">
+                <input id="checkbox_ttl_disabled"
+                       type="checkbox"
+                       data-project-toggle="ttl_disabled"
+                       {% if current_ttl and current_ttl.user_disabled %}checked{% endif %}>
+                <span>Disable TTL Deletion</span>
+              </label>
+              {% endif %}
               {% if user.has_role('Admin') %}
               <a class="pure-button pure-button-secondary"
                  href="{{ url_for('admin.view_access_log', runid=current_ron.runid, config=current_ron.config_stem)}}"

@@ -101,6 +101,13 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
 
         Ron(wd, cfg)
 
+        try:
+            from wepppy.weppcloud.utils.run_ttl import initialize_ttl
+
+            initialize_ttl(wd)
+        except Exception:
+            logger.exception("rq-engine huc-fire TTL initialization failed")
+
         with flask_app.app_context():
             user_datastore.create_run(runid, config, user)
 

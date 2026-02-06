@@ -52,6 +52,12 @@ def _spawn_run(config: str, overrides: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         Ron(wd, cfg_with_params)
+        try:
+            from wepppy.weppcloud.utils.run_ttl import initialize_ttl
+
+            initialize_ttl(wd)
+        except Exception:
+            current_app.logger.exception("Failed to initialize TTL for test run")
         ensure_readme_on_create(runid, config)
     except Exception as exc:  # clean up directory and re-raise
         _cleanup_run_directory(wd_path)

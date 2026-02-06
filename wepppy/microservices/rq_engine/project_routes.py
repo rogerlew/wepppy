@@ -298,6 +298,13 @@ async def create(request: Request) -> Response:
         return error_response("Could not create run")
 
     try:
+        from wepppy.weppcloud.utils.run_ttl import initialize_ttl
+
+        initialize_ttl(wd)
+    except Exception:
+        logger.exception("rq-engine create TTL initialization failed")
+
+    try:
         _register_run_owner(runid, config, user)
     except Exception:
         logger.exception("rq-engine create run owner failed")

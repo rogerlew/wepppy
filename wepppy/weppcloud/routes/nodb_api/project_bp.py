@@ -15,7 +15,7 @@ from .._common import *  # noqa: F401,F403
 from sqlalchemy import func
 
 from wepppy.nodb.core import Ron
-from wepppy.nodb.base import clear_nodb_file_cache, iter_nodb_mods_subclasses
+from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, iter_nodb_mods_subclasses
 from wepppy.nodb.core import Watershed
 
 from wepppy.weppcloud.utils.helpers import (
@@ -96,7 +96,11 @@ def _instantiate_mod_if_available(wd: str, cfg_fn: str, mod_name: str) -> bool:
     registry = {name: cls for name, cls in iter_nodb_mods_subclasses()}
     cls = registry.get(mod_name)
     if cls is None:
-        return False
+        NoDbBase._import_mod_module(mod_name)
+        registry = {name: cls for name, cls in iter_nodb_mods_subclasses()}
+        cls = registry.get(mod_name)
+        if cls is None:
+            return False
     
     existing = cls.tryGetInstance(wd)
     if existing is not None:
@@ -203,6 +207,24 @@ def delete_run(runid, config):
         return error_factory('cannot delete readonly project')
 
     try:
+        try:
+            NoDbBase.cleanup_run_instances(wd)
+        except Exception as exc:
+            current_app.logger.warning(
+                "Failed to clean up NoDb instances for %s before delete: %s",
+                wd,
+                exc,
+            )
+        try:
+            from wepppy.weppcloud.utils.run_ttl import mark_delete_state
+
+            mark_delete_state(wd, "queued", touched_by="delete_request")
+        except Exception as exc:
+            current_app.logger.warning(
+                "Failed to update TTL delete state for %s: %s",
+                wd,
+                exc,
+            )
         from wepppy.rq.project_rq import delete_run_rq, TIMEOUT
 
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
@@ -476,6 +498,39 @@ def task_set_public(runid, config):
         return exception_factory('Error setting state', runid=runid)
 
     return success_factory({'public': bool(state)})
+
+
+@project_bp.route('/runs/<string:runid>/<config>/tasks/set_ttl_disabled', methods=['POST'])
+@roles_required('Admin', 'Root', 'PowerUser')
+@authorize_and_handle_with_exception_factory
+def task_set_ttl_disabled(runid, config):
+    payload = parse_request_payload(request, boolean_fields={'ttl_disabled'})
+    state = payload.get('ttl_disabled', None)
+
+    if state is None:
+        return error_factory('state is None')
+    if isinstance(state, str):
+        return error_factory('state must be boolean')
+
+    user_id = None
+    if hasattr(current_user, 'get_id'):
+        user_id = current_user.get_id()
+    if not user_id:
+        user_id = getattr(current_user, 'id', None)
+    if not user_id:
+        return error_factory('user id unavailable')
+
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+
+    try:
+        from wepppy.weppcloud.utils.run_ttl import set_user_ttl_disabled
+
+        ttl_state = set_user_ttl_disabled(wd, bool(state), str(user_id))
+    except Exception:
+        return exception_factory('Error setting TTL state', runid=runid)
+
+    return success_factory({'ttl_disabled': bool(state), 'ttl': ttl_state})
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])

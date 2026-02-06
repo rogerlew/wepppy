@@ -11,6 +11,7 @@ var Project = (function () {
     var SCENARIO_SELECTOR = '[data-project-field="scenario"]';
     var READONLY_SELECTOR = '[data-project-toggle="readonly"]';
     var PUBLIC_SELECTOR = '[data-project-toggle="public"]';
+    var TTL_DISABLED_SELECTOR = '[data-project-toggle="ttl_disabled"]';
     var ACTION_SELECTOR = '[data-project-action]';
     var MOD_SELECTOR = '[data-project-mod]';
     var GLOBAL_UNIT_SELECTOR = '[data-project-unitizer="global"]';
@@ -30,6 +31,8 @@ var Project = (function () {
         "project:readonly:update:failed",
         "project:public:changed",
         "project:public:update:failed",
+        "project:ttl-disabled:changed",
+        "project:ttl-disabled:update:failed",
         "project:unitizer:sync:started",
         "project:unitizer:preferences",
         "project:unitizer:sync:completed",
@@ -428,6 +431,7 @@ var Project = (function () {
             scenario: firstFieldValue(dom, SCENARIO_SELECTOR, ""),
             readonly: readToggleState(dom, READONLY_SELECTOR, false),
             public: readToggleState(dom, PUBLIC_SELECTOR, false),
+            ttlDisabled: readToggleState(dom, TTL_DISABLED_SELECTOR, false),
             mods: Array.isArray(runContext.mods && runContext.mods.list)
                 ? runContext.mods.list.slice()
                 : []
@@ -895,6 +899,58 @@ var Project = (function () {
         };
         project.setPublic = project.set_public;
 
+        project.set_ttl_disabled = function (stateValue, options) {
+            options = options || {};
+            var desiredState = Boolean(stateValue);
+            var previous = readToggleState(dom, TTL_DISABLED_SELECTOR, state.ttlDisabled);
+
+            return http.postJson(url_for_run("tasks/set_ttl_disabled"), { ttl_disabled: desiredState }).then(function (result) {
+                var response = unpackResponse(result);
+                if (isSuccess(response)) {
+                    syncToggleState(dom, TTL_DISABLED_SELECTOR, desiredState);
+                    state.ttlDisabled = desiredState;
+                    if (options.notify !== false) {
+                        var message = desiredState
+                            ? "TTL deletion disabled for this project."
+                            : "TTL deletion re-enabled for this project.";
+                        project.notifyCommandBar(message);
+                    }
+                    emitEvent(emitter, "project:ttl-disabled:changed", {
+                        ttlDisabled: desiredState,
+                        previous: previous,
+                        response: response
+                    });
+                } else {
+                    syncToggleState(dom, TTL_DISABLED_SELECTOR, previous);
+                    if (response) {
+                        project.pushResponseStacktrace(project, response);
+                    }
+                    if (options.notify !== false) {
+                        project.notifyCommandBar("Error updating TTL deletion state.", { duration: null });
+                    }
+                    emitEvent(emitter, "project:ttl-disabled:update:failed", {
+                        attempted: desiredState,
+                        previous: previous,
+                        response: response
+                    });
+                }
+                return response;
+            }).catch(function (error) {
+                syncToggleState(dom, TTL_DISABLED_SELECTOR, previous);
+                if (options.notify !== false) {
+                    project.notifyCommandBar("Error updating TTL deletion state.", { duration: null });
+                }
+                notifyError("Error updating TTL deletion state", error);
+                emitEvent(emitter, "project:ttl-disabled:update:failed", {
+                    attempted: desiredState,
+                    previous: previous,
+                    error: error
+                });
+                return null;
+            });
+        };
+        project.setTtlDisabled = project.set_ttl_disabled;
+
         project.load_mod_section = function (modName) {
             var endpoint = "view/mod/" + encodeURIComponent(modName);
             return http.getJson(url_for_run(endpoint)).then(function (response) {
@@ -1237,6 +1293,10 @@ var Project = (function () {
 
         dom.delegate(document, "change", PUBLIC_SELECTOR, function (event, target) {
             project.set_public(target.checked);
+        });
+
+        dom.delegate(document, "change", TTL_DISABLED_SELECTOR, function (event, target) {
+            project.set_ttl_disabled(target.checked);
         });
 
         dom.delegate(document, "change", MOD_SELECTOR, function (event, target) {

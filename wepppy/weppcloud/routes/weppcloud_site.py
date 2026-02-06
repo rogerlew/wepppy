@@ -151,6 +151,11 @@ def _build_run_location_dataset(source_path: Path) -> List[Dict[str, Any]]:
         return []
 
     dedup: Dict[str, Dict[str, Any]] = {}
+    try:
+        from wepppy.weppcloud.utils.run_ttl import touch_ttl_from_access_log
+    except Exception as exc:
+        current_app.logger.warning("Run TTL access-log updates unavailable: %s", exc)
+        touch_ttl_from_access_log = None
 
     try:
         fp = source_path.open()
@@ -200,6 +205,12 @@ def _build_run_location_dataset(source_path: Path) -> List[Dict[str, Any]]:
     for record in dedup.values():
         last_accessed = record.pop('_last_accessed', None)
         record['last_accessed'] = last_accessed.isoformat() if isinstance(last_accessed, datetime) else None
+        if isinstance(last_accessed, datetime):
+            try:
+                if touch_ttl_from_access_log is not None:
+                    touch_ttl_from_access_log(record['runid'], last_accessed)
+            except Exception:
+                pass
         dataset.append(record)
 
     dataset.sort(

@@ -71,6 +71,12 @@
             "isAuthenticated": user.is_authenticated,
             "readonly": ron.readonly
         },
+        "ttl": {
+            "policy": {{ (current_ttl.policy if current_ttl else None) | tojson }},
+            "userDisabled": {{ (current_ttl.user_disabled if current_ttl else False) | tojson }},
+            "disabledReason": {{ (current_ttl.disabled_reason if current_ttl else None) | tojson }},
+            "expiresAt": {{ (current_ttl.expires_at if current_ttl else None) | tojson }}
+        },
         "environment": {
             "cellSize": ron.cellsize
         },

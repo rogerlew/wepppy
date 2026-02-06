@@ -177,28 +177,34 @@ def register_context_processors(app, get_all_runs, user_model, run_model):
             ron = RonViewModel.getInstanceFromRunID(runid)
             mods = list(getattr(ron, 'mods', []) or [])
             storm_event_analyzer_ready = False
+            ttl_state = None
             try:
                 from wepppy.weppcloud.utils.helpers import get_wd
                 from wepppy.nodb.core import Wepp
+                from wepppy.weppcloud.utils.run_ttl import read_ttl_state
 
                 wd = get_wd(runid)
                 wepp = Wepp.load_detached(wd)
                 storm_event_analyzer_ready = bool(
                     wepp and wepp.storm_event_analyzer_ready
                 )
+                ttl_state = read_ttl_state(wd)
             except Exception:
                 storm_event_analyzer_ready = False
+                ttl_state = None
 
             return dict(
                 current_ron=ron,
                 current_mods=mods,
                 storm_event_analyzer_ready=storm_event_analyzer_ready,
+                current_ttl=ttl_state,
             )
         except Exception:
             return dict(
                 current_ron=None,
                 current_mods=[],
                 storm_event_analyzer_ready=False,
+                current_ttl=None,
             )
 
     @app.context_processor

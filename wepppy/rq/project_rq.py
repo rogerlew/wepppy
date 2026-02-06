@@ -307,6 +307,16 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
                 f'rq:{job.id} {MANIFEST_FILENAME} removed'
             )
 
+        try:
+            from wepppy.weppcloud.utils.run_ttl import sync_ttl_policy
+
+            sync_ttl_policy(wd, touched_by="readonly")
+        except Exception as exc:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job.id} STATUS TTL sync failed ({exc})',
+            )
+
         if prep is not None:
             try:
                 prep.timestamp(TaskEnum.set_readonly)
@@ -342,6 +352,16 @@ def delete_run_rq(runid: str, wd: Optional[str] = None) -> None:
     target = Path(wd or get_wd(runid)).resolve()
     attempts = 5
     delay_s = 0.5
+
+    try:
+        from wepppy.weppcloud.utils.run_ttl import mark_delete_state
+
+        mark_delete_state(str(target), "queued", touched_by="delete_rq")
+    except Exception as exc:
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job_id} STATUS TTL delete mark failed ({exc})',
+        )
 
     if target.exists():
         for attempt in range(1, attempts + 1):
@@ -410,7 +430,82 @@ def delete_run_rq(runid: str, wd: Optional[str] = None) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({runid})')
         raise
 
+    if target.exists():
+        try:
+            from wepppy.weppcloud.utils.run_ttl import mark_delete_state
+
+            mark_delete_state(str(target), "queued", db_cleared=True, touched_by="delete_rq")
+        except Exception as exc:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} STATUS TTL db_cleared mark failed ({exc})',
+            )
+
     StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({runid})')
+
+
+@with_exception_logging
+def gc_runs_rq(
+    root: str = "/wc1/runs",
+    limit: int = 200,
+    dry_run: bool = False,
+) -> Mapping[str, Any]:
+    """Delete runs whose TTL expiration has elapsed."""
+    job = get_current_job()
+    job_id = getattr(job, "id", "sync")
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = "gc:ttl"
+
+    StatusMessenger.publish(
+        status_channel,
+        f'rq:{job_id} STARTED {func_name}(root={root}, limit={limit}, dry_run={dry_run})',
+    )
+
+    try:
+        from wepppy.weppcloud.utils.run_ttl import collect_expired_runs, mark_delete_state
+    except Exception as exc:
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job_id} EXCEPTION {func_name}({exc})',
+        )
+        raise
+
+    expired = collect_expired_runs(root=root, limit=limit)
+    deleted = 0
+    errors: list[dict[str, str]] = []
+
+    for entry in expired:
+        runid = entry.get("runid")
+        wd = entry.get("wd")
+        if not runid or not wd:
+            continue
+        if dry_run:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} STATUS dry-run delete {runid}',
+            )
+            continue
+        try:
+            mark_delete_state(wd, "queued", touched_by="gc")
+            delete_run_rq(str(runid), str(wd))
+            deleted += 1
+        except Exception as exc:
+            errors.append({"runid": str(runid), "error": str(exc)})
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} STATUS delete failed for {runid} ({exc})',
+            )
+
+    StatusMessenger.publish(
+        status_channel,
+        f'rq:{job_id} COMPLETED {func_name}(expired={len(expired)}, deleted={deleted}, errors={len(errors)})',
+    )
+
+    return {
+        "expired": len(expired),
+        "deleted": deleted,
+        "errors": errors,
+    }
 
 
 @with_exception_logging
@@ -1255,6 +1350,16 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
                 os.remove(fn)
 
         StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC... done.\n')
+
+        try:
+            from wepppy.weppcloud.utils.run_ttl import initialize_ttl
+
+            initialize_ttl(new_wd)
+        except Exception as exc:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job.id} STATUS TTL initialization failed ({exc})',
+            )
 
         if undisturbify:
             StatusMessenger.publish(status_channel, 'Waiting for forked .nodb files to settle...\n')
