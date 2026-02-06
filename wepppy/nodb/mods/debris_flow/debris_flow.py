@@ -265,10 +265,33 @@ class DebrisFlow(NoDbBase):
 
         self.fetch_precip_data()
 
-        if self.T is None or self.I is None:
-            raise DebrisFlowNoDbLockedException("No precipitation data found. Please run fetch_precip_data() first.")
+        if not self.T or not self.I:
+            raise DebrisFlowNoDbLockedException(
+                "No precipitation data available from NOAA or the Holden WRF Atlas for this watershed."
+            )
 
         with self.locked():
+            datasource_override = None
+            if req_datasource is not None:
+                normalized = str(req_datasource).strip()
+                if normalized:
+                    available_sources = list(self.T.keys()) if self.T is not None else []
+                    match = None
+                    if normalized in available_sources:
+                        match = normalized
+                    else:
+                        for candidate in available_sources:
+                            if candidate.lower() == normalized.lower():
+                                match = candidate
+                                break
+                    if match is None:
+                        available = ", ".join(sorted(available_sources))
+                        raise ValueError(
+                            f"Requested datasource '{normalized}' is not available. "
+                            f"Available datasources: {available or 'none'}."
+                        )
+                    datasource_override = match
+
             self.volume = {}
             self.prob_occurrence = {}
 
@@ -297,9 +320,8 @@ class DebrisFlow(NoDbBase):
                 self.volume[_datasource] = deepcopy(v.tolist())
                 self.prob_occurrence[_datasource] = deepcopy(prob_occurrence.tolist())
 
-            if req_datasource is not None and self.volume is not None:
-                assert req_datasource in self.volume
-                self._datasource = req_datasource
+            if datasource_override is not None:
+                self._datasource = datasource_override
 
         try:
             prep = RedisPrep.getInstance(self.wd)

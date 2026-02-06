@@ -18,7 +18,6 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.project_rq import archive_rq, fork_rq, restore_archive_rq
-from wepppy.weppcloud.utils.archive import has_archive
 from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
@@ -202,8 +201,6 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 dir_created = True
             else:
                 if _exists(new_wd):
-                    continue
-                if has_archive(new_runid):
                     continue
                 dir_created = True
 

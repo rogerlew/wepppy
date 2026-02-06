@@ -62,8 +62,11 @@
        ) }}
 
     {% set default_datasource = '' %}
-    {% if debris_flow is defined and debris_flow is not none and debris_flow.datasource is not none %}
-      {% set default_datasource = debris_flow.datasource %}
+    {% if debris_flow is defined and debris_flow is not none %}
+      {% set available_sources = debris_flow.datasources | list if debris_flow.datasources is not none else [] %}
+      {% if debris_flow.datasource is not none and debris_flow.datasource in available_sources %}
+        {% set default_datasource = debris_flow.datasource %}
+      {% endif %}
     {% endif %}
 
     {% set datasource_options = [

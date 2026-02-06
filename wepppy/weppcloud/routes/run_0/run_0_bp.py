@@ -579,7 +579,6 @@ def create_index():
     )
 
 def create_run_dir(current_user):
-    from wepppy.weppcloud.utils.archive import has_archive
     wd = None
     dir_created = False
     while not dir_created:
@@ -588,9 +587,6 @@ def create_run_dir(current_user):
 
         wd = get_wd(runid)
         if _exists(wd):
-            continue
-
-        if has_archive(runid):
             continue
 
         os.makedirs(wd)

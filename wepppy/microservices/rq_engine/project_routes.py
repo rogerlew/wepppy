@@ -11,7 +11,6 @@ from fastapi.responses import RedirectResponse, Response
 from wepppy.nodb.core import Ron
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils import auth_tokens
-from wepppy.weppcloud.utils.archive import has_archive
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
@@ -150,8 +149,6 @@ def _create_run_dir(user_email: str | None) -> tuple[str, str]:
         runid = generate_runid(user_email or "")
         wd = get_wd(runid)
         if os.path.exists(wd):
-            continue
-        if has_archive(runid):
             continue
         os.makedirs(wd)
         return runid, wd
