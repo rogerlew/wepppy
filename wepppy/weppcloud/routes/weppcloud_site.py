@@ -152,9 +152,17 @@ def _build_run_location_dataset(source_path: Path) -> List[Dict[str, Any]]:
 
     dedup: Dict[str, Dict[str, Any]] = {}
     try:
-        from wepppy.weppcloud.utils.run_ttl import touch_ttl_from_access_log
+        from wepppy.weppcloud.utils.helpers import get_wd
+        from wepppy.weppcloud.utils.run_ttl import (
+            DELETE_STATE_ACTIVE,
+            read_ttl_state,
+            touch_ttl_from_access_log,
+        )
     except Exception as exc:
         current_app.logger.warning("Run TTL access-log updates unavailable: %s", exc)
+        get_wd = None
+        read_ttl_state = None
+        DELETE_STATE_ACTIVE = None
         touch_ttl_from_access_log = None
 
     try:
@@ -205,6 +213,14 @@ def _build_run_location_dataset(source_path: Path) -> List[Dict[str, Any]]:
     for record in dedup.values():
         last_accessed = record.pop('_last_accessed', None)
         record['last_accessed'] = last_accessed.isoformat() if isinstance(last_accessed, datetime) else None
+        if get_wd is not None and read_ttl_state is not None and DELETE_STATE_ACTIVE is not None:
+            try:
+                wd = get_wd(record['runid'], prefer_active=False)
+                ttl_state = read_ttl_state(wd)
+                if ttl_state and ttl_state.get("delete_state") != DELETE_STATE_ACTIVE:
+                    continue
+            except Exception:
+                pass
         if isinstance(last_accessed, datetime):
             try:
                 if touch_ttl_from_access_log is not None:

@@ -62,7 +62,7 @@ Policy meanings:
 - **Access log**: `_build_run_location_dataset` updates `last_accessed_at`/`expires_at`.
 - **Readonly**: `set_run_readonly_rq` syncs TTL policy after toggle.
 - **User override**: `tasks/set_ttl_disabled` updates `user_disabled` + `disabled_by_user_id`.
-- **Delete**: mark `delete_state=queued` before enqueueing delete; update `db_cleared` if DB is removed while directory persists.
+- **Delete**: mark `delete_state=queued`, clear DB/cache/locks, and return success without waiting on filesystem deletion (GC handles physical delete). Update `db_cleared` if DB is removed while directory persists.
   - Re-enabling TTL via UI resets `last_accessed_at` and `expires_at` from the toggle timestamp.
 
 ## API + UI
@@ -72,8 +72,8 @@ Policy meanings:
 
 ## Run GC
 - RQ job: `gc_runs_rq(root="/wc1/runs", limit=200, dry_run=false)`.
-- Scans for `wd/TTL` records with `policy=rolling_90d` and `expires_at <= now`.
-- Calls `delete_run_rq` for expired runs and logs failures to `gc:ttl` status channel.
+- Scans for `wd/TTL` records with `policy=rolling_90d` and `expires_at <= now`, plus runs flagged `delete_state=queued`.
+- Calls `delete_run_rq(delete_files=True)` for expired/queued runs and logs failures to `gc:ttl` status channel.
 - Scheduled via `wepppy.tools.scheduler` sidecar in compose, configured in `docker/scheduled-tasks.yml` to enqueue daily.
 
 **Implementation Status**
@@ -83,6 +83,8 @@ Policy meanings:
 - Touches TTL from access-log aggregation in `_build_run_location_dataset`.
 - Added TTL disable endpoint + UI toggle (PowerUser/Admin/Root).
 - Added delete touchpoints (mark `delete_state=queued`, record `db_cleared`).
+- Delete job is now logical-only; GC handles physical deletion on NFS.
+- Access-log dataset hides runs with `delete_state != active`.
 - Added GC job `gc_runs_rq` to purge expired runs.
 - Added scheduler sidecar to enqueue GC from `docker/scheduled-tasks.yml`.
 
@@ -93,6 +95,7 @@ Policy meanings:
 - [x] Touch TTL from access log aggregation.
 - [x] Add TTL disable endpoint + UI toggle.
 - [x] Add delete touchpoints to mark delete state.
+- [x] Treat delete jobs as logical deletes (GC removes files).
 - [x] Add GC job for expired runs.
 - [x] Schedule GC job via compose scheduler sidecar.
 - [ ] Decide on rename-to-trash deletion fallback for NFS `EBUSY`.

@@ -341,8 +341,8 @@ def set_run_readonly_rq(runid: str, readonly: bool) -> None:
 
 
 @with_exception_logging
-def delete_run_rq(runid: str, wd: Optional[str] = None) -> None:
-    """Delete a run directory and its database record in the background."""
+def delete_run_rq(runid: str, wd: Optional[str] = None, *, delete_files: bool = False) -> None:
+    """Delete a run database record, optionally removing the run directory."""
     job = get_current_job()
     job_id = getattr(job, "id", "sync")
     func_name = inspect.currentframe().f_code.co_name
@@ -363,7 +363,7 @@ def delete_run_rq(runid: str, wd: Optional[str] = None) -> None:
             f'rq:{job_id} STATUS TTL delete mark failed ({exc})',
         )
 
-    if target.exists():
+    if delete_files and target.exists():
         for attempt in range(1, attempts + 1):
             try:
                 shutil.rmtree(target)
@@ -434,7 +434,12 @@ def delete_run_rq(runid: str, wd: Optional[str] = None) -> None:
         try:
             from wepppy.weppcloud.utils.run_ttl import mark_delete_state
 
-            mark_delete_state(str(target), "queued", db_cleared=True, touched_by="delete_rq")
+            mark_delete_state(
+                str(target),
+                "queued",
+                db_cleared=True,
+                touched_by="delete_rq",
+            )
         except Exception as exc:
             StatusMessenger.publish(
                 status_channel,
@@ -450,7 +455,7 @@ def gc_runs_rq(
     limit: int = 200,
     dry_run: bool = False,
 ) -> Mapping[str, Any]:
-    """Delete runs whose TTL expiration has elapsed."""
+    """Delete runs whose TTL expiration has elapsed or are flagged for deletion."""
     job = get_current_job()
     job_id = getattr(job, "id", "sync")
     func_name = inspect.currentframe().f_code.co_name
@@ -462,7 +467,7 @@ def gc_runs_rq(
     )
 
     try:
-        from wepppy.weppcloud.utils.run_ttl import collect_expired_runs, mark_delete_state
+        from wepppy.weppcloud.utils.run_ttl import collect_gc_candidates, mark_delete_state
     except Exception as exc:
         StatusMessenger.publish(
             status_channel,
@@ -470,24 +475,25 @@ def gc_runs_rq(
         )
         raise
 
-    expired = collect_expired_runs(root=root, limit=limit)
+    candidates = collect_gc_candidates(root=root, limit=limit)
     deleted = 0
     errors: list[dict[str, str]] = []
 
-    for entry in expired:
+    for entry in candidates:
         runid = entry.get("runid")
         wd = entry.get("wd")
+        reason = entry.get("reason", "unknown")
         if not runid or not wd:
             continue
         if dry_run:
             StatusMessenger.publish(
                 status_channel,
-                f'rq:{job_id} STATUS dry-run delete {runid}',
+                f'rq:{job_id} STATUS dry-run delete {runid} ({reason})',
             )
             continue
         try:
             mark_delete_state(wd, "queued", touched_by="gc")
-            delete_run_rq(str(runid), str(wd))
+            delete_run_rq(str(runid), str(wd), delete_files=True)
             deleted += 1
         except Exception as exc:
             errors.append({"runid": str(runid), "error": str(exc)})
@@ -498,11 +504,11 @@ def gc_runs_rq(
 
     StatusMessenger.publish(
         status_channel,
-        f'rq:{job_id} COMPLETED {func_name}(expired={len(expired)}, deleted={deleted}, errors={len(errors)})',
+        f'rq:{job_id} COMPLETED {func_name}(expired={len(candidates)}, deleted={deleted}, errors={len(errors)})',
     )
 
     return {
-        "expired": len(expired),
+        "expired": len(candidates),
         "deleted": deleted,
         "errors": errors,
     }

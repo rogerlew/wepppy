@@ -44,6 +44,7 @@ __all__ = [
     "mark_delete_state",
     "read_ttl_state",
     "touch_ttl_from_access_log",
+    "collect_gc_candidates",
     "collect_expired_runs",
 ]
 
@@ -418,3 +419,61 @@ def collect_expired_runs(
             break
 
     return expired
+
+
+def collect_gc_candidates(
+    root: str = "/wc1/runs",
+    *,
+    now: Optional[datetime] = None,
+    limit: Optional[int] = None,
+) -> list[Dict[str, Any]]:
+    """Return run metadata records eligible for GC deletion."""
+    root_path = Path(root)
+    now = now or _utc_now()
+
+    candidates: list[Dict[str, Any]] = []
+    for runid, run_dir in _iter_run_dirs(root_path):
+        payload = _load_payload(ttl_path(str(run_dir)))
+        if not payload:
+            continue
+
+        delete_state = payload.get("delete_state")
+        if delete_state in {DELETE_STATE_QUEUED, DELETE_STATE_TRASH}:
+            candidates.append({
+                "runid": runid,
+                "wd": str(run_dir),
+                "reason": "queued",
+                "ttl": _normalize_payload(payload),
+            })
+            if limit is not None and len(candidates) >= limit:
+                break
+            continue
+
+        if os.path.exists(run_dir / "READONLY"):
+            continue
+        if payload.get("user_disabled"):
+            continue
+
+        policy = payload.get("policy")
+        if policy != POLICY_ROLLING:
+            continue
+
+        expires_at = _coerce_datetime(payload.get("expires_at"))
+        if expires_at is None or expires_at > now:
+            continue
+
+        if delete_state == DELETE_STATE_PURGED:
+            continue
+
+        candidates.append({
+            "runid": runid,
+            "wd": str(run_dir),
+            "reason": "expired",
+            "expires_at": _format_datetime(expires_at),
+            "ttl": _normalize_payload(payload),
+        })
+
+        if limit is not None and len(candidates) >= limit:
+            break
+
+    return candidates
