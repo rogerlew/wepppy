@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
 from collections import namedtuple
 from os.path import exists as _exists
 from os.path import join as _join
@@ -297,8 +298,10 @@ def _chown(dir_path: str) -> None:
     """
     assert os.path.isdir(dir_path), f"{dir_path} is not a directory"
 
-    cmd = f"sudo /bin/chown -R www-data:webgroup {dir_path}"
-    os.system(cmd)
+    subprocess.run(
+        ["sudo", "/bin/chown", "-R", "www-data:webgroup", dir_path],
+        check=True,
+    )
 
 def _chown_and_rmtree(dir_path: str) -> None:
     """Chown then remove a directory tree (used for stale GDB cleanup).
