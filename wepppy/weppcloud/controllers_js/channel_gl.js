@@ -826,6 +826,9 @@ var ChannelDelineation = (function () {
         var manualExtentInput = dom.qs("#map_bounds_text");
         var mapObjectGroup = dom.qs("#map_object_group");
         var mapObjectInput = dom.qs("#map_object");
+        var uploadDemGroup = dom.qs("#upload_dem_group");
+        var uploadDemInput = dom.qs("#input_upload_dem");
+        var uploadDemHintElement = dom.qs("#hint_upload_dem");
         var mapBoundsInput = dom.qs("#map_bounds");
         var mapCenterInput = dom.qs("#map_center");
         var mapZoomInput = dom.qs("#map_zoom");
@@ -840,6 +843,7 @@ var ChannelDelineation = (function () {
         var stacktraceAdapter = createLegacyAdapter(stacktraceElement);
         var rqJobAdapter = createLegacyAdapter(rqJobElement);
         var hintAdapter = createLegacyAdapter(hintElement);
+        var uploadDemHintAdapter = createLegacyAdapter(uploadDemHintElement);
 
         channel.form = formElement;
         channel.info = infoAdapter;
@@ -866,6 +870,13 @@ var ChannelDelineation = (function () {
         channel.hoverLabelLayer = null;
         channel.hoverLabelKey = null;
         channel._completion_seen = false;
+        var uploadDemState = {
+            ready: !!(formElement && formElement.dataset && formElement.dataset.uploadedDem === "true"),
+            extent: null,
+            center: null,
+            zoom: null,
+            filename: null
+        };
 
         var bootstrapState = {
             reported: false,
@@ -882,6 +893,118 @@ var ChannelDelineation = (function () {
             if (hintAdapter && typeof hintAdapter.text === "function") {
                 hintAdapter.text(message || "");
             }
+        }
+
+        function setUploadHint(message) {
+            if (uploadDemHintAdapter && typeof uploadDemHintAdapter.text === "function") {
+                uploadDemHintAdapter.text(message || "");
+            }
+        }
+
+        function ensureDemFilenameDisplay() {
+            if (!uploadDemGroup) {
+                return null;
+            }
+            var displays = uploadDemGroup.querySelectorAll(".wc-field--display");
+            for (var i = 0; i < displays.length; i += 1) {
+                var display = displays[i];
+                var label = display.querySelector(".wc-field__label");
+                if (label && label.textContent && label.textContent.indexOf("Current DEM") !== -1) {
+                    return display.querySelector(".wc-text-display");
+                }
+            }
+            var container = document.createElement("div");
+            container.className = "wc-field wc-field--display";
+            var labelNode = document.createElement("span");
+            labelNode.className = "wc-field__label";
+            labelNode.textContent = "Current DEM map";
+            var valueNode = document.createElement("div");
+            valueNode.className = "wc-text-display";
+            container.appendChild(labelNode);
+            container.appendChild(valueNode);
+            uploadDemGroup.appendChild(container);
+            return valueNode;
+        }
+
+        function updateDemFilename(filename) {
+            if (!filename) {
+                return;
+            }
+            uploadDemState.filename = filename;
+            var displayNode = ensureDemFilenameDisplay();
+            if (displayNode) {
+                displayNode.innerHTML = "<code>" + filename + "</code>";
+            }
+        }
+
+        function applyUploadedDemResult(result) {
+            if (!result || typeof result !== "object") {
+                return;
+            }
+            var extent = parseNumericList(result.extent, 4);
+            var center = parseNumericList(result.center, 2);
+            var zoom = toFloat(result.zoom);
+            uploadDemState.extent = extent;
+            uploadDemState.center = center;
+            uploadDemState.zoom = zoom;
+            if (mapBoundsInput && extent) {
+                mapBoundsInput.value = extent.join(",");
+            }
+            if (mapCenterInput && center) {
+                mapCenterInput.value = center.join(",");
+            }
+            if (mapZoomInput && zoom !== null) {
+                mapZoomInput.value = zoom;
+            }
+            if (result.dem_filename) {
+                updateDemFilename(result.dem_filename);
+            }
+        }
+
+        function buildBoundsFromExtent(extent) {
+            if (!extent || extent.length !== 4) {
+                return null;
+            }
+            var sw = { lat: extent[1], lng: extent[0] };
+            var ne = { lat: extent[3], lng: extent[2] };
+            if (typeof L !== "undefined" && L && typeof L.latLngBounds === "function") {
+                return L.latLngBounds([sw.lat, sw.lng], [ne.lat, ne.lng]);
+            }
+            return {
+                getSouthWest: function () {
+                    return sw;
+                },
+                getNorthEast: function () {
+                    return ne;
+                }
+            };
+        }
+
+        function flyToUploadedDemExtent() {
+            var map = MapController.getInstance();
+            if (!map || typeof map.flyToBounds !== "function") {
+                return;
+            }
+            var bounds = buildBoundsFromExtent(uploadDemState.extent);
+            if (bounds) {
+                map.flyToBounds(bounds);
+                return;
+            }
+            return http
+                .getJson(url_for_run("query/extent/"), { params: { _: Date.now() } })
+                .then(function (response) {
+                    var extent = parseNumericList(response, 4);
+                    if (extent) {
+                        uploadDemState.extent = extent;
+                        var nextBounds = buildBoundsFromExtent(extent);
+                        if (nextBounds) {
+                            map.flyToBounds(nextBounds);
+                        }
+                    }
+                })
+                .catch(function () {
+                    return null;
+                });
         }
 
         function resetStatus(message) {
@@ -936,11 +1059,27 @@ var ChannelDelineation = (function () {
             }
         }
 
+        function updateUploadDemVisibility(mode) {
+            if (!uploadDemGroup) {
+                return;
+            }
+            if (mode === 3) {
+                dom.show(uploadDemGroup);
+            } else {
+                dom.hide(uploadDemGroup);
+            }
+        }
+
         function updateExtentInputVisibility(mode) {
             updateManualExtentVisibility(mode);
             updateMapObjectVisibility(mode);
+            updateUploadDemVisibility(mode);
             if (mode === 2) {
                 setBuildButtonEnabled(true, "");
+                channel.update_command_button_state(channel);
+            } else if (mode === 3) {
+                var enabled = uploadDemState.ready;
+                setBuildButtonEnabled(enabled, enabled ? "" : "Upload a DEM to enable channel delineation.");
                 channel.update_command_button_state(channel);
             } else if (typeof channel.onMapChange === "function") {
                 channel.onMapChange();
@@ -1002,6 +1141,92 @@ var ChannelDelineation = (function () {
             mapBoundsInput.value = bbox.join(",");
         }
 
+        function resolveUploadErrorMessage(payload, fallback) {
+            if (!payload) {
+                return fallback;
+            }
+            if (payload.error && payload.error.message) {
+                return payload.error.message;
+            }
+            if (payload.errors && payload.errors.length) {
+                var entry = payload.errors[0];
+                if (entry && typeof entry.message === "string") {
+                    return entry.message;
+                }
+                if (typeof entry === "string") {
+                    return entry;
+                }
+            }
+            if (payload.message) {
+                return payload.message;
+            }
+            return fallback;
+        }
+
+        function validateUploadDemFile(file) {
+            if (!file) {
+                throw new Error("Choose a DEM file to upload.");
+            }
+            var name = file.name || "";
+            var ext = name.split(".").pop().toLowerCase();
+            if (ext !== "tif") {
+                throw new Error("DEM uploads must be .tif files.");
+            }
+        }
+
+        function uploadDem() {
+            if (!formElement || !uploadDemInput) {
+                return Promise.resolve(null);
+            }
+            var file = uploadDemInput.files && uploadDemInput.files.length > 0 ? uploadDemInput.files[0] : null;
+            try {
+                validateUploadDemFile(file);
+            } catch (err) {
+                var msg = err && err.message ? err.message : "Invalid DEM file.";
+                setUploadHint(msg);
+                showErrorStatus(msg);
+                return Promise.resolve(null);
+            }
+            resetStatus("Setting DEM");
+            setUploadHint("");
+            channel.hideStacktrace();
+            var formData = new window.FormData(formElement);
+            return http
+                .requestWithSessionToken(
+                    url_for_run("tasks/upload-dem/", { prefix: "/rq-engine/api" }),
+                    {
+                        method: "POST",
+                        body: formData,
+                        form: formElement
+                    }
+                )
+                .then(function (result) {
+                    var data = result.body || {};
+                    if (!data.error && !data.errors) {
+                        setUploadHint("DEM uploaded successfully.");
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html("DEM uploaded.");
+                        }
+                        uploadDemState.ready = true;
+                        applyUploadedDemResult(data.result || {});
+                        updateExtentInputVisibility(getExtentMode());
+                        return data;
+                    }
+                    channel.pushResponseStacktrace(channel, data);
+                    var message = resolveUploadErrorMessage(data, "Failed to upload DEM.");
+                    setUploadHint(message);
+                    showErrorStatus(message);
+                    return data;
+                })
+                .catch(function (error) {
+                    channel.pushErrorStacktrace(channel, error);
+                    var message = resolveUploadErrorMessage(error && error.body ? error.body : null, "Failed to upload DEM.");
+                    setUploadHint(message);
+                    showErrorStatus(message);
+                    return error;
+                });
+        }
+
         function buildPayload() {
             var raw = forms.serializeForm(formElement, { format: "object" });
             var setExtentMode = toInteger(raw.set_extent_mode);
@@ -1037,6 +1262,13 @@ var ChannelDelineation = (function () {
                 if (mapZoomInput) {
                     mapZoomInput.value = zoom;
                 }
+            } else if (setExtentMode === 3) {
+                center = uploadDemState.center || parseNumericList(raw.map_center, 2);
+                bounds = uploadDemState.extent || parseNumericList(raw.map_bounds, 4);
+                zoom = uploadDemState.zoom || toFloat(raw.map_zoom);
+                if (bounds) {
+                    mapBoundsText = bounds.join(", ");
+                }
             } else {
                 if (setExtentMode === 1) {
                     prepareExtentFields();
@@ -1046,11 +1278,15 @@ var ChannelDelineation = (function () {
                 zoom = toFloat(raw.map_zoom);
             }
 
-            if (!center || center.length !== 2) {
-                throw new Error("Map center is not available yet. Move the map to establish bounds.");
-            }
-            if (!bounds || bounds.length !== 4) {
-                throw new Error("Map extent is missing. Navigate the map or specify a manual extent.");
+            if (setExtentMode !== 3) {
+                if (!center || center.length !== 2) {
+                    throw new Error("Map center is not available yet. Move the map to establish bounds.");
+                }
+                if (!bounds || bounds.length !== 4) {
+                    throw new Error("Map extent is missing. Navigate the map or specify a manual extent.");
+                }
+            } else if (!uploadDemState.ready) {
+                throw new Error("Upload a DEM before building channels.");
             }
             if (mcl === null || csa === null) {
                 throw new Error("Minimum channel length and critical source area must be numeric.");
@@ -1091,6 +1327,10 @@ var ChannelDelineation = (function () {
             updateBreachDistanceVisibility(this.value);
         }));
 
+        delegates.push(dom.delegate(formElement, "change", "[data-channel-role=\"upload-dem\"]", function () {
+            uploadDem();
+        }));
+
         delegates.push(dom.delegate(formElement, "click", "[data-channel-action=\"build\"]", function (event) {
             event.preventDefault();
             channel.build();
@@ -1117,6 +1357,9 @@ var ChannelDelineation = (function () {
                     channel.disconnect_status_stream(channel);
                     channel.show();
                     channel.report();
+                    if (getExtentMode() === 3) {
+                        flyToUploadedDemExtent();
+                    }
                     emit("channel:build:completed", payload || {});
                     baseTriggerEvent("job:completed", {
                         job_id: channel.rq_job_id,
@@ -1193,6 +1436,9 @@ var ChannelDelineation = (function () {
                 var extentMode = getExtentMode();
                 if (extentMode === 2) {
                     setBuildButtonEnabled(true, "");
+                } else if (extentMode === 3) {
+                    var uploadReady = uploadDemState.ready;
+                    setBuildButtonEnabled(uploadReady, uploadReady ? "" : "Upload a DEM to enable channel delineation.");
                 } else {
                     var zoomOk = zoom >= channel.zoom_min;
                     var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
@@ -1270,6 +1516,7 @@ var ChannelDelineation = (function () {
                     throw error;
                 });
         };
+        channel.upload_dem = uploadDem;
 
         channel.build = function () {
             var taskMsg = "Delineating channels";

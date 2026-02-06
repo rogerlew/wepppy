@@ -687,9 +687,19 @@ class TopazRunner:
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            data = imread(self.dem)
+            try:
+                if str(self.dem).lower().endswith(".vrt"):
+                    raise ValueError("VRT requires GDAL reader")
+                data = imread(self.dem)
+            except Exception:
+                ds = gdal.Open(self.dem)
+                if ds is None:
+                    raise
+                band = ds.GetRasterBand(1)
+                data = band.ReadAsArray()
+                del ds
 
-        data = data.flatten()
+        data = np.asarray(data, dtype=float).flatten()
         data = np.clip(data, 1.0, 9999.0)
 
         dednm_inp = 'DEDNM.INP'

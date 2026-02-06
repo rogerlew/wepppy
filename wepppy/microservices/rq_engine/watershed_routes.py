@@ -1,15 +1,23 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
+from pathlib import Path
 from typing import Any
 
 import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
+from starlette.datastructures import UploadFile
+import utm
+from werkzeug.utils import secure_filename
+from osgeo import gdal, osr
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.all_your_base.geo import utm_srid
+from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
 from wepppy.nodb.core import (
     Map,
     MinimumChannelLengthTooShortError,
@@ -28,6 +36,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from .auth import AuthError, authorize_run_access, require_jwt
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +44,8 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+UPLOAD_DEM_MAX_DIMENSION = 1024
+UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
 
 
 def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, list[Any] | None]:
@@ -89,10 +100,13 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
 
     try:
         set_extent_mode = _as_int(set_extent_mode_raw, "set_extent_mode")
-        if set_extent_mode not in (0, 1, 2):
-            raise ValueError("set_extent_mode must be 0, 1, or 2.")
+        if set_extent_mode not in (0, 1, 2, 3):
+            raise ValueError("set_extent_mode must be 0, 1, 2, or 3.")
 
         map_object = None
+        extent = None
+        center = None
+        zoom = None
         if set_extent_mode == 2:
             if map_object_raw in (None, ""):
                 raise ValueError("map_object is required when set_extent_mode is 2.")
@@ -100,14 +114,15 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             center = _as_float_sequence(map_object.center, 2, "center")
             extent = _as_float_sequence(map_object.extent, 4, "bounds")
             zoom = _as_float(map_object.zoom, "zoom")
+        elif set_extent_mode == 3:
+            if center_raw not in (None, ""):
+                center = _as_float_sequence(center_raw, 2, "center")
+            if bounds_raw not in (None, ""):
+                extent = _as_float_sequence(bounds_raw, 4, "bounds")
+            if zoom_raw not in (None, ""):
+                zoom = _as_float(zoom_raw, "zoom")
         else:
-            if (
-                center_raw is None
-                or zoom_raw is None
-                or bounds_raw is None
-                or mcl_raw is None
-                or csa_raw is None
-            ):
+            if center_raw is None or zoom_raw is None or bounds_raw is None:
                 return (
                     error_response(
                         "Expecting center, zoom, bounds, mcl, and csa",
@@ -119,12 +134,19 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             extent = _as_float_sequence(bounds_raw, 4, "bounds")
             zoom = _as_float(zoom_raw, "zoom")
 
+        if mcl_raw is None or csa_raw is None:
+            return (
+                error_response("Expecting mcl and csa", status_code=400),
+                None,
+            )
+
         mcl = _as_float(mcl_raw, "mcl")
         csa = _as_float(csa_raw, "csa")
 
-        l, b, r, t = extent
-        if not (l < r and b < t):
-            raise ValueError("Invalid bounds ordering.")
+        if extent is not None:
+            l, b, r, t = extent
+            if not (l < r and b < t):
+                raise ValueError("Invalid bounds ordering.")
 
         if isinstance(wbt_fill_or_breach_raw, (list, tuple)):
             wbt_fill_or_breach = next(
@@ -152,7 +174,7 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             )
         else:
             map_bounds_text = str(map_bounds_text_raw or "")
-        if set_extent_mode == 2 and map_bounds_text == "":
+        if set_extent_mode in (2, 3) and map_bounds_text == "" and extent is not None:
             map_bounds_text = ", ".join([str(v) for v in extent])
     except ValueError as exc:
         return error_response(str(exc), status_code=400), None
@@ -172,6 +194,293 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             map_object,
         ],
     )
+
+
+def _extract_upload(form, key: str) -> UploadFile | None:
+    upload = form.get(key)
+    if isinstance(upload, UploadFile):
+        return upload
+    return None
+
+
+def _require_spatial_reference(ds: gdal.Dataset) -> osr.SpatialReference:
+    wkt = ds.GetProjection()
+    if not wkt:
+        raise UploadError("DEM is missing a spatial reference.")
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(wkt)
+    srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    return srs
+
+
+def _validate_dem_dimensions(ds: gdal.Dataset) -> None:
+    if ds.RasterXSize > UPLOAD_DEM_MAX_DIMENSION or ds.RasterYSize > UPLOAD_DEM_MAX_DIMENSION:
+        raise UploadError(
+            f"DEM must be {UPLOAD_DEM_MAX_DIMENSION}x{UPLOAD_DEM_MAX_DIMENSION} pixels or smaller."
+        )
+
+
+def _ensure_square_pixels(transform: tuple[float, ...]) -> float:
+    if transform is None or len(transform) != 6:
+        raise UploadError("DEM geotransform is missing.")
+    if not math.isclose(transform[2], 0.0, rel_tol=0.0, abs_tol=1.0e-9) or not math.isclose(
+        transform[4], 0.0, rel_tol=0.0, abs_tol=1.0e-9
+    ):
+        raise UploadError("DEM must be north-up with no rotation.")
+    cellsize_x = abs(transform[1])
+    cellsize_y = abs(transform[5])
+    if cellsize_x <= 0 or cellsize_y <= 0:
+        raise UploadError("DEM pixel size must be positive.")
+    if not math.isclose(cellsize_x, cellsize_y, rel_tol=0.0, abs_tol=1.0e-6):
+        raise UploadError("DEM pixels must be square (equal x/y resolution).")
+    return float(cellsize_x)
+
+
+def _validate_float_dem(dem_path: Path) -> None:
+    ds = gdal.Open(str(dem_path))
+    if ds is None:
+        raise UploadError("Unable to read uploaded DEM.")
+    try:
+        band = ds.GetRasterBand(1)
+        dtype = gdal.GetDataTypeName(band.DataType) if band is not None else ""
+        if "float" not in dtype.lower():
+            raise UploadError(
+                f"DEM must be floating point (Float32/Float64). Detected {dtype or 'unknown'}."
+            )
+    finally:
+        ds = None
+
+
+def _top_left_wgs(srs: osr.SpatialReference, transform: tuple[float, ...]) -> tuple[float, float]:
+    wgs = osr.SpatialReference()
+    wgs.ImportFromEPSG(4326)
+    wgs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+    transformer = osr.CoordinateTransformation(srs, wgs)
+    lon, lat, _ = transformer.TransformPoint(transform[0], transform[3])
+    return float(lon), float(lat)
+
+
+def _utm_hint_from_srs(srs: osr.SpatialReference) -> tuple[int | None, bool | None]:
+    zone = srs.GetUTMZone()
+    if zone:
+        return abs(zone), zone > 0
+    code = srs.GetAuthorityCode("PROJCS") or srs.GetAuthorityCode(None)
+    if code and str(code).isdigit():
+        epsg = int(code)
+        if 32601 <= epsg <= 32660:
+            return epsg - 32600, True
+        if 32701 <= epsg <= 32760:
+            return epsg - 32700, False
+        if 26901 <= epsg <= 26960:
+            return epsg - 26900, True
+        if 26701 <= epsg <= 26760:
+            return epsg - 26700, True
+        if 25801 <= epsg <= 25860:
+            return epsg - 25800, True
+    return None, None
+
+
+def _normalize_utm_projcs(
+    srs: osr.SpatialReference,
+    zone_number: int,
+    northern: bool,
+) -> osr.SpatialReference:
+    projcs = srs.GetAttrValue("projcs") or ""
+    projcs_compact = projcs.replace(" ", "").replace("_", "")
+    if "UTM" in projcs_compact:
+        return srs
+    adjusted = srs.Clone()
+    hemisphere = "N" if northern else "S"
+    datum_raw = (adjusted.GetAttrValue("DATUM") or "").upper()
+    datum_compact = datum_raw.replace(" ", "").replace("_", "")
+    datum_label = None
+    if "NAD83" in datum_compact or "NAD1983" in datum_compact:
+        datum_label = "NAD83"
+    elif "NAD27" in datum_compact or "NAD1927" in datum_compact:
+        datum_label = "NAD27"
+    elif "WGS84" in datum_compact or "WGS1984" in datum_compact:
+        datum_label = "WGS84"
+    if datum_label:
+        projcs_name = f"{datum_label} / UTM zone {zone_number}{hemisphere}"
+    else:
+        projcs_name = f"UTM zone {zone_number}{hemisphere}"
+    adjusted.SetProjCS(projcs_name)
+    return adjusted
+
+
+def _install_uploaded_dem(
+    *,
+    ron: Ron,
+    watershed: Watershed,
+    saved_path: Path,
+) -> dict[str, Any]:
+    ds = gdal.Open(str(saved_path))
+    if ds is None:
+        raise UploadError("Unable to read uploaded DEM.")
+
+    try:
+        _validate_dem_dimensions(ds)
+        srs = _require_spatial_reference(ds)
+        transform = ds.GetGeoTransform()
+        if transform is None or len(transform) != 6:
+            raise UploadError("DEM geotransform is missing.")
+        utm_zone, utm_northern = _utm_hint_from_srs(srs)
+    finally:
+        ds = None
+
+    dem_path = saved_path
+    utm_srs = None
+    if utm_zone is not None and utm_northern is not None:
+        ds = gdal.Open(str(saved_path))
+        if ds is None:
+            raise UploadError("Unable to read uploaded DEM.")
+        try:
+            transform = ds.GetGeoTransform()
+            cellsize = _ensure_square_pixels(transform)
+        finally:
+            ds = None
+        utm_srs = _normalize_utm_projcs(srs, utm_zone, utm_northern)
+    else:
+        lon, lat = _top_left_wgs(srs, transform)
+        _, _, zone_number, _ = utm.from_latlon(lat, lon)
+        epsg = utm_srid(zone_number, lat >= 0)
+        dem_path = saved_path.with_name(f"{saved_path.stem}_utm.tif")
+        if dem_path.exists():
+            dem_path.unlink()
+        warp_options = gdal.WarpOptions(
+            dstSRS=f"EPSG:{epsg}",
+            resampleAlg="bilinear",
+        )
+        warped = gdal.Warp(str(dem_path), str(saved_path), options=warp_options)
+        if warped is None:
+            raise UploadError("Failed to warp DEM to UTM.")
+        warped = None
+
+        ds = gdal.Open(str(dem_path))
+        if ds is None:
+            raise UploadError("Unable to read warped DEM.")
+        try:
+            _validate_dem_dimensions(ds)
+            transform = ds.GetGeoTransform()
+            cellsize = _ensure_square_pixels(transform)
+            warped_srs = _require_spatial_reference(ds)
+            warped_zone, warped_northern = _utm_hint_from_srs(warped_srs)
+            if warped_zone is None or warped_northern is None:
+                raise UploadError("Unable to determine UTM zone after warp.")
+            utm_srs = _normalize_utm_projcs(warped_srs, warped_zone, warped_northern)
+        finally:
+            ds = None
+
+    _validate_float_dem(dem_path)
+    rdi = RasterDatasetInterpolator(str(dem_path))
+    extent = list(rdi.extent)
+    center = [(extent[0] + extent[2]) / 2.0, (extent[1] + extent[3]) / 2.0]
+    zoom = getattr(ron, "_zoom0", None)
+    zoom = int(zoom) if isinstance(zoom, int) else 11
+
+    map_payload = {
+        "extent": extent,
+        "center": center,
+        "zoom": float(zoom),
+        "cellsize": float(cellsize),
+        "utm": {
+            "py/tuple": [
+                float(rdi.left),
+                float(rdi.upper),
+                int(rdi.utm_n),
+                str(rdi.utm_h),
+            ]
+        },
+        "_ul_x": float(rdi.left),
+        "_ul_y": float(rdi.upper),
+        "_lr_x": float(rdi.right),
+        "_lr_y": float(rdi.lower),
+        "_num_cols": int(rdi.width),
+        "_num_rows": int(rdi.height),
+    }
+    map_object = Map.from_payload(map_payload, default_cellsize=cellsize)
+
+    vrt_path = Path(ron.dem_dir) / "dem.vrt"
+    if vrt_path.exists():
+        vrt_path.unlink()
+    translate_options = {}
+    if utm_srs is not None:
+        translate_options["outputSRS"] = utm_srs.ExportToWkt()
+    vrt_ds = gdal.Translate(str(vrt_path), str(dem_path), format="VRT", **translate_options)
+    if vrt_ds is None or not vrt_path.exists():
+        raise UploadError("Failed to create DEM VRT.")
+    vrt_ds = None
+
+    with ron.locked():
+        ron._cellsize = float(cellsize)
+        ron._map = map_object
+        ron._w3w = None
+        ron._dem_is_vrt = True
+
+    with watershed.locked():
+        watershed._uploaded_dem_filename = saved_path.name
+        watershed._set_extent_mode = 3
+
+    try:
+        prep = RedisPrep.getInstance(ron.wd)
+        prep.timestamp(TaskEnum.fetch_dem)
+    except FileNotFoundError:
+        pass
+
+    return {
+        "dem_filename": saved_path.name,
+        "extent": extent,
+        "center": center,
+        "zoom": float(zoom),
+        "cellsize": float(cellsize),
+        "map_object": map_object.to_payload(),
+    }
+
+
+@router.post("/runs/{runid}/{config}/tasks/upload-dem/")
+async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine upload-dem auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+
+        form = await request.form()
+        upload = _extract_upload(form, "input_upload_dem")
+        if upload is None or not upload.filename:
+            return upload_failure("input_upload_dem must be provided")
+
+        filename = secure_filename(upload.filename)
+        if not filename:
+            return upload_failure("input_upload_dem must have a valid filename")
+
+        saved_path = save_upload_file(
+            upload,
+            allowed_extensions=UPLOAD_DEM_ALLOWED_EXTENSIONS,
+            dest_dir=Path(ron.dem_dir),
+            filename_transform=lambda value: filename,
+            overwrite=True,
+        )
+
+        result = _install_uploaded_dem(
+            ron=ron,
+            watershed=watershed,
+            saved_path=saved_path,
+        )
+        return upload_success(result=result)
+    except UploadError as exc:
+        return upload_failure(str(exc))
+    except Exception:
+        logger.exception("rq-engine upload-dem failed")
+        return error_response_with_traceback("Failed validating DEM", status_code=500)
 
 
 @router.post("/runs/{runid}/{config}/fetch-dem-and-build-channels")
@@ -227,8 +536,17 @@ async def fetch_dem_and_build_channels(
             return JSONResponse({"message": "Set watershed inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.fetch_dem)
+        if int(set_extent_mode) != 3:
+            prep.remove_timestamp(TaskEnum.fetch_dem)
         prep.remove_timestamp(TaskEnum.build_channels)
+
+        if int(set_extent_mode) == 3:
+            ron = Ron.getInstance(wd)
+            if ron.map is None or not ron.has_dem:
+                return error_response(
+                    "Upload DEM mode requires a validated DEM upload.",
+                    status_code=400,
+                )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:

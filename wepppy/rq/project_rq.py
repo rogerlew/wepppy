@@ -745,7 +745,7 @@ def build_channels_rq(
 @with_exception_logging
 def fetch_dem_and_build_channels_rq(
     runid: str,
-    extent: Sequence[float],
+    extent: Optional[Sequence[float]],
     center: Optional[Sequence[float]],
     zoom: Optional[int],
     csa: float,
@@ -761,6 +761,7 @@ def fetch_dem_and_build_channels_rq(
     Args:
         runid: Identifier used to locate the working directory.
         extent: Bounding box `[minx, miny, maxx, maxy]` in projected coords.
+            Optional when `set_extent_mode` is 3 (Upload DEM).
         center: Optional map center override.
         zoom: Optional zoom level.
         csa: Contributing source area threshold.
@@ -787,14 +788,25 @@ def fetch_dem_and_build_channels_rq(
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            
-            ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom, map_object))
-            job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
-            job.save()
+            if int(set_extent_mode) == 3:
+                bjob = q.enqueue_call(
+                    build_channels_rq,
+                    (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),
+                )
+                job.meta['jobs:0,func:build_channels_rq'] = bjob.id
+                job.save()
+            else:
+                ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom, map_object))
+                job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
+                job.save()
 
-            bjob = q.enqueue_call(build_channels_rq, (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),  depends_on=ajob)
-            job.meta['jobs:1,func:build_channels_rq'] = bjob.id
-            job.save()
+                bjob = q.enqueue_call(
+                    build_channels_rq,
+                    (runid, csa, mcl, wbt_fill_or_breach, wbt_blc_dist),
+                    depends_on=ajob,
+                )
+                job.meta['jobs:1,func:build_channels_rq'] = bjob.id
+                job.save()
         
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:

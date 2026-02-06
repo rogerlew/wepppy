@@ -48,7 +48,7 @@ def build_channels_rq(
 
 def fetch_dem_and_build_channels_rq(
     runid: str,
-    extent: Sequence[float],
+    extent: Optional[Sequence[float]],
     center: Optional[Sequence[float]],
     zoom: Optional[int],
     csa: float,

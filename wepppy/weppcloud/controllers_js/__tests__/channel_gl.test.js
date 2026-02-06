@@ -37,6 +37,10 @@ describe("ChannelDelineation GL controller", () => {
                     <textarea id="map_object" name="map_object" rows="8"></textarea>
                 </div>
 
+                <div id="upload_dem_group" style="display: none;">
+                    <input type="file" id="input_upload_dem" name="input_upload_dem" data-channel-role="upload-dem">
+                </div>
+
                 <div id="wbt_blc_dist_container" style="display: none;">
                     <input id="wbt_blc_dist" name="wbt_blc_dist" type="text" value="400">
                 </div>
@@ -44,6 +48,7 @@ describe("ChannelDelineation GL controller", () => {
                 <input type="radio" id="set_extent_mode_map" name="set_extent_mode" value="0" data-channel-role="extent-mode" checked>
                 <input type="radio" id="set_extent_mode_manual" name="set_extent_mode" value="1" data-channel-role="extent-mode">
                 <input type="radio" id="set_extent_mode_map_object" name="set_extent_mode" value="2" data-channel-role="extent-mode">
+                <input type="radio" id="set_extent_mode_upload_dem" name="set_extent_mode" value="3" data-channel-role="extent-mode">
 
                 <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" data-channel-role="wbt-fill">
                     <option value="fill">Fill</option>
@@ -57,6 +62,7 @@ describe("ChannelDelineation GL controller", () => {
                 <button type="button" id="btn_build_channels_en" data-channel-action="build">Build Channels</button>
             </form>
             <small id="hint_build_channels_en"></small>
+            <small id="hint_upload_dem"></small>
             <div id="sub_legend"></div>
         `;
 

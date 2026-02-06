@@ -569,23 +569,66 @@ def get_utm_zone(srs: osr.SpatialReference | PathType) -> int | None:
     if srs.IsProjected() != 1:
         return None
 
-    projcs = srs.GetAttrValue('projcs').replace(' ', '').replace('_', '')
-    assert 'UTM' in projcs
+    projcs = srs.GetAttrValue('projcs') or ''
+    projcs_compact = projcs.replace(' ', '').replace('_', '')
+
+    authority_code = srs.GetAuthorityCode('PROJCS') or srs.GetAuthorityCode(None)
+    if authority_code and str(authority_code).isdigit():
+        epsg = int(authority_code)
+        if 32601 <= epsg <= 32660:
+            return 'WGS84', epsg - 32600, 'N'
+        if 32701 <= epsg <= 32760:
+            return 'WGS84', epsg - 32700, 'S'
+        if 26901 <= epsg <= 26960:
+            return 'NAD83', epsg - 26900, 'N'
+        if 26701 <= epsg <= 26760:
+            return 'NAD27', epsg - 26700, 'N'
+        if 25801 <= epsg <= 25860:
+            return 'ETRS89', epsg - 25800, 'N'
 
     datum = None
-    if 'NAD83' in projcs:
+    if 'NAD83' in projcs_compact:
         datum = 'NAD83'
-    elif 'WGS84' in projcs:
+    elif 'WGS84' in projcs_compact:
         datum = 'WGS84'
-    elif 'NAD27' in projcs:
+    elif 'NAD27' in projcs_compact:
         datum = 'NAD27'
+    else:
+        datum_name = (srs.GetAttrValue('datum') or '').upper().replace(' ', '').replace('_', '')
+        if 'NAD83' in datum_name or 'NAD1983' in datum_name:
+            datum = 'NAD83'
+        elif 'NAD27' in datum_name or 'NAD1927' in datum_name:
+            datum = 'NAD27'
+        elif 'WGS84' in datum_name or 'WGS1984' in datum_name:
+            datum = 'WGS84'
 
     # should be something like NAD83 / UTM zone 11N...
 
-    if 'UTM' not in projcs:
+    if 'UTM' not in projcs_compact:
+        projection = (srs.GetAttrValue('PROJECTION') or '').replace(' ', '').replace('_', '')
+        if projection.lower() == 'transversemercator':
+            lon0 = srs.GetProjParm('central_meridian', None)
+            if lon0 is None:
+                lon0 = srs.GetProjParm('longitude_of_origin', None)
+            lat0 = srs.GetProjParm('latitude_of_origin', 0.0)
+            scale = srs.GetProjParm('scale_factor', 1.0)
+            false_easting = srs.GetProjParm('false_easting', None)
+            false_northing = srs.GetProjParm('false_northing', None)
+            if (
+                lon0 is not None
+                and abs(lat0) < 1.0e-4
+                and abs(scale - 0.9996) < 1.0e-3
+                and false_easting is not None
+                and abs(false_easting - 500000.0) < 250.0
+                and false_northing is not None
+            ):
+                utm_zone = int(round((float(lon0) + 183.0) / 6.0))
+                if 1 <= utm_zone <= 60:
+                    hemisphere = 'S' if float(false_northing) > 5.0e6 else 'N'
+                    return datum, utm_zone, hemisphere
         return None
 
-    utm_token = projcs.split('UTM')[1]
+    utm_token = projcs_compact.split('UTM')[1]
 
     # noinspection PyBroadException
     try:
@@ -596,7 +639,7 @@ def get_utm_zone(srs: osr.SpatialReference | PathType) -> int | None:
     if utm_zone < 0 or utm_zone > 60:
         return None
 
-    hemisphere = projcs[-1]
+    hemisphere = projcs_compact[-1]
     return datum, utm_zone, hemisphere
 
 

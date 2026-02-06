@@ -233,6 +233,7 @@ class Watershed(NoDbBase):
             self._outlet: Optional['Outlet'] = None
             self._set_extent_mode: int = 0
             self._map_bounds_text: str = ""
+            self._uploaded_dem_filename: Optional[str] = None
 
             self._wepp_chn_type: str = self.config_get_str("soils", "wepp_chn_type")
 
@@ -305,7 +306,7 @@ class Watershed(NoDbBase):
     @nodb_setter
     def set_extent_mode(self, value: int) -> None:
         _value = int(value)
-        assert _value in [0, 1, 2], f"Invalid set_extent_mode value: {_value}"
+        assert _value in [0, 1, 2, 3], f"Invalid set_extent_mode value: {_value}"
         self._set_extent_mode = _value
 
     @property
@@ -319,6 +320,20 @@ class Watershed(NoDbBase):
     def map_bounds_text(self, value: str) -> None:
         _value = str(value)
         self._map_bounds_text = _value
+
+    @property
+    def uploaded_dem_filename(self) -> Optional[str]:
+        if not hasattr(self, "_uploaded_dem_filename"):
+            return None
+        return self._uploaded_dem_filename
+
+    @uploaded_dem_filename.setter
+    @nodb_setter
+    def uploaded_dem_filename(self, value: Optional[str]) -> None:
+        if value is None or value == "":
+            self._uploaded_dem_filename = None
+            return
+        self._uploaded_dem_filename = str(value)
 
     @classmethod
     def _decode_jsonpickle(cls, json_text: str) -> 'Watershed':

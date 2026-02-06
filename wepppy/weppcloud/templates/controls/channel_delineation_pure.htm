@@ -1,10 +1,14 @@
 {% import "controls/_pure_macros.html" as ui %}
 {% from "shared/console_macros.htm" import button_row %}
 
+{% set has_uploaded_dem = watershed.uploaded_dem_filename is not none %}
 {% call ui.control_shell(
      form_id="build_channels_form",
      title="Channel Delineation",
-     collapsible=True
+     collapsible=True,
+     form_attrs={
+       "data-uploaded-dem": "true" if has_uploaded_dem else "false"
+     }
    ) %}
 
   <input type="hidden" id="map_center" name="map_center">
@@ -38,6 +42,13 @@
              "value": "2",
              "selected": watershed.set_extent_mode == 2,
              "attrs": {"class": "disable-readonly", "data-channel-role": "extent-mode"}
+           },
+           {
+             "id": "set_extent_mode_upload_dem",
+             "label": "Upload DEM",
+             "value": "3",
+             "selected": watershed.set_extent_mode == 3,
+             "attrs": {"class": "disable-readonly", "data-channel-role": "extent-mode"}
            }
          ]
        ) }}
@@ -67,6 +78,27 @@
            extra_control_class="disable-readonly",
            max_width="100%"
       ) }}
+    </div>
+
+    <div id="upload_dem_group" style="display: none;">
+      <p class="wc-field__help">
+        Upload a GeoTIFF DEM (<code>.tif</code>) with a spatial reference. Must be floating point (Float32/Float64) and no larger than 1024x1024 pixels. Non-UTM DEMs are reprojected to UTM automatically.
+      </p>
+      {{ ui.file_upload(
+           "input_upload_dem",
+           "Upload DEM file",
+           accept=".tif",
+           extra_control_class="disable-readonly",
+           attrs={"data-auto-upload": "true", "data-channel-role": "upload-dem"}
+      ) }}
+      {% if watershed.uploaded_dem_filename %}
+        {% set current_dem_content %}<code>{{ watershed.uploaded_dem_filename }}</code>{% endset %}
+        {{ ui.text_display(
+             label="Current DEM map",
+             content=current_dem_content
+        ) }}
+      {% endif %}
+      {{ ui.job_hint("hint_upload_dem", extra_class="wc-field__help") }}
     </div>
   </div>
 

@@ -116,6 +116,93 @@ def test_set_outlet_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json()["job_id"] == "job-99"
 
 
+def test_upload_dem_requires_file(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: str(tmp_path))
+
+    class DummyRon:
+        dem_dir = str(tmp_path)
+
+    class DummyWatershed:
+        pass
+
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/tasks/upload-dem/")
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "input_upload_dem must be provided"
+
+
+def test_upload_dem_success(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: str(tmp_path))
+
+    class DummyRon:
+        dem_dir = str(tmp_path)
+
+    class DummyWatershed:
+        pass
+
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(watershed_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        watershed_routes,
+        "_install_uploaded_dem",
+        lambda **kwargs: {"dem_filename": "uploaded.tif"},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/tasks/upload-dem/",
+            files={"input_upload_dem": ("sample.tif", b"demo", "image/tiff")},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["result"]["dem_filename"] == "uploaded.tif"
+
+
+def test_validate_float_dem_rejects_int(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    class DummyBand:
+        DataType = 1
+
+    class DummyDs:
+        @staticmethod
+        def GetRasterBand(_index: int):
+            return DummyBand()
+
+    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDs())
+    monkeypatch.setattr(watershed_routes.gdal, "GetDataTypeName", lambda _dtype: "Int32")
+
+    dem_path = tmp_path / "dem.tif"
+    dem_path.write_text("stub")
+
+    with pytest.raises(watershed_routes.UploadError, match="floating point"):
+        watershed_routes._validate_float_dem(dem_path)
+
+
+def test_validate_float_dem_accepts_float64(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    class DummyBand:
+        DataType = 1
+
+    class DummyDs:
+        @staticmethod
+        def GetRasterBand(_index: int):
+            return DummyBand()
+
+    monkeypatch.setattr(watershed_routes.gdal, "Open", lambda _path: DummyDs())
+    monkeypatch.setattr(watershed_routes.gdal, "GetDataTypeName", lambda _dtype: "Float64")
+
+    dem_path = tmp_path / "dem.tif"
+    dem_path.write_text("stub")
+
+    watershed_routes._validate_float_dem(dem_path)
+
+
 def test_build_subcatchments_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-77")
