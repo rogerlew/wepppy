@@ -33,11 +33,10 @@
          form_attrs={'novalidate': True},
          status_panel_options={
            "id": "archive_status_panel",
-           "title": "Archive status",
+           "title": "Console",
            "variant": "console",
            "log_id": "archive_status_log",
-           "description": "Live updates for archive and restore jobs.",
-           "initial": "Waiting for activity..."
+           "meta": '<div id="archive_console" class="wc-status" data-state="attention"></div>'
          },
          summary_panel_override='',
          stacktrace_panel_override=ui.stacktrace_panel(
