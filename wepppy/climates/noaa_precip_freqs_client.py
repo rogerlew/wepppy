@@ -1,13 +1,18 @@
-import requests
 import ast
+import logging
+
+import requests
 
 import numpy as np
 
 from wepppy.all_your_base import try_parse_float
 from deprecated import deprecated
 
-url = 'http://hdsc.nws.noaa.gov/cgi-bin/hdsc/new/cgi_readH5.py'\
-      '?lat={lat}&lon={lon}&type=pf&data=depth&units=english&series=pds'
+LOGGER = logging.getLogger(__name__)
+PFDS_URL = (
+    'https://hdsc.nws.noaa.gov/cgi-bin/new/cgi_readH5.py'
+    '?lat={lat}&lon={lon}&type=pf&data=depth&units=english&series=pds'
+)
 
 
 def _eval(line):
@@ -19,37 +24,98 @@ def _eval(line):
 
 @deprecated(reason="This client is deprecated.")
 def fetch_pf(lat, lng):
-    r = requests.get(url.format(lat=lat, lon=lng), verify=False)
+    try:
+        r = requests.get(PFDS_URL.format(lat=lat, lon=lng), timeout=20)
+    except requests.RequestException as exc:
+        LOGGER.warning(
+            "NOAA PFDS request failed for lat=%s lon=%s: %s",
+            lat,
+            lng,
+            exc,
+        )
+        return None
 
-    assert r.status_code == 200
+    if r.status_code != 200:
+        LOGGER.warning(
+            "NOAA PFDS returned status %s for lat=%s lon=%s",
+            r.status_code,
+            lat,
+            lng,
+        )
+        return None
 
-    print(r.text)
-
-    lines = r.text.split('\n')
-    lines = [line.strip() for line in lines]
+    lines = [line.strip() for line in r.text.split('\n') if line.strip()]
 
     quantiles, upper, lower = None, None, None
     for line in lines:
-        if line.startswith('result'):
-            if 'none' in line:
-                return None
+        if line.startswith('result') and 'none' in line:
+            return None
 
         if line.startswith('quantiles'):
-            quantiles = _eval(line)
+            try:
+                quantiles = _eval(line)
+            except (ValueError, SyntaxError) as exc:
+                LOGGER.warning(
+                    "NOAA PFDS quantiles parse failed for lat=%s lon=%s: %s",
+                    lat,
+                    lng,
+                    exc,
+                )
+                return None
 
         elif line.startswith('upper'):
-            upper = _eval(line)
+            try:
+                upper = _eval(line)
+            except (ValueError, SyntaxError) as exc:
+                LOGGER.warning(
+                    "NOAA PFDS upper parse failed for lat=%s lon=%s: %s",
+                    lat,
+                    lng,
+                    exc,
+                )
+                return None
 
         elif line.startswith('lower'):
-            lower = _eval(line)
+            try:
+                lower = _eval(line)
+            except (ValueError, SyntaxError) as exc:
+                LOGGER.warning(
+                    "NOAA PFDS lower parse failed for lat=%s lon=%s: %s",
+                    lat,
+                    lng,
+                    exc,
+                )
+                return None
+
+    if quantiles is None or upper is None or lower is None:
+        LOGGER.warning(
+            "NOAA PFDS response missing expected tables for lat=%s lon=%s",
+            lat,
+            lng,
+        )
+        return None
 
     rec_intervals = [1, 2, 5, 10, 25, 50, 100, 200, 500, 1000]
     durations = ['5-min', '10-min', '15-min', '30-min', '60-min', '2-hour', '3-hour', '6-hour', '12-hour', '24-hour',
                  '2-day', '3-day', '4-day', '7-day', '10-day', '20-day', '30-day', '45-day', '60-day']
 
-    assert np.array(quantiles).shape == (len(durations), len(rec_intervals))
-    assert np.array(upper).shape == (len(durations), len(rec_intervals))
-    assert np.array(lower).shape == (len(durations), len(rec_intervals))
+    expected_shape = (len(durations), len(rec_intervals))
+    quantiles_shape = np.array(quantiles).shape
+    upper_shape = np.array(upper).shape
+    lower_shape = np.array(lower).shape
+
+    if quantiles_shape != expected_shape or upper_shape != expected_shape or lower_shape != expected_shape:
+        LOGGER.warning(
+            "NOAA PFDS response shape mismatch for lat=%s lon=%s: "
+            "quantiles=%s upper=%s lower=%s expected=%s",
+            lat,
+            lng,
+            quantiles_shape,
+            upper_shape,
+            lower_shape,
+            expected_shape,
+        )
+        return None
 
     return dict(rec_intervals=rec_intervals,
                 durations=durations,
@@ -84,6 +150,5 @@ if __name__ == '__main__':
 
     I = I.tolist()
     T = T.tolist()
-
 
 
