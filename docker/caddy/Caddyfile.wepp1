@@ -1,3 +1,7 @@
+{
+    order respond before redir
+}
+
 wepp.cloud {
     # Bot blocking - aggressive crawlers (see docs/mini-work-packages/20260203_resource_contraints.md)
     @blocked_bots header_regexp User-Agent "(?i)(Bytespider|meta-externalagent)"
