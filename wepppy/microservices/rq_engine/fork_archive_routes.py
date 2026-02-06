@@ -39,6 +39,17 @@ def _resolve_bearer_claims(request: Request) -> Mapping[str, Any] | None:
     return require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
 
 
+def has_archive(runid: str) -> bool:
+    wd = get_wd(runid)
+    archives_dir = os.path.join(wd, "archives")
+    if not os.path.isdir(archives_dir):
+        return False
+    for entry in os.scandir(archives_dir):
+        if entry.is_file() and entry.name.endswith(".zip"):
+            return True
+    return False
+
+
 def _ensure_anonymous_access(runid: str, wd: str) -> None:
     owners = list(get_run_owners_lazy(runid) or [])
     if not owners:
