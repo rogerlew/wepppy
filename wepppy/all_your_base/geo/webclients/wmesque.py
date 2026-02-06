@@ -82,7 +82,7 @@ def wmesque_retrieve(
     fname: str,
     cellsize: float,
     resample: str | None = None,
-    v: int = 1,
+    v: int = 2,
     write_meta: bool = True,
     wmesque_endpoint: str | None = None,
     extent_crs: str | None = None,

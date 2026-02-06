@@ -9,6 +9,8 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 """
+Deprecated: use ``wepppy.webservices.wmesque2`` instead.
+
 WMSesque is a flask web application that provides an endpoint for acquiring
 tiled raster datasets. The web application reprojects (warps) the map to UTM
 based on the top left corner of the bounding box {bbox} provided to the
@@ -25,10 +27,11 @@ looks for: {geodata_dir}/{dataset}/{year}/.vrt
 
 from __future__ import annotations
 
-import subprocess
 import fnmatch
 import os
 import shlex
+import subprocess
+import warnings
 from uuid import uuid4
 
 from datetime import datetime
@@ -49,11 +52,30 @@ from osgeo import gdal
 import xml.etree.ElementTree as ET
 import base64, json, hashlib
 
+warnings.warn(
+    "wepppy.webservices.wmesque is deprecated; use wepppy.webservices.wmesque2 instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 
 def _b64url(obj: Dict[str, object]) -> str:
     """Serialize ``obj`` to JSON and return a URL-safe base64 payload."""
     b = json.dumps(obj, separators=(",", ":")).encode("utf-8")
     return base64.urlsafe_b64encode(b).decode("ascii").rstrip("=")
+
+
+def _command_to_str(command: Sequence[str]) -> str:
+    return " ".join(shlex.quote(str(part)) for part in command)
+
+
+def _run_command(command: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [str(part) for part in command],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
 
 geodata_dir = "/geodata"
@@ -81,9 +103,9 @@ SCRATCH_DIR = os.environ.get("WMESQUE_SCRATCH_DIR", "/tmp")
 
 def raster_stats(src: str) -> Dict[str, float]:
     """Return GDAL statistics for ``src`` after running ``gdalinfo -stats``."""
-    cmd = "gdalinfo %s -stats" % src
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    output = p.stdout.read().decode("utf-8").replace("\n", "|")
+    cmd = ["gdalinfo", src, "-stats"]
+    result = _run_command(cmd)
+    output = (result.stdout or "").replace("\n", "|")
 
     stat_fn = src + ".aux.xml"
     assert os.path.exists(stat_fn), (src, stat_fn)
@@ -104,18 +126,25 @@ def format_convert(src: str, _format: str) -> Optional[str]:
     dst = src[:-4] + ext_d[_format]
     if _format == "ENVI":
         stats = raster_stats(src)
-        cmd = "gdal_translate -of %s -ot Uint16 -scale %s %s 0 65535 %s %s" % (
+        cmd = [
+            "gdal_translate",
+            "-of",
             _format,
-            stats["STATISTICS_MINIMUM"],
-            stats["STATISTICS_MAXIMUM"],
+            "-ot",
+            "Uint16",
+            "-scale",
+            str(stats["STATISTICS_MINIMUM"]),
+            str(stats["STATISTICS_MAXIMUM"]),
+            "0",
+            "65535",
             src,
             dst,
-        )
+        ]
     else:
-        cmd = "gdal_translate -of %s %s %s" % (_format, src, dst)
+        cmd = ["gdal_translate", "-of", _format, src, dst]
 
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    output = p.stdout.read().decode("utf-8").replace("\n", "|")
+    result = _run_command(cmd)
+    output = (result.stdout or "").replace("\n", "|")
 
     if os.path.exists(dst):
         return dst
@@ -286,20 +315,24 @@ def api_dataset_year(
             return jsonify({"Error": "format driver not valid" + _format})
 
     # build command to warp, crop, and scale dataset
-    cmd = (
-        "gdalwarp -t_srs '{proj4}' -tr {cellsize} {cellsize} "
-        "-te {xmin} {ymin} {xmax} {ymax} -r {resample} {src} {dst}".format(
-            proj4=proj4,
-            cellsize=cellsize,
-            xmin=ul_x,
-            xmax=lr_x,
-            ymin=lr_y,
-            ymax=ul_y,
-            resample=resample,
-            src=src,
-            dst=dst,
-        )
-    )
+    cmd_args = [
+        "gdalwarp",
+        "-t_srs",
+        proj4,
+        "-tr",
+        str(cellsize),
+        str(cellsize),
+        "-te",
+        str(ul_x),
+        str(lr_y),
+        str(lr_x),
+        str(ul_y),
+        "-r",
+        resample,
+        src,
+        dst,
+    ]
+    cmd = _command_to_str(cmd_args)
 
     # delete destination file if it exists
     if os.path.exists(dst):
@@ -309,8 +342,11 @@ def api_dataset_year(
     #        fp.write(cmd)
 
     # run command, check_output returns standard output
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    output = p.stdout.read().decode("utf-8").replace("\n", "|")
+    result = _run_command(cmd_args)
+    output = (result.stdout or "")
+    if result.stderr:
+        output = f"{output}\n{result.stderr}"
+    output = output.replace("\n", "|")
 
     # check to see if file was created
     if not os.path.exists(dst):
@@ -335,11 +371,12 @@ def api_dataset_year(
         fn_uuid2 = str(uuid4().hex) + ".tif"
         dst2 = os.path.join(SCRATCH_DIR, fn_uuid)
 
-        cmd2 = "gdaldem %s %s %s" % (gdaldem, dst, dst2)
-
-        output2 = subprocess.Popen(
-            cmd2, shell=True, stdout=subprocess.PIPE
-        ).stdout.read()
+        cmd2_args = ["gdaldem", gdaldem, dst, dst2]
+        cmd2 = _command_to_str(cmd2_args)
+        result2 = _run_command(cmd2_args)
+        output2 = (result2.stdout or "")
+        if result2.stderr:
+            output2 = f"{output2}\n{result2.stderr}"
         output2 = output2.replace("\n", "|")
 
         # check to see if file was created
