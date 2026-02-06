@@ -16,6 +16,7 @@ import pyarrow.parquet as pq
 
 from wepppy.all_your_base.stats import weibull_series
 from wepppy.climates.cligen import ClimateFile
+from wepppy.io_wait import wait_for_path
 from wepppy.query_engine import activate_query_engine, resolve_run_context, update_catalog_entry
 from wepppy.query_engine.activate import READONLY_SENTINEL
 LOGGER = logging.getLogger(__name__)
@@ -395,16 +396,19 @@ def refresh_return_period_events(
     root_dir = context.base_dir
 
     ebe_path = root_dir / EBE_DATASET
-    if not ebe_path.exists():
-        alt_ebe = root_dir / "wepp" / "output" / "ebe_pw0.parquet"
-        if alt_ebe.exists():
-            ebe_path = alt_ebe
-        else:
-            raise FileNotFoundError(ebe_path)
+    alt_ebe = root_dir / "wepp" / "output" / "ebe_pw0.parquet"
+    if not ebe_path.exists() and alt_ebe.exists():
+        ebe_path = alt_ebe
+    try:
+        wait_for_path(ebe_path, logger=LOGGER)
+    except FileNotFoundError:
+        if ebe_path == alt_ebe:
+            raise
+        wait_for_path(alt_ebe, logger=LOGGER)
+        ebe_path = alt_ebe
 
     tot_path = root_dir / TOTALWATSED3_DATASET
-    if not tot_path.exists():
-        raise FileNotFoundError(tot_path)
+    wait_for_path(tot_path, logger=LOGGER)
 
     climate_info = _discover_climate_asset(root_dir)
     topaz_filter = _build_topaz_filter(topaz_ids)
