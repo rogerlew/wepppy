@@ -712,14 +712,14 @@ soils = cached_load_db()
 
 **Soil File Loading:** Each `WeppSoilUtil()` call parses the `.sol` file. For batch operations, consider:
 
-1. **Pre-load to YAML/BSON:**
+1. **Pre-load to BSON:**
    ```python
    # One-time conversion
    soil = WeppSoilUtil(get_soil('Forest/Forest loam.sol'))
-   soil.dump_yaml('/cache/forest_loam.yaml')
+   soil.dump_bson('/cache/forest_loam.bson')
    
    # Faster subsequent loads
-   soil = WeppSoilUtil('/cache/forest_loam.yaml')
+   soil = WeppSoilUtil('/cache/forest_loam.bson')
    ```
 
 2. **Multiprocessing for batch migration:**
@@ -736,7 +736,6 @@ soils = cached_load_db()
    with ProcessPoolExecutor(max_workers=8) as executor:
        results = executor.map(process_soil, soil_list)
    ```
-
 ## Known Limitations
 
 ### State Coverage

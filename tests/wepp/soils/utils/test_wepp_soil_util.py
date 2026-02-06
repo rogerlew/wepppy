@@ -3,12 +3,9 @@ import math
 import shutil
 import sys
 import types
-import uuid
 from pathlib import Path
 from typing import NamedTuple
 
-import yaml as pyyaml
-import yaml
 import pytest
 
 pytestmark = pytest.mark.integration
@@ -221,12 +218,17 @@ def workspace_tmp_dir(tmp_path_factory):
 
 
 @pytest.fixture
-def make_soil_yaml(workspace_tmp_dir):
+def make_soil_util(wepp_soil_util_module):
     def _factory(luse="test use"):
         payload = _soil_payload(luse=luse)
-        path = workspace_tmp_dir / f"soil_{uuid.uuid4().hex}.yaml"
-        path.write_text(pyyaml.safe_dump(payload))
-        return path
+        util = wepp_soil_util_module.WeppSoilUtil.__new__(
+            wepp_soil_util_module.WeppSoilUtil
+        )
+        util.compute_erodibilities = False
+        util.compute_conductivity = False
+        util.obj = payload
+        util.fn = "in-memory"
+        return util
 
     return _factory
 
@@ -245,9 +247,8 @@ def test_pars_to_string_formats_values(wepp_soil_util_module):
     assert formatted == "(a='value', b=1.5)"
 
 
-def test_modify_initial_sat_updates_all_ofes_and_header(make_soil_yaml, wepp_soil_util_module):
-    path = make_soil_yaml()
-    util = wepp_soil_util_module.WeppSoilUtil(str(path))
+def test_modify_initial_sat_updates_all_ofes_and_header(make_soil_util):
+    util = make_soil_util()
 
     util.modify_initial_sat(0.9)
 
@@ -258,9 +259,8 @@ def test_modify_initial_sat_updates_all_ofes_and_header(make_soil_yaml, wepp_soi
     )
 
 
-def test_modify_kslast_skips_developed_soils(make_soil_yaml, wepp_soil_util_module):
-    path = make_soil_yaml(luse="Highly Developed area")
-    util = wepp_soil_util_module.WeppSoilUtil(str(path))
+def test_modify_kslast_skips_developed_soils(make_soil_util):
+    util = make_soil_util(luse="Highly Developed area")
     original_header = list(util.obj["header"])
     original_kslast = util.obj["ofes"][0]["res_lyr"]["kslast"]
 
@@ -271,9 +271,8 @@ def test_modify_kslast_skips_developed_soils(make_soil_yaml, wepp_soil_util_modu
     assert util.obj["res_lyr"]["kslast"] == original_kslast
 
 
-def test_modify_kslast_updates_soil_and_header(make_soil_yaml, wepp_soil_util_module):
-    path = make_soil_yaml()
-    util = wepp_soil_util_module.WeppSoilUtil(str(path))
+def test_modify_kslast_updates_soil_and_header(make_soil_util):
+    util = make_soil_util()
 
     util.modify_kslast(1.8, pars={"reason": "adjusted"})
 
@@ -285,9 +284,8 @@ def test_modify_kslast_updates_soil_and_header(make_soil_yaml, wepp_soil_util_mo
     )
 
 
-def test_clip_soil_depth_truncates_horizons(make_soil_yaml, wepp_soil_util_module):
-    path = make_soil_yaml()
-    util = wepp_soil_util_module.WeppSoilUtil(str(path))
+def test_clip_soil_depth_truncates_horizons(make_soil_util):
+    util = make_soil_util()
 
     util.clip_soil_depth(120)
 
@@ -301,14 +299,9 @@ def test_clip_soil_depth_truncates_horizons(make_soil_yaml, wepp_soil_util_modul
     )
 
 
-def test_dump_yaml_round_trip(workspace_tmp_dir, wepp_soil_util_module):
-    payload = _soil_payload()
+def test_yaml_input_raises_value_error(workspace_tmp_dir, wepp_soil_util_module):
     src = workspace_tmp_dir / "source.yaml"
-    src.write_text(yaml.dump(payload))
-    util = wepp_soil_util_module.WeppSoilUtil(str(src))
+    src.write_text("header: []\n")
 
-    dst = workspace_tmp_dir / "round_trip.yaml"
-    util.dump_yaml(str(dst))
-
-    round_trip = yaml.safe_load(dst.read_text())
-    assert round_trip == util.obj
+    with pytest.raises(ValueError, match="YAML soil serialization is no longer supported"):
+        wepp_soil_util_module.WeppSoilUtil(str(src))

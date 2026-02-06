@@ -13,7 +13,7 @@ The `wepppy.wepp.soils.utils` package provides utilities for working with WEPP s
 - Migrate between WEPP file format versions
 - Apply parameter replacements for scenario modeling
 - Compose multi-OFE soil files from single-OFE components
-- Export to WEPP `.sol`, YAML, or BSON formats
+- Export to WEPP `.sol` or BSON formats
 
 **Primary Users:**
 - NoDb controllers transforming soils for disturbed lands, BAER analysis, treatments
@@ -29,7 +29,6 @@ wepppy/wepp/soils/utils/
 ├── multi_ofe.py             # SoilMultipleOfeSynth for multi-OFE composition
 └── utils.py                 # Texture classification and lookup helpers
 ```
-
 ## WeppSoilUtil Class
 
 The primary interface for WEPP soil file manipulation. Loads a soil file into a structured dictionary, provides methods to transform parameters, and writes modified files back to disk.
@@ -66,15 +65,13 @@ WeppSoilUtil(
 ```
 
 **Parameters:**
-- `fn` - Path to `.sol`, `.yaml`, or `.bson` file
+- `fn` - Path to `.sol` or `.bson` file
 - `compute_erodibilities` - Recalculate interrill/rill/shear from texture (first horizon)
 - `compute_conductivity` - Recalculate hydraulic conductivity using WEPP formulas
 
 **Supported File Formats:**
 - `.sol` - Native WEPP soil files (all versions)
-- `.yaml` - YAML serialization of soil structure
 - `.bson` - Binary JSON serialization
-
 ### Key Properties
 
 #### Texture and Composition
@@ -296,19 +293,6 @@ The `WeppSoilUtil.obj` dictionary contains the parsed soil structure:
 
 ### Serialization Methods
 
-#### YAML Export
-
-```python
-soil.dump_yaml(dst: str) -> None
-```
-
-Export soil structure to YAML format for human-readable inspection or version control.
-
-**Example:**
-```python
-soil.dump_yaml('/path/to/soil.yaml')
-```
-
 #### BSON Export
 
 ```python
@@ -331,7 +315,6 @@ content = str(soil)
 ```
 
 Write WEPP-formatted `.sol` file. The `__str__()` method generates the exact WEPP format.
-
 ### Advanced Examples
 
 #### Batch Transform for Wildfire Scenarios
@@ -701,7 +684,7 @@ These headers appear as comments in the output `.sol` file, providing audit trai
 **Migration:** `to7778()` with Rosetta predictions takes ~50-100ms per soil due to pedotransfer calculations.
 
 **Batch Processing:** For large soil databases (>1000 files), consider:
-- Pre-parsing to YAML/BSON for faster repeated access
+- Pre-parsing to BSON for faster repeated access
 - Multiprocessing for parallel transformations
 - Caching `WeppSoilUtil` instances if reused
 
@@ -724,7 +707,6 @@ with ProcessPoolExecutor(max_workers=8) as executor:
 for result in results:
     print(f"Migrated {result}")
 ```
-
 ## Known Limitations
 
 ### Version Mixing

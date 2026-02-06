@@ -1,9 +1,9 @@
 """Utilities for inspecting and transforming WEPP soil (``.sol``) files.
 
-The :class:`WeppSoilUtil` helper loads WEPP soil records from native ``.sol``,
-YAML, or BSON sources and offers convenience methods to mutate hydraulic and
-erosion properties, migrate between file versions, and write the adjusted data
-back to disk.
+The :class:`WeppSoilUtil` helper loads WEPP soil records from native ``.sol``
+or BSON sources and offers convenience methods to mutate hydraulic and erosion
+properties, migrate between file versions, and write the adjusted data back to
+disk.
 """
 
 from __future__ import annotations
@@ -12,18 +12,6 @@ import shlex
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-
-import yaml
-
-try:
-    from yaml import CSafeLoader as Loader  # type: ignore
-except ImportError:  # pragma: no cover - C extensions may be unavailable
-    from yaml import SafeLoader as Loader  # type: ignore
-
-try:
-    from yaml import CSafeDumper as Dumper  # type: ignore
-except ImportError:  # pragma: no cover - C extensions may be unavailable
-    from yaml import SafeDumper as Dumper  # type: ignore
 
 from wepppy.all_your_base import isfloat, try_parse, try_parse_float
 
@@ -67,7 +55,7 @@ class WeppSoilUtil(object):
         Parameters
         ----------
         fn:
-            Path to a ``.sol``, ``.yaml``, or ``.bson`` soil file.
+            Path to a ``.sol`` or ``.bson`` soil file.
         compute_erodibilities:
             When True, recompute interrill/rill/shear values for the first horizon.
         compute_conductivity:
@@ -82,7 +70,7 @@ class WeppSoilUtil(object):
             except:
                 raise Exception(f"Error opening {fn}")
         elif fn.endswith('.yaml'):
-            self._load_yaml(fn)
+            raise ValueError("YAML soil serialization is no longer supported. Use .sol or .bson.")
         elif fn.endswith('.bson'):
             self._load_bson(fn)
 
@@ -906,23 +894,6 @@ class WeppSoilUtil(object):
 
         return new
 
-    def _load_yaml(self, fn: str) -> None:
-        """Load a YAML representation of a soil into ``self.obj``."""
-        with open(fn) as fp:
-            yaml_txt = fp.read()
-            self.obj = yaml.load(yaml_txt, Loader=Loader)
-
-    def dump_yaml(self, dst: str) -> None:
-        """Write the current soil state to ``dst`` as YAML."""
-        with open(dst, 'w') as fp:
-            fp.write(
-                yaml.dump(
-                    self.obj,
-                    Dumper=Dumper,
-                    sort_keys=False,
-                )
-            )
-
     def _load_bson(self, fn: str) -> None:
         """Load a BSON-encoded soil file into ``self.obj``."""
         import bson
@@ -1048,7 +1019,6 @@ if __name__ == "__main__":
     fp.write('slid,texid,burn_class,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
     for sol_fn in sol_fns:
         sol = WeppSoilUtil(sol_fn)
-        sol.dump_yaml(sol_fn.replace('.sol', '.sol.yaml'))
 
         ofe = sol.obj['ofes'][0]
         hor = ofe['horizons'][0]
