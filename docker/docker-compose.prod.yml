@@ -82,6 +82,10 @@ services:
       - info
       - --forwarded-allow-ips
       - "192.168.1.1"
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.weppcloud.app:app
     ports:
       - "${WEPPCLOUD_PORT:-8000}:8000"
@@ -111,6 +115,10 @@ services:
       - info
       - -k
       - uvicorn.workers.UvicornWorker
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.microservices.browse:app
     ports:
       - "${BROWSE_PORT:-9009}:9009"
@@ -133,6 +141,10 @@ services:
       - 0.0.0.0:9010
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.dtale:app
     expose:
       - "9010"
@@ -182,6 +194,10 @@ services:
       - 0.0.0.0:8002
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.microservices.elevationquery:app
     ports:
       - "${ELEVATIONQUERY_PORT:-8002}:8002"
@@ -201,6 +217,10 @@ services:
       - 0.0.0.0:8004
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.metquery:app
     ports:
       - "${METQUERY_PORT:-8004}:8004"
@@ -220,6 +240,10 @@ services:
       - 0.0.0.0:8003
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.wmesque:app
     ports:
       - "${WMESQUE_PORT:-8003}:8003"
@@ -241,6 +265,10 @@ services:
       - info
       - -k
       - uvicorn.workers.UvicornWorker
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.wmesque2:app
     ports:
       - "${WMESQUE2_PORT:-8030}:8030"

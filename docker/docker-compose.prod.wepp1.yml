@@ -52,6 +52,10 @@ services:
       - 0.0.0.0:8000
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.weppcloud.app:app
   browse:
     <<: *wepppy-image
@@ -67,6 +71,10 @@ services:
       - info
       - -k
       - uvicorn.workers.UvicornWorker
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.microservices.browse:app
   dtale:
     <<: *wepppy-image

@@ -70,6 +70,10 @@ services:
       - --forwarded-allow-ips
       - "192.168.1.1"
       - --reload
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.weppcloud.app:app
     ports:
       - "8000:8000"
@@ -216,6 +220,10 @@ services:
       - info
       - -k
       - uvicorn.workers.UvicornWorker
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.microservices.browse:app
     ports:
       - "9009:9009"
@@ -236,6 +244,10 @@ services:
       - 0.0.0.0:9010
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.dtale:app
     environment:
       <<: *wepppy-env
@@ -264,6 +276,10 @@ services:
       - 0.0.0.0:8002
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.microservices.elevationquery:app
     ports:
       - "8002:8002"
@@ -284,6 +300,10 @@ services:
       - 0.0.0.0:8004
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.metquery:app
     ports:
       - "8004:8004"
@@ -304,6 +324,10 @@ services:
       - 0.0.0.0:8003
       - --log-level
       - info
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.wmesque:app
     ports:
       - "8003:8003"
@@ -326,6 +350,10 @@ services:
       - info
       - -k
       - uvicorn.workers.UvicornWorker
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
       - wepppy.webservices.wmesque2:app
     ports:
       - "8030:8030"
