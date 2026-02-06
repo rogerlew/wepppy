@@ -15,6 +15,8 @@ from tests.factories.singleton import LockedMixin, singleton_factory
 RUN_ID = "test-run"
 CONFIG = "cfg"
 
+pytestmark = pytest.mark.routes
+
 
 @pytest.fixture()
 def project_client(
@@ -308,3 +310,46 @@ def test_set_mod_enable_restores_backup(project_client):
     assert nodb_path.exists()
     assert nodb_path.read_text() == "restored-state"
     assert not backup_path.exists()
+
+
+def test_set_mod_imports_missing_mod_class(project_client, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    created = {"called": False}
+
+    class DebrisFlowStub(project_module.NoDbBase):
+        filename = "debris_flow.nodb"
+
+        def __init__(self, wd: str, cfg_fn: str, run_group=None, group_name=None) -> None:
+            created["called"] = True
+            Path(wd).joinpath(self.filename).write_text("stub")
+
+    calls = {"iter": 0, "imported": 0}
+
+    def fake_iter():
+        calls["iter"] += 1
+        if calls["iter"] == 1:
+            return iter([])
+        return iter([("debris_flow", DebrisFlowStub)])
+
+    def fake_import(mod_name: str) -> None:
+        calls["imported"] += 1
+
+    monkeypatch.setattr(project_module, "iter_nodb_mods_subclasses", fake_iter)
+    monkeypatch.setattr(project_module.NoDbBase, "_import_mod_module", fake_import)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "debris_flow", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "debris_flow"
+    assert payload["Content"]["enabled"] is True
+    assert "debris_flow" in controller.mods
+    assert calls["imported"] == 1
+    assert created["called"] is True
+    assert Path(run_dir).joinpath("debris_flow.nodb").exists()
