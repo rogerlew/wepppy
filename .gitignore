@@ -55,3 +55,5 @@ docker/wepppy-rq-worker-batch.env
 tests/wepp/interchange/fixtures/*
 !tests/wepp/interchange/fixtures/decimal-pleasing/
 !tests/wepp/interchange/fixtures/decimal-pleasing/**
+
+*.md.bak
