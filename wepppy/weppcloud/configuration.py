@@ -207,7 +207,10 @@ def config_app(app: Any):
 
     site_prefix = os.getenv("SITE_PREFIX", "/weppcloud")
     app.config["APPLICATION_ROOT"] = site_prefix
-    app.config["DEBUG"] = True
+    debug_enabled = _get_env_bool("FLASK_DEBUG", False)
+    if not debug_enabled:
+        debug_enabled = _get_env_bool("DEBUG", False)
+    app.config["DEBUG"] = debug_enabled
     app.config["SITE_PREFIX"] = site_prefix
     app.config["ENABLE_LOCAL_LOGIN"] = _get_env_bool("ENABLE_LOCAL_LOGIN", True)
 
