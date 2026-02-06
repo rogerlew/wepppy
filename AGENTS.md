@@ -13,6 +13,10 @@
 ## Key Contracts
 - RQ response schema and canonical error payloads: `docs/schemas/rq-response-contract.md`
 
+## RQ Dependency Catalog
+- Update `wepppy/rq/job-dependencies-catalog.md` whenever enqueue sites or dependency edges change (`wepppy/rq/*.py`, `wepppy/microservices/rq_engine/*`, or rq-initiated route handlers).
+- Manual validation is expected; compare the catalog with live job trees via `wepppy/rq/job_info.py` or the UI job dashboard when touching queue wiring.
+
 ## Repository Overview
 
 wepppy is a DevOps-focused erosion modeling stack that fuses Python orchestration, Rust geospatial kernels, and Redis-first observability. The system automates Water Erosion Prediction Project (WEPP) runs, wildfire response analytics, and watershed-scale geospatial preprocessing by gluing together legacy Fortran executables, modern Python services, and Rust-accelerated tooling. The architecture as a whole strives for openness, flexibility, and observability.
