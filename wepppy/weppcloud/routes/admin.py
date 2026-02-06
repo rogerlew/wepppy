@@ -14,6 +14,8 @@ from ._common import *  # noqa: F401,F403
 
 admin_bp = Blueprint('admin', __name__)
 
+_USERMOD_ALLOWED_ROLES = {"PowerUser", "Admin", "Dev", "Root"}
+
 @admin_bp.route('/runs/<string:runid>/<config>/access-log')
 @login_required
 @roles_required('Admin', 'Root')
@@ -84,16 +86,21 @@ def allruns():
 @handle_with_exception_factory
 def task_usermod():
     from sqlalchemy import func
-    from wepppy.weppcloud.app import db, user_datastore, User
+    from wepppy.weppcloud.app import db, user_datastore, Role, User
     user_id = request.json.get('user_id')
     user_email = request.json.get('user_email')
     role = request.json.get('role')
     role_state = request.json.get('role_state')
 
+    if role not in _USERMOD_ALLOWED_ROLES:
+        return error_factory(f"unsupported role '{role}'")
+
     user = None
     if user_id is not None:
         user = User.query.filter(User.id == user_id).first()
     else:
+        if not user_email:
+            return error_factory("user_id or user_email required")
         user = User.query.filter(func.lower(User.email) == user_email.lower()).first()
 
     if user is None:
@@ -103,7 +110,13 @@ def task_usermod():
         return error_factory(f'{user.email} role {role} already is {role_state}')
 
     if role_state:
-        user_datastore.add_role_to_user(user, role)
+        role_obj = Role.query.filter(Role.name == role).first()
+        if role_obj is None:
+            current_app.logger.warning("Role %s missing; creating on-demand via usermod.", role)
+            role_obj = Role(name=role, description=f"Auto-created role {role}.")
+            db.session.add(role_obj)
+            db.session.flush()
+        user_datastore.add_role_to_user(user, role_obj)
     else:
         user_datastore.remove_role_from_user(user, role)
 
