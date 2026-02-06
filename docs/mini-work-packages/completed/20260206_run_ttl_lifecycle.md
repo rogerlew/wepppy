@@ -1,5 +1,5 @@
 # Mini Work Package: Run TTL Lifecycle + GC
-Status: Draft
+Status: Completed
 Last Updated: 2026-02-06
 Primary Areas: `wepppy/weppcloud/utils/run_ttl.py`, `wepppy/weppcloud/routes/weppcloud_site.py`, `wepppy/weppcloud/routes/nodb_api/project_bp.py`, `wepppy/rq/project_rq.py`, `wepppy/weppcloud/templates/header/_run_header_fixed.htm`
 
@@ -27,6 +27,7 @@ Introduce a durable run TTL lifecycle with a `wd/TTL` metadata file that:
 - Add UI toggle in the More menu (after Public).
 - Add delete touchpoints (mark `delete_state` + `db_cleared`).
 - Add run GC job to delete expired runs.
+
 ## Non-goals
 - Refactor delete behavior to rename-to-trash (tracked separately).
 - Real-time TTL updates on every request.
@@ -65,6 +66,7 @@ Policy meanings:
 - **User override**: `tasks/set_ttl_disabled` updates `user_disabled` + `disabled_by_user_id`.
 - **Delete**: mark `delete_state=queued`, clear DB/cache/locks, and return success without surfacing filesystem delete errors to the user. Physical deletion may be deferred (GC handles removal); update `db_cleared` if the DB is removed while the directory persists.
   - Re-enabling TTL via UI resets `last_accessed_at` and `expires_at` from the toggle timestamp.
+
 ## API + UI
 - Endpoint: `POST /runs/<runid>/<config>/tasks/set_ttl_disabled` (PowerUser/Admin/Root only)
 - Payload: `{ "ttl_disabled": true | false }`
@@ -102,6 +104,7 @@ Policy meanings:
 - [x] Schedule access-log compile job to refresh `access.csv` + `runid-locations.json`.
 - [x] Schedule GC job via compose scheduler sidecar.
 - [ ] Decide on rename-to-trash deletion fallback for NFS `EBUSY`. (Deferred; logical delete + GC covers current needs.)
+
 ## Validation
 - Create a run and confirm `wd/TTL` is created with `expires_at` set.
 - Touch access log and confirm TTL extends.
@@ -109,6 +112,7 @@ Policy meanings:
 - Toggle TTL disable as PowerUser/Admin and confirm user override persists.
 - Run GC in dry-run mode and verify expected candidates.
 - Run access-log compilation (`compile_dot_logs_rq`) and confirm `access.csv` + `runid-locations.json` refresh and TTL extends.
+
 ## Follow-ups
 - Rename-to-trash deletion fallback for NFS `EBUSY`.
 - Dedicated UI to display TTL metadata and delete state.

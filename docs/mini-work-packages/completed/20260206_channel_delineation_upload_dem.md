@@ -1,5 +1,5 @@
 # Mini Work Package: Channel Delineation Upload DEM Extent Mode
-Status: Draft
+Status: Completed
 Last Updated: 2026-02-06
 Primary Areas: `wepppy/microservices/rq_engine/watershed_routes.py`, `wepppy/rq/project_rq.py`, `wepppy/nodb/core/watershed.py`, `wepppy/weppcloud/templates/controls/channel_delineation_pure.htm`, `wepppy/weppcloud/controllers_js/channel_delineation.js`, `wepppy/weppcloud/controllers_js/channel_gl.js`
 
