@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Iterable, Mapping, Sequence, TYPE_CHECKING, Any
 
 import logging
+import os
+import tempfile
 import duckdb
 import numpy as np
 import pandas as pd
@@ -657,6 +659,23 @@ def _finalise_table(df: pd.DataFrame) -> pa.Table:
     return pa.Table.from_pandas(df, schema=SCHEMA, preserve_index=False)
 
 
+def _write_parquet_atomic(table: pa.Table, output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f"{output_path.name}.",
+        suffix=".tmp",
+        dir=output_path.parent,
+    )
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    try:
+        pq.write_table(table, tmp_path, compression="snappy", use_dictionary=True)
+        os.replace(tmp_path, output_path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
 def run_totalwatsed3(
     interchange_dir: Path | str,
     baseflow_opts: BaseflowOpts,
@@ -686,7 +705,7 @@ def run_totalwatsed3(
 
     if wat_df.empty:
         table = EMPTY_TABLE
-        pq.write_table(table, targets.output_path, compression="snappy", use_dictionary=True)
+        _write_parquet_atomic(table, targets.output_path)
         return targets.output_path
 
     merged = wat_df.merge(pass_df, on=list(DATE_COLUMNS), how="left", suffixes=("", "_pass"))
@@ -757,7 +776,7 @@ def run_totalwatsed3(
 
     merged = merged.sort_values(["year", "julian", "sim_day_index"], kind="mergesort").reset_index(drop=True)
     table = _finalise_table(merged)
-    pq.write_table(table.combine_chunks(), targets.output_path, compression="snappy", use_dictionary=True)
+    _write_parquet_atomic(table.combine_chunks(), targets.output_path)
     return targets.output_path
 
 
