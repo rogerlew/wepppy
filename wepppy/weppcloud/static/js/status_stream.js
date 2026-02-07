@@ -243,61 +243,114 @@
             }
         }
 
-        function resolveStacktraceTargets(stacktraceConfig) {
-            if (!stacktraceConfig) {
-                return null;
-            }
-            var panel = resolveElement(stacktraceConfig.element || stacktraceConfig.panel);
-            if (!panel) {
-                console.warn("StatusStream: stacktrace panel element not found");
-                return null;
-            }
-            var body = stacktraceConfig.body ? resolveElement(stacktraceConfig.body) : panel.querySelector("[data-stacktrace-body]");
-            if (!body) {
-                console.warn("StatusStream: stacktrace body element not found. Panel:", panel.id || "(no id)", "Expected selector: [data-stacktrace-body]");
-                return null;
-            }
-            return {
-                panel: panel,
-                body: body,
-                fetchJobInfo: typeof stacktraceConfig.fetchJobInfo === "function" ? stacktraceConfig.fetchJobInfo : defaultStacktraceFetcher
-            };
+    function resolveStacktraceTargets(stacktraceConfig) {
+        if (!stacktraceConfig) {
+            return null;
+        }
+        var panel = resolveElement(stacktraceConfig.element || stacktraceConfig.panel);
+        if (!panel) {
+            console.warn("StatusStream: stacktrace panel element not found");
+            return null;
+        }
+        var body = stacktraceConfig.body ? resolveElement(stacktraceConfig.body) : panel.querySelector("[data-stacktrace-body]");
+        if (!body) {
+            console.warn("StatusStream: stacktrace body element not found. Panel:", panel.id || "(no id)", "Expected selector: [data-stacktrace-body]");
+            return null;
+        }
+        return {
+            panel: panel,
+            body: body,
+            fetchJobInfo: typeof stacktraceConfig.fetchJobInfo === "function" ? stacktraceConfig.fetchJobInfo : defaultStacktraceFetcher,
+            allowHtml: stacktraceConfig.allowHtml === true
+        };
+    }
+
+    var stacktraceTargets = resolveStacktraceTargets(config.stacktrace);
+
+    function decodeHtmlEntities(message) {
+        if (typeof message !== "string") {
+            return message;
+        }
+        if (message.indexOf("&") === -1) {
+            return message;
+        }
+        var needsDecode = (
+            message.indexOf("&lt;") !== -1 ||
+            message.indexOf("&gt;") !== -1 ||
+            message.indexOf("&#") !== -1 ||
+            message.indexOf("&amp;") !== -1 ||
+            message.indexOf("&quot;") !== -1
+        );
+        if (!needsDecode || typeof document === "undefined") {
+            return message;
+        }
+        var textarea = document.createElement("textarea");
+        textarea.innerHTML = message;
+        return textarea.value;
+    }
+
+    function shouldRenderStacktraceHtml(message, allowHtml) {
+        if (!allowHtml || typeof message !== "string") {
+            return false;
+        }
+        var lowered = message.toLowerCase();
+        return (
+            lowered.indexOf("<h6") !== -1 ||
+            lowered.indexOf("<pre") !== -1 ||
+            lowered.indexOf("<small") !== -1
+        );
+    }
+
+    function renderStacktraceBody(body, message, allowHtml) {
+        if (!body) {
+            return;
+        }
+        var formatted = formatMessage(message);
+        var isString = typeof formatted === "string";
+        var decoded = isString ? decodeHtmlEntities(formatted) : formatted;
+        if (isString && shouldRenderStacktraceHtml(decoded, true)) {
+            body.innerHTML = decoded;
+            return;
+        }
+        if (allowHtml && isString && shouldRenderStacktraceHtml(formatted, true)) {
+            body.innerHTML = formatted;
+            return;
+        }
+        body.textContent = formatted;
+    }
+
+    function showStacktrace(message) {
+        if (!stacktraceTargets) {
+            return;
         }
 
-        var stacktraceTargets = resolveStacktraceTargets(config.stacktrace);
-
-        function showStacktrace(message) {
-            if (!stacktraceTargets) {
-                return;
-            }
-
-            var panel = stacktraceTargets.panel;
-            var body = stacktraceTargets.body;
+        var panel = stacktraceTargets.panel;
+        var body = stacktraceTargets.body;
             if (!panel || !body) {
                 return;
             }
 
             panel.hidden = false;
             if (typeof panel.open !== "undefined") {
-                panel.open = true;
-            }
-
-            body.textContent = formatMessage(message);
-
-            var jobId = parseJobIdFromMessage(message);
-            var fetcher = stacktraceTargets.fetchJobInfo;
-            if (!fetcher || !jobId) {
-                return;
-            }
-
-            fetcher(jobId).then(function (text) {
-                if (text) {
-                    body.textContent = text;
-                }
-            }).catch(function (error) {
-                console.warn("StatusStream stacktrace enrichment failed:", error);
-            });
+            panel.open = true;
         }
+
+        renderStacktraceBody(body, message, stacktraceTargets.allowHtml);
+
+        var jobId = parseJobIdFromMessage(message);
+        var fetcher = stacktraceTargets.fetchJobInfo;
+        if (!fetcher || !jobId) {
+            return;
+        }
+
+        fetcher(jobId).then(function (text) {
+            if (text) {
+                renderStacktraceBody(body, text, stacktraceTargets.allowHtml);
+            }
+        }).catch(function (error) {
+            console.warn("StatusStream stacktrace enrichment failed:", error);
+        });
+    }
 
         function handleTrigger(message) {
             if (typeof message !== "string" || message.indexOf("TRIGGER") === -1) {

@@ -515,11 +515,11 @@ function controlBase() {
     }
 
     function appendHtml(target, value) {
-        if (callAdapter(target, "append", [value])) {
-            return;
-        }
         const element = unwrapElement(target);
         if (!element) {
+            if (callAdapter(target, "append", [value])) {
+                return;
+            }
             return;
         }
         if (value instanceof window.Node) {

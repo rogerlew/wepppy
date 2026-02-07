@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Sequence, Union
 
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_security import current_user
+import functools
 
 from .._common import Blueprint, roles_required, parse_request_payload
 from wepppy.nodb import unitizer as unitizer_module
@@ -23,6 +24,17 @@ batch_runner_bp = Blueprint(
     __name__,
     template_folder="templates"
 )
+
+def _batch_roles_required(*roles: str):
+    """Allow temporary auth bypass for batch routes via config."""
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if current_app.config.get("BATCH_RUNNER_SKIP_AUTH", False):
+                return func(*args, **kwargs)
+            return roles_required(*roles)(func)(*args, **kwargs)
+        return wrapper
+    return decorator
 
 def _batch_runner_feature_enabled() -> bool:
     flag = current_app.config.get("BATCH_RUNNER_ENABLED", False)
@@ -160,7 +172,7 @@ def _create_batch_project(
 
 
 @batch_runner_bp.route("/batch/create/", methods=["GET", "POST"])
-@roles_required("Admin")
+@_batch_roles_required("Admin")
 @handle_with_exception_factory
 def create_batch_project():
     """Render or submit the batch creation form."""
@@ -209,7 +221,7 @@ def create_batch_project():
 
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/", methods=["GET"])
-@roles_required("Admin")
+@_batch_roles_required("Admin")
 @handle_with_exception_factory
 def view_batch(batch_name: str):
     """Render the placeholder batch detail page for Batch Runner (Phase 0)."""
@@ -262,7 +274,7 @@ def view_batch(batch_name: str):
 
 
 @batch_runner_bp.route('/batch/_/<string:batch_name>/run-directives', methods=['POST'])
-@roles_required('Admin')
+@_batch_roles_required('Admin')
 @handle_with_exception_factory
 def update_run_directives(batch_name: str):
     if not _batch_runner_feature_enabled():
@@ -296,7 +308,7 @@ def _batch_runner_disabled_response():
     }
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/validate-template", methods=["POST"])
-@roles_required("Admin")
+@_batch_roles_required("Admin")
 @handle_with_exception_factory
 def validate_template(batch_name: str):
     if not _batch_runner_feature_enabled():
@@ -345,7 +357,7 @@ def validate_template(batch_name: str):
 
 
 @batch_runner_bp.route("/batch/_/<string:batch_name>/runstate", methods=["GET"])
-@roles_required("Admin")
+@_batch_roles_required("Admin")
 @handle_with_exception_factory
 def runstate(batch_name: str):
     if not _batch_runner_feature_enabled():

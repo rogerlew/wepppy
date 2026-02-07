@@ -35,6 +35,12 @@ def config_app(app, logger=None):
         except (TypeError, ValueError):
             app.config['BATCH_GEOJSON_MAX_MB'] = 10
 
+    skip_batch_auth = os.getenv('BATCH_RUNNER_SKIP_AUTH')
+    if skip_batch_auth is None:
+        app.config.setdefault('BATCH_RUNNER_SKIP_AUTH', False)
+    else:
+        app.config['BATCH_RUNNER_SKIP_AUTH'] = skip_batch_auth.strip().lower() in {'1', 'true', 'yes', 'on'}
+
     app.config.setdefault('PROFILE_RECORDER_ENABLED', True)
     if 'PROFILE_DATA_ROOT' not in app.config:
         app.config['PROFILE_DATA_ROOT'] = os.getenv('PROFILE_DATA_ROOT', '/workdir/wepppy-test-engine-data')

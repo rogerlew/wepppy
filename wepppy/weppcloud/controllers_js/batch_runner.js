@@ -492,7 +492,8 @@ var BatchRunner = (function () {
                 logLimit: 400,
                 stacktrace: {
                     element: controller.stacktracePanelEl,
-                    body: controller.stacktrace
+                    body: controller.stacktrace,
+                    allowHtml: true
                 }
             });
             controller._statusStreamRunId = desiredRunId;
