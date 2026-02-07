@@ -4698,7 +4698,15 @@ class Omni(NoDbBase):
             
             with self.timed(f'  {scenario_name}: applying treatments'):
                 treatments = Treatments.getInstance(new_wd)
-                treatment_key = treatments.treatments_lookup[str(scenario)]
+                treatments_lookup = treatments.treatments_lookup
+                treatment_key = treatments_lookup.get(str(scenario))
+                if treatment_key is None:
+                    available = ", ".join(sorted(treatments_lookup)) if treatments_lookup else "none"
+                    raise ValueError(
+                        "Prescribed fire scenario requires a treatment mapping for 'prescribed_fire', "
+                        "but the current landuse mapping does not define it. "
+                        f"Available treatment keys: {available}."
+                    )
 
                 treatments_domlc_d = {}
                 for topaz_id, dom in landuse.domlc_d.items():

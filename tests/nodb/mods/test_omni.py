@@ -327,6 +327,47 @@ def test_omni_scenario_equality_supports_int_and_str(omni_module):
     assert thinning != 999
 
 
+def test_run_omni_scenario_prescribed_fire_requires_treatment_key(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.runid = "run-omni-prescribed-fire"
+    omni.logger = logging.getLogger("tests.omni.prescribed_fire")
+    omni.rq_job_pool_max_worker_per_scenario_task = 1
+
+    scenario_dir = tmp_path / "_pups" / "omni" / "scenarios" / "prescribed_fire"
+    scenario_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(omni_module, "_omni_clone", lambda *args, **kwargs: str(scenario_dir))
+    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False), raising=False)
+
+    class DummyDisturbed:
+        has_sbs = False
+
+    class DummyLanduse:
+        pass
+
+    class DummySoils:
+        def build(self, max_workers=None):
+            return None
+
+    class DummyTreatments:
+        @property
+        def treatments_lookup(self):
+            return {}
+
+    import wepppy.nodb.core as nodb_core
+    import wepppy.nodb.mods.disturbed as disturbed_mod
+    import wepppy.nodb.mods.treatments as treatments_mod
+
+    monkeypatch.setattr(disturbed_mod.Disturbed, "getInstance", lambda wd: DummyDisturbed())
+    monkeypatch.setattr(nodb_core.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(nodb_core.Soils, "getInstance", lambda wd: DummySoils())
+    monkeypatch.setattr(treatments_mod.Treatments, "getInstance", lambda wd: DummyTreatments())
+
+    with pytest.raises(ValueError, match="prescribed_fire"):
+        omni.run_omni_scenario({"type": "prescribed_fire"})
+
+
 def test_clear_cache_and_locks_invokes_dependencies(monkeypatch, omni_module):
     calls = []
 
