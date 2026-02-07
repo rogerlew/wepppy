@@ -329,10 +329,10 @@ def test_omni_scenario_equality_supports_int_and_str(omni_module):
 
 def test_run_omni_scenario_prescribed_fire_requires_treatment_key(tmp_path, monkeypatch, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
-    omni.wd = str(tmp_path)
-    omni.runid = "run-omni-prescribed-fire"
+    run_dir = tmp_path / "run-omni-prescribed-fire"
+    run_dir.mkdir()
+    omni.wd = str(run_dir)
     omni.logger = logging.getLogger("tests.omni.prescribed_fire")
-    omni.rq_job_pool_max_worker_per_scenario_task = 1
 
     scenario_dir = tmp_path / "_pups" / "omni" / "scenarios" / "prescribed_fire"
     scenario_dir.mkdir(parents=True)
