@@ -10,6 +10,13 @@
 - **Codex can't compress verbose docs** (bulk loads context, no compression pass). Keep code docs dense/terse—every verbose token reduces code-reading capacity. Claude compresses on-the-fly so tolerates verbosity but it's wasteful. Write for Codex's token budget.
 - Do not add “fallback” wrappers that silently mask missing required dependencies (for example, swallowing ImportError for coverage instrumentation). Prefer explicit failures so debugging stays fast and obvious.
 
+### Change Scope Discipline (Required)
+- Do not add speculative abstractions or generalized code paths for unsupported or hypothetical cases.
+- Match existing data and API contracts first; if a contract change is needed, call it out explicitly before implementation.
+- Prefer the smallest possible fix that resolves the confirmed failing path.
+- State assumptions explicitly in PR/commit notes and ask for confirmation before broadening behavior.
+- Add regression coverage for the exact reported failure mode instead of widening implementation scope.
+
 ## Key Contracts
 - RQ response schema and canonical error payloads: `docs/schemas/rq-response-contract.md`
 

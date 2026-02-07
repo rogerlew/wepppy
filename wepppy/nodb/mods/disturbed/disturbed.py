@@ -889,6 +889,7 @@ class Disturbed(NoDbBase):
         d = load_map(mapping)
 
         man_d = {}
+        man_d_base = {}
         for k in d:
             m = get_management(k, _map=mapping)
             # Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
@@ -906,21 +907,33 @@ class Disturbed(NoDbBase):
                                     plant=m.plants[0]) for v in hdr]
 
             man_d[disturbed_class] = dict(zip(hdr, row))
+            # Base-class fallback keeps lookup rows keyed by canonical classes
+            # like "thinning" even when management map entries are variant forms
+            # such as "thinning_40_90".
+            base_class = disturbed_class
+            if isinstance(base_class, str):
+                if 'mulch' in base_class:
+                    base_class = 'mulch'
+                elif 'thinning' in base_class:
+                    base_class = 'thinning'
+            if isinstance(base_class, str) and base_class not in man_d_base:
+                man_d_base[base_class] = man_d[disturbed_class]
 
-        landsoil_lookup = read_disturbed_land_soil_lookup(self.lookup_fn)
+        landsoil_lookup = self.land_soil_replacements_d
         extended_landsoil_lookup = _join(_data_dir, 'extended_disturbed_land_soil_lookup.csv')
 
         wtr = None
         with open(extended_landsoil_lookup, 'w') as f:
             for (texid, disturbed_class), _d in landsoil_lookup.items():
-                if disturbed_class not in man_d:
+                man_row = man_d.get(disturbed_class) or man_d_base.get(disturbed_class)
+                if man_row is None:
                     print(f'No management found for {disturbed_class} in man_d')
                     continue
 
-                _d.update(man_d[disturbed_class])
+                _d.update(man_row)
 
                 sev_enum = 0
-                disturbed_class = _d.get('luse', '')
+                luse_value = _d.get('luse', disturbed_class)
                 if 'high sev' in disturbed_class:
                     sev_enum = 4
                 elif 'moderate sev' in disturbed_class:
@@ -930,7 +943,7 @@ class Disturbed(NoDbBase):
                 elif 'prescribed' in disturbed_class:
                     sev_enum = 1
 
-                luse = f'{disturbed_class}'
+                luse = f'{luse_value}'
 
                 if 'forest' in luse:
                     luse = 'forest'
@@ -939,15 +952,25 @@ class Disturbed(NoDbBase):
                 elif 'shrub' in luse:
                     luse = 'shrub'
 
-                del _d['luse']
+                if 'luse' in _d:
+                    del _d['luse']
 
                 _d = {'sev_enum': sev_enum,  'landuse': luse, 'disturbed_class': disturbed_class, **_d}
+                # Keep canonical disturbed class from lookup key for downstream
+                # soil replacement lookups (for example, ("silt loam", "thinning")).
+                _d['disturbed_class'] = disturbed_class
 
-                _d['plant.data.rdmax'] = _d['rdmax']
-                del _d['rdmax']
+                if 'rdmax' in _d:
+                    _d['plant.data.rdmax'] = _d['rdmax']
+                    del _d['rdmax']
+                elif 'plant.data.rdmax' not in _d:
+                    _d['plant.data.rdmax'] = None
 
-                _d['plant.data.xmxlai'] = _d['xmxlai']
-                del _d['xmxlai']
+                if 'xmxlai' in _d:
+                    _d['plant.data.xmxlai'] = _d['xmxlai']
+                    del _d['xmxlai']
+                elif 'plant.data.xmxlai' not in _d:
+                    _d['plant.data.xmxlai'] = None
 
                 if wtr is None:
                     wtr = csv.DictWriter(f, fieldnames=_d.keys())
@@ -1041,6 +1064,18 @@ class Disturbed(NoDbBase):
                     default_fn, _lookup_fn, [], {})
             return read_disturbed_land_soil_lookup(_lookup_fn)
 
+        expected_thinning_keys = {
+            ('clay loam', 'thinning'),
+            ('loam', 'thinning'),
+            ('sand loam', 'thinning'),
+            ('silt loam', 'thinning'),
+        }
+        if any(key not in lookup for key in expected_thinning_keys):
+            default_lookup = read_disturbed_land_soil_lookup(default_fn)
+            for key in expected_thinning_keys:
+                if key not in lookup and key in default_lookup:
+                    lookup[key] = default_lookup[key]
+
         return lookup
 
     def pmetpara_prep(self) -> None:
@@ -1090,14 +1125,21 @@ class Disturbed(NoDbBase):
                     elif 'thinning' in disturbed_class:
                         disturbed_class = 'thinning'
 
-                if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
+                replacements = _land_soil_replacements_d.get((texid, disturbed_class))
+                if disturbed_class is None or disturbed_class == '' or 'developed' in disturbed_class:
                     self.logger.info('      setting kcb and rawp for unclassified disturbed_class or developed')
+                    kcb = 0.95
+                    rawb = 0.80
+                elif replacements is None:
+                    self.logger.info(
+                        f'      no land_soil_lookup entry for {texid}-{disturbed_class}; using defaults'
+                    )
                     kcb = 0.95
                     rawb = 0.80
                 else:
                     self.logger.info(f'      setting kcb and rawp for {texid}-{disturbed_class} from land_soil_lookup')
-                    kcb = _land_soil_replacements_d[(texid, disturbed_class)]['pmet_kcb']        
-                    rawb = _land_soil_replacements_d[(texid, disturbed_class)]['pmet_rawp']        
+                    kcb = replacements['pmet_kcb']
+                    rawb = replacements['pmet_rawp']
 
                 description = f'{texid}-{disturbed_class}'.replace(' ', '_')
                 plant_name = man.plants[0].name

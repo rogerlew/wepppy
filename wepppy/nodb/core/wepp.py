@@ -1739,13 +1739,15 @@ class Wepp(NoDbBase):
 
                 # probably isn't the right location for this code. should be in nodb.disturbed
                 if disturbed is not None:
+                    disturbed_class_str = disturbed_class if isinstance(disturbed_class, str) else ''
                     if isinstance(disturbed_class, str):  # occured with No Data class with c3s-disturbed map
                         if 'mulch' in disturbed_class:
                             disturbed_class = 'mulch'
                         elif 'thinning' in disturbed_class:
                             disturbed_class = 'thinning'
+                        disturbed_class_str = disturbed_class
 
-                    if hillslope_cancovs is not None and 'mulch' not in disturbed_class and 'thinning' not in disturbed_class:
+                    if hillslope_cancovs is not None and 'mulch' not in disturbed_class_str and 'thinning' not in disturbed_class_str:
                         assert rap_ts is None, 'project has rap and rap_ts'
                         management.set_cancov(hillslope_cancovs[str(topaz_id)])
 
@@ -1754,16 +1756,21 @@ class Wepp(NoDbBase):
                     sand = _soil.sand
                     texid = simple_texture(clay=clay, sand=sand)
 
-                    if (texid, disturbed_class) not in _land_soil_replacements_d:
+                    key = (texid, disturbed_class)
+                    replacements = _land_soil_replacements_d.get(key)
+                    if replacements is None:
                         self.logger.info(f'     _prep_managements: {texid}:{disturbed_class} not in replacements_d')
 
-                    if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
+                    if disturbed_class is None or disturbed_class == '' or ('developed' in disturbed_class_str):
+                        rdmax = None
+                        xmxlai = None
+                    elif replacements is None:
                         rdmax = None
                         xmxlai = None
                     else:
-                        rdmax = _land_soil_replacements_d[(texid, disturbed_class)].get('rdmax', None)
+                        rdmax = replacements.get('rdmax', None)
                         if man_summary.cancov_override is None:
-                            xmxlai = _land_soil_replacements_d[(texid, disturbed_class)].get('xmxlai', None)
+                            xmxlai = replacements.get('xmxlai', None)
                         else:
                             rdmax = None
                             xmxlai = None
@@ -1774,10 +1781,10 @@ class Wepp(NoDbBase):
                     if isfloat(xmxlai):
                         management.set_xmxlai(float(xmxlai))
 
-                    if (texid, disturbed_class) in _land_soil_replacements_d:
+                    if replacements is not None:
                         apply_disturbed_management_overrides(
                             management,
-                            _land_soil_replacements_d[(texid, disturbed_class)],
+                            replacements,
                         )
 
                     meoization_key = (mukey, dom, disturbed_class)

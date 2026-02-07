@@ -76,17 +76,26 @@ def _calendar_day_to_julian(
 ) -> int:
     """Convert calendar day to julian using CLI calendar when available."""
     if calendar_lookup:
-        days = calendar_lookup.get(int(year))
-        if days:
+        # Prefer the exact year, but if absent fall back to any available calendar;
+        # this keeps empirical (non-Gregorian) day counts intact.
+        lookup_year = calendar_lookup.get(int(year))
+        candidate_years = [lookup_year] if lookup_year is not None else list(calendar_lookup.values())
+        for days in candidate_years:
             for idx, (m, d) in enumerate(days):
                 if int(m) == int(month) and int(d) == int(day_of_month):
                     return idx + 1
-            raise ValueError(
-                f"Date {year}-{month}-{day_of_month} not found in CLI calendar lookup "
-                f"(available years: {sorted(calendar_lookup.keys())})"
-            )
+        raise ValueError(
+            f"Date {year}-{month}-{day_of_month} not found in CLI calendar lookup "
+            f"(available years: {sorted(calendar_lookup.keys())})"
+        )
 
-    return (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+    try:
+        return (datetime(year, month, day_of_month) - datetime(year, 1, 1)).days + 1
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid date {year}-{month}-{day_of_month} with no CLI calendar lookup; "
+            f"ensure climate/wepp_cli.parquet exists with year/month/day columns."
+        ) from exc
 
 
 def _compute_sim_day_index(

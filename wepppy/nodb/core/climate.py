@@ -2024,8 +2024,13 @@ class Climate(NoDbBase):
             **dict(start_year=kwds['future_start_year'],
                    end_year=kwds['future_end_year']))
 
-        # mode 4: single storm
-        self.set_single_storm_pars(**kwds)
+        # mode 4: single storm (deprecated)
+        if climate_mode in (
+            ClimateMode.SingleStorm,
+            ClimateMode.SingleStormBatch,
+            ClimateMode.UserDefinedSingleStorm,
+        ):
+            self.set_single_storm_pars(**kwds)
 
     def set_observed_pars(self, **kwds: Any) -> None:
         with self.locked():

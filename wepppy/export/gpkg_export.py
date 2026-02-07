@@ -187,7 +187,29 @@ def gpkg_export(wd: str) -> None:
         columns_to_drop.extend([c for c in hill_df.columns if 'Density' in c])
         hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_df = esri_compatible_colnames(hill_df)
-        hill_df['TopazID'] = hill_df['TopazID'].astype('int64')
+        if 'TopazID' in hill_df.columns:
+            hill_df['TopazID'] = hill_df['TopazID'].astype('int64')
+        elif 'topaz_id' in hill_df.columns:
+            hill_df['TopazID'] = pd.to_numeric(hill_df['topaz_id'], errors='coerce').astype('Int64')
+        else:
+            wepp_col = None
+            for candidate in ('wepp_id', 'WeppID'):
+                if candidate in hill_df.columns:
+                    wepp_col = candidate
+                    break
+            if wepp_col is not None:
+                translator = watershed.translator_factory()
+                def _map_wepp_to_topaz(value: object) -> object:
+                    try:
+                        if pd.isna(value):
+                            return pd.NA
+                        return translator.top(wepp=int(value))
+                    except Exception:
+                        return pd.NA
+                hill_df['TopazID'] = hill_df[wepp_col].map(_map_wepp_to_topaz).astype('Int64')
+        overlap_cols = [c for c in hill_df.columns if c != 'TopazID' and c in hill_gdf.columns]
+        if overlap_cols:
+            hill_df = hill_df.drop(columns=overlap_cols)
         hill_gdf = hill_gdf.merge(hill_df, left_on='TopazID', right_on='TopazID', how='left')
         
     hill_gdf = esri_compatible_colnames(hill_gdf)
@@ -265,7 +287,23 @@ def gpkg_export(wd: str) -> None:
         columns_to_drop = [c for c in columns_to_drop if c in chn_df.columns]
         chn_df.drop(columns=columns_to_drop, inplace=True)
         chn_df = esri_compatible_colnames(chn_df)
-        chn_df['TopazID'] = chn_df['TopazID'].astype('int64')
+        if 'TopazID' in chn_df.columns:
+            chn_df['TopazID'] = chn_df['TopazID'].astype('int64')
+        elif 'topaz_id' in chn_df.columns:
+            chn_df['TopazID'] = pd.to_numeric(chn_df['topaz_id'], errors='coerce').astype('Int64')
+        elif 'chn_enum' in chn_df.columns:
+            translator = watershed.translator_factory()
+            def _map_chn_to_topaz(value: object) -> object:
+                try:
+                    if pd.isna(value):
+                        return pd.NA
+                    return translator.top(chn_enum=int(value))
+                except Exception:
+                    return pd.NA
+            chn_df['TopazID'] = chn_df['chn_enum'].map(_map_chn_to_topaz).astype('Int64')
+        overlap_cols = [c for c in chn_df.columns if c != 'TopazID' and c in chn_gdf.columns]
+        if overlap_cols:
+            chn_df = chn_df.drop(columns=overlap_cols)
         chn_gdf = chn_gdf.merge(chn_df, left_on='TopazID', right_on='TopazID', how='left')
 
     chn_gdf = esri_compatible_colnames(chn_gdf)
