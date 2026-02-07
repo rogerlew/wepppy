@@ -4,9 +4,11 @@
 
 {% set catalog = climate_catalog or [] %}
 {% set ns = namespace(selected=climate.catalog_id, selected_dataset=None, options=[]) %}
+{% set deprecated_single_storm_modes = [4, 14, 15] %}
 
 {% for dataset in catalog %}
-  {% if ns.selected is none and dataset.ui_exposed %}
+  {% set dataset_mode = dataset.climate_mode | int %}
+  {% if ns.selected is none and dataset.ui_exposed and (dataset_mode not in deprecated_single_storm_modes) %}
     {% set ns.selected = dataset.catalog_id %}
   {% endif %}
 {% endfor %}
@@ -15,6 +17,12 @@
 {% endif %}
 
 {% for dataset in catalog %}
+  {% set dataset_mode = dataset.climate_mode | int %}
+  {% if dataset_mode in deprecated_single_storm_modes %}
+    {% if dataset.catalog_id == ns.selected %}
+      {% set ns.selected_dataset = dataset %}
+    {% endif %}
+  {% else %}
   {% set is_visible = dataset.ui_exposed or dataset.catalog_id == ns.selected %}
   {% if is_visible %}
     {% set ns.options = ns.options + [{
@@ -36,6 +44,7 @@
   {% endif %}
   {% if dataset.catalog_id == ns.selected %}
     {% set ns.selected_dataset = dataset %}
+  {% endif %}
   {% endif %}
 {% endfor %}
 
@@ -65,9 +74,19 @@
   <input type="hidden" id="climate_catalog_id" name="climate_catalog_id" value="{{ selected_catalog_id }}" data-climate-field="catalog-id">
   <input type="hidden" id="climate_mode" name="climate_mode" value="{{ selected_mode }}" data-climate-field="mode">
 
+  {% if climate.is_single_storm %}
+  <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
+    <p class="wc-alert__body">
+      <strong>Single-storm climates are deprecated and unsupported.</strong>
+      This run will not execute. Choose a continuous climate dataset instead.
+      For event-scale analysis, use the Storm Event Analyzer.
+    </p>
+  </div>
+  {% endif %}
+
   <section class="wc-stack" id="climate_dataset_section" data-climate-element="dataset">
     {# Build grouped options structure #}
-    {% set groups_order = ['Stochastic', 'Observed', 'Future', 'Single Event', 'User-Defined'] %}
+    {% set groups_order = ['Stochastic', 'Observed', 'Future', 'User-Defined'] %}
     {% set grouped = namespace(data={}) %}
     {% for opt in ns.options %}
       {% set grp = opt.get('group', 'Other') %}
@@ -321,122 +340,6 @@
          value=climate.future_end_year,
          attrs={"class": "disable-readonly", "inputmode": "numeric"},
          extra_control_class="disable-readonly"
-       ) }}
-  </section>
-
-  <section class="wc-stack" id="climate_mode4_controls" data-climate-section="single_storm">
-    <div class="wc-stack">
-      {{ ui.text_field(
-           "ss_storm_date",
-           "Storm date (month day year)",
-           value=climate.ss_storm_date,
-           help="Example: 4 15 01",
-           attrs={"placeholder": "M D Y"},
-           extra_control_class="disable-readonly"
-         ) }}
-
-      {{ ui.numeric_field(
-           "ss_duration_of_storm_in_hours",
-           "Storm duration",
-           value=climate.ss_duration_of_storm_in_hours,
-           unit_label="hours",
-           help="Enter the total storm duration (e.g., 6 for a six-hour storm).",
-           precision="0.1",
-           min="0",
-           attrs={"inputmode": "decimal"},
-           extra_control_class="disable-readonly",
-           max_width="320px"
-         ) }}
-
-      {{ ui.numeric_field(
-           "ss_time_to_peak_intensity_pct",
-           "Time to peak intensity",
-           value=climate.ss_time_to_peak_intensity_pct,
-           unit_label="%",
-           help="Percent of the storm duration until peak intensity (0-100).",
-           precision="0.1",
-           min="0",
-           max="100",
-           attrs={"inputmode": "decimal"},
-           extra_control_class="disable-readonly",
-           max_width="320px"
-         ) }}
-    </div>
-
-    <p class="wc-text-muted">
-      Design storm depth and intensity respect your Unitizer preference—enter either SI or English values and we keep them synchronized.
-    </p>
-
-    {{ ui.unitized_numeric_group(
-         metric={
-           'unit_class': 'units-mm',
-           'fields': [
-             {
-               'id': 'ss_design_storm_amount_mm',
-               'label': 'Design storm amount',
-               'unit_label': 'mm',
-               'value': (climate.ss_design_storm_amount_inches * 25.4) | round(2),
-               'help': 'Metric entry automatically updates the English field.',
-               'precision': '0.01',
-               'attrs': {
-                 'data-convert-target': '#ss_design_storm_amount_inches',
-                 'data-convert-func': 'mm_to_in',
-                 'data-convert-decimals': '2'
-               },
-               'unit_category': 'xs-distance',
-               'unit_name': 'mm',
-               'extra_control_class': 'disable-readonly',
-               'max_width': '320px'
-             }
-           ]
-         },
-         imperial={
-           'unit_class': 'units-in',
-           'fields': [
-             {
-               'id': 'ss_design_storm_amount_inches',
-               'label': 'Design storm amount',
-               'unit_label': 'in',
-               'value': climate.ss_design_storm_amount_inches,
-               'help': 'English entry automatically updates the metric field.',
-               'precision': '0.01',
-               'attrs': {
-                 'data-convert-target': '#ss_design_storm_amount_mm',
-                 'data-convert-func': 'in_to_mm',
-                 'data-convert-decimals': '2'
-               },
-               'unit_category': 'xs-distance',
-               'unit_name': 'in',
-               'extra_control_class': 'disable-readonly',
-               'max_width': '320px'
-             }
-           ]
-         }
-    ) }}
-
-    {{ ui.numeric_field(
-         "ss_max_intensity_inches_per_hour",
-         "Maximum intensity",
-         value=climate.ss_max_intensity_inches_per_hour,
-         unit_label="in/hour",
-         help="Peak rainfall intensity for the single storm.",
-         precision="0.01",
-         min="0",
-         attrs={"class": "disable-readonly"},
-         unit_category="xs-distance-rate",
-         unit_name="in/hour",
-         extra_control_class="disable-readonly",
-         max_width="320px"
-       ) }}
-  </section>
-
-  <section class="wc-stack" id="climate_mode14_controls" data-climate-section="single_storm_batch">
-    {{ ui.textarea_field(
-         "ss_batch",
-         "Single storms (one per line: mo da yr prcp duration tp intensity)",
-         value=climate.ss_batch,
-         rows=10,
-         attrs={"class": "disable-readonly", "placeholder": "mo da year prcp dur tp ip"}
        ) }}
   </section>
 

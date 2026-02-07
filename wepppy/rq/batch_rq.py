@@ -155,6 +155,10 @@ def run_batch_rq(batch_name: str) -> Job:
             )
             final_job.meta['runid'] = batch_name
             final_job.save()
+            try:
+                batch_runner.set_rq_job_id("final_batch_complete_rq", final_job.id)
+            except Exception as exc:
+                logger.warning("batch_rq: failed to persist final_batch_complete_rq job id - %s", exc)
             if job is not None:
                 job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
                 job.save()
@@ -211,7 +215,37 @@ def run_batch_watershed_rq(
             prep is None or prep[str(TaskEnum.run_omni_scenarios)] is None
         ):
             _reset_omni_nodb_from_base(Path(batch_runner.base_wd), runid_wd, runid)
-            run_omni_scenarios_rq(runid)
+            omni_final_job = run_omni_scenarios_rq(runid)
+            if job is not None and omni_final_job is not None:
+                job.meta['omni_final_job_id'] = omni_final_job.id
+                job.save()
+            if omni_final_job is not None:
+                final_job_id = batch_runner.rq_job_ids.get("final_batch_complete_rq")
+                if not final_job_id:
+                    logger.warning(
+                        "batch_rq: missing final_batch_complete_rq id for %s; Omni job %s not linked",
+                        batch_name,
+                        omni_final_job.id,
+                    )
+                else:
+                    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+                    with redis.Redis(**conn_kwargs) as redis_conn:
+                        try:
+                            final_job = Job.fetch(final_job_id, connection=redis_conn)
+                        except Exception as exc:
+                            logger.warning(
+                                "batch_rq: failed to fetch final_batch_complete_rq %s for %s - %s",
+                                final_job_id,
+                                batch_name,
+                                exc,
+                            )
+                        else:
+                            dependency_ids = list(final_job._dependency_ids or [])
+                            if omni_final_job.id not in dependency_ids:
+                                dependency_ids.append(omni_final_job.id)
+                                final_job._dependency_ids = dependency_ids
+                                final_job.save()
+                                final_job.register_dependency()
 
         elapsed = time.time() - start_ts
         status = True

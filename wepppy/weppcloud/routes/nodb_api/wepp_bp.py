@@ -932,7 +932,8 @@ def report_wepp_return_periods(runid, config):
         method=method, 
         gringorten_correction=gringorten_correction, 
         exclude_months=exclude_months,
-        chn_topaz_id_of_interest=chn_topaz_id_of_interest
+        chn_topaz_id_of_interest=chn_topaz_id_of_interest,
+        wait_for_inputs=False,
     )
 
     translator = Watershed.getInstance(wd).translator_factory()

@@ -2804,7 +2804,8 @@ class Wepp(NoDbBase):
                               method: str = 'cta', gringorten_correction: bool = True, 
                               meoization: bool = True,
                               exclude_months: Optional[List[int]] = None,
-                              chn_topaz_id_of_interest: Optional[int] = None) -> ReturnPeriods:
+                              chn_topaz_id_of_interest: Optional[int] = None,
+                              wait_for_inputs: bool = True) -> ReturnPeriods:
 
         output_dir = self.output_dir
 
@@ -2848,7 +2849,11 @@ class Wepp(NoDbBase):
                 cached_report = None
 
         readonly = _exists(_join(self.wd, 'READONLY'))
-        dataset = ReturnPeriodDataset(self.wd, auto_refresh=not readonly)
+        dataset = ReturnPeriodDataset(
+            self.wd,
+            auto_refresh=not readonly,
+            wait_for_inputs=wait_for_inputs,
+        )
         return_periods = dataset.create_report(
             rec_intervals,
             exclude_yr_indxs=exclude_yr_indxs,

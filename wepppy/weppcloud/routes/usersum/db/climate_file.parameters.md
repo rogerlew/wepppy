@@ -3,6 +3,8 @@ Derived from `wepppy/weppcloud/routes/usersum/input-file-specifications/climate-
 See also: [CLIGEN station statistics input file format](../input-file-specifications/cligenparms.md) for `.par` station metadata.
 Line numbers reference the CLIGEN climate file format; the heading supplies the default `usersum <parameter>` description.
 
+**WEPPcloud note:** Single-storm climate generation is deprecated and unsupported. Treat `itemp=2` as legacy-only.
+
 ## Header
 ### Line 1 — CLIGEN Metadata
 #### `datver` — CLIGEN version selector (real)
@@ -12,7 +14,7 @@ Line numbers reference the CLIGEN climate file format; the heading supplies the 
 ### Line 2 — Simulation Flags
 #### `itemp` — Simulation mode flag (integer)
 - **Line**: 2
-- **Extended**: Selects continuous (1) vs. single-storm (2) climate generation.
+- **Extended**: Selects continuous (1) vs. single-storm (2) climate generation (single-storm is deprecated/unsupported in WEPPcloud).
 
 #### `ibrkpt` — Breakpoint data flag (integer)
 - **Line**: 2

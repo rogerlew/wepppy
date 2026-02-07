@@ -92,12 +92,11 @@ Emitted via `WCEvents.useEventMap`:
 | Channels (pass 1) | glify | `/resources/netful.json` | ChannelDelineation | No click handler. |
 | Channels (pass 2) | glify | `/resources/channels.json` | ChannelDelineation | Click -> `chnQuery(TopazID)`. |
 | Channel labels | LayerGroup | From channels | ChannelDelineation | Div icon markers. |
-| Gridded Output | GeoTIFF | `/resources/flowpaths_loss.tif` | SubcatchmentDelineation | Legacy Leaflet-only overlay (removed from GL path in Phase 13). |
+| Gridded Output | GeoTIFF | `/resources/flowpaths_loss.tif` | SubcatchmentDelineation | Deprecated flowpath loss grid. Legacy Leaflet-only overlay removed from GL path in Phase 13; it does not account for converging flows, so prefer gridded model outputs. |
 | Outlet marker | CircleMarker | `/query/outlet/` | Outlet | Added to `markerCustomPane`. |
 | Burn Severity Map | ImageOverlay | `/query/baer_wgs_map/` | Baer | Renders legend under `#sbs_legend` (client-side). |
 | Selection overlays | GeoJSON + Rectangle | `/resources/subcatchments.json` | LanduseModify/RangelandCoverModify | For box and click selection. |
 | Boundary overlay | GeoJSON | `context.map.boundary.url` | MapController | Added during bootstrap. |
-
 ## Run-scoped endpoints used by the map panel
 - Elevation: `/runs/<runid>/<config>/elevationquery/` (POST `{ lat, lng }`).
 - Drilldown: `report/sub_summary/<TopazID>/`, `report/chn_summary/<TopazID>/`.

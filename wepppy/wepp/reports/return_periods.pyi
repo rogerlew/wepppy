@@ -35,6 +35,7 @@ def refresh_return_period_events(
     topaz_ids: Optional[Sequence[int]] = ...,
     max_rank: int = ...,
     buffer: int = ...,
+    wait_for_inputs: bool = ...,
 ) -> tuple[Path, Path]: ...
 
 
@@ -46,6 +47,7 @@ class ReturnPeriodDataset:
         auto_refresh: bool = ...,
         max_rank: int = ...,
         buffer: int = ...,
+        wait_for_inputs: bool = ...,
     ) -> None: ...
 
     @property

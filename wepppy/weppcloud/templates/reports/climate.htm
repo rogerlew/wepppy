@@ -1,3 +1,13 @@
+{% if climate.is_single_storm %}
+  <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
+    <p class="wc-alert__body">
+      <strong>Single-storm climates are deprecated and unsupported.</strong>
+      Legacy outputs may be incomplete or unreliable. Use continuous climate datasets for supported runs.
+      For event-scale analysis, use the Storm Event Analyzer.
+    </p>
+  </div>
+{% endif %}
+
 <h5>Station</h5>
 {% if station_meta == none %}
     <p><i>Station information is not available</i></p>

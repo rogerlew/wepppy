@@ -301,6 +301,8 @@ climate.climate_mode = 9  # OBSERVED_DAYMET
 climate.input_years = (2015, 2020)
 climate.build_climate()
 
+**Single-storm climate modes are deprecated and unsupported.** Use continuous or multi-year climate datasets for WEPP runs. If you need event-scale analysis, use observed data or an event-based modeling workflow instead of single-storm WEPP.
+
 # Set landuse and soils
 landuse = Landuse.getInstance(wd, "config.cfg")
 landuse.mode = "Gridded"

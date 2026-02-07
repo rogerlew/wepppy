@@ -175,7 +175,11 @@ def gpkg_export(wd: str) -> None:
             soils_hill_df['TopazID'] = soils_hill_df['topaz_id'].astype('int64')
         hill_gdf = hill_gdf.merge(soils_hill_df, left_on='TopazID', right_on='TopazID', how='left')
 
-    hill_loss_fn = _join(wd, 'wepp/output/loss_pw0.hill.parquet')
+    hill_loss_fn = _join(wd, 'wepp/output/interchange/loss_pw0.hill.parquet')
+    if not _exists(hill_loss_fn):
+        legacy_hill_loss_fn = _join(wd, 'wepp/output/loss_pw0.hill.parquet')
+        if _exists(legacy_hill_loss_fn):
+            hill_loss_fn = legacy_hill_loss_fn
     if _exists(hill_loss_fn):
         hill_df = pd.read_parquet(hill_loss_fn)
         # filter single storm
@@ -249,7 +253,11 @@ def gpkg_export(wd: str) -> None:
             chn_gdf['TopazID'] = chn_gdf['TopazID'].astype('int64')
             chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='TopazID', how='left')
 
-    chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
+    chn_loss_fn = _join(wd, 'wepp/output/interchange/loss_pw0.chn.parquet')
+    if not _exists(chn_loss_fn):
+        legacy_chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
+        if _exists(legacy_chn_loss_fn):
+            chn_loss_fn = legacy_chn_loss_fn
     if _exists(chn_loss_fn):
         chn_df = pd.read_parquet(chn_loss_fn)
         columns_to_drop = ['Length', 'Area', 'WeppID']

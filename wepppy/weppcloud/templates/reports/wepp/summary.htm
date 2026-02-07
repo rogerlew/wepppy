@@ -44,7 +44,8 @@
   <p class="wc-text-muted">
     Aggregate outlet, hillslope, and channel metrics derived from the WEPP loss reports.
     {% if is_singlestorm %}
-      Values reflect the current single-storm simulation.
+      Single-storm runs are deprecated and unsupported; values (if present) reflect a legacy single-storm simulation.
+      For event-scale analysis, use the Storm Event Analyzer.
     {% else %}
       Values represent average annual results over the simulated period.
     {% endif %}

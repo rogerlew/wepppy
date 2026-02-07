@@ -54,7 +54,7 @@ from wepppy.nodb.mods.treatments import Treatments
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.wepp.interchange import run_totalwatsed3
-from wepppy.io_wait import wait_for_paths
+from wepppy.io_wait import wait_for_path, wait_for_paths
 from wepppy.rq.exception_logging import with_exception_logging
 from .wepp_rq import run_wepp_rq
 
@@ -879,7 +879,7 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
                     watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
         watershed.build_subcatchments()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        time.sleep(1)
+        wait_for_path(watershed.subwta, logger=watershed.logger)
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -897,13 +897,13 @@ def abstract_watershed_rq(runid: str) -> None:
         Exception: Propagates failures from watershed abstraction routines.
     """
     try:
-        time.sleep(0.05)  # race condition where SUBWTA.ARC is not yet written
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         watershed = Watershed.getInstance(wd)
+        wait_for_path(watershed.subwta, logger=watershed.logger)
         watershed.abstract_watershed()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation WATERSHED_ABSTRACTION_TASK_COMPLETED')
@@ -1490,7 +1490,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
                 os.path.join(new_wd, 'soils.nodb'),
                 os.path.join(new_wd, 'disturbed.nodb'),
             ]
-            wait_for_paths(required_nodbs)
+            wait_for_paths(required_nodbs, timeout_s=60.0)
             StatusMessenger.publish(status_channel, 'Forked .nodb files ready.\n')
 
             StatusMessenger.publish(status_channel, 'Undisturbifying Project...\n')

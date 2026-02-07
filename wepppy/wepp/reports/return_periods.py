@@ -377,6 +377,7 @@ def refresh_return_period_events(
     topaz_ids: Optional[Sequence[int]] = None,
     max_rank: int = 128,
     buffer: int = 10,
+    wait_for_inputs: bool = True,
 ) -> tuple[Path, Path]:
     """Regenerate the staged parquet assets that power return-period reports.
 
@@ -399,16 +400,25 @@ def refresh_return_period_events(
     alt_ebe = root_dir / "wepp" / "output" / "ebe_pw0.parquet"
     if not ebe_path.exists() and alt_ebe.exists():
         ebe_path = alt_ebe
-    try:
-        wait_for_path(ebe_path, logger=LOGGER)
-    except FileNotFoundError:
-        if ebe_path == alt_ebe:
-            raise
-        wait_for_path(alt_ebe, logger=LOGGER)
-        ebe_path = alt_ebe
+    if wait_for_inputs:
+        try:
+            wait_for_path(ebe_path, logger=LOGGER)
+        except FileNotFoundError:
+            if ebe_path == alt_ebe:
+                raise
+            wait_for_path(alt_ebe, logger=LOGGER)
+            ebe_path = alt_ebe
+    else:
+        if not ebe_path.exists() and alt_ebe.exists():
+            ebe_path = alt_ebe
+        if not ebe_path.exists():
+            raise FileNotFoundError(ebe_path)
 
     tot_path = root_dir / TOTALWATSED3_DATASET
-    wait_for_path(tot_path, logger=LOGGER)
+    if wait_for_inputs:
+        wait_for_path(tot_path, logger=LOGGER)
+    elif not tot_path.exists():
+        raise FileNotFoundError(tot_path)
 
     climate_info = _discover_climate_asset(root_dir)
     topaz_filter = _build_topaz_filter(topaz_ids)
@@ -585,6 +595,7 @@ class ReturnPeriodDataset:
         auto_refresh: bool = True,
         max_rank: int = 128,
         buffer: int = 10,
+        wait_for_inputs: bool = True,
     ) -> None:
         """Load the staged parquet files and optionally regenerate them first.
 
@@ -593,6 +604,8 @@ class ReturnPeriodDataset:
             auto_refresh: When ``True`` the staging pipeline is executed if either file is absent.
             max_rank: Maximum desired rank for ``auto_refresh`` operations.
             buffer: Additional rows retained beyond ``max_rank`` when auto-refreshing.
+            wait_for_inputs: When ``True`` wait for interchange parquet inputs; when ``False`` fail fast
+                if inputs are missing (useful for UI routes that should not block).
         """
         base = _ensure_path(wd)
         context = resolve_run_context(str(base), auto_activate=False)
@@ -605,7 +618,12 @@ class ReturnPeriodDataset:
         missing_assets = (not self._events_path.exists() or not self._ranks_path.exists())
 
         if auto_refresh and not readonly and missing_assets:
-            refresh_return_period_events(base, max_rank=max_rank, buffer=buffer)
+            refresh_return_period_events(
+                base,
+                max_rank=max_rank,
+                buffer=buffer,
+                wait_for_inputs=wait_for_inputs,
+            )
         elif readonly and missing_assets:
             raise PermissionError(
                 f"Return-period assets missing for readonly run '{self._root}'. "

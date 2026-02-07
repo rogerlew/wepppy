@@ -490,6 +490,21 @@ class ClimateMode(IntEnum):
         raise KeyError
 
 
+_SINGLE_STORM_DEPRECATED_MESSAGE = (
+    "Single-storm climate modes are deprecated and unsupported in WEPPcloud. "
+    "Use continuous or multi-year climate datasets instead."
+)
+
+
+def _assert_supported_climate_mode(mode: ClimateMode) -> None:
+    if mode in (
+        ClimateMode.SingleStorm,
+        ClimateMode.SingleStormBatch,
+        ClimateMode.UserDefinedSingleStorm,
+    ):
+        raise ValueError(_SINGLE_STORM_DEPRECATED_MESSAGE)
+
+
 class ClimateSpatialMode(IntEnum):
     Undefined = -1
     Single = 0
@@ -1395,11 +1410,13 @@ class Climate(NoDbBase):
     @nodb_setter
     def climate_mode(self, value: Union[ClimateMode, int, str]) -> None:
         if isinstance(value, ClimateMode):
-            self._climate_mode = value
+            mode = value
         elif isint(value):
-            self._climate_mode = ClimateMode(int(value))
+            mode = ClimateMode(int(value))
         else:
-            self._climate_mode = ClimateMode.parse(value)
+            mode = ClimateMode.parse(value)
+        _assert_supported_climate_mode(mode)
+        self._climate_mode = mode
 
     @property
     def is_single_storm(self) -> bool:
@@ -1928,6 +1945,7 @@ class Climate(NoDbBase):
                     raise ValueError('climate_mode not provided')
                 climate_mode = ClimateMode(int(raw_climate_mode))
                 self._catalog_id = None
+            _assert_supported_climate_mode(climate_mode)
 
             climate_spatialmode = kwds.get('climate_spatialmode', ClimateSpatialMode.Single)
             if catalog_dataset is not None:
@@ -2172,6 +2190,7 @@ class Climate(NoDbBase):
 
         climate_mode = self.climate_mode
         self.logger.info(f'  climate_mode: {climate_mode}')
+        _assert_supported_climate_mode(climate_mode)
 
         if climate_mode == ClimateMode.Undefined:
             self.logger.info('  climate_mode is Undefined, raising error')

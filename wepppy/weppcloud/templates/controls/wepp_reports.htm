@@ -21,11 +21,22 @@
       <section class="wc-stack">
         <h4 class="wc-heading wc-heading--sm">WEPP Results</h4>
         {% if is_single_storm %}
-          <div class="wc-alert wc-alert--info" role="status" aria-live="polite">
+          <div class="wc-alert wc-alert--warning" role="alert" aria-live="assertive">
             <p class="wc-alert__body">
-              <strong>Note:</strong>
-              A limited number of reports are available for single storms.
+              <strong>Single-storm runs are deprecated and unsupported.</strong>
+              Legacy outputs may be incomplete or unreliable. Choose a continuous climate dataset to run WEPP.
+              For event-scale analysis, use the Storm Event Analyzer.
             </p>
+            {% if storm_event_analyzer_ready|default(false) %}
+            <p class="wc-alert__body">
+              <a class="wc-link wc-link--file"
+                 href="{{ url_for_run('storm_event_analyzer.storm_event_analyzer', runid=runid, config=config) }}"
+                 target="_blank"
+                 rel="noopener">
+                Open Storm Event Analyzer
+              </a>
+            </p>
+            {% endif %}
           </div>
           <div class="wc-stack">
             <a class="wc-link wc-link--file"

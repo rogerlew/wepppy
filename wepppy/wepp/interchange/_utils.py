@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import logging
-import time
 from datetime import datetime, timedelta
 from os.path import exists as _exists
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
+
+from wepppy.io_wait import wait_for_path
 
 logger = logging.getLogger(__name__)
 
@@ -19,21 +20,13 @@ def _wait_for_path(path: Path | str, timeout=60.0, poll=0.5):
     Dockerized deployments occasionally surface slower I/O, so give the
     filesystem a chance to catch up before raising.
     """
-    if isinstance(path, str):
-        path = Path(path)
-
-    deadline = time.time() + timeout
-
-    while True:
-        if path.exists():
-            return
-
-        if time.time() >= deadline:
-            raise FileNotFoundError(
-                f'Expected file {path} to be available within {timeout}s'
-            )
-
-        time.sleep(poll)
+    wait_for_path(
+        path,
+        timeout_s=float(timeout),
+        poll_s=float(poll),
+        require_stable_size=True,
+        logger=logger,
+    )
 
 def _parse_float(token: str) -> float:
     stripped = token.strip()

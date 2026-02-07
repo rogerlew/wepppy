@@ -74,6 +74,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.io_wait import wait_for_path, wait_for_paths
 
 from wepppy.export.prep_details import (
     export_channels_prep_details,
@@ -100,6 +101,17 @@ TIMEOUT: int = 43_200
 _DSS_CHANNELS_RELATIVE_PATH = ("export", "dss", "dss_channels.geojson")
 _FEATURE_TOPAZ_KEYS = ("TopazID", "topaz_id", "topazId", "topaz", "id", "ID")
 _BOUNDARY_CONDITION_WIDTH_M = 100.0
+
+
+_SINGLE_STORM_DEPRECATED_MESSAGE = (
+    "Single-storm climate modes are deprecated and unsupported. "
+    "Use continuous/multi-year climate datasets for WEPP runs."
+)
+
+
+def _assert_supported_climate(climate: Climate) -> None:
+    if climate.is_single_storm:
+        raise ValueError(_SINGLE_STORM_DEPRECATED_MESSAGE)
 
 
 
@@ -334,6 +346,7 @@ def run_wepp_rq(runid: str) -> Job:
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         climate = Climate.getInstance(wd)
+        _assert_supported_climate(climate)
         runs_dir = os.path.abspath(wepp.runs_dir)
         wepp_bin = wepp.wepp_bin
 
@@ -401,12 +414,45 @@ def run_wepp_rq(runid: str) -> Job:
             job2_totalwatsed2: Job | None = None
             job2_hillslope_interchange: Job | None = None
             job2_post_dss_export: Job | None = None
+            job_post_run_cleanup_out: Job | None = None
+            swat_job_build: Job | None = None
 
+            swat_before_interchange = bool(
+                wepp.mods
+                and 'swat' in wepp.mods
+                and climate.delete_after_interchange
+            )
+            swat_job_run: Job | None = None
+            if swat_before_interchange:
+                swat_dependencies = [jobs1_hillslopes]
+                if job2_watershed_prep is not None:
+                    swat_dependencies.append(job2_watershed_prep)
+                swat_job_build = q.enqueue_call(
+                    _build_swat_inputs_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=swat_dependencies,
+                )
+                job.meta['jobs:2,func:_build_swat_inputs_rq'] = swat_job_build.id
+                job.save()
+
+                swat_job_run = q.enqueue_call(
+                    _run_swat_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=swat_job_build,
+                )
+                job.meta['jobs:3,func:_run_swat_rq'] = swat_job_run.id
+                job.save()
+
+            interchange_dependencies: list[Job] = [jobs1_hillslopes]
+            if swat_job_build is not None:
+                interchange_dependencies.append(swat_job_build)
             job2_hillslope_interchange = q.enqueue_call(
                 _build_hillslope_interchange_rq,
                 (runid,),
                 timeout=TIMEOUT,
-                depends_on=jobs1_hillslopes,
+                depends_on=interchange_dependencies,
             )
             job.meta['jobs:2,func:_build_hillslope_interchange_rq'] = job2_hillslope_interchange.id
             job.save()
@@ -416,11 +462,6 @@ def run_wepp_rq(runid: str) -> Job:
                 job.meta['jobs:2,func:_build_totalwatsed3_rq'] = job2_totalwatsed2.id
                 job.save()
 
-                if wepp.dss_export_on_run_completion:
-                    job2_post_dss_export = q.enqueue_call(post_dss_export_rq, (runid,),  timeout=TIMEOUT, depends_on=job2_hillslope_interchange)
-                    job.meta['jobs:2,func:_post_dss_export_rq'] = job2_post_dss_export.id
-                    job.save()
-
 
             jobs2_flowpaths: Job | None = None
             if wepp.run_flowpaths:
@@ -428,8 +469,7 @@ def run_wepp_rq(runid: str) -> Job:
                 job.meta['jobs:2,func:run_flowpaths_rq'] = jobs2_flowpaths.id
                 job.save()
 
-            swat_job_run: Job | None = None
-            if wepp.mods and 'swat' in wepp.mods:
+            if wepp.mods and 'swat' in wepp.mods and swat_job_build is None:
                 swat_dependencies = [job2_hillslope_interchange]
                 if job2_watershed_prep is not None:
                     swat_dependencies.append(job2_watershed_prep)
@@ -485,9 +525,14 @@ def run_wepp_rq(runid: str) -> Job:
 
                 post_dependencies = jobs3_watersheds or [job2_watershed_prep]
 
-                _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = _job.id
-                jobs4_post.append(_job)
+                job_post_run_cleanup_out = q.enqueue_call(
+                    _post_run_cleanup_out_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=post_dependencies,
+                )
+                job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = job_post_run_cleanup_out.id
+                jobs4_post.append(job_post_run_cleanup_out)
                 job.save()
 
                 if wepp.prep_details_on_run_completion:
@@ -497,7 +542,15 @@ def run_wepp_rq(runid: str) -> Job:
                     job.save()
 
                 if not climate.is_single_storm:
-                    _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
+                    watbal_dependencies = list(post_dependencies)
+                    if job2_hillslope_interchange is not None:
+                        watbal_dependencies.append(job2_hillslope_interchange)
+                    _job = q.enqueue_call(
+                        _run_hillslope_watbal_rq,
+                        (runid,),
+                        timeout=TIMEOUT,
+                        depends_on=watbal_dependencies,
+                    )
                     job.meta['jobs:4,func:_run_hillslope_watbal_rq'] = _job.id
                     jobs4_post.append(_job)
                     job.save()
@@ -512,16 +565,14 @@ def run_wepp_rq(runid: str) -> Job:
                     _post_watershed_interchange_rq,
                     (runid,),
                     timeout=TIMEOUT,
-                    depends_on=post_dependencies,
+                    depends_on=job_post_run_cleanup_out,
                 )
                 job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
                 jobs4_post.append(job_post_watershed_interchange)
                 job.save()
 
-                if not climate.is_single_storm:
-                    return_period_deps = [job_post_watershed_interchange]
-                    if job2_totalwatsed2 is not None:
-                        return_period_deps.append(job2_totalwatsed2)
+                if not climate.is_single_storm and job2_totalwatsed2 is not None:
+                    return_period_deps = [job_post_watershed_interchange, job2_totalwatsed2]
                     _job = q.enqueue_call(
                         _analyze_return_periods_rq,
                         (runid,),
@@ -531,6 +582,19 @@ def run_wepp_rq(runid: str) -> Job:
                     job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
                     jobs4_post.append(_job)
                     job.save()
+
+            if run_watershed and not climate.is_single_storm and wepp.dss_export_on_run_completion:
+                dss_dependencies: list[Job] = [job2_hillslope_interchange]
+                if job_post_run_cleanup_out is not None:
+                    dss_dependencies.append(job_post_run_cleanup_out)
+                job2_post_dss_export = q.enqueue_call(
+                    post_dss_export_rq,
+                    (runid,),
+                    timeout=TIMEOUT,
+                    depends_on=dss_dependencies,
+                )
+                job.meta['jobs:2,func:_post_dss_export_rq'] = job2_post_dss_export.id
+                job.save()
 
             jobs5_post: list[Job] = []
             if run_watershed and wepp.legacy_arc_export_on_run_completion:
@@ -629,6 +693,7 @@ def run_wepp_watershed_rq(runid: str) -> Job:
 
         watershed = Watershed.getInstance(wd)
         climate = Climate.getInstance(wd)
+        _assert_supported_climate(climate)
         runs_dir = os.path.abspath(wepp.runs_dir)
         wepp_bin = wepp.wepp_bin
 
@@ -682,9 +747,14 @@ def run_wepp_watershed_rq(runid: str) -> Job:
             # jobs:4
             jobs4_post: list[Job] = []
 
-            _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-            job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = _job.id
-            jobs4_post.append(_job)
+            job_post_run_cleanup_out = q.enqueue_call(
+                _post_run_cleanup_out_rq,
+                (runid,),
+                timeout=TIMEOUT,
+                depends_on=post_dependencies,
+            )
+            job.meta['jobs:4,func:_post_run_cleanup_out_rq'] = job_post_run_cleanup_out.id
+            jobs4_post.append(job_post_run_cleanup_out)
             job.save()
 
             if wepp.prep_details_on_run_completion:
@@ -694,31 +764,32 @@ def run_wepp_watershed_rq(runid: str) -> Job:
                 job.save()
 
             if not wepp.multi_ofe:
-                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=post_dependencies)
-                job.meta['jobs:4,func:_post_make_loss_grid_rq'] = _job.id
-                jobs4_post.append(_job)
-                job.save()
+                has_hillslope_outputs = bool(glob(_join(wepp.output_dir, 'H*')))
+                if has_hillslope_outputs:
+                    _job = q.enqueue_call(
+                        _post_make_loss_grid_rq,
+                        (runid,),
+                        timeout=TIMEOUT,
+                        depends_on=post_dependencies,
+                    )
+                    job.meta['jobs:4,func:_post_make_loss_grid_rq'] = _job.id
+                    jobs4_post.append(_job)
+                    job.save()
+                else:
+                    StatusMessenger.publish(
+                        status_channel,
+                        'Skipping loss grid: hillslope outputs (H*) not found in wepp/output',
+                    )
 
             job_post_watershed_interchange = q.enqueue_call(
                 _post_watershed_interchange_rq,
                 (runid,),
                 timeout=TIMEOUT,
-                depends_on=post_dependencies,
+                depends_on=job_post_run_cleanup_out,
             )
             job.meta['jobs:4,func:_post_watershed_interchange_rq'] = job_post_watershed_interchange.id
             jobs4_post.append(job_post_watershed_interchange)
             job.save()
-
-            if not climate.is_single_storm:
-                _job = q.enqueue_call(
-                    _analyze_return_periods_rq,
-                    (runid,),
-                    timeout=TIMEOUT,
-                    depends_on=job_post_watershed_interchange,
-                )
-                job.meta['jobs:4,func:_analyze_return_periods_rq'] = _job.id
-                jobs4_post.append(_job)
-                job.save()
 
             jobs5_post: list[Job] = []
             if wepp.legacy_arc_export_on_run_completion:
@@ -1081,6 +1152,19 @@ def _analyze_return_periods_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
+        output_dir = Path(wepp.output_dir)
+        interchange_dir = output_dir / "interchange"
+        ebe_path = interchange_dir / "ebe_pw0.parquet"
+        alt_ebe = output_dir / "ebe_pw0.parquet"
+        if not ebe_path.exists() and alt_ebe.exists():
+            ebe_path = alt_ebe
+        tot_path = interchange_dir / "totalwatsed3.parquet"
+        wait_for_paths(
+            [ebe_path, tot_path],
+            timeout_s=60.0,
+            require_stable_size=True,
+            logger=wepp.logger,
+        )
         wepp.export_return_periods_tsv_summary(meoization=True)
         wepp.export_return_periods_tsv_summary(meoization=True, extraneous=True)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
@@ -1139,6 +1223,13 @@ def _build_totalwatsed3_rq(runid: str) -> None:
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
+        interchange_dir = Path(wepp.output_dir) / "interchange"
+        wait_for_paths(
+            [interchange_dir / "H.pass.parquet", interchange_dir / "H.wat.parquet"],
+            timeout_s=60.0,
+            require_stable_size=True,
+            logger=wepp.logger,
+        )
         wepp._build_totalwatsed3()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
@@ -1162,9 +1253,8 @@ def _run_hillslope_watbal_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        from wepppy.wepp.interchange._utils import _wait_for_path
         wat_file = _join(wd, 'wepp/output/interchange/H.wat.parquet')
-        _wait_for_path(wat_file)
+        wait_for_path(wat_file, timeout_s=60.0, require_stable_size=True)
         wepp = Wepp.getInstance(wd)
         wepp._run_hillslope_watbal()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
@@ -1217,8 +1307,55 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         start_year = climate.calendar_start_year
         run_soil_interchange = not climate.is_single_storm
         run_chnwb_interchange = not climate.is_single_storm
+        wepp = Wepp.getInstance(wd)
+        output_dir = Path(wepp.output_dir)
+        timeout_s = 60.0
+        poll_s = 0.5
+
+        def _wait_for_output(filename: str, *, allow_gzip: bool = False) -> Path:
+            path = output_dir / filename
+            gz_path = path.with_suffix(path.suffix + ".gz") if allow_gzip else None
+            deadline = time.monotonic() + timeout_s
+            while True:
+                if path.exists():
+                    wait_for_path(
+                        path,
+                        timeout_s=timeout_s,
+                        poll_s=poll_s,
+                        require_stable_size=True,
+                        logger=wepp.logger,
+                    )
+                    return path
+                if allow_gzip and gz_path is not None and gz_path.exists():
+                    wait_for_path(
+                        gz_path,
+                        timeout_s=timeout_s,
+                        poll_s=poll_s,
+                        require_stable_size=True,
+                        logger=wepp.logger,
+                    )
+                    return gz_path
+                if time.monotonic() >= deadline:
+                    if allow_gzip and gz_path is not None:
+                        raise FileNotFoundError(
+                            f"Expected file {path} (or {gz_path}) to be available within {timeout_s:.2f}s"
+                        )
+                    raise FileNotFoundError(
+                        f"Expected file {path} to be available within {timeout_s:.2f}s"
+                    )
+                time.sleep(poll_s)
+
+        _wait_for_output("pass_pw0.txt", allow_gzip=True)
+        _wait_for_output("ebe_pw0.txt")
+        _wait_for_output("loss_pw0.txt")
+        _wait_for_output("chan.out")
+        _wait_for_output("chanwb.out")
+        if run_chnwb_interchange:
+            _wait_for_output("chnwb.txt")
+        if run_soil_interchange:
+            _wait_for_output("soil_pw0.txt", allow_gzip=True)
         run_wepp_watershed_interchange(
-            _join(wd, 'wepp/output'),
+            output_dir,
             start_year=start_year,
             run_soil_interchange=run_soil_interchange,
             run_chnwb_interchange=run_chnwb_interchange,
@@ -1499,6 +1636,7 @@ def post_dss_export_rq(runid: str) -> None:
         channel_filter: Optional[list[int]] = export_channel_ids if export_channel_ids else None
         start_date = parse_dss_date(wepp.dss_start_date)
         end_date = parse_dss_date(wepp.dss_end_date)
+        dss_export_dir = Path(wd) / "export" / "dss"
 
         StatusMessenger.publish(status_channel, 'cleaning up previous DSS export directory...')
         _cleanup_dss_export_dir(wd)
@@ -1511,7 +1649,14 @@ def post_dss_export_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, 'writing DSS channel geojson + boundary GMLs...')
         _write_dss_channel_geojson(wd, channel_filter)
 
-        time.sleep(1)
+        dss_channels_path = dss_export_dir / "dss_channels.geojson"
+        if dss_channels_path.exists():
+            wait_for_path(
+                dss_channels_path,
+                timeout_s=60.0,
+                require_stable_size=True,
+                logger=wepp.logger,
+            )
         StatusMessenger.publish(status_channel, 'generating partitioned DSS export...')
         totalwatsed_partitioned_dss_export(
             wd,
@@ -1520,7 +1665,14 @@ def post_dss_export_rq(runid: str) -> None:
             start_date=start_date,
             end_date=end_date,
         )
-        time.sleep(1)
+        totalwatsed_exports = sorted(dss_export_dir.glob("totalwatsed3_chan_*.dss"))
+        if totalwatsed_exports:
+            wait_for_paths(
+                totalwatsed_exports,
+                timeout_s=60.0,
+                require_stable_size=True,
+                logger=wepp.logger,
+            )
         StatusMessenger.publish(status_channel, 'generating channel outlet DSS export...')
         chanout_dss_export(
             wd,
@@ -1528,11 +1680,32 @@ def post_dss_export_rq(runid: str) -> None:
             start_date=start_date,
             end_date=end_date,
         )
-        time.sleep(1)
+        chanout_exports = sorted(dss_export_dir.glob("peak_chan_*.dss"))
+        if chanout_exports:
+            wait_for_paths(
+                chanout_exports,
+                timeout_s=60.0,
+                require_stable_size=True,
+                logger=wepp.logger,
+            )
         _copy_dss_readme(wd, status_channel=status_channel)
-        time.sleep(0.5)
+        readme_path = dss_export_dir / "README.dss_export.md"
+        if readme_path.exists():
+            wait_for_path(
+                readme_path,
+                timeout_s=60.0,
+                require_stable_size=True,
+                logger=wepp.logger,
+            )
         StatusMessenger.publish(status_channel, 'archiving DSS export zip...')
         archive_dss_export_zip(wd, status_channel=status_channel)
+        dss_export_zip = Path(wd) / "export" / "dss.zip"
+        wait_for_path(
+            dss_export_zip,
+            timeout_s=60.0,
+            require_stable_size=True,
+            logger=wepp.logger,
+        )
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
 

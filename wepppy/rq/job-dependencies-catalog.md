@@ -29,6 +29,35 @@
 - Prereq files list explicit file/dir inputs referenced by the job or immediate controller calls. Optional inputs are marked.
 - Paths are shown relative to `wd` unless noted; placeholders like `<topaz>` and `<wepp_id>` indicate per-hillslope files.
 
+## Single-Storm Deprecation
+Single-storm (single-event) runs are deprecated and are not supported for production or analysis. The catalog assumes continuous/multi-year WEPP runs and lists the full set of outputs and dependencies for that supported path. Legacy single-storm conditionals may still exist in code, but they are considered obsolete and are intentionally not documented as a supported mode here.
+
+If you need reliable event-scale data, do not use single-storm WEPP runs. WEPP is a process-based model and does not fully accommodate deterministic, single-event reproduction. Use observed data or an event-based modeling workflow instead.
+
+## Wait Strategy And Inventory
+- Prefer explicit `depends_on` edges. File waits are a last-resort guard for filesystem propagation, not a substitute for missing dependencies.
+- Waits must be time-bounded and run only inside background RQ workers or offline tooling; never add waits to UI routes or sync handlers where a run might not exist yet.
+- Use `wepppy.io_wait.wait_for_path` / `wait_for_paths` when possible for stable-size checks. The interchange helper `wepppy.wepp.interchange._utils._wait_for_path` now delegates to `io_wait` with stable-size checks.
+- When outputs might not exist because a run never executed, fail fast rather than waiting.
+
+### Wait Inventory (File Guards)
+| Area | Function | Guard | Target(s) | Timeout / poll | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `wepppy/rq/wepp_rq.py` | `_post_watershed_interchange_rq` | `wait_for_path` via `_wait_for_output` | `wepp/output/pass_pw0.txt` (or `.gz`), `ebe_pw0.txt`, `loss_pw0.txt`, `chan.out`, `chanwb.out`, `chnwb.txt`, `soil_pw0.txt` (or `.gz`) | `timeout_s=60`, `poll_s=0.5` | RQ worker only; stable-size check before watershed interchange. Legacy single-storm conditionals skip some waits; single-storm is deprecated. |
+| `wepppy/rq/wepp_rq.py` | `_run_hillslope_watbal_rq` | `wait_for_path` | `wepp/output/interchange/H.wat.parquet` | `timeout_s=60` (poll via `PERIDOT_INPUT_POLL_S`) | RQ worker only; stable-size check. |
+| `wepppy/rq/wepp_rq.py` | `_build_totalwatsed3_rq` | `wait_for_paths` | `wepp/output/interchange/H.pass.parquet`, `wepp/output/interchange/H.wat.parquet` | `timeout_s=60` (poll via `PERIDOT_INPUT_POLL_S`) | RQ worker only; stable-size check before totalwatsed3 aggregation. |
+| `wepppy/rq/wepp_rq.py` | `_analyze_return_periods_rq` | `wait_for_paths` | `wepp/output/interchange/ebe_pw0.parquet` (fallback `wepp/output/ebe_pw0.parquet`), `wepp/output/interchange/totalwatsed3.parquet` | `timeout_s=60` | RQ worker only; stable-size check before return-period export. |
+| `wepppy/rq/wepp_rq.py` | `post_dss_export_rq` | `wait_for_path` / `wait_for_paths` | `export/dss/dss_channels.geojson` (if written), `export/dss/totalwatsed3_chan_*.dss` (if written), `export/dss/peak_chan_*.dss` (if written), `export/dss/README.dss_export.md` (if written), `export/dss.zip` | `timeout_s=60` | RQ worker only; stable-size checks between DSS export stages. |
+| `wepppy/rq/project_rq.py` | `build_subcatchments_rq` | `wait_for_path` | `watershed.subwta` (`SUBWTA.ARC` or `subwta.tif`) | defaults (`PERIDOT_INPUT_WAIT_S` / `PERIDOT_INPUT_POLL_S`) | Guard before publishing completion trigger. |
+| `wepppy/rq/project_rq.py` | `abstract_watershed_rq` | `wait_for_path` | `watershed.subwta` (`SUBWTA.ARC` or `subwta.tif`) | defaults (`PERIDOT_INPUT_WAIT_S` / `PERIDOT_INPUT_POLL_S`) | Guard before abstraction. |
+| `wepppy/rq/project_rq.py` | `fork_rq` (`undisturbify=True`) | `wait_for_paths` | `ron.nodb`, `wepp.nodb`, `landuse.nodb`, `soils.nodb`, `disturbed.nodb` | `timeout_s=60` (poll via `PERIDOT_INPUT_POLL_S`) | Ensures forked NoDb files are readable before undisturbify. |
+| `wepppy/topo/peridot/peridot_runner.py` | `run_peridot_abstract_watershed` | `_wait_for_file` | `dem/topaz/SUBWTA.ARC` | `PERIDOT_INPUT_WAIT_S` / `PERIDOT_INPUT_POLL_S` | Defensive guard before Peridot. |
+| `wepppy/topo/peridot/peridot_runner.py` | `run_peridot_wbt_abstract_watershed` | `_wait_for_file` | `dem/wbt/subwta.tif` | `PERIDOT_INPUT_WAIT_S` / `PERIDOT_INPUT_POLL_S` | Defensive guard before Peridot (WBT). |
+| `wepppy/wepp/interchange/watershed_ebe_interchange.py` | `run_wepp_watershed_ebe_interchange` | `_utils._wait_for_path` | `wepp/output/ebe_pw0.txt` | `timeout=60`, `poll=0.5` | Stable-size wait inside interchange. |
+| `wepppy/wepp/interchange/watershed_chanwb_interchange.py` | `run_wepp_watershed_chanwb_interchange` | `_utils._wait_for_path` | `wepp/output/chanwb.out` | `timeout=60`, `poll=0.5` | Stable-size wait inside interchange. |
+| `wepppy/wepp/interchange/watershed_chan_peak_interchange.py` | `run_wepp_watershed_chan_peak_interchange` | `_utils._wait_for_path` | `wepp/output/chan.out` | `timeout=60`, `poll=0.5` | Stable-size wait inside interchange. |
+| `wepppy/wepp/interchange/watershed_chnwb_interchange.py` | `run_wepp_watershed_chnwb_interchange` | `_utils._wait_for_path` | `wepp/output/chnwb.txt` | `timeout=60`, `poll=0.5` | Stable-size wait inside interchange. |
+| `wepppy/wepp/reports/return_periods.py` | `refresh_return_period_events` | `wait_for_path` | `interchange/ebe_pw0.parquet` (or `wepp/output/ebe_pw0.parquet`), `interchange/totalwatsed3.parquet` | defaults | Report builder waits for parquet assets unless `wait_for_inputs=False` (UI routes). |
 ## Catalog
 
 **`wepppy/rq/wepp_rq.py`**
@@ -41,11 +70,11 @@ jobs:0 prep inputs
   -> _prep_remaining_rq
   -> _run_hillslopes_rq
   -> (_prep_watershed_rq if run_watershed)
-  -> _build_hillslope_interchange_rq
-  -> (_build_totalwatsed3_rq if not single storm)
-  -> (_post_dss_export_rq if enabled)
+  -> _build_hillslope_interchange_rq (after SWAT build when delete_after_interchange)
+  -> _build_totalwatsed3_rq
+  -> (post_dss_export_rq if enabled and run_watershed; after `_post_run_cleanup_out_rq`)
   -> (_run_flowpaths_rq if enabled)
-  -> (SWAT build/run if enabled)
+  -> (SWAT build/run if enabled; before interchange when delete_after_interchange)
   -> watershed runs (if run_watershed)
   -> post-run jobs (cleanup, prep details, watbal, loss grid, watershed interchange, return periods)
   -> export jobs (legacy arc, gpkg)
@@ -64,28 +93,32 @@ Child jobs, dependencies, and file prerequisites:
 | jobs:0 | `_prep_remaining_rq` | `jobs0_hillslopes_prep` list | `runs_dir/p*.slp`; `runs_dir/p*.sol`; `runs_dir/p*.man`; `runs_dir/p*.cli` |
 | jobs:1 | `_run_hillslopes_rq` | `_prep_remaining_rq` | `runs_dir/*.run`; `runs_dir/p*.slp`; `runs_dir/p*.sol`; `runs_dir/p*.man`; `runs_dir/p*.cli` |
 | jobs:2 | `_prep_watershed_rq` | `_run_hillslopes_rq` | `wat_dir/structure.json` or `wat_dir/network.txt`; `wat_dir/channels.parquet`; `wat_dir/hillslopes.parquet`; `wat_dir/slope_files/channels.slp` or `wat_dir/channels.slp`; `soils/soils.parquet`; `cli_dir/<cli_fn>` |
-| jobs:2 | `_build_hillslope_interchange_rq` | `_run_hillslopes_rq` | `output_dir/H*.pass.dat`; `output_dir/H*.ebe.dat`; `output_dir/H*.element.dat`; `output_dir/H*.loss.dat`; `output_dir/H*.soil.dat`; `output_dir/H*.wat.dat` |
+| jobs:2 | `_build_hillslope_interchange_rq` | `_run_hillslopes_rq` (+ `_build_swat_inputs_rq` if SWAT enabled + delete_after_interchange) | `output_dir/H*.pass.dat`; `output_dir/H*.ebe.dat`; `output_dir/H*.element.dat`; `output_dir/H*.loss.dat`; `output_dir/H*.soil.dat`; `output_dir/H*.wat.dat` |
 | jobs:2 | `_build_totalwatsed3_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash/H<wepp_id>_ash.parquet` or `ash/H<wepp_id>.parquet`; optional `ash.nodb`; `wat_dir/hillslopes.parquet` (area lookup when ash is present) |
-| jobs:2 | `post_dss_export_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash/*.parquet`; `output_dir/interchange/chan.out.parquet`; `watershed.channels_shp` (GeoJSON); `wat_dir/network.txt` (downstream mapping); `export/dss` dir (created) |
+| jobs:2 | `post_dss_export_rq` | `_build_hillslope_interchange_rq` (+ `_post_run_cleanup_out_rq` if run_watershed) | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash/*.parquet`; `output_dir/chan.out`; `watershed.channels_shp` (GeoJSON); `wat_dir/network.txt` (downstream mapping); `export/dss` dir (created) |
 | jobs:2 | `_run_flowpaths_rq` | `_prep_remaining_rq` | `wat_dir/slope_files/flowpaths/*.slps`; `fp_runs_dir` (created/cleaned by controller) |
-| jobs:2 | `_build_swat_inputs_rq` | `_build_hillslope_interchange_rq` (+ `_prep_watershed_rq` if present) | `wepp/output/*` (hillslope outputs); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `swat_template_dir/*` (config `swat_template_dir`) |
+| jobs:2 | `_build_swat_inputs_rq` | `_build_hillslope_interchange_rq` (+ `_prep_watershed_rq` if present); if delete_after_interchange then `_run_hillslopes_rq` (+ `_prep_watershed_rq` if present) | `wepp/output/*` (hillslope outputs); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `swat_template_dir/*` (config `swat_template_dir`) |
 | jobs:3 | `_run_swat_rq` | `_build_swat_inputs_rq` | `swat_txtinout_dir/*` |
 | jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | `_prep_watershed_rq` | `runs_dir/pw0.str`; `runs_dir/pw0.slp`; `runs_dir/pw0.chn`; `runs_dir/pw0.sol`; `runs_dir/pw0.cli`; `runs_dir/pw0.man`; `runs_dir/chan.inp`; for SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` or `_prep_watershed_rq` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
 | jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
-| jobs:4 | `_run_hillslope_watbal_rq` | `post_dependencies` | `output_dir/interchange/H.wat.parquet` |
+| jobs:4 | `_run_hillslope_watbal_rq` | `post_dependencies` + `_build_hillslope_interchange_rq` | `output_dir/interchange/H.wat.parquet` |
 | jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta` (`wat_dir/SUBWTA.ARC` or `wbt_wd/subwta.tif`); `watershed.discha` (`wat_dir/DISCHA.ARC` or `wbt_wd/discha.tif`); `output_dir/H*` |
-| jobs:4 | `_post_watershed_interchange_rq` | `post_dependencies` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
-| jobs:4 | `_analyze_return_periods_rq` | `_post_watershed_interchange_rq` (+ `_build_totalwatsed3_rq` if present) | `output_dir/loss_pw0.txt`; optional cached `output_dir/return_periods*.json` |
+| jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
+| jobs:4 | `_analyze_return_periods_rq` | `_post_watershed_interchange_rq` + `_build_totalwatsed3_rq` | `output_dir/interchange/ebe_pw0.parquet` (fallback `output_dir/ebe_pw0.parquet`); `output_dir/interchange/totalwatsed3.parquet`; optional cached `output_dir/return_periods*.json` |
 | jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
-| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp` (SUBCATCHMENTS.WGS JSON); `watershed.channels_shp` (CHANNELS.WGS JSON); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/loss_pw0.hill.parquet`; `output_dir/loss_pw0.chn.parquet` |
+| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp` (SUBCATCHMENTS.WGS JSON); `watershed.channels_shp` (CHANNELS.WGS JSON); `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/interchange/loss_pw0.hill.parquet`; `output_dir/interchange/loss_pw0.chn.parquet` |
 | jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
 
 Audit notes:
-1. `_run_hillslope_watbal_rq` waits for `output_dir/interchange/H.wat.parquet` internally but is not explicitly dependent on `_build_hillslope_interchange_rq`.
-2. `_run_flowpaths_rq` only depends on `_prep_remaining_rq`. It requires `wat_dir/slope_files/flowpaths/*.slps`; verify those are always ready before `_prep_remaining_rq` completes.
-3. `post_dss_export_rq` depends on `_build_hillslope_interchange_rq` only. If DSS export needs `totalwatsed3` outputs from a prior step, add a dependency on `_build_totalwatsed3_rq`.
-4. `_build_totalwatsed3_rq` depends on hillslope interchange. If watershed outputs are required, depend on `jobs3_watersheds` or `_post_watershed_interchange_rq`.
+1. `_run_hillslope_watbal_rq` depends on `_build_hillslope_interchange_rq` and still waits for `output_dir/interchange/H.wat.parquet` internally.
+2. `_run_flowpaths_rq` only depends on `_prep_remaining_rq`. It requires `wat_dir/slope_files/flowpaths/*.slps` but the flowpath loss grid is deprecated and not physically reliable (no converging-flow accumulation), so treat this output as legacy.
+3. `post_dss_export_rq` only enqueues when `run_watershed` is true (guarded in `run_wepp_rq`).
+4. `post_dss_export_rq` calls `totalwatsed_partitioned_dss_export`, which runs `run_totalwatsed3` per channel; it does not require `_build_totalwatsed3_rq` unless the export is refactored to reuse a prebuilt `totalwatsed3.parquet`.
+5. `_build_totalwatsed3_rq` depends on hillslope interchange. If watershed outputs are required, depend on `jobs3_watersheds` or `_post_watershed_interchange_rq`.
+6. When `delete_after_interchange` is enabled, SWAT inputs are built before interchange and interchange waits on SWAT to avoid deleting raw `wepp/output` files.
+7. `_run_hillslope_watbal_rq` and `post_dss_export_rq` target continuous runs; legacy single-storm conditionals may skip them, but single-storm is deprecated.
+8. `_analyze_return_periods_rq` depends on `totalwatsed3`; legacy single-storm runs skip this pipeline and are deprecated.
 
 **`run_wepp_watershed_rq(runid)`**
 
@@ -95,14 +128,14 @@ Audit notes:
 | jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | `_prep_watershed_rq` | `runs_dir/pw0.*` as above; SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
 | jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` or `_prep_watershed_rq` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
 | jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
-| jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` |
-| jobs:4 | `_post_watershed_interchange_rq` | `post_dependencies` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
-| jobs:4 | `_analyze_return_periods_rq` | `_post_watershed_interchange_rq` | `output_dir/loss_pw0.txt`; optional cached `output_dir/return_periods*.json` |
+| jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` (job skipped when hillslope outputs are missing) |
+| jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
 | jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
 | jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
 
 Audit notes:
 1. This entrypoint bypasses hillslope prep/run; ensure downstream jobs only require watershed outputs.
+2. Return-period exports are not enqueued here because `totalwatsed3` is not scheduled.
 
 **`wepppy/rq/swat_rq.py`**
 
@@ -123,10 +156,10 @@ Audit notes:
 | Stage | Child job | `depends_on` | File prerequisites |
 | --- | --- | --- | --- |
 | jobs:0 | `run_batch_watershed_rq` (per watershed feature) | none | Batch workspace `batch_root/<batch_name>`; `batch_runner.nodb`; uploaded watershed GeoJSON (stored in `batch_runner.nodb` state); base run directory for cloning |
-| jobs:1 | `_final_batch_complete_rq` | all `jobs:0` | `batch_runner.nodb` (for status updates) |
+| jobs:1 | `_final_batch_complete_rq` | all `jobs:0` (+ Omni final jobs when `run_omni_scenarios_rq` enqueues work) | `batch_runner.nodb` (for status updates) |
 
 Audit notes:
-1. `run_batch_watershed_rq` calls `run_omni_scenarios_rq(runid)` inline. Those Omni jobs are not linked into the batch dependency tree, so batch completion does not wait for Omni completion. Confirm if this is intended.
+1. `run_batch_watershed_rq` calls `run_omni_scenarios_rq(runid)` inline. When Omni enqueues jobs, the batch completion job is updated to depend on the Omni final job so batch completion waits.
 
 **`wepppy/rq/culvert_rq.py`**
 
@@ -191,7 +224,7 @@ Audit notes:
 | jobs:1 | `abstract_watershed_rq` | `build_subcatchments_rq` | `watershed.subwta` (`wat_dir/SUBWTA.ARC` or `wbt_wd/subwta.tif`) and associated topo products under `wat_dir/*` |
 
 Audit notes:
-1. `abstract_watershed_rq` includes a short `time.sleep(0.05)` to avoid a known file write race (`SUBWTA.ARC`). If the race reappears, add a file existence wait instead of a fixed sleep.
+1. `build_subcatchments_rq` now uses `wait_for_path` on `watershed.subwta` before publishing completion.
 
 **`fork_rq(..., undisturbify=True)`**
 
