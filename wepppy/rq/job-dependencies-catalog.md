@@ -248,6 +248,127 @@ Audit notes:
 Audit notes:
 1. `migrations_rq` depends on the sync job, ensuring that run files exist before migrations execute.
 
+## NFS Consistency Headaches
+
+### Background (Feb 6, 2026)
+
+Production WEPP runs experienced rare, intermittent failures (on the order of 1 in 10⁶ to 10⁹ events) where RQ worker jobs could not read files that upstream jobs had already written. Symptoms included `FileNotFoundError` on `.parquet` interchange files, `wait_for_path` timeouts on watershed outputs (`pass_pw0.txt`, `ebe_pw0.txt`, etc.), and stale reads returning truncated or zero-length files. These failures were non-deterministic and consistent with NFS client cache staleness, though the root cause has not been definitively confirmed.
+
+Notably, the same `soft` mount configuration works reliably on the dev and test-production NFS servers, which use ZFS as the backing filesystem. The failures have only been observed on the production NAS, suggesting the issue may involve an interaction between the `soft` mount options and the production storage backend rather than the mount options alone.
+
+### Suspected Cause: NFS Mount Options
+
+The `/geodata` mount was configured with `soft` mode and large read/write buffers with aggressive attribute caching. The following options are suspected contributors to the degraded behavior:
+
+```
+# BEFORE (degraded)
+nas.rocket.net:/wepp  /geodata  nfs4  rw,noatime,proto=tcp,vers=4.2,soft,rsize=32768,wsize=32768,timeo=600,_netdev  0  0
+```
+
+| Option | Potential problem |
+| --- | --- |
+| `soft` | NFS operations return errors after `timeo` retries instead of blocking. Under load, transient server delays could cause I/O errors that surface as missing or corrupt files in downstream RQ jobs. |
+| `rsize=32768,wsize=32768` | Fixed 32 KB transfer sizes bypass the kernel's auto-negotiation, potentially limiting throughput on large sequential writes (interchange parquet files) and adding round-trips for small metadata operations. |
+| `timeo=600` | 60-second timeout (in deciseconds) combined with `soft` means jobs may receive `EIO` after a single retry window rather than waiting for the server to recover. |
+| *(no `actimeo`)* | Default attribute cache lifetime (~3–60 s) can allow NFS clients to serve stale `stat()` results. A file written by one worker could appear absent or zero-length to another worker for up to 60 seconds. |
+
+### Remediation: Updated Mount
+
+```
+# AFTER (remediated)
+nas.rocket.net:/wepp  /geodata  nfs4  rw,noatime,proto=tcp,vers=4.2,hard,intr,actimeo=0,_netdev  0  0
+```
+
+| Option | Effect |
+| --- | --- |
+| `hard` | NFS operations block indefinitely until the server responds, preventing spurious `EIO` errors during transient load spikes. Workers wait rather than fail. |
+| `intr` | Allows blocked hard-mount operations to be interrupted by signals, so jobs can still be cancelled or timed out by RQ without requiring a full process kill. |
+| `actimeo=0` | Disables attribute caching entirely. Every `stat()`, `open()`, and directory listing goes to the server, ensuring that when an upstream job writes a file, downstream jobs should see it immediately. This targets the suspected file-guard race conditions. |
+| *(removed `rsize`/`wsize`)* | Lets the NFS client and server auto-negotiate optimal transfer sizes (typically 1 MB on NFSv4.2), improving throughput for large parquet writes and reducing round-trips. |
+| *(removed `timeo`)* | With `hard` mount, timeout is irrelevant; operations retry until the server responds. |
+
+### Impact on RQ Job Dependencies and File Guards
+
+The catalog documents two layers of ordering between RQ jobs: explicit `depends_on` edges (job-level) and `wait_for_path` / `wait_for_paths` file guards (filesystem-level). If the NFS attribute cache hypothesis is correct, it would affect the second layer directly and the first layer indirectly.
+
+**Explicit `depends_on` edges** (job-level ordering) are not themselves affected by NFS caching. RQ tracks job completion in Redis, so a `depends_on` edge fires when the upstream job's Python function returns, not when the filesystem flushes. However, a job returning successfully does not guarantee that its output files are visible to other NFS clients—this is the gap the file guards fill. The edge graph in this catalog was verified through several auditing and review passes during this investigation.
+
+**File guards** (`wait_for_path` / `wait_for_paths` with stable-size checks) are the suspected primary failure point. Under a stale attribute cache scenario:
+
+1. `stat()` calls inside `wait_for_path` could return `ENOENT` even after the file existed on the server.
+2. When `stat()` did succeed, it could report a stale size (often 0), causing the stable-size check to loop until timeout.
+3. Under a `soft` mount, the timeout could produce an `EIO` instead of a retry, crashing the worker.
+
+The following call chains were traced end-to-end from rq-engine API entry through RQ job execution to file-guard resolution:
+
+#### Trace: `POST /rq-engine/run-sync` → Full WEPP Run
+
+```
+rq-engine API: POST /rq-engine/run-sync
+  └─ run_sync_rq                          [depends_on: none]
+       └─ migrations_rq                   [depends_on: run_sync_rq]
+            └─ run_wepp_rq(runid)         [depends_on: none]
+                 ├─ jobs:0  _prep_*_rq                        [depends_on: none]
+                 ├─ jobs:0  _prep_remaining_rq                [depends_on: jobs0 prep list]
+                 ├─ jobs:1  _run_hillslopes_rq                [depends_on: _prep_remaining_rq]
+                 ├─ jobs:2  _prep_watershed_rq                [depends_on: _run_hillslopes_rq]
+                 ├─ jobs:2  _build_hillslope_interchange_rq   [depends_on: _run_hillslopes_rq]
+                 │    └─ READS: output_dir/H*.pass.dat, H*.ebe.dat, H*.wat.dat, ...
+                 │    └─ WRITES: output_dir/interchange/H.pass.parquet, H.wat.parquet, ...
+                 ├─ jobs:2  _build_totalwatsed3_rq            [depends_on: _build_hillslope_interchange_rq]
+                 │    └─ FILE GUARD: wait_for_paths → H.pass.parquet, H.wat.parquet  ← NFS-affected
+                 │    └─ WRITES: output_dir/interchange/totalwatsed3.parquet
+                 ├─ jobs:3  run_watershed_rq                  [depends_on: _prep_watershed_rq]
+                 │    └─ WRITES: output_dir/pass_pw0.txt, ebe_pw0.txt, chan.out, ...
+                 ├─ jobs:4  _post_run_cleanup_out_rq          [depends_on: jobs3_watersheds]
+                 ├─ jobs:4  _post_watershed_interchange_rq    [depends_on: _post_run_cleanup_out_rq]
+                 │    └─ FILE GUARD: wait_for_path → pass_pw0.txt, ebe_pw0.txt,
+                 │       chan.out, chanwb.out, chnwb.txt, soil_pw0.txt  ← NFS-affected
+                 │    └─ WRITES: output_dir/interchange/ebe_pw0.parquet, ...
+                 ├─ jobs:4  _run_hillslope_watbal_rq          [depends_on: post_deps + interchange]
+                 │    └─ FILE GUARD: wait_for_path → H.wat.parquet  ← NFS-affected
+                 ├─ jobs:4  _analyze_return_periods_rq        [depends_on: _post_watershed_interchange + totalwatsed3]
+                 │    └─ FILE GUARD: wait_for_paths → ebe_pw0.parquet,
+                 │       totalwatsed3.parquet  ← NFS-affected
+                 ├─ jobs:5  _post_gpkg_export_rq              [depends_on: jobs4_post]
+                 └─ jobs:6  _log_complete_rq                  [depends_on: jobs4+5]
+```
+
+Every `← NFS-affected` guard above is a candidate site for stale-cache failures under the old mount. With `actimeo=0`, these guards should resolve on the first or second poll cycle (typically < 1 s) instead of timing out.
+
+#### Trace: Subcatchment Build → Abstract Watershed
+
+```
+rq-engine API: POST /api/subcatchments/build
+  └─ build_subcatchments_rq               [depends_on: none]
+       └─ FILE GUARD: wait_for_path → watershed.subwta  ← NFS-affected
+  └─ abstract_watershed_rq               [depends_on: build_subcatchments_rq]
+       └─ FILE GUARD: wait_for_path → watershed.subwta  ← NFS-affected
+```
+
+#### Trace: Fork with Undisturbify
+
+```
+rq-engine API: POST /api/fork
+  └─ fork_rq(undisturbify=True)
+       └─ FILE GUARD: wait_for_paths → ron.nodb, wepp.nodb, landuse.nodb,
+          soils.nodb, disturbed.nodb  ← NFS-affected
+       └─ run_wepp_rq(new_runid)          [full chain as above]
+       └─ _finish_fork_rq                 [depends_on: _log_complete_rq]
+```
+
+### Summary
+
+| Before | After |
+| --- | --- |
+| `soft` mount with fixed buffer sizes; stale attribute cache | `hard,intr` mount with `actimeo=0`; auto-negotiated transfer sizes |
+| File guards timed out or received `EIO` under load | File guards should resolve immediately; operations block until server responds |
+| Non-deterministic run failures correlated with NFS client count | Expected deterministic file visibility across all NFS clients |
+
+The `depends_on` job graph documented in this catalog was reviewed through several auditing passes as part of this investigation—no missing edges were identified. However, the job dependency graph is not readily testable in isolation: edges are constructed dynamically at enqueue time, depend on runtime configuration (e.g. `run_watershed`, `delete_after_interchange`, SWAT/Omni enablement), and span multiple modules. Validation relies primarily on cognitive review of the code paths rather than automated verification. The interplay of RQ job orchestration, NoDb state, Rust-based interchange, and Fortran WEPP subprocesses makes constructing meaningful automated tests for the dependency graph near impossible, and the regression surface for dependency changes is correspondingly difficult to characterize.
+
+The failures are consistent with the NFS attribute cache allowing downstream file guards to poll stale metadata, though other contributing factors have not been ruled out. The mount remediation targets this class of failure without requiring changes to job dependency wiring or wait timeouts. Continued monitoring is needed to confirm effectiveness.
+
 ## Checklist For New Child Jobs
 1. Add `depends_on` for any file or controller state produced by upstream jobs.
 2. Record `job.meta["jobs:<order>,..."]` for every child job so `job_info.py` and `cancel_job.py` can traverse the tree.
