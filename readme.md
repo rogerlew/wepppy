@@ -29,10 +29,29 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 - **Query engine**: DuckDB-backed SQL API over Parquet interchange for instant loss reports and timeseries
 - **Multi-format exports**: HEC-DSS, NetCDF, GeoJSON, Excel for integration with external hydrologic models and GIS
 
+### WEPPcloud Bootstrap (Git-Backed Inputs)
+
+WEPPcloud Bootstrap adds a run-scoped Git workflow for managing WEPP and SWAT+
+input files directly from the server-side run directory. Its primary purpose is
+to let users override WEPP and SWAT+ inputs while continuing to use WEPPcloud
+compute for WEPP execution, interchange generation, and interactive reports and
+dashboards. Input revisions remain auditable, reproducible, and recoverable
+without introducing a new run-state database layer.
+
+- **Versioned input state**: Track changes to `wepp/runs/` and `swat/TxtInOut/`
+  with commit history and deterministic checkouts.
+- **Bounded auth + authorization**: JWT-validated Git HTTP access is scoped to
+  host + run + user and checked against run eligibility.
+- **Server-side safety gates**: `pre-receive` validation enforces path and file
+  constraints before updates land in a run workspace.
+- **Pipeline integration**: Standard WEPP/SWAT pipeline paths can synchronize
+  generated input rebuilds into commit history.
+
+See `docs/weppcloud-bootstrap-spec.md` for implementation and deployment details.
+
 ## Documentation
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design, component diagrams, and data flow
-- **[API_REFERENCE.md](API_REFERENCE.md)** - Quick reference for key APIs and patterns
 - **[AGENTS.md](AGENTS.md)** - AI agent coding guide and conventions
 - **[CONTRIBUTING_AGENTS.md](CONTRIBUTING_AGENTS.md)** - Contributing guide for AI coding assistants
 - **[docs/schemas/rq-response-contract.md](docs/schemas/rq-response-contract.md)** - RQ and rq-engine response contract (canonical keys and error shape)
