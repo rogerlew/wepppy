@@ -20,6 +20,7 @@ from wepppy.rq.project_rq import run_ash_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -143,7 +144,23 @@ def _first_value(value: Any) -> Any:
     return value
 
 
-@router.post("/runs/{runid}/{config}/run-ash")
+@router.post(
+    "/runs/{runid}/{config}/run-ash",
+    summary="Run ash transport",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates ash inputs/uploads, mutates ash settings, and asynchronously enqueues ash transport."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_ash"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Ash transport job accepted and `job_id` returned.",
+        extra={
+            400: "Ash payload or file validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

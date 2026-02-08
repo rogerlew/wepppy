@@ -18,6 +18,7 @@ from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -39,7 +40,23 @@ def _to_float(value: Any) -> float:
     return float(value)
 
 
-@router.post("/runs/{runid}/{config}/build-soils")
+@router.post(
+    "/runs/{runid}/{config}/build-soils",
+    summary="Build soils inputs",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates soils settings and, outside batch mode, asynchronously enqueues soils building."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("build_soils"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Soils inputs accepted; returns batch update message or enqueued `job_id`.",
+        extra={
+            400: "Soils validation or precondition failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def build_soils(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

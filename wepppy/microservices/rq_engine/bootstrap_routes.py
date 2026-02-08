@@ -27,6 +27,7 @@ from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response
 
 logger = logging.getLogger(__name__)
@@ -126,7 +127,25 @@ def _enqueue_no_prep_job(runid: str, *, job_fn, job_key: str, reset_tasks: list[
     return JSONResponse({"job_id": job.id})
 
 
-@router.post("/runs/{runid}/{config}/bootstrap/enable")
+@router.post(
+    "/runs/{runid}/{config}/bootstrap/enable",
+    summary="Enable bootstrap for a run",
+    description=(
+        "Requires JWT Bearer with scope `bootstrap:enable` and run access via `authorize_run_access`. "
+        "Invokes bootstrap enable operation, which may synchronously report state or asynchronously enqueue enable work."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("bootstrap_enable"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Bootstrap state returned.",
+        extra={
+            202: "Bootstrap enable job accepted and `job_id` returned.",
+            400: "Bootstrap business-rule validation failed. Returns the canonical error payload.",
+            409: "Bootstrap lock contention (`bootstrap lock busy`). Returns the canonical error payload.",
+        },
+    ),
+)
 async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_ENABLE_SCOPE)
@@ -149,7 +168,23 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/bootstrap/mint-token")
+@router.post(
+    "/runs/{runid}/{config}/bootstrap/mint-token",
+    summary="Mint bootstrap clone token",
+    description=(
+        "Requires JWT Bearer with scope `bootstrap:token:mint` and run access via `authorize_run_access`. "
+        "Synchronously mints bootstrap clone credentials; no queue enqueue."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("bootstrap_mint_token"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Bootstrap clone token payload returned.",
+        extra={
+            400: "Bootstrap preconditions failed (run/user/bootstrap state). Returns the canonical error payload.",
+        },
+    ),
+)
 async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_TOKEN_MINT_SCOPE)
@@ -173,7 +208,23 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.get("/runs/{runid}/{config}/bootstrap/commits")
+@router.get(
+    "/runs/{runid}/{config}/bootstrap/commits",
+    summary="List bootstrap commits",
+    description=(
+        "Requires JWT Bearer with scope `bootstrap:read` and run access via `authorize_run_access`. "
+        "Read-only bootstrap metadata fetch; no queue enqueue."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("bootstrap_commits"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Bootstrap commit list returned.",
+        extra={
+            400: "Bootstrap preconditions failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_READ_SCOPE)
@@ -193,7 +244,23 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.get("/runs/{runid}/{config}/bootstrap/current-ref")
+@router.get(
+    "/runs/{runid}/{config}/bootstrap/current-ref",
+    summary="Get bootstrap current ref",
+    description=(
+        "Requires JWT Bearer with scope `bootstrap:read` and run access via `authorize_run_access`. "
+        "Read-only bootstrap metadata fetch; no queue enqueue."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("bootstrap_current_ref"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Bootstrap current ref returned.",
+        extra={
+            400: "Bootstrap preconditions failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_READ_SCOPE)
@@ -213,7 +280,24 @@ async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JS
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/bootstrap/checkout")
+@router.post(
+    "/runs/{runid}/{config}/bootstrap/checkout",
+    summary="Checkout a bootstrap commit",
+    description=(
+        "Requires JWT Bearer with scope `bootstrap:checkout` and run access via `authorize_run_access`. "
+        "Synchronously performs bootstrap git checkout under lock; no queue enqueue."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("bootstrap_checkout"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Bootstrap checkout completed.",
+        extra={
+            400: "Checkout request or bootstrap preconditions failed. Returns the canonical error payload.",
+            409: "Bootstrap lock contention (`bootstrap lock busy`). Returns the canonical error payload.",
+        },
+    ),
+)
 async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_CHECKOUT_SCOPE)
@@ -238,7 +322,23 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/run-wepp-npprep")
+@router.post(
+    "/runs/{runid}/{config}/run-wepp-npprep",
+    summary="Run WEPP without prep",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Requires bootstrap-enabled run state, then asynchronously enqueues no-prep WEPP execution."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("run_wepp_npprep"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="No-prep WEPP job accepted and `job_id` returned.",
+        extra={
+            400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -268,7 +368,23 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/run-wepp-watershed-no-prep")
+@router.post(
+    "/runs/{runid}/{config}/run-wepp-watershed-no-prep",
+    summary="Run WEPP watershed without prep",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Requires bootstrap-enabled run state, then asynchronously enqueues no-prep watershed WEPP execution."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("run_wepp_watershed_noprep"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="No-prep watershed WEPP job accepted and `job_id` returned.",
+        extra={
+            400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -293,7 +409,23 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response("Error Handling Request", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/run-swat-noprep")
+@router.post(
+    "/runs/{runid}/{config}/run-swat-noprep",
+    summary="Run SWAT without prep",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Requires bootstrap-enabled run state, then asynchronously enqueues no-prep SWAT execution."
+    ),
+    tags=["rq-engine", "bootstrap"],
+    operation_id=rq_operation_id("run_swat_noprep"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="No-prep SWAT job accepted and `job_id` returned.",
+        extra={
+            400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

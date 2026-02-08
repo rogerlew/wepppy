@@ -15,6 +15,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
 
 from .auth import AuthError, _check_revocation, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -218,7 +219,23 @@ def _collect_overrides(payload: Mapping[str, Any], query_params: Mapping[str, An
     return "&".join(overrides)
 
 
-@router.post("/create/")
+@router.post(
+    "/create/",
+    summary="Create a new run",
+    description=(
+        "Supports `rq_token`, Bearer auth (`rq:enqueue`), or CAPTCHA verification. "
+        "Synchronously creates run directory/config metadata and responds with a redirect to the new run URL."
+    ),
+    tags=["rq-engine", "project"],
+    operation_id=rq_operation_id("create"),
+    responses=agent_route_responses(
+        success_code=303,
+        success_description="Run created and redirect issued to the new run URL.",
+        extra={
+            400: "Create payload validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def create(request: Request) -> Response:
     try:
         payload = await parse_request_payload(request)

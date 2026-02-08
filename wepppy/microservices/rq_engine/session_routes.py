@@ -16,6 +16,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils import auth_tokens
 
 from .auth import AuthError, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
@@ -141,7 +142,21 @@ def _resolve_scopes(claims: Mapping[str, Any]) -> list[str]:
     return list(SESSION_TOKEN_SCOPES)
 
 
-@router.post("/runs/{runid}/{config}/session-token")
+@router.post(
+    "/runs/{runid}/{config}/session-token",
+    summary="Issue a run-scoped session token",
+    description=(
+        "Supports Bearer or Flask session-cookie auth. Bearer path requires scope `rq:status`; "
+        "cookie path validates server session marker and allows public-run fallback. "
+        "Synchronously mints and returns a short-lived run-scoped session token."
+    ),
+    tags=["rq-engine", "session"],
+    operation_id=rq_operation_id("issue_session_token"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Session token issued.",
+    ),
+)
 def issue_session_token(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = _resolve_bearer_claims(request)

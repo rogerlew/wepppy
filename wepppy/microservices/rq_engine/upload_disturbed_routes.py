@@ -14,6 +14,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
 
@@ -31,7 +32,23 @@ def _extract_upload(form, key: str) -> UploadFile | None:
     return None
 
 
-@router.post("/runs/{runid}/{config}/tasks/upload-sbs/")
+@router.post(
+    "/runs/{runid}/{config}/tasks/upload-sbs/",
+    summary="Upload SBS disturbed map",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Synchronously uploads and validates the disturbed SBS map; no queue enqueue."
+    ),
+    tags=["rq-engine", "uploads"],
+    operation_id=rq_operation_id("upload_sbs"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="SBS upload accepted and disturbed map state updated.",
+        extra={
+            400: "Upload or SBS validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_UPLOAD_SCOPES)
@@ -84,7 +101,23 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Failed validating file", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/tasks/upload-cover-transform")
+@router.post(
+    "/runs/{runid}/{config}/tasks/upload-cover-transform",
+    summary="Upload revegetation cover transform",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Synchronously uploads and validates cover-transform CSV content; no queue enqueue."
+    ),
+    tags=["rq-engine", "uploads"],
+    operation_id=rq_operation_id("upload_cover_transform"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Cover-transform upload accepted.",
+        extra={
+            400: "Upload or cover-transform validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def upload_cover_transform(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_UPLOAD_SCOPES)

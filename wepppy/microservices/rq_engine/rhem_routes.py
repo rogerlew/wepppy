@@ -14,6 +14,7 @@ from wepppy.rq.project_rq import run_rhem_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -25,7 +26,20 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
-@router.post("/runs/{runid}/{config}/run-rhem")
+@router.post(
+    "/runs/{runid}/{config}/run-rhem",
+    summary="Run RHEM model",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates RHEM run flags from payload and asynchronously enqueues RHEM processing."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_rhem"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="RHEM job accepted and `job_id` returned.",
+    ),
+)
 async def run_rhem(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

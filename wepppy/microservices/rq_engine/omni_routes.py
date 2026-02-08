@@ -27,6 +27,7 @@ from wepppy.rq.omni_rq import (
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -753,7 +754,23 @@ async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
     )
 
 
-@router.post("/runs/{runid}/{config}/run-omni")
+@router.post(
+    "/runs/{runid}/{config}/run-omni",
+    summary="Run OMNI scenarios",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates OMNI scenario payload/upload inputs, mutates OMNI state, and asynchronously enqueues OMNI runs."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_omni"),
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="OMNI run accepted and `job_id` returned.",
+        extra={
+            400: "OMNI scenario input validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -767,7 +784,23 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
     return await _run_omni(runid, config, request)
 
 
-@router.post("/runs/{runid}/{config}/run-omni-contrasts")
+@router.post(
+    "/runs/{runid}/{config}/run-omni-contrasts",
+    summary="Run OMNI contrasts",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates OMNI contrast inputs, mutates contrast configuration, and asynchronously enqueues contrast processing."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_omni_contrasts"),
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="OMNI contrast run accepted and `job_id` returned.",
+        extra={
+            400: "OMNI contrast validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -781,7 +814,23 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
     return await _run_omni_contrasts(runid, config, request)
 
 
-@router.post("/runs/{runid}/{config}/run-omni-contrasts-dry-run")
+@router.post(
+    "/runs/{runid}/{config}/run-omni-contrasts-dry-run",
+    summary="Dry-run OMNI contrasts",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates OMNI contrast inputs and synchronously returns a dry-run contrast report; no queue enqueue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_omni_contrasts_dry_run"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Dry-run contrast report returned.",
+        extra={
+            400: "OMNI contrast validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -795,7 +844,20 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
     return await _dry_run_omni_contrasts(runid, config, request)
 
 
-@router.post("/runs/{runid}/{config}/delete-omni-contrasts")
+@router.post(
+    "/runs/{runid}/{config}/delete-omni-contrasts",
+    summary="Delete OMNI contrasts",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Asynchronously enqueues OMNI contrast deletion and returns the queued job metadata."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("delete_omni_contrasts"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Delete-contrasts job accepted and returned in `result.job_id`.",
+    ),
+)
 async def delete_omni_contrasts(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

@@ -11,6 +11,7 @@ from wepppy.nodb.core import Ron
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,23 @@ def _resolve_export_wd(runid: str, request: Request) -> str:
     return str(candidate)
 
 
-@router.get("/runs/{runid}/{config}/export/ermit")
+@router.get(
+    "/runs/{runid}/{config}/export/ermit",
+    summary="Export ERMiT input",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Read-only export endpoint that may generate ERMiT artifacts before returning a file response."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_ermit"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="ERMiT export file returned.",
+        extra={
+            404: "Requested run/export artifact was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def export_ermit(runid: str, config: str, request: Request):
     try:
         claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
@@ -83,7 +100,23 @@ async def export_ermit(runid: str, config: str, request: Request):
         return error_response_with_traceback("Error exporting ERMiT")
 
 
-@router.get("/runs/{runid}/{config}/export/geopackage")
+@router.get(
+    "/runs/{runid}/{config}/export/geopackage",
+    summary="Export GeoPackage",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Read-only export endpoint that may generate geopackage artifacts before returning a file response."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_geopackage"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="GeoPackage export file returned.",
+        extra={
+            404: "Requested run/export artifact was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def export_geopackage(runid: str, config: str, request: Request):
     try:
         claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
@@ -113,7 +146,23 @@ async def export_geopackage(runid: str, config: str, request: Request):
         return error_response_with_traceback("Error exporting geopackage")
 
 
-@router.get("/runs/{runid}/{config}/export/geodatabase")
+@router.get(
+    "/runs/{runid}/{config}/export/geodatabase",
+    summary="Export geodatabase archive",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Read-only export endpoint that may generate geodatabase artifacts before returning a file response."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_geodatabase"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Geodatabase export archive returned.",
+        extra={
+            404: "Requested run/export artifact was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def export_geodatabase(runid: str, config: str, request: Request):
     try:
         claims = require_jwt(request, required_scopes=EXPORT_SCOPES)
@@ -143,8 +192,40 @@ async def export_geodatabase(runid: str, config: str, request: Request):
         return error_response_with_traceback("Error exporting geodatabase")
 
 
-@router.get("/runs/{runid}/{config}/export/prep_details")
-@router.get("/runs/{runid}/{config}/export/prep_details/")
+@router.get(
+    "/runs/{runid}/{config}/export/prep_details",
+    summary="Export prep details archive",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Read-only export endpoint that generates prep-details artifacts and returns archive data or status JSON."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_prep_details"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Prep details response returned (archive file or status payload).",
+        extra={
+            404: "Requested run/export artifact was not found. Returns the canonical error payload.",
+        },
+    ),
+)
+@router.get(
+    "/runs/{runid}/{config}/export/prep_details/",
+    summary="Export prep details archive (trailing slash)",
+    description=(
+        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
+        "Read-only export endpoint equivalent to `/export/prep_details` with trailing-slash path compatibility."
+    ),
+    tags=["rq-engine", "exports"],
+    operation_id=rq_operation_id("export_prep_details_trailing_slash"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Prep details response returned (archive file or status payload).",
+        extra={
+            404: "Requested run/export artifact was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def export_prep_details(runid: str, config: str, request: Request):
     try:
         claims = require_jwt(request, required_scopes=EXPORT_SCOPES)

@@ -15,6 +15,7 @@ from wepppy.rq.project_rq import run_debris_flow_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -35,7 +36,23 @@ def _first_value(value: Any) -> Any:
     return value
 
 
-@router.post("/runs/{runid}/{config}/run-debris-flow")
+@router.post(
+    "/runs/{runid}/{config}/run-debris-flow",
+    summary="Run debris-flow analysis",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates debris-flow payload fields and asynchronously enqueues debris-flow processing."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_debris_flow"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Debris-flow job accepted and `job_id` returned.",
+        extra={
+            400: "Debris-flow payload validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

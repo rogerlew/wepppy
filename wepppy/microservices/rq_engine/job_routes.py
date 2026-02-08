@@ -19,6 +19,7 @@ from wepppy.rq.job_info import (
 from wepppy.rq.jobinfo_payloads import extract_job_ids
 
 from .auth import AuthError, require_jwt, require_session_marker
+from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
@@ -185,7 +186,24 @@ def _polling_guard(
     return claims, None
 
 
-@router.get("/jobstatus/{job_id}")
+@router.get(
+    "/jobstatus/{job_id}",
+    summary="Get job status",
+    description=(
+        "Read-only polling endpoint. Open by default (`RQ_ENGINE_POLL_AUTH_MODE=open`); "
+        "token modes validate JWT scope `rq:status`. Applies in-memory poll rate limiting."
+    ),
+    tags=["rq-engine", "jobs"],
+    operation_id=rq_operation_id("jobstatus"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Job status payload returned.",
+        extra={
+            404: "Job not found. Returns the canonical error payload.",
+            429: "Polling rate limit exceeded. Returns the canonical error payload.",
+        },
+    ),
+)
 def jobstatus(job_id: str, request: Request):
     claims, guard_response = _polling_guard(endpoint="jobstatus", request=request, job_id=job_id)
     if guard_response is not None:
@@ -234,7 +252,24 @@ def jobstatus(job_id: str, request: Request):
         return error_response_with_traceback("Error Handling Request")
 
 
-@router.get("/jobinfo/{job_id}")
+@router.get(
+    "/jobinfo/{job_id}",
+    summary="Get job info",
+    description=(
+        "Read-only polling endpoint. Open by default (`RQ_ENGINE_POLL_AUTH_MODE=open`); "
+        "token modes validate JWT scope `rq:status`. Applies in-memory poll rate limiting."
+    ),
+    tags=["rq-engine", "jobs"],
+    operation_id=rq_operation_id("jobinfo"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Detailed job info payload returned.",
+        extra={
+            404: "Job not found. Returns the canonical error payload.",
+            429: "Polling rate limit exceeded. Returns the canonical error payload.",
+        },
+    ),
+)
 def jobinfo(job_id: str, request: Request):
     claims, guard_response = _polling_guard(endpoint="jobinfo", request=request, job_id=job_id)
     if guard_response is not None:
@@ -283,7 +318,24 @@ def jobinfo(job_id: str, request: Request):
         return error_response_with_traceback("Error Handling Request")
 
 
-@router.post("/jobinfo")
+@router.post(
+    "/jobinfo",
+    summary="Get batch job info",
+    description=(
+        "Read-only polling endpoint for multiple job IDs. Open by default "
+        "(`RQ_ENGINE_POLL_AUTH_MODE=open`); token modes validate JWT scope `rq:status`. "
+        "Applies in-memory poll rate limiting."
+    ),
+    tags=["rq-engine", "jobs"],
+    operation_id=rq_operation_id("jobinfo_batch"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Batch job info payload returned.",
+        extra={
+            429: "Polling rate limit exceeded. Returns the canonical error payload.",
+        },
+    ),
+)
 async def jobinfo_batch(request: Request):
     claims, guard_response = _polling_guard(endpoint="jobinfo_batch", request=request, job_id="batch")
     if guard_response is not None:
@@ -330,7 +382,23 @@ async def jobinfo_batch(request: Request):
         return error_response_with_traceback("Failed to retrieve batch job info")
 
 
-@router.post("/canceljob/{job_id}")
+@router.post(
+    "/canceljob/{job_id}",
+    summary="Cancel a queued or running job",
+    description=(
+        "Requires JWT Bearer scope `rq:status`. If job metadata contains a run ID, "
+        "enforces session marker access for that run. Synchronously cancels existing job(s); no enqueue."
+    ),
+    tags=["rq-engine", "jobs"],
+    operation_id=rq_operation_id("canceljob"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Cancellation request accepted and current job cancellation status returned.",
+        extra={
+            404: "Job not found. Returns the canonical error payload.",
+        },
+    ),
+)
 def canceljob(job_id: str, request: Request):
     try:
         claims = require_jwt(request, required_scopes=["rq:status"])

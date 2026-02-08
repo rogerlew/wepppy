@@ -17,6 +17,7 @@ from wepppy.rq.swat_rq import run_swat_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -46,7 +47,20 @@ def _parse_int(value: object) -> int | None:
         return None
 
 
-@router.post("/runs/{runid}/{config}/run-swat")
+@router.post(
+    "/runs/{runid}/{config}/run-swat",
+    summary="Run SWAT model",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates SWAT inputs for the run and asynchronously enqueues SWAT execution."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_swat"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="SWAT job accepted and `job_id` returned.",
+    ),
+)
 async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -79,7 +93,23 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Error Handling Request")
 
 
-@router.post("/runs/{runid}/{config}/swat/print-prt")
+@router.post(
+    "/runs/{runid}/{config}/swat/print-prt",
+    summary="Update SWAT print.prt object flags",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Synchronously mutates SWAT `print.prt` object output flags; no queue enqueue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("update_swat_print_prt"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="print.prt object flags updated.",
+        extra={
+            400: "SWAT print.prt payload validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def update_swat_print_prt(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -131,7 +161,23 @@ async def update_swat_print_prt(runid: str, config: str, request: Request) -> JS
         return error_response_with_traceback("Error Handling Request")
 
 
-@router.post("/runs/{runid}/{config}/swat/print-prt/meta")
+@router.post(
+    "/runs/{runid}/{config}/swat/print-prt/meta",
+    summary="Update SWAT print.prt metadata",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Synchronously mutates SWAT `print.prt` metadata fields; no queue enqueue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("update_swat_print_prt_meta"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="print.prt metadata updated.",
+        extra={
+            400: "SWAT print.prt metadata validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def update_swat_print_prt_meta(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

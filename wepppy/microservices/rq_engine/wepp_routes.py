@@ -17,6 +17,7 @@ from wepppy.rq.wepp_rq import run_wepp_rq, run_wepp_watershed_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -170,7 +171,23 @@ async def _handle_run_wepp_request(
         return error_response_with_traceback("Error Handling Request")
 
 
-@router.post("/runs/{runid}/{config}/run-wepp")
+@router.post(
+    "/runs/{runid}/{config}/run-wepp",
+    summary="Run WEPP hillslope workflow",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates WEPP/soil/watershed run options from payload and asynchronously enqueues hillslope WEPP."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_wepp"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="WEPP job accepted and `job_id` returned.",
+        extra={
+            400: "WEPP payload validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -201,7 +218,23 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     )
 
 
-@router.post("/runs/{runid}/{config}/run-wepp-watershed")
+@router.post(
+    "/runs/{runid}/{config}/run-wepp-watershed",
+    summary="Run WEPP watershed workflow",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates WEPP/watershed run options from payload and asynchronously enqueues watershed WEPP."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("run_wepp_watershed"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="WEPP watershed job accepted and `job_id` returned.",
+        extra={
+            400: "WEPP payload validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

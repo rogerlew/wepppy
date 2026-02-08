@@ -16,6 +16,7 @@ from wepppy.rq.project_rq import fetch_and_analyze_rap_ts_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -72,7 +73,23 @@ def _normalize_schedule(value: Any) -> Any:
     raise ValueError("Schedule payload must be a list, object, or JSON string.")
 
 
-@router.post("/runs/{runid}/{config}/acquire-rap-ts")
+@router.post(
+    "/runs/{runid}/{config}/acquire-rap-ts",
+    summary="Enqueue RAP time-series acquisition",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates RAP dataset/schedule inputs and asynchronously enqueues RAP acquisition/analysis."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("acquire_rap_ts"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Job accepted and `job_id` returned.",
+        extra={
+            400: "Input validation failed (for example invalid RAP schedule payload). Returns the canonical error payload.",
+        },
+    ),
+)
 async def acquire_rap_ts(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

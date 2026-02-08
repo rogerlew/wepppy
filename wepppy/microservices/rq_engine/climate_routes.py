@@ -20,6 +20,7 @@ from wepppy.rq.project_rq import build_climate_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -31,7 +32,23 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
-@router.post("/runs/{runid}/{config}/build-climate")
+@router.post(
+    "/runs/{runid}/{config}/build-climate",
+    summary="Build climate inputs",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates climate inputs and, outside batch mode, asynchronously enqueues climate building."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("build_climate"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Climate inputs accepted; returns batch update message or enqueued `job_id`.",
+        extra={
+            400: "Climate input validation or climate precondition failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def build_climate(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

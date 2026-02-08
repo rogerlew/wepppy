@@ -21,6 +21,7 @@ from wepppy.rq.project_rq import build_treatments_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -39,7 +40,23 @@ def _extract_upload(form: Any, key: str) -> UploadFile | None:
     return None
 
 
-@router.post("/runs/{runid}/{config}/build-treatments")
+@router.post(
+    "/runs/{runid}/{config}/build-treatments",
+    summary="Build treatment inputs",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates treatment configuration/files and asynchronously enqueues treatment building."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("build_treatments"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Treatment inputs accepted and `job_id` returned.",
+        extra={
+            400: "Treatment validation/business-rule error. Returns the canonical error payload.",
+        },
+    ),
+)
 async def build_treatments(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

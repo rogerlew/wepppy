@@ -15,6 +15,7 @@ from wepppy.rq.project_rq import fetch_and_analyze_openet_ts_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -26,7 +27,20 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
-@router.post("/runs/{runid}/{config}/acquire-openet-ts")
+@router.post(
+    "/runs/{runid}/{config}/acquire-openet-ts",
+    summary="Enqueue OpenET time-series acquisition",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Asynchronously enqueues OpenET acquisition/analysis for the run."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("acquire_openet_ts"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Job accepted and `job_id` returned.",
+    ),
+)
 async def acquire_openet_ts(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

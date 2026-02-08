@@ -28,6 +28,7 @@ from wepppy.rq.culvert_rq import TIMEOUT as CULVERT_BATCH_TIMEOUT
 from wepppy.rq.culvert_rq import run_culvert_batch_rq, run_culvert_run_rq
 
 from .auth import AuthError, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback, validation_error_response
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,23 @@ router = APIRouter()
 MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 
 
-@router.post("/culverts-wepp-batch/")
+@router.post(
+    "/culverts-wepp-batch/",
+    summary="Submit a culvert batch payload",
+    description=(
+        "Requires JWT Bearer scope `culvert:batch:submit`. Validates and stages uploaded payload.zip, "
+        "then asynchronously enqueues culvert batch processing and returns `job_id`."
+    ),
+    tags=["rq-engine", "culverts"],
+    operation_id=rq_operation_id("culverts_wepp_batch"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Payload accepted, batch created, and job enqueued.",
+        extra={
+            400: "Payload validation failed or upload constraints were not met. Returns the canonical error payload.",
+        },
+    ),
+)
 async def culverts_wepp_batch(request: Request) -> JSONResponse:
     try:
         require_jwt(request, required_scopes=["culvert:batch:submit"])
@@ -132,7 +149,24 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         return error_response_with_traceback("Failed to ingest culvert batch payload")
 
 
-@router.post("/culverts-wepp-batch/{batch_uuid}/retry/{point_id}")
+@router.post(
+    "/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
+    summary="Retry one culvert point in a batch",
+    description=(
+        "Requires JWT Bearer scope `culvert:batch:retry`. Validates existing batch state, "
+        "then asynchronously enqueues a retry job for a single `point_id`."
+    ),
+    tags=["rq-engine", "culverts"],
+    operation_id=rq_operation_id("culverts_retry_run"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Retry job enqueued and `job_id` returned.",
+        extra={
+            400: "Batch metadata is invalid or required files are missing. Returns the canonical error payload.",
+            404: "Batch or point ID was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def culverts_retry_run(
     batch_uuid: str, point_id: str, request: Request
 ) -> JSONResponse:

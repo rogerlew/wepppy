@@ -34,6 +34,7 @@ from wepppy.rq.project_rq import (
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 from .upload_helpers import UploadError, save_upload_file, upload_failure, upload_success
@@ -437,7 +438,23 @@ def _install_uploaded_dem(
     }
 
 
-@router.post("/runs/{runid}/{config}/tasks/upload-dem/")
+@router.post(
+    "/runs/{runid}/{config}/tasks/upload-dem/",
+    summary="Upload and validate DEM",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Synchronously uploads/validates DEM content and updates watershed map metadata; no queue enqueue."
+    ),
+    tags=["rq-engine", "uploads"],
+    operation_id=rq_operation_id("upload_dem"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="DEM upload accepted and watershed DEM metadata updated.",
+        extra={
+            400: "DEM upload or validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -483,7 +500,23 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Failed validating DEM", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/fetch-dem-and-build-channels")
+@router.post(
+    "/runs/{runid}/{config}/fetch-dem-and-build-channels",
+    summary="Fetch DEM and build channels",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates watershed delineation settings and, outside batch mode, asynchronously enqueues DEM/channel processing."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("fetch_dem_and_build_channels"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Watershed inputs accepted; returns batch update message or enqueued `job_id`.",
+        extra={
+            400: "Watershed map/change validation failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def fetch_dem_and_build_channels(
     runid: str, config: str, request: Request
 ) -> JSONResponse:
@@ -581,7 +614,23 @@ async def fetch_dem_and_build_channels(
         return error_response_with_traceback("fetch_dem_and_build_channels Failed")
 
 
-@router.post("/runs/{runid}/{config}/set-outlet")
+@router.post(
+    "/runs/{runid}/{config}/set-outlet",
+    summary="Set watershed outlet",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates outlet coordinates and asynchronously enqueues outlet-setting work."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("set_outlet"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Outlet job accepted and `job_id` returned.",
+        extra={
+            400: "Outlet coordinates were invalid. Returns the canonical error payload.",
+        },
+    ),
+)
 async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -646,7 +695,23 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Could not set outlet")
 
 
-@router.post("/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed")
+@router.post(
+    "/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed",
+    summary="Build subcatchments and abstract watershed",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates watershed abstraction options and, outside batch mode, asynchronously enqueues abstraction work."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("build_subcatchments_and_abstract_watershed"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Watershed abstraction inputs accepted; returns batch update message or enqueued `job_id`.",
+        extra={
+            400: "Watershed abstraction validation/business rule failed. Returns the canonical error payload.",
+        },
+    ),
+)
 async def build_subcatchments_and_abstract_watershed(
     runid: str, config: str, request: Request
 ) -> JSONResponse:

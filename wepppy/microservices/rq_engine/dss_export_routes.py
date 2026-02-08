@@ -18,6 +18,7 @@ from wepppy.wepp.interchange.dss_dates import format_dss_date, parse_dss_date
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -49,7 +50,23 @@ def _dedupe_positive_ints(values: Iterable[Any]) -> list[int]:
     return cleaned
 
 
-@router.post("/runs/{runid}/{config}/post-dss-export-rq")
+@router.post(
+    "/runs/{runid}/{config}/post-dss-export-rq",
+    summary="Enqueue DSS export",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Mutates DSS export settings and asynchronously enqueues DSS export processing."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("post_dss_export"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="DSS export job accepted and `job_id` returned.",
+        extra={
+            400: "DSS export validation/business-rule error. Returns the canonical error payload.",
+        },
+    ),
+)
 async def post_dss_export(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)

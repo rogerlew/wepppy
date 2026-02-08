@@ -22,6 +22,7 @@ from wepppy.weppcloud.utils.helpers import get_primary_wd, get_run_owners_lazy, 
 from wepppy.weppcloud.utils.runid import generate_runid
 
 from .auth import AuthError, authorize_run_access, require_jwt
+from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 
@@ -156,7 +157,23 @@ def _verify_cap_token(request: Request, token: str) -> None:
         raise AuthError("CAPTCHA verification failed.", status_code=403, code="forbidden")
 
 
-@router.post("/runs/{runid}/{config}/fork")
+@router.post(
+    "/runs/{runid}/{config}/fork",
+    summary="Fork a run",
+    description=(
+        "Supports optional JWT Bearer auth (`rq:enqueue`) with run access checks, or anonymous CAPTCHA flow "
+        "for eligible public runs. Asynchronously enqueues fork work after preparing target run metadata."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("fork_project"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Fork job accepted and fork target metadata returned.",
+        extra={
+            404: "Source run was not found or not anonymously accessible. Returns the canonical error payload.",
+        },
+    ),
+)
 async def fork_project(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = _resolve_bearer_claims(request)
@@ -272,7 +289,24 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
     )
 
 
-@router.post("/runs/{runid}/{config}/archive")
+@router.post(
+    "/runs/{runid}/{config}/archive",
+    summary="Archive a run",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates lock/job state and asynchronously enqueues archive creation."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("archive_run"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Archive job accepted and `job_id` returned.",
+        extra={
+            400: "Archive request failed validation/business rules (locks, running archive job). Returns the canonical error payload.",
+            404: "Run was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def archive_run(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -338,7 +372,24 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
         return error_response_with_traceback("Error enqueueing archive job", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/restore-archive")
+@router.post(
+    "/runs/{runid}/{config}/restore-archive",
+    summary="Restore a run archive",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates archive/lock state and asynchronously enqueues archive restoration."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("restore_archive"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Restore job accepted and `job_id` returned.",
+        extra={
+            400: "Restore request failed validation/business rules (missing params, locks, running archive job). Returns the canonical error payload.",
+            404: "Run or archive was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def restore_archive(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
@@ -412,7 +463,24 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
         return error_response_with_traceback("Error enqueueing restore job", status_code=500)
 
 
-@router.post("/runs/{runid}/{config}/delete-archive")
+@router.post(
+    "/runs/{runid}/{config}/delete-archive",
+    summary="Delete a run archive",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Validates archive/lock state and synchronously deletes archive content; no queue enqueue."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("delete_archive"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Archive deleted.",
+        extra={
+            400: "Delete request failed validation/business rules (missing params, locks, running archive job). Returns the canonical error payload.",
+            404: "Run or archive was not found. Returns the canonical error payload.",
+        },
+    ),
+)
 async def delete_archive(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
