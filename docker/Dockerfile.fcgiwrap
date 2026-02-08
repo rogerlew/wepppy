@@ -1,5 +1,8 @@
 ARG BASE_IMAGE=wepppy-dev
 FROM ${BASE_IMAGE}
+ARG APP_USER=roger
+
+USER root
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -9,6 +12,9 @@ RUN apt-get update \
 
 # Allow git-http-backend to read run repositories mounted under /wc1/runs.
 RUN git config --system --add safe.directory '*'
+
+# Match the base WEPPcloud runtime user for repository file ownership.
+USER ${APP_USER}
 
 EXPOSE 9000
 
