@@ -46,12 +46,13 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
+import random
 
 from glob import glob
 
 _IS_WINDOWS = os.name == 'nt'
 
-from time import time
+from time import sleep, time
 
 import subprocess
 
@@ -363,7 +364,7 @@ def run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=None, ss_batch_id=None, s
 
 def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
                   man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
-                  no_file_checks=False, timeout=60):
+                  no_file_checks=False, timeout=60, timeout_retries=3):
     
     if man_relpath != '':
         assert man_relpath.endswith('/'), man_relpath
@@ -393,52 +394,165 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
         assert _exists(_join(runs_dir, cli_relpath, f'p{wepp_id}.cli'))
         assert _exists(_join(runs_dir, sol_relpath, f'p{wepp_id}.sol'))
 
+    if timeout_retries < 0:
+        raise ValueError(f"timeout_retries must be >= 0 (received {timeout_retries})")
+
     _stderr_fn = _join(runs_dir, f'p{wepp_id}.err')
-    _run = open(_join(runs_dir, f'p{wepp_id}.run'))
+    _run_fn = _join(runs_dir, f'p{wepp_id}.run')
     _log = open(_stderr_fn, 'w')
     success = False
-    stdout_data = ""
+    total_attempts = timeout_retries + 1
+    timeout_attempts = []
+    last_returncode = None
+    runs_dir_abs = os.path.abspath(runs_dir)
+    cmd_text = " ".join(cmd)
+    backoff_base_seconds = 0.5
+    backoff_cap_seconds = 5.0
+
+    def _clip_log_line(line, max_len=240):
+        if len(line) <= max_len:
+            return line
+        return line[: max_len - 3] + "..."
+
+    def _emit_flake_metric(final_state):
+        if not status_channel or not timeout_attempts:
+            return
+        success_on_retry = int(success and len(timeout_attempts) > 0)
+        metric_line = (
+            f'metric:run_hillslope wepp_id={wepp_id} '
+            f'timeout_attempts={len(timeout_attempts)} '
+            f'success_on_retry={success_on_retry} '
+            f'final_state={final_state}'
+        )
+        _log.write(f'[run_hillslope] {metric_line}\n')
+        _log.flush()
+        StatusMessenger.publish(status_channel, metric_line)
 
     try:
-        p = subprocess.Popen(
-            cmd,
-            stdin=_run,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            cwd=runs_dir,
-            universal_newlines=True,
+        _log.write(
+            f'[run_hillslope] wepp_id={wepp_id} runs_dir={runs_dir_abs} run_file={_run_fn} '
+            f'err_file={_stderr_fn} cmd="{cmd_text}" timeout={timeout}s '
+            f'timeout_retries={timeout_retries}\n'
         )
+        _log.flush()
 
-        timed_out = False
-        timeout_exc = None
-        try:
-            stdout_data, _ = p.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired as exc:
-            timed_out = True
-            timeout_exc = exc
-            p.kill()
-            stdout_data, _ = p.communicate()
+        for attempt in range(1, total_attempts + 1):
+            attempt_started = time()
+            _log.write(f'[run_hillslope] attempt {attempt}/{total_attempts} start\n')
+            _log.flush()
 
-        for output in stdout_data.splitlines():
-            output = output.strip()
-            if output:
-                if 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in output:
-                    success = True
-                _log.write(output + '\n')
-                _log.flush()
+            with open(_run_fn) as _run:
+                p = subprocess.Popen(
+                    cmd,
+                    stdin=_run,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    cwd=runs_dir,
+                    universal_newlines=True,
+                )
 
-        if timed_out and not success:
-            raise TimeoutError(
-                f'Hillslope simulation for wepp_id {wepp_id} exceeded {timeout} seconds'
-            ) from timeout_exc
+                timed_out = False
+                timeout_exc = None
+                stdout_data = ""
+                try:
+                    stdout_data, _ = p.communicate(timeout=timeout)
+                except subprocess.TimeoutExpired as exc:
+                    timed_out = True
+                    timeout_exc = exc
+                    p.kill()
+                    stdout_data, _ = p.communicate()
+
+            last_returncode = p.returncode
+            output_lines = []
+
+            for output in stdout_data.splitlines():
+                output = output.strip()
+                if output:
+                    output_lines.append(output)
+                    if 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in output:
+                        success = True
+                    _log.write(output + '\n')
+            _log.flush()
+
+            attempt_elapsed = time() - attempt_started
+            last_output = _clip_log_line(output_lines[-1]) if output_lines else '<no output>'
+
+            if timed_out and not success:
+                timeout_attempts.append(
+                    {
+                        "attempt": attempt,
+                        "elapsed": attempt_elapsed,
+                        "last_output": last_output,
+                    }
+                )
+                _log.write(
+                    f'[run_hillslope] timeout attempt={attempt}/{total_attempts} '
+                    f'elapsed={attempt_elapsed:.2f}s timeout={timeout}s '
+                    f'returncode={last_returncode} last_output="{last_output}"\n'
+                )
+                if attempt < total_attempts:
+                    backoff_seconds = min(
+                        backoff_cap_seconds,
+                        backoff_base_seconds * (2 ** (attempt - 1)),
+                    )
+                    jitter_seconds = random.uniform(0.0, backoff_base_seconds)
+                    delay_seconds = backoff_seconds + jitter_seconds
+                    _log.write(
+                        f'[run_hillslope] retrying after timeout '
+                        f'(next_attempt={attempt + 1}/{total_attempts}) '
+                        f'backoff={delay_seconds:.2f}s '
+                        f'(base={backoff_seconds:.2f}s jitter={jitter_seconds:.2f}s)\n'
+                    )
+                    _log.flush()
+                    sleep(delay_seconds)
+                else:
+                    _log.flush()
+
+                if attempt == total_attempts:
+                    _emit_flake_metric(final_state="timeout")
+                    timeout_summary = "; ".join(
+                        (
+                            f'a{entry["attempt"]}:{entry["elapsed"]:.2f}s '
+                            f'last="{entry["last_output"]}"'
+                        )
+                        for entry in timeout_attempts
+                    )
+                    raise TimeoutError(
+                        f'Hillslope simulation timed out for wepp_id={wepp_id}; '
+                        f'runs_dir={runs_dir_abs}; run_file={_run_fn}; err_file={_stderr_fn}; '
+                        f'cmd="{cmd_text}"; timeout={timeout}s; attempts={total_attempts}; '
+                        f'timeout_summary=[{timeout_summary}]'
+                    ) from timeout_exc
+                continue
+
+            if success:
+                if timeout_attempts:
+                    _log.write(
+                        f'[run_hillslope] flake_detected wepp_id={wepp_id} '
+                        f'timeout_attempts={len(timeout_attempts)} '
+                        f'success_attempt={attempt}/{total_attempts}\n'
+                    )
+                    _log.flush()
+                    _emit_flake_metric(final_state="success")
+                break
+
+            _log.write(
+                f'[run_hillslope] attempt {attempt}/{total_attempts} finished without success marker '
+                f'returncode={last_returncode}\n'
+            )
+            _log.flush()
+            break
     finally:
-        _run.close()
         _log.close()
 
     if success:
         return True, wepp_id, time() - t0
 
-    raise Exception(f'Error running wepp for wepp_id {wepp_id}\nSee {_stderr_fn}')
+    raise Exception(
+        f'Error running WEPP hillslope for wepp_id={wepp_id}; runs_dir={runs_dir_abs}; '
+        f'run_file={_run_fn}; err_file={_stderr_fn}; cmd="{cmd_text}"; '
+        f'returncode={last_returncode}'
+    )
 
 
 def run_flowpath(fp_id, wepp_id, runs_dir, fp_runs_dir, wepp_bin=None, status_channel=None):
