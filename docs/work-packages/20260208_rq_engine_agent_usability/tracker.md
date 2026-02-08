@@ -5,7 +5,7 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Contract checklist baseline and guard coverage  
+**Current phase**: Agent-facing docs split (developer doc landed)  
 **Last updated**: 2026-02-08  
 **Next milestone**: Agent-facing rq-engine docs and usersum split
 
@@ -31,6 +31,7 @@
 - [x] Captured Bootstrap Phase 2 wrap-up artifact and verification snapshot (2026-02-08).
 - [x] Standardized OpenAPI metadata for frozen agent-facing routes and added contract budget checks (2026-02-08).
 - [x] Added route contract checklist artifact + drift guard tooling/tests (2026-02-08).
+- [x] Added canonical rq-engine developer contract doc for agents (2026-02-08).
 
 ## Timeline
 
@@ -42,6 +43,7 @@
 - **2026-02-08** - Freeze-review remediations landed for Bootstrap scopes, wrapper parity, polling hardening, and inventory drift guard.
 - **2026-02-08** - OpenAPI metadata standardized for frozen agent-facing routes with contract/size budget tests.
 - **2026-02-08** - Route contract checklist artifact published with automated drift guard.
+- **2026-02-08** - Added `docs/dev-notes/rq-engine-agent-api.md` as the canonical developer-facing rq-engine agent contract.
 
 ## Decisions Log
 
@@ -280,3 +282,22 @@ handoff point for further API usability work.
   - Result: `Route contract checklist check passed`
 - `wctl run-pytest tests/tools/test_route_contract_checklist_guard.py tests/tools/test_endpoint_inventory_guard.py tests/microservices/test_rq_engine_openapi_contract.py`
   - Result: `9 passed`
+
+### 2026-02-08: rq-engine developer contract doc
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added `docs/dev-notes/rq-engine-agent-api.md` with:
+  - canonical rq-engine API surface and OpenAPI access paths
+  - auth model and polling mode contract
+  - scope contract summary
+  - response/error payload expectations
+  - recommended agent workflow
+  - endpoint-family map linked to frozen checklist/inventory artifacts
+
+**Open follow-ups**:
+- Add the complementary usersum page for non-API user workflow framing.
+
+**Validation results**:
+- `wctl doc-lint --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+  - Result: `3 files validated, 0 errors, 0 warnings`

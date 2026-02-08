@@ -80,6 +80,7 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
 - Route documentation and OpenAPI metadata updates in `wepppy/microservices/rq_engine/*`.
 - Updated docs for auth and Bootstrap workflows:
   - `docs/dev-notes/auth-token.spec.md`
+  - `docs/dev-notes/rq-engine-agent-api.md`
   - `docs/weppcloud-bootstrap-spec.md`
   - `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md`
 - Endpoint inventory drift guard:
