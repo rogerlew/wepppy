@@ -1,6 +1,6 @@
 # RQ-Engine Agent Usability and Documentation Hardening
 
-**Status**: Open (2026-02-08)
+**Status**: Ready for Review (2026-02-08)
 
 ## Overview
 RQ-engine now carries core agent-facing operations, but contract quality and documentation are still uneven across route modules and audiences. This package hardens the API contract, OpenAPI metadata, and supporting docs so agents and users can run Bootstrap and queue workflows without reverse-engineering implementation details.
@@ -33,11 +33,11 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
 - **Informed**: Bootstrap and API consumers using automation clients
 
 ## Success Criteria
-- [ ] Agent-facing Bootstrap operations are available in `rq-engine` and represented in OpenAPI.
-- [ ] Each agent-facing route has explicit auth requirements, schemas, and canonical error examples.
-- [ ] Bootstrap async enable flow is documented and regression-tested for `queued`, `finished`, and `failed`.
-- [ ] Token lifetime/audience/scope expectations are consistent across code and docs.
-- [ ] A new engineer can execute documented workflows without reading source first.
+- [x] Agent-facing Bootstrap operations are available in `rq-engine` and represented in OpenAPI.
+- [x] Each agent-facing route has explicit auth requirements, schemas, and canonical error examples.
+- [x] Bootstrap async enable flow is documented and regression-tested for `queued`, `finished`, and `failed`.
+- [x] Token lifetime/audience/scope expectations are consistent across code and docs.
+- [x] A new engineer can execute documented workflows without reading source first.
 
 ## Dependencies
 

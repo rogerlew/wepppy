@@ -5,9 +5,18 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Contract guards operationalized in wctl + CI  
+**Current phase**: Ready for review  
 **Last updated**: 2026-02-08  
-**Next milestone**: Final package closure review
+**Next milestone**: Reviewer sign-off and package archive
+
+## Review Readiness
+
+- **Status**: Ready for review.
+- **Contract completeness**: Endpoint freeze, checklist artifact, and OpenAPI metadata guard coverage are in place.
+- **Operational checks**: `wctl check-rq-contracts` and CI workflow `rq-engine-contract-guards` are implemented.
+- **Documentation split**: Developer contract (`docs/dev-notes/rq-engine-agent-api.md`) and usersum workflow page (`wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`) are published.
+- **Residual non-blocking notes**:
+  - `scripts/build_forest_workflows.py` currently exits non-zero in this repository state because `readme.md` lacks the expected "Dev Server Nightly Profile Tests" section; generated workflow output for this package was still produced.
 
 ## Task Board
 
@@ -34,6 +43,7 @@
 - [x] Added canonical rq-engine developer contract doc for agents (2026-02-08).
 - [x] Added usersum companion doc for rq-engine concepts/workflows (2026-02-08).
 - [x] Operationalized route/checklist guards in `wctl` and CI workflow (2026-02-08).
+- [x] Marked package status as ready for review (2026-02-08).
 
 ## Timeline
 
@@ -48,6 +58,7 @@
 - **2026-02-08** - Added `docs/dev-notes/rq-engine-agent-api.md` as the canonical developer-facing rq-engine agent contract.
 - **2026-02-08** - Added usersum `rq-engine.md` and cross-linked usersum/dev-note Bootstrap and rq-engine docs.
 - **2026-02-08** - Added `wctl check-rq-contracts` and CI workflow `rq-engine-contract-guards`.
+- **2026-02-08** - Marked work package as ready for review.
 
 ## Decisions Log
 
