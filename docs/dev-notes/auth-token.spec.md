@@ -9,7 +9,7 @@ error shapes must follow `docs/schemas/rq-response-contract.md`.
 - Defines required claims, token classes, audience usage, and revocation rules.
 - Non-auth payload schemas live in their own contracts (see `docs/schemas/rq-response-contract.md`).
 
-## Implementation status (2026-01-12)
+## Implementation status (2026-02-08)
 - **Implemented**
   - `auth_tokens` HMAC JWT utilities (`wepppy/weppcloud/utils/auth_tokens.py`).
   - Query-engine MCP JWT validation (`wepppy/query_engine/app/mcp/auth.py`).
@@ -17,6 +17,7 @@ error shapes must follow `docs/schemas/rq-response-contract.md`.
   - CLI token revocation script (`wepppy/weppcloud/_scripts/revoke_auth_token.py`).
   - `wctl issue-auth-token` / `wctl revoke-auth-token` wrappers (`tools/wctl2/commands/auth.py`).
   - Session JWT issuance endpoint (`/rq-engine/api/runs/<runid>/<config>/session-token`).
+  - Profile JWT issuance endpoint (`POST /profile/mint-token`) for authenticated users.
   - rq-engine JWT enforcement on `canceljob` and culvert batch submit/retry routes (includes jti denylist).
   - Flask `/rq/api/*` routes removed; rq-engine owns queue-triggering endpoints.
   - Secret rotation via `WEPP_AUTH_JWT_SECRETS` (multiple validation secrets).
@@ -69,6 +70,7 @@ following environment variables:
   - Multi-service tokens: use an `aud` list and require intersection on each service.
 - **TTL targets** (set via config or explicit `expires_in`):
   - User tokens: 4 days (345600s).
+  - Profile-issued user tokens: 90 days (7776000s).
   - Session tokens: 4 days (345600s).
   - Service tokens: variable; culvert target 90 days (7776000s).
   - MCP tokens: 60 days (5184000s).
@@ -157,6 +159,15 @@ If validation fails a `JWTDecodeError` is raised.
   - Issues a session JWT (`token_class=session`) scoped to the run.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
   - Stores a Redis marker `auth:session:run:<runid>:<session_id>` (DB 11) with TTL.
+
+## Profile token issuance
+- Endpoint: `POST /profile/mint-token` (Flask route, authenticated user required).
+- Behavior:
+  - Issues a user JWT (`token_class=user`) with subject set to the current user ID.
+  - Includes user claims: `email`, `roles`, `groups`.
+  - Sets audiences to `rq-engine` and `query-engine`.
+  - Sets scopes to `runs:read`, `queries:validate`, `queries:execute`, `rq:status`, `rq:enqueue`, `rq:export`.
+  - Uses a fixed TTL of 90 days (`7776000` seconds).
 
 ## Revocation and rotation
 - Services MUST enforce `jti` denylist checks.

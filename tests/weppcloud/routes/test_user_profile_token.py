@@ -1,0 +1,164 @@
+from __future__ import annotations
+
+import importlib
+import uuid
+
+import pytest
+
+pytest.importorskip("flask")
+from flask import Flask
+from flask_security import RoleMixin, SQLAlchemyUserDatastore, Security, UserMixin
+from flask_security.utils import hash_password, login_user
+from flask_sqlalchemy import SQLAlchemy
+
+pytestmark = pytest.mark.routes
+
+
+def _configure_jwt_env(monkeypatch: pytest.MonkeyPatch, module) -> None:
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "profile-token-secret")
+    monkeypatch.setenv("WEPP_AUTH_JWT_ALGORITHMS", "HS256")
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
+    monkeypatch.delenv("WEPP_AUTH_JWT_DEFAULT_AUDIENCE", raising=False)
+    monkeypatch.delenv("WEPP_AUTH_JWT_ISSUER", raising=False)
+    module.auth_tokens.get_jwt_config.cache_clear()
+
+
+@pytest.fixture()
+def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
+    app = Flask(__name__)
+    app.config.update(
+        SECRET_KEY="profile-secret",
+        SQLALCHEMY_DATABASE_URI="sqlite://",
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        SECURITY_PASSWORD_SALT="profile-salt",
+        SECURITY_PASSWORD_HASH="bcrypt",
+        SECURITY_REGISTERABLE=False,
+        SECURITY_SEND_REGISTER_EMAIL=False,
+        SECURITY_TRACKABLE=False,
+        SECURITY_UNAUTHORIZED_VIEW=None,
+    )
+
+    db = SQLAlchemy()
+    db.init_app(app)
+
+    roles_users = db.Table(
+        "roles_users",
+        db.Column("user_id", db.Integer(), db.ForeignKey("user.id")),
+        db.Column("role_id", db.Integer(), db.ForeignKey("role.id")),
+    )
+
+    class Role(db.Model, RoleMixin):
+        id = db.Column(db.Integer(), primary_key=True)
+        name = db.Column(db.String(80), unique=True)
+
+    class User(db.Model, UserMixin):
+        id = db.Column(db.Integer, primary_key=True)
+        email = db.Column(db.String(255), unique=True)
+        password = db.Column(db.String(255))
+        active = db.Column(db.Boolean(), default=True)
+        fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False)
+        roles = db.relationship("Role", secondary=roles_users, backref=db.backref("users", lazy="dynamic"))
+
+    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    Security(app, user_datastore)
+
+    @app.login_manager.unauthorized_handler
+    def unauthorized():
+        return "Unauthorized", 401
+
+    @app.get("/test-login/<int:user_id>")
+    def test_login(user_id: int):
+        user = db.session.get(User, user_id)
+        login_user(user)
+        db.session.commit()
+        return "ok"
+
+    with app.app_context():
+        db.create_all()
+        user_role = user_datastore.create_role(name="User")
+        user = user_datastore.create_user(
+            email="user@example.com",
+            password=hash_password("password"),
+            fs_uniquifier=uuid.uuid4().hex,
+            roles=[user_role],
+        )
+        user_datastore.commit()
+        user_id = user.id
+
+    user_module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.user"))
+    app.register_blueprint(user_module.user_bp)
+
+    with app.test_client() as client:
+        yield {
+            "client": client,
+            "module": user_module,
+            "user_id": user_id,
+        }
+
+
+def test_profile_token_mint_requires_login(profile_auth_client) -> None:
+    client = profile_auth_client["client"]
+
+    response = client.post("/profile/mint-token")
+
+    assert response.status_code == 401
+
+
+def test_profile_token_mint_issues_90_day_user_token(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    _configure_jwt_env(monkeypatch, module)
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/profile/mint-token")
+
+    assert response.status_code == 200
+    assert response.headers.get("Cache-Control") == "no-store"
+    payload = response.get_json()
+    content = payload["Content"]
+    token = content["token"]
+    claims = module.auth_tokens.decode_token(token, audience="rq-engine")
+
+    assert content["token_class"] == "user"
+    assert content["expires_in"] == 90 * 24 * 60 * 60
+    assert content["audience"] == ["rq-engine", "query-engine"]
+    assert content["scopes"] == [
+        "runs:read",
+        "queries:validate",
+        "queries:execute",
+        "rq:status",
+        "rq:enqueue",
+        "rq:export",
+    ]
+
+    assert claims["token_class"] == "user"
+    assert claims["sub"] == str(user_id)
+    assert claims["email"] == "user@example.com"
+    assert claims["roles"] == ["User"]
+    assert claims["groups"] == []
+    assert claims["exp"] - claims["iat"] == 90 * 24 * 60 * 60
+
+
+def test_profile_token_mint_errors_without_jwt_secret(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRET", raising=False)
+    monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
+    module.auth_tokens.get_jwt_config.cache_clear()
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/profile/mint-token")
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert "WEPP_AUTH_JWT_SECRET must be set to issue tokens" in payload["error"]["message"]

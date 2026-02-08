@@ -104,6 +104,203 @@ User Profile
     {% endif %}
   </section>
 
+  <section
+    class="wc-profile-token"
+    data-profile-token-root
+    data-mint-endpoint="{{ url_for('user.mint_profile_token') }}">
+    <h3 class="wc-profile__subheading">API Token</h3>
+    <p class="wc-profile-token__description">
+      Mint a personal JWT for WEPPcloud APIs. Tokens from this panel expire after 90 days.
+    </p>
+
+    <div class="wc-alert wc-alert--info" role="status" aria-live="polite" hidden data-profile-token-message>
+      <p class="wc-alert__body" data-profile-token-message-body></p>
+    </div>
+
+    <div class="wc-button-row">
+      <button
+        type="button"
+        class="pure-button pure-button-primary"
+        data-profile-token-action="mint">
+        Mint JWT Token
+      </button>
+    </div>
+
+    <div class="wc-field wc-profile-token__field">
+      <label class="wc-field__label" for="profile_jwt_token">JWT</label>
+      <div class="wc-field__input-row">
+        <textarea
+          id="profile_jwt_token"
+          class="wc-field__control wc-field__control--text"
+          style="flex: 1 1 auto; min-width: 240px; width: 100%; height: 164px;"
+          autocomplete="off"
+          readonly
+          data-profile-token-field="token"></textarea>
+        <button
+          type="button"
+          class="pure-button pure-button-secondary"
+          data-profile-token-action="copy-token"
+          disabled>
+          Copy
+        </button>
+      </div>
+      <p class="wc-field__help">
+        Store this securely. Anyone with this token can call WEPPcloud APIs as your account.
+        Default audiences: <code>rq-engine</code>, <code>query-engine</code>.
+        Default scopes: <code>runs:read</code>, <code>queries:validate</code>, <code>queries:execute</code>,
+        <code>rq:status</code>, <code>rq:enqueue</code>, <code>rq:export</code>.
+      </p>
+    </div>
+
+    <p class="wc-profile-token__expiry" data-profile-token-expiry></p>
+  </section>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    var root = document.querySelector('[data-profile-token-root]');
+    if (!root) {
+        return;
+    }
+
+    var mintEndpoint = root.getAttribute('data-mint-endpoint');
+    var message = root.querySelector('[data-profile-token-message]');
+    var messageBody = root.querySelector('[data-profile-token-message-body]');
+    var mintButton = root.querySelector('[data-profile-token-action="mint"]');
+    var tokenField = root.querySelector('[data-profile-token-field="token"]');
+    var copyTokenButton = root.querySelector('[data-profile-token-action="copy-token"]');
+    var expiry = root.querySelector('[data-profile-token-expiry]');
+
+    function setAlert(kind, text) {
+        if (!message || !messageBody) {
+            return;
+        }
+        message.hidden = false;
+        message.className = 'wc-alert wc-alert--' + kind;
+        messageBody.textContent = text;
+    }
+
+    function setCopyEnabled(enabled) {
+        if (copyTokenButton) {
+            copyTokenButton.disabled = !enabled;
+        }
+    }
+
+    function parseError(payload, fallback) {
+        if (payload && payload.error && payload.error.message) {
+            return payload.error.message;
+        }
+        return fallback;
+    }
+
+    function updateTokenViews(payloadContent) {
+        var token = payloadContent && payloadContent.token ? String(payloadContent.token) : '';
+        var expiresAt = payloadContent ? payloadContent.expires_at : null;
+        if (tokenField) {
+            tokenField.value = token;
+        }
+        if (expiry) {
+            if (typeof expiresAt === 'number') {
+                var expiresAtDate = new Date(expiresAt * 1000);
+                expiry.textContent = 'Expires: ' + expiresAtDate.toLocaleString();
+            } else {
+                expiry.textContent = '';
+            }
+        }
+        setCopyEnabled(Boolean(token));
+    }
+
+    function fallbackCopy(text, field, successMessage) {
+        if (!field) {
+            setAlert('warning', 'Copy failed. Copy manually.');
+            return;
+        }
+        field.focus();
+        field.select();
+        try {
+            if (document.execCommand('copy')) {
+                setAlert('success', successMessage);
+            } else {
+                setAlert('warning', 'Copy failed. Copy manually.');
+            }
+        } catch (_error) {
+            setAlert('warning', 'Copy failed. Copy manually.');
+        }
+    }
+
+    function copyField(text, field, successMessage) {
+        if (!text) {
+            return;
+        }
+        if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(text)
+                .then(function() {
+                    setAlert('success', successMessage);
+                })
+                .catch(function() {
+                    fallbackCopy(text, field, successMessage);
+                });
+            return;
+        }
+        fallbackCopy(text, field, successMessage);
+    }
+
+    function mintToken() {
+        if (!mintEndpoint) {
+            setAlert('error', 'Token endpoint is not configured.');
+            return;
+        }
+        if (mintButton) {
+            mintButton.disabled = true;
+        }
+        setAlert('info', 'Minting token...');
+        fetch(mintEndpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(function(response) {
+                return response.json().catch(function() { return {}; }).then(function(payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            })
+            .then(function(result) {
+                var payload = result.payload || {};
+                if (!result.ok || payload.error) {
+                    setAlert('error', parseError(payload, 'Token mint failed.'));
+                    return;
+                }
+                var content = payload.Content || {};
+                updateTokenViews(content);
+                setAlert('success', 'Token minted.');
+            })
+            .catch(function() {
+                setAlert('error', 'Token mint failed.');
+            })
+            .finally(function() {
+                if (mintButton) {
+                    mintButton.disabled = false;
+                }
+            });
+    }
+
+    if (mintButton) {
+        mintButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            mintToken();
+        });
+    }
+
+    if (copyTokenButton) {
+        copyTokenButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            copyField(tokenField ? tokenField.value : '', tokenField, 'Token copied.');
+        });
+    }
+});
+</script>
+
   {% if user.has_role('Dev') %}
   <section class="wc-profile-dev">
     <h3 class="wc-profile__subheading">Developer Settings</h3>

@@ -18,6 +18,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
+from wepppy.weppcloud.utils import auth_tokens
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -46,6 +47,17 @@ SORT_ALIASES = {
 }
 
 DB_SORT_FIELDS = {'runid', 'config', 'date_created', 'last_modified'}
+
+PROFILE_TOKEN_TTL_SECONDS = 90 * 24 * 60 * 60
+PROFILE_TOKEN_SCOPES = (
+    'runs:read',
+    'queries:validate',
+    'queries:execute',
+    'rq:status',
+    'rq:enqueue',
+    'rq:export',
+)
+PROFILE_TOKEN_AUDIENCES = ('rq-engine', 'query-engine')
 
 
 class SimplePagination:
@@ -284,6 +296,32 @@ def _pagination_payload(pagination) -> Dict[str, Any]:
         "next_num": getattr(pagination, "next_num", None),
     }
 
+
+def _claim_names(raw_values: Any) -> List[str]:
+    if raw_values is None:
+        return []
+    if hasattr(raw_values, 'all') and callable(raw_values.all):
+        try:
+            raw_values = raw_values.all()
+        except Exception:
+            raw_values = []
+
+    names: List[str] = []
+    for value in raw_values:
+        candidate = getattr(value, 'name', value)
+        if candidate is None:
+            continue
+        text = str(candidate).strip()
+        if text:
+            names.append(text)
+    return sorted(set(names), key=str.casefold)
+
+
+def _current_user_groups() -> List[str]:
+    groups = getattr(current_user, 'groups', None)
+    return _claim_names(groups)
+
+
 @user_bp.route('/profile', strict_slashes=False)
 @login_required
 def profile():
@@ -291,6 +329,50 @@ def profile():
         return render_template('user/profile.html', user=current_user)
     except:
         return exception_factory()
+
+
+@user_bp.route('/profile/mint-token', methods=['POST'])
+@login_required
+def mint_profile_token():
+    try:
+        user_id = getattr(current_user, 'id', None)
+        if user_id is None:
+            return error_factory('Current user is missing an id.', status_code=400)
+
+        email = str(getattr(current_user, 'email', '') or '').strip()
+        if not email:
+            return error_factory('Current user is missing an email address.', status_code=400)
+
+        role_names = _claim_names(getattr(current_user, 'roles', []))
+        group_names = _current_user_groups()
+        result = auth_tokens.issue_token(
+            str(user_id),
+            scopes=PROFILE_TOKEN_SCOPES,
+            audience=PROFILE_TOKEN_AUDIENCES,
+            expires_in=PROFILE_TOKEN_TTL_SECONDS,
+            extra_claims={
+                'token_class': 'user',
+                'email': email,
+                'roles': role_names,
+                'groups': group_names,
+            },
+        )
+        claims = result.get('claims', {})
+        response = success_factory(
+            {
+                'token': result.get('token'),
+                'token_class': 'user',
+                'audience': claims.get('aud'),
+                'scopes': list(PROFILE_TOKEN_SCOPES),
+                'expires_at': claims.get('exp'),
+                'issued_at': claims.get('iat'),
+                'expires_in': PROFILE_TOKEN_TTL_SECONDS,
+            }
+        )
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+    except Exception as exc:
+        return error_factory(str(exc), status_code=500)
 
 def _build_meta(wd, attrs: dict):
         try:

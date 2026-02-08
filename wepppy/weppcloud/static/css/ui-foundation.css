@@ -2461,6 +2461,30 @@ h5:first-child {
   border: 1px solid var(--wc-color-border);
 }
 
+.wc-profile-token {
+  padding-top: var(--wc-space-xl);
+  border-top: 1px solid var(--wc-color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-md);
+}
+
+.wc-profile-token__description {
+  margin: 0;
+  color: var(--wc-color-text-muted);
+  font-size: 0.95rem;
+}
+
+.wc-profile-token__field {
+  margin: 0;
+}
+
+.wc-profile-token__expiry {
+  margin: 0;
+  color: var(--wc-color-text-muted);
+  font-size: 0.9rem;
+}
+
 .wc-profile-dev {
   padding: var(--wc-space-xl) 0;
   border-top: 1px solid var(--wc-color-border);
