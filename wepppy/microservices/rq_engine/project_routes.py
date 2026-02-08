@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from typing import Any, Mapping, Sequence
@@ -252,12 +253,20 @@ async def create(request: Request) -> Response:
 
     if rq_token:
         try:
-            claims = _require_rq_token(rq_token, required_scopes=RQ_CREATE_SCOPES)
+            claims = await asyncio.to_thread(
+                _require_rq_token,
+                rq_token,
+                required_scopes=RQ_CREATE_SCOPES,
+            )
         except AuthError as exc:
             return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     elif "authorization" in {key.lower() for key in request.headers.keys()}:
         try:
-            claims = require_jwt(request, required_scopes=RQ_CREATE_SCOPES)
+            claims = await asyncio.to_thread(
+                require_jwt,
+                request,
+                required_scopes=RQ_CREATE_SCOPES,
+            )
         except AuthError as exc:
             return error_response(exc.message, status_code=exc.status_code, code=exc.code)
         except Exception:
@@ -267,7 +276,7 @@ async def create(request: Request) -> Response:
         if not cap_token:
             return error_response("CAPTCHA token is required.", status_code=403)
         try:
-            verification = _verify_cap_token(request, cap_token)
+            verification = await asyncio.to_thread(_verify_cap_token, request, cap_token)
         except CapVerificationError as exc:
             logger.error("CAPTCHA verification error for create/%s: %s", config, exc)
             return error_response("CAPTCHA verification failed.", status_code=500)
@@ -279,56 +288,63 @@ async def create(request: Request) -> Response:
             )
             return error_response("CAPTCHA verification failed.", status_code=403)
 
-    user = None
-    try:
-        user = _resolve_user_from_claims(claims)
-    except Exception:
-        logger.exception("rq-engine create user lookup failed")
-
-    try:
-        runid, wd = _create_run_dir(getattr(user, "email", None) if user else None)
-    except PermissionError as exc:
-        logger.exception("rq-engine create run directory permission error")
-        return error_response(
-            "Could not create run directory. NAS may be down.",
-            details=str(exc),
-        )
-    except Exception as exc:
-        logger.exception("rq-engine create run directory failed")
-        return error_response(
-            "Could not create run directory.",
-            details=str(exc),
-        )
-
     cfg = f"{config}.cfg"
     overrides = _collect_overrides(payload, request.query_params)
     if overrides:
         cfg = f"{cfg}?{overrides}"
 
-    try:
-        Ron(wd, cfg)
-    except Exception:
-        logger.exception("rq-engine create Ron failed")
-        return error_response("Could not create run")
+    def _create_run_blocking() -> str | Response:
+        user = None
+        try:
+            user = _resolve_user_from_claims(claims)
+        except Exception:
+            logger.exception("rq-engine create user lookup failed")
 
-    try:
-        from wepppy.weppcloud.utils.run_ttl import initialize_ttl
+        try:
+            runid, wd = _create_run_dir(getattr(user, "email", None) if user else None)
+        except PermissionError as exc:
+            logger.exception("rq-engine create run directory permission error")
+            return error_response(
+                "Could not create run directory. NAS may be down.",
+                details=str(exc),
+            )
+        except Exception as exc:
+            logger.exception("rq-engine create run directory failed")
+            return error_response(
+                "Could not create run directory.",
+                details=str(exc),
+            )
 
-        initialize_ttl(wd)
-    except Exception:
-        logger.exception("rq-engine create TTL initialization failed")
+        try:
+            Ron(wd, cfg)
+        except Exception:
+            logger.exception("rq-engine create Ron failed")
+            return error_response("Could not create run")
 
-    try:
-        _register_run_owner(runid, config, user)
-    except Exception:
-        logger.exception("rq-engine create run owner failed")
+        try:
+            from wepppy.weppcloud.utils.run_ttl import initialize_ttl
 
-    try:
-        ensure_readme_on_create(runid, config)
-    except Exception:
-        logger.exception("rq-engine create README failed")
+            initialize_ttl(wd)
+        except Exception:
+            logger.exception("rq-engine create TTL initialization failed")
 
-    return RedirectResponse(_run_url(runid, config), status_code=303)
+        try:
+            _register_run_owner(runid, config, user)
+        except Exception:
+            logger.exception("rq-engine create run owner failed")
+
+        try:
+            ensure_readme_on_create(runid, config)
+        except Exception:
+            logger.exception("rq-engine create README failed")
+
+        return runid
+
+    create_result = await asyncio.to_thread(_create_run_blocking)
+    if isinstance(create_result, Response):
+        return create_result
+
+    return RedirectResponse(_run_url(create_result, config), status_code=303)
 
 
 __all__ = ["router"]

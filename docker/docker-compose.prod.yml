@@ -325,7 +325,7 @@ services:
       - uvicorn
       - wepppy.microservices.rq_engine:app
       - --workers
-      - "2"
+      - "4"
       - --host
       - 0.0.0.0
       - --port
