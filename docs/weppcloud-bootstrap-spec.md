@@ -44,7 +44,9 @@ When the user enables Bootstrap in the UI, the server:
 3. Creates an initial commit on `main` with the current input file state.
 4. Sets `receive.denyCurrentBranch=updateInstead` so HTTP pushes update the
    checked-out working tree.
-5. Installs the `pre-receive` validation hook.
+5. Sets `receive.denyNonFastForwards=true` (rejects force pushes) and
+   `http.receivepack=true` (enables pushes over HTTP).
+6. Installs the `pre-receive` validation hook.
 
 #### 2. Git HTTP Backend via Caddy
 
@@ -71,9 +73,10 @@ work tree repo at /wc1/runs/<prefix>/<runid>/
 (typically at `/usr/lib/git-core/git-http-backend`). It implements the smart HTTP
 transport protocol. It is not a standalone server — it needs a CGI host.
 
-**CGI host: `fcgiwrap`.** A lightweight FastCGI wrapper (`apt install fcgiwrap`)
-that runs as a systemd service and listens on a Unix socket. Caddy speaks
-FastCGI to it, and `fcgiwrap` invokes `git-http-backend` per-request.
+**CGI host: `fcgiwrap`.** A lightweight FastCGI wrapper. It can run as a systemd
+service on the host (Unix socket) or as a sidecar container over TCP
+(`fcgiwrap:9000`). Caddy speaks FastCGI to it, and `fcgiwrap` invokes
+`git-http-backend` per-request.
 
 **Why Caddy:** Caddy's `forward_auth` directive handles the auth subrequest to
 Flask cleanly, and its FastCGI transport proxies to `fcgiwrap` without additional
@@ -112,11 +115,12 @@ another.
 
 1. User clicks **Enable Bootstrap** (or **Mint Token** if already enabled).
 2. Server signs a JWT with a server-wide secret key containing the user's email
-   and the runid. Tokens expire after 30 days (`exp` claim).
-3. Clone URL is displayed with the JWT as the Basic auth password.
+   and the runid. Tokens expire after 2 years (`exp` claim).
+3. UI displays the Clone Command and Set Remote Origin Command with the JWT as
+   the Basic auth password.
 
 ```
-git clone https://<user_id>:<jwt>@wepp.cloud/git/<prefix>/<runid>
+git clone https://<user_id>:<jwt>@wepp.cloud/git/<prefix>/<runid>/.git
 ```
 
 The `<user_id>` is a URL-safe identifier (username or numeric ID, not raw email)
@@ -132,8 +136,8 @@ record.
 5. Check the run is eligible: nodb `_bootstrap_enabled = true`, Postgres run
    record has `bootstrap_disabled = false`, and `is_anonymous = false`.
 6. Check `sub` is a valid user with access to the run.
-7. Return 200 with `X-Auth-User` header (user email) for server-side audit
-   logging only. Commit attribution is based on the JWT audit trail (git
+7. Return 200 with `X-Auth-User` header (user email). The `pre-receive` hook
+   requires this header and records commit attribution based on the JWT (git
    author fields are not enforced).
 
 **Revocation — admin blacklist flag:**
@@ -142,7 +146,7 @@ record.
 - When bootstrap is disabled for a run, `bootstrap_disabled` is set to true in
   Postgres. All JWTs for that run become invalid immediately.
 - Re-enabling bootstrap for the same run sets `bootstrap_disabled = false`.
-  Users should mint a new JWT. Prior tokens still expire within 30 days. The
+  Users should mint a new JWT. Prior tokens still expire within 2 years. The
   nodb user opt-in remains set.
 - Only non-anonymous runs can enable bootstrap.
 
@@ -183,7 +187,9 @@ updates atomically:
 - Reject symlinks.
 - Reject files exceeding 50 MB per file.
 - Reject binary files (all tracked content should be text).
-- Do not enforce git author/committer emails; rely on JWT audit logs instead.
+- Require an authenticated user header and write a JWT-based push log for
+  commit attribution; git author/committer fields are not enforced.
+- Persist the push log at `.git/bootstrap/push-log.ndjson` for UI lookup.
 - Do not enforce commit message formats; the hook ignores message content.
 - Concurrency relies on git fast-forward rules; a second push is rejected until
   the user pulls.
@@ -239,13 +245,15 @@ def mint_bootstrap_jwt(self, user_email: str, user_id: str) -> str:
     """
     Sign and return a JWT for the given user and this run.
     Does not store anything server-side.
-    Returns the clone URL with embedded JWT.
+    Returns the clone URL with embedded JWT (UI builds commands from it).
     """
 
 def get_bootstrap_commits(self) -> list[dict]:
     """
     Return list of commits on main branch.
-    Each entry: {sha, short_sha, message, author, date}
+    Each entry: {sha, short_sha, message, author, date, pusher, git_author?}
+    `author` is derived from the JWT push log (defaults to `\"unknown\"` if
+    missing); use `git_author` for diagnostic context only.
     """
 
 def checkout_bootstrap_commit(self, sha: str) -> bool:
@@ -309,8 +317,19 @@ Third collapsible section in the existing WEPP/SWAT+ execution panel:
 │                                                     │
 │  Current: main (a1b2c3d)                            │
 │                                                     │
-│  Clone URL: https://<user_id>:<jwt>@wepp.cloud/     │
-│             git/<prefix>/<runid>             [Copy] │
+│  [Mint Token]                                       │
+│                                                     │
+│  Clone Command:                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │ git clone https://<user_id>:<jwt>@...      │     │
+│  └────────────────────────────────────────────┘     │
+│                                             [Copy]  │
+│                                                     │
+│  Set Remote Origin Command:                         │
+│  ┌────────────────────────────────────────────┐     │
+│  │ git remote set-url origin https://<...>    │     │
+│  └────────────────────────────────────────────┘     │
+│                                             [Copy]  │
 │                                                     │
 │  Commit:                                            │
 │  ┌────────────────────────────────────────────┐     │
@@ -349,11 +368,16 @@ Before Bootstrap is enabled, the collapsible shows a single:
 
 1. User clicks **Enable Bootstrap**.
 2. Server `git init`s (if not already initialized), commits current state.
-3. User clicks **Mint Token** — server signs a JWT, UI shows clone URL.
-4. User clones locally:
-   ```
-   git clone https://<user_id>:<jwt>@wepp.cloud/git/<prefix>/<runid>
-   ```
+3. User clicks **Mint Token** — server signs a JWT, UI shows Clone Command and
+   Set Remote Origin Command.
+4. User runs the Clone Command (or runs Set Remote Origin inside an existing
+   clone):
+```
+git clone https://<user_id>:<jwt>@wepp.cloud/git/<prefix>/<runid>/.git
+```
+```
+git remote set-url origin https://<user_id>:<jwt>@wepp.cloud/git/<prefix>/<runid>/.git
+```
 5. User edits input files, commits, pushes.
 6. Push hook validates files. Rejects if `.run` modified or formats invalid.
 7. User returns to UI, refreshes commit list (or it auto-refreshes).
@@ -371,14 +395,17 @@ Example Caddyfile snippet:
 wepp.cloud {
     # ... existing routes ...
 
-    handle_path /git/* {
-        forward_auth localhost:5000 {
+    handle /git/* {
+        forward_auth weppcloud:8000 {
             uri /api/bootstrap/verify-token
-            copy_headers {
-                Authorization
-            }
+            copy_headers X-Auth-User
+            header_up Authorization {http.request.header.Authorization}
+            header_up X-Forwarded-Uri {uri}
+            header_up X-Forwarded-Host {host}
+            header_up X-Forwarded-Proto {scheme}
         }
-        reverse_proxy unix//run/fcgiwrap.socket {
+        uri strip_prefix /git
+        reverse_proxy fcgiwrap:9000 {
             transport fastcgi {
                 env GIT_PROJECT_ROOT /wc1/runs
                 env GIT_HTTP_EXPORT_ALL ""
@@ -389,6 +416,17 @@ wepp.cloud {
 }
 ```
 
+`forward_auth` should see the unstripped `/git/...` path (so the verify endpoint
+can validate it). `uri strip_prefix /git` ensures `git-http-backend` receives
+`/<prefix>/<runid>/.git/...` relative to `GIT_PROJECT_ROOT`.
+
+For Docker-based deployments, run `fcgiwrap` as a sidecar container (exposed on
+`fcgiwrap:9000`) or bind-mount the host socket into the Caddy container and
+replace the upstream with `unix//run/fcgiwrap.socket`. The sidecar should use
+the same Python environment as WEPPcloud (or otherwise have the WEPPcloud
+dependencies available), because the `pre-receive` hook imports WEPPcloud
+parsers for validation.
+
 ### Server Dependencies
 
 ```
@@ -397,12 +435,86 @@ fcgiwrap               # FastCGI wrapper for CGI programs (apt install fcgiwrap)
 caddy                  # Reverse proxy with forward_auth and FastCGI transport
 ```
 
-`fcgiwrap` runs as a systemd service (`systemctl enable --now fcgiwrap.socket`)
-and listens on a Unix socket (typically `/run/fcgiwrap.socket`). Caddy's FastCGI
-transport connects to this socket to invoke `git-http-backend` per-request.
+`fcgiwrap` can run as a systemd service (`systemctl enable --now fcgiwrap.socket`)
+and listen on a Unix socket (typically `/run/fcgiwrap.socket`), or it can run in
+a sidecar container and listen on TCP (for example `fcgiwrap:9000`). Caddy's
+FastCGI transport should target whichever endpoint you deploy.
+
+If the `fcgiwrap` process runs as a different user than the repo owner, Git may
+refuse to serve the repo (`fatal: detected dubious ownership`). Set
+`safe.directory` (for example `git config --system --add safe.directory '*'`) or
+run `fcgiwrap` under the same user/group as the run directories.
 
 The `forward_auth` block ensures every git operation hits the Flask token
 verification endpoint before reaching `git-http-backend`.
+
+`forward_auth` passes response headers upstream, so `X-Auth-User` from the
+verify endpoint becomes `HTTP_X_AUTH_USER` for `git-http-backend` and hooks.
+
+If you have an upstream proxy (HAProxy, nginx, etc.) in front of Caddy, ensure
+it preserves the `Authorization` header. Basic auth credentials are required
+for every git HTTP request.
+
+## Deployment & Operations
+
+### Deploy Checklist
+
+- Set `EXTERNAL_HOST` to the public hostname (used as the JWT `aud` claim).
+- Set `WEPP_AUTH_JWT_SECRET` (and `WEPP_AUTH_JWT_SECRETS` if rotating).
+- Apply the Postgres migration that adds `runs.bootstrap_disabled`.
+- Update the Caddy `/git/*` route (forward auth + header forwarding + FastCGI).
+- Run `fcgiwrap` as a sidecar using the WEPPcloud image so the `pre-receive`
+  hook can import the WEPP parsers.
+- Rebuild the controller bundle after UI changes:
+  `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
+
+**Sidecar example (compose):**
+
+```yaml
+services:
+  fcgiwrap:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.fcgiwrap
+      args:
+        BASE_IMAGE: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+    volumes:
+      - /wc1:/wc1
+      - /wc1/geodata:/geodata
+    expose:
+      - "9000"
+```
+
+### Integration Notes
+
+- The UI provides a **Clone Command** (new clone) and **Set Remote Origin
+  Command** (existing clone). The username should be a URL-safe ID (numeric
+  user ID preferred), not raw email.
+- Tokens expire after 2 years. Mint a new token and update `origin` when
+  necessary.
+- Use the no-prep endpoints for bootstrap runs:
+  `/runs/{runid}/{config}/run-wepp-npprep`,
+  `/runs/{runid}/{config}/run-swat-noprep`,
+  `/runs/{runid}/{config}/run-wepp-watershed-no-prep`.
+- Automated pipelines that are not using bootstrap should `git checkout main`
+  before prep so they operate on canonical inputs.
+- If `fcgiwrap` runs as a different user than the run directories, configure
+  `git config --system --add safe.directory '*'` (or run as the same user).
+
+### Troubleshooting
+
+- **401 missing authorization** — upstream proxy stripped `Authorization`. Ensure
+  it is preserved and Caddy forwards it to `/api/bootstrap/verify-token`.
+- **401 invalid git path** — missing/stripped `X-Forwarded-Uri`. Ensure Caddy
+  passes the original path and only strips `/git` after `forward_auth`.
+- **401 invalid token / expired** — mint a new token; verify `EXTERNAL_HOST`
+  matches the public hostname (JWT `aud`).
+- **502/503 from Caddy** — `fcgiwrap` unavailable or misconfigured upstream.
+- **500 with "dubious ownership"** — set `safe.directory` or align user/group.
+- **pre-receive: python3 not found / import error** — run `fcgiwrap` with the
+  WEPPcloud image and mount `/workdir/wepppy` in dev so parsers are available.
+- **pre-receive validation failed** — fix file format, remove `.run` changes,
+  or reduce file size below 50 MB.
 
 ## File Validation Details
 
@@ -449,44 +561,53 @@ verification endpoint before reaching `git-http-backend`.
    operation.
 
 3. **JWT scope + expiry:** Each JWT is bound to a specific
-   `(external_host, runid, user_email)` triple and expires after 30 days. The
+   `(external_host, runid, user_email)` triple and expires after 2 years. The
    verify endpoint confirms the `aud` matches the current host and the `runid`
    matches the URL path. No cross-run or cross-deployment access.
 
-4. **Push validation:** Server-side `pre-receive` hook is the security boundary.
+4. **Commit attribution:** The `pre-receive` hook requires an authenticated
+   user header (`X-Auth-User` → `HTTP_X_AUTH_USER`) and logs commit SHAs with
+   that JWT identity. The UI should display this log instead of git author
+   fields.
+
+5. **Push validation:** Server-side `pre-receive` hook is the security boundary.
    Even if a user crafts a malicious push, the hook rejects it before files land
    on disk.
 
-5. **`.run` file lockdown:** These files execute via `subprocess`. No user
+6. **`.run` file lockdown:** These files execute via `subprocess`. No user
    modifications permitted. Hook enforces this by diffing against the protected
    baseline.
 
-6. **Path traversal:** Hook rejects any paths containing `..`, symlinks, or
+7. **Path traversal:** Hook rejects any paths containing `..`, symlinks, or
    paths outside the allowed directories.
 
-7. **No shell in commit messages:** Commit messages are never interpolated into
+8. **No shell in commit messages:** Commit messages are never interpolated into
    shell commands.
 
 ## Implementation Plan
-
-- [ ] Add `runs.bootstrap_disabled` (admin blacklist) and enforce
+- [x] Add `runs.bootstrap_disabled` (admin blacklist) and enforce
   `is_anonymous = false` gating in enable and verify flows.
-- [ ] Update nodb `Wepp` to set `_bootstrap_enabled` as a one-way user opt-in.
-- [ ] Implement JWT signing with 30-day expiry and `/api/bootstrap/verify-token`
+- [x] Update nodb `Wepp` to set `_bootstrap_enabled` as a one-way user opt-in.
+- [x] Implement JWT signing with 2-year expiry and `/api/bootstrap/verify-token`
   eligibility checks (nodb opt-in + Postgres not disabled).
-- [ ] Initialize git repo with `.gitignore` (including `wepp/runs/tc_out.txt`),
-  set `receive.denyCurrentBranch=updateInstead`, and install `pre-receive`.
-- [ ] Implement `pre-receive` hook: path allowlist, `.run` protection, symlink
+- [x] Initialize git repo with `.gitignore` (including `wepp/runs/tc_out.txt`),
+  set `receive.denyCurrentBranch=updateInstead`,
+  `receive.denyNonFastForwards=true`, `http.receivepack=true`, and install
+  `pre-receive`.
+- [x] Implement `pre-receive` hook: path allowlist, `.run` protection, symlink
   rejection, binary rejection, 50 MB per-file cap, and parser validation via a
-  process pool with fail-fast behavior.
-- [ ] Add rq-engine `bootstrap_routes.py` with no-prep endpoints:
+  process pool with fail-fast behavior. Record JWT-based commit attribution to
+  `.git/bootstrap/push-log.ndjson`.
+- [x] Add rq-engine `bootstrap_routes.py` with no-prep endpoints:
   `/runs/{runid}/{config}/run-wepp-npprep`,
   `/runs/{runid}/{config}/run-swat-noprep`,
   `/runs/{runid}/{config}/run-wepp-watershed-no-prep`.
-- [ ] Update standard pipeline entrypoints to `git checkout main` when
+- [x] Update standard pipeline entrypoints to `git checkout main` when
   Bootstrap is enabled; keep no-prep bootstrap routes on the current checkout.
-- [ ] Build the Bootstrap UI panel (enable, mint token, clone URL, commit list,
-  checkout, run buttons) and mark disable as admin-only.
-- [ ] Add tests for auth gating, JWT expiry, hook rejection cases, and parser
-  validation errors.
+- [x] Build the Bootstrap UI panel (enable, mint token, clone + remote commands,
+  commit list, checkout, run buttons) and mark disable as admin-only. Display
+  JWT-based `pusher` and optionally `git_author` for commit attribution.
+- [x] Add tests for auth gating (Flask-Security integration), JWT expiry/invalid
+  tokens for `/api/bootstrap/verify-token`, hook rejection cases, parser
+  validation errors, push-log parsing, and bootstrap route coverage.
 - [ ] Deprecate `wepppy-win-bootstrap` docs in favor of this workflow.

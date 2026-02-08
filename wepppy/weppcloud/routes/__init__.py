@@ -107,6 +107,7 @@ from .run_0 import run_0_bp
 from ._security import security_logging_bp, security_oauth_bp, security_ui_bp
 from .ui_showcase import ui_showcase_bp
 from .recorder_bp import recorder_bp
+from .bootstrap import bootstrap_bp
 try:
     from .test_bp import test_bp
 except ImportError:
@@ -138,6 +139,7 @@ _RUN_CONTEXT_BLUEPRINTS = dict.fromkeys([
     readme_bp,
     rhem_bp,
     run_0_bp,
+    bootstrap_bp,
     soils_bp,
     stats_bp,
     treatments_bp,
@@ -202,5 +204,6 @@ __all__ = [
     'security_oauth_bp',
     'recorder_bp',
     'ui_showcase_bp',
+    'bootstrap_bp',
     'test_bp',
 ]

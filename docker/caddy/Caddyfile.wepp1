@@ -88,6 +88,25 @@ wepp.cloud {
         }
     }
 
+    handle /git/* {
+        forward_auth weppcloud:8000 {
+            uri /api/bootstrap/verify-token
+            copy_headers X-Auth-User
+            header_up Authorization {http.request.header.Authorization}
+            header_up X-Forwarded-Uri {uri}
+            header_up X-Forwarded-Host {host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+        uri strip_prefix /git
+        reverse_proxy fcgiwrap:9000 {
+            transport fastcgi {
+                env GIT_PROJECT_ROOT /wc1/runs
+                env GIT_HTTP_EXPORT_ALL ""
+                env SCRIPT_FILENAME /usr/lib/git-core/git-http-backend
+            }
+        }
+    }
+
     handle_path /weppcloudr* {
         reverse_proxy weppcloudr:8050 {
             header_up X-Forwarded-Prefix /weppcloudr

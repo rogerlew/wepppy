@@ -805,6 +805,157 @@ var Wepp = (function () {
                 });
         };
 
+        wepp.runNoPrep = function () {
+            var taskMsg = "Submitting WEPP no-prep run";
+
+            wepp.reset_panel_state(wepp, {
+                taskMessage: taskMsg,
+                resultsTarget: resultsContainer,
+                hintTarget: hintAdapter
+            });
+
+            resetCompletionSeen();
+            ensureWeppStatusStream();
+            wepp.connect_status_stream(wepp);
+            if (hasSwatControls) {
+                resetSwatCompletionSeen();
+                ensureSwatStatusStream();
+                connectSwatStatusStream();
+            }
+
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+
+            if (weppEvents && typeof weppEvents.emit === "function") {
+                weppEvents.emit("wepp:run:started", { payload: payload });
+            }
+
+            http.postJsonWithSessionToken(
+                url_for_run("run-wepp-npprep", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.error || response.errors)) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = "run_wepp_noprep_rq job submitted: " + response.job_id;
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message, { job_id: response.job_id });
+                    wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+                    wepp.set_rq_job_id(wepp, response.job_id);
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run:queued", { job_id: response.job_id, payload: payload });
+                    }
+                })
+                .catch(function (error) {
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run:error", toResponsePayload(http, error));
+                    }
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
+        wepp.runWatershedNoPrep = function () {
+            var taskMsg = "Submitting WEPP watershed run (no-prep)";
+
+            wepp.reset_panel_state(wepp, {
+                taskMessage: taskMsg,
+                resultsTarget: resultsContainer,
+                hintTarget: hintAdapter
+            });
+
+            resetCompletionSeen();
+            ensureWeppStatusStream();
+            wepp.connect_status_stream(wepp);
+            if (hasSwatControls) {
+                resetSwatCompletionSeen();
+                ensureSwatStatusStream();
+                connectSwatStatusStream();
+            }
+
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+
+            if (weppEvents && typeof weppEvents.emit === "function") {
+                weppEvents.emit("wepp:run_watershed:started", { payload: payload });
+            }
+
+            http.postJsonWithSessionToken(
+                url_for_run("run-wepp-watershed-no-prep", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.error || response.errors)) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = "run_wepp_watershed_noprep_rq job submitted: " + response.job_id;
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message, { job_id: response.job_id });
+                    wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+                    wepp.set_rq_job_id(wepp, response.job_id);
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run_watershed:queued", { job_id: response.job_id, payload: payload });
+                    }
+                })
+                .catch(function (error) {
+                    if (weppEvents && typeof weppEvents.emit === "function") {
+                        weppEvents.emit("wepp:run_watershed:error", toResponsePayload(http, error));
+                    }
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
+        wepp.runSwatNoPrep = function () {
+            var taskMsg = "Submitting SWAT run (no-prep)";
+
+            var cachedResults = wepp.resultsContainer;
+            wepp.resultsContainer = null;
+            wepp.reset_panel_state(wepp, {
+                taskMessage: taskMsg,
+                hintTarget: swatHintAdapter
+            });
+            wepp.resultsContainer = cachedResults;
+
+            resetSwatCompletionSeen();
+            ensureWeppStatusStream();
+            ensureSwatStatusStream();
+            wepp.connect_status_stream(wepp);
+            connectSwatStatusStream();
+
+            var payload = forms.serializeForm(formElement, { format: "json" }) || {};
+
+            http.postJsonWithSessionToken(
+                url_for_run("run-swat-noprep", { prefix: "/rq-engine/api" }),
+                payload,
+                { form: formElement }
+            )
+                .then(function (result) {
+                    var response = result && result.body ? result.body : null;
+                    if (response && (response.error || response.errors)) {
+                        wepp.pushResponseStacktrace(wepp, response);
+                        return;
+                    }
+                    var message = "run_swat_noprep_rq job submitted: " + response.job_id;
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html(message);
+                    }
+                    wepp.appendStatus(message, { job_id: response.job_id });
+                    wepp.poll_completion_event = "SWAT_RUN_TASK_COMPLETED";
+                    wepp.set_rq_job_id(wepp, response.job_id);
+                })
+                .catch(function (error) {
+                    wepp.pushResponseStacktrace(wepp, toResponsePayload(http, error));
+                });
+        };
+
         wepp.runSwat = function () {
             var taskMsg = "Submitting SWAT run";
 
@@ -860,6 +1011,13 @@ var Wepp = (function () {
                 wepp.run();
             }));
 
+            wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-noprep"]', function (event) {
+                if (event && typeof event.preventDefault === "function") {
+                    event.preventDefault();
+                }
+                wepp.runNoPrep();
+            }));
+
             wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-watershed"]', function (event) {
                 if (event && typeof event.preventDefault === "function") {
                     event.preventDefault();
@@ -867,11 +1025,25 @@ var Wepp = (function () {
                 wepp.runWatershed();
             }));
 
+            wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-watershed-noprep"]', function (event) {
+                if (event && typeof event.preventDefault === "function") {
+                    event.preventDefault();
+                }
+                wepp.runWatershedNoPrep();
+            }));
+
             wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-swat"]', function (event) {
                 if (event && typeof event.preventDefault === "function") {
                     event.preventDefault();
                 }
                 wepp.runSwat();
+            }));
+
+            wepp._delegates.push(dom.delegate(formElement, "click", '[data-wepp-action="run-swat-noprep"]', function (event) {
+                if (event && typeof event.preventDefault === "function") {
+                    event.preventDefault();
+                }
+                wepp.runSwatNoPrep();
             }));
 
             wepp._delegates.push(dom.delegate(formElement, "change", "[data-wepp-routine]", function () {
@@ -937,10 +1109,31 @@ var Wepp = (function () {
                         completionEvent = "WEPP_RUN_TASK_COMPLETED";
                     }
                 }
+                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_noprep_rq")) {
+                    var noprepValue = jobIds.run_wepp_noprep_rq;
+                    if (noprepValue !== undefined && noprepValue !== null) {
+                        jobId = String(noprepValue);
+                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+                    }
+                }
+                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_watershed_noprep_rq")) {
+                    var watershedNoPrepValue = jobIds.run_wepp_watershed_noprep_rq;
+                    if (watershedNoPrepValue !== undefined && watershedNoPrepValue !== null) {
+                        jobId = String(watershedNoPrepValue);
+                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+                    }
+                }
                 if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_swat_rq")) {
                     var swatValue = jobIds.run_swat_rq;
                     if (swatValue !== undefined && swatValue !== null) {
                         jobId = String(swatValue);
+                        completionEvent = "SWAT_RUN_TASK_COMPLETED";
+                    }
+                }
+                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_swat_noprep_rq")) {
+                    var swatNoPrepValue = jobIds.run_swat_noprep_rq;
+                    if (swatNoPrepValue !== undefined && swatNoPrepValue !== null) {
+                        jobId = String(swatNoPrepValue);
                         completionEvent = "SWAT_RUN_TASK_COMPLETED";
                     }
                 }

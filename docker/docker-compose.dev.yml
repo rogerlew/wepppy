@@ -700,6 +700,18 @@ services:
       - weppcloudr
       - rq-dashboard
       - profile-playback
+      - fcgiwrap
+
+  fcgiwrap:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.fcgiwrap
+    volumes:
+      - ../:/workdir/wepppy
+      - ${WC1_DIR}:/wc1
+      - ${GEODATA_DIR}:/geodata
+    expose:
+      - "9000"
 
 networks:
   default:

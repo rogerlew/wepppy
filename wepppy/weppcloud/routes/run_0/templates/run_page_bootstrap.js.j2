@@ -68,6 +68,8 @@
         },
         "user": {
             "isPowerUser": current_user.has_role('PowerUser'),
+            "isAdmin": current_user.has_role('Admin') or current_user.has_role('Root'),
+            "isRoot": current_user.has_role('Root'),
             "isAuthenticated": user.is_authenticated,
             "readonly": ron.readonly
         },
@@ -141,6 +143,11 @@
                 "hasRun": wepp.has_run,
                 "dssExportMode": wepp.dss_export_mode,
                 "hasDssZip": wepp.has_dss_zip
+            },
+            "bootstrap": {
+                "enabled": wepp.bootstrap_enabled,
+                "adminDisabled": bootstrap_admin_disabled,
+                "isAnonymous": bootstrap_is_anonymous
             },
             "omni": {
                 "hasRanScenarios": omni_has_ran_scenarios,
@@ -247,6 +254,7 @@
         add("climate", typeof Climate !== "undefined" ? Climate : null);
         add("observed", typeof Observed !== "undefined" ? Observed : null);
         add("wepp", typeof Wepp !== "undefined" ? Wepp : null);
+        add("bootstrap", typeof BootstrapControl !== "undefined" ? BootstrapControl : null);
         add("dssExport", typeof DssExport !== "undefined" ? DssExport : null);
         if (modFlags.treatments) {
             add("treatments", typeof Treatments !== "undefined" ? Treatments : null);

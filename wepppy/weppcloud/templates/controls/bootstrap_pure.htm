@@ -1,0 +1,163 @@
+{% import "controls/_pure_macros.html" as ui %}
+{% from "shared/console_macros.htm" import button_row %}
+
+<div class="wc-stack" data-bootstrap-root>
+  <div class="wc-alert wc-alert--info" role="status" aria-live="polite" hidden data-bootstrap-message>
+    <p class="wc-alert__body" data-bootstrap-message-body></p>
+  </div>
+
+  <section data-bootstrap-disabled>
+    <p class="wc-text-muted">
+      Enable git-based input file management. Clone the run's WEPP and SWAT+ input files,
+      modify them locally, and push changes back.
+    </p>
+    {% call button_row() %}
+      <button
+        type="button"
+        class="pure-button pure-button-primary disable-readonly"
+        data-bootstrap-action="enable">
+        Enable Bootstrap
+      </button>
+    {% endcall %}
+    <p class="wc-text-muted">Requires a non-anonymous run tied to a user account.</p>
+  </section>
+
+  <section data-bootstrap-enabled hidden>
+    {% call ui.fieldset(legend="Repository") %}
+      <div class="wc-field wc-field--text-inline">
+        <div class="wc-field__inline-row">
+          <span class="wc-field__label">Current checkout</span>
+          <div class="wc-field__input-row">
+            <code data-bootstrap-current-ref>—</code>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;"></div>
+      {% call button_row() %}
+        <button
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-bootstrap-action="mint">
+          Mint Token
+        </button>
+      {% endcall %}
+
+      <div class="wc-field">
+        <label class="wc-field__label" for="bootstrap_clone_command">Clone Command</label>
+        <div class="wc-field__input-row">
+          <textarea
+            id="bootstrap_clone_command"
+            class="wc-field__control wc-field__control--text"
+            style="flex: 1 1 auto; min-width: 240px; width: 100%; height: 164px;"
+            autocomplete="off"
+            readonly
+            data-bootstrap-clone-command></textarea>
+          <button
+            type="button"
+            class="pure-button pure-button-secondary"
+            data-bootstrap-action="copy-clone"
+            disabled>
+            Copy
+          </button>
+        </div>
+        <p class="wc-field__help">
+          Run this from the directory where you want the repo cloned. Tokens expire after 2 years.
+          Mint a new token anytime.
+        </p>
+      </div>
+
+      <div class="wc-field">
+        <label class="wc-field__label" for="bootstrap_remote_command">Set Remote Origin Command</label>
+        <div class="wc-field__input-row">
+          <textarea
+            id="bootstrap_remote_command"
+            class="wc-field__control wc-field__control--text"
+            style="flex: 1 1 auto; min-width: 240px; width: 100%; height: 164px;"
+            autocomplete="off"
+            readonly
+            data-bootstrap-remote-command></textarea>
+          <button
+            type="button"
+            class="pure-button pure-button-secondary"
+            data-bootstrap-action="copy-remote"
+            disabled>
+            Copy
+          </button>
+        </div>
+        <p class="wc-field__help">Expired Token? Run inside an existing cloned repo to update `origin` and push to run.</p>
+      </div>
+    {% endcall %}
+
+    {% call ui.fieldset(legend="History") %}
+      <div class="wc-field">
+        <label class="wc-field__label" for="bootstrap_commit_select">Commit</label>
+        <select
+          id="bootstrap_commit_select"
+          class="wc-field__control"
+          data-bootstrap-field="commit">
+        </select>
+        <p class="wc-field__help" data-bootstrap-commit-meta>—</p>
+      </div>
+
+      {% call button_row() %}
+        <button
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-bootstrap-action="refresh">
+          Refresh Commits
+        </button>
+        <button
+          type="button"
+          class="pure-button pure-button-primary disable-readonly"
+          data-bootstrap-action="checkout">
+          Checkout
+        </button>
+      {% endcall %}
+    {% endcall %}
+
+    {% call ui.fieldset(legend="Run (No Prep)") %}
+      {% call button_row() %}
+        <button
+          id="btn_run_wepp_noprep"
+          type="button"
+          class="pure-button pure-button-primary disable-readonly"
+          data-wepp-action="run-noprep">
+          Run WEPP Hillslopes and Watershed
+        </button>
+        <button
+          id="btn_run_wepp_watershed_noprep"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-wepp-action="run-watershed-noprep">
+          Run WEPP Watershed
+        </button>
+        {% if swat %}
+        <button
+          id="btn_run_swat_noprep"
+          type="button"
+          class="pure-button pure-button-secondary disable-readonly"
+          data-wepp-action="run-swat-noprep">
+          Run SWAT+ Channel Routing
+        </button>
+        {% endif %}
+      {% endcall %}
+    {% endcall %}
+
+    {% if user.has_role('Admin') or user.has_role('Root') %}
+      {% call ui.fieldset(legend="Admin") %}
+        <p class="wc-text-muted">
+          Disable bootstrap for this run to block git access. Existing commits remain on disk.
+        </p>
+        {% call button_row() %}
+          <button
+            type="button"
+            class="pure-button pure-button-secondary"
+            data-bootstrap-action="disable">
+            Disable Bootstrap (Admin)
+          </button>
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+  </section>
+</div>

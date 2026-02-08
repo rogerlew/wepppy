@@ -106,6 +106,7 @@ class Run(db.Model):
     config = db.Column(db.String(255))
     last_modified = db.Column(db.DateTime(), nullable=True)
     last_accessed = db.Column(db.DateTime(), nullable=True)
+    bootstrap_disabled = db.Column(db.Boolean(), default=False, nullable=False)
 
     @property
     def valid(self):

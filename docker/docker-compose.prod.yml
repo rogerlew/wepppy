@@ -53,6 +53,23 @@ x-wepppy-service: &wepppy-service
     - backend
 
 services:
+  fcgiwrap:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.fcgiwrap
+      args:
+        BASE_IMAGE: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+    image: wepppy-fcgiwrap
+    restart: unless-stopped
+    cpuset: "40-47"
+    volumes:
+      - /wc1:/wc1
+      - /wc1/geodata:/geodata
+    expose:
+      - "9000"
+    networks:
+      - backend
+
   weppcloud:
     <<: *wepppy-service
     cpuset: "40-47"
@@ -490,6 +507,8 @@ services:
       - ../wepppy/weppcloud/static:/srv/weppcloud/static:ro
     depends_on:
       weppcloud:
+        condition: service_started
+      fcgiwrap:
         condition: service_started
       status:
         condition: service_started

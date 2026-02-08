@@ -32,6 +32,8 @@ def run_swat_rq(runid: str) -> Job:
         if wepp.islocked():
             raise Exception(f"{runid} is locked")
 
+        wepp.ensure_bootstrap_main()
+
         if not wepp.mods or "swat" not in wepp.mods:
             raise Exception("SWAT mod is not enabled for this run")
 
@@ -50,6 +52,42 @@ def run_swat_rq(runid: str) -> Job:
                 depends_on=job_build,
             )
             job.meta["jobs:1,func:_run_swat_rq"] = job_run.id
+            job.save()
+
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job.id} ENQUEUED {func_name}({runid}) -> awaiting final job {job_run.id}",
+        )
+    except Exception:
+        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
+        raise
+
+    return job_run
+
+
+@with_exception_logging
+def run_swat_noprep_rq(runid: str) -> Job:
+    """Enqueue SWAT+ execution using existing TxtInOut inputs (no prep)."""
+    try:
+        job = get_current_job()
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f"{runid}:swat"
+        StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
+
+        wd = get_wd(runid)
+        wepp = Wepp.getInstance(wd)
+
+        if wepp.islocked():
+            raise Exception(f"{runid} is locked")
+
+        if not wepp.mods or "swat" not in wepp.mods:
+            raise Exception("SWAT mod is not enabled for this run")
+
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job_run = q.enqueue_call(_run_swat_rq, (runid,), timeout=TIMEOUT)
+            job.meta["jobs:0,func:_run_swat_rq"] = job_run.id
             job.save()
 
         StatusMessenger.publish(

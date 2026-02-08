@@ -120,6 +120,37 @@ Audit notes:
 7. `_run_hillslope_watbal_rq` and `post_dss_export_rq` target continuous runs; legacy single-storm conditionals may skip them, but single-storm is deprecated.
 8. `_analyze_return_periods_rq` depends on `totalwatsed3`; legacy single-storm runs skip this pipeline and are deprecated.
 
+**`run_wepp_noprep_rq(runid)`**
+
+Graph (prep stages skipped; uses existing inputs under `wepp/runs/`):
+```text
+jobs:1 _run_hillslopes_rq
+  -> _build_hillslope_interchange_rq
+  -> _build_totalwatsed3_rq
+  -> watershed runs (if run_watershed)
+  -> post-run jobs (cleanup, prep details, watbal, loss grid, watershed interchange, return periods)
+  -> exports (legacy arc, gpkg)
+  -> (post_dss_export_rq if enabled and run_watershed)
+  -> _log_complete_rq
+```
+
+| Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
+| --- | --- | --- | --- |
+| jobs:1 | `_run_hillslopes_rq` | none | `runs_dir/*.run`; `runs_dir/p*.slp`; `runs_dir/p*.sol`; `runs_dir/p*.man`; `runs_dir/p*.cli` |
+| jobs:2 | `_build_hillslope_interchange_rq` | `_run_hillslopes_rq` | `output_dir/H*.pass.dat`; `output_dir/H*.ebe.dat`; `output_dir/H*.element.dat`; `output_dir/H*.loss.dat`; `output_dir/H*.soil.dat`; `output_dir/H*.wat.dat` |
+| jobs:2 | `_build_totalwatsed3_rq` | `_build_hillslope_interchange_rq` | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash` parquet; `wat_dir/hillslopes.parquet` |
+| jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | `_run_hillslopes_rq` | `runs_dir/pw0.*` as above; SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
+| jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` or `_run_hillslopes_rq` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
+| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
+| jobs:4 | `_run_hillslope_watbal_rq` | `post_dependencies` + `_build_hillslope_interchange_rq` | `output_dir/interchange/H.wat.parquet` |
+| jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` |
+| jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
+| jobs:4 | `_analyze_return_periods_rq` | `_post_watershed_interchange_rq` + `_build_totalwatsed3_rq` | `output_dir/interchange/ebe_pw0.parquet`; `output_dir/interchange/totalwatsed3.parquet` |
+| jobs:2 | `post_dss_export_rq` | `_build_hillslope_interchange_rq` (+ `_post_run_cleanup_out_rq` if run_watershed) | `output_dir/interchange/H.pass.parquet`; `output_dir/interchange/H.wat.parquet`; optional `ash` parquet; `output_dir/chan.out`; `watershed.channels_shp`; `wat_dir/network.txt`; `export/dss` dir |
+| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
+| jobs:5 | `_post_gpkg_export_rq` | `jobs4_post` | `watershed.subwta_shp`; `watershed.channels_shp`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet`; `output_dir/interchange/loss_pw0.hill.parquet`; `output_dir/interchange/loss_pw0.chn.parquet` |
+| jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
+
 **`run_wepp_watershed_rq(runid)`**
 
 | Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
@@ -137,6 +168,18 @@ Audit notes:
 1. This entrypoint bypasses hillslope prep/run; ensure downstream jobs only require watershed outputs.
 2. Return-period exports are not enqueued here because `totalwatsed3` is not scheduled.
 
+**`run_wepp_watershed_noprep_rq(runid)`**
+
+| Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
+| --- | --- | --- | --- |
+| jobs:3 | `run_watershed_rq` / `run_ss_batch_watershed_rq` | none | `runs_dir/pw0.*` as above; SS batch `runs_dir/pw0.<ss_batch_id>.cli` |
+| jobs:4 | `_post_run_cleanup_out_rq` | `jobs3_watersheds` | `runs_dir/*.out`; optional `runs_dir/tc_out.txt` |
+| jobs:4 | `_post_prep_details_rq` | `post_dependencies` | `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; `landuse/landuse.parquet`; `soils/soils.parquet` |
+| jobs:4 | `_post_make_loss_grid_rq` | `post_dependencies` | `watershed.subwta`; `watershed.discha`; `output_dir/H*` (job skipped when hillslope outputs are missing) |
+| jobs:4 | `_post_watershed_interchange_rq` | `_post_run_cleanup_out_rq` | `output_dir/pass_pw0.txt`; `output_dir/ebe_pw0.txt`; `output_dir/chan.out`; `output_dir/chanwb.out`; `output_dir/chnwb.txt`; `output_dir/soil_pw0.txt` or `output_dir/soil_pw0.txt.gz`; `output_dir/loss_pw0.txt` |
+| jobs:5 | `_post_legacy_arc_export_rq` | `jobs4_post` | `topaz_wd/*.ARC`; `topaz_wd/SUBCATCHMENTS.JSON`; `topaz_wd/CHANNELS.JSON`; `output_dir/loss_pw0.txt`; `wat_dir/hillslopes.parquet`; `wat_dir/channels.parquet`; optional `ash` metadata |
+| jobs:6 | `_log_complete_rq` | `jobs4_post + jobs5_post` | `ron.nodb` |
+
 **`wepppy/rq/swat_rq.py`**
 
 **`run_swat_rq(runid)`**
@@ -148,6 +191,12 @@ Audit notes:
 
 Audit notes:
 1. This assumes WEPP outputs already exist. The caller is responsible for enqueueing only after WEPP hillslope/watershed outputs are ready.
+
+**`run_swat_noprep_rq(runid)`**
+
+| Stage | Child job | `depends_on` | File prerequisites (relative to `wd`) |
+| --- | --- | --- | --- |
+| jobs:0 | `_run_swat_rq` | none | `swat_txtinout_dir/*` |
 
 **`wepppy/rq/batch_rq.py`**
 
@@ -282,7 +331,7 @@ nas.rocket.net:/wepp  /geodata  nfs4  rw,noatime,proto=tcp,vers=4.2,hard,intr,ac
 | Option | Effect |
 | --- | --- |
 | `hard` | NFS operations block indefinitely until the server responds, preventing spurious `EIO` errors during transient load spikes. Workers wait rather than fail. |
-| `intr` | Allows blocked hard-mount operations to be interrupted by signals, so jobs can still be cancelled or timed out by RQ without requiring a full process kill. |
+| `intr` | Allows blocked hard-mount operations to be interrupted by signals, so jobs can still be canceled or timed out by RQ without requiring a full process kill. |
 | `actimeo=0` | Disables attribute caching entirely. Every `stat()`, `open()`, and directory listing goes to the server, ensuring that when an upstream job writes a file, downstream jobs should see it immediately. This targets the suspected file-guard race conditions. |
 | *(removed `rsize`/`wsize`)* | Lets the NFS client and server auto-negotiate optimal transfer sizes (typically 1 MB on NFSv4.2), improving throughput for large parquet writes and reducing round-trips. |
 | *(removed `timeo`)* | With `hard` mount, timeout is irrelevant; operations retry until the server responds. |

@@ -19,6 +19,18 @@ x-wepppy-image: &wepppy-image
     <<: *wepppy-env
 
 services:
+  fcgiwrap:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.fcgiwrap
+      args:
+        BASE_IMAGE: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+    image: wepppy-fcgiwrap
+    cpuset: "32-47"
+    volumes:
+      - /geodata/wc1:/wc1
+      - /geodata:/geodata
+
   caddy:
     cpuset: "32-47"
     ports:

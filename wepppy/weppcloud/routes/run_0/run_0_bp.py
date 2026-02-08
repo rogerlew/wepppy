@@ -297,7 +297,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
 
     _log_access(base_wd, current_user, request.remote_addr)
     timestamp = datetime.now()
-    Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
+    run_record = Run.query.filter(Run.runid == runid).first()
+    if run_record is not None:
+        run_record.last_accessed = timestamp
+    else:
+        Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
     db.session.commit()
 
     mods_list = ron.mods or []
@@ -320,6 +324,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_dss_export = 'dss_export' in mods_list or playwright_load_all
     show_path_ce = 'path_ce' in mods_list or playwright_load_all
+
+    bootstrap_admin_disabled = bool(getattr(run_record, "bootstrap_disabled", False)) if run_record else False
+    bootstrap_is_anonymous = not bool(getattr(run_record, "owner_id", None)) if run_record else True
     
     omni_has_ran_scenarios = bool(omni and omni.has_ran_scenarios)
     omni_has_ran_contrasts = bool(omni and omni.has_ran_contrasts)
@@ -397,7 +404,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
         is_omni_child=is_omni_child,
         omni_has_ran_scenarios=omni_has_ran_scenarios,
         omni_has_ran_contrasts=omni_has_ran_contrasts,
-        mod_visibility=mod_visibility
+        mod_visibility=mod_visibility,
+        bootstrap_admin_disabled=bootstrap_admin_disabled,
+        bootstrap_is_anonymous=bootstrap_is_anonymous
     )
     return context
 

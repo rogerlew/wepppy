@@ -1,0 +1,15 @@
+ARG BASE_IMAGE=wepppy-dev
+FROM ${BASE_IMAGE}
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        fcgiwrap \
+        spawn-fcgi \
+    && rm -rf /var/lib/apt/lists/*
+
+# Allow git-http-backend to read run repositories mounted under /wc1/runs.
+RUN git config --system --add safe.directory '*'
+
+EXPOSE 9000
+
+CMD ["spawn-fcgi", "-n", "-p", "9000", "--", "/usr/sbin/fcgiwrap"]

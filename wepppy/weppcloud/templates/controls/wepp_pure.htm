@@ -83,6 +83,10 @@
     {% endcall %}
   {% endif %}
 
+  {% call ui.collapsible_card(title="Bootstrap", expanded=False, card_id="wepp_bootstrap") %}
+    {% include "controls/bootstrap_pure.htm" %}
+  {% endcall %}
+
   <div class="wc-stack">
     {% call button_row() %}
       <button

@@ -50,6 +50,7 @@ _BLUEPRINT_ATTRS = [
     "batch_runner_bp",
     "interchange_bp",
     "ui_showcase_bp",
+    "bootstrap_bp",
 ]
 
 
