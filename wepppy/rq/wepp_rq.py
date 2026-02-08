@@ -629,7 +629,15 @@ def run_wepp_rq(runid: str) -> Job:
             # jobs:6
             job6_finalfinal: Job
             final_dependencies = jobs4_post + jobs5_post
-            job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=final_dependencies)
+            job6_finalfinal = q.enqueue_call(
+                _log_complete_rq,
+                (runid,),
+                kwargs={
+                    "auto_commit_inputs": True,
+                    "commit_stage": "WEPP pipeline",
+                },
+                depends_on=final_dependencies,
+            )
                 
             job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
             job.save()
@@ -896,7 +904,14 @@ def run_wepp_watershed_rq(runid: str) -> Job:
             conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
             with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
-                job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,))
+                job6_finalfinal = q.enqueue_call(
+                    _log_complete_rq,
+                    (runid,),
+                    kwargs={
+                        "auto_commit_inputs": True,
+                        "commit_stage": "WEPP watershed pipeline",
+                    },
+                )
                 job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
                 job.save()
             return job6_finalfinal
@@ -1018,7 +1033,15 @@ def run_wepp_watershed_rq(runid: str) -> Job:
             # jobs:6
             job6_finalfinal: Job
             final_dependencies = jobs4_post + jobs5_post
-            job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=final_dependencies)
+            job6_finalfinal = q.enqueue_call(
+                _log_complete_rq,
+                (runid,),
+                kwargs={
+                    "auto_commit_inputs": True,
+                    "commit_stage": "WEPP watershed pipeline",
+                },
+                depends_on=final_dependencies,
+            )
                 
             job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
             job.save()
@@ -2105,7 +2128,11 @@ def _post_make_loss_grid_rq(runid: str) -> None:
 
 
 @with_exception_logging
-def _log_complete_rq(runid: str) -> None:
+def _log_complete_rq(
+    runid: str,
+    auto_commit_inputs: bool = False,
+    commit_stage: str = "WEPP pipeline",
+) -> None:
     """Record final completion metadata and emit notifications for the run.
 
     Args:
@@ -2126,6 +2153,10 @@ def _log_complete_rq(runid: str) -> None:
             prep.timestamp(TaskEnum.run_wepp_watershed)
         except FileNotFoundError:
             pass
+
+        if auto_commit_inputs:
+            wepp = Wepp.getInstance(wd)
+            wepp.bootstrap_commit_inputs(commit_stage)
 
         ron = Ron.getInstance(wd)
         name = ron.name

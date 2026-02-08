@@ -71,14 +71,11 @@ def _parse_name_status(payload: bytes) -> list[Tuple[str, str, str | None]]:
     return entries
 
 
-def _diff_paths(old_sha: str, new_sha: str) -> list[Tuple[str, str, str | None]]:
-    if old_sha == ZERO_SHA:
-        payload = _git_output(["diff-tree", "--no-commit-id", "-r", "--name-status", "-z", new_sha], text=False)
-    else:
-        payload = _git_output(
-            ["diff-tree", "--no-commit-id", "-r", "--name-status", "-z", old_sha, new_sha],
-            text=False,
-        )
+def _diff_commit_paths(commit: str) -> list[Tuple[str, str, str | None]]:
+    payload = _git_output(
+        ["show", "--pretty=format:", "--name-status", "-z", commit],
+        text=False,
+    )
     return _parse_name_status(payload)
 
 
@@ -101,11 +98,12 @@ def _push_log_path() -> Path:
     return _git_dir() / "bootstrap" / "push-log.ndjson"
 
 
-def _list_new_commits(old_sha: str, new_sha: str) -> list[str]:
+def _list_introduced_commits(old_sha: str, new_sha: str) -> list[str]:
     if old_sha == ZERO_SHA:
-        output = _git_output(["rev-list", "--reverse", new_sha])
+        args = ["rev-list", "--reverse", new_sha, "--not", "--all"]
     else:
-        output = _git_output(["rev-list", "--reverse", f"{old_sha}..{new_sha}"])
+        args = ["rev-list", "--reverse", f"{old_sha}..{new_sha}", "--not", "--all"]
+    output = _git_output(args)
     return [line.strip() for line in output.splitlines() if line.strip()]
 
 
@@ -113,7 +111,7 @@ def _append_push_log(user: str, updates: list[Tuple[str, str, str]]) -> None:
     entries: list[Tuple[str, str]] = []
     seen: set[str] = set()
     for old_sha, new_sha, ref in updates:
-        for sha in _list_new_commits(old_sha, new_sha):
+        for sha in _list_introduced_commits(old_sha, new_sha):
             if sha in seen:
                 continue
             seen.add(sha)
@@ -259,24 +257,30 @@ def main() -> int:
     baseline_main = _git_output(["rev-parse", "refs/heads/main"]).strip()
 
     parser_entries: list[Tuple[str, bytes]] = []
+    validated_commits: set[str] = set()
     for old_sha, new_sha, ref in updates:
         if new_sha == ZERO_SHA:
             raise RuntimeError(f"Ref deletion not allowed: {ref}")
 
-        _ensure_run_files_unchanged(new_sha, baseline_main)
+        for commit in _list_introduced_commits(old_sha, new_sha):
+            if commit in validated_commits:
+                continue
+            validated_commits.add(commit)
 
-        for status, path, path2 in _diff_paths(old_sha, new_sha):
-            if status.startswith(("R", "C")):
-                raise RuntimeError(f"Rename/copy not allowed: {path} -> {path2}")
-            if status.startswith("D"):
-                if path and any(path.startswith(prefix) for prefix in ALLOWED_PREFIXES):
-                    raise RuntimeError(f"Deleting inputs is not allowed: {path}")
-                continue
-            if not path:
-                continue
-            entry = _validate_blob(new_sha, path)
-            if entry is not None:
-                parser_entries.append(entry)
+            _ensure_run_files_unchanged(commit, baseline_main)
+
+            for status, path, path2 in _diff_commit_paths(commit):
+                if status.startswith(("R", "C")):
+                    raise RuntimeError(f"Rename/copy not allowed: {path} -> {path2}")
+                if status.startswith("D"):
+                    if path and any(path.startswith(prefix) for prefix in ALLOWED_PREFIXES):
+                        raise RuntimeError(f"Deleting inputs is not allowed: {path}")
+                    continue
+                if not path:
+                    continue
+                entry = _validate_blob(commit, path)
+                if entry is not None:
+                    parser_entries.append(entry)
 
     _validate_with_pool(parser_entries)
     _append_push_log(auth_user, updates)

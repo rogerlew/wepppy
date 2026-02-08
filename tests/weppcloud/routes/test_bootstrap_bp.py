@@ -25,12 +25,13 @@ class DummyRun:
 
 
 class DummyUser:
-    def __init__(self, user_id: int, email: str) -> None:
+    def __init__(self, user_id: int, email: str, roles: set[str] | None = None) -> None:
         self.id = user_id
         self.email = email
+        self._roles = {role.lower() for role in (roles or set())}
 
     def has_role(self, role: str) -> bool:
-        return False
+        return role.lower() in self._roles
 
 
 class DummyWepp:
@@ -103,6 +104,7 @@ def bootstrap_context(monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(common, "login_required", lambda f: f)
     monkeypatch.setattr(common, "roles_required", lambda *args, **kwargs: (lambda f: f))
+    monkeypatch.setattr(common, "roles_accepted", lambda *args, **kwargs: (lambda f: f))
 
     module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.bootstrap"))
 
@@ -150,7 +152,7 @@ def test_verify_token_success(bootstrap_context, monkeypatch: pytest.MonkeyPatch
 
     headers = {
         "Authorization": f"Basic {_basic_auth('u1', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs?service=git-upload-pack",
     }
 
     with app.test_client() as client:
@@ -176,7 +178,7 @@ def test_verify_token_rejects_disabled_run(bootstrap_context, monkeypatch: pytes
 
     headers = {
         "Authorization": f"Basic {_basic_auth('u2', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
     }
 
     with app.test_client() as client:
@@ -201,7 +203,7 @@ def test_verify_token_rejects_expired_jwt(bootstrap_context, monkeypatch: pytest
 
     headers = {
         "Authorization": f"Basic {_basic_auth('u3', token)}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
     }
 
     with app.test_client() as client:
@@ -218,7 +220,7 @@ def test_verify_token_rejects_invalid_jwt(bootstrap_context, monkeypatch: pytest
     token = "not-a-jwt"
     headers = {
         "Authorization": f"Basic {_basic_auth('u4', token)}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
     }
 
     with app.test_client() as client:
@@ -226,6 +228,74 @@ def test_verify_token_rejects_invalid_jwt(bootstrap_context, monkeypatch: pytest
 
     assert response.status_code == 401
     assert b"invalid token: Invalid token format" in response.data
+
+
+def test_verify_token_rejects_path_without_dot_git(bootstrap_context) -> None:
+    app, _module, _set_user = bootstrap_context
+    headers = {
+        "Authorization": f"Basic {_basic_auth('u5', 'tok')}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}",
+    }
+
+    with app.test_client() as client:
+        response = client.get("/api/bootstrap/verify-token", headers=headers)
+
+    assert response.status_code == 401
+    assert b"invalid git path" in response.data
+
+
+def test_verify_token_rejects_traversal_path(bootstrap_context) -> None:
+    app, _module, _set_user = bootstrap_context
+    headers = {
+        "Authorization": f"Basic {_basic_auth('u6', 'tok')}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/%2e%2e/wepp/runs/file.sol",
+    }
+
+    with app.test_client() as client:
+        response = client.get("/api/bootstrap/verify-token", headers=headers)
+
+    assert response.status_code == 401
+    assert b"invalid git path" in response.data
+
+
+def test_verify_token_uses_external_host_audience(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _set_user = bootstrap_context
+    user = DummyUser(12, "user@example.com")
+    run = DummyRun(RUN_ID, owner_id=user.id)
+    run.users.append(user)
+    captured: dict[str, str | None] = {"audience": None}
+
+    monkeypatch.setattr(module, "_resolve_run_record", lambda runid: run)
+    monkeypatch.setattr(module, "_resolve_user_by_email", lambda email: user)
+    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
+
+    def _decode(token: str, audience: str | None = None) -> dict[str, str]:
+        captured["audience"] = audience
+        return {"sub": user.email, "runid": run.runid}
+
+    monkeypatch.setattr(module.auth_tokens, "decode_token", _decode)
+
+    headers = {
+        "Authorization": f"Basic {_basic_auth('u7', 'tok')}",
+        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
+    }
+
+    with app.test_client() as client:
+        response = client.get("/api/bootstrap/verify-token", headers=headers)
+
+    assert response.status_code == 200
+    assert captured["audience"] == "wepp.cloud"
+
+
+def test_user_has_run_access_allows_root_role(bootstrap_context) -> None:
+    _app, module, _set_user = bootstrap_context
+    user = DummyUser(99, "root@example.com", roles={"Root"})
+    run = DummyRun(RUN_ID, owner_id=1)
+
+    assert module._user_has_run_access(user, run) is True
 
 
 def test_enable_bootstrap_calls_init(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:

@@ -29,6 +29,7 @@ x-wepppy-service: &wepppy-service
     PROFILE_PLAYBACK_USE_CLONE: ${PROFILE_PLAYBACK_USE_CLONE:-true}
     ENABLE_PROFILE_COVERAGE: ${ENABLE_PROFILE_COVERAGE:-false}
     DEV_MODE: ${DEV_MODE:-false}
+    WEPPPY_SOURCE_ROOT: ${WEPPPY_SOURCE_ROOT:-/workdir/wepppy}
   env_file:
     - ${WEPPPY_ENV_FILE:-docker/.env}
   volumes:

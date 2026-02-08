@@ -115,7 +115,7 @@ another.
 
 1. User clicks **Enable Bootstrap** (or **Mint Token** if already enabled).
 2. Server signs a JWT with a server-wide secret key containing the user's email
-   and the runid. Tokens expire after 2 years (`exp` claim).
+   and the runid. Tokens expire after 6 months (`exp` claim).
 3. UI displays the Clone Command and Set Remote Origin Command with the JWT as
    the Basic auth password.
 
@@ -132,7 +132,8 @@ record.
 1. Decode and verify JWT signature against server secret.
 2. Check `aud` claim matches the current `external_host`.
 3. Extract `runid` claim from the JWT.
-4. Check URL path is `/git/<prefix>/<runid>` (derive `prefix` from `runid`).
+4. Check URL path is `/git/<prefix>/<runid>/.git/...` after URL-decoding and
+   normalization (reject traversal segments and malformed paths).
 5. Check the run is eligible: nodb `_bootstrap_enabled = true`, Postgres run
    record has `bootstrap_disabled = false`, and `is_anonymous = false`.
 6. Check `sub` is a valid user with access to the run.
@@ -146,7 +147,7 @@ record.
 - When bootstrap is disabled for a run, `bootstrap_disabled` is set to true in
   Postgres. All JWTs for that run become invalid immediately.
 - Re-enabling bootstrap for the same run sets `bootstrap_disabled = false`.
-  Users should mint a new JWT. Prior tokens still expire within 2 years. The
+  Users should mint a new JWT. Prior tokens still expire within 6 months. The
   nodb user opt-in remains set.
 - Only non-anonymous runs can enable bootstrap.
 
@@ -269,7 +270,7 @@ def get_bootstrap_current_ref(self) -> str:
 
 def disable_bootstrap(self) -> None:
     """
-    Admin-only. Sets runs.bootstrap_disabled = True (invalidates all JWTs).
+    Admin/Root only. Sets runs.bootstrap_disabled = True (invalidates all JWTs).
     Leaves working files and git history in place.
     """
 ```
@@ -279,8 +280,8 @@ def disable_bootstrap(self) -> None:
 When Bootstrap is enabled and the normal WeppCloud pipeline runs (e.g., user
 changes landuse, rebuilds soils, regenerates climate), the pipeline should
 ensure `main` is checked out at the beginning. This applies to the standard
-run endpoints (non-bootstrap). Bootstrap no-prep routes do not switch branches
-and do not auto-commit.
+run endpoints (non-bootstrap), and those paths auto-commit rebuilt inputs.
+Bootstrap no-prep routes do not switch branches and do not auto-commit.
 
 ```python
 # At start of pipeline (non-bootstrap endpoints only):
@@ -344,7 +345,7 @@ Third collapsible section in the existing WEPP/SWAT+ execution panel:
 │  [Run WEPP Watershed]                               │
 │  [Run SWAT+ Channel Routing]                        │
 │                                                     │
-│  [Disable Bootstrap (Admin)]                        │
+│  [Disable Bootstrap (Admin/Root)]                   │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -490,7 +491,7 @@ services:
 - The UI provides a **Clone Command** (new clone) and **Set Remote Origin
   Command** (existing clone). The username should be a URL-safe ID (numeric
   user ID preferred), not raw email.
-- Tokens expire after 2 years. Mint a new token and update `origin` when
+- Tokens expire after 6 months. Mint a new token and update `origin` when
   necessary.
 - Use the no-prep endpoints for bootstrap runs:
   `/runs/{runid}/{config}/run-wepp-npprep`,
@@ -512,7 +513,9 @@ services:
 - **502/503 from Caddy** — `fcgiwrap` unavailable or misconfigured upstream.
 - **500 with "dubious ownership"** — set `safe.directory` or align user/group.
 - **pre-receive: python3 not found / import error** — run `fcgiwrap` with the
-  WEPPcloud image and mount `/workdir/wepppy` in dev so parsers are available.
+  WEPPcloud image. If your code is mounted outside the image path, set
+  `WEPPPY_SOURCE_ROOT` in the service environment so the hook can extend
+  `PYTHONPATH`.
 - **pre-receive validation failed** — fix file format, remove `.run` changes,
   or reduce file size below 50 MB.
 
@@ -561,7 +564,7 @@ services:
    operation.
 
 3. **JWT scope + expiry:** Each JWT is bound to a specific
-   `(external_host, runid, user_email)` triple and expires after 2 years. The
+   `(external_host, runid, user_email)` triple and expires after 6 months. The
    verify endpoint confirms the `aud` matches the current host and the `runid`
    matches the URL path. No cross-run or cross-deployment access.
 
@@ -588,7 +591,7 @@ services:
 - [x] Add `runs.bootstrap_disabled` (admin blacklist) and enforce
   `is_anonymous = false` gating in enable and verify flows.
 - [x] Update nodb `Wepp` to set `_bootstrap_enabled` as a one-way user opt-in.
-- [x] Implement JWT signing with 2-year expiry and `/api/bootstrap/verify-token`
+- [x] Implement JWT signing with 6-month expiry and `/api/bootstrap/verify-token`
   eligibility checks (nodb opt-in + Postgres not disabled).
 - [x] Initialize git repo with `.gitignore` (including `wepp/runs/tc_out.txt`),
   set `receive.denyCurrentBranch=updateInstead`,
@@ -603,9 +606,10 @@ services:
   `/runs/{runid}/{config}/run-swat-noprep`,
   `/runs/{runid}/{config}/run-wepp-watershed-no-prep`.
 - [x] Update standard pipeline entrypoints to `git checkout main` when
-  Bootstrap is enabled; keep no-prep bootstrap routes on the current checkout.
+  Bootstrap is enabled and auto-commit rebuilt inputs; keep no-prep bootstrap
+  routes on the current checkout.
 - [x] Build the Bootstrap UI panel (enable, mint token, clone + remote commands,
-  commit list, checkout, run buttons) and mark disable as admin-only. Display
+  commit list, checkout, run buttons) and mark disable as Admin/Root-only. Display
   JWT-based `pusher` and optionally `git_author` for commit attribution.
 - [x] Add tests for auth gating (Flask-Security integration), JWT expiry/invalid
   tokens for `/api/bootstrap/verify-token`, hook rejection cases, parser

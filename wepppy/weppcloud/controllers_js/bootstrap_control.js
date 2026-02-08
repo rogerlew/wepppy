@@ -384,8 +384,8 @@ var BootstrapControl = (function () {
                 return;
             }
             elements.disableButton.textContent = state.adminDisabled
-                ? "Re-enable Bootstrap (Admin)"
-                : "Disable Bootstrap (Admin)";
+                ? "Re-enable Bootstrap (Admin/Root)"
+                : "Disable Bootstrap (Admin/Root)";
         }
 
         function renderState() {

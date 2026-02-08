@@ -136,11 +136,18 @@ def auth_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             email="admin@example.com",
             password=hash_password("password"),
             fs_uniquifier=uuid.uuid4().hex,
-            roles=[admin_role, root_role],
+            roles=[admin_role],
+        )
+        root = user_datastore.create_user(
+            email="root@example.com",
+            password=hash_password("password"),
+            fs_uniquifier=uuid.uuid4().hex,
+            roles=[root_role],
         )
         user_datastore.commit()
         user_id = user.id
         admin_id = admin.id
+        root_id = root.id
 
     bootstrap_module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.bootstrap"))
     app.register_blueprint(bootstrap_module.bootstrap_bp)
@@ -171,6 +178,7 @@ def auth_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             "client": client,
             "user_id": user_id,
             "admin_id": admin_id,
+            "root_id": root_id,
             "dummy_run": dummy_run,
         }
 
@@ -192,7 +200,7 @@ def test_login_required_allows_authenticated(auth_client) -> None:
     assert response.get_json() == {"Content": {"enabled": True}}
 
 
-def test_roles_required_blocks_non_admin(auth_client) -> None:
+def test_roles_accepted_blocks_non_admin(auth_client) -> None:
     client = auth_client["client"]
     user_id = auth_client["user_id"]
 
@@ -202,12 +210,25 @@ def test_roles_required_blocks_non_admin(auth_client) -> None:
     assert response.status_code == 403
 
 
-def test_roles_required_allows_admin(auth_client) -> None:
+def test_roles_accepted_allows_admin(auth_client) -> None:
     client = auth_client["client"]
     admin_id = auth_client["admin_id"]
     dummy_run = auth_client["dummy_run"]
 
     client.get(f"/test-login/{admin_id}")
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/disable", json={"disabled": True})
+
+    assert response.status_code == 200
+    assert response.get_json() == {"Content": {"bootstrap_disabled": True}}
+    assert dummy_run.bootstrap_disabled is True
+
+
+def test_roles_accepted_allows_root(auth_client) -> None:
+    client = auth_client["client"]
+    root_id = auth_client["root_id"]
+    dummy_run = auth_client["dummy_run"]
+
+    client.get(f"/test-login/{root_id}")
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/disable", json={"disabled": True})
 
     assert response.status_code == 200

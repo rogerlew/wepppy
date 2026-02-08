@@ -193,6 +193,7 @@ def _copyfile(src_fn: str, dst_fn: str) -> None:
 
 
 STORM_EVENT_ANALYZER_MIN_INTERCHANGE_VERSION = Version(major=1, minor=2)
+BOOTSTRAP_JWT_EXPIRES_SECONDS = 180 * 24 * 60 * 60
 
 
 class ChannelRoutingMethod(IntEnum):
@@ -640,7 +641,9 @@ class Wepp(NoDbBase):
         hook_lines = [
             "#!/usr/bin/env bash",
             "set -euo pipefail",
-            'export PYTHONPATH="/workdir/wepppy${PYTHONPATH:+:$PYTHONPATH}"',
+            'if [[ -n "${WEPPPY_SOURCE_ROOT:-}" ]]; then',
+            '  export PYTHONPATH="${WEPPPY_SOURCE_ROOT}${PYTHONPATH:+:$PYTHONPATH}"',
+            "fi",
             "exec python3 -m wepppy.weppcloud.bootstrap.pre_receive",
             "",
         ]
@@ -696,7 +699,7 @@ class Wepp(NoDbBase):
         issued = auth_tokens.issue_token(
             user_email,
             audience=external_host,
-            expires_in=2 * 365 * 24 * 60 * 60,
+            expires_in=BOOTSTRAP_JWT_EXPIRES_SECONDS,
             extra_claims={"runid": self.runid},
         )
         token = issued["token"]
@@ -767,6 +770,37 @@ class Wepp(NoDbBase):
         if self.get_bootstrap_current_ref() == "main":
             return
         self._run_git(["checkout", "main"])
+
+    def _bootstrap_managed_paths(self) -> list[str]:
+        paths: list[str] = []
+        if _exists(_join(self.wd, "wepp", "runs")):
+            paths.append("wepp/runs")
+        if _exists(_join(self.wd, "swat", "TxtInOut")):
+            paths.append("swat/TxtInOut")
+        return paths
+
+    def bootstrap_commit_inputs(self, stage: str) -> str | None:
+        if not self.bootstrap_enabled:
+            return None
+        if not self._bootstrap_repo_exists():
+            raise RuntimeError("Bootstrap repo not initialized")
+
+        self.ensure_bootstrap_main()
+        managed_paths = self._bootstrap_managed_paths()
+        if not managed_paths:
+            return None
+
+        status = self._run_git(["status", "--porcelain", "--"] + managed_paths)
+        if not status.stdout.strip():
+            return None
+
+        self._run_git(["add", "--"] + managed_paths)
+
+        stage_label = " ".join(str(stage).split()) or "inputs"
+        self._run_git(["commit", "-m", f"Pipeline: rebuilt {stage_label}"])
+        sha = self._run_git(["rev-parse", "HEAD"]).stdout.strip()
+        self.logger.info(f"Bootstrap auto-commit created {sha[:7]} for {stage_label}")
+        return sha
 
     def disable_bootstrap(self) -> None:
         from wepppy.weppcloud.app import Run, db

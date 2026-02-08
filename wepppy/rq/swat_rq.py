@@ -115,6 +115,8 @@ def _build_swat_inputs_rq(runid: str) -> None:
 
         swat = Swat.getInstance(wd)
         swat.build_inputs()
+        wepp = Wepp.getInstance(wd)
+        wepp.bootstrap_commit_inputs("SWAT inputs")
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
         StatusMessenger.publish(

@@ -4,6 +4,7 @@ x-wepp1-volumes: &wepp1-volumes
 
 x-wepppy-env: &wepppy-env
   CLIMATE_ENGINE_API_KEY: ${CLIMATE_ENGINE_API_KEY}
+  WEPPPY_SOURCE_ROOT: ${WEPPPY_SOURCE_ROOT:-/workdir/wepppy}
 
 x-wepppy-image: &wepppy-image
   image: ${WEPPCLOUD_IMAGE:-wepppy:latest}

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import base64
 import re
-from typing import Any, Optional, Tuple
+from typing import Any, Tuple
+from urllib.parse import unquote, urlsplit
 
 from ._common import *  # noqa: F401,F403
 
@@ -15,7 +16,7 @@ bootstrap_bp = Blueprint("bootstrap", __name__)
 
 
 _GIT_PATH_RE = re.compile(
-    r"^/(?:git/)?(?P<prefix>[^/]+)/(?P<runid>[^/]+?)(?:\\.git)?(?:/|$)"
+    r"^/git/(?P<prefix>[A-Za-z0-9]{2})/(?P<runid>[A-Za-z0-9][A-Za-z0-9._-]*)/\.git(?:/.*)?$"
 )
 
 
@@ -23,6 +24,9 @@ def _get_external_host() -> str | None:
     host = current_app.config.get("OAUTH_REDIRECT_HOST") or current_app.config.get("EXTERNAL_HOST")
     if host:
         return str(host)
+    forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
+    if forwarded_host:
+        return forwarded_host.split(":")[0] or None
     return (request.host or "").split(":")[0] or None
 
 
@@ -59,8 +63,9 @@ def _user_has_run_access(user: Any, run: Any) -> bool:
     if user is None or run is None:
         return False
     try:
-        if user.has_role("Admin"):
-            return True
+        for role_name in ("Admin", "Root"):
+            if user.has_role(role_name):
+                return True
     except Exception:
         pass
 
@@ -78,6 +83,22 @@ def _reject(message: str, status_code: int = 401):
     if status_code == 401:
         response.headers["WWW-Authenticate"] = 'Basic realm="Bootstrap"'
     return response
+
+
+def _parse_forwarded_git_path(forwarded_path: str) -> Tuple[str, str]:
+    decoded_path = unquote(urlsplit(forwarded_path).path or "")
+    if not decoded_path:
+        raise ValueError("invalid git path")
+    if "\\" in decoded_path:
+        raise ValueError("invalid git path")
+    parts = [part for part in decoded_path.split("/") if part]
+    if any(part in {".", ".."} for part in parts):
+        raise ValueError("invalid git path")
+
+    match = _GIT_PATH_RE.fullmatch(decoded_path)
+    if not match:
+        raise ValueError("invalid git path")
+    return match.group("prefix"), match.group("runid")
 
 
 def _validate_bootstrap_eligibility(runid: str, email: str) -> Tuple[Any, Any]:
@@ -115,15 +136,11 @@ def verify_token():
     forwarded_path = request.headers.get("X-Forwarded-Uri") or request.headers.get("X-Original-Uri")
     if not forwarded_path:
         return _reject("missing forwarded path")
-    if "?" in forwarded_path:
-        forwarded_path = forwarded_path.split("?", 1)[0]
-    match = _GIT_PATH_RE.match(forwarded_path)
-    if not match:
-        return _reject("invalid git path")
-
-    runid = match.group("runid")
-    prefix = match.group("prefix")
-    if prefix != runid[:2]:
+    try:
+        prefix, runid = _parse_forwarded_git_path(forwarded_path)
+    except ValueError as exc:
+        return _reject(str(exc))
+    if len(runid) < 2 or prefix != runid[:2]:
         return _reject("run prefix mismatch")
 
     external_host = _get_external_host()
@@ -232,7 +249,7 @@ def bootstrap_current_ref(runid: str, config: str):
 
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/disable", methods=["POST"])
-@roles_required("Admin", "Root")
+@roles_accepted("Admin", "Root")
 def bootstrap_disable(runid: str, config: str):
     authorize(runid, config)
     payload = request.json or {}

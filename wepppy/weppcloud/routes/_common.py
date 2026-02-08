@@ -32,7 +32,7 @@ from flask import (
     url_for,
     send_from_directory
 )
-from flask_security import current_user, login_required, roles_required
+from flask_security import current_user, login_required, roles_accepted, roles_required
 from werkzeug.utils import secure_filename
 
 from wepppy.weppcloud.utils.helpers import (
@@ -68,6 +68,7 @@ __all__ = [
     'request',
     'Response',
     'roles_required',
+    'roles_accepted',
     'send_file',
     'stream_with_context',
     'success_factory',
