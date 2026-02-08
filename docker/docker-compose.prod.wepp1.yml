@@ -27,13 +27,11 @@ services:
       args:
         BASE_IMAGE: ${WEPPCLOUD_IMAGE:-wepppy:latest}
     image: wepppy-fcgiwrap
-    cpuset: "32-47"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
 
   caddy:
-    cpuset: "32-47"
     ports:
       - "80:80"
       - "443:443"
@@ -48,7 +46,6 @@ services:
       CAP_ASSET_ROOT: /opt/cap
   weppcloud:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
@@ -72,7 +69,6 @@ services:
       - wepppy.weppcloud.app:app
   browse:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
     command:
       - gunicorn
@@ -91,38 +87,30 @@ services:
       - wepppy.microservices.browse:app
   dtale:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   profile-playback:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes:
       - /geodata/wc1:/wc1
       - /geodata:/geodata
       - ${PROFILE_PLAYBACK_DATA_DIR:-/workdir/wepppy-test-engine-data}:/workdir/wepppy-test-engine-data
   elevationquery:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   metquery:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   wmesque:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   wmesque2:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   query-engine:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   rq-engine:
     <<: *wepppy-image
-    cpuset: "32-47"
     volumes: *wepp1-volumes
   rq-worker:
     <<: *wepppy-image
@@ -143,7 +131,6 @@ services:
       PERIDOT_CPU: "4"
   scheduler:
     <<: *wepppy-image
-    cpuset: "32-47"
     environment:
       <<: *wepppy-env
       SCHEDULE_CONFIG: /workdir/wepppy/docker/scheduled-tasks.yml
@@ -155,7 +142,6 @@ services:
       - wepppy.tools.scheduler
   weppcloudr:
     container_name: weppcloudr
-    cpuset: "32-47"
     volumes:
       - /geodata:/geodata
       - /geodata/wc1:/wc1

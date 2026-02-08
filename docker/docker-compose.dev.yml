@@ -49,7 +49,6 @@ services:
   weppcloud:
     <<: *wepppy-service
     container_name: weppcloud
-    cpuset: "40-47"
     shm_size: "1g"
     ulimits:
       nofile:
@@ -94,7 +93,6 @@ services:
       dockerfile: services/status2/Dockerfile
     image: status2-dev
     container_name: weppcloud-status
-    cpuset: "40-47"
     environment:
       STATUS_REDIS_URL: ${STATUS_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/2}
       STATUS_LISTEN_ADDR: 0.0.0.0:9002
@@ -142,7 +140,6 @@ services:
       dockerfile: services/preflight2/Dockerfile
     image: preflight2-dev
     container_name: weppcloud-preflight
-    cpuset: "40-47"
     environment:
       PREFLIGHT_REDIS_URL: ${PREFLIGHT_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       PREFLIGHT_LISTEN_ADDR: 0.0.0.0:9001
@@ -163,7 +160,6 @@ services:
         CAP_REF: ${CAP_REF:-main}
     image: wepppy-cap-dev
     container_name: wepppy-cap
-    cpuset: "40-47"
     environment:
       CAP_SITE_KEY: ${CAP_SITE_KEY}
       CAP_SECRET: ${CAP_SECRET}
@@ -178,7 +174,6 @@ services:
   profile-playback:
     <<: *wepppy-service
     container_name: profile-playback
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -206,7 +201,6 @@ services:
   browse:
     <<: *wepppy-service
     container_name: wepppy-browse
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 1000000
@@ -232,7 +226,6 @@ services:
   dtale:
     <<: *wepppy-service
     container_name: wepppy-dtale
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -262,7 +255,6 @@ services:
   elevationquery:
     <<: *wepppy-service
     container_name: wepppy-elevationquery
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -288,7 +280,6 @@ services:
   metquery:
     <<: *wepppy-service
     container_name: wepppy-metquery
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -312,7 +303,6 @@ services:
   wmesque:
     <<: *wepppy-service
     container_name: wepppy-wmesque
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -336,7 +326,6 @@ services:
   wmesque2:
     <<: *wepppy-service
     container_name: wepppy-wmesque2
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -362,7 +351,6 @@ services:
   query-engine:
     <<: *wepppy-service
     container_name: wepppy-query-engine
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -387,7 +375,6 @@ services:
   rq-engine:
     <<: *wepppy-service
     container_name: wepppy-rq-engine
-    cpuset: "40-47"
     ulimits:
       nofile:
         soft: 65536
@@ -409,7 +396,6 @@ services:
       dockerfile: weppcloudR/Dockerfile
     image: weppcloudr-dev
     container_name: weppcloudr
-    cpuset: "40-47"
     environment:
       PORT: "8050"
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
@@ -520,7 +506,6 @@ services:
   redis:
     image: redis:latest
     container_name: wepppy-redis
-    cpuset: "40-47"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: ["redis-server", "--notify-keyspace-events", "Kh", "--save", "", "--appendonly", "no", "--requirepass", "${REDIS_PASSWORD}"]
@@ -538,7 +523,6 @@ services:
   postgres:
     image: postgres:16
     container_name: wepppy-postgres
-    cpuset: "40-47"
     stop_grace_period: 120s
     environment:
       POSTGRES_DB: wepppy
@@ -584,19 +568,19 @@ services:
       - |
         set -euo pipefail
         mkdir -p "$${BACKUP_DIR:-/backups}"
-        
+
         # Run initial backup on startup
         run_backup() {
           ts=$$(date +"%Y%m%d-%H%M%S")
           target="$${BACKUP_DIR:-/backups}/weppcloud-$${ts}.dump"
           tmp_target="$${target}.tmp"
-          
+
           echo "[ $$(date --iso-8601=seconds) ] Starting backup to $$target"
-          
+
           # Dump to temp file first, then atomic rename
           if pg_dump -h "$${PGHOST}" -U "$${PGUSER}" -d "$${PGDATABASE}" -Fc -f "$$tmp_target"; then
             mv "$$tmp_target" "$$target"
-            
+
             # Verify backup header
             if head -c 5 "$$target" | grep -q "PGDMP"; then
               size=$$(du -h "$$target" | cut -f1)
@@ -611,22 +595,22 @@ services:
             rm -f "$$tmp_target"
             return 1
           fi
-          
+
           # Purge old backups
           echo "[ $$(date --iso-8601=seconds) ] Purging backups older than $${BACKUP_KEEP_DAYS:-7} days"
           find "$${BACKUP_DIR:-/backups}" -name "weppcloud-*.dump" -type f -mtime +$${BACKUP_KEEP_DAYS:-7} -delete
-          
+
           # Also purge legacy named backups
           find "$${BACKUP_DIR:-/backups}" -name "wepppy-*.dump" -type f -mtime +$${BACKUP_KEEP_DAYS:-7} -delete
-          
+
           # List current backups
           echo "[ $$(date --iso-8601=seconds) ] Current backups:"
           ls -lh "$${BACKUP_DIR:-/backups}"/*.dump 2>/dev/null || echo "  (none)"
         }
-        
+
         # Initial backup
         run_backup || echo "Initial backup failed, will retry on schedule"
-        
+
         # Scheduled backups
         while true; do
           sleep $${BACKUP_INTERVAL_SECONDS:-86400}
@@ -636,7 +620,6 @@ services:
   scheduler:
     <<: *wepppy-service
     container_name: wepppy-scheduler
-    cpuset: "40-47"
     depends_on:
       redis:
         condition: service_started
@@ -655,7 +638,6 @@ services:
       context: ../..
       dockerfile: wepppy/docker/Dockerfile.rq-dashboard
     container_name: wepppy-rq-dashboard
-    cpuset: "40-47"
     environment:
       RQ_DASHBOARD_REDIS_URL: ${RQ_DASHBOARD_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/9}
       RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
@@ -685,7 +667,6 @@ services:
   caddy:
     image: caddy:2-alpine
     container_name: wepppy-caddy
-    cpuset: "40-47"
     ports:
       - "8080:8080"
     volumes:
