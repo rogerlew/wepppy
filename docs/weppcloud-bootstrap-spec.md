@@ -740,3 +740,38 @@ Add/expand tests in `tests/microservices/` and `tests/weppcloud/routes/`:
 - Pre-receive policy edge coverage: symlink/submodule rejection, rename/copy
   rejection, and delete rejection inside allowed input roots.
 - Backward-compatibility wrapper tests for existing Flask Bootstrap routes.
+
+### Phase 2 Closure Snapshot (February 8, 2026)
+
+Implemented remediations from the production-readiness review:
+
+- Canonical run-path resolution for bootstrap mutations via
+  `get_wd(..., prefer_active=False)` in Flask + rq-engine paths.
+- Explicit status-code handling for Flask bootstrap endpoints (`400/404/409/500`)
+  and generic internal error responses.
+- Admin/Root authorization parity in both web and rq-engine helpers.
+- Sanitized unexpected rq-engine bootstrap exceptions (no traceback payload leaks).
+- `bootstrap_disabled` enforcement for mutation/token-mint operations while
+  keeping read/checkout available.
+- Enable lock and dedupe TTLs aligned with RQ timeout
+  (`max(configured_ttl, RQ timeout + 300)`).
+- Git lock coverage for WEPP/SWAT auto-commit mutation paths.
+- Production compose defaults hardened for JWT and D-Tale secrets.
+
+Verification snapshot:
+
+- Targeted Bootstrap suite run on 2026-02-08:
+  - `tests/weppcloud/routes/test_bootstrap_bp.py`
+  - `tests/weppcloud/routes/test_bootstrap_auth_integration.py`
+  - `tests/microservices/test_rq_engine_bootstrap_routes.py`
+  - `tests/rq/test_bootstrap_enable_rq.py`
+  - `tests/weppcloud/bootstrap/test_enable_jobs.py`
+  - `tests/rq/test_bootstrap_autocommit_rq.py`
+  - `tests/weppcloud/bootstrap/test_pre_receive.py`
+- Result: `60 passed`
+
+Known measurement limitation:
+
+- `/wc1/runs/fa/fast-paced-blastoff` exists but currently lacks `.git` and
+  `wepp/runs` content, so destructive bootstrap-init timing tests were not run
+  there.

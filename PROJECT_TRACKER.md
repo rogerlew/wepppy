@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-01-24  
+**Last Updated**: 2026-02-08  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,6 +78,37 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### RQ-Engine Agent Usability and Documentation Hardening
+**Proposed**: 2026-02-08  
+**Size**: Medium (1-2 weeks)  
+**Priority**: High  
+**Status**: Scoped - Ready to Start  
+**Package**: [docs/work-packages/20260208_rq_engine_agent_usability/](docs/work-packages/20260208_rq_engine_agent_usability/)  
+**Description**: Establish rq-engine as the canonical agent API for Bootstrap and queue workflows, harden OpenAPI route metadata, and align docs/tests across developer and user audiences.
+
+**Scope**:
+- Converge agent-facing Bootstrap endpoints into `/rq-engine/api/*` ownership.
+- Standardize OpenAPI metadata (`summary`, `description`, `operation_id`, schemas, examples, auth notes).
+- Align token/scope documentation with enforced behavior (`bootstrap:enable`, `bootstrap:token:mint`, `bootstrap:read`, `bootstrap:checkout`).
+- Expand regression coverage for auth failures, async enable lifecycle, lock contention, and canonical errors.
+
+**Strategic Value**:
+- Gives agents one discoverable API surface and reduces Flask/rq-engine contract drift.
+- Improves automation reliability through explicit route contracts and examples.
+- Makes Bootstrap workflows auditable, reproducible, and supportable for both users and tooling.
+
+**Dependencies**:
+- Existing rq response contract (`docs/schemas/rq-response-contract.md`)
+- Bootstrap Phase 2 endpoint baseline in rq-engine
+- Current token policy docs (`docs/dev-notes/auth-token.spec.md`)
+
+**Next Steps**:
+1. Freeze endpoint inventory and classify `agent-facing` vs `internal` routes.
+2. Apply OpenAPI metadata pass on agent-critical modules.
+3. Close test and docs drift gaps with targeted suites and artifacts.
+
+---
 
 ### Wojak Lives: Interactive Agent Integration
 **Proposed**: 2025-10-28  
