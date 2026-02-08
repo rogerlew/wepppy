@@ -5,18 +5,18 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Contract freeze baseline captured  
+**Current phase**: Contract checklist baseline and guard coverage  
 **Last updated**: 2026-02-08  
-**Next milestone**: Standardize OpenAPI metadata for frozen agent-facing routes
+**Next milestone**: Agent-facing rq-engine docs and usersum split
 
 ## Task Board
 
 ### Ready / Backlog
 - [x] Freeze endpoint inventory (`agent-facing`, `internal`, `UI-only`).
-- [ ] Standardize OpenAPI metadata for agent-facing Bootstrap and queue routes.
+- [x] Standardize OpenAPI metadata for agent-facing Bootstrap and queue routes.
 - [x] Align auth/token documentation with enforced scope behavior.
 - [x] Add/expand regression tests for auth, async enable lifecycle, and lock contention paths.
-- [ ] Produce artifact checklist for route contracts and test coverage.
+- [x] Produce artifact checklist for route contracts and test coverage.
 
 ### In Progress
 - [ ] None.
@@ -29,6 +29,8 @@
 - [x] Locked policy decisions on endpoint ownership, scope minimums, and polling access (2026-02-08).
 - [x] Migrated mini work package to full work-package structure with artifacts/prompt directories (2026-02-08).
 - [x] Captured Bootstrap Phase 2 wrap-up artifact and verification snapshot (2026-02-08).
+- [x] Standardized OpenAPI metadata for frozen agent-facing routes and added contract budget checks (2026-02-08).
+- [x] Added route contract checklist artifact + drift guard tooling/tests (2026-02-08).
 
 ## Timeline
 
@@ -38,6 +40,8 @@
 - **2026-02-08** - Bootstrap Phase 2 closure snapshot documented.
 - **2026-02-08** - Endpoint inventory freeze captured with classification, ownership, auth/access, and mutation semantics.
 - **2026-02-08** - Freeze-review remediations landed for Bootstrap scopes, wrapper parity, polling hardening, and inventory drift guard.
+- **2026-02-08** - OpenAPI metadata standardized for frozen agent-facing routes with contract/size budget tests.
+- **2026-02-08** - Route contract checklist artifact published with automated drift guard.
 
 ## Decisions Log
 
@@ -249,3 +253,30 @@ handoff point for further API usability work.
   - Result: `80 passed, 8 warnings`
 - `wctl doc-lint --path docs/weppcloud-bootstrap-spec.md --path docs/dev-notes/auth-token.spec.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
   - Result: `5 files validated, 0 errors, 0 warnings`
+
+### 2026-02-08: Route contract checklist artifact + guard
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added artifact:
+  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
+  with one checklist row per frozen `agent-facing` `rq-engine` route
+  (`51` rows).
+- Added checklist drift guard:
+  `tools/check_route_contract_checklist.py`.
+- Added pytest coverage for checklist drift guard:
+  `tests/tools/test_route_contract_checklist_guard.py`.
+- Enforced checklist quality gates:
+  - parity with frozen inventory route set
+  - non-empty contract fields
+  - required auth error codes (`401/403/500`) plus a success code
+  - required linkage to OpenAPI contract coverage test module
+
+**Next steps**:
+- Add/expand agent-facing rq-engine API docs and user-facing split docs.
+
+**Test results**:
+- `python tools/check_route_contract_checklist.py`
+  - Result: `Route contract checklist check passed`
+- `wctl run-pytest tests/tools/test_route_contract_checklist_guard.py tests/tools/test_endpoint_inventory_guard.py tests/microservices/test_rq_engine_openapi_contract.py`
+  - Result: `9 passed`

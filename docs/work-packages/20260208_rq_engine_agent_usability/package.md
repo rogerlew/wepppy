@@ -75,6 +75,8 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
   - `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/`
   - Freeze artifact:
     `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+  - Contract checklist artifact:
+    `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md`
 - Route documentation and OpenAPI metadata updates in `wepppy/microservices/rq_engine/*`.
 - Updated docs for auth and Bootstrap workflows:
   - `docs/dev-notes/auth-token.spec.md`
@@ -83,6 +85,9 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
 - Endpoint inventory drift guard:
   - `tools/check_endpoint_inventory.py`
   - `tests/tools/test_endpoint_inventory_guard.py`
+- Route contract checklist drift guard:
+  - `tools/check_route_contract_checklist.py`
+  - `tests/tools/test_route_contract_checklist_guard.py`
 - Regression coverage updates in:
   - `tests/microservices/*`
   - `tests/weppcloud/routes/*`
