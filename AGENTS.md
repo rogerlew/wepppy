@@ -794,6 +794,7 @@ self._logger.info("Task completed", extra={
 - First line: concise summary (≤50 chars)
 - Body: explain why, not what (code shows what)
 - Reference issues: "Fixes #123"
+- **Agent attribution required:** append `Co-Authored-By: <Model Name> <noreply@provider.domain>` trailer to every agent-authored commit (e.g., `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`, `Co-Authored-By: GPT-5 Codex <noreply@openai.com>`)
 
 ## Performance Optimization
 
