@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Sequence
 from typing import Any, Mapping
 
 import redis
@@ -14,11 +15,15 @@ from wepppy.nodb.core import Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.swat_rq import run_swat_noprep_rq
 from wepppy.rq.wepp_rq import run_wepp_noprep_rq, run_wepp_watershed_noprep_rq
-from wepppy.weppcloud.bootstrap.enable_jobs import BootstrapLockBusyError, enqueue_bootstrap_enable
-from wepppy.weppcloud.bootstrap.git_lock import (
-    acquire_bootstrap_git_lock,
-    release_bootstrap_git_lock,
+from wepppy.weppcloud.bootstrap.api_shared import (
+    BootstrapOperationError,
+    bootstrap_checkout_operation,
+    bootstrap_commits_operation,
+    bootstrap_current_ref_operation,
+    enable_bootstrap_operation,
+    mint_bootstrap_token_operation,
 )
+from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -31,38 +36,48 @@ router = APIRouter()
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
-
-def _safe_json_load_run(runid: str) -> dict[str, Any] | None:
-    try:
-        from wepppy.weppcloud.app import Run, app as flask_app
-    except Exception:
-        logger.exception("Failed to import weppcloud app for bootstrap run lookup")
-        return None
-
-    with flask_app.app_context():
-        run = Run.query.filter(Run.runid == runid).first()
-        if run is None:
-            return None
-        return {
-            "runid": str(run.runid),
-            "owner_id": str(run.owner_id) if run.owner_id else None,
-            "bootstrap_disabled": bool(getattr(run, "bootstrap_disabled", False)),
-        }
+BOOTSTRAP_ENABLE_SCOPE = "bootstrap:enable"
+BOOTSTRAP_TOKEN_MINT_SCOPE = "bootstrap:token:mint"
+BOOTSTRAP_READ_SCOPE = "bootstrap:read"
+BOOTSTRAP_CHECKOUT_SCOPE = "bootstrap:checkout"
 
 
-def _ensure_bootstrap_eligibility(
-    runid: str,
-    *,
-    require_owner: bool,
-    enforce_not_disabled: bool = True,
-) -> None:
-    run_record = _safe_json_load_run(runid)
-    if run_record is None:
-        raise ValueError("run not found")
-    if enforce_not_disabled and run_record.get("bootstrap_disabled"):
-        raise ValueError("bootstrap disabled")
-    if require_owner and not run_record.get("owner_id"):
-        raise ValueError("anonymous runs cannot enable bootstrap")
+def _extract_scopes(claims: Mapping[str, Any]) -> set[str]:
+    raw = claims.get("scope")
+    separator = get_jwt_config().scope_separator
+
+    def _split_scope_text(text: str) -> set[str]:
+        parts: list[str] = []
+        for chunk in text.split(separator):
+            parts.extend(chunk.split())
+        return {part for part in parts if part}
+
+    if raw is None:
+        return set()
+    if isinstance(raw, str):
+        return _split_scope_text(raw)
+    if isinstance(raw, Sequence):
+        scopes: set[str] = set()
+        for item in raw:
+            if isinstance(item, str):
+                scopes.update(_split_scope_text(item))
+        return scopes
+    return set()
+
+
+def _require_bootstrap_claims(request: Request, *, required_scope: str) -> Mapping[str, Any]:
+    claims = require_jwt(request)
+    scopes = _extract_scopes(claims)
+    if required_scope in scopes:
+        return claims
+
+    raise AuthError(f"Token missing required scope(s): {required_scope}", status_code=403, code="forbidden")
+
+
+def _authorize_bootstrap_request(request: Request, *, runid: str, required_scope: str) -> Mapping[str, Any]:
+    claims = _require_bootstrap_claims(request, required_scope=required_scope)
+    authorize_run_access(claims, runid)
+    return claims
 
 
 def _ensure_bootstrap_enabled(wepp: Wepp) -> None:
@@ -82,10 +97,6 @@ def _resolve_bootstrap_actor(claims: Mapping[str, Any]) -> str:
     if subject:
         return subject
     return "unknown"
-
-
-def _job_status_url(job_id: str) -> str:
-    return f"/rq-engine/api/jobstatus/{job_id}"
 
 
 async def _safe_json(request: Request) -> dict[str, Any]:
@@ -118,8 +129,7 @@ def _enqueue_no_prep_job(runid: str, *, job_fn, job_key: str, reset_tasks: list[
 @router.post("/runs/{runid}/{config}/bootstrap/enable")
 async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
-        authorize_run_access(claims, runid)
+        claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_ENABLE_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -127,16 +137,13 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return error_response("Failed to authorize request", status_code=401)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=True)
-        payload, status_code = enqueue_bootstrap_enable(runid, actor=_resolve_bootstrap_actor(claims))
-        job_id = str(payload.get("job_id") or "").strip()
-        if job_id:
-            payload["status_url"] = _job_status_url(job_id)
-        return JSONResponse(payload, status_code=status_code)
-    except BootstrapLockBusyError as exc:
-        return error_response(str(exc), status_code=409, code="conflict")
-    except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        result = enable_bootstrap_operation(
+            runid,
+            actor=_resolve_bootstrap_actor(claims),
+        )
+        return JSONResponse(result.payload, status_code=result.status_code)
+    except BootstrapOperationError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap-enable enqueue failed")
         return error_response("Error Handling Request", status_code=500)
@@ -145,8 +152,7 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
 @router.post("/runs/{runid}/{config}/bootstrap/mint-token")
 async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
-        authorize_run_access(claims, runid)
+        claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_TOKEN_MINT_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -154,22 +160,14 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return error_response("Failed to authorize request", status_code=401)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=True)
-        user_email = str(claims.get("email") or "").strip()
-        user_id = str(claims.get("sub") or "").strip()
-        if not user_email or not user_id:
-            return error_response(
-                "User identity claims are required to mint bootstrap tokens",
-                status_code=403,
-                code="forbidden",
-            )
-
-        wd = get_wd(runid, prefer_active=False)
-        wepp = Wepp.getInstance(wd)
-        _ensure_bootstrap_enabled(wepp)
-        return JSONResponse({"clone_url": wepp.mint_bootstrap_jwt(user_email, user_id)})
-    except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        result = mint_bootstrap_token_operation(
+            runid,
+            user_email=str(claims.get("email") or "").strip(),
+            user_id=str(claims.get("sub") or "").strip(),
+        )
+        return JSONResponse(result.payload, status_code=result.status_code)
+    except BootstrapOperationError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap mint-token failed")
         return error_response("Error Handling Request", status_code=500)
@@ -178,8 +176,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
 @router.get("/runs/{runid}/{config}/bootstrap/commits")
 async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
-        authorize_run_access(claims, runid)
+        _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_READ_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -187,13 +184,10 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         return error_response("Failed to authorize request", status_code=401)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=False, enforce_not_disabled=False)
-        wd = get_wd(runid, prefer_active=False)
-        wepp = Wepp.getInstance(wd)
-        _ensure_bootstrap_enabled(wepp)
-        return JSONResponse({"commits": wepp.get_bootstrap_commits()})
-    except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        result = bootstrap_commits_operation(runid)
+        return JSONResponse(result.payload, status_code=result.status_code)
+    except BootstrapOperationError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap commits failed")
         return error_response("Error Handling Request", status_code=500)
@@ -202,8 +196,7 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
 @router.get("/runs/{runid}/{config}/bootstrap/current-ref")
 async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
-        authorize_run_access(claims, runid)
+        _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_READ_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -211,13 +204,10 @@ async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JS
         return error_response("Failed to authorize request", status_code=401)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=False, enforce_not_disabled=False)
-        wd = get_wd(runid, prefer_active=False)
-        wepp = Wepp.getInstance(wd)
-        _ensure_bootstrap_enabled(wepp)
-        return JSONResponse({"ref": wepp.get_bootstrap_current_ref()})
-    except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        result = bootstrap_current_ref_operation(runid)
+        return JSONResponse(result.payload, status_code=result.status_code)
+    except BootstrapOperationError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap current-ref failed")
         return error_response("Error Handling Request", status_code=500)
@@ -226,8 +216,7 @@ async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JS
 @router.post("/runs/{runid}/{config}/bootstrap/checkout")
 async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONResponse:
     try:
-        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
-        authorize_run_access(claims, runid)
+        claims = _authorize_bootstrap_request(request, runid=runid, required_scope=BOOTSTRAP_CHECKOUT_SCOPE)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -235,34 +224,15 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         return error_response("Failed to authorize request", status_code=401)
 
     payload = await _safe_json(request)
-    sha = str(payload.get("sha") or "").strip()
-    if not sha:
-        return error_response("sha required", status_code=400)
-
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=False, enforce_not_disabled=False)
-        wd = get_wd(runid, prefer_active=False)
-        wepp = Wepp.getInstance(wd)
-        _ensure_bootstrap_enabled(wepp)
-
-        lock_conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
-        with redis.Redis(**lock_conn_kwargs) as lock_conn:
-            lock = acquire_bootstrap_git_lock(
-                lock_conn,
-                runid=runid,
-                operation="checkout",
-                actor=_resolve_bootstrap_actor(claims),
-            )
-            if lock is None:
-                return error_response("bootstrap lock busy", status_code=409, code="conflict")
-            try:
-                if not wepp.checkout_bootstrap_commit(sha):
-                    return error_response("checkout failed", status_code=400)
-            finally:
-                release_bootstrap_git_lock(lock_conn, runid=runid, token=lock.token)
-        return JSONResponse({"checked_out": sha})
-    except ValueError as exc:
-        return error_response(str(exc), status_code=400)
+        result = bootstrap_checkout_operation(
+            runid,
+            sha=payload.get("sha"),
+            actor=_resolve_bootstrap_actor(claims),
+        )
+        return JSONResponse(result.payload, status_code=result.status_code)
+    except BootstrapOperationError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap checkout failed")
         return error_response("Error Handling Request", status_code=500)

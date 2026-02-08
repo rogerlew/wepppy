@@ -682,11 +682,13 @@ Authentication/authorization model:
 
 - Require JWT auth (`require_jwt`) and run authorization (`authorize_run_access`).
 - Enforce non-anonymous run requirements for `enable` and `mint-token`.
-- Introduce explicit Bootstrap scopes (recommended):
+- Enforce explicit Bootstrap scopes:
   - `bootstrap:enable`
   - `bootstrap:token:mint`
   - `bootstrap:read`
   - `bootstrap:checkout`
+- Bootstrap routes require the explicit `bootstrap:*` scopes above; `rq:enqueue`
+  is not accepted as a substitute.
 
 ### Async Bootstrap Enable Flow
 
@@ -708,12 +710,17 @@ Recommended dedupe key:
 
 Phase 2 keeps existing Flask routes in place as wrappers while clients migrate.
 
-- WeppCloud `bootstrap.py` and rq-engine currently share the async enable enqueue
-  helper; read/mint/checkout routes are still duplicated while migration is in progress.
+- WeppCloud `bootstrap.py` wrapper handlers now call shared operations in
+  `wepppy/weppcloud/bootstrap/api_shared.py`, which are also used by rq-engine.
+  This keeps status/payload behavior deterministic during migration.
 - UI can switch incrementally to `/rq-engine/api/...` endpoints.
-- After migration and soak period, deprecate/remove duplicate Flask route
-  handlers except `/api/bootstrap/verify-token` (still used by Caddy forward_auth
-  for git HTTP auth flow).
+- Flask exceptions that remain intentionally Flask-owned:
+  - `/api/bootstrap/verify-token` (Caddy `forward_auth` contract).
+  - `/runs/<runid>/<config>/bootstrap/disable` (Admin/Root UI action).
+- Wrapper deprecation plan:
+  1. Move UI callers to rq-engine endpoints.
+  2. Keep wrappers as pass-through aliases for one release cycle.
+  3. Remove duplicate Flask wrappers after telemetry confirms no active usage.
 
 ### Data and Response Contracts
 

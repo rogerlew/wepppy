@@ -11,6 +11,14 @@ from wepppy.weppcloud.utils import auth_tokens
 pytestmark = pytest.mark.microservice
 
 
+@pytest.fixture(autouse=True)
+def _reset_polling_state(monkeypatch: pytest.MonkeyPatch):
+    job_routes._POLL_RATE_LIMIT_BUCKETS.clear()
+    monkeypatch.delenv(job_routes.POLL_AUTH_MODE_ENV, raising=False)
+    monkeypatch.delenv(job_routes.POLL_RATE_LIMIT_COUNT_ENV, raising=False)
+    monkeypatch.delenv(job_routes.POLL_RATE_LIMIT_WINDOW_ENV, raising=False)
+
+
 def test_health_returns_expected_payload() -> None:
     with TestClient(rq_engine.app) as client:
         response = client.get("/health")
@@ -133,6 +141,98 @@ def test_jobinfo_error_returns_500_payload(monkeypatch: pytest.MonkeyPatch) -> N
     payload = response.json()
     assert response.status_code == 500
     assert isinstance(payload["error"]["message"], str)
+
+
+def test_polling_mode_required_rejects_without_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "required")
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", lambda job_id: {"status": "ok", "job_id": job_id})
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/jobstatus/job-required")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "unauthorized"
+
+
+def test_polling_mode_token_optional_accepts_without_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "token_optional")
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", lambda job_id: {"status": "ok", "job_id": job_id})
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/jobstatus/job-optional")
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-optional"
+
+
+def test_polling_mode_token_optional_validates_token_when_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "token_optional")
+    seen = {"called": False}
+
+    def _require_jwt(request, required_scopes=None):
+        seen["called"] = True
+        assert required_scopes == ["rq:status"]
+        return {"sub": "u1", "scope": "rq:status"}
+
+    monkeypatch.setattr(job_routes, "require_jwt", _require_jwt)
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", lambda job_id: {"status": "ok", "job_id": job_id})
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            "/api/jobstatus/job-optional-auth",
+            headers={"Authorization": "Bearer test-token"},
+        )
+
+    assert response.status_code == 200
+    assert seen["called"] is True
+
+
+def test_polling_mode_required_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "required")
+    monkeypatch.setattr(job_routes, "require_jwt", lambda request, required_scopes=None: {"sub": "u2", "scope": "rq:status"})
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_info", lambda job_id: {"status": "finished", "job_id": job_id})
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            "/api/jobinfo/job-required-ok",
+            headers={"Authorization": "Bearer test-token"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-required-ok"
+
+
+def test_jobstatus_rate_limit_returns_429(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(job_routes.POLL_RATE_LIMIT_COUNT_ENV, "1")
+    monkeypatch.setenv(job_routes.POLL_RATE_LIMIT_WINDOW_ENV, "60")
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", lambda job_id: {"status": "ok", "job_id": job_id})
+
+    with TestClient(rq_engine.app) as client:
+        first = client.get("/api/jobstatus/job-rate", headers={"X-Forwarded-For": "1.2.3.4"})
+        second = client.get("/api/jobstatus/job-rate", headers={"X-Forwarded-For": "1.2.3.4"})
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    payload = second.json()
+    assert payload["error"]["code"] == "rate_limited"
+    assert "Rate limit exceeded" in payload["error"]["details"]
+
+
+def test_jobstatus_audit_logging_includes_job_id_and_ip(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", lambda job_id: {"status": "ok", "job_id": job_id})
+
+    with caplog.at_level("INFO"):
+        with TestClient(rq_engine.app) as client:
+            response = client.get("/api/jobstatus/job-audit", headers={"X-Forwarded-For": "5.6.7.8"})
+
+    assert response.status_code == 200
+    audit_lines = [record.message for record in caplog.records if "rq_engine_poll_audit" in record.message]
+    assert audit_lines
+    assert any("job_id=job-audit" in line for line in audit_lines)
+    assert any("ip=5.6.7.8" in line for line in audit_lines)
 
 
 def _issue_rq_token(

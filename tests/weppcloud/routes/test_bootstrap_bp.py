@@ -1,19 +1,26 @@
 from __future__ import annotations
 
-import base64
 import importlib
-import time
 
 import pytest
 
 pytest.importorskip("flask")
 from flask import Flask
 
+TestClient = pytest.importorskip("fastapi.testclient").TestClient
+
+import wepppy.microservices.rq_engine as rq_engine
+from wepppy.microservices.rq_engine import bootstrap_routes as rq_bootstrap_routes
+from wepppy.weppcloud.bootstrap.api_shared import (
+    BootstrapForwardAuthContext,
+    BootstrapOperationError,
+    BootstrapOperationResult,
+)
+
 pytestmark = pytest.mark.routes
 
 RUN_ID = "ab-run"
 CONFIG = "cfg"
-PREFIX = RUN_ID[:2]
 
 
 class DummyRun:
@@ -21,7 +28,6 @@ class DummyRun:
         self.runid = runid
         self.owner_id = owner_id
         self.bootstrap_disabled = bootstrap_disabled
-        self.users: list[DummyUser] = []
 
 
 class DummyUser:
@@ -32,30 +38,6 @@ class DummyUser:
 
     def has_role(self, role: str) -> bool:
         return role.lower() in self._roles
-
-
-class DummyWepp:
-    def __init__(self, enabled: bool = False) -> None:
-        self.bootstrap_enabled = enabled
-        self.init_calls = 0
-        self.checkout_calls: list[str] = []
-
-    def init_bootstrap(self) -> None:
-        self.init_calls += 1
-        self.bootstrap_enabled = True
-
-    def mint_bootstrap_jwt(self, user_email: str, user_id: str) -> str:
-        return f"clone://{user_id}@example.test/{user_email}"
-
-    def get_bootstrap_commits(self) -> list[dict]:
-        return [{"sha": "abc", "author": "user@example.com"}]
-
-    def checkout_bootstrap_commit(self, sha: str) -> bool:
-        self.checkout_calls.append(sha)
-        return True
-
-    def get_bootstrap_current_ref(self) -> str:
-        return "main"
 
 
 class ComparableAttribute:
@@ -121,222 +103,159 @@ def bootstrap_context(monkeypatch: pytest.MonkeyPatch):
     return app, module, _set_current_user
 
 
-def _basic_auth(user_id: str, token: str) -> str:
-    payload = f"{user_id}:{token}".encode("utf-8")
-    return base64.b64encode(payload).decode("utf-8")
-
-
-def _configure_jwt_env(monkeypatch: pytest.MonkeyPatch, module) -> None:
-    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
-    monkeypatch.setenv("WEPP_AUTH_JWT_ALGORITHMS", "HS256")
-    monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
-    monkeypatch.delenv("WEPP_AUTH_JWT_DEFAULT_AUDIENCE", raising=False)
-    monkeypatch.delenv("WEPP_AUTH_JWT_ISSUER", raising=False)
-    module.auth_tokens.get_jwt_config.cache_clear()
+def _stub_rq_auth(monkeypatch: pytest.MonkeyPatch, *, scope: str) -> None:
+    monkeypatch.setattr(
+        rq_bootstrap_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "sub": "7",
+            "email": "user@example.com",
+            "scope": scope,
+        },
+    )
+    monkeypatch.setattr(rq_bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
 
 
 def test_verify_token_success(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, _set_user = bootstrap_context
-    user = DummyUser(10, "user@example.com")
-    run = DummyRun(RUN_ID, owner_id=user.id)
-    run.users.append(user)
-
-    monkeypatch.setattr(module, "_resolve_run_record", lambda runid: run)
-    monkeypatch.setattr(module, "_resolve_user_by_email", lambda email: user)
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
     monkeypatch.setattr(
-        module.auth_tokens,
-        "decode_token",
-        lambda token, audience=None: {"sub": user.email, "runid": run.runid},
+        module,
+        "verify_forward_auth_context",
+        lambda **kwargs: BootstrapForwardAuthContext(runid=RUN_ID, email="user@example.com"),
     )
+    monkeypatch.setattr(module, "ensure_bootstrap_eligibility", lambda *args, **kwargs: (object(), object()))
+    monkeypatch.setattr(module, "ensure_bootstrap_opt_in", lambda runid: object())
 
     headers = {
-        "Authorization": f"Basic {_basic_auth('u1', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs?service=git-upload-pack",
+        "Authorization": "Basic token",
+        "X-Forwarded-Uri": f"/git/{RUN_ID[:2]}/{RUN_ID}/.git/info/refs",
     }
 
     with app.test_client() as client:
         response = client.get("/api/bootstrap/verify-token", headers=headers)
 
     assert response.status_code == 200
-    assert response.headers.get("X-Auth-User") == user.email
+    assert response.headers.get("X-Auth-User") == "user@example.com"
 
 
-def test_verify_token_accepts_stripped_git_prefix(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
-    app, module, _set_user = bootstrap_context
-    user = DummyUser(10, "user@example.com")
-    run = DummyRun(RUN_ID, owner_id=user.id)
-    run.users.append(user)
-
-    monkeypatch.setattr(module, "_resolve_run_record", lambda runid: run)
-    monkeypatch.setattr(module, "_resolve_user_by_email", lambda email: user)
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
-    monkeypatch.setattr(
-        module.auth_tokens,
-        "decode_token",
-        lambda token, audience=None: {"sub": user.email, "runid": run.runid},
-    )
-
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u1', 'tok')}",
-        "X-Forwarded-Uri": f"/{PREFIX}/{RUN_ID}/.git/info/refs?service=git-upload-pack",
-    }
-
-    with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
-
-    assert response.status_code == 200
-    assert response.headers.get("X-Auth-User") == user.email
-
-
-def test_verify_token_rejects_disabled_run(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
-    app, module, _set_user = bootstrap_context
-    user = DummyUser(11, "user@example.com")
-    run = DummyRun(RUN_ID, owner_id=user.id, bootstrap_disabled=True)
-
-    monkeypatch.setattr(module, "_resolve_run_record", lambda runid: run)
-    monkeypatch.setattr(module, "_resolve_user_by_email", lambda email: user)
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
-    monkeypatch.setattr(
-        module.auth_tokens,
-        "decode_token",
-        lambda token, audience=None: {"sub": user.email, "runid": run.runid},
-    )
-
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u2', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
-    }
-
-    with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
-
-    assert response.status_code == 401
-    assert b"bootstrap disabled" in response.data
-
-
-def test_verify_token_rejects_expired_jwt(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
-    app, module, _set_user = bootstrap_context
-    _configure_jwt_env(monkeypatch, module)
-
-    now = int(time.time())
-    token = module.auth_tokens.issue_token(
-        "user@example.com",
-        audience="wepp.cloud",
-        expires_in=60,
-        issued_at=now - 120,
-        extra_claims={"runid": RUN_ID},
-    )["token"]
-
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u3', token)}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
-    }
-
-    with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
-
-    assert response.status_code == 401
-    assert b"invalid token: Token has expired" in response.data
-
-
-def test_verify_token_rejects_invalid_jwt(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
-    app, module, _set_user = bootstrap_context
-    _configure_jwt_env(monkeypatch, module)
-
-    token = "not-a-jwt"
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u4', token)}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
-    }
-
-    with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
-
-    assert response.status_code == 401
-    assert b"invalid token: Invalid token format" in response.data
-
-
-def test_verify_token_rejects_path_without_dot_git(bootstrap_context) -> None:
-    app, _module, _set_user = bootstrap_context
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u5', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}",
-    }
-
-    with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
-
-    assert response.status_code == 401
-    assert b"invalid git path" in response.data
-
-
-def test_verify_token_rejects_traversal_path(bootstrap_context) -> None:
-    app, _module, _set_user = bootstrap_context
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u6', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/%2e%2e/wepp/runs/file.sol",
-    }
-
-    with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
-
-    assert response.status_code == 401
-    assert b"invalid git path" in response.data
-
-
-def test_verify_token_uses_external_host_audience(
+def test_verify_token_uses_x_original_uri_when_forwarded_missing(
     bootstrap_context,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     app, module, _set_user = bootstrap_context
-    user = DummyUser(12, "user@example.com")
-    run = DummyRun(RUN_ID, owner_id=user.id)
-    run.users.append(user)
-    captured: dict[str, str | None] = {"audience": None}
+    seen: dict[str, str | None] = {"forwarded_path": None}
 
-    monkeypatch.setattr(module, "_resolve_run_record", lambda runid: run)
-    monkeypatch.setattr(module, "_resolve_user_by_email", lambda email: user)
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
+    def _verify(**kwargs):
+        seen["forwarded_path"] = kwargs["forwarded_path"]
+        return BootstrapForwardAuthContext(runid=RUN_ID, email="user@example.com")
 
-    def _decode(token: str, audience: str | None = None) -> dict[str, str]:
-        captured["audience"] = audience
-        return {"sub": user.email, "runid": run.runid}
-
-    monkeypatch.setattr(module.auth_tokens, "decode_token", _decode)
-
-    headers = {
-        "Authorization": f"Basic {_basic_auth('u7', 'tok')}",
-        "X-Forwarded-Uri": f"/git/{PREFIX}/{RUN_ID}/.git/info/refs",
-    }
+    monkeypatch.setattr(module, "verify_forward_auth_context", _verify)
+    monkeypatch.setattr(module, "ensure_bootstrap_eligibility", lambda *args, **kwargs: (object(), object()))
+    monkeypatch.setattr(module, "ensure_bootstrap_opt_in", lambda runid: object())
 
     with app.test_client() as client:
-        response = client.get("/api/bootstrap/verify-token", headers=headers)
+        response = client.get(
+            "/api/bootstrap/verify-token",
+            headers={
+                "Authorization": "Basic token",
+                "X-Original-Uri": f"/git/{RUN_ID[:2]}/{RUN_ID}/.git/info/refs",
+            },
+        )
 
     assert response.status_code == 200
-    assert captured["audience"] == "wepp.cloud"
+    assert seen["forwarded_path"] == f"/git/{RUN_ID[:2]}/{RUN_ID}/.git/info/refs"
 
 
-def test_user_has_run_access_allows_root_role(bootstrap_context) -> None:
-    _app, module, _set_user = bootstrap_context
-    user = DummyUser(99, "root@example.com", roles={"Root"})
-    run = DummyRun(RUN_ID, owner_id=1)
+def test_verify_token_prefers_x_forwarded_uri_when_both_headers_present(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _set_user = bootstrap_context
+    seen: dict[str, str | None] = {"forwarded_path": None}
 
-    assert module._user_has_run_access(user, run) is True
+    def _verify(**kwargs):
+        seen["forwarded_path"] = kwargs["forwarded_path"]
+        return BootstrapForwardAuthContext(runid=RUN_ID, email="user@example.com")
+
+    monkeypatch.setattr(module, "verify_forward_auth_context", _verify)
+    monkeypatch.setattr(module, "ensure_bootstrap_eligibility", lambda *args, **kwargs: (object(), object()))
+    monkeypatch.setattr(module, "ensure_bootstrap_opt_in", lambda runid: object())
+
+    with app.test_client() as client:
+        response = client.get(
+            "/api/bootstrap/verify-token",
+            headers={
+                "Authorization": "Basic token",
+                "X-Forwarded-Uri": "/git/ab/forwarded/.git/info/refs",
+                "X-Original-Uri": "/git/ab/original/.git/info/refs",
+            },
+        )
+
+    assert response.status_code == 200
+    assert seen["forwarded_path"] == "/git/ab/forwarded/.git/info/refs"
+
+
+def test_verify_token_contract_returns_401_for_forward_auth_failures(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _set_user = bootstrap_context
+
+    monkeypatch.setattr(
+        module,
+        "verify_forward_auth_context",
+        lambda **kwargs: (_ for _ in ()).throw(BootstrapOperationError("invalid git path", status_code=400)),
+    )
+
+    with app.test_client() as client:
+        response = client.get(
+            "/api/bootstrap/verify-token",
+            headers={"Authorization": "Basic token", "X-Forwarded-Uri": "/git/ab/run/.git"},
+        )
+
+    assert response.status_code == 401
+    assert response.headers.get("WWW-Authenticate") == 'Basic realm="Bootstrap"'
+    assert b"invalid git path" in response.data
+
+
+def test_verify_token_missing_forwarded_path_returns_401(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _set_user = bootstrap_context
+
+    monkeypatch.setattr(
+        module,
+        "verify_forward_auth_context",
+        lambda **kwargs: (_ for _ in ()).throw(BootstrapOperationError("missing forwarded path", status_code=401)),
+    )
+
+    with app.test_client() as client:
+        response = client.get(
+            "/api/bootstrap/verify-token",
+            headers={"Authorization": "Basic token"},
+        )
+
+    assert response.status_code == 401
+    assert b"missing forwarded path" in response.data
 
 
 def test_enable_bootstrap_enqueues_job(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, set_user = bootstrap_context
-    user = DummyUser(20, "owner@example.com")
-    set_user(user)
+    set_user(DummyUser(20, "owner@example.com"))
 
-    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
     monkeypatch.setattr(
         module,
-        "enqueue_bootstrap_enable",
-        lambda runid, actor: (
-            {"enabled": False, "queued": True, "job_id": "job-22", "message": "Bootstrap enable job enqueued."},
-            202,
+        "enable_bootstrap_operation",
+        lambda runid, actor, email, require_user_access: BootstrapOperationResult(
+            payload={
+                "enabled": False,
+                "queued": True,
+                "job_id": "job-22",
+                "message": "Bootstrap enable job enqueued.",
+                "status_url": "/rq-engine/api/jobstatus/job-22",
+            },
+            status_code=202,
         ),
     )
 
@@ -360,11 +279,15 @@ def test_mint_token_returns_clone_url(bootstrap_context, monkeypatch: pytest.Mon
     app, module, set_user = bootstrap_context
     user = DummyUser(30, "owner@example.com")
     set_user(user)
-    wepp = DummyWepp(enabled=True)
 
-    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
-    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=True: f"/tmp/{runid}")
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: wepp)
+    monkeypatch.setattr(
+        module,
+        "mint_bootstrap_token_operation",
+        lambda runid, user_email, user_id, require_user_access: BootstrapOperationResult(
+            payload={"clone_url": f"clone://{user_id}@example.test/{user_email}"},
+            status_code=200,
+        ),
+    )
 
     with app.test_client() as client:
         response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
@@ -374,86 +297,34 @@ def test_mint_token_returns_clone_url(bootstrap_context, monkeypatch: pytest.Mon
     assert payload == {"Content": {"clone_url": f"clone://{user.id}@example.test/{user.email}"}}
 
 
-def test_mint_token_uses_canonical_wd(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_checkout_requires_sha(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, set_user = bootstrap_context
-    user = DummyUser(31, "owner@example.com")
-    set_user(user)
-    calls: dict[str, bool] = {}
+    set_user(DummyUser(32, "owner@example.com"))
 
-    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
-
-    def _capture_wd(runid: str, *, prefer_active: bool = True) -> str:
-        calls["prefer_active"] = prefer_active
-        return f"/tmp/{runid}"
-
-    monkeypatch.setattr(module, "get_wd", _capture_wd)
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
+    monkeypatch.setattr(
+        module,
+        "bootstrap_checkout_operation",
+        lambda runid, sha, actor: (_ for _ in ()).throw(BootstrapOperationError("sha required", status_code=400)),
+    )
 
     with app.test_client() as client:
-        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
-
-    assert response.status_code == 200
-    assert calls["prefer_active"] is False
-
-
-def test_mint_token_validation_error_returns_400(
-    bootstrap_context,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    app, module, set_user = bootstrap_context
-    set_user(DummyUser(30, "owner@example.com"))
-
-    def _raise_bad_run(runid: str, email: str):
-        raise ValueError("bad run")
-
-    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", _raise_bad_run)
-
-    with app.test_client() as client:
-        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
+        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout", json={})
 
     assert response.status_code == 400
-    assert response.get_json() == {"error": {"message": "bad run"}}
-
-
-def test_mint_token_unexpected_error_returns_500(
-    bootstrap_context,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    app, module, set_user = bootstrap_context
-    user = DummyUser(31, "owner@example.com")
-    set_user(user)
-    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
-
-    def _raise_runtime(runid: str, prefer_active: bool = True):
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(module, "get_wd", _raise_runtime)
-
-    with app.test_client() as client:
-        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
-
-    assert response.status_code == 500
-    assert response.get_json() == {"error": {"message": "Error Handling Request"}}
+    assert response.get_json() == {"error": {"message": "sha required"}}
 
 
 def test_checkout_returns_conflict_when_lock_busy(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, set_user = bootstrap_context
-    user = DummyUser(31, "owner@example.com")
-    set_user(user)
+    set_user(DummyUser(31, "owner@example.com"))
 
-    monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
-    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=True: f"/tmp/{runid}")
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
-    monkeypatch.setattr(module, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    monkeypatch.setattr(module.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        module,
+        "bootstrap_checkout_operation",
+        lambda runid, sha, actor: (_ for _ in ()).throw(
+            BootstrapOperationError("bootstrap lock busy", status_code=409)
+        ),
+    )
 
     with app.test_client() as client:
         response = client.post(
@@ -463,60 +334,6 @@ def test_checkout_returns_conflict_when_lock_busy(bootstrap_context, monkeypatch
 
     assert response.status_code == 409
     assert response.get_json() == {"error": {"message": "bootstrap lock busy"}}
-
-
-def test_checkout_requires_sha(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
-    app, module, set_user = bootstrap_context
-    set_user(DummyUser(32, "owner@example.com"))
-    monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
-
-    with app.test_client() as client:
-        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout", json={})
-
-    assert response.status_code == 400
-    assert response.get_json() == {"error": {"message": "sha required"}}
-
-
-def test_checkout_returns_bad_request_when_git_checkout_fails(
-    bootstrap_context,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    app, module, set_user = bootstrap_context
-    user = DummyUser(33, "owner@example.com")
-    set_user(user)
-
-    class DummyFailingWepp(DummyWepp):
-        def checkout_bootstrap_commit(self, sha: str) -> bool:
-            self.checkout_calls.append(sha)
-            return False
-
-    monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
-    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=True: f"/tmp/{runid}")
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyFailingWepp(enabled=True))
-    monkeypatch.setattr(
-        module,
-        "acquire_bootstrap_git_lock",
-        lambda *args, **kwargs: type("Lock", (), {"token": "lock-token"})(),
-    )
-    monkeypatch.setattr(module, "release_bootstrap_git_lock", lambda *args, **kwargs: True)
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    monkeypatch.setattr(module.redis, "Redis", lambda **kwargs: DummyRedis())
-
-    with app.test_client() as client:
-        response = client.post(
-            f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout",
-            json={"sha": "abc1234"},
-        )
-
-    assert response.status_code == 400
-    assert response.get_json() == {"error": {"message": "checkout failed"}}
 
 
 def test_bootstrap_disable_sets_flag(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -569,3 +386,102 @@ def test_bootstrap_disable_returns_404_for_missing_run(
     assert response.status_code == 404
     assert response.get_json() == {"error": {"message": "run not found"}}
     assert db.commits == 0
+
+
+def test_parity_enable_wrapper_matches_rq_engine(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, flask_module, set_user = bootstrap_context
+    set_user(DummyUser(70, "owner@example.com"))
+
+    result = BootstrapOperationResult(
+        payload={"queued": True, "job_id": "job-enable", "status_url": "/rq-engine/api/jobstatus/job-enable"},
+        status_code=202,
+    )
+
+    monkeypatch.setattr(flask_module, "enable_bootstrap_operation", lambda *args, **kwargs: result)
+    monkeypatch.setattr(rq_bootstrap_routes, "enable_bootstrap_operation", lambda *args, **kwargs: result)
+    _stub_rq_auth(monkeypatch, scope=rq_bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE)
+
+    with app.test_client() as flask_client, TestClient(rq_engine.app) as rq_client:
+        flask_response = flask_client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/enable")
+        rq_response = rq_client.post(f"/api/runs/{RUN_ID}/{CONFIG}/bootstrap/enable")
+
+    assert flask_response.status_code == rq_response.status_code == 202
+    assert flask_response.get_json()["Content"] == rq_response.json()
+
+
+def test_parity_mint_token_wrapper_matches_rq_engine(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, flask_module, set_user = bootstrap_context
+    set_user(DummyUser(71, "owner@example.com"))
+
+    result = BootstrapOperationResult(payload={"clone_url": "clone://71@example.test"}, status_code=200)
+
+    monkeypatch.setattr(flask_module, "mint_bootstrap_token_operation", lambda *args, **kwargs: result)
+    monkeypatch.setattr(rq_bootstrap_routes, "mint_bootstrap_token_operation", lambda *args, **kwargs: result)
+    _stub_rq_auth(monkeypatch, scope=rq_bootstrap_routes.BOOTSTRAP_TOKEN_MINT_SCOPE)
+
+    with app.test_client() as flask_client, TestClient(rq_engine.app) as rq_client:
+        flask_response = flask_client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
+        rq_response = rq_client.post(f"/api/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
+
+    assert flask_response.status_code == rq_response.status_code == 200
+    assert flask_response.get_json()["Content"] == rq_response.json()
+
+
+def test_parity_commits_wrapper_matches_rq_engine(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, flask_module, set_user = bootstrap_context
+    set_user(DummyUser(72, "owner@example.com"))
+
+    result = BootstrapOperationResult(payload={"commits": [{"sha": "abc"}]}, status_code=200)
+
+    monkeypatch.setattr(flask_module, "bootstrap_commits_operation", lambda *args, **kwargs: result)
+    monkeypatch.setattr(rq_bootstrap_routes, "bootstrap_commits_operation", lambda *args, **kwargs: result)
+    _stub_rq_auth(monkeypatch, scope=rq_bootstrap_routes.BOOTSTRAP_READ_SCOPE)
+
+    with app.test_client() as flask_client, TestClient(rq_engine.app) as rq_client:
+        flask_response = flask_client.get(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/commits")
+        rq_response = rq_client.get(f"/api/runs/{RUN_ID}/{CONFIG}/bootstrap/commits")
+
+    assert flask_response.status_code == rq_response.status_code == 200
+    assert flask_response.get_json()["Content"] == rq_response.json()
+
+
+def test_parity_current_ref_wrapper_matches_rq_engine(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, flask_module, set_user = bootstrap_context
+    set_user(DummyUser(73, "owner@example.com"))
+
+    result = BootstrapOperationResult(payload={"ref": "main"}, status_code=200)
+
+    monkeypatch.setattr(flask_module, "bootstrap_current_ref_operation", lambda *args, **kwargs: result)
+    monkeypatch.setattr(rq_bootstrap_routes, "bootstrap_current_ref_operation", lambda *args, **kwargs: result)
+    _stub_rq_auth(monkeypatch, scope=rq_bootstrap_routes.BOOTSTRAP_READ_SCOPE)
+
+    with app.test_client() as flask_client, TestClient(rq_engine.app) as rq_client:
+        flask_response = flask_client.get(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/current-ref")
+        rq_response = rq_client.get(f"/api/runs/{RUN_ID}/{CONFIG}/bootstrap/current-ref")
+
+    assert flask_response.status_code == rq_response.status_code == 200
+    assert flask_response.get_json()["Content"] == rq_response.json()
+
+
+def test_parity_checkout_wrapper_matches_rq_engine(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, flask_module, set_user = bootstrap_context
+    set_user(DummyUser(74, "owner@example.com"))
+
+    result = BootstrapOperationResult(payload={"checked_out": "abc1234"}, status_code=200)
+
+    monkeypatch.setattr(flask_module, "bootstrap_checkout_operation", lambda *args, **kwargs: result)
+    monkeypatch.setattr(rq_bootstrap_routes, "bootstrap_checkout_operation", lambda *args, **kwargs: result)
+    _stub_rq_auth(monkeypatch, scope=rq_bootstrap_routes.BOOTSTRAP_CHECKOUT_SCOPE)
+
+    with app.test_client() as flask_client, TestClient(rq_engine.app) as rq_client:
+        flask_response = flask_client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout",
+            json={"sha": "abc1234"},
+        )
+        rq_response = rq_client.post(
+            f"/api/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout",
+            json={"sha": "abc1234"},
+        )
+
+    assert flask_response.status_code == rq_response.status_code == 200
+    assert flask_response.get_json()["Content"] == rq_response.json()

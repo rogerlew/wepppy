@@ -11,6 +11,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import RoleMixin, SQLAlchemyUserDatastore, Security, UserMixin
 from flask_security.utils import hash_password, login_user
 
+from wepppy.weppcloud.bootstrap.api_shared import BootstrapOperationResult
+
 pytestmark = pytest.mark.routes
 
 RUN_ID = "ab-run"
@@ -61,16 +63,6 @@ class DummyRun:
     def __init__(self, runid: str) -> None:
         self.runid = runid
         self.bootstrap_disabled = False
-
-
-class DummyWepp:
-    def __init__(self) -> None:
-        self.bootstrap_enabled = False
-        self.init_calls = 0
-
-    def init_bootstrap(self) -> None:
-        self.init_calls += 1
-        self.bootstrap_enabled = True
 
 
 @pytest.fixture()
@@ -152,22 +144,19 @@ def auth_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     bootstrap_module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.bootstrap"))
     app.register_blueprint(bootstrap_module.bootstrap_bp)
 
-    def _fake_validate(runid: str, email: str):
-        from flask_security import current_user
-
-        return object(), current_user
-
     monkeypatch.setattr(bootstrap_module, "authorize", lambda runid, config: None)
-    monkeypatch.setattr(bootstrap_module, "_validate_bootstrap_eligibility", _fake_validate)
-    monkeypatch.setattr(bootstrap_module, "_ensure_bootstrap_opt_in", lambda runid: None)
-    monkeypatch.setattr(bootstrap_module, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
-    monkeypatch.setattr(bootstrap_module.Wepp, "getInstance", lambda wd: DummyWepp())
     monkeypatch.setattr(
         bootstrap_module,
-        "enqueue_bootstrap_enable",
-        lambda runid, actor: (
-            {"enabled": False, "queued": True, "job_id": "job-auth", "message": "Bootstrap enable job enqueued."},
-            202,
+        "enable_bootstrap_operation",
+        lambda *args, **kwargs: BootstrapOperationResult(
+            payload={
+                "enabled": False,
+                "queued": True,
+                "job_id": "job-auth",
+                "message": "Bootstrap enable job enqueued.",
+                "status_url": "/rq-engine/api/jobstatus/job-auth",
+            },
+            status_code=202,
         ),
     )
 

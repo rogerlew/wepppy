@@ -2,27 +2,21 @@
 
 from __future__ import annotations
 
-import base64
-import re
-from typing import Any, Tuple
-from urllib.parse import unquote, urlsplit
-
-import redis
-
 from ._common import *  # noqa: F401,F403
 
-from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.core import Wepp
-from wepppy.weppcloud.bootstrap.enable_jobs import BootstrapLockBusyError, enqueue_bootstrap_enable
-from wepppy.weppcloud.bootstrap.git_lock import acquire_bootstrap_git_lock, release_bootstrap_git_lock
-from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.bootstrap.api_shared import (
+    BootstrapOperationError,
+    bootstrap_checkout_operation,
+    bootstrap_commits_operation,
+    bootstrap_current_ref_operation,
+    enable_bootstrap_operation,
+    ensure_bootstrap_eligibility,
+    ensure_bootstrap_opt_in,
+    mint_bootstrap_token_operation,
+    verify_forward_auth_context,
+)
 
 bootstrap_bp = Blueprint("bootstrap", __name__)
-
-
-_GIT_PATH_RE = re.compile(
-    r"^/(?:git/)?(?P<prefix>[A-Za-z0-9]{2})/(?P<runid>[A-Za-z0-9][A-Za-z0-9._-]*)/\.git(?:/.*)?$"
-)
 
 
 def _get_external_host() -> str | None:
@@ -35,105 +29,11 @@ def _get_external_host() -> str | None:
     return (request.host or "").split(":")[0] or None
 
 
-def _decode_basic_auth(auth_header: str | None) -> Tuple[str, str] | None:
-    if not auth_header:
-        return None
-    if not auth_header.lower().startswith("basic "):
-        return None
-    encoded = auth_header.split(None, 1)[1].strip()
-    try:
-        decoded = base64.b64decode(encoded).decode("utf-8")
-    except Exception:
-        return None
-    if ":" not in decoded:
-        return None
-    user_id, token = decoded.split(":", 1)
-    return user_id, token
-
-
-def _resolve_run_record(runid: str):
-    from wepppy.weppcloud.app import Run
-
-    return Run.query.filter(Run.runid == runid).first()
-
-
-def _resolve_user_by_email(email: str):
-    from sqlalchemy import func
-    from wepppy.weppcloud.app import User
-
-    return User.query.filter(func.lower(User.email) == email.lower()).first()
-
-
-def _user_has_run_access(user: Any, run: Any) -> bool:
-    if user is None or run is None:
-        return False
-    try:
-        for role_name in ("Admin", "Root"):
-            if user.has_role(role_name):
-                return True
-    except Exception:
-        pass
-
-    if run.owner_id and str(run.owner_id) == str(user.id):
-        return True
-
-    try:
-        return user in run.users
-    except Exception:
-        return False
-
-
 def _reject(message: str, status_code: int = 401):
     response = make_response(message, status_code)
     if status_code == 401:
         response.headers["WWW-Authenticate"] = 'Basic realm="Bootstrap"'
     return response
-
-
-def _parse_forwarded_git_path(forwarded_path: str) -> Tuple[str, str]:
-    decoded_path = unquote(urlsplit(forwarded_path).path or "")
-    if not decoded_path:
-        raise ValueError("invalid git path")
-    if "\\" in decoded_path:
-        raise ValueError("invalid git path")
-    parts = [part for part in decoded_path.split("/") if part]
-    if any(part in {".", ".."} for part in parts):
-        raise ValueError("invalid git path")
-
-    match = _GIT_PATH_RE.fullmatch(decoded_path)
-    if not match:
-        raise ValueError("invalid git path")
-    return match.group("prefix"), match.group("runid")
-
-
-def _validate_bootstrap_eligibility(runid: str, email: str) -> Tuple[Any, Any]:
-    run = _resolve_run_record(runid)
-    if run is None:
-        raise ValueError("run not found")
-    if getattr(run, "bootstrap_disabled", False):
-        raise ValueError("bootstrap disabled")
-    if not run.owner_id:
-        raise ValueError("anonymous runs cannot enable bootstrap")
-
-    user = _resolve_user_by_email(email)
-    if user is None:
-        raise ValueError("user not found")
-    if not _user_has_run_access(user, run):
-        raise ValueError("user does not have access to run")
-
-    return run, user
-
-
-def _ensure_bootstrap_opt_in(runid: str) -> None:
-    wd = _bootstrap_wd(runid)
-    wepp = Wepp.getInstance(wd)
-    if not wepp.bootstrap_enabled:
-        raise ValueError("bootstrap not enabled")
-
-
-def _bootstrap_wd(runid: str) -> str:
-    """Resolve the canonical run working directory for bootstrap operations."""
-    return get_wd(runid, prefer_active=False)
 
 
 def _bootstrap_actor_for_current_user() -> str:
@@ -144,49 +44,31 @@ def _bootstrap_actor_for_current_user() -> str:
 
 @bootstrap_bp.route("/api/bootstrap/verify-token", methods=["GET", "POST"])
 def verify_token():
-    auth = _decode_basic_auth(request.headers.get("Authorization"))
-    if not auth:
-        return _reject("missing authorization")
-    _ignored_user_id, token = auth
-
     forwarded_path = request.headers.get("X-Forwarded-Uri") or request.headers.get("X-Original-Uri")
-    if not forwarded_path:
-        return _reject("missing forwarded path")
-    try:
-        prefix, runid = _parse_forwarded_git_path(forwarded_path)
-    except ValueError as exc:
-        return _reject(str(exc))
-    if len(runid) < 2 or prefix != runid[:2]:
-        return _reject("run prefix mismatch")
-
-    external_host = _get_external_host()
-    if not external_host:
-        return _reject("missing external host")
 
     try:
-        claims = auth_tokens.decode_token(token, audience=external_host)
-    except Exception as exc:
-        return _reject(f"invalid token: {exc}")
-
-    token_runid = claims.get("runid")
-    if token_runid != runid:
-        return _reject("runid mismatch")
-
-    email = claims.get("sub")
-    if not isinstance(email, str) or not email:
-        return _reject("missing subject")
-
-    try:
-        _validate_bootstrap_eligibility(runid, email)
-        _ensure_bootstrap_opt_in(runid)
-    except ValueError as exc:
-        return _reject(str(exc))
+        context = verify_forward_auth_context(
+            auth_header=request.headers.get("Authorization"),
+            forwarded_path=forwarded_path,
+            external_host=_get_external_host(),
+        )
+        ensure_bootstrap_eligibility(
+            context.runid,
+            require_owner=True,
+            enforce_not_disabled=True,
+            email=context.email,
+            require_user_access=True,
+        )
+        ensure_bootstrap_opt_in(context.runid)
+    except BootstrapOperationError as exc:
+        # Keep Caddy forward_auth contract stable: all denials return 401.
+        return _reject(exc.message, status_code=401)
     except Exception:
         current_app.logger.exception("bootstrap verify-token failed")
         return _reject("bootstrap verification failed")
 
     response = make_response("", 200)
-    response.headers["X-Auth-User"] = email
+    response.headers["X-Auth-User"] = context.email
     return response
 
 
@@ -195,21 +77,17 @@ def verify_token():
 def enable_bootstrap(runid: str, config: str):
     authorize(runid, config)
     try:
-        _validate_bootstrap_eligibility(runid, current_user.email)
-        payload, status_code = enqueue_bootstrap_enable(
+        result = enable_bootstrap_operation(
             runid,
             actor=_bootstrap_actor_for_current_user(),
+            email=str(getattr(current_user, "email", "") or "").strip(),
+            require_user_access=True,
         )
-        job_id = str(payload.get("job_id") or "").strip()
-        if job_id:
-            payload["status_url"] = f"/rq-engine/api/jobstatus/{job_id}"
-        response = success_factory(payload)
-        response.status_code = status_code
+        response = success_factory(result.payload)
+        response.status_code = result.status_code
         return response
-    except BootstrapLockBusyError as exc:
-        return error_factory(str(exc), status_code=409)
-    except ValueError as exc:
-        return error_factory(str(exc), status_code=400)
+    except BootstrapOperationError as exc:
+        return error_factory(exc.message, status_code=exc.status_code)
     except Exception:
         current_app.logger.exception("bootstrap enable failed for %s", runid)
         return error_factory("Error Handling Request", status_code=500)
@@ -220,14 +98,15 @@ def enable_bootstrap(runid: str, config: str):
 def mint_bootstrap_token(runid: str, config: str):
     authorize(runid, config)
     try:
-        _validate_bootstrap_eligibility(runid, current_user.email)
-        _ensure_bootstrap_opt_in(runid)
-        wd = _bootstrap_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        clone_url = wepp.mint_bootstrap_jwt(current_user.email, str(current_user.id))
-        return success_factory({"clone_url": clone_url})
-    except ValueError as exc:
-        return error_factory(str(exc), status_code=400)
+        result = mint_bootstrap_token_operation(
+            runid,
+            user_email=str(getattr(current_user, "email", "") or "").strip(),
+            user_id=str(getattr(current_user, "id", "") or "").strip(),
+            require_user_access=True,
+        )
+        return success_factory(result.payload)
+    except BootstrapOperationError as exc:
+        return error_factory(exc.message, status_code=exc.status_code)
     except Exception:
         current_app.logger.exception("bootstrap mint-token failed for %s", runid)
         return error_factory("Error Handling Request", status_code=500)
@@ -238,12 +117,10 @@ def mint_bootstrap_token(runid: str, config: str):
 def bootstrap_commits(runid: str, config: str):
     authorize(runid, config)
     try:
-        _ensure_bootstrap_opt_in(runid)
-        wd = _bootstrap_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        return success_factory({"commits": wepp.get_bootstrap_commits()})
-    except ValueError as exc:
-        return error_factory(str(exc), status_code=400)
+        result = bootstrap_commits_operation(runid)
+        return success_factory(result.payload)
+    except BootstrapOperationError as exc:
+        return error_factory(exc.message, status_code=exc.status_code)
     except Exception:
         current_app.logger.exception("bootstrap commits failed for %s", runid)
         return error_factory("Error Handling Request", status_code=500)
@@ -253,31 +130,16 @@ def bootstrap_commits(runid: str, config: str):
 @login_required
 def bootstrap_checkout(runid: str, config: str):
     authorize(runid, config)
-    sha = (request.json or {}).get("sha")
-    if not sha:
-        return error_factory("sha required", status_code=400)
+    payload = request.json or {}
     try:
-        _ensure_bootstrap_opt_in(runid)
-        wd = _bootstrap_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        lock_conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
-        with redis.Redis(**lock_conn_kwargs) as lock_conn:
-            lock = acquire_bootstrap_git_lock(
-                lock_conn,
-                runid=runid,
-                operation="checkout",
-                actor=_bootstrap_actor_for_current_user(),
-            )
-            if lock is None:
-                return error_factory("bootstrap lock busy", status_code=409)
-            try:
-                if not wepp.checkout_bootstrap_commit(str(sha)):
-                    return error_factory("checkout failed", status_code=400)
-            finally:
-                release_bootstrap_git_lock(lock_conn, runid=runid, token=lock.token)
-        return success_factory({"checked_out": str(sha)})
-    except ValueError as exc:
-        return error_factory(str(exc), status_code=400)
+        result = bootstrap_checkout_operation(
+            runid,
+            sha=payload.get("sha"),
+            actor=_bootstrap_actor_for_current_user(),
+        )
+        return success_factory(result.payload)
+    except BootstrapOperationError as exc:
+        return error_factory(exc.message, status_code=exc.status_code)
     except Exception:
         current_app.logger.exception("bootstrap checkout failed for %s", runid)
         return error_factory("Error Handling Request", status_code=500)
@@ -288,12 +150,10 @@ def bootstrap_checkout(runid: str, config: str):
 def bootstrap_current_ref(runid: str, config: str):
     authorize(runid, config)
     try:
-        _ensure_bootstrap_opt_in(runid)
-        wd = _bootstrap_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        return success_factory({"ref": wepp.get_bootstrap_current_ref()})
-    except ValueError as exc:
-        return error_factory(str(exc), status_code=400)
+        result = bootstrap_current_ref_operation(runid)
+        return success_factory(result.payload)
+    except BootstrapOperationError as exc:
+        return error_factory(exc.message, status_code=exc.status_code)
     except Exception:
         current_app.logger.exception("bootstrap current-ref failed for %s", runid)
         return error_factory("Error Handling Request", status_code=500)

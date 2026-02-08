@@ -5,17 +5,17 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Discovery  
+**Current phase**: Contract freeze baseline captured  
 **Last updated**: 2026-02-08  
-**Next milestone**: Freeze endpoint inventory and annotate agent-facing routes
+**Next milestone**: Standardize OpenAPI metadata for frozen agent-facing routes
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Freeze endpoint inventory (`agent-facing`, `internal`, `UI-only`).
+- [x] Freeze endpoint inventory (`agent-facing`, `internal`, `UI-only`).
 - [ ] Standardize OpenAPI metadata for agent-facing Bootstrap and queue routes.
-- [ ] Align auth/token documentation with enforced scope behavior.
-- [ ] Add/expand regression tests for auth, async enable lifecycle, and lock contention paths.
+- [x] Align auth/token documentation with enforced scope behavior.
+- [x] Add/expand regression tests for auth, async enable lifecycle, and lock contention paths.
 - [ ] Produce artifact checklist for route contracts and test coverage.
 
 ### In Progress
@@ -36,6 +36,8 @@
 - **2026-02-08** - Decisions locked for Bootstrap endpoint ownership and scopes.
 - **2026-02-08** - Migrated to full work-package structure.
 - **2026-02-08** - Bootstrap Phase 2 closure snapshot documented.
+- **2026-02-08** - Endpoint inventory freeze captured with classification, ownership, auth/access, and mutation semantics.
+- **2026-02-08** - Freeze-review remediations landed for Bootstrap scopes, wrapper parity, polling hardening, and inventory drift guard.
 
 ## Decisions Log
 
@@ -77,9 +79,22 @@
 1. Token-gate all polling endpoints.
 2. Keep read-only polling open.
 
-**Decision**: Keep polling endpoints open for now.
+**Decision**: Keep polling endpoints open (`RQ_ENGINE_POLL_AUTH_MODE=open`) across dev/test/prod for now.
 
 **Impact**: Preserves current UX and agent simplicity; threat model relies on UUID4 job ID entropy and read-only semantics.
+
+---
+
+### 2026-02-08: Polling rate-limit backend
+**Context**: Polling hardening added rate limiting; backend choice was open.
+
+**Options considered**:
+1. Redis-backed distributed limiter.
+2. In-process limiter per worker.
+
+**Decision**: Keep the in-process limiter for now.
+
+**Impact**: Fast and low-complexity implementation pre-deploy; cross-worker/global limiting can be revisited post-deploy if needed.
 
 ---
 
@@ -169,3 +184,68 @@ handoff point for further API usability work.
   - `tests/rq/test_bootstrap_autocommit_rq.py`
   - `tests/weppcloud/bootstrap/test_pre_receive.py`
   - Result: `60 passed`
+
+### 2026-02-08: Endpoint inventory freeze
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added freeze artifact:
+  `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`.
+- Enumerated all route decorators in:
+  - `wepppy/microservices/rq_engine/*.py`
+  - `wepppy/weppcloud/routes/bootstrap.py`
+- Classified each endpoint (`agent-facing`, `internal`, `ui-only`) and recorded canonical owner.
+- Captured per-endpoint auth/access model (JWT/open/login/basic auth, scopes, run-access/role gates).
+- Captured mutation semantics (read-only vs mutating, async enqueue/job-response behavior).
+- Documented Bootstrap duplication/convergence state and frozen decisions.
+
+**Open follow-ups**:
+- Converge or retire duplicate Flask Bootstrap wrapper endpoints once deployment telemetry exists.
+- Decide whether Flask-only `bootstrap/disable` should remain Flask-owned or move into rq-engine after first deploy.
+
+**Test results**:
+- `wctl doc-lint` executed (wrapper runs `markdown-doc lint --staged`; no staged files in this session).
+- File-level lint validated with:
+  - `markdown-doc lint --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+  - Result: `3 files validated, 0 errors, 0 warnings`
+
+### 2026-02-08: Endpoint-freeze remediation implementation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Enforced strict Bootstrap scopes in rq-engine routes:
+  - `bootstrap:enable`
+  - `bootstrap:token:mint`
+  - `bootstrap:read`
+  - `bootstrap:checkout`
+- Refactored Flask Bootstrap duplicate routes into thin wrappers around shared
+  logic in `wepppy/weppcloud/bootstrap/api_shared.py`.
+- Kept Flask-owned exceptions intact:
+  - `/api/bootstrap/verify-token`
+  - `/runs/<runid>/<config>/bootstrap/disable`
+- Added parity tests for Flask wrapper vs rq-engine on:
+  - enable
+  - mint-token
+  - commits
+  - current-ref
+  - checkout
+- Hardened polling endpoints with:
+  - auth mode switch (`open`, `token_optional`, `required`)
+  - rate limiting defaults (`120` requests / `60` seconds)
+  - structured audit logging fields (endpoint, status, success/failure, job id,
+    caller, IP)
+- Added inventory drift guard:
+  - `tools/check_endpoint_inventory.py`
+  - `tests/tools/test_endpoint_inventory_guard.py`
+
+**Open follow-ups**:
+- Set Flask wrapper retirement milestones once first production deployment
+  telemetry is available.
+- Keep route-ownership drift guard in pytest for now; revisit broader CI wiring
+  after initial deploy.
+
+**Test results**:
+- `wctl run-pytest tests/weppcloud/routes/test_bootstrap_bp.py tests/weppcloud/routes/test_bootstrap_auth_integration.py tests/microservices/test_rq_engine_bootstrap_routes.py tests/microservices/test_rq_engine_jobinfo.py tests/rq/test_bootstrap_enable_rq.py tests/weppcloud/bootstrap/test_enable_jobs.py tests/rq/test_bootstrap_autocommit_rq.py tests/weppcloud/bootstrap/test_pre_receive.py tests/tools/test_endpoint_inventory_guard.py`
+  - Result: `80 passed, 8 warnings`
+- `wctl doc-lint --path docs/weppcloud-bootstrap-spec.md --path docs/dev-notes/auth-token.spec.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+  - Result: `5 files validated, 0 errors, 0 warnings`

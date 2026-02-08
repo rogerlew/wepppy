@@ -194,6 +194,33 @@ If validation fails a `JWTDecodeError` is raised.
 4. Wait out the longest token TTL (or revoke known `jti` values early).
 5. Remove the retired secrets from `WEPP_AUTH_JWT_SECRETS` once no active tokens use them.
 
+## Bootstrap scopes (2026-02-08)
+- rq-engine Bootstrap endpoints use operation-specific scopes:
+  - `bootstrap:enable`
+  - `bootstrap:token:mint`
+  - `bootstrap:read`
+  - `bootstrap:checkout`
+- `rq:enqueue` is not accepted as a substitute for Bootstrap operations.
+
+## Polling endpoint auth modes (rq-engine)
+- Applies to:
+  - `GET /rq-engine/api/jobstatus/{job_id}`
+  - `GET /rq-engine/api/jobinfo/{job_id}`
+  - `POST /rq-engine/api/jobinfo`
+- Mode switch:
+  - `RQ_ENGINE_POLL_AUTH_MODE=open` (default, backward compatible)
+  - `RQ_ENGINE_POLL_AUTH_MODE=token_optional` (validate JWT when present)
+  - `RQ_ENGINE_POLL_AUTH_MODE=required` (JWT + `rq:status` required)
+- Current policy sets `open` in dev/test/prod until deployment requirements
+  change.
+- Operational hardening:
+  - In-process rate limiting per endpoint/caller/IP.
+  - Audit logging includes endpoint, status, success/failure, job id, caller,
+    and client IP.
+- Rate limit defaults:
+  - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT=120`
+  - `RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS=60`
+
 ## Service scopes
 
 | Scope | Purpose |
@@ -204,6 +231,10 @@ If validation fails a `JWTDecodeError` is raised.
 | `rq:status` | Poll job status/info. |
 | `rq:enqueue` | Submit RQ jobs (future). |
 | `rq:export` | Request rq-engine export artifacts. |
+| `bootstrap:enable` | Enqueue Bootstrap enable for eligible runs. |
+| `bootstrap:token:mint` | Mint Bootstrap git access token URLs. |
+| `bootstrap:read` | Read Bootstrap commit history and current ref metadata. |
+| `bootstrap:checkout` | Checkout a Bootstrap commit under run lock. |
 | `culvert:batch:submit` | Submit culvert batch payloads. |
 | `culvert:batch:retry` | Retry culvert runs. |
 | `culvert:batch:read` | Read culvert batch/job metadata. |

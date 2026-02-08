@@ -10,14 +10,25 @@ import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import bootstrap_routes
 from wepppy.nodb.redis_prep import TaskEnum
+from wepppy.weppcloud.bootstrap.api_shared import BootstrapOperationError, BootstrapOperationResult
 from wepppy.weppcloud.utils import auth_tokens
-from wepppy.weppcloud.bootstrap.enable_jobs import BootstrapLockBusyError
 
 pytestmark = pytest.mark.microservice
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch, *, claims: dict | None = None) -> None:
-    resolved_claims = claims or {"sub": "7", "email": "user@example.com"}
+    resolved_claims = claims or {
+        "sub": "7",
+        "email": "user@example.com",
+        "scope": " ".join(
+            [
+                bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE,
+                bootstrap_routes.BOOTSTRAP_TOKEN_MINT_SCOPE,
+                bootstrap_routes.BOOTSTRAP_READ_SCOPE,
+                bootstrap_routes.BOOTSTRAP_CHECKOUT_SCOPE,
+            ]
+        ),
+    }
     monkeypatch.setattr(
         bootstrap_routes,
         "require_jwt",
@@ -73,7 +84,7 @@ def _issue_rq_token(
     auth_tokens.get_jwt_config.cache_clear()
     payload = auth_tokens.issue_token(
         "7",
-        scopes=scopes or ["rq:enqueue"],
+        scopes=scopes or [bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE],
         audience=audience,
         issued_at=issued_at,
         expires_in=expires_in,
@@ -90,15 +101,16 @@ def test_bootstrap_enable_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(
         bootstrap_routes,
-        "_ensure_bootstrap_eligibility",
-        lambda runid, require_owner, enforce_not_disabled=True: None,
-    )
-    monkeypatch.setattr(
-        bootstrap_routes,
-        "enqueue_bootstrap_enable",
-        lambda runid, actor: (
-            {"enabled": False, "queued": True, "job_id": "enable-1", "message": "Bootstrap enable job enqueued."},
-            202,
+        "enable_bootstrap_operation",
+        lambda runid, actor: BootstrapOperationResult(
+            payload={
+                "enabled": False,
+                "queued": True,
+                "job_id": "enable-1",
+                "message": "Bootstrap enable job enqueued.",
+                "status_url": "/rq-engine/api/jobstatus/enable-1",
+            },
+            status_code=202,
         ),
     )
 
@@ -115,6 +127,38 @@ def test_bootstrap_enable_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     }
 
 
+def test_bootstrap_enable_scope_only_token_works(monkeypatch: pytest.MonkeyPatch) -> None:
+    token = _issue_rq_token(monkeypatch, scopes=[bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE])
+    headers = {"Authorization": f"Bearer {token}"}
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(
+        bootstrap_routes,
+        "enable_bootstrap_operation",
+        lambda runid, actor: BootstrapOperationResult(payload={"queued": True, "job_id": "enable-2"}, status_code=202),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/bootstrap/enable", headers=headers)
+
+    assert response.status_code == 202
+    assert response.json() == {"queued": True, "job_id": "enable-2"}
+
+
+def test_bootstrap_enable_rejects_rq_enqueue_without_bootstrap_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    token = _issue_rq_token(monkeypatch, scopes=["rq:enqueue"])
+    headers = {"Authorization": f"Bearer {token}"}
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda _jti: None)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/bootstrap/enable", headers=headers)
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE in payload["error"]["message"]
+
+
 def test_bootstrap_enable_rejects_missing_scope(monkeypatch: pytest.MonkeyPatch) -> None:
     token = _issue_rq_token(monkeypatch, scopes=["runs:read"])
     headers = {"Authorization": f"Bearer {token}"}
@@ -126,7 +170,7 @@ def test_bootstrap_enable_rejects_missing_scope(monkeypatch: pytest.MonkeyPatch)
     assert response.status_code == 403
     payload = response.json()
     assert payload["error"]["code"] == "forbidden"
-    assert "missing required scope" in payload["error"]["message"].lower()
+    assert bootstrap_routes.BOOTSTRAP_ENABLE_SCOPE in payload["error"]["message"]
 
 
 def test_bootstrap_enable_rejects_expired_token(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -186,16 +230,11 @@ def test_bootstrap_enable_rejects_revoked_token(monkeypatch: pytest.MonkeyPatch)
 
 def test_bootstrap_enable_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
-    monkeypatch.setattr(
-        bootstrap_routes,
-        "_ensure_bootstrap_eligibility",
-        lambda runid, require_owner, enforce_not_disabled=True: None,
-    )
 
     def _raise_busy(runid: str, actor: str):
-        raise BootstrapLockBusyError("bootstrap lock busy")
+        raise BootstrapOperationError("bootstrap lock busy", status_code=409, code="conflict")
 
-    monkeypatch.setattr(bootstrap_routes, "enqueue_bootstrap_enable", _raise_busy)
+    monkeypatch.setattr(bootstrap_routes, "enable_bootstrap_operation", _raise_busy)
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/bootstrap/enable")
@@ -205,14 +244,7 @@ def test_bootstrap_enable_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPatch
 
 
 def test_bootstrap_mint_token_requires_user_claims(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, claims={"token_class": "session", "sub": "session-1"})
-    monkeypatch.setattr(
-        bootstrap_routes,
-        "_ensure_bootstrap_eligibility",
-        lambda runid, require_owner, enforce_not_disabled=True: None,
-    )
-    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    _stub_auth(monkeypatch, claims={"token_class": "session", "sub": "session-1", "scope": bootstrap_routes.BOOTSTRAP_TOKEN_MINT_SCOPE})
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/bootstrap/mint-token")
@@ -222,21 +254,18 @@ def test_bootstrap_mint_token_requires_user_claims(monkeypatch: pytest.MonkeyPat
 
 
 def test_bootstrap_mint_token_returns_clone_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch, claims={"sub": "42", "email": "owner@example.com"})
+    _stub_auth(
+        monkeypatch,
+        claims={"sub": "42", "email": "owner@example.com", "scope": bootstrap_routes.BOOTSTRAP_TOKEN_MINT_SCOPE},
+    )
     monkeypatch.setattr(
         bootstrap_routes,
-        "_ensure_bootstrap_eligibility",
-        lambda runid, require_owner, enforce_not_disabled=True: None,
+        "mint_bootstrap_token_operation",
+        lambda runid, user_email, user_id: BootstrapOperationResult(
+            payload={"clone_url": f"https://{user_id}:token@example.test/git/ru/run-1/.git"},
+            status_code=200,
+        ),
     )
-
-    class DummyWepp:
-        bootstrap_enabled = True
-
-        def mint_bootstrap_jwt(self, user_email: str, user_id: str) -> str:
-            return f"https://{user_id}:token@example.test/git/ru/run-1/.git"
-
-    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: DummyWepp())
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/bootstrap/mint-token")
@@ -246,7 +275,7 @@ def test_bootstrap_mint_token_returns_clone_url(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_bootstrap_checkout_requires_sha(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch)
+    _stub_auth(monkeypatch, claims={"sub": "7", "email": "user@example.com", "scope": bootstrap_routes.BOOTSTRAP_CHECKOUT_SCOPE})
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/bootstrap/checkout", json={})
 
@@ -255,28 +284,15 @@ def test_bootstrap_checkout_requires_sha(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_bootstrap_checkout_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch)
+    _stub_auth(monkeypatch, claims={"sub": "7", "email": "user@example.com", "scope": bootstrap_routes.BOOTSTRAP_CHECKOUT_SCOPE})
+
     monkeypatch.setattr(
         bootstrap_routes,
-        "_ensure_bootstrap_eligibility",
-        lambda runid, require_owner, enforce_not_disabled=True: None,
+        "bootstrap_checkout_operation",
+        lambda runid, sha, actor: (_ for _ in ()).throw(
+            BootstrapOperationError("bootstrap lock busy", status_code=409, code="conflict")
+        ),
     )
-    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(
-        bootstrap_routes.Wepp,
-        "getInstance",
-        lambda wd: type("W", (), {"bootstrap_enabled": True, "checkout_bootstrap_commit": lambda self, sha: True})(),
-    )
-    monkeypatch.setattr(bootstrap_routes, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    monkeypatch.setattr(bootstrap_routes.redis, "Redis", lambda **kwargs: DummyRedis())
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/bootstrap/checkout", json={"sha": "abc1234"})
@@ -286,24 +302,11 @@ def test_bootstrap_checkout_rejects_when_lock_busy(monkeypatch: pytest.MonkeyPat
 
 
 def test_bootstrap_commits_allows_read_when_admin_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch)
+    _stub_auth(monkeypatch, claims={"sub": "7", "email": "user@example.com", "scope": bootstrap_routes.BOOTSTRAP_READ_SCOPE})
     monkeypatch.setattr(
         bootstrap_routes,
-        "_safe_json_load_run",
-        lambda runid: {"runid": runid, "owner_id": "7", "bootstrap_disabled": True},
-    )
-    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(
-        bootstrap_routes.Wepp,
-        "getInstance",
-        lambda wd: type(
-            "W",
-            (),
-            {
-                "bootstrap_enabled": True,
-                "get_bootstrap_commits": lambda self: [{"sha": "abc1234"}],
-            },
-        )(),
+        "bootstrap_commits_operation",
+        lambda runid: BootstrapOperationResult(payload={"commits": [{"sha": "abc1234"}]}, status_code=200),
     )
 
     with TestClient(rq_engine.app) as client:
