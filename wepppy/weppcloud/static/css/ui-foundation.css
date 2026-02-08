@@ -3728,8 +3728,10 @@ h5:first-child {
   margin: 0 0 var(--wc-space-lg) 0;
 }
 
-.wc-fieldset__legend {
+.wc-fieldset .wc-fieldset__legend {
   font-weight: 600;
+  color: var(--wc-color-text);
+  border-bottom-color: var(--wc-color-border);
 }
 
 .wc-fieldset__description {
