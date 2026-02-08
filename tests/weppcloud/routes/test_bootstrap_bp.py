@@ -363,7 +363,7 @@ def test_mint_token_returns_clone_url(bootstrap_context, monkeypatch: pytest.Mon
     wepp = DummyWepp(enabled=True)
 
     monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
-    monkeypatch.setattr(module, "get_wd", lambda runid: f"/tmp/{runid}")
+    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=True: f"/tmp/{runid}")
     monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: wepp)
 
     with app.test_client() as client:
@@ -374,13 +374,75 @@ def test_mint_token_returns_clone_url(bootstrap_context, monkeypatch: pytest.Mon
     assert payload == {"Content": {"clone_url": f"clone://{user.id}@example.test/{user.email}"}}
 
 
+def test_mint_token_uses_canonical_wd(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, module, set_user = bootstrap_context
+    user = DummyUser(31, "owner@example.com")
+    set_user(user)
+    calls: dict[str, bool] = {}
+
+    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
+
+    def _capture_wd(runid: str, *, prefer_active: bool = True) -> str:
+        calls["prefer_active"] = prefer_active
+        return f"/tmp/{runid}"
+
+    monkeypatch.setattr(module, "get_wd", _capture_wd)
+    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
+
+    with app.test_client() as client:
+        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
+
+    assert response.status_code == 200
+    assert calls["prefer_active"] is False
+
+
+def test_mint_token_validation_error_returns_400(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, set_user = bootstrap_context
+    set_user(DummyUser(30, "owner@example.com"))
+
+    def _raise_bad_run(runid: str, email: str):
+        raise ValueError("bad run")
+
+    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", _raise_bad_run)
+
+    with app.test_client() as client:
+        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": {"message": "bad run"}}
+
+
+def test_mint_token_unexpected_error_returns_500(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, set_user = bootstrap_context
+    user = DummyUser(31, "owner@example.com")
+    set_user(user)
+    monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
+
+    def _raise_runtime(runid: str, prefer_active: bool = True):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(module, "get_wd", _raise_runtime)
+
+    with app.test_client() as client:
+        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/mint-token")
+
+    assert response.status_code == 500
+    assert response.get_json() == {"error": {"message": "Error Handling Request"}}
+
+
 def test_checkout_returns_conflict_when_lock_busy(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, set_user = bootstrap_context
     user = DummyUser(31, "owner@example.com")
     set_user(user)
 
     monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
-    monkeypatch.setattr(module, "get_wd", lambda runid: f"/tmp/{runid}")
+    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=True: f"/tmp/{runid}")
     monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
     monkeypatch.setattr(module, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
 
@@ -401,6 +463,60 @@ def test_checkout_returns_conflict_when_lock_busy(bootstrap_context, monkeypatch
 
     assert response.status_code == 409
     assert response.get_json() == {"error": {"message": "bootstrap lock busy"}}
+
+
+def test_checkout_requires_sha(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, module, set_user = bootstrap_context
+    set_user(DummyUser(32, "owner@example.com"))
+    monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
+
+    with app.test_client() as client:
+        response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout", json={})
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": {"message": "sha required"}}
+
+
+def test_checkout_returns_bad_request_when_git_checkout_fails(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, set_user = bootstrap_context
+    user = DummyUser(33, "owner@example.com")
+    set_user(user)
+
+    class DummyFailingWepp(DummyWepp):
+        def checkout_bootstrap_commit(self, sha: str) -> bool:
+            self.checkout_calls.append(sha)
+            return False
+
+    monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
+    monkeypatch.setattr(module, "get_wd", lambda runid, prefer_active=True: f"/tmp/{runid}")
+    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyFailingWepp(enabled=True))
+    monkeypatch.setattr(
+        module,
+        "acquire_bootstrap_git_lock",
+        lambda *args, **kwargs: type("Lock", (), {"token": "lock-token"})(),
+    )
+    monkeypatch.setattr(module, "release_bootstrap_git_lock", lambda *args, **kwargs: True)
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(module.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with app.test_client() as client:
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout",
+            json={"sha": "abc1234"},
+        )
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": {"message": "checkout failed"}}
 
 
 def test_bootstrap_disable_sets_flag(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -427,3 +543,29 @@ def test_bootstrap_disable_sets_flag(bootstrap_context, monkeypatch: pytest.Monk
     assert payload == {"Content": {"bootstrap_disabled": True}}
     assert run.bootstrap_disabled is True
     assert db.commits == 1
+
+
+def test_bootstrap_disable_returns_404_for_missing_run(
+    bootstrap_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _set_user = bootstrap_context
+
+    class DummyRunModel:
+        runid = ComparableAttribute("runid")
+        query = DummyQuery(None)
+
+    db = DummyDB()
+    app_module = importlib.import_module("wepppy.weppcloud.app")
+    monkeypatch.setattr(app_module, "Run", DummyRunModel)
+    monkeypatch.setattr(app_module, "db", db)
+
+    with app.test_client() as client:
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/bootstrap/disable",
+            json={"disabled": True},
+        )
+
+    assert response.status_code == 404
+    assert response.get_json() == {"error": {"message": "run not found"}}
+    assert db.commits == 0

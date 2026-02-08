@@ -160,7 +160,7 @@ def auth_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     monkeypatch.setattr(bootstrap_module, "authorize", lambda runid, config: None)
     monkeypatch.setattr(bootstrap_module, "_validate_bootstrap_eligibility", _fake_validate)
     monkeypatch.setattr(bootstrap_module, "_ensure_bootstrap_opt_in", lambda runid: None)
-    monkeypatch.setattr(bootstrap_module, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(bootstrap_module, "get_wd", lambda runid, prefer_active=False: str(tmp_path))
     monkeypatch.setattr(bootstrap_module.Wepp, "getInstance", lambda wd: DummyWepp())
     monkeypatch.setattr(
         bootstrap_module,

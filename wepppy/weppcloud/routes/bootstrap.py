@@ -125,10 +125,15 @@ def _validate_bootstrap_eligibility(runid: str, email: str) -> Tuple[Any, Any]:
 
 
 def _ensure_bootstrap_opt_in(runid: str) -> None:
-    wd = get_wd(runid)
+    wd = _bootstrap_wd(runid)
     wepp = Wepp.getInstance(wd)
     if not wepp.bootstrap_enabled:
         raise ValueError("bootstrap not enabled")
+
+
+def _bootstrap_wd(runid: str) -> str:
+    """Resolve the canonical run working directory for bootstrap operations."""
+    return get_wd(runid, prefer_active=False)
 
 
 def _bootstrap_actor_for_current_user() -> str:
@@ -142,7 +147,7 @@ def verify_token():
     auth = _decode_basic_auth(request.headers.get("Authorization"))
     if not auth:
         return _reject("missing authorization")
-    _user_id, token = auth
+    _ignored_user_id, token = auth
 
     forwarded_path = request.headers.get("X-Forwarded-Uri") or request.headers.get("X-Original-Uri")
     if not forwarded_path:
@@ -176,9 +181,9 @@ def verify_token():
         _ensure_bootstrap_opt_in(runid)
     except ValueError as exc:
         return _reject(str(exc))
-    except Exception as exc:
+    except Exception:
         current_app.logger.exception("bootstrap verify-token failed")
-        return _reject(str(exc))
+        return _reject("bootstrap verification failed")
 
     response = make_response("", 200)
     response.headers["X-Auth-User"] = email
@@ -203,8 +208,11 @@ def enable_bootstrap(runid: str, config: str):
         return response
     except BootstrapLockBusyError as exc:
         return error_factory(str(exc), status_code=409)
-    except Exception as exc:
-        return error_factory(str(exc))
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
+    except Exception:
+        current_app.logger.exception("bootstrap enable failed for %s", runid)
+        return error_factory("Error Handling Request", status_code=500)
 
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/mint-token", methods=["POST"])
@@ -214,12 +222,15 @@ def mint_bootstrap_token(runid: str, config: str):
     try:
         _validate_bootstrap_eligibility(runid, current_user.email)
         _ensure_bootstrap_opt_in(runid)
-        wd = get_wd(runid)
+        wd = _bootstrap_wd(runid)
         wepp = Wepp.getInstance(wd)
         clone_url = wepp.mint_bootstrap_jwt(current_user.email, str(current_user.id))
         return success_factory({"clone_url": clone_url})
-    except Exception as exc:
-        return error_factory(str(exc))
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
+    except Exception:
+        current_app.logger.exception("bootstrap mint-token failed for %s", runid)
+        return error_factory("Error Handling Request", status_code=500)
 
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/commits", methods=["GET"])
@@ -228,11 +239,14 @@ def bootstrap_commits(runid: str, config: str):
     authorize(runid, config)
     try:
         _ensure_bootstrap_opt_in(runid)
-        wd = get_wd(runid)
+        wd = _bootstrap_wd(runid)
         wepp = Wepp.getInstance(wd)
         return success_factory({"commits": wepp.get_bootstrap_commits()})
-    except Exception as exc:
-        return error_factory(str(exc))
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
+    except Exception:
+        current_app.logger.exception("bootstrap commits failed for %s", runid)
+        return error_factory("Error Handling Request", status_code=500)
 
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/checkout", methods=["POST"])
@@ -241,10 +255,10 @@ def bootstrap_checkout(runid: str, config: str):
     authorize(runid, config)
     sha = (request.json or {}).get("sha")
     if not sha:
-        return error_factory("sha required")
+        return error_factory("sha required", status_code=400)
     try:
         _ensure_bootstrap_opt_in(runid)
-        wd = get_wd(runid)
+        wd = _bootstrap_wd(runid)
         wepp = Wepp.getInstance(wd)
         lock_conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
         with redis.Redis(**lock_conn_kwargs) as lock_conn:
@@ -258,12 +272,15 @@ def bootstrap_checkout(runid: str, config: str):
                 return error_factory("bootstrap lock busy", status_code=409)
             try:
                 if not wepp.checkout_bootstrap_commit(str(sha)):
-                    return error_factory("checkout failed")
+                    return error_factory("checkout failed", status_code=400)
             finally:
                 release_bootstrap_git_lock(lock_conn, runid=runid, token=lock.token)
         return success_factory({"checked_out": str(sha)})
-    except Exception as exc:
-        return error_factory(str(exc))
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
+    except Exception:
+        current_app.logger.exception("bootstrap checkout failed for %s", runid)
+        return error_factory("Error Handling Request", status_code=500)
 
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/current-ref", methods=["GET"])
@@ -272,11 +289,14 @@ def bootstrap_current_ref(runid: str, config: str):
     authorize(runid, config)
     try:
         _ensure_bootstrap_opt_in(runid)
-        wd = get_wd(runid)
+        wd = _bootstrap_wd(runid)
         wepp = Wepp.getInstance(wd)
         return success_factory({"ref": wepp.get_bootstrap_current_ref()})
-    except Exception as exc:
-        return error_factory(str(exc))
+    except ValueError as exc:
+        return error_factory(str(exc), status_code=400)
+    except Exception:
+        current_app.logger.exception("bootstrap current-ref failed for %s", runid)
+        return error_factory("Error Handling Request", status_code=500)
 
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/disable", methods=["POST"])
@@ -290,12 +310,13 @@ def bootstrap_disable(runid: str, config: str):
 
         run = Run.query.filter(Run.runid == runid).first()
         if run is None:
-            return error_factory("run not found")
+            return error_factory("run not found", status_code=404)
         run.bootstrap_disabled = bool(disabled)
         db.session.commit()
         return success_factory({"bootstrap_disabled": run.bootstrap_disabled})
-    except Exception as exc:
-        return error_factory(str(exc))
+    except Exception:
+        current_app.logger.exception("bootstrap disable failed for %s", runid)
+        return error_factory("Error Handling Request", status_code=500)
 
 
 __all__ = ["bootstrap_bp"]

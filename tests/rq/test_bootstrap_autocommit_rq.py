@@ -75,6 +75,14 @@ def _make_parent_job() -> SimpleNamespace:
     return job
 
 
+class DummyRedis:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+
 def test_log_complete_skips_autocommit_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_log_complete_dependencies(monkeypatch)
 
@@ -89,10 +97,26 @@ def test_log_complete_skips_autocommit_by_default(monkeypatch: pytest.MonkeyPatc
 def test_log_complete_autocommits_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_log_complete_dependencies(monkeypatch)
     stages: list[str] = []
+    released_tokens: list[str] = []
     monkeypatch.setattr(
         wepp_rq.Wepp,
         "getInstance",
-        lambda wd: SimpleNamespace(bootstrap_commit_inputs=lambda stage: stages.append(stage)),
+        lambda wd: SimpleNamespace(
+            bootstrap_commit_inputs=lambda stage: stages.append(stage),
+            logger=SimpleNamespace(warning=lambda *args, **kwargs: None),
+        ),
+    )
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        wepp_rq,
+        "acquire_bootstrap_git_lock",
+        lambda *args, **kwargs: SimpleNamespace(token="lock-1"),
+    )
+    monkeypatch.setattr(
+        wepp_rq,
+        "release_bootstrap_git_lock",
+        lambda _redis_conn, *, runid, token: released_tokens.append(token) or True,
     )
 
     wepp_rq._log_complete_rq(
@@ -102,6 +126,34 @@ def test_log_complete_autocommits_when_enabled(monkeypatch: pytest.MonkeyPatch) 
     )
 
     assert stages == ["WEPP pipeline"]
+    assert released_tokens == ["lock-1"]
+
+
+def test_log_complete_skips_autocommit_when_git_lock_busy(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_log_complete_dependencies(monkeypatch)
+    stages: list[str] = []
+    warnings: list[str] = []
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda wd: SimpleNamespace(
+            bootstrap_commit_inputs=lambda stage: stages.append(stage),
+            logger=SimpleNamespace(warning=lambda message, *_args: warnings.append(str(message))),
+        ),
+    )
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(wepp_rq, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
+
+    wepp_rq._log_complete_rq(
+        "ab-run",
+        auto_commit_inputs=True,
+        commit_stage="WEPP pipeline",
+    )
+
+    assert stages == []
+    assert warnings
+    assert "bootstrap lock busy" in warnings[-1].lower()
 
 
 def test_standard_watershed_enqueue_sets_autocommit(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -173,15 +225,30 @@ def test_build_swat_inputs_autocommits(monkeypatch: pytest.MonkeyPatch) -> None:
 
     swat_module.Swat = DummySwat  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.swat", swat_module)
+    released_tokens: list[str] = []
     monkeypatch.setattr(
         swat_rq.Wepp,
         "getInstance",
         lambda wd: SimpleNamespace(
             bootstrap_commit_inputs=lambda stage: commit_stages.append(stage),
+            logger=SimpleNamespace(warning=lambda *args, **kwargs: None),
         ),
+    )
+    monkeypatch.setattr(swat_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(swat_rq.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        swat_rq,
+        "acquire_bootstrap_git_lock",
+        lambda *args, **kwargs: SimpleNamespace(token="lock-1"),
+    )
+    monkeypatch.setattr(
+        swat_rq,
+        "release_bootstrap_git_lock",
+        lambda _redis_conn, *, runid, token: released_tokens.append(token) or True,
     )
 
     swat_rq._build_swat_inputs_rq("ab-run")
 
     assert built == ["built"]
     assert commit_stages == ["SWAT inputs"]
+    assert released_tokens == ["lock-1"]

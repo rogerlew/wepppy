@@ -204,3 +204,75 @@ def test_pre_receive_new_ref_logs_only_introduced_commits(
     shas = {entry["sha"] for entry in entries}
     assert new_sha in shas
     assert main_head not in shas
+
+
+def test_pre_receive_rejects_symlink_entries(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo = _init_repo(tmp_path)
+    baseline_sha = _run_git(repo, ["rev-parse", "HEAD"])
+
+    _run_git(repo, ["checkout", "-b", "push"])
+    runs_dir = repo / "wepp" / "runs"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    (runs_dir / "plain.sol").write_text("plain text")
+    (runs_dir / "linked.sol").symlink_to("plain.sol")
+    new_sha = _commit_all(repo, "add symlink")
+    _run_git(repo, ["checkout", "main"])
+    _run_git(repo, ["branch", "-D", "push"])
+
+    with pytest.raises(RuntimeError, match=r"Symlinks are not allowed"):
+        _run_pre_receive(monkeypatch, repo, baseline_sha, new_sha)
+
+
+def test_pre_receive_rejects_submodule_entries(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo = _init_repo(tmp_path)
+    baseline_sha = _run_git(repo, ["rev-parse", "HEAD"])
+
+    _run_git(repo, ["checkout", "-b", "push"])
+    head_sha = _run_git(repo, ["rev-parse", "HEAD"])
+    _run_git(
+        repo,
+        ["update-index", "--add", "--cacheinfo", f"160000,{head_sha},wepp/runs/submodule-entry"],
+    )
+    _run_git(repo, ["commit", "-m", "add gitlink"])
+    new_sha = _run_git(repo, ["rev-parse", "HEAD"])
+    _run_git(repo, ["checkout", "main"])
+    _run_git(repo, ["branch", "-D", "push"])
+
+    with pytest.raises(RuntimeError, match=r"Submodules are not allowed"):
+        _run_pre_receive(monkeypatch, repo, baseline_sha, new_sha)
+
+
+def test_pre_receive_rejects_rename_operations(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo = _init_repo(tmp_path)
+    runs_dir = repo / "wepp" / "runs"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    original_path = runs_dir / "source.sol"
+    original_path.write_text("source")
+    baseline_sha = _commit_all(repo, "add source")
+
+    _run_git(repo, ["checkout", "-b", "push"])
+    _run_git(repo, ["mv", "wepp/runs/source.sol", "wepp/runs/renamed.sol"])
+    new_sha = _commit_all(repo, "rename source")
+    _run_git(repo, ["checkout", "main"])
+    _run_git(repo, ["branch", "-D", "push"])
+
+    with pytest.raises(RuntimeError, match=r"Rename/copy not allowed"):
+        _run_pre_receive(monkeypatch, repo, baseline_sha, new_sha)
+
+
+def test_pre_receive_rejects_deleting_allowed_inputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo = _init_repo(tmp_path)
+    runs_dir = repo / "wepp" / "runs"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    target_path = runs_dir / "delete-me.sol"
+    target_path.write_text("delete me")
+    baseline_sha = _commit_all(repo, "add input")
+
+    _run_git(repo, ["checkout", "-b", "push"])
+    _run_git(repo, ["rm", "wepp/runs/delete-me.sol"])
+    new_sha = _commit_all(repo, "remove input")
+    _run_git(repo, ["checkout", "main"])
+    _run_git(repo, ["branch", "-D", "push"])
+
+    with pytest.raises(RuntimeError, match=r"Deleting inputs is not allowed"):
+        _run_pre_receive(monkeypatch, repo, baseline_sha, new_sha)

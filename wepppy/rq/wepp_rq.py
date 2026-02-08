@@ -84,6 +84,7 @@ from wepppy.query_engine.activate import activate_query_engine
 from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq
 from wepppy.weppcloud.bootstrap.git_lock import (
+    acquire_bootstrap_git_lock,
     clear_bootstrap_enable_job_id,
     release_bootstrap_git_lock,
 )
@@ -132,6 +133,31 @@ def _safe_relpath(base: str, target: str | os.PathLike[str]) -> str:
         return os.path.relpath(str(target), base)
     except (ValueError, TypeError):
         return str(target)
+
+
+def _bootstrap_autocommit_actor(job: Job | None) -> str:
+    job_id = str(getattr(job, "id", "") or "").strip()
+    if job_id:
+        return f"rq:{job_id}:wepp:auto_commit"
+    return "rq:unknown:wepp:auto_commit"
+
+
+def _bootstrap_autocommit_with_lock(runid: str, wepp: Wepp, stage: str, *, actor: str) -> str | None:
+    conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        lock = acquire_bootstrap_git_lock(
+            redis_conn,
+            runid=runid,
+            operation="auto_commit",
+            actor=actor,
+        )
+        if lock is None:
+            wepp.logger.warning("Skipped bootstrap auto-commit for %s: bootstrap lock busy", stage)
+            return None
+        try:
+            return wepp.bootstrap_commit_inputs(stage)
+        finally:
+            release_bootstrap_git_lock(redis_conn, runid=runid, token=lock.token)
 
 
 def compress_fn(fn: str) -> None:
@@ -2191,7 +2217,12 @@ def _log_complete_rq(
 
         if auto_commit_inputs:
             wepp = Wepp.getInstance(wd)
-            wepp.bootstrap_commit_inputs(commit_stage)
+            _bootstrap_autocommit_with_lock(
+                runid,
+                wepp,
+                commit_stage,
+                actor=_bootstrap_autocommit_actor(job),
+            )
 
         ron = Ron.getInstance(wd)
         name = ron.name

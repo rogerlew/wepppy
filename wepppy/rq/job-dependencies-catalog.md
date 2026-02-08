@@ -309,6 +309,36 @@ Audit notes:
 1. Route-level dedupe key `bootstrap:enable:job:<runid>` prevents duplicate enable jobs while one is active.
 2. Route acquires run-scoped Redis git lock `bootstrap:git-lock:<runid>` before enqueueing; the worker releases it in `bootstrap_enable_rq` cleanup.
 
+**`POST /api/runs/{runid}/{config}/run-wepp-npprep`**
+
+| Stage | Child job | `depends_on` | File prerequisites |
+| --- | --- | --- | --- |
+| root | `run_wepp_noprep_rq` | none | Existing WEPP input state under `wepp/runs`; Bootstrap must already be enabled for the run |
+
+Audit notes:
+1. Route resets Redis prep timestamps for WEPP tasks before enqueueing the no-prep run.
+2. This endpoint intentionally skips prep rebuilds and runs against the currently checked-out git state.
+
+**`POST /api/runs/{runid}/{config}/run-wepp-watershed-no-prep`**
+
+| Stage | Child job | `depends_on` | File prerequisites |
+| --- | --- | --- | --- |
+| root | `run_wepp_watershed_noprep_rq` | none | Existing watershed inputs under `wepp/runs`; Bootstrap must already be enabled for the run |
+
+Audit notes:
+1. Route resets the watershed prep timestamp before enqueueing.
+2. No branch checkout occurs here; execution uses current repository checkout.
+
+**`POST /api/runs/{runid}/{config}/run-swat-noprep`**
+
+| Stage | Child job | `depends_on` | File prerequisites |
+| --- | --- | --- | --- |
+| root | `run_swat_noprep_rq` | none | Existing SWAT+ inputs under `swat/TxtInOut`; Bootstrap must already be enabled and SWAT mod present |
+
+Audit notes:
+1. Route enqueues SWAT no-prep execution without rebuilding TxtInOut.
+2. Endpoint depends on existing SWAT inputs and the active checkout state.
+
 ## NFS Consistency Headaches
 
 ### Background (Feb 6, 2026)

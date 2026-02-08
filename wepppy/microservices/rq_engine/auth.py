@@ -146,8 +146,8 @@ def require_roles(claims: Mapping[str, Any], required_roles: Sequence[str]) -> N
 
 
 def _authorize_user_claims(claims: Mapping[str, Any], runid: str) -> None:
-    roles = {role.lower() for role in _normalize_list(claims.get("roles"))}
-    if "admin" in roles:
+    roles = _normalize_roles(claims.get("roles"))
+    if "admin" in roles or "root" in roles:
         return
 
     wd = get_wd(runid, prefer_active=False)

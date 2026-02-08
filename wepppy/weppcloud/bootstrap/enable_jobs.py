@@ -13,6 +13,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 from .git_lock import (
     BOOTSTRAP_ENABLE_JOB_TTL_SECONDS,
+    BOOTSTRAP_GIT_LOCK_TTL_SECONDS,
     acquire_bootstrap_git_lock,
     get_bootstrap_enable_job_id,
     release_bootstrap_git_lock,
@@ -26,8 +27,18 @@ class BootstrapLockBusyError(RuntimeError):
     """Raised when a run-scoped bootstrap git lock is already held."""
 
 
+def _bootstrap_enable_lock_ttl_seconds() -> int:
+    # Keep the enable lock alive for at least the configured job timeout.
+    return max(BOOTSTRAP_GIT_LOCK_TTL_SECONDS, RQ_TIMEOUT + 300)
+
+
+def _bootstrap_enable_job_ttl_seconds() -> int:
+    # Keep the dedupe key aligned with the max expected job lifetime.
+    return max(BOOTSTRAP_ENABLE_JOB_TTL_SECONDS, RQ_TIMEOUT + 300)
+
+
 def enqueue_bootstrap_enable(runid: str, *, actor: str) -> tuple[dict[str, Any], int]:
-    wd = get_wd(runid)
+    wd = get_wd(runid, prefer_active=False)
     wepp = Wepp.getInstance(wd)
     if wepp.bootstrap_enabled:
         return {"enabled": True, "message": "Bootstrap already enabled."}, 200
@@ -53,6 +64,7 @@ def enqueue_bootstrap_enable(runid: str, *, actor: str) -> tuple[dict[str, Any],
             runid=runid,
             operation="enable",
             actor=actor,
+            ttl_seconds=_bootstrap_enable_lock_ttl_seconds(),
         )
         if lock is None:
             raise BootstrapLockBusyError("bootstrap lock busy")
@@ -70,7 +82,7 @@ def enqueue_bootstrap_enable(runid: str, *, actor: str) -> tuple[dict[str, Any],
                 lock_conn,
                 runid=runid,
                 job_id=job.id,
-                ttl_seconds=BOOTSTRAP_ENABLE_JOB_TTL_SECONDS,
+                ttl_seconds=_bootstrap_enable_job_ttl_seconds(),
             )
         except Exception:
             release_bootstrap_git_lock(lock_conn, runid=runid, token=lock.token)

@@ -22,7 +22,7 @@ from wepppy.weppcloud.bootstrap.git_lock import (
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +50,16 @@ def _safe_json_load_run(runid: str) -> dict[str, Any] | None:
         }
 
 
-def _ensure_bootstrap_eligibility(runid: str, *, require_owner: bool) -> None:
+def _ensure_bootstrap_eligibility(
+    runid: str,
+    *,
+    require_owner: bool,
+    enforce_not_disabled: bool = True,
+) -> None:
     run_record = _safe_json_load_run(runid)
     if run_record is None:
         raise ValueError("run not found")
-    if run_record.get("bootstrap_disabled"):
+    if enforce_not_disabled and run_record.get("bootstrap_disabled"):
         raise ValueError("bootstrap disabled")
     if require_owner and not run_record.get("owner_id"):
         raise ValueError("anonymous runs cannot enable bootstrap")
@@ -94,7 +99,7 @@ async def _safe_json(request: Request) -> dict[str, Any]:
 
 
 def _enqueue_no_prep_job(runid: str, *, job_fn, job_key: str, reset_tasks: list[TaskEnum]) -> JSONResponse:
-    wd = get_wd(runid)
+    wd = get_wd(runid, prefer_active=False)
     wepp = Wepp.getInstance(wd)
     _ensure_bootstrap_enabled(wepp)
 
@@ -119,7 +124,7 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap-enable auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         _ensure_bootstrap_eligibility(runid, require_owner=True)
@@ -134,7 +139,7 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine bootstrap-enable enqueue failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post("/runs/{runid}/{config}/bootstrap/mint-token")
@@ -146,7 +151,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap mint-token auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         _ensure_bootstrap_eligibility(runid, require_owner=True)
@@ -159,7 +164,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
                 code="forbidden",
             )
 
-        wd = get_wd(runid)
+        wd = get_wd(runid, prefer_active=False)
         wepp = Wepp.getInstance(wd)
         _ensure_bootstrap_enabled(wepp)
         return JSONResponse({"clone_url": wepp.mint_bootstrap_jwt(user_email, user_id)})
@@ -167,7 +172,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine bootstrap mint-token failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.get("/runs/{runid}/{config}/bootstrap/commits")
@@ -179,11 +184,11 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap commits auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=False)
-        wd = get_wd(runid)
+        _ensure_bootstrap_eligibility(runid, require_owner=False, enforce_not_disabled=False)
+        wd = get_wd(runid, prefer_active=False)
         wepp = Wepp.getInstance(wd)
         _ensure_bootstrap_enabled(wepp)
         return JSONResponse({"commits": wepp.get_bootstrap_commits()})
@@ -191,7 +196,7 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine bootstrap commits failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.get("/runs/{runid}/{config}/bootstrap/current-ref")
@@ -203,11 +208,11 @@ async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JS
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap current-ref auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=False)
-        wd = get_wd(runid)
+        _ensure_bootstrap_eligibility(runid, require_owner=False, enforce_not_disabled=False)
+        wd = get_wd(runid, prefer_active=False)
         wepp = Wepp.getInstance(wd)
         _ensure_bootstrap_enabled(wepp)
         return JSONResponse({"ref": wepp.get_bootstrap_current_ref()})
@@ -215,7 +220,7 @@ async def bootstrap_current_ref(runid: str, config: str, request: Request) -> JS
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine bootstrap current-ref failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post("/runs/{runid}/{config}/bootstrap/checkout")
@@ -227,7 +232,7 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine bootstrap checkout auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     payload = await _safe_json(request)
     sha = str(payload.get("sha") or "").strip()
@@ -235,8 +240,8 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         return error_response("sha required", status_code=400)
 
     try:
-        _ensure_bootstrap_eligibility(runid, require_owner=False)
-        wd = get_wd(runid)
+        _ensure_bootstrap_eligibility(runid, require_owner=False, enforce_not_disabled=False)
+        wd = get_wd(runid, prefer_active=False)
         wepp = Wepp.getInstance(wd)
         _ensure_bootstrap_enabled(wepp)
 
@@ -260,7 +265,7 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine bootstrap checkout failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post("/runs/{runid}/{config}/run-wepp-npprep")
@@ -272,7 +277,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine run-wepp-npprep auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         return _enqueue_no_prep_job(
@@ -290,7 +295,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine run-wepp-npprep enqueue failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post("/runs/{runid}/{config}/run-wepp-watershed-no-prep")
@@ -302,7 +307,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine run-wepp-watershed-no-prep auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         return _enqueue_no_prep_job(
@@ -315,7 +320,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine run-wepp-watershed-no-prep enqueue failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 @router.post("/runs/{runid}/{config}/run-swat-noprep")
@@ -327,7 +332,7 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
         logger.exception("rq-engine run-swat-noprep auth failed")
-        return error_response_with_traceback("Failed to authorize request", status_code=401)
+        return error_response("Failed to authorize request", status_code=401)
 
     try:
         return _enqueue_no_prep_job(
@@ -340,7 +345,7 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400)
     except Exception:
         logger.exception("rq-engine run-swat-noprep enqueue failed")
-        return error_response_with_traceback("Error Handling Request")
+        return error_response("Error Handling Request", status_code=500)
 
 
 __all__ = ["router"]

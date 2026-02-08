@@ -537,7 +537,7 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
         return
 
     try:
-        if current_user.has_role("Admin"):
+        if current_user.has_role("Admin") or current_user.has_role("Root"):
             return
     except Exception:
         return

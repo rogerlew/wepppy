@@ -124,8 +124,8 @@ git clone https://<user_id>:<jwt>@wepp.cloud/git/<prefix>/<runid>/.git
 ```
 
 The `<user_id>` is a URL-safe identifier (username or numeric ID, not raw email)
-to avoid `@` encoding issues in URLs. The server resolves it to the full user
-record.
+to avoid `@` encoding issues in URLs. Authorization is based on JWT claims
+(`sub`, `runid`, `aud`); the Basic-auth username is not used for access checks.
 
 **Verification flow** (`/api/bootstrap/verify-token`):
 
@@ -145,10 +145,13 @@ record.
 
 - **No per-user revocation.** Revocation is per-run only.
 - When bootstrap is disabled for a run, `bootstrap_disabled` is set to true in
-  Postgres. All JWTs for that run become invalid immediately.
+  Postgres. Git HTTP push/pull and token minting for that run are blocked
+  immediately.
 - Re-enabling bootstrap for the same run sets `bootstrap_disabled = false`.
   Users should mint a new JWT. Prior tokens still expire within 6 months. The
   nodb user opt-in remains set.
+- Read-only commit/history checkout flows in the UI and bootstrap no-prep run
+  buttons remain available for existing commit states while disabled.
 - Only non-anonymous runs can enable bootstrap.
 
 **Benefits:**
@@ -462,10 +465,13 @@ for every git HTTP request.
 
 - Set `EXTERNAL_HOST` to the public hostname (used as the JWT `aud` claim).
 - Set `WEPP_AUTH_JWT_SECRET` (and `WEPP_AUTH_JWT_SECRETS` if rotating).
+- Set `DTALE_INTERNAL_TOKEN` to a non-default secret value for production.
 - Apply the Postgres migration that adds `runs.bootstrap_disabled`.
 - Update the Caddy `/git/*` route (forward auth + header forwarding + FastCGI).
 - Run `fcgiwrap` as a sidecar using the WEPPcloud image so the `pre-receive`
   hook can import the WEPP parsers.
+- Keep `ENABLE_LOCAL_LOGIN=false` in production unless explicitly needed for a
+  controlled break-glass workflow.
 - Rebuild the controller bundle after UI changes:
   `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
 
@@ -649,8 +655,11 @@ Use Redis DB 0 (`RedisDB.LOCK`) as the authoritative lock backend.
   - `acquired_at` (unix seconds)
   - `ttl_seconds`
 - **Acquire:** `SET <key> <value> NX EX <ttl_seconds>`
-- **Default TTL:** 900 seconds (extendable for long operations)
-- **Renewal:** not currently implemented; operations rely on the initial TTL.
+- **Default TTL:** 900 seconds for short operations (`checkout`, `auto_commit`)
+- **Enable lock TTL:** `max(BOOTSTRAP_GIT_LOCK_TTL_SECONDS, RQ_ENGINE_RQ_TIMEOUT + 300)`
+- **Enable dedupe TTL:** `max(BOOTSTRAP_ENABLE_JOB_TTL_SECONDS, RQ_ENGINE_RQ_TIMEOUT + 300)`
+- **Renewal:** not currently implemented; long enable operations use the computed
+  timeout-aligned TTL values above.
 - **Release:** compare-and-delete Lua script (delete only if token matches)
 - **Contention behavior:** return HTTP 409 (`bootstrap lock busy`) for
   mutation endpoints when another mutation lock is active.
@@ -717,12 +726,17 @@ Phase 2 keeps existing Flask routes in place as wrappers while clients migrate.
 
 Add/expand tests in `tests/microservices/` and `tests/weppcloud/routes/`:
 
-- rq-engine auth + scope coverage for all Bootstrap endpoints.
+- rq-engine auth + scope coverage for all Bootstrap endpoints, including missing
+  scope, expired token, audience mismatch, and revoked `jti`.
 - Enable route returns `202` and enqueues exactly one job per run while dedupe key exists.
 - Redis lock behavior:
   - lock acquisition success
   - lock contention returns `409`
   - token-checked release
   - TTL expiry recovery
+- Flask bootstrap route status-code regressions (`400/404/409/500`) and
+  canonical run-path resolution (`get_wd(..., prefer_active=False)`).
 - Functional checks for mint/commits/current-ref/checkout in rq-engine.
+- Pre-receive policy edge coverage: symlink/submodule rejection, rename/copy
+  rejection, and delete rejection inside allowed input roots.
 - Backward-compatibility wrapper tests for existing Flask Bootstrap routes.
