@@ -47,13 +47,13 @@ RUN_ID_PATTERN = re.compile(r"/runs/([^/]+)/")
 def _context(ctx: typer.Context) -> CLIContext:
     context = ctx.obj
     if not isinstance(context, CLIContext):
-        raise RuntimeError("CLIContext is not initialised.")
+        raise RuntimeError("CLIContext is not initialized.")
     return context
 
 
 def _resolve_base_url(context: CLIContext, env: EnvironmentPreset, base_url: Optional[str]) -> str:
     """
-    Determine which base URL to use, prioritising explicit overrides and
+    Determine which base URL to use, prioritizing explicit overrides and
     falling back to preset defaults or environment-defined overrides.
     """
 
@@ -424,10 +424,7 @@ def register(app: typer.Typer) -> None:
 
         current_run_path = run_path
         env_vars = dict(context.environment)
-        if browsers_path:
-            env_vars["PLAYWRIGHT_BROWSERS_PATH"] = browsers_path
-        else:
-            env_vars.setdefault("PLAYWRIGHT_BROWSERS_PATH", DEFAULT_BROWSERS_PATH)
+        env_vars["PLAYWRIGHT_BROWSERS_PATH"] = browsers_path or DEFAULT_BROWSERS_PATH
         env_vars["SMOKE_BASE_URL"] = resolved_url
         env_vars["SMOKE_RUN_CONFIG"] = config
         env_vars["SMOKE_HEADLESS"] = "false" if headed else "true"
