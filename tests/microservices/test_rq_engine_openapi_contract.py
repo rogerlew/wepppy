@@ -8,6 +8,7 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
+from tools.rq_engine_contract_rules import required_response_codes
 
 pytestmark = pytest.mark.microservice
 
@@ -15,82 +16,6 @@ pytestmark = pytest.mark.microservice
 INVENTORY_FILE = Path(
     "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
 )
-
-SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
-    ("POST", "/api/runs/{runid}/{config}/run-omni"): 202,
-    ("POST", "/api/runs/{runid}/{config}/run-omni-contrasts"): 202,
-    ("POST", "/create/"): 303,
-}
-
-PATHS_REQUIRING_400 = {
-    "/api/culverts-wepp-batch/",
-    "/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
-    "/api/runs/{runid}/{config}/acquire-rap-ts",
-    "/api/runs/{runid}/{config}/archive",
-    "/api/runs/{runid}/{config}/bootstrap/checkout",
-    "/api/runs/{runid}/{config}/bootstrap/commits",
-    "/api/runs/{runid}/{config}/bootstrap/current-ref",
-    "/api/runs/{runid}/{config}/bootstrap/enable",
-    "/api/runs/{runid}/{config}/bootstrap/mint-token",
-    "/api/runs/{runid}/{config}/build-climate",
-    "/api/runs/{runid}/{config}/build-landuse",
-    "/api/runs/{runid}/{config}/build-soils",
-    "/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed",
-    "/api/runs/{runid}/{config}/build-treatments",
-    "/api/runs/{runid}/{config}/delete-archive",
-    "/api/runs/{runid}/{config}/fetch-dem-and-build-channels",
-    "/api/runs/{runid}/{config}/post-dss-export-rq",
-    "/api/runs/{runid}/{config}/restore-archive",
-    "/api/runs/{runid}/{config}/run-ash",
-    "/api/runs/{runid}/{config}/run-debris-flow",
-    "/api/runs/{runid}/{config}/run-omni",
-    "/api/runs/{runid}/{config}/run-omni-contrasts",
-    "/api/runs/{runid}/{config}/run-omni-contrasts-dry-run",
-    "/api/runs/{runid}/{config}/run-wepp",
-    "/api/runs/{runid}/{config}/run-wepp-npprep",
-    "/api/runs/{runid}/{config}/run-wepp-watershed",
-    "/api/runs/{runid}/{config}/run-wepp-watershed-no-prep",
-    "/api/runs/{runid}/{config}/run-swat-noprep",
-    "/api/runs/{runid}/{config}/set-outlet",
-    "/api/runs/{runid}/{config}/swat/print-prt",
-    "/api/runs/{runid}/{config}/swat/print-prt/meta",
-    "/api/runs/{runid}/{config}/tasks/upload-cli/",
-    "/api/runs/{runid}/{config}/tasks/upload-cover-transform",
-    "/api/runs/{runid}/{config}/tasks/upload-dem/",
-    "/api/runs/{runid}/{config}/tasks/upload-sbs/",
-    "/create/",
-}
-
-PATHS_REQUIRING_404 = {
-    "/api/canceljob/{job_id}",
-    "/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
-    "/api/jobinfo/{job_id}",
-    "/api/jobstatus/{job_id}",
-    "/api/runs/{runid}/{config}/archive",
-    "/api/runs/{runid}/{config}/delete-archive",
-    "/api/runs/{runid}/{config}/export/ermit",
-    "/api/runs/{runid}/{config}/export/geodatabase",
-    "/api/runs/{runid}/{config}/export/geopackage",
-    "/api/runs/{runid}/{config}/export/prep_details",
-    "/api/runs/{runid}/{config}/export/prep_details/",
-    "/api/runs/{runid}/{config}/fork",
-    "/api/runs/{runid}/{config}/restore-archive",
-}
-
-PATHS_REQUIRING_409 = {
-    "/api/runs/{runid}/{config}/bootstrap/checkout",
-    "/api/runs/{runid}/{config}/bootstrap/enable",
-}
-
-PATHS_REQUIRING_429 = {
-    "/api/jobinfo",
-    "/api/jobinfo/{job_id}",
-    "/api/jobstatus/{job_id}",
-}
-
-PATHS_REQUIRING_EXTRA_202 = {
-    "/api/runs/{runid}/{config}/bootstrap/enable",
-}
 
 MAX_OPENAPI_CANONICAL_BYTES = 90_000
 MAX_FROZEN_SUMMARY_CHARS = 72
@@ -152,24 +77,6 @@ def _openapi_doc() -> dict:
 def _frozen_agent_routes() -> list[tuple[str, str]]:
     repo_root = Path(__file__).resolve().parents[2]
     return _load_frozen_agent_routes(repo_root)
-
-
-def _required_codes(method: str, path: str) -> set[int]:
-    success_code = SUCCESS_STATUS_OVERRIDES.get((method, path), 200)
-    required = {success_code, 401, 403, 500}
-
-    if path in PATHS_REQUIRING_400:
-        required.add(400)
-    if path in PATHS_REQUIRING_404:
-        required.add(404)
-    if path in PATHS_REQUIRING_409:
-        required.add(409)
-    if path in PATHS_REQUIRING_429:
-        required.add(429)
-    if path in PATHS_REQUIRING_EXTRA_202:
-        required.add(202)
-
-    return required
 
 
 def _response_codes(operation: dict) -> set[int]:
@@ -268,10 +175,10 @@ def test_frozen_agent_required_response_codes_documented(
     for method, path in _frozen_agent_routes:
         operation = paths[path][method.lower()]
         codes = _response_codes(operation)
-        required_codes = _required_codes(method, path)
-        assert required_codes.issubset(codes), (
+        expected_codes = required_response_codes(method, path)
+        assert expected_codes.issubset(codes), (
             f"{method} {path} missing response codes. "
-            f"required={sorted(required_codes)} documented={sorted(codes)}"
+            f"required={sorted(expected_codes)} documented={sorted(codes)}"
         )
 
         for auth_code in (401, 403, 500):

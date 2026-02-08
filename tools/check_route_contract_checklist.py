@@ -6,6 +6,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import re
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.rq_engine_contract_rules import required_response_codes
 
 INVENTORY_FILE = Path(
     "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
@@ -181,6 +188,13 @@ def collect_checklist_issues(repo_root: Path | None = None) -> list[str]:
             issues.append(
                 f"Checklist required responses missing success code: {route_label} "
                 f"({record.required_responses})"
+            )
+
+        expected_codes = required_response_codes(record.method, record.path)
+        if codes != expected_codes:
+            issues.append(
+                "Checklist/OpenAPI response parity mismatch for "
+                f"{route_label}: checklist={sorted(codes)} expected={sorted(expected_codes)}"
             )
 
         if "test_rq_engine_openapi_contract.py" not in record.contract_coverage:

@@ -22,6 +22,7 @@ class RouteRecord:
     path: str
     module: str
     function: str
+    lineno: int | None = None
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,17 @@ def _strip_markdown_code(text: str) -> str:
     if stripped.startswith("`") and stripped.endswith("`") and len(stripped) >= 2:
         return stripped[1:-1]
     return stripped
+
+
+def _split_module_ref(module_ref: str) -> tuple[str, int | None]:
+    module_ref = module_ref.strip()
+    if ":" not in module_ref:
+        return module_ref, None
+
+    module_path, maybe_lineno = module_ref.rsplit(":", 1)
+    if maybe_lineno.isdigit():
+        return module_path, int(maybe_lineno)
+    return module_ref, None
 
 
 def _extract_rq_router_prefixes(repo_root: Path) -> dict[str, str]:
@@ -133,6 +145,7 @@ def _extract_rq_engine_routes(repo_root: Path) -> list[RouteRecord]:
                         path=full_path,
                         module=f"wepppy/microservices/rq_engine/{module_name}.py",
                         function=node.name,
+                        lineno=node.lineno,
                     )
                 )
 
@@ -164,6 +177,7 @@ def _extract_rq_engine_routes(repo_root: Path) -> list[RouteRecord]:
                     path=first_arg.value,
                     module="wepppy/microservices/rq_engine/__init__.py",
                     function=node.name,
+                    lineno=node.lineno,
                 )
             )
 
@@ -216,6 +230,7 @@ def _extract_flask_bootstrap_routes(repo_root: Path) -> list[RouteRecord]:
                         path=path,
                         module="wepppy/weppcloud/routes/bootstrap.py",
                         function=node.name,
+                        lineno=node.lineno,
                     )
                 )
 
@@ -274,6 +289,7 @@ def collect_inventory_issues(repo_root: Path | None = None) -> list[str]:
 
     extracted_routes = _extract_rq_engine_routes(root) + _extract_flask_bootstrap_routes(root)
     extracted_keys = {(route.method, route.path) for route in extracted_routes}
+    extracted_by_key = {(route.method, route.path): route for route in extracted_routes}
 
     inventory_records = _parse_inventory(root)
     inventory_keys = set(inventory_records)
@@ -288,6 +304,7 @@ def collect_inventory_issues(repo_root: Path | None = None) -> list[str]:
 
     for key in sorted(inventory_keys):
         record = inventory_records[key]
+        route = extracted_by_key.get(key)
         if not record.classification or record.classification not in _ALLOWED_CLASSIFICATIONS:
             issues.append(
                 "Inventory classification missing/invalid for "
@@ -297,6 +314,27 @@ def collect_inventory_issues(repo_root: Path | None = None) -> list[str]:
             issues.append(
                 "Inventory owner missing/invalid for "
                 f"{record.method} {record.path}: {record.owner!r}"
+            )
+        if route is None:
+            continue
+
+        inventory_module_path, inventory_lineno = _split_module_ref(record.module)
+        if inventory_module_path != route.module:
+            issues.append(
+                "Inventory module mismatch for "
+                f"{record.method} {record.path}: inventory={inventory_module_path!r} "
+                f"source={route.module!r}"
+            )
+        if inventory_lineno is not None and route.lineno is not None and inventory_lineno != route.lineno:
+            issues.append(
+                "Inventory module line mismatch for "
+                f"{record.method} {record.path}: inventory={inventory_lineno} source={route.lineno}"
+            )
+        if record.function != route.function:
+            issues.append(
+                "Inventory function mismatch for "
+                f"{record.method} {record.path}: inventory={record.function!r} "
+                f"source={route.function!r}"
             )
 
     return issues

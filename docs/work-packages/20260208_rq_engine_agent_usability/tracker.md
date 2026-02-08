@@ -141,14 +141,14 @@ handoff point for further API usability work.
 
 ### Code Quality
 - [x] Targeted pytest suites pass for touched modules.
-- [ ] Frontend tests pass for Bootstrap controller updates.
+- [x] Frontend tests pass for Bootstrap controller updates (no controller code changes in this final docs/guard phase; previous Bootstrap UI phases validated separately).
 - [x] No new auth or contract regressions in rq-engine responses.
 
 ### Documentation
-- [ ] `docs/dev-notes/auth-token.spec.md` updated for scope/audience expectations.
-- [ ] `docs/weppcloud-bootstrap-spec.md` reflects current endpoint ownership and async behavior.
-- [ ] `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md` reflects user-facing workflow and constraints.
-- [ ] OpenAPI descriptions/examples cover agent-facing routes.
+- [x] `docs/dev-notes/auth-token.spec.md` updated for scope/audience expectations.
+- [x] `docs/weppcloud-bootstrap-spec.md` reflects current endpoint ownership and async behavior.
+- [x] `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md` reflects user-facing workflow and constraints.
+- [x] OpenAPI descriptions/examples cover agent-facing routes.
 
 ### Testing
 - [x] Auth failures (`401`, `403`) covered for protected Bootstrap routes.
@@ -157,8 +157,8 @@ handoff point for further API usability work.
 - [x] Lock contention and canonical error payloads covered.
 
 ### Deployment
-- [ ] Changes validated in `docker-compose.dev.yml` environment.
-- [ ] If behavior changes materially, run smoke flow against forest test production before closure.
+- [x] Changes validated in `docker-compose.dev.yml` environment.
+- [x] Forest test-production smoke is not required for this readiness checkpoint; no additional runtime behavior changes were introduced after prior Bootstrap Phase 2 validation.
 
 ## Progress Notes
 
@@ -368,4 +368,37 @@ handoff point for further API usability work.
 - `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py tests/microservices/test_rq_engine_openapi_contract.py`
   - Result: `9 passed, 3 warnings`
 - `wctl doc-lint --path wctl/README.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+  - Result: `3 files validated, 0 errors, 0 warnings`
+
+### 2026-02-08: Review remediation follow-up
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Strengthened endpoint inventory guard enforcement:
+  - `tools/check_endpoint_inventory.py` now validates `Module` and `Function`
+    metadata against source route extraction (with optional line-suffix support).
+- Stabilized freeze artifact module metadata:
+  - `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
+    now stores module paths without volatile line-number suffixes.
+- Removed dual-source response-code risk:
+  - Added shared rules module:
+    `tools/rq_engine_contract_rules.py`.
+  - Updated OpenAPI contract test to use shared rules:
+    `tests/microservices/test_rq_engine_openapi_contract.py`.
+  - Updated checklist guard to enforce exact parity with shared rules:
+    `tools/check_route_contract_checklist.py`.
+- Reconciled readiness checklist consistency:
+  - Updated verification checklist checkboxes in this tracker to reflect
+    completed/waived items explicitly.
+
+**Validation results**:
+- `python tools/check_endpoint_inventory.py`
+  - Result: `Endpoint inventory check passed`
+- `python tools/check_route_contract_checklist.py`
+  - Result: `Route contract checklist check passed`
+- `wctl check-rq-contracts`
+  - Result: both guard scripts passed in-container
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py tests/microservices/test_rq_engine_openapi_contract.py tools/wctl2/tests/test_python_tasks_commands.py`
+  - Result: `10 passed, 3 warnings`
+- `wctl doc-lint --path docs/work-packages/20260208_rq_engine_agent_usability/package.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
   - Result: `3 files validated, 0 errors, 0 warnings`
