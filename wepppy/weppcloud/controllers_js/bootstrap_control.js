@@ -26,6 +26,10 @@ var BootstrapControl = (function () {
         actionCopyRemote: "[data-bootstrap-action=\"copy-remote\"]",
         actionDisable: "[data-bootstrap-action=\"disable\"]"
     };
+    var EVENTS = {
+        enableCompleted: "BOOTSTRAP_ENABLE_TASK_COMPLETED",
+        jobError: "job:error"
+    };
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -178,6 +182,7 @@ var BootstrapControl = (function () {
         var state = {
             bound: false,
             enabled: false,
+            enablePending: false,
             adminDisabled: false,
             isAnonymous: false,
             isAuthenticated: false,
@@ -392,10 +397,10 @@ var BootstrapControl = (function () {
             showSection(elements.enabledSection, state.enabled);
             showSection(elements.disabledSection, !state.enabled);
 
-            var canEnable = state.isAuthenticated && !state.isAnonymous && !state.adminDisabled;
-            var canMint = state.enabled && state.isAuthenticated && !state.isAnonymous && !state.adminDisabled;
-            var canRefresh = state.enabled;
-            var canCheckout = state.enabled && Boolean(state.selectedSha);
+            var canEnable = state.isAuthenticated && !state.isAnonymous && !state.adminDisabled && !state.enablePending;
+            var canMint = state.enabled && !state.enablePending && state.isAuthenticated && !state.isAnonymous && !state.adminDisabled;
+            var canRefresh = state.enabled && !state.enablePending;
+            var canCheckout = state.enabled && !state.enablePending && Boolean(state.selectedSha);
             var canCopyClone = Boolean(state.cloneCommand);
             var canCopyRemote = Boolean(state.remoteCommand);
             var canAdminToggle = state.isAdmin && state.isAuthenticated;
@@ -457,6 +462,42 @@ var BootstrapControl = (function () {
             refreshCommits();
         }
 
+        function startEnableJobTracking(jobId) {
+            if (!jobId || typeof control.set_rq_job_id !== "function") {
+                return;
+            }
+            control.poll_completion_event = EVENTS.enableCompleted;
+            control.set_rq_job_id(control, jobId);
+        }
+
+        function clearEnableJobTracking() {
+            if (typeof control.set_rq_job_id === "function") {
+                control.set_rq_job_id(control, null);
+            }
+        }
+
+        function handleEnableCompletion() {
+            if (!state.enablePending) {
+                return;
+            }
+            state.enablePending = false;
+            clearEnableJobTracking();
+            setAlert("success", "Bootstrap enabled.");
+            renderState();
+            refreshData();
+        }
+
+        function handleEnableFailure() {
+            if (!state.enablePending) {
+                return;
+            }
+            state.enablePending = false;
+            state.enabled = false;
+            clearEnableJobTracking();
+            setAlert("error", "Bootstrap initialization failed. Check job status and retry.");
+            renderState();
+        }
+
         function enableBootstrap() {
             setAlert("info", "Enabling Bootstrap...");
             return http.postJson(url_for_run("bootstrap/enable"), {}, { form: formElement })
@@ -467,12 +508,25 @@ var BootstrapControl = (function () {
                         setAlert("error", message);
                         return;
                     }
+                    var content = getContent(payload);
                     state.enabled = true;
+                    state.enablePending = false;
+                    if (content && content.queued && content.job_id) {
+                        state.enablePending = true;
+                        startEnableJobTracking(content.job_id);
+                        setAlert(
+                            "info",
+                            "Bootstrap initialization queued (" + content.job_id + "). Waiting for completion."
+                        );
+                        renderState();
+                        return;
+                    }
                     setAlert("success", "Bootstrap enabled.");
                     renderState();
                     refreshData();
                 })
                 .catch(function (error) {
+                    state.enablePending = false;
                     setAlert("error", resolveHttpErrorMessage(error, "Enable failed."));
                 });
         }
@@ -672,12 +726,29 @@ var BootstrapControl = (function () {
             state.enabled = readFlag("enabled", state.enabled);
             state.adminDisabled = readFlag("adminDisabled", state.adminDisabled);
             state.isAnonymous = readFlag("isAnonymous", state.isAnonymous);
+            if (!state.enabled) {
+                state.enablePending = false;
+            }
 
             if (ctx.user) {
                 state.isAuthenticated = Boolean(ctx.user.isAuthenticated);
                 state.isAdmin = Boolean(ctx.user.isAdmin || ctx.user.isRoot);
             }
         }
+
+        var baseTriggerEvent = typeof control.triggerEvent === "function"
+            ? control.triggerEvent.bind(control)
+            : function () {};
+        control.triggerEvent = function (eventName, payload) {
+            var normalized = eventName ? String(eventName).toUpperCase() : "";
+            var detail = payload && payload.detail ? payload.detail : payload || null;
+            if (normalized === EVENTS.enableCompleted) {
+                handleEnableCompletion(detail);
+            } else if (normalized === EVENTS.jobError.toUpperCase()) {
+                handleEnableFailure(detail);
+            }
+            return baseTriggerEvent(eventName, payload);
+        };
 
         control.bootstrap = function bootstrap(context) {
             syncElements();
@@ -704,3 +775,7 @@ var BootstrapControl = (function () {
         }
     };
 }());
+
+if (typeof globalThis !== "undefined") {
+    globalThis.BootstrapControl = BootstrapControl;
+}
