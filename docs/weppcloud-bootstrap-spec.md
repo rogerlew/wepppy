@@ -615,3 +615,106 @@ services:
   tokens for `/api/bootstrap/verify-token`, hook rejection cases, parser
   validation errors, push-log parsing, and bootstrap route coverage.
 - [ ] Deprecate `wepppy-win-bootstrap` docs in favor of this workflow.
+
+## Phase 2 Implementation Plan (RQ Engine + Agent API)
+
+### Goals
+
+- Move Bootstrap API operations to rq-engine so they are available in OpenAPI
+  for agent and external API clients.
+- Move expensive bootstrap initialization (`git init` + initial commit) off
+  Flask request threads and into an RQ job.
+- Add explicit concurrency control for git mutations at run scope.
+- Keep existing WeppCloud routes as compatibility wrappers during migration.
+
+### Redis Git Lock Design
+
+Use Redis DB 0 (`RedisDB.LOCK`) as the authoritative lock backend.
+
+- **Lock key:** `bootstrap:git-lock:<runid>`
+- **Lock value (JSON):**
+  - `token` (uuid)
+  - `owner` (`hostname:pid`)
+  - `operation` (`enable|checkout|auto_commit`)
+  - `actor` (user/session/service id)
+  - `acquired_at` (unix seconds)
+  - `ttl_seconds`
+- **Acquire:** `SET <key> <value> NX EX <ttl_seconds>`
+- **Default TTL:** 900 seconds (extendable for long operations)
+- **Renewal:** heartbeat every 30 seconds for long-running operations
+  (token-checked `EXPIRE`/renew script)
+- **Release:** compare-and-delete Lua script (delete only if token matches)
+- **Contention behavior:** return HTTP 409 (`bootstrap lock busy`) for
+  mutation endpoints when another mutation lock is active.
+- **Crash safety:** lock expires via TTL if owner dies.
+
+This lock is for git mutations only and is separate from `.nodb` file locks.
+
+### New rq-engine Bootstrap Endpoints
+
+Add first-class endpoints in `wepppy/microservices/rq_engine/bootstrap_routes.py`
+under `/rq-engine/api`:
+
+- `POST /runs/{runid}/{config}/bootstrap/enable`
+- `POST /runs/{runid}/{config}/bootstrap/mint-token`
+- `GET /runs/{runid}/{config}/bootstrap/commits`
+- `GET /runs/{runid}/{config}/bootstrap/current-ref`
+- `POST /runs/{runid}/{config}/bootstrap/checkout`
+
+Authentication/authorization model:
+
+- Require JWT auth (`require_jwt`) and run authorization (`authorize_run_access`).
+- Enforce non-anonymous run requirements for `enable` and `mint-token`.
+- Introduce explicit Bootstrap scopes (recommended):
+  - `bootstrap:enable`
+  - `bootstrap:token:mint`
+  - `bootstrap:read`
+  - `bootstrap:checkout`
+
+### Async Bootstrap Enable Flow
+
+`POST /bootstrap/enable` should enqueue an RQ job instead of running in-request.
+
+1. Validate JWT + run access + eligibility.
+2. Acquire per-run bootstrap git lock (or fail with 409 if busy).
+3. Enqueue `bootstrap_enable_rq(runid, actor)` with dedupe guard.
+4. Return `202 Accepted` with `job_id` and polling URL.
+5. Worker performs idempotent `wepp.init_bootstrap()` and records status.
+6. Worker releases git lock.
+
+Recommended dedupe key:
+
+- `bootstrap:enable:job:<runid>` → active job id (short TTL) to prevent
+  duplicate initialize jobs.
+
+### Compatibility and Migration
+
+Phase 2 keeps existing Flask routes in place as wrappers while clients migrate.
+
+- WeppCloud `bootstrap.py` routes call shared Bootstrap service methods used by
+  rq-engine routes.
+- UI can switch incrementally to `/rq-engine/api/...` endpoints.
+- After migration and soak period, deprecate/remove duplicate Flask route
+  handlers except `/api/bootstrap/verify-token` (still used by Caddy forward_auth
+  for git HTTP auth flow).
+
+### Data and Response Contracts
+
+- Keep success/error payloads aligned with `docs/schemas/rq-response-contract.md`.
+- Ensure rq-engine OpenAPI documents Bootstrap request/response models.
+- Include lock contention (`409`), auth errors (`401/403`), and run eligibility
+  errors (`400`) explicitly in endpoint docs.
+
+### Testing Plan
+
+Add/expand tests in `tests/microservices/` and `tests/weppcloud/routes/`:
+
+- rq-engine auth + scope coverage for all Bootstrap endpoints.
+- Enable route returns `202` and enqueues exactly one job per run while dedupe key exists.
+- Redis lock behavior:
+  - lock acquisition success
+  - lock contention returns `409`
+  - token-checked release
+  - TTL expiry recovery
+- Functional checks for mint/commits/current-ref/checkout in rq-engine.
+- Backward-compatibility wrapper tests for existing Flask Bootstrap routes.
