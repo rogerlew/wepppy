@@ -1,5 +1,6 @@
 # WEPPcloud Bootstrap
 > Use Git to override WEPP and SWAT+ input files, then run those inputs on WEPPcloud compute.
+> **See also:** `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md` for the broader job API and polling model.
 
 ## Overview
 Bootstrap gives each run its own Git repository so you can:

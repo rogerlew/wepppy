@@ -83,6 +83,7 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
   - `docs/dev-notes/rq-engine-agent-api.md`
   - `docs/weppcloud-bootstrap-spec.md`
   - `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md`
+  - `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`
 - Endpoint inventory drift guard:
   - `tools/check_endpoint_inventory.py`
   - `tests/tools/test_endpoint_inventory_guard.py`

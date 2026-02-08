@@ -5,9 +5,9 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Agent-facing docs split (developer doc landed)  
+**Current phase**: Agent-facing docs split (developer + usersum docs landed)  
 **Last updated**: 2026-02-08  
-**Next milestone**: Agent-facing rq-engine docs and usersum split
+**Next milestone**: Operationalize route/checklist guards in standard pre-merge checks
 
 ## Task Board
 
@@ -32,6 +32,7 @@
 - [x] Standardized OpenAPI metadata for frozen agent-facing routes and added contract budget checks (2026-02-08).
 - [x] Added route contract checklist artifact + drift guard tooling/tests (2026-02-08).
 - [x] Added canonical rq-engine developer contract doc for agents (2026-02-08).
+- [x] Added usersum companion doc for rq-engine concepts/workflows (2026-02-08).
 
 ## Timeline
 
@@ -44,6 +45,7 @@
 - **2026-02-08** - OpenAPI metadata standardized for frozen agent-facing routes with contract/size budget tests.
 - **2026-02-08** - Route contract checklist artifact published with automated drift guard.
 - **2026-02-08** - Added `docs/dev-notes/rq-engine-agent-api.md` as the canonical developer-facing rq-engine agent contract.
+- **2026-02-08** - Added usersum `rq-engine.md` and cross-linked usersum/dev-note Bootstrap and rq-engine docs.
 
 ## Decisions Log
 
@@ -301,3 +303,22 @@ handoff point for further API usability work.
 **Validation results**:
 - `wctl doc-lint --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
   - Result: `3 files validated, 0 errors, 0 warnings`
+
+### 2026-02-08: rq-engine usersum companion doc
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added usersum document:
+  - `wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md`
+- Added cross-link from Bootstrap usersum page:
+  - `wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md`
+- Added reciprocal link from developer contract:
+  - `docs/dev-notes/rq-engine-agent-api.md`
+- Updated package deliverables list to include the usersum document.
+
+**Open follow-ups**:
+- Wire route/checklist guard scripts into the standard pre-merge command path.
+
+**Validation results**:
+- `wctl doc-lint --path wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md --path wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+  - Result: `5 files validated, 0 errors, 0 warnings`
