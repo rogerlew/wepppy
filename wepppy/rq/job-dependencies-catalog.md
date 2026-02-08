@@ -4,7 +4,7 @@
 
 ## Scope
 - Modules: `wepppy/rq/*.py` (entrypoints that enqueue other jobs).
-- rq-engine routes that build dependency chains directly: `wepppy/microservices/rq_engine/run_sync_routes.py`.
+- rq-engine routes that build dependency chains directly: `wepppy/microservices/rq_engine/run_sync_routes.py` and `wepppy/microservices/rq_engine/bootstrap_routes.py`.
 
 ## Path Legend
 | Token | Meaning |
@@ -296,6 +296,18 @@ Audit notes:
 
 Audit notes:
 1. `migrations_rq` depends on the sync job, ensuring that run files exist before migrations execute.
+
+**`wepppy/microservices/rq_engine/bootstrap_routes.py`**
+
+**`POST /api/runs/{runid}/{config}/bootstrap/enable`**
+
+| Stage | Child job | `depends_on` | File prerequisites |
+| --- | --- | --- | --- |
+| root | `bootstrap_enable_rq` | none | `wd` (run directory from `get_wd(runid)`); writes `.git/` and commits tracked bootstrap inputs under `wepp/runs` and/or `swat/TxtInOut` |
+
+Audit notes:
+1. Route-level dedupe key `bootstrap:enable:job:<runid>` prevents duplicate enable jobs while one is active.
+2. Route acquires run-scoped Redis git lock `bootstrap:git-lock:<runid>` before enqueueing; the worker releases it in `bootstrap_enable_rq` cleanup.
 
 ## NFS Consistency Headaches
 

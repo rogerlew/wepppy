@@ -627,6 +627,15 @@ services:
 - Add explicit concurrency control for git mutations at run scope.
 - Keep existing WeppCloud routes as compatibility wrappers during migration.
 
+### Status (February 8, 2026)
+
+- [x] Added first-class rq-engine Bootstrap endpoints for enable/mint/read/checkout.
+- [x] Moved Bootstrap enable initialization into async RQ job `bootstrap_enable_rq`.
+- [x] Added Redis lock key `bootstrap:git-lock:<runid>` for enable/checkout mutations.
+- [x] Added dedupe key `bootstrap:enable:job:<runid>` to suppress duplicate enable jobs.
+- [x] Updated Flask `/runs/.../bootstrap/enable` route to enqueue the same async job.
+- [x] Added route/unit tests for rq-engine Bootstrap endpoints, lock contention, and job enqueue logic.
+
 ### Redis Git Lock Design
 
 Use Redis DB 0 (`RedisDB.LOCK`) as the authoritative lock backend.
@@ -641,8 +650,7 @@ Use Redis DB 0 (`RedisDB.LOCK`) as the authoritative lock backend.
   - `ttl_seconds`
 - **Acquire:** `SET <key> <value> NX EX <ttl_seconds>`
 - **Default TTL:** 900 seconds (extendable for long operations)
-- **Renewal:** heartbeat every 30 seconds for long-running operations
-  (token-checked `EXPIRE`/renew script)
+- **Renewal:** not currently implemented; operations rely on the initial TTL.
 - **Release:** compare-and-delete Lua script (delete only if token matches)
 - **Contention behavior:** return HTTP 409 (`bootstrap lock busy`) for
   mutation endpoints when another mutation lock is active.
@@ -691,8 +699,8 @@ Recommended dedupe key:
 
 Phase 2 keeps existing Flask routes in place as wrappers while clients migrate.
 
-- WeppCloud `bootstrap.py` routes call shared Bootstrap service methods used by
-  rq-engine routes.
+- WeppCloud `bootstrap.py` and rq-engine currently share the async enable enqueue
+  helper; read/mint/checkout routes are still duplicated while migration is in progress.
 - UI can switch incrementally to `/rq-engine/api/...` endpoints.
 - After migration and soak period, deprecate/remove duplicate Flask route
   handlers except `/api/bootstrap/verify-token` (still used by Caddy forward_auth

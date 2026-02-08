@@ -7,16 +7,21 @@ import re
 from typing import Any, Tuple
 from urllib.parse import unquote, urlsplit
 
+import redis
+
 from ._common import *  # noqa: F401,F403
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Wepp
+from wepppy.weppcloud.bootstrap.enable_jobs import BootstrapLockBusyError, enqueue_bootstrap_enable
+from wepppy.weppcloud.bootstrap.git_lock import acquire_bootstrap_git_lock, release_bootstrap_git_lock
 from wepppy.weppcloud.utils import auth_tokens
 
 bootstrap_bp = Blueprint("bootstrap", __name__)
 
 
 _GIT_PATH_RE = re.compile(
-    r"^/git/(?P<prefix>[A-Za-z0-9]{2})/(?P<runid>[A-Za-z0-9][A-Za-z0-9._-]*)/\.git(?:/.*)?$"
+    r"^/(?:git/)?(?P<prefix>[A-Za-z0-9]{2})/(?P<runid>[A-Za-z0-9][A-Za-z0-9._-]*)/\.git(?:/.*)?$"
 )
 
 
@@ -126,6 +131,12 @@ def _ensure_bootstrap_opt_in(runid: str) -> None:
         raise ValueError("bootstrap not enabled")
 
 
+def _bootstrap_actor_for_current_user() -> str:
+    user_id = getattr(current_user, "id", "unknown")
+    email = str(getattr(current_user, "email", "") or "").strip().lower() or "unknown"
+    return f"user:{user_id}:{email}"
+
+
 @bootstrap_bp.route("/api/bootstrap/verify-token", methods=["GET", "POST"])
 def verify_token():
     auth = _decode_basic_auth(request.headers.get("Authorization"))
@@ -180,11 +191,18 @@ def enable_bootstrap(runid: str, config: str):
     authorize(runid, config)
     try:
         _validate_bootstrap_eligibility(runid, current_user.email)
-        wd = get_wd(runid)
-        wepp = Wepp.getInstance(wd)
-        if not wepp.bootstrap_enabled:
-            wepp.init_bootstrap()
-        return success_factory({"enabled": True})
+        payload, status_code = enqueue_bootstrap_enable(
+            runid,
+            actor=_bootstrap_actor_for_current_user(),
+        )
+        job_id = str(payload.get("job_id") or "").strip()
+        if job_id:
+            payload["status_url"] = f"/rq-engine/api/jobstatus/{job_id}"
+        response = success_factory(payload)
+        response.status_code = status_code
+        return response
+    except BootstrapLockBusyError as exc:
+        return error_factory(str(exc), status_code=409)
     except Exception as exc:
         return error_factory(str(exc))
 
@@ -228,8 +246,21 @@ def bootstrap_checkout(runid: str, config: str):
         _ensure_bootstrap_opt_in(runid)
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
-        if not wepp.checkout_bootstrap_commit(str(sha)):
-            return error_factory("checkout failed")
+        lock_conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
+        with redis.Redis(**lock_conn_kwargs) as lock_conn:
+            lock = acquire_bootstrap_git_lock(
+                lock_conn,
+                runid=runid,
+                operation="checkout",
+                actor=_bootstrap_actor_for_current_user(),
+            )
+            if lock is None:
+                return error_factory("bootstrap lock busy", status_code=409)
+            try:
+                if not wepp.checkout_bootstrap_commit(str(sha)):
+                    return error_factory("checkout failed")
+            finally:
+                release_bootstrap_git_lock(lock_conn, runid=runid, token=lock.token)
         return success_factory({"checked_out": str(sha)})
     except Exception as exc:
         return error_factory(str(exc))

@@ -83,6 +83,10 @@ from wepppy.export.prep_details import (
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq
+from wepppy.weppcloud.bootstrap.git_lock import (
+    clear_bootstrap_enable_job_id,
+    release_bootstrap_git_lock,
+)
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -301,6 +305,37 @@ def run_ss_batch_watershed_rq(
 
 
 # the main turtle
+
+@with_exception_logging
+def bootstrap_enable_rq(runid: str, actor: str | None = None, lock_token: str | None = None) -> dict[str, Any]:
+    """Initialize git bootstrap for a run in a background worker."""
+    job = get_current_job()
+    job_id = job.id if job is not None else ""
+    status_channel = f"{runid}:bootstrap"
+
+    try:
+        StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED bootstrap_enable_rq({runid})")
+        wd = get_wd(runid)
+        wepp = Wepp.getInstance(wd)
+
+        if not wepp.bootstrap_enabled:
+            wepp.init_bootstrap()
+
+        StatusMessenger.publish(status_channel, f"rq:{job_id} COMPLETED bootstrap_enable_rq({runid})")
+        return {"enabled": True, "runid": runid}
+    except Exception:
+        StatusMessenger.publish(status_channel, f"rq:{job_id} EXCEPTION bootstrap_enable_rq({runid})")
+        raise
+    finally:
+        conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            if job_id:
+                clear_bootstrap_enable_job_id(redis_conn, runid=runid, expected_job_id=job_id)
+            else:
+                clear_bootstrap_enable_job_id(redis_conn, runid=runid)
+            if lock_token:
+                release_bootstrap_git_lock(redis_conn, runid=runid, token=lock_token)
+
 
 @with_exception_logging
 def run_wepp_rq(runid: str) -> Job:

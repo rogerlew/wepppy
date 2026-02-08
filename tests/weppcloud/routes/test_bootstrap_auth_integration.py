@@ -162,6 +162,14 @@ def auth_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     monkeypatch.setattr(bootstrap_module, "_ensure_bootstrap_opt_in", lambda runid: None)
     monkeypatch.setattr(bootstrap_module, "get_wd", lambda runid: str(tmp_path))
     monkeypatch.setattr(bootstrap_module.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(
+        bootstrap_module,
+        "enqueue_bootstrap_enable",
+        lambda runid, actor: (
+            {"enabled": False, "queued": True, "job_id": "job-auth", "message": "Bootstrap enable job enqueued."},
+            202,
+        ),
+    )
 
     dummy_run = DummyRun(RUN_ID)
 
@@ -196,8 +204,16 @@ def test_login_required_allows_authenticated(auth_client) -> None:
     client.get(f"/test-login/{user_id}")
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/enable")
 
-    assert response.status_code == 200
-    assert response.get_json() == {"Content": {"enabled": True}}
+    assert response.status_code == 202
+    assert response.get_json() == {
+        "Content": {
+            "enabled": False,
+            "queued": True,
+            "job_id": "job-auth",
+            "message": "Bootstrap enable job enqueued.",
+            "status_url": "/rq-engine/api/jobstatus/job-auth",
+        }
+    }
 
 
 def test_roles_accepted_blocks_non_admin(auth_client) -> None:

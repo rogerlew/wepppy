@@ -162,6 +162,33 @@ def test_verify_token_success(bootstrap_context, monkeypatch: pytest.MonkeyPatch
     assert response.headers.get("X-Auth-User") == user.email
 
 
+def test_verify_token_accepts_stripped_git_prefix(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, module, _set_user = bootstrap_context
+    user = DummyUser(10, "user@example.com")
+    run = DummyRun(RUN_ID, owner_id=user.id)
+    run.users.append(user)
+
+    monkeypatch.setattr(module, "_resolve_run_record", lambda runid: run)
+    monkeypatch.setattr(module, "_resolve_user_by_email", lambda email: user)
+    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
+    monkeypatch.setattr(
+        module.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: {"sub": user.email, "runid": run.runid},
+    )
+
+    headers = {
+        "Authorization": f"Basic {_basic_auth('u1', 'tok')}",
+        "X-Forwarded-Uri": f"/{PREFIX}/{RUN_ID}/.git/info/refs?service=git-upload-pack",
+    }
+
+    with app.test_client() as client:
+        response = client.get("/api/bootstrap/verify-token", headers=headers)
+
+    assert response.status_code == 200
+    assert response.headers.get("X-Auth-User") == user.email
+
+
 def test_verify_token_rejects_disabled_run(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, _set_user = bootstrap_context
     user = DummyUser(11, "user@example.com")
@@ -298,24 +325,35 @@ def test_user_has_run_access_allows_root_role(bootstrap_context) -> None:
     assert module._user_has_run_access(user, run) is True
 
 
-def test_enable_bootstrap_calls_init(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_enable_bootstrap_enqueues_job(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
     app, module, set_user = bootstrap_context
     user = DummyUser(20, "owner@example.com")
     set_user(user)
-    wepp = DummyWepp(enabled=False)
 
     monkeypatch.setattr(module, "_validate_bootstrap_eligibility", lambda runid, email: (object(), user))
-    monkeypatch.setattr(module, "get_wd", lambda runid: f"/tmp/{runid}")
-    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: wepp)
+    monkeypatch.setattr(
+        module,
+        "enqueue_bootstrap_enable",
+        lambda runid, actor: (
+            {"enabled": False, "queued": True, "job_id": "job-22", "message": "Bootstrap enable job enqueued."},
+            202,
+        ),
+    )
 
     with app.test_client() as client:
         response = client.post(f"/runs/{RUN_ID}/{CONFIG}/bootstrap/enable")
 
-    assert response.status_code == 200
+    assert response.status_code == 202
     payload = response.get_json()
-    assert payload == {"Content": {"enabled": True}}
-    assert wepp.init_calls == 1
-    assert wepp.bootstrap_enabled is True
+    assert payload == {
+        "Content": {
+            "enabled": False,
+            "queued": True,
+            "job_id": "job-22",
+            "message": "Bootstrap enable job enqueued.",
+            "status_url": "/rq-engine/api/jobstatus/job-22",
+        }
+    }
 
 
 def test_mint_token_returns_clone_url(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -334,6 +372,35 @@ def test_mint_token_returns_clone_url(bootstrap_context, monkeypatch: pytest.Mon
     assert response.status_code == 200
     payload = response.get_json()
     assert payload == {"Content": {"clone_url": f"clone://{user.id}@example.test/{user.email}"}}
+
+
+def test_checkout_returns_conflict_when_lock_busy(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    app, module, set_user = bootstrap_context
+    user = DummyUser(31, "owner@example.com")
+    set_user(user)
+
+    monkeypatch.setattr(module, "_ensure_bootstrap_opt_in", lambda runid: None)
+    monkeypatch.setattr(module, "get_wd", lambda runid: f"/tmp/{runid}")
+    monkeypatch.setattr(module.Wepp, "getInstance", lambda wd: DummyWepp(enabled=True))
+    monkeypatch.setattr(module, "acquire_bootstrap_git_lock", lambda *args, **kwargs: None)
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(module.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with app.test_client() as client:
+        response = client.post(
+            f"/runs/{RUN_ID}/{CONFIG}/bootstrap/checkout",
+            json={"sha": "abc1234"},
+        )
+
+    assert response.status_code == 409
+    assert response.get_json() == {"error": {"message": "bootstrap lock busy"}}
 
 
 def test_bootstrap_disable_sets_flag(bootstrap_context, monkeypatch: pytest.MonkeyPatch) -> None:
