@@ -363,7 +363,7 @@ def run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=None, ss_batch_id=None, s
 
 def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
                   man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
-                  no_file_checks=False, timeout=30):
+                  no_file_checks=False, timeout=60):
     
     if man_relpath != '':
         assert man_relpath.endswith('/'), man_relpath
