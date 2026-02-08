@@ -93,6 +93,17 @@ def register(app: typer.Typer) -> None:
         result = compose_exec(context, "weppcloud", command, check=False)
         _exit_from_result(result)
 
+    @app.command("check-rq-contracts")
+    def check_rq_contracts(ctx: typer.Context) -> None:
+        context = _context(ctx)
+        command = (
+            "cd /workdir/wepppy && "
+            "/opt/venv/bin/python tools/check_endpoint_inventory.py && "
+            "/opt/venv/bin/python tools/check_route_contract_checklist.py"
+        )
+        result = compose_exec(context, "weppcloud", command, check=False)
+        _exit_from_result(result)
+
     @app.command(
         "check-test-isolation",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},

@@ -90,6 +90,9 @@ RQ-engine now carries core agent-facing operations, but contract quality and doc
 - Route contract checklist drift guard:
   - `tools/check_route_contract_checklist.py`
   - `tests/tools/test_route_contract_checklist_guard.py`
+- Operationalized guard entrypoints:
+  - `wctl check-rq-contracts` (`tools/wctl2/commands/python_tasks.py`)
+  - CI workflow: `.github/workflows/rq-engine-contract-guards.yml`
 - Regression coverage updates in:
   - `tests/microservices/*`
   - `tests/weppcloud/routes/*`

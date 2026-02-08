@@ -1,0 +1,53 @@
+name: RQ-Engine Contract Guards
+on:
+  pull_request:
+    paths:
+      - wepppy/microservices/rq_engine/**
+      - tests/microservices/test_rq_engine_openapi_contract.py
+      - tests/tools/test_endpoint_inventory_guard.py
+      - tests/tools/test_route_contract_checklist_guard.py
+      - tools/check_endpoint_inventory.py
+      - tools/check_route_contract_checklist.py
+      - tools/wctl2/commands/python_tasks.py
+      - tools/wctl2/tests/test_python_tasks_commands.py
+      - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md
+      - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md
+      - .github/forest_workflows/rq-engine-contract-guards.yml
+      - .github/workflows/rq-engine-contract-guards.yml
+  push:
+    branches:
+      - master
+    paths:
+      - wepppy/microservices/rq_engine/**
+      - tests/microservices/test_rq_engine_openapi_contract.py
+      - tests/tools/test_endpoint_inventory_guard.py
+      - tests/tools/test_route_contract_checklist_guard.py
+      - tools/check_endpoint_inventory.py
+      - tools/check_route_contract_checklist.py
+      - tools/wctl2/commands/python_tasks.py
+      - tools/wctl2/tests/test_python_tasks_commands.py
+      - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md
+      - docs/work-packages/20260208_rq_engine_agent_usability/artifacts/route_contract_checklist_20260208.md
+      - .github/forest_workflows/rq-engine-contract-guards.yml
+      - .github/workflows/rq-engine-contract-guards.yml
+  workflow_dispatch:
+jobs:
+  rq-engine-contract-guards:
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - homelab
+    timeout-minutes: 20
+    steps:
+      - name: Run rq-engine contract guard scripts
+        run: |
+          set -euo pipefail
+          wctl check-rq-contracts
+      - name: Run rq-engine contract guard tests
+        run: |
+          set -euo pipefail
+          wctl run-pytest \
+            tests/tools/test_endpoint_inventory_guard.py \
+            tests/tools/test_route_contract_checklist_guard.py \
+            tests/microservices/test_rq_engine_openapi_contract.py

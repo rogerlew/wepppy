@@ -5,9 +5,9 @@
 ## Quick Status
 
 **Started**: 2026-02-08  
-**Current phase**: Agent-facing docs split (developer + usersum docs landed)  
+**Current phase**: Contract guards operationalized in wctl + CI  
 **Last updated**: 2026-02-08  
-**Next milestone**: Operationalize route/checklist guards in standard pre-merge checks
+**Next milestone**: Final package closure review
 
 ## Task Board
 
@@ -33,6 +33,7 @@
 - [x] Added route contract checklist artifact + drift guard tooling/tests (2026-02-08).
 - [x] Added canonical rq-engine developer contract doc for agents (2026-02-08).
 - [x] Added usersum companion doc for rq-engine concepts/workflows (2026-02-08).
+- [x] Operationalized route/checklist guards in `wctl` and CI workflow (2026-02-08).
 
 ## Timeline
 
@@ -46,6 +47,7 @@
 - **2026-02-08** - Route contract checklist artifact published with automated drift guard.
 - **2026-02-08** - Added `docs/dev-notes/rq-engine-agent-api.md` as the canonical developer-facing rq-engine agent contract.
 - **2026-02-08** - Added usersum `rq-engine.md` and cross-linked usersum/dev-note Bootstrap and rq-engine docs.
+- **2026-02-08** - Added `wctl check-rq-contracts` and CI workflow `rq-engine-contract-guards`.
 
 ## Decisions Log
 
@@ -317,8 +319,42 @@ handoff point for further API usability work.
 - Updated package deliverables list to include the usersum document.
 
 **Open follow-ups**:
-- Wire route/checklist guard scripts into the standard pre-merge command path.
+- None.
 
 **Validation results**:
 - `wctl doc-lint --path wepppy/weppcloud/routes/usersum/weppcloud/rq-engine.md --path wepppy/weppcloud/routes/usersum/weppcloud/bootstrap.md --path docs/dev-notes/rq-engine-agent-api.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
   - Result: `5 files validated, 0 errors, 0 warnings`
+
+### 2026-02-08: Guard operationalization (wctl + CI)
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added `wctl` command:
+  - `check-rq-contracts` in `tools/wctl2/commands/python_tasks.py`
+  - Runs both guard scripts in container:
+    - `tools/check_endpoint_inventory.py`
+    - `tools/check_route_contract_checklist.py`
+- Added CLI unit test:
+  - `tools/wctl2/tests/test_python_tasks_commands.py`
+- Added forest workflow spec + generated workflow:
+  - `.github/forest_workflows/rq-engine-contract-guards.yml`
+  - `.github/workflows/rq-engine-contract-guards.yml`
+- Updated `wctl` docs:
+  - `wctl/README.md`
+- Updated package deliverables to include operationalized guard entrypoints.
+
+**Notes**:
+- `scripts/build_forest_workflows.py` generated the new workflow file correctly
+  but exits non-zero in this repository state because `readme.md` lacks the
+  expected "Dev Server Nightly Profile Tests" section used by the generator's
+  profile table updater.
+
+**Validation results**:
+- `wctl run-pytest tools/wctl2/tests/test_python_tasks_commands.py`
+  - Result: `1 passed`
+- `wctl check-rq-contracts`
+  - Result: `Endpoint inventory check passed` and `Route contract checklist check passed`
+- `wctl run-pytest tests/tools/test_endpoint_inventory_guard.py tests/tools/test_route_contract_checklist_guard.py tests/microservices/test_rq_engine_openapi_contract.py`
+  - Result: `9 passed, 3 warnings`
+- `wctl doc-lint --path wctl/README.md --path docs/work-packages/20260208_rq_engine_agent_usability/tracker.md --path docs/work-packages/20260208_rq_engine_agent_usability/package.md`
+  - Result: `3 files validated, 0 errors, 0 warnings`
