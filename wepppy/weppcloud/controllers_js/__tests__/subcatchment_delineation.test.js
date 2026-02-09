@@ -269,6 +269,22 @@ describe("Subcatchment Delineation controller", () => {
         expect(pollCompletionValues).toEqual(["WATERSHED_ABSTRACTION_TASK_COMPLETED"]);
     });
 
+    test("build handles message-only responses without undefined job id", async () => {
+        httpPostJsonMock.mockResolvedValueOnce({
+            body: { message: "Set subcatchment inputs for batch processing" },
+        });
+
+        subcatchment.build();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(document.querySelector("#build_subcatchments_form #status").textContent).toContain(
+            "Set subcatchment inputs for batch processing"
+        );
+        expect(document.querySelector("#build_subcatchments_form #status").textContent).not.toContain("undefined");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(subcatchment, null);
+    });
+
     test("registers delegated handlers for map controls", () => {
         expect(delegateSpy).toBeDefined();
         const changeCall = delegateSpy.mock.calls.find(([root, eventName, selector]) => root === document && eventName === "change" && selector === "[data-subcatchment-role='cmap-option']");

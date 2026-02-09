@@ -4628,8 +4628,16 @@ class Omni(NoDbBase):
         elif scenario == OmniScenario.Undisturbed:
             self.logger.info(f' {scenario_name}: scenario == undisturbed')
 
-            if not self.has_sbs:
+            runid_leaf = str(self.runid).split(';;')[-1] if self.runid else ''
+            wd_leaf = os.path.basename(os.path.normpath(self.wd))
+            is_base_project = runid_leaf == '_base' or wd_leaf == '_base'
+
+            if not self.has_sbs and not is_base_project:
                 raise Exception('Undisturbed scenario requires a base scenario with sbs')
+            if not self.has_sbs and is_base_project:
+                self.logger.info(
+                    f'  {scenario_name}: skipping sbs guard for _base project context'
+                )
 
             with self.timed(f'  {scenario_name}: remove sbs'):
                 disturbed.remove_sbs()

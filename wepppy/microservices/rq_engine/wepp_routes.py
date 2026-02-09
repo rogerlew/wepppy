@@ -29,6 +29,12 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
+def _is_base_project_context(runid: str, config: str) -> bool:
+    runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
+    config_token = str(config).strip().lower() if config is not None else ""
+    return runid_leaf == "_base" or config_token == "_base"
+
+
 def _pop_scalar(mapping: dict[str, Any], key: str, default: Any = None) -> Any:
     if key not in mapping:
         return default
@@ -70,6 +76,7 @@ def _apply_swat_channel_params(wd: str, payload: dict[str, Any]) -> None:
 
 async def _handle_run_wepp_request(
     runid: str,
+    config: str,
     request: Request,
     *,
     job_fn,
@@ -153,6 +160,9 @@ async def _handle_run_wepp_request(
         wepp._dss_export_on_run_completion = dss_export_on_run_completion
         wepp._dss_excluded_channel_orders = dss_export_exclude_orders
 
+    if getattr(wepp, "run_group", "") == "batch" or _is_base_project_context(runid, config):
+        return JSONResponse({"message": "Set wepp inputs for batch processing"})
+
     try:
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
@@ -176,13 +186,14 @@ async def _handle_run_wepp_request(
     summary="Run WEPP hillslope workflow",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Mutates WEPP/soil/watershed run options from payload and asynchronously enqueues hillslope WEPP."
+        "Mutates WEPP/soil/watershed run options from payload and, outside batch mode, "
+        "asynchronously enqueues hillslope WEPP."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("run_wepp"),
     responses=agent_route_responses(
         success_code=200,
-        success_description="WEPP job accepted and `job_id` returned.",
+        success_description="WEPP inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
         },
@@ -211,6 +222,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
 
     return await _handle_run_wepp_request(
         runid,
+        config,
         request,
         job_fn=run_wepp_rq,
         job_key="run_wepp_rq",
@@ -223,13 +235,16 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     summary="Run WEPP watershed workflow",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Mutates WEPP/watershed run options from payload and asynchronously enqueues watershed WEPP."
+        "Mutates WEPP/watershed run options from payload and, outside batch mode, "
+        "asynchronously enqueues watershed WEPP."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("run_wepp_watershed"),
     responses=agent_route_responses(
         success_code=200,
-        success_description="WEPP watershed job accepted and `job_id` returned.",
+        success_description=(
+            "WEPP watershed inputs accepted; returns batch update message or enqueued `job_id`."
+        ),
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
         },
@@ -257,6 +272,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
 
     return await _handle_run_wepp_request(
         runid,
+        config,
         request,
         job_fn=run_wepp_watershed_rq,
         job_key="run_wepp_watershed_rq",

@@ -266,6 +266,24 @@ describe("Ash controller", () => {
         expect(pollCompletionEvent).toBe("ASH_RUN_TASK_COMPLETED");
     });
 
+    test("run handles message-only responses without undefined job id", async () => {
+        global.WCHttp.requestWithSessionToken = jest.fn(() =>
+            Promise.resolve({ body: { message: "Set ash inputs for batch processing" } })
+        );
+        const runCompleted = jest.fn();
+        ash.events.on("ash:run:completed", runCompleted);
+
+        ash.run();
+        await Promise.resolve();
+
+        expect(document.getElementById("status").textContent).toContain(
+            "Set ash inputs for batch processing"
+        );
+        expect(document.getElementById("status").textContent).not.toContain("undefined");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(ash, null);
+        expect(runCompleted).toHaveBeenCalledWith(expect.objectContaining({ job_id: null }));
+    });
+
     test("run failures push stacktrace and emit completed", async () => {
         const error = new Error("network");
         global.WCHttp.requestWithSessionToken = jest.fn(() => Promise.reject(error));

@@ -34,6 +34,12 @@ ASH_ALLOWED_EXTENSIONS = ("tif", "tiff", "img")
 ASH_MAX_BYTES = 100 * 1024 * 1024
 
 
+def _is_base_project_context(runid: str, config: str) -> bool:
+    runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
+    config_token = str(config).strip().lower() if config is not None else ""
+    return runid_leaf == "_base" or config_token == "_base"
+
+
 def _extract_upload(form: FormData, key: str) -> UploadFile | None:
     upload = form.get(key)
     if isinstance(upload, UploadFile):
@@ -149,13 +155,14 @@ def _first_value(value: Any) -> Any:
     summary="Run ash transport",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates ash inputs/uploads, mutates ash settings, and asynchronously enqueues ash transport."
+        "Validates ash inputs/uploads, mutates ash settings, and, outside batch mode, "
+        "asynchronously enqueues ash transport."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("run_ash"),
     responses=agent_route_responses(
         success_code=200,
-        success_description="Ash transport job accepted and `job_id` returned.",
+        success_description="Ash inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Ash payload or file validation failed. Returns the canonical error payload.",
         },
@@ -277,9 +284,12 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
                     return error_response(str(exc), status_code=400)
 
             if ash.ash_load_fn is None:
-                return error_response('Expecting ashload map"', status_code=400)
+                return error_response("Expecting ashload map", status_code=400)
 
         ash.ash_depth_mode = ash_depth_mode
+
+        if getattr(ash, "run_group", "") == "batch" or _is_base_project_context(runid, config):
+            return JSONResponse({"message": "Set ash inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_watar)

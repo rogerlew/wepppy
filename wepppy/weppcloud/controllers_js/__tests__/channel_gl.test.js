@@ -199,6 +199,10 @@ describe("ChannelDelineation GL controller", () => {
 
     afterEach(() => {
         delete window.ChannelDelineation;
+        delete window.runid;
+        delete window.runId;
+        delete window.config;
+        window.history.replaceState({}, "", "/");
         delete global.WCEvents;
         delete global.WCHttp;
         delete global.url_for_run;
@@ -305,6 +309,21 @@ describe("ChannelDelineation GL controller", () => {
         expect(startedEvents[0].payload.payload.map_center).toEqual([-117.52, 46.88]);
     });
 
+    test("build handles message-only responses without false failure", async () => {
+        const channel = window.ChannelDelineation.getInstance();
+
+        requestMock.mockResolvedValueOnce({
+            body: { message: "Set watershed inputs for batch processing" },
+        });
+
+        const result = await channel.build();
+
+        expect(result).toEqual(expect.objectContaining({ message: "Set watershed inputs for batch processing" }));
+        expect(document.getElementById("status").textContent).toContain("Set watershed inputs for batch processing");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, null);
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+    });
+
     test("triggerEvent handles completion once and emits report + layer", async () => {
         const channel = window.ChannelDelineation.getInstance();
 
@@ -354,6 +373,35 @@ describe("ChannelDelineation GL controller", () => {
         expect(buildButton.disabled).toBe(false);
         expect(mapCenterInput.value).toBe("-117.52,46.88");
         expect(mapZoomInput.value).toBe("13");
+    });
+
+    test("onMapChange keeps build enabled at low zoom for _base run ids", () => {
+        const channel = window.ChannelDelineation.getInstance();
+        const buildButton = document.getElementById("btn_build_channels_en");
+
+        mapStub._zoom = 10;
+        window.runid = "batch;;demo_batch;;_base";
+
+        channel.onMapChange();
+
+        expect(buildButton.disabled).toBe(false);
+        expect(buildButton.dataset.mapDisabled).toBe("false");
+    });
+
+    test("onMapChange keeps build enabled at low zoom when _base is present in URL", () => {
+        const channel = window.ChannelDelineation.getInstance();
+        const buildButton = document.getElementById("btn_build_channels_en");
+
+        mapStub._zoom = 10;
+        delete window.runid;
+        delete window.runId;
+        delete window.config;
+        window.history.replaceState({}, "", "/weppcloud/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg");
+
+        channel.onMapChange();
+
+        expect(buildButton.disabled).toBe(false);
+        expect(buildButton.dataset.mapDisabled).toBe("false");
     });
 
     test("show pass 2 registers labels and clicks drilldown", async () => {

@@ -1402,12 +1402,38 @@ var SubcatchmentDelineation = (function () {
                         emit("subcatchment:build:error", { error: response });
                         return response;
                     }
-                    if (statusAdapter && typeof statusAdapter.html === "function") {
-                        statusAdapter.html("build_subcatchments_and_abstract_watershed_rq job submitted: " + response.job_id);
+                    if (response && response.job_id) {
+                        var jobId = String(response.job_id);
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html("build_subcatchments_and_abstract_watershed_rq job submitted: " + jobId);
+                        }
+                        if (typeof sub.set_rq_job_id === "function") {
+                            sub.poll_completion_event = "WATERSHED_ABSTRACTION_TASK_COMPLETED";
+                            sub.set_rq_job_id(sub, jobId);
+                        }
+                        return response;
                     }
-                    sub.poll_completion_event = "WATERSHED_ABSTRACTION_TASK_COMPLETED";
+                    if (response && typeof response.message === "string" && response.message.trim()) {
+                        var message = response.message.trim();
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html(message);
+                        }
+                        if (typeof sub.set_rq_job_id === "function") {
+                            sub.set_rq_job_id(sub, null);
+                        }
+                        return response;
+                    }
+                    if (response) {
+                        if (typeof sub.pushResponseStacktrace === "function") {
+                            sub.pushResponseStacktrace(sub, response);
+                        }
+                        return response;
+                    }
+                    if (statusAdapter && typeof statusAdapter.html === "function") {
+                        statusAdapter.html("Subcatchment inputs updated.");
+                    }
                     if (typeof sub.set_rq_job_id === "function") {
-                        sub.set_rq_job_id(sub, response.job_id);
+                        sub.set_rq_job_id(sub, null);
                     }
                     return response;
                 })

@@ -226,6 +226,35 @@ describe("SubcatchmentDelineation GL controller", () => {
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(sub, "job-123");
     });
 
+    test("build handles message-only responses without undefined job id", async () => {
+        const sub = window.SubcatchmentDelineation.getInstance();
+
+        postJsonMock.mockResolvedValueOnce({
+            body: { message: "Set subcatchment inputs for batch processing" },
+        });
+
+        await sub.build();
+
+        const statusElement = document.querySelector("#build_subcatchments_form #status");
+        expect(statusElement.textContent).toContain("Set subcatchment inputs for batch processing");
+        expect(statusElement.textContent).not.toContain("undefined");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(sub, null);
+    });
+
+    test("build pushes stacktrace for malformed response payloads", async () => {
+        const sub = window.SubcatchmentDelineation.getInstance();
+
+        postJsonMock.mockResolvedValueOnce({
+            body: { unexpected: true },
+        });
+
+        const response = await sub.build();
+
+        expect(response).toEqual({ unexpected: true });
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(sub, { unexpected: true });
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalled();
+    });
+
     test("hover labels render when subcatchment labels are hidden", async () => {
         const sub = window.SubcatchmentDelineation.getInstance();
 

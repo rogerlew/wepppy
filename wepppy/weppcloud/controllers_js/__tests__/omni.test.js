@@ -41,6 +41,14 @@ describe("Omni controller", () => {
                 <div id="stacktrace"></div>
                 <div id="rq_job"></div>
                 <div id="braille"></div>
+                <select data-omni-contrast-role="control-scenario">
+                    <option value="uniform_low">uniform_low</option>
+                    <option value="mulch">mulch</option>
+                </select>
+                <select data-omni-contrast-role="contrast-scenario">
+                    <option value="uniform_low">uniform_low</option>
+                    <option value="mulch">mulch</option>
+                </select>
                 <label>
                     <input type="radio" name="omni_contrast_selection_mode" value="cumulative" checked />
                     Cumulative
@@ -160,6 +168,22 @@ describe("Omni controller", () => {
         expect(hint.innerHTML).toContain("job-321");
     });
 
+    test("run_omni_scenarios handles message-only responses without undefined job id", async () => {
+        requestMock.mockResolvedValueOnce({
+            body: { message: "Set omni inputs for batch processing" }
+        });
+
+        addScenarioAndSelect("uniform_low");
+
+        omni.run_omni_scenarios();
+        await requestMock.mock.results[0].value;
+
+        const statusElement = document.getElementById("status");
+        expect(statusElement.textContent).toContain("Set omni inputs for batch processing");
+        expect(statusElement.textContent).not.toContain("undefined");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni, null);
+    });
+
     test("load_scenarios_from_backend hydrates scenario controls", async () => {
         getJsonMock.mockResolvedValueOnce([
             { type: "thinning", canopy_cover: "40%", ground_cover: "93%" }
@@ -225,6 +249,39 @@ describe("Omni controller", () => {
 
         const remaining = document.querySelectorAll("[data-omni-scenario-item='true']");
         expect(remaining).toHaveLength(0);
+    });
+
+    test("run_omni_contrasts handles message-only responses without undefined job id", async () => {
+        addScenarioAndSelect("uniform_low");
+        addScenarioAndSelect("mulch");
+
+        const controlSelect = document.querySelector("[data-omni-contrast-role='control-scenario']");
+        const contrastSelect = document.querySelector("[data-omni-contrast-role='contrast-scenario']");
+        controlSelect.innerHTML = `
+            <option value="uniform_low">uniform_low</option>
+            <option value="mulch">mulch</option>
+        `;
+        contrastSelect.innerHTML = `
+            <option value="uniform_low">uniform_low</option>
+            <option value="mulch">mulch</option>
+        `;
+        controlSelect.value = "uniform_low";
+        contrastSelect.value = "mulch";
+        controlSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+        contrastSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+
+        requestMock.mockResolvedValueOnce({
+            body: { message: "Set omni inputs for batch processing" }
+        });
+
+        omni.run_omni_contrasts();
+        expect(requestMock).toHaveBeenCalled();
+        await requestMock.mock.results[0].value;
+
+        const statusElement = document.querySelector("#omni_contrasts_form #status");
+        expect(statusElement.textContent).toContain("Set omni inputs for batch processing");
+        expect(statusElement.textContent).not.toContain("undefined");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(omni.contrastController, null);
     });
 
     test("delete contrasts submits job and updates hint/status", async () => {

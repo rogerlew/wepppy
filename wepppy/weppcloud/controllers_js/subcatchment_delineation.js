@@ -1707,15 +1707,31 @@ var SubcatchmentDelineation = (function () {
                 .then(function (result) {
                     var response = result && result.body ? result.body : null;
                     if (response && response.job_id) {
+                        var jobId = String(response.job_id);
                         if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html("build_subcatchments_and_abstract_watershed_rq job submitted: " + response.job_id);
+                            statusAdapter.html("build_subcatchments_and_abstract_watershed_rq job submitted: " + jobId);
                         } else {
-                            safeHtml(statusElement, "build_subcatchments_and_abstract_watershed_rq job submitted: " + response.job_id);
+                            safeHtml(statusElement, "build_subcatchments_and_abstract_watershed_rq job submitted: " + jobId);
                         }
                         sub.poll_completion_event = "WATERSHED_ABSTRACTION_TASK_COMPLETED";
-                        sub.set_rq_job_id(sub, response.job_id);
+                        sub.set_rq_job_id(sub, jobId);
+                    } else if (response && typeof response.message === "string" && response.message.trim()) {
+                        var message = response.message.trim();
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html(message);
+                        } else {
+                            safeHtml(statusElement, message);
+                        }
+                        sub.set_rq_job_id(sub, null);
                     } else if (response) {
                         sub.pushResponseStacktrace(sub, response);
+                    } else {
+                        if (statusAdapter && typeof statusAdapter.html === "function") {
+                            statusAdapter.html("Subcatchment inputs updated.");
+                        } else {
+                            safeHtml(statusElement, "Subcatchment inputs updated.");
+                        }
+                        sub.set_rq_job_id(sub, null);
                     }
                 })
                 .catch(function (error) {

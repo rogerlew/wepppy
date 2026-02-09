@@ -699,14 +699,33 @@ var Ash = (function () {
             ).then(function (response) {
                 var payload = response.body || {};
                 if (!payload.error && !payload.errors) {
-                    statusAdapter.html("run_ash job submitted: " + payload.job_id);
-                    ash.poll_completion_event = "ASH_RUN_TASK_COMPLETED";
-                    ash.set_rq_job_id(ash, payload.job_id);
-                    ash.rq_job_id = payload.job_id;
-                    emitter.emit("ash:run:started", {
-                        job_id: payload.job_id,
-                        payload: payloadSnapshot
-                    });
+                    var jobId = payload.job_id ? String(payload.job_id) : "";
+                    var statusMessage = "";
+                    if (jobId) {
+                        statusMessage = "run_ash job submitted: " + jobId;
+                    } else if (typeof payload.message === "string" && payload.message.trim()) {
+                        statusMessage = payload.message.trim();
+                    } else {
+                        statusMessage = "Ash inputs updated.";
+                    }
+                    statusAdapter.html(statusMessage);
+                    if (jobId) {
+                        ash.poll_completion_event = "ASH_RUN_TASK_COMPLETED";
+                        ash.set_rq_job_id(ash, jobId);
+                        ash.rq_job_id = jobId;
+                        emitter.emit("ash:run:started", {
+                            job_id: jobId,
+                            payload: payloadSnapshot
+                        });
+                    } else {
+                        ash.set_rq_job_id(ash, null);
+                        ash.rq_job_id = null;
+                        var completedPayload = {
+                            job_id: null,
+                            payload: payloadSnapshot
+                        };
+                        emitter.emit("ash:run:completed", completedPayload);
+                    }
                 } else {
                     ash.pushResponseStacktrace(ash, payload);
                     var failureEvent = { job_id: null, error: payload };

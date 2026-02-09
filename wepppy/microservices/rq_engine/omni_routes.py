@@ -44,6 +44,12 @@ GEOJSON_MAX_BYTES = 100 * 1024 * 1024
 CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
 
 
+def _is_base_project_context(runid: str, config: str) -> bool:
+    runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
+    config_token = str(config).strip().lower() if config is not None else ""
+    return runid_leaf == "_base" or config_token == "_base"
+
+
 def _normalize_extensions(allowed_extensions: tuple[str, ...]) -> set[str]:
     normalized: set[str] = set()
     for ext in allowed_extensions:
@@ -482,6 +488,18 @@ async def _run_omni(
         raw_json = None
     form = await request.form()
 
+    is_batch_run = getattr(omni, "run_group", "") == "batch" or _is_base_project_context(
+        runid,
+        config,
+    )
+    has_scenarios_payload = (
+        (isinstance(raw_json, dict) and raw_json.get("scenarios") is not None)
+        or payload.get("scenarios") is not None
+        or isinstance(raw_json, list)
+    )
+    if is_batch_run and not has_scenarios_payload:
+        return JSONResponse({"message": "Set omni inputs for batch processing"})
+
     try:
         parsed_inputs = _prepare_omni_scenarios(
             payload,
@@ -496,6 +514,9 @@ async def _run_omni(
         return error_response(str(exc), status_code=400)
     except Exception as exc:
         return error_response_with_traceback(f"Error parsing omni inputs: {exc}")
+
+    if is_batch_run:
+        return JSONResponse({"message": "Set omni inputs for batch processing"})
 
     try:
         prep = RedisPrep.getInstance(wd)
@@ -560,6 +581,11 @@ async def _run_omni_contrasts(
 
     try:
         omni.parse_inputs(parsed_inputs)
+        if getattr(omni, "run_group", "") == "batch" or _is_base_project_context(
+            runid,
+            config,
+        ):
+            return JSONResponse({"message": "Set omni inputs for batch processing"})
         if selection_mode == "cumulative":
             threshold_fraction = parsed_inputs.get("omni_contrast_cumulative_obj_param_threshold_fraction")
             if threshold_fraction is None:
@@ -759,14 +785,16 @@ async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
     summary="Run OMNI scenarios",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates OMNI scenario payload/upload inputs, mutates OMNI state, and asynchronously enqueues OMNI runs."
+        "Validates OMNI scenario payload/upload inputs, mutates OMNI state, and, outside batch mode, "
+        "asynchronously enqueues OMNI runs."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("run_omni"),
     responses=agent_route_responses(
         success_code=202,
-        success_description="OMNI run accepted and `job_id` returned.",
+        success_description="OMNI inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
+            200: "OMNI batch/_base inputs accepted; no enqueue and message-only payload returned.",
             400: "OMNI scenario input validation failed. Returns the canonical error payload.",
         },
     ),
@@ -789,14 +817,18 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
     summary="Run OMNI contrasts",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates OMNI contrast inputs, mutates contrast configuration, and asynchronously enqueues contrast processing."
+        "Validates OMNI contrast inputs, mutates contrast configuration, and, outside batch mode, "
+        "asynchronously enqueues contrast processing."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("run_omni_contrasts"),
     responses=agent_route_responses(
         success_code=202,
-        success_description="OMNI contrast run accepted and `job_id` returned.",
+        success_description=(
+            "OMNI contrast inputs accepted; returns batch update message or enqueued `job_id`."
+        ),
         extra={
+            200: "OMNI contrast batch/_base inputs accepted; no enqueue and message-only payload returned.",
             400: "OMNI contrast validation failed. Returns the canonical error payload.",
         },
     ),

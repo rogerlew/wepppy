@@ -193,6 +193,47 @@ var ChannelDelineation = (function () {
         return Math.trunc(parsed);
     }
 
+    function isBaseRunId(runIdValue) {
+        if (typeof runIdValue !== "string") {
+            return false;
+        }
+        return runIdValue.trim().endsWith(";;_base");
+    }
+
+    function decodePathToken(token) {
+        if (typeof token !== "string") {
+            return "";
+        }
+        try {
+            return decodeURIComponent(token);
+        } catch (error) {
+            return token;
+        }
+    }
+
+    function isBaseRunContext() {
+        if (isBaseRunId(window.runid) || isBaseRunId(window.runId)) {
+            return true;
+        }
+
+        if (typeof window.config === "string" && window.config.trim() === "_base") {
+            return true;
+        }
+
+        if (window.location && typeof window.location.pathname === "string") {
+            var match = window.location.pathname.match(/\/runs\/([^/]+)\/([^/]+)/);
+            if (match) {
+                var runIdFromPath = decodePathToken(match[1]);
+                var configFromPath = decodePathToken(match[2]);
+                if (isBaseRunId(runIdFromPath) || configFromPath.trim() === "_base") {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     function coalesceNumeric(raw, keys) {
         if (!raw) {
             return null;
@@ -1442,7 +1483,8 @@ var ChannelDelineation = (function () {
                 } else {
                     var zoomOk = zoom >= channel.zoom_min;
                     var powerOverride = typeof window.ispoweruser !== "undefined" && window.ispoweruser;
-                    var enabled = zoomOk || powerOverride;
+                    var allowAnyZoom = isBaseRunContext();
+                    var enabled = zoomOk || powerOverride || allowAnyZoom;
 
                     if (!enabled) {
                         setBuildButtonEnabled(false, "Area is too large, zoom must be " + channel.zoom_min + ", current zoom is " + zoom + ".");
@@ -1572,18 +1614,29 @@ var ChannelDelineation = (function () {
                 }
             )
                 .then(function (result) {
-                    var data = result.body || {};
-                    if (!data.error && !data.errors && data.job_id) {
-                        if (statusAdapter && typeof statusAdapter.html === "function") {
-                            statusAdapter.html("fetch_dem_and_build_channels_rq job submitted: " + data.job_id);
+                    var data = result && result.body ? result.body : null;
+                    if (data && !data.error && !data.errors) {
+                        var jobId = data.job_id ? String(data.job_id) : "";
+                        if (jobId) {
+                            if (statusAdapter && typeof statusAdapter.html === "function") {
+                                statusAdapter.html("fetch_dem_and_build_channels_rq job submitted: " + jobId);
+                            }
+                            channel.set_rq_job_id(channel, jobId);
+                            channel.triggerEvent("job:started", {
+                                job_id: jobId,
+                                task: "channel:build",
+                                payload: payload
+                            });
+                            return data;
                         }
-                        channel.set_rq_job_id(channel, data.job_id);
-                        channel.triggerEvent("job:started", {
-                            job_id: data.job_id,
-                            task: "channel:build",
-                            payload: payload
-                        });
-                        return data;
+
+                        if (typeof data.message === "string" && data.message.trim()) {
+                            if (statusAdapter && typeof statusAdapter.html === "function") {
+                                statusAdapter.html(data.message.trim());
+                            }
+                            channel.set_rq_job_id(channel, null);
+                            return data;
+                        }
                     }
                     channel.pushResponseStacktrace(channel, data);
                     showErrorStatus("Failed to submit channel delineation job.");

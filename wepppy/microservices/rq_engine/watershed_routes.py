@@ -49,6 +49,12 @@ UPLOAD_DEM_MAX_DIMENSION = 1024
 UPLOAD_DEM_ALLOWED_EXTENSIONS = ("tif",)
 
 
+def _is_base_project_context(runid: str, config: str) -> bool:
+    runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
+    config_token = str(config).strip().lower() if config is not None else ""
+    return runid_leaf == "_base" or config_token == "_base"
+
+
 def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, list[Any] | None]:
     center_raw = payload.get("map_center")
     zoom_raw = payload.get("map_zoom")
@@ -550,7 +556,7 @@ async def fetch_dem_and_build_channels(
 
         wd = get_wd(runid)
         watershed = Watershed.getInstance(wd)
-        if watershed.run_group == "batch":
+        if watershed.run_group == "batch" or _is_base_project_context(runid, config):
             with watershed.locked():
                 watershed._mcl = mcl
                 watershed._csa = csa
@@ -605,7 +611,7 @@ async def fetch_dem_and_build_channels(
         return JSONResponse({"job_id": job.id})
     except MinimumChannelLengthTooShortError as exc:
         return error_response(
-            exc.__name__ or "Minimum Channel Length TooShort Error",
+            exc.__class__.__name__ or "Minimum Channel Length TooShort Error",
             status_code=400,
             details=exc.__doc__,
         )
@@ -817,9 +823,9 @@ async def build_subcatchments_and_abstract_watershed(
             if value is not None:
                 updates["bieger2015_widths"] = value
 
-        if watershed.run_group == "batch":
+        if watershed.run_group == "batch" or _is_base_project_context(runid, config):
             _apply_watershed_updates(watershed, updates)
-            return JSONResponse({"message": "Set watershed inputs for batch processing"})
+            return JSONResponse({"message": "Set subcatchment inputs for batch processing"})
 
         _apply_watershed_updates(watershed, updates)
 
@@ -839,7 +845,7 @@ async def build_subcatchments_and_abstract_watershed(
         return JSONResponse({"job_id": job.id})
     except WatershedBoundaryTouchesEdgeError as exc:
         return error_response(
-            exc.__name__ or "Watershed Boundary Touches Edge Error",
+            exc.__class__.__name__ or "Watershed Boundary Touches Edge Error",
             status_code=400,
             details=exc.__doc__,
         )

@@ -368,6 +368,135 @@ def test_run_omni_scenario_prescribed_fire_requires_treatment_key(tmp_path, monk
         omni.run_omni_scenario({"type": "prescribed_fire"})
 
 
+def test_run_omni_scenario_undisturbed_allows_base_without_sbs(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    run_dir = tmp_path / "_base"
+    run_dir.mkdir()
+    scenario_dir = run_dir / "_pups" / "omni" / "scenarios" / "undisturbed"
+    scenario_dir.mkdir(parents=True)
+    (run_dir / "wepp" / "runs").mkdir(parents=True, exist_ok=True)
+    (scenario_dir / "wepp" / "runs").mkdir(parents=True, exist_ok=True)
+    (scenario_dir / "wepp" / "output").mkdir(parents=True, exist_ok=True)
+
+    omni.wd = str(run_dir)
+    omni.logger = logging.getLogger("tests.omni.undisturbed_base")
+
+    monkeypatch.setattr(omni_module, "_omni_clone", lambda *args, **kwargs: str(scenario_dir))
+    monkeypatch.setattr(omni_module, "run_wepp_hillslope_interchange", lambda *args, **kwargs: None)
+    monkeypatch.setattr(omni_module, "_post_watershed_run_cleanup", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "delete_after_interchange",
+        property(lambda self: False),
+        raising=False,
+    )
+    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False), raising=False)
+
+    remove_calls = {"count": 0}
+
+    class DummyDisturbed:
+        has_sbs = False
+
+        def remove_sbs(self) -> None:
+            remove_calls["count"] += 1
+
+    class DummyLanduse:
+        def build(self) -> None:
+            return None
+
+        def build_managements(self) -> None:
+            return None
+
+    class DummySoils:
+        def build(self, max_workers=None) -> None:
+            return None
+
+    class DummyWepp:
+        def __init__(self, wd: str) -> None:
+            self.runs_dir = str(Path(wd) / "wepp" / "runs")
+            self.output_dir = str(Path(wd) / "wepp" / "output")
+
+        def prep_hillslopes(self, **kwargs) -> None:
+            return None
+
+        def run_hillslopes(self, **kwargs) -> None:
+            return None
+
+        def prep_watershed(self) -> None:
+            return None
+
+        def run_watershed(self) -> None:
+            return None
+
+    class DummyClimate:
+        observed_start_year = None
+        future_start_year = None
+
+    import wepppy.nodb.core as nodb_core
+    import wepppy.nodb.mods.disturbed as disturbed_mod
+
+    monkeypatch.setattr(disturbed_mod.Disturbed, "getInstance", lambda wd: DummyDisturbed())
+    monkeypatch.setattr(nodb_core.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(nodb_core.Soils, "getInstance", lambda wd: DummySoils())
+    monkeypatch.setattr(nodb_core.Wepp, "getInstance", lambda wd: DummyWepp(wd))
+    monkeypatch.setattr(nodb_core.Climate, "getInstance", lambda wd: DummyClimate())
+
+    scenario_wd, scenario_name = omni.run_omni_scenario({"type": "undisturbed"})
+
+    assert Path(scenario_wd) == scenario_dir
+    assert scenario_name == "undisturbed"
+    assert remove_calls["count"] == 1
+
+
+def test_run_omni_scenario_undisturbed_requires_sbs_outside_base(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    run_dir = tmp_path / "run-omni-undisturbed"
+    run_dir.mkdir()
+    scenario_dir = run_dir / "_pups" / "omni" / "scenarios" / "undisturbed"
+    scenario_dir.mkdir(parents=True)
+
+    omni.wd = str(run_dir)
+    omni.logger = logging.getLogger("tests.omni.undisturbed_requires_sbs")
+
+    monkeypatch.setattr(omni_module, "_omni_clone", lambda *args, **kwargs: str(scenario_dir))
+    monkeypatch.setattr(omni_module.NoDbBase, "has_sbs", property(lambda self: False), raising=False)
+
+    class DummyDisturbed:
+        has_sbs = False
+
+        def remove_sbs(self) -> None:
+            return None
+
+    class DummyLanduse:
+        def build(self) -> None:
+            return None
+
+        def build_managements(self) -> None:
+            return None
+
+    class DummySoils:
+        def build(self, max_workers=None) -> None:
+            return None
+
+    import wepppy.nodb.core as nodb_core
+    import wepppy.nodb.mods.disturbed as disturbed_mod
+
+    monkeypatch.setattr(disturbed_mod.Disturbed, "getInstance", lambda wd: DummyDisturbed())
+    monkeypatch.setattr(nodb_core.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(nodb_core.Soils, "getInstance", lambda wd: DummySoils())
+
+    with pytest.raises(Exception, match="Undisturbed scenario requires a base scenario with sbs"):
+        omni.run_omni_scenario({"type": "undisturbed"})
+
+
 def test_clear_cache_and_locks_invokes_dependencies(monkeypatch, omni_module):
     calls = []
 

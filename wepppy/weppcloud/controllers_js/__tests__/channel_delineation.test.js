@@ -188,6 +188,10 @@ describe("Channel Delineation controller", () => {
         if (global.parseBboxText) {
             delete global.parseBboxText;
         }
+        delete window.runid;
+        delete window.runId;
+        delete window.config;
+        window.history.replaceState({}, "", "/");
         document.body.innerHTML = "";
     });
 
@@ -218,6 +222,17 @@ describe("Channel Delineation controller", () => {
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, "job-99");
         expect(events).toHaveLength(1);
         expect(events[0].payload.payload.map_center).toEqual([-117.52, 46.88]);
+    });
+
+    test("build handles message-only responses without false failure", async () => {
+        requestMock.mockResolvedValueOnce({ body: { message: "Set watershed inputs for batch processing" } });
+
+        const result = await channel.build();
+
+        expect(result).toEqual(expect.objectContaining({ message: "Set watershed inputs for batch processing" }));
+        expect(document.getElementById("status").textContent).toContain("Set watershed inputs for batch processing");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, null);
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
     });
 
     test("map changes keep job hint when a job is active", () => {
@@ -315,6 +330,31 @@ describe("Channel Delineation controller", () => {
         expect(document.getElementById("hint_build_channels_en").textContent).toContain("zoom must be");
         expect(events).toHaveLength(1);
         expect(events[0].zoom).toBe(10);
+    });
+
+    test("onMapChange keeps build button enabled at low zoom for _base runs", () => {
+        mapStub._zoom = 10;
+        window.runid = "batch;;demo_batch;;_base";
+
+        channel.onMapChange();
+
+        const button = document.getElementById("btn_build_channels_en");
+        expect(button.disabled).toBe(false);
+        expect(button.dataset.mapDisabled).toBe("false");
+    });
+
+    test("onMapChange keeps build button enabled at low zoom for _base runs parsed from URL", () => {
+        mapStub._zoom = 10;
+        delete window.runid;
+        delete window.runId;
+        delete window.config;
+        window.history.replaceState({}, "", "/weppcloud/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg");
+
+        channel.onMapChange();
+
+        const button = document.getElementById("btn_build_channels_en");
+        expect(button.disabled).toBe(false);
+        expect(button.dataset.mapDisabled).toBe("false");
     });
 
     test("onMapChange keeps build button enabled in Set Map Object mode regardless of zoom", () => {

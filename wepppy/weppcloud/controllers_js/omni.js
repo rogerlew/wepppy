@@ -2136,18 +2136,34 @@ var Omni = (function () {
                     return;
                 }
                 if (body) {
-                    setStatus("run_omni_rq job submitted: " + body.job_id);
-                    omni.poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED";
-                    omni.set_rq_job_id(omni, body.job_id);
-                    if (hintAdapter && typeof hintAdapter.html === "function") {
-                        hintAdapter.html(formatJobHint(body.job_id));
-                        if (typeof hintAdapter.show === "function") {
-                            hintAdapter.show();
+                    var jobId = body.job_id ? String(body.job_id) : "";
+                    var statusMessage = "";
+                    if (jobId) {
+                        statusMessage = "run_omni_rq job submitted: " + jobId;
+                    } else if (typeof body.message === "string" && body.message.trim()) {
+                        statusMessage = body.message.trim();
+                    } else {
+                        statusMessage = "Omni inputs updated.";
+                    }
+                    setStatus(statusMessage);
+                    if (jobId) {
+                        omni.poll_completion_event = "OMNI_SCENARIO_RUN_TASK_COMPLETED";
+                        omni.set_rq_job_id(omni, jobId);
+                        if (hintAdapter && typeof hintAdapter.html === "function") {
+                            hintAdapter.html(formatJobHint(jobId));
+                            if (typeof hintAdapter.show === "function") {
+                                hintAdapter.show();
+                            }
+                        }
+                    } else {
+                        omni.set_rq_job_id(omni, null);
+                        if (hintAdapter && typeof hintAdapter.text === "function") {
+                            hintAdapter.text(statusMessage);
                         }
                     }
                     if (omniEvents && typeof omniEvents.emit === "function") {
                         omniEvents.emit("omni:run:completed", {
-                            job_id: body.job_id,
+                            job_id: jobId || null,
                             scenarios: payload.scenarios
                         });
                     }
@@ -2248,13 +2264,29 @@ var Omni = (function () {
                     return;
                 }
                 if (body) {
-                    setContrastStatus("run_omni_contrasts_rq job submitted: " + body.job_id);
-                    contrastController.poll_completion_event = CONTRAST_COMPLETION_EVENT;
-                    contrastController.set_rq_job_id(contrastController, body.job_id);
-                    if (contrastHintAdapter && typeof contrastHintAdapter.html === "function") {
-                        contrastHintAdapter.html(formatJobHint(body.job_id));
-                        if (typeof contrastHintAdapter.show === "function") {
-                            contrastHintAdapter.show();
+                    var contrastJobId = body.job_id ? String(body.job_id) : "";
+                    var contrastStatusMessage = "";
+                    if (contrastJobId) {
+                        contrastStatusMessage = "run_omni_contrasts_rq job submitted: " + contrastJobId;
+                    } else if (typeof body.message === "string" && body.message.trim()) {
+                        contrastStatusMessage = body.message.trim();
+                    } else {
+                        contrastStatusMessage = "Omni contrast inputs updated.";
+                    }
+                    setContrastStatus(contrastStatusMessage);
+                    if (contrastJobId) {
+                        contrastController.poll_completion_event = CONTRAST_COMPLETION_EVENT;
+                        contrastController.set_rq_job_id(contrastController, contrastJobId);
+                        if (contrastHintAdapter && typeof contrastHintAdapter.html === "function") {
+                            contrastHintAdapter.html(formatJobHint(contrastJobId));
+                            if (typeof contrastHintAdapter.show === "function") {
+                                contrastHintAdapter.show();
+                            }
+                        }
+                    } else {
+                        contrastController.set_rq_job_id(contrastController, null);
+                        if (contrastHintAdapter && typeof contrastHintAdapter.text === "function") {
+                            contrastHintAdapter.text(contrastStatusMessage);
                         }
                     }
                 }
