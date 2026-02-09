@@ -322,6 +322,39 @@ def _current_user_groups() -> List[str]:
     return _claim_names(groups)
 
 
+def _is_admin_runs_viewer() -> bool:
+    return bool(current_user.has_role('Admin') or current_user.has_role('Root'))
+
+
+def _normalize_alias(raw_alias: Optional[str]) -> Optional[str]:
+    if raw_alias is None:
+        return None
+    alias = str(raw_alias).strip()
+    return alias or None
+
+
+def _resolve_runs_user_id(raw_alias: Optional[str]) -> tuple[Optional[int], Optional[str]]:
+    viewer_user_id = getattr(current_user, 'id', None)
+    alias = _normalize_alias(raw_alias)
+    if not _is_admin_runs_viewer() or alias is None:
+        return viewer_user_id, None
+
+    from sqlalchemy import func
+    from wepppy.weppcloud.app import User
+
+    user = None
+    if alias.isdigit():
+        user = User.query.filter(User.id == int(alias)).first()
+
+    if user is None:
+        user = User.query.filter(func.lower(User.email) == alias.lower()).first()
+
+    if user is None:
+        return None, alias
+
+    return user.id, None
+
+
 @user_bp.route('/profile', strict_slashes=False)
 @login_required
 def profile():
@@ -373,6 +406,49 @@ def mint_profile_token():
         return response
     except Exception as exc:
         return error_factory(str(exc), status_code=500)
+
+
+@user_bp.route("/runs/users", strict_slashes=False)
+@login_required
+@roles_accepted('Admin', 'Root')
+def runs_users():
+    from sqlalchemy import func
+    from wepppy.weppcloud.app import User, db
+
+    try:
+        records: List[Dict[str, Any]] = []
+        users = User.query.order_by(func.lower(User.email).asc(), User.id.asc()).all()
+        for user in users:
+            email = (getattr(user, 'email', None) or '').strip()
+            first = (getattr(user, 'first_name', None) or '').strip()
+            last = (getattr(user, 'last_name', None) or '').strip()
+            name = ' '.join(part for part in (first, last) if part).strip()
+            display_name = name or email or f'User {user.id}'
+            if email and name:
+                label = f'{name} <{email}>'
+            elif email:
+                label = email
+            else:
+                label = display_name
+
+            records.append(
+                {
+                    "alias": str(user.id),
+                    "id": user.id,
+                    "email": email,
+                    "name": name,
+                    "display_name": display_name,
+                    "label": label,
+                    "search_index": f'{name} {email}'.strip().lower(),
+                }
+            )
+
+        return jsonify(users=records, total=len(records))
+    except Exception:
+        return exception_factory()
+    finally:
+        db.session.remove()
+
 
 def _build_meta(wd, attrs: dict):
         try:
@@ -454,10 +530,14 @@ def runs():
         sort_param = _normalize_sort_param(request.args.get('sort'))
         direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
         is_desc = direction_param == 'desc'
+        requested_alias = request.args.get('alias')
+        selected_user_id, missing_alias = _resolve_runs_user_id(requested_alias)
+        if missing_alias is not None and _is_admin_runs_viewer():
+            return error_factory(f"user alias '{missing_alias}' not found", status_code=404)
 
         format_param = (request.args.get('format') or request.args.get('fomat') or '').lower()
         if format_param == 'json':
-            base_query = _runs_query_for_user(current_user.id).order_by(
+            base_query = _runs_query_for_user(selected_user_id).order_by(
                 Run.last_modified.desc().nullslast(),
                 Run.id.desc(),
             )
@@ -501,6 +581,9 @@ def runs():
             sort=sort_param,
             direction=direction_param,
             per_page=per_page,
+            is_admin_runs_viewer=_is_admin_runs_viewer(),
+            selected_alias=_normalize_alias(requested_alias),
+            current_user_alias=str(getattr(current_user, 'id', '')) if getattr(current_user, 'id', None) is not None else '',
         )
     except:
         return exception_factory()
@@ -513,12 +596,11 @@ def runs_catalog():
         sort_param = _normalize_sort_param(request.args.get('sort'))
         direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
         is_desc = direction_param == 'desc'
-
-        scope = (request.args.get('scope') or '').lower()
-        if scope == 'all' and (current_user.has_role('Admin') or current_user.has_role('Root')):
-            runs_all = _collect_run_rows(_runs_query_for_user(None))
-        else:
-            runs_all = _collect_run_rows(_runs_query_for_user(current_user.id))
+        requested_alias = request.args.get('alias')
+        selected_user_id, missing_alias = _resolve_runs_user_id(requested_alias)
+        if missing_alias is not None and _is_admin_runs_viewer():
+            return error_factory(f"user alias '{missing_alias}' not found", status_code=404)
+        runs_all = _collect_run_rows(_runs_query_for_user(selected_user_id))
 
         metas = _collect_metas_for_runs(runs_all)
         metas = _sort_metas(metas, sort_param, is_desc)
@@ -536,17 +618,14 @@ def runs_catalog():
 def runs_map_data():
     try:
         from wepppy.weppcloud.app import Run
-        scope = (request.args.get('scope') or '').lower()
-        if scope == 'all' and (current_user.has_role('Admin') or current_user.has_role('Root')):
-            query = _runs_query_for_user(None).order_by(
-                Run.last_modified.desc().nullslast(),
-                Run.id.desc(),
-            )
-        else:
-            query = _runs_query_for_user(current_user.id).order_by(
-                Run.last_modified.desc().nullslast(),
-                Run.id.desc(),
-            )
+        requested_alias = request.args.get('alias')
+        selected_user_id, missing_alias = _resolve_runs_user_id(requested_alias)
+        if missing_alias is not None and _is_admin_runs_viewer():
+            return error_factory(f"user alias '{missing_alias}' not found", status_code=404)
+        query = _runs_query_for_user(selected_user_id).order_by(
+            Run.last_modified.desc().nullslast(),
+            Run.id.desc(),
+        )
         run_rows = _collect_run_rows(query)
         metas = _collect_map_metas_for_runs(run_rows)
         return jsonify(runs=metas)

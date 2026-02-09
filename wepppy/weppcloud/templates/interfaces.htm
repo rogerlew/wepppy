@@ -14,11 +14,6 @@
       <div class="wc-nav__menu-content">
         {% if current_user.has_role('Admin') %}
           <a class="pure-button pure-button-secondary"
-             href="{{ url_for('admin.allruns') }}"
-             rel="noopener">
-            All Runs
-          </a>
-          <a class="pure-button pure-button-secondary"
              href="{{ url_for('run_sync_dashboard.run_sync_dashboard') }}"
              rel="noopener">
             Run Sync

@@ -58,31 +58,6 @@ def usermod():
     return render_template('user/usermod.html', user=current_user)
 
 
-@admin_bp.route('/allruns')
-@admin_bp.route('/allruns/')
-@roles_required('Admin')
-@handle_with_exception_factory
-def allruns():
-    from wepppy.weppcloud.routes.user import _normalize_direction, _normalize_sort_param
-
-    per_page = request.args.get('per_page', 25, type=int)
-    if per_page <= 0:
-        per_page = 25
-
-    sort_param = _normalize_sort_param(request.args.get('sort'))
-    direction_param = _normalize_direction(request.args.get('direction') or request.args.get('order'))
-
-    return render_template(
-        'user/runs2.html',
-        user=current_user,
-        user_runs=[],
-        show_owner=True,
-        sort=sort_param,
-        direction=direction_param,
-        per_page=per_page,
-        runs_sort_endpoint='admin.allruns',
-    )
-
 @admin_bp.route('/tasks/usermod/', methods=['POST'])
 @roles_required('Root')
 @handle_with_exception_factory

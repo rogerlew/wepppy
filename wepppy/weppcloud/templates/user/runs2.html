@@ -88,6 +88,32 @@
             <button type="button" class="pure-button pure-button-primary" id="runs_search_go">Search</button>
           </div>
         </div>
+        {% if is_admin_runs_viewer %}
+        <div class="wc-map-controls__row wc-map-controls__row--inputs">
+          <label class="wc-map-controls__label" for="runs_admin_user_search">Specify Alias</label>
+          <div class="wc-map-controls__input">
+            <input class="wc-map-controls__input-field wc-field__control wc-field__control--text"
+                   id="runs_admin_user_search"
+                   name="runs_admin_user_search"
+                   type="text"
+                   placeholder="Search by name or email"
+                   autocomplete="off"
+                   inputmode="search">
+            <div id="runs_admin_user_suggestions"
+                 class="wc-runs-admin-suggestions"
+                 role="listbox"
+                 aria-label="Matching users"
+                 hidden></div>
+          </div>
+          <div class="wc-map-controls__actions">
+            <button type="button" class="pure-button pure-button-secondary" id="runs_admin_reset_scope">My Runs</button>
+          </div>
+          <div class="wc-map-controls__go">
+            <button type="button" class="pure-button pure-button-primary" id="runs_admin_apply_scope" disabled>View Runs for User</button>
+          </div>
+        </div>
+        <div id="runs_admin_scope_status" class="wc-text-muted" aria-live="polite"></div>
+        {% endif %}
       </div>
       <div class="wc-toolbar wc-toolbar--end">
         <button type="button" class="pure-button pure-button-secondary" id="delete_runs_button" onclick="deleteRuns()" disabled>Delete selected</button>
@@ -130,6 +156,36 @@
   </section>
 </section>
 
+{% if is_admin_runs_viewer %}
+<style>
+  .wc-runs-admin-suggestions {
+    margin-top: var(--wc-space-xs);
+    border: 1px solid var(--wc-color-border);
+    border-radius: var(--wc-radius-sm);
+    background: var(--wc-color-surface);
+    box-shadow: var(--wc-shadow-sm);
+    max-height: 16rem;
+    overflow-y: auto;
+  }
+
+  .wc-runs-admin-suggestions__item {
+    width: 100%;
+    text-align: left;
+    padding: var(--wc-space-xs) var(--wc-space-sm);
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .wc-runs-admin-suggestions__item:hover,
+  .wc-runs-admin-suggestions__item:focus-visible {
+    background: color-mix(in srgb, var(--wc-color-primary) 12%, transparent);
+    outline: none;
+  }
+</style>
+{% endif %}
+
 <script>
   const sitePrefix = {{ site_prefix | default('', true) | tojson }};
   const deleteButton = document.getElementById('delete_runs_button');
@@ -147,17 +203,21 @@
   const runsSearchClear = document.getElementById('runs_search_clear');
   const runsSearchGo = document.getElementById('runs_search_go');
   const runsDeleteStatus = document.getElementById('runs-delete-status');
+  const runsAdminUserInput = document.getElementById('runs_admin_user_search');
+  const runsAdminApplyScope = document.getElementById('runs_admin_apply_scope');
+  const runsAdminResetScope = document.getElementById('runs_admin_reset_scope');
+  const runsAdminSuggestions = document.getElementById('runs_admin_user_suggestions');
+  const runsAdminScopeStatus = document.getElementById('runs_admin_scope_status');
   const showOwner = {{ show_owner | tojson }};
+  const isAdminRunsViewer = {{ is_admin_runs_viewer | default(false, true) | tojson }};
+  const currentUserAlias = {{ current_user_alias | default('', true) | tojson }};
+  const initialAlias = {{ selected_alias | default('', true) | tojson }};
   const runsSortParam = {{ sort | default('last_modified', true) | tojson }};
   const runsDirectionParam = {{ direction | default('desc', true) | tojson }};
   const runsPerPageDefault = {{ per_page | default(25, true) | tojson }};
-  {% if show_owner %}
-  const runsCatalogUrl = {{ url_for('user.runs_catalog', scope='all') | tojson }};
-  const runsMapDataUrl = {{ url_for('user.runs_map_data', scope='all') | tojson }};
-  {% else %}
   const runsCatalogUrl = {{ url_for('user.runs_catalog') | tojson }};
   const runsMapDataUrl = {{ url_for('user.runs_map_data') | tojson }};
-  {% endif %}
+  const runsUsersUrl = {{ url_for('user.runs_users') | tojson }};
   let runsCatalog = [];
   let runsFiltered = [];
   let runsCatalogLoaded = false;
@@ -166,6 +226,9 @@
   let searchQuery = '';
   let runsMapInitialized = false;
   let runsMapDeck = null;
+  let runsUsers = [];
+  let runsScopeAlias = isAdminRunsViewer ? initialAlias : '';
+  let pendingScopeAlias = runsScopeAlias;
   const deleteTracker = {
     total: 0,
     completed: 0,
@@ -189,6 +252,11 @@
       runsSearchInput.value = searchQuery;
     }
   }
+  const aliasParam = (initialParams.get('alias') || '').trim();
+  if (isAdminRunsViewer && aliasParam) {
+    runsScopeAlias = aliasParam;
+    pendingScopeAlias = aliasParam;
+  }
 
   function buildRunsCatalogUrl() {
     const params = new URLSearchParams();
@@ -198,8 +266,20 @@
     if (runsDirectionParam) {
       params.set('direction', runsDirectionParam);
     }
+    if (isAdminRunsViewer && runsScopeAlias) {
+      params.set('alias', runsScopeAlias);
+    }
     const query = params.toString();
     return query ? `${runsCatalogUrl}?${query}` : runsCatalogUrl;
+  }
+
+  function buildRunsMapDataUrl() {
+    const params = new URLSearchParams();
+    if (isAdminRunsViewer && runsScopeAlias) {
+      params.set('alias', runsScopeAlias);
+    }
+    const query = params.toString();
+    return query ? `${runsMapDataUrl}?${query}` : runsMapDataUrl;
   }
 
   function updateRunsUrl() {
@@ -215,9 +295,48 @@
     if (searchQuery) {
       params.set('q', searchQuery);
     }
+    if (isAdminRunsViewer && runsScopeAlias) {
+      params.set('alias', runsScopeAlias);
+    }
     const query = params.toString();
     const nextUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
     window.history.replaceState(null, '', nextUrl);
+  }
+
+  function syncSortLinksAlias() {
+    if (!isAdminRunsViewer) {
+      return;
+    }
+    const links = document.querySelectorAll('.wc-server-sort');
+    links.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (!href) {
+        return;
+      }
+      try {
+        const parsed = new URL(href, window.location.origin);
+        if (runsScopeAlias) {
+          parsed.searchParams.set('alias', runsScopeAlias);
+        } else {
+          parsed.searchParams.delete('alias');
+        }
+        const normalized = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+        link.setAttribute('href', normalized);
+      } catch (_err) {
+        // Ignore malformed hrefs; server links remain usable.
+      }
+    });
+  }
+
+  function resetRunsMap() {
+    if (runsMapDeck && typeof runsMapDeck.finalize === 'function') {
+      runsMapDeck.finalize();
+    }
+    runsMapDeck = null;
+    runsMapInitialized = false;
+    if (runsMapCanvas) {
+      runsMapCanvas.innerHTML = '';
+    }
   }
 
   function buildSearchIndex(run) {
@@ -540,6 +659,184 @@
     updateRunsUrl();
   }
 
+  function setRunsAdminStatus(message, isError = false) {
+    if (!runsAdminScopeStatus) {
+      return;
+    }
+    runsAdminScopeStatus.textContent = message || '';
+    runsAdminScopeStatus.classList.toggle('wc-text-danger', Boolean(isError));
+  }
+
+  function hideRunsUserSuggestions() {
+    if (!runsAdminSuggestions) {
+      return;
+    }
+    runsAdminSuggestions.hidden = true;
+    runsAdminSuggestions.innerHTML = '';
+  }
+
+  function userSearchIndex(user) {
+    return String(
+      user.search_index
+      || user.searchIndex
+      || [user.name, user.display_name, user.email, user.label].filter(Boolean).join(' ')
+    ).toLowerCase();
+  }
+
+  function userAlias(user) {
+    return String(user.alias || user.id || '').trim();
+  }
+
+  function userLabel(user) {
+    if (!user) {
+      return '';
+    }
+    if (user.label) {
+      return String(user.label);
+    }
+    if (user.name && user.email) {
+      return `${user.name} <${user.email}>`;
+    }
+    return String(user.email || user.name || userAlias(user));
+  }
+
+  function findUserByAlias(alias) {
+    const normalized = String(alias || '').trim();
+    if (!normalized) {
+      return null;
+    }
+    const lowered = normalized.toLowerCase();
+    return runsUsers.find((user) => {
+      const email = String(user.email || '').trim().toLowerCase();
+      return userAlias(user) === normalized || (email && email === lowered);
+    }) || null;
+  }
+
+  function updateRunsScopeStatus() {
+    if (!isAdminRunsViewer) {
+      return;
+    }
+    if (!runsScopeAlias || runsScopeAlias === currentUserAlias) {
+      setRunsAdminStatus('Viewing your runs.');
+      return;
+    }
+    const selectedUser = findUserByAlias(runsScopeAlias);
+    if (selectedUser) {
+      setRunsAdminStatus(`Viewing runs for ${userLabel(selectedUser)}.`);
+    } else {
+      setRunsAdminStatus('Viewing runs for selected user.');
+    }
+  }
+
+  function renderRunsUserSuggestions(rawQuery) {
+    if (!runsAdminSuggestions) {
+      return;
+    }
+    const query = String(rawQuery || '').trim().toLowerCase();
+    if (!query || !runsUsers.length) {
+      hideRunsUserSuggestions();
+      return;
+    }
+
+    const matches = runsUsers
+      .filter((user) => userSearchIndex(user).includes(query))
+      .slice(0, 10);
+
+    if (!matches.length) {
+      hideRunsUserSuggestions();
+      return;
+    }
+
+    runsAdminSuggestions.innerHTML = '';
+    matches.forEach((user) => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'wc-runs-admin-suggestions__item';
+      option.textContent = userLabel(user);
+      option.dataset.alias = userAlias(user);
+      option.setAttribute('role', 'option');
+      option.addEventListener('click', () => {
+        pendingScopeAlias = userAlias(user);
+        if (runsAdminUserInput) {
+          runsAdminUserInput.value = userLabel(user);
+        }
+        if (runsAdminApplyScope) {
+          runsAdminApplyScope.disabled = !pendingScopeAlias;
+        }
+        hideRunsUserSuggestions();
+      });
+      runsAdminSuggestions.appendChild(option);
+    });
+
+    runsAdminSuggestions.hidden = false;
+  }
+
+  async function loadRunsUsers() {
+    if (!isAdminRunsViewer || !runsUsersUrl) {
+      return;
+    }
+    try {
+      const response = await fetch(runsUsersUrl);
+      if (!response.ok) {
+        throw new Error(`User table fetch failed ${response.status}`);
+      }
+      const payload = await response.json();
+      runsUsers = (payload.users || [])
+        .map((user) => ({
+          ...user,
+          alias: userAlias(user),
+          searchIndex: userSearchIndex(user),
+        }))
+        .filter((user) => user.alias);
+
+      if (runsScopeAlias) {
+        const selectedUser = findUserByAlias(runsScopeAlias);
+        if (selectedUser) {
+          pendingScopeAlias = userAlias(selectedUser);
+          if (runsAdminUserInput) {
+            runsAdminUserInput.value = userLabel(selectedUser);
+          }
+          if (runsAdminApplyScope) {
+            runsAdminApplyScope.disabled = false;
+          }
+        } else {
+          runsScopeAlias = '';
+          pendingScopeAlias = '';
+          if (runsAdminUserInput) {
+            runsAdminUserInput.value = '';
+          }
+          if (runsAdminApplyScope) {
+            runsAdminApplyScope.disabled = true;
+          }
+          setRunsAdminStatus('Requested user was not found. Showing your runs.', true);
+        }
+      } else {
+        if (runsAdminApplyScope) {
+          runsAdminApplyScope.disabled = true;
+        }
+      }
+
+      if (!runsAdminScopeStatus || !runsAdminScopeStatus.classList.contains('wc-text-danger')) {
+        updateRunsScopeStatus();
+      }
+    } catch (error) {
+      console.error(error);
+      setRunsAdminStatus('Unable to load user directory.', true);
+    }
+  }
+
+  function reloadRunsForScope() {
+    currentPage = 1;
+    runsCatalogLoaded = false;
+    resetRunsMap();
+    updateRunsScopeStatus();
+    syncSortLinksAlias();
+    loadRunsCatalog();
+    if (runsMapView && !runsMapView.hidden) {
+      initRunsMap();
+    }
+  }
+
   async function loadRunsCatalog() {
     if (!runsCatalogUrl) {
       return;
@@ -547,11 +844,11 @@
     setRunsEmptyMessage('Loading runs...');
     try {
       const response = await fetch(buildRunsCatalogUrl());
-      if (!response.ok) {
-        throw new Error(`Runs fetch failed ${response.status}`);
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || (payload && payload.error)) {
+        throw new Error(payload?.error?.message || `Runs fetch failed ${response.status}`);
       }
-      const payload = await response.json();
-      runsCatalog = (payload.runs || []).map((run) => ({
+      runsCatalog = ((payload && payload.runs) || []).map((run) => ({
         ...run,
         searchIndex: buildSearchIndex(run),
       }));
@@ -560,7 +857,7 @@
     } catch (error) {
       console.error(error);
       runsCatalogLoaded = true;
-      setRunsEmptyMessage('Unable to load runs.');
+      setRunsEmptyMessage(error?.message || 'Unable to load runs.');
       renderPagination();
     }
   }
@@ -771,7 +1068,7 @@
     }
     let payload;
     try {
-      const response = await fetch(runsMapDataUrl);
+      const response = await fetch(buildRunsMapDataUrl());
       if (!response.ok) {
         throw new Error(`Map data fetch failed ${response.status}`);
       }
@@ -887,6 +1184,87 @@
     });
   }
 
+  if (isAdminRunsViewer) {
+    if (runsAdminUserInput) {
+      runsAdminUserInput.addEventListener('input', () => {
+        const typed = runsAdminUserInput.value.trim().toLowerCase();
+        const exactUser = runsUsers.find((user) => {
+          const email = String(user.email || '').trim().toLowerCase();
+          const name = String(user.name || '').trim().toLowerCase();
+          const label = userLabel(user).trim().toLowerCase();
+          return Boolean(typed) && (typed === email || typed === name || typed === label);
+        });
+        if (exactUser) {
+          pendingScopeAlias = userAlias(exactUser);
+          if (runsAdminApplyScope) {
+            runsAdminApplyScope.disabled = false;
+          }
+          hideRunsUserSuggestions();
+          return;
+        }
+        pendingScopeAlias = '';
+        if (runsAdminApplyScope) {
+          runsAdminApplyScope.disabled = true;
+        }
+        renderRunsUserSuggestions(runsAdminUserInput.value);
+      });
+      runsAdminUserInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (runsAdminApplyScope && !runsAdminApplyScope.disabled) {
+            runsAdminApplyScope.click();
+          }
+        }
+        if (event.key === 'Escape') {
+          hideRunsUserSuggestions();
+        }
+      });
+      runsAdminUserInput.addEventListener('blur', () => {
+        window.setTimeout(hideRunsUserSuggestions, 120);
+      });
+    }
+
+    if (runsAdminApplyScope) {
+      runsAdminApplyScope.addEventListener('click', () => {
+        if (!pendingScopeAlias) {
+          return;
+        }
+        runsScopeAlias = pendingScopeAlias;
+        hideRunsUserSuggestions();
+        reloadRunsForScope();
+      });
+    }
+
+    if (runsAdminResetScope) {
+      runsAdminResetScope.addEventListener('click', () => {
+        runsScopeAlias = '';
+        pendingScopeAlias = '';
+        if (runsAdminUserInput) {
+          runsAdminUserInput.value = '';
+        }
+        if (runsAdminApplyScope) {
+          runsAdminApplyScope.disabled = true;
+        }
+        hideRunsUserSuggestions();
+        reloadRunsForScope();
+      });
+    }
+
+    document.addEventListener('click', (event) => {
+      if (!runsAdminSuggestions) {
+        return;
+      }
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+      if (runsAdminSuggestions.contains(target) || (runsAdminUserInput && runsAdminUserInput.contains(target))) {
+        return;
+      }
+      hideRunsUserSuggestions();
+    });
+  }
+
   if (runsTabTable) {
     runsTabTable.addEventListener('click', () => setRunsView('table'));
   }
@@ -903,7 +1281,15 @@
     updateDeleteState();
   }
 
-  loadRunsCatalog();
+  async function initializeRunsPage() {
+    syncSortLinksAlias();
+    if (isAdminRunsViewer) {
+      await loadRunsUsers();
+    }
+    await loadRunsCatalog();
+  }
+
+  initializeRunsPage();
 </script>
 {% endblock %}
 
