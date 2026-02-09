@@ -168,6 +168,7 @@ If validation fails a `JWTDecodeError` is raised.
 ## Profile token issuance
 - Endpoint: `POST /profile/mint-token` (Flask route, authenticated user required).
 - Behavior:
+  - Caller must have at least one role in `Admin`, `PowerUser`, `Dev`, `Root`; others receive `403`.
   - Issues a user JWT (`token_class=user`) with subject set to the current user ID.
   - Includes user claims: `email`, `roles`, `groups`.
   - Sets audiences to `rq-engine` and `query-engine`.

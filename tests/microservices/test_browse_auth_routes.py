@@ -354,6 +354,40 @@ def test_private_browse_uses_bearer_when_cookie_token_revoked(
     assert "shh" in response.text
 
 
+def test_private_browse_prefers_valid_cookie_over_bearer(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-private-cookie-precedence"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.browse.auth as auth_mod
+
+    def _unexpected_bearer_resolution(request):
+        raise AssertionError("bearer fallback should not run when cookie auth succeeds")
+
+    monkeypatch.setattr(auth_mod, "resolve_bearer_context", _unexpected_bearer_resolution)
+
+    cookie_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["Root"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
+
+
 def test_files_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-files-public"
     config = "cfg"
@@ -1106,6 +1140,94 @@ def test_group_routes_require_auth(
         response = client.get(f"/weppcloud/{base}/{identifier}/{suffix}", follow_redirects=False)
 
     assert response.status_code == 401
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_service_token_missing_identifier_scope_is_forbidden(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-no-scope"
+    group_root_root = tmp_path / base
+    _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", **{root_env: str(group_root_root)})
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="service",
+        roles=["User"],
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+    assert "Token missing run scope" in response.text
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_user_token_without_privileged_role_is_forbidden(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-user-role-forbidden"
+    group_root_root = tmp_path / base
+    _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", **{root_env: str(group_root_root)})
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="user",
+        roles=["User"],
+        subject="42",
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+    assert "User token requires Admin, PowerUser, Dev, or Root role" in response.text
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_user_token_with_privileged_role_is_allowed(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-user-role-allowed"
+    group_root_root = tmp_path / base
+    _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", **{root_env: str(group_root_root)})
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="user",
+        roles=["PowerUser"],
+        subject="42",
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])

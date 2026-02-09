@@ -28,6 +28,7 @@ DEFAULT_SITE_PREFIX = "/weppcloud"
 ROOT_ONLY_FILENAMES = frozenset({"exceptions.log", "exception_factory.log"})
 RUN_ALLOWED_TOKEN_CLASSES = frozenset({"session", "user", "service"})
 USER_SERVICE_TOKEN_CLASSES = frozenset({"user", "service"})
+GROUP_USER_TOKEN_ALLOWED_ROLES = frozenset({"admin", "poweruser", "dev", "root"})
 
 
 @dataclass(frozen=True)
@@ -379,6 +380,14 @@ def authorize_group_request(
             require_service_claim=True,
             require_session_claim=False,
         )
+        if context.token_class == "user" and not (
+            context.roles & GROUP_USER_TOKEN_ALLOWED_ROLES
+        ):
+            raise BrowseAuthError(
+                "User token requires Admin, PowerUser, Dev, or Root role",
+                status_code=403,
+                code="forbidden",
+            )
 
         if root_only and not context.is_root:
             raise BrowseAuthError(
@@ -425,6 +434,7 @@ __all__ = [
     "BROWSE_JWT_COOKIE_NAME_ENV",
     "BrowseAuthError",
     "DEFAULT_BROWSE_JWT_COOKIE_NAME",
+    "GROUP_USER_TOKEN_ALLOWED_ROLES",
     "RUN_ALLOWED_TOKEN_CLASSES",
     "USER_SERVICE_TOKEN_CLASSES",
     "authorize_group_request",

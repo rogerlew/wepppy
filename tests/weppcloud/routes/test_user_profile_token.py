@@ -93,7 +93,28 @@ def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
             "client": client,
             "module": user_module,
             "user_id": user_id,
+            "app": app,
+            "db": db,
+            "user_datastore": user_datastore,
+            "user_model": User,
         }
+
+
+def _grant_role(profile_auth_client, role_name: str) -> None:
+    app = profile_auth_client["app"]
+    db = profile_auth_client["db"]
+    user_datastore = profile_auth_client["user_datastore"]
+    user_model = profile_auth_client["user_model"]
+    user_id = profile_auth_client["user_id"]
+
+    with app.app_context():
+        role = user_datastore.find_role(role_name)
+        if role is None:
+            role = user_datastore.create_role(name=role_name)
+        user = db.session.get(user_model, user_id)
+        assert user is not None
+        user_datastore.add_role_to_user(user, role)
+        user_datastore.commit()
 
 
 def test_profile_token_mint_requires_login(profile_auth_client) -> None:
@@ -102,6 +123,24 @@ def test_profile_token_mint_requires_login(profile_auth_client) -> None:
     response = client.post("/profile/mint-token")
 
     assert response.status_code == 401
+
+
+def test_profile_token_mint_requires_privileged_role(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+
+    _configure_jwt_env(monkeypatch, module)
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post("/profile/mint-token")
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert "requires one of these roles" in payload["error"]["message"]
 
 
 def test_profile_token_mint_issues_90_day_user_token(
@@ -113,6 +152,7 @@ def test_profile_token_mint_issues_90_day_user_token(
     user_id = profile_auth_client["user_id"]
 
     _configure_jwt_env(monkeypatch, module)
+    _grant_role(profile_auth_client, "PowerUser")
     client.get(f"/test-login/{user_id}")
 
     response = client.post("/profile/mint-token")
@@ -139,7 +179,7 @@ def test_profile_token_mint_issues_90_day_user_token(
     assert claims["token_class"] == "user"
     assert claims["sub"] == str(user_id)
     assert claims["email"] == "user@example.com"
-    assert claims["roles"] == ["User"]
+    assert set(claims["roles"]) == {"PowerUser", "User"}
     assert claims["groups"] == []
     assert claims["exp"] - claims["iat"] == 90 * 24 * 60 * 60
 
@@ -154,6 +194,7 @@ def test_profile_token_mint_errors_without_jwt_secret(
 
     monkeypatch.delenv("WEPP_AUTH_JWT_SECRET", raising=False)
     monkeypatch.delenv("WEPP_AUTH_JWT_SECRETS", raising=False)
+    _grant_role(profile_auth_client, "PowerUser")
     module.auth_tokens.get_jwt_config.cache_clear()
     client.get(f"/test-login/{user_id}")
 
@@ -162,3 +203,54 @@ def test_profile_token_mint_errors_without_jwt_secret(
     assert response.status_code == 500
     payload = response.get_json()
     assert "WEPP_AUTH_JWT_SECRET must be set to issue tokens" in payload["error"]["message"]
+
+
+def test_profile_hides_token_controls_without_privileged_role(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    captured_context: dict = {}
+
+    def _fake_render_template(_name: str, **context):
+        captured_context.update(context)
+        if context.get("can_mint_profile_token"):
+            return "data-profile-token-root"
+        return "token-controls-hidden"
+
+    monkeypatch.setattr(module, "render_template", _fake_render_template)
+
+    client.get(f"/test-login/{user_id}")
+    response = client.get("/profile")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "token-controls-hidden"
+    assert captured_context.get("can_mint_profile_token") is False
+
+
+def test_profile_shows_token_controls_for_privileged_role(
+    profile_auth_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    captured_context: dict = {}
+
+    def _fake_render_template(_name: str, **context):
+        captured_context.update(context)
+        if context.get("can_mint_profile_token"):
+            return "data-profile-token-root"
+        return "token-controls-hidden"
+
+    monkeypatch.setattr(module, "render_template", _fake_render_template)
+
+    _grant_role(profile_auth_client, "Dev")
+    client.get(f"/test-login/{user_id}")
+    response = client.get("/profile")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "data-profile-token-root"
+    assert captured_context.get("can_mint_profile_token") is True

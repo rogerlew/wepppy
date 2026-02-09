@@ -58,6 +58,10 @@ PROFILE_TOKEN_SCOPES = (
     'rq:export',
 )
 PROFILE_TOKEN_AUDIENCES = ('rq-engine', 'query-engine')
+PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES = ('Admin', 'PowerUser', 'Dev', 'Root')
+PROFILE_USER_TOKEN_MINT_ALLOWED_ROLE_SET = frozenset(
+    role.casefold() for role in PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES
+)
 
 
 class SimplePagination:
@@ -322,6 +326,20 @@ def _current_user_groups() -> List[str]:
     return _claim_names(groups)
 
 
+def _current_user_roles() -> List[str]:
+    roles = getattr(current_user, 'roles', None)
+    return _claim_names(roles)
+
+
+def _can_mint_profile_user_token(role_names: Optional[List[str]] = None) -> bool:
+    if role_names is None:
+        role_names = _current_user_roles()
+    return any(
+        role.casefold() in PROFILE_USER_TOKEN_MINT_ALLOWED_ROLE_SET
+        for role in role_names
+    )
+
+
 def _is_admin_runs_viewer() -> bool:
     return bool(current_user.has_role('Admin') or current_user.has_role('Root'))
 
@@ -359,7 +377,12 @@ def _resolve_runs_user_id(raw_alias: Optional[str]) -> tuple[Optional[int], Opti
 @login_required
 def profile():
     try:
-        return render_template('user/profile.html', user=current_user)
+        role_names = _current_user_roles()
+        return render_template(
+            'user/profile.html',
+            user=current_user,
+            can_mint_profile_token=_can_mint_profile_user_token(role_names),
+        )
     except:
         return exception_factory()
 
@@ -376,7 +399,13 @@ def mint_profile_token():
         if not email:
             return error_factory('Current user is missing an email address.', status_code=400)
 
-        role_names = _claim_names(getattr(current_user, 'roles', []))
+        role_names = _current_user_roles()
+        if not _can_mint_profile_user_token(role_names):
+            allowed_roles = ', '.join(PROFILE_USER_TOKEN_MINT_ALLOWED_ROLES)
+            return error_factory(
+                f'Minting user tokens requires one of these roles: {allowed_roles}.',
+                status_code=403,
+            )
         group_names = _current_user_groups()
         result = auth_tokens.issue_token(
             str(user_id),

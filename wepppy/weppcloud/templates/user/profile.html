@@ -104,6 +104,7 @@ User Profile
     {% endif %}
   </section>
 
+  {% if can_mint_profile_token %}
   <section
     class="wc-profile-token"
     data-profile-token-root
@@ -300,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+  {% endif %}
 
   {% if user.has_role('Dev') %}
   <section class="wc-profile-dev">
