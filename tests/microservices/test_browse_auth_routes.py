@@ -181,6 +181,31 @@ def test_browse_private_run_redirects_without_token(tmp_path: Path, load_secure_
     assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
 
 
+def test_private_browse_invalid_cookie_without_bearer_still_redirects(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private-invalid-cookie"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "invalid-token")
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    parsed = urlparse(response.headers["location"])
+    assert parsed.path == f"/weppcloud/runs/{runid}/"
+    next_value = parse_qs(parsed.query).get("next", [""])[0]
+    assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
+
+
 def test_private_browse_falls_back_to_bearer_when_cookie_invalid(
     tmp_path: Path,
     load_secure_browse,
@@ -215,6 +240,27 @@ def test_files_requires_auth_even_for_public_run(tmp_path: Path, load_secure_bro
     app = browse.create_app()
 
     with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["code"] == "unauthorized"
+
+
+def test_files_public_run_invalid_cookie_still_requires_auth(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-files-invalid-cookie"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "invalid-token")
         response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
 
     assert response.status_code == 401
@@ -411,6 +457,38 @@ def test_group_routes_require_auth(
 
     with TestClient(app) as client:
         response = client.get(f"/weppcloud/{base}/{identifier}/{suffix}", follow_redirects=False)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_routes_ignore_invalid_cookie_and_still_require_auth(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-invalid-cookie"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{
+            root_env: str(group_root_root),
+            "DTALE_SERVICE_URL": "http://dtale-service",
+        },
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "invalid-token")
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            follow_redirects=False,
+        )
 
     assert response.status_code == 401
 
