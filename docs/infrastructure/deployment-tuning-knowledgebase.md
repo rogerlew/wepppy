@@ -64,6 +64,22 @@ Interpretation:
 | Knob | Location | Status | When to tune |
 | --- | --- | --- | --- |
 | `POSTGRES_IDLE_IN_TX_TIMEOUT` | `wepppy/weppcloud/configuration.py` | Available, historically caution-flagged | If idle-in-transaction reappears; validate OAuth/CAP flows after enabling. |
+| `SECRET_KEY` / `SECURITY_PASSWORD_SALT` raw-value parity | `docker/.env` + live container env (`docker inspect`) | Required invariant | Any login/session-cookie failures, especially rq-engine `session-token` 401s. |
+
+Auth secret invariant:
+- `weppcloud` and `rq-engine` must run with identical raw `SECRET_KEY` and
+  `SECURITY_PASSWORD_SALT` values.
+- Do not alter literal single `$` characters inside existing secret values.
+- Post-deploy check:
+
+```bash
+for c in docker-weppcloud-1 docker-rq-engine-1; do
+  s=$(docker inspect "$c" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^SECRET_KEY=//p')
+  printf '%s len=%s sha16=%s\n' "$c" "${#s}" "$(printf %s "$s" | sha256sum | cut -c1-16)"
+done
+```
+
+Expected: identical length/hash across both containers.
 
 ### Run Storage / NFS Lifecycle
 | Mechanism | Location | Current behavior | Tuning/Follow-up |
@@ -90,6 +106,7 @@ Operational note:
 | --- | --- | --- | --- |
 | Caddy `status=502`, `msg=\"EOF\"` on `/rq-engine/create/` with ~37-61s durations | `rq-engine` workers | Upstream worker death during blocking request path | Correlate Caddy timestamps with `docker-rq-engine` `Child process [...] died` lines; verify deployed `project_routes.py` version. |
 | Caddy `dial tcp ...:8042: connect: connection refused` | `rq-engine` availability | Service restart window or crash-loop | `docker ps`, recent container restart reason, parent/child start logs. |
+| `POST /rq-engine/api/runs/<runid>/<config>/session-token` returns `401 Invalid session cookie` while Redis session key exists | Auth/session boundary | `SECRET_KEY` mismatch between `weppcloud` and `rq-engine` (often from secret-value drift around `$` characters) | Compare `SECRET_KEY` length/hash between containers via `docker inspect`; ensure both services were recreated from the same env values. |
 | Rising `502` on browse/download with crawler user agents | Edge/capacity | Aggressive bot traffic | Apply user-agent blocks/rate controls from resource-constraints package; monitor status delta. |
 | Many open log FDs per `weppcloud` worker + DB `idle in transaction` | App/DB | Non-detached NoDb loading on list/render paths, delayed session closure | Confirm detached-load code path and query closure behavior from 2026-01 hardening package. |
 

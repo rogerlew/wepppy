@@ -262,7 +262,43 @@ EOF
 chmod 600 .env
 ```
 
-**2. Build Static Assets**
+**2. Critical Secret Handling (`$` Characters)**
+
+`SECRET_KEY` and `SECURITY_PASSWORD_SALT` are authentication-critical values. If
+their raw bytes change, logins and session-cookie validation can fail.
+
+Rules:
+- Keep literal single `$` characters in the actual secret value.
+- Do not "escape" by changing a real secret value from `$` to `$$`.
+- Do not hand-edit these values during troubleshooting unless you are rotating
+  secrets intentionally across all auth services at once.
+
+Bad example (changes secret bytes):
+
+```env
+SECRET_KEY=abc$$def
+```
+
+Good example (original literal value preserved):
+
+```env
+SECRET_KEY=abc$def
+```
+
+After any deploy/recreate, verify parity between `weppcloud` and `rq-engine`:
+
+```bash
+for c in docker-weppcloud-1 docker-rq-engine-1; do
+  s=$(docker inspect "$c" --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^SECRET_KEY=//p')
+  printf '%s len=%s sha16=%s\n' "$c" "${#s}" "$(printf %s "$s" | sha256sum | cut -c1-16)"
+done
+```
+
+Expected: both containers report identical length and hash. If they differ,
+session-token refresh (`/rq-engine/api/runs/.../session-token`) can return
+`401 Invalid session cookie`.
+
+**3. Build Static Assets**
 
 ⚠️ **CRITICAL:** Production uses bind mounts for static files. You MUST build assets on the host before deployment.
 
@@ -294,7 +330,7 @@ ls -la /workdir/wepppy/wepppy/weppcloud/static/vendor/leaflet/leaflet.js
 
 **Expected output:** All vendor directories (bootstrap, bootstrap-toc, datatables, jquery, leaflet, purecss, spin) should exist in `wepppy/weppcloud/static/vendor/`.
 
-**3. Verify Data Directories**
+**4. Verify Data Directories**
 
 Production requires access to geodata and run storage:
 
