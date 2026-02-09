@@ -1,3 +1,4 @@
+import contextlib
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -226,3 +227,363 @@ def test_build_subcatchments_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> No
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+
+
+def test_build_subcatchments_batch_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "batch"
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
+            json={"clip_hillslopes": True},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set subcatchment inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_fetch_dem_batch_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "batch"
+        delineation_backend_is_wbt = False
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield self
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    payload = {
+        "map_center": [-117.52, 46.88],
+        "map_zoom": 13,
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+            json=payload,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set watershed inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_fetch_dem_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = ""
+        delineation_backend_is_wbt = False
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield self
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    payload = {
+        "map_center": [-117.52, 46.88],
+        "map_zoom": 13,
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/fetch-dem-and-build-channels",
+            json=payload,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set watershed inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_fetch_dem_runid_base_suffix_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for runid ;;_base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = ""
+        delineation_backend_is_wbt = False
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield self
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    payload = {
+        "map_center": [-117.52, 46.88],
+        "map_zoom": 13,
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg/fetch-dem-and-build-channels",
+            json=payload,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set watershed inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_fetch_dem_returns_400_for_minimum_channel_length_exception(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            raise watershed_routes.MinimumChannelLengthTooShortError()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "default"
+        delineation_backend_is_wbt = False
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    payload = {
+        "map_center": [-117.52, 46.88],
+        "map_zoom": 13,
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+            json=payload,
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "MinimumChannelLengthTooShortError"
+    assert "MINIMUM CHANNEL LENGTH" in payload["error"]["details"]
+
+
+def test_build_subcatchments_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = ""
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/build-subcatchments-and-abstract-watershed",
+            json={"clip_hillslopes": True},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set subcatchment inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_build_subcatchments_returns_400_for_boundary_touches_edge_exception(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            raise watershed_routes.WatershedBoundaryTouchesEdgeError()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "default"
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: DummyWatershed(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
+            json={"clip_hillslopes": True},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "WatershedBoundaryTouchesEdgeError"
+    assert "WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM" in payload["error"]["details"]

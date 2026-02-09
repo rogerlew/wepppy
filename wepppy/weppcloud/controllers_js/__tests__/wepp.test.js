@@ -149,6 +149,23 @@ describe("Wepp controller", () => {
         expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
     });
 
+    test("run handles message-only responses without undefined job id", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { message: "Set wepp inputs for batch processing" } });
+        const completed = jest.fn();
+        wepp.events.on("wepp:run:completed", completed);
+
+        const runButton = document.querySelector('[data-wepp-action="run"]');
+        runButton.dispatchEvent(new Event("click", { bubbles: true }));
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), null);
+        expect(document.getElementById("status").innerHTML).toContain("Set wepp inputs for batch processing");
+        expect(document.getElementById("status").innerHTML).not.toContain("undefined");
+        expect(completed).toHaveBeenCalledWith(expect.objectContaining({ job_id: null }));
+    });
+
     test("runWatershed submits JSON payload and sets job id", async () => {
         const pollCompletionValues = [];
         controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
@@ -169,6 +186,38 @@ describe("Wepp controller", () => {
         expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
     });
 
+    test("runWatershed handles message-only responses without undefined job id", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { message: "Set wepp inputs for batch processing" } });
+        const completed = jest.fn();
+        wepp.events.on("wepp:run_watershed:completed", completed);
+
+        wepp.runWatershed();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), null);
+        expect(document.getElementById("status").innerHTML).toContain("Set wepp inputs for batch processing");
+        expect(document.getElementById("status").innerHTML).not.toContain("undefined");
+        expect(completed).toHaveBeenCalledWith(expect.objectContaining({ job_id: null }));
+    });
+
+    test("runWatershed emits watershed completion event after queued job completes", async () => {
+        const completed = jest.fn();
+        const runCompleted = jest.fn();
+        wepp.events.on("wepp:run_watershed:completed", completed);
+        wepp.events.on("wepp:run:completed", runCompleted);
+
+        wepp.runWatershed();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED", { source: "status" });
+
+        expect(completed).toHaveBeenCalledWith(expect.objectContaining({ source: "status" }));
+        expect(runCompleted).not.toHaveBeenCalled();
+    });
+
     test("runSwat submits JSON payload and sets job id", async () => {
         const pollCompletionValues = [];
         controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
@@ -187,6 +236,58 @@ describe("Wepp controller", () => {
         );
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), "job-1");
         expect(pollCompletionValues).toEqual(["SWAT_RUN_TASK_COMPLETED"]);
+    });
+
+    test("runNoPrep handles message-only responses without undefined job id", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { message: "Set wepp inputs for batch processing" } });
+
+        wepp.runNoPrep();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), null);
+        expect(document.getElementById("status").innerHTML).toContain("Set wepp inputs for batch processing");
+        expect(document.getElementById("status").innerHTML).not.toContain("undefined");
+    });
+
+    test("runWatershedNoPrep handles message-only responses without undefined job id", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { message: "Set wepp inputs for batch processing" } });
+
+        wepp.runWatershedNoPrep();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), null);
+        expect(document.getElementById("status").innerHTML).toContain("Set wepp inputs for batch processing");
+        expect(document.getElementById("status").innerHTML).not.toContain("undefined");
+    });
+
+    test("runSwatNoPrep handles message-only responses without undefined job id", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { message: "Set swat inputs for batch processing" } });
+
+        wepp.runSwatNoPrep();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), null);
+        expect(document.getElementById("status").innerHTML).toContain("Set swat inputs for batch processing");
+        expect(document.getElementById("status").innerHTML).not.toContain("undefined");
+    });
+
+    test("runSwat handles message-only responses without undefined job id", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { message: "Set swat inputs for batch processing" } });
+
+        wepp.runSwat();
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(expect.any(Object), null);
+        expect(document.getElementById("status").innerHTML).toContain("Set swat inputs for batch processing");
+        expect(document.getElementById("status").innerHTML).not.toContain("undefined");
     });
 
     test("run emits lifecycle events", async () => {
@@ -327,5 +428,22 @@ describe("Wepp controller", () => {
 
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "wepp-job");
         expect(reportSpy).toHaveBeenCalled();
+    });
+
+    test("bootstrap preserves watershed completion event namespace", () => {
+        const completed = jest.fn();
+        const runCompleted = jest.fn();
+        wepp.events.on("wepp:run_watershed:completed", completed);
+        wepp.events.on("wepp:run:completed", runCompleted);
+
+        wepp.bootstrap({
+            jobIds: { run_wepp_watershed_rq: "wepp-watershed-job" },
+            data: { wepp: { hasRun: false } }
+        });
+
+        wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED", { source: "status" });
+
+        expect(completed).toHaveBeenCalledWith(expect.objectContaining({ source: "status" }));
+        expect(runCompleted).not.toHaveBeenCalled();
     });
 });

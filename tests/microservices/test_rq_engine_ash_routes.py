@@ -49,8 +49,11 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(ash_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
 
 
-def _stub_ash(monkeypatch: pytest.MonkeyPatch) -> None:
+def _stub_ash(monkeypatch: pytest.MonkeyPatch, *, run_group: str = "") -> None:
     class DummyAsh:
+        run_group = ""
+        _ash_load_fn = None
+
         def parse_inputs(self, payload) -> None:
             return None
 
@@ -58,6 +61,11 @@ def _stub_ash(monkeypatch: pytest.MonkeyPatch) -> None:
         def locked(self):
             yield self
 
+        @property
+        def ash_load_fn(self):
+            return self._ash_load_fn
+
+    DummyAsh.run_group = run_group
     monkeypatch.setattr(ash_routes.Ash, "getInstance", lambda wd: DummyAsh())
 
 
@@ -96,3 +104,174 @@ def test_run_ash_requires_depth_mode(monkeypatch: pytest.MonkeyPatch) -> None:
         payload["error"]["message"]
         == "ash_depth_mode is required (0=loads, 1=depths, 2=maps)"
     )
+
+
+def test_run_ash_batch_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_ash(monkeypatch, run_group="batch")
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(ash_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(ash_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            json={
+                "ash_depth_mode": 1,
+                "ini_black_depth": 1.2,
+                "ini_white_depth": 2.3,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set ash inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_ash_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_ash(monkeypatch, run_group="")
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(ash_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(ash_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/run-ash",
+            json={
+                "ash_depth_mode": 1,
+                "ini_black_depth": 1.2,
+                "ini_white_depth": 2.3,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set ash inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_ash_runid_base_suffix_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_ash(monkeypatch, run_group="")
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for runid ;;_base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(ash_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(ash_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg/run-ash",
+            json={
+                "ash_depth_mode": 1,
+                "ini_black_depth": 1.2,
+                "ini_white_depth": 2.3,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set ash inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_ash_batch_multipart_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_ash(monkeypatch, run_group="batch")
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(ash_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(ash_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            data={
+                "ash_depth_mode": "2",
+                "ini_black_depth": "1.2",
+                "ini_white_depth": "2.3",
+            },
+            files={
+                "input_upload_ash_load": (
+                    "ash-load.tif",
+                    b"fake-tif-bytes",
+                    "image/tiff",
+                )
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set ash inputs for batch processing"
+    assert queue_called["called"] is False

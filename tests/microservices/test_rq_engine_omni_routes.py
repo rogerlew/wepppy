@@ -48,8 +48,10 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(omni_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
 
 
-def _stub_omni(monkeypatch: pytest.MonkeyPatch) -> None:
+def _stub_omni(monkeypatch: pytest.MonkeyPatch, *, run_group: str = "") -> None:
     class DummyOmni:
+        run_group = ""
+
         def parse_scenarios(self, scenarios) -> None:
             return None
 
@@ -59,6 +61,7 @@ def _stub_omni(monkeypatch: pytest.MonkeyPatch) -> None:
         def build_contrasts(self, *args, **kwargs) -> None:
             return None
 
+    DummyOmni.run_group = run_group
     monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
 
 
@@ -109,6 +112,196 @@ def test_run_omni_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["job_id"] == "job-11"
     assert payload["message"] == "Job enqueued."
     assert payload["status_url"] == "/rq-engine/api/jobstatus/job-11"
+
+
+def test_run_omni_batch_returns_input_message_without_enqueue(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch, run_group="batch")
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_omni_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch, run_group="")
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_omni_runid_base_suffix_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch, run_group="")
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for runid ;;_base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg/run-omni",
+            json={"scenarios": [{"type": "uniform_low"}]},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_omni_batch_without_scenarios_returns_input_message(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch, run_group="batch")
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            json={},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_omni_batch_multipart_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_omni(monkeypatch, run_group="batch")
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni",
+            data={"scenarios": '[{"type":"sbs_map"}]'},
+            files={
+                "scenarios[0][sbs_file]": (
+                    "severity.tif",
+                    b"fake-tif-bytes",
+                    "image/tiff",
+                )
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
 
 
 def test_run_omni_requires_scenarios(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -421,6 +614,112 @@ def test_run_omni_contrasts_passes_geojson_upload_path(monkeypatch: pytest.Monke
     assert captured["build"]["contrast_pairs"] == [
         {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
     ]
+
+
+def test_run_omni_contrasts_batch_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+    build_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyOmni:
+        run_group = "batch"
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            build_called["called"] = True
+            raise AssertionError("build_contrasts should not run for batch input updates")
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "cumulative",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
+    assert build_called["called"] is False
+
+
+def test_run_omni_contrasts_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(omni_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+    build_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyOmni:
+        run_group = ""
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def build_contrasts(self, *args, **kwargs) -> None:
+            build_called["called"] = True
+            raise AssertionError("build_contrasts should not run for _base input updates")
+
+    monkeypatch.setattr(omni_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(omni_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(omni_routes.Omni, "getInstance", lambda wd: DummyOmni())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/run-omni-contrasts",
+            json={
+                "omni_contrast_selection_mode": "cumulative",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set omni inputs for batch processing"
+    assert queue_called["called"] is False
+    assert build_called["called"] is False
 
 
 def test_run_omni_contrasts_dry_run_cumulative(monkeypatch: pytest.MonkeyPatch) -> None:

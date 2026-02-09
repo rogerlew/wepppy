@@ -49,7 +49,12 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(wepp_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
 
 
-def _stub_wepp_stack(monkeypatch: pytest.MonkeyPatch, *, parse_error: bool = False) -> None:
+def _stub_wepp_stack(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    parse_error: bool = False,
+    run_group: str = "",
+) -> None:
     class DummyRon:
         mods = []
 
@@ -63,6 +68,7 @@ def _stub_wepp_stack(monkeypatch: pytest.MonkeyPatch, *, parse_error: bool = Fal
         clip_hillslope_length = None
 
     class DummyWepp:
+        run_group = ""
         dss_excluded_channel_orders = [1, 2]
 
         def parse_inputs(self, payload) -> None:
@@ -73,6 +79,8 @@ def _stub_wepp_stack(monkeypatch: pytest.MonkeyPatch, *, parse_error: bool = Fal
         @contextlib.contextmanager
         def locked(self):
             yield self
+
+    DummyWepp.run_group = run_group
 
     monkeypatch.setattr(wepp_routes.Soils, "getInstance", lambda wd: DummySoils())
     monkeypatch.setattr(wepp_routes.Watershed, "getInstance", lambda wd: DummyWatershed())
@@ -125,3 +133,191 @@ def test_run_wepp_watershed_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-88"
+
+
+def test_run_wepp_batch_returns_input_message_without_enqueue(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, run_group="batch")
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"clip_soils": True, "clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set wepp inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_wepp_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, run_group="")
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/run-wepp",
+            json={"clip_soils": True, "clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set wepp inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_wepp_runid_base_suffix_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, run_group="")
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for runid ;;_base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg/run-wepp",
+            json={"clip_soils": True, "clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set wepp inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_wepp_watershed_batch_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, run_group="batch")
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp-watershed",
+            json={"clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set wepp inputs for batch processing"
+    assert queue_called["called"] is False
+
+
+def test_run_wepp_watershed_base_project_context_returns_input_message_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, run_group="")
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for _base runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/_base/run-wepp-watershed",
+            json={"clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set wepp inputs for batch processing"
+    assert queue_called["called"] is False
