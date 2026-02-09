@@ -10,7 +10,7 @@ import threading
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from wepppy.nodb.base import NoDbAlreadyLockedError
+from wepppy.nodb.base import NoDbAlreadyLockedError, clear_locks
 from wepppy.nodb.core.climate import Climate
 from tests.nodb.lock_contention_utils import LockContentionSimulator, short_lock_ttl, ensure_climate_stub
 
@@ -18,8 +18,15 @@ from tests.nodb.lock_contention_utils import LockContentionSimulator, short_lock
 @pytest.fixture
 def climate_wd(tmp_path):
     """Create a working directory with minimal climate setup."""
-    wd = str(tmp_path / "climate_test")
+    wd = str(tmp_path)
     Path(wd).mkdir(parents=True, exist_ok=True)
+    runid = Path(wd).name
+
+    # Keep this fixture isolated from stale Redis lock keys left by prior runs.
+    try:
+        clear_locks(runid)
+    except Exception:
+        pass
     
     # Create minimal required files
     config_path = Path(wd) / "test.cfg"

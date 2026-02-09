@@ -7,6 +7,7 @@ import pytest
 pytest.importorskip("pandas")
 pytest.importorskip("pyarrow")
 
+from wepppy.nodb.base import clear_locks, redis_lock_client
 from wepppy.nodb.mods.observed import Observed
 
 pytestmark = [pytest.mark.nodb, pytest.mark.slow]
@@ -75,11 +76,19 @@ def _skip_if_missing_inputs() -> None:
         pytest.skip("Observed regression inputs missing H*.wat.dat outputs.")
 
 
+def _clear_observed_lock_state() -> None:
+    if redis_lock_client is None:
+        return
+    clear_locks(RUN_DIR.name, pup_relpath="observed.nodb")
+
+
 @pytest.fixture()
 def observed_run() -> None:
     _skip_if_missing_inputs()
     Observed.cleanup_all_instances()
+    _clear_observed_lock_state()
     yield
+    _clear_observed_lock_state()
     Observed.cleanup_all_instances()
 
 
