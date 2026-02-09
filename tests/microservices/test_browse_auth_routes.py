@@ -140,6 +140,26 @@ def test_browse_allows_public_run_without_token(tmp_path: Path, load_secure_brow
     assert "demo.txt" in response.text
 
 
+def test_public_browse_ignores_invalid_cookie_without_bearer(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-public-cookie"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "not-a-jwt")
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/")
+
+    assert response.status_code == 200
+    assert "demo.txt" in response.text
+
+
 def test_browse_private_run_redirects_without_token(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-private"
     config = "cfg"
@@ -159,6 +179,30 @@ def test_browse_private_run_redirects_without_token(tmp_path: Path, load_secure_
     assert parsed.path == f"/weppcloud/runs/{runid}/"
     next_value = parse_qs(parsed.query).get("next", [""])[0]
     assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
+
+
+def test_private_browse_falls_back_to_bearer_when_cookie_invalid(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private-bearer-fallback"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+    token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "expired-or-invalid")
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
 
 
 def test_files_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:
@@ -220,6 +264,46 @@ def test_private_download_redirects_only_for_navigation(tmp_path: Path, load_sec
 
     assert html_response.status_code == 302
     assert api_response.status_code == 401
+
+
+def test_aria2c_private_run_returns_401_without_redirect(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-aria2c-private"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "report.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/aria2c.spec",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 401
+    assert "location" not in {key.lower() for key in response.headers}
+
+
+def test_aria2c_public_run_allows_anonymous_access(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-aria2c-public"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "report.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/aria2c.spec")
+
+    assert response.status_code == 200
+    assert "report.txt" in response.text
 
 
 def test_private_gdalinfo_returns_401_without_redirect(tmp_path: Path, load_secure_browse) -> None:

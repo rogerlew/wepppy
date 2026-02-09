@@ -220,23 +220,25 @@ def _context_from_claims(claims: Mapping[str, Any]) -> AuthContext:
 
 def resolve_auth_context(request: StarletteRequest) -> AuthContext:
     cookie_token = request.cookies.get(browse_jwt_cookie_name())
-    failures: list[BrowseAuthError] = []
+    cookie_failure: BrowseAuthError | None = None
 
     if cookie_token:
         try:
             return _context_from_claims(_decode_token(cookie_token))
         except BrowseAuthError as exc:
-            failures.append(exc)
+            cookie_failure = exc
 
     bearer_token = _extract_bearer_token(request)
     if bearer_token:
         try:
             return _context_from_claims(_decode_token(bearer_token))
-        except BrowseAuthError as exc:
-            failures.append(exc)
+        except BrowseAuthError:
+            raise
 
-    if failures:
-        raise failures[-1]
+    # Treat an invalid/stale cookie as anonymous when no bearer token is provided.
+    # Private endpoints still reject anonymous callers; public browse remains accessible.
+    if cookie_failure is not None:
+        return AuthContext(claims=None, token_class=None, roles=frozenset())
 
     return AuthContext(claims=None, token_class=None, roles=frozenset())
 
