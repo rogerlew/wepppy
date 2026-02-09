@@ -3,6 +3,7 @@ package config
 import (
 	"log/slog"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -151,6 +152,23 @@ func TestLoadStatusRedisURLInjectsPassword(t *testing.T) {
 
 	if cfg.RedisURL != "redis://:sekret@redis:6379/2" {
 		t.Fatalf("RedisURL = %s, want redis://:sekret@redis:6379/2", cfg.RedisURL)
+	}
+}
+
+func TestStringRedactsRedisPassword(t *testing.T) {
+	cfg := Config{
+		ListenAddr:   defaultListenAddr,
+		RedisURL:     "redis://:sekret@redis:6379/2",
+		PingInterval: defaultPingInterval,
+		PongTimeout:  defaultPongTimeout,
+	}
+
+	rendered := cfg.String()
+	if strings.Contains(rendered, "sekret") {
+		t.Fatalf("Config.String() leaked redis password: %s", rendered)
+	}
+	if !strings.Contains(rendered, "redis://:redacted@redis:6379/2") {
+		t.Fatalf("Config.String() did not include redacted redis URL: %s", rendered)
 	}
 }
 

@@ -202,6 +202,18 @@ func parseLogLevel(raw string) slog.Level {
 	}
 }
 
+func redactRedisURL(raw string) string {
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.User == nil {
+		return raw
+	}
+	if _, hasPassword := parsed.User.Password(); !hasPassword {
+		return raw
+	}
+	parsed.User = url.UserPassword(parsed.User.Username(), "redacted")
+	return parsed.String()
+}
+
 func (c Config) String() string {
 	origins := "any"
 	if len(c.AllowedOrigins) > 0 {
@@ -209,7 +221,7 @@ func (c Config) String() string {
 	}
 	return fmt.Sprintf("listen=%s redis=%s ping=%s pong=%s metrics=%t origins=%s",
 		c.ListenAddr,
-		c.RedisURL,
+		redactRedisURL(c.RedisURL),
 		c.PingInterval,
 		c.PongTimeout,
 		c.MetricsEnabled,

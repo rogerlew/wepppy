@@ -158,6 +158,23 @@ func TestLoadPreflightRedisURLInjectsPassword(t *testing.T) {
 	}
 }
 
+func TestStringRedactsRedisPassword(t *testing.T) {
+	cfg := Config{
+		ListenAddr:   defaultListenAddr,
+		RedisURL:     "redis://:sekret@redis:6379/0",
+		PingInterval: defaultPingInterval,
+		PongTimeout:  defaultPongTimeout,
+	}
+
+	rendered := cfg.String()
+	if strings.Contains(rendered, "sekret") {
+		t.Fatalf("Config.String() leaked redis password: %s", rendered)
+	}
+	if !strings.Contains(rendered, "redis://:redacted@redis:6379/0") {
+		t.Fatalf("Config.String() did not include redacted redis URL: %s", rendered)
+	}
+}
+
 func clearPreflightEnv(t *testing.T) {
 	t.Helper()
 	for _, kv := range os.Environ() {
