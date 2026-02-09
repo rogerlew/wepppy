@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
@@ -30,6 +31,8 @@ KNOWN_FILE_KEYS: Iterable[str] = (
     "input_files",
     "upload_files",
 )
+
+_REDACTED = "[redacted]"
 
 
 class ProfileRecorder:
@@ -58,7 +61,7 @@ class ProfileRecorder:
             user: Optional Flask user object; metadata is copied when authenticated.
             assembler_override: Force-enable/disable assembler handling when set.
         """
-        record = dict(event)
+        record = self._sanitize_event(dict(event))
         record.setdefault("received_at", datetime.now(timezone.utc).isoformat())
 
         if user and getattr(user, "is_authenticated", False):
@@ -90,6 +93,133 @@ class ProfileRecorder:
                 )
             except Exception as exc:
                 LOGGER.debug("Profile assembler failed for event %s: %s", run_id, exc)
+
+    def _sanitize_event(self, event: EventPayload) -> EventPayload:
+        """Return a recorder payload with sensitive fields removed/redacted."""
+        sanitized = self._redact_sensitive_fields(event)
+        request_meta = sanitized.get("requestMeta")
+        if isinstance(request_meta, dict):
+            sanitized["requestMeta"] = self._sanitize_request_meta(dict(request_meta))
+        return sanitized
+
+    def _sanitize_request_meta(self, request_meta: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize request metadata before it is persisted."""
+        body_capture_allowed = self.config.allow_body_values
+        sanitized = dict(request_meta)
+
+        if "jsonPayload" in sanitized:
+            json_keys = self._extract_json_keys(sanitized.get("jsonPayload"))
+            if json_keys:
+                sanitized["jsonKeys"] = self._merge_key_lists(sanitized.get("jsonKeys"), json_keys)
+            if not body_capture_allowed:
+                sanitized.pop("jsonPayload", None)
+
+        form_values = sanitized.get("formValues")
+        if isinstance(form_values, dict):
+            form_keys = list(form_values.keys())
+            sanitized["formKeys"] = self._merge_key_lists(sanitized.get("formKeys"), form_keys)
+            if body_capture_allowed:
+                sanitized["formValues"] = self._redact_sensitive_fields(form_values)
+            else:
+                sanitized.pop("formValues", None)
+        elif not body_capture_allowed:
+            sanitized.pop("formValues", None)
+
+        if not body_capture_allowed:
+            sanitized.pop("bodyPreview", None)
+
+        if body_capture_allowed:
+            json_payload = sanitized.get("jsonPayload")
+            if isinstance(json_payload, str):
+                redacted_payload = self._redact_json_payload(json_payload)
+                if redacted_payload is None:
+                    sanitized.pop("jsonPayload", None)
+                else:
+                    sanitized["jsonPayload"] = redacted_payload
+
+        return self._redact_sensitive_fields(sanitized)
+
+    @classmethod
+    def _extract_json_keys(cls, payload: Any) -> list[str]:
+        """Return top-level JSON keys when the payload is object-like."""
+        parsed = payload
+        if isinstance(payload, str):
+            try:
+                parsed = json.loads(payload)
+            except Exception:
+                return []
+        if isinstance(parsed, dict):
+            return [str(key) for key in parsed.keys()]
+        return []
+
+    @classmethod
+    def _merge_key_lists(cls, existing: Any, additional: Iterable[str]) -> list[str]:
+        """Merge key lists while preserving insertion order."""
+        merged: list[str] = []
+
+        def _append(key: Any) -> None:
+            if not isinstance(key, str):
+                return
+            if key not in merged:
+                merged.append(key)
+
+        if isinstance(existing, list):
+            for key in existing:
+                _append(key)
+        for key in additional:
+            _append(key)
+        return merged
+
+    @classmethod
+    def _redact_json_payload(cls, payload: str) -> Optional[str]:
+        """Redact sensitive keys from serialized JSON payloads."""
+        try:
+            parsed = json.loads(payload)
+        except Exception:
+            return None
+        redacted = cls._redact_sensitive_fields(parsed)
+        try:
+            return json.dumps(redacted, separators=(",", ":"))
+        except Exception:
+            return None
+
+    @classmethod
+    def _redact_sensitive_fields(cls, value: Any, key_name: Optional[str] = None) -> Any:
+        """Recursively redact known sensitive key/value pairs."""
+        if key_name and cls._is_sensitive_key(key_name):
+            return _REDACTED
+        if isinstance(value, dict):
+            redacted: Dict[str, Any] = {}
+            for key, entry in value.items():
+                key_text = str(key)
+                redacted[key] = cls._redact_sensitive_fields(entry, key_text)
+            return redacted
+        if isinstance(value, list):
+            return [cls._redact_sensitive_fields(entry) for entry in value]
+        if isinstance(value, tuple):
+            return [cls._redact_sensitive_fields(entry) for entry in value]
+        return value
+
+    @staticmethod
+    def _is_sensitive_key(key: str) -> bool:
+        """Return True for keys that must never store raw values."""
+        normalized = re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_")
+        if not normalized:
+            return False
+        if normalized in {"email", "auth", "authorization", "cookie", "set_cookie"}:
+            return True
+        return any(
+            marker in normalized
+            for marker in (
+                "password",
+                "secret",
+                "token",
+                "session",
+                "jwt",
+                "api_key",
+                "apikey",
+            )
+        )
 
     def _resolve_run_directory(self, run_id: Optional[str]) -> Optional[Path]:
         """Return (and create if needed) the working directory for the given run."""

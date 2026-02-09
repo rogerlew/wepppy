@@ -13,6 +13,7 @@ class _ConfiguredApp(Protocol):
 class RecorderConfig:
     data_repo_root: Path
     assembler_enabled: bool
+    allow_body_values: bool
 
 
 def resolve_recorder_config(app: _ConfiguredApp) -> RecorderConfig: ...

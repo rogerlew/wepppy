@@ -150,8 +150,11 @@ describe("recorder interceptor", () => {
         expect(requestEvent.requestMeta).toEqual(expect.objectContaining({
             hasBody: true,
             bodyType: "json",
-            jsonPayload: JSON.stringify({ foo: "bar" })
+            jsonType: "object",
+            jsonKeys: ["foo"],
+            bodyCaptured: false
         }));
+        expect(requestEvent.requestMeta).not.toHaveProperty("jsonPayload");
         expect(requestEvent.params).toEqual(["foo"]);
 
         const responseEvent = parseEvents(1)[0];
@@ -217,13 +220,10 @@ describe("recorder interceptor", () => {
         expect(requestEvent.requestMeta).toEqual(expect.objectContaining({
             hasBody: true,
             bodyType: "form-data",
-            formKeys: ["file", "meta", "repeat"]
+            formKeys: ["file", "meta", "repeat"],
+            bodyCaptured: false
         }));
-        expect(requestEvent.requestMeta.formValues).toEqual({
-            meta: "value",
-            repeat: ["first", "second"]
-        });
-        expect(requestEvent.requestMeta.formValues).not.toHaveProperty("file");
+        expect(requestEvent.requestMeta).not.toHaveProperty("formValues");
     });
 
     it("summarises text payloads with preview and length", async () => {
@@ -243,9 +243,53 @@ describe("recorder interceptor", () => {
         expect(requestEvent.requestMeta).toEqual(expect.objectContaining({
             hasBody: true,
             bodyType: "text",
-            bodyPreview: body,
-            bodyLength: body.length
+            bodyLength: body.length,
+            bodyCaptured: false
         }));
+        expect(requestEvent.requestMeta).not.toHaveProperty("bodyPreview");
+    });
+
+    it("captures redacted request bodies only when captureBodyValues=true", async () => {
+        const wrappedFetch = jest.fn(() => Promise.resolve({}));
+        global.fetch = wrappedFetch;
+
+        const originalRequest = jest.fn(() => Promise.resolve({ status: 200, ok: true }));
+        setupInterceptor({ batchSize: 1, captureBodyValues: true }, originalRequest);
+
+        await global.WCHttp.request("tasks/run", {
+            method: "post",
+            json: {
+                email: "person@example.com",
+                password: "p@ss",
+                hillslope_count: 4
+            }
+        });
+
+        const jsonEvent = parseEvents(0)[0];
+        expect(jsonEvent.requestMeta.bodyCaptured).toBe(true);
+        expect(JSON.parse(jsonEvent.requestMeta.jsonPayload)).toEqual({
+            email: "[redacted]",
+            password: "[redacted]",
+            hillslope_count: 4
+        });
+
+        const form = new global.FormData();
+        form.append("email", "person@example.com");
+        form.append("token", "secret-token");
+        form.append("note", "safe");
+
+        await global.WCHttp.request("tasks/upload", {
+            method: "post",
+            body: form
+        });
+
+        const formEvent = parseEvents(2)[0];
+        expect(formEvent.requestMeta.bodyCaptured).toBe(true);
+        expect(formEvent.requestMeta.formValues).toEqual({
+            email: "[redacted]",
+            token: "[redacted]",
+            note: "safe"
+        });
     });
 
     it("flushes queue immediately when batch size threshold is reached", () => {

@@ -249,6 +249,77 @@
         return false;
     }
 
+    function shouldCaptureBodyValues() {
+        return recorderConfig && recorderConfig.captureBodyValues === true;
+    }
+
+    function isSensitiveFieldName(name) {
+        if (typeof name !== "string" || !name) {
+            return false;
+        }
+        var normalized = name.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+        if (!normalized) {
+            return false;
+        }
+        if (normalized === "email") {
+            return true;
+        }
+        if (normalized.indexOf("password") !== -1) {
+            return true;
+        }
+        if (normalized.indexOf("secret") !== -1) {
+            return true;
+        }
+        if (normalized.indexOf("token") !== -1) {
+            return true;
+        }
+        if (normalized.indexOf("authorization") !== -1 || normalized === "auth") {
+            return true;
+        }
+        if (normalized.indexOf("cookie") !== -1) {
+            return true;
+        }
+        if (normalized.indexOf("session") !== -1) {
+            return true;
+        }
+        if (normalized.indexOf("jwt") !== -1) {
+            return true;
+        }
+        if (normalized.indexOf("api_key") !== -1 || normalized === "apikey") {
+            return true;
+        }
+        return false;
+    }
+
+    function redactSensitive(value, keyName) {
+        if (isSensitiveFieldName(keyName)) {
+            return "[redacted]";
+        }
+        if (Array.isArray(value)) {
+            return value.map(function (entry) {
+                return redactSensitive(entry, null);
+            });
+        }
+        if (!value || typeof value !== "object") {
+            return value;
+        }
+        var out = {};
+        Object.keys(value).forEach(function (key) {
+            out[key] = redactSensitive(value[key], key);
+        });
+        return out;
+    }
+
+    function describeJsonShape(value) {
+        if (Array.isArray(value)) {
+            return "array";
+        }
+        if (value === null) {
+            return "null";
+        }
+        return typeof value;
+    }
+
     function serialiseFormValue(value) {
         if (value === undefined || value === null) {
             return "";
@@ -263,6 +334,13 @@
         }
     }
 
+    function summariseJsonKeys(value) {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+            return [];
+        }
+        return Object.keys(value);
+    }
+
     function summariseBody(options, method) {
         var summary = {
             hasBody: false
@@ -273,14 +351,22 @@
         var body = options.body;
         if (options.json !== undefined) {
             summary.hasBody = true;
-            try {
-                var serialised = JSON.stringify(options.json);
-                summary.bodyPreview = serialised.slice(0, 256);
-                summary.jsonPayload = serialised;
-            } catch (err) {
-                summary.bodyPreview = "[unserializable json]";
-            }
             summary.bodyType = "json";
+            summary.jsonType = describeJsonShape(options.json);
+            summary.jsonKeys = summariseJsonKeys(options.json);
+            summary.bodyCaptured = false;
+            if (Array.isArray(options.json)) {
+                summary.jsonLength = options.json.length;
+            }
+            if (shouldCaptureBodyValues()) {
+                try {
+                    var redactedJson = redactSensitive(options.json, null);
+                    summary.jsonPayload = JSON.stringify(redactedJson);
+                    summary.bodyCaptured = true;
+                } catch (err) {
+                    summary.bodyCaptured = false;
+                }
+            }
             return summary;
         }
         if (body === undefined || body === null || method === "GET") {
@@ -315,15 +401,26 @@
                 /* noop */
             }
             summary.formKeys = keys;
-            if (hasValues) {
+            summary.bodyCaptured = false;
+            if (hasValues && shouldCaptureBodyValues()) {
+                Object.keys(values).forEach(function (key) {
+                    if (isSensitiveFieldName(key)) {
+                        values[key] = "[redacted]";
+                    }
+                });
                 summary.formValues = values;
+                summary.bodyCaptured = true;
             }
             return summary;
         }
         if (typeof body === "string") {
             summary.bodyType = "text";
             summary.bodyLength = body.length;
-            summary.bodyPreview = body.slice(0, 256);
+            summary.bodyCaptured = false;
+            if (shouldCaptureBodyValues()) {
+                summary.bodyPreview = body.slice(0, 256);
+                summary.bodyCaptured = true;
+            }
             return summary;
         }
         summary.bodyType = typeof body;

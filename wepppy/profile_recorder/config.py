@@ -19,6 +19,7 @@ class RecorderConfig:
 
     data_repo_root: Path
     assembler_enabled: bool
+    allow_body_values: bool = False
 
 
 def resolve_recorder_config(app: _ConfiguredApp) -> RecorderConfig:
@@ -34,4 +35,5 @@ def resolve_recorder_config(app: _ConfiguredApp) -> RecorderConfig:
     if not data_root:
         data_root = "/workdir/wepppy-test-engine-data"
     assembler_enabled = app.config.get("PROFILE_RECORDER_ASSEMBLER_ENABLED", True)
-    return RecorderConfig(Path(data_root), assembler_enabled)
+    allow_body_values = app.config.get("PROFILE_RECORDER_ALLOW_BODY_VALUES", False)
+    return RecorderConfig(Path(data_root), assembler_enabled, bool(allow_body_values))
