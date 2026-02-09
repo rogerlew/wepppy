@@ -120,3 +120,55 @@ def test_runs0_nocfg_ignores_invalid_next_and_uses_canonical_redirect(
     assert response.status_code == 302
     assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/"
     assert called is False
+
+
+def test_runs0_nocfg_rejects_cross_run_next(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    called = False
+
+    def _unexpected_cookie_call(response, *, runid: str, config: str) -> bool:
+        nonlocal called
+        called = True
+        return True
+
+    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", _unexpected_cookie_call)
+
+    with app.test_client() as client:
+        response = client.get(
+            f"/runs/{runid}/?next={quote('/weppcloud/runs/other-run/browse/private.txt', safe='')}",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/"
+    assert called is False
+
+
+def test_runs0_nocfg_rejects_dot_segment_traversal_next(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    called = False
+
+    def _unexpected_cookie_call(response, *, runid: str, config: str) -> bool:
+        nonlocal called
+        called = True
+        return True
+
+    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", _unexpected_cookie_call)
+
+    with app.test_client() as client:
+        response = client.get(
+            f"/runs/{runid}/?next={quote(f'/weppcloud/runs/{runid}/cfg/../browse/private.txt', safe='')}",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/"
+    assert called is False

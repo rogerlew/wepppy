@@ -10,7 +10,7 @@ import uuid
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 import redis
 from itsdangerous import BadSignature, Signer
@@ -415,6 +415,8 @@ def _sanitize_runs0_next_target(next_value: str | None, runid: str, config: str)
         return None
     if not path.startswith("/"):
         path = "/" + path.lstrip("/")
+    if _path_has_unsafe_segments(path):
+        return None
 
     run_base = f"{_site_prefix()}/runs/{runid}/"
     if not path.startswith(run_base):
@@ -437,6 +439,19 @@ def _sanitize_runs0_next_target(next_value: str | None, runid: str, config: str)
     if parsed.fragment:
         normalized_path = f"{normalized_path}#{parsed.fragment}"
     return normalized_path
+
+
+def _path_has_unsafe_segments(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    for segment in normalized.split("/"):
+        if not segment:
+            continue
+        decoded = unquote(segment).strip()
+        if decoded in {".", ".."}:
+            return True
+        if "/" in decoded or "\\" in decoded:
+            return True
+    return False
 
 def _log_access(wd, current_user, ip):
     assert _exists(wd)
