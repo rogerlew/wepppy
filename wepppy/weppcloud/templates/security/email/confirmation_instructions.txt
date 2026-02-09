@@ -1,0 +1,10 @@
+Confirm Your WEPPcloud Email
+
+Hello {{ user.email }},
+
+Please confirm your email address to finish setting up your WEPPcloud account.
+
+Confirm email address:
+{{ confirmation_link }}
+
+If you did not create a WEPPcloud account, you can safely ignore this message.

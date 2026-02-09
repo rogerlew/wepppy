@@ -1,0 +1,24 @@
+{#
+  Context:
+    confirmation_link
+    confirmation_token
+    user
+    security
+#}
+<div style="margin:0;padding:24px 12px;background-color:#f5f7fa;font-family:Arial,sans-serif;color:#1f2933;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #d9e2ec;border-radius:8px;">
+    <tr>
+      <td style="padding:28px 28px 20px 28px;">
+        <h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;color:#102a43;">Confirm Your WEPPcloud Email</h1>
+        <p style="margin:0 0 14px 0;font-size:15px;line-height:1.6;">Hello {{ user.email }},</p>
+        <p style="margin:0 0 20px 0;font-size:15px;line-height:1.6;">Please confirm your email address to finish setting up your WEPPcloud account.</p>
+        <p style="margin:0 0 22px 0;">
+          <a href="{{ confirmation_link }}" style="display:inline-block;background:#1f6feb;color:#ffffff;text-decoration:none;padding:11px 18px;border-radius:6px;font-size:14px;font-weight:600;">Confirm Email Address</a>
+        </p>
+        <p style="margin:0 0 8px 0;font-size:13px;line-height:1.6;color:#52606d;">If the button does not work, copy and paste this link into your browser:</p>
+        <p style="margin:0 0 8px 0;font-size:13px;line-height:1.6;word-break:break-all;"><a href="{{ confirmation_link }}" style="color:#1f6feb;">{{ confirmation_link }}</a></p>
+        <p style="margin:0;font-size:13px;line-height:1.6;color:#7b8794;">If you did not create a WEPPcloud account, you can safely ignore this message.</p>
+      </td>
+    </tr>
+  </table>
+</div>

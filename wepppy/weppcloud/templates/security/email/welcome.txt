@@ -1,0 +1,12 @@
+Welcome to WEPPcloud
+
+Hello {{ user.email }},
+
+Your account has been created successfully.
+
+{% if security.confirmable and confirmation_link %}
+Please confirm your email address to complete activation:
+{{ confirmation_link }}
+{% endif %}
+
+Thanks for using WEPPcloud.

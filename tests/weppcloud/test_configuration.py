@@ -71,6 +71,14 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
     assert app.config["MAIL_USERNAME"] == "noreply@uidaho.edu"
     assert "MAIL_PASSWORD" not in app.config
     assert app.config["SECURITY_EMAIL_SENDER"] == "cals-wepp@uidaho.edu"
+    assert app.config["EMAIL_SUBJECT_REGISTER"] == "Welcome to WEPPcloud"
+    assert app.config["EMAIL_SUBJECT_CONFIRM"] == "Confirm your WEPPcloud email"
+    assert app.config["EMAIL_SUBJECT_PASSWORD_RESET"] == "Reset your WEPPcloud password"
+    assert app.config["EMAIL_SUBJECT_PASSWORD_NOTICE"] == "Your WEPPcloud password was reset"
+    assert (
+        app.config["EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE"]
+        == "Your WEPPcloud password was changed"
+    )
 
 
 def test_config_app_uses_uidaho_mail_defaults_when_zoho_password_missing(

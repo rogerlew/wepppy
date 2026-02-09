@@ -1,0 +1,10 @@
+Password Reset Completed
+
+Hello {{ user.email }},
+
+Your WEPPcloud password was reset successfully.
+
+{% if security.recoverable %}
+If you did not perform this action, reset your password immediately:
+{{ url_for_security('forgot_password', _external=True) }}
+{% endif %}

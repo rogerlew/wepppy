@@ -1,0 +1,21 @@
+{# Context:
+    user
+    security
+#}
+<div style="margin:0;padding:24px 12px;background-color:#f5f7fa;font-family:Arial,sans-serif;color:#1f2933;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #d9e2ec;border-radius:8px;">
+    <tr>
+      <td style="padding:28px 28px 20px 28px;">
+        <h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;color:#102a43;">Your Password Was Changed</h1>
+        <p style="margin:0 0 14px 0;font-size:15px;line-height:1.6;">Hello {{ user.email }},</p>
+        <p style="margin:0 0 14px 0;font-size:15px;line-height:1.6;">This notice confirms that your WEPPcloud password has been changed.</p>
+        {% if security.recoverable %}
+          <p style="margin:0 0 8px 0;font-size:14px;line-height:1.6;color:#52606d;">If you did not make this change, secure your account now:</p>
+          <p style="margin:0;">
+            <a href="{{ url_for_security('forgot_password', _external=True) }}" style="color:#1f6feb;">{{ url_for_security('forgot_password', _external=True) }}</a>
+          </p>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+</div>

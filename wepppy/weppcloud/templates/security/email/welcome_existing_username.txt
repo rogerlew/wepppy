@@ -1,0 +1,7 @@
+Complete Registration with a Different Username
+
+Hello {{ email }},
+
+The username "{{ username }}" is already associated with another account.
+
+Please start registration again and choose a different username.

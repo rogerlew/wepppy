@@ -1,0 +1,10 @@
+Your Password Was Changed
+
+Hello {{ user.email }},
+
+This notice confirms that your WEPPcloud password has been changed.
+
+{% if security.recoverable %}
+If you did not make this change, secure your account now:
+{{ url_for_security('forgot_password', _external=True) }}
+{% endif %}

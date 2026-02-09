@@ -1,0 +1,14 @@
+WEPPcloud Account Already Exists
+
+Hello {{ user.email }},
+
+A registration request was submitted for this email address, but an account already exists.
+
+{% if user.username %}
+Username on file: {{ user.username }}
+{% endif %}
+
+{% if recovery_link %}
+If you need account access, reset your password here:
+{{ recovery_link }}
+{% endif %}
