@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError
 
 TestClient = pytest.importorskip("starlette.testclient").TestClient
 
@@ -160,6 +161,35 @@ def test_public_browse_ignores_invalid_cookie_without_bearer(
     assert "demo.txt" in response.text
 
 
+def test_public_browse_surfaces_jwt_config_errors(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-public-cookie-config-error"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.browse.auth as auth_mod
+
+    monkeypatch.setattr(
+        auth_mod.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: (_ for _ in ()).throw(JWTConfigurationError("broken jwt settings")),
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "any-token")
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/")
+
+    assert response.status_code == 500
+    assert "JWT configuration error" in response.text
+
+
 def test_browse_private_run_redirects_without_token(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-private"
     config = "cfg"
@@ -266,6 +296,37 @@ def test_files_public_run_invalid_cookie_still_requires_auth(
     assert response.status_code == 401
     payload = response.json()
     assert payload["error"]["code"] == "unauthorized"
+
+
+def test_files_surfaces_internal_error_on_jwt_config_failure(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-files-config-error"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.browse.auth as auth_mod
+
+    monkeypatch.setattr(
+        auth_mod.auth_tokens,
+        "decode_token",
+        lambda token, audience=None: (_ for _ in ()).throw(JWTConfigurationError("broken jwt settings")),
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", "any-token")
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/")
+
+    assert response.status_code == 500
+    payload = response.json()
+    assert payload["error"]["code"] == "internal_error"
+    assert "JWT configuration error" in payload["error"]["details"]
 
 
 def test_dtale_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:

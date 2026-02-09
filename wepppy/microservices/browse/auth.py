@@ -226,6 +226,8 @@ def resolve_auth_context(request: StarletteRequest) -> AuthContext:
         try:
             return _context_from_claims(_decode_token(cookie_token))
         except BrowseAuthError as exc:
+            if exc.status_code >= 500:
+                raise
             cookie_failure = exc
 
     bearer_token = _extract_bearer_token(request)

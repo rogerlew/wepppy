@@ -579,6 +579,13 @@ async def _handle_files_request(
             allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
         )
     except BrowseAuthError as exc:
+        if exc.status_code >= HTTPStatus.INTERNAL_SERVER_ERROR:
+            _raise_files_error(
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+                "Internal server error.",
+                code="internal_error",
+                details=exc.message,
+            )
         message = "Authentication required." if exc.status_code == HTTPStatus.UNAUTHORIZED else "Access denied."
         code = "unauthorized" if exc.status_code == HTTPStatus.UNAUTHORIZED else "forbidden"
         _raise_files_error(
