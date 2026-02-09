@@ -298,9 +298,8 @@ def _set_session_jwt_cookie(response: JSONResponse, *, runid: str, config: str, 
     summary="Issue a run-scoped session token",
     description=(
         "Supports Bearer or Flask session-cookie auth. Bearer path requires scope `rq:status`; "
-        "cookie path validates server session marker and allows public-run fallback. "
-        "Synchronously mints and returns a short-lived run-scoped session token and "
-        "sets an HttpOnly run-scoped cookie for browse navigation."
+        "cookie path validates the server session marker with public-run fallback. "
+        "Synchronously mints a run-scoped session token and sets an HttpOnly browse cookie."
     ),
     tags=["rq-engine", "session"],
     operation_id=rq_operation_id("issue_session_token"),
