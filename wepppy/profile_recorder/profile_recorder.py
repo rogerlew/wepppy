@@ -64,7 +64,6 @@ class ProfileRecorder:
         if user and getattr(user, "is_authenticated", False):
             record["user"] = {
                 "id": getattr(user, "id", None),
-                "email": getattr(user, "email", None),
             }
 
         run_id = record.get("runId") or record.get("run_id")

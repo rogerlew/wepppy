@@ -45,7 +45,7 @@ The interceptor requires no controller modifications; it wraps `http.request` on
 Backend Flask middleware that persists events and forwards them to the assembler:
 
 - **Audit logging** – Appends timestamped JSON events to `<run_dir>/_logs/profile.events.jsonl` ensuring all backend activity is permanently captured
-- **User enrichment** – Attaches authenticated user metadata (ID, email) to events when available
+- **User enrichment** – Attaches authenticated user metadata (ID only; no email) when available
 - **Assembler forwarding** – Passes successful response events plus file path hints (extracted from known payload keys like `output_files`, `upload_files`) to the streaming assembler
 - **Per-run toggle** – Respects `Ron.profile_recorder_assembler_enabled` flag so specific runs can disable draft generation while preserving audit trails
 - **Promotion endpoint** – Exposes `/runs/<runid>/<config>/recorder/promote` (PowerUser-only) for finalizing profile captures
@@ -349,7 +349,7 @@ Frontend events include:
 
 Backend enrichment adds:
 - `received_at`: UTC timestamp (ISO 8601)
-- `user`: `{id, email}` when authenticated
+- `user`: `{id}` when authenticated (email is excluded by policy)
 - `runId`, `config`, `sessionId`, `rootUrl`: Context from JavaScript globals
 
 ### Testing Strategy
@@ -398,7 +398,7 @@ tools/wctl2/commands/
 
 | Module | Key Classes / Functions | Responsibilities | Notes |
 |--------|-------------------------|------------------|-------|
-| `profile_recorder/profile_recorder.py` | `ProfileRecorder`, `get_profile_recorder()` | Flask extension that persists recorder events, enriches payloads with user metadata, and forwards successful responses (plus inferred file hints) to the assembler. | Docstrings outline audit log layout and extension wiring; stubs live in `profile_recorder.pyi`. Covered by `tests/profile_recorder/test_profile_recorder.py`. |
+| `profile_recorder/profile_recorder.py` | `ProfileRecorder`, `get_profile_recorder()` | Flask extension that persists recorder events, enriches payloads with sanitized user metadata, and forwards successful responses (plus inferred file hints) to the assembler. | Docstrings outline audit log layout and extension wiring; stubs live in `profile_recorder.pyi`. Covered by `tests/profile_recorder/test_profile_recorder.py`. |
 | `profile_recorder/assembler.py` | `ProfileAssembler`, `TASK_RULES` | Streams events into `_drafts`, snapshots uploads/derived assets, enforces task-specific expectations, and promotes drafts into reusable profiles. | Event lifecycle, seed handling, and validation logging are described inline; stubs in `assembler.pyi`. Exercised by `tests/profile_recorder/test_assembler.py`. |
 | `profile_recorder/playback.py` | `PlaybackSession`, `SandboxViolationError`, `main()` | Replays promoted captures, hydrates sandboxed run directories, rebuilds form-data payloads, polls RQ jobs, and emits human-readable reports. | CLI docstrings describe every helper (form builders, polling, logging). Stubs in `playback.pyi`; tested via `tests/profile_recorder/test_playback_session.py`. |
 | `profile_recorder/config.py` | `RecorderConfig`, `resolve_recorder_config()` | Centralizes recorder settings (data roots, assembler toggle) and documents required Flask app config keys. | Protocol `_ConfiguredApp` keeps typing explicit; changes require stub update in `config.pyi`. |
@@ -462,7 +462,7 @@ Profiles grow quickly (typical capture: 1-5 MB for `events.jsonl`, 50-200 MB for
 
 - **[AGENTS.md](AGENTS.md)** – Developer onboarding, upload implementation checklist, multipart inventory
 - **[PROFILE_TEST_ENGINE_SPEC.md](PROFILE_TEST_ENGINE_SPEC.md)** – Detailed technical specification covering event schemas, playback semantics, authentication flows
-- **[tools/wctl2/README.md](../../tools/wctl2/README.md)** – wctl CLI documentation, command reference
+- **[wctl/README.md](../../wctl/README.md)** – wctl CLI documentation, command reference
 - **[wepppy/weppcloud/controllers_js/README.md](../../wepppy/weppcloud/controllers_js/README.md)** – Frontend controller architecture, HTTP abstraction patterns
 - **[services/status2/README.md](../../services/status2/README.md)** – WebSocket streaming architecture (similar pattern used for playback logs)
 

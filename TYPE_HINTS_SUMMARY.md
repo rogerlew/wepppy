@@ -123,9 +123,9 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/mcp/report_editor.py`
 - [ ] `wepppy/mcp/report_files.py`
 - [ ] `wepppy/microservices/__init__.py`
-- [ ] `wepppy/microservices/_download.py`
+- [ ] `wepppy/microservices/browse/_download.py`
 - [ ] `wepppy/microservices/_gdalinfo.py`
-- [ ] `wepppy/microservices/browse.py`
+- [ ] `wepppy/microservices/browse/browse.py`
 - [ ] `wepppy/microservices/elevationquery.py`
 - [ ] `wepppy/nodb/__init__.py`
 - [x] `wepppy/nodb/base.py`

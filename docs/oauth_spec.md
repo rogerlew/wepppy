@@ -140,7 +140,7 @@ Add a uniqueness constraint on `(provider, provider_uid)` to prevent duplicate l
   - Expose health checks so the Flask layer can detect Redis unavailability, surface a friendly maintenance banner, and short-circuit confusing stack traces.
   - Flush sessions intentionally during deploys using `redis-cli FLUSHDB` or key-prefix deletion rather than relying on unplanned Redis restarts, which can happen mid-request and exacerbate flaky UX.
 - Inventory the session consumers outside the monolith and document their interfaces:
-  - The Starlette-based browse microservice serves file browsing, download, and metadata routes and currently trusts the upstream proxy for authentication context.【F:wepppy/microservices/browse.py†L1-L70】
+  - The Starlette-based browse microservice serves file browsing, download, and metadata routes and currently trusts the upstream proxy for authentication context.【F:wepppy/microservices/browse/browse.py†L1-L70】
   - `preflight2` is a Go WebSocket service that streams checklist updates over Redis and does not yet enforce first-party authentication beyond origin checks.【F:services/preflight2/internal/server/server.go†L1-L118】
   - `status2` is a Go WebSocket service with the same deployment model, subscribing to Redis status channels for browsers.【F:services/status2/README.md†L1-L85】
 - Establish a shared JWT authority inside the Flask app once OAuth sign-in succeeds:
@@ -150,7 +150,7 @@ Add a uniqueness constraint on `(provider, provider_uid)` to prevent duplicate l
   - Issue the token after each successful login/refresh and store it in a secure, HTTP-only cookie scoped to the site prefix (or return via a one-time POST message that front-end code can store in memory for WebSocket headers).
   - For WebSocket clients (browse, preflight2, status2), require `Authorization: Bearer <token>` during handshake and reject unauthenticated connections.
 - Add token verification middleware to each service:
-  - Browse: implement a Starlette middleware that validates the JWT, loads the user context, and enforces authorization before serving filesystem routes.【F:wepppy/microservices/browse.py†L18-L66】
+  - Browse: implement a Starlette middleware that validates the JWT, loads the user context, and enforces authorization before serving filesystem routes.【F:wepppy/microservices/browse/browse.py†L18-L66】
   - Preflight2 and Status2: extend the Go servers to parse and verify JWTs (using a JWKS cache) before accepting WebSocket upgrades; surface user context in structured logs for auditing.【F:services/preflight2/internal/server/server.go†L75-L118】【F:services/status2/README.md†L58-L112】
 - Introduce refresh tokens (server-side session bound) to renew JWTs without forcing password/OAuth reauth; reuse Flask-Security’s remember token table or add an `oauth_session` table keyed by device to manage revocation.
 - Plan for deprecation of direct session coupling once JWT enforcement is proven:

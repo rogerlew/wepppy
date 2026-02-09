@@ -8,7 +8,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from wepppy.microservices._download import _parquet_to_dataframe_with_units
+from wepppy.microservices.browse._download import _parquet_to_dataframe_with_units
 
 
 @pytest.mark.unit

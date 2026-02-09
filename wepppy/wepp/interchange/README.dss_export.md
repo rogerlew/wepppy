@@ -9,7 +9,7 @@
 | `run_totalwatsed3()` | Aggregates hydrology + ash metrics into `totalwatsed3.parquet`. | `wepppy/wepp/interchange/totalwatsed3.py` |
 | `totalwatsed_partitioned_dss_export()` | Writes one DSS file per channel (`totalwatsed3_chan_<id>.dss`) using `totalwatsed3.parquet`. | `wepppy/wepp/interchange/watershed_totalwatsed_export.py` |
 | `chanout_dss_export()` | Converts `chan.out.parquet` peak flows into `peak_chan_<id>.dss` (irregular `IR-Year` series). | `wepppy/wepp/interchange/watershed_chan_peak_interchange.py` |
-| Browse DSS view | Provides a “pandas `.info()`”-style summary for any `*.dss`. | `wepppy/microservices/browse.py`, template `browse/dss_file.htm` |
+| Browse DSS view | Provides a “pandas `.info()`”-style summary for any `*.dss`. | `wepppy/microservices/browse/browse.py`, template `browse/dss_file.htm` |
 
 Exports run either from the UI (RQ job `post_dss_export_rq`) or from `Wepp._export_partitioned_totalwatsed2_dss()`. Date filtering uses the `dss_start_date` / `dss_end_date` fields stored in `wepp.nodb`.
 
@@ -255,6 +255,6 @@ When you see a flat peak lasting 6–24 hours during spring or after snow events
 
 - [pydsstools documentation](https://github.com/gyanz/pydsstools)
 - `docker/Dockerfile` – runtime stack ensuring GDAL/PROJ/HDF5 libs exist for `pydsstools`.
-- `wepppy/microservices/browse.py` – browse service handler (`_maybe_render_dss_preview`).
+- `wepppy/microservices/browse/browse.py` – browse service handler (`_maybe_render_dss_preview`).
 - `wepppy/nodb/scripts/dss_export/plot_peak_chan_compare.py` - overlay plot comparing `peak_chan_<id>.dss` vs `chan.out.parquet`.
 - `tests/wepp/interchange/test_watershed_totalwatsed_export.py` – regression test for date filtering and per-channel exports.

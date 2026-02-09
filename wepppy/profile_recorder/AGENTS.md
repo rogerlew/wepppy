@@ -28,6 +28,7 @@ When adding support for a new multipart/form-data workflow:
 - Recorded `/rq-engine/api/jobstatus/<id>` polls and `elevationquery` requests are skipped during replay; the runner waits on the fresh job IDs emitted by each POST response instead.
 - Authentication defaults to automated login using `ADMIN_EMAIL` / `ADMIN_PASSWORD` (see `docker/.env`). If a profile needs user-scoped permissions, record with the appropriate account and capture the session cookie for playback (`--cookie-file`).
 - The recorder runs globally even when not actively capturing profiles; audit logs under each run’s `_logs/` folder always append new events. Promotion copies only the slice under `_drafts/<run>/<capture>/`.
+- Privacy standard: recorder artifacts (`_logs/profile.events.jsonl` and `capture/events.jsonl`) must never store email addresses, JWTs, cookies, or `Authorization` headers. Use non-PII identifiers only (for example `user.id`).
 
 ## Troubleshooting
 - **Event missing in profile capture:** Confirm the frontend call uses `WCHttp.request` (not raw `fetch`). If missing, rebuild the controller bundle (`python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`) and hard refresh to ensure the interceptor is active.

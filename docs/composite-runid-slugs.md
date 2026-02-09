@@ -89,7 +89,7 @@ This is the current map of how services resolve a runid into a working directory
 | Service | Entry point | Resolver | Notes |
 | --- | --- | --- | --- |
 | Web app (Flask routes) | `wepppy/weppcloud/routes/*` | `load_run_context()` → `get_wd()` | `load_run_context` ignores `?pup=` for composite runids; `ctx.run_root` vs `ctx.active_root` separates run root/pup. |
-| Browse microservice | `wepppy/microservices/browse.py` | `get_wd()` | Uses `runid`/`diff` directly; no `RunContext` wrapper. |
+| Browse microservice | `wepppy/microservices/browse/browse.py` | `get_wd()` | Uses `runid`/`diff` directly; no `RunContext` wrapper. |
 | RQ engine API | `wepppy/microservices/rq_engine/*` | `get_wd()` | Endpoints resolve the composite runid before dispatching jobs. |
 | RQ worker (single runs) | `wepppy/rq/*.py`, `wepppy/rq/rq_worker.py` | `get_wd()` | Worker tasks resolve the same composite slug used by the API. |
 | RQ worker (batch) | `wepppy/nodb/batch_runner.py` | `get_wd()` | Batch runner constructs `batch;;<batch_name>;;<runid>` and relies on `get_wd` to target `/wc1/batch/...`. |

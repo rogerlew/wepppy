@@ -1,6 +1,6 @@
 # Browse Microservice
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for Flask web application and microservices architecture.
+> **See also:** [AGENTS.md](../../../AGENTS.md) for Flask web application and microservices architecture.
 
 ## Why this exists
 - This service offloads all filesystem browsing and metadata endpoints from the Flask monolith onto a Starlette app that can be scaled and rate-limited independently.
@@ -8,7 +8,7 @@
 - The microservice runs under gunicorn with uvicorn workers (port 9009 in production) and is fronted by HAProxy.
 
 ## High-level architecture
-- **Application**: `wepppy/microservices/browse.py`
+- **Application**: `wepppy/microservices/browse/browse.py`
   - Creates a Starlette app and registers the browse UI plus the download and gdalinfo helper routes.
   - Reuses the existing Jinja templates (directory listings, text viewer, etc.) but renders them outside Flask.
   - Contains shims so templates that call `url_for(...)` or expect `SITE_PREFIX` still work.
@@ -22,17 +22,19 @@
 ## Directory layout (key files)
 ```
 wepppy/microservices/
-  browse.py              # Starlette application factory and browse UI logic
-  _download.py           # Download + aria2c routes shared with browse
+  browse/
+    browse.py            # Starlette application factory and browse UI logic
+    _download.py         # Download + aria2c routes shared with browse
+    README.md            # Browse service documentation
   _gdalinfo.py           # gdalinfo JSON route shared with browse
   _service_files/        # systemd / gunicorn configs (browse service runs on 9009)
-```  
+```
 Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 
 ## Routes & options
 | Route | What it does | Notable query params |
 |-------|---------------|----------------------|
-| `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run, `include_hidden=1` to show dot-prefixed entries. |
+| `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run. |
 | `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables (pandas), and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet/CSV viewers expose convenience links (pivot, CSV). |
 | `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion. |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
@@ -44,7 +46,7 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
   - Path traversal is blocked by comparing real paths against the resolved run directory.
   - Missing resources return 404/JSON errors rather than Flask responses.
 - **Hidden entries**
-  - Dot-prefixed entries are omitted from listings unless `include_hidden=1` is set.
+  - Dot-prefixed entries are always omitted from listings.
 - **Performance**
   - Async subprocesses mean directory listings are ~4–10× faster for most runs.
   - Large file conversions run in thread executors; gunicorn workers stay responsive.

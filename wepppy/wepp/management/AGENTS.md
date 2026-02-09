@@ -56,7 +56,7 @@
 - `wepppy/nodb/core/wepp.py` and `wepppy/nodb/core/landuse.py` expect map keys and summaries to stay stable; update the controllers’ validation messages if new classes are introduced.
 - `wepppy/nodb/mods/disturbed` relies on consistent `DisturbedClass` strings—document any renames in `docs/disturbance_*` notes before shipping.
 - `wepppy/export/export.py` references `_management_dir` when packaging runs; ensure new assets live under the canonical directory tree to avoid missing file errors.
-- `wepppy/microservices/browse.py` may read management files directly; test browse flows if altering public APIs such as `get_management_summary`.
+- `wepppy/microservices/browse/browse.py` may read management files directly; test browse flows if altering public APIs such as `get_management_summary`.
 
 ## Utilities & QA
 - `python tests/wepp/management/export_covers.py` – regenerate management CSV mirrors and extended disturbance lookups.

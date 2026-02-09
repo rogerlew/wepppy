@@ -22,8 +22,8 @@ This directory contains lightweight microservices built with Starlette or FastAP
 
 ### Browse Microservice
 
-**File**: `browse.py`  
-**Documentation**: [README.browse.md](README.browse.md)
+**File**: `browse/browse.py`  
+**Documentation**: [browse/README.md](browse/README.md)
 
 Provides filesystem browsing, file downloads, and GDAL metadata extraction for run directories.
 
@@ -237,7 +237,7 @@ Common configuration:
 
 ## Further Reading
 
-- [README.browse.md](README.browse.md) - Detailed browse service documentation
+- [browse/README.md](browse/README.md) - Detailed browse service documentation
 - [AGENTS.md](../../AGENTS.md) - Microservices architecture and patterns
 - [docker/README.md](../../docker/README.md) - Docker deployment guide
 - [wepppy/webservices/](../webservices/) - Related Flask/FastAPI services

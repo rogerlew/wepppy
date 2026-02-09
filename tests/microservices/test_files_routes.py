@@ -14,7 +14,7 @@ def load_browse(monkeypatch):
     def _loader(**env):
         for key, value in env.items():
             monkeypatch.setenv(key, value)
-        import wepppy.microservices.browse as browse_mod
+        import wepppy.microservices.browse.browse as browse_mod
 
         return importlib.reload(browse_mod)
 
@@ -270,6 +270,89 @@ def test_files_rejects_path_traversal(tmp_path: Path, monkeypatch, load_browse):
     payload = response.json()
     assert payload["error"]["code"] == "path_outside_root"
     assert payload["error"]["details"]
+
+
+@pytest.mark.parametrize(
+    "subpath",
+    [
+        "_logs",
+        "_logs/profile.events.jsonl",
+        "wepp/output/profile.events.jsonl",
+    ],
+)
+def test_files_blocks_recorder_log_paths(tmp_path: Path, monkeypatch, load_browse, subpath: str):
+    runid = "run-logs-files"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "_logs" / "profile.events.jsonl", '{"ok":true}\n')
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/files/{subpath}?meta=true")
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden_path"
+    assert "recorder log artifacts" in payload["error"]["details"]
+
+
+@pytest.mark.parametrize(
+    "subpath",
+    [
+        "_logs/",
+        "_logs/profile.events.jsonl",
+        "wepp/output/profile.events.jsonl",
+    ],
+)
+def test_browse_blocks_recorder_log_paths(tmp_path: Path, monkeypatch, load_browse, subpath: str):
+    runid = "run-logs-browse"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "_logs" / "profile.events.jsonl", '{"ok":true}\n')
+    _write_file(run_root / "wepp" / "output" / "profile.events.jsonl", '{"ok":true}\n')
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/{subpath}")
+
+    assert response.status_code == 403
+    assert "recorder log artifacts" in response.text
+
+
+@pytest.mark.parametrize(
+    "subpath",
+    [
+        "_logs/profile.events.jsonl",
+        "wepp/output/profile.events.jsonl",
+    ],
+)
+def test_download_blocks_recorder_log_paths(tmp_path: Path, monkeypatch, load_browse, subpath: str):
+    runid = "run-logs-download"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    _write_file(run_root / "_logs" / "profile.events.jsonl", '{"ok":true}\n')
+    _write_file(run_root / "wepp" / "output" / "profile.events.jsonl", '{"ok":true}\n')
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/download/{subpath}")
+
+    assert response.status_code == 403
+    assert "recorder log artifacts" in response.text
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
@@ -928,7 +1011,7 @@ def test_files_dotfiles_hidden_by_default(tmp_path: Path, monkeypatch, load_brow
     assert response.status_code == 200
     payload = response.json()
     names = {entry["name"] for entry in payload["entries"]}
-    assert ".secret" in names
+    assert ".secret" not in names
 
     browse.create_manifest(str(run_root))
     app = browse.create_app()
@@ -946,7 +1029,7 @@ def test_files_dotfiles_hidden_by_default(tmp_path: Path, monkeypatch, load_brow
     assert response.status_code == 200
     payload = response.json()
     names = {entry["name"] for entry in payload["entries"]}
-    assert ".secret" in names
+    assert ".secret" not in names
 
 
 def test_browse_error_with_files_segment_stays_html(tmp_path: Path, monkeypatch, load_browse):

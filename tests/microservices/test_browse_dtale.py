@@ -21,7 +21,7 @@ def load_browse(monkeypatch):
     def _loader(**env):
         for key, value in env.items():
             monkeypatch.setenv(key, value)
-        import wepppy.microservices.browse as browse_mod
+        import wepppy.microservices.browse.browse as browse_mod
 
         return importlib.reload(browse_mod)
 

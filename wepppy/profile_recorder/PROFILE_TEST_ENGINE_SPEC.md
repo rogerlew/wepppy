@@ -17,11 +17,17 @@ The stack favors append-only JSONL streams and direct filesystem snapshots over 
 
 ## Recorder Pipeline
 1. `ProfileRecorder.append_event` accepts JSON events emitted by WEPPcloud middleware.
-2. Events are normalized with UTC timestamps and optional user metadata.
+2. Events are normalized with UTC timestamps and optional non-PII user metadata.
 3. The recorder resolves the run working directory (when possible) and appends the event to `_logs/profile.events.jsonl`.
 4. When the assembler is enabled (`PROFILE_RECORDER_ASSEMBLER_ENABLED`, default `True`) the same event is forwarded for draft construction alongside file hints extracted from known payload keys.
 
 Event payloads intentionally match what the playback runner expects: `stage` (`request` or `response`), `id`, `endpoint`, `method`, status data, and `requestMeta` for payload inspection.
+
+## Recorder Privacy Standard
+- Recorder artifacts (`_logs/profile.events.jsonl` and draft `capture/events.jsonl`) must not store email addresses.
+- Recorder artifacts must not store JWTs, cookies, or `Authorization` header values.
+- User attribution should use non-PII identifiers only (for example `user.id`).
+- Treat this as a required contract for all recorder event schema changes.
 
 ## Streaming Assembler
 - Drafts are created under `profiles/_drafts/<run>/<capture>` where `<capture>` defaults to `stream`.

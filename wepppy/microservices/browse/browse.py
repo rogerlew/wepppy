@@ -87,7 +87,7 @@ from starlette.responses import (
     Response as StarletteResponse,
 )
 from starlette.routing import Route
-from wepppy.microservices._download import create_routes as create_download_routes
+from wepppy.microservices.browse._download import create_routes as create_download_routes
 from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
 from wepppy.microservices.dss_preview import build_preview as build_dss_preview
 
@@ -140,7 +140,8 @@ class FlaskRequestAdapter:
 
 
 BASE_DIR = Path(__file__).resolve().parent
-WEPP_CLOUD_DIR = (BASE_DIR.parent / 'weppcloud').resolve()
+WEPPPY_DIR = BASE_DIR.parent.parent
+WEPP_CLOUD_DIR = (WEPPPY_DIR / 'weppcloud').resolve()
 BROWSE_TEMPLATES_DIR = (WEPP_CLOUD_DIR / 'routes' / 'browse' / 'templates').resolve()
 COMMAND_BAR_TEMPLATES_DIR = (WEPP_CLOUD_DIR / 'routes' / 'command_bar' / 'templates').resolve()
 SITE_TEMPLATES_DIR = (WEPP_CLOUD_DIR / 'templates').resolve()
@@ -297,6 +298,20 @@ def _assert_within_root(root: str | Path, target: str | Path) -> None:
         abort(403)
     if common != os.path.abspath(str(root)):
         abort(403)
+
+
+_RESTRICTED_PATH_SEGMENTS = {"_logs", "profile.events.jsonl"}
+
+
+def _is_restricted_recorder_path(raw_path: str) -> bool:
+    if not raw_path:
+        return False
+    normalized = raw_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part not in ("", ".")]
+    if not parts:
+        return False
+    lower_parts = {part.lower() for part in parts}
+    return any(segment in lower_parts for segment in _RESTRICTED_PATH_SEGMENTS)
 
 
 def _format_mtime_ns(ns: int) -> str:
@@ -817,8 +832,7 @@ def create_manifest(wd: str) -> str:
 
 
 def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str, page: int,
-                               page_size: int, sort_by: str, sort_order: str,
-                               include_hidden: bool):
+                               page_size: int, sort_by: str, sort_order: str):
     manifest_path = _manifest_path(root_wd)
     if not os.path.exists(manifest_path):
         return None
@@ -846,10 +860,8 @@ def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str
             if int(parent_row['is_dir']) != 1:
                 return None
 
-        where_clause = 'dir_path = ?'
+        where_clause = "dir_path = ? AND name NOT LIKE '.%'"
         params = [rel_dir]
-        if not include_hidden:
-            where_clause += " AND name NOT LIKE '.%'"
         if filter_pattern:
             prefilter_clause, prefilter_params = _pattern_sql_prefilter(filter_pattern)
             if prefilter_clause:
@@ -909,14 +921,11 @@ def _manifest_get_page_entries(root_wd: str, directory: str, filter_pattern: str
 
             mtime_display = _format_mtime_ns(int(row['mtime_ns']))
             if is_dir:
-                if include_hidden:
-                    child_count = row['child_count'] if row['child_count'] is not None else 0
-                else:
-                    child_dir = _rel_join(rel_dir, name)
-                    child_count = conn.execute(
-                        "SELECT COUNT(*) AS total FROM entries WHERE dir_path = ? AND name NOT LIKE '.%'",
-                        (child_dir,),
-                    ).fetchone()['total']
+                child_dir = _rel_join(rel_dir, name)
+                child_count = conn.execute(
+                    "SELECT COUNT(*) AS total FROM entries WHERE dir_path = ? AND name NOT LIKE '.%'",
+                    (child_dir,),
+                ).fetchone()['total']
                 hr_value = f'{child_count} items'
             else:
                 hr_value = _format_human_size(int(row['size_bytes']))
@@ -1043,23 +1052,8 @@ def _pattern_sql_prefilter(pattern: str) -> tuple[str | None, list[str]]:
 _SORT_FIELDS = {'name', 'date', 'size'}
 _SORT_ORDERS = {'asc', 'desc'}
 
-_BOOL_TRUE = {'1', 'true', 'yes', 'y', 'on'}
-_BOOL_FALSE = {'0', 'false', 'no', 'n', 'off'}
-
-
-def _parse_bool_param(value: str | None, default: bool = False) -> tuple[bool, bool]:
-    if value is None:
-        return default, True
-    normalized = value.strip().lower()
-    if normalized in _BOOL_TRUE:
-        return True, True
-    if normalized in _BOOL_FALSE:
-        return False, True
-    return default, False
-
-
-def _should_hide_entry(name: str, include_hidden: bool) -> bool:
-    return (not include_hidden) and name.startswith('.') and name not in ('.', '..')
+def _should_hide_entry(name: str) -> bool:
+    return name.startswith('.') and name not in ('.', '..')
 
 
 def _normalize_sort_params(args) -> tuple[str, str]:
@@ -1089,7 +1083,7 @@ def _is_files_request(request: StarletteRequest) -> bool:
     return True
 
 
-def _parse_files_query_params(request: StarletteRequest) -> tuple[int, int, str, str, str, bool, bool]:
+def _parse_files_query_params(request: StarletteRequest) -> tuple[int, int, str, str, str, bool]:
     params = request.query_params
     errors = []
 
@@ -1151,11 +1145,6 @@ def _parse_files_query_params(request: StarletteRequest) -> tuple[int, int, str,
             meta = False
             _add_error('meta', 'meta must be a boolean.')
 
-    include_hidden_raw = params.get('include_hidden')
-    include_hidden, include_hidden_valid = _parse_bool_param(include_hidden_raw, default=False)
-    if include_hidden_raw is not None and not include_hidden_valid:
-        _add_error('include_hidden', 'include_hidden must be a boolean.')
-
     if errors:
         _raise_files_error(
             HTTPStatus.BAD_REQUEST,
@@ -1165,7 +1154,7 @@ def _parse_files_query_params(request: StarletteRequest) -> tuple[int, int, str,
             errors=errors,
         )
 
-    return limit, offset, pattern, sort_by, sort_order, meta, include_hidden
+    return limit, offset, pattern, sort_by, sort_order, meta
 
 
 def _resolve_files_root(runid: str) -> str:
@@ -1512,8 +1501,7 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
 def _scan_directory_snapshot(directory: str,
                              filter_pattern: str,
                              sort_by: str,
-                             sort_order: str,
-                             include_hidden: bool) -> tuple[list[dict], int]:
+                             sort_order: str) -> tuple[list[dict], int]:
     entries = []
     try:
         with os.scandir(directory) as it:
@@ -1521,7 +1509,7 @@ def _scan_directory_snapshot(directory: str,
                 name = entry.name
                 if name in ('.', '..'):
                     continue
-                if _should_hide_entry(name, include_hidden):
+                if _should_hide_entry(name):
                     continue
                 if filter_pattern and not fnmatch.fnmatchcase(name, filter_pattern):
                     continue
@@ -1599,7 +1587,7 @@ def _scan_directory_snapshot(directory: str,
     return entries, len(entries)
 
 
-async def _format_page_entries(entries: list[dict], directory: str, include_hidden: bool) -> list[tuple]:
+async def _format_page_entries(entries: list[dict], directory: str) -> list[tuple]:
     if not entries:
         return []
 
@@ -1632,7 +1620,7 @@ async def _format_page_entries(entries: list[dict], directory: str, include_hidd
         loop = asyncio.get_running_loop()
         start_time = loop.time()
         totals = await asyncio.gather(
-            *[get_total_items(dir_path, include_hidden=include_hidden) for _, dir_path in dir_indices],
+            *[get_total_items(dir_path) for _, dir_path in dir_indices],
             return_exceptions=True,
         )
         elapsed = loop.time() - start_time
@@ -1659,7 +1647,7 @@ async def _format_page_entries(entries: list[dict], directory: str, include_hidd
     return formatted
 
 
-def _count_directory_items(directory: str, filter_pattern: str, include_hidden: bool) -> int:
+def _count_directory_items(directory: str, filter_pattern: str) -> int:
     total = 0
     try:
         with os.scandir(directory) as it:
@@ -1667,7 +1655,7 @@ def _count_directory_items(directory: str, filter_pattern: str, include_hidden: 
                 name = entry.name
                 if name in ('.', '..'):
                     continue
-                if _should_hide_entry(name, include_hidden):
+                if _should_hide_entry(name):
                     continue
                 if filter_pattern and not fnmatch.fnmatchcase(name, filter_pattern):
                     continue
@@ -1678,8 +1666,7 @@ def _count_directory_items(directory: str, filter_pattern: str, include_hidden: 
 
 
 async def get_entries(directory, filter_pattern, start, end, page_size,
-                      sort_by: str = 'name', sort_order: str = 'asc',
-                      include_hidden: bool = False):
+                      sort_by: str = 'name', sort_order: str = 'asc'):
     """Retrieve paginated directory entries using deterministic ordering."""
 
     entries, _total_items = await asyncio.to_thread(
@@ -1688,22 +1675,20 @@ async def get_entries(directory, filter_pattern, start, end, page_size,
         filter_pattern,
         sort_by,
         sort_order,
-        include_hidden,
     )
     start_index = max(0, start - 1)
     end_index = min(len(entries), end)
-    return await _format_page_entries(entries[start_index:end_index], directory, include_hidden)
+    return await _format_page_entries(entries[start_index:end_index], directory)
 
 
-async def get_total_items(directory, filter_pattern: str = '', include_hidden: bool = False):
+async def get_total_items(directory, filter_pattern: str = ''):
     """Count total items in the directory, respecting the filter_pattern."""
 
-    return await asyncio.to_thread(_count_directory_items, directory, filter_pattern, include_hidden)
+    return await asyncio.to_thread(_count_directory_items, directory, filter_pattern)
 
 
 async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='',
-                           sort_by: str = 'name', sort_order: str = 'asc',
-                           include_hidden: bool = False):
+                           sort_by: str = 'name', sort_order: str = 'asc'):
     """List directory contents with pagination and optional filtering."""
 
     manifest_result = await asyncio.to_thread(
@@ -1715,7 +1700,6 @@ async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filt
         page_size,
         sort_by,
         sort_order,
-        include_hidden,
     )
     if manifest_result is not None:
         entries, total_items = manifest_result
@@ -1732,9 +1716,8 @@ async def get_page_entries(wd, directory, page=1, page_size=MAX_FILE_LIMIT, filt
         filter_pattern,
         sort_by,
         sort_order,
-        include_hidden,
     )
-    page_entries = await _format_page_entries(entries[start_index:end_index], directory, include_hidden)
+    page_entries = await _format_page_entries(entries[start_index:end_index], directory)
     elapsed = loop.time() - start_time
     if elapsed > 5:
         _logger.warning(
@@ -1751,8 +1734,7 @@ def get_pad(x):
 
 async def html_dir_list(_dir, runid, wd, request_path, diff_wd, base_query,
                         page=1, page_size=MAX_FILE_LIMIT, filter_pattern='',
-                        sort_by: str = 'name', sort_order: str = 'asc',
-                        include_hidden: bool = False):
+                        sort_by: str = 'name', sort_order: str = 'asc'):
     _padding = ' '
     s = []
     
@@ -1765,7 +1747,6 @@ async def html_dir_list(_dir, runid, wd, request_path, diff_wd, base_query,
         filter_pattern,
         sort_by,
         sort_order,
-        include_hidden,
     )
 
     original_request_path = request_path
@@ -1895,8 +1876,6 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     if '?' in diff_runid:
         diff_runid = diff_runid.split('?')[0]
 
-    include_hidden, _ = _parse_bool_param(args.get('include_hidden'), default=False)
-
     sort_by, sort_order = _normalize_sort_params(args)
 
     diff_wd = None
@@ -1909,8 +1888,6 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
     if include_sort_params:
         base_query['sort'] = sort_by
         base_query['order'] = sort_order
-    if include_hidden:
-        base_query['include_hidden'] = '1'
 
     query_suffix = f'?{urlencode(base_query)}' if base_query else ''
     
@@ -1973,7 +1950,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         listing_html, total_items, using_manifest = await html_dir_list(
             path, runid, wd, request.path, diff_wd, base_query,
             page=page, page_size=MAX_FILE_LIMIT, filter_pattern=filter_pattern,
-            sort_by=sort_by, sort_order=sort_order, include_hidden=include_hidden,
+            sort_by=sort_by, sort_order=sort_order,
         )
         
         # Calculate total pages and validate page number
@@ -2270,8 +2247,7 @@ async def _files_list_response(*,
                                offset: int,
                                pattern: str,
                                sort_by: str,
-                               sort_order: str,
-                               include_hidden: bool) -> JSONResponse:
+                               sort_order: str) -> JSONResponse:
     page = (offset // limit) + 1
     page_offset = offset % limit
 
@@ -2283,7 +2259,6 @@ async def _files_list_response(*,
         filter_pattern=pattern,
         sort_by=sort_by,
         sort_order=sort_order,
-        include_hidden=include_hidden,
     )
 
     if total_items == 0 or offset >= total_items:
@@ -2299,7 +2274,6 @@ async def _files_list_response(*,
                 filter_pattern=pattern,
                 sort_by=sort_by,
                 sort_order=sort_order,
-                include_hidden=include_hidden,
             )
             using_manifest = using_manifest or next_using_manifest
             needed = limit - len(entries)
@@ -2345,8 +2319,7 @@ async def _files_meta_response(*,
                                wd: str,
                                rel_path: str,
                                abs_path: str,
-                               using_manifest: bool,
-                               include_hidden: bool) -> JSONResponse:
+                               using_manifest: bool) -> JSONResponse:
     name = '' if rel_path in ('.', '') else os.path.basename(abs_path.rstrip(os.sep))
     is_symlink = os.path.islink(abs_path)
     symlink_is_dir = False
@@ -2359,7 +2332,7 @@ async def _files_meta_response(*,
 
     hr_value = ''
     if is_dir:
-        child_count = await get_total_items(abs_path, include_hidden=include_hidden)
+        child_count = await get_total_items(abs_path)
         hr_value = f'{child_count} items'
 
     entry_payload = _build_files_entry_payload(
@@ -2398,10 +2371,17 @@ async def _handle_files_request(
             details='Accept header must allow application/json.',
         )
 
-    limit, offset, pattern, sort_by, sort_order, meta, include_hidden = _parse_files_query_params(request)
+    limit, offset, pattern, sort_by, sort_order, meta = _parse_files_query_params(request)
 
     wd = _resolve_files_root(runid)
     rel_path = _normalize_files_rel_path(subpath or '')
+    if _is_restricted_recorder_path(rel_path):
+        _raise_files_error(
+            HTTPStatus.FORBIDDEN,
+            'Access denied.',
+            code='forbidden_path',
+            details='Access to recorder log artifacts is forbidden.',
+        )
     abs_path = _resolve_files_path(wd, rel_path)
     _enforce_no_symlink_traversal(wd, rel_path, meta=meta)
 
@@ -2425,7 +2405,6 @@ async def _handle_files_request(
             rel_path=rel_path,
             abs_path=abs_path,
             using_manifest=using_manifest,
-            include_hidden=include_hidden,
         )
 
     if not os.path.isdir(abs_path):
@@ -2448,7 +2427,6 @@ async def _handle_files_request(
         pattern=pattern,
         sort_by=sort_by,
         sort_order=sort_order,
-        include_hidden=include_hidden,
     )
 
 
@@ -2473,9 +2451,16 @@ async def _handle_browse_request(
     *,
     wd_override: str | Path | None = None,
 ):
+    subpath_value = subpath or ''
+    if _is_restricted_recorder_path(subpath_value):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail='Access to recorder log artifacts is forbidden.',
+        )
+
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
     flask_request = FlaskRequestAdapter(request)
-    result = await _browse_tree_helper(runid, subpath or '', wd, flask_request, config)
+    result = await _browse_tree_helper(runid, subpath_value, wd, flask_request, config)
     return ensure_response(result)
 
 

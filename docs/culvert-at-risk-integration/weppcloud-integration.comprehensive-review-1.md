@@ -27,7 +27,7 @@
 - Ingestion tests do not cover size/hash mismatches, invalid `schema_version`, invalid `total_bytes`, invalid ZIP member paths, or raster transform/size mismatches. (tests: `tests/microservices/test_rq_engine_culverts.py:55`, validator: `wepppy/microservices/culvert_payload_validator.py:241`)
 - Orchestration tests don’t exercise `NoOutletFoundError` seeding, `CulvertPointOutsideWatershedError`, or minimum watershed area filtering. (tests: `tests/culverts/test_culvert_orchestration.py:32`, code: `wepppy/rq/culvert_rq.py:1310`)
 - CulvertsRunner tests skip VRT cropping, stream fallback selection (`streams.tif`/`chnjnt.streams.tif`), and map-mode order reduction behavior. (tests: `tests/culverts/test_culverts_runner.py:200`, code: `wepppy/nodb/culverts_runner.py:235`)
-- No tests cover the retry endpoint or browse/download routes for culvert batches. (routes: `wepppy/microservices/rq_engine/culvert_routes.py:126`, `wepppy/microservices/browse.py:1909`, `wepppy/microservices/_download.py:214`)
+- No tests cover the retry endpoint or browse/download routes for culvert batches. (routes: `wepppy/microservices/rq_engine/culvert_routes.py:126`, `wepppy/microservices/browse/browse.py:1909`, `wepppy/microservices/browse/_download.py:214`)
 - No tests validate native-CRS WMesque retrieval or the nodata guard behavior noted in Phase 5d. (code: `wepppy/rq/culvert_rq.py:1218`, plan: `docs/culvert-at-risk-integration/weppcloud-integration.plan.md:552`)
 
 ## Known Issues and Open Items
@@ -40,7 +40,7 @@
 
 ## Integration Points
 - WMesque2 native CRS retrieval is wired through `extent_crs` and `bbox_crs` in the client and culvert batch landuse/soils fetch path. (client: `wepppy/all_your_base/geo/webclients/wmesque.py:79`, caller: `wepppy/rq/culvert_rq.py:1218`)
-- Browse and download routes exist for culvert batch artifacts under `/weppcloud/culverts/{uuid}/browse/` and `/weppcloud/culverts/{uuid}/download/`. (browse: `wepppy/microservices/browse.py:1909`, download: `wepppy/microservices/_download.py:214`)
+- Browse and download routes exist for culvert batch artifacts under `/weppcloud/culverts/{uuid}/browse/` and `/weppcloud/culverts/{uuid}/download/`. (browse: `wepppy/microservices/browse/browse.py:1909`, download: `wepppy/microservices/browse/_download.py:214`)
 - RQ job metadata is set for culvert batch/run jobs, and job status aggregation works, but errors are not surfaced in job status payloads. (culvert jobs: `wepppy/rq/culvert_rq.py:253`, job info: `wepppy/rq/job_info.py:104`)
 - Run path resolution supports culvert run groups via `CULVERTS_ROOT`, aligning browse/download to `/wc1/culverts/<uuid>/runs/<Point_ID>/`. (helpers: `wepppy/weppcloud/utils/helpers.py:144`)
 
