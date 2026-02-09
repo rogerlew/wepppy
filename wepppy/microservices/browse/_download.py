@@ -16,7 +16,16 @@ from starlette.routing import Route
 import pandas as pd
 import pyarrow.parquet as pq
 
+from wepppy.microservices.browse.auth import (
+    RUN_ALLOWED_TOKEN_CLASSES,
+    USER_SERVICE_TOKEN_CLASSES,
+    BrowseAuthError,
+    authorize_group_request,
+    authorize_run_request,
+    handle_auth_error,
+)
 from wepppy.microservices.browse.security import (
+    PATH_SECURITY_FORBIDDEN_RECORDER,
     path_security_detail,
     validate_raw_subpath,
     validate_resolved_target,
@@ -28,12 +37,34 @@ from wepppy.weppcloud.utils.helpers import get_wd
 async def aria2c_spec(request: Request) -> PlainTextResponse:
     runid = request.path_params['runid']
     config = request.path_params['config']
+    try:
+        auth_context = authorize_run_request(
+            request,
+            runid=runid,
+            subpath='',
+            allow_public_without_token=True,
+            require_authenticated=False,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        handle_auth_error(
+            request,
+            runid=runid,
+            error=exc,
+            redirect_on_401=False,
+        )
+        raise
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
     base_url = f"https://wepp.cloud/weppcloud/runs/{runid}/{config}/download"
 
-    file_specs = await asyncio.to_thread(_collect_file_specs, wd, base_url)
+    file_specs = await asyncio.to_thread(
+        _collect_file_specs,
+        wd,
+        base_url,
+        auth_context.is_root,
+    )
     spec_content = "\n".join(file_specs)
     return PlainTextResponse(spec_content)
 
@@ -42,8 +73,29 @@ async def download_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
     runid = request.path_params['runid']
     config = request.path_params['config']
+    try:
+        auth_context = authorize_run_request(
+            request,
+            runid=runid,
+            subpath=subpath,
+            allow_public_without_token=True,
+            require_authenticated=False,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        return handle_auth_error(
+            request,
+            runid=runid,
+            error=exc,
+            redirect_on_401=True,
+            redirect_html_only=True,
+        )
 
+    allow_recorder = auth_context.is_root
     violation = validate_raw_subpath(subpath)
+    if violation is not None:
+        if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            violation = None
     if violation is not None:
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
@@ -52,7 +104,7 @@ async def download_with_subpath(request: Request) -> Response:
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
     _assert_within_root(wd, dir_path)
-    _assert_target_within_allowed_roots(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
 
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
@@ -63,8 +115,21 @@ async def download_with_subpath(request: Request) -> Response:
 async def download_culvert_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
     batch_uuid = request.path_params['uuid']
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_uuid,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
 
+    allow_recorder = auth_context.is_root
     violation = validate_raw_subpath(subpath)
+    if violation is not None:
+        if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            violation = None
     if violation is not None:
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
@@ -74,7 +139,7 @@ async def download_culvert_with_subpath(request: Request) -> Response:
 
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
-    _assert_target_within_allowed_roots(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
@@ -84,8 +149,21 @@ async def download_culvert_with_subpath(request: Request) -> Response:
 async def download_batch_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
     batch_name = request.path_params['batch_name']
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_name,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
 
+    allow_recorder = auth_context.is_root
     violation = validate_raw_subpath(subpath)
+    if violation is not None:
+        if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            violation = None
     if violation is not None:
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
@@ -95,7 +173,7 @@ async def download_batch_with_subpath(request: Request) -> Response:
 
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
-    _assert_target_within_allowed_roots(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
@@ -213,19 +291,30 @@ def _assert_within_root(root: str | Path, target: str | Path) -> None:
         raise HTTPException(status_code=403, detail="Invalid path.")
 
 
-def _assert_target_within_allowed_roots(root: str | Path, target: str | Path) -> None:
+def _assert_target_within_allowed_roots(
+    root: str | Path,
+    target: str | Path,
+    *,
+    allow_recorder: bool = False,
+) -> None:
     violation = validate_resolved_target(root, target)
+    if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+        return
     if violation is not None:
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
 
-def _collect_file_specs(wd: str, base_url: str) -> list[str]:
+def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[str]:
     specs: list[str] = []
     for root, _dirs, files in os.walk(wd):
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, wd)
-            if validate_raw_subpath(relative_path) is not None:
+            violation = validate_raw_subpath(relative_path)
+            if (
+                violation is not None
+                and not (allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER)
+            ):
                 continue
             url = f"{base_url}/{relative_path}"
             specs.append(f"{url}\n out={relative_path}")

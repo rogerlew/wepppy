@@ -10,12 +10,24 @@ pytestmark = pytest.mark.microservice
 
 @pytest.fixture
 def load_browse(monkeypatch):
+    def _allow_auth(*args, **kwargs):
+        import wepppy.microservices.browse.auth as auth_mod
+
+        return auth_mod.AuthContext(
+            claims={"token_class": "user", "roles": ["User"], "sub": "1"},
+            token_class="user",
+            roles=frozenset({"user"}),
+        )
+
     def _loader(**env):
         for key, value in env.items():
             monkeypatch.setenv(key, value)
         import wepppy.microservices.browse.browse as browse_mod
 
-        return importlib.reload(browse_mod)
+        browse_mod = importlib.reload(browse_mod)
+        monkeypatch.setattr(browse_mod, "authorize_run_request", _allow_auth)
+        monkeypatch.setattr(browse_mod, "authorize_group_request", _allow_auth)
+        return browse_mod
 
     return _loader
 

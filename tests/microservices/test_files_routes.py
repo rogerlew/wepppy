@@ -11,14 +11,40 @@ pytestmark = pytest.mark.microservice
 
 @pytest.fixture
 def load_browse(monkeypatch):
+    def _allow_auth(*args, **kwargs):
+        import wepppy.microservices.browse.auth as auth_mod
+
+        return auth_mod.AuthContext(
+            claims={"token_class": "user", "roles": ["User"], "sub": "1"},
+            token_class="user",
+            roles=frozenset({"user"}),
+        )
+
     def _loader(**env):
         for key, value in env.items():
             monkeypatch.setenv(key, value)
+        import wepppy.microservices.browse._download as download_mod
         import wepppy.microservices.browse.dtale as dtale_mod
+        import wepppy.microservices.browse.files_api as files_api_mod
         import wepppy.microservices.browse.browse as browse_mod
+        import wepppy.microservices._gdalinfo as gdalinfo_mod
 
+        importlib.reload(download_mod)
         importlib.reload(dtale_mod)
-        return importlib.reload(browse_mod)
+        importlib.reload(files_api_mod)
+        importlib.reload(gdalinfo_mod)
+        browse_mod = importlib.reload(browse_mod)
+
+        monkeypatch.setattr(download_mod, "authorize_run_request", _allow_auth)
+        monkeypatch.setattr(download_mod, "authorize_group_request", _allow_auth)
+        monkeypatch.setattr(dtale_mod, "authorize_run_request", _allow_auth)
+        monkeypatch.setattr(dtale_mod, "authorize_group_request", _allow_auth)
+        monkeypatch.setattr(files_api_mod, "authorize_run_request", _allow_auth)
+        monkeypatch.setattr(gdalinfo_mod, "authorize_run_request", _allow_auth)
+        monkeypatch.setattr(gdalinfo_mod, "authorize_group_request", _allow_auth)
+        monkeypatch.setattr(browse_mod, "authorize_run_request", _allow_auth)
+        monkeypatch.setattr(browse_mod, "authorize_group_request", _allow_auth)
+        return browse_mod
 
     return _loader
 

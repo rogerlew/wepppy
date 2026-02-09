@@ -89,6 +89,15 @@ from wepppy.microservices.browse.dtale import (
     build_handlers as build_dtale_handlers,
     resolve_dtale_base as _resolve_dtale_base,
 )
+from wepppy.microservices.browse.auth import (
+    AuthContext,
+    BrowseAuthError,
+    RUN_ALLOWED_TOKEN_CLASSES,
+    USER_SERVICE_TOKEN_CLASSES,
+    authorize_group_request,
+    authorize_run_request,
+    handle_auth_error,
+)
 from wepppy.microservices.browse.files_api import (
     FilesApiDependencies,
     accepts_json as _accepts_json,
@@ -109,6 +118,7 @@ from wepppy.microservices.browse.listing import (
     remove_manifest,
 )
 from wepppy.microservices.browse.security import (
+    PATH_SECURITY_FORBIDDEN_RECORDER,
     is_restricted_recorder_path,
     path_security_detail,
     validate_raw_subpath,
@@ -262,8 +272,15 @@ def _assert_within_root(root: str | Path, target: str | Path) -> None:
         abort(403)
 
 
-def _assert_target_within_allowed_roots(root: str | Path, target: str | Path) -> None:
+def _assert_target_within_allowed_roots(
+    root: str | Path,
+    target: str | Path,
+    *,
+    allow_recorder: bool = False,
+) -> None:
     violation = validate_resolved_target(root, target)
+    if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+        return
     if violation is not None:
         abort(403, path_security_detail(violation))
 
@@ -769,14 +786,23 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
     return HTMLResponse(page_html, status_code=500)
 
 
-async def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
+async def _browse_tree_helper(
+    runid,
+    subpath,
+    wd,
+    request,
+    config,
+    *,
+    allow_recorder: bool,
+    filter_pattern_default='',
+):
     """
     Helper function to handle common browse tree logic.
     Returns the response for a file or directory browse request.
     """
     full_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, full_path)
-    _assert_target_within_allowed_roots(wd, full_path)
+    _assert_target_within_allowed_roots(wd, full_path, allow_recorder=allow_recorder)
 
     if os.path.isfile(full_path):
         # If subpath points to a file, serve it
@@ -801,7 +827,7 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
         
         # Security and existence checks
         _assert_within_root(wd, dir_path)
-        _assert_target_within_allowed_roots(wd, dir_path)
+        _assert_target_within_allowed_roots(wd, dir_path, allow_recorder=allow_recorder)
             
         if not os.path.isdir(dir_path):
             return _path_not_found_response(runid, subpath, wd, request, config)
@@ -1203,10 +1229,34 @@ async def _handle_browse_request(
     config: str,
     subpath: str,
     *,
+    auth_context: AuthContext | None = None,
     wd_override: str | Path | None = None,
 ):
     subpath_value = subpath or ''
+    context = auth_context
+    if context is None:
+        try:
+            context = authorize_run_request(
+                request,
+                runid=runid,
+                subpath=subpath_value,
+                allow_public_without_token=True,
+                require_authenticated=False,
+                allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+            )
+        except BrowseAuthError as exc:
+            return handle_auth_error(
+                request,
+                runid=runid,
+                error=exc,
+                redirect_on_401=True,
+            )
+
+    allow_recorder = bool(context and context.is_root)
     violation = validate_raw_subpath(subpath_value)
+    if violation is not None:
+        if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            violation = None
     if violation is not None:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
@@ -1215,18 +1265,35 @@ async def _handle_browse_request(
 
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
     flask_request = FlaskRequestAdapter(request)
-    result = await _browse_tree_helper(runid, subpath_value, wd, flask_request, config)
+    result = await _browse_tree_helper(
+        runid,
+        subpath_value,
+        wd,
+        flask_request,
+        config,
+        allow_recorder=allow_recorder,
+    )
     return ensure_response(result)
 
 
 async def browse_culvert_root(request: StarletteRequest):
     batch_uuid = request.path_params['uuid']
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_uuid,
+            subpath='',
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
     batch_root = _resolve_culvert_batch_root(batch_uuid)
     return await _handle_browse_request(
         request,
         runid=batch_uuid,
         config='culvert-batch',
         subpath='',
+        auth_context=auth_context,
         wd_override=batch_root,
     )
 
@@ -1234,24 +1301,44 @@ async def browse_culvert_root(request: StarletteRequest):
 async def browse_culvert_subpath(request: StarletteRequest):
     batch_uuid = request.path_params['uuid']
     subpath = request.path_params.get('subpath', '')
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_uuid,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
     batch_root = _resolve_culvert_batch_root(batch_uuid)
     return await _handle_browse_request(
         request,
         runid=batch_uuid,
         config='culvert-batch',
         subpath=subpath,
+        auth_context=auth_context,
         wd_override=batch_root,
     )
 
 
 async def browse_batch_root(request: StarletteRequest):
     batch_name = request.path_params['batch_name']
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_name,
+            subpath='',
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
     batch_root = _resolve_batch_root(batch_name)
     return await _handle_browse_request(
         request,
         runid=batch_name,
         config='batch',
         subpath='',
+        auth_context=auth_context,
         wd_override=batch_root,
     )
 
@@ -1259,12 +1346,22 @@ async def browse_batch_root(request: StarletteRequest):
 async def browse_batch_subpath(request: StarletteRequest):
     batch_name = request.path_params['batch_name']
     subpath = request.path_params.get('subpath', '')
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_name,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
     batch_root = _resolve_batch_root(batch_name)
     return await _handle_browse_request(
         request,
         runid=batch_name,
         config='batch',
         subpath=subpath,
+        auth_context=auth_context,
         wd_override=batch_root,
     )
 

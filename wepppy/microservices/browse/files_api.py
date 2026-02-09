@@ -15,6 +15,11 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import JSONResponse
 
+from wepppy.microservices.browse.auth import (
+    USER_SERVICE_TOKEN_CLASSES,
+    BrowseAuthError,
+    authorize_run_request,
+)
 from wepppy.microservices.browse.security import (
     PATH_SECURITY_FORBIDDEN_HIDDEN,
     PATH_SECURITY_FORBIDDEN_RECORDER,
@@ -564,6 +569,26 @@ async def _handle_files_request(
             details="Accept header must allow application/json.",
         )
 
+    try:
+        auth_context = authorize_run_request(
+            request,
+            runid=runid,
+            subpath=subpath or "",
+            allow_public_without_token=False,
+            require_authenticated=True,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        message = "Authentication required." if exc.status_code == HTTPStatus.UNAUTHORIZED else "Access denied."
+        code = "unauthorized" if exc.status_code == HTTPStatus.UNAUTHORIZED else "forbidden"
+        _raise_files_error(
+            exc.status_code,
+            message,
+            code=code,
+            details=exc.message,
+        )
+
+    allow_recorder = auth_context.is_root
     limit, offset, pattern, sort_by, sort_order, meta = _parse_files_query_params(
         request, validate_filter_pattern=deps.validate_filter_pattern
     )
@@ -589,6 +614,9 @@ async def _handle_files_request(
 
     raw_violation = validate_raw_subpath(rel_path)
     if raw_violation is not None:
+        if allow_recorder and raw_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            raw_violation = None
+    if raw_violation is not None:
         _raise_forbidden_path(raw_violation)
 
     abs_path = _resolve_files_path(wd, rel_path)
@@ -610,6 +638,9 @@ async def _handle_files_request(
         )
 
     resolved_violation = validate_resolved_target(wd, abs_path)
+    if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
+        if allow_recorder and resolved_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            resolved_violation = None
     if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
         _raise_forbidden_path(resolved_violation)
     if resolved_violation is not None:

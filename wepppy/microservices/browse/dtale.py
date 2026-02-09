@@ -13,7 +13,16 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import RedirectResponse
 
+from wepppy.microservices.browse.auth import (
+    RUN_ALLOWED_TOKEN_CLASSES,
+    USER_SERVICE_TOKEN_CLASSES,
+    BrowseAuthError,
+    authorize_group_request,
+    authorize_run_request,
+    handle_auth_error,
+)
 from wepppy.microservices.browse.security import (
+    PATH_SECURITY_FORBIDDEN_RECORDER,
     path_security_detail,
     validate_raw_subpath,
     validate_resolved_target,
@@ -69,6 +78,7 @@ def build_handlers(
         *,
         runid: str,
         config: str,
+        auth_mode: str,
         wd_override: str | Path | None = None,
     ):
         if not _DTALE_SERVICE_URL:
@@ -79,7 +89,39 @@ def build_handlers(
 
         subpath = request.path_params.get('subpath') or ''
         rel_path = subpath.lstrip('/')
+        if auth_mode == 'run':
+            try:
+                auth_context = authorize_run_request(
+                    request,
+                    runid=runid,
+                    subpath=rel_path,
+                    allow_public_without_token=False,
+                    require_authenticated=True,
+                    allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+                )
+            except BrowseAuthError as exc:
+                return handle_auth_error(
+                    request,
+                    runid=runid,
+                    error=exc,
+                    redirect_on_401=True,
+                )
+        else:
+            try:
+                auth_context = authorize_group_request(
+                    request,
+                    identifier=runid,
+                    subpath=rel_path,
+                    allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+                )
+            except BrowseAuthError as exc:
+                raise HTTPException(status_code=exc.status_code, detail=exc.message)
+
+        allow_recorder = auth_context.is_root
         raw_violation = validate_raw_subpath(rel_path)
+        if raw_violation is not None:
+            if allow_recorder and raw_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+                raw_violation = None
         if raw_violation is not None:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN,
@@ -90,6 +132,9 @@ def build_handlers(
         target = os.path.abspath(os.path.join(wd, rel_path))
         assert_within_root(wd, target)
         resolved_violation = validate_resolved_target(wd, target)
+        if resolved_violation is not None:
+            if allow_recorder and resolved_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+                resolved_violation = None
         if resolved_violation is not None:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN,
@@ -158,7 +203,12 @@ def build_handlers(
     async def dtale_open(request: StarletteRequest):
         runid = request.path_params['runid']
         config = request.path_params['config']
-        return await _dtale_open_for_root(request, runid=runid, config=config)
+        return await _dtale_open_for_root(
+            request,
+            runid=runid,
+            config=config,
+            auth_mode='run',
+        )
 
     async def dtale_culvert_open(request: StarletteRequest):
         batch_uuid = request.path_params['uuid']
@@ -167,6 +217,7 @@ def build_handlers(
             request,
             runid=batch_uuid,
             config='culvert-batch',
+            auth_mode='group',
             wd_override=batch_root,
         )
 
@@ -177,6 +228,7 @@ def build_handlers(
             request,
             runid=batch_name,
             config='batch',
+            auth_mode='group',
             wd_override=batch_root,
         )
 

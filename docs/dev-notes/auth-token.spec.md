@@ -17,6 +17,7 @@ error shapes must follow `docs/schemas/rq-response-contract.md`.
   - CLI token revocation script (`wepppy/weppcloud/_scripts/revoke_auth_token.py`).
   - `wctl issue-auth-token` / `wctl revoke-auth-token` wrappers (`tools/wctl2/commands/auth.py`).
   - Session JWT issuance endpoint (`/rq-engine/api/runs/<runid>/<config>/session-token`).
+  - Session-token endpoint sets an HttpOnly browse cookie scoped to `/weppcloud/runs/<runid>/<config>/`.
   - Profile JWT issuance endpoint (`POST /profile/mint-token`) for authenticated users.
   - rq-engine JWT enforcement on `canceljob` and culvert batch submit/retry routes (includes jti denylist).
   - Flask `/rq/api/*` routes removed; rq-engine owns queue-triggering endpoints.
@@ -56,6 +57,7 @@ following environment variables:
 ### Session token (anonymous runs)
 - `token_class=session`
 - Required claims: `sub` (session id), `runid`, `session_id`, `aud`, `scope`, `iat`, `exp`, `jti`.
+- Optional authenticated-session claims: `user_id` (int), `roles` (`list[str]`).
 - Authorization: run-scoped access only, optionally validated against the active session store.
 
 ### MCP token (query-engine)
@@ -91,6 +93,7 @@ Issued tokens contain the following fields:
 - `roles`, `groups` – User token claims.
 - `service_groups` – Service token claim.
 - `session_id` – Session token claim.
+- `user_id`, `roles` – Optional authenticated session-token claims.
 - Additional custom claims are preserved verbatim.
 
 Downstream services should verify signatures using
@@ -157,8 +160,10 @@ If validation fails a `JWTDecodeError` is raised.
 - Behavior:
   - Requires run authorization (public or owner).
   - Issues a session JWT (`token_class=session`) scoped to the run.
+  - If a Flask login session is present, includes `user_id` and `roles` claims from Redis-backed session data.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
   - Stores a Redis marker `auth:session:run:<runid>:<session_id>` (DB 11) with TTL.
+  - Sets an HttpOnly cookie (default key `wepp_browse_jwt`, configurable via `WEPP_BROWSE_JWT_COOKIE_NAME`) scoped to `/weppcloud/runs/<runid>/<config>/`.
 
 ## Profile token issuance
 - Endpoint: `POST /profile/mint-token` (Flask route, authenticated user required).

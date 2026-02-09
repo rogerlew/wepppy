@@ -10,13 +10,18 @@ import uuid
 from wepppy.weppcloud.utils.runid import generate_runid
 import json
 import traceback
+from urllib.parse import urlsplit
+
+import redis
+from itsdangerous import BadSignature, Signer
 
 from .._common import *  # noqa: F401,F403
-from flask import current_app
+from flask import current_app, session
 from werkzeug.exceptions import HTTPException
 
 import wepppy
 from wepppy.all_your_base import isint
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import get_configs
 from wepppy.nodb.core import * 
 from wepppy.nodb.unitizer import Unitizer
@@ -47,6 +52,12 @@ from wepppy.weppcloud.utils.helpers import (
 
 run_0_bp = Blueprint('run_0', __name__,
                      template_folder='templates')
+
+SESSION_TOKEN_TTL_SECONDS = 4 * 24 * 60 * 60
+SESSION_TOKEN_SCOPES = ["rq:status", "rq:enqueue", "rq:export"]
+DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
+BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
+DEFAULT_SITE_PREFIX = "/weppcloud"
 
 VAPID_PUBLIC_KEY = ''
 _VAPID_PATH = pathlib.Path('/workdir/weppcloud2/microservices/wepppush/vapid.json')
@@ -182,7 +193,250 @@ def runs0_nocfg(runid):
     if pup_relpath:
         target_args['pup'] = pup_relpath
 
+    next_target = _sanitize_runs0_next_target(request.args.get("next"), runid, ron.config_stem)
+    if next_target:
+        response = redirect(next_target)
+        if _set_run_session_jwt_cookie(response, runid=runid, config=ron.config_stem):
+            return response
+        target_args['next'] = next_target
+        return redirect(url_for_run('run_0.runs0', **target_args))
+
     return redirect(url_for_run('run_0.runs0', **target_args))
+
+
+def _bool_env(name: str, *, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    token = raw.strip().lower()
+    if token in {"1", "true", "yes", "on"}:
+        return True
+    if token in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _normalize_site_prefix(prefix: str | None) -> str:
+    if not prefix:
+        return ""
+    trimmed = prefix.strip()
+    if not trimmed or trimmed == "/":
+        return ""
+    return "/" + trimmed.strip("/")
+
+
+def _site_prefix() -> str:
+    configured = current_app.config.get("SITE_PREFIX", DEFAULT_SITE_PREFIX)
+    return _normalize_site_prefix(configured)
+
+
+def _browse_jwt_cookie_name() -> str:
+    value = (os.getenv(BROWSE_JWT_COOKIE_NAME_ENV) or "").strip()
+    return value or DEFAULT_BROWSE_JWT_COOKIE_NAME
+
+
+def _browse_jwt_cookie_path(runid: str, config: str) -> str:
+    return f"{_site_prefix()}/runs/{runid}/{config}/"
+
+
+def _cookie_samesite() -> str:
+    value = (os.getenv("WEPP_AUTH_SESSION_COOKIE_SAMESITE") or "lax").strip().lower()
+    if value in {"lax", "strict", "none"}:
+        return value
+    return "lax"
+
+
+def _parse_user_id(raw: object) -> int | None:
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        return int(str(raw).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _normalize_role_names(raw: object) -> list[str]:
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        candidates = [part.strip() for part in raw.split(",") if part.strip()]
+    elif isinstance(raw, (list, tuple, set)):
+        candidates = [str(item).strip() for item in raw if str(item).strip()]
+    else:
+        candidates = [str(raw).strip()] if str(raw).strip() else []
+
+    names: list[str] = []
+    seen: set[str] = set()
+    for role in candidates:
+        key = role.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        names.append(role)
+    return names
+
+
+def _session_identity_claims() -> tuple[int | None, list[str]]:
+    user_id = _parse_user_id(session.get("_user_id") or session.get("user_id"))
+    roles = _normalize_role_names(
+        session.get("_roles_mask") or session.get("_roles") or session.get("roles")
+    )
+    return user_id, roles
+
+
+def _owner_matches_user(owner: object, user_id: int) -> bool:
+    owner_id = getattr(owner, "id", None)
+    if owner_id is None:
+        return False
+    try:
+        return int(owner_id) == int(user_id)
+    except (TypeError, ValueError):
+        return False
+
+
+def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: list[str]) -> bool:
+    wd = get_wd(runid, prefer_active=False)
+    if Ron.ispublic(wd):
+        return True
+
+    owners = get_run_owners_lazy(runid)
+    if not owners:
+        return True
+
+    role_set = {role.lower() for role in roles}
+    if "admin" in role_set or "root" in role_set:
+        return True
+
+    if user_id is None:
+        return False
+    return any(_owner_matches_user(owner, user_id) for owner in owners)
+
+
+def _resolve_session_id_from_request() -> str | None:
+    sid = getattr(session, "sid", None)
+    if sid:
+        return str(sid)
+
+    cookie_name = current_app.config.get("SESSION_COOKIE_NAME", "session")
+    raw_cookie = request.cookies.get(cookie_name)
+    if not raw_cookie:
+        return None
+
+    use_signer = current_app.config.get("SESSION_USE_SIGNER", True)
+    if not use_signer:
+        return str(raw_cookie)
+
+    secret = current_app.config.get("SECRET_KEY") or os.getenv("SECRET_KEY")
+    if not secret:
+        return None
+
+    signer = Signer(secret, salt="flask-session", key_derivation="hmac")
+    try:
+        return signer.unsign(raw_cookie).decode("utf-8")
+    except BadSignature:
+        return None
+
+
+def _store_session_marker(runid: str, session_id: str) -> None:
+    key = f"auth:session:run:{runid}:{session_id}"
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        redis_conn.setex(key, SESSION_TOKEN_TTL_SECONDS, "1")
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+
+
+def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
+    user_id, roles = _session_identity_claims()
+    session_id = _resolve_session_id_from_request()
+    if not session_id:
+        if _session_user_authorized_for_run(runid, user_id, roles):
+            session_id = uuid.uuid4().hex
+        else:
+            return False
+
+    if not _session_user_authorized_for_run(runid, user_id, roles):
+        return False
+
+    extra_claims: dict[str, object] = {
+        "token_class": "session",
+        "session_id": session_id,
+        "runid": runid,
+        "config": config,
+        "jti": uuid.uuid4().hex,
+    }
+    if user_id is not None:
+        extra_claims["user_id"] = user_id
+        extra_claims["roles"] = roles
+
+    token_payload = auth_tokens.issue_token(
+        session_id,
+        scopes=SESSION_TOKEN_SCOPES,
+        audience="rq-engine",
+        expires_in=SESSION_TOKEN_TTL_SECONDS,
+        extra_claims=extra_claims,
+    )
+    token_value = token_payload.get("token")
+    if not isinstance(token_value, str) or not token_value:
+        return False
+
+    _store_session_marker(runid, session_id)
+    response.set_cookie(
+        key=_browse_jwt_cookie_name(),
+        value=token_value,
+        max_age=SESSION_TOKEN_TTL_SECONDS,
+        httponly=True,
+        secure=_bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=False),
+        samesite=_cookie_samesite(),
+        path=_browse_jwt_cookie_path(runid, config),
+    )
+    return True
+
+
+def _sanitize_runs0_next_target(next_value: str | None, runid: str, config: str) -> str | None:
+    if not next_value:
+        return None
+
+    try:
+        parsed = urlsplit(str(next_value))
+    except Exception:
+        return None
+
+    if parsed.scheme or parsed.netloc:
+        return None
+
+    path = parsed.path or ""
+    if not path:
+        return None
+    if path.startswith("//"):
+        return None
+    if not path.startswith("/"):
+        path = "/" + path.lstrip("/")
+
+    run_base = f"{_site_prefix()}/runs/{runid}/"
+    if not path.startswith(run_base):
+        return None
+
+    remainder = path[len(run_base):]
+    if not remainder or remainder == config:
+        normalized_path = f"{run_base}{config}/"
+    elif remainder.startswith(f"{config}/"):
+        normalized_path = f"{run_base}{remainder}"
+    else:
+        normalized_path = f"{run_base}{config}/{remainder.lstrip('/')}"
+
+    expected_prefix = f"{run_base}{config}/"
+    if not normalized_path.startswith(expected_prefix):
+        return None
+
+    if parsed.query:
+        normalized_path = f"{normalized_path}?{parsed.query}"
+    if parsed.fragment:
+        normalized_path = f"{normalized_path}#{parsed.fragment}"
+    return normalized_path
 
 def _log_access(wd, current_user, ip):
     assert _exists(wd)

@@ -95,6 +95,51 @@ def _session_snapshot() -> Dict[str, Any]:
     }
 
 
+def _extract_role_names(user) -> list[str]:
+    if user is None:
+        return []
+
+    raw_roles = getattr(user, "roles", None) or []
+    names: list[str] = []
+    seen: set[str] = set()
+    for role in raw_roles:
+        candidate = role if isinstance(role, str) else getattr(role, "name", None)
+        if candidate is None:
+            continue
+        role_name = str(candidate).strip()
+        if not role_name:
+            continue
+        key = role_name.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        names.append(role_name)
+    return names
+
+
+def _cache_authenticated_role_state(user) -> None:
+    if not has_request_context():
+        return
+
+    role_names = _extract_role_names(user)
+    session["_roles_mask"] = role_names
+    session["_roles"] = role_names
+    session.modified = True
+
+
+def _clear_cached_role_state() -> None:
+    if not has_request_context():
+        return
+
+    changed = False
+    for key in ("_roles_mask", "_roles"):
+        if key in session:
+            session.pop(key, None)
+            changed = True
+    if changed:
+        session.modified = True
+
+
 def _extract_identity(user, login_form, extra: Dict[str, Any]):
     if user is not None:
         for attr in ('email', 'username'):
@@ -266,6 +311,11 @@ def _log_login_response(response):
 def _connect_security_signals(app):
     def _make_handler(event_name: str):
         def _handler(sender, user=None, **extra):
+            if event_name == "user_authenticated":
+                _cache_authenticated_role_state(user)
+            elif event_name == "user_unauthenticated":
+                _clear_cached_role_state()
+
             extra_copy = dict(extra)
             login_form = extra_copy.pop('login_form', None)
             _log_event(event_name, user=user, login_form=login_form, extra=extra_copy)
@@ -284,7 +334,7 @@ def _connect_security_signals(app):
         signal = getattr(fs_signals, signal_name, None)
         if signal is None:
             continue
-        signal.connect(_make_handler(event_name), app)
+        signal.connect(_make_handler(event_name), app, weak=False)
 
 _diagnostic_logger = logging.getLogger("gunicorn.error")
 _diagnostic_logger.debug("Security logging module imported")

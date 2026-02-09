@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pickle
 import uuid
 from typing import Any, Mapping, Sequence
 
@@ -12,10 +13,10 @@ from itsdangerous import BadSignature, Signer
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbBase
-from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils import auth_tokens
 
-from .auth import AuthError, require_jwt
+from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 
@@ -27,6 +28,9 @@ SESSION_TOKEN_TTL_SECONDS = 4 * 24 * 60 * 60
 SESSION_TOKEN_SCOPES = ["rq:status", "rq:enqueue", "rq:export"]
 SESSION_TOKEN_REQUIRED_SCOPES = ["rq:status"]
 SESSION_KEY_PREFIX = "session:"
+DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
+BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
+DEFAULT_SITE_PREFIX = "/weppcloud"
 
 
 def _bool_env(name: str, *, default: bool) -> bool:
@@ -81,16 +85,48 @@ def _session_exists(session_id: str) -> None:
     key_prefix = os.getenv("SESSION_KEY_PREFIX", SESSION_KEY_PREFIX)
     key = f"{key_prefix}{session_id}"
     conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
-    with redis.Redis(**conn_kwargs) as redis_conn:
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
         if not redis_conn.exists(key):
             raise AuthError("Session expired or invalid", status_code=401)
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+
+
+def _session_payload(session_id: str) -> Mapping[str, Any]:
+    key_prefix = os.getenv("SESSION_KEY_PREFIX", SESSION_KEY_PREFIX)
+    key = f"{key_prefix}{session_id}"
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        raw_value = redis_conn.get(key)
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+    if raw_value is None:
+        raise AuthError("Session expired or invalid", status_code=401)
+    try:
+        payload = pickle.loads(raw_value)
+    except Exception as exc:
+        raise AuthError("Invalid session payload", status_code=401) from exc
+    if not isinstance(payload, Mapping):
+        raise AuthError("Invalid session payload", status_code=401)
+    return payload
 
 
 def _store_session_marker(runid: str, session_id: str, ttl_seconds: int) -> None:
     key = f"auth:session:run:{runid}:{session_id}"
     conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
-    with redis.Redis(**conn_kwargs) as redis_conn:
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
         redis_conn.setex(key, ttl_seconds, "1")
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
 
 
 def _resolve_bearer_claims(request: Request) -> Mapping[str, Any] | None:
@@ -109,10 +145,60 @@ def _normalize_list(value: Any) -> list[str]:
     return []
 
 
-def _ensure_run_claim(claims: Mapping[str, Any], runid: str) -> None:
-    runs = _normalize_list(claims.get("runs") or claims.get("runid"))
-    if runs and str(runid) not in runs:
+def _ensure_identifier_claim(claims: Mapping[str, Any], runid: str) -> None:
+    run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
+    if run_claims and str(runid) not in run_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
+
+
+def _normalize_roles(raw: Any) -> list[str]:
+    roles = _normalize_list(raw)
+    if not roles:
+        return []
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for role in roles:
+        if not role:
+            continue
+        key = role.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized.append(role)
+    return normalized
+
+
+def _parse_user_id(raw: Any) -> int | None:
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        return int(str(raw).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _owner_id_matches(owner: Any, user_id: int) -> bool:
+    owner_id = getattr(owner, "id", None)
+    if owner_id is None:
+        return False
+    try:
+        return int(owner_id) == int(user_id)
+    except (TypeError, ValueError):
+        return False
+
+
+def _identity_from_session_payload(payload: Mapping[str, Any]) -> tuple[int | None, list[str]]:
+    user_id = _parse_user_id(payload.get("_user_id") or payload.get("user_id"))
+    roles = _normalize_roles(
+        payload.get("_roles_mask") or payload.get("_roles") or payload.get("roles")
+    )
+    return user_id, roles
+
+
+def _identity_from_claims(claims: Mapping[str, Any]) -> tuple[int | None, list[str]]:
+    user_id = _parse_user_id(claims.get("user_id") or claims.get("sub"))
+    roles = _normalize_roles(claims.get("roles"))
+    return user_id, roles
 
 
 def _session_id_from_claims(claims: Mapping[str, Any]) -> str:
@@ -132,6 +218,27 @@ def _run_is_public(runid: str) -> bool:
     return NoDbBase.ispublic(wd)
 
 
+def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: Sequence[str]) -> bool:
+    if _run_is_public(runid):
+        return True
+
+    owners = get_run_owners_lazy(runid)
+    if not owners:
+        return True
+
+    role_set = {role.lower() for role in roles}
+    if "admin" in role_set or "root" in role_set:
+        return True
+
+    if user_id is None:
+        return False
+
+    for owner in owners:
+        if _owner_id_matches(owner, user_id):
+            return True
+    return False
+
+
 def _resolve_scopes(claims: Mapping[str, Any]) -> list[str]:
     scope_claim = claims.get("scope")
     scope_separator = auth_tokens.get_jwt_config().scope_separator
@@ -142,13 +249,55 @@ def _resolve_scopes(claims: Mapping[str, Any]) -> list[str]:
     return list(SESSION_TOKEN_SCOPES)
 
 
+def _browse_jwt_cookie_name() -> str:
+    value = (os.getenv(BROWSE_JWT_COOKIE_NAME_ENV) or "").strip()
+    return value or DEFAULT_BROWSE_JWT_COOKIE_NAME
+
+
+def _normalize_prefix(prefix: str | None) -> str:
+    if not prefix:
+        return ""
+    trimmed = prefix.strip()
+    if not trimmed or trimmed == "/":
+        return ""
+    return "/" + trimmed.strip("/")
+
+
+def _site_prefix() -> str:
+    return _normalize_prefix(os.getenv("SITE_PREFIX", DEFAULT_SITE_PREFIX))
+
+
+def _session_jwt_cookie_path(runid: str, config: str) -> str:
+    return f"{_site_prefix()}/runs/{runid}/{config}/"
+
+
+def _cookie_samesite() -> str:
+    value = (os.getenv("WEPP_AUTH_SESSION_COOKIE_SAMESITE") or "lax").strip().lower()
+    if value in {"lax", "strict", "none"}:
+        return value
+    return "lax"
+
+
+def _set_session_jwt_cookie(response: JSONResponse, *, runid: str, config: str, token: str) -> None:
+    response.set_cookie(
+        key=_browse_jwt_cookie_name(),
+        value=token,
+        max_age=SESSION_TOKEN_TTL_SECONDS,
+        httponly=True,
+        secure=_bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=False),
+        samesite=_cookie_samesite(),
+        path=_session_jwt_cookie_path(runid, config),
+    )
+
+
 @router.post(
     "/runs/{runid}/{config}/session-token",
     summary="Issue a run-scoped session token",
     description=(
         "Supports Bearer or Flask session-cookie auth. Bearer path requires scope `rq:status`; "
         "cookie path validates server session marker and allows public-run fallback. "
-        "Synchronously mints and returns a short-lived run-scoped session token."
+        "Synchronously mints and returns a short-lived run-scoped session token and "
+        "sets an HttpOnly run-scoped cookie for browse navigation."
     ),
     tags=["rq-engine", "session"],
     operation_id=rq_operation_id("issue_session_token"),
@@ -159,49 +308,75 @@ def _resolve_scopes(claims: Mapping[str, Any]) -> list[str]:
 )
 def issue_session_token(runid: str, config: str, request: Request) -> JSONResponse:
     try:
+        user_id: int | None = None
+        roles: list[str] = []
         claims = _resolve_bearer_claims(request)
         if claims is not None:
-            _ensure_run_claim(claims, runid)
+            authorize_run_access(claims, runid)
+            _ensure_identifier_claim(claims, runid)
             session_id = _session_id_from_claims(claims)
+            user_id, roles = _identity_from_claims(claims)
         else:
             try:
                 session_id = _resolve_session_id_from_cookie(request)
                 _session_exists(session_id)
+                session_payload = _session_payload(session_id)
+                user_id, roles = _identity_from_session_payload(session_payload)
+                if not _session_user_authorized_for_run(runid, user_id, roles):
+                    raise AuthError(
+                        "Session not authorized for run",
+                        status_code=401,
+                        code="unauthorized",
+                    )
             except AuthError:
                 if _run_is_public(runid):
                     session_id = uuid.uuid4().hex
+                    user_id = None
+                    roles = []
                 else:
                     raise
+
+        extra_claims: dict[str, Any] = {
+            "token_class": "session",
+            "session_id": session_id,
+            "runid": runid,
+            "config": config,
+            "jti": uuid.uuid4().hex,
+        }
+        if user_id is not None:
+            extra_claims["user_id"] = user_id
+            extra_claims["roles"] = roles
 
         token_payload = auth_tokens.issue_token(
             session_id,
             scopes=SESSION_TOKEN_SCOPES,
             audience="rq-engine",
             expires_in=SESSION_TOKEN_TTL_SECONDS,
-            extra_claims={
-                "token_class": "session",
-                "session_id": session_id,
-                "runid": runid,
-                "config": config,
-                "jti": uuid.uuid4().hex,
-            },
+            extra_claims=extra_claims,
         )
         claims = token_payload.get("claims", {})
         _store_session_marker(runid, session_id, SESSION_TOKEN_TTL_SECONDS)
         expires_at = claims.get("exp")
         scopes = _resolve_scopes(claims)
-        return JSONResponse(
-            {
-                "token": token_payload.get("token"),
-                "token_class": "session",
-                "runid": runid,
-                "config": config,
-                "session_id": session_id,
-                "expires_at": expires_at,
-                "scopes": scopes,
-                "audience": claims.get("aud"),
-            }
-        )
+        payload: dict[str, Any] = {
+            "token": token_payload.get("token"),
+            "token_class": "session",
+            "runid": runid,
+            "config": config,
+            "session_id": session_id,
+            "expires_at": expires_at,
+            "scopes": scopes,
+            "audience": claims.get("aud"),
+        }
+        if claims.get("user_id") is not None:
+            payload["user_id"] = claims.get("user_id")
+            payload["roles"] = claims.get("roles") or []
+
+        response = JSONResponse(payload)
+        token_value = token_payload.get("token")
+        if isinstance(token_value, str) and token_value:
+            _set_session_jwt_cookie(response, runid=runid, config=config, token=token_value)
+        return response
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except auth_tokens.JWTConfigurationError as exc:

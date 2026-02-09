@@ -13,6 +13,20 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
+from wepppy.microservices.browse.auth import (
+    RUN_ALLOWED_TOKEN_CLASSES,
+    USER_SERVICE_TOKEN_CLASSES,
+    BrowseAuthError,
+    authorize_group_request,
+    authorize_run_request,
+    handle_auth_error,
+)
+from wepppy.microservices.browse.security import (
+    PATH_SECURITY_FORBIDDEN_RECORDER,
+    path_security_detail,
+    validate_raw_subpath,
+    validate_resolved_target,
+)
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -20,12 +34,38 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
     runid = request.path_params['runid']
     config = request.path_params['config']
     subpath = request.path_params['subpath']
+    try:
+        auth_context = authorize_run_request(
+            request,
+            runid=runid,
+            subpath=subpath,
+            allow_public_without_token=True,
+            require_authenticated=False,
+            allowed_token_classes=RUN_ALLOWED_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        handle_auth_error(
+            request,
+            runid=runid,
+            error=exc,
+            redirect_on_401=False,
+        )
+        raise
+
+    allow_recorder = auth_context.is_root
+    raw_violation = validate_raw_subpath(subpath)
+    if raw_violation is not None:
+        if allow_recorder and raw_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            raw_violation = None
+    if raw_violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(raw_violation))
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
     target_path = os.path.abspath(os.path.join(wd, subpath))
 
     _assert_within_root(wd, target_path)
+    _assert_target_within_allowed_roots(wd, target_path, allow_recorder=allow_recorder)
     if not os.path.exists(target_path) or os.path.isdir(target_path):
         raise HTTPException(status_code=404)
 
@@ -43,6 +83,23 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
 async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
     batch_uuid = request.path_params['uuid']
     subpath = request.path_params['subpath']
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_uuid,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+
+    allow_recorder = auth_context.is_root
+    raw_violation = validate_raw_subpath(subpath)
+    if raw_violation is not None:
+        if allow_recorder and raw_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            raw_violation = None
+    if raw_violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(raw_violation))
 
     wd = str(_resolve_culvert_root(batch_uuid))
     if not os.path.isdir(wd):
@@ -50,6 +107,7 @@ async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
 
     target_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, target_path)
+    _assert_target_within_allowed_roots(wd, target_path, allow_recorder=allow_recorder)
     if not os.path.exists(target_path) or os.path.isdir(target_path):
         raise HTTPException(status_code=404)
 
@@ -67,6 +125,23 @@ async def gdalinfo_culvert_with_subpath(request: Request) -> JSONResponse:
 async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
     batch_name = request.path_params['batch_name']
     subpath = request.path_params['subpath']
+    try:
+        auth_context = authorize_group_request(
+            request,
+            identifier=batch_name,
+            subpath=subpath,
+            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+        )
+    except BrowseAuthError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+
+    allow_recorder = auth_context.is_root
+    raw_violation = validate_raw_subpath(subpath)
+    if raw_violation is not None:
+        if allow_recorder and raw_violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+            raw_violation = None
+    if raw_violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(raw_violation))
 
     wd = str(_resolve_batch_root(batch_name))
     if not os.path.isdir(wd):
@@ -74,6 +149,7 @@ async def gdalinfo_batch_with_subpath(request: Request) -> JSONResponse:
 
     target_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, target_path)
+    _assert_target_within_allowed_roots(wd, target_path, allow_recorder=allow_recorder)
     if not os.path.exists(target_path) or os.path.isdir(target_path):
         raise HTTPException(status_code=404)
 
@@ -159,6 +235,19 @@ def _assert_within_root(root: str | Path, target: str | Path) -> None:
         raise HTTPException(status_code=403, detail="Invalid path.") from exc
     if common != os.path.abspath(str(root)):
         raise HTTPException(status_code=403, detail="Invalid path.")
+
+
+def _assert_target_within_allowed_roots(
+    root: str | Path,
+    target: str | Path,
+    *,
+    allow_recorder: bool = False,
+) -> None:
+    violation = validate_resolved_target(root, target)
+    if allow_recorder and violation == PATH_SECURITY_FORBIDDEN_RECORDER:
+        return
+    if violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
 
 def create_routes(prefix_path: Callable[[str], str]) -> list[Route]:
