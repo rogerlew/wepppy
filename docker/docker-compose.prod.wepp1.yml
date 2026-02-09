@@ -112,6 +112,10 @@ services:
   rq-engine:
     <<: *wepppy-image
     volumes: *wepp1-volumes
+    environment:
+      <<: *wepppy-env
+      RQ_ENGINE_POLL_RATE_LIMIT_COUNT: "400"
+      RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS: "60"
   rq-worker:
     <<: *wepppy-image
     cpuset: "0-31"

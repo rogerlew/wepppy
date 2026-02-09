@@ -6,7 +6,7 @@ function controlBase() {
     const TERMINAL_JOB_STATUSES = new Set(["finished", "failed", "stopped", "canceled", "not_found"]);
     const SUCCESS_JOB_STATUSES = new Set(["finished"]);
     const FAILURE_JOB_STATUSES = new Set(["failed", "stopped", "canceled", "not_found"]);
-    const DEFAULT_POLL_INTERVAL_MS = 800;
+    const DEFAULT_POLL_INTERVAL_MS = 2000;
     const DEFAULT_SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
     function ensureHttp() {

@@ -117,6 +117,21 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 - Together, these two components are the contract for any control that launches asynchronous work: provide the DOM IDs, call `set_rq_job_id`, and the infrastructure handles the rest.
 - The Project controller applies the same contract when readonly toggles queue `set_run_readonly_rq`; the worker now pushes human-readable updates to `<runid>:command`, which the command bar consumes directly to surface messages such as `manifest.db creation finished` without extra wiring.
 
+### Polling Interval Reference (Client)
+| Surface | Poll target | Interval | Approx max rate | Source of truth |
+| --- | --- | --- | --- | --- |
+| `controlBase` default (shared across `set_rq_job_id` callsites) | `/rq-engine/api/jobstatus/<job_id>` | `2000 ms` | `30 req/min` per active job | `wepppy/weppcloud/controllers_js/control_base.js` (`DEFAULT_POLL_INTERVAL_MS`) |
+| `PathCE` `controlBase` override | `/rq-engine/api/jobstatus/<job_id>` | `2000 ms` | `30 req/min` per active job | `wepppy/weppcloud/controllers_js/path_ce.js` (`controller.job_status_poll_interval_ms`) |
+| Migration status page (non-controller template, tracked here due rq-engine load) | `/rq-engine/api/jobstatus/<job_id>` | `5000 ms` | `12 req/min` per active page | `wepppy/weppcloud/routes/run_0/templates/run_0/rq-migration-status.htm` |
+| `PathCE` status/results loop | `api/path_ce/status` + `api/path_ce/results` | `5000 ms` | `12 req/min` each endpoint | `wepppy/weppcloud/controllers_js/path_ce.js` (`POLL_INTERVAL_MS`) |
+| RQ Job Dashboard | `/rq-engine/api/jobinfo/<job_id>` | Dynamic `1000-5000 ms` | `60-12 req/min` | `wepppy/weppcloud/routes/rq/job_dashboard/templates/dashboard_pure.htm` |
+| DEVAL loading page | `/rq-engine/api/jobstatus/<job_id>` | `800 ms` | `75 req/min` while active | `wepppy/weppcloud/templates/reports/deval_loading.htm` |
+| Runs page delete poll | `/rq-engine/api/jobstatus/<job_id>` | Backoff `2000 -> 8000 ms` | `30 -> 7.5 req/min` per job | `wepppy/weppcloud/templates/user/runs2.html` |
+| Batch Runner runstate | `/batch/_/<name>/runstate` | `10000 ms` | `6 req/min` | `wepppy/weppcloud/controllers_js/batch_runner.js` |
+| Run Sync dashboard status | `/rq-engine/api/run-sync/status` | `10000 ms` | `6 req/min` | `wepppy/weppcloud/controllers_js/run_sync_dashboard.js` |
+
+`set_rq_job_id(...)` appears in 23 client files, and every one inherits the `controlBase` default unless it sets `job_status_poll_interval_ms` explicitly.
+
 ## Views and DOM Contract
 - The HTML that controllers operate on lives under `wepppy/weppcloud/templates/controls/`. Each control has its own template (Pure variants such as `wepp_pure.htm`, `landuse_pure.htm`, etc.) and they extend the markup defined in `_pure_base.htm` (legacy `_base.htm` remains only for archived Bootstrap views).
 - `_pure_base.htm` defines the canonical form structure: `#status`, `#info`, `#rq_job`, `#stacktrace`, `#preflight_status`, and other fields that the JS expects. As long as new controls keep those IDs, `controlBase` can update the UI without per-controller duplication. Legacy `_base.htm` persists only for archived Bootstrap-era controls.

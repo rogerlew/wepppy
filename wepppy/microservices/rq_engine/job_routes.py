@@ -55,7 +55,7 @@ def _poll_auth_mode() -> str:
 
 
 def _poll_rate_limit_count() -> int:
-    return _safe_int_env(POLL_RATE_LIMIT_COUNT_ENV, default=120, minimum=1)
+    return _safe_int_env(POLL_RATE_LIMIT_COUNT_ENV, default=400, minimum=1)
 
 
 def _poll_rate_limit_window_seconds() -> int:

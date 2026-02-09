@@ -497,7 +497,7 @@ var PathCE = (function () {
             statusStartedAt: null
         };
         controller.state = state;
-        controller.job_status_poll_interval_ms = 1200;
+        controller.job_status_poll_interval_ms = 2000;
 
         var emitter = events.useEventMap(EVENT_NAMES, events.createEmitter());
         controller.events = emitter;

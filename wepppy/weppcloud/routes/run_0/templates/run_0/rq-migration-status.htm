@@ -742,7 +742,7 @@ function startStatusPolling(jobId, statusUrl) {
     } catch (error) {
       console.error('Error polling status:', error);
     }
-  }, 1000);
+  }, 5000);
 }
 
 function stopPolling() {
