@@ -18,6 +18,7 @@
 - **Supporting modules**
   - `_download.py`: serves file downloads, parquet→CSV conversion, and aria2c manifests.
   - `files_api.py`: JSON `/files` route parsing, validation, and payload assembly.
+  - `listing.py`: manifest creation plus sorted/paginated directory listing helpers.
   - `_gdalinfo.py`: shells out to `gdalinfo -json` and returns raster metadata.
 
 ## Directory layout (key files)
@@ -27,6 +28,7 @@ wepppy/microservices/
     browse.py            # Starlette application factory and browse UI logic
     _download.py         # Download + aria2c routes shared with browse
     files_api.py         # JSON files endpoint handlers
+    listing.py           # Manifest + directory listing internals
     README.md            # Browse service documentation
   _gdalinfo.py           # gdalinfo JSON route shared with browse
   _service_files/        # systemd / gunicorn configs (browse service runs on 9009)
