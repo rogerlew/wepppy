@@ -179,6 +179,10 @@ def test_runs0_nocfg_rejects_dot_segment_traversal_next(
     [
         "/weppcloud/runs/{runid}/cfg/%2e%2e/browse/private.txt",
         "/weppcloud/runs/{runid}/cfg/%252e%252e/browse/private.txt",
+        "/weppcloud/runs/{runid}/cfg/%2f..%2fbrowse/private.txt",
+        "/weppcloud/runs/{runid}/cfg/%252f..%252fbrowse/private.txt",
+        "/weppcloud/runs/{runid}/cfg/%5c..%5cbrowse/private.txt",
+        "/weppcloud/runs/{runid}/cfg/%255c..%255cbrowse/private.txt",
     ],
 )
 def test_runs0_nocfg_rejects_encoded_dot_segment_traversal_next(
