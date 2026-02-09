@@ -432,6 +432,8 @@ def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monk
     _write_file(run_root / "nested" / ".secret2", "hidden")
     _write_file(run_root / "_logs" / "profile.events.jsonl", '{"ok":true}\n')
     _write_file(run_root / "wepp" / "output" / "profile.events.jsonl", '{"ok":true}\n')
+    _write_file(run_root / "exceptions.log", "traceback")
+    _write_file(run_root / "nested" / "exception_factory.log", "traceback")
 
     browse = load_browse(SITE_PREFIX="/weppcloud")
     import wepppy.microservices.browse._download as download_mod
@@ -447,6 +449,8 @@ def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monk
     assert "nested/table.csv" in spec
     assert ".secret" not in spec
     assert "profile.events.jsonl" not in spec
+    assert "exceptions.log" not in spec
+    assert "exception_factory.log" not in spec
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")

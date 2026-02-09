@@ -709,6 +709,42 @@ def test_aria2c_public_run_allows_anonymous_access(
     assert "report.txt" in response.text
 
 
+def test_aria2c_root_only_entries_visible_only_to_root(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-aria2c-root-only"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "report.txt", "hello")
+    _touch(run_root / "exceptions.log", "traceback")
+    _touch(run_root / "nested" / "exception_factory.log", "traceback")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+    user_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+    root_token = _issue_service_token(runid, runs=[runid], roles=["Root"])
+
+    with TestClient(app) as client:
+        user_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/aria2c.spec",
+            headers={"Authorization": f"Bearer {user_token}"},
+            follow_redirects=False,
+        )
+        root_response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/aria2c.spec",
+            headers={"Authorization": f"Bearer {root_token}"},
+            follow_redirects=False,
+        )
+
+    assert user_response.status_code == 200
+    assert root_response.status_code == 200
+    assert "report.txt" in user_response.text
+    assert "exceptions.log" not in user_response.text
+    assert "exception_factory.log" not in user_response.text
+    assert "exceptions.log" in root_response.text
+    assert "nested/exception_factory.log" in root_response.text
+
+
 def test_private_gdalinfo_returns_401_without_redirect(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-gdal-private"
     config = "cfg"
@@ -874,7 +910,14 @@ def test_service_token_run_mismatch_is_forbidden(tmp_path: Path, load_secure_bro
     assert response.status_code == 403
 
 
-@pytest.mark.parametrize("subpath", ["_logs/profile.events.jsonl", "exceptions.log"])
+@pytest.mark.parametrize(
+    "subpath",
+    [
+        "_logs/profile.events.jsonl",
+        "exceptions.log",
+        "exception_factory.log",
+    ],
+)
 def test_root_only_paths_require_root_role(
     tmp_path: Path,
     load_secure_browse,

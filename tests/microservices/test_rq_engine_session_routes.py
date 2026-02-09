@@ -66,6 +66,32 @@ def test_session_token_rejects_wrong_run(monkeypatch: pytest.MonkeyPatch) -> Non
     assert payload["error"]["code"] == "forbidden"
 
 
+def test_session_token_rejects_service_token_without_run_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    token = auth_tokens.issue_token(
+        "service-client",
+        scopes=["rq:status"],
+        audience="rq-engine",
+        extra_claims={"token_class": "service", "jti": "service-no-run-claim"},
+    )["token"]
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+
+
 def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
     monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)

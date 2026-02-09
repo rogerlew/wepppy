@@ -146,7 +146,10 @@ def _normalize_list(value: Any) -> list[str]:
 
 
 def _ensure_identifier_claim(claims: Mapping[str, Any], runid: str) -> None:
+    token_class = str(claims.get("token_class") or "").strip().lower()
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
+    if token_class == "service" and not run_claims:
+        raise AuthError("Token missing run scope", status_code=403, code="forbidden")
     if run_claims and str(runid) not in run_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
 

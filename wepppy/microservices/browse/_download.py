@@ -23,6 +23,7 @@ from wepppy.microservices.browse.auth import (
     authorize_group_request,
     authorize_run_request,
     handle_auth_error,
+    is_root_only_path,
 )
 from wepppy.microservices.browse.security import (
     PATH_SECURITY_FORBIDDEN_RECORDER,
@@ -310,6 +311,8 @@ def _collect_file_specs(wd: str, base_url: str, allow_recorder: bool) -> list[st
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, wd)
+            if is_root_only_path(relative_path) and not allow_recorder:
+                continue
             violation = validate_raw_subpath(relative_path)
             if (
                 violation is not None

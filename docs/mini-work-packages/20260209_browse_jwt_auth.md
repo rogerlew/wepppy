@@ -146,3 +146,9 @@ Notes:
 - `runs0_nocfg` supports direct mint-and-handoff to validated `next` browse targets without intermediate run-page load.
 - `include_hidden` logic is not reintroduced.
 - Tests cover anonymous, session, user, and service token paths, including culvert service access.
+
+## Deferred Follow-up (2026-02-09)
+- Deferred by decision: user-token identifier scoping for group routes (`/culverts/{uuid}/...`, `/batch/{batch_name}/...`).
+- Current behavior: route-identifier claim checks are enforced for `service` and `session` tokens; `user` tokens are authorized by user identity and run/group ownership policy.
+- Planned hardening: introduce identifier-scoped group tokens, starting with `batch_uuid`-specific tokens, and require claim-to-route identifier matching for group endpoints.
+- Release note: this work package intentionally ships without that tightening and tracks it as follow-up security hardening.
