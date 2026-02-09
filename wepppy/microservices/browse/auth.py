@@ -35,6 +35,7 @@ class AuthContext:
     claims: Mapping[str, Any] | None
     token_class: str | None
     roles: frozenset[str]
+    source: str = "none"
 
     @property
     def is_authenticated(self) -> bool:
@@ -210,11 +211,12 @@ def _decode_token(token: str) -> Mapping[str, Any]:
     return claims
 
 
-def _context_from_claims(claims: Mapping[str, Any]) -> AuthContext:
+def _context_from_claims(claims: Mapping[str, Any], *, source: str) -> AuthContext:
     return AuthContext(
         claims=claims,
         token_class=_normalize_token_class(claims),
         roles=_normalize_roles(claims.get("roles")),
+        source=source,
     )
 
 
@@ -224,18 +226,15 @@ def resolve_auth_context(request: StarletteRequest) -> AuthContext:
 
     if cookie_token:
         try:
-            return _context_from_claims(_decode_token(cookie_token))
+            return _context_from_claims(_decode_token(cookie_token), source="cookie")
         except BrowseAuthError as exc:
             if exc.status_code >= 500:
                 raise
             cookie_failure = exc
 
-    bearer_token = _extract_bearer_token(request)
-    if bearer_token:
-        try:
-            return _context_from_claims(_decode_token(bearer_token))
-        except BrowseAuthError:
-            raise
+    bearer_context = resolve_bearer_context(request)
+    if bearer_context is not None:
+        return bearer_context
 
     # Treat an invalid/stale cookie as anonymous when no bearer token is provided.
     # Private endpoints still reject anonymous callers; public browse remains accessible.
@@ -243,6 +242,13 @@ def resolve_auth_context(request: StarletteRequest) -> AuthContext:
         return AuthContext(claims=None, token_class=None, roles=frozenset())
 
     return AuthContext(claims=None, token_class=None, roles=frozenset())
+
+
+def resolve_bearer_context(request: StarletteRequest) -> AuthContext | None:
+    bearer_token = _extract_bearer_token(request)
+    if not bearer_token:
+        return None
+    return _context_from_claims(_decode_token(bearer_token), source="bearer")
 
 
 def _run_is_public(runid: str) -> bool:
@@ -294,46 +300,55 @@ def authorize_run_request(
     require_authenticated: bool,
     allowed_token_classes: Sequence[str] = tuple(RUN_ALLOWED_TOKEN_CLASSES),
 ) -> AuthContext:
+    def _evaluate_context(context: AuthContext) -> AuthContext:
+        root_only = is_root_only_path(subpath)
+
+        if not context.is_authenticated:
+            if (
+                allow_public_without_token
+                and not require_authenticated
+                and not root_only
+                and _run_is_public(runid)
+            ):
+                return context
+            raise BrowseAuthError("Authentication required")
+
+        token_class = context.token_class
+        if token_class not in {item.lower() for item in allowed_token_classes}:
+            raise BrowseAuthError(
+                "Token class is not allowed for this endpoint",
+                status_code=403,
+                code="forbidden",
+            )
+
+        assert context.claims is not None  # For type narrowing.
+        _require_identifier_claim(context.claims, runid)
+        try:
+            authorize_run_access(context.claims, runid)
+        except RqAuthError as exc:
+            raise BrowseAuthError(
+                exc.message,
+                status_code=exc.status_code,
+                code=exc.code,
+            ) from exc
+
+        if root_only and not context.is_root:
+            raise BrowseAuthError(
+                "Root role required for this path",
+                status_code=403,
+                code="forbidden",
+            )
+        return context
+
     context = resolve_auth_context(request)
-    root_only = is_root_only_path(subpath)
-
-    if not context.is_authenticated:
-        if (
-            allow_public_without_token
-            and not require_authenticated
-            and not root_only
-            and _run_is_public(runid)
-        ):
-            return context
-        raise BrowseAuthError("Authentication required")
-
-    token_class = context.token_class
-    if token_class not in {item.lower() for item in allowed_token_classes}:
-        raise BrowseAuthError(
-            "Token class is not allowed for this endpoint",
-            status_code=403,
-            code="forbidden",
-        )
-
-    assert context.claims is not None  # For type narrowing.
-    _require_identifier_claim(context.claims, runid)
     try:
-        authorize_run_access(context.claims, runid)
-    except RqAuthError as exc:
-        raise BrowseAuthError(
-            exc.message,
-            status_code=exc.status_code,
-            code=exc.code,
-        ) from exc
-
-    if root_only and not context.is_root:
-        raise BrowseAuthError(
-            "Root role required for this path",
-            status_code=403,
-            code="forbidden",
-        )
-
-    return context
+        return _evaluate_context(context)
+    except BrowseAuthError as primary_exc:
+        if context.source == "cookie":
+            bearer_context = resolve_bearer_context(request)
+            if bearer_context is not None:
+                return _evaluate_context(bearer_context)
+        raise primary_exc
 
 
 def authorize_group_request(
@@ -343,36 +358,45 @@ def authorize_group_request(
     subpath: str,
     allowed_token_classes: Sequence[str] = tuple(USER_SERVICE_TOKEN_CLASSES),
 ) -> AuthContext:
+    def _evaluate_context(context: AuthContext) -> AuthContext:
+        root_only = is_root_only_path(subpath)
+
+        if not context.is_authenticated:
+            raise BrowseAuthError("Authentication required")
+
+        token_class = context.token_class
+        if token_class not in {item.lower() for item in allowed_token_classes}:
+            raise BrowseAuthError(
+                "Token class is not allowed for this endpoint",
+                status_code=403,
+                code="forbidden",
+            )
+
+        assert context.claims is not None  # For type narrowing.
+        _require_identifier_claim(
+            context.claims,
+            identifier,
+            require_service_claim=True,
+            require_session_claim=False,
+        )
+
+        if root_only and not context.is_root:
+            raise BrowseAuthError(
+                "Root role required for this path",
+                status_code=403,
+                code="forbidden",
+            )
+        return context
+
     context = resolve_auth_context(request)
-    root_only = is_root_only_path(subpath)
-
-    if not context.is_authenticated:
-        raise BrowseAuthError("Authentication required")
-
-    token_class = context.token_class
-    if token_class not in {item.lower() for item in allowed_token_classes}:
-        raise BrowseAuthError(
-            "Token class is not allowed for this endpoint",
-            status_code=403,
-            code="forbidden",
-        )
-
-    assert context.claims is not None  # For type narrowing.
-    _require_identifier_claim(
-        context.claims,
-        identifier,
-        require_service_claim=True,
-        require_session_claim=False,
-    )
-
-    if root_only and not context.is_root:
-        raise BrowseAuthError(
-            "Root role required for this path",
-            status_code=403,
-            code="forbidden",
-        )
-
-    return context
+    try:
+        return _evaluate_context(context)
+    except BrowseAuthError as primary_exc:
+        if context.source == "cookie":
+            bearer_context = resolve_bearer_context(request)
+            if bearer_context is not None:
+                return _evaluate_context(bearer_context)
+        raise primary_exc
 
 
 def handle_auth_error(
@@ -410,6 +434,7 @@ __all__ = [
     "handle_auth_error",
     "is_root_only_path",
     "request_prefers_navigation",
+    "resolve_bearer_context",
     "resolve_auth_context",
     "site_prefix",
 ]

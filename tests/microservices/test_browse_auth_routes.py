@@ -265,6 +265,36 @@ def test_private_browse_falls_back_to_bearer_when_cookie_invalid(
     assert "shh" in response.text
 
 
+def test_private_browse_uses_bearer_when_cookie_run_scope_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private-cookie-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-cookie",
+        extra_claims={"runid": "other-run", "session_id": "sid-cookie"},
+    )
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
+
+
 def test_files_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-files-public"
     config = "cfg"
@@ -332,6 +362,38 @@ def test_files_surfaces_internal_error_on_jwt_config_failure(
     payload = response.json()
     assert payload["error"]["code"] == "internal_error"
     assert "JWT configuration error" in payload["error"]["details"]
+
+
+def test_files_use_bearer_when_cookie_token_class_not_allowed(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-files-cookie-class-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-files",
+        extra_claims={"runid": runid, "session_id": "sid-files"},
+    )
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert any(entry["name"] == "demo.txt" for entry in payload["entries"])
 
 
 def test_dtale_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:
@@ -613,6 +675,45 @@ def test_group_routes_ignore_invalid_cookie_and_still_require_auth(
         )
 
     assert response.status_code == 401
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_routes_use_bearer_when_cookie_token_class_not_allowed(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-cookie-class-mismatch"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{
+            root_env: str(group_root_root),
+        },
+    )
+    app = browse.create_app()
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-group",
+        extra_claims={"runid": identifier, "session_id": "sid-group"},
+    )
+    bearer_token = _issue_service_token(identifier, runs=[identifier], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize(
