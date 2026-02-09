@@ -409,6 +409,69 @@ def test_files_use_bearer_when_cookie_token_class_not_allowed(
     assert any(entry["name"] == "demo.txt" for entry in payload["entries"])
 
 
+def test_files_root_only_path_requires_root_role(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-files-root-only"
+    config = "cfg"
+    run_root = tmp_path / runid
+    subpath = "_logs/profile.events.jsonl"
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / subpath, "sensitive")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    user_token = _issue_service_token(runid, roles=["User"], runs=[runid])
+    root_token = _issue_service_token(runid, roles=["Root"], runs=[runid])
+
+    with TestClient(app) as client:
+        forbidden = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/{subpath}?meta=true",
+            headers={"Authorization": f"Bearer {user_token}"},
+            follow_redirects=False,
+        )
+        allowed = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/{subpath}?meta=true",
+            headers={"Authorization": f"Bearer {root_token}"},
+            follow_redirects=False,
+        )
+
+    assert forbidden.status_code == 403
+    assert forbidden.json()["error"]["code"] == "forbidden"
+    assert allowed.status_code == 200
+    assert allowed.json()["name"] == "profile.events.jsonl"
+
+
+def test_files_root_only_path_uses_bearer_when_cookie_lacks_root_role(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-files-root-fallback"
+    config = "cfg"
+    run_root = tmp_path / runid
+    subpath = "_logs/profile.events.jsonl"
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / subpath, "sensitive")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_service_token(runid, roles=["User"], runs=[runid])
+    bearer_token = _issue_service_token(runid, roles=["Root"], runs=[runid])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/{subpath}?meta=true",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["name"] == "profile.events.jsonl"
+
+
 def test_dtale_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-dtale-public"
     config = "cfg"
