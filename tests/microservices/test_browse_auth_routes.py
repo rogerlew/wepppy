@@ -68,17 +68,22 @@ def _issue_token(
     runs: list[str] | None = None,
     roles: list[str] | None = None,
     subject: str = "svc-browse",
+    extra_claims: dict | None = None,
 ) -> str:
+    merged_claims = {
+        "token_class": token_class,
+        "roles": roles or [],
+        "jti": uuid.uuid4().hex,
+    }
+    if extra_claims:
+        merged_claims.update(extra_claims)
+
     payload = auth_tokens.issue_token(
         subject,
         scopes=["rq:status"],
         audience="rq-engine",
         runs=runs,
-        extra_claims={
-            "token_class": token_class,
-            "roles": roles or [],
-            "jti": uuid.uuid4().hex,
-        },
+        extra_claims=merged_claims,
     )
     return payload["token"]
 
@@ -429,6 +434,62 @@ def test_private_gdalinfo_returns_401_without_redirect(tmp_path: Path, load_secu
 
     assert response.status_code == 401
     assert "location" not in {key.lower() for key in response.headers}
+
+
+def test_private_browse_session_token_runid_mismatch_is_forbidden(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-session-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="session",
+        subject="sid-1",
+        extra_claims={"runid": "other-run", "session_id": "sid-1"},
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+    assert "location" not in {key.lower() for key in response.headers}
+
+
+def test_files_reject_session_token_class(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-files-session-class"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="session",
+        subject="sid-2",
+        extra_claims={"runid": runid, "session_id": "sid-2"},
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
 
 
 def test_service_token_run_mismatch_is_forbidden(tmp_path: Path, load_secure_browse) -> None:
