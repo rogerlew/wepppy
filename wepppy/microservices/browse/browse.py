@@ -67,7 +67,6 @@ from pathlib import Path
 from datetime import datetime
 from http import HTTPStatus
 
-import httpx
 import pandas as pd
 from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -85,6 +84,11 @@ from starlette.responses import (
 )
 from starlette.routing import Route
 from wepppy.microservices.browse._download import create_routes as create_download_routes
+from wepppy.microservices.browse.dtale import (
+    DTALE_SUPPORTED_SUFFIXES,
+    build_handlers as build_dtale_handlers,
+    resolve_dtale_base as _resolve_dtale_base,
+)
 from wepppy.microservices.browse.files_api import (
     FilesApiDependencies,
     accepts_json as _accepts_json,
@@ -190,23 +194,6 @@ def _prefix_path(path: str) -> str:
     return SITE_PREFIX + path if path.startswith('/') else SITE_PREFIX + '/' + path
 
 
-_DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
-_DTALE_INTERNAL_TOKEN = os.getenv('DTALE_INTERNAL_TOKEN', '').strip()
-_DTALE_SUPPORTED_SUFFIXES = (
-    '.parquet',
-    '.pq',
-    '.feather',
-    '.arrow',
-    '.csv',
-    '.csv.gz',
-    '.tsv',
-    '.tsv.gz',
-    '.pkl',
-    '.pickle',
-)
-_DTALE_HTTP_TIMEOUT = httpx.Timeout(60.0, connect=5.0)
-
-
 def _resolve_browse_paths(request_path: str, runid: str, config: str) -> tuple[str, str]:
     browse_marker = '/browse'
     if browse_marker in request_path:
@@ -218,16 +205,6 @@ def _resolve_browse_paths(request_path: str, runid: str, config: str) -> tuple[s
     browse_base = _prefix_path(f'/runs/{runid}/{config}/browse/')
     home_href = _prefix_path(f'/runs/{runid}/{config}')
     return browse_base, home_href
-
-
-def _resolve_dtale_base(request_path: str, runid: str, config: str) -> str:
-    browse_base, _home_href = _resolve_browse_paths(request_path, runid, config)
-    if "/browse/" in browse_base:
-        return browse_base.replace("/browse/", "/dtale/", 1)
-    if browse_base.endswith("/browse"):
-        return browse_base[: -len("/browse")] + "/dtale/"
-    return _prefix_path(f"/runs/{runid}/{config}/dtale/")
-
 
 def _resolve_culvert_batch_root(batch_uuid: str) -> Path:
     culverts_root = Path(os.getenv('CULVERTS_ROOT', '/wc1/culverts')).resolve()
@@ -429,7 +406,7 @@ MARKDOWN_EXTENSIONS = ('.md', '.markdown', '.mdown', '.mkdn')
 
 _FILES_PREVIEW_EXTENSIONS = (
     MARKDOWN_EXTENSIONS
-    + _DTALE_SUPPORTED_SUFFIXES
+    + DTALE_SUPPORTED_SUFFIXES
     + (
         '.arc',
         '.csv',
@@ -1129,7 +1106,7 @@ async def browse_response(path, runid, wd, request, config, filter_pattern=''):
         if html is not None:
             table_markup = Markup(html)
             rel_url = os.path.relpath(path, wd).replace('\\', '/')
-            dtale_base = _resolve_dtale_base(request.path, runid, config)
+            dtale_base = _resolve_dtale_base(request.path, runid, config, _prefix_path)
             dtale_url = f"{dtale_base}{quote(rel_url, safe='/')}"
             return render_template(
                 'browse/data_table.htm',
@@ -1290,113 +1267,13 @@ async def browse_batch_subpath(request: StarletteRequest):
     )
 
 
-async def _dtale_open_for_root(
-    request: StarletteRequest,
-    *,
-    runid: str,
-    config: str,
-    wd_override: str | Path | None = None,
-):
-    if not _DTALE_SERVICE_URL:
-        raise HTTPException(
-            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
-            detail="D-Tale integration is not configured.",
-        )
-
-    subpath = request.path_params.get('subpath') or ''
-    rel_path = subpath.lstrip('/')
-
-    wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
-    target = os.path.abspath(os.path.join(wd, rel_path))
-
-    _assert_within_root(wd, target)
-
-    if not os.path.isfile(target):
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="File not found.")
-
-    rel_lower = rel_path.lower()
-    if not any(rel_lower.endswith(ext) for ext in _DTALE_SUPPORTED_SUFFIXES):
-        raise HTTPException(
-            status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
-            detail="D-Tale currently supports parquet, csv/tsv, feather, and pickle files.",
-        )
-
-    payload = {
-        'runid': runid,
-        'config': config,
-        'path': rel_path.replace('\\', '/'),
-    }
-    headers = {}
-    if _DTALE_INTERNAL_TOKEN:
-        headers['X-DTALE-TOKEN'] = _DTALE_INTERNAL_TOKEN
-
-    endpoint = f'{_DTALE_SERVICE_URL}/internal/load'
-    try:
-        async with httpx.AsyncClient(timeout=_DTALE_HTTP_TIMEOUT) as client:
-            response = await client.post(endpoint, json=payload, headers=headers)
-    except httpx.HTTPError as exc:
-        _logger.error('Unable to reach D-Tale loader at %s', endpoint, exc_info=True)
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_GATEWAY,
-            detail="Unable to contact the D-Tale service.",
-        ) from exc
-
-    if response.status_code >= 400:
-        detail = None
-        try:
-            error_payload = response.json()
-            detail = error_payload.get('description') or error_payload.get('error')
-        except ValueError:
-            detail = response.text.strip()
-        detail = detail or 'D-Tale rejected the load request.'
-        raise HTTPException(status_code=response.status_code, detail=detail)
-
-    try:
-        data = response.json()
-    except ValueError as exc:
-        _logger.error('Invalid response from D-Tale: %s', response.text)
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_GATEWAY,
-            detail="Received malformed response from D-Tale.",
-        ) from exc
-
-    target_url = data.get('url')
-    if not target_url:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_GATEWAY,
-            detail="D-Tale response missing redirect URL.",
-        )
-
-    _logger.info('Forwarding %s to D-Tale at %s', rel_path, target_url)
-    return RedirectResponse(url=target_url, status_code=HTTPStatus.SEE_OTHER)
-
-
-async def dtale_open(request: StarletteRequest):
-    runid = request.path_params['runid']
-    config = request.path_params['config']
-    return await _dtale_open_for_root(request, runid=runid, config=config)
-
-
-async def dtale_culvert_open(request: StarletteRequest):
-    batch_uuid = request.path_params['uuid']
-    batch_root = _resolve_culvert_batch_root(batch_uuid)
-    return await _dtale_open_for_root(
-        request,
-        runid=batch_uuid,
-        config='culvert-batch',
-        wd_override=batch_root,
-    )
-
-
-async def dtale_batch_open(request: StarletteRequest):
-    batch_name = request.path_params['batch_name']
-    batch_root = _resolve_batch_root(batch_name)
-    return await _dtale_open_for_root(
-        request,
-        runid=batch_name,
-        config='batch',
-        wd_override=batch_root,
-    )
+dtale_open, dtale_culvert_open, dtale_batch_open = build_dtale_handlers(
+    get_wd=lambda runid: get_wd(runid),
+    assert_within_root=_assert_within_root,
+    resolve_culvert_batch_root=lambda batch_uuid: _resolve_culvert_batch_root(batch_uuid),
+    resolve_batch_root=lambda batch_name: _resolve_batch_root(batch_name),
+    logger=_logger,
+)
 
 
 async def browse_root(request: StarletteRequest):

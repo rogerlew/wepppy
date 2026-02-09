@@ -17,6 +17,7 @@
   - Pandas I/O (`read_csv`, `read_parquet`) and heavy file reads are moved into `asyncio.to_thread` keeps the event loop responsive.
 - **Supporting modules**
   - `_download.py`: serves file downloads, parquet→CSV conversion, and aria2c manifests.
+  - `dtale.py`: forwards supported tabular files to the D-Tale loader service and returns redirects.
   - `files_api.py`: JSON `/files` route parsing, validation, and payload assembly.
   - `listing.py`: manifest creation plus sorted/paginated directory listing helpers.
   - `_gdalinfo.py`: shells out to `gdalinfo -json` and returns raster metadata.
@@ -27,6 +28,7 @@ wepppy/microservices/
   browse/
     browse.py            # Starlette application factory and browse UI logic
     _download.py         # Download + aria2c routes shared with browse
+    dtale.py             # D-Tale loader bridge handlers and URL helpers
     files_api.py         # JSON files endpoint handlers
     listing.py           # Manifest + directory listing internals
     README.md            # Browse service documentation
@@ -41,6 +43,7 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run. |
 | `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables (pandas), and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet/CSV viewers expose convenience links (pivot, CSV). |
 | `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion. |
+| `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
 
