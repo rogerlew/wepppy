@@ -454,7 +454,7 @@ def _path_has_unsafe_segments(path: str) -> bool:
     return False
 
 
-def _fully_unquote_segment(segment: str, *, max_rounds: int = 3) -> str:
+def _fully_unquote_segment(segment: str, *, max_rounds: int = 8) -> str:
     decoded = str(segment)
     for _ in range(max_rounds):
         candidate = unquote(decoded)
