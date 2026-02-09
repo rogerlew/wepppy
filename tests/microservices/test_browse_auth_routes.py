@@ -54,13 +54,27 @@ def _issue_service_token(
     roles: list[str] | None = None,
     runs: list[str] | None = None,
 ) -> str:
+    return _issue_token(
+        token_class="service",
+        runs=runs if runs is not None else [runid],
+        roles=roles,
+    )
+
+
+def _issue_token(
+    *,
+    token_class: str,
+    runs: list[str] | None = None,
+    roles: list[str] | None = None,
+    subject: str = "svc-browse",
+) -> str:
     payload = auth_tokens.issue_token(
-        "svc-browse",
+        subject,
         scopes=["rq:status"],
         audience="rq-engine",
-        runs=runs if runs is not None else [runid],
+        runs=runs,
         extra_claims={
-            "token_class": "service",
+            "token_class": token_class,
             "roles": roles or [],
             "jti": uuid.uuid4().hex,
         },
@@ -71,6 +85,43 @@ def _issue_service_token(
 def _touch(path: Path, text: str = "demo") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text)
+
+
+def _mock_dtale_loader(monkeypatch: pytest.MonkeyPatch) -> dict:
+    import wepppy.microservices.browse.dtale as dtale_mod
+
+    captured: dict = {}
+
+    class DummyResponse:
+        status_code = 200
+        text = ""
+
+        @staticmethod
+        def json():
+            return {"url": "/weppcloud/dtale/main/test"}
+
+    class DummyClient:
+        def __init__(self, *args, **kwargs):
+            captured["client_kwargs"] = kwargs
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def post(self, url, json=None, headers=None):
+            captured["url"] = url
+            captured["json"] = json
+            captured["headers"] = headers
+            return DummyResponse()
+
+    monkeypatch.setattr(
+        dtale_mod.httpx,
+        "AsyncClient",
+        lambda *args, **kwargs: DummyClient(*args, **kwargs),
+    )
+    return captured
 
 
 def test_browse_allows_public_run_without_token(tmp_path: Path, load_secure_browse) -> None:
@@ -235,3 +286,175 @@ def test_root_only_paths_require_root_role(
 
     assert forbidden.status_code == 403
     assert allowed.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "base,root_env",
+    [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")],
+)
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        "browse/",
+        "download/runs/1001/shared.txt",
+        "gdalinfo/runs/1001/raster.tif",
+        "dtale/runs/1001/table.csv",
+    ],
+)
+def test_group_routes_require_auth(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+    suffix: str,
+) -> None:
+    identifier = "group-42"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "shared.txt", "ok")
+    _touch(group_root / "runs" / "1001" / "raster.tif", "raster")
+    _touch(group_root / "runs" / "1001" / "table.csv", "a,b\n1,2\n")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{
+            root_env: str(group_root_root),
+            "DTALE_SERVICE_URL": "http://dtale-service",
+        },
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/{base}/{identifier}/{suffix}", follow_redirects=False)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "base,root_env,config_name",
+    [("culverts", "CULVERTS_ROOT", "culvert-batch"), ("batch", "BATCH_RUNNER_ROOT", "batch")],
+)
+def test_group_routes_accept_scoped_service_token(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+    base: str,
+    root_env: str,
+    config_name: str,
+) -> None:
+    identifier = "group-77"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "shared.txt", "group-ok")
+    _touch(group_root / "runs" / "1001" / "raster.tif", "raster")
+    _touch(group_root / "runs" / "1001" / "table.csv", "a,b\n1,2\n")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{
+            root_env: str(group_root_root),
+            "DTALE_SERVICE_URL": "http://dtale-service",
+        },
+    )
+    app = browse.create_app()
+    token = _issue_service_token(identifier, runs=[identifier], roles=["User"])
+    headers = {"Authorization": f"Bearer {token}"}
+
+    import wepppy.microservices._gdalinfo as gdalinfo_mod
+
+    async def _fake_run_shell_command(command: str, cwd: str | None):
+        return (0, '{"driver":"GTiff"}', "")
+
+    monkeypatch.setattr(
+        gdalinfo_mod,
+        "_run_shell_command",
+        _fake_run_shell_command,
+    )
+    captured_dtale = _mock_dtale_loader(monkeypatch)
+
+    with TestClient(app) as client:
+        browse_response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers=headers,
+        )
+        download_response = client.get(
+            f"/weppcloud/{base}/{identifier}/download/runs/1001/shared.txt",
+            headers=headers,
+        )
+        gdalinfo_response = client.get(
+            f"/weppcloud/{base}/{identifier}/gdalinfo/runs/1001/raster.tif",
+            headers=headers,
+        )
+        dtale_response = client.get(
+            f"/weppcloud/{base}/{identifier}/dtale/runs/1001/table.csv",
+            headers=headers,
+            follow_redirects=False,
+        )
+
+    assert browse_response.status_code == 200
+    assert download_response.status_code == 200
+    assert download_response.text == "group-ok"
+    assert gdalinfo_response.status_code == 200
+    assert gdalinfo_response.json()["driver"] == "GTiff"
+    assert dtale_response.status_code == 303
+    assert captured_dtale["json"] == {
+        "runid": identifier,
+        "config": config_name,
+        "path": "runs/1001/table.csv",
+    }
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_service_token_identifier_mismatch_is_forbidden(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-88"
+    group_root_root = tmp_path / base
+    _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", **{root_env: str(group_root_root)})
+    app = browse.create_app()
+    token = _issue_service_token(identifier, runs=["other-group"])
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_routes_reject_session_token_class(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-99"
+    group_root_root = tmp_path / base
+    _touch(group_root_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", **{root_env: str(group_root_root)})
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="session",
+        runs=[identifier],
+        subject="sid-123",
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
