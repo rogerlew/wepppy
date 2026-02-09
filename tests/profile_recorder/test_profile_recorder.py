@@ -167,11 +167,15 @@ def test_append_event_allow_body_values_redacts_sensitive_fields(tmp_path, monke
             "jsonPayload": json.dumps({
                 "email": "user@example.com",
                 "token": "abc123",
+                "authorization": "Bearer abc",
+                "cookie": "session=abc123",
                 "slope": 5,
             }),
             "formValues": {
                 "email": "user@example.com",
                 "token": "abc123",
+                "authorization": "Bearer abc",
+                "cookie": "session=abc123",
                 "note": "safe",
             },
             "bodyPreview": "preview-value",
@@ -186,11 +190,15 @@ def test_append_event_allow_body_values_redacts_sensitive_fields(tmp_path, monke
     assert json.loads(meta["jsonPayload"]) == {
         "email": "[redacted]",
         "token": "[redacted]",
+        "authorization": "[redacted]",
+        "cookie": "[redacted]",
         "slope": 5,
     }
     assert meta["formValues"] == {
         "email": "[redacted]",
         "token": "[redacted]",
+        "authorization": "[redacted]",
+        "cookie": "[redacted]",
         "note": "safe",
     }
     assert meta["bodyPreview"] == "preview-value"

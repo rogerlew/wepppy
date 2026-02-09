@@ -197,7 +197,7 @@ describe("recorder interceptor", () => {
         expect(global.WCRecorder._queueSize()).toBe(0);
     });
 
-    it("summarises form-data payloads and marks file uploads", async () => {
+    it("summarizes form-data payloads and marks file uploads", async () => {
         const wrappedFetch = jest.fn(() => Promise.resolve({}));
         global.fetch = wrappedFetch;
 
@@ -226,7 +226,7 @@ describe("recorder interceptor", () => {
         expect(requestEvent.requestMeta).not.toHaveProperty("formValues");
     });
 
-    it("summarises text payloads with preview and length", async () => {
+    it("summarizes text payloads with preview and length", async () => {
         const wrappedFetch = jest.fn(() => Promise.resolve({}));
         global.fetch = wrappedFetch;
 
@@ -261,6 +261,8 @@ describe("recorder interceptor", () => {
             json: {
                 email: "person@example.com",
                 password: "p@ss",
+                authorization: "Bearer abc",
+                cookie: "session=abc123",
                 hillslope_count: 4
             }
         });
@@ -270,12 +272,16 @@ describe("recorder interceptor", () => {
         expect(JSON.parse(jsonEvent.requestMeta.jsonPayload)).toEqual({
             email: "[redacted]",
             password: "[redacted]",
+            authorization: "[redacted]",
+            cookie: "[redacted]",
             hillslope_count: 4
         });
 
         const form = new global.FormData();
         form.append("email", "person@example.com");
         form.append("token", "secret-token");
+        form.append("authorization", "Bearer abc");
+        form.append("cookie", "session=abc123");
         form.append("note", "safe");
 
         await global.WCHttp.request("tasks/upload", {
@@ -288,6 +294,8 @@ describe("recorder interceptor", () => {
         expect(formEvent.requestMeta.formValues).toEqual({
             email: "[redacted]",
             token: "[redacted]",
+            authorization: "[redacted]",
+            cookie: "[redacted]",
             note: "safe"
         });
     });
@@ -332,7 +340,7 @@ describe("recorder interceptor", () => {
         jest.useRealTimers();
     });
 
-    it("emits error events with normalised payloads when requests fail", async () => {
+    it("emits error events with normalized payloads when requests fail", async () => {
         const wrappedFetch = jest.fn(() => Promise.resolve({}));
         global.fetch = wrappedFetch;
 
