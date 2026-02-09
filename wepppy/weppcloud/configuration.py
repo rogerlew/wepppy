@@ -61,6 +61,31 @@ def _normalize_site_prefix(site_prefix: str) -> str:
     return prefix
 
 
+def _resolve_mail_config() -> Dict[str, Any]:
+    zoho_email = (os.getenv("ZOHO_NOREPLY_EMAIL") or "").strip()
+    zoho_password = (os.getenv("ZOHO_NOREPLY_EMAIL_PASSWORD") or "").strip()
+
+    if zoho_email and zoho_password:
+        return {
+            "MAIL_SERVER": "smtp.zoho.com",
+            "MAIL_PORT": 587,
+            "MAIL_USE_TLS": True,
+            "MAIL_USE_SSL": False,
+            "MAIL_USERNAME": zoho_email,
+            "MAIL_PASSWORD": zoho_password,
+            "SECURITY_EMAIL_SENDER": zoho_email,
+        }
+
+    return {
+        "MAIL_SERVER": "mx.uidaho.edu",
+        "MAIL_PORT": 25,
+        "MAIL_USE_TLS": False,
+        "MAIL_USE_SSL": False,
+        "MAIL_USERNAME": "noreply@uidaho.edu",
+        "SECURITY_EMAIL_SENDER": "cals-wepp@uidaho.edu",
+    }
+
+
 def _build_oauth_redirect_uri(
     scheme: str,
     host: Optional[str],
@@ -199,11 +224,7 @@ def config_app(app: Any):
     """
     Configure the Flask application instance using environment variables.
     """
-    app.config["MAIL_SERVER"] = "mx.uidaho.edu"
-    app.config["MAIL_PORT"] = 25
-    app.config["MAIL_USE_TLS"] = False
-    app.config["MAIL_USE_SSL"] = False
-    app.config["MAIL_USERNAME"] = "noreply@uidaho.edu"
+    app.config.update(_resolve_mail_config())
 
     site_prefix = os.getenv("SITE_PREFIX", "/weppcloud")
     app.config["APPLICATION_ROOT"] = site_prefix
@@ -239,7 +260,6 @@ def config_app(app: Any):
         engine_options["connect_args"] = connect_args
         app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
 
-    app.config["SECURITY_EMAIL_SENDER"] = "cals-wepp@uidaho.edu"
     app.config["SECURITY_CONFIRMABLE"] = True
     app.config["SECURITY_LOGIN_WITHOUT_CONFIRMATION"] = True
     app.config["SECURITY_REGISTERABLE"] = True

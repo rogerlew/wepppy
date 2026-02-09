@@ -249,6 +249,11 @@ WEPP_AUTH_JWT_SECRET=$(python -c 'import secrets; print(secrets.token_urlsafe(64
 # Keep WEPP_AUTH_JWT_SECRET aligned with the first entry for query-engine MCP validation.
 # WEPP_AUTH_JWT_SECRETS=active-secret,previous-secret
 
+# Optional: Zoho SMTP credentials for transactional email.
+# If both are set, weppcloud uses smtp.zoho.com:587 (TLS) and sends as ZOHO_NOREPLY_EMAIL.
+# ZOHO_NOREPLY_EMAIL=noreply@wepp.cloud
+# ZOHO_NOREPLY_EMAIL_PASSWORD=app-password-or-account-password
+
 # WeppcloudR container name (must match actual container name from docker compose)
 WEPPCLOUDR_CONTAINER=weppcloudr
 

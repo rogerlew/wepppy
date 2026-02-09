@@ -124,6 +124,8 @@ The application is configured via environment variables, typically defined in `d
 | `WEPPCLOUD_RUNS_DIR` | `/geodata/weppcloud_runs` | Directory for run storage |
 | `TEST_SUPPORT_ENABLED` | `false` | Enable test support endpoints |
 | `DTALE_INTERNAL_TOKEN` | *(optional)* | Token for D-Tale integration |
+| `ZOHO_NOREPLY_EMAIL` | *(optional)* | Zoho SMTP sender account; when paired with `ZOHO_NOREPLY_EMAIL_PASSWORD`, Flask-Mail uses Zoho (`smtp.zoho.com:587` with TLS) |
+| `ZOHO_NOREPLY_EMAIL_PASSWORD` | *(optional)* | Password or app password for `ZOHO_NOREPLY_EMAIL`; both Zoho vars must be non-empty to enable Zoho SMTP |
 
 ### Flask Extensions
 
