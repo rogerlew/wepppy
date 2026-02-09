@@ -172,3 +172,38 @@ def test_runs0_nocfg_rejects_dot_segment_traversal_next(
     assert response.status_code == 302
     assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/"
     assert called is False
+
+
+@pytest.mark.parametrize(
+    "next_path",
+    [
+        "/weppcloud/runs/{runid}/cfg/%2e%2e/browse/private.txt",
+        "/weppcloud/runs/{runid}/cfg/%252e%252e/browse/private.txt",
+    ],
+)
+def test_runs0_nocfg_rejects_encoded_dot_segment_traversal_next(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+    next_path: str,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    called = False
+
+    def _unexpected_cookie_call(response, *, runid: str, config: str) -> bool:
+        nonlocal called
+        called = True
+        return True
+
+    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", _unexpected_cookie_call)
+
+    rendered = next_path.format(runid=runid)
+    with app.test_client() as client:
+        response = client.get(
+            f"/runs/{runid}/?next={quote(rendered, safe='/%')}",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/"
+    assert called is False

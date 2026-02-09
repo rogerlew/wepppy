@@ -446,12 +446,22 @@ def _path_has_unsafe_segments(path: str) -> bool:
     for segment in normalized.split("/"):
         if not segment:
             continue
-        decoded = unquote(segment).strip()
+        decoded = _fully_unquote_segment(segment).strip()
         if decoded in {".", ".."}:
             return True
         if "/" in decoded or "\\" in decoded:
             return True
     return False
+
+
+def _fully_unquote_segment(segment: str, *, max_rounds: int = 3) -> str:
+    decoded = str(segment)
+    for _ in range(max_rounds):
+        candidate = unquote(decoded)
+        if candidate == decoded:
+            break
+        decoded = candidate
+    return decoded
 
 def _log_access(wd, current_user, ip):
     assert _exists(wd)
