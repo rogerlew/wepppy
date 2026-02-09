@@ -161,6 +161,12 @@ class WhiteboxToolsTopazEmulator:
         self._outlet: Optional['Outlet'] = None
         self._build_hooks: defaultdict[str, list[Callable[..., None]]] = defaultdict(list)
 
+    def __getstate__(self) -> Dict[str, Any]:
+        """Exclude the live WhiteboxTools runner to avoid serializing process env."""
+        state = self.__dict__.copy()
+        state.pop("_wbt_runner", None)
+        return state
+
     @property
     def raise_on_error(self):
         """

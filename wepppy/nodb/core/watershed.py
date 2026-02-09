@@ -296,6 +296,12 @@ class Watershed(NoDbBase):
             )
             self._mofe_max_ofes: int = self.config_get_int("watershed", "mofe_max_ofes", 19)
 
+    def __getstate__(self) -> Dict[str, Any]:
+        """Exclude live WhiteboxTools instances from persisted NoDb payloads."""
+        state = super().__getstate__()
+        state.pop("_wbt", None)
+        return state
+
     @property
     def set_extent_mode(self) -> int:
         if not hasattr(self, "_set_extent_mode"):
