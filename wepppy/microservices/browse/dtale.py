@@ -13,6 +13,12 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import RedirectResponse
 
+from wepppy.microservices.browse.security import (
+    path_security_detail,
+    validate_raw_subpath,
+    validate_resolved_target,
+)
+
 _DTALE_SERVICE_URL = os.getenv('DTALE_SERVICE_URL', 'http://dtale:9010').rstrip('/')
 _DTALE_INTERNAL_TOKEN = os.getenv('DTALE_INTERNAL_TOKEN', '').strip()
 DTALE_SUPPORTED_SUFFIXES = (
@@ -73,10 +79,22 @@ def build_handlers(
 
         subpath = request.path_params.get('subpath') or ''
         rel_path = subpath.lstrip('/')
+        raw_violation = validate_raw_subpath(rel_path)
+        if raw_violation is not None:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail=path_security_detail(raw_violation),
+            )
 
         wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))
         target = os.path.abspath(os.path.join(wd, rel_path))
         assert_within_root(wd, target)
+        resolved_violation = validate_resolved_target(wd, target)
+        if resolved_violation is not None:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail=path_security_detail(resolved_violation),
+            )
 
         if not os.path.isfile(target):
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='File not found.')

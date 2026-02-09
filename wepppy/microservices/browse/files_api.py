@@ -15,6 +15,16 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import JSONResponse
 
+from wepppy.microservices.browse.security import (
+    PATH_SECURITY_FORBIDDEN_HIDDEN,
+    PATH_SECURITY_FORBIDDEN_RECORDER,
+    path_security_detail,
+    validate_raw_subpath,
+    validate_resolved_path_against_roots,
+    validate_resolved_target,
+    derive_allowed_symlink_roots,
+)
+
 __all__ = [
     "FILES_DEFAULT_LIMIT",
     "FILES_MAX_LIMIT",
@@ -136,14 +146,27 @@ def _normalize_files_rel_path(raw_path: str) -> str:
     return rel_path
 
 
-def _enforce_no_symlink_traversal(root: str, rel_path: str, *, meta: bool) -> None:
+def _enforce_no_symlink_traversal(
+    root: str,
+    rel_path: str,
+    *,
+    meta: bool,
+    on_forbidden_target: Callable[[str], None],
+) -> None:
     if rel_path in (".", ""):
         return
     parts = [part for part in rel_path.split("/") if part]
     current = os.path.abspath(root)
+    allowed_roots = derive_allowed_symlink_roots(root)
     for index, part in enumerate(parts):
         current = os.path.join(current, part)
         if os.path.islink(current):
+            resolved = os.path.realpath(current)
+            violation = validate_resolved_path_against_roots(resolved, allowed_roots)
+            if violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
+                on_forbidden_target(violation)
+            if violation is None:
+                continue
             if index < len(parts) - 1:
                 _raise_files_error(
                     HTTPStatus.BAD_REQUEST,
@@ -159,7 +182,12 @@ def _enforce_no_symlink_traversal(root: str, rel_path: str, *, meta: bool) -> No
                     code="not_a_directory",
                     details="Symlink traversal is not allowed.",
                 )
-            return
+            _raise_files_error(
+                HTTPStatus.BAD_REQUEST,
+                "Invalid path.",
+                code="path_outside_root",
+                details="Symlink traversal is not allowed.",
+            )
 
 
 def _resolve_files_path(root: str, rel_path: str) -> str:
@@ -542,15 +570,34 @@ async def _handle_files_request(
 
     wd = _resolve_files_root(runid, deps)
     rel_path = _normalize_files_rel_path(subpath or "")
-    if deps.is_restricted_recorder_path(rel_path):
+
+    def _raise_forbidden_path(violation_code: str) -> None:
         _raise_files_error(
             HTTPStatus.FORBIDDEN,
             "Access denied.",
             code="forbidden_path",
-            details="Access to recorder log artifacts is forbidden.",
+            details=path_security_detail(violation_code),
         )
+
+    def _raise_outside_or_invalid_path() -> None:
+        _raise_files_error(
+            HTTPStatus.BAD_REQUEST,
+            "Invalid path.",
+            code="path_outside_root",
+            details="Symlink traversal is not allowed.",
+        )
+
+    raw_violation = validate_raw_subpath(rel_path)
+    if raw_violation is not None:
+        _raise_forbidden_path(raw_violation)
+
     abs_path = _resolve_files_path(wd, rel_path)
-    _enforce_no_symlink_traversal(wd, rel_path, meta=meta)
+    _enforce_no_symlink_traversal(
+        wd,
+        rel_path,
+        meta=meta,
+        on_forbidden_target=_raise_forbidden_path,
+    )
 
     if not os.path.lexists(abs_path):
         path_display = _display_rel_path(rel_path) or "."
@@ -561,6 +608,12 @@ async def _handle_files_request(
             code="path_not_found",
             details=f"No entry at {path_display}",
         )
+
+    resolved_violation = validate_resolved_target(wd, abs_path)
+    if resolved_violation in (PATH_SECURITY_FORBIDDEN_RECORDER, PATH_SECURITY_FORBIDDEN_HIDDEN):
+        _raise_forbidden_path(resolved_violation)
+    if resolved_violation is not None:
+        _raise_outside_or_invalid_path()
 
     using_manifest = os.path.exists(deps.manifest_path(wd))
 

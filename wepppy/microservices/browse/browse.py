@@ -108,6 +108,12 @@ from wepppy.microservices.browse.listing import (
     html_dir_list,
     remove_manifest,
 )
+from wepppy.microservices.browse.security import (
+    is_restricted_recorder_path,
+    path_security_detail,
+    validate_raw_subpath,
+    validate_resolved_target,
+)
 from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
 from wepppy.microservices.dss_preview import build_preview as build_dss_preview
 
@@ -256,18 +262,10 @@ def _assert_within_root(root: str | Path, target: str | Path) -> None:
         abort(403)
 
 
-_RESTRICTED_PATH_SEGMENTS = {"_logs", "profile.events.jsonl"}
-
-
-def _is_restricted_recorder_path(raw_path: str) -> bool:
-    if not raw_path:
-        return False
-    normalized = raw_path.replace("\\", "/")
-    parts = [part for part in normalized.split("/") if part not in ("", ".")]
-    if not parts:
-        return False
-    lower_parts = {part.lower() for part in parts}
-    return any(segment in lower_parts for segment in _RESTRICTED_PATH_SEGMENTS)
+def _assert_target_within_allowed_roots(root: str | Path, target: str | Path) -> None:
+    violation = validate_resolved_target(root, target)
+    if violation is not None:
+        abort(403, path_security_detail(violation))
 
 
 # NOTE: Simplified url_for shim mimics Flask asset lookup.
@@ -777,7 +775,9 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
     Returns the response for a file or directory browse request.
     """
     full_path = os.path.abspath(os.path.join(wd, subpath))
-    
+    _assert_within_root(wd, full_path)
+    _assert_target_within_allowed_roots(wd, full_path)
+
     if os.path.isfile(full_path):
         # If subpath points to a file, serve it
         return await browse_response(full_path, runid, wd, request, config)
@@ -801,6 +801,7 @@ async def _browse_tree_helper(runid, subpath, wd, request, config, filter_patter
         
         # Security and existence checks
         _assert_within_root(wd, dir_path)
+        _assert_target_within_allowed_roots(wd, dir_path)
             
         if not os.path.isdir(dir_path):
             return _path_not_found_response(runid, subpath, wd, request, config)
@@ -1182,7 +1183,7 @@ async def _maybe_render_dss_preview(path: str, runid: str, config: str):
 
 _FILES_API_DEPENDENCIES = FilesApiDependencies(
     get_wd=lambda runid: get_wd(runid),
-    is_restricted_recorder_path=_is_restricted_recorder_path,
+    is_restricted_recorder_path=is_restricted_recorder_path,
     manifest_path=_manifest_path,
     normalize_rel_path=_normalize_rel_path,
     rel_join=_rel_join,
@@ -1205,10 +1206,11 @@ async def _handle_browse_request(
     wd_override: str | Path | None = None,
 ):
     subpath_value = subpath or ''
-    if _is_restricted_recorder_path(subpath_value):
+    violation = validate_raw_subpath(subpath_value)
+    if violation is not None:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
-            detail='Access to recorder log artifacts is forbidden.',
+            detail=path_security_detail(violation),
         )
 
     wd = os.path.abspath(str(wd_override)) if wd_override is not None else os.path.abspath(get_wd(runid))

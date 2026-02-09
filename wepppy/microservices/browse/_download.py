@@ -16,22 +16,13 @@ from starlette.routing import Route
 import pandas as pd
 import pyarrow.parquet as pq
 
+from wepppy.microservices.browse.security import (
+    path_security_detail,
+    validate_raw_subpath,
+    validate_resolved_target,
+)
 from wepppy.weppcloud.routes._run_context import RunContext
 from wepppy.weppcloud.utils.helpers import get_wd
-
-
-_RESTRICTED_PATH_SEGMENTS = {"_logs", "profile.events.jsonl"}
-
-
-def _is_restricted_recorder_path(raw_path: str) -> bool:
-    if not raw_path:
-        return False
-    normalized = raw_path.replace("\\", "/")
-    parts = [part for part in normalized.split("/") if part not in ("", ".")]
-    if not parts:
-        return False
-    lower_parts = {part.lower() for part in parts}
-    return any(segment in lower_parts for segment in _RESTRICTED_PATH_SEGMENTS)
 
 
 async def aria2c_spec(request: Request) -> PlainTextResponse:
@@ -52,14 +43,16 @@ async def download_with_subpath(request: Request) -> Response:
     runid = request.path_params['runid']
     config = request.path_params['config']
 
-    if _is_restricted_recorder_path(subpath):
-        raise HTTPException(status_code=403, detail="Access to recorder log artifacts is forbidden.")
+    violation = validate_raw_subpath(subpath)
+    if violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
     _assert_within_root(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path)
 
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
@@ -71,8 +64,9 @@ async def download_culvert_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
     batch_uuid = request.path_params['uuid']
 
-    if _is_restricted_recorder_path(subpath):
-        raise HTTPException(status_code=403, detail="Access to recorder log artifacts is forbidden.")
+    violation = validate_raw_subpath(subpath)
+    if violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
     wd = str(_resolve_culvert_root(batch_uuid))
     if not os.path.isdir(wd):
@@ -80,6 +74,7 @@ async def download_culvert_with_subpath(request: Request) -> Response:
 
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path)
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
@@ -90,8 +85,9 @@ async def download_batch_with_subpath(request: Request) -> Response:
     subpath = request.path_params.get('subpath', '')
     batch_name = request.path_params['batch_name']
 
-    if _is_restricted_recorder_path(subpath):
-        raise HTTPException(status_code=403, detail="Access to recorder log artifacts is forbidden.")
+    violation = validate_raw_subpath(subpath)
+    if violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(violation))
 
     wd = str(_resolve_batch_root(batch_name))
     if not os.path.isdir(wd):
@@ -99,6 +95,7 @@ async def download_batch_with_subpath(request: Request) -> Response:
 
     dir_path = os.path.abspath(os.path.join(wd, subpath))
     _assert_within_root(wd, dir_path)
+    _assert_target_within_allowed_roots(wd, dir_path)
     if not os.path.exists(dir_path):
         raise HTTPException(status_code=404)
 
@@ -216,13 +213,19 @@ def _assert_within_root(root: str | Path, target: str | Path) -> None:
         raise HTTPException(status_code=403, detail="Invalid path.")
 
 
+def _assert_target_within_allowed_roots(root: str | Path, target: str | Path) -> None:
+    violation = validate_resolved_target(root, target)
+    if violation is not None:
+        raise HTTPException(status_code=403, detail=path_security_detail(violation))
+
+
 def _collect_file_specs(wd: str, base_url: str) -> list[str]:
     specs: list[str] = []
     for root, _dirs, files in os.walk(wd):
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, wd)
-            if _is_restricted_recorder_path(relative_path):
+            if validate_raw_subpath(relative_path) is not None:
                 continue
             url = f"{base_url}/{relative_path}"
             specs.append(f"{url}\n out={relative_path}")
