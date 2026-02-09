@@ -7,6 +7,8 @@ function controlBase() {
     const SUCCESS_JOB_STATUSES = new Set(["finished"]);
     const FAILURE_JOB_STATUSES = new Set(["failed", "stopped", "canceled", "not_found"]);
     const DEFAULT_POLL_INTERVAL_MS = 2000;
+    const MAX_POLL_BACKOFF_INTERVAL_MS = 30000;
+    const POLL_BACKOFF_MULTIPLIER = 2;
     const DEFAULT_SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
     function ensureHttp() {
@@ -703,11 +705,27 @@ function controlBase() {
         };
     }
 
+    function parseRetryAfterMs(error) {
+        if (!error || !error.response || !error.response.headers || typeof error.response.headers.get !== "function") {
+            return 0;
+        }
+        const retryAfter = error.response.headers.get("Retry-After");
+        if (!retryAfter) {
+            return 0;
+        }
+        const parsedSeconds = parseInt(retryAfter, 10);
+        if (!Number.isFinite(parsedSeconds) || parsedSeconds <= 0) {
+            return 0;
+        }
+        return parsedSeconds * 1000;
+    }
+
     return {
         command_btn_id: null,
         rq_job_id: null,
         rq_job_status: null,
         job_status_poll_interval_ms: DEFAULT_POLL_INTERVAL_MS,
+        _job_status_poll_interval_active_ms: DEFAULT_POLL_INTERVAL_MS,
         _job_status_poll_timeout: null,
         _job_status_stacktrace_timeout: null,
         _job_status_fetch_inflight: false,
@@ -907,6 +925,7 @@ function controlBase() {
             self.rq_job_id = normalizedJobId;
             self.rq_job_status = null;
             self._job_status_error = null;
+            self._job_status_poll_interval_active_ms = self.job_status_poll_interval_ms || DEFAULT_POLL_INTERVAL_MS;
 
             self.reset_status_spinner(self);
             self.stop_job_status_polling(self);
@@ -954,6 +973,7 @@ function controlBase() {
                 self._job_status_error_parts = null;
             }
             self._job_status_error = null;
+            self._job_status_poll_interval_active_ms = self.job_status_poll_interval_ms || DEFAULT_POLL_INTERVAL_MS;
             self.rq_job_status = data || {};
             self.render_job_status(self);
             self.manage_status_stream(self, self.rq_job_status && self.rq_job_status.status);
@@ -974,6 +994,7 @@ function controlBase() {
             const parts = deriveErrorParts(error);
             const statusCode = parts.statusCode;
             const isNotFound = (error && error.status === 404) || statusCode === "404";
+            const isRateLimited = (error && error.status === 429) || statusCode === "429";
             if (isNotFound) {
                 let payload = error && error.body && typeof error.body === "object" ? error.body : {};
                 if (!payload.status) {
@@ -991,6 +1012,15 @@ function controlBase() {
                 maybeDispatchFailure(self, payload, "poll");
                 self.update_command_button_state(self);
                 return;
+            }
+            if (isRateLimited) {
+                const baseInterval = self.job_status_poll_interval_ms || DEFAULT_POLL_INTERVAL_MS;
+                const activeInterval = self._job_status_poll_interval_active_ms || baseInterval;
+                const retryAfterMs = parseRetryAfterMs(error);
+                const raisedInterval = Math.max(activeInterval * POLL_BACKOFF_MULTIPLIER, retryAfterMs || 0, baseInterval);
+                self._job_status_poll_interval_active_ms = Math.min(raisedInterval, MAX_POLL_BACKOFF_INTERVAL_MS);
+            } else {
+                self._job_status_poll_interval_active_ms = self.job_status_poll_interval_ms || DEFAULT_POLL_INTERVAL_MS;
             }
             self._job_status_error = `${parts.statusCode} ${parts.statusText}`.trim();
             self._job_status_error_parts = parts;
@@ -1068,7 +1098,9 @@ function controlBase() {
                 return;
             }
 
-            const interval = self.job_status_poll_interval_ms || DEFAULT_POLL_INTERVAL_MS;
+            const interval = self._job_status_poll_interval_active_ms
+                || self.job_status_poll_interval_ms
+                || DEFAULT_POLL_INTERVAL_MS;
 
             self.stop_job_status_polling(self);
 

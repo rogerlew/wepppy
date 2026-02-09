@@ -229,6 +229,9 @@
   let anyFailed = false;
   let paused = false;
   let queryInterval = 1000;
+  const RATE_LIMIT_MAX_INTERVAL_MS = 30000;
+  const RATE_LIMIT_BACKOFF_MULTIPLIER = 2;
+  let jobPollTimer = null;
   let qrResizeTimer = null;
 
   const statusStateMap = {
@@ -423,6 +426,28 @@
     return "";
   }
 
+  function isRateLimitedPayload(payload) {
+    if (!payload || typeof payload !== "object") {
+      return false;
+    }
+    const errorNode = payload.error && typeof payload.error === "object" ? payload.error : null;
+    const errorCode = errorNode && typeof errorNode.code === "string" ? errorNode.code.toLowerCase() : "";
+    const message = resolveErrorMessage(payload, "") || "";
+    return errorCode === "rate_limited" || /too many polling requests/i.test(message);
+  }
+
+  function scheduleJobPoll(delayMs) {
+    if (jobPollTimer) {
+      window.clearTimeout(jobPollTimer);
+      jobPollTimer = null;
+    }
+    const delay = Math.max(0, Number(delayMs) || 0);
+    jobPollTimer = window.setTimeout(() => {
+      jobPollTimer = null;
+      fetchJobStatus();
+    }, delay);
+  }
+
   function setHtml(id, html) {
     const element = document.getElementById(id);
     if (element) {
@@ -479,6 +504,7 @@
         parseFailed ? "Invalid JSON response" : `Request failed (${response.status})`
       );
       const error = new Error(errorMessage || "Request failed");
+      error.status = response.status;
       error.payload = payload;
       throw error;
     }
@@ -564,11 +590,26 @@
       setText("query-count", `${queryCount}`);
       setText("query-interval", `${queryInterval}`);
 
-      setTimeout(fetchJobStatus, queryInterval);
+      scheduleJobPoll(queryInterval);
     }
 
-  function handleError(response) {
-    const payload = response || { error: { message: "Request failed" } };
+  function handleError(error) {
+    const payload = error && error.payload && typeof error.payload === "object"
+      ? error.payload
+      : null;
+    const statusCode = error && typeof error.status === "number" ? error.status : 0;
+    if (statusCode === 429 || isRateLimitedPayload(payload)) {
+      queryInterval = Math.min(
+        Math.max(queryInterval * RATE_LIMIT_BACKOFF_MULTIPLIER, 1000),
+        RATE_LIMIT_MAX_INTERVAL_MS
+      );
+      const message = resolveErrorMessage(payload, "Polling rate limited; backing off.") || "Polling rate limited; backing off.";
+      const detail = resolveErrorDetails(payload);
+      setHtml("job-dashboard", renderError(message, detail, "Rate limited"));
+      setText("query-interval", `${queryInterval}`);
+      scheduleJobPoll(queryInterval);
+      return;
+    }
     const message = resolveErrorMessage(payload, "Request failed") || "Request failed";
     const detail = resolveErrorDetails(payload);
     setHtml("job-dashboard", renderError(message, detail, "Request failed"));
@@ -578,7 +619,7 @@
       const data = await requestJson(primaryUrl);
       handleSuccess(data);
     } catch (error) {
-      handleError((error && error.payload) || null);
+      handleError(error);
     }
   }
 

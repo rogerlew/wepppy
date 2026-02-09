@@ -360,6 +360,10 @@ const runid = '{{ runid }}';
 const config = '{{ config }}';
 let pollInterval = null;
 let lastStatus = null;
+const MIGRATION_POLL_BASE_INTERVAL_MS = 5000;
+const MIGRATION_POLL_MAX_INTERVAL_MS = 30000;
+const MIGRATION_POLL_BACKOFF_MULTIPLIER = 2;
+let migrationPollIntervalMs = MIGRATION_POLL_BASE_INTERVAL_MS;
 
 function normalizeErrorValue(value) {
   if (value === undefined || value === null) {
@@ -486,6 +490,43 @@ function resolveErrorMessage(payload, fallback) {
 
 function hasErrorPayload(payload) {
   return !!(payload && (payload.error || payload.errors));
+}
+
+function isRateLimitedPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return false;
+  }
+  const payloadStatus = parseInt(payload._http_status, 10);
+  if (Number.isFinite(payloadStatus) && payloadStatus === 429) {
+    return true;
+  }
+  const errorNode = payload.error && typeof payload.error === 'object' ? payload.error : null;
+  const errorCode = errorNode && typeof errorNode.code === 'string' ? errorNode.code.toLowerCase() : '';
+  const message = resolveErrorMessage(payload, '') || '';
+  return errorCode === 'rate_limited' || /too many polling requests/i.test(message);
+}
+
+function resolveRateLimitIntervalMs(payload) {
+  const fallbackInterval = Math.min(
+    Math.max(migrationPollIntervalMs * MIGRATION_POLL_BACKOFF_MULTIPLIER, MIGRATION_POLL_BASE_INTERVAL_MS),
+    MIGRATION_POLL_MAX_INTERVAL_MS
+  );
+  const details = payload && payload.error && typeof payload.error === 'object'
+    ? normalizeErrorValue(payload.error.details)
+    : null;
+  if (!details) {
+    return fallbackInterval;
+  }
+  const detailsText = String(details);
+  const windowMatch = detailsText.match(/per\s+(\d+)\s+seconds?/i);
+  if (!windowMatch) {
+    return fallbackInterval;
+  }
+  const seconds = parseInt(windowMatch[1], 10);
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return fallbackInterval;
+  }
+  return Math.min(Math.max(seconds * 1000, fallbackInterval), MIGRATION_POLL_MAX_INTERVAL_MS);
 }
 
 function renderFailure(resultDiv, heading, errorMessage) {
@@ -663,12 +704,18 @@ async function fetchJobStatus(statusUrl) {
     } catch (error) {
       if (http.isHttpError && http.isHttpError(error) && error.body) {
         if (typeof error.body === 'string') {
-          return { error: { message: error.body } };
+          return {
+            _http_status: error.status || 0,
+            error: { message: error.body }
+          };
         }
-        return error.body;
+        return Object.assign({ _http_status: error.status || 0 }, error.body);
       }
       if (http.isHttpError && http.isHttpError(error)) {
-        return { error: { message: error.message || 'Failed to fetch status.' } };
+        return {
+          _http_status: error.status || 0,
+          error: { message: error.message || 'Failed to fetch status.' }
+        };
       }
       throw error;
     }
@@ -677,9 +724,12 @@ async function fetchJobStatus(statusUrl) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (hasErrorPayload(payload)) {
-      return payload;
+      return Object.assign({ _http_status: response.status }, payload);
     }
-    throw new Error(`Failed to fetch status (HTTP ${response.status})`);
+    const error = new Error(`Failed to fetch status (HTTP ${response.status})`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
   return payload;
 }
@@ -696,58 +746,94 @@ function appendStatusLog(message) {
   logOutput.scrollTop = logOutput.scrollHeight;
 }
 
-function startStatusPolling(jobId, statusUrl) {
+function scheduleMigrationPoll(jobId, statusUrl) {
+  stopPolling();
+  pollInterval = window.setTimeout(() => {
+    pollInterval = null;
+    pollStatus(jobId, statusUrl);
+  }, migrationPollIntervalMs);
+}
+
+async function pollStatus(jobId, statusUrl) {
   const statusText = document.getElementById('status-text');
   const progressFill = document.getElementById('progress-fill');
-  
-  pollInterval = setInterval(async () => {
-    try {
-      const statusPayload = await fetchJobStatus(statusUrl);
-      if (hasErrorPayload(statusPayload)) {
-        const message = resolveErrorMessage(
-          statusPayload,
-          'Failed to fetch migration status.'
-        );
-        stopPolling();
-        onMigrationFailed(message || 'Failed to fetch migration status.');
+
+  try {
+    const statusPayload = await fetchJobStatus(statusUrl);
+    if (hasErrorPayload(statusPayload)) {
+      if (isRateLimitedPayload(statusPayload)) {
+        migrationPollIntervalMs = resolveRateLimitIntervalMs(statusPayload);
+        if (statusText) {
+          statusText.textContent = `Polling rate limited. Retrying in ${Math.round(migrationPollIntervalMs / 1000)}s…`;
+        }
+        appendStatusLog(`Polling rate limited. Backing off to ${Math.round(migrationPollIntervalMs / 1000)}s.`);
+        scheduleMigrationPoll(jobId, statusUrl);
         return;
       }
-
-      const statusValue = statusPayload && statusPayload.status ? String(statusPayload.status).toLowerCase() : '';
-      statusText.textContent = resolveMigrationStatusLabel(statusValue);
-        
-      // Update progress bar
-      if (progressFill) {
-        progressFill.style.width = `${resolveMigrationProgress(statusValue)}%`;
-      }
-      if (statusValue && statusValue !== lastStatus) {
-        appendStatusLog(resolveMigrationStatusLabel(statusValue));
-        lastStatus = statusValue;
-      }
-        
-      // Check if job is complete
-      if (statusValue === 'finished') {
-        stopPolling();
-        const jobInfo = await fetchJobInfo(jobId);
-        onMigrationComplete(jobInfo ? jobInfo.result : null);
-      } else if (statusValue === 'failed' || statusValue === 'stopped' || statusValue === 'canceled') {
-        stopPolling();
-        const jobInfo = await fetchJobInfo(jobId);
-        const errorText = jobInfo && jobInfo.exc_info ? jobInfo.exc_info : 'Unknown error';
-        onMigrationFailed(errorText);
-      } else if (statusValue === 'not_found') {
-        stopPolling();
-        onMigrationFailed('Migration job was not found.');
-      }
-    } catch (error) {
-      console.error('Error polling status:', error);
+      const message = resolveErrorMessage(
+        statusPayload,
+        'Failed to fetch migration status.'
+      );
+      stopPolling();
+      onMigrationFailed(message || 'Failed to fetch migration status.');
+      return;
     }
-  }, 5000);
+
+    migrationPollIntervalMs = MIGRATION_POLL_BASE_INTERVAL_MS;
+    const statusValue = statusPayload && statusPayload.status ? String(statusPayload.status).toLowerCase() : '';
+    statusText.textContent = resolveMigrationStatusLabel(statusValue);
+
+    // Update progress bar
+    if (progressFill) {
+      progressFill.style.width = `${resolveMigrationProgress(statusValue)}%`;
+    }
+    if (statusValue && statusValue !== lastStatus) {
+      appendStatusLog(resolveMigrationStatusLabel(statusValue));
+      lastStatus = statusValue;
+    }
+
+    // Check if job is complete
+    if (statusValue === 'finished') {
+      stopPolling();
+      const jobInfo = await fetchJobInfo(jobId);
+      onMigrationComplete(jobInfo ? jobInfo.result : null);
+    } else if (statusValue === 'failed' || statusValue === 'stopped' || statusValue === 'canceled') {
+      stopPolling();
+      const jobInfo = await fetchJobInfo(jobId);
+      const errorText = jobInfo && jobInfo.exc_info ? jobInfo.exc_info : 'Unknown error';
+      onMigrationFailed(errorText);
+    } else if (statusValue === 'not_found') {
+      stopPolling();
+      onMigrationFailed('Migration job was not found.');
+    } else {
+      scheduleMigrationPoll(jobId, statusUrl);
+    }
+  } catch (error) {
+    const errorPayload = error && error.payload && typeof error.payload === 'object'
+      ? error.payload
+      : null;
+    if ((error && error.status === 429) || isRateLimitedPayload(errorPayload)) {
+      migrationPollIntervalMs = resolveRateLimitIntervalMs(errorPayload);
+      if (statusText) {
+        statusText.textContent = `Polling rate limited. Retrying in ${Math.round(migrationPollIntervalMs / 1000)}s…`;
+      }
+      appendStatusLog(`Polling rate limited. Backing off to ${Math.round(migrationPollIntervalMs / 1000)}s.`);
+      scheduleMigrationPoll(jobId, statusUrl);
+      return;
+    }
+    console.error('Error polling status:', error);
+    scheduleMigrationPoll(jobId, statusUrl);
+  }
+}
+
+function startStatusPolling(jobId, statusUrl) {
+  migrationPollIntervalMs = MIGRATION_POLL_BASE_INTERVAL_MS;
+  scheduleMigrationPoll(jobId, statusUrl);
 }
 
 function stopPolling() {
   if (pollInterval) {
-    clearInterval(pollInterval);
+    clearTimeout(pollInterval);
     pollInterval = null;
   }
 }

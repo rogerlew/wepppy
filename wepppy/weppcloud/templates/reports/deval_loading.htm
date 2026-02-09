@@ -66,9 +66,12 @@
   const statusSpinner = document.getElementById("statusSpinner");
   const statusNote = document.getElementById("statusNote");
   const POLL_INTERVAL_MS = 800;
+  const POLL_BACKOFF_MAX_MS = 30000;
+  const POLL_BACKOFF_MULTIPLIER = 2;
   const MAX_POLL_ERRORS = 5;
   const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
   let pollTimer = null;
+  let pollIntervalMs = POLL_INTERVAL_MS;
   let spinnerTimer = null;
   let spinnerIndex = 0;
   let lastState = initialStatus || "queued";
@@ -137,7 +140,16 @@
     async function fetchOnce(url) {
       const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        let payload = null;
+        try {
+          payload = await response.json();
+        } catch (err) {
+          payload = null;
+        }
+        const error = new Error(`HTTP ${response.status}`);
+        error.status = response.status;
+        error.payload = payload;
+        throw error;
       }
 
       const contentType = response.headers.get('content-type');
@@ -151,6 +163,27 @@
     return fetchOnce(jobStatusPrimaryUrl);
   }
 
+  function isRateLimitedPayload(payload) {
+    if (!payload || typeof payload !== "object") {
+      return false;
+    }
+    const errorNode = payload.error && typeof payload.error === "object" ? payload.error : null;
+    const errorCode = errorNode && typeof errorNode.code === "string" ? errorNode.code.toLowerCase() : "";
+    const message = errorNode && typeof errorNode.message === "string" ? errorNode.message : "";
+    return errorCode === "rate_limited" || /too many polling requests/i.test(message);
+  }
+
+  function scheduleNextPoll(delayMs = pollIntervalMs) {
+    if (pollTimer) {
+      window.clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+    pollTimer = window.setTimeout(() => {
+      pollTimer = null;
+      pollStatus();
+    }, delayMs);
+  }
+
   async function pollStatus() {
     if (!jobId || !jobStatusPrimaryUrl) {
       return handleFailure("unknown", "Job could not be enqueued.");
@@ -159,40 +192,59 @@
       const payload = await fetchJobStatusJson();
       const state = payload.status || payload.job_status || 'unknown';
       consecutiveErrors = 0; // Reset error counter on successful poll
+      pollIntervalMs = POLL_INTERVAL_MS;
       if (state === lastState) {
+        scheduleNextPoll();
         return;
       }
       lastState = state;
       if (ACTIVE_STATES.has(state)) {
         handleActive(state);
+        scheduleNextPoll();
         return;
       }
       if (FAILURE_STATES.has(state)) {
         handleFailure(state, payload.description || payload.error || '' );
         if (pollTimer) {
-          window.clearInterval(pollTimer);
+          window.clearTimeout(pollTimer);
+          pollTimer = null;
         }
         return;
       }
       handleSuccess();
       if (pollTimer) {
-        window.clearInterval(pollTimer);
+        window.clearTimeout(pollTimer);
+        pollTimer = null;
       }
     } catch (error) {
       console.error('Failed to poll job status', error);
+      if ((error && error.status === 429) || isRateLimitedPayload(error && error.payload ? error.payload : null)) {
+        consecutiveErrors = 0;
+        pollIntervalMs = Math.min(
+          Math.max(pollIntervalMs * POLL_BACKOFF_MULTIPLIER, POLL_INTERVAL_MS),
+          POLL_BACKOFF_MAX_MS
+        );
+        if (statusText) {
+          statusText.textContent = `Polling rate limited. Retrying in ${Math.round(pollIntervalMs / 1000)}s…`;
+        }
+        scheduleNextPoll();
+        return;
+      }
       consecutiveErrors += 1;
       
       // Only fail permanently after multiple consecutive errors
       if (consecutiveErrors >= MAX_POLL_ERRORS) {
         handleFailure('failed', `Unable to reach the job status endpoint after ${MAX_POLL_ERRORS} attempts. ${error.message || ''}`);
         if (pollTimer) {
-          window.clearInterval(pollTimer);
+          window.clearTimeout(pollTimer);
+          pollTimer = null;
         }
       } else {
         // Show a transient error but keep polling
         if (statusText) {
           statusText.textContent = `Connection issue (attempt ${consecutiveErrors}/${MAX_POLL_ERRORS}). Retrying…`;
         }
+        scheduleNextPoll();
       }
     }
   }
@@ -201,7 +253,8 @@
     handleFailure('failed', 'No job identifier was provided.');
   } else if (!initialStatus || ACTIVE_STATES.has(initialStatus)) {
     handleActive(initialStatus || 'queued');
-    pollTimer = window.setInterval(pollStatus, POLL_INTERVAL_MS);
+    pollIntervalMs = POLL_INTERVAL_MS;
+    scheduleNextPoll(POLL_INTERVAL_MS);
   } else if (FAILURE_STATES.has(initialStatus)) {
     handleFailure(initialStatus, 'Renderer reported a failure before polling began.');
   } else {
