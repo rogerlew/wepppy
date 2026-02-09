@@ -1109,8 +1109,9 @@ class Watershed(NoDbBase):
 
         channels_are_vrt = bool(as_cropped_vrt)
         self._flovec_netful_relief_chnjnt_are_vrt = channels_are_vrt
-        if self._wbt is not None:
-            self._wbt.flovec_netful_relief_are_vrt = channels_are_vrt
+        wbt = getattr(self, "_wbt", None)
+        if wbt is not None:
+            wbt.flovec_netful_relief_are_vrt = channels_are_vrt
 
         netful_geojson = self.netful_utm_shp
         netful_wgs_geojson = self.netful_shp
