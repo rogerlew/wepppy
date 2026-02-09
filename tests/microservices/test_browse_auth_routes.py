@@ -504,6 +504,36 @@ def test_aria2c_private_run_returns_401_without_redirect(
     assert "location" not in {key.lower() for key in response.headers}
 
 
+def test_aria2c_uses_bearer_when_cookie_run_scope_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-aria2c-cookie-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "report.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-aria2c",
+        extra_claims={"runid": "other-run", "session_id": "sid-aria2c"},
+    )
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/aria2c.spec",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "report.txt" in response.text
+
+
 def test_aria2c_public_run_allows_anonymous_access(
     tmp_path: Path,
     load_secure_browse,
@@ -855,6 +885,127 @@ def test_group_routes_use_bearer_when_cookie_token_class_not_allowed(
         )
 
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "base,root_env",
+    [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")],
+)
+def test_group_download_uses_bearer_when_cookie_identifier_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-download-cookie-mismatch"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{root_env: str(group_root_root)},
+    )
+    app = browse.create_app()
+
+    cookie_token = _issue_service_token(identifier, roles=["User"], runs=["other-group"])
+    bearer_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/download/runs/1001/shared.txt",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert response.text == "ok"
+
+
+@pytest.mark.parametrize(
+    "base,root_env",
+    [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")],
+)
+def test_group_gdalinfo_uses_bearer_when_cookie_identifier_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-gdal-cookie-mismatch"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "raster.tif", "raster")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{root_env: str(group_root_root)},
+    )
+    app = browse.create_app()
+    _mock_gdalinfo_shell(monkeypatch)
+
+    cookie_token = _issue_service_token(identifier, roles=["User"], runs=["other-group"])
+    bearer_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/gdalinfo/runs/1001/raster.tif",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["driver"] == "GTiff"
+
+
+@pytest.mark.parametrize(
+    "base,root_env,config_name",
+    [("culverts", "CULVERTS_ROOT", "culvert-batch"), ("batch", "BATCH_RUNNER_ROOT", "batch")],
+)
+def test_group_dtale_uses_bearer_when_cookie_identifier_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+    base: str,
+    root_env: str,
+    config_name: str,
+) -> None:
+    identifier = "group-dtale-cookie-mismatch"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "table.csv", "a,b\n1,2\n")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        DTALE_SERVICE_URL="http://dtale-service",
+        **{root_env: str(group_root_root)},
+    )
+    app = browse.create_app()
+    captured_dtale = _mock_dtale_loader(monkeypatch)
+
+    cookie_token = _issue_service_token(identifier, roles=["User"], runs=["other-group"])
+    bearer_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/dtale/runs/1001/table.csv",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 303
+    assert captured_dtale["json"] == {
+        "runid": identifier,
+        "config": config_name,
+        "path": "runs/1001/table.csv",
+    }
 
 
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
