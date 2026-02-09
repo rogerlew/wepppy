@@ -17,6 +17,7 @@
   - Pandas I/O (`read_csv`, `read_parquet`) and heavy file reads are moved into `asyncio.to_thread` keeps the event loop responsive.
 - **Supporting modules**
   - `_download.py`: serves file downloads, parquet→CSV conversion, and aria2c manifests.
+  - `files_api.py`: JSON `/files` route parsing, validation, and payload assembly.
   - `_gdalinfo.py`: shells out to `gdalinfo -json` and returns raster metadata.
 
 ## Directory layout (key files)
@@ -25,6 +26,7 @@ wepppy/microservices/
   browse/
     browse.py            # Starlette application factory and browse UI logic
     _download.py         # Download + aria2c routes shared with browse
+    files_api.py         # JSON files endpoint handlers
     README.md            # Browse service documentation
   _gdalinfo.py           # gdalinfo JSON route shared with browse
   _service_files/        # systemd / gunicorn configs (browse service runs on 9009)

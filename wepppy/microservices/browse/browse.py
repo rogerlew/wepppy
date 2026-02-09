@@ -50,7 +50,6 @@ import math
 import json
 import logging
 import html
-import mimetypes
 import traceback
 import fnmatch
 from html import escape as html_escape
@@ -67,7 +66,7 @@ from os.path import abspath, basename
 import gzip
 from functools import lru_cache, cmp_to_key
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime
 from http import HTTPStatus
 
 import httpx
@@ -88,6 +87,12 @@ from starlette.responses import (
 )
 from starlette.routing import Route
 from wepppy.microservices.browse._download import create_routes as create_download_routes
+from wepppy.microservices.browse.files_api import (
+    FilesApiDependencies,
+    accepts_json as _accepts_json,
+    build_error_payload as _build_error_payload,
+    build_files_handlers,
+)
 from wepppy.microservices._gdalinfo import create_routes as create_gdalinfo_routes
 from wepppy.microservices.dss_preview import build_preview as build_dss_preview
 
@@ -329,181 +334,6 @@ def _format_human_size(size_bytes: int) -> str:
     unit_index = min(int(math.log(size_bytes, 1024)), len(size_units) - 1)
     scaled = round(size_bytes / (1024 ** unit_index), 2)
     return f'{scaled} {size_units[unit_index]}'
-
-
-FILES_DEFAULT_LIMIT = 1000
-FILES_MAX_LIMIT = 10000
-
-
-def _accepts_json(request: StarletteRequest) -> bool:
-    accept = request.headers.get('accept', '')
-    if not accept:
-        return True
-    for part in accept.split(','):
-        part = part.strip()
-        if not part:
-            continue
-        media, *params = [segment.strip() for segment in part.split(';')]
-        q_value = 1.0
-        for param in params:
-            if param.lower().startswith('q='):
-                try:
-                    q_value = float(param.split('=', 1)[1])
-                except (TypeError, ValueError):
-                    q_value = 0.0
-                break
-        if q_value <= 0:
-            continue
-        media = media.lower()
-        if media in ('*/*', 'application/json', 'application/*') or media.endswith('+json'):
-            return True
-    return False
-
-
-def _build_error_payload(message: str, code: str | None = None, details: str | None = None, errors=None) -> dict:
-    payload = {
-        'error': {
-            'message': message,
-            'code': code,
-            'details': details or message,
-        }
-    }
-    if errors:
-        payload['errors'] = errors
-    return payload
-
-
-def _raise_files_error(status_code: int, message: str, *, code: str | None = None, details: str | None = None, errors=None) -> None:
-    raise HTTPException(
-        status_code=status_code,
-        detail=_build_error_payload(message, code=code, details=details, errors=errors),
-    )
-
-
-def _normalize_files_rel_path(raw_path: str) -> str:
-    if not raw_path:
-        return '.'
-    if '\x00' in raw_path:
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            "Invalid path.",
-            code="path_outside_root",
-            details="Null byte in path.",
-        )
-    raw_path = raw_path.replace('\\', '/')
-    if raw_path.startswith('/'):
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            "Invalid path.",
-            code="path_outside_root",
-            details="Absolute paths are not allowed.",
-        )
-    parts = [part for part in raw_path.split('/') if part not in ('', '.')]
-    if any(part == '..' for part in parts):
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            "Invalid path.",
-            code="path_outside_root",
-            details="Path traversal segments are not allowed.",
-        )
-    rel_path = '/'.join(parts) or '.'
-    return rel_path
-
-
-def _enforce_no_symlink_traversal(root: str, rel_path: str, *, meta: bool) -> None:
-    if rel_path in ('.', ''):
-        return
-    parts = [part for part in rel_path.split('/') if part]
-    current = os.path.abspath(root)
-    for index, part in enumerate(parts):
-        current = os.path.join(current, part)
-        if os.path.islink(current):
-            if index < len(parts) - 1:
-                _raise_files_error(
-                    HTTPStatus.BAD_REQUEST,
-                    "Invalid path.",
-                    code="path_outside_root",
-                    details="Symlink traversal is not allowed.",
-                )
-            if not meta:
-                path_display = _display_rel_path(rel_path) or '.'
-                _raise_files_error(
-                    HTTPStatus.BAD_REQUEST,
-                    f"Path '{path_display}' is not a directory",
-                    code='not_a_directory',
-                    details="Symlink traversal is not allowed.",
-                )
-            return
-
-
-def _resolve_files_path(root: str, rel_path: str) -> str:
-    root_abs = os.path.abspath(root)
-    join_path = rel_path if rel_path != '.' else ''
-    abs_path = os.path.abspath(os.path.join(root_abs, join_path))
-    try:
-        common = os.path.commonpath([root_abs, abs_path])
-    except ValueError:
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            "Invalid path.",
-            code="path_outside_root",
-            details="Path traversal detected.",
-        )
-    if common != root_abs:
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            "Invalid path.",
-            code="path_outside_root",
-            details="Path traversal detected.",
-        )
-    return abs_path
-
-
-def _format_iso_mtime(stat_result) -> str | None:
-    if stat_result is None:
-        return None
-    mtime_ns = getattr(stat_result, 'st_mtime_ns', None)
-    if mtime_ns is None:
-        mtime_ns = int(stat_result.st_mtime * 1_000_000_000)
-    try:
-        dt = datetime.fromtimestamp(mtime_ns / 1_000_000_000, tz=timezone.utc)
-    except (OSError, OverflowError, ValueError):
-        dt = datetime.fromtimestamp(0, tz=timezone.utc)
-    return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-
-def _parse_child_count(value: str) -> int | None:
-    if not value:
-        return None
-    match = re.match(r'^(\d+)', value.strip())
-    if not match:
-        return None
-    try:
-        return int(match.group(1))
-    except ValueError:
-        return None
-
-
-def _display_rel_path(rel_path: str) -> str:
-    return '' if rel_path in ('.', '') else rel_path
-
-
-def _safe_symlink_target(root: str, entry_path: str, target: str) -> str | None:
-    if not target:
-        return None
-    if os.path.isabs(target):
-        candidate = target
-    else:
-        candidate = os.path.abspath(os.path.join(os.path.dirname(entry_path), target))
-    root_abs = os.path.abspath(root)
-    try:
-        common = os.path.commonpath([root_abs, candidate])
-    except ValueError:
-        return None
-    if common != root_abs:
-        return None
-    rel_target = os.path.relpath(candidate, root_abs).replace('\\', '/')
-    return _display_rel_path(_normalize_rel_path(rel_target))
 
 
 # NOTE: Simplified url_for shim mimics Flask asset lookup.
@@ -1082,161 +912,6 @@ def _is_files_request(request: StarletteRequest) -> bool:
         return False
     return True
 
-
-def _parse_files_query_params(request: StarletteRequest) -> tuple[int, int, str, str, str, bool]:
-    params = request.query_params
-    errors = []
-
-    def _add_error(path: str, message: str) -> None:
-        errors.append({
-            'code': 'invalid_value',
-            'message': message,
-            'path': path,
-        })
-
-    limit_raw = params.get('limit')
-    if limit_raw is None:
-        limit = FILES_DEFAULT_LIMIT
-    else:
-        try:
-            limit = int(limit_raw)
-        except (TypeError, ValueError):
-            limit = FILES_DEFAULT_LIMIT
-            _add_error('limit', 'limit must be an integer.')
-        else:
-            if limit < 1 or limit > FILES_MAX_LIMIT:
-                _add_error('limit', f'limit must be between 1 and {FILES_MAX_LIMIT}.')
-
-    offset_raw = params.get('offset')
-    if offset_raw is None:
-        offset = 0
-    else:
-        try:
-            offset = int(offset_raw)
-        except (TypeError, ValueError):
-            offset = 0
-            _add_error('offset', 'offset must be an integer.')
-        else:
-            if offset < 0:
-                _add_error('offset', 'offset must be >= 0.')
-
-    pattern = params.get('pattern') or ''
-    if pattern and not _validate_filter_pattern(pattern):
-        _add_error('pattern', 'pattern contains unsupported characters.')
-
-    sort_by = (params.get('sort') or 'name').lower()
-    if sort_by not in _SORT_FIELDS:
-        _add_error('sort', 'sort must be one of: name, date, size.')
-
-    sort_order = (params.get('order') or 'asc').lower()
-    if sort_order not in _SORT_ORDERS:
-        _add_error('order', 'order must be one of: asc, desc.')
-
-    meta_raw = params.get('meta')
-    if meta_raw is None:
-        meta = False
-    else:
-        meta_value = meta_raw.strip().lower()
-        if meta_value in ('1', 'true', 'yes', 'y', 'on'):
-            meta = True
-        elif meta_value in ('0', 'false', 'no', 'n', 'off'):
-            meta = False
-        else:
-            meta = False
-            _add_error('meta', 'meta must be a boolean.')
-
-    if errors:
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            'Validation failed',
-            code='validation_error',
-            details=errors[0]['message'],
-            errors=errors,
-        )
-
-    return limit, offset, pattern, sort_by, sort_order, meta
-
-
-def _resolve_files_root(runid: str) -> str:
-    try:
-        wd = os.path.abspath(get_wd(runid))
-    except Exception as exc:
-        _raise_files_error(
-            HTTPStatus.NOT_FOUND,
-            f"Run '{runid}' not found",
-            code='run_not_found',
-            details=str(exc) or f'No run directory for runid={runid}',
-        )
-    if not os.path.isdir(wd):
-        _raise_files_error(
-            HTTPStatus.NOT_FOUND,
-            f"Run '{runid}' not found",
-            code='run_not_found',
-            details=f'No run directory for runid={runid}',
-        )
-    return wd
-
-
-def _build_files_entry_payload(*,
-                               name: str,
-                               rel_dir: str,
-                               root: str,
-                               is_dir: bool,
-                               is_symlink: bool,
-                               symlink_is_dir: bool,
-                               hr_value: str,
-                               runid: str,
-                               config: str,
-                               include_meta: bool) -> dict:
-    rel_path = _rel_join(rel_dir, name)
-    abs_path = os.path.abspath(os.path.join(root, rel_path))
-    try:
-        stat_result = os.lstat(abs_path)
-    except OSError:
-        stat_result = None
-
-    payload = {
-        'name': name,
-        'path': _display_rel_path(rel_path),
-        'type': 'file',
-    }
-
-    modified_iso = _format_iso_mtime(stat_result)
-    if modified_iso:
-        payload['modified_iso'] = modified_iso
-
-    if is_symlink:
-        payload['type'] = 'symlink'
-        payload['symlink_is_dir'] = bool(symlink_is_dir)
-        try:
-            target = os.readlink(abs_path)
-        except OSError:
-            target = ''
-        safe_target = _safe_symlink_target(root, abs_path, target)
-        if safe_target is not None:
-            payload['symlink_target'] = safe_target
-        return payload
-
-    if is_dir:
-        payload['type'] = 'directory'
-        child_count = _parse_child_count(hr_value)
-        if child_count is not None:
-            payload['child_count'] = child_count
-        return payload
-
-    if stat_result is not None:
-        payload['size_bytes'] = int(stat_result.st_size)
-
-    payload['download_url'] = _prefix_path(
-        f"/runs/{runid}/{config}/download/{quote(rel_path, safe='/')}"
-    )
-
-    if include_meta:
-        content_type, _encoding = mimetypes.guess_type(name)
-        payload['content_type'] = content_type or 'application/octet-stream'
-        payload['preview_available'] = _preview_available(name)
-
-    return payload
 
 def _ensure_markup(value):
     if isinstance(value, Markup):
@@ -2237,210 +1912,20 @@ async def _maybe_render_dss_preview(path: str, runid: str, config: str):
     )
 
 
-async def _files_list_response(*,
-                               runid: str,
-                               config: str,
-                               wd: str,
-                               rel_path: str,
-                               abs_path: str,
-                               limit: int,
-                               offset: int,
-                               pattern: str,
-                               sort_by: str,
-                               sort_order: str) -> JSONResponse:
-    page = (offset // limit) + 1
-    page_offset = offset % limit
-
-    entries, total_items, using_manifest = await get_page_entries(
-        wd,
-        abs_path,
-        page=page,
-        page_size=limit,
-        filter_pattern=pattern,
-        sort_by=sort_by,
-        sort_order=sort_order,
-    )
-
-    if total_items == 0 or offset >= total_items:
-        entries = []
-    elif page_offset:
-        entries = entries[page_offset:]
-        if len(entries) < limit and (offset + len(entries)) < total_items:
-            next_entries, _next_total, next_using_manifest = await get_page_entries(
-                wd,
-                abs_path,
-                page=page + 1,
-                page_size=limit,
-                filter_pattern=pattern,
-                sort_by=sort_by,
-                sort_order=sort_order,
-            )
-            using_manifest = using_manifest or next_using_manifest
-            needed = limit - len(entries)
-            if needed > 0:
-                entries.extend(next_entries[:needed])
-
-    payload_entries = []
-    for entry in entries:
-        name, is_dir, _mtime_display, hr_value, is_symlink, _sym_target, symlink_is_dir = entry
-        payload_entries.append(
-            _build_files_entry_payload(
-                name=name,
-                rel_dir=rel_path,
-                root=wd,
-                is_dir=is_dir,
-                is_symlink=is_symlink,
-                symlink_is_dir=symlink_is_dir,
-                hr_value=hr_value,
-                runid=runid,
-                config=config,
-                include_meta=False,
-            )
-        )
-
-    response_payload = {
-        'runid': runid,
-        'config': config,
-        'path': _display_rel_path(rel_path),
-        'entries': payload_entries,
-        'total': total_items,
-        'limit': limit,
-        'offset': offset,
-        'has_more': (offset + len(payload_entries)) < total_items,
-    }
-    if using_manifest:
-        response_payload['cached'] = True
-    return JSONResponse(response_payload)
-
-
-async def _files_meta_response(*,
-                               runid: str,
-                               config: str,
-                               wd: str,
-                               rel_path: str,
-                               abs_path: str,
-                               using_manifest: bool) -> JSONResponse:
-    name = '' if rel_path in ('.', '') else os.path.basename(abs_path.rstrip(os.sep))
-    is_symlink = os.path.islink(abs_path)
-    symlink_is_dir = False
-    if is_symlink:
-        try:
-            symlink_is_dir = os.path.isdir(abs_path)
-        except OSError:
-            symlink_is_dir = False
-    is_dir = False if is_symlink else os.path.isdir(abs_path)
-
-    hr_value = ''
-    if is_dir:
-        child_count = await get_total_items(abs_path)
-        hr_value = f'{child_count} items'
-
-    entry_payload = _build_files_entry_payload(
-        name=name,
-        rel_dir=_rel_parent(rel_path)[0] if rel_path not in ('.', '') else '.',
-        root=wd,
-        is_dir=is_dir,
-        is_symlink=is_symlink,
-        symlink_is_dir=symlink_is_dir,
-        hr_value=hr_value,
-        runid=runid,
-        config=config,
-        include_meta=True,
-    )
-
-    response_payload = {
-        'runid': runid,
-        'config': config,
-        **entry_payload,
-    }
-
-    return JSONResponse(response_payload)
-
-
-async def _handle_files_request(
-    request: StarletteRequest,
-    runid: str,
-    config: str,
-    subpath: str,
-):
-    if not _accepts_json(request):
-        _raise_files_error(
-            HTTPStatus.NOT_ACCEPTABLE,
-            'Only application/json is supported.',
-            code='not_acceptable',
-            details='Accept header must allow application/json.',
-        )
-
-    limit, offset, pattern, sort_by, sort_order, meta = _parse_files_query_params(request)
-
-    wd = _resolve_files_root(runid)
-    rel_path = _normalize_files_rel_path(subpath or '')
-    if _is_restricted_recorder_path(rel_path):
-        _raise_files_error(
-            HTTPStatus.FORBIDDEN,
-            'Access denied.',
-            code='forbidden_path',
-            details='Access to recorder log artifacts is forbidden.',
-        )
-    abs_path = _resolve_files_path(wd, rel_path)
-    _enforce_no_symlink_traversal(wd, rel_path, meta=meta)
-
-    if not os.path.lexists(abs_path):
-        path_display = _display_rel_path(rel_path) or '.'
-        label = 'Path' if meta else 'Directory'
-        _raise_files_error(
-            HTTPStatus.NOT_FOUND,
-            f"{label} '{path_display}' does not exist",
-            code='path_not_found',
-            details=f'No entry at {path_display}',
-        )
-
-    using_manifest = os.path.exists(_manifest_path(wd))
-
-    if meta:
-        return await _files_meta_response(
-            runid=runid,
-            config=config,
-            wd=wd,
-            rel_path=rel_path,
-            abs_path=abs_path,
-            using_manifest=using_manifest,
-        )
-
-    if not os.path.isdir(abs_path):
-        path_display = _display_rel_path(rel_path) or '.'
-        _raise_files_error(
-            HTTPStatus.BAD_REQUEST,
-            f"Path '{path_display}' is not a directory",
-            code='not_a_directory',
-            details='Requested path is not a directory.',
-        )
-
-    return await _files_list_response(
-        runid=runid,
-        config=config,
-        wd=wd,
-        rel_path=rel_path,
-        abs_path=abs_path,
-        limit=limit,
-        offset=offset,
-        pattern=pattern,
-        sort_by=sort_by,
-        sort_order=sort_order,
-    )
-
-
-async def files_root(request: StarletteRequest):
-    runid = request.path_params['runid']
-    config = request.path_params['config']
-    return await _handle_files_request(request, runid, config, '')
-
-
-async def files_subpath(request: StarletteRequest):
-    runid = request.path_params['runid']
-    config = request.path_params['config']
-    subpath = request.path_params.get('subpath', '')
-    return await _handle_files_request(request, runid, config, subpath)
+_FILES_API_DEPENDENCIES = FilesApiDependencies(
+    get_wd=lambda runid: get_wd(runid),
+    is_restricted_recorder_path=_is_restricted_recorder_path,
+    manifest_path=_manifest_path,
+    normalize_rel_path=_normalize_rel_path,
+    rel_join=_rel_join,
+    rel_parent=_rel_parent,
+    prefix_path=_prefix_path,
+    preview_available=_preview_available,
+    validate_filter_pattern=_validate_filter_pattern,
+    get_page_entries=get_page_entries,
+    get_total_items=get_total_items,
+)
+files_root, files_subpath = build_files_handlers(_FILES_API_DEPENDENCIES)
 
 
 async def _handle_browse_request(
