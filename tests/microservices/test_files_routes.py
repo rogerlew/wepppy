@@ -394,6 +394,35 @@ def test_download_blocks_recorder_log_paths(tmp_path: Path, monkeypatch, load_br
     assert "recorder log artifacts" in response.text
 
 
+def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monkeypatch, load_browse):
+    runid = "run-aria2c"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+
+    _write_file(run_root / "visible.txt", "ok")
+    _write_file(run_root / "nested" / "table.csv", "a,b\n1,2\n")
+    _write_file(run_root / ".secret", "hidden")
+    _write_file(run_root / "nested" / ".secret2", "hidden")
+    _write_file(run_root / "_logs" / "profile.events.jsonl", '{"ok":true}\n')
+    _write_file(run_root / "wepp" / "output" / "profile.events.jsonl", '{"ok":true}\n')
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    import wepppy.microservices.browse._download as download_mod
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/aria2c.spec")
+
+    assert response.status_code == 200
+    spec = response.text
+    assert "visible.txt" in spec
+    assert "nested/table.csv" in spec
+    assert ".secret" not in spec
+    assert "profile.events.jsonl" not in spec
+
+
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
 def test_files_symlink_target_outside_root(tmp_path: Path, monkeypatch, load_browse):
     runid = "run-321"
