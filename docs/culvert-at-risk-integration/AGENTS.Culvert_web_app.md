@@ -37,6 +37,27 @@
 - Cancellation:
   - `/cancel_task/...` writes Redis flag, `check_cancellation` raises `TaskCancelledError`.
 
+## WEPP Cloud Integration and JWT Security (reviewed 2026-02-09)
+- Integration files:
+  - `culvert_app/tasks/build_payload.py`: builds payload ZIP from ws_deln/hydrogeo outputs.
+  - `culvert_app/tasks/submit_payload.py`: upload + polling client for rq-engine culvert endpoints.
+  - `culvert_app/tasks/wepp_cloud_integration_task.py`: end-to-end hydrogeo task flow (build -> upload -> poll -> download -> parse).
+- Live WEPPcloud auth contract (from `wepppy` code):
+  - `POST /rq-engine/api/culverts-wepp-batch/` requires JWT scope `culvert:batch:submit`.
+  - `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` requires JWT scope `culvert:batch:retry`.
+  - `GET /rq-engine/api/jobstatus/{job_id}` and `/jobinfo/{job_id}` are open only when `RQ_ENGINE_POLL_AUTH_MODE=open`; in `token_optional` or `required`, scope `rq:status` is required.
+  - `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` requires browse authentication; token class must be `user` or `service`.
+  - Browse auth checks also require `aud` compatible with `rq-engine` and a `jti` claim (revocation lookup).
+  - For `service` tokens on culvert downloads, `runs`/`runid` must include the specific `batch_uuid`; otherwise download is denied.
+- Current integration gaps (as of 2026-02-09 review):
+  - `wepp_cloud_integration_task.py` sends `Authorization: Bearer` for upload and download, but not for job-status polling. This fails when WEPPcloud runs with `RQ_ENGINE_POLL_AUTH_MODE=required` (or `token_optional` with auth expected).
+  - `wepp_cloud_integration_task.py` constructs `/rq-engine/api/jobstatus/{job_id}` directly instead of using the response `status_url`; this is less robust when reverse-proxy prefixes or route shapes change.
+- Token strategy guidance:
+  - Prefer short-lived tokens (for example 1 hour) with only required scopes.
+  - For current Culvert batch flow, use `token_class=user` unless you have per-batch service-token issuance; static `service` tokens cannot download new batch UUIDs unless `runs` is minted per batch.
+  - Do not commit `WEPPCLOUD_TOKEN`; inject it via environment/secret manager.
+  - Recommended minimum scopes for end-to-end flow: `culvert:batch:submit` and `rq:status`.
+
 ## Geospatial Pipelines
 - Watershed delineation (ws_deln):
   - Inputs: boundary polygon (upload/draw), DEM (upload or USGS 3DEP VRT), roads (upload or OSM), pour points (culvert/gauge or derived).
