@@ -602,6 +602,32 @@ def test_root_only_paths_require_root_role(
     assert allowed.status_code == 200
 
 
+def test_root_only_path_uses_bearer_when_cookie_lacks_root_role(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-root-fallback"
+    config = "cfg"
+    run_root = tmp_path / runid
+    subpath = "_logs/profile.events.jsonl"
+    _touch(run_root / subpath, "sensitive")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_service_token(runid, roles=["User"], runs=[runid])
+    bearer_token = _issue_service_token(runid, roles=["Root"], runs=[runid])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/{subpath}",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+
+
 @pytest.mark.parametrize(
     "base,root_env",
     [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")],
@@ -709,6 +735,42 @@ def test_group_routes_use_bearer_when_cookie_token_class_not_allowed(
         client.cookies.set("wepp_browse_jwt", cookie_token)
         response = client.get(
             f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_root_only_path_uses_bearer_when_cookie_lacks_root_role(
+    tmp_path: Path,
+    load_secure_browse,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-root-fallback"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    subpath = "runs/1001/_logs/profile.events.jsonl"
+    _touch(group_root / subpath, "sensitive")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{
+            root_env: str(group_root_root),
+        },
+    )
+    app = browse.create_app()
+
+    cookie_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
+    bearer_token = _issue_service_token(identifier, roles=["Root"], runs=[identifier])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/{subpath}",
             headers={"Authorization": f"Bearer {bearer_token}"},
             follow_redirects=False,
         )
