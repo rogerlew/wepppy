@@ -48,6 +48,11 @@ following environment variables:
 - `token_class=user`
 - Required claims: `sub`, `roles`, `groups`, `aud`, `scope`, `iat`, `exp`, `jti`.
 - Authorization: use server-side run ownership and role checks; do not embed full run lists.
+- Role policy:
+  - Minting is restricted to callers with at least one role in `Admin`, `PowerUser`, `Dev`, `Root`.
+  - Browse group routes (`/culverts/{uuid}/...`, `/batch/{batch_name}/...`) require
+    user tokens to include at least one role in `admin`, `poweruser`, `dev`, `root`
+    (case-insensitive match).
 
 ### Service token
 - `token_class=service`
@@ -170,7 +175,7 @@ If validation fails a `JWTDecodeError` is raised.
 - Behavior:
   - Caller must have at least one role in `Admin`, `PowerUser`, `Dev`, `Root`; others receive `403`.
   - Issues a user JWT (`token_class=user`) with subject set to the current user ID.
-  - Includes user claims: `email`, `roles`, `groups`.
+  - Includes user claims: `email`, `roles`, `groups` (current role names from the caller session/user record).
   - Sets audiences to `rq-engine` and `query-engine`.
   - Sets scopes to `runs:read`, `queries:validate`, `queries:execute`, `rq:status`, `rq:enqueue`, `rq:export`.
   - Uses a fixed TTL of 90 days (`7776000` seconds).
