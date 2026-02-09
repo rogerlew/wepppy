@@ -130,6 +130,19 @@ def _mock_dtale_loader(monkeypatch: pytest.MonkeyPatch) -> dict:
     return captured
 
 
+def _mock_gdalinfo_shell(monkeypatch: pytest.MonkeyPatch, *, payload: str = '{"driver":"GTiff"}') -> None:
+    import wepppy.microservices._gdalinfo as gdalinfo_mod
+
+    async def _fake_run_shell_command(command: str, cwd: str | None):
+        return (0, payload, "")
+
+    monkeypatch.setattr(
+        gdalinfo_mod,
+        "_run_shell_command",
+        _fake_run_shell_command,
+    )
+
+
 def test_browse_allows_public_run_without_token(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-public"
     config = "cfg"
@@ -440,6 +453,36 @@ def test_private_download_redirects_only_for_navigation(tmp_path: Path, load_sec
     assert api_response.status_code == 401
 
 
+def test_private_download_uses_bearer_when_cookie_run_scope_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-download-cookie-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "payload.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-download",
+        extra_claims={"runid": "other-run", "session_id": "sid-download"},
+    )
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/payload.txt",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert response.text == "hello"
+
+
 def test_aria2c_private_run_returns_401_without_redirect(
     tmp_path: Path,
     load_secure_browse,
@@ -496,6 +539,78 @@ def test_private_gdalinfo_returns_401_without_redirect(tmp_path: Path, load_secu
 
     assert response.status_code == 401
     assert "location" not in {key.lower() for key in response.headers}
+
+
+def test_private_gdalinfo_uses_bearer_when_cookie_run_scope_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-gdal-cookie-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "raster.tif", "raster")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+    _mock_gdalinfo_shell(monkeypatch)
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-gdal",
+        extra_claims={"runid": "other-run", "session_id": "sid-gdal"},
+    )
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/gdalinfo/raster.tif",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["driver"] == "GTiff"
+
+
+def test_private_dtale_uses_bearer_when_cookie_run_scope_mismatch(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-dtale-cookie-mismatch"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "table.csv", "a,b\n1,2\n")
+    browse = load_secure_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        DTALE_SERVICE_URL="http://dtale-service",
+    )
+    app = browse.create_app()
+    captured_dtale = _mock_dtale_loader(monkeypatch)
+
+    cookie_token = _issue_token(
+        token_class="session",
+        subject="sid-dtale",
+        extra_claims={"runid": "other-run", "session_id": "sid-dtale"},
+    )
+    bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/dtale/table.csv",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 303
+    assert captured_dtale["json"] == {
+        "runid": runid,
+        "config": config,
+        "path": "table.csv",
+    }
 
 
 def test_private_browse_session_token_runid_mismatch_is_forbidden(
