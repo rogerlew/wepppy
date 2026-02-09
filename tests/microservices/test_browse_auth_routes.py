@@ -308,6 +308,52 @@ def test_private_browse_uses_bearer_when_cookie_run_scope_mismatch(
     assert "shh" in response.text
 
 
+def test_private_browse_uses_bearer_when_cookie_token_revoked(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-private-cookie-revoked"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.browse.auth as auth_mod
+
+    def _check_revocation(jti: str) -> None:
+        if jti == "revoked-cookie-jti":
+            raise auth_mod.BrowseAuthError("Token has been revoked", status_code=403, code="forbidden")
+
+    monkeypatch.setattr(auth_mod, "_check_revocation", _check_revocation)
+
+    bearer_token = _issue_token(
+        token_class="service",
+        runs=[runid],
+        roles=["User"],
+        extra_claims={"jti": "ok-bearer-jti"},
+    )
+    # Override cookie token with deterministic revoked JTI.
+    cookie_token = _issue_token(
+        token_class="service",
+        runs=[runid],
+        roles=["User"],
+        extra_claims={"jti": "revoked-cookie-jti"},
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
+
+
 def test_files_requires_auth_even_for_public_run(tmp_path: Path, load_secure_browse) -> None:
     runid = "run-files-public"
     config = "cfg"
@@ -395,6 +441,53 @@ def test_files_use_bearer_when_cookie_token_class_not_allowed(
         extra_claims={"runid": runid, "session_id": "sid-files"},
     )
     bearer_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/files/",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert any(entry["name"] == "demo.txt" for entry in payload["entries"])
+
+
+def test_files_use_bearer_when_cookie_token_revoked(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-files-cookie-revoked"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "demo.txt", "hello")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.browse.auth as auth_mod
+
+    def _check_revocation(jti: str) -> None:
+        if jti == "revoked-cookie-jti":
+            raise auth_mod.BrowseAuthError("Token has been revoked", status_code=403, code="forbidden")
+
+    monkeypatch.setattr(auth_mod, "_check_revocation", _check_revocation)
+
+    cookie_token = _issue_token(
+        token_class="service",
+        runs=[runid],
+        roles=["User"],
+        extra_claims={"jti": "revoked-cookie-jti"},
+    )
+    bearer_token = _issue_token(
+        token_class="service",
+        runs=[runid],
+        roles=["User"],
+        extra_claims={"jti": "ok-bearer-jti"},
+    )
 
     with TestClient(app) as client:
         client.cookies.set("wepp_browse_jwt", cookie_token)
@@ -1031,6 +1124,60 @@ def test_group_routes_use_bearer_when_cookie_token_class_not_allowed(
         extra_claims={"runid": identifier, "session_id": "sid-group"},
     )
     bearer_token = _issue_service_token(identifier, runs=[identifier], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", cookie_token)
+        response = client.get(
+            f"/weppcloud/{base}/{identifier}/browse/runs/1001/",
+            headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
+def test_group_routes_use_bearer_when_cookie_token_revoked(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+    base: str,
+    root_env: str,
+) -> None:
+    identifier = "group-cookie-revoked"
+    group_root_root = tmp_path / base
+    group_root = group_root_root / identifier
+    _touch(group_root / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse(
+        {},
+        SITE_PREFIX="/weppcloud",
+        **{
+            root_env: str(group_root_root),
+        },
+    )
+    app = browse.create_app()
+
+    import wepppy.microservices.browse.auth as auth_mod
+
+    def _check_revocation(jti: str) -> None:
+        if jti == "revoked-cookie-jti":
+            raise auth_mod.BrowseAuthError("Token has been revoked", status_code=403, code="forbidden")
+
+    monkeypatch.setattr(auth_mod, "_check_revocation", _check_revocation)
+
+    cookie_token = _issue_token(
+        token_class="service",
+        runs=[identifier],
+        roles=["User"],
+        extra_claims={"jti": "revoked-cookie-jti"},
+    )
+    bearer_token = _issue_token(
+        token_class="service",
+        runs=[identifier],
+        roles=["User"],
+        extra_claims={"jti": "ok-bearer-jti"},
+    )
 
     with TestClient(app) as client:
         client.cookies.set("wepp_browse_jwt", cookie_token)
