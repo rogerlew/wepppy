@@ -98,6 +98,11 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     assert payload["job_id"] == "job-123"
     assert payload["status_url"] == "/rq-engine/api/jobstatus/job-123"
     assert payload["culvert_batch_uuid"] == seen["uuid"]
+    assert isinstance(payload.get("browse_token"), str)
+
+    browse_claims = auth_tokens.decode_token(payload["browse_token"], audience="rq-engine")
+    assert browse_claims.get("token_class") == "service"
+    assert payload["culvert_batch_uuid"] in (browse_claims.get("runs") or [])
 
     batch_root = culverts_root / payload["culvert_batch_uuid"]
     metadata_path = batch_root / "batch_metadata.json"

@@ -26,6 +26,7 @@ from wepppy.microservices.culvert_payload_validator import (
 )
 from wepppy.rq.culvert_rq import TIMEOUT as CULVERT_BATCH_TIMEOUT
 from wepppy.rq.culvert_rq import run_culvert_batch_rq, run_culvert_run_rq
+from wepppy.weppcloud.utils import auth_tokens
 
 from .auth import AuthError, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
@@ -36,6 +37,22 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
+CULVERT_BROWSE_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
+
+
+def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, Any]:
+    """Mint a batch-scoped browse token for /weppcloud/culverts/{uuid}/browse/*."""
+    return auth_tokens.issue_token(
+        subject or "culvert-batch",
+        audience="rq-engine",
+        runs=[batch_uuid],
+        expires_in=CULVERT_BROWSE_TOKEN_TTL_SECONDS,
+        extra_claims={
+            "token_class": "service",
+            "service_groups": ["culverts"],
+            "jti": uuid.uuid4().hex,
+        },
+    )
 
 
 @router.post(
@@ -57,7 +74,7 @@ MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 )
 async def culverts_wepp_batch(request: Request) -> JSONResponse:
     try:
-        require_jwt(request, required_scopes=["culvert:batch:submit"])
+        submitter_claims = require_jwt(request, required_scopes=["culvert:batch:submit"])
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -136,11 +153,18 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
 
         job_id = _enqueue_culvert_batch_job(culvert_batch_uuid)
         status_url = f"/rq-engine/api/jobstatus/{job_id}"
+        browse_token_payload = _mint_culvert_browse_token(
+            culvert_batch_uuid,
+            subject=str(submitter_claims.get("sub") or "culvert-batch"),
+        )
+        browse_claims = browse_token_payload.get("claims", {}) or {}
         return JSONResponse(
             {
                 "job_id": job_id,
                 "culvert_batch_uuid": culvert_batch_uuid,
                 "status_url": status_url,
+                "browse_token": browse_token_payload.get("token"),
+                "browse_token_expires_at": browse_claims.get("exp"),
             }
         )
     except Exception:
@@ -172,7 +196,7 @@ async def culverts_retry_run(
 ) -> JSONResponse:
     """Retry a single culvert run within an existing batch."""
     try:
-        require_jwt(request, required_scopes=["culvert:batch:retry"])
+        submitter_claims = require_jwt(request, required_scopes=["culvert:batch:retry"])
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -224,12 +248,19 @@ async def culverts_retry_run(
 
     job_id = _enqueue_culvert_run_job(batch_uuid, point_id)
     status_url = f"/rq-engine/api/jobstatus/{job_id}"
+    browse_token_payload = _mint_culvert_browse_token(
+        batch_uuid,
+        subject=str(submitter_claims.get("sub") or "culvert-batch"),
+    )
+    browse_claims = browse_token_payload.get("claims", {}) or {}
     return JSONResponse(
         {
             "job_id": job_id,
             "culvert_batch_uuid": batch_uuid,
             "point_id": point_id,
             "status_url": status_url,
+            "browse_token": browse_token_payload.get("token"),
+            "browse_token_expires_at": browse_claims.get("exp"),
         }
     )
 
