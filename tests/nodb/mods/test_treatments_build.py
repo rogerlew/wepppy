@@ -139,3 +139,48 @@ def test_build_treatments_updates_domlc_and_dumps_parquet(monkeypatch, tmp_path)
     assert landuse.dump_called is True
     assert apply_calls == [("101", "thinning_40_75", "forest")]
     assert modify_calls == ["101"]
+
+
+@pytest.mark.unit
+def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
+    class DummySoil:
+        def __init__(self, clay: float, sand: float):
+            self.clay = clay
+            self.sand = sand
+
+    class DummySoils:
+        def __init__(self):
+            self._locked = False
+            self.domsoil_d = {"101": "Cambisols-clay loam"}
+            # Key must be the full composite mukey (ISRIC uses WRB-texture IDs).
+            self.soils = {"Cambisols-clay loam": DummySoil(clay=30.0, sand=30.0)}
+
+        @contextmanager
+        def locked(self):
+            self._locked = True
+            try:
+                yield
+            finally:
+                self._locked = False
+
+        def islocked(self):
+            return self._locked
+
+    class DummyDisturbed:
+        sol_ver = 7778.0
+        land_soil_replacements_d = {}
+
+    landuse = FakeLanduse(
+        domlc_d={"101": "41"},
+        managements={"41": DummyManagementSummary("forest")},
+        mapping={},
+    )
+    soils = DummySoils()
+    disturbed = DummyDisturbed()
+
+    treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.wd = str(tmp_path)
+    treatments.logger = logging.getLogger("test.treatments.modify_soil")
+
+    with soils.locked():
+        treatments._modify_soil(landuse, soils, disturbed, "101")

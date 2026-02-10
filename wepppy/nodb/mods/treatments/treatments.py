@@ -568,12 +568,28 @@ class Treatments(NoDbBase):
         if not soils_instance.islocked():
             raise RuntimeError("soils.nodb is not locked!")
 
-        mukey = soils_instance.domsoil_d[topaz_id]
+        raw_mukey = soils_instance.domsoil_d[topaz_id]
 
-        if '-' in mukey:
-            mukey = mukey.split('-')[0]
+        # Prefer the "base" soil key (token before the first '-') so we don't stack
+        # modifications when domsoil_d already points at a disturbed derivative.
+        # Legacy ISRIC keys used '-' as part of the base ID (e.g. "Cambisols-clay loam"),
+        # so we fall back to the raw key when the base token is not present.
+        base_mukey = raw_mukey
+        if "-" in base_mukey:
+            base_mukey = base_mukey.split("-", 1)[0]
 
-        _soil = soils_instance.soils[mukey]
+        if base_mukey in soils_instance.soils:
+            lookup_mukey = base_mukey
+            mukey = base_mukey
+        elif raw_mukey in soils_instance.soils:
+            lookup_mukey = raw_mukey
+            mukey = raw_mukey
+        else:
+            raise KeyError(
+                f"Unknown soil key for topaz_id={topaz_id!r}: domsoil_d={raw_mukey!r} (base={base_mukey!r})"
+            )
+
+        _soil = soils_instance.soils[lookup_mukey]
         clay = _soil.clay
         sand = _soil.sand
 

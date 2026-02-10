@@ -478,7 +478,9 @@ class ISRICSoilData:
         if simple_texture is None:
             return None, None, meta
         
-        mukey = f'{wrb}-{simple_texture}'
+        # Avoid '-' in the base mukey so downstream code can safely use '-' as a
+        # delimiter when constructing derived/disturbed soil IDs.
+        mukey = f'{wrb}_{simple_texture}'
         
         s = ['7778',
              '#',
