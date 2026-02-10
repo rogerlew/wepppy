@@ -276,7 +276,14 @@
 
   if (pupRelPath) {
     const appendPupParam = (url) => {
-      if (!url || /^https?:\/\//i.test(url) || url.startsWith('//') || url.includes('pup=')) {
+      if (
+        !url ||
+        /^https?:\/\//i.test(url) ||
+        url.startsWith('//') ||
+        url.includes('pup=') ||
+        // `elevationquery` no longer honors `?pup=`; use composite runids for child runs.
+        url.includes('elevationquery')
+      ) {
         return url;
       }
       const separator = url.includes('?') ? '&' : '?';
