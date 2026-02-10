@@ -86,6 +86,48 @@ function url_for_run(url, options) {
         activeConfig = String(configOverride).trim();
     }
 
+    // When rendering legacy pup runs, prefer composing an Omni composite runid
+    // instead of propagating `?pup=` for supported omni scenarios/contrasts.
+    if (
+        (runIdOverride === undefined || runIdOverride === null) &&
+        activeRunId &&
+        activeRunId.indexOf(";;") === -1
+    ) {
+        var pupRelpath = "";
+        try {
+            if (typeof globalThis !== "undefined" && typeof globalThis.pup_relpath === "string") {
+                pupRelpath = globalThis.pup_relpath;
+            } else if (typeof window !== "undefined" && typeof window.pup_relpath === "string") {
+                pupRelpath = window.pup_relpath;
+            }
+        } catch (noop) {
+            pupRelpath = "";
+        }
+
+        if (pupRelpath) {
+            var normalizedPup = String(pupRelpath || "")
+                .trim()
+                .replace(/\\/g, "/")
+                .replace(/^\/+/, "")
+                .replace(/\/+$/, "");
+            if (normalizedPup.indexOf("_pups/") === 0) {
+                normalizedPup = normalizedPup.slice("_pups/".length);
+            }
+
+            if (normalizedPup.indexOf("omni/scenarios/") === 0) {
+                var scenarioName = normalizedPup.slice("omni/scenarios/".length).replace(/\/+$/, "");
+                if (scenarioName && scenarioName.indexOf("/") === -1) {
+                    activeRunId = activeRunId + ";;omni;;" + scenarioName;
+                }
+            } else if (normalizedPup.indexOf("omni/contrasts/") === 0) {
+                var contrastId = normalizedPup.slice("omni/contrasts/".length).replace(/\/+$/, "");
+                if (contrastId && contrastId.indexOf("/") === -1) {
+                    activeRunId = activeRunId + ";;omni-contrast;;" + contrastId;
+                }
+            }
+        }
+    }
+
     var runScopedPath = normalizedUrl;
     if (activeRunId && activeConfig) {
         runScopedPath = "runs/" + encodeURIComponent(activeRunId) + "/" + encodeURIComponent(activeConfig) + "/";

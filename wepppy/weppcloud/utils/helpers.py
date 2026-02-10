@@ -380,6 +380,35 @@ def url_for_run(endpoint: str, **values: Any) -> str:
         if missing:
             raise ValueError(f'Missing values for {endpoint}: {", ".join(missing)}')
 
+    omni_composite = False
+    # When rendering legacy pup runs, prefer composing an Omni composite runid
+    # instead of propagating `?pup=` for supported omni scenarios/contrasts.
+    runid_value = values.get("runid")
+    if isinstance(runid_value, str) and runid_value and ";;" not in runid_value:
+        pup_value: Any | None
+        if "pup" in values:
+            pup_value = values.get("pup")
+        else:
+            pup_value = getattr(g, "pup_relpath", None)
+
+        if isinstance(pup_value, str) and pup_value:
+            normalized = pup_value.strip().replace("\\", "/").lstrip("/").rstrip("/")
+            if normalized.startswith("_pups/"):
+                normalized = normalized[len("_pups/"):]
+
+            if normalized.startswith("omni/scenarios/"):
+                scenario_name = normalized[len("omni/scenarios/"):].rstrip("/")
+                if scenario_name and "/" not in scenario_name:
+                    values["runid"] = f"{runid_value};;omni;;{scenario_name}"
+                    values.pop("pup", None)
+                    omni_composite = True
+            elif normalized.startswith("omni/contrasts/"):
+                contrast_id = normalized[len("omni/contrasts/"):].rstrip("/")
+                if contrast_id and "/" not in contrast_id:
+                    values["runid"] = f"{runid_value};;omni-contrast;;{contrast_id}"
+                    values.pop("pup", None)
+                    omni_composite = True
+
     if endpoint == 'browse.browse_tree':
         _require(['runid', 'config'])
         subpath = (values.get('subpath') or '').lstrip('/')
@@ -404,7 +433,7 @@ def url_for_run(endpoint: str, **values: Any) -> str:
 
     if 'pup' not in values:
         pup_relpath = getattr(g, 'pup_relpath', None)
-        if pup_relpath:
+        if pup_relpath and not omni_composite:
             values['pup'] = pup_relpath
 
     url = url_for(endpoint, **values)

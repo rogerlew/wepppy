@@ -281,6 +281,9 @@
         /^https?:\/\//i.test(url) ||
         url.startsWith('//') ||
         url.includes('pup=') ||
+        // Composite runids encode child context in the run slug (no `pup=` needed).
+        url.includes(';;') ||
+        url.toLowerCase().includes('%3b%3b') ||
         // `elevationquery` no longer honors `?pup=`; use composite runids for child runs.
         url.includes('elevationquery')
       ) {
