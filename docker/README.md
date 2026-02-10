@@ -3,6 +3,7 @@
 > **See also:** [AGENTS.md](../AGENTS.md) for Development Workflow, Docker Compose (Recommended), and Common Docker tasks sections.
 
 This guide covers both the development (`docker-compose.dev.yml`) and production (`docker-compose.prod.yml`) Docker Compose stacks for WEPPcloud.
+It also covers the production worker pool stack (`docker-compose.prod.worker.yml`) used on dedicated RQ worker hosts.
 
 ## Deployment Environments
 
@@ -10,6 +11,7 @@ This guide covers both the development (`docker-compose.dev.yml`) and production
 |-------------|------|--------|--------------|-------|
 | **Test Production** | `forest1.local` | `wc-prod.bearhive.duckdns.org` | `docker-compose.prod.yml` | Primary test production server |
 | **Development** | `forest.local` | `wc.bearhive.duckdns.org` | `docker-compose.dev.yml` | Development with bind mounts |
+| **Prod Worker Pool** | (separate worker host) | — | `docker-compose.prod.worker.yml` | Dedicated RQ workers connected to an external Redis (no Redis/Postgres services). |
 
 ### Test Production (forest1.local)
 
@@ -20,6 +22,33 @@ cd /workdir/wepppy
 ./scripts/deploy-production.sh
 # Or manually:
 docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
+```
+
+### Production Worker Pool (Dedicated RQ Hosts)
+
+Worker-only stacks (no Flask/Caddy/Redis/Postgres) use:
+- Compose file: `docker/docker-compose.prod.worker.yml`
+- Guide: `docker/prod-worker-deploy-guide.md`
+
+Key `docker/.env` requirements for `docker-compose.prod.worker.yml`:
+- `RQ_REDIS_URL` must point at a reachable Redis (DB 9). If unset, the compose default falls back to `redis:6379`, which only works when a `redis` service exists on the same Compose network.
+- `WC1_DIR` and `GEODATA_DIR` must match the host mount points (shared run storage + geodata).
+- `WEPPPY_ENV_FILE` controls the `env_file:` path for services. `wctl` sets it automatically; if running raw `docker compose`, set `WEPPPY_ENV_FILE=.env` and run from `docker/` to avoid `docker/docker/.env` path resolution failures.
+
+Recommended: pin `wctl` on worker hosts and use it for ops (it generates a temporary env file and sets `WEPPPY_ENV_FILE` so `env_file:` paths resolve correctly).
+
+```bash
+cd /workdir/wepppy
+./wctl/install.sh worker
+wctl up -d rq-worker rq-worker-batch
+wctl rq-info
+```
+
+Optional: keep `weppcloudr` behind a profile (so `wctl up -d` doesn’t start it unless requested):
+
+```bash
+export WCTL_COMPOSE_FILE_EXTRAS=docker/docker-compose.prod.worker.override.yml
+wctl up -d rq-worker rq-worker-batch
 ```
 
 ### Development (Local)
@@ -63,25 +92,37 @@ docker logs docker-postgres-backup-1  # Check recent backup status
 ## Prerequisites
 - Docker Desktop or a recent Docker Engine.
 - `docker compose` plugin (v2).
-- A populated `docker/.env` file containing at least `POSTGRES_PASSWORD` and optionally `UID`/`GID`.
+- A populated `docker/.env` file containing at least `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, and `DATABASE_URL` (plus optional `UID`/`GID`).
 
 ```bash
 cat > docker/.env <<EOF
 UID=$(id -u)          # customize to match the user you want inside the containers
 GID=$(id -g)
 POSTGRES_PASSWORD=localdev
+DATABASE_URL=postgresql://wepppy:localdev@postgres/wepppy
+SQLALCHEMY_DATABASE_URI=postgresql://wepppy:localdev@postgres/wepppy
+REDIS_PASSWORD=localdev
 EOF
 ```
 
 > To run everything as `roger:docker`, set `UID=1000` and `GID=$(getent group docker | cut -d: -f3)` (typically `993`). Ensure the group exists on the host; Compose passes numeric ids straight through.
 
 ## wctl (weppcloud control)
-Wrapper for running docker compose commands
+`wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/.env` plus host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
-e.g
+One-time install (pins the default compose file for the host):
 
+```bash
+./wctl/install.sh dev|prod|wepp1|worker
 ```
-wctl logs weppcloud
+
+Common commands:
+
+```bash
+wctl ps
+wctl logs -f rq-worker
+wctl rq-info
+wctl docker compose config
 ```
 
 ## Service Catalog
@@ -106,7 +147,9 @@ wctl logs weppcloud
 
 ### Scaling rq-worker-batch
 
-`rq-worker-batch` uses a fixed `container_name`, so Compose scaling is not available. To add a second pool without interrupting the stack, clone the existing batch worker configuration and start another container on the same network.
+In `docker-compose.dev.yml`, `rq-worker-batch` uses a fixed `container_name`, so Compose scaling is not available. To add a second pool without interrupting the stack, clone the existing batch worker configuration and start another container on the same network.
+
+In `docker-compose.prod.worker.yml`, `rq-worker-batch` does not set `container_name`, so Compose scaling works (each container already runs a multi-process `rq worker-pool -n ...`).
 
 Preparation (one-time):
 ```bash
@@ -116,6 +159,7 @@ mv /tmp/wepppy-rq-worker-batch.env docker/wepppy-rq-worker-batch.env
 
 Start a second batch worker pool:
 ```bash
+# docker/wepppy-rq-worker-batch.env should include REDIS_PASSWORD.
 docker run -d \
   --name wepppy-rq-worker-batch-2 \
   --network wepppy-net \
@@ -127,8 +171,7 @@ docker run -d \
   --env-file docker/wepppy-rq-worker-batch.env \
   --volumes-from wepppy-rq-worker-batch \
   --init wepppy-dev \
-  rq worker-pool -n "4" -u redis://redis:6379/9 --logging-level INFO \
-  --worker-class wepppy.rq.WepppyRqWorker batch
+  bash -lc 'rq worker-pool -n "4" -u "redis://:${REDIS_PASSWORD}@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch'
 ```
 
 Inspect and stop:
@@ -197,6 +240,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 - **Permission denied when writing to bind-mounted directories** — double-check `UID`/`GID` in `docker/.env` and recreate containers. Existing files created with old ids may need a `chown`.
 - **`I have no name!` shell prompt** — indicates the uid lacks an `/etc/passwd` entry. Adjust the Dockerfile if cosmetic prompts matter.
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
+- **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service; set `RQ_REDIS_URL=redis://:<password>@<redis_host>:6379/9` in `docker/.env` and recreate `rq-worker`/`rq-worker-batch`. Use `wctl rq-info` to confirm workers registered.
 
 Refer back to this document whenever you add services, change ports, or adjust the proxy topology so the Compose stack stays in sync with production expectations.
 
@@ -222,6 +266,8 @@ cd /workdir/wepppy/docker
 SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(64))')
 SECURITY_PASSWORD_SALT=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
 DTALE_INTERNAL_TOKEN=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
+POSTGRES_PASSWORD=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
+REDIS_PASSWORD=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
 
 # Create .env file
 cat > .env <<EOF
@@ -234,7 +280,13 @@ EXTERNAL_HOST=wc-prod.bearhive.duckdns.org
 EXTERNAL_HOST_DESCRIPTION="WEPPcloud Test Production Server"
 
 # Database credentials
-POSTGRES_PASSWORD=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+DATABASE_URL=postgresql://wepppy:${POSTGRES_PASSWORD}@postgres/wepppy
+SQLALCHEMY_DATABASE_URI=postgresql://wepppy:${POSTGRES_PASSWORD}@postgres/wepppy
+
+# Redis credentials
+REDIS_PASSWORD=${REDIS_PASSWORD}
+RQ_REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/9
 
 # Flask secrets
 SECRET_KEY=${SECRET_KEY}
@@ -273,18 +325,24 @@ chmod 600 .env
 their raw bytes change, logins and session-cookie validation can fail.
 
 Rules:
-- Keep literal single `$` characters in the actual secret value.
-- Do not "escape" by changing a real secret value from `$` to `$$`.
+- Prefer `wctl` for deploy/ops commands (recommended). It escapes `$` for Compose interpolation while preserving the literal secret bytes inside containers.
+- If you run `docker compose --env-file docker/.env ...` directly, any literal `$` in `docker/.env` must be written as `$$` so Compose passes a single `$` into containers.
 - Do not hand-edit these values during troubleshooting unless you are rotating
   secrets intentionally across all auth services at once.
 
-Bad example (changes secret bytes):
+Bad example (direct `docker compose --env-file docker/.env ...` will interpolate `$def` and drop it):
+
+```env
+SECRET_KEY=abc$def
+```
+
+Good example (direct `docker compose --env-file docker/.env ...` preserves a literal `$` in the container):
 
 ```env
 SECRET_KEY=abc$$def
 ```
 
-Good example (original literal value preserved):
+Good example (when using `wctl`, keep the secret unescaped in `docker/.env`):
 
 ```env
 SECRET_KEY=abc$def
