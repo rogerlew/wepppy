@@ -13,16 +13,20 @@ Composite slugs are used for:
 
 ## Syntax
 
+Composite runids are `;;`-delimited strings with 3+ segments:
+
 ```
-composite-runid = segment 2*(";;" segment)
-segment         = 1*(ALNUM / "_" / "-" / ".")
+composite-runid = segment ";;" segment ";;" segment *( ";;" segment )
+segment         = <non-empty string>
 ```
 
-Constraints:
-- `;;` is reserved and MUST NOT appear inside a segment.
-- Segments MUST NOT contain `/` or `\`.
-- Segments MUST NOT be `.` or `..`.
-- Keep segments ASCII; avoid whitespace.
+Runtime validation in `wepppy/weppcloud/utils/helpers.py:get_wd` enforces:
+- Segments MUST be non-empty and MUST NOT be `.` or `..`.
+- Segments MUST NOT contain `/`, `\`, or NUL (`\x00`).
+
+Recommendations:
+- Prefer portable segment characters like `[A-Za-z0-9_.-]` when possible.
+- URL-encode each segment when embedding a composite runid in a URL path (spaces, `#`, `?`, etc.).
 
 ## Resolution Rules
 
@@ -30,26 +34,30 @@ Composite runids resolve to a WD using `get_wd(runid)`:
 
 | Type | Runid format | Resolved working directory |
 | --- | --- | --- |
-| Batch run | `batch;;<batch_name>;;<runid>` | `/wc1/batch/<batch_name>/runs/<runid>` |
-| Batch base | `batch;;<batch_name>;;_base` | `/wc1/batch/<batch_name>/_base` |
+| Batch run | `batch;;<batch_name>;;<runid>` | `${BATCH_RUNNER_ROOT}/<batch_name>/runs/<runid>` (default `BATCH_RUNNER_ROOT=/wc1/batch`) |
+| Batch base | `batch;;<batch_name>;;_base` | `${BATCH_RUNNER_ROOT}/<batch_name>/_base` (default `BATCH_RUNNER_ROOT=/wc1/batch`) |
 | Culvert | `culvert;;<batch_uuid>;;<runid>` | `${CULVERTS_ROOT}/<batch_uuid>/runs/<runid>` (default `CULVERTS_ROOT=/wc1/culverts`) |
 | Profile tmp | `profile;;tmp;;<runid>` | `${PROFILE_PLAYBACK_RUN_ROOT}/<runid>` |
 | Profile fork | `profile;;fork;;<runid>` | `${PROFILE_PLAYBACK_FORK_ROOT}/<runid>` |
 | Profile archive | `profile;;archive;;<runid>` | `${PROFILE_PLAYBACK_ARCHIVE_ROOT}/<runid>` |
 | Omni scenario | `<parent_runid>;;omni;;<scenario_name>` | `<parent_wd>/_pups/omni/scenarios/<scenario_name>` |
 | Omni contrast | `<parent_runid>;;omni-contrast;;<contrast_id>` | `<parent_wd>/_pups/omni/contrasts/<contrast_id>` |
+| Batch omni scenario | `batch;;<batch_name>;;<runid>;;omni;;<scenario_name>` | `${BATCH_RUNNER_ROOT}/<batch_name>/runs/<runid>/_pups/omni/scenarios/<scenario_name>` (default `BATCH_RUNNER_ROOT=/wc1/batch`) |
+| Batch omni contrast | `batch;;<batch_name>;;<runid>;;omni-contrast;;<contrast_id>` | `${BATCH_RUNNER_ROOT}/<batch_name>/runs/<runid>/_pups/omni/contrasts/<contrast_id>` (default `BATCH_RUNNER_ROOT=/wc1/batch`) |
 
 Notes:
 - For simple parents, `<parent_wd>` resolves via the canonical run root `/wc1/runs/<prefix>/<parent_runid>` with a legacy fallback to `/geodata/weppcloud_runs/<parent_runid>` if present.
-- For batch parents, `<parent_wd>` resolves under `/wc1/batch/<batch_name>/runs/<runid>`.
+- For batch parents, `<parent_wd>` resolves under `${BATCH_RUNNER_ROOT}/<batch_name>/runs/<runid>`.
 - Omni child runs link shared inputs (`climate/`, `dem/`, `watershed/`) from the parent if missing.
 - Omni suffix slugs may be applied to batch composite parents (for example `batch;;spring-2025;;run-001;;omni-contrast;;3`). Nested omni suffixes are not supported for other composite parents (for example `culvert` or `profile`).
 
 ## Behavior and Semantics
 
 - **Pup query ignored**: for composite runids, `load_run_context` ignores the `?pup=` query parameter.
+- **Playback clone override**: when `PROFILE_PLAYBACK_USE_CLONE=true`, `get_wd` will resolve a non-composite runid to `${PROFILE_PLAYBACK_RUN_ROOT}/<runid>` *if that directory exists*, before falling back to `/wc1/runs/<prefix>/<runid>`.
+- **WD cache (Redis DB 11)**: `get_wd` caches `runid -> WD` lookups for 72 hours (only when the resolved path exists). Composite slugs cache under their full slug string; omni child slugs still authorize and emit telemetry using the stripped parent runid.
 - **NoDb runid**: Omni child NoDb controllers keep `NoDbBase.runid` equal to the parent runid (because `_parent_wd` is set). Redis keys, status channels, and preflight updates therefore use the parent runid.
-- **Authorization**: Omni scenario/contrast slugs authorize against the parent runid (strip the trailing `;;omni;;...` / `;;omni-contrast;;...` suffix). Batch slugs (`batch;;...`) are Admin/Root-only because batch runs are not tracked in the `Run` ownership table. Composite slugs are not stored as separate `Run` records.
+- **Authorization**: Omni scenario/contrast slugs authorize against the parent runid (strip the trailing `;;omni;;...` / `;;omni-contrast;;...` suffix) and inherit the parent run's access controls. Batch slugs (`batch;;...`) are Admin/Root-only because batch runs are not tracked in the `Run` ownership table.
 
 ## Omni Monkey Patching
 
@@ -82,8 +90,15 @@ The same composite runid string is valid for RQ endpoints:
 ## Implementation Touchpoints
 
 - Resolver: `wepppy/weppcloud/utils/helpers.py:get_wd`
+- Omni suffix handling: `wepppy/weppcloud/utils/helpers.py:_strip_omni_suffix_runid`, `wepppy/weppcloud/utils/helpers.py:is_omni_child_run`
+- Auth: `wepppy/weppcloud/utils/helpers.py:authorize`
 - Run context: `wepppy/weppcloud/routes/_run_context.py:load_run_context`
 - NoDb runid behavior: `wepppy/nodb/base.py:NoDbBase.runid`
+- Composite runid generators (selected):
+  - Batch: `wepppy/rq/batch_rq.py`, `wepppy/nodb/batch_runner.py`, `wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py`
+  - Culverts: `wepppy/microservices/rq_engine/culvert_routes.py`, `wepppy/rq/culvert_rq.py`, `wepppy/nodb/culverts_runner.py`
+  - Omni (UI): `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js`, `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js`, `wepppy/weppcloud/templates/reports/omni/*.htm`
+  - Profile playback: `services/profile_playback/app.py`, `wepppy/profile_recorder/playback.py`
 - weppcloudR resolver: `weppcloudR/plumber.R:resolve_run_root`, `weppcloudR/templates/scripts/users/*/weppcloudr_report_functions.R:resolve_run_root`
 
 ## Resolution by Service
@@ -93,17 +108,28 @@ This is the current map of how services resolve a runid into a working directory
 | Service | Entry point | Resolver | Notes |
 | --- | --- | --- | --- |
 | Web app (Flask routes) | `wepppy/weppcloud/routes/*` | `load_run_context()` → `get_wd()` | `load_run_context` ignores `?pup=` for composite runids; `ctx.run_root` vs `ctx.active_root` separates run root/pup. |
-| Browse microservice | `wepppy/microservices/browse/browse.py` | `get_wd()` | Uses `runid`/`diff` directly; no `RunContext` wrapper. |
+| Browse microservice | `wepppy/microservices/browse/browse.py` | `get_wd()` | Uses `runid`/`diff` directly; no `RunContext` wrapper. Does **not** honor `?pup=`; use composite runids for omni scenario/contrast browsing. |
 | RQ engine API | `wepppy/microservices/rq_engine/*` | `get_wd()` | Endpoints resolve the composite runid before dispatching jobs. |
 | RQ worker (single runs) | `wepppy/rq/*.py`, `wepppy/rq/rq_worker.py` | `get_wd()` | Worker tasks resolve the same composite slug used by the API. |
-| RQ worker (batch) | `wepppy/nodb/batch_runner.py` | `get_wd()` | Batch runner constructs `batch;;<batch_name>;;<runid>` and relies on `get_wd` to target `/wc1/batch/...`. |
-| Query engine | `wepppy/query_engine/app/helpers.py` | `get_wd()` | Accepts `runid` or `runid/config`; scenario strings resolved under `_pups/omni`. |
-| Elevation query (Starlette) | `wepppy/microservices/elevationquery.py` | `get_wd()` | Resolves `runid` and optional `?pup=` directly; **does not** ignore `pup` when `runid` is composite (needs patch). |
+| RQ worker (batch) | `wepppy/nodb/batch_runner.py` | `get_wd()` | Batch runner constructs `batch;;<batch_name>;;<runid>` and relies on `get_wd` to target `${BATCH_RUNNER_ROOT}` (default `/wc1/batch`). |
+| Query engine | `wepppy/query_engine/app/server.py`, `wepppy/query_engine/app/helpers.py` | `get_wd()` | Accepts `runid`, `runid/config`, or filesystem paths. Omni scenarios are primarily addressed via POST body `{"scenario": "<scenario_name>"}`; omni contrasts are typically addressed via composite runids (`...;;omni-contrast;;...`). |
+| Elevation query (Starlette) | `wepppy/microservices/elevationquery.py` | `get_wd()` | Resolves `runid` and optional `?pup=` directly; unlike Flask `load_run_context`, it will honor `?pup=` even when `runid` is composite. |
 | weppcloudR (R renderer) | `weppcloudR/plumber.R`, `weppcloudR/templates/scripts/users/*/weppcloudr_report_functions.R` | `resolve_run_root()` | Used by DEVAL and report helper scripts; now supports omni scenarios/contrasts (including composite parents) plus batch/culvert/profile slugs. |
 
 ## Preflight and Telemetry Routing
 
 Preflight updates and status channels are keyed off `NoDbBase.runid` (parent runid for omni child runs). This is why preflight and WebSocket status streams target the parent run even when the URL uses a composite slug.
+
+## Database and Cache Touchpoints
+
+Composite runid slugs show up in (or influence keys for) these persistence surfaces:
+
+- **Filesystem**: composite slugs resolve to working directories under `/wc1/runs/...`, `${BATCH_RUNNER_ROOT}/...`, `${CULVERTS_ROOT}/...`, or profile playback roots.
+- **Redis DB 11 (WD cache)**: `wepppy/weppcloud/utils/helpers.py:get_wd` caches `runid -> WD` for 72 hours when the resolved WD exists.
+- **Redis DB 0 (NoDb locks)**: `wepppy/nodb/base.py` lock state is keyed by `NoDbBase.runid` (group-prefixed for batch/culvert/profile; stripped parent runid for omni child runs).
+- **Redis DB 13 (NoDb JSON cache)**: serialized NoDb state is cached by `NoDbBase.runid` for 72 hours; omni child controllers share the parent runid key.
+- **Redis DB 2 (status pub/sub)**: status channels include `NoDbBase.runid` as a prefix (for example `<runid>:<controller>`), so omni child runs publish on the parent runid channel namespace.
+- **Postgres (Run ownership)**: `wepppy/weppcloud/utils/helpers.py:authorize` normalizes omni composite runids to the parent runid via `_strip_omni_suffix_runid`; batch composite slugs are Admin/Root-only.
 
 ## Legacy `?pup=` Query Parameter
 
@@ -118,8 +144,8 @@ Example:
 Current usages (non-exhaustive, but the primary ones to keep in mind):
 - `wepppy/weppcloud/routes/_run_context.py` honors `?pup=` for non-composite runids.
 - `wepppy/weppcloud/templates/header/_run_header_fixed.htm` and `wepppy/weppcloud/templates/reports/_base_report.htm` patch `fetch`/XHR to append `?pup=` when `current_ron.pup_relpath` is set.
-- `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js` builds scenario URLs using `?pup=` for base-run comparisons.
-- `wepppy/microservices/elevationquery.py` and `wepppy/microservices/rq_engine/export_routes.py` resolve `?pup=` directly (no composite-slug guard).
+- `wepppy/microservices/elevationquery.py` resolves `?pup=` directly (even when `runid` is composite).
+- `wepppy/microservices/rq_engine/export_routes.py:_resolve_export_wd` ignores `?pup=` when `runid` is composite (aligns with Flask `load_run_context`).
 
 Guidance:
 - Prefer composite runid slugs for omni scenarios/contrasts and any new child-run access.
