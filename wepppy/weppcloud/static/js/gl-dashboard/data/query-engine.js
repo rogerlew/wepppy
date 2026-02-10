@@ -21,8 +21,12 @@ export function createQueryEngine(ctx) {
   function resolveParentRunId(runid) {
     const raw = String(runid || '');
     const parts = raw.split(';;');
-    if (parts.length === 3 && parts[1] && (parts[1] === 'omni' || parts[1] === 'omni-contrast')) {
-      return parts[0];
+    if (
+      parts.length >= 3 &&
+      parts[parts.length - 2] &&
+      (parts[parts.length - 2] === 'omni' || parts[parts.length - 2] === 'omni-contrast')
+    ) {
+      return parts.slice(0, -2).join(';;');
     }
     return raw;
   }

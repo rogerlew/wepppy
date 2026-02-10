@@ -106,6 +106,31 @@ describe('scenario manager', () => {
     );
   });
 
+  test('buildScenarioUrl strips nested composite runid to parent before rebuilding', () => {
+    const state = { currentScenarioPath: '_pups/omni/scenarios/treated' };
+    const scenarioManager = createScenarioManager({
+      ctx: {
+        sitePrefix: '/weppcloud',
+        runid: 'batch;;spring-2025;;run-001;;omni;;undisturbed',
+        config: 'disturbed9002_wbt',
+      },
+      getState: () => state,
+      setValue: () => {},
+      setState: () => {},
+      postQueryEngine: jest.fn(),
+      postBaseQueryEngine: jest.fn(),
+      fetchWeppSummary: jest.fn(),
+      weppDataManager: {},
+      onScenarioChange: jest.fn(),
+    });
+
+    const url = scenarioManager.buildScenarioUrl('query/soils/subcatchments');
+
+    expect(url).toBe(
+      '/weppcloud/runs/batch;;spring-2025;;run-001;;omni;;treated/disturbed9002_wbt/query/soils/subcatchments',
+    );
+  });
+
   test('buildScenarioUrl preserves grouped runid segments for omni contrasts', () => {
     const state = { currentScenarioPath: '_pups/omni/contrasts/3' };
     const scenarioManager = createScenarioManager({
