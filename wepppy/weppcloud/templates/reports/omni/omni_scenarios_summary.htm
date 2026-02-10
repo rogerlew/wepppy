@@ -28,7 +28,7 @@
       {% set scenario_runid = parent_runid ~ ';;omni;;' ~ scenario.name %}
       <tr>
         <th scope="row">
-          <a href="{{ site_prefix ~ '/runs/' ~ scenario_runid ~ '/' ~ config ~ '/' }}">{{ scenario.name }}</a>
+          <a href="{{ url_for_run('run_0.runs0', runid=scenario_runid, config=config, pup=None) }}">{{ scenario.name }}</a>
         </th>
         <td class="wc-text-right">
           {{ unitizer(scenario.water_discharge.value, scenario.water_discharge.unit or water_units) | safe }}

@@ -82,7 +82,7 @@
         <tr>
           {% if selection_mode == "cumulative" %}
             <th scope="row">
-              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+              <a href="{{ url_for_run('run_0.runs0', runid=contrast_runid, config=config, pup=None) }}">{{ item.contrast_id }}</a>
             </th>
             <td>{{ item.topaz_id if item.topaz_id is not none else "-" }}</td>
             <td class="wc-text-right">
@@ -101,7 +101,7 @@
             </td>
           {% elif selection_mode == "user_defined_areas" %}
             <th scope="row">
-              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+              <a href="{{ url_for_run('run_0.runs0', runid=contrast_runid, config=config, pup=None) }}">{{ item.contrast_id }}</a>
             </th>
             <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
             <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
@@ -123,7 +123,7 @@
             </td>
           {% elif selection_mode == "user_defined_hillslope_groups" %}
             <th scope="row">
-              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+              <a href="{{ url_for_run('run_0.runs0', runid=contrast_runid, config=config, pup=None) }}">{{ item.contrast_id }}</a>
             </th>
             <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
             <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
@@ -145,7 +145,7 @@
             </td>
           {% elif selection_mode == "stream_order" %}
             <th scope="row">
-              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+              <a href="{{ url_for_run('run_0.runs0', runid=contrast_runid, config=config, pup=None) }}">{{ item.contrast_id }}</a>
             </th>
             <td>{{ item.control_scenario if item.control_scenario is not none else "-" }}</td>
             <td>{{ item.contrast_scenario if item.contrast_scenario is not none else "-" }}</td>
@@ -167,7 +167,7 @@
             </td>
           {% else %}
             <th scope="row">
-              <a href="{{ site_prefix ~ '/runs/' ~ contrast_runid ~ '/' ~ config ~ '/' }}">{{ item.contrast_id }}</a>
+              <a href="{{ url_for_run('run_0.runs0', runid=contrast_runid, config=config, pup=None) }}">{{ item.contrast_id }}</a>
             </th>
             <td>{{ item.run_status }}</td>
           {% endif %}
