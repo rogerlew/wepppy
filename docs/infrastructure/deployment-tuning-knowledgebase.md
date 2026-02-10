@@ -89,17 +89,192 @@ Expected: identical length/hash across both containers.
 | NFS deletion fallback | Follow-up in TTL package | Rename-to-trash deferred | Implement only if `EBUSY`/delete tail risk becomes operationally significant. |
 
 ### NFS Mount Profiles (wepp1 Candidate Set)
-As of February 8, 2026, the following mount profiles are tracked for `nas.rocket.net:/wepp -> /geodata`:
+As of February 9, 2026, the following mount profiles are tracked for `nas.rocket.net:/wepp -> /geodata`:
 
 | Profile | Mount line | Status/Intent |
 | --- | --- | --- |
 | Legacy NFSv3 soft mount | `#nas.rocket.net:/wepp /geodata nfs rw,bg,soft,nointr,rsize=32768,wsize=32768,tcp,vers=3,timeo=600,_netdev 0 0` | Historical baseline; commented out. |
 | NFSv4.2 soft mount (32K IO) | `#nas.rocket.net:/wepp /geodata nfs4 rw,noatime,proto=tcp,vers=4.2,soft,rsize=32768,wsize=32768,timeo=600,_netdev 0 0` | Prior candidate; commented out. |
 | NFSv4.2 hard mount with `actimeo=0` | `#nas.rocket.net:/wepp /geodata nfs4 rw,noatime,proto=tcp,vers=4.2,hard,intr,actimeo=0,_netdev 0 0` | Prior low-cache candidate; commented out. |
-| NFSv4.2 hard mount with directory-cache bias | `nas.rocket.net:/wepp /geodata nfs4 rw,noatime,proto=tcp,vers=4.2,hard,intr,acregmin=3,acregmax=30,acdirmin=0,acdirmax=0,rsize=65536,wsize=65536,_netdev` | Active uncommented target, pending restart to take effect. |
+| NFSv4.2 hard mount with zero directory cache (debug only) | `#nas.rocket.net:/wepp /geodata nfs4 rw,noatime,proto=tcp,vers=4.2,hard,acregmin=3,acregmax=30,acdirmin=0,acdirmax=0,rsize=65536,wsize=65536,_netdev 0 0` | Keep commented out unless explicitly debugging stale-directory visibility. |
+| NFSv4.2 hard mount with metadata cache (recommended) | `nas.rocket.net:/wepp /geodata nfs4 rw,noatime,proto=tcp,vers=4.2,hard,timeo=600,retrans=2,rsize=65536,wsize=65536,acregmin=3,acregmax=30,acdirmin=5,acdirmax=60,_netdev,x-systemd.automount,nofail 0 0` | Recommended baseline for `wepp1` run browsing and NoDb-heavy route loads. |
 
-Operational note:
-- After restart, verify effective options with `findmnt -no SOURCE,TARGET,FSTYPE,OPTIONS /geodata` and record results in this knowledgebase.
+Operational notes:
+- `intr` is intentionally omitted in recommended NFSv4 profiles; modern Linux NFS clients ignore it.
+- Current degraded profile observed on `wepp1` during incident: `acdirmin=0,acdirmax=0` with `hard` mount semantics.
+
+#### Metadata And Latency Statistics (February 9, 2026)
+Benchmark comparison used:
+- Degraded host/run: `https://wepp.cloud/weppcloud/runs/olive-colored-bluestone/disturbed9002_wbt`
+- Comparator host/run: `https://wc.bearhive.duckdns.org/weppcloud/runs/preliminary-moussaka/wepp-swat-wbt/`
+
+| Benchmark | `wepp1` (`wepp.cloud` + olive run) | `wc.bearhive.duckdns.org` + preliminary run | Relative slowdown |
+| --- | --- | --- | --- |
+| External HTTPS run-page TTFB, `curl` `time_starttransfer` (`n=30`) | mean `639.0 ms`, p50 `550.9 ms`, p95 `1045.6 ms` | mean `15.4 ms`, p50 `15.2 ms`, p95 `16.5 ms` | `41.5x` (mean) |
+| Local Gunicorn run route TTFB (`http://127.0.0.1:8000/runs/.../`, `n=30`) | mean `584.0 ms`, p50 `520.9 ms`, p95 `942.7 ms` | mean `6.0 ms`, p50 `5.7 ms`, p95 `7.5 ms` | `97.3x` (mean) |
+| `get_wd(runid, prefer_active=False)` in `weppcloud` container (`n=50`) | mean `8.793 ms`, p50 `8.095 ms`, p95 `15.076 ms` | mean `0.167 ms`, p50 `0.157 ms`, p95 `0.183 ms` | `52.7x` (mean) |
+| `os.stat(run_dir)` in `weppcloud` container (`n=50`) | mean `8.552 ms`, p50 `8.562 ms`, p95 `15.615 ms` | mean `0.006 ms`, p50 `0.006 ms`, p95 `0.006 ms` | `1425x` (mean) |
+| `len(os.listdir(run_dir))` in `weppcloud` container (`n=50`) | mean `13.318 ms`, p50 `8.951 ms`, p95 `27.799 ms` | mean `0.237 ms`, p50 `0.217 ms`, p95 `0.310 ms` | `56.2x` (mean) |
+| NFSv4 per-request `GETATTR` delta on one run-page request (`n=8`) | mean `861.6`, range `691-1090` | `0` for measured comparator route | Not comparable; strong metadata amplification on degraded path |
+
+Interpretation:
+- The majority of run-page delay on `wepp1` is server-side, not DNS/connect/TLS overhead.
+- Directory metadata churn (`GETATTR`) dominates the degraded path and correlates with high TTFB variance.
+
+#### wepp2 Validation (February 10, 2026)
+`wepp2` had `/geodata` mounted with `acdirmin=0,acdirmax=0` and active WEPP binaries holding `/geodata` open, so we did a non-disruptive A/B mount:
+- Leave the live mount intact (`/geodata`).
+- Mount the same export a second time at `/mnt/geodata_test` with the recommended metadata cache options.
+
+Result (run dir `wc1/runs/ol/olive-colored-bluestone`, metadata-only microbench):
+
+| Benchmark | `wepp2` current `/geodata` (`acdirmin=0,acdirmax=0`) | `wepp2` test mount `/mnt/geodata_test` (`acdirmin=5,acdirmax=60`) | Relative slowdown |
+| --- | --- | --- | --- |
+| `stat(run_dir)` (`n=20`) | mean `19.138 ms`, p50 `19.397 ms`, p95 `27.210 ms` | mean `0.006 ms`, p50 `0.005 ms`, p95 `0.006 ms` | `~3189x` (mean) |
+| `len(os.listdir(run_dir))` (`n=10`) | mean `35.852 ms`, p50 `35.429 ms`, p95 `41.352 ms` | mean `5.619 ms`, p50 `2.463 ms`, p95 `5.000 ms` | `~6.4x` (mean) |
+
+#### Reproducible Benchmark Procedure
+Run from a host that can reach both sites and can SSH to `wepp1` over Tailscale.
+
+1. Record effective mount options (host + container view).
+
+```bash
+# On wepp1 host
+findmnt -T /geodata -o TARGET,SOURCE,FSTYPE,OPTIONS
+nfsstat -m
+
+# In weppcloud container (container may see /wc1 rather than /geodata)
+c=$(docker ps --format '{{.Names}}' | grep -E 'weppcloud' | head -n1)
+docker exec "$c" sh -lc "stat -f -c 'path=%n fstype=%T' /wc1 /wc1/runs; mount | grep -E ' /wc1 | /geodata '"
+```
+
+2. Measure external run-page phase timings (`DNS`, `connect`, `TLS`, `TTFB`, `total`).
+
+```bash
+python3 - <<'PY'
+import subprocess, statistics
+urls = [
+    "https://wepp.cloud/weppcloud/runs/olive-colored-bluestone/disturbed9002_wbt",
+    "https://wc.bearhive.duckdns.org/weppcloud/runs/preliminary-moussaka/wepp-swat-wbt/",
+]
+fields = ["time_namelookup","time_connect","time_appconnect","time_starttransfer","time_total"]
+for url in urls:
+    rows = []
+    for _ in range(30):
+        out = subprocess.check_output(
+            ["curl","-k","-sS","-L","-o","/dev/null","-w",";".join([f"%{{{f}}}" for f in fields]),url],
+            text=True,
+        ).strip()
+        rows.append([float(v) * 1000 for v in out.split(";")])
+    print(url)
+    for idx, f in enumerate(fields):
+        col = sorted(r[idx] for r in rows)
+        print(f"  {f}: mean_ms={statistics.mean(col):.1f} p50_ms={statistics.median(col):.1f} p95_ms={col[int(0.95*(len(col)-1))]:.1f}")
+PY
+```
+
+3. Measure local app-only route TTFB on each host (bypasses internet and TLS).
+
+```bash
+# Example on wepp1 (run a matching command on comparator host with its run URL)
+python3 - <<'PY'
+import subprocess, statistics
+url = "http://127.0.0.1:8000/runs/olive-colored-bluestone/disturbed9002_wbt/"
+vals = []
+for _ in range(30):
+    t = subprocess.check_output(["curl","-sS","-o","/dev/null","-w","%{time_starttransfer}",url], text=True).strip()
+    vals.append(float(t) * 1000)
+vals = sorted(vals)
+print(url)
+print(f"mean_ms={statistics.mean(vals):.1f} p50_ms={statistics.median(vals):.1f} p95_ms={vals[int(0.95*(len(vals)-1))]:.1f} min_ms={vals[0]:.1f} max_ms={vals[-1]:.1f}")
+PY
+```
+
+4. Measure metadata-sensitive helpers inside `weppcloud` container.
+
+```bash
+c=$(docker ps --format '{{.Names}}' | grep -E 'weppcloud' | head -n1)
+docker exec -i "$c" python - <<'PY'
+import os, time, statistics
+from wepppy.weppcloud.utils.helpers import get_wd
+runid = "olive-colored-bluestone"  # swap for comparator run
+N = 50
+path = get_wd(runid, prefer_active=False)
+def bench(label, fn):
+    vals = []
+    for _ in range(N):
+        t0 = time.perf_counter()
+        fn()
+        vals.append((time.perf_counter() - t0) * 1000)
+    vals.sort()
+    print(f"{label}: mean_ms={statistics.mean(vals):.3f} p50_ms={statistics.median(vals):.3f} p95_ms={vals[int(0.95*(N-1))]:.3f} max_ms={vals[-1]:.3f}")
+print("path", path)
+bench("get_wd", lambda: get_wd(runid, prefer_active=False))
+bench("exists", lambda: os.path.exists(path))
+bench("stat", lambda: os.stat(path))
+bench("listdir_len", lambda: len(os.listdir(path)))
+PY
+```
+
+5. Quantify per-request NFS metadata amplification using `/proc/net/rpc/nfs`.
+
+```bash
+python3 - <<'PY'
+import subprocess
+def read_proc4():
+    line = subprocess.check_output(["bash","-lc","grep '^proc4 ' /proc/net/rpc/nfs"], text=True).strip().split()
+    n = int(line[1])
+    return list(map(int, line[2:2+n]))
+URL = "http://127.0.0.1:8000/runs/olive-colored-bluestone/disturbed9002_wbt/"
+b = read_proc4()
+ttfb = float(subprocess.check_output(["curl","-sS","-o","/dev/null","-w","%{time_starttransfer}",URL], text=True).strip()) * 1000
+a = read_proc4()
+delta = [a[i] - b[i] for i in range(len(a))]
+print(f"ttfb_ms={ttfb:.1f} getattr={delta[18]} lookup={delta[19]} read={delta[1]} readdir={delta[29]} open_noat={delta[6]} close={delta[8]}")
+PY
+```
+
+6. (Optional) Non-disruptive mount A/B to validate metadata caching on a busy host.
+
+This mounts the same export a second time at `/mnt/geodata_test` without touching the live `/geodata` mount.
+
+```bash
+run_rel='wc1/runs/ol/olive-colored-bluestone'
+opts=$(findmnt -T /geodata -n -o OPTIONS)
+addr=$(echo "$opts" | sed -n 's/.*addr=\([^,]*\).*/\1/p')
+remote="${addr}:/wepp"
+
+docker run --rm --privileged --pid=host alpine:3.20 sh -lc "\
+  apk add --no-cache util-linux >/dev/null && \
+  nsenter -t 1 -m -n -- chroot /proc/1/root mkdir -p /mnt/geodata_test && \
+  nsenter -t 1 -m -n -- chroot /proc/1/root mount -t nfs4 -o rw,noatime,proto=tcp,vers=4.2,hard,timeo=600,retrans=2,rsize=65536,wsize=65536,acregmin=3,acregmax=30,acdirmin=5,acdirmax=60 \"$remote\" /mnt/geodata_test && \
+  nsenter -t 1 -m -n -- chroot /proc/1/root findmnt -T /mnt/geodata_test -o TARGET,SOURCE,FSTYPE,OPTIONS"
+
+python3 - <<PY
+import os, time, statistics
+run_rel = "${run_rel}"
+paths = {"current": "/geodata/" + run_rel, "test": "/mnt/geodata_test/" + run_rel}
+def bench(fn, n):
+    vals=[]
+    for _ in range(n):
+        t0=time.perf_counter(); fn(); vals.append((time.perf_counter()-t0)*1000)
+    vals.sort()
+    return {"mean": statistics.mean(vals), "p50": statistics.median(vals), "p95": vals[int(0.95*(n-1))]}
+for name,p in paths.items():
+    s=bench(lambda: os.stat(p), 20)
+    l=bench(lambda: len(os.listdir(p)), 10)
+    print(name, p)
+    print(f"  stat mean_ms={s['mean']:.3f} p50_ms={s['p50']:.3f} p95_ms={s['p95']:.3f}")
+    print(f"  listdir mean_ms={l['mean']:.3f} p50_ms={l['p50']:.3f} p95_ms={l['p95']:.3f}")
+PY
+
+docker run --rm --privileged --pid=host alpine:3.20 sh -lc "\
+  apk add --no-cache util-linux >/dev/null && \
+  nsenter -t 1 -m -n -- chroot /proc/1/root umount /mnt/geodata_test && \
+  nsenter -t 1 -m -n -- chroot /proc/1/root rmdir /mnt/geodata_test || true"
+```
+
+7. After mount changes, rerun steps 1-5 and append before/after results to this section.
 
 ## Failure-Signature Map
 | Observed signature | Likely layer | High-probability cause | First checks |
