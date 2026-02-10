@@ -86,4 +86,17 @@ describe('gl-dashboard query-engine routing', () => {
     expect(url).toBe('/query-engine/runs/batch;;spring-2025;;run-001;;omni-contrast;;3/cfg1/query');
     expect(body.scenario).toBeUndefined();
   });
+
+  it('url-encodes unsafe contrast ids when building query-engine URLs', async () => {
+    setValue('currentScenarioPath', '_pups/omni/contrasts/treated name#1');
+    const engine = createQueryEngine({ runid: 'decimal-pleasing', config: 'cfg1' });
+
+    await engine.postQueryEngine({ datasets: ['foo'] });
+
+    const [url, init] = global.fetch.mock.calls[0];
+    const body = JSON.parse(init.body);
+
+    expect(url).toBe('/query-engine/runs/decimal-pleasing;;omni-contrast;;treated%20name%231/cfg1/query');
+    expect(body.scenario).toBeUndefined();
+  });
 });

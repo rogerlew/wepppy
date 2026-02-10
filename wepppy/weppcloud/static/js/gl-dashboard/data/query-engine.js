@@ -9,11 +9,17 @@ import { getValue } from '../state.js';
  * Scenario is passed in the request body as "scenario" parameter.
  */
 export function createQueryEngine(ctx) {
+  function encodePathComponentPreserveSemicolons(value) {
+    // Composite runids use ";;" delimiters. Preserve ";" for readability while still
+    // encoding characters that would truncate or corrupt the request (e.g. #, ?, space).
+    return encodeURIComponent(String(value || '')).replace(/%3B/gi, ';');
+  }
+
   function getBaseUrl(runidOverride = null) {
     const runid = runidOverride || ctx.runid;
-    let queryPath = `runs/${runid}`;
+    let queryPath = `runs/${encodePathComponentPreserveSemicolons(runid)}`;
     if (ctx.config) {
-      queryPath += `/${ctx.config}`;
+      queryPath += `/${encodePathComponentPreserveSemicolons(ctx.config)}`;
     }
     return `/query-engine/${queryPath}/query`;
   }
