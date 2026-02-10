@@ -59,10 +59,6 @@ class RunNotFoundError(ElevationQueryError):
     """Raised when the run directory cannot be located."""
 
 
-class PupNotFoundError(ElevationQueryError):
-    """Raised when a requested pup project cannot be resolved."""
-
-
 class DemNotFoundError(ElevationQueryError):
     """Raised when a DEM raster cannot be located in the run directory."""
 
@@ -169,28 +165,12 @@ def _transform_to_wgs84(lng: float, lat: float, srs: str) -> Tuple[float, float]
     return transformed_lng, transformed_lat
 
 
-def _resolve_active_root(runid: str, pup_relpath: Optional[str]) -> Path:
+def _resolve_active_root(runid: str) -> Path:
     run_root = Path(get_wd(runid, prefer_active=False)).resolve()
     if not run_root.is_dir():
         raise RunNotFoundError(f"Run '{runid}' not found")
 
-    if not pup_relpath:
-        return run_root
-
-    pups_root = (run_root / '_pups').resolve()
-    if not pups_root.is_dir():
-        raise PupNotFoundError(f"Pup project '{pup_relpath}' not found for run '{runid}'")
-
-    candidate = (pups_root / pup_relpath).resolve()
-    try:
-        candidate.relative_to(pups_root)
-    except ValueError as exc:
-        raise PupNotFoundError(f"Pup project '{pup_relpath}' not found for run '{runid}'") from exc
-
-    if not candidate.is_dir():
-        raise PupNotFoundError(f"Pup project '{pup_relpath}' not found for run '{runid}'")
-
-    return candidate
+    return run_root
 
 
 def _locate_dem(active_root: Path) -> Path:
@@ -277,7 +257,6 @@ def _build_response(
 async def elevationquery_endpoint(request: Request) -> JSONResponse:
     runid = request.path_params['runid']
     _config = request.path_params['config']  # reserved for future use / parity with route structure
-    pup_relpath = request.query_params.get('pup')
 
     try:
         lat, lng = await _extract_coordinates(request)
@@ -285,10 +264,8 @@ async def elevationquery_endpoint(request: Request) -> JSONResponse:
         return _build_response(elevation=None, lat=None, lng=None, error=str(exc))
 
     try:
-        active_root = await asyncio.to_thread(_resolve_active_root, runid, pup_relpath)
+        active_root = await asyncio.to_thread(_resolve_active_root, runid)
     except RunNotFoundError as exc:
-        return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
-    except PupNotFoundError as exc:
         return _build_response(elevation=None, lat=lat, lng=lng, error=str(exc))
     except Exception:
         logger.exception("Unexpected failure resolving run root for %s", runid)

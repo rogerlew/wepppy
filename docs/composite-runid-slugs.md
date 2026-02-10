@@ -113,7 +113,7 @@ This is the current map of how services resolve a runid into a working directory
 | RQ worker (single runs) | `wepppy/rq/*.py`, `wepppy/rq/rq_worker.py` | `get_wd()` | Worker tasks resolve the same composite slug used by the API. |
 | RQ worker (batch) | `wepppy/nodb/batch_runner.py` | `get_wd()` | Batch runner constructs `batch;;<batch_name>;;<runid>` and relies on `get_wd` to target `${BATCH_RUNNER_ROOT}` (default `/wc1/batch`). |
 | Query engine | `wepppy/query_engine/app/server.py`, `wepppy/query_engine/app/helpers.py` | `get_wd()` | Accepts `runid`, `runid/config`, or filesystem paths. Omni scenarios are primarily addressed via POST body `{"scenario": "<scenario_name>"}`; omni contrasts are typically addressed via composite runids (`...;;omni-contrast;;...`). |
-| Elevation query (Starlette) | `wepppy/microservices/elevationquery.py` | `get_wd()` | Resolves `runid` and optional `?pup=` directly; unlike Flask `load_run_context`, it will honor `?pup=` even when `runid` is composite. |
+| Elevation query (Starlette) | `wepppy/microservices/elevationquery.py` | `get_wd()` | Resolves the run root via `get_wd()`. Does **not** honor `?pup=`; use composite runids for child runs. |
 | weppcloudR (R renderer) | `weppcloudR/plumber.R`, `weppcloudR/templates/scripts/users/*/weppcloudr_report_functions.R` | `resolve_run_root()` | Used by DEVAL and report helper scripts; now supports omni scenarios/contrasts (including composite parents) plus batch/culvert/profile slugs. |
 
 ## Preflight and Telemetry Routing
@@ -144,7 +144,6 @@ Example:
 Current usages (non-exhaustive, but the primary ones to keep in mind):
 - `wepppy/weppcloud/routes/_run_context.py` honors `?pup=` for non-composite runids.
 - `wepppy/weppcloud/templates/header/_run_header_fixed.htm` and `wepppy/weppcloud/templates/reports/_base_report.htm` patch `fetch`/XHR to append `?pup=` when `current_ron.pup_relpath` is set.
-- `wepppy/microservices/elevationquery.py` resolves `?pup=` directly (even when `runid` is composite).
 - `wepppy/microservices/rq_engine/export_routes.py:_resolve_export_wd` ignores `?pup=` when `runid` is composite (aligns with Flask `load_run_context`).
 
 Guidance:
