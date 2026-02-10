@@ -4,7 +4,7 @@
 
 ## Overview
 
-WEPPcloud uses `runid` as the primary identifier in routes like `/runs/<runid>/<config>/...`. A **composite runid slug** is a three-part runid that encodes a grouping or child-run context while still fitting in the `runid` slot. Composite slugs are parsed by `wepppy.weppcloud.utils.helpers.get_wd` and resolve to a working directory (WD).
+WEPPcloud uses `runid` as the primary identifier in routes like `/runs/<runid>/<config>/...`. A **composite runid slug** is a `;;`-delimited runid slug (3+ segments; common forms are 3 or 5 segments) that encodes a grouping or child-run context while still fitting in the `runid` slot. Composite slugs are parsed by `wepppy.weppcloud.utils.helpers.get_wd` and resolve to a working directory (WD).
 
 Composite slugs are used for:
 - batch and culvert grouped runs,
@@ -14,7 +14,7 @@ Composite slugs are used for:
 ## Syntax
 
 ```
-composite-runid = segment ";;" segment ";;" segment
+composite-runid = segment 2*(";;" segment)
 segment         = 1*(ALNUM / "_" / "-" / ".")
 ```
 
@@ -41,7 +41,7 @@ Composite runids resolve to a WD using `get_wd(runid)`:
 Notes:
 - `<parent_wd>` resolves via the canonical run root `/wc1/runs/<prefix>/<parent_runid>` with a legacy fallback to `/geodata/weppcloud_runs/<parent_runid>` if present.
 - Omni child runs link shared inputs (`climate/`, `dem/`, `watershed/`) from the parent if missing.
-- The parent segment can itself be composite (for example `batch;;spring-2025;;run-001;;omni-contrast;;3`); resolvers should strip the trailing `;;omni;;...`/`;;omni-contrast;;...` suffix and resolve the parent runid first.
+- Omni suffix slugs may be applied to composite parents (for example `batch;;spring-2025;;run-001;;omni-contrast;;3`). Resolvers should strip the trailing `;;omni;;...`/`;;omni-contrast;;...` suffix, resolve the parent runid, then append `_pups/omni/...`.
 
 ## Behavior and Semantics
 

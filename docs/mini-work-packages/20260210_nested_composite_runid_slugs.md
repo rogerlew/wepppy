@@ -1,0 +1,108 @@
+# Mini Work Package: Nested Composite Runid Slugs For Batch + Omni (GL Dashboard)
+Status: Draft
+Last Updated: 2026-02-10
+See also: `docs/composite-runid-slugs.md`, `docs/mini-work-packages/20260209_gl_dashboard_batch_mode.md`
+Primary Areas: `wepppy/weppcloud/utils/helpers.py`, `wepppy/weppcloud/routes/_run_context.py`, `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js`, `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js`, `tests/weppcloud/utils/test_helpers_paths.py`, `wepppy/weppcloud/static/js/gl-dashboard/__tests__/scenario-manager.test.js`, `wepppy/weppcloud/static/js/gl-dashboard/__tests__/query-engine.test.js`
+
+## Objective
+Support nested composite runid slugs so GL Dashboard batch projects can target Omni scenarios/contrasts using existing `/runs/<runid>/<config>/...` and `/query-engine/runs/<runid>/<config>/...` route patterns.
+
+Target nested slug forms:
+- `batch;;<batch_name>;;<runid>;;omni;;<scenario_name>`
+- `batch;;<batch_name>;;<runid>;;omni-contrast;;<contrast_id>`
+
+## Problem Summary
+- `gl-dashboard` builds composite runids for Omni access:
+  - scenarios: `/runs/<parent_runid>;;omni;;<scenario>/<config>/...`
+  - contrasts: `/runs/<parent_runid>;;omni-contrast;;<id>/<config>/...`
+  - Source: `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js`
+- Query Engine calls pass scenarios in a JSON request-body `scenario` field, but route contrasts via composite runid in the URL.
+  - Source: `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js`
+- Batch runids are already composite (`batch;;<batch_name>;;<runid>`). Batch + Omni therefore requires a nested slug if you want Omni behavior to survive route hops.
+- `load_run_context()` ignores `?pup=` whenever the runid contains `;;`, so `?pup=omni/...` cannot be used to “enter” Omni from a batch runid.
+  - Source: `wepppy/weppcloud/routes/_run_context.py`
+
+### Current Blockers
+1. Backend WD resolution rejects nested composite runids.
+   - `get_wd()` hard-requires exactly 3 segments for any runid containing `;;` and raises on `len(parts) != 3`.
+   - Source: `wepppy/weppcloud/utils/helpers.py:get_wd`
+2. Frontend deep-linking can double-nest.
+   - `resolveParentRunId()` only strips `;;omni;;...` / `;;omni-contrast;;...` when `parts.length === 3`.
+   - If `ctx.runid` is already nested (5 segments), URL rebuilds can produce `...;;omni;;X;;omni;;Y`.
+   - Sources: `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js`, `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js`
+
+## Scope
+- Backend: update `get_wd()` to resolve Omni suffixes when the parent runid is itself composite (for example batch).
+- Frontend: update `resolveParentRunId()` so it strips Omni suffixes regardless of the total segment count.
+- Tests: add regression coverage for the exact nested slug forms required by batch + Omni.
+
+## Non-goals
+- No generalized “arbitrary nesting” contract beyond: “an Omni suffix may be applied to any parent runid that `get_wd()` can already resolve”.
+- No changes to `load_run_context()` pup-query ignore behavior in this package (batch+omni is intended to work without `?pup=`).
+- No changes to Query Engine API payload format or contrast routing semantics.
+
+## Implementation Plan
+
+### Phase 0: Clarify Doc Contract (Spec)
+- `docs/composite-runid-slugs.md` should define composite runid slugs as `3+` `;;`-delimited segments (common forms are 3 and 5 segments).
+- Update the doc to explicitly define “Omni suffix slugs” as: `<parent_runid>;;omni;;<scenario_name>` and `<parent_runid>;;omni-contrast;;<contrast_id>` where `<parent_runid>` may itself be composite (for example `batch;;...;;...`).
+
+Deliverable:
+- Doc tweak only (no behavior change).
+
+### Phase 1: Backend `get_wd()` Nested Omni Suffix Support
+Update `wepppy/weppcloud/utils/helpers.py:get_wd` to recognize Omni suffixes at the end of the runid and resolve the parent via `get_wd(parent_runid)`:
+
+Parsing rule:
+- Let `parts = runid.split(';;')`.
+- If `len(parts) >= 3` and `parts[-2] in {"omni", "omni-contrast"}`:
+  - `parent_runid = ";;".join(parts[:-2])`
+  - `leaf = parts[-1]` (`scenario_name` or `contrast_id`)
+  - `parent_wd = get_wd(parent_runid, prefer_active=prefer_active)` (parent may be `batch;;...`, `culvert;;...`, etc.)
+  - `child_wd = os.path.join(parent_wd, "_pups", "omni", ("scenarios"|"contrasts"), leaf)`
+  - Call `_ensure_omni_shared_inputs(parent_wd, child_wd)` (existing behavior).
+  - Return `child_wd`.
+
+Guard rails:
+- Preserve existing 3-segment parsing for `batch`, `culvert`, `profile` when the runid does not end with an Omni suffix.
+- For runids containing `;;` that do not match known patterns, keep explicit failure (do not silently fall back to primary WD guessing).
+
+### Phase 2: Frontend Parent Runid Resolution
+Update both:
+- `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:resolveParentRunId`
+- `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js:resolveParentRunId`
+
+Desired behavior:
+- If a runid ends with `;;omni;;<x>` or `;;omni-contrast;;<x>`, strip the trailing 2 segments and return the remaining `parent_runid` (even if the parent itself contains `;;`).
+
+Implementation rule (JS):
+- `const parts = raw.split(';;');`
+- If `parts.length >= 3` and `['omni','omni-contrast'].includes(parts[parts.length - 2])`:
+  - `return parts.slice(0, -2).join(';;');`
+
+### Phase 3: Regression Tests
+Backend (pytest, unit):
+- Extend `tests/weppcloud/utils/test_helpers_paths.py`:
+  - Add a test that stubs `_exists` and asserts:
+    - `get_wd("batch;;spring-2025;;run-001;;omni;;treated", prefer_active=False)` resolves to `/wc1/batch/spring-2025/runs/run-001/_pups/omni/scenarios/treated`
+    - `get_wd("batch;;spring-2025;;run-001;;omni-contrast;;3", prefer_active=False)` resolves to `/wc1/batch/spring-2025/runs/run-001/_pups/omni/contrasts/3`
+
+Frontend (jest, unit):
+- Extend `wepppy/weppcloud/static/js/gl-dashboard/__tests__/scenario-manager.test.js`:
+  - Add a deep-link case where `ctx.runid` is already nested (`batch;;...;;omni;;undisturbed`) and ensure `buildScenarioUrl()` does not double-nest.
+- Extend `wepppy/weppcloud/static/js/gl-dashboard/__tests__/query-engine.test.js`:
+  - Add a case where `ctx.runid` is nested and contrast routing still produces a single Omni suffix (no repeated `;;omni-contrast;;`).
+
+## Manual Validation Checklist
+1. Confirm batch+omni WD resolution:
+   - `get_wd("batch;;<batch>;;<runid>;;omni;;<scenario>")` resolves to `<batch_run_wd>/_pups/omni/scenarios/<scenario>`.
+2. Open GL Dashboard on a nested batch+omni runid URL and verify:
+   - scenario/contrast fetches hit the correct `/runs/...` route without 404.
+   - Query Engine contrast requests hit `/query-engine/runs/<nested_runid>;;omni-contrast;;<id>/<config>/query` exactly once (no double nesting).
+3. Deep-link reload test:
+   - Refreshing the page on the nested URL does not break subsequent navigation or cause repeated suffix growth.
+
+## Acceptance Criteria
+- Backend `get_wd()` resolves nested `batch;;...;;omni...` and `batch;;...;;omni-contrast...` slugs without raising on segment count.
+- GL Dashboard can deep-link into nested slugs and continue to build correct scenario/contrast URLs (no double nesting).
+- Added unit tests cover the nested forms and pass under the standard gates.
