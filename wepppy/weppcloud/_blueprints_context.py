@@ -60,7 +60,11 @@ def _register(app, blueprint):
 
 
 def _register_from_routes(app, name: str):
-    _register(app, getattr(routes, name, None))
+    try:
+        blueprint = routes.resolve_blueprint(name)
+    except AttributeError:
+        blueprint = None
+    _register(app, blueprint)
 
 
 def register_blueprints(app):
