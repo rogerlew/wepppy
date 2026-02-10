@@ -29,7 +29,7 @@ wctl exec weppcloud bash -lc "source /opt/venv/bin/activate && \
 ```
 
 3) Capture key outputs
-- job_id, culvert_batch_uuid, status_url, final status, browse URL.
+- job_id, culvert_batch_uuid, status_url, browse_token (+ expires_at), final status, browse URL.
 
 4) If it fails or stalls, collect logs
 ```

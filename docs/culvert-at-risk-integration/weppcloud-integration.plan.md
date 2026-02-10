@@ -9,7 +9,7 @@
 - DEM handling: new `Ron.symlink_dem()` to symlink the canonical DEM into each run and populate `ron.map`.
 - Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
 - Watersheds: GeoJSON polygons with `Point_ID` attribute (no raster, no culvert_id_map needed).
-- RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse under `/weppcloud/culverts/<batch_uuid>/browse/`.
+- RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse/download under `/weppcloud/culverts/<batch_uuid>/browse/` and `/weppcloud/culverts/<batch_uuid>/download/{subpath}` (requires `browse_token` from submit response or an authenticated session).
 - Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `batch_summary.json` plus per-run `run_metadata.json`.
 - Limits: max ZIP 2GB, max 300 culverts; error responses are structured 400s.
 
@@ -49,7 +49,7 @@ Notes:
 - Climate duration and soils DB use defaults from `culvert.cfg` (no override keys in v1).
 
 ## Phase 1 - API ingestion, validation, and job enqueue (rq-engine) (COMPLETE)
-- Scope: implement `/rq-engine/api/culverts-wepp-batch/` in rq-engine (FastAPI); accept multipart upload, mint `culvert_batch_uuid`, validate payload inline (payload_validator), extract payload, enqueue RQ job, return `{job_id, culvert_batch_uuid, status_url}`. Add `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` for flake-checking reruns. This keeps validation inside the ingestion path and avoids the 30s Caddy timeout applied to weppcloud routes. Long term, migrate `/rq/api/*` to `/rq-engine/api/*`.
+- Scope: implement `/rq-engine/api/culverts-wepp-batch/` in rq-engine (FastAPI); accept multipart upload, mint `culvert_batch_uuid`, validate payload inline (payload_validator), extract payload, enqueue RQ job, return `{job_id, culvert_batch_uuid, status_url, browse_token, browse_token_expires_at}`. Add `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` for flake-checking reruns. This keeps validation inside the ingestion path and avoids the 30s Caddy timeout applied to weppcloud routes. Long term, migrate `/rq/api/*` to `/rq-engine/api/*`.
 - Request parameters (optional): `zip_sha256`, `total_bytes` to capture payload metadata since the ZIP is created client-side.
 - Dependencies: Phase 0 schema decisions; RQ queue configuration; open endpoint for POC (auth deferred to Phase 6).
 - Deliverables: rq-engine route + request/response contract; `payload_validator` module + error types; RQ job function stub (`run_culvert_batch_rq`); `batch_metadata.json` written at batch root; logging to batch root.
@@ -64,7 +64,7 @@ Notes:
 - Verification: unit tests for `Ron.symlink_dem()` and run directory creation; integration test that `_base` + one run hydrate NoDb singletons without errors.
 
 ## Phase 1/2 combined handoff summary
-- Implemented rq-engine package split (`wepppy/microservices/rq_engine/`) with APIRouter modules; `/rq-engine/api/culverts-wepp-batch/` now accepts multipart `payload.zip`, validates inline, extracts to `/wc1/culverts/<culvert_batch_uuid>/`, writes `batch_metadata.json`, enqueues `run_culvert_batch_rq`, and returns `{job_id, culvert_batch_uuid, status_url}`.
+- Implemented rq-engine package split (`wepppy/microservices/rq_engine/`) with APIRouter modules; `/rq-engine/api/culverts-wepp-batch/` now accepts multipart `payload.zip`, validates inline, extracts to `/wc1/culverts/<culvert_batch_uuid>/`, writes `batch_metadata.json`, enqueues `run_culvert_batch_rq`, and returns `{job_id, culvert_batch_uuid, status_url, browse_token, browse_token_expires_at}`.
 - Validator lives in `wepppy/microservices/culvert_payload_validator.py` (required files, CRS alignment, DEM/streams alignment, `Point_ID` coverage) and returns structured 400s.
 - RQ entrypoint stub lives in `wepppy/rq/culvert_rq.py` (StatusMessenger wiring, TIMEOUT=43200).
 - CulvertsRunner NoDb added (`wepppy/nodb/culverts_runner.py`) to create per-culvert runs under `/wc1/culverts/<culvert_batch_uuid>/runs/<Point_ID>/`, set run_group `culvert;;<batch_uuid>;;<runid>`, and record completion metadata.

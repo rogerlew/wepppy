@@ -166,7 +166,8 @@ def upload_payload(
     """
     Upload payload.zip to the culvert batch endpoint.
 
-    Returns the JSON response containing job_id, culvert_batch_uuid, status_url.
+    Returns the JSON response containing job_id, culvert_batch_uuid, status_url,
+    and a batch-scoped browse token (browse_token + browse_token_expires_at).
     """
     endpoint = urljoin(base_url, UPLOAD_ENDPOINT)
 

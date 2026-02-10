@@ -26,7 +26,7 @@ Culvert_web_app developers and stakeholders integrating with the wepp.cloud culv
 1. Build a payload from Culvert_web_app outputs using `build_payload.py`
 2. POST to `https://{host}/rq-engine/api/culverts-wepp-batch/`
 3. Poll `status_url` until job completes
-4. Download `weppcloud_run_skeletons.zip` from `https://{host}/weppcloud/culverts/{batch_uuid}/browse/`
+4. Download `weppcloud_run_skeletons.zip` from `https://{host}/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`
 5. (Optional) Browse results interactively at `https://{host}/weppcloud/culverts/{batch_uuid}/browse/`
 
 ## Authentication (JWT)
@@ -61,6 +61,16 @@ wctl issue-auth-token culvert-app \
 ```
 
 Send the token as `Authorization: Bearer <token>`.
+
+## Artifacts access (browse/download)
+
+Successful submissions return a short-lived, **batch-scoped** bearer token:
+- `browse_token`
+- `browse_token_expires_at` (JWT `exp`, Unix timestamp seconds)
+
+Use `browse_token` as `Authorization: Bearer <browse_token>` for:
+- `GET /weppcloud/culverts/{batch_uuid}/browse/*` (interactive browse)
+- `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download)
 
 ## Payload preparation for wepp.cloud
 
@@ -739,6 +749,7 @@ request the full (non-skeletonized) output.
 | GET | `/rq-engine/api/jobstatus/{job_id}` | Poll job status |
 | GET | `/rq-engine/api/jobinfo/{job_id}` | Get detailed job info |
 | GET | `/weppcloud/culverts/{batch_uuid}/browse/` | Browse batch artifacts |
+| GET | `/weppcloud/culverts/{batch_uuid}/download/{subpath}` | Download artifacts (authenticated) |
 
 ### POST `/rq-engine/api/culverts-wepp-batch/`
 
@@ -752,20 +763,29 @@ Submit a culvert batch payload.
 **Response (200 OK):**
 ```json
 {
-  "success": true,
   "job_id": "abc123-def456-...",
   "culvert_batch_uuid": "xyz789-uvw012-...",
-  "status_url": "/rq-engine/api/jobstatus/abc123-def456-..."
+  "status_url": "/rq-engine/api/jobstatus/abc123-def456-...",
+  "browse_token": "eyJhbGciOi...",
+  "browse_token_expires_at": 1760000000
 }
 ```
 
 **Response (400 Bad Request):**
 ```json
 {
-  "success": false,
-  "error": "Validation failed",
-  "error_code": "VALIDATION_ERROR",
-  "error_detail": "Missing required file: topo/breached_filled_DEM_UTM.tif"
+  "error": {
+    "message": "Validation failed",
+    "details": "Missing required file: topo/breached_filled_DEM_UTM.tif",
+    "code": "validation_error"
+  },
+  "errors": [
+    {
+      "code": "missing_file",
+      "message": "Missing required file: topo/breached_filled_DEM_UTM.tif",
+      "path": "topo/breached_filled_DEM_UTM.tif"
+    }
+  ]
 }
 ```
 
@@ -776,11 +796,12 @@ Retry a single culvert run within an existing batch (for flake-checking or after
 **Response (200 OK):**
 ```json
 {
-  "success": true,
   "job_id": "new-job-id-...",
   "culvert_batch_uuid": "xyz789-uvw012-...",
   "point_id": "42",
-  "status_url": "/rq-engine/api/jobstatus/new-job-id-..."
+  "status_url": "/rq-engine/api/jobstatus/new-job-id-...",
+  "browse_token": "eyJhbGciOi...",
+  "browse_token_expires_at": 1760000000
 }
 ```
 

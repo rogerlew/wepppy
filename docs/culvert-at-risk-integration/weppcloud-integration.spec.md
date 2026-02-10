@@ -53,8 +53,10 @@ Request (multipart/form-data):
 
 Response (JSON):
 - job_id (standard RQ response payload)
-- culvert_batch_uuid (for composing download url)
+- culvert_batch_uuid
 - status_url: `/rq-engine/api/jobstatus/{job_id}`
+- browse_token: batch-scoped bearer JWT for `/weppcloud/culverts/<culvert_batch_uuid>/*` browse/download access
+- browse_token_expires_at: JWT `exp` (Unix timestamp seconds)
 
 ### POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}
 Retry a single culvert run within an existing batch (flake-checking runs). The server removes the existing run directory and enqueues a fresh `run_culvert_run_rq` job.
@@ -64,6 +66,8 @@ Response (JSON):
 - culvert_batch_uuid
 - point_id
 - status_url: `/rq-engine/api/jobstatus/{job_id}`
+- browse_token
+- browse_token_expires_at
 
 ### Job status (existing)
 Use existing RQ engine endpoints instead of custom status routes:
@@ -76,7 +80,9 @@ Use the browse service for listing/downloading artifacts instead of a culvert-sp
 **Browse service URL scheme:**
 - Batch root browse: `/weppcloud/culverts/<culvert_batch_uuid>/browse/`
 - Per-culvert browse: `/weppcloud/culverts/<culvert_batch_uuid>/browse/runs/<culvert_id>/`
-- Direct file download: `/weppcloud/culverts/<culvert_batch_uuid>/browse/runs/<culvert_id>/<path>`
+- Direct file download: `/weppcloud/culverts/<culvert_batch_uuid>/download/runs/<culvert_id>/<path>`
+
+Send `Authorization: Bearer <browse_token>` for browse/download access (or rely on an authenticated browser session when using the UI).
 
 This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach is used for the batch runner (`/weppcloud/batch/{batch_name}/browse/`).
 

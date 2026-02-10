@@ -266,7 +266,9 @@ python /workdir/wepppy/docs/culvert-at-risk-integration/dev-package/scripts/subm
     --payload santee_payload.zip
 
 # 3. Results will be available at:
-#    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/browse/
+#    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/browse/   (interactive)
+#    https://wc.bearhive.duckdns.org/weppcloud/culverts/<batch_uuid>/download/weppcloud_run_skeletons.zip
+#    Use Authorization: Bearer <browse_token> from the submit response.
 ```
 
 ### Observability
