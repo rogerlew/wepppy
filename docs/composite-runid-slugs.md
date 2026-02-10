@@ -21,6 +21,7 @@ segment         = 1*(ALNUM / "_" / "-" / ".")
 Constraints:
 - `;;` is reserved and MUST NOT appear inside a segment.
 - Segments MUST NOT contain `/` or `\`.
+- Segments MUST NOT be `.` or `..`.
 - Keep segments ASCII; avoid whitespace.
 
 ## Resolution Rules
@@ -39,9 +40,10 @@ Composite runids resolve to a WD using `get_wd(runid)`:
 | Omni contrast | `<parent_runid>;;omni-contrast;;<contrast_id>` | `<parent_wd>/_pups/omni/contrasts/<contrast_id>` |
 
 Notes:
-- `<parent_wd>` resolves via the canonical run root `/wc1/runs/<prefix>/<parent_runid>` with a legacy fallback to `/geodata/weppcloud_runs/<parent_runid>` if present.
+- For simple parents, `<parent_wd>` resolves via the canonical run root `/wc1/runs/<prefix>/<parent_runid>` with a legacy fallback to `/geodata/weppcloud_runs/<parent_runid>` if present.
+- For batch parents, `<parent_wd>` resolves under `/wc1/batch/<batch_name>/runs/<runid>`.
 - Omni child runs link shared inputs (`climate/`, `dem/`, `watershed/`) from the parent if missing.
-- Omni suffix slugs may be applied to composite parents (for example `batch;;spring-2025;;run-001;;omni-contrast;;3`). Resolvers should strip the trailing `;;omni;;...`/`;;omni-contrast;;...` suffix, resolve the parent runid, then append `_pups/omni/...`.
+- Omni suffix slugs may be applied to batch composite parents (for example `batch;;spring-2025;;run-001;;omni-contrast;;3`). Nested omni suffixes are not supported for other composite parents (for example `culvert` or `profile`).
 
 ## Behavior and Semantics
 
@@ -65,6 +67,8 @@ Patch behaviors:
 /weppcloud/runs/decimal-pleasing;;omni;;undisturbed/0/
 /weppcloud/runs/decimal-pleasing;;omni-contrast;;12/0/
 /weppcloud/runs/batch;;spring-2025;;_base/0/
+/weppcloud/runs/batch;;spring-2025;;run-001;;omni;;treated/0/
+/weppcloud/runs/batch;;spring-2025;;run-001;;omni-contrast;;3/0/
 /weppcloud/runs/culvert;;6d2a2c2b;;pt-001/0/
 /weppcloud/runs/profile;;tmp;;playback-01/0/
 ```

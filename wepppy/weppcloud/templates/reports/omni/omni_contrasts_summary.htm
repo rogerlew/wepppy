@@ -3,7 +3,12 @@
 {% set first_item = items|first if items else None %}
 {% set water_units = first_item["water_discharge"]["unit"] if first_item and first_item["water_discharge"] and first_item["water_discharge"]["unit"] else 'm^3/yr' %}
 {% set soil_units = first_item["soil_loss"]["unit"] if first_item and first_item["soil_loss"] and first_item["soil_loss"]["unit"] else 'tonne/yr' %}
-{% set parent_runid = runid.split(';;')[0] if ';;' in runid else runid %}
+{% set _runid_parts = runid.split(';;') if runid else [] %}
+{% if _runid_parts|length >= 3 and (_runid_parts[_runid_parts|length - 2] == 'omni' or _runid_parts[_runid_parts|length - 2] == 'omni-contrast') %}
+  {% set parent_runid = _runid_parts[:-2] | join(';;') %}
+{% else %}
+  {% set parent_runid = runid %}
+{% endif %}
 
 {% if not items %}
   <p class="wc-text-muted">No contrasts available.</p>

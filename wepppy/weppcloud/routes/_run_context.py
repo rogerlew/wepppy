@@ -69,9 +69,12 @@ def load_run_context(
 
     resolver: Callable[..., str] = get_wd_fn or get_wd
     try:
-        resolved_path = resolver(runid, prefer_active=False)
-    except TypeError:
-        resolved_path = resolver(runid)
+        try:
+            resolved_path = resolver(runid, prefer_active=False)
+        except TypeError:
+            resolved_path = resolver(runid)
+    except ValueError as exc:
+        abort(404, description=str(exc))
 
     run_root = Path(resolved_path).resolve()
     if not run_root.is_dir():

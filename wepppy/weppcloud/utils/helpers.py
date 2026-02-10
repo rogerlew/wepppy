@@ -164,14 +164,21 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     path = None
 
+    if not runid or runid in {".", ".."} or "/" in runid or "\\" in runid or "\x00" in runid:
+        raise ValueError(f'Invalid run identifier: {runid}')
+
     if ';;' in runid:
         parts = runid.split(';;')
-        if len(parts) > 3 and parts[-2] in {"omni", "omni-contrast"}:
-            parent_runid = ';;'.join(parts[:-2])
-            omni_kind = parts[-2]
-            leaf = parts[-1]
+        if any(part in {"", ".", ".."} or "/" in part or "\\" in part or "\x00" in part for part in parts):
+            raise ValueError(f'Invalid grouped run identifier: {runid}')
+        # Nested composite runids are currently only supported for batch+omni.
+        # Avoid recursion here; explicitly resolve the batch parent and append the omni leaf.
+        if len(parts) == 5 and parts[0] == 'batch' and parts[3] in {"omni", "omni-contrast"}:
+            _, batch_name, batch_runid, omni_kind, leaf = parts
+            if not batch_name or not batch_runid or not leaf:
+                raise ValueError(f'Invalid grouped run identifier: {runid}')
 
-            base_root = get_wd(parent_runid, prefer_active=prefer_active)
+            base_root = get_batch_run_wd(batch_name, batch_runid)
             scenario_dir = 'scenarios' if omni_kind == 'omni' else 'contrasts'
             scenario_path = _join(base_root, '_pups', 'omni', scenario_dir, leaf)
             path = scenario_path

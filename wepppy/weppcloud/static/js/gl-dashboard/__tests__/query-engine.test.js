@@ -47,6 +47,19 @@ describe('gl-dashboard query-engine routing', () => {
     expect(body.scenario).toBe('burned');
   });
 
+  it('strips composite omni runid to parent when routing scenario queries', async () => {
+    setValue('currentScenarioPath', '_pups/omni/scenarios/burned');
+    const engine = createQueryEngine({ runid: 'decimal-pleasing;;omni;;undisturbed', config: 'cfg1' });
+
+    await engine.postQueryEngine({ datasets: ['foo'] });
+
+    const [url, init] = global.fetch.mock.calls[0];
+    const body = JSON.parse(init.body);
+
+    expect(url).toBe('/query-engine/runs/decimal-pleasing/cfg1/query');
+    expect(body.scenario).toBe('burned');
+  });
+
   it('preserves grouped runid segments when building contrast query URLs', async () => {
     setValue('currentScenarioPath', '_pups/omni/contrasts/3');
     const engine = createQueryEngine({ runid: 'batch;;spring-2025;;run-001', config: 'cfg1' });

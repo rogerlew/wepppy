@@ -53,8 +53,9 @@ export function createQueryEngine(ctx) {
   async function postQueryEngine(payload) {
     const scenarioPath = getValue('currentScenarioPath');
     const contrastRunId = resolveContrastRunId(scenarioPath);
-    const targetUrl = getBaseUrl(contrastRunId);
     const scenario = contrastRunId ? null : extractScenarioName(scenarioPath);
+    const runidOverride = contrastRunId || (scenario ? resolveParentRunId(ctx.runid) : null);
+    const targetUrl = getBaseUrl(runidOverride);
     const body = scenario ? { ...payload, scenario } : payload;
     const resp = await fetch(targetUrl, {
       method: 'POST',
@@ -78,8 +79,9 @@ export function createQueryEngine(ctx) {
 
   async function postQueryEngineForScenario(payload, scenarioPath) {
     const contrastRunId = resolveContrastRunId(scenarioPath);
-    const targetUrl = getBaseUrl(contrastRunId);
     const scenario = contrastRunId ? null : extractScenarioName(scenarioPath);
+    const runidOverride = contrastRunId || (scenario ? resolveParentRunId(ctx.runid) : null);
+    const targetUrl = getBaseUrl(runidOverride);
     const body = scenario ? { ...payload, scenario } : payload;
     const resp = await fetch(targetUrl, {
       method: 'POST',
