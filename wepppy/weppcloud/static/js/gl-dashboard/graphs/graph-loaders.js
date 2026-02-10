@@ -68,6 +68,7 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 export function createGraphLoaders(deps) {
   const {
+    cacheNamespace: rawCacheNamespace,
     graphScenarios,
     contrastScenarios,
     graphCumulativeScenarios,
@@ -79,6 +80,8 @@ export function createGraphLoaders(deps) {
     jet2Color,
     RAP_BAND_LABELS,
   } = deps;
+
+  const cacheNamespace = rawCacheNamespace != null ? String(rawCacheNamespace) : '';
 
   const omniScenarios = Array.isArray(graphScenarios) ? graphScenarios : [];
   const omniContrastScenarios = Array.isArray(contrastScenarios) ? contrastScenarios : [];
@@ -110,6 +113,13 @@ export function createGraphLoaders(deps) {
     const safeIdx = Math.abs(idx) % GRAPH_COLORS.length;
     const c = GRAPH_COLORS[safeIdx];
     return [c[0], c[1], c[2], 255];
+  }
+
+  function withCacheNamespace(key) {
+    if (!cacheNamespace) return key;
+    const normalized = String(key || '').trim();
+    if (!normalized) return cacheNamespace;
+    return `${cacheNamespace}::${normalized}`;
   }
 
   function quantile(values, q) {
@@ -203,7 +213,9 @@ export function createGraphLoaders(deps) {
   }
 
   async function loadHillLossScenario(scenPath) {
-    const cacheKey = scenPath || 'base';
+    const baseKey = scenPath || 'base';
+    const cacheKey = withCacheNamespace(baseKey);
+    const isBaseScenario = !scenPath;
     if (state.hillLossCache[cacheKey]) {
       console.debug('gl-dashboard: cache hit for', cacheKey);
       return state.hillLossCache[cacheKey];
@@ -247,10 +259,10 @@ export function createGraphLoaders(deps) {
         const totalSoilLoss = rows.reduce((sum, r) => sum + (r.soil_loss_kg || 0), 0);
         console.debug('gl-dashboard: loaded', { scenPath, rows: rows.length, totalSoilLoss });
       }
-      if (rows.length || cacheKey !== 'base' || !state.hillLossCache[cacheKey]) {
+      if (rows.length || !isBaseScenario || !state.hillLossCache[cacheKey]) {
         state.hillLossCache[cacheKey] = rows;
       }
-      if (!rows.length && cacheKey === 'base' && Array.isArray(state.hillLossCache[cacheKey]) && state.hillLossCache[cacheKey].length) {
+      if (!rows.length && isBaseScenario && Array.isArray(state.hillLossCache[cacheKey]) && state.hillLossCache[cacheKey].length) {
         return state.hillLossCache[cacheKey];
       }
       const totalArea = rows.reduce(
@@ -267,7 +279,9 @@ export function createGraphLoaders(deps) {
   }
 
   async function loadChannelLossScenario(scenPath) {
-    const cacheKey = scenPath || 'base';
+    const baseKey = scenPath || 'base';
+    const cacheKey = withCacheNamespace(baseKey);
+    const isBaseScenario = !scenPath;
     if (state.channelLossCache[cacheKey]) return state.channelLossCache[cacheKey];
     const payload = {
       datasets: [
@@ -287,10 +301,10 @@ export function createGraphLoaders(deps) {
           });
         }
       }
-      if (rows.length || cacheKey !== 'base' || !state.channelLossCache[cacheKey]) {
+      if (rows.length || !isBaseScenario || !state.channelLossCache[cacheKey]) {
         state.channelLossCache[cacheKey] = rows;
       }
-      if (!rows.length && cacheKey === 'base' && Array.isArray(state.channelLossCache[cacheKey]) && state.channelLossCache[cacheKey].length) {
+      if (!rows.length && isBaseScenario && Array.isArray(state.channelLossCache[cacheKey]) && state.channelLossCache[cacheKey].length) {
         return state.channelLossCache[cacheKey];
       }
       return rows;
@@ -302,7 +316,9 @@ export function createGraphLoaders(deps) {
   }
 
   async function loadOutletScenario(scenPath) {
-    const cacheKey = scenPath || 'base';
+    const baseKey = scenPath || 'base';
+    const cacheKey = withCacheNamespace(baseKey);
+    const isBaseScenario = !scenPath;
     if (state.outletAllYearsCache[cacheKey]) return state.outletAllYearsCache[cacheKey];
     const payload = {
       datasets: [{ path: 'wepp/output/interchange/loss_pw0.all_years.out.parquet', alias: 'out' }],
@@ -323,10 +339,10 @@ export function createGraphLoaders(deps) {
           }
         }
       }
-      if (Object.keys(map).length || cacheKey !== 'base' || !state.outletAllYearsCache[cacheKey]) {
+      if (Object.keys(map).length || !isBaseScenario || !state.outletAllYearsCache[cacheKey]) {
         state.outletAllYearsCache[cacheKey] = map;
       }
-      if (!Object.keys(map).length && cacheKey === 'base' && state.outletAllYearsCache[cacheKey]) {
+      if (!Object.keys(map).length && isBaseScenario && state.outletAllYearsCache[cacheKey]) {
         return state.outletAllYearsCache[cacheKey];
       }
       return map;
@@ -338,7 +354,8 @@ export function createGraphLoaders(deps) {
   }
 
   async function getTotalAreaHa(scenPath) {
-    const cacheKey = scenPath || 'base';
+    const baseKey = scenPath || 'base';
+    const cacheKey = withCacheNamespace(baseKey);
     if (state.hillslopeAreaCache[cacheKey] != null) return state.hillslopeAreaCache[cacheKey];
     await loadHillLossScenario(scenPath);
     return state.hillslopeAreaCache[cacheKey] || 0;
@@ -1047,12 +1064,12 @@ export function createGraphLoaders(deps) {
       const scenarioKeys = options && Array.isArray(options.scenarioPaths)
         ? options.scenarioPaths.slice().sort().join('|')
         : (state.cumulativeScenarioSelections || []).slice().sort().join('|');
-      return `${key}:${measureKey}:${scenarioKeys}`;
+      return withCacheNamespace(`${key}:${measureKey}:${scenarioKeys}`);
     }
     if (key === 'climate-yearly') {
       const water = options && options.waterYear !== undefined ? options.waterYear : state.climateWaterYear;
       const start = options && options.startMonth ? options.startMonth : state.climateStartMonth || 10;
-      return `${key}:${water ? 'wy' : 'cy'}:${start}`;
+      return withCacheNamespace(`${key}:${water ? 'wy' : 'cy'}:${start}`);
     }
     if (key === 'openet-yearly') {
       const dataset =
@@ -1061,9 +1078,9 @@ export function createGraphLoaders(deps) {
           : state.openetYearlySelectedDatasetKey || state.openetSelectedDatasetKey || 'unknown';
       const water = options && options.waterYear !== undefined ? options.waterYear : state.openetYearlyWaterYear;
       const start = options && options.startMonth ? options.startMonth : state.openetYearlyStartMonth || 10;
-      return `${key}:${dataset}:${water ? 'wy' : 'cy'}:${start}`;
+      return withCacheNamespace(`${key}:${dataset}:${water ? 'wy' : 'cy'}:${start}`);
     }
-    return key;
+    return withCacheNamespace(key);
   }
 
   async function loadGraphDataset(key, { force, options } = {}) {

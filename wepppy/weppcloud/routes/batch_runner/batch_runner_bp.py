@@ -41,6 +41,21 @@ def _batch_runner_feature_enabled() -> bool:
     return bool(flag)
 
 
+def _coerce_bool_setting(value: object, *, default: bool = False) -> bool:
+    """Normalize config booleans that may arrive as strings from env-backed settings."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"1", "true", "yes", "on"}:
+            return True
+        if token in {"0", "false", "no", "off"}:
+            return False
+    return default
+
+
 _BATCH_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$")
 _GEOJSON_MAX_BYTES = 10 * 1024 * 1024
 _GEOJSON_MAX_MB = int(_GEOJSON_MAX_BYTES // (1024 * 1024))
@@ -271,6 +286,83 @@ def view_batch(batch_name: str):
     context.setdefault("site_prefix", current_app.config.get("SITE_PREFIX", ""))
 
     return render_template("manage_pure.htm", **context)
+
+
+@batch_runner_bp.route("/batch/_/<string:batch_name>/gl-dashboard", strict_slashes=False)
+@_batch_roles_required("Admin")
+@handle_with_exception_factory
+def gl_dashboard_batch(batch_name: str):
+    """Render the GL dashboard for a batch project (collection of runs).
+
+    This endpoint is feature-flagged and intentionally additive; it does not
+    alter existing single-run `/runs/<runid>/<config>/gl-dashboard` behavior.
+    """
+    if not _batch_runner_feature_enabled():
+        return jsonify(_batch_runner_disabled_response()), 403
+
+    batch_mode_enabled = _coerce_bool_setting(
+        current_app.config.get("GL_DASHBOARD_BATCH_ENABLED", False),
+        default=False,
+    )
+    if not batch_mode_enabled:
+        return jsonify({"error": {"message": "GL Dashboard batch mode is currently disabled."}}), 403
+
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    base_config = batch_runner.base_config
+    if not base_config:
+        raise ValueError(f"Batch '{batch_name}' is missing base_config.")
+
+    base_runid = f"batch;;{batch_name};;_base"
+
+    runs = []
+    try:
+        features = batch_runner.get_watershed_features_lpt()
+    except Exception:
+        current_app.logger.warning(
+            "batch gl-dashboard: failed to load watershed features for batch '%s'",
+            batch_name,
+            exc_info=True,
+        )
+        features = []
+
+    for feature in features:
+        leaf_runid = getattr(feature, "runid", None)
+        if not leaf_runid:
+            continue
+        runs.append(
+            {
+                "runid": f"batch;;{batch_name};;{leaf_runid}",
+                "leaf_runid": str(leaf_runid),
+            }
+        )
+
+    site_prefix = current_app.config.get("SITE_PREFIX", "/weppcloud")
+    tile_url = current_app.config.get(
+        "GL_DASHBOARD_BASE_TILE_URL", "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    )
+
+    return render_template(
+        "gl_dashboard.htm",
+        runid=base_runid,
+        config=base_config,
+        site_prefix=site_prefix,
+        tile_url=tile_url,
+        map_extent=None,
+        map_center=None,
+        map_zoom=None,
+        climate_context=None,
+        omni_scenarios=None,
+        omni_contrasts=None,
+        is_omni_child=False,
+        mode="batch",
+        batch_name=batch_name,
+        batch={
+            "name": batch_name,
+            "base_runid": base_runid,
+            "runs": runs,
+        },
+        batch_mode_enabled=batch_mode_enabled,
+    )
 
 
 @batch_runner_bp.route('/batch/_/<string:batch_name>/run-directives', methods=['POST'])

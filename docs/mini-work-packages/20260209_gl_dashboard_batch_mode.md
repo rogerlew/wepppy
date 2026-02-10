@@ -1,6 +1,6 @@
 # Mini Work Package: GL Dashboard Additive Batch Mode With Composite Hillslope Keys
-Status: Draft
-Last Updated: 2026-02-09
+Status: Implemented (Batch Map MVP; Phase 6 Deferred)
+Last Updated: 2026-02-10
 Primary Areas: `wepppy/weppcloud/routes/gl_dashboard.py`, `wepppy/weppcloud/templates/gl_dashboard.htm`, `wepppy/weppcloud/static/js/gl-dashboard.js`, `wepppy/weppcloud/static/js/gl-dashboard/state.js`, `wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js`, `wepppy/weppcloud/static/js/gl-dashboard/map/layers.js`, `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js`, `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js`, `wepppy/weppcloud/static/js/gl-dashboard/data/*.js`, `tests/weppcloud/routes/*`, `wepppy/weppcloud/static/js/gl-dashboard/__tests__/*`, `wepppy/weppcloud/static-src/tests/smoke/*`
 
 ## Objective
@@ -10,6 +10,21 @@ Enable `gl-dashboard` to render a batch project (collection of runs) as one grou
 - Canonical usage: all hillslope and channel joins, graph highlighting, and per-feature caches in batch mode
 
 This work must preserve existing single-run behavior and minimize regression risk.
+
+## Current State (As Built)
+Batch mode currently supports:
+- merged geometry: `resources/subcatchments.json`, `resources/channels.json`
+- merged summaries (keyed by `feature_key`): landuse, soils, watershed/hillslopes
+- run-aware tooltips and label de-dupe (no `TopazID` collisions)
+- string-safe hover highlight (map <-> graph highlight IDs are strings)
+- readiness gate: exclude runs missing required geometry; surface degraded optional endpoints in UI
+- batch mode short-circuits async detection when no runs are ready (avoid accidental run-scoped fetches against `_base`)
+- batch mode hides OpenET month slider (OpenET remains run-scoped)
+
+Batch mode currently does not support:
+- batch Query Engine fan-out (WEPP, RAP, OpenET, WATAR remain run-scoped)
+- batch graphs beyond string-safe highlight plumbing (graph data remains run-scoped)
+- Playwright batch smoke specs and performance telemetry (Phase 6)
 
 ## Problem Summary
 - Batch projects contain multiple runs with overlapping `TopazID` / `topaz_id` values.
@@ -54,6 +69,7 @@ This work must preserve existing single-run behavior and minimize regression ris
 - Do not parse the key with `parseInt` or numeric coercion at any point.
 - Preserve `runid` and `topaz_id` separately for display/tooltips; do not rely on parsing `feature_key`.
 - Label dedupe sets must use `feature_key` in batch mode to avoid cross-run suppression.
+- Treat `ctx.mode === "batch"` as authoritative; do not use `ctx.batch.runs.length` to decide batch vs run behavior.
 
 ## Architecture Changes (Additive)
 
@@ -67,7 +83,7 @@ This work must preserve existing single-run behavior and minimize regression ris
 ### Data Provider
 - Add a batch provider layer responsible for:
   - loading per-run geometry (`resources/subcatchments.json`, `resources/channels.json`)
-  - loading per-run summaries (landuse, soils, watershed, WEPP, RAP, OpenET)
+  - loading per-run summaries (landuse, soils, watershed/hillslopes)
   - merging outputs into batch-wide state keyed by `feature_key`
 - Apply bounded concurrency and fail-soft behavior per run with explicit status reporting.
 
@@ -101,7 +117,7 @@ Deliverables:
 - Implement per-run fan-out loader with bounded concurrency.
 - Merge subcatchments/channels into one `FeatureCollection`.
 - Inject `runid`, `topaz_id`, and `feature_key` into merged geometry.
-- Re-key summary dictionaries by `feature_key`.
+- Re-key supported summary dictionaries by `feature_key` (landuse/soils/hillslopes).
 
 Deliverables:
 - Batch provider module and orchestrator wiring.
@@ -128,7 +144,7 @@ Deliverables:
 ### Phase 5: Scenario/Sync Readiness Gates
 - Validate run readiness before batch render (required datasets and outputs).
 - Surface explicit statuses for excluded or degraded runs.
-- Guard comparison paths against scenario mismatch across runs.
+- Guard comparison paths against scenario mismatch across runs. (Deferred: comparison is currently not exposed in batch mode.)
 
 Deliverables:
 - Readiness checker and UI state messaging.
@@ -148,14 +164,14 @@ Deliverables:
 ### A. JavaScript Unit Tests (gl-dashboard core)
 - Add/extend tests under `wepppy/weppcloud/static/js/gl-dashboard/__tests__/`:
   - `batch-keys.test.js`: key normalization, uniqueness, and string invariants.
-  - `batch-merge-provider.test.js`: geometry/summary merge with repeated `topaz_id`.
-  - `layers-batch-mode.test.js`: map color lookup by `feature_key`.
-  - `timeseries-graph-highlight.test.js`: no `parseInt` coercion; highlight remains string.
-  - `graph-loaders-batch-mode.test.js`: series IDs and caches remain run-aware.
+  - `batch-detector.test.js`: geometry + summary merge with repeated `topaz_id`.
+  - `batch-tooltips.test.js`: tooltip includes run + TopazID and looks up by `feature_key`.
+  - `batch-readiness.test.js`: required geometry exclusion + optional endpoint reporting.
+  - `timeseries-graph-highlight.test.js`: no numeric coercion; highlight IDs remain strings.
 
 Assertions:
 - Two runs with same `topaz_id` produce two distinct rendered features.
-- Hovering a graph series highlights the correct run-specific polygon.
+- Hovering a graph series emits the correct string ID (batch composite keys supported).
 - Tooltip includes both run and topaz identifiers.
 
 ### B. Python Route/Context Tests
@@ -169,20 +185,14 @@ Assertions:
 - Batch route only enabled when feature flag is on.
 
 ### C. Integration Tests (Data/Readiness)
-- Add tests for readiness gate behavior:
-  - one run missing WEPP outputs
-  - one run missing subcatchments geometry
-  - scenario mismatch across runs
+Deferred (Phase 6): readiness coverage for WEPP outputs, scenario mismatch, and larger batch sizes.
 
 Assertions:
 - Missing runs are explicitly flagged.
 - Available runs still render without silent key collisions.
 
 ### D. Frontend Smoke Tests (Playwright)
-- Add batch smoke specs in `wepppy/weppcloud/static-src/tests/smoke/`:
-  - render grouped batch map with duplicate `topaz_id` values.
-  - validate hover tooltip contains expected run and topaz values.
-  - verify graph hover highlights correct run-specific polygon.
+Deferred (Phase 6): batch smoke specs in `wepppy/weppcloud/static-src/tests/smoke/`.
 
 ### E. Performance/Scalability Checks
 - Define benchmark scenarios (for example 2, 10, 25 runs in batch).
@@ -220,3 +230,8 @@ Assertions:
 2. Implement Phase 2 + Phase 3 with map-level correctness tests.
 3. Implement Phase 4 for graph/highlight string safety.
 4. Implement Phase 5 + Phase 6 for readiness, performance, and rollout hardening.
+
+## Validation (As Run)
+- `wctl run-npm lint`
+- `wctl run-npm test`
+- `wctl run-pytest tests/weppcloud/routes/test_gl_dashboard_route.py tests/weppcloud/routes/test_gl_dashboard_batch_route.py`

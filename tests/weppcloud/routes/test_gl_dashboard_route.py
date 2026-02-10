@@ -99,6 +99,8 @@ def test_gl_dashboard_context_includes_batch_mode_flag(gl_dashboard_client) -> N
     kwargs = captured["kwargs"]
     assert kwargs["runid"] == "run-123"
     assert kwargs["config"] == "cfg"
+    assert kwargs["mode"] == "run"
+    assert kwargs["batch"] is None
     assert kwargs["batch_mode_enabled"] is True
 
 

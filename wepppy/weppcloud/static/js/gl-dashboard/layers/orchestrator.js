@@ -57,7 +57,12 @@ export function createDetectionController({
   }
 
   async function detectLanduseOverlays() {
-    const result = await detectorModule.detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl });
+    const result = await detectorModule.detectLanduseOverlays({
+      ctx,
+      buildScenarioUrl,
+      buildBaseUrl,
+      subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
+    });
     if (result) {
       const subcatchments = getState().subcatchmentsGeoJson || result.subcatchmentsGeoJson;
       const prevVisible = (getState().landuseLayers || []).find((l) => l && l.visible);
@@ -82,6 +87,7 @@ export function createDetectionController({
 
   async function detectSoilsOverlays() {
     const result = await detectorModule.detectSoilsOverlays({
+      ctx,
       buildScenarioUrl,
       buildBaseUrl,
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
@@ -100,6 +106,7 @@ export function createDetectionController({
 
   async function detectHillslopesOverlays() {
     const result = await detectorModule.detectHillslopesOverlays({
+      ctx,
       buildScenarioUrl,
       buildBaseUrl,
       subcatchmentsGeoJson: getState().subcatchmentsGeoJson,
@@ -130,7 +137,7 @@ export function createDetectionController({
   }
 
   async function detectChannelsOverlays() {
-    const result = await detectorModule.detectChannelsOverlays({ buildBaseUrl });
+    const result = await detectorModule.detectChannelsOverlays({ ctx, buildBaseUrl });
     if (result) {
       const existing = getState().channelsLayers || [];
       const hasWeppChannelSelection = (getState().weppChannelLayers || []).some((l) => l && l.visible);
@@ -361,17 +368,22 @@ export function createDetectionController({
   }
 
   async function detectLayers() {
-    const tasks = [
-      detectRasterLayers(),
-      detectHillslopesOverlays(),
-      detectD8DirectionLayer(),
-      detectChannelsOverlays(),
-      detectWeppYearlyChannelOverlays(),
-      detectOpenetOverlays(),
-      detectWatarOverlays(),
-      detectWeppEventOverlays(),
-      detectRapOverlays(),
-    ];
+    const isBatch =
+      ctx && ctx.mode === 'batch' && ctx.batch && Array.isArray(ctx.batch.runs);
+
+    const tasks = [detectRasterLayers(), detectHillslopesOverlays(), detectD8DirectionLayer(), detectChannelsOverlays()];
+
+    // Batch mode only supports merged geometry + basic summaries in early phases.
+    // Skip run-scoped time-series overlays until a batch fan-out provider exists.
+    if (!isBatch) {
+      tasks.push(
+        detectWeppYearlyChannelOverlays(),
+        detectOpenetOverlays(),
+        detectWatarOverlays(),
+        detectWeppEventOverlays(),
+        detectRapOverlays(),
+      );
+    }
     await Promise.all(tasks);
   }
 

@@ -21,7 +21,7 @@ function normalizeRequiredPart(value, label) {
   return normalized;
 }
 
-function resolveTopazId(properties) {
+export function resolveTopazIdFromProperties(properties) {
   if (!properties || typeof properties !== 'object') return null;
   return (
     properties.TopazID ||
@@ -51,7 +51,7 @@ export function getFeatureKeyFromProperties(properties, { strict = false } = {})
   }
 
   const runid = properties.runid || properties.run_id || null;
-  const topazId = resolveTopazId(properties);
+  const topazId = resolveTopazIdFromProperties(properties);
   if (runid == null || topazId == null) {
     if (strict) {
       throw new TypeError('gl-dashboard batch key error: runid/topaz_id unavailable in feature properties');

@@ -180,5 +180,7 @@ def gl_dashboard(runid: str, config: str):
         omni_scenarios=omni_scenarios,
         omni_contrasts=omni_contrasts,
         is_omni_child=is_omni_child,
+        mode="run",
+        batch=None,
         batch_mode_enabled=batch_mode_enabled,
     )

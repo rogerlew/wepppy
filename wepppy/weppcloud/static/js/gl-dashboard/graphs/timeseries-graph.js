@@ -1220,7 +1220,8 @@ export function createTimeseriesGraph(options = {}) {
       }
 
       if (!(this._data && this._data.disableMapHighlight)) {
-        notifyHighlight(closestId ? parseInt(closestId, 10) : null);
+        // Keep highlight IDs string-safe end-to-end (batch mode uses composite "<runid>-<topaz_id>" keys).
+        notifyHighlight(closestId != null ? String(closestId) : null);
       }
     },
 

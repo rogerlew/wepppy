@@ -4,6 +4,12 @@
  * No DOM/deck access; suitable for tests/workers.
  */
 
+import {
+  DASHBOARD_MODES,
+  buildBatchFeatureKey,
+  resolveTopazIdFromProperties,
+} from '../batch-keys.js';
+
 function logDetection(kind, message, context) {
   const parts = [`gl-dashboard detection: ${message}`];
   if (context !== undefined) {
@@ -14,6 +20,321 @@ function logDetection(kind, message, context) {
 
 const logDetectionInfo = (message, context) => logDetection('info', message, context);
 const logDetectionWarn = (message, context) => logDetection('warn', message, context);
+
+const DEFAULT_BATCH_FETCH_CONCURRENCY = 6;
+
+const _batchGeoJsonCache = new Map();
+
+function isBatchContext(ctx) {
+  return (
+    ctx &&
+    ctx.mode === DASHBOARD_MODES.BATCH &&
+    ctx.batch &&
+    Array.isArray(ctx.batch.runs)
+  );
+}
+
+function normalizeSitePrefix(prefix) {
+  if (!prefix) return '';
+  return String(prefix).replace(/\/+$/, '');
+}
+
+function normalizeRelativePath(value) {
+  if (!value) return '';
+  return String(value).replace(/^\/+/, '');
+}
+
+function encodeCompositeRunId(runid) {
+  const raw = String(runid || '').trim();
+  if (!raw) return '';
+  if (raw.indexOf(';;') === -1) {
+    return encodeURIComponent(raw);
+  }
+  return raw
+    .split(';;')
+    .map((segment) => encodeURIComponent(segment))
+    .join(';;');
+}
+
+function buildRunUrlFromCtx(ctx, runid, relativePath) {
+  const sitePrefix = normalizeSitePrefix(ctx && ctx.sitePrefix);
+  const runSlug = String(runid || '').trim();
+  const configSlug = String(ctx && ctx.config ? ctx.config : '').trim();
+  const path = normalizeRelativePath(relativePath);
+  const runPath = `/runs/${encodeCompositeRunId(runSlug)}/${encodeCompositeRunId(configSlug)}/`;
+  return (sitePrefix ? sitePrefix + runPath : runPath) + path;
+}
+
+async function mapWithConcurrency(items, limit, handler) {
+  if (!Array.isArray(items) || !items.length) return [];
+  const concurrency = Math.max(1, Math.min(Number(limit) || 1, items.length));
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const idx = nextIndex;
+      nextIndex += 1;
+      try {
+        results[idx] = await handler(items[idx], idx);
+      } catch (err) {
+        results[idx] = null;
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
+  return results;
+}
+
+function decorateGeoJsonFeaturesForBatch(geoJson, run) {
+  if (!geoJson || !Array.isArray(geoJson.features)) return geoJson;
+  const runid = run && run.runid != null ? String(run.runid) : '';
+  const leaf = run && run.leaf_runid != null ? String(run.leaf_runid) : '';
+  geoJson.features.forEach((feature) => {
+    if (!feature || typeof feature !== 'object') return;
+    const props = feature.properties && typeof feature.properties === 'object' ? feature.properties : {};
+    feature.properties = props;
+    if (runid) {
+      props.runid = runid;
+    }
+    if (leaf) {
+      props.leaf_runid = leaf;
+    }
+    const topazId = resolveTopazIdFromProperties(props);
+    if (topazId == null) return;
+    if (props.topaz_id == null) {
+      props.topaz_id = topazId;
+    }
+    if (props.feature_key == null && runid) {
+      props.feature_key = buildBatchFeatureKey(runid, topazId);
+    }
+    if (feature.id == null && props.feature_key != null) {
+      feature.id = String(props.feature_key);
+    }
+  });
+  return geoJson;
+}
+
+function mergeFeatureCollections(collections, { name } = {}) {
+  const mergedFeatures = [];
+  let crs = null;
+  for (const collection of collections) {
+    if (!collection || !Array.isArray(collection.features) || !collection.features.length) {
+      continue;
+    }
+    if (!crs && collection.crs) {
+      crs = collection.crs;
+    }
+    mergedFeatures.push(...collection.features);
+  }
+  if (!mergedFeatures.length) return null;
+  const merged = { type: 'FeatureCollection', features: mergedFeatures };
+  if (crs) merged.crs = crs;
+  if (name) merged.name = name;
+  return merged;
+}
+
+async function ensureBatchGeoJson(ctx, kind) {
+  if (!isBatchContext(ctx)) return null;
+  const baseKey =
+    (ctx.batch && (ctx.batch.base_runid || ctx.batch.name)) || String(ctx.runid || 'batch');
+  const cacheKey = `${baseKey}::${String(ctx.config || '')}::${kind}`;
+  if (_batchGeoJsonCache.has(cacheKey)) {
+    return _batchGeoJsonCache.get(cacheKey);
+  }
+
+  const promise = (async () => {
+    const runs = ctx.batch.runs;
+    const relPath = kind === 'channels' ? 'resources/channels.json' : 'resources/subcatchments.json';
+    const label = kind === 'channels' ? 'Channels GeoJSON' : 'Subcatchments GeoJSON';
+    const perRun = await mapWithConcurrency(runs, DEFAULT_BATCH_FETCH_CONCURRENCY, async (run) => {
+      const url = buildRunUrlFromCtx(ctx, run.runid, relPath);
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        logDetectionInfo(`${label} missing`, { url, status: resp.status });
+        return null;
+      }
+      const payload = await resp.json();
+      if (!payload || !Array.isArray(payload.features) || !payload.features.length) {
+        logDetectionInfo(`${label} empty`, { url });
+        return null;
+      }
+      return decorateGeoJsonFeaturesForBatch(payload, run);
+    });
+
+    const merged = mergeFeatureCollections(perRun.filter(Boolean), {
+      name: ctx.batch && ctx.batch.name ? `batch:${ctx.batch.name}` : 'batch',
+    });
+    if (!merged) {
+      logDetectionInfo(`Batch ${label} unavailable`, { kind, runs: runs.length });
+    }
+    return merged;
+  })();
+
+  _batchGeoJsonCache.set(cacheKey, promise);
+  return promise;
+}
+
+async function fetchBatchSummary(ctx, relativePath, { label } = {}) {
+  if (!isBatchContext(ctx)) return null;
+  const runs = ctx.batch.runs;
+  const perRun = await mapWithConcurrency(runs, DEFAULT_BATCH_FETCH_CONCURRENCY, async (run) => {
+    const url = buildRunUrlFromCtx(ctx, run.runid, relativePath);
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      logDetectionInfo(`${label || relativePath} missing`, { url, status: resp.status });
+      return null;
+    }
+    const payload = await resp.json();
+    if (!payload || Array.isArray(payload) || typeof payload !== 'object') {
+      logDetectionInfo(`${label || relativePath} empty`, { url });
+      return null;
+    }
+    return { run, payload };
+  });
+
+  const merged = {};
+  let mergedCount = 0;
+  for (const item of perRun) {
+    if (!item) continue;
+    const runid = String(item.run.runid || '');
+    if (!runid) continue;
+    for (const [topazId, row] of Object.entries(item.payload)) {
+      if (topazId == null || topazId === '') continue;
+      try {
+        const featureKey = buildBatchFeatureKey(runid, topazId);
+        merged[featureKey] = row;
+        mergedCount += 1;
+      } catch (err) {
+        continue;
+      }
+    }
+  }
+
+  return mergedCount ? merged : null;
+}
+
+function countFeaturesByRunId(geoJson) {
+  const counts = {};
+  if (!geoJson || !Array.isArray(geoJson.features) || !geoJson.features.length) {
+    return counts;
+  }
+  for (const feature of geoJson.features) {
+    const props = feature && feature.properties;
+    if (!props || typeof props !== 'object') continue;
+    const runid = props.runid || props.run_id;
+    if (!runid) continue;
+    const key = String(runid);
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  return counts;
+}
+
+async function checkRunSummaryEndpoint(ctx, run, relativePath, { label } = {}) {
+  const url = buildRunUrlFromCtx(ctx, run.runid, relativePath);
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    return { ok: false, status: resp.status, url, label: label || relativePath };
+  }
+  const payload = await resp.json();
+  const ok =
+    payload &&
+    typeof payload === 'object' &&
+    !Array.isArray(payload) &&
+    Object.keys(payload).length > 0;
+  return { ok, status: resp.status, url, label: label || relativePath };
+}
+
+export async function detectBatchReadiness({ ctx } = {}) {
+  try {
+    if (!isBatchContext(ctx)) return null;
+
+    const allRuns = ctx.batch.runs;
+
+    // Required: subcatchment geometry must be available to participate in the batch map.
+    const subcatchmentsGeoJson = await ensureBatchGeoJson(ctx, 'subcatchments');
+    const subcatchmentCounts = countFeaturesByRunId(subcatchmentsGeoJson);
+
+    // Optional: channel geometry, used for channel overlay/labels.
+    const channelsGeoJson = await ensureBatchGeoJson(ctx, 'channels');
+    const channelCounts = countFeaturesByRunId(channelsGeoJson);
+
+    const statuses = allRuns.map((run) => {
+      const runid = run && run.runid != null ? String(run.runid) : '';
+      const leaf = run && run.leaf_runid != null ? String(run.leaf_runid) : runid;
+      const subcatchments = runid ? subcatchmentCounts[runid] || 0 : 0;
+      const channels = runid ? channelCounts[runid] || 0 : 0;
+      const missingRequired = [];
+      const missingOptional = [];
+      if (!subcatchments) {
+        missingRequired.push('subcatchments');
+      }
+      if (!channels) {
+        missingOptional.push('channels');
+      }
+      return {
+        runid,
+        leaf_runid: leaf,
+        ready: missingRequired.length === 0,
+        counts: { subcatchments, channels },
+        missingRequired,
+        missingOptional,
+        summaries: {},
+      };
+    });
+
+    const readyRuns = statuses
+      .filter((s) => s.ready)
+      .map((s) => ({ runid: s.runid, leaf_runid: s.leaf_runid }));
+
+    // Optional summaries (used for supported batch overlays).
+    const summaryChecks = [
+      { key: 'landuse', label: 'Landuse summary', path: 'query/landuse/subcatchments' },
+      { key: 'soils', label: 'Soils summary', path: 'query/soils/subcatchments' },
+      { key: 'hillslopes', label: 'Hillslopes summary', path: 'query/watershed/subcatchments' },
+    ];
+
+    const byRunId = new Map(statuses.map((s) => [s.runid, s]));
+    await mapWithConcurrency(readyRuns, DEFAULT_BATCH_FETCH_CONCURRENCY, async (run) => {
+      const status = byRunId.get(String(run.runid || ''));
+      if (!status) return null;
+      for (const check of summaryChecks) {
+        try {
+          const result = await checkRunSummaryEndpoint(ctx, run, check.path, { label: check.label });
+          status.summaries[check.key] = result;
+          if (!result.ok) {
+            status.missingOptional.push(check.key);
+          }
+        } catch (err) {
+          status.summaries[check.key] = { ok: false, status: null, url: null, label: check.label };
+          status.missingOptional.push(check.key);
+        }
+      }
+      return null;
+    });
+
+    // De-dupe missingOptional arrays after summary checks.
+    for (const status of statuses) {
+      if (status && Array.isArray(status.missingOptional) && status.missingOptional.length > 1) {
+        status.missingOptional = Array.from(new Set(status.missingOptional));
+      }
+    }
+
+    return {
+      totalRuns: allRuns.length,
+      readyRuns,
+      statuses,
+      mergedCounts: {
+        subcatchments: subcatchmentsGeoJson && Array.isArray(subcatchmentsGeoJson.features) ? subcatchmentsGeoJson.features.length : 0,
+        channels: channelsGeoJson && Array.isArray(channelsGeoJson.features) ? channelsGeoJson.features.length : 0,
+      },
+    };
+  } catch (err) {
+    logDetectionWarn('failed to detect batch readiness', err);
+    return null;
+  }
+}
 
 const D8_POINTER_DELTAS = Object.freeze({
   1: [1, 1],
@@ -143,11 +464,14 @@ function buildChannelLabelData(geoJson) {
     const props = feature && feature.properties ? feature.properties : {};
     const topazId = props.TopazID || props.topaz_id || props.topaz || props.id || props.WeppID || props.wepp_id;
     if (topazId == null) return;
-    const key = String(topazId);
+    const key = props.feature_key != null ? String(props.feature_key) : String(topazId);
     if (seen.has(key)) return;
     const position = resolveGeometryCenter(feature.geometry);
     if (!position) return;
-    labels.push({ text: key, position });
+    const leafRunId = props.leaf_runid || null;
+    const runLabel = leafRunId ? String(leafRunId) : props.runid ? String(props.runid) : null;
+    const text = runLabel ? `${runLabel}:${topazId}` : String(topazId);
+    labels.push({ text, position });
     seen.add(key);
   });
   return labels;
@@ -446,22 +770,46 @@ export async function detectOpenetOverlays({
   }
 }
 
-export async function detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl }) {
+export async function detectLanduseOverlays({ ctx, buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson } = {}) {
   try {
+    if (isBatchContext(ctx)) {
+      const [landuseSummary, geoJson] = await Promise.all([
+        fetchBatchSummary(ctx, 'query/landuse/subcatchments', { label: 'Landuse summary' }),
+        subcatchmentsGeoJson ? Promise.resolve(subcatchmentsGeoJson) : ensureBatchGeoJson(ctx, 'subcatchments'),
+      ]);
+      if (!landuseSummary || !geoJson) {
+        logDetectionInfo('Batch landuse overlays missing summary or geometry', {
+          hasSummary: Boolean(landuseSummary),
+          hasGeoJson: Boolean(geoJson),
+        });
+        return null;
+      }
+
+      const basePath = 'landuse/landuse.parquet';
+      const landuseLayers = [
+        { key: 'lu-dominant', label: 'Dominant landuse', path: basePath, mode: 'dominant', visible: true },
+        { key: 'lu-cancov', label: 'Canopy cover (cancov)', path: basePath, mode: 'cancov', visible: false },
+        { key: 'lu-inrcov', label: 'Interrill cover (inrcov)', path: basePath, mode: 'inrcov', visible: false },
+        { key: 'lu-rilcov', label: 'Rill cover (rilcov)', path: basePath, mode: 'rilcov', visible: false },
+      ];
+
+      return { landuseSummary, subcatchmentsGeoJson: geoJson, landuseLayers };
+    }
+
     const url = buildScenarioUrl(`query/landuse/subcatchments`);
-    const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
-    const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
-    if (!subResp.ok || !geoResp.ok) {
-      logDetectionInfo('Landuse overlays missing', { subStatus: subResp.status, geoStatus: geoResp.status });
+    const geoUrl = subcatchmentsGeoJson ? null : buildBaseUrl(`resources/subcatchments.json`);
+    const [subResp, geoResp] = await Promise.all([fetch(url), geoUrl ? fetch(geoUrl) : Promise.resolve(null)]);
+    if (!subResp.ok || (geoResp && !geoResp.ok)) {
+      logDetectionInfo('Landuse overlays missing', { subStatus: subResp.status, geoStatus: geoResp ? geoResp.status : null });
       return null;
     }
 
     const landuseSummary = await subResp.json();
-    const subcatchmentsGeoJson = await geoResp.json();
-    if (!landuseSummary || !subcatchmentsGeoJson) {
+    const resolvedGeoJson = subcatchmentsGeoJson || (geoResp ? await geoResp.json() : null);
+    if (!landuseSummary || !resolvedGeoJson) {
       logDetectionInfo('Landuse overlays unavailable (empty payload)', {
         hasSummary: Boolean(landuseSummary),
-        hasGeoJson: Boolean(subcatchmentsGeoJson),
+        hasGeoJson: Boolean(resolvedGeoJson),
       });
       return null;
     }
@@ -474,15 +822,41 @@ export async function detectLanduseOverlays({ buildScenarioUrl, buildBaseUrl }) 
       { key: 'lu-rilcov', label: 'Rill cover (rilcov)', path: basePath, mode: 'rilcov', visible: false },
     ];
 
-    return { landuseSummary, subcatchmentsGeoJson, landuseLayers };
+    return { landuseSummary, subcatchmentsGeoJson: resolvedGeoJson, landuseLayers };
   } catch (err) {
     logDetectionWarn('failed to load landuse overlays', err);
     return null;
   }
 }
 
-export async function detectSoilsOverlays({ buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson }) {
+export async function detectSoilsOverlays({ ctx, buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson }) {
   try {
+    if (isBatchContext(ctx)) {
+      const [soilsSummary, geoJson] = await Promise.all([
+        fetchBatchSummary(ctx, 'query/soils/subcatchments', { label: 'Soils summary' }),
+        subcatchmentsGeoJson ? Promise.resolve(subcatchmentsGeoJson) : ensureBatchGeoJson(ctx, 'subcatchments'),
+      ]);
+      if (!soilsSummary || !geoJson) {
+        logDetectionInfo('Batch soils overlays missing summary or geometry', {
+          hasSummary: Boolean(soilsSummary),
+          hasGeoJson: Boolean(geoJson),
+        });
+        return null;
+      }
+
+      const basePath = 'soils/soils.parquet';
+      const soilsLayers = [
+        { key: 'soil-dominant', label: 'Dominant soil (color)', path: basePath, mode: 'dominant', visible: false },
+        { key: 'soil-clay', label: 'Clay content (%)', path: basePath, mode: 'clay', visible: false },
+        { key: 'soil-sand', label: 'Sand content (%)', path: basePath, mode: 'sand', visible: false },
+        { key: 'soil-bd', label: 'Bulk density (g/cm³)', path: basePath, mode: 'bd', visible: false },
+        { key: 'soil-rock', label: 'Rock content (%)', path: basePath, mode: 'rock', visible: false },
+        { key: 'soil-depth', label: 'Soil depth (mm)', path: basePath, mode: 'soil_depth', visible: false },
+      ];
+
+      return { soilsSummary, subcatchmentsGeoJson: geoJson, soilsLayers };
+    }
+
     const url = buildScenarioUrl(`query/soils/subcatchments`);
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
@@ -518,8 +892,31 @@ export async function detectSoilsOverlays({ buildScenarioUrl, buildBaseUrl, subc
   }
 }
 
-export async function detectHillslopesOverlays({ buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson }) {
+export async function detectHillslopesOverlays({ ctx, buildScenarioUrl, buildBaseUrl, subcatchmentsGeoJson }) {
   try {
+    if (isBatchContext(ctx)) {
+      const [hillslopesSummary, geoJson] = await Promise.all([
+        fetchBatchSummary(ctx, 'query/watershed/subcatchments', { label: 'Hillslopes summary' }),
+        subcatchmentsGeoJson ? Promise.resolve(subcatchmentsGeoJson) : ensureBatchGeoJson(ctx, 'subcatchments'),
+      ]);
+      if (!hillslopesSummary || !geoJson) {
+        logDetectionInfo('Batch hillslopes overlays missing summary or geometry', {
+          hasSummary: Boolean(hillslopesSummary),
+          hasGeoJson: Boolean(geoJson),
+        });
+        return null;
+      }
+
+      const basePath = 'watershed/hillslopes.parquet';
+      const hillslopesLayers = [
+        { key: 'hillslope-slope', label: 'Slope (rise/run)', path: basePath, mode: 'slope_scalar', visible: false },
+        { key: 'hillslope-length', label: 'Hillslope length (m)', path: basePath, mode: 'length', visible: false },
+        { key: 'hillslope-aspect', label: 'Aspect (degrees)', path: basePath, mode: 'aspect', visible: false },
+      ];
+
+      return { hillslopesSummary, subcatchmentsGeoJson: geoJson, hillslopesLayers };
+    }
+
     const url = buildScenarioUrl(`query/watershed/subcatchments`);
     const geoUrl = buildBaseUrl(`resources/subcatchments.json`);
     const [subResp, geoResp] = await Promise.all([fetch(url), fetch(geoUrl)]);
@@ -613,17 +1010,21 @@ export async function detectD8DirectionLayer({ fetchGdalInfo, loadRasterFromDown
   }
 }
 
-export async function detectChannelsOverlays({ buildBaseUrl }) {
+export async function detectChannelsOverlays({ ctx, buildBaseUrl } = {}) {
   try {
-    const geoUrl = buildBaseUrl(`resources/channels.json`);
-    const geoResp = await fetch(geoUrl);
-    if (!geoResp.ok) {
-      logDetectionInfo('Channels overlay missing', { geoUrl, status: geoResp.status });
-      return null;
-    }
-    const channelsGeoJson = await geoResp.json();
+    const channelsGeoJson = isBatchContext(ctx)
+      ? await ensureBatchGeoJson(ctx, 'channels')
+      : await (async () => {
+          const geoUrl = buildBaseUrl(`resources/channels.json`);
+          const geoResp = await fetch(geoUrl);
+          if (!geoResp.ok) {
+            logDetectionInfo('Channels overlay missing', { geoUrl, status: geoResp.status });
+            return null;
+          }
+          return geoResp.json();
+        })();
     if (!channelsGeoJson || !Array.isArray(channelsGeoJson.features) || !channelsGeoJson.features.length) {
-      logDetectionInfo('Channels overlay empty', { geoUrl });
+      logDetectionInfo('Channels overlay empty');
       return null;
     }
     const channelLabelsData = buildChannelLabelData(channelsGeoJson);

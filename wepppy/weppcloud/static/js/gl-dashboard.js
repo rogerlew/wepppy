@@ -116,7 +116,7 @@
     NLCD_LABELS,
     RAP_BAND_LABELS,
   } = config;
-  const { DASHBOARD_MODES } = batchKeysModule;
+  const { DASHBOARD_MODES, getFeatureKeyFromProperties } = batchKeysModule;
 
   const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
   const WEPP_LOSS_PATH = 'wepp/output/interchange/loss_pw0.hill.parquet';
@@ -265,6 +265,7 @@
   const graphPanelEl = document.getElementById('gl-graph');
   const glMainEl = document.querySelector('.gl-main');
   const graphModeButtons = document.querySelectorAll('[data-graph-mode]');
+  const batchStatusContentEl = document.getElementById('gl-batch-status-content');
 
   const yearSlider = createYearSlider({
     el: document.getElementById('gl-year-slider'),
@@ -293,6 +294,105 @@
   }
   window.glDashboardYearSlider = yearSlider;
   window.glDashboardMonthSlider = monthSlider;
+
+  function renderBatchStatus(readiness) {
+    if (!batchStatusContentEl) return;
+    while (batchStatusContentEl.firstChild) {
+      batchStatusContentEl.removeChild(batchStatusContentEl.firstChild);
+    }
+
+    if (!readiness) {
+      batchStatusContentEl.textContent = 'Batch status unavailable.';
+      return;
+    }
+
+    const total = Number(readiness.totalRuns) || 0;
+    const readyRuns = Array.isArray(readiness.readyRuns) ? readiness.readyRuns : [];
+    const readyCount = readyRuns.length;
+    const excludedCount = Math.max(0, total - readyCount);
+
+    const headline = document.createElement('div');
+    headline.innerHTML = `<strong>${readyCount}</strong> of <strong>${total}</strong> runs ready`;
+    batchStatusContentEl.appendChild(headline);
+
+    const mergedCounts = readiness.mergedCounts || {};
+    if (mergedCounts.subcatchments != null) {
+      const row = document.createElement('div');
+      row.textContent = `Subcatchments: ${Number(mergedCounts.subcatchments) || 0} features`;
+      batchStatusContentEl.appendChild(row);
+    }
+
+    if (excludedCount) {
+      const title = document.createElement('div');
+      title.style.marginTop = '0.35rem';
+      title.innerHTML = `<strong>Excluded</strong> (${excludedCount})`;
+      batchStatusContentEl.appendChild(title);
+    }
+
+    const statuses = Array.isArray(readiness.statuses) ? readiness.statuses : [];
+    const excluded = statuses.filter((s) => s && s.ready === false);
+    if (excluded.length) {
+      const ul = document.createElement('ul');
+      ul.style.margin = '0.25rem 0 0 1.1rem';
+      ul.style.padding = '0';
+      ul.style.display = 'grid';
+      ul.style.gap = '0.15rem';
+      excluded.forEach((s) => {
+        const li = document.createElement('li');
+        const missing = Array.isArray(s.missingRequired) ? s.missingRequired.join(', ') : '';
+        li.textContent = `${s.leaf_runid || s.runid}${missing ? ` (missing: ${missing})` : ''}`;
+        ul.appendChild(li);
+      });
+      batchStatusContentEl.appendChild(ul);
+    }
+
+    const degraded = statuses.filter((s) => s && s.ready === true && Array.isArray(s.missingOptional) && s.missingOptional.length);
+    if (degraded.length) {
+      const title = document.createElement('div');
+      title.style.marginTop = '0.35rem';
+      title.innerHTML = `<strong>Degraded</strong> (${degraded.length})`;
+      batchStatusContentEl.appendChild(title);
+      const ul = document.createElement('ul');
+      ul.style.margin = '0.25rem 0 0 1.1rem';
+      ul.style.padding = '0';
+      ul.style.display = 'grid';
+      ul.style.gap = '0.15rem';
+      degraded.forEach((s) => {
+        const li = document.createElement('li');
+        li.textContent = `${s.leaf_runid || s.runid} (missing: ${s.missingOptional.join(', ')})`;
+        ul.appendChild(li);
+      });
+      batchStatusContentEl.appendChild(ul);
+    }
+  }
+
+  async function initializeBatchReadiness() {
+    if (dashboardMode !== DASHBOARD_MODES.BATCH) return null;
+    if (!ctx || !ctx.batch || !Array.isArray(ctx.batch.runs) || !ctx.batch.runs.length) {
+      const readiness = { totalRuns: 0, readyRuns: [], statuses: [], mergedCounts: { subcatchments: 0, channels: 0 } };
+      setValue('batchReadiness', readiness);
+      renderBatchStatus(readiness);
+      return readiness;
+    }
+    if (!detectorModule || typeof detectorModule.detectBatchReadiness !== 'function') {
+      renderBatchStatus(null);
+      return null;
+    }
+
+    try {
+      const readiness = await detectorModule.detectBatchReadiness({ ctx });
+      setValue('batchReadiness', readiness);
+      renderBatchStatus(readiness);
+      if (readiness && Array.isArray(readiness.readyRuns) && readiness.readyRuns.length) {
+        ctx.batch.runs = readiness.readyRuns;
+      }
+      return readiness;
+    } catch (err) {
+      console.warn('gl-dashboard: batch readiness failed', err);
+      renderBatchStatus(null);
+      return null;
+    }
+  }
 
   if (typeof createRasterUtils !== 'function') {
     throw new Error('gl-dashboard: raster utils module failed to load');
@@ -538,13 +638,25 @@
     },
   });
 
+  let userInteractedWithMap = false;
+  let didAutoFitBatch = false;
+
   mapController = createMapController({
     deck,
     target,
     controllerOptions: DEFAULT_CONTROLLER_OPTIONS,
     initialViewState,
     layers: [basemapController ? basemapController.getBaseLayer() : undefined].filter(Boolean),
-    onViewStateChange: ({ viewState }) => {
+    onViewStateChange: ({ viewState, interactionState }) => {
+      if (
+        interactionState &&
+        (interactionState.isDragging ||
+          interactionState.isPanning ||
+          interactionState.isZooming ||
+          interactionState.isRotating)
+      ) {
+        userInteractedWithMap = true;
+      }
       setViewState({
         ...viewState,
         minZoom: initialViewState.minZoom,
@@ -554,9 +666,13 @@
     onHover: (info) => {
       if (info && info.object && info.object.properties) {
         const props = info.object.properties;
-        const topaz = props.TopazID || props.topaz_id || props.topaz || props.id;
-        if (topaz != null) {
-          timeseriesGraph && timeseriesGraph.highlightSubcatchment(String(topaz));
+        const state = getState();
+        const key =
+          state.dashboardMode === DASHBOARD_MODES.BATCH
+            ? getFeatureKeyFromProperties(props)
+            : props.TopazID || props.topaz_id || props.topaz || props.id || props.WeppID || props.wepp_id;
+        if (key != null) {
+          timeseriesGraph && timeseriesGraph.highlightSubcatchment(String(key));
           return;
         }
       }
@@ -569,6 +685,62 @@
   });
   const { deckgl } = mapController;
   window.glDashboardDeck = deckgl;
+
+  function computeGeoJsonExtent(geoJson) {
+    if (!geoJson || !Array.isArray(geoJson.features)) return null;
+    let west = Infinity;
+    let south = Infinity;
+    let east = -Infinity;
+    let north = -Infinity;
+
+    function walk(coords) {
+      if (!Array.isArray(coords)) return;
+      if (coords.length >= 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+        const lon = coords[0];
+        const lat = coords[1];
+        if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+        if (lon < west) west = lon;
+        if (lon > east) east = lon;
+        if (lat < south) south = lat;
+        if (lat > north) north = lat;
+        return;
+      }
+      coords.forEach(walk);
+    }
+
+    for (const feature of geoJson.features) {
+      const geom = feature && feature.geometry;
+      if (!geom || !geom.coordinates) continue;
+      walk(geom.coordinates);
+    }
+
+    if (![west, south, east, north].every((v) => Number.isFinite(v))) {
+      return null;
+    }
+    return [west, south, east, north];
+  }
+
+  if (dashboardMode === DASHBOARD_MODES.BATCH && typeof subscribe === 'function') {
+    subscribe(['subcatchmentsGeoJson'], () => {
+      if (didAutoFitBatch || userInteractedWithMap) return;
+      const geoJson = getState().subcatchmentsGeoJson;
+      const extent = computeGeoJsonExtent(geoJson);
+      if (!extent) return;
+      const [west, south, east, north] = extent;
+      const span = Math.max(east - west, north - south);
+      const zoom = Math.max(2, Math.min(16, Math.log2(360 / (span || 0.001)) + 0.5));
+      const next = {
+        ...(getState().currentViewState || initialViewState),
+        longitude: (west + east) / 2,
+        latitude: (south + north) / 2,
+        zoom,
+        minZoom: initialViewState.minZoom,
+        maxZoom: initialViewState.maxZoom,
+      };
+      didAutoFitBatch = true;
+      setViewState(next);
+    });
+  }
 
   function applyLayers() {
     if (!layerUtils || !mapController) return;
@@ -684,6 +856,7 @@
     graphContrastScenarios,
     graphLoadersFactory: () =>
       graphLoadersModule.createGraphLoaders({
+        cacheNamespace: `${ctx.runid || ''}::${ctx.config || ''}`,
         graphScenarios,
         contrastScenarios: graphContrastScenarios,
         graphCumulativeScenarios,
@@ -806,7 +979,7 @@
   }
 
   bindModeButtons();
-  if (typeof subscribe === 'function') {
+  if (dashboardMode !== DASHBOARD_MODES.BATCH && typeof subscribe === 'function') {
     subscribe(['openetMetadata'], () => {
       renderGraphList();
     });
@@ -989,6 +1162,7 @@
   });
 
   monthSlider.on('change', async (index) => {
+    if (dashboardMode === DASHBOARD_MODES.BATCH) return;
     setValue('openetSelectedMonthIndex', index);
     const changed = await refreshOpenetData();
     if (changed) {
@@ -1067,23 +1241,45 @@
     bindComparisonToggle();
     setBaseScenarioLabel(baseScenarioLabel);
     basemapController.bindBasemapControls();
-    renderGraphList();
+    if (dashboardMode === DASHBOARD_MODES.BATCH) {
+      if (graphListEl) {
+        graphListEl.innerHTML =
+          '<li class="gl-layer-item" style="color:var(--wc-color-text-muted);">Graphs are not available in batch mode.</li>';
+      }
+      if (graphEmptyEl) {
+        graphEmptyEl.textContent = 'Graphs are not available in batch mode.';
+        graphEmptyEl.hidden = false;
+      }
+    } else {
+      renderGraphList();
+    }
     applyLayers(); // Render map immediately with base layers
 
     // Async layer detection - fire and forget, don't block page
     (async () => {
       try {
         const scenarioInitialized = await initializeScenarioFromSelect();
+        if (dashboardMode === DASHBOARD_MODES.BATCH) {
+          const readiness = await initializeBatchReadiness();
+          if (readiness && Array.isArray(readiness.readyRuns) && readiness.readyRuns.length === 0) {
+            console.warn('gl-dashboard: batch has no ready runs');
+            return;
+          }
+        }
         const detectionTasks = [detectLayers()];
         if (!scenarioInitialized) {
           detectionTasks.push(
             detectLanduseOverlays(),
             detectSoilsOverlays(),
-            detectWeppOverlays(),
-            detectWeppChannelOverlays(),
-            detectWeppYearlyOverlays(),
-            detectWeppYearlyChannelOverlays(),
           );
+          if (dashboardMode !== DASHBOARD_MODES.BATCH) {
+            detectionTasks.push(
+              detectWeppOverlays(),
+              detectWeppChannelOverlays(),
+              detectWeppYearlyOverlays(),
+              detectWeppYearlyChannelOverlays(),
+            );
+          }
         }
         await Promise.all(detectionTasks);
       } catch (err) {
