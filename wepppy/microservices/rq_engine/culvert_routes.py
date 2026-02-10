@@ -42,9 +42,11 @@ CULVERT_BROWSE_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
 
 def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, Any]:
     """Mint a batch-scoped browse token for /weppcloud/culverts/{uuid}/browse/*."""
+    # Keep the minted token audience in lock-step with what downstream services validate.
+    audience = (os.getenv("RQ_ENGINE_JWT_AUDIENCE") or "rq-engine").strip() or "rq-engine"
     return auth_tokens.issue_token(
         subject or "culvert-batch",
-        audience="rq-engine",
+        audience=audience,
         runs=[batch_uuid],
         expires_in=CULVERT_BROWSE_TOKEN_TTL_SECONDS,
         extra_claims={

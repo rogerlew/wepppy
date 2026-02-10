@@ -121,7 +121,8 @@ async def download_culvert_with_subpath(request: Request) -> Response:
             request,
             identifier=batch_uuid,
             subpath=subpath,
-            allowed_token_classes=USER_SERVICE_TOKEN_CLASSES,
+            allowed_token_classes=("service",),
+            required_service_groups=("culverts",),
         )
     except BrowseAuthError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message)

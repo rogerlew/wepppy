@@ -37,7 +37,7 @@ for read-only polling.
 Required scopes (service token): `culvert:batch:submit`, `culvert:batch:retry`,
 `culvert:batch:read`, `rq:status`.
 
-Recommended claims: `aud=rq-engine`, `token_class=service`, `service_groups=culverts`,
+Recommended claims: `aud=<RQ_ENGINE_JWT_AUDIENCE>` (default `rq-engine`), `token_class=service`, `service_groups=culverts`,
 `jti=<uuid>` (required for revocation).
 
 TTL guidance: culvert service tokens should default to ~90 days. Rotate or revoke on compromise
@@ -64,13 +64,13 @@ Send the token as `Authorization: Bearer <token>`.
 
 ## Artifacts access (browse/download)
 
-Successful submissions return a short-lived, **batch-scoped** bearer token:
+Successful submissions return a short-lived, **batch-scoped** bearer token (currently 7-day TTL):
 - `browse_token`
 - `browse_token_expires_at` (JWT `exp`, Unix timestamp seconds)
 
 Use `browse_token` as `Authorization: Bearer <browse_token>` for:
 - `GET /weppcloud/culverts/{batch_uuid}/browse/*` (interactive browse)
-- `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download)
+- `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download; requires `token_class=service` with `service_groups` including `culverts`)
 
 ## Payload preparation for wepp.cloud
 
@@ -756,7 +756,7 @@ request the full (non-skeletonized) output.
 Submit a culvert batch payload.
 
 **Request:** `multipart/form-data`
-- `file`: `payload.zip` (required)
+- file field: `payload.zip` (required; `payload.zip` is the preferred form key, but `payload` / `file` are accepted aliases)
 - `zip_sha256`: SHA256 hash of payload (optional, for verification)
 - `total_bytes`: Payload size in bytes (optional)
 
@@ -815,8 +815,9 @@ lightweight and designed for frequent polling.
 {
   "job_id": "abc123-def456-...",
   "status": "started",
-  "queued_at": "2026-01-05T10:30:00+00:00",
-  "started_at": "2026-01-05T10:30:05+00:00"
+  "runid": null,
+  "started_at": "2026-01-05T10:30:05+00:00",
+  "ended_at": null
 }
 ```
 
@@ -826,20 +827,12 @@ lightweight and designed for frequent polling.
 | `queued` | Job is waiting in the queue |
 | `started` | Job is currently running |
 | `finished` | Job completed successfully |
-| `failed` | Job failed (check `error_code`, `error_detail`) |
+| `failed` | Job failed (use `GET /rq-engine/api/jobinfo/{job_id}` plus batch artifacts for details) |
 | `deferred` | Job is deferred |
 | `scheduled` | Job is scheduled for later |
 | `canceled` | Job was canceled |
 
-**Failed job response:**
-```json
-{
-  "job_id": "abc123-def456-...",
-  "status": "failed",
-  "error_code": "EXECUTION_ERROR",
-  "error_detail": "Run 42 failed: NoOutletFoundError - No valid outlet found"
-}
-```
+Note: `jobstatus` is an aggregated status view and does not currently include execution error payloads.
 
 ### Artifact Access
 

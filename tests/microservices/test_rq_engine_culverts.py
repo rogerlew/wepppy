@@ -114,6 +114,71 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     assert not (batch_root / "topo" / "netful.tif").exists()
 
 
+def test_culvert_retry_success_returns_browse_token(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch, scopes=["culvert:batch:retry"])
+    batch_uuid = "culvert-retry-1234"
+    point_id = "42"
+
+    batch_root = culverts_root / batch_uuid
+    watersheds_path = batch_root / "culverts" / "watersheds.geojson"
+    watersheds_path.parent.mkdir(parents=True, exist_ok=True)
+    watersheds_path.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {"Point_ID": point_id},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [[0, 0], [1, 0], [1, 1], [0, 0]],
+                            ],
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    seen: dict[str, str] = {}
+
+    def fake_enqueue(batch: str, point: str) -> str:
+        seen["batch_uuid"] = batch
+        seen["point_id"] = point
+        return "job-456"
+
+    monkeypatch.setattr(culvert_routes, "_enqueue_culvert_run_job", fake_enqueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            f"/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
+            headers=auth_headers,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["job_id"] == "job-456"
+    assert payload["culvert_batch_uuid"] == batch_uuid
+    assert payload["point_id"] == point_id
+    assert payload["status_url"] == "/rq-engine/api/jobstatus/job-456"
+    assert isinstance(payload.get("browse_token"), str)
+    assert isinstance(payload.get("browse_token_expires_at"), int)
+
+    browse_claims = auth_tokens.decode_token(payload["browse_token"], audience="rq-engine")
+    assert browse_claims.get("token_class") == "service"
+    assert batch_uuid in (browse_claims.get("runs") or [])
+    assert "culverts" in {str(g).strip().lower() for g in (browse_claims.get("service_groups") or [])}
+    assert payload["browse_token_expires_at"] == browse_claims.get("exp")
+    assert seen == {"batch_uuid": batch_uuid, "point_id": point_id}
+
+
 def test_culvert_ingest_missing_files_returns_400(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

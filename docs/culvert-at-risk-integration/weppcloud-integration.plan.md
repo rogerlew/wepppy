@@ -9,7 +9,7 @@
 - DEM handling: new `Ron.symlink_dem()` to symlink the canonical DEM into each run and populate `ron.map`.
 - Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
 - Watersheds: GeoJSON polygons with `Point_ID` attribute (no raster, no culvert_id_map needed).
-- RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse/download under `/weppcloud/culverts/<batch_uuid>/browse/` and `/weppcloud/culverts/<batch_uuid>/download/{subpath}` (requires `browse_token` from submit response or an authenticated session).
+- RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse/download under `/weppcloud/culverts/<batch_uuid>/browse/` and `/weppcloud/culverts/<batch_uuid>/download/{subpath}` (requires `browse_token` from submit response).
 - Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `batch_summary.json` plus per-run `run_metadata.json`.
 - Limits: max ZIP 2GB, max 300 culverts; error responses are structured 400s.
 
@@ -447,7 +447,7 @@ Key observation: Hillslope soil loss is **48% lower** with representative flowpa
 
 ## Phase 5 - Observability, error handling, retention (COMPLETE)
 - Status: complete; remaining work moved to Phase 6a and cleanup follow-ups.
-- Scope: run-level validation + error propagation, structured error codes for validation/execution, publish status events to Redis DB 2, update RQ job info with `error_code`/`error_detail`, add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
+- Scope: run-level validation + error propagation into batch artifacts (`run_metadata.json`, `runs_manifest.md`, `culverts_runner.nodb`), publish status events to Redis DB 2 (optional), add validation metrics, and implement cleanup/retention policy in `/wc1/culverts/` (delete 7 days after job completion, with completion time stored in `CulvertsRunner` state).
 - Dependencies: Phase 1 RQ job framework; ops decision on retention window.
 - Deliverables:
   - Culvert point-in-watershed validation (`WatershedFeature.contains_point`) before modeling; supports `culvert_runner.contains_point_buffer_m` (meters) to tolerate small alignment offsets; failures recorded as `CulvertPointOutsideWatershedError`.
@@ -587,12 +587,12 @@ watershed_poly_gdf_merged = simplify_geometry(watershed_poly_gdf_merged, toleran
 - Risks: callback storms for large batches; secrets management; backward compatibility with POC auth.
 - Verification: auth enforcement tests; webhook retry tests with mock endpoints; manual validation with Culvert_web_app dev instance.
 
-## Phase 6a - Error schema standardization (COMPLETE)
-- Scope: standardize `success`/`error` payloads across rq-engine routes and add `error_code`/`error_detail` to job status/job info outputs.
+## Phase 6a - Error schema standardization (DEFERRED)
+- Scope: standardize error payloads across rq-engine routes. (Note: `jobstatus`/`jobinfo` do not currently surface `error_code`/`error_detail`.)
 - Dependencies: agreement on error taxonomy and client expectations for job status polling.
-- Deliverables: updated response helpers, job status payload extensions, updated spec/dev-package docs.
+- Deliverables: updated response helpers, updated spec/dev-package docs.
 - Risks: client-side parsing changes; backward compatibility for existing integrations.
-- Verification: regression tests for error responses and job status schema; manual checks against culvert payload uploads.
+- Verification: regression tests for error responses; manual checks against culvert payload uploads.
 
 ## Phase 6b - Payload naming + ws_deln metadata alignment (READY FOR REVIEW)
 - Scope: rename the DEM payload path to `topo/breached_filled_DEM_UTM.tif` (no misleading "hydro-enforced" filename) and capture `hydroEnforcementSelect` as `hydro_enforcement_select` in `metadata.json`.

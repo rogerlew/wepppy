@@ -358,6 +358,7 @@ def authorize_group_request(
     identifier: str,
     subpath: str,
     allowed_token_classes: Sequence[str] = tuple(USER_SERVICE_TOKEN_CLASSES),
+    required_service_groups: Sequence[str] | None = None,
 ) -> AuthContext:
     def _evaluate_context(context: AuthContext) -> AuthContext:
         root_only = is_root_only_path(subpath)
@@ -388,6 +389,26 @@ def authorize_group_request(
                 status_code=403,
                 code="forbidden",
             )
+
+        if context.token_class == "service" and required_service_groups:
+            required = {
+                str(group).strip().lower()
+                for group in required_service_groups
+                if str(group).strip()
+            }
+            if required:
+                present = {
+                    group.lower()
+                    for group in _normalize_list(context.claims.get("service_groups"))
+                    if group
+                }
+                missing = required - present
+                if missing:
+                    raise BrowseAuthError(
+                        "Service token missing required group scope",
+                        status_code=403,
+                        code="forbidden",
+                    )
 
         if root_only and not context.is_root:
             raise BrowseAuthError(

@@ -54,11 +54,16 @@ def _issue_service_token(
     *,
     roles: list[str] | None = None,
     runs: list[str] | None = None,
+    service_groups: list[str] | None = None,
 ) -> str:
+    extra_claims = None
+    if service_groups is not None:
+        extra_claims = {"service_groups": service_groups}
     return _issue_token(
         token_class="service",
         runs=runs if runs is not None else [runid],
         roles=roles,
+        extra_claims=extra_claims,
     )
 
 
@@ -1230,6 +1235,56 @@ def test_group_user_token_with_privileged_role_is_allowed(
     assert response.status_code == 200
 
 
+def test_culvert_download_rejects_user_token_even_with_privileged_role(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    identifier = "culverts-user-download-forbidden"
+    culverts_root = tmp_path / "culverts"
+    _touch(culverts_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", CULVERTS_ROOT=str(culverts_root))
+    app = browse.create_app()
+    token = _issue_token(
+        token_class="user",
+        roles=["PowerUser"],
+        subject="42",
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/culverts/{identifier}/download/runs/1001/shared.txt",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+    assert "Token class is not allowed" in response.text
+
+
+def test_culvert_download_requires_service_group_claim(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    identifier = "culverts-service-groups-required"
+    culverts_root = tmp_path / "culverts"
+    _touch(culverts_root / identifier / "runs" / "1001" / "shared.txt", "ok")
+
+    browse = load_secure_browse({}, SITE_PREFIX="/weppcloud", CULVERTS_ROOT=str(culverts_root))
+    app = browse.create_app()
+    token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/culverts/{identifier}/download/runs/1001/shared.txt",
+            headers={"Authorization": f"Bearer {token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 403
+    assert "Service token missing required group scope" in response.text
+
+
 @pytest.mark.parametrize("base,root_env", [("culverts", "CULVERTS_ROOT"), ("batch", "BATCH_RUNNER_ROOT")])
 def test_group_routes_ignore_invalid_cookie_and_still_require_auth(
     tmp_path: Path,
@@ -1377,8 +1432,19 @@ def test_group_download_uses_bearer_when_cookie_identifier_mismatch(
     )
     app = browse.create_app()
 
-    cookie_token = _issue_service_token(identifier, roles=["User"], runs=["other-group"])
-    bearer_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
+    service_groups = ["culverts"] if base == "culverts" else None
+    cookie_token = _issue_service_token(
+        identifier,
+        roles=["User"],
+        runs=["other-group"],
+        service_groups=service_groups,
+    )
+    bearer_token = _issue_service_token(
+        identifier,
+        roles=["User"],
+        runs=[identifier],
+        service_groups=service_groups,
+    )
 
     with TestClient(app) as client:
         client.cookies.set("wepp_browse_jwt", cookie_token)
@@ -1498,8 +1564,19 @@ def test_group_root_only_path_uses_bearer_when_cookie_lacks_root_role(
     )
     app = browse.create_app()
 
-    cookie_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
-    bearer_token = _issue_service_token(identifier, roles=["Root"], runs=[identifier])
+    service_groups = ["culverts"] if base == "culverts" else None
+    cookie_token = _issue_service_token(
+        identifier,
+        roles=["User"],
+        runs=[identifier],
+        service_groups=service_groups,
+    )
+    bearer_token = _issue_service_token(
+        identifier,
+        roles=["Root"],
+        runs=[identifier],
+        service_groups=service_groups,
+    )
 
     with TestClient(app) as client:
         client.cookies.set("wepp_browse_jwt", cookie_token)
@@ -1534,8 +1611,19 @@ def test_group_download_root_only_path_uses_bearer_when_cookie_lacks_root_role(
     )
     app = browse.create_app()
 
-    cookie_token = _issue_service_token(identifier, roles=["User"], runs=[identifier])
-    bearer_token = _issue_service_token(identifier, roles=["Root"], runs=[identifier])
+    service_groups = ["culverts"] if base == "culverts" else None
+    cookie_token = _issue_service_token(
+        identifier,
+        roles=["User"],
+        runs=[identifier],
+        service_groups=service_groups,
+    )
+    bearer_token = _issue_service_token(
+        identifier,
+        roles=["Root"],
+        runs=[identifier],
+        service_groups=service_groups,
+    )
 
     with TestClient(app) as client:
         client.cookies.set("wepp_browse_jwt", cookie_token)
@@ -1664,7 +1752,12 @@ def test_group_routes_accept_scoped_service_token(
         },
     )
     app = browse.create_app()
-    token = _issue_service_token(identifier, runs=[identifier], roles=["User"])
+    token = _issue_service_token(
+        identifier,
+        runs=[identifier],
+        roles=["User"],
+        service_groups=["culverts"] if base == "culverts" else None,
+    )
     headers = {"Authorization": f"Bearer {token}"}
 
     import wepppy.microservices._gdalinfo as gdalinfo_mod

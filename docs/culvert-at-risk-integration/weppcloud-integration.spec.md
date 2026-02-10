@@ -48,8 +48,8 @@ Create a batch and enqueue a culvert WEPP job. Implemented in rq-engine to avoid
 Heavy topo generation (flovec/netful pruning/chnjnt) runs inside the RQ job, not the API handler, so the API stays fast and resilient under load.
 
 Request (multipart/form-data):
-- file: `payload.zip` (required)
-- fields (JSON or form fields): undetermined; prefer embedding all required metadata inside `payload.zip`.
+- file: `payload.zip` (required; `payload.zip` is the preferred form key, but `payload` / `file` are accepted aliases)
+- optional form fields: `zip_sha256` (string), `total_bytes` (int as string)
 
 Response (JSON):
 - job_id (standard RQ response payload)
@@ -82,7 +82,7 @@ Use the browse service for listing/downloading artifacts instead of a culvert-sp
 - Per-culvert browse: `/weppcloud/culverts/<culvert_batch_uuid>/browse/runs/<culvert_id>/`
 - Direct file download: `/weppcloud/culverts/<culvert_batch_uuid>/download/runs/<culvert_id>/<path>`
 
-Send `Authorization: Bearer <browse_token>` for browse/download access (or rely on an authenticated browser session when using the UI).
+Send `Authorization: Bearer <browse_token>` for browse/download access. `browse_token` is a batch-scoped service JWT (`token_class=service`, `service_groups` includes `culverts`, and `runs` includes the batch UUID).
 
 This scheme mirrors the existing `/runs/{runid}/{config}/browse/` pattern. The same approach is used for the batch runner (`/weppcloud/batch/{batch_name}/browse/`).
 
@@ -345,7 +345,7 @@ Notes:
 - Per-run validation errors (e.g., culvert point outside watershed polygon) are treated as failed runs with `CulvertPointOutsideWatershedError` in `run_metadata.json`, and are merged into `culverts_runner.nodb` + `runs_manifest.md`.
 - Runs below `culvert_runner.minimum_watershed_area_m2` (when `area_sqm` is present) fail with `WatershedAreaBelowMinimumError`.
 - `NoOutletFoundError` triggers the mask-extension + outlet seeding fallback; if it still fails, the run is marked failed with the error payload.
-- Execution failures return job status `failed` with `error_code` and `error_detail` in the RQ engine status endpoint.
+- Execution failures return job status `failed` in `GET /rq-engine/api/jobstatus/{job_id}`. Use `jobinfo` and batch artifacts (`runs_manifest.md`, per-run `run_metadata.json`) for error details.
 - Artifacts access relies on the browse service; missing outputs should be surfaced there.
 
 ## Performance and limits
