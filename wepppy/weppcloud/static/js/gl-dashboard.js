@@ -24,6 +24,7 @@
   const moduleSuffix = scriptQuery || '';
 
   let config;
+  let batchKeysModule;
   let colorsModule;
   let stateModule;
   let graphModule;
@@ -48,6 +49,7 @@
   try {
     [
       config,
+      batchKeysModule,
       colorsModule,
       stateModule,
       graphModule,
@@ -70,6 +72,7 @@
       openetDataModule,
     ] = await Promise.all([
       import(`${moduleBase}config.js${moduleSuffix}`),
+      import(`${moduleBase}batch-keys.js${moduleSuffix}`),
       import(`${moduleBase}colors.js${moduleSuffix}`),
       import(`${moduleBase}state.js${moduleSuffix}`),
       import(`${moduleBase}graphs/timeseries-graph.js${moduleSuffix}`),
@@ -113,6 +116,7 @@
     NLCD_LABELS,
     RAP_BAND_LABELS,
   } = config;
+  const { DASHBOARD_MODES } = batchKeysModule;
 
   const WEPP_YEARLY_PATH = 'wepp/output/interchange/loss_pw0.all_years.hill.parquet';
   const WEPP_LOSS_PATH = 'wepp/output/interchange/loss_pw0.hill.parquet';
@@ -180,8 +184,12 @@
     pitch: 0,
     bearing: 0,
   };
+  const dashboardMode =
+    ctx.mode === DASHBOARD_MODES.BATCH ? DASHBOARD_MODES.BATCH : DASHBOARD_MODES.RUN;
 
   initState({
+    dashboardMode,
+    batchModeEnabled: !!ctx.batchModeEnabled,
     currentBasemapKey: BASEMAP_DEFS[ctx.basemap] ? ctx.basemap : 'googleTerrain',
     currentViewState: initialViewState,
     subcatchmentsVisible: true,
@@ -205,6 +213,8 @@
   }
 
   bindStateKeys([
+    'dashboardMode',
+    'batchModeEnabled',
     'currentBasemapKey',
     'currentScenarioPath',
     'comparisonMode',

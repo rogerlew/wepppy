@@ -16,6 +16,21 @@ gl_dashboard_bp = Blueprint("gl_dashboard", __name__)
 logger = logging.getLogger(__name__)
 
 
+def _coerce_bool_setting(value: object, *, default: bool = False) -> bool:
+    """Normalize config booleans that may arrive as strings from env-backed settings."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"1", "true", "yes", "on"}:
+            return True
+        if token in {"0", "false", "no", "off"}:
+            return False
+    return default
+
+
 def _get_omni_scenarios(wd: str):
     """Get list of omni scenarios if the project has the omni mod.
     
@@ -97,6 +112,10 @@ def gl_dashboard(runid: str, config: str):
     tile_url = current_app.config.get(
         "GL_DASHBOARD_BASE_TILE_URL", "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
     )
+    batch_mode_enabled = _coerce_bool_setting(
+        current_app.config.get("GL_DASHBOARD_BATCH_ENABLED", False),
+        default=False,
+    )
     
     # Check for omni scenarios (skip when viewing omni child runs).
     is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
@@ -161,4 +180,5 @@ def gl_dashboard(runid: str, config: str):
         omni_scenarios=omni_scenarios,
         omni_contrasts=omni_contrasts,
         is_omni_child=is_omni_child,
+        batch_mode_enabled=batch_mode_enabled,
     )

@@ -10,6 +10,8 @@ const STATE_KEY = '__GL_DASHBOARD_STATE__';
 const SUBSCRIBERS_KEY = '__GL_DASHBOARD_STATE_SUBSCRIBERS__';
 
 const defaultState = {
+  dashboardMode: 'run',
+  batchModeEnabled: false,
   currentScenarioPath: '',
   comparisonMode: false,
   baseSummaryCache: {},
