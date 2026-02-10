@@ -49,7 +49,7 @@ Notes:
 
 - **Pup query ignored**: for composite runids, `load_run_context` ignores the `?pup=` query parameter.
 - **NoDb runid**: Omni child NoDb controllers keep `NoDbBase.runid` equal to the parent runid (because `_parent_wd` is set). Redis keys, status channels, and preflight updates therefore use the parent runid.
-- **Authorization**: ownership and access checks are based on the parent runid. Composite runids are not stored as separate `Run` records.
+- **Authorization**: Omni scenario/contrast slugs authorize against the parent runid (strip the trailing `;;omni;;...` / `;;omni-contrast;;...` suffix). Batch slugs (`batch;;...`) are Admin/Root-only because batch runs are not tracked in the `Run` ownership table. Composite slugs are not stored as separate `Run` records.
 
 ## Omni Monkey Patching
 

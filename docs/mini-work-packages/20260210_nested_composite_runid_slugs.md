@@ -34,6 +34,7 @@ Target nested slug forms:
 ## Scope
 - Backend: update `get_wd()` to resolve nested batch+omni slugs (no recursion; no support for nested omni on non-batch composite parents).
 - Frontend: update `resolveParentRunId()` so it strips Omni suffixes regardless of the total segment count.
+- Access control: batch composite slugs (and nested batch+omni children) are Admin/Root-only because batch runs are not tracked in the `Run` ownership table.
 - Tests: add regression coverage for the exact nested slug forms required by batch + Omni.
 
 ## Non-goals

@@ -115,6 +115,20 @@ def is_omni_child_run(
     return False
 
 
+def _strip_omni_suffix_runid(runid: str) -> str:
+    """Return the parent runid for omni composite slugs.
+
+    Examples:
+    - ``decimal-pleasing;;omni;;burned`` -> ``decimal-pleasing``
+    - ``batch;;spring-2025;;run-001;;omni-contrast;;3`` -> ``batch;;spring-2025;;run-001``
+    """
+    raw = runid or ""
+    parts = raw.split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"}:
+        return ";;".join(parts[:-2])
+    return raw
+
+
 def get_wd(runid: str, *, prefer_active: bool = True) -> str:
     """Return the working directory path for a run, caching lookups in Redis.
 
@@ -130,6 +144,14 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
         ValueError: If the run identifier encodes an unknown group prefix.
     """
     global redis_wd_cache_client
+
+    if not runid or runid in {".", ".."} or "/" in runid or "\\" in runid or "\x00" in runid:
+        raise ValueError(f"Invalid run identifier: {runid}")
+
+    if ";;" in runid:
+        parts = runid.split(";;")
+        if any(part in {"", ".", ".."} or "/" in part or "\\" in part or "\x00" in part for part in parts):
+            raise ValueError(f"Invalid grouped run identifier: {runid}")
 
     context_override = None
     if prefer_active:
@@ -164,13 +186,8 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     path = None
 
-    if not runid or runid in {".", ".."} or "/" in runid or "\\" in runid or "\x00" in runid:
-        raise ValueError(f'Invalid run identifier: {runid}')
-
     if ';;' in runid:
         parts = runid.split(';;')
-        if any(part in {"", ".", ".."} or "/" in part or "\\" in part or "\x00" in part for part in parts):
-            raise ValueError(f'Invalid grouped run identifier: {runid}')
         # Nested composite runids are currently only supported for batch+omni.
         # Avoid recursion here; explicitly resolve the batch parent and append the omni leaf.
         if len(parts) == 5 and parts[0] == 'batch' and parts[3] in {"omni", "omni-contrast"}:
@@ -547,7 +564,6 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     """
     from flask_login import current_user
     from flask import abort
-    from wepppy.nodb.core import Ron
     from wepppy.weppcloud.app import get_run_owners
 
     login_manager = getattr(current_app, "login_manager", None)
@@ -560,10 +576,17 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     except Exception:
         return
 
-    # Always use base run path for authorization checks, not scenario paths.
-    # Scenarios inherit their parent run's access permissions.
-    wd = get_wd(runid, prefer_active=False)
-    owners = get_run_owners(runid)
+    auth_runid = _strip_omni_suffix_runid(runid)
+
+    # Batch runs are admin-facing and are not tracked in the Run ownership table.
+    # Treat any batch-prefixed runid (including nested batch+omni) as Admin/Root-only.
+    if auth_runid.startswith("batch;;"):
+        abort(403)
+
+    # Always use the parent run path for authorization checks, not scenario paths.
+    # Omni scenarios/contrasts inherit their parent run's access permissions.
+    wd = get_wd(auth_runid, prefer_active=False)
+    owners = get_run_owners(auth_runid)
 
     if not owners:
         return  # No owners means public run
@@ -571,6 +594,7 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
     if current_user in owners:
         return
     
+    from wepppy.nodb.core import Ron
     if  Ron.ispublic(wd):
         return
 
