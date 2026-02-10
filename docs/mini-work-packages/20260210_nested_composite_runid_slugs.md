@@ -1,5 +1,5 @@
 # Mini Work Package: Nested Composite Runid Slugs For Batch + Omni (GL Dashboard)
-Status: Draft
+Status: Implemented
 Last Updated: 2026-02-10
 See also: `docs/composite-runid-slugs.md`, `docs/mini-work-packages/20260209_gl_dashboard_batch_mode.md`
 Primary Areas: `wepppy/weppcloud/utils/helpers.py`, `wepppy/weppcloud/routes/_run_context.py`, `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js`, `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js`, `tests/weppcloud/utils/test_helpers_paths.py`, `wepppy/weppcloud/static/js/gl-dashboard/__tests__/scenario-manager.test.js`, `wepppy/weppcloud/static/js/gl-dashboard/__tests__/query-engine.test.js`
@@ -22,7 +22,7 @@ Target nested slug forms:
 - `load_run_context()` ignores `?pup=` whenever the runid contains `;;`, so `?pup=omni/...` cannot be used to “enter” Omni from a batch runid.
   - Source: `wepppy/weppcloud/routes/_run_context.py`
 
-### Current Blockers
+### Historical Blockers (Resolved)
 1. Backend WD resolution rejects nested composite runids.
    - `get_wd()` hard-requires exactly 3 segments for any runid containing `;;` and raises on `len(parts) != 3`.
    - Source: `wepppy/weppcloud/utils/helpers.py:get_wd`
@@ -43,14 +43,14 @@ Target nested slug forms:
 
 ## Implementation Plan
 
-### Phase 0: Clarify Doc Contract (Spec)
+### Phase 0: Clarify Doc Contract (Spec) (Done: `cdb700135`)
 - `docs/composite-runid-slugs.md` should define composite runid slugs as `3+` `;;`-delimited segments (common forms are 3 and 5 segments).
 - Update the doc to explicitly define “Omni suffix slugs” as: `<parent_runid>;;omni;;<scenario_name>` and `<parent_runid>;;omni-contrast;;<contrast_id>` where `<parent_runid>` may itself be composite (for example `batch;;...;;...`).
 
 Deliverable:
 - Doc tweak only (no behavior change).
 
-### Phase 1: Backend `get_wd()` Nested Omni Suffix Support
+### Phase 1: Backend `get_wd()` Nested Omni Suffix Support (Done: `38dabea20`)
 Update `wepppy/weppcloud/utils/helpers.py:get_wd` to recognize Omni suffixes at the end of the runid and resolve the parent via `get_wd(parent_runid)`:
 
 Parsing rule:
@@ -67,7 +67,7 @@ Guard rails:
 - Preserve existing 3-segment parsing for `batch`, `culvert`, `profile` when the runid does not end with an Omni suffix.
 - For runids containing `;;` that do not match known patterns, keep explicit failure (do not silently fall back to primary WD guessing).
 
-### Phase 2: Frontend Parent Runid Resolution
+### Phase 2: Frontend Parent Runid Resolution (Done: `4d2725f1f`)
 Update both:
 - `wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:resolveParentRunId`
 - `wepppy/weppcloud/static/js/gl-dashboard/data/query-engine.js:resolveParentRunId`
@@ -80,7 +80,7 @@ Implementation rule (JS):
 - If `parts.length >= 3` and `['omni','omni-contrast'].includes(parts[parts.length - 2])`:
   - `return parts.slice(0, -2).join(';;');`
 
-### Phase 3: Regression Tests
+### Phase 3: Regression Tests (Done: `38dabea20`, `4d2725f1f`)
 Backend (pytest, unit):
 - Extend `tests/weppcloud/utils/test_helpers_paths.py`:
   - Add a test that stubs `_exists` and asserts:
@@ -92,6 +92,10 @@ Frontend (jest, unit):
   - Add a deep-link case where `ctx.runid` is already nested (`batch;;...;;omni;;undisturbed`) and ensure `buildScenarioUrl()` does not double-nest.
 - Extend `wepppy/weppcloud/static/js/gl-dashboard/__tests__/query-engine.test.js`:
   - Add a case where `ctx.runid` is nested and contrast routing still produces a single Omni suffix (no repeated `;;omni-contrast;;`).
+
+## Validation (Completed)
+- `wctl run-pytest tests/weppcloud/utils/test_helpers_paths.py --maxfail=1`
+- `wctl run-npm test -- static/js/gl-dashboard/__tests__`
 
 ## Manual Validation Checklist
 1. Confirm batch+omni WD resolution:
@@ -106,3 +110,8 @@ Frontend (jest, unit):
 - Backend `get_wd()` resolves nested `batch;;...;;omni...` and `batch;;...;;omni-contrast...` slugs without raising on segment count.
 - GL Dashboard can deep-link into nested slugs and continue to build correct scenario/contrast URLs (no double nesting).
 - Added unit tests cover the nested forms and pass under the standard gates.
+
+## Follow-ups / Known Gaps
+- Jinja omni report templates compute `parent_runid` as `runid.split(';;')[0]`, which is wrong for nested composite runids (parent becomes `batch`, not `batch;;...;;runid`):
+  - `wepppy/weppcloud/templates/reports/omni/omni_scenarios_summary.htm`
+  - `wepppy/weppcloud/templates/reports/omni/omni_contrasts_summary.htm`
