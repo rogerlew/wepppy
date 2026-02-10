@@ -166,51 +166,62 @@ def get_wd(runid: str, *, prefer_active: bool = True) -> str:
 
     if ';;' in runid:
         parts = runid.split(';;')
-        if len(parts) != 3:
-            raise ValueError(f'Invalid grouped run identifier: {runid}')
-        _group, _name, _runid = parts
-        if _group == 'batch':
-            path = get_batch_run_wd(_name, _runid)
-        elif _group == 'profile' and _name == 'tmp':
-            playback_root = _playback_path("PROFILE_PLAYBACK_RUN_ROOT", "runs")
-            path = _join(playback_root, _runid)
-        elif _group == 'profile' and _name == 'fork':
-            playback_root = _playback_path("PROFILE_PLAYBACK_FORK_ROOT", "fork")
-            path = _join(playback_root, _runid)
-        elif _group == 'profile' and _name == 'archive':
-            playback_root = _playback_path("PROFILE_PLAYBACK_ARCHIVE_ROOT", "archive")
-            path = _join(playback_root, _runid)
-        elif _group == 'culvert':
-            culverts_root = os.getenv("CULVERTS_ROOT", "/wc1/culverts")
-            path = _join(culverts_root, _name, "runs", _runid)
-        elif _name == 'omni':
-            _name, _group = _group, _name
-            # Omni scenarios live under the parent run's _pups directory.
-            base_root = get_primary_wd(_name)
-            scenario_path = _join(base_root, '_pups', 'omni', 'scenarios', _runid)
-            if not _exists(scenario_path):
-                legacy_base_root = _join('/geodata/weppcloud_runs', _name)
-                legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'scenarios', _runid)
-                if _exists(legacy_candidate):
-                    base_root = legacy_base_root
-                    scenario_path = legacy_candidate
-            path = scenario_path
-            _ensure_omni_shared_inputs(base_root, scenario_path)
-        elif _name == 'omni-contrast':
-            _name, _group = _group, _name
-            # Omni contrasts live under the parent run's _pups directory.
-            base_root = get_primary_wd(_name)
-            scenario_path = _join(base_root, '_pups', 'omni', 'contrasts', _runid)
-            if not _exists(scenario_path):
-                legacy_base_root = _join('/geodata/weppcloud_runs', _name)
-                legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'contrasts', _runid)
-                if _exists(legacy_candidate):
-                    base_root = legacy_base_root
-                    scenario_path = legacy_candidate
+        if len(parts) > 3 and parts[-2] in {"omni", "omni-contrast"}:
+            parent_runid = ';;'.join(parts[:-2])
+            omni_kind = parts[-2]
+            leaf = parts[-1]
+
+            base_root = get_wd(parent_runid, prefer_active=prefer_active)
+            scenario_dir = 'scenarios' if omni_kind == 'omni' else 'contrasts'
+            scenario_path = _join(base_root, '_pups', 'omni', scenario_dir, leaf)
             path = scenario_path
             _ensure_omni_shared_inputs(base_root, scenario_path)
         else:
-            raise ValueError(f'Unknown group prefix: {_group}')
+            if len(parts) != 3:
+                raise ValueError(f'Invalid grouped run identifier: {runid}')
+            _group, _name, _runid = parts
+            if _group == 'batch':
+                path = get_batch_run_wd(_name, _runid)
+            elif _group == 'profile' and _name == 'tmp':
+                playback_root = _playback_path("PROFILE_PLAYBACK_RUN_ROOT", "runs")
+                path = _join(playback_root, _runid)
+            elif _group == 'profile' and _name == 'fork':
+                playback_root = _playback_path("PROFILE_PLAYBACK_FORK_ROOT", "fork")
+                path = _join(playback_root, _runid)
+            elif _group == 'profile' and _name == 'archive':
+                playback_root = _playback_path("PROFILE_PLAYBACK_ARCHIVE_ROOT", "archive")
+                path = _join(playback_root, _runid)
+            elif _group == 'culvert':
+                culverts_root = os.getenv("CULVERTS_ROOT", "/wc1/culverts")
+                path = _join(culverts_root, _name, "runs", _runid)
+            elif _name == 'omni':
+                _name, _group = _group, _name
+                # Omni scenarios live under the parent run's _pups directory.
+                base_root = get_primary_wd(_name)
+                scenario_path = _join(base_root, '_pups', 'omni', 'scenarios', _runid)
+                if not _exists(scenario_path):
+                    legacy_base_root = _join('/geodata/weppcloud_runs', _name)
+                    legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'scenarios', _runid)
+                    if _exists(legacy_candidate):
+                        base_root = legacy_base_root
+                        scenario_path = legacy_candidate
+                path = scenario_path
+                _ensure_omni_shared_inputs(base_root, scenario_path)
+            elif _name == 'omni-contrast':
+                _name, _group = _group, _name
+                # Omni contrasts live under the parent run's _pups directory.
+                base_root = get_primary_wd(_name)
+                scenario_path = _join(base_root, '_pups', 'omni', 'contrasts', _runid)
+                if not _exists(scenario_path):
+                    legacy_base_root = _join('/geodata/weppcloud_runs', _name)
+                    legacy_candidate = _join(legacy_base_root, '_pups', 'omni', 'contrasts', _runid)
+                    if _exists(legacy_candidate):
+                        base_root = legacy_base_root
+                        scenario_path = legacy_candidate
+                path = scenario_path
+                _ensure_omni_shared_inputs(base_root, scenario_path)
+            else:
+                raise ValueError(f'Unknown group prefix: {_group}')
     elif path is None:
         playback_root = _playback_path("PROFILE_PLAYBACK_RUN_ROOT", "runs") if _PLAYBACK_USE_CLONE else None
         if playback_root:

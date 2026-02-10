@@ -63,3 +63,25 @@ def test_get_primary_wd_always_points_to_wc1(monkeypatch: pytest.MonkeyPatch) ->
     _disable_redis_cache(monkeypatch)
     runid = "ef-new"
     assert helpers.get_primary_wd(runid) == "/wc1/runs/ef/ef-new"
+
+
+def test_get_wd_resolves_nested_batch_omni_scenario(monkeypatch: pytest.MonkeyPatch) -> None:
+    _disable_redis_cache(monkeypatch)
+    dummy_app = types.SimpleNamespace(config={})
+    monkeypatch.setattr(helpers, "current_app", dummy_app)
+    monkeypatch.setattr(helpers, "_exists", lambda _path: False)
+
+    resolved = helpers.get_wd("batch;;spring-2025;;run-001;;omni;;treated", prefer_active=False)
+
+    assert resolved == "/wc1/batch/spring-2025/runs/run-001/_pups/omni/scenarios/treated"
+
+
+def test_get_wd_resolves_nested_batch_omni_contrast(monkeypatch: pytest.MonkeyPatch) -> None:
+    _disable_redis_cache(monkeypatch)
+    dummy_app = types.SimpleNamespace(config={})
+    monkeypatch.setattr(helpers, "current_app", dummy_app)
+    monkeypatch.setattr(helpers, "_exists", lambda _path: False)
+
+    resolved = helpers.get_wd("batch;;spring-2025;;run-001;;omni-contrast;;3", prefer_active=False)
+
+    assert resolved == "/wc1/batch/spring-2025/runs/run-001/_pups/omni/contrasts/3"
