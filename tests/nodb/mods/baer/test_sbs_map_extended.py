@@ -621,6 +621,17 @@ class TestSBSMapProperties(unittest.TestCase):
         # Should have color table
         output_ct = band.GetRasterColorTable()
         self.assertIsNotNone(output_ct)
+
+        expected_export_colors = {
+            0: (0, 158, 115, 255),      # unburned
+            1: (86, 180, 233, 255),     # low
+            2: (240, 228, 66, 255),     # moderate
+            3: (204, 121, 167, 255),    # high
+            255: (255, 255, 255, 0),    # nodata
+        }
+        for pixel_val, expected_color in expected_export_colors.items():
+            actual_color = output_ct.GetColorEntry(pixel_val)
+            self.assertEqual(actual_color, expected_color)
         
         # Should have 0, 1, 2, 3 values (not 130-133)
         unique_vals = np.unique(output_data)
