@@ -34,6 +34,10 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
+def _is_profile_target_runid(runid: str) -> bool:
+    return str(runid).startswith("profile;;")
+
+
 def _resolve_bearer_claims(request: Request) -> Mapping[str, Any] | None:
     if "authorization" not in {key.lower() for key in request.headers.keys()}:
         return None
@@ -64,7 +68,8 @@ def _ensure_anonymous_access(runid: str, wd: str) -> None:
 def _resolve_user_from_claims(
     claims: Mapping[str, Any],
 ) -> tuple[Any | None, Any | None, Any | None]:
-    if claims.get("token_class") != "user":
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    if token_class not in {"user", "session"}:
         return None, None, None
 
     from wepppy.weppcloud.utils.helpers import get_user_models
@@ -74,16 +79,19 @@ def _resolve_user_from_claims(
 
     user = None
     sub = claims.get("sub")
+    user_id_claim = claims.get("user_id")
     email = claims.get("email")
 
     with flask_app.app_context():
-        if sub is not None:
+        for raw_user_id in (user_id_claim, sub):
             try:
-                user_id = int(str(sub))
+                user_id = int(str(raw_user_id))
             except (TypeError, ValueError):
                 user_id = None
             if user_id is not None:
                 user = User.query.filter(User.id == user_id).first()
+                if user is not None:
+                    break
 
         if user is None and email:
             if hasattr(user_datastore, "find_user"):
@@ -203,6 +211,12 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             requested_runid = requested_runid[0] if requested_runid else None
         if isinstance(requested_runid, str):
             requested_runid = requested_runid.strip() or None
+        requested_wd = None
+        if requested_runid:
+            try:
+                requested_wd = get_wd(requested_runid, prefer_active=False)
+            except Exception:
+                return error_response("Invalid target_runid", status_code=400, code="validation_error")
 
         if claims is None:
             cap_token = payload.get("cap_token", "")
@@ -212,18 +226,23 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
 
         source_config = Ron.getInstance(wd).config_stem
         owners = list(get_run_owners_lazy(runid) or [])
+        resolved_user = None
+        if claims is not None:
+            resolved_user, _, _ = _resolve_user_from_claims(claims)
 
         dir_created = False
         while not dir_created:
             if requested_runid:
                 new_runid = requested_runid
+                new_wd = requested_wd
             else:
                 email = ""
                 if claims is not None:
                     email = str(claims.get("email") or "")
+                if not email and resolved_user is not None:
+                    email = str(getattr(resolved_user, "email", "") or "")
                 new_runid = generate_runid(email)
-
-            new_wd = get_primary_wd(new_runid)
+                new_wd = get_primary_wd(new_runid)
 
             if requested_runid:
                 dir_created = True
@@ -233,11 +252,17 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 dir_created = True
 
         if requested_runid:
+            if _exists(new_wd):
+                if not _is_profile_target_runid(new_runid):
+                    return error_response(
+                        "target_runid already exists",
+                        status_code=409,
+                        code="conflict",
+                    )
+                shutil.rmtree(new_wd)
             parent_dir = os.path.dirname(new_wd.rstrip("/"))
             if parent_dir:
                 os.makedirs(parent_dir, exist_ok=True)
-            if _exists(new_wd):
-                shutil.rmtree(new_wd)
             os.makedirs(new_wd, exist_ok=True)
         else:
             if _exists(new_wd):
@@ -258,18 +283,67 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 from wepppy.weppcloud.app import app as flask_app, user_datastore
 
             with flask_app.app_context():
+                from wepppy.weppcloud.utils.helpers import get_user_models
+
+                _, User, _ = get_user_models()
+
+                def _resolve_user_in_session(candidate: Any | None) -> Any | None:
+                    if candidate is None:
+                        return None
+
+                    raw_user_id = getattr(candidate, "id", None)
+                    if raw_user_id is not None:
+                        try:
+                            user_id = int(str(raw_user_id))
+                        except (TypeError, ValueError):
+                            user_id = None
+                        if user_id is not None:
+                            model = User.query.filter_by(id=user_id).first()
+                            if model is not None:
+                                return model
+
+                    email_value = getattr(candidate, "email", None)
+                    if email_value:
+                        model = User.query.filter_by(email=str(email_value)).first()
+                        if model is not None:
+                            return model
+
+                    return None
+
+                owner_models: list[Any] = []
+                owner_ids: set[int] = set()
+                for owner in owners:
+                    owner_model = _resolve_user_in_session(owner)
+                    if owner_model is None:
+                        continue
+                    raw_owner_id = getattr(owner_model, "id", None)
+                    if raw_owner_id is None:
+                        continue
+                    try:
+                        owner_id = int(str(raw_owner_id))
+                    except (TypeError, ValueError):
+                        continue
+                    if owner_id in owner_ids:
+                        continue
+                    owner_ids.add(owner_id)
+                    owner_models.append(owner_model)
+
+                user_model = _resolve_user_in_session(user)
+                if user is not None and user_model is None:
+                    return error_response("Could not add run to user database", status_code=500)
+
                 run_record = None
-                if user is not None:
-                    run_record = user_datastore.create_run(new_runid, source_config, user)
-                elif owners:
-                    run_record = user_datastore.create_run(new_runid, source_config, owners[0])
+                if user_model is not None:
+                    run_record = user_datastore.create_run(new_runid, source_config, user_model)
+                elif owner_models:
+                    run_record = user_datastore.create_run(new_runid, source_config, owner_models[0])
 
                 if run_record is not None:
-                    for owner in owners:
+                    for owner in owner_models:
                         if run_record not in owner.runs:
                             user_datastore.add_run_to_user(owner, run_record)
-                    if user is not None and run_record not in user.runs:
-                        user_datastore.add_run_to_user(user, run_record)
+                    if user_model is not None and run_record not in user_model.runs:
+                        user_datastore.add_run_to_user(user_model, run_record)
 
         prep = RedisPrep.getInstance(wd)
 

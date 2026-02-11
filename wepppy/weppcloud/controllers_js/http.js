@@ -7,6 +7,7 @@
     var doc = global.document;
     var http = {};
     var sessionTokenCache = {};
+    var rqEngineTokenEntry = null;
 
     function isAbsoluteUrl(url) {
         return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
@@ -144,6 +145,57 @@
         return (Date.now() / 1000) < (entry.expiresAt - 30);
     }
 
+    function _isRqEngineTokenValid(entry) {
+        if (!entry || !entry.token || !entry.expiresAt) {
+            return false;
+        }
+        return (Date.now() / 1000) < (entry.expiresAt - 30);
+    }
+
+    function getRqEngineToken(options) {
+        if (_isRqEngineTokenValid(rqEngineTokenEntry)) {
+            return Promise.resolve(rqEngineTokenEntry.token);
+        }
+        if (rqEngineTokenEntry && rqEngineTokenEntry.promise) {
+            return rqEngineTokenEntry.promise;
+        }
+
+        var opts = options ? Object.assign({}, options) : {};
+        rqEngineTokenEntry = rqEngineTokenEntry || {};
+        rqEngineTokenEntry.promise = http.request("/api/auth/rq-engine-token", {
+            method: "POST",
+            credentials: "same-origin",
+            timeoutMs: opts.timeoutMs
+        })
+            .then(function (result) {
+                var body = result.body || {};
+                if (!body || !body.token) {
+                    throw new HttpError("RQ-engine token missing from response", {
+                        url: result.url,
+                        status: result.status,
+                        statusText: result.statusText,
+                        body: body,
+                        response: result.response
+                    });
+                }
+                rqEngineTokenEntry.token = body.token;
+                rqEngineTokenEntry.expiresAt = Number(body.expires_at || 0);
+                if (!rqEngineTokenEntry.expiresAt) {
+                    rqEngineTokenEntry.expiresAt = (Date.now() / 1000) + 600;
+                }
+                rqEngineTokenEntry.promise = null;
+                return rqEngineTokenEntry.token;
+            })
+            .catch(function (error) {
+                if (rqEngineTokenEntry) {
+                    rqEngineTokenEntry.promise = null;
+                }
+                throw error;
+            });
+
+        return rqEngineTokenEntry.promise;
+    }
+
     function getSessionToken(runId, config, options) {
         if (!runId || !config) {
             return Promise.reject(new HttpError("Run ID and config are required for session tokens"));
@@ -191,7 +243,19 @@
             .catch(function (error) {
                 entry.promise = null;
                 sessionTokenCache[key] = entry;
-                throw error;
+                if (!isHttpError(error) || (error.status !== 401 && error.status !== 403)) {
+                    throw error;
+                }
+                return getRqEngineToken(opts).then(function (fallbackToken) {
+                    entry.token = fallbackToken;
+                    entry.expiresAt = (Date.now() / 1000) + 600;
+                    entry.scopes = null;
+                    sessionTokenCache[key] = entry;
+                    return fallbackToken;
+                }).catch(function (fallbackError) {
+                    fallbackError.rqEngineFallbackTried = true;
+                    throw fallbackError;
+                });
             });
 
         sessionTokenCache[key] = entry;
@@ -204,6 +268,10 @@
             return;
         }
         delete sessionTokenCache[_sessionCacheKey(runId, config)];
+    }
+
+    function clearRqEngineToken() {
+        rqEngineTokenEntry = null;
     }
 
     function resolveRunContext(options) {
@@ -270,12 +338,29 @@
         delete opts.config;
         delete opts.tokenTimeoutMs;
 
-        return getSessionToken(context.runId, context.config, tokenOptions).then(function (token) {
+        function requestWithBearer(token) {
             var headers = opts.headers ? Object.assign({}, opts.headers) : {};
             headers.Authorization = "Bearer " + token;
             opts.headers = headers;
             return request(url, opts);
-        });
+        }
+
+        return getSessionToken(context.runId, context.config, tokenOptions)
+            .then(requestWithBearer)
+            .catch(function (error) {
+                if (error && error.rqEngineFallbackTried) {
+                    throw error;
+                }
+                if (!isHttpError(error) || (error.status !== 401 && error.status !== 403)) {
+                    throw error;
+                }
+                clearSessionToken(context.runId, context.config);
+                clearRqEngineToken();
+                return getRqEngineToken(tokenOptions).then(requestWithBearer).catch(function (fallbackError) {
+                    fallbackError.rqEngineFallbackTried = true;
+                    throw fallbackError;
+                });
+            });
     }
 
     function postJsonWithSessionToken(url, payload, options) {
@@ -788,6 +873,8 @@
     http.getCsrfToken = getCsrfToken;
     http.getSessionToken = getSessionToken;
     http.clearSessionToken = clearSessionToken;
+    http.getRqEngineToken = getRqEngineToken;
+    http.clearRqEngineToken = clearRqEngineToken;
 
     global.WCHttp = http;
 })(typeof window !== "undefined" ? window : this);

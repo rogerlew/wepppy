@@ -1,7 +1,7 @@
 from collections import Counter
-import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import json
 from flask import send_from_directory
@@ -10,6 +10,7 @@ from flask_security import current_user
 from ._common import *  # noqa: F401,F403
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
+from wepppy.weppcloud.utils.rq_engine_token import issue_user_rq_engine_token
 
 
 weppcloud_site_bp = Blueprint('weppcloud_site', __name__)
@@ -24,40 +25,50 @@ _LANDING_STATIC_DIRNAME = 'ui-lab'
 
 
 def _issue_rq_engine_token() -> str | None:
+    return issue_user_rq_engine_token(current_user)
+
+
+def _is_same_origin_post() -> bool:
+    origin = request.headers.get("Origin", "").strip()
+    if origin:
+        return origin.rstrip("/") == request.host_url.rstrip("/")
+
+    referer = request.headers.get("Referer", "").strip()
+    if not referer:
+        return True
+
+    parsed = urlparse(referer)
+    if not parsed.scheme or not parsed.netloc:
+        return False
+    referer_origin = f"{parsed.scheme}://{parsed.netloc}"
+    return referer_origin.rstrip("/") == request.host_url.rstrip("/")
+
+
+@weppcloud_site_bp.route('/api/auth/rq-engine-token', methods=['POST'])
+def issue_rq_engine_token():
     if current_user.is_anonymous:
-        return None
+        response = error_factory('Authentication required.')
+        response.status_code = 401
+        return response
+    if not _is_same_origin_post():
+        response = error_factory('Cross-origin request blocked.')
+        response.status_code = 403
+        return response
 
-    subject = None
-    if hasattr(current_user, "get_id"):
-        subject = current_user.get_id()
-    if not subject:
-        subject = getattr(current_user, "id", None)
-    if not subject:
-        subject = getattr(current_user, "email", None)
-    if not subject:
-        raise RuntimeError("Unable to resolve user subject for rq-engine token")
+    try:
+        token = _issue_rq_engine_token()
+    except auth_tokens.JWTConfigurationError as exc:
+        current_app.logger.exception("Failed to issue rq-engine token via API")
+        response = error_factory(f"JWT configuration error: {exc}")
+        response.status_code = 500
+        return response
+    except Exception:
+        current_app.logger.exception("Failed to issue rq-engine token via API")
+        response = error_factory("Failed to issue rq-engine token.")
+        response.status_code = 500
+        return response
 
-    roles = [
-        str(getattr(role, "name", role)).strip()
-        for role in (getattr(current_user, "roles", None) or [])
-        if str(getattr(role, "name", role)).strip()
-    ]
-
-    token_payload = auth_tokens.issue_token(
-        str(subject),
-        scopes=["rq:enqueue"],
-        audience="rq-engine",
-        extra_claims={
-            "roles": roles,
-            "token_class": "user",
-            "email": getattr(current_user, "email", None),
-            "jti": uuid.uuid4().hex,
-        },
-    )
-    token = token_payload.get("token")
-    if not token:
-        raise RuntimeError("Failed to issue rq-engine token")
-    return token
+    return jsonify({"token": token})
 
 
 def _resolve_access_log_path() -> Path:
@@ -257,7 +268,7 @@ def landing():
 @weppcloud_site_bp.route('/landing/light/', strict_slashes=False)
 @handle_with_exception_factory
 def landing_light():
-    """Render the light-themed (governmental esthetic) landing page variant."""
+    """Render the light-themed (governmental aesthetic) landing page variant."""
     return _render_landing_page('light')
 
 
