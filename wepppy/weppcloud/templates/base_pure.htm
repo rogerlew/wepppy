@@ -13,7 +13,7 @@
     {% block head_extras %}{% endblock %}
   </head>
   <body class="wc-page"
-        data-user-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
+        data-user-authenticated="{{ 'true' if current_user is defined and current_user.is_authenticated else 'false' }}"
         data-site-prefix="{{ site_prefix | default('', true) }}">
     {% block site_header %}
     <header class="wc-header">
