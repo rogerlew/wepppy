@@ -44,6 +44,24 @@ Both lookup sources now treat the shifted SBS palette as first-class, not an exc
 | Moderate | `132` | `255,255,0` (`#FFFF00`) | `240,228,66` (`#F0E442`) |
 | High | `133` | `255,0,0` (`#FF0000`) | `204,121,167` (`#CC79A7`) |
 
+### Okabe-Ito Details
+
+The shifted SBS palette uses an Okabe-Ito-style set selected for universal design in data graphics:
+
+- Strong hue separation between adjacent classes (`Unburned`, `Low`, `Moderate`, `High`).
+- Better distinguishability across common color-vision differences than red/green-forward legacy schemes.
+- Better robustness in mixed viewing conditions (projectors, screenshots, print, and field displays).
+- Stable interpretation when combined with non-color cues (ordered classes and explicit labels).
+
+### Why Accessible Palettes Should Be Preferred
+
+Prefer accessible palettes over institutional legacy palettes for operational SBS products:
+
+- They reduce misclassification risk when users cannot reliably separate legacy class colors.
+- They improve consistency across agencies, contractors, and public-facing products with unknown display settings.
+- They make map interpretation more reliable under stress, which is critical for post-fire planning and communication.
+- They preserve inclusivity without changing model semantics or backend contracts.
+
 Validation rule used by sanity checks:
 - A color table is considered valid when at least one of `low`, `mod`, or `high` is recognized.
 
