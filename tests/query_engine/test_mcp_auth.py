@@ -66,6 +66,7 @@ def _make_app(config):
 def _issue_token(config, claims: dict[str, object]) -> str:
     base_claims = {
         "sub": "user-123",
+        "token_class": "mcp",
         "scope": "runs:read queries:execute",
         "runs": ["alpha", "beta"],
         "jti": "token-jti",
@@ -160,3 +161,29 @@ def test_missing_jti_is_rejected(auth_env):
     body = response.json()
     assert body["errors"][0]["code"] == "unauthorized"
     assert "jti" in body["errors"][0]["detail"].lower()
+
+
+def test_missing_token_class_is_rejected(auth_env):
+    app = _make_app(auth_env)
+    token = _issue_token(auth_env, {"token_class": None})
+    client = TestClient(app)
+
+    response = client.get("/mcp/ping", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 401
+    body = response.json()
+    assert body["errors"][0]["code"] == "unauthorized"
+    assert "token class" in body["errors"][0]["detail"].lower()
+
+
+def test_non_mcp_token_class_is_rejected(auth_env):
+    app = _make_app(auth_env)
+    token = _issue_token(auth_env, {"token_class": "service"})
+    client = TestClient(app)
+
+    response = client.get("/mcp/ping", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 401
+    body = response.json()
+    assert body["errors"][0]["code"] == "unauthorized"
+    assert "token class" in body["errors"][0]["detail"].lower()

@@ -13,6 +13,7 @@
        data-config="{{ config }}"
        data-undisturbify="{{ 'true' if undisturbify is sameas true else 'false' }}"
        data-cap-required="{{ 'true' if not current_user.is_authenticated else 'false' }}"
+       data-rq-engine-token="{{ rq_engine_token | default('', true) | e }}"
        data-cap-section="fork"
        hidden></div>
   {% call ui.control_shell(

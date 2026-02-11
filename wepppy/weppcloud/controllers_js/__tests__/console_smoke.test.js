@@ -250,6 +250,52 @@ describe("Fork console smoke", () => {
         }));
     });
 
+    test("submitting fork form uses rq-engine token when provided", async () => {
+        document.body.innerHTML = `
+            <section data-controller="fork-console">
+                <div data-fork-console-config
+                     data-runid="demo-run"
+                     data-config="cfg"
+                     data-undisturbify="false"
+                     data-rq-engine-token="rq-token-123"
+                     hidden></div>
+                <div id="fork_status_panel">
+                    <div id="fork_status_log" data-status-log></div>
+                </div>
+                <div id="fork_stacktrace_panel"><pre data-stacktrace-body></pre></div>
+                <form id="fork_form">
+                    <input id="runid_input" value="demo-run" />
+                    <input id="undisturbify_checkbox" type="checkbox" />
+                    <button id="submit_button" type="submit">Fork project</button>
+                    <button id="cancel_button" type="button" hidden>Cancel</button>
+                </form>
+                <div id="the_console" data-state=""></div>
+            </section>
+        `;
+
+        jest.resetModules();
+        await import("../../static/js/console_utils.js");
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+        fetchMock.mockClear();
+
+        const form = document.getElementById("fork_form");
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        const [url, options] = fetchMock.mock.calls[0];
+        expect(url).toBe("http://localhost/rq-engine/api/runs/demo-run/cfg/fork");
+        expect(options).toMatchObject({
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: "Bearer rq-token-123",
+            },
+            body: "undisturbify=false",
+        });
+    });
+
     test("failed fork surfaces stacktrace", async () => {
         fetchMock.mockImplementation((url) => {
             if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {

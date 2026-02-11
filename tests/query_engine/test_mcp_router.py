@@ -11,6 +11,8 @@ pytest.importorskip("starlette")
 
 from starlette.applications import Starlette
 
+pytestmark = pytest.mark.unit
+
 
 def _clear_auth_cache():
     from wepppy.query_engine.app.mcp import auth
@@ -113,6 +115,7 @@ def _issue_token(auth_module, runid: str | None = None, scopes: Sequence[str] | 
     return auth_module.encode_jwt(
         {
             "sub": "user-123",
+            "token_class": "mcp",
             "scope": scope_value,
             "runs": runs_payload,
             "jti": "router-test-jti",

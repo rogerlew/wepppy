@@ -211,6 +211,10 @@ def _build_principal(claims: Mapping[str, Any], config: MCPAuthConfig) -> MCPPri
     if not subject or not isinstance(subject, str):
         raise Unauthorized(detail="Token subject is missing")
 
+    token_class = str(claims.get("token_class") or "").strip().lower()
+    if token_class != "mcp":
+        raise Unauthorized(detail="Token class must be 'mcp'")
+
     scopes = _normalise_scope_claim(claims.get("scope"), separator=config.scope_separator)
     scopes = _ensure_allowed_scopes(scopes, config.allowed_scopes)
 

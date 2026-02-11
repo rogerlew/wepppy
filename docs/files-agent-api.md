@@ -10,7 +10,7 @@
 ## Scope
 - **Base path:** `/weppcloud/runs/{runid}/{config}/files/`
 - **Content type:** JSON only (`application/json`).
-- **Auth:** Inherits existing browse auth model.
+- **Auth:** JWT-authenticated access (no anonymous mode).
 
 ## Endpoints
 
@@ -184,8 +184,11 @@ If an upstream proxy intercepts the request (for example, dot-segment traversal)
 - Implementations may include `cache_source` and `cache_updated_iso` for additional transparency.
 
 ## Authentication
-- Inherits existing browse auth model (currently unauthenticated read access).
-- If auth requirements change, return HTTP 401/403 with canonical error payloads.
+- `/files/` routes require authenticated JWT context and reject anonymous access.
+- Accepted token classes are `user` and `service`.
+- `session` tokens are not accepted on `/files/` endpoints.
+- Tokens must pass run-authorization checks for the target run.
+- Failures return HTTP `401`/`403` with canonical error payloads.
 
 ## Rate limits
 - If rate limiting is enabled, return HTTP 429 with a canonical error payload.

@@ -186,6 +186,7 @@ def issue_query_engine_mcp_token(runid, config):
             scopes=["runs:read", "queries:validate", "queries:execute"],
             runs=[runid],
             audience=["query-engine"],
+            extra_claims={"token_class": "mcp"},
         )
     except JWTConfigurationError as exc:
         return jsonify({'error': {'message': f'JWT configuration error: {exc}'}}), 500

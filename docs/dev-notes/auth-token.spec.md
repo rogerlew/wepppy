@@ -68,7 +68,7 @@ following environment variables:
   - `jti` is required (revocation denylist check).
   - `exp`/`iat`/`nbf` are validated when present.
   - `runs` is required for run-scoped endpoints (`/mcp/runs/{runid}/...`).
-  - `token_class` is currently not enforced by query-engine MCP middleware.
+  - `token_class` MUST be `mcp`.
 - Audience contract:
   - When `WEPP_MCP_JWT_AUDIENCE` is configured, tokens MUST include that
     audience value (recommended: `query-engine`).
@@ -184,6 +184,34 @@ If validation fails a `JWTDecodeError` is raised.
     overridden with `WEPP_AUTH_SESSION_COOKIE_SECURE`.
   - Cookie `SameSite` is controlled by `WEPP_AUTH_SESSION_COOKIE_SAMESITE`
     (`lax` default).
+
+## UI token renewal (transparent)
+- Endpoint: `POST /weppcloud/api/auth/rq-engine-token`
+- Purpose: allow browser clients to recover from stale/invalid run-scoped
+  session-token minting without forcing logout/login.
+- Caller requirements:
+  - Existing authenticated WEPPcloud login session (`current_user` not anonymous).
+  - Same-origin request with CSRF protection (handled by `WCHttp`).
+- Issued token shape:
+  - `token_class=user`
+  - `aud=rq-engine`
+  - scopes: `rq:enqueue`, `rq:status`, `rq:export`
+  - user claims: `email`, `roles`, `jti`, plus standard JWT claims.
+- Response:
+  - Success: `200` with `{ "token": "<jwt>" }`
+  - Anonymous caller: `401` canonical error payload (`Authentication required.`)
+  - JWT config failure: `500` canonical error payload.
+
+### Browser renewal sequence
+- `WCHttp.getSessionToken(runid, config)` first calls
+  `POST /rq-engine/api/runs/<runid>/<config>/session-token`.
+- If that call returns `401` or `403`, client automatically calls
+  `POST /weppcloud/api/auth/rq-engine-token`.
+- The fallback token is cached client-side (short-lived cache, ~10 minutes when
+  `exp` is not provided) and used for the pending request.
+- `WCHttp.requestWithSessionToken(...)` retries the original rq-engine call with
+  `Authorization: Bearer <fallback-token>`.
+- Renewal is transparent to users; manual logout/login is not a required recovery path.
 
 ## Profile token issuance
 - Endpoint: `POST /profile/mint-token` (Flask route, authenticated user required).

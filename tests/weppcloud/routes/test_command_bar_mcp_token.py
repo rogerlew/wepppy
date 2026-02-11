@@ -32,25 +32,31 @@ def command_bar_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         "current_user",
         SimpleNamespace(get_id=lambda: "user-1", email="user@example.com"),
     )
-    monkeypatch.setattr(
-        module.auth_tokens,
-        "issue_token",
-        lambda *_args, **_kwargs: {
+    issue_token_calls: list[dict[str, object]] = []
+
+    def _issue_token(*_args, **kwargs):
+        issue_token_calls.append(dict(kwargs))
+        return {
             "token": "super-secret-token",
             "claims": {
                 "exp": 1_700_000_000,
                 "scope": "runs:read queries:validate queries:execute",
             },
-        },
+        }
+
+    monkeypatch.setattr(
+        module.auth_tokens,
+        "issue_token",
+        _issue_token,
     )
     monkeypatch.setattr(module.auth_tokens, "get_jwt_config", lambda: SimpleNamespace(scope_separator=" "))
 
     with app.test_client() as client:
-        yield client, tmp_path
+        yield client, tmp_path, issue_token_calls
 
 
 def test_query_engine_mcp_instructions_do_not_persist_token(command_bar_client) -> None:
-    client, run_root = command_bar_client
+    client, run_root, issue_token_calls = command_bar_client
 
     response = client.post(
         "/runs/run-1/cfg/command_bar/query_engine_mcp_token",
@@ -68,3 +74,4 @@ def test_query_engine_mcp_instructions_do_not_persist_token(command_bar_client) 
     markdown = instructions_path.read_text(encoding="utf-8")
     assert "super-secret-token" not in markdown
     assert "Authorization: Bearer <paste-token-from-command-bar-response>" in markdown
+    assert issue_token_calls[0]["extra_claims"] == {"token_class": "mcp"}

@@ -153,6 +153,7 @@
     var config = dataset.config || dataset.configSlug || "cfg";
     var capRequired = dataset.capRequired === true || dataset.capRequired === "true";
     var capSection = dataset.capSection || "";
+    var rqEngineToken = (dataset.rqEngineToken || "").trim();
     var undisturbifyRaw = dataset.undisturbify;
     var initialUndisturbify = false;
     if (typeof undisturbifyRaw === "string") {
@@ -263,6 +264,76 @@
           }
           return payload.token;
         });
+    }
+
+    function requestWithBearerToken(url, options, token) {
+      var requestOptions = options ? Object.assign({}, options) : {};
+      var headers = requestOptions.headers ? Object.assign({}, requestOptions.headers) : {};
+      headers.Authorization = "Bearer " + token;
+      requestOptions.headers = headers;
+
+      if (window.WCHttp && typeof window.WCHttp.request === "function") {
+        return window.WCHttp.request(url, requestOptions);
+      }
+
+      return fetch(url, requestOptions).then(function (resp) {
+        return resp.text().then(function (text) {
+          var body = null;
+          if (text) {
+            try {
+              body = JSON.parse(text);
+            } catch (err) {
+              body = text;
+            }
+          }
+          if (!resp.ok) {
+            var errMsg = resolveErrorMessage(body, "Request failed");
+            var error = new Error(errMsg);
+            error.status = resp.status;
+            error.detail = errMsg;
+            error.body = body;
+            if (body && typeof body === "object" && body.error && body.error.details !== undefined) {
+              error.details = body.error.details;
+            }
+            throw error;
+          }
+          return { ok: true, body: body };
+        });
+      });
+    }
+
+    function requestWithRenewal(url, options) {
+      var sessionHelper = window.WCHttp && typeof window.WCHttp.requestWithSessionToken === "function"
+        ? window.WCHttp
+        : null;
+
+      if (rqEngineToken) {
+        return requestWithBearerToken(url, options, rqEngineToken).catch(function (error) {
+          if (error && (error.status === 401 || error.status === 403)) {
+            rqEngineToken = "";
+            if (sessionHelper) {
+              var fallbackOptions = options ? Object.assign({}, options) : {};
+              fallbackOptions.runId = runId;
+              fallbackOptions.config = config;
+              return sessionHelper.requestWithSessionToken(url, fallbackOptions);
+            }
+            return fetchSessionToken().then(function (token) {
+              return requestWithBearerToken(url, options, token);
+            });
+          }
+          throw error;
+        });
+      }
+
+      if (!sessionHelper) {
+        return fetchSessionToken().then(function (token) {
+          return requestWithBearerToken(url, options, token);
+        });
+      }
+      var requestOptions = options ? Object.assign({}, options) : {};
+      requestOptions.runId = runId;
+      requestOptions.config = config;
+      return sessionHelper.requestWithSessionToken(url, requestOptions);
     }
 
     function attachCapHandlers() {
@@ -573,20 +644,13 @@
         }
       }
 
-      var tokenPromise = capRequired ? Promise.resolve(null) : fetchSessionToken();
-
-      tokenPromise.then(function (token) {
-        var headers = { "Content-Type": "application/x-www-form-urlencoded" };
-        if (token) {
-          headers.Authorization = "Bearer " + token;
-        }
-        return fetch(forkUrl, {
+      var submitPromise;
+      if (capRequired) {
+        submitPromise = fetch(forkUrl, {
           method: "POST",
-          headers: headers,
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: payload.toString()
-        });
-      })
-        .then(function (resp) {
+        }).then(function (resp) {
           return resp.text().then(function (text) {
             var body = null;
             if (text) {
@@ -598,10 +662,21 @@
             }
             return { ok: resp.ok, body: body };
           });
-        })
+        });
+      } else {
+        submitPromise = requestWithRenewal(forkUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: payload.toString()
+        }).then(function (result) {
+          return { ok: true, body: result && result.body ? result.body : {} };
+        });
+      }
+
+      submitPromise
         .then(function (result) {
-          var body = result.body || {};
-          if (!result.ok || hasErrorPayload(body)) {
+          var body = result && result.body ? result.body : {};
+          if (!result || !result.ok || hasErrorPayload(body)) {
             var errMsg = resolveErrorMessage(body, "Fork submission failed");
             if (consoleBlock) {
               consoleBlock.dataset.state = "critical";
@@ -657,13 +732,21 @@
           }
         })
         .catch(function (err) {
+          var detail = err && err.detail ? String(err.detail) : null;
+          var message = detail || (err && err.message ? err.message : String(err));
+          var detailsBody = null;
+          if (err && err.details !== undefined) {
+            detailsBody = { error: { details: err.details } };
+          } else if (err && err.body && typeof err.body === "object") {
+            detailsBody = err.body;
+          }
           if (consoleBlock) {
             consoleBlock.dataset.state = "critical";
-            consoleBlock.textContent = "Error: " + (err.message || err);
+            consoleBlock.textContent = "Error: " + message;
           }
-          appendStatus("Error submitting fork job: " + (err.message || err));
-          renderErrorDetails(err && err.details ? { error: { details: err.details } } : null);
-          if (err && err.stack) {
+          appendStatus("Error submitting fork job: " + message);
+          renderErrorDetails(detailsBody);
+          if (!detailsBody && err && err.stack) {
             showStacktrace(err.stack.split("\n"));
           }
           if (submitButton) {
@@ -684,24 +767,49 @@
       var sessionHelper = window.WCHttp && typeof window.WCHttp.getSessionToken === "function"
         ? window.WCHttp
         : null;
-      if (!sessionHelper) {
-        appendStatus("Cancel request failed: session token helper unavailable.");
-        window.alert("Unable to cancel job.");
-        if (cancelButton) {
-          cancelButton.disabled = false;
-        }
+
+      if (!capRequired && window.WCHttp && typeof window.WCHttp.requestWithSessionToken === "function") {
+        requestWithRenewal("/rq-engine/api/canceljob/" + encodeURIComponent(jobId), {
+          method: "POST"
+        })
+          .then(function () {
+            appendStatus("Cancel request acknowledged for " + jobId + ".");
+            window.alert("Job canceled");
+          })
+          .catch(function (err) {
+            var detail = err && err.detail ? String(err.detail) : null;
+            var message = detail || (err && err.message ? err.message : String(err));
+            console.error(err);
+            appendStatus("Cancel request failed: " + message);
+            window.alert("Unable to cancel job.");
+          })
+          .finally(function () {
+            if (cancelButton) {
+              cancelButton.disabled = false;
+            }
+          });
         return;
       }
-      sessionHelper.getSessionToken(runId, config)
+
+      var tokenPromise = sessionHelper ? sessionHelper.getSessionToken(runId, config) : fetchSessionToken();
+
+      tokenPromise
         .then(function (token) {
-          return sessionHelper.request(
-            "/rq-engine/api/canceljob/" + encodeURIComponent(jobId),
-            {
+          var requestFn = sessionHelper && typeof sessionHelper.request === "function"
+            ? sessionHelper.request.bind(sessionHelper)
+            : null;
+          if (requestFn) {
+            return requestFn("/rq-engine/api/canceljob/" + encodeURIComponent(jobId), {
               method: "POST",
               headers: {
                 Authorization: "Bearer " + token
               }
-            }
+            });
+          }
+          return requestWithBearerToken(
+            "/rq-engine/api/canceljob/" + encodeURIComponent(jobId),
+            { method: "POST" },
+            token
           );
         })
         .then(function () {

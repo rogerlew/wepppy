@@ -50,7 +50,7 @@ Mode switch via `RQ_ENGINE_POLL_AUTH_MODE`:
 
 Polling hardening:
 - In-memory rate limiter (`endpoint + caller + ip`).
-- Default limit: `120` requests per `60` seconds.
+- Default limit: `400` requests per `60` seconds.
 - Env vars:
   - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT`
   - `RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS`
@@ -109,6 +109,24 @@ Common route-level status requirements are enforced by
 3. If response includes `job_id`, poll `GET /api/jobstatus/{job_id}`.
 4. On failure/debug needs, fetch `GET /api/jobinfo/{job_id}`.
 5. Optionally cancel with `POST /api/canceljob/{job_id}`.
+
+## Browser Renewal Contract (UI clients)
+For WEPPcloud browser traffic using `WCHttp.requestWithSessionToken(...)`, token
+acquisition is resilient by contract:
+
+1. Attempt run-scoped session token:
+   - `POST /api/runs/{runid}/{config}/session-token` (proxied as `/rq-engine/api/...`).
+2. If token issuance returns `401` or `403`, transparently fall back to:
+   - `POST /weppcloud/api/auth/rq-engine-token` (same-origin Flask endpoint).
+3. Retry the original rq-engine request with the fallback bearer token.
+
+Notes:
+- This renewal path is intended for authenticated WEPPcloud browser sessions.
+- Anonymous/CAPTCHA flows (for example public fork) remain route-specific and do
+  not use `/api/auth/rq-engine-token`.
+- Fallback token scopes are `rq:enqueue`, `rq:status`, `rq:export`.
+- Client-side fallback token cache is short-lived; callers should still treat
+  401/403 responses as authoritative when both primary and fallback paths fail.
 
 ## Endpoint Families (Agent-Facing)
 For the exact 51-route frozen list, use the contract checklist artifact. The
