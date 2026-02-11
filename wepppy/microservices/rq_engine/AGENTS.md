@@ -64,6 +64,7 @@ this service as the canonical async interface for run-scoped operations.
 ## Key Route Modules (Run-Scoped)
 - `session_routes.py` - issues session tokens.
 - `job_routes.py` - job status/info/cancel.
+- `admin_job_routes.py` - admin-only job listing/debug endpoints (`/api/admin/*`).
 - `climate_routes.py`, `watershed_routes.py`, `wepp_routes.py` - core run flow.
 - `landuse_routes.py`, `soils_routes.py`, `treatments_routes.py` - inputs.
 - `upload_*_routes.py` - file uploads for batch/climate/landuse inputs.

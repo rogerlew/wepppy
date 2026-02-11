@@ -127,6 +127,18 @@ table below is the practical family map used by agent clients.
 | Culvert batch | `/api/culverts-wepp-batch/`, `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | Async enqueue | `culvert:batch:*` |
 | Project create | `/create/` | Sync redirect (`303`) plus resource creation | `rq:enqueue` token path or CAPTCHA |
 
+## Internal Admin Debug Endpoints
+These routes are intentionally **internal/admin** and are not part of the
+frozen 51-route agent-facing checklist.
+
+| Method | Path | Purpose | Auth |
+|---|---|---|---|
+| `GET` | `/api/admin/recently-completed-jobs` | Recently completed jobs across `default` and `batch` queues (lookback/filter support). | JWT Bearer, `rq:status`, `Admin`/`Root` role |
+| `GET` | `/api/admin/jobs-detail` | Complete started + queued jobs across `default` and `batch` queues. | JWT Bearer, `rq:status`, `Admin`/`Root` role |
+
+Inventory source of truth for these internal routes remains:
+`docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`.
+
 ## Bootstrap + Flask Exceptions
 Agent-facing Bootstrap operations are canonically owned by rq-engine. Two
 Bootstrap endpoints remain intentionally Flask-owned for infrastructure/UI

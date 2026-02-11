@@ -156,6 +156,11 @@ High-frequency job polling endpoints are served by the rq-engine FastAPI service
 - `GET /rq-engine/api/jobstatus/{job_id}`
 - `GET /rq-engine/api/jobinfo/{job_id}`
 - `POST /rq-engine/api/jobinfo`
+- `POST /rq-engine/api/canceljob/{job_id}` (JWT `rq:status`)
+
+Admin debugging endpoints:
+- `GET /rq-engine/api/admin/recently-completed-jobs`
+- `GET /rq-engine/api/admin/jobs-detail`
 
 Clients should use `/rq-engine/api/...` for job polling and enqueue endpoints.
 
@@ -403,7 +408,7 @@ See [tests/README.md](../../tests/README.md) and [static-src/README.md](static-s
 - [controllers_js/README.md](controllers_js/README.md) - Frontend controller architecture and bundling
 - [docker/README.md](../../docker/README.md) - Docker deployment and development workflow
 - [tests/weppcloud/README.md](../../tests/weppcloud/README.md) - Testing patterns for routes and controllers
-- [API_REFERENCE.md](../../API_REFERENCE.md) - Complete API endpoint documentation
+- [docs/dev-notes/rq-engine-agent-api.md](../../docs/dev-notes/rq-engine-agent-api.md) - rq-engine endpoint and auth contract
 - [../../readme.md](../../readme.md) - Repository overview and architecture
 
 ## Credits

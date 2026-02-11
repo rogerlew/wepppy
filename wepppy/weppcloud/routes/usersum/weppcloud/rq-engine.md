@@ -32,6 +32,7 @@ In WEPPcloud deployments behind Caddy, routes are usually under:
 Examples:
 - `POST /rq-engine/api/runs/{runid}/{config}/run-wepp`
 - `GET /rq-engine/api/jobstatus/{job_id}`
+- `GET /rq-engine/api/admin/jobs-detail` (admin debugging)
 
 ## Job Lifecycle Mental Model
 Most run operations are asynchronous (background jobs).
@@ -58,6 +59,13 @@ Common scopes:
 
 Polling routes are currently open by default in WEPPcloud policy, but this can
 be tightened with environment settings.
+
+Admin debugging routes require bearer JWT + admin role:
+- `GET /rq-engine/api/admin/recently-completed-jobs`
+- `GET /rq-engine/api/admin/jobs-detail`
+
+These power the admin snapshot page at:
+- `/weppcloud/rq/info-details`
 
 ## Common User Workflows
 ### 1. Standard WEPPcloud UI run

@@ -64,17 +64,22 @@ elevation = response.json()["elevation"]
 
 **Package**: `rq_engine/`
 
-Read-only FastAPI service that exposes RQ job polling endpoints to offload frequent jobstatus/jobinfo requests from the Flask app.
+FastAPI service that handles run-scoped enqueue routes plus RQ polling/control
+and admin debugging endpoints.
 
 **Key endpoints:**
 - `GET /rq-engine/api/jobstatus/{job_id}`
 - `GET /rq-engine/api/jobinfo/{job_id}`
 - `POST /rq-engine/api/jobinfo`
 - `POST /rq-engine/api/canceljob/{job_id}` (JWT required; `rq:status` scope)
+- `GET /rq-engine/api/admin/recently-completed-jobs` (admin role + `rq:status`)
+- `GET /rq-engine/api/admin/jobs-detail` (admin role + `rq:status`)
 
 **Auth notes:**
 - `jobstatus`/`jobinfo` remain unsecured for read-only polling.
 - `canceljob` requires a bearer token validated against the JWT contract.
+- Admin debug routes require bearer JWT with `rq:status` and `Admin`/`Root`
+  role claims.
 
 **Deployment**: Runs as a separate container in Docker Compose stacks; see `docker/docker-compose.dev.yml`.
 
