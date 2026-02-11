@@ -639,6 +639,54 @@ class TestSBSMapProperties(unittest.TestCase):
         
         ds = None
 
+    def test_export_4class_map_legacy_palette(self):
+        """Legacy palette mode should remain available for transition workflows."""
+        filename = os.path.join(self.temp_dir, 'test_export_input_legacy.tif')
+        output_fn = os.path.join(self.temp_dir, 'test_export_output_legacy.tif')
+
+        data = np.array([
+            [0, 1, 2, 3],
+            [3, 2, 1, 0],
+        ], dtype=np.uint8)
+
+        ct = GeoTiffTestHelper.create_standard_sbs_color_table()
+        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
+
+        sbs_map = SoilBurnSeverityMap(filename)
+        sbs_map.export_4class_map(output_fn, export_palette='legacy')
+
+        ds = gdal.Open(output_fn)
+        self.assertIsNotNone(ds)
+        band = ds.GetRasterBand(1)
+        output_ct = band.GetRasterColorTable()
+        self.assertIsNotNone(output_ct)
+
+        expected_legacy_colors = {
+            0: (0, 100, 0, 255),       # unburned
+            1: (127, 255, 212, 255),   # low
+            2: (255, 255, 0, 255),     # moderate
+            3: (255, 0, 0, 255),       # high
+            255: (255, 255, 255, 0),   # nodata
+        }
+        for pixel_val, expected_color in expected_legacy_colors.items():
+            actual_color = output_ct.GetColorEntry(pixel_val)
+            self.assertEqual(actual_color, expected_color)
+
+        ds = None
+
+    def test_export_4class_map_invalid_palette(self):
+        """Unsupported export palettes should fail fast with a clear error."""
+        filename = os.path.join(self.temp_dir, 'test_export_input_invalid_palette.tif')
+        output_fn = os.path.join(self.temp_dir, 'test_export_output_invalid_palette.tif')
+
+        data = np.array([[0, 1, 2, 3]], dtype=np.uint8)
+        ct = GeoTiffTestHelper.create_standard_sbs_color_table()
+        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
+
+        sbs_map = SoilBurnSeverityMap(filename)
+        with self.assertRaises(ValueError):
+            sbs_map.export_4class_map(output_fn, export_palette='invalid')  # type: ignore[arg-type]
+
 
 class TestSBSMapSanityCheck(unittest.TestCase):
     """Test sbs_map_sanity_check validation function."""

@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 
 _SBS_COLOR_MAP_PATH = _join(_split(__file__)[0], "data", "sbs_color_map.json")
 
+ExportPaletteMode: TypeAlias = Literal["shifted", "legacy"]
+
 _DEFAULT_COLOR_TO_SEVERITY: dict[RGBColor, str] = {
     (0, 100, 0): "unburned",
     (0, 0, 0): "unburned",
@@ -64,6 +66,19 @@ _SBS_4CLASS_EXPORT_COLORS: dict[int, tuple[int, int, int, int]] = {
     2: (240, 228, 66, 255),       # moderate
     3: (204, 121, 167, 255),      # high
     255: (255, 255, 255, 0),      # n/a
+}
+
+_SBS_4CLASS_EXPORT_COLORS_LEGACY: dict[int, tuple[int, int, int, int]] = {
+    0: (0, 100, 0, 255),          # unburned
+    1: (127, 255, 212, 255),      # low
+    2: (255, 255, 0, 255),        # moderate
+    3: (255, 0, 0, 255),          # high
+    255: (255, 255, 255, 0),      # n/a
+}
+
+_SBS_4CLASS_EXPORT_COLORS_BY_MODE: dict[ExportPaletteMode, dict[int, tuple[int, int, int, int]]] = {
+    "shifted": _SBS_4CLASS_EXPORT_COLORS,
+    "legacy": _SBS_4CLASS_EXPORT_COLORS_LEGACY,
 }
 
 try:
@@ -262,26 +277,38 @@ def _summary_cache_key(path: str) -> tuple[str, int, int]:
     return path, stat.st_mtime_ns, stat.st_size
 
 
-def _build_sbs_4class_export_color_table() -> gdal.ColorTable:
+def _get_sbs_4class_export_colors(export_palette: ExportPaletteMode) -> dict[int, tuple[int, int, int, int]]:
+    colors = _SBS_4CLASS_EXPORT_COLORS_BY_MODE.get(export_palette)
+    if colors is None:
+        raise ValueError(
+            f"Unsupported export_palette '{export_palette}'. Expected one of: shifted, legacy."
+        )
+    return colors
+
+
+def _build_sbs_4class_export_color_table(export_palette: ExportPaletteMode) -> gdal.ColorTable:
     color_table = gdal.ColorTable()
-    for class_code, rgba in _SBS_4CLASS_EXPORT_COLORS.items():
+    for class_code, rgba in _get_sbs_4class_export_colors(export_palette).items():
         color_table.SetColorEntry(class_code, rgba)
     return color_table
 
 
-def _apply_sbs_4class_export_palette_to_band(band: gdal.Band) -> None:
-    color_table = _build_sbs_4class_export_color_table()
+def _apply_sbs_4class_export_palette_to_band(
+    band: gdal.Band,
+    export_palette: ExportPaletteMode,
+) -> None:
+    color_table = _build_sbs_4class_export_color_table(export_palette)
     band.SetColorTable(color_table)
     band.SetNoDataValue(255)
 
 
-def _apply_sbs_4class_export_palette(path: str) -> None:
+def _apply_sbs_4class_export_palette(path: str, export_palette: ExportPaletteMode) -> None:
     ds = gdal.Open(path, gdal.GA_Update)
     if ds is None:
         raise RuntimeError(f"Failed to open exported 4-class map for palette update: {path}")
 
     band = ds.GetRasterBand(1)
-    _apply_sbs_4class_export_palette_to_band(band)
+    _apply_sbs_4class_export_palette_to_band(band, export_palette)
     ds = None
 
 
@@ -1046,13 +1073,20 @@ class SoilBurnSeverityMap(LandcoverMap):
         assert _exists(disturbed_rgb_png), ' '.join(cmd)
 
 
-    def export_4class_map(self, fn: str, cellsize: Optional[float] = None) -> None:
+    def export_4class_map(
+        self,
+        fn: str,
+        cellsize: Optional[float] = None,
+        export_palette: ExportPaletteMode = "shifted",
+    ) -> None:
         """Export a 4-class GeoTIFF with palette encoding for GIS clients.
 
         Args:
             fn: Destination GeoTIFF path.
             cellsize: Optional output cell size, inferred from the source when
                 omitted.
+            export_palette: Palette to apply to classes ``0..3``. Supported
+                values are ``"shifted"`` (default) and ``"legacy"``.
         """
         if cellsize is None:
             transform = self.transform
@@ -1072,7 +1106,7 @@ class SoilBurnSeverityMap(LandcoverMap):
             nodata_vals=self.nodata_vals,
         ):
             assert _exists(fn)
-            _apply_sbs_4class_export_palette(fn)
+            _apply_sbs_4class_export_palette(fn, export_palette)
             return
 
         _data, transform, proj = read_raster(fname, dtype=np.uint8)
@@ -1101,7 +1135,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         dst.SetGeoTransform(transform)
         band = dst.GetRasterBand(1)
 
-        _apply_sbs_4class_export_palette_to_band(band)
+        _apply_sbs_4class_export_palette_to_band(band, export_palette)
 
         band.WriteArray(data.T)
 

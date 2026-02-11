@@ -17,6 +17,7 @@ The output contract is stable across both paths:
 - Runtime map-class mapping uses `130..133` (`130=unburned`, `131=low`, `132=moderate`, `133=high`).
 - Unknown color-table indices map to `255` (NoData sentinel in classification contexts).
 - `export_4class_map` writes the shifted (Okabe-Ito) palette by default for classes `0..3`.
+- `export_4class_map(..., export_palette="legacy")` is available as an explicit transition mode when legacy RGB output is required.
 
 ## API
 

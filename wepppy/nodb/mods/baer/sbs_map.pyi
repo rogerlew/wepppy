@@ -89,4 +89,9 @@ class SoilBurnSeverityMap(LandcoverMap):
 
     def export_rgb_map(self, wgs_fn: str, fn: str, rgb_png: str) -> None: ...
 
-    def export_4class_map(self, fn: str, cellsize: Optional[float] = ...) -> None: ...
+    def export_4class_map(
+        self,
+        fn: str,
+        cellsize: Optional[float] = ...,
+        export_palette: Literal["shifted", "legacy"] = ...,
+    ) -> None: ...
