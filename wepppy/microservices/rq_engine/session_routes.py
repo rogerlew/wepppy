@@ -117,6 +117,15 @@ def _session_payload(session_id: str) -> Mapping[str, Any]:
     return payload
 
 
+def _session_not_authorized_message(request: Request, *, user_id: int | None) -> str:
+    if user_id is None and request.cookies.get("remember_token"):
+        return (
+            "Session not authorized for run. Your login session is stale. "
+            "Log out and sign in again, then retry."
+        )
+    return "Session not authorized for run"
+
+
 def _store_session_marker(runid: str, session_id: str, ttl_seconds: int) -> None:
     key = f"auth:session:run:{runid}:{session_id}"
     conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
@@ -326,7 +335,7 @@ def issue_session_token(runid: str, config: str, request: Request) -> JSONRespon
                 user_id, roles = _identity_from_session_payload(session_payload)
                 if not _session_user_authorized_for_run(runid, user_id, roles):
                     raise AuthError(
-                        "Session not authorized for run",
+                        _session_not_authorized_message(request, user_id=user_id),
                         status_code=401,
                         code="unauthorized",
                     )

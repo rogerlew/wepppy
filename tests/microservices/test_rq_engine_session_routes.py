@@ -168,6 +168,34 @@ def test_session_token_private_run_requires_authenticated_cookie_session(
     assert response.status_code == 401
     payload = response.json()
     assert payload["error"]["code"] == "unauthorized"
+    assert payload["error"]["message"] == "Session not authorized for run"
+
+
+def test_session_token_stale_remember_cookie_includes_relogin_guidance(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
+    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
+    monkeypatch.setattr(session_routes, "_session_payload", lambda session_id: {})
+    monkeypatch.setattr(
+        session_routes,
+        "_session_user_authorized_for_run",
+        lambda runid, user_id, roles: False,
+    )
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            cookies={"session": "signed", "remember_token": "remembered"},
+        )
+
+    assert response.status_code == 401
+    payload = response.json()
+    assert payload["error"]["code"] == "unauthorized"
+    assert "Log out and sign in again, then retry." in payload["error"]["message"]
 
 
 def test_hello_world_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
