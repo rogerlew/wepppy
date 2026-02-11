@@ -4,7 +4,7 @@
 
 ## Scope
 - Modules: `wepppy/rq/*.py` (entrypoints that enqueue other jobs).
-- rq-engine routes that build dependency chains directly: `wepppy/microservices/rq_engine/run_sync_routes.py` and `wepppy/microservices/rq_engine/bootstrap_routes.py`.
+- rq-engine routes that enqueue RQ jobs directly: `wepppy/microservices/rq_engine/batch_routes.py`, `wepppy/microservices/rq_engine/run_sync_routes.py`, and `wepppy/microservices/rq_engine/bootstrap_routes.py`.
 
 ## Path Legend
 | Token | Meaning |
@@ -296,6 +296,23 @@ Audit notes:
 
 Audit notes:
 1. `migrations_rq` depends on the sync job, ensuring that run files exist before migrations execute.
+
+**`wepppy/microservices/rq_engine/batch_routes.py`**
+
+**`POST /api/batch/_/{batch_name}/run-batch`**
+
+| Stage | Child job | `depends_on` | File prerequisites |
+| --- | --- | --- | --- |
+| root | `run_batch_rq` | none | Batch workspace `batch_root/<batch_name>`; `batch_runner.nodb`; uploaded watershed GeoJSON + validated template |
+
+**`POST /api/batch/_/{batch_name}/delete-batch`**
+
+| Stage | Child job | `depends_on` | File prerequisites |
+| --- | --- | --- | --- |
+| root | `delete_batch_rq` | none | Batch workspace `batch_root/<batch_name>` (including `_base` and `runs/*`) |
+
+Audit notes:
+1. `delete_batch_rq` is destructive and removes the batch workspace recursively after clearing batch run lock/cache metadata.
 
 **`wepppy/microservices/rq_engine/bootstrap_routes.py`**
 

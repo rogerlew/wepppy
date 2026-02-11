@@ -82,12 +82,17 @@ describe("BatchRunner controller", () => {
                 </section>
                 <div data-role="run-directive-list"></div>
                 <div data-role="run-directive-status"></div>
-            </div>
-            <div class="form-group" id="batch_runner_run_container">
-                <button id="btn_run_batch" data-action="batch-run" type="button">Run Batch</button>
-                <div id="batch_run_message"></div>
-                <small id="hint_run_batch" data-job-hint></small>
-                <img id="run_batch_lock" style="display:none;">
+                <div class="form-group" id="batch_runner_run_container">
+                    <button id="btn_run_batch" data-action="batch-run" type="button">Run Batch</button>
+                    <button id="btn_delete_batch" data-modal-open="batch-runner-delete-modal" type="button">Delete Batch</button>
+                    <div id="batch_run_message"></div>
+                    <div id="batch_delete_message"></div>
+                    <small id="hint_run_batch" data-job-hint></small>
+                    <img id="run_batch_lock" style="display:none;">
+                    <div id="batch-runner-delete-modal" data-modal hidden>
+                        <button type="button" data-action="batch-delete-confirm" data-modal-dismiss>Delete Batch</button>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -388,6 +393,31 @@ describe("BatchRunner controller", () => {
         );
         expect(started).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-42" }));
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    test("deleteBatch posts to RQ endpoint and emits start event", async () => {
+        postJsonMock.mockResolvedValueOnce({
+            body: {
+                job_id: "job-del-5",
+                message: "Batch delete submitted."
+            }
+        });
+
+        const started = jest.fn();
+        controller.emitter.on("batch:delete:started", started);
+
+        document
+            .querySelector('[data-action="batch-delete-confirm"]')
+            .dispatchEvent(new Event("click", { bubbles: true }));
+        await flushPromises();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "/rq-engine/api/batch/_/demo/delete-batch",
+            {},
+            { headers: { Authorization: "Bearer token-123" } }
+        );
+        expect(started).toHaveBeenCalledWith(expect.objectContaining({ job_id: "job-del-5" }));
+        expect(controller.deleteBatchStatus.textContent).toContain("Batch delete submitted.");
     });
 
     test("refreshRunstate requests the runstate report", async () => {

@@ -106,7 +106,8 @@
     margin: var(--wc-space-xs) 0 0;
   }
   #batch-runner-root [data-role="upload-status"]:empty,
-  #batch-runner-root [data-role="sbs-upload-status"]:empty {
+  #batch-runner-root [data-role="sbs-upload-status"]:empty,
+  #batch-runner-root #batch_delete_message:empty {
     display: none;
   }
 </style>
@@ -358,9 +359,47 @@
              alt="Batch is locked" />
         Run Batch
       </button>
+      <button
+        id="btn_delete_batch"
+        class="pure-button button-error"
+        type="button"
+        data-modal-open="batch-runner-delete-modal"
+        {% if not feature_enabled %}disabled{% endif %}>
+        Delete Batch
+      </button>
     </div>
     <div id="batch_run_message" class="wc-status-chip batch-runner-status" role="status" aria-live="polite"></div>
+    <div id="batch_delete_message" class="wc-status-chip batch-runner-status" role="status" aria-live="polite"></div>
     <p id="hint_run_batch" data-job-hint class="wc-job-hint wc-text-muted"></p>
+
+    <div class="wc-modal" id="batch-runner-delete-modal" data-modal hidden>
+      <div class="wc-modal__overlay" data-modal-dismiss></div>
+      <div class="wc-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="batchRunnerDeleteModalTitle">
+        <header class="wc-modal__header">
+          <h2 class="wc-modal__title" id="batchRunnerDeleteModalTitle">Delete batch</h2>
+          <button type="button"
+                  class="wc-modal__close"
+                  data-modal-dismiss
+                  aria-label="Close delete batch dialog">
+            &times;
+          </button>
+        </header>
+        <div class="wc-modal__body">
+          <p class="wc-text-muted">
+            Are you sure you want to delete batch '{{ batch_name }}'?
+          </p>
+        </div>
+        <footer class="wc-modal__footer">
+          <button type="button" class="pure-button pure-button-secondary" data-modal-dismiss>Cancel</button>
+          <button type="button"
+                  class="pure-button button-error"
+                  data-action="batch-delete-confirm"
+                  data-modal-dismiss>
+            Delete Batch
+          </button>
+        </footer>
+      </div>
+    </div>
   </section>
 </div>
 {% endcall %}

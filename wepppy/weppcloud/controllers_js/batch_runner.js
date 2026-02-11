@@ -20,6 +20,9 @@ var BatchRunner = (function () {
         "batch:run:started",
         "batch:run:completed",
         "batch:run:failed",
+        "batch:delete:started",
+        "batch:delete:completed",
+        "batch:delete:failed",
         "batch:sbs-upload:started",
         "batch:sbs-upload:completed",
         "batch:sbs-upload:failed",
@@ -42,6 +45,8 @@ var BatchRunner = (function () {
         templateCard: "#batch-runner-template-card",
         runBatchButton: "#btn_run_batch",
         runBatchStatus: "#batch_run_message",
+        deleteBatchButton: "#btn_delete_batch",
+        deleteBatchStatus: "#batch_delete_message",
         runBatchHint: "#hint_run_batch",
         runBatchLock: "#run_batch_lock"
     };
@@ -82,7 +87,8 @@ var BatchRunner = (function () {
         upload: '[data-action="batch-upload"]',
         uploadSbs: '[data-action="batch-upload-sbs"]',
         validate: '[data-action="batch-validate"]',
-        run: '[data-action="batch-run"]'
+        run: '[data-action="batch-run"]',
+        deleteConfirm: '[data-action="batch-delete-confirm"]'
     };
 
     function ensureHelpers() {
@@ -328,6 +334,8 @@ var BatchRunner = (function () {
         controller.rq_job = null;
         controller.runBatchButton = null;
         controller.runBatchStatus = null;
+        controller.deleteBatchButton = null;
+        controller.deleteBatchStatus = null;
         controller.runBatchHint = null;
         controller.runBatchLock = null;
 
@@ -369,6 +377,7 @@ var BatchRunner = (function () {
         controller.destroy = destroy;
         controller.refreshRunstate = refreshRunstate;
         controller.runBatch = runBatch;
+        controller.deleteBatch = deleteBatch;
         controller.uploadGeojson = uploadGeojson;
         controller.validateTemplate = validateTemplate;
 
@@ -377,8 +386,10 @@ var BatchRunner = (function () {
         controller.renderValidation = renderValidation;
 
         controller._setRunBatchMessage = setRunBatchMessage;
+        controller._setDeleteBatchMessage = setDeleteBatchMessage;
         controller._renderRunControls = renderRunControls;
         controller._setRunBatchBusy = setRunBatchBusy;
+        controller._setDeleteBatchBusy = setDeleteBatchBusy;
         controller._setUploadBusy = setUploadBusy;
         controller._setUploadStatus = setUploadStatus;
         controller._setValidateBusy = setValidateBusy;
@@ -392,6 +403,7 @@ var BatchRunner = (function () {
         controller._handleUpload = handleUpload;
         controller._handleSbsUpload = handleSbsUpload;
         controller._handleValidate = handleValidate;
+        controller._handleDeleteBatch = handleDeleteBatch;
 
         controller._setRunDirectivesBusy = setRunDirectivesBusy;
         controller._submitRunDirectives = submitRunDirectives;
@@ -445,6 +457,8 @@ var BatchRunner = (function () {
 
             controller.runBatchButton = deps.dom.qs(SELECTORS.runBatchButton);
             controller.runBatchStatus = deps.dom.qs(SELECTORS.runBatchStatus);
+            controller.deleteBatchButton = deps.dom.qs(SELECTORS.deleteBatchButton);
+            controller.deleteBatchStatus = deps.dom.qs(SELECTORS.deleteBatchStatus);
             controller.runBatchHint = deps.dom.qs(SELECTORS.runBatchHint);
             controller.runBatchLock = deps.dom.qs(SELECTORS.runBatchLock);
             controller.hint = createLegacyAdapter(controller.runBatchHint);
@@ -629,6 +643,13 @@ var BatchRunner = (function () {
                     })
                 );
             }
+
+            delegates.push(
+                deps.dom.delegate(controller.container, "click", ACTIONS.deleteConfirm, function (event) {
+                    event.preventDefault();
+                    handleDeleteBatch();
+                })
+            );
         }
 
         function buildBaseUrl(prefixOverride) {
@@ -1012,13 +1033,15 @@ var BatchRunner = (function () {
         function renderRunControls(options) {
             options = options || {};
             var preserveMessage = options.preserveMessage === true;
+            var preserveDeleteMessage = options.preserveDeleteMessage === true;
 
-            if (!controller.runBatchButton) {
+            if (!controller.runBatchButton && !controller.deleteBatchButton) {
                 return;
             }
 
             var jobLocked = controller.should_disable_command_button(controller);
             controller.update_command_button_state(controller);
+            var enabled = Boolean(controller.state.enabled);
 
             if (controller.runBatchLock) {
                 if (jobLocked) {
@@ -1029,12 +1052,19 @@ var BatchRunner = (function () {
             }
 
             if (jobLocked) {
-                controller.runBatchButton.disabled = true;
+                if (controller.runBatchButton) {
+                    controller.runBatchButton.disabled = true;
+                }
+                if (controller.deleteBatchButton) {
+                    controller.deleteBatchButton.disabled = true;
+                }
                 setRunBatchMessage("Batch run in progress…", "info");
+                if (!preserveDeleteMessage) {
+                    setDeleteBatchMessage("", "");
+                }
                 return;
             }
 
-            var enabled = Boolean(controller.state.enabled);
             var snapshot = controller.state.snapshot || {};
             var resources = snapshot.resources || {};
             var resource = resources.watershed_geojson;
@@ -1061,7 +1091,13 @@ var BatchRunner = (function () {
                 state = "success";
             }
 
-            controller.runBatchButton.disabled = !allowRun;
+            if (controller.runBatchButton) {
+                controller.runBatchButton.disabled = !allowRun;
+            }
+
+            if (controller.deleteBatchButton) {
+                controller.deleteBatchButton.disabled = !enabled;
+            }
 
             if (!preserveMessage || !allowRun) {
                 setRunBatchMessage(message, state);
@@ -1088,6 +1124,9 @@ var BatchRunner = (function () {
             if (controller.runBatchButton && busy) {
                 controller.runBatchButton.disabled = true;
             }
+            if (controller.deleteBatchButton && busy) {
+                controller.deleteBatchButton.disabled = true;
+            }
             if (controller.runBatchLock) {
                 if (busy) {
                     deps.dom.show(controller.runBatchLock);
@@ -1099,7 +1138,22 @@ var BatchRunner = (function () {
                 setRunBatchMessage(message, state || "info");
             }
             if (!busy) {
-                renderRunControls({ preserveMessage: true });
+                renderRunControls({ preserveMessage: true, preserveDeleteMessage: true });
+            }
+        }
+
+        function setDeleteBatchBusy(busy, message, state) {
+            if (controller.deleteBatchButton) {
+                controller.deleteBatchButton.disabled = busy || !controller.state.enabled;
+            }
+            if (controller.runBatchButton && busy) {
+                controller.runBatchButton.disabled = true;
+            }
+            if (message != null) {
+                setDeleteBatchMessage(message, state || "info");
+            }
+            if (!busy) {
+                renderRunControls({ preserveMessage: true, preserveDeleteMessage: true });
             }
         }
 
@@ -1130,6 +1184,14 @@ var BatchRunner = (function () {
             }
             applyDataState(controller.runBatchStatus, state);
             setText(controller.runBatchStatus, message || "");
+        }
+
+        function setDeleteBatchMessage(message, state) {
+            if (!controller.deleteBatchStatus) {
+                return;
+            }
+            applyDataState(controller.deleteBatchStatus, state);
+            setText(controller.deleteBatchStatus, message || "");
         }
 
         function setUploadBusy(busy, message) {
@@ -1783,6 +1845,13 @@ var BatchRunner = (function () {
                 });
         }
 
+        function handleDeleteBatch(event) {
+            if (event && typeof event.preventDefault === "function") {
+                event.preventDefault();
+            }
+            deleteBatch();
+        }
+
         function runBatch() {
             if (!controller.state.enabled) {
                 setRunBatchMessage("Batch runner is disabled.", "warning");
@@ -1855,6 +1924,83 @@ var BatchRunner = (function () {
                 });
         }
 
+        function deleteBatch() {
+            if (!controller.state.enabled) {
+                setDeleteBatchMessage("Batch runner is disabled.", "warning");
+                return;
+            }
+
+            if (controller.should_disable_command_button(controller)) {
+                return;
+            }
+
+            if (!controller.state.batchName) {
+                setDeleteBatchMessage("Batch name is missing.", "critical");
+                return;
+            }
+
+            if (typeof controller.reset_panel_state === "function") {
+                controller.reset_panel_state(controller);
+            }
+            cancelRunstateTimer();
+            controller.runstate.refreshPending = false;
+
+            setDeleteBatchBusy(true, "Submitting batch delete…", "info");
+
+            controller.connect_status_stream(controller);
+
+            controller.http
+                .postJson(
+                    "/rq-engine/api/batch/_/" + encodeURIComponent(controller.state.batchName) + "/delete-batch",
+                    {},
+                    controller.rqEngineToken
+                        ? { headers: { Authorization: "Bearer " + controller.rqEngineToken } }
+                        : undefined
+                )
+                .then(function (response) {
+                    var payload = response.body || {};
+                    if (payload.error || payload.errors) {
+                        var errorMsg = resolveErrorMessage(payload, "Failed to submit batch delete.");
+                        throw new Error(errorMsg);
+                    }
+
+                    if (payload.job_id) {
+                        controller.poll_completion_event = "BATCH_DELETE_COMPLETED";
+                        controller.set_rq_job_id(controller, payload.job_id);
+                    } else {
+                        controller.update_command_button_state(controller);
+                    }
+
+                    var successMessage = payload.message || "Batch delete submitted.";
+                    setDeleteBatchMessage(successMessage, "success");
+
+                    controller.emitter.emit("batch:delete:started", {
+                        batchName: controller.state.batchName,
+                        job_id: payload.job_id || null
+                    });
+                    controller.emitter.emit("job:started", {
+                        batchName: controller.state.batchName,
+                        job_id: payload.job_id || null
+                    });
+                })
+                .catch(function (error) {
+                    var message = resolveErrorMessage(error, "Failed to submit batch delete.");
+                    setDeleteBatchMessage(message, "critical");
+                    controller.disconnect_status_stream(controller);
+                    controller.emitter.emit("batch:delete:failed", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                    controller.emitter.emit("job:error", {
+                        error: message,
+                        batchName: controller.state.batchName
+                    });
+                })
+                .finally(function () {
+                    setDeleteBatchBusy(false);
+                });
+        }
+
         function uploadGeojson(event) {
             handleUpload(event);
             return false;
@@ -1866,6 +2012,14 @@ var BatchRunner = (function () {
         }
 
         function overrideControlBase(ctrl) {
+            function buildBatchCreateUrl() {
+                var prefix = ctrl.sitePrefix || "";
+                if (prefix && prefix.slice(-1) === "/") {
+                    prefix = prefix.slice(0, -1);
+                }
+                return prefix + "/batch/create/";
+            }
+
             var baseSetRqJobId = ctrl.set_rq_job_id;
             ctrl.set_rq_job_id = function (self, jobId) {
                 baseSetRqJobId.call(ctrl, self, jobId);
@@ -1886,7 +2040,39 @@ var BatchRunner = (function () {
 
             var baseTriggerEvent = ctrl.triggerEvent;
             ctrl.triggerEvent = function (eventName, payload) {
-                if (eventName === "BATCH_RUN_COMPLETED" || eventName === "END_BROADCAST") {
+                if (eventName === "BATCH_DELETE_COMPLETED") {
+                    ctrl.disconnect_status_stream(ctrl);
+                    ctrl.reset_status_spinner(ctrl);
+                    cancelRunstateTimer();
+                    ctrl.runstate.refreshPending = false;
+                    setDeleteBatchMessage("Batch deleted. Redirecting…", "success");
+                    ctrl.emitter.emit("batch:delete:completed", {
+                        batchName: ctrl.state.batchName,
+                        job_id: ctrl.rq_job_id || null,
+                        payload: payload || null
+                    });
+                    ctrl.emitter.emit("job:completed", {
+                        batchName: ctrl.state.batchName,
+                        job_id: ctrl.rq_job_id || null,
+                        payload: payload || null
+                    });
+                    setTimeout(function () {
+                        window.location.assign(buildBatchCreateUrl());
+                    }, 150);
+                } else if (eventName === "BATCH_DELETE_FAILED") {
+                    var deleteErrorText = payload
+                        ? (payload.error_message || payload.message || payload.error)
+                        : null;
+                    setDeleteBatchMessage(deleteErrorText || "Batch delete failed.", "critical");
+                    ctrl.emitter.emit("batch:delete:failed", {
+                        error: deleteErrorText || "Batch delete failed.",
+                        batchName: ctrl.state.batchName
+                    });
+                    ctrl.emitter.emit("job:error", {
+                        error: deleteErrorText || "Batch delete failed.",
+                        batchName: ctrl.state.batchName
+                    });
+                } else if (eventName === "BATCH_RUN_COMPLETED" || eventName === "END_BROADCAST") {
                     ctrl.disconnect_status_stream(ctrl);
                     ctrl.reset_status_spinner(ctrl);
                     refreshRunstate({ force: true });

@@ -16,11 +16,12 @@ import socket
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Any, Tuple, List, Optional
 
 import redis
 from rq import Queue, get_current_job
 from rq.job import Job
+from rq.registry import DeferredJobRegistry, ScheduledJobRegistry, StartedJobRegistry
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -29,7 +30,12 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from wepppy.nodb.base import NoDbAlreadyLockedError, clear_nodb_file_cache
+from wepppy.nodb.base import (
+    NoDbAlreadyLockedError,
+    NoDbBase,
+    clear_locks,
+    clear_nodb_file_cache,
+)
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -48,6 +54,16 @@ RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
 logger = logging.getLogger(__name__)
+
+
+_TERMINAL_JOB_STATUSES = {
+    "finished",
+    "failed",
+    "stopped",
+    "canceled",
+    "not_found",
+}
+
 
 def _write_run_metadata(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -87,6 +103,185 @@ def _reset_omni_nodb_from_base(base_wd: Path, runid_wd: Path, runid: str) -> Non
     if target_omni_dir.exists():
         shutil.rmtree(target_omni_dir)
     shutil.copytree(base_omni_dir, target_omni_dir)
+
+
+def _collect_batch_runids(batch_wd: Path, batch_name: str) -> list[str]:
+    runids = [f'batch;;{batch_name};;_base']
+    runs_dir = batch_wd / 'runs'
+    if runs_dir.exists():
+        for child in runs_dir.iterdir():
+            if child.is_dir():
+                runids.append(f'batch;;{batch_name};;{child.name}')
+    return runids
+
+
+def _cleanup_batch_run_cache_and_locks(runid: str) -> None:
+    try:
+        clear_nodb_file_cache(runid)
+    except FileNotFoundError:
+        # The run directory may not exist for every possible leaf run ID.
+        pass
+    except Exception as exc:
+        logger.warning("batch_rq: failed to clear NoDb cache for %s - %s", runid, exc)
+
+    try:
+        clear_locks(runid)
+    except Exception as exc:
+        logger.warning("batch_rq: failed to clear locks for %s - %s", runid, exc)
+
+
+def _job_targets_batch(job: Job, batch_name: str) -> bool:
+    meta = job.meta if isinstance(job.meta, dict) else {}
+    raw_runid = meta.get("runid")
+    runid = str(raw_runid).strip() if raw_runid is not None else ""
+    if runid == batch_name:
+        return True
+    if runid.startswith(f"batch;;{batch_name};;"):
+        return True
+
+    args = list(job.args or [])
+    if args:
+        first_arg = args[0]
+        if isinstance(first_arg, str) and first_arg == batch_name:
+            return True
+
+    return False
+
+
+def _active_batch_job_summaries(
+    batch_name: str,
+    *,
+    redis_conn: redis.Redis | None = None,
+    exclude_job_ids: set[str] | None = None,
+    max_jobs: int = 25,
+) -> list[str]:
+    """Return active job summaries for a batch (queued/started/deferred/scheduled)."""
+    if max_jobs <= 0:
+        return []
+
+    excluded = set(exclude_job_ids or set())
+
+    def _collect(connection: redis.Redis) -> list[str]:
+        queue = Queue("batch", connection=connection)
+        registries = [
+            ("queued", queue.get_job_ids()),
+            ("started", StartedJobRegistry(queue=queue).get_job_ids()),
+            ("deferred", DeferredJobRegistry(queue=queue).get_job_ids()),
+            ("scheduled", ScheduledJobRegistry(queue=queue).get_job_ids()),
+        ]
+
+        seen: set[str] = set()
+        summaries: list[str] = []
+        for registry_label, job_ids in registries:
+            for raw_job_id in job_ids:
+                job_id = str(raw_job_id)
+                if not job_id or job_id in seen or job_id in excluded:
+                    continue
+                seen.add(job_id)
+
+                try:
+                    job = Job.fetch(job_id, connection=connection)
+                except Exception:
+                    continue
+                if job is None:
+                    continue
+                if not _job_targets_batch(job, batch_name):
+                    continue
+
+                status = str(job.get_status(refresh=False) or registry_label).lower()
+                if status in _TERMINAL_JOB_STATUSES:
+                    continue
+
+                func_name = str(getattr(job, "func_name", "") or "")
+                if func_name:
+                    func_name = func_name.rsplit(".", 1)[-1]
+                else:
+                    func_name = str(getattr(job, "description", "job") or "job")
+
+                summaries.append(f"{job.id}:{status}:{func_name}")
+                if len(summaries) >= max_jobs:
+                    return summaries
+
+        return summaries
+
+    if redis_conn is not None:
+        return _collect(redis_conn)
+
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as connection:
+        return _collect(connection)
+
+
+def delete_batch_rq(batch_name: str) -> dict[str, Any]:
+    """Delete an entire batch workspace (base + generated runs)."""
+    job = get_current_job()
+    job_id = job.id if job is not None else 'N/A'
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{batch_name}:batch'
+
+    try:
+        StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({batch_name})')
+        if job is not None:
+            job.meta['runid'] = batch_name
+            job.save()
+
+        try:
+            batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+        except FileNotFoundError:
+            StatusMessenger.publish(
+                status_channel,
+                f'rq:{job_id} COMPLETED {func_name}({batch_name}) already-missing',
+            )
+            StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
+            return {'batch_name': batch_name, 'deleted': False, 'already_missing': True}
+
+        batch_wd = Path(batch_runner.wd).resolve()
+        runids = _collect_batch_runids(batch_wd, batch_name)
+
+        for runid in runids:
+            _cleanup_batch_run_cache_and_locks(runid)
+
+        wd_targets: list[str] = [str(batch_wd)]
+        base_wd = batch_wd / '_base'
+        if base_wd.exists():
+            wd_targets.append(str(base_wd))
+        runs_dir = batch_wd / 'runs'
+        if runs_dir.exists():
+            wd_targets.extend(str(path) for path in runs_dir.iterdir() if path.is_dir())
+
+        try:
+            BatchRunner.cleanup_run_instances(str(batch_wd))
+        except Exception as exc:
+            logger.warning("batch_rq: failed to cleanup BatchRunner instance for %s - %s", batch_wd, exc)
+
+        for wd in wd_targets:
+            try:
+                NoDbBase.cleanup_run_instances(wd)
+            except Exception as exc:
+                logger.warning("batch_rq: failed to cleanup NoDb instances for %s - %s", wd, exc)
+
+        active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
+        if active_jobs:
+            active_jobs_text = ", ".join(active_jobs[:5])
+            if len(active_jobs) > 5:
+                active_jobs_text += f" (+{len(active_jobs) - 5} more)"
+            raise RuntimeError(
+                "Batch cannot be deleted while jobs are active. "
+                f"Active jobs: {active_jobs_text}"
+            )
+
+        if batch_wd.exists():
+            shutil.rmtree(batch_wd)
+
+        StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
+        StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
+        return {'batch_name': batch_name, 'deleted': True}
+
+    except Exception as exc:
+        StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({batch_name})')
+        StatusMessenger.publish(status_channel, f'rq:{job_id} STATUS delete batch failed ({exc})')
+        StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_FAILED')
+        raise
 
 def run_batch_rq(batch_name: str) -> Job:
     """Enqueue a batch run for each watershed feature and a finalizer task.
