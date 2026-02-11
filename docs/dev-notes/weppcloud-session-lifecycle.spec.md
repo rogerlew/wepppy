@@ -61,6 +61,7 @@
   - expected: `403` canonical error payload.
 - Missing both `Origin` and `Referer` on heartbeat or token-refresh POST:
   - expected: `403` canonical error payload.
+- Same-origin checks normalize default ports and honor trusted forwarded/configured external host aliases so proxied HTTPS origins are accepted.
 - Heartbeat network failures:
   - client tolerates transient failures and keeps retrying on the interval; only auth failures (`401`/`403`) trigger session-expired UX.
 - Stale authenticated UI shell:

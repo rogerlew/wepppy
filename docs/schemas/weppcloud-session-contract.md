@@ -84,7 +84,7 @@ Source-of-truth implementation:
 - Page-specific workflows that submit to rq-engine (fork, archive, reports, readme actions, other ancillary run pages) SHOULD treat explicit auth failures (`401`, `403`, `unauthorized`, `forbidden`) as stale-session signals and prompt reload/sign-in.
 
 ## Same-Origin and Security Contract
-- `POST /weppcloud/api/auth/session-heartbeat` and `POST /weppcloud/api/auth/rq-engine-token` MUST use same-origin checks (`Origin` or `Referer` origin equality to host URL).
+- `POST /weppcloud/api/auth/session-heartbeat` and `POST /weppcloud/api/auth/rq-engine-token` MUST use same-origin checks (`Origin` or `Referer`), compared against the effective WEPPcloud origin (request host plus trusted forwarded/configured external host aliases).
 - Requests missing both `Origin` and `Referer` headers MUST be rejected for these endpoints.
 - Anonymous or stale session-token claims MUST NOT bypass CAPTCHA/public-run gates in anonymous flows.
 - Private-run session-token issuance via cookie-auth path MUST enforce run authorization from server-side owner/role state.

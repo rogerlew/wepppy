@@ -29,10 +29,62 @@ def _issue_rq_engine_token() -> str | None:
     return issue_user_rq_engine_token(current_user)
 
 
+def _normalized_origin(value: str) -> tuple[str, str, int] | None:
+    candidate = str(value or "").strip()
+    if not candidate:
+        return None
+    parsed = urlparse(candidate)
+    scheme = (parsed.scheme or "").strip().lower()
+    host = (parsed.hostname or "").strip().lower()
+    if not scheme or not host:
+        return None
+    port = parsed.port
+    if port is None:
+        if scheme == "https":
+            port = 443
+        elif scheme == "http":
+            port = 80
+        else:
+            return None
+    return scheme, host, int(port)
+
+
+def _allowed_origin_set() -> set[tuple[str, str, int]]:
+    origins: set[tuple[str, str, int]] = set()
+
+    def _add(candidate: str) -> None:
+        normalized = _normalized_origin(candidate)
+        if normalized is not None:
+            origins.add(normalized)
+
+    _add(request.host_url)
+    _add(f"{request.scheme}://{request.host}")
+
+    forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
+    forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
+    if forwarded_proto and request.host:
+        _add(f"{forwarded_proto}://{request.host}")
+    if forwarded_host:
+        _add(f"{forwarded_proto or request.scheme}://{forwarded_host}")
+
+    external_host = (
+        current_app.config.get("OAUTH_REDIRECT_HOST")
+        or current_app.config.get("EXTERNAL_HOST")
+        or ""
+    )
+    external_scheme = (current_app.config.get("OAUTH_REDIRECT_SCHEME") or request.scheme or "").strip().lower()
+    if external_host:
+        _add(f"{external_scheme}://{external_host}")
+
+    return origins
+
+
 def _is_same_origin_post() -> bool:
+    allowed_origins = _allowed_origin_set()
     origin = request.headers.get("Origin", "").strip()
     if origin:
-        return origin.rstrip("/") == request.host_url.rstrip("/")
+        normalized_origin = _normalized_origin(origin)
+        return normalized_origin in allowed_origins
 
     referer = request.headers.get("Referer", "").strip()
     if not referer:
@@ -42,7 +94,8 @@ def _is_same_origin_post() -> bool:
     if not parsed.scheme or not parsed.netloc:
         return False
     referer_origin = f"{parsed.scheme}://{parsed.netloc}"
-    return referer_origin.rstrip("/") == request.host_url.rstrip("/")
+    normalized_referer_origin = _normalized_origin(referer_origin)
+    return normalized_referer_origin in allowed_origins
 
 
 @weppcloud_site_bp.route('/api/auth/rq-engine-token', methods=['POST'])
