@@ -4,26 +4,20 @@ This document is the authoritative contract for WEPPcloud JWTs, including token
 classes, required claims, and validation expectations. Response payloads and
 error shapes must follow `docs/schemas/rq-response-contract.md`.
 
+## Normative status (strict and authoritative)
+- This specification is normative, strict, and authoritative for JWT/auth behavior.
+- Statements using MUST, MUST NOT, SHOULD, and MAY are to be interpreted as
+  RFC 2119 requirement levels.
+- This document is not aspirational and does not define a future-state wishlist.
+- If implementation and this spec diverge, treat it as a defect:
+  - Fix the implementation to match this contract, or
+  - Update this contract in the same change when behavior is intentionally
+    changed.
+
 ## Scope
 - Applies to rq-engine, query-engine MCP, and service-to-service tokens.
 - Defines required claims, token classes, audience usage, and revocation rules.
 - Non-auth payload schemas live in their own contracts (see `docs/schemas/rq-response-contract.md`).
-
-## Implementation status (2026-02-08)
-- **Implemented**
-  - `auth_tokens` HMAC JWT utilities (`wepppy/weppcloud/utils/auth_tokens.py`).
-  - Query-engine MCP JWT validation (`wepppy/query_engine/app/mcp/auth.py`).
-  - CLI token issuance script (`wepppy/weppcloud/_scripts/issue_auth_token.py`).
-  - CLI token revocation script (`wepppy/weppcloud/_scripts/revoke_auth_token.py`).
-  - `wctl issue-auth-token` / `wctl revoke-auth-token` wrappers (`tools/wctl2/commands/auth.py`).
-  - Session JWT issuance endpoint (`/rq-engine/api/runs/<runid>/<config>/session-token`).
-  - Session-token endpoint sets an HttpOnly browse cookie scoped to `/weppcloud/runs/<runid>/<config>/`.
-  - Profile JWT issuance endpoint (`POST /profile/mint-token`) for authenticated users.
-  - rq-engine JWT enforcement on `canceljob` and culvert batch submit/retry routes (includes jti denylist).
-  - Flask `/rq/api/*` routes removed; rq-engine owns queue-triggering endpoints.
-  - Secret rotation via `WEPP_AUTH_JWT_SECRETS` (multiple validation secrets).
-- **In progress / planned**
-  - Rotation playbook rollout communication.
 
 ## Environment configuration
 
@@ -67,21 +61,34 @@ following environment variables:
 
 ### MCP token (query-engine)
 - `token_class=mcp`
-- Required claims: `sub`, `aud=query-engine`, `scope`, `iat`, `exp`, `jti`.
-- Validation: query-engine MCP uses `WEPP_MCP_JWT_*` config; secrets are wired from `WEPP_AUTH_JWT_SECRET`.
+- Preferred issued shape (WEPPcloud): include `token_class=mcp`, `sub`,
+  `scope`, `jti`, `iat`, `exp`, and `runs`.
+- Enforced by query-engine MCP middleware:
+  - `sub` is required.
+  - `jti` is required (revocation denylist check).
+  - `exp`/`iat`/`nbf` are validated when present.
+  - `runs` is required for run-scoped endpoints (`/mcp/runs/{runid}/...`).
+  - `token_class` is currently not enforced by query-engine MCP middleware.
+- Audience contract:
+  - When `WEPP_MCP_JWT_AUDIENCE` is configured, tokens MUST include that
+    audience value (recommended: `query-engine`).
+  - When `WEPP_MCP_JWT_AUDIENCE` is unset, audience checks are not enforced.
+- Validation: query-engine MCP uses `WEPP_MCP_JWT_*` config; secrets are wired
+  from `WEPP_AUTH_JWT_SECRET`.
 
 ## Policy defaults
 - **Audience**:
-  - rq-engine tokens: `aud=rq-engine`.
-  - MCP tokens: `aud=query-engine`.
+  - rq-engine tokens: `aud=rq-engine` (default enforcement via
+    `RQ_ENGINE_JWT_AUDIENCE`).
+  - MCP tokens: `aud=<WEPP_MCP_JWT_AUDIENCE>` when configured (recommended
+    `query-engine`).
   - Multi-service tokens: use an `aud` list and require intersection on each service.
-- **TTL targets** (set via config or explicit `expires_in`):
-  - User tokens: 4 days (345600s).
-  - Profile-issued user tokens: 90 days (7776000s).
-  - Session tokens: 4 days (345600s).
-  - Service tokens: variable; culvert target 90 days (7776000s).
-  - MCP tokens: 60 days (5184000s).
-- Recommended: set `WEPP_AUTH_JWT_DEFAULT_TTL_SECONDS=345600` for user/session tokens; pass explicit `expires_in` for service and MCP tokens.
+- **TTL contracts** (set via config or explicit `expires_in`):
+  - Profile-issued user tokens: fixed 90 days (`7776000` seconds).
+  - Session tokens: fixed 4 days (`345600` seconds).
+  - Command-bar-issued MCP tokens: uses `WEPP_AUTH_JWT_DEFAULT_TTL_SECONDS`
+    unless an explicit `expires_in` is added.
+  - Service-token TTLs are endpoint-specific.
 
 ## Claims
 
@@ -161,14 +168,22 @@ If validation fails a `JWTDecodeError` is raised.
 
 ## Session token issuance
 - Preferred endpoint: `POST /rq-engine/api/runs/<runid>/<config>/session-token`
-- Legacy endpoint (Flask): removed; session tokens are issued by rq-engine only.
+- Additional minting path: Flask run bootstrap path
+  (`runs0_nocfg`, `wepppy/weppcloud/routes/run_0/run_0_bp.py`) sets the same
+  run-scoped browse JWT cookie when rendering run pages.
 - Behavior:
   - Requires run authorization (public or owner).
   - Issues a session JWT (`token_class=session`) scoped to the run.
   - If a Flask login session is present, includes `user_id` and `roles` claims from Redis-backed session data.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
   - Stores a Redis marker `auth:session:run:<runid>:<session_id>` (DB 11) with TTL.
-  - Sets an HttpOnly cookie (default key `wepp_browse_jwt`, configurable via `WEPP_BROWSE_JWT_COOKIE_NAME`) scoped to `/weppcloud/runs/<runid>/<config>/`.
+  - Sets an HttpOnly cookie (default key `wepp_browse_jwt`, configurable via
+    `WEPP_BROWSE_JWT_COOKIE_NAME`) scoped to
+    `/weppcloud/runs/<runid>/<config>/`.
+  - Cookie `Secure` behavior defaults to request/proxy scheme and can be
+    overridden with `WEPP_AUTH_SESSION_COOKIE_SECURE`.
+  - Cookie `SameSite` is controlled by `WEPP_AUTH_SESSION_COOKIE_SAMESITE`
+    (`lax` default).
 
 ## Profile token issuance
 - Endpoint: `POST /profile/mint-token` (Flask route, authenticated user required).
@@ -229,7 +244,7 @@ If validation fails a `JWTDecodeError` is raised.
   - Audit logging includes endpoint, status, success/failure, job id, caller,
     and client IP.
 - Rate limit defaults:
-  - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT=120`
+  - `RQ_ENGINE_POLL_RATE_LIMIT_COUNT=400`
   - `RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS=60`
 
 ## Service scopes
@@ -239,8 +254,9 @@ If validation fails a `JWTDecodeError` is raised.
 | `runs:read` | List or fetch metadata about accessible runs. |
 | `queries:validate` | Validate payloads against dataset schema. |
 | `queries:execute` | Execute queries (POST to `/query`). |
+| `runs:activate` | Trigger query-engine catalog activation via MCP. |
 | `rq:status` | Poll job status/info. |
-| `rq:enqueue` | Submit RQ jobs (future). |
+| `rq:enqueue` | Submit run-scoped RQ jobs. |
 | `rq:export` | Request rq-engine export artifacts. |
 | `bootstrap:enable` | Enqueue Bootstrap enable for eligible runs. |
 | `bootstrap:token:mint` | Mint Bootstrap git access token URLs. |

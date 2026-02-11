@@ -120,7 +120,7 @@ handle_path /query-engine* {
 
 The query engine exposes several HTTP endpoints under the `/query-engine` prefix:
 
-#### Primary Routes (No Authentication Required in Current Implementation)
+#### Primary Routes (Console and Direct Access)
 
 | Route | Method | Purpose |
 |-------|--------|---------|
@@ -130,7 +130,7 @@ The query engine exposes several HTTP endpoints under the `/query-engine` prefix
 | `/runs/{runid}/{config}/console` | GET | **Interactive console** - Web UI for building and testing queries |
 | `/runs/{runid}/{config}` | GET | **Run info** - Activation status and dataset count |
 
-#### MCP Routes (Future Authentication-Enabled API)
+#### MCP Routes (JWT-Protected API)
 
 The `/mcp` prefix provides a **Model Context Protocol**-compatible API for LLM agents and tooling. These routes mirror the primary routes but include bearer token authentication, scoped permissions, and structured JSON:API responses.
 
@@ -145,7 +145,7 @@ The `/mcp` prefix provides a **Model Context Protocol**-compatible API for LLM a
 | `/mcp/runs/{runid}/queries/validate` | POST | Validate payload | `queries:validate` |
 | `/mcp/runs/{runid}/queries/execute` | POST | Execute query | `queries:execute` |
 
-**Note:** MCP routes are designed for future integration with authentication layers. Current production deployments use the primary routes without authentication.
+**Note:** MCP routes are mounted when `WEPP_MCP_JWT_SECRET` is configured. If the secret is unset, `/mcp` is not mounted.
 
 ### Catalog Activation
 
@@ -170,16 +170,16 @@ Queries are **stateless** and **ephemeral**:
 
 ### Security Model
 
-**Current Deployment** (No Authentication):
+**Primary Routes** (No JWT):
 - All runs are publicly accessible via their `runid` and `config`
 - No write operations are exposed
 - Queries are sandboxed to the run directory (no filesystem traversal)
 - DuckDB connections are isolated and cannot access other runs
 
-**Future MCP Deployment** (With Authentication):
+**MCP Routes** (JWT Authentication):
 - Bearer tokens map to user identities and run allow-lists
 - Scopes control access to activation, validation, and execution
-- Rate limiting per token prevents abuse
+- Revocation checks enforce denylisted `jti` values
 - Audit logs track query execution per user
 
 ### Data Sources
@@ -428,24 +428,23 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
   {
     "data": {
       "type": "activation_job",
-      "id": "copacetic-note:20240507T1633Z",
       "attributes": {
-        "status": "accepted",
-        "submitted_at": "2024-05-07T16:33:22Z"
-      },
-      "links": {
-        "status": "https://host/query-engine/mcp/runs/copacetic-note"
+        "runid": "copacetic-note",
+        "status": "completed",
+        "generated_at": "2024-05-07T16:33:22Z",
+        "dataset_count": 84
       }
     },
     "meta": {
-      "poll_after_seconds": 10
+      "catalog": {
+        "generated_at": "2024-05-07T16:33:22Z",
+        "dataset_count": 84
+      }
     }
   }
   ```
-- When the job is accepted but still running, the API returns `202 Accepted`, sets a `Retry-After` header, and includes `meta.poll_after_seconds` to guide status polling.
-- If activation is already running, return `202` with `status: "in_progress"` and include both a `Retry-After` header and `meta.poll_after_seconds`.
-- A `409` response is under consideration for clients that prefer an immediate conflict signal instead of polling; the current behavior remains `202 Accepted`.
-- Upon completion, `GET /mcp/runs/{runid}` reflects updated `last_catalog_refresh`.
+- Activation is synchronous in current implementation and returns `200` on success.
+- On completion, `GET /mcp/runs/{runid}` reflects updated `last_catalog_refresh`.
 
 ## 9. Prompt Template Endpoint
 - Returns Markdown similar to the current console template.
@@ -463,9 +462,7 @@ All datasets share common join keys (`TopazID`, `topaz_id`, `wepp_id`) for linki
   - `401` unauthenticated.
   - `403` insufficient scope or run access.
   - `404` run or dataset not found.
-  - `409` activation conflict.
   - `422` payload schema mismatch.
-  - `429` throttled.
   - `500` unexpected server error.
 - Include `trace_id` in `meta` for observability.
 
