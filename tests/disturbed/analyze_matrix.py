@@ -4,7 +4,7 @@ Analyze the disturbed matrix test results.
 
 Compares burned vs unburned simulations for:
 - Event counts (burned > unburned, same, unburned > burned)
-- Descriptive statistics for runoff and sediment delivery
+- Descriptive statistics for runoff, peak discharge, and sediment delivery
 
 Output: Markdown tables for inclusion in the disturbed README.md
 """
@@ -47,6 +47,9 @@ DISTURBED_CLASSES = {
     ("tall grass", 3): "grass high sev fire",
 }
 
+PASS_EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
+PASS_EVENT_FLOAT_COUNT = 24  # dur..tdep + sedcon + sediment fractions + groundwater terms
+
 
 def generate_wepp_id(texture: str, severity: int, veg_type: str) -> int:
     """Generate a unique WEPP ID for this combination."""
@@ -81,6 +84,14 @@ class Event:
 
 
 @dataclass
+class PeakEvent:
+    """A single peak discharge event from pass.dat EVENT rows."""
+    year: int
+    julian: int
+    peakflow: float     # m^3/s
+
+
+@dataclass
 class ComparisonResult:
     """Results of comparing burned vs unburned for a single combination."""
     texture: str
@@ -96,6 +107,11 @@ class ComparisonResult:
     sed_burned_gt: int
     sed_equal: int
     sed_unburned_gt: int
+    # Peak discharge comparisons
+    peak_total_events: int
+    peak_burned_gt: int
+    peak_equal: int
+    peak_unburned_gt: int
     # Statistics
     runoff_burned_mean: float
     runoff_burned_std: float
@@ -113,6 +129,14 @@ class ComparisonResult:
     sed_unburned_std: float
     sed_unburned_median: float
     sed_unburned_sum: float
+    peak_burned_mean: float
+    peak_burned_std: float
+    peak_burned_median: float
+    peak_burned_sum: float
+    peak_unburned_mean: float
+    peak_unburned_std: float
+    peak_unburned_median: float
+    peak_unburned_sum: float
 
 
 # =============================================================================
@@ -174,6 +198,80 @@ def load_all_events(output_dir: Path) -> Dict[int, List[Event]]:
     return events_by_id
 
 
+def parse_pass_peakflow_file(filepath: Path) -> List[PeakEvent]:
+    """Parse pass.dat EVENT rows and extract peak runoff rate (peak discharge)."""
+    peak_events: List[PeakEvent] = []
+
+    with open(filepath, "r") as f:
+        lines = f.readlines()
+
+    if len(lines) < 6:
+        return peak_events
+
+    header_tokens = lines[1].split()
+    if not header_tokens:
+        return peak_events
+
+    try:
+        start_year = int(header_tokens[-1])
+    except ValueError:
+        return peak_events
+
+    data_lines = lines[5:]
+    idx = 0
+    while idx < len(data_lines):
+        raw_line = data_lines[idx]
+        label = raw_line[:8].strip().upper()
+        if label != "EVENT":
+            idx += 1
+            continue
+
+        tokens = raw_line[8:].split()
+        idx += 1
+        expected = 2 + PASS_EVENT_FLOAT_COUNT
+
+        while len(tokens) < expected and idx < len(data_lines):
+            candidate = data_lines[idx]
+            candidate_label = candidate[:8].strip().upper()
+            if candidate_label in PASS_EVENT_LABELS and candidate_label:
+                break
+            tokens.extend(candidate.split())
+            idx += 1
+
+        if len(tokens) < expected:
+            continue
+
+        try:
+            absolute_year = int(tokens[0])
+            julian = int(tokens[1])
+            values = tokens[2:]
+            if len(values) != PASS_EVENT_FLOAT_COUNT:
+                continue
+            peakflow = float(values[9])  # peakro field in pass EVENT payload
+            sim_year = absolute_year - start_year + 1
+            peak_events.append(
+                PeakEvent(year=sim_year, julian=julian, peakflow=peakflow)
+            )
+        except (ValueError, IndexError):
+            continue
+
+    return peak_events
+
+
+def load_all_peak_events(output_dir: Path) -> Dict[int, List[PeakEvent]]:
+    """Load all pass.dat peakflow EVENT rows keyed by wepp_id."""
+    peak_events_by_id: Dict[int, List[PeakEvent]] = {}
+
+    for wepp_id in range(1, 49):  # 48 simulations
+        pass_file = output_dir / f"H{wepp_id}.pass.dat"
+        if pass_file.exists():
+            peak_events_by_id[wepp_id] = parse_pass_peakflow_file(pass_file)
+        else:
+            print(f"Warning: Missing {pass_file}")
+
+    return peak_events_by_id
+
+
 # =============================================================================
 # Analysis Functions
 # =============================================================================
@@ -181,6 +279,11 @@ def load_all_events(output_dir: Path) -> Dict[int, List[Event]]:
 def events_to_dict(events: List[Event]) -> Dict[Tuple[int, int, int], Event]:
     """Convert event list to dict keyed by (day, month, year)."""
     return {(e.day, e.month, e.year): e for e in events}
+
+
+def peak_events_to_dict(events: List[PeakEvent]) -> Dict[Tuple[int, int], PeakEvent]:
+    """Convert peak event list to dict keyed by (simulation year, julian day)."""
+    return {(e.year, e.julian): e for e in events}
 
 
 def compare_burned_vs_unburned(
@@ -249,8 +352,53 @@ def compare_burned_vs_unburned(
     )
 
 
+def compare_peakflow_burned_vs_unburned(
+    burned_events: List[PeakEvent],
+    unburned_events: List[PeakEvent],
+    tolerance: float = 1e-9,
+) -> Tuple[
+    int, int, int, int,  # peakflow: burned_gt, equal, unburned_gt, total
+    List[float], List[float],  # peakflow: burned, unburned (matched)
+]:
+    """Compare peakflow events between burned and unburned simulations."""
+    burned_dict = peak_events_to_dict(burned_events)
+    unburned_dict = peak_events_to_dict(unburned_events)
+
+    common_dates = set(burned_dict.keys()) & set(unburned_dict.keys())
+
+    peak_burned_gt = 0
+    peak_equal = 0
+    peak_unburned_gt = 0
+    peak_burned: List[float] = []
+    peak_unburned: List[float] = []
+
+    for date in sorted(common_dates):
+        b = burned_dict[date]
+        u = unburned_dict[date]
+
+        peak_burned.append(b.peakflow)
+        peak_unburned.append(u.peakflow)
+
+        if b.peakflow > u.peakflow + tolerance:
+            peak_burned_gt += 1
+        elif u.peakflow > b.peakflow + tolerance:
+            peak_unburned_gt += 1
+        else:
+            peak_equal += 1
+
+    return (
+        peak_burned_gt,
+        peak_equal,
+        peak_unburned_gt,
+        len(common_dates),
+        peak_burned,
+        peak_unburned,
+    )
+
+
 def analyze_all_comparisons(
-    events_by_id: Dict[int, List[Event]]
+    events_by_id: Dict[int, List[Event]],
+    peak_events_by_id: Dict[int, List[PeakEvent]],
 ) -> List[ComparisonResult]:
     """Analyze all burned vs unburned comparisons."""
     results = []
@@ -279,11 +427,27 @@ def analyze_all_comparisons(
                     sed_burned, sed_unburned
                 ) = compare_burned_vs_unburned(burned_events, unburned_events)
 
+                peak_burned_events = peak_events_by_id.get(burned_id, [])
+                peak_unburned_events = peak_events_by_id.get(unburned_id, [])
+                (
+                    peak_burned_gt,
+                    peak_equal,
+                    peak_unburned_gt,
+                    peak_total,
+                    peak_burned,
+                    peak_unburned,
+                ) = compare_peakflow_burned_vs_unburned(
+                    peak_burned_events,
+                    peak_unburned_events,
+                )
+
                 # Calculate statistics
                 runoff_burned_arr = np.array(runoff_burned)
                 runoff_unburned_arr = np.array(runoff_unburned)
                 sed_burned_arr = np.array(sed_burned)
                 sed_unburned_arr = np.array(sed_unburned)
+                peak_burned_arr = np.array(peak_burned)
+                peak_unburned_arr = np.array(peak_unburned)
 
                 disturbed_class = DISTURBED_CLASSES[(veg_type, severity)]
 
@@ -317,6 +481,19 @@ def analyze_all_comparisons(
                     sed_unburned_std=np.std(sed_unburned_arr) if len(sed_unburned_arr) else 0,
                     sed_unburned_median=np.median(sed_unburned_arr) if len(sed_unburned_arr) else 0,
                     sed_unburned_sum=np.sum(sed_unburned_arr) if len(sed_unburned_arr) else 0,
+                    # Peakflow
+                    peak_total_events=peak_total,
+                    peak_burned_gt=peak_burned_gt,
+                    peak_equal=peak_equal,
+                    peak_unburned_gt=peak_unburned_gt,
+                    peak_burned_mean=np.mean(peak_burned_arr) if len(peak_burned_arr) else 0,
+                    peak_burned_std=np.std(peak_burned_arr) if len(peak_burned_arr) else 0,
+                    peak_burned_median=np.median(peak_burned_arr) if len(peak_burned_arr) else 0,
+                    peak_burned_sum=np.sum(peak_burned_arr) if len(peak_burned_arr) else 0,
+                    peak_unburned_mean=np.mean(peak_unburned_arr) if len(peak_unburned_arr) else 0,
+                    peak_unburned_std=np.std(peak_unburned_arr) if len(peak_unburned_arr) else 0,
+                    peak_unburned_median=np.median(peak_unburned_arr) if len(peak_unburned_arr) else 0,
+                    peak_unburned_sum=np.sum(peak_unburned_arr) if len(peak_unburned_arr) else 0,
                 ))
 
     return results
@@ -332,32 +509,44 @@ def aggregate_by_veg_severity(
     """Aggregate results by vegetation type and severity (across textures)."""
     agg = defaultdict(lambda: {
         'total_events': 0,
+        'peak_total_events': 0,
         'runoff_burned_gt': 0,
         'runoff_equal': 0,
         'runoff_unburned_gt': 0,
         'sed_burned_gt': 0,
         'sed_equal': 0,
         'sed_unburned_gt': 0,
+        'peak_burned_gt': 0,
+        'peak_equal': 0,
+        'peak_unburned_gt': 0,
         'runoff_burned_sum': 0,
         'runoff_unburned_sum': 0,
         'sed_burned_sum': 0,
         'sed_unburned_sum': 0,
+        'peak_burned_sum': 0,
+        'peak_unburned_sum': 0,
         'count': 0,
     })
 
     for r in results:
         key = (r.veg_type, r.severity)
         agg[key]['total_events'] += r.total_events
+        agg[key]['peak_total_events'] += r.peak_total_events
         agg[key]['runoff_burned_gt'] += r.runoff_burned_gt
         agg[key]['runoff_equal'] += r.runoff_equal
         agg[key]['runoff_unburned_gt'] += r.runoff_unburned_gt
         agg[key]['sed_burned_gt'] += r.sed_burned_gt
         agg[key]['sed_equal'] += r.sed_equal
         agg[key]['sed_unburned_gt'] += r.sed_unburned_gt
+        agg[key]['peak_burned_gt'] += r.peak_burned_gt
+        agg[key]['peak_equal'] += r.peak_equal
+        agg[key]['peak_unburned_gt'] += r.peak_unburned_gt
         agg[key]['runoff_burned_sum'] += r.runoff_burned_sum
         agg[key]['runoff_unburned_sum'] += r.runoff_unburned_sum
         agg[key]['sed_burned_sum'] += r.sed_burned_sum
         agg[key]['sed_unburned_sum'] += r.sed_unburned_sum
+        agg[key]['peak_burned_sum'] += r.peak_burned_sum
+        agg[key]['peak_unburned_sum'] += r.peak_unburned_sum
         agg[key]['count'] += 1
 
     return dict(agg)
@@ -422,6 +611,29 @@ def generate_event_counts_markdown(results: List[ComparisonResult]) -> str:
                 f"{format_number(a['sed_burned_gt'], 0)} | "
                 f"{format_number(a['sed_equal'], 0)} | "
                 f"{format_number(a['sed_unburned_gt'], 0)} |"
+            )
+
+    lines.append("")
+    lines.append("### Peakflow Event Counts (Burned vs Unburned)")
+    lines.append("")
+    lines.append("Event counts compare burned vs unburned peak discharge by matching")
+    lines.append("simulation year/julian day in `H*.pass.dat` EVENT records.")
+    lines.append("")
+    lines.append("| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |")
+    lines.append("|----------|----------|-------------:|------------------:|------:|------------------:|")
+
+    for veg_type in VEG_TYPES:
+        for severity in [1, 2, 3]:
+            key = (veg_type, severity)
+            if key not in agg:
+                continue
+            a = agg[key]
+            lines.append(
+                f"| {veg_type} | {SEVERITY_NAMES[severity]} | "
+                f"{format_number(a['peak_total_events'], 0)} | "
+                f"{format_number(a['peak_burned_gt'], 0)} | "
+                f"{format_number(a['peak_equal'], 0)} | "
+                f"{format_number(a['peak_unburned_gt'], 0)} |"
             )
 
     return "\n".join(lines)
@@ -502,6 +714,40 @@ def generate_descriptive_stats_markdown(results: List[ComparisonResult]) -> str:
                 f"{np.mean(unburned_medians):.3f} | {sum(unburned_sums):.1f} |"
             )
 
+    lines.append("")
+    lines.append("### Peakflow Descriptive Statistics (m^3/s)")
+    lines.append("")
+    lines.append("| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |")
+    lines.append("|----------|----------|-----------|-----:|--------:|-------:|------:|")
+
+    for veg_type in VEG_TYPES:
+        for severity in [1, 2, 3]:
+            texture_results = [r for r in results
+                              if r.veg_type == veg_type and r.severity == severity]
+            if not texture_results:
+                continue
+
+            burned_means = [r.peak_burned_mean for r in texture_results]
+            burned_stds = [r.peak_burned_std for r in texture_results]
+            burned_medians = [r.peak_burned_median for r in texture_results]
+            burned_sums = [r.peak_burned_sum for r in texture_results]
+
+            unburned_means = [r.peak_unburned_mean for r in texture_results]
+            unburned_stds = [r.peak_unburned_std for r in texture_results]
+            unburned_medians = [r.peak_unburned_median for r in texture_results]
+            unburned_sums = [r.peak_unburned_sum for r in texture_results]
+
+            lines.append(
+                f"| {veg_type} | {SEVERITY_NAMES[severity]} | burned | "
+                f"{np.mean(burned_means):.3f} | {np.mean(burned_stds):.3f} | "
+                f"{np.mean(burned_medians):.3f} | {sum(burned_sums):.3f} |"
+            )
+            lines.append(
+                f"| | | unburned | "
+                f"{np.mean(unburned_means):.3f} | {np.mean(unburned_stds):.3f} | "
+                f"{np.mean(unburned_medians):.3f} | {sum(unburned_sums):.3f} |"
+            )
+
     return "\n".join(lines)
 
 
@@ -550,6 +796,26 @@ def generate_detailed_texture_markdown(results: List[ComparisonResult]) -> str:
                     f"{r.sed_equal:,} | {r.sed_unburned_gt:,} |"
                 )
 
+    lines.append("")
+    lines.append("#### Peakflow Event Counts by Texture")
+    lines.append("")
+    lines.append("| Texture | Veg Type | Severity | Total | Burned > | Equal | Unburned > |")
+    lines.append("|---------|----------|----------|------:|---------:|------:|-----------:|")
+
+    for texture in TEXTURES:
+        for veg_type in VEG_TYPES:
+            for severity in [1, 2, 3]:
+                r = next((x for x in results
+                          if x.texture == texture and x.veg_type == veg_type
+                          and x.severity == severity), None)
+                if not r:
+                    continue
+                lines.append(
+                    f"| {texture} | {veg_type} | {SEVERITY_NAMES[severity]} | "
+                    f"{r.peak_total_events:,} | {r.peak_burned_gt:,} | "
+                    f"{r.peak_equal:,} | {r.peak_unburned_gt:,} |"
+                )
+
     return "\n".join(lines)
 
 
@@ -590,7 +856,7 @@ def main():
         "--output-dir",
         type=Path,
         default=Path(__file__).parent / "disturbed_matrix0" / "output",
-        help="Path to the output directory containing H*.ebe.dat files"
+        help="Path to the output directory containing H*.ebe.dat/H*.pass.dat files"
     )
     parser.add_argument(
         "--out",
@@ -603,6 +869,8 @@ def main():
     print(f"Loading events from: {args.output_dir}")
     events_by_id = load_all_events(args.output_dir)
     print(f"Loaded {len(events_by_id)} simulations")
+    peak_events_by_id = load_all_peak_events(args.output_dir)
+    print(f"Loaded peakflow events for {len(peak_events_by_id)} simulations")
 
     # Summarize event counts
     for wepp_id, events in sorted(events_by_id.items()):
@@ -610,7 +878,7 @@ def main():
         print(f"  H{wepp_id}: {texture}, {veg_type}, {SEVERITY_NAMES[severity]} - {len(events)} events")
 
     print("\nAnalyzing comparisons...")
-    results = analyze_all_comparisons(events_by_id)
+    results = analyze_all_comparisons(events_by_id, peak_events_by_id)
     print(f"Generated {len(results)} comparison results")
 
     # Generate report

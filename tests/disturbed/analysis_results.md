@@ -42,6 +42,23 @@ all 4 soil textures. Results aggregated from 100-year simulations (48 total runs
 | tall grass | moderate | 1,480 | 87 | 1,388 | 5 |
 | tall grass | high | 1,459 | 278 | 1,181 | 0 |
 
+### Peakflow Event Counts (Burned vs Unburned)
+
+Event counts compare burned vs unburned peak discharge by matching
+simulation year/julian day in `H*.pass.dat` EVENT records.
+
+| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|-------------:|------------------:|------:|------------------:|
+| forest | low | 1,242 | 1,078 | 8 | 156 |
+| forest | moderate | 1,186 | 980 | 6 | 200 |
+| forest | high | 1,148 | 955 | 6 | 187 |
+| shrub | low | 1,322 | 1,035 | 10 | 277 |
+| shrub | moderate | 1,313 | 1,030 | 10 | 273 |
+| shrub | high | 1,303 | 1,028 | 10 | 265 |
+| tall grass | low | 1,415 | 820 | 80 | 515 |
+| tall grass | moderate | 1,400 | 828 | 18 | 554 |
+| tall grass | high | 1,378 | 828 | 12 | 538 |
+
 ### Runoff Descriptive Statistics (mm)
 
 Statistics aggregated across all 4 soil textures for 100-year simulations.
@@ -89,6 +106,29 @@ Statistics aggregated across all 4 soil textures for 100-year simulations.
 | | | unburned | 0.151 | 0.779 | 0.000 | 242.7 |
 | tall grass | high | burned | 3.941 | 12.201 | 0.000 | 6398.5 |
 | | | unburned | 0.153 | 0.784 | 0.000 | 242.7 |
+
+### Peakflow Descriptive Statistics (m^3/s)
+
+| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
+|----------|----------|-----------|-----:|--------:|-------:|------:|
+| forest | low | burned | 0.010 | 0.035 | 0.003 | 13.017 |
+| | | unburned | 0.007 | 0.022 | 0.003 | 9.364 |
+| forest | moderate | burned | 264.812 | 4961.073 | 0.003 | 372852.725 |
+| | | unburned | 0.008 | 0.023 | 0.003 | 9.263 |
+| forest | high | burned | 1446.719 | 16722.634 | 0.004 | 1771635.174 |
+| | | unburned | 0.008 | 0.023 | 0.003 | 9.181 |
+| shrub | low | burned | 820.003 | 12806.408 | 0.003 | 1198135.224 |
+| | | unburned | 0.008 | 0.024 | 0.003 | 10.588 |
+| shrub | moderate | burned | 1045.652 | 14386.683 | 0.003 | 1474013.109 |
+| | | unburned | 0.008 | 0.024 | 0.003 | 10.576 |
+| shrub | high | burned | 3033.479 | 24672.485 | 0.004 | 4227064.262 |
+| | | unburned | 0.008 | 0.024 | 0.003 | 10.562 |
+| tall grass | low | burned | 0.009 | 0.038 | 0.003 | 13.501 |
+| | | unburned | 0.010 | 0.042 | 0.003 | 14.482 |
+| tall grass | moderate | burned | 235.805 | 4727.188 | 0.003 | 380113.192 |
+| | | unburned | 0.010 | 0.042 | 0.003 | 14.467 |
+| tall grass | high | burned | 1877.968 | 16388.666 | 0.003 | 2935836.255 |
+| | | unburned | 0.010 | 0.042 | 0.003 | 14.439 |
 
 ### Detailed Results by Soil Texture
 
@@ -173,3 +213,44 @@ Statistics aggregated across all 4 soil textures for 100-year simulations.
 | silt loam | tall grass | low | 365 | 8 | 356 | 1 |
 | silt loam | tall grass | moderate | 363 | 9 | 354 | 0 |
 | silt loam | tall grass | high | 360 | 18 | 342 | 0 |
+
+#### Peakflow Event Counts by Texture
+
+| Texture | Veg Type | Severity | Total | Burned > | Equal | Unburned > |
+|---------|----------|----------|------:|---------:|------:|-----------:|
+| clay loam | forest | low | 367 | 302 | 5 | 60 |
+| clay loam | forest | moderate | 352 | 272 | 4 | 76 |
+| clay loam | forest | high | 343 | 265 | 4 | 74 |
+| clay loam | shrub | low | 388 | 291 | 4 | 93 |
+| clay loam | shrub | moderate | 386 | 294 | 4 | 88 |
+| clay loam | shrub | high | 384 | 297 | 4 | 83 |
+| clay loam | tall grass | low | 407 | 234 | 21 | 152 |
+| clay loam | tall grass | moderate | 403 | 234 | 6 | 163 |
+| clay loam | tall grass | high | 398 | 239 | 4 | 155 |
+| loam | forest | low | 331 | 290 | 1 | 40 |
+| loam | forest | moderate | 318 | 266 | 1 | 51 |
+| loam | forest | high | 308 | 260 | 1 | 47 |
+| loam | shrub | low | 360 | 284 | 2 | 74 |
+| loam | shrub | moderate | 358 | 280 | 2 | 76 |
+| loam | shrub | high | 356 | 282 | 2 | 72 |
+| loam | tall grass | low | 383 | 219 | 19 | 145 |
+| loam | tall grass | moderate | 380 | 222 | 4 | 154 |
+| loam | tall grass | high | 374 | 220 | 3 | 151 |
+| sand loam | forest | low | 241 | 219 | 0 | 22 |
+| sand loam | forest | moderate | 226 | 199 | 0 | 27 |
+| sand loam | forest | high | 217 | 195 | 0 | 22 |
+| sand loam | shrub | low | 255 | 211 | 2 | 42 |
+| sand loam | shrub | moderate | 253 | 209 | 2 | 42 |
+| sand loam | shrub | high | 248 | 205 | 2 | 41 |
+| sand loam | tall grass | low | 280 | 164 | 18 | 98 |
+| sand loam | tall grass | moderate | 275 | 171 | 3 | 101 |
+| sand loam | tall grass | high | 270 | 163 | 2 | 105 |
+| silt loam | forest | low | 303 | 267 | 2 | 34 |
+| silt loam | forest | moderate | 290 | 243 | 1 | 46 |
+| silt loam | forest | high | 280 | 235 | 1 | 44 |
+| silt loam | shrub | low | 319 | 249 | 2 | 68 |
+| silt loam | shrub | moderate | 316 | 247 | 2 | 67 |
+| silt loam | shrub | high | 315 | 244 | 2 | 69 |
+| silt loam | tall grass | low | 345 | 203 | 22 | 120 |
+| silt loam | tall grass | moderate | 342 | 201 | 5 | 136 |
+| silt loam | tall grass | high | 336 | 206 | 3 | 127 |

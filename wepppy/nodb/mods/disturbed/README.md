@@ -2,7 +2,7 @@
 
 > Orchestrates wildfire/logging disturbance scenarios by remapping landuse and regenerating WEPP management/soil artifacts from burn-severity rasters.
 
-> **See also:** [AGENTS.md](../../../AGENTS.md) for Working with NoDb Controllers.
+> **See also:** [AGENTS.md](../../../../AGENTS.md) for Working with NoDb Controllers.
 
 ## Overview
 
@@ -171,6 +171,23 @@ all 4 soil textures. Results aggregated from 100-year simulations (48 total runs
 | tall grass | moderate | 1,480 | 87 | 1,388 | 5 |
 | tall grass | high | 1,459 | 278 | 1,181 | 0 |
 
+#### Peakflow Event Counts (Burned vs Unburned)
+
+Event counts compare burned vs unburned peak discharge by matching
+simulation year/julian day in `H*.pass.dat` EVENT records.
+
+| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |
+|----------|----------|-------------:|------------------:|------:|------------------:|
+| forest | low | 1,242 | 1,078 | 8 | 156 |
+| forest | moderate | 1,186 | 980 | 6 | 200 |
+| forest | high | 1,148 | 955 | 6 | 187 |
+| shrub | low | 1,322 | 1,035 | 10 | 277 |
+| shrub | moderate | 1,313 | 1,030 | 10 | 273 |
+| shrub | high | 1,303 | 1,028 | 10 | 265 |
+| tall grass | low | 1,415 | 820 | 80 | 515 |
+| tall grass | moderate | 1,400 | 828 | 18 | 554 |
+| tall grass | high | 1,378 | 828 | 12 | 538 |
+
 #### Runoff Descriptive Statistics (mm)
 
 Statistics aggregated across all 4 soil textures for 100-year simulations.
@@ -218,6 +235,29 @@ Statistics aggregated across all 4 soil textures for 100-year simulations.
 | | | unburned | 0.151 | 0.779 | 0.000 | 242.7 |
 | tall grass | high | burned | 3.941 | 12.201 | 0.000 | 6,398.5 |
 | | | unburned | 0.153 | 0.784 | 0.000 | 242.7 |
+
+#### Peakflow Descriptive Statistics (m^3/s)
+
+| Veg Type | Severity | Condition | Mean | Std Dev | Median | Total |
+|----------|----------|-----------|-----:|--------:|-------:|------:|
+| forest | low | burned | 0.010 | 0.035 | 0.003 | 13.017 |
+| | | unburned | 0.007 | 0.022 | 0.003 | 9.364 |
+| forest | moderate | burned | 264.812 | 4,961.073 | 0.003 | 372,852.725 |
+| | | unburned | 0.008 | 0.023 | 0.003 | 9.263 |
+| forest | high | burned | 1,446.719 | 16,722.634 | 0.004 | 1,771,635.174 |
+| | | unburned | 0.008 | 0.023 | 0.003 | 9.181 |
+| shrub | low | burned | 820.003 | 12,806.408 | 0.003 | 1,198,135.224 |
+| | | unburned | 0.008 | 0.024 | 0.003 | 10.588 |
+| shrub | moderate | burned | 1,045.652 | 14,386.683 | 0.003 | 1,474,013.109 |
+| | | unburned | 0.008 | 0.024 | 0.003 | 10.576 |
+| shrub | high | burned | 3,033.479 | 24,672.485 | 0.004 | 4,227,064.262 |
+| | | unburned | 0.008 | 0.024 | 0.003 | 10.562 |
+| tall grass | low | burned | 0.009 | 0.038 | 0.003 | 13.501 |
+| | | unburned | 0.010 | 0.042 | 0.003 | 14.482 |
+| tall grass | moderate | burned | 235.805 | 4,727.188 | 0.003 | 380,113.192 |
+| | | unburned | 0.010 | 0.042 | 0.003 | 14.467 |
+| tall grass | high | burned | 1,877.968 | 16,388.666 | 0.003 | 2,935,836.255 |
+| | | unburned | 0.010 | 0.042 | 0.003 | 14.439 |
 
 #### Key Findings
 
