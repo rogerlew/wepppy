@@ -371,7 +371,7 @@ def _run_contrast(
     runid: str,
     control_scenario_key: str,
     contrast_scenario_key: str,
-    wepp_bin: str = 'wepp_a557997',
+    wepp_bin: str = 'wepp_dcc52a6',
     output_options: Optional[Dict[str, bool]] = None,
 ) -> str:
     from wepppy.nodb.core import Landuse, Soils, Wepp
