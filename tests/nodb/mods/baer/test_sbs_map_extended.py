@@ -180,6 +180,16 @@ class GeoTiffTestHelper:
         ct.SetColorEntry(2, (255, 255, 0, 255))     # moderate - yellow
         ct.SetColorEntry(3, (255, 0, 0, 255))       # high - red
         return ct
+
+    @staticmethod
+    def create_shifted_sbs_color_table():
+        """Create shifted (Okabe-Ito) SBS color table."""
+        ct = gdal.ColorTable()
+        ct.SetColorEntry(0, (0, 158, 115, 255))     # unburned
+        ct.SetColorEntry(1, (86, 180, 233, 255))    # low
+        ct.SetColorEntry(2, (240, 228, 66, 255))    # moderate
+        ct.SetColorEntry(3, (204, 121, 167, 255))   # high
+        return ct
         
     @staticmethod
     def create_custom_color_table():
@@ -273,6 +283,28 @@ class TestColorTableMaps(unittest.TestCase):
         self.assertEqual(class_pixel_map['1'], '131')  # low
         self.assertEqual(class_pixel_map['3'], '133')  # high (skipping moderate)
         self.assertNotIn('2', class_pixel_map)  # Value 2 not present
+
+    def test_color_table_shifted_values(self):
+        """Shifted SBS palette should classify exactly like the standard palette."""
+        filename = os.path.join(self.temp_dir, 'ct_shifted.tif')
+
+        data = np.array([
+            [0, 1, 2, 3],
+            [3, 2, 1, 0],
+        ], dtype=np.uint8)
+
+        ct = GeoTiffTestHelper.create_shifted_sbs_color_table()
+        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
+
+        sbs_map = SoilBurnSeverityMap(filename)
+        self.assertIsNotNone(sbs_map.ct)
+        self.assertIsNone(sbs_map.breaks)
+
+        class_pixel_map = sbs_map.class_pixel_map
+        self.assertEqual(class_pixel_map['0'], '130')  # unburned
+        self.assertEqual(class_pixel_map['1'], '131')  # low
+        self.assertEqual(class_pixel_map['2'], '132')  # moderate
+        self.assertEqual(class_pixel_map['3'], '133')  # high
         
     def test_color_table_with_unknown_colors(self):
         """Test color table map with colors not in standard lookup."""
@@ -619,6 +651,19 @@ class TestSBSMapSanityCheck(unittest.TestCase):
         
         status, message = sbs_map_sanity_check(filename)
         
+        self.assertEqual(status, 0)
+        self.assertIn('valid color table', message)
+
+    def test_sanity_check_valid_shifted_color_table(self):
+        """Test sanity check passes for a shifted SBS color table map."""
+        filename = os.path.join(self.temp_dir, 'valid_shifted_ct.tif')
+
+        data = np.array([[0, 1, 2, 3]], dtype=np.uint8)
+        ct = GeoTiffTestHelper.create_shifted_sbs_color_table()
+        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
+
+        status, message = sbs_map_sanity_check(filename)
+
         self.assertEqual(status, 0)
         self.assertIn('valid color table', message)
         

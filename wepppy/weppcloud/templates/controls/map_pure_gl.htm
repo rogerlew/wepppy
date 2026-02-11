@@ -68,6 +68,10 @@
 {% endif %}
 
 {% set sub_layer_selection_content %}
+  <label class="pure-checkbox" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;">
+    <input type="checkbox" id="sbs_color_shift_toggle">
+    <span>Apply Color Shift</span>
+  </label>
   <h3 class="wc-map-panel__title">Subcatchment Colormapping</h3>
   {{ ui.radio_group(
        "sub_cmap_radio",

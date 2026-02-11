@@ -43,12 +43,28 @@ var MapController = (function () {
     var SBS_LAYER_NAME = "Burn Severity Map";
     var SBS_QUERY_ENDPOINT = "query/baer_wgs_map/";
     var SBS_DEFAULT_OPACITY = 0.3;
-    var SBS_LEGEND_ITEMS = [
+    var SBS_COLOR_MODES = {
+        STANDARD: "standard",
+        SHIFTED: "shifted"
+    };
+    var SBS_LEGEND_ITEMS_STANDARD = [
         { key: 130, label: "No Burn", color: "#00734A" },
         { key: 131, label: "Low Severity Burn", color: "#4DE600" },
         { key: 132, label: "Moderate Severity Burn", color: "#FFFF00" },
         { key: 133, label: "High Severity Burn", color: "#FF0000" }
     ];
+    var SBS_LEGEND_ITEMS_SHIFTED = [
+        { key: 130, label: "No Burn", color: "#009E73" },
+        { key: 131, label: "Low Severity Burn", color: "#56B4E9" },
+        { key: 132, label: "Moderate Severity Burn", color: "#F0E442" },
+        { key: 133, label: "High Severity Burn", color: "#CC79A7" }
+    ];
+    var SBS_STANDARD_TO_SHIFTED_RGB = {
+        "0_115_74": [0, 158, 115],
+        "77_230_0": [86, 180, 233],
+        "255_255_0": [240, 228, 66],
+        "255_0_0": [204, 121, 167]
+    };
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
     var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
@@ -421,6 +437,77 @@ var MapController = (function () {
         return Math.max(0, Math.min(1, parsed));
     }
 
+    function normalizeSbsColorMode(value) {
+        return value === SBS_COLOR_MODES.SHIFTED ? SBS_COLOR_MODES.SHIFTED : SBS_COLOR_MODES.STANDARD;
+    }
+
+    function getSbsLegendItemsForMode(mode) {
+        return normalizeSbsColorMode(mode) === SBS_COLOR_MODES.SHIFTED
+            ? SBS_LEGEND_ITEMS_SHIFTED
+            : SBS_LEGEND_ITEMS_STANDARD;
+    }
+
+    function getSbsColorShiftKey(r, g, b) {
+        return [r, g, b].join("_");
+    }
+
+    function mapSbsRgbForMode(r, g, b, mode) {
+        if (normalizeSbsColorMode(mode) !== SBS_COLOR_MODES.SHIFTED) {
+            return [r, g, b];
+        }
+        var mapped = SBS_STANDARD_TO_SHIFTED_RGB[getSbsColorShiftKey(r, g, b)];
+        return mapped || [r, g, b];
+    }
+
+    function drawSbsImageToCanvas(imageSource) {
+        if (!imageSource || typeof document === "undefined") {
+            return null;
+        }
+        var width = Number(imageSource.width);
+        var height = Number(imageSource.height);
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return null;
+        }
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var context = canvas.getContext("2d");
+        if (!context) {
+            return null;
+        }
+        try {
+            context.drawImage(imageSource, 0, 0);
+        } catch (error) {
+            return null;
+        }
+        return canvas;
+    }
+
+    function buildShiftedSbsImage(imageSource) {
+        var baseCanvas = drawSbsImageToCanvas(imageSource);
+        if (!baseCanvas) {
+            return imageSource;
+        }
+        var context = baseCanvas.getContext("2d");
+        if (!context) {
+            return imageSource;
+        }
+        var imageData = context.getImageData(0, 0, baseCanvas.width, baseCanvas.height);
+        var data = imageData.data;
+        for (var i = 0; i < data.length; i += 4) {
+            var alpha = data[i + 3];
+            if (alpha === 0) {
+                continue;
+            }
+            var mapped = mapSbsRgbForMode(data[i], data[i + 1], data[i + 2], SBS_COLOR_MODES.SHIFTED);
+            data[i] = mapped[0];
+            data[i + 1] = mapped[1];
+            data[i + 2] = mapped[2];
+        }
+        context.putImageData(imageData, 0, 0);
+        return baseCanvas;
+    }
+
     function normalizeSbsBounds(bounds) {
         if (!Array.isArray(bounds) || bounds.length < 2) {
             return null;
@@ -549,6 +636,7 @@ var MapController = (function () {
         var drilldownElement = dom.qs("#drilldown");
         var subLegendElement = dom.qs("#sub_legend");
         var sbsLegendElement = dom.qs("#sbs_legend");
+        var sbsColorShiftToggleElement = dom.qs("#sbs_color_shift_toggle");
         var mapStatusElement = dom.qs("#mapstatus");
         var mapStatusCenterElement = dom.qs("#mapstatus-center");
         var mapStatusZoomElement = dom.qs("#mapstatus-zoom");
@@ -589,6 +677,13 @@ var MapController = (function () {
                 channels: null
             }
         };
+
+        function getSbsColorModeFromToggle() {
+            if (sbsColorShiftToggleElement && sbsColorShiftToggleElement.checked) {
+                return SBS_COLOR_MODES.SHIFTED;
+            }
+            return SBS_COLOR_MODES.STANDARD;
+        }
 
         function emit(eventName, payload) {
             if (mapEvents && typeof mapEvents.emit === "function") {
@@ -2350,7 +2445,11 @@ var MapController = (function () {
             if (!sbsLegendElement) {
                 return Promise.resolve(null);
             }
-            var html = buildSbsLegendHtml(SBS_LEGEND_ITEMS);
+            var mode = getSbsColorModeFromToggle();
+            if (sbsLayerController && typeof sbsLayerController.getColorMode === "function") {
+                mode = sbsLayerController.getColorMode();
+            }
+            var html = buildSbsLegendHtml(getSbsLegendItemsForMode(mode));
             sbsLegendElement.innerHTML = html;
             attachSbsOpacitySlider(sbsLegendElement);
             dom.show(sbsLegendElement);
@@ -2503,15 +2602,19 @@ var MapController = (function () {
             var activeImageAbort = null;
             var requestToken = 0;
             var currentOpacity = clampOpacity(options.opacity);
+            var currentColorMode = normalizeSbsColorMode(options.colorMode);
             var currentBounds = null;
-            var currentImage = null;
+            var currentImageStandard = null;
+            var currentImageShifted = null;
             var currentLayer = buildBitmapLayer(layerId, null, null, currentOpacity);
             currentLayer.options = { opacity: currentOpacity };
             var controller = {
                 layer: currentLayer,
                 refresh: refresh,
                 setOpacity: setOpacity,
-                getOpacity: getOpacity
+                getOpacity: getOpacity,
+                setColorMode: setColorMode,
+                getColorMode: getColorMode
             };
 
             function replaceLayer(nextLayer) {
@@ -2535,6 +2638,8 @@ var MapController = (function () {
                 controller.layer = currentLayer;
                 currentLayer.refresh = controller.refresh;
                 currentLayer.setOpacity = controller.setOpacity;
+                currentLayer.setColorMode = controller.setColorMode;
+                currentLayer.getColorMode = controller.getColorMode;
                 currentLayer.options = { opacity: currentOpacity };
                 if (options.mapKey) {
                     map[options.mapKey] = currentLayer;
@@ -2560,9 +2665,29 @@ var MapController = (function () {
                 return currentOpacity;
             }
 
+            function getColorMode() {
+                return currentColorMode;
+            }
+
+            function resolveDisplayImage() {
+                if (currentColorMode !== SBS_COLOR_MODES.SHIFTED) {
+                    return currentImageStandard;
+                }
+                if (currentImageShifted === null && currentImageStandard !== null) {
+                    currentImageShifted = buildShiftedSbsImage(currentImageStandard);
+                }
+                return currentImageShifted || currentImageStandard;
+            }
+
             function setOpacity(next) {
                 currentOpacity = clampOpacity(next);
-                var nextLayer = buildBitmapLayer(layerId, currentImage, currentBounds, currentOpacity);
+                var nextLayer = buildBitmapLayer(layerId, resolveDisplayImage(), currentBounds, currentOpacity);
+                replaceLayer(nextLayer);
+            }
+
+            function setColorMode(nextMode) {
+                currentColorMode = normalizeSbsColorMode(nextMode);
+                var nextLayer = buildBitmapLayer(layerId, resolveDisplayImage(), currentBounds, currentOpacity);
                 replaceLayer(nextLayer);
             }
 
@@ -2618,8 +2743,9 @@ var MapController = (function () {
                         }
                         activeImageAbort = null;
                         currentBounds = bounds;
-                        currentImage = image;
-                        var nextLayer = buildBitmapLayer(layerId, image, bounds, currentOpacity);
+                        currentImageStandard = drawSbsImageToCanvas(image) || image;
+                        currentImageShifted = null;
+                        var nextLayer = buildBitmapLayer(layerId, resolveDisplayImage(), bounds, currentOpacity);
                         replaceLayer(nextLayer);
                         return data;
                     });
@@ -2635,6 +2761,8 @@ var MapController = (function () {
 
             currentLayer.refresh = refresh;
             currentLayer.setOpacity = setOpacity;
+            currentLayer.setColorMode = setColorMode;
+            currentLayer.getColorMode = getColorMode;
 
             return controller;
         }
@@ -3089,7 +3217,8 @@ var MapController = (function () {
         sbsLayerController = createSbsLayerController({
             layerName: SBS_LAYER_NAME,
             mapKey: "sbs_layer",
-            opacity: SBS_DEFAULT_OPACITY
+            opacity: SBS_DEFAULT_OPACITY,
+            colorMode: getSbsColorModeFromToggle()
         });
 
         attachLayerRefresh(USGS_LAYER_NAME, usgsLayerController);
@@ -3142,6 +3271,26 @@ var MapController = (function () {
                 }
             });
         }
+
+        function bindSbsColorShiftToggle() {
+            if (!sbsColorShiftToggleElement || sbsColorShiftToggleElement.dataset.sbsColorShiftBound === "true") {
+                return;
+            }
+            sbsColorShiftToggleElement.dataset.sbsColorShiftBound = "true";
+            sbsColorShiftToggleElement.checked = getSbsColorModeFromToggle() === SBS_COLOR_MODES.SHIFTED;
+            sbsColorShiftToggleElement.addEventListener("change", function () {
+                var mode = getSbsColorModeFromToggle();
+                if (sbsLayerController && typeof sbsLayerController.setColorMode === "function") {
+                    sbsLayerController.setColorMode(mode);
+                }
+                if (map.sbs_layer && map.hasLayer(map.sbs_layer)) {
+                    loadSbsLegend().catch(function (error) {
+                        console.warn("Map GL: failed to update SBS legend after color shift", error);
+                    });
+                }
+            });
+        }
+        bindSbsColorShiftToggle();
 
         map.setBaseLayer = function (key) {
             var def = resolveBasemap(key);

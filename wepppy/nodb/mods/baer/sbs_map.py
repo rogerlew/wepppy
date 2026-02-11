@@ -42,6 +42,7 @@ _DEFAULT_COLOR_TO_SEVERITY: dict[RGBColor, str] = {
     (0, 100, 0): "unburned",
     (0, 0, 0): "unburned",
     (0, 115, 74): "unburned",
+    (0, 158, 115): "unburned",
     (0, 175, 166): "unburned",
     (102, 204, 204): "low",
     (102, 205, 205): "low",
@@ -49,9 +50,12 @@ _DEFAULT_COLOR_TO_SEVERITY: dict[RGBColor, str] = {
     (127, 255, 212): "low",
     (0, 255, 255): "low",
     (77, 230, 0): "low",
+    (86, 180, 233): "low",
     (255, 255, 0): "mod",
     (255, 232, 32): "mod",
+    (240, 228, 66): "mod",
     (255, 0, 0): "high",
+    (204, 121, 167): "high",
 }
 
 try:

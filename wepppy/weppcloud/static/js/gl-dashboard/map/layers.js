@@ -32,6 +32,12 @@ const D8_DIRECTION_ICON_MAPPING = Object.freeze({
   arrow: { x: 0, y: 0, width: 64, height: 64, mask: true },
 });
 const D8_DIRECTION_ICON_ID = 'arrow';
+const SBS_STANDARD_TO_SHIFTED_RGB = Object.freeze({
+  '0_115_74': [0, 158, 115],
+  '77_230_0': [86, 180, 233],
+  '255_255_0': [240, 228, 66],
+  '255_0_0': [204, 121, 167],
+});
 
 function resolveFeatureIdentity(props, state) {
   const topazId = resolveTopazIdFromProperties(props);
@@ -65,6 +71,53 @@ function hexToRgba(hex, alpha) {
     return [0, 0, 0, Math.round(alpha * 255)];
   }
   return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255, Math.round(alpha * 255)];
+}
+
+function getSbsRgbKey(r, g, b) {
+  return `${r}_${g}_${b}`;
+}
+
+function mapSbsRgbForDisplay(r, g, b, shifted) {
+  if (!shifted) return [r, g, b];
+  return SBS_STANDARD_TO_SHIFTED_RGB[getSbsRgbKey(r, g, b)] || [r, g, b];
+}
+
+function getShiftedSbsCanvas(layer, shifted) {
+  if (!shifted || !layer || !layer.canvas) return layer && layer.canvas ? layer.canvas : null;
+
+  const sourceCanvas = layer.canvas;
+  const sourceWidth = Number(sourceCanvas.width);
+  const sourceHeight = Number(sourceCanvas.height);
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) {
+    return sourceCanvas;
+  }
+  if (
+    layer._sbsShiftedCanvas &&
+    layer._sbsShiftedCanvas.width === sourceCanvas.width &&
+    layer._sbsShiftedCanvas.height === sourceCanvas.height
+  ) {
+    return layer._sbsShiftedCanvas;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = sourceCanvas.width;
+  canvas.height = sourceCanvas.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return sourceCanvas;
+
+  ctx.drawImage(sourceCanvas, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    const mapped = mapSbsRgbForDisplay(data[i], data[i + 1], data[i + 2], true);
+    data[i] = mapped[0];
+    data[i + 1] = mapped[1];
+    data[i + 2] = mapped[2];
+  }
+  ctx.putImageData(imageData, 0, 0);
+  layer._sbsShiftedCanvas = canvas;
+  return canvas;
 }
 
 const CHANNEL_LINE_PALETTE = CHANNEL_ORDER_COLORS.map((color) => hexToRgba(color, CHANNEL_LINE_OPACITY));
@@ -915,9 +968,16 @@ export function createLayerUtils({
     if (xi < 0 || xi >= layer.width || yi < 0 || yi >= layer.height) return null;
     if (layer.sampleMode === 'rgba') {
       const base = (yi * layer.width + xi) * 4;
-      const r = layer.values[base];
-      const g = layer.values[base + 1];
-      const b = layer.values[base + 2];
+      const shifted = layer.key === 'sbs' && !!getState().sbsColorShiftEnabled;
+      const mapped = mapSbsRgbForDisplay(
+        layer.values[base],
+        layer.values[base + 1],
+        layer.values[base + 2],
+        shifted,
+      );
+      const r = mapped[0];
+      const g = mapped[1];
+      const b = mapped[2];
       const a = layer.values[base + 3];
       return `rgba(${r}, ${g}, ${b}, ${a})`;
     }
@@ -927,6 +987,7 @@ export function createLayerUtils({
   }
 
   function buildRasterLayers(state) {
+    const sbsColorShift = !!state.sbsColorShiftEnabled;
     return state.detectedLayers
       .filter((layer) => layer.visible)
       .map((layer) => {
@@ -941,9 +1002,12 @@ export function createLayerUtils({
           });
         }
         if (layer.canvas) {
+          const image = layer.key === 'sbs'
+            ? getShiftedSbsCanvas(layer, sbsColorShift)
+            : layer.canvas;
           return new deck.BitmapLayer({
             id: `raster-${layer.key}`,
-            image: layer.canvas,
+            image,
             bounds: layer.bounds,
             pickable: false,
             opacity: 0.8,

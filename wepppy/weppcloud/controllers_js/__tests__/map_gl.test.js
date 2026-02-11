@@ -32,6 +32,7 @@ describe("Map GL controller", () => {
                     <div id="drilldown" role="tabpanel" hidden></div>
                 </div>
             </form>
+            <label><input type="checkbox" id="sbs_color_shift_toggle" /></label>
             <div id="sub_legend"></div>
             <div id="sbs_legend"></div>
             <div id="mapstatus" class="wc-control__panel-summary">
@@ -343,6 +344,36 @@ describe("Map GL controller", () => {
         const legend = document.getElementById("sbs_legend");
         expect(legend.hidden).toBe(false);
         expect(legend.innerHTML).toContain("SBS Legend");
+    });
+
+    test("SBS color shift toggle swaps legend palette", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
+
+        global.WCHttp.getJson.mockResolvedValueOnce({
+            Content: {
+                bounds: [[40.0, -120.0], [41.0, -119.0]],
+                imgurl: "resources/baer.png",
+            },
+        });
+        global.WCHttp.request.mockResolvedValue({ body: new Blob([""], { type: "image/png" }) });
+
+        await mapInstance.loadSbsMap();
+
+        const legend = document.getElementById("sbs_legend");
+        const toggle = document.getElementById("sbs_color_shift_toggle");
+        expect(legend.innerHTML).toContain("#4DE600");
+        expect(legend.innerHTML).not.toContain("#56B4E9");
+
+        toggle.checked = true;
+        toggle.dispatchEvent(new Event("change"));
+        expect(legend.innerHTML).toContain("#56B4E9");
+        expect(legend.innerHTML).toContain("#CC79A7");
+
+        toggle.checked = false;
+        toggle.dispatchEvent(new Event("change"));
+        expect(legend.innerHTML).toContain("#4DE600");
+        expect(legend.innerHTML).not.toContain("#56B4E9");
     });
 
     test("SBS opacity slider updates layer opacity and emits event", async () => {

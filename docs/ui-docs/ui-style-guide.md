@@ -34,16 +34,23 @@
   - [Form has 11em left margin](#form-has-11em-left-margin)
   - [Summary pane doesn't show](#summary-pane-doesnt-show)
   - [Advanced options don't collapse](#advanced-options-dont-collapse)
+- [Usage Examples from Codebase](#usage-examples-from-codebase)
+  - [Example 1: File Upload with Auto-Submit (Pattern #9 · Payload Dropzone)](#example-1-file-upload-with-auto-submit-pattern-9-payload-dropzone)
+  - [Example 2: Modal Dialog for Settings (Pattern #10 · Orbit Overlay)](#example-2-modal-dialog-for-settings-pattern-10-orbit-overlay)
+  - [Example 3: Status Panel + WebSocket (Pattern #4 · Livewire Status Stream)](#example-3-status-panel-websocket-pattern-4-livewire-status-stream)
+  - [Example 4: Form with Validation (Pattern #6 · Guardrail Form)](#example-4-form-with-validation-pattern-6-guardrail-form)
 - [Testing Checklist for New Controls](#testing-checklist-for-new-controls)
 - [Design philosophy](#design-philosophy)
-  - [The "Zero-Aesthetic" Reality](#the-zero-aesthetic-reality)
-  - [Classic Design Principles (Still Apply)](#classic-design-principles-still-apply)
+  - [The "Zero-Aesthetic" Philosophy](#the-zero-aesthetic-philosophy)
+  - [Classic Design Principles](#classic-design-principles)
 - [Technology stack](#technology-stack)
   - [Contributor quick-start](#contributor-quick-start)
 - [Control components](#control-components)
+- [Zero-Chill UI Patterns](#zero-chill-ui-patterns)
   - [Base layout snippet](#base-layout-snippet)
 - [Tokens, colors, and typography](#tokens-colors-and-typography)
   - [Color palette](#color-palette)
+  - [Color Shift palettes (universal design)](#color-shift-palettes-universal-design)
   - [Typography & spacing](#typography-spacing)
   - [Layout primitives](#layout-primitives)
 - [Component guidance](#component-guidance)
@@ -1457,6 +1464,21 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 | `--wc-color-critical` | `#cf222e` | Error panels, destructive actions.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L33-L34】|
 
 **Default Theme:** The values above represent the default "system" theme (light grayscale). Users can select from 11 additional themes via the theme switcher dropdown. All themes use the same CSS variable names, so controls remain theme-agnostic.
+
+### Color Shift palettes (universal design)
+
+- Scope: SBS burn severity overlays in runs0_pure (`map_pure_gl`) and `gl-dashboard`.
+- Architecture: frontend-only remap. Keep backend and GeoTIFF/raster contracts unchanged.
+- UI copy: use `Apply Color Shift` for the toggle label (do not use disability-specific wording).
+- Control placement: first top-level (0-level) map/layer control in the sidebar/list for both experiences.
+- State behavior: default `off`; when enabled, apply the shifted mapping consistently to raster display, legend chips, and tooltip swatches.
+
+| Burn class key | Severity | Standard palette (legacy) | Shift palette (Okabe-Ito) |
+| --- | --- | --- | --- |
+| `130` | Unburned / No Burn | `RGB(0, 115, 74)` / `#00734A` | `RGB(0, 158, 115)` / `#009E73` |
+| `131` | Low | `RGB(77, 230, 0)` / `#4DE600` | `RGB(86, 180, 233)` / `#56B4E9` |
+| `132` | Moderate | `RGB(255, 255, 0)` / `#FFFF00` | `RGB(240, 228, 66)` / `#F0E442` |
+| `133` | High | `RGB(255, 0, 0)` / `#FF0000` | `RGB(204, 121, 167)` / `#CC79A7` |
 
 ### Typography & spacing
 - Font stacks: sans-serif UI text uses `Source Sans 3` with system fallbacks; monospace uses `Source Code Pro` family.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L10-L147】

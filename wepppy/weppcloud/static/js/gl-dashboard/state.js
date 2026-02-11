@@ -17,6 +17,7 @@ const defaultState = {
   baseSummaryCache: {},
   comparisonDiffRanges: {},
   baseScenarioLabel: 'Undisturbed',
+  sbsColorShiftEnabled: false,
 
   subcatchmentsVisible: true,
   subcatchmentLabelsVisible: false,

@@ -196,6 +196,7 @@
     subcatchmentLabelsVisible: false,
     channelsVisible: true,
     channelLabelsVisible: false,
+    sbsColorShiftEnabled: false,
   });
   const state = getState();
   function bindStateKeys(keys) {
@@ -222,6 +223,7 @@
     'subcatchmentLabelsVisible',
     'channelsVisible',
     'channelLabelsVisible',
+    'sbsColorShiftEnabled',
     'currentViewState',
     'graphFocus',
     'graphMode',
@@ -1218,6 +1220,22 @@
     });
   }
 
+  function bindSbsColorShiftToggle() {
+    const colorShiftToggle = document.getElementById('gl-sbs-color-shift-toggle');
+    if (!colorShiftToggle || colorShiftToggle.dataset.glSbsColorShiftBound === 'true') return;
+    colorShiftToggle.dataset.glSbsColorShiftBound = 'true';
+    colorShiftToggle.checked = !!getState().sbsColorShiftEnabled;
+    colorShiftToggle.addEventListener('change', (e) => {
+      const enabled = !!(e && e.target && e.target.checked);
+      if (enabled === getState().sbsColorShiftEnabled) {
+        return;
+      }
+      setValue('sbsColorShiftEnabled', enabled);
+      applyLayers();
+      updateLegendsPanel();
+    });
+  }
+
   async function initializeScenarioFromSelect() {
     const scenarioSelect = document.getElementById('gl-scenario-select');
     if (!scenarioSelect || !scenarioSelect.value) return false;
@@ -1239,6 +1257,7 @@
     // Synchronous UI setup - runs immediately
     bindScenarioSelector();
     bindComparisonToggle();
+    bindSbsColorShiftToggle();
     setBaseScenarioLabel(baseScenarioLabel);
     basemapController.bindBasemapControls();
     if (dashboardMode === DASHBOARD_MODES.BATCH) {

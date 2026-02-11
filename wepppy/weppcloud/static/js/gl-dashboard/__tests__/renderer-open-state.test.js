@@ -80,4 +80,72 @@ describe('gl-dashboard layer renderer', () => {
     expect(refreshedDetails).not.toBeNull();
     expect(refreshedDetails.open).toBe(true);
   });
+
+  it('swaps SBS legend colors when color shift is enabled', () => {
+    const legendsContentEl = document.createElement('div');
+    const legendEmptyEl = document.createElement('p');
+    legendEmptyEl.id = 'gl-legend-empty';
+    legendsContentEl.appendChild(legendEmptyEl);
+
+    const state = {
+      landuseLayers: [],
+      soilsLayers: [],
+      hillslopesLayers: [],
+      channelsLayers: [],
+      weppLayers: [],
+      weppChannelLayers: [],
+      weppYearlyLayers: [],
+      weppYearlyChannelLayers: [],
+      weppEventLayers: [],
+      watarLayers: [],
+      rapLayers: [],
+      openetLayers: [],
+      detectedLayers: [{ key: 'sbs', label: 'SBS Map', visible: true }],
+      sbsColorShiftEnabled: false,
+      rapCumulativeMode: false,
+      weppStatistic: 'mean',
+    };
+
+    const renderer = createLayerRenderer({
+      getState: () => state,
+      setValue: jest.fn(),
+      layerUtils: { getActiveLayersForLegend: () => state.detectedLayers },
+      domRefs: {
+        layerListEl: document.createElement('ul'),
+        layerEmptyEl: document.createElement('div'),
+        legendsContentEl,
+        legendEmptyEl,
+      },
+      yearSlider: { setRange: jest.fn() },
+      deselectAllSubcatchmentOverlays: jest.fn(),
+      activateWeppYearlyLayer: jest.fn(),
+      activateWeppYearlyChannelLayer: jest.fn(),
+      refreshWeppStatisticData: jest.fn(),
+      refreshRapData: jest.fn(),
+      refreshOpenetData: jest.fn(),
+      refreshWeppEventData: jest.fn(),
+      loadRapTimeseriesData: jest.fn(),
+      loadWeppYearlyTimeseriesData: jest.fn(),
+      loadOpenetTimeseriesData: jest.fn(),
+      applyLayers: jest.fn(),
+      syncGraphLayout: jest.fn(),
+      clearGraphModeOverride: jest.fn(),
+      setGraphFocus: jest.fn(),
+      setGraphCollapsed: jest.fn(),
+      pickActiveWeppEventLayer: jest.fn(),
+      soilColorForValue: jest.fn(),
+      constants: {},
+    });
+
+    renderer.updateLegendsPanel();
+    let swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
+    expect(swatches.length).toBe(4);
+    expect(swatches[1].style.backgroundColor).toContain('77, 230, 0');
+
+    state.sbsColorShiftEnabled = true;
+    renderer.updateLegendsPanel();
+    swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
+    expect(swatches.length).toBe(4);
+    expect(swatches[1].style.backgroundColor).toContain('86, 180, 233');
+  });
 });

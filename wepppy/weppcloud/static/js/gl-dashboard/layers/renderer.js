@@ -45,12 +45,18 @@ export function createLayerRenderer({
     NLCD_LABELS,
   } = constants || {};
 
-  // SBS burn class colors and labels (matches baer.py / disturbed.py)
-  const SBS_CLASSES = [
+  // SBS burn class colors and labels (matches map_gl.js / baer.py / disturbed.py)
+  const SBS_CLASSES_STANDARD = [
     { color: '#00734A', label: 'Unburned' },
     { color: '#4DE600', label: 'Low' },
     { color: '#FFFF00', label: 'Moderate' },
     { color: '#FF0000', label: 'High' },
+  ];
+  const SBS_CLASSES_SHIFTED = [
+    { color: '#009E73', label: 'Unburned' },
+    { color: '#56B4E9', label: 'Low' },
+    { color: '#F0E442', label: 'Moderate' },
+    { color: '#CC79A7', label: 'High' },
   ];
 
   // Units for continuous layers
@@ -839,6 +845,13 @@ export function createLayerRenderer({
     return container;
   }
 
+  function getSbsLegendClasses(state) {
+    if (state && state.sbsColorShiftEnabled) {
+      return SBS_CLASSES_SHIFTED;
+    }
+    return SBS_CLASSES_STANDARD;
+  }
+
   function renderContinuousLegend(minVal, maxVal, unit, colormap) {
     const container = document.createElement('div');
     container.className = 'gl-legend-continuous';
@@ -1046,7 +1059,7 @@ export function createLayerRenderer({
     }
 
     if (layer.key === 'sbs') {
-      section.appendChild(renderCategoricalLegend(SBS_CLASSES));
+      section.appendChild(renderCategoricalLegend(getSbsLegendClasses(state)));
       return section;
     }
 
