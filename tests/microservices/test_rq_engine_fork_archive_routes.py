@@ -107,6 +107,30 @@ def test_fork_requires_cap_for_anonymous(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert payload["error"]["message"] == "CAPTCHA token is required."
 
 
+def test_fork_requires_cap_for_anonymous_session_claims(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    monkeypatch.setattr(fork_archive_routes, "_resolve_bearer_claims", lambda request: {"token_class": "session"})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
+    monkeypatch.setattr(fork_archive_routes, "_ensure_anonymous_access", lambda runid, wd: None)
+    monkeypatch.setattr(fork_archive_routes, "_resolve_user_from_claims", lambda claims: (None, None, None))
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["message"] == "CAPTCHA token is required."
+
+
 def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
@@ -268,12 +292,38 @@ def test_fork_session_claims_use_resolved_user_email_for_runid(
     monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: DummyRon())
 
     class DummyUser:
-        email = "mdobre@example.com"
+        def __init__(self) -> None:
+            self.id = 7
+            self.email = "mdobre@example.com"
+            self.runs: list[object] = []
 
+    class DummyRunRecord:
+        pass
+
+    class DummyUserDatastore:
+        def __init__(self) -> None:
+            self.created: list[tuple[str, str, object]] = []
+
+        def create_run(self, runid, source_config, owner):
+            self.created.append((runid, source_config, owner))
+            return DummyRunRecord()
+
+        def add_run_to_user(self, owner, run_record):
+            if run_record not in owner.runs:
+                owner.runs.append(run_record)
+
+    class DummyApp:
+        @contextlib.contextmanager
+        def app_context(self):
+            yield
+
+    user = DummyUser()
+    user_datastore = DummyUserDatastore()
+    _patch_user_model_lookup(monkeypatch, user, user_datastore)
     monkeypatch.setattr(
         fork_archive_routes,
         "_resolve_user_from_claims",
-        lambda claims: (DummyUser(), None, None),
+        lambda claims: (user, user_datastore, DummyApp()),
     )
 
     captured_emails: list[str] = []
@@ -299,6 +349,7 @@ def test_fork_session_claims_use_resolved_user_email_for_runid(
     assert payload["job_id"] == "job-session"
     assert payload["new_runid"] == "mdobre-prefixed-run"
     assert captured_emails == ["mdobre@example.com"]
+    assert len(user_datastore.created) == 1
 
 
 def test_fork_rebinds_detached_users_before_adding_run_to_user(

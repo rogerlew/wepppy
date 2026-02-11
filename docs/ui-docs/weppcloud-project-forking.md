@@ -25,6 +25,7 @@ Script: `wepppy/weppcloud/static/js/fork_console.js`
   - Polling failures fetch `/rq-engine/api/jobinfo/<job_id>` to populate stacktraces.
   - `job:completed`/`job:error` fallback handlers are idempotent.
 - Completion updates the console with the new run link; failure surfaces the status log + stacktrace panel.
+- Auth failures (`401`/`403`, including stale session-tab cases) now trigger a reload/sign-in prompt instead of silently continuing with stale page state.
 - Cancel uses `/rq-engine/api/canceljob/<job_id>` to request termination.
 
 ## Blueprint
@@ -40,8 +41,9 @@ Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 - `fork` (POST): queues `fork_rq` for the source run.
   - Payload: form fields `undisturbify` and optional `target_runid`.
   - Validates permissions (run owners, admin users, public runs, or ownerless runs).
+  - Session tokens that cannot resolve to an authenticated user are treated as anonymous requests (public-run checks + CAPTCHA required).
   - Allocates a new run ID via `awesome_codename` when no target is supplied.
-  - Registers the new run in the user database (when available).
+  - Registers the new run in the user database when owner/user context is available (authenticated `user` and authenticated `session` token classes).
   - Responds with `{ job_id, new_runid, undisturbify }`.
 
 ## RQ Jobs

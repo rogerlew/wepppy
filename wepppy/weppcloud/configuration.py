@@ -290,7 +290,7 @@ def config_app(app: Any):
     app.config["SESSION_KEY_PREFIX"] = "session:"
     app.config["SESSION_COOKIE_PATH"] = os.getenv("SESSION_COOKIE_PATH", "/")
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
-    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
     app.config["SESSION_COOKIE_SECURE"] = True
 
     redirect_scheme_raw = os.getenv("OAUTH_REDIRECT_SCHEME") or "https"

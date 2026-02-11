@@ -107,6 +107,7 @@ Fork console uses `wepppy/weppcloud/static/js/fork_console.js` for the same flow
 - blocks submission and triggers the floating prompt if the token is missing
 - enables the submit button after verification
 - includes `cap_token` in the POST payload
+- backend treats unresolved/stale session-token auth as anonymous, so `cap_token` remains mandatory unless a current authenticated user identity is present
 
 ## Invisible CAPTCHA Gate (anonymous-only)
 Some routes (run landing page + report pages) use invisible Cap.js for anonymous users. The flow:

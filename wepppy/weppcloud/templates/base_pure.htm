@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="{{ static_url('css/themes/all-themes.css') }}">
     {% block head_extras %}{% endblock %}
   </head>
-  <body class="wc-page">
+  <body class="wc-page"
+        data-user-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
+        data-site-prefix="{{ site_prefix | default('', true) }}">
     {% block site_header %}
     <header class="wc-header">
       <div class="wc-header__inner {% block header_container_class %}wc-container{% endblock %}">
@@ -37,6 +39,7 @@
     </main>
     {% block footer %}{% endblock %}
     <script src="{{ static_url('js/theme.js') }}" defer></script>
+    <script src="{{ static_url('js/session_heartbeat.js') }}" defer></script>
     {% block script_extras %}{% endblock %}
   </body>
 </html>

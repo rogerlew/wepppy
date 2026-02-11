@@ -1,10 +1,11 @@
 from collections import Counter
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 import json
-from flask import send_from_directory
+from flask import send_from_directory, session
 from flask_security import current_user
 
 from ._common import *  # noqa: F401,F403
@@ -35,7 +36,7 @@ def _is_same_origin_post() -> bool:
 
     referer = request.headers.get("Referer", "").strip()
     if not referer:
-        return True
+        return False
 
     parsed = urlparse(referer)
     if not parsed.scheme or not parsed.netloc:
@@ -69,6 +70,23 @@ def issue_rq_engine_token():
         return response
 
     return jsonify({"token": token})
+
+
+@weppcloud_site_bp.route('/api/auth/session-heartbeat', methods=['POST'])
+def session_heartbeat():
+    if current_user.is_anonymous:
+        response = error_factory('Authentication required.')
+        response.status_code = 401
+        return response
+    if not _is_same_origin_post():
+        response = error_factory('Cross-origin request blocked.')
+        response.status_code = 403
+        return response
+
+    heartbeat_at = int(time.time())
+    session["_heartbeat_ts"] = heartbeat_at
+    session.modified = True
+    return jsonify({"ok": True, "heartbeat_at": heartbeat_at})
 
 
 def _resolve_access_log_path() -> Path:

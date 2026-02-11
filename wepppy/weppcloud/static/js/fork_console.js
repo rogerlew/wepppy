@@ -136,6 +136,31 @@
     return Boolean(body && typeof body === "object" && (body.error || body.errors));
   }
 
+  function _normalizeErrorCode(code) {
+    if (typeof code !== "string") {
+      return "";
+    }
+    return code.trim().toLowerCase();
+  }
+
+  function _extractErrorCode(body) {
+    if (!body || typeof body !== "object") {
+      return "";
+    }
+    if (body.error && typeof body.error === "object") {
+      return _normalizeErrorCode(body.error.code);
+    }
+    return _normalizeErrorCode(body.code);
+  }
+
+  function isAuthFailureStatus(status, body) {
+    if (status === 401 || status === 403) {
+      return true;
+    }
+    var code = _extractErrorCode(body);
+    return code === "unauthorized" || code === "forbidden";
+  }
+
   function initForkConsole(container) {
     if (!container || container.__forkConsoleInit === true) {
       return;
@@ -186,6 +211,7 @@
     var newRunId = "";
     var poller = null;
     var completionState = { completed: false, failed: false };
+    var authRecoveryTriggered = false;
 
     function initCapElements() {
       if (!capRequired || !capSection) {
@@ -253,7 +279,10 @@
           return resp.json().then(function (payload) {
             if (!resp.ok) {
               var message = resolveErrorMessage(payload, "Session token request failed");
-              throw new Error(message);
+              var error = new Error(message);
+              error.status = resp.status;
+              error.body = payload;
+              throw error;
             }
             return payload;
           });
@@ -264,6 +293,39 @@
           }
           return payload.token;
         });
+    }
+
+    function handleStaleAuth(message) {
+      if (authRecoveryTriggered) {
+        return;
+      }
+      authRecoveryTriggered = true;
+      var prompt = "Your session expired. Reload this page and sign in again.";
+      if (message) {
+        prompt = message + " " + prompt;
+      }
+      if (consoleBlock) {
+        consoleBlock.dataset.state = "critical";
+        consoleBlock.textContent = prompt;
+      }
+      appendStatus(prompt);
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      window.alert(prompt);
+      var userAgent = window.navigator && window.navigator.userAgent
+        ? String(window.navigator.userAgent).toLowerCase()
+        : "";
+      if (userAgent.indexOf("jsdom") !== -1) {
+        return;
+      }
+      if (window.location && typeof window.location.reload === "function") {
+        try {
+          window.location.reload();
+        } catch (err) {
+          console.warn("Reload failed after auth expiration prompt:", err);
+        }
+      }
     }
 
     function requestWithBearerToken(url, options, token) {
@@ -660,7 +722,7 @@
                 body = text;
               }
             }
-            return { ok: resp.ok, body: body };
+            return { ok: resp.ok, status: resp.status, body: body };
           });
         });
       } else {
@@ -669,7 +731,7 @@
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: payload.toString()
         }).then(function (result) {
-          return { ok: true, body: result && result.body ? result.body : {} };
+          return { ok: true, status: 200, body: result && result.body ? result.body : {} };
         });
       }
 
@@ -678,6 +740,10 @@
           var body = result && result.body ? result.body : {};
           if (!result || !result.ok || hasErrorPayload(body)) {
             var errMsg = resolveErrorMessage(body, "Fork submission failed");
+            if (!capRequired && isAuthFailureStatus(result && result.status, body)) {
+              handleStaleAuth(errMsg);
+              return;
+            }
             if (consoleBlock) {
               consoleBlock.dataset.state = "critical";
               consoleBlock.textContent = "Error: " + errMsg;
@@ -732,6 +798,11 @@
           }
         })
         .catch(function (err) {
+          if (!capRequired && isAuthFailureStatus(err && err.status, err && err.body)) {
+            var authMessage = err && err.message ? String(err.message) : "Fork submission failed";
+            handleStaleAuth(authMessage);
+            return;
+          }
           var detail = err && err.detail ? String(err.detail) : null;
           var message = detail || (err && err.message ? err.message : String(err));
           var detailsBody = null;
@@ -777,6 +848,11 @@
             window.alert("Job canceled");
           })
           .catch(function (err) {
+            if (!capRequired && isAuthFailureStatus(err && err.status, err && err.body)) {
+              var authMessage = err && err.message ? String(err.message) : "Unable to cancel job.";
+              handleStaleAuth(authMessage);
+              return;
+            }
             var detail = err && err.detail ? String(err.detail) : null;
             var message = detail || (err && err.message ? err.message : String(err));
             console.error(err);
@@ -817,6 +893,11 @@
           window.alert("Job canceled");
         })
         .catch(function (err) {
+          if (!capRequired && isAuthFailureStatus(err && err.status, err && err.body)) {
+            var authMessage = err && err.message ? String(err.message) : "Unable to cancel job.";
+            handleStaleAuth(authMessage);
+            return;
+          }
           console.error(err);
           appendStatus("Cancel request failed: " + (err.message || err));
           window.alert("Unable to cancel job.");

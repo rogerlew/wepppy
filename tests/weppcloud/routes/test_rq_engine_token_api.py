@@ -54,7 +54,10 @@ def test_issue_rq_engine_token_returns_token(monkeypatch: pytest.MonkeyPatch) ->
     )
 
     with app.test_client() as client:
-        response = client.post("/weppcloud/api/auth/rq-engine-token")
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-token",
+            headers={"Origin": "http://localhost"},
+        )
 
     assert response.status_code == 200
     payload = response.get_json()
@@ -147,8 +150,115 @@ def test_issue_rq_engine_token_handles_jwt_config_error(monkeypatch: pytest.Monk
     )
 
     with app.test_client() as client:
-        response = client.post("/weppcloud/api/auth/rq-engine-token")
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-token",
+            headers={"Origin": "http://localhost"},
+        )
 
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "JWT configuration error: missing secret"
+
+
+def test_session_heartbeat_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post("/weppcloud/api/auth/session-heartbeat")
+
+    assert response.status_code == 401
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Authentication required."
+
+
+def test_session_heartbeat_blocks_cross_origin(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/session-heartbeat",
+            headers={"Origin": "https://evil.example"},
+        )
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_session_heartbeat_updates_session(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/session-heartbeat",
+            headers={"Origin": "http://localhost"},
+        )
+
+        assert response.status_code == 200
+        payload = response.get_json()
+        assert payload["ok"] is True
+        assert isinstance(payload["heartbeat_at"], int)
+
+        with client.session_transaction() as sess:
+            assert isinstance(sess.get("_heartbeat_ts"), int)
+
+
+def test_issue_rq_engine_token_blocks_missing_origin_and_referer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "_issue_rq_engine_token",
+        lambda: "rq-user-token",
+    )
+
+    with app.test_client() as client:
+        response = client.post("/weppcloud/api/auth/rq-engine-token")
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Cross-origin request blocked."
+
+
+def test_session_heartbeat_blocks_missing_origin_and_referer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post("/weppcloud/api/auth/session-heartbeat")
+
+    assert response.status_code == 403
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Cross-origin request blocked."

@@ -62,6 +62,7 @@ def test_build_session_redis_uses_session_url_helper(monkeypatch: pytest.MonkeyP
 def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.delenv("SESSION_COOKIE_SAMESITE", raising=False)
     app = _build_configured_app(monkeypatch)
 
     assert app.config["MAIL_SERVER"] == "mx.uidaho.edu"
@@ -79,6 +80,7 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
         app.config["EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE"]
         == "Your WEPPcloud password was changed"
     )
+    assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
 
 
 def test_config_app_uses_uidaho_mail_defaults_when_zoho_password_missing(
@@ -131,3 +133,11 @@ def test_config_app_sets_gl_dashboard_batch_enabled_from_env(
     app = _build_configured_app(monkeypatch)
 
     assert app.config["GL_DASHBOARD_BATCH_ENABLED"] is expected
+
+
+def test_config_app_allows_session_cookie_samesite_env_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SESSION_COOKIE_SAMESITE", "Strict")
+    app = _build_configured_app(monkeypatch)
+    assert app.config["SESSION_COOKIE_SAMESITE"] == "Strict"

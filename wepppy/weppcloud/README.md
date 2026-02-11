@@ -124,6 +124,7 @@ The application is configured via environment variables, typically defined in `d
 | `WEPPCLOUD_RUNS_DIR` | `/geodata/weppcloud_runs` | Directory for run storage |
 | `TEST_SUPPORT_ENABLED` | `false` | Enable test support endpoints |
 | `DTALE_INTERNAL_TOKEN` | *(optional)* | Token for D-Tale integration |
+| `SESSION_COOKIE_SAMESITE` | `Lax` | Flask session cookie SameSite policy (`Lax`, `Strict`, or `None`) |
 | `ZOHO_NOREPLY_EMAIL` | *(optional)* | Zoho SMTP sender account; when paired with `ZOHO_NOREPLY_EMAIL_PASSWORD`, Flask-Mail uses Zoho (`smtp.zoho.com:587` with TLS) |
 | `ZOHO_NOREPLY_EMAIL_PASSWORD` | *(optional)* | Password or app password for `ZOHO_NOREPLY_EMAIL`; both Zoho vars must be non-empty to enable Zoho SMTP |
 
@@ -133,6 +134,18 @@ The application is configured via environment variables, typically defined in `d
 - **Flask-Security**: Authentication and authorization framework
 - **Flask-Session**: Server-side session storage (Redis-backed)
 - **Redis**: Caching, pub/sub messaging, and distributed locking
+
+### Session Lifecycle
+
+- Authoritative session contract: `docs/schemas/weppcloud-session-contract.md`.
+- Session lifecycle implementation spec: `docs/dev-notes/weppcloud-session-lifecycle.spec.md`.
+- Flask sessions are stored in Redis with a 12-hour lifetime.
+- Session cookie defaults are `Secure=True` and `SameSite=Lax` (override with `SESSION_COOKIE_SAMESITE`).
+- Pages rendered from `templates/base_pure.htm` (including run subpages such as fork/archive/readme/reports) load `static/js/session_heartbeat.js`, which sends a periodic heartbeat while the tab is open.
+- Heartbeat endpoint: `POST /weppcloud/api/auth/session-heartbeat`
+  - Requires authenticated user + same-origin POST
+  - Updates Flask session state so Redis TTL is refreshed during long-running rq-engine workflows
+- RQ-engine token minting endpoint: `POST /weppcloud/api/auth/rq-engine-token`
 
 ### URL Structure
 

@@ -2,7 +2,8 @@
 
 This document is the authoritative contract for WEPPcloud JWTs, including token
 classes, required claims, and validation expectations. Response payloads and
-error shapes must follow `docs/schemas/rq-response-contract.md`.
+error shapes must follow `docs/schemas/rq-response-contract.md`. Browser/session
+lifecycle behavior must follow `docs/schemas/weppcloud-session-contract.md`.
 
 ## Normative status (strict and authoritative)
 - This specification is normative, strict, and authoritative for JWT/auth behavior.

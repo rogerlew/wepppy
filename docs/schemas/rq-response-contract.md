@@ -1,5 +1,6 @@
 # RQ Response Contract
 > Authoritative contract for rq-engine JSON responses (legacy weppcloud rq/api is removed).
+> **See also:** `docs/schemas/weppcloud-session-contract.md` for browser/session lifecycle rules.
 
 ## Scope
 - Applies to rq-engine (FastAPI). Legacy weppcloud rq/api routes are removed.

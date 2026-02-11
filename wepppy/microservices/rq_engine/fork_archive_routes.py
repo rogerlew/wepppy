@@ -109,6 +109,12 @@ def _resolve_user_from_claims(
     return user, user_datastore, flask_app
 
 
+def _token_class_from_claims(claims: Mapping[str, Any] | None) -> str:
+    if claims is None:
+        return ""
+    return str(claims.get("token_class") or "").strip().lower()
+
+
 def _resolve_cap_config(request: Request) -> tuple[str, str, str]:
     base_url = os.getenv("CAP_BASE_URL", "")
     site_key = os.getenv("CAP_SITE_KEY", "")
@@ -201,7 +207,20 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 status_code=404,
             )
 
-        if claims is None:
+        token_class = _token_class_from_claims(claims)
+        resolved_user = None
+        resolved_user_datastore = None
+        resolved_user_flask_app = None
+        if claims is not None and token_class in {"user", "session"}:
+            (
+                resolved_user,
+                resolved_user_datastore,
+                resolved_user_flask_app,
+            ) = _resolve_user_from_claims(claims)
+
+        is_anonymous_session = token_class == "session" and resolved_user is None
+
+        if claims is None or is_anonymous_session:
             _ensure_anonymous_access(runid, wd)
 
         payload = await parse_request_payload(request, boolean_fields={"undisturbify"})
@@ -218,7 +237,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             except Exception:
                 return error_response("Invalid target_runid", status_code=400, code="validation_error")
 
-        if claims is None:
+        if claims is None or is_anonymous_session:
             cap_token = payload.get("cap_token", "")
             if isinstance(cap_token, list):
                 cap_token = cap_token[0] if cap_token else ""
@@ -226,9 +245,6 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
 
         source_config = Ron.getInstance(wd).config_stem
         owners = list(get_run_owners_lazy(runid) or [])
-        resolved_user = None
-        if claims is not None:
-            resolved_user, _, _ = _resolve_user_from_claims(claims)
 
         dir_created = False
         while not dir_created:
@@ -269,15 +285,20 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 raise RuntimeError(f"Run directory already exists: {new_wd}")
 
         register_run = not new_runid.startswith("profile;;")
-        should_register = register_run and (owners or (claims is not None and claims.get("token_class") == "user"))
+        is_user_token = token_class == "user"
+        is_authenticated_session_token = token_class == "session" and resolved_user is not None
+        should_register = register_run and (owners or is_user_token or is_authenticated_session_token)
         if should_register:
             user = None
             user_datastore = None
             flask_app = None
-            if claims is not None and claims.get("token_class") == "user":
-                user, user_datastore, flask_app = _resolve_user_from_claims(claims)
+            if is_user_token or is_authenticated_session_token:
+                user = resolved_user
+                user_datastore = resolved_user_datastore
+                flask_app = resolved_user_flask_app
                 if user is None or user_datastore is None or flask_app is None:
-                    return error_response("Could not add run to user database", status_code=500)
+                    if is_user_token:
+                        return error_response("Could not add run to user database", status_code=500)
 
             if user_datastore is None or flask_app is None:
                 from wepppy.weppcloud.app import app as flask_app, user_datastore
