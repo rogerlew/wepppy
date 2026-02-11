@@ -82,6 +82,7 @@ class CulvertsRunner(NoDbBase):
             self._completed_at: Optional[str] = None
             self._retention_days: Optional[int] = None
             self._summary: Optional[Dict[str, Any]] = None
+            self._rq_job_ids: Dict[str, str] = {}
             self._run_config: str = cfg_fn
             order_reduction = self.config_get_int(
                 "culvert_runner", "order_reduction_passes", 1
@@ -137,6 +138,13 @@ class CulvertsRunner(NoDbBase):
 
         os.makedirs(self.runs_dir, exist_ok=True)
 
+    @classmethod
+    def _post_instance_loaded(cls, instance):
+        instance = super()._post_instance_loaded(instance)
+        if not hasattr(instance, "_rq_job_ids") or instance._rq_job_ids is None:
+            instance._rq_job_ids = {}
+        return instance
+
     @property
     def runs_dir(self) -> str:
         return _join(self.wd, "runs")
@@ -173,6 +181,10 @@ class CulvertsRunner(NoDbBase):
     @property
     def runs(self) -> Dict[str, Dict[str, Any]]:
         return deepcopy(self._runs)
+
+    @property
+    def rq_job_ids(self) -> Dict[str, str]:
+        return deepcopy(self._rq_job_ids) if self._rq_job_ids else {}
 
     @property
     def completed_at(self) -> Optional[str]:
@@ -231,6 +243,17 @@ class CulvertsRunner(NoDbBase):
         if value is None:
             return None
         return float(value)
+
+    def set_rq_job_id(self, key: str, job_id: Optional[str]) -> None:
+        if not key:
+            return
+        with self.locked():
+            if not self._rq_job_ids:
+                self._rq_job_ids = {}
+            if job_id:
+                self._rq_job_ids[key] = job_id
+            else:
+                self._rq_job_ids.pop(key, None)
 
     def _select_stream_sources_for_run(
         self,

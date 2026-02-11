@@ -44,6 +44,7 @@ from wepppy.topo.watershed_collection import WatershedFeature
 logger = logging.getLogger(__name__)
 
 TIMEOUT: int = 43_200
+CULVERT_BATCH_RQ_JOB_KEY = "run_culvert_batch_rq"
 
 D8_TO_DELTA: Dict[int, Tuple[int, int]] = {
     1: (-1, 1),
@@ -109,6 +110,16 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    if job is not None:
+        try:
+            runner.set_rq_job_id(CULVERT_BATCH_RQ_JOB_KEY, job.id)
+        except Exception as exc:
+            logger.warning(
+                "culvert_batch %s: failed to persist parent job id %s - %s",
+                culvert_batch_uuid,
+                job.id,
+                exc,
+            )
 
     _attach_batch_logger(runner)
     logger.info(f"culvert_batch {culvert_batch_uuid}: starting")

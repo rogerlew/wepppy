@@ -18,6 +18,7 @@ from rq import Queue
 from starlette.datastructures import UploadFile
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.microservices.culvert_payload_validator import (
     ValidationIssue,
     format_validation_errors,
@@ -38,6 +39,7 @@ router = APIRouter()
 
 MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 CULVERT_BROWSE_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
+CULVERT_BATCH_RQ_JOB_KEY = "run_culvert_batch_rq"
 
 
 def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, Any]:
@@ -154,6 +156,17 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         )
 
         job_id = _enqueue_culvert_batch_job(culvert_batch_uuid)
+        try:
+            runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
+            if runner is None:
+                runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+            runner.set_rq_job_id(CULVERT_BATCH_RQ_JOB_KEY, job_id)
+        except Exception:
+            logger.warning(
+                "rq-engine culvert batch: failed to persist parent job id for %s",
+                culvert_batch_uuid,
+                exc_info=True,
+            )
         status_url = f"/rq-engine/api/jobstatus/{job_id}"
         browse_token_payload = _mint_culvert_browse_token(
             culvert_batch_uuid,
