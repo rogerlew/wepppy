@@ -313,6 +313,9 @@ WEPPCLOUDR_CONTAINER=weppcloudr
 # WEPPCLOUD_PORT=8000
 # REDIS_PORT=6379
 # POSTGRES_PORT=5432
+
+# Optional: Enable GL Dashboard batch route (/batch/_/<batch_name>/gl-dashboard)
+# GL_DASHBOARD_BATCH_ENABLED=false
 EOF
 
 # Secure the .env file

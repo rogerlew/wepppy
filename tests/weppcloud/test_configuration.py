@@ -108,3 +108,26 @@ def test_config_app_enables_zoho_mail_when_credentials_present(
     assert app.config["MAIL_USERNAME"] == "noreply@wepp.cloud"
     assert app.config["MAIL_PASSWORD"] == "zoho-app-password"
     assert app.config["SECURITY_EMAIL_SENDER"] == "noreply@wepp.cloud"
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (None, False),
+        ("true", True),
+        ("1", True),
+        ("off", False),
+        ("0", False),
+    ],
+)
+def test_config_app_sets_gl_dashboard_batch_enabled_from_env(
+    monkeypatch: pytest.MonkeyPatch, raw: str | None, expected: bool
+) -> None:
+    if raw is None:
+        monkeypatch.delenv("GL_DASHBOARD_BATCH_ENABLED", raising=False)
+    else:
+        monkeypatch.setenv("GL_DASHBOARD_BATCH_ENABLED", raw)
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["GL_DASHBOARD_BATCH_ENABLED"] is expected

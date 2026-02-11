@@ -1,6 +1,6 @@
 # Mini Work Package: GL Dashboard Additive Batch Mode With Composite Hillslope Keys
 Status: Implemented (Batch Map MVP; Phase 6 Deferred)
-Last Updated: 2026-02-10
+Last Updated: 2026-02-11
 Primary Areas: `wepppy/weppcloud/routes/gl_dashboard.py`, `wepppy/weppcloud/templates/gl_dashboard.htm`, `wepppy/weppcloud/static/js/gl-dashboard.js`, `wepppy/weppcloud/static/js/gl-dashboard/state.js`, `wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js`, `wepppy/weppcloud/static/js/gl-dashboard/map/layers.js`, `wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js`, `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js`, `wepppy/weppcloud/static/js/gl-dashboard/data/*.js`, `tests/weppcloud/routes/*`, `wepppy/weppcloud/static/js/gl-dashboard/__tests__/*`, `wepppy/weppcloud/static-src/tests/smoke/*`
 
 ## Objective
@@ -20,6 +20,7 @@ Batch mode currently supports:
 - readiness gate: exclude runs missing required geometry; surface degraded optional endpoints in UI
 - batch mode short-circuits async detection when no runs are ready (avoid accidental run-scoped fetches against `_base`)
 - batch mode hides OpenET month slider (OpenET remains run-scoped)
+- batch mode feature flag can be set via environment (`GL_DASHBOARD_BATCH_ENABLED`) in Docker stacks
 
 Batch mode currently does not support:
 - batch Query Engine fan-out (WEPP, RAP, OpenET, WATAR remain run-scoped)
