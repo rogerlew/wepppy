@@ -25,7 +25,7 @@ class DummyUser:
 
 def test_authorize_strips_omni_suffix_for_parent_ownership_checks(monkeypatch: pytest.MonkeyPatch) -> None:
     app = Flask(__name__)
-    # authorize() is a no-op when the app doesn't have a login_manager.
+    # authorize() requires login_manager to be configured.
     app.login_manager = SimpleNamespace()
 
     monkeypatch.setattr(flask_login, "current_user", DummyUser())
@@ -91,3 +91,44 @@ def test_authorize_allows_batch_runids_for_admin(monkeypatch: pytest.MonkeyPatch
 
     with app.test_request_context("/"):
         helpers.authorize("batch;;spring-2025;;run-001;;omni;;treated", "cfg")
+
+
+def test_authorize_rejects_when_login_manager_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = Flask(__name__)
+
+    monkeypatch.setattr(flask_login, "current_user", DummyUser())
+    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: pytest.fail("get_wd should not be called"))
+    import wepppy.weppcloud.app as app_module
+
+    monkeypatch.setattr(
+        app_module,
+        "get_run_owners",
+        lambda *_args, **_kwargs: pytest.fail("get_run_owners should not be called"),
+    )
+
+    with app.test_request_context("/"):
+        with pytest.raises(Forbidden):
+            helpers.authorize("decimal-pleasing", "cfg")
+
+
+def test_authorize_rejects_when_role_lookup_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    class BrokenUser:
+        def has_role(self, _role: str) -> bool:
+            raise RuntimeError("broken role backend")
+
+    app = Flask(__name__)
+    app.login_manager = SimpleNamespace()
+
+    monkeypatch.setattr(flask_login, "current_user", BrokenUser())
+    monkeypatch.setattr(helpers, "get_wd", lambda *_args, **_kwargs: pytest.fail("get_wd should not be called"))
+    import wepppy.weppcloud.app as app_module
+
+    monkeypatch.setattr(
+        app_module,
+        "get_run_owners",
+        lambda *_args, **_kwargs: pytest.fail("get_run_owners should not be called"),
+    )
+
+    with app.test_request_context("/"):
+        with pytest.raises(Forbidden):
+            helpers.authorize("decimal-pleasing", "cfg")

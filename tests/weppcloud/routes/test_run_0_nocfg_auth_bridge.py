@@ -174,6 +174,45 @@ def test_runs0_nocfg_rejects_dot_segment_traversal_next(
     assert called is False
 
 
+def test_set_run_session_jwt_cookie_sets_secure_for_forwarded_https(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (42, ["User"]))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+
+    with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(response, runid=runid, config="cfg") is True
+
+    set_cookie = response.headers.get("Set-Cookie", "")
+    assert "Secure" in set_cookie
+
+
+def test_set_run_session_jwt_cookie_secure_can_be_disabled_with_env_override(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (42, ["User"]))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+    monkeypatch.setenv("WEPP_AUTH_SESSION_COOKIE_SECURE", "false")
+
+    with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(response, runid=runid, config="cfg") is True
+
+    set_cookie = response.headers.get("Set-Cookie", "")
+    assert "Secure" not in set_cookie
+
+
 @pytest.mark.parametrize(
     "next_path",
     [

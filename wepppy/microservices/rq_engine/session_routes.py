@@ -290,13 +290,39 @@ def _cookie_samesite() -> str:
     return "lax"
 
 
-def _set_session_jwt_cookie(response: JSONResponse, *, runid: str, config: str, token: str) -> None:
+def _request_is_secure(request: Request) -> bool:
+    forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
+    if forwarded_proto in {"https", "http"}:
+        return forwarded_proto == "https"
+
+    forwarded_ssl = (request.headers.get("X-Forwarded-Ssl") or "").strip().lower()
+    if forwarded_ssl in {"on", "off"}:
+        return forwarded_ssl == "on"
+
+    return (request.url.scheme or "").lower() == "https"
+
+
+def _session_cookie_secure(request: Request) -> bool:
+    default_secure = _request_is_secure(request)
+    if os.getenv("WEPP_AUTH_SESSION_COOKIE_SECURE") is None:
+        return default_secure
+    return _bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=default_secure)
+
+
+def _set_session_jwt_cookie(
+    response: JSONResponse,
+    *,
+    runid: str,
+    config: str,
+    token: str,
+    request: Request,
+) -> None:
     response.set_cookie(
         key=_browse_jwt_cookie_name(),
         value=token,
         max_age=SESSION_TOKEN_TTL_SECONDS,
         httponly=True,
-        secure=_bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=False),
+        secure=_session_cookie_secure(request),
         samesite=_cookie_samesite(),
         path=_session_jwt_cookie_path(runid, config),
     )
@@ -386,7 +412,13 @@ def issue_session_token(runid: str, config: str, request: Request) -> JSONRespon
         response = JSONResponse(payload)
         token_value = token_payload.get("token")
         if isinstance(token_value, str) and token_value:
-            _set_session_jwt_cookie(response, runid=runid, config=config, token=token_value)
+            _set_session_jwt_cookie(
+                response,
+                runid=runid,
+                config=config,
+                token=token_value,
+                request=request,
+            )
         return response
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)

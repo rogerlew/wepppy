@@ -66,6 +66,45 @@ def test_session_token_rejects_wrong_run(monkeypatch: pytest.MonkeyPatch) -> Non
     assert payload["error"]["code"] == "forbidden"
 
 
+def test_session_token_cookie_sets_secure_for_forwarded_https(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+
+    token = _issue_token(monkeypatch, runs=["run-1"])
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Authorization": f"Bearer {token}", "X-Forwarded-Proto": "https"},
+        )
+
+    assert response.status_code == 200
+    assert "Secure" in response.headers["set-cookie"]
+
+
+def test_session_token_cookie_secure_can_be_disabled_with_env_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_SESSION_COOKIE_SECURE", "false")
+
+    token = _issue_token(monkeypatch, runs=["run-1"])
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/session-token",
+            headers={"Authorization": f"Bearer {token}", "X-Forwarded-Proto": "https"},
+        )
+
+    assert response.status_code == 200
+    assert "Secure" not in response.headers["set-cookie"]
+
+
 def test_session_token_rejects_service_token_without_run_scope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -22,6 +22,17 @@ def _set_auth_env(monkeypatch):
     monkeypatch.setenv("WEPP_MCP_JWT_SECRET", "unit-test-secret")
     monkeypatch.setenv("WEPP_MCP_JWT_ALGORITHMS", "HS256")
     _clear_auth_cache()
+    from wepppy.query_engine.app.mcp import auth
+
+    class _NoopRedis:
+        def exists(self, _key: str) -> int:
+            return 0
+
+        def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(auth, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(auth.redis, "Redis", lambda **_kwargs: _NoopRedis())
 
 
 def test_create_mcp_app(monkeypatch):
@@ -104,6 +115,7 @@ def _issue_token(auth_module, runid: str | None = None, scopes: Sequence[str] | 
             "sub": "user-123",
             "scope": scope_value,
             "runs": runs_payload,
+            "jti": "router-test-jti",
         },
         "unit-test-secret",
         algorithm="HS256",

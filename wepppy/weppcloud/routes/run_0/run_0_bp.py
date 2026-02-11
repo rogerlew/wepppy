@@ -246,6 +246,25 @@ def _cookie_samesite() -> str:
     return "lax"
 
 
+def _request_is_secure() -> bool:
+    forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
+    if forwarded_proto in {"https", "http"}:
+        return forwarded_proto == "https"
+
+    forwarded_ssl = (request.headers.get("X-Forwarded-Ssl") or "").strip().lower()
+    if forwarded_ssl in {"on", "off"}:
+        return forwarded_ssl == "on"
+
+    return bool(request.is_secure)
+
+
+def _session_cookie_secure() -> bool:
+    default_secure = _request_is_secure()
+    if os.getenv("WEPP_AUTH_SESSION_COOKIE_SECURE") is None:
+        return default_secure
+    return _bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=default_secure)
+
+
 def _parse_user_id(raw: object) -> int | None:
     if raw is None or isinstance(raw, bool):
         return None
@@ -389,7 +408,7 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
         value=token_value,
         max_age=SESSION_TOKEN_TTL_SECONDS,
         httponly=True,
-        secure=_bool_env("WEPP_AUTH_SESSION_COOKIE_SECURE", default=False),
+        secure=_session_cookie_secure(),
         samesite=_cookie_samesite(),
         path=_browse_jwt_cookie_path(runid, config),
     )

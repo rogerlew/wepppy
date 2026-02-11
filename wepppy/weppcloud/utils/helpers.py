@@ -597,13 +597,13 @@ def authorize(runid: str, config: str, require_owner: bool = False) -> None:
 
     login_manager = getattr(current_app, "login_manager", None)
     if login_manager is None:
-        return
+        abort(403)
 
     try:
         if current_user.has_role("Admin") or current_user.has_role("Root"):
             return
     except Exception:
-        return
+        abort(403)
 
     auth_runid = _strip_omni_suffix_runid(runid)
 

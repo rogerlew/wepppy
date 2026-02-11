@@ -14,9 +14,12 @@ from functools import lru_cache
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
+import redis
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
 
 DEFAULT_SCOPE_SEPARATOR = " "
@@ -223,6 +226,34 @@ def _build_principal(claims: Mapping[str, Any], config: MCPAuthConfig) -> MCPPri
         issuer=issuer if isinstance(issuer, str) else None,
         claims=dict(claims),
     )
+
+
+def _check_revocation(token_id: str | None) -> None:
+    """Reject revoked JWT identifiers from the shared denylist."""
+    if not token_id:
+        raise Unauthorized(detail="Token missing jti claim")
+
+    key = f"auth:jwt:revoked:{token_id}"
+    conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        exists_fn = getattr(redis_conn, "exists", None)
+        if callable(exists_fn):
+            is_revoked = bool(exists_fn(key))
+        else:
+            get_fn = getattr(redis_conn, "get", None)
+            is_revoked = bool(callable(get_fn) and get_fn(key))
+    except AuthError:
+        raise
+    except Exception as exc:
+        raise Unauthorized(detail="Failed to validate token revocation") from exc
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+
+    if is_revoked:
+        raise Forbidden(detail="Token has been revoked")
 
 
 def decode_bearer_token(token: str, config: MCPAuthConfig) -> MCPPrincipal:
@@ -534,6 +565,7 @@ class MCPAuthMiddleware(BaseHTTPMiddleware):
                 return await call_next(request)
             token = _extract_bearer_token(header)
             principal = decode_bearer_token(token, self._config)
+            _check_revocation(principal.token_id)
             request.state.mcp_principal = principal
         except AuthError as exc:
             payload = {"errors": [{"code": exc.code, "detail": exc.detail}]}

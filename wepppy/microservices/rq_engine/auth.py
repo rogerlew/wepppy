@@ -175,9 +175,20 @@ def _check_revocation(jti: str) -> None:
 
     key = f"auth:jwt:revoked:{jti}"
     conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
-    with redis.Redis(**conn_kwargs) as redis_conn:
-        if redis_conn.exists(key):
+    redis_conn = redis.Redis(**conn_kwargs)
+    try:
+        exists_fn = getattr(redis_conn, "exists", None)
+        if callable(exists_fn):
+            is_revoked = bool(exists_fn(key))
+        else:
+            get_fn = getattr(redis_conn, "get", None)
+            is_revoked = bool(callable(get_fn) and get_fn(key))
+        if is_revoked:
             raise AuthError("Token has been revoked", status_code=403, code="forbidden")
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
 
 
 def _check_session_marker(session_id: str, runid: str) -> None:
@@ -196,7 +207,7 @@ def _check_session_marker(session_id: str, runid: str) -> None:
 
 
 def require_session_marker(claims: Mapping[str, Any], runid: str) -> None:
-    token_class = claims.get("token_class")
+    token_class = str(claims.get("token_class") or "").strip().lower()
     if token_class != "session":
         return
 
@@ -214,7 +225,7 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
     if not runid:
         return
 
-    token_class = claims.get("token_class")
+    token_class = str(claims.get("token_class") or "").strip().lower()
     if token_class == "session":
         require_session_marker(claims, runid)
         return
@@ -223,6 +234,8 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
         return
 
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
+    if token_class in {"service", "mcp"} and not run_claims:
+        raise AuthError("Token missing run scope", status_code=403, code="forbidden")
     if run_claims and str(runid) not in run_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
 
