@@ -157,7 +157,7 @@ pfdf @ git+https://github.com/rogerlew/usgs-pfdf
 pbr==5.8.0
 pexpect==4.8.0
 pickleshare==0.7.5
-pillow==10.3.0
+pillow==12.1.1
 pint==0.23
 platformdirs==2.5.1
 plotnine==0.13.6
