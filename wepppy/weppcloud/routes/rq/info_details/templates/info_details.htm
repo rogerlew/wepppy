@@ -1,0 +1,150 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}RQ Info Details{% endblock %}
+
+{% block body_container_class %}wc-container wc-container--fluid{% endblock %}
+{% block header_container_class %}wc-container wc-container--fluid{% endblock %}
+
+{% block body %}
+<section class="wc-stack wc-table-page wc-stack">
+  <header class="wc-stack">
+    <div class="wc-console-header">
+      <div class="wc-console-header__primary">
+        <h1 class="wc-heading__title">RQ Info Details</h1>
+        {% if subtitle %}
+          <p class="wc-text-muted">{{ subtitle }}</p>
+        {% endif %}
+      </div>
+      {% if actions %}
+        <div class="wc-console-actions">
+          {% for action in actions %}
+            {% set classes = 'pure-button' %}
+            {% if action.get('variant') %}
+              {% set classes = classes + ' ' + action.get('variant') %}
+            {% endif %}
+            <a class="{{ classes }}"
+               href="{{ action.get('href') }}"
+               {% if action.get('target') %}target="{{ action.get('target') }}"{% endif %}
+               {% if action.get('rel') %}rel="{{ action.get('rel') }}"{% endif %}>
+              {{ action.get('label') }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2>Recently Completed Jobs</h2>
+      <p class="wc-text-muted">Jobs that ended within the lookback window across default and batch queues.</p>
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense wc-table--striped">
+        <thead>
+          <tr>
+            <th scope="col">Ended</th>
+            <th scope="col">Queue</th>
+            <th scope="col">Status</th>
+            <th scope="col">Worker</th>
+            <th scope="col">Job</th>
+            <th scope="col">Function</th>
+            <th scope="col">Run</th>
+            <th scope="col">Submitter</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if recent_jobs %}
+            {% for job in recent_jobs %}
+              <tr>
+                <td><code>{{ job.ended_at or '-' }}</code></td>
+                <td><code>{{ job.queue or '-' }}</code></td>
+                <td><code>{{ job.status or job.registry or '-' }}</code></td>
+                <td><code>{{ job.worker_name or '-' }}</code></td>
+                <td>
+                  <a href="{{ url_for_run('rq_job_dashboard.job_dashboard_route', job_id=job.job_id) }}" target="_blank" rel="noopener">
+                    <code>{{ job.job_id }}</code>
+                  </a>
+                </td>
+                <td><code>{{ job.func_name or '-' }}</code></td>
+                <td>
+                  {% if job.runid %}
+                    <a href="{{ url_for_run('run_0.runs0_nocfg', runid=job.runid) }}" target="_blank" rel="noopener">
+                      <code>{{ job.runid }}</code>
+                    </a>
+                  {% else %}
+                    <code>-</code>
+                  {% endif %}
+                </td>
+                <td><code>{{ job.submitter or '-' }}</code></td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="8" class="wc-text-muted">(none)</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack">
+      <h2>Active Jobs (Started + Queued)</h2>
+      <p class="wc-text-muted">Complete set of started and queued jobs across default and batch queues.</p>
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense wc-table--striped">
+        <thead>
+          <tr>
+            <th scope="col">State</th>
+            <th scope="col">Queue</th>
+            <th scope="col">Worker</th>
+            <th scope="col">Job</th>
+            <th scope="col">Function</th>
+            <th scope="col">Run</th>
+            <th scope="col">Submitter</th>
+            <th scope="col">Enqueued</th>
+            <th scope="col">Started</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if active_jobs %}
+            {% for job in active_jobs %}
+              <tr>
+                <td><code>{{ job.state or '-' }}</code></td>
+                <td><code>{{ job.queue or '-' }}</code></td>
+                <td><code>{{ job.worker or job.worker_name or '-' }}</code></td>
+                <td>
+                  <a href="{{ url_for_run('rq_job_dashboard.job_dashboard_route', job_id=job.job_id) }}" target="_blank" rel="noopener">
+                    <code>{{ job.job_id }}</code>
+                  </a>
+                </td>
+                <td><code>{{ job.func_name or '-' }}</code></td>
+                <td>
+                  {% if job.runid %}
+                    <a href="{{ url_for_run('run_0.runs0_nocfg', runid=job.runid) }}" target="_blank" rel="noopener">
+                      <code>{{ job.runid }}</code>
+                    </a>
+                  {% else %}
+                    <code>-</code>
+                  {% endif %}
+                </td>
+                <td><code>{{ job.submitter or '-' }}</code></td>
+                <td><code>{{ job.enqueued_at or '-' }}</code></td>
+                <td><code>{{ job.started_at or '-' }}</code></td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="9" class="wc-text-muted">(none)</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+{% endblock %}
+

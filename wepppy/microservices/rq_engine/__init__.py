@@ -14,6 +14,7 @@ from .debug_routes import router as debug_router
 from .export_routes import router as export_router
 from .fork_archive_routes import router as fork_archive_router
 from .job_routes import router as job_router
+from .admin_job_routes import router as admin_job_router
 from .landuse_routes import router as landuse_router
 from .landuse_soils_routes import router as landuse_soils_router
 from .migration_routes import router as migration_router
@@ -57,6 +58,7 @@ def health() -> dict[str, str]:
 
 
 app.include_router(job_router, prefix="/api")
+app.include_router(admin_job_router, prefix="/api")
 app.include_router(batch_router, prefix="/api")
 app.include_router(bootstrap_router, prefix="/api")
 app.include_router(culvert_router, prefix="/api")

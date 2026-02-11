@@ -43,6 +43,7 @@ _BLUEPRINT_ATTRS = [
     "recorder_bp",
     "locations_bp",
     "rq_job_dashboard_bp",
+    "rq_info_details_bp",
     "readme_bp",
     "usersum_bp",
     "stats_bp",

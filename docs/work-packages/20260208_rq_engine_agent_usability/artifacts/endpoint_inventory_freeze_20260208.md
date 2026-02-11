@@ -5,14 +5,16 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **71**
-- Classification counts: **agent-facing 51**, **internal 14**, **ui-only 6**
-- Canonical owner counts: **rq-engine 68**, **Flask wrapper 3**
+- Total endpoints inventoried: **73**
+- Classification counts: **agent-facing 51**, **internal 16**, **ui-only 6**
+- Canonical owner counts: **rq-engine 70**, **Flask wrapper 3**
 
 ## Inventory Table
 
 | Method | Path | Module | Function | Classification | Owner | Auth | Scope | Mutates | Notes |
 |---|---|---|---|---|---|---|---|---|---|
+| GET | `/api/admin/jobs-detail` | `wepppy/microservices/rq_engine/admin_job_routes.py` | `jobs_detail` | internal | rq-engine | JWT Bearer | `rq:status` | read-only | Admin/Root-only debug view over started + queued jobs for default and batch queues. |
+| GET | `/api/admin/recently-completed-jobs` | `wepppy/microservices/rq_engine/admin_job_routes.py` | `recently_completed_jobs` | internal | rq-engine | JWT Bearer | `rq:status` | read-only | Admin/Root-only debug view over recently completed jobs (ended within lookback window) across default and batch queues. |
 | POST | `/api/batch/_/{batch_name}/run-batch` | `wepppy/microservices/rq_engine/batch_routes.py` | `run_batch` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Role gate: `["admin"]`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/batch/_/{batch_name}/upload-geojson` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `upload_geojson` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Role gate: `["Admin"]`. Synchronous BatchRunner resource mutation; no queue. |
 | POST | `/api/batch/_/{batch_name}/upload-sbs-map` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `upload_sbs_map` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Role gate: `["Admin"]`. Synchronous BatchRunner resource mutation; no queue. |

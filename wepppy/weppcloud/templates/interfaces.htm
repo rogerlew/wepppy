@@ -12,6 +12,13 @@
     <details class="wc-nav__menu">
       <summary class="wc-nav__menu-button">More</summary>
       <div class="wc-nav__menu-content">
+        {% if current_user.has_role('Admin') or current_user.has_role('Root') %}
+          <a class="pure-button pure-button-secondary"
+             href="{{ url_for('rq_info_details.rq_info_details') }}"
+             rel="noopener">
+            RQ Info
+          </a>
+        {% endif %}
         {% if current_user.has_role('Admin') %}
           <a class="pure-button pure-button-secondary"
              href="{{ url_for('run_sync_dashboard.run_sync_dashboard') }}"
