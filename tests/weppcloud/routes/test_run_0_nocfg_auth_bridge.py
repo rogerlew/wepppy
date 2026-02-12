@@ -282,6 +282,49 @@ def test_set_run_session_jwt_cookie_scopes_grouped_run_cookie_without_semicolon_
     assert "%3B" not in set_cookie
 
 
+def test_set_run_session_jwt_cookie_uses_current_user_fallback_when_session_identity_missing(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    class _Owner:
+        id = 42
+
+    class _CurrentUser:
+        is_authenticated = True
+        id = 42
+
+        @staticmethod
+        def get_id() -> str:
+            return "42"
+
+        @staticmethod
+        def has_role(_role: str) -> bool:
+            return False
+
+    class _AuthRon:
+        @staticmethod
+        def ispublic(_wd: str) -> bool:
+            return False
+
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (None, []))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: None)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+    monkeypatch.setattr(module, "get_wd", lambda *_args, **_kwargs: "/tmp/run")
+    monkeypatch.setattr(module, "Ron", _AuthRon)
+    monkeypatch.setattr(module, "get_run_owners_lazy", lambda _runid: [_Owner()])
+    monkeypatch.setattr(module, "current_user", _CurrentUser())
+
+    with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(response, runid=runid, config="cfg") is True
+
+    set_cookie = response.headers.get("Set-Cookie", "")
+    assert "session-token" in set_cookie
+
+
 def test_composite_browse_redirect_chain_terminates_after_cookie_mint(
     run0_prefixed_grouped_app,
     monkeypatch: pytest.MonkeyPatch,

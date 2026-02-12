@@ -322,6 +322,40 @@ def _owner_matches_user(owner: object, user_id: int) -> bool:
         return False
 
 
+def _request_current_user_identity() -> tuple[int | None, set[str]]:
+    try:
+        user_obj = current_user
+    except Exception:
+        return None, set()
+
+    try:
+        if not bool(getattr(user_obj, "is_authenticated", False)):
+            return None, set()
+    except Exception:
+        return None, set()
+
+    user_id = _parse_user_id(getattr(user_obj, "id", None))
+    if user_id is None:
+        get_id = getattr(user_obj, "get_id", None)
+        if callable(get_id):
+            try:
+                user_id = _parse_user_id(get_id())
+            except Exception:
+                user_id = None
+
+    elevated_roles: set[str] = set()
+    has_role = getattr(user_obj, "has_role", None)
+    if callable(has_role):
+        for role_name in ("Admin", "Root"):
+            try:
+                if has_role(role_name):
+                    elevated_roles.add(role_name.lower())
+            except Exception:
+                continue
+
+    return user_id, elevated_roles
+
+
 def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: list[str]) -> bool:
     wd = get_wd(runid, prefer_active=False)
     if Ron.ispublic(wd):
@@ -332,12 +366,19 @@ def _session_user_authorized_for_run(runid: str, user_id: int | None, roles: lis
         return True
 
     role_set = {role.lower() for role in roles}
+    fallback_user_id: int | None = None
+    fallback_roles: set[str] = set()
+    if user_id is None or not {"admin", "root"} & role_set:
+        fallback_user_id, fallback_roles = _request_current_user_identity()
+        role_set.update(fallback_roles)
+
     if "admin" in role_set or "root" in role_set:
         return True
 
-    if user_id is None:
+    effective_user_id = user_id if user_id is not None else fallback_user_id
+    if effective_user_id is None:
         return False
-    return any(_owner_matches_user(owner, user_id) for owner in owners)
+    return any(_owner_matches_user(owner, effective_user_id) for owner in owners)
 
 
 def _resolve_session_id_from_request() -> str | None:
