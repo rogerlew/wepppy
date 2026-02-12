@@ -573,6 +573,7 @@ async def _handle_files_request(
         auth_context = authorize_run_request(
             request,
             runid=runid,
+            config=config,
             subpath=subpath or "",
             allow_public_without_token=False,
             require_authenticated=True,

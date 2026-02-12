@@ -179,8 +179,11 @@ If validation fails a `JWTDecodeError` is raised.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
   - Stores a Redis marker `auth:session:run:<runid>:<session_id>` (DB 11) with TTL.
   - Sets an HttpOnly cookie (default key `wepp_browse_jwt`, configurable via
-    `WEPP_BROWSE_JWT_COOKIE_NAME`) scoped to
-    `/weppcloud/runs/<runid>/<config>/`.
+    `WEPP_BROWSE_JWT_COOKIE_NAME`) with path/key scoping rules:
+    - Non-composite runids: cookie key `wepp_browse_jwt`; path `/weppcloud/runs/<runid>/<config>/`.
+    - Composite runids (contains `;`): cookie key `wepp_browse_jwt_<sha256(runid + "\\n" + config)[:16]>`; path `/weppcloud/runs/`.
+    - Validators SHOULD check the derived composite key first, then the legacy base key for backward compatibility.
+    - Implementations MUST NOT rely on `/runs/<runid>/<config>/` cookie paths for composite runids; encoded semicolons in `Path` can cause browser mismatches and redirect loops on browse routes.
   - Cookie `Secure` behavior defaults to request/proxy scheme and can be
     overridden with `WEPP_AUTH_SESSION_COOKIE_SECURE`.
   - Cookie `SameSite` is controlled by `WEPP_AUTH_SESSION_COOKIE_SAMESITE`

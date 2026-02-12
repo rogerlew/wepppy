@@ -1,3 +1,5 @@
+import hashlib
+
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -46,6 +48,33 @@ def test_session_token_issues_with_bearer(monkeypatch: pytest.MonkeyPatch) -> No
     assert "set-cookie" in response.headers
     assert "HttpOnly" in response.headers["set-cookie"]
     assert "Path=/weppcloud/runs/run-1/cfg/" in response.headers["set-cookie"]
+
+
+def test_session_token_uses_grouped_cookie_key_and_safe_path_for_grouped_runid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(session_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+
+    grouped_runid = "upset-reckoning;;omni;;undisturbed"
+    grouped_runid_url = "upset-reckoning%3B%3Bomni%3B%3Bundisturbed"
+    config = "disturbed9002"
+    token = _issue_token(monkeypatch, runs=[grouped_runid])
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            f"/api/runs/{grouped_runid_url}/{config}/session-token",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 200
+    cookie_header = response.headers["set-cookie"]
+    digest = hashlib.sha256(f"{grouped_runid}\n{config}".encode("utf-8")).hexdigest()[:16]
+    expected_key = f"{session_routes.DEFAULT_BROWSE_JWT_COOKIE_NAME}_{digest}"
+    assert cookie_header.startswith(f"{expected_key}=")
+    assert "Path=/weppcloud/runs/" in cookie_header
+    assert "%3B" not in cookie_header
 
 
 def test_session_token_rejects_wrong_run(monkeypatch: pytest.MonkeyPatch) -> None:

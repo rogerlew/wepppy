@@ -58,6 +58,7 @@ Notes:
 - **WD cache (Redis DB 11)**: `get_wd` caches `runid -> WD` lookups for 72 hours (only when the resolved path exists). Composite slugs cache under their full slug string; omni child slugs still authorize and emit telemetry using the stripped parent runid.
 - **NoDb runid**: Omni child NoDb controllers keep `NoDbBase.runid` equal to the parent runid (because `_parent_wd` is set). Redis keys, status channels, and preflight updates therefore use the parent runid.
 - **Authorization**: Omni scenario/contrast slugs authorize against the parent runid (strip the trailing `;;omni;;...` / `;;omni-contrast;;...` suffix) and inherit the parent run's access controls. Batch slugs (`batch;;...`) are Admin/Root-only because batch runs are not tracked in the `Run` ownership table.
+- **Run-scoped auth cookie safety**: if `runid` contains `;` (composite slug), browse/session JWT cookies MUST use a semicolon-safe path scope (`<SITE_PREFIX>/runs/`) and MUST scope by cookie key, not cookie path. The cookie key should be derived as `<base_cookie_name>_<sha256(runid + "\\n" + config)[:16]>`. Using `/runs/<runid>/<config>/` as a cookie path for composite runids can cause browser path mismatches and 302 redirect loops (`/browse/*` -> `/runs/<runid>/?next=...` -> `/browse/*` ...).
 
 ## Omni Monkey Patching
 

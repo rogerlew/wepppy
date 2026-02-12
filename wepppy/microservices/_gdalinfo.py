@@ -38,6 +38,7 @@ async def gdalinfo_with_subpath(request: Request) -> JSONResponse:
         auth_context = authorize_run_request(
             request,
             runid=runid,
+            config=config,
             subpath=subpath,
             allow_public_without_token=True,
             require_authenticated=False,

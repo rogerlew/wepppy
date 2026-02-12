@@ -49,6 +49,10 @@ from wepppy.weppcloud.utils.helpers import (
     authorize_and_handle_with_exception_factory,
     handle_with_exception_factory
 )
+from wepppy.weppcloud.utils.browse_cookie import (
+    browse_cookie_name,
+    browse_cookie_path,
+)
 
 
 run_0_bp = Blueprint('run_0', __name__,
@@ -236,8 +240,12 @@ def _browse_jwt_cookie_name() -> str:
     return value or DEFAULT_BROWSE_JWT_COOKIE_NAME
 
 
+def _browse_jwt_cookie_key(runid: str, config: str) -> str:
+    return browse_cookie_name(_browse_jwt_cookie_name(), runid, config)
+
+
 def _browse_jwt_cookie_path(runid: str, config: str) -> str:
-    return f"{_site_prefix()}/runs/{runid}/{config}/"
+    return browse_cookie_path(_site_prefix(), runid, config)
 
 
 def _cookie_samesite() -> str:
@@ -405,7 +413,7 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
 
     _store_session_marker(runid, session_id)
     response.set_cookie(
-        key=_browse_jwt_cookie_name(),
+        key=_browse_jwt_cookie_key(runid, config),
         value=token_value,
         max_age=SESSION_TOKEN_TTL_SECONDS,
         httponly=True,

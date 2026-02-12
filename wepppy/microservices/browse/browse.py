@@ -1239,6 +1239,7 @@ async def _handle_browse_request(
             context = authorize_run_request(
                 request,
                 runid=runid,
+                config=config,
                 subpath=subpath_value,
                 allow_public_without_token=True,
                 require_authenticated=False,

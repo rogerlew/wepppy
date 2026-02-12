@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib
 from pathlib import Path
 from urllib.parse import parse_qs, quote, urlencode, urlparse
@@ -7,7 +8,7 @@ from urllib.parse import parse_qs, quote, urlencode, urlparse
 import pytest
 
 pytest.importorskip("flask")
-from flask import Flask
+from flask import Flask, redirect, request
 
 pytestmark = pytest.mark.routes
 
@@ -55,6 +56,48 @@ def run0_app(
     app.config.update(SECRET_KEY="run0-test-secret", TESTING=True, SITE_PREFIX="/weppcloud")
     app.register_blueprint(module.run_0_bp)
     return app, module, runid, url_for_calls
+
+
+@pytest.fixture()
+def run0_prefixed_grouped_app(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.run_0.run_0_bp"))
+
+    runid = "upset-reckoning;;omni;;undisturbed"
+    config = "disturbed9002"
+    run_root = tmp_path / "grouped"
+    run_root.mkdir(parents=True, exist_ok=True)
+
+    class _GroupedDummyRon:
+        config_stem = config
+
+        @classmethod
+        def getInstance(cls, _wd: str) -> "_GroupedDummyRon":
+            return cls()
+
+    def _fake_get_wd(requested_runid: str, **_kwargs) -> str:
+        assert requested_runid == runid
+        return str(run_root)
+
+    def _fake_url_for_run(endpoint: str, **kwargs) -> str:
+        path = f"/weppcloud/runs/{kwargs['runid']}/{kwargs['config']}/"
+        query: dict[str, str] = {}
+        if kwargs.get("next"):
+            query["next"] = kwargs["next"]
+        if kwargs.get("pup"):
+            query["pup"] = kwargs["pup"]
+        return f"{path}?{urlencode(query)}" if query else path
+
+    monkeypatch.setattr(module, "get_wd", _fake_get_wd)
+    monkeypatch.setattr(module, "Ron", _GroupedDummyRon)
+    monkeypatch.setattr(module, "url_for_run", _fake_url_for_run)
+
+    app = Flask(__name__)
+    app.config.update(SECRET_KEY="run0-test-secret", TESTING=True, SITE_PREFIX="/weppcloud")
+    app.register_blueprint(module.run_0_bp, url_prefix="/weppcloud")
+    return app, module, runid, config
 
 
 def test_runs0_nocfg_mints_cookie_and_redirects_to_next(
@@ -211,6 +254,71 @@ def test_set_run_session_jwt_cookie_secure_can_be_disabled_with_env_override(
 
     set_cookie = response.headers.get("Set-Cookie", "")
     assert "Secure" not in set_cookie
+
+
+def test_set_run_session_jwt_cookie_scopes_grouped_run_cookie_without_semicolon_path(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, _runid, _url_for_calls = run0_app
+    grouped_runid = "upset-reckoning;;omni;;undisturbed"
+    config = "disturbed9002"
+
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (42, ["User"]))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module.auth_tokens, "issue_token", lambda *_args, **_kwargs: {"token": "session-token"})
+
+    with app.test_request_context(f"/runs/{grouped_runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(response, runid=grouped_runid, config=config) is True
+
+    set_cookie = response.headers.get("Set-Cookie", "")
+    digest = hashlib.sha256(f"{grouped_runid}\n{config}".encode("utf-8")).hexdigest()[:16]
+    expected_cookie_key = f"{module.DEFAULT_BROWSE_JWT_COOKIE_NAME}_{digest}"
+    assert set_cookie.startswith(f"{expected_cookie_key}=session-token;")
+    assert "Path=/weppcloud/runs/" in set_cookie
+    assert "%3B" not in set_cookie
+
+
+def test_composite_browse_redirect_chain_terminates_after_cookie_mint(
+    run0_prefixed_grouped_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, config = run0_prefixed_grouped_app
+    digest = hashlib.sha256(f"{runid}\n{config}".encode("utf-8")).hexdigest()[:16]
+    expected_cookie_key = f"{module.DEFAULT_BROWSE_JWT_COOKIE_NAME}_{digest}"
+
+    def _set_cookie(response, *, runid: str, config: str) -> bool:
+        response.set_cookie(
+            key=expected_cookie_key,
+            value="session-token",
+            path=module._browse_jwt_cookie_path(runid, config),
+        )
+        return True
+
+    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", _set_cookie)
+
+    @app.get("/weppcloud/runs/<string:requested_runid>/<string:requested_config>/browse/<path:subpath>")
+    def _fake_browse(requested_runid: str, requested_config: str, subpath: str):
+        assert requested_config == config
+        _ = subpath
+        if request.cookies.get(expected_cookie_key) == "session-token":
+            return "ok", 200
+        request_target = request.path
+        if request.query_string:
+            request_target = f"{request_target}?{request.query_string.decode('utf-8')}"
+        return redirect(f"/weppcloud/runs/{requested_runid}/?next={quote(request_target, safe='')}")
+
+    start_path = f"/weppcloud/runs/{runid}/{config}/browse/secret.txt"
+    with app.test_client() as client:
+        response = client.get(start_path, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert response.data == b"ok"
+    assert [item.status_code for item in response.history] == [302, 302]
+    assert len(response.history) <= 3
 
 
 @pytest.mark.parametrize(

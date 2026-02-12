@@ -42,6 +42,7 @@ async def aria2c_spec(request: Request) -> PlainTextResponse:
         auth_context = authorize_run_request(
             request,
             runid=runid,
+            config=config,
             subpath='',
             allow_public_without_token=True,
             require_authenticated=False,
@@ -78,6 +79,7 @@ async def download_with_subpath(request: Request) -> Response:
         auth_context = authorize_run_request(
             request,
             runid=runid,
+            config=config,
             subpath=subpath,
             allow_public_without_token=True,
             require_authenticated=False,

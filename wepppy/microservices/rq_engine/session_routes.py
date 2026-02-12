@@ -15,6 +15,10 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbBase
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.utils.browse_cookie import (
+    browse_cookie_name,
+    browse_cookie_path,
+)
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
@@ -266,6 +270,10 @@ def _browse_jwt_cookie_name() -> str:
     return value or DEFAULT_BROWSE_JWT_COOKIE_NAME
 
 
+def _browse_jwt_cookie_key(runid: str, config: str) -> str:
+    return browse_cookie_name(_browse_jwt_cookie_name(), runid, config)
+
+
 def _normalize_prefix(prefix: str | None) -> str:
     if not prefix:
         return ""
@@ -280,7 +288,7 @@ def _site_prefix() -> str:
 
 
 def _session_jwt_cookie_path(runid: str, config: str) -> str:
-    return f"{_site_prefix()}/runs/{runid}/{config}/"
+    return browse_cookie_path(_site_prefix(), runid, config)
 
 
 def _cookie_samesite() -> str:
@@ -318,7 +326,7 @@ def _set_session_jwt_cookie(
     request: Request,
 ) -> None:
     response.set_cookie(
-        key=_browse_jwt_cookie_name(),
+        key=_browse_jwt_cookie_key(runid, config),
         value=token,
         max_age=SESSION_TOKEN_TTL_SECONDS,
         httponly=True,

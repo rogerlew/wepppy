@@ -20,6 +20,7 @@ from wepppy.microservices.rq_engine.auth import (
 from wepppy.nodb.base import NoDbBase
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError, JWTDecodeError
+from wepppy.weppcloud.utils.browse_cookie import browse_cookie_name_candidates
 from wepppy.weppcloud.utils.helpers import get_wd
 
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
@@ -221,11 +222,29 @@ def _context_from_claims(claims: Mapping[str, Any], *, source: str) -> AuthConte
     )
 
 
-def resolve_auth_context(request: StarletteRequest) -> AuthContext:
-    cookie_token = request.cookies.get(browse_jwt_cookie_name())
+def _browse_cookie_names_for_request(
+    *,
+    runid: str | None = None,
+    config: str | None = None,
+) -> list[str]:
+    default_name = browse_jwt_cookie_name()
+    if runid and config:
+        return browse_cookie_name_candidates(default_name, runid, config)
+    return [default_name]
+
+
+def resolve_auth_context(
+    request: StarletteRequest,
+    *,
+    runid: str | None = None,
+    config: str | None = None,
+) -> AuthContext:
     cookie_failure: BrowseAuthError | None = None
 
-    if cookie_token:
+    for cookie_name in _browse_cookie_names_for_request(runid=runid, config=config):
+        cookie_token = request.cookies.get(cookie_name)
+        if not cookie_token:
+            continue
         try:
             return _context_from_claims(_decode_token(cookie_token), source="cookie")
         except BrowseAuthError as exc:
@@ -296,6 +315,7 @@ def authorize_run_request(
     request: StarletteRequest,
     *,
     runid: str,
+    config: str,
     subpath: str,
     allow_public_without_token: bool,
     require_authenticated: bool,
@@ -341,7 +361,7 @@ def authorize_run_request(
             )
         return context
 
-    context = resolve_auth_context(request)
+    context = resolve_auth_context(request, runid=runid, config=config)
     try:
         return _evaluate_context(context)
     except BrowseAuthError as primary_exc:

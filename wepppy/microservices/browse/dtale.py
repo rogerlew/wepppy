@@ -94,6 +94,7 @@ def build_handlers(
                 auth_context = authorize_run_request(
                     request,
                     runid=runid,
+                    config=config,
                     subpath=rel_path,
                     allow_public_without_token=False,
                     require_authenticated=True,

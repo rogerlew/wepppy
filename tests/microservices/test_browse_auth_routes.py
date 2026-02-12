@@ -7,6 +7,7 @@ import pytest
 
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError
+from wepppy.weppcloud.utils.browse_cookie import browse_cookie_name
 
 TestClient = pytest.importorskip("starlette.testclient").TestClient
 
@@ -306,6 +307,81 @@ def test_private_browse_uses_bearer_when_cookie_run_scope_mismatch(
         response = client.get(
             f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
             headers={"Authorization": f"Bearer {bearer_token}"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
+
+
+def test_private_browse_accepts_grouped_run_scoped_cookie_name(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private;;omni;;treated"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    cookie_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+    cookie_name = browse_cookie_name("wepp_browse_jwt", runid, config)
+
+    with TestClient(app) as client:
+        client.cookies.set(cookie_name, cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
+
+
+def test_private_browse_accepts_legacy_base_cookie_name_for_grouped_runid(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private;;omni;;treated"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    legacy_cookie_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", legacy_cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert "shh" in response.text
+
+
+def test_private_browse_falls_back_to_legacy_cookie_when_grouped_cookie_invalid(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-private;;omni;;treated"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "secret.txt", "shh")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    derived_cookie_name = browse_cookie_name("wepp_browse_jwt", runid, config)
+    legacy_cookie_token = _issue_service_token(runid, runs=[runid], roles=["User"])
+
+    with TestClient(app) as client:
+        client.cookies.set(derived_cookie_name, "invalid-token")
+        client.cookies.set("wepp_browse_jwt", legacy_cookie_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/secret.txt",
             follow_redirects=False,
         )
 
