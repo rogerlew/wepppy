@@ -9,7 +9,7 @@
 - DEM handling: new `Ron.symlink_dem()` to symlink the canonical DEM into each run and populate `ron.map`.
 - Streams: provided by Culvert_web_app (no mcl/csa parameters needed).
 - Watersheds: GeoJSON polygons with `Point_ID` attribute (no raster, no culvert_id_map needed).
-- RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse/download under `/weppcloud/culverts/<batch_uuid>/browse/` and `/weppcloud/culverts/<batch_uuid>/download/{subpath}` (requires `browse_token` from submit response).
+- RQ job status: use `/rq-engine/api/jobstatus/{job_id}`; artifacts via browse/download under `/weppcloud/culverts/<batch_uuid>/browse/` and `/weppcloud/culverts/<batch_uuid>/download/{subpath}` (requires `browse_token` from submit response). Batch archive path: `/weppcloud/culverts/<batch_uuid>/download/weppcloud_run_skeletons.zip`.
 - Outputs: per-culvert GeoJSON + parquet + WEPP interchange; batch-level `batch_summary.json` plus per-run `run_metadata.json`.
 - Limits: max ZIP 2GB, max 300 culverts; error responses are structured 400s.
 
@@ -222,7 +222,7 @@ Notes:
 - Batch artifacts: finalizer writes `batch_summary.json`, `runs_manifest.md` (Source + Batch Summary + runs table), and `weppcloud_run_skeletons.zip` (includes skeletonized `runs/`, `runs_manifest.md`, and `culverts_runner.nodb`).
 - NoDb state: `culverts_runner.nodb` now carries per-run job metadata (`job_status`, `job_created`) plus a persisted batch summary.
 - Browse/DTale/download/gdalinfo: added `/weppcloud/culverts/...` and `/weppcloud/batch/...` routes in browse, download, gdalinfo, and D-Tale services; Caddy routes updated to proxy these paths; path traversal checks hardened while allowing symlinked assets.
-- Tests: added browse route tests and extended culvert orchestration test to validate manifest + NoDb summary.
+- Tests: added browse route tests and extended culvert orchestration test to validate manifest + NoDb summary; submit-response `browse_token` download coverage is in `tests/microservices/test_rq_engine_culverts.py::test_culvert_submit_browse_token_downloads_batch_skeleton_zip`.
 
 ## Phase 4b - Batch landuse/soils downscale (COMPLETE)
 - Scope: for culvert batches, fetch NLCD + SSURGO once at 30m for the payload DEM extent, then downscale locally to the DEM grid (matches subwta); run this in `run_culvert_batch_rq` before enqueuing child jobs, store canonical rasters at the batch root, and symlink into runs.

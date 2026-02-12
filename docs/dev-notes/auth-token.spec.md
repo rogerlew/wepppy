@@ -54,6 +54,24 @@ following environment variables:
 - Required claims: `sub`, `service_groups`, `aud`, `scope`, `iat`, `exp`, `jti`.
 - Authorization: map `service_groups` to scope bundles (for example `culverts`).
 
+### Culvert browse/download service token
+- Token source: `POST /rq-engine/api/culverts-wepp-batch/` and
+  `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}`.
+- Response fields: `browse_token` and `browse_token_expires_at` (`exp`, Unix
+  timestamp seconds).
+- Claim contract for `browse_token`:
+  - `token_class` MUST be `service`.
+  - `aud` MUST include `rq-engine`.
+  - `runs` MUST include exactly the submitted `culvert_batch_uuid` scope.
+  - `service_groups` MUST include `culverts`.
+  - `jti` MUST be present (revocation checks are mandatory).
+- Access contract:
+  - Bearer usage: `Authorization: Bearer <browse_token>`.
+  - Browse: `/weppcloud/culverts/{batch_uuid}/browse/...`
+  - Download: `/weppcloud/culverts/{batch_uuid}/download/{subpath}`
+  - Batch archive path (current MVP): `/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip`
+  - Cross-batch use (`runs` scope mismatch) MUST return `403`.
+
 ### Session token (anonymous runs)
 - `token_class=session`
 - Required claims: `sub` (session id), `runid`, `session_id`, `aud`, `scope`, `iat`, `exp`, `jti`.

@@ -1,3 +1,4 @@
+import importlib
 import json
 import zipfile
 from pathlib import Path
@@ -115,6 +116,51 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     assert runner.rq_job_ids.get("run_culvert_batch_rq") == "job-123"
     assert not (batch_root / "topo" / "flovec.tif").exists()
     assert not (batch_root / "topo" / "netful.tif").exists()
+
+
+def test_culvert_submit_browse_token_downloads_batch_skeleton_zip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+
+    monkeypatch.setattr(culvert_routes, "_enqueue_culvert_batch_job", lambda _batch_uuid: "job-zip")
+
+    with PAYLOAD_ZIP.open("rb") as handle:
+        with TestClient(rq_engine.app) as rq_client:
+            submit_response = rq_client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert submit_response.status_code == 200
+    submit_payload = submit_response.json()
+    batch_uuid = submit_payload["culvert_batch_uuid"]
+    browse_token = submit_payload["browse_token"]
+
+    skeleton_zip_path = culverts_root / batch_uuid / "weppcloud_run_skeletons.zip"
+    skeleton_zip_path.write_bytes(b"zip-content")
+
+    import wepppy.microservices.browse.browse as browse_mod
+
+    browse_mod = importlib.reload(browse_mod)
+    browse_app = browse_mod.create_app()
+
+    with TestClient(browse_app) as browse_client:
+        download_response = browse_client.get(
+            f"/weppcloud/culverts/{batch_uuid}/download/weppcloud_run_skeletons.zip",
+            headers={"Authorization": f"Bearer {browse_token}"},
+        )
+        wrong_batch_response = browse_client.get(
+            "/weppcloud/culverts/other-batch/download/weppcloud_run_skeletons.zip",
+            headers={"Authorization": f"Bearer {browse_token}"},
+        )
+
+    assert download_response.status_code == 200
+    assert download_response.content == b"zip-content"
+    assert wrong_batch_response.status_code == 403
 
 
 def test_culvert_retry_success_returns_browse_token(

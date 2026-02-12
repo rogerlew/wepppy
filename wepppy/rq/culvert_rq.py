@@ -45,6 +45,8 @@ logger = logging.getLogger(__name__)
 
 TIMEOUT: int = 43_200
 CULVERT_BATCH_RQ_JOB_KEY = "run_culvert_batch_rq"
+CULVERT_BATCH_LOCK_RETRY_ATTEMPTS = 10
+CULVERT_BATCH_LOCK_RETRY_SECONDS = 0.5
 
 D8_TO_DELTA: Dict[int, Tuple[int, int]] = {
     1: (-1, 1),
@@ -233,12 +235,27 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     run_ids = runner._load_run_ids(watersheds_src)
     run_config = runner._resolve_run_config(model_parameters)
 
-    with runner.locked():
-        runner._culvert_batch_uuid = culvert_batch_uuid
-        runner._payload_metadata = deepcopy(payload_metadata)
-        runner._model_parameters = deepcopy(model_parameters) if model_parameters else None
-        runner._runs = {}
-        runner._run_config = run_config
+    for attempt in range(1, CULVERT_BATCH_LOCK_RETRY_ATTEMPTS + 1):
+        try:
+            with runner.locked():
+                runner._culvert_batch_uuid = culvert_batch_uuid
+                runner._payload_metadata = deepcopy(payload_metadata)
+                runner._model_parameters = (
+                    deepcopy(model_parameters) if model_parameters else None
+                )
+                runner._runs = {}
+                runner._run_config = run_config
+            break
+        except NoDbAlreadyLockedError:
+            if attempt >= CULVERT_BATCH_LOCK_RETRY_ATTEMPTS:
+                raise
+            logger.warning(
+                "culvert_batch %s: runner lock busy; retrying (%d/%d)",
+                culvert_batch_uuid,
+                attempt,
+                CULVERT_BATCH_LOCK_RETRY_ATTEMPTS,
+            )
+            time.sleep(CULVERT_BATCH_LOCK_RETRY_SECONDS)
 
     base_wd = runner._ensure_base_project()
     if base_wd is None:
