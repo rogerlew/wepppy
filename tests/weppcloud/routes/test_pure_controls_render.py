@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -114,3 +115,40 @@ def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Enviro
     rendered = template.render(omni_user_defined_contrast_limit=200)
 
     assert "capped at 200 total contrast runs (contrast pairs x groups)." in rendered
+
+
+def test_frost_advanced_template_renders_wepp_variable_labels(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/wepp_pure_advanced_options/frost.htm")
+    wepp = SimpleNamespace(
+        run_frost=True,
+        frost_opts=SimpleNamespace(
+            wintRed=1,
+            fineTop=10,
+            fineBot=10,
+            ksnowf=1.0,
+            kresf=1.0,
+            ksoilf=1.0,
+            kfactor1=0.00001,
+            kfactor2=0.00001,
+            kfactor3=0.5,
+        ),
+    )
+    rendered = template.render(wepp=wepp)
+
+    for label in (
+        "wintRed",
+        "fineTop",
+        "fineBot",
+        "ksnowf",
+        "kresf",
+        "ksoilf",
+        "kfactor(1)",
+        "kfactor(2)",
+        "kfactor(3)",
+    ):
+        assert label in rendered
+
+    for field_id in ("frost_opts_kfactor1", "frost_opts_kfactor2", "frost_opts_kfactor3"):
+        match = re.search(rf'id="{field_id}"[^>]*>', rendered)
+        assert match is not None
+        assert "min=" not in match.group(0)

@@ -106,6 +106,7 @@ from wepppyo3.wepp_viz import make_soil_loss_grid, make_soil_loss_grid_fps
 __all__ = [
     'ChannelRoutingMethod',
     'SnowOpts',
+    'FrostOpts',
     'BaseflowOpts',
     'PhosphorusOpts',
     'TCROpts',
@@ -243,6 +244,100 @@ class SnowOpts(object):
             '{0.rst}  # rain-snow threshold\n'
             '{0.newsnw}  # density of new snow\n'
             '{0.ssd}  # snow settling density\n'
+            .format(self)
+        )
+
+
+def _parse_optional_int(value: Any) -> Optional[int]:
+    parsed = try_parse_float(value, None)
+    if not isfloat(parsed):
+        return None
+
+    parsed_float = float(parsed)
+    if isnan(parsed_float) or isinf(parsed_float):
+        return None
+
+    if not parsed_float.is_integer():
+        return None
+
+    return int(parsed_float)
+
+
+class FrostOpts(object):
+    """Stores the WEPP winter control coefficients for ``frost.txt``."""
+
+    wintRed: int
+    fineTop: int
+    fineBot: int
+    ksnowf: float
+    kresf: float
+    ksoilf: float
+    kfactor1: float
+    kfactor2: float
+    kfactor3: float
+
+    def __init__(
+        self,
+        wintRed: Optional[int] = None,
+        fineTop: Optional[int] = None,
+        fineBot: Optional[int] = None,
+        ksnowf: Optional[float] = None,
+        kresf: Optional[float] = None,
+        ksoilf: Optional[float] = None,
+        kfactor1: Optional[float] = None,
+        kfactor2: Optional[float] = None,
+        kfactor3: Optional[float] = None,
+    ) -> None:
+        # 1 = run water redistribution during frost simulation
+        self.wintRed = 1 if wintRed is None else int(wintRed)
+
+        # Number of fine layers in each top 10 cm section (1..10)
+        self.fineTop = 10 if fineTop is None else int(fineTop)
+
+        # Number of fine layers in deeper sections (1..10)
+        self.fineBot = 10 if fineBot is None else int(fineBot)
+
+        # Thermal conductivity multipliers
+        self.ksnowf = 1.0 if ksnowf is None else float(ksnowf)
+        self.kresf = 1.0 if kresf is None else float(kresf)
+        self.ksoilf = 1.0 if ksoilf is None else float(ksoilf)
+
+        # Frozen-soil conductivity lower limits by land cover class
+        self.kfactor1 = 1e-5 if kfactor1 is None else float(kfactor1)
+        self.kfactor2 = 1e-5 if kfactor2 is None else float(kfactor2)
+        self.kfactor3 = 0.5 if kfactor3 is None else float(kfactor3)
+
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None:
+        int_fields = ('wintRed', 'fineTop', 'fineBot')
+        float_fields = ('ksnowf', 'kresf', 'ksoilf', 'kfactor1', 'kfactor2', 'kfactor3')
+
+        for var in int_fields:
+            prefixed = f'frost_opts_{var}'
+            if var in kwds:
+                parsed = _parse_optional_int(kwds[var])
+                if parsed is not None:
+                    setattr(self, var, parsed)
+            elif prefixed in kwds:
+                parsed = _parse_optional_int(kwds[prefixed])
+                if parsed is not None:
+                    setattr(self, var, parsed)
+
+        for var in float_fields:
+            prefixed = f'frost_opts_{var}'
+            if var in kwds:
+                parsed = try_parse_float(kwds[var], None)
+                if isfloat(parsed):
+                    setattr(self, var, float(parsed))
+            elif prefixed in kwds:
+                parsed = try_parse_float(kwds[prefixed], None)
+                if isfloat(parsed):
+                    setattr(self, var, float(parsed))
+
+    @property
+    def contents(self) -> str:
+        return (
+            '{0.wintRed}  {0.fineTop}  {0.fineBot}\n'
+            '{0.ksnowf}  {0.kresf}  {0.ksoilf}  {0.kfactor1}  {0.kfactor2}  {0.kfactor3}\n'
             .format(self)
         )
 
@@ -465,11 +560,25 @@ class Wepp(NoDbBase):
     _SNOW_SSD_BOUNDS = (75.0, 750.0)
     _TCR_TAUMIN_BOUNDS = (5.0, 400.0)
     _TCR_TAUMAX_BOUNDS = (5.0, 400.0)
+    _FROST_WINTRED_BOUNDS = (0, 1)
+    _FROST_FINETOP_BOUNDS = (1, 10)
+    _FROST_FINEBOT_BOUNDS = (1, 10)
+    _FROST_K_ADJUST_BOUNDS = (0.1, 10.0)
+    _FROST_KFACTOR_BOUNDS = (0.0, 1.0)
 
     _SNOW_NEWSNW_DEFAULT = 100.0
     _SNOW_SSD_DEFAULT = 250.0
     _TCR_TAUMIN_DEFAULT = 35.0
     _TCR_TAUMAX_DEFAULT = 70.0
+    _FROST_WINTRED_DEFAULT = 1
+    _FROST_FINETOP_DEFAULT = 10
+    _FROST_FINEBOT_DEFAULT = 10
+    _FROST_KSNOWF_DEFAULT = 1.0
+    _FROST_KRESF_DEFAULT = 1.0
+    _FROST_KSOILF_DEFAULT = 1.0
+    _FROST_KFACTOR1_DEFAULT = 1e-5
+    _FROST_KFACTOR2_DEFAULT = 1e-5
+    _FROST_KFACTOR3_DEFAULT = 0.5
     
     def __init__(self, wd: str, cfg_fn: str, run_group: Optional[str] = None, group_name: Optional[str] = None) -> None:
         super(Wepp, self).__init__(wd, cfg_fn, run_group=run_group, group_name=group_name)
@@ -494,6 +603,18 @@ class Wepp(NoDbBase):
                 rst=self.config_get_float('snow_opts', 'rst'),
                 newsnw=self.config_get_float('snow_opts', 'newsnw'),
                 ssd=self.config_get_float('snow_opts', 'ssd'))
+
+            self.frost_opts = FrostOpts(
+                wintRed=self.config_get_int('frost_opts', 'wintRed'),
+                fineTop=self.config_get_int('frost_opts', 'fineTop'),
+                fineBot=self.config_get_int('frost_opts', 'fineBot'),
+                ksnowf=self.config_get_float('frost_opts', 'ksnowf'),
+                kresf=self.config_get_float('frost_opts', 'kresf'),
+                ksoilf=self.config_get_float('frost_opts', 'ksoilf'),
+                kfactor1=self.config_get_float('frost_opts', 'kfactor1'),
+                kfactor2=self.config_get_float('frost_opts', 'kfactor2'),
+                kfactor3=self.config_get_float('frost_opts', 'kfactor3'),
+            )
 
             self.tcr_opts = TCROpts(
                 taumin=self.config_get_float('tcr_opts', 'taumin'),
@@ -554,6 +675,7 @@ class Wepp(NoDbBase):
             self._bootstrap_enabled = False
 
             self.clean()
+            self._mint_default_frost_file()
 
     @classmethod
     def _post_instance_loaded(cls, instance: 'Wepp') -> 'Wepp':
@@ -568,6 +690,19 @@ class Wepp(NoDbBase):
 
         if not hasattr(instance, '_bootstrap_enabled'):
             instance._bootstrap_enabled = False
+        if not hasattr(instance, 'frost_opts') or instance.frost_opts is None:
+            instance.frost_opts = FrostOpts(
+                wintRed=instance.config_get_int('frost_opts', 'wintRed'),
+                fineTop=instance.config_get_int('frost_opts', 'fineTop'),
+                fineBot=instance.config_get_int('frost_opts', 'fineBot'),
+                ksnowf=instance.config_get_float('frost_opts', 'ksnowf'),
+                kresf=instance.config_get_float('frost_opts', 'kresf'),
+                ksoilf=instance.config_get_float('frost_opts', 'ksoilf'),
+                kfactor1=instance.config_get_float('frost_opts', 'kfactor1'),
+                kfactor2=instance.config_get_float('frost_opts', 'kfactor2'),
+                kfactor3=instance.config_get_float('frost_opts', 'kfactor3'),
+            )
+        instance._guard_frost_bounds()
 
         return instance
 
@@ -1109,6 +1244,169 @@ class Wepp(NoDbBase):
             return default_value
         return value_float
 
+    def _resolve_positive_default(self, section: str, option: str, fallback: float, max_value: float) -> float:
+        value = self.config_get_float(section, option, fallback)
+        if not isfloat(value):
+            return fallback
+        value_float = float(value)
+        if isnan(value_float) or isinf(value_float) or value_float <= 0.0 or value_float > max_value:
+            return fallback
+        return value_float
+
+    def _guard_positive_value(self, section: str, option: str, value: Optional[float], max_value: float, fallback: float) -> float:
+        default_value = self._resolve_positive_default(section, option, fallback, max_value)
+        if not isfloat(value):
+            self.logger.warning(
+                'Resetting %s.%s from %s to %s (bounds >0..%s)',
+                section,
+                option,
+                value,
+                default_value,
+                max_value,
+            )
+            return default_value
+        value_float = float(value)
+        if isnan(value_float) or isinf(value_float) or value_float <= 0.0 or value_float > max_value:
+            self.logger.warning(
+                'Resetting %s.%s from %s to %s (bounds >0..%s)',
+                section,
+                option,
+                value,
+                default_value,
+                max_value,
+            )
+            return default_value
+        return value_float
+
+    def _resolve_integer_default(self, section: str, option: str, fallback: int,
+                                 min_value: int, max_value: int) -> int:
+        value = self.config_get_int(section, option, fallback)
+        if not isint(value):
+            return fallback
+        value_int = int(value)
+        if value_int < min_value or value_int > max_value:
+            return fallback
+        return value_int
+
+    def _guard_integer_value(self, section: str, option: str, value: Any,
+                             min_value: int, max_value: int, fallback: int) -> int:
+        default_value = self._resolve_integer_default(section, option, fallback, min_value, max_value)
+        if not isint(value):
+            if isfloat(value):
+                value_float = float(value)
+                if not isnan(value_float) and not isinf(value_float) and value_float.is_integer():
+                    value = int(value_float)
+                else:
+                    self.logger.warning(
+                        'Resetting %s.%s from %s to %s (bounds %s..%s)',
+                        section,
+                        option,
+                        value,
+                        default_value,
+                        min_value,
+                        max_value,
+                    )
+                    return default_value
+            else:
+                self.logger.warning(
+                    'Resetting %s.%s from %s to %s (bounds %s..%s)',
+                    section,
+                    option,
+                    value,
+                    default_value,
+                    min_value,
+                    max_value,
+                )
+                return default_value
+        value_int = int(value)
+        if value_int < min_value or value_int > max_value:
+            self.logger.warning(
+                'Resetting %s.%s from %s to %s (bounds %s..%s)',
+                section,
+                option,
+                value,
+                default_value,
+                min_value,
+                max_value,
+            )
+            return default_value
+        return value_int
+
+    def _guard_frost_bounds(self) -> None:
+        if not hasattr(self, 'frost_opts') or self.frost_opts is None:
+            self.frost_opts = FrostOpts()
+
+        self.frost_opts.wintRed = self._guard_integer_value(
+            'frost_opts',
+            'wintRed',
+            self.frost_opts.wintRed,
+            self._FROST_WINTRED_BOUNDS[0],
+            self._FROST_WINTRED_BOUNDS[1],
+            self._FROST_WINTRED_DEFAULT,
+        )
+        self.frost_opts.fineTop = self._guard_integer_value(
+            'frost_opts',
+            'fineTop',
+            self.frost_opts.fineTop,
+            self._FROST_FINETOP_BOUNDS[0],
+            self._FROST_FINETOP_BOUNDS[1],
+            self._FROST_FINETOP_DEFAULT,
+        )
+        self.frost_opts.fineBot = self._guard_integer_value(
+            'frost_opts',
+            'fineBot',
+            self.frost_opts.fineBot,
+            self._FROST_FINEBOT_BOUNDS[0],
+            self._FROST_FINEBOT_BOUNDS[1],
+            self._FROST_FINEBOT_DEFAULT,
+        )
+
+        self.frost_opts.ksnowf = self._guard_unitized_value(
+            'frost_opts',
+            'ksnowf',
+            self.frost_opts.ksnowf,
+            self._FROST_K_ADJUST_BOUNDS[0],
+            self._FROST_K_ADJUST_BOUNDS[1],
+            self._FROST_KSNOWF_DEFAULT,
+        )
+        self.frost_opts.kresf = self._guard_unitized_value(
+            'frost_opts',
+            'kresf',
+            self.frost_opts.kresf,
+            self._FROST_K_ADJUST_BOUNDS[0],
+            self._FROST_K_ADJUST_BOUNDS[1],
+            self._FROST_KRESF_DEFAULT,
+        )
+        self.frost_opts.ksoilf = self._guard_unitized_value(
+            'frost_opts',
+            'ksoilf',
+            self.frost_opts.ksoilf,
+            self._FROST_K_ADJUST_BOUNDS[0],
+            self._FROST_K_ADJUST_BOUNDS[1],
+            self._FROST_KSOILF_DEFAULT,
+        )
+        self.frost_opts.kfactor1 = self._guard_positive_value(
+            'frost_opts',
+            'kfactor1',
+            self.frost_opts.kfactor1,
+            self._FROST_KFACTOR_BOUNDS[1],
+            self._FROST_KFACTOR1_DEFAULT,
+        )
+        self.frost_opts.kfactor2 = self._guard_positive_value(
+            'frost_opts',
+            'kfactor2',
+            self.frost_opts.kfactor2,
+            self._FROST_KFACTOR_BOUNDS[1],
+            self._FROST_KFACTOR2_DEFAULT,
+        )
+        self.frost_opts.kfactor3 = self._guard_positive_value(
+            'frost_opts',
+            'kfactor3',
+            self.frost_opts.kfactor3,
+            self._FROST_KFACTOR_BOUNDS[1],
+            self._FROST_KFACTOR3_DEFAULT,
+        )
+
     def _guard_unitized_bounds(self) -> None:
         if hasattr(self, 'snow_opts'):
             self.snow_opts.newsnw = self._guard_unitized_value(
@@ -1144,6 +1442,7 @@ class Wepp(NoDbBase):
                 self._TCR_TAUMAX_BOUNDS[1],
                 self._TCR_TAUMAX_DEFAULT,
             )
+        self._guard_frost_bounds()
 
     def parse_inputs(self, kwds: Dict[str, Any]) -> None:
         with self.locked():
@@ -1154,6 +1453,11 @@ class Wepp(NoDbBase):
 
             if hasattr(self, 'snow_opts'):
                 self.snow_opts.parse_inputs(kwds)
+
+            if hasattr(self, 'frost_opts'):
+                self.frost_opts.parse_inputs(kwds)
+            else:
+                self.frost_opts = FrostOpts()
 
             self._guard_unitized_bounds()
 
@@ -1396,10 +1700,27 @@ class Wepp(NoDbBase):
             os.remove(fn)
 
     def _prep_frost(self) -> None:
+        if not hasattr(self, 'frost_opts') or self.frost_opts is None:
+            self.frost_opts = FrostOpts()
+        self._guard_frost_bounds()
         fn = _join(self.runs_dir, 'frost.txt')
         with open(fn, 'w') as fp:
-            fp.write('1  1  1\n')
-            fp.write('1.0   1.0  1.0   0.5\n\n')
+            fp.write(self.frost_opts.contents)
+
+    def _mint_default_frost_file(self) -> None:
+        fn = _join(self.runs_dir, 'frost.txt')
+        if _exists(fn):
+            return
+
+        if not _exists(self.runs_dir):
+            os.makedirs(self.runs_dir, exist_ok=True)
+
+        if not hasattr(self, 'frost_opts') or self.frost_opts is None:
+            self.frost_opts = FrostOpts()
+        self._guard_frost_bounds()
+
+        with open(fn, 'w') as fp:
+            fp.write(self.frost_opts.contents)
 
     def _remove_frost(self) -> None:
         fn = _join(self.runs_dir, 'frost.txt')

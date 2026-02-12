@@ -1,6 +1,6 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-  <p class="wc-text-muted">Adjust effective hydraulic and thermal conductivity for snow, frozen residue, and frozen soil.</p>
+  <p class="wc-text-muted">WEPP winter process settings written to <code>frost.txt</code> (line 1: 3 ints, line 2: 6 floats). If <code>frost.txt</code> is not written, WEPP uses internal default winter parameters.</p>
   {{ ui.checkbox_field(
        "checkbox_wepp_frost",
        "Write frost inputs (frost.txt)",
@@ -9,4 +9,91 @@
         "class": "disable-readonly",
         "data-wepp-routine": "frost"
        }
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_wintRed",
+       "wintRed",
+       value=wepp.frost_opts.wintRed,
+       precision=1,
+       min=0,
+       max=1,
+       help="int [0..1]: 1 enables frost water redistribution; 0 disables it.",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_fineTop",
+       "fineTop",
+       value=wepp.frost_opts.fineTop,
+       precision=1,
+       min=1,
+       max=10,
+       help="int [1..10]: fine layers for each of the top two 10 cm soil sections.",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_fineBot",
+       "fineBot",
+       value=wepp.frost_opts.fineBot,
+       precision=1,
+       min=1,
+       max=10,
+       help="int [1..10]: fine layers for each deeper soil section.",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_ksnowf",
+       "ksnowf",
+       value=wepp.frost_opts.ksnowf,
+       precision=0.1,
+       min=0.1,
+       max=10.0,
+       help="float [0.1..10]: snow thermal conductivity adjustment factor.",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_kresf",
+       "kresf",
+       value=wepp.frost_opts.kresf,
+       precision=0.1,
+       min=0.1,
+       max=10.0,
+       help="float [0.1..10]: residue thermal conductivity adjustment factor.",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_ksoilf",
+       "ksoilf",
+       value=wepp.frost_opts.ksoilf,
+       precision=0.1,
+       min=0.1,
+       max=10.0,
+       help="float [0.1..10]: soil thermal conductivity adjustment factor.",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_kfactor1",
+       "kfactor(1)",
+       value=wepp.frost_opts.kfactor1,
+       precision=0.00001,
+       max=1.0,
+       help="float (0..1]: frozen-soil conductivity lower limit for annual/fallow conditions (must be > 0).",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_kfactor2",
+       "kfactor(2)",
+       value=wepp.frost_opts.kfactor2,
+       precision=0.00001,
+       max=1.0,
+       help="float (0..1]: frozen-soil conductivity lower limit for pasture/perennial conditions (must be > 0).",
+       attrs={"class": "disable-readonly"}
+     ) }}
+  {{ ui.numeric_field(
+       "frost_opts_kfactor3",
+       "kfactor(3)",
+       value=wepp.frost_opts.kfactor3,
+       precision=0.00001,
+       max=1.0,
+       help="float (0..1]: frozen-soil conductivity lower limit for forest conditions (must be > 0).",
+       attrs={"class": "disable-readonly"}
      ) }}

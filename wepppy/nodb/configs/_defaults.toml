@@ -72,6 +72,17 @@ bin=wepp_dcc52a6
 [baseflow_opts]
 gwstorage=0.0
 
+[frost_opts]
+wintRed=1
+fineTop=10
+fineBot=10
+ksnowf=1.0
+kresf=1.0
+ksoilf=1.0
+kfactor1=0.00001
+kfactor2=0.00001
+kfactor3=0.5
+
 [tcr_opts]
 taumin=35.0
 taumax=70.0

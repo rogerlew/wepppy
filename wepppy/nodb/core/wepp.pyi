@@ -6,7 +6,7 @@ from typing import Any, ClassVar, Dict, List, Set, Tuple, TYPE_CHECKING
 from wepppy.nodb.base import NoDbBase
 from wepppy.wepp.reports import ChannelWatbalReport, FrqFloodReport, HillslopeWatbalReport, ReturnPeriods, SedimentCharacteristics
 
-__all__ = ['ChannelRoutingMethod', 'SnowOpts', 'BaseflowOpts', 'PhosphorusOpts', 'TCROpts', 'WeppNoDbLockedException', 'Wepp']
+__all__ = ['ChannelRoutingMethod', 'SnowOpts', 'FrostOpts', 'BaseflowOpts', 'PhosphorusOpts', 'TCROpts', 'WeppNoDbLockedException', 'Wepp']
 
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
@@ -17,6 +17,21 @@ class SnowOpts:
     newsnw: float
     ssd: float
     def __init__(self, rst: float | None = None, newsnw: float | None = None, ssd: float | None = None) -> None: ...
+    def parse_inputs(self, kwds: Dict[str, Any]) -> None: ...
+    @property
+    def contents(self) -> str: ...
+
+class FrostOpts:
+    wintRed: int
+    fineTop: int
+    fineBot: int
+    ksnowf: float
+    kresf: float
+    ksoilf: float
+    kfactor1: float
+    kfactor2: float
+    kfactor3: float
+    def __init__(self, wintRed: int | None = None, fineTop: int | None = None, fineBot: int | None = None, ksnowf: float | None = None, kresf: float | None = None, ksoilf: float | None = None, kfactor1: float | None = None, kfactor2: float | None = None, kfactor3: float | None = None) -> None: ...
     def parse_inputs(self, kwds: Dict[str, Any]) -> None: ...
     @property
     def contents(self) -> str: ...
@@ -63,16 +78,31 @@ class Wepp(NoDbBase):
     _SNOW_SSD_BOUNDS: ClassVar[Tuple[float, float]]
     _TCR_TAUMIN_BOUNDS: ClassVar[Tuple[float, float]]
     _TCR_TAUMAX_BOUNDS: ClassVar[Tuple[float, float]]
+    _FROST_WINTRED_BOUNDS: ClassVar[Tuple[int, int]]
+    _FROST_FINETOP_BOUNDS: ClassVar[Tuple[int, int]]
+    _FROST_FINEBOT_BOUNDS: ClassVar[Tuple[int, int]]
+    _FROST_K_ADJUST_BOUNDS: ClassVar[Tuple[float, float]]
+    _FROST_KFACTOR_BOUNDS: ClassVar[Tuple[float, float]]
     _SNOW_NEWSNW_DEFAULT: ClassVar[float]
     _SNOW_SSD_DEFAULT: ClassVar[float]
     _TCR_TAUMIN_DEFAULT: ClassVar[float]
     _TCR_TAUMAX_DEFAULT: ClassVar[float]
+    _FROST_WINTRED_DEFAULT: ClassVar[int]
+    _FROST_FINETOP_DEFAULT: ClassVar[int]
+    _FROST_FINEBOT_DEFAULT: ClassVar[int]
+    _FROST_KSNOWF_DEFAULT: ClassVar[float]
+    _FROST_KRESF_DEFAULT: ClassVar[float]
+    _FROST_KSOILF_DEFAULT: ClassVar[float]
+    _FROST_KFACTOR1_DEFAULT: ClassVar[float]
+    _FROST_KFACTOR2_DEFAULT: ClassVar[float]
+    _FROST_KFACTOR3_DEFAULT: ClassVar[float]
     phosphorus_opts: Incomplete
     p_surf_runoff_map: Incomplete
     p_lateral_flow_map: Incomplete
     p_baseflow_map: Incomplete
     p_sediment_map: Incomplete
     snow_opts: Incomplete
+    frost_opts: Incomplete
     tcr_opts: Incomplete
     channel_critical_shear_map: Incomplete
     baseflow_opts: Incomplete
