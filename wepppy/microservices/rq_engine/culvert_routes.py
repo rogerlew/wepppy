@@ -26,7 +26,11 @@ from wepppy.microservices.culvert_payload_validator import (
     validate_zip_members,
 )
 from wepppy.rq.culvert_rq import TIMEOUT as CULVERT_BATCH_TIMEOUT
-from wepppy.rq.culvert_rq import run_culvert_batch_rq, run_culvert_run_rq
+from wepppy.rq.culvert_rq import (
+    run_culvert_batch_finalize_rq,
+    run_culvert_batch_rq,
+    run_culvert_run_rq,
+)
 from wepppy.weppcloud.utils import auth_tokens
 
 from .auth import AuthError, require_jwt
@@ -280,6 +284,59 @@ async def culverts_retry_run(
     )
 
 
+@router.post(
+    "/culverts-wepp-batch/{batch_uuid}/finalize",
+    summary="Finalize a culvert batch",
+    description=(
+        "Requires JWT Bearer scope `culvert:batch:retry`. Asynchronously enqueues the "
+        "batch finalizer to rebuild `runs_manifest.md`, summary totals, and archive artifacts."
+    ),
+    tags=["rq-engine", "culverts"],
+    operation_id=rq_operation_id("culverts_finalize_batch"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Finalizer job enqueued and `job_id` returned.",
+        extra={
+            404: "Batch root was not found. Returns the canonical error payload.",
+        },
+    ),
+)
+async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResponse:
+    """Enqueue finalizer for an existing culvert batch."""
+    try:
+        submitter_claims = require_jwt(request, required_scopes=["culvert:batch:retry"])
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:
+        logger.exception("rq-engine culvert finalize auth failed")
+        return error_response_with_traceback("Failed to authorize request", status_code=401)
+
+    culverts_root = _resolve_culverts_root()
+    batch_root = culverts_root / batch_uuid
+    if not batch_root.is_dir():
+        return error_response(
+            f"Batch not found: {batch_uuid}",
+            status_code=404,
+        )
+
+    job_id = _enqueue_culvert_finalize_job(batch_uuid)
+    status_url = f"/rq-engine/api/jobstatus/{job_id}"
+    browse_token_payload = _mint_culvert_browse_token(
+        batch_uuid,
+        subject=str(submitter_claims.get("sub") or "culvert-batch"),
+    )
+    browse_claims = browse_token_payload.get("claims", {}) or {}
+    return JSONResponse(
+        {
+            "job_id": job_id,
+            "culvert_batch_uuid": batch_uuid,
+            "status_url": status_url,
+            "browse_token": browse_token_payload.get("token"),
+            "browse_token_expires_at": browse_claims.get("exp"),
+        }
+    )
+
+
 def _enqueue_culvert_run_job(culvert_batch_uuid: str, point_id: str) -> str:
     """Enqueue a single culvert run job."""
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
@@ -294,6 +351,21 @@ def _enqueue_culvert_run_job(culvert_batch_uuid: str, point_id: str) -> str:
         job.meta["culvert_batch_uuid"] = culvert_batch_uuid
         job.meta["point_id"] = point_id
         job.meta["runid"] = runid
+        job.save()
+    return job.id
+
+
+def _enqueue_culvert_finalize_job(culvert_batch_uuid: str) -> str:
+    """Enqueue culvert batch finalizer to refresh summary artifacts."""
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        q = Queue("batch", connection=redis_conn)
+        job = q.enqueue_call(
+            func=run_culvert_batch_finalize_rq,
+            args=[culvert_batch_uuid],
+            timeout=CULVERT_BATCH_TIMEOUT,
+        )
+        job.meta["culvert_batch_uuid"] = culvert_batch_uuid
         job.save()
     return job.id
 

@@ -47,6 +47,7 @@ PATHS_REQUIRING_400 = {
 
 PATHS_REQUIRING_404 = {
     "/api/canceljob/{job_id}",
+    "/api/culverts-wepp-batch/{batch_uuid}/finalize",
     "/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
     "/api/jobinfo/{job_id}",
     "/api/jobstatus/{job_id}",

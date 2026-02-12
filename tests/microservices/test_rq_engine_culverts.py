@@ -228,6 +228,67 @@ def test_culvert_retry_success_returns_browse_token(
     assert seen == {"batch_uuid": batch_uuid, "point_id": point_id}
 
 
+def test_culvert_finalize_success_returns_browse_token(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch, scopes=["culvert:batch:retry"])
+    batch_uuid = "culvert-finalize-1234"
+
+    batch_root = culverts_root / batch_uuid
+    batch_root.mkdir(parents=True, exist_ok=True)
+
+    seen: dict[str, str] = {}
+
+    def fake_enqueue(batch: str) -> str:
+        seen["batch_uuid"] = batch
+        return "job-789"
+
+    monkeypatch.setattr(culvert_routes, "_enqueue_culvert_finalize_job", fake_enqueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            f"/api/culverts-wepp-batch/{batch_uuid}/finalize",
+            headers=auth_headers,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["job_id"] == "job-789"
+    assert payload["culvert_batch_uuid"] == batch_uuid
+    assert payload["status_url"] == "/rq-engine/api/jobstatus/job-789"
+    assert isinstance(payload.get("browse_token"), str)
+    assert isinstance(payload.get("browse_token_expires_at"), int)
+
+    browse_claims = auth_tokens.decode_token(payload["browse_token"], audience="rq-engine")
+    assert browse_claims.get("token_class") == "service"
+    assert batch_uuid in (browse_claims.get("runs") or [])
+    assert "culverts" in {
+        str(g).strip().lower() for g in (browse_claims.get("service_groups") or [])
+    }
+    assert payload["browse_token_expires_at"] == browse_claims.get("exp")
+    assert seen == {"batch_uuid": batch_uuid}
+
+
+def test_culvert_finalize_missing_batch_returns_404(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch, scopes=["culvert:batch:retry"])
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/culverts-wepp-batch/missing-batch/finalize",
+            headers=auth_headers,
+        )
+
+    assert response.status_code == 404
+    payload = response.json()
+    assert payload["error"]["message"] == "Batch not found: missing-batch"
+
+
 def test_culvert_ingest_missing_files_returns_400(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

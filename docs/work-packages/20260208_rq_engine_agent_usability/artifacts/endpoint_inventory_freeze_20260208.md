@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **74**
-- Classification counts: **agent-facing 51**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 71**, **Flask wrapper 3**
+- Total endpoints inventoried: **75**
+- Classification counts: **agent-facing 52**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 72**, **Flask wrapper 3**
 
 ## Inventory Table
 
@@ -21,6 +21,7 @@ Snapshot summary:
 | POST | `/api/batch/_/{batch_name}/upload-sbs-map` | `wepppy/microservices/rq_engine/upload_batch_runner_routes.py` | `upload_sbs_map` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Role gate: `["Admin"]`. Synchronous BatchRunner resource mutation; no queue. |
 | POST | `/api/canceljob/{job_id}` | `wepppy/microservices/rq_engine/job_routes.py` | `canceljob` | agent-facing | rq-engine | JWT Bearer | `rq:status` | mutating | If fetched job metadata includes a run ID, enforces `require_session_marker`. No enqueue; cancels existing RQ job(s). |
 | POST | `/api/culverts-wepp-batch/` | `wepppy/microservices/rq_engine/culvert_routes.py` | `culverts_wepp_batch` | agent-facing | rq-engine | JWT Bearer | `culvert:batch:submit` | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/culverts-wepp-batch/{batch_uuid}/finalize` | `wepppy/microservices/rq_engine/culvert_routes.py` | `culverts_finalize_batch` | agent-facing | rq-engine | JWT Bearer | `culvert:batch:retry` | mutating | Async enqueue; rebuilds batch rollup artifacts after retry/repair runs. |
 | POST | `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | `wepppy/microservices/rq_engine/culvert_routes.py` | `culverts_retry_run` | agent-facing | rq-engine | JWT Bearer | `culvert:batch:retry` | mutating | Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/huc-fire/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_huc_fire_routes.py` | `upload_huc_fire_sbs` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Creates a new disturbed run synchronously from upload payload; no queue. |
 | POST | `/api/jobinfo` | `wepppy/microservices/rq_engine/job_routes.py` | `jobinfo_batch` | agent-facing | rq-engine | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | Polling remains open in default mode; optional/required JWT modes plus rate limiting + audit logging are now available. |

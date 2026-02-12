@@ -746,6 +746,7 @@ request the full (non-skeletonized) output.
 |--------|------|-------------|
 | POST | `/rq-engine/api/culverts-wepp-batch/` | Submit a payload and start batch processing |
 | POST | `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | Retry a single failed run |
+| POST | `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize` | Rebuild batch summary artifacts after retries |
 | GET | `/rq-engine/api/jobstatus/{job_id}` | Poll job status |
 | GET | `/rq-engine/api/jobinfo/{job_id}` | Get detailed job info |
 | GET | `/weppcloud/culverts/{batch_uuid}/browse/` | Browse batch artifacts |
@@ -800,6 +801,22 @@ Retry a single culvert run within an existing batch (for flake-checking or after
   "culvert_batch_uuid": "xyz789-uvw012-...",
   "point_id": "42",
   "status_url": "/rq-engine/api/jobstatus/new-job-id-...",
+  "browse_token": "eyJhbGciOi...",
+  "browse_token_expires_at": 1760000000
+}
+```
+
+### POST `/rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize`
+
+Rebuild batch-level rollup artifacts (`runs_manifest.md`, `batch_summary.json`, and
+`weppcloud_run_skeletons.zip`) after one or more point retries complete.
+
+**Response (200 OK):**
+```json
+{
+  "job_id": "finalizer-job-id-...",
+  "culvert_batch_uuid": "xyz789-uvw012-...",
+  "status_url": "/rq-engine/api/jobstatus/finalizer-job-id-...",
   "browse_token": "eyJhbGciOi...",
   "browse_token_expires_at": 1760000000
 }

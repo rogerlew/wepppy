@@ -56,7 +56,8 @@ following environment variables:
 
 ### Culvert browse/download service token
 - Token source: `POST /rq-engine/api/culverts-wepp-batch/` and
-  `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}`.
+  `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` and
+  `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize`.
 - Response fields: `browse_token` and `browse_token_expires_at` (`exp`, Unix
   timestamp seconds).
 - Claim contract for `browse_token`:
@@ -313,7 +314,7 @@ If validation fails a `JWTDecodeError` is raised.
 | `bootstrap:read` | Read Bootstrap commit history and current ref metadata. |
 | `bootstrap:checkout` | Checkout a Bootstrap commit under run lock. |
 | `culvert:batch:submit` | Submit culvert batch payloads. |
-| `culvert:batch:retry` | Retry culvert runs. |
+| `culvert:batch:retry` | Retry culvert runs and enqueue batch finalizers. |
 | `culvert:batch:read` | Read culvert batch/job metadata. |
 
 Scopes are additive; downstream services should check presence before

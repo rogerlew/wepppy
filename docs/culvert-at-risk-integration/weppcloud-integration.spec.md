@@ -69,6 +69,16 @@ Response (JSON):
 - browse_token
 - browse_token_expires_at
 
+### POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/finalize
+Enqueue the culvert batch finalizer to rebuild rollup artifacts after one or more retries complete.
+
+Response (JSON):
+- job_id
+- culvert_batch_uuid
+- status_url: `/rq-engine/api/jobstatus/{job_id}`
+- browse_token
+- browse_token_expires_at
+
 ### Job status (existing)
 Use existing RQ engine endpoints instead of custom status routes:
 - `/rq-engine/api/jobstatus/{job_id}`

@@ -549,6 +549,11 @@ def run_culvert_run_rq(
     return status
 
 
+def run_culvert_batch_finalize_rq(culvert_batch_uuid: str) -> dict[str, Any]:
+    """Rebuild culvert batch summary artifacts after retries or manual repairs."""
+    return _final_culvert_batch_complete_rq(culvert_batch_uuid)
+
+
 def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     batch_root = _resolve_batch_root(culvert_batch_uuid)
     if not batch_root.is_dir():
@@ -2124,5 +2129,6 @@ __all__ = [
     "TIMEOUT",
     "run_culvert_batch_rq",
     "run_culvert_run_rq",
+    "run_culvert_batch_finalize_rq",
     "CulvertBatchError",
 ]
