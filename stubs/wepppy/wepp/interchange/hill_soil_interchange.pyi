@@ -6,11 +6,15 @@ from typing import Any, Dict, List, Tuple
 
 SOIL_FILE_RE: Pattern[str]
 RAW_HEADER: List[str]
+TSMF_HEADER: List[str]
 LEGACY_HEADER: List[str]
 RAW_UNITS: List[str]
+TSMF_UNITS: List[str]
 COMPACT_UNITS: List[str]
+TSMF_COMPACT_UNITS: List[str]
 LEGACY_UNITS: List[str]
 MEASUREMENT_COLUMNS: List[str]
+RAW_MEASUREMENT_COLUMNS: List[str]
 LEGACY_MEASUREMENT_COLUMNS: List[str]
 SCHEMA: Any
 EMPTY_TABLE: Any

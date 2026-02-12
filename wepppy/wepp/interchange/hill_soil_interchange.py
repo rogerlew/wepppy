@@ -41,6 +41,8 @@ RAW_HEADER = [
     "TSW",
 ]
 
+TSMF_HEADER = RAW_HEADER + ["TSMF"]
+
 LEGACY_HEADER = RAW_HEADER[:-2]
 
 LOGGER = logging.getLogger(__name__)
@@ -62,7 +64,10 @@ RAW_UNITS = [
     "mm",
 ]
 
+TSMF_UNITS = RAW_UNITS + ["frac"]
+
 COMPACT_UNITS = [token for token in RAW_UNITS if token]
+TSMF_COMPACT_UNITS = [token for token in TSMF_UNITS if token]
 LEGACY_UNITS = COMPACT_UNITS[: len(LEGACY_HEADER) - 3]
 
 MEASUREMENT_COLUMNS = [
@@ -77,8 +82,10 @@ MEASUREMENT_COLUMNS = [
     "Tauc",
     "Saturation",
     "TSW",
+    "TSMF",
 ]
 
+RAW_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(RAW_HEADER) - 3]
 LEGACY_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(LEGACY_HEADER) - 3]
 
 SCHEMA = schema_with_version(
@@ -104,6 +111,7 @@ SCHEMA = schema_with_version(
             pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
             pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction (10mm profile)"),
             pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
+            pa_field("TSMF", pa.float64(), units="frac", description="True soil moisture fraction (full profile)"),
         ]
     )
 )
@@ -134,9 +142,12 @@ def _extract_layout(lines: List[str]) -> Tuple[List[str], List[str], List[str]]:
     if header_idx is None or unit_idx is None or header_tokens is None or unit_tokens is None:
         raise ValueError("Unable to locate SOIL header layout")
 
-    if header_tokens == RAW_HEADER:
-        expected_units = COMPACT_UNITS
+    if header_tokens == TSMF_HEADER:
+        expected_units = TSMF_COMPACT_UNITS
         measurement_columns = MEASUREMENT_COLUMNS
+    elif header_tokens == RAW_HEADER:
+        expected_units = COMPACT_UNITS
+        measurement_columns = RAW_MEASUREMENT_COLUMNS
     elif header_tokens == LEGACY_HEADER:
         expected_units = LEGACY_UNITS
         measurement_columns = LEGACY_MEASUREMENT_COLUMNS
@@ -193,7 +204,10 @@ def _parse_soil_file(
             continue
         tokens = raw_line.split()
         if len(tokens) != expected_columns:
-            continue
+            raise ValueError(
+                f"Unexpected token count in SOIL row ({len(tokens)} != {expected_columns}) "
+                f"for {path.name}: {raw_line!r}"
+            )
 
         ofe = int(tokens[0])
         julian = int(tokens[1])

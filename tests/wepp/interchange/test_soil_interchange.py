@@ -75,6 +75,57 @@ def test_soil_interchange_writes_parquet(tmp_path, monkeypatch):
     assert second["month"] == 7
     assert second["day_of_month"] == 19
     assert second["TSW"] == pytest.approx(40.00)
+    assert second["TSMF"] != second["TSMF"]  # NaN for legacy-modern rows without TSMF
+
+
+def test_soil_interchange_parses_tsmf_layout(tmp_path, monkeypatch):
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+
+    header = [
+        " Soil properties, daily output",
+        "------------------------------------------------------------------------------------------------",
+        " OFE Day   Y   Poros   Keff  Suct    FC     WP    Rough    Ki     Kr    Tauc    Saturation    TSW    TSMF",
+        "                 %    mm/hr   mm    mm/mm  mm/mm    mm   adjsmt adjsmt adjsmt   frac          mm    frac",
+        "------------------------------------------------------------------------------------------------",
+        "",
+    ]
+    rows = [
+        "  1   15   2001   66.01  40.00  17.65   0.20   0.05 100.00   0.04   0.13   2.00    0.46   30.56   0.6123",
+        "  2   16   2001   55.50  20.00  25.00   0.18   0.04  80.00   0.03   0.10   1.50    0.60   40.00   0.7345",
+    ]
+    (workdir / "H1.soil.dat").write_text("\n".join(header + rows) + "\n")
+
+    monkeypatch.setattr(soil_module, "write_parquet_with_pool", concurrency_module.write_parquet_with_pool)
+    target = soil_module.run_wepp_hillslope_soil_interchange(workdir)
+    table = pq.read_table(target)
+    df = table.to_pandas()
+
+    assert df.loc[0, "TSMF"] == pytest.approx(0.6123)
+    assert df.loc[1, "TSMF"] == pytest.approx(0.7345)
+
+
+@pytest.mark.unit
+def test_soil_interchange_raises_on_token_mismatch(tmp_path):
+    source = tmp_path / "H1.soil.dat"
+    source.write_text(
+        "\n".join(
+            [
+                " Soil properties, daily output",
+                "------------------------------------------------------------------------------------------------",
+                " OFE Day   Y   Poros   Keff  Suct    FC     WP    Rough    Ki     Kr    Tauc    Saturation    TSW",
+                "                 %    mm/hr   mm    mm/mm  mm/mm    mm   adjsmt adjsmt adjsmt   frac          mm",
+                "------------------------------------------------------------------------------------------------",
+                "",
+                # Missing trailing TSW token.
+                "  1   15   2001   66.01  40.00  17.65   0.20   0.05 100.00   0.04   0.13   2.00    0.46",
+            ]
+        )
+        + "\n"
+    )
+
+    with pytest.raises(ValueError, match="Unexpected token count in SOIL row"):
+        soil_module._parse_soil_file(source)
 
 
 def test_soil_interchange_handles_missing_files(tmp_path):
@@ -93,8 +144,8 @@ def test_soil_interchange_handles_missing_files(tmp_path):
 @pytest.mark.parametrize(
     ("profile", "soil_filename", "missing_columns"),
     [
-        ("legacy-palouse", "H1.soil.dat", {"Saturation", "TSW"}),
-        ("us-small-wbt-daymet-rap-wepp", "H10.soil.dat", set()),
+        ("legacy-palouse", "H1.soil.dat", {"Saturation", "TSW", "TSMF"}),
+        ("us-small-wbt-daymet-rap-wepp", "H10.soil.dat", {"TSMF"}),
     ],
     ids=["legacy-layout", "modern-layout"],
 )

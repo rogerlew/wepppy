@@ -54,6 +54,8 @@ RAW_HEADER = [
     "TSW",
 ]
 
+TSMF_HEADER = RAW_HEADER + ["TSMF"]
+
 LEGACY_HEADER = RAW_HEADER[:-2]
 
 MEASUREMENT_COLUMNS = [
@@ -68,8 +70,10 @@ MEASUREMENT_COLUMNS = [
     "Tauc",
     "Saturation",
     "TSW",
+    "TSMF",
 ]
 
+RAW_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(RAW_HEADER) - 3]
 LEGACY_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(LEGACY_HEADER) - 3]
 
 SCHEMA = schema_with_version(
@@ -95,6 +99,7 @@ SCHEMA = schema_with_version(
             pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
             pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
             pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
+            pa_field("TSMF", pa.float64(), units="frac", description="True soil moisture fraction (full profile)"),
         ]
     )
 )
@@ -102,6 +107,19 @@ SCHEMA = schema_with_version(
 
 def _init_column_store() -> Dict[str, List]:
     return {name: [] for name in SCHEMA.names}
+
+
+def _validate_rust_schema(actual: pa.Schema) -> None:
+    if actual.names != SCHEMA.names:
+        raise ValueError(f"Rust SOIL schema mismatch: expected {SCHEMA.names} but got {actual.names}")
+
+    for expected_field in SCHEMA:
+        actual_field = actual.field(expected_field.name)
+        if actual_field.type != expected_field.type:
+            raise ValueError(
+                "Rust SOIL schema type mismatch for "
+                f"{expected_field.name}: expected {expected_field.type} but got {actual_field.type}"
+            )
 
 
 def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
@@ -137,7 +155,7 @@ def _write_soil_parquet(
     row_counter = 0
     header_tokens: Optional[List[str]] = None
     measurement_columns = MEASUREMENT_COLUMNS
-    expected_tokens = len(RAW_HEADER)
+    expected_tokens = len(TSMF_HEADER)
 
     try:
         with source.open("r") as stream:
@@ -147,8 +165,10 @@ def _write_soil_parquet(
                     if stripped.startswith("OFE"):
                         header_found = True
                         header_tokens = stripped.split()
-                        if header_tokens == RAW_HEADER:
+                        if header_tokens == TSMF_HEADER:
                             measurement_columns = MEASUREMENT_COLUMNS
+                        elif header_tokens == RAW_HEADER:
+                            measurement_columns = RAW_MEASUREMENT_COLUMNS
                         elif header_tokens == LEGACY_HEADER:
                             measurement_columns = LEGACY_MEASUREMENT_COLUMNS
                         else:
@@ -280,6 +300,7 @@ def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
                 cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
                 chunk_rows=CHUNK_SIZE,
             )
+            _validate_rust_schema(pq.read_schema(target))
             LOGGER.info("wepp interchange: SOIL via Rust")
             return target
         except Exception as exc:
