@@ -37,6 +37,7 @@ from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_to_tokens
 from wepppy.nodb.mods.openet import OpenET_TS
 from wepppy.nodb.mods.omni import Omni, OmniScenario
+import wepppy.nodb.mods.omni as omni_mod
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.weppcloud.routes.nodb_api.landuse_bp import build_landuse_report_context
@@ -699,6 +700,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_debris_flow=show_debris_flow,
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
+        omni_user_defined_contrast_limit=int(getattr(omni_mod, "USER_DEFINED_CONTRAST_LIMIT", 200)),
         is_omni_child=is_omni_child,
         omni_has_ran_scenarios=omni_has_ran_scenarios,
         omni_has_ran_contrasts=omni_has_ran_contrasts,

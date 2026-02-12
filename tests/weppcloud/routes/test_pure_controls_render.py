@@ -107,3 +107,10 @@ def jinja_env() -> Environment:
 def test_pure_control_renders(template_name: str, jinja_env: Environment) -> None:
     template = jinja_env.get_template(template_name)
     template.render()
+
+
+def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/omni_contrasts_pure.htm")
+    rendered = template.render(omni_user_defined_contrast_limit=200)
+
+    assert "capped at 200 total contrast runs (contrast pairs x groups)." in rendered

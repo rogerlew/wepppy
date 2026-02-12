@@ -20,6 +20,7 @@
      description=description
    ) %}
 
+  {% set user_defined_contrast_limit = omni_user_defined_contrast_limit|default(200, true) %}
   {% set selected_mode = omni.contrast_selection_mode if omni.contrast_selection_mode is defined else "cumulative" %}
   {% if selected_mode in ["stream_order_pruning", "stream-order-pruning"] %}
     {% set selected_mode = "stream_order" %}
@@ -169,6 +170,10 @@
 
     <p class="wc-text-muted">
       Each pair selects contrasts only after both scenarios have run. Duplicate pairs are blocked.
+    </p>
+    <p class="wc-text-muted">
+      User-defined and stream-order modes are capped at {{ user_defined_contrast_limit }} total contrast runs (contrast pairs x groups).
+      Reduce the number of pairs or groups if the total would exceed this limit.
     </p>
   </div>
 
