@@ -47,6 +47,8 @@ TIMEOUT: int = 43_200
 CULVERT_BATCH_RQ_JOB_KEY = "run_culvert_batch_rq"
 CULVERT_BATCH_LOCK_RETRY_ATTEMPTS = 10
 CULVERT_BATCH_LOCK_RETRY_SECONDS = 0.5
+CULVERT_CLIP_RASTER_RETRY_ATTEMPTS = 2
+CULVERT_CLIP_RASTER_RETRY_SECONDS = 0.25
 
 D8_TO_DELTA: Dict[int, Tuple[int, int]] = {
     1: (-1, 1),
@@ -815,6 +817,71 @@ def _generate_stream_junctions(
         )
 
 
+def _clip_raster_to_raster_with_retry(
+    *,
+    wbt: WhiteboxTools,
+    input_path: Path,
+    mask_path: Path,
+    output_path: Path,
+    attempts: int = CULVERT_CLIP_RASTER_RETRY_ATTEMPTS,
+    retry_seconds: float = CULVERT_CLIP_RASTER_RETRY_SECONDS,
+) -> None:
+    """
+    Run ClipRasterToRaster and tolerate transient cases where no output is written.
+    """
+    if attempts < 1:
+        attempts = 1
+
+    clip_error: Optional[Exception] = None
+    for attempt in range(1, attempts + 1):
+        if output_path.exists():
+            output_path.unlink()
+        try:
+            wbt.clip_raster_to_raster(
+                i=str(input_path),
+                mask=str(mask_path),
+                output=str(output_path),
+            )
+        except Exception as exc:
+            clip_error = exc
+        else:
+            if output_path.exists():
+                return
+
+        if attempt < attempts:
+            if clip_error is None:
+                logger.warning(
+                    "ClipRasterToRaster produced no output; retrying (%d/%d) "
+                    "(input=%s, mask=%s, output=%s)",
+                    attempt,
+                    attempts,
+                    input_path,
+                    mask_path,
+                    output_path,
+                )
+            else:
+                logger.warning(
+                    "ClipRasterToRaster raised %s; retrying (%d/%d) "
+                    "(input=%s, mask=%s, output=%s): %s",
+                    type(clip_error).__name__,
+                    attempt,
+                    attempts,
+                    input_path,
+                    mask_path,
+                    output_path,
+                    clip_error,
+                )
+            time.sleep(retry_seconds)
+
+    detail = (
+        "ClipRasterToRaster failed "
+        f"(input={input_path}, mask={mask_path}, output={output_path})"
+    )
+    if clip_error is not None:
+        raise RuntimeError(f"{detail}: {clip_error}") from clip_error
+    raise RuntimeError(detail)
+
+
 def _generate_masked_stream_junctions(
     flovec_path: Path,
     netful_path: Path,
@@ -832,19 +899,12 @@ def _generate_masked_stream_junctions(
     wbt.set_working_dir(str(chnjnt_path.parent))
 
     masked_netful = chnjnt_path.parent / "netful.masked.tif"
-    if masked_netful.exists():
-        masked_netful.unlink()
-
-    wbt.clip_raster_to_raster(
-        i=str(netful_path),
-        mask=str(watershed_mask_path),
-        output=str(masked_netful),
+    _clip_raster_to_raster_with_retry(
+        wbt=wbt,
+        input_path=netful_path,
+        mask_path=watershed_mask_path,
+        output_path=masked_netful,
     )
-    if not masked_netful.exists():
-        raise RuntimeError(
-            "ClipRasterToRaster failed "
-            f"(input={netful_path}, mask={watershed_mask_path}, output={masked_netful})"
-        )
 
     chnjnt_vrt = chnjnt_path.with_suffix(".vrt")
     fallback_chnjnt_src: Optional[Path] = None
@@ -863,18 +923,12 @@ def _generate_masked_stream_junctions(
                 fallback_chnjnt_src,
             )
             masked_chnjnt = chnjnt_path.with_name("chnjnt.masked.tif")
-            if masked_chnjnt.exists():
-                masked_chnjnt.unlink()
-            wbt.clip_raster_to_raster(
-                i=str(fallback_chnjnt_src),
-                mask=str(watershed_mask_path),
-                output=str(masked_chnjnt),
+            _clip_raster_to_raster_with_retry(
+                wbt=wbt,
+                input_path=fallback_chnjnt_src,
+                mask_path=watershed_mask_path,
+                output_path=masked_chnjnt,
             )
-            if not masked_chnjnt.exists():
-                raise RuntimeError(
-                    "ClipRasterToRaster failed "
-                    f"(input={fallback_chnjnt_src}, mask={watershed_mask_path}, output={masked_chnjnt})"
-                )
             if chnjnt_path.exists():
                 chnjnt_path.unlink()
             os.replace(masked_chnjnt, chnjnt_path)

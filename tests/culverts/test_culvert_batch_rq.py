@@ -340,3 +340,70 @@ def test_culvert_batch_retries_runner_lock_before_state_update(
 
     assert lock_attempts["count"] >= 2
     assert culvert_rq_module.CULVERT_BATCH_LOCK_RETRY_SECONDS in sleeps
+
+
+def test_generate_masked_stream_junctions_retries_clip_when_output_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    flovec_path = tmp_path / "flovec.tif"
+    netful_path = tmp_path / "netful.tif"
+    watershed_mask_path = tmp_path / "target_watershed.tif"
+    chnjnt_path = tmp_path / "chnjnt.tif"
+
+    flovec_path.write_bytes(b"flovec")
+    netful_path.write_bytes(b"netful")
+    watershed_mask_path.write_bytes(b"mask")
+
+    clip_outputs: list[Path] = []
+
+    class _DummyWhiteboxTools:
+        def __init__(self, verbose: bool = False, raise_on_error: bool = True) -> None:
+            self.verbose = verbose
+            self.raise_on_error = raise_on_error
+            self.working_dir: str | None = None
+            self._netful_clip_attempts = 0
+
+        def set_working_dir(self, working_dir: str) -> None:
+            self.working_dir = working_dir
+
+        def clip_raster_to_raster(self, i: str, mask: str, output: str) -> int:
+            del mask
+            output_path = Path(output)
+            clip_outputs.append(output_path)
+            # Reproduce run 583 behavior: first netful clip returns but no output.
+            if Path(i) == netful_path:
+                self._netful_clip_attempts += 1
+                if self._netful_clip_attempts == 1:
+                    return 0
+            output_path.write_bytes(b"clipped")
+            return 0
+
+        def stream_junction_identifier(
+            self, d8_pntr: str, streams: str, output: str
+        ) -> int:
+            del d8_pntr, streams
+            Path(output).write_bytes(b"junctions")
+            return 0
+
+    monkeypatch.setattr(culvert_rq_module, "WhiteboxTools", _DummyWhiteboxTools)
+    monkeypatch.setattr(culvert_rq_module, "_raster_has_stream_cells", lambda _p: True)
+
+    sleeps: list[float] = []
+    monkeypatch.setattr(
+        culvert_rq_module.time,
+        "sleep",
+        lambda seconds: sleeps.append(float(seconds)),
+    )
+
+    culvert_rq_module._generate_masked_stream_junctions(
+        flovec_path=flovec_path,
+        netful_path=netful_path,
+        watershed_mask_path=watershed_mask_path,
+        chnjnt_path=chnjnt_path,
+    )
+
+    netful_masked = chnjnt_path.parent / "netful.masked.tif"
+    netful_clip_attempts = clip_outputs.count(netful_masked)
+    assert netful_clip_attempts == 2
+    assert chnjnt_path.exists()
+    assert culvert_rq_module.CULVERT_CLIP_RASTER_RETRY_SECONDS in sleeps
