@@ -323,9 +323,13 @@ class Landuse(NoDbBase):
         if hasattr(instance, 'domlc_mofe_d') and instance.domlc_mofe_d is not None:
             for topaz_id in instance.domlc_mofe_d:
                 mofe_d = {}
-                for _id in sorted(int(_id) for _id in instance.domlc_mofe_d[topaz_id]):
+                hill_mofe_d = instance.domlc_mofe_d[topaz_id]
+                for _id in sorted(int(_id) for _id in hill_mofe_d):
                     _id = str(_id)
-                    mofe_d[_id] = instance.domlc_mofe_d[topaz_id][_id]
+                    dom = hill_mofe_d[_id]
+                    if isinstance(dom, int):
+                        dom = str(dom)
+                    mofe_d[_id] = dom
                 instance.domlc_mofe_d[topaz_id] = mofe_d
 
         return instance
@@ -1021,7 +1025,10 @@ class Landuse(NoDbBase):
 
             apply_buffer = watershed.mofe_buffer and not str(topaz_id).endswith('1')
             if apply_buffer:
-                domlc_d[topaz_id][mofe_ids[-1]] = self.mofe_buffer_selection
+                buffer_selection = self.mofe_buffer_selection
+                if buffer_selection is not None:
+                    buffer_selection = str(buffer_selection)
+                domlc_d[topaz_id][mofe_ids[-1]] = buffer_selection
 
             doms = [domlc_d[topaz_id][_id] for _id in mofe_ids]
 
