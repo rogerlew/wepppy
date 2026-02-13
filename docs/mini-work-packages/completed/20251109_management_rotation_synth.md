@@ -1,4 +1,6 @@
-# Management Rotation Synth – Stack-and-Merge Spec
+# Mini Work Package: Management Rotation Synth – Stack-and-Merge
+Status: Completed
+Last Updated: 2025-11-09
 
 ## Overview
 - Extend `ManagementRotationSynth` so it supports both the existing “end-to-end” concatenation and a new “stack-and-merge” algorithm.

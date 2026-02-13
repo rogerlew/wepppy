@@ -22,7 +22,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/docker_compose_plan.md](docs/dev-notes/docker_compose_plan.md)
 - [docs/dev-notes/endpoint_security_notes.md](docs/dev-notes/endpoint_security_notes.md)
 - [docs/dev-notes/kubernetes-deployment-strategy.md](docs/dev-notes/kubernetes-deployment-strategy.md)
-- [docs/dev-notes/management-rotation-synth.spec.md](docs/dev-notes/management-rotation-synth.spec.md)
+- [docs/mini-work-packages/completed/20251109_management_rotation_synth.md](docs/mini-work-packages/completed/20251109_management_rotation_synth.md)
 - [docs/dev-notes/mock-factory-spec.md](docs/dev-notes/mock-factory-spec.md)
 - [docs/dev-notes/module_refactor_workflow.md](docs/dev-notes/module_refactor_workflow.md)
 - [docs/dev-notes/qmd-reports-feature.spec.md](docs/dev-notes/qmd-reports-feature.spec.md)
@@ -500,7 +500,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/management-rotation-synth.spec.md
+## docs/mini-work-packages/completed/20251109_management_rotation_synth.md
 
 - [Management Rotation Synth – Stack-and-Merge Spec](#management-rotation-synth-stack-and-merge-spec)
   - [Overview](#overview)
