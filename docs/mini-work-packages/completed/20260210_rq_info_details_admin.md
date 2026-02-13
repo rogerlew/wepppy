@@ -1,5 +1,5 @@
 # Mini Work Package: Admin RQ Info Details Snapshot + rq-engine Admin Job Listing Routes
-Status: Implemented
+Status: Completed
 Last Updated: 2026-02-10
 Primary Areas: `wepppy/weppcloud/routes/rq/info_details/*`, `wepppy/microservices/rq_engine/admin_job_routes.py`, `wepppy/rq/job_listings.py`, `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`
 
