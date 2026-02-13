@@ -1,4 +1,6 @@
-# Reports Refactor Notes
+# Mini Work Package: Reports Refactor
+Status: Completed
+Last Updated: 2025-10-18
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for WEPP model file management and validation sections.
 

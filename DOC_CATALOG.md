@@ -32,7 +32,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 - [docs/dev-notes/reports/report-catalog.md](docs/dev-notes/reports/report-catalog.md)
 - [docs/dev-notes/reports/reportbase-guide.md](docs/dev-notes/reports/reportbase-guide.md)
 - [docs/dev-notes/reports-refactor-plan.md](docs/dev-notes/reports-refactor-plan.md)
-- [docs/dev-notes/reports.md](docs/dev-notes/reports.md)
+- [docs/mini-work-packages/completed/20251018_reports_refactor.md](docs/mini-work-packages/completed/20251018_reports_refactor.md)
 - [docs/dev-notes/style-guide.md](docs/dev-notes/style-guide.md)
 - [docs/mini-work-packages/completed/20251103_test_tooling_spec.md](docs/mini-work-packages/completed/20251103_test_tooling_spec.md)
 - [docs/dev-notes/totalwatsed-interchange.spec.md](docs/dev-notes/totalwatsed-interchange.spec.md)
@@ -635,7 +635,7 @@ Last updated: 2025-10-26T11:41:05.594789180-07:00
 
 ---
 
-## docs/dev-notes/reports.md
+## docs/mini-work-packages/completed/20251018_reports_refactor.md
 
 - [Reports Refactor Notes](#reports-refactor-notes)
   - [ReportBase contract](#reportbase-contract)
